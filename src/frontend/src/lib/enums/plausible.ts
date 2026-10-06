@@ -24,17 +24,56 @@ export enum PLAUSIBLE_EVENTS {
 	LIMIT_ORDER = 'limit_order',
 	DEPOSIT_WITHDRAW = 'deposit_withdraw',
 	PERSONAL_NOTE = 'personal_note',
-	PERSONAL_NOTE_SHARE = 'personal_note_share'
+	PERSONAL_NOTE_SHARE = 'personal_note_share',
+	HELP = 'help',
+	TIP = 'tip',
+	// The countdown to the end of the XDR basket that prices TCYCLES.
+	XDR_BASKET_EXPIRY = 'xdr_basket_expiry',
+	CYCLES_MINT = 'cycles_mint',
+	// An invariant we believed unreachable was reached. Not for flows that can legitimately
+	// fail — those keep their own event and report the outcome via `result_status`.
+	ERROR = 'error'
+}
+
+// How serious any event is, from low to high, in `event_severity`: OpenTelemetry's level names,
+// with `blocker` (as in `PLAUSIBLE_EVENT_ERROR_SEVERITIES`) in place of `fatal`. Unlike
+// `result_error_severity`, which rates only errors, it can be set on every event.
+export enum PLAUSIBLE_EVENT_SEVERITIES {
+	INFO = 'info',
+	WARN = 'warn',
+	ERROR = 'error',
+	BLOCKER = 'blocker'
 }
 
 export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
-	MAJOR = 'major'
+	// The user cannot continue at all.
+	BLOCKER = 'blocker',
+	// A whole feature is unusable, the rest of the app works.
+	CRITICAL = 'critical',
+	// The user's action visibly failed.
+	MAJOR = 'major',
+	// Invisible to the user; they keep working as normal.
+	MINOR = 'minor'
 }
 
 export enum PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES {
 	SECRET_NOT_CONFIGURED = 'secret_not_configured',
 	RATE_LIMITED = 'rate_limited',
 	SIGNING_FAILED = 'signing_failed'
+}
+
+// ICPSwap writes free text into its `InternalError` variant and `mapIcpSwapFactoryError`
+// interpolates it verbatim, so a raw message cannot satisfy invariant 4 in
+// docs/ai/frontend/analytics.md. Help failures are categorised by error class instead; which call
+// failed is already in `event_modifier`.
+export enum PLAUSIBLE_EVENT_HELP_ERROR_TYPES {
+	// The factory has no pool for the pair, or the lookup itself failed - the factory answers an
+	// unknown pair with a text-free `CommonError`, so the two cannot be told apart.
+	POOL_NOT_FOUND = 'pool_not_found',
+	// The factory or the pool returned an error variant.
+	CANISTER_ERROR = 'canister_error',
+	// Anything else: transport, agent, or an unexpected throw.
+	UNKNOWN = 'unknown'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {
@@ -51,7 +90,10 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	NETWORKS = 'networks',
 	LEARN_MORE = 'learn_more',
 	TRADING = 'trading',
-	PERSONAL_NOTES = 'personal_notes'
+	PERSONAL_NOTES = 'personal_notes',
+	HELP = 'help',
+	TIPS = 'tips',
+	COMPUTE = 'compute'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -72,6 +114,10 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND {
 	GLOBAL = 'global'
 }
 
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_NETWORKS {
+	SETTINGS_KEY_UNMAPPED = 'settings_key_unmapped'
+}
+
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS {
 	UNCERTIFIED_REMOVED = 'uncertified_removed'
 }
@@ -85,6 +131,13 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER {
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_NOTES {
 	SHARE = 'share'
+}
+
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_HELP {
+	SUPPORT = 'support',
+	NETWORK_EXPLORERS = 'network_explorers',
+	PROVIDER_EXPLORERS = 'provider_explorers',
+	ICPSWAP_WITHDRAWAL = 'icpswap_withdrawal'
 }
 
 export enum PLAUSIBLE_EVENT_VALUES {
@@ -132,10 +185,14 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	OISY_TRADE = 'oisy_trade',
 	NOTES = 'notes',
 	NOTE_SHARE_DIALOG = 'share_dialog',
-	NOTE_SHARE_RECIPIENT_PAGE = 'recipient_page'
+	NOTE_SHARE_RECIPIENT_PAGE = 'recipient_page',
+	HELP_PAGE = 'help_page',
+	TIP_SENDER = 'tip_sender',
+	TIP_CLAIMER = 'tip_claimer'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
+	BALANCES_FOUND = 'balances_found',
 	GROUP = 'group',
 	VISIBILITY = 'visibility',
 	SORT = 'sort',

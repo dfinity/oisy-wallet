@@ -44,6 +44,30 @@ export const withdrawErc20 = async ({
 	});
 };
 
+/**
+ * Status of a ck withdrawal, keyed on the ckETH ledger burn index the minter
+ * returned when the withdrawal was submitted. Mirrors `withdrawalStatuses` in
+ * `ckbtc-minter.api.ts`: a thin pass-through over what the SDK already exposes.
+ *
+ * Serves ckERC20 withdrawals too — the minter's `withdrawal_id` for one *is* its
+ * `cketh_block_index`, and there is no `retrieve_erc20_status` counterpart.
+ */
+export const retrieveEthStatus = async ({
+	identity,
+	minterCanisterId,
+	blockIndex
+}: {
+	identity: NullishIdentity;
+	minterCanisterId: CanisterIdText;
+	blockIndex: bigint;
+}): Promise<CkEthMinterDid.RetrieveEthStatus> => {
+	assertNonNullish(identity);
+
+	const { retrieveEthStatus } = await ckEthMinterCanister({ identity, minterCanisterId });
+
+	return retrieveEthStatus(blockIndex);
+};
+
 export const eip1559TransactionPrice = async ({
 	identity,
 	minterCanisterId,

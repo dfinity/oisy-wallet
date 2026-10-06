@@ -1,6 +1,6 @@
 import {
 	TRACK_COUNT_SWAP_ERROR,
-	TRACK_COUNT_SWAP_SUCCESS
+	TRACK_COUNT_SWAP_SUBMITTED
 } from '$lib/constants/analytics.constants';
 import {
 	SWAP_SWITCH_TOKENS_BUTTON,
@@ -339,7 +339,7 @@ describe('SwapSolWizard', () => {
 			expect(onStartTriggerAmount).toHaveBeenCalledOnce();
 		});
 
-		it('tracks success event after successful swap', async () => {
+		it('tracks submitted event at initiation (settlement is tracked via the AUT store)', async () => {
 			const { getByText } = renderExecution();
 
 			await fireEvent.click(getByText(en.swap.text.swap_button));
@@ -347,7 +347,7 @@ describe('SwapSolWizard', () => {
 
 			expect(analytics.trackEvent).toHaveBeenCalledWith(
 				expect.objectContaining({
-					name: TRACK_COUNT_SWAP_SUCCESS
+					name: TRACK_COUNT_SWAP_SUBMITTED
 				})
 			);
 		});

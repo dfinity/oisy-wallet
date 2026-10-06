@@ -1,14 +1,11 @@
 //! Code for interacting with the chain fusion signer.
 use bitcoin::{Address, CompressedPublicKey, Network};
 use candid::{Nat, Principal};
-use ic_cdk::{
-    api::msg_caller,
-    bitcoin_canister::Network as BitcoinNetwork,
-    call::Call,
-    management_canister::{
-        canister_status, ecdsa_public_key, schnorr_public_key, CanisterStatusArgs, EcdsaCurve,
-        EcdsaKeyId, EcdsaPublicKeyArgs, SchnorrAlgorithm, SchnorrKeyId, SchnorrPublicKeyArgs,
-    },
+use ic_cdk::{api::msg_caller, call::Call};
+use ic_cdk_bitcoin_canister::Network as BitcoinNetwork;
+use ic_cdk_management_canister::{
+    canister_status, ecdsa_public_key, schnorr_public_key, CanisterStatusArgs, EcdsaCurve,
+    EcdsaKeyId, EcdsaPublicKeyArgs, SchnorrAlgorithm, SchnorrKeyId, SchnorrPublicKeyArgs,
 };
 use ic_cycles_ledger_client::{
     Account, AllowanceArgs, ApproveArgs, CyclesLedgerService, DepositArgs, DepositResult,

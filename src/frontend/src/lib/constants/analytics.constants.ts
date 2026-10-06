@@ -53,6 +53,10 @@ export const TRACK_COUNT_SOL_SEND_ERROR = 'sol_send_error';
 export const TRACK_COUNT_WC_SOL_SEND_SUCCESS = 'wc_sol_send_success';
 export const TRACK_COUNT_WC_SOL_SEND_ERROR = 'wc_sol_send_error';
 
+// XRP Ledger
+export const TRACK_COUNT_XRP_SEND_SUCCESS = 'xrp_send_success';
+export const TRACK_COUNT_XRP_SEND_ERROR = 'xrp_send_error';
+
 // WalletConnect
 export const TRACK_COUNT_WALLET_CONNECT_MENU_OPEN = 'wallet_connect_menu_open';
 export const TRACK_COUNT_WALLET_CONNECT_QR_CODE = 'wallet_connect_qr_code';
@@ -135,6 +139,7 @@ export const TRACK_SNAPSHOT_SEND_ERROR = 'snapshot_send_error';
 export const LANDING_PAGE_ROUTE = 'landing-page';
 export const HOME_PAGE_ROUTE = 'home-page';
 export const USER_MENU_ROUTE = 'user-menu';
+export const MORE_MENU_ROUTE = 'more-menu';
 export const HIDE_TOKEN_MODAL_ROUTE = 'hide-token-modal';
 export const MANAGE_TOKENS_MODAL_ROUTE = 'manage-tokens-modal';
 export const TOKEN_VIEW_ROUTE = 'token-view';

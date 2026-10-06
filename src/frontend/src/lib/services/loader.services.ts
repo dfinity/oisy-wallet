@@ -2,12 +2,14 @@ import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import { allowSigning } from '$lib/api/backend.api';
 import {
 	networkBitcoinMainnetEnabled,
 	networkEthereumEnabled,
 	networkEvmMainnetEnabled,
-	networkSolanaMainnetEnabled
+	networkSolanaMainnetEnabled,
+	networkXrpMainnetEnabled
 } from '$lib/derived/networks.derived';
 import { loadAddresses } from '$lib/services/addresses.services';
 import { trackRateLimited } from '$lib/services/analytics.services';
@@ -127,7 +129,8 @@ export const initLoader = async ({
 	const enabledNetworkIds: NetworkId[] = [
 		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_NETWORK_ID] : []),
 		...(get(networkEthereumEnabled) || get(networkEvmMainnetEnabled) ? [ETHEREUM_NETWORK_ID] : []),
-		...(get(networkSolanaMainnetEnabled) ? [SOLANA_MAINNET_NETWORK_ID] : [])
+		...(get(networkSolanaMainnetEnabled) ? [SOLANA_MAINNET_NETWORK_ID] : []),
+		...(get(networkXrpMainnetEnabled) ? [XRP_MAINNET_NETWORK_ID] : [])
 	];
 
 	const { success: addressSuccess } = await loadAddresses(enabledNetworkIds);

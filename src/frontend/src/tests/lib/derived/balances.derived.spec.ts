@@ -1,23 +1,62 @@
+import * as lendBorrowEnv from '$env/lend-borrow';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import * as tradingEnv from '$env/trading';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	allBalancesZero,
 	anyBalanceNonZero,
 	balance,
 	balanceZero,
-	noPositiveBalanceAndNotAllBalancesZero
+	enabledMainnetTotalUsdBalance,
+	noPositiveBalanceAndNotAllBalancesZero,
+	providersUsdBalance
 } from '$lib/derived/balances.derived';
 import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { token } from '$lib/stores/token.store';
 import type { Token } from '$lib/types/token';
+import type { TokenUi } from '$lib/types/token-ui';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import { bn1Bi } from '$tests/mocks/balances.mock';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
+
+// The net worth is assembled from stores of their own; override just those so the tests can drive
+// the values without standing up a DEX deposit, a Liquidium portfolio or a token list.
+const { oisyTradeUsdValueMock, liquidiumNetValueUsdMock, enabledMainnetFungibleTokensUiMock } =
+	vi.hoisted(() => {
+		// eslint-disable-next-line @typescript-eslint/no-require-imports
+		const { writable: createWritable } = require('svelte/store');
+		return {
+			oisyTradeUsdValueMock: createWritable(0),
+			liquidiumNetValueUsdMock: createWritable(0),
+			enabledMainnetFungibleTokensUiMock: createWritable([])
+		};
+	});
+
+vi.mock(import('$lib/derived/oisy-trade.derived'), async (importOriginal) => ({
+	...(await importOriginal()),
+	get oisyTradeUsdValue() {
+		return oisyTradeUsdValueMock;
+	}
+}));
+
+vi.mock(import('$lib/derived/liquidium.derived'), async (importOriginal) => ({
+	...(await importOriginal()),
+	get liquidiumNetValueUsd() {
+		return liquidiumNetValueUsdMock;
+	}
+}));
+
+vi.mock(import('$lib/derived/tokens-ui.derived'), async (importOriginal) => ({
+	...(await importOriginal()),
+	get enabledMainnetFungibleTokensUi() {
+		return enabledMainnetFungibleTokensUiMock;
+	}
+}));
 
 describe('balances.derived', () => {
 	describe('balance', () => {
@@ -383,6 +422,114 @@ describe('balances.derived', () => {
 			balancesStore.reset(tokens[1].id);
 
 			expect(get(noPositiveBalanceAndNotAllBalancesZero)).toBeTruthy();
+		});
+	});
+
+	describe('providersUsdBalance', () => {
+		beforeEach(() => {
+			vi.restoreAllMocks();
+
+			oisyTradeUsdValueMock.set(0);
+			liquidiumNetValueUsdMock.set(0);
+		});
+
+		it('should sum the DEX deposits and the lend/borrow net value', () => {
+			oisyTradeUsdValueMock.set(40);
+			liquidiumNetValueUsdMock.set(15);
+
+			expect(get(providersUsdBalance)).toBe(55);
+		});
+
+		it('should deduct a negative lend/borrow net value (net debt)', () => {
+			oisyTradeUsdValueMock.set(40);
+			liquidiumNetValueUsdMock.set(-100);
+
+			expect(get(providersUsdBalance)).toBe(-60);
+		});
+
+		it('should ignore the DEX deposits when no trading provider is enabled', () => {
+			vi.spyOn(tradingEnv, 'anyTradingProviderEnabled', 'get').mockReturnValue(false);
+
+			oisyTradeUsdValueMock.set(40);
+			liquidiumNetValueUsdMock.set(15);
+
+			expect(get(providersUsdBalance)).toBe(15);
+		});
+
+		it('should ignore the lend/borrow net value when no provider is enabled', () => {
+			vi.spyOn(lendBorrowEnv, 'anyLendBorrowProviderEnabled', 'get').mockReturnValue(false);
+
+			oisyTradeUsdValueMock.set(40);
+			liquidiumNetValueUsdMock.set(15);
+
+			expect(get(providersUsdBalance)).toBe(40);
+		});
+	});
+
+	describe('enabledMainnetTotalUsdBalance', () => {
+		const tokenUi = (financialData: Partial<TokenUi>): TokenUi => ({
+			...ICP_TOKEN,
+			...financialData
+		});
+
+		beforeEach(() => {
+			vi.restoreAllMocks();
+
+			oisyTradeUsdValueMock.set(0);
+			liquidiumNetValueUsdMock.set(0);
+			enabledMainnetFungibleTokensUiMock.set([]);
+		});
+
+		it('should sum the wallet balances of every enabled mainnet token', () => {
+			enabledMainnetFungibleTokensUiMock.set([
+				tokenUi({ usdBalance: 100 }),
+				tokenUi({ usdBalance: 20.5 })
+			]);
+
+			expect(get(enabledMainnetTotalUsdBalance)).toBe(120.5);
+		});
+
+		it('should add the staked balance and its claimable rewards', () => {
+			enabledMainnetFungibleTokensUiMock.set([
+				tokenUi({ usdBalance: 100, stakeUsdBalance: 30, claimableStakeBalanceUsd: 7 })
+			]);
+
+			expect(get(enabledMainnetTotalUsdBalance)).toBe(137);
+		});
+
+		it('should treat missing financial data as zero', () => {
+			enabledMainnetFungibleTokensUiMock.set([tokenUi({}), tokenUi({ usdBalance: 50 })]);
+
+			expect(get(enabledMainnetTotalUsdBalance)).toBe(50);
+		});
+
+		it('should add the provider-held value', () => {
+			enabledMainnetFungibleTokensUiMock.set([tokenUi({ usdBalance: 100 })]);
+
+			oisyTradeUsdValueMock.set(40);
+			liquidiumNetValueUsdMock.set(15);
+
+			expect(get(enabledMainnetTotalUsdBalance)).toBe(155);
+		});
+
+		it('should keep the provider-held value when no token is enabled', () => {
+			oisyTradeUsdValueMock.set(40);
+			liquidiumNetValueUsdMock.set(15);
+
+			expect(get(enabledMainnetTotalUsdBalance)).toBe(55);
+		});
+
+		it('should react to the token list changing', () => {
+			enabledMainnetFungibleTokensUiMock.set([tokenUi({ usdBalance: 100 })]);
+
+			expect(get(enabledMainnetTotalUsdBalance)).toBe(100);
+
+			enabledMainnetFungibleTokensUiMock.set([
+				tokenUi({ usdBalance: 100 }),
+				tokenUi({ usdBalance: 250 })
+			]);
+
+			expect(get(enabledMainnetTotalUsdBalance)).toBe(350);
 		});
 	});
 });

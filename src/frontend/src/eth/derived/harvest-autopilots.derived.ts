@@ -1,3 +1,4 @@
+import { HARVEST_AUTOPILOT_TOKENS } from '$eth/constants/harvest-autopilots.constants';
 import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import { isTokenHarvestAutopilot } from '$eth/utils/harvest-autopilots.utils';
@@ -49,13 +50,17 @@ export const harvestAutopilotsCurrentEarning: Readable<number> = derived(
 		)
 );
 
+// Deliberately sourced from the shipped vault list rather than from harvestAutopilots: the rate
+// Harvest offers does not depend on which networks the user enabled, and its only consumer is the
+// Earn card, which must keep advertising it when they are off.
 export const harvestAutopilotsMaxApy: Readable<string> = derived(
-	[harvestAutopilots],
-	([$harvestAutopilots]) =>
-		$harvestAutopilots.reduce<string>(
-			(acc, { apy }) => (nonNullish(apy) ? `${Math.max(Number(acc), Number(apy))}` : acc),
-			'0'
-		)
+	[harvestVaultsStore],
+	([$harvestVaultsStore]) =>
+		HARVEST_AUTOPILOT_TOKENS.reduce<string>((acc, { address }) => {
+			const apy = $harvestVaultsStore[address.toLowerCase()]?.estimatedApy;
+
+			return nonNullish(apy) ? `${Math.max(Number(acc), Number(apy))}` : acc;
+		}, '0')
 );
 
 export const harvestAutopilotsUsdBalance: Readable<number> = derived(

@@ -131,6 +131,42 @@ describe('btc-listener', () => {
 
 			expect(balance?.[tokenId]).toBeNull();
 		});
+
+		it('should store the transactions posted along with a certified balance', () => {
+			// After the query-only warm-up the worker only runs certified syncs, so the new
+			// transactions arrive with certified balances and must not be dropped.
+			syncWallet({ data: mockPostMessage({ certified: true }), tokenId });
+
+			const transactions = get(btcTransactionsStore);
+
+			expect(transactions?.[tokenId]).toEqual(mockCertifiedTransactions(mockTransactions));
+		});
+
+		it('should leave btcTransactionsStore untouched when no new transactions are posted', () => {
+			syncWallet({ data: mockPostMessage({ certified: false }), tokenId });
+
+			const before = get(btcTransactionsStore)?.[tokenId];
+
+			syncWallet({ data: mockPostMessage({ transactions: [], certified: true }), tokenId });
+
+			expect(get(btcTransactionsStore)?.[tokenId]).toBe(before);
+		});
+
+		it('should record an empty history when a wallet without transactions first syncs', () => {
+			btcTransactionsStore.clear(tokenId);
+
+			syncWallet({ data: mockPostMessage({ transactions: [] }), tokenId });
+
+			expect(get(btcTransactionsStore)?.[tokenId]).toEqual([]);
+		});
+
+		it('should record an empty history when the first sync after an error has no transactions', () => {
+			btcTransactionsStore.reset(tokenId);
+
+			syncWallet({ data: mockPostMessage({ transactions: [], certified: true }), tokenId });
+
+			expect(get(btcTransactionsStore)?.[tokenId]).toEqual([]);
+		});
 	});
 
 	describe('syncWalletError', () => {

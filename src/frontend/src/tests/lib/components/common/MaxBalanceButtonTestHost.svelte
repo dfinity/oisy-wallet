@@ -15,9 +15,17 @@
 
 	let amount = $state<OptionAmount>(undefined);
 	let amountSetToMax = $state(false);
+
+	// Mirrors `TokenInputContent.onInput`, which the button does not render itself: typing sets
+	// the amount and clears the flag.
+	const simulateInput = () => {
+		amount = '0.002';
+		amountSetToMax = false;
+	};
 </script>
 
 <MaxBalanceButton {balance} {fee} {maxAmount} {token} bind:amount bind:amountSetToMax />
 
 <span data-tid="max-balance-button-amount">{amount ?? ''}</span>
 <span data-tid="max-balance-button-amount-set-to-max">{amountSetToMax.toString()}</span>
+<button data-tid="max-balance-button-simulate-input" onclick={simulateInput}>input</button>

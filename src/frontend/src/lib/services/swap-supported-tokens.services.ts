@@ -1,7 +1,9 @@
+import { btcSwapProviders } from '$lib/providers/btc-swap.providers';
 import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
 import { icpBridgeProviders } from '$lib/providers/icp-bridge-swap.providers';
 import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
+import { xrpSwapProviders } from '$lib/providers/xrp-swap.providers';
 import {
 	swapSupportedTokensStore,
 	type SwapProviderSupport,
@@ -71,7 +73,14 @@ export const loadSwapSupportedTokens = async ({
 }: {
 	identity: Identity;
 }): Promise<void> => {
-	const [icpProviders, icpBridgeProvidersResolved, evmProviders, solProviders] = await Promise.all([
+	const [
+		icpProviders,
+		icpBridgeProvidersResolved,
+		evmProviders,
+		solProviders,
+		btcProviders,
+		xrpProviders
+	] = await Promise.all([
 		resolveProviderGroup({
 			providers: swapProviders,
 			sourceCategory: 'icp',
@@ -91,6 +100,16 @@ export const loadSwapSupportedTokens = async ({
 			providers: solSwapProviders,
 			sourceCategory: 'sol',
 			callFn: (fn) => fn()
+		}),
+		resolveProviderGroup({
+			providers: btcSwapProviders,
+			sourceCategory: 'btc',
+			callFn: (fn) => fn()
+		}),
+		resolveProviderGroup({
+			providers: xrpSwapProviders,
+			sourceCategory: 'xrp',
+			callFn: (fn) => fn()
 		})
 	]);
 
@@ -99,10 +118,18 @@ export const loadSwapSupportedTokens = async ({
 	const aggregated: SwapSupportedTokensData = {
 		icp: aggregateCategory(icpResolutions),
 		evm: aggregateCategory(evmProviders),
-		sol: aggregateCategory(solProviders)
+		sol: aggregateCategory(solProviders),
+		btc: aggregateCategory(btcProviders),
+		xrp: aggregateCategory(xrpProviders)
 	};
 
-	const providers: SwapProviderSupport[] = [...icpResolutions, ...evmProviders, ...solProviders];
+	const providers: SwapProviderSupport[] = [
+		...icpResolutions,
+		...evmProviders,
+		...solProviders,
+		...btcProviders,
+		...xrpProviders
+	];
 
 	swapSupportedTokensStore.set({ aggregated, providers });
 };

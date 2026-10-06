@@ -1,16 +1,17 @@
-import { INFURA_API_KEY } from '$env/rest/infura.env';
 import type { Erc165Identifier } from '$eth/constants/erc.constants';
 import { ERC165_ABI } from '$eth/constants/erc165.constants';
+import { ethersProvider } from '$eth/providers/ethers.providers';
 import type { Erc165Provider } from '$eth/types/contracts-providers';
 import type { Erc165ContractAddress } from '$eth/types/erc165';
+import type { EthersProviderNetwork } from '$eth/types/network';
 import { Contract } from 'ethers/contract';
-import { InfuraProvider, type Networkish } from 'ethers/providers';
+import type { JsonRpcProvider } from 'ethers/providers';
 
 export class InfuraErc165Provider implements Erc165Provider {
-	protected readonly provider: InfuraProvider;
+	protected readonly provider: JsonRpcProvider;
 
-	constructor(protected readonly network: Networkish) {
-		this.provider = new InfuraProvider(this.network, INFURA_API_KEY);
+	constructor(protected readonly network: EthersProviderNetwork) {
+		this.provider = ethersProvider(this.network);
 	}
 
 	isSupportedInterface = async ({

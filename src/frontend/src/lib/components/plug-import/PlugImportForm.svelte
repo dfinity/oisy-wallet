@@ -45,7 +45,7 @@
 			also never written anywhere but this component's state. -->
 		<textarea
 			id={PLUG_IMPORT_PHRASE_INPUT}
-			class="min-h-24 w-full resize-none rounded-lg border border-brand-subtle-20 bg-primary p-4 text-base font-normal text-primary outline-none transition-colors placeholder:text-tertiary focus:border-brand-primary"
+			class="min-h-24 w-full resize-none rounded-lg border border-brand-subtle-20 bg-primary p-4 text-base font-normal text-primary transition-colors outline-none placeholder:text-tertiary focus:border-brand-primary"
 			autocapitalize="off"
 			autocomplete="off"
 			data-tid={PLUG_IMPORT_PHRASE_INPUT}
@@ -60,7 +60,7 @@
 
 		<input
 			id={PLUG_IMPORT_ACCOUNTS_INPUT}
-			class="w-24 rounded-lg border border-brand-subtle-20 bg-primary p-3 text-base font-normal text-primary outline-none transition-colors focus:border-brand-primary"
+			class="w-24 rounded-lg border border-brand-subtle-20 bg-primary p-3 text-base font-normal text-primary transition-colors outline-none focus:border-brand-primary"
 			data-tid={PLUG_IMPORT_ACCOUNTS_INPUT}
 			disabled={loading}
 			max={PLUG_MAX_ACCOUNT_INDEX + 1}

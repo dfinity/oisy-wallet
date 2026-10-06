@@ -10,7 +10,7 @@ import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import { consoleWarn } from '$lib/utils/console.utils';
-import { jsonReviver, nonNullish } from '@dfinity/utils';
+import { isNullish, jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const syncWallet = ({
@@ -27,14 +27,17 @@ export const syncWallet = ({
 		}
 	} = data;
 
-	// Only parse new transactions when certified is false (when we actually receive transaction data)
-	// When certified is true, newTransactions are not provided
-	const providerTransactions: CertifiedData<BtcTransactionUi>[] | null = certified
-		? null
-		: JSON.parse(newTransactions, jsonReviver);
+	// The worker posts the new transactions on query and certified syncs alike: after the
+	// query-only warm-up, the certified sync is the only one still running.
+	const providerTransactions: CertifiedData<BtcTransactionUi>[] = JSON.parse(
+		newTransactions,
+		jsonReviver
+	);
 
-	// Only store transactions when we have actual transaction data (certified === false)
-	if (nonNullish(providerTransactions)) {
+	// An empty page is still written while the token has no history yet: that entry is what tells
+	// the UI its history has loaded, so a wallet without Bitcoin transactions would otherwise keep
+	// Activity on its skeleton for good.
+	if (providerTransactions.length > 0 || isNullish(get(btcTransactionsStore)?.[tokenId])) {
 		btcTransactionsStore.prepend({
 			tokenId,
 			transactions: providerTransactions

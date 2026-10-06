@@ -4,17 +4,27 @@ use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
 use shared::types::{
-    active_user_transaction::ActiveUserTransaction, agreement::AgreementHistoryEntry,
-    api_keys::ApiKeys, backend_config::Config, bitcoin::StoredPendingTransaction,
-    contact::StoredContacts, custom_token::CustomToken, exchange::ExchangeRate, token::UserToken,
-    user_profile::StoredUserProfile, user_transaction::UserTransaction, Timestamp,
+    active_user_transaction::ActiveUserTransaction,
+    agreement::AgreementHistoryEntry,
+    api_keys::ApiKeys,
+    backend_config::Config,
+    bitcoin::StoredPendingTransaction,
+    contact::{ContactImage, StoredContacts},
+    custom_token::CustomToken,
+    exchange::ExchangeRate,
+    token::UserToken,
+    user_profile::StoredUserProfile,
+    user_transaction::UserTransaction,
+    Timestamp,
 };
 
 use crate::{
     personal_notes::share::model::PersonalNoteShareRecord,
+    tips::model::TipRecord,
     types::storable::{
-        ActiveUserTransactionKey, Candid, PersonalNoteShareCreatorKey, PersonalNoteShareToken,
-        StoredPrincipal, StoredTokenId, UserTransactionKey,
+        ActiveUserTransactionKey, Candid, ContactImageKey, PersonalNoteShareCreatorKey,
+        PersonalNoteShareToken, StoredPrincipal, StoredTokenId, TipId, TipSenderKey,
+        UserTransactionKey,
     },
 };
 
@@ -37,6 +47,10 @@ pub type UserProfileUpdatedMap = StableBTreeMap<StoredPrincipal, Timestamp, VMem
 
 // Define a new type for the contact storage
 pub type ContactMap = StableBTreeMap<StoredPrincipal, Candid<StoredContacts>, VMem>;
+
+/// Contact images, held outside [`ContactMap`] so that a contact read or write decodes only the
+/// contact metadata rather than every image the principal has stored.
+pub type ContactImageMap = StableBTreeMap<ContactImageKey, Candid<ContactImage>, VMem>;
 
 pub type PendingTransactionsMap = HashMap<String, Vec<StoredPendingTransaction>>;
 
@@ -72,3 +86,12 @@ pub type PersonalNoteShareMap =
 /// [`PersonalNoteShareMap`].
 pub type PersonalNoteSharesByCreatorMap =
     StableBTreeMap<PersonalNoteShareCreatorKey, Timestamp, VMem>;
+
+/// Primary tip store: tip id → record. Readable anonymously through
+/// `get_tip`, which returns only the amount, token and deadline — see
+/// `tips::service`.
+pub type TipMap = StableBTreeMap<TipId, Candid<TipRecord>, VMem>;
+
+/// By-sender index for the active-tip cap and History: `(sender, tip_id) → expires_at_ns`.
+/// Lets both range-scan one sender's tips without touching [`TipMap`].
+pub type TipsBySenderMap = StableBTreeMap<TipSenderKey, Timestamp, VMem>;

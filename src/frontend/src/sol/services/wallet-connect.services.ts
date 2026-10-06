@@ -19,21 +19,29 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { getAccountInfo } from '$sol/api/solana.api';
+import { estimatePriorityFee, getAccountInfo } from '$sol/api/solana.api';
+import { TOKEN_2022_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
 } from '$sol/constants/wallet-connect.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
+import { loadSolProgramNames } from '$sol/services/sol-program-name.services';
 import {
 	sendSignedTransaction,
 	setLifetimeAndFeePayerToTransaction
 } from '$sol/services/sol-send.services';
 import { signTransaction as executeSign } from '$sol/services/sol-sign.services';
+import { simulateSolTransaction } from '$sol/services/sol-simulation.services';
+import { calculateAssociatedTokenAddress } from '$sol/services/spl-accounts.services';
+import { loadSplTokenMetadata } from '$sol/services/spl-token-metadata.services';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
+import { convertSolComputeUnitPriceToFee } from '$sol/utils/fee.utils';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
+import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
+import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
 import {
 	createSigner,
 	signMessage as signMessageBytes,
@@ -42,9 +50,14 @@ import {
 } from '$sol/utils/sol-sign.utils';
 import {
 	decodeTransactionMessage,
+	isSolCompiledTransactionMessage,
 	mapSolTransactionMessage,
 	parseSolBase64TransactionMessage
 } from '$sol/utils/sol-transactions.utils';
+import {
+	deriveSolTransferParties,
+	mapSolTransferLegs
+} from '$sol/utils/sol-transfer-parties.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { WalletKitTypes } from '@reown/walletkit';
 import {
@@ -61,6 +74,7 @@ import { get } from 'svelte/store';
 interface WalletConnectDecodeTransactionParams {
 	base64EncodedTransactionMessage: string;
 	networkId: NetworkId;
+	address: OptionSolAddress;
 }
 
 type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
@@ -70,11 +84,23 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	progress: (step: ProgressStepsSign | ProgressStepsSendSol.SEND) => void;
 	token: Token;
 	identity: NullishIdentity;
+	// Whether a simulated run described anything the review could show. The decode already made the
+	// call, so its outcome is handed on rather than repeated here: asking again would put a second
+	// round trip on the critical path, and a run that landed after the user pressed approve would
+	// describe a review they never read. A run that completed and reported nothing is not a
+	// description - an effect outside what the preview measures produces exactly that.
+	simulated: boolean;
+	// Whether a close in the reviewed instruction list pays an account's balance to an address
+	// that is not the user's wallet. Decided from that list rather than from the message, which
+	// cannot see a close a program makes inside its own call, and handed on for the same reason
+	// the simulated flag is.
+	closesPayOthers: boolean;
 };
 
 export const decode = async ({
 	base64EncodedTransactionMessage,
-	networkId
+	networkId,
+	address
 }: WalletConnectDecodeTransactionParams) => {
 	const solNetwork = safeMapNetworkIdToNetwork(networkId);
 
@@ -83,23 +109,192 @@ export const decode = async ({
 		rpc: solanaHttpRpc(solNetwork)
 	});
 
-	const mapped = mapSolTransactionMessage(parsedTransactionMessage);
+	const mappedTransaction = mapSolTransactionMessage({
+		transactionMessage: parsedTransactionMessage,
+		userAddress: address
+	});
+
+	// The review is synchronous, so both the estimate the requested fee is judged against and the
+	// simulation are fetched here, where the request is already being decoded before the modal
+	// opens. A simulation that lands after the user has approved would be worthless.
+	const [prioritizationFeeEstimate, simulation] = await Promise.all([
+		estimateSolPrioritizationFee({
+			computeUnitLimit: mappedTransaction.computeUnitLimit,
+			network: solNetwork
+		}),
+		simulateSolTransaction({
+			base64EncodedTransactionMessage,
+			transactionMessage: parsedTransactionMessage,
+			address,
+			network: solNetwork
+		})
+	]);
+
+	const {
+		preview,
+		instructions: simulatedInstructions,
+		messageSummary,
+		parties: simulatedParties
+	} = simulation ?? {};
+
+	// Name the mints and the programs the review is about to show. Best effort and awaited, since
+	// the review is synchronous and a name that landed after the modal opened would arrive too late
+	// to read.
+	const [namedInstructions] = await Promise.all([
+		loadSolProgramNames({ instructions: simulatedInstructions ?? [], network: solNetwork }),
+		loadSplTokenMetadata({
+			tokenAddresses: (preview?.tokenDeltas ?? []).map(({ tokenAddress }) => tokenAddress),
+			network: solNetwork
+		})
+	]);
+
+	const mapped = {
+		...mappedTransaction,
+		...(nonNullish(prioritizationFeeEstimate) && { prioritizationFeeEstimate }),
+		...(nonNullish(preview) && { preview }),
+		...(nonNullish(messageSummary) && { messageSummary })
+	};
 
 	// Unchecked SPL `Transfer`/`Approve` instructions do not carry the mint, so it is
 	// not surfaced by the mapper. Recover it from the source token account (the account
 	// being debited) so the review can still show the correct token instead of native
 	// SOL. We deliberately do not look at the destination: a native SOL transfer *to* a
 	// token account would otherwise be misread as an SPL transfer.
-	if (nonNullish(mapped.tokenAddress)) {
-		return mapped;
+	const tokenAddress =
+		mapped.tokenAddress ??
+		(await resolveSplTokenAddress({ address: mapped.source, network: solNetwork }));
+
+	// Read whenever either fallback below needs it. A run reports its parties and its instructions,
+	// an empty list included, so the two go missing together, and an instruction list built without
+	// the user's own accounts cannot tell a send from a receive.
+	const owned =
+		nonNullish(simulatedParties) && nonNullish(simulatedInstructions)
+			? undefined
+			: await ownSolAddresses({ address, tokenAddress });
+
+	const parties = simulatedParties ?? {
+		...deriveSolTransferParties({
+			legs: mapSolTransferLegs(parsedTransactionMessage.instructions),
+			...(owned ?? { ownedAddresses: [], addressToOwner: {} })
+		}),
+		// Without a simulation the legs are whatever the message states itself, and a routed swap
+		// states none of them. The lists stay, because losing the destination the review shows
+		// today would be a regression, but they must say that they are partial: an empty list
+		// reads as "nothing moves", which is the most dangerous thing this review can claim.
+		partial: true
+	};
+
+	// The list the Operations tab shows. A simulated run reveals the calls made inside other
+	// programs, which the message states none of; without one, the message's own top-level
+	// instructions are still worth listing, and the review says which of the two it got.
+	//
+	// The message carries its instructions as raw bytes, so none of them can be read into an
+	// effect and every line here is an unrecognised one naming its program. That is the whole
+	// point of listing them: without it this fallback produced nothing at all.
+	const instructions = nonNullish(simulatedInstructions)
+		? namedInstructions
+		: await loadSolProgramNames({
+				instructions: mapSolInstructionSummaries({
+					instructions: [...parsedTransactionMessage.instructions].map(
+						asSolParsedRpcInstructionOrSelf
+					),
+					innerInstructions: [],
+					ownedAddresses: owned?.ownedAddresses ?? [],
+					userAddress: address,
+					includeUnrecognised: true
+				}),
+				network: solNetwork
+			});
+
+	return {
+		...mapped,
+		// A run's list is passed on even when it is empty: that is the run saying there is nothing to
+		// list, and the message's own reading would fill it with what the run found was not there.
+		...((instructions.length > 0 || nonNullish(simulatedInstructions)) && {
+			instructions,
+			simulatedInstructions: nonNullish(simulatedInstructions)
+		}),
+		...(nonNullish(tokenAddress) && { tokenAddress }),
+		parties
+	};
+};
+
+/**
+ * The accounts the user owns, when there is no simulation to read them from.
+ *
+ * The wallet address alone would not do: SPL transfers name token accounts, so matching on it
+ * would put every token transfer in neither list, for exactly the transactions the lists exist to
+ * explain. The user's associated token account is derived locally instead, for both token programs
+ * since a mint belongs to one or the other, which costs no round trip. Each derived account maps
+ * back to the wallet so that it is shown as one, the way the activity list already shows them.
+ */
+const ownSolAddresses = async ({
+	address,
+	tokenAddress
+}: {
+	address: OptionSolAddress;
+	tokenAddress: SplTokenAddress | undefined;
+}): Promise<{
+	ownedAddresses: SolAddress[];
+	addressToOwner: Record<SolAddress, SolAddress>;
+}> => {
+	if (isNullish(address)) {
+		return { ownedAddresses: [], addressToOwner: {} };
 	}
 
-	const tokenAddress = await resolveSplTokenAddress({
-		address: mapped.source,
-		network: solNetwork
-	});
+	if (isNullish(tokenAddress)) {
+		return { ownedAddresses: [address], addressToOwner: {} };
+	}
 
-	return nonNullish(tokenAddress) ? { ...mapped, tokenAddress } : mapped;
+	try {
+		const ataAddresses = await Promise.all(
+			[TOKEN_PROGRAM_ADDRESS, TOKEN_2022_PROGRAM_ADDRESS].map(
+				async (tokenOwnerAddress) =>
+					await calculateAssociatedTokenAddress({ owner: address, tokenAddress, tokenOwnerAddress })
+			)
+		);
+
+		return {
+			ownedAddresses: [address, ...ataAddresses],
+			addressToOwner: ataAddresses.reduce<Record<SolAddress, SolAddress>>(
+				(acc, ata) => ({ ...acc, [ata]: address }),
+				{}
+			)
+		};
+	} catch (_: unknown) {
+		// Deriving an address needs the subtle crypto the browser only offers in a secure context.
+		// Losing it costs the lists their token accounts, which the partial marker already covers;
+		// letting it throw would cost the user the whole review.
+		return { ownedAddresses: [address], addressToOwner: {} };
+	}
+};
+
+/**
+ * What OISY would pay to prioritise this message, so the review can say whether the fee the dApp
+ * asks for is in line with the network or far above it.
+ *
+ * `getRecentPrioritizationFees` quotes micro-lamports per compute unit, so it only becomes a
+ * comparable lamport figure once applied to the very compute unit limit this message resolves to.
+ */
+const estimateSolPrioritizationFee = async ({
+	computeUnitLimit,
+	network
+}: {
+	computeUnitLimit?: bigint;
+	network: SolanaNetworkType;
+}): Promise<bigint | undefined> => {
+	if (isNullish(computeUnitLimit)) {
+		return undefined;
+	}
+
+	try {
+		const computeUnitPrice = await estimatePriorityFee({ network });
+
+		return convertSolComputeUnitPriceToFee({ computeUnitPrice, computeUnitLimit });
+	} catch (_: unknown) {
+		// Best-effort: without an estimate the review falls back to its fiat floor. A failed
+		// lookup must never keep the user from seeing the request.
+	}
 };
 
 /**
@@ -261,6 +456,8 @@ export const sign = ({
 	token,
 	progress,
 	identity,
+	simulated,
+	closesPayOthers,
 	...params
 }: WalletConnectSignTransactionParams): Promise<ResultSuccess> =>
 	execute({
@@ -303,7 +500,29 @@ export const sign = ({
 				rpc: solanaHttpRpc(solNetwork)
 			});
 
-			const { amount, destination, ambiguous } = mapSolTransactionMessage(parsedTransactionMessage);
+			const { amount, destination, ambiguous, unreviewed } = mapSolTransactionMessage({
+				transactionMessage: parsedTransactionMessage,
+				userAddress: address
+			});
+
+			// The balance is gone the moment this is signed, and the message mapper cannot see a close
+			// made inside another program's call. Refused rather than warned about, on the same test
+			// the mapper applies to the closes it can see: only the user's wallet holds lamports as a
+			// balance, so any other destination is value leaving.
+			//
+			// Asked before the ambiguous refusal below, which the mapper also raises for a close the
+			// message states: both are true of the commonest case, and the general sentence would be
+			// given for the specific thing that is wrong with it. The review's notices are ordered
+			// the same way, and the two have to agree or the toast contradicts the screen it follows.
+			if (closesPayOthers) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.close_pays_others }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
 
 			// The review screen collapses the transaction to a single source/destination/amount.
 			// When the message bundles instructions that disagree on those fields, that summary
@@ -312,6 +531,24 @@ export const sign = ({
 			if (ambiguous) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.ambiguous_transaction }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
+			// An instruction OISY cannot read does not corrupt the summary, so it is a warning rather
+			// than a refusal - but the thing that makes it a warning and not a blindfold is the
+			// simulated run, which reports what the message would do to the user's own accounts
+			// whether or not any decoder understood it. Without that run the review says only that
+			// something in here could not be read, and approving it is approving an effect nobody
+			// described. The simulation is best effort by design and stays that way: it is not
+			// required of a message OISY did read, and a provider that times out on a transaction
+			// the wallet understands still signs.
+			if ((unreviewed ?? false) && !simulated) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.unreviewed_without_simulation }
 				});
 
 				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
@@ -384,6 +621,19 @@ export const sign = ({
 		})
 	});
 
+/**
+ * Reown sends the `signMessage` payload base58-encoded (per the Reown Solana RPC reference). A
+ * value that is not base58 carries no bytes to review or sign, so it is reported as an unusable
+ * parameter rather than thrown on.
+ */
+const decodeBase58Message = (message: string): Uint8Array | undefined => {
+	try {
+		return Uint8Array.from(getBase58Encoder().encode(message));
+	} catch (_: unknown) {
+		return undefined;
+	}
+};
+
 type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
 	listener: OptionWalletConnectListener;
 	address: OptionSolAddress;
@@ -441,17 +691,48 @@ export const signMessage = ({
 				return { success: false };
 			}
 
+			const messageBytes = decodeBase58Message(message);
+
+			if (isNullish(messageBytes)) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.unknown_parameter }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
+			// What is signed is decided by the requested method, never by what the payload parses as.
+			// This method signs messages, so a transaction is refused rather than rendered as text.
+			//
+			// It has to be refused rather than merely displayed differently: Ed25519 signs the raw
+			// bytes, and the transaction flow signs the compiled transaction message bytes with this
+			// very key, derivation path and no domain separator or prefix. A signature taken here over
+			// a transaction message is therefore byte-for-byte a usable transaction signature, while
+			// the review that obtained it shows no amount, destination, fee, decoded instruction,
+			// warning or simulation.
+			if (isSolCompiledTransactionMessage(messageBytes)) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.sol_transaction_as_message }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
 			modalNext();
 
 			try {
 				progress(ProgressStepsSign.SIGN);
 
-				// Ed25519 signs the raw message bytes; the WC param is base58-encoded, and the response
-				// signature is base58 too (per the Reown Solana RPC reference).
+				// Ed25519 signs the raw message bytes, and the response signature is base58 too (per the
+				// Reown Solana RPC reference).
 				const signatureBytes = await signMessageBytes({
 					identity,
 					network: safeMapNetworkIdToNetwork(networkId),
-					message: Uint8Array.from(getBase58Encoder().encode(message))
+					message: messageBytes
 				});
 
 				const signature = getBase58Decoder().decode(signatureBytes);

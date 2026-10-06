@@ -1,3 +1,9 @@
+import { enabledMainnetBitcoinToken } from '$btc/derived/tokens.derived';
+import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
+import {
+	NEAR_INTENTS_BTC_SWAP_ENABLED,
+	NEAR_INTENTS_XRP_SWAP_ENABLED
+} from '$env/rest/near-intents.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ZERO } from '$lib/constants/app.constants';
 import {
@@ -12,6 +18,7 @@ import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { filterSwapTokens } from '$lib/utils/swap-tokens-filter.utils';
+import { enabledXrpTokens } from '$xrp/derived/tokens.derived';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -21,29 +28,80 @@ export interface SwappableTokens {
 }
 
 /**
+ * Bitcoin's contribution to the swap universe: the enabled mainnet BTC token, and only
+ * when a provider can move it: Chain Fusion (ck conversion) or NEAR Intents (bridging).
+ *
+ * Kept out of `allCrossChainSwapTokens`, which is typed around the EVM / SOL custom-token
+ * unions that BTC does not belong to.
+ */
+const swapUniverseBitcoinTokens: Readable<TokenToggleable<Token>[]> = derived(
+	[enabledMainnetBitcoinToken],
+	([$enabledMainnetBitcoinToken]) =>
+		(CHAIN_FUSION_SWAP_ENABLED || NEAR_INTENTS_BTC_SWAP_ENABLED) &&
+		nonNullish($enabledMainnetBitcoinToken)
+			? [{ ...$enabledMainnetBitcoinToken, enabled: true }]
+			: []
+);
+
+/**
+ * XRP's contribution to the swap universe: the enabled XRP token, while NEAR Intents, its only
+ * provider, is enabled for it. Kept out of `allCrossChainSwapTokens` for the same reason as Bitcoin.
+ */
+const swapUniverseXrpTokens: Readable<TokenToggleable<Token>[]> = derived(
+	[enabledXrpTokens],
+	([$enabledXrpTokens]) =>
+		NEAR_INTENTS_XRP_SWAP_ENABLED
+			? $enabledXrpTokens.map((token) => ({ ...token, enabled: true }))
+			: []
+);
+
+/**
  * The unfiltered universe of tokens that can appear in either side of the swap UI:
- * ICP + all known ICRC tokens + all cross-chain (EVM/SOL) tokens. Provider-supported
- * filtering is applied on top via `filterSwapTokens`.
+ * ICP + all known ICRC tokens + all cross-chain (EVM/SOL) tokens + Bitcoin + XRP.
+ * Provider-supported filtering is applied on top via `filterSwapTokens`.
  */
 export const allSwapUniverseTokens: Readable<TokenToggleable<Token>[]> = derived(
-	[allSortedIcrcTokens, allCrossChainSwapTokens],
-	([$allSortedIcrcTokens, $allCrossChainSwapTokens]) => [
+	[allSortedIcrcTokens, allCrossChainSwapTokens, swapUniverseBitcoinTokens, swapUniverseXrpTokens],
+	([
+		$allSortedIcrcTokens,
+		$allCrossChainSwapTokens,
+		$swapUniverseBitcoinTokens,
+		$swapUniverseXrpTokens
+	]) => [
 		{ ...ICP_TOKEN, enabled: true },
 		...$allSortedIcrcTokens,
-		...$allCrossChainSwapTokens
+		...$allCrossChainSwapTokens,
+		...$swapUniverseBitcoinTokens,
+		...$swapUniverseXrpTokens
 	]
 );
 
 const selectedSwappableToken: Readable<Token | undefined> = derived(
-	[pageToken, allSwapCompatibleIcrcTokens, allCrossChainSwapTokens],
-	([$pageToken, $allSwapCompatibleIcrcTokens, $allCrossChainSwapTokens]) => {
+	[
+		pageToken,
+		allSwapCompatibleIcrcTokens,
+		allCrossChainSwapTokens,
+		swapUniverseBitcoinTokens,
+		swapUniverseXrpTokens
+	],
+	([
+		$pageToken,
+		$allSwapCompatibleIcrcTokens,
+		$allCrossChainSwapTokens,
+		$swapUniverseBitcoinTokens,
+		$swapUniverseXrpTokens
+	]) => {
 		if (nonNullish($pageToken)) {
 			const selectedToken = $pageToken;
 
 			const swappableToken: Token | undefined = [
 				{ ...ICP_TOKEN, enabled: true },
 				...$allSwapCompatibleIcrcTokens,
-				...$allCrossChainSwapTokens
+				...$allCrossChainSwapTokens,
+				// Without this, opening Swap from the BTC token page would fail to preselect BTC.
+				...$swapUniverseBitcoinTokens,
+				// And from the XRP token page, where it is also what shows the Swap action at all.
+				...$swapUniverseXrpTokens
 			].find((t) => t.id === selectedToken.id);
 
 			if (nonNullish(swappableToken)) {

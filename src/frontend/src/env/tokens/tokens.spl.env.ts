@@ -10,6 +10,7 @@ import { ARMON_TOKEN } from '$env/tokens/tokens-spl/tokens.armon.env';
 import { AVGOX_TOKEN } from '$env/tokens/tokens-spl/tokens.avgox.env';
 import { AZNX_TOKEN } from '$env/tokens/tokens-spl/tokens.aznx.env';
 import { BABAON_TOKEN } from '$env/tokens/tokens-spl/tokens.babaon.env';
+import { BAT_TOKEN } from '$env/tokens/tokens-spl/tokens.bat.env';
 import { BIDUON_TOKEN } from '$env/tokens/tokens-spl/tokens.biduon.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { CBBTC_TOKEN } from '$env/tokens/tokens-spl/tokens.cbbtc.env';
@@ -79,6 +80,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	AVGOX_TOKEN,
 	AZNX_TOKEN,
 	BABAON_TOKEN,
+	BAT_TOKEN,
 	BIDUON_TOKEN,
 	BONK_TOKEN,
 	CBBTC_TOKEN,

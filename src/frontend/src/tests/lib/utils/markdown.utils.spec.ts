@@ -205,4 +205,21 @@ describe('markdownToHTML', () => {
 		expect(result).toContain('<h1');
 		expect(result).toContain('Title');
 	});
+
+	it('renders the inline markup nested inside a link', async () => {
+		const result = await markdownToHTML('[**Bold** Oisy](https://oisy.com)');
+
+		expect(result).toContain('href="https://oisy.com"');
+		expect(result).toContain('<strong>Bold</strong> Oisy');
+	});
+
+	it('converts a raw img tag to a link via the custom html renderer', async () => {
+		const result = await markdownToHTML(
+			'<p><img src="https://oisy.com/logo.png" alt="Logo" /></p>'
+		);
+
+		expect(result).toContain('href="https://oisy.com/logo.png"');
+		expect(result).toContain('type="image/png"');
+		expect(result).not.toContain('<img');
+	});
 });

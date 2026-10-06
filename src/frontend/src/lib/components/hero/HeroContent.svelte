@@ -37,7 +37,9 @@
 		networkBsc,
 		networkEthereum,
 		networkPolygon,
+		networkRobinhood,
 		networkSolana,
+		networkXrp,
 		pseudoNetworkChainFusion,
 		networkArbitrum,
 		selectedNetworkNftUnsupported
@@ -136,6 +138,12 @@
 
 	let isGradientToBottomRight = $derived((isGLDTToken || $networkBsc) && !isUsd1Token);
 
+	let isRobinhoodGradient = $derived($networkRobinhood && !isUsd1Token);
+
+	let robinhoodGradientClasses = $derived(
+		isRobinhoodGradient ? 'bg-linear-135 from-55% to-[110%]' : ''
+	);
+
 	let rateChangeBackground = $derived.by(() => {
 		if (isIcpHero) {
 			return isDarkTheme ? ('dark' as const) : ('light' as const);
@@ -144,6 +152,7 @@
 		return $networkBase ||
 			$networkPolygon ||
 			$networkArbitrum ||
+			$networkRobinhood ||
 			isTrumpToken ||
 			isVeurToken ||
 			isUsd1Token
@@ -153,7 +162,7 @@
 </script>
 
 <div
-	class="bg-pos-0 flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-primary p-3 text-center transition-[background-position,background-size] duration-500 ease-in-out md:rounded-[28px] md:p-5"
+	class="bg-pos-0 flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-primary p-3 text-center transition-[background-position,background-size] duration-500 ease-in-out md:rounded-[28px] md:p-5 {robinhoodGradientClasses}"
 	class:bg-center={isVeurToken || isUsd1Token}
 	class:bg-cover={isTrumpToken || isVchfToken || isVeurToken || isUsd1Token}
 	class:bg-gradient-to-r={isGradientToRight}
@@ -162,6 +171,7 @@
 	class:bg-linear-to-b={!isIcpHero &&
 		!isGradientToRight &&
 		!isGradientToBottomRight &&
+		!isRobinhoodGradient &&
 		!isUsd1Token}
 	class:bg-pos-100={!$pseudoNetworkChainFusion}
 	class:bg-size-200={!isTrumpToken && !isUsd1Token}
@@ -178,8 +188,10 @@
 	class:from-eth-0={$networkEthereum}
 	class:from-gold-0={isGLDTToken}
 	class:from-polygon-0={$networkPolygon}
+	class:from-robinhood-0={$networkRobinhood}
 	class:from-sol-0={$networkSolana && !isTrumpToken}
 	class:from-trump-0={isTrumpToken}
+	class:from-xrp-0={$networkXrp}
 	class:text-primary={isIcpHero}
 	class:text-primary-inverted={!isIcpHero}
 	class:to-arbitrum-100={$networkArbitrum}
@@ -190,8 +202,10 @@
 	class:to-eth-100={$networkEthereum}
 	class:to-gold-100={isGLDTToken}
 	class:to-polygon-100={$networkPolygon}
+	class:to-robinhood-100={$networkRobinhood}
 	class:to-sol-100={$networkSolana && !isTrumpToken}
 	class:to-trump-100={isTrumpToken}
+	class:to-xrp-100={$networkXrp}
 >
 	{#if isTransactionsPage}
 		<div class="flex w-full flex-col gap-6" in:slide={SLIDE_PARAMS}>

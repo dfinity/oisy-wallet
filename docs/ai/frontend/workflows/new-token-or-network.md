@@ -53,8 +53,9 @@ pointer; the detailed step-by-step lives in [HACKING.md](../../../../HACKING.md)
    (`$lib/services/exchange.services.ts`,
    `$lib/workers/exchange.worker.ts`,
    `$lib/derived/exchange.derived.ts`).
-10. Update CSP in [`scripts/build.csp.mjs`](../../../../scripts/build.csp.mjs)
-    for any new provider URL.
+10. CSP needs **no** change for a new provider URL — `connect-src` is a
+    `'self' https: wss:` wildcard. Only a new framed origin needs an entry
+    in [`scripts/build.csp.mjs`](../../../../scripts/build.csp.mjs).
 11. Add or extend tests under `$tests/`.
 12. Run quality gates ([`pr-and-ci.md §4`](../../pr-and-ci.md#4-local-quality-gates)).
 
@@ -68,8 +69,14 @@ A token / network add is naturally cross-cutting. To stay reviewable:
   per logical group (`feat(frontend): add <network> ERC-20 tokens batch 1`).
 - Exchange-rate plumbing → can ship in the first PR if it's small;
   otherwise split.
-- Backend variant change is usually its own PR
-  (`feat(backend): add <network> variant to NetworkSettingsFor`).
+- Backend variant change is usually its own PR, and a breaking one —
+  a new `NetworkSettingsFor` variant degrades the optional
+  `UserProfile.settings` to `null` for older clients
+  (`feat(backend)!: add <network> variant to NetworkSettingsFor`, with a
+  `BREAKING CHANGE:` line). See
+  [`breaking-interface.md`](../../backend/workflows/breaking-interface.md).
+  The `networkIdToKey` / `keyToNetworkId` arms do **not** go in it: they
+  need the network id constant, so they land with the frontend PR.
 
 ## Don'ts
 
@@ -78,6 +85,9 @@ A token / network add is naturally cross-cutting. To stay reviewable:
 - Hand-edit any `tokens.*.json` under `$env/tokens/`. Run the matching
   `npm run build:tokens-*` script (or let the `update-tokens` workflow
   do it).
-- Forget the CSP update — the FE will silently fail to talk to the new
-  RPC otherwise.
+- Add a coingecko platform to `coingecko.schema.ts` and forget the
+  duplicate gate in `buildErc20PriceParams`
+  (`$lib/utils/exchange.utils.ts`) — a platform missing there is dropped
+  with no error, so the chain looks wired up and never gets ERC-20
+  prices. Cover it with a test.
 - Add a token without an icon, name, decimals, and symbol typed correctly.

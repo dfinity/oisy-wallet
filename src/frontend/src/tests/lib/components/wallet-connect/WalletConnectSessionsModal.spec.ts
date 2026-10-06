@@ -13,10 +13,12 @@ import type { SessionTypes } from '@walletconnect/types';
 describe('WalletConnectSessionsModal', () => {
 	const mockSession = ({
 		accounts,
+		namespace = 'eip155',
 		name = 'Test dApp',
 		url = 'https://test-dapp.com'
 	}: {
 		accounts: string[];
+		namespace?: string;
 		name?: string;
 		url?: string;
 	}): SessionTypes.Struct =>
@@ -31,7 +33,7 @@ describe('WalletConnectSessionsModal', () => {
 				}
 			},
 			namespaces: {
-				eip155: {
+				[namespace]: {
 					accounts,
 					methods: [],
 					events: []
@@ -128,6 +130,29 @@ describe('WalletConnectSessionsModal', () => {
 		const overlappedLogos = container.querySelectorAll('[style*="z-index"]');
 
 		expect(overlappedLogos.length).toBeGreaterThan(0);
+	});
+
+	it('should render the Bitcoin network icon for a bip122 session', () => {
+		// Regression: the bip122 chain had no entry in the icon map, so the Bitcoin icon never
+		// resolved and OverlappedLogos showed its loading skeleton indefinitely.
+		const session = mockSession({
+			namespace: 'bip122',
+			// bip122 account: `bip122:<first 32 hex chars of the mainnet genesis hash>:<address>`.
+			accounts: [
+				'bip122:000000000019d6689c085ae165831e93:bc1qexampleaddressxxxxxxxxxxxxxxxxxxxxxxx'
+			]
+		});
+
+		walletConnectListenerStore.set({
+			...mockListener,
+			getActiveSessions: vi.fn().mockReturnValue({ 'test-topic': session })
+		} as unknown as WalletConnectListener);
+
+		const { container } = render(WalletConnectSessionsModal);
+
+		const overlappedLogos = container.querySelectorAll('[style*="z-index"]');
+
+		expect(overlappedLogos).toHaveLength(1);
 	});
 
 	it('should deduplicate network icons for same chain', () => {

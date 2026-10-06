@@ -2,8 +2,10 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { SessionTypes } from '@walletconnect/types';
 	import { onMount } from 'svelte';
+	import { BIP122_CHAINS } from '$env/bip122-chains.env';
 	import { CAIP10_CHAINS } from '$env/caip10-chains.env';
 	import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+	import { SUPPORTED_BITCOIN_NETWORKS } from '$env/networks/networks.btc.env';
 	import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 	import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 	import IconLinkOff from '$lib/components/icons/IconLinkOff.svelte';
@@ -37,6 +39,10 @@
 		...Object.entries(CAIP10_CHAINS).reduce<Record<string, string>>((acc, [key, { network }]) => {
 			const { icon } =
 				network === SolanaNetworks.mainnet ? SOLANA_MAINNET_NETWORK : SOLANA_DEVNET_NETWORK;
+			return nonNullish(icon) ? { ...acc, [key]: icon } : acc;
+		}, {}),
+		...Object.entries(BIP122_CHAINS).reduce<Record<string, string>>((acc, [key, { networkId }]) => {
+			const icon = SUPPORTED_BITCOIN_NETWORKS.find(({ id }) => id === networkId)?.icon;
 			return nonNullish(icon) ? { ...acc, [key]: icon } : acc;
 		}, {})
 	};
