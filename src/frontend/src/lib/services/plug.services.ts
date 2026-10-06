@@ -9,6 +9,7 @@ import { getBalanceQuery } from '$icp/api/bitcoin.api';
 import { balance as icrcBalance, transfer as icrcTransfer } from '$icp/api/icrc-ledger.api';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIcp, isTokenIcrc } from '$icp/utils/icrc.utils';
+import { PLUG_BALANCE_TIMEOUT_MILLISECONDS } from '$lib/constants/plug.constants';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { PlugAccount, PlugBalance } from '$lib/types/plug';
 import type { Token } from '$lib/types/token';
@@ -19,6 +20,7 @@ import {
 	isNetworkIdEvm,
 	isNetworkIdSolana
 } from '$lib/utils/network.utils';
+import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { loadSolNetworkBalances } from '$sol/services/sol-balances.services';
 import { SolanaNetworks } from '$sol/types/network';
 import { isTokenSpl } from '$sol/utils/spl.utils';
@@ -222,7 +224,14 @@ export const loadPlugBalances = async ({
 				...acc,
 				(async (): Promise<PlugBalance | undefined> => {
 					try {
-						return { token, address, balance: await load() };
+						const balance = await Promise.race([
+							load(),
+							waitForMilliseconds(PLUG_BALANCE_TIMEOUT_MILLISECONDS).then(() => {
+								throw new Error('Balance lookup timed out');
+							})
+						]);
+
+						return { token, address, balance };
 					} catch (err: unknown) {
 						if (isPermanentlyUnreadable(err)) {
 							return undefined;

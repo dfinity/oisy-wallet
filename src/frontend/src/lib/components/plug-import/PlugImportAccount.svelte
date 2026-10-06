@@ -71,7 +71,7 @@
 		<span class="text-tertiary">{$i18n.plug_import.text.empty_account}</span>
 	{:else}
 		<ul class="flex w-full flex-col gap-2">
-			{#each visible as row (`${row.token.symbol}-${row.address}`)}
+			{#each visible as row (`${row.token.network.id.toString()}-${row.token.symbol}`)}
 				{@const { token, address, balance } = row}
 				{@const amount = plugSweepableAmount({ token, balance })}
 				{@const reason = blockedReason(row)}
