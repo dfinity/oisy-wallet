@@ -1,0 +1,730 @@
+import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
+import { ZERO } from '$lib/constants/app.constants';
+import { absBigInt, maxBigInt } from '$lib/utils/bigint.utils';
+import { formatToken } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import type { OptionSolAddress } from '$sol/types/address';
+import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
+import type {
+	SolNetBalanceChange,
+	SolTransactionSummary
+} from '$sol/types/sol-transaction-summary';
+import type { SplTokenAddress } from '$sol/types/spl';
+import { isSolNetBalanceChangeSol } from '$sol/utils/sol-net-changes.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
+
+export const flattenInstructions = (
+	instructions: SolInstructionSummary[]
+): SolInstructionSummary[] =>
+	instructions.flatMap((instruction) => [
+		instruction,
+		...flattenInstructions(instruction.children ?? [])
+	]);
+
+/**
+ * Whether the message closes an account of the user's and pays its balance to an address that is
+ * not their wallet.
+ *
+ * The instruction mapper asks the same question of the message's own instructions, and cannot ask
+ * it of anything else: a program's internal calls exist only in the simulated run, so a close made
+ * inside a routed swap never reaches it. These effects carry both, which makes this the only place
+ * an inner close can be seen at all.
+ *
+ * Measured against the wallet rather than every account the user owns. A close pays lamports, and
+ * the only account of theirs that holds lamports as a balance is the wallet: paying them into
+ * another token account of theirs leaves them under that account's rent reserve rather than spent,
+ * which is not something a review can state as money coming back. It is also what keeps a chain
+ * of closes from arising - each one has to end at the wallet, so none of them can name an account
+ * that is closed again further on.
+ *
+ * A close whose destination was never read is left alone. Those are closes the effects record
+ * without one, and refusing on an address nobody has is refusing on nothing.
+ */
+export const solClosesPayOthers = ({
+	instructions,
+	userAddress
+}: {
+	instructions: SolInstructionSummary[];
+	userAddress: OptionSolAddress;
+}): boolean =>
+	flattenInstructions(instructions).some(
+		({ kind, counterparty, ownAccount }) =>
+			// An account that is not the user's is not theirs to lose. One reaches the list only
+			// because it pays their wallet, so this never fires for it - stated rather than relied
+			// on, since widening what the list carries must not start refusing other people's.
+			(kind === 'closeTokenAccount' || kind === 'unwrap') &&
+			ownAccount !== false &&
+			nonNullish(counterparty) &&
+			counterparty !== userAddress
+	);
+
+const isClose = ({ kind }: SolInstructionSummary): boolean =>
+	kind === 'closeTokenAccount' || kind === 'unwrap';
+
+/**
+ * Where the address a close is closing was closed before, or -1: the account this close ends
+ * began after that, so nothing that opened an account there before it is any part of this one.
+ *
+ * The close alone, not the opening that follows it: the opening is what this is used to find.
+ */
+const closedBefore = ({
+	closes,
+	index
+}: {
+	closes: SolInstructionSummary[];
+	index: number;
+}): number => {
+	const { account } = closes[index] ?? {};
+
+	return closes
+		.slice(0, index)
+		.findLastIndex((close) => isClose(close) && close.account === account);
+};
+
+/**
+ * The positions of the earlier closes that paid into the account a close is closing, since it last
+ * opened.
+ *
+ * Since the address was last closed or opened, whichever came later. A close of somebody else's
+ * account is listed only when it pays the wallet, so one of theirs closed elsewhere and then opened
+ * again for the user leaves no close behind to stop at, and what was paid into the first account
+ * would read as paid into the second. Its opening is where the second one starts.
+ */
+const closesInto = ({
+	closes,
+	index
+}: {
+	closes: SolInstructionSummary[];
+	index: number;
+}): number[] => {
+	const { account } = closes[index] ?? {};
+
+	if (isNullish(account)) {
+		return [];
+	}
+
+	const opened = closes
+		.slice(0, index)
+		.findLastIndex(
+			(summary) =>
+				summary.account === account && (isClose(summary) || summary.kind === 'createTokenAccount')
+		);
+
+	return closes
+		.slice(0, index)
+		.reduce<number[]>(
+			(acc, close, position) =>
+				position > opened && isClose(close) && close.counterparty === account
+					? [...acc, position]
+					: acc,
+			[]
+		);
+};
+
+/**
+ * The rent the transaction paid to open the account a close is closing: the opening since that
+ * address was last closed, and before the close. An opening after it is another account's, whose
+ * rent this close never held.
+ */
+const openingRent = ({
+	closes,
+	index
+}: {
+	closes: SolInstructionSummary[];
+	index: number;
+}): bigint => {
+	const { account } = closes[index] ?? {};
+
+	if (isNullish(account)) {
+		return ZERO;
+	}
+
+	const opening = closes
+		.slice(closedBefore({ closes, index }) + 1, index)
+		.findLast((summary) => summary.kind === 'createTokenAccount' && summary.account === account);
+
+	return opening?.rent ?? ZERO;
+};
+
+/**
+ * What earlier closes paid into the account a close is closing, since it last opened.
+ *
+ * One level only: each of those payouts already carries whatever flowed into its own account, so
+ * subtracting them from this one leaves exactly this account's own lamports.
+ */
+const paidIn = ({ closes, index }: { closes: SolInstructionSummary[]; index: number }): bigint =>
+	closesInto({ closes, index }).reduce(
+		(acc, position) => acc + (closes[position]?.returned ?? ZERO),
+		ZERO
+	);
+
+/**
+ * The rent a close hands back of what its own account cost, leaving aside anything other closes
+ * paid into it.
+ */
+const ownRent = ({ closes, index }: { closes: SolInstructionSummary[]; index: number }): bigint => {
+	const { kind, returned, ownAccount, reserve } = closes[index] ?? {};
+
+	// An account that was never the user's cost them no rent.
+	if (ownAccount === false) {
+		return ZERO;
+	}
+
+	// An unwrap's balance is mostly the SOL wrapped in it, so its rent is the rent the same
+	// transaction paid to open it.
+	if (kind === 'unwrap') {
+		return openingRent({ closes, index });
+	}
+
+	if (isNullish(returned)) {
+		return ZERO;
+	}
+
+	// What a plain token account hands back beyond what other closes paid into it is its own, and
+	// of that only the reserve is rent. Lamports held on top of it come back with the close, but as
+	// a balance returning rather than as a refund of what opening an account cost, and counted as
+	// rent they cancel the rent of accounts the message still opens. Where the reserve is not known
+	// the whole of it stands: crediting nothing instead would charge the rent of every account a
+	// message opens and closes again, which is the ordinary case, to guard against the rare one.
+	const own = maxBigInt(returned - paidIn({ closes, index }), ZERO);
+
+	return nonNullish(reserve) && own > reserve ? reserve : own;
+};
+
+/**
+ * The rent a close brings back: its own account's, and what each earlier close into that account
+ * brought with it.
+ *
+ * A close hands on everything its account holds, the payouts of earlier closes into it included,
+ * so the user's rent can come home through an account that was never theirs: close one of theirs
+ * into somebody else's, and that one to the wallet. Reading the last close alone loses the rent
+ * there, since that account's balance is none of theirs, and where the last account is theirs it
+ * reads whatever else reached it as rent - the SOL wrapped in an account closed into it, for one.
+ *
+ * Never more than the close hands over. A wrapped SOL account passes lamports on with every token
+ * transfer out, and what left it that way before its close never reached the wallet through it.
+ *
+ * Only earlier closes are followed, so a message that closes accounts into each other in a cycle
+ * still reads to an end.
+ *
+ * And only the closes the list carries, which leaves one reading short. A close of somebody else's
+ * account is listed only when it pays the wallet, so a chain through two of them in a row loses the
+ * rent at the first, and what such a close pays into an account of the user's is read as that
+ * account's own.
+ */
+const rentBrought = ({
+	closes,
+	index
+}: {
+	closes: SolInstructionSummary[];
+	index: number;
+}): bigint => {
+	const { returned } = closes[index] ?? {};
+
+	const brought = closesInto({ closes, index }).reduce(
+		(acc, position) => acc + rentBrought({ closes, index: position }),
+		ownRent({ closes, index })
+	);
+
+	return nonNullish(returned) && returned < brought ? returned : brought;
+};
+
+/**
+ * What the token accounts cost the transaction: the rent of the ones it opens, less the rent the
+ * ones it closes bring back.
+ *
+ * A transaction that opens one account and closes another charges only the difference, and one
+ * that closes as many as it opens charges nothing at all. Reporting the rent of the opens alone
+ * bills the user for accounts they no longer have.
+ *
+ * Never negative: a transaction that closes more than it opens ends up with SOL it did not start
+ * with, and calling that a fee below zero says something a fee cannot say. It nets to nothing, and
+ * a caller shows nothing.
+ *
+ * An unwrap nets too, but only by the rent. What it hands back is the account's whole balance, the
+ * wrapped SOL included, and subtracting that would cancel rent the user genuinely paid on every
+ * swap that wraps. The rent it gets back is the rent the same transaction paid to open that
+ * account, which the opening instruction states exactly, so the account is what ties the two
+ * together - as of the close, since an address opened again after it is another account. An unwrap
+ * of an account opened by some earlier transaction nets nothing: its rent was never this
+ * transaction's to charge.
+ *
+ * Only a close that pays the wallet is credited, and only with the rent it brings back. One that
+ * names anywhere else spends the balance rather than returning it - an account of the user's own
+ * included, where the lamports end up under its rent reserve rather than in a balance they can
+ * spend. And what a close hands back is not the rent it brings: it can hold more, the SOL wrapped
+ * in an account closed into it, and less, when the rent came home through an account that was
+ * never the user's.
+ */
+export const solAtaFee = ({
+	instructions,
+	userAddress
+}: {
+	instructions: SolInstructionSummary[];
+	userAddress: OptionSolAddress;
+}): bigint => {
+	const flattened = flattenInstructions(instructions);
+
+	return maxBigInt(
+		flattened.reduce((acc, current, index) => {
+			const { kind, rent, counterparty } = current;
+
+			if (kind === 'createTokenAccount' && nonNullish(rent)) {
+				return acc + rent;
+			}
+
+			if (!isClose(current)) {
+				return acc;
+			}
+
+			// Only a close that pays the wallet reduces what the transaction cost. One that names
+			// anywhere else spends the balance rather than returning it, and crediting it would
+			// report the smaller number precisely where the larger one is the point - an account of
+			// the user's own included, where the lamports end up under its rent reserve rather than
+			// back in a balance they can spend.
+			//
+			// Asking about the wallet is also what keeps a chain of closes from counting twice.
+			// Closing A into B and B into the wallet credits the second alone, with the rent it
+			// brings back from A.
+			//
+			// A close naming no destination keeps its refund. Those are the closes recorded before
+			// the destination was read, and turning them into losses would be its own misreport.
+			if (nonNullish(counterparty) && counterparty !== userAddress) {
+				return acc;
+			}
+
+			return acc - rentBrought({ closes: flattened, index });
+		}, ZERO),
+		ZERO
+	);
+};
+
+/**
+ * The tokens the transaction actually trades, read from its legs.
+ *
+ * `undefined` in the set stands for native SOL. SOL makes the set only through a transfer or a
+ * wrap: an SPL send that opens the recipient an account also moves SOL, but that SOL is rent, and
+ * counting it would turn every such send into a swap.
+ */
+const tradedTokens = (instructions: SolInstructionSummary[]): Set<SplTokenAddress | undefined> =>
+	flattenInstructions(instructions).reduce<Set<SplTokenAddress | undefined>>(
+		(acc, { kind, tokenAddress }) => {
+			if (['send', 'receive'].includes(kind)) {
+				acc.add(tokenAddress);
+			}
+
+			if (['wrap', 'unwrap'].includes(kind)) {
+				acc.add(undefined);
+			}
+
+			return acc;
+		},
+		new Set()
+	);
+
+/**
+ * The tokens that enter or leave through a route, wrap included, since wrapping is how SOL enters
+ * one.
+ *
+ * A transaction can move an asset outside its routes too: a protocol tip in SOL beside an
+ * ORCA-for-USDC swap. Both are outs, but only one of them is the trade, and the route is what
+ * tells them apart.
+ */
+const routeTradedTokens = (
+	instructions: SolInstructionSummary[]
+): Set<SplTokenAddress | undefined> =>
+	instructions.reduce<Set<SplTokenAddress | undefined>>((acc, { kind, children }) => {
+		if (kind === 'wrap') {
+			acc.add(undefined);
+		}
+
+		if (kind !== 'route') {
+			return acc;
+		}
+
+		(children ?? [])
+			.filter((child) => ['send', 'receive'].includes(child.kind))
+			.forEach((child) => acc.add(child.tokenAddress));
+
+		return acc;
+	}, new Set());
+
+const largest = (changes: SolNetBalanceChange[]): SolNetBalanceChange | undefined =>
+	changes.reduce<SolNetBalanceChange | undefined>(
+		(acc, change) =>
+			isNullish(acc) || absBigInt(change.delta) > absBigInt(acc.delta) ? change : acc,
+		undefined
+	);
+
+const counterpartyOf = ({
+	instructions,
+	kind,
+	tokenAddress
+}: {
+	instructions: SolInstructionSummary[];
+	kind: 'send' | 'receive';
+	tokenAddress?: SplTokenAddress;
+}): string | undefined =>
+	flattenInstructions(instructions).find(
+		(view) =>
+			view.kind === kind &&
+			view.tokenAddress === tokenAddress &&
+			nonNullish(view.counterparty) &&
+			view.own !== true
+	)?.counterparty;
+
+/**
+ * One transaction reduced to the line the activity list shows.
+ *
+ * The kind comes from the legs and the magnitudes from the net: the legs say whether SOL was
+ * traded or merely spent as rent, the net says how much actually moved once every internal hop
+ * cancelled out. Three swaps of one pair net into a single swap; the accounts opened and closed
+ * around them stay visible in the instruction list, not here.
+ */
+export const deriveSolTransactionSummary = ({
+	netChanges,
+	instructions,
+	userAddress
+}: {
+	netChanges: SolNetBalanceChange[];
+	instructions: SolInstructionSummary[];
+	userAddress: OptionSolAddress;
+}): SolTransactionSummary => {
+	const traded = tradedTokens(instructions);
+
+	// Rent leaves the wallet address but is not traded, and the balance the chain reports cannot
+	// tell the two apart. A swap of 0.001 SOL that opens an account on the way spends 0.00310888
+	// of it, and stating that as the amount traded overstates the trade by the rent every time.
+	//
+	// The account is still the user's and closing it hands the rent back, so what it costs the
+	// transaction is stated as a fee of its own, beside this line rather than inside it. The
+	// balance changes keep the figure the chain reports: this is what the transaction did, not
+	// what the address holds.
+	const rent = solAtaFee({ instructions, userAddress });
+
+	const considered = netChanges
+		.filter((change) => !isSolNetBalanceChangeSol(change) || traded.has(undefined))
+		.map((change) =>
+			isSolNetBalanceChangeSol(change) && rent !== ZERO
+				? { ...change, delta: change.delta + rent }
+				: change
+		);
+
+	const outs = considered.filter(({ delta }) => delta < ZERO);
+	const ins = considered.filter(({ delta }) => delta > ZERO);
+
+	if (outs.length === 1 && ins.length === 0) {
+		const [spent] = outs;
+
+		return {
+			kind: 'send',
+			spent,
+			counterparty: counterpartyOf({ instructions, kind: 'send', tokenAddress: spent.tokenAddress })
+		};
+	}
+
+	if (ins.length === 1 && outs.length === 0) {
+		const [received] = ins;
+
+		return {
+			kind: 'receive',
+			received,
+			counterparty: counterpartyOf({
+				instructions,
+				kind: 'receive',
+				tokenAddress: received.tokenAddress
+			})
+		};
+	}
+
+	// A transfer to an account of the user's own nets to nothing, which would otherwise read as a
+	// transaction that did nothing at all. The legs are what tell the two apart, and they are only
+	// worth walking once the net has already come out empty.
+	if (outs.length === 0 && ins.length === 0) {
+		const ownTransfer = flattenInstructions(instructions).find(
+			({ kind, counterparty, own }) => kind === 'send' && (own ?? false) && nonNullish(counterparty)
+		);
+
+		if (nonNullish(ownTransfer)) {
+			return {
+				kind: 'self',
+				...(nonNullish(ownTransfer.amount) && {
+					spent: {
+						delta: -ownTransfer.amount,
+						...(nonNullish(ownTransfer.tokenAddress) && { tokenAddress: ownTransfer.tokenAddress }),
+						...(nonNullish(ownTransfer.decimals) && { decimals: ownTransfer.decimals })
+					}
+				}),
+				...(nonNullish(ownTransfer.counterparty) && { counterparty: ownTransfer.counterparty })
+			};
+		}
+	}
+
+	if (outs.length > 0 && ins.length > 0) {
+		const routeTraded = routeTradedTokens(instructions);
+
+		const pick = (changes: SolNetBalanceChange[]): SolNetBalanceChange | undefined => {
+			const inRoute = changes.filter(({ tokenAddress }) => routeTraded.has(tokenAddress));
+
+			return largest(inRoute.length > 0 ? inRoute : changes);
+		};
+
+		return { kind: 'swap', spent: pick(outs), received: pick(ins) };
+	}
+
+	return { kind: 'other' };
+};
+
+/**
+ * One transaction summary as the sentence that names it.
+ *
+ * A swap says its pair, because in a day of swaps that is the only thing telling one row from
+ * another. Everything else is a word. No figures anywhere but the self-transfer, whose net is zero
+ * by definition: the amount column beside the sentence carries them, and saying them twice reads
+ * as two movements.
+ *
+ * The symbols and the formatting come from the caller, since what a mint is called depends on the
+ * view asking: a list numbers its unnamed mints against the others beside them.
+ */
+export const formatSolTransactionSummary = ({
+	summary: { kind, spent, received },
+	i18n,
+	symbolOf,
+	amountOf
+}: {
+	summary: SolTransactionSummary;
+	i18n: I18n;
+	symbolOf: (tokenAddress: string | undefined) => string;
+	amountOf: (change: SolNetBalanceChange) => string;
+}): string => {
+	if (kind === 'send') {
+		return i18n.send.text.send;
+	}
+
+	if (kind === 'receive') {
+		return i18n.receive.text.receive;
+	}
+
+	// The asset never left the wallet, so the amount column shows the zero it netted to and the
+	// sentence is the only place the figure that moved can appear.
+	if (kind === 'self') {
+		return nonNullish(spent)
+			? replacePlaceholders(i18n.transaction.text.summary_self, {
+					$amount: amountOf(spent),
+					$symbol: symbolOf(spent.tokenAddress)
+				})
+			: i18n.transaction.text.kind_other;
+	}
+
+	// The pair, without the figures: the amount column beside the sentence already carries them,
+	// and one row of a swap shows one of the two anyway.
+	if (kind === 'swap') {
+		return nonNullish(spent) && nonNullish(received)
+			? replacePlaceholders(i18n.transaction.text.summary_swap, {
+					$spent_symbol: symbolOf(spent.tokenAddress),
+					$received_symbol: symbolOf(received.tokenAddress)
+				})
+			: i18n.swap.text.swap;
+	}
+
+	return i18n.transaction.text.kind_other;
+};
+
+/**
+ * One instruction summary as a sentence with an optional detail, composed here so the component
+ * stays a renderer. The children of a route are the caller's to indent, not this function's.
+ */
+export const formatSolInstructionSummary = ({
+	instruction: {
+		kind,
+		amount: value,
+		tokenAddress,
+		decimals,
+		counterparty,
+		own,
+		rent,
+		returned,
+		wrapped,
+		ownAccount,
+		program
+	},
+	i18n,
+	symbolOf,
+	decimalsOf,
+	userAddress
+}: {
+	instruction: SolInstructionSummary;
+	i18n: I18n;
+	symbolOf: (tokenAddress: SplTokenAddress | undefined) => string;
+	decimalsOf: (tokenAddress: SplTokenAddress | undefined) => number;
+	userAddress: OptionSolAddress;
+}): { text: string; detail?: string } => {
+	const amount = (raw: bigint): string =>
+		formatToken({
+			value: raw < ZERO ? -raw : raw,
+			unitName: decimals ?? decimalsOf(tokenAddress),
+			displayDecimals: decimals ?? decimalsOf(tokenAddress)
+		});
+
+	const ownDetail = own === true ? i18n.transaction.text.instruction_own_account : undefined;
+
+	if (kind === 'send' && nonNullish(value) && nonNullish(counterparty)) {
+		return {
+			text: replacePlaceholders(i18n.transaction.text.instruction_send, {
+				$amount: amount(value),
+				$symbol: symbolOf(tokenAddress)
+			}),
+			...(nonNullish(ownDetail) && { detail: ownDetail })
+		};
+	}
+
+	if (kind === 'receive' && nonNullish(value) && nonNullish(counterparty)) {
+		return {
+			text: replacePlaceholders(i18n.transaction.text.instruction_receive, {
+				$amount: amount(value),
+				$symbol: symbolOf(tokenAddress)
+			}),
+			...(nonNullish(ownDetail) && { detail: ownDetail })
+		};
+	}
+
+	if (kind === 'wrap' && nonNullish(value)) {
+		return {
+			text: replacePlaceholders(i18n.transaction.text.instruction_wrap, {
+				$amount: formatToken({ value, unitName: 9, displayDecimals: 9 })
+			})
+		};
+	}
+
+	// Closing hands the account's whole balance to the destination it names, which for a wrapped
+	// SOL account is the rent plus the SOL that was wrapped. Saying "rent" for that understates it
+	// by whatever was wrapped - and saying "to your wallet" for a close that names somebody else
+	// states the one thing about it that matters wrongly, so the line says "to" and the address is
+	// rendered beside it.
+	// The wallet, and not any account the user owns, on the same test the cost figure applies:
+	// lamports paid into another token account of theirs sit under its rent reserve rather than in
+	// a balance they can spend, so saying they came back would be saying the wrong thing.
+	const returnedHome = isNullish(counterparty) || counterparty === userAddress;
+
+	// Returned when the account was the user's: what arrives is theirs coming back. Sent when it
+	// was not, which is the only way such a close reaches the list at all - money they did not
+	// have rather than a refund, and saying it "returned" would claim they had paid it.
+	const arrival = ownAccount === false;
+
+	const returnedDetail = nonNullish(returned)
+		? replacePlaceholders(
+				returnedHome
+					? arrival
+						? i18n.transaction.text.instruction_sent
+						: i18n.transaction.text.instruction_returned
+					: i18n.transaction.text.instruction_returned_to,
+				{
+					$amount: formatToken({
+						value: returned,
+						unitName: SOLANA_DEFAULT_DECIMALS,
+						displayDecimals: SOLANA_DEFAULT_DECIMALS
+					})
+				}
+			)
+		: returnedHome
+			? arrival
+				? i18n.transaction.text.instruction_balance_sent
+				: i18n.transaction.text.instruction_balance_returned
+			: i18n.transaction.text.instruction_balance_returned_to;
+
+	// Unwrapping is what a close does with the SOL inside a wrapped SOL account. One holding none
+	// is only being closed, and the label says so; an amount nobody read leaves it as an unwrap,
+	// which is the reading that does not understate.
+	if (kind === 'unwrap') {
+		return {
+			text: replacePlaceholders(
+				wrapped === ZERO
+					? i18n.transaction.text.instruction_close_account_for
+					: i18n.transaction.text.instruction_unwrap,
+				{ $symbol: symbolOf(tokenAddress) }
+			),
+			detail: returnedDetail
+		};
+	}
+
+	if (kind === 'createTokenAccount') {
+		return {
+			text: replacePlaceholders(i18n.transaction.text.instruction_create_account, {
+				$symbol: symbolOf(tokenAddress)
+			}),
+			...(nonNullish(rent) && {
+				detail: replacePlaceholders(i18n.transaction.text.instruction_rent, {
+					$amount: formatToken({ value: rent, unitName: 9, displayDecimals: 9 })
+				})
+			})
+		};
+	}
+
+	// The mint names the account the line is about, the way the opening line already does. It is
+	// left out when nobody read it: `symbolOf` answers an unknown mint with the native symbol,
+	// which would name a token account after SOL.
+	if (kind === 'closeTokenAccount') {
+		return {
+			text: nonNullish(tokenAddress)
+				? replacePlaceholders(i18n.transaction.text.instruction_close_account_for, {
+						$symbol: symbolOf(tokenAddress)
+					})
+				: i18n.transaction.text.instruction_close_account,
+			detail: returnedDetail
+		};
+	}
+
+	if (kind === 'approve' && nonNullish(counterparty)) {
+		return {
+			text: i18n.transaction.text.instruction_approve
+		};
+	}
+
+	if (kind === 'revoke') {
+		return { text: i18n.transaction.text.instruction_revoke };
+	}
+
+	if (kind === 'setAuthority') {
+		return {
+			text: i18n.transaction.text.instruction_set_authority
+		};
+	}
+
+	if ((kind === 'burn' || kind === 'mint') && nonNullish(value)) {
+		return {
+			text: replacePlaceholders(
+				kind === 'burn'
+					? i18n.transaction.text.instruction_burn
+					: i18n.transaction.text.instruction_mint,
+				{ $amount: amount(value), $symbol: symbolOf(tokenAddress) }
+			)
+		};
+	}
+
+	if (kind === 'freeze' || kind === 'thaw') {
+		return {
+			text:
+				kind === 'freeze'
+					? i18n.transaction.text.instruction_freeze
+					: i18n.transaction.text.instruction_thaw
+		};
+	}
+
+	if (kind === 'route') {
+		return {
+			text: i18n.transaction.text.instruction_route
+		};
+	}
+
+	// Says only that the wallet could not read it. The program beside it is the whole of what is
+	// known, so the line names that program rather than guessing at what the call does.
+	if (kind === 'unknown') {
+		return {
+			text: nonNullish(program)
+				? i18n.transaction.text.instruction_unknown_via
+				: i18n.transaction.text.instruction_unknown
+		};
+	}
+
+	return { text: i18n.transaction.text.summary_other };
+};

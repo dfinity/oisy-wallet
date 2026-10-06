@@ -2,6 +2,7 @@ import { SUPPORTED_ARBITRUM_NETWORK_IDS } from '$env/networks/networks-evm/netwo
 import { SUPPORTED_BASE_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.base.env';
 import { SUPPORTED_BSC_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { SUPPORTED_POLYGON_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { SUPPORTED_ROBINHOOD_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { SUPPORTED_BITCOIN_NETWORK_IDS } from '$env/networks/networks.btc.env';
 import { SUPPORTED_NETWORK_IDS, SUPPORTED_TESTNET_NETWORK_IDS } from '$env/networks/networks.env';
 import { SUPPORTED_ETHEREUM_NETWORK_IDS } from '$env/networks/networks.eth.env';
@@ -14,7 +15,7 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import { DEFAULT_ARBITRUM_TOKEN } from '$lib/constants/tokens.constants';
+import { DEFAULT_ARBITRUM_TOKEN, DEFAULT_ROBINHOOD_TOKEN } from '$lib/constants/tokens.constants';
 import { defaultFallbackToken } from '$lib/derived/token.derived';
 import { token } from '$lib/stores/token.store';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
@@ -100,6 +101,15 @@ describe('token.derived', () => {
 				mockPage.mockNetwork(networkId.description);
 
 				expect(get(defaultFallbackToken)).toEqual(DEFAULT_ARBITRUM_TOKEN);
+			}
+		);
+
+		it.each(SUPPORTED_ROBINHOOD_NETWORK_IDS)(
+			`should return default token for Robinhood network %s`,
+			(networkId) => {
+				mockPage.mockNetwork(networkId.description);
+
+				expect(get(defaultFallbackToken)).toEqual(DEFAULT_ROBINHOOD_TOKEN);
 			}
 		);
 

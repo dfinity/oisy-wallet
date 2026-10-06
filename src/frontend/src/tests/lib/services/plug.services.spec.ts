@@ -11,19 +11,16 @@ import type { IcToken } from '$icp/types/ic-token';
 import { loadPlugBalances, sweepPlugBalance } from '$lib/services/plug.services';
 import type { PlugAccount } from '$lib/types/plug';
 import type { Token } from '$lib/types/token';
-import { loadSolLamportsBalance } from '$sol/api/solana.api';
-import { loadSplTokenBalance } from '$sol/services/spl-accounts.services';
+import { loadSolNetworkBalances } from '$sol/services/sol-balances.services';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { Principal } from '@icp-sdk/core/principal';
-import { lamports } from '@solana/kit';
 
 vi.mock('$icp/api/icrc-ledger.api', () => ({ balance: vi.fn(), transfer: vi.fn() }));
 vi.mock('$icp/api/bitcoin.api', () => ({ getBalanceQuery: vi.fn() }));
 vi.mock('$eth/providers/infura.providers', () => ({ infuraProviders: vi.fn() }));
 vi.mock('$eth/providers/infura-erc20.providers', () => ({ infuraErc20Providers: vi.fn() }));
-vi.mock('$sol/api/solana.api', () => ({ loadSolLamportsBalance: vi.fn() }));
-vi.mock('$sol/services/spl-accounts.services', () => ({ loadSplTokenBalance: vi.fn() }));
+vi.mock('$sol/services/sol-balances.services', () => ({ loadSolNetworkBalances: vi.fn() }));
 
 const mockAccount: PlugAccount = {
 	index: 0,
@@ -94,8 +91,10 @@ describe('loadPlugBalances', () => {
 
 		vi.mocked(icrcBalance).mockResolvedValue(1n);
 		vi.mocked(getBalanceQuery).mockResolvedValue(2n);
-		vi.mocked(loadSolLamportsBalance).mockResolvedValue(lamports(4n));
-		vi.mocked(loadSplTokenBalance).mockResolvedValue(5n);
+		vi.mocked(loadSolNetworkBalances).mockResolvedValue({
+			sol: 4n,
+			spl: { USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB: 5n }
+		});
 		vi.mocked(infuraProviders).mockReturnValue({
 			balance: vi.fn().mockResolvedValue(3n)
 		} as unknown as ReturnType<typeof infuraProviders>);
@@ -147,11 +146,10 @@ describe('loadPlugBalances', () => {
 		it('queries an SPL token against the derived Solana address', async () => {
 			const results = await call([splToken]);
 
-			expect(loadSplTokenBalance).toHaveBeenCalledExactlyOnceWith(
+			expect(loadSolNetworkBalances).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({
 					address: mockAccount.solAddress,
-					tokenAddress: 'USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB',
-					tokenOwnerAddress: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+					tokens: [splToken]
 				})
 			);
 			expect(results[0].balance).toBe(5n);
@@ -163,10 +161,12 @@ describe('loadPlugBalances', () => {
 			expect(infuraProviders).not.toHaveBeenCalled();
 		});
 
-		it('does not use the native loader for an SPL token', async () => {
+		it('reads an SPL token by its token entry, not as a bare native balance', async () => {
 			await call([splToken]);
 
-			expect(loadSolLamportsBalance).not.toHaveBeenCalled();
+			expect(loadSolNetworkBalances).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ tokens: [splToken] })
+			);
 		});
 	});
 
@@ -205,12 +205,21 @@ describe('loadPlugBalances', () => {
 		});
 
 		it('keeps the other chains when one of them fails', async () => {
-			vi.mocked(loadSolLamportsBalance).mockRejectedValue(new Error('rpc down'));
+			vi.mocked(loadSolNetworkBalances).mockRejectedValue(new Error('rpc down'));
 
 			const results = await call([nativeBtc, nativeSol]);
 
 			expect(results.find(({ token: { symbol } }) => symbol === 'BTC')?.balance).toBe(2n);
 			expect(results.find(({ token: { symbol } }) => symbol === 'SOL')?.balance).toBeUndefined();
+		});
+
+		it('keeps an SPL account the service cannot read as an unreadable row, not as zero', async () => {
+			vi.mocked(loadSolNetworkBalances).mockResolvedValue({ sol: 4n, spl: {} });
+
+			const results = await call([splToken]);
+
+			expect(results).toHaveLength(1);
+			expect(results[0].balance).toBeUndefined();
 		});
 
 		it('keeps a transient ICRC failure visible as an unreadable row', async () => {

@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import IconChevronRight from '$lib/components/icons/lucide/IconChevronRight.svelte';
+	import OisyTradeMark from '$lib/components/trading/OisyTradeMark.svelte';
 	import { OISY_TRADE_PROVIDER_NAME } from '$lib/constants/oisy-trade.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -41,7 +42,10 @@
 		onclick={() => (expanded = !expanded)}
 		type="button"
 	>
-		<span class="bg-success-subtle h-4 w-4 flex-shrink-0 rounded"></span>
+		<!-- Decorative: the row's own text already names the provider. -->
+		<span class="flex flex-shrink-0 items-center" aria-hidden="true">
+			<OisyTradeMark size="16" />
+		</span>
 		<span class="flex-1 text-xs text-secondary">
 			{replacePlaceholders($i18n.trading.limit_order.routing_name, { $provider: '' })}<strong
 				class="font-semibold text-primary">{OISY_TRADE_PROVIDER_NAME}</strong

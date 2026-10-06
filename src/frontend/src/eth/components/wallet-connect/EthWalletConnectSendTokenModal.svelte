@@ -22,7 +22,11 @@
 	import type { ProgressStep } from '$eth/types/send';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
-	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
+	import {
+		classifyWalletConnectEthCall,
+		getSendParamsGas,
+		isWalletConnectEthApproval
+	} from '$eth/utils/wallet-connect.utils';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -33,6 +37,7 @@
 	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
@@ -53,13 +58,22 @@
 
 	let { request, firstTransaction, sourceNetwork, listener }: Props = $props();
 
-	let erc20Approve = $derived(isErc20TransactionApprove(firstTransaction.data));
+	let call = $derived(classifyWalletConnectEthCall(firstTransaction.data));
+
+	// An approval authorizes someone else to move the user's tokens. It is not a send, whatever
+	// native value the request carries alongside it.
+	let approve = $derived(isWalletConnectEthApproval(call));
+
+	// Only a request that carries no calldata is titled a send. A contract call OISY could not read
+	// might do anything, and titling it "Send" is the misstatement that let an `increaseAllowance`
+	// granting an unlimited allowance be presented as a zero-value transfer.
+	let unknownCall = $derived(call.type === 'unknown');
 
 	/**
 	 * Send context store
 	 */
 
-	const { sendTokenId, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenId, sendToken, sendEthFeePriority } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Fee context store
@@ -70,11 +84,13 @@
 	const feeSymbolStore = writable<string | undefined>(undefined);
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
 	const feeDecimalsStore = writable<number | undefined>(undefined);
+	const feeExchangeRateStore = writable<number | undefined>(undefined);
 
 	$effect(() => {
 		feeSymbolStore.set($sendToken.symbol);
 		feeTokenIdStore.set($sendToken.id);
 		feeDecimalsStore.set($sendToken.decimals);
+		feeExchangeRateStore.set($exchanges?.[$sendToken.id]?.usd);
 	});
 
 	setContext<FeeContextType>(
@@ -83,7 +99,8 @@
 			feeStore,
 			feeSymbolStore,
 			feeTokenIdStore,
-			feeDecimalsStore
+			feeDecimalsStore,
+			feeExchangeRateStore
 		})
 	);
 
@@ -149,6 +166,8 @@
 
 	let amount = $derived(BigInt(firstTransaction?.value ?? ZERO));
 
+	let requestedGas = $derived(getSendParamsGas(firstTransaction.gas));
+
 	const send = async () => {
 		if (isNullish(modal)) {
 			return;
@@ -180,7 +199,13 @@
 
 	{#snippet title()}
 		<WalletConnectModalTitle>
-			{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}
+			{#if approve}
+				{$i18n.core.text.approve}
+			{:else if unknownCall}
+				{$i18n.wallet_connect.text.unknown_call_title}
+			{:else}
+				{$i18n.send.text.send}
+			{/if}
 		</WalletConnectModalTitle>
 	{/snippet}
 
@@ -190,6 +215,7 @@
 		{destination}
 		nativeEthereumToken={$nativeEthereumTokenWithFallback}
 		observe={currentStep?.name !== WizardStepsSend.SENDING}
+		priority={$sendEthFeePriority}
 		sendToken={$sendToken}
 		sendTokenId={$sendTokenId}
 		{sourceNetwork}
@@ -206,11 +232,12 @@
 						{amount}
 						{application}
 						approveDisabled={isNullish($feeStore)}
+						{call}
 						{data}
 						{destination}
-						{erc20Approve}
 						onApprove={send}
 						onReject={reject}
+						{requestedGas}
 						{sourceNetwork}
 						{targetNetwork}
 					/>

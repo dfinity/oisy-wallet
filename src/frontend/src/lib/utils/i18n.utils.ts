@@ -20,18 +20,44 @@ export interface I18nSubstitutions {
 }
 
 /**
+ * Substitutes every placeholder in a single pass, so that a value is never re-scanned once inserted.
+ * Values are frequently third-party controlled (token symbols, NFT collection names), and a second
+ * pass would let them rewrite the surrounding sentence: either through the `$&`, `` $` ``, `$'` and
+ * `$$` patterns that `String.replace` expands in a replacement string, or by carrying a placeholder
+ * key that a later substitution would then fill in.
+ *
+ * Longer keys are matched first so a key that is a prefix of another one does not shadow it.
+ *
  * @example
  * ("Why $1?", {$1: "World", Why: "Hello", "?": "!"}) => "Hello World!"
  */
 // eslint-disable-next-line local-rules/prefer-object-params -- This function is used a lot throughout the codebase, and it's easier/clearer to use it with separate arguments.
 export const replacePlaceholders = (text: string, substitutions: I18nSubstitutions): string => {
-	let result = text;
-	for (const [key, value] of Object.entries(substitutions)) {
-		result = result.replace(new RegExp(escapeRegExp(key), 'g'), value);
+	const keys = Object.keys(substitutions);
+
+	if (keys.length === 0) {
+		return text;
 	}
 
-	return result;
+	const placeholders = new RegExp(
+		[...keys]
+			.sort((a, b) => b.length - a.length)
+			.map(escapeRegExp)
+			.join('|'),
+		'g'
+	);
+
+	return text.replace(placeholders, (match) => substitutions[match]);
 };
+
+/**
+ * Joins items the way the given language writes a list — "A, B, and C" in English (`en` prescribes
+ * the serial comma), "A, B und C" in German, "A、B、C" in Japanese. Left to `Intl.ListFormat` rather
+ * than hardcoding a separator, because the conjunction, its position and even the comma differ per
+ * locale.
+ */
+export const formatList = ({ items, language }: { items: string[]; language: Languages }): string =>
+	new Intl.ListFormat(language, { type: 'conjunction', style: 'long' }).format(items);
 
 export const replaceOisyPlaceholders = (text: string): string =>
 	replacePlaceholders(text, {

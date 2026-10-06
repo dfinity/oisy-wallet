@@ -22,6 +22,7 @@ import {
 	liquidiumMinBorrowApy,
 	liquidiumNetValueUsd,
 	liquidiumPortfolio,
+	liquidiumPortfolioLoading,
 	liquidiumRepayReserves,
 	liquidiumSupplyMarkets,
 	liquidiumTotalBorrowedUsd,
@@ -352,6 +353,37 @@ describe('liquidium derived stores', () => {
 
 		it('is null by default', () => {
 			expect(get(liquidiumPortfolio)).toBeNull();
+		});
+	});
+
+	describe('liquidiumPortfolioLoading', () => {
+		it('is true before the first load settles', () => {
+			expect(get(liquidiumPortfolioLoading)).toBeTruthy();
+		});
+
+		it('is false once the load settles, even with nothing to show', () => {
+			liquidiumStore.setLoaded(true);
+
+			expect(get(liquidiumPortfolioLoading)).toBeFalsy();
+		});
+
+		it('is true again after a reset', () => {
+			liquidiumStore.setLoaded(true);
+			liquidiumStore.reset();
+
+			expect(get(liquidiumPortfolioLoading)).toBeTruthy();
+		});
+
+		it('is false when the lend & borrow provider is off, however unsettled the store', async () => {
+			vi.resetModules();
+			vi.doMock('$env/lend-borrow', () => ({ anyLendBorrowProviderEnabled: false }));
+
+			const { liquidiumPortfolioLoading: gated } = await import('$lib/derived/liquidium.derived');
+
+			expect(get(gated)).toBeFalsy();
+
+			vi.doUnmock('$env/lend-borrow');
+			vi.resetModules();
 		});
 	});
 

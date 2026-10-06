@@ -1,4 +1,3 @@
-import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { AppWorker } from '$lib/services/_worker.services';
 import {
 	solAddressDevnetStore,
@@ -19,16 +18,26 @@ import {
 	syncWalletError,
 	syncWalletFromCache
 } from '$sol/services/sol-listener.services';
-import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
+import { mapSolSourcesToTokens } from '$sol/services/sol-resolve-signatures.services';
+import type {
+	SolPostMessageDataResponseWallet,
+	SolWalletRouting
+} from '$sol/types/sol-post-message';
+import type { SplToken } from '$sol/types/spl';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
-import { isTokenSpl } from '$sol/utils/spl.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
+/**
+ * The balances and the history of every Solana token of one network, synced by one worker.
+ *
+ * It is started for a given address and token list and never changes them: when either changes,
+ * the caller destroys it and starts another one.
+ */
 export class SolWalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
 		worker: WorkerData,
-		tokenId: TokenId,
+		private readonly routing: SolWalletRouting,
 		private readonly data: PostMessageDataRequestSol
 	) {
 		super(worker);
@@ -37,73 +46,91 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 			({ data: dataMsg }: MessageEvent<PostMessageScheduler<SolPostMessageDataResponseWallet>>) => {
 				const { ref, msg, data } = dataMsg;
 
-				// A pooled worker is shared by several Solana tokens, so drop any message meant for
-				// another token. The scheduler stamps `ref` with the token address + network.
-				if (ref !== `${this.data.tokenAddress ?? SOLANA_TOKEN.symbol}-${this.data.solanaNetwork}`) {
+				// The scheduler stamps its wallet messages with the network. Its status messages carry no
+				// ref, and are not for the wallet stores.
+				if (ref !== this.data.solanaNetwork) {
 					return;
 				}
 
 				switch (msg) {
 					case 'syncSolWallet':
 						syncWallet({
-							tokenId,
-							data: data as SolPostMessageDataResponseWallet
+							data: data as SolPostMessageDataResponseWallet,
+							routing: this.routing
 						});
 						return;
 
 					case 'syncSolWalletError':
-						syncWalletError({
-							tokenId,
-							error: data.error,
-							hideToast: true
-						});
+						this.tokenIds.forEach((tokenId) =>
+							syncWalletError({
+								tokenId,
+								error: data.error,
+								hideToast: true
+							})
+						);
 				}
 			}
 		);
 	}
 
-	static async init({ token }: { token: Token }): Promise<SolWalletWorker> {
+	get tokenIds(): TokenId[] {
+		return [this.routing.nativeTokenId, ...this.routing.splTokenIds.values()];
+	}
+
+	/**
+	 * @param token The native SOL token of the network.
+	 * @param splTokens The enabled SPL tokens of the same network.
+	 * @param cachedTokenIds The tokens a previous worker of this network already restored from the
+	 * IndexedDB cache. Restoring them again would put back a cached balance older than the one shown.
+	 */
+	static async init({
+		token,
+		splTokens,
+		cachedTokenIds
+	}: {
+		token: Token;
+		splTokens: SplToken[];
+		cachedTokenIds?: ReadonlySet<TokenId>;
+	}): Promise<SolWalletWorker> {
 		const {
-			id: tokenId,
+			id: nativeTokenId,
 			network: { id: networkId }
 		} = token;
 
-		await syncWalletFromCache({ tokenId, networkId });
+		// The cache only shows something while the chain loads: a token whose cache cannot be read must
+		// not keep the whole network from syncing.
+		await Promise.allSettled(
+			[token, ...splTokens]
+				.filter(({ id }) => !(cachedTokenIds?.has(id) ?? false))
+				.map(({ id: tokenId }) => syncWalletFromCache({ tokenId, networkId }))
+		);
 
-		const isDevnetNetwork = isNetworkIdSOLDevnet(networkId);
-		const isLocalNetwork = isNetworkIdSOLLocal(networkId);
-
-		// TODO: stop/start the worker on address change (same as for worker.btc-wallet.services.ts)
 		const address = get(
-			isDevnetNetwork
+			isNetworkIdSOLDevnet(networkId)
 				? solAddressDevnetStore
-				: isLocalNetwork
+				: isNetworkIdSOLLocal(networkId)
 					? solAddressLocalnetStore
 					: solAddressMainnetStore
 		);
 		assertNonNullish(address, 'No Solana address provided to start Solana wallet worker.');
 
-		const network = mapNetworkIdToNetwork(token.network.id);
+		const network = mapNetworkIdToNetwork(networkId);
 		assertNonNullish(network, 'No Solana network provided to start Solana wallet worker.');
 
-		// If the token is an SPL token, we need to pass the token address and the owner address to the worker.
-		// Otherwise, we pass undefined, which will be considered as the native SOLANA token.
-		const { address: tokenAddress, owner: tokenOwnerAddress } = isTokenSpl(token)
-			? token
-			: { address: undefined, owner: undefined };
+		const tokens = splTokens.map(({ address: tokenAddress, owner }) => ({
+			address: tokenAddress,
+			owner
+		}));
 
-		const data: PostMessageDataRequestSol = {
-			address,
-			solanaNetwork: network,
-			tokenAddress,
-			tokenOwnerAddress
+		const routing: SolWalletRouting = {
+			nativeTokenId,
+			splTokenIds: new Map(splTokens.map(({ address: tokenAddress, id }) => [tokenAddress, id])),
+			sourceTokens: await mapSolSourcesToTokens({ address: address.data, tokens })
 		};
 
-		const worker = await AppWorker.getInstance({
-			pooled: true,
-			poolKey: `${data.tokenAddress ?? SOLANA_TOKEN.symbol}-${data.solanaNetwork}`
-		});
-		return new SolWalletWorker(worker, tokenId, data);
+		const worker = await AppWorker.getInstance();
+
+		return new SolWalletWorker(worker, routing, { address, solanaNetwork: network, tokens });
 	}
 
 	protected override stopTimer = () => {

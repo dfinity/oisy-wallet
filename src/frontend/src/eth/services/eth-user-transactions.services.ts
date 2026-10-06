@@ -1,14 +1,19 @@
 import type { TokenId as BackendTokenId } from '$declarations/backend/backend.did';
+import {
+	ETH_OLDER_PAGE_RETRY_BASE_DELAY,
+	ETH_OLDER_PAGE_RETRY_MAX_DELAY
+} from '$eth/constants/eth.constants';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
-import type { OptionEthAddress } from '$eth/types/address';
+import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import {
 	isTransactionFinalized,
 	mapTransactionToUserTransaction,
 	mapUserTransactionToTransaction
 } from '$eth/utils/user-transactions.utils';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+import { MAX_USER_TRANSACTIONS_PER_TOKEN } from '$lib/constants/user-transactions.constants';
 import {
 	loadUserTransactions,
 	saveFinalizedTransactions
@@ -20,6 +25,128 @@ import type { Transaction } from '$lib/types/transaction';
 import type { LoadUserTransactionsResult } from '$lib/types/user-transactions';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
+
+/**
+ * Where paging through the backend's stored history has got to, per token.
+ *
+ * The initial load reads the newest page and is handed the cursor to the one below it. Without
+ * keeping that cursor, scrolling back would skip the backend and ask Etherscan for history the
+ * backend already holds.
+ */
+const ethBackendPaginationCursors = new Map<TokenId, bigint>();
+
+export const setEthBackendPaginationCursor = ({
+	tokenId,
+	nextStart
+}: {
+	tokenId: TokenId;
+	nextStart: bigint | undefined;
+}) => {
+	if (nonNullish(nextStart)) {
+		ethBackendPaginationCursors.set(tokenId, nextStart);
+
+		return;
+	}
+
+	ethBackendPaginationCursors.delete(tokenId);
+};
+
+export const getEthBackendPaginationCursor = (tokenId: TokenId): bigint | undefined =>
+	ethBackendPaginationCursors.get(tokenId);
+
+/**
+ * Tokens whose stored history has reached the per-token cap, from the `totalStored` of the last
+ * backend read.
+ *
+ * At the cap the canister trims the oldest entries on every save, so persisting history older than
+ * what it already holds is written and evicted in the same call. Newer transactions are still worth
+ * saving, which is why this only gates the older-page path.
+ */
+const ethBackendAtCapacity = new Set<TokenId>();
+
+export const setEthBackendAtCapacity = ({
+	tokenId,
+	totalStored
+}: {
+	tokenId: TokenId;
+	totalStored: bigint | undefined;
+}) => {
+	if (nonNullish(totalStored) && totalStored >= BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN)) {
+		ethBackendAtCapacity.add(tokenId);
+
+		return;
+	}
+
+	ethBackendAtCapacity.delete(tokenId);
+};
+
+export const isEthBackendAtCapacity = (tokenId: TokenId): boolean =>
+	ethBackendAtCapacity.has(tokenId);
+
+/**
+ * Per address and token, how many older pages in a row Etherscan failed to serve, and when it may be
+ * asked again.
+ *
+ * A failed page is not the end of the history, so the lists ask again on the next scroll into view.
+ * Held here rather than in either list so the Activity list and the token page share one budget.
+ * It never gives up: it only spaces the attempts out, and the first page served clears it.
+ *
+ * The address is part of the key because this outlives a session: the token ids are the same for
+ * everyone, so keying by token alone would hand the next wallet signed in on this tab the previous
+ * one's failure, and skip its first request without ever asking for its own address.
+ */
+const etherscanOlderPageBackOff = new Map<
+	string,
+	{ failures: number; retryAt: number; err: unknown }
+>();
+
+const backOffKey = ({ address, tokenId }: { address: EthAddress; tokenId: TokenId }): string =>
+	`${address}:${String(tokenId)}`;
+
+export const resetEtherscanOlderPageBackOff = () => etherscanOlderPageBackOff.clear();
+
+/**
+ * Runs an Etherscan request for older history, or skips it while the address and token are backing
+ * off from earlier failures. A skipped request resolves with the last failure, so callers treat it
+ * exactly like the failed page it stands in for.
+ */
+export const requestOlderEtherscanPage = async <T>({
+	address,
+	tokenId,
+	request
+}: {
+	address: EthAddress;
+	tokenId: TokenId;
+	request: () => Promise<T>;
+}): Promise<{ page: T } | { err: unknown }> => {
+	const key = backOffKey({ address, tokenId });
+
+	const backOff = etherscanOlderPageBackOff.get(key);
+
+	if (nonNullish(backOff) && Date.now() < backOff.retryAt) {
+		return { err: backOff.err };
+	}
+
+	try {
+		const page = await request();
+
+		etherscanOlderPageBackOff.delete(key);
+
+		return { page };
+	} catch (err: unknown) {
+		const failures = (backOff?.failures ?? 0) + 1;
+
+		const delay = Math.min(
+			ETH_OLDER_PAGE_RETRY_BASE_DELAY * 2 ** (failures - 1),
+			ETH_OLDER_PAGE_RETRY_MAX_DELAY
+		);
+
+		etherscanOlderPageBackOff.set(key, { failures, retryAt: Date.now() + delay, err });
+
+		return { err };
+	}
+};
 
 /**
  * Loads a page of stored ETH transactions from the backend, mapping each
@@ -98,7 +225,9 @@ export const saveEthFinalizedTransactions = ({
  *   displayed in the UI. Used as the upper bound when querying Etherscan for older history.
  * @param beAtCapacity - When `true`, skip persisting Etherscan results to the backend
  *   (e.g. the backend storage is full).
- * @returns Whether more pages may exist beyond the returned batch.
+ * @returns Whether more pages may exist beyond the returned batch. `err` is set when the page
+ *   failed, in which case `hasMore: false` says nothing about the history and callers must ask again
+ *   later rather than treat the token as exhausted.
  */
 export const loadNextEthUserTransactions = async ({
 	identity,
@@ -118,7 +247,9 @@ export const loadNextEthUserTransactions = async ({
 	cursor: bigint | undefined;
 	oldestLoadedBlockNumber: number | undefined;
 	beAtCapacity?: boolean;
-}): Promise<{ hasMore: boolean }> => {
+}): Promise<{ hasMore: boolean; err?: unknown }> => {
+	const atCapacity = beAtCapacity || isEthBackendAtCapacity(tokenId);
+
 	if (nonNullish(cursor)) {
 		const result = await loadEthUserTransactions({
 			identity,
@@ -127,19 +258,43 @@ export const loadNextEthUserTransactions = async ({
 			maxResults: WALLET_PAGINATION
 		});
 
+		// Record the capacity signal from any successful read, not only one that returned a page. An
+		// empty page still carries `totalStored`, and it is the shape a cursor invalidated by eviction
+		// comes back as, so dropping it leaves the tracker stale exactly as the fall-through below is
+		// about to save.
+		if (nonNullish(result)) {
+			setEthBackendAtCapacity({ tokenId, totalStored: result.totalStored });
+		}
+
 		if (nonNullish(result) && result.transactions.length > 0) {
-			const certifiedTransactions = result.transactions.map((transaction) => ({
-				data: transaction,
-				certified: false
-			}));
+			const loadedBefore = (get(ethTransactionsStore)?.[tokenId] ?? []).length;
 
-			ethTransactionsStore.append({ tokenId, transactions: certifiedTransactions });
+			ethTransactionsStore.append({
+				tokenId,
+				transactions: result.transactions.map((transaction) => ({
+					data: transaction,
+					certified: false
+				}))
+			});
 
-			return {
-				hasMore: nonNullish(result.nextStart) || nonNullish(result.oldestBlockIndex)
-			};
+			const loadedAfter = (get(ethTransactionsStore)?.[tokenId] ?? []).length;
+
+			// The cursor is a position in the stored list, so trimming at the per-token cap shifts every
+			// entry under it and the cursor stops lining up. Pages then come back full of transactions
+			// we already have, which `append` dedupes away. Treat that like an empty page and fall
+			// through to the explorer rather than asking the canister for the same rows again.
+			if (loadedAfter > loadedBefore) {
+				setEthBackendPaginationCursor({ tokenId, nextStart: result.nextStart });
+
+				return {
+					hasMore: nonNullish(result.nextStart) || nonNullish(result.oldestBlockIndex)
+				};
+			}
 		}
 	}
+
+	// The backend has nothing more to give, so the next intersection must not ask it again.
+	setEthBackendPaginationCursor({ tokenId, nextStart: undefined });
 
 	return loadOlderFromEtherscan({
 		identity,
@@ -148,7 +303,7 @@ export const loadNextEthUserTransactions = async ({
 		tokenId,
 		networkId,
 		oldestLoadedBlockNumber,
-		skipSave: beAtCapacity
+		skipSave: atCapacity
 	});
 };
 
@@ -184,7 +339,7 @@ const loadOlderFromEtherscan = async ({
 	networkId: NetworkId;
 	oldestLoadedBlockNumber: number | undefined;
 	skipSave: boolean;
-}): Promise<{ hasMore: boolean }> => {
+}): Promise<{ hasMore: boolean; err?: unknown }> => {
 	if (isNullish(oldestLoadedBlockNumber) || oldestLoadedBlockNumber <= 0) {
 		return { hasMore: false };
 	}
@@ -193,45 +348,55 @@ const loadOlderFromEtherscan = async ({
 		return { hasMore: false };
 	}
 
-	try {
-		const { transactions: transactionsProvider } = etherscanProviders(networkId);
+	const result = await requestOlderEtherscanPage({
+		address,
+		tokenId,
+		request: () => {
+			const { transactions: transactionsProvider } = etherscanProviders(networkId);
 
-		const olderTransactions = await transactionsProvider({
-			address,
-			endBlock: oldestLoadedBlockNumber - 1,
-			sort: 'desc'
-		});
-
-		if (olderTransactions.length === 0) {
-			return { hasMore: false };
+			return transactionsProvider({
+				address,
+				endBlock: oldestLoadedBlockNumber - 1,
+				sort: 'desc'
+			});
 		}
+	});
 
-		const certifiedTransactions = olderTransactions.map((transaction) => ({
-			data: transaction,
-			certified: false
-		}));
+	// A page that could not be fetched is not the start of the history. Reporting it as one used to
+	// retire the token from the list until the page was left.
+	if ('err' in result) {
+		return { hasMore: false, err: result.err };
+	}
 
-		ethTransactionsStore.append({ tokenId, transactions: certifiedTransactions });
+	const { page: olderTransactions } = result;
 
-		if (!skipSave) {
-			try {
-				const { getBlockNumber } = infuraProviders(networkId);
-
-				const latestBlockNumber = await getBlockNumber();
-
-				await saveEthFinalizedTransactions({
-					identity,
-					tokenId: transactionTokenId,
-					transactions: olderTransactions,
-					currentBlockNumber: latestBlockNumber
-				});
-			} catch (_: unknown) {
-				// We silently ignore the saving errors since it is just useful for the next time, and not necessary for the user experience
-			}
-		}
-
-		return { hasMore: true };
-	} catch (_: unknown) {
+	if (olderTransactions.length === 0) {
 		return { hasMore: false };
 	}
+
+	const certifiedTransactions = olderTransactions.map((transaction) => ({
+		data: transaction,
+		certified: false
+	}));
+
+	ethTransactionsStore.append({ tokenId, transactions: certifiedTransactions });
+
+	if (!skipSave) {
+		try {
+			const { getBlockNumber } = infuraProviders(networkId);
+
+			const latestBlockNumber = await getBlockNumber();
+
+			await saveEthFinalizedTransactions({
+				identity,
+				tokenId: transactionTokenId,
+				transactions: olderTransactions,
+				currentBlockNumber: latestBlockNumber
+			});
+		} catch (_: unknown) {
+			// We silently ignore the saving errors since it is just useful for the next time, and not necessary for the user experience
+		}
+	}
+
+	return { hasMore: true };
 };

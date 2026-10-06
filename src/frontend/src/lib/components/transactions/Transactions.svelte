@@ -16,7 +16,8 @@
 		networkEthereum,
 		networkEvm,
 		networkICP,
-		networkSolana
+		networkSolana,
+		networkXrp
 	} from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -25,6 +26,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getPageTokenIdentifier } from '$lib/utils/page-token.utils';
 	import SolTransactions from '$sol/components/transactions/SolTransactions.svelte';
+	import XrpTransactions from '$xrp/components/transactions/XrpTransactions.svelte';
 
 	let token = $derived(
 		$allTokens.find(
@@ -84,5 +86,7 @@
 		<EthTransactions />
 	{:else if $networkSolana}
 		<SolTransactions />
+	{:else if $networkXrp}
+		<XrpTransactions />
 	{/if}
 {/if}

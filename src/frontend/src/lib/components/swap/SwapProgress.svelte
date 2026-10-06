@@ -7,9 +7,19 @@
 	interface Props {
 		swapProgressStep?: string;
 		sendWithApproval?: boolean;
+		// The approve row on its own, without the two signing rows `sendWithApproval`
+		// also brings, for a flow that approves a ledger allowance and signs nothing the
+		// user sees — OISY Trade, whose deposit leg is `icrc2_approve` then `deposit`. On
+		// the ICP wizard an approve is a plain canister call, so there is no signature to
+		// show; and a step driven into a list that does not render it matches nothing,
+		// which leaves every row unhighlighted until the next step that does exist.
+		withApproveStep?: boolean;
 		sendWithTransfer?: boolean;
 		swapWithWithdrawing?: boolean;
 		swapWithActiveTransaction?: boolean;
+		// Only meaningful together with `swapWithActiveTransaction`: whether the
+		// background phase is a bridge (1Sec) rather than a plain swap settlement.
+		swapWithBridging?: boolean;
 		failedSteps?: string[];
 	}
 
@@ -17,9 +27,11 @@
 		swapProgressStep = ProgressStepsSwap.INITIALIZATION,
 		failedSteps = $bindable([]),
 		sendWithApproval = false,
+		withApproveStep = false,
 		sendWithTransfer = false,
 		swapWithWithdrawing = false,
-		swapWithActiveTransaction = false
+		swapWithActiveTransaction = false,
+		swapWithBridging = false
 	}: Props = $props();
 
 	let steps = $derived<ProgressSteps>([
@@ -34,7 +46,13 @@
 						step: ProgressStepsSwap.SIGN_APPROVE,
 						text: $i18n.send.text.signing_approval,
 						state: 'next'
-					},
+					}
+				] as ProgressSteps)
+			: []),
+		// Contributed by either prop, exactly once: the in-progress lookup matches steps
+		// by id, so two rows sharing `APPROVE` would break it.
+		...(sendWithApproval || withApproveStep
+			? ([
 					{
 						step: ProgressStepsSwap.APPROVE,
 						text: $i18n.send.text.approving,
@@ -68,7 +86,9 @@
 		{
 			step: ProgressStepsSwap.UPDATE_UI,
 			text: swapWithActiveTransaction
-				? $i18n.swap.text.starting_to_bridge
+				? swapWithBridging
+					? $i18n.swap.text.starting_to_bridge
+					: $i18n.swap.text.finishing_in_background
 				: $i18n.swap.text.refreshing_ui,
 			state: 'next'
 		}

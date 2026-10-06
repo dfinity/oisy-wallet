@@ -3,26 +3,45 @@ import {
 	TRACK_COUNT_LIQUIDIUM_ERROR,
 	TRACK_COUNT_LIQUIDIUM_SUCCESS,
 	TRACK_COUNT_SWAP_ERROR,
-	TRACK_COUNT_SWAP_SUCCESS
+	TRACK_COUNT_SWAP_SUCCESS,
+	TRACK_COUNT_XRP_SEND_ERROR,
+	TRACK_COUNT_XRP_SEND_SUCCESS
 } from '$lib/constants/analytics.constants';
 import { ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { LIQUIDIUM_PROVIDER_ID } from '$lib/constants/liquidium.constants';
 import * as addressDerived from '$lib/derived/address.derived';
 import * as authDerived from '$lib/derived/auth.derived';
+import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+import en from '$lib/i18n/en.json';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import * as analyticsServices from '$lib/services/analytics.services';
+import * as chainFusionPoller from '$lib/services/chain-fusion-swap-active-tx.services';
+import * as cyclesMintPoller from '$lib/services/cycles-mint-active-tx.services';
 import * as liquidiumPoller from '$lib/services/liquidium-active-tx.services';
 import * as liquidiumServices from '$lib/services/liquidium.services';
+import * as nearIntentsPoller from '$lib/services/near-intents-active-tx.services';
+import * as oisyTradePoller from '$lib/services/oisy-trade-active-tx.services';
 import * as oneSecPoller from '$lib/services/onesec-swap.services';
+import * as veloraPoller from '$lib/services/velora-active-tx.services';
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
+import * as toasts from '$lib/stores/toasts.store';
+import { CYCLES_MINT_EXTERNAL_REF_KEYS } from '$lib/types/cycles-mint-active-tx';
 import { SwapProvider } from '$lib/types/swap';
 import * as walletUtils from '$lib/utils/wallet.utils';
 import {
 	mockActiveUserTransaction,
-	mockLiquidiumActiveUserTransaction
+	mockChainFusionActiveUserTransaction,
+	mockCyclesMintActiveUserTransaction,
+	mockLiquidiumActiveUserTransaction,
+	mockNearIntentsActiveUserTransaction,
+	mockOisyTradeActiveUserTransaction,
+	mockVeloraActiveUserTransaction,
+	mockXrpActiveUserTransaction,
+	mockXrpSwapActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import * as xrpPoller from '$xrp/services/xrp-active-tx.services';
 import { render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get, readable } from 'svelte/store';
@@ -47,6 +66,96 @@ const failed = (id: string) =>
 		id,
 		status: { Failed: null } as const
 	}) satisfies typeof mockActiveUserTransaction;
+
+const pendingNearIntents = (id: string) =>
+	({
+		...mockNearIntentsActiveUserTransaction,
+		id,
+		status: { Pending: null } as const
+	}) satisfies typeof mockNearIntentsActiveUserTransaction;
+
+const succeededNearIntents = (id: string) =>
+	({
+		...mockNearIntentsActiveUserTransaction,
+		id,
+		status: { Succeeded: null } as const
+	}) satisfies typeof mockNearIntentsActiveUserTransaction;
+
+const pendingVelora = (id: string) =>
+	({
+		...mockVeloraActiveUserTransaction,
+		id,
+		status: { Pending: null } as const
+	}) satisfies typeof mockVeloraActiveUserTransaction;
+
+const succeededVelora = (id: string) =>
+	({
+		...mockVeloraActiveUserTransaction,
+		id,
+		status: { Succeeded: null } as const
+	}) satisfies typeof mockVeloraActiveUserTransaction;
+
+const pendingChainFusion = (id: string) =>
+	({
+		...mockChainFusionActiveUserTransaction,
+		id,
+		status: { Pending: null } as const
+	}) satisfies typeof mockChainFusionActiveUserTransaction;
+
+const succeededChainFusion = (id: string) =>
+	({
+		...mockChainFusionActiveUserTransaction,
+		id,
+		status: { Succeeded: null } as const
+	}) satisfies typeof mockChainFusionActiveUserTransaction;
+
+const pendingXrp = (id: string) =>
+	({
+		...mockXrpActiveUserTransaction,
+		id,
+		status: { Pending: null } as const
+	}) satisfies typeof mockXrpActiveUserTransaction;
+
+const pendingOisyTrade = (id: string) =>
+	({
+		...mockOisyTradeActiveUserTransaction,
+		id,
+		status: { Executing: null } as const
+	}) satisfies typeof mockOisyTradeActiveUserTransaction;
+
+const succeededOisyTrade = (id: string) =>
+	({
+		...mockOisyTradeActiveUserTransaction,
+		id,
+		status: { Succeeded: null } as const
+	}) satisfies typeof mockOisyTradeActiveUserTransaction;
+
+const failedOisyTrade = (id: string) =>
+	({
+		...mockOisyTradeActiveUserTransaction,
+		id,
+		status: { Failed: null } as const
+	}) satisfies typeof mockOisyTradeActiveUserTransaction;
+
+const cyclesMint = ({
+	id,
+	status,
+	outcome
+}: {
+	id: string;
+	status: typeof mockCyclesMintActiveUserTransaction.status;
+	outcome?: string;
+}) => ({
+	...mockCyclesMintActiveUserTransaction,
+	id,
+	status,
+	external_refs: [
+		...mockCyclesMintActiveUserTransaction.external_refs,
+		...(outcome === undefined
+			? []
+			: [{ key: CYCLES_MINT_EXTERNAL_REF_KEYS.OUTCOME, value: outcome }])
+	]
+});
 
 const pendingLiquidium = (id: string) =>
 	({
@@ -181,6 +290,202 @@ describe('LoaderActiveUserTransactions', () => {
 			});
 		});
 
+		it('polls NEAR Intents rows on each tick when present', async () => {
+			const oneSecSpy = vi
+				.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions')
+				.mockResolvedValue();
+			const nearSpy = vi
+				.spyOn(nearIntentsPoller, 'pollNearIntentsActiveUserTransactions')
+				.mockResolvedValue();
+			const tx = pendingNearIntents('near-a');
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: tx });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(oneSecSpy).not.toHaveBeenCalled();
+			expect(nearSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [tx]
+			});
+		});
+
+		it('polls Velora rows on each tick when present, with the EVM address', async () => {
+			const oneSecSpy = vi
+				.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions')
+				.mockResolvedValue();
+			const veloraSpy = vi
+				.spyOn(veloraPoller, 'pollVeloraActiveUserTransactions')
+				.mockResolvedValue();
+			vi.spyOn(addressDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
+			const tx = pendingVelora('velora-a');
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: tx });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(oneSecSpy).not.toHaveBeenCalled();
+			expect(veloraSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [tx],
+				userAddress: mockEthAddress
+			});
+		});
+
+		it('polls Chain Fusion rows on each tick when present', async () => {
+			const oneSecSpy = vi
+				.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions')
+				.mockResolvedValue();
+			const chainFusionSpy = vi
+				.spyOn(chainFusionPoller, 'pollChainFusionActiveUserTransactions')
+				.mockResolvedValue();
+			const tx = pendingChainFusion('chain-fusion-a');
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: tx });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(oneSecSpy).not.toHaveBeenCalled();
+			expect(chainFusionSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [tx]
+			});
+		});
+
+		it('polls OISY Trade rows on each tick when present', async () => {
+			const oneSecSpy = vi
+				.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions')
+				.mockResolvedValue();
+			const oisyTradeSpy = vi
+				.spyOn(oisyTradePoller, 'pollOisyTradeActiveUserTransactions')
+				.mockResolvedValue();
+			// `Executing`, not `Pending`: every OISY Trade row is `Executing` from the
+			// deposit onwards, so a partition matching on the `Pending` *status* rather than
+			// on non-terminal would never see a real settlement.
+			const tx = pendingOisyTrade('oisy-trade-a');
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: tx });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(oneSecSpy).not.toHaveBeenCalled();
+			expect(oisyTradeSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [tx]
+			});
+		});
+
+		it('polls cycles-mint rows on each tick when present', async () => {
+			const oneSecSpy = vi
+				.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions')
+				.mockResolvedValue();
+			const cyclesMintSpy = vi
+				.spyOn(cyclesMintPoller, 'pollCyclesMintActiveUserTransactions')
+				.mockResolvedValue();
+			const tx = cyclesMint({ id: 'cycles-mint-a', status: { Executing: null } });
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: tx });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(oneSecSpy).not.toHaveBeenCalled();
+			expect(cyclesMintSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [tx]
+			});
+		});
+
+		// XRP is the eighth flow on the same poller host, and the one whose window
+		// is shortest: an XRP record self-clears in about a minute, well inside the
+		// 5-second tick.
+		it('polls XRP rows on each tick when present', async () => {
+			const oneSecSpy = vi
+				.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions')
+				.mockResolvedValue();
+			const xrpSpy = vi.spyOn(xrpPoller, 'pollXrpActiveUserTransactions').mockResolvedValue();
+			const tx = pendingXrp('xrp-a');
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: tx });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(oneSecSpy).not.toHaveBeenCalled();
+			expect(xrpSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [tx]
+			});
+		});
+
+		// A swap from XRP goes to the XRP ledger resolution while its deposit is `Pending`: 1Click
+		// reports `PENDING_DEPOSIT` at once, which would move the row to `Executing` and release the
+		// address while the deposit can still apply. From `Executing` on, 1Click decides.
+		describe('a swap from XRP', () => {
+			const spies = () => ({
+				xrpSpy: vi.spyOn(xrpPoller, 'pollXrpActiveUserTransactions').mockResolvedValue(),
+				nearSpy: vi
+					.spyOn(nearIntentsPoller, 'pollNearIntentsActiveUserTransactions')
+					.mockResolvedValue()
+			});
+
+			it('is polled against the XRP ledger while its deposit is Pending', async () => {
+				const { xrpSpy, nearSpy } = spies();
+				const tx = { ...mockXrpSwapActiveUserTransaction, id: 'xrp-swap-a' };
+
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.upsert({ transaction: tx });
+
+				render(LoaderActiveUserTransactions);
+
+				await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+				expect(nearSpy).not.toHaveBeenCalled();
+				expect(xrpSpy).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					transactions: [tx]
+				});
+			});
+
+			it('is polled at 1Click once Executing', async () => {
+				const { xrpSpy, nearSpy } = spies();
+				const tx = {
+					...mockXrpSwapActiveUserTransaction,
+					id: 'xrp-swap-b',
+					status: { Executing: null }
+				};
+
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.upsert({ transaction: tx });
+
+				render(LoaderActiveUserTransactions);
+
+				await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+				expect(xrpSpy).not.toHaveBeenCalled();
+				expect(nearSpy).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					transactions: [tx]
+				});
+			});
+		});
+
 		it('stops polling once all rows reach a terminal state', async () => {
 			const spy = vi.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions').mockResolvedValue();
 
@@ -229,6 +534,105 @@ describe('LoaderActiveUserTransactions', () => {
 			vi.spyOn(activeUserTransactionsServices, 'loadActiveUserTransactions').mockResolvedValue();
 			refreshSpy = vi.spyOn(walletUtils, 'waitAndTriggerWallet').mockResolvedValue();
 			trackEventSpy = vi.spyOn(analyticsServices, 'trackEvent').mockReturnValue(undefined);
+			vi.spyOn(toasts, 'toastsShow').mockReturnValue(Symbol('toast'));
+			vi.spyOn(toasts, 'toastsError').mockReturnValue(Symbol('toast'));
+		});
+
+		// The XRP send stops at the broadcast, so by the time the ledger decides there may be no
+		// modal left. This hook is the only place the outcome is reported — and it fires once per
+		// row even when the row terminalized while the tab was shut.
+		describe('an XRP send reports its outcome here, because nothing else can', () => {
+			it('toasts success, refreshes the wallet and fires the success event', async () => {
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.upsert({ transaction: pendingXrp('xrp-a') });
+
+				render(LoaderActiveUserTransactions);
+				await tick();
+
+				expect(toasts.toastsShow).not.toHaveBeenCalled();
+
+				activeUserTransactionsStore.upsert({
+					transaction: { ...pendingXrp('xrp-a'), status: { Succeeded: null } }
+				});
+				await tick();
+
+				expect(toasts.toastsShow).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ text: en.send.text.xrp_sent, level: 'success' })
+				);
+				expect(refreshSpy).toHaveBeenCalledOnce();
+				expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ name: TRACK_COUNT_XRP_SEND_SUCCESS })
+				);
+			});
+
+			// The recorded text, not a message derived here: the two failures need different
+			// advice — nothing was sent, or the fee was charged — and only the resolver knows which
+			// one it wrote.
+			it('toasts the recorded failure text and refreshes the wallet', async () => {
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.upsert({ transaction: pendingXrp('xrp-a') });
+
+				render(LoaderActiveUserTransactions);
+				await tick();
+
+				activeUserTransactionsStore.upsert({
+					transaction: {
+						...pendingXrp('xrp-a'),
+						status: { Failed: null },
+						error: ['the network did not include it in time']
+					}
+				});
+				await tick();
+
+				expect(toasts.toastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: 'the network did not include it in time' }
+				});
+				// Refreshed on failure too: a validated one claimed the fee, which the balance must show.
+				expect(refreshSpy).toHaveBeenCalledOnce();
+				expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ name: TRACK_COUNT_XRP_SEND_ERROR })
+				);
+			});
+
+			it('falls back to generic copy when the record carries no error text', async () => {
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.upsert({ transaction: pendingXrp('xrp-a') });
+
+				render(LoaderActiveUserTransactions);
+				await tick();
+
+				activeUserTransactionsStore.upsert({
+					transaction: { ...pendingXrp('xrp-a'), status: { Failed: null }, error: [] }
+				});
+				await tick();
+
+				expect(toasts.toastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.send.error.unexpected }
+				});
+			});
+
+			// Once per row, not once per store update — the same idempotency the seven other flows
+			// rely on, which is what makes a row that settled while the tab was shut safe to report.
+			it('reports once even when the row is written again', async () => {
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.upsert({
+					transaction: { ...pendingXrp('xrp-a'), status: { Succeeded: null } }
+				});
+
+				render(LoaderActiveUserTransactions);
+				await tick();
+
+				activeUserTransactionsStore.upsert({
+					transaction: {
+						...pendingXrp('xrp-a'),
+						status: { Succeeded: null },
+						updated_at_ns: 99n
+					}
+				});
+				await tick();
+
+				expect(toasts.toastsShow).toHaveBeenCalledOnce();
+			});
 		});
 
 		it('fires waitAndTriggerWallet and a swap_success event once when a row transitions to Succeeded', async () => {
@@ -250,6 +654,276 @@ describe('LoaderActiveUserTransactions', () => {
 				metadata: expect.objectContaining({ dApp: SwapProvider.ONE_SEC })
 			});
 			expect(appliedFlags()).toEqual({ a: true });
+		});
+
+		it('fires waitAndTriggerWallet and a swap_success event with the NEAR Intents dApp when a NEAR row succeeds', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingNearIntents('near-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			expect(refreshSpy).not.toHaveBeenCalled();
+			expect(trackEventSpy).not.toHaveBeenCalled();
+
+			activeUserTransactionsStore.upsert({ transaction: succeededNearIntents('near-a') });
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_SWAP_SUCCESS,
+				metadata: expect.objectContaining({ dApp: SwapProvider.NEAR_INTENTS })
+			});
+			expect(appliedFlags()).toEqual({ 'near-a': true });
+		});
+
+		// The deposit's network fee was charged, so the balance changed although the swap failed.
+		it('refreshes the wallet when a swap from XRP fails', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: mockXrpSwapActiveUserTransaction });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			expect(refreshSpy).not.toHaveBeenCalled();
+
+			activeUserTransactionsStore.upsert({
+				transaction: { ...mockXrpSwapActiveUserTransaction, status: { Failed: null } }
+			});
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_SWAP_ERROR,
+				metadata: expect.objectContaining({ dApp: SwapProvider.NEAR_INTENTS })
+			});
+		});
+
+		it('does not refresh the wallet when a swap from another chain fails', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingNearIntents('near-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			activeUserTransactionsStore.upsert({
+				transaction: { ...pendingNearIntents('near-a'), status: { Failed: null } }
+			});
+			await tick();
+
+			expect(refreshSpy).not.toHaveBeenCalled();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ name: TRACK_COUNT_SWAP_ERROR })
+			);
+		});
+
+		it('fires waitAndTriggerWallet and a swap_success event with the Velora dApp when a Velora row succeeds', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingVelora('velora-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			expect(refreshSpy).not.toHaveBeenCalled();
+			expect(trackEventSpy).not.toHaveBeenCalled();
+
+			activeUserTransactionsStore.upsert({ transaction: succeededVelora('velora-a') });
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_SWAP_SUCCESS,
+				metadata: expect.objectContaining({ dApp: SwapProvider.VELORA })
+			});
+			expect(appliedFlags()).toEqual({ 'velora-a': true });
+		});
+
+		it('fires waitAndTriggerWallet and a swap_success event with the Chain Fusion dApp when a ck row succeeds', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingChainFusion('chain-fusion-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			expect(refreshSpy).not.toHaveBeenCalled();
+			expect(trackEventSpy).not.toHaveBeenCalled();
+
+			activeUserTransactionsStore.upsert({ transaction: succeededChainFusion('chain-fusion-a') });
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			// A ck conversion reports into the swap funnel, not the convert one.
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_SWAP_SUCCESS,
+				metadata: expect.objectContaining({ dApp: SwapProvider.CHAIN_FUSION })
+			});
+			expect(appliedFlags()).toEqual({ 'chain-fusion-a': true });
+		});
+
+		it('fires a swap_success event with the OISY Trade dApp when an order settles', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingOisyTrade('oisy-trade-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			expect(trackEventSpy).not.toHaveBeenCalled();
+
+			activeUserTransactionsStore.upsert({ transaction: succeededOisyTrade('oisy-trade-a') });
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_SWAP_SUCCESS,
+				metadata: expect.objectContaining({ dApp: SwapProvider.OISY_TRADE })
+			});
+			expect(appliedFlags()).toEqual({ 'oisy-trade-a': true });
+		});
+
+		// OISY Trade settles in the foreground, so the wizard reports most swaps itself
+		// and claims the row's side effects to say so. This loader is the reporter only
+		// for a row the poller finished — a session that died mid-flow — and must stay
+		// silent about a claimed one, or the same swap is counted twice.
+		it('fires nothing for an OISY Trade row the foreground already claimed', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingOisyTrade('oisy-trade-a') });
+			activeUserTransactionsStore.markTerminalSideEffectsApplied({ ids: ['oisy-trade-a'] });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			activeUserTransactionsStore.upsert({ transaction: succeededOisyTrade('oisy-trade-a') });
+			await tick();
+
+			expect(trackEventSpy).not.toHaveBeenCalled();
+			expect(refreshSpy).not.toHaveBeenCalled();
+		});
+
+		// Unlike every other provider: a failed OISY Trade swap is a killed fill-or-kill
+		// order whose *source* token has just been withdrawn back to the wallet, so the
+		// balance changed and the refresh has to fire on failure too.
+		it('refreshes the wallet even when an OISY Trade row fails', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingOisyTrade('oisy-trade-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			activeUserTransactionsStore.upsert({ transaction: failedOisyTrade('oisy-trade-a') });
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_SWAP_ERROR,
+				metadata: expect.objectContaining({ dApp: SwapProvider.OISY_TRADE })
+			});
+		});
+
+		// Fired here rather than by the modal, so a mint counts once whichever session
+		// closes its row.
+		it('fires one cycles_mint success and refreshes the wallet when a mint settles', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({
+				transaction: cyclesMint({ id: 'cycles-mint-a', status: { Executing: null } })
+			});
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			expect(trackEventSpy).not.toHaveBeenCalled();
+
+			activeUserTransactionsStore.upsert({
+				transaction: cyclesMint({
+					id: 'cycles-mint-a',
+					status: { Succeeded: null },
+					outcome: 'minted'
+				})
+			});
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: PLAUSIBLE_EVENTS.CYCLES_MINT,
+				metadata: expect.objectContaining({ event_modifier: 'mint', result_status: 'success' })
+			});
+			expect(appliedFlags()).toEqual({ 'cycles-mint-a': true });
+		});
+
+		// A refund brings most of the ICP back, so the balance changed on failure too.
+		it('reports a refunded mint as an error and still refreshes the wallet', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({
+				transaction: cyclesMint({ id: 'cycles-mint-a', status: { Executing: null } })
+			});
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			activeUserTransactionsStore.upsert({
+				transaction: cyclesMint({
+					id: 'cycles-mint-a',
+					status: { Failed: null },
+					outcome: 'refunded'
+				})
+			});
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: PLAUSIBLE_EVENTS.CYCLES_MINT,
+				metadata: expect.objectContaining({
+					result_status: 'error',
+					result_error_code: 'refunded'
+				})
+			});
+		});
+
+		// Closed by the poller when no deposit was ever found: reported once, from the row.
+		it('reports a mint that never sent its ICP with its own error code', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({
+				transaction: cyclesMint({ id: 'cycles-mint-a', status: { Pending: null } })
+			});
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			activeUserTransactionsStore.upsert({
+				transaction: cyclesMint({
+					id: 'cycles-mint-a',
+					status: { Failed: null },
+					outcome: 'not_sent'
+				})
+			});
+			await tick();
+
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: PLAUSIBLE_EVENTS.CYCLES_MINT,
+				metadata: expect.objectContaining({
+					result_status: 'error',
+					result_error_code: 'not_sent'
+				})
+			});
+			expect(appliedFlags()).toEqual({ 'cycles-mint-a': true });
+		});
+
+		it('fires a swap_error event without a wallet refresh when a ck row fails', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingChainFusion('chain-fusion-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			activeUserTransactionsStore.upsert({
+				transaction: { ...pendingChainFusion('chain-fusion-a'), status: { Failed: null } }
+			});
+			await tick();
+
+			expect(refreshSpy).not.toHaveBeenCalled();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_SWAP_ERROR,
+				metadata: expect.objectContaining({ dApp: SwapProvider.CHAIN_FUSION })
+			});
 		});
 
 		it('fires wallet and Liquidium refreshes plus analytics when a Liquidium row succeeds', async () => {

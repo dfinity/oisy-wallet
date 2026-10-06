@@ -77,11 +77,24 @@
 		if (!amountSetToMax) {
 			return;
 		}
-		debounce(() => setMax(), 500)();
+		debounce(() => {
+			// Rechecked because the flag can be cleared during the delay: typing into the input
+			// clears it, and this callback would otherwise overwrite what the user just typed —
+			// and re-arm the flag, so the next fee change would do it again.
+			if (!amountSetToMax) {
+				return;
+			}
+
+			setMax();
+		}, 500)();
 	};
 
 	$effect(() => {
-		[fee];
+		// `maxAmount` is tracked alongside the fee because it arrives asynchronously and can
+		// shrink afterwards — a BTC cap lands once the UTXOs load and drops again when a
+		// pending send reserves some. A "Max" chosen before either would otherwise stay at the
+		// balance-based amount the cap exists to rule out.
+		[fee, maxAmount];
 
 		debounceSetMax();
 	});

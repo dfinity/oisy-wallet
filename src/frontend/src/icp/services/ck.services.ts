@@ -1,7 +1,7 @@
 import { retrieveBtc } from '$icp/api/ckbtc-minter.api';
 import { withdrawErc20, withdrawEth } from '$icp/api/cketh-minter.api';
 import { approve } from '$icp/api/icrc-ledger.api';
-import type { IcTransferParams } from '$icp/types/ic-send';
+import type { IcCkWithdrawalResult, IcTransferParams } from '$icp/types/ic-send';
 import type { IcCanisters, IcCkMetadata, IcCkToken } from '$icp/types/ic-token';
 import { NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
@@ -19,7 +19,7 @@ export const convertCkBTCToBtc = async ({
 	to
 }: IcTransferParams & {
 	token: IcCkToken;
-}): Promise<void> => {
+}): Promise<IcCkWithdrawalResult> => {
 	assertNonNullish(minterCanisterId, get(i18n).init.error.minter_ckbtc_btc);
 
 	await approveTransfer({
@@ -32,12 +32,14 @@ export const convertCkBTCToBtc = async ({
 
 	progress?.(ProgressStepsSendIc.SEND);
 
-	await retrieveBtc({
+	const { block_index: blockIndex } = await retrieveBtc({
 		identity,
 		minterCanisterId,
 		address: to,
 		amount
 	});
+
+	return { type: 'ckBtcToBtc', blockIndex };
 };
 
 /**
@@ -54,7 +56,7 @@ export const convertCkErc20ToErc20 = async ({
 	ckErc20ToErc20MaxCkEthFees
 }: IcTransferParams & {
 	token: IcCkToken;
-}): Promise<void> => {
+}): Promise<IcCkWithdrawalResult> => {
 	const { minterCanisterId, ledgerCanisterId } = token;
 
 	assertNonNullish(minterCanisterId, get(i18n).init.error.minter_ckerc20_erc20);
@@ -94,13 +96,16 @@ export const convertCkErc20ToErc20 = async ({
 
 	progress?.(ProgressStepsSendIc.SEND);
 
-	await withdrawErc20({
-		identity,
-		minterCanisterId,
-		ledgerCanisterId,
-		address: to,
-		amount
-	});
+	const { cketh_block_index: ckEthBlockIndex, ckerc20_block_index: ckErc20BlockIndex } =
+		await withdrawErc20({
+			identity,
+			minterCanisterId,
+			ledgerCanisterId,
+			address: to,
+			amount
+		});
+
+	return { type: 'ckErc20ToErc20', ckEthBlockIndex, ckErc20BlockIndex };
 };
 
 export const convertCkETHToEth = async ({
@@ -111,7 +116,7 @@ export const convertCkETHToEth = async ({
 	to
 }: IcTransferParams & {
 	token: IcCkToken;
-}): Promise<void> => {
+}): Promise<IcCkWithdrawalResult> => {
 	assertNonNullish(minterCanisterId, get(i18n).init.error.minter_cketh_eth);
 
 	await approveTransfer({
@@ -124,12 +129,14 @@ export const convertCkETHToEth = async ({
 
 	progress?.(ProgressStepsSendIc.SEND);
 
-	await withdrawEth({
+	const { block_index: blockIndex } = await withdrawEth({
 		identity,
 		minterCanisterId,
 		address: to,
 		amount
 	});
+
+	return { type: 'ckEthToEth', blockIndex };
 };
 
 const approveTransfer = ({

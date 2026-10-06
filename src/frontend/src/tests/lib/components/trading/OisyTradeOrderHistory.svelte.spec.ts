@@ -30,6 +30,7 @@ const order = (over: Partial<OisyTradeOrderView>): OisyTradeOrderView => ({
 	price: 2.5,
 	filledQuantity: 10,
 	status: 'Filled',
+	timeInForce: 'GoodTilCanceled',
 	createdAt: 1_718_452_800_000_000_000n,
 	...over
 });

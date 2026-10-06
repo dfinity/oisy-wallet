@@ -1,10 +1,6 @@
-import { ZERO } from '$lib/constants/app.constants';
-import { checkIfAccountExists, loadTokenBalance } from '$sol/api/solana.api';
 import type { SolAddress } from '$sol/types/address';
-import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { isAtaAddress } from '$sol/utils/sol-address.utils';
 import {
 	findAssociatedTokenPda,
 	getCreateAssociatedTokenInstructionAsync
@@ -46,41 +42,3 @@ export const createAtaInstruction = async ({
 		mint: solAddress(tokenAddress),
 		tokenProgram: solAddress(tokenOwnerAddress)
 	});
-
-/**
- * Fetches the SPL token balance for a wallet.
- */
-export const loadSplTokenBalance = async ({
-	address,
-	network,
-	tokenAddress,
-	tokenOwnerAddress
-}: {
-	address: SolAddress;
-	network: SolanaNetworkType;
-	tokenAddress: SplTokenAddress;
-	tokenOwnerAddress: SolAddress;
-}): Promise<bigint> => {
-	const isAta = await isAtaAddress({ address, network });
-
-	const ataAddress: SolAddress = isAta
-		? address
-		: await calculateAssociatedTokenAddress({
-				owner: address,
-				tokenAddress,
-				tokenOwnerAddress
-			});
-
-	const accountExists = await checkIfAccountExists({ address: ataAddress, network });
-
-	if (!accountExists) {
-		return ZERO;
-	}
-
-	const balance = await loadTokenBalance({
-		ataAddress,
-		network
-	});
-
-	return balance ?? ZERO;
-};

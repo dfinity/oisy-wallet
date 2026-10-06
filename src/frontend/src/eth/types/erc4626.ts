@@ -1,5 +1,5 @@
 import type { ContractAddress, Erc20ContractAddress } from '$eth/types/address';
-import type { EthereumNetwork } from '$eth/types/network';
+import type { EthereumNetwork, EthersProviderNetwork } from '$eth/types/network';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { RequiredToken, Token, TokenStandardCode } from '$lib/types/token';
 
@@ -30,5 +30,7 @@ export interface Erc4626TokensExchangeData {
 	assetAddress: Erc4626Token['assetAddress'];
 	assetDecimals: Erc4626Token['assetDecimals'];
 	exchange: Erc4626Token['network']['exchange'];
-	infura: Erc4626Token['network']['providers']['infura'];
+	// Only the slice of the network a provider is built from: this data crosses the exchange
+	// worker's `postMessage` boundary, which a whole network object would not survive.
+	network: EthersProviderNetwork;
 }

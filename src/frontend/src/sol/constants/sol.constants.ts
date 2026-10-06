@@ -6,6 +6,22 @@ export const TOKEN_PROGRAM_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5D
 export const TOKEN_2022_PROGRAM_ADDRESS = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
 export const ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS =
 	'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
+export const ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS = 'AddressLookupTab1e1111111111111111111111111';
+export const STAKE_PROGRAM_ADDRESS = 'Stake11111111111111111111111111111111111111';
+
+// Both Memo programs are still in use: the original one is what older integrations were built
+// against, and neither is upgradeable, so nothing retires the first in favour of the second.
+// They share a data format, a bare UTF-8 string, so one decoder covers both.
+export const MEMO_LEGACY_PROGRAM_ADDRESS = 'Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo';
+export const MEMO_PROGRAM_ADDRESS = 'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr';
+
+// Where and how an Anchor program publishes its own interface. The seed is Anchor's, and so is the
+// account layout: a fixed discriminator it stamps on every IDL account (a constant, not derived
+// from a name), the authority allowed to rewrite it, then the length of the compressed IDL.
+export const ANCHOR_IDL_SEED = 'anchor:idl';
+export const ANCHOR_IDL_ACCOUNT_DISCRIMINATOR = [24, 70, 98, 191, 58, 144, 123, 158];
+export const ANCHOR_IDL_ACCOUNT_LENGTH_OFFSET = 40;
+export const ANCHOR_IDL_ACCOUNT_HEADER_LENGTH = 44;
 
 // Solana transaction fee
 // It can be hard-coded since it is not changed unsless under community proposal, with time in advance.
@@ -13,3 +29,68 @@ export const ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS =
 export const SOLANA_TRANSACTION_FEE_IN_LAMPORTS = 5_000n;
 
 export const MICROLAMPORTS_PER_LAMPORT = 1_000_000n;
+
+// When a transaction does not request a compute unit limit, the runtime budgets a fixed
+// amount per instruction, capped transaction-wide. The prioritisation fee is charged on the
+// requested (or defaulted) limit, not on the units actually consumed.
+// https://solana.com/docs/core/fees#compute-unit-limit
+export const SOLANA_DEFAULT_COMPUTE_UNIT_LIMIT_PER_INSTRUCTION = 200_000n;
+export const SOLANA_MAX_COMPUTE_UNIT_LIMIT = 1_400_000n;
+
+// A prioritisation fee is only meaningful next to what the same transaction *should* cost, so the
+// review judges it against a baseline: the larger of this fiat floor and what OISY itself would
+// pay right now. The floor keeps the baseline honest when the network is quiet and its estimate
+// collapses towards nothing, which would otherwise make an ordinary tip look enormous.
+export const SOLANA_PRIORITIZATION_FEE_BASELINE_FLOOR_USD = 0.1;
+
+// The simulated preview asks the RPC for the post-state of an explicit list of accounts. Only
+// writable accounts can change, which already discards most of a DeFi message's account set;
+// past this many the preview is dropped rather than truncated, because a truncated preview
+// would report "no changes" for accounts it never looked at.
+/**
+ * What the runtime charges to keep an account alive, as the protocol states it: every account pays
+ * for a fixed 128-byte header plus its own data, at a per-byte-year price, for a fixed number of
+ * years up front. An account funded with this much is exempt and never pays again.
+ *
+ * Reproduced here rather than asked of a provider because the review needs it before it renders,
+ * and because the three values are protocol constants rather than chain state.
+ */
+export const SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES = 128n;
+export const SOLANA_RENT_LAMPORTS_PER_BYTE_YEAR = 3_480n;
+export const SOLANA_RENT_EXEMPTION_YEARS = 2n;
+
+export const SOLANA_SIMULATION_MAX_ACCOUNTS = 60;
+
+// The preview is fetched before the review renders, so a slow or unresponsive RPC would hold
+// the request behind it. Past this it is abandoned and the review renders without it.
+export const SOLANA_SIMULATION_TIMEOUT_MILLISECONDS = 5_000;
+
+// Multiples of that baseline at which the review speaks up: twice it is worth naming as the dApp's
+// own choice, five times it is worth questioning. Both stay short of blocking, since paying well
+// over the odds is a legitimate thing to want during congestion.
+export const SOLANA_PRIORITIZATION_FEE_NOTICE_MULTIPLIER = 2n;
+export const SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER = 5n;
+
+// Every page of the wallet's head check costs a signature lookup per source, and a tick runs
+// every minute. A burst bigger than this many pages is not dropped: the head check resumes it on
+// the next ticks, so the bound only spreads the lookups out.
+export const SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK = 5;
+
+// A signature lookup on an associated token account answers with transactions that never moved
+// anything of the user's, and a whole page of history can consist of them. Each page costs one
+// detail fetch per signature, so the loader steps over at most this many of them in one round
+// rather than walking an arbitrarily long run of them while the user waits.
+export const SOLANA_MAX_SKIPPED_SIGNATURE_PAGES = 3;
+
+// The RPC rejects a `getMultipleAccounts` call that asks for more accounts than this.
+// https://solana.com/docs/rpc/http/getmultipleaccounts
+export const SOLANA_MAX_MULTIPLE_ACCOUNTS = 100;
+
+// A page of signatures is resolved concurrently, but public RPC endpoints throttle bursts of
+// `getTransaction` calls, so only this many are in flight at once.
+export const SOLANA_TRANSACTION_DETAIL_CONCURRENCY = 5;
+
+// How many transaction details are kept per network in IndexedDB, the newest slots first. The newest
+// page is what the worker fetches again on every reload, and a few pages below it cover what a newly
+// enabled token derives again for most wallets. A detail is around 10 KB, so this is about 2 MB.
+export const SOLANA_TRANSACTION_DETAILS_CACHE_SIZE = 200;

@@ -1,7 +1,7 @@
 import PillButton from '$lib/components/ui/PillButton.svelte';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
-import { createRawSnippet } from 'svelte';
+import { createRawSnippet, tick } from 'svelte';
 
 describe('PillButton', () => {
 	const createTextSnippet = (text: string) =>
@@ -59,6 +59,215 @@ describe('PillButton', () => {
 		expect(button?.classList.contains('bg-brand-primary')).toBeTruthy();
 		expect(button?.classList.contains('text-primary-inverted')).toBeTruthy();
 		expect(button?.classList.contains('text-secondary')).toBeFalsy();
+	});
+
+	it('should give an unselected accented pill the same border and fill as any other', () => {
+		const { container } = render(PillButton, {
+			props: { children: createTextSnippet('Test'), accent: true }
+		});
+
+		const button = container.querySelector('button');
+
+		expect(button?.classList.contains('border-primary')).toBeTruthy();
+		expect(button?.classList.contains('bg-primary')).toBeTruthy();
+		expect(button?.classList.contains('border-brand-subtle-20')).toBeFalsy();
+		expect(button?.classList.contains('bg-brand-subtle-20')).toBeFalsy();
+	});
+
+	it('should keep the regular text colour on an accented pill', () => {
+		const { container } = render(PillButton, {
+			props: { children: createTextSnippet('Test'), accent: true }
+		});
+
+		const button = container.querySelector('button');
+
+		expect(button?.classList.contains('text-secondary')).toBeTruthy();
+		expect(button?.classList.contains('text-brand-primary')).toBeFalsy();
+	});
+
+	it('should hover an accented pill with the same wash as any other', () => {
+		const { container } = render(PillButton, {
+			props: { children: createTextSnippet('Test'), accent: true }
+		});
+
+		const button = container.querySelector('button');
+
+		expect(button?.classList.contains('hover:bg-brand-subtle-10')).toBeTruthy();
+		expect(button?.classList.contains('hover:border-brand-subtle-30')).toBeFalsy();
+	});
+
+	it('should apply the regular selected styles when an accented pill is selected', () => {
+		const { container } = render(PillButton, {
+			props: { children: createTextSnippet('Test'), accent: true, selected: true }
+		});
+
+		const button = container.querySelector('button');
+
+		expect(button?.classList.contains('bg-brand-primary')).toBeTruthy();
+		expect(button?.classList.contains('text-primary-inverted')).toBeTruthy();
+		expect(button?.classList.contains('bg-brand-subtle-20')).toBeFalsy();
+		expect(button?.getAttribute('aria-pressed')).toBe('true');
+	});
+
+	it('should run the border lap on an unselected accented pill', () => {
+		const { container } = render(PillButton, {
+			props: { children: createTextSnippet('Test'), accent: true }
+		});
+
+		const button = container.querySelector('button');
+
+		expect(button?.querySelector('.pill-lap')).not.toBeNull();
+	});
+
+	it('should not run the border lap when an accented pill is selected', () => {
+		const { container } = render(PillButton, {
+			props: { children: createTextSnippet('Test'), accent: true, selected: true }
+		});
+
+		const button = container.querySelector('button');
+
+		expect(button?.querySelector('.pill-lap')).toBeNull();
+	});
+
+	it('should not run the border lap without accent', () => {
+		const { container } = render(PillButton, {
+			props: { children: createTextSnippet('Test') }
+		});
+
+		const button = container.querySelector('button');
+
+		expect(button?.querySelector('.pill-lap')).toBeNull();
+	});
+
+	it('should replay the border laps when the pointer enters', async () => {
+		const { container } = render(PillButton, {
+			props: { children: createTextSnippet('Test'), accent: true }
+		});
+
+		const button = container.querySelector('button');
+
+		assertNonNullish(button);
+
+		const firstLap = button.querySelector('.pill-lap');
+
+		await fireEvent.pointerEnter(button, { pointerType: 'mouse' });
+
+		const replayedLap = button.querySelector('.pill-lap');
+
+		expect(replayedLap).not.toBeNull();
+		expect(replayedLap).not.toBe(firstLap);
+	});
+
+	it('should not restart the border laps while they are running', async () => {
+		const { container } = render(PillButton, {
+			props: { children: createTextSnippet('Test'), accent: true }
+		});
+
+		const button = container.querySelector('button');
+
+		assertNonNullish(button);
+
+		const runningLap = button.querySelector('.pill-lap');
+
+		assertNonNullish(runningLap);
+
+		await fireEvent.animationStart(runningLap);
+		await fireEvent.pointerEnter(button, { pointerType: 'mouse' });
+
+		expect(button.querySelector('.pill-lap')).toBe(runningLap);
+
+		await fireEvent.animationEnd(runningLap);
+		await fireEvent.pointerEnter(button, { pointerType: 'mouse' });
+
+		expect(button.querySelector('.pill-lap')).not.toBe(runningLap);
+	});
+
+	it('should replay the border laps after the pill is selected mid-run and deselected', async () => {
+		const { container, rerender } = render(PillButton, {
+			props: { children: createTextSnippet('Test'), accent: true }
+		});
+
+		const button = container.querySelector('button');
+
+		assertNonNullish(button);
+
+		const runningLap = button.querySelector('.pill-lap');
+
+		assertNonNullish(runningLap);
+
+		await fireEvent.animationStart(runningLap);
+
+		await rerender({ selected: true });
+
+		expect(button.querySelector('.pill-lap')).toBeNull();
+
+		await rerender({ selected: false });
+
+		const lapAfterDeselect = button.querySelector('.pill-lap');
+
+		await fireEvent.pointerEnter(button, { pointerType: 'mouse' });
+
+		expect(button.querySelector('.pill-lap')).not.toBe(lapAfterDeselect);
+	});
+
+	it('should not replay the border laps on touch', async () => {
+		const { container } = render(PillButton, {
+			props: { children: createTextSnippet('Test'), accent: true }
+		});
+
+		const button = container.querySelector('button');
+
+		assertNonNullish(button);
+
+		const firstLap = button.querySelector('.pill-lap');
+
+		await fireEvent.pointerEnter(button, { pointerType: 'touch' });
+
+		expect(button.querySelector('.pill-lap')).toBe(firstLap);
+	});
+
+	describe('when the pill mounts out of view', () => {
+		let reportVisible: (isIntersecting: boolean) => void;
+		const disconnect = vi.fn();
+
+		beforeEach(() => {
+			disconnect.mockClear();
+
+			vi.stubGlobal(
+				'IntersectionObserver',
+				class {
+					constructor(callback: IntersectionObserverCallback) {
+						reportVisible = (isIntersecting) =>
+							callback(
+								[{ isIntersecting } as IntersectionObserverEntry],
+								this as unknown as IntersectionObserver
+							);
+					}
+					observe = () => reportVisible(false);
+					disconnect = disconnect;
+				}
+			);
+		});
+
+		afterEach(() => {
+			vi.unstubAllGlobals();
+		});
+
+		it('should wait until the pill is in view to run the border laps', async () => {
+			const { container } = render(PillButton, {
+				props: { children: createTextSnippet('Test'), accent: true }
+			});
+
+			const button = container.querySelector('button');
+
+			expect(button?.querySelector('.pill-lap')).toBeNull();
+
+			reportVisible(true);
+			await tick();
+
+			expect(button?.querySelector('.pill-lap')).not.toBeNull();
+			expect(disconnect).toHaveBeenCalled();
+		});
 	});
 
 	it('should call onclick handler when clicked', async () => {

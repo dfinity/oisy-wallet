@@ -39,14 +39,14 @@ describe('infura-erc4626.providers', () => {
 		});
 
 		it('should initialise the provider with the correct network and API key', () => {
-			const provider = new InfuraErc4626Provider(infura);
+			const provider = new InfuraErc4626Provider(ETHEREUM_NETWORK);
 
 			expect(provider).toBeDefined();
 			expect(InfuraProviderLib).toHaveBeenCalledWith(infura, 'test-api-key');
 		});
 
 		it('should be an instance of InfuraErc20Provider', () => {
-			const provider = new InfuraErc4626Provider(infura);
+			const provider = new InfuraErc4626Provider(ETHEREUM_NETWORK);
 
 			expect(provider).toBeInstanceOf(InfuraErc4626Provider);
 		});
@@ -67,7 +67,7 @@ describe('infura-erc4626.providers', () => {
 			});
 
 			it('should return true when contract implements ERC4626', async () => {
-				const provider = new InfuraErc4626Provider(infura);
+				const provider = new InfuraErc4626Provider(ETHEREUM_NETWORK);
 
 				const result = await provider.isInterfaceErc4626(contractAddress);
 
@@ -77,7 +77,7 @@ describe('infura-erc4626.providers', () => {
 			it('should return false when asset() returns nullish', async () => {
 				mockAsset.mockResolvedValue(null);
 
-				const provider = new InfuraErc4626Provider(infura);
+				const provider = new InfuraErc4626Provider(ETHEREUM_NETWORK);
 
 				const result = await provider.isInterfaceErc4626(contractAddress);
 
@@ -87,7 +87,7 @@ describe('infura-erc4626.providers', () => {
 			it('should return false when totalAssets() returns nullish', async () => {
 				mockTotalAssets.mockResolvedValue(null);
 
-				const provider = new InfuraErc4626Provider(infura);
+				const provider = new InfuraErc4626Provider(ETHEREUM_NETWORK);
 
 				const result = await provider.isInterfaceErc4626(contractAddress);
 
@@ -97,7 +97,7 @@ describe('infura-erc4626.providers', () => {
 			it('should return false when contract call throws', async () => {
 				mockAsset.mockRejectedValue(new Error('Not ERC4626'));
 
-				const provider = new InfuraErc4626Provider(infura);
+				const provider = new InfuraErc4626Provider(ETHEREUM_NETWORK);
 
 				const result = await provider.isInterfaceErc4626(contractAddress);
 
@@ -105,7 +105,7 @@ describe('infura-erc4626.providers', () => {
 			});
 
 			it('should create contract with ERC4626 ABI', async () => {
-				const provider = new InfuraErc4626Provider(infura);
+				const provider = new InfuraErc4626Provider(ETHEREUM_NETWORK);
 
 				await provider.isInterfaceErc4626(contractAddress);
 
@@ -131,7 +131,7 @@ describe('infura-erc4626.providers', () => {
 			});
 
 			it('should return the asset address', async () => {
-				const provider = new InfuraErc4626Provider(infura);
+				const provider = new InfuraErc4626Provider(ETHEREUM_NETWORK);
 
 				const result = await provider.getAssetAddress(contractAddress);
 
@@ -139,7 +139,7 @@ describe('infura-erc4626.providers', () => {
 			});
 
 			it('should call the asset method of the contract', async () => {
-				const provider = new InfuraErc4626Provider(infura);
+				const provider = new InfuraErc4626Provider(ETHEREUM_NETWORK);
 
 				await provider.getAssetAddress(contractAddress);
 
@@ -157,7 +157,7 @@ describe('infura-erc4626.providers', () => {
 				const errorMessage = 'Error fetching asset address';
 				mockAsset.mockRejectedValue(new Error(errorMessage));
 
-				const provider = new InfuraErc4626Provider(infura);
+				const provider = new InfuraErc4626Provider(ETHEREUM_NETWORK);
 
 				await expect(provider.getAssetAddress(contractAddress)).rejects.toThrow(errorMessage);
 			});
@@ -178,7 +178,7 @@ describe('infura-erc4626.providers', () => {
 			});
 
 			it('should return the converted assets amount', async () => {
-				const provider = new InfuraErc4626Provider(infura);
+				const provider = new InfuraErc4626Provider(ETHEREUM_NETWORK);
 
 				const result = await provider.convertToAssets({
 					contract: contractAddress,
@@ -189,7 +189,7 @@ describe('infura-erc4626.providers', () => {
 			});
 
 			it('should call convertToAssets on the contract with the correct shares', async () => {
-				const provider = new InfuraErc4626Provider(infura);
+				const provider = new InfuraErc4626Provider(ETHEREUM_NETWORK);
 
 				await provider.convertToAssets({ contract: contractAddress, shares: mockShares });
 
@@ -208,7 +208,7 @@ describe('infura-erc4626.providers', () => {
 				const errorMessage = 'Error converting to assets';
 				mockConvertToAssets.mockRejectedValue(new Error(errorMessage));
 
-				const provider = new InfuraErc4626Provider(infura);
+				const provider = new InfuraErc4626Provider(ETHEREUM_NETWORK);
 
 				await expect(
 					provider.convertToAssets({ contract: contractAddress, shares: mockShares })

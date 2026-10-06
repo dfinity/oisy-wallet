@@ -3,8 +3,10 @@ import type { FeeStoreData } from '$eth/stores/eth-fee.store';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { SendParams } from '$eth/types/send';
 import {
+	getSendParamsGas,
 	getSignParamsMessageHex,
-	getSignParamsMessageTypedDataV4Hash
+	getSignParamsMessageTypedDataV4Hash,
+	isEthSignTypedDataMethod
 } from '$eth/utils/wallet-connect.utils';
 import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
@@ -26,7 +28,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 type WalletConnectSendParams = WalletConnectExecuteParams & {
@@ -153,7 +155,7 @@ export const send = ({
 					amount,
 					maxFeePerGas,
 					maxPriorityFeePerGas,
-					gas: nonNullish(gasWC) ? BigInt(gasWC) : gas,
+					gas: getSendParamsGas(gasWC) ?? gas,
 					data,
 					identity,
 					minterInfo,
@@ -218,24 +220,31 @@ export const signMessage = ({
 				const sign = (params: string[]): Promise<string> => {
 					const { identity } = get(authStore);
 
-					try {
-						const hash = getSignParamsMessageTypedDataV4Hash(params);
+					// The signature scheme is decided by the requested method alone. A
+					// payload that parses as EIP-712 must not turn `personal_sign` /
+					// `eth_sign` into a typed-data signature: the user approves those as
+					// plain messages, and an EIP-712 signature over them would be an
+					// executable authorization (e.g. an ERC-2612 permit) they never saw.
+					if (isEthSignTypedDataMethod(request.params.request.method)) {
+						// Typed-data methods reject on any parse/validate/hash failure, never
+						// downgrading to a raw message signature.
 						return signPrehash({
-							hash,
-							identity,
-							nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-						});
-					} catch (_err: unknown) {
-						// If the above failed, it's because JSON.parse throw an exception.
-						// We are assuming that it did so because it tried to parse a string that does not represent an object.
-						// Therefore, we continue with a message as hex string.
-						const message = getSignParamsMessageHex(params);
-						return signMessageApi({
-							message,
+							hash: getSignParamsMessageTypedDataV4Hash({
+								params,
+								// The chain the dApp connected under. Hashing refuses a domain on any
+								// other, so a session cannot reach past the network it was granted.
+								sessionChainId: request.params.chainId
+							}),
 							identity,
 							nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 						});
 					}
+
+					return signMessageApi({
+						message: getSignParamsMessageHex(params),
+						identity,
+						nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+					});
 				};
 
 				const signedMessage = await sign(params);
