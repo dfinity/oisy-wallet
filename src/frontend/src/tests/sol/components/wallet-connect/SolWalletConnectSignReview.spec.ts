@@ -325,6 +325,48 @@ describe('SolWalletConnectSignReview', () => {
 		expect(queryByTestId('ata-fee')).not.toBeInTheDocument();
 	});
 
+	// The rent sits in an account the application controls, so it is stated apart from the rent of
+	// the user's own token accounts.
+	it('should state what opening an application’s account costs as its own line', () => {
+		const { getByTestId } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{
+						kind: 'route' as const,
+						program: 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo',
+						children: [
+							{
+								kind: 'createAccount' as const,
+								account: 'BNzxjYNsUyyUyJgds2qYqtpThcd6FPnucFKXfWGzweDK',
+								program: 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo',
+								rent: 41_899_840n
+							}
+						]
+					},
+					{ kind: 'createTokenAccount' as const, account: 'ata-one', rent: 2_039_280n }
+				]
+			}
+		});
+
+		expect(getByTestId('app-account-fee')).toHaveTextContent(en.fee.text.app_account_kind);
+		expect(getByTestId('app-account-fee')).toHaveTextContent('0.04189984');
+		expect(getByTestId('ata-fee')).toHaveTextContent('0.00203928');
+	});
+
+	it('should state no application account cost when the message opens none', () => {
+		const { queryByTestId } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{ kind: 'createTokenAccount' as const, account: 'ata-one', rent: 2_039_280n }
+				]
+			}
+		});
+
+		expect(queryByTestId('app-account-fee')).not.toBeInTheDocument();
+	});
+
 	it('should charge no rent when the message opens no account', () => {
 		const { queryByTestId } = render(SolWalletConnectSignReview, {
 			props: { ...props, instructions: [{ kind: 'send' as const, amount: 1n }] }

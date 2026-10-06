@@ -1709,7 +1709,8 @@
 			"prioritization_fee": "",
 			"base_kind": "",
 			"prioritization_kind": "",
-			"ata_kind": ""
+			"ata_kind": "",
+			"app_account_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Niewystarczające saldo na pokrycie opłat."

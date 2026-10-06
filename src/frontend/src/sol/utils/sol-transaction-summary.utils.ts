@@ -310,6 +310,23 @@ export const solAtaFee = ({
 };
 
 /**
+ * What the transaction pays from the wallet to open accounts for applications: the rent of each.
+ *
+ * Kept apart from the rent of token accounts. A token account stays under the user's control, and
+ * closing it hands its rent back to them. An application's account is the application's, and
+ * whether its rent ever comes back is for the application's code to decide, so nothing nets it.
+ */
+export const solAppAccountCost = ({
+	instructions
+}: {
+	instructions: SolInstructionSummary[];
+}): bigint =>
+	flattenInstructions(instructions).reduce(
+		(acc, { kind, rent }) => (kind === 'createAccount' && nonNullish(rent) ? acc + rent : acc),
+		ZERO
+	);
+
+/**
  * The tokens the transaction actually trades, read from its legs.
  *
  * `undefined` in the set stands for native SOL. SOL makes the set only through a transfer or a

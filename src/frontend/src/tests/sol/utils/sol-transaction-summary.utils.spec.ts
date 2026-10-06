@@ -10,6 +10,7 @@ import {
 	deriveSolTransactionSummary,
 	formatSolInstructionSummary,
 	formatSolTransactionSummary,
+	solAppAccountCost,
 	solAtaFee,
 	solClosesPayOthers
 } from '$sol/utils/sol-transaction-summary.utils';
@@ -393,6 +394,40 @@ describe('sol-transaction-summary.utils', () => {
 					userAddress: mockSolAddress
 				})
 			).toBeFalsy();
+		});
+	});
+
+	describe('solAppAccountCost', () => {
+		const opening = (rent: bigint): SolInstructionSummary => ({
+			kind: 'createAccount',
+			account: mockAtaAddress,
+			program: mockSolAddress3,
+			rent
+		});
+
+		// The opening sits under the instruction that made it, like every line of an instruction
+		// the wallet cannot read.
+		it('should add up the rent of every account opened for an application', () => {
+			expect(
+				solAppAccountCost({
+					instructions: [
+						{ kind: 'route', program: mockSolAddress3, children: [opening(41_899_840n)] },
+						opening(1_000_000n)
+					]
+				})
+			).toBe(42_899_840n);
+		});
+
+		it('should leave the rent of a token account to the account rent', () => {
+			expect(
+				solAppAccountCost({
+					instructions: [{ kind: 'createTokenAccount', account: mockAtaAddress, rent: 2_039_280n }]
+				})
+			).toBe(ZERO);
+		});
+
+		it('should cost nothing when no application account is opened', () => {
+			expect(solAppAccountCost({ instructions: [] })).toBe(ZERO);
 		});
 	});
 

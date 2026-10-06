@@ -37,6 +37,7 @@
 	import {
 		flattenInstructions,
 		formatSolTransactionSummary,
+		solAppAccountCost,
 		solAtaFee
 	} from '$sol/utils/sol-transaction-summary.utils';
 
@@ -113,6 +114,11 @@
 	// it closes hand back. Charged like a fee and part of neither the base nor the bid, so it is
 	// stated as its own line rather than folded into either.
 	let ataFee = $derived(solAtaFee({ instructions: instructions ?? [], userAddress: source }));
+
+	// What the message pays to open accounts for applications. A line of its own rather than part of
+	// the rent above: the user can always close a token account and get its rent back, while an
+	// application's account returns its rent only if the application chooses to.
+	let appAccountCost = $derived(solAppAccountCost({ instructions: instructions ?? [] }));
 
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
@@ -428,6 +434,15 @@
 						{#if ataFee > ZERO}
 							<div data-tid="ata-fee">
 								{@render feeValue({ kind: $i18n.fee.text.ata_kind, feeAmount: ataFee })}
+							</div>
+						{/if}
+
+						{#if appAccountCost > ZERO}
+							<div data-tid="app-account-fee">
+								{@render feeValue({
+									kind: $i18n.fee.text.app_account_kind,
+									feeAmount: appAccountCost
+								})}
 							</div>
 						{/if}
 					</div>
