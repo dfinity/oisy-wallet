@@ -136,15 +136,13 @@ That includes an amount range (a bucket, as `docs/ai/frontend/analytics.md` §6 
 
 ## 11. Implementation plan
 
-Two PRs (§12, D7), each in granular commits:
+Five PRs (§12, D7), each in granular commits:
 
-1. **#14217, `feat(frontend): add a cycles-ledger top-up service and label top-ups in TCYCLES activity`**, with no UI for topping up:
-   1. `docs(ai):` this spec.
-   2. The cycles-ledger bindings (§7.1, approved in D3).
-   3. The wrapper and the top-up service, mapping each `withdraw` answer to §5.4, and the canister existence check (§5.1.2, §7.3), with unit tests.
-   4. The Top up and Top-up refund labels in TCYCLES Activity (§5.5), in every shipped locale, with tests and PRODUCT.md.
-   5. Tests pinning burns out of Recently used (§6), and the PRODUCT.md sentence that burns never count.
-2. **`feat(frontend): top up a canister with TCYCLES`**, stacked on #14217: the flag, the fuel pump icon, the button, the modal, Recently topped up, analytics, every shipped locale, component tests and PRODUCT.md.
+1. **#14217, `docs(ai): add spec for topping up a canister with TCYCLES`**: this spec.
+2. **Cycles-ledger client**: the bindings (§7.1, approved in D3), the `withdraw` wrapper, the top-up service mapping each `withdraw` answer to §5.4, and the canister existence check (§5.1.2, §7.3), with unit tests.
+3. **Activity labels and burns**: the Top up and Top-up refund labels in TCYCLES Activity (§5.5), and the tests pinning burns out of Recently used (§6).
+4. **UI**: the flag, the fuel pump icon, the button, the modal, Recently topped up and analytics, in English, with component tests.
+5. **Translations and PRODUCT.md**: every shipped locale, and the PRODUCT.md entries for Top up, its Activity labels and the rule that burns never count.
 
 The modal is mostly translated copy, so expect pressure on `compare-sizes`; the precedent is a maintainer override. Every new component and derived store ships with tests (`test-coverage` gate). Staging talks to the mainnet cycles ledger, so verifying a top-up there spends real TCYCLES; a small amount suffices.
 
@@ -166,7 +164,7 @@ None.
 - **D4 Rollout:** as for Mint, a flag that is on for local and staging builds until a real top-up on staging is verified, then on everywhere and kept as a kill switch (§4.4).
 - **D5 Icon:** a fuel pump (§4.1), decided on 2026-10-06 from three candidates drawn in the hero row at phone width, in both themes. Cycles are what a canister runs on, and a top-up refuels it. The pump has the same visual weight as its neighbours (Receive's QR code, Send's paper plane, Swap's arrows, Mint's pickaxe) and looks like none of them. The rejected candidates were a charging battery, which is wide and short and so reads smaller than its neighbours, and a bolt in a circle, which in a multi-chain wallet can suggest an instant payment or Bitcoin's Lightning Network.
 - **D6 No amounts in analytics, not even as a range:** decided on 2026-10-06 (§8). Amount ranges stay a separate change, introduced together with an event that can use them without singling out a transaction.
-- **D7 Two PRs:** decided on 2026-10-06 (§11). The first, #14217, carries the spec and everything without UI, so the spec lands with the first code that uses it; the Top up flow follows in a PR stacked on it.
+- **D7 Five PRs:** decided on 2026-10-06 (§11). PR1, #14217, is this spec on its own; the implementation follows in four PRs.
 - **Q1 Existence check:** verified on 2026-10-06 on mainnet, with the agent version OISY pins (§5.1.2, §7.3).
   - The cycles ledger (`um5iw-rqaaa-aaaaq-qaaba-cai`, with code): `controllers` and `module_hash` are both found.
   - Two canisters without code (`2223e-iaaaa-aaaac-awyra-cai`, `2223u-yaaaa-aaaal-qutrq-cai`): `controllers` is found and `module_hash` is absent, so `module_hash` cannot tell whether a canister exists.
