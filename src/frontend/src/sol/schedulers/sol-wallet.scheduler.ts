@@ -41,6 +41,10 @@ interface LoadSolWalletParams {
 
 interface SolWalletStore {
 	balances: SolNetworkBalances | undefined;
+	// Whether a message with the history has been posted. The balances posted on their own leave every
+	// transaction list unset, so the first head check that succeeds posts, even when it brings nothing
+	// new.
+	historyPosted: boolean;
 	// The newest slot the head check has resolved, and the signatures it has resolved at that slot and
 	// at the slot each catch-up walk ends on. Only a signature above that slot, or in it and not
 	// resolved yet, is new, unless a catch-up walk that began below it returns it: anything older
@@ -85,6 +89,7 @@ interface SolWalletHead {
 
 const initialStore = (): SolWalletStore => ({
 	balances: undefined,
+	historyPosted: false,
 	newestSlot: undefined,
 	signatures: new Map(),
 	catchUp: []
@@ -435,6 +440,8 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 	}): { hasChanges: boolean } => {
 		const newBalances = this.hasNewBalances(balances);
 
+		const { historyPosted } = this.store;
+
 		const newestSlot = signatures.reduce<SolSignature['slot'] | undefined>(
 			(acc, { slot }) => (isNullish(acc) || slot > acc ? slot : acc),
 			this.store.newestSlot
@@ -445,6 +452,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 
 		this.store = {
 			balances,
+			historyPosted: true,
 			newestSlot,
 			signatures: new Map(
 				[
@@ -455,7 +463,9 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 			catchUp
 		};
 
-		return { hasChanges: newBalances || transactions.length > 0 || unreadable.length > 0 };
+		return {
+			hasChanges: newBalances || !historyPosted || transactions.length > 0 || unreadable.length > 0
+		};
 	};
 
 	private postMessageWallet(data: SolPostMessageDataResponseWallet) {

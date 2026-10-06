@@ -1057,6 +1057,24 @@ describe('sol-wallet.scheduler', () => {
 			expect(posts[0].data.wallet.transactionsUnavailable).toBeUndefined();
 		});
 
+		// The balances posted on their own leave every transaction list unset, and only a message with
+		// the history sets them.
+		it('should post the history once it loads, even with no transaction and the same balances', async () => {
+			vi.mocked(getSolSignatures).mockRejectedValue(new Error('Too many requests'));
+
+			await scheduler.trigger(data);
+
+			mockPage([]);
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(posts[0].data.wallet).toEqual({ balances: mockBalances, newTransactions: '[]' });
+		});
+
 		it('should still fail the tick when the balances fail too', async () => {
 			vi.mocked(loadSolNetworkBalances).mockRejectedValue(new Error('Failed to fetch'));
 
