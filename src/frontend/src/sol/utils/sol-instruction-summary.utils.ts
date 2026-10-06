@@ -4,6 +4,8 @@ import { maxBigInt } from '$lib/utils/bigint.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import {
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
+	SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES,
+	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
@@ -349,6 +351,21 @@ const transferEffect = ({
 };
 
 /**
+ * What an account of this size must hold to be exempt from rent, scaled from what the chain charges
+ * an account of the usual token account size: rent is a price per byte, the account's fixed header
+ * included, so the two sizes cost in proportion.
+ */
+const rentExemptMinimumFor = ({
+	space,
+	rentExemptMinimum
+}: {
+	space: bigint;
+	rentExemptMinimum: bigint;
+}): bigint =>
+	(rentExemptMinimum * (SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES + space)) /
+	(SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES + ATA_SIZE);
+
+/**
  * One instruction reduced to the effect it has on the user, or nothing when it has none.
  *
  * `rent` is not read here: the lamports an associated token account costs are stated by the System
@@ -440,6 +457,46 @@ const toEffect = ({
 		}
 
 		return { kind: 'createTokenAccount', account, ...(nonNullish(mint) && { tokenAddress: mint }) };
+	}
+
+	// An account opened for a program other than the token programs, with rent from the user's
+	// wallet: a liquidity position, an order book's open orders. The rent leaves the wallet as surely
+	// as a send does, and an application opening its own account inside its instruction may have no
+	// other line to show for it - without this one, the instruction read as one nothing described.
+	//
+	// At any level: the associated token account program opens its accounts the same way, but for
+	// the token program, and those are read as the token accounts they become. Both spellings, since
+	// a run reports the call as the RPC parses it and a message carries it as the wallet decodes it.
+	//
+	// Rent and nothing above it. Lamports beyond what the account's size costs are a balance in an
+	// account the program controls, a payment that "rent" would understate, and stay unstated.
+	if (program === 'system' && type === 'createAccount') {
+		const owner = address({ info, key: 'owner' }) ?? address({ info, key: 'programAddress' });
+
+		if (
+			nonNullish(owner) &&
+			owner !== TOKEN_PROGRAM_ADDRESS &&
+			owner !== TOKEN_2022_PROGRAM_ADDRESS
+		) {
+			const source = address({ info, key: 'source' }) ?? address({ info, key: 'payer' });
+			const account = address({ info, key: 'newAccount' });
+			const lamports = amount({ info, key: 'lamports' });
+			const space = amount({ info, key: 'space' });
+
+			const reserve =
+				nonNullish(space) && nonNullish(rentExemptMinimum)
+					? rentExemptMinimumFor({ space, rentExemptMinimum })
+					: undefined;
+
+			return nonNullish(source) &&
+				isOwned({ account: source }) &&
+				nonNullish(account) &&
+				nonNullish(lamports) &&
+				nonNullish(reserve) &&
+				lamports <= reserve
+				? { kind: 'createAccount', account, program: owner, rent: lamports }
+				: undefined;
+		}
 	}
 
 	// An account the message opens for the token program, read as the token account it is about to

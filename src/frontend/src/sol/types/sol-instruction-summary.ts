@@ -16,6 +16,9 @@ export type SolInstructionSummaryKind =
 	| 'wrap'
 	| 'unwrap'
 	| 'createTokenAccount'
+	// An account opened for an application's own program, its rent paid by the user. The account is
+	// the program's, and the rent is what the user hands over to open it.
+	| 'createAccount'
 	| 'closeTokenAccount'
 	| 'approve'
 	| 'revoke'
@@ -76,7 +79,8 @@ export interface SolInstructionSummary {
 	ownAccount?: boolean;
 	// The new authority of a `setAuthority`, absent when the field was cleared.
 	newAuthority?: SolAddress;
-	// The program that produced the legs of a route, when one is known by address.
+	// The program that produced the legs of a route, or that an account is opened for, when one is
+	// known by address.
 	program?: SolAddress;
 	// The name that program publishes for itself, when it publishes one. Its own claim about
 	// itself, attested by nobody: a label for the address, never a statement about what it does.

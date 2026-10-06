@@ -22,6 +22,7 @@ import {
 	mockAtaAddress3,
 	mockSolAddress,
 	mockSolAddress2,
+	mockSolAddress3,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { nonNullish } from '@dfinity/utils';
@@ -999,6 +1000,18 @@ describe('sol-transaction-summary.utils', () => {
 					counterparty: mockSolAddress
 				})
 			).toBe('0.00203928 SOL returned to your wallet');
+		});
+
+		// The program the account is opened for is rendered after the line.
+		it('should state the rent an account opened for an application costs', () => {
+			expect(
+				format({
+					kind: 'createAccount',
+					account: mockSolAddress2,
+					program: mockSolAddress3,
+					rent: 41_899_840n
+				})
+			).toStrictEqual({ text: 'Pay 0.04189984 SOL rent to create an account for' });
 		});
 	});
 });

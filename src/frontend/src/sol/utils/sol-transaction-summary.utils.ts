@@ -660,6 +660,20 @@ export const formatSolInstructionSummary = ({
 		};
 	}
 
+	// The program the account is opened for is rendered beside the line, and is what names it: the
+	// account's own address is one nobody recognises.
+	if (kind === 'createAccount' && nonNullish(rent)) {
+		return {
+			text: replacePlaceholders(i18n.transaction.text.instruction_create_program_account, {
+				$amount: formatToken({
+					value: rent,
+					unitName: SOLANA_DEFAULT_DECIMALS,
+					displayDecimals: SOLANA_DEFAULT_DECIMALS
+				})
+			})
+		};
+	}
+
 	// The mint names the account the line is about, the way the opening line already does. It is
 	// left out when nobody read it: `symbolOf` answers an unknown mint with the native symbol,
 	// which would name a token account after SOL.
