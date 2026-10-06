@@ -1013,5 +1013,40 @@ describe('sol-transaction-summary.utils', () => {
 				})
 			).toStrictEqual({ text: 'Pay 0.04189984 SOL rent to create an account for' });
 		});
+
+		describe('a group of legs', () => {
+			const send: SolInstructionSummary = {
+				kind: 'send',
+				amount: 1_000_000n,
+				tokenAddress: mockSplAddress,
+				counterparty: mockSolAddress2
+			};
+			const receive: SolInstructionSummary = { ...send, kind: 'receive' };
+
+			it('should call legs going both ways a swap route', () => {
+				expect(textOf({ kind: 'route', program: mockSolAddress3, children: [send, receive] })).toBe(
+					en.transaction.text.instruction_route
+				);
+			});
+
+			// Something leaving and nothing arriving is what a deposit looks like too.
+			it('should not call legs that all leave a swap', () => {
+				expect(textOf({ kind: 'route', program: mockSolAddress3, children: [send, send] })).toBe(
+					en.transaction.text.instruction_unknown_via
+				);
+			});
+
+			it('should not call legs that all arrive a swap', () => {
+				expect(
+					textOf({ kind: 'route', program: mockSolAddress3, children: [receive, receive] })
+				).toBe(en.transaction.text.instruction_unknown_via);
+			});
+
+			it('should say so without a program when none is known', () => {
+				expect(textOf({ kind: 'route', children: [send, send] })).toBe(
+					en.transaction.text.instruction_unknown
+				);
+			});
+		});
 	});
 });

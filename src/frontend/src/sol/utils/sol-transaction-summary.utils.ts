@@ -546,7 +546,8 @@ export const formatSolInstructionSummary = ({
 		returned,
 		wrapped,
 		ownAccount,
-		program
+		program,
+		children
 	},
 	i18n,
 	symbolOf,
@@ -724,9 +725,22 @@ export const formatSolInstructionSummary = ({
 		};
 	}
 
+	// A swap is something leaving and something else arriving. Legs that all leave, or all arrive,
+	// are what a deposit or a withdrawal looks like too, made by a program the wallet cannot read,
+	// so the group says that instead, with the legs beneath it.
 	if (kind === 'route') {
+		const legs = children ?? [];
+
+		const oneWay =
+			legs.every(({ kind: leg }) => leg === 'send') ||
+			legs.every(({ kind: leg }) => leg === 'receive');
+
 		return {
-			text: i18n.transaction.text.instruction_route
+			text: !oneWay
+				? i18n.transaction.text.instruction_route
+				: nonNullish(program)
+					? i18n.transaction.text.instruction_unknown_via
+					: i18n.transaction.text.instruction_unknown
 		};
 	}
 

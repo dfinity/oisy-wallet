@@ -127,4 +127,27 @@ describe('SolInstructionsList', () => {
 			'Pay 0.04189984 SOL rent to create an account for lb_clmm'
 		);
 	});
+
+	it('should not call sends that all leave a swap', () => {
+		const { getByTestId } = render(SolInstructionsList, {
+			props: {
+				instructions: [
+					{
+						kind: 'route',
+						program: mockSolAddress3,
+						children: [send(mockSplAddress), send(mockSplAddress)]
+					}
+				],
+				token: SOLANA_TOKEN,
+				userAddress: mockSolAddress
+			}
+		});
+
+		expect(getByTestId('sol-instructions-list')).toHaveTextContent(
+			en.transaction.text.instruction_unknown_via
+		);
+		expect(getByTestId('sol-instructions-list')).not.toHaveTextContent(
+			en.transaction.text.instruction_route
+		);
+	});
 });
