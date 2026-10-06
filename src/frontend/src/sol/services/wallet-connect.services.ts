@@ -19,8 +19,13 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { estimatePriorityFee, getAccountInfo, getSolCreateAccountFee } from '$sol/api/solana.api';
-import { TOKEN_2022_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import {
+	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
+	TOKEN_2022_PROGRAM_ADDRESS,
+	TOKEN_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
@@ -110,14 +115,18 @@ export const decode = async ({
 
 	// What the chain charges a token account to exist, which every account creation in the message
 	// is held to: anything funded above it is a payment rather than rent. Read alongside the message
-	// so the review waits no longer for it. Best effort - without it a creation for a program has no
-	// line to be held to and is refused.
+	// so the review waits no longer for it, and given up on after the simulation's timeout so an RPC
+	// that never answers cannot hold the review either. Best effort - without it a creation for a
+	// program has no line to be held to and is refused.
 	const [parsedTransactionMessage, rentExemptMinimum] = await Promise.all([
 		parseSolBase64TransactionMessage({
 			transactionMessage: base64EncodedTransactionMessage,
 			rpc: solanaHttpRpc(solNetwork)
 		}),
-		getSolCreateAccountFee(solNetwork).catch(() => undefined)
+		Promise.race([
+			getSolCreateAccountFee(solNetwork),
+			waitForMilliseconds(SOLANA_SIMULATION_TIMEOUT_MILLISECONDS).then(() => undefined)
+		]).catch(() => undefined)
 	]);
 
 	const mappedTransaction = mapSolTransactionMessage({

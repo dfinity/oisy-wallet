@@ -12,6 +12,7 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { estimatePriorityFee, getAccountInfo, getSolCreateAccountFee } from '$sol/api/solana.api';
+import { SOLANA_SIMULATION_TIMEOUT_MILLISECONDS } from '$sol/constants/sol.constants';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_MESSAGE,
@@ -314,6 +315,10 @@ describe('wallet-connect.services', () => {
 			const base64EncodedTransactionMessage = 'mockBase64Transaction';
 			const networkId = SOLANA_MAINNET_NETWORK_ID;
 
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
 			it('should hold the message to the reserve the chain charges and hand it on', async () => {
 				const result = await decode({
 					base64EncodedTransactionMessage,
@@ -352,6 +357,31 @@ describe('wallet-connect.services', () => {
 				expect(simulateSolTransaction).toHaveBeenCalledExactlyOnceWith(
 					expect.objectContaining({ rentExemptMinimum: undefined })
 				);
+				expect(result).not.toHaveProperty('rentExemptMinimum');
+			});
+
+			// An RPC that never answers is given up on after the simulation's timeout, so it cannot leave
+			// the review unapprovable.
+			it('should decode without a reserve when the chain does not answer in time', async () => {
+				vi.useFakeTimers();
+
+				vi.mocked(getSolCreateAccountFee).mockReturnValueOnce(new Promise(() => undefined));
+
+				const pending = decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				await vi.advanceTimersByTimeAsync(SOLANA_SIMULATION_TIMEOUT_MILLISECONDS);
+
+				const result = await pending;
+
+				expect(mapSolTransactionMessage).toHaveBeenCalledExactlyOnceWith({
+					transactionMessage: mockParsedTransaction,
+					userAddress: mockSolAddress,
+					rentExemptMinimum: undefined
+				});
 				expect(result).not.toHaveProperty('rentExemptMinimum');
 			});
 		});
