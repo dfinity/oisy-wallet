@@ -127,6 +127,8 @@
 			return;
 		}
 
+		const resent = nonNullish(unanswered) && resendsUnanswered;
+
 		const request: TopUpRequest =
 			nonNullish(unanswered) && resendsUnanswered
 				? unanswered
@@ -142,12 +144,20 @@
 
 		progressStep = ProgressStepsCyclesTopUp.TOP_UP;
 
-		const result = await topUpCanister({
+		const answer = await topUpCanister({
 			identity: $authIdentity,
 			canisterId: principal,
 			amount: request.amount,
 			createdAt: request.createdAt
 		});
+
+		// A resend past the ledger's 24-hour window is refused as too old whatever happened to the
+		// first call, which may have gone through: its outcome stays unknown, and Top up keeps
+		// resending that same request rather than starting a fresh one.
+		const result: CyclesTopUpResult =
+			resent && answer.status === 'refused' && answer.refusal === 'too_old'
+				? { status: 'unknown' }
+				: answer;
 
 		if (result.status === 'topped_up') {
 			unanswered = undefined;
