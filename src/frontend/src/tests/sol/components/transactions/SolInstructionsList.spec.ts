@@ -1,4 +1,5 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import SolInstructionsList from '$sol/components/transactions/SolInstructionsList.svelte';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
@@ -126,6 +127,66 @@ describe('SolInstructionsList', () => {
 		expect(getByTestId('sol-instructions-list')).toHaveTextContent(
 			/^Create app account for lb_clmm .+ · rent 0\.04189984 SOL$/
 		);
+	});
+
+	describe('an account opened under the heading of an instruction', () => {
+		const opening: SolInstructionSummary = {
+			kind: 'createAccount',
+			account: mockSolAddress2,
+			program: mockSolAddress3,
+			programName: 'lb_clmm',
+			rent: 41_899_840n
+		};
+
+		const render$ = (heading: SolInstructionSummary) =>
+			render(SolInstructionsList, {
+				props: {
+					instructions: [heading],
+					token: SOLANA_TOKEN,
+					userAddress: mockSolAddress
+				}
+			});
+
+		// The heading right above shows the address with its controls, so the line keeps the
+		// name alone and reads like the opening of a token account.
+		it('should name the program without repeating its address', () => {
+			const { getAllByTestId, getAllByText } = render$({
+				kind: 'route',
+				program: mockSolAddress3,
+				programName: 'lb_clmm',
+				children: [opening]
+			});
+
+			const [, line] = getAllByTestId('sol-instruction');
+
+			expect(line).toHaveTextContent(/^Create app account for lb_clmm · rent 0\.04189984 SOL$/);
+			expect(getAllByText(shortenWithMiddleEllipsis({ text: mockSolAddress3 }))).toHaveLength(1);
+		});
+
+		it('should name it by its address when it publishes no name', () => {
+			const { getAllByTestId } = render$({
+				kind: 'route',
+				program: mockSolAddress3,
+				children: [{ ...opening, programName: undefined }]
+			});
+
+			const [, line] = getAllByTestId('sol-instruction');
+
+			expect(line).toHaveTextContent(
+				`Create app account for ${shortenWithMiddleEllipsis({ text: mockSolAddress3 })} · rent 0.04189984 SOL`
+			);
+		});
+
+		it('should keep the address of a program other than the heading’s', () => {
+			const { getAllByText } = render$({
+				kind: 'route',
+				program: mockSolAddress,
+				children: [opening]
+			});
+
+			expect(getAllByText(shortenWithMiddleEllipsis({ text: mockSolAddress3 }))).toHaveLength(1);
+			expect(getAllByText(shortenWithMiddleEllipsis({ text: mockSolAddress }))).toHaveLength(1);
+		});
 	});
 
 	it('should not call sends that all leave a swap', () => {
