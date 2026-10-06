@@ -3,7 +3,12 @@ import SolInstructionsList from '$sol/components/transactions/SolInstructionsLis
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import en from '$tests/mocks/i18n.mock';
-import { mockSolAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
+import {
+	mockSolAddress,
+	mockSolAddress2,
+	mockSolAddress3,
+	mockSplAddress
+} from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { render } from '@testing-library/svelte';
 
@@ -97,6 +102,52 @@ describe('SolInstructionsList', () => {
 
 		expect(getByTestId('sol-instructions-list')).toHaveTextContent(
 			`0.01 ${mockValidSplToken.symbol}`
+		);
+	});
+
+	// The program names the account, so it follows the line the way the program of a route does.
+	it('should name the program an account is opened for', () => {
+		const { getByTestId } = render(SolInstructionsList, {
+			props: {
+				instructions: [
+					{
+						kind: 'createAccount',
+						account: mockSolAddress2,
+						program: mockSolAddress3,
+						programName: 'lb_clmm',
+						rent: 41_899_840n
+					}
+				],
+				token: SOLANA_TOKEN,
+				userAddress: mockSolAddress
+			}
+		});
+
+		expect(getByTestId('sol-instructions-list')).toHaveTextContent(
+			'Pay 0.04189984 SOL rent to create an account for lb_clmm'
+		);
+	});
+
+	it('should not call sends that all leave a swap', () => {
+		const { getByTestId } = render(SolInstructionsList, {
+			props: {
+				instructions: [
+					{
+						kind: 'route',
+						program: mockSolAddress3,
+						children: [send(mockSplAddress), send(mockSplAddress)]
+					}
+				],
+				token: SOLANA_TOKEN,
+				userAddress: mockSolAddress
+			}
+		});
+
+		expect(getByTestId('sol-instructions-list')).toHaveTextContent(
+			en.transaction.text.instruction_unknown_via
+		);
+		expect(getByTestId('sol-instructions-list')).not.toHaveTextContent(
+			en.transaction.text.instruction_route
 		);
 	});
 });

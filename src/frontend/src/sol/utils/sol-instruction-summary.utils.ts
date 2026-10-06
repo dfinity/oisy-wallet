@@ -4,6 +4,8 @@ import { maxBigInt } from '$lib/utils/bigint.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import {
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
+	SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES,
+	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
@@ -349,6 +351,21 @@ const transferEffect = ({
 };
 
 /**
+ * What an account of this size must hold to be exempt from rent, scaled from what the chain charges
+ * an account of the usual token account size: rent is a price per byte, the account's fixed header
+ * included, so the two sizes cost in proportion.
+ */
+const rentExemptMinimumFor = ({
+	space,
+	rentExemptMinimum
+}: {
+	space: bigint;
+	rentExemptMinimum: bigint;
+}): bigint =>
+	(rentExemptMinimum * (SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES + space)) /
+	(SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES + ATA_SIZE);
+
+/**
  * One instruction reduced to the effect it has on the user, or nothing when it has none.
  *
  * `rent` is not read here: the lamports an associated token account costs are stated by the System
@@ -440,6 +457,46 @@ const toEffect = ({
 		}
 
 		return { kind: 'createTokenAccount', account, ...(nonNullish(mint) && { tokenAddress: mint }) };
+	}
+
+	// An account opened for a program other than the token programs, with rent from the user's
+	// wallet: a liquidity position, an order book's open orders. The rent leaves the wallet as surely
+	// as a send does, and an application opening its own account inside its instruction may have no
+	// other line to show for it - without this one, the instruction read as one nothing described.
+	//
+	// At any level: the associated token account program opens its accounts the same way, but for
+	// the token program, and those are read as the token accounts they become. Both spellings, since
+	// a run reports the call as the RPC parses it and a message carries it as the wallet decodes it.
+	//
+	// Rent and nothing above it. Lamports beyond what the account's size costs are a balance in an
+	// account the program controls, a payment that "rent" would understate, and stay unstated.
+	if (program === 'system' && type === 'createAccount') {
+		const owner = address({ info, key: 'owner' }) ?? address({ info, key: 'programAddress' });
+
+		if (
+			nonNullish(owner) &&
+			owner !== TOKEN_PROGRAM_ADDRESS &&
+			owner !== TOKEN_2022_PROGRAM_ADDRESS
+		) {
+			const source = address({ info, key: 'source' }) ?? address({ info, key: 'payer' });
+			const account = address({ info, key: 'newAccount' });
+			const lamports = amount({ info, key: 'lamports' });
+			const space = amount({ info, key: 'space' });
+
+			const reserve =
+				nonNullish(space) && nonNullish(rentExemptMinimum)
+					? rentExemptMinimumFor({ space, rentExemptMinimum })
+					: undefined;
+
+			return nonNullish(source) &&
+				isOwned({ account: source }) &&
+				nonNullish(account) &&
+				nonNullish(lamports) &&
+				nonNullish(reserve) &&
+				lamports <= reserve
+				? { kind: 'createAccount', account, program: owner, rent: lamports }
+				: undefined;
+		}
 	}
 
 	// An account the message opens for the token program, read as the token account it is about to
@@ -1202,24 +1259,24 @@ const asWrap = ({
 			}
 		: effect;
 
-/**
- * Consecutive legs of one top-level instruction, gathered under the route that produced them.
- *
- * A route is only a route when it has more than one leg: a plain send performs a single transfer
- * and would otherwise be indented under a heading that describes nothing. Runs are consecutive so
- * that an account closed midway through a swap breaks the route rather than disappearing into it.
- */
-const isLeg = ({ kind }: { kind: SolInstructionSummaryKind }): boolean =>
-	kind === 'send' || kind === 'receive';
-
 const strip = ({ parentIndex: _parentIndex, ...view }: Effect): SolInstructionSummary => view;
 
-const groupRoutes = ({
+/**
+ * Every line of a top-level instruction the wallet could not read, gathered under it.
+ *
+ * Such an instruction is described only by the calls it made inside itself, so each line found
+ * there is that instruction's doing. One line or several, they hang under a heading that names its
+ * program: flat, a line made inside an application reads like one the message states itself, and
+ * a four-leg swap like four unrelated transfers. An instruction the wallet read is its own line.
+ */
+const groupUnread = ({
 	effects,
-	programs
+	programs,
+	unread
 }: {
 	effects: Effect[];
 	programs: Record<number, SolAddress>;
+	unread: Set<number>;
 }): SolInstructionSummary[] =>
 	effects
 		.reduce<Effect[][]>((runs, effect) => {
@@ -1227,15 +1284,16 @@ const groupRoutes = ({
 
 			const continues =
 				nonNullish(run) &&
-				run[0].parentIndex === effect.parentIndex &&
-				isLeg(run[0]) === isLeg(effect);
+				unread.has(effect.parentIndex) &&
+				run[0].parentIndex === effect.parentIndex;
 
 			return continues ? [...runs.slice(0, -1), [...run, effect]] : [...runs, [effect]];
 		}, [])
 		.flatMap((run) => {
 			const [first] = run;
 
-			if (run.length < 2 || !isLeg(first)) {
+			// An instruction with nothing under it is already the line that names its program.
+			if (!unread.has(first.parentIndex) || first.kind === 'unknown') {
 				return run.map(strip);
 			}
 
@@ -1478,5 +1536,12 @@ export const mapSolInstructionSummaries = ({
 			].sort(({ parentIndex: first }, { parentIndex: second }) => first - second)
 		: effects;
 
-	return groupRoutes({ effects: listed, programs });
+	const unread = new Set(
+		instructions.reduce<number[]>(
+			(acc, instruction, index) => (isParsed(instruction) ? acc : [...acc, index]),
+			[]
+		)
+	);
+
+	return groupUnread({ effects: listed, programs, unread });
 };
