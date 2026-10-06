@@ -285,6 +285,7 @@ describe('CyclesTopUpModal', () => {
 			expect(toastsErrorSpy).toHaveBeenCalledWith({
 				msg: {
 					text: replacePlaceholders(en.cycles_top_up.error.refunded, {
+						$refund: '1.4999',
 						$token: 'TCYCLES',
 						$fees: '0.0002'
 					})
@@ -301,6 +302,54 @@ describe('CyclesTopUpModal', () => {
 
 			expect(topUpSpy).toHaveBeenLastCalledWith(
 				expect.objectContaining({ createdAt: 2_000_000_000n })
+			);
+		});
+
+		it('offers the clock as the next step when a first top-up is refused as too old', async () => {
+			topUpSpy.mockResolvedValue({ status: 'refused', refusal: 'too_old' });
+
+			const result = await toReview();
+
+			await topUp(result);
+
+			await backOnReview(result);
+
+			expect(toastsErrorSpy).toHaveBeenCalledWith({
+				msg: { text: en.cycles_top_up.error.clock }
+			});
+		});
+
+		it('keeps the outcome unknown when a resent top-up is refused as too old', async () => {
+			topUpSpy
+				.mockResolvedValueOnce({ status: 'unknown' })
+				.mockResolvedValueOnce({ status: 'refused', refusal: 'too_old' });
+
+			const result = await toReview();
+
+			await topUp(result);
+
+			await backOnReview(result);
+
+			await topUp(result);
+
+			await waitFor(() => {
+				expect(topUpSpy).toHaveBeenCalledTimes(2);
+			});
+
+			await backOnReview(result);
+
+			expect(toastsErrorSpy).not.toHaveBeenCalled();
+			expect(result.container).toHaveTextContent(
+				replacePlaceholders(en.cycles_top_up.text.unknown, { $token: 'TCYCLES' })
+			);
+			expect(trackSpy).toHaveBeenLastCalledWith({
+				step: 'top_up',
+				tokenSymbol: 'TCYCLES',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				errorCode: 'unknown'
+			});
+			expect(topUpSpy).toHaveBeenLastCalledWith(
+				expect.objectContaining({ createdAt: 1_000_000_000n })
 			);
 		});
 
