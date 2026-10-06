@@ -112,6 +112,8 @@ One structured event family, **`cycles_top_up`**, under `event_context: compute`
 
 That includes an amount range (a bucket, as `docs/ai/frontend/analytics.md` §6 suggests for amounts). A bucket hides a top-up only when many burns in the same range happen around the event's time, and on the cycles ledger almost none do above $1: in 600 blocks sampled over about 11 hours on 2026-10-05/06, 584 of the 586 top-ups were under $1, 2 were between $1 and $10, and none was larger. A top-up of $1 or more would be one of a handful a day, so its range and time would still point at its burn (§12, D6).
 
+The event's own time remains. `executing` and then `success` or `error` arrive as they happen, so per-event timestamps bracket the burn within seconds, and in the same sample the ledger ran 5 to 27 blocks a minute: such a window often holds a single burn. Every OISY event tied to an on-chain action (sends, swaps, mints) carries the same exposure, so whether to blur event times is a decision for `docs/ai/frontend/analytics.md` §6 as a whole, not for this flow.
+
 ## 9. Acceptance criteria
 
 - **AC1** With the flag on, the TCYCLES page shows Top up as its fifth hero button, after Mint, with the fuel pump icon (D5), and no other token page does. With the flag off, it is absent.
