@@ -4,8 +4,9 @@ use super::token_id::TokenId;
 use crate::types::Timestamp;
 
 /// Maximum number of active user transactions kept per user. Counts every
-/// stored row regardless of status; the FE must delete acknowledged rows to
-/// free room for new ones.
+/// stored row regardless of status. At the cap a create deletes the user's
+/// oldest finished rows to make room, and is refused only when every row is
+/// still `Pending` or `Executing`.
 pub const MAX_ACTIVE_USER_TRANSACTIONS_PER_USER: usize = 100;
 
 /// Maximum length of the `id` field (`UUIDv4` is 36 ASCII characters).
