@@ -73,6 +73,8 @@ DFX_NETWORK=ic ./scripts/build.icrc3.sh
 #    With `-e`: the script itself carries on past a failed download, after which
 #    install_did_files would only warn and those bindings would be skipped.
 bash -e ./scripts/download.icp.sh
+# .. fetches candid for the plug_helper from the canister itself
+DFX_NETWORK=ic ./scripts/build.plug_helper.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate Rust bindings

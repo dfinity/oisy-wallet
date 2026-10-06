@@ -32,7 +32,8 @@ const promises = Object.keys(canisters)
 				'icrc3',
 				'cmc',
 				'icp_index',
-				'icp_ledger'
+				'icp_ledger',
+				'plug_helper'
 			].includes(canister)
 	)
 	.map(deleteFolder);

@@ -1,0 +1,93 @@
+type BtcNetwork = variant { Mainnet; Testnet };
+type CallType = variant { Send; Sign };
+type Icrc21ConsentInfo = record {
+	metadata : Icrc21ConsentMessageMetadata;
+	consent_message : Icrc21ConsentMessage
+};
+type Icrc21ConsentMessage = variant {
+	FieldsDisplayMessage : record {
+		fields : vec record { text; Value };
+		intent : text
+	};
+	GenericDisplayMessage : text
+};
+type Icrc21ConsentMessageMetadata = record {
+	utc_offset_minutes : opt int16;
+	language : text
+};
+type Icrc21ConsentMessageRequest = record {
+	arg : blob;
+	method : text;
+	user_preferences : Icrc21ConsentMessageSpec
+};
+type Icrc21ConsentMessageSpec = record {
+	metadata : Icrc21ConsentMessageMetadata;
+	device_spec : opt Icrc21DeviceSpec
+};
+type Icrc21DeviceSpec = variant { GenericDisplay; FieldsDisplay };
+type Icrc21ErrorInfo = record { description : text };
+type Outpoint = record { txid : blob; vout : nat32 };
+type Result = variant { Ok : text; Err : text };
+type Result_1 = variant { Ok : Icrc21ConsentInfo; Err : Icrc21ErrorInfo };
+type Result_2 = variant { Ok : SchnorrPublicKeyResponse; Err : text };
+type Result_3 = variant { Ok : blob; Err : text };
+type Result_4 = variant { Ok : nat; Err : text };
+type SchnorrAlgorithm = variant { ed25519; bip340secp256k1 };
+type SchnorrPublicKeyResponse = record { public_key : blob; chain_code : blob };
+type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
+type Value = variant {
+	Text : record { content : text };
+	TokenAmount : record { decimals : nat8; amount : nat64; symbol : text };
+	TimestampSeconds : record { amount : nat64 };
+	DurationSeconds : record { amount : nat64 }
+};
+service : {
+	approve_erc20 : (CallType, nat, nat, nat, nat, nat, nat64, text) -> (Result);
+	btc_p2tr_raw_key_address : (principal, BtcNetwork) -> (Result);
+	custom_approve_erc20 : (
+		CallType,
+		nat,
+		nat,
+		nat,
+		nat,
+		nat,
+		nat64,
+		text,
+		text
+	) -> (Result);
+	custom_deposit_erc20 : (CallType, nat, nat, nat, nat, nat, nat64, text) -> (
+		Result
+	);
+	deposit_erc20 : (CallType, nat, nat, nat, nat, nat, nat64, text) -> (Result);
+	doge_address : (opt principal, bool) -> (text);
+	eth_address : (opt principal) -> (text);
+	eth_call_contract : (
+		CallType,
+		nat,
+		nat,
+		nat,
+		nat,
+		nat,
+		nat64,
+		text,
+		text
+	) -> (Result);
+	icrc21_canister_call_consent_message : (Icrc21ConsentMessageRequest) -> (
+		Result_1
+	);
+	mint_cketh : (CallType, nat, nat, nat, nat, nat, nat64) -> (Result);
+	personal_sign : (text) -> (Result);
+	public_key : (SchnorrAlgorithm) -> (Result_2);
+	send_btc : (CallType, text, nat64, nat64, BtcNetwork, vec Utxo) -> (Result);
+	send_erc20 : (CallType, nat, nat, nat, nat, nat, nat64, text, text) -> (
+		Result
+	);
+	send_eth : (CallType, text, nat, nat, nat, nat, nat, nat64) -> (Result);
+	send_ordinal : (CallType, text, nat64, BtcNetwork, Utxo, Utxo) -> (Result);
+	sign_doge : (text, nat64, nat64, vec Utxo, bool) -> (Result);
+	sign_hash : (blob) -> (Result);
+	sign_sol : (blob) -> (Result_3);
+	solana_address : (principal) -> (Result);
+	ton_address : (principal) -> (Result);
+	transaction_count : (opt principal, nat64) -> (Result_4)
+}
