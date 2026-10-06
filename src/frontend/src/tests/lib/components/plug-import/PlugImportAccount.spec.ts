@@ -63,6 +63,7 @@ describe('PlugImportAccount', () => {
 		const eth = { ...mockValidToken, symbol: 'ETH', network: ETHEREUM_NETWORK };
 
 		const { getAllByText } = render(PlugImportAccount, {
+			onsend: vi.fn(),
 			account: mockAccount,
 			balances: [
 				balance({ token: eth, address: mockAccount.evmAddress }),
