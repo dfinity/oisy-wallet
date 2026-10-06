@@ -1210,7 +1210,7 @@
 			"refused": "Die Aufladung ist nicht durchgegangen. Nichts hat deine Wallet verlassen. Versuche es gleich noch einmal.",
 			"insufficient_funds": "Nicht genug $token für diese Aufladung und die Gebühr. Nichts hat deine Wallet verlassen. Verringere den Betrag.",
 			"clock": "Die Aufladung ist nicht durchgegangen, weil die Uhr deines Geräts falsch geht. Nichts hat deine Wallet verlassen. Stelle die richtige Zeit ein und versuche es erneut.",
-			"refunded": "Der Canister konnte die Cycles nicht empfangen. Deine $token sind zurück, abzüglich $fees $token Gebühren. Prüfe die Canister-ID.",
+			"refunded": "Der Canister konnte die Cycles nicht empfangen. $refund $token sind in deine Wallet zurückgekommen, und der Versuch hat $fees $token an Gebühren gekostet. Prüfe die Canister-ID.",
 			"refunded_nothing": "Der Canister konnte die Cycles nicht empfangen, und die Gebühren haben den ganzen Betrag aufgebraucht. Prüfe die Canister-ID."
 		}
 	},

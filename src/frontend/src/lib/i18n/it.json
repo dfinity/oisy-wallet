@@ -1210,7 +1210,7 @@
 			"refused": "La ricarica non è andata a buon fine. Nulla è uscito dal tuo wallet. Riprova tra un attimo.",
 			"insufficient_funds": "Non hai abbastanza $token per questa ricarica e la commissione. Nulla è uscito dal tuo wallet. Riduci l'importo.",
 			"clock": "La ricarica non è andata a buon fine perché l'orologio del tuo dispositivo non è corretto. Nulla è uscito dal tuo wallet. Imposta l'ora corretta e riprova.",
-			"refunded": "Il canister non ha potuto ricevere i cicli. I tuoi $token sono tornati, meno $fees $token di commissioni. Controlla l'ID del canister.",
+			"refunded": "Il canister non ha potuto ricevere i cicli. $refund $token sono tornati nel tuo wallet, e il tentativo è costato $fees $token di commissioni. Controlla l'ID del canister.",
 			"refunded_nothing": "Il canister non ha potuto ricevere i cicli e le commissioni hanno assorbito l'intero importo. Controlla l'ID del canister."
 		}
 	},

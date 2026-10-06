@@ -1210,7 +1210,7 @@
 			"refused": "La recharge n'a pas abouti. Rien n'a quitté votre portefeuille. Réessayez dans un instant.",
 			"insufficient_funds": "Pas assez de $token pour cette recharge et les frais. Rien n'a quitté votre portefeuille. Réduisez le montant.",
 			"clock": "La recharge n'a pas abouti car l'horloge de votre appareil est décalée. Rien n'a quitté votre portefeuille. Réglez l'heure correcte et réessayez.",
-			"refunded": "Le canister n'a pas pu recevoir les cycles. Vos $token sont revenus, moins $fees $token de frais. Vérifiez l'ID du canister.",
+			"refunded": "Le canister n'a pas pu recevoir les cycles. $refund $token sont revenus dans votre portefeuille, et la tentative a coûté $fees $token de frais. Vérifiez l'ID du canister.",
 			"refunded_nothing": "Le canister n'a pas pu recevoir les cycles, et les frais ont absorbé tout le montant. Vérifiez l'ID du canister."
 		}
 	},

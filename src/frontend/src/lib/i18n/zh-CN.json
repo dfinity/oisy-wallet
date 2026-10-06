@@ -1210,7 +1210,7 @@
 			"refused": "充值未成功。您的钱包中没有资金转出。请稍后再试。",
 			"insufficient_funds": "$token 不足以支付本次充值和手续费。您的钱包中没有资金转出。请降低金额。",
 			"clock": "由于您的设备时钟不准，充值未成功。您的钱包中没有资金转出。请设置正确的时间后再试。",
-			"refunded": "该 Canister 无法接收 Cycles。您的 $token 已退回，扣除了 $fees $token 手续费。请检查 Canister ID。",
+			"refunded": "该 Canister 无法接收 Cycles。$refund $token 已退回您的钱包，此次尝试共花费 $fees $token 手续费。请检查 Canister ID。",
 			"refunded_nothing": "该 Canister 无法接收 Cycles，手续费耗尽了全部金额。请检查 Canister ID。"
 		}
 	},

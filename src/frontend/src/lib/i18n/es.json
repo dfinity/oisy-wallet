@@ -1210,7 +1210,7 @@
 			"refused": "La recarga no se completó. No salió nada de tu billetera. Inténtalo de nuevo en un momento.",
 			"insufficient_funds": "No tienes suficientes $token para esta recarga y la comisión. No salió nada de tu billetera. Reduce el importe.",
 			"clock": "La recarga no se completó porque el reloj de tu dispositivo no está en hora. No salió nada de tu billetera. Ajusta la hora correcta e inténtalo de nuevo.",
-			"refunded": "El canister no pudo recibir los ciclos. Tus $token han vuelto, menos $fees $token de comisiones. Comprueba el ID del canister.",
+			"refunded": "El canister no pudo recibir los ciclos. $refund $token volvieron a tu billetera, y el intento costó $fees $token en comisiones. Comprueba el ID del canister.",
 			"refunded_nothing": "El canister no pudo recibir los ciclos y las comisiones se llevaron todo el importe. Comprueba el ID del canister."
 		}
 	},

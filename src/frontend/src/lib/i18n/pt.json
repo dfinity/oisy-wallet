@@ -1210,7 +1210,7 @@
 			"refused": "A recarga não foi concluída. Nada saiu da sua carteira. Tente novamente em instantes.",
 			"insufficient_funds": "Não há $token suficientes para esta recarga e a taxa. Nada saiu da sua carteira. Reduza o valor.",
 			"clock": "A recarga não foi concluída porque o relógio do seu dispositivo está errado. Nada saiu da sua carteira. Ajuste a hora correta e tente novamente.",
-			"refunded": "O canister não conseguiu receber os ciclos. Seus $token voltaram, menos $fees $token de taxas. Verifique o ID do canister.",
+			"refunded": "O canister não conseguiu receber os ciclos. $refund $token voltaram para sua carteira, e a tentativa custou $fees $token em taxas. Verifique o ID do canister.",
 			"refunded_nothing": "O canister não conseguiu receber os ciclos, e as taxas consumiram todo o valor. Verifique o ID do canister."
 		}
 	},

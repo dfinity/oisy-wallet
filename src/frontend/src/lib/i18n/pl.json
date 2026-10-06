@@ -1210,7 +1210,7 @@
 			"refused": "Doładowanie się nie powiodło. Nic nie opuściło Twojego portfela. Spróbuj ponownie za chwilę.",
 			"insufficient_funds": "Za mało $token na to doładowanie i opłatę. Nic nie opuściło Twojego portfela. Zmniejsz kwotę.",
 			"clock": "Doładowanie się nie powiodło, ponieważ zegar Twojego urządzenia jest źle ustawiony. Nic nie opuściło Twojego portfela. Ustaw prawidłowy czas i spróbuj ponownie.",
-			"refunded": "Kanister nie mógł przyjąć cykli. Twoje $token wróciły, pomniejszone o $fees $token opłat. Sprawdź ID kanistra.",
+			"refunded": "Kanister nie mógł przyjąć cykli. Do Twojego portfela wróciło $refund $token, a próba kosztowała $fees $token opłat. Sprawdź ID kanistra.",
 			"refunded_nothing": "Kanister nie mógł przyjąć cykli, a opłaty pochłonęły całą kwotę. Sprawdź ID kanistra."
 		}
 	},

@@ -1210,7 +1210,7 @@
 			"refused": "Dobití neproběhlo. Z peněženky nic neodešlo. Zkuste to za chvíli znovu.",
 			"insufficient_funds": "Nemáte dost $token na toto dobití a poplatek. Z peněženky nic neodešlo. Snižte částku.",
 			"clock": "Dobití neproběhlo, protože hodiny vašeho zařízení nejdou správně. Z peněženky nic neodešlo. Nastavte správný čas a zkuste to znovu.",
-			"refunded": "Kanistr nemohl cykly přijmout. Vaše $token se vrátily, snížené o poplatky $fees $token. Zkontrolujte ID kanistru.",
+			"refunded": "Kanistr nemohl cykly přijmout. Do peněženky se vrátilo $refund $token a pokus stál $fees $token na poplatcích. Zkontrolujte ID kanistru.",
 			"refunded_nothing": "Kanistr nemohl cykly přijmout a poplatky spotřebovaly celou částku. Zkontrolujte ID kanistru."
 		}
 	},
