@@ -147,14 +147,14 @@ The event's own time remains. `executing` and then `success` or `error` arrive a
 
 ## 11. Implementation plan
 
-Six PRs (§12, D7), each in granular commits:
+Six PRs (§12, D7), each in granular commits. Each PR updates PRODUCT.md for the behaviour it ships, as `workflow.md` asks:
 
 1. **#14217, `docs(ai): add spec for topping up a canister with TCYCLES`**: this spec.
 2. **#14229, cycles-ledger client**: the bindings (§7.1, approved in D3), the `withdraw` wrapper, the top-up service mapping each `withdraw` answer to §5.4, and the canister existence check (§5.1.2, §7.3), with unit tests.
-3. **Activity labels and burns**: the Top up and Top-up refund labels in TCYCLES Activity (§5.5), and the tests pinning burns out of Recently used (§6).
-4. **UI**: the flag, the fuel pump icon, the button, the modal, Recently topped up and analytics, in English, with component tests.
-5. **Send warning**: the warning for TCYCLES sent to a canister (§5.6), in English, with tests. It comes after PR4 because it points to the Top up flow.
-6. **Translations and PRODUCT.md**: every shipped locale, and the PRODUCT.md entries for Top up, its Activity labels, the send warning and the rule that burns never count.
+3. **Activity labels and burns**: the Top up and Top-up refund labels in TCYCLES Activity (§5.5), and the tests pinning burns out of Recently used (§6), with the PRODUCT.md entries for both.
+4. **UI**: the flag, the fuel pump icon, the button, the modal, Recently topped up and analytics, in English, with component tests. PRODUCT.md gains Top up and its analytics, and Mint's non-goals no longer list topping up a canister.
+5. **Send warning**: the warning for TCYCLES sent to a canister (§5.6), in English, with tests and its PRODUCT.md entry. It comes after PR4 because it points to the Top up flow.
+6. **Translations**: every shipped locale.
 
 The modal is mostly translated copy, so expect pressure on `compare-sizes`; the precedent is a maintainer override. Every new component and derived store ships with tests (`test-coverage` gate). Staging talks to the mainnet cycles ledger, so verifying a top-up there spends real TCYCLES; a small amount suffices.
 
