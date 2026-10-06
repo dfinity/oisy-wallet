@@ -1184,6 +1184,34 @@
 			"unconfirmed": "$token 전송을 확인하지 못했습니다. 전송이 완료되었다면 민트는 백그라운드에서 완료되며, 활성 트랜잭션에서 진행 상황을 확인할 수 있습니다."
 		}
 	},
+	"cycles_top_up": {
+		"text": {
+			"top_up": "",
+			"title": "",
+			"description": "",
+			"canister_id_placeholder": "",
+			"checking_canister": "",
+			"recently_topped_up": "",
+			"canister": "",
+			"you_top_up": "",
+			"total": "",
+			"one_way": "",
+			"topping_up": "",
+			"topped_up": "",
+			"unknown": ""
+		},
+		"error": {
+			"invalid_canister_id": "",
+			"canister_not_found": "",
+			"canister_check_failed": "",
+			"amount_too_small": "",
+			"refused": "",
+			"insufficient_funds": "",
+			"clock": "",
+			"refunded": "",
+			"refunded_nothing": ""
+		}
+	},
 	"active_user_transactions": {
 		"text": {
 			"button_label": "",

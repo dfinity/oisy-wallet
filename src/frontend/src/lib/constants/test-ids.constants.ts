@@ -304,6 +304,16 @@ export const CYCLES_MINT_REVIEW = 'cycles-mint-review';
 export const CYCLES_MINT_REVIEW_BACK_BUTTON = 'cycles-mint-review-back-button';
 export const CYCLES_MINT_REVIEW_MINT_BUTTON = 'cycles-mint-review-mint-button';
 export const CYCLES_MINT_RATE = 'cycles-mint-rate';
+export const CYCLES_TOP_UP_BUTTON = 'cycles-top-up-button';
+export const CYCLES_TOP_UP_CANISTER = 'cycles-top-up-canister';
+export const CYCLES_TOP_UP_CANISTER_INPUT = 'cycles-top-up-canister-input';
+export const CYCLES_TOP_UP_CANISTER_NEXT_BUTTON = 'cycles-top-up-canister-next-button';
+export const CYCLES_TOP_UP_RECENT_CANISTER = 'cycles-top-up-recent-canister';
+export const CYCLES_TOP_UP_AMOUNT = 'cycles-top-up-amount';
+export const CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON = 'cycles-top-up-amount-next-button';
+export const CYCLES_TOP_UP_REVIEW = 'cycles-top-up-review';
+export const CYCLES_TOP_UP_REVIEW_BACK_BUTTON = 'cycles-top-up-review-back-button';
+export const CYCLES_TOP_UP_REVIEW_TOP_UP_BUTTON = 'cycles-top-up-review-top-up-button';
 
 export const HELP_AUTH_IMAGE_BANNER = 'help-auth-image-banner';
 export const HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON = 'help-auth-new-identity-version-button';

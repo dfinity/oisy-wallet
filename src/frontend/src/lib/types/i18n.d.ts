@@ -913,6 +913,35 @@ interface I18nCycles_mint {
 	};
 }
 
+interface I18nCycles_top_up {
+	text: {
+		top_up: string;
+		title: string;
+		description: string;
+		canister_id_placeholder: string;
+		checking_canister: string;
+		recently_topped_up: string;
+		canister: string;
+		you_top_up: string;
+		total: string;
+		one_way: string;
+		topping_up: string;
+		topped_up: string;
+		unknown: string;
+	};
+	error: {
+		invalid_canister_id: string;
+		canister_not_found: string;
+		canister_check_failed: string;
+		amount_too_small: string;
+		refused: string;
+		insufficient_funds: string;
+		clock: string;
+		refunded: string;
+		refunded_nothing: string;
+	};
+}
+
 interface I18nActive_user_transactions {
 	text: {
 		button_label: string;
@@ -2654,6 +2683,7 @@ interface I18n {
 	mint: I18nMint;
 	burn: I18nBurn;
 	cycles_mint: I18nCycles_mint;
+	cycles_top_up: I18nCycles_top_up;
 	active_user_transactions: I18nActive_user_transactions;
 	scanner: I18nScanner;
 	convert: I18nConvert;

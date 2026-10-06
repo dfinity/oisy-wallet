@@ -1184,6 +1184,34 @@
 			"unconfirmed": "$tokenの送金を確認できませんでした。送金が完了していれば、ミントはバックグラウンドで完了します。進行状況はアクティブなトランザクションで確認できます。"
 		}
 	},
+	"cycles_top_up": {
+		"text": {
+			"top_up": "",
+			"title": "",
+			"description": "",
+			"canister_id_placeholder": "",
+			"checking_canister": "",
+			"recently_topped_up": "",
+			"canister": "",
+			"you_top_up": "",
+			"total": "",
+			"one_way": "",
+			"topping_up": "",
+			"topped_up": "",
+			"unknown": ""
+		},
+		"error": {
+			"invalid_canister_id": "",
+			"canister_not_found": "",
+			"canister_check_failed": "",
+			"amount_too_small": "",
+			"refused": "",
+			"insufficient_funds": "",
+			"clock": "",
+			"refunded": "",
+			"refunded_nothing": ""
+		}
+	},
 	"active_user_transactions": {
 		"text": {
 			"button_label": "",

@@ -1184,6 +1184,34 @@
 			"unconfirmed": "无法确认 $token 转账。如果转账已完成，铸造将在后台完成：可在活跃交易中查看进度。"
 		}
 	},
+	"cycles_top_up": {
+		"text": {
+			"top_up": "",
+			"title": "",
+			"description": "",
+			"canister_id_placeholder": "",
+			"checking_canister": "",
+			"recently_topped_up": "",
+			"canister": "",
+			"you_top_up": "",
+			"total": "",
+			"one_way": "",
+			"topping_up": "",
+			"topped_up": "",
+			"unknown": ""
+		},
+		"error": {
+			"invalid_canister_id": "",
+			"canister_not_found": "",
+			"canister_check_failed": "",
+			"amount_too_small": "",
+			"refused": "",
+			"insufficient_funds": "",
+			"clock": "",
+			"refunded": "",
+			"refunded_nothing": ""
+		}
+	},
 	"active_user_transactions": {
 		"text": {
 			"button_label": "",
