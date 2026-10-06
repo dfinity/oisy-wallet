@@ -2227,7 +2227,9 @@
 			"converting_ck_token": "Đang chuyển đổi $ckToken sang $twinToken",
 			"twin_network": "mạng $twinNetwork",
 			"no_date_available": "Không có ngày khả dụng",
-			"pending": "Đang chờ xử lý"
+			"pending": "Đang chờ xử lý",
+			"top_up": "",
+			"top_up_refund": ""
 		},
 		"alt": {
 			"open_block_explorer": "Mở giao dịch này trên trình khám phá khối",

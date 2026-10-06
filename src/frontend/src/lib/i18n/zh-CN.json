@@ -2227,7 +2227,9 @@
 			"converting_ck_token": "正在将 $ckToken 转换为 $twinToken",
 			"twin_network": "$twinNetwork 网络",
 			"no_date_available": "无可用日期",
-			"pending": "处理中"
+			"pending": "处理中",
+			"top_up": "",
+			"top_up_refund": ""
 		},
 		"alt": {
 			"open_block_explorer": "在区块浏览器中打开此交易",

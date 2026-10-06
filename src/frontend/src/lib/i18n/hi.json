@@ -2227,7 +2227,9 @@
 			"converting_ck_token": "$ckToken को $twinToken में बदल रहा है",
 			"twin_network": "$twinNetwork नेटवर्क",
 			"no_date_available": "कोई तिथि उपलब्ध नहीं",
-			"pending": "लंबित"
+			"pending": "लंबित",
+			"top_up": "",
+			"top_up_refund": ""
 		},
 		"alt": {
 			"open_block_explorer": "इस लेनदेन को ब्लॉक एक्सप्लोरर पर खोलें",

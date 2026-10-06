@@ -2227,7 +2227,9 @@
 			"converting_ck_token": "Conversion de $ckToken en $twinToken",
 			"twin_network": "Réseau $twinNetwork",
 			"no_date_available": "Aucune date disponible",
-			"pending": "En attente"
+			"pending": "En attente",
+			"top_up": "",
+			"top_up_refund": ""
 		},
 		"alt": {
 			"open_block_explorer": "Ouvrir cette transaction sur un explorateur de blocs",

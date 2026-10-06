@@ -2227,7 +2227,9 @@
 			"converting_ck_token": "Převádění $ckToken na $twinToken",
 			"twin_network": "síť $twinNetwork",
 			"no_date_available": "Datum není k dispozici",
-			"pending": "Čeká na vyřízení"
+			"pending": "Čeká na vyřízení",
+			"top_up": "",
+			"top_up_refund": ""
 		},
 		"alt": {
 			"open_block_explorer": "Otevřít tuto transakci v blockchainovém průzkumníku",

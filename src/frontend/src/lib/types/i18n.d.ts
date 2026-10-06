@@ -1900,6 +1900,8 @@ interface I18nTransaction {
 		twin_network: string;
 		no_date_available: string;
 		pending: string;
+		top_up: string;
+		top_up_refund: string;
 	};
 	alt: {
 		open_block_explorer: string;

@@ -2227,7 +2227,9 @@
 			"converting_ck_token": "$ckToken을 $twinToken으로 전환 중",
 			"twin_network": "$twinNetwork 네트워크",
 			"no_date_available": "날짜 없음",
-			"pending": "대기 중"
+			"pending": "대기 중",
+			"top_up": "",
+			"top_up_refund": ""
 		},
 		"alt": {
 			"open_block_explorer": "블록 탐색기에서 이 트랜잭션 열기",
