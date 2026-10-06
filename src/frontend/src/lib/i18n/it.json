@@ -1198,7 +1198,8 @@
 			"one_way": "Una ricarica non può essere annullata: i cicli restano nel canister.",
 			"topping_up": "Ricarica di $canister in corso...",
 			"topped_up": "$canister ricaricato con $amount $token.",
-			"unknown": "OISY non sa ancora se la ricarica è andata a buon fine. Se sì, la vedrai nell'attività di $token. Ricarica di nuovo per inviare la stessa ricarica: può andare a buon fine una sola volta.",
+			"unknown": "OISY non sa ancora se la ricarica è andata a buon fine. Se sì, la vedrai nell'attività di $token. Ricarica di nuovo per reinviare la stessa ricarica: può andare a buon fine una sola volta. Una ricarica nuova o modificata aggiungerebbe di nuovo cicli se questa è andata a buon fine.",
+			"unknown_fresh": "OISY non sa ancora se la tua ultima ricarica è andata a buon fine. Se sì, questa ricarica aggiunge di nuovo cicli. Controlla prima l'attività di $token.",
 			"sent_to_canister": "Inviare $token a un canister non lo ricarica. I $token arrivano sul conto del canister, e il canister riceve cicli solo se il suo codice li preleva.",
 			"sent_to_canister_top_up": "Per aggiungere cicli a un canister, usa «Ricarica» nella pagina di $token."
 		},
@@ -1210,7 +1211,7 @@
 			"refused": "La ricarica non è andata a buon fine. Nulla è uscito dal tuo wallet. Riprova tra un attimo.",
 			"insufficient_funds": "Non hai abbastanza $token per questa ricarica e la commissione. Nulla è uscito dal tuo wallet. Riduci l'importo.",
 			"clock": "La ricarica non è andata a buon fine perché l'orologio del tuo dispositivo non è corretto. Nulla è uscito dal tuo wallet. Imposta l'ora corretta e riprova.",
-			"refunded": "Il canister non ha potuto ricevere i cicli. I tuoi $token sono tornati, meno $fees $token di commissioni. Controlla l'ID del canister.",
+			"refunded": "Il canister non ha potuto ricevere i cicli. $refund $token sono tornati nel tuo wallet, e il tentativo è costato $fees $token di commissioni. Controlla l'ID del canister.",
 			"refunded_nothing": "Il canister non ha potuto ricevere i cicli e le commissioni hanno assorbito l'intero importo. Controlla l'ID del canister."
 		}
 	},

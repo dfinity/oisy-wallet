@@ -1198,7 +1198,8 @@
 			"one_way": "Không thể hoàn tác việc nạp: cycles ở lại trong canister.",
 			"topping_up": "Đang nạp cho $canister...",
 			"topped_up": "Đã nạp $amount $token cho $canister.",
-			"unknown": "OISY chưa thể biết việc nạp đã thành công hay chưa. Nếu đã thành công, hoạt động $token của bạn sẽ hiển thị. Hãy nạp lại để gửi cùng một lần nạp: lần nạp đó chỉ có thể thành công một lần.",
+			"unknown": "OISY chưa thể biết việc nạp đã thành công hay chưa. Nếu đã thành công, hoạt động $token của bạn sẽ hiển thị. Hãy nạp lại để gửi lại cùng một lần nạp: lần nạp đó chỉ có thể thành công một lần. Một lần nạp mới hoặc đã thay đổi sẽ thêm cycles một lần nữa nếu lần nạp này đã thành công.",
+			"unknown_fresh": "OISY chưa thể biết lần nạp gần nhất của bạn đã thành công hay chưa. Nếu đã thành công, lần nạp này sẽ thêm cycles một lần nữa. Hãy kiểm tra hoạt động $token trước.",
 			"sent_to_canister": "Gửi $token đến một canister không nạp cho canister đó. Số $token sẽ vào tài khoản của canister, và canister chỉ nhận được cycles nếu mã của chính nó rút chúng ra.",
 			"sent_to_canister_top_up": "Để thêm cycles cho một canister, hãy dùng “Nạp” trên trang $token."
 		},
@@ -1210,7 +1211,7 @@
 			"refused": "Việc nạp không thành công. Không có gì rời khỏi ví của bạn. Vui lòng thử lại sau giây lát.",
 			"insufficient_funds": "Không đủ $token cho lần nạp này và phí. Không có gì rời khỏi ví của bạn. Hãy giảm số tiền.",
 			"clock": "Việc nạp không thành công vì đồng hồ trên thiết bị của bạn bị lệch. Không có gì rời khỏi ví của bạn. Hãy đặt đúng giờ và thử lại.",
-			"refunded": "Canister không thể nhận cycles. Số $token của bạn đã được hoàn lại, trừ $fees $token phí. Hãy kiểm tra ID canister.",
+			"refunded": "Canister không thể nhận cycles. $refund $token đã được hoàn lại vào ví của bạn, và lần thử này tốn $fees $token phí. Hãy kiểm tra ID canister.",
 			"refunded_nothing": "Canister không thể nhận cycles, và phí đã tiêu hết toàn bộ số tiền. Hãy kiểm tra ID canister."
 		}
 	},

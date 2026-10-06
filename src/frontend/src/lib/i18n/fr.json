@@ -1198,7 +1198,8 @@
 			"one_way": "Une recharge est irréversible : les cycles restent dans le canister.",
 			"topping_up": "Recharge de $canister...",
 			"topped_up": "$canister rechargé avec $amount $token.",
-			"unknown": "OISY ne peut pas encore dire si la recharge a abouti. Si c'est le cas, votre activité $token l'affichera. Rechargez à nouveau pour envoyer la même recharge : elle ne peut aboutir qu'une seule fois.",
+			"unknown": "OISY ne peut pas encore dire si la recharge a abouti. Si c'est le cas, votre activité $token l'affichera. Rechargez à nouveau pour renvoyer la même recharge : elle ne peut aboutir qu'une seule fois. Une recharge nouvelle ou modifiée ajouterait à nouveau des cycles si celle-ci a abouti.",
+			"unknown_fresh": "OISY ne peut pas encore dire si votre dernière recharge a abouti. Si c'est le cas, cette recharge ajoute à nouveau des cycles. Vérifiez d'abord votre activité $token.",
 			"sent_to_canister": "Envoyer des $token à un canister ne le recharge pas. Les $token arrivent sur le compte du canister, et le canister ne reçoit des cycles que si son propre code les retire.",
 			"sent_to_canister_top_up": "Pour ajouter des cycles à un canister, utilisez « Recharger » sur la page $token."
 		},
@@ -1210,7 +1211,7 @@
 			"refused": "La recharge n'a pas abouti. Rien n'a quitté votre portefeuille. Réessayez dans un instant.",
 			"insufficient_funds": "Pas assez de $token pour cette recharge et les frais. Rien n'a quitté votre portefeuille. Réduisez le montant.",
 			"clock": "La recharge n'a pas abouti car l'horloge de votre appareil est décalée. Rien n'a quitté votre portefeuille. Réglez l'heure correcte et réessayez.",
-			"refunded": "Le canister n'a pas pu recevoir les cycles. Vos $token sont revenus, moins $fees $token de frais. Vérifiez l'ID du canister.",
+			"refunded": "Le canister n'a pas pu recevoir les cycles. $refund $token sont revenus dans votre portefeuille, et la tentative a coûté $fees $token de frais. Vérifiez l'ID du canister.",
 			"refunded_nothing": "Le canister n'a pas pu recevoir les cycles, et les frais ont absorbé tout le montant. Vérifiez l'ID du canister."
 		}
 	},

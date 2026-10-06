@@ -7,6 +7,7 @@ import {
 	CYCLES_TOP_UP_CANISTER_INPUT,
 	CYCLES_TOP_UP_CANISTER_NEXT_BUTTON,
 	CYCLES_TOP_UP_REVIEW,
+	CYCLES_TOP_UP_REVIEW_BACK_BUTTON,
 	CYCLES_TOP_UP_REVIEW_TOP_UP_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
@@ -285,6 +286,7 @@ describe('CyclesTopUpModal', () => {
 			expect(toastsErrorSpy).toHaveBeenCalledWith({
 				msg: {
 					text: replacePlaceholders(en.cycles_top_up.error.refunded, {
+						$refund: '1.4999',
 						$token: 'TCYCLES',
 						$fees: '0.0002'
 					})
@@ -301,6 +303,102 @@ describe('CyclesTopUpModal', () => {
 
 			expect(topUpSpy).toHaveBeenLastCalledWith(
 				expect.objectContaining({ createdAt: 2_000_000_000n })
+			);
+		});
+
+		it('offers the clock as the next step when a first top-up is refused as too old', async () => {
+			topUpSpy.mockResolvedValue({ status: 'refused', refusal: 'too_old' });
+
+			const result = await toReview();
+
+			await topUp(result);
+
+			await backOnReview(result);
+
+			expect(toastsErrorSpy).toHaveBeenCalledWith({
+				msg: { text: en.cycles_top_up.error.clock }
+			});
+		});
+
+		it('keeps the outcome unknown when a resent top-up is refused as too old', async () => {
+			topUpSpy
+				.mockResolvedValueOnce({ status: 'unknown' })
+				.mockResolvedValueOnce({ status: 'refused', refusal: 'too_old' });
+
+			const result = await toReview();
+
+			await topUp(result);
+
+			await backOnReview(result);
+
+			await topUp(result);
+
+			await waitFor(() => {
+				expect(topUpSpy).toHaveBeenCalledTimes(2);
+			});
+
+			await backOnReview(result);
+
+			expect(toastsErrorSpy).not.toHaveBeenCalled();
+			expect(result.container).toHaveTextContent(
+				replacePlaceholders(en.cycles_top_up.text.unknown, { $token: 'TCYCLES' })
+			);
+			expect(trackSpy).toHaveBeenLastCalledWith({
+				step: 'top_up',
+				tokenSymbol: 'TCYCLES',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				errorCode: 'unknown'
+			});
+			expect(topUpSpy).toHaveBeenLastCalledWith(
+				expect.objectContaining({ createdAt: 1_000_000_000n })
+			);
+		});
+
+		it('warns that a changed top-up can top up again while the last outcome is unknown', async () => {
+			topUpSpy.mockResolvedValueOnce({ status: 'unknown' });
+
+			const result = await toReview();
+
+			await topUp(result);
+
+			await backOnReview(result);
+
+			await fireEvent.click(result.getByTestId(CYCLES_TOP_UP_REVIEW_BACK_BUTTON));
+
+			await waitFor(() => {
+				expect(result.getByTestId(CYCLES_TOP_UP_AMOUNT)).toBeInTheDocument();
+			});
+
+			const input = result.container.querySelector<HTMLInputElement>(
+				`input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`
+			);
+
+			assertNonNullish(input);
+
+			await fireEvent.input(input, { target: { value: '2' } });
+
+			await waitFor(() => {
+				expect(result.getByTestId(CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON)).toBeEnabled();
+			});
+
+			await fireEvent.click(result.getByTestId(CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON));
+
+			await backOnReview(result);
+
+			expect(result.container).toHaveTextContent(
+				replacePlaceholders(en.cycles_top_up.text.unknown_fresh, { $token: 'TCYCLES' })
+			);
+
+			vi.setSystemTime(new Date(2_000));
+
+			await topUp(result);
+
+			await waitFor(() => {
+				expect(topUpSpy).toHaveBeenCalledTimes(2);
+			});
+
+			expect(topUpSpy).toHaveBeenLastCalledWith(
+				expect.objectContaining({ amount: 2_000_000_000_000n, createdAt: 2_000_000_000n })
 			);
 		});
 
