@@ -101,6 +101,17 @@ describe('canister-state.api', () => {
 			);
 		});
 
+		it('should report unknown when the agent cannot be created', async () => {
+			const err = new Error('Root key unavailable');
+			vi.mocked(getAgent).mockRejectedValue(err);
+
+			await expect(getCanisterExistence({ identity: mockIdentity, canisterId })).resolves.toBe(
+				'unknown'
+			);
+			expect(consoleUtils.consoleError).toHaveBeenCalledExactlyOnceWith(err);
+			expect(agent.readState).not.toHaveBeenCalled();
+		});
+
 		it('should report a failed read as unknown', async () => {
 			const err = new Error('Network down');
 			agent.readState.mockRejectedValue(err);
