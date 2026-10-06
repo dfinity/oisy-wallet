@@ -7,6 +7,7 @@ import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { getBalanceQuery } from '$icp/api/bitcoin.api';
 import { balance as icrcBalance } from '$icp/api/icrc-ledger.api';
+import { PLUG_BALANCE_TIMEOUT_MILLISECONDS } from '$lib/constants/plug.constants';
 import { loadPlugBalances } from '$lib/services/plug.services';
 import type { PlugAccount } from '$lib/types/plug';
 import type { Token } from '$lib/types/token';
@@ -206,6 +207,23 @@ describe('loadPlugBalances', () => {
 			vi.mocked(loadSolNetworkBalances).mockRejectedValue(new Error('rpc down'));
 
 			const results = await call([nativeBtc, nativeSol]);
+
+			expect(results.find(({ token: { symbol } }) => symbol === 'BTC')?.balance).toBe(2n);
+			expect(results.find(({ token: { symbol } }) => symbol === 'SOL')?.balance).toBeUndefined();
+		});
+
+		it('shows a lookup that never settles as unavailable once it times out', async () => {
+			vi.useFakeTimers();
+
+			vi.mocked(loadSolNetworkBalances).mockReturnValue(new Promise(() => {}));
+
+			const pending = call([nativeBtc, nativeSol]);
+
+			await vi.advanceTimersByTimeAsync(PLUG_BALANCE_TIMEOUT_MILLISECONDS);
+
+			const results = await pending;
+
+			vi.useRealTimers();
 
 			expect(results.find(({ token: { symbol } }) => symbol === 'BTC')?.balance).toBe(2n);
 			expect(results.find(({ token: { symbol } }) => symbol === 'SOL')?.balance).toBeUndefined();

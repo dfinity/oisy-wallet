@@ -38,3 +38,11 @@ export const PLUG_EVM_PATH_DISCRIMINATOR = 0x01;
  * `$lib/ic-pub-key/src/cli.ts`.
  */
 export const PLUG_ZERO_CHAIN_CODE = '0'.repeat(64);
+
+/**
+ * How long one balance lookup may take before its row is shown as unavailable.
+ * An account renders only once all of its lookups have settled, and a provider
+ * that never answers (or keeps retrying a rate limit) would otherwise leave the
+ * whole account loading.
+ */
+export const PLUG_BALANCE_TIMEOUT_MILLISECONDS = 15_000;
