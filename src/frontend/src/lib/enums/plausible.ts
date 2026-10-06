@@ -33,6 +33,7 @@ export enum PLAUSIBLE_EVENTS {
 	// The countdown to the end of the XDR basket that prices TCYCLES.
 	XDR_BASKET_EXPIRY = 'xdr_basket_expiry',
 	CYCLES_MINT = 'cycles_mint',
+	CYCLES_TOP_UP = 'cycles_top_up',
 	// Sending a transaction, sent when something notable happens to it. The outcome is in
 	// `result_status`, never in the name.
 	TRANSACTION_SEND = 'transaction_send',
