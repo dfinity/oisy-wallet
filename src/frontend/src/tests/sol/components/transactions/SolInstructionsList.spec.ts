@@ -124,7 +124,7 @@ describe('SolInstructionsList', () => {
 		});
 
 		expect(getByTestId('sol-instructions-list')).toHaveTextContent(
-			'Pay 0.04189984 SOL rent to create an account for lb_clmm'
+			/^Create app account for lb_clmm .+ · rent 0\.04189984 SOL$/
 		);
 	});
 

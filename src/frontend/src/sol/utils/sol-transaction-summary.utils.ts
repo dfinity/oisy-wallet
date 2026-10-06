@@ -573,7 +573,7 @@ export const formatSolInstructionSummary = ({
 	symbolOf: (tokenAddress: SplTokenAddress | undefined) => string;
 	decimalsOf: (tokenAddress: SplTokenAddress | undefined) => number;
 	userAddress: OptionSolAddress;
-}): { text: string; detail?: string } => {
+}): { text: string; detail?: string; trailing?: string } => {
 	const amount = (raw: bigint): string =>
 		formatToken({
 			value: raw < ZERO ? -raw : raw,
@@ -675,11 +675,13 @@ export const formatSolInstructionSummary = ({
 		};
 	}
 
-	// The program the account is opened for is rendered beside the line, and is what names it: the
-	// account's own address is one nobody recognises.
+	// Read like the opening of a token account, with the program in place of the token: it is what
+	// names the account, whose own address nobody recognises. The program is rendered after the
+	// sentence, so the rent follows it rather than the sentence.
 	if (kind === 'createAccount' && nonNullish(rent)) {
 		return {
-			text: replacePlaceholders(i18n.transaction.text.instruction_create_program_account, {
+			text: i18n.transaction.text.instruction_create_program_account,
+			trailing: replacePlaceholders(i18n.transaction.text.instruction_rent, {
 				$amount: formatToken({
 					value: rent,
 					unitName: SOLANA_DEFAULT_DECIMALS,

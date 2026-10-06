@@ -68,7 +68,7 @@
 </script>
 
 {#snippet line(instruction: SolInstructionSummary)}
-	{@const { text, detail } = formatSolInstructionSummary({
+	{@const { text, detail, trailing } = formatSolInstructionSummary({
 		instruction,
 		i18n: $i18n,
 		symbolOf,
@@ -117,6 +117,10 @@
 					externalLinkAriaLabel={$i18n.wallet_connect.alt.open_address_block_explorer}
 					inline
 				/>
+			{/if}
+
+			{#if nonNullish(trailing)}
+				<span class="text-tertiary">{`· ${trailing}`}</span>
 			{/if}
 		</span>
 
