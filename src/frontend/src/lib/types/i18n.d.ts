@@ -928,6 +928,8 @@ interface I18nCycles_top_up {
 		topping_up: string;
 		topped_up: string;
 		unknown: string;
+		sent_to_canister: string;
+		sent_to_canister_top_up: string;
 	};
 	error: {
 		invalid_canister_id: string;
