@@ -23,6 +23,10 @@ import {
 	mapCkEthereumTransaction
 } from '$icp/utils/cketh-transactions.utils';
 import {
+	isCyclesLedger,
+	mapCyclesLedgerTransaction
+} from '$icp/utils/cycles-ledger-transactions.utils';
+import {
 	isTokenCkBtcLedger,
 	isTokenCkErc20Ledger,
 	isTokenCkEthLedger
@@ -68,6 +72,10 @@ export const mapIcTransaction = ({
 			env,
 			...rest
 		});
+	}
+
+	if (isCyclesLedger(token)) {
+		return mapCyclesLedgerTransaction({ transaction: transaction as IcrcTransaction, ...rest });
 	}
 
 	return mapIcrcTransaction({ transaction: transaction as IcrcTransaction, ...rest });
