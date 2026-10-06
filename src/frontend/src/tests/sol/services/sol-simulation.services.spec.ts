@@ -1,9 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
-import {
-	getMultipleAccountsInfo,
-	getSolCreateAccountFee,
-	simulateTransactionAccounts
-} from '$sol/api/solana.api';
+import { getMultipleAccountsInfo, simulateTransactionAccounts } from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
 	SYSTEM_PROGRAM_ADDRESS,
@@ -16,6 +12,7 @@ import type {
 	SolanaSimulatedInnerInstructions
 } from '$sol/types/sol-rpc';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
+import * as solInstructionSummaryUtils from '$sol/utils/sol-instruction-summary.utils';
 import {
 	mockAtaAddress,
 	mockAtaAddress2,
@@ -38,7 +35,6 @@ import {
 
 vi.mock('$sol/api/solana.api', () => ({
 	getMultipleAccountsInfo: vi.fn(),
-	getSolCreateAccountFee: vi.fn(),
 	simulateTransactionAccounts: vi.fn()
 }));
 
@@ -110,7 +106,8 @@ describe('sol-simulation.services', () => {
 		base64EncodedTransactionMessage,
 		transactionMessage,
 		address: mockSolAddress,
-		network
+		network,
+		rentExemptMinimum: 2_039_280n
 	});
 
 	const simulated = ({
@@ -129,7 +126,6 @@ describe('sol-simulation.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.mocked(getSolCreateAccountFee).mockResolvedValue(2_039_280n as never);
 		vi.mocked(getMultipleAccountsInfo).mockResolvedValue([]);
 		vi.mocked(simulateTransactionAccounts).mockResolvedValue(simulated({ accounts: [] }));
 	});
@@ -189,6 +185,22 @@ describe('sol-simulation.services', () => {
 		vi.mocked(simulateTransactionAccounts).mockRejectedValue(new Error('rpc down'));
 
 		await expect(simulateSolTransaction(params(message([])))).resolves.toBeUndefined();
+	});
+
+	// A creation may fund a token account with more than its reserve and let the initialisation read
+	// the difference as the balance, so the list can only split the two with the reserve the decode
+	// read, which it is handed rather than asking the chain again.
+	it('should hand the reserve it is given to the instruction list', async () => {
+		const spyMapSolInstructionSummaries = vi.spyOn(
+			solInstructionSummaryUtils,
+			'mapSolInstructionSummaries'
+		);
+
+		await simulateSolTransaction({ ...params(message([])), rentExemptMinimum: 1_488_440n });
+
+		expect(spyMapSolInstructionSummaries).toHaveBeenCalledWith(
+			expect.objectContaining({ rentExemptMinimum: 1_488_440n })
+		);
 	});
 
 	it('should yield nothing without a wallet address', async () => {

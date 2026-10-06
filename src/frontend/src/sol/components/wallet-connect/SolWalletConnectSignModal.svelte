@@ -94,6 +94,9 @@
 	let simulatedInstructions = $state<boolean | undefined>();
 	let messageSummary = $state<SolTransactionSummary | undefined>();
 	let parties = $state<SolTransferParties | undefined>();
+	// What the chain charged a token account to exist when the review was computed. Signing holds the
+	// message's account creations to it, so what the review allowed is what gets signed.
+	let rentExemptMinimum = $state<bigint | undefined>();
 	// The decode is asynchronous, so until it settles the review shows an empty summary and no
 	// warning. Approval waits for it: signing on the strength of a review that has not been
 	// computed yet is exactly what the warnings exist to prevent. A failed decode never flips it,
@@ -121,7 +124,8 @@
 				instructions,
 				simulatedInstructions,
 				messageSummary,
-				parties
+				parties,
+				rentExemptMinimum
 			} = await decodeService({
 				base64EncodedTransactionMessage: data,
 				networkId,
@@ -239,7 +243,8 @@
 				nonNullish(instructions) &&
 				instructions.length > 0 &&
 				!instructions.some(({ kind }) => kind === 'unknown'),
-			closesPayOthers
+			closesPayOthers,
+			rentExemptMinimum
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);

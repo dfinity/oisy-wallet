@@ -11,7 +11,7 @@ import { trackEvent } from '$lib/services/analytics.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { estimatePriorityFee, getAccountInfo } from '$sol/api/solana.api';
+import { estimatePriorityFee, getAccountInfo, getSolCreateAccountFee } from '$sol/api/solana.api';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_MESSAGE,
@@ -56,6 +56,7 @@ import {
 	getBase58Decoder,
 	getBase58Encoder,
 	isTransactionMessageWithBlockhashLifetime,
+	lamports,
 	type Rpc,
 	type SolanaRpcApi
 } from '@solana/kit';
@@ -87,6 +88,7 @@ vi.mock('$sol/api/solana.api', () => ({
 	getAccountInfo: vi.fn(),
 	estimatePriorityFee: vi.fn(),
 	getMultipleAccountsInfo: vi.fn(),
+	getSolCreateAccountFee: vi.fn(),
 	simulateTransactionAccounts: vi.fn()
 }));
 
@@ -105,6 +107,8 @@ describe('wallet-connect.services', () => {
 		destination: mockAtaAddress
 	};
 	const mockTransactionMessage = { mock: 'mockTransactionMessage' };
+	// What mainnet charged a token account to exist on 2026-10-06.
+	const mockRentExemptMinimum = lamports(1_488_440n);
 
 	// Without a simulation the lists come from the message's own instructions and say so. The mock
 	// message states none, so both are empty and the partial marker is the whole answer.
@@ -149,6 +153,8 @@ describe('wallet-connect.services', () => {
 		vi.mocked(getAccountInfo).mockResolvedValue({
 			value: null
 		} as unknown as Awaited<ReturnType<typeof getAccountInfo>>);
+
+		vi.mocked(getSolCreateAccountFee).mockResolvedValue(mockRentExemptMinimum);
 
 		vi.mocked(isTransactionMessageWithBlockhashLifetime).mockReturnValue(true);
 
@@ -197,9 +203,14 @@ describe('wallet-connect.services', () => {
 			});
 			expect(mapSolTransactionMessage).toHaveBeenCalledWith({
 				transactionMessage: mockParsedTransaction,
-				userAddress: mockSolAddress
+				userAddress: mockSolAddress,
+				rentExemptMinimum: mockRentExemptMinimum
 			});
-			expect(result).toEqual({ ...mockMappedTransaction, parties: emptyPartialParties });
+			expect(result).toEqual({
+				...mockMappedTransaction,
+				rentExemptMinimum: mockRentExemptMinimum,
+				parties: emptyPartialParties
+			});
 		});
 
 		it('should recover the SPL mint from the token account when the mapper did not surface it', async () => {
@@ -230,6 +241,7 @@ describe('wallet-connect.services', () => {
 				source: mockAtaAddress,
 				destination: mockSolAddress2,
 				tokenAddress: mockSplAddress,
+				rentExemptMinimum: mockRentExemptMinimum,
 				parties: emptyPartialParties
 			});
 		});
@@ -264,6 +276,7 @@ describe('wallet-connect.services', () => {
 				amount: 5n,
 				source: mockSolAddress,
 				destination: mockAtaAddress,
+				rentExemptMinimum: mockRentExemptMinimum,
 				parties: emptyPartialParties
 			});
 		});
@@ -290,7 +303,56 @@ describe('wallet-connect.services', () => {
 				amount: 7n,
 				source: mockAtaAddress,
 				destination: mockSolAddress2,
+				rentExemptMinimum: mockRentExemptMinimum,
 				parties: emptyPartialParties
+			});
+		});
+
+		// Every account creation in the message is held to what the chain charges a token account to
+		// exist: funded above it, a creation is a payment rather than rent, and is refused.
+		describe('the rent reserve', () => {
+			const base64EncodedTransactionMessage = 'mockBase64Transaction';
+			const networkId = SOLANA_MAINNET_NETWORK_ID;
+
+			it('should hold the message to the reserve the chain charges and hand it on', async () => {
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(getSolCreateAccountFee).toHaveBeenCalledExactlyOnceWith('mainnet');
+				expect(mapSolTransactionMessage).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ rentExemptMinimum: mockRentExemptMinimum })
+				);
+				expect(simulateSolTransaction).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ rentExemptMinimum: mockRentExemptMinimum })
+				);
+				expect(result).toEqual(
+					expect.objectContaining({ rentExemptMinimum: mockRentExemptMinimum })
+				);
+			});
+
+			// Without it a creation for a program has no line to be held to, which the mapper refuses,
+			// so the review holds the button rather than offering what signing would refuse.
+			it('should decode without a reserve when the chain does not answer', async () => {
+				vi.mocked(getSolCreateAccountFee).mockRejectedValueOnce(new Error('RPC down'));
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(mapSolTransactionMessage).toHaveBeenCalledExactlyOnceWith({
+					transactionMessage: mockParsedTransaction,
+					userAddress: mockSolAddress,
+					rentExemptMinimum: undefined
+				});
+				expect(simulateSolTransaction).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ rentExemptMinimum: undefined })
+				);
+				expect(result).not.toHaveProperty('rentExemptMinimum');
 			});
 		});
 
@@ -326,7 +388,8 @@ describe('wallet-connect.services', () => {
 					base64EncodedTransactionMessage,
 					transactionMessage: mockParsedTransaction,
 					address: mockSolAddress,
-					network: 'mainnet'
+					network: 'mainnet',
+					rentExemptMinimum: mockRentExemptMinimum
 				});
 				expect(result).toEqual(expect.objectContaining({ preview: mockPreview }));
 			});
@@ -340,7 +403,11 @@ describe('wallet-connect.services', () => {
 					address: mockSolAddress
 				});
 
-				expect(result).toEqual({ ...mockMappedTransaction, parties: mockParties });
+				expect(result).toEqual({
+					...mockMappedTransaction,
+					rentExemptMinimum: mockRentExemptMinimum,
+					parties: mockParties
+				});
 				expect(result).not.toHaveProperty('preview');
 			});
 		});
@@ -391,7 +458,11 @@ describe('wallet-connect.services', () => {
 				});
 
 				expect(result).not.toHaveProperty('simulatedInstructions');
-				expect(result).toEqual({ ...mockMappedTransaction, parties: mockParties });
+				expect(result).toEqual({
+					...mockMappedTransaction,
+					rentExemptMinimum: mockRentExemptMinimum,
+					parties: mockParties
+				});
 			});
 
 			// An empty list is the run's answer that there is nothing to list. Rebuilt from the
@@ -544,7 +615,8 @@ describe('wallet-connect.services', () => {
 			request: mockRequest,
 			listener: mockListener,
 			simulated: true,
-			closesPayOthers: false
+			closesPayOthers: false,
+			rentExemptMinimum: mockRentExemptMinimum
 		};
 
 		describe(`with method ${SESSION_REQUEST_SOL_SIGN_TRANSACTION}`, () => {
@@ -565,7 +637,8 @@ describe('wallet-connect.services', () => {
 				request: mockRequest,
 				listener: mockListener,
 				simulated: true,
-				closesPayOthers: false
+				closesPayOthers: false,
+				rentExemptMinimum: mockRentExemptMinimum
 			};
 
 			const expected = {
@@ -601,8 +674,13 @@ describe('wallet-connect.services', () => {
 
 				expect(mapSolTransactionMessage).toHaveBeenCalledExactlyOnceWith({
 					transactionMessage: mockParsedTransaction,
-					userAddress: mockSolAddress
+					userAddress: mockSolAddress,
+					rentExemptMinimum: mockRentExemptMinimum
 				});
+
+				// Signing holds the message to the reserve the review was computed with rather than
+				// asking the chain again.
+				expect(getSolCreateAccountFee).not.toHaveBeenCalled();
 
 				expect(decodeTransactionMessage).toHaveBeenCalledExactlyOnceWith(mockTransaction);
 
@@ -704,7 +782,8 @@ describe('wallet-connect.services', () => {
 				request: mockRequest,
 				listener: mockListener,
 				simulated: true,
-				closesPayOthers: false
+				closesPayOthers: false,
+				rentExemptMinimum: mockRentExemptMinimum
 			};
 
 			it('should show an error if the address is nullish', async () => {
@@ -738,7 +817,8 @@ describe('wallet-connect.services', () => {
 
 				expect(mapSolTransactionMessage).toHaveBeenCalledExactlyOnceWith({
 					transactionMessage: mockParsedTransaction,
-					userAddress: mockSolAddress
+					userAddress: mockSolAddress,
+					rentExemptMinimum: mockRentExemptMinimum
 				});
 
 				expect(decodeTransactionMessage).toHaveBeenCalledExactlyOnceWith(mockTransaction);

@@ -72,10 +72,14 @@ const conflicts = ({
 
 export const mapSolTransactionMessage = ({
 	transactionMessage: { instructions },
-	userAddress
+	userAddress,
+	rentExemptMinimum
 }: {
 	transactionMessage: TransactionMessage;
 	userAddress?: OptionSolAddress;
+	// What the chain charges a token account of the usual size to exist, which every account
+	// creation in the message is held to.
+	rentExemptMinimum?: bigint;
 }): MappedSolTransaction => {
 	const instructionsList = Array.from(instructions);
 
@@ -92,7 +96,7 @@ export const mapSolTransactionMessage = ({
 				computeUnitPrice,
 				computeUnitLimit,
 				ambiguous: instructionAmbiguous
-			} = mapSolInstruction({ instruction, userAddress });
+			} = mapSolInstruction({ instruction, userAddress, rentExemptMinimum });
 
 			// The summary holds a single value per field, so any later instruction that
 			// disagrees on source, destination or payer would be silently dropped from the

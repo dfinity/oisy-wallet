@@ -19,7 +19,7 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { estimatePriorityFee, getAccountInfo } from '$sol/api/solana.api';
+import { estimatePriorityFee, getAccountInfo, getSolCreateAccountFee } from '$sol/api/solana.api';
 import { TOKEN_2022_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
@@ -95,6 +95,10 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	// cannot see a close a program makes inside its own call, and handed on for the same reason
 	// the simulated flag is.
 	closesPayOthers: boolean;
+	// What the chain charges a token account to exist, as the decode read it. Signing holds the
+	// message's account creations to the same line the review did, so the two cannot disagree, and
+	// approving adds no round trip of its own.
+	rentExemptMinimum: bigint | undefined;
 };
 
 export const decode = async ({
@@ -104,14 +108,22 @@ export const decode = async ({
 }: WalletConnectDecodeTransactionParams) => {
 	const solNetwork = safeMapNetworkIdToNetwork(networkId);
 
-	const parsedTransactionMessage = await parseSolBase64TransactionMessage({
-		transactionMessage: base64EncodedTransactionMessage,
-		rpc: solanaHttpRpc(solNetwork)
-	});
+	// What the chain charges a token account to exist, which every account creation in the message
+	// is held to: anything funded above it is a payment rather than rent. Read alongside the message
+	// so the review waits no longer for it. Best effort - without it a creation for a program has no
+	// line to be held to and is refused.
+	const [parsedTransactionMessage, rentExemptMinimum] = await Promise.all([
+		parseSolBase64TransactionMessage({
+			transactionMessage: base64EncodedTransactionMessage,
+			rpc: solanaHttpRpc(solNetwork)
+		}),
+		getSolCreateAccountFee(solNetwork).catch(() => undefined)
+	]);
 
 	const mappedTransaction = mapSolTransactionMessage({
 		transactionMessage: parsedTransactionMessage,
-		userAddress: address
+		userAddress: address,
+		rentExemptMinimum
 	});
 
 	// The review is synchronous, so both the estimate the requested fee is judged against and the
@@ -126,7 +138,8 @@ export const decode = async ({
 			base64EncodedTransactionMessage,
 			transactionMessage: parsedTransactionMessage,
 			address,
-			network: solNetwork
+			network: solNetwork,
+			rentExemptMinimum
 		})
 	]);
 
@@ -215,6 +228,8 @@ export const decode = async ({
 			simulatedInstructions: nonNullish(simulatedInstructions)
 		}),
 		...(nonNullish(tokenAddress) && { tokenAddress }),
+		// Handed on to signing, which holds the message to the line this review was computed with.
+		...(nonNullish(rentExemptMinimum) && { rentExemptMinimum }),
 		parties
 	};
 };
@@ -458,6 +473,7 @@ export const sign = ({
 	identity,
 	simulated,
 	closesPayOthers,
+	rentExemptMinimum,
 	...params
 }: WalletConnectSignTransactionParams): Promise<ResultSuccess> =>
 	execute({
@@ -502,7 +518,8 @@ export const sign = ({
 
 			const { amount, destination, ambiguous, unreviewed } = mapSolTransactionMessage({
 				transactionMessage: parsedTransactionMessage,
-				userAddress: address
+				userAddress: address,
+				rentExemptMinimum
 			});
 
 			// The balance is gone the moment this is signed, and the message mapper cannot see a close

@@ -1,9 +1,5 @@
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
-import {
-	getMultipleAccountsInfo,
-	getSolCreateAccountFee,
-	simulateTransactionAccounts
-} from '$sol/api/solana.api';
+import { getMultipleAccountsInfo, simulateTransactionAccounts } from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
 	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS
@@ -33,12 +29,18 @@ const simulate = async ({
 	base64EncodedTransactionMessage,
 	transactionMessage,
 	address,
-	network
+	network,
+	rentExemptMinimum
 }: {
 	base64EncodedTransactionMessage: string;
 	transactionMessage: CompilableTransactionMessage;
 	address: SolAddress;
 	network: SolanaNetworkType;
+	// The reserve a token account costs to exist. A creation may fund one with more than that and let
+	// its initialisation read the difference as the balance, and nothing in the message says where
+	// the line falls - without it the balance of an account this message opens is stated as unknown
+	// rather than guessed at.
+	rentExemptMinimum: bigint | undefined;
 }): Promise<SolSimulationResult | undefined> => {
 	const addresses = selectSolSimulationAddresses(transactionMessage);
 
@@ -49,17 +51,11 @@ const simulate = async ({
 	}
 
 	// The "before" read does not depend on the simulation's outcome, so the two go out together
-	// and the preview costs one round trip rather than two. The reserve a token account costs to
-	// exist joins them: a creation may fund one with more than that and let its initialisation
-	// read the difference as the balance, and nothing in the message says where the line falls.
-	// Best effort - without it the balance of an account this message opens is stated as unknown
-	// rather than guessed at.
-	const [preAccounts, { err, accounts: postAccounts, innerInstructions }, rentExemptMinimum] =
-		await Promise.all([
-			getMultipleAccountsInfo({ addresses, network }),
-			simulateTransactionAccounts({ base64EncodedTransactionMessage, addresses, network }),
-			getSolCreateAccountFee(network).catch(() => undefined)
-		]);
+	// and the preview costs one round trip rather than two.
+	const [preAccounts, { err, accounts: postAccounts, innerInstructions }] = await Promise.all([
+		getMultipleAccountsInfo({ addresses, network }),
+		simulateTransactionAccounts({ base64EncodedTransactionMessage, addresses, network })
+	]);
 
 	// A run that failed rolled its changes back, so its post-state describes nothing the user
 	// would actually get. Showing those deltas would be worse than showing none.
@@ -218,6 +214,7 @@ export const simulateSolTransaction = async (params: {
 	transactionMessage: CompilableTransactionMessage;
 	address: OptionSolAddress;
 	network: SolanaNetworkType;
+	rentExemptMinimum: bigint | undefined;
 }): Promise<SolSimulationResult | undefined> => {
 	const { address } = params;
 
