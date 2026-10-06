@@ -285,6 +285,7 @@ describe('CyclesTopUpModal', () => {
 			expect(toastsErrorSpy).toHaveBeenCalledWith({
 				msg: {
 					text: replacePlaceholders(en.cycles_top_up.error.refunded, {
+						$refund: '1.4999',
 						$token: 'TCYCLES',
 						$fees: '0.0002'
 					})
