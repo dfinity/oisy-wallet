@@ -1199,6 +1199,7 @@
 			"topping_up": "Recargando $canister...",
 			"topped_up": "$canister recargado con $amount $token.",
 			"unknown": "OISY aún no puede saber si la recarga se completó. Si fue así, tu actividad de $token la mostrará. Vuelve a recargar para enviar la misma recarga: solo puede completarse una vez.",
+			"unknown_fresh": "",
 			"sent_to_canister": "Enviar $token a un canister no lo recarga. Los $token llegan a la cuenta del canister, y el canister solo recibe ciclos si su propio código los retira.",
 			"sent_to_canister_top_up": "Para añadir ciclos a un canister, usa «Recargar» en la página de $token."
 		},

@@ -1198,7 +1198,8 @@
 			"one_way": "A top-up cannot be undone: the cycles stay in the canister.",
 			"topping_up": "Topping up $canister...",
 			"topped_up": "Topped up $canister with $amount $token.",
-			"unknown": "OISY can't tell yet whether the top-up went through. Your $token activity will show it if it did. Top up again to send the same top-up: it can only go through once.",
+			"unknown": "OISY can't tell yet whether the top-up went through. Your $token activity will show it if it did. Top up again to resend the same top-up: it can only go through once. A new or changed top-up would add cycles again if this one went through.",
+			"unknown_fresh": "OISY can't tell yet whether your last top-up went through. If it did, this top-up adds cycles again. Check your $token activity first.",
 			"sent_to_canister": "Sending $token to a canister doesn't top it up. The $token land in the canister's account, and the canister only gets cycles if its own code withdraws them.",
 			"sent_to_canister_top_up": "To add cycles to a canister, use Top up on the $token page."
 		},

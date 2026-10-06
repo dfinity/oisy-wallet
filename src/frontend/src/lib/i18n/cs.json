@@ -1199,6 +1199,7 @@
 			"topping_up": "Dobíjení $canister...",
 			"topped_up": "Kanistr $canister byl dobit o $amount $token.",
 			"unknown": "OISY zatím nedokáže určit, zda dobití proběhlo. Pokud ano, uvidíte ho v aktivitě $token. Dobijte znovu, abyste odeslali stejné dobití: může proběhnout jen jednou.",
+			"unknown_fresh": "",
 			"sent_to_canister": "Odesláním $token do kanistru se kanistr nedobije. $token skončí na účtu kanistru a kanistr získá cykly, jen pokud si je vybere jeho vlastní kód.",
 			"sent_to_canister_top_up": "Chcete-li kanistru přidat cykly, použijte „Dobít“ na stránce $token."
 		},

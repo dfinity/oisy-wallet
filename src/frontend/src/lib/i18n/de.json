@@ -1199,6 +1199,7 @@
 			"topping_up": "$canister wird aufgeladen...",
 			"topped_up": "$canister mit $amount $token aufgeladen.",
 			"unknown": "OISY kann noch nicht sagen, ob die Aufladung durchgegangen ist. Falls ja, zeigt deine $token-Aktivität sie an. Lade erneut auf, um dieselbe Aufladung zu senden: Sie kann nur einmal durchgehen.",
+			"unknown_fresh": "",
 			"sent_to_canister": "$token an einen Canister zu senden, lädt ihn nicht auf. Die $token landen auf dem Konto des Canisters, und der Canister erhält nur dann Cycles, wenn sein eigener Code sie abhebt.",
 			"sent_to_canister_top_up": "Um einem Canister Cycles hinzuzufügen, nutze „Aufladen“ auf der $token-Seite."
 		},

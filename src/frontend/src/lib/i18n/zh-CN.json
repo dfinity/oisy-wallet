@@ -1199,6 +1199,7 @@
 			"topping_up": "正在为 $canister 充值...",
 			"topped_up": "已为 $canister 充值 $amount $token。",
 			"unknown": "OISY 暂时无法确定充值是否成功。如果成功，您的 $token 活动中会显示。再次充值会发送同一笔充值：它只能成功一次。",
+			"unknown_fresh": "",
 			"sent_to_canister": "向 Canister 发送 $token 不会为其充值。这些 $token 会进入该 Canister 的账户，只有当 Canister 自己的代码将其提取时，它才能获得 Cycles。",
 			"sent_to_canister_top_up": "要为 Canister 添加 Cycles，请在 $token 页面使用“充值”。"
 		},

@@ -1199,6 +1199,7 @@
 			"topping_up": "Doładowywanie $canister...",
 			"topped_up": "Doładowano $canister kwotą $amount $token.",
 			"unknown": "OISY nie wie jeszcze, czy doładowanie się powiodło. Jeśli tak, zobaczysz je w aktywności $token. Doładuj ponownie, aby wysłać to samo doładowanie: może się powieść tylko raz.",
+			"unknown_fresh": "",
 			"sent_to_canister": "Wysłanie $token do kanistra go nie doładowuje. $token trafiają na konto kanistra, a kanister dostaje cykle tylko wtedy, gdy wypłaci je jego własny kod.",
 			"sent_to_canister_top_up": "Aby dodać cykle do kanistra, użyj opcji „Doładuj” na stronie $token."
 		},

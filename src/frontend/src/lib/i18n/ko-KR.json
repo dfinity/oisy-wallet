@@ -1199,6 +1199,7 @@
 			"topping_up": "$canister 충전 중...",
 			"topped_up": "$canister에 $amount $token을 충전했습니다.",
 			"unknown": "OISY가 아직 충전 완료 여부를 확인할 수 없습니다. 완료되었다면 $token 활동에 표시됩니다. 다시 충전하면 같은 충전이 전송되며, 한 번만 처리됩니다.",
+			"unknown_fresh": "",
 			"sent_to_canister": "캐니스터에 $token을 보내도 충전되지 않습니다. $token은 캐니스터의 계정으로 들어가며, 캐니스터 자체 코드가 인출할 때만 사이클이 됩니다.",
 			"sent_to_canister_top_up": "캐니스터에 사이클을 추가하려면 $token 페이지에서 '충전'을 사용하세요."
 		},
