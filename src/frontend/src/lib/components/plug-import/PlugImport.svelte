@@ -1,20 +1,30 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
+	import type { Principal } from '@icp-sdk/core/principal';
 	import { SvelteMap } from 'svelte/reactivity';
+	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import PlugImportAccount from '$lib/components/plug-import/PlugImportAccount.svelte';
 	import PlugImportForm from '$lib/components/plug-import/PlugImportForm.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { PLUG_IMPORT_ERROR, PLUG_IMPORT_NOTICES } from '$lib/constants/test-ids.constants';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledFungibleTokens } from '$lib/derived/tokens.derived';
+	import { sweepPlugEvmBalance } from '$lib/services/plug-evm.services';
 	import { loadPlugBalances, sweepPlugBalance } from '$lib/services/plug.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import type { NetworkId } from '$lib/types/network';
 	import type { PlugAccount, PlugBalance } from '$lib/types/plug';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 	import {
 		derivePlugAccounts,
 		derivePlugIdentity,
-		isPlugSweepableToken
+		isPlugEvmContractToken,
+		isPlugSweepableToken,
+		plugEvmNetwork,
+		plugRowKey
 	} from '$lib/utils/plug.utils';
 
 	// The phrase lives here and nowhere else: no store, no storage, no URL. Leaving
@@ -39,33 +49,87 @@
 		balances.set(account.index, loaded);
 	};
 
+	// Which chain's send path a row takes. The imported identity is derived per call
+	// and never stored, so it lives only for the duration of one transfer.
+	const sendFor = async ({
+		account,
+		row: { token, address },
+		amount,
+		destination
+	}: {
+		account: PlugAccount;
+		row: PlugBalance;
+		amount: bigint;
+		destination: Principal;
+	}): Promise<void> => {
+		const identity = derivePlugIdentity({ phrase, index: account.index });
+		const { network } = token;
+
+		if (isNetworkIdEthereum(network.id) || isNetworkIdEvm(network.id)) {
+			const evmNetwork = plugEvmNetwork(network.id);
+
+			if (isNullish(evmNetwork)) {
+				throw new Error(`No EVM network configured for ${network.name}`);
+			}
+
+			// The EVM destination is the user's own OISY EVM address, not their principal.
+			if (isNullish($ethAddress)) {
+				throw new Error('Your OISY Ethereum address is not loaded yet');
+			}
+
+			await sweepPlugEvmBalance({
+				identity,
+				token,
+				balance: amount,
+				nativeBalance: nativeBalanceFor({ account, networkId: network.id }),
+				destination: mapAddressStartsWith0x($ethAddress),
+				from: address,
+				network: evmNetwork
+			});
+
+			return;
+		}
+
+		if (!isPlugSweepableToken(token)) {
+			throw new Error(`No send path for ${token.symbol} on ${network.name}`);
+		}
+
+		await sweepPlugBalance({ identity, token, amount, destination });
+	};
+
+	const nativeBalanceFor = ({
+		account,
+		networkId
+	}: {
+		account: PlugAccount;
+		networkId: NetworkId;
+	}): bigint =>
+		(balances.get(account.index) ?? []).find(
+			({ token }) => token.network.id === networkId && !isPlugEvmContractToken(token)
+		)?.balance ?? ZERO;
+
 	const send = async ({
 		account,
-		balance: { token },
+		balance: row,
 		amount
 	}: {
 		account: PlugAccount;
 		balance: PlugBalance;
 		amount: bigint;
 	}): Promise<void> => {
+		const { token } = row;
 		const destination = $authIdentity?.getPrincipal();
 
-		// Both are guaranteed by the UI — the row only offers an action for a sweepable
-		// IC token, and the page is behind auth — but the transfer must not be attempted
-		// on a half-known state.
-		if (isNullish(destination) || !isPlugSweepableToken(token)) {
+		// Guaranteed by the UI, which only offers an action on a movable row behind
+		// auth — but a transfer must not be attempted on a half-known state.
+		if (isNullish(destination)) {
 			return;
 		}
 
-		sending = token.symbol;
+		sending = plugRowKey(row);
 
 		try {
-			await sweepPlugBalance({
-				identity: derivePlugIdentity({ phrase, index: account.index }),
-				token,
-				amount,
-				destination
-			});
+			await sendFor({ account, row, amount, destination });
 
 			toastsShow({
 				text: replacePlaceholders($i18n.plug_import.text.send_success, { $symbol: token.symbol }),

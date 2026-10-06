@@ -106,9 +106,31 @@ Sign locally with the `Secp256k1KeyIdentity` derived from the phrase and transfe
 
 **Irreversibility is confirmed.** Each send goes through the shared `ConfirmButtonWithModal`, naming the amount and symbol, since the transfer cannot be undone. Only one send runs at a time; the row in flight shows a spinner and the others are disabled. On success the account's balances reload so the row reflects reality rather than an optimistic guess.
 
-## Part 3 — PR3: the other chains
+## Part 3 — the other chains, one PR each
 
-BTC / EVM / SOL cannot be signed by OISY. Two viable paths, and the choice is a product decision rather than an engineering one — see Pending decisions.
+_Resolved:_ the source wallet's helper canister is called to sign, and OISY broadcasts. Its `CallType` variant offers a `Send` mode that would broadcast for us; it is deliberately unused, so we see the transaction hash and the RPC error directly and a third party stays off the critical path for everything but the signature.
+
+The interface is fetched from the canister via `__get_candid_interface_tmp_hack` and vendored like any other third-party canister, because it is published nowhere else. `eth_address` confirmed the canister accepts callers other than the source wallet, and returned exactly the address derived offline.
+
+Note the asymmetry that makes this necessary at all: on the management canister, `ecdsa_public_key` and `schnorr_public_key` take a `canister_id` argument, but `sign_with_ecdsa` and `sign_with_schnorr` do not — the key is derived from the caller. So these addresses are readable by anyone and signable only by that canister. **If it ever stops answering, those funds are unreachable by anybody, the source wallet included.** No implementation here can change that.
+
+### EVM
+
+Gas is paid in the network's native coin out of the _imported_ account, which drives the whole shape:
+
+- A **native** send can only move `balance - gas`; sending the full balance always fails.
+- A **token** send needs native coin sitting in that same account — a common gap for someone who only ever received tokens. The row is blocked with the coin named, rather than greyed out.
+- Both are enforced in the send path against live fee data, not trusted from the UI, because the fee moves between the moment a row renders and the moment the user confirms.
+
+Fee data comes from `getEthFeeDataWithProvider`, which already applies the per-chain floors (BSC minimums) — worth reusing rather than reading `getFeeData` raw. The nonce comes from OISY's own provider rather than the canister's `transaction_count`, keeping a third party off the path.
+
+The EVM destination is the user's **OISY EVM address**, not their principal — unlike the IC sweep.
+
+**A row's identity is network plus symbol.** Symbol alone is not unique and neither is the address: the same token enabled on several EVM networks yields rows sharing both. The first cut keyed the in-flight send on symbol, which would have spun two rows at once.
+
+### BTC and SOL
+
+Not yet built. SOL should fit OISY's existing `TransactionPartialSigner` abstraction via `sign_sol`. BTC needs UTXOs, fee percentiles and a broadcast path — the last is an open question, since `bitcoin_send_transaction` is canister-only.
 
 ## PRODUCT.md updates (land with the behaviour change)
 
@@ -124,6 +146,6 @@ BTC / EVM / SOL cannot be signed by OISY. Two viable paths, and the choice is a 
 
 ## Pending decisions (facts are clear — someone needs to decide)
 
-- **PR3 approach.** Either (a) call Plug's helper canister as the imported identity — full in-OISY UX for all chains, but an undocumented dependency on a third party's canister that can change under us, and possibly their commission; or (b) show the user their OISY destination addresses and have them send from within Plug — zero dependency, extra step for the user. (a) should not ship as a silently reverse-engineered integration; it warrants talking to Plug first.
+- ~~**PR3 approach.**~~ _Resolved:_ (a) — call the helper canister to sign, broadcast from OISY. Verified that plain sends carry no commission (the commission constants in their bundle belong to the HyperLiquid/trade paths) and that the canister accepts outside callers. The residual risk is that this is an undocumented interface which their upgrade can break; it is accepted deliberately, on the assumption the canister stays alive.
 - **Whether the page ships behind a feature flag.** The `$env/*.env.ts` flag pattern is available. Given it is a Settings-linked page handling seed phrases, a flag would allow shipping the read path without exposing it until reviewed.
 - **Security review scope.** This is the first OISY code to hold raw private key material in memory. The review should cover the memory-hygiene guarantees above (no autofill, no URL, no logs, no persistence) as much as the derivation correctness.
