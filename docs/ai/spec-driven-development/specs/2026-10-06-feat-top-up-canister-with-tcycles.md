@@ -70,9 +70,9 @@ The modal follows the Send flow's shape: canister, amount, review. The title is 
 
 1. One step, "Topping up …", while the call runs. The modal locks, as Mint's does.
 2. **Done**, or a `Duplicate` answer, which means an identical earlier request went through: the modal closes with a confirmation, "Topped up <canister> with X TCYCLES", and the TCYCLES balance refreshes.
-3. **Refused before anything moved** (`InsufficientFunds`, `InvalidReceiver`, `TooOld`, `CreatedInFuture`, `TemporarilyUnavailable`, `BadFee`, `GenericError`): an error that says nothing left the wallet, and the user is back on Review. For the two clock answers, the next step it offers is to check the device's clock.
-4. **Deposit failed** (`FailedToWithdraw`): an error that says the canister could not receive the cycles, that the amount came back minus 0.0002 TCYCLES in fees, and to check the canister ID. Following the failure copy rules of `docs/ai/frontend/brand-and-copy.md`, the Internet Computer's own reason text is not shown.
-5. **No answer** (the call timed out or the connection dropped): the top-up may or may not have gone through, so it is reported as neither. The modal says it cannot tell yet, that TCYCLES Activity will show the top-up if it happened, and offers to try again. Trying again sends the identical request, which the ledger answers as a duplicate if the first one went through (§3.5), so a top-up can never run twice. A new modal makes a new request.
+3. **Refused before anything moved** (`InsufficientFunds`, `InvalidReceiver`, `CreatedInFuture`, `TemporarilyUnavailable`, `BadFee`, `GenericError`, or `TooOld` on the first attempt): an error that says nothing left the wallet, and the user is back on Review. For `CreatedInFuture` and first-attempt `TooOld`, the next step it offers is to check the device's clock. If an unanswered request is retried and returns `TooOld`, only the retry is known to have been refused: the original outcome remains unknown. Direct the user to TCYCLES Activity and do not automatically create a fresh withdrawal.
+4. **Deposit failed** (`FailedToWithdraw`): an error that says the canister could not receive the cycles, that the entered amount came back minus 0.0001 TCYCLES, that the attempt cost 0.0002 TCYCLES in total fees, and to check the canister ID. Following the failure copy rules of `docs/ai/frontend/brand-and-copy.md`, the Internet Computer's own reason text is not shown.
+5. **No answer** (the call timed out or the connection dropped): the top-up may or may not have gone through, so it is reported as neither. The modal says it cannot tell yet, that TCYCLES Activity will show the top-up if it happened, and offers to try again. Trying again sends the identical request, including `created_at_time`, so retrying this request cannot create a second withdrawal (§3.5). A new modal makes a distinct request. While the earlier outcome is unknown, the message warns that starting a fresh request can cause an additional top-up if the earlier one succeeded, and directs the user to check TCYCLES Activity first.
 
 ### 5.5 Activity
 
@@ -112,6 +112,8 @@ One structured event family, **`cycles_top_up`**, under `event_context: compute`
 
 That includes an amount range (a bucket, as `docs/ai/frontend/analytics.md` §6 suggests for amounts). A bucket hides a top-up only when many burns in the same range happen around the event's time, and on the cycles ledger almost none do above $1: in 600 blocks sampled over about 11 hours on 2026-10-05/06, 584 of the 586 top-ups were under $1, 2 were between $1 and $10, and none was larger. A top-up of $1 or more would be one of a handful a day, so its range and time would still point at its burn (§12, D6).
 
+The event's own time remains. `executing` and then `success` or `error` arrive as they happen, so per-event timestamps bracket the burn within seconds, and in the same sample the ledger ran 5 to 27 blocks a minute: such a window often holds a single burn. Every OISY event tied to an on-chain action (sends, swaps, mints) carries the same exposure, so whether to blur event times is a decision for `docs/ai/frontend/analytics.md` §6 as a whole, not for this flow.
+
 ## 9. Acceptance criteria
 
 - **AC1** With the flag on, the TCYCLES page shows Top up as its fifth hero button, after Mint, with the fuel pump icon (D5), and no other token page does. With the flag off, it is absent.
@@ -121,8 +123,8 @@ That includes an amount range (a bucket, as `docs/ai/frontend/analytics.md` §6 
 - **AC5** The amount step shows the balance, Max (balance − 0.0001 TCYCLES, or 0), the fiat value and the fee, and cannot continue with no amount, with an amount that with its fee exceeds the balance, or with an amount of 0.0001 TCYCLES or less.
 - **AC6** Review shows the full canister ID, the amount with its fiat value, the fee, the total and the notice; Back keeps the inputs.
 - **AC7** Top up makes one `withdraw` call from the user's default account, with the entered canister and amount and a creation timestamp. Success, or `Duplicate`, closes the modal with the confirmation and refreshes the balance.
-- **AC8** A refusal before anything moved says nothing left the wallet. `FailedToWithdraw` says the amount came back minus 0.0002 TCYCLES. Neither shows the Internet Computer's own reason text.
-- **AC9** A call without an answer is reported as neither done nor failed, and trying again resends the identical request.
+- **AC8** A refusal before anything moved says nothing left the wallet. `FailedToWithdraw` says the entered amount came back minus 0.0001 TCYCLES and that the attempt cost 0.0002 TCYCLES in total fees. Neither shows the Internet Computer's own reason text.
+- **AC9** A call without an answer is reported as neither done nor failed, and trying again resends the identical request. A resent request that gets `TooOld` keeps the outcome unknown and points to TCYCLES Activity, without starting a fresh request. While the outcome is unknown, Review warns that a fresh request, after a change of amount or canister or in a new modal, can top up again, and points to TCYCLES Activity first.
 - **AC10** TCYCLES Activity shows a burn whose memo names a canister as Top up with that canister, in the list and in the details, the refund of a failed top-up as Top-up refund, and every other burn as Burn.
 - **AC11** No ICP, ICRC (top-ups included), ckBTC or ckETH burn appears in a send flow's Recently used list or suppresses the first-time destination warning, and tests pin it. The CMC deposit account stays excluded.
 - **AC12** The analytics fire as in §8 and never carry an amount, a canister ID or a principal.
@@ -145,14 +147,14 @@ That includes an amount range (a bucket, as `docs/ai/frontend/analytics.md` §6 
 
 ## 11. Implementation plan
 
-Six PRs (§12, D7), each in granular commits:
+Six PRs (§12, D7), each in granular commits. Each PR updates PRODUCT.md for the behaviour it ships, as `workflow.md` asks:
 
 1. **#14217, `docs(ai): add spec for topping up a canister with TCYCLES`**: this spec.
 2. **#14229, cycles-ledger client**: the bindings (§7.1, approved in D3), the `withdraw` wrapper, the top-up service mapping each `withdraw` answer to §5.4, and the canister existence check (§5.1.2, §7.3), with unit tests.
-3. **Activity labels and burns**: the Top up and Top-up refund labels in TCYCLES Activity (§5.5), and the tests pinning burns out of Recently used (§6).
-4. **UI**: the flag, the fuel pump icon, the button, the modal, Recently topped up and analytics, in English, with component tests.
-5. **Send warning**: the warning for TCYCLES sent to a canister (§5.6), in English, with tests. It comes after PR4 because it points to the Top up flow.
-6. **Translations and PRODUCT.md**: every shipped locale, and the PRODUCT.md entries for Top up, its Activity labels, the send warning and the rule that burns never count.
+3. **Activity labels and burns**: the Top up and Top-up refund labels in TCYCLES Activity (§5.5), and the tests pinning burns out of Recently used (§6), with the PRODUCT.md entries for both.
+4. **UI**: the flag, the fuel pump icon, the button, the modal, Recently topped up and analytics, in English, with component tests. PRODUCT.md gains Top up and its analytics, and Mint's non-goals no longer list topping up a canister.
+5. **Send warning**: the warning for TCYCLES sent to a canister (§5.6), in English, with tests and its PRODUCT.md entry. It comes after PR4 because it points to the Top up flow.
+6. **Translations**: every shipped locale.
 
 The modal is mostly translated copy, so expect pressure on `compare-sizes`; the precedent is a maintainer override. Every new component and derived store ships with tests (`test-coverage` gate). Staging talks to the mainnet cycles ledger, so verifying a top-up there spends real TCYCLES; a small amount suffices.
 
