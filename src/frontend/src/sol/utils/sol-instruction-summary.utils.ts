@@ -4,7 +4,6 @@ import { maxBigInt } from '$lib/utils/bigint.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import {
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
-	SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
@@ -15,6 +14,7 @@ import type {
 } from '$sol/types/sol-instruction-summary';
 import type { SolParsedRpcInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
+import { rentExemptMinimumFor } from '$sol/utils/sol-rent.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export interface SolInstructionGroup {
@@ -349,21 +349,6 @@ const transferEffect = ({
 		})
 	};
 };
-
-/**
- * What an account of this size must hold to be exempt from rent, scaled from what the chain charges
- * an account of the usual token account size: rent is a price per byte, the account's fixed header
- * included, so the two sizes cost in proportion.
- */
-const rentExemptMinimumFor = ({
-	space,
-	rentExemptMinimum
-}: {
-	space: bigint;
-	rentExemptMinimum: bigint;
-}): bigint =>
-	(rentExemptMinimum * (SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES + space)) /
-	(SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES + ATA_SIZE);
 
 /**
  * One instruction reduced to the effect it has on the user, or nothing when it has none.
