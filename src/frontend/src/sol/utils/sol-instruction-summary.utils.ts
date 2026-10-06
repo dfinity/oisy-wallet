@@ -4,6 +4,7 @@ import { maxBigInt } from '$lib/utils/bigint.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import {
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
+	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
@@ -444,8 +445,8 @@ const toEffect = ({
 		return { kind: 'createTokenAccount', account, ...(nonNullish(mint) && { tokenAddress: mint }) };
 	}
 
-	// An account opened for a program other than the token programs, with rent from the user's
-	// wallet: a liquidity position, an order book's open orders. The rent leaves the wallet as surely
+	// An account opened for a program other than the System and token programs, with rent from the
+	// user's wallet: a liquidity position, an order book's open orders. The rent leaves the wallet as surely
 	// as a send does, and an application opening its own account inside its instruction may have no
 	// other line to show for it - without this one, the instruction read as one nothing described.
 	//
@@ -455,11 +456,15 @@ const toEffect = ({
 	//
 	// Rent and nothing above it. Lamports beyond what the account's size costs are a balance in an
 	// account the program controls, a payment that "rent" would understate, and stay unstated.
+	//
+	// Not an account left with the System program: that is a wallet, whoever holds its key spends
+	// what it holds, and funding one is a payment to them rather than rent.
 	if (program === 'system' && type === 'createAccount') {
 		const owner = address({ info, key: 'owner' }) ?? address({ info, key: 'programAddress' });
 
 		if (
 			nonNullish(owner) &&
+			owner !== SYSTEM_PROGRAM_ADDRESS &&
 			owner !== TOKEN_PROGRAM_ADDRESS &&
 			owner !== TOKEN_2022_PROGRAM_ADDRESS
 		) {
