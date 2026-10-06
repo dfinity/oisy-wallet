@@ -2991,7 +2991,7 @@
 			"send_confirm_title": "Send to your OISY wallet",
 			"send_confirm_description": "$amount $symbol will be sent to your OISY wallet. The network fee is deducted from this token, and the transfer cannot be undone.",
 			"send_success": "$symbol sent to your OISY wallet.",
-			"send_only_ic": "Only Internet Computer tokens can be moved from here. For the other networks, send from your original wallet.",
+			"send_only_ic": "ICRC tokens only.",
 			"send_below_fee": "Too small to move \u2014 the balance does not cover the $symbol network fee.",
 			"unavailable_hint": "A token marked unavailable could not be read \u2014 usually because its ledger or network did not respond. That is not the same as a zero balance.",
 			"not_shown_title": "Not shown here",
