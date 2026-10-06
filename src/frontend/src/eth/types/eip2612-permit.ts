@@ -17,6 +17,7 @@ export interface PermitMetadata {
 	name: string;
 	version: string;
 	deadline: number;
+	domainSeparator: string;
 }
 
 export interface EIP2612Domain {
@@ -44,7 +45,6 @@ export interface FetchPermitMetadataParams {
 	tokenContract: Contract;
 	userAddress: EthAddress;
 	customDeadline?: number;
-	tokenName: string;
 }
 
 export interface CreateEIP2612TypedDataParams {

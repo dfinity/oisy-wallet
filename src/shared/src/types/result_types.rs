@@ -25,6 +25,7 @@ use crate::types::{
     onramper::{SignOnramperWidgetUrlError, SignOnramperWidgetUrlResponse},
     personal_note::{PersonalNoteEntry, PersonalNoteError},
     personal_note_share::{PersonalNoteShareContent, PersonalNoteShareError},
+    tip::{MyTip, PublicTip, TipClaim, TipDetails, TipError},
     transaction_settings::UpdateTransactionFilterSettingsError,
     user_transaction::{GetUserTransactionsResponse, UserTransactionError},
 };
@@ -605,6 +606,137 @@ impl From<Result<u64, PersonalNoteShareError>> for GetPersonalNoteSharesCountRes
         match result {
             Ok(count) => GetPersonalNoteSharesCountResult::Ok(count),
             Err(err) => GetPersonalNoteSharesCountResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum CreateTipResult {
+    Ok(()),
+    Err(TipError),
+}
+impl From<Result<(), TipError>> for CreateTipResult {
+    fn from(result: Result<(), TipError>) -> Self {
+        match result {
+            Ok(()) => CreateTipResult::Ok(()),
+            Err(err) => CreateTipResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetTipResult {
+    Ok(PublicTip),
+    Err(TipError),
+}
+impl From<Result<PublicTip, TipError>> for GetTipResult {
+    fn from(result: Result<PublicTip, TipError>) -> Self {
+        match result {
+            Ok(tip) => GetTipResult::Ok(tip),
+            Err(err) => GetTipResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetTipDetailsResult {
+    Ok(TipDetails),
+    Err(TipError),
+}
+impl From<Result<TipDetails, TipError>> for GetTipDetailsResult {
+    fn from(result: Result<TipDetails, TipError>) -> Self {
+        match result {
+            Ok(details) => GetTipDetailsResult::Ok(details),
+            Err(err) => GetTipDetailsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum ClaimTipResult {
+    Ok(TipClaim),
+    Err(TipError),
+}
+impl From<Result<TipClaim, TipError>> for ClaimTipResult {
+    fn from(result: Result<TipClaim, TipError>) -> Self {
+        match result {
+            Ok(claim) => ClaimTipResult::Ok(claim),
+            Err(err) => ClaimTipResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum CancelTipResult {
+    Ok(()),
+    Err(TipError),
+}
+impl From<Result<(), TipError>> for CancelTipResult {
+    fn from(result: Result<(), TipError>) -> Self {
+        match result {
+            Ok(()) => CancelTipResult::Ok(()),
+            Err(err) => CancelTipResult::Err(err),
+        }
+    }
+}
+
+/// vetKey material for the tip-secrets store, or why it could not be derived.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum TipVetkeyResult {
+    /// vetKey bytes, opaque to the canister.
+    Ok(ByteBuf),
+    Err(TipError),
+}
+impl From<Result<ByteBuf, TipError>> for TipVetkeyResult {
+    fn from(result: Result<ByteBuf, TipError>) -> Self {
+        match result {
+            Ok(vetkey) => TipVetkeyResult::Ok(vetkey),
+            Err(err) => TipVetkeyResult::Err(err),
+        }
+    }
+}
+
+/// The caller's encrypted claim code for one tip. `Ok(None)` means no secret is
+/// stored — a tip from before the store existed, or one already cleaned up.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum GetTipSecretResult {
+    Ok(Option<ByteBuf>),
+    Err(TipError),
+}
+impl From<Result<Option<ByteBuf>, TipError>> for GetTipSecretResult {
+    fn from(result: Result<Option<ByteBuf>, TipError>) -> Self {
+        match result {
+            Ok(secret) => GetTipSecretResult::Ok(secret),
+            Err(err) => GetTipSecretResult::Err(err),
+        }
+    }
+}
+
+/// Outcome of storing an encrypted claim code.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum SetTipSecretResult {
+    Ok,
+    Err(TipError),
+}
+impl From<Result<(), TipError>> for SetTipSecretResult {
+    fn from(result: Result<(), TipError>) -> Self {
+        match result {
+            Ok(()) => SetTipSecretResult::Ok,
+            Err(err) => SetTipSecretResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetMyTipsResult {
+    Ok(Vec<MyTip>),
+    Err(TipError),
+}
+impl From<Result<Vec<MyTip>, TipError>> for GetMyTipsResult {
+    fn from(result: Result<Vec<MyTip>, TipError>) -> Self {
+        match result {
+            Ok(tips) => GetMyTipsResult::Ok(tips),
+            Err(err) => GetMyTipsResult::Err(err),
         }
     }
 }

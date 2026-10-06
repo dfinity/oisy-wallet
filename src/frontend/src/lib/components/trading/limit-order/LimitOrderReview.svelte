@@ -11,6 +11,8 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT } from '$lib/constants/oisy-trade.constants';
+	import { oisyTradeIcTokenBySymbol } from '$lib/derived/oisy-trade.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
@@ -22,6 +24,7 @@
 		type LimitOrderSide,
 		queuePositionDisplay,
 		queuePositionFraction,
+		restsAgainstValue,
 		valueDifferencePercent
 	} from '$lib/utils/oisy-trade.utils';
 
@@ -67,11 +70,18 @@
 	const baseAmountDisplay = $derived(
 		formatTradeAmount({ amount: baseAmount, decimals: pairView?.baseDecimals ?? 8 })
 	);
+	// Undefined rather than a dash below the min notional: the hero's shared
+	// `SwapToken` row parses the amount, so a placeholder string would throw.
 	const quoteAmountDisplay = $derived(
 		quoteAmount > 0
 			? formatTradeAmount({ amount: quoteAmount, decimals: pairView?.quoteDecimals ?? 8 })
-			: '-'
+			: undefined
 	);
+
+	// Resolved the same way the form does, so the hero can show each leg's logo
+	// exactly as the Swap review does.
+	const baseToken = $derived($oisyTradeIcTokenBySymbol[base]);
+	const quoteToken = $derived($oisyTradeIcTokenBySymbol[quote]);
 	const priceDisplay = $derived(
 		formatTradeAmount({ amount: price, decimals: pairView?.quoteDecimals ?? 8 })
 	);
@@ -83,7 +93,25 @@
 
 	const crossing = $derived(crossesBook({ side, price, bid, ask }));
 	const valueDiff = $derived(valueDifferencePercent({ side, price, currentValue }));
-	const severe = $derived(crossing && valueDiff < -5);
+	const severe = $derived(crossing && valueDiff <= LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT);
+
+	// The resting counterpart of `severe`: the order does not fill now, but it is
+	// priced 5% or more against current value, so it is the one the market reaches
+	// first and it would fill at that give-up. Same treatment as a severe crossing
+	// order — its own copy, and the confirmation is required before placing. The
+	// two are mutually exclusive (`restsAgainstValue` excludes crossing prices), so
+	// at most one box shows and they share one confirmation.
+	// `restsAgainstValue` only settles that the order rests against current value,
+	// with its own comparison left strict (a price exactly at current value is not
+	// "past" it); the severity boundary is applied separately and inclusively, the
+	// way `ValueDifference` classifies `errorLevel` — otherwise an exact -5% pairs
+	// a red figure with an amber warning and no confirmation.
+	const severeResting = $derived(
+		restsAgainstValue({ side, price, currentValue, bid, ask, threshold: 0 }) &&
+			valueDiff <= LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT
+	);
+
+	const confirmationRequired = $derived(severe || severeResting);
 
 	const orderType = $derived(
 		fillOrKill ? $i18n.trading.limit_order.order_type_fok : $i18n.trading.limit_order.order_type_gtc
@@ -118,22 +146,21 @@
 	});
 
 	// >5% give-up requires the confirmation; FOK shows the taker fee only.
-	const placeDisabled = $derived(severe && !giveUpConfirmed);
+	const placeDisabled = $derived(confirmationRequired && !giveUpConfirmed);
 </script>
 
 <ContentWithToolbar>
 	<LimitOrderIntentHero
 		baseAmount={baseAmountDisplay}
-		baseSymbol={base}
+		{baseToken}
 		quoteAmount={quoteAmountDisplay}
-		quoteSymbol={quote}
+		{quoteToken}
 		{side}
 	/>
 
 	<LimitOrderPriceSummary
 		baseSymbol={base}
 		{currentValueDisplay}
-		muted={!(crossing || fillOrKill)}
 		{priceDisplay}
 		{queueText}
 		quoteSymbol={quote}
@@ -142,7 +169,7 @@
 
 	<LimitOrderTermsList {makerFee} orderTypeLabel={orderType} {takerFee} takerOnly={fillOrKill} />
 
-	{#if severe}
+	{#if confirmationRequired}
 		<div class="mt-4" transition:slide>
 			<MessageBox level="error" styleClass="!mb-0">
 				{#snippet icon()}
@@ -153,8 +180,15 @@
 					/>
 				{/snippet}
 
+				<!-- One line either way, as the crossing case has always been: the price
+					 rows above already carry the give-up, so the box only has to be
+					 acknowledged. The two differ in how certain the fill is. -->
 				<label class="block text-sm leading-snug" for="limit-order-giveup">
-					<Html text={$i18n.trading.limit_order.give_up_confirm} />
+					<Html
+						text={severeResting
+							? $i18n.trading.limit_order.rests_against_value_confirm
+							: $i18n.trading.limit_order.give_up_confirm}
+					/>
 				</label>
 			</MessageBox>
 		</div>

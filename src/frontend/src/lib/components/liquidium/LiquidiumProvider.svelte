@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { LEND_BORROW_ENABLED } from '$env/lend-borrow';
+	import { anyLendBorrowProviderEnabled } from '$env/lend-borrow';
 	import { LIQUIDIUM_ENABLED } from '$env/liquidium';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import LiquidiumBorrowedRow from '$lib/components/liquidium/LiquidiumBorrowedRow.svelte';
@@ -45,13 +45,13 @@
 		loadLiquidium({ identity: $authIdentity, ethAddress: $ethAddress });
 
 	onMount(() => {
-		if (!LEND_BORROW_ENABLED) {
+		if (!anyLendBorrowProviderEnabled) {
 			goto(AppPath.Earn);
 		}
 	});
 </script>
 
-{#if LEND_BORROW_ENABLED}
+{#if anyLendBorrowProviderEnabled}
 	{#if LIQUIDIUM_ENABLED}
 		<IntervalLoader interval={LIQUIDIUM_POLL_INTERVAL_MILLIS} onLoad={load} />
 	{/if}

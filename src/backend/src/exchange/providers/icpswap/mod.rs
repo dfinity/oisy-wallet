@@ -1,5 +1,6 @@
 use futures::future::join_all;
-use ic_cdk::{api::time, management_canister::HttpHeader};
+use ic_cdk::api::time;
+use ic_cdk_management_canister::HttpHeader;
 use serde::Deserialize;
 use serde_json::from_slice;
 use shared::types::{exchange::ExchangeData, token_id::TokenId};

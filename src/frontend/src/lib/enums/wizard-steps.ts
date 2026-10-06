@@ -94,6 +94,14 @@ export enum WizardStepsTradingWithdraw {
 	TOKENS_LIST = 'Tokens List'
 }
 
+export enum WizardStepsTip {
+	INTRO = 'Intro',
+	TOKENS_LIST = 'Tokens List',
+	CREATE = 'Create',
+	SHARE = 'Share',
+	HISTORY = 'History'
+}
+
 export enum WizardStepsLiquidiumSupply {
 	SUPPLY = 'Supply',
 	REVIEW = 'Review',
@@ -161,4 +169,10 @@ export enum WizardStepsLimitOrder {
 	QUOTE_TOKEN = 'Quote token',
 	REVIEW = 'Review',
 	PLACING = 'Placing'
+}
+
+export enum WizardStepsCyclesMint {
+	MINT = 'Mint',
+	REVIEW = 'Review',
+	MINTING = 'Minting'
 }

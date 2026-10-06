@@ -3,12 +3,19 @@ import type {
 	BtcGetFeePercentilesResponse,
 	Contact,
 	CreatePersonalNoteShareRequest,
+	CreateTipRequest,
 	CustomToken,
 	DeletePersonalNoteRequest,
 	GetAllowedCyclesResponse,
+	MyTip,
 	PersonalNoteEntry,
 	PersonalNoteShareContent,
+	PublicTip,
+	SetTipSecretRequest,
 	SignOnramperWidgetUrlResponse,
+	TipClaim,
+	TipClaimRequest,
+	TipDetails,
 	TokenId
 } from '$declarations/backend/backend.did';
 import { CanisterApi } from '$lib/api/canister.api';
@@ -405,6 +412,84 @@ export const getPersonalNotesVetkeyPublicKey = async ({
 }: CanisterApiFunctionParams): Promise<Uint8Array | number[]> => {
 	const { getPersonalNotesVetkeyPublicKey } = await backendCanister({ identity });
 	return getPersonalNotesVetkeyPublicKey();
+};
+
+export const setTipSecret = async ({
+	identity,
+	...request
+}: CanisterApiFunctionParams<SetTipSecretRequest>): Promise<void> => {
+	const { setTipSecret } = await backendCanister({ identity });
+	return setTipSecret(request);
+};
+
+export const getTipSecret = async ({
+	identity,
+	tipId
+}: CanisterApiFunctionParams<{ tipId: string }>): Promise<Uint8Array | number[] | undefined> => {
+	const { getTipSecret } = await backendCanister({ identity });
+	return getTipSecret(tipId);
+};
+
+export const getTipEncryptedVetkey = async ({
+	identity,
+	transportPublicKey
+}: CanisterApiFunctionParams<{
+	transportPublicKey: Uint8Array;
+}>): Promise<Uint8Array | number[]> => {
+	const { getTipEncryptedVetkey } = await backendCanister({ identity });
+	return getTipEncryptedVetkey(transportPublicKey);
+};
+
+export const getTipVetkeyPublicKey = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<Uint8Array | number[]> => {
+	const { getTipVetkeyPublicKey } = await backendCanister({ identity });
+	return getTipVetkeyPublicKey();
+};
+
+export const createTip = async ({
+	identity,
+	...request
+}: CanisterApiFunctionParams<CreateTipRequest>): Promise<void> => {
+	const { createTip } = await backendCanister({ identity });
+	return createTip(request);
+};
+
+export const getTip = async ({
+	identity,
+	tipId
+}: CanisterApiFunctionParams<{ tipId: string }>): Promise<PublicTip> => {
+	const { getTip } = await backendCanister({ identity });
+	return getTip(tipId);
+};
+
+export const getTipDetails = async ({
+	identity,
+	...request
+}: CanisterApiFunctionParams<TipClaimRequest>): Promise<TipDetails> => {
+	const { getTipDetails } = await backendCanister({ identity });
+	return getTipDetails(request);
+};
+
+export const claimTip = async ({
+	identity,
+	...request
+}: CanisterApiFunctionParams<TipClaimRequest>): Promise<TipClaim> => {
+	const { claimTip } = await backendCanister({ identity });
+	return claimTip(request);
+};
+
+export const cancelTip = async ({
+	identity,
+	tipId
+}: CanisterApiFunctionParams<{ tipId: string }>): Promise<void> => {
+	const { cancelTip } = await backendCanister({ identity });
+	return cancelTip(tipId);
+};
+
+export const getMyTips = async ({ identity }: CanisterApiFunctionParams): Promise<MyTip[]> => {
+	const { getMyTips } = await backendCanister({ identity });
+	return getMyTips();
 };
 
 export const createPersonalNoteShare = async ({

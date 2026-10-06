@@ -1,24 +1,26 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
-import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { ERC20_ABI, ERC20_PERMIT_ABI } from '$eth/constants/erc20.constants';
+import { ethersProvider } from '$eth/providers/ethers.providers';
 import type { EthAddress } from '$eth/types/address';
 import type { Erc20Provider } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress, Erc20Metadata } from '$eth/types/erc20';
+import type { EthersProviderNetwork } from '$eth/types/network';
 import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { Contract, type ContractTransaction } from 'ethers/contract';
-import { InfuraProvider, type Networkish } from 'ethers/providers';
+import { TypedDataEncoder } from 'ethers/hash';
+import type { JsonRpcProvider } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraErc20Provider implements Erc20Provider {
-	protected readonly provider: InfuraProvider;
+	protected readonly provider: JsonRpcProvider;
 
-	constructor(private readonly network: Networkish) {
-		this.provider = new InfuraProvider(this.network, INFURA_API_KEY);
+	constructor(private readonly network: EthersProviderNetwork) {
+		this.provider = ethersProvider(this.network);
 	}
 
 	metadata = async ({ address }: Pick<Erc20ContractAddress, 'address'>): Promise<Erc20Metadata> => {
@@ -130,21 +132,40 @@ export class InfuraErc20Provider implements Erc20Provider {
 
 	isErc20SupportsPermit = async ({
 		contractAddress,
-		userAddress
+		userAddress,
+		chainId
 	}: {
 		contractAddress: string;
 		userAddress: EthAddress;
+		chainId: bigint;
 	}): Promise<boolean> => {
-		const { nonces, DOMAIN_SEPARATOR, version } = new Contract(
+		const { nonces, DOMAIN_SEPARATOR, version, name } = new Contract(
 			contractAddress,
 			ERC20_PERMIT_ABI,
 			this.provider
 		);
 
 		try {
-			await Promise.all([nonces(userAddress), DOMAIN_SEPARATOR(), version()]);
+			const [, domainSeparator, tokenVersion, tokenName] = await Promise.all([
+				nonces(userAddress),
+				DOMAIN_SEPARATOR(),
+				version(),
+				name()
+			]);
 
-			return true;
+			// Probing for the getters is not enough: a token can expose all of them yet hash a
+			// different domain shape (salt-based domains without chainId, DAI-style permits), and a
+			// permit signed over the wrong domain can never be verified by the token. Only report
+			// support when the standard EIP-2612 domain reproduces the token's DOMAIN_SEPARATOR;
+			// everything else must go through the on-chain approval flow.
+			return (
+				TypedDataEncoder.hashDomain({
+					name: tokenName,
+					version: tokenVersion,
+					chainId,
+					verifyingContract: contractAddress
+				}).toLowerCase() === domainSeparator.toLowerCase()
+			);
 		} catch (_: unknown) {
 			return false;
 		}
@@ -155,7 +176,7 @@ const providers: Record<NetworkId, InfuraErc20Provider> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, InfuraErc20Provider>>(
-	(acc, { id, providers: { infura } }) => ({ ...acc, [id]: new InfuraErc20Provider(infura) }),
+	(acc, network) => ({ ...acc, [network.id]: new InfuraErc20Provider(network) }),
 	{}
 );
 

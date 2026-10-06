@@ -122,6 +122,13 @@ export const mapIcrcTransaction = ({
 
 	const approveExpiresAt = fromNullishNullable(approveData?.expires_at);
 
+	// An ICRC-2 `transfer_from` is indexed as a plain transfer with the spender attached. The
+	// account owner did not pick the destination in that case, the spender did.
+	const transferSpenderAccount = fromNullishNullable(fromNullable(transfer)?.spender);
+	const transferSpender = nonNullish(transferSpenderAccount)
+		? encodeIcrcAccount(fromCandidAccount(transferSpenderAccount))
+		: undefined;
+
 	return {
 		id: `${id.toString()}${transferToSelf === 'receive' ? '-self' : ''}`,
 		type,
@@ -135,6 +142,7 @@ export const mapIcrcTransaction = ({
 		...(nonNullish(approveSpender) && {
 			approveSpenderExplorerUrl: `${ICP_EXPLORER_URL}/account/${approveSpender}`
 		}),
-		...(nonNullish(approveExpiresAt) && { approveExpiresAt })
+		...(nonNullish(approveExpiresAt) && { approveExpiresAt }),
+		...(nonNullish(transferSpender) && { transferSpender })
 	};
 };

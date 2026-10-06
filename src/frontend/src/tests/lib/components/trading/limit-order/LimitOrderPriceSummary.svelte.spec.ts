@@ -6,8 +6,7 @@ describe('LimitOrderPriceSummary', () => {
 		priceDisplay: '2.5',
 		baseSymbol: 'ICP',
 		quoteSymbol: 'ckUSDC',
-		valueDifference: -2,
-		muted: false
+		valueDifference: -2
 	};
 
 	it('renders the limit price and a resolved current value', () => {

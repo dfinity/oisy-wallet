@@ -16,6 +16,7 @@
 		testId,
 		disablePointerEvents = false,
 		title,
+		ariaLabel,
 		headerLeft,
 		headerRight,
 		subTitle,
@@ -58,6 +59,7 @@
 	<div
 		class="modal"
 		aria-describedby={modalContentId}
+		aria-label={showHeader ? undefined : ariaLabel}
 		aria-labelledby={showHeader ? modalTitleId : undefined}
 		data-tid={testId}
 		onclick={stopPropagation(onClick)}

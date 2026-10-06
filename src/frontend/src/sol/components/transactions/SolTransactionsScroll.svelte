@@ -1,12 +1,10 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import InfiniteScroll from '$lib/components/ui/InfiniteScroll.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { Token } from '$lib/types/token';
-	import { last } from '$lib/utils/array.utils';
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
-	import { loadNextSolTransactions } from '$sol/services/sol-transactions.services';
+	import { loadOlderSolTokenTransactions } from '$sol/services/sol-history-pagers.services';
 
 	interface Props {
 		token: Token;
@@ -18,17 +16,15 @@
 	let disableInfiniteScroll = $state(false);
 
 	const onIntersect = async () => {
-		const lastSignature = last($solTransactions)?.signature;
-
-		if (isNullish(lastSignature)) {
-			// No transactions, we do nothing here and wait for the worker to post the first transactions
+		// Only a gate, not a cursor: the pager keeps its own. Until the worker posts the first
+		// transactions, paging would race it for the same newest signatures.
+		if ($solTransactions.length === 0) {
 			return;
 		}
 
-		await loadNextSolTransactions({
+		await loadOlderSolTokenTransactions({
 			identity: $authIdentity,
 			token,
-			before: lastSignature,
 			signalEnd: () => (disableInfiniteScroll = true)
 		});
 	};

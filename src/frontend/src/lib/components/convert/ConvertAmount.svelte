@@ -12,6 +12,7 @@
 		destinationTokenFee?: bigint;
 		minFee?: bigint;
 		ethereumEstimateFee?: bigint;
+		maxAmount?: bigint;
 		exchangeValueUnit?: DisplayUnit;
 	}
 
@@ -22,6 +23,7 @@
 		destinationTokenFee,
 		minFee,
 		ethereumEstimateFee,
+		maxAmount,
 		exchangeValueUnit = $bindable('usd')
 	}: Props = $props();
 
@@ -33,6 +35,7 @@
 		<ConvertAmountSource
 			{ethereumEstimateFee}
 			{inputUnit}
+			{maxAmount}
 			{minFee}
 			{totalFee}
 			bind:sendAmount

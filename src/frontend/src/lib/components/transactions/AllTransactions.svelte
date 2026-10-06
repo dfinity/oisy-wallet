@@ -1,7 +1,11 @@
 <script lang="ts">
 	import type { DismissedNotification } from '$declarations/backend/backend.did';
+	import {
+		enabledIcTokens,
+		tokensToWarnAboutIndexCanister
+	} from '$icp/derived/ic-transactions-status.derived';
+	import { icTransactionsWarningStore } from '$icp/stores/ic-transactions-warning.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-	import type { IcToken } from '$icp/types/ic-token';
 	import { hasNoIndexCanister } from '$icp/validation/ic-token.validation';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
@@ -12,7 +16,7 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import {
 		hiddenMicroTransactionsBannerVisible,
@@ -21,8 +25,7 @@
 	} from '$lib/derived/user-profile.derived';
 	import { dismissNotifications } from '$lib/services/notification.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { TokenUi } from '$lib/types/token-ui';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { formatList, replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		filterUndismissedNotificationQualifiers,
 		isSimpleNotificationDismissed
@@ -66,31 +69,25 @@
 		});
 	};
 
-	let enabledTokensWithoutTransaction = $derived(
-		$enabledFungibleNetworkTokens
-			.filter((token) => $icTransactionsStore?.[token.id] === null)
-			.map((token: TokenUi) => token as IcToken)
+	// A nullified entry means the wallet syncs the balance only, because the token has no Index
+	// canister at all. A token whose Index canister is merely failing keeps its transactions and is
+	// surfaced by tokensWithUnavailableIndexCanister once the failures pile up.
+	// TODO: use a unique token identifier (e.g. token ID + network) instead of the display symbol to avoid collisions if two tokens share the same symbol
+	let tokensWithoutCanister = $derived(
+		$enabledIcTokens
+			.filter(({ id }) => $icTransactionsStore?.[id] === null)
+			.filter(hasNoIndexCanister)
+			.map(getTokenDisplaySymbol)
 	);
 
-	let { tokensWithoutCanister, tokensWithUnavailableCanister } = $derived(
-		enabledTokensWithoutTransaction.reduce<{
-			tokensWithoutCanister: string[];
-			tokensWithUnavailableCanister: string[];
-		}>(
-			(acc, curr) => {
-				// TODO: use a unique token identifier (e.g. token ID + network) instead of the display symbol to avoid collisions if two tokens share the same symbol
-				const symbol = getTokenDisplaySymbol(curr);
-
-				if (hasNoIndexCanister(curr)) {
-					acc.tokensWithoutCanister.push(symbol);
-				} else {
-					acc.tokensWithUnavailableCanister.push(symbol);
-				}
-				return acc;
-			},
-			{ tokensWithoutCanister: [], tokensWithUnavailableCanister: [] }
-		)
+	// The dismissal lives in a shared store: the same warning is raised on the token page, and
+	// dismissing it in either place has to silence both.
+	let tokensWithUnavailableCanister = $derived(
+		$tokensToWarnAboutIndexCanister.map(getTokenDisplaySymbol)
 	);
+
+	const dismissUnavailableCanisterWarning = () =>
+		icTransactionsWarningStore.dismiss($tokensToWarnAboutIndexCanister);
 
 	let undismissedNoCanister = $derived(
 		filterUndismissedNotificationQualifiers({
@@ -150,17 +147,23 @@
 		<div class="flex flex-col">
 			{#if undismissedNoCanister.length > 0}
 				<MessageBox level="warning" onDismiss={dismissNoCanisterWarning}>
-					{replacePlaceholders($i18n.activity.warning.no_index_canister, {
-						$token_list: undismissedNoCanister.map((s) => `$${s}`).join(', ')
+					{replacePlaceholders(replaceOisyPlaceholders($i18n.activity.warning.no_index_canister), {
+						$token_list: formatList({ items: undismissedNoCanister, language: $currentLanguage })
 					})}
 				</MessageBox>
 			{/if}
 
 			{#if tokensWithUnavailableCanister.length > 0}
-				<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
-					{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
-						$token_list: tokensWithUnavailableCanister.map((s) => `$${s}`).join(', ')
-					})}
+				<MessageBox level="warning" onDismiss={dismissUnavailableCanisterWarning}>
+					{replacePlaceholders(
+						replaceOisyPlaceholders($i18n.activity.warning.unavailable_index_canister),
+						{
+							$token_list: formatList({
+								items: tokensWithUnavailableCanister,
+								language: $currentLanguage
+							})
+						}
+					)}
 				</MessageBox>
 			{/if}
 

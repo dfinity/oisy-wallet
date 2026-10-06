@@ -30,6 +30,9 @@ const promises = Object.keys(canisters)
 				'icpunks',
 				'icrc7',
 				'icrc3',
+				'cmc',
+				'icp_index',
+				'icp_ledger',
 				'plug_helper'
 			].includes(canister)
 	)

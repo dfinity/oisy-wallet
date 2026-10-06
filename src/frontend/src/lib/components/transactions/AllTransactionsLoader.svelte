@@ -1,23 +1,44 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onDestroy, type Snippet } from 'svelte';
-	import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.services';
-	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+	import { onDestroy, type Snippet, untrack } from 'svelte';
+	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
-	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+	import { ACTIVITY_LEVELLING_MAX_PAGES } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { transactionsStoreWithTokens } from '$lib/derived/transactions.derived';
+	import {
+		loadedTransactionsCount,
+		loadOlderTransactionsFor
+	} from '$lib/services/transactions-pagination.services';
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
-	import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
+	import type { ResultSuccess } from '$lib/types/utils';
 	import { areTransactionsStoresLoaded } from '$lib/utils/transactions.utils';
-	import { loadNextSolTransactionsByOldest } from '$sol/services/sol-transactions.services.js';
-	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+
+	interface LoaderControls {
+		/**
+		 * Pages every token one step further back. `success` is whether any new transaction was
+		 * actually loaded, counted across the stores themselves so an active filter cannot make a
+		 * successful fetch look empty. `err` is set when a page failed, so loading nothing does not
+		 * mean the chains have nothing left.
+		 */
+		loadMore: () => Promise<ResultSuccess>;
+		/** True once no enabled token has any history left to give. */
+		exhausted: boolean;
+		/**
+		 * How far back the list reaches, in seconds. Until levelling or a first `loadMore` sets a floor,
+		 * it is how far back every token that still has history has loaded; from then on, the floor
+		 * every token is being levelled to, which drops with every round whatever a single token does,
+		 * so a token whose page failed or that reached the page cap can be short of it until the next
+		 * round. Absent while no token holds a dated row.
+		 */
+		floor?: number;
+	}
 
 	interface Props {
 		transactions: AllTransactionUiWithCmp[];
-		children?: Snippet;
+		children?: Snippet<[LoaderControls]>;
 	}
 
 	let { transactions, children }: Props = $props();
@@ -30,81 +51,271 @@
 		destroyed = true;
 	});
 
-	const loadMissingTransactions = async () => {
-		if (isNullish($authIdentity)) {
-			return;
+	// `undefined` when no row is dated. Pending transactions carry no timestamp, and a floor taken
+	// from them came out as `Infinity`, which hid every dated row that arrived after them.
+	const oldestTimestamp = (rows: AllTransactionUiWithCmp[]): number | undefined =>
+		rows.reduce<number | undefined>((oldest, { transaction: { timestamp } }) => {
+			if (isNullish(timestamp)) {
+				return oldest;
+			}
+
+			const seconds = normalizeTimestampToSeconds(timestamp);
+
+			return isNullish(oldest) || seconds < oldest ? seconds : oldest;
+		}, undefined);
+
+	// The oldest transaction on screen across every token. Tokens whose history stops short of it
+	// would leave gaps in the merged list, so they get paged down to it.
+	const oldestLoadedTimestamp = (): number | undefined => oldestTimestamp(transactions);
+
+	const pageToken = async ({
+		token,
+		minTimestamp
+	}: {
+		token: Token;
+		minTimestamp?: number;
+	}): Promise<ResultSuccess> => {
+		const { id: tokenId } = token;
+
+		if (destroyed || disableLoader[tokenId] || isNullish($authIdentity)) {
+			return { success: false };
 		}
 
-		if (transactions.length === 0) {
-			return;
+		const loadOlder = loadOlderTransactionsFor(token);
+
+		if (isNullish(loadOlder)) {
+			// Nothing to page for this chain; treat it as done rather than retrying every intersection.
+			disableLoader[tokenId] = true;
+
+			return { success: false };
 		}
 
-		const minTimestamp = Math.min(
-			...transactions.map(({ transaction: { timestamp } }) =>
-				nonNullish(timestamp) ? normalizeTimestampToSeconds(timestamp) : Infinity
-			)
-		);
+		try {
+			return await loadOlder({
+				token,
+				identity: $authIdentity,
+				...(nonNullish(minTimestamp) && { minTimestamp }),
+				signalEnd: () => (disableLoader[tokenId] = true)
+			});
+		} catch (err: unknown) {
+			return { success: false, err };
+		}
+	};
 
-		const loadNextTransactions = async (token: Token) => {
-			if (destroyed) {
-				return;
-			}
+	// Levelling in flight per token. A run for a token already being levelled is chained after the
+	// current one instead of started alongside it, so the two never fetch the same page.
+	const levellingByToken = new SvelteMap<TokenId, Promise<ResultSuccess>>();
 
-			const {
-				id: tokenId,
-				network: { id: networkId }
-			} = token;
+	// Pulls a token back until it reaches `minTimestamp`, runs out of history, or hits the page cap.
+	// Resolves with the failure that cut the run short, if any.
+	const levelToken = ({
+		token,
+		minTimestamp
+	}: {
+		token: Token;
+		minTimestamp: number;
+	}): Promise<ResultSuccess> => {
+		const run = async (): Promise<ResultSuccess> => {
+			// Each chain loader ends the run by returning `success: false` once its oldest loaded
+			// transaction has reached the floor. The cap only guards against one that never does.
+			for (let page = 0; page < ACTIVITY_LEVELLING_MAX_PAGES; page++) {
+				const result = await pageToken({ token, minTimestamp });
 
-			if (disableLoader[tokenId]) {
-				return;
-			}
-
-			if (isNetworkIdICP(networkId)) {
-				const { success: icSuccess } = await loadNextIcTransactionsByOldest({
-					minTimestamp,
-					transactions: ($icTransactionsStore?.[tokenId] ?? []).map(({ data }) => data),
-					owner: $authIdentity.getPrincipal(),
-					identity: $authIdentity,
-					maxResults: WALLET_PAGINATION,
-					token,
-					signalEnd: () => (disableLoader[tokenId] = true)
-				});
-
-				if (icSuccess) {
-					// We call the function again in case the last transaction is not the last one that we need
-					await loadNextTransactions(token);
+				// A failed page ends the run too, rather than hammering a chain that is erroring, but its
+				// `err` is passed on so the caller does not take the token as levelled.
+				if (!result.success) {
+					return result;
 				}
-			} else if (isNetworkIdSolana(networkId)) {
-				const { success: solSuccess } = await loadNextSolTransactionsByOldest({
-					identity: $authIdentity,
-					minTimestamp,
-					transactions: ($solTransactionsStore?.[tokenId] ?? []).map(({ data }) => data),
-					token,
-					signalEnd: () => (disableLoader[tokenId] = true)
-				});
-
-				if (solSuccess) {
-					// We call the function again in case the last transaction is not the last one that we need
-					await loadNextTransactions(token);
-				}
-			} else {
-				disableLoader[tokenId] = true;
 			}
+
+			return { success: true };
 		};
 
-		await Promise.allSettled($enabledFungibleNetworkTokens.map(loadNextTransactions));
+		const inFlight = levellingByToken.get(token.id);
+
+		// Started right away when nothing is in flight, so the first page is requested within the same
+		// update rather than a microtask later.
+		const next = (isNullish(inFlight) ? run() : inFlight.then(run))
+			// A failed page only ends this token's run; the others carry on.
+			.catch((err: unknown) => ({ success: false, err }));
+
+		levellingByToken.set(token.id, next);
+
+		return next;
+	};
+
+	const levelTokens = ({
+		tokens,
+		minTimestamp
+	}: {
+		tokens: Token[];
+		minTimestamp: number;
+	}): Promise<ResultSuccess[]> =>
+		Promise.all(tokens.map((token) => levelToken({ token, minTimestamp })));
+
+	// The floor every token is levelled to. Set from the oldest row on screen when levelling first
+	// runs, deepened by `loadMore`, and lowered by a token whose history arrives late with older rows.
+	// Rows a token pages in while being levelled never move it: if they did, each run would overshoot
+	// the floor, lower it, and set every other token off again, until all of them had walked back to
+	// the start of their history.
+	//
+	// Once set, the list reveals rows down to it. It is the target rather than what every token has
+	// reached: holding the list at the token furthest behind froze it whenever one token stopped moving
+	// (pages that keep failing, or that hold only transactions the list does not show), and kept
+	// loading the others while showing nothing.
+	let levelFloor = $state<number | undefined>();
+
+	// Tokens whose rows the floor already accounts for.
+	const accountedTokenIds = new SvelteSet<TokenId>();
+
+	// Stores fill at different times. Without a warm IndexedDB cache a token with little history can
+	// bring in a row from months ago while a busier token still holds only its first, recent page, or
+	// nothing at all yet. Levelling once after mount missed whatever arrived after it, and the scroll
+	// reveals rows already in memory without asking for more, so the gap stayed on screen. Each token
+	// is therefore levelled when its first rows arrive, and only then: at most once per token.
+	const levelNewcomers = () => {
+		if (destroyed || isNullish($authIdentity) || transactions.length === 0) {
+			return;
+		}
+
+		const newcomers = $enabledFungibleNetworkTokens.filter(
+			(token) => !accountedTokenIds.has(token.id) && loadedTransactionsCount(token) > 0
+		);
+
+		if (newcomers.length === 0) {
+			return;
+		}
+
+		const newcomerIds = new Set(newcomers.map(({ id }) => id));
+
+		const newcomersOldest = isNullish(levelFloor)
+			? oldestLoadedTimestamp()
+			: oldestTimestamp(transactions.filter(({ token: { id } }) => newcomerIds.has(id)));
+
+		// No dated row loaded yet, so there is no floor to level to. The newcomers stay unaccounted
+		// and are looked at again when more rows arrive.
+		if (isNullish(levelFloor) && isNullish(newcomersOldest)) {
+			return;
+		}
+
+		newcomers.forEach(({ id }) => accountedTokenIds.add(id));
+
+		// Older than the current floor: every token has to reach the new one, not just the newcomers.
+		if (nonNullish(newcomersOldest) && (isNullish(levelFloor) || newcomersOldest < levelFloor)) {
+			levelFloor = newcomersOldest;
+
+			levelTokens({ tokens: $enabledFungibleNetworkTokens, minTimestamp: levelFloor });
+
+			return;
+		}
+
+		if (isNullish(levelFloor)) {
+			return;
+		}
+
+		// Newcomers with only undated rows too: their history can still reach below the floor.
+		levelTokens({ tokens: newcomers, minTimestamp: levelFloor });
+	};
+
+	const totalLoaded = (): number =>
+		$enabledFungibleNetworkTokens.reduce(
+			(total, token) => total + loadedTransactionsCount(token),
+			0
+		);
+
+	const loadMore = async (): Promise<ResultSuccess> => {
+		if (isNullish($authIdentity) || transactions.length === 0) {
+			return { success: false };
+		}
+
+		const loadedBefore = totalLoaded();
+
+		// Let running levelling settle first, so the page below starts from where it left each token
+		// rather than fetching the same page twice.
+		await Promise.all(levellingByToken.values());
+
+		// One unconditional page per token first: without it every token already sits at the floor
+		// and levelling alone would find nothing left to do.
+		const pages = await Promise.all(
+			$enabledFungibleNetworkTokens.map(async (token) => ({
+				token,
+				result: await pageToken({ token })
+			}))
+		);
+
+		// The previous floor stays when no row is dated, rather than one that hides every row.
+		const floor = oldestLoadedTimestamp() ?? levelFloor;
+
+		levelFloor = floor;
+
+		// A token whose page just failed waits for the next round: levelling it now would ask for the
+		// same failed cursor again straight away.
+		const levelled = isNullish(floor)
+			? []
+			: await levelTokens({
+					tokens: pages.filter(({ result: { err } }) => isNullish(err)).map(({ token }) => token),
+					minTimestamp: floor
+				});
+
+		// Without it a round in which pages failed and nothing loaded would read as the chains having
+		// nothing left, and the scroll would stop asking.
+		const failure = [...pages.map(({ result }) => result), ...levelled].find(({ err }) =>
+			nonNullish(err)
+		);
+
+		return {
+			success: totalLoaded() > loadedBefore,
+			...(nonNullish(failure) && { err: failure.err })
+		};
 	};
 
 	let allStoresAreLoaded = $derived(areTransactionsStoresLoaded($transactionsStoreWithTokens));
 
-	let firstLoad = $state(false);
-
 	$effect(() => {
-		if (allStoresAreLoaded && !firstLoad) {
-			firstLoad = true;
-			loadMissingTransactions();
+		if (!allStoresAreLoaded) {
+			return;
 		}
+
+		[transactions];
+
+		untrack(levelNewcomers);
+	});
+
+	let exhausted = $derived(
+		$enabledFungibleNetworkTokens.length > 0 &&
+			$enabledFungibleNetworkTokens.every(({ id }) => disableLoader[id] === true)
+	);
+
+	// Until a floor is set, how far back every token that still has history has loaded. Levelling
+	// only starts once every store has loaded, and one that never does left the list with no floor at
+	// all: tokens whose first page reached further back showed rows a token with a shorter one had not
+	// loaded yet. Each such token is complete down to its own oldest row, so the list is complete down
+	// to the newest of those. A token with nothing to page is left out: holding the list at its first
+	// page would stop it there for good. This only lasts until the first round, which starts once the
+	// end of the list is on screen, so a token that stops moving cannot hold the list after it.
+	let completeDownTo = $derived.by((): number | undefined => {
+		const pagedTokenIds = new Set($enabledFungibleNetworkTokens.map(({ id }) => id));
+
+		const oldestByToken = transactions.reduce<Map<TokenId, number>>(
+			(acc, { token: { id }, transaction: { timestamp } }) => {
+				if (!pagedTokenIds.has(id) || disableLoader[id] === true || isNullish(timestamp)) {
+					return acc;
+				}
+
+				const seconds = normalizeTimestampToSeconds(timestamp);
+				const oldest = acc.get(id);
+
+				if (isNullish(oldest) || seconds < oldest) {
+					acc.set(id, seconds);
+				}
+
+				return acc;
+			},
+			new Map()
+		);
+
+		return oldestByToken.size > 0 ? Math.max(...oldestByToken.values()) : undefined;
 	});
 </script>
 
-{@render children?.()}
+{@render children?.({ loadMore, exhausted, floor: levelFloor ?? completeDownTo })}
