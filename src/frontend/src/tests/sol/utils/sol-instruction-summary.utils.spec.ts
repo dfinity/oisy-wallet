@@ -490,6 +490,14 @@ describe('sol-instruction-summary.utils', () => {
 				).toStrictEqual(['unknown']);
 			});
 
+			// An account left with the System program is a wallet: whoever holds its key spends what it
+			// is funded with, so the funding is a payment rather than rent.
+			it('should not call funding an account left with the System program rent', () => {
+				expect(
+					kinds(openedInside({ creation: opening({ owner: '11111111111111111111111111111111' }) }))
+				).toStrictEqual(['unknown']);
+			});
+
 			it('should leave out an account somebody else pays for', () => {
 				expect(
 					kinds(
