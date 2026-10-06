@@ -1198,7 +1198,8 @@
 			"one_way": "",
 			"topping_up": "",
 			"topped_up": "",
-			"unknown": ""
+			"unknown": "",
+			"unknown_fresh": ""
 		},
 		"error": {
 			"invalid_canister_id": "",
