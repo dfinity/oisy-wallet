@@ -5,9 +5,10 @@
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
-	import type { OptionSolAddress } from '$sol/types/address';
+	import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 	import { solAccountExplorerUrl } from '$sol/utils/sol-explorer.utils';
@@ -67,7 +68,7 @@
 				0);
 </script>
 
-{#snippet line(instruction: SolInstructionSummary)}
+{#snippet line(instruction: SolInstructionSummary, headingProgram?: SolAddress)}
 	{@const { text, detail, trailing } = formatSolInstructionSummary({
 		instruction,
 		i18n: $i18n,
@@ -88,14 +89,27 @@
 		(instruction.kind === 'closeTokenAccount' || instruction.kind === 'unwrap') &&
 		instruction.counterparty === userAddress}
 
-	{@const actionAddress = closedHome
-		? undefined
-		: (instruction.counterparty ?? instruction.newAuthority ?? instruction.program)}
+	<!-- A line under the heading of the very program it names need not repeat that program's
+	     address: the heading shows it, with its controls, right above. The line keeps the name, and
+	     reads like the opening of a token account. -->
+	{@const programLabel =
+		nonNullish(headingProgram) && instruction.program === headingProgram
+			? (instruction.programName ?? shortenWithMiddleEllipsis({ text: headingProgram }))
+			: undefined}
+
+	{@const actionAddress =
+		closedHome || nonNullish(programLabel)
+			? undefined
+			: (instruction.counterparty ?? instruction.newAuthority ?? instruction.program)}
 
 	<span class="flex flex-col gap-1" data-tid="sol-instruction">
 		<span class="flex flex-wrap items-center gap-x-1">
 			<span>
-				{text}{#if nonNullish(detail)}<span class="text-tertiary">{` · ${detail}`}</span>{/if}
+				{text}{#if nonNullish(programLabel)}<span class="text-tertiary">{` ${programLabel}`}</span
+					>{/if}{#if nonNullish(detail)}<span class="text-tertiary">{` · ${detail}`}</span
+					>{/if}{#if nonNullish(programLabel) && nonNullish(trailing)}<span class="text-tertiary"
+						>{` · ${trailing}`}</span
+					>{/if}
 			</span>
 
 			<!-- A contact or a token OISY knows names the account; the address is what is left when
@@ -119,7 +133,7 @@
 				/>
 			{/if}
 
-			{#if nonNullish(trailing)}
+			{#if isNullish(programLabel) && nonNullish(trailing)}
 				<span class="text-tertiary">{`· ${trailing}`}</span>
 			{/if}
 		</span>
@@ -130,7 +144,7 @@
 		{#if nonNullish(instruction.children)}
 			<span class="flex flex-col gap-1 ps-4">
 				{#each instruction.children as child, i (i)}
-					{@render line(child)}
+					{@render line(child, instruction.program)}
 				{/each}
 			</span>
 		{/if}
