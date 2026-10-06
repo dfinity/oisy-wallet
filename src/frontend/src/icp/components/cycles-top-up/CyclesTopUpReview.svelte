@@ -28,13 +28,14 @@
 	interface Props {
 		canisterId: string;
 		sendAmount: OptionAmount;
-		// The last top-up got no answer: the warning says so, and Top up sends it again.
-		unknownOutcome?: boolean;
+		// The last top-up got no answer. `resend`: Review shows that top-up again, and Top up
+		// resends it. `fresh`: the amount or canister changed, so Top up starts a new one.
+		unknownOutcome?: 'resend' | 'fresh';
 		onBack: () => void;
 		onTopUp: () => void;
 	}
 
-	let { canisterId, sendAmount, unknownOutcome = false, onBack, onTopUp }: Props = $props();
+	let { canisterId, sendAmount, unknownOutcome, onBack, onTopUp }: Props = $props();
 
 	const { sourceToken, sourceTokenExchangeRate } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
@@ -80,10 +81,15 @@
 		</ModalValue>
 	{/if}
 
-	{#if unknownOutcome}
+	{#if nonNullish(unknownOutcome)}
 		<div class="mt-4" in:fade>
 			<MessageBox level="warning">
-				{replacePlaceholders($i18n.cycles_top_up.text.unknown, { $token: $sourceToken.symbol })}
+				{replacePlaceholders(
+					unknownOutcome === 'resend'
+						? $i18n.cycles_top_up.text.unknown
+						: $i18n.cycles_top_up.text.unknown_fresh,
+					{ $token: $sourceToken.symbol }
+				)}
 			</MessageBox>
 		</div>
 	{/if}
