@@ -3,7 +3,7 @@
 	import InfiniteScroll from '$lib/components/ui/InfiniteScroll.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { Token } from '$lib/types/token';
-	import { solTransactions } from '$sol/derived/sol-transactions.derived';
+	import { solTransactionsInitialized } from '$sol/derived/sol-transactions.derived';
 	import { loadOlderSolTokenTransactions } from '$sol/services/sol-history-pagers.services';
 
 	interface Props {
@@ -16,9 +16,11 @@
 	let disableInfiniteScroll = $state(false);
 
 	const onIntersect = async () => {
-		// Only a gate, not a cursor: the pager keeps its own. Until the worker posts the first
-		// transactions, paging would race it for the same newest signatures.
-		if ($solTransactions.length === 0) {
+		// Only a gate, not a cursor: the pager keeps its own. Until the worker has posted the token's
+		// list, paging would race it for the same newest signatures. A list it posted empty is not the
+		// end: the network's newest page can hold none of the token's transactions, which are then all
+		// older, and only the pager reaches them.
+		if (!$solTransactionsInitialized) {
 			return;
 		}
 

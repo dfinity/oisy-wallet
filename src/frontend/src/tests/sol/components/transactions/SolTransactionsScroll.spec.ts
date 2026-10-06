@@ -82,13 +82,19 @@ describe('SolTransactionsScroll', () => {
 			expect(loadOlderSolTokenTransactions).not.toHaveBeenCalled();
 		});
 
-		it('should not load next transactions if the transactions store is empty', () => {
+		// The worker's first page holds the network's newest transactions only, which can include none
+		// of this token's: an empty list it posted is where the token's own history starts.
+		it('should load the token history when the worker posted an empty list', () => {
 			solTransactionsStore.reset(mockToken.id);
 			solTransactionsStore.prepend({ tokenId: mockToken.id, transactions: [] });
 
 			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
 
-			expect(loadOlderSolTokenTransactions).not.toHaveBeenCalled();
+			expect(loadOlderSolTokenTransactions).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				token: mockToken,
+				signalEnd: expect.any(Function)
+			});
 		});
 	});
 });
