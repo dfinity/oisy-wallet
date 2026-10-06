@@ -1186,32 +1186,32 @@
 	},
 	"cycles_top_up": {
 		"text": {
-			"top_up": "",
-			"title": "",
-			"description": "",
-			"canister_id_placeholder": "",
-			"checking_canister": "",
-			"recently_topped_up": "",
-			"canister": "",
-			"you_top_up": "",
-			"total": "",
-			"one_way": "",
-			"topping_up": "",
-			"topped_up": "",
-			"unknown": "",
-			"sent_to_canister": "",
-			"sent_to_canister_top_up": ""
+			"top_up": "Recarregar",
+			"title": "Recarregar um canister",
+			"description": "Os ciclos saem do seu saldo de $token para o canister, que os gasta em computação e armazenamento.",
+			"canister_id_placeholder": "Insira um ID de canister",
+			"checking_canister": "Verificando o canister...",
+			"recently_topped_up": "Recarregados recentemente",
+			"canister": "Canister",
+			"you_top_up": "Você recarrega",
+			"total": "Total",
+			"one_way": "Uma recarga não pode ser desfeita: os ciclos ficam no canister.",
+			"topping_up": "Recarregando $canister...",
+			"topped_up": "$canister recarregado com $amount $token.",
+			"unknown": "OISY ainda não sabe se a recarga foi concluída. Se foi, sua atividade de $token vai mostrá-la. Recarregue de novo para enviar a mesma recarga: ela só pode ser concluída uma vez.",
+			"sent_to_canister": "Enviar $token para um canister não o recarrega. Os $token chegam à conta do canister, e o canister só recebe ciclos se o próprio código dele os sacar.",
+			"sent_to_canister_top_up": "Para adicionar ciclos a um canister, use “Recarregar” na página de $token."
 		},
 		"error": {
-			"invalid_canister_id": "",
-			"canister_not_found": "",
-			"canister_check_failed": "",
-			"amount_too_small": "",
-			"refused": "",
-			"insufficient_funds": "",
-			"clock": "",
-			"refunded": "",
-			"refunded_nothing": ""
+			"invalid_canister_id": "Insira um ID de canister. Principals de usuário, IDs de conta e endereços de outras redes não podem ser recarregados.",
+			"canister_not_found": "Não existe nenhum canister com este ID no Internet Computer. Verifique o ID.",
+			"canister_check_failed": "OISY não conseguiu verificar este canister. Tente novamente em instantes.",
+			"amount_too_small": "Insira mais do que a taxa de $fee $token.",
+			"refused": "A recarga não foi concluída. Nada saiu da sua carteira. Tente novamente em instantes.",
+			"insufficient_funds": "Não há $token suficientes para esta recarga e a taxa. Nada saiu da sua carteira. Reduza o valor.",
+			"clock": "A recarga não foi concluída porque o relógio do seu dispositivo está errado. Nada saiu da sua carteira. Ajuste a hora correta e tente novamente.",
+			"refunded": "O canister não conseguiu receber os ciclos. Seus $token voltaram, menos $fees $token de taxas. Verifique o ID do canister.",
+			"refunded_nothing": "O canister não conseguiu receber os ciclos, e as taxas consumiram todo o valor. Verifique o ID do canister."
 		}
 	},
 	"active_user_transactions": {
@@ -2258,8 +2258,8 @@
 			"twin_network": "Rede $twinNetwork",
 			"no_date_available": "Data não disponível",
 			"pending": "Pendente",
-			"top_up": "",
-			"top_up_refund": ""
+			"top_up": "Recarga",
+			"top_up_refund": "Reembolso da recarga"
 		},
 		"alt": {
 			"open_block_explorer": "Abrir esta transação no explorador de blocos",

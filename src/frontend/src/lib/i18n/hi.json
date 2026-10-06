@@ -1186,32 +1186,32 @@
 	},
 	"cycles_top_up": {
 		"text": {
-			"top_up": "",
-			"title": "",
-			"description": "",
-			"canister_id_placeholder": "",
-			"checking_canister": "",
-			"recently_topped_up": "",
-			"canister": "",
-			"you_top_up": "",
-			"total": "",
-			"one_way": "",
-			"topping_up": "",
-			"topped_up": "",
-			"unknown": "",
-			"sent_to_canister": "",
-			"sent_to_canister_top_up": ""
+			"top_up": "टॉप अप करें",
+			"title": "कैनिस्टर टॉप अप करें",
+			"description": "साइकल्स आपके $token बैलेंस से कैनिस्टर में जाते हैं, जो उन्हें कंप्यूटेशन और स्टोरेज पर खर्च करता है।",
+			"canister_id_placeholder": "कैनिस्टर ID दर्ज करें",
+			"checking_canister": "कैनिस्टर की जाँच हो रही है...",
+			"recently_topped_up": "हाल ही में टॉप अप किए गए",
+			"canister": "कैनिस्टर",
+			"you_top_up": "आप टॉप अप करते हैं",
+			"total": "कुल",
+			"one_way": "टॉप-अप को वापस नहीं किया जा सकता: साइकल्स कैनिस्टर में ही रहते हैं।",
+			"topping_up": "$canister को टॉप अप किया जा रहा है...",
+			"topped_up": "$canister को $amount $token से टॉप अप किया गया।",
+			"unknown": "OISY अभी नहीं बता सकता कि टॉप-अप पूरा हुआ या नहीं। अगर हुआ है, तो यह आपकी $token गतिविधि में दिखेगा। वही टॉप-अप भेजने के लिए फिर से टॉप अप करें: यह केवल एक बार ही पूरा हो सकता है।",
+			"sent_to_canister": "किसी कैनिस्टर को $token भेजने से वह टॉप अप नहीं होता। $token कैनिस्टर के खाते में पहुँचते हैं, और कैनिस्टर को साइकल्स तभी मिलते हैं जब उसका अपना कोड उन्हें निकालता है।",
+			"sent_to_canister_top_up": "किसी कैनिस्टर में साइकल्स जोड़ने के लिए, $token पेज पर “टॉप अप करें” का उपयोग करें।"
 		},
 		"error": {
-			"invalid_canister_id": "",
-			"canister_not_found": "",
-			"canister_check_failed": "",
-			"amount_too_small": "",
-			"refused": "",
-			"insufficient_funds": "",
-			"clock": "",
-			"refunded": "",
-			"refunded_nothing": ""
+			"invalid_canister_id": "कैनिस्टर ID दर्ज करें। यूज़र प्रिंसिपल, अकाउंट ID और अन्य नेटवर्क के पते टॉप अप नहीं किए जा सकते।",
+			"canister_not_found": "Internet Computer पर इस ID वाला कोई कैनिस्टर मौजूद नहीं है। ID जाँचें।",
+			"canister_check_failed": "OISY इस कैनिस्टर की जाँच नहीं कर सका। थोड़ी देर में फिर से कोशिश करें।",
+			"amount_too_small": "$fee $token शुल्क से अधिक राशि दर्ज करें।",
+			"refused": "टॉप-अप पूरा नहीं हुआ। आपके वॉलेट से कुछ नहीं गया। थोड़ी देर में फिर से कोशिश करें।",
+			"insufficient_funds": "इस टॉप-अप और शुल्क के लिए पर्याप्त $token नहीं हैं। आपके वॉलेट से कुछ नहीं गया। राशि कम करें।",
+			"clock": "टॉप-अप पूरा नहीं हुआ क्योंकि आपके डिवाइस की घड़ी सही नहीं है। आपके वॉलेट से कुछ नहीं गया। सही समय सेट करें और फिर से कोशिश करें।",
+			"refunded": "कैनिस्टर साइकल्स प्राप्त नहीं कर सका। आपके $token वापस आ गए, $fees $token शुल्क घटाकर। कैनिस्टर ID जाँचें।",
+			"refunded_nothing": "कैनिस्टर साइकल्स प्राप्त नहीं कर सका, और शुल्क में पूरी राशि चली गई। कैनिस्टर ID जाँचें।"
 		}
 	},
 	"active_user_transactions": {
@@ -2258,8 +2258,8 @@
 			"twin_network": "$twinNetwork नेटवर्क",
 			"no_date_available": "कोई तिथि उपलब्ध नहीं",
 			"pending": "लंबित",
-			"top_up": "",
-			"top_up_refund": ""
+			"top_up": "टॉप-अप",
+			"top_up_refund": "टॉप-अप रिफ़ंड"
 		},
 		"alt": {
 			"open_block_explorer": "इस लेनदेन को ब्लॉक एक्सप्लोरर पर खोलें",

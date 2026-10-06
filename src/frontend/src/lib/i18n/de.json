@@ -1186,32 +1186,32 @@
 	},
 	"cycles_top_up": {
 		"text": {
-			"top_up": "",
-			"title": "",
-			"description": "",
-			"canister_id_placeholder": "",
-			"checking_canister": "",
-			"recently_topped_up": "",
-			"canister": "",
-			"you_top_up": "",
-			"total": "",
-			"one_way": "",
-			"topping_up": "",
-			"topped_up": "",
-			"unknown": "",
-			"sent_to_canister": "",
-			"sent_to_canister_top_up": ""
+			"top_up": "Aufladen",
+			"title": "Canister aufladen",
+			"description": "Die Cycles gehen von deinem $token-Guthaben in den Canister, der sie für Rechenleistung und Speicher verbraucht.",
+			"canister_id_placeholder": "Canister-ID eingeben",
+			"checking_canister": "Canister wird geprüft...",
+			"recently_topped_up": "Zuletzt aufgeladen",
+			"canister": "Canister",
+			"you_top_up": "Du lädst auf",
+			"total": "Gesamt",
+			"one_way": "Eine Aufladung lässt sich nicht rückgängig machen: Die Cycles bleiben im Canister.",
+			"topping_up": "$canister wird aufgeladen...",
+			"topped_up": "$canister mit $amount $token aufgeladen.",
+			"unknown": "OISY kann noch nicht sagen, ob die Aufladung durchgegangen ist. Falls ja, zeigt deine $token-Aktivität sie an. Lade erneut auf, um dieselbe Aufladung zu senden: Sie kann nur einmal durchgehen.",
+			"sent_to_canister": "$token an einen Canister zu senden, lädt ihn nicht auf. Die $token landen auf dem Konto des Canisters, und der Canister erhält nur dann Cycles, wenn sein eigener Code sie abhebt.",
+			"sent_to_canister_top_up": "Um einem Canister Cycles hinzuzufügen, nutze „Aufladen“ auf der $token-Seite."
 		},
 		"error": {
-			"invalid_canister_id": "",
-			"canister_not_found": "",
-			"canister_check_failed": "",
-			"amount_too_small": "",
-			"refused": "",
-			"insufficient_funds": "",
-			"clock": "",
-			"refunded": "",
-			"refunded_nothing": ""
+			"invalid_canister_id": "Gib eine Canister-ID ein. User-Principals, Konto-IDs und Adressen in anderen Netzwerken können nicht aufgeladen werden.",
+			"canister_not_found": "Auf dem Internet Computer gibt es keinen Canister mit dieser ID. Prüfe die ID.",
+			"canister_check_failed": "OISY konnte diesen Canister nicht prüfen. Versuche es gleich noch einmal.",
+			"amount_too_small": "Gib mehr als die Gebühr von $fee $token ein.",
+			"refused": "Die Aufladung ist nicht durchgegangen. Nichts hat deine Wallet verlassen. Versuche es gleich noch einmal.",
+			"insufficient_funds": "Nicht genug $token für diese Aufladung und die Gebühr. Nichts hat deine Wallet verlassen. Verringere den Betrag.",
+			"clock": "Die Aufladung ist nicht durchgegangen, weil die Uhr deines Geräts falsch geht. Nichts hat deine Wallet verlassen. Stelle die richtige Zeit ein und versuche es erneut.",
+			"refunded": "Der Canister konnte die Cycles nicht empfangen. Deine $token sind zurück, abzüglich $fees $token Gebühren. Prüfe die Canister-ID.",
+			"refunded_nothing": "Der Canister konnte die Cycles nicht empfangen, und die Gebühren haben den ganzen Betrag aufgebraucht. Prüfe die Canister-ID."
 		}
 	},
 	"active_user_transactions": {
@@ -2258,8 +2258,8 @@
 			"twin_network": "$twinNetwork-Netzwerk",
 			"no_date_available": "Kein Datum verfügbar",
 			"pending": "Ausstehend",
-			"top_up": "",
-			"top_up_refund": ""
+			"top_up": "Aufladung",
+			"top_up_refund": "Erstattung der Aufladung"
 		},
 		"alt": {
 			"open_block_explorer": "Diese Transaktion in einem Block-Explorer öffnen",

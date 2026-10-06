@@ -1186,32 +1186,32 @@
 	},
 	"cycles_top_up": {
 		"text": {
-			"top_up": "",
-			"title": "",
-			"description": "",
-			"canister_id_placeholder": "",
-			"checking_canister": "",
-			"recently_topped_up": "",
-			"canister": "",
-			"you_top_up": "",
-			"total": "",
-			"one_way": "",
-			"topping_up": "",
-			"topped_up": "",
-			"unknown": "",
-			"sent_to_canister": "",
-			"sent_to_canister_top_up": ""
+			"top_up": "Пополнить",
+			"title": "Пополнить контейнер",
+			"description": "Циклы переходят с вашего баланса $token в контейнер, который тратит их на вычисления и хранение.",
+			"canister_id_placeholder": "Введите ID контейнера",
+			"checking_canister": "Проверка контейнера...",
+			"recently_topped_up": "Недавно пополненные",
+			"canister": "Контейнер",
+			"you_top_up": "Вы пополняете",
+			"total": "Итого",
+			"one_way": "Пополнение нельзя отменить: циклы остаются в контейнере.",
+			"topping_up": "Пополнение $canister...",
+			"topped_up": "$canister пополнен на $amount $token.",
+			"unknown": "OISY пока не может определить, прошло ли пополнение. Если прошло, оно появится в активности $token. Пополните ещё раз, чтобы отправить то же пополнение: оно может пройти только один раз.",
+			"sent_to_canister": "Отправка $token в контейнер не пополняет его. $token поступают на счёт контейнера, и контейнер получает циклы, только если их выведет его собственный код.",
+			"sent_to_canister_top_up": "Чтобы добавить циклы в контейнер, используйте «Пополнить» на странице $token."
 		},
 		"error": {
-			"invalid_canister_id": "",
-			"canister_not_found": "",
-			"canister_check_failed": "",
-			"amount_too_small": "",
-			"refused": "",
-			"insufficient_funds": "",
-			"clock": "",
-			"refunded": "",
-			"refunded_nothing": ""
+			"invalid_canister_id": "Введите ID контейнера. Принципалы пользователей, ID аккаунтов и адреса в других сетях пополнить нельзя.",
+			"canister_not_found": "В Internet Computer нет контейнера с таким ID. Проверьте ID.",
+			"canister_check_failed": "OISY не удалось проверить этот контейнер. Повторите попытку чуть позже.",
+			"amount_too_small": "Введите сумму больше комиссии $fee $token.",
+			"refused": "Пополнение не прошло. Из кошелька ничего не ушло. Повторите попытку чуть позже.",
+			"insufficient_funds": "Недостаточно $token для этого пополнения и комиссии. Из кошелька ничего не ушло. Уменьшите сумму.",
+			"clock": "Пополнение не прошло, потому что часы вашего устройства идут неверно. Из кошелька ничего не ушло. Установите правильное время и повторите попытку.",
+			"refunded": "Контейнер не смог принять циклы. Ваши $token вернулись за вычетом комиссий $fees $token. Проверьте ID контейнера.",
+			"refunded_nothing": "Контейнер не смог принять циклы, и комиссии поглотили всю сумму. Проверьте ID контейнера."
 		}
 	},
 	"active_user_transactions": {
@@ -2258,8 +2258,8 @@
 			"twin_network": "Сеть $twinNetwork",
 			"no_date_available": "Дата недоступна",
 			"pending": "Ожидание",
-			"top_up": "",
-			"top_up_refund": ""
+			"top_up": "Пополнение",
+			"top_up_refund": "Возврат пополнения"
 		},
 		"alt": {
 			"open_block_explorer": "Открыть эту транзакцию в обозревателе блоков",

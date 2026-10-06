@@ -1186,32 +1186,32 @@
 	},
 	"cycles_top_up": {
 		"text": {
-			"top_up": "",
-			"title": "",
-			"description": "",
-			"canister_id_placeholder": "",
-			"checking_canister": "",
-			"recently_topped_up": "",
-			"canister": "",
-			"you_top_up": "",
-			"total": "",
-			"one_way": "",
-			"topping_up": "",
-			"topped_up": "",
-			"unknown": "",
-			"sent_to_canister": "",
-			"sent_to_canister_top_up": ""
+			"top_up": "チャージ",
+			"title": "キャニスターにチャージ",
+			"description": "サイクルは$tokenの残高からキャニスターに送られ、キャニスターはそれを計算とストレージに使います。",
+			"canister_id_placeholder": "キャニスターIDを入力",
+			"checking_canister": "キャニスターを確認しています...",
+			"recently_topped_up": "最近チャージしたキャニスター",
+			"canister": "キャニスター",
+			"you_top_up": "チャージ額",
+			"total": "合計",
+			"one_way": "チャージは取り消せません。サイクルはキャニスターに残ります。",
+			"topping_up": "$canisterにチャージしています...",
+			"topped_up": "$canisterに$amount $tokenをチャージしました。",
+			"unknown": "チャージが完了したかどうか、OISYはまだ判断できません。完了していれば$tokenのアクティビティに表示されます。もう一度チャージすると同じチャージが送信されますが、完了するのは1回だけです。",
+			"sent_to_canister": "キャニスターに$tokenを送ってもチャージにはなりません。$tokenはキャニスターのアカウントに届き、キャニスター自身のコードが引き出した場合にのみサイクルになります。",
+			"sent_to_canister_top_up": "キャニスターにサイクルを追加するには、$tokenのページで「チャージ」を使ってください。"
 		},
 		"error": {
-			"invalid_canister_id": "",
-			"canister_not_found": "",
-			"canister_check_failed": "",
-			"amount_too_small": "",
-			"refused": "",
-			"insufficient_funds": "",
-			"clock": "",
-			"refunded": "",
-			"refunded_nothing": ""
+			"invalid_canister_id": "キャニスターIDを入力してください。ユーザーのプリンシパル、アカウントID、他のネットワークのアドレスにはチャージできません。",
+			"canister_not_found": "このIDのキャニスターはInternet Computer上に存在しません。IDを確認してください。",
+			"canister_check_failed": "OISYはこのキャニスターを確認できませんでした。しばらくしてからもう一度お試しください。",
+			"amount_too_small": "手数料の$fee $tokenより多い額を入力してください。",
+			"refused": "チャージは完了しませんでした。ウォレットからは何も出ていません。しばらくしてからもう一度お試しください。",
+			"insufficient_funds": "このチャージと手数料に必要な$tokenが足りません。ウォレットからは何も出ていません。金額を減らしてください。",
+			"clock": "デバイスの時計がずれているため、チャージは完了しませんでした。ウォレットからは何も出ていません。正しい時刻に設定して、もう一度お試しください。",
+			"refunded": "キャニスターがサイクルを受け取れませんでした。$tokenは手数料$fees $tokenを差し引いて戻りました。キャニスターIDを確認してください。",
+			"refunded_nothing": "キャニスターがサイクルを受け取れず、手数料で全額がなくなりました。キャニスターIDを確認してください。"
 		}
 	},
 	"active_user_transactions": {
@@ -2258,8 +2258,8 @@
 			"twin_network": "$twinNetworkネットワーク",
 			"no_date_available": "日付情報なし",
 			"pending": "保留中",
-			"top_up": "",
-			"top_up_refund": ""
+			"top_up": "チャージ",
+			"top_up_refund": "チャージの返金"
 		},
 		"alt": {
 			"open_block_explorer": "ブロックエクスプローラーでこのトランザクションを開く",
