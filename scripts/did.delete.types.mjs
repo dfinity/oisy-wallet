@@ -31,6 +31,7 @@ const promises = Object.keys(canisters)
 				'icrc7',
 				'icrc3',
 				'cmc',
+				'cycles_ledger',
 				'icp_index',
 				'icp_ledger'
 			].includes(canister)
