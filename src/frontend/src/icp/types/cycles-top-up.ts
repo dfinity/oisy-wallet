@@ -14,3 +14,8 @@ export type CyclesTopUpResult =
 	| { status: 'refused'; refusal: CyclesLedgerWithdrawRefusal }
 	| { status: 'refunded'; refundBlockIndex?: bigint }
 	| { status: 'unknown' };
+
+/**
+ * Whether a canister exists. `unknown` means the check could not be made.
+ */
+export type CanisterExistence = 'exists' | 'not_found' | 'unknown';
