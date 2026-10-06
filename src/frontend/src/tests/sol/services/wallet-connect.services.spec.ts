@@ -331,9 +331,12 @@ describe('wallet-connect.services', () => {
 				expect(mapSolTransactionMessage).toHaveBeenCalledExactlyOnceWith(
 					expect.objectContaining({ rentExemptMinimum: mockRentExemptMinimum })
 				);
-				expect(simulateSolTransaction).toHaveBeenCalledExactlyOnceWith(
-					expect.objectContaining({ rentExemptMinimum: mockRentExemptMinimum })
-				);
+				expect(simulateSolTransaction).toHaveBeenCalledOnce();
+
+				const [[{ rentExemptMinimumRequest }]] = vi.mocked(simulateSolTransaction).mock.calls;
+
+				await expect(rentExemptMinimumRequest).resolves.toBe(mockRentExemptMinimum);
+
 				expect(result).toEqual(
 					expect.objectContaining({ rentExemptMinimum: mockRentExemptMinimum })
 				);
@@ -355,9 +358,12 @@ describe('wallet-connect.services', () => {
 					userAddress: mockSolAddress,
 					rentExemptMinimum: undefined
 				});
-				expect(simulateSolTransaction).toHaveBeenCalledExactlyOnceWith(
-					expect.objectContaining({ rentExemptMinimum: undefined })
-				);
+				expect(simulateSolTransaction).toHaveBeenCalledOnce();
+
+				const [[{ rentExemptMinimumRequest }]] = vi.mocked(simulateSolTransaction).mock.calls;
+
+				await expect(rentExemptMinimumRequest).resolves.toBeUndefined();
+
 				expect(result).not.toHaveProperty('rentExemptMinimum');
 			});
 
@@ -384,6 +390,31 @@ describe('wallet-connect.services', () => {
 					rentExemptMinimum: undefined
 				});
 				expect(result).not.toHaveProperty('rentExemptMinimum');
+			});
+
+			// The run waits for the reserve inside its own timeout, so a stalled reserve and a stalled
+			// run cost one timeout rather than two in a row.
+			it('should start the simulation before the reserve arrives', async () => {
+				vi.useFakeTimers();
+
+				vi.mocked(getSolCreateAccountFee).mockReturnValueOnce(new Promise(() => undefined));
+
+				const pending = decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(simulateSolTransaction).toHaveBeenCalledOnce();
+				expect(mapSolTransactionMessage).not.toHaveBeenCalled();
+
+				await vi.advanceTimersByTimeAsync(SOLANA_SIMULATION_TIMEOUT_MILLISECONDS);
+
+				await pending;
+
+				expect(mapSolTransactionMessage).toHaveBeenCalledOnce();
 			});
 		});
 
@@ -420,7 +451,7 @@ describe('wallet-connect.services', () => {
 					transactionMessage: mockParsedTransaction,
 					address: mockSolAddress,
 					network: 'mainnet',
-					rentExemptMinimum: mockRentExemptMinimum
+					rentExemptMinimumRequest: expect.any(Promise)
 				});
 				expect(result).toEqual(expect.objectContaining({ preview: mockPreview }));
 			});

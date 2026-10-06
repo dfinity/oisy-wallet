@@ -114,20 +114,35 @@ export const decode = async ({
 	const solNetwork = safeMapNetworkIdToNetwork(networkId);
 
 	// What the chain charges a token account to exist, which every account creation in the message
-	// is held to: anything funded above it is a payment rather than rent. Read alongside the message
-	// so the review waits no longer for it, and given up on after the simulation's timeout so an RPC
-	// that never answers cannot hold the review either. Best effort - without it a creation for a
-	// program has no line to be held to and is refused.
-	const [parsedTransactionMessage, rentExemptMinimum] = await Promise.all([
-		parseSolBase64TransactionMessage({
-			transactionMessage: base64EncodedTransactionMessage,
-			rpc: solanaHttpRpc(solNetwork)
-		}),
-		Promise.race([
-			getSolCreateAccountFee(solNetwork),
-			waitForMilliseconds(SOLANA_SIMULATION_TIMEOUT_MILLISECONDS).then(() => undefined)
-		]).catch(() => undefined)
-	]);
+	// is held to: anything funded above it is a payment rather than rent. Requested alongside the
+	// message, and given up on after the simulation's timeout so an RPC that never answers cannot
+	// hold the review either. Best effort - without it a creation for a program has no line to be
+	// held to and is refused.
+	const rentExemptMinimumRequest = Promise.race([
+		getSolCreateAccountFee(solNetwork),
+		waitForMilliseconds(SOLANA_SIMULATION_TIMEOUT_MILLISECONDS).then(() => undefined)
+	]).catch(() => undefined);
+
+	const parsedTransactionMessage = await parseSolBase64TransactionMessage({
+		transactionMessage: base64EncodedTransactionMessage,
+		rpc: solanaHttpRpc(solNetwork)
+	});
+
+	// The review is synchronous, so both the estimate the requested fee is judged against and the
+	// simulation are fetched here, where the request is already being decoded before the modal
+	// opens. A simulation that lands after the user has approved would be worthless.
+	//
+	// The simulation starts before the reserve is awaited and waits for the same request inside its
+	// own timeout, so a stalled reserve and a stalled run cost one timeout rather than two in a row.
+	const simulationRequest = simulateSolTransaction({
+		base64EncodedTransactionMessage,
+		transactionMessage: parsedTransactionMessage,
+		address,
+		network: solNetwork,
+		rentExemptMinimumRequest
+	});
+
+	const rentExemptMinimum = await rentExemptMinimumRequest;
 
 	const mappedTransaction = mapSolTransactionMessage({
 		transactionMessage: parsedTransactionMessage,
@@ -135,21 +150,12 @@ export const decode = async ({
 		rentExemptMinimum
 	});
 
-	// The review is synchronous, so both the estimate the requested fee is judged against and the
-	// simulation are fetched here, where the request is already being decoded before the modal
-	// opens. A simulation that lands after the user has approved would be worthless.
 	const [prioritizationFeeEstimate, simulation] = await Promise.all([
 		estimateSolPrioritizationFee({
 			computeUnitLimit: mappedTransaction.computeUnitLimit,
 			network: solNetwork
 		}),
-		simulateSolTransaction({
-			base64EncodedTransactionMessage,
-			transactionMessage: parsedTransactionMessage,
-			address,
-			network: solNetwork,
-			rentExemptMinimum
-		})
+		simulationRequest
 	]);
 
 	const {

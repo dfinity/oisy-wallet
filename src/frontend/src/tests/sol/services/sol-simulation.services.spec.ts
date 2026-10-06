@@ -2,6 +2,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { getMultipleAccountsInfo, simulateTransactionAccounts } from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
+	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
@@ -107,7 +108,7 @@ describe('sol-simulation.services', () => {
 		transactionMessage,
 		address: mockSolAddress,
 		network,
-		rentExemptMinimum: 2_039_280n
+		rentExemptMinimumRequest: Promise.resolve(2_039_280n)
 	});
 
 	const simulated = ({
@@ -128,6 +129,10 @@ describe('sol-simulation.services', () => {
 
 		vi.mocked(getMultipleAccountsInfo).mockResolvedValue([]);
 		vi.mocked(simulateTransactionAccounts).mockResolvedValue(simulated({ accounts: [] }));
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
 	});
 
 	it('should diff the pre-state against the simulated post-state', async () => {
@@ -196,11 +201,29 @@ describe('sol-simulation.services', () => {
 			'mapSolInstructionSummaries'
 		);
 
-		await simulateSolTransaction({ ...params(message([])), rentExemptMinimum: 1_488_440n });
+		await simulateSolTransaction({
+			...params(message([])),
+			rentExemptMinimumRequest: Promise.resolve(1_488_440n)
+		});
 
 		expect(spyMapSolInstructionSummaries).toHaveBeenCalledWith(
 			expect.objectContaining({ rentExemptMinimum: 1_488_440n })
 		);
+	});
+
+	// The decode starts the run before the reserve arrives, so waiting for it has to fall inside the
+	// run's own timeout: otherwise a stalled reserve would hold the review past it.
+	it('should give up on a reserve that never arrives within its own timeout', async () => {
+		vi.useFakeTimers();
+
+		const pending = simulateSolTransaction({
+			...params(message([])),
+			rentExemptMinimumRequest: new Promise(() => undefined)
+		});
+
+		await vi.advanceTimersByTimeAsync(SOLANA_SIMULATION_TIMEOUT_MILLISECONDS);
+
+		await expect(pending).resolves.toBeUndefined();
 	});
 
 	it('should yield nothing without a wallet address', async () => {

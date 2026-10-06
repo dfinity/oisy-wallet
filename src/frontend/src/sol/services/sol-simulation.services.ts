@@ -30,17 +30,15 @@ const simulate = async ({
 	transactionMessage,
 	address,
 	network,
-	rentExemptMinimum
+	rentExemptMinimumRequest
 }: {
 	base64EncodedTransactionMessage: string;
 	transactionMessage: CompilableTransactionMessage;
 	address: SolAddress;
 	network: SolanaNetworkType;
-	// The reserve a token account costs to exist. A creation may fund one with more than that and let
-	// its initialisation read the difference as the balance, and nothing in the message says where
-	// the line falls - without it the balance of an account this message opens is stated as unknown
-	// rather than guessed at.
-	rentExemptMinimum: bigint | undefined;
+	// The decode's request for the reserve a token account costs to exist, still pending when the
+	// run starts, so that waiting for it falls inside the run's own timeout.
+	rentExemptMinimumRequest: Promise<bigint | undefined>;
 }): Promise<SolSimulationResult | undefined> => {
 	const addresses = selectSolSimulationAddresses(transactionMessage);
 
@@ -51,11 +49,17 @@ const simulate = async ({
 	}
 
 	// The "before" read does not depend on the simulation's outcome, so the two go out together
-	// and the preview costs one round trip rather than two.
-	const [preAccounts, { err, accounts: postAccounts, innerInstructions }] = await Promise.all([
-		getMultipleAccountsInfo({ addresses, network }),
-		simulateTransactionAccounts({ base64EncodedTransactionMessage, addresses, network })
-	]);
+	// and the preview costs one round trip rather than two. The reserve a token account costs to
+	// exist joins them: a creation may fund one with more than that and let its initialisation
+	// read the difference as the balance, and nothing in the message says where the line falls.
+	// Best effort - without it the balance of an account this message opens is stated as unknown
+	// rather than guessed at.
+	const [preAccounts, { err, accounts: postAccounts, innerInstructions }, rentExemptMinimum] =
+		await Promise.all([
+			getMultipleAccountsInfo({ addresses, network }),
+			simulateTransactionAccounts({ base64EncodedTransactionMessage, addresses, network }),
+			rentExemptMinimumRequest
+		]);
 
 	// A run that failed rolled its changes back, so its post-state describes nothing the user
 	// would actually get. Showing those deltas would be worse than showing none.
@@ -214,7 +218,7 @@ export const simulateSolTransaction = async (params: {
 	transactionMessage: CompilableTransactionMessage;
 	address: OptionSolAddress;
 	network: SolanaNetworkType;
-	rentExemptMinimum: bigint | undefined;
+	rentExemptMinimumRequest: Promise<bigint | undefined>;
 }): Promise<SolSimulationResult | undefined> => {
 	const { address } = params;
 
