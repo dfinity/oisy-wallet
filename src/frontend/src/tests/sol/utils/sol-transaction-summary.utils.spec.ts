@@ -1056,7 +1056,7 @@ describe('sol-transaction-summary.utils', () => {
 					program: mockSolAddress3,
 					rent: 41_899_840n
 				})
-			).toStrictEqual({ text: 'Pay 0.04189984 SOL rent to create an account for' });
+			).toStrictEqual({ text: 'Create app account for', trailing: 'rent 0.04189984 SOL' });
 		});
 
 		describe('the heading over the lines of an instruction it cannot read', () => {
