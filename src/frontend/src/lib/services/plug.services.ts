@@ -18,8 +18,7 @@ import {
 	isNetworkIdEvm,
 	isNetworkIdSolana
 } from '$lib/utils/network.utils';
-import { loadSolLamportsBalance } from '$sol/api/solana.api';
-import { loadSplTokenBalance } from '$sol/services/spl-accounts.services';
+import { loadSolNetworkBalances } from '$sol/services/sol-balances.services';
 import { SolanaNetworks } from '$sol/types/network';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -123,17 +122,27 @@ const balanceLookup = ({
 	}
 
 	if (isTokenSpl(token)) {
-		const { address: tokenAddress, owner: tokenOwnerAddress } = token;
+		const { address: tokenAddress } = token;
 
 		return {
 			address: account.solAddress,
-			load: async () =>
-				await loadSplTokenBalance({
+			load: async () => {
+				const { spl } = await loadSolNetworkBalances({
 					address: account.solAddress,
 					network: SolanaNetworks.mainnet,
-					tokenAddress,
-					tokenOwnerAddress
-				})
+					tokens: [token]
+				});
+
+				const balance = spl[tokenAddress];
+
+				// The service leaves out an account it cannot read as this token's. Zero would claim
+				// the user holds none, so the row degrades to an unreadable balance instead.
+				if (isNullish(balance)) {
+					throw new Error(`Unreadable token account for ${tokenAddress}`);
+				}
+
+				return balance;
+			}
 		};
 	}
 
@@ -160,11 +169,15 @@ const balanceLookup = ({
 	if (isNetworkIdSolana(networkId)) {
 		return {
 			address: account.solAddress,
-			load: async () =>
-				await loadSolLamportsBalance({
+			load: async () => {
+				const { sol } = await loadSolNetworkBalances({
 					address: account.solAddress,
-					network: SolanaNetworks.mainnet
-				})
+					network: SolanaNetworks.mainnet,
+					tokens: []
+				});
+
+				return sol;
+			}
 		};
 	}
 
