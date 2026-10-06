@@ -13,7 +13,7 @@ import {
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 
 vi.mock('$sol/services/sol-history-pagers.services', () => ({
 	loadOlderSolTokenTransactions: vi.fn()
@@ -37,6 +37,8 @@ describe('SolTransactionsScroll', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		vi.mocked(loadOlderSolTokenTransactions).mockResolvedValue({ success: false });
 
 		mockAuthStore();
 
@@ -95,6 +97,32 @@ describe('SolTransactionsScroll', () => {
 				token: mockToken,
 				signalEnd: expect.any(Function)
 			});
+		});
+
+		// Neither rows the micro-transaction filter hides nor a round of pages that wrote no row move
+		// the end of the list, so only the pager's result asks for the next round.
+		it('should ask again after a round the pager got through, even when the list stays empty', async () => {
+			solTransactionsStore.reset(mockToken.id);
+			solTransactionsStore.prepend({ tokenId: mockToken.id, transactions: [] });
+
+			vi.mocked(loadOlderSolTokenTransactions).mockResolvedValueOnce({ success: true });
+
+			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
+
+			await waitFor(() => expect(loadOlderSolTokenTransactions).toHaveBeenCalledTimes(2));
+		});
+
+		it('should not ask again at once after a failed page', async () => {
+			vi.mocked(loadOlderSolTokenTransactions).mockResolvedValue({
+				success: false,
+				err: new Error('getSignaturesForAddress failed')
+			});
+
+			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
+
+			await new Promise((resolve) => setTimeout(resolve, 0));
+
+			expect(loadOlderSolTokenTransactions).toHaveBeenCalledOnce();
 		});
 	});
 });

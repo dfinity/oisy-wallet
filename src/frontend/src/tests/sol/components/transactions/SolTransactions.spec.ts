@@ -13,7 +13,7 @@ import { createMockSolTransactionUi } from '$tests/mocks/sol-transactions.mock';
 import { render } from '@testing-library/svelte';
 
 vi.mock('$sol/services/sol-history-pagers.services', () => ({
-	loadOlderSolTokenTransactions: vi.fn().mockResolvedValue({ success: true })
+	loadOlderSolTokenTransactions: vi.fn().mockResolvedValue({ success: false })
 }));
 
 describe('SolTransactions', () => {
