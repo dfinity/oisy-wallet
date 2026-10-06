@@ -18,6 +18,7 @@ import {
 	resolveSolSignatures
 } from '$sol/services/sol-resolve-signatures.services';
 import { getSolSignatures } from '$sol/services/sol-signatures.services';
+import { reportUnreadableSolTransactions } from '$sol/services/sol-unreadable-transactions.services';
 import { saveSolFinalizedTransactions } from '$sol/services/sol-user-transactions.services';
 import { calculateAssociatedTokenAddress } from '$sol/services/spl-accounts.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
@@ -320,7 +321,7 @@ const pageOnce = async ({
 			.map(([signature]) => signature)
 	);
 
-	const resolved = await resolveSolSignatures({
+	const { transactions: resolved, unreadable } = await resolveSolSignatures({
 		address: wallet,
 		network,
 		tokens: splTokens,
@@ -331,6 +332,19 @@ const pageOnce = async ({
 	if (!isCurrent()) {
 		return;
 	}
+
+	reportUnreadableSolTransactions({
+		transactions: unreadable.flatMap(({ signature, errorCode }) => {
+			const tokens = tokensBySignature.get(String(signature)) ?? [];
+
+			const [token] = tokens;
+
+			// A signature no token of this pager routes to is missing from no history it shows.
+			return isNullish(token)
+				? []
+				: [{ signature, errorCode, network: token.network, tokenIds: tokens.map(({ id }) => id) }];
+		})
+	});
 
 	const recordsByToken = resolved.reduce<Map<Token, SolTransactionUi[]>>((acc, { transaction }) => {
 		(tokensBySignature.get(String(transaction.signature)) ?? []).forEach((token) =>

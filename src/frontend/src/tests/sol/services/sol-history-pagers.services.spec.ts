@@ -15,6 +15,7 @@ import {
 	resolveSolSignatures
 } from '$sol/services/sol-resolve-signatures.services';
 import { getSolSignatures } from '$sol/services/sol-signatures.services';
+import { reportUnreadableSolTransactions } from '$sol/services/sol-unreadable-transactions.services';
 import { calculateAssociatedTokenAddress } from '$sol/services/spl-accounts.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolAddress } from '$sol/types/address';
@@ -30,7 +31,10 @@ import {
 	mockSolAddress,
 	mockSolAddress2
 } from '$tests/mocks/sol.mock';
-import type { UnixTimestamp } from '@solana/kit';
+import {
+	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION,
+	type UnixTimestamp
+} from '@solana/kit';
 import { get, type Writable } from 'svelte/store';
 
 vi.mock('$lib/derived/tokens.derived', async () => {
@@ -57,6 +61,10 @@ vi.mock('$sol/services/sol-resolve-signatures.services', () => ({
 
 vi.mock('$sol/services/spl-accounts.services', () => ({
 	calculateAssociatedTokenAddress: vi.fn()
+}));
+
+vi.mock('$sol/services/sol-unreadable-transactions.services', () => ({
+	reportUnreadableSolTransactions: vi.fn()
 }));
 
 vi.mock('$env/user-transactions.env', () => ({
@@ -122,11 +130,12 @@ describe('sol-history-pagers.services', () => {
 		vi.mocked(calculateAssociatedTokenAddress).mockResolvedValue(bonkAta);
 
 		vi.mocked(resolveSolSignatures).mockImplementation(({ signatures, known }) =>
-			Promise.resolve(
-				signatures
+			Promise.resolve({
+				transactions: signatures
 					.filter(({ signature }) => !(known?.has(signature) ?? false))
-					.map((signature) => ({ transaction: recordOf(signature), sources: signature.sources }))
-			)
+					.map((signature) => ({ transaction: recordOf(signature), sources: signature.sources })),
+				unreadable: []
+			})
 		);
 	});
 
@@ -221,12 +230,13 @@ describe('sol-history-pagers.services', () => {
 			});
 
 			vi.mocked(resolveSolSignatures).mockImplementation(({ signatures }) =>
-				Promise.resolve(
-					signatures.map((signature) => ({
+				Promise.resolve({
+					transactions: signatures.map((signature) => ({
 						transaction: { ...recordOf(signature), value: 2n },
 						sources: signature.sources
-					}))
-				)
+					})),
+					unreadable: []
+				})
 			);
 
 			mockPages({ signatures: [swap], cursor: cursor('next') });
@@ -411,6 +421,67 @@ describe('sol-history-pagers.services', () => {
 			});
 
 			expect(signalEnd).not.toHaveBeenCalled();
+		});
+
+		describe('a transaction the RPC refused to return', () => {
+			const transfer = signatureAt({ blockTime: 100, sources: [wallet] });
+			const refused = signatureAt({ blockTime: 90, sources: [wallet, usdcAta] });
+
+			beforeEach(() => {
+				vi.mocked(resolveSolSignatures).mockImplementation(({ signatures }) =>
+					Promise.resolve({
+						transactions: signatures
+							.filter(({ signature }) => signature !== refused.signature)
+							.map((signature) => ({
+								transaction: recordOf(signature),
+								sources: signature.sources
+							})),
+						unreadable: signatures
+							.filter(({ signature }) => signature === refused.signature)
+							.map(({ signature, sources }) => ({
+								signature,
+								sources,
+								errorCode: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION
+							}))
+					})
+				);
+			});
+
+			it('should report it for every token it belongs to', async () => {
+				mockPages({ signatures: [transfer, refused], cursor: cursor('next') });
+
+				await load();
+
+				expect(reportUnreadableSolTransactions).toHaveBeenCalledExactlyOnceWith({
+					transactions: [
+						{
+							signature: refused.signature,
+							errorCode: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION,
+							network: SOLANA_TOKEN.network,
+							tokenIds: [SOLANA_TOKEN.id, USDC_TOKEN.id]
+						}
+					]
+				});
+			});
+
+			it('should write the rest of the page and move on', async () => {
+				const next = cursor('next');
+
+				mockPages(
+					{ signatures: [transfer, refused], cursor: next },
+					{ signatures: [signatureAt({ blockTime: 80, sources: [wallet] })] }
+				);
+
+				await expect(load()).resolves.toEqual({ success: true });
+
+				expect(signaturesIn(SOLANA_TOKEN)).toEqual([transfer.signature]);
+
+				await load();
+
+				expect(getSolSignatures).toHaveBeenLastCalledWith(
+					expect.objectContaining({ cursor: next })
+				);
+			});
 		});
 
 		it('should start over when the address changes', async () => {

@@ -12,7 +12,9 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import SolLoaderWallets from '$sol/components/core/SolLoaderWallets.svelte';
 import { SolWalletWorker } from '$sol/services/worker.sol-wallet.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+import { solUnreadableTransactionsStore } from '$sol/stores/sol-unreadable-transactions.store';
 import type { SplToken } from '$sol/types/spl';
+import { mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
 import { createMockSolTransactionUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
@@ -150,6 +152,8 @@ describe('SolLoaderWallets', () => {
 	describe('what the stores hold when the worker is replaced', () => {
 		const syncedTokenIds = [SOLANA_TOKEN.id, mockValidSplToken.id];
 
+		const unreadableSignature = mockSolSignatureResponse().signature;
+
 		const fillStores = () =>
 			syncedTokenIds.forEach((tokenId) => {
 				solTransactionsStore.set({
@@ -157,18 +161,20 @@ describe('SolLoaderWallets', () => {
 					transactions: [{ data: createMockSolTransactionUi('old-address-tx'), certified: false }]
 				});
 				balancesStore.set({ id: tokenId, data: { data: 100n, certified: false } });
+				solUnreadableTransactionsStore.add({ tokenId, signatures: [unreadableSignature] });
 			});
 
 		beforeEach(() => {
 			solTransactionsStore.reinitialize();
 			balancesStore.reinitialize();
+			syncedTokenIds.forEach((tokenId) => solUnreadableTransactionsStore.reset(tokenId));
 
 			solAddressMainnetStore.set({ data: mockSolAddress, certified: true });
 			splTokensStore.set([mockValidSplToken]);
 		});
 
 		// The new worker's first sync would prepend the new address's rows to the old one's.
-		it('should clear the rows and balances of the old address, and restore them from the cache', async () => {
+		it('should clear the rows, balances and unreadable transactions of the old address, and restore them from the cache', async () => {
 			render(SolLoaderWallets);
 
 			await settle();
@@ -182,6 +188,7 @@ describe('SolLoaderWallets', () => {
 			syncedTokenIds.forEach((tokenId) => {
 				expect(get(solTransactionsStore)?.[tokenId]).toBeNull();
 				expect(get(balancesStore)?.[tokenId]).toBeNull();
+				expect(get(solUnreadableTransactionsStore)[tokenId]).toBeUndefined();
 			});
 
 			expect(SolWalletWorker.init).toHaveBeenLastCalledWith({
@@ -191,7 +198,7 @@ describe('SolLoaderWallets', () => {
 			});
 		});
 
-		it('should keep the rows and balances when only the token list changes', async () => {
+		it('should keep the rows, balances and unreadable transactions when only the token list changes', async () => {
 			render(SolLoaderWallets);
 
 			await settle();
@@ -207,6 +214,7 @@ describe('SolLoaderWallets', () => {
 			syncedTokenIds.forEach((tokenId) => {
 				expect(get(solTransactionsStore)?.[tokenId]).toHaveLength(1);
 				expect(get(balancesStore)?.[tokenId]?.data).toBe(100n);
+				expect(get(solUnreadableTransactionsStore)[tokenId]).toEqual([unreadableSignature]);
 			});
 		});
 	});

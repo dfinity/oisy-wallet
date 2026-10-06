@@ -4,12 +4,21 @@ import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type {
-	SolResolvedTransaction,
+	SolResolvedSignatures,
 	SolSignatureWithSources,
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
 import type { SplToken, SplTokenAddress } from '$sol/types/spl';
 import { nonNullish } from '@dfinity/utils';
+import {
+	isSolanaError,
+	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION
+} from '@solana/kit';
+
+// The RPC's answers that retrying cannot change: only an OISY that reads the transaction can. A
+// network error or a rate limit is not one of them.
+const isUnreadableSolTransactionError = (err: unknown) =>
+	isSolanaError(err, SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION);
 
 /**
  * Which token each source address belongs to: the wallet maps to `null` (native SOL), the
@@ -73,11 +82,15 @@ const mapWithConcurrency = async <T, R>({
  * once however many sources returned it. Every associated token account of the network is seeded as
  * the user's, so one derivation serves every token the signature belongs to.
  *
- * The result keeps the page's order, one entry per signature that derives to a record, with the
- * sources the pager tagged it with. A signature that derives to nothing (an associated token
+ * The transactions keep the page's order, one entry per signature that derives to a record, with
+ * the sources the pager tagged it with. A signature that derives to nothing (an associated token
  * account lookup returns transactions that never touched anything of the user's) is left out, and
- * so is every signature in `known`. A failed fetch rejects the call, so that the caller retries
- * rather than taking a partial page for a complete one.
+ * so is every signature in `known`.
+ *
+ * A transaction the RPC refuses to return is left out too, and listed in `unreadable`: retrying
+ * cannot change that answer, and failing the page on it would stop the history of every token it
+ * belongs to for as long as it stays on that page. Any other failed fetch rejects the call, so that
+ * the caller retries rather than taking a partial page for a complete one.
  */
 export const resolveSolSignatures = async ({
 	address,
@@ -91,37 +104,61 @@ export const resolveSolSignatures = async ({
 	tokens: Pick<SplToken, 'address' | 'owner'>[];
 	signatures: SolSignatureWithSources[];
 	known?: ReadonlySet<string>;
-}): Promise<SolResolvedTransaction[]> => {
+}): Promise<SolResolvedSignatures> => {
 	const toResolve = [...mergeSignatureSources(signatures).values()].filter(
 		({ signature }) => !(known?.has(signature) ?? false)
 	);
 
 	if (toResolve.length === 0) {
-		return [];
+		return { transactions: [], unreadable: [] };
 	}
 
 	const sourcesToTokens = await mapSolSourcesToTokens({ address, tokens });
 
 	const ownedTokenAccounts = [...sourcesToTokens.keys()].filter((source) => source !== address);
 
-	const records = await mapWithConcurrency<SolSignatureWithSources, SolTransactionUi | undefined>({
+	const outcomes = await mapWithConcurrency<
+		SolSignatureWithSources,
+		{ transaction: SolTransactionUi | undefined } | { errorCode: number }
+	>({
 		items: toResolve,
 		concurrency: SOLANA_TRANSACTION_DETAIL_CONCURRENCY,
 		task: async (signature) => {
-			const [transaction] = await fetchSolTransactionsForSignature({
-				signature,
-				network,
-				address,
-				ownedTokenAccounts
-			});
+			try {
+				const [transaction] = await fetchSolTransactionsForSignature({
+					signature,
+					network,
+					address,
+					ownedTokenAccounts
+				});
 
-			return transaction;
+				return { transaction };
+			} catch (err: unknown) {
+				if (isUnreadableSolTransactionError(err)) {
+					return { errorCode: err.context.__code };
+				}
+
+				throw err;
+			}
 		}
 	});
 
-	return toResolve.reduce<SolResolvedTransaction[]>((acc, { sources }, index) => {
-		const transaction = records[index];
+	return toResolve.reduce<SolResolvedSignatures>(
+		(acc, { signature, sources }, index) => {
+			const outcome = outcomes[index];
 
-		return nonNullish(transaction) ? [...acc, { transaction, sources }] : acc;
-	}, []);
+			if ('errorCode' in outcome) {
+				const { errorCode } = outcome;
+
+				return { ...acc, unreadable: [...acc.unreadable, { signature, sources, errorCode }] };
+			}
+
+			const { transaction } = outcome;
+
+			return nonNullish(transaction)
+				? { ...acc, transactions: [...acc.transactions, { transaction, sources }] }
+				: acc;
+		},
+		{ transactions: [], unreadable: [] }
+	);
 };

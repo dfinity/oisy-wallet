@@ -1,4 +1,4 @@
-import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { SOLANA_MAINNET_NETWORK, SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { getIdbBalances } from '$lib/api/idb-balances.api';
 import { getIdbSolTransactions } from '$lib/api/idb-transactions.api';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -9,6 +9,7 @@ import {
 	syncWalletError,
 	syncWalletFromCache
 } from '$sol/services/sol-listener.services';
+import { reportUnreadableSolTransactions } from '$sol/services/sol-unreadable-transactions.services';
 import {
 	solTransactionsStore,
 	type SolCertifiedTransaction
@@ -22,6 +23,7 @@ import type {
 import type { SolResolvedTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import {
 	mockAtaAddress,
@@ -32,6 +34,7 @@ import {
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { isNullish, jsonReplacer } from '@dfinity/utils';
+import { SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION } from '@solana/kit';
 import { get } from 'svelte/store';
 
 vi.mock(import('$lib/api/idb-transactions.api'), async (importOriginal) => ({
@@ -42,6 +45,10 @@ vi.mock(import('$lib/api/idb-transactions.api'), async (importOriginal) => ({
 vi.mock(import('$lib/api/idb-balances.api'), async (importOriginal) => ({
 	...(await importOriginal()),
 	getIdbBalances: vi.fn()
+}));
+
+vi.mock('$sol/services/sol-unreadable-transactions.services', () => ({
+	reportUnreadableSolTransactions: vi.fn()
 }));
 
 describe('sol-listener.services', () => {
@@ -55,6 +62,7 @@ describe('sol-listener.services', () => {
 
 	// The wallet is the source of native SOL, each associated token account the source of its mint.
 	const routing: SolWalletRouting = {
+		network: SOLANA_MAINNET_NETWORK,
 		nativeTokenId,
 		splTokenIds: new Map([
 			[mint, splTokenId],
@@ -176,6 +184,69 @@ describe('sol-listener.services', () => {
 			syncWallet({ data: mockPostMessage({}), routing });
 
 			tokenIds.forEach((tokenId) => expect(storedTransactions(tokenId)).toEqual([]));
+		});
+
+		describe('transactions the RPC refused to return', () => {
+			const refused = mockSolSignatureResponse().signature;
+
+			const withUnreadable = (sources: SolAddress[]): SolPostMessageDataResponseWallet => ({
+				wallet: {
+					...mockPostMessage({}).wallet,
+					unreadableTransactions: [
+						{
+							signature: refused,
+							sources,
+							errorCode: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION
+						}
+					]
+				}
+			});
+
+			it('should report one for the tokens of the sources that returned it, on the network', () => {
+				syncWallet({ data: withUnreadable([mockSolAddress, mockAtaAddress2]), routing });
+
+				expect(reportUnreadableSolTransactions).toHaveBeenCalledExactlyOnceWith({
+					transactions: [
+						{
+							signature: refused,
+							errorCode: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION,
+							network: SOLANA_MAINNET_NETWORK,
+							tokenIds: [nativeTokenId, splTokenId2]
+						}
+					]
+				});
+			});
+
+			it('should report one from a source the routing does not know for no token', () => {
+				syncWallet({ data: withUnreadable([mockAtaAddress3]), routing });
+
+				expect(reportUnreadableSolTransactions).toHaveBeenCalledExactlyOnceWith({
+					transactions: [expect.objectContaining({ signature: refused, tokenIds: [] })]
+				});
+			});
+
+			it('should still write the records of the tick', () => {
+				syncWallet({
+					data: {
+						wallet: {
+							...withUnreadable([mockSolAddress]).wallet,
+							newTransactions: JSON.stringify(
+								[{ transaction, sources: [mockSolAddress] }],
+								jsonReplacer
+							)
+						}
+					},
+					routing
+				});
+
+				expect(storedTransactions(nativeTokenId)).toEqual([toCertified(transaction)]);
+			});
+
+			it('should report nothing for a tick without any', () => {
+				syncWallet({ data: mockPostMessage({}), routing });
+
+				expect(reportUnreadableSolTransactions).not.toHaveBeenCalled();
+			});
 		});
 
 		describe('when the history was unavailable', () => {

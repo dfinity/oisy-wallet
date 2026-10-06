@@ -85,6 +85,21 @@ export interface SolResolvedTransaction {
 	sources: SolAddress[];
 }
 
+// A signature whose transaction the RPC refused to return, left out of the history it was on
+// rather than failing it.
+export interface SolUnreadableTransaction {
+	signature: Signature;
+	// As for a resolved transaction: the history of the token of each of them is missing it.
+	sources: SolAddress[];
+	// The code the RPC refused it with.
+	errorCode: number;
+}
+
+export interface SolResolvedSignatures {
+	transactions: SolResolvedTransaction[];
+	unreadable: SolUnreadableTransaction[];
+}
+
 export type SolSignedTransaction = Transaction &
 	FullySignedTransaction &
 	TransactionWithinSizeLimit &

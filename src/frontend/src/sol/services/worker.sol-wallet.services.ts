@@ -94,6 +94,7 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 	}): Promise<SolWalletWorker> {
 		const {
 			id: nativeTokenId,
+			network: tokenNetwork,
 			network: { id: networkId }
 		} = token;
 
@@ -123,6 +124,7 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 		}));
 
 		const routing: SolWalletRouting = {
+			network: tokenNetwork,
 			nativeTokenId,
 			splTokenIds: new Map(splTokens.map(({ address: tokenAddress, id }) => [tokenAddress, id])),
 			sourceTokens: await mapSolSourcesToTokens({ address: address.data, tokens })

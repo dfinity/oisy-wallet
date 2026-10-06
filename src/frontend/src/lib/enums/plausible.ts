@@ -13,6 +13,9 @@ export enum PLAUSIBLE_EVENTS {
 	STAKE = 'stake',
 	UNSTAKE = 'unstake',
 	LOAD_TRANSACTIONS = 'load_transactions',
+	// Loading transactions, sent when something notable happens to it. The outcome is in
+	// `result_status`, never in the name.
+	TRANSACTION_LOAD = 'transaction_load',
 	SIGNER_PAGE_VISIT = 'signer_page_visit',
 	SIGNER_INTERACTION = 'signer_interaction',
 	NETWORK_FILTER = 'network_filter',
@@ -120,6 +123,11 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_NETWORKS {
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS {
 	UNCERTIFIED_REMOVED = 'uncertified_removed'
+}
+
+// What a `transaction_load` event is about: one transaction, or a whole load of them.
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTION_LOAD {
+	SINGLE = 'single'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER {
