@@ -460,7 +460,9 @@ An `eth_sendTransaction` request addressed to the ckETH helper contract, the con
 
 Any other request to the helper that carries data is **refused**: a deposit to a principal that is not the user's, or data OISY cannot read as such a deposit. The review states why and keeps Approve disabled, and the signing step applies the same check, so a refused request is never signed and there is no way to approve it from the review. A request to the helper that carries no data is signed as a deposit to the user's own principal. The helper is recognised however the dApp writes the letter case of its address.
 
-This covers the ckETH helper contract only. A deposit call addressed to any other contract is reviewed like any other call OISY cannot read.
+OISY takes the helper's address from the ckETH minter, and the review loads that information whenever it opens on Ethereum or Sepolia. Until certified minter information confirms the address, every `deposit(bytes32)` request on those two networks is **held**, whatever it is addressed to: the review says OISY can't check the deposit yet and keeps Approve disabled, and the signing step holds it too. Once the address is confirmed, the request is reviewed as described above. If the minter information cannot be loaded, the hold lasts for the rest of the session.
+
+Only Ethereum and Sepolia have a ckETH helper contract. On other EVM networks no address is treated as the helper, so a `deposit(bytes32)` there is reviewed like any other call OISY cannot read, as is a deposit call addressed to any contract other than the confirmed helper.
 
 ### Starting a pairing from the scanner
 
