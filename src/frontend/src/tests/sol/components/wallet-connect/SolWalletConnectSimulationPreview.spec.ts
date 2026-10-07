@@ -1,6 +1,7 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { CONVERT_AMOUNT_EXCHANGE_VALUE } from '$lib/constants/test-ids.constants';
 import { exchangeStore } from '$lib/stores/exchange.store';
+import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
@@ -10,7 +11,7 @@ import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 import en from '$tests/mocks/i18n.mock';
 import { mockAtaAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
-import { render } from '@testing-library/svelte';
+import { render, within } from '@testing-library/svelte';
 
 describe('SolWalletConnectSimulationPreview', () => {
 	const props = (preview: SolSimulationPreview) => ({
@@ -156,13 +157,36 @@ describe('SolWalletConnectSimulationPreview', () => {
 			expect(second).toHaveTextContent(`${en.transaction.text.unknown_token} 2`);
 		});
 
-		it('should not show the raw mint address', () => {
-			const { queryByText } = render(
+		// The placeholder says the wallet does not list the token, and a symbol of its own is its
+		// creator's choice. The address is what the user can look the token up by.
+		it('should show the address of an unlisted mint with controls to copy it and open its page', () => {
+			const { getByTestId } = render(
 				SolWalletConnectSimulationPreview,
 				props({ tokenDeltas: [delta(mockSplAddress)], controlChanges: [] })
 			);
 
-			expect(queryByText(new RegExp(mockSplAddress.slice(0, 6)))).not.toBeInTheDocument();
+			const address = getByTestId('simulated-token-address');
+
+			expect(address).toHaveTextContent(shortenWithMiddleEllipsis({ text: mockSplAddress }));
+			expect(
+				within(address).getByRole('button', { name: `${en.core.text.copy}: ${mockSplAddress}` })
+			).toBeInTheDocument();
+			expect(
+				within(address).getByRole('link', {
+					name: en.tokens.alt.open_token_address_block_explorer
+				})
+			).toHaveAttribute('href', `https://solscan.io/token/${mockSplAddress}/`);
+		});
+
+		it('should show no address for a token the wallet lists', () => {
+			enableSplToken();
+
+			const { queryByTestId } = render(
+				SolWalletConnectSimulationPreview,
+				props({ tokenDeltas: [delta(mockValidSplToken.address)], controlChanges: [] })
+			);
+
+			expect(queryByTestId('simulated-token-address')).not.toBeInTheDocument();
 		});
 
 		// Any mint can carry the symbol of a token the wallet lists. The two rows have to differ,
@@ -192,6 +216,9 @@ describe('SolWalletConnectSimulationPreview', () => {
 				`+2.5 ${replacePlaceholders(en.transaction.text.unknown_token_named, {
 					$symbol: mockValidSplToken.symbol
 				})}`
+			);
+			expect(within(unlisted).getByTestId('simulated-token-address')).toHaveTextContent(
+				shortenWithMiddleEllipsis({ text: otherMint })
 			);
 		});
 
