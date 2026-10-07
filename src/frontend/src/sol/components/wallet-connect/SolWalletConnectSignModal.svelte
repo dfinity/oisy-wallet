@@ -36,7 +36,7 @@
 	import type { OptionSolAddress } from '$sol/types/address';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
-	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
+	import type { SolSimulationPreview, SolUnreadProgram } from '$sol/types/sol-simulation';
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
 	import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
 	import { solClosesPayOthers } from '$sol/utils/sol-transaction-summary.utils';
@@ -94,6 +94,11 @@
 	let simulatedInstructions = $state<boolean | undefined>();
 	let messageSummary = $state<SolTransactionSummary | undefined>();
 	let parties = $state<SolTransferParties | undefined>();
+	let unreadPrograms = $state<SolUnreadProgram[] | undefined>();
+	// Whether the user confirmed on the review that OISY cannot say what those programs do. Cleared
+	// with every request: a confirmation given for one set of programs says nothing about another.
+	let unreadProgramsAcknowledged = $state(false);
+	let callsUnreadPrograms = $derived((unreadPrograms ?? []).length > 0);
 	// What the chain charged a token account to exist when the review was computed. Signing holds the
 	// message's account creations to it, so what the review allowed is what gets signed.
 	let rentExemptMinimum = $state<bigint | undefined>();
@@ -128,6 +133,7 @@
 				simulatedInstructions,
 				messageSummary,
 				parties,
+				unreadPrograms,
 				rentExemptMinimum,
 				opensAccountBeyondRent
 			} = await decodeService({
@@ -158,6 +164,7 @@
 
 		untrack(() => {
 			decoded = false;
+			unreadProgramsAcknowledged = false;
 
 			updateData();
 		});
@@ -232,12 +239,11 @@
 			// stays unknown. A list with nothing unknown left in it is the description; anything
 			// else leaves an instruction the review cannot account for.
 			//
-			// One shape escapes it. An instruction is marked accounted for as soon as any one of its
-			// invocations produced an effect, so an unread instruction making both a transfer we
-			// model and a call we do not - a stake delegation among them - leaves no unknown entry
-			// and passes here with that call unstated. Closing it needs each inner effect accounted
-			// for by name, which means separating a call that genuinely does nothing from one this
-			// wallet has never modelled, for every program an invocation can reach.
+			// An instruction is marked accounted for as soon as any one of its invocations produced an
+			// effect, so an unread instruction making both a transfer we model and a call we do not
+			// leaves no unknown entry here. That call is what the unread programs below cover: a run
+			// reaching a program outside the known ones names it on the review, and approving waits
+			// for the user to confirm it.
 			//
 			// And a list with something in it. A run's empty list reaches here now, where before it
 			// was dropped on the way, and whether a run with nothing to list vouches for an instruction
@@ -248,6 +254,7 @@
 				instructions.length > 0 &&
 				!instructions.some(({ kind }) => kind === 'unknown'),
 			closesPayOthers,
+			unreadProgramsAcknowledged: !callsUnreadPrograms || unreadProgramsAcknowledged,
 			rentExemptMinimum,
 			opensAccountBeyondRent: opensAccountBeyondRent ?? false
 		});
@@ -298,7 +305,9 @@
 				simulatedInstructions={simulatedInstructions ?? false}
 				source={address ?? ''}
 				token={reviewToken}
+				unreadPrograms={unreadPrograms ?? []}
 				unreviewed={unreviewed ?? false}
+				bind:unreadProgramsAcknowledged
 			/>
 		{/if}
 	{/key}

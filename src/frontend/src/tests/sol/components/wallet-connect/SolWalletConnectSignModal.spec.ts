@@ -263,6 +263,74 @@ describe('SolWalletConnectSignModal', () => {
 		});
 	});
 
+	describe('the programs the run calls that OISY cannot read', () => {
+		const decoded = (unreadPrograms: { address: string; name?: string }[]) => ({
+			amount: 1n,
+			unreadPrograms,
+			parties: { sources: [], destinations: [], partial: false }
+		});
+
+		it('should hold approval until the user confirms them, and say so when signing', async () => {
+			vi.mocked(sign).mockClear();
+			vi.mocked(sign).mockResolvedValueOnce({ success: false });
+			vi.mocked(decode).mockResolvedValueOnce(
+				decoded([{ address: 'Stake11111111111111111111111111111111111111' }])
+			);
+
+			const { getByRole, getByText } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			await waitFor(() => {
+				expect(getByText(en.wallet_connect.text.unread_programs_one)).toBeInTheDocument();
+			});
+
+			const button = getByRole('button', { name: en.core.text.approve });
+
+			expect(button).toBeDisabled();
+
+			await fireEvent.click(getByText(en.wallet_connect.text.unread_programs_acknowledge));
+
+			expect(button).toBeEnabled();
+
+			await fireEvent.click(button);
+
+			await waitFor(() => {
+				expect(sign).toHaveBeenCalledOnce();
+			});
+
+			expect(vi.mocked(sign).mock.calls[0][0]).toEqual(
+				expect.objectContaining({ unreadProgramsAcknowledged: true })
+			);
+		});
+
+		it('should call a run that reaches only known programs confirmed', async () => {
+			vi.mocked(sign).mockClear();
+			vi.mocked(sign).mockResolvedValueOnce({ success: false });
+			vi.mocked(decode).mockResolvedValueOnce(decoded([]));
+
+			const { getByRole } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			const button = getByRole('button', { name: en.core.text.approve });
+
+			await waitFor(() => {
+				expect(button).toBeEnabled();
+			});
+
+			await fireEvent.click(button);
+
+			await waitFor(() => {
+				expect(sign).toHaveBeenCalledOnce();
+			});
+
+			expect(vi.mocked(sign).mock.calls[0][0]).toEqual(
+				expect.objectContaining({ unreadProgramsAcknowledged: true })
+			);
+		});
+	});
+
 	it('should keep the message title for a sign-message request', async () => {
 		const { getByText } = render(SolWalletConnectSignMessageModal, {
 			props: props(SESSION_REQUEST_SOL_SIGN_MESSAGE)

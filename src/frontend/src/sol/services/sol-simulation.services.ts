@@ -16,6 +16,7 @@ import {
 import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
 import { deriveSolMessageSummary } from '$sol/utils/sol-message-summary.utils';
 import {
+	findSolUnreadPrograms,
 	isEmptySolSimulationPreview,
 	mapSolSimulationAccountOwners,
 	mapSolSimulationPreview,
@@ -67,6 +68,14 @@ const simulate = async ({
 	// A run that failed rolled its changes back, so its post-state describes nothing the user
 	// would actually get. Showing those deltas would be worse than showing none.
 	if (nonNullish(err)) {
+		return undefined;
+	}
+
+	// A run with a nested call that names no program cannot be said to call only known ones, and
+	// the review would read the empty list as exactly that.
+	const unreadPrograms = findSolUnreadPrograms(innerInstructions);
+
+	if (isNullish(unreadPrograms)) {
 		return undefined;
 	}
 
@@ -204,7 +213,8 @@ const simulate = async ({
 				addressToOwner
 			}),
 			partial: false
-		}
+		},
+		unreadPrograms
 	};
 };
 
