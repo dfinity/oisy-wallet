@@ -1,6 +1,7 @@
 import * as canisterStateApi from '$icp/api/canister-state.api';
 import CyclesTopUpModal from '$icp/components/cycles-top-up/CyclesTopUpModal.svelte';
 import * as cyclesTopUpServices from '$icp/services/cycles-top-up.services';
+import { unansweredCyclesTopUp } from '$icp/stores/cycles-top-up.store';
 import {
 	CYCLES_TOP_UP_AMOUNT,
 	CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON,
@@ -21,7 +22,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import * as walletUtils from '$lib/utils/wallet.utils';
 import { mockTcyclesToken } from '$tests/mocks/cycles-mint.mock';
 import en from '$tests/mocks/i18n.mock';
-import { mockIdentity, mockPrincipalText } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal2, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -121,6 +122,8 @@ describe('CyclesTopUpModal', () => {
 			id: mockTcyclesToken.id,
 			data: { data: 5_000_000_000_000n, certified: true }
 		});
+
+		unansweredCyclesTopUp.set(undefined);
 	});
 
 	afterEach(() => {
@@ -426,6 +429,103 @@ describe('CyclesTopUpModal', () => {
 
 			expect(topUpSpy).toHaveBeenLastCalledWith(
 				expect.objectContaining({ createdAt: 1_000_000_000n })
+			);
+		});
+
+		it('resends an unanswered top-up from a new modal', async () => {
+			topUpSpy.mockResolvedValueOnce({ status: 'unknown' });
+
+			const first = await toReview();
+
+			await topUp(first);
+
+			await backOnReview(first);
+
+			first.unmount();
+
+			vi.setSystemTime(new Date(2_000));
+
+			const second = await toReview();
+
+			expect(second.container).toHaveTextContent(
+				replacePlaceholders(en.cycles_top_up.text.unknown, { $token: 'TCYCLES' })
+			);
+
+			await topUp(second);
+
+			await waitFor(() => {
+				expect(topUpSpy).toHaveBeenCalledTimes(2);
+			});
+
+			expect(topUpSpy).toHaveBeenLastCalledWith(
+				expect.objectContaining({ createdAt: 1_000_000_000n })
+			);
+		});
+
+		it('warns in a new modal that another top-up can top up again while the last outcome is unknown', async () => {
+			topUpSpy.mockResolvedValueOnce({ status: 'unknown' });
+
+			const first = await toReview();
+
+			await topUp(first);
+
+			await backOnReview(first);
+
+			first.unmount();
+
+			vi.setSystemTime(new Date(2_000));
+
+			const second = await toReview('2');
+
+			expect(second.container).toHaveTextContent(
+				replacePlaceholders(en.cycles_top_up.text.unknown_fresh, { $token: 'TCYCLES' })
+			);
+
+			await topUp(second);
+
+			await waitFor(() => {
+				expect(topUpSpy).toHaveBeenCalledTimes(2);
+			});
+
+			expect(topUpSpy).toHaveBeenLastCalledWith(
+				expect.objectContaining({ amount: 2_000_000_000_000n, createdAt: 2_000_000_000n })
+			);
+		});
+
+		it("does not resend another principal's unanswered top-up", async () => {
+			topUpSpy.mockResolvedValueOnce({ status: 'unknown' });
+
+			const first = await toReview();
+
+			await topUp(first);
+
+			await backOnReview(first);
+
+			first.unmount();
+
+			vi.spyOn(authDerived, 'authIdentity', 'get').mockReturnValue(
+				readable({ ...mockIdentity, getPrincipal: () => mockPrincipal2 })
+			);
+
+			vi.setSystemTime(new Date(2_000));
+
+			const second = await toReview();
+
+			expect(second.container).not.toHaveTextContent(
+				replacePlaceholders(en.cycles_top_up.text.unknown, { $token: 'TCYCLES' })
+			);
+			expect(second.container).not.toHaveTextContent(
+				replacePlaceholders(en.cycles_top_up.text.unknown_fresh, { $token: 'TCYCLES' })
+			);
+
+			await topUp(second);
+
+			await waitFor(() => {
+				expect(topUpSpy).toHaveBeenCalledTimes(2);
+			});
+
+			expect(topUpSpy).toHaveBeenLastCalledWith(
+				expect.objectContaining({ createdAt: 2_000_000_000n })
 			);
 		});
 	});

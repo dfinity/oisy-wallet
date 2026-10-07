@@ -6,7 +6,8 @@
 	import CyclesTopUpProgress from '$icp/components/cycles-top-up/CyclesTopUpProgress.svelte';
 	import CyclesTopUpReview from '$icp/components/cycles-top-up/CyclesTopUpReview.svelte';
 	import { topUpCanister } from '$icp/services/cycles-top-up.services';
-	import type { CyclesTopUpResult } from '$icp/types/cycles-top-up';
+	import { unansweredCyclesTopUp } from '$icp/stores/cycles-top-up.store';
+	import type { CyclesTopUpRequest, CyclesTopUpResult } from '$icp/types/cycles-top-up';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { parseCanisterId } from '$icp/utils/cycles-top-up.utils';
 	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
@@ -40,17 +41,16 @@
 	let currentStep = $state<WizardStep<WizardStepsCyclesTopUp> | undefined>();
 	let modal = $state<WizardModal<WizardStepsCyclesTopUp>>();
 
-	interface TopUpRequest {
-		canisterId: string;
-		amount: bigint;
-		createdAt: bigint;
-	}
-
-	// A top-up that got no answer. Sending the same canister and amount again reuses its
-	// creation time, so the ledger answers with the first one's block if it went through,
-	// and the top-up runs at most once. The ledger keeps that for 24 hours, far longer than
-	// a modal stays open; a new modal makes a new request.
-	let unanswered = $state<TopUpRequest | undefined>();
+	// A top-up that got no answer, kept until the page reloads, so a later modal has it too.
+	// Sending the same canister and amount again reuses its creation time, so the ledger
+	// answers with the first one's block if it went through, and the top-up runs at most
+	// once. The ledger keeps that for 24 hours; a resend after that stays unknown (below).
+	let unanswered = $derived(
+		nonNullish($unansweredCyclesTopUp) &&
+			$unansweredCyclesTopUp.principal === $authIdentity?.getPrincipal().toText()
+			? $unansweredCyclesTopUp.request
+			: undefined
+	);
 
 	let canisterId = $derived(parseCanisterId(canisterIdText)?.toText());
 
@@ -89,7 +89,6 @@
 		closeModal(() => {
 			canisterIdText = '';
 			sendAmount = undefined;
-			unanswered = undefined;
 			progressStep = ProgressStepsCyclesTopUp.INITIALIZATION;
 			currentStep = undefined;
 		});
@@ -133,9 +132,11 @@
 			return;
 		}
 
+		const sender = $authIdentity.getPrincipal().toText();
+
 		const resent = nonNullish(unanswered) && resendsUnanswered;
 
-		const request: TopUpRequest =
+		const request: CyclesTopUpRequest =
 			nonNullish(unanswered) && resendsUnanswered
 				? unanswered
 				: { canisterId: principal.toText(), amount, createdAt: nowInBigIntNanoSeconds() };
@@ -166,7 +167,7 @@
 				: answer;
 
 		if (result.status === 'topped_up') {
-			unanswered = undefined;
+			unansweredCyclesTopUp.set(undefined);
 
 			trackCyclesTopUp({ ...analytics, resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS });
 
@@ -196,7 +197,9 @@
 
 		// Only a top-up without an answer may be resent as it was. After a refund, the same
 		// request would be answered as a duplicate of the refunded one.
-		unanswered = result.status === 'unknown' ? request : undefined;
+		unansweredCyclesTopUp.set(
+			result.status === 'unknown' ? { principal: sender, request } : undefined
+		);
 
 		// Review shows the warning for a top-up without an answer.
 		if (result.status === 'refused' || result.status === 'refunded') {
