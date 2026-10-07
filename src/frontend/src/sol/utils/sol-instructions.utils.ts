@@ -947,11 +947,21 @@ const mapSolLookupTableInstruction = (instruction: SolParsedInstruction): Mapped
 	return unreviewedInstruction();
 };
 
-const mapSolStakeInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+const mapSolStakeInstruction = ({
+	instruction,
+	userAddress
+}: {
+	instruction: SolParsedInstruction;
+	userAddress?: OptionSolAddress;
+}): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
-	// A withdrawal is the one stake instruction the summary can state in full: it names the amount,
-	// the account it leaves and the account it arrives at, exactly as a plain SOL transfer does.
+	// A withdrawal names the amount, the account it leaves and the account it arrives at, exactly as
+	// a plain SOL transfer does. But the account it leaves is a stake account, and the review reads
+	// the wallet alone: the balance changes measure the wallet and its token accounts, and the review
+	// names no recipient of its own. Paid to the wallet, the lamports arrive where the balance
+	// changes show them. Paid anywhere else, nothing on the review would show them leaving or say
+	// where they went, so it fails closed, as a close paying anywhere but the wallet does.
 	if (instructionType === StakeInstruction.Withdraw) {
 		const {
 			data: { args: amount },
@@ -960,6 +970,10 @@ const mapSolStakeInstruction = (instruction: SolParsedInstruction): MappedSolTra
 				recipient: { address: destination }
 			}
 		} = instruction;
+
+		if (destination !== userAddress) {
+			return unfaithfulInstruction();
+		}
 
 		return {
 			amount,
@@ -1277,7 +1291,7 @@ export const mapSolInstruction = ({
 	}
 
 	if (programAddress === STAKE_PROGRAM_ADDRESS) {
-		return mapSolStakeInstruction(parsedInstruction);
+		return mapSolStakeInstruction({ instruction: parsedInstruction, userAddress });
 	}
 
 	consoleWarn(`Could not map Solana instruction for program ${programAddress}`);

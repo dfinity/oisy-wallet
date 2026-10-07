@@ -1923,7 +1923,43 @@ describe('sol-instructions.utils', () => {
 		describe('with a Stake instruction', () => {
 			const mockStakeAuthority = createNoopSigner(address(mockSolAddress));
 
-			it('should state a Withdraw instruction in full', () => {
+			it('should state a Withdraw instruction that pays the wallet in full', () => {
+				const instruction = getWithdrawInstruction({
+					stake: address(mockSolAddress2),
+					recipient: address(mockSolAddress),
+					withdrawAuthority: mockStakeAuthority,
+					args: 5_000_000n
+				});
+
+				expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+					amount: 5_000_000n,
+					source: mockSolAddress2,
+					destination: mockSolAddress
+				});
+
+				expect(parseSolStakeInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
+				expect(console.warn).not.toHaveBeenCalled();
+			});
+
+			// The stake account is not one the balance changes read, so lamports it pays anywhere but
+			// the wallet would leave without a line on the review saying so.
+			it('should fail closed on a Withdraw instruction that pays anywhere but the wallet', () => {
+				const instruction = getWithdrawInstruction({
+					stake: address(mockSolAddress2),
+					recipient: address(mockSolAddress3),
+					withdrawAuthority: mockStakeAuthority,
+					args: 5_000_000n
+				});
+
+				expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+
+				expect(console.warn).not.toHaveBeenCalled();
+			});
+
+			it('should fail closed on a Withdraw instruction when the wallet is not known', () => {
 				const instruction = getWithdrawInstruction({
 					stake: address(mockSolAddress2),
 					recipient: address(mockSolAddress),
@@ -1932,13 +1968,9 @@ describe('sol-instructions.utils', () => {
 				});
 
 				expect(mapSolInstruction({ instruction })).toStrictEqual({
-					amount: 5_000_000n,
-					source: mockSolAddress2,
-					destination: mockSolAddress
+					amount: undefined,
+					ambiguous: true
 				});
-
-				expect(parseSolStakeInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
-				expect(console.warn).not.toHaveBeenCalled();
 			});
 
 			// Handing over the withdraw authority hands over everything the account holds, and the
