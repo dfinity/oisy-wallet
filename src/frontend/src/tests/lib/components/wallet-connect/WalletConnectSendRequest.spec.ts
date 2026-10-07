@@ -22,6 +22,12 @@ import type { WalletKitTypes } from '@reown/walletkit';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { AbiCoder, Interface } from 'ethers/abi';
 
+// The ckETH minter information is never loaded here.
+vi.mock(import('$icp-eth/services/cketh.services'), async (importOriginal) => ({
+	...(await importOriginal()),
+	loadCkEthMinterInfo: vi.fn()
+}));
+
 // What the review renders is covered against the components themselves. What is covered here is the
 // wiring: that a session request as WalletConnect delivers it reaches that review at all, carrying
 // the calldata the dApp sent. A review that describes an unreadable call correctly is worth nothing

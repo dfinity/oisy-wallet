@@ -1,11 +1,15 @@
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
-import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
-import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { IC_CKETH_MINTER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
+import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthWalletConnectSendTokenModal from '$eth/components/wallet-connect/EthWalletConnectSendTokenModal.svelte';
 import { CKETH_ABI } from '$eth/constants/cketh.constants';
+import { send as sendServices } from '$eth/services/wallet-connect.services';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
+import { loadCkEthMinterInfo } from '$icp-eth/services/cketh.services';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import { EthFeePriority } from '$lib/enums/eth-fee-priority';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
@@ -20,14 +24,24 @@ import { toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
 import type { WalletKitTypes } from '@reown/walletkit';
-import { render, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { Interface } from 'ethers/abi';
+import { tick } from 'svelte';
 import { get } from 'svelte/store';
 
 vi.mock(
 	'$eth/components/fee/EthFeeContext.svelte',
 	async () => await import('$tests/eth/components/wallet-connect/EthFeeContextStub.svelte')
 );
+
+vi.mock(import('$icp-eth/services/cketh.services'), async (importOriginal) => ({
+	...(await importOriginal()),
+	loadCkEthMinterInfo: vi.fn()
+}));
+
+vi.mock('$eth/services/wallet-connect.services', () => ({
+	send: vi.fn()
+}));
 
 describe('EthWalletConnectSendTokenModal', () => {
 	const setup = ({
@@ -44,7 +58,7 @@ describe('EthWalletConnectSendTokenModal', () => {
 	} = {}) => {
 		const sendContext = initSendContext({ token });
 
-		const { getByText } = render(EthWalletConnectSendTokenModal, {
+		const rendered = render(EthWalletConnectSendTokenModal, {
 			props: {
 				request: {
 					verifyContext: { verified: { origin: 'https://dapp.example' } }
@@ -56,10 +70,12 @@ describe('EthWalletConnectSendTokenModal', () => {
 			context: new Map<symbol, unknown>([[SEND_CONTEXT_KEY, sendContext]])
 		});
 
-		return { ...sendContext, getByText };
+		return { ...sendContext, ...rendered };
 	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
+
 		observedPriority.set(undefined);
 	});
 
@@ -154,6 +170,67 @@ describe('EthWalletConnectSendTokenModal', () => {
 			});
 
 			expect(getByText(en.wallet_connect.text.unknown_call_title)).toBeInTheDocument();
+		});
+
+		it('should load the minter information for a request on Ethereum', async () => {
+			ckEthMinterInfoStore.reset(ETHEREUM_TOKEN.id);
+
+			setup();
+
+			await waitFor(() => {
+				expect(loadCkEthMinterInfo).toHaveBeenCalledWith({
+					tokenId: ETHEREUM_TOKEN.id,
+					canisters: { minterCanisterId: IC_CKETH_MINTER_CANISTER_ID }
+				});
+			});
+		});
+
+		it('should leave loading the minter information on an EVM network without ckETH as it was', async () => {
+			setup({ token: BASE_ETH_TOKEN, sourceNetwork: BASE_NETWORK });
+
+			await tick();
+
+			expect(loadCkEthMinterInfo).not.toHaveBeenCalled();
+		});
+
+		// The review and the signing step read the helper contract from the same minter information:
+		// the one for the network the request is on, not the one for the network selected in OISY.
+		it('should sign with the minter information of the network the request is on', async () => {
+			// Any address other than Ethereum's helper will do.
+			const SEPOLIA_HELPER = '0x1111111111111111111111111111111111111111';
+
+			const sepoliaMinterInfo = {
+				data: { ...mockCkMinterInfo, eth_helper_contract_address: toNullable(SEPOLIA_HELPER) },
+				certified: true
+			};
+
+			ckEthMinterInfoStore.set({ id: SEPOLIA_TOKEN.id, data: sepoliaMinterInfo });
+
+			vi.mocked(sendServices).mockResolvedValue({ success: true });
+
+			const { getByRole } = setup({
+				firstTransaction: {
+					from: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+					to: SEPOLIA_HELPER,
+					data: encodeDeposit(mockPrincipal)
+				},
+				token: SEPOLIA_TOKEN,
+				sourceNetwork: SEPOLIA_NETWORK
+			});
+
+			await fireEvent.click(getByRole('button', { name: en.core.text.approve }));
+
+			await waitFor(() => {
+				expect(sendServices).toHaveBeenCalledOnce();
+			});
+
+			expect(vi.mocked(sendServices).mock.calls[0][0]).toMatchObject({
+				minterInfo: sepoliaMinterInfo,
+				sourceNetwork: SEPOLIA_NETWORK,
+				targetNetwork: ICP_NETWORK
+			});
+
+			ckEthMinterInfoStore.reset(SEPOLIA_TOKEN.id);
 		});
 
 		// The store can hold Ethereum's minter information under another chain's token, and the address

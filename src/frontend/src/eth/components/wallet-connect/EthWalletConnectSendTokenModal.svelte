@@ -7,10 +7,7 @@
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthWalletConnectSendReview from '$eth/components/wallet-connect/EthWalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
-	import {
-		nativeEthereumTokenWithFallback,
-		nativeEthereumTokenId
-	} from '$eth/derived/token.derived';
+	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
 	import { send as sendServices } from '$eth/services/wallet-connect.services';
 	import {
 		ETH_FEE_CONTEXT_KEY,
@@ -48,6 +45,7 @@
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 
 	interface Props {
 		request: WalletKitTypes.SessionRequest;
@@ -64,8 +62,13 @@
 
 	const { sendTokenId, sendToken, sendEthFeePriority } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	// The ckETH minter information for the network the request is signed on.
+	// The ckETH minter information for the network the request is signed on. The review and the
+	// signing step both read it, so they hold the request to the same helper contract.
 	let minterInfo = $derived($ckEthMinterInfoStore?.[$sendTokenId]);
+
+	// A deposit on a network with a ckETH helper contract is held until the minter information
+	// confirms the helper, so on those networks it is loaded whenever a request is reviewed.
+	let ckEthNetwork = $derived(isNetworkIdEthereum(sourceNetwork.id));
 
 	let ckEthHelperContractAddress = $derived(
 		toWalletConnectCkEthHelperContractAddress({ networkId: sourceNetwork.id, minterInfo })
@@ -207,7 +210,7 @@
 			token: $sendToken,
 			progress: (step: ProgressStep) => (sendProgressStep = step),
 			identity: $authIdentity,
-			minterInfo: $ckEthMinterInfoStore?.[$nativeEthereumTokenId],
+			minterInfo,
 			sourceNetwork,
 			targetNetwork
 		});
@@ -244,7 +247,7 @@
 		sendTokenId={$sendTokenId}
 		{sourceNetwork}
 	>
-		<CkEthLoader nativeTokenId={$sendTokenId}>
+		<CkEthLoader isSendFlow={ckEthNetwork} nativeTokenId={$sendTokenId}>
 			{#key currentStep?.name}
 				{#if currentStep?.name === WizardStepsSend.SENDING}
 					<InProgressWizard
