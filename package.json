@@ -100,7 +100,7 @@
 		"decimal.js": "^10.6.0",
 		"dompurify": "^3.4.16",
 		"ethers": "^6.16.0",
-		"idb-keyval": "6.2.5",
+		"idb-keyval": "6.3.0",
 		"marked": "^18.0.6",
 		"onesec-bridge": "^0.13.0",
 		"qr-creator": "^1.0.0",

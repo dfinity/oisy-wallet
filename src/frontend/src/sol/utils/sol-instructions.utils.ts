@@ -8,9 +8,6 @@ import {
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	MEMO_LEGACY_PROGRAM_ADDRESS,
 	MEMO_PROGRAM_ADDRESS,
-	SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES,
-	SOLANA_RENT_EXEMPTION_YEARS,
-	SOLANA_RENT_LAMPORTS_PER_BYTE_YEAR,
 	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
@@ -34,6 +31,7 @@ import { parseSolStakeInstruction } from '$sol/utils/sol-instructions-stake.util
 import { parseSolSystemInstruction } from '$sol/utils/sol-instructions-system.utils';
 import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
 import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
+import { rentExemptMinimumFor } from '$sol/utils/sol-rent.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { AddressLookupTableInstruction } from '@solana-program/address-lookup-table';
 import { ComputeBudgetInstruction } from '@solana-program/compute-budget';
@@ -421,15 +419,6 @@ const parseSolInstruction = (
 };
 
 /**
- * The lamports an account of this size must hold to be rent-exempt, which is what opening one
- * legitimately costs.
- */
-const solRentExemptLamports = (space: bigint): bigint =>
-	(SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES + space) *
-	SOLANA_RENT_LAMPORTS_PER_BYTE_YEAR *
-	SOLANA_RENT_EXEMPTION_YEARS;
-
-/**
  * Whether a creation funds the account beyond what its size costs.
  *
  * Rent is the price of the account existing, and the review carries it as the cost of the operation
@@ -438,11 +427,29 @@ const solRentExemptLamports = (space: bigint): bigint =>
  * account hands its whole balance to a destination the closing instruction names, and a message can
  * open, initialise and close one in a single request. That is a payment, and the creation states no
  * destination for the review to show it against.
+ *
+ * What the size costs is what the chain charges now, which the network lowers in steps: a price
+ * kept here would let each cut pass as rent. Without the chain's figure there is no line to hold the
+ * creation to, so it counts as funded beyond it.
  */
-const fundsBeyondRent = ({ lamports, space }: { lamports: bigint; space: bigint }): boolean =>
-	lamports > solRentExemptLamports(space);
+const fundsBeyondRent = ({
+	lamports,
+	space,
+	rentExemptMinimum
+}: {
+	lamports: bigint;
+	space: bigint;
+	rentExemptMinimum: bigint | undefined;
+}): boolean =>
+	isNullish(rentExemptMinimum) || lamports > rentExemptMinimumFor({ space, rentExemptMinimum });
 
-const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+const mapSolSystemInstruction = ({
+	instruction,
+	rentExemptMinimum
+}: {
+	instruction: SolParsedInstruction;
+	rentExemptMinimum: bigint | undefined;
+}): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
 	if (instructionType === SystemInstruction.CreateAccount) {
@@ -471,7 +478,10 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 		// Over-funded means a program governs them and the creation still states no destination: an
 		// SPL token account opened, initialised and closed in one message hands its whole balance to
 		// whoever the close names. Either way the payment cannot be shown, so neither is signed.
-		if (owner === SYSTEM_PROGRAM_ADDRESS || fundsBeyondRent({ lamports, space })) {
+		if (
+			owner === SYSTEM_PROGRAM_ADDRESS ||
+			fundsBeyondRent({ lamports, space, rentExemptMinimum })
+		) {
 			return unfaithfulInstruction();
 		}
 
@@ -496,7 +506,10 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 			}
 		} = instruction;
 
-		if (owner === SYSTEM_PROGRAM_ADDRESS || fundsBeyondRent({ lamports: amount, space })) {
+		if (
+			owner === SYSTEM_PROGRAM_ADDRESS ||
+			fundsBeyondRent({ lamports: amount, space, rentExemptMinimum })
+		) {
 			return unfaithfulInstruction();
 		}
 
@@ -1244,10 +1257,15 @@ export const asSolParsedRpcInstructionOrSelf = (instruction: unknown): unknown =
 
 export const mapSolInstruction = ({
 	instruction,
-	userAddress
+	userAddress,
+	rentExemptMinimum
 }: {
 	instruction: SolInstruction;
 	userAddress?: OptionSolAddress;
+	// What the chain charges a token account of the usual size to exist, which an account creation
+	// is held to. Without it a creation for a program is refused, since nothing says where its rent
+	// ends.
+	rentExemptMinimum?: bigint;
 }): MappedSolTransaction => {
 	// Compute budget instructions can never move funds, but they do set the prioritisation
 	// fee the wallet pays in SOL, so their directives are surfaced rather than ignored.
@@ -1282,7 +1300,7 @@ export const mapSolInstruction = ({
 	const { programAddress } = parsedInstruction;
 
 	if (programAddress === SYSTEM_PROGRAM_ADDRESS) {
-		return mapSolSystemInstruction(parsedInstruction);
+		return mapSolSystemInstruction({ instruction: parsedInstruction, rentExemptMinimum });
 	}
 
 	if (programAddress === TOKEN_PROGRAM_ADDRESS) {
