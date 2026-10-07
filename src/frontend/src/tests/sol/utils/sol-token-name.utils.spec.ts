@@ -72,6 +72,52 @@ describe('sol-token-name.utils', () => {
 				})
 			).toBe(mockValidSplToken.symbol);
 		});
+
+		// The same mint address exists on several clusters and carries different data on each, so a
+		// devnet mint must not inherit the name its mainnet namesake happens to have.
+		it('should ignore a name held for another cluster', () => {
+			expect(
+				solTokenSymbol({
+					...args,
+					tokenAddress: 'unlisted-mint',
+					metadata: {
+						[SolanaNetworks.devnet]: { 'unlisted-mint': { name: 'Pump', symbol: 'PUMP' } }
+					},
+					unknownTokenAddresses: ['unlisted-mint']
+				})
+			).toBe('Unknown token');
+		});
+
+		it('should fall back to the placeholder, unnumbered when it stands alone', () => {
+			expect(
+				solTokenSymbol({
+					...args,
+					tokenAddress: 'nameless',
+					metadata: on({}),
+					unknownTokenAddresses: ['nameless']
+				})
+			).toBe('Unknown token');
+		});
+
+		// Two rows both reading "Unknown token" are worse than an address: nothing tells them apart.
+		it('should number the placeholders when a view holds more than one', () => {
+			const unknownTokenAddresses = ['first', 'second'];
+
+			expect(
+				solTokenSymbol({ ...args, tokenAddress: 'second', metadata: on({}), unknownTokenAddresses })
+			).toBe('Unknown token 2');
+		});
+
+		it('should name native SOL without consulting anything', () => {
+			expect(
+				solTokenSymbol({
+					...args,
+					tokenAddress: undefined,
+					metadata: on({}),
+					unknownTokenAddresses: []
+				})
+			).toBe('SOL');
+		});
 	});
 
 	// A network with no Solana cluster behind it has no names of its own, and must not be handed
