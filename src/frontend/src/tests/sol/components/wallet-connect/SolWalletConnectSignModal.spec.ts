@@ -9,6 +9,7 @@ import {
 import { decode, sign } from '$sol/services/wallet-connect.services';
 import en from '$tests/mocks/i18n.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
+import { lamports } from '@solana/kit';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 vi.mock('$sol/services/wallet-connect.services', () => ({
@@ -122,33 +123,33 @@ describe('SolWalletConnectSignModal', () => {
 		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
 	});
 
+	// The service tests are handed what the modal passes to signing, so only these cover how the modal
+	// derives it: a regression hard-coding a value would leave those green and disable the refusal.
+	const approve = async (decoded: Awaited<ReturnType<typeof decode>>) => {
+		vi.mocked(sign).mockClear();
+		vi.mocked(sign).mockResolvedValueOnce({ success: false });
+		vi.mocked(decode).mockResolvedValueOnce(decoded);
+
+		const { getByRole } = render(SolWalletConnectSignModal, {
+			props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+		});
+
+		const button = getByRole('button', { name: en.core.text.approve });
+
+		await waitFor(() => {
+			expect(button).toBeEnabled();
+		});
+
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(sign).toHaveBeenCalledOnce();
+		});
+
+		return vi.mocked(sign).mock.calls[0][0];
+	};
+
 	describe('the simulated flag it hands the signing service', () => {
-		// The service tests pass this flag in, so only these cover the derivation itself: a
-		// regression hard-coding it would leave those green and disable the refusal.
-		const approve = async (decoded: Awaited<ReturnType<typeof decode>>) => {
-			vi.mocked(sign).mockClear();
-			vi.mocked(sign).mockResolvedValueOnce({ success: false });
-			vi.mocked(decode).mockResolvedValueOnce(decoded);
-
-			const { getByRole } = render(SolWalletConnectSignModal, {
-				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
-			});
-
-			const button = getByRole('button', { name: en.core.text.approve });
-
-			await waitFor(() => {
-				expect(button).toBeEnabled();
-			});
-
-			await fireEvent.click(button);
-
-			await waitFor(() => {
-				expect(sign).toHaveBeenCalledOnce();
-			});
-
-			return vi.mocked(sign).mock.calls[0][0];
-		};
-
 		it('should be true when the run accounted for every instruction', async () => {
 			// A routed swap's router instruction is unreadable and still covered: the transfers its own
 			// invocations make carry its index, so the run leaves nothing unknown.
@@ -207,6 +208,97 @@ describe('SolWalletConnectSignModal', () => {
 			});
 
 			expect(args).toEqual(expect.objectContaining({ simulated: false }));
+		});
+	});
+
+	// Signing holds the message's account creations to the reserve the review was computed with, so
+	// what the review allowed is what gets signed.
+	describe('the rent reserve it hands the signing service', () => {
+		it('should be the reserve the decode read', async () => {
+			const args = await approve({
+				amount: 1n,
+				rentExemptMinimum: lamports(1_488_440n),
+				parties: { sources: [], destinations: [], partial: true }
+			});
+
+			expect(args).toEqual(expect.objectContaining({ rentExemptMinimum: 1_488_440n }));
+		});
+
+		it('should be none when the decode read none', async () => {
+			const args = await approve({
+				amount: 1n,
+				parties: { sources: [], destinations: [], partial: true }
+			});
+
+			expect(args).toEqual(expect.objectContaining({ rentExemptMinimum: undefined }));
+		});
+	});
+
+	describe('the programs the run calls that OISY cannot read', () => {
+		const decoded = (unreadPrograms: { address: string; name?: string }[]) => ({
+			amount: 1n,
+			unreadPrograms,
+			parties: { sources: [], destinations: [], partial: false }
+		});
+
+		it('should hold approval until the user confirms them, and say so when signing', async () => {
+			vi.mocked(sign).mockClear();
+			vi.mocked(sign).mockResolvedValueOnce({ success: false });
+			vi.mocked(decode).mockResolvedValueOnce(
+				decoded([{ address: 'Stake11111111111111111111111111111111111111' }])
+			);
+
+			const { getByRole, getByText } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			await waitFor(() => {
+				expect(getByText(en.wallet_connect.text.unread_programs_one)).toBeInTheDocument();
+			});
+
+			const button = getByRole('button', { name: en.core.text.approve });
+
+			expect(button).toBeDisabled();
+
+			await fireEvent.click(getByText(en.wallet_connect.text.unread_programs_acknowledge));
+
+			expect(button).toBeEnabled();
+
+			await fireEvent.click(button);
+
+			await waitFor(() => {
+				expect(sign).toHaveBeenCalledOnce();
+			});
+
+			expect(vi.mocked(sign).mock.calls[0][0]).toEqual(
+				expect.objectContaining({ unreadProgramsAcknowledged: true })
+			);
+		});
+
+		it('should call a run that reaches only known programs confirmed', async () => {
+			vi.mocked(sign).mockClear();
+			vi.mocked(sign).mockResolvedValueOnce({ success: false });
+			vi.mocked(decode).mockResolvedValueOnce(decoded([]));
+
+			const { getByRole } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			const button = getByRole('button', { name: en.core.text.approve });
+
+			await waitFor(() => {
+				expect(button).toBeEnabled();
+			});
+
+			await fireEvent.click(button);
+
+			await waitFor(() => {
+				expect(sign).toHaveBeenCalledOnce();
+			});
+
+			expect(vi.mocked(sign).mock.calls[0][0]).toEqual(
+				expect.objectContaining({ unreadProgramsAcknowledged: true })
+			);
 		});
 	});
 

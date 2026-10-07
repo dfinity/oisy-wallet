@@ -1709,7 +1709,8 @@
 			"prioritization_fee": "",
 			"base_kind": "",
 			"prioritization_kind": "",
-			"ata_kind": ""
+			"ata_kind": "",
+			"app_account_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Saldo insufficiente per coprire le fee."
@@ -1761,6 +1762,9 @@
 			"tab_operations": "Operazioni",
 			"unreviewed_instructions": "OISY non riesce a decodificare alcune di queste istruzioni, quindi la revisione qui sotto potrebbe essere incompleta.",
 			"unreviewed_instructions_simulated": "Questa transazione contiene operazioni provenienti da una fonte esterna che OISY non riesce a decodificare, quindi OISY ne ha eseguito una simulazione. Assicurati di fidarti dell'applicazione e controlla le variazioni di saldo simulate e le operazioni prima di firmare. Tieni presente che il risultato effettivo potrebbe differire dalla simulazione.",
+			"unread_programs_one": "Questa transazione chiama un programma che OISY non riesce a leggere. Può spostare fondi che detieni in altre app, come SOL in staking o depositi in protocolli di prestito, e nulla di quanto riportato sotto lo mostrerebbe.",
+			"unread_programs_other": "Questa transazione chiama programmi che OISY non riesce a leggere. Possono spostare fondi che detieni in altre app, come SOL in staking o depositi in protocolli di prestito, e nulla di quanto riportato sotto lo mostrerebbe.",
+			"unread_programs_acknowledge": "Capisco che OISY non può mostrare cosa fa questa app",
 			"cannot_be_shown": "Questa transazione include azioni che non possono essere mostrate tutte in modo accurato per la revisione, quindi OISY non la firmerà. Rifiutala e chiedi all'app una richiesta più semplice.",
 			"close_pays_others": "Questa transazione chiude uno dei tuoi conti token e versa il suo saldo a un indirizzo che non è il tuo wallet. Per la tua sicurezza, OISY non la firma.",
 			"simulated_instructions": "Istruzioni simulate",
@@ -1880,6 +1884,7 @@
 			"ambiguous_transaction": "Questa transazione sposta fondi tra più indirizzi e non può essere mostrata in modo accurato per la revisione. Per la tua sicurezza, non è stata firmata.",
 			"close_pays_others": "Questa transazione chiude uno dei tuoi conti token e versa il suo saldo a un indirizzo che non è il tuo wallet. Per la tua sicurezza non è stata firmata.",
 			"unreviewed_without_simulation": "OISY non ha potuto leggere una parte di questa transazione e la rete non ne ha restituito nemmeno una simulazione, quindi nulla descrive cosa farebbe quella parte. Per la tua sicurezza, non è stata firmata.",
+			"unread_programs_unconfirmed": "Questa transazione chiama un programma che OISY non riesce a leggere e non è stata confermata nella revisione. Per la tua sicurezza, non è stata firmata.",
 			"sol_transaction_as_message": "Questo messaggio è una transazione Solana, che può essere approvata solo tramite una revisione della transazione. Per la tua sicurezza, non è stata firmata.",
 			"request_not_defined": "Errore inaspettato: la richiesta non è definita, pertanto non può essere elaborata.",
 			"unexpected_processing_request": "Errore inaspettato durante l'elaborazione della richiesta con WalletConnect."
@@ -2159,6 +2164,7 @@
 			"instruction_wrap": "",
 			"instruction_unwrap": "Sblocca e chiudi il conto token $symbol",
 			"instruction_create_account": "",
+			"instruction_create_program_account": "",
 			"instruction_close_account": "",
 			"instruction_close_account_for": "Chiudi il conto token $symbol",
 			"instruction_approve": "",

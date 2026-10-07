@@ -8,6 +8,7 @@ import {
 	decodeSolProgramIdlName,
 	findSolProgramIdlAddress
 } from '$sol/utils/sol-program-idl.utils';
+import { flattenInstructions } from '$sol/utils/sol-transaction-summary.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -48,7 +49,7 @@ export const loadSolProgramNames = async ({
 	instructions: SolInstructionSummary[];
 	network: SolanaNetworkType;
 }): Promise<SolInstructionSummary[]> => {
-	const programAddresses = instructions
+	const programAddresses = flattenInstructions(instructions)
 		.map(({ program }) => program)
 		.filter((program): program is SolAddress => nonNullish(program));
 
@@ -86,11 +87,19 @@ export const loadSolProgramNames = async ({
 
 	const resolved = get(solProgramNameStore)[network] ?? {};
 
-	return instructions.map((instruction) => {
-		const { program } = instruction;
+	// The lines under an instruction the wallet could not read name programs too: the one an account
+	// is opened for, most often the same one the heading above them names.
+	const named = (instruction: SolInstructionSummary): SolInstructionSummary => {
+		const { program, children } = instruction;
 
 		const programName = nonNullish(program) ? resolved[program] : undefined;
 
-		return notEmptyString(programName) ? { ...instruction, programName } : instruction;
-	});
+		return {
+			...instruction,
+			...(notEmptyString(programName) && { programName }),
+			...(nonNullish(children) && { children: children.map(named) })
+		};
+	};
+
+	return instructions.map(named);
 };

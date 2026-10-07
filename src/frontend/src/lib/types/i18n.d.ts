@@ -1399,6 +1399,7 @@ interface I18nFee {
 		base_kind: string;
 		prioritization_kind: string;
 		ata_kind: string;
+		app_account_kind: string;
 	};
 	assertion: { insufficient_funds_for_fee: string };
 	error: { cannot_fetch_gas_fee: string };
@@ -1443,6 +1444,9 @@ interface I18nWallet_connect {
 		tab_operations: string;
 		unreviewed_instructions: string;
 		unreviewed_instructions_simulated: string;
+		unread_programs_one: string;
+		unread_programs_other: string;
+		unread_programs_acknowledge: string;
 		cannot_be_shown: string;
 		close_pays_others: string;
 		simulated_instructions: string;
@@ -1559,6 +1563,7 @@ interface I18nWallet_connect {
 		ambiguous_transaction: string;
 		close_pays_others: string;
 		unreviewed_without_simulation: string;
+		unread_programs_unconfirmed: string;
 		sol_transaction_as_message: string;
 		request_not_defined: string;
 		unexpected_processing_request: string;
@@ -1831,6 +1836,7 @@ interface I18nTransaction {
 		instruction_wrap: string;
 		instruction_unwrap: string;
 		instruction_create_account: string;
+		instruction_create_program_account: string;
 		instruction_close_account: string;
 		instruction_close_account_for: string;
 		instruction_approve: string;

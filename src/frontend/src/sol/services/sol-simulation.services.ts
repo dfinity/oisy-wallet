@@ -1,9 +1,5 @@
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
-import {
-	getMultipleAccountsInfo,
-	getSolCreateAccountFee,
-	simulateTransactionAccounts
-} from '$sol/api/solana.api';
+import { getMultipleAccountsInfo, simulateTransactionAccounts } from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
 	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS
@@ -17,6 +13,7 @@ import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.u
 import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
 import { deriveSolMessageSummary } from '$sol/utils/sol-message-summary.utils';
 import {
+	findSolUnreadPrograms,
 	isEmptySolSimulationPreview,
 	mapSolSimulationAccountOwners,
 	mapSolSimulationPreview,
@@ -33,12 +30,16 @@ const simulate = async ({
 	base64EncodedTransactionMessage,
 	transactionMessage,
 	address,
-	network
+	network,
+	rentExemptMinimumRequest
 }: {
 	base64EncodedTransactionMessage: string;
 	transactionMessage: CompilableTransactionMessage;
 	address: SolAddress;
 	network: SolanaNetworkType;
+	// The decode's request for the reserve a token account costs to exist, still pending when the
+	// run starts, so that waiting for it falls inside the run's own timeout.
+	rentExemptMinimumRequest: Promise<bigint | undefined>;
 }): Promise<SolSimulationResult | undefined> => {
 	const addresses = selectSolSimulationAddresses(transactionMessage);
 
@@ -58,12 +59,20 @@ const simulate = async ({
 		await Promise.all([
 			getMultipleAccountsInfo({ addresses, network }),
 			simulateTransactionAccounts({ base64EncodedTransactionMessage, addresses, network }),
-			getSolCreateAccountFee(network).catch(() => undefined)
+			rentExemptMinimumRequest
 		]);
 
 	// A run that failed rolled its changes back, so its post-state describes nothing the user
 	// would actually get. Showing those deltas would be worse than showing none.
 	if (nonNullish(err)) {
+		return undefined;
+	}
+
+	// A run with a nested call that names no program cannot be said to call only known ones, and
+	// the review would read the empty list as exactly that.
+	const unreadPrograms = findSolUnreadPrograms(innerInstructions);
+
+	if (isNullish(unreadPrograms)) {
 		return undefined;
 	}
 
@@ -195,7 +204,8 @@ const simulate = async ({
 				addressToOwner
 			}),
 			partial: false
-		}
+		},
+		unreadPrograms
 	};
 };
 
@@ -218,6 +228,7 @@ export const simulateSolTransaction = async (params: {
 	transactionMessage: CompilableTransactionMessage;
 	address: OptionSolAddress;
 	network: SolanaNetworkType;
+	rentExemptMinimumRequest: Promise<bigint | undefined>;
 }): Promise<SolSimulationResult | undefined> => {
 	const { address } = params;
 

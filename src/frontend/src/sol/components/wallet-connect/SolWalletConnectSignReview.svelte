@@ -20,6 +20,7 @@
 	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
 	import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
 	import SolWalletConnectTransferParties from '$sol/components/wallet-connect/SolWalletConnectTransferParties.svelte';
+	import SolWalletConnectUnreadPrograms from '$sol/components/wallet-connect/SolWalletConnectUnreadPrograms.svelte';
 	import {
 		SOLANA_PRIORITIZATION_FEE_BASELINE_FLOOR_USD,
 		SOLANA_PRIORITIZATION_FEE_NOTICE_MULTIPLIER,
@@ -29,7 +30,7 @@
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
-	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
+	import type { SolSimulationPreview, SolUnreadProgram } from '$sol/types/sol-simulation';
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
 	import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
 	import { solMessageMatchesSimulation } from '$sol/utils/sol-message-summary.utils';
@@ -37,6 +38,7 @@
 	import {
 		flattenInstructions,
 		formatSolTransactionSummary,
+		solAppAccountCost,
 		solAtaFee
 	} from '$sol/utils/sol-transaction-summary.utils';
 
@@ -78,6 +80,12 @@
 		// user's wallet. Read from the list rather than the message, which cannot see a close made
 		// inside another program.
 		closesPayOthers?: boolean;
+		// The programs the simulated run calls from inside another program's instruction that OISY
+		// does not know. What such a call does to funds the user holds in an application is in
+		// neither the balance changes nor the operations, so the review names them and asks the user
+		// to confirm; the confirmation is bound back to the caller, which holds the button on it.
+		unreadPrograms?: SolUnreadProgram[];
+		unreadProgramsAcknowledged?: boolean;
 		approveDisabled?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
@@ -102,6 +110,8 @@
 		messageSummary,
 		parties,
 		closesPayOthers = false,
+		unreadPrograms = [],
+		unreadProgramsAcknowledged = $bindable(false),
 		approveDisabled = false,
 		onApprove,
 		onReject
@@ -109,16 +119,30 @@
 
 	let activeTab = $state('summary');
 
+	// The confirmation the unread programs ask for holds the button, and only the button: the notices
+	// read `approveDisabled` as whether the request can be acted on at all, which it can.
+	let approveHeld = $derived(
+		approveDisabled || (unreadPrograms.length > 0 && !unreadProgramsAcknowledged)
+	);
+
 	// What the token accounts cost this message: the rent of the ones it opens, less what the ones
 	// it closes hand back. Charged like a fee and part of neither the base nor the bid, so it is
 	// stated as its own line rather than folded into either.
 	let ataFee = $derived(solAtaFee({ instructions: instructions ?? [], userAddress: source }));
 
+	// What the message pays to open accounts for applications. A line of its own rather than part of
+	// the rent above: the user can always close a token account and get its rent back, while an
+	// application's account returns its rent only if the application chooses to.
+	let appAccountCost = $derived(solAppAccountCost({ instructions: instructions ?? [] }));
+
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
-	// What the transaction costs beyond what it moves. The simulated SOL balance carries all of it
-	// and the message states none of it, so it is the room the comparison of the two allows.
-	let costs = $derived(SOLANA_TRANSACTION_FEE_IN_LAMPORTS + (prioritizationFee ?? ZERO) + ataFee);
+	// What the transaction costs beyond what it moves: every line of the fee section. The simulated
+	// SOL balance carries all of it and the message states none of it, so it is the room the
+	// comparison of the two allows.
+	let costs = $derived(
+		SOLANA_TRANSACTION_FEE_IN_LAMPORTS + (prioritizationFee ?? ZERO) + ataFee + appAccountCost
+	);
 
 	// The message read on its own says a plain send, receive or swap, and the run agrees that this
 	// is all it does. Anything less than agreement is left unsaid: a confident sentence over a
@@ -260,6 +284,17 @@
 	     refuses one the message states and so marks the request ambiguous as well: the two would
 	     both be true of the commonest case, and the general sentence would be shown for the
 	     specific thing that is wrong with it. -->
+	<!-- Above the caveats, because it is the one notice that asks something of the user: approving
+	     waits for the confirmation it carries. A refusal hides it, since there is nothing left to
+	     confirm on a request OISY will not sign. -->
+	{#if !ambiguous && !closesPayOthers && unreadPrograms.length > 0}
+		<SolWalletConnectUnreadPrograms
+			network={token.network}
+			programs={unreadPrograms}
+			bind:acknowledged={unreadProgramsAcknowledged}
+		/>
+	{/if}
+
 	{#if closesPayOthers}
 		<!-- `role="alert"` because this arrives only once the decode settles, and it is the reason
 		     the Approve button never becomes usable: without a live region a screen-reader user is
@@ -430,6 +465,15 @@
 								{@render feeValue({ kind: $i18n.fee.text.ata_kind, feeAmount: ataFee })}
 							</div>
 						{/if}
+
+						{#if appAccountCost > ZERO}
+							<div data-tid="app-account-fee">
+								{@render feeValue({
+									kind: $i18n.fee.text.app_account_kind,
+									feeAmount: appAccountCost
+								})}
+							</div>
+						{/if}
 					</div>
 				</WalletConnectModalValue>
 
@@ -469,6 +513,6 @@
 	</Tabs>
 
 	{#snippet toolbar()}
-		<WalletConnectActions {approveDisabled} {onApprove} {onReject} />
+		<WalletConnectActions approveDisabled={approveHeld} {onApprove} {onReject} />
 	{/snippet}
 </ContentWithToolbar>
