@@ -67,6 +67,10 @@
 
 	let inputElement = $state<HTMLInputElement | undefined>();
 
+	// Checks are numbered, so only the latest one acts on its answer: picking another recently
+	// topped-up canister starts a new check while one may still be running.
+	let latestCheck = 0;
+
 	// Only an existing canister can take cycles: a top-up to an ID with nothing behind it is
 	// refunded minus the ledger's fees. A canister without code is fine.
 	const next = async () => {
@@ -76,11 +80,24 @@
 
 		const checkedText = canisterIdText;
 
+		latestCheck += 1;
+
+		const thisCheck = latestCheck;
+
 		checking = true;
 
 		const existence = await getCanisterExistence({ identity: $authIdentity, canisterId });
 
+		if (thisCheck !== latestCheck) {
+			return;
+		}
+
 		checking = false;
+
+		// The ID was edited or reset while it was checked, so the answer is not about it.
+		if (checkedText !== canisterIdText) {
+			return;
+		}
 
 		if (existence === 'exists') {
 			check = undefined;

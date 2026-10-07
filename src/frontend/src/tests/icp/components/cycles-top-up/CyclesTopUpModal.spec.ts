@@ -3,6 +3,7 @@ import CyclesTopUpModal from '$icp/components/cycles-top-up/CyclesTopUpModal.sve
 import * as cyclesTopUpServices from '$icp/services/cycles-top-up.services';
 import { unansweredCyclesTopUp } from '$icp/stores/cycles-top-up.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+import type { CanisterExistence } from '$icp/types/cycles-top-up';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import {
 	CYCLES_TOP_UP_AMOUNT,
@@ -91,6 +92,26 @@ describe('CyclesTopUpModal', () => {
 		});
 
 		return result;
+	};
+
+	// A canister check whose answer the test gives when it chooses.
+	const pendingCheck = (): ((existence: CanisterExistence) => void) => {
+		let answer: (existence: CanisterExistence) => void = () => undefined;
+
+		existenceSpy.mockImplementationOnce(
+			() =>
+				new Promise<CanisterExistence>((resolve) => {
+					answer = resolve;
+				})
+		);
+
+		return (existence) => answer(existence);
+	};
+
+	const checkDone = async (result: ReturnType<typeof renderModal>) => {
+		await waitFor(() => {
+			expect(result.container).not.toHaveTextContent(en.cycles_top_up.text.checking_canister);
+		});
 	};
 
 	const topUp = async (result: ReturnType<typeof renderModal>) => {
@@ -237,6 +258,58 @@ describe('CyclesTopUpModal', () => {
 				});
 			});
 
+			it('acts only on the latest pick while an earlier check still runs', async () => {
+				const other = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
+
+				icTransactionsStore.append({
+					tokenId: mockTcyclesToken.id,
+					transactions: [
+						{ data: recentTopUp, certified: true },
+						{
+							data: {
+								...recentTopUp,
+								id: '2',
+								to: other,
+								timestamp: recentTopUp.timestamp - 1n
+							},
+							certified: true
+						}
+					]
+				});
+
+				const answerFirst = pendingCheck();
+				const answerSecond = pendingCheck();
+
+				const result = renderModal();
+
+				const [first, second] = result
+					.getAllByTestId(CYCLES_TOP_UP_RECENT_CANISTER)
+					.map((item) => item.querySelector('button'));
+
+				assertNonNullish(first);
+				assertNonNullish(second);
+
+				await fireEvent.click(first);
+				await fireEvent.click(second);
+
+				answerFirst('exists');
+
+				// Let the first answer be handled before looking.
+				await new Promise((resolve) => setTimeout(resolve, 0));
+
+				expect(result.container).toHaveTextContent(en.cycles_top_up.text.checking_canister);
+				expect(result.queryByTestId(CYCLES_TOP_UP_AMOUNT)).toBeNull();
+
+				answerSecond('not_found');
+
+				await waitFor(() => {
+					expect(result.container).toHaveTextContent(en.cycles_top_up.error.canister_not_found);
+				});
+
+				expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_INPUT)).toHaveValue(other);
+				expect(result.queryByTestId(CYCLES_TOP_UP_AMOUNT)).toBeNull();
+			});
+
 			it('stays on the canister step when a picked canister no longer exists', async () => {
 				existenceSpy.mockResolvedValue('not_found');
 
@@ -249,6 +322,27 @@ describe('CyclesTopUpModal', () => {
 				expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_INPUT)).toHaveValue(canister);
 				expect(result.queryByTestId(CYCLES_TOP_UP_AMOUNT)).toBeNull();
 			});
+		});
+
+		it.each([
+			{ name: 'edited', text: 'ryjl3-tyaaa-aaaaa-aaaba-cai' },
+			{ name: 'reset', text: '' }
+		])('ignores the answer for an ID $name while it was checked', async ({ text }) => {
+			const answer = pendingCheck();
+
+			const result = renderModal();
+
+			await enterCanister({ result, text: canister });
+			await fireEvent.click(result.getByTestId(CYCLES_TOP_UP_CANISTER_NEXT_BUTTON));
+
+			await enterCanister({ result, text });
+
+			answer('exists');
+
+			await checkDone(result);
+
+			expect(result.queryByTestId(CYCLES_TOP_UP_AMOUNT)).toBeNull();
+			expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_INPUT)).toHaveValue(text);
 		});
 
 		it('lets a check that could not be made be tried again', async () => {
