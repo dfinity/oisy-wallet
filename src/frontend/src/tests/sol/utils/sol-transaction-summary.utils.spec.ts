@@ -22,6 +22,7 @@ import {
 	mockAtaAddress3,
 	mockSolAddress,
 	mockSolAddress2,
+	mockSolAddress3,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { nonNullish } from '@dfinity/utils';
@@ -139,6 +140,51 @@ describe('sol-transaction-summary.utils', () => {
 			expect(result.kind).toBe('swap');
 			expect(result.spent?.tokenAddress).toBeUndefined();
 			expect(result.received?.tokenAddress).toBe('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+		});
+
+		// The lines of every instruction the wallet cannot read hang under a heading, a tip's
+		// included. Only a heading over something leaving and something arriving is the trade.
+		it('should not take a tip paid under its own instruction for the trade', () => {
+			const usdc = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+			const orca = 'orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE';
+
+			const result = deriveSolTransactionSummary({
+				netChanges: [
+					{ tokenAddress: usdc, decimals: 6, delta: -1_000_000n },
+					{ delta: -5_000_000n },
+					{ tokenAddress: orca, decimals: 6, delta: 2_000_000n }
+				],
+				instructions: [
+					{
+						kind: 'route',
+						program: mockSolAddress3,
+						children: [{ kind: 'send', amount: 5_000_000n, counterparty: mockSolAddress2 }]
+					},
+					{
+						kind: 'route',
+						program: mockSolAddress2,
+						children: [
+							{
+								kind: 'send',
+								amount: 1_000_000n,
+								tokenAddress: usdc,
+								counterparty: mockAtaAddress
+							},
+							{
+								kind: 'receive',
+								amount: 2_000_000n,
+								tokenAddress: orca,
+								counterparty: mockAtaAddress2
+							}
+						]
+					}
+				],
+				userAddress: mockSolAddress
+			});
+
+			expect(result.kind).toBe('swap');
+			expect(result.spent?.tokenAddress).toBe(usdc);
+			expect(result.received?.tokenAddress).toBe(orca);
 		});
 
 		it('should call a transaction that touches nothing of the user’s other', () => {
@@ -999,6 +1045,63 @@ describe('sol-transaction-summary.utils', () => {
 					counterparty: mockSolAddress
 				})
 			).toBe('0.00203928 SOL returned to your wallet');
+		});
+
+		// The program the account is opened for is rendered after the line.
+		it('should state the rent an account opened for an application costs', () => {
+			expect(
+				format({
+					kind: 'createAccount',
+					account: mockSolAddress2,
+					program: mockSolAddress3,
+					rent: 41_899_840n
+				})
+			).toStrictEqual({ text: 'Create app account for', trailing: 'rent 0.04189984 SOL' });
+		});
+
+		describe('the heading over the lines of an instruction it cannot read', () => {
+			const send: SolInstructionSummary = {
+				kind: 'send',
+				amount: 1_000_000n,
+				tokenAddress: mockSplAddress,
+				counterparty: mockSolAddress2
+			};
+			const receive: SolInstructionSummary = { ...send, kind: 'receive' };
+
+			it('should call legs going both ways a swap route', () => {
+				expect(textOf({ kind: 'route', program: mockSolAddress3, children: [send, receive] })).toBe(
+					en.transaction.text.instruction_route
+				);
+			});
+
+			// Something leaving and nothing arriving is what a deposit looks like too.
+			it('should not call legs that all leave a swap', () => {
+				expect(textOf({ kind: 'route', program: mockSolAddress3, children: [send, send] })).toBe(
+					en.transaction.text.instruction_unknown_via
+				);
+			});
+
+			it('should not call legs that all arrive a swap', () => {
+				expect(
+					textOf({ kind: 'route', program: mockSolAddress3, children: [receive, receive] })
+				).toBe(en.transaction.text.instruction_unknown_via);
+			});
+
+			it('should not call an account opening a swap', () => {
+				expect(
+					textOf({
+						kind: 'route',
+						program: mockSolAddress3,
+						children: [{ kind: 'createAccount', program: mockSolAddress3, rent: 41_899_840n }]
+					})
+				).toBe(en.transaction.text.instruction_unknown_via);
+			});
+
+			it('should say so without a program when none is known', () => {
+				expect(textOf({ kind: 'route', children: [send, send] })).toBe(
+					en.transaction.text.instruction_unknown
+				);
+			});
 		});
 	});
 });

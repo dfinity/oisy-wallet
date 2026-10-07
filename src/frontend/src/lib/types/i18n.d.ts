@@ -1825,6 +1825,7 @@ interface I18nTransaction {
 		instruction_wrap: string;
 		instruction_unwrap: string;
 		instruction_create_account: string;
+		instruction_create_program_account: string;
 		instruction_close_account: string;
 		instruction_close_account_for: string;
 		instruction_approve: string;
