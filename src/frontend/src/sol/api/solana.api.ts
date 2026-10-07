@@ -5,6 +5,7 @@ import {
 	setIdbSolTransactionDetail
 } from '$sol/api/idb-sol-transaction-details.api';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
+import { SOLANA_MAX_SUPPORTED_TRANSACTION_VERSION } from '$sol/constants/sol.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
@@ -86,7 +87,7 @@ export const getRpcTransaction = async ({
 	const { getTransaction } = solanaHttpRpc(network);
 
 	return await getTransaction(signature, {
-		maxSupportedTransactionVersion: 0,
+		maxSupportedTransactionVersion: SOLANA_MAX_SUPPORTED_TRANSACTION_VERSION,
 		encoding: 'jsonParsed'
 	}).send();
 };

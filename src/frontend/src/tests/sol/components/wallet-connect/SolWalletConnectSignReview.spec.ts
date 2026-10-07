@@ -4,6 +4,7 @@ import { exchangeStore } from '$lib/stores/exchange.store';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
+import { STAKE_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import en from '$tests/mocks/i18n.mock';
 import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -105,6 +106,69 @@ describe('SolWalletConnectSignReview', () => {
 
 			expect(queryByText(en.wallet_connect.text.balance_changes_unknown)).not.toBeInTheDocument();
 			expect(queryByText(en.wallet_connect.text.simulated_changes)).toBeInTheDocument();
+		});
+	});
+
+	describe('programs the run calls that OISY cannot read', () => {
+		const unreadPrograms = [{ address: STAKE_PROGRAM_ADDRESS }];
+
+		const approve = (queries: { getByRole: (role: string, options: object) => HTMLElement }) =>
+			queries.getByRole('button', { name: en.core.text.approve });
+
+		it('should name them', () => {
+			const { getByTestId } = render(SolWalletConnectSignReview, {
+				props: { ...props, decoded: true, unreadPrograms }
+			});
+
+			expect(getByTestId('unread-programs')).toHaveTextContent(
+				en.wallet_connect.text.unread_programs_one
+			);
+		});
+
+		it('should hold Approve until the user confirms it', async () => {
+			const queries = render(SolWalletConnectSignReview, {
+				props: { ...props, decoded: true, unreadPrograms }
+			});
+
+			expect(approve(queries)).toBeDisabled();
+
+			await fireEvent.click(queries.getByText(en.wallet_connect.text.unread_programs_acknowledge));
+
+			expect(approve(queries)).toBeEnabled();
+		});
+
+		it('should ask nothing when the run calls only programs it knows', () => {
+			const queries = render(SolWalletConnectSignReview, {
+				props: { ...props, decoded: true, unreadPrograms: [] }
+			});
+
+			expect(queries.queryByTestId('unread-programs')).not.toBeInTheDocument();
+			expect(approve(queries)).toBeEnabled();
+		});
+
+		// There is nothing to confirm on a request OISY will not sign, and its refusal is the one
+		// thing the review has to say.
+		it('should ask nothing about a request it will not sign', () => {
+			const { queryByTestId } = render(SolWalletConnectSignReview, {
+				props: { ...props, decoded: true, ambiguous: true, unreadPrograms }
+			});
+
+			expect(queryByTestId('unread-programs')).not.toBeInTheDocument();
+		});
+
+		// The notices read `approveDisabled` as whether the request can be acted on at all. The
+		// confirmation holds the button without changing that, or waiting for it would hide them.
+		it('should leave the other notices as they are while it waits', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					decoded: true,
+					unreadPrograms,
+					preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(getByText(en.wallet_connect.text.multiple_operations)).toBeInTheDocument();
 		});
 	});
 
