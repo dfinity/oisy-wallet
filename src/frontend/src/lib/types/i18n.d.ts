@@ -1480,6 +1480,9 @@ interface I18nWallet_connect {
 		unverifiable_approval_for_all_request: string;
 		approval_for_all_grant: string;
 		approval_for_all_revoke: string;
+		cketh_deposit: string;
+		cketh_deposit_principal: string;
+		cketh_deposit_refused: string;
 		raw_copied: string;
 		sign_message: string;
 		sign_psbt: string;

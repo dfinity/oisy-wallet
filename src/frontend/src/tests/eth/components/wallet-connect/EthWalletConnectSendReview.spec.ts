@@ -1,7 +1,9 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { USDC_SYMBOL, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthWalletConnectSendReview from '$eth/components/wallet-connect/EthWalletConnectSendReview.svelte';
+import { CKETH_ABI } from '$eth/constants/cketh.constants';
 import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
 import {
 	ERC20_APPROVE_HASH,
@@ -21,7 +23,10 @@ import {
 } from '$eth/stores/eth-fee.store';
 import type { EthFeePriorities } from '$eth/types/fee';
 import type { WalletConnectEthCall } from '$eth/types/wallet-connect';
-import { classifyWalletConnectEthCall } from '$eth/utils/wallet-connect.utils';
+import {
+	classifyWalletConnectEthCall,
+	classifyWalletConnectEthSendTransaction
+} from '$eth/utils/wallet-connect.utils';
 import { MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
 import {
 	CONVERT_AMOUNT_EXCHANGE_VALUE,
@@ -32,9 +37,12 @@ import { EthFeePriority as Priority } from '$lib/enums/eth-fee-priority';
 import { screensStore } from '$lib/stores/screens.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import en from '$tests/mocks/i18n.mock';
+import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { isNullish } from '@dfinity/utils';
+import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
+import { Principal } from '@icp-sdk/core/principal';
 import { fireEvent, render, within } from '@testing-library/svelte';
-import { AbiCoder } from 'ethers/abi';
+import { AbiCoder, Interface } from 'ethers/abi';
 import { writable } from 'svelte/store';
 
 describe('EthWalletConnectSendReview', () => {
@@ -587,6 +595,97 @@ describe('EthWalletConnectSendReview', () => {
 			expect(queryByTestId(unknownTestId)).not.toBeInTheDocument();
 			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 		});
+	});
+
+	describe('ckETH helper contract deposits', () => {
+		// The ckETH helper contract on Ethereum mainnet, as the minter returns it.
+		const CKETH_HELPER = '0x7574eB42cA208A4f6960ECCAfDF186D627dCC175';
+
+		const conversionTestId = 'wallet-connect-cketh-deposit';
+		const refusedTestId = 'wallet-connect-cketh-deposit-refused';
+		const unknownTestId = 'wallet-connect-unknown-call';
+
+		const encodeDeposit = (principal: Principal): string =>
+			new Interface(CKETH_ABI).encodeFunctionData('deposit', [
+				encodePrincipalToEthAddress(principal)
+			]);
+
+		const renderDeposit = ({ data, to = CKETH_HELPER }: { data: string; to?: string }) =>
+			render(EthWalletConnectSendReview, {
+				props: {
+					...props,
+					amount: 1_000_000_000_000_000_000n,
+					// The classifier the modal uses, so every case reaches the branch production reaches.
+					call: classifyWalletConnectEthSendTransaction({
+						to,
+						data,
+						ckEthHelperContractAddress: CKETH_HELPER,
+						principal: mockPrincipal
+					}),
+					data,
+					destination: to,
+					targetNetwork: ICP_NETWORK
+				},
+				context: mockContext
+			});
+
+		it('should review a deposit to the principal of the user as a conversion to it', () => {
+			const { getByTestId, queryByTestId, getByText, container, getByRole } = renderDeposit({
+				data: encodeDeposit(mockPrincipal)
+			});
+
+			expect(getByTestId(conversionTestId)).toHaveTextContent(en.wallet_connect.text.cketh_deposit);
+			expect(queryByTestId(unknownTestId)).not.toBeInTheDocument();
+			expect(queryByTestId(refusedTestId)).not.toBeInTheDocument();
+
+			expect(container.querySelector('#cketh-deposit-principal')).toHaveTextContent(
+				mockPrincipal.toText()
+			);
+			expect(getByText(en.wallet_connect.text.cketh_deposit_principal)).toBeInTheDocument();
+
+			expect(getByText(`1 ${ETHEREUM_TOKEN.symbol}`)).toBeInTheDocument();
+			expect(container.querySelector('#destination-network')).toHaveTextContent(ICP_NETWORK.name);
+
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		it.each([
+			{
+				kind: 'a deposit to another principal',
+				data: encodeDeposit(Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'))
+			},
+			{ kind: 'a deposit followed by more bytes', data: `${encodeDeposit(mockPrincipal)}00` },
+			{ kind: 'calldata that is not a deposit', data: `${ERC20_TRANSFER_HASH}deadbeef` }
+		])('should refuse $kind and disable approval', ({ data }) => {
+			const { getByTestId, queryByTestId, container, getByRole } = renderDeposit({ data });
+
+			expect(getByTestId(refusedTestId)).toHaveTextContent(
+				en.wallet_connect.text.cketh_deposit_refused
+			);
+			expect(queryByTestId(conversionTestId)).not.toBeInTheDocument();
+			expect(container.querySelector('#cketh-deposit-principal')).toBeNull();
+
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it.each([CKETH_HELPER.toLowerCase(), `0x${CKETH_HELPER.slice(2).toUpperCase()}`])(
+			'should recognise the helper contract addressed as %s',
+			(to) => {
+				const refused = renderDeposit({
+					to,
+					data: encodeDeposit(Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'))
+				});
+
+				expect(refused.getByTestId(refusedTestId)).toBeInTheDocument();
+				expect(refused.getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+
+				refused.unmount();
+
+				const { getByTestId } = renderDeposit({ to, data: encodeDeposit(mockPrincipal) });
+
+				expect(getByTestId(conversionTestId)).toBeInTheDocument();
+			}
+		);
 	});
 
 	describe('transaction priority', () => {

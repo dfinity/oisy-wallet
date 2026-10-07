@@ -21,9 +21,9 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
-	import { shouldSendWithApproval } from '$eth/utils/send.utils';
+	import { isDestinationContractAddress, shouldSendWithApproval } from '$eth/utils/send.utils';
 	import {
-		classifyWalletConnectEthCall,
+		classifyWalletConnectEthSendTransaction,
 		getSendParamsGas,
 		isWalletConnectEthApproval
 	} from '$eth/utils/wallet-connect.utils';
@@ -58,7 +58,26 @@
 
 	let { request, firstTransaction, sourceNetwork, listener }: Props = $props();
 
-	let call = $derived(classifyWalletConnectEthCall(firstTransaction.data));
+	/**
+	 * Send context store
+	 */
+
+	const { sendTokenId, sendToken, sendEthFeePriority } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	let ckEthHelperContractAddress = $derived(
+		toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId])
+	);
+
+	// Classified from where the request goes as well as from its calldata: a `deposit(bytes32)` is a
+	// ckETH conversion only at the helper contract, and only one to the user's own principal is signed.
+	let call = $derived(
+		classifyWalletConnectEthSendTransaction({
+			to: firstTransaction.to,
+			data: firstTransaction.data,
+			ckEthHelperContractAddress,
+			principal: $authIdentity?.getPrincipal()
+		})
+	);
 
 	// An approval authorizes someone else to move the user's tokens. It is not a send, whatever
 	// native value the request carries alongside it.
@@ -69,11 +88,8 @@
 	// granting an unlimited allowance be presented as a zero-value transfer.
 	let unknownCall = $derived(call.type === 'unknown');
 
-	/**
-	 * Send context store
-	 */
-
-	const { sendTokenId, sendToken, sendEthFeePriority } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	// A call to the ckETH helper contract OISY refuses to sign is not a send either.
+	let ckEthDepositRefused = $derived(call.type === 'ckEthDepositRefused');
 
 	/**
 	 * Fee context store
@@ -110,8 +126,10 @@
 
 	let destination = $derived(firstTransaction.to ?? '');
 
+	// Compared however the address is cased, as the signing path compares it, so that casing cannot
+	// change where the review says the request goes.
 	let targetNetwork = $derived(
-		destination === toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId])
+		isDestinationContractAddress({ destination, contractAddress: ckEthHelperContractAddress })
 			? ICP_NETWORK
 			: $sendToken.network
 	);
@@ -201,7 +219,7 @@
 		<WalletConnectModalTitle>
 			{#if approve}
 				{$i18n.core.text.approve}
-			{:else if unknownCall}
+			{:else if unknownCall || ckEthDepositRefused}
 				{$i18n.wallet_connect.text.unknown_call_title}
 			{:else}
 				{$i18n.send.text.send}
