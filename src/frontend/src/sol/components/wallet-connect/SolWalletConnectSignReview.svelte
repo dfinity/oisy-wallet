@@ -38,6 +38,7 @@
 	import {
 		flattenInstructions,
 		formatSolTransactionSummary,
+		solAppAccountCost,
 		solAtaFee
 	} from '$sol/utils/sol-transaction-summary.utils';
 
@@ -129,11 +130,19 @@
 	// stated as its own line rather than folded into either.
 	let ataFee = $derived(solAtaFee({ instructions: instructions ?? [], userAddress: source }));
 
+	// What the message pays to open accounts for applications. A line of its own rather than part of
+	// the rent above: the user can always close a token account and get its rent back, while an
+	// application's account returns its rent only if the application chooses to.
+	let appAccountCost = $derived(solAppAccountCost({ instructions: instructions ?? [] }));
+
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
-	// What the transaction costs beyond what it moves. The simulated SOL balance carries all of it
-	// and the message states none of it, so it is the room the comparison of the two allows.
-	let costs = $derived(SOLANA_TRANSACTION_FEE_IN_LAMPORTS + (prioritizationFee ?? ZERO) + ataFee);
+	// What the transaction costs beyond what it moves: every line of the fee section. The simulated
+	// SOL balance carries all of it and the message states none of it, so it is the room the
+	// comparison of the two allows.
+	let costs = $derived(
+		SOLANA_TRANSACTION_FEE_IN_LAMPORTS + (prioritizationFee ?? ZERO) + ataFee + appAccountCost
+	);
 
 	// The message read on its own says a plain send, receive or swap, and the run agrees that this
 	// is all it does. Anything less than agreement is left unsaid: a confident sentence over a
@@ -454,6 +463,15 @@
 						{#if ataFee > ZERO}
 							<div data-tid="ata-fee">
 								{@render feeValue({ kind: $i18n.fee.text.ata_kind, feeAmount: ataFee })}
+							</div>
+						{/if}
+
+						{#if appAccountCost > ZERO}
+							<div data-tid="app-account-fee">
+								{@render feeValue({
+									kind: $i18n.fee.text.app_account_kind,
+									feeAmount: appAccountCost
+								})}
 							</div>
 						{/if}
 					</div>

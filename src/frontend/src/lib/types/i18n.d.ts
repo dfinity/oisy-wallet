@@ -1399,6 +1399,7 @@ interface I18nFee {
 		base_kind: string;
 		prioritization_kind: string;
 		ata_kind: string;
+		app_account_kind: string;
 	};
 	assertion: { insufficient_funds_for_fee: string };
 	error: { cannot_fetch_gas_fee: string };

@@ -1709,7 +1709,8 @@
 			"prioritization_fee": "Priority fee",
 			"base_kind": "Base",
 			"prioritization_kind": "Priority",
-			"ata_kind": "Account rent"
+			"ata_kind": "Account rent",
+			"app_account_kind": "App account cost"
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Insufficient balance to cover the fees."
