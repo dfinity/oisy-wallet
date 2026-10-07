@@ -1,11 +1,16 @@
 import * as canisterStateApi from '$icp/api/canister-state.api';
 import CyclesTopUpModal from '$icp/components/cycles-top-up/CyclesTopUpModal.svelte';
 import * as cyclesTopUpServices from '$icp/services/cycles-top-up.services';
+import { unansweredCyclesTopUp } from '$icp/stores/cycles-top-up.store';
+import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+import type { CanisterExistence } from '$icp/types/cycles-top-up';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import {
 	CYCLES_TOP_UP_AMOUNT,
 	CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON,
 	CYCLES_TOP_UP_CANISTER_INPUT,
 	CYCLES_TOP_UP_CANISTER_NEXT_BUTTON,
+	CYCLES_TOP_UP_RECENT_CANISTER,
 	CYCLES_TOP_UP_REVIEW,
 	CYCLES_TOP_UP_REVIEW_BACK_BUTTON,
 	CYCLES_TOP_UP_REVIEW_TOP_UP_BUTTON,
@@ -21,7 +26,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import * as walletUtils from '$lib/utils/wallet.utils';
 import { mockTcyclesToken } from '$tests/mocks/cycles-mint.mock';
 import en from '$tests/mocks/i18n.mock';
-import { mockIdentity, mockPrincipalText } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal2, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -89,6 +94,26 @@ describe('CyclesTopUpModal', () => {
 		return result;
 	};
 
+	// A canister check whose answer the test gives when it chooses.
+	const pendingCheck = (): ((existence: CanisterExistence) => void) => {
+		let answer: (existence: CanisterExistence) => void = () => undefined;
+
+		existenceSpy.mockImplementationOnce(
+			() =>
+				new Promise<CanisterExistence>((resolve) => {
+					answer = resolve;
+				})
+		);
+
+		return (existence) => answer(existence);
+	};
+
+	const checkDone = async (result: ReturnType<typeof renderModal>) => {
+		await waitFor(() => {
+			expect(result.container).not.toHaveTextContent(en.cycles_top_up.text.checking_canister);
+		});
+	};
+
 	const topUp = async (result: ReturnType<typeof renderModal>) => {
 		await fireEvent.click(result.getByTestId(CYCLES_TOP_UP_REVIEW_TOP_UP_BUTTON));
 	};
@@ -121,6 +146,9 @@ describe('CyclesTopUpModal', () => {
 			id: mockTcyclesToken.id,
 			data: { data: 5_000_000_000_000n, certified: true }
 		});
+
+		unansweredCyclesTopUp.set(undefined);
+		icTransactionsStore.reset(mockTcyclesToken.id);
 	});
 
 	afterEach(() => {
@@ -141,6 +169,27 @@ describe('CyclesTopUpModal', () => {
 			await enterCanister({ result, text: mockPrincipalText });
 
 			expect(result.container).toHaveTextContent(en.cycles_top_up.error.invalid_canister_id);
+			expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_NEXT_BUTTON)).toBeDisabled();
+		});
+
+		it.each([
+			{ name: 'the management canister', text: 'aaaaa-aa' },
+			{ name: 'the anonymous principal', text: '2vxsx-fae' }
+		])('asks for a canister ID for $name, however short', async ({ text }) => {
+			const result = renderModal();
+
+			await enterCanister({ result, text });
+
+			expect(result.container).toHaveTextContent(en.cycles_top_up.error.invalid_canister_id);
+			expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_NEXT_BUTTON)).toBeDisabled();
+		});
+
+		it('does not flag a canister ID still being typed', async () => {
+			const result = renderModal();
+
+			await enterCanister({ result, text: canister.slice(0, 9) });
+
+			expect(result.container).not.toHaveTextContent(en.cycles_top_up.error.invalid_canister_id);
 			expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_NEXT_BUTTON)).toBeDisabled();
 		});
 
@@ -166,6 +215,134 @@ describe('CyclesTopUpModal', () => {
 			});
 
 			expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_NEXT_BUTTON)).toBeDisabled();
+		});
+
+		describe('recently topped up', () => {
+			const recentTopUp: IcTransactionUi = {
+				id: '1',
+				type: 'burn',
+				typeLabel: 'transaction.label.top_up',
+				to: canister,
+				value: 1_000_000_000_000n,
+				timestamp: 1_700_000_000_000_000_000n,
+				status: 'executed'
+			};
+
+			const pickRecent = async () => {
+				icTransactionsStore.append({
+					tokenId: mockTcyclesToken.id,
+					transactions: [{ data: recentTopUp, certified: true }]
+				});
+
+				const result = renderModal();
+
+				const button = result.getByTestId(CYCLES_TOP_UP_RECENT_CANISTER).querySelector('button');
+
+				assertNonNullish(button);
+
+				await fireEvent.click(button);
+
+				return result;
+			};
+
+			it('goes on to the amount when a canister is picked, after checking it', async () => {
+				const result = await pickRecent();
+
+				await waitFor(() => {
+					expect(result.getByTestId(CYCLES_TOP_UP_AMOUNT)).toBeInTheDocument();
+				});
+
+				expect(existenceSpy).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					canisterId: Principal.fromText(canister)
+				});
+			});
+
+			it('acts only on the latest pick while an earlier check still runs', async () => {
+				const other = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
+
+				icTransactionsStore.append({
+					tokenId: mockTcyclesToken.id,
+					transactions: [
+						{ data: recentTopUp, certified: true },
+						{
+							data: {
+								...recentTopUp,
+								id: '2',
+								to: other,
+								timestamp: 1_600_000_000_000_000_000n
+							},
+							certified: true
+						}
+					]
+				});
+
+				const answerFirst = pendingCheck();
+				const answerSecond = pendingCheck();
+
+				const result = renderModal();
+
+				const [first, second] = result
+					.getAllByTestId(CYCLES_TOP_UP_RECENT_CANISTER)
+					.map((item) => item.querySelector('button'));
+
+				assertNonNullish(first);
+				assertNonNullish(second);
+
+				await fireEvent.click(first);
+				await fireEvent.click(second);
+
+				answerFirst('exists');
+
+				// Let the first answer be handled before looking.
+				await new Promise((resolve) => setTimeout(resolve, 0));
+
+				expect(result.container).toHaveTextContent(en.cycles_top_up.text.checking_canister);
+				expect(result.queryByTestId(CYCLES_TOP_UP_AMOUNT)).toBeNull();
+
+				answerSecond('not_found');
+
+				await waitFor(() => {
+					expect(result.container).toHaveTextContent(en.cycles_top_up.error.canister_not_found);
+				});
+
+				expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_INPUT)).toHaveValue(other);
+				expect(result.queryByTestId(CYCLES_TOP_UP_AMOUNT)).toBeNull();
+			});
+
+			it('stays on the canister step when a picked canister no longer exists', async () => {
+				existenceSpy.mockResolvedValue('not_found');
+
+				const result = await pickRecent();
+
+				await waitFor(() => {
+					expect(result.container).toHaveTextContent(en.cycles_top_up.error.canister_not_found);
+				});
+
+				expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_INPUT)).toHaveValue(canister);
+				expect(result.queryByTestId(CYCLES_TOP_UP_AMOUNT)).toBeNull();
+			});
+		});
+
+		it.each([
+			{ name: 'edited', text: 'ryjl3-tyaaa-aaaaa-aaaba-cai' },
+			{ name: 'reset', text: '' }
+		])('ignores the answer for an ID $name while it was checked', async ({ text }) => {
+			const answer = pendingCheck();
+
+			const result = renderModal();
+
+			await enterCanister({ result, text: canister });
+			await fireEvent.click(result.getByTestId(CYCLES_TOP_UP_CANISTER_NEXT_BUTTON));
+
+			await enterCanister({ result, text });
+
+			answer('exists');
+
+			await checkDone(result);
+
+			expect(result.queryByTestId(CYCLES_TOP_UP_AMOUNT)).toBeNull();
+			expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_INPUT)).toHaveValue(text);
 		});
 
 		it('lets a check that could not be made be tried again', async () => {
@@ -426,6 +603,103 @@ describe('CyclesTopUpModal', () => {
 
 			expect(topUpSpy).toHaveBeenLastCalledWith(
 				expect.objectContaining({ createdAt: 1_000_000_000n })
+			);
+		});
+
+		it('resends an unanswered top-up from a new modal', async () => {
+			topUpSpy.mockResolvedValueOnce({ status: 'unknown' });
+
+			const first = await toReview();
+
+			await topUp(first);
+
+			await backOnReview(first);
+
+			first.unmount();
+
+			vi.setSystemTime(new Date(2_000));
+
+			const second = await toReview();
+
+			expect(second.container).toHaveTextContent(
+				replacePlaceholders(en.cycles_top_up.text.unknown, { $token: 'TCYCLES' })
+			);
+
+			await topUp(second);
+
+			await waitFor(() => {
+				expect(topUpSpy).toHaveBeenCalledTimes(2);
+			});
+
+			expect(topUpSpy).toHaveBeenLastCalledWith(
+				expect.objectContaining({ createdAt: 1_000_000_000n })
+			);
+		});
+
+		it('warns in a new modal that another top-up can top up again while the last outcome is unknown', async () => {
+			topUpSpy.mockResolvedValueOnce({ status: 'unknown' });
+
+			const first = await toReview();
+
+			await topUp(first);
+
+			await backOnReview(first);
+
+			first.unmount();
+
+			vi.setSystemTime(new Date(2_000));
+
+			const second = await toReview('2');
+
+			expect(second.container).toHaveTextContent(
+				replacePlaceholders(en.cycles_top_up.text.unknown_fresh, { $token: 'TCYCLES' })
+			);
+
+			await topUp(second);
+
+			await waitFor(() => {
+				expect(topUpSpy).toHaveBeenCalledTimes(2);
+			});
+
+			expect(topUpSpy).toHaveBeenLastCalledWith(
+				expect.objectContaining({ amount: 2_000_000_000_000n, createdAt: 2_000_000_000n })
+			);
+		});
+
+		it("does not resend another principal's unanswered top-up", async () => {
+			topUpSpy.mockResolvedValueOnce({ status: 'unknown' });
+
+			const first = await toReview();
+
+			await topUp(first);
+
+			await backOnReview(first);
+
+			first.unmount();
+
+			vi.spyOn(authDerived, 'authIdentity', 'get').mockReturnValue(
+				readable({ ...mockIdentity, getPrincipal: () => mockPrincipal2 })
+			);
+
+			vi.setSystemTime(new Date(2_000));
+
+			const second = await toReview();
+
+			expect(second.container).not.toHaveTextContent(
+				replacePlaceholders(en.cycles_top_up.text.unknown, { $token: 'TCYCLES' })
+			);
+			expect(second.container).not.toHaveTextContent(
+				replacePlaceholders(en.cycles_top_up.text.unknown_fresh, { $token: 'TCYCLES' })
+			);
+
+			await topUp(second);
+
+			await waitFor(() => {
+				expect(topUpSpy).toHaveBeenCalledTimes(2);
+			});
+
+			expect(topUpSpy).toHaveBeenLastCalledWith(
+				expect.objectContaining({ createdAt: 2_000_000_000n })
 			);
 		});
 	});

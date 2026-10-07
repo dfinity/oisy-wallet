@@ -5,6 +5,7 @@
 	import CyclesTopUpRecentCanisters from '$icp/components/cycles-top-up/CyclesTopUpRecentCanisters.svelte';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { parseCanisterId } from '$icp/utils/cycles-top-up.utils';
+	import { isIcrcAddress } from '$icp/utils/icrc-account.utils';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -35,8 +36,12 @@
 
 	let canisterId = $derived(parseCanisterId(canisterIdText));
 
+	// A complete principal or account that is not a canister ID is flagged at once, however
+	// short (`aaaaa-aa`, `2vxsx-fae`). Other text only once it is too long to be still typing.
 	let invalid = $derived(
-		isNullish(canisterId) && canisterIdText.trim().length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE
+		isNullish(canisterId) &&
+			(canisterIdText.trim().length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE ||
+				isIcrcAddress(canisterIdText.trim()))
 	);
 
 	// The outcome of the last existence check, cleared as soon as the ID changes. A check that
@@ -62,6 +67,10 @@
 
 	let inputElement = $state<HTMLInputElement | undefined>();
 
+	// Checks are numbered, so only the latest one acts on its answer: picking another recently
+	// topped-up canister starts a new check while one may still be running.
+	let latestCheck = 0;
+
 	// Only an existing canister can take cycles: a top-up to an ID with nothing behind it is
 	// refunded minus the ledger's fees. A canister without code is fine.
 	const next = async () => {
@@ -71,11 +80,24 @@
 
 		const checkedText = canisterIdText;
 
+		latestCheck += 1;
+
+		const thisCheck = latestCheck;
+
 		checking = true;
 
 		const existence = await getCanisterExistence({ identity: $authIdentity, canisterId });
 
+		if (thisCheck !== latestCheck) {
+			return;
+		}
+
 		checking = false;
+
+		// The ID was edited or reset while it was checked, so the answer is not about it.
+		if (checkedText !== canisterIdText) {
+			return;
+		}
 
 		if (existence === 'exists') {
 			check = undefined;
@@ -122,7 +144,15 @@
 		</div>
 	{/if}
 
-	<CyclesTopUpRecentCanisters onSelect={(selected) => (canisterIdText = selected)} {token} />
+	<!-- As in the send flow, picking a canister goes on, after the same check as Next. -->
+	<CyclesTopUpRecentCanisters
+		onSelect={async (selected) => {
+			canisterIdText = selected;
+
+			await next();
+		}}
+		{token}
+	/>
 
 	{#snippet toolbar()}
 		<ButtonGroup>

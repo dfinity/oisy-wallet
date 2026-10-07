@@ -34,7 +34,7 @@
 	<div class="mt-6">
 		<p class="mb-2 font-bold">{$i18n.cycles_top_up.text.recently_topped_up}</p>
 
-		<ul class="flex flex-col gap-1">
+		<ul class="flex list-none flex-col gap-1">
 			{#each canisters as { canisterId, value, timestamp } (canisterId)}
 				<li data-tid={CYCLES_TOP_UP_RECENT_CANISTER}>
 					<LogoButton onClick={() => onSelect(canisterId)}>
