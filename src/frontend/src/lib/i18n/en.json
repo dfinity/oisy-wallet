@@ -1871,6 +1871,7 @@
 			"btc_psbt_input_ambiguous": "OISY cannot tell which previous output one of this transaction's inputs refers to, so the amounts shown for review could differ from the amounts being signed. For your security, it was not signed.",
 			"from_address_not_wallet": "From address requested for the transaction is not the address of this wallet.",
 			"unknown_destination": "Unknown destination address.",
+			"cketh_deposit_refused": "This request calls the ckETH conversion contract for an Internet Computer principal that isn't yours, or with data OISY can't read. For your security, it was not signed.",
 			"ambiguous_transaction": "This transaction includes multiple actions that can't all be shown accurately for review. For your security, it was not signed.",
 			"close_pays_others": "This transaction closes one of your token accounts and pays its balance to an address that is not your wallet. For your security, it was not signed.",
 			"unreviewed_without_simulation": "OISY couldn't read part of this transaction, and the network didn't return a simulation of it either, so nothing describes what that part would do. For your security, it was not signed.",

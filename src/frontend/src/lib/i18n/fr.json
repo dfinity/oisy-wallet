@@ -1871,6 +1871,7 @@
 			"btc_psbt_input_ambiguous": "OISY ne peut pas déterminer à quelle sortie précédente se réfère l'une des entrées de cette transaction, de sorte que les montants affichés pour vérification pourraient différer des montants réellement signés. Pour votre sécurité, elle n'a pas été signée.",
 			"from_address_not_wallet": "L'adresse 'From' demandée pour la transaction n'est pas l'adresse de ce portefeuille.",
 			"unknown_destination": "Adresse de destination inconnue.",
+			"cketh_deposit_refused": "",
 			"ambiguous_transaction": "Cette transaction déplace des fonds entre plusieurs adresses et ne peut pas être affichée correctement pour vérification. Pour votre sécurité, elle n'a pas été signée.",
 			"close_pays_others": "Cette transaction ferme l'un de vos comptes de jetons et verse son solde à une adresse qui n'est pas votre portefeuille. Pour votre sécurité, elle n'a pas été signée.",
 			"unreviewed_without_simulation": "OISY n'a pas pu lire une partie de cette transaction et le réseau n'en a pas renvoyé de simulation, donc rien ne décrit ce que ferait cette partie. Pour votre sécurité, elle n'a pas été signée.",

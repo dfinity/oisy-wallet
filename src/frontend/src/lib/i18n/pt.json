@@ -1871,6 +1871,7 @@
 			"btc_psbt_input_ambiguous": "A OISY não consegue determinar a qual saída anterior uma das entradas desta transação se refere, portanto os valores mostrados para revisão podem diferir dos valores realmente assinados. Por sua segurança, ela não foi assinada.",
 			"from_address_not_wallet": "O endereço 'De' solicitado para a transação não é o endereço desta carteira.",
 			"unknown_destination": "Endereço de destino desconhecido.",
+			"cketh_deposit_refused": "",
 			"ambiguous_transaction": "Esta transação movimenta fundos entre vários endereços e não pode ser exibida com precisão para revisão. Para sua segurança, ela não foi assinada.",
 			"close_pays_others": "Esta transação encerra uma das suas contas de tokens e envia o saldo dela para um endereço que não é a sua carteira. Para a sua segurança, não foi assinada.",
 			"unreviewed_without_simulation": "A OISY não conseguiu ler parte desta transação e a rede também não devolveu uma simulação, por isso nada descreve o que essa parte faria. Para a sua segurança, não foi assinada.",

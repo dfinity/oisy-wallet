@@ -6,9 +6,11 @@ import {
 	getSendParamsGas,
 	getSignParamsMessageHex,
 	getSignParamsMessageTypedDataV4Hash,
+	getWalletConnectEthCkEthDeposit,
 	isEthSignTypedDataMethod
 } from '$eth/utils/wallet-connect.utils';
 import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
+import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
 import {
 	TRACK_COUNT_WC_ETH_SEND_ERROR,
@@ -75,7 +77,8 @@ export const send = ({
 						unknown_parameter,
 						wallet_not_initialized,
 						from_address_not_wallet,
-						unknown_destination
+						unknown_destination,
+						cketh_deposit_refused
 					}
 				}
 			} = get(i18n);
@@ -106,6 +109,23 @@ export const send = ({
 			if (isNullish(firstParam.to)) {
 				toastsError({
 					msg: { text: unknown_destination }
+				});
+				return { success: false };
+			}
+
+			// The review refuses these requests through the same check. Running it here as well, against
+			// the helper contract the transaction is then prepared for, keeps a refused request from being
+			// signed however this is reached.
+			try {
+				getWalletConnectEthCkEthDeposit({
+					to: firstParam.to,
+					data: firstParam.data,
+					ckEthHelperContractAddress: toCkEthHelperContractAddress(minterInfo),
+					principal: identity?.getPrincipal()
+				});
+			} catch (_: unknown) {
+				toastsError({
+					msg: { text: cketh_deposit_refused }
 				});
 				return { success: false };
 			}

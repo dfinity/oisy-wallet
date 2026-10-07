@@ -1550,6 +1550,7 @@ interface I18nWallet_connect {
 		btc_psbt_input_ambiguous: string;
 		from_address_not_wallet: string;
 		unknown_destination: string;
+		cketh_deposit_refused: string;
 		ambiguous_transaction: string;
 		close_pays_others: string;
 		unreviewed_without_simulation: string;

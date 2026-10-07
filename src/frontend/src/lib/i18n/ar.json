@@ -1871,6 +1871,7 @@
 			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "عنوان المرسل المطلوب للمعاملة ليس عنوان هذه المحفظة.",
 			"unknown_destination": "عنوان الوجهة غير معروف.",
+			"cketh_deposit_refused": "",
 			"ambiguous_transaction": "تنقل هذه المعاملة الأموال بين عدة عناوين ولا يمكن عرضها بدقة للمراجعة. حفاظًا على أمانك، لم يتم توقيعها.",
 			"close_pays_others": "",
 			"unreviewed_without_simulation": "",

@@ -1871,6 +1871,7 @@
 			"btc_psbt_input_ambiguous": "OISY không thể xác định một trong các đầu vào của giao dịch này tham chiếu đến đầu ra trước đó nào, vì vậy số tiền hiển thị để xem xét có thể khác với số tiền thực sự được ký. Vì lý do bảo mật, giao dịch chưa được ký.",
 			"from_address_not_wallet": "Địa chỉ gửi được yêu cầu cho giao dịch không phải là địa chỉ của ví này.",
 			"unknown_destination": "Địa chỉ đích không xác định.",
+			"cketh_deposit_refused": "",
 			"ambiguous_transaction": "Giao dịch này chuyển tiền giữa nhiều địa chỉ và không thể hiển thị chính xác để xem xét. Vì sự an toàn của bạn, giao dịch này đã không được ký.",
 			"close_pays_others": "Giao dịch này đóng một trong các tài khoản token của bạn và trả số dư của nó cho một địa chỉ không phải ví của bạn. Vì sự an toàn của bạn, giao dịch đã không được ký.",
 			"unreviewed_without_simulation": "OISY không thể đọc một phần của giao dịch này và mạng cũng không trả về bản mô phỏng, nên không có gì mô tả phần đó sẽ làm gì. Vì sự an toàn của bạn, giao dịch đã không được ký.",

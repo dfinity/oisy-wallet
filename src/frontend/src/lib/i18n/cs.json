@@ -1871,6 +1871,7 @@
 			"btc_psbt_input_ambiguous": "OISY nedokáže určit, na který předchozí výstup odkazuje jeden ze vstupů této transakce, takže zobrazené částky ke kontrole se mohou lišit od skutečně podepisovaných částek. Z bezpečnostních důvodů nebyla podepsána.",
 			"from_address_not_wallet": "Adresa „Od“ požadovaná pro transakci není adresou této peněženky.",
 			"unknown_destination": "Neznámá cílová adresa.",
+			"cketh_deposit_refused": "",
 			"ambiguous_transaction": "Tato transakce přesouvá prostředky mezi několika adresami a nelze ji přesně zobrazit ke kontrole. Z důvodu vaší bezpečnosti nebyla podepsána.",
 			"close_pays_others": "Tato transakce zavírá jeden z vašich tokenových účtů a vyplácí jeho zůstatek na adresu, která není vaše peněženka. Pro vaši bezpečnost nebyla podepsána.",
 			"unreviewed_without_simulation": "OISY nedokázala přečíst část této transakce a síť k ní nevrátila ani simulaci, takže nic nepopisuje, co by tato část udělala. Z důvodu vaší bezpečnosti nebyla podepsána.",
