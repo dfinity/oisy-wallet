@@ -31,6 +31,7 @@ import {
 import { EthFeePriority as Priority } from '$lib/enums/eth-fee-priority';
 import { screensStore } from '$lib/stores/screens.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import { isNullish } from '@dfinity/utils';
 import { fireEvent, render, within } from '@testing-library/svelte';
@@ -846,6 +847,82 @@ describe('EthWalletConnectSendReview', () => {
 			});
 
 			expect(getByText('~$4.00')).toBeInTheDocument();
+		});
+	});
+
+	describe('native value sent along with a token call', () => {
+		const tokenCallWithValueTestId = 'wallet-connect-token-call-with-value';
+
+		const noticeFor = (amount: string) =>
+			replacePlaceholders(en.wallet_connect.text.token_call_with_value, {
+				$amount: `${amount} ${ETHEREUM_TOKEN.symbol}`,
+				$symbol: ETHEREUM_TOKEN.symbol
+			});
+
+		const renderTokenCall = ({
+			selector,
+			amount,
+			destination = USDC_TOKEN.address
+		}: {
+			selector: string;
+			amount: bigint;
+			destination?: string;
+		}) => {
+			const data = encodeCall({ selector, to: RECIPIENT, value: 1_500_000n });
+
+			return render(EthWalletConnectSendReview, {
+				props: { ...props, amount, call: classifyWalletConnectEthCall(data), data, destination },
+				context: mockContext
+			});
+		};
+
+		const tokenCalls = [
+			ERC20_TRANSFER_HASH,
+			ERC20_APPROVE_HASH,
+			ERC20_INCREASE_ALLOWANCE_HASH,
+			ERC20_DECREASE_ALLOWANCE_HASH
+		];
+
+		it.each(tokenCalls)(
+			'should state the native value and disable approval for selector %s',
+			(selector) => {
+				const { getByTestId, getByRole } = renderTokenCall({
+					selector,
+					amount: 5_000_000_000_000_000_000n
+				});
+
+				expect(getByTestId(tokenCallWithValueTestId)).toHaveTextContent(noticeFor('5'));
+				expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+			}
+		);
+
+		it.each(tokenCalls)(
+			'should say nothing for selector %s carrying no native value',
+			(selector) => {
+				const { queryByTestId, getByRole } = renderTokenCall({ selector, amount: ZERO });
+
+				expect(queryByTestId(tokenCallWithValueTestId)).not.toBeInTheDocument();
+				expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+			}
+		);
+
+		it('should state an amount too small to display without rounding it to zero', () => {
+			const { getByTestId } = renderTokenCall({ selector: ERC20_TRANSFER_HASH, amount: 1n });
+
+			expect(getByTestId(tokenCallWithValueTestId)).toHaveTextContent(noticeFor('< 0.00000001'));
+		});
+
+		// The native value is the more specific reason, and the one that names an amount.
+		it('should state the native value rather than the unknown token when both apply', () => {
+			const { getByTestId, queryByTestId, getByRole } = renderTokenCall({
+				selector: ERC20_TRANSFER_HASH,
+				amount: 5_000_000_000_000_000_000n,
+				destination: UNKNOWN_CONTRACT
+			});
+
+			expect(getByTestId(tokenCallWithValueTestId)).toBeInTheDocument();
+			expect(queryByTestId(warningTestId)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
 		});
 	});
 

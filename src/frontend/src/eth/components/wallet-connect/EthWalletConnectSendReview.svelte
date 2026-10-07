@@ -14,6 +14,7 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { WalletConnectEthCall } from '$eth/types/wallet-connect';
 	import { decodeErc20AbiData, decodeSetApprovalForAllData } from '$eth/utils/transactions.utils';
+	import { isWalletConnectEthTokenCallWithValue } from '$eth/utils/wallet-connect.utils';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import SendDataSpender from '$lib/components/send/SendDataSpender.svelte';
@@ -31,6 +32,8 @@
 	import type { Network } from '$lib/types/network';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { maxBigInt } from '$lib/utils/bigint.utils';
+	import { formatToken } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		amount: bigint;
@@ -156,6 +159,17 @@
 	// undecodable approve would otherwise render as a zero-amount interaction and stay approvable.
 	let unverifiableErc20 = $derived(erc20 && (isNullish(decodedErc20Data) || isNullish(token)));
 
+	// The summary of a token call states the token amount, so native value sent along with it would
+	// have no line of its own. The request is refused, and the notice states that amount instead.
+	let tokenCallWithValue = $derived(isWalletConnectEthTokenCallWithValue({ call, value: amount }));
+
+	let tokenCallValue = $derived(
+		replacePlaceholders($i18n.wallet_connect.text.token_call_with_value, {
+			$amount: `${formatToken({ value: amount, unitName: $sendToken.decimals })} ${$sendToken.symbol}`,
+			$symbol: $sendToken.symbol
+		})
+	);
+
 	// Same reasoning for an operator grant: the operator is the whole of what is being authorized,
 	// and calldata that hides it would otherwise fall through to a native zero-value summary.
 	let unverifiableSetApprovalForAll = $derived(
@@ -184,6 +198,10 @@
 	{#if unknownCall}
 		<MessageBox level="error" testId="wallet-connect-unknown-call">
 			{$i18n.wallet_connect.text.unknown_call}
+		</MessageBox>
+	{:else if tokenCallWithValue}
+		<MessageBox level="error" testId="wallet-connect-token-call-with-value">
+			{tokenCallValue}
 		</MessageBox>
 	{:else if unverifiableErc20}
 		<MessageBox level="warning" testId="wallet-connect-unverifiable-erc20-warning">
@@ -302,7 +320,10 @@
 
 	{#snippet toolbar()}
 		<WalletConnectActions
-			approveDisabled={approveDisabled || unverifiableErc20 || unverifiableSetApprovalForAll}
+			approveDisabled={approveDisabled ||
+				tokenCallWithValue ||
+				unverifiableErc20 ||
+				unverifiableSetApprovalForAll}
 			{onApprove}
 			{onReject}
 		/>
