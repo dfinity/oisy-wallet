@@ -1,6 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { SOLANA_KNOWN_PROGRAM_ADDRESSES } from '$sol/constants/sol-known-programs.constants';
-import type { SolAddress } from '$sol/types/address';
+import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaParsedAccountInfo, SolanaSimulatedInnerInstructions } from '$sol/types/sol-rpc';
 import type {
 	SolSimulationControlChange,
@@ -279,6 +279,25 @@ export const isEmptySolSimulationPreview = ({
 	controlChanges
 }: SolSimulationPreview): boolean =>
 	isNullish(solDelta) && tokenDeltas.length === 0 && controlChanges.length === 0;
+
+/**
+ * Whether the run hands the user's wallet to a program other than the one that owned it.
+ *
+ * Once assigned, that program and no longer the wallet's key decides what leaves the wallet, and
+ * the wallet can no longer pay a fee. The message need not state the assignment: a program can
+ * make it inside its own call, where only the run sees it, as a change of the wallet's owning
+ * program.
+ */
+export const solSimulationReassignsWallet = ({
+	preview,
+	userAddress
+}: {
+	preview: SolSimulationPreview | undefined;
+	userAddress: OptionSolAddress;
+}): boolean =>
+	(preview?.controlChanges ?? []).some(
+		({ account, field }) => field === 'program' && account === userAddress
+	);
 
 /**
  * The programs a simulated run calls from inside another program's instruction that are not among
