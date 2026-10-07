@@ -102,6 +102,10 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	// Empty unless the review offered it and its box was ticked. A refusal found here that is not in
 	// the list still refuses, so an acknowledgement covers what the review showed and nothing else.
 	acknowledgedRefusals: SolWalletConnectRefusal[];
+	// Whether the run hands the user's wallet to another program. A program can make that assignment
+	// inside its own call, where only the run shows it, and the review already has the run, so it is
+	// handed on for the same reason the simulated flag is.
+	reassignsWallet: boolean;
 };
 
 export const decode = async ({
@@ -466,6 +470,7 @@ export const sign = ({
 	simulated,
 	closesPayOthers,
 	acknowledgedRefusals,
+	reassignsWallet,
 	...params
 }: WalletConnectSignTransactionParams): Promise<ResultSuccess> =>
 	execute({
@@ -508,20 +513,34 @@ export const sign = ({
 				rpc: solanaHttpRpc(solNetwork)
 			});
 
-			const { amount, destination, ambiguous, unreviewed } = mapSolTransactionMessage({
+			const {
+				amount,
+				destination,
+				ambiguous: messageAmbiguous,
+				unreviewed,
+				reassignsWallet: messageReassignsWallet
+			} = mapSolTransactionMessage({
 				transactionMessage: parsedTransactionMessage,
 				userAddress: address
 			});
 
+			// The wallet itself handed to another program, whether the message states it or a program
+			// does it inside its own call. Refused as one the review cannot show.
+			const handsOverWallet = reassignsWallet || (messageReassignsWallet ?? false);
+			const ambiguous = (messageAmbiguous ?? false) || handsOverWallet;
+
 			// A site WalletConnect's domain verification flags is never signed past, whatever the review
 			// handed on: the review offers no way out for one, so no acknowledgement for it can be real.
-			const acknowledged = isWalletConnectDomainFlagged(request.verifyContext)
-				? []
-				: acknowledgedRefusals;
+			// Nor is a request handing over the wallet itself: no app needs that, and the wallet cannot
+			// pay a fee afterwards, so the review offers no way out for it either.
+			const acknowledged =
+				isWalletConnectDomainFlagged(request.verifyContext) || handsOverWallet
+					? []
+					: acknowledgedRefusals;
 
 			const refusals: SolWalletConnectRefusal[] = [
 				...(closesPayOthers ? (['close_pays_others'] as const) : []),
-				...((ambiguous ?? false) ? (['cannot_be_shown'] as const) : []),
+				...(ambiguous ? (['cannot_be_shown'] as const) : []),
 				...((unreviewed ?? false) && !simulated ? (['unreviewed_without_simulation'] as const) : [])
 			];
 
@@ -548,7 +567,7 @@ export const sign = ({
 			// When the message bundles instructions that disagree on those fields, that summary
 			// would hide part of the fund flow (e.g. a transfer to an attacker alongside a benign
 			// one). Refuse to sign anything we cannot display faithfully.
-			if ((ambiguous ?? false) && !acknowledged.includes('cannot_be_shown')) {
+			if (ambiguous && !acknowledged.includes('cannot_be_shown')) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.ambiguous_transaction }
 				});

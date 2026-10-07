@@ -85,6 +85,9 @@
 		// Whether WalletConnect's domain verification flagged the site. No way past a refusal is
 		// offered then, and the review does not point at the Settings switch either.
 		domainFlagged?: boolean;
+		// Whether the request hands the connected wallet itself to another program. Like a flagged site,
+		// no way past the refusal is offered, and the review does not point at the Settings switch.
+		reassignsWallet?: boolean;
 		// Whether the Settings switch was on when the review opened, so that a refusal can be signed
 		// past once the user acknowledges it, and whether they have.
 		uncheckedSigningOffered?: boolean;
@@ -117,6 +120,7 @@
 		closesPayOthers = false,
 		unreviewedWithoutSimulation = false,
 		domainFlagged = false,
+		reassignsWallet = false,
 		uncheckedSigningOffered = false,
 		uncheckedSigningAcknowledged = false,
 		approveDisabled = false,
@@ -335,7 +339,7 @@
 		<MessageBox level="info">{$i18n.wallet_connect.text.simulated_review}</MessageBox>
 	{/if}
 
-	{#if refused && !domainFlagged}
+	{#if refused && !domainFlagged && !reassignsWallet}
 		<WalletConnectUncheckedSigning
 			acknowledged={uncheckedSigningAcknowledged}
 			offered={uncheckedSigningOffered}

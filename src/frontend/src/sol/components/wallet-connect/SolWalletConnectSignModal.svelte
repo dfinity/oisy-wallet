@@ -50,6 +50,7 @@
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
 	import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
 	import type { SolWalletConnectRefusal } from '$sol/types/wallet-connect';
+	import { solSimulationReassignsWallet } from '$sol/utils/sol-simulation.utils';
 	import { solClosesPayOthers } from '$sol/utils/sol-transaction-summary.utils';
 	import { findSplToken } from '$sol/utils/spl.utils';
 
@@ -96,6 +97,9 @@
 	// is decoded and still cannot be stated. `sign()` refuses such a message, so the review says so
 	// and holds the button rather than letting the user press it and bounce.
 	let ambiguous = $state<boolean | undefined>();
+	// Set when the message hands the connected wallet itself to another program, which it also refuses
+	// as ambiguous.
+	let messageReassignsWallet = $state<boolean | undefined>();
 	let unreviewed = $state<boolean | undefined>();
 	let prioritizationFee = $state<bigint | undefined>();
 	let prioritizationFeeEstimate = $state<bigint | undefined>();
@@ -116,6 +120,13 @@
 	// is signed.
 	let closesPayOthers = $derived(
 		solClosesPayOthers({ instructions: instructions ?? [], userAddress: address })
+	);
+	// The wallet itself handed to another program, whether the message states it or a program does it
+	// inside its own call, where only the run shows it. Refused like an ambiguous message and never
+	// offered past: no app needs it, and the wallet cannot pay a fee afterwards.
+	let reassignsWallet = $derived(
+		(messageReassignsWallet ?? false) ||
+			solSimulationReassignsWallet({ preview, userAddress: address })
 	);
 
 	// Whether the run described the instructions nobody read, which neither the run happening nor the
@@ -154,7 +165,7 @@
 
 	let refusals = $derived<SolWalletConnectRefusal[]>([
 		...(closesPayOthers ? (['close_pays_others'] as const) : []),
-		...((ambiguous ?? false) ? (['cannot_be_shown'] as const) : []),
+		...((ambiguous ?? false) || reassignsWallet ? (['cannot_be_shown'] as const) : []),
 		...(unreviewedWithoutSimulation ? (['unreviewed_without_simulation'] as const) : [])
 	]);
 
@@ -170,7 +181,7 @@
 		now: Date.now()
 	});
 
-	let uncheckedSigningOffered = $derived(uncheckedSigningOn && !domainFlagged);
+	let uncheckedSigningOffered = $derived(uncheckedSigningOn && !domainFlagged && !reassignsWallet);
 
 	let uncheckedSigningAcknowledged = $state(false);
 
@@ -192,6 +203,7 @@
 		try {
 			({
 				ambiguous,
+				reassignsWallet: messageReassignsWallet,
 				destination,
 				tokenAddress,
 				isApproval,
@@ -310,7 +322,8 @@
 			identity: $authIdentity,
 			simulated,
 			closesPayOthers,
-			acknowledgedRefusals: uncheckedSigningOffered && uncheckedSigningAcknowledged ? refusals : []
+			acknowledgedRefusals: uncheckedSigningOffered && uncheckedSigningAcknowledged ? refusals : [],
+			reassignsWallet
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
@@ -336,7 +349,7 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<SolWalletConnectSignReview
-				ambiguous={ambiguous ?? false}
+				ambiguous={(ambiguous ?? false) || reassignsWallet}
 				{application}
 				{approveDisabled}
 				{closesPayOthers}
@@ -357,6 +370,7 @@
 				{preview}
 				{prioritizationFee}
 				{prioritizationFeeEstimate}
+				{reassignsWallet}
 				simulatedInstructions={simulatedInstructions ?? false}
 				source={address ?? ''}
 				token={reviewToken}

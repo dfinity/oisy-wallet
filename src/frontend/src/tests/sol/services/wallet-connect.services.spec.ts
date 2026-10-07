@@ -550,7 +550,8 @@ describe('wallet-connect.services', () => {
 			listener: mockListener,
 			simulated: true,
 			closesPayOthers: false,
-			acknowledgedRefusals: []
+			acknowledgedRefusals: [],
+			reassignsWallet: false
 		};
 
 		describe(`with method ${SESSION_REQUEST_SOL_SIGN_TRANSACTION}`, () => {
@@ -572,7 +573,8 @@ describe('wallet-connect.services', () => {
 				listener: mockListener,
 				simulated: true,
 				closesPayOthers: false,
-				acknowledgedRefusals: []
+				acknowledgedRefusals: [],
+				reassignsWallet: false
 			};
 
 			const expected = {
@@ -712,7 +714,8 @@ describe('wallet-connect.services', () => {
 				listener: mockListener,
 				simulated: true,
 				closesPayOthers: false,
-				acknowledgedRefusals: []
+				acknowledgedRefusals: [],
+				reassignsWallet: false
 			};
 
 			it('should show an error if the address is nullish', async () => {
@@ -1216,6 +1219,43 @@ describe('wallet-connect.services', () => {
 					msg: { text: en.wallet_connect.error.ambiguous_transaction }
 				});
 				expect(executeSign).not.toHaveBeenCalled();
+			});
+
+			// The wallet itself handed to another program is never signed past: no app needs it.
+			it('should refuse handing over the wallet the message states, acknowledged or not', async () => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					...mockMappedTransaction,
+					ambiguous: true,
+					reassignsWallet: true
+				});
+
+				const result = await sign({ ...mockParams, acknowledgedRefusals: ['cannot_be_shown'] });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.ambiguous_transaction }
+				});
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+				expect(trackWalletConnectUncheckedSigning).not.toHaveBeenCalled();
+			});
+
+			it('should refuse handing over the wallet the run shows, acknowledged or not', async () => {
+				const result = await sign({
+					...mockParams,
+					reassignsWallet: true,
+					acknowledgedRefusals: ['cannot_be_shown']
+				});
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.ambiguous_transaction }
+				});
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+				expect(trackWalletConnectUncheckedSigning).not.toHaveBeenCalled();
 			});
 
 			it('should not count a request that needed no acknowledgement', async () => {

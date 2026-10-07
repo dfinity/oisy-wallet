@@ -1122,6 +1122,16 @@ describe('SolWalletConnectSignReview', () => {
 			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).not.toBeInTheDocument();
 		});
 
+		it('should offer nothing, not even the switch, for a request handing over the wallet', () => {
+			const { getByText, queryByTestId } = render(SolWalletConnectSignReview, {
+				props: { ...props, ambiguous: true, reassignsWallet: true }
+			});
+
+			expect(getByText(en.wallet_connect.text.cannot_be_shown)).toBeInTheDocument();
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_POINTER)).not.toBeInTheDocument();
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).not.toBeInTheDocument();
+		});
+
 		it('should state the reason without refusing, and ask for the acknowledgement, with the switch on', () => {
 			const { getByRole, getByTestId, queryByText } = render(SolWalletConnectSignReview, {
 				props: { ...props, ambiguous: true, uncheckedSigningOffered: true }

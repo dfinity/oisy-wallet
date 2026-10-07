@@ -5,6 +5,7 @@ import {
 	WALLET_CONNECT_UNCHECKED_SIGNING_POINTER
 } from '$lib/constants/test-ids.constants';
 import * as walletConnectServices from '$lib/services/wallet-connect.services';
+import { solAddressMainnetStore } from '$lib/stores/address.store';
 import { walletConnectUncheckedSigningStore } from '$lib/stores/wallet-connect-unchecked-signing.store';
 import SolWalletConnectSignMessageModal from '$sol/components/wallet-connect/SolWalletConnectSignMessageModal.svelte';
 import SolWalletConnectSignModal from '$sol/components/wallet-connect/SolWalletConnectSignModal.svelte';
@@ -15,6 +16,7 @@ import {
 } from '$sol/constants/wallet-connect.constants';
 import { decode, sign } from '$sol/services/wallet-connect.services';
 import en from '$tests/mocks/i18n.mock';
+import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
@@ -335,6 +337,54 @@ describe('SolWalletConnectSignModal', () => {
 			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).not.toBeInTheDocument();
 			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_POINTER)).not.toBeInTheDocument();
 			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		// The wallet itself handed to another program is never signed past: no app needs it.
+		it('should offer no way past handing over the wallet the message states, with the switch on', async () => {
+			walletConnectUncheckedSigningStore.enable();
+
+			vi.mocked(decode).mockResolvedValueOnce({ ...refused, reassignsWallet: true });
+
+			const { getByRole, getByText, queryByTestId } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			await waitFor(() => {
+				expect(getByText(en.wallet_connect.text.cannot_be_shown)).toBeInTheDocument();
+			});
+
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).not.toBeInTheDocument();
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_POINTER)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should offer no way past a run handing over the wallet, with the switch on', async () => {
+			solAddressMainnetStore.set({ data: mockSolAddress, certified: true });
+			walletConnectUncheckedSigningStore.enable();
+
+			vi.mocked(decode).mockResolvedValueOnce({
+				amount: 1n,
+				preview: {
+					solDelta: -5_000n,
+					tokenDeltas: [],
+					controlChanges: [{ account: mockSolAddress, field: 'program', to: mockSolAddress2 }]
+				},
+				parties: { sources: [], destinations: [], partial: false }
+			});
+
+			const { getByRole, getByText, queryByTestId } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			await waitFor(() => {
+				expect(getByText(en.wallet_connect.text.cannot_be_shown)).toBeInTheDocument();
+			});
+
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).not.toBeInTheDocument();
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_POINTER)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+
+			solAddressMainnetStore.reset();
 		});
 
 		it('should refuse on the review an instruction nobody read and no run described', async () => {
