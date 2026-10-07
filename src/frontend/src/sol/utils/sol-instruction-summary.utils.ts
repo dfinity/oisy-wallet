@@ -1307,7 +1307,10 @@ const groupUnread = ({
  * the list leaves an over-funded one out rather than call it rent - which refuses the request only
  * while nothing else in that instruction has a line. Anything above the rent is a balance in an
  * account the program controls, a payment with no destination, wherever the account is opened.
- * Without the chain's reserve there is no line to hold the run to, and it is not judged on this.
+ *
+ * An account the System program owns counts whatever it is funded with: nothing governs its lamports
+ * but the key it is opened at, so none of them is rent, as when the message opens one itself. For
+ * any other owner the line is the chain's reserve, and without it the opening is not judged on this.
  */
 export const solOpensAccountBeyondRent = ({
 	innerInstructions,
@@ -1316,7 +1319,6 @@ export const solOpensAccountBeyondRent = ({
 	innerInstructions: SolInstructionGroup[];
 	rentExemptMinimum: bigint | undefined;
 }): boolean =>
-	nonNullish(rentExemptMinimum) &&
 	innerInstructions.some(({ instructions }) =>
 		instructions.some((instruction) => {
 			if (!isParsed(instruction)) {
@@ -1333,14 +1335,19 @@ export const solOpensAccountBeyondRent = ({
 			}
 
 			const owner = address({ info, key: 'owner' });
+
+			if (owner === SYSTEM_PROGRAM_ADDRESS) {
+				return true;
+			}
+
 			const lamports = amount({ info, key: 'lamports' });
 			const space = amount({ info, key: 'space' });
 
 			return (
 				nonNullish(owner) &&
-				owner !== SYSTEM_PROGRAM_ADDRESS &&
 				nonNullish(lamports) &&
 				nonNullish(space) &&
+				nonNullish(rentExemptMinimum) &&
 				lamports > rentExemptMinimumFor({ space, rentExemptMinimum })
 			);
 		})

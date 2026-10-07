@@ -3111,6 +3111,34 @@ describe('sol-instruction-summary.utils', () => {
 			).toBeFalsy();
 		});
 
+		// Nothing governs a System-owned account's lamports but its key, so none of them is rent.
+		it('should flag a System-owned opening whatever its funding', () => {
+			expect(
+				solOpensAccountBeyondRent({
+					innerInstructions: opening({
+						lamports: 650_240n,
+						space: ZERO,
+						owner: '11111111111111111111111111111111'
+					}),
+					rentExemptMinimum
+				})
+			).toBeTruthy();
+		});
+
+		it("should flag a System-owned seed-derived opening without the chain's reserve", () => {
+			expect(
+				solOpensAccountBeyondRent({
+					innerInstructions: opening({
+						type: 'createAccountWithSeed',
+						lamports: 650_240n,
+						space: ZERO,
+						owner: '11111111111111111111111111111111'
+					}),
+					rentExemptMinimum: undefined
+				})
+			).toBeTruthy();
+		});
+
 		it('should not judge the Meteora DLMM position, opened with exactly its rent', () => {
 			expect(
 				solOpensAccountBeyondRent({
