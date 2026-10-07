@@ -1811,10 +1811,10 @@ describe('sol-instructions.utils', () => {
 				});
 			});
 
-			it('should leave an unwrap that pays the user unread', () => {
+			it('should state nothing for an unwrap that pays the user', () => {
 				expect(
 					mapSolInstruction({ instruction: unwrapTo(mockSolAddress), userAddress: mockSolAddress })
-				).toStrictEqual({ amount: undefined, unreviewed: true });
+				).toStrictEqual({ amount: undefined });
 			});
 
 			it('should fail closed on a Token-2022 unwrap that pays somebody else', () => {
@@ -1831,7 +1831,7 @@ describe('sol-instructions.utils', () => {
 				});
 			});
 
-			it('should leave a Token-2022 unwrap that pays the user unread', () => {
+			it('should state nothing for a Token-2022 unwrap that pays the user', () => {
 				const instruction = getToken2022UnwrapLamportsInstruction({
 					source: address(mockSolAddress3),
 					destination: address(mockSolAddress),
@@ -1840,8 +1840,7 @@ describe('sol-instructions.utils', () => {
 				});
 
 				expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
-					amount: undefined,
-					unreviewed: true
+					amount: undefined
 				});
 			});
 		});

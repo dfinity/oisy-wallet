@@ -628,6 +628,32 @@ const toEffect = ({
 			});
 		}
 
+		// Unwrapping pays lamports out of a wrapped SOL account to the destination it names, which
+		// leaves the account open and moves its wrapped SOL like a transfer does. An amount left
+		// unstated is everything the account wraps, as it stands at this instruction.
+		if (type === 'unwrapLamports') {
+			const source = address({ info, key: 'source' });
+			const stated = amount({ info, key: 'amount' });
+
+			const wrapped =
+				isNullish(stated) && nonNullish(source)
+					? heldAtInstruction({
+							account: source,
+							native: true,
+							flattened,
+							accountTokenAmounts,
+							rentExemptMinimum,
+							until: position
+						})
+					: undefined;
+
+			return transferEffect({
+				info: nonNullish(wrapped) ? { ...info, amount: wrapped } : info,
+				isOwned,
+				mintOf: (account) => mintAt({ account, position })
+			});
+		}
+
 		if (type === 'closeAccount') {
 			const account = address({ info, key: 'account' });
 			const owner = address({ info, key: 'owner' });
@@ -906,6 +932,23 @@ const heldAtInstruction = ({
 				return nonNullish(wrapping) && address({ info, key: 'destination' }) === account
 					? acc + wrapping
 					: acc;
+			}
+
+			// Unwrapping takes lamports out of a wrapped SOL account, whose token balance they are: the
+			// amount it states, or everything the account wraps.
+			if (
+				native &&
+				nonNullish(program) &&
+				TOKEN_PROGRAMS.includes(program) &&
+				type === 'unwrapLamports'
+			) {
+				if (address({ info, key: 'source' }) !== account) {
+					return acc;
+				}
+
+				const unwrapped = amount({ info, key: 'amount' });
+
+				return nonNullish(unwrapped) ? maxBigInt(acc - unwrapped, ZERO) : ZERO;
 			}
 
 			if (
@@ -1199,6 +1242,37 @@ const closePayouts = ({
 
 				if (nonNullish(source) && mintAt({ account: source, position }) === WSOL_TOKEN.address) {
 					lamports.set(source, maxBigInt((held(source) ?? ZERO) - moved, ZERO));
+				}
+
+				return;
+			}
+
+			// Unwrapping moves lamports out of a wrapped SOL account and leaves it open. An amount left
+			// unstated is what it wraps, which this walk does not know apart from its rent: both ends
+			// then hold an amount nobody can state, rather than one this walk made up.
+			if (nonNullish(program) && TOKEN_PROGRAMS.includes(program) && type === 'unwrapLamports') {
+				const source = address({ info, key: 'source' });
+				const destination = address({ info, key: 'destination' });
+				const moved = amount({ info, key: 'amount' });
+
+				if (isNullish(source) || source === destination) {
+					return;
+				}
+
+				if (isNullish(moved)) {
+					lamports.set(source, undefined);
+
+					if (nonNullish(destination)) {
+						lamports.set(destination, undefined);
+					}
+
+					return;
+				}
+
+				lamports.set(source, maxBigInt((held(source) ?? ZERO) - moved, ZERO));
+
+				if (nonNullish(destination)) {
+					add({ account: destination, value: moved });
 				}
 
 				return;

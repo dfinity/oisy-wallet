@@ -3046,6 +3046,87 @@ describe('sol-instruction-summary.utils', () => {
 			});
 		});
 
+		describe('an unwrap', () => {
+			const TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+			const wrapped = mockAtaAddress2;
+
+			const unwrap = (amount?: string) => ({
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'unwrapLamports',
+					info: {
+						source: wrapped,
+						destination: mockSolAddress2,
+						authority: mockSolAddress,
+						...(amount !== undefined && { amount })
+					}
+				}
+			});
+
+			const read = ({
+				instructions,
+				accountLamports,
+				accountTokenAmounts
+			}: {
+				instructions: unknown[];
+				accountLamports?: Record<string, bigint>;
+				accountTokenAmounts?: Record<string, bigint>;
+			}) =>
+				mapSolInstructionSummaries({
+					instructions,
+					ownedAddresses: [mockSolAddress, wrapped],
+					userAddress: mockSolAddress,
+					addressToToken: { [wrapped]: WSOL_TOKEN.address },
+					accountLamports,
+					accountTokenAmounts
+				});
+
+			it('should state the wrapped SOL leaving the account for its destination', () => {
+				expect(read({ instructions: [unwrap('5000')] })).toStrictEqual([
+					{
+						kind: 'send',
+						amount: 5_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						counterparty: mockSolAddress2,
+						own: false
+					}
+				]);
+			});
+
+			it('should state everything the account wraps when it names no amount', () => {
+				const [line] = read({
+					instructions: [unwrap()],
+					accountTokenAmounts: { [wrapped]: 7_000n }
+				});
+
+				expect(line.amount).toBe(7_000n);
+			});
+
+			it('should have a later close of the account hand back what the unwrap left', () => {
+				const views = read({
+					instructions: [
+						unwrap('5000'),
+						{
+							program: 'spl-token',
+							programId: TOKEN,
+							parsed: {
+								type: 'closeAccount',
+								info: { account: wrapped, destination: mockSolAddress, owner: mockSolAddress }
+							}
+						}
+					],
+					accountLamports: { [wrapped]: 2_046_280n },
+					accountTokenAmounts: { [wrapped]: 7_000n }
+				});
+
+				const close = views.find(({ kind }) => kind === 'unwrap');
+
+				expect(close?.returned).toBe(2_041_280n);
+				expect(close?.wrapped).toBe(2_000n);
+			});
+		});
+
 		describe('instructions it cannot read', () => {
 			it('should ignore an instruction the RPC did not parse', () => {
 				expect(

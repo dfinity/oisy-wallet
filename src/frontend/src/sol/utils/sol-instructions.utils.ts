@@ -744,8 +744,8 @@ const mapSolTokenInstruction = ({
 	}
 
 	// Unwrapping pays lamports out of a wrapped SOL account to the destination the instruction names,
-	// which is the question a close answers too, and it is refused on the same terms when the answer
-	// is not the user's wallet. Paid to the wallet it stays an instruction the review does not read.
+	// which is the question a close answers too, and it is read on the same terms: paid to the
+	// user's wallet it states nothing the summary needs to carry, paid anywhere else it is refused.
 	if (instructionType === TokenInstruction.UnwrapLamports) {
 		const {
 			accounts: {
@@ -753,9 +753,7 @@ const mapSolTokenInstruction = ({
 			}
 		} = instruction;
 
-		if (destination !== userAddress) {
-			return unfaithfulInstruction();
-		}
+		return destination === userAddress ? ignoredInstruction() : unfaithfulInstruction();
 	}
 
 	if (
@@ -870,9 +868,7 @@ const mapSolToken2022Instruction = ({
 			}
 		} = instruction;
 
-		if (destination !== userAddress) {
-			return unfaithfulInstruction();
-		}
+		return destination === userAddress ? ignoredInstruction() : unfaithfulInstruction();
 	}
 
 	if (
