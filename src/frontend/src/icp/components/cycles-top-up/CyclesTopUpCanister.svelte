@@ -122,7 +122,15 @@
 		</div>
 	{/if}
 
-	<CyclesTopUpRecentCanisters onSelect={(selected) => (canisterIdText = selected)} {token} />
+	<!-- As in the send flow, picking a canister goes on, after the same check as Next. -->
+	<CyclesTopUpRecentCanisters
+		onSelect={async (selected) => {
+			canisterIdText = selected;
+
+			await next();
+		}}
+		{token}
+	/>
 
 	{#snippet toolbar()}
 		<ButtonGroup>
