@@ -1,6 +1,17 @@
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import { getRecentlyToppedUpCanisters, parseCanisterId } from '$icp/utils/cycles-top-up.utils';
-import { mockAccountIdentifierText, mockPrincipalText } from '$tests/mocks/identity.mock';
+import {
+	getRecentlyToppedUpCanisters,
+	isCanisterAccount,
+	isCanisterId,
+	parseCanisterId
+} from '$icp/utils/cycles-top-up.utils';
+import {
+	mockAccountIdentifierText,
+	mockPrincipal,
+	mockPrincipalText
+} from '$tests/mocks/identity.mock';
+import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
+import { Principal } from '@icp-sdk/core/principal';
 
 describe('cycles-top-up.utils', () => {
 	const canister = 'ywcsb-maaaa-aaaai-q6k7a-cai';
@@ -26,6 +37,37 @@ describe('cycles-top-up.utils', () => {
 			{ name: 'empty text', text: '' }
 		])('should refuse $name', ({ text }) => {
 			expect(parseCanisterId(text)).toBeUndefined();
+		});
+	});
+
+	describe('isCanisterId', () => {
+		it('should recognise a canister ID', () => {
+			expect(isCanisterId(Principal.fromText(canister))).toBeTruthy();
+		});
+
+		it('should not recognise a user principal or the anonymous principal', () => {
+			expect(isCanisterId(mockPrincipal)).toBeFalsy();
+			expect(isCanisterId(Principal.anonymous())).toBeFalsy();
+		});
+	});
+
+	describe('isCanisterAccount', () => {
+		it('should recognise a canister account, with or without a subaccount', () => {
+			expect(isCanisterAccount(canister)).toBeTruthy();
+			expect(
+				isCanisterAccount(
+					encodeIcrcAccount({
+						owner: Principal.fromText(canister),
+						subaccount: new Uint8Array(32).fill(1)
+					})
+				)
+			).toBeTruthy();
+		});
+
+		it('should not recognise a user account, an ICP account identifier or other text', () => {
+			expect(isCanisterAccount(mockPrincipalText)).toBeFalsy();
+			expect(isCanisterAccount(mockAccountIdentifierText)).toBeFalsy();
+			expect(isCanisterAccount('not an account')).toBeFalsy();
 		});
 	});
 

@@ -5,6 +5,7 @@ import { SOLANA_DEVNET_TOKEN } from '$env/tokens/tokens.sol.env';
 import { XRP_TOKEN, XRP_TOKEN_ID } from '$env/tokens/tokens.xrp.env';
 import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
 import {
+	CYCLES_SENT_TO_CANISTER_WARNING,
 	DESTINATION_INPUT,
 	SEND_DESTINATION_WIZARD_CONTACT,
 	SEND_DESTINATION_WIZARD_STEP,
@@ -26,9 +27,11 @@ import {
 	mockBackendContactAddressEth,
 	mockBackendContactAddressXrp
 } from '$tests/mocks/contacts.mock';
+import { mockTcyclesToken } from '$tests/mocks/cycles-mint.mock';
 import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockXrpAddress, mockXrpAddress2 } from '$tests/mocks/xrp.mock';
 import {
 	xrpTransactionsStore,
@@ -133,6 +136,24 @@ describe('SendDestinationWizardStep', () => {
 		expect(
 			getByTestId(`${SEND_DESTINATION_WIZARD_STEP}-${mockValidIcCkToken.network.name}`)
 		).toBeInTheDocument();
+	});
+
+	it('should warn about TCYCLES sent to a canister', () => {
+		const { getByTestId } = render(SendDestinationWizardStep, {
+			props: { ...props, destination: 'ywcsb-maaaa-aaaai-q6k7a-cai' },
+			context: mockContext(mockTcyclesToken)
+		});
+
+		expect(getByTestId(CYCLES_SENT_TO_CANISTER_WARNING)).toBeInTheDocument();
+	});
+
+	it('should not warn about TCYCLES sent to a user', () => {
+		const { queryByTestId } = render(SendDestinationWizardStep, {
+			props: { ...props, destination: mockPrincipalText },
+			context: mockContext(mockTcyclesToken)
+		});
+
+		expect(queryByTestId(CYCLES_SENT_TO_CANISTER_WARNING)).toBeNull();
 	});
 
 	it('should display SOL send destination components if sendToken network is SOL', () => {

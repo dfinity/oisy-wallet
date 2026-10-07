@@ -1,11 +1,18 @@
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { ZERO } from '$lib/constants/app.constants';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { decodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 
 // The class byte that ends an opaque principal, the kind every canister ID is. User
 // principals, the anonymous principal and the management canister's empty ID end otherwise.
 const OPAQUE_PRINCIPAL_CLASS = 0x01;
+
+export const isCanisterId = (principal: Principal): boolean => {
+	const bytes = principal.toUint8Array();
+
+	return bytes.length > 0 && bytes[bytes.length - 1] === OPAQUE_PRINCIPAL_CLASS;
+};
 
 /**
  * The canister ID a text names, or `undefined` for anything else: text that is not a
@@ -21,11 +28,19 @@ export const parseCanisterId = (text: string): Principal | undefined => {
 		return undefined;
 	}
 
-	const bytes = principal.toUint8Array();
+	return isCanisterId(principal) ? principal : undefined;
+};
 
-	return bytes.length > 0 && bytes[bytes.length - 1] === OPAQUE_PRINCIPAL_CLASS
-		? principal
-		: undefined;
+/**
+ * Whether an ICRC account, given as text, belongs to a canister, with or without a
+ * subaccount.
+ */
+export const isCanisterAccount = (text: string): boolean => {
+	try {
+		return isCanisterId(decodeIcrcAccount(text.trim()).owner);
+	} catch (_: unknown) {
+		return false;
+	}
 };
 
 export interface RecentlyToppedUpCanister {

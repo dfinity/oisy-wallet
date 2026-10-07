@@ -314,6 +314,7 @@ export const CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON = 'cycles-top-up-amount-next-butto
 export const CYCLES_TOP_UP_REVIEW = 'cycles-top-up-review';
 export const CYCLES_TOP_UP_REVIEW_BACK_BUTTON = 'cycles-top-up-review-back-button';
 export const CYCLES_TOP_UP_REVIEW_TOP_UP_BUTTON = 'cycles-top-up-review-top-up-button';
+export const CYCLES_SENT_TO_CANISTER_WARNING = 'cycles-sent-to-canister-warning';
 
 export const HELP_AUTH_IMAGE_BANNER = 'help-auth-image-banner';
 export const HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON = 'help-auth-new-identity-version-button';
