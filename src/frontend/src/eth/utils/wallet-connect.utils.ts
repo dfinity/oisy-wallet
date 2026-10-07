@@ -1,12 +1,15 @@
 import { EIP155_CHAINS } from '$env/eip155-chains.env';
 import { SESSION_REQUEST_ETH_SIGN_TYPED_DATA_METHODS } from '$eth/constants/wallet-connect.constants';
+import type { OptionEthAddress } from '$eth/types/address';
 import type {
 	WalletConnectEthCall,
 	WalletConnectEthSignTypedDataV4,
 	WalletConnectEthTypedDataApproval
 } from '$eth/types/wallet-connect';
 import { isEthAddress } from '$eth/utils/account.utils';
+import { isDestinationContractAddress } from '$eth/utils/send.utils';
 import {
+	decodeCkEthDepositPrincipal,
 	getCalldataSelector,
 	hasCalldata,
 	isErc20TransactionApprove,
@@ -19,6 +22,7 @@ import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
 import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
 import { consoleError } from '$lib/utils/console.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
 import type { Verify } from '@walletconnect/types';
 import { TypedDataEncoder, type TypedDataDomain, type TypedDataField } from 'ethers/hash';
 import { isHexString, toUtf8String } from 'ethers/utils';
@@ -89,6 +93,89 @@ export const classifyWalletConnectEthCall = (data: string | undefined): WalletCo
 	}
 
 	return { type: 'unknown', selector: getCalldataSelector(data) };
+};
+
+/**
+ * Thrown when an `eth_sendTransaction` request addressed to the ckETH helper contract carries
+ * calldata other than a deposit to the principal of the user signing it.
+ */
+export class WalletConnectEthCkEthDepositError extends Error {}
+
+interface WalletConnectEthCkEthDepositParams {
+	to: string | undefined;
+	data: string | undefined;
+	ckEthHelperContractAddress: OptionEthAddress;
+	principal: Principal | undefined;
+}
+
+/**
+ * The principal a request addressed to the ckETH helper contract converts ETH for.
+ *
+ * The helper contract mints ckETH to whichever principal its `deposit(bytes32)` call names, and the
+ * review presents such a request as a conversion to the Internet Computer. OISY therefore signs one
+ * only for the principal of the user approving it. Anything else addressed to the helper throws: a
+ * deposit to another principal, calldata that is not a deposit OISY can decode, or a deposit with
+ * no signed-in user to hold it to.
+ *
+ * `undefined` for a request addressed elsewhere, and for one to the helper that carries no calldata,
+ * which OISY populates as a deposit to the user's own principal itself.
+ *
+ * The helper is matched however its address is cased, since casing is not part of the address the
+ * transaction goes to. Checked here rather than in the review alone, so that the gate and the signer
+ * cannot disagree: both reach the request through this function.
+ */
+export const getWalletConnectEthCkEthDeposit = ({
+	to,
+	data,
+	ckEthHelperContractAddress,
+	principal
+}: WalletConnectEthCkEthDepositParams): Principal | undefined => {
+	if (
+		!hasCalldata(data) ||
+		!isDestinationContractAddress({ destination: to, contractAddress: ckEthHelperContractAddress })
+	) {
+		return;
+	}
+
+	const deposited = decodeCkEthDepositPrincipal(data);
+
+	if (isNullish(deposited)) {
+		throw new WalletConnectEthCkEthDepositError(
+			'The request calls the ckETH helper contract with calldata that is not a deposit OISY can decode.'
+		);
+	}
+
+	if (isNullish(principal) || deposited.toText() !== principal.toText()) {
+		throw new WalletConnectEthCkEthDepositError(
+			`The request deposits to principal ${deposited.toText()}, which is not the principal of the signed-in user.`
+		);
+	}
+
+	return deposited;
+};
+
+/**
+ * What an `eth_sendTransaction` request is, read from where it goes as well as from its calldata.
+ *
+ * A `deposit(bytes32)` means something only at the ckETH helper contract, so the destination is
+ * what decides whether it is a conversion. Everything else is classified by its calldata alone, see
+ * {@link classifyWalletConnectEthCall}.
+ */
+export const classifyWalletConnectEthSendTransaction = ({
+	data,
+	...rest
+}: WalletConnectEthCkEthDepositParams): WalletConnectEthCall => {
+	try {
+		const principal = getWalletConnectEthCkEthDeposit({ data, ...rest });
+
+		if (nonNullish(principal)) {
+			return { type: 'ckEthDeposit', principal };
+		}
+	} catch (_: unknown) {
+		return { type: 'ckEthDepositRefused' };
+	}
+
+	return classifyWalletConnectEthCall(data);
 };
 
 /**
