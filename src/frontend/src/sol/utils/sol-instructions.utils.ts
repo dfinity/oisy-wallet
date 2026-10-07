@@ -442,7 +442,13 @@ const solRentExemptLamports = (space: bigint): bigint =>
 const fundsBeyondRent = ({ lamports, space }: { lamports: bigint; space: bigint }): boolean =>
 	lamports > solRentExemptLamports(space);
 
-const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+const mapSolSystemInstruction = ({
+	instruction,
+	userAddress
+}: {
+	instruction: SolParsedInstruction;
+	userAddress?: OptionSolAddress;
+}): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
 	if (instructionType === SystemInstruction.CreateAccount) {
@@ -534,6 +540,16 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 	// length and nothing else, so there is no amount, source or destination for the summary to
 	// carry, and the account it sizes is its only meta and a required signer, so a message can name
 	// the connected wallet here as well.
+	//
+	// A plain `Assign` naming the connected wallet hands over the wallet itself, which no
+	// acknowledgement signs past, so it says so on top of being refused.
+	if (
+		instructionType === SystemInstruction.Assign &&
+		instruction.accounts.account.address === userAddress
+	) {
+		return { ...unfaithfulInstruction(), reassignsWallet: true };
+	}
+
 	if (
 		instructionType === SystemInstruction.Assign ||
 		instructionType === SystemInstruction.AssignWithSeed ||
@@ -1235,7 +1251,7 @@ export const mapSolInstruction = ({
 	const { programAddress } = parsedInstruction;
 
 	if (programAddress === SYSTEM_PROGRAM_ADDRESS) {
-		return mapSolSystemInstruction(parsedInstruction);
+		return mapSolSystemInstruction({ instruction: parsedInstruction, userAddress });
 	}
 
 	if (programAddress === TOKEN_PROGRAM_ADDRESS) {

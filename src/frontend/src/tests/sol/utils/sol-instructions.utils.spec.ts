@@ -1180,6 +1180,33 @@ describe('sol-instructions.utils', () => {
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
+		// Handing over the wallet itself is the one assignment no acknowledgement signs past, so the
+		// mapper says which account it names.
+		it('should mark an `Assign` naming the connected wallet as handing it over', () => {
+			const instruction = getAssignInstruction({
+				account: createNoopSigner(address(mockSolAddress)),
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+				amount: undefined,
+				ambiguous: true,
+				reassignsWallet: true
+			});
+		});
+
+		it('should not mark an `Assign` of another account as handing over the wallet', () => {
+			const instruction = getAssignInstruction({
+				account: createNoopSigner(address(mockSolAddress2)),
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+		});
+
 		it('should fail closed on an `AssignWithSeed` instruction', () => {
 			const instruction = getAssignWithSeedInstruction({
 				account: address(mockSolAddress2),

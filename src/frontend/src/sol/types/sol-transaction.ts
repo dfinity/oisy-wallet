@@ -125,6 +125,10 @@ export interface MappedSolTransaction {
 	// so such a transaction cannot be faithfully represented on the review screen and
 	// must not be signed without the user seeing every fund movement.
 	ambiguous?: boolean;
+	// `true` when the message hands the connected wallet itself to another program. It sets
+	// `ambiguous` too, and is kept apart because no acknowledgement signs past it: no app needs the
+	// wallet handed over, and the wallet cannot pay a fee afterwards.
+	reassignsWallet?: boolean;
 }
 
 export interface SolMappedTransaction {
