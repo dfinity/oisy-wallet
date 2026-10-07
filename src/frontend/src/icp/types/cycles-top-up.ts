@@ -16,6 +16,16 @@ export type CyclesTopUpResult =
 	| { status: 'unknown' };
 
 /**
+ * A top-up as sent to the ledger. Sent again unchanged, creation time included, it runs at
+ * most once.
+ */
+export interface CyclesTopUpRequest {
+	canisterId: string;
+	amount: bigint;
+	createdAt: bigint;
+}
+
+/**
  * Whether a canister exists. `unknown` means the check could not be made.
  */
 export type CanisterExistence = 'exists' | 'not_found' | 'unknown';

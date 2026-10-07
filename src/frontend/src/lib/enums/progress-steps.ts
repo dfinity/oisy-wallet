@@ -214,3 +214,10 @@ export enum ProgressStepsCyclesMint {
 	MINT = 'mint',
 	DONE = 'done'
 }
+
+// Topping up a canister: one cycles-ledger call.
+export enum ProgressStepsCyclesTopUp {
+	INITIALIZATION = 'initialization',
+	TOP_UP = 'top_up',
+	DONE = 'done'
+}

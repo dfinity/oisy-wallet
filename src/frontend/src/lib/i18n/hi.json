@@ -1184,6 +1184,35 @@
 			"unconfirmed": "$token ट्रांसफ़र की पुष्टि नहीं हो सकी। अगर यह हो गया है, तो मिंट बैकग्राउंड में पूरा होगा: इसे सक्रिय लेनदेन में देखें।"
 		}
 	},
+	"cycles_top_up": {
+		"text": {
+			"top_up": "",
+			"title": "",
+			"description": "",
+			"canister_id_placeholder": "",
+			"checking_canister": "",
+			"recently_topped_up": "",
+			"canister": "",
+			"you_top_up": "",
+			"total": "",
+			"one_way": "",
+			"topping_up": "",
+			"topped_up": "",
+			"unknown": "",
+			"unknown_fresh": ""
+		},
+		"error": {
+			"invalid_canister_id": "",
+			"canister_not_found": "",
+			"canister_check_failed": "",
+			"amount_too_small": "",
+			"refused": "",
+			"insufficient_funds": "",
+			"clock": "",
+			"refunded": "",
+			"refunded_nothing": ""
+		}
+	},
 	"active_user_transactions": {
 		"text": {
 			"button_label": "",
