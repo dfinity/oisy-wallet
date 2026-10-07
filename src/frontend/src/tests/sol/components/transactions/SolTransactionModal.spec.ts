@@ -3,7 +3,10 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
+import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
+import { SolanaNetworks } from '$sol/types/network';
 import en from '$tests/mocks/i18n.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress2, mockSolAddress3, mockSplAddress } from '$tests/mocks/sol.mock';
@@ -334,5 +337,63 @@ describe('SolTransactionModal', () => {
 				`Swap ${en.transaction.text.unknown_token} 1 to ${en.transaction.text.unknown_token} 2`
 			)
 		).toBeInTheDocument();
+	});
+
+	describe('a swap into a token the wallet does not list', () => {
+		const transaction = {
+			...mockSolTransactionUi,
+			summary: {
+				kind: 'swap' as const,
+				spent: { delta: -1_000_000_000n },
+				received: { delta: 2_500_000n, tokenAddress: 'unlisted-mint', decimals: 6 }
+			},
+			netChanges: [
+				{ delta: -1_000_000_000n },
+				{ delta: 2_500_000n, tokenAddress: 'unlisted-mint', decimals: 6 }
+			]
+		};
+
+		const named = replacePlaceholders(en.transaction.text.unknown_token_named, {
+			$symbol: 'PING'
+		});
+
+		beforeEach(() => {
+			splTokenMetadataStore.set({
+				network: SolanaNetworks.mainnet,
+				metadata: { 'unlisted-mint': { name: 'Ping', symbol: 'PING' } }
+			});
+		});
+
+		afterEach(() => {
+			splTokenMetadataStore.reset();
+		});
+
+		// The symbol a mint carries is its creator's choice, so the sentence and the figures keep it
+		// inside the placeholder, where it cannot read as a token the wallet lists.
+		it('should name the mint by the placeholder carrying its own symbol in the hero', () => {
+			const { getByText } = render(SolTransactionModal, {
+				props: { transaction, token: SOLANA_TOKEN }
+			});
+
+			expect(
+				getByText(
+					replacePlaceholders(en.transaction.text.summary_swap, {
+						$spent_symbol: SOLANA_TOKEN.symbol,
+						$received_symbol: named
+					})
+				)
+			).toBeInTheDocument();
+			expect(getByText(`1 SOL → 2.5 ${named}`)).toBeInTheDocument();
+		});
+
+		it('should name the mint the same way on the balance changes tab', async () => {
+			const { getByText } = render(SolTransactionModal, {
+				props: { transaction, token: SOLANA_TOKEN }
+			});
+
+			await fireEvent.click(getByText(en.transaction.text.tab_balance_changes));
+
+			expect(getByText(`+2.5 ${named}`)).toBeInTheDocument();
+		});
 	});
 });
