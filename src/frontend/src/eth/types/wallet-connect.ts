@@ -61,3 +61,7 @@ export interface WalletConnectEthTypedDataApproval {
 	unlimited?: boolean;
 	expiration?: number;
 }
+
+// Why OISY refuses an `eth_sendTransaction` it could sign but cannot show faithfully. The Settings
+// switch lets the user sign past each of these once they acknowledge it on the review.
+export type EthWalletConnectRefusal = 'unverifiable_erc20' | 'unverifiable_approval_for_all';

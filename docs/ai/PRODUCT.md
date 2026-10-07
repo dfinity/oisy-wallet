@@ -480,7 +480,9 @@ While it is on, the review of a refused request states each reason without sayin
 
 No way out is offered, and the switch is not pointed at, when WalletConnect's domain verification flags the site as a known scam or as running on an origin other than the domain the app declares. Nor for a Solana request that hands the connected wallet itself to another program, whether the message states the assignment or a program makes it inside its own call, as the simulated run shows: no app needs the wallet handed over, and the wallet cannot pay a fee afterwards. Signing checks again: OISY signs only when every refusal it finds was acknowledged on the review, and never for a flagged site or a wallet handed to another program.
 
-Refusals that protect a signing rule stay refused whatever the switch says: a Solana `signMessage` over the bytes of a transaction, every Bitcoin `signPsbt` refusal, and the Ethereum refusals of typed data that cannot be signed or names another chain, and of a request from another account. Ethereum requests are not covered by the switch yet.
+On Ethereum and the EVM networks, an `eth_sendTransaction` is refused the same way when an ERC-20 approve, transfer or allowance change, or an NFT operator grant (`setApprovalForAll`), carries arguments that do not decode, and the switch covers those too. A request on an ERC-20 token OISY does not list, among the default tokens and the user's custom ones, is refused for good instead: the review tells the user to add the token to OISY and send the request again, after which it is reviewed in full. The signing path checks again here too, rather than relying on the review: it refuses a call on a token OISY does not list, a refusal that was not acknowledged, and every refusal for a flagged site.
+
+Refusals that protect a signing rule stay refused whatever the switch says: a Solana `signMessage` over the bytes of a transaction, every Bitcoin `signPsbt` refusal, and the Ethereum refusals of typed data that cannot be signed or names another chain, and of a request from another account.
 
 ### Starting a pairing from the scanner
 

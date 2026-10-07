@@ -14,6 +14,10 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { WalletConnectEthCall } from '$eth/types/wallet-connect';
 	import { decodeErc20AbiData, decodeSetApprovalForAllData } from '$eth/utils/transactions.utils';
+	import {
+		findWalletConnectEthErc20Token,
+		walletConnectEthRefusals
+	} from '$eth/utils/wallet-connect.utils';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import SendDataSpender from '$lib/components/send/SendDataSpender.svelte';
@@ -23,13 +27,13 @@
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
+	import WalletConnectUncheckedSigning from '$lib/components/wallet-connect/WalletConnectUncheckedSigning.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
-	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { maxBigInt } from '$lib/utils/bigint.utils';
 
 	interface Props {
@@ -46,9 +50,18 @@
 		requestedGas?: bigint;
 		sourceNetwork: EthereumNetwork;
 		targetNetwork?: Network;
+		// Whether WalletConnect's domain verification flagged the site. No way past a refusal is
+		// offered then, and the review does not point at the Settings switch either.
+		domainFlagged?: boolean;
+		// Whether the Settings switch was on when the review opened, so that a refusal can be signed
+		// past once the user acknowledges it, and whether they have.
+		uncheckedSigningOffered?: boolean;
+		uncheckedSigningAcknowledged?: boolean;
 		approveDisabled?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
+		onUncheckedSigningAcknowledge: () => void;
+		onOpenSettings: () => void;
 	}
 
 	let {
@@ -60,9 +73,14 @@
 		requestedGas,
 		sourceNetwork: sourceNetworkProp,
 		targetNetwork,
+		domainFlagged = false,
+		uncheckedSigningOffered = false,
+		uncheckedSigningAcknowledged = false,
 		approveDisabled = false,
 		onApprove,
-		onReject
+		onReject,
+		onUncheckedSigningAcknowledge,
+		onOpenSettings
 	}: Props = $props();
 
 	const { feeStore }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
@@ -137,11 +155,11 @@
 
 	let token = $derived(
 		erc20
-			? $ercFungibleTokens.find(
-					({ address, network: { id: networkId } }) =>
-						areAddressesEqual({ address1: address, address2: destination, networkId }) &&
-						networkId === sourceNetworkProp.id
-				)
+			? findWalletConnectEthErc20Token({
+					tokens: $ercFungibleTokens,
+					destination,
+					networkId: sourceNetworkProp.id
+				})
 			: $sendToken
 	);
 
@@ -156,11 +174,18 @@
 	// undecodable approve would otherwise render as a zero-amount interaction and stay approvable.
 	let unverifiableErc20 = $derived(erc20 && (isNullish(decodedErc20Data) || isNullish(token)));
 
-	// Same reasoning for an operator grant: the operator is the whole of what is being authorized,
-	// and calldata that hides it would otherwise fall through to a native zero-value summary.
-	let unverifiableSetApprovalForAll = $derived(
-		setApprovalForAll && isNullish(decodedSetApprovalForAll)
-	);
+	// A token the wallet does not list is refused for good: adding it is what makes the request
+	// reviewable, so the Settings switch never signs past it and the review says how to proceed.
+	let unlistedErc20 = $derived(erc20 && isNullish(token));
+
+	// What the Settings switch can sign past: calldata that does not decode, for an ERC-20 call on a
+	// token the wallet lists and for an operator grant, whose operator is the whole of what it
+	// authorizes. The signing service refuses the same list.
+	let refusals = $derived(walletConnectEthRefusals({ call, data }));
+
+	let refused = $derived(refusals.length > 0 && !unlistedErc20);
+
+	let unverifiableSetApprovalForAll = $derived(refusals.includes('unverifiable_approval_for_all'));
 
 	// An operator grant authorizes rather than moves, so it has no amount and no balance to spend
 	// against. Native value carried alongside it is still real value leaving the wallet, and hiding
@@ -185,13 +210,21 @@
 		<MessageBox level="error" testId="wallet-connect-unknown-call">
 			{$i18n.wallet_connect.text.unknown_call}
 		</MessageBox>
+	{:else if unlistedErc20}
+		<MessageBox level="warning" testId="wallet-connect-unlisted-erc20-warning">
+			{$i18n.wallet_connect.text.unlisted_erc20_request}
+		</MessageBox>
 	{:else if unverifiableErc20}
 		<MessageBox level="warning" testId="wallet-connect-unverifiable-erc20-warning">
-			{$i18n.wallet_connect.text.unverifiable_erc20_request}
+			{uncheckedSigningOffered
+				? $i18n.wallet_connect.text.undecodable_erc20_reason
+				: $i18n.wallet_connect.text.undecodable_erc20_request}
 		</MessageBox>
 	{:else if unverifiableSetApprovalForAll}
 		<MessageBox level="warning" testId="wallet-connect-unverifiable-approval-for-all-warning">
-			{$i18n.wallet_connect.text.unverifiable_approval_for_all_request}
+			{uncheckedSigningOffered
+				? $i18n.wallet_connect.text.unverifiable_approval_for_all_reason
+				: $i18n.wallet_connect.text.unverifiable_approval_for_all_request}
 		</MessageBox>
 	{:else if nonNullish(decodedSetApprovalForAll)}
 		<MessageBox
@@ -211,6 +244,15 @@
 				? $i18n.wallet_connect.text.allowance_increase
 				: $i18n.wallet_connect.text.allowance_decrease}
 		</MessageBox>
+	{/if}
+
+	{#if refused && !domainFlagged}
+		<WalletConnectUncheckedSigning
+			acknowledged={uncheckedSigningAcknowledged}
+			offered={uncheckedSigningOffered}
+			onAcknowledge={onUncheckedSigningAcknowledge}
+			{onOpenSettings}
+		/>
 	{/if}
 
 	<!-- Padding an estimate is ordinary dApp behaviour and unused gas is refunded, so both tiers
@@ -302,7 +344,9 @@
 
 	{#snippet toolbar()}
 		<WalletConnectActions
-			approveDisabled={approveDisabled || unverifiableErc20 || unverifiableSetApprovalForAll}
+			approveDisabled={approveDisabled ||
+				unlistedErc20 ||
+				(refused && !(uncheckedSigningOffered && uncheckedSigningAcknowledged))}
 			{onApprove}
 			{onReject}
 		/>

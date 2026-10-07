@@ -1,12 +1,18 @@
+import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 import { send as executeSend } from '$eth/services/send.services';
 import type { FeeStoreData } from '$eth/stores/eth-fee.store';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { SendParams } from '$eth/types/send';
+import type { EthWalletConnectRefusal } from '$eth/types/wallet-connect';
 import {
+	classifyWalletConnectEthCall,
+	findWalletConnectEthErc20Token,
 	getSendParamsGas,
 	getSignParamsMessageHex,
 	getSignParamsMessageTypedDataV4Hash,
-	isEthSignTypedDataMethod
+	isEthSignTypedDataMethod,
+	isWalletConnectEthErc20Call,
+	walletConnectEthRefusals
 } from '$eth/utils/wallet-connect.utils';
 import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
@@ -17,6 +23,7 @@ import {
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { ProgressStepsSend, ProgressStepsSign } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
+import { trackWalletConnectUncheckedSigning } from '$lib/services/wallet-connect-analytics.services';
 import {
 	execute,
 	type WalletConnectCallBackParams,
@@ -28,6 +35,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { isWalletConnectDomainFlagged } from '$lib/utils/wallet-connect.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -37,6 +45,10 @@ type WalletConnectSendParams = WalletConnectExecuteParams & {
 	fee: FeeStoreData;
 	modalNext: () => void;
 	amount: bigint;
+	// The refusals the user signed past on the review, which the Settings switch allows. Empty unless
+	// the review offered it and its box was ticked. A refusal found here that is not in the list still
+	// refuses, so an acknowledgement covers what the review showed and nothing else.
+	acknowledgedRefusals: EthWalletConnectRefusal[];
 } & SendParams;
 
 type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
@@ -57,6 +69,7 @@ export const send = ({
 	minterInfo,
 	sourceNetwork,
 	targetNetwork,
+	acknowledgedRefusals,
 	...params
 }: WalletConnectSendParams): Promise<ResultSuccess> =>
 	execute({
@@ -75,7 +88,9 @@ export const send = ({
 						unknown_parameter,
 						wallet_not_initialized,
 						from_address_not_wallet,
-						unknown_destination
+						unknown_destination,
+						unlisted_token,
+						unverifiable_request
 					}
 				}
 			} = get(i18n);
@@ -106,6 +121,43 @@ export const send = ({
 			if (isNullish(firstParam.to)) {
 				toastsError({
 					msg: { text: unknown_destination }
+				});
+				return { success: false };
+			}
+
+			// The review refuses what follows, and the signing checks again rather than trusting that it
+			// did, the same way for every request.
+			const call = classifyWalletConnectEthCall(firstParam.data);
+
+			// A token the wallet does not list is never signed past: adding it is what makes the request
+			// reviewable, which is what the review tells the user to do.
+			if (
+				isWalletConnectEthErc20Call(call) &&
+				isNullish(
+					findWalletConnectEthErc20Token({
+						tokens: get(ercFungibleTokens),
+						destination: firstParam.to,
+						networkId: sourceNetwork.id
+					})
+				)
+			) {
+				toastsError({
+					msg: { text: unlisted_token }
+				});
+				return { success: false };
+			}
+
+			// A site WalletConnect's domain verification flags is never signed past, whatever the review
+			// handed on: the review offers no way out for one, so no acknowledgement for it can be real.
+			const acknowledged = isWalletConnectDomainFlagged(request.verifyContext)
+				? []
+				: acknowledgedRefusals;
+
+			const refusals = walletConnectEthRefusals({ call, data: firstParam.data });
+
+			if (refusals.some((refusal) => !acknowledged.includes(refusal))) {
+				toastsError({
+					msg: { text: unverifiable_request }
 				});
 				return { success: false };
 			}
@@ -173,6 +225,14 @@ export const send = ({
 						token: token.symbol
 					}
 				});
+
+				if (refusals.length > 0) {
+					trackWalletConnectUncheckedSigning({
+						modifier: 'sign',
+						network: sourceNetwork.id.description ?? sourceNetwork.name,
+						reasons: refusals
+					});
+				}
 
 				return { success: true };
 			} catch (err: unknown) {
