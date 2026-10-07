@@ -1,8 +1,12 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { CKETH_ABI } from '$eth/constants/cketh.constants';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
-import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
+import {
+	infuraCkETHProviders,
+	type InfuraCkETHProvider
+} from '$eth/providers/infura-cketh.providers';
 import * as approveServices from '$eth/services/approve.services';
 import * as ethTransactionServices from '$eth/services/eth-transaction.services';
 import * as prepareServices from '$eth/services/prepare.services';
@@ -20,6 +24,7 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
+import { Interface } from 'ethers/abi';
 import { get } from 'svelte/store';
 
 const { mockSendTransaction } = vi.hoisted(() => ({
@@ -388,6 +393,41 @@ describe('send.services', () => {
 					expect.objectContaining({
 						data: '0xdata',
 						to: mockEthHelperContractAddress
+					})
+				);
+			});
+
+			// A WalletConnect request to the helper is only approvable when it is this very deposit, so
+			// the transaction signed carries the calldata the app sent, byte for byte.
+			it('should sign the calldata of a deposit to the principal of the user unchanged', async () => {
+				const ckEthInterface = new Interface(CKETH_ABI);
+
+				const { prepare } = await vi.importActual<typeof prepareServices>(
+					'$eth/services/prepare.services'
+				);
+				vi.mocked(prepareServices.prepare).mockImplementationOnce(prepare);
+
+				vi.mocked(infuraCkETHProviders).mockReturnValueOnce({
+					populateTransaction: ({ to }: { to: string }) =>
+						Promise.resolve({ data: ckEthInterface.encodeFunctionData('deposit', [to]) })
+				} as unknown as InfuraCkETHProvider);
+
+				const data = ckEthInterface.encodeFunctionData('deposit', [userPrincipalBytes32]);
+
+				await send({
+					...convertParams,
+					token: ETHEREUM_TOKEN,
+					to: mockEthHelperContractAddress,
+					data
+				});
+
+				expect(signerApi.signTransaction).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						transaction: expect.objectContaining({
+							to: mockEthHelperContractAddress,
+							data: toNullable(data),
+							value: 1_000_000n
+						})
 					})
 				);
 			});
