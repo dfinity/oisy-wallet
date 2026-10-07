@@ -1329,7 +1329,26 @@ describe('sol-instructions.utils', () => {
 			});
 		});
 
-		it('should state a `WithdrawNonceAccount` instruction as the transfer it is', () => {
+		it('should state a `WithdrawNonceAccount` instruction that pays the wallet as the transfer it is', () => {
+			const instruction = getWithdrawNonceAccountInstruction({
+				nonceAccount: address(mockSolAddress2),
+				recipientAccount: address(mockSolAddress),
+				nonceAuthority: createNoopSigner(address(mockSolAddress)),
+				withdrawAmount: 5_000n
+			});
+
+			expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+				amount: 5_000n,
+				source: mockSolAddress2,
+				destination: mockSolAddress
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		// The nonce account is not one the balance changes read, so lamports it pays anywhere but the
+		// wallet would leave without a line on the review saying so.
+		it('should fail closed on a `WithdrawNonceAccount` instruction that pays anywhere but the wallet', () => {
 			const instruction = getWithdrawNonceAccountInstruction({
 				nonceAccount: address(mockSolAddress2),
 				recipientAccount: address(mockSolAddress3),
@@ -1337,16 +1356,35 @@ describe('sol-instructions.utils', () => {
 				withdrawAmount: 5_000n
 			});
 
-			expect(mapSolInstruction({ instruction })).toStrictEqual({
-				amount: 5_000n,
-				source: mockSolAddress2,
-				destination: mockSolAddress3
+			expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
 			});
 
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
-		it('should state a `TransferSolWithSeed` instruction as the transfer it is', () => {
+		it('should state a `TransferSolWithSeed` instruction that pays the wallet as the transfer it is', () => {
+			const instruction = getTransferSolWithSeedInstruction({
+				source: address(mockSolAddress2),
+				baseAccount: createNoopSigner(address(mockSolAddress)),
+				destination: address(mockSolAddress),
+				amount: 7_000n,
+				fromSeed: 'vault',
+				fromOwner: address(SYSTEM_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+				amount: 7_000n,
+				source: mockSolAddress2,
+				destination: mockSolAddress
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		// The seed-derived source is never the wallet itself, so the same holds as for a nonce account.
+		it('should fail closed on a `TransferSolWithSeed` instruction that pays anywhere but the wallet', () => {
 			const instruction = getTransferSolWithSeedInstruction({
 				source: address(mockSolAddress2),
 				baseAccount: createNoopSigner(address(mockSolAddress)),
@@ -1356,10 +1394,9 @@ describe('sol-instructions.utils', () => {
 				fromOwner: address(SYSTEM_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction({ instruction })).toStrictEqual({
-				amount: 7_000n,
-				source: mockSolAddress2,
-				destination: mockSolAddress3
+			expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
 			});
 
 			expect(console.warn).not.toHaveBeenCalled();
