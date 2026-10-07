@@ -2227,7 +2227,9 @@
 			"converting_ck_token": "جاري تحويل $ckToken إلى $twinToken",
 			"twin_network": "شبكة $twinNetwork",
 			"no_date_available": "لا يوجد تاريخ متاح",
-			"pending": "معلق"
+			"pending": "معلق",
+			"top_up": "",
+			"top_up_refund": ""
 		},
 		"alt": {
 			"open_block_explorer": "افتح هذه المعاملة في مستكشف الكتل",

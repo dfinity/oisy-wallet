@@ -2227,7 +2227,9 @@
 			"converting_ck_token": "$ckTokenを$twinTokenに変換中",
 			"twin_network": "$twinNetworkネットワーク",
 			"no_date_available": "日付情報なし",
-			"pending": "保留中"
+			"pending": "保留中",
+			"top_up": "",
+			"top_up_refund": ""
 		},
 		"alt": {
 			"open_block_explorer": "ブロックエクスプローラーでこのトランザクションを開く",

@@ -1,3 +1,4 @@
+import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { btcStatusesStore } from '$icp/stores/btc.store';
 import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
@@ -23,6 +24,7 @@ import {
 	cleanupCkBtcPendingStores,
 	cleanupCkEthPendingStore,
 	cleanupIcTransactionsStore,
+	createMockIcrcBurnTransaction,
 	createMockIcrcTransferTransaction,
 	setupCkBtcPendingStores,
 	setupCkEthPendingStore,
@@ -36,6 +38,7 @@ import {
 	mockPrincipalText2
 } from '$tests/mocks/identity.mock';
 import { nonNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
 describe('getIcExtendedTransactions', () => {
@@ -206,6 +209,38 @@ describe('mapIcTransaction', () => {
 			});
 
 			expect(result.transferSpender).toBeUndefined();
+		});
+	});
+
+	describe('cycles-ledger transactions', () => {
+		const topUp = createMockIcrcBurnTransaction({
+			memo: Uint8Array.from([
+				0x81,
+				0x4a,
+				...Principal.fromText('ywcsb-maaaa-aaaai-q6k7a-cai').toUint8Array()
+			])
+		});
+
+		it('should label a top-up on the cycles ledger', () => {
+			const result = mapIcTransaction({
+				transaction: topUp,
+				token: { ...icrcToken, ledgerCanisterId: IC_CYCLES_LEDGER_CANISTER_ID },
+				identity: mockIdentity
+			});
+
+			expect(result.typeLabel).toBe('transaction.label.top_up');
+			expect(result.to).toBe('ywcsb-maaaa-aaaai-q6k7a-cai');
+		});
+
+		it('should not label the same burn on another ledger', () => {
+			const result = mapIcTransaction({
+				transaction: topUp,
+				token: icrcToken,
+				identity: mockIdentity
+			});
+
+			expect(result.typeLabel).toBeUndefined();
+			expect(result.to).toBeUndefined();
 		});
 	});
 
