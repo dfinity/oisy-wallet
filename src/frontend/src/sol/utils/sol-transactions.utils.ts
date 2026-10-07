@@ -1,4 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
+import { COMPUTE_BUDGET_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { OptionSolAddress } from '$sol/types/address';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
@@ -10,6 +11,8 @@ import {
 	getBase64Encoder,
 	getCompiledTransactionMessageDecoder,
 	getTransactionDecoder,
+	getTransactionMessageComputeUnitLimit,
+	getTransactionMessagePriorityFeeLamports,
 	type Rpc,
 	type SolanaRpcApi,
 	type Transaction,
@@ -71,13 +74,19 @@ const conflicts = ({
 }): boolean => nonNullish(current) && nonNullish(next) && current !== next;
 
 export const mapSolTransactionMessage = ({
-	transactionMessage: { instructions },
+	transactionMessage,
 	userAddress
 }: {
 	transactionMessage: TransactionMessage;
 	userAddress?: OptionSolAddress;
 }): MappedSolTransaction => {
-	const instructionsList = Array.from(instructions);
+	// A version 1 message states its priority fee and compute unit limit in its config. The network
+	// ignores Compute Budget instructions there, even invalid ones, and runs them as no-ops, so they
+	// neither price the message nor leave its review unfaithful.
+	const instructionsList = Array.from(transactionMessage.instructions).filter(
+		({ programAddress }) =>
+			transactionMessage.version !== 1 || programAddress !== COMPUTE_BUDGET_PROGRAM_ADDRESS
+	);
 
 	const mapped = instructionsList.reduce<MappedSolTransaction>(
 		(acc, instruction) => {
@@ -150,6 +159,25 @@ export const mapSolTransactionMessage = ({
 	);
 
 	const { computeUnitPrice, computeUnitLimit, ...rest } = mapped;
+
+	// The config states the fee as a total rather than a price per compute unit, and a limit it
+	// leaves unset is zero rather than a default derived from the instruction count.
+	if (transactionMessage.version === 1) {
+		const prioritizationFee = getTransactionMessagePriorityFeeLamports(transactionMessage);
+
+		if (isNullish(prioritizationFee) || prioritizationFee <= ZERO) {
+			return rest;
+		}
+
+		return {
+			...rest,
+			prioritizationFee,
+			computeUnitLimit: resolveSolComputeUnitLimit({
+				computeUnitLimit: BigInt(getTransactionMessageComputeUnitLimit(transactionMessage) ?? 0),
+				instructionsCount: instructionsList.length
+			})
+		};
+	}
 
 	// The prioritisation fee needs the whole message: the price and the limit come from separate
 	// instructions, and the limit falls back to a default derived from the instruction count.

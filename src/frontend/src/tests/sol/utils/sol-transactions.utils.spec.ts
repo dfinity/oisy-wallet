@@ -5,7 +5,8 @@ import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
 import {
 	isSolCompiledTransactionMessage,
-	mapSolTransactionMessage
+	mapSolTransactionMessage,
+	parseSolBase64TransactionMessage
 } from '$sol/utils/sol-transactions.utils';
 import { bn1Bi, bn3Bi } from '$tests/mocks/balances.mock';
 import {
@@ -19,6 +20,7 @@ import {
 	mockSolAddress3
 } from '$tests/mocks/sol.mock';
 import {
+	getRequestUnitsInstruction,
 	getSetComputeUnitLimitInstruction,
 	getSetComputeUnitPriceInstruction
 } from '@solana-program/compute-budget';
@@ -35,7 +37,23 @@ import {
 	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction,
 	AuthorityType as Token2022AuthorityType
 } from '@solana-program/token-2022';
-import { address, createNoopSigner, type TransactionMessage } from '@solana/kit';
+import {
+	address,
+	appendTransactionMessageInstructions,
+	blockhash,
+	compileTransaction,
+	createNoopSigner,
+	createSolanaRpc,
+	createTransactionMessage,
+	getBase64EncodedWireTransaction,
+	pipe,
+	setTransactionMessageConfig,
+	setTransactionMessageFeePayer,
+	setTransactionMessageLifetimeUsingBlockhash,
+	type Instruction,
+	type TransactionMessage,
+	type V1TransactionConfig
+} from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 describe('sol-transactions.utils', () => {
@@ -755,6 +773,147 @@ describe('sol-transactions.utils', () => {
 					source: mockAtaAddress,
 					destination: mockSolAddress2,
 					tokenAddress: JUP_TOKEN.address
+				});
+			});
+		});
+
+		describe('with a version 1 message', () => {
+			// The real instruction mapper, so that a Compute Budget instruction is priced as it would
+			// be in an older message.
+			beforeEach(() => {
+				spyMapSolInstruction.mockRestore();
+			});
+
+			const transfer = getTransferSolInstruction({
+				source: createNoopSigner(address(mockSolAddress)),
+				destination: address(mockSolAddress2),
+				amount: 1n
+			});
+
+			const mappedTransfer = {
+				amount: 1n,
+				source: mockSolAddress,
+				destination: mockSolAddress2
+			};
+
+			const v1Message = ({
+				instructions = [transfer],
+				config
+			}: {
+				instructions?: readonly Instruction[];
+				config: V1TransactionConfig;
+			}) =>
+				pipe(
+					createTransactionMessage({ version: 1 }),
+					(tx) => appendTransactionMessageInstructions(instructions, tx),
+					(tx) => setTransactionMessageConfig(config, tx)
+				);
+
+			it('should report the priority fee and the compute unit limit its config states', () => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: v1Message({
+							config: { priorityFeeLamports: 1_000_000_001n, computeUnitLimit: 300_000 }
+						})
+					})
+				).toStrictEqual({
+					...mappedTransfer,
+					prioritizationFee: 1_000_000_001n,
+					computeUnitLimit: 300_000n
+				});
+			});
+
+			it('should not report a priority fee when its config sets none', () => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: v1Message({ config: { computeUnitLimit: 300_000 } })
+					})
+				).toStrictEqual(mappedTransfer);
+			});
+
+			it('should budget a compute unit limit its config leaves unset at zero', () => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: v1Message({ config: { priorityFeeLamports: 10_000n } })
+					})
+				).toStrictEqual({ ...mappedTransfer, prioritizationFee: 10_000n, computeUnitLimit: ZERO });
+			});
+
+			// The network ignores them in a version 1 message: a price they state is never charged, and
+			// they cannot lower the fee the config states.
+			it('should not price the message from its Compute Budget instructions', () => {
+				const instructions = [
+					getSetComputeUnitLimitInstruction({ units: 1_400_000 }),
+					getSetComputeUnitPriceInstruction({ microLamports: 714_285_715 }),
+					transfer
+				];
+
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: v1Message({
+							instructions,
+							config: { priorityFeeLamports: 5_000n, computeUnitLimit: 200_000 }
+						})
+					})
+				).toStrictEqual({
+					...mappedTransfer,
+					prioritizationFee: 5_000n,
+					computeUnitLimit: 200_000n
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: v1Message({ instructions, config: { computeUnitLimit: 200_000 } })
+					})
+				).toStrictEqual(mappedTransfer);
+			});
+
+			it('should not refuse a Compute Budget instruction it cannot price, which the network runs as a no-op', () => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: v1Message({
+							instructions: [
+								getRequestUnitsInstruction({ units: 300_000, additionalFee: 1_000 }),
+								transfer
+							],
+							config: { computeUnitLimit: 300_000 }
+						})
+					})
+				).toStrictEqual(mappedTransfer);
+			});
+
+			it('should read the config of a request decoded from its wire format', async () => {
+				const transactionMessage = pipe(
+					createTransactionMessage({ version: 1 }),
+					(tx) => setTransactionMessageFeePayer(address(mockSolAddress), tx),
+					(tx) =>
+						setTransactionMessageLifetimeUsingBlockhash(
+							{
+								blockhash: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+								lastValidBlockHeight: 100n
+							},
+							tx
+						),
+					(tx) => appendTransactionMessageInstructions([transfer], tx),
+					(tx) =>
+						setTransactionMessageConfig(
+							{ priorityFeeLamports: 50_000n, computeUnitLimit: 300_000 },
+							tx
+						)
+				);
+
+				// A version 1 message has no lookup tables, so decoding it never reaches the RPC.
+				const decoded = await parseSolBase64TransactionMessage({
+					transactionMessage: getBase64EncodedWireTransaction(
+						compileTransaction(transactionMessage)
+					),
+					rpc: createSolanaRpc('http://127.0.0.1:8899')
+				});
+
+				expect(mapSolTransactionMessage({ transactionMessage: decoded })).toStrictEqual({
+					...mappedTransfer,
+					prioritizationFee: 50_000n,
+					computeUnitLimit: 300_000n
 				});
 			});
 		});

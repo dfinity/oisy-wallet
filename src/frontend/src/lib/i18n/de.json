@@ -1762,6 +1762,9 @@
 			"tab_operations": "Operationen",
 			"unreviewed_instructions": "OISY kann einige dieser Anweisungen nicht entschlüsseln, daher ist die Überprüfung unten möglicherweise unvollständig.",
 			"unreviewed_instructions_simulated": "Diese Transaktion enthält Operationen aus einer externen Quelle, die OISY nicht entschlüsseln kann, daher hat OISY eine Simulation davon durchgeführt. Vergewissern Sie sich, dass Sie der Anwendung vertrauen, und überprüfen Sie vor dem Signieren die simulierten Guthabenänderungen und Operationen. Beachten Sie, dass das tatsächliche Ergebnis von der Simulation abweichen kann.",
+			"unread_programs_one": "Diese Transaktion ruft ein Programm auf, das OISY nicht lesen kann. Es kann Gelder bewegen, die Sie in anderen Apps halten, etwa gestakte SOL oder Einlagen in Kreditprotokollen, und nichts weiter unten würde das anzeigen.",
+			"unread_programs_other": "Diese Transaktion ruft Programme auf, die OISY nicht lesen kann. Diese Programme können Gelder bewegen, die Sie in anderen Apps halten, etwa gestakte SOL oder Einlagen in Kreditprotokollen, und nichts weiter unten würde das anzeigen.",
+			"unread_programs_acknowledge": "Ich verstehe, dass OISY nicht anzeigen kann, was diese App tut",
 			"cannot_be_shown": "Diese Transaktion enthält Aktionen, die sich nicht alle korrekt zur Prüfung anzeigen lassen – OISY signiert sie daher nicht. Lehnen Sie sie ab und bitten Sie die App um eine einfachere Anfrage.",
 			"close_pays_others": "Diese Transaktion schliesst eines deiner Token-Konten und zahlt dessen Guthaben an eine Adresse aus, die nicht deine Wallet ist. Zu deiner Sicherheit signiert OISY sie nicht.",
 			"simulated_instructions": "Simulierte Anweisungen",
@@ -1875,6 +1878,7 @@
 			"ambiguous_transaction": "Diese Transaktion bewegt Gelder zwischen mehreren Adressen und kann nicht korrekt zur Überprüfung angezeigt werden. Zu deiner Sicherheit wurde sie nicht signiert.",
 			"close_pays_others": "Diese Transaktion schliesst eines deiner Token-Konten und zahlt dessen Guthaben an eine Adresse aus, die nicht deine Wallet ist. Zu deiner Sicherheit wurde sie nicht signiert.",
 			"unreviewed_without_simulation": "OISY konnte einen Teil dieser Transaktion nicht lesen, und das Netzwerk hat dazu auch keine Simulation zurückgegeben – es beschreibt also nichts, was dieser Teil tun würde. Zu Ihrer Sicherheit wurde sie nicht signiert.",
+			"unread_programs_unconfirmed": "Diese Transaktion ruft ein Programm auf, das OISY nicht lesen kann, und wurde in der Überprüfung nicht bestätigt. Zu Ihrer Sicherheit wurde sie nicht signiert.",
 			"sol_transaction_as_message": "Diese Nachricht ist eine Solana-Transaktion, die nur durch eine Transaktionsüberprüfung genehmigt werden kann. Aus Sicherheitsgründen wurde sie nicht signiert.",
 			"request_not_defined": "Unerwarteter Fehler: Anfrage ist nicht definiert und kann daher nicht verarbeitet werden.",
 			"unexpected_processing_request": "Unerwarteter Fehler bei der Verarbeitung der WalletConnect-Anfrage."
