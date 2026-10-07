@@ -109,6 +109,8 @@
 
 	let ckEthDepositRefused = $derived(call.type === 'ckEthDepositRefused');
 
+	let ckEthHelperUnconfirmed = $derived(call.type === 'ckEthHelperUnconfirmed');
+
 	let erc20 = $derived(erc20Approve || erc20Transfer || allowanceDelta);
 
 	let decodedErc20Data = $derived.by(() => {
@@ -190,6 +192,10 @@
 	{#if ckEthDepositRefused}
 		<MessageBox level="error" testId="wallet-connect-cketh-deposit-refused">
 			{$i18n.wallet_connect.text.cketh_deposit_refused}
+		</MessageBox>
+	{:else if ckEthHelperUnconfirmed}
+		<MessageBox level="warning" testId="wallet-connect-cketh-helper-unconfirmed">
+			{$i18n.wallet_connect.text.cketh_helper_unconfirmed}
 		</MessageBox>
 	{:else if nonNullish(ckEthDepositPrincipal)}
 		<MessageBox level="info" testId="wallet-connect-cketh-deposit">
@@ -326,7 +332,8 @@
 			approveDisabled={approveDisabled ||
 				unverifiableErc20 ||
 				unverifiableSetApprovalForAll ||
-				ckEthDepositRefused}
+				ckEthDepositRefused ||
+				ckEthHelperUnconfirmed}
 			{onApprove}
 			{onReject}
 		/>

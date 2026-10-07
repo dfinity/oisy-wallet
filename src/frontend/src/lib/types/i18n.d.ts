@@ -1483,6 +1483,7 @@ interface I18nWallet_connect {
 		cketh_deposit: string;
 		cketh_deposit_principal: string;
 		cketh_deposit_refused: string;
+		cketh_helper_unconfirmed: string;
 		raw_copied: string;
 		sign_message: string;
 		sign_psbt: string;
@@ -1554,6 +1555,7 @@ interface I18nWallet_connect {
 		from_address_not_wallet: string;
 		unknown_destination: string;
 		cketh_deposit_refused: string;
+		cketh_helper_unconfirmed: string;
 		ambiguous_transaction: string;
 		close_pays_others: string;
 		unreviewed_without_simulation: string;

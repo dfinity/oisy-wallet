@@ -32,6 +32,7 @@ import {
 	toTypedDataDomainChainId,
 	toWalletConnectCkEthHelperContractAddress,
 	WalletConnectEthCkEthDepositError,
+	WalletConnectEthCkEthHelperUnconfirmedError,
 	WalletConnectEthTypedDataError
 } from '$eth/utils/wallet-connect.utils';
 import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
@@ -610,14 +611,97 @@ describe('wallet-connect.utils', () => {
 				).toBeUndefined();
 			});
 
-			it('should return undefined while the helper contract is not known', () => {
-				expect(
-					getWalletConnectEthCkEthDeposit({
-						...params,
-						minterInfo: undefined,
-						data: encodeDeposit(OTHER_PRINCIPAL)
-					})
-				).toBeUndefined();
+			describe('while the helper contract is not confirmed', () => {
+				const unconfirmed = [
+					{ state: 'not loaded', minterInfo: undefined },
+					{ state: 'not loadable', minterInfo: null },
+					{ state: 'not certified', minterInfo: { ...minterInfo, certified: false } }
+				];
+
+				it.each(unconfirmed)(
+					'should hold a deposit to another principal while the minter information is $state',
+					({ minterInfo }) => {
+						expect(() =>
+							getWalletConnectEthCkEthDeposit({
+								...params,
+								minterInfo,
+								data: encodeDeposit(OTHER_PRINCIPAL)
+							})
+						).toThrow(WalletConnectEthCkEthHelperUnconfirmedError);
+					}
+				);
+
+				it.each(unconfirmed)(
+					'should hold a deposit to the principal of the user while the minter information is $state',
+					({ minterInfo }) => {
+						expect(() => getWalletConnectEthCkEthDeposit({ ...params, minterInfo })).toThrow(
+							WalletConnectEthCkEthHelperUnconfirmedError
+						);
+					}
+				);
+
+				// Without the helper's address, a contract that is not the helper cannot be told apart from
+				// one that is.
+				it('should hold a deposit addressed to any contract', () => {
+					expect(() =>
+						getWalletConnectEthCkEthDeposit({
+							...params,
+							to: SPENDER,
+							minterInfo: undefined,
+							data: encodeDeposit(OTHER_PRINCIPAL)
+						})
+					).toThrow(WalletConnectEthCkEthHelperUnconfirmedError);
+				});
+
+				it('should hold a deposit on Sepolia as well', () => {
+					expect(() =>
+						getWalletConnectEthCkEthDeposit({
+							...params,
+							networkId: SEPOLIA_NETWORK_ID,
+							minterInfo: undefined
+						})
+					).toThrow(WalletConnectEthCkEthHelperUnconfirmedError);
+				});
+
+				it('should hold a deposit whatever the case of its selector', () => {
+					expect(() =>
+						getWalletConnectEthCkEthDeposit({
+							...params,
+							minterInfo: undefined,
+							data: `0x${ownDeposit.slice(2).toUpperCase()}`
+						})
+					).toThrow(WalletConnectEthCkEthHelperUnconfirmedError);
+				});
+
+				it('should not hold calldata that is not a deposit', () => {
+					expect(
+						getWalletConnectEthCkEthDeposit({
+							...params,
+							minterInfo: undefined,
+							data: `${ERC20_TRANSFER_HASH}${'de'.repeat(64)}`
+						})
+					).toBeUndefined();
+				});
+
+				it.each([undefined, '0x'])(
+					'should not hold a request carrying no calldata (%s)',
+					(data) => {
+						expect(
+							getWalletConnectEthCkEthDeposit({ ...params, minterInfo: undefined, data })
+						).toBeUndefined();
+					}
+				);
+
+				it('should not hold a deposit on an EVM network without ckETH', () => {
+					expect(
+						getWalletConnectEthCkEthDeposit({
+							...params,
+							networkId: BASE_NETWORK_ID,
+							minterInfo: undefined,
+							data: encodeDeposit(OTHER_PRINCIPAL)
+						})
+					).toBeUndefined();
+				});
 			});
 		});
 
@@ -670,6 +754,12 @@ describe('wallet-connect.utils', () => {
 				).toEqual({ type: 'erc20Transfer' });
 			});
 
+			it('should hold a deposit while the helper contract is not confirmed', () => {
+				expect(
+					classifyWalletConnectEthSendTransaction({ ...params, minterInfo: undefined })
+				).toEqual({ type: 'ckEthHelperUnconfirmed' });
+			});
+
 			it('should classify a deposit on an EVM network without ckETH by its calldata alone', () => {
 				expect(
 					classifyWalletConnectEthSendTransaction({ ...params, networkId: BASE_NETWORK_ID })
@@ -694,7 +784,8 @@ describe('wallet-connect.utils', () => {
 			{ type: 'erc20Transfer' as const },
 			{ type: 'unknown' as const, selector: '0xdeadbeef' },
 			{ type: 'ckEthDeposit' as const, principal: mockPrincipal },
-			{ type: 'ckEthDepositRefused' as const }
+			{ type: 'ckEthDepositRefused' as const },
+			{ type: 'ckEthHelperUnconfirmed' as const }
 		])('should not treat $type as an approval', (call) => {
 			expect(isWalletConnectEthApproval(call)).toBeFalsy();
 		});

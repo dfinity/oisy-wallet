@@ -41,6 +41,10 @@ export type WalletConnectEthCall =
 	// Calldata addressed to the ckETH helper contract that is not a deposit to the user's own
 	// principal. OISY does not sign it.
 	| { type: 'ckEthDepositRefused' }
+	// A `deposit(bytes32)` on a network with a ckETH helper contract, while OISY has not yet confirmed
+	// the helper's address and so cannot tell whether the deposit converts ETH, or for whom. Held
+	// until it can.
+	| { type: 'ckEthHelperUnconfirmed' }
 	// The selector is carried so the review can name the call it could not decode. It is `undefined`
 	// when the calldata is too short to hold one.
 	| { type: 'unknown'; selector: string | undefined };

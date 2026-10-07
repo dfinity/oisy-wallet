@@ -604,6 +604,7 @@ describe('EthWalletConnectSendReview', () => {
 
 		const conversionTestId = 'wallet-connect-cketh-deposit';
 		const refusedTestId = 'wallet-connect-cketh-deposit-refused';
+		const unconfirmedTestId = 'wallet-connect-cketh-helper-unconfirmed';
 		const unknownTestId = 'wallet-connect-unknown-call';
 
 		const encodeDeposit = (principal: Principal): string =>
@@ -616,7 +617,15 @@ describe('EthWalletConnectSendReview', () => {
 			certified: true
 		};
 
-		const renderDeposit = ({ data, to = CKETH_HELPER }: { data: string; to?: string }) =>
+		const renderDeposit = ({
+			data,
+			to = CKETH_HELPER,
+			unconfirmed = false
+		}: {
+			data: string;
+			to?: string;
+			unconfirmed?: boolean;
+		}) =>
 			render(EthWalletConnectSendReview, {
 				props: {
 					...props,
@@ -626,7 +635,7 @@ describe('EthWalletConnectSendReview', () => {
 						to,
 						data,
 						networkId: ETHEREUM_NETWORK.id,
-						minterInfo,
+						minterInfo: unconfirmed ? undefined : minterInfo,
 						principal: mockPrincipal
 					}),
 					data,
@@ -674,6 +683,29 @@ describe('EthWalletConnectSendReview', () => {
 
 			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
 		});
+
+		it.each([
+			{ owner: 'the user', principal: mockPrincipal },
+			{ owner: 'another principal', principal: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') }
+		])(
+			'should hold a deposit to $owner with approval disabled while the helper contract is not confirmed',
+			({ principal }) => {
+				const { getByTestId, queryByTestId, container, getByRole } = renderDeposit({
+					data: encodeDeposit(principal),
+					unconfirmed: true
+				});
+
+				expect(getByTestId(unconfirmedTestId)).toHaveTextContent(
+					en.wallet_connect.text.cketh_helper_unconfirmed
+				);
+				expect(queryByTestId(conversionTestId)).not.toBeInTheDocument();
+				expect(queryByTestId(refusedTestId)).not.toBeInTheDocument();
+				expect(queryByTestId(unknownTestId)).not.toBeInTheDocument();
+				expect(container.querySelector('#cketh-deposit-principal')).toBeNull();
+
+				expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+			}
+		);
 
 		it.each([CKETH_HELPER.toLowerCase(), `0x${CKETH_HELPER.slice(2).toUpperCase()}`])(
 			'should recognise the helper contract addressed as %s',

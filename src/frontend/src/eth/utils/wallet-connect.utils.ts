@@ -1,4 +1,5 @@
 import { EIP155_CHAINS } from '$env/eip155-chains.env';
+import { CKETH_DEPOSIT_HASH } from '$eth/constants/cketh.constants';
 import { SESSION_REQUEST_ETH_SIGN_TYPED_DATA_METHODS } from '$eth/constants/wallet-connect.constants';
 import type { OptionEthAddress } from '$eth/types/address';
 import type {
@@ -106,6 +107,12 @@ export const classifyWalletConnectEthCall = (data: string | undefined): WalletCo
 export class WalletConnectEthCkEthDepositError extends Error {}
 
 /**
+ * Thrown for a `deposit(bytes32)` request on a network with a ckETH helper contract while the
+ * helper's address is not confirmed by certified minter information.
+ */
+export class WalletConnectEthCkEthHelperUnconfirmedError extends WalletConnectEthCkEthDepositError {}
+
+/**
  * The ckETH helper contract on the network a WalletConnect request is signed for.
  *
  * Only Ethereum and Sepolia have one, at the address their ckETH minter states. On any other EVM
@@ -141,6 +148,10 @@ interface WalletConnectEthCkEthDepositParams {
  * `undefined` for a request addressed elsewhere, and for one to the helper that carries no calldata,
  * which OISY populates as a deposit to the user's own principal itself.
  *
+ * Until certified minter information confirms where the helper is, any `deposit(bytes32)` on Ethereum
+ * or Sepolia throws instead, whatever it is addressed to: telling the helper from another contract is
+ * what the check rests on, so a request is held until that is possible.
+ *
  * The helper is matched however its address is cased, since casing is not part of the address the
  * transaction goes to. Checked here rather than in the review alone, so that the gate and the signer
  * cannot disagree: both reach the request through this function.
@@ -152,13 +163,28 @@ export const getWalletConnectEthCkEthDeposit = ({
 	minterInfo,
 	principal
 }: WalletConnectEthCkEthDepositParams): Principal | undefined => {
+	if (!hasCalldata(data) || !isNetworkIdEthereum(networkId)) {
+		return;
+	}
+
 	const ckEthHelperContractAddress = toWalletConnectCkEthHelperContractAddress({
 		networkId,
 		minterInfo
 	});
 
+	// Conversions are only signed against certified minter information, so an answer that is not
+	// certified yet does not confirm the helper either.
+	if (isNullish(ckEthHelperContractAddress) || minterInfo?.certified !== true) {
+		if (getCalldataSelector(data) === CKETH_DEPOSIT_HASH) {
+			throw new WalletConnectEthCkEthHelperUnconfirmedError(
+				'The ckETH helper contract is not confirmed yet, so a deposit cannot be checked against it.'
+			);
+		}
+
+		return;
+	}
+
 	if (
-		!hasCalldata(data) ||
 		!isDestinationContractAddress({ destination: to, contractAddress: ckEthHelperContractAddress })
 	) {
 		return;
@@ -198,8 +224,10 @@ export const classifyWalletConnectEthSendTransaction = ({
 		if (nonNullish(principal)) {
 			return { type: 'ckEthDeposit', principal };
 		}
-	} catch (_: unknown) {
-		return { type: 'ckEthDepositRefused' };
+	} catch (err: unknown) {
+		return err instanceof WalletConnectEthCkEthHelperUnconfirmedError
+			? { type: 'ckEthHelperUnconfirmed' }
+			: { type: 'ckEthDepositRefused' };
 	}
 
 	return classifyWalletConnectEthCall(data);

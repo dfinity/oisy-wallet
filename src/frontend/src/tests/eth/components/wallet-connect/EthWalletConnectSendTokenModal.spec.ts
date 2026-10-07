@@ -142,6 +142,20 @@ describe('EthWalletConnectSendTokenModal', () => {
 			}
 		);
 
+		it('should title a deposit as a contract call while the helper contract is not confirmed', () => {
+			ckEthMinterInfoStore.reset(ETHEREUM_TOKEN.id);
+
+			const { getByText } = setup({
+				firstTransaction: {
+					from: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+					to: CKETH_HELPER,
+					data: encodeDeposit(mockPrincipal)
+				}
+			});
+
+			expect(getByText(en.wallet_connect.text.unknown_call_title)).toBeInTheDocument();
+		});
+
 		// The store can hold Ethereum's minter information under another chain's token, and the address
 		// it names is not the ckETH helper on that chain.
 		it('should not title a deposit on an EVM network without ckETH as a conversion', () => {

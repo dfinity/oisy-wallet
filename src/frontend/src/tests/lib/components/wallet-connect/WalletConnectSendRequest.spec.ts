@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { CKETH_ABI } from '$eth/constants/cketh.constants';
 import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
 import {
 	ERC20_APPROVE_HASH,
@@ -15,9 +16,11 @@ import { MAX_UINT_256 } from '$lib/constants/app.constants';
 import { modalStore } from '$lib/stores/modal.store';
 import en from '$tests/mocks/i18n.mock';
 import { nonNullish } from '@dfinity/utils';
+import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
+import { Principal } from '@icp-sdk/core/principal';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { AbiCoder } from 'ethers/abi';
+import { AbiCoder, Interface } from 'ethers/abi';
 
 // What the review renders is covered against the components themselves. What is covered here is the
 // wiring: that a session request as WalletConnect delivers it reaches that review at all, carrying
@@ -124,6 +127,19 @@ describe('an eth_sendTransaction request reaching the review', () => {
 
 		expect(container).toHaveTextContent(MULTICALL_HASH);
 		expect(container).toHaveTextContent(ERC20_APPROVE_HASH);
+	});
+
+	// No ckETH minter information is loaded here, so the review cannot tell the helper contract from
+	// any other. A deposit reaches it held rather than as an ordinary contract call.
+	it('should hold a ckETH deposit while the helper contract is not confirmed', async () => {
+		const { container } = await deliver(
+			new Interface(CKETH_ABI).encodeFunctionData('deposit', [
+				encodePrincipalToEthAddress(Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'))
+			])
+		);
+
+		expect(container).toHaveTextContent(en.wallet_connect.text.cketh_helper_unconfirmed);
+		expect(container).not.toHaveTextContent(en.wallet_connect.text.unknown_call);
 	});
 
 	// Every selector a researcher demonstrated could move assets through this review, each carrying

@@ -366,6 +366,44 @@ describe('eth wallet-connect.services', () => {
 				expect(executeSend).not.toHaveBeenCalled();
 			});
 
+			describe('while the helper contract is not confirmed', () => {
+				const unconfirmed = [
+					{ state: 'not loaded', info: undefined },
+					{ state: 'not loadable', info: null },
+					{ state: 'not certified', info: { ...minterInfo, certified: false } }
+				];
+
+				const owners = [
+					{ owner: 'the user', principal: mockPrincipal },
+					{
+						owner: 'another principal',
+						principal: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai')
+					}
+				];
+
+				// Without a confirmed helper the modal does not route the request to the Internet Computer,
+				// so it reaches here as a contract call on Ethereum. The check is what stops it.
+				it.each(unconfirmed.flatMap((state) => owners.map((owner) => ({ ...state, ...owner }))))(
+					'should hold a deposit to $owner while the minter information is $state, and never sign it',
+					async ({ info, principal }) => {
+						const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+						const { success } = await send({
+							...buildDepositParams({ to: CKETH_HELPER, data: encodeDeposit(principal) }),
+							minterInfo: info,
+							targetNetwork: ETHEREUM_NETWORK
+						});
+
+						expect(success).toBeFalsy();
+						expect(executeSend).not.toHaveBeenCalled();
+						expect(mockListener.approveRequest).not.toHaveBeenCalled();
+						expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+							msg: { text: get(i18n).wallet_connect.error.cketh_helper_unconfirmed }
+						});
+					}
+				);
+			});
+
 			// Only Ethereum and Sepolia have a ckETH helper contract. Elsewhere the address the minter
 			// states is not one, so the request is the contract call it is there and not a conversion.
 			it('should not check a deposit on an EVM network without ckETH', async () => {

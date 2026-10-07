@@ -7,7 +7,8 @@ import {
 	getSignParamsMessageHex,
 	getSignParamsMessageTypedDataV4Hash,
 	getWalletConnectEthCkEthDeposit,
-	isEthSignTypedDataMethod
+	isEthSignTypedDataMethod,
+	WalletConnectEthCkEthHelperUnconfirmedError
 } from '$eth/utils/wallet-connect.utils';
 import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
@@ -77,7 +78,8 @@ export const send = ({
 						wallet_not_initialized,
 						from_address_not_wallet,
 						unknown_destination,
-						cketh_deposit_refused
+						cketh_deposit_refused,
+						cketh_helper_unconfirmed
 					}
 				}
 			} = get(i18n);
@@ -123,9 +125,14 @@ export const send = ({
 					minterInfo,
 					principal: identity?.getPrincipal()
 				});
-			} catch (_: unknown) {
+			} catch (err: unknown) {
 				toastsError({
-					msg: { text: cketh_deposit_refused }
+					msg: {
+						text:
+							err instanceof WalletConnectEthCkEthHelperUnconfirmedError
+								? cketh_helper_unconfirmed
+								: cketh_deposit_refused
+					}
 				});
 				return { success: false };
 			}

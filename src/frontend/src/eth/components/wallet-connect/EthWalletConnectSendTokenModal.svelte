@@ -92,8 +92,10 @@
 	// granting an unlimited allowance be presented as a zero-value transfer.
 	let unknownCall = $derived(call.type === 'unknown');
 
-	// A call to the ckETH helper contract OISY refuses to sign is not a send either.
-	let ckEthDepositRefused = $derived(call.type === 'ckEthDepositRefused');
+	// A deposit OISY refuses to sign, or holds until it can check it, is not a send either.
+	let ckEthDepositBlocked = $derived(
+		call.type === 'ckEthDepositRefused' || call.type === 'ckEthHelperUnconfirmed'
+	);
 
 	/**
 	 * Fee context store
@@ -223,7 +225,7 @@
 		<WalletConnectModalTitle>
 			{#if approve}
 				{$i18n.core.text.approve}
-			{:else if unknownCall || ckEthDepositRefused}
+			{:else if unknownCall || ckEthDepositBlocked}
 				{$i18n.wallet_connect.text.unknown_call_title}
 			{:else}
 				{$i18n.send.text.send}
