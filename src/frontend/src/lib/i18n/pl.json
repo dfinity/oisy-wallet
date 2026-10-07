@@ -1186,33 +1186,33 @@
 	},
 	"cycles_top_up": {
 		"text": {
-			"top_up": "",
-			"title": "",
-			"description": "",
-			"canister_id_placeholder": "",
-			"checking_canister": "",
-			"recently_topped_up": "",
-			"canister": "",
-			"you_top_up": "",
-			"total": "",
-			"one_way": "",
-			"topping_up": "",
-			"topped_up": "",
-			"unknown": "",
-			"unknown_fresh": "",
-			"sent_to_canister": "",
-			"sent_to_canister_top_up": ""
+			"top_up": "Doładuj",
+			"title": "Doładuj kanister",
+			"description": "Cykle trafiają z Twojego salda $token do kanistra, który zużywa je na obliczenia i przechowywanie danych.",
+			"canister_id_placeholder": "Wpisz ID kanistra",
+			"checking_canister": "Sprawdzanie kanistra...",
+			"recently_topped_up": "Ostatnio doładowane",
+			"canister": "Kanister",
+			"you_top_up": "Doładowujesz",
+			"total": "Razem",
+			"one_way": "Doładowania nie można cofnąć: cykle zostają w kanistrze.",
+			"topping_up": "Doładowywanie $canister...",
+			"topped_up": "Doładowano $canister kwotą $amount $token.",
+			"unknown": "OISY nie wie jeszcze, czy doładowanie się powiodło. Jeśli tak, zobaczysz je w aktywności $token. Doładuj ponownie, aby wysłać to samo doładowanie jeszcze raz: może się powieść tylko raz. Nowe lub zmienione doładowanie dodałoby cykle ponownie, jeśli to się powiodło.",
+			"unknown_fresh": "OISY nie wie jeszcze, czy Twoje ostatnie doładowanie się powiodło. Jeśli tak, to doładowanie doda cykle ponownie. Najpierw sprawdź aktywność $token.",
+			"sent_to_canister": "Wysłanie $token do kanistra go nie doładowuje. $token trafiają na konto kanistra, a kanister dostaje cykle tylko wtedy, gdy wypłaci je jego własny kod.",
+			"sent_to_canister_top_up": "Aby dodać cykle do kanistra, użyj opcji „Doładuj” na stronie $token."
 		},
 		"error": {
-			"invalid_canister_id": "",
-			"canister_not_found": "",
-			"canister_check_failed": "",
-			"amount_too_small": "",
-			"refused": "",
-			"insufficient_funds": "",
-			"clock": "",
-			"refunded": "",
-			"refunded_nothing": ""
+			"invalid_canister_id": "Wpisz ID kanistra. Principali użytkowników, ID kont i adresów w innych sieciach nie można doładować.",
+			"canister_not_found": "Na Internet Computer nie ma kanistra o tym ID. Sprawdź ID.",
+			"canister_check_failed": "OISY nie mógł sprawdzić tego kanistra. Spróbuj ponownie za chwilę.",
+			"amount_too_small": "Wpisz więcej niż opłata $fee $token.",
+			"refused": "Doładowanie się nie powiodło. Nic nie opuściło Twojego portfela. Spróbuj ponownie za chwilę.",
+			"insufficient_funds": "Za mało $token na to doładowanie i opłatę. Nic nie opuściło Twojego portfela. Zmniejsz kwotę.",
+			"clock": "Doładowanie się nie powiodło, ponieważ zegar Twojego urządzenia jest źle ustawiony. Nic nie opuściło Twojego portfela. Ustaw prawidłowy czas i spróbuj ponownie.",
+			"refunded": "Kanister nie mógł przyjąć cykli. Do Twojego portfela wróciło $refund $token, a próba kosztowała $fees $token opłat. Sprawdź ID kanistra.",
+			"refunded_nothing": "Kanister nie mógł przyjąć cykli, a opłaty pochłonęły całą kwotę. Sprawdź ID kanistra."
 		}
 	},
 	"active_user_transactions": {
@@ -2259,8 +2259,8 @@
 			"twin_network": "Sieć $twinNetwork",
 			"no_date_available": "Brak dostępnej daty",
 			"pending": "Oczekuje",
-			"top_up": "",
-			"top_up_refund": ""
+			"top_up": "Doładowanie",
+			"top_up_refund": "Zwrot doładowania"
 		},
 		"alt": {
 			"open_block_explorer": "Otwórz tę transakcję w eksploratorze bloków",

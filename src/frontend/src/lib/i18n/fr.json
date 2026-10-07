@@ -1186,33 +1186,33 @@
 	},
 	"cycles_top_up": {
 		"text": {
-			"top_up": "",
-			"title": "",
-			"description": "",
-			"canister_id_placeholder": "",
-			"checking_canister": "",
-			"recently_topped_up": "",
-			"canister": "",
-			"you_top_up": "",
-			"total": "",
-			"one_way": "",
-			"topping_up": "",
-			"topped_up": "",
-			"unknown": "",
-			"unknown_fresh": "",
-			"sent_to_canister": "",
-			"sent_to_canister_top_up": ""
+			"top_up": "Recharger",
+			"title": "Recharger un canister",
+			"description": "Les cycles passent de votre solde $token au canister, qui les utilise pour le calcul et le stockage.",
+			"canister_id_placeholder": "Saisissez un ID de canister",
+			"checking_canister": "Vérification du canister...",
+			"recently_topped_up": "Rechargés récemment",
+			"canister": "Canister",
+			"you_top_up": "Vous rechargez",
+			"total": "Total",
+			"one_way": "Une recharge est irréversible : les cycles restent dans le canister.",
+			"topping_up": "Recharge de $canister...",
+			"topped_up": "$canister rechargé avec $amount $token.",
+			"unknown": "OISY ne peut pas encore dire si la recharge a abouti. Si c'est le cas, votre activité $token l'affichera. Rechargez à nouveau pour renvoyer la même recharge : elle ne peut aboutir qu'une seule fois. Une recharge nouvelle ou modifiée ajouterait à nouveau des cycles si celle-ci a abouti.",
+			"unknown_fresh": "OISY ne peut pas encore dire si votre dernière recharge a abouti. Si c'est le cas, cette recharge ajoute à nouveau des cycles. Vérifiez d'abord votre activité $token.",
+			"sent_to_canister": "Envoyer des $token à un canister ne le recharge pas. Les $token arrivent sur le compte du canister, et le canister ne reçoit des cycles que si son propre code les retire.",
+			"sent_to_canister_top_up": "Pour ajouter des cycles à un canister, utilisez « Recharger » sur la page $token."
 		},
 		"error": {
-			"invalid_canister_id": "",
-			"canister_not_found": "",
-			"canister_check_failed": "",
-			"amount_too_small": "",
-			"refused": "",
-			"insufficient_funds": "",
-			"clock": "",
-			"refunded": "",
-			"refunded_nothing": ""
+			"invalid_canister_id": "Saisissez un ID de canister. Les principals d'utilisateur, les ID de compte et les adresses d'autres réseaux ne peuvent pas être rechargés.",
+			"canister_not_found": "Aucun canister avec cet ID n'existe sur l'Internet Computer. Vérifiez l'ID.",
+			"canister_check_failed": "OISY n'a pas pu vérifier ce canister. Réessayez dans un instant.",
+			"amount_too_small": "Saisissez plus que les frais de $fee $token.",
+			"refused": "La recharge n'a pas abouti. Rien n'a quitté votre portefeuille. Réessayez dans un instant.",
+			"insufficient_funds": "Pas assez de $token pour cette recharge et les frais. Rien n'a quitté votre portefeuille. Réduisez le montant.",
+			"clock": "La recharge n'a pas abouti car l'horloge de votre appareil est décalée. Rien n'a quitté votre portefeuille. Réglez l'heure correcte et réessayez.",
+			"refunded": "Le canister n'a pas pu recevoir les cycles. $refund $token sont revenus dans votre portefeuille, et la tentative a coûté $fees $token de frais. Vérifiez l'ID du canister.",
+			"refunded_nothing": "Le canister n'a pas pu recevoir les cycles, et les frais ont absorbé tout le montant. Vérifiez l'ID du canister."
 		}
 	},
 	"active_user_transactions": {
@@ -2259,8 +2259,8 @@
 			"twin_network": "Réseau $twinNetwork",
 			"no_date_available": "Aucune date disponible",
 			"pending": "En attente",
-			"top_up": "",
-			"top_up_refund": ""
+			"top_up": "Recharge",
+			"top_up_refund": "Remboursement de recharge"
 		},
 		"alt": {
 			"open_block_explorer": "Ouvrir cette transaction sur un explorateur de blocs",

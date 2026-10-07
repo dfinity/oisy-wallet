@@ -1186,33 +1186,33 @@
 	},
 	"cycles_top_up": {
 		"text": {
-			"top_up": "",
-			"title": "",
-			"description": "",
-			"canister_id_placeholder": "",
-			"checking_canister": "",
-			"recently_topped_up": "",
-			"canister": "",
-			"you_top_up": "",
-			"total": "",
-			"one_way": "",
-			"topping_up": "",
-			"topped_up": "",
-			"unknown": "",
-			"unknown_fresh": "",
-			"sent_to_canister": "",
-			"sent_to_canister_top_up": ""
+			"top_up": "充值",
+			"title": "为 Canister 充值",
+			"description": "Cycles 会从您的 $token 余额转入 Canister，Canister 用它们支付计算和存储。",
+			"canister_id_placeholder": "输入 Canister ID",
+			"checking_canister": "正在检查 Canister...",
+			"recently_topped_up": "最近充值",
+			"canister": "Canister",
+			"you_top_up": "您充值",
+			"total": "合计",
+			"one_way": "充值无法撤销：Cycles 会留在 Canister 中。",
+			"topping_up": "正在为 $canister 充值...",
+			"topped_up": "已为 $canister 充值 $amount $token。",
+			"unknown": "OISY 暂时无法确定充值是否成功。如果成功，您的 $token 活动中会显示。再次充值会重新发送同一笔充值：它只能成功一次。如果这笔充值已成功，新的或修改过的充值会再次添加 Cycles。",
+			"unknown_fresh": "OISY 暂时无法确定您上一笔充值是否成功。如果已成功，这笔充值会再次添加 Cycles。请先检查您的 $token 活动。",
+			"sent_to_canister": "向 Canister 发送 $token 不会为其充值。这些 $token 会进入该 Canister 的账户，只有当 Canister 自己的代码将其提取时，它才能获得 Cycles。",
+			"sent_to_canister_top_up": "要为 Canister 添加 Cycles，请在 $token 页面使用“充值”。"
 		},
 		"error": {
-			"invalid_canister_id": "",
-			"canister_not_found": "",
-			"canister_check_failed": "",
-			"amount_too_small": "",
-			"refused": "",
-			"insufficient_funds": "",
-			"clock": "",
-			"refunded": "",
-			"refunded_nothing": ""
+			"invalid_canister_id": "请输入 Canister ID。用户 Principal、账户 ID 和其他网络的地址无法充值。",
+			"canister_not_found": "Internet Computer 上不存在此 ID 的 Canister。请检查 ID。",
+			"canister_check_failed": "OISY 无法检查此 Canister。请稍后再试。",
+			"amount_too_small": "请输入高于 $fee $token 手续费的金额。",
+			"refused": "充值未成功。您的钱包中没有资金转出。请稍后再试。",
+			"insufficient_funds": "$token 不足以支付本次充值和手续费。您的钱包中没有资金转出。请降低金额。",
+			"clock": "由于您的设备时钟不准，充值未成功。您的钱包中没有资金转出。请设置正确的时间后再试。",
+			"refunded": "该 Canister 无法接收 Cycles。$refund $token 已退回您的钱包，此次尝试共花费 $fees $token 手续费。请检查 Canister ID。",
+			"refunded_nothing": "该 Canister 无法接收 Cycles，手续费耗尽了全部金额。请检查 Canister ID。"
 		}
 	},
 	"active_user_transactions": {
@@ -2259,8 +2259,8 @@
 			"twin_network": "$twinNetwork 网络",
 			"no_date_available": "无可用日期",
 			"pending": "处理中",
-			"top_up": "",
-			"top_up_refund": ""
+			"top_up": "充值",
+			"top_up_refund": "充值退款"
 		},
 		"alt": {
 			"open_block_explorer": "在区块浏览器中打开此交易",

@@ -1186,33 +1186,33 @@
 	},
 	"cycles_top_up": {
 		"text": {
-			"top_up": "",
-			"title": "",
-			"description": "",
-			"canister_id_placeholder": "",
-			"checking_canister": "",
-			"recently_topped_up": "",
-			"canister": "",
-			"you_top_up": "",
-			"total": "",
-			"one_way": "",
-			"topping_up": "",
-			"topped_up": "",
-			"unknown": "",
-			"unknown_fresh": "",
-			"sent_to_canister": "",
-			"sent_to_canister_top_up": ""
+			"top_up": "충전",
+			"title": "캐니스터 충전",
+			"description": "사이클은 $token 잔액에서 캐니스터로 이동하며, 캐니스터는 이를 연산과 스토리지에 사용합니다.",
+			"canister_id_placeholder": "캐니스터 ID 입력",
+			"checking_canister": "캐니스터 확인 중...",
+			"recently_topped_up": "최근 충전한 캐니스터",
+			"canister": "캐니스터",
+			"you_top_up": "충전 금액",
+			"total": "합계",
+			"one_way": "충전은 되돌릴 수 없습니다. 사이클은 캐니스터에 남습니다.",
+			"topping_up": "$canister 충전 중...",
+			"topped_up": "$canister에 $amount $token을 충전했습니다.",
+			"unknown": "OISY가 아직 충전 완료 여부를 확인할 수 없습니다. 완료되었다면 $token 활동에 표시됩니다. 다시 충전하면 같은 충전이 다시 전송되며, 한 번만 처리됩니다. 이 충전이 완료되었다면 새로운 충전이나 내용을 바꾼 충전은 사이클을 한 번 더 추가합니다.",
+			"unknown_fresh": "OISY가 아직 마지막 충전의 완료 여부를 확인할 수 없습니다. 완료되었다면 이번 충전으로 사이클이 한 번 더 추가됩니다. 먼저 $token 활동을 확인하세요.",
+			"sent_to_canister": "캐니스터에 $token을 보내도 충전되지 않습니다. $token은 캐니스터의 계정으로 들어가며, 캐니스터 자체 코드가 인출할 때만 사이클이 됩니다.",
+			"sent_to_canister_top_up": "캐니스터에 사이클을 추가하려면 $token 페이지에서 '충전'을 사용하세요."
 		},
 		"error": {
-			"invalid_canister_id": "",
-			"canister_not_found": "",
-			"canister_check_failed": "",
-			"amount_too_small": "",
-			"refused": "",
-			"insufficient_funds": "",
-			"clock": "",
-			"refunded": "",
-			"refunded_nothing": ""
+			"invalid_canister_id": "캐니스터 ID를 입력하세요. 사용자 프린시펄, 계정 ID, 다른 네트워크의 주소는 충전할 수 없습니다.",
+			"canister_not_found": "Internet Computer에 이 ID의 캐니스터가 없습니다. ID를 확인하세요.",
+			"canister_check_failed": "OISY가 이 캐니스터를 확인하지 못했습니다. 잠시 후 다시 시도하세요.",
+			"amount_too_small": "수수료 $fee $token보다 많은 금액을 입력하세요.",
+			"refused": "충전이 완료되지 않았습니다. 지갑에서 빠져나간 것은 없습니다. 잠시 후 다시 시도하세요.",
+			"insufficient_funds": "이 충전과 수수료에 필요한 $token이 부족합니다. 지갑에서 빠져나간 것은 없습니다. 금액을 줄이세요.",
+			"clock": "기기의 시계가 맞지 않아 충전이 완료되지 않았습니다. 지갑에서 빠져나간 것은 없습니다. 올바른 시간으로 설정한 후 다시 시도하세요.",
+			"refunded": "캐니스터가 사이클을 받지 못했습니다. $refund $token이 지갑으로 돌아왔고, 이번 시도에 수수료로 $fees $token이 들었습니다. 캐니스터 ID를 확인하세요.",
+			"refunded_nothing": "캐니스터가 사이클을 받지 못했고, 수수료로 전액이 소진되었습니다. 캐니스터 ID를 확인하세요."
 		}
 	},
 	"active_user_transactions": {
@@ -2259,8 +2259,8 @@
 			"twin_network": "$twinNetwork 네트워크",
 			"no_date_available": "날짜 없음",
 			"pending": "대기 중",
-			"top_up": "",
-			"top_up_refund": ""
+			"top_up": "충전",
+			"top_up_refund": "충전 환불"
 		},
 		"alt": {
 			"open_block_explorer": "블록 탐색기에서 이 트랜잭션 열기",
