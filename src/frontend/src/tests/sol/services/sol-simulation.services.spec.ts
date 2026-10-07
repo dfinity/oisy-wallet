@@ -1,11 +1,8 @@
 import { ZERO } from '$lib/constants/app.constants';
-import {
-	getMultipleAccountsInfo,
-	getSolCreateAccountFee,
-	simulateTransactionAccounts
-} from '$sol/api/solana.api';
+import { getMultipleAccountsInfo, simulateTransactionAccounts } from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
+	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
 	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
@@ -17,6 +14,7 @@ import type {
 	SolanaSimulatedInnerInstructions
 } from '$sol/types/sol-rpc';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
+import * as solInstructionSummaryUtils from '$sol/utils/sol-instruction-summary.utils';
 import {
 	mockAtaAddress,
 	mockAtaAddress2,
@@ -39,7 +37,6 @@ import {
 
 vi.mock('$sol/api/solana.api', () => ({
 	getMultipleAccountsInfo: vi.fn(),
-	getSolCreateAccountFee: vi.fn(),
 	simulateTransactionAccounts: vi.fn()
 }));
 
@@ -111,7 +108,8 @@ describe('sol-simulation.services', () => {
 		base64EncodedTransactionMessage,
 		transactionMessage,
 		address: mockSolAddress,
-		network
+		network,
+		rentExemptMinimumRequest: Promise.resolve(2_039_280n)
 	});
 
 	const simulated = ({
@@ -130,9 +128,12 @@ describe('sol-simulation.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.mocked(getSolCreateAccountFee).mockResolvedValue(2_039_280n as never);
 		vi.mocked(getMultipleAccountsInfo).mockResolvedValue([]);
 		vi.mocked(simulateTransactionAccounts).mockResolvedValue(simulated({ accounts: [] }));
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
 	});
 
 	it('should diff the pre-state against the simulated post-state', async () => {
@@ -190,6 +191,40 @@ describe('sol-simulation.services', () => {
 		vi.mocked(simulateTransactionAccounts).mockRejectedValue(new Error('rpc down'));
 
 		await expect(simulateSolTransaction(params(message([])))).resolves.toBeUndefined();
+	});
+
+	// A creation may fund a token account with more than its reserve and let the initialisation read
+	// the difference as the balance, so the list can only split the two with the reserve the decode
+	// read, which it is handed rather than asking the chain again.
+	it('should hand the reserve it is given to the instruction list', async () => {
+		const spyMapSolInstructionSummaries = vi.spyOn(
+			solInstructionSummaryUtils,
+			'mapSolInstructionSummaries'
+		);
+
+		await simulateSolTransaction({
+			...params(message([])),
+			rentExemptMinimumRequest: Promise.resolve(1_488_440n)
+		});
+
+		expect(spyMapSolInstructionSummaries).toHaveBeenCalledWith(
+			expect.objectContaining({ rentExemptMinimum: 1_488_440n })
+		);
+	});
+
+	// The decode starts the run before the reserve arrives, so waiting for it has to fall inside the
+	// run's own timeout: otherwise a stalled reserve would hold the review past it.
+	it('should give up on a reserve that never arrives within its own timeout', async () => {
+		vi.useFakeTimers();
+
+		const pending = simulateSolTransaction({
+			...params(message([])),
+			rentExemptMinimumRequest: new Promise(() => undefined)
+		});
+
+		await vi.advanceTimersByTimeAsync(SOLANA_SIMULATION_TIMEOUT_MILLISECONDS);
+
+		await expect(pending).resolves.toBeUndefined();
 	});
 
 	it('should yield nothing without a wallet address', async () => {

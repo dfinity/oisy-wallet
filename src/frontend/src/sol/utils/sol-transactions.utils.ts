@@ -75,10 +75,14 @@ const conflicts = ({
 
 export const mapSolTransactionMessage = ({
 	transactionMessage,
-	userAddress
+	userAddress,
+	rentExemptMinimum
 }: {
 	transactionMessage: TransactionMessage;
 	userAddress?: OptionSolAddress;
+	// What the chain charges a token account of the usual size to exist, which every account
+	// creation in the message is held to.
+	rentExemptMinimum?: bigint;
 }): MappedSolTransaction => {
 	// A version 1 message states its priority fee and compute unit limit in its config. The network
 	// ignores Compute Budget instructions there, even invalid ones, and runs them as no-ops, so they
@@ -101,7 +105,7 @@ export const mapSolTransactionMessage = ({
 				computeUnitPrice,
 				computeUnitLimit,
 				ambiguous: instructionAmbiguous
-			} = mapSolInstruction({ instruction, userAddress });
+			} = mapSolInstruction({ instruction, userAddress, rentExemptMinimum });
 
 			// The summary holds a single value per field, so any later instruction that
 			// disagrees on source, destination or payer would be silently dropped from the

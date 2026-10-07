@@ -74,11 +74,13 @@ describe('sol-transactions.utils', () => {
 
 		it('should map a sol transaction message', () => {
 			// The message's close names the signer as its destination, so it states nothing rather
-			// than failing closed. Passing anybody else here is covered in `mapSolInstruction`.
+			// than failing closed. Passing anybody else here is covered in `mapSolInstruction`. Its
+			// creation is funded with the reserve the chain charged when it was recorded.
 			expect(
 				mapSolTransactionMessage({
 					transactionMessage: mockSolParsedTransactionMessage,
-					userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
+					userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
+					rentExemptMinimum: 2_039_280n
 				})
 			).toStrictEqual({
 				amount: 2044380n,
@@ -124,6 +126,22 @@ describe('sol-transactions.utils', () => {
 				instruction: instruction1,
 				userAddress: undefined
 			});
+		});
+
+		it('should hold every instruction to the reserve it is given', () => {
+			spyMapSolInstruction.mockReturnValue({ amount: undefined });
+
+			mapSolTransactionMessage({ transactionMessage: mockParams, rentExemptMinimum: 1_488_440n });
+
+			expect(spyMapSolInstruction).toHaveBeenCalledTimes(3);
+
+			[instruction1, instruction2, instruction3].forEach((instruction, index) =>
+				expect(spyMapSolInstruction).toHaveBeenNthCalledWith(index + 1, {
+					instruction,
+					userAddress: undefined,
+					rentExemptMinimum: 1_488_440n
+				})
+			);
 		});
 
 		it('should sum amounts across multiple instructions', () => {

@@ -1,9 +1,5 @@
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
-import {
-	getMultipleAccountsInfo,
-	getSolCreateAccountFee,
-	simulateTransactionAccounts
-} from '$sol/api/solana.api';
+import { getMultipleAccountsInfo, simulateTransactionAccounts } from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
 	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS
@@ -34,12 +30,16 @@ const simulate = async ({
 	base64EncodedTransactionMessage,
 	transactionMessage,
 	address,
-	network
+	network,
+	rentExemptMinimumRequest
 }: {
 	base64EncodedTransactionMessage: string;
 	transactionMessage: CompilableTransactionMessage;
 	address: SolAddress;
 	network: SolanaNetworkType;
+	// The decode's request for the reserve a token account costs to exist, still pending when the
+	// run starts, so that waiting for it falls inside the run's own timeout.
+	rentExemptMinimumRequest: Promise<bigint | undefined>;
 }): Promise<SolSimulationResult | undefined> => {
 	const addresses = selectSolSimulationAddresses(transactionMessage);
 
@@ -59,7 +59,7 @@ const simulate = async ({
 		await Promise.all([
 			getMultipleAccountsInfo({ addresses, network }),
 			simulateTransactionAccounts({ base64EncodedTransactionMessage, addresses, network }),
-			getSolCreateAccountFee(network).catch(() => undefined)
+			rentExemptMinimumRequest
 		]);
 
 	// A run that failed rolled its changes back, so its post-state describes nothing the user
@@ -228,6 +228,7 @@ export const simulateSolTransaction = async (params: {
 	transactionMessage: CompilableTransactionMessage;
 	address: OptionSolAddress;
 	network: SolanaNetworkType;
+	rentExemptMinimumRequest: Promise<bigint | undefined>;
 }): Promise<SolSimulationResult | undefined> => {
 	const { address } = params;
 

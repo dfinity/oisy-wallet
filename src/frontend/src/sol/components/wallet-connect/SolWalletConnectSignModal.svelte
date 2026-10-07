@@ -99,6 +99,9 @@
 	// with every request: a confirmation given for one set of programs says nothing about another.
 	let unreadProgramsAcknowledged = $state(false);
 	let callsUnreadPrograms = $derived((unreadPrograms ?? []).length > 0);
+	// What the chain charged a token account to exist when the review was computed. Signing holds the
+	// message's account creations to it, so what the review allowed is what gets signed.
+	let rentExemptMinimum = $state<bigint | undefined>();
 	// The decode is asynchronous, so until it settles the review shows an empty summary and no
 	// warning. Approval waits for it: signing on the strength of a review that has not been
 	// computed yet is exactly what the warnings exist to prevent. A failed decode never flips it,
@@ -127,7 +130,8 @@
 				simulatedInstructions,
 				messageSummary,
 				parties,
-				unreadPrograms
+				unreadPrograms,
+				rentExemptMinimum
 			} = await decodeService({
 				base64EncodedTransactionMessage: data,
 				networkId,
@@ -246,7 +250,8 @@
 				instructions.length > 0 &&
 				!instructions.some(({ kind }) => kind === 'unknown'),
 			closesPayOthers,
-			unreadProgramsAcknowledged: !callsUnreadPrograms || unreadProgramsAcknowledged
+			unreadProgramsAcknowledged: !callsUnreadPrograms || unreadProgramsAcknowledged,
+			rentExemptMinimum
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);

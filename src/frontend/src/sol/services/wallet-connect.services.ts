@@ -19,8 +19,13 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { estimatePriorityFee, getAccountInfo } from '$sol/api/solana.api';
-import { TOKEN_2022_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import { waitForMilliseconds } from '$lib/utils/timeout.utils';
+import { estimatePriorityFee, getAccountInfo, getSolCreateAccountFee } from '$sol/api/solana.api';
+import {
+	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
+	TOKEN_2022_PROGRAM_ADDRESS,
+	TOKEN_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
@@ -100,6 +105,10 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	// it does not know do. True when the run calls none. Asked there and handed on for the same
 	// reason as the two flags above.
 	unreadProgramsAcknowledged: boolean;
+	// What the chain charges a token account to exist, as the decode read it. Signing holds the
+	// message's account creations to the same line the review did, so the two cannot disagree, and
+	// approving adds no round trip of its own.
+	rentExemptMinimum: bigint | undefined;
 };
 
 export const decode = async ({
@@ -109,30 +118,49 @@ export const decode = async ({
 }: WalletConnectDecodeTransactionParams) => {
 	const solNetwork = safeMapNetworkIdToNetwork(networkId);
 
+	// What the chain charges a token account to exist, which every account creation in the message
+	// is held to: anything funded above it is a payment rather than rent. Requested alongside the
+	// message, and given up on after the simulation's timeout so an RPC that never answers cannot
+	// hold the review either. Best effort - without it a creation for a program has no line to be
+	// held to and is refused.
+	const rentExemptMinimumRequest = Promise.race([
+		getSolCreateAccountFee(solNetwork),
+		waitForMilliseconds(SOLANA_SIMULATION_TIMEOUT_MILLISECONDS).then(() => undefined)
+	]).catch(() => undefined);
+
 	const parsedTransactionMessage = await parseSolBase64TransactionMessage({
 		transactionMessage: base64EncodedTransactionMessage,
 		rpc: solanaHttpRpc(solNetwork)
 	});
 
-	const mappedTransaction = mapSolTransactionMessage({
-		transactionMessage: parsedTransactionMessage,
-		userAddress: address
-	});
-
 	// The review is synchronous, so both the estimate the requested fee is judged against and the
 	// simulation are fetched here, where the request is already being decoded before the modal
 	// opens. A simulation that lands after the user has approved would be worthless.
+	//
+	// The simulation starts before the reserve is awaited and waits for the same request inside its
+	// own timeout, so a stalled reserve and a stalled run cost one timeout rather than two in a row.
+	const simulationRequest = simulateSolTransaction({
+		base64EncodedTransactionMessage,
+		transactionMessage: parsedTransactionMessage,
+		address,
+		network: solNetwork,
+		rentExemptMinimumRequest
+	});
+
+	const rentExemptMinimum = await rentExemptMinimumRequest;
+
+	const mappedTransaction = mapSolTransactionMessage({
+		transactionMessage: parsedTransactionMessage,
+		userAddress: address,
+		rentExemptMinimum
+	});
+
 	const [prioritizationFeeEstimate, simulation] = await Promise.all([
 		estimateSolPrioritizationFee({
 			computeUnitLimit: mappedTransaction.computeUnitLimit,
 			network: solNetwork
 		}),
-		simulateSolTransaction({
-			base64EncodedTransactionMessage,
-			transactionMessage: parsedTransactionMessage,
-			address,
-			network: solNetwork
-		})
+		simulationRequest
 	]);
 
 	const {
@@ -215,6 +243,7 @@ export const decode = async ({
 					innerInstructions: [],
 					ownedAddresses: owned?.ownedAddresses ?? [],
 					userAddress: address,
+					rentExemptMinimum,
 					includeUnrecognised: true
 				}),
 				network: solNetwork
@@ -238,6 +267,8 @@ export const decode = async ({
 				return { address, ...(nonNullish(name) && { name }) };
 			})
 		}),
+		// Handed on to signing, which holds the message to the line this review was computed with.
+		...(nonNullish(rentExemptMinimum) && { rentExemptMinimum }),
 		parties
 	};
 };
@@ -482,6 +513,7 @@ export const sign = ({
 	simulated,
 	closesPayOthers,
 	unreadProgramsAcknowledged,
+	rentExemptMinimum,
 	...params
 }: WalletConnectSignTransactionParams): Promise<ResultSuccess> =>
 	execute({
@@ -526,7 +558,8 @@ export const sign = ({
 
 			const { amount, destination, ambiguous, unreviewed } = mapSolTransactionMessage({
 				transactionMessage: parsedTransactionMessage,
-				userAddress: address
+				userAddress: address,
+				rentExemptMinimum
 			});
 
 			// The balance is gone the moment this is signed, and the message mapper cannot see a close
