@@ -124,6 +124,20 @@ describe('IcTransactionModal', () => {
 			expect(getByText(canister)).toBeInTheDocument();
 		});
 
+		it('should title a top-up refund as one', () => {
+			const { container } = render(IcTransactionModal, {
+				transaction: {
+					...mockIcTransactionUi,
+					type: 'mint' as const,
+					typeLabel: 'transaction.label.top_up_refund'
+				},
+				token: mockTcyclesToken
+			});
+
+			expect(container).toHaveTextContent(get(i18n).transaction.label.top_up_refund);
+			expect(container).not.toHaveTextContent(/\bmint\b/);
+		});
+
 		it('should keep the plain type on another ledger', () => {
 			const { getByText } = render(IcTransactionModal, {
 				transaction: topUp,
