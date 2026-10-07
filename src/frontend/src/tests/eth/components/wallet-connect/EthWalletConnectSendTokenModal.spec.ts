@@ -1,11 +1,15 @@
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthWalletConnectSendTokenModal from '$eth/components/wallet-connect/EthWalletConnectSendTokenModal.svelte';
 import { CKETH_ABI } from '$eth/constants/cketh.constants';
+import type { EthereumNetwork } from '$eth/types/network';
 import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import { EthFeePriority } from '$lib/enums/eth-fee-priority';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import type { Token } from '$lib/types/token';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { observedPriority } from '$tests/eth/components/wallet-connect/eth-fee-context-stub.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -26,13 +30,19 @@ vi.mock(
 );
 
 describe('EthWalletConnectSendTokenModal', () => {
-	const setup = (
-		firstTransaction: WalletConnectEthSendTransactionParams = {
+	const setup = ({
+		firstTransaction = {
 			from: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
 			to: '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a'
-		}
-	) => {
-		const sendContext = initSendContext({ token: ETHEREUM_TOKEN });
+		},
+		token = ETHEREUM_TOKEN,
+		sourceNetwork = ETHEREUM_NETWORK
+	}: {
+		firstTransaction?: WalletConnectEthSendTransactionParams;
+		token?: Token;
+		sourceNetwork?: EthereumNetwork;
+	} = {}) => {
+		const sendContext = initSendContext({ token });
 
 		const { getByText } = render(EthWalletConnectSendTokenModal, {
 			props: {
@@ -40,7 +50,7 @@ describe('EthWalletConnectSendTokenModal', () => {
 					verifyContext: { verified: { origin: 'https://dapp.example' } }
 				} as WalletKitTypes.SessionRequest,
 				firstTransaction,
-				sourceNetwork: ETHEREUM_NETWORK,
+				sourceNetwork,
 				listener: undefined as OptionWalletConnectListener
 			},
 			context: new Map<symbol, unknown>([[SEND_CONTEXT_KEY, sendContext]])
@@ -106,9 +116,11 @@ describe('EthWalletConnectSendTokenModal', () => {
 			'should title a deposit to another principal sent to %s as a contract call',
 			(to) => {
 				const { getByText } = setup({
-					from: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-					to,
-					data: encodeDeposit(Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'))
+					firstTransaction: {
+						from: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+						to,
+						data: encodeDeposit(Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'))
+					}
 				});
 
 				expect(getByText(en.wallet_connect.text.unknown_call_title)).toBeInTheDocument();
@@ -119,13 +131,41 @@ describe('EthWalletConnectSendTokenModal', () => {
 			'should title a deposit to the principal of the user sent to %s as a send',
 			(to) => {
 				const { getByText } = setup({
-					from: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-					to,
-					data: encodeDeposit(mockPrincipal)
+					firstTransaction: {
+						from: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+						to,
+						data: encodeDeposit(mockPrincipal)
+					}
 				});
 
 				expect(getByText(en.send.text.send)).toBeInTheDocument();
 			}
 		);
+
+		// The store can hold Ethereum's minter information under another chain's token, and the address
+		// it names is not the ckETH helper on that chain.
+		it('should not title a deposit on an EVM network without ckETH as a conversion', () => {
+			ckEthMinterInfoStore.set({
+				id: BASE_ETH_TOKEN.id,
+				data: {
+					data: { ...mockCkMinterInfo, eth_helper_contract_address: toNullable(CKETH_HELPER) },
+					certified: true
+				}
+			});
+
+			const { getByText } = setup({
+				firstTransaction: {
+					from: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+					to: CKETH_HELPER,
+					data: encodeDeposit(mockPrincipal)
+				},
+				token: BASE_ETH_TOKEN,
+				sourceNetwork: BASE_NETWORK
+			});
+
+			expect(getByText(en.wallet_connect.text.unknown_call_title)).toBeInTheDocument();
+
+			ckEthMinterInfoStore.reset(BASE_ETH_TOKEN.id);
+		});
 	});
 });

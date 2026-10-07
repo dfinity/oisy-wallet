@@ -1,5 +1,7 @@
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { CKETH_ABI } from '$eth/constants/cketh.constants';
 import {
@@ -362,6 +364,26 @@ describe('eth wallet-connect.services', () => {
 
 				expect(success).toBeFalsy();
 				expect(executeSend).not.toHaveBeenCalled();
+			});
+
+			// Only Ethereum and Sepolia have a ckETH helper contract. Elsewhere the address the minter
+			// states is not one, so the request is the contract call it is there and not a conversion.
+			it('should not check a deposit on an EVM network without ckETH', async () => {
+				const data = encodeDeposit(Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
+
+				const { success } = await send({
+					...buildDepositParams({ to: CKETH_HELPER, data }),
+					token: BASE_ETH_TOKEN,
+					sourceNetwork: BASE_NETWORK,
+					targetNetwork: BASE_NETWORK
+				});
+
+				expect(success).toBeTruthy();
+				expect(vi.mocked(executeSend).mock.calls[0][0]).toMatchObject({
+					to: CKETH_HELPER,
+					data,
+					sourceNetwork: BASE_NETWORK
+				});
 			});
 		});
 	});

@@ -36,9 +36,10 @@ import {
 import { EthFeePriority as Priority } from '$lib/enums/eth-fee-priority';
 import { screensStore } from '$lib/stores/screens.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
 import { fireEvent, render, within } from '@testing-library/svelte';
@@ -610,6 +611,11 @@ describe('EthWalletConnectSendReview', () => {
 				encodePrincipalToEthAddress(principal)
 			]);
 
+		const minterInfo = {
+			data: { ...mockCkMinterInfo, eth_helper_contract_address: toNullable(CKETH_HELPER) },
+			certified: true
+		};
+
 		const renderDeposit = ({ data, to = CKETH_HELPER }: { data: string; to?: string }) =>
 			render(EthWalletConnectSendReview, {
 				props: {
@@ -619,7 +625,8 @@ describe('EthWalletConnectSendReview', () => {
 					call: classifyWalletConnectEthSendTransaction({
 						to,
 						data,
-						ckEthHelperContractAddress: CKETH_HELPER,
+						networkId: ETHEREUM_NETWORK.id,
+						minterInfo,
 						principal: mockPrincipal
 					}),
 					data,

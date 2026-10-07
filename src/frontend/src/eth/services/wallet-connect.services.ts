@@ -10,7 +10,6 @@ import {
 	isEthSignTypedDataMethod
 } from '$eth/utils/wallet-connect.utils';
 import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
-import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
 import {
 	TRACK_COUNT_WC_ETH_SEND_ERROR,
@@ -114,13 +113,14 @@ export const send = ({
 			}
 
 			// The review refuses these requests through the same check. Running it here as well, against
-			// the helper contract the transaction is then prepared for, keeps a refused request from being
-			// signed however this is reached.
+			// the minter information the transaction is then prepared with, keeps a refused request from
+			// being signed however this is reached.
 			try {
 				getWalletConnectEthCkEthDeposit({
 					to: firstParam.to,
 					data: firstParam.data,
-					ckEthHelperContractAddress: toCkEthHelperContractAddress(minterInfo),
+					networkId: sourceNetwork.id,
+					minterInfo,
 					principal: identity?.getPrincipal()
 				});
 			} catch (_: unknown) {

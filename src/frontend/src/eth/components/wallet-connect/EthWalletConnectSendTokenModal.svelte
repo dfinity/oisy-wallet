@@ -25,12 +25,12 @@
 	import {
 		classifyWalletConnectEthSendTransaction,
 		getSendParamsGas,
-		isWalletConnectEthApproval
+		isWalletConnectEthApproval,
+		toWalletConnectCkEthHelperContractAddress
 	} from '$eth/utils/wallet-connect.utils';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
@@ -64,8 +64,11 @@
 
 	const { sendTokenId, sendToken, sendEthFeePriority } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
+	// The ckETH minter information for the network the request is signed on.
+	let minterInfo = $derived($ckEthMinterInfoStore?.[$sendTokenId]);
+
 	let ckEthHelperContractAddress = $derived(
-		toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId])
+		toWalletConnectCkEthHelperContractAddress({ networkId: sourceNetwork.id, minterInfo })
 	);
 
 	// Classified from where the request goes as well as from its calldata: a `deposit(bytes32)` is a
@@ -74,7 +77,8 @@
 		classifyWalletConnectEthSendTransaction({
 			to: firstTransaction.to,
 			data: firstTransaction.data,
-			ckEthHelperContractAddress,
+			networkId: sourceNetwork.id,
+			minterInfo,
 			principal: $authIdentity?.getPrincipal()
 		})
 	);

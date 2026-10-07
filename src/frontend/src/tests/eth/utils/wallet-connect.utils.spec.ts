@@ -1,3 +1,5 @@
+import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { CKETH_ABI, CKETH_DEPOSIT_HASH } from '$eth/constants/cketh.constants';
 import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
 import {
@@ -28,11 +30,14 @@ import {
 	isEthSignTypedDataMethod,
 	isWalletConnectEthApproval,
 	toTypedDataDomainChainId,
+	toWalletConnectCkEthHelperContractAddress,
 	WalletConnectEthCkEthDepositError,
 	WalletConnectEthTypedDataError
 } from '$eth/utils/wallet-connect.utils';
 import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
+import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
 import { Interface } from 'ethers/abi';
@@ -467,12 +472,52 @@ describe('wallet-connect.utils', () => {
 
 		const ownDeposit = encodeDeposit(mockPrincipal);
 
+		const minterInfoWithHelper = (helper: string) => ({
+			data: { ...mockCkMinterInfo, eth_helper_contract_address: toNullable(helper) },
+			certified: true
+		});
+
+		const minterInfo = minterInfoWithHelper(CKETH_HELPER);
+
 		const params = {
 			to: CKETH_HELPER,
 			data: ownDeposit,
-			ckEthHelperContractAddress: CKETH_HELPER,
+			networkId: ETHEREUM_NETWORK_ID,
+			minterInfo,
 			principal: mockPrincipal
 		};
+
+		describe('toWalletConnectCkEthHelperContractAddress', () => {
+			it.each([
+				{ network: 'Ethereum', networkId: ETHEREUM_NETWORK_ID },
+				{ network: 'Sepolia', networkId: SEPOLIA_NETWORK_ID }
+			])(
+				'should read the helper contract off the minter information on $network',
+				({ networkId }) => {
+					expect(toWalletConnectCkEthHelperContractAddress({ networkId, minterInfo })).toBe(
+						CKETH_HELPER
+					);
+				}
+			);
+
+			it('should name no helper contract on an EVM network without ckETH', () => {
+				expect(
+					toWalletConnectCkEthHelperContractAddress({ networkId: BASE_NETWORK_ID, minterInfo })
+				).toBeUndefined();
+			});
+
+			it.each([undefined, null])(
+				'should name no helper contract without minter information (%s)',
+				(missing) => {
+					expect(
+						toWalletConnectCkEthHelperContractAddress({
+							networkId: ETHEREUM_NETWORK_ID,
+							minterInfo: missing
+						})
+					).toBeUndefined();
+				}
+			);
+		});
 
 		describe('getWalletConnectEthCkEthDeposit', () => {
 			it('should return the principal of the user for a deposit to it', () => {
@@ -480,26 +525,48 @@ describe('wallet-connect.utils', () => {
 			});
 
 			it.each([
-				{ to: CKETH_HELPER.toLowerCase(), ckEthHelperContractAddress: CKETH_HELPER },
-				{ to: CKETH_HELPER, ckEthHelperContractAddress: CKETH_HELPER.toLowerCase() },
-				{ to: `0x${CKETH_HELPER.slice(2).toUpperCase()}`, ckEthHelperContractAddress: CKETH_HELPER }
+				{ to: CKETH_HELPER.toLowerCase(), helper: CKETH_HELPER },
+				{ to: CKETH_HELPER, helper: CKETH_HELPER.toLowerCase() },
+				{ to: `0x${CKETH_HELPER.slice(2).toUpperCase()}`, helper: CKETH_HELPER }
 			])(
 				'should hold $to to the helper contract however its address is cased',
-				({ to, ckEthHelperContractAddress }) => {
+				({ to, helper }) => {
+					const casedParams = { ...params, to, minterInfo: minterInfoWithHelper(helper) };
+
 					expect(() =>
 						getWalletConnectEthCkEthDeposit({
-							...params,
-							to,
-							ckEthHelperContractAddress,
+							...casedParams,
 							data: encodeDeposit(OTHER_PRINCIPAL)
 						})
 					).toThrow(WalletConnectEthCkEthDepositError);
 
-					expect(
-						getWalletConnectEthCkEthDeposit({ ...params, to, ckEthHelperContractAddress })?.toText()
-					).toBe(mockPrincipal.toText());
+					expect(getWalletConnectEthCkEthDeposit(casedParams)?.toText()).toBe(
+						mockPrincipal.toText()
+					);
 				}
 			);
+
+			it('should hold a deposit on Sepolia to its helper contract as well', () => {
+				expect(() =>
+					getWalletConnectEthCkEthDeposit({
+						...params,
+						networkId: SEPOLIA_NETWORK_ID,
+						data: encodeDeposit(OTHER_PRINCIPAL)
+					})
+				).toThrow(WalletConnectEthCkEthDepositError);
+			});
+
+			// The minter information in the store for another chain's token is still Ethereum's, so the
+			// address it names is not the ckETH helper there.
+			it('should not check a deposit on an EVM network without ckETH', () => {
+				expect(
+					getWalletConnectEthCkEthDeposit({
+						...params,
+						networkId: BASE_NETWORK_ID,
+						data: encodeDeposit(OTHER_PRINCIPAL)
+					})
+				).toBeUndefined();
+			});
 
 			it('should throw for a deposit to another principal', () => {
 				expect(() =>
@@ -547,7 +614,7 @@ describe('wallet-connect.utils', () => {
 				expect(
 					getWalletConnectEthCkEthDeposit({
 						...params,
-						ckEthHelperContractAddress: undefined,
+						minterInfo: undefined,
 						data: encodeDeposit(OTHER_PRINCIPAL)
 					})
 				).toBeUndefined();
@@ -601,6 +668,12 @@ describe('wallet-connect.utils', () => {
 						data: `${ERC20_TRANSFER_HASH}${'de'.repeat(64)}`
 					})
 				).toEqual({ type: 'erc20Transfer' });
+			});
+
+			it('should classify a deposit on an EVM network without ckETH by its calldata alone', () => {
+				expect(
+					classifyWalletConnectEthSendTransaction({ ...params, networkId: BASE_NETWORK_ID })
+				).toEqual({ type: 'unknown', selector: CKETH_DEPOSIT_HASH });
 			});
 		});
 	});

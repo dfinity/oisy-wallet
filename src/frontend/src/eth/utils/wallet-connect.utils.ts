@@ -18,9 +18,13 @@ import {
 	isErc20TransactionTransfer,
 	isErcTransactionSetApprovalForAll
 } from '$eth/utils/transactions.utils';
+import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
+import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
 import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
+import type { NetworkId } from '$lib/types/network';
 import { consoleError } from '$lib/utils/console.utils';
+import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
 import type { Verify } from '@walletconnect/types';
@@ -101,10 +105,27 @@ export const classifyWalletConnectEthCall = (data: string | undefined): WalletCo
  */
 export class WalletConnectEthCkEthDepositError extends Error {}
 
+/**
+ * The ckETH helper contract on the network a WalletConnect request is signed for.
+ *
+ * Only Ethereum and Sepolia have one, at the address their ckETH minter states. On any other EVM
+ * network no address is the helper, whatever minter information is in the store for its token.
+ */
+export const toWalletConnectCkEthHelperContractAddress = ({
+	networkId,
+	minterInfo
+}: {
+	networkId: NetworkId;
+	minterInfo: OptionCertifiedMinterInfo;
+}): OptionEthAddress =>
+	isNetworkIdEthereum(networkId) ? toCkEthHelperContractAddress(minterInfo) : undefined;
+
 interface WalletConnectEthCkEthDepositParams {
 	to: string | undefined;
 	data: string | undefined;
-	ckEthHelperContractAddress: OptionEthAddress;
+	// The network the request is signed for, and the ckETH minter information loaded for it.
+	networkId: NetworkId;
+	minterInfo: OptionCertifiedMinterInfo;
 	principal: Principal | undefined;
 }
 
@@ -127,9 +148,15 @@ interface WalletConnectEthCkEthDepositParams {
 export const getWalletConnectEthCkEthDeposit = ({
 	to,
 	data,
-	ckEthHelperContractAddress,
+	networkId,
+	minterInfo,
 	principal
 }: WalletConnectEthCkEthDepositParams): Principal | undefined => {
+	const ckEthHelperContractAddress = toWalletConnectCkEthHelperContractAddress({
+		networkId,
+		minterInfo
+	});
+
 	if (
 		!hasCalldata(data) ||
 		!isDestinationContractAddress({ destination: to, contractAddress: ckEthHelperContractAddress })
