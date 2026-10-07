@@ -19,8 +19,13 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { estimatePriorityFee, getAccountInfo } from '$sol/api/solana.api';
-import { TOKEN_2022_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import { waitForMilliseconds } from '$lib/utils/timeout.utils';
+import { estimatePriorityFee, getAccountInfo, getSolCreateAccountFee } from '$sol/api/solana.api';
+import {
+	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
+	TOKEN_2022_PROGRAM_ADDRESS,
+	TOKEN_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
@@ -37,6 +42,7 @@ import { calculateAssociatedTokenAddress } from '$sol/services/spl-accounts.serv
 import { loadSplTokenMetadata } from '$sol/services/spl-token-metadata.services';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
+import type { SolUnreadProgram } from '$sol/types/sol-simulation';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { convertSolComputeUnitPriceToFee } from '$sol/utils/fee.utils';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
@@ -95,6 +101,18 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	// cannot see a close a program makes inside its own call, and handed on for the same reason
 	// the simulated flag is.
 	closesPayOthers: boolean;
+	// Whether the user confirmed on the review that OISY cannot say what the programs the run calls
+	// it does not know do. True when the run calls none. Asked there and handed on for the same
+	// reason as the two flags above.
+	unreadProgramsAcknowledged: boolean;
+	// What the chain charges a token account to exist, as the decode read it. Signing holds the
+	// message's account creations to the same line the review did, so the two cannot disagree, and
+	// approving adds no round trip of its own.
+	rentExemptMinimum: bigint | undefined;
+	// Whether the run opens an account inside another program's instruction with more than its size
+	// costs. Only the run shows such an opening, and the decode already has it, so it is handed on
+	// for the same reason the simulated flag is.
+	opensAccountBeyondRent: boolean;
 };
 
 export const decode = async ({
@@ -104,44 +122,73 @@ export const decode = async ({
 }: WalletConnectDecodeTransactionParams) => {
 	const solNetwork = safeMapNetworkIdToNetwork(networkId);
 
+	// What the chain charges a token account to exist, which every account creation in the message
+	// is held to: anything funded above it is a payment rather than rent. Requested alongside the
+	// message, and given up on after the simulation's timeout so an RPC that never answers cannot
+	// hold the review either. Best effort - without it a creation for a program has no line to be
+	// held to and is refused.
+	const rentExemptMinimumRequest = Promise.race([
+		getSolCreateAccountFee(solNetwork),
+		waitForMilliseconds(SOLANA_SIMULATION_TIMEOUT_MILLISECONDS).then(() => undefined)
+	]).catch(() => undefined);
+
 	const parsedTransactionMessage = await parseSolBase64TransactionMessage({
 		transactionMessage: base64EncodedTransactionMessage,
 		rpc: solanaHttpRpc(solNetwork)
 	});
 
-	const mappedTransaction = mapSolTransactionMessage({
-		transactionMessage: parsedTransactionMessage,
-		userAddress: address
-	});
-
 	// The review is synchronous, so both the estimate the requested fee is judged against and the
 	// simulation are fetched here, where the request is already being decoded before the modal
 	// opens. A simulation that lands after the user has approved would be worthless.
+	//
+	// The simulation starts before the reserve is awaited and waits for the same request inside its
+	// own timeout, so a stalled reserve and a stalled run cost one timeout rather than two in a row.
+	const simulationRequest = simulateSolTransaction({
+		base64EncodedTransactionMessage,
+		transactionMessage: parsedTransactionMessage,
+		address,
+		network: solNetwork,
+		rentExemptMinimumRequest
+	});
+
+	const rentExemptMinimum = await rentExemptMinimumRequest;
+
+	const mappedTransaction = mapSolTransactionMessage({
+		transactionMessage: parsedTransactionMessage,
+		userAddress: address,
+		rentExemptMinimum
+	});
+
 	const [prioritizationFeeEstimate, simulation] = await Promise.all([
 		estimateSolPrioritizationFee({
 			computeUnitLimit: mappedTransaction.computeUnitLimit,
 			network: solNetwork
 		}),
-		simulateSolTransaction({
-			base64EncodedTransactionMessage,
-			transactionMessage: parsedTransactionMessage,
-			address,
-			network: solNetwork
-		})
+		simulationRequest
 	]);
 
 	const {
 		preview,
 		instructions: simulatedInstructions,
 		messageSummary,
-		parties: simulatedParties
+		parties: simulatedParties,
+		unreadPrograms,
+		opensAccountBeyondRent
 	} = simulation ?? {};
 
 	// Name the mints and the programs the review is about to show. Best effort and awaited, since
 	// the review is synchronous and a name that landed after the modal opened would arrive too late
 	// to read.
-	const [namedInstructions] = await Promise.all([
+	const [namedInstructions, namedUnreadPrograms] = await Promise.all([
 		loadSolProgramNames({ instructions: simulatedInstructions ?? [], network: solNetwork }),
+		// Each is an instruction nothing here reads, which is what the loader names.
+		loadSolProgramNames({
+			instructions: (unreadPrograms ?? []).map((program) => ({
+				kind: 'unknown' as const,
+				program
+			})),
+			network: solNetwork
+		}),
 		loadSplTokenMetadata({
 			tokenAddresses: (preview?.tokenDeltas ?? []).map(({ tokenAddress }) => tokenAddress),
 			network: solNetwork
@@ -201,6 +248,7 @@ export const decode = async ({
 					innerInstructions: [],
 					ownedAddresses: owned?.ownedAddresses ?? [],
 					userAddress: address,
+					rentExemptMinimum,
 					includeUnrecognised: true
 				}),
 				network: solNetwork
@@ -215,6 +263,18 @@ export const decode = async ({
 			simulatedInstructions: nonNullish(simulatedInstructions)
 		}),
 		...(nonNullish(tokenAddress) && { tokenAddress }),
+		// Only from a run: without one there are no nested calls to name, and the review already says
+		// that the lists are then partial.
+		...(nonNullish(unreadPrograms) && {
+			unreadPrograms: unreadPrograms.map((address, index): SolUnreadProgram => {
+				const name = namedUnreadPrograms[index]?.programName;
+
+				return { address, ...(nonNullish(name) && { name }) };
+			})
+		}),
+		// Handed on to signing, which holds the message to the line this review was computed with.
+		...(nonNullish(rentExemptMinimum) && { rentExemptMinimum }),
+		...(opensAccountBeyondRent === true && { opensAccountBeyondRent }),
 		parties
 	};
 };
@@ -458,6 +518,9 @@ export const sign = ({
 	identity,
 	simulated,
 	closesPayOthers,
+	unreadProgramsAcknowledged,
+	rentExemptMinimum,
+	opensAccountBeyondRent,
 	...params
 }: WalletConnectSignTransactionParams): Promise<ResultSuccess> =>
 	execute({
@@ -502,7 +565,8 @@ export const sign = ({
 
 			const { amount, destination, ambiguous, unreviewed } = mapSolTransactionMessage({
 				transactionMessage: parsedTransactionMessage,
-				userAddress: address
+				userAddress: address,
+				rentExemptMinimum
 			});
 
 			// The balance is gone the moment this is signed, and the message mapper cannot see a close
@@ -528,7 +592,11 @@ export const sign = ({
 			// When the message bundles instructions that disagree on those fields, that summary
 			// would hide part of the fund flow (e.g. a transfer to an attacker alongside a benign
 			// one). Refuse to sign anything we cannot display faithfully.
-			if (ambiguous) {
+			//
+			// An account a program opens inside its own instruction with more than its size costs is
+			// refused on the same terms as an over-funded opening the message states itself: what
+			// sits above the rent is a payment with no destination, which no line can show.
+			if (ambiguous || opensAccountBeyondRent) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.ambiguous_transaction }
 				});
@@ -549,6 +617,20 @@ export const sign = ({
 			if ((unreviewed ?? false) && !simulated) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.unreviewed_without_simulation }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
+			// A program the run calls from inside another one can act on what the user holds in an
+			// application, which neither the balance changes nor the operations show. The review holds
+			// the button until the user confirms they understand that; this is the same condition,
+			// asked where the signature is made.
+			if (!unreadProgramsAcknowledged) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.unread_programs_unconfirmed }
 				});
 
 				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });

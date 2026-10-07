@@ -1709,7 +1709,8 @@
 			"prioritization_fee": "",
 			"base_kind": "",
 			"prioritization_kind": "",
-			"ata_kind": ""
+			"ata_kind": "",
+			"app_account_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "手数料をカバーするのに十分な資金がありません。"
@@ -1761,6 +1762,9 @@
 			"tab_operations": "オペレーション",
 			"unreviewed_instructions": "OISYはこれらの指示の一部をデコードできないため、以下のレビューは不完全な場合があります。",
 			"unreviewed_instructions_simulated": "このトランザクションには、OISYがデコードできない外部ソースからの操作が含まれているため、OISYはそのシミュレーションを実行しました。アプリケーションを信頼できることを確認し、署名する前にシミュレートされた残高の変化と操作を確認してください。実際の結果はシミュレーションと異なる場合があることにご注意ください。",
+			"unread_programs_one": "このトランザクションは、OISYが読み取れないプログラムを呼び出します。このプログラムは、ステーキング中のSOLやレンディングの預け入れなど、他のアプリで保有している資金を移動させることができ、以下の内容にはそれが表示されません。",
+			"unread_programs_other": "このトランザクションは、OISYが読み取れない複数のプログラムを呼び出します。これらのプログラムは、ステーキング中のSOLやレンディングの預け入れなど、他のアプリで保有している資金を移動させることができ、以下の内容にはそれが表示されません。",
+			"unread_programs_acknowledge": "OISYがこのアプリの動作を表示できないことを理解しました",
 			"cannot_be_shown": "このトランザクションには、確認用に正確に表示しきれない操作が含まれているため、OISY は署名しません。拒否して、アプリにより簡単なリクエストを送るよう依頼してください。",
 			"close_pays_others": "このトランザクションはあなたのトークンアカウントの一つを閉じ、その残高をあなたのウォレット以外のアドレスに支払います。安全のため、OISY はこれに署名しません。",
 			"simulated_instructions": "シミュレートされた指示",
@@ -1874,6 +1878,7 @@
 			"ambiguous_transaction": "このトランザクションは複数のアドレス間で資金を移動するため、確認のために正確に表示できません。安全のため、署名されませんでした。",
 			"close_pays_others": "このトランザクションはあなたのトークンアカウントの一つを閉じ、その残高をあなたのウォレット以外のアドレスに支払います。安全のため、署名されませんでした。",
 			"unreviewed_without_simulation": "OISY はこのトランザクションの一部を読み取れず、ネットワークからシミュレーションも返されなかったため、その部分が何を行うのかを示すものがありません。安全のため、署名されませんでした。",
+			"unread_programs_unconfirmed": "このトランザクションはOISYが読み取れないプログラムを呼び出しており、レビューで確認されませんでした。安全のため、署名されませんでした。",
 			"sol_transaction_as_message": "このメッセージはSolanaのトランザクションであり、トランザクションレビューを通じてのみ承認できます。安全のため、署名されませんでした。",
 			"request_not_defined": "予期しないエラー: リクエストが定義されていないため、処理できません。",
 			"unexpected_processing_request": "WalletConnectでリクエストを処理中に予期しないエラーが発生しました。"
@@ -2153,6 +2158,7 @@
 			"instruction_wrap": "",
 			"instruction_unwrap": "$symbol のトークンアカウントをアンラップして閉じる",
 			"instruction_create_account": "",
+			"instruction_create_program_account": "",
 			"instruction_close_account": "",
 			"instruction_close_account_for": "$symbol のトークンアカウントを閉じる",
 			"instruction_approve": "",

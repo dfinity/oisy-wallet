@@ -1,9 +1,15 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import SolInstructionsList from '$sol/components/transactions/SolInstructionsList.svelte';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import en from '$tests/mocks/i18n.mock';
-import { mockSolAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
+import {
+	mockSolAddress,
+	mockSolAddress2,
+	mockSolAddress3,
+	mockSplAddress
+} from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { render } from '@testing-library/svelte';
 
@@ -97,6 +103,112 @@ describe('SolInstructionsList', () => {
 
 		expect(getByTestId('sol-instructions-list')).toHaveTextContent(
 			`0.01 ${mockValidSplToken.symbol}`
+		);
+	});
+
+	// The program names the account, so it follows the line the way the program of a route does.
+	it('should name the program an account is opened for', () => {
+		const { getByTestId } = render(SolInstructionsList, {
+			props: {
+				instructions: [
+					{
+						kind: 'createAccount',
+						account: mockSolAddress2,
+						program: mockSolAddress3,
+						programName: 'lb_clmm',
+						rent: 41_899_840n
+					}
+				],
+				token: SOLANA_TOKEN,
+				userAddress: mockSolAddress
+			}
+		});
+
+		expect(getByTestId('sol-instructions-list')).toHaveTextContent(
+			/^Create app account for lb_clmm .+ · rent 0\.04189984 SOL$/
+		);
+	});
+
+	describe('an account opened under the heading of an instruction', () => {
+		const opening: SolInstructionSummary = {
+			kind: 'createAccount',
+			account: mockSolAddress2,
+			program: mockSolAddress3,
+			programName: 'lb_clmm',
+			rent: 41_899_840n
+		};
+
+		const render$ = (heading: SolInstructionSummary) =>
+			render(SolInstructionsList, {
+				props: {
+					instructions: [heading],
+					token: SOLANA_TOKEN,
+					userAddress: mockSolAddress
+				}
+			});
+
+		// The heading right above shows the address with its controls, so the line keeps the
+		// name alone and reads like the opening of a token account.
+		it('should name the program without repeating its address', () => {
+			const { getAllByTestId, getAllByText } = render$({
+				kind: 'route',
+				program: mockSolAddress3,
+				programName: 'lb_clmm',
+				children: [opening]
+			});
+
+			const [, line] = getAllByTestId('sol-instruction');
+
+			expect(line).toHaveTextContent(/^Create app account for lb_clmm · rent 0\.04189984 SOL$/);
+			expect(getAllByText(shortenWithMiddleEllipsis({ text: mockSolAddress3 }))).toHaveLength(1);
+		});
+
+		it('should name it by its address when it publishes no name', () => {
+			const { getAllByTestId } = render$({
+				kind: 'route',
+				program: mockSolAddress3,
+				children: [{ ...opening, programName: undefined }]
+			});
+
+			const [, line] = getAllByTestId('sol-instruction');
+
+			expect(line).toHaveTextContent(
+				`Create app account for ${shortenWithMiddleEllipsis({ text: mockSolAddress3 })} · rent 0.04189984 SOL`
+			);
+		});
+
+		it('should keep the address of a program other than the heading’s', () => {
+			const { getAllByText } = render$({
+				kind: 'route',
+				program: mockSolAddress,
+				children: [opening]
+			});
+
+			expect(getAllByText(shortenWithMiddleEllipsis({ text: mockSolAddress3 }))).toHaveLength(1);
+			expect(getAllByText(shortenWithMiddleEllipsis({ text: mockSolAddress }))).toHaveLength(1);
+		});
+	});
+
+	it('should not call sends that all leave a swap', () => {
+		const { getByTestId } = render(SolInstructionsList, {
+			props: {
+				instructions: [
+					{
+						kind: 'route',
+						program: mockSolAddress3,
+						children: [send(mockSplAddress), send(mockSplAddress)]
+					}
+				],
+				token: SOLANA_TOKEN,
+				userAddress: mockSolAddress
+			}
+		});
+
+		expect(getByTestId('sol-instructions-list')).toHaveTextContent(
+			en.transaction.text.instruction_unknown_via
+		);
+		expect(getByTestId('sol-instructions-list')).not.toHaveTextContent(
+			en.transaction.text.instruction_route
 		);
 	});
 });
