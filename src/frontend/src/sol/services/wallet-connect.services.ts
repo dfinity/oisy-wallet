@@ -109,6 +109,10 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	// message's account creations to the same line the review did, so the two cannot disagree, and
 	// approving adds no round trip of its own.
 	rentExemptMinimum: bigint | undefined;
+	// Whether the run opens an account inside another program's instruction with more than its size
+	// costs. Only the run shows such an opening, and the decode already has it, so it is handed on
+	// for the same reason the simulated flag is.
+	opensAccountBeyondRent: boolean;
 };
 
 export const decode = async ({
@@ -168,7 +172,8 @@ export const decode = async ({
 		instructions: simulatedInstructions,
 		messageSummary,
 		parties: simulatedParties,
-		unreadPrograms
+		unreadPrograms,
+		opensAccountBeyondRent
 	} = simulation ?? {};
 
 	// Name the mints and the programs the review is about to show. Best effort and awaited, since
@@ -269,6 +274,7 @@ export const decode = async ({
 		}),
 		// Handed on to signing, which holds the message to the line this review was computed with.
 		...(nonNullish(rentExemptMinimum) && { rentExemptMinimum }),
+		...(opensAccountBeyondRent === true && { opensAccountBeyondRent }),
 		parties
 	};
 };
@@ -514,6 +520,7 @@ export const sign = ({
 	closesPayOthers,
 	unreadProgramsAcknowledged,
 	rentExemptMinimum,
+	opensAccountBeyondRent,
 	...params
 }: WalletConnectSignTransactionParams): Promise<ResultSuccess> =>
 	execute({
@@ -585,7 +592,11 @@ export const sign = ({
 			// When the message bundles instructions that disagree on those fields, that summary
 			// would hide part of the fund flow (e.g. a transfer to an attacker alongside a benign
 			// one). Refuse to sign anything we cannot display faithfully.
-			if (ambiguous) {
+			//
+			// An account a program opens inside its own instruction with more than its size costs is
+			// refused on the same terms as an over-funded opening the message states itself: what
+			// sits above the rent is a payment with no destination, which no line can show.
+			if (ambiguous || opensAccountBeyondRent) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.ambiguous_transaction }
 				});

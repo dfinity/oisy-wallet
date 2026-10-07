@@ -67,6 +67,9 @@ export interface SolSimulationResult {
 	// from the run. Whether the run agrees is the caller's to decide, since only the caller knows
 	// what the transaction costs, which the simulated balance carries and the message never states.
 	messageSummary?: SolTransactionSummary;
+	// Whether the run opens an account inside another program's instruction with more than its size
+	// costs: a payment the review refuses rather than states, as it does for the message's own.
+	opensAccountBeyondRent?: boolean;
 	parties: SolTransferParties;
 	// The programs the run calls from inside another program's instruction that are not among the
 	// known ones. Such a call can act on what the user holds in an application, which neither the
