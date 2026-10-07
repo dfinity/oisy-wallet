@@ -86,6 +86,11 @@ export const SOLANA_MAX_SKIPPED_SIGNATURE_PAGES = 3;
 // https://solana.com/docs/rpc/http/getmultipleaccounts
 export const SOLANA_MAX_MULTIPLE_ACCOUNTS = 100;
 
+// The RPC refuses to return a transaction of a newer version than the caller declares support for,
+// and one such transaction in a wallet's history fails every load of it. Version 1 (SIMD-0385) is
+// accepted on mainnet since epoch 1035.
+export const SOLANA_MAX_SUPPORTED_TRANSACTION_VERSION = 1;
+
 // A page of signatures is resolved concurrently, but public RPC endpoints throttle bursts of
 // `getTransaction` calls, so only this many are in flight at once.
 export const SOLANA_TRANSACTION_DETAIL_CONCURRENCY = 5;
