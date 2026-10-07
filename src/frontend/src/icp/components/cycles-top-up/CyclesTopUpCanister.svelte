@@ -5,6 +5,7 @@
 	import CyclesTopUpRecentCanisters from '$icp/components/cycles-top-up/CyclesTopUpRecentCanisters.svelte';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { parseCanisterId } from '$icp/utils/cycles-top-up.utils';
+	import { isIcrcAddress } from '$icp/utils/icrc-account.utils';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -35,8 +36,12 @@
 
 	let canisterId = $derived(parseCanisterId(canisterIdText));
 
+	// A complete principal or account that is not a canister ID is flagged at once, however
+	// short (`aaaaa-aa`, `2vxsx-fae`). Other text only once it is too long to be still typing.
 	let invalid = $derived(
-		isNullish(canisterId) && canisterIdText.trim().length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE
+		isNullish(canisterId) &&
+			(canisterIdText.trim().length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE ||
+				isIcrcAddress(canisterIdText.trim()))
 	);
 
 	// The outcome of the last existence check, cleared as soon as the ID changes. A check that

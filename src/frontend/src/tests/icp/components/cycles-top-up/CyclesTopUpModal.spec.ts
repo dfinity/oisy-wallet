@@ -151,6 +151,27 @@ describe('CyclesTopUpModal', () => {
 			expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_NEXT_BUTTON)).toBeDisabled();
 		});
 
+		it.each([
+			{ name: 'the management canister', text: 'aaaaa-aa' },
+			{ name: 'the anonymous principal', text: '2vxsx-fae' }
+		])('asks for a canister ID for $name, however short', async ({ text }) => {
+			const result = renderModal();
+
+			await enterCanister({ result, text });
+
+			expect(result.container).toHaveTextContent(en.cycles_top_up.error.invalid_canister_id);
+			expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_NEXT_BUTTON)).toBeDisabled();
+		});
+
+		it('does not flag a canister ID still being typed', async () => {
+			const result = renderModal();
+
+			await enterCanister({ result, text: canister.slice(0, 9) });
+
+			expect(result.container).not.toHaveTextContent(en.cycles_top_up.error.invalid_canister_id);
+			expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_NEXT_BUTTON)).toBeDisabled();
+		});
+
 		it('checks that the canister exists before going on', async () => {
 			await toAmount();
 
