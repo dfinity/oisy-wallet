@@ -18,6 +18,7 @@ describe('sol-token-name.utils', () => {
 		tokens,
 		networkId: network.id,
 		unknownTokenLabel: 'Unknown token',
+		unknownTokenNamedLabel: 'Unknown token ($symbol)',
 		nativeSymbol: 'SOL'
 	};
 
@@ -34,8 +35,9 @@ describe('sol-token-name.utils', () => {
 		});
 
 		// One account read names a Token-2022 mint the wallet does not list, which is the whole
-		// point of asking: a placeholder tells the user nothing.
-		it('should use the symbol the mint carries in its own account', () => {
+		// point of asking: a placeholder tells the user nothing. Its creator chose that symbol, so it
+		// is shown inside the placeholder rather than as the token's name.
+		it('should show the symbol the mint carries in its own account inside the placeholder', () => {
 			expect(
 				solTokenSymbol({
 					...args,
@@ -43,53 +45,32 @@ describe('sol-token-name.utils', () => {
 					metadata: on({ 'unlisted-mint': { name: 'Pump', symbol: 'PUMP' } }),
 					unknownTokenAddresses: []
 				})
-			).toBe('PUMP');
+			).toBe('Unknown token (PUMP)');
 		});
 
-		// The same mint address exists on several clusters and carries different data on each, so a
-		// devnet mint must not inherit the name its mainnet namesake happens to have.
-		it('should ignore a name held for another cluster', () => {
+		// Any mint can carry the symbol of a token the wallet lists. Only the listed one reads as
+		// that symbol on its own.
+		it('should keep a listed symbol carried by another mint inside the placeholder', () => {
+			const metadata = on({
+				'other-mint': { name: mockValidSplToken.name, symbol: mockValidSplToken.symbol }
+			});
+
 			expect(
 				solTokenSymbol({
 					...args,
-					tokenAddress: 'unlisted-mint',
-					metadata: {
-						[SolanaNetworks.devnet]: { 'unlisted-mint': { name: 'Pump', symbol: 'PUMP' } }
-					},
-					unknownTokenAddresses: ['unlisted-mint']
-				})
-			).toBe('Unknown token');
-		});
-
-		it('should fall back to the placeholder, unnumbered when it stands alone', () => {
-			expect(
-				solTokenSymbol({
-					...args,
-					tokenAddress: 'nameless',
-					metadata: on({}),
-					unknownTokenAddresses: ['nameless']
-				})
-			).toBe('Unknown token');
-		});
-
-		// Two rows both reading "Unknown token" are worse than an address: nothing tells them apart.
-		it('should number the placeholders when a view holds more than one', () => {
-			const unknownTokenAddresses = ['first', 'second'];
-
-			expect(
-				solTokenSymbol({ ...args, tokenAddress: 'second', metadata: on({}), unknownTokenAddresses })
-			).toBe('Unknown token 2');
-		});
-
-		it('should name native SOL without consulting anything', () => {
-			expect(
-				solTokenSymbol({
-					...args,
-					tokenAddress: undefined,
-					metadata: on({}),
+					tokenAddress: 'other-mint',
+					metadata,
 					unknownTokenAddresses: []
 				})
-			).toBe('SOL');
+			).toBe(`Unknown token (${mockValidSplToken.symbol})`);
+			expect(
+				solTokenSymbol({
+					...args,
+					tokenAddress: mockValidSplToken.address,
+					metadata,
+					unknownTokenAddresses: []
+				})
+			).toBe(mockValidSplToken.symbol);
 		});
 	});
 

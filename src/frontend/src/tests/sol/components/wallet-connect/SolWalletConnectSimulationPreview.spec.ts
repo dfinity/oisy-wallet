@@ -1,8 +1,11 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { CONVERT_AMOUNT_EXCHANGE_VALUE } from '$lib/constants/test-ids.constants';
 import { exchangeStore } from '$lib/stores/exchange.store';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
+import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
+import { SolanaNetworks } from '$sol/types/network';
 import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 import en from '$tests/mocks/i18n.mock';
 import { mockAtaAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
@@ -26,6 +29,7 @@ describe('SolWalletConnectSimulationPreview', () => {
 	beforeEach(() => {
 		exchangeStore.reset();
 		splCustomTokensStore.resetAll();
+		splTokenMetadataStore.reset();
 	});
 
 	it('should render an outgoing SOL delta as a negative amount', () => {
@@ -159,6 +163,36 @@ describe('SolWalletConnectSimulationPreview', () => {
 			);
 
 			expect(queryByText(new RegExp(mockSplAddress.slice(0, 6)))).not.toBeInTheDocument();
+		});
+
+		// Any mint can carry the symbol of a token the wallet lists. The two rows have to differ,
+		// or the change reads as one of the token the user knows.
+		it('should keep a listed symbol carried by an unlisted mint inside the placeholder', () => {
+			enableSplToken();
+			splTokenMetadataStore.set({
+				network: SolanaNetworks.mainnet,
+				metadata: {
+					[otherMint]: { name: mockValidSplToken.name, symbol: mockValidSplToken.symbol }
+				}
+			});
+
+			const { getAllByTestId } = render(
+				SolWalletConnectSimulationPreview,
+				props({
+					tokenDeltas: [delta(mockValidSplToken.address), delta(otherMint)],
+					controlChanges: []
+				})
+			);
+
+			const [listed, unlisted] = getAllByTestId('simulated-token-delta');
+
+			expect(listed).toHaveTextContent(`+2.5 ${mockValidSplToken.symbol}`);
+			expect(listed).not.toHaveTextContent(en.transaction.text.unknown_token);
+			expect(unlisted).toHaveTextContent(
+				`+2.5 ${replacePlaceholders(en.transaction.text.unknown_token_named, {
+					$symbol: mockValidSplToken.symbol
+				})}`
+			);
 		});
 
 		it('should still prefer the ticker of a mint it knows', () => {

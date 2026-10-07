@@ -30,8 +30,8 @@
 		findSplToken({ tokens: $splTokens, tokenAddress, networkId: feeToken.network.id });
 
 	// Mints nothing can name, in the order they appear. The wallet's own list answers first, then
-	// the name a Token-2022 mint carries in its own account; the numbered placeholder is what is
-	// left when neither does.
+	// the placeholder carrying the symbol a Token-2022 mint has in its own account; the numbered
+	// placeholder alone is what is left when neither does.
 	let unknownTokenAddresses = $derived(
 		solUnknownTokenAddresses({
 			tokenAddresses: tokenDeltas.map(({ tokenAddress }) => tokenAddress),
@@ -49,6 +49,7 @@
 			metadata: $splTokenMetadataStore,
 			unknownTokenAddresses,
 			unknownTokenLabel: $i18n.transaction.text.unknown_token,
+			unknownTokenNamedLabel: $i18n.transaction.text.unknown_token_named,
 			nativeSymbol: feeToken.symbol
 		});
 

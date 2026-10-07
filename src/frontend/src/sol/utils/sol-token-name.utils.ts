@@ -1,4 +1,5 @@
 import type { NetworkId } from '$lib/types/network';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { SplTokenMetadata, SplTokenMetadataData } from '$sol/stores/spl-token-metadata.store';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
@@ -23,12 +24,33 @@ const namesOn = ({
 };
 
 /**
+ * The symbol a mint carries in its own account, if it carries one.
+ */
+const ownSymbol = ({
+	tokenAddress,
+	networkId,
+	metadata
+}: {
+	tokenAddress: SplTokenAddress;
+	networkId: NetworkId;
+	metadata: SplTokenMetadataData;
+}): string | undefined => {
+	const symbol = namesOn({ metadata, networkId })[tokenAddress]?.symbol;
+
+	return notEmptyString(symbol) ? symbol : undefined;
+};
+
+/**
  * How a mint is named, wherever one is named.
  *
- * In order: the token the wallet lists, the symbol the mint carries in its own account, and
- * finally a placeholder. The placeholder is numbered by the order the mints appear, and only when
- * a single view holds more than one of them: two rows reading "Unknown token" are worse than an
- * address, because nothing distinguishes them.
+ * In order: the token the wallet lists, the placeholder carrying the symbol the mint has in its
+ * own account, and finally the placeholder alone. The bare placeholder is numbered by the order
+ * the mints appear, and only when a single view holds more than one of them: two rows reading
+ * "Unknown token" are worse than an address, because nothing distinguishes them.
+ *
+ * A symbol of the mint's own never stands on its own. Anybody can create a mint that calls itself
+ * "USDC", so it is shown inside the placeholder: a token the wallet does not list never reads as
+ * one it does.
  *
  * The list the caller passes is the wallet's whole one, disabled tokens included: hiding a token
  * from the asset list says nothing about how to read a transaction that moves it.
@@ -43,6 +65,7 @@ export const solTokenSymbol = ({
 	metadata,
 	unknownTokenAddresses,
 	unknownTokenLabel,
+	unknownTokenNamedLabel,
 	nativeSymbol
 }: {
 	tokenAddress: SplTokenAddress | undefined;
@@ -51,6 +74,8 @@ export const solTokenSymbol = ({
 	metadata: SplTokenMetadataData;
 	unknownTokenAddresses: SplTokenAddress[];
 	unknownTokenLabel: string;
+	// The placeholder with a `$symbol` in it, for a mint that carries a symbol of its own.
+	unknownTokenNamedLabel: string;
 	nativeSymbol: string;
 }): string => {
 	if (isNullish(tokenAddress)) {
@@ -63,10 +88,10 @@ export const solTokenSymbol = ({
 		return listed;
 	}
 
-	const onChain = namesOn({ metadata, networkId })[tokenAddress]?.symbol;
+	const own = ownSymbol({ tokenAddress, networkId, metadata });
 
-	if (notEmptyString(onChain)) {
-		return onChain;
+	if (nonNullish(own)) {
+		return replacePlaceholders(unknownTokenNamedLabel, { $symbol: own });
 	}
 
 	const index = unknownTokenAddresses.indexOf(tokenAddress);
@@ -90,15 +115,13 @@ export const solUnknownTokenAddresses = ({
 	tokens: SplCustomToken[];
 	networkId: NetworkId;
 	metadata: SplTokenMetadataData;
-}): SplTokenAddress[] => {
-	const names = namesOn({ metadata, networkId });
-
-	return tokenAddresses.reduce<SplTokenAddress[]>((acc, tokenAddress) => {
+}): SplTokenAddress[] =>
+	tokenAddresses.reduce<SplTokenAddress[]>((acc, tokenAddress) => {
 		if (
 			isNullish(tokenAddress) ||
 			acc.includes(tokenAddress) ||
 			nonNullish(findSplToken({ tokens, tokenAddress, networkId })) ||
-			notEmptyString(names[tokenAddress]?.symbol)
+			nonNullish(ownSymbol({ tokenAddress, networkId, metadata }))
 		) {
 			return acc;
 		}
@@ -106,4 +129,3 @@ export const solUnknownTokenAddresses = ({
 		acc.push(tokenAddress);
 		return acc;
 	}, []);
-};

@@ -200,6 +200,7 @@
 							metadata: $splTokenMetadataStore,
 							unknownTokenAddresses: summaryTokenAddresses,
 							unknownTokenLabel: $i18n.transaction.text.unknown_token,
+							unknownTokenNamedLabel: $i18n.transaction.text.unknown_token_named,
 							nativeSymbol: feeToken.symbol
 						}),
 					amountOf: ({ delta, decimals }) =>

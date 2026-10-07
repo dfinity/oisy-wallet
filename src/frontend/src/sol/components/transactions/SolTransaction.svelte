@@ -70,6 +70,7 @@
 			metadata: $splTokenMetadataStore,
 			unknownTokenAddresses,
 			unknownTokenLabel: $i18n.transaction.text.unknown_token,
+			unknownTokenNamedLabel: $i18n.transaction.text.unknown_token_named,
 			nativeSymbol: SOLANA_TOKEN.symbol
 		});
 
