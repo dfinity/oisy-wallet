@@ -738,6 +738,21 @@ const mapSolTokenInstruction = ({
 		return destination === userAddress ? ignoredInstruction() : unfaithfulInstruction();
 	}
 
+	// Unwrapping pays lamports out of a wrapped SOL account to the destination the instruction names,
+	// which is the question a close answers too, and it is refused on the same terms when the answer
+	// is not the user's wallet. Paid to the wallet it stays an instruction the review does not read.
+	if (instructionType === TokenInstruction.UnwrapLamports) {
+		const {
+			accounts: {
+				destination: { address: destination }
+			}
+		} = instruction;
+
+		if (destination !== userAddress) {
+			return unfaithfulInstruction();
+		}
+	}
+
 	if (
 		instructionType === TokenInstruction.SetAuthority ||
 		instructionType === TokenInstruction.Burn ||
@@ -840,6 +855,19 @@ const mapSolToken2022Instruction = ({
 		} = instruction;
 
 		return destination === userAddress ? ignoredInstruction() : unfaithfulInstruction();
+	}
+
+	// Same reading as the Token program's unwrap: only a payout to the user's wallet passes.
+	if (instructionType === Token2022Instruction.UnwrapLamports) {
+		const {
+			accounts: {
+				destination: { address: destination }
+			}
+		} = instruction;
+
+		if (destination !== userAddress) {
+			return unfaithfulInstruction();
+		}
 	}
 
 	if (

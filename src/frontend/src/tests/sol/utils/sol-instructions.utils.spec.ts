@@ -80,6 +80,7 @@ import {
 	getCreateAssociatedTokenInstruction,
 	getSetAuthorityInstruction,
 	getTransferCheckedInstruction,
+	getUnwrapLamportsInstruction,
 	TokenInstruction
 } from '@solana-program/token';
 import {
@@ -90,6 +91,7 @@ import {
 	getCloseAccountInstruction as getToken2022CloseAccountInstruction,
 	getSetAuthorityInstruction as getToken2022SetAuthorityInstruction,
 	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction,
+	getUnwrapLamportsInstruction as getToken2022UnwrapLamportsInstruction,
 	AuthorityType as Token2022AuthorityType
 } from '@solana-program/token-2022';
 import {
@@ -1775,6 +1777,63 @@ describe('sol-instructions.utils', () => {
 			});
 
 			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		describe('an `UnwrapLamports` instruction', () => {
+			const unwrapTo = (destination: string) =>
+				getUnwrapLamportsInstruction({
+					source: address(mockSolAddress3),
+					destination: address(destination),
+					authority: address(mockSolAddress),
+					amount: 100n
+				});
+
+			it('should fail closed on an unwrap that pays somebody else', () => {
+				expect(
+					mapSolInstruction({ instruction: unwrapTo(mockSolAddress2), userAddress: mockSolAddress })
+				).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on an unwrap when the user is not known', () => {
+				expect(mapSolInstruction({ instruction: unwrapTo(mockSolAddress) })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should leave an unwrap that pays the user unread', () => {
+				expect(
+					mapSolInstruction({ instruction: unwrapTo(mockSolAddress), userAddress: mockSolAddress })
+				).toStrictEqual({ amount: undefined, unreviewed: true });
+			});
+
+			it('should fail closed on a Token-2022 unwrap that pays somebody else', () => {
+				const instruction = getToken2022UnwrapLamportsInstruction({
+					source: address(mockSolAddress3),
+					destination: address(mockSolAddress2),
+					authority: address(mockSolAddress),
+					amount: 100n
+				});
+
+				expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should leave a Token-2022 unwrap that pays the user unread', () => {
+				const instruction = getToken2022UnwrapLamportsInstruction({
+					source: address(mockSolAddress3),
+					destination: address(mockSolAddress),
+					authority: address(mockSolAddress),
+					amount: 100n
+				});
+
+				expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+					amount: undefined,
+					unreviewed: true
+				});
+			});
 		});
 
 		it('should ignore a Create Associated Token instruction', () => {
