@@ -10,6 +10,7 @@
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
+	import WalletConnectUncheckedSigning from '$lib/components/wallet-connect/WalletConnectUncheckedSigning.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -78,9 +79,24 @@
 		// user's wallet. Read from the list rather than the message, which cannot see a close made
 		// inside another program.
 		closesPayOthers?: boolean;
+		// Whether the message carries an instruction nobody read that no run described, which the
+		// signing flow refuses like the two above.
+		unreviewedWithoutSimulation?: boolean;
+		// Whether WalletConnect's domain verification flagged the site. No way past a refusal is
+		// offered then, and the review does not point at the Settings switch either.
+		domainFlagged?: boolean;
+		// Whether the request hands the connected wallet itself to another program. Like a flagged site,
+		// no way past the refusal is offered, and the review does not point at the Settings switch.
+		reassignsWallet?: boolean;
+		// Whether the Settings switch was on when the review opened, so that a refusal can be signed
+		// past once the user acknowledges it, and whether they have.
+		uncheckedSigningOffered?: boolean;
+		uncheckedSigningAcknowledged?: boolean;
 		approveDisabled?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
+		onUncheckedSigningAcknowledge: () => void;
+		onOpenSettings: () => void;
 	}
 
 	let {
@@ -102,10 +118,19 @@
 		messageSummary,
 		parties,
 		closesPayOthers = false,
+		unreviewedWithoutSimulation = false,
+		domainFlagged = false,
+		reassignsWallet = false,
+		uncheckedSigningOffered = false,
+		uncheckedSigningAcknowledged = false,
 		approveDisabled = false,
 		onApprove,
-		onReject
+		onReject,
+		onUncheckedSigningAcknowledge,
+		onOpenSettings
 	}: Props = $props();
+
+	let refused = $derived(closesPayOthers || ambiguous || unreviewedWithoutSimulation);
 
 	let activeTab = $state('summary');
 
@@ -260,7 +285,28 @@
 	     refuses one the message states and so marks the request ambiguous as well: the two would
 	     both be true of the commonest case, and the general sentence would be shown for the
 	     specific thing that is wrong with it. -->
-	{#if closesPayOthers}
+	<!-- With the Settings switch on, the review is going to be acted on after all, so it says what is
+	     wrong without saying OISY won't sign it, and gives every reason rather than the first: the
+	     acknowledgement below covers each of them. -->
+	{#if refused && uncheckedSigningOffered}
+		<div role="alert">
+			<MessageBox level="error">
+				<span class="flex flex-col gap-2">
+					{#if closesPayOthers}
+						<span>{$i18n.wallet_connect.text.close_pays_others_reason}</span>
+					{/if}
+
+					{#if ambiguous}
+						<span>{$i18n.wallet_connect.text.cannot_be_shown_reason}</span>
+					{/if}
+
+					{#if unreviewedWithoutSimulation}
+						<span>{$i18n.wallet_connect.text.unreviewed_without_simulation_reason}</span>
+					{/if}
+				</span>
+			</MessageBox>
+		</div>
+	{:else if closesPayOthers}
 		<!-- `role="alert"` because this arrives only once the decode settles, and it is the reason
 		     the Approve button never becomes usable: without a live region a screen-reader user is
 		     left on a button that will not proceed and never hears why. The same reasoning as the
@@ -274,6 +320,13 @@
 		<div role="alert">
 			<MessageBox level="error">{$i18n.wallet_connect.text.cannot_be_shown}</MessageBox>
 		</div>
+	{:else if unreviewedWithoutSimulation}
+		<!-- Same live region, same reason. -->
+		<div role="alert">
+			<MessageBox level="error">
+				{$i18n.wallet_connect.text.unreviewed_without_simulation}
+			</MessageBox>
+		</div>
 	{:else if unreviewed}
 		<MessageBox level="warning">
 			{nonNullish(preview)
@@ -286,10 +339,20 @@
 		<MessageBox level="info">{$i18n.wallet_connect.text.simulated_review}</MessageBox>
 	{/if}
 
+	{#if refused && !domainFlagged && !reassignsWallet}
+		<WalletConnectUncheckedSigning
+			acknowledged={uncheckedSigningAcknowledged}
+			offered={uncheckedSigningOffered}
+			onAcknowledge={onUncheckedSigningAcknowledge}
+			{onOpenSettings}
+		/>
+	{/if}
+
 	<!-- Everything below qualifies a review that is going to be acted on. None of it applies to a
 	     message the wallet has already decided it will not sign, and the partial-parties notice is
-	     actively wrong there: it tells the user which lists to read on a request that is refused. -->
-	{#if !ambiguous && !closesPayOthers}
+	     actively wrong there: it tells the user which lists to read on a request that is refused.
+	     With the Settings switch on, a refused message may be signed after all, so it all applies. -->
+	{#if !refused || uncheckedSigningOffered}
 		<!-- An authority change moves no funds at all, so a diff of amounts alone would describe the
 		     theft as nothing happening. It is named first among the fund warnings for that reason. -->
 		{#if nonNullish(preview) && preview.controlChanges.length > 0}

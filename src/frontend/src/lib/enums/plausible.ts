@@ -30,6 +30,9 @@ export enum PLAUSIBLE_EVENTS {
 	// The countdown to the end of the XDR basket that prices TCYCLES.
 	XDR_BASKET_EXPIRY = 'xdr_basket_expiry',
 	CYCLES_MINT = 'cycles_mint',
+	// The Settings switch that lets the user sign WalletConnect transactions OISY refuses because its
+	// review cannot show what they do: turned on, and a request signed through it.
+	WALLET_CONNECT_UNCHECKED_SIGNING = 'wallet_connect_unchecked_signing',
 	// An invariant we believed unreachable was reached. Not for flows that can legitimately
 	// fail — those keep their own event and report the outcome via `result_status`.
 	ERROR = 'error'
@@ -93,7 +96,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	PERSONAL_NOTES = 'personal_notes',
 	HELP = 'help',
 	TIPS = 'tips',
-	COMPUTE = 'compute'
+	COMPUTE = 'compute',
+	WALLET_CONNECT = 'wallet_connect'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -204,7 +208,8 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	TOKEN = 'token',
 	CONTACT = 'contact',
 	TYPE = 'type',
-	LINK = 'link'
+	LINK = 'link',
+	REASON = 'reason'
 }
 
 export enum PLAUSIBLE_EVENT_FILTER_MODIFIERS {

@@ -3,6 +3,7 @@
 	import { updateUserTransactionFilterSettings } from '$lib/api/backend.api';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
+	import SettingsWalletConnectUncheckedSigning from '$lib/components/settings/SettingsWalletConnectUncheckedSigning.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Toggle from '$lib/components/ui/Toggle.svelte';
 	import { OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL } from '$lib/constants/oisy.constants';
@@ -89,4 +90,10 @@
 			</span>
 		{/snippet}
 	</SettingsCardItem>
+
+	<h5 class="mt-5 text-xs font-semibold tracking-wide text-tertiary uppercase">
+		{$i18n.settings.text.expert_features}
+	</h5>
+
+	<SettingsWalletConnectUncheckedSigning />
 </SettingsCard>

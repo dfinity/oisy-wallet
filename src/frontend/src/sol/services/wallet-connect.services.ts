@@ -5,6 +5,7 @@ import {
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { ProgressStepsSendSol, ProgressStepsSign } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
+import { trackWalletConnectUncheckedSigning } from '$lib/services/wallet-connect-analytics.services';
 import {
 	execute,
 	type WalletConnectCallBackParams,
@@ -19,6 +20,7 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { isWalletConnectDomainFlagged } from '$lib/utils/wallet-connect.utils';
 import { estimatePriorityFee, getAccountInfo } from '$sol/api/solana.api';
 import { TOKEN_2022_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import {
@@ -38,6 +40,7 @@ import { loadSplTokenMetadata } from '$sol/services/spl-token-metadata.services'
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
+import type { SolWalletConnectRefusal } from '$sol/types/wallet-connect';
 import { convertSolComputeUnitPriceToFee } from '$sol/utils/fee.utils';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
@@ -95,6 +98,14 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	// cannot see a close a program makes inside its own call, and handed on for the same reason
 	// the simulated flag is.
 	closesPayOthers: boolean;
+	// The refusals below that the user signed past on the review, which the Settings switch allows.
+	// Empty unless the review offered it and its box was ticked. A refusal found here that is not in
+	// the list still refuses, so an acknowledgement covers what the review showed and nothing else.
+	acknowledgedRefusals: SolWalletConnectRefusal[];
+	// Whether the run hands the user's wallet to another program. A program can make that assignment
+	// inside its own call, where only the run shows it, and the review already has the run, so it is
+	// handed on for the same reason the simulated flag is.
+	reassignsWallet: boolean;
 };
 
 export const decode = async ({
@@ -458,6 +469,8 @@ export const sign = ({
 	identity,
 	simulated,
 	closesPayOthers,
+	acknowledgedRefusals,
+	reassignsWallet,
 	...params
 }: WalletConnectSignTransactionParams): Promise<ResultSuccess> =>
 	execute({
@@ -500,10 +513,36 @@ export const sign = ({
 				rpc: solanaHttpRpc(solNetwork)
 			});
 
-			const { amount, destination, ambiguous, unreviewed } = mapSolTransactionMessage({
+			const {
+				amount,
+				destination,
+				ambiguous: messageAmbiguous,
+				unreviewed,
+				reassignsWallet: messageReassignsWallet
+			} = mapSolTransactionMessage({
 				transactionMessage: parsedTransactionMessage,
 				userAddress: address
 			});
+
+			// The wallet itself handed to another program, whether the message states it or a program
+			// does it inside its own call. Refused as one the review cannot show.
+			const handsOverWallet = reassignsWallet || (messageReassignsWallet ?? false);
+			const ambiguous = (messageAmbiguous ?? false) || handsOverWallet;
+
+			// A site WalletConnect's domain verification flags is never signed past, whatever the review
+			// handed on: the review offers no way out for one, so no acknowledgement for it can be real.
+			// Nor is a request handing over the wallet itself: no app needs that, and the wallet cannot
+			// pay a fee afterwards, so the review offers no way out for it either.
+			const acknowledged =
+				isWalletConnectDomainFlagged(request.verifyContext) || handsOverWallet
+					? []
+					: acknowledgedRefusals;
+
+			const refusals: SolWalletConnectRefusal[] = [
+				...(closesPayOthers ? (['close_pays_others'] as const) : []),
+				...(ambiguous ? (['cannot_be_shown'] as const) : []),
+				...((unreviewed ?? false) && !simulated ? (['unreviewed_without_simulation'] as const) : [])
+			];
 
 			// The balance is gone the moment this is signed, and the message mapper cannot see a close
 			// made inside another program's call. Refused rather than warned about, on the same test
@@ -514,7 +553,7 @@ export const sign = ({
 			// message states: both are true of the commonest case, and the general sentence would be
 			// given for the specific thing that is wrong with it. The review's notices are ordered
 			// the same way, and the two have to agree or the toast contradicts the screen it follows.
-			if (closesPayOthers) {
+			if (closesPayOthers && !acknowledged.includes('close_pays_others')) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.close_pays_others }
 				});
@@ -528,7 +567,7 @@ export const sign = ({
 			// When the message bundles instructions that disagree on those fields, that summary
 			// would hide part of the fund flow (e.g. a transfer to an attacker alongside a benign
 			// one). Refuse to sign anything we cannot display faithfully.
-			if (ambiguous) {
+			if (ambiguous && !acknowledged.includes('cannot_be_shown')) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.ambiguous_transaction }
 				});
@@ -546,7 +585,11 @@ export const sign = ({
 			// described. The simulation is best effort by design and stays that way: it is not
 			// required of a message OISY did read, and a provider that times out on a transaction
 			// the wallet understands still signs.
-			if ((unreviewed ?? false) && !simulated) {
+			if (
+				(unreviewed ?? false) &&
+				!simulated &&
+				!acknowledged.includes('unreviewed_without_simulation')
+			) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.unreviewed_without_simulation }
 				});
@@ -601,6 +644,14 @@ export const sign = ({
 						token: token.symbol
 					}
 				});
+
+				if (refusals.length > 0) {
+					trackWalletConnectUncheckedSigning({
+						modifier: 'sign',
+						network: networkId.description ?? token.network.name,
+						reasons: refusals
+					});
+				}
 
 				return { success: true, amount, destination };
 			} catch (err: unknown) {

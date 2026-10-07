@@ -2,6 +2,8 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy, untrack } from 'svelte';
+	import { get } from 'svelte/store';
+	import { goto } from '$app/navigation';
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
@@ -10,6 +12,7 @@
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		solAddressDevnet,
 		solAddressLocal,
@@ -21,10 +24,17 @@
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
+	import { walletConnectUncheckedSigningStore } from '$lib/stores/wallet-connect-unchecked-signing.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { consoleError } from '$lib/utils/console.utils';
+	import { networkUrl } from '$lib/utils/nav.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
+	import {
+		isWalletConnectDomainFlagged,
+		isWalletConnectUncheckedSigningActive
+	} from '$lib/utils/wallet-connect.utils';
 	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$sol/constants/steps.constants';
 	import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
@@ -39,6 +49,8 @@
 	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
 	import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
+	import type { SolWalletConnectRefusal } from '$sol/types/wallet-connect';
+	import { solSimulationReassignsWallet } from '$sol/utils/sol-simulation.utils';
 	import { solClosesPayOthers } from '$sol/utils/sol-transaction-summary.utils';
 	import { findSplToken } from '$sol/utils/spl.utils';
 
@@ -85,6 +97,9 @@
 	// is decoded and still cannot be stated. `sign()` refuses such a message, so the review says so
 	// and holds the button rather than letting the user press it and bounce.
 	let ambiguous = $state<boolean | undefined>();
+	// Set when the message hands the connected wallet itself to another program, which it also refuses
+	// as ambiguous.
+	let messageReassignsWallet = $state<boolean | undefined>();
 	let unreviewed = $state<boolean | undefined>();
 	let prioritizationFee = $state<bigint | undefined>();
 	let prioritizationFeeEstimate = $state<bigint | undefined>();
@@ -106,11 +121,89 @@
 	let closesPayOthers = $derived(
 		solClosesPayOthers({ instructions: instructions ?? [], userAddress: address })
 	);
+	// The wallet itself handed to another program, whether the message states it or a program does it
+	// inside its own call, where only the run shows it. Refused like an ambiguous message and never
+	// offered past: no app needs it, and the wallet cannot pay a fee afterwards.
+	let reassignsWallet = $derived(
+		(messageReassignsWallet ?? false) ||
+			solSimulationReassignsWallet({ preview, userAddress: address })
+	);
+
+	// Whether the run described the instructions nobody read, which neither the run happening nor the
+	// preview's contents can say. The preview attributes nothing to an instruction, and it carries the
+	// user's lamport delta whether or not that delta is anything but the fee, so its presence says
+	// almost nothing.
+	//
+	// The instruction list does attribute. Built from a run, it marks an entry `unknown` only when no
+	// effect - stated by the message or made inside a program - carried that instruction's index, so a
+	// routed swap's router instruction is covered by the transfers its own invocations produced, while
+	// a stake delegation produces no effect anywhere and stays unknown. A list with nothing unknown
+	// left in it is the description; anything else leaves an instruction the review cannot account
+	// for.
+	//
+	// One shape escapes it. An instruction is marked accounted for as soon as any one of its
+	// invocations produced an effect, so an unread instruction making both a transfer we model and a
+	// call we do not - a stake delegation among them - leaves no unknown entry and passes here with
+	// that call unstated. Closing it needs each inner effect accounted for by name, which means
+	// separating a call that genuinely does nothing from one this wallet has never modelled, for every
+	// program an invocation can reach.
+	//
+	// And a list with something in it. A run's empty list reaches here now, where before it was
+	// dropped on the way, and whether a run with nothing to list vouches for an instruction nobody read
+	// is its own decision, not one to make by letting an empty list through.
+	let simulated = $derived(
+		(simulatedInstructions ?? false) &&
+			nonNullish(instructions) &&
+			instructions.length > 0 &&
+			!instructions.some(({ kind }) => kind === 'unknown')
+	);
+
+	// `sign()` refuses an instruction nobody read that no run described. Stated on the review like the
+	// other refusals, rather than bounced in a toast after Approve, since the way past it has to be
+	// offered where the reason is.
+	let unreviewedWithoutSimulation = $derived((unreviewed ?? false) && !simulated);
+
+	let refusals = $derived<SolWalletConnectRefusal[]>([
+		...(closesPayOthers ? (['close_pays_others'] as const) : []),
+		...((ambiguous ?? false) || reassignsWallet ? (['cannot_be_shown'] as const) : []),
+		...(unreviewedWithoutSimulation ? (['unreviewed_without_simulation'] as const) : [])
+	]);
+
+	// WalletConnect's domain verification flagged the site: no way past a refusal is offered, and the
+	// review does not point at the switch either.
+	let domainFlagged = $derived(isWalletConnectDomainFlagged(request.verifyContext));
+
+	// Read once, when the review opens: one that opened while the Settings switch was on keeps the
+	// offer until it closes, so reading carefully is not penalised by the clock, and one that opened
+	// after it turned off never gains it.
+	const uncheckedSigningOn = isWalletConnectUncheckedSigningActive({
+		expiresAt: get(walletConnectUncheckedSigningStore),
+		now: Date.now()
+	});
+
+	let uncheckedSigningOffered = $derived(uncheckedSigningOn && !domainFlagged && !reassignsWallet);
+
+	let uncheckedSigningAcknowledged = $state(false);
+
+	// A tick agrees to the refusals the review showed when it was given. Should the decode settle on
+	// different ones, the box starts over rather than carrying the agreement across.
+	let refusalsKey = $derived(refusals.join());
+
+	$effect(() => {
+		[refusalsKey];
+
+		untrack(() => (uncheckedSigningAcknowledged = false));
+	});
+
+	let approveDisabled = $derived(
+		!decoded || (refusals.length > 0 && !(uncheckedSigningOffered && uncheckedSigningAcknowledged))
+	);
 
 	const updateData = async () => {
 		try {
 			({
 				ambiguous,
+				reassignsWallet: messageReassignsWallet,
 				destination,
 				tokenAddress,
 				isApproval,
@@ -195,6 +288,21 @@
 		close();
 	};
 
+	// Leaving the review rejects the request, as closing it does: the user turns the switch on and the
+	// app sends the request again.
+	const openSettings = async () => {
+		await reject();
+
+		await goto(
+			networkUrl({
+				path: AppPath.Settings,
+				networkId: $userSelectedNetworkStore,
+				usePreviousRoute: false,
+				fromRoute: null
+			})
+		);
+	};
+
 	/**
 	 * Sign
 	 */
@@ -212,34 +320,10 @@
 			token,
 			progress: (step: ProgressStepsSign | ProgressStepsSendSol.SEND) => (signProgressStep = step),
 			identity: $authIdentity,
-			// Whether the run described the instructions nobody read, which neither the run happening
-			// nor the preview's contents can say. The preview attributes nothing to an instruction,
-			// and it carries the user's lamport delta whether or not that delta is anything but the
-			// fee, so its presence says almost nothing.
-			//
-			// The instruction list does attribute. Built from a run, it marks an entry `unknown`
-			// only when no effect - stated by the message or made inside a program - carried that
-			// instruction's index, so a routed swap's router instruction is covered by the transfers
-			// its own invocations produced, while a stake delegation produces no effect anywhere and
-			// stays unknown. A list with nothing unknown left in it is the description; anything
-			// else leaves an instruction the review cannot account for.
-			//
-			// One shape escapes it. An instruction is marked accounted for as soon as any one of its
-			// invocations produced an effect, so an unread instruction making both a transfer we
-			// model and a call we do not - a stake delegation among them - leaves no unknown entry
-			// and passes here with that call unstated. Closing it needs each inner effect accounted
-			// for by name, which means separating a call that genuinely does nothing from one this
-			// wallet has never modelled, for every program an invocation can reach.
-			//
-			// And a list with something in it. A run's empty list reaches here now, where before it
-			// was dropped on the way, and whether a run with nothing to list vouches for an instruction
-			// nobody read is its own decision, not one to make by letting an empty list through.
-			simulated:
-				(simulatedInstructions ?? false) &&
-				nonNullish(instructions) &&
-				instructions.length > 0 &&
-				!instructions.some(({ kind }) => kind === 'unknown'),
-			closesPayOthers
+			simulated,
+			closesPayOthers,
+			acknowledgedRefusals: uncheckedSigningOffered && uncheckedSigningAcknowledged ? refusals : [],
+			reassignsWallet
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
@@ -265,27 +349,35 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<SolWalletConnectSignReview
-				ambiguous={ambiguous ?? false}
+				ambiguous={(ambiguous ?? false) || reassignsWallet}
 				{application}
-				approveDisabled={!decoded || (ambiguous ?? false) || closesPayOthers}
+				{approveDisabled}
 				{closesPayOthers}
 				{data}
 				{decoded}
 				destination={destination ?? ''}
+				{domainFlagged}
 				feeToken={token}
 				{instructions}
 				isApproval={isApproval ?? false}
 				{messageSummary}
 				onApprove={sign}
+				onOpenSettings={openSettings}
 				onReject={reject}
+				onUncheckedSigningAcknowledge={() =>
+					(uncheckedSigningAcknowledged = !uncheckedSigningAcknowledged)}
 				{parties}
 				{preview}
 				{prioritizationFee}
 				{prioritizationFeeEstimate}
+				{reassignsWallet}
 				simulatedInstructions={simulatedInstructions ?? false}
 				source={address ?? ''}
 				token={reviewToken}
+				{uncheckedSigningAcknowledged}
+				{uncheckedSigningOffered}
 				unreviewed={unreviewed ?? false}
+				{unreviewedWithoutSimulation}
 			/>
 		{/if}
 	{/key}

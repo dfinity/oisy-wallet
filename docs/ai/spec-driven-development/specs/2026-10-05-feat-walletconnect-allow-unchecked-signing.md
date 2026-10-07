@@ -44,20 +44,22 @@ Each refusal below is placed in one of two tiers:
 (`src/frontend/src/sol/components/wallet-connect/SolWalletConnectSignReview.svelte`) states the
 first two and holds Approve (`SolWalletConnectSignModal.svelte`).
 
-| Refusal                                                                       | Copy today                                                                          | Tier                          |
-| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------- |
-| A close pays an account's balance to an address that is not the user's wallet | `wallet_connect.text.close_pays_others`, `wallet_connect.error.close_pays_others`   | Unlockable (see D1)           |
-| Actions that can't be shown accurately (`ambiguous`, listed below)            | `wallet_connect.text.cannot_be_shown`, `wallet_connect.error.ambiguous_transaction` | Unlockable                    |
-| An instruction OISY cannot read, with no simulated run accounting for it      | `wallet_connect.error.unreviewed_without_simulation`                                | Unlockable                    |
-| The review could not be computed (decode failed)                              | Approve held, no notice                                                             | Never: nothing to check       |
-| `signAndSendTransaction` that still needs other signers                       | none                                                                                | Never: the network rejects it |
+| Refusal                                                                                                                 | Copy today                                                                          | Tier                          |
+| ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------- |
+| A close pays an account's balance to an address that is not the user's wallet                                           | `wallet_connect.text.close_pays_others`, `wallet_connect.error.close_pays_others`   | Unlockable (see D1)           |
+| Actions that can't be shown accurately (`ambiguous`, listed below)                                                      | `wallet_connect.text.cannot_be_shown`, `wallet_connect.error.ambiguous_transaction` | Unlockable                    |
+| The connected wallet handed to another program: an `Assign` naming it, or a run that leaves it owned by another program | `wallet_connect.text.cannot_be_shown`, `wallet_connect.error.ambiguous_transaction` | Never (see D4)                |
+| An instruction OISY cannot read, with no simulated run accounting for it                                                | `wallet_connect.error.unreviewed_without_simulation`                                | Unlockable                    |
+| The review could not be computed (decode failed)                                                                        | Approve held, no notice                                                             | Never: nothing to check       |
+| `signAndSendTransaction` that still needs other signers                                                                 | none                                                                                | Never: the network rejects it |
 
 `ambiguous` covers instructions that disagree on source, destination, payer, token or action type
 (`mapSolTransactionMessage`), and instructions decoded in full that the summary cannot carry
 (`unfaithfulInstruction()` in `sol-instructions.utils.ts`): burns, token and stake authority
-changes, System assignments, sizing and nonce set-up, System-owned, over-funded or prefunded
-account creations, unclassified System instructions, closing a lookup table, Compute Budget
-directives OISY cannot price, and instructions of known programs that fail to parse.
+changes, System assignments (one of the connected wallet itself is the Never row above), sizing and
+nonce set-up, System-owned, over-funded or prefunded account creations, unclassified System
+instructions, closing a lookup table, Compute Budget directives OISY cannot price, and instructions
+of known programs that fail to parse.
 
 The no-simulation refusal (`unreviewed && !simulated`) is the odd one out: the review only warns,
 Approve stays usable, and the refusal arrives as a toast afterwards.
@@ -158,10 +160,11 @@ It is asked every time the switch is turned on. There is no "don't ask again".
 - Whether a review offers the way out is decided **when the review opens**. A review that opened
   while the switch was on keeps the offer until it closes, so a user reading carefully is not
   penalised for the clock running out.
-- It is kept in **this browser only**: never in the user profile on the backend, never synced to
-  another device. It survives a reload within the 5 minutes.
+- It is kept in **the session storage of this tab only**: never in the user profile on the
+  backend, never in local storage. It survives a reload within the 5 minutes, and another tab or
+  another device never sees it.
 - **Signing out ends it**, on every sign-out path, including the automatic one when the session
-  expires.
+  expires: every one of them clears the session storage.
 
 ### 5. The review of a refused request
 
@@ -174,14 +177,17 @@ because the way out has to be offered where the refusal is.
 
 **Switch off.** The refusal is stated as today, followed by one sentence pointing to the switch,
 for example: "If you trust this app, you can allow such transactions for 5 minutes in Settings,
-then send the request again from the app." "Settings" is a link. Following it rejects the request,
-as closing the review does today, and opens Settings with the Security card in view.
+then send the request again from the app.", and an **Open Settings** link under it. Following it
+rejects the request, as closing the review does today, and opens Settings, where the Security card
+is the second one.
 
-**Switch on.** The refusal stays: it is the reason. Below it, at the error level, a confirmation
-with a checkbox: "I understand OISY can't show what this transaction does, and I want to sign it
-anyway." Approve becomes usable once it is ticked and every condition that applies today is met
-(for Solana, the decode has settled). The box is never pre-ticked and never remembered from one
-review to the next.
+**Switch on.** The reason stays, without the sentence saying OISY won't sign it, and every reason
+that applies is stated rather than only the first, since the acknowledgement covers each of them.
+Below it, at the error level, a confirmation with a checkbox: "I understand OISY can't show what
+this transaction does, and I want to sign it anyway." Approve becomes usable once it is ticked and
+every condition that applies today is met (for Solana, the decode has settled). The box is never
+pre-ticked and never remembered from one review to the next, and it starts over should the decode
+settle on different refusals.
 
 The rest of the review then shows everything it shows for a request it signs, including the
 notices it suppresses today on a refused request (changes of control, partial source lists,
@@ -238,7 +244,8 @@ No addresses, amounts, transaction data or app domains.
 4. Turning the switch off needs no confirmation and takes effect at once.
 5. The switch turns itself off 5 minutes after the confirmation, also with the tab in the
    background and across a reload, and on any sign-out.
-6. The switch's state is not written to the backend.
+6. The switch's state is not written to the backend or to local storage, and another tab does not
+   see it.
 7. With the switch off, each Unlockable refusal is stated on the review with a pointer to the
    switch (unless its domain is flagged, see 10), and its Approve stays unusable. The
    no-simulation refusal is among them, stated before Approve.
@@ -270,7 +277,9 @@ No addresses, amounts, transaction data or app domains.
 ## Open questions (facts to confirm)
 
 - **Q1.** The docs page the Learn more link points to, presumably a new section next to the
-  small-transactions one at `docs.oisy.com/introduction/oisy-keeps-you-protected`.
+  small-transactions one at `docs.oisy.com/introduction/oisy-keeps-you-protected`. Until it is
+  written the link uses the anchor `#signing-transactions-oisy-cant-check` on that page, which
+  lands at its top.
 
 ## Pending decisions
 
@@ -279,3 +288,6 @@ No addresses, amounts, transaction data or app domains.
 - **D2.** Typed data for a chain other than the session's: Unlockable or Never. _Resolved:_
   **Never**, until a legitimate app is seen needing it.
 - **D3.** The subheading in the Security card. _Resolved:_ **"Expert features"**.
+- **D4.** The connected wallet handed to another program, whether the message states the assignment
+  or a program makes it inside its own call: Unlockable or Never. _Resolved:_ **Never**: no app
+  needs the wallet itself handed over, and the wallet cannot pay a fee afterwards.

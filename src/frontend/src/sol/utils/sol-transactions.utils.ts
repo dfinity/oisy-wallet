@@ -91,7 +91,8 @@ export const mapSolTransactionMessage = ({
 				unreviewed,
 				computeUnitPrice,
 				computeUnitLimit,
-				ambiguous: instructionAmbiguous
+				ambiguous: instructionAmbiguous,
+				reassignsWallet
 			} = mapSolInstruction({ instruction, userAddress });
 
 			// The summary holds a single value per field, so any later instruction that
@@ -142,6 +143,7 @@ export const mapSolTransactionMessage = ({
 				...((isApproval ?? acc.isApproval) && { isApproval: true }),
 				...((unreviewed ?? acc.unreviewed) && { unreviewed: true }),
 				...(ambiguous && { ambiguous }),
+				...((reassignsWallet ?? acc.reassignsWallet) && { reassignsWallet: true }),
 				...(nonNullish(computeUnitPrice) && { computeUnitPrice }),
 				...(nonNullish(computeUnitLimit) && { computeUnitLimit })
 			};
