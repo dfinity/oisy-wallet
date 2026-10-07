@@ -8,6 +8,7 @@ import {
 	Certificate,
 	HttpErrorCode,
 	LookupPathStatus,
+	type HttpAgent,
 	type Identity
 } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
@@ -42,7 +43,15 @@ export const getCanisterExistence = async ({
 	identity: Identity;
 	canisterId: Principal;
 }): Promise<CanisterExistence> => {
-	const agent = await getAgent({ identity });
+	let agent: HttpAgent;
+
+	try {
+		agent = await getAgent({ identity });
+	} catch (err: unknown) {
+		consoleError(err);
+
+		return 'unknown';
+	}
 
 	const path = CanisterStatus.encodePath('controllers', canisterId);
 
