@@ -44,20 +44,22 @@ Each refusal below is placed in one of two tiers:
 (`src/frontend/src/sol/components/wallet-connect/SolWalletConnectSignReview.svelte`) states the
 first two and holds Approve (`SolWalletConnectSignModal.svelte`).
 
-| Refusal                                                                       | Copy today                                                                          | Tier                          |
-| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------- |
-| A close pays an account's balance to an address that is not the user's wallet | `wallet_connect.text.close_pays_others`, `wallet_connect.error.close_pays_others`   | Unlockable (see D1)           |
-| Actions that can't be shown accurately (`ambiguous`, listed below)            | `wallet_connect.text.cannot_be_shown`, `wallet_connect.error.ambiguous_transaction` | Unlockable                    |
-| An instruction OISY cannot read, with no simulated run accounting for it      | `wallet_connect.error.unreviewed_without_simulation`                                | Unlockable                    |
-| The review could not be computed (decode failed)                              | Approve held, no notice                                                             | Never: nothing to check       |
-| `signAndSendTransaction` that still needs other signers                       | none                                                                                | Never: the network rejects it |
+| Refusal                                                                                                                 | Copy today                                                                          | Tier                          |
+| ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------- |
+| A close pays an account's balance to an address that is not the user's wallet                                           | `wallet_connect.text.close_pays_others`, `wallet_connect.error.close_pays_others`   | Unlockable (see D1)           |
+| Actions that can't be shown accurately (`ambiguous`, listed below)                                                      | `wallet_connect.text.cannot_be_shown`, `wallet_connect.error.ambiguous_transaction` | Unlockable                    |
+| The connected wallet handed to another program: an `Assign` naming it, or a run that leaves it owned by another program | `wallet_connect.text.cannot_be_shown`, `wallet_connect.error.ambiguous_transaction` | Never (see D4)                |
+| An instruction OISY cannot read, with no simulated run accounting for it                                                | `wallet_connect.error.unreviewed_without_simulation`                                | Unlockable                    |
+| The review could not be computed (decode failed)                                                                        | Approve held, no notice                                                             | Never: nothing to check       |
+| `signAndSendTransaction` that still needs other signers                                                                 | none                                                                                | Never: the network rejects it |
 
 `ambiguous` covers instructions that disagree on source, destination, payer, token or action type
 (`mapSolTransactionMessage`), and instructions decoded in full that the summary cannot carry
 (`unfaithfulInstruction()` in `sol-instructions.utils.ts`): burns, token and stake authority
-changes, System assignments, sizing and nonce set-up, System-owned, over-funded or prefunded
-account creations, unclassified System instructions, closing a lookup table, Compute Budget
-directives OISY cannot price, and instructions of known programs that fail to parse.
+changes, System assignments (one of the connected wallet itself is the Never row above), sizing and
+nonce set-up, System-owned, over-funded or prefunded account creations, unclassified System
+instructions, closing a lookup table, Compute Budget directives OISY cannot price, and instructions
+of known programs that fail to parse.
 
 The no-simulation refusal (`unreviewed && !simulated`) is the odd one out: the review only warns,
 Approve stays usable, and the refusal arrives as a toast afterwards.
@@ -286,3 +288,6 @@ No addresses, amounts, transaction data or app domains.
 - **D2.** Typed data for a chain other than the session's: Unlockable or Never. _Resolved:_
   **Never**, until a legitimate app is seen needing it.
 - **D3.** The subheading in the Security card. _Resolved:_ **"Expert features"**.
+- **D4.** The connected wallet handed to another program, whether the message states the assignment
+  or a program makes it inside its own call: Unlockable or Never. _Resolved:_ **Never**: no app
+  needs the wallet itself handed over, and the wallet cannot pay a fee afterwards.
