@@ -2,11 +2,14 @@ import * as canisterStateApi from '$icp/api/canister-state.api';
 import CyclesTopUpModal from '$icp/components/cycles-top-up/CyclesTopUpModal.svelte';
 import * as cyclesTopUpServices from '$icp/services/cycles-top-up.services';
 import { unansweredCyclesTopUp } from '$icp/stores/cycles-top-up.store';
+import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import {
 	CYCLES_TOP_UP_AMOUNT,
 	CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON,
 	CYCLES_TOP_UP_CANISTER_INPUT,
 	CYCLES_TOP_UP_CANISTER_NEXT_BUTTON,
+	CYCLES_TOP_UP_RECENT_CANISTER,
 	CYCLES_TOP_UP_REVIEW,
 	CYCLES_TOP_UP_REVIEW_BACK_BUTTON,
 	CYCLES_TOP_UP_REVIEW_TOP_UP_BUTTON,
@@ -124,6 +127,7 @@ describe('CyclesTopUpModal', () => {
 		});
 
 		unansweredCyclesTopUp.set(undefined);
+		icTransactionsStore.reset(mockTcyclesToken.id);
 	});
 
 	afterEach(() => {
@@ -169,6 +173,61 @@ describe('CyclesTopUpModal', () => {
 			});
 
 			expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_NEXT_BUTTON)).toBeDisabled();
+		});
+
+		describe('recently topped up', () => {
+			const recentTopUp: IcTransactionUi = {
+				id: '1',
+				type: 'burn',
+				typeLabel: 'transaction.label.top_up',
+				to: canister,
+				value: 1_000_000_000_000n,
+				timestamp: 1_700_000_000_000_000_000n,
+				status: 'executed'
+			};
+
+			const pickRecent = async () => {
+				icTransactionsStore.append({
+					tokenId: mockTcyclesToken.id,
+					transactions: [{ data: recentTopUp, certified: true }]
+				});
+
+				const result = renderModal();
+
+				const button = result.getByTestId(CYCLES_TOP_UP_RECENT_CANISTER).querySelector('button');
+
+				assertNonNullish(button);
+
+				await fireEvent.click(button);
+
+				return result;
+			};
+
+			it('goes on to the amount when a canister is picked, after checking it', async () => {
+				const result = await pickRecent();
+
+				await waitFor(() => {
+					expect(result.getByTestId(CYCLES_TOP_UP_AMOUNT)).toBeInTheDocument();
+				});
+
+				expect(existenceSpy).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					canisterId: Principal.fromText(canister)
+				});
+			});
+
+			it('stays on the canister step when a picked canister no longer exists', async () => {
+				existenceSpy.mockResolvedValue('not_found');
+
+				const result = await pickRecent();
+
+				await waitFor(() => {
+					expect(result.container).toHaveTextContent(en.cycles_top_up.error.canister_not_found);
+				});
+
+				expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_INPUT)).toHaveValue(canister);
+				expect(result.queryByTestId(CYCLES_TOP_UP_AMOUNT)).toBeNull();
+			});
 		});
 
 		it('lets a check that could not be made be tried again', async () => {
