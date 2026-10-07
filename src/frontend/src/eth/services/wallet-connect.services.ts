@@ -3,10 +3,12 @@ import type { FeeStoreData } from '$eth/stores/eth-fee.store';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { SendParams } from '$eth/types/send';
 import {
+	classifyWalletConnectEthCall,
 	getSendParamsGas,
 	getSignParamsMessageHex,
 	getSignParamsMessageTypedDataV4Hash,
-	isEthSignTypedDataMethod
+	isEthSignTypedDataMethod,
+	isWalletConnectEthTokenCallWithValue
 } from '$eth/utils/wallet-connect.utils';
 import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
@@ -27,6 +29,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -142,6 +145,24 @@ export const send = ({
 			}
 
 			const { to, gas: gasWC, data } = firstParam as { to: string; gas?: string; data?: string };
+
+			// The review refuses a token call that sends native value along with it, and the signing
+			// step holds to the same check.
+			if (
+				isWalletConnectEthTokenCallWithValue({
+					call: classifyWalletConnectEthCall(data),
+					value: amount
+				})
+			) {
+				toastsError({
+					msg: {
+						text: replacePlaceholders(get(i18n).wallet_connect.error.token_call_with_value, {
+							$amount: `${formatToken({ value: amount, unitName: token.decimals })} ${token.symbol}`
+						})
+					}
+				});
+				return { success: false };
+			}
 
 			modalNext();
 
