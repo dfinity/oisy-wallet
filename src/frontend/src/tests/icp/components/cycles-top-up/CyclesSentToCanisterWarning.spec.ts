@@ -39,6 +39,14 @@ describe('CyclesSentToCanisterWarning', () => {
 		expect(getByTestId(CYCLES_SENT_TO_CANISTER_WARNING)).toHaveTextContent(topUpHint);
 	});
 
+	it('should announce the warning as it appears', () => {
+		const { getByRole } = render(CyclesSentToCanisterWarning, {
+			props: { destination: canister, token: mockTcyclesToken }
+		});
+
+		expect(getByRole('alert')).toHaveTextContent(warning);
+	});
+
 	it('should leave out the pointer to Top up while its flag is off', () => {
 		enableTopUp(false);
 

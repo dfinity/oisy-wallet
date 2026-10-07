@@ -28,6 +28,7 @@
 	<div
 		class={styleClass}
 		data-tid={CYCLES_SENT_TO_CANISTER_WARNING}
+		role="alert"
 		transition:slide={SLIDE_DURATION}
 	>
 		<MessageBox level="warning">
