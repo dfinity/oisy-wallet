@@ -802,7 +802,10 @@ describe('sol-transactions.utils', () => {
 				spyMapSolInstruction.mockRestore();
 			});
 
-			// A stake account is 200 bytes, so its rent is (128 + 200) * 3480 * 2 = 2_282_880 lamports.
+			// A stake account is 200 bytes. With a token account's 165 costing 2_039_280 lamports, its
+			// rent is 2_039_280 * (128 + 200) / (128 + 165) = 2_282_880 lamports.
+			const rentExemptMinimum = 2_039_280n;
+
 			const createStakeAccount = getCreateAccountInstruction({
 				payer: createNoopSigner(address(mockSolAddress)),
 				newAccount: createNoopSigner(address(mockSolAddress3)),
@@ -825,7 +828,8 @@ describe('sol-transactions.utils', () => {
 							...mockSolParsedTransactionMessage,
 							instructions: [createStakeAccount, initialize({ withdrawer: mockSolAddress2 })]
 						},
-						userAddress: mockSolAddress
+						userAddress: mockSolAddress,
+						rentExemptMinimum
 					})
 				).toStrictEqual({
 					amount: 2_282_880n,
@@ -841,7 +845,8 @@ describe('sol-transactions.utils', () => {
 							...mockSolParsedTransactionMessage,
 							instructions: [createStakeAccount, initialize({ withdrawer: mockSolAddress })]
 						},
-						userAddress: mockSolAddress
+						userAddress: mockSolAddress,
+						rentExemptMinimum
 					})
 				).toStrictEqual({
 					amount: 2_282_880n,
@@ -863,7 +868,8 @@ describe('sol-transactions.utils', () => {
 							...mockSolParsedTransactionMessage,
 							instructions: [createStakeAccount, initializeChecked]
 						},
-						userAddress: mockSolAddress
+						userAddress: mockSolAddress,
+						rentExemptMinimum
 					})
 				).toStrictEqual({
 					amount: 2_282_880n,
