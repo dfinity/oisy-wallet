@@ -4,7 +4,7 @@
 
 - **Type:** `feat`
 - **Area:** Frontend (TCYCLES token page, Top up modal, cycles-ledger calls, TCYCLES activity labels, recently used destinations, a send-flow warning)
-- **Status:** Draft. All decisions and Q1 are resolved; Q2 is open (§12).
+- **Status:** Draft. All decisions and questions are resolved (§12).
 
 ---
 
@@ -162,7 +162,7 @@ The modal is mostly translated copy, so expect pressure on `compare-sizes`; the 
 
 ### Open questions (facts to confirm)
 
-- **Q2 Refund memo on mainnet.** The 32 × `0xFF` refund memo (§3.4) comes from the source; no refund was among the recent mainnet blocks checked. Confirm it on a real failed top-up before the Top-up refund label (§5.5.2) relies on it. A test top-up is planned for that.
+None.
 
 ### Pending decisions (facts are clear)
 
@@ -183,6 +183,7 @@ None.
   - An unused ID inside a subnet's range (`z6546-5qaaa-aaaai-777ya-cai`): the subnet's certificate verifies and proves both paths absent.
   - An ID outside every subnet's range, the anonymous principal, and a user principal: the boundary node answers HTTP 400, `canister_not_found`, "The specified canister does not exist." That answer is not certified, but a wrong one can only block a top-up, never move cycles.
   - `CanisterStatus.request` returns `null` in every one of these "no" cases, and also when the read fails.
+- **Q2 Refund memo:** confirmed on 2026-10-07 from mainnet history (§3.4, §5.5.2). The newest 40,000 cycles-ledger blocks hold 28 mints with memo 32 × `0xFF`, each right after a withdrawal burn by the same account, for the refund plus the 0.0001 TCYCLES fee. For example, blocks 16,792,327 and 16,792,328 withdraw 0.0005 TCYCLES each to `s5zhi-ciaaa-aaacg-aaaja-cai` and `su2mu-uaaaa-aaacg-aaaiq-cai`, and blocks 16,792,329 and 16,792,331 mint 0.0004 TCYCLES back.
 - **Destination check:** canister IDs only, and the canister must exist (§5.1).
 - **Activity label:** Top up, naming the canister (§5.5).
 - **No canister cycle balance** in v1 (§10).
