@@ -1,11 +1,9 @@
 import { ZERO } from '$lib/constants/app.constants';
-import {
-	getMultipleAccountsInfo,
-	getSolCreateAccountFee,
-	simulateTransactionAccounts
-} from '$sol/api/solana.api';
+import { getMultipleAccountsInfo, simulateTransactionAccounts } from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
+	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
+	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
@@ -16,6 +14,7 @@ import type {
 	SolanaSimulatedInnerInstructions
 } from '$sol/types/sol-rpc';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
+import * as solInstructionSummaryUtils from '$sol/utils/sol-instruction-summary.utils';
 import {
 	mockAtaAddress,
 	mockAtaAddress2,
@@ -38,7 +37,6 @@ import {
 
 vi.mock('$sol/api/solana.api', () => ({
 	getMultipleAccountsInfo: vi.fn(),
-	getSolCreateAccountFee: vi.fn(),
 	simulateTransactionAccounts: vi.fn()
 }));
 
@@ -110,7 +108,8 @@ describe('sol-simulation.services', () => {
 		base64EncodedTransactionMessage,
 		transactionMessage,
 		address: mockSolAddress,
-		network
+		network,
+		rentExemptMinimumRequest: Promise.resolve(2_039_280n)
 	});
 
 	const simulated = ({
@@ -129,9 +128,12 @@ describe('sol-simulation.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.mocked(getSolCreateAccountFee).mockResolvedValue(2_039_280n as never);
 		vi.mocked(getMultipleAccountsInfo).mockResolvedValue([]);
 		vi.mocked(simulateTransactionAccounts).mockResolvedValue(simulated({ accounts: [] }));
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
 	});
 
 	it('should diff the pre-state against the simulated post-state', async () => {
@@ -191,6 +193,40 @@ describe('sol-simulation.services', () => {
 		await expect(simulateSolTransaction(params(message([])))).resolves.toBeUndefined();
 	});
 
+	// A creation may fund a token account with more than its reserve and let the initialisation read
+	// the difference as the balance, so the list can only split the two with the reserve the decode
+	// read, which it is handed rather than asking the chain again.
+	it('should hand the reserve it is given to the instruction list', async () => {
+		const spyMapSolInstructionSummaries = vi.spyOn(
+			solInstructionSummaryUtils,
+			'mapSolInstructionSummaries'
+		);
+
+		await simulateSolTransaction({
+			...params(message([])),
+			rentExemptMinimumRequest: Promise.resolve(1_488_440n)
+		});
+
+		expect(spyMapSolInstructionSummaries).toHaveBeenCalledWith(
+			expect.objectContaining({ rentExemptMinimum: 1_488_440n })
+		);
+	});
+
+	// The decode starts the run before the reserve arrives, so waiting for it has to fall inside the
+	// run's own timeout: otherwise a stalled reserve would hold the review past it.
+	it('should give up on a reserve that never arrives within its own timeout', async () => {
+		vi.useFakeTimers();
+
+		const pending = simulateSolTransaction({
+			...params(message([])),
+			rentExemptMinimumRequest: new Promise(() => undefined)
+		});
+
+		await vi.advanceTimersByTimeAsync(SOLANA_SIMULATION_TIMEOUT_MILLISECONDS);
+
+		await expect(pending).resolves.toBeUndefined();
+	});
+
 	it('should yield nothing without a wallet address', async () => {
 		const result = await simulateSolTransaction({
 			...params(message([])),
@@ -216,6 +252,53 @@ describe('sol-simulation.services', () => {
 	// message made of nothing else has nothing to list. That is its answer rather than a gap: left
 	// out, the review rebuilt the list from the message alone, which cannot tell that the account
 	// was there and listed the creation as one.
+	// An account a program opens inside its own instruction reaches the review through the run alone,
+	// so it is the run that says whether one was funded above its rent.
+	describe('accounts opened inside an instruction', () => {
+		const innerOpening = (lamports: number): SolanaSimulatedInnerInstructions =>
+			[
+				{
+					index: 0,
+					instructions: [
+						{
+							program: 'system',
+							programId: address(SYSTEM_PROGRAM_ADDRESS),
+							parsed: {
+								type: 'createAccount',
+								info: {
+									source: mockSolAddress,
+									newAccount: mockSolAddress2,
+									lamports,
+									space: 165,
+									owner: TOKEN_PROGRAM_ADDRESS
+								}
+							}
+						}
+					]
+				}
+			] satisfies SolanaSimulatedInnerInstructions;
+
+		it('should say so when one is funded above its rent', async () => {
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({ accounts: [], innerInstructions: innerOpening(2_039_281) })
+			);
+
+			const result = await simulateSolTransaction(params(message([])));
+
+			expect(result?.opensAccountBeyondRent).toBeTruthy();
+		});
+
+		it('should say nothing when one is funded with exactly its rent', async () => {
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({ accounts: [], innerInstructions: innerOpening(2_039_280) })
+			);
+
+			const result = await simulateSolTransaction(params(message([])));
+
+			expect(result).not.toHaveProperty('opensAccountBeyondRent');
+		});
+	});
+
 	it('should keep an empty list for a run with nothing to list', async () => {
 		const accountAt = ({ addresses }: { addresses: SolAddress[] }) =>
 			addresses.map((account) =>
@@ -454,6 +537,65 @@ describe('sol-simulation.services', () => {
 				destinations: [{ address: mockAtaAddress, owner: mockSolAddress, own: true }],
 				partial: false
 			});
+		});
+	});
+
+	describe('unread programs', () => {
+		// Calls the run makes inside a router, handed over raw: a router's own call and one to a
+		// program the wallet does not know.
+		const nested = (programs: SolAddress[]) =>
+			[
+				{
+					index: 0,
+					instructions: programs.map((programId) => ({ programId, accounts: [], data: '' }))
+				}
+			] as unknown as SolanaSimulatedInnerInstructions;
+
+		const JUPITER = 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4';
+
+		beforeEach(() => {
+			vi.mocked(getMultipleAccountsInfo).mockResolvedValue([systemAccount(1_000_000n)]);
+		});
+
+		it('should name a program a nested call reaches that is not among the known ones', async () => {
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({
+					accounts: [systemAccount(994_000n)],
+					innerInstructions: nested([JUPITER, STAKE_PROGRAM_ADDRESS])
+				})
+			);
+
+			const result = await simulateSolTransaction(params(message([])));
+
+			expect(result?.unreadPrograms).toEqual([STAKE_PROGRAM_ADDRESS]);
+		});
+
+		it('should name none when every nested call reaches a known program', async () => {
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({
+					accounts: [systemAccount(994_000n)],
+					innerInstructions: nested([JUPITER, SYSTEM_PROGRAM_ADDRESS])
+				})
+			);
+
+			const result = await simulateSolTransaction(params(message([])));
+
+			expect(result?.unreadPrograms).toEqual([]);
+		});
+
+		it('should yield nothing when a nested call does not name its program', async () => {
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({
+					accounts: [systemAccount(994_000n)],
+					innerInstructions: [
+						{ index: 0, instructions: [{ programIdIndex: 3, accounts: [], data: '' }] }
+					] as unknown as SolanaSimulatedInnerInstructions
+				})
+			);
+
+			const result = await simulateSolTransaction(params(message([])));
+
+			expect(result).toBeUndefined();
 		});
 	});
 });

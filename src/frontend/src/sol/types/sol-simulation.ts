@@ -41,6 +41,16 @@ export interface SolSimulationPreview {
 }
 
 /**
+ * A program the simulated run calls from inside another program's instruction and that OISY does
+ * not know, with the name it publishes for itself when it publishes one. The name is the program's
+ * own claim, attested by nobody: a label for the address, never a statement about what it does.
+ */
+export interface SolUnreadProgram {
+	address: SolAddress;
+	name?: string;
+}
+
+/**
  * Everything one simulated run yields for the review.
  *
  * The preview is absent when the run changes nothing the user owns; the parties are always
@@ -57,5 +67,12 @@ export interface SolSimulationResult {
 	// from the run. Whether the run agrees is the caller's to decide, since only the caller knows
 	// what the transaction costs, which the simulated balance carries and the message never states.
 	messageSummary?: SolTransactionSummary;
+	// Whether the run opens an account inside another program's instruction with more than its size
+	// costs: a payment the review refuses rather than states, as it does for the message's own.
+	opensAccountBeyondRent?: boolean;
 	parties: SolTransferParties;
+	// The programs the run calls from inside another program's instruction that are not among the
+	// known ones. Such a call can act on what the user holds in an application, which neither the
+	// preview nor the instructions describe. Empty when every nested call reaches a known program.
+	unreadPrograms: SolAddress[];
 }
