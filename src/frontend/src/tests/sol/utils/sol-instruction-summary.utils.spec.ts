@@ -1,7 +1,10 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
-import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
+import {
+	mapSolInstructionSummaries,
+	solOpensAccountBeyondRent
+} from '$sol/utils/sol-instruction-summary.utils';
 import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
 import { flattenInstructions, solClosesPayOthers } from '$sol/utils/sol-transaction-summary.utils';
 import { decodeTransactionMessage } from '$sol/utils/sol-transactions.utils';
@@ -3029,6 +3032,120 @@ describe('sol-instruction-summary.utils', () => {
 					)
 				).toStrictEqual(['createTokenAccount', 'send']);
 			});
+		});
+	});
+
+	describe('solOpensAccountBeyondRent', () => {
+		// What mainnet charged a token account to exist on 2026-10-06.
+		const rentExemptMinimum = 1_488_440n;
+
+		const opening = ({
+			type = 'createAccount',
+			lamports,
+			space,
+			owner = 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo'
+		}: {
+			type?: string;
+			lamports: bigint;
+			space: bigint;
+			owner?: string;
+		}) => [
+			{
+				index: 0,
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type,
+							info: {
+								source: mockSolAddress,
+								newAccount: mockSolAddress2,
+								lamports: Number(lamports),
+								space: Number(space),
+								owner
+							}
+						}
+					}
+				]
+			}
+		];
+
+		it('should not judge an opening funded with exactly its rent', () => {
+			expect(
+				solOpensAccountBeyondRent({
+					innerInstructions: opening({ lamports: 41_899_840n, space: 8_120n }),
+					rentExemptMinimum
+				})
+			).toBeFalsy();
+		});
+
+		it('should flag an opening funded a lamport above its rent', () => {
+			expect(
+				solOpensAccountBeyondRent({
+					innerInstructions: opening({ lamports: 41_899_841n, space: 8_120n }),
+					rentExemptMinimum
+				})
+			).toBeTruthy();
+		});
+
+		it('should flag the seed-derived form on the same terms', () => {
+			expect(
+				solOpensAccountBeyondRent({
+					innerInstructions: opening({
+						type: 'createAccountWithSeed',
+						lamports: 1_488_441n,
+						space: 165n
+					}),
+					rentExemptMinimum
+				})
+			).toBeTruthy();
+		});
+
+		it("should not judge the run without the chain's reserve", () => {
+			expect(
+				solOpensAccountBeyondRent({
+					innerInstructions: opening({ lamports: 1_000_000_000n, space: 165n }),
+					rentExemptMinimum: undefined
+				})
+			).toBeFalsy();
+		});
+
+		// Nothing governs a System-owned account's lamports but its key, so none of them is rent.
+		it('should flag a System-owned opening whatever its funding', () => {
+			expect(
+				solOpensAccountBeyondRent({
+					innerInstructions: opening({
+						lamports: 650_240n,
+						space: ZERO,
+						owner: '11111111111111111111111111111111'
+					}),
+					rentExemptMinimum
+				})
+			).toBeTruthy();
+		});
+
+		it("should flag a System-owned seed-derived opening without the chain's reserve", () => {
+			expect(
+				solOpensAccountBeyondRent({
+					innerInstructions: opening({
+						type: 'createAccountWithSeed',
+						lamports: 650_240n,
+						space: ZERO,
+						owner: '11111111111111111111111111111111'
+					}),
+					rentExemptMinimum: undefined
+				})
+			).toBeTruthy();
+		});
+
+		it('should not judge the Meteora DLMM position, opened with exactly its rent', () => {
+			expect(
+				solOpensAccountBeyondRent({
+					innerInstructions: MOCK_SOL_METEORA_DLMM_OPEN_POSITION.innerInstructions,
+					rentExemptMinimum: MOCK_SOL_METEORA_DLMM_OPEN_POSITION.rentExemptMinimum
+				})
+			).toBeFalsy();
 		});
 	});
 });

@@ -102,6 +102,9 @@
 	// What the chain charged a token account to exist when the review was computed. Signing holds the
 	// message's account creations to it, so what the review allowed is what gets signed.
 	let rentExemptMinimum = $state<bigint | undefined>();
+	// An account the run opens inside another program's instruction with more than its size costs.
+	// `sign()` refuses it as it does an ambiguous message, so the review says so the same way.
+	let opensAccountBeyondRent = $state<boolean | undefined>();
 	// The decode is asynchronous, so until it settles the review shows an empty summary and no
 	// warning. Approval waits for it: signing on the strength of a review that has not been
 	// computed yet is exactly what the warnings exist to prevent. A failed decode never flips it,
@@ -131,7 +134,8 @@
 				messageSummary,
 				parties,
 				unreadPrograms,
-				rentExemptMinimum
+				rentExemptMinimum,
+				opensAccountBeyondRent
 			} = await decodeService({
 				base64EncodedTransactionMessage: data,
 				networkId,
@@ -251,7 +255,8 @@
 				!instructions.some(({ kind }) => kind === 'unknown'),
 			closesPayOthers,
 			unreadProgramsAcknowledged: !callsUnreadPrograms || unreadProgramsAcknowledged,
-			rentExemptMinimum
+			rentExemptMinimum,
+			opensAccountBeyondRent: opensAccountBeyondRent ?? false
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
@@ -277,9 +282,12 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<SolWalletConnectSignReview
-				ambiguous={ambiguous ?? false}
+				ambiguous={(ambiguous ?? false) || (opensAccountBeyondRent ?? false)}
 				{application}
-				approveDisabled={!decoded || (ambiguous ?? false) || closesPayOthers}
+				approveDisabled={!decoded ||
+					(ambiguous ?? false) ||
+					(opensAccountBeyondRent ?? false) ||
+					closesPayOthers}
 				{closesPayOthers}
 				{data}
 				{decoded}
