@@ -9,13 +9,17 @@ import type { SplTokenAddress } from '$sol/types/spl';
  * (`syncNative`, `initializeImmutableOwner`) names nothing a user holds or controls.
  */
 export type SolInstructionSummaryKind =
-	// Not an instruction at all: the container the legs of one routed swap hang under.
+	// Not an effect at all: the heading the lines of one instruction the wallet could not read hang
+	// under, a routed swap's legs among them.
 	| 'route'
 	| 'send'
 	| 'receive'
 	| 'wrap'
 	| 'unwrap'
 	| 'createTokenAccount'
+	// An account opened for an application's own program, its rent paid by the user. The account is
+	// the program's, and the rent is what the user hands over to open it.
+	| 'createAccount'
 	| 'closeTokenAccount'
 	| 'approve'
 	| 'revoke'
@@ -76,13 +80,15 @@ export interface SolInstructionSummary {
 	ownAccount?: boolean;
 	// The new authority of a `setAuthority`, absent when the field was cleared.
 	newAuthority?: SolAddress;
-	// The program that produced the legs of a route, when one is known by address.
+	// The program that produced the legs of a route, or that an account is opened for, when one is
+	// known by address.
 	program?: SolAddress;
 	// The name that program publishes for itself, when it publishes one. Its own claim about
 	// itself, attested by nobody: a label for the address, never a statement about what it does.
 	programName?: string;
-	// The legs of a single routed swap. They hang under the route rather than sitting flat among
-	// the top-level effects, which is what keeps a four-leg route from reading as four unrelated
-	// transfers.
+	// The lines of a single instruction the wallet could not read, the legs of a routed swap among
+	// them. They hang under it rather than sitting flat among the top-level effects, which is what
+	// keeps a four-leg route from reading as four unrelated transfers, and a line made inside an
+	// application from reading as one the message states itself.
 	children?: SolInstructionSummary[];
 }

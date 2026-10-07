@@ -49,6 +49,23 @@ describe('sol-program-name.services', () => {
 			});
 		});
 
+		// An account opened inside an application's instruction names the program it is opened for.
+		it('should name the programs of the lines under an instruction too', async () => {
+			const opening: SolInstructionSummary = {
+				kind: 'createAccount',
+				program: mockSolAddress,
+				rent: 41_899_840n
+			};
+
+			await expect(
+				loadSolProgramNames({ instructions: [{ ...route, children: [opening] }], network })
+			).resolves.toStrictEqual([
+				{ ...route, programName: 'jupiter', children: [{ ...opening, programName: 'jupiter' }] }
+			]);
+
+			expect(findSolProgramIdlAddress).toHaveBeenCalledOnce();
+		});
+
 		it('should leave an instruction that names no program untouched', async () => {
 			await expect(loadSolProgramNames({ instructions: [send], network })).resolves.toStrictEqual([
 				send
