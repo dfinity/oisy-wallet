@@ -125,9 +125,10 @@ Add new feature folders only if your concern doesn't fit any of the above.
 
 ### Chain-specific utils worth knowing
 
-| Util                         | Where         | Purpose                                                                                                                                                                                                        |
-| ---------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sol-transfer-parties.utils` | `$sol/utils/` | Transfer legs and the Sources / Destinations rules. One derivation for the WalletConnect review and the activity list; adapters onto both instruction mappers live here, do not re-derive parties per surface. |
+| Util                         | Where         | Purpose                                                                                                                                                                                                                 |
+| ---------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sol-transfer-parties.utils` | `$sol/utils/` | Transfer legs and the Sources / Destinations rules. One derivation for the WalletConnect review and the activity list; adapters onto both instruction mappers live here, do not re-derive parties per surface.          |
+| `sol-rent.utils`             | `$sol/utils/` | `rentExemptMinimumFor`: an account's rent-exempt reserve for any size, scaled from the chain's reserve for a token account (`getSolCreateAccountFee`). Solana lowers rent in steps, so never hard-code a lamport price. |
 
 ### REST + workers
 
