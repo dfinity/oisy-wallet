@@ -261,7 +261,7 @@ describe('sol-simulation.services', () => {
 					instructions: [
 						{
 							program: 'system',
-							programId: SYSTEM_PROGRAM_ADDRESS,
+							programId: address(SYSTEM_PROGRAM_ADDRESS),
 							parsed: {
 								type: 'createAccount',
 								info: {
@@ -275,7 +275,7 @@ describe('sol-simulation.services', () => {
 						}
 					]
 				}
-			] as unknown as SolanaSimulatedInnerInstructions;
+			] satisfies SolanaSimulatedInnerInstructions;
 
 		it('should say so when one is funded above its rent', async () => {
 			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
