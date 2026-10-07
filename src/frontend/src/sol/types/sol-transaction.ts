@@ -115,7 +115,8 @@ export interface MappedSolTransaction {
 	computeUnitPrice?: bigint;
 	computeUnitLimit?: bigint;
 	// The prioritisation fee, in lamports, the message will be charged on top of the base
-	// transaction fee. Only set at message level, where the whole instruction list is known.
+	// transaction fee. Only set at message level, where the whole instruction list, or the config
+	// of a version 1 message, is known.
 	prioritizationFee?: bigint;
 	// What OISY itself would pay to prioritise this same message, in lamports, from the network's
 	// recent fees. The review compares the requested fee against it. Absent when the estimate
