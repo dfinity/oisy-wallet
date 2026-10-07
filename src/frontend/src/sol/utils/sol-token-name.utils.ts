@@ -5,7 +5,7 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { findSplToken } from '$sol/utils/spl.utils';
-import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
  * The names known for one cluster. The same mint address exists on several of them and carries
@@ -23,8 +23,19 @@ const namesOn = ({
 	return nonNullish(network) ? (metadata[network] ?? {}) : {};
 };
 
+// The longest symbol of its own a mint is shown with, the ellipsis included. Tickers run to a
+// handful of characters, and the symbol sits inside a sentence, which a longer one would swamp.
+const OWN_SYMBOL_MAX_LENGTH = 12;
+
+// Characters that show nothing themselves or rearrange the ones around them: controls, format
+// characters such as the bidirectional overrides and the zero-width joiners, and code points that
+// are private, unassigned or half of a pair.
+const INVISIBLE_CHARACTERS = /[\p{Cc}\p{Cf}\p{Co}\p{Cn}\p{Cs}]/gu;
+
 /**
- * The symbol a mint carries in its own account, if it carries one.
+ * The symbol a mint carries in its own account, as it may be shown. Whoever creates the mint
+ * writes it, so it is kept to what is visible and cut to a ticker's length. Nothing left of it is
+ * no symbol at all.
  */
 const ownSymbol = ({
 	tokenAddress,
@@ -37,7 +48,24 @@ const ownSymbol = ({
 }): string | undefined => {
 	const symbol = namesOn({ metadata, networkId })[tokenAddress]?.symbol;
 
-	return notEmptyString(symbol) ? symbol : undefined;
+	if (isNullish(symbol)) {
+		return undefined;
+	}
+
+	// Counted in code points, so a symbol cannot stretch past the bound on marks stacked onto a
+	// single letter.
+	const characters = [...symbol.replace(INVISIBLE_CHARACTERS, '').replace(/\s+/gu, ' ').trim()];
+
+	if (characters.length === 0) {
+		return undefined;
+	}
+
+	return characters.length > OWN_SYMBOL_MAX_LENGTH
+		? `${characters
+				.slice(0, OWN_SYMBOL_MAX_LENGTH - 1)
+				.join('')
+				.trimEnd()}…`
+		: characters.join('');
 };
 
 /**
@@ -103,7 +131,7 @@ export const solTokenSymbol = ({
 
 /**
  * The mints of a view that nothing can name, in the order they appear, which is what the numbering
- * counts off.
+ * counts off. A mint whose own symbol has nothing visible in it is one of them.
  */
 export const solUnknownTokenAddresses = ({
 	tokenAddresses,
