@@ -270,7 +270,7 @@ describe('CyclesTopUpModal', () => {
 								...recentTopUp,
 								id: '2',
 								to: other,
-								timestamp: recentTopUp.timestamp - 1n
+								timestamp: 1_600_000_000_000_000_000n
 							},
 							certified: true
 						}
