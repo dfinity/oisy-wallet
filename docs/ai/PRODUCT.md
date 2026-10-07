@@ -244,7 +244,7 @@ Scrolling back through Solana history works per network on the Activity page and
 
 ### TCYCLES top-ups
 
-The cycles ledger's `withdraw` tops up a canister: it burns TCYCLES and deposits the same number of cycles into the canister. The ledger records the canister in the burn's memo, so TCYCLES Activity lists such a burn as **Top up**, with the canister as its destination, whichever tool made it. The refund of a top-up the canister could not take is listed as **Top-up refund**, and every other burn on the cycles ledger stays **Burn**.
+The cycles ledger's `withdraw` tops up a canister: it burns TCYCLES and deposits the same number of cycles into the canister. The ledger records the canister in the burn's memo, so TCYCLES Activity shows such a burn as **Top up**, with the canister as its destination, in the list and in the details, whichever tool made it. The refund of a top-up the canister could not take shows as **Top-up refund**, and every other burn on the cycles ledger stays **Burn**.
 
 ---
 
