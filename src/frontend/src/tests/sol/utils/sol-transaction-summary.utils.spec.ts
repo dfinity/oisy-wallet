@@ -1137,6 +1137,14 @@ describe('sol-transaction-summary.utils', () => {
 					en.transaction.text.instruction_unknown
 				);
 			});
+
+			// A batch is named for what it is, whatever its lines do: it is the token program
+			// running several of its own instructions, not a trade routed through a venue.
+			it('should call the heading over the lines of a token batch a batch', () => {
+				expect(textOf({ kind: 'batch', program: mockSolAddress3, children: [send, receive] })).toBe(
+					en.transaction.text.instruction_batch_via
+				);
+			});
 		});
 	});
 });

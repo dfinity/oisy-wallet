@@ -1,10 +1,13 @@
 import type { SolAddress } from '$sol/types/address';
+import { SolanaNetworks } from '$sol/types/network';
 import type { SolRpcInstruction } from '$sol/types/sol-instructions';
 import type { MappedSolTransaction, SolTransferLeg } from '$sol/types/sol-transaction';
 import {
 	deriveSolTransferParties,
 	isSolTransferInstruction,
 	isSolTransferSourcesRedundant,
+	mapSolSimulatedTransferLegs,
+	mapSolTransferLegs,
 	solTransferPartyAddress,
 	toSolTransferLeg
 } from '$sol/utils/sol-transfer-parties.utils';
@@ -17,6 +20,8 @@ import {
 	mockSolAddress3,
 	mockSolAddress4
 } from '$tests/mocks/sol.mock';
+import { getBatchInstruction, getTransferCheckedInstruction } from '@solana-program/token';
+import { address } from '@solana/kit';
 
 describe('sol-transfer-parties.utils', () => {
 	const leg = ({
@@ -259,6 +264,98 @@ describe('sol-transfer-parties.utils', () => {
 					userAddress: mockSolAddress
 				})
 			).toBeFalsy();
+		});
+	});
+
+	describe('the transfers a token batch carries', () => {
+		const TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+		const mint = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
+		const transferTo = ({ destination, amount }: { destination: string; amount: bigint }) =>
+			getTransferCheckedInstruction({
+				source: address(mockAtaAddress),
+				mint: address(mint),
+				destination: address(destination),
+				authority: address(mockSolAddress),
+				amount,
+				decimals: 6
+			});
+
+		const batch = () =>
+			getBatchInstruction([
+				transferTo({ destination: mockAtaAddress2, amount: 1n }),
+				transferTo({ destination: mockAtaAddress3, amount: 2n })
+			]);
+
+		const legs = [
+			{ amount: 1n, source: mockAtaAddress, destination: mockAtaAddress2, tokenAddress: mint },
+			{ amount: 2n, source: mockAtaAddress, destination: mockAtaAddress3, tokenAddress: mint }
+		];
+
+		it('should give a leg for each transfer of a batch the message states', () => {
+			expect(mapSolTransferLegs([batch()])).toStrictEqual(legs);
+		});
+
+		it('should give a leg for each transfer of a batch the message states, with a run', async () => {
+			await expect(
+				mapSolSimulatedTransferLegs({
+					instructions: [batch()],
+					innerInstructions: [],
+					network: SolanaNetworks.mainnet,
+					addressToToken: {}
+				})
+			).resolves.toStrictEqual(legs);
+		});
+
+		it('should give a leg for a transfer of a batch a program runs inside its own call', async () => {
+			const [leg] = await mapSolSimulatedTransferLegs({
+				instructions: [
+					{
+						programAddress: address(mockSolAddress4),
+						accounts: [],
+						data: new Uint8Array([1])
+					}
+				],
+				innerInstructions: [
+					{
+						index: 0,
+						instructions: [
+							{
+								program: 'spl-token',
+								programId: address(TOKEN),
+								parsed: {
+									type: 'batch',
+									info: {
+										instructions: [
+											{
+												type: 'transferChecked',
+												info: {
+													source: mockAtaAddress,
+													destination: mockAtaAddress2,
+													authority: mockSolAddress,
+													mint,
+													tokenAmount: { amount: '5', decimals: 6, uiAmountString: '0.000005' }
+												}
+											}
+										]
+									}
+								},
+								stackHeight: 2
+							}
+						]
+					}
+				],
+				network: SolanaNetworks.mainnet,
+				addressToToken: {}
+			});
+
+			expect(leg).toEqual(
+				expect.objectContaining({
+					source: mockAtaAddress,
+					destination: mockAtaAddress2,
+					amount: 5n
+				})
+			);
 		});
 	});
 });

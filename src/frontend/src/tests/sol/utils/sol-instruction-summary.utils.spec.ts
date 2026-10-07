@@ -23,6 +23,7 @@ import {
 	AuthorityType,
 	getApproveCheckedInstruction,
 	getApproveInstruction,
+	getBatchInstruction,
 	getBurnInstruction,
 	getFreezeAccountInstruction,
 	getMintToInstruction,
@@ -2899,6 +2900,149 @@ describe('sol-instruction-summary.utils', () => {
 						userAddress: me
 					})
 				).not.toThrow();
+			});
+		});
+
+		describe('a token batch', () => {
+			const TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+			const APP = 'App1111111111111111111111111111111111111111';
+			const mint = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
+			const transferTo = ({ destination, amount }: { destination: string; amount: bigint }) =>
+				getTransferCheckedInstruction({
+					source: toAddress(mockAtaAddress),
+					mint: toAddress(mint),
+					destination: toAddress(destination),
+					authority: toAddress(mockSolAddress),
+					amount,
+					decimals: 6
+				});
+
+			const send = ({ counterparty, amount }: { counterparty: string; amount: bigint }) => ({
+				kind: 'send',
+				amount,
+				tokenAddress: mint,
+				decimals: 6,
+				counterparty,
+				own: false
+			});
+
+			// What the RPC reports for a batch a program runs inside its own instruction.
+			const reportedBatch = (instructions: unknown) => ({
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: { type: 'batch', info: { instructions } },
+				stackHeight: 2
+			});
+
+			const unreadCall = { programId: APP, accounts: [], data: '' };
+
+			it('should list the instructions of a batch the message states under one line naming it', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						getBatchInstruction([
+							transferTo({ destination: mockSolAddress2, amount: 1n }),
+							transferTo({ destination: mockAtaAddress2, amount: 2n })
+						])
+					].map(asSolParsedRpcInstructionOrSelf),
+					ownedAddresses: [mockSolAddress, mockAtaAddress],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(views).toStrictEqual([
+					{
+						kind: 'batch',
+						program: TOKEN,
+						children: [
+							send({ counterparty: mockSolAddress2, amount: 1n }),
+							send({ counterparty: mockAtaAddress2, amount: 2n })
+						]
+					}
+				]);
+			});
+
+			it('should list a batch a program runs under that program and under one line naming it', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [unreadCall],
+					innerInstructions: [
+						{
+							index: 0,
+							instructions: [
+								reportedBatch([
+									{
+										type: 'transferChecked',
+										info: {
+											source: mockAtaAddress,
+											destination: mockSolAddress2,
+											authority: mockSolAddress,
+											mint,
+											tokenAmount: { amount: '5', decimals: 6 }
+										}
+									}
+								])
+							]
+						}
+					],
+					ownedAddresses: [mockSolAddress, mockAtaAddress],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(views).toStrictEqual([
+					{
+						kind: 'route',
+						program: APP,
+						children: [
+							{
+								kind: 'batch',
+								program: TOKEN,
+								children: [send({ counterparty: mockSolAddress2, amount: 5n })]
+							}
+						]
+					}
+				]);
+			});
+
+			it('should hold a close inside such a batch that pays somebody else to the close refusal', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [unreadCall],
+					innerInstructions: [
+						{
+							index: 0,
+							instructions: [
+								reportedBatch([
+									{
+										type: 'closeAccount',
+										info: {
+											account: mockAtaAddress,
+											destination: mockSolAddress2,
+											owner: mockSolAddress
+										}
+									}
+								])
+							]
+						}
+					],
+					ownedAddresses: [mockSolAddress, mockAtaAddress],
+					userAddress: mockSolAddress,
+					accountLamports: { [mockAtaAddress]: 2_039_280n }
+				});
+
+				expect(
+					solClosesPayOthers({ instructions: views, userAddress: mockSolAddress })
+				).toBeTruthy();
+			});
+
+			it('should leave a batch whose contents it cannot read unrecognised', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [reportedBatch('not a list')],
+					ownedAddresses: [mockSolAddress, mockAtaAddress],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(kinds(views)).toStrictEqual(['unknown']);
 			});
 		});
 

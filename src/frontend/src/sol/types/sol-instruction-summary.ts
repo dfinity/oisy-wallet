@@ -12,6 +12,9 @@ export type SolInstructionSummaryKind =
 	// Not an effect at all: the heading the lines of one instruction the wallet could not read hang
 	// under, a routed swap's legs among them.
 	| 'route'
+	// Not an effect either: the heading the lines of one token batch hang under, naming the program
+	// the batch runs in.
+	| 'batch'
 	| 'send'
 	| 'receive'
 	| 'wrap'
@@ -87,8 +90,8 @@ export interface SolInstructionSummary {
 	// itself, attested by nobody: a label for the address, never a statement about what it does.
 	programName?: string;
 	// The lines of a single instruction the wallet could not read, the legs of a routed swap among
-	// them. They hang under it rather than sitting flat among the top-level effects, which is what
-	// keeps a four-leg route from reading as four unrelated transfers, and a line made inside an
-	// application from reading as one the message states itself.
+	// them, or of a token batch. They hang under it rather than sitting flat among the top-level
+	// effects, which is what keeps a four-leg route from reading as four unrelated transfers, and a
+	// line made inside an application from reading as one the message states itself.
 	children?: SolInstructionSummary[];
 }

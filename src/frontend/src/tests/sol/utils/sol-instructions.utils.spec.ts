@@ -31,7 +31,12 @@ import * as solInstructionsToken2022Utils from '$sol/utils/sol-instructions-toke
 import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
 import * as solInstructionsTokenUtils from '$sol/utils/sol-instructions-token.utils';
 import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
-import { mapSolInstruction, mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
+import {
+	asSolParsedRpcInstruction,
+	mapSolInstruction,
+	mapSolParsedInstruction,
+	solUnbatchedInstructions
+} from '$sol/utils/sol-instructions.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolParsedTransactionMessage } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSolAddress2, mockSolAddress3 } from '$tests/mocks/sol.mock';
@@ -2265,6 +2270,99 @@ describe('sol-instructions.utils', () => {
 			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
 				`Could not parse Solana instruction for program ${mockInstruction1.programAddress}`
 			);
+		});
+	});
+
+	describe('a token batch read through its instructions', () => {
+		const transferTo = (destination: string) =>
+			getTransferCheckedInstruction({
+				source: address(mockSolAddress3),
+				mint: address(JUP_TOKEN.address),
+				destination: address(destination),
+				authority: address(mockSolAddress),
+				amount: 1n,
+				decimals: 6
+			});
+
+		const nest = (inner: SolInstruction): SolInstruction => ({
+			programAddress: inner.programAddress,
+			accounts: inner.accounts,
+			data: getBatchInstructionDataEncoder().encode({
+				data: [
+					{
+						numberOfAccounts: inner.accounts?.length ?? 0,
+						instructionData: inner.data ?? new Uint8Array()
+					}
+				]
+			})
+		});
+
+		describe('solUnbatchedInstructions', () => {
+			it('should give the instructions a batch carries, each with its own accounts', () => {
+				const first = transferTo(mockSolAddress2);
+				const second = transferTo(mockSolAddress);
+
+				const unbatched = solUnbatchedInstructions(getBatchInstruction([first, second]));
+
+				expect(unbatched).toHaveLength(2);
+				expect(unbatched.map(({ accounts }) => accounts)).toStrictEqual([
+					first.accounts,
+					second.accounts
+				]);
+				expect(unbatched.map(({ data }) => data)).toStrictEqual([first.data, second.data]);
+			});
+
+			it('should leave any other instruction as it is', () => {
+				const transfer = transferTo(mockSolAddress2);
+
+				expect(solUnbatchedInstructions(transfer)).toStrictEqual([transfer]);
+			});
+
+			it('should leave a batch nested in a batch whole', () => {
+				const nested = nest(getBatchInstruction([transferTo(mockSolAddress2)]));
+
+				expect(solUnbatchedInstructions(nested)).toStrictEqual([nested]);
+			});
+
+			it('should leave a batch naming more accounts than it carries whole', () => {
+				const batch = getBatchInstruction([transferTo(mockSolAddress2)]);
+				const short = { ...batch, accounts: batch.accounts.slice(0, -1) };
+
+				expect(solUnbatchedInstructions(short)).toStrictEqual([short]);
+			});
+		});
+
+		describe('asSolParsedRpcInstruction', () => {
+			it('should state a batch the way the RPC reports one', () => {
+				expect(
+					asSolParsedRpcInstruction(
+						getBatchInstruction([transferTo(mockSolAddress2), transferTo(mockSolAddress)])
+					)
+				).toStrictEqual({
+					program: 'spl-token',
+					programId: TOKEN_PROGRAM_ADDRESS,
+					parsed: {
+						type: 'batch',
+						info: {
+							instructions: [mockSolAddress2, mockSolAddress].map((destination) => ({
+								type: 'transferChecked',
+								info: expect.objectContaining({
+									source: mockSolAddress3,
+									mint: JUP_TOKEN.address,
+									destination,
+									authority: mockSolAddress
+								})
+							}))
+						}
+					}
+				});
+			});
+
+			it('should leave a batch nested in a batch unread', () => {
+				expect(
+					asSolParsedRpcInstruction(nest(getBatchInstruction([transferTo(mockSolAddress2)])))
+				).toBeUndefined();
+			});
 		});
 	});
 });

@@ -180,8 +180,62 @@ const PLUMBING_TYPES = [
 	'syncNative'
 ];
 
+const isParsedStep = (entry: unknown): entry is { type: string; info: object } =>
+	nonNullish(entry) &&
+	typeof entry === 'object' &&
+	'type' in entry &&
+	typeof entry.type === 'string' &&
+	'info' in entry &&
+	nonNullish(entry.info) &&
+	typeof entry.info === 'object';
+
+/**
+ * A token batch as the RPC reports one: the parsed instructions it carries, which come without a
+ * program of their own, since they run in the batch's. Each is given the batch's in turn. A batch
+ * whose contents are not in that shape stays whole, and describes nothing.
+ */
+export const solRpcBatchedInstructions = <
+	T extends { program?: string; parsed: { type: string; info?: object } }
+>(
+	instruction: T
+): T[] => {
+	const {
+		program,
+		parsed: { type, info }
+	} = instruction;
+
+	if (
+		type !== 'batch' ||
+		isNullish(program) ||
+		!TOKEN_PROGRAMS.includes(program) ||
+		isNullish(info)
+	) {
+		return [instruction];
+	}
+
+	const carried = field({ info, key: 'instructions' });
+
+	if (!Array.isArray(carried) || carried.length === 0) {
+		return [instruction];
+	}
+
+	const entries = carried.filter(isParsedStep);
+
+	return entries.length === carried.length
+		? entries.map((parsed) => ({ ...instruction, parsed }))
+		: [instruction];
+};
+
+// A token batch's instructions are marked as its own, so its lines can be gathered under it. The
+// mark names one batch among all the instructions of the transaction, and the program it runs in.
+interface SolBatchMark {
+	id: string;
+	program: SolAddress;
+}
+
 interface Effect extends SolInstructionSummary {
 	parentIndex: number;
+	batch?: SolBatchMark;
 }
 
 /**
@@ -211,7 +265,12 @@ const flatten = ({
 }: {
 	instructions: readonly unknown[];
 	innerInstructions: readonly SolInstructionGroup[];
-}): { parentIndex: number; topLevel: boolean; instruction: SolParsedRpcInstruction }[] =>
+}): {
+	parentIndex: number;
+	topLevel: boolean;
+	instruction: SolParsedRpcInstruction;
+	batch?: SolBatchMark;
+}[] =>
 	instructions.flatMap((instruction, parentIndex) => {
 		const inner = innerInstructions.find(({ index }) => index === parentIndex)?.instructions ?? [];
 
@@ -220,16 +279,29 @@ const flatten = ({
 		// that program's own plumbing and is already described by the instruction that caused it.
 		// Marked before the parse filter, so an unreadable top-level call does not promote its first
 		// inner one.
-		return [
-			{ instruction, topLevel: true },
-			...inner.map((nested) => ({ instruction: nested, topLevel: false }))
-		]
-			.filter(({ instruction: candidate }) => isParsed(candidate))
-			.map(({ instruction: parsed, topLevel }) => ({
-				parentIndex,
-				topLevel,
-				instruction: parsed as SolParsedRpcInstruction
-			}));
+		return (
+			[
+				{ instruction, topLevel: true },
+				...inner.map((nested) => ({ instruction: nested, topLevel: false }))
+			]
+				.filter(({ instruction: candidate }) => isParsed(candidate))
+				// A token batch runs the instructions it carries one after the other, so each takes the
+				// batch's place in turn, marked as the batch's. One whose contents cannot be read stays
+				// whole, and describes nothing.
+				.flatMap(({ instruction: candidate, topLevel }, position) => {
+					const parsed = candidate as SolParsedRpcInstruction;
+					const carried = solRpcBatchedInstructions(parsed);
+
+					return carried.length === 1 && carried[0] === parsed
+						? [{ parentIndex, topLevel, instruction: parsed }]
+						: carried.map((entry) => ({
+								parentIndex,
+								topLevel,
+								instruction: entry,
+								batch: { id: `${parentIndex}:${position}`, program: parsed.programId }
+							}));
+				})
+		);
 	});
 
 /**
@@ -1249,7 +1321,43 @@ const asWrap = ({
 			}
 		: effect;
 
-const strip = ({ parentIndex: _parentIndex, ...view }: Effect): SolInstructionSummary => view;
+const strip = ({
+	parentIndex: _parentIndex,
+	batch: _batch,
+	...view
+}: Effect): SolInstructionSummary => view;
+
+/**
+ * The lines of each token batch, gathered under one that names the batch and the program it runs in.
+ *
+ * A batch is one instruction to the network, and every line under it is that instruction's doing:
+ * listed flat, its lines would read as ones the message states one by one. They are consecutive,
+ * since the program runs a batch's instructions one after the other and nothing in between.
+ */
+const groupBatches = (effects: Effect[]): Effect[] =>
+	effects
+		.reduce<Effect[][]>((runs, effect) => {
+			const run = runs[runs.length - 1];
+
+			const continues =
+				nonNullish(run) && nonNullish(effect.batch) && run[0].batch?.id === effect.batch.id;
+
+			return continues ? [...runs.slice(0, -1), [...run, effect]] : [...runs, [effect]];
+		}, [])
+		.flatMap((run) => {
+			const [{ parentIndex, batch }] = run;
+
+			return isNullish(batch)
+				? run
+				: [
+						{
+							kind: 'batch' as const,
+							program: batch.program,
+							children: run.map(strip),
+							parentIndex
+						}
+					];
+		});
 
 /**
  * Every line of a top-level instruction the wallet could not read, gathered under it.
@@ -1503,7 +1611,7 @@ export const mapSolInstructionSummaries = ({
 	]);
 
 	const effects = flattened.reduce<Effect[]>(
-		(acc, { parentIndex, topLevel, instruction }, position) => {
+		(acc, { parentIndex, topLevel, instruction, batch }, position) => {
 			const effect = toEffect({
 				instruction,
 				topLevel,
@@ -1541,20 +1649,30 @@ export const mapSolInstructionSummaries = ({
 						})
 					: undefined;
 
-			return [...acc, { ...wrapped, ...(nonNullish(rent) && { rent }), parentIndex }];
+			return [
+				...acc,
+				{
+					...wrapped,
+					...(nonNullish(rent) && { rent }),
+					parentIndex,
+					...(nonNullish(batch) && { batch })
+				}
+			];
 		},
 		[]
 	);
+
+	const lines = groupBatches(effects);
 
 	// A top-level instruction none of the effects came from is one the wallet could not read: a
 	// program it does not know, or a message whose instructions carry raw bytes rather than the
 	// parsed form. Kept in the position it holds in the transaction, so the list reads in the
 	// order the run would take rather than as the recognised instructions with the gaps closed up.
-	const covered = new Set(effects.map(({ parentIndex }) => parentIndex));
+	const covered = new Set(lines.map(({ parentIndex }) => parentIndex));
 
 	const listed = includeUnrecognised
 		? [
-				...effects,
+				...lines,
 				...instructions.reduce<Effect[]>((acc, _, index) => {
 					if (covered.has(index)) {
 						return acc;
@@ -1579,7 +1697,7 @@ export const mapSolInstructionSummaries = ({
 					];
 				}, [])
 			].sort(({ parentIndex: first }, { parentIndex: second }) => first - second)
-		: effects;
+		: lines;
 
 	const unread = new Set(
 		instructions.reduce<number[]>(

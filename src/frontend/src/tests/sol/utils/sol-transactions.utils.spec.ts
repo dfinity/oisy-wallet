@@ -833,6 +833,44 @@ describe('sol-transactions.utils', () => {
 					tokenAddress: JUP_TOKEN.address
 				});
 			});
+
+			it('should read a token batch carrying a transfer as that transfer', () => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [getBatchInstruction([dustTransfer])]
+						},
+						userAddress: mockSolAddress
+					})
+				).toStrictEqual({
+					amount: 1n,
+					source: mockAtaAddress,
+					destination: mockSolAddress2,
+					tokenAddress: JUP_TOKEN.address
+				});
+			});
+
+			it('should reject a token batch whose transfer disagrees with one the message states', () => {
+				const elsewhere = getTransferCheckedInstruction({
+					source: address(mockAtaAddress),
+					mint: address(JUP_TOKEN.address),
+					destination: address(mockSolAddress3),
+					authority: address(mockSolAddress),
+					amount: 5n,
+					decimals: 6
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [dustTransfer, getBatchInstruction([elsewhere])]
+						},
+						userAddress: mockSolAddress
+					})
+				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
+			});
 		});
 
 		describe('with a version 1 message', () => {

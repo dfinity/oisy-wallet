@@ -771,6 +771,11 @@ export const formatSolInstructionSummary = ({
 		};
 	}
 
+	// The heading over the lines of a token batch, with the program it runs in beside it.
+	if (kind === 'batch') {
+		return { text: i18n.transaction.text.instruction_batch_via };
+	}
+
 	// Says only that the wallet could not read it. The program beside it is the whole of what is
 	// known, so the line names that program rather than guessing at what the call does.
 	if (kind === 'unknown') {

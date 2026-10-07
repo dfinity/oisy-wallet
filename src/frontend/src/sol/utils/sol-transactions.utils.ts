@@ -4,7 +4,7 @@ import type { OptionSolAddress } from '$sol/types/address';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import { calculateSolPrioritizationFee, resolveSolComputeUnitLimit } from '$sol/utils/fee.utils';
-import { mapSolInstruction } from '$sol/utils/sol-instructions.utils';
+import { mapSolInstruction, solUnbatchedInstructions } from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	decompileTransactionMessageFetchingLookupTables,
@@ -92,7 +92,10 @@ export const mapSolTransactionMessage = ({
 			transactionMessage.version !== 1 || programAddress !== COMPUTE_BUDGET_PROGRAM_ADDRESS
 	);
 
-	const mapped = instructionsList.reduce<MappedSolTransaction>(
+	// A token batch runs the instructions it carries one after the other, so they are read as if the
+	// message stated each itself, held to the same rules as their neighbours. The count that sizes
+	// the default compute limit stays the message's own: the batch is one instruction to the network.
+	const mapped = instructionsList.flatMap(solUnbatchedInstructions).reduce<MappedSolTransaction>(
 		(acc, instruction) => {
 			const {
 				amount,

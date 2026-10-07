@@ -189,6 +189,28 @@ describe('SolInstructionsList', () => {
 		});
 	});
 
+	it('should list the lines of a token batch under one naming it and its program', () => {
+		const { getAllByTestId, getAllByText } = render(SolInstructionsList, {
+			props: {
+				instructions: [
+					{
+						kind: 'batch',
+						program: mockSolAddress3,
+						children: [send(mockSplAddress), send(mockSplAddress)]
+					}
+				],
+				token: SOLANA_TOKEN,
+				userAddress: mockSolAddress
+			}
+		});
+
+		const [heading, ...lines] = getAllByTestId('sol-instruction');
+
+		expect(heading).toHaveTextContent(en.transaction.text.instruction_batch_via);
+		expect(lines).toHaveLength(2);
+		expect(getAllByText(shortenWithMiddleEllipsis({ text: mockSolAddress3 }))).toHaveLength(1);
+	});
+
 	it('should not call sends that all leave a swap', () => {
 		const { getByTestId } = render(SolInstructionsList, {
 			props: {

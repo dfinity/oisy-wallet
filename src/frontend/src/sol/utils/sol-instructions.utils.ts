@@ -1183,6 +1183,25 @@ export const asSolParsedRpcInstruction = (
 		return;
 	}
 
+	// Read the way the RPC reports a batch, as the instructions it carries, each read on its own: a
+	// batch the message states is then read exactly like one a program runs inside its own call. One
+	// that does not hold together, or nests another, stays unread.
+	if (isSolTokenBatch(instruction)) {
+		const batched = solBatchedInstructions(instruction);
+
+		const carried = (batched ?? []).map((inner) =>
+			isSolTokenBatch(inner) ? undefined : asSolParsedRpcInstruction(inner)
+		);
+
+		return nonNullish(batched) && carried.every(nonNullish)
+			? {
+					program: vocabulary.program,
+					programId,
+					parsed: { type: 'batch', info: { instructions: carried.map(({ parsed }) => parsed) } }
+				}
+			: undefined;
+	}
+
 	try {
 		const decoded = parseSolInstruction(instruction);
 
@@ -1288,6 +1307,22 @@ const solBatchedInstructions = ({
 	}
 };
 
+/**
+ * The instructions a message runs, with a token batch read as the instructions it carries.
+ *
+ * A batch that does not hold together, or that nests another, stays whole: neither program runs one,
+ * and mapped as it is, it is refused.
+ */
+export const solUnbatchedInstructions = (instruction: SolInstruction): SolInstruction[] => {
+	if (!isSolTokenBatch(instruction)) {
+		return [instruction];
+	}
+
+	const batched = solBatchedInstructions(instruction);
+
+	return nonNullish(batched) && !batched.some(isSolTokenBatch) ? batched : [instruction];
+};
+
 export const mapSolInstruction = ({
 	instruction,
 	userAddress,
@@ -1312,7 +1347,8 @@ export const mapSolInstruction = ({
 	// names, so it does what they would do stated one by one. Each is held to the reading it would
 	// get on its own, and one refused there is refused here too, with the whole message. A batch
 	// nested in a batch, which neither token program runs, and one that does not hold together are
-	// refused as well. A batch that passes stays an instruction the review does not read.
+	// refused as well. Mapped on its own, a batch that passes stays an instruction the review does
+	// not read; a message's mapping reads it as the instructions it carries instead.
 	if (isSolTokenBatch(instruction)) {
 		const batched = solBatchedInstructions(instruction);
 
