@@ -27,11 +27,13 @@ import {
 import { getCreateAccountInstruction, getTransferSolInstruction } from '@solana-program/system';
 import {
 	AuthorityType,
+	getBatchInstruction,
 	getBurnInstruction,
 	getSetAuthorityInstruction,
 	getTransferCheckedInstruction
 } from '@solana-program/token';
 import {
+	getBatchInstruction as getToken2022BatchInstruction,
 	getBurnInstruction as getToken2022BurnInstruction,
 	getSetAuthorityInstruction as getToken2022SetAuthorityInstruction,
 	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction,
@@ -774,6 +776,44 @@ describe('sol-transactions.utils', () => {
 							...mockSolParsedTransactionMessage,
 							instructions: [token2022DustTransfer, burn]
 						}
+					})
+				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
+			});
+
+			it('should reject a `SetAuthority` carried in a token batch', () => {
+				const setAuthority = getSetAuthorityInstruction({
+					owned: address(mockAtaAddress),
+					owner: address(mockSolAddress),
+					authorityType: AuthorityType.AccountOwner,
+					newAuthority: address(mockSolAddress3)
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [dustTransfer, getBatchInstruction([setAuthority])]
+						},
+						userAddress: mockSolAddress
+					})
+				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
+			});
+
+			it('should reject a Token-2022 `Burn` carried in a token batch', () => {
+				const burn = getToken2022BurnInstruction({
+					account: address(mockAtaAddress),
+					mint: address(JUP_TOKEN.address),
+					authority: address(mockSolAddress),
+					amount: 1_000_000n
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [token2022DustTransfer, getToken2022BatchInstruction([burn])]
+						},
+						userAddress: mockSolAddress
 					})
 				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
 			});
