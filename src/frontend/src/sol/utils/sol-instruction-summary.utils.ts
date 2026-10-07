@@ -459,7 +459,12 @@ const toEffect = ({
 	//
 	// Not an account left with the System program: that is a wallet, whoever holds its key spends
 	// what it holds, and funding one is a payment to them rather than rent.
-	if (program === 'system' && type === 'createAccount') {
+	//
+	// The seed-derived form too. Its address is derived from a base rather than a key of its own,
+	// which changes nothing about who governs the account once it exists: the program it is opened
+	// for, exactly as with the plain form. Signing holds both forms to the same rent, and the review
+	// states each one it accepts.
+	if (program === 'system' && ['createAccount', 'createAccountWithSeed'].includes(type)) {
 		const owner = address({ info, key: 'owner' }) ?? address({ info, key: 'programAddress' });
 
 		if (

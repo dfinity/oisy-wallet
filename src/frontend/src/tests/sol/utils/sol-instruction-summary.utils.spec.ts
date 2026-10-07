@@ -18,7 +18,11 @@ import {
 	mockSolAddress,
 	mockSolAddress2
 } from '$tests/mocks/sol.mock';
-import { getCreateAccountInstruction, getTransferSolInstruction } from '@solana-program/system';
+import {
+	getCreateAccountInstruction,
+	getCreateAccountWithSeedInstruction,
+	getTransferSolInstruction
+} from '@solana-program/system';
 import {
 	AuthorityType,
 	getApproveCheckedInstruction,
@@ -550,6 +554,90 @@ describe('sol-instruction-summary.utils', () => {
 				).toStrictEqual([
 					{ kind: 'createAccount', account: position, program: application, rent: positionRent }
 				]);
+			});
+
+			// The address is derived from a base rather than being a key of its own, and the program
+			// the account is opened for governs it all the same.
+			describe('at an address derived from a seed', () => {
+				const seedOpening = ({
+					lamports = positionRent,
+					owner = application
+				}: {
+					lamports?: bigint;
+					owner?: string;
+				} = {}) => {
+					const {
+						parsed: { info }
+					} = opening({ lamports, owner });
+
+					return {
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccountWithSeed',
+							info: { ...info, base: user, seed: 'position' }
+						}
+					};
+				};
+
+				it('should state its rent as it does for an account at a key of its own', () => {
+					expect(openedInside({ creation: seedOpening() })).toStrictEqual([
+						{
+							kind: 'route',
+							program: application,
+							children: [
+								{
+									kind: 'createAccount',
+									account: position,
+									program: application,
+									rent: positionRent
+								}
+							]
+						}
+					]);
+				});
+
+				it('should not call lamports above what the account’s size costs rent', () => {
+					expect(
+						kinds(openedInside({ creation: seedOpening({ lamports: positionRent + 1n }) }))
+					).toStrictEqual(['unknown']);
+				});
+
+				it('should not call funding an account left with the System program rent', () => {
+					expect(
+						kinds(
+							openedInside({
+								creation: seedOpening({ owner: '11111111111111111111111111111111' })
+							})
+						)
+					).toStrictEqual(['unknown']);
+				});
+
+				it('should read the same opening stated by the message itself', () => {
+					const signer = (address: string) => ({ address }) as never;
+
+					expect(
+						mapSolInstructionSummaries({
+							instructions: [
+								getCreateAccountWithSeedInstruction({
+									payer: signer(user),
+									newAccount: toAddress(position),
+									base: toAddress(user),
+									seed: 'position',
+									amount: positionRent,
+									space: 8120,
+									programAddress: toAddress(application)
+								})
+							].map(asSolParsedRpcInstructionOrSelf),
+							ownedAddresses: [user],
+							userAddress: user,
+							rentExemptMinimum,
+							includeUnrecognised: true
+						})
+					).toStrictEqual([
+						{ kind: 'createAccount', account: position, program: application, rent: positionRent }
+					]);
+				});
 			});
 
 			// The request exactly as Meteora sent it to open a DLMM position, read the way the
