@@ -101,6 +101,25 @@ export const classifyWalletConnectEthCall = (data: string | undefined): WalletCo
 export const isWalletConnectEthApproval = ({ type }: WalletConnectEthCall): boolean =>
 	type === 'erc20Approve' || type === 'setApprovalForAll' || type === 'erc20AllowanceDelta';
 
+/**
+ * Whether an ERC-20 call also sends native value to the token contract.
+ *
+ * The review of such a call states what its calldata moves or authorizes: the token amount and
+ * the recipient or spender. The native value is a second amount leaving the wallet, and that
+ * summary has no line for it. Standard token contracts accept no native value on these calls, so
+ * a request carrying one is not an ordinary token operation, and it is refused rather than shown
+ * in part.
+ */
+export const isWalletConnectEthTokenCallWithValue = ({
+	call: { type },
+	value
+}: {
+	call: WalletConnectEthCall;
+	value: bigint;
+}): boolean =>
+	value > ZERO &&
+	(type === 'erc20Transfer' || type === 'erc20Approve' || type === 'erc20AllowanceDelta');
+
 export const getSignParamsMessageHex = (params: string[]): string =>
 	params.filter((p) => !isEthAddress(p))[0];
 
