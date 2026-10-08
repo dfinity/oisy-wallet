@@ -14,7 +14,10 @@
 	import { DEFAULT_TIP_EXPIRY_MS, TIP_EXPIRY_OPTIONS } from '$lib/constants/tip.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
-	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
+	import {
+		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		PLAUSIBLE_EVENT_TIP_ERROR_TYPES
+	} from '$lib/enums/plausible';
 	import { ProgressStepsTip } from '$lib/enums/progress-steps';
 	import { WizardStepsTip } from '$lib/enums/wizard-steps';
 	import { toTipErrorType, trackTip } from '$lib/services/tip-analytics.services';
@@ -258,11 +261,19 @@
 
 			// One event per reopen, sent once the recovery has answered, so a failed
 			// reopen is not also counted as a plain one. Before the stale check for the
-			// same reason as the failure below.
+			// same reason as the failure below. No link is an error here even though
+			// the screen does not call it one: the reopen did not give the sender
+			// their link back, and counting it as a success would hide the tips whose
+			// copy was never saved.
 			trackTip({
 				step: 'reopen',
 				side: 'sender',
-				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				...(nonNullish(recovered)
+					? { resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS }
+					: {
+							resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+							errorType: PLAUSIBLE_EVENT_TIP_ERROR_TYPES.LINK_UNAVAILABLE
+						}),
 				symbol: token.symbol
 			});
 

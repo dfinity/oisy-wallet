@@ -122,6 +122,9 @@ export enum PLAUSIBLE_EVENT_TIP_ERROR_TYPES {
 	LEDGER_EXPIRED = 'ledger_expired',
 	// The sender's balance does not cover the amount plus the fee.
 	LEDGER_INSUFFICIENT_FUNDS = 'ledger_insufficient_funds',
+	// Not a canister error: a reopen found no recoverable copy of the claim code, because the tip
+	// predates the store, was cancelled, or its copy could not be saved when it was created.
+	LINK_UNAVAILABLE = 'link_unavailable',
 	// Anything else: transport, agent, the vetKey decryption, or an unexpected throw.
 	UNKNOWN = 'unknown'
 }
