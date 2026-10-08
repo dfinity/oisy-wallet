@@ -789,7 +789,7 @@ separately.
 
 That metadata is untrusted and optional, so it can never block the terminal update.
 `receiving.amount` must match `/^\d+$/` and `receiving.token.decimals` must be an
-integer from 0 to 36 (the range `formatToken` handles); `receiving.token.symbol` must be a
+integer from 0 to 36 (a sanity bound well above any real token, keeping formatting cheap); `receiving.token.symbol` must be a
 non-empty string. If any check fails, or formatting throws, the poller still writes
 `Succeeded` and simply omits the two received refs: the row then shows the target token
 as before, which is the same display as `COMPLETED`.
