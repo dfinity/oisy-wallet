@@ -1047,6 +1047,7 @@
 			"contacts_empty_state_title": "Vaše kontakty se zobrazí zde",
 			"contacts_empty_state_description": "Zdá se, že jste ještě nepřidali žádné kontakty",
 			"send_review_subtitle": "Odesíláte",
+			"memo": "Poznámka",
 			"no_nfts_found": "Nebyly nalezeny žádné sběratelské předměty",
 			"no_nfts_found_desc": "Upravte své vyhledávání nebo síť, abyste našli své sběratelské předměty.",
 			"select_nft": "Vyberte sběratelský předmět"
@@ -1055,6 +1056,7 @@
 			"enter_eth_address": "Zadejte veřejnou adresu (0x), jméno nebo alias",
 			"enter_recipient_address": "Zadejte adresu příjemce, jméno nebo alias",
 			"enter_wallet_address": "Zadejte adresu peněženky, jméno nebo alias",
+			"enter_memo": "Zadejte poznámku (volitelné)",
 			"xrp_destination_tag": "Zadejte cílový tag XRP (nepovinné)",
 			"select_network": "Vybrat síť",
 			"search_nfts": "Hledat sběratelské předměty"

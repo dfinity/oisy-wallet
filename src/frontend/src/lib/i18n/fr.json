@@ -1047,6 +1047,7 @@
 			"contacts_empty_state_title": "Vos contacts apparaîtront ici",
 			"contacts_empty_state_description": "Il semble que vous n'ayez pas encore ajouté de contacts",
 			"send_review_subtitle": "Vous envoyez",
+			"memo": "Mémo",
 			"no_nfts_found": "Aucun objet de collection trouvé",
 			"no_nfts_found_desc": "Ajustez votre recherche ou votre réseau pour trouver vos objets de collection",
 			"select_nft": "Sélectionner un objet de collection"
@@ -1055,6 +1056,7 @@
 			"enter_eth_address": "Saisir l'adresse publique (0x), le nom ou l'alias",
 			"enter_recipient_address": "Saisir l'adresse du destinataire, le nom ou l'alias",
 			"enter_wallet_address": "Saisir l'adresse du portefeuille, le nom ou l'alias",
+			"enter_memo": "Saisir un mémo (optionnel)",
 			"xrp_destination_tag": "Saisir le tag de destination XRP (facultatif)",
 			"select_network": "Sélectionner le réseau",
 			"search_nfts": "Rechercher des objets de collection"

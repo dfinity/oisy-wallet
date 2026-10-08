@@ -1047,6 +1047,7 @@
 			"contacts_empty_state_title": "연락처가 여기에 표시됩니다",
 			"contacts_empty_state_description": "아직 연락처를 추가하지 않으셨습니다",
 			"send_review_subtitle": "전송 금액",
+			"memo": "메모",
 			"no_nfts_found": "컬렉터블을 찾을 수 없습니다",
 			"no_nfts_found_desc": "검색어나 네트워크를 조정하여 컬렉터블을 찾아보세요",
 			"select_nft": "컬렉터블 선택"
@@ -1055,6 +1056,7 @@
 			"enter_eth_address": "공개 주소 (0x), 이름 또는 별칭 입력",
 			"enter_recipient_address": "수신자 주소, 이름 또는 별칭 입력",
 			"enter_wallet_address": "지갑 주소, 이름 또는 별칭 입력",
+			"enter_memo": "메모 입력 (선택사항)",
 			"xrp_destination_tag": "XRP 목적지 태그 입력 (선택 사항)",
 			"select_network": "네트워크 선택",
 			"search_nfts": "컬렉터블 검색"

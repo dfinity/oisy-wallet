@@ -1047,6 +1047,7 @@
 			"contacts_empty_state_title": "あなたの連絡先がここに表示されます。",
 			"contacts_empty_state_description": "まだ連絡先を追加していないようです。",
 			"send_review_subtitle": "以下の内容を送信します。",
+			"memo": "メモ",
 			"no_nfts_found": "コレクティブルが見つかりません。",
 			"no_nfts_found_desc": "コレクティブルを見つけるには、検索条件またはネットワークを調整してください。",
 			"select_nft": "送信するコレクティブルを選択"
@@ -1055,6 +1056,7 @@
 			"enter_eth_address": "パブリックアドレス (0x)、名前、またはエイリアスを入力",
 			"enter_recipient_address": "受取人のアドレス、名前、またはエイリアスを入力",
 			"enter_wallet_address": "ウォレットアドレス、名前、またはエイリアスを入力",
+			"enter_memo": "メモを入力（任意）",
 			"xrp_destination_tag": "XRP 宛先タグを入力（任意）",
 			"select_network": "ネットワークを選択",
 			"search_nfts": "コレクティブルを検索"

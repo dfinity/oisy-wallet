@@ -6,8 +6,11 @@
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
+	import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 	import ScannedPlainAddressNotice from '$lib/components/send/ScannedPlainAddressNotice.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
+	import InputText from '$lib/components/ui/InputText.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
@@ -33,7 +36,7 @@
 		cancel
 	}: Props = $props();
 
-	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenStandard, sendMemo } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError = $state<IcAmountAssertionError | undefined>();
 
@@ -46,6 +49,8 @@
 	);
 
 	let invalid = $derived(invalidDestination || nonNullish(amountError) || isNullish(amount));
+
+	let isIcrcDestination = $derived(!invalidIcrcAddress(destination));
 </script>
 
 <SendForm
@@ -63,6 +68,24 @@
 
 	{#snippet sendAmount()}
 		<IcSendAmount {onTokensList} bind:amount bind:amountError />
+	{/snippet}
+
+	{#snippet memo()}
+		{#if isIcrcDestination}
+			<div class="-mt-6 mb-4">
+				<div class="flex items-center gap-3">
+					<label class="shrink-0 text-sm text-tertiary" for="memo">{$i18n.send.text.memo}</label>
+					<div class="flex-1">
+						<InputText
+							name="memo"
+							placeholder={$i18n.send.placeholder.enter_memo}
+							required={false}
+							bind:value={$sendMemo}
+						/>
+					</div>
+				</div>
+			</div>
+		{/if}
 	{/snippet}
 
 	{#snippet fee()}

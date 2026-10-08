@@ -1047,6 +1047,7 @@
 			"contacts_empty_state_title": "Danh bạ của bạn sẽ xuất hiện ở đây",
 			"contacts_empty_state_description": "Có vẻ như bạn chưa thêm liên hệ nào",
 			"send_review_subtitle": "Bạn gửi",
+			"memo": "Ghi chú",
 			"no_nfts_found": "Không vật phẩm sưu tầm nào được tìm thấy",
 			"no_nfts_found_desc": "Điều chỉnh tìm kiếm hoặc mạng của bạn để tìm vật phẩm sưu tầm",
 			"select_nft": "Chọn vật phẩm sưu tầm"
@@ -1055,6 +1056,7 @@
 			"enter_eth_address": "Nhập địa chỉ công khai (0x), tên hoặc biệt danh",
 			"enter_recipient_address": "Nhập địa chỉ người nhận, tên hoặc biệt danh",
 			"enter_wallet_address": "Nhập địa chỉ ví, tên hoặc biệt danh",
+			"enter_memo": "Nhập ghi chú (tuỳ chọn)",
 			"xrp_destination_tag": "Nhập thẻ đích XRP (không bắt buộc)",
 			"select_network": "Chọn mạng",
 			"search_nfts": "Tìm kiếm vật phẩm sưu tầm"
