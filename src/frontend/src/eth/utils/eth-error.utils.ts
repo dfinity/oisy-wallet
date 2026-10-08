@@ -96,7 +96,23 @@ interface NodeAnswer {
 	message: string;
 }
 
+// Ethers attaches the request to a failed `eth_call` or `eth_estimateGas` too, and a send runs such
+// calls before it signs, an allowance check for one. Out of gas there is no transaction refused, and
+// nothing that could have cost a fee, so only an answer to the broadcast itself counts. An error
+// that carries no request at all is still taken at its word.
+const answersOtherRequest = (err: unknown): boolean =>
+	collectErrorRecords({ err }).some(
+		({ payload }) =>
+			isRecord(payload) &&
+			nonNullish(payload.method) &&
+			payload.method !== SEND_RAW_TRANSACTION_METHOD
+	);
+
 const findNodeOutOfGasAnswer = (err: unknown): NodeAnswer | undefined => {
+	if (answersOtherRequest(err)) {
+		return;
+	}
+
 	const answer = collectErrorRecords({ err }).find(
 		({ code, message }) =>
 			code === JSON_RPC_SERVER_ERROR_CODE &&

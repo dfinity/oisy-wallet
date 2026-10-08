@@ -340,6 +340,40 @@ describe('eth-error.utils', () => {
 				expect(tracked).not.toContain('gas_needed');
 			});
 
+			// A send runs calls of its own before it signs, an allowance check for one, and ethers
+			// attaches their request to the error the same way.
+			it.each(['eth_call', 'eth_estimateGas'])(
+				'does not take a failed %s for a refused send',
+				(method) => {
+					const err = Object.assign(new Error('missing revert data'), {
+						code: 'CALL_EXCEPTION',
+						info: {
+							error: { code: -32000, message: 'out of gas' },
+							payload: {
+								id: 7,
+								jsonrpc: '2.0',
+								method,
+								params: [{ to: '0x2222222222222222222222222222222222222222', data: '0xdd62ed3e' }]
+							}
+						}
+					});
+
+					toastEthereumTransactionError({
+						err,
+						fallbackMsg: en.send.error.unexpected,
+						...sendParams
+					});
+
+					expect(toasts.toastsError).toHaveBeenCalledExactlyOnceWith({
+						msg: { text: en.send.error.unexpected },
+						err
+					});
+
+					expect(toasts.toastsErrorNoTrace).not.toHaveBeenCalled();
+					expect(analytics.trackEvent).not.toHaveBeenCalled();
+				}
+			);
+
 			it('trusts only the node answer, not the same words elsewhere in the chain', () => {
 				const err = new Error('out of gas');
 
