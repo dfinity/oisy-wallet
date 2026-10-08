@@ -2176,6 +2176,7 @@
 			"instruction_thaw": "Unfreeze token account",
 			"instruction_unknown": "Unrecognised instruction",
 			"instruction_unknown_via": "Unrecognised instruction via",
+			"instruction_via": "via $program",
 			"instruction_rent": "rent $amount SOL",
 			"instruction_balance_returned": "SOL balance returned to your wallet",
 			"instruction_balance_sent": "SOL balance sent to your wallet",

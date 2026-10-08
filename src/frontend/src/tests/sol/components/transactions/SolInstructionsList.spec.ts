@@ -189,6 +189,35 @@ describe('SolInstructionsList', () => {
 		});
 	});
 
+	// The notice about programs OISY cannot read names a pool by itself; the leg the pool made has to
+	// say so too, or the name matches nothing on the screen.
+	it('should name the pool a leg of a route goes through', () => {
+		const { getAllByTestId } = render(SolInstructionsList, {
+			props: {
+				instructions: [
+					{
+						kind: 'route',
+						program: mockSolAddress3,
+						programName: 'jupiter',
+						children: [
+							{
+								...send(mockSplAddress),
+								via: 'fUSioN9YKKSa3CUC2YUc4tPkHJ5Y6XW1yz8y6F7qWz9',
+								viaName: 'fusionamm'
+							}
+						]
+					}
+				],
+				token: SOLANA_TOKEN,
+				userAddress: mockSolAddress
+			}
+		});
+
+		const [, leg] = getAllByTestId('sol-instruction');
+
+		expect(leg).toHaveTextContent(/· via fusionamm$/);
+	});
+
 	it('should not call sends that all leave a swap', () => {
 		const { getByTestId } = render(SolInstructionsList, {
 			props: {
