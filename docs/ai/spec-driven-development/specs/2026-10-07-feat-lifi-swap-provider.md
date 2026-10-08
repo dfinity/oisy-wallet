@@ -270,10 +270,8 @@ allow-list registered on LI.FI's partner portal**, and staging and production us
 Infura secrets). A key extracted from the staging bundle is rejected from any other
 origin and cannot touch production's quota.
 
-Before the flag-flip PR, the production key must be registered with OISY's production
-origins, and whether LI.FI's 100 req/min limit is per key or per IP must be confirmed
-(it decides whether the [cadence](#cadence-on-input-change-then-every-30-s) below is
-enough at production traffic).
+The flag-flip PR is gated on two items that are still open; see
+[Open questions](#open-questions).
 
 ### Quoting
 
@@ -834,8 +832,10 @@ decimals would otherwise be lost, and a Solana row has no spare key to store the
 separately.
 
 That metadata is untrusted and optional, so it can never block the terminal update.
-`receiving.amount` must match `/^\d+$/` and `receiving.token.decimals` must be an
-integer from 0 to 36 (a sanity bound well above any real token, keeping formatting cheap); `receiving.token.symbol` must be a
+`receiving.amount` must match `/^\d{1,78}$/` (78 digits cover the full unsigned 256-bit
+range, and the length is checked **before** any `BigInt` or `formatToken` call, so an
+unbounded string never reaches them) and `receiving.token.decimals` must be an integer
+from 0 to 36 (a sanity bound well above any real token); `receiving.token.symbol` must be a
 non-empty string. If any check fails, or formatting throws, the poller still writes
 `Succeeded` and simply omits the two received refs: the row then shows the target token
 as before, which is the same display as `COMPLETED`.
@@ -1122,6 +1122,17 @@ everywhere.
 19. Every LI.FI-supplied string written to a row (error or ref value) fits the backend's
     UTF-8 byte limits, including non-ASCII text.
 
+## Open questions
+
+Facts still to confirm. Both gate PR 4 (the flag flip), not PRs 1–3.
+
+- **Production API key.** A separate key, scoped to OISY's production origins, must be
+  registered on LI.FI's partner portal and set as a deployment secret. Owner: whoever
+  holds the LI.FI partner account.
+- **Rate-limit scope.** Is LI.FI's 100 requests / min limit per key or per IP? If per
+  key, the 30 s [cadence](#cadence-on-input-change-then-every-30-s) must be checked
+  against expected production traffic before the flip. Owner: ask LI.FI.
+
 ## Decisions
 
 Recorded so a future reader can tell "excluded on purpose" from "forgotten".
@@ -1144,9 +1155,10 @@ Recorded so a future reader can tell "excluded on purpose" from "forgotten".
   incoming lamports.
 - **`@lifi/sdk` (core only) is approved** as a new dependency.
 - **PR 2 is split into 2a / 2b** up front.
-- **The LI.FI integrator id and API key are registered.** Their values are set in the
-  environment outside the repository; the implementer asks before editing
-  `deploy-to-environment.yml`.
+- **The LI.FI integrator id and the staging API key are registered.** Their values are
+  set in the environment outside the repository; the implementer asks before editing
+  `deploy-to-environment.yml`. The **production** key is not registered yet; it is a
+  prerequisite for PR 4 (see [Open questions](#open-questions)).
 
 ## References
 
