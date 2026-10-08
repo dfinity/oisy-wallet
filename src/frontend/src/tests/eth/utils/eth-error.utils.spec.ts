@@ -9,10 +9,13 @@ import en from '$tests/mocks/i18n.mock';
 import { SigningKey } from 'ethers/crypto';
 import { Transaction } from 'ethers/transaction';
 
-const { safeEstimateGas } = vi.hoisted(() => ({ safeEstimateGas: vi.fn() }));
+const { estimateGas, safeEstimateGas } = vi.hoisted(() => ({
+	estimateGas: vi.fn(),
+	safeEstimateGas: vi.fn()
+}));
 
 vi.mock('$eth/providers/infura.providers', () => ({
-	infuraProviders: () => ({ safeEstimateGas })
+	infuraProviders: () => ({ estimateGas, safeEstimateGas })
 }));
 
 describe('eth-error.utils', () => {
@@ -193,7 +196,7 @@ describe('eth-error.utils', () => {
 			const toastText = () => vi.mocked(toasts.toastsErrorNoTrace).mock.calls[0]?.[0].msg.text;
 
 			beforeEach(() => {
-				safeEstimateGas.mockResolvedValue(62_989n);
+				estimateGas.mockResolvedValue(62_989n);
 
 				vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
 			});
@@ -233,16 +236,19 @@ describe('eth-error.utils', () => {
 
 				await vi.waitFor(() => expect(toasts.toastsErrorNoTrace).toHaveBeenCalledOnce());
 
-				expect(safeEstimateGas).toHaveBeenCalledExactlyOnceWith({
+				expect(estimateGas).toHaveBeenCalledExactlyOnceWith({
 					from: sender,
 					to: '0x2222222222222222222222222222222222222222',
 					data: '0xa9059cbb',
 					value: ZERO
 				});
+
+				// It reports a failure with the raw error, which carries the transaction it estimated.
+				expect(safeEstimateGas).not.toHaveBeenCalled();
 			});
 
 			it('gives only the gas sent when the gas needed cannot be estimated', async () => {
-				safeEstimateGas.mockResolvedValue(undefined);
+				estimateGas.mockRejectedValue(new Error('missing response'));
 
 				toastEthereumTransactionError({
 					err: outOfGas({ withRequest: true }),
@@ -272,7 +278,7 @@ describe('eth-error.utils', () => {
 
 				expect(toastText()).toBe(en.send.error.ethereum_out_of_gas);
 
-				expect(safeEstimateGas).not.toHaveBeenCalled();
+				expect(estimateGas).not.toHaveBeenCalled();
 			});
 
 			it('tracks the flow, the token, both gas figures and the node answer', async () => {
@@ -309,6 +315,29 @@ describe('eth-error.utils', () => {
 
 				expect(tracked).not.toContain(signedTransaction.slice(2, 66).toLowerCase());
 				expect(tracked).not.toContain(sender.slice(2).toLowerCase());
+			});
+
+			it('tracks nothing of a failed re-estimate, whose error names the transaction', async () => {
+				estimateGas.mockRejectedValue(
+					new Error(
+						`execution reverted (action="estimateGas", transaction={ "data": "0xa9059cbb", "from": "${sender}", "to": "0x2222222222222222222222222222222222222222" }, code=CALL_EXCEPTION, version=6.17.0)`
+					)
+				);
+
+				toastEthereumTransactionError({
+					err: outOfGas({ withRequest: true }),
+					fallbackMsg: en.send.error.unexpected,
+					...sendParams
+				});
+
+				await vi.waitFor(() => expect(toasts.toastsErrorNoTrace).toHaveBeenCalledOnce());
+
+				expect(analytics.trackEvent).toHaveBeenCalledOnce();
+
+				const tracked = JSON.stringify(vi.mocked(analytics.trackEvent).mock.calls).toLowerCase();
+
+				expect(tracked).not.toContain(sender.slice(2).toLowerCase());
+				expect(tracked).not.toContain('gas_needed');
 			});
 
 			it('trusts only the node answer, not the same words elsewhere in the chain', () => {

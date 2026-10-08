@@ -134,7 +134,9 @@ const decodeSignedTransaction = (signedTransaction: string): Transaction | undef
 };
 
 // The node only says the gas the transaction was signed with fell short, so the gas it needs is
-// asked again, against the state as it is now. Best effort: the toast does not wait on it to show.
+// asked again, against the state as it is now. Best effort: when it fails, the toast shows without
+// it. And untracked: `safeEstimateGas` reports a failure with the raw error, and ethers writes the
+// transaction it estimated into that error's message, sender and calldata included.
 const estimateGasNeeded = async ({
 	transaction: { from, to, data, value },
 	token: {
@@ -149,7 +151,7 @@ const estimateGasNeeded = async ({
 	}
 
 	try {
-		return await infuraProviders(networkId).safeEstimateGas({ from, to, data, value });
+		return await infuraProviders(networkId).estimateGas({ from, to, data, value });
 	} catch {
 		return undefined;
 	}
