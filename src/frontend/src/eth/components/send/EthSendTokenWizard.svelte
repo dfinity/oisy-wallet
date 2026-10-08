@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, setContext } from 'svelte';
+	import { getContext, setContext, untrack } from 'svelte';
 	import { writable } from 'svelte/store';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
@@ -159,6 +159,16 @@
 			evaluateFee
 		})
 	);
+
+	// The gas an ERC-20 transfer needs depends on what is sent and to whom: a first transfer to an
+	// address pays for the storage of its balance. Without this, the fee is re-estimated only on a
+	// mined block or a return to the foreground, and the review step freezes whatever sample is in
+	// hand, possibly one taken for a previous amount or recipient.
+	$effect(() => {
+		[amount, destination];
+
+		untrack(() => evaluateFee());
+	});
 
 	/**
 	 * Send

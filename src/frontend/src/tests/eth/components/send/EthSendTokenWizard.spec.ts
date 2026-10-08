@@ -292,6 +292,57 @@ describe('EthSendTokenWizard.spec', () => {
 			// move the fee underneath it, and a spike right before "Send" would be signed as is.
 			expect(feeServices.getEthFeeDataWithProvider).not.toHaveBeenCalled();
 		});
+
+		describe('when the inputs change', () => {
+			const otherDestination = '0x2222222222222222222222222222222222222222';
+
+			beforeEach(() => {
+				// Never settles: a failed sample schedules a retry, and a retry reads the current inputs
+				// too, so it would stand in for the re-estimate under test.
+				vi.mocked(feeServices.getEthFeeDataWithProvider).mockImplementation(
+					() => new Promise(() => {})
+				);
+			});
+
+			const renderSettled = async (name: WizardStepsSend) => {
+				const result = renderStep(name);
+
+				await vi.runOnlyPendingTimersAsync();
+
+				vi.mocked(feeServices.getEthFeeDataWithProvider).mockClear();
+
+				return result;
+			};
+
+			it('re-estimates the fee for a new recipient', async () => {
+				const { rerender } = await renderSettled(WizardStepsSend.SEND);
+
+				await rerender({ destination: otherDestination });
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(feeServices.getEthFeeDataWithProvider).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ to: otherDestination })
+				);
+			});
+
+			it('re-estimates the fee for a new amount', async () => {
+				const { rerender } = await renderSettled(WizardStepsSend.SEND);
+
+				await rerender({ amount: 2 });
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(feeServices.getEthFeeDataWithProvider).toHaveBeenCalledOnce();
+			});
+
+			it('keeps the fee frozen on the review step', async () => {
+				const { rerender } = await renderSettled(WizardStepsSend.REVIEW);
+
+				await rerender({ destination: otherDestination, amount: 2 });
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(feeServices.getEthFeeDataWithProvider).not.toHaveBeenCalled();
+			});
+		});
 	});
 
 	describe('max send', () => {
