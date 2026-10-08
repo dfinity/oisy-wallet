@@ -272,10 +272,17 @@
 				return;
 			}
 
+			// A zero amount is what the input holds mid-typing ("0", "0."), and its estimate is not the
+			// cost of the transfer the user is about to send: moving nothing leaves the recipient's
+			// balance untouched, so it skips the storage write that a first transfer to an address pays
+			// for. That is about 20k gas, and a transaction signed against it runs out of gas on-chain.
 			const erc20GasFeeParams = {
 				...params,
 				contract: sendToken as Erc20Token,
-				amount: parseToken({ value: `${amount ?? '1'}`, unitName: sendToken.decimals }),
+				amount: parseToken({
+					value: `${nonNullish(amount) && Number(amount) > 0 ? amount : '1'}`,
+					unitName: sendToken.decimals
+				}),
 				sourceNetwork
 			};
 

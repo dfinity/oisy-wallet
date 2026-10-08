@@ -31,6 +31,7 @@ import type { Nft } from '$lib/types/nft';
 import type { OptionAmount } from '$lib/types/send';
 import type { Token, TokenId } from '$lib/types/token';
 import * as networkUtils from '$lib/utils/network.utils';
+import { parseToken } from '$lib/utils/parse.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
@@ -414,6 +415,44 @@ describe('EthFeeContext', () => {
 			expect.objectContaining({
 				gas: 123n
 			})
+		);
+	});
+
+	describe('ERC-20 transfer fee estimation', () => {
+		const renderErc20 = (amount: OptionAmount) =>
+			renderWith({
+				amount,
+				sendToken: mockValidErc20Token,
+				sendTokenId: mockValidErc20Token.id
+			});
+
+		it('estimates the amount entered', async () => {
+			renderErc20('0.1');
+
+			await vi.runAllTimersAsync();
+
+			expect(feeServices.getErc20FeeData).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					amount: parseToken({ value: '0.1', unitName: mockValidErc20Token.decimals })
+				})
+			);
+		});
+
+		// Moving nothing skips the recipient's balance write, so a zero estimate falls short of the
+		// gas the transfer the user is typing will need.
+		it.each([0, '0', '0.', '0.0', undefined])(
+			'estimates one whole token instead of %s',
+			async (amount) => {
+				renderErc20(amount);
+
+				await vi.runAllTimersAsync();
+
+				expect(feeServices.getErc20FeeData).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						amount: parseToken({ value: '1', unitName: mockValidErc20Token.decimals })
+					})
+				);
+			}
 		);
 	});
 
