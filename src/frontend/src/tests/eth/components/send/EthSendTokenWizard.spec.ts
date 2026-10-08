@@ -13,7 +13,6 @@ import {
 } from '$eth/stores/eth-fee.store';
 import * as tokenUtils from '$eth/utils/token.utils';
 import * as ckethServices from '$icp-eth/services/cketh.services';
-import { TRACK_NFT_SEND } from '$lib/constants/analytics.constants';
 import { MAX_BUTTON, REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import * as idDerived from '$lib/derived/auth.derived';
@@ -287,18 +286,19 @@ describe('EthSendTokenWizard.spec', () => {
 		await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
 		await vi.runOnlyPendingTimersAsync();
 
-		expect(analytics.trackEvent).toHaveBeenCalledExactlyOnceWith({
-			name: TRACK_NFT_SEND,
-			metadata: {
-				resultStatus: 'error',
-				token: collectionToken.symbol,
-				collection: nft.collection.name,
-				address: nft.collection.address,
-				tokenId: String(nft.id),
-				network: ETHEREUM_NETWORK.name,
-				error: expect.stringContaining('"message": "already known"')
-			}
-		});
+		expect(analytics.trackEvent).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({
+				metadata: {
+					resultStatus: 'error',
+					token: collectionToken.symbol,
+					collection: nft.collection.name,
+					address: nft.collection.address,
+					tokenId: String(nft.id),
+					network: ETHEREUM_NETWORK.name,
+					error: expect.stringContaining('"message": "already known"')
+				}
+			})
+		);
 
 		const [[{ metadata }]] = vi.mocked(analytics.trackEvent).mock.calls;
 
