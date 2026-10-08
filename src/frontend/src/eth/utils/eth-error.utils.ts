@@ -1,6 +1,14 @@
+import { infuraProviders } from '$eth/providers/infura.providers';
+import {
+	trackEthTransactionSendOutOfGas,
+	type EthTransactionSendContext
+} from '$eth/services/eth-transaction-send-analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
-import { nonNullish } from '@dfinity/utils';
+import type { Token } from '$lib/types/token';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
+import { Transaction } from 'ethers/transaction';
 import { get } from 'svelte/store';
 
 // How deep to follow `cause` / `error` / `info` before giving up. A provider wraps the node's own
@@ -25,6 +33,17 @@ const EXECUTION_REVERTED_PATTERN = /execution reverted/i;
 // Ethers' own verdict that the node refused the account. It never gives this code to a revert,
 // which it reports as `CALL_EXCEPTION`.
 const ETHERS_INSUFFICIENT_FUNDS_CODE = 'INSUFFICIENT_FUNDS';
+
+// The node simulates a transaction before it takes it, and refuses one that runs out of the gas it
+// was signed with. Base words it "out of gas: gas required exceeds: N", N being that very limit, so
+// the answer says the estimate fell short but not by how much. The refusal does not mean the
+// transaction went nowhere: another node can still mine it, and then it reverts, its fee spent.
+const OUT_OF_GAS_PATTERN = /out of gas/i;
+
+// The request ethers attaches to the error carries the signed transaction it tried to broadcast.
+const SEND_RAW_TRANSACTION_METHOD = 'eth_sendRawTransaction';
+
+const SIGNED_TRANSACTION_PATTERN = /^0x[0-9a-f]+$/i;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
 	nonNullish(value) && typeof value === 'object';
@@ -72,6 +91,132 @@ const isInsufficientBalanceError = (err: unknown): boolean =>
 			record.code === ETHERS_INSUFFICIENT_FUNDS_CODE || isNodeInsufficientBalanceAnswer(record)
 	);
 
+interface NodeAnswer {
+	code: number;
+	message: string;
+}
+
+const findNodeOutOfGasAnswer = (err: unknown): NodeAnswer | undefined => {
+	const answer = collectErrorRecords({ err }).find(
+		({ code, message }) =>
+			code === JSON_RPC_SERVER_ERROR_CODE &&
+			typeof message === 'string' &&
+			OUT_OF_GAS_PATTERN.test(message) &&
+			!EXECUTION_REVERTED_PATTERN.test(message)
+	);
+
+	return nonNullish(answer)
+		? { code: JSON_RPC_SERVER_ERROR_CODE, message: `${answer.message}` }
+		: undefined;
+};
+
+const requestedSignedTransaction = ({ payload }: Record<string, unknown>): unknown =>
+	isRecord(payload) &&
+	payload.method === SEND_RAW_TRANSACTION_METHOD &&
+	Array.isArray(payload.params)
+		? (payload.params as unknown[])[0]
+		: undefined;
+
+const findSignedTransaction = (err: unknown): string | undefined =>
+	collectErrorRecords({ err })
+		.map(requestedSignedTransaction)
+		.find(
+			(candidate): candidate is string =>
+				typeof candidate === 'string' && SIGNED_TRANSACTION_PATTERN.test(candidate)
+		);
+
+const decodeSignedTransaction = (signedTransaction: string): Transaction | undefined => {
+	try {
+		return Transaction.from(signedTransaction);
+	} catch {
+		return undefined;
+	}
+};
+
+// The node only says the gas the transaction was signed with fell short, so the gas it needs is
+// asked again, against the state as it is now. Best effort: the toast does not wait on it to show.
+const estimateGasNeeded = async ({
+	transaction: { from, to, data, value },
+	token: {
+		network: { id: networkId }
+	}
+}: {
+	transaction: Transaction;
+	token: Token;
+}): Promise<bigint | undefined> => {
+	if (isNullish(from) || isNullish(to)) {
+		return;
+	}
+
+	try {
+		return await infuraProviders(networkId).safeEstimateGas({ from, to, data, value });
+	} catch {
+		return undefined;
+	}
+};
+
+const toastOutOfGasError = async ({
+	err,
+	answer,
+	token,
+	context
+}: {
+	err: unknown;
+	answer: NodeAnswer;
+	token: Token;
+	context: EthTransactionSendContext;
+}) => {
+	const signedTransaction = findSignedTransaction(err);
+	const transaction = nonNullish(signedTransaction)
+		? decodeSignedTransaction(signedTransaction)
+		: undefined;
+
+	const gasSent = transaction?.gasLimit;
+	const gasNeeded = nonNullish(transaction)
+		? await estimateGasNeeded({ transaction, token })
+		: undefined;
+
+	const {
+		lang,
+		send: { error }
+	} = get(i18n);
+
+	const formatGas = (gas: bigint): string => new Intl.NumberFormat(lang).format(gas);
+
+	const gasLine = nonNullish(gasSent)
+		? nonNullish(gasNeeded)
+			? replacePlaceholders(error.ethereum_out_of_gas_gas, {
+					$gasSent: formatGas(gasSent),
+					$gasNeeded: formatGas(gasNeeded)
+				})
+			: replacePlaceholders(error.ethereum_out_of_gas_gas_sent, { $gasSent: formatGas(gasSent) })
+		: undefined;
+
+	const transactionLine = nonNullish(signedTransaction)
+		? replacePlaceholders(error.ethereum_signed_transaction, { $transaction: signedTransaction })
+		: undefined;
+
+	// The figures and the signed transaction are there for the user to screenshot or copy and hand to
+	// support. Each sits on a line of its own, without a blank line before it: in a toast that shows
+	// little more than two lines, a blank one reads as the end of the message.
+	toastsErrorNoTrace({
+		msg: {
+			text: [error.ethereum_out_of_gas, gasLine, transactionLine].filter(nonNullish).join('<br>'),
+			renderAsHtml: true
+		},
+		err
+	});
+
+	trackEthTransactionSendOutOfGas({
+		context,
+		token,
+		gasSent,
+		gasNeeded,
+		errorCode: answer.code,
+		nodeMessage: answer.message
+	});
+};
+
 /**
  * Maps an error raised while broadcasting an Ethereum or EVM transaction to a user-friendly message.
  *
@@ -98,18 +243,35 @@ export const mapEthereumErrorMsg = (err: unknown): string | undefined => {
  * not. `toastsErrorNoTrace` still writes the original error to the console, so nothing is lost for
  * whoever has to diagnose it. An unexplained failure keeps the detail on screen, it being the only
  * thing there is to report.
+ *
+ * A transaction that ran out of gas is explained too, with the gas it was signed with and the gas it
+ * needs, and the signed transaction itself in place of the dump that carries it. It is also
+ * tracked, as the flow it failed in (`context`) and the token it sent. Its toast follows a moment
+ * later, once the gas needed has been asked of the network.
  */
 export const toastEthereumTransactionError = ({
 	err,
-	fallbackMsg
+	fallbackMsg,
+	token,
+	context
 }: {
 	err: unknown;
 	fallbackMsg: string;
+	token: Token;
+	context: EthTransactionSendContext;
 }) => {
 	const msg = mapEthereumErrorMsg(err);
 
 	if (nonNullish(msg)) {
 		toastsErrorNoTrace({ msg: { text: msg }, err });
+		return;
+	}
+
+	const outOfGasAnswer = findNodeOutOfGasAnswer(err);
+
+	if (nonNullish(outOfGasAnswer)) {
+		// Never rejects: every step that can fail is caught, and the toast shows regardless.
+		toastOutOfGasError({ err, answer: outOfGasAnswer, token, context });
 		return;
 	}
 
