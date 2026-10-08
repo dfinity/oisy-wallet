@@ -6,7 +6,12 @@ import {
 	decodeSolProgramIdlName,
 	findSolProgramIdlAddress
 } from '$sol/utils/sol-program-idl.utils';
-import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import {
+	mockSolAddress,
+	mockSolAddress2,
+	mockSolAddress3,
+	mockSolAddress4
+} from '$tests/mocks/sol.mock';
 import { get } from 'svelte/store';
 
 vi.mock('$sol/api/solana.api', () => ({
@@ -64,6 +69,26 @@ describe('sol-program-name.services', () => {
 			]);
 
 			expect(findSolProgramIdlAddress).toHaveBeenCalledOnce();
+		});
+
+		it('should name the pool a leg of a route goes through', async () => {
+			vi.mocked(decodeSolProgramIdlName).mockImplementation(({ length }) =>
+				Promise.resolve(length === 3 ? 'jupiter' : 'fusionamm')
+			);
+			vi.mocked(getAccountData).mockImplementation(({ address }) =>
+				Promise.resolve(new Uint8Array(address === mockSolAddress2 ? [1, 2, 3] : [1]))
+			);
+			vi.mocked(findSolProgramIdlAddress).mockImplementation(({ programAddress }) =>
+				Promise.resolve(programAddress === mockSolAddress ? mockSolAddress2 : mockSolAddress3)
+			);
+
+			const leg: SolInstructionSummary = { ...send, via: mockSolAddress4 };
+
+			await expect(
+				loadSolProgramNames({ instructions: [{ ...route, children: [leg] }], network })
+			).resolves.toStrictEqual([
+				{ ...route, programName: 'jupiter', children: [{ ...leg, viaName: 'fusionamm' }] }
+			]);
 		});
 
 		it('should leave an instruction that names no program untouched', async () => {

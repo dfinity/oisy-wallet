@@ -50,7 +50,7 @@ export const loadSolProgramNames = async ({
 	network: SolanaNetworkType;
 }): Promise<SolInstructionSummary[]> => {
 	const programAddresses = flattenInstructions(instructions)
-		.map(({ program }) => program)
+		.flatMap(({ program, via }) => [program, via])
 		.filter((program): program is SolAddress => nonNullish(program));
 
 	const known = get(solProgramNameStore)[network] ?? {};
@@ -88,15 +88,18 @@ export const loadSolProgramNames = async ({
 	const resolved = get(solProgramNameStore)[network] ?? {};
 
 	// The lines under an instruction the wallet could not read name programs too: the one an account
-	// is opened for, most often the same one the heading above them names.
+	// is opened for, most often the same one the heading above them names, and the pool a leg of a
+	// routed swap goes through.
 	const named = (instruction: SolInstructionSummary): SolInstructionSummary => {
-		const { program, children } = instruction;
+		const { program, via, children } = instruction;
 
 		const programName = nonNullish(program) ? resolved[program] : undefined;
+		const viaName = nonNullish(via) ? resolved[via] : undefined;
 
 		return {
 			...instruction,
 			...(notEmptyString(programName) && { programName }),
+			...(notEmptyString(viaName) && { viaName }),
 			...(nonNullish(children) && { children: children.map(named) })
 		};
 	};
