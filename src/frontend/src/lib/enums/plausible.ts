@@ -30,6 +30,9 @@ export enum PLAUSIBLE_EVENTS {
 	// The countdown to the end of the XDR basket that prices TCYCLES.
 	XDR_BASKET_EXPIRY = 'xdr_basket_expiry',
 	CYCLES_MINT = 'cycles_mint',
+	// Sending a transaction, sent when something notable happens to it. The outcome is in
+	// `result_status`, never in the name.
+	TRANSACTION_SEND = 'transaction_send',
 	// An invariant we believed unreachable was reached. Not for flows that can legitimately
 	// fail — those keep their own event and report the outcome via `result_status`.
 	ERROR = 'error'
@@ -76,6 +79,13 @@ export enum PLAUSIBLE_EVENT_HELP_ERROR_TYPES {
 	UNKNOWN = 'unknown'
 }
 
+// The category is what a dashboard filters on. The node's own text sits next to it in
+// `result_error_text` only in the one wording known to carry a gas figure alone.
+export enum PLAUSIBLE_EVENT_TRANSACTION_SEND_ERROR_TYPES {
+	// The node simulated the transaction and it ran out of the gas it was signed with.
+	OUT_OF_GAS = 'out_of_gas'
+}
+
 export enum PLAUSIBLE_EVENT_CONTEXTS {
 	BACKEND = 'backend',
 	NFT = 'nft',
@@ -93,7 +103,10 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	PERSONAL_NOTES = 'personal_notes',
 	HELP = 'help',
 	TIPS = 'tips',
-	COMPUTE = 'compute'
+	COMPUTE = 'compute',
+	SEND = 'send',
+	CONVERT = 'convert',
+	AI_ASSISTANT = 'ai_assistant'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -204,7 +217,11 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	TOKEN = 'token',
 	CONTACT = 'contact',
 	TYPE = 'type',
-	LINK = 'link'
+	LINK = 'link',
+	// The gas limit a transaction was signed with.
+	GAS_SENT = 'gas_sent',
+	// The gas the network estimates the same transaction needs, asked again after it failed.
+	GAS_NEEDED = 'gas_needed'
 }
 
 export enum PLAUSIBLE_EVENT_FILTER_MODIFIERS {

@@ -328,7 +328,13 @@ These are not guidelines. A PR that violates them does not merge.
    (`notEmptyString`). Where the text comes from a third party — another
    project's canister, an external API — a scrubber cannot be written against
    payloads we do not control: emit an allow-listed `result_error_type` category
-   instead and leave the message to the toast and the console.
+   instead and leave the message to the toast and the console. One exception,
+   narrow by design: `transaction_send` adds the EVM node's own out-of-gas
+   answer to its `result_error_type`, as `result_error_text`, but only when it
+   reads exactly `out of gas: gas required exceeds: <digits>`, a gas figure and
+   nothing else. Any other wording is free text and stays out. It is the
+   JSON-RPC message itself, never the error ethers wraps around it, which
+   embeds the signed request and so the wallet, the recipient and the amount.
 5. **English, locale-independent labels.** Human-readable labels resolve against
    the bundled `en.json` (see `resolveEnglishLabel` / `replaceOisyPlaceholders`),
    never the user's locale, so dashboards stay consistent and no locale leaks.

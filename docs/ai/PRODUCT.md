@@ -159,6 +159,22 @@ The same invariant keeps the destination URL out of both `explorer` subcontexts,
 
 `result_error_code` says why a mint ended in `error`: `refunded` (the CMC returned the ICP, minus its fees), `failed` (another final CMC answer), and, for mints where nothing moved, `transfer_failed`, `not_trackable`, `timed_out` and `not_sent`. A mint that ends in the modal before any ICP moves reports from there, once its row is deleted (the modal tries the delete up to three times, since a delete also succeeds for a row an earlier, unanswered one already removed); a row the modal could not delete reports the ending itself, as `not_sent`, so the modal and the row never both report it. Every other ending, `not_sent` included, fires from the mint's active user transaction, whichever session closes it, under the loader's rule for every flow it tracks: once in every tab open when the mint ends, never in a tab or session started after one of them has recorded it, and once in any other browser or device that later loads the finished row. The event never carries a principal, and never the CMC's own reason text, which can name the caller's account.
 
+### Transaction send tracking
+
+An Ethereum or EVM transaction that [runs out of gas](#a-send-that-runs-out-of-gas) emits one **`transaction_send`** event at `event_severity: error`, once per failed send. `event_context` names the flow: `send`, `convert` or `ai_assistant`.
+
+| Property                      | Value                                                                                                 |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `event_key` / `event_value`   | `gas_sent` / the gas limit the transaction was signed with                                            |
+| `event_key2` / `event_value2` | `gas_needed` / the gas the network estimates it needs, left out when that estimate fails or times out |
+| `token_*`                     | `token_network`, `token_standard`, `token_symbol`, and `token_address` for a contract                 |
+| `result_status`               | `error`, with `result_error_severity: major`                                                          |
+| `result_error_type`           | `out_of_gas`                                                                                          |
+| `result_error_code`           | the node's JSON-RPC code, `-32000`                                                                    |
+| `result_error_text`           | the node's own message, only in the wording `out of gas: gas required exceeds: N`                     |
+
+The two gas figures show how far estimates fall short, per token and network. The event never carries the signed transaction, its hash, an address other than the token's contract, the amount or its USD value: the signed transaction alone names the sender, the recipient and the amount, which is why the error ethers wraps around the node's message, with the signed request inside it, stays out too.
+
 ---
 
 ## Tokens
@@ -495,6 +511,10 @@ The fee a send quotes is what the transaction is **expected to cost**, not the m
 ### Transaction priority
 
 An Ethereum or EVM send lets the user pick how fast it should confirm: **slow**, **standard** or **fast**. This is currently limited to local and staging builds; beta and production keep the previous single-speed form. Standard is the default and the recommendation, and the choice lasts for that one send rather than being remembered. Each option is priced against the same transaction, so the amounts differ only by the tip the sender is willing to add, which is the part of the fee they actually control. That difference is quoted in gwei, a billionth of the native token, because in the token's own units a whole fee is a few millionths and the three options separate only in the eighth decimal; the fiat value beside each one is the same amount in money. The fee row itself stays in the token, since it quotes a single amount with nothing beside it to compare. Picking a different speed re-prices from the sample already in hand rather than asking the network again, so the quoted fee updates immediately. Whatever is chosen is what gets signed. On a small screen the options open in a sheet; on a large one they expand in place. Where the network reports no choice, the row does not appear and the send behaves as it did before. The same choice is offered when a connected dApp asks the wallet to sign a transaction, on every request type it can ask for, since the speed is a property of the transaction rather than of what the transaction does. There the options are priced against the gas limit the dApp asked for, which is the limit that gets signed, so they agree with the fee quoted beneath them. Swaps, conversions and staking still use the standard speed.
+
+### A send that runs out of gas
+
+A node simulates a transaction before it takes it, and refuses one that would run out of the gas it was signed with. The same transaction can still reach the chain through another node, where it reverts and its fee is spent. When a send, a conversion or a send from the AI assistant ends this way, the toast says the send failed because it needed more gas than estimated, that the funds are still in the wallet, and that the network may still have charged a fee. Below that it shows the gas the transaction was signed with, the gas the network now estimates it needs (asked again right after the failure, and left out when that estimate fails or takes longer than 3 seconds), the transaction's hash and the unsigned transaction. These lines give the user something to screenshot or copy for support: the hash tells an explorer whether the transaction was mined, and the unsigned transaction holds every other detail of the send, whether or not it was mined. The signed transaction itself is never shown: it stays valid until its nonce is used, so whoever a screenshot of it reaches could broadcast it. Each sits on its own line, with no blank line before it, since a toast shows little more than two lines and a blank one reads as the end of the message. The [`transaction_send`](#transaction-send-tracking) event records the failure.
 
 ---
 
