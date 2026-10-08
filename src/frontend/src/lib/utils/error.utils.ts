@@ -102,6 +102,17 @@ const IC_REQUEST_ID_KEY = 'Request ID';
 export const replaceIcErrorFields = (err: unknown): string | undefined =>
 	replaceErrorFields({ err, keysToRemove: [IC_REQUEST_ID_KEY] });
 
+// An address, a hash or signed data: each points to a wallet or a payment. When a node refuses a
+// request, ethers writes that request into the message of the error it raises, and for a broadcast
+// the request holds the signed transaction.
+const HEX_VALUE_PATTERN = /0x[0-9a-f]+/gi;
+
+/**
+ * Replaces every `0x` hex value in an error text with `0x…`, for a text that is about to be
+ * tracked. The rest of it, such as the node's own answer, is kept.
+ */
+export const replaceHexValues = (text: string): string => text.replace(HEX_VALUE_PATTERN, '0x…');
+
 const stripHttpDetails = (text: string): string =>
 	text
 		// Remove from "HTTP details:" + "{" up to the next closing brace on its own line
