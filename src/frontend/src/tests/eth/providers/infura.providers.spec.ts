@@ -136,7 +136,8 @@ describe('infura.providers', () => {
 
 			const balance = '1234567890123';
 
-			const reason = 'ERC20: transfer amount exceeds balance';
+			// Written by the contract, which can build it from the caller's address and balance.
+			const reason = `account ${mockEthAddress3} holds ${balance}`;
 
 			beforeEach(() => {
 				mockProvider.prototype.estimateGas = mockEstimateGas;
@@ -159,16 +160,16 @@ describe('infura.providers', () => {
 				{
 					answer: 'a revert without data',
 					err: AbiCoder.getBuiltinCallException('estimateGas', transaction, null),
-					tracked: 'CALL_EXCEPTION: missing revert data'
+					tracked: 'CALL_EXCEPTION'
 				},
 				{
-					answer: 'a revert with a reason',
+					answer: 'a reason naming address and balance',
 					err: AbiCoder.getBuiltinCallException(
 						'estimateGas',
 						transaction,
 						new Interface([]).encodeErrorResult('Error', [reason])
 					),
-					tracked: `CALL_EXCEPTION: execution reverted: "${reason}"`
+					tracked: 'CALL_EXCEPTION'
 				},
 				{
 					answer: 'insufficient funds',
@@ -182,9 +183,9 @@ describe('infura.providers', () => {
 							}
 						}
 					}),
-					tracked: 'INSUFFICIENT_FUNDS: insufficient funds'
+					tracked: 'INSUFFICIENT_FUNDS'
 				}
-			])('should leave the transaction out of the event for $answer', async ({ err, tracked }) => {
+			])('should track only the ethers code for $answer', async ({ err, tracked }) => {
 				mockEstimateGas.mockRejectedValueOnce(err);
 
 				const provider = new InfuraProvider(ETHEREUM_NETWORK);
