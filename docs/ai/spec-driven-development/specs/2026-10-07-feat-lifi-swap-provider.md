@@ -22,8 +22,8 @@ once funds have left the wallet, and the global AUT poller drives the row to
 `Succeeded` / `Failed`, surviving a closed tab or a re-login.
 
 Behind a new feature flag, `LIFI_SWAP_ENABLED`, which is `LOCAL || STAGING` (and off in
-unit tests) until a separate one-line PR enables it everywhere. That PR is gated on
-LI.FI confirming browser use of our API key (see [API key](#api-key)).
+unit tests) until a separate one-line PR enables it everywhere. That PR is gated on the
+production key and the rate-limit check described under [API key](#api-key).
 
 **Out of scope:**
 
@@ -264,12 +264,16 @@ The key and the integrator id ship in the client bundle as `VITE_LIFI_API_KEY` a
 `.github/workflows/deploy-to-environment.yml` (a restricted path — the implementer asks
 before editing it). Their values are set outside the repository.
 
-Because LI.FI's docs advise against client-side keys, **the flag-flip PR is gated on
-LI.FI confirming in writing** that this key is meant for browser use, with origin
-allow-listing for OISY's production domains, and confirming whether its 100 req/min
-limit is per key or per IP. Until then the flag stays on `LOCAL || STAGING`, where the
-traffic is negligible. The quote cadence below is chosen to keep per-user traffic low
-either way.
+Shipping the key in the bundle is acceptable because each key is **scoped to an origin
+allow-list registered on LI.FI's partner portal**, and staging and production use
+**separate keys** (`VITE_LIFI_API_KEY_STAGING` / `_BETA` / production, mirroring the
+Infura secrets). A key extracted from the staging bundle is rejected from any other
+origin and cannot touch production's quota.
+
+Before the flag-flip PR, the production key must be registered with OISY's production
+origins, and whether LI.FI's 100 req/min limit is per key or per IP must be confirmed
+(it decides whether the [cadence](#cadence-on-input-change-then-every-30-s) below is
+enough at production traffic).
 
 ### Quoting
 
@@ -444,7 +448,16 @@ route kind, and any other selector aborts:
 - `LIFI_NON_EVM_RECEIVER_SELECTORS` — the subset of `LIFI_BRIDGE_SELECTORS` that may be
   used for a **Solana destination** (see below).
 
-Then the decoded values are compared with the request:
+Then the decoded values are compared with the request. For **every** route, the full
+`SwapData[]` is bound, not just its first entry: the Diamond's `LibAsset.depositAssets`
+pulls `fromAmount` of `sendingAssetId` from the user for **each** entry with
+`requiresDeposit = true`, so a forged later entry could pull another asset the user has
+already approved to the Diamond. `swapData[0]` (when present) must have
+`requiresDeposit = true` with the source token and `fromAmount`; every later entry must
+have `requiresDeposit = false`. Cross-chain routes get the array from `extractData`;
+same-chain routes decode it locally with the pinned GenericSwap ABI (the selector is
+already pinned, so the layout is known), because `extractGenericSwapParameters` returns
+only aggregates.
 
 - **Same-chain** (`fromChainId === toChainId`): `extractGenericSwapParameters(data)`.
   `sendingAssetId` equals the source token, `amount` equals `fromAmount`, `receiver`
@@ -578,6 +591,13 @@ New `fetchLifiEvmSwap` in `lib/services/swap.services.ts`, mirroring
    path and is then approved to exactly `amount`. When the flag is absent, the behaviour
    is unchanged, so Velora and ckERC20 are not affected.
 
+   With `exactAllowance`, an allowance larger than `amount` now costs **three**
+   transactions (reset, approve, swap), while `SwapEthForm.svelte` reserves only
+   `maxGasFee * 2` whenever approval is needed. So for LI.FI the form reads the current
+   allowance to the pinned Diamond (`erc20ContractAllowance`) when the quote is
+   selected and reserves one approval fee for "no allowance", two for "non-zero, not
+   equal" (reset + approve), none for "equal", on top of the swap fee below.
+
 2. **Re-quote with simulation on** (same params, `skipSimulation` omitted). The
    allowance now exists, so the simulation reflects the real transaction. Run
    `assertLifiQuote`; if no route comes back, or the new `toAmountMin` is below the
@@ -595,9 +615,22 @@ New `fetchLifiEvmSwap` in `lib/services/swap.services.ts`, mirroring
    ([Calldata binding](#calldata-binding-evm-execution-time-quote)); a failure aborts
    with a generic swap error, not the slippage one.
 
-3. `swap({ to: tr.to, transaction: { data: tr.data, gas: tr.gasLimit, value: tr.value, chainId: tr.chainId }, maxFeePerGas, maxPriorityFeePerGas, … })`
-   — OISY's own EIP-1559 fees; LI.FI's `gasPrice` is ignored.
-4. Create the AUT row (best effort), `enableSwapDestinationToken`.
+3. **Gas is estimated by OISY, not taken from LI.FI.** LI.FI's `gasLimit` is unsigned
+   and unrelated to the `EthFeeContext` estimate the form validated, so it is ignored
+   (as is `gasPrice`). After the calldata check, `eth_estimateGas({ from, to, data,
+value })` runs on the exact checked transaction through `infuraProviders(networkId)`
+   (the existing `estimateGas` on the Infura provider; the allowance exists by now, so the estimate reflects the real call), plus a new fixed buffer `LIFI_GAS_LIMIT_BUFFER_PERCENT` (20 %; the repo has no shared one). A failing estimate aborts. With OISY's EIP-1559
+   `maxFeePerGas`, the native balance must cover `value + gas × maxFeePerGas`, or the
+   swap aborts with the existing insufficient-funds error before signing.
+4. `swap({ to: tr.to, transaction: { data: tr.data, gas: estimatedGas, value: tr.value, chainId: tr.chainId }, maxFeePerGas, maxPriorityFeePerGas, … })`.
+
+   In the form, the swap leg's fee for balance validation and the displayed maximum
+   comes from the quote's `estimate.gasCosts` (LI.FI's own estimate for the route)
+   rather than `EthFeeContext`'s plain-transfer estimate, so a bridge call's larger
+   gas is reserved up front. The execution-time estimate above remains the authority.
+   Velora Market keeps signing its provider's gas, unchanged.
+
+5. Create the AUT row (best effort), `enableSwapDestinationToken`.
 
 Wizard: add `SwapProvider.LIFI` to `isActiveTransactionSwap`, `isApproveNeeded` and
 `swapEmitsApprovalSteps` in `SwapEthWizard.svelte`, plus a dispatch branch.
@@ -742,6 +775,10 @@ Each tick, per pending LI.FI row:
         status is the row set to `Failed` ("expired, never landed"). This is the same
         two-observation guard Velora Market uses for "replaced or dropped", applied here
         because a `Failed` verdict is immutable.
+     4. The two observations must be **consecutive**: any poll that finds a signature
+        status, or a still-valid blockhash, **removes** `lifi_expired_seen` from the
+        row's refs. An update replaces the stored ref list in full, so the poller writes
+        the list without the key; "merge learned refs" never resurrects it.
 2. **Then `getStatus({ txHash, fromChain, toChain, bridge })`**, mapped through
    `advanceStatus`:
 
@@ -849,13 +886,13 @@ loader's 5 s tick.
 
 ## Delivery plan
 
-| PR  | Scope                                                                                                                                                                                                                                                                                                                                                                                                      | Depends on                          |
-| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| 1   | **Backend AUT variant** — `Lifi(LifiData)`, validation, tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                           | —                                   |
-| 2a  | **Scaffolding + quoting** — `@lifi/sdk`, env (flag **narrowed to `LOCAL`**), types, quote service + cache, form-time trust checks, LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges), provider sheet | 1                                   |
-| 2b  | **EVM execution + tracking** — calldata binding (pinned selectors + `CalldataVerificationFacet`), `exactAllowance` on `approve()`, `fetchLifiEvmSwap` + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound)/loader (incl. wallet refresh)/item; flag back to `LOCAL \|\| STAGING`, `PRODUCT.md` for EVM-source swaps          | 2a                                  |
-| 3   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` in the simulation preview), `SwapSolWizard` dispatch, Solana source-chain check in the poller, `PRODUCT.md` update for Solana-source swaps                                                                           | 2b                                  |
-| 4   | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                   | 3, LI.FI's written key confirmation |
+| PR  | Scope                                                                                                                                                                                                                                                                                                                                                                                                      | Depends on                                     |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| 1   | **Backend AUT variant** — `Lifi(LifiData)`, validation, tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                           | —                                              |
+| 2a  | **Scaffolding + quoting** — `@lifi/sdk`, env (flag **narrowed to `LOCAL`**), types, quote service + cache, form-time trust checks, LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges), provider sheet | 1                                              |
+| 2b  | **EVM execution + tracking** — calldata binding (pinned selectors + `CalldataVerificationFacet`), `exactAllowance` on `approve()`, `fetchLifiEvmSwap` + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound)/loader (incl. wallet refresh)/item; flag back to `LOCAL \|\| STAGING`, `PRODUCT.md` for EVM-source swaps          | 2a                                             |
+| 3   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` in the simulation preview), `SwapSolWizard` dispatch, Solana source-chain check in the poller, `PRODUCT.md` update for Solana-source swaps                                                                           | 2b                                             |
+| 4   | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                   | 3, production key + rate-limit scope confirmed |
 
 PR 2 is split up front so each PR stays reviewable. The flag stays on `LOCAL` through
 2a, so no deployed environment ever shows an offer that cannot be executed. Solana → EVM
