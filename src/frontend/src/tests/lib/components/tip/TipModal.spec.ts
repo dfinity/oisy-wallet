@@ -4,6 +4,7 @@ import {
 	TIP_HISTORY_CANCEL_BUTTON,
 	TIP_HISTORY_ROW_BUTTON
 } from '$lib/constants/test-ids.constants';
+import { trackEvent } from '$lib/services/analytics.services';
 import * as tipServices from '$lib/services/tip.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
@@ -130,6 +131,67 @@ describe('TipModal', () => {
 		// tip rather than a missing one.
 		expect(container.textContent).not.toContain('first-code');
 		expect(container.textContent).toContain('second-code');
+	});
+
+	describe('tracking a reopen', () => {
+		beforeEach(() => {
+			vi.mocked(trackEvent).mockClear();
+
+			vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([
+				tip({ tip_id: 'only', ledger: mockValidIcrcToken.ledgerCanisterId })
+			]);
+		});
+
+		const reopenEvents = () =>
+			vi
+				.mocked(trackEvent)
+				.mock.calls.map(([params]) => params)
+				.filter(({ metadata }) => metadata?.event_modifier === 'reopen');
+
+		const reopen = async () => {
+			const { container, getByText } = render(TipModal);
+
+			const [row] = await openHistory({ container, getByText, rows: 1 });
+
+			row.click();
+
+			await waitFor(() => expect(reopenEvents()).toHaveLength(1));
+
+			const [{ metadata }] = reopenEvents();
+
+			return metadata;
+		};
+
+		it('counts a recovered link as a successful reopen', async () => {
+			vi.spyOn(tipServices, 'recoverTipLink').mockResolvedValue(
+				'https://oisy.com/tip#i=only&c=only-code'
+			);
+
+			const metadata = await reopen();
+
+			expect(metadata?.result_status).toBe('success');
+			expect(metadata).not.toHaveProperty('result_error_type');
+		});
+
+		it('counts a reopen that found no stored link as an error', async () => {
+			// The screen says the link is unavailable rather than that something
+			// failed, but the reopen did not give the sender their link back.
+			vi.spyOn(tipServices, 'recoverTipLink').mockResolvedValue(undefined);
+
+			const metadata = await reopen();
+
+			expect(metadata?.result_status).toBe('error');
+			expect(metadata?.result_error_type).toBe('link_unavailable');
+		});
+
+		it('sends one event for a reopen whose recovery failed', async () => {
+			vi.spyOn(tipServices, 'recoverTipLink').mockRejectedValue(new Error('Call failed'));
+
+			const metadata = await reopen();
+
+			expect(metadata?.result_status).toBe('error');
+			expect(metadata?.result_error_type).toBe('unknown');
+		});
 	});
 
 	describe('cancelling a reopened tip', () => {
