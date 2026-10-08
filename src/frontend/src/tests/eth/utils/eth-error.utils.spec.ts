@@ -267,6 +267,40 @@ describe('eth-error.utils', () => {
 				);
 			});
 
+			it('shows the toast without the gas needed once the estimate has taken 3 seconds', async () => {
+				vi.useFakeTimers();
+
+				try {
+					estimateGas.mockReturnValue(new Promise(() => {}));
+
+					toastEthereumTransactionError({
+						err: outOfGas({ withRequest: true }),
+						fallbackMsg: en.send.error.unexpected,
+						...sendParams
+					});
+
+					await vi.advanceTimersByTimeAsync(2_999);
+
+					expect(toasts.toastsErrorNoTrace).not.toHaveBeenCalled();
+
+					await vi.advanceTimersByTimeAsync(1);
+
+					expect(toastText()).toBe(
+						[
+							en.send.error.ethereum_out_of_gas,
+							'Gas sent: 60,243',
+							`Signed transaction: ${signedTransaction}`
+						].join('<br>')
+					);
+
+					expect(JSON.stringify(vi.mocked(analytics.trackEvent).mock.calls)).not.toContain(
+						'gas_needed'
+					);
+				} finally {
+					vi.useRealTimers();
+				}
+			});
+
 			it('keeps to the explanation when the error carries no signed transaction', async () => {
 				toastEthereumTransactionError({
 					err: outOfGas({ withRequest: false }),

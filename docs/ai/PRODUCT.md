@@ -163,15 +163,15 @@ The same invariant keeps the destination URL out of both `explorer` subcontexts,
 
 An Ethereum or EVM transaction that [runs out of gas](#a-send-that-runs-out-of-gas) emits one **`transaction_send`** event at `event_severity: error`, once per failed send. `event_context` names the flow: `send`, `convert` or `ai_assistant`.
 
-| Property                      | Value                                                                                    |
-| ----------------------------- | ---------------------------------------------------------------------------------------- |
-| `event_key` / `event_value`   | `gas_sent` / the gas limit the transaction was signed with                               |
-| `event_key2` / `event_value2` | `gas_needed` / the gas the network estimates it needs, left out when that estimate fails |
-| `token_*`                     | `token_network`, `token_standard`, `token_symbol`, and `token_address` for a contract    |
-| `result_status`               | `error`, with `result_error_severity: major`                                             |
-| `result_error_type`           | `out_of_gas`                                                                             |
-| `result_error_code`           | the node's JSON-RPC code, `-32000`                                                       |
-| `result_error_text`           | the node's own message, only in the wording `out of gas: gas required exceeds: N`        |
+| Property                      | Value                                                                                                 |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `event_key` / `event_value`   | `gas_sent` / the gas limit the transaction was signed with                                            |
+| `event_key2` / `event_value2` | `gas_needed` / the gas the network estimates it needs, left out when that estimate fails or times out |
+| `token_*`                     | `token_network`, `token_standard`, `token_symbol`, and `token_address` for a contract                 |
+| `result_status`               | `error`, with `result_error_severity: major`                                                          |
+| `result_error_type`           | `out_of_gas`                                                                                          |
+| `result_error_code`           | the node's JSON-RPC code, `-32000`                                                                    |
+| `result_error_text`           | the node's own message, only in the wording `out of gas: gas required exceeds: N`                     |
 
 The two gas figures show how far estimates fall short, per token and network. The event never carries the signed transaction, its hash, an address other than the token's contract, the amount or its USD value: the signed transaction alone names the sender, the recipient and the amount, which is why the error ethers wraps around the node's message, with the signed request inside it, stays out too.
 
@@ -514,7 +514,7 @@ An Ethereum or EVM send lets the user pick how fast it should confirm: **slow**,
 
 ### A send that runs out of gas
 
-A node simulates a transaction before it takes it, and refuses one that would run out of the gas it was signed with. The same transaction can still reach the chain through another node, where it reverts and its fee is spent. When a send, a conversion or a send from the AI assistant ends this way, the toast says the send failed because it needed more gas than estimated, that the funds are still in the wallet, and that the network may still have charged a fee. Below that it shows the gas the transaction was signed with, the gas the network now estimates it needs (asked again right after the failure, and left out when that estimate fails), and the signed transaction itself. These lines give the user something to screenshot or copy for support: the signed transaction holds everything needed to look the send up, whether or not it was mined. Each sits on its own line, with no blank line before it, since a toast shows little more than two lines and a blank one reads as the end of the message. The [`transaction_send`](#transaction-send-tracking) event records the failure.
+A node simulates a transaction before it takes it, and refuses one that would run out of the gas it was signed with. The same transaction can still reach the chain through another node, where it reverts and its fee is spent. When a send, a conversion or a send from the AI assistant ends this way, the toast says the send failed because it needed more gas than estimated, that the funds are still in the wallet, and that the network may still have charged a fee. Below that it shows the gas the transaction was signed with, the gas the network now estimates it needs (asked again right after the failure, and left out when that estimate fails or takes longer than 3 seconds), and the signed transaction itself. These lines give the user something to screenshot or copy for support: the signed transaction holds everything needed to look the send up, whether or not it was mined. Each sits on its own line, with no blank line before it, since a toast shows little more than two lines and a blank one reads as the end of the message. The [`transaction_send`](#transaction-send-tracking) event records the failure.
 
 ---
 

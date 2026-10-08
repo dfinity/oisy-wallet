@@ -43,6 +43,11 @@ const OUT_OF_GAS_PATTERN = /out of gas/i;
 // The request ethers attaches to the error carries the signed transaction it tried to broadcast.
 const SEND_RAW_TRANSACTION_METHOD = 'eth_sendRawTransaction';
 
+// The longest the toast waits on the gas needed. The same RPC has just answered, so the estimate is
+// usually back within a few hundred milliseconds; a stalled one would otherwise hold the toast for
+// the five minutes ethers waits on a request.
+const GAS_NEEDED_TIMEOUT_MILLISECONDS = 3_000;
+
 const SIGNED_TRANSACTION_PATTERN = /^0x[0-9a-f]+$/i;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -150,9 +155,9 @@ const decodeSignedTransaction = (signedTransaction: string): Transaction | undef
 };
 
 // The node only says the gas the transaction was signed with fell short, so the gas it needs is
-// asked again, against the state as it is now. Best effort: when it fails, the toast shows without
-// it. And untracked: `safeEstimateGas` reports a failure with the raw error, and ethers writes the
-// transaction it estimated into that error's message, sender and calldata included.
+// asked again, against the state as it is now. Best effort: when it fails or takes too long, the
+// toast shows without it. And untracked: `safeEstimateGas` reports a failure with the raw error, and
+// ethers writes the transaction it estimated into that error's message, sender and calldata included.
 const estimateGasNeeded = async ({
 	transaction: { from, to, data, value },
 	token: {
@@ -166,10 +171,21 @@ const estimateGasNeeded = async ({
 		return;
 	}
 
+	let timer: NodeJS.Timeout | undefined;
+
+	const timeout = new Promise<undefined>((resolve) => {
+		timer = setTimeout(() => resolve(undefined), GAS_NEEDED_TIMEOUT_MILLISECONDS);
+	});
+
 	try {
-		return await infuraProviders(networkId).estimateGas({ from, to, data, value });
+		return await Promise.race([
+			infuraProviders(networkId).estimateGas({ from, to, data, value }),
+			timeout
+		]);
 	} catch {
 		return undefined;
+	} finally {
+		clearTimeout(timer);
 	}
 };
 
