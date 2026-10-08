@@ -1496,6 +1496,7 @@ interface I18nWallet_connect {
 		unread_programs_acknowledge: string;
 		cannot_be_shown: string;
 		close_pays_others: string;
+		fee_paid_by_others: string;
 		simulated_instructions: string;
 		multiple_operations: string;
 		simulated_review: string;

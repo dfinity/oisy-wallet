@@ -1815,6 +1815,7 @@
 			"unread_programs_acknowledge": "I understand OISY can't show what this app does",
 			"cannot_be_shown": "This transaction includes actions that can't all be shown accurately for review, so OISY won't sign it. Reject it and ask the app to send a simpler request.",
 			"close_pays_others": "This transaction closes one of your token accounts and pays its balance to an address that is not your wallet. For your security, OISY won't sign it.",
+			"fee_paid_by_others": "This transaction's network fee is set to be paid by another account. OISY only sends transactions your wallet pays the fee for, so for your security, it won't sign this one.",
 			"simulated_instructions": "Simulated instructions",
 			"multiple_operations": "This transaction contains multiple operations that affect your wallet. Verify the simulated balance changes and the contained instructions, and only approve this transaction if you also trust the application.",
 			"simulated_review": "The review below is what simulating this transaction against the network's current state predicts. What happens when it actually runs can differ.",

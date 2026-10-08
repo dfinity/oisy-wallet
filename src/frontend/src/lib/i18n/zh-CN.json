@@ -1815,6 +1815,7 @@
 			"unread_programs_acknowledge": "我了解 OISY 无法显示此应用会做什么",
 			"cannot_be_shown": "此交易包含无法全部准确显示以供审核的操作，因此 OISY 不会签名。请拒绝，并要求该应用发送更简单的请求。",
 			"close_pays_others": "此交易会关闭您的一个代币账户，并将其余额支付到不属于您钱包的地址。为了您的安全，OISY 不会签署该交易。",
+			"fee_paid_by_others": "",
 			"simulated_instructions": "模拟指令",
 			"multiple_operations": "此交易包含多个影响您钱包的操作。请核实模拟的余额变化和包含的指令，仅在您也信任该应用程序时才批准此交易。",
 			"simulated_review": "以下审查是根据网络当前状态模拟此交易所预测的结果。实际执行时的结果可能与此不同。",
