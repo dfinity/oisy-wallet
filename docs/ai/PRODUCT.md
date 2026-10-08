@@ -516,6 +516,10 @@ An Ethereum or EVM send lets the user pick how fast it should confirm: **slow**,
 
 A node simulates a transaction before it takes it, and refuses one that would run out of the gas it was signed with. The same transaction can still reach the chain through another node, where it reverts and its fee is spent. When a send, a conversion or a send from the AI assistant ends this way, the toast says the send failed because it needed more gas than estimated, that the funds are still in the wallet, and that the network may still have charged a fee. Below that it shows the gas the transaction was signed with, the gas the network now estimates it needs (asked again right after the failure, and left out when that estimate fails or takes longer than 3 seconds), the transaction's hash and the unsigned transaction. These lines give the user something to screenshot or copy for support: the hash tells an explorer whether the transaction was mined, and the unsigned transaction holds every other detail of the send, whether or not it was mined. The signed transaction itself is never shown: it stays valid until its nonce is used, so whoever a screenshot of it reaches could broadcast it. Each sits on its own line, with no blank line before it, since a toast shows little more than two lines and a blank one reads as the end of the message. The [`transaction_send`](#transaction-send-tracking) event records the failure.
 
+### A send that fails for another reason
+
+When a send, a conversion or a send from the AI assistant fails for a reason OISY has no explanation of its own for, the toast says something went wrong and adds the node's own message. When the node refused the broadcast itself, the toast shows that message followed by the transaction's hash and the unsigned transaction, a line each, as for [a send that runs out of gas](#a-send-that-runs-out-of-gas), and never the signed transaction, which stays valid until its nonce is used. Should composing that toast fail, it shows the generic message alone.
+
 ---
 
 ## Bitcoin
