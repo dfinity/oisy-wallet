@@ -460,6 +460,64 @@ describe('EthFeeContext', () => {
 		});
 	});
 
+	describe('a failed fetch for inputs that have changed since', () => {
+		// Only the first fetch is held and then failed; every later one resolves as usual.
+		const renderWithFirstFetchInFlight = async () => {
+			let failFirst: () => void = () => undefined;
+
+			const getFeeDataSpy = vi
+				.spyOn(infuraMod.infuraProviders(network.id), 'getFeeData')
+				.mockImplementationOnce(
+					() =>
+						new Promise((_, reject) => {
+							failFirst = () => reject(new Error('network down'));
+						})
+				);
+
+			vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+
+			const rendered = renderWith();
+
+			await vi.advanceTimersByTimeAsync(1000);
+
+			expect(getFeeDataSpy).toHaveBeenCalledOnce();
+
+			return { ...rendered, getFeeDataSpy, failFirst };
+		};
+
+		it('is neither reported nor retried once the sample for the current inputs has landed', async () => {
+			const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError');
+
+			const { component, getFeeDataSpy, failFirst } = await renderWithFirstFetchInFlight();
+
+			component.triggerUpdateFee();
+			await vi.advanceTimersByTimeAsync(1000);
+
+			expect(setFeeMock).toHaveBeenCalledOnce();
+
+			failFirst();
+			await vi.advanceTimersByTimeAsync(60_000);
+
+			expect(toastsErrorSpy).not.toHaveBeenCalled();
+			// A retry would have been a third fetch.
+			expect(getFeeDataSpy).toHaveBeenCalledTimes(2);
+		});
+
+		it('is not reported while the sample for the current inputs is still to come', async () => {
+			const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError');
+
+			const { component, failFirst } = await renderWithFirstFetchInFlight();
+
+			component.triggerUpdateFee();
+
+			failFirst();
+			await vi.advanceTimersByTimeAsync(60_000);
+
+			expect(toastsErrorSpy).not.toHaveBeenCalled();
+			expect(setFeeMock).toHaveBeenCalledOnce();
+		});
+	});
+
 	it('should set fee for native ETH / EVM-native tokens using max(safeEstimateGas, getEthFeeData)', async () => {
 		vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
 

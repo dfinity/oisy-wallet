@@ -133,6 +133,8 @@
 	let fetchGeneration = 0;
 
 	const updateFeeData = async () => {
+		const currentGeneration = fetchGeneration;
+
 		try {
 			// The debounce utility has no cancel support, so this callback can fire after the component
 			// is destroyed, after the swap store has been reset (`sendToken` becomes `undefined`), or
@@ -142,8 +144,6 @@
 			if (isDestroyed || isNullish(sendToken) || isNullish($ethAddress) || isFrozen()) {
 				return;
 			}
-
-			const currentGeneration = fetchGeneration;
 
 			const setFetchedFee = (data: TransactionFeeData) => {
 				if (currentGeneration !== fetchGeneration) {
@@ -364,6 +364,12 @@
 				})
 			});
 		} catch (err: unknown) {
+			// A fetch for inputs that have changed since is neither reported nor retried: the fetch for the
+			// current ones reports its own outcome, and a retry would only repeat that fetch.
+			if (currentGeneration !== fetchGeneration) {
+				return;
+			}
+
 			toastsHide(errorMsgs);
 
 			errorMsgs.push(
