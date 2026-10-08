@@ -45,7 +45,9 @@ import {
 	createNoopSigner,
 	createSolanaRpc,
 	createTransactionMessage,
+	getBase64Decoder,
 	getBase64EncodedWireTransaction,
+	getBase64Encoder,
 	pipe,
 	setTransactionMessageConfig,
 	setTransactionMessageFeePayer,
@@ -946,6 +948,80 @@ describe('sol-transactions.utils', () => {
 				amount: 60n
 			});
 		});
+	});
+
+	describe('parseSolBase64TransactionMessage', () => {
+		// A version 1 message has no lookup tables, so decoding it never reaches the RPC.
+		const rpc = createSolanaRpc('http://127.0.0.1:8899');
+
+		const v1Request = getBase64EncodedWireTransaction(
+			compileTransaction(
+				pipe(
+					createTransactionMessage({ version: 1 }),
+					(tx) => setTransactionMessageFeePayer(address(mockSolAddress), tx),
+					(tx) =>
+						setTransactionMessageLifetimeUsingBlockhash(
+							{
+								blockhash: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+								lastValidBlockHeight: 100n
+							},
+							tx
+						),
+					(tx) =>
+						appendTransactionMessageInstructions(
+							[
+								getTransferSolInstruction({
+									source: createNoopSigner(address(mockSolAddress)),
+									destination: address(mockSolAddress2),
+									amount: 1n
+								})
+							],
+							tx
+						),
+					(tx) =>
+						setTransactionMessageConfig(
+							{ priorityFeeLamports: 50_000n, computeUnitLimit: 300_000 },
+							tx
+						)
+				)
+			)
+		);
+
+		// A version 1 transaction opens with its message: the version byte and the three header bytes,
+		// then the config mask, a little-endian u32. The config values stay as they are, which is the
+		// layout the decoder reads for a bit it does not know.
+		const withConfigBits = ({ request, bits }: { request: string; bits: number }): string => {
+			const bytes = new Uint8Array(getBase64Encoder().encode(request));
+			const view = new DataView(bytes.buffer);
+
+			view.setUint32(4, view.getUint32(4, true) | bits, true);
+
+			return getBase64Decoder().decode(bytes);
+		};
+
+		it('should decode a version 1 request that sets only the config bits the network accepts', async () => {
+			const decoded = await parseSolBase64TransactionMessage({
+				transactionMessage: v1Request,
+				rpc
+			});
+
+			expect(decoded.version === 1 && decoded.config).toStrictEqual({
+				priorityFeeLamports: 50_000n,
+				computeUnitLimit: 300_000
+			});
+		});
+
+		it.each([5, 31])(
+			'should refuse a version 1 request whose config mask sets bit %i, which the network refuses',
+			async (bit) => {
+				await expect(
+					parseSolBase64TransactionMessage({
+						transactionMessage: withConfigBits({ request: v1Request, bits: 1 << bit }),
+						rpc
+					})
+				).rejects.toThrow('Unsupported Solana version 1 transaction config mask');
+			}
+		);
 	});
 
 	describe('isSolCompiledTransactionMessage', () => {
