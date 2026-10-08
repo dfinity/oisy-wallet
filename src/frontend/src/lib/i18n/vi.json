@@ -1937,6 +1937,7 @@
 			"token_call_with_value": "Yêu cầu này gửi $amount đến hợp đồng token, ngoài số lượng token. Vì sự an toàn của bạn, yêu cầu đã không được ký.",
 			"ambiguous_transaction": "Giao dịch này chuyển tiền giữa nhiều địa chỉ và không thể hiển thị chính xác để xem xét. Vì sự an toàn của bạn, giao dịch này đã không được ký.",
 			"close_pays_others": "Giao dịch này đóng một trong các tài khoản token của bạn và trả số dư của nó cho một địa chỉ không phải ví của bạn. Vì sự an toàn của bạn, giao dịch đã không được ký.",
+			"fee_paid_by_others": "",
 			"unreviewed_without_simulation": "OISY không thể đọc một phần của giao dịch này và mạng cũng không trả về bản mô phỏng, nên không có gì mô tả phần đó sẽ làm gì. Vì sự an toàn của bạn, giao dịch đã không được ký.",
 			"unreviewed_not_described_by_simulation": "OISY không thể đọc một phần của giao dịch này và bản mô phỏng của nó cũng không cho thấy phần đó sẽ làm gì. Vì sự an toàn của bạn, giao dịch đã không được ký.",
 			"unread_programs_unconfirmed": "Giao dịch này gọi một chương trình mà OISY không thể đọc và chưa được xác nhận trong phần xem xét. Vì sự an toàn của bạn, giao dịch đã không được ký.",

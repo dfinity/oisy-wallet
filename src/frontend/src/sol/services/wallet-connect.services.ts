@@ -594,6 +594,25 @@ export const sign = ({
 				rpc: solanaHttpRpc(solNetwork)
 			});
 
+			// A send goes out with the wallet as its fee payer, and the fee payer signs. A message that
+			// names another account to pay was reviewed with the wallet as an account that does not
+			// sign, so sending it would sign a transaction the review never ran. Only a message the
+			// wallet already pays for is sent: setting the fee payer then changes no account's role.
+			// Asked first, as the review asks it, since every check below read the message as the dApp
+			// sent it.
+			if (
+				method === SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION &&
+				parsedTransactionMessage.feePayer.address !== address
+			) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.fee_paid_by_others }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
 			const { amount, destination, ambiguous, unreviewed } = mapSolTransactionMessage({
 				transactionMessage: parsedTransactionMessage,
 				userAddress: address,

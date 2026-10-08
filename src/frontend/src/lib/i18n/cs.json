@@ -1937,6 +1937,7 @@
 			"token_call_with_value": "Tento požadavek posílá kromě částky tokenu také $amount na smlouvu tokenu. Pro vaši bezpečnost nebyl podepsán.",
 			"ambiguous_transaction": "Tato transakce přesouvá prostředky mezi několika adresami a nelze ji přesně zobrazit ke kontrole. Z důvodu vaší bezpečnosti nebyla podepsána.",
 			"close_pays_others": "Tato transakce zavírá jeden z vašich tokenových účtů a vyplácí jeho zůstatek na adresu, která není vaše peněženka. Pro vaši bezpečnost nebyla podepsána.",
+			"fee_paid_by_others": "",
 			"unreviewed_without_simulation": "OISY nedokázala přečíst část této transakce a síť k ní nevrátila ani simulaci, takže nic nepopisuje, co by tato část udělala. Z důvodu vaší bezpečnosti nebyla podepsána.",
 			"unreviewed_not_described_by_simulation": "OISY nedokázala přečíst část této transakce a ani její simulace neukázala, co by tato část udělala. Z důvodu vaší bezpečnosti nebyla podepsána.",
 			"unread_programs_unconfirmed": "Tato transakce volá program, který OISY nedokáže přečíst, a při kontrole nebyla potvrzena. Z důvodu vaší bezpečnosti nebyla podepsána.",

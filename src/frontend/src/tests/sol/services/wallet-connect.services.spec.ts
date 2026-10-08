@@ -1439,6 +1439,77 @@ describe('wallet-connect.services', () => {
 			});
 		});
 
+		// A send goes out with the wallet as its fee payer, which a message naming another payer was not
+		// reviewed with. Signing it without sending keeps the payer it names.
+		describe('with a message that names another account to pay its fee', () => {
+			beforeEach(() => {
+				vi.spyOn(solTransactionsUtils, 'parseSolBase64TransactionMessage').mockResolvedValue({
+					...mockParsedTransaction,
+					feePayer: { address: mockSolAddress2 }
+				} as unknown as CompilableTransactionMessage);
+			});
+
+			it('should refuse to send it', async () => {
+				const result = await sign(mockParams);
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.wallet_connect.error.fee_paid_by_others }
+				});
+
+				expect(mockParams.modalNext).not.toHaveBeenCalled();
+				expect(solSendServices.setLifetimeAndFeePayerToTransaction).not.toHaveBeenCalled();
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(sendSignedTransaction).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: mockRequest.topic,
+					id: mockRequest.id,
+					error: UNEXPECTED_ERROR
+				});
+			});
+
+			// The review names this refusal before any other, so the toast has to as well or it
+			// contradicts the screen it follows.
+			it('should say which refusal it is when the message is refused on other grounds too', async () => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					...mockMappedTransaction,
+					ambiguous: true
+				});
+
+				const result = await sign({ ...mockParams, closesPayOthers: true });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.wallet_connect.error.fee_paid_by_others }
+				});
+			});
+
+			it('should sign it when it is only to be signed', async () => {
+				const result = await sign({
+					...mockParams,
+					request: {
+						...mockRequest,
+						params: {
+							...mockRequest.params,
+							request: {
+								...mockRequest.params.request,
+								method: SESSION_REQUEST_SOL_SIGN_TRANSACTION
+							}
+						}
+					}
+				});
+
+				expect(result).toEqual(expect.objectContaining({ success: true }));
+
+				expect(spyToastsError).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).toHaveBeenCalledOnce();
+			});
+		});
+
 		describe('with a close that pays somebody else', () => {
 			it('should refuse to sign', async () => {
 				const result = await sign({ ...mockParams, closesPayOthers: true });

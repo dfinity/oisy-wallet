@@ -1937,6 +1937,7 @@
 			"token_call_with_value": "Questa richiesta invia $amount al contratto del token, oltre all'importo di token. Per la tua sicurezza non è stata firmata.",
 			"ambiguous_transaction": "Questa transazione sposta fondi tra più indirizzi e non può essere mostrata in modo accurato per la revisione. Per la tua sicurezza, non è stata firmata.",
 			"close_pays_others": "Questa transazione chiude uno dei tuoi conti token e versa il suo saldo a un indirizzo che non è il tuo wallet. Per la tua sicurezza non è stata firmata.",
+			"fee_paid_by_others": "",
 			"unreviewed_without_simulation": "OISY non ha potuto leggere una parte di questa transazione e la rete non ne ha restituito nemmeno una simulazione, quindi nulla descrive cosa farebbe quella parte. Per la tua sicurezza, non è stata firmata.",
 			"unreviewed_not_described_by_simulation": "OISY non ha potuto leggere una parte di questa transazione e nemmeno la sua simulazione ha mostrato cosa farebbe quella parte. Per la tua sicurezza, non è stata firmata.",
 			"unread_programs_unconfirmed": "Questa transazione chiama un programma che OISY non riesce a leggere e non è stata confermata nella revisione. Per la tua sicurezza, non è stata firmata.",

@@ -1615,6 +1615,7 @@ interface I18nWallet_connect {
 		token_call_with_value: string;
 		ambiguous_transaction: string;
 		close_pays_others: string;
+		fee_paid_by_others: string;
 		unreviewed_without_simulation: string;
 		unreviewed_not_described_by_simulation: string;
 		unread_programs_unconfirmed: string;
