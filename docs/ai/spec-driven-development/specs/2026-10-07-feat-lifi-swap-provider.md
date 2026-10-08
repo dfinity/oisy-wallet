@@ -535,6 +535,17 @@ The result must show all of the following:
   `createdAccounts: { account, owner, delegate?, closeAuthority? }[]` field (post-state
   of user-owned accounts with no pre-state), filled from the same parsed states.
   WalletConnect ignores the field, so its review is unchanged.
+- **No pre-existing user account is closed.** The same mapper also returns no
+  `controlChanges` when `post` is absent, an empty token account closed by the run
+  reports no token delta, and its rent lamports go to whatever destination the
+  `CloseAccount` names; only the fee payer's own lamports count toward `solDelta`. A
+  forged transaction could therefore close the user's empty token accounts and send their
+  rent elsewhere while passing every bound above. So the preview gains a
+  `closedAccounts: SolAddress[]` field (user-owned accounts with a pre-state and no
+  post-state), and it must be empty. Accounts the transaction both creates and closes (a
+  temporary wSOL account) have no pre-state and are not listed. A route that closes one
+  of the user's existing accounts (for example, unwrapping into a pre-existing wSOL ATA)
+  is refused: fail closed, at the cost of those rare routes.
 - **Every program is known.** Every top-level instruction's program, and every entry of
   `unreadPrograms`, is in `SOLANA_KNOWN_PROGRAM_ADDRESSES` or in a new pinned
   `LIFI_SOLANA_PROGRAM_ADDRESSES`. `unreadPrograms` only lists programs called from
@@ -916,7 +927,7 @@ loader's 5 s tick.
 | 1   | **Backend AUT variant** — `Lifi(LifiData)`, validation, tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                           | —                                              |
 | 2a  | **Scaffolding + quoting** — `@lifi/sdk`, env (flag **narrowed to `LOCAL`**), types, quote service + cache, form-time trust checks, LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges), provider sheet | 1                                              |
 | 2b  | **EVM execution + tracking** — calldata binding (pinned selectors + `CalldataVerificationFacet`), `exactAllowance` on `approve()`, `fetchLifiEvmSwap` + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound)/loader (incl. wallet refresh)/item; flag back to `LOCAL \|\| STAGING`, `PRODUCT.md` for EVM-source swaps          | 2a                                             |
-| 3   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` in the simulation preview), `SwapSolWizard` dispatch, Solana source-chain check in the poller, `PRODUCT.md` update for Solana-source swaps                                                                           | 2b                                             |
+| 3   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` / `closedAccounts` in the simulation preview), `SwapSolWizard` dispatch, Solana source-chain check in the poller, `PRODUCT.md` update for Solana-source swaps                                                        | 2b                                             |
 | 4   | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                   | 3, production key + rate-limit scope confirmed |
 
 PR 2 is split up front so each PR stays reviewable. The flag stays on `LOCAL` through
@@ -988,7 +999,8 @@ everywhere.
    is never signed. A decode that reverts aborts the swap.
 9. A Solana swap is never signed unless a simulation of its exact bytes succeeds, shows
    no control change, leaves every token account it creates for the user with the user
-   as owner and no foreign delegate or close authority, calls (top-level or nested)
+   as owner and no foreign delegate or close authority, closes none of the user's
+   pre-existing accounts, calls (top-level or nested)
    only programs in `SOLANA_KNOWN_PROGRAM_ADDRESSES` or the pinned
    `LIFI_SOLANA_PROGRAM_ADDRESSES`, spends no more than `fromAmount` (plus the SOL fee
    cap) from the user's accounts and, Solana → Solana, credits at least `toAmountMin`
