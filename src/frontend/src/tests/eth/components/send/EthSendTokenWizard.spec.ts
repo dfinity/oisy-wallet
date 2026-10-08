@@ -13,6 +13,7 @@ import {
 } from '$eth/stores/eth-fee.store';
 import * as tokenUtils from '$eth/utils/token.utils';
 import * as ckethServices from '$icp-eth/services/cketh.services';
+import { TRACK_NFT_SEND } from '$lib/constants/analytics.constants';
 import { MAX_BUTTON, REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import * as idDerived from '$lib/derived/auth.derived';
@@ -35,6 +36,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import type { TransactionResponse } from 'ethers/providers';
+import { makeError } from 'ethers/utils';
 import { readable, writable, type Writable } from 'svelte/store';
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
@@ -245,6 +247,62 @@ describe('EthSendTokenWizard.spec', () => {
 		await vi.runOnlyPendingTimersAsync();
 
 		expect(onCloseStep).toHaveBeenCalledExactlyOnceWith(ProgressStepsSend.DONE);
+	});
+
+	it('tracks a refused NFT broadcast without the signed transaction', async () => {
+		const nft: Nft = mockValidErc721Nft;
+		const collectionToken: NonFungibleToken = mockValidErc721Token;
+
+		// An EIP-1559 transfer as the signer returns it, cut short: it carries the wallet and the
+		// recipient.
+		const signedTransaction = `0x02f8b10107843b9aca00${fromAddr.slice(2)}${destination.slice(2)}`;
+
+		// What ethers raises when the node refuses the broadcast: the request it sent, signed
+		// transaction included, is part of the message.
+		const err = makeError('could not coalesce error', 'UNKNOWN_ERROR', {
+			error: { code: -32000, message: 'already known' },
+			payload: {
+				id: 9,
+				jsonrpc: '2.0',
+				method: 'eth_sendRawTransaction',
+				params: [signedTransaction]
+			}
+		});
+
+		expect(err.message).toContain(signedTransaction);
+
+		vi.mocked(nftSendServices.sendNft).mockRejectedValueOnce(err);
+
+		const { getByTestId } = renderHost({
+			currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+			sendProgressStep: ProgressStepsSend.INITIALIZATION,
+			nft,
+			destination,
+			sourceNetwork: ETHEREUM_NETWORK,
+			nativeEthereumToken: ETHEREUM_TOKEN,
+			sendToken: collectionToken,
+			sendTokenDecimals: 0
+		});
+
+		await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+		await vi.runOnlyPendingTimersAsync();
+
+		expect(analytics.trackEvent).toHaveBeenCalledExactlyOnceWith({
+			name: TRACK_NFT_SEND,
+			metadata: {
+				resultStatus: 'error',
+				token: collectionToken.symbol,
+				collection: nft.collection.name,
+				address: nft.collection.address,
+				tokenId: String(nft.id),
+				network: ETHEREUM_NETWORK.name,
+				error: expect.stringContaining('"message": "already known"')
+			}
+		});
+
+		const [[{ metadata }]] = vi.mocked(analytics.trackEvent).mock.calls;
+
+		expect(JSON.stringify(metadata)).not.toContain(signedTransaction);
 	});
 
 	describe('fee observation', () => {
