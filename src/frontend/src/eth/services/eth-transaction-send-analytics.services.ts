@@ -17,17 +17,18 @@ export type EthTransactionSendContext =
 	| PLAUSIBLE_EVENT_CONTEXTS.CONVERT
 	| PLAUSIBLE_EVENT_CONTEXTS.AI_ASSISTANT;
 
-// Every hex value in a node's message: an address, a hash or signed data, each of which points to a
-// wallet or a payment.
-const HEX_VALUE_PATTERN = /0x[0-9a-f]+/gi;
+// The one out-of-gas answer whose wording is known, Base's: a gas figure and nothing else. Any other
+// wording is a node's free text, which no scrub can bound, so it is not tracked.
+const GAS_ONLY_ANSWER_PATTERN = /^out of gas: gas required exceeds: \d+$/;
 
 /**
  * A transaction the node refused, or mined and reverted, because it ran out of the gas it was
  * signed with. An error: the send visibly failed, and a mined one still cost its fee.
  *
  * The two gas figures show how far the estimate fell short, per token and network. The node's
- * message is kept, every hex value in it replaced, and never the error ethers wraps around it: that
- * one embeds the signed transaction, which names the wallet, the recipient and the amount.
+ * message is kept only in the wording known to carry a gas figure alone, and never the error ethers
+ * wraps around it: that one embeds the signed transaction, which names the wallet, the recipient
+ * and the amount.
  */
 export const trackEthTransactionSendOutOfGas = ({
 	context,
@@ -65,7 +66,7 @@ export const trackEthTransactionSendOutOfGas = ({
 			result_error_severity: PLAUSIBLE_EVENT_ERROR_SEVERITIES.MAJOR,
 			result_error_type: PLAUSIBLE_EVENT_TRANSACTION_SEND_ERROR_TYPES.OUT_OF_GAS,
 			result_error_code: `${errorCode}`,
-			result_error_text: nodeMessage.replace(HEX_VALUE_PATTERN, '0x…')
+			...(GAS_ONLY_ANSWER_PATTERN.test(nodeMessage) && { result_error_text: nodeMessage })
 		}
 	});
 };

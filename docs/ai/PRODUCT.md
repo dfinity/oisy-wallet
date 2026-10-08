@@ -171,7 +171,7 @@ An Ethereum or EVM transaction that [runs out of gas](#a-send-that-runs-out-of-g
 | `result_status`               | `error`, with `result_error_severity: major`                                             |
 | `result_error_type`           | `out_of_gas`                                                                             |
 | `result_error_code`           | the node's JSON-RPC code, `-32000`                                                       |
-| `result_error_text`           | the node's own message, every hex value in it replaced by `0x…`                          |
+| `result_error_text`           | the node's own message, only in the wording `out of gas: gas required exceeds: N`        |
 
 The two gas figures show how far estimates fall short, per token and network. The event never carries the signed transaction, its hash, an address other than the token's contract, the amount or its USD value: the signed transaction alone names the sender, the recipient and the amount, which is why the error ethers wraps around the node's message, with the signed request inside it, stays out too.
 

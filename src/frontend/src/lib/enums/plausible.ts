@@ -79,8 +79,8 @@ export enum PLAUSIBLE_EVENT_HELP_ERROR_TYPES {
 	UNKNOWN = 'unknown'
 }
 
-// The node's own text sits next to it in `result_error_text`, scrubbed of every hex value; the
-// category is what a dashboard filters on.
+// The category is what a dashboard filters on. The node's own text sits next to it in
+// `result_error_text` only in the one wording known to carry a gas figure alone.
 export enum PLAUSIBLE_EVENT_TRANSACTION_SEND_ERROR_TYPES {
 	// The node simulated the transaction and it ran out of the gas it was signed with.
 	OUT_OF_GAS = 'out_of_gas'

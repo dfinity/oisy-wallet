@@ -93,16 +93,28 @@ describe('trackEthTransactionSendOutOfGas', () => {
 		expect(metadata).not.toHaveProperty('token_address');
 	});
 
-	it('replaces every hex value in the node message', () => {
+	// A node's free text can carry a balance, an address or anything else; only the known gas-only
+	// wording is safe to send.
+	it.each([
+		'out of gas',
+		'out of gas: gas required exceeds: 60243, balance 1250000',
+		'out of gas: address 0x1111111111111111111111111111111111111111',
+		'Out of gas: gas required exceeds: 60243',
+		'out of gas: gas required exceeds: 0xeb53'
+	])('leaves out a node message worded as "%s", keeping its category', (message) => {
 		trackEthTransactionSendOutOfGas({
 			context: PLAUSIBLE_EVENT_CONTEXTS.SEND,
 			token: mockValidErc20Token,
 			errorCode: -32000,
-			nodeMessage: 'out of gas: address 0x1111111111111111111111111111111111111111 tx 0xDeadBeef'
+			nodeMessage: message
 		});
 
 		const [[{ metadata }]] = track.mock.calls;
 
-		expect(metadata).toMatchObject({ result_error_text: 'out of gas: address 0x… tx 0x…' });
+		expect(metadata).toMatchObject({
+			result_error_type: 'out_of_gas',
+			result_error_code: '-32000'
+		});
+		expect(metadata).not.toHaveProperty('result_error_text');
 	});
 });
