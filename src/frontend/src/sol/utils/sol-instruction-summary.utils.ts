@@ -2,6 +2,7 @@ import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { maxBigInt } from '$lib/utils/bigint.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
+import { SOLANA_KNOWN_PROGRAM_ADDRESSES } from '$sol/constants/sol-known-programs.constants';
 import {
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
@@ -1591,13 +1592,14 @@ export const mapSolInstructionSummaries = ({
 						})
 					: undefined;
 
-			// The program that made a transfer, when it is not the one the line hangs under: a routed
-			// swap's legs are made inside the pools it goes through, and the heading names only the
-			// router.
+			// The program that made a transfer, when it is not the one the line hangs under and not one
+			// of the known programs: a program the review's notice about programs OISY cannot read
+			// names. A known pool on every leg of every routed swap would only repeat itself.
 			const via =
 				['send', 'receive'].includes(wrapped.kind) &&
 				nonNullish(madeBy) &&
-				madeBy !== programs[parentIndex]
+				madeBy !== programs[parentIndex] &&
+				!SOLANA_KNOWN_PROGRAM_ADDRESSES.includes(madeBy)
 					? madeBy
 					: undefined;
 

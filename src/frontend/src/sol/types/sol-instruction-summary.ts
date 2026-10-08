@@ -87,7 +87,8 @@ export interface SolInstructionSummary {
 	// itself, attested by nobody: a label for the address, never a statement about what it does.
 	programName?: string;
 	// The program that made a transfer inside the instruction it hangs under, when that is another
-	// program than the one the heading names: the pool a leg of a routed swap goes through.
+	// program than the one the heading names and not one of the known programs: a pool OISY cannot
+	// read, which the review's notice about such programs names.
 	via?: SolAddress;
 	// The name that program publishes for itself, when it publishes one. A label, as above.
 	viaName?: string;

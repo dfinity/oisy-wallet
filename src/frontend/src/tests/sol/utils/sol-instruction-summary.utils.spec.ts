@@ -16,7 +16,8 @@ import {
 	mockAtaAddress,
 	mockAtaAddress2,
 	mockSolAddress,
-	mockSolAddress2
+	mockSolAddress2,
+	mockSolAddress3
 } from '$tests/mocks/sol.mock';
 import { nonNullish } from '@dfinity/utils';
 import { getCreateAccountInstruction, getTransferSolInstruction } from '@solana-program/system';
@@ -135,7 +136,8 @@ describe('sol-instruction-summary.utils', () => {
 
 		describe('the program each leg of a route goes through', () => {
 			const router = 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4';
-			const fusion = 'fUSioN9YKKSa3CUC2YUc4tPkHJ5Y6XW1yz8y6F7qWz9';
+			// A pool OISY does not know, and one it does.
+			const unread = mockSolAddress3;
 			const meteora = 'cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG';
 
 			// What the run reports: the depth of every nested call, which says who made it.
@@ -194,24 +196,38 @@ describe('sol-instruction-summary.utils', () => {
 					.filter(({ kind }) => kind !== 'route')
 					.map(({ kind, via }) => [kind, via]);
 
-			it('should name the pool that made each leg', () => {
+			it('should name the pool OISY cannot read that made each leg', () => {
 				expect(
 					legs({
 						top: router,
 						inner: [
-							call({ programId: fusion, stackHeight: 2 }),
+							call({ programId: unread, stackHeight: 2 }),
 							transfer({ outgoing: true, amount: '1000', stackHeight: 3 }),
-							transfer({ outgoing: false, amount: '900', stackHeight: 3 }),
+							transfer({ outgoing: false, amount: '900', stackHeight: 3 })
+						]
+					})
+				).toStrictEqual([
+					['send', unread],
+					['receive', unread]
+				]);
+			});
+
+			// The notice names only programs off the list, and a known pool on every leg of every
+			// routed swap would only repeat itself.
+			it('should name no pool among the known programs', () => {
+				expect(
+					legs({
+						top: router,
+						inner: [
+							call({ programId: unread, stackHeight: 2 }),
+							transfer({ outgoing: true, amount: '1000', stackHeight: 3 }),
 							call({ programId: meteora, stackHeight: 2 }),
-							transfer({ outgoing: true, amount: '500', stackHeight: 3 }),
 							transfer({ outgoing: false, amount: '450', stackHeight: 3 })
 						]
 					})
 				).toStrictEqual([
-					['send', fusion],
-					['receive', fusion],
-					['send', meteora],
-					['receive', meteora]
+					['send', unread],
+					['receive', undefined]
 				]);
 			});
 
@@ -219,7 +235,7 @@ describe('sol-instruction-summary.utils', () => {
 			it('should name nothing for a leg the heading program made itself', () => {
 				expect(
 					legs({
-						top: fusion,
+						top: unread,
 						inner: [
 							transfer({ outgoing: true, amount: '1000', stackHeight: 2 }),
 							transfer({ outgoing: false, amount: '900', stackHeight: 2 })
@@ -236,7 +252,7 @@ describe('sol-instruction-summary.utils', () => {
 					legs({
 						top: router,
 						inner: [
-							call({ programId: fusion }),
+							call({ programId: unread }),
 							transfer({ outgoing: true, amount: '1000' }),
 							transfer({ outgoing: false, amount: '900' })
 						]
