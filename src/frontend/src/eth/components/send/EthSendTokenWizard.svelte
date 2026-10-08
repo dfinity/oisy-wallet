@@ -170,6 +170,11 @@
 		untrack(() => evaluateFee());
 	});
 
+	// Set from an amount or recipient change until the fee estimated for the new values has landed.
+	// "Next" waits for it: the review step freezes the fee in hand, and a sample taken for the previous
+	// values can fall short of the gas this transfer needs.
+	let feeOutdated = $state(false);
+
 	/**
 	 * Send
 	 */
@@ -439,6 +444,7 @@
 	sendToken={$sendToken}
 	sendTokenId={$sendTokenId}
 	{sourceNetwork}
+	bind:outdated={feeOutdated}
 >
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsSend.REVIEW}
@@ -457,6 +463,7 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSend.SEND}
 			<EthSendForm
+				{feeOutdated}
 				{nativeEthereumToken}
 				{onBack}
 				{onNext}

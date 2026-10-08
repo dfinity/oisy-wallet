@@ -381,6 +381,85 @@ describe('EthFeeContext', () => {
 		});
 	});
 
+	describe('a sample taken before the inputs changed', () => {
+		// One fetch per sample, each released by the test, with a tip that tells the samples apart. The
+		// tips sit above the provider's own quote, which would otherwise floor them both to the same value.
+		const releases: ((maxPriorityFeePerGas: bigint) => void)[] = [];
+
+		const sample = (maxPriorityFeePerGas: bigint) => ({
+			baseFeePerGas: 5n,
+			perPriority: {
+				[EthFeePriority.SLOW]: { maxFeePerGas: 100n, maxPriorityFeePerGas },
+				[EthFeePriority.STANDARD]: { maxFeePerGas: 100n, maxPriorityFeePerGas },
+				[EthFeePriority.FAST]: { maxFeePerGas: 100n, maxPriorityFeePerGas }
+			}
+		});
+
+		beforeEach(() => {
+			releases.length = 0;
+
+			InfuraGasRest.prototype.getSuggestedFeeData = vi
+				.fn()
+				.mockImplementation(
+					async () =>
+						await new Promise((resolve) =>
+							releases.push((maxPriorityFeePerGas) => resolve(sample(maxPriorityFeePerGas)))
+						)
+				);
+
+			vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+		});
+
+		const renderWithTwoFetchesInFlight = async () => {
+			const rendered = renderWith();
+
+			// The fetch for the inputs before...
+			await vi.advanceTimersByTimeAsync(1000);
+
+			rendered.component.triggerUpdateFee();
+
+			// ...and the one for the inputs now entered.
+			await vi.advanceTimersByTimeAsync(1000);
+
+			expect(releases).toHaveLength(2);
+
+			const [releaseBefore, releaseAfter] = releases;
+
+			return { ...rendered, releaseBefore, releaseAfter };
+		};
+
+		it('is dropped when it lands first', async () => {
+			const { releaseBefore, releaseAfter } = await renderWithTwoFetchesInFlight();
+
+			releaseBefore(30n);
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(setFeeMock).not.toHaveBeenCalled();
+
+			releaseAfter(40n);
+			await vi.runAllTimersAsync();
+
+			expect(setFeeMock).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ maxPriorityFeePerGas: 40n })
+			);
+		});
+
+		it('is dropped when it lands last, over the sample for the inputs now entered', async () => {
+			const { releaseBefore, releaseAfter } = await renderWithTwoFetchesInFlight();
+
+			releaseAfter(40n);
+			await vi.advanceTimersByTimeAsync(0);
+
+			releaseBefore(30n);
+			await vi.runAllTimersAsync();
+
+			expect(setFeeMock).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ maxPriorityFeePerGas: 40n })
+			);
+			expect(get(feeState)).toEqual(expect.objectContaining({ maxPriorityFeePerGas: 40n }));
+		});
+	});
+
 	it('should set fee for native ETH / EVM-native tokens using max(safeEstimateGas, getEthFeeData)', async () => {
 		vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
 

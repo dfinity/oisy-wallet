@@ -52,6 +52,10 @@
 
 	interface Props {
 		observe: boolean;
+		// Set by `triggerUpdateFee` and cleared once a sample taken for the new inputs has landed. Until
+		// then the fee in hand was estimated for inputs that are gone, which a consumer about to freeze
+		// it has to wait out.
+		outdated?: boolean;
 		// Flows that offer no choice (swap, convert, stake) simply leave this at the default.
 		priority?: EthFeePriority;
 		destination?: string;
@@ -72,6 +76,7 @@
 
 	let {
 		observe,
+		outdated = $bindable(false),
 		priority = EthFeePriority.STANDARD,
 		destination = '',
 		amount,
@@ -121,6 +126,12 @@
 		feeStore.setFee(data);
 	};
 
+	// Moved on by every input change a consumer reports through `triggerUpdateFee`. Such a change does
+	// not cancel a fetch already in flight, so that fetch can still come back with a sample for the
+	// inputs before, even after the sample for the current ones has landed. Only a fetch started in
+	// the current generation may write.
+	let fetchGeneration = 0;
+
 	const updateFeeData = async () => {
 		try {
 			// The debounce utility has no cancel support, so this callback can fire after the component
@@ -131,6 +142,18 @@
 			if (isDestroyed || isNullish(sendToken) || isNullish($ethAddress) || isFrozen()) {
 				return;
 			}
+
+			const currentGeneration = fetchGeneration;
+
+			const setFetchedFee = (data: TransactionFeeData) => {
+				if (currentGeneration !== fetchGeneration) {
+					return;
+				}
+
+				setFee(data);
+
+				outdated = false;
+			};
 
 			const { network } = sendToken;
 
@@ -149,7 +172,7 @@
 				priority
 			});
 
-			if (isFrozen()) {
+			if (isFrozen() || currentGeneration !== fetchGeneration) {
 				return;
 			}
 
@@ -189,7 +212,7 @@
 							data
 						});
 
-				setFee({
+				setFetchedFee({
 					...feeData,
 					gas: maxBigInt(feeDataGas, estimatedGas)
 				});
@@ -217,7 +240,7 @@
 						data: encodedData
 					});
 
-					setFee({
+					setFetchedFee({
 						...feeData,
 						gas: estimatedGas ?? ERC20_FALLBACK_FEE
 					});
@@ -241,7 +264,7 @@
 						data: encodedData
 					});
 
-					setFee({
+					setFetchedFee({
 						...feeData,
 						gas: estimatedGas ?? ERC20_FALLBACK_FEE
 					});
@@ -264,7 +287,7 @@
 				// Deposit gas cannot be estimated before approval is on-chain, so we use a
 				// conservative fallback here. The actual deposit transaction re-estimates gas
 				// after the approval step succeeds (see depositErc4626 in erc4626.services.ts).
-				setFee({
+				setFetchedFee({
 					...feeData,
 					gas: (approveGas ?? ERC20_FALLBACK_FEE) + ERC20_FALLBACK_FEE
 				});
@@ -287,7 +310,7 @@
 			};
 
 			if (isSupportedErc20TwinTokenId(sendTokenId)) {
-				setFee({
+				setFetchedFee({
 					...feeData,
 					gas: await getCkErc20FeeData({
 						...erc20GasFeeParams,
@@ -322,14 +345,14 @@
 
 				const estimatedGasNft = await estimateGas({ from: $ethAddress, to, data });
 
-				setFee({
+				setFetchedFee({
 					...feeData,
 					gas: estimatedGasNft
 				});
 				return;
 			}
 
-			setFee({
+			setFetchedFee({
 				...feeData,
 				gas: await getErc20FeeData({
 					...erc20GasFeeParams,
@@ -522,8 +545,14 @@
 
 	/**
 	 * Expose a call to evaluate so that consumers can re-evaluate imperatively, for example, when the user manually updates the amount or destination.
+	 * Every call stands for new inputs: the fetches still in flight can no longer write, and the fee in hand stays `outdated` until a sample for the new inputs lands.
 	 */
-	export const triggerUpdateFee = () => debounceUpdateFeeData();
+	export const triggerUpdateFee = () => {
+		fetchGeneration++;
+		outdated = true;
+
+		debounceUpdateFeeData();
+	};
 </script>
 
 <svelte:document onvisibilitychange={onVisibilityChange} />

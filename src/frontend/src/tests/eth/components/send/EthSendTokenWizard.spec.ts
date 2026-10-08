@@ -13,7 +13,11 @@ import {
 } from '$eth/stores/eth-fee.store';
 import * as tokenUtils from '$eth/utils/token.utils';
 import * as ckethServices from '$icp-eth/services/cketh.services';
-import { MAX_BUTTON, REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
+import {
+	MAX_BUTTON,
+	REVIEW_FORM_SEND_BUTTON,
+	SEND_FORM_NEXT_BUTTON
+} from '$lib/constants/test-ids.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import * as idDerived from '$lib/derived/auth.derived';
 import * as exchDerived from '$lib/derived/exchange.derived';
@@ -341,6 +345,116 @@ describe('EthSendTokenWizard.spec', () => {
 				await vi.runOnlyPendingTimersAsync();
 
 				expect(feeServices.getEthFeeDataWithProvider).not.toHaveBeenCalled();
+			});
+		});
+
+		describe('when the amount changes on the amount step', () => {
+			// One fetch per sample, each released by the test with the gas its estimate came back with.
+			const releases: ((gas: bigint) => void)[] = [];
+
+			const sample = (gas: bigint) =>
+				({
+					feeData: { maxFeePerGas: 2_000_000n, maxPriorityFeePerGas: 1_000_000n },
+					priorities: undefined,
+					provider: { safeEstimateGas: () => Promise.resolve(gas) },
+					params: { from: fromAddr, to: destination }
+				}) as unknown as Awaited<ReturnType<typeof feeServices.getEthFeeDataWithProvider>>;
+
+			beforeEach(() => {
+				releases.length = 0;
+
+				vi.mocked(feeServices.getEthFeeDataWithProvider).mockImplementation(
+					() => new Promise((resolve) => releases.push((gas) => resolve(sample(gas))))
+				);
+			});
+
+			// A balance that covers every amount below, so the fee is all that can hold "Next" back.
+			const renderAmountStep = async () => {
+				const result = render(EthSendTokenWizard, {
+					props: {
+						currentStep: { name: WizardStepsSend.SEND, title: WizardStepsSend.SEND },
+						sendProgressStep: ProgressStepsSend.INITIALIZATION,
+						destination,
+						sourceNetwork: ETHEREUM_NETWORK,
+						amount: 1,
+						nativeEthereumToken: ETHEREUM_TOKEN,
+						onBack: vi.fn(),
+						onClose: vi.fn(),
+						onNext: vi.fn(),
+						onSendBack: vi.fn(),
+						onTokensList: vi.fn()
+					},
+					context: new Map<unknown, unknown>([
+						[ETH_FEE_CONTEXT_KEY, { feeStore }],
+						[
+							SEND_CONTEXT_KEY,
+							initSendContext({ token: ETHEREUM_TOKEN, customSendBalance: 10n ** 19n })
+						]
+					])
+				});
+
+				await vi.advanceTimersByTimeAsync(1000);
+
+				releases[0](25_000n);
+				await vi.advanceTimersByTimeAsync(0);
+
+				return result;
+			};
+
+			const changeAmount = async (rerender: (props: { amount: number }) => Promise<void>) => {
+				await rerender({ amount: 2 });
+
+				// The re-estimate is in flight.
+				await vi.advanceTimersByTimeAsync(1000);
+
+				expect(releases).toHaveLength(2);
+			};
+
+			it('holds "Next" until the fee for the new amount has landed', async () => {
+				const { getByTestId, rerender } = await renderAmountStep();
+
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeEnabled();
+
+				await changeAmount(rerender);
+
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+
+				releases[1](30_000n);
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeEnabled();
+			});
+
+			it('keeps holding "Next" while the fee for the new amount cannot be fetched', async () => {
+				const { getByTestId, rerender } = await renderAmountStep();
+
+				vi.mocked(feeServices.getEthFeeDataWithProvider).mockRejectedValue(new Error('offline'));
+
+				await rerender({ amount: 2 });
+				await vi.advanceTimersByTimeAsync(1000);
+
+				// The sample in hand was estimated for the previous amount, so it does not count.
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+			});
+
+			it('signs the fee estimated for the amount under review', async () => {
+				const { getByTestId, rerender } = await renderAmountStep();
+
+				await changeAmount(rerender);
+
+				releases[1](30_000n);
+				await vi.advanceTimersByTimeAsync(0);
+
+				await rerender({
+					currentStep: { name: WizardStepsSend.REVIEW, title: WizardStepsSend.REVIEW }
+				});
+
+				await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(sendServices.send).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ amount: 2_000_000_000_000_000_000n, gas: 30_000n })
+				);
 			});
 		});
 	});
