@@ -91,6 +91,24 @@ describe('sol-program-name.services', () => {
 			]);
 		});
 
+		// The review names its instructions and the programs it cannot read in parallel, and the pool
+		// of a routed swap is often among both.
+		it('should read a program once when two lookups ask about it at the same time', async () => {
+			const unread: SolInstructionSummary = { kind: 'unknown', program: mockSolAddress };
+
+			await expect(
+				Promise.all([
+					loadSolProgramNames({ instructions: [route], network }),
+					loadSolProgramNames({ instructions: [unread], network })
+				])
+			).resolves.toStrictEqual([
+				[{ ...route, programName: 'jupiter' }],
+				[{ ...unread, programName: 'jupiter' }]
+			]);
+
+			expect(getAccountData).toHaveBeenCalledOnce();
+		});
+
 		it('should leave an instruction that names no program untouched', async () => {
 			await expect(loadSolProgramNames({ instructions: [send], network })).resolves.toStrictEqual([
 				send

@@ -30,6 +30,44 @@ const loadName = async ({
 	return (await decodeSolProgramIdlName(data)) ?? '';
 };
 
+// The reads under way, so a lookup that asks about a program another lookup is still reading waits
+// for that read instead of starting its own: the review names its instructions and the programs it
+// cannot read in parallel, and the pool of a routed swap is often among both.
+const pendingNames = new Map<string, Promise<string | undefined>>();
+
+const readName = ({
+	programAddress,
+	network
+}: {
+	programAddress: SolAddress;
+	network: SolanaNetworkType;
+}): Promise<string | undefined> => {
+	const key = `${network}:${programAddress}`;
+
+	const pending = pendingNames.get(key);
+
+	if (nonNullish(pending)) {
+		return pending;
+	}
+
+	const read = (async () => {
+		try {
+			return await loadName({ programAddress, network });
+		} catch (err: unknown) {
+			consoleWarn(`Could not read the interface Solana program ${programAddress} publishes`, err);
+
+			return undefined;
+		} finally {
+			// Settled either way: a failed read is asked again by the next review, as before.
+			pendingNames.delete(key);
+		}
+	})();
+
+	pendingNames.set(key, read);
+
+	return read;
+};
+
 /**
  * Names the programs the review is about to show, from the interface each one publishes for itself,
  * and hands back the same instructions carrying the names that were found.
@@ -59,18 +97,7 @@ export const loadSolProgramNames = async ({
 
 	if (missing.length > 0) {
 		const names = await Promise.all(
-			missing.map(async (programAddress) => {
-				try {
-					return await loadName({ programAddress, network });
-				} catch (err: unknown) {
-					consoleWarn(
-						`Could not read the interface Solana program ${programAddress} publishes`,
-						err
-					);
-
-					return undefined;
-				}
-			})
+			missing.map((programAddress) => readName({ programAddress, network }))
 		);
 
 		solProgramNameStore.set({
