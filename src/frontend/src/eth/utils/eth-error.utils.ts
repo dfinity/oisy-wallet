@@ -226,16 +226,27 @@ const toastOutOfGasError = async ({
 			: replacePlaceholders(error.ethereum_out_of_gas_gas_sent, { $gasSent: formatGas(gasSent) })
 		: undefined;
 
-	const transactionLine = nonNullish(signedTransaction)
-		? replacePlaceholders(error.ethereum_signed_transaction, { $transaction: signedTransaction })
+	// Never the signed transaction itself: it stays valid until its nonce is used, and whoever it is
+	// shared with could broadcast it. The hash tells an explorer whether it was mined, and the unsigned
+	// transaction carries every field but the signature, so neither can be sent again.
+	const hashLine = nonNullish(transaction?.hash)
+		? replacePlaceholders(error.ethereum_transaction_hash, { $hash: transaction.hash })
 		: undefined;
 
-	// The figures and the signed transaction are there for the user to screenshot or copy and hand to
+	const unsignedTransactionLine = nonNullish(transaction)
+		? replacePlaceholders(error.ethereum_unsigned_transaction, {
+				$transaction: transaction.unsignedSerialized
+			})
+		: undefined;
+
+	// The figures and the transaction are there for the user to screenshot or copy and hand to
 	// support. Each sits on a line of its own, without a blank line before it: in a toast that shows
 	// little more than two lines, a blank one reads as the end of the message.
 	toastsErrorNoTrace({
 		msg: {
-			text: [error.ethereum_out_of_gas, gasLine, transactionLine].filter(nonNullish).join('<br>'),
+			text: [error.ethereum_out_of_gas, gasLine, hashLine, unsignedTransactionLine]
+				.filter(nonNullish)
+				.join('<br>'),
 			renderAsHtml: true
 		},
 		err
@@ -279,9 +290,9 @@ export const mapEthereumErrorMsg = (err: unknown): string | undefined => {
  * thing there is to report.
  *
  * A transaction that ran out of gas is explained too, with the gas it was signed with and the gas it
- * needs, and the signed transaction itself in place of the dump that carries it. It is also
- * tracked, as the flow it failed in (`context`) and the token it sent. Its toast follows a moment
- * later, once the gas needed has been asked of the network.
+ * needs, and its hash and unsigned form in place of the dump, which carries the signed transaction.
+ * It is also tracked, as the flow it failed in (`context`) and the token it sent. Its toast follows
+ * a moment later, once the gas needed has been asked of the network.
  */
 export const toastEthereumTransactionError = ({
 	err,

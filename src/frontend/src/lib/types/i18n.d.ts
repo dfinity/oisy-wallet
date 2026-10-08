@@ -864,7 +864,8 @@ interface I18nSend {
 		ethereum_out_of_gas: string;
 		ethereum_out_of_gas_gas: string;
 		ethereum_out_of_gas_gas_sent: string;
-		ethereum_signed_transaction: string;
+		ethereum_transaction_hash: string;
+		ethereum_unsigned_transaction: string;
 		solana_transaction_expired: string;
 		solana_confirmation_failed: string;
 		solana_insufficient_funds: string;

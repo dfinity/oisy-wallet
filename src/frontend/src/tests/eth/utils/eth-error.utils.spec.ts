@@ -217,7 +217,8 @@ describe('eth-error.utils', () => {
 						text: [
 							en.send.error.ethereum_out_of_gas,
 							'Gas sent: 60,243 · Gas needed: 62,989',
-							`Signed transaction: ${signedTransaction}`
+							`Transaction hash: ${transaction.hash}`,
+							`Unsigned transaction: ${transaction.unsignedSerialized}`
 						].join('<br>'),
 						renderAsHtml: true
 					},
@@ -225,6 +226,22 @@ describe('eth-error.utils', () => {
 				});
 
 				expect(toasts.toastsError).not.toHaveBeenCalled();
+			});
+
+			// Whoever a screenshot of it reaches could broadcast a signed transaction until its nonce is
+			// used; neither the hash nor the unsigned form can be sent.
+			it('never shows the signed transaction or its signature', async () => {
+				toastEthereumTransactionError({
+					err: outOfGas({ withRequest: true }),
+					fallbackMsg: en.send.error.unexpected,
+					...sendParams
+				});
+
+				await vi.waitFor(() => expect(toasts.toastsErrorNoTrace).toHaveBeenCalledOnce());
+
+				expect(toastText()).not.toContain(signedTransaction);
+				expect(toastText()).not.toContain(`${transaction.signature?.r}`.slice(2));
+				expect(toastText()).not.toContain(`${transaction.signature?.s}`.slice(2));
 			});
 
 			it('asks the network again for the gas the same transaction needs', async () => {
@@ -262,7 +279,8 @@ describe('eth-error.utils', () => {
 					[
 						en.send.error.ethereum_out_of_gas,
 						'Gas sent: 60,243',
-						`Signed transaction: ${signedTransaction}`
+						`Transaction hash: ${transaction.hash}`,
+						`Unsigned transaction: ${transaction.unsignedSerialized}`
 					].join('<br>')
 				);
 			});
@@ -289,7 +307,8 @@ describe('eth-error.utils', () => {
 						[
 							en.send.error.ethereum_out_of_gas,
 							'Gas sent: 60,243',
-							`Signed transaction: ${signedTransaction}`
+							`Transaction hash: ${transaction.hash}`,
+							`Unsigned transaction: ${transaction.unsignedSerialized}`
 						].join('<br>')
 					);
 
