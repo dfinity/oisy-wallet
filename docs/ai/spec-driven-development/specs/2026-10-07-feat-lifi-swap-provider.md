@@ -992,11 +992,25 @@ loader's 5 s tick.
   `$ethAddress` / `$solAddressMainnet` (the loader imports only `ethAddress` today; add
   `solAddressMainnet` from `lib/derived/address.derived.ts`), and a terminal-status branch firing
   `TRACK_COUNT_SWAP_SUCCESS` / `_ERROR` with `buildLifiSwapTrackingMetadata`.
-- That terminal branch also sets `shouldRefresh` (→ `waitAndTriggerWallet()`) for
-  **every** terminal LI.FI row, not only `Succeeded`: the modal closed at broadcast, so
-  nothing else refreshes balances when the route settles, and a failed, reverted or
-  refunded swap still spent gas or returned funds. A redundant refresh (dropped or
-  expired source) only finds nothing new.
+- That terminal branch refreshes balances for **every** terminal LI.FI row, not only
+  `Succeeded`: the modal closed at broadcast, so nothing else refreshes them when the
+  route settles, and a failed, reverted or refunded swap still spent gas or returned
+  funds. Two parts, because they cover different chains:
+  - `shouldRefresh` (→ `waitAndTriggerWallet()`) for the Solana side. It only emits the
+    `oisyTriggerWallet` worker event, and **EVM balances have no wallet worker**
+    (`LoaderEthBalances.svelte` does not listen for it, as `native-balance.services.ts`
+    notes), so it refreshes nothing on EVM.
+  - An explicit EVM reload with `reloadEthereumBalance` (`eth/services/eth-balance.services.ts`)
+    for each affected EVM token: the source token and its network's native token (gas,
+    `nativeTokenOf`) on every terminal status, since a refund can also land there, and the
+    destination token when it is on an EVM network. `swap()` only reloads the source
+    token once the source transaction is mined, so without this an EVM destination payout
+    or a later refund stays stale until the periodic poll. The row stores backend
+    `TokenId`s, and only the forward mapping exists (`toBackendTokenId`,
+    `lib/utils/token-id.utils.ts`), so the tokens are resolved by finding the enabled
+    token whose `toBackendTokenId` equals the row's `source_token` / `dest_token`; an
+    unresolved token (disabled since the swap) is skipped.
+  - Redundant refreshes (dropped or expired source) only find nothing new.
 - `ActiveUserTransactionItem.svelte`: `isLifi` in the `isSwap` list and the
   `providerName` chain; when `lifi_received_symbol` is present, the received token and
   amount replace the destination token in the row.
@@ -1023,13 +1037,13 @@ loader's 5 s tick.
 
 ## Delivery plan
 
-| PR  | Scope                                                                                                                                                                                                                                                                                                                                                                                                      | Depends on                                     |
-| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| 1   | **Backend AUT variant** — `Lifi(LifiData)`, validation, tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                           | —                                              |
-| 2a  | **Scaffolding + quoting** — `@lifi/sdk`, env (flag **narrowed to `LOCAL`**), types, quote service + cache, form-time trust checks, LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges), provider sheet | 1                                              |
-| 2b  | **EVM execution + tracking** — calldata binding (pinned selectors + `CalldataVerificationFacet`), `exactAllowance` on `approve()`, `fetchLifiEvmSwap` + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound)/loader (incl. wallet refresh)/item; flag back to `LOCAL \|\| STAGING`, `PRODUCT.md` for EVM-source swaps          | 2a                                             |
-| 3   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` / `closedAccounts` in the simulation preview), `SwapSolWizard` dispatch, Solana source-chain check in the poller, `PRODUCT.md` update for Solana-source swaps                                                        | 2b                                             |
-| 4   | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                   | 3, production key + rate-limit scope confirmed |
+| PR  | Scope                                                                                                                                                                                                                                                                                                                                                                                                           | Depends on                                     |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| 1   | **Backend AUT variant** — `Lifi(LifiData)`, validation, tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                                | —                                              |
+| 2a  | **Scaffolding + quoting** — `@lifi/sdk`, env (flag **narrowed to `LOCAL`**), types, quote service + cache, form-time trust checks, LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges), provider sheet      | 1                                              |
+| 2b  | **EVM execution + tracking** — calldata binding (pinned selectors + `CalldataVerificationFacet`), `exactAllowance` on `approve()`, `fetchLifiEvmSwap` + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound)/loader (incl. wallet + EVM balance refresh)/item; flag back to `LOCAL \|\| STAGING`, `PRODUCT.md` for EVM-source swaps | 2a                                             |
+| 3   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` / `closedAccounts` in the simulation preview), `SwapSolWizard` dispatch, Solana source-chain check in the poller, `PRODUCT.md` update for Solana-source swaps                                                             | 2b                                             |
+| 4   | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                        | 3, production key + rate-limit scope confirmed |
 
 PR 2 is split up front so each PR stays reviewable. The flag stays on `LOCAL` through
 2a, so no deployed environment ever shows an offer that cannot be executed. Solana → EVM
@@ -1119,7 +1133,8 @@ everywhere.
 12. After broadcast, the modal closes, an AUT row appears in the Active-transactions
     panel labelled "LI.FI", and it reaches `Succeeded` / `Failed` in the background,
     including after a page reload. Every terminal LI.FI row triggers one wallet
-    balance refresh.
+    refresh and an explicit reload of its EVM source, gas and (EVM) destination
+    balances.
 13. `DONE/PARTIAL` ends `Succeeded` and the row shows the token actually received, with
     its amount correctly formatted; `DONE/REFUNDED` ends `Failed` with the refunded copy.
 14. A reverted / dropped (EVM) or reverted / expired (Solana) source transaction ends
