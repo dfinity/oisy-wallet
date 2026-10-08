@@ -133,9 +133,10 @@
 			symbol: token.symbol
 		});
 
-	// Tracked once the share sheet has answered rather than on the tap. Dismissing
-	// it rejects with `AbortError`, which is the sender changing their mind, not a
-	// failure, and neither of the two is a share.
+	// Tracked once the share sheet has answered rather than on the tap. An
+	// `AbortError` is a `cancel`, not a dismissal: the Web Share API answers both a
+	// dismissed sheet and a device with no share target that way and says nothing
+	// about which. Either way nothing was shared and nothing in OISY failed.
 	const share = async () => {
 		if (isNullish(link)) {
 			return;

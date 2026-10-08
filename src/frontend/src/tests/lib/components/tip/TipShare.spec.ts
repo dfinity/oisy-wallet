@@ -458,7 +458,9 @@ describe('TipShare', () => {
 			expect(share).toHaveBeenCalledExactlyOnceWith({ text: link });
 		});
 
-		it('counts a dismissed share sheet as a cancel, not a failure', async () => {
+		it('counts an aborted share as a cancel, not a failure', async () => {
+			// A dismissed sheet and a device with no share target both reject with
+			// `AbortError`, so a cancel covers both.
 			share.mockRejectedValue(new DOMException('Share canceled', 'AbortError'));
 
 			clickShare();
