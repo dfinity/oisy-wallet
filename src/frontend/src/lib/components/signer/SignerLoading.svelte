@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Spinner } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
 	import SignerCenteredContent from '$lib/components/signer/SignerCenteredContent.svelte';
+	import LoaderSpinner from '$lib/components/ui/LoaderSpinner.svelte';
 
 	interface Props {
 		children: Snippet;
@@ -12,7 +12,7 @@
 
 <SignerCenteredContent>
 	<div class="text-brand-primary">
-		<Spinner inline />
+		<LoaderSpinner inline />
 	</div>
 	<span>{@render children()}</span>
 </SignerCenteredContent>

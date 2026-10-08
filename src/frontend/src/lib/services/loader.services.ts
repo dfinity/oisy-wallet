@@ -2,16 +2,18 @@ import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import { allowSigning } from '$lib/api/backend.api';
 import {
 	networkBitcoinMainnetEnabled,
 	networkEthereumEnabled,
 	networkEvmMainnetEnabled,
-	networkSolanaMainnetEnabled
+	networkSolanaMainnetEnabled,
+	networkXrpMainnetEnabled
 } from '$lib/derived/networks.derived';
 import { loadAddresses } from '$lib/services/addresses.services';
 import { trackRateLimited } from '$lib/services/analytics.services';
-import { errorSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
+import { errorSignOut, infoSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
@@ -86,14 +88,32 @@ export const initLoader = async ({
 
 	// The user profile settings will define the enabled/disabled networks.
 	// So we need to load it first to enable/disable the rest of the services.
-	const { success: userProfileSuccess } = await loadUserProfile({ identity });
+	const {
+		success: userProfileSuccess,
+		err: userProfileError,
+		profileCreated
+	} = await loadUserProfile({
+		identity
+	});
 
 	if (!userProfileSuccess) {
+		if (userProfileError === 'signups-closed') {
+			await infoSignOut({
+				text: get(i18n).auth.info.signups_closed,
+				source: 'signups-closed'
+			});
+
+			return;
+		}
+
 		await signOut({});
 		return;
 	}
 
-	if (FRONTEND_DERIVATION_ENABLED) {
+	// A just-created profile has no signing allowance yet, so it must be awaited even when addresses
+	// are derived in the frontend: the wallet workers started by `progressAndLoad` issue paid signer
+	// calls (e.g. the certified BTC balance) that would otherwise race the approve.
+	if (FRONTEND_DERIVATION_ENABLED && !profileCreated) {
 		// We do not need to await this call, as it is required for signing transactions only and not for the generic initialization.
 		initSignerAllowance();
 	} else {
@@ -109,7 +129,8 @@ export const initLoader = async ({
 	const enabledNetworkIds: NetworkId[] = [
 		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_NETWORK_ID] : []),
 		...(get(networkEthereumEnabled) || get(networkEvmMainnetEnabled) ? [ETHEREUM_NETWORK_ID] : []),
-		...(get(networkSolanaMainnetEnabled) ? [SOLANA_MAINNET_NETWORK_ID] : [])
+		...(get(networkSolanaMainnetEnabled) ? [SOLANA_MAINNET_NETWORK_ID] : []),
+		...(get(networkXrpMainnetEnabled) ? [XRP_MAINNET_NETWORK_ID] : [])
 	];
 
 	const { success: addressSuccess } = await loadAddresses(enabledNetworkIds);

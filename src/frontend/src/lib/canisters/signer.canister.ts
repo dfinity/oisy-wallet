@@ -1,6 +1,7 @@
 import type { BtcAddress } from '$btc/types/address';
 import type {
-	BitcoinNetwork,
+	Network as BitcoinNetwork,
+	BtcSignPrehashRequest,
 	EthAddressRequest,
 	EthPersonalSignRequest,
 	EthSignPrehashRequest,
@@ -17,17 +18,26 @@ import { getAgent } from '$lib/actors/agents.ic';
 import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import {
 	mapSignerCanisterBtcError,
+	mapSignerCanisterBtcSignPrehashError,
 	mapSignerCanisterGetEthAddressError,
 	mapSignerCanisterSendBtcError
 } from '$lib/canisters/signer.errors';
 import type {
+	GenericSignWithEcdsaParams,
 	GetSchnorrPublicKeyParams,
 	SendBtcParams,
 	SignWithSchnorrParams
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapDerivationPath } from '$lib/utils/signer.utils';
-import { Canister, createServices, fromDefinedNullable, toNullable } from '@dfinity/utils';
+import {
+	Canister,
+	createServices,
+	fromDefinedNullable,
+	hexStringToUint8Array,
+	toNullable,
+	uint8ArrayToHexString
+} from '@dfinity/utils';
 
 export class SignerCanister extends Canister<SignerService> {
 	static async create({
@@ -176,6 +186,28 @@ export class SignerCanister extends Canister<SignerService> {
 		throw mapSignerCanisterGetEthAddressError(response.Err);
 	};
 
+	signBtcPrehash = async ({ hash }: { hash: Uint8Array }): Promise<Uint8Array> => {
+		const { btc_sign_prehash } = this.caller({
+			certified: true
+		});
+
+		// The signer signs the digest under the caller's BTC key (schema `0x00`), matching the
+		// advertised P2WPKH address — unlike `generic_sign_with_ecdsa`, which signs under a generic
+		// key. The response is a raw `r || s`; the caller recovers the recovery id from the known
+		// public key (see `encodeRecoverableSignature`).
+		const request: BtcSignPrehashRequest = { hash: uint8ArrayToHexString(hash) };
+		const response = await btc_sign_prehash(request, [SIGNER_PAYMENT_TYPE]);
+
+		if ('Ok' in response) {
+			const {
+				Ok: { signature }
+			} = response;
+			return hexStringToUint8Array(signature);
+		}
+
+		throw mapSignerCanisterBtcSignPrehashError(response.Err);
+	};
+
 	sendBtc = async ({
 		feeSatoshis,
 		utxosToSpend,
@@ -267,6 +299,7 @@ export class SignerCanister extends Canister<SignerService> {
 
 		const response = await schnorr_sign(
 			{
+				aux: [],
 				key_id: keyId,
 				derivation_path: mapDerivationPath(derivationPath),
 				message
@@ -281,5 +314,30 @@ export class SignerCanister extends Canister<SignerService> {
 
 		// TODO: map error like the other methods when SchnorrSignError is exposed in the Signer repo
 		throw response.Err;
+	};
+
+	genericSignWithEcdsa = async ({
+		derivationPath,
+		keyId,
+		messageHash
+	}: GenericSignWithEcdsaParams): Promise<Uint8Array> => {
+		const { generic_sign_with_ecdsa } = this.caller({
+			certified: true
+		});
+
+		// Note: the candid signature is `(opt PaymentType, SignWithEcdsaArgument)`, so the
+		// payment type is the first argument here (unlike the other signer methods).
+		const response = await generic_sign_with_ecdsa([SIGNER_PAYMENT_TYPE], {
+			key_id: keyId,
+			derivation_path: mapDerivationPath(derivationPath),
+			message_hash: messageHash
+		});
+
+		if ('Ok' in response) {
+			const { signature } = fromDefinedNullable(response.Ok);
+			return signature;
+		}
+
+		throw mapSignerCanisterGetEthAddressError(response.Err);
 	};
 }

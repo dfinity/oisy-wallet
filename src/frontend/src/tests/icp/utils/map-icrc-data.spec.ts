@@ -54,4 +54,30 @@ describe('mapIcrcData', () => {
 
 		expect(result).toEqual({});
 	});
+
+	describe('metadataOnly', () => {
+		beforeEach(() => {
+			vi.resetAllMocks();
+
+			(['LOCAL', 'BETA', 'STAGING'] as const).forEach((e) =>
+				vi.spyOn(appConstants, e, 'get').mockImplementation(() => false)
+			);
+			vi.spyOn(appConstants, 'PROD', 'get').mockImplementation(() => true);
+		});
+
+		it('should preserve the metadataOnly property', () => {
+			const result = mapIcrcData({
+				METATOKEN: {
+					ledgerCanisterId: 'dummy-ledger-id',
+					name: 'Meta',
+					symbol: 'META',
+					decimals: 8,
+					fee: 1000n,
+					metadataOnly: true
+				}
+			});
+
+			expect(result.METATOKEN.metadataOnly).toBeTruthy();
+		});
+	});
 });

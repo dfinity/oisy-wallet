@@ -1,12 +1,10 @@
 <script lang="ts">
-	import { InfiniteScroll } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import InfiniteScroll from '$lib/components/ui/InfiniteScroll.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { Token } from '$lib/types/token';
-	import { last } from '$lib/utils/array.utils';
-	import { solTransactions } from '$sol/derived/sol-transactions.derived';
-	import { loadNextSolTransactions } from '$sol/services/sol-transactions.services';
+	import { solTransactionsInitialized } from '$sol/derived/sol-transactions.derived';
+	import { loadOlderSolTokenTransactions } from '$sol/services/sol-history-pagers.services';
 
 	interface Props {
 		token: Token;
@@ -17,20 +15,26 @@
 
 	let disableInfiniteScroll = $state(false);
 
-	const onIntersect = async () => {
-		const lastSignature = last($solTransactions)?.signature;
-
-		if (isNullish(lastSignature)) {
-			// No transactions, we do nothing here and wait for the worker to post the first transactions
-			return;
+	// Resolves whether the pager moved on, because neither rows the micro-transaction filter hides nor
+	// a round of pages that wrote no row move the end of the list: it stays on screen, and over an
+	// empty list there is nothing to scroll away and back. A failed page resolves `false` so it is not
+	// retried at once, and the end disables the scroll.
+	const onIntersect = async (): Promise<boolean> => {
+		// Only a gate, not a cursor: the pager keeps its own. Until the worker has posted the token's
+		// list, paging would race it for the same newest signatures. A list it posted empty is not the
+		// end: the network's newest page can hold none of the token's transactions, which are then all
+		// older, and only the pager reaches them.
+		if (!$solTransactionsInitialized) {
+			return false;
 		}
 
-		await loadNextSolTransactions({
+		const { success } = await loadOlderSolTokenTransactions({
 			identity: $authIdentity,
 			token,
-			before: lastSignature,
 			signalEnd: () => (disableInfiniteScroll = true)
 		});
+
+		return success;
 	};
 </script>
 

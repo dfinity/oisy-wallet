@@ -3,17 +3,11 @@ pub mod impls;
 use std::time::Duration;
 
 use candid::CandidType;
-use ic_cdk::bitcoin_canister::{MillisatoshiPerByte, Network as BitcoinNetwork, Utxo};
+use ic_cdk_bitcoin_canister::{MillisatoshiPerByte, Network as BitcoinNetwork, Utxo};
 use serde::Deserialize;
 
 use super::delegation::IIDelegationChain;
 use crate::types::signer::RateLimitError;
-
-/// The maximum length of a bitcoin address, expressed as a string.
-/// - The longest current formats seem to be `Bech32` and `Bech32m` which are up to 62 characters
-///   long.
-/// - Some obsolete formats seem to be at most 160 characters long.
-pub const MAX_ADDRESS_LEN: usize = 62;
 
 /// The maximum length of a single `txid`:
 ///
@@ -50,32 +44,8 @@ pub struct BtcGetFeePercentilesResponse {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub struct SelectedUtxosFeeRequest {
-    pub amount_satoshis: u64,
-    pub network: BitcoinNetwork,
-    pub min_confirmations: Option<u32>,
-    pub ii_delegation_chain: Option<IIDelegationChain>,
-}
-
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-#[serde(remote = "Self")]
-pub struct SelectedUtxosFeeResponse {
-    pub utxos: Vec<Utxo>,
-    pub fee_satoshis: u64,
-}
-
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum SelectedUtxosFeeError {
-    InternalError {
-        msg: String,
-    },
-    PendingTransactions,
-    /// The caller has exceeded the call rate limit.
-    RateLimited(RateLimitError),
-    /// The provided II delegation chain is missing or failed verification.
-    InvalidDelegationChain {
-        msg: String,
-    },
+pub enum BtcGetFeePercentilesError {
+    InternalError { msg: String },
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -106,9 +76,7 @@ pub enum BtcAddPendingTransactionError {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-#[serde(remote = "Self")]
 pub struct BtcGetPendingTransactionsRequest {
-    pub address: String,
     pub network: BitcoinNetwork,
     pub ii_delegation_chain: Option<IIDelegationChain>,
 }
@@ -133,7 +101,6 @@ pub struct BtcGetPendingTransactionsReponse {
     pub transactions: Vec<PendingTransaction>,
 }
 
-/// Errors that can occur when retrieving pending Bitcoin transactions.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum BtcGetPendingTransactionsError {
     InternalError {

@@ -12,7 +12,7 @@
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { AnyTransactionUi } from '$lib/types/transaction-ui';
-	import { getContactForAddress } from '$lib/utils/contact.utils';
+	import { getContactForAddress, mapAddressToContactAddressUi } from '$lib/utils/contact.utils';
 
 	interface Props {
 		type: 'send' | 'receive' | 'approve';
@@ -55,6 +55,13 @@
 			: undefined
 	);
 
+	// Saving goes through `mapAddressToContactAddressUi`, which only resolves addresses the backend
+	// `TokenAccountId` union can hold. Offering the action for anything else walks the user into a
+	// form that cannot be prefilled and can never validate.
+	let isSaveable: boolean = $derived(
+		nonNullish(address) && nonNullish(mapAddressToContactAddressUi(address))
+	);
+
 	let modalStoreData = $derived($modalStore?.data as OpenTransactionParams<AnyTransactionUi>);
 
 	const getOnComplete = (data: OpenTransactionParams<AnyTransactionUi>) => () =>
@@ -77,7 +84,7 @@
 				>
 				<span class="w-full truncate">{address}</span>
 
-				{#if isNullish(contact)}
+				{#if isNullish(contact) && isSaveable}
 					<Button
 						ariaLabel={$i18n.address.save.title}
 						link

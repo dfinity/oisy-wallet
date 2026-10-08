@@ -20,6 +20,10 @@ import {
 	loadDefaultIcrcTokens,
 	processCustomTokens as processIcrcCustomTokens
 } from '$icp/services/icrc.services';
+import {
+	loadDefaultIcrc7Tokens,
+	processCustomTokens as processIcrc7CustomTokens
+} from '$icp/services/icrc7.services';
 import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
 import * as appConstants from '$lib/constants/app.constants';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
@@ -98,6 +102,11 @@ vi.mock('$icp/services/icpunks.services', () => ({
 	processCustomTokens: vi.fn().mockResolvedValue(undefined)
 }));
 
+vi.mock('$icp/services/icrc7.services', () => ({
+	loadDefaultIcrc7Tokens: vi.fn().mockResolvedValue(undefined),
+	processCustomTokens: vi.fn().mockResolvedValue(undefined)
+}));
+
 vi.mock('$sol/services/spl.services', () => ({
 	loadDefaultSplTokens: vi.fn().mockResolvedValue(undefined),
 	processCustomTokens: vi.fn().mockResolvedValue(undefined)
@@ -147,6 +156,14 @@ describe('LoaderTokens', () => {
 
 			await waitFor(() => {
 				expect(loadDefaultIcPunksTokens).toHaveBeenCalled();
+			});
+		});
+
+		it('should always load Icrc7 default tokens', async () => {
+			render(LoaderTokens);
+
+			await waitFor(() => {
+				expect(loadDefaultIcrc7Tokens).toHaveBeenCalled();
 			});
 		});
 
@@ -220,13 +237,14 @@ describe('LoaderTokens', () => {
 			expect(uniqueIdentities.size).toBeLessThanOrEqual(2);
 		});
 
-		it('should always process ICRC, EXT, and ICPunks custom tokens', async () => {
+		it('should always process ICRC, EXT, ICPunks and Icrc7 custom tokens', async () => {
 			render(LoaderTokens);
 
 			await waitFor(() => {
 				expect(processIcrcCustomTokens).toHaveBeenCalled();
 				expect(processExtCustomTokens).toHaveBeenCalled();
 				expect(processIcPunksCustomTokens).toHaveBeenCalled();
+				expect(processIcrc7CustomTokens).toHaveBeenCalled();
 			});
 		});
 
@@ -258,6 +276,7 @@ describe('LoaderTokens', () => {
 				expect(processSplCustomTokens).toHaveBeenCalled();
 				expect(processExtCustomTokens).toHaveBeenCalled();
 				expect(processIcPunksCustomTokens).toHaveBeenCalled();
+				expect(processIcrc7CustomTokens).toHaveBeenCalled();
 			});
 		});
 
@@ -272,6 +291,7 @@ describe('LoaderTokens', () => {
 				expect(processIcrcCustomTokens).toHaveBeenCalled();
 				expect(processExtCustomTokens).toHaveBeenCalled();
 				expect(processIcPunksCustomTokens).toHaveBeenCalled();
+				expect(processIcrc7CustomTokens).toHaveBeenCalled();
 				expect(processErc20CustomTokens).toHaveBeenCalled();
 				expect(processSplCustomTokens).toHaveBeenCalled();
 			});

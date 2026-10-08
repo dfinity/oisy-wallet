@@ -3,12 +3,12 @@ import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+import { doesTokenMatchFilter } from '$lib/utils/tokens.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { SvelteMap } from 'svelte/reactivity';
 
 const getFilterCondition = ({ filter, token }: { filter: string; token: TokenUi }): boolean =>
-	token.name.toLowerCase().indexOf(filter.toLowerCase()) >= 0 ||
-	token.symbol.toLowerCase().indexOf(filter.toLowerCase()) >= 0;
+	doesTokenMatchFilter({ token, filter });
 
 export const getFilteredTokenList = ({
 	filter,

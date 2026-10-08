@@ -17,6 +17,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AddressBookModalParams } from '$lib/types/address-book';
 	import type { ContactUi } from '$lib/types/contact';
+	import { matchesContactByText } from '$lib/utils/contact.utils';
 
 	interface Props {
 		onCreateContact?: () => void;
@@ -35,7 +36,7 @@
 	);
 
 	let filteredContacts = $derived(
-		$contacts.filter((c) => c.name.toLowerCase().includes(inputValue.toLowerCase()))
+		$contacts.filter((contact) => matchesContactByText({ contact, query: inputValue }))
 	);
 </script>
 

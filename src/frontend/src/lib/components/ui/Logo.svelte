@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { isIOS } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import IconRandom from '$lib/components/icons/IconRandom.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
 	import type { LogoSize } from '$lib/types/components';
+	import { isIOS } from '$lib/utils/device.utils';
 
 	interface Props {
 		src?: string;

@@ -1,22 +1,26 @@
 <script lang="ts">
-	import { IconUser, Popover } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { TIPS_ENABLED } from '$env/tips.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
 	import LockOrSignOut from '$lib/components/core/LockOrSignOut.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
 	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
-	import MenuCurrencySelector from '$lib/components/currency/MenuCurrencySelector.svelte';
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
+	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
 	import IconPay from '$lib/components/icons/IconPay.svelte';
+	import IconUser from '$lib/components/icons/IconUser.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
+	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
+	import IconHeart from '$lib/components/icons/lucide/IconHeart.svelte';
 	import IconMaximize from '$lib/components/icons/lucide/IconMaximize.svelte';
 	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
 	import IconUsersRound from '$lib/components/icons/lucide/IconUsersRound.svelte';
@@ -25,39 +29,53 @@
 	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
 	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
 	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
+	import Badge from '$lib/components/ui/Badge.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import NotificationBlob from '$lib/components/ui/NotificationBlob.svelte';
+	import Popover from '$lib/components/ui/Popover.svelte';
 	import { USER_MENU_ROUTE } from '$lib/constants/analytics.constants';
 	import { OISY_SUPPORT_URL } from '$lib/constants/oisy.constants';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		NAVIGATION_MENU_BUTTON,
 		NAVIGATION_MENU,
 		NAVIGATION_MENU_VIP_BUTTON,
 		NAVIGATION_MENU_REFERRAL_BUTTON,
+		NAVIGATION_MENU_TIP_BADGE,
+		NAVIGATION_MENU_TIP_BUTTON,
+		NAVIGATION_MENU_TIP_COUNT,
 		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
 		NAVIGATION_MENU_GOLD_BUTTON,
 		NAVIGATION_MENU_SCANNER_BUTTON,
 		NAVIGATION_MENU_PAY_BUTTON,
 		NAVIGATION_MENU_PRIVACY_MODE_BUTTON,
+		NAVIGATION_MENU_SETTINGS_BUTTON,
 		NAVIGATION_MENU_SUPPORT_BUTTON,
 		NAVIGATION_MENU_DOC_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { BACKDROP_FADE_OUT_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity, authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { tipsOverview } from '$lib/derived/tips.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
 	import { getUserRoles } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		isRouteActivity,
 		isRouteRewards,
+		isRouteHelp,
 		isRouteDappExplorer,
-		isRouteSettings
+		isRouteSettings,
+		networkUrl
 	} from '$lib/utils/nav.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
+	import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 
 	interface Props {
 		visible?: boolean;
@@ -82,32 +100,82 @@
 		setPrivacyMode({ enabled: !$isPrivacyMode, withToast: false, source: 'User menu click' });
 	};
 
+	const goToSettings = async () => {
+		hidePopover();
+		// Wait for the popover's backdrop to finish fading out before navigating.
+		// Otherwise the blurred backdrop lingers over the freshly-rendered Settings
+		// page and reads as a flicker — unlike the other menu entries, which open a
+		// covering modal and never change the route.
+		await waitForMilliseconds(BACKDROP_FADE_OUT_DURATION);
+		await goto(
+			networkUrl({
+				path: AppPath.Settings,
+				networkId: $userSelectedNetworkStore,
+				usePreviousRoute: false,
+				fromRoute: null
+			})
+		);
+	};
+
 	const settingsRoute = $derived(isRouteSettings(page));
 	const dAppExplorerRoute = $derived(isRouteDappExplorer(page));
 	const activityRoute = $derived(isRouteActivity(page));
 	const rewardsRoute = $derived(isRouteRewards(page));
+	const helpRoute = $derived(isRouteHelp(page));
 	const addressesOption = $derived(
-		!settingsRoute && !dAppExplorerRoute && !activityRoute && !rewardsRoute
+		!settingsRoute && !dAppExplorerRoute && !activityRoute && !rewardsRoute && !helpRoute
 	);
 
 	const addressModalId = Symbol();
 	const referralModalId = Symbol();
+	const tipModalId = Symbol();
 	const universalScannerModalId = Symbol();
 	const payDialogModalId = Symbol();
 	const goldModalId = Symbol();
 	const vipModalId = Symbol();
+
+	// `ButtonMenu` renders its own `aria-label`, which replaces the button's
+	// contents as the accessible name — so the count badge inside it is announced
+	// nowhere unless it is said here too.
+	let tipMenuLabel = $derived(
+		$tipsOverview.failed > 0
+			? replacePlaceholders($i18n.navigation.alt.issue_tip_attention, {
+					$count: `${$tipsOverview.failed}`
+				})
+			: $i18n.navigation.alt.issue_tip
+	);
 </script>
 
+<!--
+	The mark is the only thing outside the menu that knows a tip needs attention, so
+	it is what makes the count inside worth opening the menu for. It costs nothing:
+	`tipsOverview` is derived from the tips the app already loaded once at sign-in,
+	with no polling and no extra call.
+
+	`NotificationBlob` rather than a dot of our own: it is the same marker the token
+	and transaction-filter menus already put on a toolbar icon, so a dot up here
+	means one consistent thing instead of one thing per feature. It carries no text,
+	because a bare dot read out on its own says something is wrong without saying
+	what — the count reaches a screen reader through the tip entry's own
+	`aria-label` once the menu is open.
+-->
 <ButtonIcon
 	ariaLabel={$i18n.navigation.alt.menu}
 	colorStyle="tertiary-alt"
+	expanded={visible}
 	link={false}
 	onclick={() => (visible = true)}
 	testId={NAVIGATION_MENU_BUTTON}
 	bind:button
 >
 	{#snippet icon()}
-		<IconUser size="24" />
+		<NotificationBlob
+			display={$tipsOverview.failed > 0}
+			position="top-right"
+			testId={NAVIGATION_MENU_TIP_BADGE}
+		>
+			<IconUser size="24" />
+		</NotificationBlob>
 	{/snippet}
 	{$i18n.navigation.alt.menu}
 </ButtonIcon>
@@ -120,6 +188,9 @@
 		role="none"
 	>
 		{#if $authNotSignedIn}
+			<div class="mb-2 text-center text-base font-semibold">
+				{$i18n.auth.text.sign_in_or_sign_up}
+			</div>
 			<span class="mb-2 text-center">
 				<ButtonAuthenticateWithHelp fullWidth helpAlignment="center" needHelpLink={false} />
 			</span>
@@ -214,6 +285,36 @@
 
 			<Hr />
 
+			{#if TIPS_ENABLED}
+				<ButtonMenu
+					ariaLabel={tipMenuLabel}
+					onclick={() => modalStore.openTip(tipModalId)}
+					testId={NAVIGATION_MENU_TIP_BUTTON}
+				>
+					<IconHeart size="20" />
+
+					<!--
+						The count, where the dot on the icon only said "something". Inside the
+						menu there is room to say how many.
+
+						It reaches a screen reader through the button's `aria-label`, not from
+						here: `ButtonMenu` sets an explicit label, which replaces everything
+						inside it as the accessible name. So this badge is decoration by
+						construction, and the count has to be in the label or it is announced
+						nowhere.
+					-->
+					<span class="flex flex-1 items-center justify-between gap-2">
+						{$i18n.navigation.text.issue_tip}
+
+						{#if $tipsOverview.failed > 0}
+							<Badge testId={NAVIGATION_MENU_TIP_COUNT} variant="warning" width="w-fit">
+								{$tipsOverview.failed}
+							</Badge>
+						{/if}
+					</span>
+				</ButtonMenu>
+			{/if}
+
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.refer_a_friend}
 				onclick={() => modalStore.openReferralCode(referralModalId)}
@@ -229,10 +330,20 @@
 				asMenuItemCondensed
 				href={OISY_SUPPORT_URL}
 				iconVisible={false}
+				styleClass="group"
 				testId={NAVIGATION_MENU_SUPPORT_BUTTON}
 			>
 				<IconHelpCircle />
-				{$i18n.navigation.text.support}
+
+				<span class="flex w-full items-center justify-between">
+					{$i18n.navigation.text.support}
+
+					<span
+						class="text-tertiary-inverted transition-colors duration-700 group-hover:text-brand-primary-alt"
+					>
+						<IconExternalLink size="16" />
+					</span>
+				</span>
 			</ExternalLink>
 
 			<Hr />
@@ -265,13 +376,22 @@
 		{/if}
 	</div>
 
-	<div class="flex max-w-80 flex-col gap-5 py-5">
-		<MenuLanguageSelector />
+	<div class="flex max-w-80 flex-col gap-1 pt-5 pb-1">
+		{#if $authNotSignedIn}
+			<MenuLanguageSelector />
+		{/if}
 
 		{#if $authSignedIn}
-			<MenuCurrencySelector />
-
 			<MenuThemeSelector />
+
+			<ButtonMenu
+				ariaLabel={$i18n.navigation.alt.settings}
+				onclick={goToSettings}
+				testId={NAVIGATION_MENU_SETTINGS_BUTTON}
+			>
+				<IconlySettings size="20" />
+				{$i18n.navigation.text.settings}
+			</ButtonMenu>
 		{/if}
 	</div>
 
@@ -285,7 +405,9 @@
 
 	<Hr />
 
-	<div class="mt-4 flex justify-center gap-2 text-xs text-nowrap text-tertiary">
+	<div
+		class="mt-4 flex max-w-80 flex-wrap justify-center gap-x-2 gap-y-1 text-xs text-nowrap text-tertiary"
+	>
 		<TermsOfUseLink />
 		<PrivacyPolicyLink />
 		<LicenseAgreementLink />

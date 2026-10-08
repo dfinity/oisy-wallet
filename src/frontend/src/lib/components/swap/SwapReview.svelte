@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { Checkbox, Html } from '@dfinity/gix-components';
-	import { isEmptyString, nonNullish } from '@dfinity/utils';
+	import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet, untrack } from 'svelte';
 	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
@@ -11,8 +10,10 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import {
@@ -99,20 +100,26 @@
 		nonNullish(valueDifference) && valueDifference <= SWAP_VALUE_DIFFERENCE_ERROR_VALUE
 	);
 
-	let isValueDifferenceConfirmed = $state(false);
+	let isMissingTokenPrice = $derived(
+		isNullish($sourceTokenExchangeRate) || isNullish($destinationTokenExchangeRate)
+	);
+
+	let isWarningConfirmationRequired = $derived(isValueDifferenceError || isMissingTokenPrice);
+
+	let isWarningConfirmed = $state(false);
 
 	const reset = () => {
-		isValueDifferenceConfirmed = false;
+		isWarningConfirmed = false;
 	};
 
 	$effect(() => {
-		[valueDifference, isValueDifferenceError];
+		[valueDifference, isValueDifferenceError, isMissingTokenPrice];
 
 		untrack(reset);
 	});
 
 	let swapButtonDisabled = $derived(
-		isSwapAmountsLoading || (isValueDifferenceError && !isValueDifferenceConfirmed)
+		isSwapAmountsLoading || (isWarningConfirmationRequired && !isWarningConfirmed)
 	);
 </script>
 
@@ -161,19 +168,23 @@
 		</div>
 	{/if}
 
-	{#if isValueDifferenceError}
+	{#if isWarningConfirmationRequired}
 		<div class="mt-4">
-			<MessageBox level="error">
+			<MessageBox level="error" styleClass="!mb-0">
 				{#snippet icon()}
 					<Checkbox
-						inputId="swap-review-value-difference-confirmation"
-						bind:checked={isValueDifferenceConfirmed}
-						on:nnsChange={() => (isValueDifferenceConfirmed = !isValueDifferenceConfirmed)}
+						checked={isWarningConfirmed}
+						inputId="swap-review-warning-confirmation"
+						onChange={() => (isWarningConfirmed = !isWarningConfirmed)}
 					/>
 				{/snippet}
 
-				<label class="align-top text-sm" for="swap-review-value-difference-confirmation">
-					{$i18n.swap.text.value_difference_error_confirmation}
+				<label class="block text-sm leading-snug" for="swap-review-warning-confirmation">
+					<Html
+						text={isValueDifferenceError
+							? $i18n.swap.text.value_difference_error_confirmation
+							: $i18n.swap.text.value_difference_missing_price_confirmation}
+					/>
 				</label>
 			</MessageBox>
 		</div>
@@ -181,7 +192,7 @@
 
 	{#if nonNullish($failedSwapError)}
 		<div class="mt-4">
-			<MessageBox level={$failedSwapError.variant}>
+			<MessageBox level={$failedSwapError.variant} styleClass="!mb-0">
 				{#if nonNullish($failedSwapError.errorType) && nonNullish($failedSwapError.url) && isEmptyString($failedSwapError?.message)}
 					<Html
 						text={$failedSwapError.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED

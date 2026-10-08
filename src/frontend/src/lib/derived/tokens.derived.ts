@@ -1,8 +1,11 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
+import { BNB_MAINNET_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
+import { POL_MAINNET_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
@@ -14,7 +17,8 @@ import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { extTokens } from '$icp/derived/ext.derived';
 import { icPunksTokens } from '$icp/derived/icpunks.derived';
-import { icrcChainFusionDefaultTokens, icrcTokens } from '$icp/derived/icrc.derived';
+import { icrcTokens } from '$icp/derived/icrc.derived';
+import { icrc7Tokens } from '$icp/derived/icrc7.derived';
 import { defaultIcpTokens } from '$icp/derived/tokens.derived';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIc } from '$icp/utils/icrc.utils';
@@ -28,6 +32,7 @@ import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import type { SplToken } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
+import { enabledXrpTokens } from '$xrp/derived/tokens.derived';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -37,19 +42,22 @@ export const nativeTokens: Readable<Token[]> = derivedMemo(
 		enabledBitcoinTokens,
 		enabledEthereumTokens,
 		enabledEvmTokens,
-		enabledSolanaTokens
+		enabledSolanaTokens,
+		enabledXrpTokens
 	],
 	([
 		$defaultIcpTokens,
 		$enabledBitcoinTokens,
 		$enabledEthereumTokens,
 		$enabledEvmTokens,
-		$enabledSolanaTokens
+		$enabledSolanaTokens,
+		$enabledXrpTokens
 	]) => [
 		...$defaultIcpTokens,
 		...$enabledBitcoinTokens,
 		...$enabledEthereumTokens,
 		...$enabledSolanaTokens,
+		...$enabledXrpTokens,
 		...$enabledEvmTokens
 	],
 	tokenListEqual
@@ -67,12 +75,13 @@ export const fungibleTokens: Readable<Token[]> = derivedMemo(
 );
 
 export const nonFungibleTokens: Readable<CustomToken<NonFungibleToken>[]> = derived(
-	[erc721Tokens, erc1155Tokens, extTokens, icPunksTokens],
-	([$erc721Tokens, $erc1155Tokens, $extTokens, $icPunksTokens]) => [
+	[erc721Tokens, erc1155Tokens, extTokens, icPunksTokens, icrc7Tokens],
+	([$erc721Tokens, $erc1155Tokens, $extTokens, $icPunksTokens, $icrc7Tokens]) => [
 		...$erc721Tokens,
 		...$erc1155Tokens,
 		...$extTokens,
-		...$icPunksTokens
+		...$icPunksTokens,
+		...$icrc7Tokens
 	]
 );
 
@@ -83,16 +92,31 @@ export const tokens: Readable<Token[]> = derivedMemo(
 );
 
 export const tokensToPin: Readable<TokenToPin[]> = derived(
-	[icrcChainFusionDefaultTokens, enabledEvmTokens],
-	([$icrcChainFusionDefaultTokens, $enabledEvmTokens]) => [
-		BTC_MAINNET_TOKEN,
-		ETHEREUM_TOKEN,
-		ICP_TOKEN,
-		TESTICP_TOKEN,
-		SOLANA_TOKEN,
-		...$icrcChainFusionDefaultTokens,
-		...$enabledEvmTokens
-	]
+	[enabledEvmTokens],
+	([$enabledEvmTokens]) => {
+		// Native EVM tokens (e.g. BNB, POL) also appear inside `$enabledEvmTokens`.
+		// Dedupe by id so the explicit pin order above wins over the later occurrence,
+		// which would otherwise overwrite the pin index in the comparator's Map.
+		const result: TokenToPin[] = [];
+		const seen = new Set<TokenToPin['id']>();
+		for (const token of [
+			BTC_MAINNET_TOKEN,
+			ETHEREUM_TOKEN,
+			ICP_TOKEN,
+			TESTICP_TOKEN,
+			BNB_MAINNET_TOKEN,
+			POL_MAINNET_TOKEN,
+			SOLANA_TOKEN,
+			XRP_TOKEN,
+			...$enabledEvmTokens
+		]) {
+			if (!seen.has(token.id)) {
+				seen.add(token.id);
+				result.push(token);
+			}
+		}
+		return result;
+	}
 );
 
 /**

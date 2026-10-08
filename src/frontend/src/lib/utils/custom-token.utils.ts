@@ -6,6 +6,8 @@ import type {
 	ExtV2Token,
 	// The backend declarations are not exporting IcPunksToken because it is structurally identical to ExtV2Token
 	ExtV2Token as IcPunksToken,
+	// The backend declarations are not exporting Icrc7Token because it is structurally identical to ExtV2Token
+	ExtV2Token as Icrc7Token,
 	IcrcToken,
 	SplToken,
 	Token
@@ -17,11 +19,12 @@ import type {
 	ErcSaveCustomToken,
 	ExtSaveCustomToken,
 	IcPunksSaveCustomToken,
+	Icrc7SaveCustomToken,
 	IcrcSaveCustomToken,
 	SaveCustomTokenWithKey,
 	SplSaveCustomToken
 } from '$lib/types/custom-token';
-import type { TokenId, TokenMetadata } from '$lib/types/token';
+import type { TokenId, TokenStandardCode } from '$lib/types/token';
 import { mapCustomTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import type { SolanaChainId } from '$sol/types/network';
@@ -51,6 +54,10 @@ const toIcPunksCustomToken = ({ canisterId }: IcPunksSaveCustomToken): IcPunksTo
 	canister_id: Principal.fromText(canisterId)
 });
 
+const toIcrc7CustomToken = ({ canisterId }: Icrc7SaveCustomToken): Icrc7Token => ({
+	canister_id: Principal.fromText(canisterId)
+});
+
 const toErcCustomToken = ({
 	address: token_address,
 	chainId: chain_id
@@ -74,6 +81,7 @@ export const toCustomToken = ({
 	version,
 	section,
 	allowExternalContentSource,
+	allowedExternalContentSourceUrls,
 	...rest
 }: SaveCustomTokenWithKey): CustomToken => {
 	const toCustomTokenMap = (): Token => {
@@ -93,6 +101,10 @@ export const toCustomToken = ({
 
 		if (networkKey === 'IcPunks') {
 			return { IcPunks: toIcPunksCustomToken(rest) };
+		}
+
+		if (networkKey === 'Icrc7') {
+			return { Icrc7: toIcrc7CustomToken(rest) };
 		}
 
 		if (networkKey === 'Erc20') {
@@ -127,19 +139,40 @@ export const toCustomToken = ({
 		version: toNullable(version),
 		token: toCustomTokenMap(),
 		section: toNullable(nonNullish(section) ? mapCustomTokenSection(section) : undefined),
-		allow_external_content_source: toNullable(allowExternalContentSource)
+		allow_external_content_source: toNullable(allowExternalContentSource),
+		allowed_external_content_source_urls: toNullable(allowedExternalContentSourceUrls)
 	};
 };
 
+// Interned: `parseTokenId` mints a new Symbol per call, which would churn ids on every reload.
+const customTokenIdCache = new Map<string, TokenId>();
+
 export const parseCustomTokenId = ({
 	identifier,
-	chainId
+	chainId,
+	standard
 }:
 	| {
-			identifier: ContractAddress['address'] | TokenMetadata['symbol'];
+			identifier: ContractAddress['address'];
 			chainId: EthereumChainId;
+			standard: TokenStandardCode;
 	  }
 	| {
-			identifier: SplTokenAddress | TokenMetadata['symbol'];
+			identifier: SplTokenAddress;
 			chainId: SolanaChainId['chainId'];
-	  }): TokenId => parseTokenId(`custom-token#${identifier}#${chainId}`);
+			standard: TokenStandardCode;
+	  }): TokenId => {
+	// The standard splits entries sharing an address, e.g. an ERC-721 and an ERC-1155 collection.
+	const key = `custom-token#${standard}#${identifier}#${chainId}`;
+
+	const cachedId = customTokenIdCache.get(key);
+	if (nonNullish(cachedId)) {
+		return cachedId;
+	}
+
+	// The description omits the standard: it feeds the persisted Activity token-filter key.
+	const tokenId = parseTokenId(`custom-token#${identifier}#${chainId}`);
+	customTokenIdCache.set(key, tokenId);
+
+	return tokenId;
+};

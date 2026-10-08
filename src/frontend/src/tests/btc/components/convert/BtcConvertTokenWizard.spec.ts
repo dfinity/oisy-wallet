@@ -1,5 +1,6 @@
 import BtcConvertTokenWizard from '$btc/components/convert/BtcConvertTokenWizard.svelte';
 import * as btcPendingSentTransactionsServices from '$btc/services/btc-pending-sent-transactions.services';
+import * as btcSendServices from '$btc/services/btc-send.services';
 import * as btcUtxosService from '$btc/services/btc-utxos.service';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
@@ -122,6 +123,7 @@ describe('BtcConvertTokenWizard', () => {
 
 		vi.spyOn(btcUtxosService, 'prepareBtcSend').mockResolvedValue({
 			feeSatoshis: mockUtxosFee.feeSatoshis,
+			feeRateMiliSatoshisPerVByte: mockUtxosFee.feeRateMiliSatoshisPerVByte,
 			utxos: mockUtxosFee.utxos
 		});
 		vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
@@ -131,6 +133,7 @@ describe('BtcConvertTokenWizard', () => {
 			next_page: []
 		});
 		vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1000n);
+		vi.spyOn(btcSendServices, 'validateBtcSend').mockResolvedValue(undefined);
 	});
 
 	it('should call sendBtc if all requirements are met', async () => {

@@ -8,6 +8,7 @@ import { AMDON_TOKEN } from '$env/tokens/tokens-erc20/tokens.amdon.env';
 import { ARB_TOKEN } from '$env/tokens/tokens-erc20/tokens.arb.env';
 import { ARMON_TOKEN } from '$env/tokens/tokens-erc20/tokens.armon.env';
 import { BABAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.babaon.env';
+import { BAT_TOKEN } from '$env/tokens/tokens-erc20/tokens.bat.env';
 import { BIDUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.biduon.env';
 import { BOB_TOKEN } from '$env/tokens/tokens-erc20/tokens.bob.env';
 import { CBBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.cbbtc.env';
@@ -37,6 +38,7 @@ import { SHIB_TOKEN } from '$env/tokens/tokens-erc20/tokens.shib.env';
 import { SLVON_TOKEN } from '$env/tokens/tokens-erc20/tokens.slvon.env';
 import { SPX_TOKEN } from '$env/tokens/tokens-erc20/tokens.spx.env';
 import { UNI_TOKEN } from '$env/tokens/tokens-erc20/tokens.uni.env';
+import { USD1_TOKEN } from '$env/tokens/tokens-erc20/tokens.usd1.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { WBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.wbtc.env';
@@ -46,7 +48,14 @@ import { WSTETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.wsteth.env';
 import { XAUT_TOKEN } from '$env/tokens/tokens-erc20/tokens.xaut.env';
 import { ZCHF_TOKEN } from '$env/tokens/tokens-erc20/tokens.zchf.env';
 import { ICP_TOKEN as ICP_ARBITRUM_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.icp.env';
+import { USDC_TOKEN as USDC_ARBITRUM_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN as USDT_ARBITRUM_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdt.env';
 import { ICP_TOKEN as ICP_BASE_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.icp.env';
+import { USDC_TOKEN as USDC_BASE_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
+import { USDC_TOKEN as USDC_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdc.env';
+import { USDT_TOKEN as USDT_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdt.env';
+import { USDC_TOKEN as USDC_POLYGON_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN as USDT_POLYGON_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdt.env';
 import type {
 	Erc20Contract,
 	RequiredAdditionalErc20Token,
@@ -101,6 +110,7 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	RNDR_TOKEN,
 	SLVON_TOKEN,
 	SPX_TOKEN,
+	USD1_TOKEN,
 	WEETH_TOKEN,
 	WETH_TOKEN,
 	ZCHF_TOKEN
@@ -123,6 +133,7 @@ export const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [
 	USDC_TOKEN,
 	LINK_TOKEN,
 	PEPE_TOKEN,
+	BAT_TOKEN,
 	OCT_TOKEN,
 	SHIB_TOKEN,
 	WBTC_TOKEN,
@@ -147,5 +158,12 @@ export const ERC20_SUGGESTED_TOKENS = [
 	USDC_TOKEN,
 	ICP_TOKEN,
 	ICP_ARBITRUM_TOKEN,
-	ICP_BASE_TOKEN
+	ICP_BASE_TOKEN,
+	USDC_ARBITRUM_TOKEN,
+	USDT_ARBITRUM_TOKEN,
+	USDC_BASE_TOKEN,
+	USDC_BSC_TOKEN,
+	USDT_BSC_TOKEN,
+	USDC_POLYGON_TOKEN,
+	USDT_POLYGON_TOKEN
 ];

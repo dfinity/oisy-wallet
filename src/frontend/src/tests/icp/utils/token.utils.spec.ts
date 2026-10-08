@@ -6,8 +6,11 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { getTokenFee } from '$icp/utils/token.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { mockValidExtV2Token } from '$tests/mocks/ext-tokens.mock';
 import { mockValidDip20Token, mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
+import { mockValidIcrc7Token } from '$tests/mocks/icrc7-tokens.mock';
 
 describe('token.utils', () => {
 	describe('getTokenFee', () => {
@@ -23,8 +26,13 @@ describe('token.utils', () => {
 			expect(getTokenFee(mockValidDip20Token)).toBe(mockValidDip20Token.fee);
 		});
 
-		it('should return zero for EXT tokens', () => {
-			expect(getTokenFee(mockValidExtV2Token)).toBe(ZERO);
+		it.each([
+			{ label: 'EXT', token: mockValidExtV2Token },
+			{ label: 'DIP-721', token: mockValidDip721Token },
+			{ label: 'IcPunks', token: mockValidIcPunksToken },
+			{ label: 'ICRC-7', token: mockValidIcrc7Token }
+		])('should return zero for IC NFT collections ($label)', ({ token }) => {
+			expect(getTokenFee(token)).toBe(ZERO);
 		});
 
 		it('should return undefined for other token standards', () => {

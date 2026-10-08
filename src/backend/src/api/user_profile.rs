@@ -8,23 +8,21 @@ use shared::types::{
     network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
     notification::{AddDismissedNotificationError, AddDismissedNotificationRequest},
     result_types::{
-        AddUserDismissedNotificationResult, AddUserHiddenDappIdResult, GetAgreementHistoryResult,
-        GetUserProfileResult, SetUserShowTestnetsResult, UpdateExperimentalFeaturesSettingsResult,
-        UpdateProviderAgreementsResult, UpdateTransactionFilterSettingsResult,
-        UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
+        AddUserDismissedNotificationResult, AddUserHiddenDappIdResult, CreateUserProfileResult,
+        GetAgreementHistoryResult, GetUserProfileResult, SetUserShowTestnetsResult,
+        UpdateExperimentalFeaturesSettingsResult, UpdateProviderAgreementsResult,
+        UpdateTransactionFilterSettingsResult, UpdateUserAgreementsResult,
+        UpdateUserNetworkSettingsResult,
     },
     transaction_settings::UpdateTransactionFilterSettingsRequest,
-    user_profile::{HasUserProfileResponse, UserProfile},
+    user_profile::{CreateUserProfileError, HasUserProfileResponse, UserProfile},
 };
 
 use crate::{
     state::{self, mutate_state, read_state},
     types::StoredPrincipal,
     user_profile::{model::UserProfileModel, service},
-    utils::{
-        guards::{caller_is_not_anonymous, caller_is_registered_user},
-        housekeeping::spawn_allow_signing_if_below_limit,
-    },
+    utils::guards::{caller_is_controller, caller_is_not_anonymous, caller_is_registered_user},
 };
 
 /// Updates the user's preference to enable (or disable) networks in the interface, merging with any
@@ -311,10 +309,19 @@ pub fn update_user_transaction_filter_settings(
 
 /// It creates a new user profile for the caller.
 /// If the user has already a profile, it will return that profile.
+///
+/// # Errors
+/// - Returns `Err(SignupsClosed)` when sign-ups of new users are disabled on the backend and the
+///   caller does not already have a profile. Existing users are unaffected and still receive
+///   `Ok(profile)` for idempotent calls.
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
-pub fn create_user_profile() -> UserProfile {
+pub fn create_user_profile() -> CreateUserProfileResult {
     let stored_principal = StoredPrincipal(msg_caller());
+
+    if !state::read_new_user_signups_allowed() && !service::has_user_profile(stored_principal) {
+        return Err(CreateUserProfileError::SignupsClosed).into();
+    }
 
     let user_profile: UserProfile = mutate_state(|s| {
         let mut user_profile_model =
@@ -324,13 +331,7 @@ pub fn create_user_profile() -> UserProfile {
         UserProfile::from(&stored_user)
     });
 
-    // TODO convert create_user_profile(..) to an asynchronous function and remove spawning the
-    // async task. Upon initial user login, we ensure allow_signing is called to handle cases
-    // where users lack the cycles required for signer operations. create_user_profile(..) must
-    // be invoked before any signer-related calls (e.g., get_eth_address).
-    spawn_allow_signing_if_below_limit(stored_principal);
-
-    user_profile
+    Ok::<UserProfile, CreateUserProfileError>(user_profile).into()
 }
 
 /// Returns whether sign-ups of new users are currently allowed.
@@ -341,6 +342,16 @@ pub fn create_user_profile() -> UserProfile {
 #[must_use]
 pub fn new_user_signups_allowed() -> bool {
     state::read_new_user_signups_allowed()
+}
+
+/// Toggles whether sign-ups of new users are allowed. Restricted to canister controllers.
+///
+/// When disabled, `create_user_profile` rejects callers that do not already have a profile with
+/// `CreateUserProfileError::SignupsClosed`. Existing users are unaffected. All other `Config`
+/// fields are preserved.
+#[update(guard = "caller_is_controller")]
+pub fn set_new_user_signups_allowed(allowed: bool) {
+    state::set_new_user_signups_allowed(allowed);
 }
 
 /// Returns the caller's user profile.

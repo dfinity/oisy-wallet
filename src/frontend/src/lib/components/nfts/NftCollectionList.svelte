@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
 	import NftCollectionCard from '$lib/components/nfts/NftCollectionCard.svelte';
@@ -9,7 +9,7 @@
 	import type { NftCollectionUi } from '$lib/types/nft';
 
 	interface Props {
-		title: string;
+		title?: string;
 		section?: CustomTokenSection;
 		icon?: Snippet;
 		nftCollections: NftCollectionUi[];
@@ -23,10 +23,12 @@
 
 <div data-tid={testId}>
 	{#if notEmptyCollections.length > 0 || isNullish(section)}
-		<div class="mt-2 flex items-center gap-2">
-			{@render icon?.()}
-			<h5>{title}</h5>
-		</div>
+		{#if nonNullish(title)}
+			<div class="mt-2 flex items-center gap-2">
+				{@render icon?.()}
+				<h5>{title}</h5>
+			</div>
+		{/if}
 
 		{#if $selectedNetworkNftUnsupported}
 			<NftsNetworkUnsupported hideDescription />

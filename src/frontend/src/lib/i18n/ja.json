@@ -1,4 +1,39 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "借りるへようこそ！",
+			"header_description": "売却せずに流動性を得られます。BTCやICPなどを担保にステーブルコインを借り入れましょう。",
+			"borrowing_options": "借入オプション",
+			"borrowing_potential": "借入可能額",
+			"borrowing_power_hint": "資産を担保として提供した場合に、最良の金利でどれくらい借り入れできるかの見積もりです。",
+			"available_best_provider": "利用可能 · 最良プロバイダー",
+			"remaining_best_provider": "残り · 最良プロバイダー",
+			"active_loans": "アクティブな借入",
+			"no_active_loans": "アクティブな借入はありません",
+			"amount_borrowed": "",
+			"apr": "APR",
+			"borrow_apr_from": "借入APR"
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
+		}
+	},
+	"borrowings": {
+		"text": {
+			"tab_title": "借入",
+			"tab_title_short": "借入",
+			"no_borrowings": "",
+			"go_to_borrow": ""
+		}
+	},
 	"core": {
 		"text": {
 			"cancel": "キャンセル",
@@ -7,6 +42,8 @@
 			"back": "戻る",
 			"done": "完了",
 			"close": "閉じる",
+			"collapse": "折りたたむ",
+			"expand": "展開",
 			"change": "変更",
 			"continue": "続行",
 			"apply": "適用",
@@ -29,6 +66,7 @@
 			"not_available": "該当なし",
 			"new": "New",
 			"edit": "編集",
+			"download": "ダウンロード",
 			"no_results": "一致する結果はありません。",
 			"paste": "貼り付け",
 			"to": "宛先",
@@ -46,7 +84,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_shortはあなたを守ります！"
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",
@@ -71,17 +110,31 @@
 			"video_not_supported": "ブラウザがビデオ再生をサポートしていません。"
 		}
 	},
+	"progress": {
+		"completed": "完了",
+		"in_progress": "進行中",
+		"failed": "失敗"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "資産",
+			"nfts": "コレクティブル",
 			"settings": "設定",
 			"dapp_explorer": "DAppを探す",
 			"activity": "履歴",
+			"trade": "取引する",
+			"borrow": "借りる",
+			"section_portfolio": "ポートフォリオ",
+			"section_finance": "金融",
+			"section_more": "その他",
 			"airdrops": "エアドロップ",
 			"earning": "収益",
 			"pay": "",
 			"wallet_connect": "",
 			"source_code_on_github": "GitHub上のソースコード",
+			"x": "",
+			"help": "ヘルプ",
+			"faq": "",
 			"view_on_explorer": "エクスプローラーで確認",
 			"source_code": "ソースコード",
 			"documentation": "ドキュメント",
@@ -94,26 +147,38 @@
 			"hide_balances": "残高を非表示",
 			"show_balances": "残高を表示",
 			"privacy_mode_enabled": "プライバシーモードが有効です。[P]キーを押して残高を再表示します。",
-			"privacy_mode_disabled": "プライバシーモードが無効です。[P]キーを押して残高を非表示にします。"
+			"privacy_mode_disabled": "プライバシーモードが無効です。[P]キーを押して残高を非表示にします。",
+			"notes": "メモ",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "資産一覧に移動",
+			"nfts": "コレクティブルビューを開く",
 			"settings": "設定を表示",
 			"dapp_explorer": "Dapp一覧を表示",
 			"activity": "トランザクション履歴を表示",
+			"trade": "取引画面を表示",
+			"borrow": "借入画面を表示",
+			"earning": "収益画面を表示",
 			"airdrops": "エアドロップ報酬を表示",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "ウォレットアドレス、設定、サインアウト、外部リンク",
 			"documentation": "$oisy_nameドキュメントを開く",
 			"support": "$oisy_nameドキュメントのサポートページを開く",
+			"help_page": "ヘルプページを開く",
 			"open_twitter": "DFINITY X/Twitterを開く",
+			"more": "",
+			"faq": "",
 			"vip_qr_code": "招待リンクを生成",
 			"binance_qr_code": "バイナンスクラブハウスリンクを生成",
 			"refer_a_friend": "友達の紹介リンクを生成",
 			"address_book": "アドレス帳を開く",
 			"hide_balances": "表示中の残高を非表示にする",
-			"show_balances": "非表示の残高を表示する"
+			"show_balances": "非表示の残高を表示する",
+			"notes": "メモを開く",
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "ドキュメント"
@@ -123,14 +188,15 @@
 		"text": {
 			"title_part_1": "あなたのデジタル資産を",
 			"title_part_2": "プライベートで、安全に。",
+			"description": "ウォレットを開くか、数秒で作成できます",
 			"logout": "ログアウト",
 			"lock": "ロック",
 			"authenticate": "ログイン/新規作成",
+			"sign_in_or_sign_up": "ログインまたは新規登録",
 			"internet_identity": "",
-			"asset_types": "BTC / SOL / ETH / ICP など幅広い資産を一元管理",
-			"instant_and_private": "AIアシスタント搭載 ― プライバシーを標準装備",
-			"advanced_cryptography": "先端暗号技術で保護 ― 全てを100％オンチェーンで",
-			"social_login": "即時かつプライベートなアクセス + ソーシャルログイン"
+			"asset_types": "暗号資産、株式、コモディティ、コレクティブル、暗号化されたノート。",
+			"advanced_cryptography": "プライベートで改ざん不可。必要なときは非表示に。",
+			"move_swap_grow": "AIアシスタント搭載で、稼ぐ・借りる・取引する。"
 		},
 		"alt": {
 			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー",
@@ -140,6 +206,12 @@
 		},
 		"message": {
 			"session_locked": "別のタブで操作が行われたため、このセッションはロックされました。"
+		},
+		"info": {
+			"signups_closed": "現在、新規登録は制限されています。後でもう一度お試しください。"
+		},
+		"banner": {
+			"signups_closed": "現在、新規ユーザーの登録はできません。既存のユーザーは引き続き $oisy_short を通常どおりご利用いただけます。"
 		},
 		"warning": {
 			"not_signed_in": "サインインしていません。続行するにはサインインしてください。",
@@ -211,17 +283,17 @@
 			"website": "$dAppNameの画像"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
+			"aa_new": "最近追加",
+			"ab_icp": "ICP",
 			"ai": "AI",
-			"defi": "DeFi",
+			"dex": "DEX",
 			"game": "ゲーム",
-			"nft": "NFT",
-			"rwa": "",
-			"social_media": "ソーシャルメディア",
+			"lending": "レンディング",
+			"nft": "コレクティブル",
+			"rwa": "RWA",
+			"social": "ソーシャル",
 			"staking": "ステーキング",
-			"tools": "ツール",
-			"walletconnect": "WalletConnect"
+			"tools": "ツール"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -244,17 +316,6 @@
 					"call_to_action": "もっと見る"
 				}
 			},
-			"decideid": {
-				"name": "DecideID",
-				"one_liner": "信頼できるデジタルエンゲージメントのためのユニークな本人確認",
-				"call_to_action": "DecideIDを開く",
-				"stats": "50,000以上の推論リクエスト",
-				"description": "Decide IDは、Decide AIシステムの中核にあり、独自のProof of Personhood（PoP）方法論を通じて信頼とセキュリティを確保します。参加すると、複数の証明を提供し、本人確認のための特別なチャレンジを完了する検証プロセスを経ます。これにより、すべてのユーザーが本物で、ユニークで、ボットではないことが保証されます。このプロセス中に、ユニークなオンチェーン識別子であるプリンシパルIDが作成されます。これは、検証済みの人格を必要とするさまざまなアプリケーションで使用でき、あらゆるアプリのサインアップまたはログインプロセスへの安全でシームレスな統合を保証します。さらに、ゼロ知識証明の使用により、生体情報などの個人データは機密性が保たれ、安全です。<br/><br/>Decide IDで、柔軟で安全、かつプライバシーを第一に考えたオンラインでの本人確認とエンゲージメントをお楽しみください。",
-				"carousel": {
-					"text": "プライバシーを第一に考えたオンラインでの本人確認とエンゲージメントをお楽しみください。",
-					"call_to_action": "興味がありますか？"
-				}
-			},
 			"icpswap": {
 				"name": "ICPSwap",
 				"one_liner": "ICPSwapは、ICP上のフルスタックの金融およびDAOサービスの最高のハブである、完全にオンチェーンで構築されたAMM DEXです。",
@@ -262,10 +323,10 @@
 				"description": "未来の分散型金融のハブ！<br/>取引所をハブとして再発明し、ICPSwapはInternet Computer上でフルスタックの金融、市場、DAOサービスを提供します。DFINITYのInternet Computerの基盤技術に基づき、ICPSwapはユーザーと開発者が共同でプロジェクトを構築する方法を再構築することにより、真に分散化された金融のエコシステムを確立します。"
 			},
 			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "NNSフロントエンドdappは、誰でも使いやすいUIでInternet Computerのネットワークナーバスシステムと対話できるようにします。",
-				"call_to_action": "参加する",
-				"description": "NNSフロントエンドdappは、誰でも使いやすいUIでInternet Computerのネットワークナーバスシステムと対話できるようにします。ブロックチェーンを介して完全にエンドツーエンドで提供されるこの分散型dappを使用すると、次のアクションを簡単に実行できます：<br/><ul><li>トークン（ICP, ckBTC, CHATなど）の送受信</li><li>ニューロンのステーキングと管理</li><li>Internet ComputerとSNSのガバナンスへの投票</li><li>分散化スワップへの参加</li><li>キャニスターの作成と補充</li><li>ガバナンス報酬の獲得</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Internet Computerのガバナンスプラットフォームで、ユーザーがステーキング、投票、ネットワーク活動の追跡を行えます。",
+				"call_to_action": "ICPガバナンスに参加する",
+				"description": "NNSアプリケーションはInternet Computer（ICP）のガバナンスプラットフォームで、ユーザーはトークンのステーキング、投票への参加、ネットワーク活動の追跡が可能です。<br/><br/>ユーザーのアクションやガバナンス活動の可視性を高め、ステーキング・投票・参加がエコシステム全体にどのように貢献するかを理解しやすくします。"
 			},
 			"uniswap": {
 				"name": "Uniswap",
@@ -302,16 +363,6 @@
 				"one_liner": "EthereumおよびEVM互換チェーン上の主要なDEX、ステーブルコインプロバイダー、およびレンディングプラットフォーム",
 				"call_to_action": "ワープしよう",
 				"description": "Curve financeは、EthereumおよびEVM互換チェーン上の主要な分散型取引所、ステーブルコインプロバイダー、およびレンディングプラットフォームです。ステーブルコインおよび変動資産向けの高度な自動マーケットメーカー、およびローン向けのユニークなソフト清算システムで知られています。"
-			},
-			"sonic": {
-				"name": "Sonic",
-				"one_liner": "DeFiの可能性を最大限に引き出し、合理化された取引を実現します。トークンをスワップし、流動性プロバイダーとして収益を上げ、Bitfinity EVMの主要なAMMを活用してください。",
-				"call_to_action": "Sonicを開く",
-				"description": "Sonicは、Internet Computer Protocol（ICP）上に構築されたマルチチェーンの分散型取引所で、幅広いDeFiサービスを提供しています。ユーザーは簡単にトークンや無期限契約を取引し、流動性を提供し、LBPトークンセールに参加できます。ユーザーはDAOガバナンスに参加し、報酬のためにステーキングし、プラットフォームの決定に投票することができます。<br/><br/>完全にオンチェーンでオープンソース！プロのようにトークンをスワップし、流動性プロバイダーとして手数料を稼ぎ、AMMの雰囲気に参加し、Sonic DAOの不可欠な一部になりましょう。",
-				"carousel": {
-					"text": "Defiの可能性を最大限に引き出す",
-					"call_to_action": "Sonicを開く"
-				}
 			},
 			"raydium": {
 				"name": "Raydium",
@@ -359,17 +410,6 @@
 					"text": "こんにちは、自己記述型インターネット",
 					"call_to_action": "詳細を見る"
 				}
-			},
-			"beam": {
-				"name": "Beam",
-				"one_liner": "主権型L1ブロックチェーン - ゲーム、Web3、フロンティア技術の資金調達と加速を行う",
-				"call_to_action": "参加する",
-				"description": "Beam は、ゲーム、Web3、そして最先端のイノベーション領域における高インパクトな技術を資金面から支援し、加速させることを目的に設計された主権型 Layer 1 ブロックチェーンです。オンチェーンのトレジャリーおよび助成金エコシステムに支えられ、Beam は チームやインフラに直接投資します。またこのチェーンは、ネイティブツールと創業者との密な協業を通じて、スケーラブルな分散型アプリケーション（dApps）をサポートします。"
-			},
-			"axie_infinity": {
-				"name": "Axie Infinity",
-				"one_liner": "ポケモン風のブロックチェーンゲーム - Axiesを収集し、育成し、戦う",
-				"description": "Axie Infinity は、「Axie」と呼ばれる NFT クリーチャーを収集・繁殖・バトルさせる play-to-earn 型のブロックチェーンゲームです。Ronin サイドチェーン上に構築されており、プレイヤーは $AXS や $SLP トークンを獲得することで、所有と競争が循環する経済圏を形成します。Axie Infinity は P2E（Play-to-Earn）モデルの先駆けとなり、Web3 における初期の代表的なメインストリーム成功例の一つとなりました。"
 			},
 			"mobox": {
 				"name": "Mobox",
@@ -421,11 +461,6 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"sphere_finance": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"binaryx": {
 				"name": "",
 				"one_liner": "",
@@ -439,11 +474,7 @@
 			"liquidium": {
 				"name": "",
 				"one_liner": "",
-				"description": "",
-				"carousel": {
-					"text": "",
-					"call_to_action": ""
-				}
+				"description": ""
 			},
 			"icpindex": {
 				"name": "",
@@ -468,6 +499,20 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
+				"description": ""
+			},
+			"cloud_engines": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"hyperliquid": {
+				"name": "",
+				"one_liner": "",
 				"description": ""
 			}
 		}
@@ -726,12 +771,14 @@
 			"icrc_custom_token": "ICRCカスタムトークンの読み込み中にエラーが発生しました。",
 			"ext_custom_tokens": "EXTカスタムトークンの読み込み中にエラーが発生しました。",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "ウォレットにはまだロードされていない初期データが必要です。もう一度お試しください。",
 			"allow_signing": "署名の準備中にエラーが発生しました。サインアウトされました。問題が解決しない場合は、サポートにお問い合わせください。",
 			"waiting_for_allowed_cycles_aborted": "Cyclesレジャーの準備を中止しました。後でログインしてください。",
 			"btc_wallet_error": "BTCウォレット情報の読み込み中にエラーが発生しました。",
-			"sol_wallet_error": "SOLウォレット情報の読み込み中にエラーが発生しました。"
+			"sol_wallet_error": "SOLウォレット情報の読み込み中にエラーが発生しました。",
+			"xrp_wallet_error": "XRPウォレット情報の読み込み中にエラーが発生しました。"
 		}
 	},
 	"hero": {
@@ -747,10 +794,65 @@
 			"toggle_privacy_mode": "プライバシーモードのオン/オフを切り替える"
 		}
 	},
+	"help": {
+		"text": {
+			"title": "ヘルプ",
+			"support_title": "サポート",
+			"support_description": "$oisy_name ドキュメントのサポートページで回答や詳しい情報をご確認いただけます。解決しない場合はチームまでご連絡ください。",
+			"support_link": "サポートページへ",
+			"network_explorers_title": "",
+			"network_explorers_description": "",
+			"explorers_title": "",
+			"explorers_description": "",
+			"explorers_velora_description": "",
+			"explorers_near_intents_description": "",
+			"explorers_onesec_description": "",
+			"explorers_chain_eth": "",
+			"explorers_chain_sol": "",
+			"explorers_chain_btc": "",
+			"explorers_chain_icp": "",
+			"icpswap_title": "ICPSwap のトークン出金",
+			"icpswap_description": "ICPSwap でのスワップでは、トークンは一度プールに移されてから返却されます。この最後のステップが失敗した場合、トークンは引き続きお客様のもので、プールに残っています。$oisy_name がそれを探して返却できます。",
+			"scan": "プールを確認",
+			"scanning": "プールを確認しています…",
+			"scan_hint": "ウォレットで有効な 2 つのトークンの組み合わせすべてのプールを確認します。有効にしていないトークンへスワップした場合は、先にそのトークンを有効にしてから、もう一度確認するか、下でペアを指定してください。",
+			"scan_nothing_found": "確認した $pools 件のプールに残高は残っていません。",
+			"scan_unreadable": "$pools 件のうち $unreadable 件のプールを読み取れませんでした。もう一度お試しか、下でペアを指定してください。",
+			"or_pick_a_pair": "またはペアを指定",
+			"token_first": "1 つ目のトークン",
+			"token_second": "2 つ目のトークン",
+			"select_token": "選択",
+			"no_tokens": "選択できるのは ICP のみです。先にプールの不足しているトークンを有効にしてください。プールに ICP が含まれない場合は、両方のトークンを有効にしてください。",
+			"checking_pool": "プールを確認しています…",
+			"nothing_to_withdraw": "このプールに出金できる残高はありません。",
+			"results_found": "出金可能な残高: $balances 件。",
+			"balance_unused": "未使用の残高",
+			"withdraw": "出金"
+		},
+		"alt": {
+			"network_explorer_link": "",
+			"explorer_link": "",
+			"select_token_first": "プールの 1 つ目のトークンを選択",
+			"select_token_second": "プールの 2 つ目のトークンを選択",
+			"withdraw": "プールから $symbol を出金",
+			"scan": "有効なトークン間のプールを確認"
+		},
+		"error": {
+			"pool_not_found": "このペアのプールが見つかりませんでした。2 つのトークンをご確認いただくか、しばらくしてからもう一度お試しください。",
+			"load_failed": "このプールの残高を読み取れませんでした。",
+			"withdraw_failed": "出金に失敗しました。",
+			"scan_failed": "ICPSwap のプール一覧を取得できませんでした。"
+		},
+		"success": {
+			"withdraw": "プールから $amount $symbol を出金しました。",
+			"withdraw_hidden": "プールから $symbol を出金しました。"
+		}
+	},
 	"settings": {
 		"text": {
 			"title": "設定",
 			"general": "一般",
+			"preferences": "環境設定",
 			"principal": "あなたのPrincipal",
 			"principal_copied": "Principalがコピーされました。",
 			"principal_description": "$oisy_nameのあなたのIDです。Internet Identityによって作成されます。",
@@ -778,7 +880,15 @@
 			"enable_hide_micro_transactions": "非常に小さな価値のトランザクションの非表示を有効にする",
 			"disable_hide_micro_transactions": "非常に小さな価値のトランザクションの非表示を無効にする",
 			"save_spam_filter_success": "スパムフィルターの設定が更新されました。",
-			"learn_more": ""
+			"export_data": "データをエクスポート",
+			"export_data_description": "トークンと取引をCSVとしてダウンロード — 基本情報には Basic、追加項目には Extended をご利用ください。",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "トークンをエクスポート",
+			"export_transactions": "取引をエクスポート",
+			"export_tokens_success": "トークンCSVをダウンロードしました。",
+			"export_transactions_success": "取引CSVをダウンロードしました。",
+			"learn_more": "詳細を見る"
 		},
 		"alt": {
 			"testnets_toggle": "テストネットの表示/非表示を切り替え",
@@ -788,7 +898,9 @@
 			"appearance_system": "OSのテーマ設定に従う"
 		},
 		"error": {
-			"loading_profile": "プロフィールの読み込み中にエラーが発生しました。ページを更新してください。"
+			"loading_profile": "プロフィールの読み込み中にエラーが発生しました。ページを更新してください。",
+			"export_exchange_rate_unavailable": "為替レートを読み込み中です。しばらくしてから再度お試しください。",
+			"export_failed": "エクスポートを作成できませんでした。もう一度お試しください。"
 		}
 	},
 	"shortcuts": {
@@ -885,14 +997,24 @@
 				"solana_address_copied": "Solanaアドレスをコピーしました。",
 				"display_solana_address_qr": "SolanaアドレスをQRコードで表示"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {
 		"text": {
 			"send": "送信",
+			"xrp_sent": "XRP の送金が成立しました。",
+			"xrp_submitted": "送金を送信しました。通常は数秒で確定します。これを閉じて続けていただけます。",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "宛先",
-			"source": "送信元",
 			"balance": "残高",
 			"review": "確認",
 			"signing_approval": "承認の署名中...",
@@ -910,6 +1032,7 @@
 			"network": "ネットワーク",
 			"source_network": "送信元ネットワーク",
 			"destination_network": "宛先ネットワーク",
+			"xrp_destination_tag": "XRP 宛先タグ",
 			"initializing_transaction": "トランザクション初期化中",
 			"convert_to_native_icp": "ネイティブICPに変換",
 			"open_qr_modal": "トランザクション詳細のQRコードをスキャン開始",
@@ -924,24 +1047,31 @@
 			"contacts_empty_state_title": "あなたの連絡先がここに表示されます。",
 			"contacts_empty_state_description": "まだ連絡先を追加していないようです。",
 			"send_review_subtitle": "以下の内容を送信します。",
-			"no_nfts_found": "NFTが見つかりません。",
-			"no_nfts_found_desc": "NFTを見つけるには、検索条件またはネットワークを調整してください。",
-			"select_nft": "送信するNFTを選択"
+			"no_nfts_found": "コレクティブルが見つかりません。",
+			"no_nfts_found_desc": "コレクティブルを見つけるには、検索条件またはネットワークを調整してください。",
+			"select_nft": "送信するコレクティブルを選択"
 		},
 		"placeholder": {
 			"enter_eth_address": "パブリックアドレス (0x)、名前、またはエイリアスを入力",
 			"enter_recipient_address": "受取人のアドレス、名前、またはエイリアスを入力",
 			"enter_wallet_address": "ウォレットアドレス、名前、またはエイリアスを入力",
+			"xrp_destination_tag": "XRP 宛先タグを入力（任意）",
 			"select_network": "ネットワークを選択",
-			"search_nfts": "NFTを検索"
+			"search_nfts": "コレクティブルを検索"
 		},
 		"info": {
 			"ckbtc_certified": "ckBTCパラメーターが認証されるまでお待ちください。",
 			"cketh_certified": "ckETHパラメーターが認証されるまでお待ちください。",
 			"pending_bitcoin_transaction": "現在のBTCトランザクションが完了するまで、新たな送信はできません。",
 			"no_available_utxos": "このトランザクションを行うための利用可能なUTXOが不足しています。",
-			"unknown_destination": "このアドレスとやり取りは初めてです。送信先を確認してください。",
-			"fee_info": "手数料は$feeSymbolで支払われます。利用可能残高: <strong>$feeBalance $feeSymbol</strong>"
+			"first_time_destination": "このアドレスにトークンを送金したことはないようです。アドレスを慎重に確認してください。",
+			"first_time_destination_confirm": "このアドレスにトークンを送金するのは初めてで、アドレスを慎重に確認しました。",
+			"xrp_destination_tag_hint": "ほとんどの取引所で必須です。空欄のままにすると資金を失う可能性があります。",
+			"xrp_destination_tag_missing": "XRP 宛先タグがありません。取引所に送金する場合は、タグが必要かどうかを確認してください。確認しないと資金を失う可能性があります。",
+			"fee_expired": "",
+			"fee_info": "手数料は$feeSymbolで支払われます。利用可能残高: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "スキャンしたコードには宛先アドレスのみが含まれていました。正しいトークンを選択し、正しい数量を入力し、宛先アドレスを慎重に確認してください！",
+			"scanned_address_only_destination_single_token": "スキャンしたコードには宛先アドレスのみが含まれていました。正しい数量を入力し、宛先アドレスを慎重に確認してください！"
 		},
 		"assertion": {
 			"invalid_destination_address": "送信先アドレスが無効です",
@@ -956,7 +1086,9 @@
 			"unknown_cketh": "ckETHトークンは取得できません。",
 			"destination_address_invalid": "送信先アドレスが無効です。",
 			"amount_invalid": "金額が無効です。",
+			"xrp_destination_tag_invalid": "XRP 宛先タグは 0 から 4294967295 までの整数である必要があります。",
 			"insufficient_funds_verbose_btc": "",
+			"insufficient_funds_for_reserve": "残高が不足しています。手数料とXRPアカウントに必要な準備金を賄える分を残す金額にしてください。",
 			"insufficient_funds_for_gas": "ガス代に必要な残高が不足しています。",
 			"insufficient_funds_for_amount": "送金額に対して残高が不足しています。",
 			"insufficient_ethereum_funds_to_cover_the_fees": "手数料をカバーするEthereumの資金が不足しています。",
@@ -976,7 +1108,7 @@
 			"btc_utxo_locked": "保留中のトランザクションによりBitcoin資金がロックされています。",
 			"btc_invalid_fee_calculation": "Bitcoinトランザクション手数料の検証に失敗しました。",
 			"pending_transactions_not_available": "保留中のトランザクションサービスは現在利用できません。後でもう一度お試しください。",
-			"no_nft_selected": "送信するNFTが選択されていません。"
+			"no_nft_selected": "送信するコレクティブルが選択されていません。"
 		},
 		"error": {
 			"unexpected": "トランザクションの送信中にエラーが発生しました。",
@@ -991,22 +1123,38 @@
 			"incompatible_token": "トークンに互換性がありません。互換性のあるトークンで再度お試しください。",
 			"no_btc_network_id": "現在のネットワーク（$networkId）はBitcoinネットワークではありません。",
 			"no_solana_network_id": "現在のネットワーク（$networkId）はSolanaネットワークではありません。",
+			"no_xrp_network_id": "現在のネットワーク（$networkId）はXRP Ledgerネットワークではありません。",
 			"no_pending_bitcoin_transaction": "保留中のBitcoinトランザクションの読み込み中にエラーが発生しました。後ほど再度お試しください。",
 			"unexpected_utxos_fee": "トランザクション手数料の計算中にエラーが発生しました。",
 			"unable_to_retrieve_amount": "n/a（取得できません）",
+			"ethereum_insufficient_funds": "",
+			"ethereum_out_of_gas": "見積もりより多くのガスが必要だったため、送信に失敗しました。資金はウォレットに残っていますが、失敗したトランザクションに対してネットワーク手数料が請求された可能性があります。もう一度お試しください。",
+			"ethereum_out_of_gas_gas": "送信したガス: $gasSent · 必要なガス: $gasNeeded",
+			"ethereum_out_of_gas_gas_sent": "送信したガス: $gasSent",
+			"ethereum_transaction_hash": "トランザクションハッシュ: $hash",
+			"ethereum_unsigned_transaction": "未署名のトランザクション: $transaction",
 			"solana_transaction_expired": "お客様のトランザクションはSolanaネットワークで処理されず、期限切れになりました。これは、提供された優先手数料が不十分だったためと考えられます。最新の推奨額に更新しましたので、再度お試しください。",
 			"solana_confirmation_failed": "作成されたトランザクションの確認を受信できませんでした。数秒お待ちいただいた後、トークンのトランザクション一覧でトランザクションが正しく作成されたかご確認ください。",
 			"solana_insufficient_funds": "このトランザクションを完了するためのトークン残高が不足しています。残高は最後に表示されてから変わっている可能性があります。",
 			"solana_insufficient_funds_for_fee": "トランザクション手数料を賄うためのSOL残高が不足しています。",
 			"solana_insufficient_funds_for_rent": "アカウント作成に必要なレントを賄うためのSOL残高が不足しています。",
-			"fee_calc_unsupported_standard": "指定されたトークン標準がサポートされていないため、手数料を計算できませんでした。"
+			"fee_calc_unsupported_standard": "指定されたトークン標準がサポートされていないため、手数料を計算できませんでした。",
+			"xrp_send_expired": "$network での $amount $symbol の送信は完了しませんでした。ネットワークが期限内に取り込まなかったためです。ウォレットから資金は出ておらず、あらためて送信しても安全です。",
+			"xrp_send_already_in_flight": "このアドレスからの以前の XRP の送金がまだ確定していません。何も送信されていません。完了するまで、およそ1分ほどお待ちいただき、その後もう一度送信してください。",
+			"xrp_send_not_guarded": "以前の XRP の送金がまだ確定処理中かどうかを確認できませんでした。何も送信されていません。しばらくしてからもう一度お試しください。",
+			"xrp_active_transaction_failed": "$network での $amount $symbol の送信はネットワークで処理されましたが失敗したため（$result）、資金は送信されていません。ネットワーク手数料は請求されました。",
+			"xrp_amount_exceeds_sendable": "この金額は収まらなくなりました。アカウントは XRP の準備金とネットワーク手数料を残す必要があり、確認中にどちらも変わることがあります。何も送信されていません。金額を減らすか、アカウント情報が更新されてからもう一度お試しください。",
+			"xrp_destination_unfunded": "このアドレスにはまだ XRP アカウントがありません。作成には少なくとも $reserve XRP の最初の送金が必要です。何も送信されていません。金額を増やすか、すでに有効化されたアドレスへ送信してください。",
+			"xrp_destination_tag_required": "このアドレスには XRP 宛先タグが必要です。何も送信されていません。支払先のサービスから受け取ったタグを入力して、もう一度送信してください。",
+			"xrp_destination_is_source": "これはご自身の XRP アドレスです。何も送信されていません。別の送金先を選んでください。",
+			"xrp_account_state_unavailable": "ウォレットがアカウント情報を読み取れなかったため、金額を確認できませんでした。何も送信されていません。しばらくしてからもう一度お試しください。"
 		}
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "ミント",
+			"minting": "ミント中...",
+			"mint_review_subtitle": "ミントする量"
 		}
 	},
 	"burn": {
@@ -1014,6 +1162,45 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "$tokenをミント",
+			"description": "ミントすると、ネットワークのレートで$sourceTokenから新しい$destinationTokenが作られ、$sourceTokenはバーンされます。",
+			"you_mint_estimate": "ミントする量（見積もり）",
+			"rate": "レート",
+			"cycles_ledger_fee": "Cycles Ledger手数料",
+			"minter": "ミント元",
+			"one_way": "ミントは取り消せません。$destinationTokenを$sourceTokenに戻すことはできません。",
+			"sending": "$tokenを$minterに送信中...",
+			"minting": "$tokenをミント中...",
+			"minted": "$amount $tokenをミントしました。",
+			"pending": "ミントに通常より時間がかかっています。バックグラウンドで完了します。進行状況はアクティブなトランザクションで確認できます。"
+		},
+		"error": {
+			"rate_unavailable": "$tokenのレートを読み込めませんでした。しばらくしてからもう一度お試しください。",
+			"amount_too_small": "$tokenをミントするには金額が少なすぎます。",
+			"refunded": "ミントは返金されました。$tokenは$refundFee $tokenを差し引いて返却されました。理由: $reason",
+			"refunded_nothing": "ミントは返金されましたが、手数料で全額が差し引かれたため、$tokenは返却されませんでした。理由: $reason",
+			"failed": "ミントに失敗しました。理由: $reason",
+			"not_started": "ミントを開始できませんでした。何も送信されていません。もう一度お試しください。",
+			"transfer_failed": "$tokenの送金に失敗しました。何も送信されていません。",
+			"unconfirmed": "$tokenの送金を確認できませんでした。送金が完了していれば、ミントはバックグラウンドで完了します。進行状況はアクティブなトランザクションで確認できます。"
+		}
+	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
 		}
 	},
 	"scanner": {
@@ -1057,6 +1244,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "コード/リンクが無効です",
+			"link_domain_mismatch": "このリンクは別のドメイン向けです",
 			"data_is_incompleted": "受信したデータが不完全です。必要な情報の一部が欠けています。"
 		}
 	},
@@ -1129,9 +1317,14 @@
 			"max_slippage_error": "スリッページ許容度は0%にできません。また$maxSlippage%を超えることもできません。",
 			"swap_button": "今すぐスワップ",
 			"swap_is_not_offered": "このスワップは現在提供されていません。",
+			"swap_amount_too_low": "",
+			"swap_amount_too_low_minimum": "",
 			"executing_transaction": "トランザクションを実行中...",
 			"initializing": "トランザクションを初期化中...",
 			"swapping": "スワップ中...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "UIを更新中",
 			"swap_provider": "スワッププロバイダー",
 			"swap_provider_website": "ウェブサイト",
@@ -1154,12 +1347,21 @@
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します。",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
-			"value_difference_error_confirmation": ""
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
+			"chain_fusion_minimum_amount": "",
+			"oisy_trade_minimum_notional": "",
+			"oisy_trade_deposit_fee": "",
+			"oisy_trade_taker_fee": "",
+			"oisy_trade_withdrawal_fee": "",
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "少なくとも1つのトークンの価格を取得できませんでした。このスワップオファーが公正な取引であることを<strong>独自に確認</strong>してください。<br>スリッページ設定は、受取額が大幅に低いオファーからは保護<strong>されません</strong>のでご注意ください！"
 		},
 		"error": {
 			"kong_not_available": "現在、トークンスワップ用の取引所が利用できません。後ほど再試行してください。",
 			"unexpected": "トークンをスワップ中に問題が発生しました。",
 			"unexpected_missing_data": "スワップトランザクションの開始中に予期しない問題が発生しました。",
+			"failed_unexpectedly": "スワップを完了できませんでした。ウォレットの残高をご確認のうえ、再度お試しいただくか、別のプロバイダーをお選びください。",
 			"slippage_exceeded": "$oisy_short が保護しています：取引がスリッページ許容範囲の $maxSlippage% を超えています。最大スリッページを調整して再試行してください。",
 			"pool_not_found": "スワップ失敗。プールが見つかりません。",
 			"deposit_error": "スワップの資金を入金できませんでした。再度お試しいただくか、スワッププロバイダーを変更してください。",
@@ -1173,13 +1375,29 @@
 			"swap_sucess_withdraw_failed": "スワップは完了しましたが、トークンを自動的に出金できませんでした。下の出金ボタンをクリックして手動で引き出すか、<br>以下に従ってください。",
 			"swap_sucess_manually_withdraw_success": "前回のスワップのトークンは正常に出金されました。このモーダルを閉じることができます。",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": "",
+			"near_intents_quote_unverified": "",
+			"near_intents_quote_expired": "",
+			"oisy_trade_not_trackable": "",
+			"oisy_trade_order_killed": "",
+			"oisy_trade_settlement_unresolved": "",
+			"oisy_trade_order_not_placed": "",
+			"oisy_trade_recovery_failed": ""
 		}
 	},
 	"buy": {
 		"text": {
 			"buy": "購入",
-			"buy_dev": "購入（開発環境）"
+			"buy_dev": "購入（開発環境）",
+			"unavailable_title": "トークンの購入は一時的にご利用いただけません",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
+			"unavailable_fallback_hint": "それまでの間も、ウォレットアドレスを共有することでトークンを受け取ることができます。"
+		},
+		"actions": {
+			"close": "了解"
 		},
 		"onramper": {
 			"title": "Onramper経由で購入"
@@ -1211,6 +1429,7 @@
 	"tokens": {
 		"text": {
 			"title": "トークン",
+			"title_short": "トークン",
 			"contract_address": "コントラクトアドレス",
 			"token_address": "トークンアドレス",
 			"balance": "残高",
@@ -1268,7 +1487,7 @@
 		"import": {
 			"text": {
 				"title": "トークンをインポート",
-				"title_nft": "NFTコレクションをインポート",
+				"title_nft": "コレクションをインポート",
 				"review": "確認",
 				"saving": "保存中...",
 				"updating": "トークンリストを更新中",
@@ -1284,7 +1503,8 @@
 				"info": "台帳およびインデックスキャニスターIDは通常、プロジェクトのウェブサイトで入手できます。",
 				"info_ext": "キャニスターIDは通常、プロジェクトのウェブサイトで入手できます。",
 				"info_index": "インデックスキャニスターIDはオプションですが、これがないと$oisy_shortはトランザクション履歴を表示できません。",
-				"custom_tokens_not_supported": "選択したネットワークはカスタムトークンをサポートしていません。"
+				"custom_tokens_not_supported": "選択したネットワークはカスタムトークンをサポートしていません。",
+				"custom_tokens_not_supported_yet": "OISY はこのネットワークでのカスタムトークンにまだ対応していません。"
 			},
 			"error": {
 				"loading_metadata": "指定されたアドレスは選択されたネットワークで有効なトークンではありません。",
@@ -1307,12 +1527,12 @@
 		"manage": {
 			"text": {
 				"title": "トークンの管理",
-				"title_nft": "NFTコレクションの管理",
+				"title_nft": "コレクションの管理",
 				"manage_list": "トークンの管理",
-				"manage_list_nft": "NFTの管理",
+				"manage_list_nft": "コレクティブルの管理",
 				"list_settings": "リスト設定",
 				"import_token": "トークンをインポート",
-				"import_nft": "NFTコレクションをインポート",
+				"import_nft": "コレクションをインポート",
 				"network": "ネットワーク",
 				"all_tokens_zero_balance": "すべてのトークンの残高がゼロです。",
 				"enable_more_assets": "さらに多くのトークンを有効にする"
@@ -1380,7 +1600,11 @@
 			"crypto": "暗号資産",
 			"stablecoin": "ステーブルコイン",
 			"stock": "株式",
-			"commodity": "コモディティ"
+			"commodity": "コモディティ",
+			"compute": "コンピュート"
+		},
+		"category_in_sentence": {
+			"compute": "コンピュートトークン"
 		},
 		"risk": {
 			"low": "低リスク",
@@ -1390,14 +1614,13 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFT",
-			"title_empty": "あなたのNFTがここに表示されます。",
-			"description_empty": "まだNFTを受け取っていないようです。",
-			"title_not_supported": "選択されたネットワークではNFTはまだサポートされていません。",
-			"description_not_supported": "このアドレスにNFTを送信しないでください。",
-			"grouping": "グループ化",
-			"as_plain_list": "リスト表示",
-			"by_collection": "コレクションでグループ化",
+			"title": "コレクティブル",
+			"count_one": "",
+			"count_other": "",
+			"title_empty": "あなたのコレクティブルがここに表示されます。",
+			"description_empty": "まだコレクティブルを受け取っていないようです。",
+			"title_not_supported": "選択されたネットワークではコレクティブルはまだサポートされていません。",
+			"description_not_supported": "このアドレスにコレクティブルを送信しないでください。",
 			"show_spam": "スパムを表示",
 			"show_hidden": "非表示を表示",
 			"recents_first": "新しい順",
@@ -1410,21 +1633,23 @@
 			"quantity": "数量",
 			"item_traits": "アイテムの特性",
 			"collection_not_loaded": "コレクションはまだ読み込まれていないため表示できません。",
-			"nft_not_loaded": "NFTはまだ読み込まれていないため表示できません。",
+			"nft_not_loaded": "コレクティブルはまだ読み込まれていないため表示できません。",
 			"collections": "コレクション",
-			"all_assets": "すべての資産",
+			"check_new": "新規を確認",
+			"check_new_short": "確認",
+			"ungrouped": "未グループ化",
 			"address_copied": "アドレス $address をコピーしました。",
 			"collection_name_copied": "コレクション名をコピーしました。",
 			"id_copied": "トークンID名をコピーしました。",
 			"spam": "スパム",
 			"not_spam": "スパムではない",
 			"spam_warning": "'$collection'をスパムに移動しますか?",
-			"spam_warning_text": "<b>$collection</b>のすべてのNFTがスパムに移動されます。メインビューからは非表示になりますが、いつでも検索して復元できます。",
+			"spam_warning_text": "<b>$collection</b>のすべてのコレクティブルがスパムに移動されます。メインビューからは非表示になりますが、いつでも検索して復元できます。",
 			"hide": "非表示",
 			"unhide": "再表示",
 			"hidden": "非表示",
 			"hide_warning": "'$collection'を非表示にしますか?",
-			"hide_warning_text": "<b>$collection</b>と関連するすべてのNFTがメインビューから非表示になりますが、いつでも検索して復元できます。",
+			"hide_warning_text": "<b>$collection</b>と関連するすべてのコレクティブルがメインビューから非表示になりますが、いつでも検索して復元できます。",
 			"open_explorer": "このコントラクトをブロックチェーンエクスプローラーで開く",
 			"img_consent_disabled": "このコレクションの画像を無効にしました。",
 			"img_consent_none": "セキュリティ上の理由で画像が無効になっています。",
@@ -1451,13 +1676,14 @@
 			"media_stored_at_different_location": "メディアは別の場所に保存されているようです。アクセスするには、このリンクを慎重に確認した上でご利用ください。:"
 		},
 		"alt": {
-			"placeholder_image": "まだNFTがありません",
+			"placeholder_image": "まだコレクティブルがありません",
 			"card": {
-				"image": "トークンIDが$tokenIdのNFTの画像"
+				"image": "トークンIDが$tokenIdのコレクティブルの画像"
 			},
 			"copy_address": "このアドレスをクリップボードにコピー",
 			"review_preference": "表示設定を変更",
-			"go_to_collection": "コレクションページを開く"
+			"go_to_collection": "コレクションページを開く",
+			"check_new": "新しいコレクティブルを確認"
 		}
 	},
 	"fee": {
@@ -1466,7 +1692,16 @@
 			"estimated_btc": "推定BTCネットワーク手数料",
 			"estimated_inter_network": "推定ネットワーク間手数料",
 			"estimated_eth": "推定Ethereum手数料",
-			"max_fee_eth": "最大手数料<small>（おそらく30秒以内）</small>",
+			"estimated_fee_eth": "",
+			"estimated": "",
+			"priority": "",
+			"gwei": "",
+			"priority_slow": "",
+			"priority_slow_description": "",
+			"priority_standard": "",
+			"priority_standard_description": "",
+			"priority_fast": "",
+			"priority_fast_description": "",
 			"convert_fee": "変換手数料",
 			"convert_inter_network_fee": "変換ネットワーク間手数料",
 			"convert_btc_network_fee": "Bitcoinネットワーク手数料",
@@ -1475,7 +1710,12 @@
 			"ata_fee": "ATA手数料",
 			"transaction_fees": "トランザクション手数料",
 			"network_fee": "ネットワーク手数料",
-			"approval_fee": "承認手数料"
+			"approval_fee": "承認手数料",
+			"prioritization_fee": "",
+			"base_kind": "",
+			"prioritization_kind": "",
+			"ata_kind": "",
+			"app_account_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "手数料をカバーするのに十分な資金がありません。"
@@ -1510,9 +1750,12 @@
 			"or_use_link": "またはWalletConnectリンクを使用",
 			"proposer": "接続元",
 			"spender": "承認先",
+			"operator": "オペレーター",
 			"application": "アプリケーション",
 			"review": "$chain_name ($key)のに必須な権限を確認",
 			"method": "方法",
+			"interacting_with": "",
+			"type": "種類",
 			"methods": "方法",
 			"events": "イベント",
 			"message": "メッセージ",
@@ -1521,14 +1764,80 @@
 			"network": "ネットワーク",
 			"amount": "数量",
 			"hex_data": "HEXデータ",
+			"tab_operations": "オペレーション",
+			"unreviewed_instructions": "OISYはこれらの指示の一部をデコードできないため、以下のレビューは不完全な場合があります。",
+			"unreviewed_instructions_simulated": "このトランザクションには、OISYがデコードできない外部ソースからの操作が含まれているため、OISYはそのシミュレーションを実行しました。アプリケーションを信頼できることを確認し、署名する前にシミュレートされた残高の変化と操作を確認してください。実際の結果はシミュレーションと異なる場合があることにご注意ください。",
+			"unread_programs_one": "このトランザクションは、OISYが読み取れないプログラムを呼び出します。このプログラムは、ステーキング中のSOLやレンディングの預け入れなど、他のアプリで保有している資金を移動させることができ、以下の内容にはそれが表示されません。",
+			"unread_programs_other": "このトランザクションは、OISYが読み取れない複数のプログラムを呼び出します。これらのプログラムは、ステーキング中のSOLやレンディングの預け入れなど、他のアプリで保有している資金を移動させることができ、以下の内容にはそれが表示されません。",
+			"unread_programs_acknowledge": "OISYがこのアプリの動作を表示できないことを理解しました",
+			"cannot_be_shown": "このトランザクションには、確認用に正確に表示しきれない操作が含まれているため、OISY は署名しません。拒否して、アプリにより簡単なリクエストを送るよう依頼してください。",
+			"close_pays_others": "このトランザクションはあなたのトークンアカウントの一つを閉じ、その残高をあなたのウォレット以外のアドレスに支払います。安全のため、OISY はこれに署名しません。",
+			"simulated_instructions": "シミュレートされた指示",
+			"multiple_operations": "このトランザクションには、ウォレットに影響する複数の操作が含まれています。シミュレートされた残高の変化と含まれる指示を確認し、アプリケーションも信頼できる場合にのみこのトランザクションを承認してください。",
+			"simulated_review": "以下のレビューは、このトランザクションをネットワークの現在の状態に対してシミュレートした場合の予測です。実際に実行した場合の結果は異なる場合があります。",
+			"simulated_changes": "シミュレートされた残高の変化",
+			"balance_changes": "残高の変化",
+			"balance_changes_none": "このトランザクションはあなたのアカウントに何の変更も加えません。",
+			"balance_changes_unknown": "OISY はこのトランザクションがどの資産をどれだけ動かすのか判断できません。このアプリを信頼できる場合にのみ署名してください。",
+			"simulation_control_change": "このトランザクションは、1つ以上のアカウントを誰が管理するかを変更します。承認すると、中身だけでなくアカウント自体が引き渡される可能性があります。",
+			"simulation_new_owner": "新しいアカウント所有者",
+			"simulation_new_spender": "新しく承認された使用者",
+			"simulation_new_close_authority": "新しいクローズ権限",
+			"simulation_new_program": "新しい所有プログラム",
+			"simulation_control_removed": "削除済み",
+			"transfer_sources": "送金元",
+			"transfer_party_own": "自分のアカウント",
+			"transfer_parties_partial": "OISY はこのトランザクションをシミュレートできないため、表示されている送信元と操作は、トランザクション自体が含むものだけです。別のプログラムが代わりに動かす資金は含まれず、OISY が読み取れない操作は、その内容を示さないまま表示されます。このアプリを信頼できる場合にのみ署名してください。",
+			"dapp_prioritization_fee": "OISYではなくdAppによって設定された優先手数料です。",
+			"high_prioritization_fee": "このトランザクションは異常に高い優先手数料を設定しています。よく確認し、このアプリを信頼できる場合のみ署名してください。",
+			"dapp_gas_limit": "OISYではなくアプリによって設定されたガスリミットです。上記の最大手数料は、このトランザクションが消費しうる最大額です。",
+			"high_gas_limit": "このリクエストは異常に高いガスリミットを設定しているため、上記の最大手数料はこのトランザクションが本来かかるはずの費用をはるかに上回っています。よく確認し、このアプリを信頼できる場合のみ署名してください。",
+			"invalid_typed_data": "このリクエストには、アプリが宣言したスキーマと型が一致しない値が含まれています。表示内容と実際に署名される内容が異なる可能性があるため、署名は無効になっています。",
+			"unreviewable_typed_data": "OISYは、このアプリが署名を求めている内容を認識できないため、概要はそれを説明できません。アプリケーションを信頼できることを確認し、署名する前に生データを確認してください。",
+			"unsigned_typed_data_keys": "このアプリは、そのスキーマが宣言していない追加のデータを送信しました。そのデータは署名の対象外であるため、以下のフィールドのみが表示されます。",
+			"tab_summary": "概要",
+			"tab_raw_data": "生データ",
+			"method_without_selector": "関数名を特定するには短すぎます",
+			"methods_capped": "このバッチの最初の呼び出しのみが表示されています。",
+			"unknown_call_title": "コントラクト呼び出し",
+			"unknown_call": "OISYは、このトランザクションが呼び出す関数を認識できないため、概要はそれを説明できません。アプリケーションを信頼できることを確認し、署名する前に生データを確認してください。",
+			"allowance_increase": "このリクエストは、以下の使用者の許可額を、既に使用可能な分に加えて表示された金額だけ引き上げます。使用者は、取り消すまでいつでもこのトークンをその金額分だけウォレットから送金できます。",
+			"allowance_decrease": "このリクエストは、以下の使用者の許可額を表示された金額だけ引き下げます。それ自体は資金を移動しません。",
+			"unverifiable_erc20_request": "このリクエストは、OISYが識別またはデコードできないトークンに関するものです。表示内容と実際に署名される内容が異なる可能性があるため、承認は無効になっています。",
+			"unverifiable_approval_for_all_request": "このリクエストは、NFTコレクションの管理権をオペレーターに引き渡しますが、OISYはどのオペレーターかをデコードできません。表示内容と実際に署名される内容が異なる可能性があるため、承認は無効になっています。",
+			"approval_for_all_grant": "このリクエストにより、以下のオペレーターは、あなたが現在所有している、または後で取得するこのコレクション内の任意のNFTを、取り消すまでいつでも転送できるようになります。それ自体は資金を移動しません。",
+			"approval_for_all_revoke": "このリクエストは以下のオペレーターを取り消すため、このコレクション内であなたが保有するNFTを転送できなくなります。",
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
 			"sign_message": "メッセージに署名",
+			"sign_psbt": "トランザクションに署名",
+			"sign_transaction_with_type": "",
+			"sign_transaction": "トランザクションに署名",
+			"sign_and_send_transaction": "トランザクションに署名して送信",
+			"signing_address": "署名アドレス",
+			"signer": "署名者",
+			"fee": "手数料",
+			"btc_symbol": "BTC",
+			"psbt_inputs": "インプット",
+			"psbt_outputs": "アウトプット",
+			"psbt_total_signed_inputs": "署名済みインプットの合計額",
+			"psbt_unknown_address": "不明なアドレス",
+			"psbt_unknown_value": "不明",
+			"psbt_fee_unknown": "不明",
+			"psbt_signed_by_wallet": "あなたのアドレス",
+			"psbt_broadcast": "ブロードキャスト",
+			"psbt_broadcast_enabled": "はい",
+			"psbt_broadcast_disabled": "いいえ",
+			"psbt_broadcast_unsupported_note": "このリクエストはウォレットにトランザクションのブロードキャストを求めていますが、これはサポートされていません。安全のため、このリクエストは承認できません。署名済みPSBTを受け取り、自分でブロードキャストするには、\"broadcast: false\" を指定してトランザクションをリクエストしてください。",
 			"connected_apps": "接続済みアプリ",
 			"no_connected_apps": "現在接続されているアプリはありません。",
-			"wallet_connect": ""
+			"disconnect_all": "すべて切断",
+			"disconnect_app": "$name を切断",
+			"wallet_connect": "WalletConnect",
+			"token_units": "トークン単位（小数点桁数不明）"
 		},
 		"alt": {
-			"connect_input": "例: wc:a281567bb3e4..."
+			"connect_input": "例: wc:a281567bb3e4...",
+			"open_address_block_explorer": "アドレスをブロックエクスプローラーで開く"
 		},
 		"domain": {
 			"title": "ドメイン認証",
@@ -1563,10 +1872,256 @@
 			"request_rejected": "WalletConnectリクエストが拒否されました。",
 			"unknown_parameter": "不明なパラメータです。",
 			"wallet_not_initialized": "予期しないエラー。ウォレットアドレスが初期化されていません。",
+			"btc_broadcast_not_supported": "署名済みトランザクションのブロードキャストはまだサポートされていません。署名済みPSBTを受け取り、自分でブロードキャストするには、\"broadcast: false\" を指定してトランザクションをリクエストしてください。",
+			"btc_non_mainnet_sign_not_supported": "ビットコインのトランザクションへの署名はメインネットでのみサポートされています。安全のため、このリクエストは署名されませんでした。",
+			"btc_psbt_decode": "このトランザクションはレビューのためにデコードできませんでした。安全のため、署名されませんでした。",
+			"btc_psbt_input_not_segwit": "このトランザクションには、OISYが署名できないSegWit（P2WPKH）以外のインプットが含まれています。安全のため、署名されませんでした。",
+			"btc_psbt_input_not_owned": "このトランザクションには、このウォレットのアドレスに属さない、OISYが署名できないインプットが含まれています。安全のため、署名されませんでした。",
+			"btc_psbt_input_ambiguous": "OISYは、このトランザクションのインプットの一つがどの過去のアウトプットを参照しているか判別できないため、レビュー用に表示される金額が実際に署名される金額と異なる可能性があります。安全のため、署名されませんでした。",
 			"from_address_not_wallet": "トランザクションで要求された送信元アドレスがこのウォレットのアドレスではありません。",
 			"unknown_destination": "不明な宛先アドレスです。",
+			"ambiguous_transaction": "このトランザクションは複数のアドレス間で資金を移動するため、確認のために正確に表示できません。安全のため、署名されませんでした。",
+			"close_pays_others": "このトランザクションはあなたのトークンアカウントの一つを閉じ、その残高をあなたのウォレット以外のアドレスに支払います。安全のため、署名されませんでした。",
+			"unreviewed_without_simulation": "OISY はこのトランザクションの一部を読み取れず、ネットワークからシミュレーションも返されなかったため、その部分が何を行うのかを示すものがありません。安全のため、署名されませんでした。",
+			"unread_programs_unconfirmed": "このトランザクションはOISYが読み取れないプログラムを呼び出しており、レビューで確認されませんでした。安全のため、署名されませんでした。",
+			"sol_transaction_as_message": "このメッセージはSolanaのトランザクションであり、トランザクションレビューを通じてのみ承認できます。安全のため、署名されませんでした。",
 			"request_not_defined": "予期しないエラー: リクエストが定義されていないため、処理できません。",
 			"unexpected_processing_request": "WalletConnectでリクエストを処理中に予期しないエラーが発生しました。"
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "取引",
+			"tab_title_short": "取引",
+			"intro": "",
+			"learn_more": "詳しく見る",
+			"provider_name": "OISY Trade",
+			"go_to_trade": ""
+		},
+		"page": {
+			"tagline": "ウォレットから直接指値注文を出せます。資金はあなたが管理するスマートコントラクトに保管され、中央機関が管理することはありません。",
+			"trading_potential": "トレード可能額",
+			"trading_potential_hint": "取引所ではなくウォレット内",
+			"deposited_assets": "入金済み資産",
+			"deposited_all_free": "すべて利用可能",
+			"deposited_empty": "まだ入金がありません",
+			"free": "$amount利用可能",
+			"in_orders": "$amount注文中",
+			"in_orders_label": "注文中",
+			"positions": "マイポジション",
+			"deposit": "入金",
+			"withdraw": "出金",
+			"active_orders": "有効な注文",
+			"active_orders_empty_deposit": "OISY Tradeで指値注文を出すには、ウォレットからトークンを入金してください。",
+			"active_orders_empty_place": "注文を出すと、有効な注文と保留中の指値注文がここに表示されます。",
+			"new_order": "新規注文",
+			"order_history": "注文履歴"
+		},
+		"provider_unavailable": {
+			"title": "取引は一時的に利用できません",
+			"description": "現在、利用可能な取引プロバイダーがありません。残高は安全に保たれており、プロバイダーが復旧次第、再び操作できるようになります。"
+		},
+		"onboarding": {
+			"title": "",
+			"description": "",
+			"step_deposit": "",
+			"step_order": "",
+			"step_withdraw": "",
+			"supported_tokens": "",
+			"deposit": ""
+		},
+		"assets": {
+			"title": "",
+			"empty": ""
+		},
+		"deposit": {
+			"title": "入金",
+			"review_title": "入金内容を確認",
+			"progress_title": "入金中",
+			"you_deposit": "入金する",
+			"error_insufficient_balance": "金額がウォレットの残高を超えています",
+			"to": "宛先",
+			"network": "ネットワーク",
+			"transaction_fee": "合計推定手数料",
+			"approval_fee": "承認手数料",
+			"transfer_fee": "ネットワーク手数料",
+			"info_title": "OISY Trade: オンチェーン板取引",
+			"info_description": "入金された資金はOISY Tradeキャニスターに保管され、指値注文に使用され、オンチェーンのスマートコントラクトによって保護されます。",
+			"empty_title": "まだ入金するものがありません",
+			"empty_description": "OISY Tradeでは、これらのトークンで注文を作成できます。いずれかをウォレットに追加し、ここに入金して取引を開始してください。",
+			"approving": "承認中",
+			"approved": "",
+			"approve_description": "",
+			"depositing": "入金中",
+			"deposit_description": "",
+			"done": "",
+			"error": {
+				"unknown_fee": "このトークンの台帳手数料を判定できませんでした。資金はウォレットに残ったままです。しばらくしてから再度お試しください。",
+				"deposit_failed": "入金が完了しませんでした。資金はウォレットに残ったままです。もう一度お試しいただくか、ネットワークの状態をご確認ください。"
+			}
+		},
+		"withdraw": {
+			"title": "出金",
+			"review_title": "出金内容を確認",
+			"progress_title": "出金中",
+			"amount_label": "出金する",
+			"from": "送金元",
+			"network": "ネットワーク",
+			"transaction_fee": "",
+			"transfer_fee": "出金手数料",
+			"you_receive": "受け取る",
+			"reserved_note": "$amount確保済み · 有効な注文によりロック中",
+			"error_insufficient_balance": "金額が利用可能残高を超えています",
+			"submit": "出金",
+			"open": "",
+			"progress_withdraw": "$symbolをウォレットに送金しています",
+			"progress_done": "",
+			"error": "出金が完了しませんでした。資金はOISY Tradeに残ったままです。しばらくしてから再度お試しください。"
+		},
+		"orders": {
+			"title": "",
+			"add_limit_order": "",
+			"tab_active": "",
+			"tab_history": "",
+			"empty_active": "有効な注文はありません",
+			"empty_history": "",
+			"side_sell": "売り",
+			"side_buy": "買い",
+			"row_sell": "",
+			"row_buy": "",
+			"row_phrase_sell": "$quoteに対して @ $price",
+			"row_phrase_buy": "$quoteで @ $price",
+			"queue_ahead": "キュー内で$percentage%が前方",
+			"status_open": "オープン",
+			"status_pending": "保留中",
+			"status_partial": "一部約定",
+			"status_filled": "約定済み",
+			"status_canceled": "キャンセル済み",
+			"status_expired": "期限切れ",
+			"count_filled": "",
+			"count_expired": "",
+			"count_canceled": ""
+		},
+		"info": {
+			"title": "OISY Tradeとは",
+			"description": "OISY Tradeはウォレットに直接統合された、完全オンチェーンの板取引所です。売買価格を指定すると、市場がその価格に達した瞬間にオンチェーンで注文が決済されます。サインアウト中でも同様です。",
+			"fact_1_title": "希望の価格で売買",
+			"fact_1_description": "トークンを売買したい正確な価格を指定できます。指値注文は市場がその価格に達するまで板に残ります。",
+			"fact_2_title": "離席中でも約定",
+			"fact_2_description": "注文を出すとオンチェーンに存在し続けます。サインインしていなくても、条件に合う注文が現れ次第、取引所が約定させます。",
+			"fact_3_title": "完全オンチェーン",
+			"fact_3_description": "注文はNNSが管理するInternet Computer上のキャニスター内でマッチングと決済が行われ、中央集権的な取引所を介しません。"
+		},
+		"order_detail": {
+			"title": "",
+			"status": "",
+			"filled": "",
+			"cancel_order": "",
+			"cancel_error": "",
+			"confirm_title": "",
+			"confirm_description": "",
+			"confirm_order": "",
+			"confirm_price": "",
+			"confirm_returns_to_free": "",
+			"confirm_keep": "",
+			"confirm_order_sell": "",
+			"confirm_order_buy": ""
+		},
+		"limit_order": {
+			"title": "",
+			"review_title": "",
+			"placing_title": "",
+			"sell": "",
+			"buy": "",
+			"select_sell_token": "",
+			"select_buy_token": "",
+			"select_sell_token_first": "",
+			"select_buy_token_first": "",
+			"you_sell": "",
+			"you_buy": "",
+			"hero_prefix": "",
+			"you_get_at_least": "",
+			"you_pay_at_most": "",
+			"connector_for": "",
+			"connector_with": "",
+			"network": "",
+			"amount_placeholder": "",
+			"price_placeholder": "",
+			"max": "",
+			"max_with_amount": "",
+			"set_price_first": "",
+			"balance": "",
+			"pick_token_to_begin": "",
+			"pick_token_to_price": "",
+			"pick_token_to_trade_against": "",
+			"price_label_sell_resting": "",
+			"price_label_buy_resting": "",
+			"price_label_sell_crossing": "",
+			"price_label_buy_crossing": "",
+			"price_label_fok_sell": "",
+			"price_label_fok_buy": "",
+			"price_label_default": "",
+			"preset_bid": "",
+			"preset_ask": "",
+			"preset_market": "",
+			"preset_sell_1": "",
+			"preset_sell_5": "",
+			"preset_buy_1": "",
+			"preset_buy_5": "",
+			"value_difference": "",
+			"value_difference_label": "",
+			"queue_position": "",
+			"queue_position_row": "",
+			"front_of_book": "",
+			"are_ahead": "",
+			"warning_crossing_sell": "",
+			"warning_crossing_buy": "",
+			"warning_resting_below_value_sell": "",
+			"warning_resting_above_value_buy": "",
+			"warning_fok_sell": "",
+			"warning_fok_buy": "",
+			"warning_fok_blocked_sell": "",
+			"warning_fok_blocked_buy": "",
+			"error_balance_sell": "",
+			"error_balance_buy": "",
+			"error_lot_multiple": "",
+			"error_lot_minimum": "",
+			"error_tick_multiple": "",
+			"error_min_notional": "",
+			"error_max_notional": "",
+			"fok_title": "",
+			"fok_help": "",
+			"routing_name": "",
+			"routing_tag": "",
+			"best_ask": "",
+			"best_bid": "",
+			"spread": "",
+			"spread_value": "",
+			"maker_fee": "",
+			"taker_fee": "",
+			"no_fee": "",
+			"fee_percent": "",
+			"review_button": "",
+			"place_order_button": "",
+			"limit_price": "",
+			"limit_price_value": "",
+			"current_value": "",
+			"current_value_feed": "",
+			"dex": "",
+			"order_type": "",
+			"order_type_gtc": "",
+			"order_type_fok": "",
+			"fee_maker_taker": "",
+			"fee_taker": "",
+			"fee_maker_taker_value": "",
+			"give_up_confirm": "",
+			"rests_against_value_confirm": "",
+			"market_moved_sell": "",
+			"market_moved_buy": "",
+			"placing_initializing": "",
+			"placing_sub": "",
+			"placing_done": "",
+			"place_error": ""
 		}
 	},
 	"transaction": {
@@ -1574,6 +2129,8 @@
 			"details": "トランザクション詳細",
 			"hash": "トランザクションハッシュ",
 			"hash_copied": "トランザクションハッシュ$hashがコピーされました。",
+			"signature": "",
+			"signature_copied": "",
 			"id": "トランザクションID",
 			"id_copied": "トランザクションIDがコピーされました。",
 			"timestamp": "タイムスタンプ",
@@ -1589,7 +2146,46 @@
 			"to_ata": "受信者トークンアカウント（ATA）",
 			"to_ata_copied": "受信者トークンアカウント（ATA）がクリップボードにコピーされました。",
 			"block": "ブロック",
-			"interacted_with": "実行先コントラクト（To）",
+			"kind_other": "",
+			"summary_swap": "",
+			"summary_self": "",
+			"swap_on": "",
+			"interacted_with": "実行先コントラクト",
+			"unknown_token": "",
+			"summary_other": "",
+			"tab_summary": "",
+			"tab_balance_changes": "",
+			"tab_instructions": "",
+			"tab_unavailable": "",
+			"no_balance_changes": "",
+			"instruction_send": "",
+			"instruction_receive": "",
+			"instruction_wrap": "",
+			"instruction_unwrap": "$symbol のトークンアカウントをアンラップして閉じる",
+			"instruction_create_account": "",
+			"instruction_create_program_account": "",
+			"instruction_close_account": "",
+			"instruction_close_account_for": "$symbol のトークンアカウントを閉じる",
+			"instruction_approve": "",
+			"instruction_revoke": "",
+			"instruction_set_authority": "",
+			"instruction_route": "",
+			"instruction_burn": "",
+			"instruction_mint": "",
+			"instruction_freeze": "",
+			"instruction_thaw": "",
+			"instruction_unknown": "",
+			"instruction_unknown_via": "",
+			"instruction_via": "$program 経由",
+			"instruction_rent": "",
+			"instruction_balance_returned": "SOL 残高がウォレットに戻ります",
+			"instruction_balance_sent": "SOL 残高があなたのウォレットに送金されます",
+			"instruction_returned": "",
+			"instruction_sent": "$amount SOL をあなたのウォレットに送金",
+			"instruction_returned_to": "$amount SOL の送金先",
+			"instruction_balance_returned_to": "SOL 残高の送り先",
+			"instruction_own_account": "",
+			"raw_value": "",
 			"status": "ステータス",
 			"confirmations": "確認数",
 			"for": "承認先",
@@ -1615,6 +2211,23 @@
 			"approve": "承認",
 			"burn": "バーン",
 			"mint": "ミント"
+		},
+		"filter": {
+			"types_label": "",
+			"tokens_label": "",
+			"contacts_label": "",
+			"types_aria_label": "",
+			"tokens_aria_label": "",
+			"contacts_aria_label": "",
+			"search_tokens_placeholder": "",
+			"search_contacts_placeholder": "",
+			"clear": "",
+			"sheet_title": "",
+			"open_filters_aria_label": "",
+			"showing_partial": "",
+			"contacts_empty_title": "まだ連絡先を追加していません",
+			"contacts_empty_description": "よく使うアドレスを連絡先に保存して、誤ったアドレスをうっかり使ってしまうリスクを減らしましょう。",
+			"contacts_empty_cta": "最初の連絡先を追加"
 		},
 		"label": {
 			"reimbursement": "払い戻し",
@@ -1805,7 +2418,8 @@
 			"Icrcv2": "Internet Computer",
 			"Btc": "Bitcoin",
 			"Eth": "Ethereum",
-			"Sol": "Solana"
+			"Sol": "Solana",
+			"Xrp": "XRP Ledger"
 		},
 		"form": {
 			"new_address": "新しいアドレス",
@@ -1838,8 +2452,9 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "あなたの$oisy_nameにアクセス",
-				"open_or_create": "既存のウォレットにログインするか、新規作成して、安全にdAppに接続し、資産の管理を始めましょう。"
+				"open_or_create": "アプリケーションと安全にやり取りするために、ウォレットを開くか作成してください。",
+				"connect_your_wallet": "あなたの$oisy_nameに接続する",
+				"oisy_protects_you_description": "アプリケーションはあなたの資金に直接アクセスできず、すべてのトランザクションはあなたの確認が必要です。"
 			}
 		},
 		"idle": {
@@ -1961,17 +2576,18 @@
 		},
 		"info": {
 			"btc_transactions": "BTCトランザクション情報は中央集権型の第三者から取得されており、独自に検証する必要があります。",
-			"hidden_micro_transactions": "<strong>OISYはあなたを守ります！</strong>非常に小さなトークン価値のトランザクションは現在非表示になっています。表示するには、<a href=\"/settings/\">設定</a>に移動してください。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">詳細はこちら</a>"
+			"hidden_micro_transactions": "非常に小さなトークン価値のトランザクションは現在非表示になっています。表示するには、<a href=\"/settings/\">設定</a>に移動してください。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">詳細はこちら</a>"
 		},
 		"warning": {
-			"no_index_canister": "$token_listのトランザクションは表示できません。インデックスキャニスターが利用できません。",
-			"unavailable_index_canister": "$token_listのトランザクションは表示できません。インデックスキャニスターは現在利用できません。"
+			"no_index_canister": "$oisy_short は $token_list の取引を読み込めません。トークンの発行者が取引の追跡機能を提供していません。",
+			"unavailable_index_canister": "$token_list の最新の取引は現在読み込めません。取引の追跡サービスが応答していないためです。サービスが復旧しだい自動的に読み込まれます。"
 		}
 	},
 	"earning": {
 		"text": {
 			"title": "稼ぐ",
 			"tab_title": "稼ぎ中",
+			"tab_title_short": "収益",
 			"earning_opportunities": "稼ぐ機会",
 			"header_title": "稼ぐへようこそ！",
 			"header_description": "トークンを稼ぐ機会に割り当てて、デジタル資産ポートフォリオを増やしましょう。",
@@ -1983,10 +2599,10 @@
 				"description": "ワンクリックのAutopilot vaultで最大限のイールド効率を実現。",
 				"action": "Autopilotへ移動"
 			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "OISYを使って稼ごう！エピソード6が公開中 🎉",
-				"action": "ステータスを確認"
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -1996,6 +2612,8 @@
 			"currentStaked": "ステーク中",
 			"currentEarning": "現在の収益",
 			"earningPotential": "収益ポテンシャル",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "条件"
 		},
 		"terms": {
@@ -2005,6 +2623,108 @@
 			"goldDaoStaking": {
 				"cardTitle": "Gold DAOで稼ぐ"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "Bitcoinを供給。ステーブルコインを借入。ネイティブのまま。",
+			"health_factor": "ヘルスファクター",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
+			"net_value": "純資産価値",
+			"markets": "マーケット",
+			"total_supplied": "合計供給額",
+			"no_assets_supplied": "供給された資産はありません",
+			"supplied": "供給済み",
+			"borrowed": "借入済み",
+			"borrow_rate": "借入金利",
+			"apy_suffix": "APY",
+			"supply_label": "供給する",
+			"borrow_label": "借りる",
+			"coming_soon": "近日公開",
+			"coming_soon_teaser": "近日公開…",
+			"action_supply": "供給する",
+			"action_borrow": "借りる",
+			"action_repay": "返済する",
+			"action_withdraw": "引き出す",
+			"transaction_failed": "トランザクションが失敗しました",
+			"select_supply_token": "",
+			"select_borrow_token": "",
+			"select_withdraw_token": "",
+			"select_repay_token": "",
+			"supply_review": "供給内容を確認",
+			"supply_review_subtitle": "供給する",
+			"supplying": "供給中",
+			"starting_to_supply": "ポジションを送信しています…",
+			"supply_started": "ポジションが有効化されています。",
+			"supply_apy": "供給APY",
+			"supply_collateral_info": "供給した資産は、借入の担保としても機能します。",
+			"supply_agreement": "自分の資産がLiquidiumプロトコルに供給され、オンチェーンのスマートコントラクトリスクを負うことを理解しています。",
+			"provider_fee": "ネットワーク手数料",
+			"transaction_fee": "トランザクション手数料",
+			"insufficient_funds_for_fee": "金額と手数料を賄うには残高が不足しています。",
+			"supply_prices_unavailable": "価格は一時的に利用できません。読み込まれるまで供給は無効になっています。",
+			"minimum_supply": "最小供給額",
+			"supply_below_minimum": "金額が最小供給額を下回っています。",
+			"borrow_review": "借入内容を確認",
+			"borrow_review_subtitle": "借り入れる",
+			"borrowing": "借入手続き中",
+			"borrow_apy": "借入APY",
+			"resulting_ltv": "結果のLTV",
+			"projected_health_factor": "予測ヘルスファクター",
+			"borrowing_power": "借入可能額",
+			"collateral": "担保",
+			"minimum_borrow": "最低借入額",
+			"provider": "プロバイダー",
+			"funds_delivered_to": "資金の送付先",
+			"your_oisy_address": "あなたの$oisy_shortアドレス",
+			"borrow_risk_info": "借入するとヘルスファクターが下がります。下がりすぎると担保が清算される可能性があります。",
+			"borrow_activation_fee_info": "Liquidiumは借入額に$fee%のアクティベーション手数料を上乗せします。",
+			"borrow_at_risk_warning": "この借入によりヘルスファクターが大きく下がります。",
+			"borrow_exceeds_power": "金額が借入可能額を超えています。",
+			"borrow_below_minimum": "金額が最低借入額を下回っています。",
+			"borrow_prices_unavailable": "価格は一時的に利用できません。読み込まれるまで借入は無効になっています。",
+			"borrow_high_risk_warning": "この借入によりポジションが清算に近づきます。",
+			"borrow_risk_confirm": "この借入によって清算リスクが高まることを理解しています。",
+			"starting_to_borrow": "ローンを送信しています…",
+			"borrow_started": "ローンが有効化されています。",
+			"withdraw_review": "引き出し内容を確認",
+			"withdraw_review_subtitle": "引き出す",
+			"withdrawing": "引き出し中",
+			"starting_to_withdraw": "引き出しを送信しています…",
+			"withdraw_started": "引き出しが処理されています。",
+			"supplied_label": "供給済み",
+			"withdrawable": "",
+			"reserved_by_debt": "未決済の負債により確保済み",
+			"withdraw_exceeds_free_collateral": "負債が残っている間は、自由担保額を超えて引き出すことはできません。",
+			"withdraw_exceeds_supplied": "金額が供給残高を超えています。",
+			"withdraw_prices_unavailable": "価格は一時的に利用できません。読み込まれるまで引き出しは無効になっています。",
+			"withdraw_risk_info": "担保を引き出すとヘルスファクターが下がります。下がりすぎると残りの担保が清算される可能性があります。",
+			"withdraw_at_risk_warning": "この引き出しによりヘルスファクターが大きく下がります。",
+			"withdraw_high_risk_warning": "この引き出しによりポジションが清算に近づきます。",
+			"withdraw_risk_confirm": "この引き出しによって清算リスクが高まることを理解しています。",
+			"repay_review": "返済内容を確認",
+			"repay_review_subtitle": "返済する",
+			"repaying": "返済中",
+			"starting_to_repay": "返済を送信しています…",
+			"repay_started": "返済が処理されています。",
+			"current_debt": "現在の負債",
+			"interest_accrued": "発生した利息",
+			"debt_after_repay": "返済後の負債",
+			"repay_exceeds_debt": "金額が未払いの負債を超えています。",
+			"repay_prices_unavailable": "価格は一時的に利用できません。読み込まれるまで返済は無効になっています。"
+		},
+		"info": {
+			"title": "Liquidiumとは",
+			"description": "Liquidiumは分散型かつノンカストディアルなレンディングプロトコルで、複数のブロックチェーンネットワークをまたいで供給または借入ができます。Internet Computer上に構築されており、中央集権的なブリッジやラップドトークンなしでクロスチェーンレンディングを実現します。",
+			"fact_1_title": "BTCで収益を得る",
+			"fact_1_description": "Bitcoinを貸し出して、担保過剰型ローンから利回りを得られます。",
+			"fact_2_title": "ノンカストディアル",
+			"fact_2_description": "預け入れはオンチェーンのスマートコントラクトによって保護されており、中央集権的な管理はありません。",
+			"fact_3_title": "ネイティブ、クロスチェーン",
+			"fact_3_description": "資産はそれぞれのネイティブチェーン上に留まるため、一方で供給し、もう一方で借り入れることができます。"
 		}
 	},
 	"vaults": {
@@ -2087,9 +2807,7 @@
 			"title_empty_3": "",
 			"description_empty": "まだトークンをステークしていないようです",
 			"full_history": "全履歴を表示",
-			"recent_history": "全履歴を閉じる",
-			"harvest_autopilot_carousel_slide_title": "Harvest Autopilot Yield FarmingでOISYを稼ぐ",
-			"harvest_autopilot_carousel_slide_cta": "詳しく見る"
+			"recent_history": "全履歴を閉じる"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "トークンの引き出し中にエラーが発生しました。",
@@ -2179,6 +2897,222 @@
 		"errors": {
 			"unknown": "申し訳ありませんが、LLMから応答を取得中に問題が発生しました。",
 			"no_response": "申し訳ありませんが、LLMから応答がありませんでした。"
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "メモ",
+			"note": "メモ",
+			"add_title": "新しいメモを追加",
+			"edit_note": "メモを編集",
+			"delete_note": "メモを削除",
+			"delete_confirm_text": "メモ「$note」が削除されます。この操作は取り消せません。",
+			"back": "戻る",
+			"empty_title": "メモはまだありません",
+			"empty_subtitle": "ウォレットと一緒に大切な情報を安全に保管できる、プライベートで暗号化されたメモを作成しましょう。",
+			"empty_add": "新しいメモを追加",
+			"unlocking_title": "メモのロックを解除しています",
+			"unlocking_subtitle": "プライベートな暗号化キーを設定しています。少しだけお待ちください。",
+			"add_note": "メモを追加",
+			"note_label": "メモ",
+			"placeholder": "メモを入力…",
+			"search_placeholder": "メモを検索",
+			"no_results": "検索条件に一致するメモはありません。",
+			"encrypted_lead": "エンドツーエンドで暗号化されています。",
+			"encrypted_info": "メモを読めるのはあなただけです。",
+			"created": "$date に作成",
+			"updated": "$date に更新",
+			"created_updated": "作成: $created · 更新: $updated",
+			"too_long": "メモは$maxCharacters文字以内にしてください。",
+			"cap_reached": "保存できるメモの上限（$max件）に達しました。新しいメモを追加するには、1件削除してください。",
+			"decryption_failed": "このメモを復号できませんでした",
+			"unavailable_title": "メモは一時的にご利用いただけません"
+		},
+		"alt": {
+			"edit": "メモを編集",
+			"delete": "メモを削除"
+		},
+		"error": {
+			"load": "メモを読み込めませんでした。もう一度お試しください。",
+			"save": "メモを保存できませんでした。もう一度お試しください。",
+			"delete": "メモを削除できませんでした。もう一度お試しください。",
+			"rate_limited": "リクエストの上限に達しました。しばらく待ってからもう一度お試しください。"
+		},
+		"share": {
+			"text": {
+				"share_note": "メモを共有",
+				"snapshot_caption": "現在の状態のメモのコピーを共有します。後でメモを編集または削除しても、このリンクは変わりません。",
+				"cap_reached": "有効な共有リンクの上限（$max件）に達しました。期限切れまたは使用済みになると解放されます。",
+				"expires_after": "リンクの有効期限",
+				"expiry_1h": "",
+				"expiry_24h": "24時間",
+				"expiry_7d": "7日間",
+				"expiry_30d": "30日間",
+				"single_use": "1回限り",
+				"single_use_option": "リンクは1回しか使用できません",
+				"protects_body": "このリンクを受け取った人だけがメモを読めます。",
+				"create_link": "リンクを作成",
+				"link_ready_title": "共有リンクの準備ができました",
+				"link_ready_subtitle": "このリンクを持つ人は誰でもメモを読めます",
+				"link_copied": "リンクをコピーしました！",
+				"recap_expires_in": "あと$durationで期限切れ",
+				"recap_single_use": "1回限り",
+				"reminder": "$oisy_shortは共有後にこのリンクを復元したり無効化したりできません。使用されるか期限切れになると機能しなくなります。",
+				"done": "完了"
+			},
+			"error": {
+				"create": "共有リンクを作成できませんでした。もう一度お試しください。"
+			},
+			"recipient": {
+				"locked_title": "メモが共有されました",
+				"reveal": "メモを表示",
+				"revealed_title": "共有されたメモ",
+				"single_use_caveat": "1回限りのリンクです。このページを閉じるか再読み込みすると、メモは完全に失われます。必要な場合は今すぐコピーしてください。",
+				"copy_note": "メモをコピー",
+				"note_copied": "メモをコピーしました！",
+				"outro_title": "あなたの資産も同じように安全に守ります",
+				"outro_subtitle": "$oisy_shortはBitcoin、Ethereum、Solana、ICPなどに対応した、完全オンチェーンのセルフカストディウォレットです。",
+				"outro_feature_multichain": "Bitcoin、Ethereum、Solana、ICPを1か所で管理",
+				"outro_feature_onchain": "100%オンチェーン — 拡張機能もシードフレーズも不要",
+				"outro_feature_encrypted": "あなたの鍵とデータをエンドツーエンドで暗号化",
+				"discover": "OISYを見てみる",
+				"unavailable_title": "このリンクは期限切れか、すでに使用されています"
+			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"overview_window": "",
+			"overview_failed": "",
+			"overview_failed_hint": "",
+			"overview_open": "",
+			"overview_none": "",
+			"overview_count_one": "",
+			"overview_count_other": "",
+			"overview_claimed": "",
+			"select_token": "",
+			"create_title": "",
+			"share_title": "",
+			"preparing_title": "",
+			"empty_balance_title": "",
+			"empty_balance_description": "",
+			"no_supported_tokens_title": "",
+			"no_supported_tokens_description": "",
+			"expiration": "",
+			"expiry_24h": "",
+			"expiry_3d": "",
+			"expiry_7d": "",
+			"message": "",
+			"message_placeholder": "",
+			"total_estimated_fee": "",
+			"reserve_fee": "",
+			"payout_fee": "",
+			"fees_are_yours": "",
+			"reserved_by_tips": "",
+			"lapse_notice": "",
+			"generate": "",
+			"share_heading": "",
+			"copy_link": "",
+			"share_link": "",
+			"they_will_receive": "",
+			"no_wallet_needed_title": "",
+			"no_wallet_needed": "",
+			"scan_or_photo": "",
+			"expires_at": "",
+			"done": "",
+			"step_reserving": "",
+			"step_creating": "",
+			"step_saving": "",
+			"recovering_link": "",
+			"link_not_saved": "",
+			"reserve_failed": "",
+			"status_title": "",
+			"claim_title": "",
+			"claim_amount": "",
+			"claim_expires": "",
+			"claim_ready_title": "",
+			"claim_ready_title_plain": "",
+			"claim_ready_description": "",
+			"claim_token": "",
+			"claim_status": "",
+			"open_or_create": "",
+			"open_or_create_hint": "",
+			"claimer_disclosure": "",
+			"claimed_title": "",
+			"claimed_description": "",
+			"claiming_title": "",
+			"claiming_description": "",
+			"claim_retry": "",
+			"received_title": "",
+			"received_description": "",
+			"network": "",
+			"status_completed": "",
+			"take_me_to_wallet": "",
+			"unavailable_title": "",
+			"unavailable_description": "",
+			"uncovered_title": "",
+			"uncovered_description": "",
+			"short_balance_title": "",
+			"short_balance_description": "",
+			"claim_failed_title": "",
+			"claim_failed": "",
+			"unreachable_title": "",
+			"unreachable_description": "",
+			"history_title": "",
+			"history_empty": "",
+			"history_failed": "",
+			"group_failed": "",
+			"group_failed_hint": "",
+			"failure_uncovered": "",
+			"failure_insufficient_funds": "",
+			"failure_transfer_failed": "",
+			"group_open": "",
+			"group_claimed": "",
+			"group_expired": "",
+			"status_reserved": "",
+			"status_failed": "",
+			"status_claimed": "",
+			"status_expired": "",
+			"status_cancelled": "",
+			"claimed_by": "",
+			"tip_amount": "",
+			"expires_in": "",
+			"link_unavailable": "",
+			"link_recovery_failed": "",
+			"cancel_tip": "",
+			"cancel_failed": "",
+			"cancelled_toast": "",
+			"cancelled_allowance_kept": "",
+			"token_unavailable": "",
+			"message_too_long": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": "",
+			"rate_limited": "",
+			"rate_limited_title": ""
+		},
+		"alt": {
+			"intro_illustration": "",
+			"claim_illustration": "",
+			"claim_failed_illustration": "",
+			"welcome_illustration": ""
+		},
+		"share": {
+			"title": "",
+			"description": ""
+		},
+		"welcome": {
+			"title": "",
+			"heading": "",
+			"body": "",
+			"point_access_title": "",
+			"point_access_text": "",
+			"point_stay_title": "",
+			"point_stay_text": "",
+			"cta": ""
 		}
 	}
 }

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { SEND_FEE_INFO } from '$lib/constants/test-ids.constants';

@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { ProgressSteps as ProgressStepsCmp, type ProgressStep } from '@dfinity/gix-components';
 	import { untrack } from 'svelte';
+	import ProgressStepsCmp from '$lib/components/ui/ProgressSteps.svelte';
 	import StaticSteps from '$lib/components/ui/StaticSteps.svelte';
+	import type { ProgressStep } from '$lib/types/progress-step';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import type { StaticStep } from '$lib/types/steps';
 	import type { NonEmptyArray } from '$lib/types/utils';

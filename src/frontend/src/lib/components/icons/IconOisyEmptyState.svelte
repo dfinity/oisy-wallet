@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Theme, themeStore } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import { themeStore } from '$lib/stores/theme.store';
+	import { Theme } from '$lib/types/theme';
 
 	// soften icon for dark mode
 	let isDarkMode = $derived(nonNullish($themeStore) ? $themeStore === Theme.DARK : false);

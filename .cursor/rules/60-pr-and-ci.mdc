@@ -1,0 +1,15 @@
+---
+description: PR title/body convention and CI gates that must pass.
+globs: ['**/*']
+alwaysApply: true
+---
+
+# Cursor — PR & CI
+
+Authoritative source: [docs/ai/pr-and-ci.md](mdc:docs/ai/pr-and-ci.md).
+
+Read it before opening a PR. It covers the CI-enforced title regex, the
+required body sections, the local quality gates, the CI job catalog, and
+the force-push policy. Title regex lives in
+[`.github/workflows/pr-checks.yml`](mdc:.github/workflows/pr-checks.yml);
+body template is [`.github/pull_request_template.md`](mdc:.github/pull_request_template.md).

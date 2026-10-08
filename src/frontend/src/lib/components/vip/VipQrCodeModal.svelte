@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Modal, QRCode } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import IconBinanceYellow from '$lib/components/icons/IconBinanceYellow.svelte';
@@ -9,6 +8,8 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
+	import QrCode from '$lib/components/ui/QrCode.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { CODE_REGENERATE_INTERVAL_IN_SECONDS } from '$lib/constants/app.constants';
 	import {
@@ -31,7 +32,7 @@
 	let { codeType = QrCodeType.VIP }: Props = $props();
 
 	let counter = $state(CODE_REGENERATE_INTERVAL_IN_SECONDS);
-	let countdown: NodeJS.Timeout | undefined = $state();
+	let countdown: NodeJS.Timeout | undefined;
 	const maxRetriesToGetRewardCode = 3;
 	let retriesToGetRewardCode = $state(0);
 
@@ -49,8 +50,35 @@
 		}
 	};
 
+	// Recursive `setTimeout` pattern (instead of `setInterval`) to serialize async ticks
+	// and avoid overlapping executions when the callback awaits (e.g. `regenerateCode`).
+	// The `countdown === id` check is what guarantees a single active timer:
+	// if `regenerateCode` or `stopCountdown` reassigns/clears `countdown` during the await,
+	// this callback will not reschedule on top of it.
+	const scheduleNext = (): void => {
+		if (nonNullish(countdown)) {
+			return;
+		}
+
+		const id: NodeJS.Timeout = setTimeout(async () => {
+			await intervalFunction();
+
+			if (countdown === id) {
+				countdown = undefined;
+				scheduleNext();
+			}
+		}, 1000);
+
+		countdown = id;
+	};
+
+	const stopCountdown = () => {
+		clearTimeout(countdown);
+		countdown = undefined;
+	};
+
 	const regenerateCode = async () => {
-		clearInterval(countdown);
+		stopCountdown();
 
 		if (retriesToGetRewardCode >= maxRetriesToGetRewardCode) {
 			return;
@@ -58,7 +86,7 @@
 
 		await generateCode();
 		counter = CODE_REGENERATE_INTERVAL_IN_SECONDS;
-		countdown = setInterval(intervalFunction, 1000);
+		scheduleNext();
 	};
 
 	const intervalFunction = async () => {
@@ -71,19 +99,24 @@
 
 	const onVisibilityChange = () => {
 		if (document.hidden) {
-			clearInterval(countdown);
-		} else {
-			countdown = setInterval(intervalFunction, 1000);
+			stopCountdown();
+			return;
 		}
+
+		if (retriesToGetRewardCode >= maxRetriesToGetRewardCode) {
+			return;
+		}
+
+		scheduleNext();
 	};
 
 	onMount(regenerateCode);
-	onDestroy(() => clearInterval(countdown));
+	onDestroy(stopCountdown);
 
 	const qrCodeUrl = $derived(`${window.location.origin}/?code=${code}`);
 </script>
 
-<svelte:window onvisibilitychange={onVisibilityChange} />
+<svelte:document onvisibilitychange={onVisibilityChange} />
 
 <Modal onClose={modalStore.close}>
 	{#snippet title()}
@@ -97,7 +130,7 @@
 	<ContentWithToolbar>
 		<div class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-full rounded-xl bg-white p-4">
 			{#if nonNullish(code)}
-				<QRCode value={qrCodeUrl}>
+				<QrCode value={qrCodeUrl}>
 					{#snippet logo()}
 						<div class="flex items-center justify-center rounded-full bg-primary p-2">
 							{#if codeType === QrCodeType.VIP}
@@ -107,7 +140,7 @@
 							{/if}
 						</div>
 					{/snippet}
-				</QRCode>
+				</QrCode>
 			{/if}
 		</div>
 

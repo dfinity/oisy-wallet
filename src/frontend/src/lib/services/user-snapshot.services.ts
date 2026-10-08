@@ -30,7 +30,8 @@ import {
 	btcAddressTestnet,
 	ethAddress,
 	solAddressDevnet,
-	solAddressMainnet
+	solAddressMainnet,
+	xrpAddressMainnet
 } from '$lib/derived/address.derived';
 import { authIdentity } from '$lib/derived/auth.derived';
 import { exchanges } from '$lib/derived/exchange.derived';
@@ -53,10 +54,13 @@ import {
 	isNetworkIdSOLDevnet,
 	isNetworkIdSOLMainnet,
 	isNetworkIdSepolia,
-	isNetworkIdSolana
+	isNetworkIdSolana,
+	isNetworkIdXRPMainnet,
+	isNetworkIdXrp
 } from '$lib/utils/network.utils';
 import { findNftsByToken } from '$lib/utils/nfts.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 import { get } from 'svelte/store';
@@ -158,7 +162,9 @@ const getLastTransactionsByToken = ({
 			? (get(solTransactionsStore)?.[tokenId] ?? []).map(({ data: transaction }) => transaction)
 			: isNetworkIdICP(networkId)
 				? (get(icTransactionsStore)?.[tokenId] ?? []).map(({ data: transaction }) => transaction)
-				: [];
+				: isNetworkIdXrp(networkId)
+					? (get(xrpTransactionsStore)?.[tokenId] ?? []).map(({ data: transaction }) => transaction)
+					: [];
 };
 
 // Currently we have not way of differentiate more details for the token (for example the standard or the ID for NFTs).
@@ -210,7 +216,9 @@ const toAnySnapshot = ({
 							? get(solAddressMainnet)
 							: isNetworkIdICP(networkId)
 								? identity.getPrincipal().toString()
-								: undefined;
+								: isNetworkIdXRPMainnet(networkId)
+									? get(xrpAddressMainnet)
+									: undefined;
 
 	if (isNullish(account)) {
 		return;

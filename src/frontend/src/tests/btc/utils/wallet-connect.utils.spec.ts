@@ -1,0 +1,287 @@
+import {
+	bitcoinSignedMessageHash,
+	buildBtcAccountAddresses,
+	deriveBtcPublicKey,
+	encodeRecoverableSignature,
+	resolvePsbtInputPrevout
+} from '$btc/utils/wallet-connect.utils';
+import {
+	BTC_MAINNET_NETWORK_ID,
+	BTC_REGTEST_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID
+} from '$env/networks/networks.btc.env';
+import * as signerEnv from '$env/signer.env';
+import * as signerConstants from '$lib/constants/signer.constants';
+import type { SignerMasterPubKeys } from '$lib/types/signer';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockPrincipal } from '$tests/mocks/identity.mock';
+import { hmac } from '@noble/hashes/hmac';
+import { sha256 } from '@noble/hashes/sha2';
+import { etc, getPublicKey, sign } from '@noble/secp256k1';
+import { networks, payments, Transaction } from 'bitcoinjs-lib';
+
+describe('btc wallet-connect.utils', () => {
+	const previousHmacSha256Sync = etc.hmacSha256Sync;
+
+	beforeAll(() => {
+		// `@noble/secp256k1` v2 needs an explicit sync HMAC implementation to sign. Only the tests sign
+		// here (production only recovers public keys, which needs no HMAC), so we wire it for the suite
+		// and restore the previous value afterwards to avoid leaking state into other test files.
+		// eslint-disable-next-line local-rules/prefer-object-params -- external callback signature
+		etc.hmacSha256Sync = (key: Uint8Array, ...messages: Uint8Array[]) =>
+			hmac(sha256, key, etc.concatBytes(...messages));
+	});
+
+	afterAll(() => {
+		etc.hmacSha256Sync = previousHmacSha256Sync;
+	});
+
+	describe('bitcoinSignedMessageHash', () => {
+		it('produces the documented digest for a known message', () => {
+			// Reference vector for the standard Bitcoin signed-message hashing of "hello".
+			const hash = bitcoinSignedMessageHash('hello');
+
+			expect(Buffer.from(hash).toString('hex')).toBe(
+				'cf0447ec85f0ce7150a257db32ebfcb7523dae17c36dbd1be598779fec0484f4'
+			);
+		});
+
+		it('is deterministic for the same message', () => {
+			expect(bitcoinSignedMessageHash('test')).toEqual(bitcoinSignedMessageHash('test'));
+		});
+	});
+
+	describe('encodeRecoverableSignature', () => {
+		const privateKey = Uint8Array.from(
+			Buffer.from('0000000000000000000000000000000000000000000000000000000000000001', 'hex')
+		);
+
+		it('recovers the recovery id and produces a 65-byte hex signature', () => {
+			const messageHash = bitcoinSignedMessageHash('hello');
+			const publicKey = getPublicKey(privateKey, true);
+
+			const recovered = sign(messageHash, privateKey);
+			const rawSignature = recovered.toCompactRawBytes();
+
+			const encoded = encodeRecoverableSignature({
+				signature: rawSignature,
+				messageHash,
+				publicKey
+			});
+
+			expect(encoded).toHaveLength(130);
+			expect(encoded).toMatch(/^[0-9a-f]+$/);
+
+			const decoded = Buffer.from(encoded, 'hex');
+
+			expect(decoded).toHaveLength(65);
+			// Header byte for a compressed key: 27 + recId + 4.
+			expect(decoded[0]).toBe(27 + (recovered.recovery ?? 0) + 4);
+			expect(Uint8Array.from(decoded.subarray(1))).toEqual(rawSignature);
+		});
+
+		it('throws when no recovery id matches the public key', () => {
+			const messageHash = bitcoinSignedMessageHash('hello');
+			const wrongPublicKey = getPublicKey(
+				Uint8Array.from(
+					Buffer.from('0000000000000000000000000000000000000000000000000000000000000002', 'hex')
+				),
+				true
+			);
+			const rawSignature = sign(messageHash, privateKey).toCompactRawBytes();
+
+			expect(() =>
+				encodeRecoverableSignature({
+					signature: rawSignature,
+					messageHash,
+					publicKey: wrongPublicKey
+				})
+			).toThrow();
+		});
+
+		it('throws on a signature of unexpected length', () => {
+			expect(() =>
+				encodeRecoverableSignature({
+					signature: new Uint8Array(10),
+					messageHash: bitcoinSignedMessageHash('hello'),
+					publicKey: getPublicKey(privateKey, true)
+				})
+			).toThrow();
+		});
+	});
+
+	describe('buildBtcAccountAddresses', () => {
+		const mockMasterPubKey: NonNullable<SignerMasterPubKeys['key_1']> = {
+			ecdsa: {
+				secp256k1: {
+					pubkey: '02f9ac345f6be6db51e1c5612cddb59e72c3d0d493c994d12035cf13257e3b1fa7'
+				}
+			},
+			schnorr: {
+				ed25519: { pubkey: '6c0824beb37621bcca6eecc237ed1bc4e64c9c59dcb85344aa7f9cc8278ee31f' }
+			}
+		};
+
+		beforeEach(() => {
+			vi.spyOn(signerConstants, 'SIGNER_MASTER_PUB_KEY', 'get').mockReturnValue(mockMasterPubKey);
+			vi.spyOn(signerEnv, 'SIGNER_CANISTER_DERIVATION_PATH', 'get').mockReturnValue([
+				0, 0, 0, 0, 0, 96, 0, 209, 1, 1
+			]);
+		});
+
+		it('returns an empty list when the address is nullish', () => {
+			expect(
+				buildBtcAccountAddresses({
+					address: undefined,
+					principal: mockPrincipal,
+					networkId: BTC_MAINNET_NETWORK_ID
+				})
+			).toEqual([]);
+			expect(
+				buildBtcAccountAddresses({
+					address: null,
+					principal: mockPrincipal,
+					networkId: BTC_MAINNET_NETWORK_ID
+				})
+			).toEqual([]);
+		});
+
+		it('builds the Reown getAccountAddresses payload for a P2WPKH address with the mainnet path', () => {
+			const expectedPublicKey = Buffer.from(
+				deriveBtcPublicKey({ principal: mockPrincipal })
+			).toString('hex');
+
+			const result = buildBtcAccountAddresses({
+				address: mockBtcAddress,
+				principal: mockPrincipal,
+				networkId: BTC_MAINNET_NETWORK_ID
+			});
+
+			expect(result).toEqual([
+				{
+					address: mockBtcAddress,
+					publicKey: expectedPublicKey,
+					path: "m/84'/0'/0'/0/0",
+					intention: 'payment'
+				}
+			]);
+		});
+
+		it.each([BTC_TESTNET_NETWORK_ID, BTC_REGTEST_NETWORK_ID])(
+			'advertises the testnet coin type for test networks',
+			(networkId) => {
+				const [{ path }] = buildBtcAccountAddresses({
+					address: mockBtcAddress,
+					principal: mockPrincipal,
+					networkId
+				});
+
+				expect(path).toBe("m/84'/1'/0'/0/0");
+			}
+		);
+
+		it('derives a 33-byte compressed public key', () => {
+			const [{ publicKey }] = buildBtcAccountAddresses({
+				address: mockBtcAddress,
+				principal: mockPrincipal,
+				networkId: BTC_MAINNET_NETWORK_ID
+			});
+
+			// Compressed secp256k1 public key: 33 bytes => 66 hex chars, prefixed with 0x02 / 0x03.
+			expect(publicKey).toHaveLength(66);
+			expect(['02', '03']).toContain(publicKey.slice(0, 2));
+		});
+	});
+
+	describe('resolvePsbtInputPrevout', () => {
+		const script = payments.p2wpkh({
+			pubkey: Buffer.from(
+				'0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798',
+				'hex'
+			),
+			network: networks.bitcoin
+		}).output as Buffer;
+
+		const otherScript = payments.p2wpkh({
+			pubkey: Buffer.from(
+				'03d01115d548e7561b15c38f004d734633687cf4419620095bc5b0f47070afe85a',
+				'hex'
+			),
+			network: networks.bitcoin
+		}).output as Buffer;
+
+		const nonWitnessUtxo = ({ script, value }: { script: Buffer; value: number }): Buffer => {
+			const tx = new Transaction();
+			tx.addInput(Buffer.alloc(32, 1), 0);
+			tx.addOutput(script, value);
+
+			return tx.toBuffer();
+		};
+
+		it('reads the witnessUtxo of an input carrying only that field', () => {
+			expect(
+				resolvePsbtInputPrevout({ input: { witnessUtxo: { script, value: 100_000 } }, vout: 0 })
+			).toStrictEqual({ prevout: { script, value: 100_000n }, ambiguous: false });
+		});
+
+		it('leaves an input carrying only a nonWitnessUtxo unpriced', () => {
+			expect(
+				resolvePsbtInputPrevout({
+					input: { nonWitnessUtxo: nonWitnessUtxo({ script, value: 100_000 }) },
+					vout: 0
+				})
+			).toStrictEqual({ prevout: undefined, ambiguous: false });
+		});
+
+		it('reads the nonWitnessUtxo the signer consumes when both fields agree', () => {
+			const { prevout, ambiguous } = resolvePsbtInputPrevout({
+				input: {
+					witnessUtxo: { script, value: 100_000 },
+					nonWitnessUtxo: nonWitnessUtxo({ script, value: 100_000 })
+				},
+				vout: 0
+			});
+
+			expect(ambiguous).toBeFalsy();
+			expect(prevout?.value).toBe(100_000n);
+			expect(Buffer.from(prevout?.script ?? []).equals(script)).toBeTruthy();
+		});
+
+		it('reports an input as ambiguous when the two fields disagree on the value', () => {
+			expect(
+				resolvePsbtInputPrevout({
+					input: {
+						witnessUtxo: { script, value: 10_000 },
+						nonWitnessUtxo: nonWitnessUtxo({ script, value: 100_000 })
+					},
+					vout: 0
+				})
+			).toStrictEqual({ prevout: undefined, ambiguous: true });
+		});
+
+		it('reports an input as ambiguous when the two fields disagree on the script', () => {
+			expect(
+				resolvePsbtInputPrevout({
+					input: {
+						witnessUtxo: { script, value: 100_000 },
+						nonWitnessUtxo: nonWitnessUtxo({ script: otherScript, value: 100_000 })
+					},
+					vout: 0
+				})
+			).toStrictEqual({ prevout: undefined, ambiguous: true });
+		});
+
+		it('reports an input as ambiguous when its nonWitnessUtxo cannot be read', () => {
+			expect(
+				resolvePsbtInputPrevout({
+					input: {
+						witnessUtxo: { script, value: 100_000 },
+						nonWitnessUtxo: nonWitnessUtxo({ script, value: 100_000 })
+					},
+					// The previous transaction has no output at this index.
+					vout: 1
+				})
+			).toStrictEqual({ prevout: undefined, ambiguous: true });
+		});
+	});
+});

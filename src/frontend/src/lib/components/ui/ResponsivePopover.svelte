@@ -1,21 +1,22 @@
 <script lang="ts">
-	import { Popover } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
 	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
+	import Popover from '$lib/components/ui/Popover.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 
 	interface Props {
 		visible: boolean;
 		button?: HTMLButtonElement;
 		content: Snippet;
+		direction?: 'rtl' | 'ltr';
 	}
 
-	let { visible = $bindable(), button, content }: Props = $props();
+	let { visible = $bindable(), button, content, direction = 'rtl' }: Props = $props();
 </script>
 
 <Responsive up="sm">
-	<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
+	<Popover anchor={button} {direction} invisibleBackdrop bind:visible>
 		{@render content()}
 	</Popover>
 </Responsive>

@@ -1,7 +1,13 @@
 import type { solTransactionTypes } from '$lib/schema/transaction.schema';
 import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
+import { SOLANA_MAX_SUPPORTED_TRANSACTION_VERSION } from '$sol/constants/sol.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolAddress } from '$sol/types/address';
+import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
+import type {
+	SolNetBalanceChange,
+	SolTransactionSummary
+} from '$sol/types/sol-transaction-summary';
 import type { SplTokenAddress } from '$sol/types/spl';
 import {
 	getBase58Decoder,
@@ -30,6 +36,12 @@ export interface SolTransactionUi extends TransactionUiCommon {
 	// For Solana transactions, we want to show the owner instead of the ATA address
 	fromOwner?: SolAddress;
 	toOwner?: SolAddress;
+	// The one-line summary, the per-asset net and the readable instruction list, derived once at
+	// fetch time from the raw transaction. The raw is not kept, so nothing can re-derive them:
+	// they either travel with the record or they are gone.
+	summary?: SolTransactionSummary;
+	netChanges?: SolNetBalanceChange[];
+	instructions?: SolInstructionSummary[];
 }
 
 const mockSolSignature = () => {
@@ -43,7 +55,7 @@ const aux = async () => {
 	const { getTransaction } = solanaHttpRpc('mainnet');
 
 	return await getTransaction(mockSolSignature(), {
-		maxSupportedTransactionVersion: 0,
+		maxSupportedTransactionVersion: SOLANA_MAX_SUPPORTED_TRANSACTION_VERSION,
 		encoding: 'jsonParsed'
 	}).send();
 };
@@ -62,6 +74,18 @@ export type SolSignature = ReturnType<
 	GetSignaturesForAddressApi['getSignaturesForAddress']
 >[number];
 
+export type SolSignatureWithSources = SolSignature & {
+	// The addresses (the wallet, or the token accounts) whose history returned this signature.
+	sources: SolAddress[];
+};
+
+export interface SolResolvedTransaction {
+	transaction: SolTransactionUi;
+	// The sources whose history returned the signature, as the pager tagged it: the record belongs
+	// to the token of each of them.
+	sources: SolAddress[];
+}
+
 export type SolSignedTransaction = Transaction &
 	FullySignedTransaction &
 	TransactionWithinSizeLimit &
@@ -72,6 +96,37 @@ export interface MappedSolTransaction {
 	payer?: SolAddress;
 	source?: SolAddress;
 	destination?: SolAddress;
+	// The SPL token mint moved by the transaction, when it is a token (not native SOL)
+	// transfer. Lets the review screen show the correct token metadata instead of
+	// defaulting to native SOL.
+	tokenAddress?: SplTokenAddress;
+	// `true` when the transaction grants a spending allowance (`Approve`/`ApproveChecked`)
+	// rather than transferring funds. The `destination` then holds the delegate (spender),
+	// so the review must label it as an approval, not a send.
+	isApproval?: boolean;
+	// `true` when the message contains at least one instruction whose effects the
+	// review screen cannot display. Unlike `ambiguous`, this does not block signing:
+	// it surfaces a warning so the user knows the review is incomplete and can decide.
+	unreviewed?: boolean;
+	// Compute Budget directives, set per instruction and combined at message level into
+	// `prioritizationFee`. They never move funds but they price the transaction. At message
+	// level `computeUnitLimit` is the *resolved* budget, defaulted and clamped as the runtime
+	// would, and it is kept so the network's per-compute-unit estimate can be priced the same way.
+	computeUnitPrice?: bigint;
+	computeUnitLimit?: bigint;
+	// The prioritisation fee, in lamports, the message will be charged on top of the base
+	// transaction fee. Only set at message level, where the whole instruction list, or the config
+	// of a version 1 message, is known.
+	prioritizationFee?: bigint;
+	// What OISY itself would pay to prioritise this same message, in lamports, from the network's
+	// recent fees. The review compares the requested fee against it. Absent when the estimate
+	// could not be obtained.
+	prioritizationFeeEstimate?: bigint;
+	// `true` when the message bundles instructions that disagree on source,
+	// destination, payer or action type. The summary keeps a single value per field,
+	// so such a transaction cannot be faithfully represented on the review screen and
+	// must not be signed without the user seeing every fund movement.
+	ambiguous?: boolean;
 }
 
 export interface SolMappedTransaction {
@@ -79,4 +134,57 @@ export interface SolMappedTransaction {
 	from: SolAddress;
 	to: SolAddress;
 	tokenAddress?: SplTokenAddress;
+}
+
+/**
+ * One value movement, as named by a single transfer instruction.
+ *
+ * OISY decodes instructions in two representations that never meet: `@solana/kit` objects for an
+ * unsigned message, RPC JSON for anything the network has already run. They do not have to. They
+ * meet here, as legs, which is the narrowest shape the party rules need.
+ */
+export interface SolTransferLeg {
+	source: SolAddress;
+	destination: SolAddress;
+	amount: bigint;
+	tokenAddress?: SplTokenAddress;
+	// Whose each end was at the transfer, where the state before the transaction or an opening
+	// earlier in it says. An address can hold more than one account within one message, closed and
+	// opened again for somebody else, and whose it is at the end says nothing about whose it was
+	// when an earlier transfer used it.
+	sourceHolder?: SolAddress;
+	destinationHolder?: SolAddress;
+	// Whether no account was open at that end at the transfer: closed earlier in the message, or
+	// opened there only later. Such an address is nobody's, which is not the same as nobody having
+	// read whose it was.
+	sourceNoAccount?: boolean;
+	destinationNoAccount?: boolean;
+}
+
+export interface SolTransferParty {
+	address: SolAddress;
+	// The wallet owning the account, where it is known. SPL transfers name token accounts, and a
+	// user recognises a wallet address where nobody recognises their own associated token account.
+	owner?: SolAddress;
+	// Whether the account is one of the user's own. Our own account legitimately appears among the
+	// destinations of a swap, where it is what the user receives, so it is marked rather than
+	// dropped.
+	own: boolean;
+}
+
+/**
+ * Who a transaction spends from and who it pays.
+ *
+ * The two rules are asymmetric on purpose. Sources answers "what of ours is being spent", so a
+ * counterparty paying into a pool never appears there. Destinations answers "where does the value
+ * end up", counting every leg we are on either side of, which is the only way a swap can show what
+ * the user receives and not only what they spend.
+ */
+export interface SolTransferParties {
+	sources: SolTransferParty[];
+	destinations: SolTransferParty[];
+	// `true` when the lists were built from top-level instructions alone. A routed swap performs
+	// its transfers inside cross-program invocations, so such lists can be empty for a message that
+	// moves four amounts, and an empty list reads as an answer rather than as a gap.
+	partial: boolean;
 }

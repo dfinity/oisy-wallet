@@ -64,8 +64,8 @@ describe('EarningPotentialCard', () => {
 			props: { highestEarningPotentialUsd: 30 }
 		});
 
-		// 30 -> "+ $30.00"
-		expect(screen.getByText('+ $30.00/year')).toBeInTheDocument();
+		// 30 -> "+$30.00"
+		expect(screen.getByText('+$30.00/year')).toBeInTheDocument();
 	});
 
 	it('handles null earning potential gracefully', () => {

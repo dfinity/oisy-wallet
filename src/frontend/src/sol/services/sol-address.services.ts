@@ -1,4 +1,3 @@
-import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_KEY_ID,
@@ -6,15 +5,17 @@ import {
 	SOLANA_MAINNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
 import { getSchnorrPublicKey } from '$lib/api/signer.api';
-import { SIGNER_MASTER_PUB_KEY } from '$lib/constants/signer.constants';
 import { deriveSolAddress } from '$lib/ic-pub-key/src/cli';
-import { loadTokenAddress, type LoadTokenAddressParams } from '$lib/services/address.services';
+import {
+	deriveTokenAddress,
+	loadTokenAddress,
+	type LoadTokenAddressParams
+} from '$lib/services/address.services';
 import {
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
 	solAddressMainnetStore
 } from '$lib/stores/address.store';
-import { i18n } from '$lib/stores/i18n.store';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
@@ -22,36 +23,32 @@ import type { ResultSuccess } from '$lib/types/utils';
 import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
 import type { SolAddress } from '$sol/types/address';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
-import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { getAddressDecoder } from '@solana/kit';
-import { get } from 'svelte/store';
 
 const getSolanaPublicKey = async ({
 	derivationPath,
 	identity,
 	...rest
-}: CanisterApiFunctionParams<{ derivationPath: string[] }>): Promise<Uint8Array> => {
-	if (FRONTEND_DERIVATION_ENABLED && nonNullish(SIGNER_MASTER_PUB_KEY)) {
-		// We use the same logic of the canister method. The potential error will be handled in the consumer.
-		assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
-
-		// HACK: This is not working for Local environment for now, because the library is not aware of the `dfx_test_1` public key (used by Local deployment).
-		const publicKey = deriveSolAddress({
-			user: identity.getPrincipal().toString(),
-			derivationPath: [SOLANA_DERIVATION_PATH_PREFIX, ...derivationPath],
-			pubkey: SIGNER_MASTER_PUB_KEY.schnorr.ed25519.pubkey
-		});
-
-		return Buffer.from(publicKey, 'hex');
-	}
-
-	return await getSchnorrPublicKey({
-		...rest,
+}: CanisterApiFunctionParams<{ derivationPath: string[] }>): Promise<Uint8Array> =>
+	await deriveTokenAddress<Uint8Array>({
 		identity,
-		keyId: SOLANA_KEY_ID,
-		derivationPath: [SOLANA_DERIVATION_PATH_PREFIX, ...derivationPath]
+		deriveAddress: ({ user, masterPubKey }) => {
+			const publicKey = deriveSolAddress({
+				user,
+				derivationPath: [SOLANA_DERIVATION_PATH_PREFIX, ...derivationPath],
+				pubkey: masterPubKey.schnorr.ed25519.pubkey
+			});
+
+			return Buffer.from(publicKey, 'hex');
+		},
+		getSignerAddress: () =>
+			getSchnorrPublicKey({
+				...rest,
+				identity,
+				keyId: SOLANA_KEY_ID,
+				derivationPath: [SOLANA_DERIVATION_PATH_PREFIX, ...derivationPath]
+			})
 	});
-};
 
 const getSolAddress = async ({
 	identity,

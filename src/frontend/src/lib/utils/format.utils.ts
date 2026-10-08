@@ -85,13 +85,23 @@ export const shortenWithMiddleEllipsis = ({
 		: text;
 };
 
-const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 	month: 'short',
 	day: 'numeric',
-	year: 'numeric',
+	year: 'numeric'
+};
+
+const TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 	hour: '2-digit',
 	minute: '2-digit',
 	hour12: false
+};
+
+// Composed from the two halves rather than restated, so a caller that wants only
+// one of them cannot drift from the app's date style.
+const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+	...DATE_FORMAT_OPTIONS,
+	...TIME_FORMAT_OPTIONS
 };
 
 export const formatSecondsToDate = ({
@@ -127,6 +137,40 @@ export const formatNanosecondsToDate = ({
 }): string => {
 	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
 	return date.toLocaleDateString(language ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
+};
+
+/**
+ * A deadline split into its date and its time, for a sentence that joins the two with
+ * a word of its own.
+ *
+ * One `toLocaleString` call cannot give that sentence what it needs: the separator it
+ * puts between the halves belongs to the locale — a comma here, the word "at" there —
+ * so a string that wants to say "at" in its own language has to be handed the halves
+ * and join them itself.
+ *
+ * Day and month order is left to the locale rather than fixed, which is the whole
+ * point of going through `Intl`. Of the fifteen languages here, twelve lead with the
+ * day, three with the year, and English alone with the month.
+ */
+export const formatNanosecondsToDateAndTime = ({
+	nanoseconds,
+	language
+}: {
+	nanoseconds: bigint;
+	language?: Languages;
+}): { date: string; time: string } => {
+	// Not `date`, which is what the field below is called: one of the two would have
+	// been read as the other.
+	const instant = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
+	const locale = language ?? Languages.ENGLISH;
+
+	return {
+		date: instant.toLocaleDateString(locale, DATE_FORMAT_OPTIONS),
+		// Seconds are not in `TIME_FORMAT_OPTIONS` and are not wanted here either:
+		// this is a deadline days away, so to the second is a precision the reader
+		// has no use for and one more thing to read past.
+		time: instant.toLocaleTimeString(locale, TIME_FORMAT_OPTIONS)
+	};
 };
 
 export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
@@ -212,6 +256,49 @@ export const formatTimestampToDaysDifference = ({
 	const daysDifference = Math.ceil((dateUTC - todayUTC) / MILLISECONDS_IN_DAY);
 
 	return getRelativeTimeFormatter(language).format(daysDifference, 'day');
+};
+
+/** Formats a past nanosecond timestamp as a short narrow relative time
+ * (e.g. "20m ago", "3h ago", "2d ago").
+ *
+ * The largest unit that fits is picked (seconds < 60s, minutes < 60m,
+ * hours < 24h, otherwise days). Future timestamps (clock skew) clamp to
+ * the current moment to avoid emitting "in X" for a "created at" field.
+ */
+export const formatNanosecondsToShortRelativeTime = ({
+	nanoseconds,
+	currentDate,
+	language
+}: {
+	nanoseconds: bigint;
+	currentDate?: Date;
+	language?: Languages;
+}): string => {
+	const nowMs = currentDate?.getTime() ?? Date.now();
+	const elapsedMs = Math.max(0, nowMs - Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
+
+	const formatter = new Intl.RelativeTimeFormat(language ?? Languages.ENGLISH, {
+		numeric: 'always',
+		style: 'narrow'
+	});
+
+	const seconds = Math.floor(elapsedMs / 1000);
+	if (seconds < 60) {
+		return formatter.format(-seconds, 'second');
+	}
+
+	const minutes = Math.floor(seconds / 60);
+	if (minutes < 60) {
+		return formatter.format(-minutes, 'minute');
+	}
+
+	const hours = Math.floor(minutes / 60);
+	if (hours < 24) {
+		return formatter.format(-hours, 'hour');
+	}
+
+	const days = Math.floor(hours / 24);
+	return formatter.format(-days, 'day');
 };
 
 export const formatCurrency = ({

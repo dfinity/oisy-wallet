@@ -1,6 +1,11 @@
 #!/bin/bash
 
-POCKET_IC_SERVER_VERSION=12.0.0
+POCKET_IC_SERVER_VERSION="$(cargo metadata --locked --format-version 1 |
+  jq -r '[.packages[] | select(.name=="pocket-ic") | .version] | first')"
+if [ -z "${POCKET_IC_SERVER_VERSION}" ] || [ "${POCKET_IC_SERVER_VERSION}" = "null" ]; then
+  echo "Failed to determine pocket-ic version from Cargo metadata." >&2
+  exit 1
+fi
 BITCOIN_CANISTER_RELEASE="2024-08-30"
 BITCOIN_CANISTER_WASM="ic-btc-canister.wasm.gz"
 CYCLES_LEDGER_CANISTER_URL="$(jq -re .canisters.cycles_ledger.wasm dfx.json)"
@@ -29,6 +34,14 @@ export CYCLES_LEDGER_CANISTER_WASM_FILE="../../${CYCLES_LEDGER_CANISTER_WASM}"
 
 scripts/download-immutable.sh "${II_CANISTER_URL}" "${II_CANISTER_WASM}"
 export II_CANISTER_WASM_FILE="../../${II_CANISTER_WASM}"
+
+# The real ICRC-1/2 token ledger, for the tips tests. Pinned to the same IC
+# commit the local ckBTC/ckETH/ckUSDC ledgers are built from, read from that
+# script so the two cannot drift apart.
+IC_LEDGER_COMMIT="$(grep -m1 '^IC_COMMIT=' scripts/download.ckbtc.sh | cut -d'"' -f2)"
+ICRC1_LEDGER_WASM="icrc1-ledger.wasm.gz"
+scripts/download-immutable.sh "https://download.dfinity.systems/ic/${IC_LEDGER_COMMIT}/canisters/ic-icrc1-ledger.wasm.gz" "${ICRC1_LEDGER_WASM}"
+export ICRC1_LEDGER_WASM_FILE="../../${ICRC1_LEDGER_WASM}"
 
 # Download PocketIC server
 
@@ -68,5 +81,56 @@ export POCKET_IC_MUTE_SERVER=1
 
 # Run tests
 
-echo "Running backend integration tests."
-cargo test -p backend "${@}"
+# Each integration test spins up a PocketIC instance holding several canisters.
+# The PocketIC server's memory grows with every instance it has ever served
+# (deleted instances are not fully reclaimed), so running the whole `it` suite
+# in a single process eventually OOM-kills the server mid-run (connection reset
+# -> SIGABRT) — and the larger the backend wasm grows, the sooner it dies.
+#
+# On CI, bound that growth by running the integration suite in chunks: each
+# chunk is its own `cargo test --test it` process with a fresh PocketIC server,
+# so peak server memory is capped at one chunk's worth of instances. Explicit
+# cargo arguments (e.g. `-- --ignored candid`) and local runs keep the original
+# single-process behaviour.
+run_it_in_chunks() {
+  local chunk_size="${BACKEND_IT_TEST_CHUNK_SIZE:-40}"
+  if ! [[ "$chunk_size" =~ ^[1-9][0-9]*$ ]]; then
+    echo "BACKEND_IT_TEST_CHUNK_SIZE must be a positive integer (got '${chunk_size}')." >&2
+    return 1
+  fi
+  local tests=()
+  local line
+  while IFS= read -r line; do
+    tests+=("${line%: test}")
+  done < <(cargo test -p backend --test it -- --list 2>/dev/null | grep ': test$')
+
+  if [ "${#tests[@]}" -eq 0 ]; then
+    echo "Could not list integration tests; running them in a single process." >&2
+    cargo test -p backend --test it
+    return
+  fi
+
+  echo "Running ${#tests[@]} integration tests in chunks of ${chunk_size}."
+  local status=0 i
+  for ((i = 0; i < ${#tests[@]}; i += chunk_size)); do
+    local chunk=("${tests[@]:i:chunk_size}")
+    echo "::group::it tests $((i + 1))-$((i + ${#chunk[@]})) / ${#tests[@]}"
+    cargo test -p backend --test it -- --exact "${chunk[@]}" || status=1
+    echo "::endgroup::"
+  done
+  return "$status"
+}
+
+echo "Running backend tests."
+if [ -n "${CI:-}" ] && [ "$#" -eq 0 ]; then
+  # Chunking caps the cumulative PocketIC server memory (a fresh server per
+  # chunk), so the suite no longer needs to run single-threaded — peak memory is
+  # one chunk's instances regardless of parallelism. RUST_TEST_THREADS is still
+  # honoured if set, e.g. to pin parallelism on a smaller runner.
+  rc=0
+  cargo test -p backend --lib || rc=1
+  run_it_in_chunks || rc=1
+  exit "$rc"
+else
+  cargo test -p backend "${@}"
+fi

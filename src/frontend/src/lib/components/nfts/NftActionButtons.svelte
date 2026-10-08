@@ -10,7 +10,7 @@
 </script>
 
 <div class="flex gap-2">
-	<ButtonWithModal isOpen={$modalSend} onOpen={modalStore.openSend}>
+	<ButtonWithModal isOpen={$modalSend} onOpen={(id) => modalStore.openSend({ id })}>
 		{#snippet button(onclick)}
 			<NftActionButton
 				colorStyle="primary"

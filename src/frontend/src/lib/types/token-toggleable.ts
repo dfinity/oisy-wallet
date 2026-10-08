@@ -4,13 +4,25 @@ import type { Token } from '$lib/types/token';
 
 // Type pick and omit fields to make the reader aware that we are redefining the fields we are interested in.
 export type CustomTokenState = Omit<
-	Pick<CustomToken, 'version' | 'enabled' | 'section' | 'allow_external_content_source'>,
-	'version' | 'enabled' | 'section' | 'allow_external_content_source'
+	Pick<
+		CustomToken,
+		| 'version'
+		| 'enabled'
+		| 'section'
+		| 'allow_external_content_source'
+		| 'allowed_external_content_source_urls'
+	>,
+	| 'version'
+	| 'enabled'
+	| 'section'
+	| 'allow_external_content_source'
+	| 'allowed_external_content_source_urls'
 > & {
 	version?: bigint;
 	enabled: boolean;
 	section?: CustomTokenSection;
 	allowExternalContentSource?: boolean;
+	allowedExternalContentSourceUrls?: string[];
 };
 
 export type TokenToggleable<T extends Token> = T & CustomTokenState;

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Toggle } from '@dfinity/gix-components';
+	import Toggle from '$lib/components/ui/Toggle.svelte';
 	import { hideZeroBalances } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
@@ -12,4 +12,4 @@
 
 <svelte:window onoisyToggleZeroBalances={toggleHide} />
 
-<Toggle ariaLabel={$i18n.tokens.text.hide_zero_balances} bind:checked on:nnsToggle={toggleHide} />
+<Toggle ariaLabel={$i18n.tokens.text.hide_zero_balances} onToggle={toggleHide} bind:checked />

@@ -1,6 +1,6 @@
-import { loadRouteParams, type RouteParams } from '$lib/utils/nav.utils';
-import type { LoadEvent } from '@sveltejs/kit';
-// eslint-disable-next-line local-rules/no-relative-imports
-import type { PageLoad } from './$types';
+import { AppPath } from '$lib/constants/routes.constants';
+import { redirect, type LoadEvent } from '@sveltejs/kit';
 
-export const load: PageLoad = ($event: LoadEvent): RouteParams => loadRouteParams($event);
+// NFTs was renamed to Collectibles; redirect old /nfts/ bookmarks and deep
+// links there, preserving query params (e.g. collection/nft ids, network).
+export const load = ({ url }: LoadEvent): never => redirect(308, `${AppPath.Nfts}${url.search}`);

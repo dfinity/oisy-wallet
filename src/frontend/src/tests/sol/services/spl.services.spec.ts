@@ -1,4 +1,5 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
+import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import * as customTokensServices from '$lib/services/custom-tokens.services';
@@ -116,6 +117,7 @@ describe('spl.services', () => {
 					enabled: true,
 					version: toNullable(1n),
 					allow_external_content_source: toNullable(false),
+					allowed_external_content_source_urls: toNullable(),
 					section: []
 				}
 			];
@@ -139,6 +141,7 @@ describe('spl.services', () => {
 					enabled: true,
 					version: toNullable(1n),
 					allow_external_content_source: toNullable(false),
+					allowed_external_content_source_urls: toNullable(),
 					section: []
 				}
 			];
@@ -175,6 +178,7 @@ describe('spl.services', () => {
 					enabled: true,
 					version: toNullable(1n),
 					allow_external_content_source: toNullable(false),
+					allowed_external_content_source_urls: toNullable(),
 					section: []
 				}
 			];
@@ -192,6 +196,50 @@ describe('spl.services', () => {
 			expect(quicknodeRest.splMetadata).not.toHaveBeenCalled();
 		});
 
+		it('should derive custom token ids from the mint address, not the symbol', async () => {
+			const toBackendToken = (tokenAddress: string): CustomToken => ({
+				token: {
+					SplMainnet: {
+						symbol: toNullable('SAME'),
+						decimals: toNullable(6),
+						token_address: tokenAddress
+					}
+				},
+				enabled: true,
+				version: toNullable(1n),
+				allow_external_content_source: toNullable(false),
+				allowed_external_content_source_urls: toNullable(),
+				section: []
+			});
+
+			vi.mocked(customTokensServices.loadNetworkCustomTokens).mockResolvedValue([
+				toBackendToken('SameSymbolMintA'),
+				toBackendToken('SameSymbolMintB')
+			]);
+			vi.mocked(solanaApi.getTokenInfo).mockResolvedValue({
+				owner: TOKEN_PROGRAM_ADDRESS,
+				symbol: 'SAME',
+				name: 'Same',
+				decimals: 6
+			});
+			vi.mocked(quicknodeRest.splMetadata).mockResolvedValue(undefined);
+			const parseCustomTokenIdSpy = vi.spyOn(customTokenUtils, 'parseCustomTokenId');
+
+			await loadCustomTokens({ identity: mockIdentity });
+
+			expect(parseCustomTokenIdSpy).toHaveBeenCalledTimes(2);
+			expect(parseCustomTokenIdSpy).toHaveBeenNthCalledWith(1, {
+				identifier: 'SameSymbolMintA',
+				chainId: SOLANA_MAINNET_NETWORK.chainId,
+				standard: 'spl'
+			});
+			expect(parseCustomTokenIdSpy).toHaveBeenNthCalledWith(2, {
+				identifier: 'SameSymbolMintB',
+				chainId: SOLANA_MAINNET_NETWORK.chainId,
+				standard: 'spl'
+			});
+		});
+
 		it('should handle SplDevnet tokens', async () => {
 			const mockAddress = 'DevnetTokenAddress';
 			const mockBackendTokens: CustomToken[] = [
@@ -206,6 +254,7 @@ describe('spl.services', () => {
 					enabled: true,
 					version: toNullable(1n),
 					allow_external_content_source: toNullable(false),
+					allowed_external_content_source_urls: toNullable(),
 					section: []
 				}
 			];
@@ -234,6 +283,7 @@ describe('spl.services', () => {
 					enabled: true,
 					version: toNullable(1n),
 					allow_external_content_source: toNullable(false),
+					allowed_external_content_source_urls: toNullable(),
 					section: []
 				}
 			];

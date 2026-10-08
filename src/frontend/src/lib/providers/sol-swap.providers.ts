@@ -5,6 +5,9 @@ import {
 	nearIntentsSupportedTokens
 } from '$lib/services/near-intents.services';
 import { SwapProvider, type SolSwapProviderConfig } from '$lib/types/swap';
+import { buildNearIntentsSupportedDestinations } from '$lib/utils/near-intents-swap.utils';
+
+const nearIntentsSolDestinations = buildNearIntentsSupportedDestinations('sol');
 
 export const solSwapProviders: SolSwapProviderConfig[] = [
 	...(NEAR_INTENTS_SWAP_ENABLED
@@ -14,7 +17,8 @@ export const solSwapProviders: SolSwapProviderConfig[] = [
 					getQuote: fetchNearIntentsSwapQuote,
 					isEnabled: NEAR_INTENTS_SWAP_ENABLED,
 					getSupportedTokens: () =>
-						nearIntentsSupportedTokens({ networkIds: [SOLANA_MAINNET_NETWORK_ID] })
+						nearIntentsSupportedTokens({ networkIds: [SOLANA_MAINNET_NETWORK_ID] }),
+					getSupportedDestinations: nearIntentsSolDestinations
 				}
 			]
 		: [])

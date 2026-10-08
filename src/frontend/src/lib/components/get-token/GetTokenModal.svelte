@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import BuyModalContent from '$lib/components/buy/BuyModalContent.svelte';
 	import GetTokenWizardStep from '$lib/components/get-token/GetTokenWizardStep.svelte';
 	import ReceiveAddressQrCode from '$lib/components/receive/ReceiveAddressQrCode.svelte';
 	import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { getTokenWizardSteps } from '$lib/config/get-token.config';
 	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -29,6 +29,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapSelectTokenType } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';

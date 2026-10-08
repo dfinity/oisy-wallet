@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { BtcTransactionUi } from '$btc/types/btc';
 	import { BTC_MAINNET_EXPLORER_URL, BTC_TESTNET_EXPLORER_URL } from '$env/explorers.env';
@@ -12,6 +11,7 @@
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
@@ -32,7 +32,7 @@
 
 	const { transaction, token }: Props = $props();
 
-	let { from, value, timestamp, id, blockNumber, to, type, status, confirmations } =
+	let { from, value, fee, timestamp, id, blockNumber, to, type, status, confirmations } =
 		$derived(transaction);
 
 	let explorerUrl: string | undefined = $derived(
@@ -150,6 +150,22 @@
 						{$i18n.transaction.text.confirmations}
 					</span>
 					<span>{confirmations}</span>
+				</ListItem>
+			{/if}
+
+			{#if nonNullish(fee) && nonNullish(token)}
+				<ListItem>
+					<span>
+						{$i18n.fee.text.fee}
+					</span>
+					<output>
+						{formatToken({
+							value: fee,
+							unitName: token.decimals,
+							displayDecimals: token.decimals
+						})}
+						{token.symbol}
+					</output>
 				</ListItem>
 			{/if}
 

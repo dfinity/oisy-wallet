@@ -54,6 +54,11 @@
 			metadata: {
 				ledgerCanisterId,
 				indexCanisterId: `${indexCanisterId}`,
+				...(nonNullish(selectedToken?.symbol) && { tokenSymbol: selectedToken.symbol }),
+				...(nonNullish(selectedToken?.name) && { tokenName: selectedToken.name }),
+				...(nonNullish(selectedToken?.standard) && {
+					tokenStandard: selectedToken.standard.code
+				}),
 				networkId: 'ICP',
 				source: HIDE_TOKEN_MODAL_ROUTE
 			}
@@ -66,6 +71,7 @@
 				version: toNullable(version),
 				section: toNullable(),
 				allow_external_content_source: toNullable(),
+				allowed_external_content_source_urls: toNullable(),
 				token: {
 					Icrc: {
 						ledger_id: Principal.fromText(ledgerCanisterId),

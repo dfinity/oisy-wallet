@@ -1,6 +1,7 @@
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import type { Erc20CustomToken, EthereumCustomToken } from '$eth/types/erc20-custom-token';
 import type { EthereumNetwork } from '$eth/types/network';
+import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import type { Token } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
@@ -26,4 +27,4 @@ export const isTokenErc20CustomToken = (token: Token): token is Erc20CustomToken
 	isTokenErc20(token) && isTokenToggleable(token);
 
 export const isTokenEthereumCustomToken = (token: Token): token is EthereumCustomToken =>
-	(token.standard.code === 'ethereum' || isTokenErc20(token)) && isTokenToggleable(token);
+	(isTokenEthereumNative(token) || isTokenErc20(token)) && isTokenToggleable(token);

@@ -1,11 +1,33 @@
 import {
+	SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES,
+	SESSION_REQUEST_BTC_SIGN_MESSAGE,
+	SESSION_REQUEST_BTC_SIGN_PSBT
+} from '$btc/constants/wallet-connect.constants';
+import { getAccountAddresses } from '$btc/services/wallet-connect.services';
+import {
+	BTC_MAINNET_NETWORK_ID,
+	BTC_REGTEST_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID
+} from '$env/networks/networks.btc.env';
+import {
 	SESSION_REQUEST_ETH_SEND_TRANSACTION,
 	SESSION_REQUEST_ETH_SIGN,
 	SESSION_REQUEST_ETH_SIGN_LEGACY,
 	SESSION_REQUEST_ETH_SIGN_V4,
 	SESSION_REQUEST_PERSONAL_SIGN
 } from '$eth/constants/wallet-connect.constants';
-import { modalUniversalScannerOpen, modalWalletConnect } from '$lib/derived/modal.derived';
+import {
+	btcAddressMainnet,
+	btcAddressRegtest,
+	btcAddressTestnet
+} from '$lib/derived/address.derived';
+import { authIdentity } from '$lib/derived/auth.derived';
+import {
+	modalUniversalScannerOpen,
+	modalWalletConnect,
+	modalWalletConnectSend,
+	modalWalletConnectSign
+} from '$lib/derived/modal.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
@@ -14,6 +36,7 @@ import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
+	SESSION_REQUEST_SOL_SIGN_MESSAGE,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
 } from '$sol/constants/wallet-connect.constants';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -59,7 +82,15 @@ export const onSessionRequest = async ({
 	}
 
 	// Another modal, like Send or Receive, is already in progress
-	if (nonNullish(get(modalStore)) && !get(modalWalletConnect) && !get(modalUniversalScannerOpen)) {
+	const otherModalInProgress =
+		nonNullish(get(modalStore)) && !get(modalWalletConnect) && !get(modalUniversalScannerOpen);
+
+	// A review the user has not answered yet is itself in progress. Letting a second request replace
+	// it would swap the summary under the user's cursor, so the decision they end up making would be
+	// about a transaction they never reviewed.
+	const reviewInProgress = get(modalWalletConnectSign) || get(modalWalletConnectSend);
+
+	if (otherModalInProgress || reviewInProgress) {
 		toastsError({
 			msg: {
 				text: get(i18n).wallet_connect.error.skipping_request
@@ -82,8 +113,26 @@ export const onSessionRequest = async ({
 		case SESSION_REQUEST_ETH_SIGN:
 		case SESSION_REQUEST_PERSONAL_SIGN:
 		case SESSION_REQUEST_SOL_SIGN_TRANSACTION:
-		case SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION: {
+		case SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION:
+		case SESSION_REQUEST_SOL_SIGN_MESSAGE:
+		case SESSION_REQUEST_BTC_SIGN_MESSAGE:
+		case SESSION_REQUEST_BTC_SIGN_PSBT: {
 			modalStore.openWalletConnectSign({ id: Symbol(), data: sessionRequest });
+			return;
+		}
+		case SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES: {
+			// `getAccountAddresses` only returns already-public account data (address, public key,
+			// derivation path) with no signing or spend, so it is answered directly without a modal.
+			await getAccountAddresses({
+				listener,
+				request: sessionRequest,
+				identity: get(authIdentity),
+				addresses: new Map([
+					[BTC_MAINNET_NETWORK_ID, get(btcAddressMainnet)],
+					[BTC_TESTNET_NETWORK_ID, get(btcAddressTestnet)],
+					[BTC_REGTEST_NETWORK_ID, get(btcAddressRegtest)]
+				])
+			});
 			return;
 		}
 		case SESSION_REQUEST_ETH_SEND_TRANSACTION: {

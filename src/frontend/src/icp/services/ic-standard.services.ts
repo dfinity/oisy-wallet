@@ -12,6 +12,7 @@ import {
 	getTokensByOwner as icPunksGetTokensByOwner,
 	metadata as icPunksMetadata
 } from '$icp/api/icpunks.api';
+import { collectionMetadata as icrc7CollectionMetadata } from '$icp/api/icrc7.api';
 import { extIndexToIdentifier } from '$icp/utils/ext.utils';
 import {
 	ResolveByProbingError,
@@ -22,7 +23,7 @@ import type { TokenStandardCode } from '$lib/types/token';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
-type AcceptedStandards = Extract<TokenStandardCode, 'ext' | 'dip721' | 'icpunks'>;
+type AcceptedStandards = Extract<TokenStandardCode, 'ext' | 'dip721' | 'icpunks' | 'icrc7'>;
 
 export const detectNftCanisterStandard = async ({
 	identity,
@@ -73,8 +74,13 @@ export const detectNftCanisterStandard = async ({
 		onResolve: () => 'icpunks'
 	};
 
+	const icrc7Canister: ResolveGroup<AcceptedStandards> = {
+		probes: [() => icrc7CollectionMetadata(baseParams)],
+		onResolve: () => 'icrc7'
+	};
+
 	try {
-		return await resolveByProbing([extCanister, dip721Canister, icPunksCanister]);
+		return await resolveByProbing([extCanister, dip721Canister, icPunksCanister, icrc7Canister]);
 	} catch (err: unknown) {
 		// If the error is caused by the probing service, we cannot identify correctly the standard.
 		if (err instanceof ResolveByProbingError) {

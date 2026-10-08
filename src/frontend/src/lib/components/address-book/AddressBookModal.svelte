@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import type { ContactImage } from '$declarations/backend/backend.did';
@@ -18,6 +17,7 @@
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { addressBookWizardSteps } from '$lib/config/address-book.config';
 	import {
 		TRACK_CONTACT_CREATE_ERROR,
@@ -46,6 +46,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AddressBookModalParams } from '$lib/types/address-book';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 

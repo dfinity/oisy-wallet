@@ -1,6 +1,3 @@
-import type { EarningCardsSchema } from '$env/schema/env-earning-cards.schema';
-import type z from 'zod';
-
 export enum EarningCardFields {
 	APY = 'apy',
 	NETWORKS = 'networks',
@@ -8,7 +5,7 @@ export enum EarningCardFields {
 	CURRENT_STAKED = 'currentStaked',
 	CURRENT_EARNING = 'currentEarning',
 	EARNING_POTENTIAL = 'earningPotential',
+	CURRENT_BORROWING = 'currentBorrowing',
+	INTEREST_PER_YEAR = 'interestPerYear',
 	TERMS = 'terms'
 }
-
-export type EarningCards = z.infer<typeof EarningCardsSchema>;

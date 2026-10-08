@@ -19,14 +19,17 @@
 	import AllTransactionsSkeletons from '$lib/components/transactions/AllTransactionsSkeletons.svelte';
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
+	import TransactionsFilterToolbar from '$lib/components/transactions/filter/TransactionsFilterToolbar.svelte';
 	import { ACTIVITY_TRANSACTION_SKELETON_PREFIX } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
+	import { allContacts, contacts, contactsNotInitialized } from '$lib/derived/contacts.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
 		modalBtcTransaction,
 		modalEthTransaction,
 		modalIcTransaction,
-		modalSolTransaction
+		modalSolTransaction,
+		modalXrpTransaction
 	} from '$lib/derived/modal.derived';
 	import {
 		enabledFungibleNetworkTokens,
@@ -34,8 +37,13 @@
 	} from '$lib/derived/network-tokens.derived';
 	import { hideMicroTransactions } from '$lib/derived/user-profile.derived';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import {
+		applyTransactionsFilter,
+		transactionsFilterTokenKey
+	} from '$lib/utils/transactions-filter.utils';
 	import {
 		filterReceivedMicroTransactions,
 		mapAllTransactionsUi,
@@ -44,6 +52,43 @@
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import XrpTransactionModal from '$xrp/components/transactions/XrpTransactionModal.svelte';
+	import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
+	import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
+
+	// The tokens panel lists the selected network's tokens only, so a selection made on another
+	// network sticks around invisibly and keeps hiding transactions with no row left to untick it.
+	// Reconciling against the selectable set is the filter's own job, hence here rather than on a
+	// network-change trigger.
+	let selectableTokenFilterKeys = $derived(
+		$enabledFungibleNetworkTokens.map(transactionsFilterTokenKey).filter(nonNullish)
+	);
+
+	$effect(() => {
+		// While the tokens are still loading the selectable set is empty; pruning then would wipe a
+		// persisted filter before the user ever sees it.
+		if (selectableTokenFilterKeys.length === 0) {
+			return;
+		}
+
+		transactionsFilterStore.retainTokenIds(selectableTokenFilterKeys);
+	});
+
+	// Same reasoning for the contacts facet: a contact deleted from the address book leaves no row
+	// in the panel, so its selection would keep hiding transactions with no way to untick it. The
+	// selectable set is the user's own contacts, not `allContacts`, which also carries the built-in
+	// ck minter entries the panel never lists.
+	let selectableContactIds = $derived($contacts.map(({ id }) => id.toString()));
+
+	$effect(() => {
+		// Unlike the tokens, an empty list is a legitimate state here (the user deleted their last
+		// contact), so we gate on the store being loaded rather than on the list being non-empty.
+		if ($contactsNotInitialized) {
+			return;
+		}
+
+		transactionsFilterStore.retainContactIds(selectableContactIds);
+	});
 
 	let allTransactions = $derived(
 		mapAllTransactionsUi({
@@ -54,6 +99,7 @@
 			$ethAddress,
 			$btcStatuses: $btcStatusesStore,
 			$solTransactions: $solTransactionsStore,
+			$xrpTransactions: $xrpTransactionsStore,
 			$icTransactionsStore,
 			$ckBtcMinterInfoStore,
 			$icPendingTransactionsStore,
@@ -64,13 +110,21 @@
 	// Filtering is only applied on the display path. The unfiltered `allTransactions` is fed to
 	// `AllTransactionsLoader` so its `transactions.length === 0` short-circuit and `minTimestamp`
 	// pagination anchor remain based on the actual loaded set, not the filtered one.
-	let displayTransactions = $derived(
+	let microFilteredTransactions = $derived(
 		$hideMicroTransactions
 			? filterReceivedMicroTransactions({
 					transactions: allTransactions,
 					exchanges: $exchanges
 				})
 			: allTransactions
+	);
+
+	let displayTransactions = $derived(
+		applyTransactionsFilter({
+			transactions: microFilteredTransactions,
+			filter: $transactionsFilterStore,
+			contacts: $allContacts
+		})
 	);
 
 	let sortedTransactions = $derived(
@@ -110,25 +164,42 @@
 			$modalStore
 		})
 	);
+
+	let { transaction: selectedXrpTransaction, token: selectedXrpToken } = $derived(
+		mapTransactionModalData<XrpTransactionUi>({
+			$modalOpen: $modalXrpTransaction,
+			$modalStore
+		})
+	);
 </script>
+
+<TransactionsFilterToolbar />
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	<AllTransactionsLoader transactions={allTransactions}>
-		<AllTransactionsScroll {sortedTransactions} bind:transactionsToDisplay>
-			{#if Object.values(groupedTransactions).length > 0}
-				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
-					<TransactionsDateGroup
-						{formattedDate}
-						testId={`all-transactions-date-group-${index}`}
-						{transactions}
-					/>
-				{/each}
-			{/if}
+		{#snippet children({ loadMore, exhausted, floor })}
+			<AllTransactionsScroll
+				{exhausted}
+				{floor}
+				onLoadMore={loadMore}
+				{sortedTransactions}
+				bind:transactionsToDisplay
+			>
+				{#if Object.values(groupedTransactions).length > 0}
+					{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+						<TransactionsDateGroup
+							{formattedDate}
+							testId={`all-transactions-date-group-${index}`}
+							{transactions}
+						/>
+					{/each}
+				{/if}
 
-			{#if Object.values(groupedTransactions).length === 0}
-				<TransactionsPlaceholder />
-			{/if}
-		</AllTransactionsScroll>
+				{#if Object.values(groupedTransactions).length === 0}
+					<TransactionsPlaceholder />
+				{/if}
+			</AllTransactionsScroll>
+		{/snippet}
 	</AllTransactionsLoader>
 </AllTransactionsSkeletons>
 
@@ -140,4 +211,6 @@
 	<IcTransactionModal token={selectedIcToken} transaction={selectedIcTransaction} />
 {:else if $modalSolTransaction && nonNullish(selectedSolTransaction)}
 	<SolTransactionModal token={selectedSolToken} transaction={selectedSolTransaction} />
+{:else if $modalXrpTransaction && nonNullish(selectedXrpTransaction)}
+	<XrpTransactionModal token={selectedXrpToken} transaction={selectedXrpTransaction} />
 {/if}

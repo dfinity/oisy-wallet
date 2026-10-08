@@ -106,7 +106,8 @@ describe('custom-token.services', () => {
 							}
 						},
 						section: toNullable(),
-						allow_external_content_source: toNullable()
+						allow_external_content_source: toNullable(),
+						allowed_external_content_source_urls: toNullable()
 					}
 				});
 
@@ -158,7 +159,8 @@ describe('custom-token.services', () => {
 							version: [1n],
 							enabled: true,
 							section: toNullable(),
-							allow_external_content_source: toNullable()
+							allow_external_content_source: toNullable(),
+							allowed_external_content_source_urls: toNullable()
 						}
 					]);
 
@@ -263,7 +265,8 @@ describe('custom-token.services', () => {
 							version: [1n],
 							enabled: true,
 							section: toNullable(),
-							allow_external_content_source: toNullable()
+							allow_external_content_source: toNullable(),
+							allowed_external_content_source_urls: toNullable()
 						}
 					]);
 
@@ -333,7 +336,8 @@ describe('custom-token.services', () => {
 								}
 							},
 							section: toNullable(),
-							allow_external_content_source: toNullable()
+							allow_external_content_source: toNullable(),
+							allowed_external_content_source_urls: toNullable()
 						}
 					});
 				});

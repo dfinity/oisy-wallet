@@ -3,16 +3,15 @@
 
 import { SIGNER_CANISTER_DERIVATION_PATH } from '$env/signer.env';
 import { mapDerivationPath } from '$lib/utils/signer.utils.js';
-import {
-	DerivationPath,
-	PublicKeyWithChainCode as Secp256k1PublicKeyWithChainCode
-} from '@dfinity/ic-pub-key/src/ecdsa/secp256k1';
-import { schnorrEd25519Derive } from '@dfinity/ic-pub-key/src/schnorr/ed25519';
+import { secp256k1 } from '@dfinity/ic-pub-key/ecdsa';
+import { ed25519 } from '@dfinity/ic-pub-key/schnorr';
 import { assertNonNullish } from '@dfinity/utils';
 import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import { Principal } from '@icp-sdk/core/principal';
 import { networks, payments, type Network } from 'bitcoinjs-lib';
 import { computeAddress } from 'ethers/transaction';
+
+const { DerivationPath, PublicKeyWithChainCode: Secp256k1PublicKeyWithChainCode } = secp256k1;
 
 /* istanbul ignore next */
 export const deriveEthAddress = ({ user, pubkey }: { user: string; pubkey: string }): string => {
@@ -123,7 +122,40 @@ export const deriveSolAddress = ({
 
 	const blobString = derivationPathObj.toBlob();
 
-	const { response: schnorr_address } = schnorrEd25519Derive(pubkey, chaincode, blobString);
+	const { response: schnorr_address } = ed25519.schnorrEd25519Derive(pubkey, chaincode, blobString);
+
+	return schnorr_address.public_key.toHex();
+};
+
+/* istanbul ignore next */
+export const deriveXrpAddress = ({
+	user,
+	derivationPath,
+	pubkey
+}: {
+	user: string;
+	derivationPath: string[];
+	pubkey: string;
+}): string => {
+	const chaincode = '0000000000000000000000000000000000000000000000000000000000000000';
+
+	const principal = Principal.fromText(user);
+
+	assertNonNullish(
+		SIGNER_CANISTER_DERIVATION_PATH,
+		'SIGNER_CANISTER_DERIVATION_PATH is not defined'
+	);
+
+	const derivationPathObj = new DerivationPath([
+		Uint8Array.from(SIGNER_CANISTER_DERIVATION_PATH),
+		Uint8Array.from([0xfe]),
+		principal.toUint8Array(),
+		...mapDerivationPath(derivationPath)
+	]);
+
+	const blobString = derivationPathObj.toBlob();
+
+	const { response: schnorr_address } = ed25519.schnorrEd25519Derive(pubkey, chaincode, blobString);
 
 	return schnorr_address.public_key.toHex();
 };

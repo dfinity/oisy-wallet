@@ -1,9 +1,7 @@
 import { derived, type Readable, type Subscriber, type Unsubscriber } from 'svelte/store';
 
 type Stores =
-	| Readable<unknown>
-	| [Readable<unknown>, ...Array<Readable<unknown>>]
-	| Array<Readable<unknown>>;
+	Readable<unknown> | [Readable<unknown>, ...Array<Readable<unknown>>] | Array<Readable<unknown>>;
 type StoresValues<T> =
 	T extends Readable<infer U> ? U : { [K in keyof T]: T[K] extends Readable<infer U> ? U : never };
 

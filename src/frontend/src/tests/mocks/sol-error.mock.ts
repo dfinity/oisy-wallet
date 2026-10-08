@@ -14,6 +14,12 @@ export const mockPreflightContext = (
 	overrides: Partial<PreflightContext> & ErrorOptions = {}
 ): PreflightContext & ErrorOptions => ({
 	accounts: null,
+	fee: null,
+	loadedAddresses: null,
+	postBalances: null,
+	postTokenBalances: null,
+	preBalances: null,
+	preTokenBalances: null,
 	returnData: null,
 	loadedAccountsDataSize: null,
 	logs: null,

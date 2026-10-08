@@ -147,9 +147,12 @@ describe('erc20.services', () => {
 
 			const tokens = get(erc20DefaultTokensStore);
 
-			[...ERC20_TWIN_TOKENS, ...EVM_ERC20_TOKENS, ...ADDITIONAL_ERC20_TOKENS].forEach((token) => {
-				expect(tokens).toContainEqual(token);
-			});
+			// metadata-only tokens are intentionally excluded from the visible store.
+			[...ERC20_TWIN_TOKENS, ...EVM_ERC20_TOKENS, ...ADDITIONAL_ERC20_TOKENS]
+				.filter(({ metadataOnly }) => !metadataOnly)
+				.forEach((token) => {
+					expect(tokens).toContainEqual(token);
+				});
 		});
 
 		it('should save the custom tokens in the store', async () => {
@@ -307,7 +310,8 @@ describe('erc20.services', () => {
 					}
 				},
 				section: toNullable(),
-				allow_external_content_source: toNullable()
+				allow_external_content_source: toNullable(),
+				allowed_external_content_source_urls: toNullable()
 			};
 			assert('Erc20' in additionalCustomToken.token);
 
@@ -387,7 +391,8 @@ describe('erc20.services', () => {
 					}
 				},
 				section: toNullable(),
-				allow_external_content_source: toNullable()
+				allow_external_content_source: toNullable(),
+				allowed_external_content_source_urls: toNullable()
 			};
 
 			vi.mocked(listCustomTokens).mockResolvedValue([

@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Assets · Liabilities tab — wireframe</title>
+		<style>
+			:root {
+				--bg: #e9eefb;
+				--panel: #ffffff;
+				--panel2: #f4f6fb;
+				--line: #e5e9f2;
+				--txt: #16203a;
+				--muted: #6b7787;
+				--accent: #2f6df6;
+				--green: #15a35b;
+				--amber: #d8890a;
+				--red: #df4a3c;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				background: var(--bg);
+				color: var(--txt);
+				font:
+					14px/1.5 -apple-system,
+					Segoe UI,
+					Roboto,
+					Arial,
+					sans-serif;
+			}
+			.wfbar {
+				max-width: 520px;
+				margin: 14px auto 0;
+				background: #ffffff;
+				border: 1px dashed #b9c4dd;
+				border-radius: 10px;
+				padding: 10px 14px;
+				color: var(--muted);
+				font-size: 12px;
+			}
+			.wfbar .tag {
+				display: inline-block;
+				font-size: 10px;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: #6b7787;
+				border: 1px solid #b9c4dd;
+				border-radius: 5px;
+				padding: 1px 6px;
+				margin-bottom: 7px;
+			}
+			.wfbar .ctrls {
+				display: flex;
+				gap: 6px;
+				align-items: center;
+				margin-top: 10px;
+				flex-wrap: wrap;
+				padding-top: 9px;
+				border-top: 1px solid #eef1f7;
+			}
+			.wrap {
+				max-width: 520px;
+				margin: 0 auto;
+				padding: 14px 18px 28px;
+			}
+			.hero {
+				padding: 6px 2px 12px;
+			}
+			.hero .lbl {
+				color: var(--muted);
+				font-size: 12px;
+			}
+			.hero .tot {
+				font-size: 30px;
+				font-weight: 700;
+			}
+			.tabs {
+				display: flex;
+				gap: 18px;
+				border-bottom: 1px solid var(--line);
+				margin: 6px 0 16px;
+			}
+			.tabs a {
+				position: relative;
+				color: var(--muted);
+				text-decoration: none;
+				padding: 9px 0;
+				font-weight: 600;
+				border-bottom: 2px solid transparent;
+				font-size: 14px;
+				cursor: pointer;
+			}
+			.tabs a.on {
+				color: var(--txt);
+				border-bottom-color: var(--red);
+			}
+			.tabdot {
+				position: absolute;
+				top: 4px;
+				right: -9px;
+				width: 8px;
+				height: 8px;
+				border-radius: 50%;
+				display: none;
+				box-shadow: 0 0 0 2px var(--bg);
+			}
+			.tabdot.amber {
+				background: var(--amber);
+				display: block;
+			}
+			.tabdot.red {
+				background: var(--red);
+				display: block;
+			}
+			.ctrls button {
+				background: var(--panel2);
+				border: 1px solid var(--line);
+				color: var(--muted);
+				border-radius: 8px;
+				padding: 4px 10px;
+				font-size: 12px;
+				cursor: pointer;
+			}
+			.ctrls button.on {
+				color: var(--txt);
+				border-color: var(--accent);
+			}
+			/* provider group */
+			.group {
+				margin-bottom: 18px;
+			}
+			.ghead {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				margin: 2px 0 10px;
+			}
+			.gtitle {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				font-weight: 600;
+			}
+			.gprov {
+				width: 18px;
+				height: 18px;
+				border-radius: 5px;
+				background: #9b6cff;
+				display: grid;
+				place-items: center;
+				font-size: 11px;
+				color: #fff;
+				font-weight: 700;
+			}
+			/* compact per-provider health tag — one small element next to the group title */
+			.htag {
+				font-size: 11.5px;
+				font-weight: 600;
+				border-radius: 999px;
+				padding: 2px 9px;
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+			}
+			.htag .d {
+				width: 7px;
+				height: 7px;
+				border-radius: 50%;
+			}
+			.htag.ok {
+				color: var(--green);
+				background: #e6f7ee;
+				border: 1px solid #a8e0c2;
+			}
+			.htag.ok .d {
+				background: var(--green);
+			}
+			.htag.amber {
+				color: var(--amber);
+				background: #fbf1de;
+				border: 1px solid #ecd29a;
+			}
+			.htag.amber .d {
+				background: var(--amber);
+			}
+			.htag.red {
+				color: var(--red);
+				background: #fce8e6;
+				border: 1px solid #f3b6ad;
+			}
+			.htag.red .d {
+				background: var(--red);
+			}
+			.gowed {
+				margin-left: auto;
+				font-size: 12.5px;
+				color: var(--red);
+				font-weight: 600;
+			}
+			.card {
+				background: var(--panel);
+				border: 1px solid #f3d6d2;
+				border-left: 3px solid var(--red);
+				border-radius: 13px;
+				padding: 13px 14px;
+				margin-bottom: 9px;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				cursor: pointer;
+				box-shadow: 0 1px 2px rgba(20, 30, 60, 0.04);
+			}
+			.left {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+			}
+			.coin {
+				width: 34px;
+				height: 34px;
+				border-radius: 50%;
+				display: grid;
+				place-items: center;
+				font-weight: 700;
+				font-size: 13px;
+			}
+			.usdc {
+				background: #2775ca;
+				color: #fff;
+			}
+			.usdt {
+				background: #26a17b;
+				color: #fff;
+			}
+			.name {
+				font-weight: 600;
+			}
+			.sub {
+				font-size: 11.5px;
+				color: var(--muted);
+				margin-top: 2px;
+			}
+			.right {
+				text-align: right;
+			}
+			.amt {
+				font-weight: 600;
+				color: var(--red);
+			}
+			.rate {
+				font-size: 12px;
+				color: var(--amber);
+				margin-top: 2px;
+			}
+			.fiat {
+				font-size: 12px;
+				color: var(--red);
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wfbar">
+			<span class="tag">Wireframe — controls below are not part of the UI</span>
+			<div>
+				Assets page, <b>Liabilities</b> tab. Grouped <b>by provider</b> (health factor is
+				per-provider). The health status is a single compact, colour-coded tag next to the provider
+				group title — no big banner here (that lives large on the provider page).
+			</div>
+			<div class="ctrls">
+				<span>Demo · Liquidium health:</span>
+				<button data-h="68" class="on">Healthy</button>
+				<button data-h="16">At risk</button>
+				<button data-h="7">Critical</button>
+			</div>
+		</div>
+		<div class="wrap">
+			<div class="hero">
+				<div class="lbl">Net worth</div>
+				<div class="tot">$112,438.20</div>
+			</div>
+			<div class="tabs">
+				<a onclick="location.href = 'earning-tab.html'">Tokens</a>
+				<a onclick="location.href = 'earning-tab.html'">NFTs</a>
+				<a onclick="location.href = 'earning-tab.html'">Earning</a>
+				<a class="on">Liabilities<span class="tabdot" id="tabdot"></span></a>
+			</div>
+
+			<div class="group">
+				<div class="ghead">
+					<div class="gtitle"><span class="gprov">L</span>Liquidium</div>
+					<span class="htag ok" id="htag"
+						><span class="d"></span><span id="htagText">Healthy at 68%</span></span
+					>
+					<span class="gowed">−$35,000.00</span>
+				</div>
+
+				<div class="card">
+					<div class="left">
+						<div class="coin usdc">U</div>
+						<div>
+							<div class="name">USDC</div>
+							<div class="sub">Borrowed</div>
+						</div>
+					</div>
+					<div class="right">
+						<div class="amt">−20,000 USDC</div>
+						<div class="rate">Borrow rate · 7.40%</div>
+						<div class="fiat">−$20,000.00</div>
+					</div>
+				</div>
+				<div class="card">
+					<div class="left">
+						<div class="coin usdt">T</div>
+						<div>
+							<div class="name">USDT</div>
+							<div class="sub">Borrowed</div>
+						</div>
+					</div>
+					<div class="right">
+						<div class="amt">−15,000 USDT</div>
+						<div class="rate">Borrow rate · 7.25%</div>
+						<div class="fiat">−$15,000.00</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- A second borrow provider, when one exists, would be its own group with its own health tag. -->
+		</div>
+		<script>
+			function band(h) {
+				return h < 12 ? 'red' : h < 40 ? 'amber' : 'ok';
+			}
+			function word(h) {
+				return h < 12 ? 'Critical' : h < 40 ? 'At risk' : 'Healthy';
+			}
+			function setHealth(h) {
+				const b = band(h);
+				const t = document.getElementById('htag');
+				t.className = 'htag ' + b;
+				document.getElementById('htagText').textContent = word(h) + ' at ' + h + '%';
+				// tab-label indicator: worst provider health across all groups (one provider here).
+				// hidden when healthy, amber at risk, red critical.
+				document.getElementById('tabdot').className = 'tabdot' + (b === 'ok' ? '' : ' ' + b);
+			}
+			document.querySelectorAll('.ctrls button').forEach((b) =>
+				b.addEventListener('click', () => {
+					document.querySelectorAll('.ctrls button').forEach((x) => x.classList.remove('on'));
+					b.classList.add('on');
+					setHealth(+b.dataset.h);
+				})
+			);
+			setHealth(68);
+		</script>
+	</body>
+</html>

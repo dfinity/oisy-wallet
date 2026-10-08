@@ -1,5 +1,5 @@
 use std::{
-    cell::RefCell,
+    cell::{Cell, RefCell},
     collections::{HashMap, VecDeque},
 };
 
@@ -20,9 +20,13 @@ thread_local! {
     pub(crate) static ALLOW_SIGNING_RATE_LIMITER: RateLimiter =
         RateLimiter::new(3, 60 * 60 * 1_000_000_000);
 
-    /// Rate-limits `btc_select_user_utxos_fee`: max 10 calls per caller per minute.
-    pub(crate) static BTC_SELECT_UTXOS_FEE_RATE_LIMITER: RateLimiter =
+    /// Rate-limits `get_allowed_cycles`: max 10 calls per caller per minute.
+    pub(crate) static GET_ALLOWED_CYCLES_RATE_LIMITER: RateLimiter =
         RateLimiter::new(10, 60 * 1_000_000_000);
+
+    /// Rate-limits `top_up_cycles_ledger`: max 5 calls per caller per minute.
+    pub(crate) static TOP_UP_CYCLES_LEDGER_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(5, 60 * 1_000_000_000);
 
     /// Rate-limits `btc_add_pending_transaction`: max 10 calls per caller per minute.
     pub(crate) static BTC_ADD_PENDING_TX_RATE_LIMITER: RateLimiter =
@@ -31,6 +35,121 @@ thread_local! {
     /// Rate-limits `btc_get_pending_transactions`: max 15 calls per caller per minute.
     pub(crate) static BTC_GET_PENDING_TX_RATE_LIMITER: RateLimiter =
         RateLimiter::new(15, 60 * 1_000_000_000);
+
+    /// Rate-limits `sign_onramper_widget_url`: max 30 calls per caller per minute. The widget
+    /// re-signs on reactive input changes, so the limit is generous for legitimate use while still
+    /// bounding abuse of the endpoint as a signing oracle for the shared `OnRamper` secret.
+    pub(crate) static SIGN_ONRAMPER_WIDGET_URL_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(30, 60 * 1_000_000_000);
+
+    /// Rate-limits `set_personal_note`: max 30 calls per caller per minute.
+    /// Generous — a single `set` covers both add and edit — while bounding write
+    /// abuse of the encrypted store.
+    pub(crate) static SET_PERSONAL_NOTE_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(30, 60 * 1_000_000_000);
+
+    /// Rate-limits `delete_personal_note`: max 30 calls per caller per minute.
+    pub(crate) static DELETE_PERSONAL_NOTE_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(30, 60 * 1_000_000_000);
+
+    /// Rate-limits `create_personal_note_share`: max 20 calls per caller per
+    /// minute. The authenticated creator is a real principal, so this is a
+    /// normal per-caller limit (mirrors `SET_PERSONAL_NOTE_RATE_LIMITER`).
+    pub(crate) static CREATE_PERSONAL_NOTE_SHARE_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(20, 60 * 1_000_000_000);
+
+    /// Coarse **global** limiter for `consume_personal_note_share`: max 600
+    /// calls total per minute, across *every* anonymous caller. An anonymous
+    /// update call has no distinguishing principal — `msg_caller()` is always
+    /// `Principal::anonymous()` — so `check_caller()` naturally buckets all
+    /// anonymous callers together under this one limiter, capping total
+    /// anonymous update-call volume rather than limiting any single caller
+    /// (which isn't possible here). `get_personal_note_share` is an anonymous
+    /// *query*, not an update: state changes made during query execution are
+    /// not persisted on the IC, so a stateful limiter on it would be a no-op on
+    /// the common (non-certified) query path and is intentionally not used — its
+    /// abuse surface is instead bounded by a cheap O(log n) lookup and the
+    /// token-guessing search space.
+    pub(crate) static CONSUME_PERSONAL_NOTE_SHARE_ANONYMOUS_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(600, 60 * 1_000_000_000);
+
+    /// Rate-limits `create_tip`. The sender is an authenticated principal, so the
+    /// per-caller tiers (20/min, 200/hour) carry most of the weight; the global
+    /// tiers (300/min, 3000/hour) are what a per-caller limit cannot see, namely
+    /// a flood spread across many principals.
+    ///
+    /// The global numbers are generous on purpose. Each call makes two ledger
+    /// *queries* — a few million cycles, three orders of magnitude below a vetKD
+    /// derivation — so the ceiling is here to stop a runaway, not to ration
+    /// ordinary use. Any value is stricter than what this had before, which was
+    /// no global ceiling at all.
+    pub(crate) static CREATE_TIP_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::with_tiers(20, 200, 300, 3000);
+
+    /// Rate-limits `claim_tip`. Per-caller (20/min, 200/hour) is what makes
+    /// brute-forcing a claim code expensive — a wrong code is rejected from state
+    /// alone, before any ledger call — and unlike `consume_personal_note_share` a
+    /// claim always has a real principal to charge it to, since the payout needs
+    /// a destination.
+    ///
+    /// The global tiers (300/min, 3000/hour) bound what that cannot: a guessing
+    /// campaign spread over many fresh identities, which are free to create.
+    pub(crate) static CLAIM_TIP_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::with_tiers(20, 200, 300, 3000);
+
+    /// Rate-limits `cancel_tip`. Cheap state-only work, so the tiers exist to
+    /// keep a loop from writing to stable memory without limit rather than to
+    /// bound cycles.
+    pub(crate) static CANCEL_TIP_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::with_tiers(30, 300, 400, 4000);
+
+    /// Rate-limits `set_tip_secret`. Not about cycles: the endpoint writes a
+    /// 512-byte entry to stable memory, and nothing else bounds how many a caller
+    /// may write. `MAX_TIPS_PER_USER` counts *active* tips, not stored codes, and
+    /// the endpoint is deliberately not gated on the tip existing — so before this
+    /// limiter a single registered caller could grow the store at ingress speed
+    /// without creating a single tip.
+    ///
+    /// Same tiers as `CREATE_TIP_RATE_LIMITER` because the browser calls this
+    /// exactly once per created tip: anything a legitimate sender can do here is
+    /// already bounded by what they can create.
+    pub(crate) static SET_TIP_SECRET_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::with_tiers(20, 200, 300, 3000);
+
+    /// Rate-limits `get_personal_notes_encrypted_vetkey` — the paid vetKD
+    /// derivation. Per-caller (2/min, 10/hour) is checked before a shared
+    /// global (20/min, 100/hour). See [`TieredRateLimiter`].
+    pub(crate) static GET_PERSONAL_NOTES_ENCRYPTED_VETKEY_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::new();
+
+    /// Rate-limits `get_personal_notes_vetkey_public_key`, with the same tiers
+    /// as the encrypted endpoint but its own independent counters. See
+    /// [`TieredRateLimiter`].
+    pub(crate) static GET_PERSONAL_NOTES_VETKEY_PUBLIC_KEY_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::new();
+
+    /// vetKD derivation for the tip-secrets store. Its own limiter rather than a
+    /// shared one, so a sender recovering tip links cannot exhaust the budget for
+    /// reading their notes, or the reverse.
+    ///
+    /// A raised burst cap (5/min instead of 2), because unlike notes this
+    /// derivation sits on the *create* path: a sender spends one per page load,
+    /// and at 2/min a third reload inside a minute failed — which silently cost
+    /// that tip its recoverable link. The hourly tiers are untouched, so
+    /// worst-case cycle spend is unchanged.
+    pub(crate) static GET_TIP_ENCRYPTED_VETKEY_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::with_caller_burst(5);
+
+    /// Verification-key reads for the tip-secrets store.
+    ///
+    /// Deliberately an ordinary limiter, not [`TieredRateLimiter`]: this
+    /// endpoint returns a caller-independent constant that the canister now
+    /// caches after the first call, so it costs no vetKD derivation and metering
+    /// it like one was actively harmful. The browser fetches it alongside the
+    /// derivation, so a rejection here used to discard a derivation that had
+    /// already been paid for.
+    pub(crate) static GET_TIP_VETKEY_PUBLIC_KEY_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(30, 60 * 1_000_000_000);
 }
 
 /// Per-caller sliding-window rate limiter for IC canister methods.
@@ -57,19 +176,41 @@ thread_local! {
 pub(crate) struct RateLimiter {
     max_calls: u32,
     window_ns: u64,
+    /// Once the tracked-principal map exceeds this many entries, the next
+    /// mutating call sweeps out principals with no calls left inside the window
+    /// (see [`Self::prune_idle`]).
+    tracking_cap: usize,
+    /// Timestamp of the last idle sweep. The sweep is throttled to at most once
+    /// per `window_ns` so it can't run on every call while the map sits above
+    /// the cap (see [`Self::prune_idle`]).
+    last_prune_ns: Cell<u64>,
     calls: RefCell<HashMap<Principal, VecDeque<u64>>>,
 }
 
 impl RateLimiter {
+    /// Default idle-sweep threshold. It is a sweep trigger, **not** a hard cap:
+    /// genuinely-active principals are never evicted, so the map may sit above
+    /// it under real load. At this size the map is on the order of ~1 MB.
+    const MAX_TRACKED_CALLERS: usize = 10_000;
+
     /// Creates a new rate limiter.
     ///
     /// - `max_calls`: maximum number of calls allowed within the window.
     /// - `window_ns`: sliding window duration in **nanoseconds**.
     #[must_use]
     pub fn new(max_calls: u32, window_ns: u64) -> Self {
+        Self::with_tracking_cap(max_calls, window_ns, Self::MAX_TRACKED_CALLERS)
+    }
+
+    /// Like [`Self::new`] but with an explicit idle-sweep threshold. Exposed so
+    /// tests can drive the sweep with a small cap.
+    #[must_use]
+    pub fn with_tracking_cap(max_calls: u32, window_ns: u64, tracking_cap: usize) -> Self {
         Self {
             max_calls,
             window_ns,
+            tracking_cap,
+            last_prune_ns: Cell::new(0),
             calls: RefCell::new(HashMap::new()),
         }
     }
@@ -96,6 +237,7 @@ impl RateLimiter {
     /// Exposed for testability so callers can inject controlled timestamps.
     pub fn check_at(&self, caller: Principal, now_ns: u64) -> Result<(), RateLimitError> {
         let mut calls = self.calls.borrow_mut();
+        self.prune_idle(&mut calls, now_ns);
         let caller_calls = calls.entry(caller).or_default();
 
         let window_start = now_ns.saturating_sub(self.window_ns);
@@ -119,6 +261,203 @@ impl RateLimiter {
         caller_calls.push_back(now_ns);
         Ok(())
     }
+
+    /// Checks the limit for `caller` at `now_ns` **without recording** the call
+    /// and without creating a `HashMap` entry for a previously-unseen caller.
+    /// Lets a caller peek a tier before any tier records, so a rejected call
+    /// leaves no state behind.
+    pub fn check_only(&self, caller: Principal, now_ns: u64) -> Result<(), RateLimitError> {
+        let calls = self.calls.borrow();
+        let window_start = now_ns.saturating_sub(self.window_ns);
+        let in_window = calls.get(&caller).map_or(0, |caller_calls| {
+            caller_calls
+                .iter()
+                .filter(|&&timestamp| timestamp > window_start)
+                .count()
+        });
+
+        if in_window >= self.max_calls as usize {
+            return Err(RateLimitError {
+                max_calls: self.max_calls,
+                window_ns: self.window_ns,
+                caller,
+            });
+        }
+        Ok(())
+    }
+
+    /// Records a call for `caller` at `now_ns`, pruning timestamps that have
+    /// aged out of the window. Does not enforce the limit — call only after
+    /// [`Self::check_only`] has confirmed the tier is within limits.
+    pub fn record(&self, caller: Principal, now_ns: u64) {
+        let mut calls = self.calls.borrow_mut();
+        self.prune_idle(&mut calls, now_ns);
+        let caller_calls = calls.entry(caller).or_default();
+
+        let window_start = now_ns.saturating_sub(self.window_ns);
+        while let Some(&front) = caller_calls.front() {
+            if front <= window_start {
+                caller_calls.pop_front();
+            } else {
+                break;
+            }
+        }
+
+        caller_calls.push_back(now_ns);
+    }
+
+    /// Bounds heap growth: once the tracked-principal map exceeds
+    /// `tracking_cap`, drop every principal whose most recent call has aged out
+    /// of the window. Idle-only — a principal with an in-window call is kept, so
+    /// this never changes a rate-limit decision; it only reclaims dead entries.
+    ///
+    /// The `retain` sweep is throttled to at most once per `window_ns`: above
+    /// the cap it would otherwise run on every mutating call, and since active
+    /// principals are never evicted, a map that is legitimately above the cap
+    /// stays there and re-sweeps on every call while reclaiming nothing. The
+    /// throttle bounds that cost without weakening reclamation — a principal
+    /// idle at a skipped sweep was already idle at the previous one, so it is
+    /// still dropped within one window of going idle.
+    fn prune_idle(&self, calls: &mut HashMap<Principal, VecDeque<u64>>, now_ns: u64) {
+        if calls.len() <= self.tracking_cap {
+            return;
+        }
+        if now_ns.saturating_sub(self.last_prune_ns.get()) < self.window_ns {
+            return;
+        }
+        self.last_prune_ns.set(now_ns);
+        let window_start = now_ns.saturating_sub(self.window_ns);
+        calls.retain(|_, timestamps| timestamps.back().is_some_and(|&last| last > window_start));
+    }
+
+    #[cfg(test)]
+    fn tracked_callers(&self) -> usize {
+        self.calls.borrow().len()
+    }
+}
+
+/// Two-tier rate limiter: a per-caller limit plus a shared global limit, each
+/// over a short (per-minute) and a long (per-hour) window, backed by four
+/// [`RateLimiter`]s.
+///
+/// The per-caller tiers bound one principal; the global tiers bound aggregate
+/// load, which is the only thing that stops a flood spread across many
+/// principals. Built for the vetKey endpoints, hence [`Self::new`]'s defaults,
+/// but the shape is what any endpoint wants when a single caller's budget is not
+/// the whole risk — see [`Self::with_tiers`].
+///
+/// Every tier is peeked before any tier records (see [`Self::check_at`]), so a
+/// rejected call leaves no state: a per-caller rejection never touches the
+/// global counters, and a call the global tier rejects never creates a
+/// per-caller `HashMap` entry. The global tiers bucket every caller under one
+/// fixed key, capping aggregate load against a many-principals flood the
+/// per-caller tiers cannot see.
+///
+/// **Requires an authenticated caller.** That fixed key is
+/// `Principal::anonymous()`, so on an endpoint the anonymous principal can reach
+/// the per-caller and global tiers become the same bucket: they consume each
+/// other, and one unauthenticated client exhausts the global budget on its own.
+/// Every caller today is behind `caller_is_registered_user` or
+/// `caller_is_not_anonymous`, which is what makes the shared key safe — a
+/// property of those guards, not of this type. An anonymous endpoint wants
+/// [`RateLimiter`] against something it can actually distinguish callers by.
+pub(crate) struct TieredRateLimiter {
+    caller_minute: RateLimiter,
+    caller_hour: RateLimiter,
+    global_minute: RateLimiter,
+    global_hour: RateLimiter,
+}
+
+impl TieredRateLimiter {
+    const HOUR_NS: u64 = 60 * 60 * 1_000_000_000;
+    const MINUTE_NS: u64 = 60 * 1_000_000_000;
+
+    /// The tiers a vetKD derivation is sized for: per-caller 2/min and 10/hour,
+    /// checked before a shared global 20/min and 100/hour.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::with_tiers(2, 10, 20, 100)
+    }
+
+    /// All four tiers chosen explicitly, for endpoints that are not vetKD
+    /// derivations and so have entirely different economics.
+    #[must_use]
+    pub fn with_tiers(
+        caller_minute: u32,
+        caller_hour: u32,
+        global_minute: u32,
+        global_hour: u32,
+    ) -> Self {
+        Self {
+            caller_minute: RateLimiter::new(caller_minute, Self::MINUTE_NS),
+            caller_hour: RateLimiter::new(caller_hour, Self::HOUR_NS),
+            global_minute: RateLimiter::new(global_minute, Self::MINUTE_NS),
+            global_hour: RateLimiter::new(global_hour, Self::HOUR_NS),
+        }
+    }
+
+    /// Same tiers as [`Self::new`] but with a chosen per-caller **burst** cap.
+    ///
+    /// Only the per-minute caller tier moves. That tier is a burst damper, not a
+    /// cost control — the per-hour caller tier is, and it still binds at 10 — so
+    /// raising this cannot increase worst-case hourly cycle spend for a caller.
+    /// It exists because 2/min throttles ordinary use: one derivation is spent
+    /// per page load, so two reloads inside a minute made the third fail.
+    #[must_use]
+    pub fn with_caller_burst(caller_minute: u32) -> Self {
+        Self {
+            caller_minute: RateLimiter::new(caller_minute, Self::MINUTE_NS),
+            caller_hour: RateLimiter::new(10, Self::HOUR_NS),
+            global_minute: RateLimiter::new(20, Self::MINUTE_NS),
+            global_hour: RateLimiter::new(100, Self::HOUR_NS),
+        }
+    }
+
+    /// Checks every tier for the current IC caller at the current IC time.
+    pub fn check_caller(&self) -> Result<(), RateLimitError> {
+        self.check_at(msg_caller(), ic_cdk::api::time())
+    }
+
+    /// Checks every tier for `caller` at `now_ns`. All tiers are peeked with
+    /// [`RateLimiter::check_only`] first and only recorded once every tier
+    /// passes, so a rejected call records nothing — no per-caller entry is
+    /// created for a call the global tier rejects, and a per-caller rejection
+    /// never touches the global counters. Exposed for testability (inject the
+    /// caller and timestamp).
+    pub fn check_at(&self, caller: Principal, now_ns: u64) -> Result<(), RateLimitError> {
+        let global_bucket = Principal::anonymous();
+
+        // Peek every tier without recording. The global tiers bucket under a
+        // fixed key, so remap a global rejection's `caller` back to the real
+        // caller (otherwise it reports as anonymous).
+        self.caller_minute.check_only(caller, now_ns)?;
+        self.caller_hour.check_only(caller, now_ns)?;
+        self.global_minute
+            .check_only(global_bucket, now_ns)
+            .map_err(|mut e| {
+                e.caller = caller;
+                e
+            })?;
+        self.global_hour
+            .check_only(global_bucket, now_ns)
+            .map_err(|mut e| {
+                e.caller = caller;
+                e
+            })?;
+
+        // Every tier is within limits — record the call.
+        self.caller_minute.record(caller, now_ns);
+        self.caller_hour.record(caller, now_ns);
+        self.global_minute.record(global_bucket, now_ns);
+        self.global_hour.record(global_bucket, now_ns);
+        Ok(())
+    }
+}
+
+impl Default for TieredRateLimiter {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[cfg(test)]
@@ -126,13 +465,11 @@ mod tests {
     use candid::Principal;
     use pretty_assertions::assert_eq;
     use shared::types::{
-        bitcoin::{
-            BtcAddPendingTransactionError, BtcGetPendingTransactionsError, SelectedUtxosFeeError,
-        },
-        signer::AllowSigningError,
+        bitcoin::{BtcAddPendingTransactionError, BtcGetPendingTransactionsError},
+        signer::{topup::TopUpCyclesLedgerError, AllowSigningError, GetAllowedCyclesError},
     };
 
-    use super::RateLimiter;
+    use super::{RateLimiter, TieredRateLimiter};
 
     fn test_principal(id: u8) -> Principal {
         Principal::from_slice(&[id])
@@ -283,18 +620,39 @@ mod tests {
     }
 
     #[test]
-    fn selected_utxos_fee_error_carries_rate_limit_details() {
+    fn get_allowed_cycles_error_carries_rate_limit_details() {
         let rl = RateLimiter::new(1, 60 * ONE_SEC);
         let caller = test_principal(42);
 
         rl.check_at(caller, ONE_SEC).unwrap();
 
-        let res: Result<(), SelectedUtxosFeeError> = rl
+        let res: Result<(), GetAllowedCyclesError> = rl
             .check_at(caller, 2 * ONE_SEC)
-            .map_err(SelectedUtxosFeeError::RateLimited);
+            .map_err(GetAllowedCyclesError::RateLimited);
 
         match res.unwrap_err() {
-            SelectedUtxosFeeError::RateLimited(e) => {
+            GetAllowedCyclesError::RateLimited(e) => {
+                assert_eq!(e.max_calls, 1);
+                assert_eq!(e.window_ns, 60 * ONE_SEC);
+                assert_eq!(e.caller, caller);
+            }
+            other => panic!("expected RateLimited, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn top_up_cycles_ledger_error_carries_rate_limit_details() {
+        let rl = RateLimiter::new(1, 60 * ONE_SEC);
+        let caller = test_principal(42);
+
+        rl.check_at(caller, ONE_SEC).unwrap();
+
+        let res: Result<(), TopUpCyclesLedgerError> = rl
+            .check_at(caller, 2 * ONE_SEC)
+            .map_err(TopUpCyclesLedgerError::RateLimited);
+
+        match res.unwrap_err() {
+            TopUpCyclesLedgerError::RateLimited(e) => {
                 assert_eq!(e.max_calls, 1);
                 assert_eq!(e.window_ns, 60 * ONE_SEC);
                 assert_eq!(e.caller, caller);
@@ -345,5 +703,320 @@ mod tests {
         assert_eq!(e.max_calls, 1);
         assert_eq!(e.window_ns, 60 * ONE_SEC);
         assert_eq!(e.caller, caller);
+    }
+
+    #[test]
+    fn vetkey_per_caller_minute_limit() {
+        let rl = TieredRateLimiter::new();
+        let caller = test_principal(1);
+
+        assert!(rl.check_at(caller, ONE_SEC).is_ok());
+        assert!(rl.check_at(caller, 2 * ONE_SEC).is_ok());
+
+        let err = rl.check_at(caller, 3 * ONE_SEC).unwrap_err();
+        assert_eq!(err.max_calls, 2);
+        assert_eq!(err.window_ns, 60 * ONE_SEC);
+    }
+
+    #[test]
+    fn vetkey_per_caller_hour_limit() {
+        let rl = TieredRateLimiter::new();
+        let caller = test_principal(1);
+
+        // 61s apart so the per-minute tier (2/min) never trips; the per-hour
+        // tier (10/hour) then rejects the 11th call.
+        for i in 0..10u64 {
+            let t = ONE_SEC + i * 61 * ONE_SEC;
+            assert!(rl.check_at(caller, t).is_ok(), "call {i} should pass");
+        }
+
+        let err = rl
+            .check_at(caller, ONE_SEC + 10 * 61 * ONE_SEC)
+            .unwrap_err();
+        assert_eq!(err.max_calls, 10);
+        assert_eq!(err.window_ns, 60 * 60 * ONE_SEC);
+    }
+
+    #[test]
+    fn vetkey_global_minute_limit_across_callers() {
+        let rl = TieredRateLimiter::new();
+
+        // 20 distinct callers, one call each — the global per-minute cap is 20.
+        for id in 1..=20u8 {
+            assert!(
+                rl.check_at(test_principal(id), ONE_SEC).is_ok(),
+                "caller {id}"
+            );
+        }
+
+        let err = rl.check_at(test_principal(21), ONE_SEC).unwrap_err();
+        assert_eq!(err.max_calls, 20);
+        assert_eq!(err.window_ns, 60 * ONE_SEC);
+        // The global tier buckets under `Principal::anonymous()` internally, but
+        // the error must report the real caller, not the bucket key.
+        assert_eq!(err.caller, test_principal(21));
+    }
+
+    #[test]
+    fn a_global_tier_catches_a_flood_the_per_caller_tier_cannot_see() {
+        // Why the global tiers exist at all, and why an endpoint may want them
+        // sized differently from the per-caller ones: a per-caller limit is blind
+        // to one call each from a thousand fresh principals, and identities are
+        // free to create.
+        let rl = TieredRateLimiter::with_tiers(20, 200, 5, 50);
+
+        for id in 1..=5u8 {
+            assert!(
+                rl.check_at(test_principal(id), ONE_SEC).is_ok(),
+                "caller {id} is well inside its own budget"
+            );
+        }
+
+        let err = rl.check_at(test_principal(6), ONE_SEC).unwrap_err();
+        assert_eq!(
+            err.max_calls, 5,
+            "the sixth distinct caller is refused by the global tier, not its own"
+        );
+    }
+
+    #[test]
+    fn a_raised_burst_lifts_the_minute_tier_and_leaves_the_hour_tier_binding() {
+        let burst = TieredRateLimiter::with_caller_burst(5);
+        let caller = test_principal(1);
+
+        // Five inside one minute, where the default would have stopped at two.
+        for call in 1..=5 {
+            assert!(
+                burst.check_at(caller, ONE_SEC).is_ok(),
+                "call {call} of the raised burst"
+            );
+        }
+        assert!(
+            burst.check_at(caller, ONE_SEC).is_err(),
+            "six is still too many"
+        );
+
+        // The point of the change: worst-case hourly spend is unmoved, because
+        // the hour tier binds at 10 regardless of how the bursts are shaped.
+        // Five more across later minutes reach that cap, and the eleventh fails.
+        for call in 6..=10u64 {
+            let minute_later = ONE_SEC + call * 60 * ONE_SEC;
+            assert!(
+                burst.check_at(caller, minute_later).is_ok(),
+                "call {call} within the hour"
+            );
+        }
+        let err = burst
+            .check_at(caller, ONE_SEC + 11 * 60 * ONE_SEC)
+            .unwrap_err();
+        assert_eq!(
+            err.max_calls, 10,
+            "the hour tier is what refused, so the cost ceiling is unchanged"
+        );
+    }
+
+    #[test]
+    fn the_default_tiers_survive_the_move_into_with_tiers() {
+        // All four, because `with_tiers` takes four positional numbers and
+        // getting one pair the wrong way round is the mistake this is for.
+        // Asserting only the first tier would have passed with the hour and
+        // global limits silently swapped.
+        let caller_minute = TieredRateLimiter::new();
+        let caller = test_principal(1);
+
+        assert!(caller_minute.check_at(caller, ONE_SEC).is_ok());
+        assert!(caller_minute.check_at(caller, ONE_SEC).is_ok());
+        assert!(
+            caller_minute.check_at(caller, ONE_SEC).is_err(),
+            "2 per minute per caller"
+        );
+
+        // Spread one call per minute so the minute tier never bites, and the
+        // tenth is what the hour tier has to refuse.
+        let caller_hour = TieredRateLimiter::new();
+
+        for minute in 0..10 {
+            assert!(
+                caller_hour
+                    .check_at(caller, minute * TieredRateLimiter::MINUTE_NS + ONE_SEC)
+                    .is_ok(),
+                "10 per hour per caller: call {minute} should pass"
+            );
+        }
+        assert!(
+            caller_hour
+                .check_at(caller, 10 * TieredRateLimiter::MINUTE_NS + ONE_SEC)
+                .is_err(),
+            "10 per hour per caller"
+        );
+
+        // A fresh principal each time, so only the global tiers can refuse.
+        let global_minute = TieredRateLimiter::new();
+
+        for n in 0..20 {
+            assert!(
+                global_minute.check_at(test_principal(n), ONE_SEC).is_ok(),
+                "20 per minute globally: call {n} should pass"
+            );
+        }
+        assert!(
+            global_minute
+                .check_at(test_principal(200), ONE_SEC)
+                .is_err(),
+            "20 per minute globally"
+        );
+
+        // Five a minute across twenty minutes: 100 calls that all sit inside one
+        // sliding hour, and never trip the 20-per-minute tier on the way. One per
+        // minute would spread them over 100 minutes, where the hour window only
+        // ever holds the last 60 and the limit is never reached.
+        let global_hour = TieredRateLimiter::new();
+
+        for n in 0..100 {
+            let at = u64::from(n / 5) * TieredRateLimiter::MINUTE_NS + ONE_SEC;
+
+            assert!(
+                global_hour.check_at(test_principal(n), at).is_ok(),
+                "100 per hour globally: call {n} should pass"
+            );
+        }
+        assert!(
+            global_hour
+                .check_at(
+                    test_principal(200),
+                    20 * TieredRateLimiter::MINUTE_NS + ONE_SEC
+                )
+                .is_err(),
+            "100 per hour globally"
+        );
+    }
+
+    #[test]
+    fn vetkey_per_caller_rejection_does_not_consume_global() {
+        let rl = TieredRateLimiter::new();
+        let heavy = test_principal(1);
+
+        // Heavy caller: 2 pass (2 global slots used); the 3rd is rejected by the
+        // per-caller minute tier and must NOT touch the global counter.
+        assert!(rl.check_at(heavy, ONE_SEC).is_ok());
+        assert!(rl.check_at(heavy, ONE_SEC).is_ok());
+        assert!(rl.check_at(heavy, ONE_SEC).is_err());
+
+        // 18 more distinct callers must still fit (global left = 20 - 2 = 18); if
+        // the rejected 3rd call had consumed a global slot, only 17 would fit.
+        for id in 2..=19u8 {
+            assert!(
+                rl.check_at(test_principal(id), ONE_SEC).is_ok(),
+                "caller {id}"
+            );
+        }
+
+        // Global is now at 20 → the next distinct caller trips the global tier.
+        let err = rl.check_at(test_principal(20), ONE_SEC).unwrap_err();
+        assert_eq!(err.max_calls, 20);
+    }
+
+    #[test]
+    fn check_only_does_not_record() {
+        let rl = RateLimiter::new(1, 10 * ONE_SEC);
+        let caller = test_principal(1);
+
+        // Repeated peeks never trip the limit — nothing is recorded.
+        assert!(rl.check_only(caller, ONE_SEC).is_ok());
+        assert!(rl.check_only(caller, ONE_SEC).is_ok());
+        assert!(rl.check_only(caller, ONE_SEC).is_ok());
+    }
+
+    #[test]
+    fn record_then_check_only_reflects_the_recorded_call() {
+        let rl = RateLimiter::new(1, 10 * ONE_SEC);
+        let caller = test_principal(1);
+
+        rl.record(caller, ONE_SEC);
+
+        let err = rl.check_only(caller, 2 * ONE_SEC).unwrap_err();
+        assert_eq!(err.max_calls, 1);
+        assert_eq!(err.caller, caller);
+    }
+
+    #[test]
+    fn vetkey_global_rejection_does_not_consume_caller_budget() {
+        let rl = TieredRateLimiter::new();
+
+        // Saturate the global minute tier with 20 distinct callers.
+        for id in 1..=20u8 {
+            assert!(
+                rl.check_at(test_principal(id), ONE_SEC).is_ok(),
+                "caller {id}"
+            );
+        }
+
+        // A fresh caller is rejected by the global tier — and records nothing.
+        let caller = test_principal(21);
+        assert!(rl.check_at(caller, ONE_SEC).is_err());
+
+        // A minute later the global window has slid; the caller still has its
+        // full per-minute budget (the rejected attempt consumed nothing).
+        let later = 61 * ONE_SEC;
+        assert!(rl.check_at(caller, later).is_ok());
+        assert!(rl.check_at(caller, later).is_ok());
+        let err = rl.check_at(caller, later).unwrap_err();
+        assert_eq!(err.max_calls, 2);
+    }
+
+    #[test]
+    fn prunes_idle_callers_once_over_the_cap() {
+        // Sweep threshold of 1: caller 2 pushes the map over it; caller 3 triggers the sweep.
+        let rl = RateLimiter::with_tracking_cap(1, 10 * ONE_SEC, 1);
+
+        rl.record(test_principal(1), ONE_SEC);
+        rl.record(test_principal(2), ONE_SEC);
+
+        // t=100s is past the 10s window, so callers 1 and 2 are idle and pruned;
+        // only the caller recorded now remains.
+        rl.record(test_principal(3), 100 * ONE_SEC);
+
+        assert_eq!(rl.tracked_callers(), 1);
+    }
+
+    #[test]
+    fn does_not_prune_active_callers() {
+        let rl = RateLimiter::with_tracking_cap(5, 10 * ONE_SEC, 1);
+
+        // Three callers, all active (in-window at t=100s). The third record
+        // tips the map over the cap of 1 and triggers a sweep, but nothing is
+        // idle so it evicts nothing.
+        rl.record(test_principal(1), 100 * ONE_SEC);
+        rl.record(test_principal(2), 100 * ONE_SEC);
+        rl.record(test_principal(3), 100 * ONE_SEC);
+
+        assert_eq!(rl.tracked_callers(), 3);
+    }
+
+    #[test]
+    fn sweep_runs_at_most_once_per_window() {
+        // Cap of 2, 10s window.
+        let rl = RateLimiter::with_tracking_cap(2, 10 * ONE_SEC, 2);
+
+        // Four callers whose most recent calls all fall inside the window at
+        // t=100s, so the first over-cap sweep keeps them all and the map stays
+        // above the cap.
+        rl.record(test_principal(1), 92 * ONE_SEC);
+        rl.record(test_principal(2), 93 * ONE_SEC);
+        rl.record(test_principal(3), 100 * ONE_SEC);
+        rl.record(test_principal(4), 100 * ONE_SEC); // triggers sweep #1 (t=100s)
+        assert_eq!(rl.tracked_callers(), 4);
+
+        // By t=103s caller 1 (last call t=92s) has aged out of the window, but
+        // only 3s have passed since sweep #1 (< the 10s window), so the sweep is
+        // skipped and the now-idle caller is not reclaimed.
+        rl.record(test_principal(5), 103 * ONE_SEC);
+        assert_eq!(rl.tracked_callers(), 5);
+
+        // t=111s is a full window past sweep #1, so the sweep runs again and
+        // drops every caller now idle (1, 2, 3, 4), leaving only the in-window
+        // callers.
+        rl.record(test_principal(6), 111 * ONE_SEC);
+        assert_eq!(rl.tracked_callers(), 2);
     }
 }

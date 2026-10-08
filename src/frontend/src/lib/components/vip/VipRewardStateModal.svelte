@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
@@ -13,6 +12,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import { VIP_STATE_BUTTON, VIP_STATE_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledIcTokens } from '$lib/derived/tokens.derived';

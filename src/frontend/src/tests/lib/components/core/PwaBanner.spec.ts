@@ -5,16 +5,27 @@ import {
 } from '$lib/constants/test-ids.constants';
 import * as deviceUtils from '$lib/utils/device.utils';
 import { fireEvent, render } from '@testing-library/svelte';
+import type { MockInstance } from 'vitest';
 
 describe('PwaBanner', () => {
+	let isPWAStandaloneSpy: MockInstance<typeof deviceUtils.isPWAStandalone>;
+
+	beforeAll(() => {
+		isPWAStandaloneSpy = vi.spyOn(deviceUtils, 'isPWAStandalone');
+	});
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.spyOn(deviceUtils, 'isPWAStandalone').mockReturnValue(true);
+		isPWAStandaloneSpy.mockReturnValue(true);
+	});
+
+	afterAll(() => {
+		vi.restoreAllMocks();
 	});
 
 	it('should not show the banner for non-PWA environment', () => {
-		vi.spyOn(deviceUtils, 'isPWAStandalone').mockReturnValue(false);
+		isPWAStandaloneSpy.mockReturnValue(false);
 
 		const { queryByTestId } = render(PwaBanner);
 

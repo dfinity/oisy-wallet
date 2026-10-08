@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { Backdrop, BottomSheet } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
+	import Backdrop from '$lib/components/ui/Backdrop.svelte';
+	import BottomSheetContainer from '$lib/components/ui/BottomSheetContainer.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { CONFIRMATION_POPUP_MODAL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
@@ -10,32 +13,63 @@
 		title: Snippet;
 		content: Snippet;
 		disabled?: boolean;
+		showCloseButton?: boolean;
 	}
 
-	let { onCancel, title, content, disabled = false }: Props = $props();
+	let { onCancel, title, content, disabled = false, showCloseButton = true }: Props = $props();
 </script>
 
-<div class="fixed inset-0 z-50">
-	<BottomSheet transition>
-		<div class="flex w-full flex-col">
-			<div class="w-full p-4">
+{#snippet body()}
+	<div class="flex w-full flex-col">
+		<div class="flex w-full items-center justify-between gap-4 px-5 pt-5 pb-2">
+			<h3 class="m-0 min-w-0 text-xl font-bold break-words" class:w-full={!showCloseButton}>
+				{@render title()}
+			</h3>
+
+			{#if showCloseButton}
 				<ButtonIcon
 					ariaLabel={$i18n.core.alt.close_details}
 					{disabled}
 					onclick={onCancel}
-					styleClass="text-disabled float-right"
+					styleClass="text-disabled"
 				>
 					{#snippet icon()}
 						<IconClose size="24" />
 					{/snippet}
 				</ButtonIcon>
-			</div>
-
-			<h3 class="mt-4 mb-2 text-center">{@render title()}</h3>
-
-			{@render content()}
+			{/if}
 		</div>
-	</BottomSheet>
 
-	<Backdrop on:nnsClose={onCancel} />
-</div>
+		{@render content()}
+	</div>
+{/snippet}
+
+<!-- Mobile: a slide-up bottom sheet, below the same `sm` breakpoint (640px) where
+     `Modal.svelte`'s own dialog switches from full-bleed to a centered card
+     (see `gix.scss`) — otherwise the underlying modal looks desktop-sized while
+     this popup still renders as a full-width mobile sheet. -->
+<Responsive down="sm">
+	<div class="fixed inset-0 z-50">
+		<BottomSheetContainer transition>
+			{@render body()}
+		</BottomSheetContainer>
+
+		<Backdrop onClose={onCancel} />
+	</div>
+</Responsive>
+
+<!-- Desktop: a smaller modal stacked over the underlying modal. -->
+<Responsive up="md">
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+		<Backdrop onClose={onCancel} />
+
+		<div
+			class="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl bg-primary shadow-[var(--overlay-box-shadow)]"
+			aria-modal="true"
+			data-tid={CONFIRMATION_POPUP_MODAL}
+			role="dialog"
+		>
+			{@render body()}
+		</div>
+	</div>
+</Responsive>

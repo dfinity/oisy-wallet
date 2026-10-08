@@ -1,5 +1,7 @@
+import type { Erc20Token } from '$eth/types/erc20';
+import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
-import { SWAP_MODE, SWAP_SIDE } from '$lib/constants/swap.constants';
+import { SWAP_MODE, SWAP_MODE_MARKET, SWAP_SIDE } from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -10,6 +12,7 @@ import {
 	type SwapMappedResult
 } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
+import { isNetworkEthereum } from '$lib/utils/network.utils';
 import {
 	geSwapEthTokenAddress,
 	mapVeloraMarketSwapResult,
@@ -25,13 +28,15 @@ export const fetchVeloraSwapAmount = async ({
 	amount,
 	userAddress
 }: EvmQuoteParams): Promise<SwapMappedResult | undefined> => {
-	if (isNullish(userAddress)) {
+	if (isNullish(userAddress) || !isNetworkEthereum(destinationToken.network)) {
 		return;
 	}
 
+	const erc20DestinationToken = destinationToken as Erc20Token;
+
 	const {
 		network: { chainId: destChainId }
-	} = destinationToken;
+	} = erc20DestinationToken;
 
 	const {
 		network: { chainId: srcChainId }
@@ -42,13 +47,21 @@ export const fetchVeloraSwapAmount = async ({
 		fetch: window.fetch
 	});
 
+	// Velora Delta settles by pulling the source token via allowance/permit, which is
+	// impossible for a native coin (no ERC-20 contract). Velora still returns Delta pricing
+	// for native sources, but executing it would require the on-chain DepositNativeAndPreSign
+	// flow we don't implement — the Delta path would crash trying to approve a native coin.
+	// Force native sources onto the Market route, which signs a standard swap transaction
+	// carrying the native value.
+	const mode = isDefaultEthereumToken(sourceToken) ? SWAP_MODE_MARKET : SWAP_MODE;
+
 	const baseParams: GetQuoteParams = {
 		amount: `${amount}`,
 		srcToken: geSwapEthTokenAddress(sourceToken),
-		destToken: geSwapEthTokenAddress(destinationToken),
+		destToken: geSwapEthTokenAddress(erc20DestinationToken),
 		srcDecimals: sourceToken.decimals,
 		destDecimals: destinationToken.decimals,
-		mode: SWAP_MODE,
+		mode,
 		side: SWAP_SIDE,
 		userAddress,
 		partner: OISY_URL_HOSTNAME
@@ -71,7 +84,7 @@ export const fetchVeloraSwapAmount = async ({
 		token_id: String(sourceToken.id),
 		token2_symbol: destinationToken.symbol,
 		token2_network: destinationToken.network.name,
-		token2_address: destinationToken.address,
+		token2_address: erc20DestinationToken.address,
 		token2_name: destinationToken.name,
 		token2_standard: destinationToken.standard.code,
 		token2_id: String(destinationToken.id),
@@ -89,7 +102,7 @@ export const fetchVeloraSwapAmount = async ({
 
 		if ('delta' in data) {
 			const destinationTokenToDecimals = formatToken({
-				value: BigInt(data.delta.destAmount),
+				value: BigInt(data.delta.route.destination.output.amount),
 				unitName: destinationToken.decimals
 			});
 

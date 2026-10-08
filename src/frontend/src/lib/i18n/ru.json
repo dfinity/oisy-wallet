@@ -1,4 +1,39 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "Добро пожаловать в раздел Займы!",
+			"header_description": "Получай ликвидность, не продавая активы. Занимай стейблкоины под залог своих BTC, ICP и других активов.",
+			"borrowing_options": "Варианты займа",
+			"borrowing_potential": "Потенциал займа",
+			"borrowing_power_hint": "Приблизительная оценка того, сколько ты сможешь занять, если предоставишь свои активы в качестве залога, по лучшей доступной ставке.",
+			"available_best_provider": "доступно · лучший поставщик",
+			"remaining_best_provider": "остаток · лучший поставщик",
+			"active_loans": "Активные займы",
+			"no_active_loans": "нет активных займов",
+			"amount_borrowed": "",
+			"apr": "APR",
+			"borrow_apr_from": "APR займа от"
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
+		}
+	},
+	"borrowings": {
+		"text": {
+			"tab_title": "Займы",
+			"tab_title_short": "Займы",
+			"no_borrowings": "",
+			"go_to_borrow": ""
+		}
+	},
 	"core": {
 		"text": {
 			"cancel": "Отмена",
@@ -7,6 +42,8 @@
 			"back": "Назад",
 			"done": "Готово",
 			"close": "Закрыть",
+			"collapse": "Свернуть",
+			"expand": "Развернуть",
 			"change": "Изменить",
 			"continue": "Продолжить",
 			"apply": "Применить",
@@ -29,6 +66,7 @@
 			"not_available": "Недоступно",
 			"new": "New",
 			"edit": "Изменить",
+			"download": "Скачать",
 			"no_results": "Нет результатов",
 			"paste": "Вставить",
 			"to": "Кому",
@@ -46,7 +84,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short защищает вас!"
 		},
 		"info": {
 			"test_banner": "Только для тестирования!",
@@ -71,17 +110,31 @@
 			"video_not_supported": "Ваш браузер не поддерживает воспроизведение видео."
 		}
 	},
+	"progress": {
+		"completed": "Завершено",
+		"in_progress": "В процессе",
+		"failed": "Ошибка"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "Активы",
+			"nfts": "Коллекционные предметы",
 			"settings": "Настройки",
 			"dapp_explorer": "Приложения",
 			"activity": "Активность",
+			"trade": "Торговать",
+			"borrow": "Брать в долг",
+			"section_portfolio": "Портфель",
+			"section_finance": "Финансы",
+			"section_more": "Ещё",
 			"airdrops": "Награды",
 			"earning": "Зарабатывать",
 			"pay": "",
 			"wallet_connect": "",
 			"source_code_on_github": "Исходный код на GitHub",
+			"x": "",
+			"help": "Помощь",
+			"faq": "",
 			"view_on_explorer": "Посмотреть в проводнике",
 			"source_code": "Исходный код",
 			"documentation": "Документация",
@@ -94,26 +147,38 @@
 			"hide_balances": "Скрыть балансы",
 			"show_balances": "Показать балансы",
 			"privacy_mode_enabled": "Режим конфиденциальности включен. Нажмите [P], чтобы снова показать балансы.",
-			"privacy_mode_disabled": "Режим конфиденциальности отключен. Нажмите [P], чтобы скрыть балансы."
+			"privacy_mode_disabled": "Режим конфиденциальности отключен. Нажмите [P], чтобы скрыть балансы.",
+			"notes": "Заметки",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "Активы",
+			"nfts": "Открыть коллекционные предметы",
 			"settings": "Настройки",
 			"dapp_explorer": "Приложения",
 			"activity": "Просмотр активности",
+			"trade": "Просмотр трейда",
+			"borrow": "Просмотр займов",
+			"earning": "Просмотр заработка",
 			"airdrops": "Просмотр наград",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "Адрес кошелька, настройки, выход и ссылки",
 			"documentation": "Документация $oisy_name",
 			"support": "Раздел поддержки документации $oisy_name",
+			"help_page": "Открыть страницу помощи",
 			"open_twitter": "X/Twitter DFINITY",
+			"more": "",
+			"faq": "",
 			"vip_qr_code": "Создать приглашение",
 			"binance_qr_code": "Создать ссылку на Binance",
 			"refer_a_friend": "Реферальная ссылка для друга",
 			"address_book": "Контакты",
 			"hide_balances": "Скрыть балансы",
-			"show_balances": "Показать скрытые балансы"
+			"show_balances": "Показать скрытые балансы",
+			"notes": "Открыть заметки",
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "Документы"
@@ -123,14 +188,15 @@
 		"text": {
 			"title_part_1": "Ваши цифровые активы",
 			"title_part_2": "Приватные и безопасные",
+			"description": "Откройте свой кошелёк или создайте новый за несколько секунд",
 			"logout": "Выйти",
 			"lock": "Закрыть",
 			"authenticate": "Открыть или создать",
+			"sign_in_or_sign_up": "Войти или зарегистрироваться",
 			"internet_identity": "",
-			"asset_types": "Bitcoin, Solana, Ethereum, ICP и другие",
-			"instant_and_private": "Приватный доступ в любой момент",
-			"advanced_cryptography": "Защищено передовой криптографией - 100% onchain",
-			"social_login": ""
+			"asset_types": "Криптовалюты, акции, сырьевые товары, коллекционные предметы и зашифрованные заметки.",
+			"advanced_cryptography": "Приватно и защищено от подмены. Невидимо, когда нужно.",
+			"move_swap_grow": "Зарабатывайте, занимайте и торгуйте со встроенным ИИ-ассистентом."
 		},
 		"alt": {
 			"preview": "Предварительный просмотр $oisy_name после входа в систему, как на настольном компьютере, так и на мобильном устройстве",
@@ -140,6 +206,12 @@
 		},
 		"message": {
 			"session_locked": "Сессия заблокирована"
+		},
+		"info": {
+			"signups_closed": "Новые регистрации временно ограничены. Пожалуйста, повторите попытку позже."
+		},
+		"banner": {
+			"signups_closed": "В настоящее время регистрация новых пользователей недоступна. Существующие пользователи могут использовать $oisy_short в обычном режиме."
 		},
 		"warning": {
 			"not_signed_in": "Вы не вошли в систему. Пожалуйста, войдите, чтобы продолжить.",
@@ -211,17 +283,17 @@
 			"website": "Изображение $dAppName"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
+			"aa_new": "Недавно добавленные",
+			"ab_icp": "ICP",
 			"ai": "ИИ",
-			"defi": "DeFi",
+			"dex": "DEX",
 			"game": "Игра",
-			"nft": "NFT",
-			"rwa": "",
-			"social_media": "Социальные сети",
+			"lending": "Лендинг",
+			"nft": "Коллекционные предметы",
+			"rwa": "RWA",
+			"social": "Социальные",
 			"staking": "Стейкинг",
-			"tools": "Инструменты",
-			"walletconnect": "WalletConnect"
+			"tools": "Инструменты"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -244,17 +316,6 @@
 					"call_to_action": "Показать больше"
 				}
 			},
-			"decideid": {
-				"name": "DecideID",
-				"one_liner": "Проверка личности для безопасных цифровых взаимодействий",
-				"call_to_action": "Открыть DecideID",
-				"stats": "50,000+ запросов на вывод",
-				"description": "Decide ID — это система проверки личности, которая обеспечивает доверие и безопасность. При регистрации вы проходите верификацию: предоставляете доказательства и выполняете задание для подтверждения личности. Это гарантирует, что каждый пользователь — реальный человек, а не бот. <br/><br/>Ваш Principal ID создается в процессе и может использоваться в разных приложениях для безопасного входа. Ваши личные данные остаются конфиденциальными благодаря технологии с нулевым разглашением.",
-				"carousel": {
-					"text": "Безопасная проверка личности с защитой конфиденциальности",
-					"call_to_action": "Заинтересованы?"
-				}
-			},
 			"icpswap": {
 				"name": "ICPSwap",
 				"one_liner": "Центр финансовых и DAO-сервисов на Internet Computer",
@@ -262,10 +323,10 @@
 				"description": "Центр будущего децентрализованных финансов! ICPSwap — это не просто биржа, а хаб для финансовых, торговых и DAO-сервисов на Internet Computer. Создает экосистему децентрализованных финансов, где пользователи и разработчики могут совместно создавать проекты."
 			},
 			"nnsdapp": {
-				"name": "NNS Dapp",
-				"one_liner": "Удобный интерфейс для управления Internet Computer",
-				"call_to_action": "Присоединяйтесь",
-				"description": "NNS Dapp — это удобный интерфейс для взаимодействия с Network Nervous System Internet Computer. Позволяет легко:<br/><ul><li>Отправлять и получать токены (ICP, ckBTC, CHAT и др.)</li><li>Стейкать и управлять нейронами</li><li>Голосовать за управление Internet Computer и SNS</li><li>Участвовать в децентрализованных обменах</li><li>Создавать и пополнять контейнеры</li><li>Зарабатывать награды за управление</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Платформа управления для Internet Computer, позволяющая пользователям делать стейкинг, голосовать и следить за активностью сети.",
+				"call_to_action": "Участвовать в управлении ICP",
+				"description": "Приложение NNS — это платформа управления для Internet Computer (ICP), которая позволяет пользователям стейкать токены, участвовать в голосованиях и следить за активностью сети.<br/><br/>Оно обеспечивает большую прозрачность действий пользователей и управленческой активности, помогая пользователям понять, как стейкинг, голосование и участие способствуют развитию экосистемы."
 			},
 			"uniswap": {
 				"name": "Uniswap",
@@ -302,16 +363,6 @@
 				"one_liner": "Ведущий DEX для стейблкоинов и кредитования на Ethereum",
 				"call_to_action": "Исказитесь",
 				"description": "Curve Finance — ведущая децентрализованная биржа для стейблкоинов и кредитования на Ethereum и совместимых блокчейнах. Известна передовыми AMM для стейблкоинов и уникальной системой мягкой ликвидации."
-			},
-			"sonic": {
-				"name": "Sonic",
-				"one_liner": "Раскройте потенциал DeFi — торгуйте, зарабатывайте, управляйте",
-				"call_to_action": "Открыть Sonic",
-				"description": "Sonic — мультичейн децентрализованная биржа на Internet Computer. Предлагает торговлю токенами, бессрочными контрактами, предоставление ликвидности и участие в DAO. <br/><br/>Полностью ончейн и открытый код! Торгуйте как профессионал, зарабатывайте комиссии как поставщик ликвидности, участвуйте в управлении Sonic DAO.",
-				"carousel": {
-					"text": "Раскройте весь потенциал DeFi",
-					"call_to_action": "Открыть Sonic"
-				}
 			},
 			"raydium": {
 				"name": "Raydium",
@@ -359,17 +410,6 @@
 					"text": "Меняйте токены на DEX",
 					"call_to_action": "Попробовать KongSwap"
 				}
-			},
-			"beam": {
-				"name": "Beam",
-				"one_liner": "Суверенный L1-блокчейн, который создаёт, инвестирует и ускоряет передовые технологии — особенно Web3-гейминг через финансирование и поддержку экосистем в сети Beam.",
-				"call_to_action": "Принять участие!",
-				"description": "Beam — это суверенный блокчейн первого уровня, предназначенный для финансирования и ускорения развития высокоэффективных технологий в игровой индустрии Web3 и передовых инновациях. Благодаря собственной казначейской системе и экосистеме грантов, Beam инвестирует напрямую в команды и инфраструктуру. Блокчейн поддерживает масштабируемые децентрализованные приложения с помощью нативных инструментов и тесного сотрудничества основателей."
-			},
-			"axie_infinity": {
-				"name": "Axie Infinity",
-				"one_liner": "Блокчейн-игра в стиле Pokémon, в которой игроки собирают, разводят, сражаются с NFT-существами (Axies) и зарабатывают токены (AXS, SLP) в экономике принадлежащей игроку на сайдчейне Ronin.",
-				"description": "Axie Infinity — это блокчейн-игра, в которой игроки собирают, разводят и сражаются с NFT-существами, называемыми Axie. Созданная на основе сайдчейна Ronin, игра вознаграждает игроков токенами $AXS и $SLP, создавая замкнутую экономику владения и конкуренции. Axie стала пионером модели P2E и одним из первых успешных проектов Web3 в сфере массовых игр."
 			},
 			"mobox": {
 				"name": "Mobox",
@@ -421,11 +461,6 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"sphere_finance": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"binaryx": {
 				"name": "",
 				"one_liner": "",
@@ -439,11 +474,7 @@
 			"liquidium": {
 				"name": "",
 				"one_liner": "",
-				"description": "",
-				"carousel": {
-					"text": "",
-					"call_to_action": ""
-				}
+				"description": ""
 			},
 			"icpindex": {
 				"name": "",
@@ -468,6 +499,20 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
+				"description": ""
+			},
+			"cloud_engines": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"hyperliquid": {
+				"name": "",
+				"one_liner": "",
 				"description": ""
 			}
 		}
@@ -726,12 +771,14 @@
 			"icrc_custom_token": "Ошибка при загрузке пользовательского токена ICRC.",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "Вашему кошельку требуются некоторые начальные данные, которые еще не загружены. Пожалуйста, попробуйте еще раз.",
 			"allow_signing": "Проблема с настройкой вашего кошелька для подписи. Вы были выведены из системы. Если проблема не исчезнет, обратитесь в службу поддержки.",
 			"waiting_for_allowed_cycles_aborted": "Пожалуйста, попробуйте войти позже",
 			"btc_wallet_error": "Ошибка при загрузке информации о кошельке BTC.",
-			"sol_wallet_error": "Ошибка при загрузке информации о кошельке SOL."
+			"sol_wallet_error": "Ошибка при загрузке информации о кошельке SOL.",
+			"xrp_wallet_error": "Ошибка при загрузке информации о кошельке XRP."
 		}
 	},
 	"hero": {
@@ -747,10 +794,65 @@
 			"toggle_privacy_mode": "Включить/выключить режим конфиденциальности"
 		}
 	},
+	"help": {
+		"text": {
+			"title": "Помощь",
+			"support_title": "Поддержка",
+			"support_description": "Ответы и дополнительную информацию вы найдёте на странице поддержки в документации $oisy_name. Если не получается разобраться, напишите команде.",
+			"support_link": "Перейти на страницу поддержки",
+			"network_explorers_title": "",
+			"network_explorers_description": "",
+			"explorers_title": "",
+			"explorers_description": "",
+			"explorers_velora_description": "",
+			"explorers_near_intents_description": "",
+			"explorers_onesec_description": "",
+			"explorers_chain_eth": "",
+			"explorers_chain_sol": "",
+			"explorers_chain_btc": "",
+			"explorers_chain_icp": "",
+			"icpswap_title": "Вывод токенов из ICPSwap",
+			"icpswap_description": "При свопе на ICPSwap ваши токены сначала попадают в пул и только потом возвращаются к вам. Если этот последний шаг не удался, токены по-прежнему ваши и по-прежнему в пуле. $oisy_name может найти их и отправить обратно.",
+			"scan": "Проверить мои пулы",
+			"scanning": "Проверяем ваши пулы…",
+			"scan_hint": "Проверяет каждый пул между двумя токенами, активными в вашем кошельке. Если вы обменяли на токен, который никогда не включали, сначала включите его, а затем проверьте снова или укажите пару ниже.",
+			"scan_nothing_found": "В проверенных пулах ($pools) ничего не осталось.",
+			"scan_unreadable": "Не удалось прочитать $unreadable из $pools пулов. Попробуйте снова или укажите пару ниже.",
+			"or_pick_a_pair": "Или укажите пару",
+			"token_first": "Первый токен",
+			"token_second": "Второй токен",
+			"select_token": "Выбрать",
+			"no_tokens": "Можно выбрать только ICP. Сначала включите недостающий токен пула или оба токена, если в пуле нет ICP.",
+			"checking_pool": "Проверяем пул…",
+			"nothing_to_withdraw": "В этом пуле нечего выводить.",
+			"results_found": "Найдено доступных для вывода балансов: $balances.",
+			"balance_unused": "Неиспользованный баланс",
+			"withdraw": "Вывести"
+		},
+		"alt": {
+			"network_explorer_link": "",
+			"explorer_link": "",
+			"select_token_first": "Выберите первый токен пула",
+			"select_token_second": "Выберите второй токен пула",
+			"withdraw": "Вывести $symbol из пула",
+			"scan": "Проверить пулы между вашими активными токенами"
+		},
+		"error": {
+			"pool_not_found": "Не удалось найти пул для этой пары. Проверьте оба токена или попробуйте снова чуть позже.",
+			"load_failed": "Не удалось прочитать ваши балансы в этом пуле.",
+			"withdraw_failed": "Вывод не удался.",
+			"scan_failed": "Не удалось получить список пулов ICPSwap."
+		},
+		"success": {
+			"withdraw": "Выведено $amount $symbol из пула.",
+			"withdraw_hidden": "Выведено $symbol из пула."
+		}
+	},
 	"settings": {
 		"text": {
 			"title": "Настройки",
 			"general": "Общие",
+			"preferences": "Параметры",
 			"principal": "Ваш Principal",
 			"principal_copied": "Принципал скопирован в буфер обмена",
 			"principal_description": "Ваш ID для $oisy_name. Создан вашей Internet Identity.",
@@ -778,7 +880,15 @@
 			"enable_hide_micro_transactions": "Включить скрытие транзакций с очень маленькими значениями",
 			"disable_hide_micro_transactions": "Отключить скрытие транзакций с очень маленькими значениями",
 			"save_spam_filter_success": "Настройки вашего спам-фильтра были обновлены.",
-			"learn_more": ""
+			"export_data": "Экспорт данных",
+			"export_data_description": "Скачивайте свои токены и транзакции в формате CSV — Basic для основной информации, Extended для дополнительных атрибутов.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Экспорт токенов",
+			"export_transactions": "Экспорт транзакций",
+			"export_tokens_success": "CSV с токенами загружен.",
+			"export_transactions_success": "CSV с транзакциями загружен.",
+			"learn_more": "Узнать больше"
 		},
 		"alt": {
 			"testnets_toggle": "Переключить, чтобы показать или скрыть тестовые сети",
@@ -788,7 +898,9 @@
 			"appearance_system": "Включает цветовой режим вашей операционной системы"
 		},
 		"error": {
-			"loading_profile": "Ошибка при загрузке профиля. Пожалуйста, обновите страницу для полного опыта."
+			"loading_profile": "Ошибка при загрузке профиля. Пожалуйста, обновите страницу для полного опыта.",
+			"export_exchange_rate_unavailable": "Курсы валют ещё загружаются. Попробуйте через мгновение.",
+			"export_failed": "Не удалось создать экспорт. Пожалуйста, попробуйте ещё раз."
 		}
 	},
 	"shortcuts": {
@@ -885,14 +997,24 @@
 				"solana_address_copied": "Адрес Solana скопирован в буфер обмена",
 				"display_solana_address_qr": "Показать адрес Solana в виде QR-кода"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {
 		"text": {
 			"send": "Отправить",
+			"xrp_sent": "Ваш платёж XRP прошёл.",
+			"xrp_submitted": "Платёж отправлен. Обычно он завершается за несколько секунд — можно закрыть это и продолжить.",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "Получатель",
-			"source": "Источник",
 			"balance": "Баланс",
 			"review": "Подверждение",
 			"signing_approval": "Подписание одобрения...",
@@ -910,6 +1032,7 @@
 			"network": "Сеть",
 			"source_network": "Исходная сеть",
 			"destination_network": "Сеть получателя",
+			"xrp_destination_tag": "Тег назначения XRP",
 			"initializing_transaction": "Инициализация транзакции",
 			"convert_to_native_icp": "Конвертировать в нативный ICP",
 			"open_qr_modal": "Начать сканирование QR-кода для получения информации о транзакции",
@@ -924,24 +1047,31 @@
 			"contacts_empty_state_title": "Ваши контакты появятся здесь",
 			"contacts_empty_state_description": "Похоже, вы еще не добавили контактов",
 			"send_review_subtitle": "Вы отправляете",
-			"no_nfts_found": "NFT не найдены",
-			"no_nfts_found_desc": "Измените параметры поиска или сеть, чтобы найти нужные вам NFT.",
-			"select_nft": "Выбрать NFT"
+			"no_nfts_found": "Коллекционные предметы не найдены",
+			"no_nfts_found_desc": "Измените параметры поиска или сеть, чтобы найти нужные вам коллекционные предметы.",
+			"select_nft": "Выбрать коллекционный предмет"
 		},
 		"placeholder": {
 			"enter_eth_address": "Введите публичный адрес (0x), имя или псевдоним",
 			"enter_recipient_address": "Введите адрес получателя, имя или псевдоним",
 			"enter_wallet_address": "Введите адрес кошелька, имя или псевдоним",
+			"xrp_destination_tag": "Введите тег назначения XRP (необязательно)",
 			"select_network": "Выбрать сеть",
-			"search_nfts": "Поиск NFT"
+			"search_nfts": "Поиск коллекционных предметов"
 		},
 		"info": {
 			"ckbtc_certified": "Пожалуйста, подождите, пока параметры ckBTC будут сертифицированы.",
 			"cketh_certified": "Пожалуйста, подождите, пока параметры ckETH будут сертифицированы.",
 			"pending_bitcoin_transaction": "Вы можете отправить еще одну транзакцию Биткойн после завершения текущей ожидающей.",
 			"no_available_utxos": "У вас не будет доступных UTXO для выполнения этой транзакции.",
-			"unknown_destination": "Вы не взаимодействовали с этим адресом раньше. Пожалуйста, убедитесь, что знаете получателя.",
-			"fee_info": "Комиссия будет оплачена в $feeSymbol. Доступно: <strong>$feeBalance $feeSymbol</strong>"
+			"first_time_destination": "Похоже, вы никогда не отправляли токены на этот адрес. Внимательно проверьте адрес.",
+			"first_time_destination_confirm": "Я отправляю токены на этот адрес впервые, и адрес внимательно проверен.",
+			"xrp_destination_tag_hint": "Требуется большинством бирж. Если оставить поле пустым, средства могут быть потеряны.",
+			"xrp_destination_tag_missing": "Тег назначения XRP не указан. Если вы отправляете на биржу, проверьте, требует ли она тег, иначе средства могут быть потеряны.",
+			"fee_expired": "",
+			"fee_info": "Комиссия будет оплачена в $feeSymbol. Доступно: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "Отсканированный код содержал только адрес получателя. Убедитесь, что вы выбрали правильный токен, ввели нужную сумму и внимательно проверили адрес получателя!",
+			"scanned_address_only_destination_single_token": "Отсканированный код содержал только адрес получателя. Убедитесь, что вы ввели нужную сумму и внимательно проверили адрес получателя!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Недействительный адрес получателя",
@@ -956,7 +1086,9 @@
 			"unknown_cketh": "Токен ckETH не может быть получен.",
 			"destination_address_invalid": "Адрес получателя недействителен.",
 			"amount_invalid": "Сумма недействительна.",
+			"xrp_destination_tag_invalid": "Тег назначения XRP должен быть целым числом от 0 до 4294967295.",
 			"insufficient_funds_verbose_btc": "",
+			"insufficient_funds_for_reserve": "Недостаточно средств: сумма должна оставить достаточно для покрытия сбора и требуемого резерва аккаунта XRP.",
 			"insufficient_funds_for_gas": "Недостаточно средств для газа",
 			"insufficient_funds_for_amount": "Недостаточно средств для этой суммы",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Недостаточно средств Ethereum для покрытия комиссий",
@@ -976,7 +1108,7 @@
 			"btc_utxo_locked": "Средства Bitcoin заблокированы ожидающими транзакциями",
 			"btc_invalid_fee_calculation": "Ошибка проверки комиссии транзакции Bitcoin",
 			"pending_transactions_not_available": "Сервис ожидающих транзакций в настоящее время недоступен. Пожалуйста, попробуйте позже.",
-			"no_nft_selected": "Не был выбран NFT для отправки"
+			"no_nft_selected": "Не был выбран коллекционный предмет для отправки"
 		},
 		"error": {
 			"unexpected": "При отправке транзакции произошла ошибка.",
@@ -991,22 +1123,38 @@
 			"incompatible_token": "Токен несовместим. Пожалуйста, повторите попытку с совместимым токеном.",
 			"no_btc_network_id": "Текущая сеть ($networkId) не является сетью Bitcoin.",
 			"no_solana_network_id": "Текущая сеть ($networkId) не является сетью Solana.",
+			"no_xrp_network_id": "Текущая сеть ($networkId) не является сетью XRP Ledger.",
 			"no_pending_bitcoin_transaction": "При загрузке ожидающих транзакций Bitcoin произошла ошибка. Пожалуйста, повторите попытку позже.",
 			"unexpected_utxos_fee": "При расчёте комиссии за транзакцию произошла ошибка.",
 			"unable_to_retrieve_amount": "н/д (не удаётся получить)",
+			"ethereum_insufficient_funds": "",
+			"ethereum_out_of_gas": "Отправка не удалась, потому что ей потребовалось больше газа, чем было оценено. Ваши средства остаются в вашем кошельке, но сеть всё равно могла взять комиссию за неудавшуюся транзакцию. Попробуйте снова.",
+			"ethereum_out_of_gas_gas": "Отправлено газа: $gasSent · Требуется газа: $gasNeeded",
+			"ethereum_out_of_gas_gas_sent": "Отправлено газа: $gasSent",
+			"ethereum_transaction_hash": "Хеш транзакции: $hash",
+			"ethereum_unsigned_transaction": "Неподписанная транзакция: $transaction",
 			"solana_transaction_expired": "Ваша транзакция не была обработана сетью Solana и истекла, скорее всего, потому что указанная приоритетная комиссия была недостаточной. Мы обновили её до последней рекомендованной суммы, поэтому повторите попытку.",
 			"solana_confirmation_failed": "Мы не получили подтверждения для только что созданной вами транзакции. Подождите несколько секунд, а затем проверьте список транзакций вашего токена, чтобы убедиться, что транзакция была создана корректно.",
 			"solana_insufficient_funds": "Баланс вашего токена недостаточен для выполнения этой транзакции. Ваш баланс мог измениться с момента последнего отображения.",
 			"solana_insufficient_funds_for_fee": "Ваш баланс SOL недостаточен для покрытия комиссий за транзакцию.",
 			"solana_insufficient_funds_for_rent": "Ваш баланс SOL недостаточен для покрытия аренды, необходимой для создания аккаунта.",
-			"fee_calc_unsupported_standard": "Не удалось рассчитать комиссию, так как указанный стандарт токена не поддерживается."
+			"fee_calc_unsupported_standard": "Не удалось рассчитать комиссию, так как указанный стандарт токена не поддерживается.",
+			"xrp_send_expired": "Отправка $amount $symbol в сети $network не была завершена: сеть не включила её вовремя. Из вашего кошелька ничего не ушло, и отправить снова безопасно.",
+			"xrp_send_already_in_flight": "Предыдущий платёж XRP с этого адреса ещё не завершён. Ничего не отправлено — дождитесь его завершения, это занимает около минуты, затем отправьте снова.",
+			"xrp_send_not_guarded": "Нам не удалось проверить, завершается ли ещё предыдущий платёж XRP. Ничего не отправлено — попробуйте через мгновение.",
+			"xrp_active_transaction_failed": "Отправка $amount $symbol в сети $network была обработана сетью, но не выполнена ($result), поэтому средства не отправлены. Сетевой сбор всё равно списан.",
+			"xrp_amount_exceeds_sendable": "Сумма больше не проходит. Счёт должен сохранить резерв XRP и сетевой сбор, а и то и другое может измениться, пока вы проверяете. Ничего не отправлено — уменьшите сумму или повторите попытку, когда данные счёта обновятся.",
+			"xrp_destination_unfunded": "У этого адреса пока нет счёта XRP. Для его создания нужен первый платёж не менее $reserve XRP. Ничего не отправлено — увеличьте сумму или отправьте на уже активированный адрес.",
+			"xrp_destination_tag_required": "Этот адрес требует тег назначения XRP. Ничего не отправлено — добавьте тег, выданный сервисом, которому вы платите, и отправьте снова.",
+			"xrp_destination_is_source": "Это ваш собственный адрес XRP. Ничего не отправлено — выберите другого получателя.",
+			"xrp_account_state_unavailable": "Кошелёк не смог прочитать данные вашего счёта, поэтому сумму не удалось проверить. Ничего не отправлено — повторите попытку через минуту."
 		}
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Выпустить",
+			"minting": "Выпуск...",
+			"mint_review_subtitle": "Вы выпускаете"
 		}
 	},
 	"burn": {
@@ -1014,6 +1162,45 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "Выпустить $token",
+			"description": "При выпуске новые $destinationToken создаются из $sourceToken по курсу сети, а $sourceToken сжигаются.",
+			"you_mint_estimate": "Вы выпускаете (оценка)",
+			"rate": "Курс",
+			"cycles_ledger_fee": "Комиссия Cycles Ledger",
+			"minter": "Выпускает",
+			"one_way": "Выпуск нельзя отменить: $destinationToken невозможно обменять обратно на $sourceToken.",
+			"sending": "Отправка $token в $minter...",
+			"minting": "Выпуск $token...",
+			"minted": "Выпущено $amount $token.",
+			"pending": "Выпуск занимает больше времени, чем обычно. Он завершится в фоновом режиме: следите за ним в активных транзакциях."
+		},
+		"error": {
+			"rate_unavailable": "Не удалось загрузить курс $token. Повторите попытку позже.",
+			"amount_too_small": "Сумма слишком мала для выпуска $token.",
+			"refunded": "Выпуск был возвращён. Ваши $token вернулись за вычетом $refundFee $token. Причина: $reason",
+			"refunded_nothing": "Выпуск был возвращён, но комиссии поглотили всю сумму: $token не вернулись. Причина: $reason",
+			"failed": "Выпуск не удался. Причина: $reason",
+			"not_started": "Не удалось начать выпуск. Ничего не было отправлено, повторите попытку.",
+			"transfer_failed": "Перевод $token не удался. Ничего не было отправлено.",
+			"unconfirmed": "Не удалось подтвердить перевод $token. Если он прошёл, выпуск завершится в фоновом режиме: следите за ним в активных транзакциях."
+		}
+	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
 		}
 	},
 	"scanner": {
@@ -1057,6 +1244,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "Код/ссылка недействительна",
+			"link_domain_mismatch": "Эта ссылка предназначена для другого домена",
 			"data_is_incompleted": "Полученные данные неполные. Отсутствуют некоторые необходимые сведения."
 		}
 	},
@@ -1129,9 +1317,14 @@
 			"max_slippage_error": "Допустимое проскальзывание не может быть 0% или превышать $maxSlippage%",
 			"swap_button": "Обменять сейчас",
 			"swap_is_not_offered": "Этот обмен в настоящее время не предлагается.",
+			"swap_amount_too_low": "",
+			"swap_amount_too_low_minimum": "",
 			"executing_transaction": "Выполнение транзакции...",
 			"initializing": "Инициализация транзакции...",
 			"swapping": "Обмен...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "Обновление пользовательского интерфейса",
 			"swap_provider": "Поставщик обмена",
 			"swap_provider_website": "Веб-сайт",
@@ -1154,12 +1347,21 @@
 			"cross_chain_networks_info": "Информация о кросс-чейн сетях",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
-			"value_difference_error_confirmation": ""
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
+			"chain_fusion_minimum_amount": "",
+			"oisy_trade_minimum_notional": "",
+			"oisy_trade_deposit_fee": "",
+			"oisy_trade_taker_fee": "",
+			"oisy_trade_withdrawal_fee": "",
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "Не удалось получить цену хотя бы одного из токенов. Пожалуйста, <strong>проверьте самостоятельно</strong>, что это предложение свопа является справедливым.<br>Обратите внимание, что настройка проскальзывания <strong>не</strong> защищает вас от предложения с гораздо меньшей суммой получения!"
 		},
 		"error": {
 			"kong_not_available": "Сейчас обмен недоступен. Попробуйте позже.",
 			"unexpected": "Произошла ошибка при обмене токенов.",
 			"unexpected_missing_data": "Не удалось подготовить транзакцию обмена.",
+			"failed_unexpectedly": "Не удалось завершить обмен. Проверьте баланс кошелька и попробуйте снова, либо выберите другого провайдера.",
 			"slippage_exceeded": "Цена изменилась больше чем на $maxSlippage%. Увеличьте допустимое проскальзывание и попробуйте снова.",
 			"pool_not_found": "Обмен не удался — пул не найден.",
 			"deposit_error": "Не удалось внести средства. Попробуйте еще раз или выберите другого провайдера.",
@@ -1173,13 +1375,29 @@
 			"swap_sucess_withdraw_failed": "Обмен прошел, но вывод не удался",
 			"swap_sucess_manually_withdraw_success": "Обмен и вывод прошли успешно",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": "",
+			"near_intents_quote_unverified": "",
+			"near_intents_quote_expired": "",
+			"oisy_trade_not_trackable": "",
+			"oisy_trade_order_killed": "",
+			"oisy_trade_settlement_unresolved": "",
+			"oisy_trade_order_not_placed": "",
+			"oisy_trade_recovery_failed": ""
 		}
 	},
 	"buy": {
 		"text": {
 			"buy": "Купить",
-			"buy_dev": "Купить (среда разработки)"
+			"buy_dev": "Купить (среда разработки)",
+			"unavailable_title": "Покупка токенов временно недоступна",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
+			"unavailable_fallback_hint": "Тем временем вы по-прежнему можете получать токены, поделившись адресом своего кошелька."
+		},
+		"actions": {
+			"close": "Понятно"
 		},
 		"onramper": {
 			"title": "Купить через Onramper"
@@ -1211,6 +1429,7 @@
 	"tokens": {
 		"text": {
 			"title": "Токены",
+			"title_short": "Токены",
 			"contract_address": "Адрес контракта",
 			"token_address": "Адрес токена",
 			"balance": "Баланс",
@@ -1268,7 +1487,7 @@
 		"import": {
 			"text": {
 				"title": "Добавить токен",
-				"title_nft": "Добавить NFT",
+				"title_nft": "Добавить коллекцию",
 				"review": "Проверить",
 				"saving": "Сохранение...",
 				"updating": "Обновление списка токенов",
@@ -1284,7 +1503,8 @@
 				"info": "ID контейнеров реестра и индекса обычно доступны на веб-сайте проекта.",
 				"info_ext": "ID контейнера обычно можно найти на веб-сайте проекта.",
 				"info_index": "ID контейнера индекса необязателен, но без него $oisy_short не может отображать историю транзакций.",
-				"custom_tokens_not_supported": "Выбранная сеть не поддерживает пользовательские токены."
+				"custom_tokens_not_supported": "Выбранная сеть не поддерживает пользовательские токены.",
+				"custom_tokens_not_supported_yet": "OISY пока не поддерживает пользовательские токены в этой сети."
 			},
 			"error": {
 				"loading_metadata": "Указанный адрес не является действительным токеном в выбранной сети.",
@@ -1307,12 +1527,12 @@
 		"manage": {
 			"text": {
 				"title": "Управление токенами",
-				"title_nft": "Управление NFT",
+				"title_nft": "Управление коллекциями",
 				"manage_list": "Управление токенами",
-				"manage_list_nft": "Управление NFT",
+				"manage_list_nft": "Управление коллекционными предметами",
 				"list_settings": "Настройки списка",
 				"import_token": "Добавить",
-				"import_nft": "Добавить NFT",
+				"import_nft": "Добавить коллекцию",
 				"network": "Сеть",
 				"all_tokens_zero_balance": "Все токены имеют нулевой баланс.",
 				"enable_more_assets": "Включить больше активов"
@@ -1380,7 +1600,11 @@
 			"crypto": "Криптовалюты",
 			"stablecoin": "Стейблкоины",
 			"stock": "Акции",
-			"commodity": "Сырьевые товары"
+			"commodity": "Сырьевые товары",
+			"compute": "Вычисления"
+		},
+		"category_in_sentence": {
+			"compute": "токенов для вычислений"
 		},
 		"risk": {
 			"low": "Низкий риск",
@@ -1390,14 +1614,13 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFT",
-			"title_empty": "Ваши NFT появятся здесь",
-			"description_empty": "Похоже, вы еще не получали NFT",
-			"title_not_supported": "В выбранной сети поддержка NFT пока отсутствует.",
-			"description_not_supported": "Пожалуйста, не отправляйте NTF-файлы на ваш адрес.",
-			"grouping": "Группировка",
-			"as_plain_list": "Простой список",
-			"by_collection": "По коллекции",
+			"title": "Коллекционные предметы",
+			"count_one": "",
+			"count_other": "",
+			"title_empty": "Ваши коллекционные предметы появятся здесь",
+			"description_empty": "Похоже, вы еще не получали коллекционные предметы",
+			"title_not_supported": "В выбранной сети поддержка коллекционных предметов пока отсутствует.",
+			"description_not_supported": "Пожалуйста, не отправляйте коллекционные предметы на ваш адрес.",
 			"show_spam": "Показывать спам",
 			"show_hidden": "Показать скрытое",
 			"recents_first": "Сначала недавние",
@@ -1410,21 +1633,23 @@
 			"quantity": "Количество",
 			"item_traits": "Характеристики предмета",
 			"collection_not_loaded": "Коллекция не загружена",
-			"nft_not_loaded": "NFT не загружен",
+			"nft_not_loaded": "Коллекционный предмет не загружен",
 			"collections": "Коллекции",
-			"all_assets": "Все активы",
+			"check_new": "Найти новые",
+			"check_new_short": "Найти",
+			"ungrouped": "Без группировки",
 			"address_copied": "Адрес скопирован",
 			"collection_name_copied": "Название коллекции скопировано",
 			"id_copied": "ID скопирован",
 			"spam": "Спам",
 			"not_spam": "Не спам",
 			"spam_warning": "Предупреждение о спаме",
-			"spam_warning_text": "Этот NFT может быть спамом",
+			"spam_warning_text": "Этот коллекционный предмет может быть спамом",
 			"hide": "Скрыть",
 			"unhide": "Показать",
 			"hidden": "Скрытый",
 			"hide_warning": "Предупреждение о скрытии",
-			"hide_warning_text": "Этот NFT будет скрыт",
+			"hide_warning_text": "Этот коллекционный предмет будет скрыт",
 			"open_explorer": "Открыть в обозревателе",
 			"img_consent_disabled": "Вы отключили изображения из этой коллекции",
 			"img_consent_none": "Изображение отключено по соображениям безопасности",
@@ -1451,13 +1676,14 @@
 			"media_stored_at_different_location": ""
 		},
 		"alt": {
-			"placeholder_image": "Пока нет NFT",
+			"placeholder_image": "Пока нет коллекционных предметов",
 			"card": {
-				"image": "Изображение NFT с ID токена: $tokenId"
+				"image": "Изображение коллекционного предмета с ID токена: $tokenId"
 			},
 			"copy_address": "Скопировать адрес",
 			"review_preference": "Изменить настройки отображения",
-			"go_to_collection": "Перейти к коллекции"
+			"go_to_collection": "Перейти к коллекции",
+			"check_new": "Проверить наличие новых коллекционных предметов"
 		}
 	},
 	"fee": {
@@ -1466,7 +1692,16 @@
 			"estimated_btc": "Примерная комиссия сети BTC",
 			"estimated_inter_network": "Примерная межсетевая комиссия",
 			"estimated_eth": "Примерная комиссия Ethereum",
-			"max_fee_eth": "Максимальная комиссия <small>(отправка, менее чем за 30 секунд)</small>",
+			"estimated_fee_eth": "",
+			"estimated": "",
+			"priority": "",
+			"gwei": "",
+			"priority_slow": "",
+			"priority_slow_description": "",
+			"priority_standard": "",
+			"priority_standard_description": "",
+			"priority_fast": "",
+			"priority_fast_description": "",
 			"convert_fee": "Комиссия за обмен",
 			"convert_inter_network_fee": "Межсетевая комиссия",
 			"convert_btc_network_fee": "Комиссия сети Bitcoin",
@@ -1475,7 +1710,12 @@
 			"ata_fee": "Комиссия ATA",
 			"transaction_fees": "Комиссии за транзакции",
 			"network_fee": "Сетевая комиссия",
-			"approval_fee": "Комиссия за одобрение"
+			"approval_fee": "Комиссия за одобрение",
+			"prioritization_fee": "",
+			"base_kind": "",
+			"prioritization_kind": "",
+			"ata_kind": "",
+			"app_account_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Недостаточный баланс для покрытия комиссий."
@@ -1510,9 +1750,12 @@
 			"or_use_link": "или использовать ссылку WalletConnect",
 			"proposer": "Инициатор",
 			"spender": "Спишется с",
+			"operator": "Оператор",
 			"application": "Приложение",
 			"review": "Проверить необходимые разрешения $chain_name ($key)",
 			"method": "Метод",
+			"interacting_with": "",
+			"type": "Тип",
 			"methods": "Методы",
 			"events": "События",
 			"message": "Сообщение",
@@ -1521,14 +1764,80 @@
 			"network": "Сеть",
 			"amount": "Сумма",
 			"hex_data": "HEX-данные",
+			"tab_operations": "Операции",
+			"unreviewed_instructions": "OISY не может декодировать некоторые из этих инструкций, поэтому проверка ниже может быть неполной.",
+			"unreviewed_instructions_simulated": "Эта транзакция содержит операции из внешнего источника, которые OISY не может декодировать, поэтому OISY выполнил их симуляцию. Убедитесь, что вы доверяете приложению, и проверьте смоделированные изменения баланса и операции перед подписанием. Обратите внимание, что фактический результат может отличаться от симуляции.",
+			"unread_programs_one": "Эта транзакция вызывает программу, которую OISY не может прочитать. Она может перемещать средства, которые вы храните в других приложениях, например SOL в стейкинге или депозиты в кредитных протоколах, и ничто ниже этого не покажет.",
+			"unread_programs_other": "Эта транзакция вызывает программы, которые OISY не может прочитать. Они могут перемещать средства, которые вы храните в других приложениях, например SOL в стейкинге или депозиты в кредитных протоколах, и ничто ниже этого не покажет.",
+			"unread_programs_acknowledge": "Я понимаю, что OISY не может показать, что делает это приложение",
+			"cannot_be_shown": "Эта транзакция содержит действия, которые нельзя полностью и точно показать для проверки, поэтому OISY её не подпишет. Отклоните её и попросите приложение отправить более простой запрос.",
+			"close_pays_others": "Эта транзакция закрывает один из ваших токен-аккаунтов и переводит его баланс на адрес, который не является вашим кошельком. В целях вашей безопасности OISY её не подпишет.",
+			"simulated_instructions": "Смоделированные инструкции",
+			"multiple_operations": "Эта транзакция содержит несколько операций, влияющих на ваш кошелёк. Проверьте смоделированные изменения баланса и содержащиеся инструкции и одобряйте эту транзакцию только если вы также доверяете приложению.",
+			"simulated_review": "Проверка ниже — это то, что предсказывает симуляция этой транзакции относительно текущего состояния сети. То, что произойдёт при фактическом выполнении, может отличаться.",
+			"simulated_changes": "Смоделированные изменения баланса",
+			"balance_changes": "Изменения баланса",
+			"balance_changes_none": "Эта транзакция ничего не меняет в ваших аккаунтах.",
+			"balance_changes_unknown": "OISY не может определить, какие активы перемещает эта транзакция и в каком объёме. Подписывайте только если доверяете этому приложению.",
+			"simulation_control_change": "Эта транзакция изменит, кто контролирует один или несколько ваших аккаунтов. Её одобрение может передать сам аккаунт, а не только то, что в нём находится.",
+			"simulation_new_owner": "Новый владелец аккаунта",
+			"simulation_new_spender": "Новый одобренный расходователь",
+			"simulation_new_close_authority": "Новое право на закрытие счёта",
+			"simulation_new_program": "Новая владеющая программа",
+			"simulation_control_removed": "Удалено",
+			"transfer_sources": "Источники",
+			"transfer_party_own": "Ваш аккаунт",
+			"transfer_parties_partial": "OISY не может смоделировать эту транзакцию, поэтому показанные источники и операции — только те, что содержит она сама. Средства, перемещаемые от её имени другой программой, не показаны, а операция, которую OISY не может прочитать, показана без того, что она делает. Подписывайте только если доверяете этому приложению.",
+			"dapp_prioritization_fee": "Приоритетная комиссия, установленная dApp, а не OISY.",
+			"high_prioritization_fee": "Эта транзакция устанавливает необычно высокую приоритетную комиссию. Внимательно проверьте её и подписывайте, только если доверяете этому приложению.",
+			"dapp_gas_limit": "Лимит газа, установленный приложением, а не OISY. Указанная выше максимальная комиссия — это наибольшая сумма, которую может стоить эта транзакция.",
+			"high_gas_limit": "Этот запрос устанавливает необычно высокий лимит газа, поэтому указанная выше максимальная комиссия значительно превышает ожидаемую стоимость этой транзакции. Внимательно проверьте её и подписывайте, только если доверяете этому приложению.",
+			"invalid_typed_data": "Этот запрос содержит значение, тип которого не соответствует схеме, заявленной приложением. Отображаемые данные могут отличаться от тех, что были бы фактически подписаны, поэтому подписание отключено.",
+			"unreviewable_typed_data": "OISY не распознаёт содержимое, которое это приложение просит вас подписать, поэтому сводка не может его описать. Убедитесь, что вы доверяете приложению, и проверьте необработанные данные перед подписанием.",
+			"unsigned_typed_data_keys": "Это приложение отправило дополнительные данные, не заявленные в его схеме. Эти данные не покрываются подписью, поэтому отображаются только поля ниже.",
+			"tab_summary": "Сводка",
+			"tab_raw_data": "Необработанные данные",
+			"method_without_selector": "Слишком коротко, чтобы назвать функцию",
+			"methods_capped": "Перечислены только первые вызовы в этой партии.",
+			"unknown_call_title": "Вызов контракта",
+			"unknown_call": "OISY не распознаёт функции, которые вызывает эта транзакция, поэтому сводка не может её описать. Убедитесь, что вы доверяете приложению, и проверьте необработанные данные перед подписанием.",
+			"allowance_increase": "Этот запрос увеличивает лимит расходования указанного ниже получателя на показанную сумму, в дополнение к тому, что он уже может потратить. Получатель может перевести это количество токена из вашего кошелька в любое время, пока вы не отзовёте разрешение.",
+			"allowance_decrease": "Этот запрос уменьшает лимит расходования указанного ниже получателя на показанную сумму. Сам по себе он не перемещает средства.",
+			"unverifiable_erc20_request": "Этот запрос касается токена, который OISY не может идентифицировать или декодировать. Отображаемые данные могут отличаться от тех, что были бы фактически подписаны, поэтому одобрение отключено.",
+			"unverifiable_approval_for_all_request": "Этот запрос передал бы оператору контроль над коллекцией NFT, а OISY не может декодировать, какому именно оператору. Отображаемые данные могут отличаться от тех, что были бы фактически подписаны, поэтому одобрение отключено.",
+			"approval_for_all_grant": "Этот запрос позволяет указанному ниже оператору переводить любой NFT из этой коллекции, которым вы владеете сейчас или приобретёте позже, в любое время, пока вы не отзовёте разрешение. Сам по себе он не перемещает средства.",
+			"approval_for_all_revoke": "Этот запрос отзывает указанного ниже оператора, поэтому он больше не сможет переводить NFT, которыми вы владеете в этой коллекции.",
 			"raw_copied": "Необработанные данные транзакции скопированы в буфер обмена.",
 			"sign_message": "Подписать сообщение",
+			"sign_psbt": "Подписать транзакцию",
+			"sign_transaction_with_type": "",
+			"sign_transaction": "Подписать транзакцию",
+			"sign_and_send_transaction": "Подписать и отправить транзакцию",
+			"signing_address": "Подписывающий адрес",
+			"signer": "Подписант",
+			"fee": "Комиссия",
+			"btc_symbol": "BTC",
+			"psbt_inputs": "Входы",
+			"psbt_outputs": "Выходы",
+			"psbt_total_signed_inputs": "Общая сумма подписанных входов",
+			"psbt_unknown_address": "Неизвестный адрес",
+			"psbt_unknown_value": "Неизвестно",
+			"psbt_fee_unknown": "Неизвестна",
+			"psbt_signed_by_wallet": "ваш адрес",
+			"psbt_broadcast": "Трансляция",
+			"psbt_broadcast_enabled": "Да",
+			"psbt_broadcast_disabled": "Нет",
+			"psbt_broadcast_unsupported_note": "Этот запрос просит кошелёк транслировать транзакцию, что не поддерживается. В целях вашей безопасности он не может быть одобрен. Запросите транзакцию с параметром \"broadcast: false\", чтобы получить подписанный PSBT и транслировать его самостоятельно.",
 			"connected_apps": "Подключённые приложения",
 			"no_connected_apps": "В настоящее время нет подключённых приложений.",
-			"wallet_connect": ""
+			"disconnect_all": "Отключить все",
+			"disconnect_app": "Отключить $name",
+			"wallet_connect": "WalletConnect",
+			"token_units": "единицы токена (количество десятичных знаков неизвестно)"
 		},
 		"alt": {
-			"connect_input": "например, wc:a281567bb3e4..."
+			"connect_input": "например, wc:a281567bb3e4...",
+			"open_address_block_explorer": "Открыть адрес в обозревателе блоков"
 		},
 		"domain": {
 			"title": "Проверка домена",
@@ -1563,10 +1872,256 @@
 			"request_rejected": "Запрос WalletConnect отклонен",
 			"unknown_parameter": "Неизвестный параметр.",
 			"wallet_not_initialized": "Непредвиденная ошибка. Ваш адрес кошелька не инициализирован.",
+			"btc_broadcast_not_supported": "Трансляция подписанной транзакции пока не поддерживается. Запросите транзакцию с параметром \"broadcast: false\", чтобы получить подписанный PSBT и транслировать его самостоятельно.",
+			"btc_non_mainnet_sign_not_supported": "Подписание биткоин-транзакций поддерживается только в основной сети (mainnet). В целях вашей безопасности этот запрос не был подписан.",
+			"btc_psbt_decode": "Не удалось декодировать эту транзакцию для проверки. В целях вашей безопасности она не была подписана.",
+			"btc_psbt_input_not_segwit": "Эта транзакция включает вход, не являющийся входом SegWit (P2WPKH), который OISY не может подписать. В целях вашей безопасности она не была подписана.",
+			"btc_psbt_input_not_owned": "Эта транзакция включает вход, не принадлежащий адресу этого кошелька, который OISY не может подписать. В целях вашей безопасности она не была подписана.",
+			"btc_psbt_input_ambiguous": "OISY не может определить, к какому предыдущему выходу относится один из входов этой транзакции, поэтому суммы, показанные для проверки, могут отличаться от фактически подписываемых сумм. В целях вашей безопасности она не была подписана.",
 			"from_address_not_wallet": "Адрес отправителя, запрошенный для транзакции, не является адресом этого кошелька.",
 			"unknown_destination": "Неизвестный адрес получателя.",
+			"ambiguous_transaction": "Эта транзакция перемещает средства между несколькими адресами и не может быть точно отображена для проверки. В целях вашей безопасности она не была подписана.",
+			"close_pays_others": "Эта транзакция закрывает один из ваших токен-аккаунтов и переводит его баланс на адрес, который не является вашим кошельком. В целях вашей безопасности она не была подписана.",
+			"unreviewed_without_simulation": "OISY не смогла прочитать часть этой транзакции, и сеть также не вернула её симуляцию, поэтому ничто не описывает, что сделала бы эта часть. В целях вашей безопасности она не была подписана.",
+			"unread_programs_unconfirmed": "Эта транзакция вызывает программу, которую OISY не может прочитать, и она не была подтверждена при проверке. В целях вашей безопасности она не была подписана.",
+			"sol_transaction_as_message": "Это сообщение является транзакцией Solana, которая может быть одобрена только через проверку транзакции. В целях вашей безопасности она не была подписана.",
 			"request_not_defined": "Непредвиденная ошибка: Запрос не определен, поэтому не может быть обработан.",
 			"unexpected_processing_request": "Непредвиденная ошибка при обработке запроса с помощью WalletConnect."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "Торговля",
+			"tab_title_short": "Торговля",
+			"intro": "",
+			"learn_more": "Узнать больше",
+			"provider_name": "OISY Trade",
+			"go_to_trade": ""
+		},
+		"page": {
+			"tagline": "Размещай лимитные ордера прямо из своего кошелька. Твои средства остаются в смарт-контрактах, которые контролируешь ты, а не централизованная сторона.",
+			"trading_potential": "Торговый потенциал",
+			"trading_potential_hint": "В твоём кошельке, а не на бирже",
+			"deposited_assets": "Внесённые активы",
+			"deposited_all_free": "Всё доступно",
+			"deposited_empty": "Пока ничего не внесено",
+			"free": "$amount доступно",
+			"in_orders": "$amount в ордерах",
+			"in_orders_label": "в ордерах",
+			"positions": "Мои позиции",
+			"deposit": "Внести",
+			"withdraw": "Вывести",
+			"active_orders": "Активные ордера",
+			"active_orders_empty_deposit": "Внеси токены со своего кошелька, чтобы начать размещать лимитные ордера на OISY Trade.",
+			"active_orders_empty_place": "Твои открытые и ожидающие лимитные ордера появятся здесь, как только ты разместишь хотя бы один.",
+			"new_order": "Новый ордер",
+			"order_history": "История ордеров"
+		},
+		"provider_unavailable": {
+			"title": "Торговля временно недоступна",
+			"description": "Сейчас нет доступных поставщиков торговли. Твои балансы в безопасности и снова станут доступны, как только поставщик вернётся в сеть."
+		},
+		"onboarding": {
+			"title": "",
+			"description": "",
+			"step_deposit": "",
+			"step_order": "",
+			"step_withdraw": "",
+			"supported_tokens": "",
+			"deposit": ""
+		},
+		"assets": {
+			"title": "",
+			"empty": ""
+		},
+		"deposit": {
+			"title": "Внести",
+			"review_title": "Проверить внесение",
+			"progress_title": "Внесение в процессе",
+			"you_deposit": "Ты вносишь",
+			"error_insufficient_balance": "Сумма превышает твой баланс в кошельке",
+			"to": "Куда",
+			"network": "Сеть",
+			"transaction_fee": "Общая расчетная комиссия",
+			"approval_fee": "Комиссия за одобрение",
+			"transfer_fee": "Сетевая комиссия",
+			"info_title": "OISY Trade: ончейн книга ордеров",
+			"info_description": "Внесённые средства хранятся в канистере OISY Trade и используются для размещения лимитных ордеров, защищённых ончейн смарт-контрактами.",
+			"empty_title": "Пока нечего вносить",
+			"empty_description": "OISY Trade позволяет создавать ордера для этих токенов. Добавь любой из них в свой кошелёк, а затем внеси его сюда, чтобы начать торговлю.",
+			"approving": "Подтверждение в процессе",
+			"approved": "",
+			"approve_description": "",
+			"depositing": "Внесение в процессе",
+			"deposit_description": "",
+			"done": "",
+			"error": {
+				"unknown_fee": "Не удалось определить комиссию леджера для этого токена. Твои средства остались в кошельке. Попробуй ещё раз через мгновение.",
+				"deposit_failed": "Внесение не завершилось. Твои средства остались в кошельке. Попробуй ещё раз или проверь статус сети."
+			}
+		},
+		"withdraw": {
+			"title": "Вывести",
+			"review_title": "Проверить вывод",
+			"progress_title": "Вывод в процессе",
+			"amount_label": "Ты выводишь",
+			"from": "Откуда",
+			"network": "Сеть",
+			"transaction_fee": "",
+			"transfer_fee": "Комиссия за вывод",
+			"you_receive": "Ты получишь",
+			"reserved_note": "$amount зарезервировано · заблокировано открытыми ордерами",
+			"error_insufficient_balance": "Сумма превышает твой доступный баланс",
+			"submit": "Вывести",
+			"open": "",
+			"progress_withdraw": "Отправка $symbol в твой кошелёк",
+			"progress_done": "",
+			"error": "Твой вывод не завершился. Твои средства остались на OISY Trade. Попробуй ещё раз через мгновение."
+		},
+		"orders": {
+			"title": "",
+			"add_limit_order": "",
+			"tab_active": "",
+			"tab_history": "",
+			"empty_active": "Нет активных ордеров",
+			"empty_history": "",
+			"side_sell": "Продажа",
+			"side_buy": "Покупка",
+			"row_sell": "",
+			"row_buy": "",
+			"row_phrase_sell": "за $quote @ $price",
+			"row_phrase_buy": "за $quote @ $price",
+			"queue_ahead": "$percentage% впереди в очереди",
+			"status_open": "Открыт",
+			"status_pending": "Ожидание",
+			"status_partial": "Частично",
+			"status_filled": "Исполнен",
+			"status_canceled": "Отменён",
+			"status_expired": "Истёк",
+			"count_filled": "",
+			"count_expired": "",
+			"count_canceled": ""
+		},
+		"info": {
+			"title": "Что такое OISY Trade",
+			"description": "OISY Trade — это полностью ончейн-биржа с книгой ордеров, встроенная прямо в твой кошелёк. Установи цену покупки или продажи, и твой ордер исполнится ончейн в тот момент, когда рынок её достигнет, даже если ты вышел из аккаунта.",
+			"fact_1_title": "Покупай или продавай по своей цене",
+			"fact_1_description": "Установи точную цену, по которой хочешь купить или продать токен. Твой лимитный ордер остаётся в книге ордеров, пока рынок её не достигнет.",
+			"fact_2_title": "Исполняется даже в твоё отсутствие",
+			"fact_2_description": "После размещения ордер существует ончейн. Биржа исполнит его, как только появится подходящий встречный ордер — независимо от того, в системе ты или нет.",
+			"fact_3_title": "Полностью ончейн",
+			"fact_3_description": "Ордера сопоставляются и исполняются внутри канистера на Internet Computer, управляемого NNS, без централизованной биржи посередине."
+		},
+		"order_detail": {
+			"title": "",
+			"status": "",
+			"filled": "",
+			"cancel_order": "",
+			"cancel_error": "",
+			"confirm_title": "",
+			"confirm_description": "",
+			"confirm_order": "",
+			"confirm_price": "",
+			"confirm_returns_to_free": "",
+			"confirm_keep": "",
+			"confirm_order_sell": "",
+			"confirm_order_buy": ""
+		},
+		"limit_order": {
+			"title": "",
+			"review_title": "",
+			"placing_title": "",
+			"sell": "",
+			"buy": "",
+			"select_sell_token": "",
+			"select_buy_token": "",
+			"select_sell_token_first": "",
+			"select_buy_token_first": "",
+			"you_sell": "",
+			"you_buy": "",
+			"hero_prefix": "",
+			"you_get_at_least": "",
+			"you_pay_at_most": "",
+			"connector_for": "",
+			"connector_with": "",
+			"network": "",
+			"amount_placeholder": "",
+			"price_placeholder": "",
+			"max": "",
+			"max_with_amount": "",
+			"set_price_first": "",
+			"balance": "",
+			"pick_token_to_begin": "",
+			"pick_token_to_price": "",
+			"pick_token_to_trade_against": "",
+			"price_label_sell_resting": "",
+			"price_label_buy_resting": "",
+			"price_label_sell_crossing": "",
+			"price_label_buy_crossing": "",
+			"price_label_fok_sell": "",
+			"price_label_fok_buy": "",
+			"price_label_default": "",
+			"preset_bid": "",
+			"preset_ask": "",
+			"preset_market": "",
+			"preset_sell_1": "",
+			"preset_sell_5": "",
+			"preset_buy_1": "",
+			"preset_buy_5": "",
+			"value_difference": "",
+			"value_difference_label": "",
+			"queue_position": "",
+			"queue_position_row": "",
+			"front_of_book": "",
+			"are_ahead": "",
+			"warning_crossing_sell": "",
+			"warning_crossing_buy": "",
+			"warning_resting_below_value_sell": "",
+			"warning_resting_above_value_buy": "",
+			"warning_fok_sell": "",
+			"warning_fok_buy": "",
+			"warning_fok_blocked_sell": "",
+			"warning_fok_blocked_buy": "",
+			"error_balance_sell": "",
+			"error_balance_buy": "",
+			"error_lot_multiple": "",
+			"error_lot_minimum": "",
+			"error_tick_multiple": "",
+			"error_min_notional": "",
+			"error_max_notional": "",
+			"fok_title": "",
+			"fok_help": "",
+			"routing_name": "",
+			"routing_tag": "",
+			"best_ask": "",
+			"best_bid": "",
+			"spread": "",
+			"spread_value": "",
+			"maker_fee": "",
+			"taker_fee": "",
+			"no_fee": "",
+			"fee_percent": "",
+			"review_button": "",
+			"place_order_button": "",
+			"limit_price": "",
+			"limit_price_value": "",
+			"current_value": "",
+			"current_value_feed": "",
+			"dex": "",
+			"order_type": "",
+			"order_type_gtc": "",
+			"order_type_fok": "",
+			"fee_maker_taker": "",
+			"fee_taker": "",
+			"fee_maker_taker_value": "",
+			"give_up_confirm": "",
+			"rests_against_value_confirm": "",
+			"market_moved_sell": "",
+			"market_moved_buy": "",
+			"placing_initializing": "",
+			"placing_sub": "",
+			"placing_done": "",
+			"place_error": ""
 		}
 	},
 	"transaction": {
@@ -1574,6 +2129,8 @@
 			"details": "Детали транзакции",
 			"hash": "Хеш транзакции",
 			"hash_copied": "Хеш транзакции $hash скопирован в буфер обмена.",
+			"signature": "",
+			"signature_copied": "",
 			"id": "ID транзакции",
 			"id_copied": "ID транзакции скопирован в буфер обмена.",
 			"timestamp": "Временная метка",
@@ -1589,7 +2146,46 @@
 			"to_ata": "Счет отправителя токенов (ATA)",
 			"to_ata_copied": "Счет отправителя токенов (ATA) скопирован в буфер обмена.",
 			"block": "Блок",
-			"interacted_with": "Взаимодействовали с (Получатель)",
+			"kind_other": "",
+			"summary_swap": "",
+			"summary_self": "",
+			"swap_on": "",
+			"interacted_with": "Взаимодействовали с",
+			"unknown_token": "",
+			"summary_other": "",
+			"tab_summary": "",
+			"tab_balance_changes": "",
+			"tab_instructions": "",
+			"tab_unavailable": "",
+			"no_balance_changes": "",
+			"instruction_send": "",
+			"instruction_receive": "",
+			"instruction_wrap": "",
+			"instruction_unwrap": "Развернуть и закрыть токен-аккаунт $symbol",
+			"instruction_create_account": "",
+			"instruction_create_program_account": "",
+			"instruction_close_account": "",
+			"instruction_close_account_for": "Закрыть токен-аккаунт $symbol",
+			"instruction_approve": "",
+			"instruction_revoke": "",
+			"instruction_set_authority": "",
+			"instruction_route": "",
+			"instruction_burn": "",
+			"instruction_mint": "",
+			"instruction_freeze": "",
+			"instruction_thaw": "",
+			"instruction_unknown": "",
+			"instruction_unknown_via": "",
+			"instruction_via": "через $program",
+			"instruction_rent": "",
+			"instruction_balance_returned": "Баланс SOL возвращён в ваш кошелёк",
+			"instruction_balance_sent": "Баланс SOL отправлен в ваш кошелёк",
+			"instruction_returned": "",
+			"instruction_sent": "$amount SOL отправлено в ваш кошелёк",
+			"instruction_returned_to": "$amount SOL на",
+			"instruction_balance_returned_to": "Баланс SOL на",
+			"instruction_own_account": "",
+			"raw_value": "",
 			"status": "Статус",
 			"confirmations": "Подтверждения",
 			"for": "Для",
@@ -1615,6 +2211,23 @@
 			"approve": "Одобрение",
 			"burn": "Сжигание",
 			"mint": "Создание"
+		},
+		"filter": {
+			"types_label": "",
+			"tokens_label": "",
+			"contacts_label": "",
+			"types_aria_label": "",
+			"tokens_aria_label": "",
+			"contacts_aria_label": "",
+			"search_tokens_placeholder": "",
+			"search_contacts_placeholder": "",
+			"clear": "",
+			"sheet_title": "",
+			"open_filters_aria_label": "",
+			"showing_partial": "",
+			"contacts_empty_title": "Вы ещё не добавили контакты",
+			"contacts_empty_description": "Сохраняйте известные адреса в Контактах, чтобы снизить риск случайно использовать неправильный адрес.",
+			"contacts_empty_cta": "Добавить первый контакт"
 		},
 		"label": {
 			"reimbursement": "Возмещение",
@@ -1805,7 +2418,8 @@
 			"Icrcv2": "Internet Computer",
 			"Btc": "Bitcoin",
 			"Eth": "Ethereum",
-			"Sol": "Solana"
+			"Sol": "Solana",
+			"Xrp": "XRP Ledger"
 		},
 		"form": {
 			"new_address": "Новый адрес",
@@ -1838,8 +2452,9 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Доступ к вашему кошельку $oisy_name",
-				"open_or_create": "Откройте или создайте свой кошелек, чтобы безопасно подключиться к dApp и начать управлять своими активами."
+				"open_or_create": "Откройте или создайте кошелёк, чтобы безопасно взаимодействовать с приложением.",
+				"connect_your_wallet": "Подключите ваш кошелёк $oisy_name",
+				"oisy_protects_you_description": "Приложения не могут напрямую получить доступ к вашим средствам, и каждая транзакция должна быть подтверждена вами."
 			}
 		},
 		"idle": {
@@ -1961,17 +2576,18 @@
 		},
 		"info": {
 			"btc_transactions": "Данные о транзакциях Bitcoin поступают от внешних сервисов — рекомендуем проверять их самостоятельно.",
-			"hidden_micro_transactions": "<strong>OISY защищает вас</strong>! Транзакции с очень маленькими значениями токенов в настоящее время скрыты. Чтобы показать их, перейдите в <a href=\"/settings/\">Настройки</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Узнать больше</a>"
+			"hidden_micro_transactions": "Транзакции с очень маленькими значениями токенов в настоящее время скрыты. Чтобы показать их, перейдите в <a href=\"/settings/\">Настройки</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Узнать больше</a>"
 		},
 		"warning": {
-			"no_index_canister": "Транзакции для $token_list не могут быть отображены. Нет доступного контейнера индекса.",
-			"unavailable_index_canister": "Транзакции для $token_list не могут быть отображены. Контейнер индекса в настоящее время недоступен."
+			"no_index_canister": "$oisy_short не может загрузить транзакции для $token_list — эмитент токена не предоставляет отслеживание транзакций.",
+			"unavailable_index_canister": "Последние транзакции для $token_list сейчас не могут быть загружены, так как их сервис отслеживания не отвечает. Они загрузятся автоматически, как только он снова заработает."
 		}
 	},
 	"earning": {
 		"text": {
 			"title": "Заработок",
 			"tab_title": "Зарабатываю",
+			"tab_title_short": "Зарабатываю",
 			"earning_opportunities": "Возможности заработка",
 			"header_title": "Добро пожаловать в раздел Заработок!",
 			"header_description": "Развивайте свой портфель цифровых активов, распределяя токены по возможностям заработка.",
@@ -1983,10 +2599,10 @@
 				"description": "Максимальная эффективность доходности с автопилотными хранилищами в один клик.",
 				"action": "Перейти к Autopilot"
 			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "Используйте OISY и ЗАРАБАТЫВАЙТЕ! Эпизод 6 уже в эфире 🎉",
-				"action": "Проверить статус"
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -1996,6 +2612,8 @@
 			"currentStaked": "В стейкинге",
 			"currentEarning": "Сейчас зарабатываю",
 			"earningPotential": "Потенциал заработка",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "Условия"
 		},
 		"terms": {
@@ -2005,6 +2623,108 @@
 			"goldDaoStaking": {
 				"cardTitle": "Зарабатывайте с Gold DAO"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "Предоставь Bitcoin. Займи стейблкоины. Оставайся нативным.",
+			"health_factor": "Коэффициент здоровья",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
+			"net_value": "Чистая стоимость",
+			"markets": "Рынки",
+			"total_supplied": "Всего предоставлено",
+			"no_assets_supplied": "нет предоставленных активов",
+			"supplied": "Предоставлено",
+			"borrowed": "Занято",
+			"borrow_rate": "Ставка по займу",
+			"apy_suffix": "APY",
+			"supply_label": "Одолжить",
+			"borrow_label": "Занять",
+			"coming_soon": "Скоро",
+			"coming_soon_teaser": "Скоро…",
+			"action_supply": "Одолжить",
+			"action_borrow": "Занять",
+			"action_repay": "Погасить",
+			"action_withdraw": "Вывести",
+			"transaction_failed": "Транзакция не удалась",
+			"select_supply_token": "",
+			"select_borrow_token": "",
+			"select_withdraw_token": "",
+			"select_repay_token": "",
+			"supply_review": "Проверить предоставление",
+			"supply_review_subtitle": "Ты предоставляешь",
+			"supplying": "Предоставление в процессе",
+			"starting_to_supply": "Отправка твоей позиции…",
+			"supply_started": "Твоя позиция сейчас активируется.",
+			"supply_apy": "APY предоставления",
+			"supply_collateral_info": "Предоставленные активы также служат залогом, под который ты можешь занимать.",
+			"supply_agreement": "Я понимаю, что мои активы будут предоставлены протоколу Liquidium и подвержены риску ончейн смарт-контрактов.",
+			"provider_fee": "Комиссия сети",
+			"transaction_fee": "Комиссия за транзакцию",
+			"insufficient_funds_for_fee": "Недостаточно средств для покрытия суммы и комиссий.",
+			"supply_prices_unavailable": "Цены временно недоступны. Предоставление отключено, пока они не загрузятся.",
+			"minimum_supply": "Минимальное предоставление",
+			"supply_below_minimum": "Сумма ниже минимального предоставления.",
+			"borrow_review": "Проверить займ",
+			"borrow_review_subtitle": "Ты занимаешь",
+			"borrowing": "Оформление займа",
+			"borrow_apy": "APY займа",
+			"resulting_ltv": "Итоговый LTV",
+			"projected_health_factor": "Прогнозируемый коэффициент здоровья",
+			"borrowing_power": "Кредитный лимит",
+			"collateral": "Залог",
+			"minimum_borrow": "Минимальный займ",
+			"provider": "Поставщик",
+			"funds_delivered_to": "Средства будут отправлены на",
+			"your_oisy_address": "Твой адрес $oisy_short",
+			"borrow_risk_info": "Заём снижает твой коэффициент здоровья. Если он упадёт слишком низко, твой залог может быть ликвидирован.",
+			"borrow_activation_fee_info": "Liquidium добавляет к сумме займа комиссию за активацию в размере $fee%.",
+			"borrow_at_risk_warning": "Этот заём заметно снижает твой коэффициент здоровья.",
+			"borrow_exceeds_power": "Сумма превышает твой кредитный лимит.",
+			"borrow_below_minimum": "Сумма ниже минимального займа.",
+			"borrow_prices_unavailable": "Цены временно недоступны. Займы отключены, пока они не загрузятся.",
+			"borrow_high_risk_warning": "Этот заём приближает твою позицию к ликвидации.",
+			"borrow_risk_confirm": "Я понимаю, что этот заём увеличивает мой риск ликвидации.",
+			"starting_to_borrow": "Отправка твоего займа…",
+			"borrow_started": "Твой займ сейчас активируется.",
+			"withdraw_review": "Проверить вывод",
+			"withdraw_review_subtitle": "Ты выводишь",
+			"withdrawing": "Вывод в процессе",
+			"starting_to_withdraw": "Отправка твоего вывода…",
+			"withdraw_started": "Твой вывод сейчас обрабатывается.",
+			"supplied_label": "Предоставлено",
+			"withdrawable": "",
+			"reserved_by_debt": "Зарезервировано из-за открытого долга",
+			"withdraw_exceeds_free_collateral": "Ты не можешь вывести больше своего свободного залога, пока открыт долг.",
+			"withdraw_exceeds_supplied": "Сумма превышает твой предоставленный баланс.",
+			"withdraw_prices_unavailable": "Цены временно недоступны. Вывод отключён, пока они не загрузятся.",
+			"withdraw_risk_info": "Вывод залога снижает твой коэффициент здоровья. Если он упадёт слишком низко, оставшийся залог может быть ликвидирован.",
+			"withdraw_at_risk_warning": "Этот вывод заметно снижает твой коэффициент здоровья.",
+			"withdraw_high_risk_warning": "Этот вывод приближает твою позицию к ликвидации.",
+			"withdraw_risk_confirm": "Я понимаю, что этот вывод увеличивает мой риск ликвидации.",
+			"repay_review": "Проверить погашение",
+			"repay_review_subtitle": "Ты погашаешь",
+			"repaying": "Погашение в процессе",
+			"starting_to_repay": "Отправка твоего погашения…",
+			"repay_started": "Твоё погашение сейчас обрабатывается.",
+			"current_debt": "Текущий долг",
+			"interest_accrued": "Начисленные проценты",
+			"debt_after_repay": "Долг после погашения",
+			"repay_exceeds_debt": "Сумма превышает твой непогашенный долг.",
+			"repay_prices_unavailable": "Цены временно недоступны. Погашение отключено, пока они не загрузятся."
+		},
+		"info": {
+			"title": "Что такое Liquidium",
+			"description": "Liquidium — это децентрализованный некастодиальный кредитный протокол, в котором ты можешь предоставлять активы или занимать средства в разных блокчейн-сетях. Построен на Internet Computer и позволяет кредитование между сетями без централизованных мостов или обёрнутых токенов.",
+			"fact_1_title": "Зарабатывай на своих BTC",
+			"fact_1_description": "Одалживай свой Bitcoin, чтобы получать доход от переобеспеченных займов.",
+			"fact_2_title": "Некастодиальный",
+			"fact_2_description": "Депозиты защищены ончейн смарт-контрактами, без централизованного контроля.",
+			"fact_3_title": "Нативный, кросс-чейн",
+			"fact_3_description": "Активы остаются в своей нативной сети, поэтому ты можешь предоставить их в одной сети, а занять — в другой."
 		}
 	},
 	"vaults": {
@@ -2087,9 +2807,7 @@
 			"title_empty_3": "",
 			"description_empty": "Похоже, вы ещё не стейкировали ни одного токена",
 			"full_history": "Показать полную историю",
-			"recent_history": "Закрыть полную историю",
-			"harvest_autopilot_carousel_slide_title": "Зарабатывайте в OISY с Harvest Autopilot Yield Farming",
-			"harvest_autopilot_carousel_slide_cta": "Узнать больше"
+			"recent_history": "Закрыть полную историю"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "При выводе токенов произошла ошибка.",
@@ -2179,6 +2897,222 @@
 		"errors": {
 			"unknown": "Извините, что-то пошло не так с получением ответа от помощника.",
 			"no_response": "Извините, я не получил ответа от помощника."
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "Заметки",
+			"note": "Заметка",
+			"add_title": "Добавить новую заметку",
+			"edit_note": "Редактировать заметку",
+			"delete_note": "Удалить заметку",
+			"delete_confirm_text": "Это удалит заметку '$note'. Это действие нельзя отменить.",
+			"back": "Назад",
+			"empty_title": "У тебя пока нет заметок",
+			"empty_subtitle": "Создавай приватные, зашифрованные заметки, чтобы хранить важные детали рядом со своим кошельком.",
+			"empty_add": "Добавить новую заметку",
+			"unlocking_title": "Разблокировка ваших заметок",
+			"unlocking_subtitle": "Настраиваем ваш личный ключ шифрования — это займёт всего мгновение.",
+			"add_note": "Добавить заметку",
+			"note_label": "Заметка",
+			"placeholder": "Напиши заметку…",
+			"search_placeholder": "Поиск заметки",
+			"no_results": "Нет заметок, соответствующих твоему запросу.",
+			"encrypted_lead": "Сквозное шифрование.",
+			"encrypted_info": "Только ты можешь читать свои заметки.",
+			"created": "Создано $date",
+			"updated": "Обновлено $date",
+			"created_updated": "Создано $created · Обновлено $updated",
+			"too_long": "Заметка должна содержать не более $maxCharacters символов.",
+			"cap_reached": "Ты достиг(ла) максимума в $max сохранённых заметок. Удали одну, чтобы добавить новую.",
+			"decryption_failed": "Не удалось расшифровать эту заметку",
+			"unavailable_title": "Заметки временно недоступны"
+		},
+		"alt": {
+			"edit": "Редактировать заметку",
+			"delete": "Удалить заметку"
+		},
+		"error": {
+			"load": "Не удалось загрузить твои заметки. Попробуй ещё раз.",
+			"save": "Не удалось сохранить твою заметку. Попробуй ещё раз.",
+			"delete": "Не удалось удалить твою заметку. Попробуй ещё раз.",
+			"rate_limited": "Ты достиг(ла) лимита запросов. Подожди немного и попробуй ещё раз."
+		},
+		"share": {
+			"text": {
+				"share_note": "Поделиться заметкой",
+				"snapshot_caption": "Делится копией заметки в её текущем виде. Последующее редактирование или удаление заметки не изменит эту ссылку.",
+				"cap_reached": "Ты достиг(ла) максимума в $max активных ссылок для доступа. Они освобождаются после истечения срока действия или использования.",
+				"expires_after": "Ссылка истекает через",
+				"expiry_1h": "",
+				"expiry_24h": "24 часа",
+				"expiry_7d": "7 дней",
+				"expiry_30d": "30 дней",
+				"single_use": "Одноразовая",
+				"single_use_option": "Ссылку можно использовать только один раз",
+				"protects_body": "Только получатель этой ссылки сможет прочитать твою заметку.",
+				"create_link": "Создать ссылку",
+				"link_ready_title": "Ссылка для доступа готова",
+				"link_ready_subtitle": "Любой, у кого есть эта ссылка, может прочитать заметку",
+				"link_copied": "Ссылка скопирована!",
+				"recap_expires_in": "Истекает через $duration",
+				"recap_single_use": "одноразовая",
+				"reminder": "$oisy_short не может восстановить или отозвать эту ссылку после того, как ею поделились. Она перестаёт работать после использования или истечения срока действия.",
+				"done": "Готово"
+			},
+			"error": {
+				"create": "Не удалось создать ссылку для доступа. Попробуй ещё раз."
+			},
+			"recipient": {
+				"locked_title": "С тобой поделились заметкой",
+				"reveal": "Показать заметку",
+				"revealed_title": "Заметка, которой поделились",
+				"single_use_caveat": "Одноразовая ссылка — как только ты закроешь или перезагрузишь эту страницу, заметка исчезнет навсегда. Скопируй её сейчас, если она тебе нужна.",
+				"copy_note": "Скопировать заметку",
+				"note_copied": "Заметка скопирована!",
+				"outro_title": "Точно так же надёжно он защищает и твои активы",
+				"outro_subtitle": "$oisy_short — это полностью ончейн-кошелёк с самостоятельным хранением для Bitcoin, Ethereum, Solana, ICP и других активов.",
+				"outro_feature_multichain": "Bitcoin, Ethereum, Solana и ICP в одном месте",
+				"outro_feature_onchain": "100% ончейн — без расширений, без seed-фразы",
+				"outro_feature_encrypted": "Твои ключи и данные — со сквозным шифрованием",
+				"discover": "Узнать про OISY",
+				"unavailable_title": "Срок действия этой ссылки истёк или она уже была использована"
+			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"overview_window": "",
+			"overview_failed": "",
+			"overview_failed_hint": "",
+			"overview_open": "",
+			"overview_none": "",
+			"overview_count_one": "",
+			"overview_count_other": "",
+			"overview_claimed": "",
+			"select_token": "",
+			"create_title": "",
+			"share_title": "",
+			"preparing_title": "",
+			"empty_balance_title": "",
+			"empty_balance_description": "",
+			"no_supported_tokens_title": "",
+			"no_supported_tokens_description": "",
+			"expiration": "",
+			"expiry_24h": "",
+			"expiry_3d": "",
+			"expiry_7d": "",
+			"message": "",
+			"message_placeholder": "",
+			"total_estimated_fee": "",
+			"reserve_fee": "",
+			"payout_fee": "",
+			"fees_are_yours": "",
+			"reserved_by_tips": "",
+			"lapse_notice": "",
+			"generate": "",
+			"share_heading": "",
+			"copy_link": "",
+			"share_link": "",
+			"they_will_receive": "",
+			"no_wallet_needed_title": "",
+			"no_wallet_needed": "",
+			"scan_or_photo": "",
+			"expires_at": "",
+			"done": "",
+			"step_reserving": "",
+			"step_creating": "",
+			"step_saving": "",
+			"recovering_link": "",
+			"link_not_saved": "",
+			"reserve_failed": "",
+			"status_title": "",
+			"claim_title": "",
+			"claim_amount": "",
+			"claim_expires": "",
+			"claim_ready_title": "",
+			"claim_ready_title_plain": "",
+			"claim_ready_description": "",
+			"claim_token": "",
+			"claim_status": "",
+			"open_or_create": "",
+			"open_or_create_hint": "",
+			"claimer_disclosure": "",
+			"claimed_title": "",
+			"claimed_description": "",
+			"claiming_title": "",
+			"claiming_description": "",
+			"claim_retry": "",
+			"received_title": "",
+			"received_description": "",
+			"network": "",
+			"status_completed": "",
+			"take_me_to_wallet": "",
+			"unavailable_title": "",
+			"unavailable_description": "",
+			"uncovered_title": "",
+			"uncovered_description": "",
+			"short_balance_title": "",
+			"short_balance_description": "",
+			"claim_failed_title": "",
+			"claim_failed": "",
+			"unreachable_title": "",
+			"unreachable_description": "",
+			"history_title": "",
+			"history_empty": "",
+			"history_failed": "",
+			"group_failed": "",
+			"group_failed_hint": "",
+			"failure_uncovered": "",
+			"failure_insufficient_funds": "",
+			"failure_transfer_failed": "",
+			"group_open": "",
+			"group_claimed": "",
+			"group_expired": "",
+			"status_reserved": "",
+			"status_failed": "",
+			"status_claimed": "",
+			"status_expired": "",
+			"status_cancelled": "",
+			"claimed_by": "",
+			"tip_amount": "",
+			"expires_in": "",
+			"link_unavailable": "",
+			"link_recovery_failed": "",
+			"cancel_tip": "",
+			"cancel_failed": "",
+			"cancelled_toast": "",
+			"cancelled_allowance_kept": "",
+			"token_unavailable": "",
+			"message_too_long": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": "",
+			"rate_limited": "",
+			"rate_limited_title": ""
+		},
+		"alt": {
+			"intro_illustration": "",
+			"claim_illustration": "",
+			"claim_failed_illustration": "",
+			"welcome_illustration": ""
+		},
+		"share": {
+			"title": "",
+			"description": ""
+		},
+		"welcome": {
+			"title": "",
+			"heading": "",
+			"body": "",
+			"point_access_title": "",
+			"point_access_text": "",
+			"point_stay_title": "",
+			"point_stay_text": "",
+			"cta": ""
 		}
 	}
 }

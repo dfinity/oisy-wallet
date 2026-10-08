@@ -3,6 +3,7 @@
 
 package.json
 package-lock.json
+signer-versions.json
 Cargo.toml
 Cargo.lock
 rust-toolchain.toml

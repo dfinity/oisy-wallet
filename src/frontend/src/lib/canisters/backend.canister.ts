@@ -1,10 +1,24 @@
 import type {
+	ActiveUserTransaction,
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
 	Contact,
+	CreatePersonalNoteShareRequest,
+	CreateTipRequest,
 	CustomToken,
+	DeletePersonalNoteRequest,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
+	MyTip,
+	PersonalNoteEntry,
+	PersonalNoteShareContent,
+	PublicTip,
+	SetTipSecretRequest,
+	SignOnramperWidgetUrlRequest,
+	SignOnramperWidgetUrlResponse,
+	TipClaim,
+	TipClaimRequest,
+	TipDetails,
 	TokenId,
 	UserProfile
 } from '$declarations/backend/backend.did';
@@ -14,11 +28,19 @@ import { getAgent } from '$lib/actors/agents.ic';
 import {
 	mapAllowSigningError,
 	mapBtcAddPendingTransactionError,
+	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
-	mapBtcSelectUserUtxosFeeError,
-	mapGetAllowedCyclesError
+	mapGetAllowedCyclesError,
+	mapPersonalNotesVetkeyError,
+	mapSignOnramperWidgetUrlError
 } from '$lib/canisters/backend.errors';
+import {
+	networkSettingsForNames,
+	tolerantIdlCertifiedFactoryBackend,
+	tolerantIdlFactoryBackend
+} from '$lib/canisters/backend.tolerant.factory';
 import { ZERO } from '$lib/constants/app.constants';
+import { trackUnmappedNetworkSettingsKey } from '$lib/services/error-analytics.services';
 import type {
 	AddPendingTransactionOutcome,
 	AddUserDismissedNotificationParams,
@@ -28,7 +50,8 @@ import type {
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
-	BtcSelectUserUtxosFeeParams,
+	CreateActiveUserTransactionParams,
+	CreateUserProfileResponse,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
 	GetUserTransactionsParams,
@@ -37,26 +60,63 @@ import type {
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
 	SaveUserTransactionsParams,
-	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
+	SignOnramperWidgetUrlParams,
+	UpdateActiveUserTransactionParams,
 	UpdateUserExperimentalFeatureSettings,
 	UpdateUserTransactionFilterSettings
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { SignupsClosedError } from '$lib/types/errors';
 import type { BackendExchangeRate } from '$lib/types/exchange';
 import { mapBackendUserAgreements } from '$lib/utils/agreements.utils';
 import { mapBackendProviderAgreements } from '$lib/utils/provider-agreements.utils';
-import { tokenIdKey } from '$lib/utils/token-id.utils';
 import { mapUserExperimentalFeatures } from '$lib/utils/user-experimental-features.utils';
-import { mapUserNetworks } from '$lib/utils/user-networks.utils';
+import { mapUserNetworks, resolveNetworkSettingsKeys } from '$lib/utils/user-networks.utils';
 import {
 	Canister,
 	createServices,
 	fromNullable,
-	nonNullish,
+	isNullish,
 	toNullable,
 	type QueryParams
 } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
+
+/**
+ * Resolves the network settings keys of a tolerantly decoded profile back to names, and reports
+ * the ones no known name hashes to — a network the backend has and these bindings do not.
+ *
+ * Only the unresolved entries are dropped. The generated decoder would have dropped the whole
+ * `settings` record instead, silently resetting every preference the user ever saved.
+ */
+const mapTolerantUserProfile = <T extends { Ok: UserProfile } | object>(response: T): T => {
+	if (!('Ok' in response)) {
+		return response;
+	}
+
+	// Defensive: this runs on freshly decoded wire data, where the opt may be absent entirely.
+	const [settings] = response.Ok.settings ?? [];
+
+	if (isNullish(settings)) {
+		return response;
+	}
+
+	const { networks, unresolved } = resolveNetworkSettingsKeys({
+		networks: settings.networks.networks,
+		names: networkSettingsForNames()
+	});
+
+	unresolved.forEach((key) => trackUnmappedNetworkSettingsKey({ key }));
+
+	return {
+		...response,
+		Ok: {
+			...response.Ok,
+			settings: [{ ...settings, networks: { ...settings.networks, networks } }]
+		}
+	};
+};
 
 export class BackendCanister extends Canister<BackendService> {
 	static async create({
@@ -74,7 +134,47 @@ export class BackendCanister extends Canister<BackendService> {
 			certifiedIdlFactory: idlCertifiedFactoryBackend
 		});
 
-		return new BackendCanister(canisterId, service, certifiedService);
+		// Tolerant companions for methods that return a user profile. `IDL.Unknown` cannot be serialized,
+		// so only `get_user_profile` and argument-free `create_user_profile` may use them.
+		const { service: tolerantService, certifiedService: tolerantCertifiedService } =
+			createServices<BackendService>({
+				options: {
+					...options,
+					agent
+				},
+				idlFactory: tolerantIdlFactoryBackend,
+				certifiedIdlFactory: tolerantIdlCertifiedFactoryBackend
+			});
+
+		return new BackendCanister({
+			canisterId,
+			service,
+			certifiedService,
+			tolerantService,
+			tolerantCertifiedService
+		});
+	}
+
+	readonly #tolerantService: BackendService;
+	readonly #tolerantCertifiedService: BackendService;
+
+	private constructor({
+		canisterId,
+		service,
+		certifiedService,
+		tolerantService,
+		tolerantCertifiedService
+	}: {
+		canisterId: Principal;
+		service: BackendService;
+		certifiedService: BackendService;
+		tolerantService: BackendService;
+		tolerantCertifiedService: BackendService;
+	}) {
+		super(canisterId, service, certifiedService);
+
+		this.#tolerantService = tolerantService;
+		this.#tolerantCertifiedService = tolerantCertifiedService;
 	}
 
 	listCustomTokens = (): Promise<CustomToken[]> => {
@@ -101,16 +201,40 @@ export class BackendCanister extends Canister<BackendService> {
 		return remove_custom_token(token);
 	};
 
-	createUserProfile = (): Promise<UserProfile> => {
-		const { create_user_profile } = this.caller({ certified: true });
+	createUserProfile = async (): Promise<CreateUserProfileResponse> => {
+		// Tolerant like `getUserProfile`: this call is idempotent, so an existing user gets their
+		// stored profile back and it lands in the store the same way a read would.
+		const { create_user_profile } = this.#tolerantCertifiedService;
 
-		return create_user_profile();
+		const response = await create_user_profile();
+
+		if ('Err' in response && 'SignupsClosed' in response.Err) {
+			throw new SignupsClosedError();
+		}
+
+		return mapTolerantUserProfile(response);
 	};
 
-	getUserProfile = ({ certified }: QueryParams): Promise<GetUserProfileResponse> => {
-		const { get_user_profile } = this.caller({ certified });
+	getUserProfile = async ({ certified }: QueryParams): Promise<GetUserProfileResponse> => {
+		const { get_user_profile } = certified ? this.#tolerantCertifiedService : this.#tolerantService;
 
-		return get_user_profile();
+		// Typed as `GetUserProfileResponse`, but the network settings keys are candid hashes until
+		// `mapTolerantUserProfile` resolves them back to names.
+		const response = await get_user_profile();
+
+		return mapTolerantUserProfile(response);
+	};
+
+	newUserSignupsAllowed = ({ certified }: QueryParams): Promise<boolean> => {
+		const { new_user_signups_allowed } = this.caller({ certified });
+
+		return new_user_signups_allowed();
+	};
+
+	exchangeRateEnabled = ({ certified }: QueryParams): Promise<boolean> => {
+		const { exchange_rate_enabled } = this.caller({ certified });
+
+		return exchange_rate_enabled();
 	};
 
 	btcAddPendingTransaction = async ({
@@ -147,14 +271,12 @@ export class BackendCanister extends Canister<BackendService> {
 
 	btcGetPendingTransactions = async ({
 		network,
-		address,
 		iiDelegationChain
 	}: BtcGetPendingTransactionParams): Promise<GetPendingTransactionsOutcome> => {
 		const { btc_get_pending_transactions } = this.caller({ certified: true });
 
 		const response = await btc_get_pending_transactions({
 			network,
-			address,
 			ii_delegation_chain: iiDelegationChain
 		});
 
@@ -180,43 +302,6 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcGetPendingTransactionsError(response.Err);
 	};
 
-	btcSelectUserUtxosFee = async ({
-		network,
-		minConfirmations,
-		amountSatoshis,
-		iiDelegationChain
-	}: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeOutcome> => {
-		const { btc_select_user_utxos_fee } = this.caller({ certified: true });
-
-		const response = await btc_select_user_utxos_fee({
-			network,
-			min_confirmations: minConfirmations,
-			amount_satoshis: amountSatoshis,
-			ii_delegation_chain: iiDelegationChain
-		});
-
-		if ('Ok' in response) {
-			return { response: response.Ok };
-		}
-
-		// In case of rate limit reached, we ignore the error and let the user continue (for now).
-		// TODO: improve placeholder with significant data, for now we do not use them
-		if ('RateLimited' in response.Err) {
-			return {
-				response: {
-					fee_satoshis: ZERO,
-					utxos: []
-				},
-				rateLimitInfo: {
-					endpoint: 'btc_select_user_utxos_fee',
-					limiter: 'BTC_SELECT_UTXOS_FEE_RATE_LIMITER'
-				}
-			};
-		}
-
-		throw mapBtcSelectUserUtxosFeeError(response.Err);
-	};
-
 	btcGetCurrentFeePercentiles = async ({
 		network
 	}: BtcGetFeePercentilesParams): Promise<BtcGetFeePercentilesResponse> => {
@@ -231,8 +316,7 @@ export class BackendCanister extends Canister<BackendService> {
 			return Ok;
 		}
 
-		// Reuse the same error mapping as other BTC methods since they share the same error type
-		throw mapBtcSelectUserUtxosFeeError(response.Err);
+		throw mapBtcGetFeePercentilesError(response.Err);
 	};
 
 	getAllowedCycles = async (): Promise<GetAllowedCyclesResponse> => {
@@ -246,6 +330,34 @@ export class BackendCanister extends Canister<BackendService> {
 		}
 
 		throw mapGetAllowedCyclesError(response.Err);
+	};
+
+	signOnramperWidgetUrl = async ({
+		wallets,
+		networkWallets,
+		walletAddressTags
+	}: SignOnramperWidgetUrlParams): Promise<SignOnramperWidgetUrlResponse> => {
+		const { sign_onramper_widget_url } = this.caller({ certified: true });
+
+		const request: SignOnramperWidgetUrlRequest = {
+			wallets: wallets.map(({ cryptoId, wallet }) => ({ key: cryptoId, value: wallet })),
+			network_wallets: networkWallets.map(({ networkId, wallet }) => ({
+				key: networkId,
+				value: wallet
+			})),
+			wallet_address_tags: (walletAddressTags ?? []).map(({ cryptoId, tag }) => ({
+				key: cryptoId,
+				value: tag
+			}))
+		};
+
+		const response = await sign_onramper_widget_url(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw mapSignOnramperWidgetUrlError(response.Err);
 	};
 
 	allowSigning = async ({
@@ -429,7 +541,7 @@ export class BackendCanister extends Canister<BackendService> {
 	};
 
 	private mapExchangeRate = (rate: ExchangeRate | undefined): BackendExchangeRate | undefined => {
-		if (!nonNullish(rate)) {
+		if (isNullish(rate)) {
 			return;
 		}
 
@@ -454,25 +566,14 @@ export class BackendCanister extends Canister<BackendService> {
 		return this.mapExchangeRate(fromNullable(response));
 	};
 
-	getExchangeRates = async ({
-		token_ids,
-		certified
-	}: { token_ids: TokenId[] } & QueryParams): Promise<Map<string, BackendExchangeRate>> => {
-		const { get_exchange_rates } = this.caller({ certified });
+	getExchangeRates = async (): Promise<Array<[TokenId, BackendExchangeRate | undefined]>> => {
+		// `get_exchange_rates` is an update on the backend (mutates token_activity, may issue
+		// HTTP outcalls), so it always goes through the certified service.
+		const { get_exchange_rates } = this.caller({ certified: true });
 
-		const results = await get_exchange_rates(token_ids);
+		const results = await get_exchange_rates();
 
-		return results.reduce<Map<string, BackendExchangeRate>>((acc, [id, rate]) => {
-			const unwrapped = this.mapExchangeRate(fromNullable(rate));
-
-			const key = tokenIdKey(id);
-
-			if (nonNullish(unwrapped) && nonNullish(key)) {
-				acc.set(key, unwrapped);
-			}
-
-			return acc;
-		}, new Map());
+		return results.map(([id, rate]) => [id, this.mapExchangeRate(fromNullable(rate))]);
 	};
 
 	getUserTransactions = async ({
@@ -519,6 +620,292 @@ export class BackendCanister extends Canister<BackendService> {
 			return;
 		}
 
+		throw response.Err;
+	};
+
+	createActiveUserTransaction = async ({
+		id,
+		data,
+		progressStep,
+		externalRefs
+	}: CreateActiveUserTransactionParams): Promise<ActiveUserTransaction> => {
+		const { create_active_user_transaction } = this.caller({ certified: true });
+
+		const response = await create_active_user_transaction({
+			id,
+			data,
+			progress_step: toNullable(progressStep),
+			external_refs: externalRefs
+		});
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw response.Err;
+	};
+
+	updateActiveUserTransaction = async ({
+		id,
+		status,
+		progressStep,
+		externalRefs,
+		error
+	}: UpdateActiveUserTransactionParams): Promise<ActiveUserTransaction> => {
+		const { update_active_user_transaction } = this.caller({ certified: true });
+
+		const response = await update_active_user_transaction({
+			id,
+			status: toNullable(status),
+			progress_step: toNullable(progressStep),
+			external_refs: toNullable(externalRefs),
+			error: toNullable(error)
+		});
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw response.Err;
+	};
+
+	deleteActiveUserTransaction = async (id: string): Promise<void> => {
+		const { delete_active_user_transaction } = this.caller({ certified: true });
+
+		const response = await delete_active_user_transaction(id);
+
+		if ('Ok' in response) {
+			return;
+		}
+
+		throw response.Err;
+	};
+
+	getActiveUserTransactions = async (): Promise<ActiveUserTransaction[]> => {
+		const { get_active_user_transactions } = this.caller({ certified: false });
+
+		const response = await get_active_user_transactions();
+
+		if ('Ok' in response) {
+			return response.Ok.transactions;
+		}
+
+		throw response.Err;
+	};
+
+	setPersonalNote = async (request: PersonalNoteEntry): Promise<void> => {
+		const { set_personal_note } = this.caller({ certified: true });
+		const response = await set_personal_note(request);
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
+	};
+
+	deletePersonalNote = async (request: DeletePersonalNoteRequest): Promise<void> => {
+		const { delete_personal_note } = this.caller({ certified: true });
+		const response = await delete_personal_note(request);
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNotes = async (): Promise<PersonalNoteEntry[]> => {
+		const { get_personal_notes } = this.caller({ certified: false });
+		const response = await get_personal_notes();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNotesCount = async (): Promise<bigint> => {
+		const { get_personal_notes_count } = this.caller({ certified: false });
+		const response = await get_personal_notes_count();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNotesEncryptedVetkey = async (
+		transportPublicKey: Uint8Array
+	): Promise<Uint8Array | number[]> => {
+		const { get_personal_notes_encrypted_vetkey } = this.caller({ certified: true });
+		const response = await get_personal_notes_encrypted_vetkey(transportPublicKey);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw mapPersonalNotesVetkeyError(response.Err);
+	};
+
+	getPersonalNotesVetkeyPublicKey = async (): Promise<Uint8Array | number[]> => {
+		const { get_personal_notes_vetkey_public_key } = this.caller({ certified: true });
+		const response = await get_personal_notes_vetkey_public_key();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw mapPersonalNotesVetkeyError(response.Err);
+	};
+
+	// Tips. The canister holds no tokens for these: `createTip` only records a
+	// reservation the caller has already made on the ledger, and `claimTip` spends
+	// it. See `src/backend/src/tips`.
+
+	createTip = async (request: CreateTipRequest): Promise<void> => {
+		const { create_tip } = this.caller({ certified: true });
+		const response = await create_tip(request);
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
+	};
+
+	// Anonymous-callable, like `getPersonalNoteShare`: the recipient of a tip link
+	// has no OISY identity yet, which is the entire point of the feature.
+	getTip = async (tipId: string): Promise<PublicTip> => {
+		const { get_tip } = this.caller({ certified: false });
+		const response = await get_tip(tipId);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	// Needs the claim code, so the sender's message is visible only to someone
+	// holding the full link — never in the anonymous preview.
+	getTipDetails = async (request: TipClaimRequest): Promise<TipDetails> => {
+		const { get_tip_details } = this.caller({ certified: false });
+		const response = await get_tip_details(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	claimTip = async (request: TipClaimRequest): Promise<TipClaim> => {
+		const { claim_tip } = this.caller({ certified: true });
+		const response = await claim_tip(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	cancelTip = async (tipId: string): Promise<void> => {
+		const { cancel_tip } = this.caller({ certified: true });
+		const response = await cancel_tip(tipId);
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
+	};
+
+	getMyTips = async (): Promise<MyTip[]> => {
+		const { get_my_tips } = this.caller({ certified: false });
+		const response = await get_my_tips();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	setTipSecret = async (request: SetTipSecretRequest): Promise<void> => {
+		const { set_tip_secret } = this.caller({ certified: true });
+		const response = await set_tip_secret(request);
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
+	};
+
+	// Certified: this is the sender's own ciphertext and the whole point of
+	// storing it is that they can trust what comes back.
+	getTipSecret = async (tipId: string): Promise<Uint8Array | number[] | undefined> => {
+		const { get_tip_secret } = this.caller({ certified: true });
+		const response = await get_tip_secret(tipId);
+
+		if ('Ok' in response) {
+			return fromNullable(response.Ok);
+		}
+		throw response.Err;
+	};
+
+	getTipEncryptedVetkey = async (
+		transportPublicKey: Uint8Array
+	): Promise<Uint8Array | number[]> => {
+		const { get_tip_encrypted_vetkey } = this.caller({ certified: true });
+		const response = await get_tip_encrypted_vetkey(transportPublicKey);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getTipVetkeyPublicKey = async (): Promise<Uint8Array | number[]> => {
+		const { get_tip_vetkey_public_key } = this.caller({ certified: true });
+		const response = await get_tip_vetkey_public_key();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	createPersonalNoteShare = async (request: CreatePersonalNoteShareRequest): Promise<void> => {
+		const { create_personal_note_share } = this.caller({ certified: true });
+		const response = await create_personal_note_share(request);
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
+	};
+
+	// Anonymous-callable read endpoint (the share recipient has no identity), so
+	// it runs as a non-certified query like the other note reads.
+	getPersonalNoteShare = async (token: string): Promise<PersonalNoteShareContent> => {
+		const { get_personal_note_share } = this.caller({ certified: false });
+		const response = await get_personal_note_share(token);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	consumePersonalNoteShare = async (token: string): Promise<PersonalNoteShareContent> => {
+		const { consume_personal_note_share } = this.caller({ certified: true });
+		const response = await consume_personal_note_share(token);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNoteSharesCount = async (): Promise<bigint> => {
+		const { get_personal_note_shares_count } = this.caller({ certified: false });
+		const response = await get_personal_note_shares_count();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
 		throw response.Err;
 	};
 }

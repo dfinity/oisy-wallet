@@ -1,91 +1,75 @@
-import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
-import { USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED } from '$env/user-transactions.env';
-import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { ZERO } from '$lib/constants/app.constants';
-import { solAddressDevnet, solAddressLocal, solAddressMainnet } from '$lib/derived/address.derived';
-import type { NullishIdentity } from '$lib/types/identity';
-import type { Token } from '$lib/types/token';
-import type { ResultSuccess } from '$lib/types/utils';
-import { consoleError } from '$lib/utils/console.utils';
-import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
-import { findOldestTransaction } from '$lib/utils/transactions.utils';
+import { absBigInt } from '$lib/utils/bigint.utils';
 import { fetchTransactionDetailForSignature, getAccountOwner } from '$sol/api/solana.api';
-import { getSolTransactions } from '$sol/services/sol-signatures.services';
-import {
-	loadSolUserTransactions,
-	saveSolFinalizedTransactions
-} from '$sol/services/sol-user-transactions.services';
-import {
-	solTransactionsStore,
-	type SolCertifiedTransaction
-} from '$sol/stores/sol-transactions.store';
+import { loadSplTokenMetadata } from '$sol/services/spl-token-metadata.services';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type { LoadNextSolTransactionsParams, LoadSolTransactionsParams } from '$sol/types/sol-api';
 import type {
 	ParsedAccount,
-	SolMappedTransaction,
 	SolRpcTransaction,
 	SolSignature,
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
-import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
-import { isTokenSpl } from '$sol/utils/spl.utils';
-import { solBackendTokenId } from '$sol/utils/user-transactions.utils';
+import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
+import { mapSolNetBalanceChanges } from '$sol/utils/sol-net-changes.utils';
+import { deriveSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { findAssociatedTokenPda } from '@solana-program/token';
-import { lamports, address as solAddress } from '@solana/kit';
-import type { Lamports } from '@solana/rpc-types';
-import { get } from 'svelte/store';
 
 // The fee payer is always the first signer
 // https://solana.com/docs/core/fees#base-transaction-fee
 export const extractFeePayer = (accountKeys: ParsedAccount[]): ParsedAccount | undefined =>
 	accountKeys.length > 0 ? accountKeys.filter(({ signer }) => signer)[0] : undefined;
 
-const extractBalances = ({
-	address,
-	accountKeys,
-	preBalances,
-	postBalances
-}: {
-	address: SolAddress;
-	accountKeys: ParsedAccount[];
-	preBalances: Lamports[];
-	postBalances: Lamports[];
-}): {
-	preBalance: Lamports;
-	postBalance: Lamports;
-} => {
-	const accountIndex =
-		accountKeys.length > 0 ? accountKeys.findIndex(({ pubkey }) => pubkey === address) : undefined;
+interface SolTokenAccountMetadata {
+	addressToOwner: Record<SolAddress, SolAddress>;
+	addressToToken: Record<SolAddress, SplTokenAddress>;
+}
 
-	if (isNullish(accountIndex) || accountIndex < 0) {
-		return { preBalance: lamports(ZERO), postBalance: lamports(ZERO) };
-	}
+type SolTokenBalance = NonNullable<
+	NonNullable<SolRpcTransaction['meta']>['preTokenBalances']
+>[number];
 
-	return {
-		preBalance: accountIndex < preBalances.length ? preBalances[accountIndex] : lamports(ZERO),
-		postBalance: accountIndex < postBalances.length ? postBalances[accountIndex] : lamports(ZERO)
-	};
+const emptySolTokenAccountMetadata: SolTokenAccountMetadata = {
+	addressToOwner: {},
+	addressToToken: {}
 };
 
+const extractTokenBalanceMetadata = ({
+	accountKeys,
+	tokenBalances
+}: {
+	accountKeys: ParsedAccount[];
+	tokenBalances: SolTokenBalance[];
+}): SolTokenAccountMetadata =>
+	tokenBalances.reduce<SolTokenAccountMetadata>(
+		({ addressToOwner, addressToToken }, { accountIndex, mint, owner }) => {
+			const account = accountKeys[Number(accountIndex)]?.pubkey;
+
+			if (isNullish(account) || isNullish(owner)) {
+				return { addressToOwner, addressToToken };
+			}
+
+			return {
+				addressToOwner: { ...addressToOwner, [account]: owner },
+				addressToToken: { ...addressToToken, [account]: mint }
+			};
+		},
+		emptySolTokenAccountMetadata
+	);
+
 export const fetchSolTransactionsForSignature = async ({
-	identity,
 	signature,
 	network,
 	address,
-	tokenAddress,
-	tokenOwnerAddress
+	ownedTokenAccounts = []
 }: {
-	identity: NullishIdentity;
 	signature: SolSignature;
 	network: SolanaNetworkType;
 	address: SolAddress;
-	tokenAddress?: SplTokenAddress;
-	tokenOwnerAddress?: SolAddress;
+	// Token accounts of the user that may hold no balance yet, known without deriving them here: a
+	// caller resolving a signature for every token of a network passes all their accounts at once.
+	ownedTokenAccounts?: SolAddress[];
 }): Promise<SolTransactionUi[]> => {
 	const transactionDetail: SolRpcTransaction | null = await fetchTransactionDetailForSignature({
 		signature,
@@ -106,309 +90,162 @@ export const fetchSolTransactionsForSignature = async ({
 		meta
 	} = transactionDetail;
 
-	const { fee, preBalances, postBalances } = meta ?? {};
+	const { fee, preBalances, postBalances, preTokenBalances, postTokenBalances } = meta ?? {};
+	const parsedAccountKeys = [...(accountKeys ?? [])];
 	const { pubkey: feePayer } = extractFeePayer([...(accountKeys ?? [])]) ?? {};
-	const { preBalance, postBalance } = extractBalances({
-		address,
-		accountKeys: [...(accountKeys ?? [])],
-		preBalances: [...(preBalances ?? [])],
-		postBalances: [...(postBalances ?? [])]
+	const tokenBalanceMetadata = extractTokenBalanceMetadata({
+		accountKeys: parsedAccountKeys,
+		tokenBalances: [...(preTokenBalances ?? []), ...(postTokenBalances ?? [])]
 	});
 
 	const putativeInnerInstructions = meta?.innerInstructions ?? [];
 
-	// Inside the instructions, there could be some that we are unable to decode, but that may have
-	// simpler (and decoded) inner instructions. We should try to map those as well.
-	// They are inserted in the instructions' array in the order they refer to the main instruction.
-	const { allInstructions } = [...putativeInnerInstructions]
-		.sort((a, b) => a.index - b.index)
-		.reduce(
-			({ allInstructions, offset }, { index, instructions }) => {
-				const insertIndex = index + offset + 1;
-				allInstructions.splice(insertIndex, 0, ...instructions);
-				return { allInstructions, offset: offset + instructions.length };
-			},
-			{ allInstructions: [...instructions], offset: 0 }
-		);
+	const { addressToOwner, addressToToken } = tokenBalanceMetadata;
 
-	const [ataAddress] =
-		nonNullish(tokenAddress) && nonNullish(tokenOwnerAddress)
-			? await findAssociatedTokenPda({
-					owner: solAddress(address),
-					tokenProgram: solAddress(tokenOwnerAddress),
-					mint: solAddress(tokenAddress)
-				})
-			: [undefined];
+	// The accounts the user owns going in: the wallet, every token account the balances name as
+	// theirs, and the token accounts the caller names, which may hold no balance yet. Accounts the
+	// transaction itself opens for the user are learnt by the derivation.
+	const ownedAddresses = [
+		address,
+		...Object.entries(addressToOwner)
+			.filter(([, owner]) => owner === address)
+			.map(([account]) => account),
+		...ownedTokenAccounts
+	];
 
-	const initialCumulativeBalances = { [address]: preBalance - postBalance };
+	// Who held each token account going in. Not the owners merged from before and after, which the
+	// counterparty lookup wants: an address closed and opened again for somebody else within the
+	// one transaction would read as theirs at a close that happened while it was still the user's.
+	const accountHolders = [...(preTokenBalances ?? [])].reduce<Record<SolAddress, SolAddress>>(
+		(acc, { accountIndex, owner }) => {
+			const account = parsedAccountKeys[Number(accountIndex)]?.pubkey;
 
-	const { parsedTransactions } = await allInstructions.reduce<
-		Promise<{
-			parsedTransactions: SolTransactionUi[];
-			cumulativeBalances: Record<SolAddress, SolMappedTransaction['value']>;
-			addressToToken: Record<SolAddress, SplTokenAddress>;
-		}>
-	>(
-		async (acc, instruction, idx) => {
-			const {
-				parsedTransactions,
-				cumulativeBalances: accCumulativeBalances,
-				addressToToken: accAddressToToken
-			} = await acc;
-
-			const mappedTransaction = await mapSolParsedInstruction({
-				identity,
-				instruction: {
-					...instruction,
-					programAddress: instruction.programId
-				},
-				network,
-				cumulativeBalances: accCumulativeBalances,
-				addressToToken: accAddressToToken
-			});
-
-			if (isNullish(mappedTransaction)) {
-				return acc;
-			}
-
-			const { value, from, to, tokenAddress: mappedTokenAddress } = mappedTransaction;
-
-			// To avoid an excessive amount of call to the Solana RPC, we keep track of the token address
-			// associated with a certain address. This way, we can skip the call to request the account info
-			// for mapping a certain transaction to its specific token.
-			const addressToToken = {
-				...accAddressToToken,
-				...(nonNullish(mappedTokenAddress) && {
-					[from]: mappedTokenAddress,
-					[to]: mappedTokenAddress
-				})
-			};
-
-			// The cumulative balances are updated for every instruction, so we can keep track of the
-			// SOL balance of the address and its associated token account at any given time.
-			// It is useful when mapping, for example, a `closeAccount` instruction, where the redeemed value
-			// is not provided in the data and must be calculated as the latest total SOL balance of the Associated Token Account.
-			const cumulativeBalances = {
-				...accCumulativeBalances,
-				// We include WSOL in the calculation because it is used to affect the SOL balance of the ATA.
-				...((isNullish(mappedTokenAddress) || mappedTokenAddress === WSOL_TOKEN.address) && {
-					[from]: (accCumulativeBalances[from] ?? ZERO) - value,
-					[to]: (accCumulativeBalances[to] ?? ZERO) + value
-				})
-			};
-
-			// Ignoring the instruction if the transaction is not related to the address or its associated token account.
-			if (from !== address && to !== address && from !== ataAddress && to !== ataAddress) {
-				return { parsedTransactions, cumulativeBalances, addressToToken };
-			}
-
-			// If the token address is not the one we are looking for, we can skip this instruction.
-			// In the case of Solana native tokens, the token address is undefined.
-			if (mappedTokenAddress !== tokenAddress) {
-				return { parsedTransactions, cumulativeBalances, addressToToken };
-			}
-
-			const fromOwner: SolTransactionUi['fromOwner'] = await getAccountOwner({
-				address: from,
-				network
-			});
-
-			const toOwner: SolTransactionUi['toOwner'] = nonNullish(to)
-				? await getAccountOwner({ address: to, network })
-				: undefined;
-
-			const newTransaction: SolTransactionUi = {
-				id: `${signature.signature}-${idx}-${instruction.programId}`,
-				signature: signature.signature,
-				blockNumber: Number(slot),
-				timestamp: blockTime ?? ZERO,
-				value,
-				type: address === from || ataAddress === from ? 'send' : 'receive',
-				from,
-				...(nonNullish(fromOwner) && { fromOwner }),
-				to,
-				...(nonNullish(toOwner) && { toOwner }),
-				status,
-				// Since the fee is assigned to a single signature, it is not entirely correct to assign it to each transaction.
-				// Particularly, we are repeating the same fee for each instruction in the transaction.
-				// However, we should have it anyway saved in the transaction, so we can display it in the UI.
-				...(nonNullish(fee) && nonNullish(feePayer) && { fee: address === feePayer ? fee : ZERO })
-			};
-
-			return {
-				parsedTransactions: [
-					...parsedTransactions,
-					newTransaction,
-					...(from === to
-						? [
-								{
-									...newTransaction,
-									id: `${newTransaction.id}-self`,
-									type: newTransaction.type === 'send' ? 'receive' : 'send'
-								} as SolTransactionUi
-							]
-						: [])
-				],
-				cumulativeBalances,
-				addressToToken
-			};
+			return nonNullish(account) && nonNullish(owner) ? { ...acc, [account]: owner } : acc;
 		},
-		Promise.resolve({
-			parsedTransactions: [],
-			cumulativeBalances: initialCumulativeBalances,
-			addressToToken: {}
-		})
+		{}
 	);
 
-	// The instructions are received in the order they were executed, meaning the first instruction
-	// in the list was executed first, and the last instruction was executed last.
-	// However, since they all share the same timestamp, we want to display them in reverse
-	// order—from the last executed instruction to the first. This ensures that when shown,
-	// the most recently executed instruction appears first, maintaining a more intuitive,
-	// backward-looking view of execution history.
-	return parsedTransactions.reverse();
-};
+	// Which mint each token account held going in, for the same reason as its holder.
+	const accountMintsBefore = [...(preTokenBalances ?? [])].reduce<
+		Record<SolAddress, SplTokenAddress>
+	>((acc, { accountIndex, mint }) => {
+		const account = parsedAccountKeys[Number(accountIndex)]?.pubkey;
 
-export const loadNextSolTransactions = async ({
-	token,
-	signalEnd,
-	...rest
-}: LoadNextSolTransactionsParams): Promise<void> => {
-	const {
-		network: { id: networkId }
-	} = token;
+		return nonNullish(account) && nonNullish(mint) ? { ...acc, [account]: mint } : acc;
+	}, {});
 
-	const address = isNetworkIdSOLDevnet(networkId)
-		? get(solAddressDevnet)
-		: isNetworkIdSOLLocal(networkId)
-			? get(solAddressLocal)
-			: get(solAddressMainnet);
+	// What each token account held going in, from the same array the owners and mints come from.
+	// Only the pre-state: what an account holds at a close is walked forward from here, and the
+	// post-state of an account that was closed is nothing at all.
+	const accountTokenAmounts = [...(preTokenBalances ?? [])].reduce<Record<SolAddress, bigint>>(
+		(acc, { accountIndex, uiTokenAmount }) => {
+			const account = parsedAccountKeys[Number(accountIndex)]?.pubkey;
 
-	const network = mapNetworkIdToNetwork(token.network.id);
+			return nonNullish(account) && nonNullish(uiTokenAmount?.amount)
+				? { ...acc, [account]: BigInt(uiTokenAmount.amount) }
+				: acc;
+		},
+		{}
+	);
 
-	if (isNullish(network) || isNullish(address)) {
-		return;
-	}
+	// What each account held going in, so a close can say what it hands back: the instruction
+	// itself states no amount, and for a wrapped SOL account it is the wrapped SOL too.
+	const balances = preBalances ?? [];
 
-	const { address: tokenAddress, owner: tokenOwnerAddress } = isTokenSpl(token)
-		? token
-		: { address: undefined, owner: undefined };
+	const accountLamports = parsedAccountKeys.reduce<Record<SolAddress, bigint>>(
+		(acc, { pubkey }, index) => {
+			const lamports = balances[index];
 
-	const transactions = await loadSolTransactions({
-		token,
-		network,
-		address,
-		tokenAddress,
-		tokenOwnerAddress,
-		...rest
+			if (nonNullish(lamports)) {
+				acc[pubkey] = lamports;
+			}
+
+			return acc;
+		},
+		{}
+	);
+
+	const instructionSummaries = mapSolInstructionSummaries({
+		instructions: [...instructions],
+		innerInstructions: [...putativeInnerInstructions].map(({ index, instructions: inner }) => ({
+			index: Number(index),
+			instructions: [...inner]
+		})),
+		ownedAddresses,
+		userAddress: address,
+		addressToToken,
+		accountHolders,
+		accountMintsBefore,
+		accountLamports,
+		accountTokenAmounts
 	});
 
-	if (transactions.length === 0) {
-		signalEnd();
-	}
-};
+	const netChanges = mapSolNetBalanceChanges({
+		address,
+		fee,
+		feePayer,
+		accountKeys: parsedAccountKeys,
+		preBalances: [...(preBalances ?? [])],
+		postBalances: [...(postBalances ?? [])],
+		preTokenBalances: [...(preTokenBalances ?? [])],
+		postTokenBalances: [...(postTokenBalances ?? [])]
+	});
 
-const loadSolTransactions = async ({
-	token: { id: tokenId },
-	network,
-	identity,
-	address,
-	tokenAddress,
-	...rest
-}: LoadSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
-	try {
-		const backendTokenId = solBackendTokenId({ network, tokenAddress });
-
-		const stored = USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED
-			? await loadSolUserTransactions({
-					identity,
-					tokenId: backendTokenId,
-					address
-				})
-			: undefined;
-
-		const newTransactions = await getSolTransactions({
-			network,
-			identity,
-			address,
-			tokenAddress,
-			...rest
-		});
-
-		const storedTransactions = stored?.transactions ?? [];
-		const newestStoredSlot = stored?.newestBlockIndex;
-
-		// Filter RPC results to only include transactions from slots newer than the stored data.
-		// This avoids overlap by range-partitioning.
-		const freshTransactions = nonNullish(newestStoredSlot)
-			? newTransactions.filter(
-					({ blockNumber }) => isNullish(blockNumber) || blockNumber > Number(newestStoredSlot)
-				)
-			: newTransactions;
-
-		const allTransactions = [...freshTransactions, ...storedTransactions];
-
-		const certifiedTransactions = allTransactions.map((transaction) => ({
-			data: transaction,
-			certified: false
-		}));
-
-		solTransactionsStore.append({
-			tokenId,
-			transactions: certifiedTransactions
-		});
-
-		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && freshTransactions.length > 0) {
-			saveSolFinalizedTransactions({
-				identity,
-				tokenId: backendTokenId,
-				transactions: freshTransactions
-			}).catch((err) => consoleError('Background save of finalized SOL transactions failed:', err));
-		}
-
-		return freshTransactions.map((transaction) => ({
-			data: transaction,
-			certified: false
-		}));
-	} catch (error: unknown) {
-		solTransactionsStore.reset(tokenId);
-
-		consoleError(`Failed to load transactions for ${tokenId.description}:`, error);
+	// Nothing of the user's moved and nothing they own was touched: one of the false positives an
+	// ATA signature lookup produces, and there is nothing to show for it.
+	if (instructionSummaries.length === 0 && netChanges.length === 0) {
 		return [];
 	}
-};
 
-export const loadNextSolTransactionsByOldest = async ({
-	minTimestamp,
-	transactions,
-	...rest
-}: {
-	identity: NullishIdentity;
-	minTimestamp: number;
-	transactions: SolTransactionUi[];
-	token: Token;
-	signalEnd: () => void;
-}): Promise<ResultSuccess> => {
-	// If there are no transactions, we let the worker load the first ones
-	if (transactions.length === 0) {
-		return { success: false };
-	}
-
-	const lastTransaction = findOldestTransaction(transactions);
-
-	const { timestamp: minIcTimestamp, signature: lastSignature } = lastTransaction ?? {};
-
-	if (
-		nonNullish(minIcTimestamp) &&
-		normalizeTimestampToSeconds(minIcTimestamp) <= normalizeTimestampToSeconds(minTimestamp)
-	) {
-		return { success: false };
-	}
-
-	await loadNextSolTransactions({
-		...rest,
-		before: lastSignature
+	// Name the mints this record mentions. Best effort: an unnamed token still renders, and the
+	// loader skips mints it has already asked about, so a busy wallet does not re-ask per page.
+	await loadSplTokenMetadata({
+		tokenAddresses: netChanges.map(({ tokenAddress }) => tokenAddress).filter(nonNullish),
+		network
 	});
 
-	return { success: true };
+	const summary = deriveSolTransactionSummary({
+		netChanges,
+		instructions: instructionSummaries,
+		userAddress: address
+	});
+
+	const { counterparty } = summary;
+
+	const counterpartyOwner = nonNullish(counterparty)
+		? (addressToOwner[counterparty] ?? (await getAccountOwner({ address: counterparty, network })))
+		: undefined;
+
+	// The shared type only speaks send and receive, so a swap is typed by its outgoing half and an
+	// approval or authority change falls back to send too; what the transaction actually was is the
+	// summary's to say, and the UI reads the summary first.
+	const type: SolTransactionUi['type'] = summary.kind === 'receive' ? 'receive' : 'send';
+
+	// A transaction that reduces to none of the three kinds has no counterparty to name: writing
+	// the wallet into `to` would fabricate a transfer to self that never happened.
+	const directional = summary.kind !== 'other';
+
+	const amount = summary.spent ?? summary.received;
+
+	// One record per signature: the transaction is the unit the user thinks in, and the summary,
+	// the net and the instruction list travel with it for the modal's three tabs.
+	const record: SolTransactionUi = {
+		id: signature.signature,
+		signature: signature.signature,
+		blockNumber: Number(slot),
+		timestamp: blockTime ?? ZERO,
+		...(nonNullish(amount) && { value: absBigInt(amount.delta) }),
+		type,
+		from: type === 'send' ? address : (counterparty ?? address),
+		...(directional && { to: type === 'send' ? (counterparty ?? address) : address }),
+		...(type === 'receive' && nonNullish(counterpartyOwner) && { fromOwner: counterpartyOwner }),
+		...(type === 'send' && nonNullish(counterpartyOwner) && { toOwner: counterpartyOwner }),
+		status,
+		...(nonNullish(fee) && nonNullish(feePayer) && { fee: address === feePayer ? fee : ZERO }),
+		summary,
+		netChanges,
+		instructions: instructionSummaries
+	};
+
+	return [record];
 };

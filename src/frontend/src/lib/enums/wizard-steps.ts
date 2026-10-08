@@ -87,9 +87,60 @@ export enum WizardStepsUnstake {
 	UNSTAKING = 'Unstaking'
 }
 
+export enum WizardStepsTradingWithdraw {
+	WITHDRAW = 'Withdraw',
+	REVIEW = 'Review',
+	WITHDRAWING = 'Withdrawing',
+	TOKENS_LIST = 'Tokens List'
+}
+
+export enum WizardStepsTip {
+	INTRO = 'Intro',
+	TOKENS_LIST = 'Tokens List',
+	CREATE = 'Create',
+	SHARE = 'Share',
+	HISTORY = 'History'
+}
+
+export enum WizardStepsLiquidiumSupply {
+	SUPPLY = 'Supply',
+	REVIEW = 'Review',
+	SUPPLYING = 'Supplying',
+	TOKENS_LIST = 'Tokens List'
+}
+
+export enum WizardStepsLiquidiumBorrow {
+	BORROW = 'Borrow',
+	REVIEW = 'Review',
+	BORROWING = 'Borrowing',
+	TOKENS_LIST = 'Tokens List'
+}
+
+export enum WizardStepsLiquidiumWithdraw {
+	WITHDRAW = 'Withdraw',
+	REVIEW = 'Review',
+	WITHDRAWING = 'Withdrawing',
+	TOKENS_LIST = 'Tokens List'
+}
+
+export enum WizardStepsLiquidiumRepay {
+	REPAY = 'Repay',
+	REVIEW = 'Review',
+	REPAYING = 'Repaying',
+	TOKENS_LIST = 'Tokens List'
+}
+
 export enum WizardStepsClaimStakingReward {
 	REVIEW = 'Review',
 	CLAIMING = 'Claiming'
+}
+
+export enum WizardStepsTradingDeposit {
+	DEPOSIT = 'Deposit',
+	TOKENS_LIST = 'Tokens List',
+	FILTER_NETWORKS = 'Filter Networks',
+	REVIEW = 'Review',
+	DEPOSITING = 'Depositing'
 }
 
 export const WizardStepsGetToken = {
@@ -110,4 +161,18 @@ export enum WizardStepsScanner {
 	PAYMENT_FAILED = 'Payment Failed',
 	WALLET_CONNECT_CONNECT = WizardStepsWalletConnect.CONNECT,
 	WALLET_CONNECT_REVIEW = WizardStepsWalletConnect.REVIEW
+}
+
+export enum WizardStepsLimitOrder {
+	FORM = 'Form',
+	BASE_TOKEN = 'Base token',
+	QUOTE_TOKEN = 'Quote token',
+	REVIEW = 'Review',
+	PLACING = 'Placing'
+}
+
+export enum WizardStepsCyclesMint {
+	MINT = 'Mint',
+	REVIEW = 'Review',
+	MINTING = 'Minting'
 }

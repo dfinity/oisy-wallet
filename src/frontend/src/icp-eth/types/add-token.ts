@@ -22,6 +22,10 @@ interface IcPunksAddTokenData {
 	icPunksCanisterId: string;
 }
 
+interface Icrc7AddTokenData {
+	icrc7CanisterId: string;
+}
+
 interface SplAddTokenData {
 	splTokenAddress: SolAddress;
 }
@@ -33,6 +37,7 @@ export type AddTokenData = OneOf<
 		ExtAddTokenData,
 		Dip721AddTokenData,
 		IcPunksAddTokenData,
+		Icrc7AddTokenData,
 		SplAddTokenData
 	]
 >;

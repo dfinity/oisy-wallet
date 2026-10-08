@@ -36,6 +36,13 @@ pub struct IcPunksToken {
     pub canister_id: CanisterId,
 }
 
+/// An ICRC-7 compliant non-fungible token collection on the Internet Computer.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[serde(remote = "Self")]
+pub struct Icrc7Token {
+    pub canister_id: CanisterId,
+}
+
 /// A network-specific unique Solana token identifier.
 #[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug, PartialOrd, Ord)]
 #[serde(remote = "Self")]
@@ -95,6 +102,7 @@ pub enum Token {
     Dip721(Dip721Token) = 7,
     IcPunks(IcPunksToken) = 8,
     Erc4626(ErcToken) = 9,
+    Icrc7(Icrc7Token) = 10,
 }
 
 /// User preferences for any token
@@ -106,6 +114,7 @@ pub struct CustomToken {
     pub version: Option<Version>,
     pub section: Option<TokenSection>,
     pub allow_external_content_source: Option<bool>,
+    pub allowed_external_content_source_urls: Option<Vec<String>>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -133,4 +142,6 @@ pub enum CustomTokenId {
     Dip721(CanisterId) = 5,
     /// A token on the Internet Computer with an interface similar to the one of `ICPunks`.
     IcPunks(CanisterId) = 6,
+    /// An ICRC-7 compliant non-fungible token collection on the Internet Computer mainnet.
+    Icrc7(CanisterId) = 7,
 }

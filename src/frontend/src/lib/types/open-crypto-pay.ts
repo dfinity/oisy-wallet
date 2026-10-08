@@ -1,4 +1,4 @@
-import type { BtcAddress, OptionBtcAddress } from '$btc/types/address';
+import type { BtcAddress } from '$btc/types/address';
 import type { UtxosFee } from '$btc/types/btc-send';
 import type { EthFeeResult } from '$eth/types/pay';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -95,7 +95,6 @@ export interface PrepareTokensParams {
 	transferAmounts: TransferAmount[];
 	networks: Network[];
 	availableTokens: Token[];
-	btcAddressMainnet: OptionBtcAddress;
 }
 
 export interface PayableTokenWithConvertedAmount extends PayableTokenWithFees {
