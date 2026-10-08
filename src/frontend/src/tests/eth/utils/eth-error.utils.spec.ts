@@ -201,7 +201,7 @@ describe('eth-error.utils', () => {
 				vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
 			});
 
-			it('explains it, then gives the gas sent, the gas needed and the signed transaction, a line each', async () => {
+			it('explains it, then gives the gas sent, the gas needed, the hash and the unsigned transaction, a line each', async () => {
 				const err = outOfGas({ withRequest: true });
 
 				toastEthereumTransactionError({
