@@ -49,7 +49,7 @@ only) and NEAR Intents (cross-chain, a curated token list). LI.FI aggregates doz
 DEXes and bridges (Relay, Across, Stargate, Mayan, NEAR, Jupiter, OKX…), so it:
 
 - adds a competing **same-chain** EVM quote next to Velora;
-- adds **cross-chain EVM ↔ EVM and EVM ↔ Solana** routes for tokens NEAR Intents does not
+- adds **cross-chain EVM ↔ EVM and EVM → Solana** routes for tokens NEAR Intents does not
   list, and competes on price where both list them;
 - adds **same-chain Solana** swaps (SPL ↔ SPL), which no provider offers today.
 
@@ -506,8 +506,18 @@ user's funds elsewhere, since every instruction is signed by the user. Before si
 `assertLifiSolTransaction` simulates the exact bytes with `simulateSolTransaction`
 (`sol/services/sol-simulation.services.ts`, the WalletConnect review's helper), and
 treats its `undefined` (timeout or RPC failure) or an `err` as an abort. It is
-best-effort for WalletConnect, but fail-closed here. The result must show all of the
-following:
+best-effort for WalletConnect, but fail-closed here.
+
+**The original blockhash is kept.** `simulateTransactionAccounts`
+(`sol/api/solana.api.ts`) always passes `replaceRecentBlockhash: true`, which suits
+WalletConnect (it re-signs with a fresh blockhash anyway) but would let a stale LI.FI
+transaction pass simulation and then be rejected at broadcast. The API helper and
+`simulateSolTransaction` gain a `replaceRecentBlockhash` option, defaulting to `true` so
+WalletConnect is unchanged; LI.FI passes `false`, so the RPC simulates the exact bytes
+with their own blockhash, and an expired one comes back as an `err`
+(`BlockhashNotFound`) and aborts.
+
+The result must show all of the following:
 
 - `preview.controlChanges` is empty. No owner, delegate or close-authority change on any
   user account. An absent `preview` (the run changed nothing the user owns) passes this
@@ -620,14 +630,25 @@ New `fetchLifiEvmSwap` in `lib/services/swap.services.ts`, mirroring
    (as is `gasPrice`). After the calldata check, `eth_estimateGas({ from, to, data,
 value })` runs on the exact checked transaction through `infuraProviders(networkId)`
    (the existing `estimateGas` on the Infura provider; the allowance exists by now, so the estimate reflects the real call), plus a new fixed buffer `LIFI_GAS_LIMIT_BUFFER_PERCENT` (20 %; the repo has no shared one). A failing estimate aborts. With OISY's EIP-1559
-   `maxFeePerGas`, the native balance must cover `value + gas × maxFeePerGas`, or the
-   swap aborts with the existing insufficient-funds error before signing.
+   `maxFeePerGas`, the transaction's fee ceiling is `gas × maxFeePerGas + l1Fee`, the same
+   formula as `maxGasFee` (`eth/utils/fee.utils.ts`). `l1Fee` is the OP-stack L1 data fee
+   (Base), read with `getL1FeeUpperBound` on the Infura provider for the **actual**
+   unsigned transaction's RLP size: the shared `OP_STACK_UNSIGNED_TX_SIZE` (128 bytes,
+   `evm/base/constants/base.constants.ts`) is sized for transfers and would underprice
+   LI.FI's calldata. It is `undefined` (zero) off OP-stack chains. The native balance must
+   cover `value + ceiling`, or the swap aborts with the existing insufficient-funds error
+   before signing.
 4. `swap({ to: tr.to, transaction: { data: tr.data, gas: estimatedGas, value: tr.value, chainId: tr.chainId }, maxFeePerGas, maxPriorityFeePerGas, … })`.
 
-   In the form, the swap leg's fee for balance validation and the displayed maximum
-   comes from the quote's `estimate.gasCosts` (LI.FI's own estimate for the route)
-   rather than `EthFeeContext`'s plain-transfer estimate, so a bridge call's larger
-   gas is reserved up front. The execution-time estimate above remains the authority.
+   **Review shows the same ceiling it signs.** In the form and review, the swap leg's
+   maximum fee (displayed, and used for balance validation and "Max") is computed with
+   the **same formula** as above: the gas units from the quote's `estimate.gasCosts`
+   (LI.FI's own estimate for the route, not its `amount`, which is an expected cost at
+   LI.FI's gas price) × the same buffer × OISY's `maxFeePerGas` + `l1Fee` for that
+   transaction's size, rather than `EthFeeContext`'s plain-transfer estimate. At
+   execution, if the ceiling from OISY's own estimate exceeds the reviewed ceiling, the
+   swap is **not signed**: it aborts back to the review step with a "network fee changed"
+   message (a new `swap.error.lifi_fee_changed`), and the user confirms the new maximum.
    Velora Market keeps signing its provider's gas, unchanged.
 
 5. Create the AUT row (best effort), `enableSwapDestinationToken`.
@@ -718,19 +739,19 @@ regenerated `backend.did` and `src/declarations/backend/*` (rebuild the wasm bef
 
 #### External refs (`LIFI_EXTERNAL_REF_KEYS`, `lib/types/lifi.ts`)
 
-| Key                    | Set           | Purpose                                                  |
-| ---------------------- | ------------- | -------------------------------------------------------- |
-| `lifi_tx_hash`         | creation      | source tx hash / Solana signature; `/status` key         |
-| `lifi_from_chain`      | creation      | LI.FI source chain id                                    |
-| `lifi_to_chain`        | creation      | LI.FI destination chain id                               |
-| `lifi_tool`            | creation      | `step.tool`, passed as `bridge` to `/status`             |
-| `lifi_transaction_id`  | creation      | LI.FI's id, for support / explorer links                 |
-| `lifi_nonce`           | creation, EVM | replaced/dropped detection (Velora Market)               |
-| `lifi_blockhash`       | creation, SOL | the transaction's recent blockhash; expiry detection     |
-| `lifi_expired_seen`    | learned, SOL  | `'1'` once one poll has observed the expiry condition    |
-| `lifi_dest_tx_hash`    | learned       | `receiving.txHash`                                       |
-| `lifi_received_symbol` | learned       | `receiving.token.symbol` when it differs from the target |
-| `lifi_received_amount` | learned       | that token's amount, **formatted** (see below)           |
+| Key                    | Set           | Purpose                                               |
+| ---------------------- | ------------- | ----------------------------------------------------- |
+| `lifi_tx_hash`         | creation      | source tx hash / Solana signature; `/status` key      |
+| `lifi_from_chain`      | creation      | LI.FI source chain id                                 |
+| `lifi_to_chain`        | creation      | LI.FI destination chain id                            |
+| `lifi_tool`            | creation      | `step.tool`, passed as `bridge` to `/status`          |
+| `lifi_transaction_id`  | creation      | LI.FI's id, for support / explorer links              |
+| `lifi_nonce`           | creation, EVM | replaced/dropped detection (Velora Market)            |
+| `lifi_blockhash`       | creation, SOL | the transaction's recent blockhash; expiry detection  |
+| `lifi_expired_seen`    | learned, SOL  | `'1'` once one poll has observed the expiry condition |
+| `lifi_dest_tx_hash`    | learned       | `receiving.txHash`                                    |
+| `lifi_received_symbol` | learned       | `receiving.token.symbol` on every `DONE` / `PARTIAL`  |
+| `lifi_received_amount` | learned       | that token's amount, **formatted** (see below)        |
 
 Plus the shared display keys (`amount`, `source_token_symbol`, `source_network_symbol`,
 `destination_token_symbol`, `destination_network_symbol`, `usd_source_value`), so
@@ -794,7 +815,10 @@ Each tick, per pending LI.FI row:
 
 `PARTIAL` is a success because the user received full value, only in a different token
 (typically a bridge's intermediate asset). The item then shows the token actually
-received rather than claiming `dest_token`. `REFUNDED` is a failure because the swap did
+received rather than claiming `dest_token`. The received symbol and amount are recorded
+on **every** `DONE` / `PARTIAL`, never only when the symbol differs from the target's:
+symbols are not unique, and the status itself already establishes that the token
+differs. `REFUNDED` is a failure because the swap did
 not happen; the error copy says the funds were returned, and `lifiExplorerLink` is not
 needed for that since the funds are back in the user's wallet.
 
@@ -881,6 +905,7 @@ loader's 5 s tick.
   fee (from `feeCosts`), the route tool name and minimum received.
 - i18n keys in `en.json` + the other locales + `i18n.d.ts`: at least
   `swap.text.lifi_route_via`, `swap.error.lifi_refunded`, `swap.error.lifi_status_unknown`,
+  `swap.error.lifi_fee_changed`,
   `swap.text.lifi_received_other_token`; optionally
   `help.text.explorers_lifi_description` for a help-page explorer entry.
 
