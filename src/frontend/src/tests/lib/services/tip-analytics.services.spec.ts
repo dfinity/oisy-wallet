@@ -198,7 +198,7 @@ describe('tip-analytics.services', () => {
 			expect(toTipErrorType(err)).toBe(PLAUSIBLE_EVENT_TIP_ERROR_TYPES.LEDGER_GENERIC_ERROR);
 		});
 
-		it.each([
+		it.each<{ label: string; err: unknown }>([
 			{ label: 'a transport failure', err: new Error('Call failed: request id 0x1234') },
 			{ label: 'a variant this build does not know', err: { SomethingNew: null } },
 			{ label: 'a key inherited from Object', err: { constructor: null } },
