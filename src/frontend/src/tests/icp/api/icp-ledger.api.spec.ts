@@ -1,4 +1,12 @@
-import { icrc1Transfer, transfer } from '$icp/api/icp-ledger.api';
+import { ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
+import {
+	accountBalance,
+	getIcpLedgerBlockTimestamp,
+	icrc1Transfer,
+	transfer
+} from '$icp/api/icp-ledger.api';
+import { IcpLedgerBlocksCanister } from '$icp/canisters/icp-ledger-blocks.canister';
+import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import {
 	mockAccountIdentifierText,
@@ -13,6 +21,7 @@ import {
 	type BlockHeight
 } from '@icp-sdk/canisters/ledger/icp';
 import type { IcrcAccount, IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
+import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock('@dfinity/utils', async () => {
@@ -136,24 +145,96 @@ describe('icp-ledger.api', () => {
 			});
 		});
 
-		it('successfully calls icrc1Transfer endpoint with memo', async () => {
-			const memoText = 'payment for invoice #42';
-			const memo = new TextEncoder().encode(memoText);
+		it('passes a memo through as the icrc1 memo', async () => {
+			const memo = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
 
-			const result = await icrc1Transfer({ ...params, memo });
-
-			expect(result).toEqual(mockIndex);
+			await icrc1Transfer({ ...params, memo });
 
 			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				to: toAccount,
-				icrc1Memo: memo,
-				createdAt
+				createdAt,
+				icrc1Memo: memo
 			});
 		});
 
 		it('throws an error if identity is undefined', async () => {
 			await expect(icrc1Transfer({ ...params, identity: undefined })).rejects.toThrow();
+		});
+	});
+
+	describe('accountBalance', () => {
+		const params = {
+			owner: mockPrincipal2,
+			identity: mockIdentity,
+			certified: true,
+			ledgerCanisterId: mockLedgerCanisterId
+		};
+
+		const mockBalance = 1_000_000n;
+
+		beforeEach(() => {
+			ledgerCanisterMock.accountBalance.mockResolvedValue(mockBalance);
+		});
+
+		it('successfully calls accountBalance endpoint with the owner account identifier', async () => {
+			const result = await accountBalance(params);
+
+			expect(result).toEqual(mockBalance);
+
+			expect(ledgerCanisterMock.accountBalance).toHaveBeenCalledExactlyOnceWith({
+				certified: true,
+				accountIdentifier: getAccountIdentifier(mockPrincipal2)
+			});
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(accountBalance({ ...params, identity: undefined })).rejects.toThrow();
+		});
+	});
+
+	describe('getIcpLedgerBlockTimestamp', () => {
+		const blocksCanisterMock = mock<IcpLedgerBlocksCanister>();
+
+		const params = {
+			identity: mockIdentity,
+			ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
+			index: 42n
+		};
+
+		beforeEach(() => {
+			vi.spyOn(IcpLedgerBlocksCanister, 'create').mockResolvedValue(blocksCanisterMock);
+			blocksCanisterMock.blockTimestamp.mockResolvedValue(1_790_000_000_000_000_000n);
+		});
+
+		it('reads the block’s time, certified by default', async () => {
+			await expect(getIcpLedgerBlockTimestamp(params)).resolves.toBe(1_790_000_000_000_000_000n);
+
+			expect(IcpLedgerBlocksCanister.create).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				canisterId: Principal.fromText(ICP_LEDGER_CANISTER_ID)
+			});
+			expect(blocksCanisterMock.blockTimestamp).toHaveBeenCalledExactlyOnceWith({
+				index: 42n,
+				certified: true
+			});
+		});
+
+		it('passes a query', async () => {
+			await getIcpLedgerBlockTimestamp({ ...params, certified: false });
+
+			expect(blocksCanisterMock.blockTimestamp).toHaveBeenCalledExactlyOnceWith({
+				index: 42n,
+				certified: false
+			});
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(
+				getIcpLedgerBlockTimestamp({ ...params, identity: undefined })
+			).rejects.toThrow();
+
+			expect(blocksCanisterMock.blockTimestamp).not.toHaveBeenCalled();
 		});
 	});
 });

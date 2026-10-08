@@ -1,6 +1,6 @@
 import type { BtcAddress } from '$btc/types/address';
 import type {
-	BitcoinNetwork,
+	Network as BitcoinNetwork,
 	EthSignTransactionRequest,
 	SendBtcResponse,
 	SignBtcResponse
@@ -10,6 +10,7 @@ import { CanisterApi } from '$lib/api/canister.api';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
+	GenericSignWithEcdsaParams,
 	GetSchnorrPublicKeyParams,
 	SendBtcParams,
 	SignWithSchnorrParams
@@ -92,6 +93,15 @@ export const signPrehash = async ({
 	return signPrehash({ hash });
 };
 
+export const signBtcPrehash = async ({
+	hash,
+	identity
+}: CanisterApiFunctionParams<{ hash: Uint8Array }>): Promise<Uint8Array> => {
+	const { signBtcPrehash } = await signerCanister({ identity });
+
+	return signBtcPrehash({ hash });
+};
+
 export const sendBtc = async ({
 	identity,
 	...params
@@ -117,6 +127,15 @@ export const signWithSchnorr = async ({
 	const { signWithSchnorr } = await signerCanister({ identity });
 
 	return await signWithSchnorr(rest);
+};
+
+export const genericSignWithEcdsa = async ({
+	identity,
+	...rest
+}: CanisterApiFunctionParams<GenericSignWithEcdsaParams>): Promise<Uint8Array> => {
+	const { genericSignWithEcdsa } = await signerCanister({ identity });
+
+	return await genericSignWithEcdsa(rest);
 };
 
 const signerCanister = async ({

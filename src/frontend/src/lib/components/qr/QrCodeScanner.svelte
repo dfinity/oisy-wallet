@@ -18,8 +18,8 @@
 	let { onScan, onBack, universalScanner = false }: Props = $props();
 
 	let resolveQrCodePromise:
-		| (({ status, code }: { status: QrStatus; code?: string }) => void)
-		| undefined = $state(undefined);
+		(({ status, code }: { status: QrStatus; code?: string }) => void) | undefined =
+		$state(undefined);
 
 	let cameraPermissionDenied = $state(false);
 
@@ -30,12 +30,20 @@
 	});
 
 	const scanQrCode = async () => {
-		const result = await new Promise<{ status: QrStatus; code?: string | undefined }>((resolve) => {
-			resolveQrCodePromise = resolve;
-		});
+		let keepScanning = true;
+		while (keepScanning) {
+			const result = await new Promise<{ status: QrStatus; code?: string | undefined }>(
+				(resolve) => {
+					resolveQrCodePromise = resolve;
+				}
+			);
 
-		if (result.status === 'success') {
-			onScan(result);
+			if (result.status === 'success') {
+				onScan(result);
+				keepScanning = isMobile() && universalScanner;
+			} else {
+				keepScanning = false;
+			}
 		}
 
 		if (!cameraPermissionDenied) {

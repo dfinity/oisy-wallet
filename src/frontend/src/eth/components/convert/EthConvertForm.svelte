@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { getContext, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
@@ -7,6 +6,7 @@
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { ckUsdcConversionDisabled } from '$icp-eth/derived/cketh.derived';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ETH_CONVERT_FORM_TEST_ID } from '$lib/constants/test-ids.constants';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';

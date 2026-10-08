@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use candid::Principal;
-use ic_cdk::bitcoin_canister::Utxo;
+use ic_cdk_bitcoin_canister::{Txid, Utxo};
 use shared::types::bitcoin::StoredPendingTransaction;
 
 use crate::types::{BtcUserPendingTransactionsMap, Candid, StoredPrincipal};
@@ -94,6 +94,11 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
     ///   present or not. Partial presence could happen if the utxos of a pending transaction were
     ///   not really used in the transaction. We don't remove in partial presence because, in the
     ///   end, partial presence will be temporary for one hour.
+    ///
+    /// An empty `current_utxos` set is treated as "no confirmation information available", not as
+    /// "all utxos confirmed". Such transactions are only freed by the 1-hour age rule, so a caller
+    /// that fetches utxos for an address with no available utxos cannot wipe its non-expired
+    /// pending reservations.
     pub fn prune_pending_transactions(
         &mut self,
         principal: Principal,
@@ -116,10 +121,11 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
             transactions.retain(|pending_transaction| {
                 let is_old = pending_transaction.created_at_timestamp_ns + HOUR_IN_NS < now_ns;
 
-                let none_of_tx_utxos_are_still_present = pending_transaction
-                    .utxos
-                    .iter()
-                    .all(|utxo| !current_utxos.contains(utxo));
+                let none_of_tx_utxos_are_still_present = !current_utxos.is_empty()
+                    && pending_transaction
+                        .utxos
+                        .iter()
+                        .all(|utxo| !current_utxos.contains(utxo));
 
                 !is_old && !none_of_tx_utxos_are_still_present
             });
@@ -162,9 +168,9 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
     /// - `true` if there is at least one overlapping UTXO.
     /// - `false` if no overlap is found.
     pub fn has_intersecting_pending_utxos(&self, principal: Principal, new_utxos: &[Utxo]) -> bool {
-        let new_keys: HashSet<(&[u8], u32)> = new_utxos
+        let new_keys: HashSet<(Txid, u32)> = new_utxos
             .iter()
-            .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
+            .map(|u| (u.outpoint.txid, u.outpoint.vout))
             .collect();
 
         let stored_principal = StoredPrincipal(principal);
@@ -177,7 +183,7 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
             .values()
             .flat_map(|txs| txs.iter())
             .flat_map(|tx| tx.utxos.iter())
-            .any(|u| new_keys.contains(&(u.outpoint.txid.as_slice(), u.outpoint.vout)))
+            .any(|u| new_keys.contains(&(u.outpoint.txid, u.outpoint.vout)))
     }
 }
 
@@ -186,7 +192,7 @@ mod tests {
     use std::{cell::RefCell, collections::HashMap, sync::LazyLock};
 
     use candid::Principal;
-    use ic_cdk::bitcoin_canister::{Outpoint, Utxo};
+    use ic_cdk_bitcoin_canister::{OutPoint, Txid, Utxo};
     use ic_stable_structures::{
         memory_manager::{MemoryId, MemoryManager},
         DefaultMemoryImpl,
@@ -197,45 +203,45 @@ mod tests {
     use super::{BtcUserPendingTransactionsModel, HOUR_IN_NS};
     use crate::types::{BtcUserPendingTransactionsMap, Candid, StoredPrincipal};
 
-    const TXID_A: &[u8] = &[0xAA; 32];
-    const TXID_B: &[u8] = &[0xBB; 32];
-    const TXID_C: &[u8] = &[0xCC; 32];
+    const TXID_A: [u8; 32] = [0xAA; 32];
+    const TXID_B: [u8; 32] = [0xBB; 32];
+    const TXID_C: [u8; 32] = [0xCC; 32];
 
     static UTXO_1: LazyLock<Utxo> = LazyLock::new(|| Utxo {
-        outpoint: Outpoint {
-            txid: TXID_A.to_vec(),
+        outpoint: OutPoint {
+            txid: Txid::from(TXID_A),
             vout: 0,
         },
         value: 1000,
         height: 100,
     });
     static UTXO_2: LazyLock<Utxo> = LazyLock::new(|| Utxo {
-        outpoint: Outpoint {
-            txid: TXID_A.to_vec(),
+        outpoint: OutPoint {
+            txid: Txid::from(TXID_A),
             vout: 1,
         },
         value: 2000,
         height: 120,
     });
     static UTXO_3: LazyLock<Utxo> = LazyLock::new(|| Utxo {
-        outpoint: Outpoint {
-            txid: TXID_B.to_vec(),
+        outpoint: OutPoint {
+            txid: Txid::from(TXID_B),
             vout: 2,
         },
         value: 3000,
         height: 150,
     });
     static UTXO_4: LazyLock<Utxo> = LazyLock::new(|| Utxo {
-        outpoint: Outpoint {
-            txid: TXID_B.to_vec(),
+        outpoint: OutPoint {
+            txid: Txid::from(TXID_B),
             vout: 2,
         },
         value: 8000,
         height: 160,
     });
     static UTXO_5: LazyLock<Utxo> = LazyLock::new(|| Utxo {
-        outpoint: Outpoint {
-            txid: TXID_C.to_vec(),
+        outpoint: OutPoint {
+            txid: Txid::from(TXID_C),
             vout: 9,
         },
         value: 9000,
@@ -517,6 +523,57 @@ mod tests {
         assert_eq!(pending_txs.len(), 2);
     }
 
+    // Regression: an empty `current_utxos` means "no confirmation information available", not
+    // "all utxos confirmed". A caller fetching utxos for an address with none must not be able
+    // to wipe their non-expired pending reservations.
+    #[test]
+    fn test_empty_current_utxos_retains_non_expired() {
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        let now_ns = 1_000_000_000_000;
+
+        let pending = StoredPendingTransaction {
+            txid: vec![1, 2, 3],
+            utxos: vec![(*UTXO_1).clone(), (*UTXO_2).clone()],
+            created_at_timestamp_ns: now_ns,
+        };
+        model
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), pending.clone())
+            .unwrap();
+
+        model.prune_pending_transactions(principal, &[], now_ns);
+
+        let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
+        assert_eq!(pending_txs.len(), 1);
+        assert_eq!(pending_txs[0], pending);
+    }
+
+    #[test]
+    fn test_empty_current_utxos_still_prunes_expired() {
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        let yesterday_ns = 1_000_000;
+        let now_ns = yesterday_ns + HOUR_IN_NS + 1;
+
+        let expired = StoredPendingTransaction {
+            txid: vec![1, 2, 3],
+            utxos: vec![(*UTXO_1).clone()],
+            created_at_timestamp_ns: yesterday_ns,
+        };
+        model
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), expired)
+            .unwrap();
+
+        model.prune_pending_transactions(principal, &[], now_ns);
+
+        let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
+        assert!(pending_txs.is_empty());
+    }
+
     #[test]
     fn test_has_intersecting_pending_utxos_true_across_addresses() {
         let (mut map, _mm) = setup();
@@ -667,8 +724,8 @@ mod tests {
         let pending = StoredPendingTransaction {
             txid: vec![1],
             utxos: vec![Utxo {
-                outpoint: Outpoint {
-                    txid: TXID_A.to_vec(),
+                outpoint: OutPoint {
+                    txid: Txid::from(TXID_A),
                     vout: 7,
                 },
                 value: 1111,
@@ -683,8 +740,8 @@ mod tests {
 
         // New utxo has same vout=7 but different txid => must NOT intersect
         let candidate = Utxo {
-            outpoint: Outpoint {
-                txid: TXID_B.to_vec(),
+            outpoint: OutPoint {
+                txid: Txid::from(TXID_B),
                 vout: 7,
             },
             value: 2222,

@@ -11,7 +11,7 @@
 	import type { LogoSize } from '$lib/types/components';
 	import type { Nft } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { getNftDisplayImageUrl } from '$lib/utils/nft.utils';
+	import { getNftDisplayImageUrl, getNftDisplayName } from '$lib/utils/nft.utils';
 
 	interface Props {
 		nft: Nft;
@@ -33,8 +33,9 @@
 		badgeTestId
 	}: Props = $props();
 
+	const nftDisplayName = $derived(getNftDisplayName(nft));
+
 	const {
-		name,
 		collection: { network }
 	} = $derived(nft);
 </script>
@@ -43,7 +44,7 @@
 	<div style={`width: ${logoSizes[logoSize]}; height: ${logoSizes[logoSize]};`}>
 		<NftDisplayGuard {nft} type="nft-logo">
 			<Logo
-				alt={replacePlaceholders($i18n.core.alt.logo, { $name: name ?? '' })}
+				alt={replacePlaceholders($i18n.core.alt.logo, { $name: nftDisplayName })}
 				circle={false}
 				{color}
 				{ring}

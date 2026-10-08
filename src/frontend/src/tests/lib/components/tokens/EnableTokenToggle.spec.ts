@@ -144,7 +144,7 @@ describe('EnableTokenToggle', () => {
 			props: { token: mockToggleableBtcToken, onToggle: mockOnToggle }
 		});
 
-		const toggleElement = getByTestId('gix-cmp-toggle');
+		const toggleElement = getByTestId('toggle');
 
 		expect(toggleElement).toBeInTheDocument();
 
@@ -162,7 +162,7 @@ describe('EnableTokenToggle', () => {
 			props: { token: mockToggleableSolToken, onToggle: mockOnToggle }
 		});
 
-		const toggleElement = getByTestId('gix-cmp-toggle');
+		const toggleElement = getByTestId('toggle');
 
 		expect(toggleElement).toBeInTheDocument();
 

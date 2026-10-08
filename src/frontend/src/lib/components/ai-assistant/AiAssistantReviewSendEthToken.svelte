@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -15,6 +14,7 @@
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isEthAddress } from '$eth/utils/account.utils';
+	import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -23,6 +23,7 @@
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import Button from '$lib/components/ui/Button.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import {
 		AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
 		AI_ASSISTANT_SEND_TOKEN_SOURCE,
@@ -38,6 +39,7 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -153,7 +155,8 @@
 			invalidDestination ||
 			notEmptyString(insufficientFundsErrorMessage) ||
 			isNullish(amount) ||
-			isNullish($ckEthMinterInfoStore?.[nativeEthereumToken.id])
+			isNullish($ckEthMinterInfoStore?.[nativeEthereumToken.id]) ||
+			isNullish($feeStore)
 	);
 
 	const send = async () => {
@@ -258,9 +261,11 @@
 				metadata: sendTrackingEventMetadata
 			});
 
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
-				err
+			toastEthereumTransactionError({
+				err,
+				fallbackMsg: $i18n.send.error.unexpected,
+				token: $sendToken,
+				context: PLAUSIBLE_EVENT_CONTEXTS.AI_ASSISTANT
 			});
 		}
 	};

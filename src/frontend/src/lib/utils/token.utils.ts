@@ -1,10 +1,14 @@
+import { USD1_TOKEN_GROUP_ID } from '$env/tokens/groups/groups.usd1.env';
+import { ICRC_SUGGESTED_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import {
 	ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS,
 	ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS
 } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
+import { SPL_SUGGESTED_TOKENS } from '$env/tokens/tokens.spl.env';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
-import type { IcCkToken } from '$icp/types/ic-token';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
+import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 import { isTokenIc } from '$icp/utils/icrc.utils';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
@@ -13,15 +17,23 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { OptionBalance } from '$lib/types/balance';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { StakeBalances } from '$lib/types/stake-balance';
-import type { RequiredTokenWithLinkedData, Token, TokenStandard } from '$lib/types/token';
+import type { RequiredTokenWithLinkedData, Token, TokenId, TokenStandard } from '$lib/types/token';
 import type { CardData } from '$lib/types/token-card';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
-import { formatToken } from '$lib/utils/format.utils';
+import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+
+const ERC20_SUGGESTED_TOKEN_IDS: Set<TokenId> = new Set(ERC20_SUGGESTED_TOKENS.map(({ id }) => id));
+const SPL_SUGGESTED_TOKEN_IDS: Set<TokenId> = new Set(SPL_SUGGESTED_TOKENS.map(({ id }) => id));
+
+// USD1 (World Liberty Financial USD) is grouped under USD1_TOKEN_GROUP across supported networks, so we
+// identify it by its token group id to avoid collisions with user-imported tokens that reuse the symbol.
+export const isUSD1Token = (token: Token): boolean => token.groupData?.id === USD1_TOKEN_GROUP_ID;
 
 /**
  * Calculates the maximum amount for a transaction.
@@ -89,8 +101,10 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 	const isSuggestedToken =
 		(nonNullish(ledgerCanisterId) &&
 			ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)) ||
-		(isTokenErc20(defaultToken) &&
-			ERC20_SUGGESTED_TOKENS.map(({ id }) => id).includes(defaultToken.id));
+		(nonNullish(ledgerCanisterId) &&
+			ICRC_SUGGESTED_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)) ||
+		(isTokenErc20(defaultToken) && ERC20_SUGGESTED_TOKEN_IDS.has(defaultToken.id)) ||
+		(isTokenSpl(defaultToken) && SPL_SUGGESTED_TOKEN_IDS.has(defaultToken.id));
 
 	return {
 		...defaultToken,
@@ -100,7 +114,8 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 			customToken?.enabled === true,
 		version: customToken?.version,
 		section: customToken?.section,
-		allowExternalContentSource: customToken?.allowExternalContentSource
+		allowExternalContentSource: customToken?.allowExternalContentSource,
+		allowedExternalContentSourceUrls: customToken?.allowedExternalContentSourceUrls
 	};
 };
 
@@ -287,3 +302,61 @@ export const getTokenDisplayName = (token: Token | CardData): string =>
  */
 export const filterEnabledToken = <T extends Token>(token: T): boolean =>
 	isTokenToggleable(token) ? token.enabled : true;
+
+/** UI-rendered token-standard label, lowercased and trimmed: `<code> <version>`
+ * (e.g. "ext v2", or just "erc20" when no version). Returns an empty string
+ * for a nullish standard. Shared by token and NFT filters so the filter input
+ * matches what users see on the details page.
+ */
+export const standardLabel = (standard: TokenStandard | undefined): string =>
+	nonNullish(standard) ? `${standard.code} ${standard.version ?? ''}`.trim().toLowerCase() : '';
+
+/**
+ * One display label per ledger, unambiguous within the given set.
+ *
+ * A custom ledger is free to claim any symbol, so a symbol alone cannot identify a ledger. Each
+ * token is labelled with its display symbol, and where a *different* ledger in the set shares
+ * that symbol, the label is suffixed with the shortened ledger id - the one field an impersonating
+ * token cannot copy. A symbol that spells out another token's suffixed label - `XYZ (qaa6y-...)`
+ * as literal text - is suffixed too, so a label can never be forged from symbol text: an
+ * unsuffixed label then matches no other symbol and no suffixed label, and suffixed labels differ
+ * by ledger id. A ledger listed twice (a default that is also an enabled custom token) is
+ * labelled once, from its first entry: the default, which carries the `oisySymbol` a custom
+ * duplicate lacks and which the rest of the app treats as authoritative.
+ *
+ * Callers that show a token in several places must build the labels once, over the whole set the
+ * user can encounter, and pass them down: computed per surface, a filtered list can lose the twin
+ * and label an impostor as though it were unique.
+ */
+export const buildIcTokenLabels = (tokens: IcToken[]): Map<LedgerCanisterIdText, string> => {
+	const uniqueTokens = [
+		...tokens
+			.reduce<Map<LedgerCanisterIdText, IcToken>>(
+				(acc, token) =>
+					acc.has(token.ledgerCanisterId) ? acc : acc.set(token.ledgerCanisterId, token),
+				new Map()
+			)
+			.values()
+	];
+
+	const ledgersBySymbol = uniqueTokens.reduce<Map<string, Set<LedgerCanisterIdText>>>(
+		(acc, token) => {
+			const symbol = getTokenDisplaySymbol(token);
+
+			return acc.set(symbol, (acc.get(symbol) ?? new Set()).add(token.ledgerCanisterId));
+		},
+		new Map()
+	);
+
+	const suffixedLabel = (token: IcToken): string =>
+		`${getTokenDisplaySymbol(token)} (${shortenWithMiddleEllipsis({ text: token.ledgerCanisterId })})`;
+
+	const suffixedLabels = new Set(uniqueTokens.map(suffixedLabel));
+
+	return uniqueTokens.reduce<Map<LedgerCanisterIdText, string>>((acc, token) => {
+		const symbol = getTokenDisplaySymbol(token);
+		const ambiguous = (ledgersBySymbol.get(symbol)?.size ?? 0) > 1 || suffixedLabels.has(symbol);
+
+		return acc.set(token.ledgerCanisterId, ambiguous ? suffixedLabel(token) : symbol);
+	}, new Map());
+};

@@ -1,5 +1,5 @@
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
-import type { DeltaAuctionOrder, SignableDeltaOrderData } from '@velora-dex/sdk';
+import type { BuiltDeltaOrder, DeltaAuctionOrder } from '@velora-dex/sdk';
 import { Signature } from 'ethers/crypto';
 import { TypedDataEncoder } from 'ethers/hash';
 
@@ -37,7 +37,7 @@ describe('EIP - 712 utils methods', () => {
 	describe('getSignParamsEIP712', () => {
 		it('should call TypedDataEncoder.hash with correct parameters and return result', () => {
 			const expectedHash = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
-			const inputParams: SignableDeltaOrderData = {
+			const inputParams: BuiltDeltaOrder['toSign'] = {
 				domain: {
 					name: 'Velora DEX',
 					version: '1',
@@ -51,7 +51,7 @@ describe('EIP - 712 utils methods', () => {
 						{ name: 'chainId', type: 'uint256' }
 					]
 				},
-				data: {
+				value: {
 					owner: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
 					beneficiary: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
 					srcToken: '0x1111111111111111111111111111111111111111',
@@ -82,14 +82,14 @@ describe('EIP - 712 utils methods', () => {
 			expect(mockTypedDataEncoder.hash).toHaveBeenCalledExactlyOnceWith(
 				inputParams.domain,
 				inputParams.types,
-				inputParams.data
+				inputParams.value
 			);
 			expect(result).toBe(expectedHash);
 		});
 
 		it('should handle different domain configurations', () => {
 			const expectedHash = '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdef';
-			const inputParams: SignableDeltaOrderData = {
+			const inputParams: BuiltDeltaOrder['toSign'] = {
 				domain: {
 					name: 'Test DEX',
 					version: '2',
@@ -103,7 +103,7 @@ describe('EIP - 712 utils methods', () => {
 						{ name: 'chainId', type: 'uint256' }
 					]
 				},
-				data: {
+				value: {
 					owner: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
 					beneficiary: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
 					srcToken: '0x1111111111111111111111111111111111111111',
@@ -134,14 +134,14 @@ describe('EIP - 712 utils methods', () => {
 			expect(mockTypedDataEncoder.hash).toHaveBeenCalledExactlyOnceWith(
 				inputParams.domain,
 				inputParams.types,
-				inputParams.data
+				inputParams.value
 			);
 			expect(result).toBe(expectedHash);
 		});
 
 		it('should handle empty data object', () => {
 			const expectedHash = '0x0000000000000000000000000000000000000000000000000000000000000000';
-			const inputParams: SignableDeltaOrderData = {
+			const inputParams: BuiltDeltaOrder['toSign'] = {
 				domain: {
 					name: 'Empty Test',
 					version: '1',
@@ -152,7 +152,7 @@ describe('EIP - 712 utils methods', () => {
 					Order: [],
 					Bridge: []
 				},
-				data: {} as DeltaAuctionOrder
+				value: {} as DeltaAuctionOrder
 			};
 
 			vi.spyOn(TypedDataEncoder, 'hash').mockReturnValue(expectedHash);
@@ -162,7 +162,7 @@ describe('EIP - 712 utils methods', () => {
 			expect(mockTypedDataEncoder.hash).toHaveBeenCalledExactlyOnceWith(
 				inputParams.domain,
 				inputParams.types,
-				inputParams.data
+				inputParams.value
 			);
 			expect(result).toBe(expectedHash);
 		});
@@ -245,7 +245,7 @@ describe('EIP - 712 utils methods', () => {
 
 	describe('Integration scenarios', () => {
 		it('should work together in a typical signing flow', () => {
-			const orderData: SignableDeltaOrderData = {
+			const orderData: BuiltDeltaOrder['toSign'] = {
 				domain: {
 					name: 'Velora DEX',
 					version: '1',
@@ -259,7 +259,7 @@ describe('EIP - 712 utils methods', () => {
 						{ name: 'chainId', type: 'uint256' }
 					]
 				},
-				data: {
+				value: {
 					owner: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
 					beneficiary: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
 					srcToken: '0x1111111111111111111111111111111111111111',
@@ -299,7 +299,7 @@ describe('EIP - 712 utils methods', () => {
 			expect(mockTypedDataEncoder.hash).toHaveBeenCalledExactlyOnceWith(
 				orderData.domain,
 				orderData.types,
-				orderData.data
+				orderData.value
 			);
 			expect(hash).toBe(expectedHash);
 

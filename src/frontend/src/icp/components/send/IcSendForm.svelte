@@ -6,6 +6,7 @@
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
+	import ScannedPlainAddressNotice from '$lib/components/send/ScannedPlainAddressNotice.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
@@ -56,6 +57,10 @@
 	{onNext}
 	{selectedContact}
 >
+	{#snippet topBanner()}
+		<ScannedPlainAddressNotice styleClass="mb-6!" />
+	{/snippet}
+
 	{#snippet sendAmount()}
 		<IcSendAmount {onTokensList} bind:amount bind:amountError />
 	{/snippet}

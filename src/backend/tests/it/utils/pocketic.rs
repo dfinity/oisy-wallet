@@ -2,14 +2,16 @@
 pub mod pic_canister;
 use std::{env, fs::read, ops::RangeBounds, sync::Arc, time::Duration};
 
-use candid::{encode_one, CandidType, Principal};
-use ic_cdk::bitcoin_canister::Network as BitcoinNetwork;
+use candid::{encode_one, CandidType, Nat, Principal};
+use ic_cdk_bitcoin_canister::Network as BitcoinNetwork;
 use ic_cycles_ledger_client::{InitArgs, LedgerArgs};
 pub use pic_canister::PicCanisterTrait;
-use pocket_ic::{PocketIc, PocketIcBuilder};
+use pocket_ic::{
+    CanisterSettings, CreateCanisterParams, CreateCanisterPlacement, PocketIc, PocketIcBuilder,
+};
 use shared::types::{
     backend_config::{Arg, InitArg},
-    user_profile::{HasUserProfileResponse, OisyUser, UserProfile},
+    user_profile::{CreateUserProfileError, HasUserProfileResponse, OisyUser, UserProfile},
 };
 
 use super::mock::{CONTROLLER, FRONTEND_DERIVATION_ORIGIN, II_CANISTER_ID, SIGNER_CANISTER_ID};
@@ -68,14 +70,13 @@ struct BitcoinInitConfig {
 ///    .with_wasm("path/to/backend.wasm")
 ///    .with_arg(vec![1, 2, 3])
 ///    .with_controllers(vec![Principal::from_text("controller").unwrap()])
-///    .with_cycles(1_000_000_000_000)
 ///    .deploy();
 /// ```
 #[derive(Debug)]
 pub struct BackendBuilder {
     /// Canister ID of the backend canister.  If not set, a new canister will be created.
     canister_id: Option<Principal>,
-    /// Cycles to add to the backend canister.
+    /// Cycles the backend canister is created with.
     cycles: u128,
     /// Path to the backend wasm file.
     wasm_path: String,
@@ -94,10 +95,17 @@ pub struct BackendBuilder {
 }
 // Defaults
 impl BackendBuilder {
-    /// The default number of cycles to add to the backend canister on deployment.
+    /// The number of cycles the backend canister is created with.
     ///
-    /// To override, please use `with_cycles()`.
-    pub const DEFAULT_CYCLES: u128 = 2_000_000_000_000;
+    /// Sized to sit between two limits, both exercised by the cycles-ledger tests:
+    /// - High enough that after the housekeeping top-up donates half the balance to the cycles
+    ///   ledger, the rest still covers the canister's in-flight call reservations. With a 2T budget
+    ///   only ~30B cycles stay liquid once the timers have calls in flight, and the next
+    ///   inter-canister call is rejected with `InsufficientLiquidCycleBalance`.
+    /// - Low enough that half of it stays under the per-user signing allowance
+    ///   (`per_user_cycles_allowance`, ~2.9T), which caps how much the signer can pull from the
+    ///   topped-up patron account.
+    pub const DEFAULT_CYCLES: u128 = 4_000_000_000_000;
 
     /// The default Wasm file to deploy:
     /// - If the environment variable `BACKEND_WASM_PATH` is set, it will use that path.
@@ -265,17 +273,22 @@ impl BackendBuilder {
                 .topology()
                 .get_fiduciary()
                 .expect("pic should have a fiduciary subnet.");
-            let canister_id = pic.create_canister_on_subnet(None, None, fiduciary_subnet_id);
+            // `PocketIC` endows a new canister with 100T cycles unless an explicit amount is
+            // given, so the balance has to be set at creation time: the cycles-ledger top-up sends
+            // a percentage of it, and an implicit endowment would swamp `self.cycles` and make
+            // those tests meaningless.
+            let canister_id = pic
+                .create_canister_with_params(
+                    None,
+                    CreateCanisterParams {
+                        cycles: Some(self.cycles),
+                        placement: Some(CreateCanisterPlacement::SubnetId(fiduciary_subnet_id)),
+                        ..Default::default()
+                    },
+                )
+                .expect("Test setup error: Failed to create the backend canister");
             self.canister_id = Some(canister_id);
             canister_id
-        }
-    }
-
-    /// Add cycles to the backend canister.
-    fn add_cycles(&mut self, pic: &PocketIc) {
-        if self.cycles > 0 {
-            let canister_id = self.canister_id(pic);
-            pic.add_cycles(canister_id, self.cycles);
         }
     }
 
@@ -318,11 +331,37 @@ impl BackendBuilder {
             .expect("Test setup error: Failed to set controllers");
     }
 
+    /// Zero the backend's freezing threshold so its frozen reserve is 0.
+    ///
+    /// The cycles-ledger top-up subtracts the canister's frozen reserve (derived from the freezing
+    /// threshold and the idle burn rate) before sending. `PocketIC` reports a nonzero idle burn, so
+    /// with the default 30-day threshold the reserve would consume the small test balance and the
+    /// top-up would send nothing. Zeroing the threshold makes the reserve 0, so top-up tests behave
+    /// deterministically (percentage of the full balance) regardless of `PocketIC`'s cost model.
+    fn zero_freezing_threshold(&mut self, pic: &PocketIc) {
+        let canister_id = self.canister_id(pic);
+        let controller = Some(
+            *self
+                .controllers
+                .first()
+                .expect("Test setup error: BackendBuilder must have at least one controller"),
+        );
+        pic.update_canister_settings(
+            canister_id,
+            controller,
+            CanisterSettings {
+                freezing_threshold: Some(Nat::from(0u32)),
+                ..Default::default()
+            },
+        )
+        .expect("Test setup error: Failed to zero the freezing threshold");
+    }
+
     pub fn deploy_backend(&mut self, pic: &PocketIc) -> Principal {
         let canister_id = self.canister_id(pic);
-        self.add_cycles(pic);
         self.install_backend(pic);
         self.set_controllers(pic);
+        self.zero_freezing_threshold(pic);
         canister_id
     }
 
@@ -340,6 +379,10 @@ impl BackendBuilder {
         let pic = PocketIcBuilder::new()
             .with_ii_subnet()
             .with_fiduciary_subnet()
+            // `PocketIC` serves the mainnet threshold keys (`key_1`) from its regular subnets and
+            // the test keys (`test_key_1`, the name the backend is initialised with here) only
+            // from a dedicated test-threshold-keys subnet.
+            .with_test_threshold_keys_subnet()
             .build();
         // Since the timestamp of the first block starts 4 years earlier, we must enable
         // auto-progress before deployment to avoid burning cycles for this entire duration.
@@ -382,11 +425,27 @@ pub fn setup() -> PicBackend {
 /// Sets up a `PocketIC` environment with NNS subnet (for root key), II subnet, and fiduciary
 /// subnet. Deploys II on the II subnet and initializes the backend with the `PocketIC` root key so
 /// that delegation signature verification works end-to-end.
+///
+/// No cycles ledger is installed, so `allow_signing` reaches its rate limiter on every call
+/// (`has_sufficient_allowance` cannot short-circuit without a ledger to query). Rate-limit tests
+/// depend on that; use [`setup_with_ii_and_cycles_ledger`] when the test needs a real allowance.
 pub fn setup_with_ii() -> (PicBackend, super::ii::IICanister) {
+    setup_with_ii_internal(false)
+}
+
+/// Like [`setup_with_ii`] but with the cycles ledger installed, so `allow_signing` can actually
+/// issue an `icrc_2_approve` and the resulting allowance is observable.
+pub fn setup_with_ii_and_cycles_ledger() -> (PicBackend, super::ii::IICanister) {
+    setup_with_ii_internal(true)
+}
+
+fn setup_with_ii_internal(cycles_ledger_enabled: bool) -> (PicBackend, super::ii::IICanister) {
     let pic = PocketIcBuilder::new()
         .with_nns_subnet()
         .with_ii_subnet()
         .with_fiduciary_subnet()
+        // See `BackendBuilder::deploy`: `test_key_1` lives on the test-threshold-keys subnet.
+        .with_test_threshold_keys_subnet()
         .build();
 
     let root_key = pic
@@ -416,7 +475,9 @@ pub fn setup_with_ii() -> (PicBackend, super::ii::IICanister) {
         new_user_signups_allowed: None,
     });
 
-    let mut builder = BackendBuilder::default().with_arg(encode_one(backend_init).unwrap());
+    let mut builder = BackendBuilder::default()
+        .with_arg(encode_one(backend_init).unwrap())
+        .with_cycles_ledger(cycles_ledger_enabled);
 
     let backend_canister_id = builder.deploy_to(&pic);
     let backend = PicBackend {
@@ -428,7 +489,6 @@ pub fn setup_with_ii() -> (PicBackend, super::ii::IICanister) {
 }
 
 impl PicBackend {
-    #[expect(dead_code)]
     pub fn upgrade_latest_wasm(&self, encoded_arg: Option<Vec<u8>>) -> Result<(), String> {
         let backend_wasm_path =
             env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());
@@ -521,7 +581,11 @@ impl PicBackend {
         for i in range {
             self.pic.advance_time(Duration::new(10, 0));
             let caller = Principal::self_authenticating(i.to_string());
-            let response = self.update::<UserProfile>(caller, "create_user_profile", ());
+            let response = self.update::<Result<UserProfile, CreateUserProfileError>>(
+                caller,
+                "create_user_profile",
+                (),
+            );
             let timestamp = self.pic.get_time();
             let timestamp_nanos = timestamp.as_nanos_since_unix_epoch();
             let expected_user = OisyUser {
@@ -530,6 +594,7 @@ impl PicBackend {
             };
             expected_users.push(expected_user);
             assert!(response.is_ok());
+            assert!(response.unwrap().is_ok());
         }
         expected_users
     }
@@ -542,11 +607,8 @@ impl PicBackend {
     ///
     /// This helper is idempotent and designed to be safe to call repeatedly:
     /// it first issues a `has_user_profile` query and only invokes the
-    /// `create_user_profile` update when the profile does not yet exist. This
-    /// avoids the side effects of `create_user_profile` (notably
-    /// `spawn_allow_signing_if_below_limit`, which consumes per-caller
-    /// rate-limit entries and spawns an inter-canister call) on repeated
-    /// invocations.
+    /// `create_user_profile` update when the profile does not yet exist,
+    /// keeping repeated invocations free of update-call side effects.
     pub fn ensure_user_profile(&self, caller: Principal) {
         let exists = self
             .query::<HasUserProfileResponse>(caller, "has_user_profile", ())
@@ -557,10 +619,18 @@ impl PicBackend {
             return;
         }
 
-        let response = self.update::<UserProfile>(caller, "create_user_profile", ());
+        let response = self.update::<Result<UserProfile, CreateUserProfileError>>(
+            caller,
+            "create_user_profile",
+            (),
+        );
         assert!(
             response.is_ok(),
             "Failed to create user profile for caller {caller}: {response:?}"
+        );
+        assert!(
+            response.as_ref().unwrap().is_ok(),
+            "create_user_profile rejected for caller {caller}: {response:?}"
         );
     }
 }

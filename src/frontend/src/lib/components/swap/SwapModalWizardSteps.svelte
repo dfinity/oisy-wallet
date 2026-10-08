@@ -1,13 +1,16 @@
 <script lang="ts">
-	import type { WizardModal, WizardStep, WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { get } from 'svelte/store';
+	import SwapBtcContexts from '$btc/components/swap/SwapBtcContexts.svelte';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
+	import { crossChainSwapNetworksMainnets } from '$lib/derived/cross-chain-networks.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { allSwapUniverseTokens } from '$lib/derived/swap.derived';
 	import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import {
@@ -28,6 +31,10 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
+	import type { WizardModal, WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
+	import { tryParseToken } from '$lib/utils/parse.utils';
+	import { networksWithSupport } from '$lib/utils/swap-tokens-filter.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	interface Props {
@@ -60,8 +67,13 @@
 		onClose
 	}: Props = $props();
 
-	const { setSourceToken, setDestinationToken, sourceToken, destinationToken } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const {
+		setSourceToken,
+		setDestinationToken,
+		sourceToken,
+		destinationToken,
+		receiveSupportedData
+	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { setFilterNetwork, setFilterQuery } = getContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY
@@ -71,6 +83,8 @@
 		getContext<ModalNetworksListContext>(MODAL_NETWORKS_LIST_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+
+	let isBitcoinSource = $derived(isNetworkIdBitcoin($sourceToken?.network?.id));
 
 	type TokenSide = 'source' | 'destination';
 
@@ -129,6 +143,29 @@
 		}, undefined);
 	};
 
+	const computeDestinationAllowedIds = (source: Token): NetworkId[] | undefined => {
+		const baseAllowedIds = SUPPORTED_CROSS_SWAP_NETWORKS[source.network.id];
+
+		const supportedData = get(receiveSupportedData);
+		if (isNullish(supportedData)) {
+			return baseAllowedIds;
+		}
+
+		const reachableIds = networksWithSupport({
+			networks: get(crossChainSwapNetworksMainnets),
+			tokens: get(allSwapUniverseTokens),
+			supportedData
+		});
+
+		const reachableSet = new Set(reachableIds);
+
+		if (isNullish(baseAllowedIds)) {
+			return reachableIds;
+		}
+
+		return baseAllowedIds.filter((id) => reachableSet.has(id));
+	};
+
 	const applyListConstraints = (side: TokenSide) => {
 		// SOURCE list: user can browse all networks (but keep current network preselected if any)
 		if (side === 'source') {
@@ -149,8 +186,9 @@
 			return;
 		}
 
-		// source selected (constraints apply)
-		const allowedIds = SUPPORTED_CROSS_SWAP_NETWORKS[$sourceToken.network.id];
+		// source selected: intersect the static cross-swap pre-filter with networks
+		// that have at least one reachable destination via the providers supporting the source.
+		const allowedIds = computeDestinationAllowedIds($sourceToken);
 
 		setNetworksMode({ enabled: false, allowedIds });
 
@@ -181,30 +219,23 @@
 		selectTokenType = undefined;
 	};
 
-	const isDestinationCompatibleWithSource = ({
-		source,
-		destination
-	}: {
-		source: Token;
-		destination: Token;
-	}): boolean => {
-		const allowed = SUPPORTED_CROSS_SWAP_NETWORKS[source.network.id];
-
-		return isNullish(allowed) ? true : allowed.includes(destination.network.id);
-	};
-
 	const selectToken = (token: Token) => {
 		if (selectTokenType === 'source') {
+			// The amount survives a source-token change, but the new token may not be able to
+			// represent its precision — a Max on BTC (8 decimals) followed by a switch to USDC (6)
+			// leaves an amount no ledger call could express. `tryParseToken` returning `undefined`
+			// is exactly that signal, so drop the amount here rather than carry one the forms can
+			// only reject, alongside the quote `enterTokenList` has already reset.
+			if (
+				nonNullish(swapAmount) &&
+				isNullish(tryParseToken({ value: `${swapAmount}`, unitName: token.decimals }))
+			) {
+				swapAmount = undefined;
+			}
+
 			setSourceToken(token);
 
 			setFilterNetwork(token.network);
-
-			if (
-				nonNullish($destinationToken) &&
-				!isDestinationCompatibleWithSource({ source: token, destination: $destinationToken })
-			) {
-				setDestinationToken(undefined);
-			}
 		} else if (selectTokenType === 'destination') {
 			setDestinationToken(token);
 
@@ -233,38 +264,50 @@
 	};
 </script>
 
-{#key currentStep?.name}
-	{#if currentStep?.name === WizardStepsSwap.TOKENS_LIST}
-		<SwapTokensList
-			onCloseTokensList={closeTokenList}
-			onSelectNetworkFilter={() => goToStep(WizardStepsSwap.FILTER_NETWORKS)}
-			onSelectToken={selectToken}
-		/>
-	{:else if currentStep?.name === WizardStepsSwap.FILTER_NETWORKS}
-		<ModalNetworksFilter
-			{allNetworksEnabled}
-			filteredNetworks={$filteredNetworks}
-			onNetworkFilter={() => goToStep(WizardStepsSwap.TOKENS_LIST)}
-			showStakeBalance={false}
-		/>
-	{:else if currentStep?.name === WizardStepsSwap.SELECT_PROVIDER}
-		<SwapProviderListModal
-			onCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
-			onSelectProvider={selectProvider}
-		/>
-	{:else if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
-		<SwapTokenWizard
-			{currentStep}
-			onBack={() => modal?.back()}
-			{onClose}
-			onNext={() => modal?.next()}
-			onShowProviderList={() => goToStep(WizardStepsSwap.SELECT_PROVIDER)}
-			onShowTokensList={showTokensList}
-			bind:swapAmount
-			bind:receiveAmount
-			bind:slippageValue
-			bind:swapProgressStep
-			bind:swapFailedProgressSteps
-		/>
-	{/if}
-{/key}
+<!--
+  Wraps the keyed block rather than sitting inside it. `{#key}` rebuilds its whole subtree on
+  every step change, and `SwapBtcContexts` owns two things that must not be rebuilt with it:
+  the `UtxosFeeContexts` store, and a teardown that clears the UTXO set, the fee percentiles
+  and the reserved outpoints. Mounted inside, the walk from the form to Review wiped all four
+  and left Review waiting on two update calls to refill them — a confirmation inside that
+  window failed on a missing fee, and every rebuild also spent one of the fifteen calls a
+  minute the backend allows for the reserved-outpoint list.
+-->
+<SwapBtcContexts amount={swapAmount} load={isBitcoinSource} networkId={$sourceToken?.network?.id}>
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsSwap.TOKENS_LIST}
+			<SwapTokensList
+				onCloseTokensList={closeTokenList}
+				onSelectNetworkFilter={() => goToStep(WizardStepsSwap.FILTER_NETWORKS)}
+				onSelectToken={selectToken}
+				side={selectTokenType}
+			/>
+		{:else if currentStep?.name === WizardStepsSwap.FILTER_NETWORKS}
+			<ModalNetworksFilter
+				{allNetworksEnabled}
+				filteredNetworks={$filteredNetworks}
+				onNetworkFilter={() => goToStep(WizardStepsSwap.TOKENS_LIST)}
+				showStakeBalance={false}
+			/>
+		{:else if currentStep?.name === WizardStepsSwap.SELECT_PROVIDER}
+			<SwapProviderListModal
+				onCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
+				onSelectProvider={selectProvider}
+			/>
+		{:else if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
+			<SwapTokenWizard
+				{currentStep}
+				onBack={() => modal?.back()}
+				{onClose}
+				onNext={() => modal?.next()}
+				onShowProviderList={() => goToStep(WizardStepsSwap.SELECT_PROVIDER)}
+				onShowTokensList={showTokensList}
+				bind:swapAmount
+				bind:receiveAmount
+				bind:slippageValue
+				bind:swapProgressStep
+				bind:swapFailedProgressSteps
+			/>
+		{/if}
+	{/key}
+</SwapBtcContexts>

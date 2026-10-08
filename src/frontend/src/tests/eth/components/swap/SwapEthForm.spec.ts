@@ -6,15 +6,20 @@ import {
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
+import { i18n } from '$lib/stores/i18n.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { render } from '@testing-library/svelte';
-import { readable, writable } from 'svelte/store';
+import { get, readable, writable } from 'svelte/store';
 
-vi.mock('$lib/utils/parse.utils', () => ({
-	parseToken: vi.fn()
-}));
+vi.mock('$lib/utils/parse.utils', async () => {
+	const { ZERO } = await import('$lib/constants/app.constants');
+	return {
+		parseToken: vi.fn(),
+		tryParseToken: vi.fn().mockReturnValue(ZERO)
+	};
+});
 
 describe('SwapFormEth', () => {
 	const mockContext = new Map();
@@ -87,7 +92,7 @@ describe('SwapFormEth', () => {
 
 		expect(getByTestId(SWAP_SWITCH_TOKENS_BUTTON)).toBeInTheDocument();
 
-		expect(getByText('Total fee')).toBeInTheDocument();
+		expect(getByText(get(i18n).fee.text.total_fee)).toBeInTheDocument();
 
 		const switchButton: HTMLButtonElement | null = container.querySelector(switchButtonSelector);
 
@@ -127,7 +132,7 @@ describe('SwapFormEth', () => {
 			context: contextWithoutDestination
 		});
 
-		expect(queryByText('Total fee')).not.toBeInTheDocument();
+		expect(queryByText(get(i18n).fee.text.total_fee)).not.toBeInTheDocument();
 	});
 
 	it('should handle loading state', () => {
@@ -170,8 +175,8 @@ describe('SwapFormEth', () => {
 			context: mockContext
 		});
 
-		expect(getByText('Cancel')).toBeInTheDocument();
-		expect(getByText('Review swap')).toBeInTheDocument();
+		expect(getByText(get(i18n).core.text.cancel)).toBeInTheDocument();
+		expect(getByText(get(i18n).swap.text.review_button)).toBeInTheDocument();
 	});
 
 	it('should show fee info message', () => {
@@ -181,6 +186,8 @@ describe('SwapFormEth', () => {
 		});
 
 		expect(container.querySelector('[data-tid="swap-fee-info"]')).toBeInTheDocument();
-		expect(getByText(/Fee will be paid in ETH/)).toBeInTheDocument();
+		expect(
+			getByText(new RegExp(`${get(i18n).send.info.fee_info.split('$feeSymbol')[0]}ETH`))
+		).toBeInTheDocument();
 	});
 });

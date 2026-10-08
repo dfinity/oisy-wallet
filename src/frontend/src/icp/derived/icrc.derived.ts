@@ -37,12 +37,15 @@ const icrcDefaultTokens: Readable<IcToken[]> = derivedMemo(
  */
 export const icrcChainFusionDefaultTokens: Readable<IcToken[]> = derived(
 	[icrcDefaultTokens],
-	([$icrcDefaultTokens]) =>
-		ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.map((canisterId) =>
-			$icrcDefaultTokens.find(
-				({ ledgerCanisterId: tokenCanisterId }) => tokenCanisterId === canisterId
-			)
-		).filter(nonNullish)
+	([$icrcDefaultTokens]) => {
+		const tokenByLedgerCanisterId = new Map(
+			$icrcDefaultTokens.map((token) => [token.ledgerCanisterId, token])
+		);
+
+		return ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.map((canisterId) =>
+			tokenByLedgerCanisterId.get(canisterId)
+		).filter(nonNullish);
+	}
 );
 
 /**
@@ -68,18 +71,18 @@ const icrcCustomTokens: Readable<IcrcCustomToken[]> = derivedMemo(
 
 const icrcDefaultTokensToggleable: Readable<IcTokenToggleable[]> = derived(
 	[icrcDefaultTokens, icrcCustomTokens],
-	([$icrcDefaultTokens, $icrcCustomTokens]) =>
-		$icrcDefaultTokens.map(({ ledgerCanisterId, ...rest }) => {
-			const customToken = $icrcCustomTokens.find(
-				({ ledgerCanisterId: customLedgerCanisterId }) =>
-					customLedgerCanisterId === ledgerCanisterId
-			);
+	([$icrcDefaultTokens, $icrcCustomTokens]) => {
+		const customTokenByLedgerCanisterId = new Map(
+			$icrcCustomTokens.map((token) => [token.ledgerCanisterId, token])
+		);
 
-			return mapDefaultTokenToToggleable<IcToken>({
+		return $icrcDefaultTokens.map(({ ledgerCanisterId, ...rest }) =>
+			mapDefaultTokenToToggleable<IcToken>({
 				defaultToken: { ledgerCanisterId, ...rest },
-				customToken
-			});
-		})
+				customToken: customTokenByLedgerCanisterId.get(ledgerCanisterId)
+			})
+		);
+	}
 );
 
 /**
@@ -96,13 +99,16 @@ const enabledIcrcDefaultTokens: Readable<IcToken[]> = derived(
  */
 const icrcCustomTokensToggleable: Readable<IcrcCustomToken[]> = derived(
 	[icrcCustomTokens, icrcDefaultTokensCanisterIds],
-	([$icrcCustomTokens, $icrcDefaultTokensCanisterIds]) =>
-		$icrcCustomTokens.filter(
-			({ ledgerCanisterId }) =>
-				![...SUPPORTED_ICP_LEDGER_CANISTER_IDS, ...$icrcDefaultTokensCanisterIds].includes(
-					ledgerCanisterId
-				)
-		)
+	([$icrcCustomTokens, $icrcDefaultTokensCanisterIds]) => {
+		const excludedLedgerCanisterIds = new Set([
+			...SUPPORTED_ICP_LEDGER_CANISTER_IDS,
+			...$icrcDefaultTokensCanisterIds
+		]);
+
+		return $icrcCustomTokens.filter(
+			({ ledgerCanisterId }) => !excludedLedgerCanisterIds.has(ledgerCanisterId)
+		);
+	}
 );
 
 const enabledIcrcCustomTokens: Readable<IcrcCustomToken[]> = derived(
@@ -134,11 +140,13 @@ export const enabledIcrcTokens: Readable<IcToken[]> = derivedMemo(
 	tokenListEqual
 );
 
+const ICRC_CK_TOKENS_LEDGER_CANISTER_IDS_SET = new Set(ICRC_CK_TOKENS_LEDGER_CANISTER_IDS);
+
 const enabledIcrcTokensNoCk: Readable<IcToken[]> = derived(
 	[enabledIcrcTokens],
 	([$enabledIcrcTokens]) =>
 		$enabledIcrcTokens.filter(
-			({ ledgerCanisterId }) => !ICRC_CK_TOKENS_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)
+			({ ledgerCanisterId }) => !ICRC_CK_TOKENS_LEDGER_CANISTER_IDS_SET.has(ledgerCanisterId)
 		)
 );
 

@@ -1,9 +1,11 @@
 import { BACKEND_EXCHANGE_ENABLED } from '$env/exchange.env';
+import { COINGECKO_FALLBACK_PROVIDER_ENABLED } from '$env/rest/coingecko.env';
+import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { calculateErc4626Prices } from '$eth/services/erc4626-exchange.services';
 import type { Erc4626TokensExchangeData } from '$eth/types/erc4626';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
+import { getSyncExchangeTimerInterval } from '$lib/constants/exchange.constants';
 import { Currency } from '$lib/enums/currency';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import {
@@ -17,10 +19,14 @@ import {
 	exchangeRateSOLToUsd,
 	exchangeRateSPLToUsd,
 	exchangeRateUsdToCurrency,
-	fetchAllExchangeRatesFromBackend
+	exchangeRateXRPToUsd,
+	fetchExchangeRatesFromBackend,
+	fillIcrcPricesFromFallbackProviders
 } from '$lib/services/exchange.services';
-import type { CoingeckoPlatformId, CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
-import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
+import type {
+	CoingeckoSimplePriceResponse,
+	CoingeckoSimpleTokenPriceResponse
+} from '$lib/types/coingecko';
 import type {
 	PostMessage,
 	PostMessageDataRequestExchangeTimer,
@@ -28,6 +34,18 @@ import type {
 } from '$lib/types/post-message';
 import { consoleError } from '$lib/utils/console.utils';
 import { errorDetailToString } from '$lib/utils/error.utils';
+import {
+	buildErc20PriceParams,
+	currencyExchangeRateFromBtc,
+	findMissingErc20ContractAddresses,
+	findMissingLedgerCanisterIds,
+	findMissingSplTokenAddresses,
+	isTcyclesLedgerCanisterId,
+	mergeExchangePrices,
+	type ProviderFallbackPrices,
+	xdrBasketStatus,
+	xdrUsdPrice
+} from '$lib/utils/exchange.utils';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -46,6 +64,8 @@ export const onExchangeMessage = async ({
 };
 
 let timer: NodeJS.Timeout | undefined = undefined;
+let timerGeneration = 0;
+let latestTimerData: PostMessageDataRequestExchangeTimer | undefined = undefined;
 
 const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | undefined) => {
 	// This worker has already been started
@@ -53,32 +73,39 @@ const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | un
 		return;
 	}
 
-	const sync = async () =>
-		await syncExchange({
-			currentCurrency: data?.currentCurrency ?? Currency.USD,
-			erc20ContractAddresses: data?.erc20Addresses ?? [],
-			icrcLedgerCanisterIds: data?.icrcCanisterIds ?? [],
-			splTokenAddresses: data?.splAddresses ?? [],
-			erc4626TokensExchangeData: data?.erc4626TokensExchangeData ?? []
-		});
+	if (syncInProgress && activeSyncGeneration === timerGeneration) {
+		return;
+	}
+
+	latestTimerData = data;
+	const generation = ++timerGeneration;
 
 	// We sync now but also schedule the update afterward
-	await sync();
+	await syncLatestExchange(generation);
+
+	if (generation !== timerGeneration) {
+		return;
+	}
 
 	const scheduleNext = (): void => {
-		timer = setTimeout(async () => {
-			await sync();
+		timer = setTimeout(
+			async () => {
+				await syncLatestExchange(generation);
 
-			if (nonNullish(timer)) {
-				scheduleNext();
-			}
-		}, SYNC_EXCHANGE_TIMER_INTERVAL);
+				if (generation === timerGeneration) {
+					scheduleNext();
+				}
+			},
+			getSyncExchangeTimerInterval(backendExchangeEnabledFromTimerData(latestTimerData))
+		);
 	};
 
 	scheduleNext();
 };
 
 const stopTimer = () => {
+	timerGeneration++;
+
 	if (isNullish(timer)) {
 		return;
 	}
@@ -88,6 +115,8 @@ const stopTimer = () => {
 };
 
 let syncInProgress = false;
+let queuedSyncGeneration: number | undefined = undefined;
+let activeSyncGeneration: number | undefined = undefined;
 
 interface SyncExchangeParams {
 	currentCurrency: Currency;
@@ -97,42 +126,8 @@ interface SyncExchangeParams {
 	erc4626TokensExchangeData: Erc4626TokensExchangeData[];
 }
 
-const buildErc20PriceParams = (
-	erc20ContractAddresses: Erc20ContractAddressWithNetwork[]
-): CoingeckoErc20PriceParams[] =>
-	Object.values(
-		erc20ContractAddresses.reduce<Record<CoingeckoPlatformId, CoingeckoErc20PriceParams>>(
-			(acc, { address, coingeckoId }) => {
-				if (
-					coingeckoId !== 'ethereum' &&
-					coingeckoId !== 'base' &&
-					coingeckoId !== 'binance-smart-chain' &&
-					coingeckoId !== 'polygon-pos' &&
-					coingeckoId !== 'arbitrum-one'
-				) {
-					return acc;
-				}
-
-				return {
-					...acc,
-					[coingeckoId]: {
-						coingeckoPlatformId: coingeckoId,
-						contractAddresses: [
-							...(acc[coingeckoId]?.contractAddresses ?? []),
-							{ address, coingeckoId }
-						]
-					}
-				};
-			},
-			{} as Record<CoingeckoPlatformId, CoingeckoErc20PriceParams>
-		)
-	);
-
 const syncExchangeFromBackend = async ({
 	currentCurrency,
-	erc20ContractAddresses,
-	icrcLedgerCanisterIds,
-	splTokenAddresses,
 	erc4626TokensExchangeData
 }: SyncExchangeParams): Promise<PostMessageDataResponseExchange> => {
 	const identity = await AuthClientProvider.getInstance().loadIdentity();
@@ -155,6 +150,7 @@ const syncExchangeFromBackend = async ({
 			currentIcpPrice: undefined,
 			currentIcrcPrices: {},
 			currentSolPrice: undefined,
+			currentXrpPrice: undefined,
 			currentSplPrices: {},
 			currentErc4626Prices: {},
 			currentBnbPrice: undefined,
@@ -162,21 +158,32 @@ const syncExchangeFromBackend = async ({
 		};
 	}
 
-	const [currentExchangeRate, backendPrices] = await Promise.all([
+	const [currentExchangeRateResult, backendPricesResult] = await Promise.allSettled([
 		exchangeRateUsdToCurrency(currentCurrency),
-		fetchAllExchangeRatesFromBackend({
-			identity,
-			erc20Addresses: erc20ContractAddresses,
-			icrcCanisterIds: icrcLedgerCanisterIds,
-			splTokenAddresses
-		})
+		fetchExchangeRatesFromBackend({ identity })
 	]);
+
+	if (currentExchangeRateResult.status === 'rejected') {
+		consoleError('Error while fetching exchange rate:', currentExchangeRateResult.reason);
+	}
+
+	if (backendPricesResult.status === 'rejected') {
+		consoleError(
+			'Error while fetching exchange rate:',
+			'Failed to fetch backend exchange rates:',
+			backendPricesResult.reason
+		);
+	}
+
+	const currentExchangeRate =
+		currentExchangeRateResult.status === 'fulfilled' ? currentExchangeRateResult.value : undefined;
 
 	const {
 		currentEthPrice,
 		currentBtcPrice,
 		currentIcpPrice,
 		currentSolPrice,
+		currentXrpPrice,
 		currentBnbPrice,
 		currentPolPrice,
 		currentArbitrumEthPrice,
@@ -184,7 +191,23 @@ const syncExchangeFromBackend = async ({
 		currentErc20Prices,
 		currentIcrcPrices,
 		currentSplPrices
-	} = backendPrices;
+	} =
+		backendPricesResult.status === 'fulfilled'
+			? backendPricesResult.value
+			: {
+					currentEthPrice: undefined,
+					currentBtcPrice: undefined,
+					currentIcpPrice: undefined,
+					currentSolPrice: undefined,
+					currentXrpPrice: undefined,
+					currentBnbPrice: undefined,
+					currentPolPrice: undefined,
+					currentArbitrumEthPrice: undefined,
+					currentBaseEthPrice: undefined,
+					currentErc20Prices: {},
+					currentIcrcPrices: {},
+					currentSplPrices: {}
+				};
 
 	const currentErc4626Prices = await calculateErc4626Prices({
 		erc20Prices: currentErc20Prices,
@@ -203,6 +226,7 @@ const syncExchangeFromBackend = async ({
 		currentIcpPrice,
 		currentIcrcPrices,
 		currentSolPrice,
+		currentXrpPrice,
 		currentSplPrices,
 		currentErc4626Prices,
 		currentBnbPrice,
@@ -236,12 +260,12 @@ const syncExchangeFromProviders = async ({
 	);
 
 	const results = await Promise.allSettled([
-		exchangeRateUsdToCurrency(currentCurrency),
 		exchangeRateETHToUsd(),
-		exchangeRateBTCToUsd(),
+		exchangeRateBTCToUsd(currentCurrency),
 		exchangeRateICPToUsd(),
-		exchangeRateICRCToUsd(icrcLedgerCanisterIds),
+		exchangeRateICRCToUsd(icrcLedgerCanisterIds.filter((id) => !isTcyclesLedgerCanisterId(id))),
 		exchangeRateSOLToUsd(),
+		exchangeRateXRPToUsd(),
 		exchangeRateSPLToUsd(splTokenAddresses),
 		exchangeRateBNBToUsd(),
 		exchangeRatePOLToUsd()
@@ -254,29 +278,34 @@ const syncExchangeFromProviders = async ({
 	});
 
 	const [
-		currentExchangeRateResult,
 		currentEthPriceResult,
 		currentBtcPriceResult,
 		currentIcpPriceResult,
 		currentIcrcPricesResult,
 		currentSolPriceResult,
+		currentXrpPriceResult,
 		currentSplPricesResult,
 		currentBnbPriceResult,
 		currentPolPriceResult
 	] = results;
 
-	const currentExchangeRate =
-		currentExchangeRateResult.status === 'fulfilled' ? currentExchangeRateResult.value : undefined;
 	const currentEthPrice =
 		currentEthPriceResult.status === 'fulfilled' ? currentEthPriceResult.value : undefined;
 	const currentBtcPrice =
 		currentBtcPriceResult.status === 'fulfilled' ? currentBtcPriceResult.value : undefined;
+	// The display currency's rate comes from the same BTC request as BTC's own price.
+	const currentExchangeRate = currencyExchangeRateFromBtc({
+		btcPrice: currentBtcPrice?.bitcoin,
+		currency: currentCurrency
+	});
 	const currentIcpPrice =
 		currentIcpPriceResult.status === 'fulfilled' ? currentIcpPriceResult.value : undefined;
 	const currentIcrcPrices =
 		currentIcrcPricesResult.status === 'fulfilled' ? currentIcrcPricesResult.value : undefined;
 	const currentSolPrice =
 		currentSolPriceResult.status === 'fulfilled' ? currentSolPriceResult.value : undefined;
+	const currentXrpPrice =
+		currentXrpPriceResult.status === 'fulfilled' ? currentXrpPriceResult.value : undefined;
 	const currentSplPrices =
 		currentSplPricesResult.status === 'fulfilled' ? currentSplPricesResult.value : undefined;
 	const currentBnbPrice =
@@ -289,6 +318,16 @@ const syncExchangeFromProviders = async ({
 		erc4626TokensExchangeData
 	});
 
+	// TCYCLES costs no request of its own, so it is priced whether or not it is enabled: the swap
+	// flow lists disabled tokens too. Once the basket has expired, it has no price rather than a
+	// wrong one. Only a refresh that includes TCYCLES reports on the basket's countdown.
+	const xdrBasket = xdrBasketStatus(Date.now());
+	const tcyclesPrice =
+		xdrBasket?.phase !== 'expired' ? xdrUsdPrice(currentBtcPrice?.bitcoin) : undefined;
+	const currentXdrBasketStatus = icrcLedgerCanisterIds.some(isTcyclesLedgerCanisterId)
+		? xdrBasket
+		: undefined;
+
 	return {
 		currentExchangeRate: {
 			exchangeRateToUsd: currentExchangeRate?.rate ?? null,
@@ -299,28 +338,241 @@ const syncExchangeFromProviders = async ({
 		currentBtcPrice,
 		currentErc20Prices,
 		currentIcpPrice,
-		currentIcrcPrices: currentIcrcPrices ?? {},
+		currentIcrcPrices: {
+			...currentIcrcPrices,
+			...(nonNullish(tcyclesPrice) && { [TCYCLES_LEDGER_CANISTER_ID]: tcyclesPrice })
+		},
 		currentSolPrice,
+		currentXrpPrice,
 		currentSplPrices: currentSplPrices ?? {},
 		currentErc4626Prices,
 		currentBnbPrice,
 		currentPolPrice,
 		currentArbitrumEthPrice: currentEthPrice,
-		currentBaseEthPrice: currentEthPrice
+		currentBaseEthPrice: currentEthPrice,
+		...(nonNullish(currentXdrBasketStatus) && { currentXdrBasketStatus })
 	};
 };
 
-const syncExchange = async (params: SyncExchangeParams) => {
-	// Avoid duplicating the sync if already in progress and not yet finished
+const settledValue = <T>(result: PromiseSettledResult<T>): T | undefined =>
+	result.status === 'fulfilled' ? result.value : undefined;
+
+// Native ETH on Arbitrum and Base reuses the Ethereum spot price (matching the
+// providers path), so all three share the single `exchangeRateETHToUsd` call.
+const fetchProviderFallbackPrices = async ({
+	backendData,
+	params
+}: {
+	backendData: PostMessageDataResponseExchange;
+	params: SyncExchangeParams;
+}): Promise<ProviderFallbackPrices | undefined> => {
+	const missingErc20 = findMissingErc20ContractAddresses({
+		allErc20ContractAddresses: params.erc20ContractAddresses,
+		coingeckoResponse: backendData.currentErc20Prices
+	});
+	const missingIcrc = findMissingLedgerCanisterIds({
+		allLedgerCanisterIds: params.icrcLedgerCanisterIds.filter(
+			(id) => !isTcyclesLedgerCanisterId(id)
+		),
+		coingeckoResponse: backendData.currentIcrcPrices
+	});
+	const missingSpl = findMissingSplTokenAddresses({
+		allSplTokenAddresses: params.splTokenAddresses,
+		coingeckoResponse: backendData.currentSplPrices ?? {}
+	});
+
+	const missingEth = isNullish(backendData.currentEthPrice);
+	const missingBtc = isNullish(backendData.currentBtcPrice);
+	const missingIcp = isNullish(backendData.currentIcpPrice);
+	const missingSol = isNullish(backendData.currentSolPrice);
+	const missingXrp = isNullish(backendData.currentXrpPrice);
+	const missingBnb = isNullish(backendData.currentBnbPrice);
+	const missingPol = isNullish(backendData.currentPolPrice);
+	const missingArbitrumEth = isNullish(backendData.currentArbitrumEthPrice);
+	const missingBaseEth = isNullish(backendData.currentBaseEthPrice);
+	// ETH, Arbitrum-ETH and Base-ETH all resolve to the same Ethereum spot price,
+	// so a single CoinGecko call covers whichever of the three are missing.
+	const needsEth = missingEth || missingArbitrumEth || missingBaseEth;
+
+	// Natives, ERC-20 and SPL fills are CoinGecko-only: when the fallback flag is
+	// off they are skipped entirely (the tokens stay unpriced) and only the
+	// ICPSwap/Kong ICRC cascade runs.
+	const erc20PriceParams = COINGECKO_FALLBACK_PROVIDER_ENABLED
+		? buildErc20PriceParams(missingErc20)
+		: [];
+	const splToFill = COINGECKO_FALLBACK_PROVIDER_ENABLED ? missingSpl : [];
+	const fillEth = COINGECKO_FALLBACK_PROVIDER_ENABLED && needsEth;
+	const fillBtc = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingBtc;
+	const fillIcp = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingIcp;
+	const fillSol = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingSol;
+	const fillXrp = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingXrp;
+	const fillBnb = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingBnb;
+	const fillPol = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingPol;
+
+	const nothingMissing =
+		erc20PriceParams.length === 0 &&
+		missingIcrc.length === 0 &&
+		splToFill.length === 0 &&
+		!fillEth &&
+		!fillBtc &&
+		!fillIcp &&
+		!fillSol &&
+		!fillXrp &&
+		!fillBnb &&
+		!fillPol;
+
+	if (nothingMissing) {
+		return undefined;
+	}
+
+	// Failures in the fill are non-fatal (the merged response simply keeps the
+	// backend's gaps), but they must stay observable — mirror the logging of the
+	// full provider path.
+	const logFallbackError = (err: unknown): undefined => {
+		consoleError('Error while fetching fallback exchange rate:', err);
+		return undefined;
+	};
+
+	const erc20PricesPromise = Promise.allSettled(
+		erc20PriceParams.map((priceParams) => exchangeRateERC20ToUsd(priceParams))
+	);
+
+	const [
+		erc20PricesSettled,
+		icrcPricesResult,
+		splPricesResult,
+		ethPriceResult,
+		btcPriceResult,
+		icpPriceResult,
+		solPriceResult,
+		xrpPriceResult,
+		bnbPriceResult,
+		polPriceResult
+	] = await Promise.all([
+		erc20PricesPromise,
+		missingIcrc.length > 0
+			? (COINGECKO_FALLBACK_PROVIDER_ENABLED
+					? exchangeRateICRCToUsd(missingIcrc)
+					: fillIcrcPricesFromFallbackProviders({ ledgerCanisterIds: missingIcrc })
+				).catch(logFallbackError)
+			: Promise.resolve(undefined),
+		splToFill.length > 0
+			? exchangeRateSPLToUsd(splToFill).catch(logFallbackError)
+			: Promise.resolve(undefined),
+		fillEth ? exchangeRateETHToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		fillBtc ? exchangeRateBTCToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		fillIcp ? exchangeRateICPToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		fillSol ? exchangeRateSOLToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		fillXrp ? exchangeRateXRPToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		fillBnb ? exchangeRateBNBToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		fillPol ? exchangeRatePOLToUsd().catch(logFallbackError) : Promise.resolve(undefined)
+	]);
+
+	const erc20Prices =
+		erc20PriceParams.length > 0
+			? erc20PricesSettled.reduce<CoingeckoSimpleTokenPriceResponse>((acc, result) => {
+					if (result.status === 'rejected') {
+						logFallbackError(result.reason);
+						return acc;
+					}
+					const value = settledValue(result);
+					if (nonNullish(value)) {
+						Object.assign(acc, value);
+					}
+					return acc;
+				}, {})
+			: undefined;
+
+	const ethPrice: CoingeckoSimplePriceResponse | undefined = ethPriceResult ?? undefined;
+
+	return {
+		erc20Prices,
+		icrcPrices: icrcPricesResult,
+		splPrices: splPricesResult,
+		ethPrice: missingEth ? ethPrice : undefined,
+		btcPrice: btcPriceResult,
+		icpPrice: icpPriceResult,
+		solPrice: solPriceResult,
+		xrpPrice: xrpPriceResult,
+		bnbPrice: bnbPriceResult,
+		polPrice: polPriceResult,
+		arbitrumEthPrice: missingArbitrumEth ? ethPrice : undefined,
+		baseEthPrice: missingBaseEth ? ethPrice : undefined
+	};
+};
+
+const syncExchangeWithFallback = async (
+	params: SyncExchangeParams
+): Promise<PostMessageDataResponseExchange> => {
+	const backendData = await syncExchangeFromBackend(params);
+
+	const providerPrices = await fetchProviderFallbackPrices({ backendData, params });
+
+	if (isNullish(providerPrices)) {
+		return backendData;
+	}
+
+	return await mergeExchangePrices({
+		backendData,
+		providerPrices,
+		erc4626Prices: (mergedErc20Prices) =>
+			calculateErc4626Prices({
+				erc20Prices: mergedErc20Prices,
+				erc4626TokensExchangeData: params.erc4626TokensExchangeData
+			})
+	});
+};
+
+const paramsFromTimerData = (
+	data: PostMessageDataRequestExchangeTimer | undefined
+): SyncExchangeParams => ({
+	currentCurrency: data?.currentCurrency ?? Currency.USD,
+	erc20ContractAddresses: data?.erc20Addresses ?? [],
+	icrcLedgerCanisterIds: data?.icrcCanisterIds ?? [],
+	splTokenAddresses: data?.splAddresses ?? [],
+	erc4626TokensExchangeData: data?.erc4626TokensExchangeData ?? []
+});
+
+const backendExchangeEnabledFromTimerData = (
+	data: PostMessageDataRequestExchangeTimer | undefined
+): boolean => data?.backendExchangeEnabled ?? BACKEND_EXCHANGE_ENABLED;
+
+const syncLatestExchange = async (generation: number) => {
+	if (generation !== timerGeneration) {
+		return;
+	}
+
 	if (syncInProgress) {
+		queuedSyncGeneration = generation;
 		return;
 	}
 
 	syncInProgress = true;
+	activeSyncGeneration = generation;
 
+	await syncExchange(paramsFromTimerData(latestTimerData)).finally(() => {
+		syncInProgress = false;
+		if (activeSyncGeneration === generation) {
+			activeSyncGeneration = undefined;
+		}
+	});
+
+	const nextGeneration = queuedSyncGeneration;
+	queuedSyncGeneration = undefined;
+
+	if (
+		nonNullish(nextGeneration) &&
+		nextGeneration !== generation &&
+		nextGeneration === timerGeneration
+	) {
+		void syncLatestExchange(nextGeneration);
+	}
+};
+
+const syncExchange = async (params: SyncExchangeParams) => {
 	try {
-		const data = BACKEND_EXCHANGE_ENABLED
-			? await syncExchangeFromBackend(params)
+		const data = backendExchangeEnabledFromTimerData(latestTimerData)
+			? await syncExchangeWithFallback(params)
 			: await syncExchangeFromProviders(params);
 
 		postMessage({
@@ -337,6 +589,4 @@ const syncExchange = async (params: SyncExchangeParams) => {
 			}
 		});
 	}
-
-	syncInProgress = false;
 };

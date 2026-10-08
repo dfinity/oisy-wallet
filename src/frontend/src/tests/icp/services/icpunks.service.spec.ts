@@ -156,7 +156,8 @@ describe('icpunks.services', () => {
 						}
 					},
 					section: toNullable(),
-					allow_external_content_source: toNullable()
+					allow_external_content_source: toNullable(),
+					allowed_external_content_source_urls: toNullable()
 				}
 			];
 

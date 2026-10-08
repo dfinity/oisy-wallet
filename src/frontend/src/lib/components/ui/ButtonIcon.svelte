@@ -19,6 +19,7 @@
 		width?: 'w-6' | 'w-8' | 'w-10' | 'w-16';
 		height?: 'h-6' | 'h-8' | 'h-10';
 		transparent?: boolean;
+		expanded?: boolean;
 	}
 
 	let {
@@ -35,7 +36,9 @@
 		styleClass = '',
 		width = 'w-10',
 		height = 'h-10',
-		transparent = false
+		transparent = false,
+		// Left undefined for non-expander buttons so no `aria-expanded` is emitted.
+		expanded
 	}: Props = $props();
 </script>
 
@@ -48,8 +51,10 @@
 	class:ease-in-out={loading}
 	class:link
 	class:loading
+	class:opened={expanded}
 	class:transition={loading}
 	class:transparent
+	aria-expanded={expanded}
 	aria-label={ariaLabel}
 	data-tid={testId}
 	disabled={disabled ?? loading}

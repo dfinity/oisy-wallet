@@ -9,10 +9,13 @@ import { derived, type Readable } from 'svelte/store';
 
 export const splDefaultTokens: Readable<SplToken[]> = derived(
 	[splDefaultTokensStore, enabledSolanaNetworksIds],
-	([$splTokensStore, $enabledSolanaNetworksIds]) =>
-		($splTokensStore ?? []).filter(({ network: { id: networkId } }) =>
-			$enabledSolanaNetworksIds.includes(networkId)
-		)
+	([$splTokensStore, $enabledSolanaNetworksIds]) => {
+		const enabledNetworkIds = new Set($enabledSolanaNetworksIds);
+
+		return ($splTokensStore ?? []).filter(({ network: { id: networkId } }) =>
+			enabledNetworkIds.has(networkId)
+		);
+	}
 );
 
 const splDefaultTokensAddresses: Readable<SplTokenAddress[]> = derived(
@@ -28,39 +31,44 @@ const splDefaultTokensAddresses: Readable<SplTokenAddress[]> = derived(
  */
 const splCustomTokens: Readable<SplCustomToken[]> = derived(
 	[splCustomTokensStore, enabledSolanaNetworksIds],
-	([$splCustomTokensStore, $enabledSolanaNetworksIds]) =>
-		$splCustomTokensStore?.reduce<SplCustomToken[]>((acc, { data: token }) => {
-			const {
-				network: { id: networkId }
-			} = token;
+	([$splCustomTokensStore, $enabledSolanaNetworksIds]) => {
+		const enabledNetworkIds = new Set($enabledSolanaNetworksIds);
 
-			if ($enabledSolanaNetworksIds.includes(networkId)) {
-				return [...acc, token];
-			}
+		return (
+			$splCustomTokensStore?.reduce<SplCustomToken[]>((acc, { data: token }) => {
+				if (enabledNetworkIds.has(token.network.id)) {
+					acc.push(token);
+				}
 
-			return acc;
-		}, []) ?? []
+				return acc;
+			}, []) ?? []
+		);
+	}
 );
 
 const splDefaultTokensToggleable: Readable<SplCustomToken[]> = derived(
 	[splDefaultTokens, splCustomTokens],
-	([$splDefaultTokens, $splCustomTokens]) =>
-		$splDefaultTokens.map(({ address, network, ...rest }) => {
-			const customToken = $splCustomTokens.find(
-				({ address: contractAddress, network: contractNetwork }) =>
-					contractAddress === address &&
-					(network as SolanaNetwork).chainId === (contractNetwork as SolanaNetwork).chainId
-			);
+	([$splDefaultTokens, $splCustomTokens]) => {
+		const customTokenByAddressAndChainId = new Map(
+			$splCustomTokens.map((token) => [
+				`${token.address}|${(token.network as SolanaNetwork).chainId}`,
+				token
+			])
+		);
 
-			return mapDefaultTokenToToggleable({
+		return $splDefaultTokens.map(({ address, network, ...rest }) =>
+			mapDefaultTokenToToggleable({
 				defaultToken: {
 					address,
 					network,
 					...rest
 				},
-				customToken
-			});
-		})
+				customToken: customTokenByAddressAndChainId.get(
+					`${address}|${(network as SolanaNetwork).chainId}`
+				)
+			})
+		);
+	}
 );
 
 /**
@@ -73,10 +81,13 @@ const enabledSplDefaultTokens: Readable<SplCustomToken[]> = derived(
 
 const splCustomTokensToggleable: Readable<SplCustomToken[]> = derived(
 	[splCustomTokens, splDefaultTokensAddresses],
-	([$splCustomTokens, $splDefaultTokensAddresses]) =>
-		$splCustomTokens.filter(
-			({ address }) => !$splDefaultTokensAddresses.includes(address.toLowerCase())
-		)
+	([$splCustomTokens, $splDefaultTokensAddresses]) => {
+		const defaultTokensAddresses = new Set($splDefaultTokensAddresses);
+
+		return $splCustomTokens.filter(
+			({ address }) => !defaultTokensAddresses.has(address.toLowerCase())
+		);
+	}
 );
 
 const enabledSplCustomTokens: Readable<SplCustomToken[]> = derived(

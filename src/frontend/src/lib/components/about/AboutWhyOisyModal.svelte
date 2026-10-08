@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
 	import CoverWhyOisy from '$lib/assets/cover-why-oisy.png';
 	import AboutFeatureItem from '$lib/components/about/AboutFeatureItem.svelte';
 	import IconCrypto from '$lib/components/icons/IconCrypto.svelte';
@@ -11,6 +10,7 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import { ABOUT_WHY_OISY_MODAL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';

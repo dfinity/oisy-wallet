@@ -40,7 +40,7 @@
 	} ${styleClass ?? ''} ${width}`}
 	data-tid={testId}
 >
-	<span class="inline-block min-w-0 truncate">
+	<span class="inline-flex min-w-0 items-center truncate py-0.5">
 		{@render children?.()}
 	</span>
 </span>

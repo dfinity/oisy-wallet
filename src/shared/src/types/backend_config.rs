@@ -11,7 +11,7 @@ pub struct InitArg {
     /// Root of trust for checking canister signatures.
     pub ic_root_key_der: Option<Vec<u8>>,
     /// Chain Fusion Signer canister id. Used to derive the bitcoin address in
-    /// `btc_select_user_utxos_fee`
+    /// `btc_add_pending_transaction`.
     pub cfs_canister_id: Option<Principal>,
     /// The derivation origin used for II authentication, ensuring users get a
     /// consistent identity across different domains.
@@ -43,7 +43,7 @@ pub struct Config {
     /// Root of trust for checking canister signatures.
     pub ic_root_key_raw: Option<Vec<u8>>,
     /// Chain Fusion Signer canister id. Used to derive the bitcoin address in
-    /// `btc_select_user_utxos_fee`
+    /// `btc_add_pending_transaction`.
     pub cfs_canister_id: Option<Principal>,
     /// The derivation origin used for II authentication, ensuring users get a
     /// consistent identity across different domains.

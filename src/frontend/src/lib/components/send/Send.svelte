@@ -13,7 +13,7 @@
 	const { isTransactionsPage, isNftsPage }: Props = $props();
 </script>
 
-<ButtonWithModal isOpen={$modalSend} onOpen={modalStore.openSend}>
+<ButtonWithModal isOpen={$modalSend} onOpen={(id) => modalStore.openSend({ id })}>
 	{#snippet button(onclick)}
 		<SendButton {onclick} />
 	{/snippet}

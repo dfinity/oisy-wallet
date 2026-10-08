@@ -53,7 +53,8 @@ const mapExtCustomToken = async ({
 		enabled,
 		version: versionNullable,
 		section: sectionNullable,
-		allow_external_content_source: allowExternalContentSourceNullable
+		allow_external_content_source: allowExternalContentSourceNullable,
+		allowed_external_content_source_urls: allowedExternalContentSourceUrlsNullable
 	}
 }: {
 	token: CustomTokenExtVariant;
@@ -63,6 +64,7 @@ const mapExtCustomToken = async ({
 	const section = fromNullable(sectionNullable);
 	const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
 	const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
+	const allowedExternalContentSourceUrls = fromNullable(allowedExternalContentSourceUrlsNullable);
 
 	const {
 		ExtV2: { canister_id: canisterId }
@@ -93,7 +95,8 @@ const mapExtCustomToken = async ({
 		...(nonNullish(mappedSection) && {
 			section: mappedSection
 		}),
-		allowExternalContentSource
+		allowExternalContentSource,
+		allowedExternalContentSourceUrls
 	};
 };
 

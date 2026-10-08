@@ -1,0 +1,11 @@
+---
+description: Svelte 5 + Svelte stores + TypeScript + Tailwind v4 patterns for the frontend.
+globs: ['src/frontend/**/*.svelte', 'src/frontend/**/*.ts', 'src/frontend/**/*.svelte.ts']
+---
+
+# Cursor — Svelte / TS / Tailwind
+
+Authoritative source: [docs/ai/frontend/stack-and-patterns.md](mdc:docs/ai/frontend/stack-and-patterns.md).
+
+Read it before writing or editing Svelte components or TypeScript modules
+in `src/frontend/`. Reuse catalog: [docs/ai/frontend/reusability.md](mdc:docs/ai/frontend/reusability.md).

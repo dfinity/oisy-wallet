@@ -1,0 +1,1049 @@
+use std::time::Duration;
+
+use candid::{Nat, Principal};
+use pretty_assertions::assert_eq;
+use shared::types::{
+    active_user_transaction::{
+        ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
+        ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
+        ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, NearIntentsData,
+        OisyTradeData, OisyTradeSide, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest,
+        VeloraData, VeloraSwapMode, XrpData, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
+    },
+    custom_token::ErcTokenId,
+    result_types::{
+        ActiveUserTransactionResult, DeleteActiveUserTransactionResult,
+        GetActiveUserTransactionsResult,
+    },
+    token_id::TokenId,
+};
+
+use crate::utils::{
+    mock::CALLER,
+    pocketic::{setup, BackendBuilder, PicBackend, PicCanisterTrait},
+};
+
+const TX_ID: &str = "11111111-1111-4111-8111-111111111111";
+const ETH_ADDR: &str = "0x0000000000000000000000000000000000000001";
+
+fn caller() -> Principal {
+    Principal::from_text(CALLER).unwrap()
+}
+
+fn other_caller() -> Principal {
+    Principal::from_text("535yc-uxytb-gfk7h-tny7p-vjkoe-i4krp-3qmcl-uqfgr-cpgej-yqtjq-rqe").unwrap()
+}
+
+fn sample_data() -> ActiveUserTransactionData {
+    ActiveUserTransactionData::OneSecIcpToEvm(OneSecIcpToEvmData {
+        source_token: TokenId::IcpNative,
+        dest_token: TokenId::EvmNative(1),
+        amount: Nat::from(1_000_000u64),
+        recipient_evm_address: ETH_ADDR.to_string(),
+    })
+}
+
+fn create_req(id: &str) -> CreateActiveUserTransactionRequest {
+    CreateActiveUserTransactionRequest {
+        id: id.to_string(),
+        data: sample_data(),
+        progress_step: Some("initialization".to_string()),
+        external_refs: vec![],
+    }
+}
+
+fn update_status_req(
+    id: &str,
+    status: ActiveUserTransactionStatus,
+) -> UpdateActiveUserTransactionRequest {
+    UpdateActiveUserTransactionRequest {
+        id: id.to_string(),
+        status: Some(status),
+        progress_step: None,
+        external_refs: None,
+        error: None,
+    }
+}
+
+fn create_active(pic: &PicBackend, user: Principal, id: &str) -> ActiveUserTransactionResult {
+    pic.ensure_user_profile(user);
+    pic.update::<ActiveUserTransactionResult>(
+        user,
+        "create_active_user_transaction",
+        create_req(id),
+    )
+    .expect("create_active_user_transaction call should succeed")
+}
+
+fn list_active(pic: &PicBackend, user: Principal) -> Vec<ActiveUserTransaction> {
+    match pic
+        .query::<GetActiveUserTransactionsResult>(user, "get_active_user_transactions", ())
+        .expect("query should succeed")
+    {
+        GetActiveUserTransactionsResult::Ok(response) => response.transactions,
+        GetActiveUserTransactionsResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+}
+
+fn assert_rejection<T>(result: Result<T, String>, expected: &str) {
+    match result {
+        Err(err) => assert!(
+            err.contains(expected),
+            "expected rejection containing {expected:?}, got {err:?}"
+        ),
+        Ok(_) => panic!("expected call rejection containing {expected:?}"),
+    }
+}
+
+#[test]
+fn create_requires_registered_user() {
+    let pic = setup();
+
+    let res = pic.update::<ActiveUserTransactionResult>(
+        Principal::anonymous(),
+        "create_active_user_transaction",
+        create_req(TX_ID),
+    );
+    assert!(
+        res.is_err(),
+        "anonymous caller must be rejected by the guard"
+    );
+}
+
+#[test]
+fn mutations_reject_authenticated_caller_without_profile() {
+    let pic = setup();
+    let user = caller();
+
+    assert_rejection(
+        pic.update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            create_req(TX_ID),
+        ),
+        "Caller has no user profile",
+    );
+
+    assert_rejection(
+        pic.update::<ActiveUserTransactionResult>(
+            user,
+            "update_active_user_transaction",
+            update_status_req(TX_ID, ActiveUserTransactionStatus::Succeeded),
+        ),
+        "Caller has no user profile",
+    );
+
+    assert_rejection(
+        pic.update::<DeleteActiveUserTransactionResult>(
+            user,
+            "delete_active_user_transaction",
+            TX_ID.to_string(),
+        ),
+        "Caller has no user profile",
+    );
+}
+
+#[test]
+fn get_rejects_anonymous_caller() {
+    let pic = setup();
+
+    let res = pic.query::<GetActiveUserTransactionsResult>(
+        Principal::anonymous(),
+        "get_active_user_transactions",
+        (),
+    );
+
+    assert_rejection(res, "Anonymous caller not authorized");
+}
+
+#[test]
+fn create_and_get_roundtrip() {
+    let pic = setup();
+    let user = caller();
+
+    let created = match create_active(&pic, user, TX_ID) {
+        ActiveUserTransactionResult::Ok(tx) => *tx,
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    };
+    assert_eq!(created.id, TX_ID);
+    assert_eq!(created.status, ActiveUserTransactionStatus::Pending);
+
+    let listed = pic
+        .query::<GetActiveUserTransactionsResult>(user, "get_active_user_transactions", ())
+        .expect("query should succeed");
+
+    match listed {
+        GetActiveUserTransactionsResult::Ok(response) => {
+            assert_eq!(response.transactions.len(), 1);
+            assert_eq!(response.transactions[0].id, TX_ID);
+        }
+        GetActiveUserTransactionsResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+}
+
+#[test]
+fn create_near_intents_variant_roundtrip() {
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let data = ActiveUserTransactionData::NearIntents(NearIntentsData {
+        source_token: TokenId::EvmNative(8453),
+        dest_token: TokenId::SolNativeMainnet,
+        amount: Nat::from(250_000u64),
+        source_address: None,
+    });
+
+    let created = pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                id: TX_ID.to_string(),
+                data: data.clone(),
+                progress_step: Some("initialization".to_string()),
+                external_refs: vec![ActiveUserTransactionRef {
+                    key: "deposit_address".to_string(),
+                    value: "0x00000000000000000000000000000000000000ff".to_string(),
+                }],
+            },
+        )
+        .expect("create_active_user_transaction call should succeed");
+
+    match created {
+        ActiveUserTransactionResult::Ok(tx) => {
+            assert_eq!(tx.id, TX_ID);
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+            assert_eq!(tx.data, data);
+            assert_eq!(tx.external_refs.len(), 1);
+        }
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+}
+
+#[test]
+fn create_near_intents_btc_variant_roundtrip() {
+    // The BTC-via-NEAR-Intents swap relies on the chain-agnostic NearIntents
+    // variant carrying BTC token ids in either position. Read back through the
+    // query path so the stored (not just echoed) representation is what the
+    // assertion sees.
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let cases = [
+        (
+            "near-btc-src",
+            ActiveUserTransactionData::NearIntents(NearIntentsData {
+                source_token: TokenId::BtcNativeMainnet,
+                dest_token: TokenId::EvmNative(8453),
+                amount: Nat::from(250_000u64),
+                source_address: None,
+            }),
+        ),
+        (
+            "near-btc-dst",
+            ActiveUserTransactionData::NearIntents(NearIntentsData {
+                source_token: TokenId::SolNativeMainnet,
+                dest_token: TokenId::BtcNativeMainnet,
+                amount: Nat::from(250_000u64),
+                source_address: None,
+            }),
+        ),
+    ];
+
+    for (id, data) in &cases {
+        let created = pic
+            .update::<ActiveUserTransactionResult>(
+                user,
+                "create_active_user_transaction",
+                CreateActiveUserTransactionRequest {
+                    id: (*id).to_string(),
+                    data: data.clone(),
+                    progress_step: Some("initialization".to_string()),
+                    external_refs: vec![ActiveUserTransactionRef {
+                        key: "deposit_address".to_string(),
+                        value: "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4".to_string(),
+                    }],
+                },
+            )
+            .expect("create_active_user_transaction call should succeed");
+
+        match created {
+            ActiveUserTransactionResult::Ok(tx) => {
+                assert_eq!(tx.id, *id);
+                assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+                assert_eq!(tx.data, *data);
+            }
+            ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+        }
+    }
+
+    let listed = list_active(&pic, user);
+    assert_eq!(listed.len(), cases.len());
+    for (id, data) in &cases {
+        let row = listed
+            .iter()
+            .find(|tx| tx.id == *id)
+            .unwrap_or_else(|| panic!("row {id} should be listed"));
+        assert_eq!(row.data, *data);
+    }
+}
+
+#[test]
+fn create_velora_variant_roundtrip() {
+    // Both Velora modes share one variant; the mode must survive the canister
+    // round-trip untouched, since the FE poller routes on it.
+    for (mode, id) in [
+        (VeloraSwapMode::Delta, "velora-delta"),
+        (VeloraSwapMode::Market, "velora-market"),
+    ] {
+        let pic = setup();
+        let user = caller();
+        pic.ensure_user_profile(user);
+
+        let data = ActiveUserTransactionData::Velora(VeloraData {
+            mode,
+            source_token: TokenId::Erc20(
+                ErcTokenId("0x0000000000000000000000000000000000000abc".to_string()),
+                1,
+            ),
+            dest_token: TokenId::Erc20(
+                ErcTokenId("0x0000000000000000000000000000000000000def".to_string()),
+                1,
+            ),
+            amount: Nat::from(7_500u64),
+        });
+
+        let created = pic
+            .update::<ActiveUserTransactionResult>(
+                user,
+                "create_active_user_transaction",
+                CreateActiveUserTransactionRequest {
+                    id: id.to_string(),
+                    data: data.clone(),
+                    progress_step: Some("initialization".to_string()),
+                    external_refs: vec![ActiveUserTransactionRef {
+                        key: "velora_auction_id".to_string(),
+                        value: "11111111-1111-4111-8111-111111111111".to_string(),
+                    }],
+                },
+            )
+            .expect("create_active_user_transaction call should succeed");
+
+        match created {
+            ActiveUserTransactionResult::Ok(tx) => {
+                assert_eq!(tx.id, id);
+                assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+                assert_eq!(tx.data, data);
+                assert_eq!(tx.external_refs.len(), 1);
+            }
+            ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+        }
+    }
+}
+
+#[test]
+fn create_chain_fusion_variant_roundtrip() {
+    // Per-direction candid fidelity is covered in-process by the shared-crate
+    // round-trip tests, so one canister round-trip proves the end-to-end wiring.
+    // `BtcToCkBtc` keeps `BtcNativeMainnet` on the wire — no other AUT variant
+    // can carry it.
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let data = ActiveUserTransactionData::ChainFusion(ChainFusionData {
+        direction: ChainFusionDirection::BtcToCkBtc,
+        source_token: TokenId::BtcNativeMainnet,
+        dest_token: TokenId::Icrc(Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai").unwrap()),
+        amount: Nat::from(1_000u64),
+    });
+
+    let created = pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                data: data.clone(),
+                external_refs: vec![ActiveUserTransactionRef {
+                    key: "btc_txid".to_string(),
+                    value: "aa".repeat(32),
+                }],
+                ..create_req(TX_ID)
+            },
+        )
+        .expect("create_active_user_transaction call should succeed");
+
+    match created {
+        ActiveUserTransactionResult::Ok(tx) => {
+            assert_eq!(tx.id, TX_ID);
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+            assert_eq!(tx.data, data);
+            assert_eq!(tx.external_refs.len(), 1);
+        }
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+
+    // Read back through the query path so the stored (not just echoed)
+    // representation is what the assertion sees.
+    let listed = list_active(&pic, user);
+    assert_eq!(listed.len(), 1);
+    assert_eq!(listed[0].data, data);
+}
+
+#[test]
+fn create_cycles_mint_variant_roundtrip() {
+    // The row is opened before the ICP transfer, so it carries no block index
+    // yet: that arrives by update once the transfer returns.
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let data = ActiveUserTransactionData::CyclesMint(CyclesMintData {
+        source_token: TokenId::Icrc(Principal::from_text("ryjl3-tyaaa-aaaaa-aaaba-cai").unwrap()),
+        dest_token: TokenId::Icrc(Principal::from_text("um5iw-rqaaa-aaaaq-qaaba-cai").unwrap()),
+        amount: Nat::from(100_000_000u64),
+        transfer_created_at_ns: 1_790_000_000_000_000_000,
+    });
+
+    let created = pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                data: data.clone(),
+                ..create_req(TX_ID)
+            },
+        )
+        .expect("create_active_user_transaction call should succeed");
+
+    match created {
+        ActiveUserTransactionResult::Ok(tx) => {
+            assert_eq!(tx.id, TX_ID);
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+            assert_eq!(tx.data, data);
+            assert!(tx.external_refs.is_empty());
+        }
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+
+    // Read back through the query path so the stored (not just echoed)
+    // representation is what the assertion sees.
+    let listed = list_active(&pic, user);
+    assert_eq!(listed.len(), 1);
+    assert_eq!(listed[0].data, data);
+}
+
+#[test]
+fn create_oisy_trade_variant_roundtrip() {
+    // Both legs are Internet Computer ledgers, and `IcpNative` is how the ICP
+    // ledger reaches the wallet — so the source leg here is the spelling the
+    // pair table cannot express as a principal.
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let data = ActiveUserTransactionData::OisyTrade(OisyTradeData {
+        side: OisyTradeSide::Sell,
+        source_token: TokenId::IcpNative,
+        dest_token: TokenId::Icrc(Principal::from_text("xevnm-gaaaa-aaaar-qafnq-cai").unwrap()),
+        amount: Nat::from(1_000_000u64),
+    });
+
+    let created = pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                data: data.clone(),
+                external_refs: vec![ActiveUserTransactionRef {
+                    key: "order_id".to_string(),
+                    value: "ab".repeat(16),
+                }],
+                ..create_req(TX_ID)
+            },
+        )
+        .expect("create_active_user_transaction call should succeed");
+
+    match created {
+        ActiveUserTransactionResult::Ok(tx) => {
+            assert_eq!(tx.id, TX_ID);
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+            assert_eq!(tx.data, data);
+            assert_eq!(tx.external_refs.len(), 1);
+        }
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+
+    // Read back through the query path so the stored (not just echoed)
+    // representation is what the assertion sees.
+    let listed = list_active(&pic, user);
+    assert_eq!(listed.len(), 1);
+    assert_eq!(listed[0].data, data);
+}
+
+#[test]
+fn create_xrp_variant_roundtrip() {
+    // `destination_tag: Some(u32::MAX)` on purpose: it is the widest real tag,
+    // so a narrower encoding anywhere on the wire or in stable memory would
+    // truncate it here rather than in a later flow. The refs are the two values
+    // the resolver polls with, at the lengths they actually have — a 64-hex
+    // transaction id, and a ledger index.
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let data = ActiveUserTransactionData::Xrp(XrpData {
+        token: TokenId::XrpNativeMainnet,
+        source_address: "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi".to_string(),
+        destination_address: "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv".to_string(),
+        destination_tag: Some(u32::MAX),
+        amount: Nat::from(25_000_000u64),
+        fee: Nat::from(12u64),
+    });
+
+    let created = pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                data: data.clone(),
+                external_refs: vec![
+                    ActiveUserTransactionRef {
+                        key: "tx_hash".to_string(),
+                        value: "AB".repeat(32),
+                    },
+                    ActiveUserTransactionRef {
+                        key: "last_ledger_sequence".to_string(),
+                        value: "97000021".to_string(),
+                    },
+                ],
+                ..create_req(TX_ID)
+            },
+        )
+        .expect("create_active_user_transaction call should succeed");
+
+    match created {
+        ActiveUserTransactionResult::Ok(tx) => {
+            assert_eq!(tx.id, TX_ID);
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+            assert_eq!(tx.data, data);
+            assert_eq!(tx.external_refs.len(), 2);
+        }
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+
+    // Read back through the query path so the stored (not just echoed)
+    // representation is what the assertion sees.
+    let listed = list_active(&pic, user);
+    assert_eq!(listed.len(), 1);
+    assert_eq!(listed[0].data, data);
+}
+
+// The invariant the XRP guard exists for, through the real endpoint: the
+// frontend's own check cannot be atomic with the create, so this is what
+// actually holds it.
+#[test]
+fn second_open_xrp_send_from_the_same_address_returns_already_in_flight() {
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let xrp = |destination: &str| {
+        ActiveUserTransactionData::Xrp(XrpData {
+            token: TokenId::XrpNativeMainnet,
+            source_address: "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi".to_string(),
+            destination_address: destination.to_string(),
+            destination_tag: None,
+            amount: Nat::from(25_000_000u64),
+            fee: Nat::from(12u64),
+        })
+    };
+
+    let create = |id: &str, data: ActiveUserTransactionData| {
+        pic.update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                data,
+                external_refs: xrp_refs(),
+                ..create_req(id)
+            },
+        )
+        .expect("create_active_user_transaction call should succeed")
+    };
+
+    match create(TX_ID, xrp("rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv")) {
+        ActiveUserTransactionResult::Ok(_) => (),
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+
+    // A different id and a different destination, so neither is what refuses it.
+    match create(
+        "22222222-2222-4222-8222-222222222222",
+        xrp("rJkHLRqmFWoMGPsBdP8ZPMK8PR7GtbxTWi"),
+    ) {
+        ActiveUserTransactionResult::Ok(tx) => panic!("expected Err, got {tx:?}"),
+        ActiveUserTransactionResult::Err(err) => {
+            assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+        }
+    }
+
+    // And the first row is the only one stored.
+    assert_eq!(list_active(&pic, user).len(), 1);
+}
+
+// Through the real endpoint, for the same reason as the send-only case above: a
+// swap's XRP deposit is a payment from the same address, and only the create is
+// atomic with the check. Refused while the swap row is `Pending` — its deposit
+// has not resolved on the ledger — and allowed once it is `Executing`, which only
+// the deposit's ledger result can make it.
+#[test]
+fn xrp_send_while_a_swap_deposit_is_in_flight_returns_already_in_flight() {
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let create = |id: &str, data: ActiveUserTransactionData| {
+        pic.update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                data,
+                external_refs: xrp_refs(),
+                ..create_req(id)
+            },
+        )
+        .expect("create_active_user_transaction call should succeed")
+    };
+
+    let swap = ActiveUserTransactionData::NearIntents(NearIntentsData {
+        source_token: TokenId::XrpNativeMainnet,
+        dest_token: TokenId::EvmNative(1),
+        amount: Nat::from(25_000_000u64),
+        source_address: Some("rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi".to_string()),
+    });
+
+    let send = ActiveUserTransactionData::Xrp(XrpData {
+        token: TokenId::XrpNativeMainnet,
+        source_address: "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi".to_string(),
+        destination_address: "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv".to_string(),
+        destination_tag: None,
+        amount: Nat::from(25_000_000u64),
+        fee: Nat::from(12u64),
+    });
+
+    match create(TX_ID, swap) {
+        ActiveUserTransactionResult::Ok(_) => (),
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+
+    let send_id = "22222222-2222-4222-8222-222222222222";
+
+    match create(send_id, send.clone()) {
+        ActiveUserTransactionResult::Ok(tx) => panic!("expected Err, got {tx:?}"),
+        ActiveUserTransactionResult::Err(err) => {
+            assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+        }
+    }
+
+    // What a frontend from before the swap UI sends on 1Click's `PENDING_DEPOSIT`.
+    match pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "update_active_user_transaction",
+            update_status_req(TX_ID, ActiveUserTransactionStatus::Executing),
+        )
+        .expect("update_active_user_transaction call should succeed")
+    {
+        ActiveUserTransactionResult::Ok(tx) => panic!("expected Err, got {tx:?}"),
+        ActiveUserTransactionResult::Err(err) => {
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "ledger_result is required to leave Pending".to_string()
+                )
+            );
+        }
+    }
+
+    match create(send_id, send.clone()) {
+        ActiveUserTransactionResult::Ok(tx) => panic!("expected Err, got {tx:?}"),
+        ActiveUserTransactionResult::Err(err) => {
+            assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+        }
+    }
+
+    let mut refs = xrp_refs();
+    refs.push(ActiveUserTransactionRef {
+        key: "ledger_result".to_string(),
+        value: "tesSUCCESS".to_string(),
+    });
+
+    match pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "update_active_user_transaction",
+            UpdateActiveUserTransactionRequest {
+                external_refs: Some(refs),
+                ..update_status_req(TX_ID, ActiveUserTransactionStatus::Executing)
+            },
+        )
+        .expect("update_active_user_transaction call should succeed")
+    {
+        ActiveUserTransactionResult::Ok(tx) => {
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Executing);
+        }
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+
+    match create(send_id, send) {
+        ActiveUserTransactionResult::Ok(_) => (),
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+}
+
+/// The two refs an XRP row is polled with, at the shapes they really have.
+fn xrp_refs() -> Vec<ActiveUserTransactionRef> {
+    vec![
+        ActiveUserTransactionRef {
+            key: "tx_hash".to_string(),
+            value: "AB".repeat(32),
+        },
+        ActiveUserTransactionRef {
+            key: "last_ledger_sequence".to_string(),
+            value: "97000021".to_string(),
+        },
+    ]
+}
+
+// Through the real endpoint, because this is the state that cannot be recovered
+// from: a `Pending` XRP row with no usable poll keys is never resolved, refuses
+// every later send from its address, and the frontend offers no way to dismiss a
+// row that is not terminal. The create has to be what refuses it.
+#[test]
+fn xrp_create_without_poll_keys_is_rejected() {
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let data = ActiveUserTransactionData::Xrp(XrpData {
+        token: TokenId::XrpNativeMainnet,
+        source_address: "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi".to_string(),
+        destination_address: "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv".to_string(),
+        destination_tag: None,
+        amount: Nat::from(25_000_000u64),
+        fee: Nat::from(12u64),
+    });
+
+    let create = |external_refs: Vec<ActiveUserTransactionRef>| {
+        pic.update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                data: data.clone(),
+                external_refs,
+                ..create_req(TX_ID)
+            },
+        )
+        .expect("create_active_user_transaction call should succeed")
+    };
+
+    let without = |key: &str| -> Vec<ActiveUserTransactionRef> {
+        xrp_refs().into_iter().filter(|r| r.key != key).collect()
+    };
+
+    for (refs, expected) in [
+        (vec![], "tx_hash is required"),
+        (without("tx_hash"), "tx_hash is required"),
+        (
+            without("last_ledger_sequence"),
+            "last_ledger_sequence is required",
+        ),
+    ] {
+        match create(refs) {
+            ActiveUserTransactionResult::Ok(tx) => panic!("expected Err, got {tx:?}"),
+            ActiveUserTransactionResult::Err(err) => assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(expected.to_string())
+            ),
+        }
+        assert!(
+            list_active(&pic, user).is_empty(),
+            "a rejected create must not leave a row behind"
+        );
+    }
+
+    // And the same create with both refs present is accepted, so it is the refs
+    // and nothing else about this payload that was refused.
+    match create(xrp_refs()) {
+        ActiveUserTransactionResult::Ok(tx) => assert_eq!(tx.external_refs, xrp_refs()),
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+}
+
+#[test]
+fn duplicate_create_returns_already_exists() {
+    let pic = setup();
+    let user = caller();
+
+    create_active(&pic, user, TX_ID);
+    let second = create_active(&pic, user, TX_ID);
+    match second {
+        ActiveUserTransactionResult::Err(ActiveUserTransactionError::AlreadyExists) => {}
+        other => panic!("expected AlreadyExists, got {other:?}"),
+    }
+}
+
+#[test]
+fn update_transitions_and_terminal_visible() {
+    let pic = setup();
+    let user = caller();
+    create_active(&pic, user, TX_ID);
+
+    let updated = pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "update_active_user_transaction",
+            UpdateActiveUserTransactionRequest {
+                id: TX_ID.to_string(),
+                status: Some(ActiveUserTransactionStatus::Succeeded),
+                progress_step: Some("done".to_string()),
+                external_refs: Some(vec![ActiveUserTransactionRef {
+                    key: "tx_hash".to_string(),
+                    value: "0xabc".to_string(),
+                }]),
+                error: None,
+            },
+        )
+        .expect("update call should succeed");
+    match updated {
+        ActiveUserTransactionResult::Ok(tx) => {
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Succeeded);
+            assert_eq!(tx.external_refs.len(), 1);
+            assert_eq!(tx.progress_step.as_deref(), Some("done"));
+        }
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+
+    let listed = pic
+        .query::<GetActiveUserTransactionsResult>(user, "get_active_user_transactions", ())
+        .expect("query should succeed");
+    match listed {
+        GetActiveUserTransactionsResult::Ok(response) => {
+            assert_eq!(response.transactions.len(), 1);
+            assert_eq!(response.transactions[0].id, TX_ID);
+            assert_eq!(
+                response.transactions[0].status,
+                ActiveUserTransactionStatus::Succeeded
+            );
+        }
+        GetActiveUserTransactionsResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+}
+
+#[test]
+fn update_and_delete_are_principal_scoped() {
+    let pic = setup();
+    let user = caller();
+    let other = other_caller();
+
+    create_active(&pic, user, TX_ID);
+    pic.ensure_user_profile(other);
+
+    let update = pic
+        .update::<ActiveUserTransactionResult>(
+            other,
+            "update_active_user_transaction",
+            update_status_req(TX_ID, ActiveUserTransactionStatus::Succeeded),
+        )
+        .expect("update call should succeed");
+    assert_eq!(
+        update,
+        ActiveUserTransactionResult::Err(ActiveUserTransactionError::NotFound)
+    );
+
+    let delete = pic
+        .update::<DeleteActiveUserTransactionResult>(
+            other,
+            "delete_active_user_transaction",
+            TX_ID.to_string(),
+        )
+        .expect("delete call should succeed");
+    assert!(matches!(delete, DeleteActiveUserTransactionResult::Ok(())));
+
+    let transactions = list_active(&pic, user);
+    assert_eq!(transactions.len(), 1);
+    assert_eq!(transactions[0].id, TX_ID);
+    assert_eq!(transactions[0].status, ActiveUserTransactionStatus::Pending);
+}
+
+#[test]
+fn illegal_status_transition_surfaces_from_endpoint() {
+    let pic = setup();
+    let user = caller();
+    create_active(&pic, user, TX_ID);
+
+    let succeeded = pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "update_active_user_transaction",
+            update_status_req(TX_ID, ActiveUserTransactionStatus::Succeeded),
+        )
+        .expect("update call should succeed");
+    assert!(matches!(succeeded, ActiveUserTransactionResult::Ok(_)));
+
+    let regressed = pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "update_active_user_transaction",
+            update_status_req(TX_ID, ActiveUserTransactionStatus::Executing),
+        )
+        .expect("update call should succeed");
+    assert_eq!(
+        regressed,
+        ActiveUserTransactionResult::Err(ActiveUserTransactionError::IllegalStatusTransition)
+    );
+
+    let transactions = list_active(&pic, user);
+    assert_eq!(transactions.len(), 1);
+    assert_eq!(
+        transactions[0].status,
+        ActiveUserTransactionStatus::Succeeded
+    );
+}
+
+#[test]
+fn delete_is_idempotent_and_filters_view() {
+    let pic = setup();
+    let user = caller();
+    create_active(&pic, user, TX_ID);
+
+    let first = pic
+        .update::<DeleteActiveUserTransactionResult>(
+            user,
+            "delete_active_user_transaction",
+            TX_ID.to_string(),
+        )
+        .expect("delete call should succeed");
+    assert!(matches!(first, DeleteActiveUserTransactionResult::Ok(())));
+
+    let second = pic
+        .update::<DeleteActiveUserTransactionResult>(
+            user,
+            "delete_active_user_transaction",
+            TX_ID.to_string(),
+        )
+        .expect("delete call should succeed on missing id");
+    assert!(matches!(second, DeleteActiveUserTransactionResult::Ok(())));
+
+    let listed = pic
+        .query::<GetActiveUserTransactionsResult>(user, "get_active_user_transactions", ())
+        .expect("query should succeed");
+    match listed {
+        GetActiveUserTransactionsResult::Ok(response) => assert!(response.transactions.is_empty()),
+        GetActiveUserTransactionsResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+}
+
+#[test]
+fn create_at_cap_removes_a_finished_record_and_refuses_when_none_is_left() {
+    let pic = setup();
+    let user = caller();
+    for i in 0..MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
+        let created = create_active(&pic, user, &format!("id-{i}"));
+        assert!(matches!(created, ActiveUserTransactionResult::Ok(_)));
+    }
+    let finished = pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "update_active_user_transaction",
+            update_status_req("id-42", ActiveUserTransactionStatus::Succeeded),
+        )
+        .expect("update call should succeed");
+    assert!(matches!(finished, ActiveUserTransactionResult::Ok(_)));
+
+    let made_room = create_active(&pic, user, "new-1");
+    assert!(matches!(made_room, ActiveUserTransactionResult::Ok(_)));
+    let ids: Vec<String> = list_active(&pic, user)
+        .into_iter()
+        .map(|tx| tx.id)
+        .collect();
+    assert_eq!(ids.len(), MAX_ACTIVE_USER_TRANSACTIONS_PER_USER);
+    assert!(!ids.iter().any(|id| id == "id-42"));
+    assert!(ids.iter().any(|id| id == "new-1"));
+
+    match create_active(&pic, user, "new-2") {
+        ActiveUserTransactionResult::Err(ActiveUserTransactionError::TooManyActiveTransactions) => {
+        }
+        other => panic!("expected TooManyActiveTransactions, got {other:?}"),
+    }
+    assert_eq!(
+        list_active(&pic, user).len(),
+        MAX_ACTIVE_USER_TRANSACTIONS_PER_USER
+    );
+}
+
+#[test]
+fn records_are_principal_scoped() {
+    let pic = setup();
+    let user = caller();
+    let other = other_caller();
+
+    create_active(&pic, user, TX_ID);
+    create_active(&pic, other, TX_ID); // same id, different principal — allowed
+
+    let user_listed = pic
+        .query::<GetActiveUserTransactionsResult>(user, "get_active_user_transactions", ())
+        .expect("query should succeed");
+    let other_listed = pic
+        .query::<GetActiveUserTransactionsResult>(other, "get_active_user_transactions", ())
+        .expect("query should succeed");
+
+    for (label, result) in [("caller", user_listed), ("other", other_listed)] {
+        match result {
+            GetActiveUserTransactionsResult::Ok(response) => {
+                assert_eq!(
+                    response.transactions.len(),
+                    1,
+                    "{label} should see exactly its own record"
+                );
+            }
+            GetActiveUserTransactionsResult::Err(err) => {
+                panic!("{label} query returned error: {err:?}")
+            }
+        }
+    }
+}
+
+#[test]
+fn records_survive_canister_upgrade() {
+    let pic = setup();
+    let user = caller();
+    create_active(&pic, user, TX_ID);
+
+    // PocketIC throttles install_code based on instructions used in recent
+    // rounds; advance simulated time and drive ticks so the heavy `setup()`
+    // install rolls out of the rate-limit window before we attempt the
+    // upgrade. Mirrors the advance_time + tick-loop idiom used in
+    // `tests/it/signer.rs` and `tests/it/status.rs`.
+    pic.pic.advance_time(Duration::from_mins(1));
+    for _ in 0..20 {
+        pic.pic.tick();
+    }
+
+    pic.upgrade_with_wasm(&BackendBuilder::default_wasm_path(), None)
+        .expect("canister upgrade should succeed");
+
+    let listed = pic
+        .query::<GetActiveUserTransactionsResult>(user, "get_active_user_transactions", ())
+        .expect("query should succeed");
+    match listed {
+        GetActiveUserTransactionsResult::Ok(response) => {
+            assert_eq!(response.transactions.len(), 1);
+            assert_eq!(response.transactions[0].id, TX_ID);
+        }
+        GetActiveUserTransactionsResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+}

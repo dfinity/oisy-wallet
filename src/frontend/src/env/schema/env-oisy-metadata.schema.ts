@@ -9,11 +9,13 @@ export const OisyMetadataSchema = z.object({
 	OISY_TWITTER_URL: z.url(),
 	OISY_DOCS_URL: z.url(),
 	OISY_AI_ASSISTANT_DOCS_URL: z.url(),
+	OISY_NOTES_DOCS_URL: z.url(),
 	OISY_SUPPORT_URL: z.url(),
 	OISY_REWARDS_URL: z.url(),
 	OISY_REFERRAL_URL: z.url(),
 	OISY_EARN_URL: z.url(),
 	OISY_EARN_HARVEST_AUTOPILOT_URL: z.url(),
+	OISY_BORROW_URL: z.url(),
 	OISY_WELCOME_TWITTER_URL: z.url(),
 	OISY_INTERNET_IDENTITY_URL: z.url(),
 	OISY_FIND_INTERNET_IDENTITY_URL: z.url(),
@@ -22,10 +24,12 @@ export const OisyMetadataSchema = z.object({
 	OISY_ACCESS_CONTROL_URL: z.url(),
 	OISY_NFT_DOCS_URL: z.url(),
 	OISY_HOW_TO_CONVERT_DOCS_URL: z.url(),
+	OISY_SIGNER_CONNECT_DOCS_URL: z.url(),
 	OISY_INTERNET_IDENTITY_VERSION_2_0_DOCS_URL: z.url(),
 	OISY_LOGGING_INTO_OISY_URL: z.url(),
 	OISY_CREATING_A_WALLET_URL: z.url(),
 	OISY_SCAN_URL: z.url(),
 	OISY_PAY_URL: z.url(),
-	OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL: z.url()
+	OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL: z.url(),
+	OISY_EXPORT_DATA_DOCS_URL: z.url()
 });

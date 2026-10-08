@@ -30,10 +30,10 @@ export class LocalCommandRunner implements CommandRunner {
 			const { stdout } = await execPromise({ command: command.toString() });
 			return stdout;
 		} catch (err: unknown) {
-			if (err instanceof Error) {
-				throw new Error(`Error executing command: ${err.message}`);
-			}
-			throw new Error(`Error executing command: ${JSON.stringify(err)}`);
+			// Use String(err) for the message — JSON.stringify can itself throw (circular
+			// refs, BigInt) and mask the failure. The original value is preserved via `cause`.
+			const detail = err instanceof Error ? err.message : String(err);
+			throw new Error(`Error executing command: ${detail}`, { cause: err });
 		}
 	}
 }

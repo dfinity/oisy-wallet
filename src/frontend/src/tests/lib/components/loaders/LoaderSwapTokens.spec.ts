@@ -43,9 +43,14 @@ describe('LoaderSwapTokens', () => {
 		mockAuthStore();
 
 		const mockData = {
-			icp: { coverage: 'all' as const, supportedTokenIds: new Set<string>() },
-			evm: { coverage: 'all' as const, supportedTokenIds: new Set<string>() },
-			sol: { coverage: 'all' as const, supportedTokenIds: new Set<string>() }
+			aggregated: {
+				icp: { coverage: 'all' as const, supportedTokenIds: new Set<string>() },
+				evm: { coverage: 'all' as const, supportedTokenIds: new Set<string>() },
+				sol: { coverage: 'all' as const, supportedTokenIds: new Set<string>() },
+				btc: { coverage: 'all' as const, supportedTokenIds: new Set<string>() },
+				xrp: { coverage: 'all' as const, supportedTokenIds: new Set<string>() }
+			},
+			providers: []
 		};
 		swapSupportedTokensStore.set(mockData);
 

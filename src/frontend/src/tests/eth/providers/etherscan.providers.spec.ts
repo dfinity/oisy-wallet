@@ -1,6 +1,7 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import * as etherscanEnv from '$env/rest/etherscan.env';
 import { EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.providers';
 import type {
 	EtherscanProviderErc1155TokenTransferTransaction,
@@ -11,6 +12,7 @@ import type {
 } from '$eth/types/etherscan-transaction';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Transaction } from '$lib/types/transaction';
+import * as consoleUtils from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
@@ -22,9 +24,48 @@ import {
 } from '$tests/mocks/etherscan.mock';
 import en from '$tests/mocks/i18n.mock';
 import { EtherscanProvider as EtherscanProviderLib, Network } from 'ethers/providers';
+import { assertArgument } from 'ethers/utils';
 
+// Exposed as a getter, not a plain property, so a test can `vi.spyOn(..., 'get')` it — the
+// pattern `exchange.derived.spec` uses for `EXCHANGE_DISABLED`.
 vi.mock('$env/rest/etherscan.env', () => ({
-	ETHERSCAN_API_KEY: 'test-api-key'
+	get ETHERSCAN_API_KEY() {
+		return 'test-api-key';
+	}
+}));
+
+// `ethers/utils` is not mocked globally (unlike `ethers/providers`), so the fallback's real
+// request-building runs here; only the transport is swapped out, to capture the URL it targets.
+const { mockFetchRequest, mockSend, requestedUrls, requests } = vi.hoisted(() => {
+	const requestedUrls: string[] = [];
+	const mockSend = vi.fn();
+	// A class, not a function: the production code does `new FetchRequest(...)`, and the repo's
+	// eslint autofix rewrites plain functions into arrows, which are not constructible — so a
+	// function here silently stops working the next time `npm run format` runs.
+	// Instances are captured so a test can pull the `processFunc` the code under test assigned
+	// and run it against a canned response, exactly as `FetchRequest.send` would.
+	const requests: { processFunc?: (req: unknown, response: unknown) => Promise<unknown> }[] = [];
+
+	const mockFetchRequest = vi.fn(
+		class {
+			setThrottleParams = vi.fn();
+			send = mockSend;
+			// Declared so the instance satisfies the captured type; the code under test assigns it.
+			processFunc?: (req: unknown, response: unknown) => Promise<unknown>;
+
+			constructor(url: string) {
+				requestedUrls.push(url);
+				requests.push(this);
+			}
+		}
+	);
+
+	return { mockFetchRequest, mockSend, requestedUrls, requests };
+});
+
+vi.mock('ethers/utils', async (importOriginal) => ({
+	...(await importOriginal<Record<string, unknown>>()),
+	FetchRequest: mockFetchRequest
 }));
 
 describe('etherscan.providers', () => {
@@ -41,6 +82,221 @@ describe('etherscan.providers', () => {
 				new Network(name, chainId),
 				ETHERSCAN_API_KEY
 			);
+		});
+	});
+
+	// The library's *real* constructor never runs under Vitest — `vitest.setup.ts` mocks
+	// `ethers/providers` for the whole suite, because the real module imports `ws`, which does not
+	// load here. So the one thing these tests cannot prove is that ethers genuinely rejects a given
+	// chain id; only `npm run build` does that, by evaluating the eagerly-built registry during SSR
+	// prerender. Everything the fallback itself does is exercised below, by making the mocked
+	// constructor throw the way the real one would.
+	describe('Etherscan v2 fallback for a chain ethers does not list', () => {
+		// Only has to differ from the chains ethers lists; 4663 is the case that motivated this.
+		const unlistedChainId = 4663n;
+		const unlistedNetwork = new Network('Unlisted Chain', unlistedChainId);
+
+		// Classes for the same reason as the `FetchRequest` stub above: these are reached via
+		// `new`, and an arrow would fail as "not a constructor" before ever throwing what we want.
+		//
+		// The error comes from the real `assertArgument`, called exactly as `provider-etherscan.js`
+		// calls it, so its *shape* is ethers' own rather than ours to get wrong. What that cannot
+		// prove is the *trigger* — that ethers genuinely rejects this chain id; see the note above.
+		const rejectUnlistedChain = () => {
+			vi.mocked(EtherscanProviderLib).mockImplementationOnce(
+				class {
+					constructor() {
+						assertArgument(false, 'unsupported network', 'network', unlistedNetwork);
+					}
+				} as unknown as typeof EtherscanProviderLib
+			);
+		};
+
+		const respondWith = (body: Record<string, unknown>) => {
+			mockSend.mockResolvedValue({ assertOk: vi.fn(), bodyJson: body });
+		};
+
+		// The sibling suite assigns `prototype.fetch` once at collection time and relies on it, so
+		// anything set here has to be put back.
+		let originalPrototypeFetch: unknown;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+			requestedUrls.length = 0;
+			requests.length = 0;
+			originalPrototypeFetch = vi.mocked(EtherscanProviderLib).prototype.fetch;
+		});
+
+		afterEach(() => {
+			vi.mocked(EtherscanProviderLib).prototype.fetch =
+				originalPrototypeFetch as typeof EtherscanProviderLib.prototype.fetch;
+			// Releases the `ETHERSCAN_API_KEY` getter spy, so a missing key cannot leak into the
+			// tests that follow. `clearAllMocks` in `beforeEach` would not undo a `spyOn`.
+			vi.restoreAllMocks();
+		});
+
+		it('should target the shared v2 endpoint with the chain id as a parameter', async () => {
+			rejectUnlistedChain();
+			respondWith({ status: '1', message: 'OK', result: [] });
+
+			const provider = new EtherscanProvider(unlistedNetwork, unlistedChainId);
+
+			await provider.transactions({ address: mockEthAddress });
+
+			expect(requestedUrls[0]).toContain('https://api.etherscan.io/v2/api?chainid=4663');
+			expect(requestedUrls[0]).toContain('module=account');
+			expect(requestedUrls[0]).toContain('action=txlist');
+			expect(requestedUrls[0]).toContain(`address=${mockEthAddress}`);
+			expect(requestedUrls[0]).toContain(`apikey=${ETHERSCAN_API_KEY}`);
+		});
+
+		it('should omit nullish parameters from the query', async () => {
+			rejectUnlistedChain();
+			respondWith({ status: '1', message: 'OK', result: [] });
+
+			const provider = new EtherscanProvider(unlistedNetwork, unlistedChainId);
+
+			// `endBlock` is not supplied, so `endblock` must be absent rather than `undefined`.
+			await provider.transactions({ address: mockEthAddress });
+
+			expect(requestedUrls[0]).not.toContain('endblock');
+			expect(requestedUrls[0]).not.toContain('undefined');
+		});
+
+		// Etherscan reports an empty history as `status: 0` with a distinguishing message. Ethers
+		// treats those as success, and so must the fallback — otherwise a wallet with no activity
+		// on the chain sees an error instead of an empty list.
+		it.each(['No transactions found', 'No records found'])(
+			'should treat "%s" as an empty result rather than an error',
+			async (message) => {
+				rejectUnlistedChain();
+				respondWith({ status: '0', message, result: [] });
+
+				const provider = new EtherscanProvider(unlistedNetwork, unlistedChainId);
+
+				await expect(provider.transactions({ address: mockEthAddress })).resolves.toEqual([]);
+			}
+		);
+
+		// Etherscan answers a throttled request with **HTTP 200** and a rate-limit string in
+		// `result`, so nothing below `send()` would notice: the status check would turn a
+		// retryable condition into a hard failure, and history would break on this chain whenever
+		// the shared key is busy — while every other chain quietly retries. The library solves
+		// this in `processFunc`, and the fallback has to mirror it rather than inherit it.
+		it('should turn a rate-limit payload into a retry rather than an error', async () => {
+			rejectUnlistedChain();
+			respondWith({ status: '1', message: 'OK', result: [] });
+
+			const provider = new EtherscanProvider(unlistedNetwork, unlistedChainId);
+
+			await provider.transactions({ address: mockEthAddress });
+
+			expect(requests[0].processFunc).toBeDefined();
+
+			const throwThrottleError = vi.fn();
+			const throttled = {
+				hasBody: () => true,
+				bodyJson: { status: '0', message: 'NOTOK', result: 'Max rate limit reached' },
+				throwThrottleError
+			};
+
+			await requests[0].processFunc?.(undefined, throttled);
+
+			// 2000ms mirrors the library's own `THROTTLE`; `FetchRequest` handles the resulting
+			// error itself and stalls for that long before retrying.
+			expect(throwThrottleError).toHaveBeenCalledExactlyOnceWith('Max rate limit reached', 2000);
+		});
+
+		it('should leave a normal response untouched in the response processor', async () => {
+			rejectUnlistedChain();
+			respondWith({ status: '1', message: 'OK', result: [] });
+
+			const provider = new EtherscanProvider(unlistedNetwork, unlistedChainId);
+
+			await provider.transactions({ address: mockEthAddress });
+
+			const throwThrottleError = vi.fn();
+			const ok = {
+				hasBody: () => true,
+				bodyJson: { status: '1', message: 'OK', result: [] },
+				throwThrottleError
+			};
+
+			await expect(requests[0].processFunc?.(undefined, ok)).resolves.toBe(ok);
+
+			expect(throwThrottleError).not.toHaveBeenCalled();
+		});
+
+		it('should throw on a genuine error response', async () => {
+			rejectUnlistedChain();
+			respondWith({ status: '0', message: 'NOTOK', result: 'Invalid API Key' });
+
+			const provider = new EtherscanProvider(unlistedNetwork, unlistedChainId);
+
+			await expect(provider.transactions({ address: mockEthAddress })).rejects.toThrow(
+				'Etherscan error response: NOTOK Invalid API Key'
+			);
+		});
+
+		// The library is the default path, and only an `INVALID_ARGUMENT` may divert to the
+		// fallback. Anything else is a real fault and must not be silently swallowed.
+		it('should rethrow a construction error that is not an argument assert', () => {
+			vi.mocked(EtherscanProviderLib).mockImplementationOnce(
+				class {
+					constructor() {
+						throw new Error('boom');
+					}
+				} as unknown as typeof EtherscanProviderLib
+			);
+
+			expect(() => new EtherscanProvider(unlistedNetwork, unlistedChainId)).toThrow('boom');
+		});
+
+		// Diverting is expected here, so it cannot be an error — but it is also the only place the
+		// assumption behind the `INVALID_ARGUMENT` check would show up as wrong, so it must be said
+		// out loud rather than swallowed.
+		it('should warn when it diverts to the fallback', () => {
+			const warnSpy = vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
+
+			rejectUnlistedChain();
+
+			new EtherscanProvider(unlistedNetwork, unlistedChainId);
+
+			expect(warnSpy).toHaveBeenCalledExactlyOnceWith(
+				expect.stringContaining(`${unlistedChainId}`),
+				expect.objectContaining({ code: 'INVALID_ARGUMENT' })
+			);
+		});
+
+		it('should fail with a named cause when the API key is not configured', async () => {
+			vi.spyOn(etherscanEnv, 'ETHERSCAN_API_KEY', 'get').mockReturnValue(undefined);
+
+			rejectUnlistedChain();
+
+			const provider = new EtherscanProvider(unlistedNetwork, unlistedChainId);
+
+			await expect(provider.transactions({ address: mockEthAddress })).rejects.toThrow(
+				'Etherscan API key is not configured: set VITE_ETHERSCAN_API_KEY.'
+			);
+
+			// Nothing is sent: a missing key must not reach Etherscan as `apikey=undefined`, which
+			// would come back as "Invalid API Key" and blame the wrong thing.
+			expect(requestedUrls).toHaveLength(0);
+		});
+
+		it('should not use the fallback for a chain ethers does list', async () => {
+			const mockLibFetch = vi.fn().mockResolvedValue([]);
+			vi.mocked(EtherscanProviderLib).prototype.fetch = mockLibFetch;
+
+			const provider = new EtherscanProvider(
+				new Network(ETHEREUM_NETWORK.name, ETHEREUM_NETWORK.chainId),
+				ETHEREUM_NETWORK.chainId
+			);
+
+			await provider.transactions({ address: mockEthAddress });
+
+			expect(mockLibFetch).toHaveBeenCalled();
+			expect(requestedUrls).toHaveLength(0);
 		});
 	});
 

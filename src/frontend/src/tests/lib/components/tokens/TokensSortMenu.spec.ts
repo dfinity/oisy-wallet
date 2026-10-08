@@ -160,19 +160,21 @@ describe('TokensSortMenu', () => {
 		});
 	});
 
-	it('should apply active class to button when popover is visible', async () => {
+	it('should mark the button as opened when popover is visible', async () => {
 		const { container } = render(TokensSortMenu);
 
 		const button = container.querySelector('button');
 
-		expect(button).not.toHaveClass('active');
-
 		assertNonNullish(button);
+
+		expect(button).not.toHaveClass('opened');
+		expect(button).toHaveAttribute('aria-expanded', 'false');
 
 		await fireEvent.click(button);
 
 		await waitFor(() => {
-			expect(button).toHaveClass('active');
+			expect(button).toHaveClass('opened');
+			expect(button).toHaveAttribute('aria-expanded', 'true');
 		});
 	});
 });

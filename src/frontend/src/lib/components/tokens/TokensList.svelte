@@ -29,7 +29,11 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
-	import { filterTokensByCategory, getTokenCategoryTag } from '$lib/utils/token-tag.utils';
+	import {
+		filterTokensByCategory,
+		getTokenCategorySentenceLabel,
+		getTokenCategoryTag
+	} from '$lib/utils/token-tag.utils';
 	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
 
@@ -166,7 +170,11 @@
 						{@const { token } = tokenOrGroup}
 
 						<div class="transition-colors duration-300 hover:bg-primary">
-							<TokenCard data={token} onClick={() => goto(transactionsUrl({ token }))} />
+							<TokenCard
+								data={token}
+								onClick={() => goto(transactionsUrl({ token }))}
+								showNetwork={false}
+							/>
 						</div>
 					{/if}
 				</div>
@@ -186,8 +194,11 @@
 							? $i18n.tokens.text.no_tokens_for_asset_type
 							: $i18n.tokens.text.no_tokens_for_asset_type_zero_tokens,
 						{
-							$asset_type:
-								$i18n.token_tag.category[$tokenCategoryFilter].toLocaleLowerCase($currentLanguage)
+							$asset_type: getTokenCategorySentenceLabel({
+								category: $tokenCategoryFilter,
+								i18n: $i18n,
+								language: $currentLanguage
+							})
 						}
 					)}
 				/>

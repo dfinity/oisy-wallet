@@ -17,6 +17,9 @@ import {
 	getFilteredTokenList
 } from '$lib/utils/token-list.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { SvelteMap } from 'svelte/reactivity';
 
 // Mock data for tokens
@@ -73,6 +76,61 @@ describe('token-list.utils', () => {
 
 			expect(result).toHaveLength(0);
 		});
+
+		it('should filter the list based on ERC20 contract address', () => {
+			const erc20TokenUi: TokenUi = mockValidErc20Token;
+			const list: TokenUiOrGroupUi[] = [tokenUi, { token: erc20TokenUi }];
+			const result = getFilteredTokenList({ filter: mockValidErc20Token.address, list });
+
+			expect(result).toHaveLength(1);
+			expect(result[0]).toEqual({ token: erc20TokenUi });
+		});
+
+		it('should filter the list based on a partial, case-insensitive ERC20 contract address', () => {
+			const erc20TokenUi: TokenUi = mockValidErc20Token;
+			const list: TokenUiOrGroupUi[] = [tokenUi, { token: erc20TokenUi }];
+			const result = getFilteredTokenList({
+				filter: mockValidErc20Token.address.slice(0, 6).toLowerCase(),
+				list
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0]).toEqual({ token: erc20TokenUi });
+		});
+
+		it('should filter the list based on SPL contract address', () => {
+			const splTokenUi: TokenUi = mockValidSplToken;
+			const list: TokenUiOrGroupUi[] = [tokenUi, { token: splTokenUi }];
+			const result = getFilteredTokenList({ filter: mockValidSplToken.address, list });
+
+			expect(result).toHaveLength(1);
+			expect(result[0]).toEqual({ token: splTokenUi });
+		});
+
+		it('should filter the list based on ICRC ledger canister id', () => {
+			const icrcTokenUi: TokenUi = mockValidIcrcToken;
+			const list: TokenUiOrGroupUi[] = [tokenUi, { token: icrcTokenUi }];
+			const result = getFilteredTokenList({
+				filter: mockValidIcrcToken.ledgerCanisterId,
+				list
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0]).toEqual({ token: icrcTokenUi });
+		});
+
+		it('should filter a token group when one of its tokens matches by address', () => {
+			const erc20TokenUi: TokenUi = mockValidErc20Token;
+			const groupWithErc20: TokenUiGroup = {
+				...tokenGroup,
+				tokens: [...tokenGroup.tokens, erc20TokenUi]
+			};
+			const list: TokenUiOrGroupUi[] = [tokenUi, { group: groupWithErc20 }];
+			const result = getFilteredTokenList({ filter: mockValidErc20Token.address, list });
+
+			expect(result).toHaveLength(1);
+			expect(result[0]).toEqual({ group: groupWithErc20 });
+		});
 	});
 
 	describe('getFilteredTokenGroup', () => {
@@ -96,12 +154,25 @@ describe('token-list.utils', () => {
 
 			expect(result).toHaveLength(0);
 		});
+
+		it('should return tokens matching the filter by ERC20 contract address', () => {
+			const erc20TokenUi: TokenUi = mockValidErc20Token;
+			const list: TokenUi[] = [token1, token2, erc20TokenUi];
+			const result = getFilteredTokenGroup({ filter: mockValidErc20Token.address, list });
+
+			expect(result).toHaveLength(1);
+			expect(result[0]).toEqual(erc20TokenUi);
+		});
 	});
 
 	describe('getDisabledOrModifiedTokens', () => {
-		vi.mock('$lib/utils/network.utils.ts', () => ({
-			showTokenFilteredBySelectedNetwork: vi.fn()
-		}));
+		vi.mock(import('$lib/utils/network.utils'), async (importOriginal) => {
+			const actual = await importOriginal();
+			return {
+				...actual,
+				showTokenFilteredBySelectedNetwork: vi.fn()
+			};
+		});
 
 		const dummyNetwork: Network = ICP_NETWORK;
 

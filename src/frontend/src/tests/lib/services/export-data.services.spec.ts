@@ -1,0 +1,382 @@
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.services';
+import { Currency } from '$lib/enums/currency';
+import { trackExportData } from '$lib/services/export-data-analytics.services';
+import { exportTokensCsv, exportTransactionsCsv } from '$lib/services/export-data.services';
+import { toastsShow } from '$lib/stores/toasts.store';
+import { consoleError } from '$lib/utils/console.utils';
+import { downloadCsv } from '$lib/utils/csv.utils';
+import {
+	buildTokenRows,
+	buildTransactionRows,
+	sortTokenRows,
+	sortTransactionRows,
+	type TokenCsvRow,
+	type TransactionCsvRow
+} from '$lib/utils/export-data.utils';
+import { loadOlderSolTransactions } from '$sol/services/sol-history-pagers.services';
+import en from '$tests/mocks/i18n.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+
+vi.mock('$icp/services/ic-transactions.services', () => ({
+	loadNextIcTransactionsByOldest: vi.fn()
+}));
+
+vi.mock('$sol/services/sol-history-pagers.services', () => ({
+	loadOlderSolTransactions: vi.fn()
+}));
+
+vi.mock('$lib/stores/toasts.store', () => ({
+	toastsShow: vi.fn()
+}));
+
+vi.mock('$lib/utils/console.utils', () => ({
+	consoleError: vi.fn()
+}));
+
+vi.mock('$lib/services/export-data-analytics.services', () => ({
+	trackExportData: vi.fn()
+}));
+
+vi.mock(import('$lib/utils/csv.utils'), async (importOriginal) => {
+	const actual = await importOriginal();
+
+	return {
+		...actual,
+		downloadCsv: vi.fn()
+	};
+});
+
+vi.mock(import('$lib/utils/export-data.utils'), async (importOriginal) => {
+	const actual = await importOriginal();
+
+	return {
+		...actual,
+		buildTokenRows: vi.fn(),
+		sortTokenRows: vi.fn(),
+		buildTransactionRows: vi.fn(),
+		sortTransactionRows: vi.fn()
+	};
+});
+
+const tokenRow: TokenCsvRow = {
+	symbol: 'ICP',
+	name: 'Internet Computer',
+	network: 'Internet Computer',
+	standard: 'icp',
+	address_or_ledger_id: '',
+	decimals: 8,
+	balance: '1.0',
+	balance_raw: '100000000',
+	usd_price: 1,
+	usd_value: 1,
+	currency: 'USD',
+	price: 1,
+	value: 1
+};
+
+const transactionRow: TransactionCsvRow = {
+	timestamp_iso: '2026-05-28T10:00:00.000Z',
+	timestamp_local: '2026-05-28 10:00:00',
+	timestamp_utc: '2026-05-28 10:00:00',
+	network: 'Internet Computer',
+	token_symbol: 'ICP',
+	token_address_or_ledger_id: '',
+	type: 'send',
+	type_display: 'Send',
+	type_raw: 'send',
+	direction: 'out',
+	status: 'executed',
+	from: 'sender',
+	to: 'recipient',
+	counterparty: 'recipient',
+	amount: '1.0',
+	amount_raw: 100_000_000n,
+	fee: '0.0001',
+	fee_raw: 10_000n,
+	fee_token: 'ICP',
+	credit: '',
+	credit_raw: undefined,
+	debit: '-1.0001',
+	debit_raw: -100_010_000n,
+	fee_token_debit: '',
+	fee_token_debit_raw: undefined,
+	effective_token: '-1.0001',
+	effective_fee_token: '',
+	tx_id: 'tx-id',
+	explorer_url: 'https://dashboard.internetcomputer.org/transaction/tx-id',
+	exported_at: '2026-05-28T10:00:00.000Z'
+};
+
+const defaultTransactionParams = (): Parameters<typeof exportTransactionsCsv>[0] => ({
+	identity: mockIdentity,
+	tokens: [],
+	buildTransactions: vi.fn(() => []),
+	userAddresses: {},
+	nativeSymbolByNetworkId: () => undefined,
+	contacts: []
+});
+
+describe('export-data.services', () => {
+	const mockLoadNextIcTransactionsByOldest = vi.mocked(loadNextIcTransactionsByOldest);
+	const mockLoadOlderSolTransactions = vi.mocked(loadOlderSolTransactions);
+	const mockBuildTokenRows = vi.mocked(buildTokenRows);
+	const mockSortTokenRows = vi.mocked(sortTokenRows);
+	const mockBuildTransactionRows = vi.mocked(buildTransactionRows);
+	const mockSortTransactionRows = vi.mocked(sortTransactionRows);
+	const mockDownloadCsv = vi.mocked(downloadCsv);
+	const mockToastsShow = vi.mocked(toastsShow);
+	const mockConsoleError = vi.mocked(consoleError);
+	const mockTrackExportData = vi.mocked(trackExportData);
+
+	beforeEach(() => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date('2026-05-28T10:00:00.000Z'));
+		vi.clearAllMocks();
+
+		mockBuildTokenRows.mockReturnValue([tokenRow]);
+		mockSortTokenRows.mockImplementation((rows) => rows);
+		mockBuildTransactionRows.mockReturnValue([transactionRow]);
+		mockSortTransactionRows.mockImplementation((rows) => rows);
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
+	describe('exportTokensCsv', () => {
+		it('blocks non-USD exports while the exchange rate is unavailable', () => {
+			const result = exportTokensCsv({
+				tokens: [],
+				currency: Currency.EUR,
+				exchangeRateToUsd: null
+			});
+
+			expect(result).toBeFalsy();
+			expect(mockBuildTokenRows).not.toHaveBeenCalled();
+			expect(mockDownloadCsv).not.toHaveBeenCalled();
+			expect(mockToastsShow).toHaveBeenCalledExactlyOnceWith({
+				text: en.settings.error.export_exchange_rate_unavailable,
+				level: 'error',
+				duration: 4000
+			});
+			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
+				type: 'tokens_extended',
+				resultStatus: 'error',
+				errorCode: 'fx_rate_unavailable'
+			});
+		});
+
+		it('downloads the requested token CSV variant and shows a success toast', () => {
+			const result = exportTokensCsv({
+				tokens: [],
+				currency: Currency.USD,
+				exchangeRateToUsd: 1,
+				variant: 'basic'
+			});
+
+			expect(result).toBeTruthy();
+			expect(mockDownloadCsv).toHaveBeenCalledExactlyOnceWith({
+				filename: 'oisy-tokens-basic-2026-05-28T10-00-00-000Z.csv',
+				csv: 'Network,Symbol,Name,Balance,Currency,Value\r\nInternet Computer,ICP,Internet Computer,1.0,USD,1'
+			});
+			expect(mockToastsShow).toHaveBeenCalledExactlyOnceWith({
+				text: en.settings.text.export_tokens_success,
+				level: 'success',
+				duration: 2000
+			});
+			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
+				type: 'tokens_basic',
+				resultStatus: 'success'
+			});
+		});
+	});
+
+	describe('exportTransactionsCsv', () => {
+		it('tracks a no_identity error and skips the export when the identity is missing', async () => {
+			const buildTransactions = vi.fn(() => []);
+
+			const result = await exportTransactionsCsv({
+				...defaultTransactionParams(),
+				identity: null,
+				buildTransactions,
+				variant: 'basic'
+			});
+
+			expect(result).toBeFalsy();
+			expect(mockLoadNextIcTransactionsByOldest).not.toHaveBeenCalled();
+			expect(mockLoadOlderSolTransactions).not.toHaveBeenCalled();
+			expect(buildTransactions).not.toHaveBeenCalled();
+			expect(mockDownloadCsv).not.toHaveBeenCalled();
+			expect(mockToastsShow).not.toHaveBeenCalled();
+			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
+				type: 'transactions_basic',
+				resultStatus: 'error',
+				errorCode: 'no_identity'
+			});
+		});
+
+		it('keeps exporting after one paginated token loader fails', async () => {
+			let icLoaderCalls = 0;
+			const buildTransactions = vi.fn(() => []);
+
+			mockLoadNextIcTransactionsByOldest.mockImplementation(({ signalEnd }) => {
+				icLoaderCalls += 1;
+
+				if (icLoaderCalls === 2) {
+					signalEnd();
+				}
+
+				return Promise.resolve({ success: true });
+			});
+			mockLoadOlderSolTransactions.mockRejectedValue(new Error('sol loader failed'));
+
+			const result = await exportTransactionsCsv({
+				...defaultTransactionParams(),
+				tokens: [ICP_TOKEN, SOLANA_TOKEN],
+				buildTransactions,
+				variant: 'basic'
+			});
+
+			expect(result).toBeTruthy();
+			expect(mockLoadNextIcTransactionsByOldest).toHaveBeenCalledTimes(2);
+			expect(mockLoadOlderSolTransactions).toHaveBeenCalledOnce();
+			expect(buildTransactions).toHaveBeenCalledOnce();
+			expect(mockBuildTransactionRows).toHaveBeenCalledOnce();
+			expect(mockDownloadCsv).toHaveBeenCalledExactlyOnceWith({
+				filename: 'oisy-transactions-basic-2026-05-28T10-00-00-000Z.csv',
+				csv: 'Timestamp,Network,Token,Type,Amount,Counterparty,Fee,Fee Token,Credit,Debit,Fee Token Debit,Transaction ID\r\n2026-05-28 10:00:00,Internet Computer,ICP,Send,1.0,recipient,0.0001,ICP,,-1.0001,,tx-id'
+			});
+			expect(mockToastsShow).toHaveBeenCalledExactlyOnceWith({
+				text: en.settings.text.export_transactions_success,
+				level: 'success',
+				duration: 2000
+			});
+			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
+				type: 'transactions_basic',
+				resultStatus: 'success'
+			});
+		});
+
+		it('fails the export when a Solana page fails, rather than exporting what came before it', async () => {
+			const error = new Error('RPC down');
+			const buildTransactions = vi.fn(() => []);
+
+			mockLoadOlderSolTransactions
+				.mockResolvedValueOnce({ success: true })
+				.mockResolvedValueOnce({ success: false, err: error });
+
+			const result = await exportTransactionsCsv({
+				...defaultTransactionParams(),
+				tokens: [SOLANA_TOKEN],
+				buildTransactions
+			});
+
+			expect(result).toBeFalsy();
+			expect(mockLoadOlderSolTransactions).toHaveBeenCalledTimes(2);
+			expect(buildTransactions).not.toHaveBeenCalled();
+			expect(mockDownloadCsv).not.toHaveBeenCalled();
+			expect(mockConsoleError).toHaveBeenCalledExactlyOnceWith(error);
+			expect(mockToastsShow).toHaveBeenCalledExactlyOnceWith({
+				text: en.settings.error.export_failed,
+				level: 'error',
+				duration: 4000
+			});
+			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
+				type: 'transactions_extended',
+				resultStatus: 'error',
+				errorCode: 'build_failed',
+				error: 'RPC down'
+			});
+		});
+
+		it('fails the export when an ICP page fails, rather than exporting what came before it', async () => {
+			const error = new Error('Index canister unavailable');
+			const buildTransactions = vi.fn(() => []);
+
+			mockLoadNextIcTransactionsByOldest
+				.mockResolvedValueOnce({ success: true })
+				.mockResolvedValueOnce({ success: false, err: error });
+
+			const result = await exportTransactionsCsv({
+				...defaultTransactionParams(),
+				tokens: [ICP_TOKEN],
+				buildTransactions
+			});
+
+			expect(result).toBeFalsy();
+			expect(mockLoadNextIcTransactionsByOldest).toHaveBeenCalledTimes(2);
+			expect(buildTransactions).not.toHaveBeenCalled();
+			expect(mockDownloadCsv).not.toHaveBeenCalled();
+			expect(mockConsoleError).toHaveBeenCalledExactlyOnceWith(error);
+		});
+
+		// The end of the history comes through `signalEnd`, and stops the walk without an error.
+		it('exports once the ICP loader signals the end', async () => {
+			mockLoadNextIcTransactionsByOldest
+				.mockResolvedValueOnce({ success: true })
+				.mockImplementationOnce(({ signalEnd }) => {
+					signalEnd();
+
+					return Promise.resolve({ success: false });
+				});
+
+			const result = await exportTransactionsCsv({
+				...defaultTransactionParams(),
+				tokens: [ICP_TOKEN]
+			});
+
+			expect(result).toBeTruthy();
+			expect(mockLoadNextIcTransactionsByOldest).toHaveBeenCalledTimes(2);
+			expect(mockDownloadCsv).toHaveBeenCalledOnce();
+		});
+
+		it('exports once the Solana pager signals the end', async () => {
+			mockLoadOlderSolTransactions
+				.mockResolvedValueOnce({ success: true })
+				.mockImplementationOnce(({ signalEnd }) => {
+					signalEnd();
+
+					return Promise.resolve({ success: false });
+				});
+
+			const result = await exportTransactionsCsv({
+				...defaultTransactionParams(),
+				tokens: [SOLANA_TOKEN]
+			});
+
+			expect(result).toBeTruthy();
+			expect(mockLoadOlderSolTransactions).toHaveBeenCalledTimes(2);
+			expect(mockDownloadCsv).toHaveBeenCalledOnce();
+			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
+				type: 'transactions_extended',
+				resultStatus: 'success'
+			});
+		});
+
+		it('shows an error toast when building the export throws', async () => {
+			const error = new Error('row build failed');
+			mockBuildTransactionRows.mockImplementation(() => {
+				throw error;
+			});
+
+			const result = await exportTransactionsCsv(defaultTransactionParams());
+
+			expect(result).toBeFalsy();
+			expect(mockConsoleError).toHaveBeenCalledExactlyOnceWith(error);
+			expect(mockDownloadCsv).not.toHaveBeenCalled();
+			expect(mockToastsShow).toHaveBeenCalledExactlyOnceWith({
+				text: en.settings.error.export_failed,
+				level: 'error',
+				duration: 4000
+			});
+			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
+				type: 'transactions_extended',
+				resultStatus: 'error',
+				errorCode: 'build_failed',
+				error: 'row build failed'
+			});
+		});
+	});
+});

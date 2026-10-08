@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import UtxosFeeContexts from '$btc/components/fee/UtxosFeeContexts.svelte';
@@ -15,15 +14,18 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Nft } from '$lib/types/nft';
+	import type { WizardStep } from '$lib/types/wizard';
 	import {
 		isNetworkIdEthereum,
 		isNetworkIdICP,
 		isNetworkIdBitcoin,
 		isNetworkIdSolana,
+		isNetworkIdXrp,
 		isNetworkIdEvm,
 		isNetworkEthereum
 	} from '$lib/utils/network.utils';
 	import SolSendTokenWizard from '$sol/components/send/SolSendTokenWizard.svelte';
+	import XrpSendTokenWizard from '$xrp/components/send/XrpSendTokenWizard.svelte';
 
 	interface Props {
 		destination: string;
@@ -36,6 +38,7 @@
 		onClose: () => void;
 		onNext: () => void;
 		onSendBack: () => void;
+		onSendForm: () => void;
 		onTokensList: () => void;
 	}
 
@@ -50,6 +53,7 @@
 		onClose,
 		onNext,
 		onSendBack,
+		onSendForm,
 		onTokensList
 	}: Props = $props();
 
@@ -131,6 +135,20 @@
 		{onClose}
 		{onNext}
 		{onSendBack}
+		{onTokensList}
+		{selectedContact}
+		bind:amount
+		bind:sendProgressStep
+	/>
+{:else if isNetworkIdXrp($sendToken.network.id)}
+	<XrpSendTokenWizard
+		{currentStep}
+		{destination}
+		{onBack}
+		{onClose}
+		{onNext}
+		{onSendBack}
+		{onSendForm}
 		{onTokensList}
 		{selectedContact}
 		bind:amount

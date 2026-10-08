@@ -53,6 +53,10 @@ export const TRACK_COUNT_SOL_SEND_ERROR = 'sol_send_error';
 export const TRACK_COUNT_WC_SOL_SEND_SUCCESS = 'wc_sol_send_success';
 export const TRACK_COUNT_WC_SOL_SEND_ERROR = 'wc_sol_send_error';
 
+// XRP Ledger
+export const TRACK_COUNT_XRP_SEND_SUCCESS = 'xrp_send_success';
+export const TRACK_COUNT_XRP_SEND_ERROR = 'xrp_send_error';
+
 // WalletConnect
 export const TRACK_COUNT_WALLET_CONNECT_MENU_OPEN = 'wallet_connect_menu_open';
 export const TRACK_COUNT_WALLET_CONNECT_QR_CODE = 'wallet_connect_qr_code';
@@ -70,8 +74,16 @@ export const TRACK_COUNT_CAROUSEL_CLOSE = 'carousel_close';
 export const TRACK_COUNT_CAROUSEL_OPEN = 'carousel_open';
 
 // Swap
+export const TRACK_COUNT_SWAP_SUBMITTED = 'swap_submitted';
 export const TRACK_COUNT_SWAP_SUCCESS = 'swap_success';
 export const TRACK_COUNT_SWAP_ERROR = 'swap_error';
+
+// Liquidium (lend & borrow). Generic across actions — the action (supply/borrow/
+// …) rides in the event metadata — mirroring the swap submitted/success/error
+// lifecycle: submitted at action time, success/error from the AUT poller.
+export const TRACK_COUNT_LIQUIDIUM_SUBMITTED = 'liquidium_submitted';
+export const TRACK_COUNT_LIQUIDIUM_SUCCESS = 'liquidium_success';
+export const TRACK_COUNT_LIQUIDIUM_ERROR = 'liquidium_error';
 
 // Manage Tokens
 export const TRACK_COUNT_MANAGE_TOKENS_ENABLE_SUCCESS = 'manage_tokens_enable_success';
@@ -127,6 +139,7 @@ export const TRACK_SNAPSHOT_SEND_ERROR = 'snapshot_send_error';
 export const LANDING_PAGE_ROUTE = 'landing-page';
 export const HOME_PAGE_ROUTE = 'home-page';
 export const USER_MENU_ROUTE = 'user-menu';
+export const MORE_MENU_ROUTE = 'more-menu';
 export const HIDE_TOKEN_MODAL_ROUTE = 'hide-token-modal';
 export const MANAGE_TOKENS_MODAL_ROUTE = 'manage-tokens-modal';
 export const TOKEN_VIEW_ROUTE = 'token-view';
@@ -167,9 +180,6 @@ export const AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED = 'ai_assistant_message_fa
 export const AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED = 'ai_assistant_tool_execution_triggered';
 export const AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED = 'ai_assistant_textual_response_received';
 
-// Buy
-export const TRACK_BUY_TOKEN = 'buy_token';
-
 // NFTs
 export const TRACK_OPEN_ASSETS_TAB = 'open_assets_tab';
 export const TRACK_NFT_SETTINGS_CHANGE = 'nft_settings_change';
@@ -179,3 +189,4 @@ export const TRACK_NFT_CONSENT_GIVEN = 'nft_consent_given';
 export const TRACK_NFT_OPEN = 'nft_open';
 export const TRACK_NFT_OPEN_CONSENT_MODAL = 'nft_open_consent_modal';
 export const TRACK_NFT_SPAM_HIDE_ACTION = 'nft_spam_hide_action';
+export const TRACK_NFT_LOAD_ONCHAIN_IMAGE_URL = 'nft_load_onchain_image_url';

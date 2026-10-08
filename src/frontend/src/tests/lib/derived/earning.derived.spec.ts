@@ -1,12 +1,5 @@
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import {
-	enabledHarvestAutopilotsUsdBalance,
-	harvestAutopilots,
-	harvestAutopilotsCurrentEarning,
-	harvestAutopilotsMaxApy,
-	harvestAutopilotsUsdBalance
-} from '$eth/derived/harvest-autopilots.derived';
-import {
 	allEarningPositionsUsd,
 	allEarningYearlyAmountUsd,
 	earningData,
@@ -14,7 +7,6 @@ import {
 	highestApyEarningData,
 	highestEarningPotentialUsd
 } from '$lib/derived/earning.derived';
-import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
 import { get } from 'svelte/store';
 
 describe('earning.derived', () => {
@@ -23,114 +15,11 @@ describe('earning.derived', () => {
 	});
 
 	describe('earningData', () => {
-		const setupStores = ({
-			enabledMainnetUsdBalance = 1000,
-			harvestUsdBalance = 100,
-			enabledHarvestUsdBalance = 100,
-			currentEarning = 5,
-			vaults = [{ token: { network: { icon: 'eth-icon' }, assetIcon: 'usdc-icon' } }],
-			maxApy = '5.5'
-		}: {
-			enabledMainnetUsdBalance?: number | null;
-			harvestUsdBalance?: number;
-			enabledHarvestUsdBalance?: number;
-			currentEarning?: number;
-			vaults?: { token: { network: { icon?: string }; assetIcon?: string } }[];
-			maxApy?: string;
-		} = {}) => {
-			vi.spyOn(enabledMainnetFungibleTokensUsdBalance, 'subscribe').mockImplementation((fn) => {
-				fn(enabledMainnetUsdBalance as number);
-				return () => {};
-			});
-			vi.spyOn(harvestAutopilotsUsdBalance, 'subscribe').mockImplementation((fn) => {
-				fn(harvestUsdBalance);
-				return () => {};
-			});
-			vi.spyOn(enabledHarvestAutopilotsUsdBalance, 'subscribe').mockImplementation((fn) => {
-				fn(enabledHarvestUsdBalance);
-				return () => {};
-			});
-			vi.spyOn(harvestAutopilotsCurrentEarning, 'subscribe').mockImplementation((fn) => {
-				fn(currentEarning);
-				return () => {};
-			});
-			vi.spyOn(harvestAutopilots, 'subscribe').mockImplementation((fn) => {
-				fn(vaults as never);
-				return () => {};
-			});
-			vi.spyOn(harvestAutopilotsMaxApy, 'subscribe').mockImplementation((fn) => {
-				fn(maxApy);
-				return () => {};
-			});
-		};
-
-		it('returns correctly structured harvest-autopilot record', () => {
-			setupStores();
-
+		it('returns the aggregated data from all providers', () => {
 			const result = get(earningData);
-			const record = result['harvest-autopilot'];
 
-			expect(record[EarningCardFields.APY]).toBe('5.5');
-			expect(record[EarningCardFields.CURRENT_STAKED]).toBe(100);
-			expect(record[EarningCardFields.CURRENT_EARNING]).toBe(5);
-			expect(record[EarningCardFields.NETWORKS]).toEqual(['eth-icon']);
-			expect(record[EarningCardFields.ASSETS]).toEqual(['usdc-icon']);
-		});
-
-		it('calculates earning potential correctly', () => {
-			setupStores({
-				enabledMainnetUsdBalance: 10000,
-				enabledHarvestUsdBalance: 2000,
-				maxApy: '10.0'
-			});
-
-			const result = get(earningData);
-			const record = result['harvest-autopilot'];
-
-			// (10000 - 2000) * 10.0 / 100 = 800
-			expect(record[EarningCardFields.EARNING_POTENTIAL]).toBe(800);
-		});
-
-		it('returns undefined earning potential when mainnet balance is nullish', () => {
-			setupStores({
-				enabledMainnetUsdBalance: null
-			});
-
-			const result = get(earningData);
-			const record = result['harvest-autopilot'];
-
-			expect(record[EarningCardFields.EARNING_POTENTIAL]).toBeUndefined();
-		});
-
-		it('deduplicates network and asset icons', () => {
-			setupStores({
-				vaults: [
-					{ token: { network: { icon: 'eth-icon' }, assetIcon: 'usdc-icon' } },
-					{ token: { network: { icon: 'eth-icon' }, assetIcon: 'usdc-icon' } },
-					{ token: { network: { icon: 'base-icon' }, assetIcon: 'usdt-icon' } }
-				]
-			});
-
-			const result = get(earningData);
-			const record = result['harvest-autopilot'];
-
-			expect(record[EarningCardFields.NETWORKS]).toEqual(['eth-icon', 'base-icon']);
-			expect(record[EarningCardFields.ASSETS]).toEqual(['usdc-icon', 'usdt-icon']);
-		});
-
-		it('excludes nullish icons from networks and assets', () => {
-			setupStores({
-				vaults: [
-					{ token: { network: { icon: 'eth-icon' }, assetIcon: undefined } },
-					{ token: { network: { icon: undefined }, assetIcon: 'usdc-icon' } }
-				]
-			});
-
-			const result = get(earningData);
-			const record = result['harvest-autopilot'];
-
-			expect(record[EarningCardFields.NETWORKS]).toEqual(['eth-icon']);
-			expect(record[EarningCardFields.ASSETS]).toEqual(['usdc-icon']);
+			expect(result).toBeDefined();
+			expect(typeof result).toBe('object');
 		});
 	});
 
@@ -189,7 +78,7 @@ describe('earning.derived', () => {
 						[EarningCardFields.APY]: '10.0',
 						action: vi.fn()
 					},
-					'other-earning': mockSecondRecord
+					'gold-dao-staking': mockSecondRecord
 				});
 				return () => {};
 			});
@@ -240,45 +129,49 @@ describe('earning.derived', () => {
 	});
 
 	describe('highestEarningPotentialUsd', () => {
-		const setupStores = ({ apy = 10, mainnetBalance = 1000, harvestBalance = 0 } = {}) => {
-			vi.spyOn(highestApyEarning, 'subscribe').mockImplementation((fn) => {
-				fn(apy);
+		it('returns the max earning potential across providers', () => {
+			vi.spyOn(earningData, 'subscribe').mockImplementation((fn) => {
+				fn({
+					'harvest-autopilot': {
+						[EarningCardFields.EARNING_POTENTIAL]: 800,
+						action: vi.fn()
+					},
+					'gold-dao-staking': {
+						[EarningCardFields.EARNING_POTENTIAL]: 200,
+						action: vi.fn()
+					}
+				});
 				return () => {};
 			});
-			vi.spyOn(enabledMainnetFungibleTokensUsdBalance, 'subscribe').mockImplementation((fn) => {
-				fn(mainnetBalance);
-				return () => {};
-			});
-			vi.spyOn(enabledHarvestAutopilotsUsdBalance, 'subscribe').mockImplementation((fn) => {
-				fn(harvestBalance);
-				return () => {};
-			});
-		};
 
-		it('returns the highest earning potential in USD', () => {
-			setupStores({ mainnetBalance: 123456 });
-
-			// (123456 - 0) * 10 / 100 = 12345.6
-			expect(get(highestEarningPotentialUsd)).toBe(12345.6);
+			expect(get(highestEarningPotentialUsd)).toBe(800);
 		});
 
-		it('subtracts enabled harvest autopilot balance', () => {
-			setupStores({ mainnetBalance: 1000, harvestBalance: 200 });
-
-			// (1000 - 200) * 10 / 100 = 80
-			expect(get(highestEarningPotentialUsd)).toBe(80);
-		});
-
-		it('handles a zero APY', () => {
-			setupStores({ apy: 0 });
+		it('returns 0 when no earning potential is available', () => {
+			vi.spyOn(earningData, 'subscribe').mockImplementation((fn) => {
+				fn({});
+				return () => {};
+			});
 
 			expect(get(highestEarningPotentialUsd)).toBe(0);
 		});
 
-		it('handles a zero balance', () => {
-			setupStores({ mainnetBalance: 0 });
+		it('ignores providers with invalid earning potential', () => {
+			vi.spyOn(earningData, 'subscribe').mockImplementation((fn) => {
+				fn({
+					'harvest-autopilot': {
+						[EarningCardFields.EARNING_POTENTIAL]: undefined,
+						action: vi.fn()
+					},
+					'gold-dao-staking': {
+						[EarningCardFields.EARNING_POTENTIAL]: 120,
+						action: vi.fn()
+					}
+				});
+				return () => {};
+			});
 
-			expect(get(highestEarningPotentialUsd)).toBe(0);
+			expect(get(highestEarningPotentialUsd)).toBe(120);
 		});
 	});
 

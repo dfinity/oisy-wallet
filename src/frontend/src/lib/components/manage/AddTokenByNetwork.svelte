@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { preventDefault } from '@dfinity/gix-components';
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import EthAddTokenForm from '$eth/components/tokens/EthAddTokenForm.svelte';
@@ -13,13 +12,15 @@
 	import { networks, networksMainnets } from '$lib/derived/networks.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
+	import { preventDefault } from '$lib/utils/event-modifiers.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdBitcoin,
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
 		isNetworkIdICP,
-		isNetworkIdSolana
+		isNetworkIdSolana,
+		isNetworkIdXrp
 	} from '$lib/utils/network.utils';
 	import SolAddTokenForm from '$sol/components/tokens/SolAddTokenForm.svelte';
 
@@ -55,12 +56,19 @@
 
 	let isSolanaNetwork = $derived(isNetworkIdSolana(network?.id));
 
+	let isXrpNetwork = $derived(isNetworkIdXrp(network?.id));
+
+	let unsupportedNetwork = $derived(
+		nonNullish(network) && !isIcpNetwork && !isEthereumNetwork && !isEvmNetwork && !isSolanaNetwork
+	);
+
 	let {
 		ledgerCanisterId,
 		indexCanisterId,
 		extCanisterId,
 		dip721CanisterId,
 		icPunksCanisterId,
+		icrc7CanisterId,
 		ethContractAddress,
 		splTokenAddress
 	} = $derived(tokenData);
@@ -74,7 +82,9 @@
 					? { extCanisterId }
 					: nonNullish(dip721CanisterId)
 						? { dip721CanisterId }
-						: { icPunksCanisterId }
+						: nonNullish(icPunksCanisterId)
+							? { icPunksCanisterId }
+							: { icrc7CanisterId }
 				: {
 						ledgerCanisterId,
 						indexCanisterId:
@@ -101,7 +111,9 @@
 
 	let invalidIcPunks = $derived(isNullishOrEmpty(icPunksCanisterId));
 
-	let invalidIcNft = $derived(invalidExt && invalidDip721 && invalidIcPunks);
+	let invalidIcrc7 = $derived(isNullishOrEmpty(icrc7CanisterId));
+
+	let invalidIcNft = $derived(invalidExt && invalidDip721 && invalidIcPunks && invalidIcrc7);
 
 	let invalidSpl = $derived(isNullishOrEmpty(splTokenAddress));
 
@@ -135,7 +147,12 @@
 
 		{#if isIcpNetwork}
 			{#if isNftsPage}
-				<IcAddNftForm bind:extCanisterId bind:dip721CanisterId bind:icPunksCanisterId />
+				<IcAddNftForm
+					bind:extCanisterId
+					bind:dip721CanisterId
+					bind:icPunksCanisterId
+					bind:icrc7CanisterId
+				/>
 			{:else}
 				<IcAddIcrcTokenForm bind:ledgerCanisterId bind:indexCanisterId />
 			{/if}
@@ -143,9 +160,19 @@
 			<EthAddTokenForm bind:contractAddress={ethContractAddress} />
 		{:else if isSolanaNetwork}
 			<SolAddTokenForm bind:tokenAddress={splTokenAddress} />
-		{:else if nonNullish($selectedNetwork)}
-			<span class="mb-6">{$i18n.tokens.import.text.custom_tokens_not_supported}</span>
 		{/if}
+
+		<!-- Always in the DOM: a polite live region is announced when its content changes, not when
+		     the region itself is inserted, so a network picked in the dropdown is read out. -->
+		<div aria-live="polite" role="status">
+			{#if unsupportedNetwork}
+				<span class="mb-6"
+					>{isXrpNetwork
+						? $i18n.tokens.import.text.custom_tokens_not_supported_yet
+						: $i18n.tokens.import.text.custom_tokens_not_supported}</span
+				>
+			{/if}
+		</div>
 
 		{#snippet toolbar()}
 			<AddTokenByNetworkToolbar {invalid} {onBack} />

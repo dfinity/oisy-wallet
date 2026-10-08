@@ -13,7 +13,6 @@
 	let { pendingTransactionsStatus, utxosFee }: Props = $props();
 </script>
 
-<!-- TODO remove this as soon as parallel BTC transactions are also enabled for BTC convert -->
 {#if pendingTransactionsStatus === BtcPendingSentTransactionsStatus.SOME}
 	<div class="w-full" in:fade>
 		<MessageBox level="warning">

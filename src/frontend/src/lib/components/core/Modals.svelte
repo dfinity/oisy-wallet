@@ -1,16 +1,23 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { PERSONAL_NOTES_ENABLED } from '$env/personal-notes.env';
+	import { TIPS_ENABLED } from '$env/tips.env';
 	import EthHideTokenModal from '$eth/components/tokens/EthHideTokenModal.svelte';
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
 	import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte';
+	import NotesModal from '$lib/components/notes/NotesModal.svelte';
 	import PayDialog from '$lib/components/pay/PayDialog.svelte';
 	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
 	import ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
 	import ScannerModal from '$lib/components/scanner/ScannerModal.svelte';
+	import SendModal from '$lib/components/send/SendModal.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
+	import TipClaimModal from '$lib/components/tip/TipClaimModal.svelte';
+	import TipModal from '$lib/components/tip/TipModal.svelte';
+	import TipWelcomeModal from '$lib/components/tip/TipWelcomeModal.svelte';
 	import FullscreenMediaModal from '$lib/components/ui/FullscreenMediaModal.svelte';
 	import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
 	import WalletConnectSessionsModal from '$lib/components/wallet-connect/WalletConnectSessionsModal.svelte';
@@ -24,7 +31,12 @@
 		modalVipQrCode,
 		modalSettingsState,
 		modalReferralCode,
+		modalTip,
+		modalTipClaim,
+		modalTipWelcome,
+		modalTipClaimData,
 		modalAddressBook,
+		modalNotes,
 		modalVipQrCodeData,
 		modalIcHideTokenData,
 		modalHideTokenData,
@@ -35,6 +47,8 @@
 		modalReceive,
 		modalReceiveId,
 		modalPayDialogOpen,
+		modalSend,
+		modalSendData,
 		modalUniversalScannerOpen,
 		modalWalletConnectSessions
 	} from '$lib/derived/modal.derived';
@@ -61,8 +75,25 @@
 		<SettingsModal />
 	{:else if $modalReferralCode}
 		<ReferralCodeModal />
+	{:else if TIPS_ENABLED && $modalTip}
+		<TipModal />
+	{:else if $modalTipClaim && nonNullish($modalTipClaimData)}
+		<!--
+			Not behind `TIPS_ENABLED`, unlike the create surface above: outstanding
+			links stay claimable while the flag is off, so closing the flag must not
+			strand a claim that is already under way.
+		-->
+		<TipClaimModal pending={$modalTipClaimData} />
+	{:else if $modalTipWelcome}
+		<!--
+			Also not behind `TIPS_ENABLED`, for the same reason as the claim above: it
+			follows a claim, and a claim stays possible while the create surface is off.
+		-->
+		<TipWelcomeModal />
 	{:else if $modalAddressBook}
 		<AddressBookModal />
+	{:else if PERSONAL_NOTES_ENABLED && $modalNotes}
+		<NotesModal />
 	{:else if $modalNftImageConsent && nonNullish($modalNftImageConsentData)}
 		<NftImageConsentModal collection={$modalNftImageConsentData} />
 	{:else if $modalNftFullscreenDisplayOpen && nonNullish($modalNftFullscreenDisplayData?.imageUrl)}
@@ -71,6 +102,8 @@
 		<ReceiveAddressModal infoCmp={ReceiveAddresses} />
 	{:else if $modalPayDialogOpen}
 		<PayDialog />
+	{:else if $modalSend && nonNullish($modalSendData)}
+		<SendModal isNftsPage={false} isTransactionsPage={false} />
 	{:else if $modalUniversalScannerOpen}
 		<ScannerModal />
 	{:else if $modalWalletConnectSessions}

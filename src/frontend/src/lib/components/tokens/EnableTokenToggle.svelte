@@ -10,6 +10,7 @@
 	import { isTokenExtCustomToken } from '$icp/utils/ext.utils';
 	import { isTokenIcPunksCustomToken } from '$icp/utils/icpunks.utils';
 	import { isTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+	import { isTokenIcrc7CustomToken } from '$icp/utils/icrc7.utils';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import type { Token } from '$lib/types/token';
 	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
@@ -26,7 +27,7 @@
 
 {#if isTokenIcrcCustomToken(token)}
 	<IcManageTokenToggle onIcToken={(t) => onToggle(t)} {token} />
-{:else if isTokenErc20CustomToken(token) || isTokenSplCustomToken(token) || isTokenErc721CustomToken(token) || isTokenErc1155CustomToken(token) || isTokenExtCustomToken(token) || isTokenDip721CustomToken(token) || isTokenIcPunksCustomToken(token) || isTokenErc4626CustomToken(token)}
+{:else if isTokenErc20CustomToken(token) || isTokenSplCustomToken(token) || isTokenErc721CustomToken(token) || isTokenErc1155CustomToken(token) || isTokenExtCustomToken(token) || isTokenDip721CustomToken(token) || isTokenIcPunksCustomToken(token) || isTokenIcrc7CustomToken(token) || isTokenErc4626CustomToken(token)}
 	<ManageTokenToggle onShowOrHideToken={(t) => onToggle(t)} {token} />
 {:else if isBitcoinToken(token)}
 	<BtcManageTokenToggle />

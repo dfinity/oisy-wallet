@@ -7,7 +7,8 @@ export type ButtonColorStyle =
 	| 'tertiary-alt'
 	| 'muted'
 	| 'error'
-	| 'success';
+	| 'success'
+	| 'success-light';
 
 export type BadgeVariant =
 	| 'default'
@@ -24,13 +25,7 @@ export type BadgeVariant =
 	| 'transparent';
 
 export type TagVariant =
-	| 'default'
-	| 'emphasis'
-	| 'info'
-	| 'error'
-	| 'warning'
-	| 'success'
-	| 'outline';
+	'default' | 'emphasis' | 'info' | 'error' | 'warning' | 'success' | 'outline';
 
 export type AvatarVariants = 'xl' | 'lg' | 'md' | 'sm' | 'xs' | 'xxs';
 

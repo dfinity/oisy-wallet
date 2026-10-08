@@ -3,12 +3,11 @@
 mod bitcoin {
     //! Tests for the bitcoin types.
     use candid::{Decode, Encode};
-    use ic_cdk::bitcoin_canister::{Network as BitcoinNetwork, Outpoint, Utxo};
+    use ic_cdk_bitcoin_canister::{Network as BitcoinNetwork, OutPoint, Txid, Utxo};
 
     use crate::{
         types::bitcoin::{
-            BtcAddPendingTransactionRequest, BtcGetPendingTransactionsRequest, PendingTransaction,
-            MAX_ADDRESS_LEN, MAX_TXID_BYTES, MAX_UTXOS_LEN,
+            BtcAddPendingTransactionRequest, PendingTransaction, MAX_TXID_BYTES, MAX_UTXOS_LEN,
         },
         validate::{test_validate_on_deserialize, TestVector, Validate},
     };
@@ -41,8 +40,8 @@ mod bitcoin {
                 input: BtcAddPendingTransactionRequest {
                     txid: vec![0; MAX_TXID_BYTES],
                     utxos: vec![Utxo {
-                        outpoint: Outpoint {
-                            txid: vec![0; MAX_TXID_BYTES],
+                        outpoint: OutPoint {
+                            txid: Txid::from([0; MAX_TXID_BYTES]),
                             vout: 0,
                         },
                         value: 0,
@@ -52,23 +51,6 @@ mod bitcoin {
                     ii_delegation_chain: None,
                 },
                 valid: true,
-            },
-            TestVector {
-                description: "With a utxo that is too long",
-                input: BtcAddPendingTransactionRequest {
-                    txid: vec![0; MAX_TXID_BYTES],
-                    utxos: vec![Utxo {
-                        outpoint: Outpoint {
-                            txid: vec![0; MAX_TXID_BYTES + 1],
-                            vout: 0,
-                        },
-                        value: 0,
-                        height: 0,
-                    }],
-                    network: BitcoinNetwork::Mainnet,
-                    ii_delegation_chain: None,
-                },
-                valid: false,
             },
             TestVector {
                 description: "With too many utxos",
@@ -76,8 +58,8 @@ mod bitcoin {
                     txid: vec![0; MAX_TXID_BYTES],
                     utxos: vec![
                         Utxo {
-                            outpoint: Outpoint {
-                                txid: vec![0; MAX_TXID_BYTES],
+                            outpoint: OutPoint {
+                                txid: Txid::from([0; MAX_TXID_BYTES]),
                                 vout: 0
                             },
                             value: 0,
@@ -85,30 +67,6 @@ mod bitcoin {
                         };
                         MAX_UTXOS_LEN + 1
                     ],
-                    network: BitcoinNetwork::Mainnet,
-                    ii_delegation_chain: None,
-                },
-                valid: false,
-            }
-        ]
-    );
-
-    test_validate_on_deserialize!(
-        BtcGetPendingTransactionsRequest,
-        [
-            TestVector {
-                description: "BtcGetPendingTransactionsRequest with max length address",
-                input: BtcGetPendingTransactionsRequest {
-                    address: "1".repeat(MAX_ADDRESS_LEN),
-                    network: BitcoinNetwork::Mainnet,
-                    ii_delegation_chain: None,
-                },
-                valid: true,
-            },
-            TestVector {
-                description: "BtcGetPendingTransactionsRequest with address too long",
-                input: BtcGetPendingTransactionsRequest {
-                    address: "1".repeat(MAX_ADDRESS_LEN + 1),
                     network: BitcoinNetwork::Mainnet,
                     ii_delegation_chain: None,
                 },
@@ -142,8 +100,8 @@ mod bitcoin {
                     txid: vec![0; MAX_TXID_BYTES],
                     utxos: vec![
                         Utxo {
-                            outpoint: Outpoint {
-                                txid: vec![0; MAX_TXID_BYTES],
+                            outpoint: OutPoint {
+                                txid: Txid::from([0; MAX_TXID_BYTES]),
                                 vout: 0,
                             },
                             value: 0,
@@ -154,21 +112,6 @@ mod bitcoin {
                 },
                 valid: false,
             },
-            TestVector {
-                description: "PendingTransaction with a utxo that is too long",
-                input: PendingTransaction {
-                    txid: vec![0; MAX_TXID_BYTES],
-                    utxos: vec![Utxo {
-                        outpoint: Outpoint {
-                            txid: vec![0; MAX_TXID_BYTES + 1],
-                            vout: 0,
-                        },
-                        value: 0,
-                        height: 0,
-                    }],
-                },
-                valid: false,
-            }
         ]
     );
 }
@@ -622,6 +565,58 @@ mod contact_image {
             ]
         );
     }
+
+    mod icrc7 {
+        //! Tests for the icrc7 module.
+        use candid::{Decode, Encode, Principal};
+
+        use crate::{
+            types::custom_token::Icrc7Token,
+            validate::{test_validate_on_deserialize, TestVector, Validate},
+        };
+
+        fn canister_id1() -> Principal {
+            Principal::from_text("xea2t-daaaa-aaaaj-qnp2a-cai").unwrap()
+        }
+        fn user_id() -> Principal {
+            Principal::from_text("tdb26-jop6k-aogll-7ltgs-eruif-6kk7m-qpktf-gdiqx-mxtrf-vb5e6-eqe")
+                .unwrap()
+        }
+
+        test_validate_on_deserialize!(
+            Icrc7Token,
+            [
+                TestVector {
+                    input: Icrc7Token {
+                        canister_id: canister_id1(),
+                    },
+                    valid: true,
+                    description: "Icrc7Token with valid canister_id",
+                },
+                TestVector {
+                    input: Icrc7Token {
+                        canister_id: Principal::anonymous(),
+                    },
+                    valid: false,
+                    description: "Icrc7Token with anonymous canister_id",
+                },
+                TestVector {
+                    input: Icrc7Token {
+                        canister_id: Principal::management_canister(),
+                    },
+                    valid: false,
+                    description: "Icrc7Token with the management canister as canister_id",
+                },
+                TestVector {
+                    input: Icrc7Token {
+                        canister_id: user_id(),
+                    },
+                    valid: false,
+                    description: "Icrc7Token with user or network principal as canister_id",
+                }
+            ]
+        );
+    }
 }
 
 mod token {
@@ -708,5 +703,77 @@ mod user_profile {
             },
             valid: true,
         }]
+    );
+}
+
+mod agreement {
+    use candid::{Decode, Encode};
+
+    use crate::{
+        types::agreement::{UpdateUserAgreementsRequest, UserAgreement, UserAgreements},
+        validate::{test_validate_on_deserialize, TestVector, Validate},
+    };
+
+    fn request(text_sha256: &str) -> UpdateUserAgreementsRequest {
+        UpdateUserAgreementsRequest {
+            current_user_version: None,
+            agreements: UserAgreements {
+                license_agreement: UserAgreement {
+                    accepted: Some(true),
+                    text_sha256: Some(text_sha256.to_string()),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+        }
+    }
+
+    test_validate_on_deserialize!(
+        UpdateUserAgreementsRequest,
+        [
+            TestVector {
+                description: "No hash provided",
+                input: UpdateUserAgreementsRequest {
+                    current_user_version: None,
+                    agreements: UserAgreements::default(),
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "Lowercase hex hash of the expected length",
+                input: request(&"0123456789abcdef".repeat(4)),
+                valid: true,
+            },
+            TestVector {
+                description: "Uppercase hex hash of the expected length",
+                input: request(&"0123456789ABCDEF".repeat(4)),
+                valid: true,
+            },
+            TestVector {
+                description: "Right length, but not hexadecimal",
+                input: request(&"z".repeat(64)),
+                valid: false,
+            },
+            TestVector {
+                description: "Right length, but a single non-hex character",
+                input: request(&format!("{}g", "a".repeat(63))),
+                valid: false,
+            },
+            TestVector {
+                description: "Right length, but punctuation rather than hex",
+                input: request(&"-".repeat(64)),
+                valid: false,
+            },
+            TestVector {
+                description: "64 bytes of multi-byte characters rather than 64 hex digits",
+                input: request(&"\u{e9}".repeat(32)),
+                valid: false,
+            },
+            TestVector {
+                description: "Hexadecimal, but too short",
+                input: request("abc123"),
+                valid: false,
+            },
+        ]
     );
 }

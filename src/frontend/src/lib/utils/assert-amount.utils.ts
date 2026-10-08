@@ -102,13 +102,13 @@ export const assertCkEthAmount = ({
 		return assertBalanceError;
 	}
 
+	if (nonNullish(fee) && userAmount < fee) {
+		return 'amount-less-than-ledger-fee';
+	}
+
 	const assertMinterInfoError = assertMinterInfo({ minterInfo, userAmount });
 	if (nonNullish(assertMinterInfoError)) {
 		return assertMinterInfoError;
-	}
-
-	if (nonNullish(fee) && userAmount < fee) {
-		return 'amount-less-than-ledger-fee';
 	}
 
 	return assertUserAmountWithFee({ userAmount, balance, fee });

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
+	import ScannedPlainAddressNotice from '$lib/components/send/ScannedPlainAddressNotice.svelte';
 	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import type { ContactUi } from '$lib/types/contact';
@@ -53,6 +54,10 @@
 	{onNext}
 	{selectedContact}
 >
+	{#snippet topBanner()}
+		<ScannedPlainAddressNotice styleClass="mb-6!" />
+	{/snippet}
+
 	{#snippet sendAmount()}
 		<SolSendAmount {onTokensList} bind:amount bind:amountError />
 	{/snippet}

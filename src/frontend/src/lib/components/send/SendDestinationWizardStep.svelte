@@ -34,11 +34,15 @@
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
 		isNetworkIdICP,
-		isNetworkIdSolana
+		isNetworkIdSolana,
+		isNetworkIdXrp
 	} from '$lib/utils/network.utils';
 	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
 	import { solNetworkContacts } from '$sol/derived/sol-contacts.derived';
 	import { solKnownDestinations } from '$sol/derived/sol-transactions.derived';
+	import XrpSendDestination from '$xrp/components/send/XrpSendDestination.svelte';
+	import { xrpNetworkContacts } from '$xrp/derived/xrp-contacts.derived';
+	import { xrpKnownDestinations } from '$xrp/derived/xrp-transactions.derived';
 
 	interface Props {
 		destination: string;
@@ -106,7 +110,6 @@
 			<CkEthLoader isSendFlow={true} nativeTokenId={$nativeEthereumTokenId}>
 				<EthSendDestination
 					knownDestinations={$ethKnownDestinations}
-					networkContacts={$ethNetworkContacts}
 					{onQRCodeScan}
 					token={$sendToken}
 					bind:destination
@@ -126,7 +129,6 @@
 		<div data-tid={testId}>
 			<IcSendDestination
 				knownDestinations={$icKnownDestinations}
-				networkContacts={$icNetworkContacts}
 				{onQRCodeScan}
 				tokenStandard={$sendToken.standard}
 				bind:destination
@@ -145,7 +147,6 @@
 		<div data-tid={testId}>
 			<BtcSendDestination
 				knownDestinations={$btcKnownDestinations}
-				networkContacts={$btcNetworkContacts}
 				networkId={$sendTokenNetworkId}
 				{onQRCodeScan}
 				bind:destination
@@ -164,7 +165,6 @@
 		<div data-tid={testId}>
 			<SolSendDestination
 				knownDestinations={$solKnownDestinations}
-				networkContacts={$solNetworkContacts}
 				{onQRCodeScan}
 				bind:destination
 				bind:invalidDestination
@@ -172,6 +172,23 @@
 			<SendDestinationTabs
 				knownDestinations={$solKnownDestinations}
 				networkContacts={$solNetworkContacts}
+				onNext={next}
+				bind:destination
+				bind:activeSendDestinationTab
+				bind:selectedContact
+			/>
+		</div>
+	{:else if isNetworkIdXrp($sendTokenNetworkId)}
+		<div data-tid={testId}>
+			<XrpSendDestination
+				knownDestinations={$xrpKnownDestinations}
+				{onQRCodeScan}
+				bind:destination
+				bind:invalidDestination
+			/>
+			<SendDestinationTabs
+				knownDestinations={$xrpKnownDestinations}
+				networkContacts={$xrpNetworkContacts}
 				onNext={next}
 				bind:destination
 				bind:activeSendDestinationTab

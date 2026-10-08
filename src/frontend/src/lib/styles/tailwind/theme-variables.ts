@@ -183,6 +183,10 @@ export const themeVariables = {
 		'gold-0': '#CCA055',
 		'gold-100': '#EBD27F',
 		'arbitrum-0': '#11AAFF',
-		'arbitrum-100': '#203147'
+		'arbitrum-100': '#203147',
+		'xrp-0': '#333333',
+		'xrp-100': '#131215',
+		'robinhood-0': '#0E0E0E',
+		'robinhood-100': '#738428'
 	}
 };

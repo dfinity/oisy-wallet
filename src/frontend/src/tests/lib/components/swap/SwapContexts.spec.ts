@@ -1,4 +1,5 @@
 import { SUPPORTED_EVM_MAINNET_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SUPPORTED_SOLANA_MAINNET_NETWORKS } from '$env/networks/networks.sol.env';
@@ -10,8 +11,12 @@ import {
 } from '$lib/stores/modal-networks-list.store';
 import { MODAL_TOKENS_LIST_CONTEXT_KEY } from '$lib/stores/modal-tokens-list.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
+import { swapSupportedTokensStore } from '$lib/stores/swap-supported-tokens.store';
 import * as swapStoreModule from '$lib/stores/swap.store';
 import { initSwapContext, SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
+import { SwapProvider } from '$lib/types/swap';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidIcrcToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSnippet, mockSnippetTestId } from '$tests/mocks/snippet.mock';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
@@ -134,7 +139,9 @@ describe('SwapContexts', () => {
 				ICP_NETWORK,
 				ETHEREUM_NETWORK,
 				...SUPPORTED_EVM_MAINNET_NETWORKS,
-				...SUPPORTED_SOLANA_MAINNET_NETWORKS
+				...SUPPORTED_SOLANA_MAINNET_NETWORKS,
+				// Bitcoin joins the list as long as a provider reaches it: Chain Fusion or NEAR Intents.
+				BTC_MAINNET_NETWORK
 			]);
 		});
 
@@ -173,6 +180,98 @@ describe('SwapContexts', () => {
 			const updatedNetworks = get(networksListContext.filteredNetworks);
 
 			expect(updatedNetworks).toEqual([ICP_NETWORK]);
+		});
+	});
+
+	describe('auto-clear destination when source changes', () => {
+		afterEach(() => {
+			swapSupportedTokensStore.reset();
+		});
+
+		const otherIcrcLedger = 'uf2wh-taaaa-aaaaq-aabna-cai';
+
+		const setProvidersOnlySupporting = (icpLedgerId: string) => {
+			swapSupportedTokensStore.set({
+				aggregated: {
+					icp: { coverage: 'all', supportedTokenIds: new Set([icpLedgerId]) },
+					evm: { coverage: 'none', supportedTokenIds: new Set() },
+					sol: { coverage: 'none', supportedTokenIds: new Set() },
+					btc: { coverage: 'none', supportedTokenIds: new Set() },
+					xrp: { coverage: 'none', supportedTokenIds: new Set() }
+				},
+				providers: [
+					{
+						key: SwapProvider.KONG_SWAP,
+						sourceCategory: 'icp',
+						supportedSourceTokens: new Set([icpLedgerId]),
+						getSupportedDestinations: ({ sourceToken, supportedSourceTokens }) =>
+							supportedSourceTokens?.has((sourceToken as typeof mockValidIcToken).ledgerCanisterId)
+								? { icp: supportedSourceTokens }
+								: undefined
+					}
+				]
+			});
+		};
+
+		it('clears destination when it falls outside the new receive support', async () => {
+			render(SwapContexts, { children: mockSnippet });
+
+			const unreachableDest = { ...mockValidIcrcToken, ledgerCanisterId: otherIcrcLedger };
+			swapContext.setSourceToken(mockValidIcToken);
+			swapContext.setDestinationToken(unreachableDest);
+
+			// Provider only supports the source going to itself; the destination is not reachable.
+			setProvidersOnlySupporting(mockValidIcToken.ledgerCanisterId);
+			await tick();
+
+			expect(get(swapContext.destinationToken)).toBeUndefined();
+		});
+
+		it('keeps destination when it remains reachable', async () => {
+			render(SwapContexts, { children: mockSnippet });
+
+			const reachableDest = { ...mockValidIcrcToken, ledgerCanisterId: otherIcrcLedger };
+			swapContext.setSourceToken(mockValidIcToken);
+			swapContext.setDestinationToken(reachableDest);
+
+			swapSupportedTokensStore.set({
+				aggregated: {
+					icp: {
+						coverage: 'all',
+						supportedTokenIds: new Set([mockValidIcToken.ledgerCanisterId, otherIcrcLedger])
+					},
+					evm: { coverage: 'none', supportedTokenIds: new Set() },
+					sol: { coverage: 'none', supportedTokenIds: new Set() },
+					btc: { coverage: 'none', supportedTokenIds: new Set() },
+					xrp: { coverage: 'none', supportedTokenIds: new Set() }
+				},
+				providers: [
+					{
+						key: SwapProvider.KONG_SWAP,
+						sourceCategory: 'icp',
+						supportedSourceTokens: new Set([mockValidIcToken.ledgerCanisterId, otherIcrcLedger]),
+						getSupportedDestinations: ({ sourceToken, supportedSourceTokens }) =>
+							supportedSourceTokens?.has((sourceToken as typeof mockValidIcToken).ledgerCanisterId)
+								? { icp: supportedSourceTokens }
+								: undefined
+					}
+				]
+			});
+			await tick();
+
+			expect(get(swapContext.destinationToken)).toEqual(reachableDest);
+		});
+
+		it('does nothing when source is unset', async () => {
+			render(SwapContexts, { children: mockSnippet });
+
+			const dest = mockValidErc20Token;
+			swapContext.setDestinationToken(dest);
+
+			setProvidersOnlySupporting(mockValidIcToken.ledgerCanisterId);
+			await tick();
+
+			expect(get(swapContext.destinationToken)).toEqual(dest);
 		});
 	});
 });

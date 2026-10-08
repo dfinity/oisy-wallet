@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
-	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
@@ -10,10 +9,12 @@
 	import type { Erc721Metadata } from '$eth/types/erc721';
 	import IcAddExtTokenReview from '$icp/components/tokens/IcAddExtTokenReview.svelte';
 	import IcAddIcPunksTokenReview from '$icp/components/tokens/IcAddIcPunksTokenReview.svelte';
+	import IcAddIcrc7TokenReview from '$icp/components/tokens/IcAddIcrc7TokenReview.svelte';
 	import IcAddIcrcTokenReview from '$icp/components/tokens/IcAddIcrcTokenReview.svelte';
 	import type { ValidateTokenData as ValidateExtTokenData } from '$icp/services/ext-add-custom-tokens.service';
 	import type { ValidateTokenData as ValidateIcrcTokenData } from '$icp/services/ic-add-custom-tokens.service';
 	import type { ValidateTokenData as ValidateIcPunksTokenData } from '$icp/services/icpunks-add-custom-tokens.service';
+	import type { ValidateTokenData as ValidateIcrc7TokenData } from '$icp/services/icrc7-add-custom-tokens.service';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import { TRACK_UNRECOGNISED_ERC_INTERFACE } from '$lib/constants/analytics.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -63,7 +64,7 @@
 	const addIcrcToken = async () => {
 		if (isNullish(ledgerCanisterId)) {
 			toastsError({
-				msg: { text: get(i18n).tokens.import.error.missing_ledger_id }
+				msg: { text: $i18n.tokens.import.error.missing_ledger_id }
 			});
 			return;
 		}
@@ -81,7 +82,7 @@
 	const addExtToken = async () => {
 		if (isNullish(extCanisterId)) {
 			toastsError({
-				msg: { text: get(i18n).tokens.import.error.missing_canister_id }
+				msg: { text: $i18n.tokens.import.error.missing_canister_id }
 			});
 			return;
 		}
@@ -98,7 +99,7 @@
 	const addIcPunksToken = async () => {
 		if (isNullish(icPunksCanisterId)) {
 			toastsError({
-				msg: { text: get(i18n).tokens.import.error.missing_canister_id }
+				msg: { text: $i18n.tokens.import.error.missing_canister_id }
 			});
 			return;
 		}
@@ -108,6 +109,23 @@
 				enabled: true,
 				networkKey: 'IcPunks',
 				canisterId: icPunksCanisterId
+			}
+		]);
+	};
+
+	const addIcrc7Token = async () => {
+		if (isNullish(icrc7CanisterId)) {
+			toastsError({
+				msg: { text: $i18n.tokens.import.error.missing_canister_id }
+			});
+			return;
+		}
+
+		await saveTokens([
+			{
+				enabled: true,
+				networkKey: 'Icrc7',
+				canisterId: icrc7CanisterId
 			}
 		]);
 	};
@@ -226,7 +244,8 @@
 			modalNext,
 			onSuccess,
 			onError,
-			identity: $authIdentity
+			identity: $authIdentity,
+			tokenManageModifier: 'import'
 		});
 
 	let icrcMetadata: ValidateIcrcTokenData | undefined = $state();
@@ -234,6 +253,8 @@
 	let extMetadata: ValidateExtTokenData | undefined = $state();
 
 	let icPunksMetadata: ValidateIcPunksTokenData | undefined = $state();
+
+	let icrc7Metadata: ValidateIcrc7TokenData | undefined = $state();
 
 	let ethMetadata: Erc20Metadata | Erc721Metadata | undefined = $state();
 
@@ -244,6 +265,7 @@
 		indexCanisterId,
 		extCanisterId,
 		icPunksCanisterId,
+		icrc7CanisterId,
 		ethContractAddress,
 		splTokenAddress
 	} = $derived(tokenData);
@@ -264,6 +286,13 @@
 				{onBack}
 				onSave={addIcPunksToken}
 				bind:metadata={icPunksMetadata}
+			/>
+		{:else if nonNullish(icrc7CanisterId)}
+			<IcAddIcrc7TokenReview
+				{icrc7CanisterId}
+				{onBack}
+				onSave={addIcrc7Token}
+				bind:metadata={icrc7Metadata}
 			/>
 		{/if}
 	{:else}

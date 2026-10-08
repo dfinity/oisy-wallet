@@ -23,23 +23,27 @@ export const extCustomTokens: Readable<ExtCustomToken[]> = derived(
 
 const extDefaultTokensToggleable: Readable<ExtCustomToken[]> = derived(
 	[extDefaultTokens, extCustomTokens],
-	([$extDefaultTokens, $extCustomTokens]) =>
-		$extDefaultTokens.map(({ canisterId, ...rest }) => {
-			const customToken = $extCustomTokens.find(
-				({ canisterId: canisterIdCustomToken }) => canisterIdCustomToken === canisterId
-			);
+	([$extDefaultTokens, $extCustomTokens]) => {
+		const customTokenByCanisterId = new Map(
+			$extCustomTokens.map((token) => [token.canisterId, token])
+		);
 
-			return mapDefaultTokenToToggleable<ExtToken>({
+		return $extDefaultTokens.map(({ canisterId, ...rest }) =>
+			mapDefaultTokenToToggleable<ExtToken>({
 				defaultToken: { canisterId, ...rest },
-				customToken
-			});
-		})
+				customToken: customTokenByCanisterId.get(canisterId)
+			})
+		);
+	}
 );
 
 const extCustomTokensToggleable: Readable<ExtCustomToken[]> = derived(
 	[extCustomTokens, extDefaultTokensCanisterIds],
-	([$extCustomTokens, $extDefaultTokensCanisterIds]) =>
-		$extCustomTokens.filter(({ canisterId }) => !$extDefaultTokensCanisterIds.includes(canisterId))
+	([$extCustomTokens, $extDefaultTokensCanisterIds]) => {
+		const defaultCanisterIds = new Set($extDefaultTokensCanisterIds);
+
+		return $extCustomTokens.filter(({ canisterId }) => !defaultCanisterIds.has(canisterId));
+	}
 );
 
 export const extTokens: Readable<ExtCustomToken[]> = derived(

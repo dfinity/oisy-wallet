@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Toggle } from '@dfinity/gix-components';
+	import Toggle from '$lib/components/ui/Toggle.svelte';
 	import { hideTokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -21,4 +21,4 @@
 
 <svelte:window onoisyToggleTokenCategoryFilter={toggleHide} />
 
-<Toggle ariaLabel={$i18n.tokens.text.hide_asset_types} bind:checked on:nnsToggle={toggleHide} />
+<Toggle ariaLabel={$i18n.tokens.text.hide_asset_types} onToggle={toggleHide} bind:checked />

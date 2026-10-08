@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { preventDefault } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -8,6 +7,9 @@
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
+	import { preventDefault } from '$lib/utils/event-modifiers.utils';
+	import { formatToken } from '$lib/utils/format.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 	import { getMaxTransactionAmount, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
@@ -17,6 +19,9 @@
 		balance: OptionBalance;
 		token?: Token;
 		fee?: bigint;
+		// Optional hard cap (base units). When set, "Max" never exceeds it even if the
+		// affordable balance is higher (e.g. full debt for repay).
+		maxAmount?: bigint;
 	}
 
 	let {
@@ -25,12 +30,13 @@
 		error = false,
 		balance,
 		token,
-		fee
+		fee,
+		maxAmount
 	}: Props = $props();
 
 	let isZeroBalance = $derived(!$isIcMintingAccount && (isNullish(balance) || balance === ZERO));
 
-	let maxAmount = $derived(
+	let maxBalanceAmount = $derived(
 		nonNullish(token)
 			? getMaxTransactionAmount({
 					balance,
@@ -41,10 +47,26 @@
 			: undefined
 	);
 
+	// Clamp the affordable max to the optional base-units cap.
+	let cappedMaxAmount = $derived.by(() => {
+		if (isNullish(maxBalanceAmount) || isNullish(token) || isNullish(maxAmount)) {
+			return maxBalanceAmount;
+		}
+
+		const affordable = parseToken({ value: maxBalanceAmount, unitName: token.decimals });
+		const capped = affordable < maxAmount ? affordable : maxAmount;
+
+		return formatToken({
+			value: capped,
+			unitName: token.decimals,
+			displayDecimals: token.decimals
+		});
+	});
+
 	const setMax = () => {
-		if (!isZeroBalance && nonNullish(maxAmount)) {
+		if (!isZeroBalance && nonNullish(cappedMaxAmount)) {
 			amountSetToMax = true;
-			amount = maxAmount;
+			amount = cappedMaxAmount;
 		}
 	};
 
@@ -55,11 +77,24 @@
 		if (!amountSetToMax) {
 			return;
 		}
-		debounce(() => setMax(), 500)();
+		debounce(() => {
+			// Rechecked because the flag can be cleared during the delay: typing into the input
+			// clears it, and this callback would otherwise overwrite what the user just typed —
+			// and re-arm the flag, so the next fee change would do it again.
+			if (!amountSetToMax) {
+				return;
+			}
+
+			setMax();
+		}, 500)();
 	};
 
 	$effect(() => {
-		[fee];
+		// `maxAmount` is tracked alongside the fee because it arrives asynchronously and can
+		// shrink afterwards — a BTC cap lands once the UTXOs load and drops again when a
+		// pending send reserves some. A "Max" chosen before either would otherwise stay at the
+		// balance-based amount the cap exists to rule out.
+		[fee, maxAmount];
 
 		debounceSetMax();
 	});
@@ -73,7 +108,7 @@
 	onclick={preventDefault(setMax)}
 >
 	{$i18n.core.text.max}:
-	{nonNullish(maxAmount) && nonNullish(token)
-		? `${maxAmount} ${getTokenDisplaySymbol(token)}`
+	{nonNullish(cappedMaxAmount) && nonNullish(token)
+		? `${cappedMaxAmount} ${getTokenDisplaySymbol(token)}`
 		: $i18n.core.text.not_available}
 </button>

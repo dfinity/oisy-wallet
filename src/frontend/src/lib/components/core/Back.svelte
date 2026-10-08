@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { IconBack } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
+	import IconBack from '$lib/components/icons/IconBack.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { back } from '$lib/utils/nav.utils';
 

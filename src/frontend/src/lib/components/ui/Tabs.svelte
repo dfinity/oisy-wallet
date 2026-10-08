@@ -8,10 +8,17 @@
 	import type { NonEmptyArray } from '$lib/types/utils';
 
 	interface Props {
-		tabs: NonEmptyArray<{ label: string; id: string; path?: string }>;
+		// shortLabel, when given, replaces label below the `xs` breakpoint — an
+		// interim fix for rows that don't fit every tab + the surrounding
+		// filter/sort controls on narrow phones (a dynamic overflow-into-a-menu
+		// behavior is the planned proper fix, not built yet).
+		tabs: NonEmptyArray<{ label: string; shortLabel?: string; id: string; path?: string }>;
 		activeTab: string;
 		children?: Snippet;
 		styleClass?: string;
+		// The gap between the tab row and its content. The default suits a full page; a modal whose
+		// other rows sit `mb-4` apart wants the tabs on the same rhythm rather than looser.
+		contentStyleClass?: string;
 		tabVariant?: TabVariant;
 		trackEventName?: string;
 	}
@@ -21,6 +28,7 @@
 		activeTab = $bindable(),
 		tabs,
 		styleClass,
+		contentStyleClass = 'mt-6',
 		tabVariant = 'default',
 		trackEventName
 	}: Props = $props();
@@ -46,7 +54,7 @@
 </script>
 
 <div class={`flex items-center ${styleClass ?? ''}`}>
-	{#each tabs as { label, id, path }, index (id)}
+	{#each tabs as { label, shortLabel, id, path }, index (id)}
 		<button
 			class="justify-center rounded-none border-0 text-sm font-semibold transition-colors hover:border-brand-primary sm:text-base"
 			class:border-b-2={activeTab === id || tabVariant === 'default'}
@@ -55,6 +63,7 @@
 			class:h-6={tabVariant === 'menu'}
 			class:hover:text-brand-primary={tabVariant === 'default'}
 			class:hover:text-primary={tabVariant === 'menu'}
+			class:max-xs:ml-3={index !== 0}
 			class:ml-4={index !== 0}
 			class:p-2={tabVariant === 'default'}
 			class:text-brand-primary={activeTab === id && tabVariant === 'default'}
@@ -63,12 +72,18 @@
 			class:w-full={tabVariant === 'default'}
 			aria-label={label}
 			onclick={() => handleClick({ id, path })}
+			type="button"
 		>
-			{label}
+			{#if nonNullish(shortLabel)}
+				<span class="max-xs:hidden">{label}</span>
+				<span class="hidden max-xs:inline">{shortLabel}</span>
+			{:else}
+				{label}
+			{/if}
 		</button>
 	{/each}
 </div>
 
-<div class="mt-6">
+<div class={contentStyleClass}>
 	{@render children?.()}
 </div>

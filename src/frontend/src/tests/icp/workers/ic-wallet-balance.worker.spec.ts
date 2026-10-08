@@ -1,4 +1,4 @@
-import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
+import { walletDataRef, type IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import { initIcrcWalletScheduler } from '$icp/workers/icrc-wallet.worker';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
@@ -9,7 +9,7 @@ import type {
 } from '$lib/types/post-message';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { IcrcLedgerCanister } from '@icp-sdk/canisters/ledger/icrc';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
@@ -110,9 +110,7 @@ describe('ic-wallet-balance.worker', () => {
 
 	const initWithBalance = <
 		PostMessageDataRequest extends
-			| PostMessageDataRequestIcrc
-			| PostMessageDataRequestIcp
-			| PostMessageDataRequestDip20
+			PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
 	>({
 		initScheduler,
 		msg,
@@ -126,13 +124,7 @@ describe('ic-wallet-balance.worker', () => {
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
-		const ref = isNullish(startData)
-			? undefined
-			: 'ledgerCanisterId' in startData
-				? startData.ledgerCanisterId
-				: 'indexCanisterId' in startData
-					? startData.indexCanisterId
-					: startData.canisterId;
+		const ref = isNullish(startData) ? undefined : walletDataRef(startData);
 
 		const mockPostMessageNotCertified = mockPostMessage({ msg, ref, certified: false });
 		const mockPostMessageCertified = mockPostMessage({ msg, ref, certified: true });
@@ -238,13 +230,12 @@ describe('ic-wallet-balance.worker', () => {
 
 	const initOtherScenarios = <
 		PostMessageDataRequest extends
-			| PostMessageDataRequestIcrc
-			| PostMessageDataRequestIcp
-			| PostMessageDataRequestDip20
+			PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
 	>({
 		initScheduler,
 		startData = undefined,
 		initErrorMock,
+		initSuccessMock,
 		msg
 	}: {
 		initScheduler: (
@@ -252,9 +243,12 @@ describe('ic-wallet-balance.worker', () => {
 		) => IcWalletScheduler<PostMessageDataRequest>;
 		startData?: PostMessageDataRequest | undefined;
 		initErrorMock: (err: Error) => void;
+		initSuccessMock?: () => void;
 		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
+
+		const ref = isNullish(startData) ? undefined : walletDataRef(startData);
 
 		return {
 			setup: () => {
@@ -279,19 +273,44 @@ describe('ic-wallet-balance.worker', () => {
 					expect(postMessageMock).toHaveBeenCalledTimes(3);
 
 					expect(postMessageMock).toHaveBeenCalledWith({
-						ref: isNullish(startData)
-							? undefined
-							: 'ledgerCanisterId' in startData
-								? startData.ledgerCanisterId
-								: 'indexCanisterId' in startData
-									? startData.indexCanisterId
-									: startData.canisterId,
+						ref,
 						msg: `${msg}Error`,
 						data: {
 							error: err
 						}
 					});
 				});
+
+				if (nonNullish(initSuccessMock)) {
+					// Implicitly covers the in-memory store reset on error: a successful sync after
+					// a fatal error can only re-emit the balance payload (rather than just status
+					// messages) when the scheduler's internal store was cleared.
+					it('should re-emit the balance payload on the next successful sync after an error', async () => {
+						const err = new Error('Failed to fetch');
+						initErrorMock(err);
+
+						await scheduler.start(startData);
+
+						await awaitJobExecution();
+
+						expect(postMessageMock).toHaveBeenCalledWith({
+							ref,
+							msg: `${msg}Error`,
+							data: { error: err }
+						});
+
+						initSuccessMock();
+						postMessageMock.mockClear();
+
+						await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+						expect(postMessageMock).toHaveBeenCalledWith({
+							ref,
+							msg,
+							data: mockPostMessageData({ certified: false })
+						});
+					});
+				}
 			}
 		};
 	};
@@ -328,11 +347,13 @@ describe('ic-wallet-balance.worker', () => {
 
 		describe('other scenarios', () => {
 			const initErrorMock = (err: Error) => ledgerCanisterMock.balance.mockRejectedValue(err);
+			const initSuccessMock = () => ledgerCanisterMock.balance.mockResolvedValue(mockBalance);
 
 			const { setup, teardown, tests } = initOtherScenarios({
 				initScheduler: initIcrcWalletScheduler,
 				startData,
 				initErrorMock,
+				initSuccessMock,
 				msg: 'syncIcrcWallet'
 			});
 

@@ -21,8 +21,7 @@
 					"test_fe_5": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"test_fe_6": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"audit": "tdxud-2yaaa-aaaad-aadiq-cai",
-					"staging": "tdxud-2yaaa-aaaad-aadiq-cai",
-					"e2e": "tdxud-2yaaa-aaaad-aadiq-cai"
+					"staging": "tdxud-2yaaa-aaaad-aadiq-cai"
 				}
 			}
 		},
@@ -45,8 +44,32 @@
 					"test_fe_5": "2ipq2-uqaaa-aaaar-qailq-cai",
 					"test_fe_6": "2ipq2-uqaaa-aaaar-qailq-cai",
 					"audit": "2ipq2-uqaaa-aaaar-qailq-cai",
-					"staging": "2ipq2-uqaaa-aaaar-qailq-cai",
-					"e2e": "2ipq2-uqaaa-aaaar-qailq-cai"
+					"staging": "2ipq2-uqaaa-aaaar-qailq-cai"
+				}
+			}
+		},
+		"oisy_trade": {
+			"type": "custom",
+			"build": "scripts/build.oisy_trade.sh",
+			"candid": "target/oisy_trade.did",
+			"wasm": "target/oisy_trade.wasm.gz",
+			"shrink": false,
+			"specified_id": "sy2xe-miaaa-aaaar-qb7sq-cai",
+			"init_arg": "(variant { Init = record { mode = variant { GeneralAvailability }; max_orders_per_chunk = 100 : nat32; instruction_budget = 1_000_000_000 : nat64 } })",
+			"post_install": "scripts/seed.oisy_trade.sh",
+			"remote": {
+				"id": {
+					"ic": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"beta": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_be_1": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_fe_1": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_fe_2": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_fe_3": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_fe_4": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_fe_5": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_fe_6": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"audit": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"staging": "sy2xe-miaaa-aaaar-qb7sq-cai"
 				}
 			}
 		},
@@ -101,6 +124,7 @@
 			"wasm": "out/backend.wasm.gz",
 			"init_arg_file": "out/backend.args.did",
 			"build": "scripts/build.backend.sh",
+			"specified_id": "d3nvo-aaaaa-aaaar-qagzq-cai",
 			"remote": {
 				"id": {
 					"test_fe_1": "d3nvo-aaaaa-aaaar-qagzq-cai",
@@ -149,17 +173,26 @@
 			"wasm": "https://github.com/dfinity/orbit/releases/download/%40orbit%2Fstation-v0.0.2-alpha.5/station.wasm.gz",
 			"remote": {
 				"id": {
-					"__default": "2vxsx-fae",
-					"staging": "4jngj-yiaaa-aaaal-ajk5q-cai",
+					"ic": "xtnlb-waaaa-aaaal-ajm7q-cai",
+					"beta": "2vxsx-fae",
+					"test_be_1": "2vxsx-fae",
+					"test_fe_1": "2vxsx-fae",
+					"test_fe_2": "2vxsx-fae",
+					"test_fe_3": "2vxsx-fae",
+					"test_fe_4": "2vxsx-fae",
+					"test_fe_5": "2vxsx-fae",
+					"test_fe_6": "2vxsx-fae",
 					"audit": "yo6ep-dyaaa-aaaal-ajs6q-cai",
-					"ic": "xtnlb-waaaa-aaaal-ajm7q-cai"
+					"staging": "4jngj-yiaaa-aaaal-ajk5q-cai",
+					"local": "2vxsx-fae",
+					"old-backend": "2vxsx-fae"
 				}
 			}
 		},
 		"internet_identity": {
 			"type": "custom",
-			"candid": "https://github.com/dfinity/internet-identity/releases/download/release-2024-10-25/internet_identity.did",
-			"wasm": "https://github.com/dfinity/internet-identity/releases/download/release-2024-10-25/internet_identity_dev.wasm.gz",
+			"candid": "https://github.com/dfinity/internet-identity/releases/download/release-2026-03-06/internet_identity.did",
+			"wasm": "https://github.com/dfinity/internet-identity/releases/download/release-2026-03-06/internet_identity_dev.wasm.gz",
 			"init_arg": "(opt record { captcha_config = opt record { max_unsolved_captchas= 50:nat64; captcha_trigger = variant {Static = variant {CaptchaDisabled}}}})",
 			"specified_id": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 			"remote": {
@@ -175,8 +208,7 @@
 					"audit": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"staging": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"beta": "rdmx6-jaaaa-aaaaa-aaadq-cai",
-					"ic": "rdmx6-jaaaa-aaaaa-aaadq-cai",
-					"e2e": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+					"ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
 				}
 			}
 		},
@@ -198,8 +230,7 @@
 					"audit": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"staging": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"beta": "um5iw-rqaaa-aaaaq-qaaba-cai",
-					"ic": "um5iw-rqaaa-aaaaq-qaaba-cai",
-					"e2e": "um5iw-rqaaa-aaaaq-qaaba-cai"
+					"ic": "um5iw-rqaaa-aaaaq-qaaba-cai"
 				}
 			}
 		},
@@ -221,8 +252,29 @@
 					"audit": "2vxsx-fae",
 					"staging": "2vxsx-fae",
 					"beta": "2vxsx-fae",
-					"ic": "2vxsx-fae",
-					"e2e": "2vxsx-fae"
+					"ic": "2vxsx-fae"
+				}
+			}
+		},
+		"cmc": {
+			"type": "custom",
+			"candid": "https://raw.githubusercontent.com/dfinity/ic/2c2c7c99bd526d8c3da51df32aeeb977e852292d/rs/nns/cmc/cmc.did",
+			"wasm": "https://download.dfinity.systems/ic/2c2c7c99bd526d8c3da51df32aeeb977e852292d/canisters/cycles-minting-canister.wasm.gz",
+			"remote": {
+				"id": {
+					"ic": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"beta": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"staging": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"audit": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"test_be_1": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"test_fe_1": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"test_fe_2": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"test_fe_3": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"test_fe_4": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"test_fe_5": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"test_fe_6": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"local": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"old-backend": "rkp4c-7iaaa-aaaaa-aaaca-cai"
 				}
 			}
 		},
@@ -246,8 +298,7 @@
 					"test_fe_5": "tghme-zyaaa-aaaar-qarca-cai",
 					"test_fe_6": "tghme-zyaaa-aaaar-qarca-cai",
 					"audit": "tghme-zyaaa-aaaar-qarca-cai",
-					"staging": "tghme-zyaaa-aaaar-qarca-cai",
-					"e2e": "tghme-zyaaa-aaaar-qarca-cai"
+					"staging": "tghme-zyaaa-aaaar-qarca-cai"
 				}
 			}
 		},
@@ -270,8 +321,7 @@
 					"audit": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"staging": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"beta": "ryjl3-tyaaa-aaaaa-aaaba-cai",
-					"ic": "ryjl3-tyaaa-aaaaa-aaaba-cai",
-					"e2e": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+					"ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
 				}
 			}
 		},
@@ -295,8 +345,7 @@
 					"audit": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"staging": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"beta": "qhbym-qaaaa-aaaaa-aaafq-cai",
-					"ic": "qhbym-qaaaa-aaaaa-aaafq-cai",
-					"e2e": "qhbym-qaaaa-aaaaa-aaafq-cai"
+					"ic": "qhbym-qaaaa-aaaaa-aaafq-cai"
 				}
 			}
 		},
@@ -318,12 +367,14 @@
 					"test_fe_5": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"test_fe_6": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"audit": "ml52i-qqaaa-aaaar-qaaba-cai",
-					"staging": "ml52i-qqaaa-aaaar-qaaba-cai",
-					"e2e": "ml52i-qqaaa-aaaar-qaaba-cai"
+					"staging": "ml52i-qqaaa-aaaar-qaaba-cai"
 				}
 			}
 		},
 		"ckbtc_ledger": {
+			"build": "scripts/build.ckbtc_ledger.sh",
+			"init_arg_file": "target/ic/ckbtc_ledger.args.did",
+			"dependencies": ["ckbtc_minter"],
 			"type": "custom",
 			"candid": "target/ic/ckbtc_ledger.did",
 			"wasm": "target/ic/ckbtc_ledger.wasm",
@@ -339,8 +390,7 @@
 					"test_fe_5": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"test_fe_6": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"audit": "mc6ru-gyaaa-aaaar-qaaaq-cai",
-					"staging": "mc6ru-gyaaa-aaaar-qaaaq-cai",
-					"e2e": "mc6ru-gyaaa-aaaar-qaaaq-cai"
+					"staging": "mc6ru-gyaaa-aaaar-qaaaq-cai"
 				}
 			}
 		},
@@ -362,8 +412,7 @@
 					"test_fe_5": "mm444-5iaaa-aaaar-qaabq-cai",
 					"test_fe_6": "mm444-5iaaa-aaaar-qaabq-cai",
 					"audit": "mm444-5iaaa-aaaar-qaabq-cai",
-					"staging": "mm444-5iaaa-aaaar-qaabq-cai",
-					"e2e": "mm444-5iaaa-aaaar-qaabq-cai"
+					"staging": "mm444-5iaaa-aaaar-qaabq-cai"
 				}
 			}
 		},
@@ -385,8 +434,7 @@
 					"test_fe_5": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"test_fe_6": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"audit": "pvm5g-xaaaa-aaaar-qaaia-cai",
-					"staging": "pvm5g-xaaaa-aaaar-qaaia-cai",
-					"e2e": "pvm5g-xaaaa-aaaar-qaaia-cai"
+					"staging": "pvm5g-xaaaa-aaaar-qaaia-cai"
 				}
 			}
 		},
@@ -408,8 +456,7 @@
 					"test_fe_5": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"test_fe_6": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"audit": "jzenf-aiaaa-aaaar-qaa7q-cai",
-					"staging": "jzenf-aiaaa-aaaar-qaa7q-cai",
-					"e2e": "jzenf-aiaaa-aaaar-qaa7q-cai"
+					"staging": "jzenf-aiaaa-aaaar-qaa7q-cai"
 				}
 			}
 		},
@@ -433,8 +480,7 @@
 					"test_fe_5": "apia6-jaaaa-aaaar-qabma-cai",
 					"test_fe_6": "apia6-jaaaa-aaaar-qabma-cai",
 					"audit": "apia6-jaaaa-aaaar-qabma-cai",
-					"staging": "apia6-jaaaa-aaaar-qabma-cai",
-					"e2e": "apia6-jaaaa-aaaar-qabma-cai"
+					"staging": "apia6-jaaaa-aaaar-qabma-cai"
 				}
 			}
 		},
@@ -458,8 +504,7 @@
 					"test_fe_5": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"test_fe_6": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"audit": "sh5u2-cqaaa-aaaar-qacna-cai",
-					"staging": "sh5u2-cqaaa-aaaar-qacna-cai",
-					"e2e": "sh5u2-cqaaa-aaaar-qacna-cai"
+					"staging": "sh5u2-cqaaa-aaaar-qacna-cai"
 				}
 			}
 		},
@@ -519,6 +564,7 @@
 			"type": "custom",
 			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.10/rewards.did",
 			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.10/rewards.wasm.gz",
+			"specified_id": "vi6cu-aiaaa-aaaad-aad7q-cai",
 			"remote": {
 				"id": {
 					"ic": "nynz6-haaaa-aaaan-qzqda-cai",
@@ -531,7 +577,6 @@
 					"test_fe_4": "vi6cu-aiaaa-aaaad-aad7q-cai",
 					"test_fe_5": "vi6cu-aiaaa-aaaad-aad7q-cai",
 					"test_fe_6": "vi6cu-aiaaa-aaaad-aad7q-cai",
-					"e2e": "vi6cu-aiaaa-aaaad-aad7q-cai",
 					"audit": "vi6cu-aiaaa-aaaad-aad7q-cai"
 				}
 			}
@@ -556,7 +601,6 @@
 					"test_fe_4": "w36hm-eqaaa-aaaal-qr76a-cai",
 					"test_fe_5": "w36hm-eqaaa-aaaal-qr76a-cai",
 					"test_fe_6": "w36hm-eqaaa-aaaal-qr76a-cai",
-					"e2e": "w36hm-eqaaa-aaaal-qr76a-cai",
 					"audit": "w36hm-eqaaa-aaaal-qr76a-cai"
 				}
 			}
@@ -572,6 +616,18 @@
 			"build": "scripts/build.dip721.sh",
 			"candid": "target/dip721.did",
 			"wasm": "target/dip721.wasm.gz"
+		},
+		"icrc7": {
+			"type": "custom",
+			"build": "scripts/build.icrc7.sh",
+			"candid": "target/icrc7.did",
+			"wasm": "target/icrc7.wasm.gz"
+		},
+		"icrc3": {
+			"type": "custom",
+			"build": "scripts/build.icrc3.sh",
+			"candid": "target/icrc3.did",
+			"wasm": "target/icrc3.wasm.gz"
 		},
 		"icpunks": {
 			"type": "custom",
@@ -629,10 +685,6 @@
 			"type": "persistent"
 		},
 		"beta": {
-			"providers": ["https://icp0.io"],
-			"type": "persistent"
-		},
-		"e2e": {
 			"providers": ["https://icp0.io"],
 			"type": "persistent"
 		},

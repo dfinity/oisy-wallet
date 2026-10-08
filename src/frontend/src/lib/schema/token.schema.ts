@@ -19,9 +19,11 @@ export const TokenStandardCodeSchema = z.enum([
 	'dip721',
 	'ext',
 	'icpunks', // This standard can be applied to all NFT IC tokens with a similar interface to ICPunks (for example, ICats)
+	'icrc7',
 	'bitcoin',
 	'solana',
-	'spl'
+	'spl',
+	'xrp'
 ]);
 
 export const TokenStandardSchema = z.object({
@@ -52,7 +54,8 @@ export const TokenAppearanceSchema = z.object({
 	oisySymbol: TokenOisySymbolSchema.optional(),
 	oisyName: TokenOisyNameSchema.optional(),
 	neverCollapseInTokenGroup: z.boolean().optional(),
-	allowExternalContentSource: z.boolean().optional()
+	allowExternalContentSource: z.boolean().optional(),
+	allowedExternalContentSourceUrls: z.array(z.string()).optional()
 });
 
 const TokenBuySchema = z.object({
@@ -61,6 +64,14 @@ const TokenBuySchema = z.object({
 
 export const TokenBuyableSchema = z.object({
 	buy: TokenBuySchema.optional()
+});
+
+// When true, this curated token definition is metadata only: it is NOT added to
+// the visible token store and is never suggested/enabled, but it is still used to
+// enrich a token the user imports manually (name, icon, tags, group membership).
+// Defaults to falsy. See docs/ai/spec-driven-development/specs/2026-07-14-feat-token-metadata-tier.md.
+export const TokenMetadataOnlyPropSchema = z.object({
+	metadataOnly: z.boolean().optional()
 });
 
 export const TokenSchema = z.object({
@@ -73,5 +84,6 @@ export const TokenSchema = z.object({
 	...TokenBuyableSchema.shape,
 	...TokenTagsSchema.shape,
 	...TokenGroupPropSchema.shape,
+	...TokenMetadataOnlyPropSchema.shape,
 	...TokenDeprecatedSchema.shape
 });

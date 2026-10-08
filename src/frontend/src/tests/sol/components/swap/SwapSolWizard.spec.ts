@@ -1,6 +1,6 @@
 import {
 	TRACK_COUNT_SWAP_ERROR,
-	TRACK_COUNT_SWAP_SUCCESS
+	TRACK_COUNT_SWAP_SUBMITTED
 } from '$lib/constants/analytics.constants';
 import {
 	SWAP_SWITCH_TOKENS_BUTTON,
@@ -40,7 +40,8 @@ vi.mock('$lib/services/provider-agreements.services', () => ({
 vi.mock('$lib/utils/parse.utils', async () => {
 	const { ZERO } = await import('$lib/constants/app.constants');
 	return {
-		parseToken: vi.fn().mockReturnValue(ZERO)
+		parseToken: vi.fn().mockReturnValue(ZERO),
+		tryParseToken: vi.fn().mockReturnValue(ZERO)
 	};
 });
 
@@ -338,7 +339,7 @@ describe('SwapSolWizard', () => {
 			expect(onStartTriggerAmount).toHaveBeenCalledOnce();
 		});
 
-		it('tracks success event after successful swap', async () => {
+		it('tracks submitted event at initiation (settlement is tracked via the AUT store)', async () => {
 			const { getByText } = renderExecution();
 
 			await fireEvent.click(getByText(en.swap.text.swap_button));
@@ -346,7 +347,7 @@ describe('SwapSolWizard', () => {
 
 			expect(analytics.trackEvent).toHaveBeenCalledWith(
 				expect.objectContaining({
-					name: TRACK_COUNT_SWAP_SUCCESS
+					name: TRACK_COUNT_SWAP_SUBMITTED
 				})
 			);
 		});

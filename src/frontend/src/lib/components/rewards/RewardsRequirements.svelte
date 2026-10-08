@@ -8,6 +8,8 @@
 	import RewardRequirement from '$lib/components/rewards/RewardRequirement.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CampaignCriterion } from '$lib/types/reward';
 
@@ -70,7 +72,13 @@
 				<ExternalLink
 					ariaLabel={$i18n.rewards.text.learn_more}
 					href={reward.learnMoreHref}
-					iconVisible={false}>{$i18n.rewards.text.learn_more}</ExternalLink
+					iconVisible={false}
+					trackEvent={buildLearnMoreEvent({
+						sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.REWARDS,
+						sourceSublocation: 'requirements',
+						labelKey: 'rewards.text.learn_more',
+						url: reward.learnMoreHref
+					})}>{$i18n.rewards.text.learn_more}</ExternalLink
 				>
 			</span>
 		{/if}

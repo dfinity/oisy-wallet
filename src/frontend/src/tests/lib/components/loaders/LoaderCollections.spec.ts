@@ -2,9 +2,11 @@ import type { CustomToken } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_MAINNET_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_MAINNET_NETWORKS } from '$env/networks/networks.eth.env';
 import { EXT_BUILTIN_TOKENS } from '$env/tokens/tokens-ext/tokens.ext.env';
+import { ICRC7_BUILTIN_TOKENS } from '$env/tokens/tokens-icrc7/tokens.icrc7.env';
 import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
 import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
 import * as extTokenApi from '$icp/api/ext-v2-token.api';
+import * as icrc7Api from '$icp/api/icrc7.api';
 import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
 import * as saveCustomTokens from '$lib/services/save-custom-tokens.services';
 import { ethAddressStore } from '$lib/stores/address.store';
@@ -21,6 +23,7 @@ import type { MockInstance } from 'vitest';
 describe('LoaderCollections', () => {
 	let alchemyProvidersSpy: MockInstance;
 	let extGetTokensByOwnerSpy: MockInstance;
+	let icrc7GetTokensByOwnerSpy: MockInstance;
 	let saveCustomTokensSpy: MockInstance;
 
 	const mockGetTokensForOwner = vi.fn();
@@ -37,6 +40,9 @@ describe('LoaderCollections', () => {
 
 		extGetTokensByOwnerSpy = vi.spyOn(extTokenApi, 'getTokensByOwner');
 		extGetTokensByOwnerSpy.mockResolvedValue([]);
+
+		icrc7GetTokensByOwnerSpy = vi.spyOn(icrc7Api, 'getTokensByOwner');
+		icrc7GetTokensByOwnerSpy.mockResolvedValue([]);
 
 		saveCustomTokensSpy = vi.spyOn(saveCustomTokens, 'saveCustomTokens');
 		saveCustomTokensSpy.mockResolvedValue(undefined);
@@ -84,8 +90,6 @@ describe('LoaderCollections', () => {
 	});
 
 	it('should not add new EXT collections by default', async () => {
-		extGetTokensByOwnerSpy.mockReset().mockResolvedValueOnce([1, 2, 3]);
-
 		render(LoaderCollections);
 
 		await waitFor(() => {
@@ -94,8 +98,17 @@ describe('LoaderCollections', () => {
 		});
 	});
 
+	it('should not add new ICRC-7 collections by default', async () => {
+		render(LoaderCollections);
+
+		await waitFor(() => {
+			expect(icrc7GetTokensByOwnerSpy).not.toHaveBeenCalled();
+			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
+		});
+	});
+
 	it('should add new EXT collections if the event is triggered', async () => {
-		extGetTokensByOwnerSpy.mockReset().mockResolvedValueOnce([1, 2, 3]);
+		extGetTokensByOwnerSpy.mockResolvedValueOnce([1, 2, 3]);
 
 		render(LoaderCollections);
 
@@ -128,6 +141,40 @@ describe('LoaderCollections', () => {
 		});
 	});
 
+	it('should add new ICRC-7 collections if the event is triggered', async () => {
+		icrc7GetTokensByOwnerSpy.mockResolvedValueOnce([1n, 2n, 3n]);
+
+		render(LoaderCollections);
+
+		emit({ message: 'oisyReloadCollections', detail: { callback: mockEventCallback } });
+
+		await waitFor(() => {
+			expect(icrc7GetTokensByOwnerSpy).toHaveBeenCalledTimes(ICRC7_BUILTIN_TOKENS.length);
+
+			ICRC7_BUILTIN_TOKENS.forEach(({ canisterId }, index) => {
+				expect(icrc7GetTokensByOwnerSpy).toHaveBeenNthCalledWith(index + 1, {
+					identity: mockIdentity,
+					owner: { owner: mockPrincipal, subaccount: [] },
+					canisterId,
+					certified: false
+				});
+			});
+
+			expect(saveCustomTokensSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				tokens: [
+					{
+						canisterId: ICRC7_BUILTIN_TOKENS[0].canisterId,
+						networkKey: 'Icrc7',
+						enabled: true
+					}
+				]
+			});
+
+			expect(mockEventCallback).toHaveBeenCalledExactlyOnceWith();
+		});
+	});
+
 	it('should not add ERC collections if there are no new collections', async () => {
 		const networks = [...SUPPORTED_EVM_MAINNET_NETWORKS, ...SUPPORTED_ETHEREUM_MAINNET_NETWORKS];
 
@@ -143,8 +190,6 @@ describe('LoaderCollections', () => {
 	});
 
 	it('should not add EXT collections if there are no new collections', async () => {
-		extGetTokensByOwnerSpy.mockReset().mockResolvedValueOnce([]);
-
 		render(LoaderCollections);
 
 		emit({ message: 'oisyReloadCollections', detail: { callback: mockEventCallback } });
@@ -156,6 +201,29 @@ describe('LoaderCollections', () => {
 				expect(extGetTokensByOwnerSpy).toHaveBeenNthCalledWith(index + 1, {
 					identity: mockIdentity,
 					owner: mockPrincipal,
+					canisterId,
+					certified: false
+				});
+			});
+
+			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
+
+			expect(mockEventCallback).toHaveBeenCalledExactlyOnceWith();
+		});
+	});
+
+	it('should not add ICRC-7 collections if there are no new collections', async () => {
+		render(LoaderCollections);
+
+		emit({ message: 'oisyReloadCollections', detail: { callback: mockEventCallback } });
+
+		await waitFor(() => {
+			expect(icrc7GetTokensByOwnerSpy).toHaveBeenCalledTimes(ICRC7_BUILTIN_TOKENS.length);
+
+			ICRC7_BUILTIN_TOKENS.forEach(({ canisterId }, index) => {
+				expect(icrc7GetTokensByOwnerSpy).toHaveBeenNthCalledWith(index + 1, {
+					identity: mockIdentity,
+					owner: { owner: mockPrincipal, subaccount: [] },
 					canisterId,
 					certified: false
 				});
@@ -180,7 +248,8 @@ describe('LoaderCollections', () => {
 			version: toNullable(1n),
 			enabled: true,
 			section: toNullable(),
-			allow_external_content_source: toNullable(false)
+			allow_external_content_source: toNullable(false),
+			allowed_external_content_source_urls: toNullable()
 		}));
 		const existingErc1155CustomTokens: CustomToken[] = networks.map((network) => ({
 			token: {
@@ -192,7 +261,8 @@ describe('LoaderCollections', () => {
 			version: toNullable(1n),
 			enabled: true,
 			section: toNullable(),
-			allow_external_content_source: toNullable(true)
+			allow_external_content_source: toNullable(true),
+			allowed_external_content_source_urls: toNullable()
 		}));
 
 		backendCustomTokens.set([...existingErc721CustomTokens, ...existingErc1155CustomTokens]);
@@ -221,7 +291,8 @@ describe('LoaderCollections', () => {
 			version: toNullable(1n),
 			enabled: true,
 			section: toNullable(),
-			allow_external_content_source: toNullable(false)
+			allow_external_content_source: toNullable(false),
+			allowed_external_content_source_urls: toNullable()
 		};
 
 		backendCustomTokens.set([existingExtCustomToken]);
@@ -237,6 +308,44 @@ describe('LoaderCollections', () => {
 				expect(extGetTokensByOwnerSpy).toHaveBeenNthCalledWith(index + 1, {
 					identity: mockIdentity,
 					owner: mockPrincipal,
+					canisterId,
+					certified: false
+				});
+			});
+
+			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
+
+			expect(mockEventCallback).toHaveBeenCalledExactlyOnceWith();
+		});
+	});
+
+	it('should not add existing ICRC-7 collections', async () => {
+		const existingIcrc7CustomToken: CustomToken = {
+			token: {
+				Icrc7: {
+					canister_id: Principal.fromText(ICRC7_BUILTIN_TOKENS[0].canisterId)
+				}
+			},
+			version: toNullable(1n),
+			enabled: true,
+			section: toNullable(),
+			allow_external_content_source: toNullable(false),
+			allowed_external_content_source_urls: toNullable()
+		};
+
+		backendCustomTokens.set([existingIcrc7CustomToken]);
+
+		render(LoaderCollections);
+
+		emit({ message: 'oisyReloadCollections', detail: { callback: mockEventCallback } });
+
+		await waitFor(() => {
+			expect(icrc7GetTokensByOwnerSpy).toHaveBeenCalledTimes(ICRC7_BUILTIN_TOKENS.length - 1);
+
+			ICRC7_BUILTIN_TOKENS.slice(1).forEach(({ canisterId }, index) => {
+				expect(icrc7GetTokensByOwnerSpy).toHaveBeenNthCalledWith(index + 1, {
+					identity: mockIdentity,
+					owner: { owner: mockPrincipal, subaccount: [] },
 					canisterId,
 					certified: false
 				});
@@ -272,6 +381,37 @@ describe('LoaderCollections', () => {
 
 			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
 				`Error fetching EXT tokens from canister ${EXT_BUILTIN_TOKENS[0].canisterId}:`,
+				mockError
+			);
+
+			expect(mockEventCallback).toHaveBeenCalledExactlyOnceWith();
+		});
+	});
+
+	it('should handle ICRC-7 error gracefully', async () => {
+		const mockError = new Error('ICRC-7 error');
+		icrc7GetTokensByOwnerSpy.mockRejectedValueOnce(mockError);
+
+		render(LoaderCollections);
+
+		emit({ message: 'oisyReloadCollections', detail: { callback: mockEventCallback } });
+
+		await waitFor(() => {
+			expect(icrc7GetTokensByOwnerSpy).toHaveBeenCalledTimes(ICRC7_BUILTIN_TOKENS.length);
+
+			ICRC7_BUILTIN_TOKENS.forEach(({ canisterId }, index) => {
+				expect(icrc7GetTokensByOwnerSpy).toHaveBeenNthCalledWith(index + 1, {
+					identity: mockIdentity,
+					owner: { owner: mockPrincipal, subaccount: [] },
+					canisterId,
+					certified: false
+				});
+			});
+
+			expect(saveCustomTokensSpy).not.toHaveBeenCalled();
+
+			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
+				`Error fetching ICRC-7 tokens from canister ${ICRC7_BUILTIN_TOKENS[0].canisterId}:`,
 				mockError
 			);
 

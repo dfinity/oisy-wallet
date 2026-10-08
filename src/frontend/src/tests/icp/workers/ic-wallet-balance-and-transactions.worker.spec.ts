@@ -1,4 +1,4 @@
-import { ICP_INDEX_CANISTER_ID } from '$env/networks/networks.icp.env';
+import { ICP_INDEX_CANISTER_ID, ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
 import { XtcLedgerCanister } from '$icp/canisters/xtc-ledger.canister';
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import * as indexCanisterServices from '$icp/services/index-canister.services';
@@ -21,8 +21,18 @@ import type {
 import * as eventsUtils from '$lib/utils/events.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
-import { arrayOfNumberToUint8Array, isNullish, jsonReplacer, toNullable } from '@dfinity/utils';
-import { IcpIndexCanister, type IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
+import {
+	arrayOfNumberToUint8Array,
+	isNullish,
+	jsonReplacer,
+	nonNullish,
+	toNullable
+} from '@dfinity/utils';
+import {
+	IcpIndexCanister,
+	IcpLedgerCanister,
+	type IcpIndexDid
+} from '@icp-sdk/canisters/ledger/icp';
 import {
 	IcrcIndexCanister,
 	IcrcLedgerCanister,
@@ -151,9 +161,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 	const initWithoutTransactions = <
 		PostMessageDataRequest extends
-			| PostMessageDataRequestIcrc
-			| PostMessageDataRequestIcp
-			| PostMessageDataRequestDip20
+			PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
 	>({
 		msg,
 		initScheduler,
@@ -240,14 +248,13 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 	const initOtherScenarios = <
 		PostMessageDataRequest extends
-			| PostMessageDataRequestIcrc
-			| PostMessageDataRequestIcp
-			| PostMessageDataRequestDip20
+			PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
 	>({
 		initScheduler,
 		startData = undefined,
 		initCleanupMock,
 		initErrorMock,
+		initSuccessMock,
 		msg
 	}: {
 		initScheduler: (
@@ -256,6 +263,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		startData?: PostMessageDataRequest | undefined;
 		initCleanupMock: (mockRogueId: bigint) => void;
 		initErrorMock: (err: Error) => void;
+		initSuccessMock?: () => void;
 		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
@@ -321,11 +329,44 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 						}
 					});
 				});
+
+				if (nonNullish(initSuccessMock)) {
+					// Implicitly covers the in-memory store reset on error: a successful sync after
+					// a fatal error can only re-emit the wallet payload (rather than just status
+					// messages) when the scheduler's internal store and initialized flag were cleared.
+					it('should re-emit the wallet payload on the next successful sync after an error', async () => {
+						const err = new Error('Failed to fetch');
+						initErrorMock(err);
+
+						await scheduler.start(startData);
+
+						await awaitJobExecution();
+
+						expect(postMessageMock).toHaveBeenCalledWith({
+							ref,
+							msg: `${msg}Error`,
+							data: { error: err }
+						});
+
+						initSuccessMock();
+						postMessageMock.mockClear();
+
+						await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+						expect(postMessageMock).toHaveBeenCalledWith(
+							expect.objectContaining({
+								ref,
+								msg
+							})
+						);
+					});
+				}
 			}
 		};
 	};
 
 	describe('icp-wallet.worker', () => {
+		const ledgerCanisterMock = mock<IcpLedgerCanister>();
 		const indexCanisterMock = mock<IcpIndexCanister>();
 
 		const mockTransaction: IcpIndexDid.TransactionWithId = {
@@ -353,11 +394,15 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		});
 
 		const startData = {
+			ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
 			indexCanisterId: ICP_INDEX_CANISTER_ID
 		};
 
 		beforeEach(() => {
+			vi.spyOn(IcpLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
 			vi.spyOn(IcpIndexCanister, 'create').mockImplementation(() => indexCanisterMock);
+
+			spyGetBalance = ledgerCanisterMock.accountBalance.mockResolvedValue(mockBalance);
 		});
 
 		describe('with transactions', () => {
@@ -369,13 +414,13 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 			const mockPostMessageNotCertified = mockPostMessage({
 				msg,
-				ref: startData.indexCanisterId,
+				ref: startData.ledgerCanisterId,
 				transaction,
 				certified: false
 			});
 			const mockPostMessageCertified = mockPostMessage({
 				msg,
-				ref: startData.indexCanisterId,
+				ref: startData.ledgerCanisterId,
 				transaction,
 				certified: true
 			});
@@ -436,6 +481,15 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				expect(spyGetTransactions).toHaveBeenCalledTimes(2);
 			});
 
+			it('should stamp the ref and emit the wallet payload when triggered without a prior start', async () => {
+				// A trigger with no preceding start must still set `ref`; otherwise postMessageWallet
+				// drops every payload (isNullish(this.ref) guard) and the manual refresh syncs nothing.
+				await scheduler.trigger(startData);
+
+				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageNotCertified);
+				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
+			});
+
 			it('should trigger syncWallet periodically calling the loader', async () => {
 				await scheduler.start(startData);
 
@@ -449,6 +503,70 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
 				expect(spyGetTransactions).toHaveBeenCalledTimes(6);
+			});
+		});
+
+		describe('Ledger balance is authoritative', () => {
+			const msg = 'syncIcpWallet';
+
+			const ledgerBalance = 555n;
+			const staleIndexBalance = 100n;
+
+			let scheduler: IcWalletScheduler<PostMessageDataRequestIcp>;
+
+			beforeEach(() => {
+				scheduler = initIcpWalletScheduler(startData);
+
+				ledgerCanisterMock.accountBalance.mockResolvedValue(ledgerBalance);
+				indexCanisterMock.getTransactions.mockResolvedValue({
+					balance: staleIndexBalance,
+					transactions: [mockTransaction],
+					oldest_tx_id: [mockOldestTxId]
+				});
+			});
+
+			afterEach(() => {
+				scheduler.stop();
+			});
+
+			it('should post the Ledger balance and ignore the stale Index balance', async () => {
+				await scheduler.start(startData);
+
+				await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+				const walletBalances = postMessageMock.mock.calls
+					.map(([message]) => message)
+					.filter((message) => message?.msg === msg)
+					.map((message) => message.data.wallet.balance.data);
+
+				expect(walletBalances.length).toBeGreaterThan(0);
+				expect(walletBalances).toSatisfy((balances: bigint[]) =>
+					balances.every((balance) => balance === ledgerBalance)
+				);
+				expect(walletBalances).not.toContain(staleIndexBalance);
+			});
+
+			it('should still post the Ledger balance when the Index transactions call fails', async () => {
+				indexCanisterMock.getTransactions.mockRejectedValue(new Error('Index canister failure'));
+
+				await scheduler.start(startData);
+
+				await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+				const walletMessages = postMessageMock.mock.calls
+					.map(([message]) => message)
+					.filter((message) => message?.msg === msg);
+
+				expect(walletMessages.length).toBeGreaterThan(0);
+				expect(walletMessages).toSatisfy(
+					(messages: { data: { wallet: { balance: { data: bigint } } } }[]) =>
+						messages.every((message) => message.data.wallet.balance.data === ledgerBalance)
+				);
+
+				// A failing Index canister must not surface as a sync error while the Ledger balance is available.
+				expect(postMessageMock).not.toHaveBeenCalledWith(
+					expect.objectContaining({ msg: `${msg}Error` })
+				);
 			});
 		});
 
@@ -493,14 +611,25 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				);
 			};
 
+			// The Ledger balance is authoritative, so only a Ledger failure is fatal for the sync.
 			const initErrorMock = (err: Error) =>
-				indexCanisterMock.getTransactions.mockRejectedValue(err);
+				ledgerCanisterMock.accountBalance.mockRejectedValue(err);
+
+			const initSuccessMock = () => {
+				ledgerCanisterMock.accountBalance.mockResolvedValue(mockBalance);
+				indexCanisterMock.getTransactions.mockResolvedValue({
+					balance: mockBalance,
+					transactions: [mockTransaction],
+					oldest_tx_id: [mockOldestTxId]
+				});
+			};
 
 			const { setup, teardown, tests } = initOtherScenarios({
 				initScheduler: initIcpWalletScheduler,
 				startData,
 				initCleanupMock,
 				initErrorMock,
+				initSuccessMock,
 				msg: 'syncIcpWallet'
 			});
 
@@ -581,6 +710,19 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				ref: startData.ledgerCanisterId,
 				transaction,
 				certified: true
+			});
+
+			const mockPostMessageWithoutNewTransactions = (certified: boolean) => ({
+				msg,
+				ref: startData.ledgerCanisterId,
+				data: {
+					wallet: {
+						balance: { certified, data: mockBalance },
+						oldest_tx_id: [],
+						transactionsUnavailable: true,
+						newTransactions: JSON.stringify([], jsonReplacer)
+					}
+				}
 			});
 
 			beforeEach(() => {
@@ -711,7 +853,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				});
 			});
 
-			it('should throw if the Index canister is not awake when it is out-of-sync with the balance', async () => {
+			it('should post the Ledger balance without transactions if the Index canister is not awake when it is out-of-sync with the balance', async () => {
 				vi.spyOn(indexCanisterServices, 'isIndexCanisterAwake').mockResolvedValue(false);
 
 				const currentMock = spyGetTransactions.getMockImplementation();
@@ -743,16 +885,67 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					certified: true
 				});
 
+				expect(postMessageMock).toHaveBeenCalledTimes(4);
+				expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+				expect(postMessageMock).toHaveBeenNthCalledWith(
+					2,
+					mockPostMessageWithoutNewTransactions(false)
+				);
+				expect(postMessageMock).toHaveBeenNthCalledWith(
+					3,
+					mockPostMessageWithoutNewTransactions(true)
+				);
+				expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
+			});
+
+			it('should post the Ledger balance without transactions if the Index canister fails', async () => {
+				spyGetTransactions.mockRejectedValue(new Error('Index canister unavailable'));
+
+				await scheduler.start(startData);
+
+				await awaitJobExecution();
+
+				expect(postMessageMock).toHaveBeenCalledTimes(4);
+				expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+				expect(postMessageMock).toHaveBeenNthCalledWith(
+					2,
+					mockPostMessageWithoutNewTransactions(false)
+				);
+				expect(postMessageMock).toHaveBeenNthCalledWith(
+					3,
+					mockPostMessageWithoutNewTransactions(true)
+				);
+				expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
+			});
+
+			it('should keep reporting the unavailable Index canister on later jobs even if nothing changed', async () => {
+				spyGetTransactions.mockRejectedValue(new Error('Index canister unavailable'));
+
+				await scheduler.start(startData);
+
+				await awaitJobExecution();
+
+				postMessageMock.mockClear();
+
+				await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageWithoutNewTransactions(true));
+			});
+
+			it('should surface an error if the Ledger canister fails', async () => {
+				const error = new Error('Ledger canister unavailable');
+				spyGetBalance.mockRejectedValue(error);
+
+				await scheduler.start(startData);
+
+				await awaitJobExecution();
+
 				expect(postMessageMock).toHaveBeenCalledTimes(3);
 				expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 				expect(postMessageMock).toHaveBeenNthCalledWith(2, {
 					ref: startData.ledgerCanisterId,
 					msg: `${msg}Error`,
-					data: {
-						error: new Error(
-							`Index canister ${startData.indexCanisterId} for Ledger canister ${startData.ledgerCanisterId} is not awake`
-						)
-					}
+					data: { error }
 				});
 				expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
 			});
@@ -799,28 +992,22 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				);
 			};
 
+			// The Ledger balance is authoritative, so only a Ledger failure is fatal for the sync. A
+			// failing Index canister is tolerated and covered in the "with transactions" scenarios.
 			describe('balance error', () => {
 				const { setup, teardown, tests } = initOtherScenarios({
 					initScheduler: initIcrcWalletScheduler,
 					startData,
 					initCleanupMock,
 					initErrorMock: (err: Error) => ledgerCanisterMock.balance.mockRejectedValue(err),
-					msg: 'syncIcrcWallet'
-				});
-
-				beforeEach(setup);
-
-				afterEach(teardown);
-
-				tests();
-			});
-
-			describe('transactions error', () => {
-				const { setup, teardown, tests } = initOtherScenarios({
-					initScheduler: initIcrcWalletScheduler,
-					startData,
-					initCleanupMock,
-					initErrorMock: (err: Error) => indexCanisterMock.getTransactions.mockRejectedValue(err),
+					initSuccessMock: () => {
+						ledgerCanisterMock.balance.mockResolvedValue(mockBalance);
+						indexCanisterMock.getTransactions.mockResolvedValue({
+							balance: mockBalanceFromTransactions(),
+							transactions: [mockTransaction],
+							oldest_tx_id: [mockOldestTxId]
+						});
+					},
 					msg: 'syncIcrcWallet'
 				});
 
@@ -938,6 +1125,15 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				// query + update = 2
 				expect(spyGetTransactions).toHaveBeenCalledTimes(2);
 				expect(spyGetBalance).toHaveBeenCalledTimes(2);
+			});
+
+			it('should stamp the ref and emit the wallet payload when triggered without a prior start', async () => {
+				// Covers the `canisterId` branch of walletDataRef: a trigger with no preceding start
+				// must still set `ref`, else postMessageWallet drops every payload.
+				await scheduler.trigger(startData);
+
+				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageNotCertified);
+				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
 			});
 
 			it('should trigger syncWallet periodically calling both loaders', async () => {

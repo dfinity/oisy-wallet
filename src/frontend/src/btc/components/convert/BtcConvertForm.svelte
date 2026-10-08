@@ -3,11 +3,13 @@
 	import { getContext, type Snippet } from 'svelte';
 	import BtcConvertFees from '$btc/components/convert/BtcConvertFees.svelte';
 	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
+	import { initBtcMaxSendAmount } from '$btc/derived/btc-max-send-amount.derived';
 	import {
 		BtcPendingSentTransactionsStatus,
 		initPendingSentTransactionsStatus
 	} from '$btc/derived/btc-pending-sent-transactions-status.derived';
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
+	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
 	import { BTC_CONVERT_FORM_TEST_ID } from '$lib/constants/test-ids.constants';
 	import {
@@ -44,7 +46,19 @@
 		amountError = $insufficientFunds || $insufficientFundsForFee;
 	});
 
+	let maxSendAmountStore = $derived(initBtcMaxSendAmount(source));
+
 	let hasPendingTransactionsStore = $derived(initPendingSentTransactionsStatus(source));
+
+	// When BTC extension is enabled, parallel transactions are allowed, so we
+	// neither block the submit button nor surface the "wait for the previous
+	// send" warning. The legacy single-send path is still reachable when the
+	// flag is off.
+	let pendingTransactionsStatus = $derived(
+		BTC_EXTENSION_FEATURE_FLAG_ENABLED
+			? BtcPendingSentTransactionsStatus.NONE
+			: $hasPendingTransactionsStore
+	);
 
 	let utxosFee = $derived(nonNullish(sendAmount) ? $storeUtxosFeeData?.utxosFee : undefined);
 
@@ -52,7 +66,7 @@
 		$insufficientFunds ||
 			$insufficientFundsForFee ||
 			invalidAmount(sendAmount) ||
-			$hasPendingTransactionsStore !== BtcPendingSentTransactionsStatus.NONE ||
+			pendingTransactionsStatus !== BtcPendingSentTransactionsStatus.NONE ||
 			isNullish($storeUtxosFeeData?.utxosFee?.utxos) ||
 			$storeUtxosFeeData.utxosFee.utxos.length === 0
 	);
@@ -63,6 +77,7 @@
 <ConvertForm
 	{cancel}
 	disabled={invalid}
+	maxAmount={$maxSendAmountStore}
 	{onNext}
 	testId={BTC_CONVERT_FORM_TEST_ID}
 	{totalFee}
@@ -70,9 +85,9 @@
 	bind:receiveAmount
 >
 	{#snippet message()}
-		{#if nonNullish($hasPendingTransactionsStore)}
+		{#if nonNullish(pendingTransactionsStatus)}
 			<div class="mb-4" data-tid="btc-convert-form-send-warnings">
-				<BtcSendWarnings pendingTransactionsStatus={$hasPendingTransactionsStore} {utxosFee} />
+				<BtcSendWarnings {pendingTransactionsStatus} {utxosFee} />
 			</div>
 		{/if}
 	{/snippet}

@@ -1,0 +1,240 @@
+<script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import { getMinimumBorrowAmount } from '@liquidium/client';
+	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
+	import LiquidiumHealthFactor from '$lib/components/liquidium/LiquidiumHealthFactor.svelte';
+	import LiquidiumActivationFeeInfo from '$lib/components/liquidium/borrow/LiquidiumActivationFeeInfo.svelte';
+	import LiquidiumBorrowSummary from '$lib/components/liquidium/borrow/LiquidiumBorrowSummary.svelte';
+	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
+	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import Checkbox from '$lib/components/ui/Checkbox.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
+	import { LIQUIDIUM_BORROWING_POWER_TOLERANCE } from '$lib/constants/liquidium.constants';
+	import type { LiquidiumBorrowPreview } from '$lib/services/liquidium-borrow.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { LiquidiumMarket, LiquidiumPortfolio } from '$lib/types/liquidium';
+	import type { OptionAmount } from '$lib/types/send';
+	import type { DisplayUnit } from '$lib/types/swap';
+	import type { Token } from '$lib/types/token';
+	import { isDesktop } from '$lib/utils/device.utils';
+	import { formatStakeApyNumber, formatToken } from '$lib/utils/format.utils';
+	import { invalidAmount } from '$lib/utils/input.utils';
+	import {
+		liquidiumMaxBorrowBaseUnits,
+		liquidiumOpeningDebtFactor
+	} from '$lib/utils/liquidium.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
+
+	interface Props {
+		market: LiquidiumMarket;
+		borrowToken: Token | undefined;
+		borrowPrice: number;
+		portfolio: LiquidiumPortfolio;
+		preview: LiquidiumBorrowPreview;
+		amount: OptionAmount;
+		confirmChecked: boolean;
+		// Opens the token-selection step; when set, the token logo becomes a selector.
+		onSelectToken?: () => void;
+		onClose: () => void;
+		onNext: () => void;
+	}
+
+	let {
+		market,
+		borrowToken,
+		borrowPrice,
+		portfolio,
+		preview,
+		amount = $bindable(),
+		confirmChecked = $bindable(),
+		onSelectToken,
+		onClose,
+		onNext
+	}: Props = $props();
+
+	let exchangeValueUnit = $state<DisplayUnit>('usd');
+	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
+	let amountSetToMax = $state(false);
+
+	$effect(() => {
+		amount;
+		confirmChecked = false;
+	});
+
+	let openingDebtFactor = $derived(liquidiumOpeningDebtFactor(market));
+
+	let maxBorrowBaseUnits = $derived(
+		nonNullish(borrowToken)
+			? liquidiumMaxBorrowBaseUnits({
+					availableBorrowsUsd: portfolio.availableBorrowsUsd,
+					price: borrowPrice,
+					openingDebtFactor,
+					decimals: borrowToken.decimals
+				})
+			: ZERO
+	);
+
+	let parsedAmount = $derived(
+		nonNullish(amount) && !invalidAmount(amount) && nonNullish(borrowToken)
+			? parseToken({ value: `${amount}`, unitName: borrowToken.decimals })
+			: undefined
+	);
+
+	let hasAmount = $derived(nonNullish(parsedAmount) && parsedAmount > ZERO);
+
+	let belowMinimum = $derived(
+		hasAmount && nonNullish(parsedAmount) && parsedAmount < getMinimumBorrowAmount(market.asset)
+	);
+
+	let minBorrowFormatted = $derived(
+		nonNullish(borrowToken)
+			? `${formatToken({
+					value: getMinimumBorrowAmount(market.asset),
+					unitName: borrowToken.decimals
+				})} ${market.asset}`
+			: ''
+	);
+
+	// Shown inside the input. Shares the service cap's tolerance so "Max" doesn't flag itself.
+	const validateBorrowAmount = (userAmount: bigint): Error | undefined => {
+		if (userAmount < getMinimumBorrowAmount(market.asset)) {
+			return new Error($i18n.liquidium.text.borrow_below_minimum);
+		}
+
+		const debtUsd =
+			(Number(userAmount) / 10 ** (borrowToken?.decimals ?? 0)) * borrowPrice * openingDebtFactor;
+
+		if (debtUsd > portfolio.availableBorrowsUsd * (1 + LIQUIDIUM_BORROWING_POWER_TOLERANCE)) {
+			return new Error($i18n.liquidium.text.borrow_exceeds_power);
+		}
+
+		return undefined;
+	};
+
+	// No price → USD cap/risk validation silently no-ops (newBorrowUsd is always 0), so block
+	// borrowing entirely until prices load (loadLiquidium falls back to {} on a prices failure).
+	let pricesUnavailable = $derived(borrowPrice <= 0);
+
+	// Any non-healthy projection requires explicit confirmation.
+	let needsConfirm = $derived(
+		hasAmount && !belowMinimum && preview.valid && preview.healthLevel !== 'healthy'
+	);
+
+	let canReview = $derived(
+		hasAmount &&
+			!belowMinimum &&
+			!pricesUnavailable &&
+			preview.valid &&
+			(!needsConfirm || confirmChecked)
+	);
+</script>
+
+<ContentWithToolbar>
+	<LiquidiumBorrowSummary {portfolio} />
+
+	<div class="mb-6">
+		<TokenInput
+			autofocus={isDesktop()}
+			displayUnit={inputUnit}
+			exchangeRate={borrowPrice}
+			isSelectable={nonNullish(onSelectToken)}
+			onClick={onSelectToken}
+			onCustomErrorValidate={validateBorrowAmount}
+			showTokenNetwork
+			token={borrowToken}
+			bind:amount
+		>
+			{#snippet title()}{$i18n.core.text.amount}{/snippet}
+
+			{#snippet amountInfo()}
+				<div class="text-tertiary">
+					<TokenInputAmountExchange
+						{amount}
+						exchangeRate={borrowPrice}
+						token={borrowToken}
+						bind:displayUnit={exchangeValueUnit}
+					/>
+				</div>
+			{/snippet}
+
+			{#snippet balance()}
+				<MaxBalanceButton
+					balance={maxBorrowBaseUnits}
+					token={borrowToken}
+					bind:amount
+					bind:amountSetToMax
+				/>
+			{/snippet}
+		</TokenInput>
+	</div>
+
+	<ModalValue>
+		{#snippet label()}{$i18n.liquidium.text.minimum_borrow}{/snippet}
+		{#snippet mainValue()}{minBorrowFormatted}{/snippet}
+	</ModalValue>
+
+	<ModalValue>
+		{#snippet label()}{$i18n.liquidium.text.borrow_apy}{/snippet}
+		{#snippet mainValue()}
+			<span class="text-warning-primary">{formatStakeApyNumber(market.borrowApy)}%</span>
+		{/snippet}
+	</ModalValue>
+
+	<ModalValue>
+		{#snippet label()}{$i18n.liquidium.text.resulting_ltv}{/snippet}
+		{#snippet mainValue()}{preview.resultingLtvPercent.toFixed(1)}%{/snippet}
+	</ModalValue>
+
+	<LiquidiumHealthFactor percent={preview.projectedHealthPercent} />
+
+	<LiquidiumActivationFeeInfo {market} />
+
+	{#if pricesUnavailable}
+		<MessageBox level="warning" styleClass="mt-3">
+			{$i18n.liquidium.text.borrow_prices_unavailable}
+		</MessageBox>
+	{/if}
+
+	<!-- Amount errors show inside the input; only the risk confirmation lives here. -->
+	{#if needsConfirm}
+		<MessageBox level={preview.healthLevel === 'critical' ? 'error' : 'warning'} styleClass="mt-3">
+			<div class="flex flex-col gap-3">
+				<span>
+					{preview.healthLevel === 'critical'
+						? $i18n.liquidium.text.borrow_high_risk_warning
+						: $i18n.liquidium.text.borrow_at_risk_warning}
+				</span>
+
+				<div class="flex items-start gap-3">
+					<Checkbox
+						checked={confirmChecked}
+						inputId="liquidium-borrow-confirm"
+						onChange={() => (confirmChecked = !confirmChecked)}
+					/>
+
+					<label class="block text-sm leading-snug" for="liquidium-borrow-confirm"
+						>{$i18n.liquidium.text.borrow_risk_confirm}</label
+					>
+				</div>
+			</div>
+		</MessageBox>
+	{/if}
+
+	<p class="mt-4 text-sm text-tertiary">{$i18n.liquidium.text.borrow_risk_info}</p>
+
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonCancel onclick={onClose} />
+
+			<Button disabled={!canReview} onclick={onNext}>
+				{$i18n.send.text.review}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
+</ContentWithToolbar>

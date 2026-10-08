@@ -59,21 +59,24 @@ describe('spl.derived', () => {
 					enabled: true,
 					version: undefined,
 					section: undefined,
-					allowExternalContentSource: undefined
+					allowExternalContentSource: undefined,
+					allowedExternalContentSourceUrls: undefined
 				},
 				{
 					...BONK_TOKEN,
 					enabled: false,
 					version: undefined,
 					section: undefined,
-					allowExternalContentSource: undefined
+					allowExternalContentSource: undefined,
+					allowedExternalContentSourceUrls: undefined
 				},
 				{
 					...TRUMP_TOKEN,
 					enabled: false,
 					version: undefined,
 					section: undefined,
-					allowExternalContentSource: undefined
+					allowExternalContentSource: undefined,
+					allowedExternalContentSourceUrls: undefined
 				},
 				mockSplCustomToken1,
 				mockSplCustomToken2
@@ -98,21 +101,24 @@ describe('spl.derived', () => {
 					enabled: true,
 					version: 1n,
 					section: undefined,
-					allowExternalContentSource: undefined
+					allowExternalContentSource: undefined,
+					allowedExternalContentSourceUrls: undefined
 				},
 				{
 					...BONK_TOKEN,
 					enabled: true,
 					version: undefined,
 					section: undefined,
-					allowExternalContentSource: undefined
+					allowExternalContentSource: undefined,
+					allowedExternalContentSourceUrls: undefined
 				},
 				{
 					...TRUMP_TOKEN,
 					enabled: false,
 					version: undefined,
 					section: undefined,
-					allowExternalContentSource: undefined
+					allowExternalContentSource: undefined,
+					allowedExternalContentSourceUrls: undefined
 				}
 			]);
 		});
@@ -137,7 +143,8 @@ describe('spl.derived', () => {
 					enabled: true,
 					version: undefined,
 					section: undefined,
-					allowExternalContentSource: undefined
+					allowExternalContentSource: undefined,
+					allowedExternalContentSourceUrls: undefined
 				},
 				{ ...mockSplDefaultToken, enabled: true },
 				mockSplCustomToken2
@@ -162,14 +169,16 @@ describe('spl.derived', () => {
 					enabled: true,
 					version: 1n,
 					section: undefined,
-					allowExternalContentSource: undefined
+					allowExternalContentSource: undefined,
+					allowedExternalContentSourceUrls: undefined
 				},
 				{
 					...BONK_TOKEN,
 					enabled: true,
 					version: undefined,
 					section: undefined,
-					allowExternalContentSource: undefined
+					allowExternalContentSource: undefined,
+					allowedExternalContentSourceUrls: undefined
 				},
 				{ ...mockSplDefaultToken, enabled: true, version: 1n },
 				{ ...BONK_TOKEN, enabled: true }

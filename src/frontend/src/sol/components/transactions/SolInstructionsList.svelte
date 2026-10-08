@@ -1,0 +1,160 @@
+<script lang="ts">
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+	import ContactOrToken from '$lib/components/contact/ContactOrToken.svelte';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { Token } from '$lib/types/token';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { splTokens } from '$sol/derived/spl.derived';
+	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
+	import type { OptionSolAddress, SolAddress } from '$sol/types/address';
+	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
+	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
+	import { solAccountExplorerUrl } from '$sol/utils/sol-explorer.utils';
+	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
+	import {
+		flattenInstructions,
+		formatSolInstructionSummary
+	} from '$sol/utils/sol-transaction-summary.utils';
+	import { findSplToken } from '$sol/utils/spl.utils';
+
+	interface Props {
+		instructions: SolInstructionSummary[];
+		token: Token;
+		// The net changes of the same transaction, whose decimals stand in for the ones an
+		// unchecked transfer does not carry.
+		netChanges?: SolNetBalanceChange[];
+		// The user's address on this network, which decides whether a close paid them back.
+		userAddress: OptionSolAddress;
+	}
+
+	let { instructions, token, netChanges, userAddress }: Props = $props();
+
+	const splToken = (tokenAddress: string) =>
+		findSplToken({
+			tokens: $splTokens,
+			tokenAddress,
+			networkId: token.network.id
+		});
+
+	// The mints this list mentions, so a placeholder is numbered against the others it stands
+	// with. A list naming two mints "Unknown token" twice says less than their addresses would.
+	let unknownTokenAddresses = $derived(
+		solUnknownTokenAddresses({
+			tokenAddresses: flattenInstructions(instructions).map(({ tokenAddress }) => tokenAddress),
+			tokens: $splTokens,
+			networkId: token.network.id,
+			metadata: $splTokenMetadataStore
+		})
+	);
+
+	const symbolOf = (tokenAddress: string | undefined): string =>
+		solTokenSymbol({
+			tokenAddress,
+			tokens: $splTokens,
+			networkId: token.network.id,
+			metadata: $splTokenMetadataStore,
+			unknownTokenAddresses,
+			unknownTokenLabel: $i18n.transaction.text.unknown_token,
+			nativeSymbol: SOLANA_TOKEN.symbol
+		});
+
+	const decimalsOf = (tokenAddress: string | undefined): number =>
+		isNullish(tokenAddress)
+			? SOLANA_TOKEN.decimals
+			: (splToken(tokenAddress)?.decimals ??
+				netChanges?.find((change) => change.tokenAddress === tokenAddress)?.decimals ??
+				0);
+</script>
+
+{#snippet line(instruction: SolInstructionSummary, headingProgram?: SolAddress)}
+	{@const { text, detail, trailing } = formatSolInstructionSummary({
+		instruction,
+		i18n: $i18n,
+		symbolOf,
+		decimalsOf,
+		userAddress
+	})}
+
+	<!-- The counterparty of a transfer, the delegate of an approval, the new authority of a
+	     handover, the program a route ran through: an address the user has something to check. The
+	     account a creation or a close names is a derived token account nobody recognises, and the
+	     token already identifies it.
+
+	     A close that pays the user their own wallet back is the exception: the line already says
+	     the balance came home, and naming the wallet underneath repeats it. The address is what
+	     the line needs when it went somewhere else. -->
+	{@const closedHome =
+		(instruction.kind === 'closeTokenAccount' || instruction.kind === 'unwrap') &&
+		instruction.counterparty === userAddress}
+
+	<!-- A line under the heading of the very program it names need not repeat that program's
+	     address: the heading shows it, with its controls, right above. The line keeps the name, and
+	     reads like the opening of a token account. -->
+	{@const programLabel =
+		nonNullish(headingProgram) && instruction.program === headingProgram
+			? (instruction.programName ?? shortenWithMiddleEllipsis({ text: headingProgram }))
+			: undefined}
+
+	{@const actionAddress =
+		closedHome || nonNullish(programLabel)
+			? undefined
+			: (instruction.counterparty ?? instruction.newAuthority ?? instruction.program)}
+
+	<span class="flex flex-col gap-1" data-tid="sol-instruction">
+		<span class="flex flex-wrap items-center gap-x-1">
+			<span>
+				{text}{#if nonNullish(programLabel)}<span class="text-tertiary">{` ${programLabel}`}</span
+					>{/if}{#if nonNullish(detail)}<span class="text-tertiary">{` · ${detail}`}</span
+					>{/if}{#if nonNullish(programLabel) && nonNullish(trailing)}<span class="text-tertiary"
+						>{` · ${trailing}`}</span
+					>{/if}
+			</span>
+
+			<!-- A contact or a token OISY knows names the account; the address is what is left when
+			     neither does. The controls copy and open the address either way, never the name. -->
+			{#if nonNullish(actionAddress)}
+				<!-- A program's published name is the program's own claim about itself, so it is shown
+				     as a label beside the address rather than in place of it: the address is the part
+				     the user can check. -->
+				{#if nonNullish(instruction.programName)}
+					<span class="text-tertiary">{instruction.programName}</span>
+				{/if}
+
+				<ContactOrToken identifier={actionAddress} showFallback />
+
+				<AddressActions
+					copyAddress={actionAddress}
+					copyAddressText={$i18n.wallet.text.address_copied}
+					externalLink={solAccountExplorerUrl({ network: token.network, address: actionAddress })}
+					externalLinkAriaLabel={$i18n.wallet_connect.alt.open_address_block_explorer}
+					inline
+				/>
+			{/if}
+
+			{#if isNullish(programLabel) && nonNullish(trailing)}
+				<span class="text-tertiary">{`· ${trailing}`}</span>
+			{/if}
+		</span>
+
+		<!-- The lines sit under the instruction that produced them: flat, a four-leg swap reads as
+		     four unrelated transfers, and a line made inside an application as one the message
+		     states itself. -->
+		{#if nonNullish(instruction.children)}
+			<span class="flex flex-col gap-1 ps-4">
+				{#each instruction.children as child, i (i)}
+					{@render line(child, instruction.program)}
+				{/each}
+			</span>
+		{/if}
+	</span>
+{/snippet}
+
+<div class="flex flex-col gap-1" data-tid="sol-instructions-list">
+	{#each instructions as instruction, i (i)}
+		{@render line(instruction)}
+	{:else}
+		<span class="text-tertiary">{$i18n.transaction.text.tab_unavailable}</span>
+	{/each}
+</div>

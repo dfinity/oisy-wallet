@@ -16,10 +16,13 @@ import type {
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
+import type { XdrBasketStatus } from '$lib/types/exchange';
 import type { CertifiedData } from '$lib/types/store';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
+import type { XrpAddress } from '$xrp/types/address';
+import type { XrpNetworkType } from '$xrp/types/network';
 import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import * as z from 'zod';
 
@@ -43,6 +46,9 @@ export const POST_MESSAGE_REQUESTS = [
 	'startSolWalletTimer',
 	'triggerBtcWalletTimer',
 	'triggerSolWalletTimer',
+	'stopXrpWalletTimer',
+	'startXrpWalletTimer',
+	'triggerXrpWalletTimer',
 	'stopBtcStatusesTimer',
 	'startBtcStatusesTimer',
 	'triggerBtcStatusesTimer',
@@ -68,7 +74,11 @@ export const PostMessageDataRequestExchangeTimerSchema = z.object({
 	erc20Addresses: z.array(z.custom<Erc20ContractAddressWithNetwork>()),
 	icrcCanisterIds: z.array(CanisterIdTextSchema),
 	splAddresses: z.array(z.custom<SplTokenAddress>()),
-	erc4626TokensExchangeData: z.array(z.custom<Erc4626TokensExchangeData>())
+	erc4626TokensExchangeData: z.array(z.custom<Erc4626TokensExchangeData>()),
+	// Effective backend `exchange_rate_enabled` flag, resolved at runtime via the backend
+	// `exchange_rate_enabled` query. Optional for backwards compatibility — when absent,
+	// the worker falls back to the build-time `BACKEND_EXCHANGE_ENABLED` env constant.
+	backendExchangeEnabled: z.boolean().optional()
 });
 
 export const PostMessageDataRequestIcrcSchema = z.object({
@@ -86,6 +96,7 @@ export const PostMessageDataRequestDip20Schema = z.object({
 });
 
 export const PostMessageDataRequestIcpSchema = z.object({
+	ledgerCanisterId: CanisterIdTextSchema,
 	indexCanisterId: CanisterIdTextSchema
 });
 
@@ -113,14 +124,21 @@ export const PostMessageDataRequestSolSchema = z.object({
 	// TODO: generate zod schema for CertifiedData
 	address: z.custom<CertifiedData<SolAddress>>(),
 	solanaNetwork: z.custom<SolanaNetworkType>(),
-	tokenAddress: z.custom<SplTokenAddress>().optional(),
-	tokenOwnerAddress: z.custom<SolAddress>().optional()
+	// The enabled SPL tokens of the network: the mint and the token program that owns it.
+	tokens: z.array(z.object({ address: z.custom<SplTokenAddress>(), owner: z.custom<SolAddress>() }))
+});
+
+export const PostMessageDataRequestXrpSchema = z.object({
+	// TODO: generate zod schema for CertifiedData
+	address: z.custom<CertifiedData<XrpAddress>>(),
+	xrpNetwork: z.custom<XrpNetworkType>()
 });
 
 export const PostMessageResponseStatusSchema = z.enum([
 	'syncIcWalletStatus',
 	'syncBtcWalletStatus',
 	'syncSolWalletStatus',
+	'syncXrpWalletStatus',
 	'syncBtcStatusesStatus',
 	'syncCkMinterInfoStatus',
 	'syncCkBTCUpdateBalanceStatus'
@@ -133,6 +151,7 @@ export const PostMessageErrorResponseSchema = z.enum([
 	'syncDip20WalletError',
 	'syncBtcWalletError',
 	'syncSolWalletError',
+	'syncXrpWalletError',
 	'syncBtcStatusesError',
 	'syncCkMinterInfoError'
 ]);
@@ -146,6 +165,7 @@ export const PostMessageResponseSchema = z.enum([
 	'syncDip20Wallet',
 	'syncBtcWallet',
 	'syncSolWallet',
+	'syncXrpWallet',
 	'syncIcpWalletCleanUp',
 	'syncIcrcWalletCleanUp',
 	'syncDip20WalletCleanUp',
@@ -170,12 +190,15 @@ export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSche
 	currentIcpPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentIcrcPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
 	currentSolPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
-	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
-	currentErc4626Prices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
+	currentXrpPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
+	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>().optional(),
+	currentErc4626Prices: z.custom<CoingeckoSimpleTokenPriceResponse>().optional(),
 	currentBnbPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentPolPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentArbitrumEthPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
-	currentBaseEthPrice: z.custom<CoingeckoSimplePriceResponse>().optional()
+	currentBaseEthPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
+	// Set by a refresh that includes TCYCLES once the countdown to the XDR basket's expiry has begun.
+	currentXdrBasketStatus: z.custom<XdrBasketStatus>().optional()
 });
 
 export const PostMessageDataResponseExchangeErrorSchema = PostMessageDataResponseSchema.extend({
@@ -187,7 +210,10 @@ export const JsonTransactionsTextSchema = z.string();
 
 export const PostMessageWalletDataSchema = z.object({
 	balance: z.custom<CertifiedData<bigint>>(),
-	newTransactions: JsonTransactionsTextSchema.optional()
+	newTransactions: JsonTransactionsTextSchema.optional(),
+	// Set when the balance could be fetched but the transactions could not — i.e. the Index canister
+	// did not answer, or answered with data we cannot trust. Absent means the check succeeded.
+	transactionsUnavailable: z.boolean().optional()
 });
 
 export const PostMessageDataResponseWalletSchema = PostMessageDataResponseSchema.extend({
@@ -195,7 +221,7 @@ export const PostMessageDataResponseWalletSchema = PostMessageDataResponseSchema
 });
 
 export const PostMessageDataResponseErrorSchema = PostMessageDataResponseSchema.extend({
-	error: z.unknown()
+	error: z.unknown().optional()
 });
 
 export const PostMessageDataErrorSchema = z.object({
@@ -234,7 +260,7 @@ const buildPostMessageResponseSchema = <T extends z.ZodTypeAny>({
 			.object({
 				...PostMessageCommonSchema.shape,
 				msg: PostMessageResponseSchema,
-				data: z.strictObject(dataSchema).shape.optional()
+				data: dataSchema.optional()
 			})
 			.strict(),
 		z
@@ -250,7 +276,7 @@ export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 		z
 			.object({
 				msg: PostMessageRequestSchema,
-				data: z.strictObject(dataSchema).shape.optional()
+				data: dataSchema.optional()
 			})
 			.strict(),
 		buildPostMessageResponseSchema({ dataSchema })

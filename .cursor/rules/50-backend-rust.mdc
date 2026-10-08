@@ -1,0 +1,17 @@
+---
+description: Rust backend (IC canister) idioms and structure. Apply to Rust files and Candid.
+globs: ['src/backend/**/*.rs', 'src/shared/**/*.rs', 'src/backend/**/*.did']
+---
+
+# Cursor — Backend (Rust / IC canister)
+
+Authoritative sources:
+
+- [docs/ai/backend/structure.md](mdc:docs/ai/backend/structure.md)
+- [docs/ai/backend/patterns.md](mdc:docs/ai/backend/patterns.md)
+- [docs/ai/backend/testing.md](mdc:docs/ai/backend/testing.md)
+
+Read the relevant page before editing Rust or Candid. Changes to
+[`src/backend/backend.did`](mdc:src/backend/backend.did) are
+breaking-interface unless proven otherwise — see
+[breaking-interface.md](mdc:docs/ai/backend/workflows/breaking-interface.md).

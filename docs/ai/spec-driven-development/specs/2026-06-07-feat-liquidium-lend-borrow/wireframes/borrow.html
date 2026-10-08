@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Borrow flow — wireframe</title>
+		<style>
+			:root {
+				--bg: #e9eefb;
+				--panel: #ffffff;
+				--panel2: #f4f6fb;
+				--line: #e5e9f2;
+				--txt: #16203a;
+				--muted: #6b7787;
+				--accent: #2f6df6;
+				--green: #15a35b;
+				--amber: #d8890a;
+				--red: #df4a3c;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				background: var(--bg);
+				color: var(--txt);
+				font:
+					14px/1.5 -apple-system,
+					Segoe UI,
+					Roboto,
+					Helvetica,
+					Arial,
+					sans-serif;
+			}
+			.wfbar {
+				max-width: 460px;
+				margin: 14px auto 0;
+				background: #ffffff;
+				border: 1px dashed #b9c4dd;
+				border-radius: 10px;
+				padding: 10px 14px;
+				color: var(--muted);
+				font-size: 12px;
+			}
+			.wfbar .tag {
+				display: inline-block;
+				font-size: 10px;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: #6b7787;
+				border: 1px solid #b9c4dd;
+				border-radius: 5px;
+				padding: 1px 6px;
+				margin-bottom: 7px;
+			}
+			.wfbar .ctrls {
+				display: flex;
+				gap: 10px;
+				align-items: center;
+				margin-top: 10px;
+				padding-top: 9px;
+				border-top: 1px solid #eef1f7;
+			}
+			.wfbar .ctrls span {
+				white-space: nowrap;
+			}
+			.modal {
+				max-width: 460px;
+				margin: 14px auto;
+				background: var(--panel);
+				border: 1px solid var(--line);
+				border-radius: 16px;
+				overflow: hidden;
+			}
+			.head {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 14px 16px;
+				border-bottom: 1px solid var(--line);
+			}
+			.head h2 {
+				font-size: 16px;
+				margin: 0;
+			}
+			.steps {
+				display: flex;
+				gap: 6px;
+			}
+			.dot {
+				width: 7px;
+				height: 7px;
+				border-radius: 50%;
+				background: var(--line);
+			}
+			.dot.on {
+				background: var(--accent);
+			}
+			.body {
+				padding: 16px;
+			}
+			.field {
+				background: var(--panel2);
+				border: 1px solid var(--line);
+				border-radius: 12px;
+				padding: 12px;
+				margin-bottom: 12px;
+			}
+			.field .top {
+				display: flex;
+				justify-content: space-between;
+				color: var(--muted);
+				font-size: 12px;
+			}
+			.field .mid {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-top: 6px;
+			}
+			input {
+				background: transparent;
+				border: 0;
+				color: var(--txt);
+				font-size: 24px;
+				width: 60%;
+				outline: none;
+			}
+			.selpill {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				background: var(--panel);
+				border: 1px solid var(--line);
+				border-radius: 999px;
+				padding: 6px 12px;
+				font-weight: 600;
+			}
+			.coin {
+				width: 24px;
+				height: 24px;
+				border-radius: 50%;
+				display: grid;
+				place-items: center;
+				font-weight: 700;
+				font-size: 11px;
+			}
+			.usdc {
+				background: #2775ca;
+				color: #fff;
+			}
+			.btc {
+				background: #f7931a;
+				color: #0e1218;
+			}
+			.infoline {
+				display: flex;
+				justify-content: space-between;
+				font-size: 12.5px;
+				color: var(--muted);
+				padding: 6px 2px;
+			}
+			.infoline b {
+				color: var(--txt);
+				font-weight: 600;
+			}
+			.hfbar {
+				height: 8px;
+				border-radius: 6px;
+				background: linear-gradient(90deg, var(--red), var(--amber) 45%, var(--green));
+				position: relative;
+				margin: 8px 0 4px;
+			}
+			.hfbar .mark {
+				position: absolute;
+				top: -3px;
+				width: 3px;
+				height: 14px;
+				background: #fff;
+				border-radius: 2px;
+				transition: left 0.15s;
+			}
+			.warn {
+				border-radius: 10px;
+				padding: 10px 12px;
+				font-size: 12.5px;
+				margin: 10px 0;
+				display: none;
+			}
+			.warn.amber {
+				background: #fbf1de;
+				border: 1px solid #ecd29a;
+				color: #8a5d05;
+				display: block;
+			}
+			.warn.red {
+				background: #fce8e6;
+				border: 1px solid #f3b6ad;
+				color: #b5392c;
+				display: block;
+			}
+			.warn label {
+				display: flex;
+				gap: 8px;
+				align-items: flex-start;
+				margin-top: 8px;
+				cursor: pointer;
+			}
+			.err {
+				color: var(--red);
+				font-size: 12px;
+				margin: 6px 2px;
+				display: none;
+			}
+			button {
+				font: inherit;
+				cursor: pointer;
+			}
+			.btn {
+				width: 100%;
+				background: var(--accent);
+				color: #fff;
+				border: 0;
+				border-radius: 11px;
+				padding: 13px;
+				font-weight: 600;
+				font-size: 15px;
+			}
+			.btn:disabled {
+				opacity: 0.4;
+				cursor: not-allowed;
+			}
+			.foot {
+				padding: 0 16px 16px;
+				display: flex;
+				gap: 10px;
+			}
+			.btn.ghost {
+				background: transparent;
+				border: 1px solid var(--line);
+				color: var(--txt);
+			}
+			.hero {
+				text-align: center;
+				padding: 8px 0 14px;
+			}
+			.hero .big {
+				font-size: 30px;
+				font-weight: 700;
+			}
+			.hide {
+				display: none;
+			}
+			.rr {
+				display: flex;
+				justify-content: space-between;
+				padding: 9px 0;
+				border-top: 1px solid var(--line);
+				font-size: 13.5px;
+			}
+			.rr:first-child {
+				border-top: 0;
+			}
+			.spin {
+				width: 34px;
+				height: 34px;
+				border: 3px solid var(--line);
+				border-top-color: var(--accent);
+				border-radius: 50%;
+				margin: 18px auto;
+				animation: s 1s linear infinite;
+			}
+			@keyframes s {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wfbar">
+			<span class="tag">Wireframe — controls below are not part of the UI</span>
+			<div>
+				Borrow flow (Form → Review → Progress). Collateral: 1 BTC ($67,170). LTV, projected health
+				factor, and the warning/confirmation thresholds update live (same logic as
+				<code>client.quote.calculateLtv</code>). You can also type in the "You borrow" field.
+			</div>
+			<div class="ctrls">
+				<span>Demo · borrow amount:</span>
+				<input
+					id="slider"
+					type="range"
+					min="0"
+					max="50000"
+					step="500"
+					value="20000"
+					style="flex: 1"
+				/>
+			</div>
+		</div>
+
+		<div class="modal">
+			<div class="head">
+				<h2 id="title">Borrow</h2>
+				<div class="steps">
+					<span class="dot on" id="d0"></span><span class="dot" id="d1"></span
+					><span class="dot" id="d2"></span>
+				</div>
+			</div>
+
+			<!-- FORM -->
+			<div id="form">
+				<div class="body">
+					<div class="infoline"><span>Collateral</span><b>1 BTC · $67,170</b></div>
+					<div class="infoline"><span>Borrowing power (max LTV 70%)</span><b>$47,019</b></div>
+
+					<div class="field">
+						<div class="top"><span>You borrow</span><span>min 1.00 USDC</span></div>
+						<div class="mid">
+							<input id="amt" type="number" value="20000" min="0" />
+							<span class="selpill"><span class="coin usdc">U</span>USDC</span>
+						</div>
+						<div class="infoline" style="padding-top: 8px">
+							<span id="fiat">$20,000.00</span
+							><span>Borrow APY <b style="color: var(--amber)">7.40%</b></span>
+						</div>
+					</div>
+
+					<div class="infoline"><span>Resulting LTV</span><b id="ltv">29.8%</b></div>
+					<div class="infoline">
+						<span>Projected health factor</span><b id="hfval" style="color: var(--green)">76%</b>
+					</div>
+					<div class="hfbar"><div class="mark" id="mark" style="left: 76%"></div></div>
+
+					<div class="err" id="err">Borrow exceeds max LTV for this collateral.</div>
+					<div class="warn" id="warn">
+						<span id="warntext"></span>
+						<label id="confirmWrap" class="hide"
+							><input type="checkbox" id="confirm" /> I understand this borrow puts my position at
+							high liquidation risk.</label
+						>
+					</div>
+					<div class="infoline" style="color: var(--muted)">
+						<span
+							>Borrowing reduces your health factor. If it falls too far your collateral can be
+							liquidated.</span
+						>
+					</div>
+				</div>
+				<div class="foot"><button class="btn" id="toReview">Review</button></div>
+			</div>
+
+			<!-- REVIEW -->
+			<div id="review" class="hide">
+				<div class="body">
+					<div class="hero">
+						<div class="muted">You borrow</div>
+						<div class="big" id="rAmt">20,000 USDC</div>
+						<div class="muted" id="rFiat">$20,000.00</div>
+					</div>
+					<div class="rr">
+						<span class="muted">Borrow APY</span><b style="color: var(--amber)">7.40%</b>
+					</div>
+					<div class="rr"><span class="muted">Resulting LTV</span><b id="rLtv">29.8%</b></div>
+					<div class="rr">
+						<span class="muted">Projected health factor</span
+						><b id="rHf" style="color: var(--green)">76%</b>
+					</div>
+					<div class="rr"><span class="muted">Provider</span><b>Liquidium</b></div>
+					<div class="rr">
+						<span class="muted">Funds delivered to</span><b>Your oisy address</b>
+					</div>
+					<div class="warn" id="rWarn"><span id="rWarnText"></span></div>
+				</div>
+				<div class="foot">
+					<button class="btn ghost" id="back">Back</button
+					><button class="btn" id="place">Borrow</button>
+				</div>
+			</div>
+
+			<!-- PROGRESS -->
+			<div id="progress" class="hide">
+				<div class="body" style="text-align: center">
+					<div class="spin"></div>
+					<div id="progText">Submitting borrow to Liquidium…</div>
+					<div class="muted small" style="margin-top: 6px">client.lending.borrow(...)</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			const COLLAT = 67170,
+				MAXLTV = 0.7,
+				LIQ = 0.8; // liquidation threshold
+			const amt = document.getElementById('amt'),
+				slider = document.getElementById('slider');
+			function calc(v) {
+				const ltv = v / COLLAT; // borrow / collateral
+				// health factor % shown by Liquidium: 100% = no debt, ->0% as ltv -> liquidation threshold
+				const hf = Math.max(0, Math.round((1 - ltv / LIQ) * 100));
+				return { ltv, hf };
+			}
+			function band(hf) {
+				if (hf < 20) return 'red';
+				if (hf < 45) return 'amber';
+				return 'ok';
+			}
+			function color(hf) {
+				return hf < 20 ? 'var(--red)' : hf < 45 ? 'var(--amber)' : 'var(--green)';
+			}
+			function update(v) {
+				const { ltv, hf } = calc(v);
+				document.getElementById('fiat').textContent =
+					'$' + v.toLocaleString('en-US', { minimumFractionDigits: 2 });
+				document.getElementById('ltv').textContent = (ltv * 100).toFixed(1) + '%';
+				const hfval = document.getElementById('hfval');
+				hfval.textContent = hf + '%';
+				hfval.style.color = color(hf);
+				document.getElementById('mark').style.left = hf + '%';
+				const over = ltv > MAXLTV;
+				document.getElementById('err').style.display = over ? 'block' : 'none';
+				const w = document.getElementById('warn'),
+					wt = document.getElementById('warntext'),
+					cw = document.getElementById('confirmWrap'),
+					cb = document.getElementById('confirm');
+				const b = band(hf);
+				w.className = 'warn' + (over ? '' : b === 'red' ? ' red' : b === 'amber' ? ' amber' : '');
+				if (!over && b === 'red') {
+					wt.textContent = 'This borrow puts your position close to liquidation. ';
+					cw.classList.remove('hide');
+				} else if (!over && b === 'amber') {
+					wt.textContent = 'This borrow noticeably lowers your health factor.';
+					cw.classList.add('hide');
+					cb.checked = false;
+				} else {
+					cw.classList.add('hide');
+					cb.checked = false;
+				}
+				document.getElementById('toReview').disabled =
+					over || v <= 0 || (b === 'red' && !cb.checked);
+			}
+			amt.addEventListener('input', () => {
+				slider.value = Math.min(50000, amt.value || 0);
+				update(+amt.value || 0);
+			});
+			slider.addEventListener('input', () => {
+				amt.value = slider.value;
+				update(+slider.value);
+			});
+			document.getElementById('confirm').addEventListener('change', () => update(+amt.value || 0));
+
+			function show(id) {
+				['form', 'review', 'progress'].forEach((s, i) => {
+					document.getElementById(s).classList.toggle('hide', s !== id);
+					document
+						.getElementById('d' + i)
+						.classList.toggle('on', ['form', 'review', 'progress'].indexOf(id) >= i);
+				});
+			}
+			document.getElementById('toReview').addEventListener('click', () => {
+				const v = +amt.value || 0,
+					{ ltv, hf } = calc(v);
+				document.getElementById('rAmt').textContent = v.toLocaleString('en-US') + ' USDC';
+				document.getElementById('rFiat').textContent =
+					'$' + v.toLocaleString('en-US', { minimumFractionDigits: 2 });
+				document.getElementById('rLtv').textContent = (ltv * 100).toFixed(1) + '%';
+				const rhf = document.getElementById('rHf');
+				rhf.textContent = hf + '%';
+				rhf.style.color = color(hf);
+				const rw = document.getElementById('rWarn');
+				const b = band(hf);
+				rw.className = 'warn' + (b === 'red' ? ' red' : b === 'amber' ? ' amber' : '');
+				document.getElementById('rWarnText').textContent =
+					b === 'red'
+						? 'High liquidation risk — monitor your position closely.'
+						: b === 'amber'
+							? 'This borrow lowers your health factor.'
+							: '';
+				document.getElementById('title').textContent = 'Review borrow';
+				show('review');
+			});
+			document.getElementById('back').addEventListener('click', () => {
+				document.getElementById('title').textContent = 'Borrow';
+				show('form');
+			});
+			document.getElementById('place').addEventListener('click', () => {
+				document.getElementById('title').textContent = 'Borrowing';
+				show('progress');
+				setTimeout(() => {
+					document.getElementById('progText').textContent =
+						'Done — funds delivered. Position updated.';
+					document.querySelector('.spin').style.display = 'none';
+				}, 1600);
+			});
+			update(20000);
+		</script>
+	</body>
+</html>
