@@ -82,6 +82,7 @@ export const SOLANA_KNOWN_PROGRAM_ADDRESSES: SolAddress[] = [
 	// Other pools.
 	'HpNfyc2Saw7RKkQd8nEL4khUcuPhQ7WwY1B2qjx8jxFq', // PancakeSwap
 	'REALQqNEomY6cQGZJUGwywTBD2UmDT32rZcNnfxQ5N2', // Byreal
+	'fUSioN9YKKSa3CUC2YUc4tPkHJ5Y6XW1yz8y6F7qWz9', // FusionAMM (DefiTuna)
 
 	// An order book. A withdrawal from it can only pay a token account of the signer, so it shows
 	// among the balance changes.
