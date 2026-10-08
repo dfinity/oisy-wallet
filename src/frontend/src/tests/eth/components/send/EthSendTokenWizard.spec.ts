@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
+import { InfuraProvider } from '$eth/providers/infura.providers';
 import * as ethBalanceServices from '$eth/services/eth-balance.services';
 import * as feeServices from '$eth/services/fee.services';
 import * as nftSendServices from '$eth/services/nft-send.services';
@@ -352,13 +353,20 @@ describe('EthSendTokenWizard.spec', () => {
 			// One fetch per sample, each released by the test with the gas its estimate came back with.
 			const releases: ((gas: bigint) => void)[] = [];
 
-			const sample = (gas: bigint) =>
-				({
+			const sample = (
+				gas: bigint
+			): Awaited<ReturnType<typeof feeServices.getEthFeeDataWithProvider>> => {
+				const provider = new InfuraProvider(ETHEREUM_NETWORK);
+
+				vi.spyOn(provider, 'safeEstimateGas').mockResolvedValue(gas);
+
+				return {
 					feeData: { maxFeePerGas: 2_000_000n, maxPriorityFeePerGas: 1_000_000n },
 					priorities: undefined,
-					provider: { safeEstimateGas: () => Promise.resolve(gas) },
+					provider,
 					params: { from: fromAddr, to: destination }
-				}) as unknown as Awaited<ReturnType<typeof feeServices.getEthFeeDataWithProvider>>;
+				};
+			};
 
 			beforeEach(() => {
 				releases.length = 0;
