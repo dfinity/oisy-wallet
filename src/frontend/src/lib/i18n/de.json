@@ -2176,7 +2176,7 @@
 			"instruction_thaw": "",
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
-			"instruction_via": "",
+			"instruction_via": "über $program",
 			"instruction_rent": "",
 			"instruction_balance_returned": "SOL-Guthaben zurück in deine Wallet",
 			"instruction_balance_sent": "SOL-Guthaben an deine Wallet gesendet",

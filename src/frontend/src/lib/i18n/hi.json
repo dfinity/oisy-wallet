@@ -2176,7 +2176,7 @@
 			"instruction_thaw": "",
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
-			"instruction_via": "",
+			"instruction_via": "$program के ज़रिए",
 			"instruction_rent": "",
 			"instruction_balance_returned": "SOL शेष राशि आपके वॉलेट में वापस",
 			"instruction_balance_sent": "SOL शेष राशि आपके वॉलेट में भेजी गई",
