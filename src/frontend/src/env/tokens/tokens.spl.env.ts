@@ -10,6 +10,7 @@ import { ARMON_TOKEN } from '$env/tokens/tokens-spl/tokens.armon.env';
 import { AVGOX_TOKEN } from '$env/tokens/tokens-spl/tokens.avgox.env';
 import { AZNX_TOKEN } from '$env/tokens/tokens-spl/tokens.aznx.env';
 import { BABAON_TOKEN } from '$env/tokens/tokens-spl/tokens.babaon.env';
+import { BAT_TOKEN } from '$env/tokens/tokens-spl/tokens.bat.env';
 import { BIDUON_TOKEN } from '$env/tokens/tokens-spl/tokens.biduon.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { CBBTC_TOKEN } from '$env/tokens/tokens-spl/tokens.cbbtc.env';
@@ -58,6 +59,7 @@ import { TQQQX_TOKEN } from '$env/tokens/tokens-spl/tokens.tqqqx.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { TSLAX_TOKEN } from '$env/tokens/tokens-spl/tokens.tslax.env';
 import { UNHX_TOKEN } from '$env/tokens/tokens-spl/tokens.unhx.env';
+import { USD1_TOKEN } from '$env/tokens/tokens-spl/tokens.usd1.env';
 import { DEVNET_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-spl/tokens.usdt.env';
 import { VTIX_TOKEN } from '$env/tokens/tokens-spl/tokens.vtix.env';
@@ -78,6 +80,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	AVGOX_TOKEN,
 	AZNX_TOKEN,
 	BABAON_TOKEN,
+	BAT_TOKEN,
 	BIDUON_TOKEN,
 	BONK_TOKEN,
 	CBBTC_TOKEN,
@@ -126,6 +129,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	TRUMP_TOKEN,
 	TSLAX_TOKEN,
 	UNHX_TOKEN,
+	USD1_TOKEN,
 	USDC_TOKEN,
 	USDT_TOKEN,
 	VTIX_TOKEN,
@@ -139,4 +143,11 @@ export const SPL_TOKENS: RequiredSplToken[] = defineSupportedTokens({
 	mainnetFlag: SOL_MAINNET_ENABLED,
 	mainnetTokens: SPL_TOKENS_MAINNET,
 	testnetTokens: SPL_TOKENS_DEVNET
+});
+
+// Suggested tokens to be enabled by default if the user set no preference
+export const SPL_SUGGESTED_TOKENS: RequiredSplToken[] = defineSupportedTokens({
+	mainnetFlag: SOL_MAINNET_ENABLED,
+	mainnetTokens: [USDC_TOKEN, USDT_TOKEN],
+	testnetTokens: [DEVNET_USDC_TOKEN]
 });

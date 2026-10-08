@@ -3,7 +3,7 @@ import type { BtcAddress } from '$btc/types/address';
 import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
-import { getPendingTransactionUtxoTxIds } from '$icp/utils/btc.utils';
+import { getPendingTransactionUtxoOutpoints } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Amount } from '$lib/types/send';
@@ -20,8 +20,9 @@ export interface BtcReviewServiceParams {
 }
 
 /**
- * Main orchestrator function that replaces the backend btc_select_user_utxos_fee call
- * This function coordinates all the steps needed to select UTXOs and calculate fees
+ * Selects UTXOs and calculates the fee for a BTC send on the frontend:
+ * filters out pending-reserved and under-confirmed UTXOs, picks the
+ * smallest-sufficient set, and returns the estimated fee.
  */
 export const prepareBtcSend = ({
 	amount,
@@ -31,10 +32,12 @@ export const prepareBtcSend = ({
 }: BtcReviewServiceParams): UtxosFee => {
 	const requiredMinConfirmations = CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
-	const pendingUtxoTxIds = getPendingTransactionUtxoTxIds(source);
-	if (isNullish(pendingUtxoTxIds)) {
+	const pendingUtxoOutpoints = getPendingTransactionUtxoOutpoints(source);
+
+	if (isNullish(pendingUtxoOutpoints)) {
 		return {
 			feeSatoshis: ZERO,
+			feeRateMiliSatoshisPerVByte,
 			utxos: [],
 			error: BtcPrepareSendError.PendingTransactionsNotAvailable
 		};
@@ -46,23 +49,25 @@ export const prepareBtcSend = ({
 	if (allUtxos.length === 0) {
 		return {
 			feeSatoshis: ZERO,
+			feeRateMiliSatoshisPerVByte,
 			utxos: [],
 			error: BtcPrepareSendError.InsufficientBalance
 		};
 	}
 
-	// Filter UTXOs based on confirmations and exclude locked ones
+	// Filter UTXOs based on confirmations and exclude reserved ones
 	const filteredUtxos = filterAvailableUtxos({
 		utxos: allUtxos,
 		options: {
 			minConfirmations: requiredMinConfirmations,
-			pendingUtxoTxIds
+			pendingUtxoOutpoints
 		}
 	});
 
 	if (filteredUtxos.length === 0) {
 		return {
 			feeSatoshis: ZERO,
+			feeRateMiliSatoshisPerVByte,
 			utxos: [],
 			error: BtcPrepareSendError.UtxoLocked
 		};
@@ -79,6 +84,7 @@ export const prepareBtcSend = ({
 	if (!selection.sufficientFunds) {
 		return {
 			feeSatoshis: selection.feeSatoshis,
+			feeRateMiliSatoshisPerVByte,
 			utxos: filteredUtxos,
 			error: BtcPrepareSendError.InsufficientBalanceForFee
 		};
@@ -87,6 +93,7 @@ export const prepareBtcSend = ({
 	// Fee is already calculated in the selection process
 	return {
 		feeSatoshis: selection.feeSatoshis,
+		feeRateMiliSatoshisPerVByte,
 		utxos: selection.selectedUtxos
 	};
 };

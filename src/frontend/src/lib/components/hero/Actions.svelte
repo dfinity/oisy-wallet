@@ -3,16 +3,20 @@
 	import { page } from '$app/state';
 	import ConvertToCkBtc from '$btc/components/convert/ConvertToCkBtc.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
+	import { CYCLES_MINT_ENABLED } from '$env/cycles-mint.env';
 	import ConvertToCkEth from '$eth/components/convert/ConvertToCkEth.svelte';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkErc20 from '$eth/components/send/ConvertToCkErc20.svelte';
 	import { erc20CustomTokensInitialized } from '$eth/derived/erc20.derived';
 	import ConvertToBtc from '$icp/components/convert/ConvertToBtc.svelte';
 	import ConvertToEthereum from '$icp/components/convert/ConvertToEthereum.svelte';
+	import CyclesMintButton from '$icp/components/cycles-mint/CyclesMintButton.svelte';
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
+	import { isTokenCyclesLedger } from '$icp/utils/cycles-mint.utils';
 	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import Buy from '$lib/components/buy/Buy.svelte';
+	import CheckNewCollectionsButton from '$lib/components/nfts/CheckNewCollectionsButton.svelte';
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import Send from '$lib/components/send/Send.svelte';
 	import Swap from '$lib/components/swap/Swap.svelte';
@@ -25,7 +29,8 @@
 		pseudoNetworkChainFusion,
 		networkId,
 		networkSolana,
-		networkEvm
+		networkEvm,
+		networkXrp
 	} from '$lib/derived/network.derived';
 	import { networkBitcoinMainnetEnabled } from '$lib/derived/networks.derived';
 	import { pageToken, pageTokenWithFallback } from '$lib/derived/page-token.derived';
@@ -33,6 +38,7 @@
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
+	import XrpReceive from '$xrp/components/receive/XrpReceive.svelte';
 
 	let convertEth = $derived($ethToCkETHEnabled && $erc20CustomTokensInitialized);
 
@@ -55,6 +61,16 @@
 
 	let buyAction = $derived((!$networkICP || nonNullish($pageToken?.buy)) && !isNftsPage);
 
+	// Only on the TCYCLES page, where it is the fourth button after Receive, Send and Swap.
+	let cyclesMintAction = $derived(CYCLES_MINT_ENABLED && isTransactionsPage);
+
+	// Only the ICP collection scan (EXT / ICRC-7) is exclusive to this action; the
+	// ERC discovery it also triggers already runs on the collections interval loader.
+	// So we offer it where that scan applies: ICP, and the all-networks view.
+	let checkNewCollectionsAction = $derived(
+		isNftsPage && ($networkICP || $pseudoNetworkChainFusion)
+	);
+
 	// Temporary workaround: disable the Buy button for tokens that support both Swap and Convert.
 	// TODO: Remove once Swap/Convert are refactored and merged.
 	let tooManyButtons = $derived(
@@ -75,6 +91,8 @@
 			<BtcReceive />
 		{:else if $networkSolana}
 			<SolReceive token={$pageTokenWithFallback} />
+		{:else if $networkXrp}
+			<XrpReceive token={$pageTokenWithFallback} />
 		{:else if $pseudoNetworkChainFusion}
 			<Receive />
 		{/if}
@@ -85,6 +103,14 @@
 
 		{#if swapAction}
 			<Swap />
+		{/if}
+
+		{#if cyclesMintAction && isTokenCyclesLedger($pageToken)}
+			<CyclesMintButton token={$pageToken} />
+		{/if}
+
+		{#if checkNewCollectionsAction}
+			<CheckNewCollectionsButton />
 		{/if}
 
 		{#if isTransactionsPage}

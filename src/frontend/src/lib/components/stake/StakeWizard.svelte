@@ -1,12 +1,11 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import HarvestStakeWizard from '$eth/components/stake/harvest-autopilot/HarvestStakeWizard.svelte';
-	import { isTokenHarvestAutopilot } from '$eth/utils/harvest-autopilots.utils';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { getStakeWizardComponent } from '$lib/config/stake.config';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Vault } from '$lib/types/vaults';
+	import type { WizardStep } from '$lib/types/wizard';
 
 	interface Props {
 		amount: OptionAmount;
@@ -27,10 +26,14 @@
 		onNext,
 		onBack
 	}: Props = $props();
+
+	let WizardComponent = $derived(
+		nonNullish(vault) ? getStakeWizardComponent(vault.token) : undefined
+	);
 </script>
 
-{#if nonNullish(vault) && isTokenHarvestAutopilot(vault.token)}
-	<HarvestStakeWizard
+{#if nonNullish(WizardComponent) && nonNullish(vault)}
+	<WizardComponent
 		{currentStep}
 		{onBack}
 		{onClose}

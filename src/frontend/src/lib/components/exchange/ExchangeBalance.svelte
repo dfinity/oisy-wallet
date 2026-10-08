@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { isIOS } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { page } from '$app/state';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
-	import { allBalancesZero } from '$lib/derived/balances.derived';
+	import { allBalancesZero, providersUsdBalance } from '$lib/derived/balances.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { enabledFungibleNetworkTokensUi } from '$lib/derived/network-tokens-ui.derived';
@@ -18,11 +17,12 @@
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { isIOS } from '$lib/utils/device.utils';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 	import { filterTokensUiByCategory } from '$lib/utils/token-tag.utils';
-	import { sumTokensUiUsdBalance, sumTokensUiUsdStakeBalance } from '$lib/utils/tokens.utils';
+	import { sumTotalUsdBalance } from '$lib/utils/tokens.utils';
 
 	interface Props {
 		hideBalance?: boolean;
@@ -34,8 +34,10 @@
 
 	const isTokensRoute = $derived(isRouteTokens(page));
 
+	const categoryFilterApplied = $derived($showTokenCategoryFilter && isTokensRoute);
+
 	const heroTokens = $derived(
-		$showTokenCategoryFilter && isTokensRoute
+		categoryFilterApplied
 			? filterTokensUiByCategory({
 					tokens: $enabledFungibleNetworkTokensUi,
 					category: $tokenCategoryFilter
@@ -43,13 +45,19 @@
 			: $enabledFungibleNetworkTokensUi
 	);
 
-	const totalUsd = $derived(sumTokensUiUsdBalance(heroTokens));
+	// Provider-held value (trading deposits, lend/borrow) has no asset type, so exclude it
+	// from the Tokens total while that total is filtered to one asset type.
+	const heroProvidersUsdBalance = $derived(
+		categoryFilterApplied && nonNullish($tokenCategoryFilter) ? 0 : $providersUsdBalance
+	);
 
-	const totalStakeUsd = $derived(sumTokensUiUsdStakeBalance(heroTokens));
+	const totalUsd = $derived(
+		sumTotalUsdBalance({ tokens: heroTokens, providersUsdBalance: heroProvidersUsdBalance })
+	);
 
 	let balance = $derived(
 		formatCurrency({
-			value: $loaded ? totalUsd + totalStakeUsd : 0,
+			value: $loaded ? totalUsd : 0,
 			currency: $currentCurrency,
 			exchangeRate: $currencyExchangeStore,
 			language: $currentLanguage

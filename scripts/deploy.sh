@@ -7,8 +7,10 @@ dfx deploy signer
 dfx deploy icp_ledger
 dfx deploy icp_index
 
-./scripts/download.ckbtc.sh
-./scripts/deploy.ckbtc.sh
+dfx deploy ckbtc_minter
+dfx deploy ckbtc_ledger
+dfx deploy ckbtc_kyt
+dfx deploy ckbtc_index
 
 dfx deploy cketh_minter
 dfx deploy cketh_ledger
@@ -18,6 +20,8 @@ dfx deploy ckusdc_index
 
 dfx deploy icp_swap_factory
 dfx deploy icp_swap_pool
+
+dfx deploy oisy_trade
 
 dfx deploy internet_identity
 dfx deploy cycles_ledger

@@ -33,12 +33,16 @@ export default {
 			ringColor: themeVariables.border,
 			textColor: themeVariables.foreground,
 			backgroundImage: {
+				'icp-token-hero-gradient':
+					'linear-gradient(to bottom, var(--color-background-icp-gradient-0), var(--color-background-icp-gradient-100))',
 				'trump-token-hero-image':
 					'url(/images/trump-token-hero-image.webp), linear-gradient(to bottom, #232bcc, #000797)',
 				'vchf-token-hero-image':
 					'url(/images/vchf-token-hero-image.webp), radial-gradient(#DA291C, #AD1207)',
 				'veur-token-hero-image':
-					'url(/images/veur-token-hero-image.webp), linear-gradient(180deg, #00319E, #00319E)'
+					'url(/images/veur-token-hero-image.webp), linear-gradient(180deg, #00319E, #00319E)',
+				'usd1-token-hero-image':
+					'url(/images/usd1-token-hero-image.webp), linear-gradient(160deg, #0F1A30, #05070E)'
 			},
 			backgroundSize: {
 				'size-200': '200% 200%'

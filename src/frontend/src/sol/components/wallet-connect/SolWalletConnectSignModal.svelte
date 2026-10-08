@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy, untrack } from 'svelte';
 	import {
@@ -9,6 +8,7 @@
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import {
 		solAddressDevnet,
@@ -22,16 +22,25 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { consoleError } from '$lib/utils/console.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$sol/constants/steps.constants';
 	import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
+	import { splTokens } from '$sol/derived/spl.derived';
 	import {
 		sign as signService,
 		decode as decodeService
 	} from '$sol/services/wallet-connect.services';
 	import type { OptionSolAddress } from '$sol/types/address';
 	import type { SolanaNetwork } from '$sol/types/network';
+	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
+	import type { SolSimulationPreview, SolUnreadProgram } from '$sol/types/sol-simulation';
+	import type { SolTransferParties } from '$sol/types/sol-transaction';
+	import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
+	import { solClosesPayOthers } from '$sol/utils/sol-transaction-summary.utils';
+	import { findSplToken } from '$sol/utils/spl.utils';
 
 	interface Props {
 		listener: OptionWalletConnectListener;
@@ -69,20 +78,96 @@
 
 	let signWithSending = $derived(method === SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION);
 
-	let amount = $state<bigint | undefined>();
 	let destination = $state<OptionSolAddress>();
+	let tokenAddress = $state<OptionSolAddress>();
+	let isApproval = $state<boolean | undefined>();
+	// Set when the message bundles instructions that disagree on what it does, or carries one that
+	// is decoded and still cannot be stated. `sign()` refuses such a message, so the review says so
+	// and holds the button rather than letting the user press it and bounce.
+	let ambiguous = $state<boolean | undefined>();
+	let unreviewed = $state<boolean | undefined>();
+	let prioritizationFee = $state<bigint | undefined>();
+	let prioritizationFeeEstimate = $state<bigint | undefined>();
+	let preview = $state<SolSimulationPreview | undefined>();
+	let instructions = $state<SolInstructionSummary[] | undefined>();
+
+	let simulatedInstructions = $state<boolean | undefined>();
+	let messageSummary = $state<SolTransactionSummary | undefined>();
+	let parties = $state<SolTransferParties | undefined>();
+	let unreadPrograms = $state<SolUnreadProgram[] | undefined>();
+	// Whether the user confirmed on the review that OISY cannot say what those programs do. Cleared
+	// with every request: a confirmation given for one set of programs says nothing about another.
+	let unreadProgramsAcknowledged = $state(false);
+	let callsUnreadPrograms = $derived((unreadPrograms ?? []).length > 0);
+	// What the chain charged a token account to exist when the review was computed. Signing holds the
+	// message's account creations to it, so what the review allowed is what gets signed.
+	let rentExemptMinimum = $state<bigint | undefined>();
+	// An account the run opens inside another program's instruction with more than its size costs.
+	// `sign()` refuses it as it does an ambiguous message, so the review says so the same way.
+	let opensAccountBeyondRent = $state<boolean | undefined>();
+	// The decode is asynchronous, so until it settles the review shows an empty summary and no
+	// warning. Approval waits for it: signing on the strength of a review that has not been
+	// computed yet is exactly what the warnings exist to prevent. A failed decode never flips it,
+	// which leaves rejecting as the only way out.
+	let decoded = $state(false);
+	// A close pays the account's lamports to whatever address it names, and the message mapper only
+	// sees the message's own instructions: a close made inside a routed swap reaches the review
+	// through this list alone. Refused rather than warned about, since the balance is gone once it
+	// is signed.
+	let closesPayOthers = $derived(
+		solClosesPayOthers({ instructions: instructions ?? [], userAddress: address })
+	);
 
 	const updateData = async () => {
-		({ amount, destination } = await decodeService({
-			base64EncodedTransactionMessage: data,
-			networkId
-		}));
+		try {
+			({
+				ambiguous,
+				destination,
+				tokenAddress,
+				isApproval,
+				unreviewed,
+				prioritizationFee,
+				prioritizationFeeEstimate,
+				preview,
+				instructions,
+				simulatedInstructions,
+				messageSummary,
+				parties,
+				unreadPrograms,
+				rentExemptMinimum,
+				opensAccountBeyondRent
+			} = await decodeService({
+				base64EncodedTransactionMessage: data,
+				networkId,
+				address
+			}));
+
+			decoded = true;
+		} catch (err: unknown) {
+			// The effect cannot await this, so a rejection would go unhandled. Leaving `decoded`
+			// false is the outcome we want anyway: a review that could not be computed stays
+			// unapprovable, and rejecting is the only way out.
+			consoleError(err);
+		}
 	};
 
-	$effect(() => {
-		[data, networkId];
+	// When the transaction moves an SPL token the wallet lists, review it with that token's
+	// metadata; otherwise fall back to the network's native SOL token.
+	let reviewToken = $derived(
+		nonNullish(tokenAddress)
+			? (findSplToken({ tokens: $splTokens, tokenAddress, networkId }) ?? token)
+			: token
+	);
 
-		untrack(() => updateData());
+	$effect(() => {
+		[data, networkId, address];
+
+		untrack(() => {
+			decoded = false;
+			unreadProgramsAcknowledged = false;
+
+			updateData();
+		});
 	});
 
 	/**
@@ -141,7 +226,37 @@
 			modalNext: modal.next,
 			token,
 			progress: (step: ProgressStepsSign | ProgressStepsSendSol.SEND) => (signProgressStep = step),
-			identity: $authIdentity
+			identity: $authIdentity,
+			// Whether the run described the instructions nobody read, which neither the run happening
+			// nor the preview's contents can say. The preview attributes nothing to an instruction,
+			// and it carries the user's lamport delta whether or not that delta is anything but the
+			// fee, so its presence says almost nothing.
+			//
+			// The instruction list does attribute. Built from a run, it marks an entry `unknown`
+			// only when no effect - stated by the message or made inside a program - carried that
+			// instruction's index, so a routed swap's router instruction is covered by the transfers
+			// its own invocations produced, while a stake delegation produces no effect anywhere and
+			// stays unknown. A list with nothing unknown left in it is the description; anything
+			// else leaves an instruction the review cannot account for.
+			//
+			// An instruction is marked accounted for as soon as any one of its invocations produced an
+			// effect, so an unread instruction making both a transfer we model and a call we do not
+			// leaves no unknown entry here. That call is what the unread programs below cover: a run
+			// reaching a program outside the known ones names it on the review, and approving waits
+			// for the user to confirm it.
+			//
+			// And a list with something in it. A run's empty list reaches here now, where before it
+			// was dropped on the way, and whether a run with nothing to list vouches for an instruction
+			// nobody read is its own decision, not one to make by letting an empty list through.
+			simulated:
+				(simulatedInstructions ?? false) &&
+				nonNullish(instructions) &&
+				instructions.length > 0 &&
+				!instructions.some(({ kind }) => kind === 'unknown'),
+			closesPayOthers,
+			unreadProgramsAcknowledged: !callsUnreadPrograms || unreadProgramsAcknowledged,
+			rentExemptMinimum,
+			opensAccountBeyondRent: opensAccountBeyondRent ?? false
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
@@ -153,7 +268,9 @@
 <WizardModal bind:this={modal} onClose={reject} {steps} bind:currentStep>
 	{#snippet title()}
 		<WalletConnectModalTitle>
-			{$i18n.wallet_connect.text.sign_message}
+			{signWithSending
+				? $i18n.wallet_connect.text.sign_and_send_transaction
+				: $i18n.wallet_connect.text.sign_transaction}
 		</WalletConnectModalTitle>
 	{/snippet}
 
@@ -165,14 +282,32 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<SolWalletConnectSignReview
-				{amount}
+				ambiguous={(ambiguous ?? false) || (opensAccountBeyondRent ?? false)}
 				{application}
+				approveDisabled={!decoded ||
+					(ambiguous ?? false) ||
+					(opensAccountBeyondRent ?? false) ||
+					closesPayOthers}
+				{closesPayOthers}
 				{data}
+				{decoded}
 				destination={destination ?? ''}
+				feeToken={token}
+				{instructions}
+				isApproval={isApproval ?? false}
+				{messageSummary}
 				onApprove={sign}
 				onReject={reject}
+				{parties}
+				{preview}
+				{prioritizationFee}
+				{prioritizationFeeEstimate}
+				simulatedInstructions={simulatedInstructions ?? false}
 				source={address ?? ''}
-				{token}
+				token={reviewToken}
+				unreadPrograms={unreadPrograms ?? []}
+				unreviewed={unreviewed ?? false}
+				bind:unreadProgramsAcknowledged
 			/>
 		{/if}
 	{/key}

@@ -1,15 +1,16 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import ButtonsSignIn from '$lib/components/auth/ButtonsSignIn.svelte';
 	import SigningInHelpLink from '$lib/components/auth/SigningInHelpLink.svelte';
 	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import { AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
 	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authLocked } from '$lib/stores/locked.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { tokenCategoryFilterStore, tokensSortStore } from '$lib/stores/settings.store';
+	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import { InternetIdentityDomain, type OpenIdProvider } from '$lib/types/auth';
 	import { componentToHtml } from '$lib/utils/component.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -43,6 +44,8 @@
 			tokensSortStore.reset({ key: 'tokens-sort' });
 
 			tokenCategoryFilterStore.reset({ key: 'token-category-filter' });
+
+			transactionsFilterStore.clear();
 		} else if (success === 'cancelled' || success === 'error') {
 			modalStore.openAuthHelp({ id: modalId, data: false });
 		}

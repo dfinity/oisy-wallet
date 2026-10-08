@@ -1,11 +1,16 @@
 import {
 	mapAllowSigningError,
 	mapBtcAddPendingTransactionError,
+	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
-	mapBtcSelectUserUtxosFeeError,
-	mapGetAllowedCyclesError
+	mapGetAllowedCyclesError,
+	mapSignOnramperWidgetUrlError
 } from '$lib/canisters/backend.errors';
-import { CanisterInternalError } from '$lib/canisters/errors';
+import {
+	CanisterInternalError,
+	OnramperRateLimitedError,
+	OnramperSecretNotConfiguredError
+} from '$lib/canisters/errors';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { ApproveError } from '@icp-sdk/canisters/ledger/icp';
 
@@ -120,49 +125,22 @@ describe('backend.errors', () => {
 		});
 	});
 
-	describe('mapBtcSelectUserUtxosFeeError', () => {
+	describe('mapBtcGetFeePercentilesError', () => {
 		it('should map InternalError', () => {
-			const err = mapBtcSelectUserUtxosFeeError({
-				InternalError: { msg: 'utxos fee error' }
+			const err = mapBtcGetFeePercentilesError({
+				InternalError: { msg: 'fee percentiles error' }
 			});
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
-			expect(err.message).toBe('utxos fee error');
-		});
-
-		it('should map PendingTransactions', () => {
-			const err = mapBtcSelectUserUtxosFeeError({
-				PendingTransactions: null
-			});
-
-			expect(err).toBeInstanceOf(CanisterInternalError);
-			expect(err.message).toBe('Selecting utxos fee is not possible - pending transactions found.');
-		});
-
-		it('should map RateLimited', () => {
-			const err = mapBtcSelectUserUtxosFeeError({
-				RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal }
-			});
-
-			expect(err).toBeInstanceOf(CanisterInternalError);
-			expect(err.message).toBe('Rate limit exceeded. Maximum of 5 calls allowed every 60 seconds.');
-		});
-
-		it('should map InvalidDelegationChain', () => {
-			const err = mapBtcSelectUserUtxosFeeError({
-				InvalidDelegationChain: { msg: 'unknown canister' }
-			});
-
-			expect(err).toBeInstanceOf(CanisterInternalError);
-			expect(err.message).toBe('II delegation chain verification failed: unknown canister');
+			expect(err.message).toBe('fee percentiles error');
 		});
 
 		it('should return unknown error for unrecognized variant', () => {
 			// @ts-expect-error testing unknown error variant
-			const err = mapBtcSelectUserUtxosFeeError({ SomeOther: null });
+			const err = mapBtcGetFeePercentilesError({ SomeOther: null });
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
-			expect(err.message).toBe('Unknown BtcSelectUserUtxosFeeError');
+			expect(err.message).toBe('Unknown BtcGetFeePercentilesError');
 		});
 	});
 
@@ -174,6 +152,17 @@ describe('backend.errors', () => {
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
 			expect(err.message).toBe('The Cycles Ledger cannot be contacted.');
+		});
+
+		it('should map RateLimited', () => {
+			const err = mapGetAllowedCyclesError({
+				RateLimited: { max_calls: 10, window_ns: 60_000_000_000n, caller: mockPrincipal }
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe(
+				'Rate limit exceeded. Maximum of 10 calls allowed every 60 seconds.'
+			);
 		});
 
 		it('should map Other', () => {
@@ -257,6 +246,38 @@ describe('backend.errors', () => {
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
 			expect(err.message).toBe('Unknown AllowSigningError');
+		});
+	});
+
+	describe('mapSignOnramperWidgetUrlError', () => {
+		it('should map SecretNotConfigured', () => {
+			const err = mapSignOnramperWidgetUrlError({
+				SecretNotConfigured: null
+			});
+
+			expect(err).toBeInstanceOf(OnramperSecretNotConfiguredError);
+			expect(err.message).toBe(
+				'OnRamper signing secret is not configured on the backend canister.'
+			);
+		});
+
+		it('should map RateLimited', () => {
+			const err = mapSignOnramperWidgetUrlError({
+				RateLimited: { max_calls: 3, window_ns: 120_000_000_000n, caller: mockPrincipal }
+			});
+
+			expect(err).toBeInstanceOf(OnramperRateLimitedError);
+			expect(err.message).toBe(
+				'Rate limit exceeded. Maximum of 3 calls allowed every 120 seconds.'
+			);
+		});
+
+		it('should return unknown error for unrecognized variant', () => {
+			// @ts-expect-error testing unknown error variant
+			const err = mapSignOnramperWidgetUrlError({ SomeOther: null });
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('Unknown SignOnramperWidgetUrlError');
 		});
 	});
 });

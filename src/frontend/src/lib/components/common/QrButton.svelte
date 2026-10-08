@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { preventDefault } from '@dfinity/gix-components';
 	import IconScanLine from '$lib/components/icons/IconScanLine.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { preventDefault } from '$lib/utils/event-modifiers.utils';
 
 	interface Props {
 		onClick: () => void;

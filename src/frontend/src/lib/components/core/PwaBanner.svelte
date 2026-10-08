@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Html, IconClose } from '@dfinity/gix-components';
+	import IconCloseThin from '$lib/components/icons/IconCloseThin.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import InfoBanner from '$lib/components/ui/InfoBanner.svelte';
 	import {
 		PWA_INFO_BANNER_CLOSE_BUTTON_TEST_ID,
@@ -28,7 +29,7 @@
 				data-tid={PWA_INFO_BANNER_CLOSE_BUTTON_TEST_ID}
 				onclick={closePwaBanner}
 			>
-				<IconClose />
+				<IconCloseThin />
 			</button>
 		</InfoBanner>
 	</div>

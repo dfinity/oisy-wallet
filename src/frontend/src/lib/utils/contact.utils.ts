@@ -179,3 +179,43 @@ export const getNetworkContactKey = ({
 	contact: ContactUi;
 	address: Address;
 }) => `${address}-${contact.id.toString()}`;
+
+/**
+ * Free-text search predicate for contact pickers. Returns `true` when `query`
+ * matches the contact's name, any address label, any address as a case-
+ * insensitive substring, or resolves to one of the contact's addresses via
+ * {@link filterAddressFromContact} — so an ICRC-2 principal still matches a
+ * contact saved by its derived ICP account-id hex, and vice versa.
+ *
+ * An empty `query` matches every contact (use this directly inside `Array.filter`
+ * without short-circuiting at the call site).
+ */
+export const matchesContactByText = ({
+	contact,
+	query
+}: {
+	contact: ContactUi;
+	query: string;
+}): boolean => {
+	if (query.length === 0) {
+		return true;
+	}
+
+	const needle = query.toLowerCase();
+
+	if (contact.name.toLowerCase().includes(needle)) {
+		return true;
+	}
+
+	if (
+		contact.addresses.some(
+			({ address, label }) =>
+				address.toLowerCase().includes(needle) ||
+				(nonNullish(label) && label.toLowerCase().includes(needle))
+		)
+	) {
+		return true;
+	}
+
+	return nonNullish(filterAddressFromContact({ contact, address: query }));
+};

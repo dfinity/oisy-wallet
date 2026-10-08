@@ -200,7 +200,7 @@
 		"tags": [
 			{
 				"type": "category",
-				"value": "stablecoin"
+				"value": "compute"
 			}
 		],
 		"decimals": 12,
@@ -213,6 +213,7 @@
 	},
 	"BITTYICP": {
 		"ledgerCanisterId": "qroj6-lyaaa-aaaam-qeqta-cai",
+		"indexCanisterId": "qf26p-uqaaa-aaaam-ai5aa-cai",
 		"mintingAccount": "r7inp-6aaaa-aaaaa-aaabq-cai",
 		"decimals": 8,
 		"name": "BITTY ON ICP",
@@ -263,7 +264,8 @@
 		"fee": {
 			"__bigint__": "10000"
 		},
-		"icon": "/icons/icrc/53nhb-haaaa-aaaar-qbn5q-cai.svg"
+		"icon": "/icons/icrc/53nhb-haaaa-aaaar-qbn5q-cai.svg",
+		"metadataOnly": true
 	},
 	"USDT": {
 		"ledgerCanisterId": "ij33n-oiaaa-aaaar-qbooa-cai",
@@ -282,6 +284,7 @@
 		"fee": {
 			"__bigint__": "10000"
 		},
-		"icon": "/icons/icrc/ij33n-oiaaa-aaaar-qbooa-cai.svg"
+		"icon": "/icons/icrc/ij33n-oiaaa-aaaar-qbooa-cai.svg",
+		"metadataOnly": true
 	}
 }

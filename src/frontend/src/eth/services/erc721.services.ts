@@ -98,7 +98,8 @@ const mapErc721CustomToken = async ({
 		enabled,
 		version: versionNullable,
 		section: sectionNullable,
-		allow_external_content_source: allowExternalContentSourceNullable
+		allow_external_content_source: allowExternalContentSourceNullable,
+		allowed_external_content_source_urls: allowedExternalContentSourceUrlsNullable
 	}
 }: {
 	token: CustomTokenErc721Variant;
@@ -107,6 +108,7 @@ const mapErc721CustomToken = async ({
 	const section = fromNullable(sectionNullable);
 	const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
 	const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
+	const allowedExternalContentSourceUrls = fromNullable(allowedExternalContentSourceUrlsNullable);
 
 	const {
 		Erc721: { token_address: tokenAddress, chain_id: tokenChainId }
@@ -130,7 +132,11 @@ const mapErc721CustomToken = async ({
 
 	return {
 		...{
-			id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
+			id: parseCustomTokenId({
+				identifier: tokenAddress,
+				chainId: network.chainId,
+				standard: 'erc721'
+			}),
 			name: tokenAddress,
 			address: tokenAddress,
 			network,
@@ -144,7 +150,8 @@ const mapErc721CustomToken = async ({
 			...(nonNullish(mappedSection) && {
 				section: mappedSection
 			}),
-			allowExternalContentSource
+			allowExternalContentSource,
+			allowedExternalContentSourceUrls
 		},
 		...metadata
 	};

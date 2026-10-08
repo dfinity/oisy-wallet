@@ -1,19 +1,21 @@
 import type { BtcAddress } from '$btc/types/address';
-import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
 	BTC_TESTNET_NETWORK_ID
 } from '$env/networks/networks.btc.env';
 import { getBtcAddress as getSignerBtcAddress } from '$lib/api/signer.api';
-import { SIGNER_MASTER_PUB_KEY } from '$lib/constants/signer.constants';
 import {
 	btcAddressMainnet,
 	btcAddressRegtest,
 	btcAddressTestnet
 } from '$lib/derived/address.derived';
 import { deriveBtcAddress } from '$lib/ic-pub-key/src/cli';
-import { loadTokenAddress, type LoadTokenAddressParams } from '$lib/services/address.services';
+import {
+	deriveTokenAddress,
+	loadTokenAddress,
+	type LoadTokenAddressParams
+} from '$lib/services/address.services';
 import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
@@ -28,7 +30,6 @@ import {
 	isNetworkIdBTCTestnet,
 	mapToSignerBitcoinNetwork
 } from '$lib/utils/network.utils';
-import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import { get } from 'svelte/store';
 
@@ -53,25 +54,22 @@ export const getBtcAddress = async ({
 }: {
 	identity: NullishIdentity;
 	network: BitcoinNetwork;
-}): Promise<BtcAddress> => {
-	if (FRONTEND_DERIVATION_ENABLED && nonNullish(SIGNER_MASTER_PUB_KEY)) {
-		// We use the same logic of the canister method. The potential error will be handled in the consumer.
-		assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
-
-		// HACK: This is not working for Local environment for now, because the library is not aware of the `dfx_test_1` public key (used by Local deployment).
-		return deriveBtcAddress({
-			user: identity.getPrincipal().toString(),
-			network,
-			pubkey: SIGNER_MASTER_PUB_KEY.ecdsa.secp256k1.pubkey
-		});
-	}
-
-	return await getSignerBtcAddress({
+}): Promise<BtcAddress> =>
+	await deriveTokenAddress<BtcAddress>({
 		identity,
-		network: mapToSignerBitcoinNetwork({ network }),
-		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+		deriveAddress: ({ user, masterPubKey }) =>
+			deriveBtcAddress({
+				user,
+				network,
+				pubkey: masterPubKey.ecdsa.secp256k1.pubkey
+			}),
+		getSignerAddress: () =>
+			getSignerBtcAddress({
+				identity,
+				network: mapToSignerBitcoinNetwork({ network }),
+				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+			})
 	});
-};
 
 const loadBtcAddress = ({
 	networkId,

@@ -1,9 +1,13 @@
-import { GHOSTNODE_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
+import {
+	GHOSTNODE_LEDGER_CANISTER_ID,
+	TCYCLES_LEDGER_CANISTER_ID
+} from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { IC_CKBTC_MINTER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import {
+	CUSTOM_NAMES_BY_LEDGER_CANISTER_ID,
 	CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID,
 	isTokenDip20,
 	isTokenIc,
@@ -19,7 +23,11 @@ import {
 import { TokenCategoryTagValue, TokenRiskTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenStandard, TokenStandardCode } from '$lib/types/token';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
-import { mockLedgerCanisterId, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	mockIndexCanisterId,
+	mockLedgerCanisterId,
+	mockValidIcToken
+} from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIcrcAccount } from '$tests/mocks/identity.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
@@ -76,6 +84,54 @@ describe('icrc.utils', () => {
 				id: token?.id
 			});
 			expect(token?.id.description).toBe(mockToken.symbol);
+		});
+
+		describe('indexCanisterId', () => {
+			it('should backfill the index canister id from icrcCustomTokens when none is provided', () => {
+				const token = mapIcrcToken({
+					...mockParams,
+					icrcCustomTokens: {
+						[mockToken.ledgerCanisterId]: { ...mockToken, indexCanisterId: mockIndexCanisterId }
+					}
+				});
+
+				expect(token?.indexCanisterId).toBe(mockIndexCanisterId);
+			});
+
+			it('should keep a provided index canister id over the icrcCustomTokens one', () => {
+				const providedIndexCanisterId = mockLedgerCanisterId;
+
+				const token = mapIcrcToken({
+					...mockParams,
+					indexCanisterId: providedIndexCanisterId,
+					icrcCustomTokens: {
+						[mockToken.ledgerCanisterId]: { ...mockToken, indexCanisterId: mockIndexCanisterId }
+					}
+				});
+
+				expect(token?.indexCanisterId).toBe(providedIndexCanisterId);
+			});
+
+			it('should keep the user-provided index canister id when the curated token has none', () => {
+				const providedIndexCanisterId = mockIndexCanisterId;
+
+				const token = mapIcrcToken({
+					...mockParams,
+					indexCanisterId: providedIndexCanisterId,
+					// mockToken (mockValidIcToken) carries no index canister id.
+					icrcCustomTokens: {
+						[mockToken.ledgerCanisterId]: mockToken
+					}
+				});
+
+				expect(token?.indexCanisterId).toBe(providedIndexCanisterId);
+			});
+
+			it('should not set an index canister id when neither is provided nor curated', () => {
+				const token = mapIcrcToken(mockParams);
+
+				expect(token?.indexCanisterId).toBeUndefined();
+			});
 		});
 
 		it('should map a token without icon when the icon is missing form metadata and icrcCustomTokens', () => {
@@ -695,6 +751,36 @@ describe('icrc.utils', () => {
 				minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID,
 				twinToken: ETHEREUM_TOKEN
 			};
+
+			expect(mapTokenOisyName(token)).toStrictEqual({
+				...token,
+				oisyName: {
+					prefix: 'ck',
+					oisyName: ETHEREUM_TOKEN.name
+				}
+			});
+		});
+
+		it('should return the token with the OISY name if there is a custom name', () => {
+			const token = { ...mockToken, ledgerCanisterId: TCYCLES_LEDGER_CANISTER_ID };
+
+			expect(mapTokenOisyName(token)).toStrictEqual({
+				...token,
+				oisyName: {
+					oisyName: 'ICP Cycles (Trillion)'
+				}
+			});
+		});
+
+		it('should prefer the twin token over a custom name', () => {
+			const token: IcCkInterface = {
+				...mockToken,
+				ledgerCanisterId: TCYCLES_LEDGER_CANISTER_ID,
+				minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID,
+				twinToken: ETHEREUM_TOKEN
+			};
+
+			expect(CUSTOM_NAMES_BY_LEDGER_CANISTER_ID[TCYCLES_LEDGER_CANISTER_ID]).toBeDefined();
 
 			expect(mapTokenOisyName(token)).toStrictEqual({
 				...token,

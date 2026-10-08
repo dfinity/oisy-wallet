@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconClose } from '@dfinity/gix-components';
+	import IconCloseThin from '$lib/components/icons/IconCloseThin.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -18,6 +18,6 @@
 	{onclick}
 >
 	{#snippet icon()}
-		<IconClose size="24" />
+		<IconCloseThin size="24" />
 	{/snippet}
 </ButtonIcon>

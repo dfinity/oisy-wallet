@@ -29,3 +29,21 @@ export const waitWalletReady = async (isDisabled: () => boolean): Promise<'ready
 
 	return result;
 };
+
+export const openOnWalletReady = async ({
+	isDisabled,
+	open
+}: {
+	isDisabled: () => boolean;
+	open: () => void | Promise<void>;
+}): Promise<void> => {
+	if (isDisabled()) {
+		const status = await waitWalletReady(isDisabled);
+
+		if (status === 'timeout') {
+			return;
+		}
+	}
+
+	await open();
+};

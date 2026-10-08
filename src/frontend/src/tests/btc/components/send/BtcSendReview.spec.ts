@@ -1,13 +1,17 @@
 import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
-import { initUtxosFeeStore, UTXOS_FEE_CONTEXT_KEY } from '$btc/stores/utxos-fee.store';
+import { initUtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import type { UtxosFee } from '$btc/types/btc-send';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
-import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
-import { SEND_CONTEXT_KEY } from '$lib/stores/send.store';
+import {
+	REVIEW_FORM_SEND_BUTTON,
+	SEND_FIRST_TIME_DESTINATION_CONFIRM
+} from '$lib/constants/test-ids.constants';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { render } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
+import { mockContextMap } from '$tests/utils/context.test-utils';
+import { mockUtxosFeeContextEntry } from '$tests/utils/fee.context.test-utils';
+import { mockSendContextEntry } from '$tests/utils/send.context.test-utils';
+import { fireEvent, render } from '@testing-library/svelte';
 
 describe('BtcSendReview', () => {
 	const defaultBalance = 1000000n;
@@ -21,21 +25,9 @@ describe('BtcSendReview', () => {
 		const utxosFeeStore = initUtxosFeeStore();
 		utxosFeeStore.setUtxosFee({ utxosFee });
 
-		return new Map([
-			[
-				SEND_CONTEXT_KEY,
-				{
-					sendToken: readable(BTC_MAINNET_TOKEN),
-					sendTokenDecimals: readable(BTC_MAINNET_TOKEN.decimals),
-					sendTokenId: readable(BTC_MAINNET_TOKEN.id),
-					sendTokenStandard: readable(BTC_MAINNET_TOKEN.standard),
-					sendTokenSymbol: readable(BTC_MAINNET_TOKEN.symbol),
-					sendTokenNetworkId: readable(BTC_MAINNET_TOKEN.network.id),
-					sendTokenExchangeRate: readable(),
-					sendBalance: readable(balance)
-				}
-			],
-			[UTXOS_FEE_CONTEXT_KEY, { store: utxosFeeStore }]
+		return mockContextMap([
+			mockSendContextEntry({ token: BTC_MAINNET_TOKEN, customSendBalance: balance }),
+			mockUtxosFeeContextEntry(utxosFeeStore)
 		]);
 	};
 	const props = {
@@ -52,11 +44,15 @@ describe('BtcSendReview', () => {
 		mockPage.reset();
 	});
 
-	it('should keep the next button enabled', () => {
+	it('should keep the next button enabled', async () => {
 		const { getByTestId } = render(BtcSendReview, {
 			props,
 			context: mockContext({ utxosFee: mockUtxosFee })
 		});
+
+		// The destination was never sent to, so it gates the send button behind a confirmation of
+		// its own, which would make the assertion below pass or fail for the wrong reason.
+		await fireEvent.click(getByTestId(SEND_FIRST_TIME_DESTINATION_CONFIRM));
 
 		expect(getByTestId(buttonTestId)).not.toHaveAttribute('disabled');
 	});

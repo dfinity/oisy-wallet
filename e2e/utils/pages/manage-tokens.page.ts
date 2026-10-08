@@ -82,7 +82,6 @@ export class ManageTokensPage extends HomepageLoggedIn {
 		);
 
 		await this.takeScreenshot({
-			freezeCarousel: true,
 			centeredElementTestId: `${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}`
 		});
 		await this.toggleTokenInList({

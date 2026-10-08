@@ -8,6 +8,7 @@ import { render } from '@testing-library/svelte';
 describe('BtcSendWarnings', () => {
 	const mockUtxosFee: UtxosFee = {
 		feeSatoshis: 1000n,
+		feeRateMiliSatoshisPerVByte: 4000n,
 		utxos: [mockUtxo]
 	};
 
@@ -242,6 +243,7 @@ describe('BtcSendWarnings', () => {
 					pendingTransactionsStatus: BtcPendingSentTransactionsStatus.NONE,
 					utxosFee: {
 						feeSatoshis: 1000n,
+						feeRateMiliSatoshisPerVByte: 4000n,
 						utxos: []
 					}
 				}

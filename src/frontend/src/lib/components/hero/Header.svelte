@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
+	import ActiveUserTransactionsButton from '$lib/components/active-user-transactions/ActiveUserTransactionsButton.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
@@ -22,9 +23,10 @@
 	import { walletConnectListenerStore } from '$lib/stores/wallet-connect.store';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 
-	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340)
+	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340).
 	let networkSwitcherOpen = $state(false);
 	let menuOpen = $state(false);
+	let activeUserTransactionsOpen = $state(false);
 
 	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish($routeCollection));
 
@@ -32,7 +34,18 @@
 		$modalWalletConnect || $modalUniversalScannerOpen || $modalPayDialogOpen
 	);
 
-	let biggerOverlay = $derived(menuOpen || networkSwitcherOpen || modalsOpen);
+	// Header-anchored popovers (user menu, network switcher) need the
+	// Header's stacking context to outrank sibling `z-10` elements
+	// (banners: `Banner`, `PwaBanner`, `AgreementsGuard`, plus
+	// `FullscreenMediaModal`). We do NOT bump for modals — gix modals /
+	// bottom sheets already paint above the default Header at `z-14`,
+	// and bumping here would hide them behind the Header and capture
+	// pointer events on top of the modal backdrop. We also keep the
+	// `1.5xl` signed-in default at `z-10` so those banners render at
+	// the same level as the Header instead of behind it.
+	let popoverOpen = $derived(menuOpen || networkSwitcherOpen || activeUserTransactionsOpen);
+
+	let biggerOverlay = $derived(popoverOpen || modalsOpen);
 
 	// When WalletConnect tries to connect, it adds the "Disconnect" label, increasing the width of the header.
 	// That causes the screen to expand, without auto-zooming, and the modals overflow outside of the screen.
@@ -47,11 +60,13 @@
 	class:1.5xl:fixed={$authSignedIn}
 	class:1.5xl:inset-x-0={$authSignedIn}
 	class:1.5xl:top-0={$authSignedIn}
-	class:1.5xl:z-10={$authSignedIn}
+	class:1.5xl:z-10={$authSignedIn && !popoverOpen}
+	class:1.5xl:z-20={$authSignedIn && popoverOpen}
 	class:pb-10={$authNotSignedIn}
 	class:sm:pb-8={$authNotSignedIn}
+	class:z-20={popoverOpen}
 	class:z-3={!biggerOverlay}
-	class:z-4={biggerOverlay}
+	class:z-4={modalsOpen && !popoverOpen}
 >
 	<div class="pointer-events-auto">
 		<OisyWalletLogoLink />
@@ -76,6 +91,8 @@
 			{#if nonNullish($walletConnectListenerStore)}
 				<WalletConnect />
 			{/if}
+
+			<ActiveUserTransactionsButton bind:visible={activeUserTransactionsOpen} />
 
 			<Scanner />
 		{/if}

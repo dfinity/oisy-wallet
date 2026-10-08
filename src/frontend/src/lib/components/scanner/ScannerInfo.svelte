@@ -1,15 +1,17 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import OisyScanPayImg from '$lib/assets/oisy-scan-pay-img.webp';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import { OISY_SCAN_URL, OISY_PAY_URL } from '$lib/constants/oisy.constants';
 	import {
 		OISY_SCANNER_INFO,
 		OISY_SCANNER_INFO_GOT_IT_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
@@ -39,6 +41,12 @@
 				iconSize="18"
 				inline
 				styleClass="font-medium"
+				trackEvent={buildLearnMoreEvent({
+					sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SCANNER,
+					sourceSublocation: 'scan',
+					labelKey: 'scanner.text.learn_more_about_scan',
+					url: OISY_SCAN_URL
+				})}
 			>
 				{replaceOisyPlaceholders($i18n.scanner.text.learn_more_about_scan)}
 			</ExternalLink>
@@ -53,6 +61,12 @@
 				iconSize="18"
 				inline
 				styleClass="font-medium"
+				trackEvent={buildLearnMoreEvent({
+					sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SCANNER,
+					sourceSublocation: 'pay',
+					labelKey: 'scanner.text.learn_more_about_pay',
+					url: OISY_PAY_URL
+				})}
 			>
 				{replaceOisyPlaceholders($i18n.scanner.text.learn_more_about_pay)}
 			</ExternalLink>

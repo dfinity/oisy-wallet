@@ -38,6 +38,4 @@ export type NonFungibleTokensByNetwork = Map<NetworkId, NonFungibleToken[]>;
 export type NonFungibleToken = EthNonFungibleToken | IcNonFungibleToken;
 
 export type NonFungibleTokenIdentifier =
-	| Erc721Token['address']
-	| Erc1155Token['address']
-	| ExtToken['canisterId'];
+	Erc721Token['address'] | Erc1155Token['address'] | ExtToken['canisterId'];

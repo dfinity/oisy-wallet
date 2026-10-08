@@ -66,6 +66,14 @@ export const KONG_BACKEND_CANISTER_ID = LOCAL
 			? import.meta.env.VITE_BETA_KONG_BACKEND_CANISTER_ID
 			: import.meta.env.VITE_IC_KONG_BACKEND_CANISTER_ID;
 
+export const OISY_TRADE_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_OISY_TRADE_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_OISY_TRADE_CANISTER_ID
+		: BETA
+			? import.meta.env.VITE_BETA_OISY_TRADE_CANISTER_ID
+			: import.meta.env.VITE_IC_OISY_TRADE_CANISTER_ID;
+
 export const ICP_SWAP_FACTORY_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_ICP_SWAP_FACTORY_CANISTER_ID
 	: STAGING
@@ -157,6 +165,9 @@ export const EIGHT_DECIMALS = 8;
 // eslint-disable-next-line no-restricted-syntax -- This is the definition
 export const ZERO = 0n;
 export const MAX_UINT_256 = (1n << 256n) - 1n;
+// Permit2 declares its allowance as a `uint160`, so an unlimited one saturates there rather than
+// at the 256-bit maximum.
+export const MAX_UINT_160 = (1n << 160n) - 1n;
 
 // NFTs
 export const COLLECTION_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1_000; // 20 seconds in milliseconds
@@ -165,13 +176,46 @@ export const NFT_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1_000; // 20 
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1_000; // 30 seconds in milliseconds
 export const WALLET_PAGINATION = 10n;
+
+// Most pages the Activity list fetches for one token in a single levelling run. A safety net for a
+// chain loader that keeps reporting progress without its oldest transaction moving, not a throttle:
+// a token it stops is picked up again by the next page the user scrolls to.
+export const ACTIVITY_LEVELLING_MAX_PAGES = 50;
+// How many consecutive jobs must fail to fetch the transactions of an IC token before we tell the user about it.
+// At the interval above, that is about 90 seconds of silence - long enough to skip transient hiccups.
+export const IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD = 3;
 // Solana wallets
 // Until we find a way to reduce the number of calls (that we pay proportionally) done to the Solana RPC, we delay them more than the other wallets.
 // TODO: Use the normal one when we have a better way to handle the Solana wallets, for example when we have the internal Solana RPC canister, or when we don't load again the transactions that are already loaded.
 export const SOL_WALLET_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute in milliseconds
+// XRP wallets
+export const XRP_WALLET_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute in milliseconds
 
 // Code generation
 export const CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
+
+// Active user transactions polling
+export const ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS = 5 * 1_000; // 5 seconds
+
+// The backend's `MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN`, in UTF-8 bytes — `validate_error` compares
+// `str::len()`. An update carrying a longer `error` is rejected whole, status included.
+export const ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES = 512;
+// The backend's `MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN`, in UTF-8 bytes, compared the
+// same way. An update carrying a longer ref value is rejected whole, too.
+export const ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES = 256;
+// Minimum delay between two `forward_evm_to_icp` re-notifications for the same
+// pending OneSec EVM→ICP row (notifying is an update call, polling is 5s).
+export const ONESEC_FORWARDING_NOTIFY_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute
+// Minimum delay between two `update_balance` calls for the same pending
+// BTC → ckBTC row. Same reasoning as above — minting is an update call, polling is
+// 5s — and it is the outer bound on top of the query gate that skips the call
+// entirely while the deposit is still gathering confirmations.
+export const CHAIN_FUSION_UPDATE_BALANCE_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute
+
+// Page size for a pending ckBTC deposit's walk over the account's ledger history looking
+// for its own mint. The walk itself is bounded by the row's creation time, not by a page
+// count — see `hasCkBtcMintForDeposit`.
+export const CHAIN_FUSION_CKBTC_MINT_LOOKUP_PAGE_SIZE = 100n;
 
 // User Snapshot
 export const USER_SNAPSHOT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 5 * 1_000; // 5 minutes in milliseconds
@@ -200,6 +244,20 @@ export const CONTACT_MAX_LABEL_LENGTH = 50;
 
 // Contact validation
 export const CONTACT_MAX_NAME_LENGTH = 100;
+
+// Personal notes
+// Cleartext cap, enforced client-side (the backend only ever sees ciphertext).
+// Counted in Unicode code points, not UTF-16 units, so emoji / CJK / astral
+// characters are measured as the user sees them.
+export const MAX_PERSONAL_NOTE_LENGTH = 2_000;
+// Per-user cap; mirrors the backend's `MAX_PERSONAL_NOTES_PER_USER`. Drives the
+// client-side "at capacity" gate; the backend `TooManyNotes` rejection remains
+// the source of truth.
+export const MAX_PERSONAL_NOTES_PER_USER = 1_000;
+// Per-user active-share cap; mirrors the backend's `MAX_PERSONAL_NOTE_SHARES_PER_USER`.
+// Drives the client-side "at capacity" gate in the Share dialog; the backend
+// `TooManyShares` rejection remains the source of truth.
+export const MAX_PERSONAL_NOTE_SHARES_PER_USER = 100;
 
 // Network bonus multiplier
 export const NETWORK_BONUS_MULTIPLIER_DEFAULT = 1;

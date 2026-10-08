@@ -82,6 +82,14 @@ export enum ProgressStepsSendSol {
 	DONE = 'done'
 }
 
+export enum ProgressStepsSendXrp {
+	INITIALIZATION = 'initialization',
+	SIGN = 'sign',
+	SEND = 'send',
+	RELOAD = 'reload',
+	DONE = 'done'
+}
+
 export enum ProgressStepsUpdateBalanceCkBtc {
 	INITIALIZATION = 'initialization',
 	RETRIEVE = 'retrieve',
@@ -119,9 +127,52 @@ export enum ProgressStepsUnstake {
 	DONE = 'done'
 }
 
+export enum ProgressStepsTradingWithdraw {
+	INITIALIZATION = 'initialization',
+	WITHDRAW = 'withdraw',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
+
+export enum ProgressStepsLiquidiumSupply {
+	INITIALIZATION = 'initialization',
+	TRANSFER = 'transfer',
+	REGISTER = 'register',
+	DONE = 'done'
+}
+
+export enum ProgressStepsLiquidiumBorrow {
+	INITIALIZATION = 'initialization',
+	SUBMIT = 'submit',
+	REGISTER = 'register',
+	DONE = 'done'
+}
+
+export enum ProgressStepsLiquidiumWithdraw {
+	INITIALIZATION = 'initialization',
+	SUBMIT = 'submit',
+	REGISTER = 'register',
+	DONE = 'done'
+}
+
+export enum ProgressStepsLiquidiumRepay {
+	INITIALIZATION = 'initialization',
+	TRANSFER = 'transfer',
+	REGISTER = 'register',
+	DONE = 'done'
+}
+
 export enum ProgressStepsClaimStakingReward {
 	INITIALIZATION = 'initialization',
 	CLAIM = 'claim',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
+
+export enum ProgressStepsTradingDeposit {
+	INITIALIZATION = 'initialization',
+	APPROVE = 'approve',
+	DEPOSIT = 'deposit',
 	UPDATE_UI = 'update_ui',
 	DONE = 'done'
 }
@@ -131,4 +182,35 @@ export enum ProgressStepsPayment {
 	CREATE_TRANSACTION = 'create_transaction',
 	SIGN_TRANSACTION = 'sign_transaction',
 	PAY = 'pay'
+}
+
+export enum ProgressStepsLimitOrder {
+	INITIALIZATION = 'initialization',
+	PLACE = 'place',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
+
+/**
+ * Creating a tip. Three stages, each a real canister call the sender waits on:
+ * the approve that sets the amount aside, the `create_tip` that mints the link,
+ * and the encrypted copy of the claim code that makes the link recoverable.
+ *
+ * The vetKD derivation is deliberately not a step of its own. It starts before
+ * the approve and is awaited inside `SAVE`, so it has no moment of its own to
+ * report — and it is the one part of this that means nothing to a sender.
+ */
+export enum ProgressStepsTip {
+	RESERVE = 'reserve',
+	CREATE = 'create',
+	SAVE = 'save',
+	DONE = 'done'
+}
+
+// Minting TCYCLES: the ICP transfer to the CMC, then the notify that mints.
+export enum ProgressStepsCyclesMint {
+	INITIALIZATION = 'initialization',
+	TRANSFER = 'transfer',
+	MINT = 'mint',
+	DONE = 'done'
 }

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, setContext } from 'svelte';
+	import { getContext, setContext, untrack } from 'svelte';
 	import { writable } from 'svelte/store';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 	import EthSendReview from '$eth/components/send/EthSendReview.svelte';
 	import { sendSteps } from '$eth/constants/steps.constants';
+	import { readEthBalance } from '$eth/services/eth-balance.services';
 	import { sendNft } from '$eth/services/nft-send.services';
 	import { send as executeSend } from '$eth/services/send.services';
 	import {
@@ -17,8 +17,11 @@
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
-	import { shouldSendWithApproval } from '$eth/utils/send.utils';
+	import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
+	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+	import { capSendAmountToFee, shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
+	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
@@ -30,9 +33,12 @@
 		TRACK_COUNT_ETH_SEND_ERROR,
 		TRACK_COUNT_ETH_SEND_SUCCESS
 	} from '$lib/constants/analytics.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
+	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -42,6 +48,8 @@
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
+	import type { WizardStep } from '$lib/types/wizard';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -49,8 +57,14 @@
 	 * Send context store
 	 */
 
-	const { sendTokenDecimals, sendTokenId, sendToken, sendEthCustomNonce } =
-		getContext<SendContext>(SEND_CONTEXT_KEY);
+	const {
+		sendTokenDecimals,
+		sendTokenId,
+		sendToken,
+		sendBalance,
+		sendEthCustomNonce,
+		sendEthFeePriority
+	} = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Props
@@ -102,6 +116,14 @@
 
 	let customNonce = $derived($sendEthCustomNonce);
 
+	// Set by the amount step's "Max" button, and read again at send time: only a "Max" amount stands
+	// for "whatever is left" rather than a figure the user typed.
+	let amountSetToMax = $state(false);
+
+	let feeIsPaidFromAmount = $derived(
+		isSupportedEthTokenId($sendTokenId) || isSupportedEvmNativeTokenId($sendTokenId)
+	);
+
 	/**
 	 * Fee context store
 	 */
@@ -138,6 +160,21 @@
 			evaluateFee
 		})
 	);
+
+	// The gas an ERC-20 transfer needs depends on what is sent and to whom: a first transfer to an
+	// address pays for the storage of its balance. Without this, the fee is re-estimated only on a
+	// mined block or a return to the foreground, and the review step freezes whatever sample is in
+	// hand, possibly one taken for a previous amount or recipient.
+	$effect(() => {
+		[amount, destination];
+
+		untrack(() => evaluateFee());
+	});
+
+	// Set from an amount or recipient change until the fee estimated for the new values has landed.
+	// "Next" waits for it: the review step freezes the fee in hand, and a sample taken for the previous
+	// values can fall short of the gas this transfer needs.
+	let feeOutdated = $state(false);
 
 	/**
 	 * Send
@@ -200,6 +237,8 @@
 				progress: (step: ProgressStep) => (sendProgressStep = step)
 			});
 
+			sendProgressStep = ProgressStepsSend.DONE;
+
 			trackEvent({
 				name: TRACK_NFT_SEND,
 				metadata: {
@@ -227,9 +266,11 @@
 				}
 			});
 
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
-				err
+			toastEthereumTransactionError({
+				err,
+				fallbackMsg: $i18n.send.error.unexpected,
+				token: $sendToken,
+				context: PLAUSIBLE_EVENT_CONTEXTS.SEND
 			});
 
 			onBack();
@@ -266,8 +307,13 @@
 			return;
 		}
 
+		// One snapshot for both the signature and the cap below. Rebuilding a literal from parts of it
+		// would let any term the rebuild omits - such as the OP-stack `l1Fee` - drop out of the ceiling
+		// the cap enforces, which is the very shortfall the cap exists to prevent.
 		// https://github.com/ethers-io/ethers.js/discussions/2439#discussioncomment-1857403
-		const { maxFeePerGas, maxPriorityFeePerGas, gas } = $feeStore;
+		const feeData = $feeStore;
+
+		const { maxFeePerGas, maxPriorityFeePerGas, gas } = feeData;
 
 		// https://docs.ethers.org/v5/api/providers/provider/#Provider-getFeeData
 		// exceeds block gas limit
@@ -286,11 +332,69 @@
 			return;
 		}
 
+		const parsedAmount = parseToken({
+			value: `${amount}`,
+			unitName: $sendTokenDecimals
+		});
+
+		let sendAmount = parsedAmount;
+
+		if (amountSetToMax && feeIsPaidFromAmount) {
+			// Taken before the re-read below, whose failure resets the stored balance. It is the last
+			// poll sample rather than the one "Max" was priced against: a failed poll while on this
+			// step can already have emptied it, which is why a missing balance is refused below
+			// instead of being treated as nothing to cap.
+			const sampledBalance = $sendBalance;
+
+			// The balance a "Max" amount was priced against is a poll sample, and every transaction the
+			// wallet sends in between - an ERC-20 transfer, an approval, a swap - pays its gas out of
+			// this very balance. Until the next poll lands, that sample still holds gas the account
+			// has already spent, and an amount drawn from it reserves more than there is left to
+			// reserve.
+			//
+			// The value is taken from the read itself, never from the store: the store is written
+			// through `batchSet`, which only lands on the next animation frame, so reading it back
+			// here would still yield the stale sample this re-read exists to replace.
+			const balance =
+				(await readEthBalance({ networkId: $sendToken.network.id, tokenId: $sendToken.id })) ??
+				sampledBalance;
+
+			// Neither the chain nor the store can say what the account holds. `capSendAmountToFee`
+			// returns an amount it has no balance for unchanged, so going on would broadcast a "Max"
+			// that nothing bounds.
+			if (isNullish(balance)) {
+				toastsError({
+					msg: {
+						text: replacePlaceholders($i18n.init.error.loading_balance, {
+							$symbol: $sendToken.symbol,
+							$network: sourceNetwork.name
+						})
+					}
+				});
+				return;
+			}
+
+			// The fee is frozen from the review step on, so the sample signed just above is the one the
+			// amount step last showed. The "Max" button, however, re-applies its amount half a second
+			// after each fee change, so a click on "Review" inside that window carries an amount priced
+			// against the sample before. A fee that has risen in between leaves it unable to cover
+			// `gas * maxFeePerGas`, and the chain refuses such a transaction outright.
+			sendAmount = capSendAmountToFee({ amount: parsedAmount, balance, feeData });
+		}
+
+		if (sendAmount <= ZERO) {
+			toastsError({
+				msg: { text: $i18n.send.assertion.insufficient_funds_for_gas }
+			});
+			return;
+		}
+
 		onNext();
 
 		const sendTrackingEventMetadata = {
 			token: $sendToken.symbol,
 			network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`,
+			feePriority: $sendEthFeePriority,
 			maxFeePerGas: maxFeePerGas.toString(),
 			maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
 			gas: gas.toString()
@@ -302,10 +406,7 @@
 				to: isErc20Icp($sendToken) ? destination : mapAddressStartsWith0x(destination),
 				progress: (step: ProgressStep) => (sendProgressStep = step),
 				token: $sendToken,
-				amount: parseToken({
-					value: `${amount}`,
-					unitName: $sendTokenDecimals
-				}),
+				amount: sendAmount,
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas,
@@ -327,9 +428,11 @@
 				metadata: sendTrackingEventMetadata
 			});
 
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
-				err
+			toastEthereumTransactionError({
+				err,
+				fallbackMsg: $i18n.send.error.unexpected,
+				token: $sendToken,
+				context: PLAUSIBLE_EVENT_CONTEXTS.SEND
 			});
 
 			onBack();
@@ -345,11 +448,14 @@
 	{amount}
 	{destination}
 	{nativeEthereumToken}
-	observe={currentStep?.name !== WizardStepsSend.SENDING}
+	observe={currentStep?.name !== WizardStepsSend.SENDING &&
+		currentStep?.name !== WizardStepsSend.REVIEW}
+	priority={$sendEthFeePriority}
 	sendNft={nft}
 	sendToken={$sendToken}
 	sendTokenId={$sendTokenId}
 	{sourceNetwork}
+	bind:outdated={feeOutdated}
 >
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsSend.REVIEW}
@@ -368,6 +474,7 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSend.SEND}
 			<EthSendForm
+				{feeOutdated}
 				{nativeEthereumToken}
 				{onBack}
 				{onNext}
@@ -375,6 +482,7 @@
 				{selectedContact}
 				bind:destination
 				bind:amount
+				bind:amountSetToMax
 			>
 				{#snippet cancel()}
 					<ButtonBack onclick={back} />

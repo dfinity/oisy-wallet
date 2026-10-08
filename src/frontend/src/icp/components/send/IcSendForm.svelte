@@ -7,6 +7,7 @@
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
+	import ScannedPlainAddressNotice from '$lib/components/send/ScannedPlainAddressNotice.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import InputText from '$lib/components/ui/InputText.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -61,6 +62,10 @@
 	{onNext}
 	{selectedContact}
 >
+	{#snippet topBanner()}
+		<ScannedPlainAddressNotice styleClass="mb-6!" />
+	{/snippet}
+
 	{#snippet sendAmount()}
 		<IcSendAmount {onTokensList} bind:amount bind:amountError />
 	{/snippet}

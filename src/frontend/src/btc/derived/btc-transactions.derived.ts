@@ -30,9 +30,11 @@ export const btcTransactionsNotInitialized: Readable<boolean> = derived(
 export const btcKnownDestinations: Readable<KnownDestinations | undefined> = derived(
 	[btcTransactionsStore, tokens],
 	([$btcTransactionsStore, $tokens]) => {
+		const tokenById = new Map($tokens.map((token) => [token.id, token]));
+
 		const mappedTransactions: AnyTransactionUiWithToken[] = [];
 		Object.getOwnPropertySymbols($btcTransactionsStore ?? {}).forEach((tokenId) => {
-			const token = $tokens.find(({ id }) => id === tokenId);
+			const token = tokenById.get(tokenId as TokenId);
 
 			if (nonNullish(token)) {
 				($btcTransactionsStore?.[tokenId as TokenId] ?? []).forEach(({ data }) => {

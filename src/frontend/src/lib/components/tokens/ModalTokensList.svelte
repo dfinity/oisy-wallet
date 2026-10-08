@@ -26,7 +26,8 @@
 		tokenListItem: Snippet<[Token, () => void]>;
 		toolbar: Snippet;
 		noResults?: Snippet;
-		onSelectNetworkFilter: () => void;
+		topBanner?: Snippet;
+		onSelectNetworkFilter?: () => void;
 		onTokenButtonClick?: (token: Token) => void;
 	}
 
@@ -35,6 +36,7 @@
 		tokenListItem,
 		toolbar,
 		noResults,
+		topBanner,
 		onSelectNetworkFilter,
 		onTokenButtonClick
 	}: Props = $props();
@@ -76,6 +78,10 @@
 </script>
 
 <div data-tid={MODAL_TOKENS_LIST}>
+	{#if topBanner}
+		{@render topBanner()}
+	{/if}
+
 	<div class="input-field condensed mb-4 flex-1">
 		<InputSearch
 			autofocus={isDesktop()}
@@ -89,7 +95,7 @@
 		<ModalFilterButton
 			ariaLabel={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
 			disabled={networkSelectorViewOnly}
-			onclick={() => !networkSelectorViewOnly && onSelectNetworkFilter()}
+			onclick={() => !networkSelectorViewOnly && onSelectNetworkFilter?.()}
 		>
 			{$filterNetwork?.name ?? $i18n.networks.chain_fusion}
 		</ModalFilterButton>

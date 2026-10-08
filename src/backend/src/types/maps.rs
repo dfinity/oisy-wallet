@@ -4,13 +4,29 @@ use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
 use shared::types::{
-    agreement::AgreementHistoryEntry, api_keys::ApiKeys, backend_config::Config,
-    bitcoin::StoredPendingTransaction, contact::StoredContacts, custom_token::CustomToken,
-    exchange::ExchangeRate, token::UserToken, user_profile::StoredUserProfile,
-    user_transaction::UserTransaction, Timestamp,
+    active_user_transaction::ActiveUserTransaction,
+    agreement::AgreementHistoryEntry,
+    api_keys::ApiKeys,
+    backend_config::Config,
+    bitcoin::StoredPendingTransaction,
+    contact::{ContactImage, StoredContacts},
+    custom_token::CustomToken,
+    exchange::ExchangeRate,
+    token::UserToken,
+    user_profile::StoredUserProfile,
+    user_transaction::UserTransaction,
+    Timestamp,
 };
 
-use crate::types::storable::{Candid, StoredPrincipal, StoredTokenId, UserTransactionKey};
+use crate::{
+    personal_notes::share::model::PersonalNoteShareRecord,
+    tips::model::TipRecord,
+    types::storable::{
+        ActiveUserTransactionKey, Candid, ContactImageKey, PersonalNoteShareCreatorKey,
+        PersonalNoteShareToken, StoredPrincipal, StoredTokenId, TipId, TipSenderKey,
+        UserTransactionKey,
+    },
+};
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
 
@@ -32,6 +48,10 @@ pub type UserProfileUpdatedMap = StableBTreeMap<StoredPrincipal, Timestamp, VMem
 // Define a new type for the contact storage
 pub type ContactMap = StableBTreeMap<StoredPrincipal, Candid<StoredContacts>, VMem>;
 
+/// Contact images, held outside [`ContactMap`] so that a contact read or write decodes only the
+/// contact metadata rather than every image the principal has stored.
+pub type ContactImageMap = StableBTreeMap<ContactImageKey, Candid<ContactImage>, VMem>;
+
 pub type PendingTransactionsMap = HashMap<String, Vec<StoredPendingTransaction>>;
 
 pub type BtcUserPendingTransactionsMap =
@@ -49,3 +69,29 @@ pub type UserTransactionsMap =
 /// Per-user audit trail of agreement consent/rejection events.
 pub type AgreementHistoryMap =
     StableBTreeMap<StoredPrincipal, Candid<Vec<AgreementHistoryEntry>>, VMem>;
+
+/// Per-record storage of in-flight user transactions (Active Transactions).
+/// Key: `(principal, frontend-generated UUID)`. One row per operation so that
+/// partial updates during polling do not rewrite a whole `Vec`.
+pub type ActiveUserTransactionsMap =
+    StableBTreeMap<ActiveUserTransactionKey, Candid<ActiveUserTransaction>, VMem>;
+
+/// Primary personal-note-share store: token → record. Publicly readable by
+/// design (unlike every other map here) — see `personal_notes::share`.
+pub type PersonalNoteShareMap =
+    StableBTreeMap<PersonalNoteShareToken, Candid<PersonalNoteShareRecord>, VMem>;
+
+/// By-creator index for the active-share cap: `(creator, token) → expires_at_ns`.
+/// Lets the cap check range-scan one creator's shares without touching
+/// [`PersonalNoteShareMap`].
+pub type PersonalNoteSharesByCreatorMap =
+    StableBTreeMap<PersonalNoteShareCreatorKey, Timestamp, VMem>;
+
+/// Primary tip store: tip id → record. Readable anonymously through
+/// `get_tip`, which returns only the amount, token and deadline — see
+/// `tips::service`.
+pub type TipMap = StableBTreeMap<TipId, Candid<TipRecord>, VMem>;
+
+/// By-sender index for the active-tip cap and History: `(sender, tip_id) → expires_at_ns`.
+/// Lets both range-scan one sender's tips without touching [`TipMap`].
+pub type TipsBySenderMap = StableBTreeMap<TipSenderKey, Timestamp, VMem>;

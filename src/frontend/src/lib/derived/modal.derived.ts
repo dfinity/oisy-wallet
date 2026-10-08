@@ -4,8 +4,11 @@ import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
+import type { OisyTradeOrderView, OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { UniversalScannerData } from '$lib/types/scanner';
+import type { SendModalData } from '$lib/types/send';
+import type { PendingTipClaim } from '$lib/types/tip';
 import type { NavigationTarget } from '@sveltejs/kit';
 import { derived, type Readable } from 'svelte/store';
 
@@ -37,6 +40,10 @@ export const modalSolReceive: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'sol-receive'
 );
+export const modalXrpReceive: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'xrp-receive'
+);
 export const modalReceive: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'receive'
@@ -48,6 +55,11 @@ export const modalReceiveId: Readable<symbol | undefined> = derived(
 export const modalSend: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'send'
+);
+export const modalSendData: Readable<SendModalData | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'send' ? ($modalStore?.data as SendModalData | undefined) : undefined
 );
 export const modalGetToken: Readable<boolean> = derived(
 	modalStore,
@@ -61,9 +73,55 @@ export const modalHarvestUnstake: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'harvest-unstake'
 );
+export const modalLiquidiumSupply: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'liquidium-supply'
+);
+export const modalLiquidiumBorrow: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'liquidium-borrow'
+);
+export const modalLiquidiumWithdraw: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'liquidium-withdraw'
+);
+export const modalLiquidiumRepay: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'liquidium-repay'
+);
+export const modalTradingDeposit: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'trading-deposit'
+);
+export const modalOisyTradeWithdraw: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'oisy-trade-withdraw'
+);
+export const modalOisyTradeWithdrawData: Readable<OisyTradeWithdrawToken | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'oisy-trade-withdraw'
+			? ($modalStore?.data as OisyTradeWithdrawToken | undefined)
+			: undefined
+);
+export const modalOisyTradeOrderDetail: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'oisy-trade-order-detail'
+);
+export const modalOisyTradeOrderDetailData: Readable<OisyTradeOrderView | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'oisy-trade-order-detail'
+			? ($modalStore?.data as OisyTradeOrderView | undefined)
+			: undefined
+);
 export const modalSwap: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'swap'
+);
+export const modalLimitOrder: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'limit-order'
 );
 export const modalBuy: Readable<boolean> = derived(
 	modalStore,
@@ -72,6 +130,10 @@ export const modalBuy: Readable<boolean> = derived(
 export const modalConvertCkBTCToBTC: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'convert-ckbtc-btc'
+);
+export const modalCyclesMint: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'cycles-mint'
 );
 export const modalConvertBTCToCkBTC: Readable<boolean> = derived(
 	modalStore,
@@ -153,6 +215,10 @@ export const modalSolTransaction: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'sol-transaction'
 );
+export const modalXrpTransaction: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'xrp-transaction'
+);
 export const modalEthToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'eth-token'
@@ -189,6 +255,15 @@ export const modalSolTokenData: Readable<NavigationTarget | undefined> = derived
 	($modalStore) =>
 		$modalStore?.type === 'sol-token' ? ($modalStore?.data as NavigationTarget) : undefined
 );
+export const modalXrpToken: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'xrp-token'
+);
+export const modalXrpTokenData: Readable<NavigationTarget | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'xrp-token' ? ($modalStore?.data as NavigationTarget) : undefined
+);
 export const modalReceiveBitcoin: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'receive-bitcoin'
@@ -210,9 +285,31 @@ export const modalReferralCode: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'referral-code'
 );
+export const modalTip: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'tip'
+);
+export const modalTipWelcome: Readable<boolean> = derived(
+	[modalStore],
+	([$modalStore]) => $modalStore?.type === 'tip-welcome'
+);
+
+export const modalTipClaim: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'tip-claim'
+);
+export const modalTipClaimData: Readable<PendingTipClaim | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'tip-claim' ? ($modalStore?.data as PendingTipClaim) : undefined
+);
 export const modalAddressBook: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'address-book'
+);
+export const modalNotes: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'notes'
 );
 export const modalDAppDetails: Readable<boolean> = derived(
 	modalStore,

@@ -8,7 +8,10 @@
 		permanentInfo?: boolean;
 		key: Snippet;
 		value?: Snippet;
-		info: Snippet;
+		// Optional: when omitted the help-icon button is suppressed entirely. Callers that
+		// want to surface a description per row pass a snippet; section-level callers (e.g.
+		// SettingsExportData) keep descriptions at the section header instead.
+		info?: Snippet;
 	}
 
 	let { permanentInfo = false, key, value, info }: Props = $props();
@@ -34,6 +37,6 @@
 	<span class="flex">{@render value?.()}</span>
 </div>
 
-{#if infoExpanded}
-	<span class="mt-1 flex w-full text-sm text-tertiary" transition:slide>{@render info()}</span>
+{#if infoExpanded && hasInfoSlot}
+	<span class="mt-1 flex w-full text-sm text-tertiary" transition:slide>{@render info?.()}</span>
 {/if}

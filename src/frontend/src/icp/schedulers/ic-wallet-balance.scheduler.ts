@@ -16,9 +16,7 @@ interface IcrcBalanceStore {
 
 export class IcWalletBalanceScheduler<
 	PostMessageDataRequest extends
-		| PostMessageDataRequestIcrc
-		| PostMessageDataRequestIcp
-		| PostMessageDataRequestDip20
+		PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
 > extends IcWalletScheduler<PostMessageDataRequest> {
 	private _queryAndUpdateWithWarmup?: ReturnType<typeof createQueryAndUpdateWithWarmup>;
 
@@ -51,7 +49,11 @@ export class IcWalletBalanceScheduler<
 		await this.queryAndUpdateWithWarmup<bigint>({
 			request: ({ identity: _, certified }) => this.getBalance({ ...data, identity, certified }),
 			onLoad: ({ certified, ...rest }) => this.syncBalance({ certified, ...rest }),
-			onUpdateError: ({ error }) => this.postMessageWalletError({ msg: this.msg, error }),
+			onUpdateError: ({ error }) => {
+				// Mirror the listener-side UI reset; otherwise the next sync only emits deltas and the UI stays empty.
+				this.store = { balance: undefined };
+				this.postMessageWalletError({ msg: this.msg, error });
+			},
 			identity
 		});
 	};

@@ -46,6 +46,7 @@ import {
 	sumMainnetTokensUsdStakeBalancesPerNetwork,
 	sumTokensUiUsdBalance,
 	sumTokensUiUsdStakeBalance,
+	sumTotalUsdBalance,
 	tokenListEqual
 } from '$lib/utils/tokens.utils';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
@@ -1018,6 +1019,42 @@ describe('tokens.utils', () => {
 		});
 	});
 
+	describe('sumTotalUsdBalance', () => {
+		it('should sum the wallet balances, the stake balances and the provider-held value', () => {
+			const tokens: TokenUi[] = [
+				{ ...ICP_TOKEN, usdBalance: 100, stakeUsdBalance: 30, claimableStakeBalanceUsd: 7 },
+				{ ...ETHEREUM_TOKEN, usdBalance: 200 }
+			];
+
+			const result = sumTotalUsdBalance({ tokens, providersUsdBalance: 55 });
+
+			expect(result).toEqual(392);
+		});
+
+		it('should treat missing financial data as zero', () => {
+			const tokens: TokenUi[] = [{ ...ICP_TOKEN }, { ...ETHEREUM_TOKEN, usdBalance: 50 }];
+
+			const result = sumTotalUsdBalance({ tokens, providersUsdBalance: 0 });
+
+			expect(result).toEqual(50);
+		});
+
+		// The provider-held value is portfolio-wide, so it survives an empty token list.
+		it('should return the provider-held value when the tokens list is empty', () => {
+			const result = sumTotalUsdBalance({ tokens: [], providersUsdBalance: 55 });
+
+			expect(result).toEqual(55);
+		});
+
+		it('should deduct a negative provider-held value', () => {
+			const tokens: TokenUi[] = [{ ...ICP_TOKEN, usdBalance: 100 }];
+
+			const result = sumTotalUsdBalance({ tokens, providersUsdBalance: -30 });
+
+			expect(result).toEqual(70);
+		});
+	});
+
 	describe('filterEnabledTokens', () => {
 		it('should correctly return filtered tokens when all tokens have "enabled" property', () => {
 			const ENABLED_ICP_TOKEN = { ...ICP_TOKEN, enabled: true };
@@ -1234,9 +1271,49 @@ describe('tokens.utils', () => {
 		];
 
 		it('should filter tokens by symbol correctly when filter is provided', () => {
-			expect(filterTokens({ tokens, filter: 'ICP' })).toStrictEqual([ICP_TOKEN]);
 			expect(filterTokens({ tokens, filter: 'BTC' })).toStrictEqual([BTC_MAINNET_TOKEN]);
 			expect(filterTokens({ tokens, filter: 'PEPE' })).toStrictEqual([]);
+		});
+
+		it('should filter tokens by standard correctly when filter is provided', () => {
+			expect(filterTokens({ tokens, filter: 'spl' })).toStrictEqual([mockValidSplToken]);
+			expect(filterTokens({ tokens, filter: 'dip721' })).toStrictEqual([mockValidDip721Token]);
+
+			expect(filterTokens({ tokens, filter: 'BITCOIN' })).toStrictEqual([BTC_MAINNET_TOKEN]);
+
+			// substring matches every ERC variant; mockValidIcCkToken matches via its erc20 twin
+			expect(filterTokens({ tokens, filter: 'erc' })).toStrictEqual([
+				mockValidIcCkToken,
+				mockValidErc20Token,
+				mockValidErc721Token,
+				mockValidErc1155Token
+			]);
+
+			// 'icp' is a substring of both 'icp' and 'icpunks'
+			expect(filterTokens({ tokens, filter: 'icp' })).toStrictEqual([
+				ICP_TOKEN,
+				mockValidIcCkToken,
+				mockValidIcPunksToken
+			]);
+		});
+
+		it('should filter tokens by standard version when filter is provided', () => {
+			const extV2Token = {
+				...mockValidExtV2Token,
+				standard: { code: 'ext' as const, version: 'v2' }
+			};
+			const tokensWithVersion = [extV2Token, ...mockTokens];
+
+			// version alone
+			expect(filterTokens({ tokens: tokensWithVersion, filter: 'v2' })).toStrictEqual([extV2Token]);
+			// combined `code version` UI label
+			expect(filterTokens({ tokens: tokensWithVersion, filter: 'ext v2' })).toStrictEqual([
+				extV2Token
+			]);
+			// case-insensitive
+			expect(filterTokens({ tokens: tokensWithVersion, filter: 'EXT V2' })).toStrictEqual([
+				extV2Token
+			]);
 		});
 
 		it('should filter tokens by name correctly when filter is provided', () => {

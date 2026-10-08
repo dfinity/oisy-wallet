@@ -10,6 +10,7 @@ import {
 	mapAddressToContactAddressUi,
 	mapToBackendContact,
 	mapToFrontendContact,
+	matchesContactByText,
 	selectColorForName
 } from '$lib/utils/contact.utils';
 import { mockBtcAddress, mockBtcP2SHAddress } from '$tests/mocks/btc.mock';
@@ -573,6 +574,99 @@ describe('contact.utils', () => {
 
 				expect(result).toBeUndefined();
 			});
+		});
+	});
+
+	describe('matchesContactByText', () => {
+		const contact: ContactUi = {
+			name: 'Alice',
+			id: BigInt(100),
+			updateTimestampNs: ZERO,
+			addresses: [
+				{
+					address: mockBtcAddress,
+					addressType: 'Btc',
+					label: 'Cold storage'
+				},
+				{
+					address: mockEthAddress,
+					addressType: 'Eth'
+				}
+			]
+		};
+
+		it('matches every contact when query is empty', () => {
+			expect(matchesContactByText({ contact, query: '' })).toBeTruthy();
+		});
+
+		it('matches by name (case-insensitive)', () => {
+			expect(matchesContactByText({ contact, query: 'ali' })).toBeTruthy();
+			expect(matchesContactByText({ contact, query: 'ALICE' })).toBeTruthy();
+		});
+
+		it('matches by address label (case-insensitive)', () => {
+			expect(matchesContactByText({ contact, query: 'cold' })).toBeTruthy();
+			expect(matchesContactByText({ contact, query: 'STORAGE' })).toBeTruthy();
+		});
+
+		it('matches by full address', () => {
+			expect(matchesContactByText({ contact, query: mockEthAddress })).toBeTruthy();
+		});
+
+		it('matches by partial address substring', () => {
+			expect(matchesContactByText({ contact, query: mockEthAddress.slice(2, 8) })).toBeTruthy();
+		});
+
+		it('returns false when nothing matches', () => {
+			expect(matchesContactByText({ contact, query: 'nonexistent' })).toBeFalsy();
+		});
+
+		it('returns false for a contact with no addresses and a non-name query', () => {
+			expect(
+				matchesContactByText({
+					contact: { ...contact, addresses: [] },
+					query: 'nope'
+				})
+			).toBeFalsy();
+		});
+
+		it('matches a principal query against a contact saved by its derived ICP account-id hex', () => {
+			const contactWithDerivedHex: ContactUi = {
+				name: 'IC user',
+				id: BigInt(101),
+				updateTimestampNs: ZERO,
+				addresses: [
+					{
+						address: mockDerivedAccountIdentifierHex,
+						addressType: 'Icrcv2'
+					}
+				]
+			};
+
+			expect(
+				matchesContactByText({ contact: contactWithDerivedHex, query: mockPrincipalText })
+			).toBeTruthy();
+		});
+
+		it('matches an ICP account-id hex query against a contact saved by its principal', () => {
+			const contactWithPrincipal: ContactUi = {
+				name: 'IC user',
+				id: BigInt(102),
+				updateTimestampNs: ZERO,
+				addresses: [
+					{
+						address: mockPrincipalText,
+						addressType: 'Icrcv2'
+					}
+				]
+			};
+
+			expect(
+				matchesContactByText({
+					contact: contactWithPrincipal,
+					query: mockDerivedAccountIdentifierHex
+				})
+			).toBeTruthy();
 		});
 	});
 

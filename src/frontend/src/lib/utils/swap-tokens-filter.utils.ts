@@ -1,13 +1,61 @@
+import { isBitcoinToken } from '$btc/utils/token.utils';
 import { isTokenErcFungible } from '$eth/utils/erc-fungible.utils';
+import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import type {
+	SwapProviderListCoverage,
+	SwapProviderSupport,
 	SwapSupportedTokensData,
 	SwapSupportedTokensInfo
 } from '$lib/stores/swap-supported-tokens.store';
+import type { Network, NetworkId } from '$lib/types/network';
+import type { SwapProvider, SwapTokenCategory } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { isTokenSpl } from '$sol/utils/spl.utils';
-import { isNullish } from '@dfinity/utils';
+import { isTokenSolanaNative } from '$sol/utils/token.utils';
+import { isTokenXrpNative } from '$xrp/utils/token.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
+
+export const determineCoverage = ({
+	totalEnabled,
+	withList
+}: {
+	totalEnabled: number;
+	withList: number;
+}): SwapProviderListCoverage => {
+	if (totalEnabled === 0 || withList === 0) {
+		return 'none';
+	}
+
+	return withList >= totalEnabled ? 'all' : 'some';
+};
+
+interface SwapTokenLookup {
+	info: SwapSupportedTokensInfo | undefined;
+	identifier: string;
+	category: SwapTokenCategory;
+}
+
+/**
+ * The identifier a token without a contract address is keyed on.
+ *
+ * The symbol alone is not unique: ETH is the native token of Ethereum mainnet, Base and
+ * Arbitrum alike, and the category sets carry no network dimension — so a bare `'eth'`
+ * made an Ethereum-mainnet-only offer (Chain Fusion's ckETH → ETH) look reachable on the
+ * L2s too. The network qualifies it back into a unique key.
+ *
+ * Contract-bearing tokens need no qualifier: their address already pins the network.
+ * Every producer of a native identifier must go through here, or the two spaces drift
+ * apart and the filter silently matches nothing.
+ */
+export const nativeSwapTokenIdentifier = ({
+	networkId,
+	symbol
+}: {
+	networkId: NetworkId;
+	symbol: string;
+}): string => `${String(networkId.description)}:${symbol.toLowerCase()}`;
 
 /**
  * Resolves the provider-group info and the token identifier used for matching
@@ -15,31 +63,66 @@ import { isNullish } from '@dfinity/utils';
  *
  * Returns `undefined` when the token doesn't belong to a known swap network.
  */
-const resolveSwapTokenLookup = ({
+export const resolveSwapTokenLookup = ({
 	token,
 	supportedData
 }: {
 	token: Token;
-	supportedData: SwapSupportedTokensData;
-}): { info: SwapSupportedTokensInfo; identifier: string } | undefined => {
+	supportedData?: SwapSupportedTokensData;
+}): SwapTokenLookup | undefined => {
 	if (isIcToken(token)) {
-		return { info: supportedData.icp, identifier: token.ledgerCanisterId };
+		return {
+			info: supportedData?.icp,
+			identifier: token.ledgerCanisterId,
+			category: 'icp'
+		};
 	}
 
 	if (isTokenErcFungible(token)) {
-		return { info: supportedData.evm, identifier: token.address.toLowerCase() };
+		return {
+			info: supportedData?.evm,
+			identifier: token.address.toLowerCase(),
+			category: 'evm'
+		};
 	}
 
 	if (isTokenSpl(token)) {
-		return { info: supportedData.sol, identifier: token.address };
+		return { info: supportedData?.sol, identifier: token.address, category: 'sol' };
 	}
 
-	if (token.standard.code === 'ethereum') {
-		return { info: supportedData.evm, identifier: token.symbol.toLowerCase() };
+	if (isTokenEthereumNative(token)) {
+		return {
+			info: supportedData?.evm,
+			identifier: nativeSwapTokenIdentifier({ networkId: token.network.id, symbol: token.symbol }),
+			category: 'evm'
+		};
 	}
 
-	if (token.standard.code === 'solana') {
-		return { info: supportedData.sol, identifier: token.symbol.toLowerCase() };
+	if (isTokenSolanaNative(token)) {
+		return {
+			info: supportedData?.sol,
+			identifier: nativeSwapTokenIdentifier({ networkId: token.network.id, symbol: token.symbol }),
+			category: 'sol'
+		};
+	}
+
+	// Bitcoin has no contract address, so it is keyed like the other native tokens. No
+	// collision with them: every guard above discriminates on `standard.code`.
+	if (isBitcoinToken(token)) {
+		return {
+			info: supportedData?.btc,
+			identifier: nativeSwapTokenIdentifier({ networkId: token.network.id, symbol: token.symbol }),
+			category: 'btc'
+		};
+	}
+
+	// Native XRP has no contract address either, so it is keyed the same way.
+	if (isTokenXrpNative(token)) {
+		return {
+			info: supportedData?.xrp,
+			identifier: nativeSwapTokenIdentifier({ networkId: token.network.id, symbol: token.symbol }),
+			category: 'xrp'
+		};
 	}
 };
 
@@ -70,28 +153,126 @@ export const filterSwapTokens = <T extends Token>({
 	return tokens.filter((token) => {
 		const lookup = resolveSwapTokenLookup({ token, supportedData });
 
-		if (isNullish(lookup)) {
+		if (isNullish(lookup) || isNullish(lookup.info)) {
 			return token.enabled;
 		}
 
-		const { info, identifier } = lookup;
-
-		if (isNullish(info)) {
-			return token.enabled;
-		}
-
+		const { info } = lookup;
 		const { coverage, supportedTokenIds } = info;
 
 		if (coverage === 'none') {
 			return token.enabled;
 		}
 
-		const isSupported = supportedTokenIds.has(identifier);
-
-		if (coverage === 'all') {
-			return isSupported;
-		}
-
-		return token.enabled || isSupported;
+		const isSupported = supportedTokenIds.has(lookup.identifier);
+		return coverage === 'all' ? isSupported : token.enabled || isSupported;
 	});
+};
+
+interface CategoryAccum {
+	total: number;
+	withList: number;
+	ids: Set<string>;
+}
+
+// A category with no supporting provider for the source is returned as coverage='all' with an
+// empty supported set, so filterSwapTokens rejects every token in this category (intersection
+// is empty). Each blocked category gets a fresh Set to avoid sharing mutable state.
+const toInfo = ({ total, withList, ids }: CategoryAccum): SwapSupportedTokensInfo =>
+	total === 0
+		? { coverage: 'all', supportedTokenIds: new Set() }
+		: {
+				coverage: determineCoverage({ totalEnabled: total, withList }),
+				supportedTokenIds: ids
+			};
+
+/**
+ * Aggregates per-provider directed-pair destinations for a given source token,
+ * producing data with the same shape as the pay-side `SwapSupportedTokensData`.
+ *
+ * Each provider's `getSupportedDestinations` returns:
+ * - `undefined`: provider does not support the source → skip.
+ * - `{}` (empty map): provider supports the source as a wildcard contributor with
+ *   no explicit destination list. Bumps the source category's `total` count only,
+ *   so the category falls back to coverage='some' / 'none' rules.
+ * - `{ icp: Set, evm: Set, ... }`: explicit destinations per category. Each populated
+ *   category bumps both `total` and `withList` and unions its IDs.
+ *
+ * A category with `total === 0` (no provider supports the source there) is returned
+ * as coverage='all' + empty supported set, which causes `filterSwapTokens` to drop
+ * every token of that category — preserving the directed-pair semantics.
+ */
+export const computeReceiveSupportedTokens = ({
+	sourceToken,
+	providers
+}: {
+	sourceToken: Token;
+	providers: SwapProviderSupport[];
+}): SwapSupportedTokensData => {
+	const accum: Record<SwapTokenCategory, CategoryAccum> = {
+		icp: { total: 0, withList: 0, ids: new Set() },
+		evm: { total: 0, withList: 0, ids: new Set() },
+		sol: { total: 0, withList: 0, ids: new Set() },
+		btc: { total: 0, withList: 0, ids: new Set() },
+		xrp: { total: 0, withList: 0, ids: new Set() }
+	};
+
+	const findProviderSourceTokens = ({
+		key,
+		category
+	}: {
+		key: SwapProvider;
+		category: SwapTokenCategory;
+	}): Set<string> | undefined =>
+		providers.find((p) => p.key === key && p.sourceCategory === category)?.supportedSourceTokens;
+
+	for (const provider of providers) {
+		const dests = provider.getSupportedDestinations({
+			sourceToken,
+			supportedSourceTokens: provider.supportedSourceTokens,
+			findProviderSourceTokens
+		});
+
+		if (nonNullish(dests)) {
+			const entries = Object.entries(dests) as [SwapTokenCategory, Set<string>][];
+
+			if (entries.length === 0) {
+				accum[provider.sourceCategory].total++;
+			} else {
+				for (const [category, ids] of entries) {
+					accum[category].total++;
+					accum[category].withList++;
+					ids.forEach((id) => accum[category].ids.add(id));
+				}
+			}
+		}
+	}
+
+	return {
+		icp: toInfo(accum.icp),
+		evm: toInfo(accum.evm),
+		sol: toInfo(accum.sol),
+		btc: toInfo(accum.btc),
+		xrp: toInfo(accum.xrp)
+	};
+};
+
+/**
+ * Returns the subset of `networks` that have at least one token in `tokens`
+ * passing `filterSwapTokens` against `supportedData`.
+ */
+export const networksWithSupport = ({
+	networks,
+	tokens,
+	supportedData
+}: {
+	networks: Network[];
+	tokens: TokenToggleable<Token>[];
+	supportedData: SwapSupportedTokensData;
+}): NetworkId[] => {
+	const passingNetworkIds = new Set(
+		filterSwapTokens({ tokens, supportedData }).map((t) => t.network.id)
+	);
+
+	return networks.filter(({ id }) => passingNetworkIds.has(id)).map(({ id }) => id);
 };

@@ -23,25 +23,27 @@ export const icPunksCustomTokens: Readable<IcPunksCustomToken[]> = derived(
 
 const icPunksDefaultTokensToggleable: Readable<IcPunksCustomToken[]> = derived(
 	[icPunksDefaultTokens, icPunksCustomTokens],
-	([$icPunksDefaultTokens, $icPunksCustomTokens]) =>
-		$icPunksDefaultTokens.map(({ canisterId, ...rest }) => {
-			const customToken = $icPunksCustomTokens.find(
-				({ canisterId: canisterIdCustomToken }) => canisterIdCustomToken === canisterId
-			);
+	([$icPunksDefaultTokens, $icPunksCustomTokens]) => {
+		const customTokenByCanisterId = new Map(
+			$icPunksCustomTokens.map((token) => [token.canisterId, token])
+		);
 
-			return mapDefaultTokenToToggleable<IcPunksToken>({
+		return $icPunksDefaultTokens.map(({ canisterId, ...rest }) =>
+			mapDefaultTokenToToggleable<IcPunksToken>({
 				defaultToken: { canisterId, ...rest },
-				customToken
-			});
-		})
+				customToken: customTokenByCanisterId.get(canisterId)
+			})
+		);
+	}
 );
 
 const icPunksCustomTokensToggleable: Readable<IcPunksCustomToken[]> = derived(
 	[icPunksCustomTokens, icPunksDefaultTokensCanisterIds],
-	([$icPunksCustomTokens, $icPunksDefaultTokensCanisterIds]) =>
-		$icPunksCustomTokens.filter(
-			({ canisterId }) => !$icPunksDefaultTokensCanisterIds.includes(canisterId)
-		)
+	([$icPunksCustomTokens, $icPunksDefaultTokensCanisterIds]) => {
+		const defaultCanisterIds = new Set($icPunksDefaultTokensCanisterIds);
+
+		return $icPunksCustomTokens.filter(({ canisterId }) => !defaultCanisterIds.has(canisterId));
+	}
 );
 
 export const icPunksTokens: Readable<IcPunksCustomToken[]> = derived(

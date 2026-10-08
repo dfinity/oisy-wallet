@@ -6,4 +6,4 @@ import type { Nullish } from '@dfinity/zod-schemas';
 export const isNullishOrEmpty = (value: OptionString): value is Nullish<''> => isEmptyString(value);
 
 export const invalidAmount = (amount: OptionAmount): boolean =>
-	isNullish(amount) || Number(amount) < 0;
+	isNullish(amount) || (typeof amount === 'string' && isEmptyString(amount)) || Number(amount) < 0;

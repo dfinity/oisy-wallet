@@ -1,9 +1,11 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { token } from '$lib/stores/token.store';
 import SolTransactionsScroll from '$sol/components/transactions/SolTransactionsScroll.svelte';
-import { loadNextSolTransactions } from '$sol/services/sol-transactions.services';
+import { loadOlderSolTokenTransactions } from '$sol/services/sol-history-pagers.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	IntersectionObserverActive,
 	IntersectionObserverPassive
@@ -11,10 +13,10 @@ import {
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 
-vi.mock('$sol/services/sol-transactions.services', () => ({
-	loadNextSolTransactions: vi.fn()
+vi.mock('$sol/services/sol-history-pagers.services', () => ({
+	loadOlderSolTokenTransactions: vi.fn()
 }));
 
 describe('SolTransactionsScroll', () => {
@@ -24,8 +26,6 @@ describe('SolTransactionsScroll', () => {
 		...tx,
 		from: mockSolAddress
 	}));
-
-	const mockLastSignature = mockTransactions[mockTransactions.length - 1].signature;
 
 	beforeAll(() => {
 		Object.defineProperty(window, 'IntersectionObserver', {
@@ -37,6 +37,10 @@ describe('SolTransactionsScroll', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		vi.mocked(loadOlderSolTokenTransactions).mockResolvedValue({ success: false });
+
+		mockAuthStore();
 
 		token.set(mockToken);
 
@@ -54,13 +58,12 @@ describe('SolTransactionsScroll', () => {
 	afterAll(() => (global.IntersectionObserver = IntersectionObserverPassive));
 
 	describe('when the infinite scroll is triggered', () => {
-		it('should load next transactions', () => {
+		it('should page the token through its own pager, without a cursor of its own making', () => {
 			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
 
-			expect(loadNextSolTransactions).toHaveBeenCalledOnce();
-			expect(loadNextSolTransactions).toHaveBeenNthCalledWith(1, {
+			expect(loadOlderSolTokenTransactions).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
 				token: mockToken,
-				before: mockLastSignature,
 				signalEnd: expect.any(Function)
 			});
 		});
@@ -70,7 +73,7 @@ describe('SolTransactionsScroll', () => {
 
 			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
 
-			expect(loadNextSolTransactions).not.toHaveBeenCalled();
+			expect(loadOlderSolTokenTransactions).not.toHaveBeenCalled();
 		});
 
 		it('should not load next transactions if the transactions store is nullish', () => {
@@ -78,16 +81,48 @@ describe('SolTransactionsScroll', () => {
 
 			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
 
-			expect(loadNextSolTransactions).not.toHaveBeenCalled();
+			expect(loadOlderSolTokenTransactions).not.toHaveBeenCalled();
 		});
 
-		it('should not load next transactions if the transactions store is empty', () => {
+		// The worker's first page holds the network's newest transactions only, which can include none
+		// of this token's: an empty list it posted is where the token's own history starts.
+		it('should load the token history when the worker posted an empty list', () => {
 			solTransactionsStore.reset(mockToken.id);
 			solTransactionsStore.prepend({ tokenId: mockToken.id, transactions: [] });
 
 			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
 
-			expect(loadNextSolTransactions).not.toHaveBeenCalled();
+			expect(loadOlderSolTokenTransactions).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				token: mockToken,
+				signalEnd: expect.any(Function)
+			});
+		});
+
+		// Neither rows the micro-transaction filter hides nor a round of pages that wrote no row move
+		// the end of the list, so only the pager's result asks for the next round.
+		it('should ask again after a round the pager got through, even when the list stays empty', async () => {
+			solTransactionsStore.reset(mockToken.id);
+			solTransactionsStore.prepend({ tokenId: mockToken.id, transactions: [] });
+
+			vi.mocked(loadOlderSolTokenTransactions).mockResolvedValueOnce({ success: true });
+
+			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
+
+			await waitFor(() => expect(loadOlderSolTokenTransactions).toHaveBeenCalledTimes(2));
+		});
+
+		it('should not ask again at once after a failed page', async () => {
+			vi.mocked(loadOlderSolTokenTransactions).mockResolvedValue({
+				success: false,
+				err: new Error('getSignaturesForAddress failed')
+			});
+
+			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
+
+			await new Promise((resolve) => setTimeout(resolve, 0));
+
+			expect(loadOlderSolTokenTransactions).toHaveBeenCalledOnce();
 		});
 	});
 });

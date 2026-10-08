@@ -1,11 +1,13 @@
 import {
 	transferDip721,
 	transferExtV2,
-	transferIcPunks
+	transferIcPunks,
+	transferIcrc7
 } from '$icp/services/nft-transfer.services';
 import { isTokenDip721 } from '$icp/utils/dip721.utils';
 import { isTokenExt } from '$icp/utils/ext.utils';
 import { isTokenIcPunks } from '$icp/utils/icpunks.utils';
+import { isTokenIcrc7 } from '$icp/utils/icrc7.utils';
 import type { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import type { SendNftCommonParams, TransferParams } from '$lib/types/send';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
@@ -56,6 +58,16 @@ export const sendNft = async ({
 				canisterId: token.canisterId,
 				to: Principal.fromText(to),
 				tokenIdentifier: BigInt(tokenId),
+				progress
+			});
+		}
+
+		if (isTokenIcrc7(token)) {
+			await transferIcrc7({
+				identity,
+				canisterId: token.canisterId,
+				to: Principal.fromText(to),
+				tokenId: BigInt(tokenId),
 				progress
 			});
 		}

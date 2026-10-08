@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
@@ -16,6 +15,7 @@
 	} from '$eth/stores/eth-fee.store';
 	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
+	import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import {
 		ckErc20HelperContractAddress,
@@ -34,12 +34,14 @@
 	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 	import { WizardStepsConvert } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -165,9 +167,11 @@
 				name: TRACK_COUNT_CONVERT_ETH_TO_CKETH_ERROR
 			});
 
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
-				err
+			toastEthereumTransactionError({
+				err,
+				fallbackMsg: $i18n.send.error.unexpected,
+				token: $sourceToken,
+				context: PLAUSIBLE_EVENT_CONTEXTS.CONVERT
 			});
 
 			back();

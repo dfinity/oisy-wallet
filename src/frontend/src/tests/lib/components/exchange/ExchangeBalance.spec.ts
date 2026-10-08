@@ -13,6 +13,7 @@ import { HERO_CONTEXT_KEY, initHeroContext, type HeroContext } from '$lib/stores
 import type { TokenUi } from '$lib/types/token-ui';
 import * as formatUtils from '$lib/utils/format.utils';
 import * as privacyUtils from '$lib/utils/privacy.utils';
+import en from '$tests/mocks/i18n.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -94,7 +95,7 @@ describe('ExchangeBalance', () => {
 		it('should render "Your balance" label when balances are not all zero', () => {
 			const { getByText } = renderComponent();
 
-			expect(getByText('Your balance')).toBeInTheDocument();
+			expect(getByText(en.hero.text.available_balance)).toBeInTheDocument();
 		});
 
 		it('should render "Top up your wallet" label when all balances are zero', () => {
@@ -102,13 +103,13 @@ describe('ExchangeBalance', () => {
 
 			const { getByText } = renderComponent();
 
-			expect(getByText('Top up your wallet to start using it!')).toBeInTheDocument();
+			expect(getByText(en.hero.text.top_up)).toBeInTheDocument();
 		});
 
 		it('should render "hidden balance" message when hideBalance is true', () => {
 			const { getByText } = renderComponent({ hideBalance: true });
 
-			expect(getByText('Your balance is hidden')).toBeInTheDocument();
+			expect(getByText(en.hero.text.hidden_balance)).toBeInTheDocument();
 		});
 	});
 
@@ -380,6 +381,74 @@ describe('ExchangeBalance', () => {
 			const { getByText } = renderComponent();
 
 			expect(getByText('$0.00')).toBeInTheDocument();
+		});
+	});
+
+	// Which providers contribute, and their feature gating, is `providersUsdBalance`' own concern
+	// (covered in balances.derived.spec). Here we only assert the hero adds it to the token total.
+	describe('provider-held value', () => {
+		beforeEach(() => {
+			mockHeroContext.loading.set(false);
+		});
+
+		it('should add the provider-held value to the total', () => {
+			vi.spyOn(balancesDerived, 'providersUsdBalance', 'get').mockReturnValue(staticStore(500));
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$835.00')).toBeInTheDocument();
+		});
+
+		it('should deduct a negative provider-held value (net debt) from the total', () => {
+			vi.spyOn(balancesDerived, 'providersUsdBalance', 'get').mockReturnValue(staticStore(-100));
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$235.00')).toBeInTheDocument();
+		});
+
+		it('should exclude the provider-held value when an asset type is selected on the tokens route', () => {
+			vi.spyOn(balancesDerived, 'providersUsdBalance', 'get').mockReturnValue(staticStore(500));
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(TokenCategoryTagValue.COMPUTE as TokenCategoryTagValue | undefined)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$0.00')).toBeInTheDocument();
+		});
+
+		it('should include the provider-held value when all asset types are selected on the tokens route', () => {
+			vi.spyOn(balancesDerived, 'providersUsdBalance', 'get').mockReturnValue(staticStore(500));
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(undefined)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$835.00')).toBeInTheDocument();
+		});
+
+		it('should include the provider-held value outside the tokens route even if an asset type is selected', () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Earning}` });
+
+			vi.spyOn(balancesDerived, 'providersUsdBalance', 'get').mockReturnValue(staticStore(500));
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(TokenCategoryTagValue.COMPUTE as TokenCategoryTagValue | undefined)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$835.00')).toBeInTheDocument();
 		});
 	});
 });

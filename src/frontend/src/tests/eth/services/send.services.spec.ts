@@ -35,6 +35,7 @@ vi.mock('$eth/providers/infura-cketh.providers', () => ({
 }));
 
 vi.mock('$eth/providers/infura-erc20.providers', () => ({
+	InfuraErc20Provider: vi.fn(class {}),
 	infuraErc20Providers: vi.fn(() => ({
 		populateTransaction: vi.fn().mockResolvedValue({ data: '0xerc20data' })
 	}))

@@ -1,0 +1,20 @@
+[
+	{
+		"id": "liquidium",
+		"type": "lending",
+		"titles": ["earning.cards.liquidium.title"],
+		"description": "earning.cards.liquidium.description",
+		"logo": "/images/dapps/liquidium-logo.webp",
+		"fields": ["networks", "assets", "currentEarning", "earningPotential"],
+		"actionText": "earning.cards.liquidium.action"
+	},
+	{
+		"id": "harvest-autopilot",
+		"type": "stake",
+		"titles": ["earning.cards.harvest_autopilot.title"],
+		"description": "earning.cards.harvest_autopilot.description",
+		"logo": "/images/dapps/harvest-autopilot-logo.svg",
+		"fields": ["networks", "assets", "currentEarning", "earningPotential"],
+		"actionText": "earning.cards.harvest_autopilot.action"
+	}
+]

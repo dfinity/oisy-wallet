@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { assertNonNullish } from '@dfinity/utils';
+	import { assertNonNullish, nonNullish } from '@dfinity/utils';
 	import type { Identity } from '@icp-sdk/core/agent';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
@@ -49,6 +49,10 @@
 			metadata: {
 				tokenId: `${selectedToken.id.description}`,
 				tokenSymbol: selectedToken.symbol,
+				...(nonNullish(selectedToken.name) && { tokenName: selectedToken.name }),
+				...(nonNullish(selectedToken.standard) && {
+					tokenStandard: selectedToken.standard.code
+				}),
 				address: selectedToken.address,
 				networkId: `${selectedToken.network.id.description}`,
 				source: HIDE_TOKEN_MODAL_ROUTE

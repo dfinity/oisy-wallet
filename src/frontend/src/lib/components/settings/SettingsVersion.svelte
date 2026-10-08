@@ -18,7 +18,7 @@
 	const branch = GIT_BRANCH_NAME;
 </script>
 
-<p class="mt-24 text-center text-xs text-primary">
+<p class="text-center text-xs text-primary">
 	<span class="opacity-50">{OISY_NAME}</span>
 	<ExternalLink
 		ariaLabel={replaceOisyPlaceholders($i18n.settings.alt.github_release)}

@@ -1,5 +1,6 @@
 import InputAddress from '$lib/components/address/InputAddress.svelte';
 import en from '$tests/mocks/i18n.mock';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('InputAddress', () => {
@@ -62,6 +63,29 @@ describe('InputAddress', () => {
 		expect(successMessage).toHaveTextContent('Bitcoin');
 	});
 
+	it('shows success message for valid XRP address', async () => {
+		const { getByPlaceholderText, getByText } = render(InputAddress, defaultProps);
+		const input = getByPlaceholderText('Enter BTC address');
+
+		await fireEvent.input(input, { target: { value: mockXrpAddress } });
+
+		const successMessage = getByText(en.address.form.valid_for_networks, { exact: false });
+
+		expect(successMessage).toHaveClass('text-success-primary');
+		expect(successMessage).toHaveTextContent('XRP Ledger');
+	});
+
+	it('shows error message for an XRP X-address', async () => {
+		const { getByPlaceholderText, getByText } = render(InputAddress, defaultProps);
+		const input = getByPlaceholderText('Enter BTC address');
+
+		await fireEvent.input(input, {
+			target: { value: 'XVPcpSm47b1CZkf5AkKM9a84dQHe3m4sBhsrA4XtnBECTAc' }
+		});
+
+		expect(getByText(en.address.form.invalid_address)).toHaveClass('text-error-primary');
+	});
+
 	it('does not show QR button when onQRCodeScan is not provided', () => {
 		const { queryByRole } = render(InputAddress, defaultProps);
 
@@ -105,16 +129,17 @@ describe('InputAddress', () => {
 		const { getByPlaceholderText, container } = render(InputAddress, defaultProps);
 		const input = getByPlaceholderText('Enter BTC address');
 
-		// Initially, border color should be inherit
-		const initialDiv = container.querySelector('div');
+		const initialDiv = container.querySelector('div') as HTMLElement;
+		const borderColor = () => initialDiv.style.getPropertyValue('--input-custom-border-color');
 
-		expect(initialDiv).toHaveStyle('--input-custom-border-color: inherit');
+		// Initially, border color should be inherit
+		expect(borderColor()).toBe('inherit');
 
 		// Enter an invalid BTC address
 		await fireEvent.input(input, { target: { value: INVALID_BTC_ADDRESS } });
 
 		// Border color should be error color
-		expect(initialDiv).toHaveStyle('--input-custom-border-color: var(--color-border-error-solid)');
+		expect(borderColor()).toBe('var(--color-border-error-solid)');
 
 		// Enter a valid BTC address
 		await fireEvent.input(input, {
@@ -122,9 +147,7 @@ describe('InputAddress', () => {
 		});
 
 		// Border color should be success color
-		expect(initialDiv).toHaveStyle(
-			'--input-custom-border-color: var(--color-border-success-solid)'
-		);
+		expect(borderColor()).toBe('var(--color-border-success-solid)');
 	});
 
 	it('passes through other props to Input component', () => {

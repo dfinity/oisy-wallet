@@ -15,7 +15,9 @@ import {
 } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import type { OptionAmount } from '$lib/types/send';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -415,6 +417,92 @@ describe('SwapForm', () => {
 			});
 
 			expect(container.querySelector('.text-error')).not.toBeInTheDocument();
+		});
+
+		it('should show the generic message without a quote error', () => {
+			setupSwapAmountsStore({
+				amountForSwap: 1,
+				swaps: [],
+				selectedProvider: undefined
+			});
+			setupIcTokenFeeStore();
+
+			const { getByText } = render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					receiveAmount: undefined,
+					slippageValue: undefined,
+					isSwapAmountsLoading: false,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+
+			expect(getByText(en.swap.text.swap_is_not_offered)).toBeInTheDocument();
+		});
+
+		it('should show the provider minimum when the amount was refused as too low', () => {
+			setupSwapAmountsStore({
+				amountForSwap: 1,
+				swaps: [],
+				selectedProvider: undefined,
+				quoteError: { type: 'amount-too-low', minAmount: 8300n }
+			});
+			setupIcTokenFeeStore();
+
+			const { getByText, queryByText } = render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					receiveAmount: undefined,
+					slippageValue: undefined,
+					isSwapAmountsLoading: false,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+
+			expect(
+				getByText(
+					replacePlaceholders(en.swap.text.swap_amount_too_low_minimum, {
+						$amount: '0.000083',
+						$symbol: mockValidIcToken.symbol
+					})
+				)
+			).toBeInTheDocument();
+			expect(queryByText(en.swap.text.swap_is_not_offered)).not.toBeInTheDocument();
+		});
+
+		it('should show the amount-too-low message without a minimum when the provider named none', () => {
+			setupSwapAmountsStore({
+				amountForSwap: 1,
+				swaps: [],
+				selectedProvider: undefined,
+				quoteError: { type: 'amount-too-low' }
+			});
+			setupIcTokenFeeStore();
+
+			const { getByText, queryByText } = render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					receiveAmount: undefined,
+					slippageValue: undefined,
+					isSwapAmountsLoading: false,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+
+			expect(getByText(en.swap.text.swap_amount_too_low)).toBeInTheDocument();
+			expect(queryByText(en.swap.text.swap_is_not_offered)).not.toBeInTheDocument();
 		});
 	});
 

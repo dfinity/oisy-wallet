@@ -1,0 +1,1566 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>OISY — personal notes wireframe</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css"
+		/>
+		<style>
+			:root {
+				/* Matched to the current OISY Contacts modal */
+				--blue: #0b5cff;
+				--blue-soft: #e9eefc;
+				--blue-soft-2: #eef2fe;
+				--grey-soft: #eef0f3;
+				--navy: #16243f;
+				--text: #0c0c0d;
+				--text-secondary: #5f6470;
+				--text-tertiary: #8a8f98;
+				--danger: #d92d20;
+				--surface: #ffffff;
+				--border: #e7e7ea;
+				--disabled-bg: #efeff1;
+				--disabled-text: #b7b7bd;
+				--radius-input: 12px;
+				--radius-panel: 16px;
+				--radius-modal: 24px;
+				--font-sans:
+					-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				padding: 28px 16px 40px;
+				font-family: var(--font-sans);
+				background: #f3f4f6;
+				color: var(--text);
+				line-height: 1.5;
+				/* fixed to the viewport so the stage caps at the window (content scrolls inside) */
+				height: 100vh;
+				display: flex;
+				flex-direction: column;
+			}
+			.wrap {
+				max-width: 720px;
+				width: 100%;
+				margin: 0 auto;
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				min-height: 0;
+			}
+			h1.page {
+				font-size: 18px;
+				font-weight: 600;
+				margin: 0 0 16px;
+				text-align: center;
+			}
+			/* controls */
+			.controls {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				gap: 16px;
+				flex-wrap: wrap;
+				margin: 0 0 16px;
+			}
+			.seg {
+				display: inline-flex;
+				border: 1px solid var(--border);
+				border-radius: 10px;
+				overflow: hidden;
+				background: #fff;
+			}
+			.seg button {
+				border: none;
+				background: transparent;
+				padding: 8px 16px;
+				font: inherit;
+				font-size: 13px;
+				color: var(--text-secondary);
+				cursor: pointer;
+			}
+			.seg button.on {
+				background: var(--blue-soft);
+				color: var(--blue);
+				font-weight: 600;
+			}
+			.toggle {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				font-size: 13px;
+				color: var(--text-secondary);
+				cursor: pointer;
+			}
+			/* stage — desktop: stretches to fill the remaining window height */
+			.stage {
+				position: relative;
+				overflow: hidden;
+				flex: 1;
+				min-height: 0;
+				background: rgba(40, 44, 52, 0.55);
+				border-radius: 16px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				padding: 24px;
+			}
+			/* dimmed app behind the menu/modal */
+			.appbg {
+				position: absolute;
+				inset: 0;
+			}
+			.avatar {
+				position: absolute;
+				top: 16px;
+				right: 16px;
+				width: 46px;
+				height: 46px;
+				border-radius: 12px;
+				background: #fff;
+				border: 2px solid var(--blue);
+				display: grid;
+				place-items: center;
+				cursor: pointer;
+				z-index: 20;
+				color: var(--text);
+			}
+			/* user menu popover */
+			.menu {
+				position: absolute;
+				top: 72px;
+				right: 16px;
+				width: 320px;
+				max-height: calc(100% - 88px);
+				overflow: auto;
+				background: #fff;
+				border-radius: 22px;
+				box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+				padding: 14px;
+				z-index: 30;
+			}
+			.mi {
+				display: flex;
+				align-items: center;
+				gap: 14px;
+				padding: 12px 10px;
+				border-radius: 12px;
+				font-size: 16px;
+				color: var(--text);
+			}
+			.mi .mi-ic {
+				font-size: 20px;
+				width: 24px;
+				text-align: center;
+			}
+			.mi .mi-right {
+				margin-left: auto;
+				color: var(--text-tertiary);
+				font-size: 13px;
+				font-weight: 700;
+			}
+			.mi.click {
+				cursor: pointer;
+			}
+			.mi.click:hover {
+				background: var(--blue-soft);
+			}
+			.mi.notes {
+				background: var(--blue-soft);
+			}
+			.mi-tag {
+				margin-left: auto;
+				border: 1px solid var(--border);
+				border-radius: 6px;
+				font-size: 12px;
+				padding: 1px 7px;
+				color: var(--text-secondary);
+			}
+			.mi-sep {
+				height: 1px;
+				background: var(--border);
+				margin: 8px 6px;
+			}
+			.appearance {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				padding: 14px 10px;
+				color: var(--text-tertiary);
+				font-size: 16px;
+			}
+			.appearance .seg3 {
+				margin-left: auto;
+				display: inline-flex;
+				border: 1px solid var(--border);
+				border-radius: 10px;
+				overflow: hidden;
+			}
+			.appearance .seg3 span {
+				padding: 8px 12px;
+				font-size: 14px;
+			}
+			.appearance .seg3 .on {
+				background: var(--blue);
+				color: #fff;
+			}
+			.menu-actions {
+				display: flex;
+				gap: 12px;
+				padding: 6px 6px 2px;
+			}
+			.menu-actions .lock {
+				flex: 1;
+				border: 1px solid var(--border);
+				border-radius: 999px;
+				padding: 14px;
+				text-align: center;
+				font-weight: 700;
+				background: #fff;
+				color: var(--text);
+			}
+			.menu-actions .logout {
+				flex: 1;
+				border: none;
+				border-radius: 999px;
+				padding: 14px;
+				text-align: center;
+				font-weight: 700;
+				background: #111;
+				color: #fff;
+			}
+			.menu-expires {
+				text-align: center;
+				color: var(--text-tertiary);
+				font-size: 13px;
+				padding: 10px 0 4px;
+			}
+			.menu-foot {
+				display: flex;
+				justify-content: center;
+				gap: 14px;
+				font-size: 12px;
+				color: var(--text-secondary);
+				padding-top: 8px;
+			}
+			.menu-foot u {
+				cursor: default;
+			}
+			.modal {
+				width: 100%;
+				max-width: 480px;
+				/* Size to content, but: at least a comfortable minimum (so short notes/lists
+				   aren't squat), and at most 75% of the window for big content (then the body
+				   scrolls inside). Both are clamped to the available space (100% of the stage),
+				   so on short screens the window/padding wins. */
+				height: auto;
+				min-height: min(560px, 100%);
+				max-height: min(75vh, 100%);
+				background: var(--surface);
+				border-radius: var(--radius-modal);
+				overflow: hidden;
+				box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+				transition: max-width 0.2s ease;
+				/* Fixed height so the list scrolls inside; header/footer stay pinned. */
+				display: flex;
+				flex-direction: column;
+				/* sit above the full-bleed appbg backdrop */
+				position: relative;
+				z-index: 10;
+			}
+			.modal-body {
+				flex: 1;
+				min-height: 0;
+				overflow: auto;
+			}
+			/* Mobile: fixed phone width, but dynamic height like desktop (fills the window,
+			   ends above the bottom); the full-page modal fills it and scrolls internally. */
+			.stage.mobile {
+				width: min(390px, 100%);
+				max-width: 390px;
+				margin: 0 auto;
+				padding: 0;
+				align-items: stretch;
+				justify-content: stretch;
+			}
+			.modal.fullpage {
+				max-width: none;
+				width: 100%;
+				height: 100%;
+				/* mobile fills the phone frame — ignore the desktop min/max caps */
+				min-height: 0;
+				max-height: none;
+				border-radius: 0;
+				box-shadow: none;
+				display: flex;
+				flex-direction: column;
+			}
+			.modal.fullpage .modal-body {
+				flex: 1;
+				overflow: auto;
+			}
+			.grip-bar {
+				display: none;
+			}
+			.modal.fullpage .grip-bar {
+				display: block;
+				width: 120px;
+				height: 5px;
+				border-radius: 3px;
+				background: var(--border);
+				margin: 8px auto 12px;
+			}
+			.modal-head {
+				position: relative;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				padding: 20px 22px;
+				border-bottom: 1px solid var(--border);
+			}
+			.modal-head .title {
+				font-size: 22px;
+				font-weight: 700;
+			}
+			.modal-head .x {
+				position: absolute;
+				right: 18px;
+				border: none;
+				background: transparent;
+				font-size: 22px;
+				line-height: 1;
+				color: var(--text);
+				cursor: pointer;
+				padding: 4px;
+			}
+			.modal-body {
+				padding: 22px;
+			}
+			.modal-foot {
+				border-top: 1px solid var(--border);
+				padding: 16px 22px 22px;
+				display: flex;
+				gap: 14px;
+			}
+			/* buttons */
+			.btn {
+				font: inherit;
+				font-weight: 700;
+				border-radius: 999px;
+				padding: 16px 22px;
+				border: none;
+				cursor: pointer;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				gap: 10px;
+			}
+			.btn-primary {
+				background: var(--blue);
+				color: #fff;
+			}
+			.btn-soft {
+				background: var(--blue-soft);
+				color: var(--blue);
+			}
+			.btn-disabled {
+				background: var(--disabled-bg);
+				color: var(--disabled-text);
+				cursor: not-allowed;
+			}
+			.btn-block {
+				width: 100%;
+			}
+			.btn .circle {
+				width: 22px;
+				height: 22px;
+				border-radius: 50%;
+				border: 2px solid currentColor;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 13px;
+			}
+			.foot-half {
+				flex: 1;
+			}
+			/* empty state */
+			/* Empty state fills the body: illustration centered, info box pinned bottom */
+			.empty-page {
+				display: flex;
+				flex-direction: column;
+				min-height: 100%;
+			}
+			.empty {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+				padding: 10px 8px;
+			}
+			.empty .mark {
+				width: 84px;
+				height: 84px;
+				border-radius: 20px;
+				background: var(--grey-soft);
+				color: #3b4a6b;
+				display: grid;
+				place-items: center;
+				margin: 0 auto 22px;
+				font-size: 36px;
+			}
+			.empty .h {
+				font-size: 24px;
+				font-weight: 700;
+				letter-spacing: -0.3px;
+				color: var(--navy);
+				margin-bottom: 12px;
+			}
+			.empty .p {
+				font-size: 16px;
+				color: var(--text-secondary);
+				line-height: 1.5;
+				max-width: 360px;
+				margin: 0 0 30px;
+			}
+			/* list */
+			.list-toolbar {
+				display: flex;
+				gap: 12px;
+				margin-bottom: 18px;
+			}
+			.search {
+				position: relative;
+				flex: 1;
+			}
+			.search input {
+				width: 100%;
+				font: inherit;
+				font-size: 15px;
+				padding: 14px 42px 14px 16px;
+				border: 1.5px solid var(--blue);
+				border-radius: var(--radius-input);
+				color: var(--text);
+				background: #fff;
+			}
+			.search input::placeholder {
+				color: var(--text-tertiary);
+			}
+			.search .mag {
+				position: absolute;
+				right: 10px;
+				top: 50%;
+				transform: translateY(-50%);
+				color: var(--text);
+				font-size: 18px;
+				border: none;
+				background: transparent;
+				padding: 4px;
+				line-height: 1;
+				cursor: pointer;
+				display: inline-flex;
+			}
+			.add-pill {
+				flex: none;
+				background: var(--blue);
+				color: #fff;
+				border: none;
+				border-radius: var(--radius-input);
+				padding: 0 18px;
+				font: inherit;
+				font-weight: 700;
+				cursor: pointer;
+				display: inline-flex;
+				align-items: center;
+				gap: 8px;
+				white-space: nowrap;
+			}
+			.add-pill:disabled {
+				background: var(--disabled-bg);
+				color: var(--disabled-text);
+				cursor: not-allowed;
+			}
+			.note-row {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				padding: 12px 8px;
+				border-radius: 12px;
+				cursor: pointer;
+			}
+			.note-row:hover {
+				background: var(--grey-soft);
+			}
+			.note-row .mid {
+				flex: 1;
+				min-width: 0;
+			}
+			.note-row .chev {
+				flex: none;
+				color: var(--text-tertiary);
+				font-size: 18px;
+			}
+			.note-row .body {
+				font-size: 16px;
+				font-weight: 600;
+				color: var(--text);
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+			.note-row .sub {
+				font-size: 14px;
+				font-weight: 400;
+				color: var(--text-secondary);
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				margin-top: 2px;
+			}
+			.note-row .time {
+				font-size: 13px;
+				color: var(--text-tertiary);
+				margin-top: 3px;
+			}
+			.note-row .acts {
+				display: flex;
+				gap: 6px;
+				flex: none;
+			}
+			.iconbtn {
+				border: none;
+				background: transparent;
+				cursor: pointer;
+				padding: 6px;
+				font-size: 18px;
+				line-height: 1;
+				color: var(--text-secondary);
+			}
+			.iconbtn.danger {
+				color: var(--danger);
+			}
+			/* read-only view mode */
+			.view-wrap {
+				display: flex;
+				flex-direction: column;
+				flex: 1;
+				min-height: 0;
+			}
+			/* in view mode, the body is a flex column so the note box scrolls (not the body) */
+			.modal.is-view .modal-body {
+				display: flex;
+				flex-direction: column;
+				overflow: hidden;
+			}
+			.note-box {
+				border: 1px solid var(--border);
+				border-radius: 14px;
+				padding: 16px 18px;
+				min-height: 124px; /* ~4 rows so the note area is always clear */
+				background: var(--surface);
+				flex: 1 1 auto;
+				overflow: auto;
+			}
+			.note-box .nv-title {
+				font-size: 16px;
+				font-weight: 700;
+				color: var(--navy);
+				line-height: 1.5;
+				white-space: pre-wrap;
+				word-break: break-word;
+			}
+			.note-box .nv-body {
+				font-size: 15px;
+				line-height: 1.6;
+				color: var(--text);
+				white-space: pre-wrap;
+				word-break: break-word;
+				margin-top: 8px;
+			}
+			.note-box a {
+				color: var(--blue);
+				text-decoration: underline;
+				word-break: break-all;
+			}
+			.view-meta {
+				font-size: 13px;
+				color: var(--text-tertiary);
+				margin-top: 18px;
+			}
+			.view-actions {
+				display: flex;
+				flex-direction: column;
+				gap: 6px;
+				margin-top: 24px;
+			}
+			.cap-banner {
+				display: flex;
+				align-items: flex-start;
+				gap: 8px;
+				background: #fdeceb;
+				color: var(--danger);
+				border-radius: var(--radius-input);
+				padding: 12px 14px;
+				font-size: 13px;
+				margin-bottom: 16px;
+			}
+			/* Pinned snackbar — floats above the list/Close, never lost to scroll */
+			.toast-pinned {
+				position: absolute;
+				left: 50%;
+				bottom: 20px;
+				transform: translateX(-50%);
+				width: calc(100% - 36px);
+				max-width: 420px;
+				z-index: 50;
+				pointer-events: none;
+			}
+			.toast-pinned .toast {
+				opacity: 0;
+				transform: translateY(10px);
+				transition:
+					opacity 0.2s ease,
+					transform 0.2s ease;
+				box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+				pointer-events: auto;
+			}
+			.toast-pinned.show .toast {
+				opacity: 1;
+				transform: translateY(0);
+			}
+			.toast {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				background: #16181d;
+				color: #fff;
+				border-radius: var(--radius-input);
+				padding: 12px 16px;
+				font-size: 14px;
+			}
+			.toast .undo {
+				color: #9ec0ff;
+				font-weight: 700;
+				background: none;
+				border: none;
+				cursor: pointer;
+				font-size: 14px;
+			}
+			/* form */
+			.panel {
+				background: var(--blue-soft-2);
+				border-radius: var(--radius-panel);
+				padding: 22px;
+			}
+			.panel .label {
+				font-size: 15px;
+				font-weight: 700;
+				margin-bottom: 10px;
+			}
+			.field {
+				position: relative;
+			}
+			.field textarea {
+				width: 100%;
+				min-height: 120px;
+				resize: vertical;
+				font: inherit;
+				font-size: 16px;
+				padding: 14px 16px;
+				border: 1.5px solid var(--blue);
+				border-radius: var(--radius-input);
+				background: #fff;
+				color: var(--text);
+			}
+			.field textarea:focus {
+				outline: none;
+				box-shadow: 0 0 0 3px rgba(11, 92, 255, 0.15);
+			}
+			.helper {
+				font-size: 13px;
+				color: var(--text-tertiary);
+				margin-top: 12px;
+			}
+			.created-line {
+				font-size: 13px;
+				color: var(--text-secondary);
+				margin-top: 12px;
+			}
+			/* Separate "OISY protects you!" privacy info box, after the Note panel */
+			.infobox {
+				display: flex;
+				align-items: flex-start;
+				gap: 12px;
+				background: var(--grey-soft);
+				border-radius: var(--radius-panel);
+				padding: 16px 18px;
+				margin-top: 14px;
+				font-size: 14px;
+				line-height: 1.5;
+				color: var(--navy);
+			}
+			.infobox .ico {
+				color: #16a34a;
+				font-size: 20px;
+				line-height: 1;
+				flex: none;
+				margin-top: 1px;
+			}
+			.infobox .learn {
+				color: var(--blue);
+				font-weight: 600;
+				text-decoration: none;
+				white-space: nowrap;
+			}
+			.demo-note {
+				font-size: 11px;
+				color: var(--text-tertiary);
+				margin-top: 4px;
+			}
+			.err {
+				font-size: 13px;
+				color: var(--danger);
+				margin-top: 10px;
+			}
+			.form-delete {
+				display: inline-flex;
+				align-items: center;
+				gap: 8px;
+				border: none;
+				background: transparent;
+				color: var(--danger);
+				font: inherit;
+				font-weight: 700;
+				cursor: pointer;
+				margin-top: 18px;
+				padding: 4px 0;
+			}
+			/* mobile bottom sheet */
+			.overlay {
+				position: absolute;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.35);
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity 0.2s;
+			}
+			.sheet {
+				position: absolute;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background: var(--surface);
+				border-radius: var(--radius-modal) var(--radius-modal) 0 0;
+				padding: 16px 20px 24px;
+				transform: translateY(120%);
+				transition: transform 0.25s;
+			}
+			.sheet .grip {
+				width: 38px;
+				height: 4px;
+				border-radius: 2px;
+				background: var(--border);
+				margin: 0 auto 14px;
+			}
+			.sheet .sheet-title {
+				font-size: 18px;
+				font-weight: 700;
+				margin-bottom: 14px;
+				text-align: center;
+			}
+			.foot-note {
+				font-size: 12px;
+				color: var(--text-tertiary);
+				margin-top: 16px;
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wrap">
+			<h1 class="page">OISY — Notes modal (wireframe, styled to current Contacts)</h1>
+
+			<div class="controls">
+				<div class="seg" role="group" aria-label="Device">
+					<button id="dev-desktop" class="on" data-dev="desktop">
+						<i class="ti ti-device-desktop" aria-hidden="true"></i>&nbsp; Desktop
+					</button>
+					<button id="dev-mobile" data-dev="mobile">
+						<i class="ti ti-device-mobile" aria-hidden="true"></i>&nbsp; Mobile
+					</button>
+				</div>
+				<label class="toggle"><input type="checkbox" id="cap" /> Simulate: at note cap</label>
+				<button
+					class="seg"
+					id="seed-test"
+					style="padding: 8px 14px; font-size: 13px; cursor: pointer"
+				>
+					<i class="ti ti-flask" aria-hidden="true"></i>&nbsp; Load test notes
+				</button>
+				<button class="seg" id="reset" style="padding: 8px 14px; font-size: 13px; cursor: pointer">
+					<i class="ti ti-refresh" aria-hidden="true"></i>&nbsp; Reset
+				</button>
+			</div>
+
+			<div class="stage" id="stage">
+				<!-- dimmed app behind; click it to dismiss the menu/modal -->
+				<div class="appbg" id="appbg"></div>
+				<button class="avatar" data-action="toggle-menu" aria-label="User menu">
+					<i class="ti ti-user" style="font-size: 24px"></i>
+				</button>
+
+				<!-- user menu popover (start state) -->
+				<div class="menu" id="menu">
+					<div class="mi click">
+						<span class="mi-ic"><i class="ti ti-coins"></i></span> Your addresses
+					</div>
+					<div class="mi click">
+						<span class="mi-ic"><i class="ti ti-users"></i></span> Contacts
+					</div>
+					<div class="mi click notes" data-action="open-notes">
+						<span class="mi-ic"><i class="ti ti-note"></i></span> Notes
+					</div>
+					<div class="mi click">
+						<span class="mi-ic"><i class="ti ti-eye-off"></i></span> Hide balances
+						<span class="mi-tag">P</span>
+					</div>
+					<div class="mi-sep"></div>
+					<div class="mi click">
+						<span class="mi-ic"><i class="ti ti-maximize"></i></span> WalletConnect
+						<span class="mi-right"><i class="ti ti-wifi"></i></span>
+					</div>
+					<div class="mi click">
+						<span class="mi-ic"><i class="ti ti-maximize"></i></span> OISY PAY
+						<span class="mi-right">PAY</span>
+					</div>
+					<div class="mi-sep"></div>
+					<div class="mi click">
+						<span class="mi-ic"><i class="ti ti-share"></i></span> Refer your friends
+					</div>
+					<div class="mi click">
+						<span class="mi-ic"><i class="ti ti-help-circle"></i></span> Support
+						<span class="mi-right"><i class="ti ti-external-link"></i></span>
+					</div>
+					<div class="mi-sep"></div>
+					<div class="appearance">
+						<span class="mi-ic"><i class="ti ti-sun-moon"></i></span> Appearance
+						<span class="seg3"
+							><span class="on"><i class="ti ti-contrast"></i></span
+							><span><i class="ti ti-moon"></i></span><span><i class="ti ti-sun"></i></span
+						></span>
+					</div>
+					<div class="mi-sep"></div>
+					<div class="menu-actions">
+						<span class="lock">Lock 🔒</span><span class="logout">Log out →</span>
+					</div>
+					<div class="menu-expires">Expires in 59 minutes</div>
+					<div class="mi-sep"></div>
+					<div class="menu-foot">
+						<u>Terms of Use</u><u>Privacy Policy</u><u>License Agreement</u>
+					</div>
+				</div>
+
+				<div class="modal" id="modal">
+					<div class="modal-head">
+						<span class="title" id="modal-title">Notes</span>
+						<button class="x" id="modal-x" data-action="close-modal" aria-label="Close">
+							<i class="ti ti-x"></i>
+						</button>
+					</div>
+					<div class="modal-body" id="modal-body"></div>
+					<div class="modal-foot" id="modal-foot"></div>
+					<div class="grip-bar"></div>
+				</div>
+
+				<div class="toast-pinned" id="toast"></div>
+			</div>
+		</div>
+
+		<script>
+			(function () {
+				var MAX = 100;
+				var CAPMSG =
+					"You've reached the maximum of 1,000 saved notes. Delete one to add a new note.";
+
+				// Start in the empty "no notes" state. Use "Add new note" to create one;
+				// each note row then shows a pencil (edit) and trash (delete) action.
+				var seed = [];
+
+				// Each note carries created/updated display labels + an `edited` flag.
+				// (Real app stores UTC epoch-ns created_at/updated_at; these are the
+				// already-formatted local-time labels for the mock.)
+				function cloneNote(n) {
+					return {
+						id: n.id,
+						text: n.text,
+						created: n.created || 'just now',
+						updated: n.updated || n.created || 'just now',
+						edited: !!n.edited
+					};
+				}
+
+				var state;
+				function reset() {
+					state = {
+						device: 'desktop',
+						atCap: false,
+						menuOpen: true, // start on the user menu
+						modalOpen: false, // Notes modal opens from the menu
+						screen: 'list', // 'list' | 'form'
+						editingId: null, // null => add
+						draft: '',
+						search: '',
+						notes: seed.map(cloneNote),
+						justDeleted: null // {note} for undo
+					};
+				}
+				reset();
+
+				var modal = document.getElementById('modal');
+				var titleEl = document.getElementById('modal-title');
+				var bodyEl = document.getElementById('modal-body');
+				var footEl = document.getElementById('modal-foot');
+				var stage = document.getElementById('stage');
+				var menuEl = document.getElementById('menu');
+				var toastEl = document.getElementById('toast');
+				var toastTimer = null;
+
+				function esc(s) {
+					return (s || '')
+						.replace(/&/g, '&amp;')
+						.replace(/</g, '&lt;')
+						.replace(/>/g, '&gt;')
+						.replace(/"/g, '&quot;')
+						.replace(/'/g, '&#39;');
+				}
+
+				// "OISY protects you!" privacy info box — shown in the editor and on the
+				// empty state so users know notes are private before creating one.
+				function privacyBox() {
+					return (
+						'<div class="infobox">' +
+						'<span class="ico"><i class="ti ti-shield-check" aria-hidden="true"></i></span>' +
+						'<div><strong>OISY protects you!</strong> Only you can see your notes, stored encrypted in OISY. <a href="#" class="learn" onclick="return false">Learn more</a></div>' +
+						'</div>'
+					);
+				}
+
+				/* ---------- list / empty ---------- */
+				function filteredNotes() {
+					var q = state.search.trim().toLowerCase();
+					if (!q) return state.notes;
+					return state.notes.filter(function (n) {
+						return n.text.toLowerCase().indexOf(q) !== -1;
+					});
+				}
+
+				// A never-edited note shows its creation time; an edited note shows the
+				// last-updated time. (All times render in the user's local timezone.)
+				function metaLine(n) {
+					return n.edited ? 'Updated ' + n.updated : 'Created ' + n.created;
+				}
+				// View shows the created date, plus the updated time once edited.
+				function fullMeta(n) {
+					return 'Created ' + n.created + (n.edited ? ' · Updated ' + n.updated : '');
+				}
+
+				// Safe linkify: escape everything, then turn only http(s) URLs into links
+				// that open a new tab. Anchors are built from escaped text, never {@html}
+				// of raw input; this is wireframe-only — the real app does this in Svelte.
+				function linkify(text) {
+					var t = text || '';
+					var re = /(https?:\/\/[^\s]+)/g;
+					var out = '';
+					var last = 0;
+					var m;
+					while ((m = re.exec(t)) !== null) {
+						out += esc(t.slice(last, m.index));
+						// trim trailing sentence punctuation off the URL
+						var url = m[0].replace(/[.,;:!?)\]}'"]+$/, '');
+						out +=
+							'<a href="' +
+							esc(url) +
+							'" target="_blank" rel="noopener noreferrer">' +
+							esc(url) +
+							'</a>';
+						out += esc(m[0].slice(url.length));
+						last = m.index + m[0].length;
+					}
+					out += esc(t.slice(last));
+					return out;
+				}
+
+				// Preview = first line as a bold title (1 line, ellipsis); the remaining
+				// lines collapse (newlines/whitespace → single space) into a lighter 2nd
+				// line (1 line, ellipsis).
+				function notePreview(text) {
+					var t = text || '';
+					var nl = t.indexOf('\n');
+					var title = (nl === -1 ? t : t.slice(0, nl)).trim();
+					var rest = (nl === -1 ? '' : t.slice(nl + 1)).replace(/\s+/g, ' ').trim();
+					// If the note starts with blank line(s), fall back to the first non-empty content as title.
+					if (!title && rest) {
+						title = rest;
+						rest = '';
+					}
+					return { title: title, rest: rest };
+				}
+
+				function rowHtml(n) {
+					var p = notePreview(n.text);
+					// The whole row opens the read-only view (edit/delete live there).
+					return (
+						'<div class="note-row" data-action="view" data-id="' +
+						n.id +
+						'" role="button" tabindex="0">' +
+						'<div class="mid">' +
+						'<div class="body">' +
+						esc(p.title) +
+						'</div>' +
+						(p.rest ? '<div class="sub">' + esc(p.rest) + '</div>' : '') +
+						'<div class="time">' +
+						esc(metaLine(n)) +
+						'</div></div>' +
+						'<i class="ti ti-chevron-right chev" aria-hidden="true"></i>' +
+						'</div>'
+					);
+				}
+
+				function renderEmpty() {
+					titleEl.textContent = 'Notes';
+					bodyEl.innerHTML =
+						'<div class="empty-page">' +
+						'<div class="empty">' +
+						'<div class="mark"><i class="ti ti-book" aria-hidden="true"></i></div>' +
+						'<div class="h">Your notes are empty</div>' +
+						'<div class="p">Create a private, encrypted note to keep details safe alongside your wallet.</div>' +
+						(state.atCap
+							? ''
+							: '<button class="btn btn-primary" data-action="add">Add new note <span class="circle"><i class="ti ti-arrow-right"></i></span></button>') +
+						'</div>' +
+						privacyBox() +
+						'</div>';
+					footEl.innerHTML =
+						'<button class="btn btn-soft btn-block" data-action="close-screen">Close</button>';
+				}
+
+				/* Pinned snackbar with Undo — fixed above the list/Close, auto-dismisses. */
+				function showToast() {
+					clearTimeout(toastTimer);
+					if (!state.justDeleted) {
+						toastEl.classList.remove('show');
+						toastEl.innerHTML = '';
+						return;
+					}
+					toastEl.innerHTML =
+						'<div class="toast"><span>Note deleted</span><button class="undo" data-action="undo">Undo</button></div>';
+					requestAnimationFrame(function () {
+						requestAnimationFrame(function () {
+							toastEl.classList.add('show');
+						});
+					});
+					toastTimer = setTimeout(function () {
+						state.justDeleted = null;
+						toastEl.classList.remove('show');
+						setTimeout(function () {
+							toastEl.innerHTML = '';
+						}, 220);
+					}, 5000);
+				}
+
+				function renderList() {
+					titleEl.textContent = 'Notes';
+					var notes = filteredNotes();
+					var addDisabled = state.atCap;
+					var toolbar =
+						'<div class="list-toolbar">' +
+						'<div class="search"><input id="search" placeholder="Search note" value="' +
+						esc(state.search) +
+						'" />' +
+						'<button type="button" class="mag" id="searchbtn" aria-label="' +
+						(state.search ? 'Clear search' : 'Search') +
+						'">' +
+						'<i class="ti ' +
+						(state.search ? 'ti-x' : 'ti-search') +
+						'"></i></button></div>' +
+						'<button class="add-pill" data-action="add"' +
+						(addDisabled ? ' disabled aria-disabled="true"' : '') +
+						'>' +
+						'<i class="ti ti-plus"></i> Add note</button>' +
+						'</div>';
+
+					var cap = state.atCap
+						? '<div class="cap-banner"><i class="ti ti-alert-circle" aria-hidden="true"></i><span>' +
+							CAPMSG +
+							'</span></div>'
+						: '';
+
+					var rows = notes.length
+						? notes.map(rowHtml).join('')
+						: '<div style="text-align:center;color:var(--text-tertiary);padding:26px 0">No notes match your search.</div>';
+
+					bodyEl.innerHTML = toolbar + cap + rows;
+					footEl.innerHTML =
+						'<button class="btn btn-soft btn-block" data-action="close-screen">Close</button>';
+
+					var s = document.getElementById('search');
+					var sbtn = document.getElementById('searchbtn');
+					function syncSearchUi() {
+						rerenderListRows();
+						if (sbtn) {
+							sbtn.innerHTML = '<i class="ti ' + (state.search ? 'ti-x' : 'ti-search') + '"></i>';
+							sbtn.setAttribute('aria-label', state.search ? 'Clear search' : 'Search');
+						}
+					}
+					if (s) {
+						s.addEventListener('input', function (e) {
+							state.search = e.target.value;
+							syncSearchUi();
+						});
+					}
+					if (sbtn) {
+						// Acts as a clear button only when there's content; otherwise it's the search glyph.
+						// stopPropagation: clearing rewrites this button's icon, detaching the clicked
+						// node — without this the click would bubble to the backdrop handler (whose
+						// "inside modal?" check then fails on the detached node) and close the modal.
+						sbtn.addEventListener('click', function (e) {
+							e.stopPropagation();
+							if (!state.search) return;
+							state.search = '';
+							if (s) {
+								s.value = '';
+								s.focus({ preventScroll: true });
+							}
+							syncSearchUi();
+						});
+					}
+				}
+
+				function rerenderListRows() {
+					// Re-render only the rows + toast, keep search input & focus
+					var notes = filteredNotes();
+					var rowsHtml = notes.length
+						? notes.map(rowHtml).join('')
+						: '<div style="text-align:center;color:var(--text-tertiary);padding:26px 0">No notes match your search.</div>';
+					// Find marker: everything after toolbar (+ optional cap banner)
+					var toolbar = bodyEl.querySelector('.list-toolbar');
+					var cap = bodyEl.querySelector('.cap-banner');
+					// remove all siblings after toolbar/cap
+					var keep = cap || toolbar;
+					while (keep && keep.nextSibling) bodyEl.removeChild(keep.nextSibling);
+					var tmp = document.createElement('div');
+					tmp.innerHTML = rowsHtml;
+					while (tmp.firstChild) bodyEl.appendChild(tmp.firstChild);
+				}
+
+				/* ---------- form ---------- */
+				function formInnerHtml(inSheet) {
+					var tooLong = state.draft.length > MAX;
+					var editing = !!state.editingId;
+					var current = editing
+						? state.notes.filter(function (x) {
+								return x.id === state.editingId;
+							})[0]
+						: null;
+					// Edit view always shows the creation date (local time); add updated if edited.
+					var meta = current
+						? '<div class="created-line">Created ' +
+							esc(current.created) +
+							(current.edited ? ' · Updated ' + esc(current.updated) : '') +
+							'</div>'
+						: '';
+					return (
+						'<div class="panel">' +
+						'<div class="label">Note</div>' +
+						'<div class="field"><textarea id="note-input" placeholder="Write a note…">' +
+						esc(state.draft) +
+						'</textarea></div>' +
+						'<div class="err" id="note-error" style="' +
+						(tooLong ? '' : 'display:none') +
+						'">Note must be ' +
+						MAX +
+						' characters or fewer.</div>' +
+						meta +
+						(editing
+							? '<button class="form-delete" data-action="delete-current"><i class="ti ti-trash"></i> Delete</button>'
+							: '') +
+						'</div>' +
+						privacyBox()
+					);
+				}
+
+				function renderForm() {
+					titleEl.textContent = state.editingId ? 'Edit note' : 'Add new note';
+					bodyEl.innerHTML = formInnerHtml(false);
+					footEl.innerHTML =
+						'<button class="btn btn-soft foot-half" data-action="cancel">Cancel</button>' +
+						'<button class="btn foot-half" id="save-btn" data-action="save">Save</button>';
+					bindInput();
+				}
+
+				/* ---------- read-only view (clickable links) ---------- */
+				function renderView() {
+					var n = state.notes.filter(function (x) {
+						return x.id === state.viewNoteId;
+					})[0];
+					if (!n) {
+						state.screen = 'list';
+						render();
+						return;
+					}
+					titleEl.textContent = 'Note';
+					// First line = bold title (like the list); remaining lines = body, with
+					// line breaks preserved. Both linkified. Wrapped in a bordered box so the
+					// note area is visually distinct.
+					var nl = (n.text || '').indexOf('\n');
+					var vTitle = nl === -1 ? n.text || '' : n.text.slice(0, nl);
+					var vBody = nl === -1 ? '' : n.text.slice(nl + 1);
+					bodyEl.innerHTML =
+						'<div class="view-wrap">' +
+						'<div class="note-box">' +
+						'<div class="nv-title">' +
+						linkify(vTitle) +
+						'</div>' +
+						(vBody ? '<div class="nv-body">' + linkify(vBody) + '</div>' : '') +
+						'</div>' +
+						'<div class="view-meta">' +
+						esc(fullMeta(n)) +
+						'</div>' +
+						'<div class="view-actions">' +
+						'<button class="btn btn-soft btn-block" data-action="edit" data-id="' +
+						n.id +
+						'"><i class="ti ti-pencil"></i> Edit note</button>' +
+						'<button class="form-delete" data-action="delete" data-id="' +
+						n.id +
+						'" style="align-self:center;margin-top:8px"><i class="ti ti-trash"></i> Delete</button>' +
+						'</div>' +
+						'</div>';
+					// "Back" when opened from the list; "OK" after returning from the editor.
+					// Primary action; Edit is secondary.
+					footEl.innerHTML =
+						'<button class="btn btn-primary btn-block" data-action="view-exit">' +
+						(state.viewLabel === 'OK' ? 'OK' : 'Back') +
+						'</button>';
+				}
+
+				function bindInput() {
+					var ta = document.getElementById('note-input');
+					if (!ta) return;
+					var err = document.getElementById('note-error');
+					var save = document.getElementById('save-btn');
+					function upd() {
+						state.draft = ta.value;
+						var trimmed = ta.value.trim();
+						var tl = ta.value.length > MAX;
+						// Unchanged-since-open check (compared trimmed); add-mode original is ''.
+						var unchanged = trimmed === (state.originalDraft || '').trim();
+						if (err) err.style.display = tl ? 'block' : 'none';
+						if (save) {
+							// Save requires: non-empty, within limit, and changed since opening.
+							var ok = trimmed !== '' && !tl && !unchanged;
+							save.className = 'btn foot-half ' + (ok ? 'btn-primary' : 'btn-disabled');
+							save.disabled = !ok;
+						}
+					}
+					ta.addEventListener('input', upd);
+					upd();
+					ta.focus({ preventScroll: true });
+					ta.setSelectionRange(ta.value.length, ta.value.length);
+				}
+
+				function closeModal() {
+					state.modalOpen = false;
+					state.screen = 'list';
+					state.editingId = null;
+					state.justDeleted = null;
+					state.menuOpen = true; // closing returns to the user menu
+					render();
+				}
+				function openNotes() {
+					state.menuOpen = false;
+					state.modalOpen = true;
+					state.screen = 'list';
+					state.editingId = null;
+					render();
+				}
+
+				/* ---------- main render ---------- */
+				function render() {
+					var mobile = state.device === 'mobile';
+					// Mobile = full-page modal (matches OISY Contacts); desktop = floating card.
+					modal.classList.toggle('fullpage', mobile);
+					stage.classList.toggle('mobile', mobile);
+					document.getElementById('dev-desktop').classList.toggle('on', !mobile);
+					document.getElementById('dev-mobile').classList.toggle('on', mobile);
+
+					// Toggle the menu popover, the modal, and the avatar (hidden while the modal is open).
+					menuEl.style.display = state.menuOpen ? '' : 'none';
+					modal.style.display = state.modalOpen ? '' : 'none';
+					modal.classList.toggle('is-view', state.modalOpen && state.screen === 'view');
+					document.querySelector('.avatar').style.display = state.modalOpen ? 'none' : '';
+
+					if (!state.modalOpen) {
+						showToast();
+						return;
+					}
+
+					// No (X) in the editor step — the user must Cancel or Save, so an
+					// accidental close can't drop unsaved text. The (X) only shows on the
+					// list/empty state (which closes the whole Notes modal).
+					document.getElementById('modal-x').style.display = state.screen === 'form' ? 'none' : '';
+
+					// The add/edit editor is a full-page step inside the modal on both
+					// desktop (within the floating card) and mobile (full screen) — more
+					// keyboard-robust than a bottom sheet for text entry.
+					if (state.screen === 'form') {
+						renderForm();
+						return;
+					}
+					if (state.screen === 'view') {
+						renderView();
+						return;
+					}
+					if (state.notes.length === 0) renderEmpty();
+					else renderList();
+					showToast();
+				}
+
+				function commitSave() {
+					var ta = document.getElementById('note-input');
+					if (!ta) return;
+					var v = ta.value.trim();
+					if (!v || v.length > MAX) return;
+					var isNew = !state.editingId;
+					if (!isNew) {
+						var n = state.notes.filter(function (x) {
+							return x.id === state.editingId;
+						})[0];
+						if (n) {
+							n.text = v;
+							n.edited = true;
+							n.updated = 'just now';
+						}
+						// bump to top
+						state.notes = [n].concat(
+							state.notes.filter(function (x) {
+								return x.id !== state.editingId;
+							})
+						);
+					} else {
+						state.notes = [
+							cloneNote({ id: 'n' + Date.now(), text: v, created: 'just now', edited: false })
+						].concat(state.notes);
+					}
+					state.justDeleted = null;
+					state.draft = '';
+					// New note → back to the list. Edited existing → its view (button becomes "OK").
+					if (isNew) {
+						state.screen = 'list';
+						state.editingId = null;
+					} else {
+						state.viewNoteId = state.editingId;
+						state.viewLabel = 'OK';
+						state.screen = 'view';
+						state.editingId = null;
+					}
+					render();
+				}
+
+				/* ---------- events ---------- */
+				document.getElementById('cap').addEventListener('change', function (e) {
+					state.atCap = e.target.checked;
+					render();
+				});
+				document.getElementById('reset').addEventListener('click', function () {
+					var dev = state.device;
+					reset();
+					state.device = dev;
+					document.getElementById('cap').checked = false;
+					render();
+				});
+
+				// Curated test notes: mixed scripts, emoji, literal HTML, long text,
+				// collapsed line breaks, both Created/Updated rows, and a spread of
+				// timestamp formats (relative + current-year date + prior-year date).
+				var testNotes = [
+					{
+						id: 't0',
+						text: 'Useful links\nDocs: https://internetcomputer.org\nWallet: https://oisy.com — open a note to click these.',
+						created: 'just now',
+						edited: false
+					},
+					{
+						id: 't1',
+						text: '巴秋子面發世步但讀老下刃吧的，在色像月馬：故乙師司功，尺西玩冬你人，何空昌内交，西去吃飛羽虫，要北水見巴。日月明王主，因назад привет, мир — 多語言測試。',
+						created: 'just now',
+						edited: false
+					},
+					{
+						id: 't2',
+						text: 'this 😂 <br>is</br> a test 🎉 <script>alert("xss")<\/script> — emoji + literal HTML',
+						created: 'Jun 1',
+						updated: '7 minutes ago',
+						edited: true
+					},
+					{
+						id: 't3',
+						text: 'Привет 你好 مرحبا こんにちは 안녕하세요 Hello 👋🌍 — one note, many scripts and an emoji.',
+						created: '3 hours ago',
+						edited: false
+					},
+					{
+						id: 't4',
+						text: 'Multi-line note:\nLine two should not show as a break here\nLine three — in the list preview these newlines collapse to spaces.',
+						created: 'Mar 2',
+						updated: 'yesterday',
+						edited: true
+					},
+					{
+						id: 't5',
+						text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.',
+						created: '4 days ago',
+						edited: false
+					},
+					{ id: 't6', text: 'Rent payment 🏠 — send on the 1st', created: 'Jun 3', edited: false },
+					{
+						id: 't7',
+						text: 'ملاحظة باللغة العربية مع نص طويل لتوضيح اتجاه الكتابة من اليمين إلى اليسار 🕌',
+						created: 'Jan 5, 2025',
+						updated: 'Mar 12, 2025',
+						edited: true
+					}
+				];
+				document.getElementById('seed-test').addEventListener('click', function () {
+					state.notes = testNotes.map(function (n) {
+						return cloneNote(n);
+					});
+					state.search = '';
+					state.screen = 'list';
+					state.editingId = null;
+					state.justDeleted = null;
+					// Open the Notes modal so the loaded notes are visible immediately.
+					state.menuOpen = false;
+					state.modalOpen = true;
+					render();
+				});
+				document.addEventListener('click', function (e) {
+					var dev = e.target.closest('[data-dev]');
+					if (dev) {
+						state.device = dev.getAttribute('data-dev');
+						render();
+						return;
+					}
+					var b = e.target.closest('[data-action]');
+					if (!b) return;
+					var a = b.getAttribute('data-action');
+					var id = b.getAttribute('data-id');
+					if (a === 'toggle-menu') {
+						if (state.modalOpen) return; // avatar inert while modal is open
+						state.menuOpen = !state.menuOpen;
+						render();
+					} else if (a === 'open-notes') {
+						openNotes();
+					} else if (a === 'close-modal' || a === 'close-screen') {
+						closeModal();
+					} else if (a === 'view') {
+						// Open the read-only view from the list (footer button = "Back").
+						state.viewNoteId = id;
+						state.viewLabel = 'Back';
+						state.screen = 'view';
+						render();
+					} else if (a === 'view-exit') {
+						// "Back" / "OK" → return to the list.
+						state.screen = 'list';
+						state.viewNoteId = null;
+						render();
+					} else if (a === 'add') {
+						if (state.atCap) return;
+						state.editingId = null;
+						state.draft = '';
+						state.originalDraft = '';
+						state.screen = 'form';
+						render();
+					} else if (a === 'edit') {
+						var n = state.notes.filter(function (x) {
+							return x.id === id;
+						})[0];
+						state.editingId = id;
+						state.draft = n ? n.text : '';
+						state.originalDraft = n ? n.text : '';
+						state.screen = 'form';
+						render();
+					} else if (a === 'cancel') {
+						// New note → list. Editing existing → back to its view (button "OK").
+						if (state.editingId) {
+							state.viewNoteId = state.editingId;
+							state.viewLabel = 'OK';
+							state.screen = 'view';
+							state.editingId = null;
+						} else {
+							state.screen = 'list';
+						}
+						render();
+					} else if (a === 'save') {
+						commitSave();
+					} else if (a === 'delete' || a === 'delete-current') {
+						var delId = a === 'delete' ? id : state.editingId;
+						var idx = state.notes.findIndex(function (x) {
+							return x.id === delId;
+						});
+						// Keep the whole note object (incl. created/updated/edited) and its
+						// position, so Undo restores it exactly — as if the delete never happened.
+						state.justDeleted = state.notes[idx];
+						state.justDeletedIndex = idx;
+						state.notes = state.notes.filter(function (x) {
+							return x.id !== delId;
+						});
+						// Delete (from view or the edit form) returns to the list with the undo toast.
+						state.screen = 'list';
+						state.editingId = null;
+						state.viewNoteId = null;
+						render();
+					} else if (a === 'undo') {
+						if (state.justDeleted) {
+							var at = state.justDeletedIndex;
+							if (at == null || at < 0 || at > state.notes.length) at = state.notes.length;
+							state.notes.splice(at, 0, state.justDeleted);
+							state.justDeleted = null;
+							state.justDeletedIndex = null;
+						}
+						render();
+					}
+				});
+
+				// Backdrop (dimmed app) clicks: close the modal from list/empty, or close
+				// the menu. During the editor step, outside clicks are IGNORED so unsaved
+				// text can't be lost.
+				stage.addEventListener('click', function (e) {
+					if (
+						e.target.closest('#menu') ||
+						e.target.closest('#modal') ||
+						e.target.closest('[data-action]')
+					) {
+						return; // clicks on the menu/modal/avatar are handled elsewhere
+					}
+					if (state.modalOpen) {
+						if (state.screen === 'form') return; // editor: ignore outside clicks
+						closeModal();
+					} else if (state.menuOpen) {
+						state.menuOpen = false;
+						render();
+					}
+				});
+
+				render();
+			})();
+		</script>
+	</body>
+</html>

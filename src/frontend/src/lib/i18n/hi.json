@@ -1,4 +1,39 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "उधार में आपका स्वागत है!",
+			"header_description": "बिना बेचे लिक्विडिटी पाएं। अपने BTC, ICP और अन्य एसेट्स के बदले स्टेबलकॉइन उधार लें।",
+			"borrowing_options": "उधार के विकल्प",
+			"borrowing_potential": "उधार क्षमता",
+			"borrowing_power_hint": "यह अनुमान है कि यदि आप अपने एसेट्स को कोलैटरल के रूप में देते हैं, तो सबसे अच्छी उपलब्ध दर पर आप कितना उधार ले सकते हैं।",
+			"available_best_provider": "उपलब्ध · सर्वश्रेष्ठ प्रोवाइडर",
+			"remaining_best_provider": "शेष · सर्वश्रेष्ठ प्रोवाइडर",
+			"active_loans": "सक्रिय उधार",
+			"no_active_loans": "कोई सक्रिय उधार नहीं",
+			"amount_borrowed": "",
+			"apr": "APR",
+			"borrow_apr_from": "उधार APR से"
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
+		}
+	},
+	"borrowings": {
+		"text": {
+			"tab_title": "उधार",
+			"tab_title_short": "उधार",
+			"no_borrowings": "",
+			"go_to_borrow": ""
+		}
+	},
 	"core": {
 		"text": {
 			"cancel": "रद्द करें",
@@ -7,10 +42,12 @@
 			"back": "वापस",
 			"done": "हो गया",
 			"close": "बंद करें",
+			"collapse": "संक्षिप्त करें",
+			"expand": "विस्तृत करें",
 			"change": "बदलें",
 			"continue": "",
 			"apply": "लागू करें",
-			"retry": "",
+			"retry": "पुनः प्रयास करें",
 			"refresh": "रीफ्रेश करें",
 			"name": "नाम",
 			"symbol": "प्रतीक",
@@ -29,6 +66,7 @@
 			"not_available": "उपलब्ध नहीं है",
 			"new": "नया",
 			"edit": "संपादित करें",
+			"download": "डाउनलोड",
 			"no_results": "कोई परिणाम नहीं",
 			"paste": "चिपकाएँ",
 			"to": "को",
@@ -41,12 +79,13 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": "",
+			"learn_more": "और जानें",
 			"sorting": "छँटाई",
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short आपकी सुरक्षा करता है!"
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
@@ -62,7 +101,7 @@
 			"switch_currency": "मुद्रा बदलें",
 			"more": "",
 			"less": "",
-			"learn_more": "",
+			"learn_more": "अधिक जानने के लिए लिंक पर जाएं",
 			"up_one_level": "एक स्तर ऊपर जाएं"
 		},
 		"warning": {
@@ -71,17 +110,31 @@
 			"video_not_supported": ""
 		}
 	},
+	"progress": {
+		"completed": "पूर्ण",
+		"in_progress": "प्रगति में",
+		"failed": "विफल"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "एसेट्स",
+			"nfts": "संग्रहणीय वस्तुएं",
 			"settings": "सेटिंग्स",
 			"dapp_explorer": "खोजें",
 			"activity": "गतिविधि",
+			"trade": "ट्रेड करें",
+			"borrow": "उधार लें",
+			"section_portfolio": "पोर्टफोलियो",
+			"section_finance": "वित्त",
+			"section_more": "अधिक",
 			"airdrops": "पुरस्कार",
 			"earning": "कमाएँ और पुरस्कार",
 			"pay": "",
 			"wallet_connect": "",
 			"source_code_on_github": "GitHub पर स्रोत कोड",
+			"x": "",
+			"help": "सहायता",
+			"faq": "",
 			"view_on_explorer": "एक्सप्लोरर पर देखें",
 			"source_code": "स्रोत कोड",
 			"documentation": "दस्तावेज़",
@@ -94,26 +147,38 @@
 			"hide_balances": "शेष राशि छुपाएं",
 			"show_balances": "शेष राशि दिखाएं",
 			"privacy_mode_enabled": "प्राइवेसी मोड सक्षम है। अपनी शेष राशि फिर से दिखाने के लिए [P] दबाएँ।",
-			"privacy_mode_disabled": "प्राइवेसी मोड अक्षम है। अपनी शेष राशि छिपाने के लिए [P] दबाएँ।"
+			"privacy_mode_disabled": "प्राइवेसी मोड अक्षम है। अपनी शेष राशि छिपाने के लिए [P] दबाएँ।",
+			"notes": "नोट्स",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "एसेट्स व्यू पर जाएँ",
+			"nfts": "संग्रहणीय वस्तुओं का दृश्य खोलें",
 			"settings": "अपनी सेटिंग्स खोलें",
 			"dapp_explorer": "ऐप एक्सप्लोरर खोलें",
 			"activity": "गतिविधि दृश्य खोलें",
+			"trade": "ट्रेड दृश्य खोलें",
+			"borrow": "उधार दृश्य खोलें",
+			"earning": "कमाई दृश्य खोलें",
 			"airdrops": "पुरस्कार दृश्य खोलें",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "आपका वॉलेट पता, सेटिंग्स, साइन-आउट और बाहरी लिंक",
 			"documentation": "$oisy_name दस्तावेज़ खोलें",
 			"support": "$oisy_name दस्तावेज़ों का समर्थन अनुभाग खोलें",
+			"help_page": "सहायता पेज खोलें",
 			"open_twitter": "DFINITY X/Twitter फ़ीड खोलें",
+			"more": "",
+			"faq": "",
 			"vip_qr_code": "एक निमंत्रण लिंक जनरेट करें",
 			"binance_qr_code": "एक बाइनेंस क्लबहाउस लिंक जनरेट करें",
 			"refer_a_friend": "एक दोस्त के लिए रेफरल लिंक जनरेट करें",
 			"address_book": "संपर्क खोलें",
 			"hide_balances": "प्रदर्शित शेष राशि छुपाएं",
-			"show_balances": "छिपी हुई शेष राशि दिखाएं"
+			"show_balances": "छिपी हुई शेष राशि दिखाएं",
+			"notes": "नोट्स खोलें",
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "डॉक्युमेंटेशन"
@@ -123,14 +188,15 @@
 		"text": {
 			"title_part_1": "",
 			"title_part_2": "",
+			"description": "अपना वॉलेट खोलें या कुछ ही सेकंड में नया बनाएँ",
 			"logout": "लॉगआउट करें",
 			"lock": "लॉक करें",
 			"authenticate": "खोलें या बनाएँ",
+			"sign_in_or_sign_up": "लॉग इन करें या साइन अप करें",
 			"internet_identity": "",
-			"asset_types": "",
-			"instant_and_private": "",
-			"advanced_cryptography": "",
-			"social_login": ""
+			"asset_types": "क्रिप्टो, स्टॉक, कमोडिटी, कलेक्टिबल्स और एन्क्रिप्टेड नोट्स।",
+			"advanced_cryptography": "निजी और छेड़छाड़-रोधी। ज़रूरत हो तो अदृश्य।",
+			"move_swap_grow": "कमाएँ, उधार लें और ट्रेड करें, अंतर्निर्मित AI असिस्टेंट के साथ।"
 		},
 		"alt": {
 			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर",
@@ -140,6 +206,12 @@
 		},
 		"message": {
 			"session_locked": ""
+		},
+		"info": {
+			"signups_closed": "नए साइन-अप फ़िलहाल प्रतिबंधित हैं। कृपया बाद में पुनः प्रयास करें।"
+		},
+		"banner": {
+			"signups_closed": "फ़िलहाल, नए उपयोगकर्ताओं का साइन-अप संभव नहीं है। मौजूदा उपयोगकर्ता $oisy_short को सामान्य रूप से उपयोग कर सकते हैं।"
 		},
 		"warning": {
 			"not_signed_in": "आपने साइन इन नहीं किया है। कृपया जारी रखने के लिए साइन इन करें।",
@@ -211,17 +283,17 @@
 			"website": "$dAppName की छवि"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
-			"ai": "",
-			"defi": "DeFi",
+			"aa_new": "हाल ही में जोड़ा गया",
+			"ab_icp": "ICP",
+			"ai": "एआई",
+			"dex": "DEX",
 			"game": "गेम",
-			"nft": "",
-			"rwa": "",
-			"social_media": "सोशल मीडिया",
+			"lending": "लेंडिंग",
+			"nft": "संग्रहणीय वस्तुएं",
+			"rwa": "RWA",
+			"social": "सोशल",
 			"staking": "स्टेकिंग",
-			"tools": "टूल्स",
-			"walletconnect": "वॉलेटकनेक्ट"
+			"tools": "टूल्स"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -244,17 +316,6 @@
 					"call_to_action": "और दिखाएँ"
 				}
 			},
-			"decideid": {
-				"name": "डिसाइडआईडी",
-				"one_liner": "विश्वसनीय डिजिटल सहभागिता के लिए अद्वितीय पहचान सत्यापन।",
-				"call_to_action": "डिसाइडआईडी खोलें",
-				"stats": "50,000+ अनुमान अनुरोध",
-				"description": "डिसाइड आईडी डिसाइड एआई सिस्टम के केंद्र में है, जो अपनी अनूठी प्रूफ ऑफ पर्सनहुड (PoP) कार्यप्रणाली के माध्यम से विश्वास और सुरक्षा सुनिश्चित करता है। जब आप जुड़ते हैं, तो आप एक सत्यापन प्रक्रिया से गुजरेंगे जहाँ आप अपनी पहचान की पुष्टि करने के लिए कई प्रमाण प्रदान करते हैं और एक विशेष चुनौती पूरी करते हैं। यह सुनिश्चित करता है कि प्रत्येक उपयोगकर्ता वास्तविक, अद्वितीय और बॉट नहीं है। आपकी प्रिंसिपल आईडी, एक अद्वितीय ऑन-चेन पहचानकर्ता, इस प्रक्रिया के दौरान बनाई जाती है। इसका उपयोग विभिन्न अनुप्रयोगों में किया जा सकता है जिनके लिए सत्यापित व्यक्ति की आवश्यकता होती है, जो किसी भी ऐप के साइन-अप या लॉगिन प्रक्रिया में एक सुरक्षित और सहज एकीकरण सुनिश्चित करता है। इसके अलावा, शून्य-ज्ञान प्रमाणों का उपयोग यह मतलब है कि आपका निजी डेटा, जैसे कि बायोमेट्रिक जानकारी, गोपनीय और सुरक्षित रहता है।<br/><br/>डिसाइड आईडी के साथ, ऑनलाइन सत्यापित करने और संलग्न होने के एक लचीले, सुरक्षित और गोपनीयता-प्रथम तरीके का आनंद लें।",
-				"carousel": {
-					"text": "ऑनलाइन सत्यापित करने और संलग्न होने के एक गोपनीयता-प्रथम तरीके का आनंद लें",
-					"call_to_action": "रुचि है?"
-				}
-			},
 			"icpswap": {
 				"name": "आईसीपीस्वैप",
 				"one_liner": "आईसीपीस्वैप एक एएमएम डेक्स है जो पूरी तरह से ऑनचेन बनाया गया है और यह आईसीपी पर फुल-स्टैक वित्तीय और डीएओ सेवाओं के लिए प्रमुख केंद्र है।",
@@ -262,10 +323,10 @@
 				"description": "भविष्य के विकेन्द्रीकृत वित्त का केंद्र!<br/>एक्सचेंज को एक केंद्र के रूप में फिर से आविष्कार करते हुए, आईसीपीस्वैप इंटरनेट कंप्यूटर पर फुल-स्टैक वित्तीय, बाजार और डीएओ सेवाएं प्रदान करता है। DFINITY के इंटरनेट कंप्यूटर की अंतर्निहित तकनीक के आधार पर, आईसीपीस्वैप उपयोगकर्ताओं और डेवलपर्स द्वारा संयुक्त रूप से परियोजनाओं के निर्माण के तरीके को पुनर्रचना करके वास्तव में विकेन्द्रीकृत वित्त का एक पारिस्थितिकी तंत्र स्थापित करता है।"
 			},
 			"nnsdapp": {
-				"name": "NNS डैप",
-				"one_liner": "NNS फ्रंट-एंड डैप किसी को भी इंटरनेट कंप्यूटर के नेटवर्क नर्वस सिस्टम के साथ उपयोगकर्ता के अनुकूल यूआई के साथ बातचीत करने की अनुमति देता है।",
-				"call_to_action": "शामिल हों",
-				"description": "NNS फ्रंट-एंड डैप किसी को भी इंटरनेट कंप्यूटर के नेटवर्क नर्वस सिस्टम के साथ उपयोगकर्ता के अनुकूल यूआई के साथ बातचीत करने की अनुमति देता है। ब्लॉकचेन के माध्यम से पूरी तरह से एंड-टू-एंड परोसा गया, यह विकेन्द्रीकृत डैप आपको निम्नलिखित कार्यों को आसानी से करने की अनुमति देता है:<br/><ul><li>टोकन भेजें और प्राप्त करें (ICP, ckBTC, CHAT, आदि)</li><li>न्यूरॉन्स को स्टेक और प्रबंधित करें</li><li>इंटरनेट कंप्यूटर और एसएनएस के शासन पर वोट करें</li><li>विकेन्द्रीकरण स्वैप में भाग लें</li><li>कैनिस्टर बनाएँ और टॉप अप करें</li><li>शासन पुरस्कार अर्जित करें</li></ul>"
+				"name": "NNS Governance",
+				"one_liner": "Internet Computer के लिए एक गवर्नेंस प्लेटफ़ॉर्म जो उपयोगकर्ताओं को स्टेक करने, मतदान करने और नेटवर्क गतिविधि का पालन करने में सक्षम बनाता है।",
+				"call_to_action": "ICP गवर्नेंस में भाग लें",
+				"description": "NNS एप्लिकेशन Internet Computer (ICP) के लिए एक गवर्नेंस प्लेटफ़ॉर्म है जो उपयोगकर्ताओं को टोकन स्टेक करने, मतदान में भाग लेने और नेटवर्क गतिविधि का पालन करने में सक्षम बनाता है।<br/><br/>यह उपयोगकर्ता कार्यों और गवर्नेंस गतिविधि पर अधिक दृश्यता प्रदान करता है, जो उपयोगकर्ताओं को यह समझने में मदद करता है कि स्टेकिंग, मतदान और भागीदारी व्यापक पारिस्थितिकी तंत्र में कैसे योगदान करती है।"
 			},
 			"uniswap": {
 				"name": "यूनिस्वैप",
@@ -302,16 +363,6 @@
 				"one_liner": "एथेरियम और EVM-संगत चेनों पर अग्रणी DEX, स्थिर मुद्रा प्रदाता और उधार मंच।",
 				"call_to_action": "ताना-बाना बुनें",
 				"description": "कर्व फाइनेंस एथेरियम और EVM-संगत चेनों पर एक अग्रणी विकेन्द्रीकृत एक्सचेंज, स्थिर मुद्रा प्रदाता और उधार मंच है। यह स्थिर सिक्कों और अस्थिर संपत्तियों के लिए अपने उन्नत स्वचालित बाजार-निर्माताओं और ऋणों के लिए अपनी अनूठी सॉफ्ट-लिक्विडेशन प्रणाली के लिए जाना जाता है।"
-			},
-			"sonic": {
-				"name": "सोनिक",
-				"one_liner": "DeFi की पूरी क्षमता और सुव्यवस्थित ट्रेडिंग को अनलॉक करें। टोकन स्वैप करें, एक लिक्विडिटी प्रदाता के रूप में कमाएँ और Bitfinity EVM के अग्रणी AMM का उपयोग करें।",
-				"call_to_action": "सोनिक खोलें",
-				"description": "सोनिक, इंटरनेट कंप्यूटर प्रोटोकॉल (ICP) पर बनाया गया एक मल्टीचेन विकेन्द्रीकृत एक्सचेंज, DeFi सेवाओं की एक विस्तृत श्रृंखला प्रदान करता है। उपयोगकर्ता आसानी से टोकन और परपेचुअल ट्रेड कर सकते हैं, लिक्विडिटी प्रदान कर सकते हैं, और LBP टोकन बिक्री में भाग ले सकते हैं। उपयोगकर्ता DAO शासन में संलग्न हो सकते हैं, पुरस्कार के लिए स्टेक कर सकते हैं, और प्लेटफ़ॉर्म निर्णयों पर वोट कर सकते हैं।<br/><br/>पूरी तरह से ऑन-चेन और ओपन-सोर्स! एक पेशेवर की तरह टोकन स्वैप करें, एक लिक्विडिटी प्रदाता के रूप में उन शुल्कों को जमा करें, AMM वाइब में शामिल हों, और सोनिक DAO का एक अभिन्न अंग बनें।",
-				"carousel": {
-					"text": "DeFi की पूरी क्षमता को अनलॉक करें",
-					"call_to_action": "सोनिक खोलें"
-				}
 			},
 			"raydium": {
 				"name": "रेडियम",
@@ -359,17 +410,6 @@
 					"text": "",
 					"call_to_action": ""
 				}
-			},
-			"beam": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
-			},
-			"axie_infinity": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
 			},
 			"mobox": {
 				"name": "",
@@ -421,11 +461,6 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"sphere_finance": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"binaryx": {
 				"name": "",
 				"one_liner": "",
@@ -439,11 +474,7 @@
 			"liquidium": {
 				"name": "",
 				"one_liner": "",
-				"description": "",
-				"carousel": {
-					"text": "",
-					"call_to_action": ""
-				}
+				"description": ""
 			},
 			"icpindex": {
 				"name": "",
@@ -468,6 +499,20 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
+				"description": ""
+			},
+			"cloud_engines": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"hyperliquid": {
+				"name": "",
+				"one_liner": "",
 				"description": ""
 			}
 		}
@@ -726,12 +771,14 @@
 			"icrc_custom_token": "ICRC कस्टम टोकन लोड करते समय त्रुटि।",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "आपके वॉलेट को कुछ प्रारंभिक डेटा की आवश्यकता है जो अभी तक लोड नहीं हुआ है। कृपया पुनः प्रयास करें।",
 			"allow_signing": "आपके वॉलेट को साइन करने के लिए सेट करते समय एक समस्या हुई। आपको साइन आउट कर दिया गया है। यदि समस्या बनी रहती है, तो सहायता से संपर्क करें।",
 			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "BTC वॉलेट जानकारी लोड करते समय त्रुटि।",
-			"sol_wallet_error": "SOL वॉलेट जानकारी लोड करते समय त्रुटि।"
+			"sol_wallet_error": "SOL वॉलेट जानकारी लोड करते समय त्रुटि।",
+			"xrp_wallet_error": "XRP वॉलेट जानकारी लोड करते समय त्रुटि।"
 		}
 	},
 	"hero": {
@@ -747,10 +794,65 @@
 			"toggle_privacy_mode": "प्राइवेसी मोड को चालू और बंद करें"
 		}
 	},
+	"help": {
+		"text": {
+			"title": "सहायता",
+			"support_title": "सपोर्ट",
+			"support_description": "$oisy_name डॉक्यूमेंटेशन के सपोर्ट पेज पर जवाब और अधिक जानकारी पाएँ, या अटक जाने पर टीम से संपर्क करें।",
+			"support_link": "हमारे सपोर्ट पेज पर जाएँ",
+			"network_explorers_title": "",
+			"network_explorers_description": "",
+			"explorers_title": "",
+			"explorers_description": "",
+			"explorers_velora_description": "",
+			"explorers_near_intents_description": "",
+			"explorers_onesec_description": "",
+			"explorers_chain_eth": "",
+			"explorers_chain_sol": "",
+			"explorers_chain_btc": "",
+			"explorers_chain_icp": "",
+			"icpswap_title": "ICPSwap से टोकन निकासी",
+			"icpswap_description": "ICPSwap पर स्वैप करते समय आपके टोकन पहले एक पूल में जाते हैं और फिर आपको वापस भेजे जाते हैं। अगर वह आखिरी चरण विफल हो गया, तो टोकन अब भी आपके हैं और अब भी पूल में हैं। $oisy_name उन्हें खोजकर आपको वापस भेज सकता है।",
+			"scan": "मेरे पूल जाँचें",
+			"scanning": "आपके पूल जाँचे जा रहे हैं…",
+			"scan_hint": "आपके वॉलेट में सक्रिय दो टोकन के बीच के हर पूल की जाँच करता है। अगर आपने किसी ऐसे टोकन में स्वैप किया था जिसे आपने कभी सक्षम नहीं किया, तो पहले उसे सक्षम करें, फिर दोबारा जाँचें या नीचे जोड़ी दर्ज करें।",
+			"scan_nothing_found": "जाँचे गए $pools पूल में कुछ भी शेष नहीं रहा।",
+			"scan_unreadable": "$pools पूल में से $unreadable पढ़े नहीं जा सके। दोबारा कोशिश करें या नीचे जोड़ी दर्ज करें।",
+			"or_pick_a_pair": "या एक जोड़ी दर्ज करें",
+			"token_first": "पहला टोकन",
+			"token_second": "दूसरा टोकन",
+			"select_token": "चुनें",
+			"no_tokens": "केवल ICP चुना जा सकता है। पहले पूल का छूटा हुआ टोकन सक्षम करें, या अगर पूल में ICP नहीं है तो दोनों टोकन।",
+			"checking_pool": "पूल जाँचा जा रहा है…",
+			"nothing_to_withdraw": "इस पूल में निकालने के लिए कुछ नहीं है।",
+			"results_found": "निकाले जा सकने वाले शेष मिले: $balances।",
+			"balance_unused": "अप्रयुक्त बैलेंस",
+			"withdraw": "निकालें"
+		},
+		"alt": {
+			"network_explorer_link": "",
+			"explorer_link": "",
+			"select_token_first": "पूल का पहला टोकन चुनें",
+			"select_token_second": "पूल का दूसरा टोकन चुनें",
+			"withdraw": "पूल से $symbol निकालें",
+			"scan": "अपने सक्रिय टोकन के बीच के पूल जाँचें"
+		},
+		"error": {
+			"pool_not_found": "इस जोड़ी के लिए कोई पूल नहीं मिल सका। दोनों टोकन जाँचें या थोड़ी देर बाद दोबारा कोशिश करें।",
+			"load_failed": "इस पूल में आपके बैलेंस पढ़े नहीं जा सके।",
+			"withdraw_failed": "निकासी विफल रही।",
+			"scan_failed": "ICPSwap पूल की सूची प्राप्त नहीं हो सकी।"
+		},
+		"success": {
+			"withdraw": "पूल से $amount $symbol निकाले गए।",
+			"withdraw_hidden": "पूल से $symbol निकाले गए।"
+		}
+	},
 	"settings": {
 		"text": {
 			"title": "सेटिंग्स",
 			"general": "",
+			"preferences": "प्राथमिकताएँ",
 			"principal": "आपका प्रिंसिपल",
 			"principal_copied": "प्रिंसिपल क्लिपबोर्ड पर कॉपी किया गया",
 			"principal_description": "$oisy_name के लिए आपकी आईडी। आपकी इंटरनेट आइडेंटिटी द्वारा बनाया गया।",
@@ -778,7 +880,15 @@
 			"enable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना सक्षम करें",
 			"disable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना अक्षम करें",
 			"save_spam_filter_success": "आपकी स्पैम फ़िल्टर सेटिंग्स अपडेट कर दी गई हैं।",
-			"learn_more": ""
+			"export_data": "डेटा निर्यात करें",
+			"export_data_description": "अपने टोकन और लेन-देन को CSV के रूप में डाउनलोड करें — आवश्यक जानकारी के लिए Basic, अतिरिक्त विशेषताओं के लिए Extended।",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "टोकन निर्यात करें",
+			"export_transactions": "लेन-देन निर्यात करें",
+			"export_tokens_success": "टोकन CSV डाउनलोड हो गया।",
+			"export_transactions_success": "लेन-देन CSV डाउनलोड हो गया।",
+			"learn_more": "और जानें"
 		},
 		"alt": {
 			"testnets_toggle": "परीक्षण नेटवर्क दिखाने या छिपाने के लिए टॉगल करें",
@@ -788,7 +898,9 @@
 			"appearance_system": "आपके ऑपरेटिंग सिस्टम के रंग मोड को सक्षम करता है"
 		},
 		"error": {
-			"loading_profile": "प्रोफाइल लोड करते समय त्रुटि। कृपया पूर्ण अनुभव प्राप्त करने के लिए पृष्ठ को रीफ्रेश करें।"
+			"loading_profile": "प्रोफाइल लोड करते समय त्रुटि। कृपया पूर्ण अनुभव प्राप्त करने के लिए पृष्ठ को रीफ्रेश करें।",
+			"export_exchange_rate_unavailable": "विनिमय दरें अभी भी लोड हो रही हैं। कृपया कुछ देर बाद पुनः प्रयास करें।",
+			"export_failed": "हम आपका निर्यात नहीं बना सके। कृपया पुनः प्रयास करें।"
 		}
 	},
 	"shortcuts": {
@@ -885,14 +997,24 @@
 				"solana_address_copied": "सोलाना पता क्लिपबोर्ड पर कॉपी किया गया",
 				"display_solana_address_qr": "सोलाना पते को क्यूआर कोड के रूप में प्रदर्शित करें"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {
 		"text": {
 			"send": "भेजें",
+			"xrp_sent": "आपका XRP भुगतान पूरा हो गया।",
+			"xrp_submitted": "भुगतान सबमिट हो गया। यह आमतौर पर कुछ सेकंड में पूरा हो जाता है — आप इसे बंद करके आगे बढ़ सकते हैं।",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "गंतव्य",
-			"source": "स्रोत",
 			"balance": "शेष राशि",
 			"review": "समीक्षा",
 			"signing_approval": "अनुमोदन पर हस्ताक्षर कर रहा है...",
@@ -910,6 +1032,7 @@
 			"network": "नेटवर्क",
 			"source_network": "स्रोत नेटवर्क",
 			"destination_network": "गंतव्य नेटवर्क",
+			"xrp_destination_tag": "XRP डेस्टिनेशन टैग",
 			"initializing_transaction": "लेनदेन प्रारंभ कर रहा है",
 			"convert_to_native_icp": "नेटिव ICP में कनवर्ट करें",
 			"open_qr_modal": "लेनदेन विवरण के लिए QR कोड स्कैन शुरू करें",
@@ -934,6 +1057,7 @@
 			"enter_recipient_address": "प्राप्तकर्ता का पता, नाम या उपनाम दर्ज करें",
 			"enter_wallet_address": "वॉलेट पता, नाम या उपनाम दर्ज करें",
 			"enter_memo": "मेमो दर्ज करें (वैकल्पिक)",
+			"xrp_destination_tag": "XRP डेस्टिनेशन टैग दर्ज करें (वैकल्पिक)",
 			"select_network": "नेटवर्क चुनें",
 			"search_nfts": ""
 		},
@@ -942,8 +1066,14 @@
 			"cketh_certified": "कृपया ckETH पैरामीटर प्रमाणित होने तक प्रतीक्षा करें।",
 			"pending_bitcoin_transaction": "आप लंबित बिटकॉइन लेनदेन पूरा होने के बाद एक और बिटकॉइन लेनदेन भेज सकते हैं।",
 			"no_available_utxos": "आपके पास इस लेनदेन को करने के लिए कोई उपलब्ध utxos नहीं होगा।",
-			"unknown_destination": "आपने पहले इस पते के साथ इंटरैक्ट नहीं किया है। कृपया सुनिश्चित करें कि आप प्राप्तकर्ता को जानते हैं।",
-			"fee_info": "शुल्क का भुगतान $feeSymbol में किया जाएगा। उपलब्ध: <strong>$feeBalance $feeSymbol</strong>"
+			"first_time_destination": "ऐसा लगता है कि आपने इस पते पर पहले कभी टोकन नहीं भेजे हैं। पते को ध्यान से जाँचें।",
+			"first_time_destination_confirm": "यह इस पते पर मेरा पहला ट्रांसफ़र है और मैंने पता ध्यान से जाँच लिया है।",
+			"xrp_destination_tag_hint": "अधिकांश एक्सचेंज इसे आवश्यक मानते हैं। इसे खाली छोड़ने पर आपके फंड खो सकते हैं।",
+			"xrp_destination_tag_missing": "कोई XRP डेस्टिनेशन टैग नहीं है। यदि आप किसी एक्सचेंज को भेज रहे हैं, तो जाँच लें कि उसे टैग चाहिए या नहीं, वरना आपके फंड खो सकते हैं।",
+			"fee_expired": "",
+			"fee_info": "शुल्क का भुगतान $feeSymbol में किया जाएगा। उपलब्ध: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "स्कैन किए गए कोड में केवल एक गंतव्य पता था। कृपया सुनिश्चित करें कि आप सही टोकन चुनें, सही राशि दर्ज करें, और गंतव्य पते की सावधानीपूर्वक समीक्षा करें!",
+			"scanned_address_only_destination_single_token": "स्कैन किए गए कोड में केवल एक गंतव्य पता था। कृपया सुनिश्चित करें कि आप सही राशि दर्ज करें, और गंतव्य पते की सावधानीपूर्वक समीक्षा करें!"
 		},
 		"assertion": {
 			"invalid_destination_address": "अमान्य गंतव्य पता",
@@ -958,7 +1088,9 @@
 			"unknown_cketh": "ckETH टोकन पुनः प्राप्त नहीं किया जा सकता है।",
 			"destination_address_invalid": "गंतव्य पता अमान्य है।",
 			"amount_invalid": "राशि अमान्य है।",
+			"xrp_destination_tag_invalid": "XRP डेस्टिनेशन टैग 0 और 4294967295 के बीच एक पूर्ण संख्या होनी चाहिए।",
 			"insufficient_funds_verbose_btc": "",
+			"insufficient_funds_for_reserve": "अपर्याप्त धन: राशि को शुल्क और आवश्यक XRP खाता रिज़र्व को कवर करने के लिए पर्याप्त शेष छोड़ना चाहिए।",
 			"insufficient_funds_for_gas": "गैस के लिए अपर्याप्त धन",
 			"insufficient_funds_for_amount": "राशि के लिए अपर्याप्त धन",
 			"insufficient_ethereum_funds_to_cover_the_fees": "शुल्क को कवर करने के लिए अपर्याप्त एथेरियम धन",
@@ -993,22 +1125,38 @@
 			"incompatible_token": "टोकन असंगत है। कृपया एक संगत टोकन के साथ पुनः प्रयास करें।",
 			"no_btc_network_id": "वर्तमान नेटवर्क ($networkId) Bitcoin नेटवर्क नहीं है।",
 			"no_solana_network_id": "वर्तमान नेटवर्क ($networkId) Solana नेटवर्क नहीं है।",
+			"no_xrp_network_id": "वर्तमान नेटवर्क ($networkId) XRP Ledger नेटवर्क नहीं है।",
 			"no_pending_bitcoin_transaction": "लंबित Bitcoin लेनदेन लोड करते समय एक त्रुटि हुई। कृपया बाद में पुनः प्रयास करें।",
 			"unexpected_utxos_fee": "लेनदेन शुल्क की गणना करते समय कुछ गलत हो गया।",
 			"unable_to_retrieve_amount": "n/a (प्राप्त करने में असमर्थ)",
+			"ethereum_insufficient_funds": "",
+			"ethereum_out_of_gas": "आपका भेजना विफल रहा क्योंकि इसमें अनुमान से अधिक गैस की आवश्यकता थी। आपकी राशि अभी भी आपके वॉलेट में है, लेकिन नेटवर्क ने विफल लेनदेन के लिए फिर भी शुल्क लिया हो सकता है। पुनः प्रयास करें।",
+			"ethereum_out_of_gas_gas": "भेजी गई गैस: $gasSent · आवश्यक गैस: $gasNeeded",
+			"ethereum_out_of_gas_gas_sent": "भेजी गई गैस: $gasSent",
+			"ethereum_transaction_hash": "लेनदेन हैश: $hash",
+			"ethereum_unsigned_transaction": "अहस्ताक्षरित लेनदेन: $transaction",
 			"solana_transaction_expired": "आपका लेनदेन Solana नेटवर्क द्वारा संसाधित नहीं किया गया और समाप्त हो गया, सबसे अधिक संभावना है क्योंकि प्रदान की गई प्राथमिकता शुल्क पर्याप्त नहीं थी। हमने इसे नवीनतम अनुशंसित राशि पर अपडेट कर दिया है, इसलिए कृपया पुनः प्रयास करें।",
 			"solana_confirmation_failed": "हमें आपके द्वारा अभी बनाए गए लेनदेन की कोई पुष्टि प्राप्त नहीं हुई। कृपया कुछ सेकंड प्रतीक्षा करें और फिर अपने टोकन की लेनदेन सूची जांचें कि आपका लेनदेन सही तरीके से बनाया गया था या नहीं।",
 			"solana_insufficient_funds": "इस लेनदेन को पूरा करने के लिए आपके टोकन का बैलेंस पर्याप्त नहीं है। आपका बैलेंस अंतिम बार प्रदर्शित होने के बाद से बदल सकता है।",
 			"solana_insufficient_funds_for_fee": "लेनदेन शुल्क को कवर करने के लिए आपका SOL बैलेंस पर्याप्त नहीं है।",
 			"solana_insufficient_funds_for_rent": "खाता निर्माण के लिए आवश्यक किराए को कवर करने के लिए आपका SOL बैलेंस पर्याप्त नहीं है।",
-			"fee_calc_unsupported_standard": "शुल्क की गणना नहीं की जा सकी क्योंकि प्रदान किया गया टोकन मानक समर्थित नहीं है।"
+			"fee_calc_unsupported_standard": "शुल्क की गणना नहीं की जा सकी क्योंकि प्रदान किया गया टोकन मानक समर्थित नहीं है।",
+			"xrp_send_expired": "$network पर $amount $symbol भेजना पूरा नहीं हुआ: नेटवर्क ने इसे समय पर शामिल नहीं किया। आपके वॉलेट से कुछ नहीं गया, और दोबारा भेजना सुरक्षित है।",
+			"xrp_send_already_in_flight": "इस पते से पहले किया गया XRP भुगतान अभी पूरा नहीं हुआ है। कुछ नहीं भेजा गया — इसके पूरा होने की प्रतीक्षा करें, इसमें लगभग एक मिनट लगता है, फिर दोबारा भेजें।",
+			"xrp_send_not_guarded": "हम यह जाँच नहीं सके कि पहले किया गया कोई XRP भुगतान अभी पूरा हो रहा है या नहीं। कुछ नहीं भेजा गया — कुछ क्षण बाद दोबारा प्रयास करें।",
+			"xrp_active_transaction_failed": "$network पर $amount $symbol भेजना नेटवर्क द्वारा प्रोसेस हुआ लेकिन विफल रहा ($result), इसलिए आपकी राशि नहीं भेजी गई। नेटवर्क शुल्क फिर भी लिया गया।",
+			"xrp_amount_exceeds_sendable": "यह राशि अब नहीं समाती। आपके खाते को अपना XRP रिज़र्व और नेटवर्क शुल्क रखना होता है, और समीक्षा के दौरान दोनों बदल सकते हैं। कुछ भी नहीं भेजा गया — राशि घटाएँ, या खाते का विवरण ताज़ा होने पर फिर कोशिश करें।",
+			"xrp_destination_unfunded": "इस पते पर अभी कोई XRP खाता नहीं है। इसे बनाने के लिए कम से कम $reserve XRP का पहला भुगतान चाहिए। कुछ भी नहीं भेजा गया — राशि बढ़ाएँ, या पहले से फंडेड पते पर भेजें।",
+			"xrp_destination_tag_required": "इस पते के लिए XRP डेस्टिनेशन टैग आवश्यक है। कुछ भी नहीं भेजा गया — जिस सेवा को आप भुगतान कर रहे हैं उसका दिया गया टैग जोड़ें और फिर भेजें।",
+			"xrp_destination_is_source": "यह आपका अपना XRP पता है। कुछ भी नहीं भेजा गया — कोई दूसरा प्राप्तकर्ता चुनें।",
+			"xrp_account_state_unavailable": "वॉलेट आपके खाते का विवरण नहीं पढ़ सका, इसलिए राशि जाँची नहीं जा सकी। कुछ भी नहीं भेजा गया — कृपया थोड़ी देर में फिर कोशिश करें।"
 		}
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "मिंट करें",
+			"minting": "मिंट हो रहा है...",
+			"mint_review_subtitle": "आप मिंट करते हैं"
 		}
 	},
 	"burn": {
@@ -1016,6 +1164,45 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "$token मिंट करें",
+			"description": "मिंट करने से नेटवर्क की दर पर $sourceToken से नए $destinationToken बनते हैं, और $sourceToken बर्न हो जाते हैं।",
+			"you_mint_estimate": "आप मिंट करते हैं (अनुमान)",
+			"rate": "दर",
+			"cycles_ledger_fee": "Cycles Ledger शुल्क",
+			"minter": "मिंट करने वाला",
+			"one_way": "मिंट को वापस नहीं किया जा सकता: $destinationToken को वापस $sourceToken में नहीं बदला जा सकता।",
+			"sending": "$token को $minter पर भेजा जा रहा है...",
+			"minting": "$token मिंट हो रहा है...",
+			"minted": "$amount $token मिंट किए गए।",
+			"pending": "मिंट में सामान्य से अधिक समय लग रहा है। यह बैकग्राउंड में पूरा होगा: इसे सक्रिय लेनदेन में देखें।"
+		},
+		"error": {
+			"rate_unavailable": "$token की दर लोड नहीं हो सकी। कृपया बाद में पुनः प्रयास करें।",
+			"amount_too_small": "$token मिंट करने के लिए राशि बहुत कम है।",
+			"refunded": "मिंट की राशि वापस कर दी गई। आपके $token $refundFee $token घटाकर वापस आ गए। कारण: $reason",
+			"refunded_nothing": "मिंट की राशि वापस कर दी गई, लेकिन शुल्क में पूरी राशि चली गई: कोई $token वापस नहीं आया। कारण: $reason",
+			"failed": "मिंट विफल रहा। कारण: $reason",
+			"not_started": "मिंट शुरू नहीं हो सका। कुछ भी नहीं भेजा गया, कृपया पुनः प्रयास करें।",
+			"transfer_failed": "$token ट्रांसफ़र विफल रहा। कुछ भी नहीं भेजा गया।",
+			"unconfirmed": "$token ट्रांसफ़र की पुष्टि नहीं हो सकी। अगर यह हो गया है, तो मिंट बैकग्राउंड में पूरा होगा: इसे सक्रिय लेनदेन में देखें।"
+		}
+	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
 		}
 	},
 	"scanner": {
@@ -1059,6 +1246,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "कोड/लिंक मान्य नहीं है",
+			"link_domain_mismatch": "यह लिंक किसी अन्य डोमेन के लिए है",
 			"data_is_incompleted": "प्राप्त डेटा अपूर्ण है। कुछ आवश्यक विवरण गायब हैं।"
 		}
 	},
@@ -1131,9 +1319,14 @@
 			"max_slippage_error": "स्लिपेज टॉलरेंस 0% नहीं हो सकती या $maxSlippage% से अधिक नहीं हो सकती",
 			"swap_button": "अभी स्वैप करें",
 			"swap_is_not_offered": "यह स्वैप वर्तमान में पेश नहीं किया गया है।",
+			"swap_amount_too_low": "",
+			"swap_amount_too_low_minimum": "",
 			"executing_transaction": "लेनदेन निष्पादित हो रहा है...",
 			"initializing": "लेनदेन प्रारंभ कर रहा है...",
 			"swapping": "स्वैप कर रहा है...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "UI रीफ्रेश कर रहा है",
 			"swap_provider": "स्वैप प्रदाता",
 			"swap_provider_website": "वेबसाइट",
@@ -1156,12 +1349,21 @@
 			"cross_chain_networks_info": "आप टोकन <b>$sourceNetwork</b> से <b>$destinationNetwork</b> नेटवर्क पर ले जाते हैं",
 			"near_intents_estimated_time": "",
 			"near_intents_tos": "",
-			"value_difference_error_confirmation": ""
+			"onesec_transfer_fee": "",
+			"onesec_protocol_fee": "",
+			"chain_fusion_minimum_amount": "",
+			"oisy_trade_minimum_notional": "",
+			"oisy_trade_deposit_fee": "",
+			"oisy_trade_taker_fee": "",
+			"oisy_trade_withdrawal_fee": "",
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "कम से कम एक टोकन की कीमत प्राप्त नहीं की जा सकी। कृपया <strong>स्वतंत्र रूप से सत्यापित करें</strong> कि यह स्वैप ऑफर उचित सौदा है।<br>ध्यान दें कि स्लिपेज सेटिंग आपको बहुत कम प्राप्त मूल्य वाले ऑफर से सुरक्षित <strong>नहीं</strong> करती है!"
 		},
 		"error": {
 			"kong_not_available": "टोकन स्वैप करने के लिए वर्तमान में कोई एक्सचेंज उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।",
 			"unexpected": "टोकन बदलते समय कुछ गलत हो गया।",
 			"unexpected_missing_data": "एक स्वैप लेनदेन शुरू करते समय कुछ गलत हो गया।",
+			"failed_unexpectedly": "स्वैप पूरा नहीं हो सका। कृपया अपना वॉलेट बैलेंस जांचें और पुनः प्रयास करें, या कोई अन्य प्रदाता चुनें।",
 			"slippage_exceeded": "$oisy_short आपको बचाता है: व्यापार आपके $maxSlippage% स्लिपेज सहिष्णुता से बाहर है। कृपया अधिकतम स्लिपेज समायोजित करें और पुनः प्रयास करें।",
 			"pool_not_found": "स्वैप विफल। पूल नहीं मिला।",
 			"deposit_error": "आपके स्वैप के लिए धन जमा करना विफल रहा। कृपया पुनः प्रयास करें या स्वैप प्रदाता बदलें।",
@@ -1175,13 +1377,29 @@
 			"swap_sucess_withdraw_failed": "स्वैप पूरा हो गया, लेकिन आपके टोकन स्वचालित रूप से वापस नहीं लिए जा सके। उन्हें मैन्युअल रूप से वापस लेने के लिए नीचे दिए गए निकालें बटन पर क्लिक करें।<br> या अनुसरण करें",
 			"swap_sucess_manually_withdraw_success": "आपके पिछले स्वैप से टोकन सफलतापूर्वक वापस ले लिए गए थे। अब आप इस मोडल को बंद कर सकते हैं।",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": "",
+			"near_intents_quote_unverified": "",
+			"near_intents_quote_expired": "",
+			"oisy_trade_not_trackable": "",
+			"oisy_trade_order_killed": "",
+			"oisy_trade_settlement_unresolved": "",
+			"oisy_trade_order_not_placed": "",
+			"oisy_trade_recovery_failed": ""
 		}
 	},
 	"buy": {
 		"text": {
 			"buy": "खरीदें",
-			"buy_dev": "खरीदें (Dev एनवायरनमेंट)"
+			"buy_dev": "खरीदें (Dev एनवायरनमेंट)",
+			"unavailable_title": "टोकन खरीदना अस्थायी रूप से अनुपलब्ध है",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
+			"unavailable_fallback_hint": "इस बीच, आप अभी भी अपने वॉलेट का पता साझा करके टोकन प्राप्त कर सकते हैं।"
+		},
+		"actions": {
+			"close": "समझ गया"
 		},
 		"onramper": {
 			"title": "ऑनराम्पर के माध्यम से खरीदें"
@@ -1213,6 +1431,7 @@
 	"tokens": {
 		"text": {
 			"title": "टोकन",
+			"title_short": "टोकन",
 			"contract_address": "अनुबंध पता",
 			"token_address": "टोकन पता",
 			"balance": "शेष राशि",
@@ -1286,7 +1505,8 @@
 				"info": "लेज़र और इंडेक्स कैनिस्टर आईडी आमतौर पर परियोजना की वेबसाइट पर उपलब्ध होती हैं।",
 				"info_ext": "",
 				"info_index": "इंडेक्स कैनिस्टर आईडी वैकल्पिक है, लेकिन इसके बिना, $oisy_short लेनदेन इतिहास प्रदर्शित नहीं कर सकता।",
-				"custom_tokens_not_supported": "चयनित नेटवर्क कस्टम टोकन का समर्थन नहीं करता है।"
+				"custom_tokens_not_supported": "चयनित नेटवर्क कस्टम टोकन का समर्थन नहीं करता है।",
+				"custom_tokens_not_supported_yet": "OISY अभी इस नेटवर्क पर कस्टम टोकन का समर्थन नहीं करता है।"
 			},
 			"error": {
 				"loading_metadata": "चयनित नेटवर्क में निर्दिष्ट पता एक वैध टोकन नहीं है।",
@@ -1382,7 +1602,11 @@
 			"crypto": "क्रिप्टो",
 			"stablecoin": "स्टेबलकॉइन",
 			"stock": "शेयर",
-			"commodity": "कमोडिटी"
+			"commodity": "कमोडिटी",
+			"compute": "कंप्यूट"
+		},
+		"category_in_sentence": {
+			"compute": "कंप्यूट टोकन"
 		},
 		"risk": {
 			"low": "कम जोखिम",
@@ -1392,14 +1616,13 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFTs",
-			"title_empty": "आपके NFTs यहाँ दिखाई देंगे",
-			"description_empty": "ऐसा लगता है कि आपने अभी तक NFTs प्राप्त नहीं किए हैं",
+			"title": "संग्रहणीय वस्तुएं",
+			"count_one": "",
+			"count_other": "",
+			"title_empty": "आपकी संग्रहणीय वस्तुएं यहाँ दिखाई देंगी",
+			"description_empty": "ऐसा लगता है कि आपने अभी तक संग्रहणीय वस्तुएं प्राप्त नहीं की हैं",
 			"title_not_supported": "",
 			"description_not_supported": "",
-			"grouping": "समूहीकरण",
-			"as_plain_list": "सादी सूची के रूप में दिखाएँ",
-			"by_collection": "संग्रह के अनुसार समूहित करें",
 			"show_spam": "स्पैम दिखाएँ",
 			"show_hidden": "छिपा हुआ दिखाएँ",
 			"recents_first": "नवीनतम पहले",
@@ -1412,9 +1635,11 @@
 			"quantity": "मात्रा",
 			"item_traits": "आइटम विशेषताएँ",
 			"collection_not_loaded": "संग्रह प्रदर्शित नहीं किया जा सका क्योंकि यह अभी तक लोड नहीं हुआ है",
-			"nft_not_loaded": "NFT प्रदर्शित नहीं किया जा सका क्योंकि यह अभी तक लोड नहीं हुआ है",
+			"nft_not_loaded": "संग्रहणीय वस्तु प्रदर्शित नहीं की जा सकी क्योंकि यह अभी तक लोड नहीं हुई है",
 			"collections": "संग्रह",
-			"all_assets": "सभी एसेट्स",
+			"check_new": "नए देखें",
+			"check_new_short": "देखें",
+			"ungrouped": "असमूहीकृत",
 			"address_copied": "पता $address कॉपी किया गया",
 			"collection_name_copied": "",
 			"id_copied": "",
@@ -1453,13 +1678,14 @@
 			"media_stored_at_different_location": ""
 		},
 		"alt": {
-			"placeholder_image": "अभी तक कोई NFTs नहीं",
+			"placeholder_image": "अभी तक कोई संग्रहणीय वस्तुएं नहीं",
 			"card": {
-				"image": "टोकन आईडी के साथ NFT की छवि: $tokenId"
+				"image": "टोकन आईडी के साथ संग्रहणीय वस्तु की छवि: $tokenId"
 			},
 			"copy_address": "इस पते को क्लिपबोर्ड पर कॉपी करें",
 			"review_preference": "",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"check_new": "नए संग्रहणीय आइटम जाँचें"
 		}
 	},
 	"fee": {
@@ -1468,7 +1694,16 @@
 			"estimated_btc": "अनुमानित BTC नेटवर्क शुल्क",
 			"estimated_inter_network": "अनुमानित अंतर-नेटवर्क शुल्क",
 			"estimated_eth": "अनुमानित एथेरियम शुल्क",
-			"max_fee_eth": "अधिकतम शुल्क <small>(संभवतः < 30 सेकंड में)</small>",
+			"estimated_fee_eth": "",
+			"estimated": "",
+			"priority": "",
+			"gwei": "",
+			"priority_slow": "",
+			"priority_slow_description": "",
+			"priority_standard": "",
+			"priority_standard_description": "",
+			"priority_fast": "",
+			"priority_fast_description": "",
 			"convert_fee": "रूपांतरण शुल्क",
 			"convert_inter_network_fee": "अंतर-नेटवर्क शुल्क",
 			"convert_btc_network_fee": "बिटकॉइन नेटवर्क शुल्क",
@@ -1477,7 +1712,12 @@
 			"ata_fee": "ATA शुल्क",
 			"transaction_fees": "",
 			"network_fee": "",
-			"approval_fee": ""
+			"approval_fee": "",
+			"prioritization_fee": "",
+			"base_kind": "",
+			"prioritization_kind": "",
+			"ata_kind": "",
+			"app_account_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "शुल्क को कवर करने के लिए अपर्याप्त बैलेंस।"
@@ -1511,26 +1751,95 @@
 			"scan_qr": "क्यूआर कोड स्कैन करें",
 			"or_use_link": "या वॉलेटकनेक्ट लिंक का उपयोग करें",
 			"proposer": "प्रस्तावक",
-			"spender": "",
-			"application": "",
+			"spender": "व्यय करने वाला",
+			"operator": "ऑपरेटर",
+			"application": "एप्लिकेशन",
 			"review": "$chain_name ($key) आवश्यक अनुमतियाँ समीक्षा करें",
 			"method": "विधि",
+			"interacting_with": "",
+			"type": "प्रकार",
 			"methods": "विधियाँ",
 			"events": "घटनाएँ",
 			"message": "संदेश",
-			"expiration": "",
-			"token": "",
-			"network": "",
-			"amount": "",
+			"expiration": "समाप्ति",
+			"token": "टोकन",
+			"network": "नेटवर्क",
+			"amount": "राशि",
 			"hex_data": "हेक्स डेटा",
+			"tab_operations": "ऑपरेशन",
+			"unreviewed_instructions": "OISY इनमें से कुछ निर्देशों को डिकोड नहीं कर सकता, इसलिए नीचे दी गई समीक्षा अधूरी हो सकती है।",
+			"unreviewed_instructions_simulated": "इस लेनदेन में किसी बाहरी स्रोत से प्राप्त ऑपरेशन शामिल हैं जिन्हें OISY डिकोड नहीं कर सकता, इसलिए OISY ने इसका सिमुलेशन चलाया। सुनिश्चित करें कि आप एप्लिकेशन पर भरोसा करते हैं, और हस्ताक्षर करने से पहले सिम्युलेटेड बैलेंस परिवर्तनों और ऑपरेशनों की समीक्षा करें। ध्यान दें कि वास्तविक परिणाम सिमुलेशन से भिन्न हो सकता है।",
+			"unread_programs_one": "यह लेनदेन एक ऐसे प्रोग्राम को कॉल करता है जिसे OISY नहीं पढ़ सकता। यह अन्य ऐप्स में रखी आपकी धनराशि, जैसे स्टेक किए गए SOL या लेंडिंग जमा, को स्थानांतरित कर सकता है, और नीचे दी गई कोई भी जानकारी इसे नहीं दिखाएगी।",
+			"unread_programs_other": "यह लेनदेन ऐसे प्रोग्रामों को कॉल करता है जिन्हें OISY नहीं पढ़ सकता। ये अन्य ऐप्स में रखी आपकी धनराशि, जैसे स्टेक किए गए SOL या लेंडिंग जमा, को स्थानांतरित कर सकते हैं, और नीचे दी गई कोई भी जानकारी इसे नहीं दिखाएगी।",
+			"unread_programs_acknowledge": "मुझे पता है कि OISY यह नहीं दिखा सकता कि यह ऐप क्या करता है",
+			"cannot_be_shown": "इस लेनदेन में ऐसी क्रियाएँ हैं जिन्हें समीक्षा के लिए पूरी तरह सटीक रूप से नहीं दिखाया जा सकता, इसलिए OISY इस पर हस्ताक्षर नहीं करेगा। इसे अस्वीकार करें और ऐप से एक सरल अनुरोध भेजने को कहें।",
+			"close_pays_others": "यह लेनदेन आपके किसी एक टोकन खाते को बंद करता है और उसकी शेष राशि ऐसे पते पर भेजता है जो आपका वॉलेट नहीं है। आपकी सुरक्षा के लिए OISY इस पर हस्ताक्षर नहीं करेगा।",
+			"simulated_instructions": "सिम्युलेटेड निर्देश",
+			"multiple_operations": "इस लेनदेन में कई ऑपरेशन शामिल हैं जो आपके वॉलेट को प्रभावित करते हैं। सिम्युलेटेड बैलेंस परिवर्तनों और शामिल निर्देशों की जांच करें, और इस लेनदेन को केवल तभी स्वीकृत करें जब आप एप्लिकेशन पर भी भरोसा करते हों।",
+			"simulated_review": "नीचे दी गई समीक्षा वह है जो नेटवर्क की वर्तमान स्थिति के विरुद्ध इस लेनदेन को सिम्युलेट करने पर अनुमानित होती है। वास्तव में चलाने पर जो होता है वह भिन्न हो सकता है।",
+			"simulated_changes": "सिम्युलेटेड बैलेंस परिवर्तन",
+			"balance_changes": "बैलेंस में बदलाव",
+			"balance_changes_none": "यह लेनदेन आपके खातों में कुछ नहीं बदलता।",
+			"balance_changes_unknown": "OISY यह निर्धारित नहीं कर सकता कि यह लेनदेन कौन-सी संपत्तियाँ और कितनी मात्रा में भेजता है। केवल तभी हस्ताक्षर करें जब आप इस ऐप पर भरोसा करते हों।",
+			"simulation_control_change": "यह लेनदेन बदल देगा कि आपके एक या अधिक खातों को कौन नियंत्रित करता है। इसे स्वीकृत करने से पूरा खाता ही सौंपा जा सकता है, न कि केवल उसमें मौजूद राशि।",
+			"simulation_new_owner": "नया खाता स्वामी",
+			"simulation_new_spender": "नया स्वीकृत व्यय करने वाला",
+			"simulation_new_close_authority": "नया समापन प्राधिकरण",
+			"simulation_new_program": "नया स्वामित्व वाला प्रोग्राम",
+			"simulation_control_removed": "हटाया गया",
+			"transfer_sources": "स्रोत",
+			"transfer_party_own": "आपका खाता",
+			"transfer_parties_partial": "OISY इस लेनदेन का सिमुलेशन नहीं कर सकता, इसलिए दिखाए गए स्रोत और ऑपरेशन केवल वही हैं जो इसमें स्वयं शामिल हैं। इसकी ओर से किसी अन्य प्रोग्राम द्वारा भेजी गई राशि सूचीबद्ध नहीं है, और जिस ऑपरेशन को OISY नहीं पढ़ सकता वह यह बताए बिना सूचीबद्ध होता है कि वह क्या करता है। केवल तभी हस्ताक्षर करें जब आप इस ऐप पर भरोसा करते हों।",
+			"dapp_prioritization_fee": "dApp द्वारा निर्धारित प्राथमिकता शुल्क, OISY द्वारा नहीं।",
+			"high_prioritization_fee": "यह लेनदेन असामान्य रूप से उच्च प्राथमिकता शुल्क निर्धारित करता है। इसे ध्यान से जांचें और केवल तभी हस्ताक्षर करें जब आप इस ऐप पर भरोसा करते हों।",
+			"dapp_gas_limit": "ऐप द्वारा निर्धारित गैस लिमिट, OISY द्वारा नहीं। ऊपर दिखाया गया अधिकतम शुल्क इस लेनदेन की अधिकतम लागत है।",
+			"high_gas_limit": "यह अनुरोध असामान्य रूप से उच्च गैस लिमिट निर्धारित करता है, जिससे ऊपर दिखाया गया अधिकतम शुल्क इस लेनदेन की अपेक्षित लागत से कहीं अधिक है। इसे ध्यान से जांचें और केवल तभी हस्ताक्षर करें जब आप इस ऐप पर भरोसा करते हों।",
+			"invalid_typed_data": "इस अनुरोध में एक ऐसा मान है जिसका प्रकार ऐप द्वारा घोषित स्कीमा से मेल नहीं खाता। जो दिखाया गया है वह वास्तव में हस्ताक्षरित होने वाली जानकारी से भिन्न हो सकता है, इसलिए हस्ताक्षर करना अक्षम कर दिया गया है।",
+			"unreviewable_typed_data": "OISY उस सामग्री को नहीं पहचानता जिस पर यह ऐप आपसे हस्ताक्षर करने के लिए कह रहा है, इसलिए सारांश इसका वर्णन नहीं कर सकता। सुनिश्चित करें कि आप एप्लिकेशन पर भरोसा करते हैं और हस्ताक्षर करने से पहले इसका रॉ डेटा देखें।",
+			"unsigned_typed_data_keys": "इस ऐप ने अतिरिक्त डेटा भेजा जिसे इसकी स्कीमा घोषित नहीं करती। वह डेटा हस्ताक्षर द्वारा कवर नहीं किया गया है, इसलिए केवल नीचे दिए गए फ़ील्ड दिखाए गए हैं।",
+			"tab_summary": "सारांश",
+			"tab_raw_data": "रॉ डेटा",
+			"method_without_selector": "किसी फ़ंक्शन का नाम रखने के लिए बहुत छोटा",
+			"methods_capped": "इस बैच में केवल पहली कॉल्स सूचीबद्ध हैं।",
+			"unknown_call_title": "कॉन्ट्रैक्ट कॉल",
+			"unknown_call": "OISY उन फ़ंक्शन को नहीं पहचानता जिन्हें यह लेनदेन कॉल करता है, इसलिए सारांश इसका वर्णन नहीं कर सकता। सुनिश्चित करें कि आप एप्लिकेशन पर भरोसा करते हैं और हस्ताक्षर करने से पहले इसका रॉ डेटा देखें।",
+			"allowance_increase": "यह अनुरोध नीचे दिए गए व्यय करने वाले की सीमा को दिखाई गई राशि से बढ़ाता है, इसके अलावा जो वह पहले से खर्च कर सकता है। व्यय करने वाला इस टोकन की उतनी राशि आपके वॉलेट से कभी भी स्थानांतरित कर सकता है, जब तक आप इसे रद्द नहीं करते।",
+			"allowance_decrease": "यह अनुरोध नीचे दिए गए व्यय करने वाले की सीमा को दिखाई गई राशि से घटाता है। यह स्वयं कोई धनराशि स्थानांतरित नहीं करता।",
+			"unverifiable_erc20_request": "यह अनुरोध एक ऐसे टोकन से संबंधित है जिसे OISY पहचान या डिकोड नहीं कर सकता। जो दिखाया गया है वह वास्तव में हस्ताक्षरित होने वाली जानकारी से भिन्न हो सकता है, इसलिए स्वीकृति अक्षम कर दी गई है।",
+			"unverifiable_approval_for_all_request": "यह अनुरोध किसी ऑपरेटर को NFT संग्रह का नियंत्रण सौंप देगा, और OISY यह डिकोड नहीं कर सकता कि कौन सा ऑपरेटर। जो दिखाया गया है वह वास्तव में हस्ताक्षरित होने वाली जानकारी से भिन्न हो सकता है, इसलिए स्वीकृति अक्षम कर दी गई है।",
+			"approval_for_all_grant": "यह अनुरोध नीचे दिए गए ऑपरेटर को इस संग्रह के किसी भी NFT को स्थानांतरित करने देता है जिसे आप अभी रखते हैं या बाद में प्राप्त करते हैं, किसी भी समय, जब तक आप इसे रद्द नहीं करते। यह स्वयं कोई धनराशि स्थानांतरित नहीं करता।",
+			"approval_for_all_revoke": "यह अनुरोध नीचे दिए गए ऑपरेटर को रद्द करता है, ताकि वह अब इस संग्रह में आपके पास मौजूद NFT को स्थानांतरित न कर सके।",
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
 			"sign_message": "संदेश पर हस्ताक्षर करें",
+			"sign_psbt": "लेनदेन पर हस्ताक्षर करें",
+			"sign_transaction_with_type": "",
+			"sign_transaction": "लेनदेन पर हस्ताक्षर करें",
+			"sign_and_send_transaction": "लेनदेन पर हस्ताक्षर करें और भेजें",
+			"signing_address": "हस्ताक्षर करने वाला पता",
+			"signer": "हस्ताक्षरकर्ता",
+			"fee": "शुल्क",
+			"btc_symbol": "BTC",
+			"psbt_inputs": "इनपुट",
+			"psbt_outputs": "आउटपुट",
+			"psbt_total_signed_inputs": "हस्ताक्षरित इनपुट का कुल मूल्य",
+			"psbt_unknown_address": "अज्ञात पता",
+			"psbt_unknown_value": "अज्ञात",
+			"psbt_fee_unknown": "अज्ञात",
+			"psbt_signed_by_wallet": "आपका पता",
+			"psbt_broadcast": "प्रसारण",
+			"psbt_broadcast_enabled": "हाँ",
+			"psbt_broadcast_disabled": "नहीं",
+			"psbt_broadcast_unsupported_note": "यह अनुरोध वॉलेट से लेनदेन प्रसारित करने के लिए कहता है, जो समर्थित नहीं है। आपकी सुरक्षा के लिए, इसे स्वीकृत नहीं किया जा सकता। हस्ताक्षरित PSBT प्राप्त करने और इसे स्वयं प्रसारित करने के लिए \"broadcast: false\" के साथ लेनदेन का अनुरोध करें।",
 			"connected_apps": "जुड़े हुए ऐप्स",
 			"no_connected_apps": "वर्तमान में कोई ऐप्स कनेक्ट नहीं हैं।",
-			"wallet_connect": ""
+			"disconnect_all": "सभी डिस्कनेक्ट करें",
+			"disconnect_app": "$name को डिस्कनेक्ट करें",
+			"wallet_connect": "WalletConnect",
+			"token_units": "टोकन इकाइयाँ (दशमलव अज्ञात)"
 		},
 		"alt": {
-			"connect_input": "उदाहरण के लिए wc:a281567bb3e4..."
+			"connect_input": "उदाहरण के लिए wc:a281567bb3e4...",
+			"open_address_block_explorer": "पते को ब्लॉक एक्सप्लोरर पर खोलें"
 		},
 		"domain": {
 			"title": "डोमेन सत्यापन",
@@ -1565,10 +1874,256 @@
 			"request_rejected": "वॉलेटकनेक्ट अनुरोध अस्वीकृत",
 			"unknown_parameter": "अज्ञात पैरामीटर।",
 			"wallet_not_initialized": "अप्रत्याशित त्रुटि। आपका वॉलेट पता प्रारंभ नहीं हुआ है।",
+			"btc_broadcast_not_supported": "हस्ताक्षरित लेनदेन को प्रसारित करना अभी समर्थित नहीं है। हस्ताक्षरित PSBT प्राप्त करने और इसे स्वयं प्रसारित करने के लिए \"broadcast: false\" के साथ लेनदेन का अनुरोध करें।",
+			"btc_non_mainnet_sign_not_supported": "बिटकॉइन लेनदेन पर हस्ताक्षर करना केवल मेननेट पर समर्थित है। आपकी सुरक्षा के लिए, इस अनुरोध पर हस्ताक्षर नहीं किए गए।",
+			"btc_psbt_decode": "समीक्षा के लिए इस लेनदेन को डिकोड नहीं किया जा सका। आपकी सुरक्षा के लिए, इस पर हस्ताक्षर नहीं किए गए।",
+			"btc_psbt_input_not_segwit": "इस लेनदेन में एक इनपुट शामिल है जो SegWit (P2WPKH) इनपुट नहीं है, जिसे OISY हस्ताक्षरित नहीं कर सकता। आपकी सुरक्षा के लिए, इस पर हस्ताक्षर नहीं किए गए।",
+			"btc_psbt_input_not_owned": "इस लेनदेन में एक इनपुट शामिल है जो इस वॉलेट के पते का नहीं है, जिसे OISY हस्ताक्षरित नहीं कर सकता। आपकी सुरक्षा के लिए, इस पर हस्ताक्षर नहीं किए गए।",
+			"btc_psbt_input_ambiguous": "OISY यह नहीं बता सकता कि इस लेनदेन के किसी इनपुट का संबंध किस पिछले आउटपुट से है, इसलिए समीक्षा के लिए दिखाई गई राशियाँ वास्तव में हस्ताक्षरित की जा रही राशियों से भिन्न हो सकती हैं। आपकी सुरक्षा के लिए, इस पर हस्ताक्षर नहीं किए गए।",
 			"from_address_not_wallet": "लेनदेन के लिए अनुरोधित 'फ्रॉम' पता इस वॉलेट का पता नहीं है।",
 			"unknown_destination": "अज्ञात गंतव्य पता।",
+			"ambiguous_transaction": "यह लेनदेन कई पतों के बीच धनराशि स्थानांतरित करता है और समीक्षा के लिए सटीक रूप से नहीं दिखाया जा सकता। आपकी सुरक्षा के लिए, इसे साइन नहीं किया गया।",
+			"close_pays_others": "यह लेनदेन आपके किसी एक टोकन खाते को बंद करता है और उसकी शेष राशि ऐसे पते पर भेजता है जो आपका वॉलेट नहीं है। आपकी सुरक्षा के लिए इस पर हस्ताक्षर नहीं किए गए।",
+			"unreviewed_without_simulation": "OISY इस लेनदेन का एक हिस्सा नहीं पढ़ सका, और नेटवर्क ने इसका सिमुलेशन भी नहीं दिया, इसलिए कुछ भी यह नहीं बताता कि वह हिस्सा क्या करेगा। आपकी सुरक्षा के लिए, इस पर हस्ताक्षर नहीं किए गए।",
+			"unread_programs_unconfirmed": "यह लेनदेन एक ऐसे प्रोग्राम को कॉल करता है जिसे OISY नहीं पढ़ सकता, और समीक्षा में इसकी पुष्टि नहीं की गई। आपकी सुरक्षा के लिए, इस पर हस्ताक्षर नहीं किए गए।",
+			"sol_transaction_as_message": "यह संदेश एक सोलाना लेनदेन है, जिसे केवल लेनदेन समीक्षा के माध्यम से स्वीकृत किया जा सकता है। आपकी सुरक्षा के लिए, इस पर हस्ताक्षर नहीं किए गए।",
 			"request_not_defined": "अप्रत्याशित त्रुटि: अनुरोध परिभाषित नहीं है इसलिए इसे संसाधित नहीं किया जा सकता है।",
 			"unexpected_processing_request": "वॉलेटकनेक्ट के साथ अनुरोध को संसाधित करते समय अप्रत्याशित त्रुटि।"
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "ट्रेडिंग",
+			"tab_title_short": "ट्रेडिंग",
+			"intro": "",
+			"learn_more": "और जानें",
+			"provider_name": "OISY Trade",
+			"go_to_trade": ""
+		},
+		"page": {
+			"tagline": "अपने वॉलेट से सीधे लिमिट ऑर्डर दें। आपका पैसा उन स्मार्ट कॉन्ट्रैक्ट्स में रहता है जिन्हें आप नियंत्रित करते हैं, किसी केंद्रीय पक्ष के पास कभी नहीं।",
+			"trading_potential": "ट्रेडिंग क्षमता",
+			"trading_potential_hint": "आपके वॉलेट में, एक्सचेंज पर नहीं",
+			"deposited_assets": "जमा किए गए एसेट्स",
+			"deposited_all_free": "सब उपलब्ध",
+			"deposited_empty": "अभी तक कुछ जमा नहीं हुआ",
+			"free": "$amount उपलब्ध",
+			"in_orders": "$amount ऑर्डर में",
+			"in_orders_label": "ऑर्डर में",
+			"positions": "मेरी पोजीशन",
+			"deposit": "जमा करें",
+			"withdraw": "निकालें",
+			"active_orders": "सक्रिय ऑर्डर",
+			"active_orders_empty_deposit": "OISY Trade पर लिमिट ऑर्डर देना शुरू करने के लिए अपने वॉलेट से टोकन जमा करें।",
+			"active_orders_empty_place": "आपके खुले और लंबित लिमिट ऑर्डर यहां दिखाई देंगे जैसे ही आप एक ऑर्डर देते हैं।",
+			"new_order": "नया ऑर्डर",
+			"order_history": "ऑर्डर इतिहास"
+		},
+		"provider_unavailable": {
+			"title": "ट्रेडिंग अस्थायी रूप से अनुपलब्ध है",
+			"description": "फिलहाल कोई ट्रेडिंग प्रोवाइडर उपलब्ध नहीं है। आपका बैलेंस सुरक्षित है और प्रोवाइडर के फिर से ऑनलाइन आते ही उपयोग करने लायक हो जाएगा।"
+		},
+		"onboarding": {
+			"title": "",
+			"description": "",
+			"step_deposit": "",
+			"step_order": "",
+			"step_withdraw": "",
+			"supported_tokens": "",
+			"deposit": ""
+		},
+		"assets": {
+			"title": "",
+			"empty": ""
+		},
+		"deposit": {
+			"title": "जमा करें",
+			"review_title": "जमा राशि की समीक्षा करें",
+			"progress_title": "जमा हो रहा है",
+			"you_deposit": "आप जमा कर रहे हैं",
+			"error_insufficient_balance": "राशि आपके वॉलेट बैलेंस से अधिक है",
+			"to": "प्रति",
+			"network": "नेटवर्क",
+			"transaction_fee": "कुल अनुमानित शुल्क",
+			"approval_fee": "अनुमोदन शुल्क",
+			"transfer_fee": "नेटवर्क शुल्क",
+			"info_title": "OISY Trade: ऑनचेन ऑर्डर-बुक",
+			"info_description": "जमा किए गए फंड OISY Trade कैनिस्टर में रखे जाते हैं और लिमिट ऑर्डर देने के लिए उपयोग किए जाते हैं, जो ऑनचेन स्मार्ट कॉन्ट्रैक्ट्स द्वारा सुरक्षित हैं।",
+			"empty_title": "अभी जमा करने के लिए कुछ नहीं है",
+			"empty_description": "OISY Trade आपको इन टोकन के लिए ऑर्डर बनाने देता है। इनमें से किसी को अपने वॉलेट में जोड़ें, फिर ट्रेडिंग शुरू करने के लिए इसे यहां जमा करें।",
+			"approving": "अनुमोदन हो रहा है",
+			"approved": "",
+			"approve_description": "",
+			"depositing": "जमा हो रहा है",
+			"deposit_description": "",
+			"done": "",
+			"error": {
+				"unknown_fee": "इस टोकन के लिए लेजर शुल्क निर्धारित नहीं किया जा सका। आपका फंड आपके वॉलेट में ही रहा। कुछ समय बाद फिर से कोशिश करें।",
+				"deposit_failed": "जमा पूरा नहीं हुआ। आपका फंड आपके वॉलेट में ही रहा। फिर से कोशिश करें या नेटवर्क स्थिति जांचें।"
+			}
+		},
+		"withdraw": {
+			"title": "निकालें",
+			"review_title": "निकासी की समीक्षा करें",
+			"progress_title": "निकासी हो रही है",
+			"amount_label": "आप निकाल रहे हैं",
+			"from": "से",
+			"network": "नेटवर्क",
+			"transaction_fee": "",
+			"transfer_fee": "निकासी शुल्क",
+			"you_receive": "आपको मिलेगा",
+			"reserved_note": "$amount आरक्षित · खुले ऑर्डर द्वारा लॉक किया गया",
+			"error_insufficient_balance": "राशि आपके उपलब्ध बैलेंस से अधिक है",
+			"submit": "निकालें",
+			"open": "",
+			"progress_withdraw": "$symbol आपके वॉलेट में भेजा जा रहा है",
+			"progress_done": "",
+			"error": "आपकी निकासी पूरी नहीं हुई। आपका फंड OISY Trade पर ही रहा। कुछ समय बाद फिर से कोशिश करें।"
+		},
+		"orders": {
+			"title": "",
+			"add_limit_order": "",
+			"tab_active": "",
+			"tab_history": "",
+			"empty_active": "कोई सक्रिय ऑर्डर नहीं",
+			"empty_history": "",
+			"side_sell": "बिक्री",
+			"side_buy": "खरीद",
+			"row_sell": "",
+			"row_buy": "",
+			"row_phrase_sell": "$quote के लिए @ $price",
+			"row_phrase_buy": "$quote के साथ @ $price",
+			"queue_ahead": "कतार में आपसे आगे $percentage%",
+			"status_open": "खुला",
+			"status_pending": "लंबित",
+			"status_partial": "आंशिक",
+			"status_filled": "पूर्ण",
+			"status_canceled": "रद्द",
+			"status_expired": "समाप्त",
+			"count_filled": "",
+			"count_expired": "",
+			"count_canceled": ""
+		},
+		"info": {
+			"title": "OISY Trade क्या है",
+			"description": "OISY Trade एक पूरी तरह से ऑनचेन ऑर्डर-बुक एक्सचेंज है, जो सीधे आपके वॉलेट में एकीकृत है। खरीदने या बेचने के लिए एक कीमत तय करें, और आपका ऑर्डर ऑनचेन सेटल हो जाता है जैसे ही मार्केट उस कीमत तक पहुंचता है, भले ही आप साइन आउट हों।",
+			"fact_1_title": "अपनी कीमत पर खरीदें या बेचें",
+			"fact_1_description": "वह सटीक कीमत तय करें जिस पर आप कोई टोकन खरीदना या बेचना चाहते हैं। आपका लिमिट ऑर्डर तब तक बुक में रहता है जब तक मार्केट उस तक नहीं पहुंच जाता।",
+			"fact_2_title": "दूर रहने पर भी पूरा होता है",
+			"fact_2_description": "एक बार प्लेस होने के बाद आपका ऑर्डर ऑनचेन मौजूद रहता है। जैसे ही कोई मिलता-जुलता ऑर्डर आता है, एक्सचेंज इसे पूरा कर देता है — चाहे आप साइन इन हों या नहीं।",
+			"fact_3_title": "पूरी तरह से ऑनचेन",
+			"fact_3_description": "ऑर्डर Internet Computer पर एक कैनिस्टर के अंदर मैच और सेटल होते हैं, जिसे NNS द्वारा संचालित किया जाता है, बीच में कोई केंद्रीकृत एक्सचेंज नहीं होता।"
+		},
+		"order_detail": {
+			"title": "",
+			"status": "",
+			"filled": "",
+			"cancel_order": "",
+			"cancel_error": "",
+			"confirm_title": "",
+			"confirm_description": "",
+			"confirm_order": "",
+			"confirm_price": "",
+			"confirm_returns_to_free": "",
+			"confirm_keep": "",
+			"confirm_order_sell": "",
+			"confirm_order_buy": ""
+		},
+		"limit_order": {
+			"title": "",
+			"review_title": "",
+			"placing_title": "",
+			"sell": "",
+			"buy": "",
+			"select_sell_token": "",
+			"select_buy_token": "",
+			"select_sell_token_first": "",
+			"select_buy_token_first": "",
+			"you_sell": "",
+			"you_buy": "",
+			"hero_prefix": "",
+			"you_get_at_least": "",
+			"you_pay_at_most": "",
+			"connector_for": "",
+			"connector_with": "",
+			"network": "",
+			"amount_placeholder": "",
+			"price_placeholder": "",
+			"max": "",
+			"max_with_amount": "",
+			"set_price_first": "",
+			"balance": "",
+			"pick_token_to_begin": "",
+			"pick_token_to_price": "",
+			"pick_token_to_trade_against": "",
+			"price_label_sell_resting": "",
+			"price_label_buy_resting": "",
+			"price_label_sell_crossing": "",
+			"price_label_buy_crossing": "",
+			"price_label_fok_sell": "",
+			"price_label_fok_buy": "",
+			"price_label_default": "",
+			"preset_bid": "",
+			"preset_ask": "",
+			"preset_market": "",
+			"preset_sell_1": "",
+			"preset_sell_5": "",
+			"preset_buy_1": "",
+			"preset_buy_5": "",
+			"value_difference": "",
+			"value_difference_label": "",
+			"queue_position": "",
+			"queue_position_row": "",
+			"front_of_book": "",
+			"are_ahead": "",
+			"warning_crossing_sell": "",
+			"warning_crossing_buy": "",
+			"warning_resting_below_value_sell": "",
+			"warning_resting_above_value_buy": "",
+			"warning_fok_sell": "",
+			"warning_fok_buy": "",
+			"warning_fok_blocked_sell": "",
+			"warning_fok_blocked_buy": "",
+			"error_balance_sell": "",
+			"error_balance_buy": "",
+			"error_lot_multiple": "",
+			"error_lot_minimum": "",
+			"error_tick_multiple": "",
+			"error_min_notional": "",
+			"error_max_notional": "",
+			"fok_title": "",
+			"fok_help": "",
+			"routing_name": "",
+			"routing_tag": "",
+			"best_ask": "",
+			"best_bid": "",
+			"spread": "",
+			"spread_value": "",
+			"maker_fee": "",
+			"taker_fee": "",
+			"no_fee": "",
+			"fee_percent": "",
+			"review_button": "",
+			"place_order_button": "",
+			"limit_price": "",
+			"limit_price_value": "",
+			"current_value": "",
+			"current_value_feed": "",
+			"dex": "",
+			"order_type": "",
+			"order_type_gtc": "",
+			"order_type_fok": "",
+			"fee_maker_taker": "",
+			"fee_taker": "",
+			"fee_maker_taker_value": "",
+			"give_up_confirm": "",
+			"rests_against_value_confirm": "",
+			"market_moved_sell": "",
+			"market_moved_buy": "",
+			"placing_initializing": "",
+			"placing_sub": "",
+			"placing_done": "",
+			"place_error": ""
 		}
 	},
 	"transaction": {
@@ -1576,6 +2131,8 @@
 			"details": "लेनदेन विवरण",
 			"hash": "लेनदेन हैश",
 			"hash_copied": "लेनदेन हैश $hash क्लिपबोर्ड पर कॉपी किया गया।",
+			"signature": "",
+			"signature_copied": "",
 			"id": "लेनदेन आईडी",
 			"id_copied": "लेनदेन आईडी क्लिपबोर्ड पर कॉपी की गई।",
 			"timestamp": "टाइमस्टैम्प",
@@ -1591,7 +2148,46 @@
 			"to_ata": "प्राप्तकर्ता टोकन खाता (ATA)",
 			"to_ata_copied": "प्राप्तकर्ता टोकन खाता (ATA) क्लिपबोर्ड पर कॉपी किया गया।",
 			"block": "ब्लॉक",
-			"interacted_with": "के साथ इंटरैक्ट किया गया (को)",
+			"kind_other": "",
+			"summary_swap": "",
+			"summary_self": "",
+			"swap_on": "",
+			"interacted_with": "के साथ इंटरैक्ट किया गया",
+			"unknown_token": "",
+			"summary_other": "",
+			"tab_summary": "",
+			"tab_balance_changes": "",
+			"tab_instructions": "",
+			"tab_unavailable": "",
+			"no_balance_changes": "",
+			"instruction_send": "",
+			"instruction_receive": "",
+			"instruction_wrap": "",
+			"instruction_unwrap": "$symbol टोकन खाता अनरैप करके बंद करें",
+			"instruction_create_account": "",
+			"instruction_create_program_account": "",
+			"instruction_close_account": "",
+			"instruction_close_account_for": "$symbol टोकन खाता बंद करें",
+			"instruction_approve": "",
+			"instruction_revoke": "",
+			"instruction_set_authority": "",
+			"instruction_route": "",
+			"instruction_burn": "",
+			"instruction_mint": "",
+			"instruction_freeze": "",
+			"instruction_thaw": "",
+			"instruction_unknown": "",
+			"instruction_unknown_via": "",
+			"instruction_via": "$program के ज़रिए",
+			"instruction_rent": "",
+			"instruction_balance_returned": "SOL शेष राशि आपके वॉलेट में वापस",
+			"instruction_balance_sent": "SOL शेष राशि आपके वॉलेट में भेजी गई",
+			"instruction_returned": "",
+			"instruction_sent": "$amount SOL आपके वॉलेट में भेजा गया",
+			"instruction_returned_to": "$amount SOL को",
+			"instruction_balance_returned_to": "SOL शेष राशि इन्हें",
+			"instruction_own_account": "",
+			"raw_value": "",
 			"status": "स्थिति",
 			"confirmations": "पुष्टियां",
 			"for": "",
@@ -1617,6 +2213,23 @@
 			"approve": "स्वीकृत करें",
 			"burn": "बर्न",
 			"mint": "मिंट"
+		},
+		"filter": {
+			"types_label": "",
+			"tokens_label": "",
+			"contacts_label": "",
+			"types_aria_label": "",
+			"tokens_aria_label": "",
+			"contacts_aria_label": "",
+			"search_tokens_placeholder": "",
+			"search_contacts_placeholder": "",
+			"clear": "",
+			"sheet_title": "",
+			"open_filters_aria_label": "",
+			"showing_partial": "",
+			"contacts_empty_title": "आपने अभी तक कोई संपर्क नहीं जोड़ा है",
+			"contacts_empty_description": "जाने-पहचाने पते संपर्क में सहेजें और गलती से गलत पते का उपयोग करने का जोखिम कम करें।",
+			"contacts_empty_cta": "अपना पहला संपर्क जोड़ें"
 		},
 		"label": {
 			"reimbursement": "प्रतिपूर्ति",
@@ -1807,7 +2420,8 @@
 			"Icrcv2": "इंटरनेट कंप्यूटर",
 			"Btc": "बिटकॉइन",
 			"Eth": "एथेरियम",
-			"Sol": "सोलाना"
+			"Sol": "सोलाना",
+			"Xrp": "XRP Ledger"
 		},
 		"form": {
 			"new_address": "नया पता",
@@ -1840,8 +2454,9 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "अपने $oisy_name तक पहुंचें",
-				"open_or_create": "dApp से सुरक्षित रूप से कनेक्ट होने और अपनी संपत्तियों का प्रबंधन शुरू करने के लिए अपना वॉलेट खोलें या बनाएँ।"
+				"open_or_create": "एप्लिकेशन के साथ सुरक्षित रूप से इंटरैक्ट करने के लिए अपना वॉलेट खोलें या बनाएं।",
+				"connect_your_wallet": "अपने $oisy_name से कनेक्ट करें",
+				"oisy_protects_you_description": "एप्लिकेशन आपके फंड तक सीधे नहीं पहुंच सकते, और हर लेनदेन आपके द्वारा पुष्टि की जानी चाहिए."
 			}
 		},
 		"idle": {
@@ -1963,17 +2578,18 @@
 		},
 		"info": {
 			"btc_transactions": "BTC लेनदेन की जानकारी केंद्रीय तीसरे पक्ष से प्राप्त की जाती है और इसे स्वतंत्र रूप से सत्यापित किया जाना चाहिए।",
-			"hidden_micro_transactions": "<strong>OISY आपकी रक्षा करता है!</strong> बहुत छोटे टोकन मूल्यों वाले लेनदेन वर्तमान में छिपे हुए हैं। उन्हें दिखाने के लिए, <a href=\"/settings/\">सेटिंग्स</a> पर जाएं। <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">और जानें</a>"
+			"hidden_micro_transactions": "बहुत छोटे टोकन मूल्यों वाले लेनदेन वर्तमान में छिपे हुए हैं। उन्हें दिखाने के लिए, <a href=\"/settings/\">सेटिंग्स</a> पर जाएं। <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">और जानें</a>"
 		},
 		"warning": {
-			"no_index_canister": "$token_list के लिए लेनदेन प्रदर्शित नहीं किए जा सकते। कोई इंडेक्स कैनिस्टर उपलब्ध नहीं है।",
-			"unavailable_index_canister": "$token_list के लिए लेनदेन प्रदर्शित नहीं किए जा सकते। इंडेक्स कैनिस्टर वर्तमान में अनुपलब्ध है।"
+			"no_index_canister": "$oisy_short, $token_list के लेनदेन लोड नहीं कर सकता — टोकन जारीकर्ता लेनदेन ट्रैकिंग की सुविधा नहीं देता।",
+			"unavailable_index_canister": "$token_list के नवीनतम लेनदेन इस समय लोड नहीं किए जा सकते, क्योंकि उनकी ट्रैकिंग सेवा प्रतिक्रिया नहीं दे रही है। सेवा के वापस आते ही वे अपने आप लोड हो जाएंगे।"
 		}
 	},
 	"earning": {
 		"text": {
 			"title": "कमाएं",
 			"tab_title": "कमाई हो रही है",
+			"tab_title_short": "कमाई हो रही है",
 			"earning_opportunities": "कमाई के अवसर",
 			"header_title": "कमाएं में आपका स्वागत है!",
 			"header_description": "अपने टोकन को कमाई के अवसरों में लगाकर अपना डिजिटल एसेट पोर्टफोलियो बढ़ाएं।",
@@ -1985,10 +2601,10 @@
 				"description": "एक क्लिक के Autopilot vaults के साथ अधिकतम यील्ड दक्षता।",
 				"action": "Autopilot पर जाएं"
 			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "OISY उपयोग करें और कमाएं! एपिसोड 6 लाइव है 🎉",
-				"action": "स्थिति जांचें"
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -1998,6 +2614,8 @@
 			"currentStaked": "स्टेक किया गया",
 			"currentEarning": "अभी कमाई",
 			"earningPotential": "कमाई की संभावना",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "शर्तें"
 		},
 		"terms": {
@@ -2007,6 +2625,108 @@
 			"goldDaoStaking": {
 				"cardTitle": "Gold DAO के साथ कमाएं"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "Bitcoin जमा करें। स्टेबलकॉइन उधार लें। नेटिव बने रहें।",
+			"health_factor": "स्वास्थ्य कारक",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
+			"net_value": "नेट वैल्यू",
+			"markets": "मार्केट्स",
+			"total_supplied": "कुल जमा",
+			"no_assets_supplied": "कोई एसेट जमा नहीं किया गया",
+			"supplied": "जमा किया गया",
+			"borrowed": "उधार लिया गया",
+			"borrow_rate": "उधार दर",
+			"apy_suffix": "APY",
+			"supply_label": "जमा करें",
+			"borrow_label": "उधार लें",
+			"coming_soon": "जल्द आ रहा है",
+			"coming_soon_teaser": "जल्द आ रहा है…",
+			"action_supply": "जमा करें",
+			"action_borrow": "उधार लें",
+			"action_repay": "चुकाएं",
+			"action_withdraw": "निकालें",
+			"transaction_failed": "लेन-देन विफल रहा",
+			"select_supply_token": "",
+			"select_borrow_token": "",
+			"select_withdraw_token": "",
+			"select_repay_token": "",
+			"supply_review": "जमा की समीक्षा करें",
+			"supply_review_subtitle": "आप जमा कर रहे हैं",
+			"supplying": "जमा हो रहा है",
+			"starting_to_supply": "आपकी पोजीशन सबमिट की जा रही है…",
+			"supply_started": "आपकी पोजीशन अब सक्रिय हो रही है।",
+			"supply_apy": "जमा APY",
+			"supply_collateral_info": "जमा किए गए एसेट्स कोलैटरल के रूप में भी काम करते हैं, जिसके बदले आप उधार ले सकते हैं।",
+			"supply_agreement": "मैं समझता/समझती हूं कि मेरे एसेट्स Liquidium प्रोटोकॉल को जमा किए जाएंगे और ऑनचेन स्मार्ट-कॉन्ट्रैक्ट जोखिम के अधीन हैं।",
+			"provider_fee": "नेटवर्क शुल्क",
+			"transaction_fee": "लेन-देन शुल्क",
+			"insufficient_funds_for_fee": "राशि और शुल्क को कवर करने के लिए बैलेंस अपर्याप्त है।",
+			"supply_prices_unavailable": "कीमतें अस्थायी रूप से अनुपलब्ध हैं। लोड होने तक जमा करना अक्षम है।",
+			"minimum_supply": "न्यूनतम जमा",
+			"supply_below_minimum": "राशि न्यूनतम जमा राशि से कम है।",
+			"borrow_review": "उधार की समीक्षा करें",
+			"borrow_review_subtitle": "आप उधार ले रहे हैं",
+			"borrowing": "उधार लिया जा रहा है",
+			"borrow_apy": "उधार APY",
+			"resulting_ltv": "परिणामी LTV",
+			"projected_health_factor": "अनुमानित स्वास्थ्य कारक",
+			"borrowing_power": "उधार क्षमता",
+			"collateral": "कोलैटरल",
+			"minimum_borrow": "न्यूनतम उधार",
+			"provider": "प्रोवाइडर",
+			"funds_delivered_to": "फंड यहां भेजे जाएंगे",
+			"your_oisy_address": "आपका $oisy_short पता",
+			"borrow_risk_info": "उधार लेने से आपका स्वास्थ्य कारक कम हो जाता है। यदि यह बहुत कम हो जाए, तो आपका कोलैटरल लिक्विडेट किया जा सकता है।",
+			"borrow_activation_fee_info": "Liquidium उधार ली गई राशि के ऊपर $fee% का एक्टिवेशन शुल्क जोड़ता है।",
+			"borrow_at_risk_warning": "यह उधार आपके स्वास्थ्य कारक को काफी कम कर देता है।",
+			"borrow_exceeds_power": "राशि आपकी उधार क्षमता से अधिक है।",
+			"borrow_below_minimum": "राशि न्यूनतम उधार से कम है।",
+			"borrow_prices_unavailable": "कीमतें अस्थायी रूप से अनुपलब्ध हैं। लोड होने तक उधार लेना अक्षम है।",
+			"borrow_high_risk_warning": "यह उधार आपकी पोजीशन को लिक्विडेशन के करीब ले जाता है।",
+			"borrow_risk_confirm": "मैं समझता/समझती हूं कि यह उधार मेरे लिक्विडेशन जोखिम को बढ़ाता है।",
+			"starting_to_borrow": "आपका लोन सबमिट किया जा रहा है…",
+			"borrow_started": "आपका लोन अब सक्रिय हो रहा है।",
+			"withdraw_review": "निकासी की समीक्षा करें",
+			"withdraw_review_subtitle": "आप निकाल रहे हैं",
+			"withdrawing": "निकासी हो रही है",
+			"starting_to_withdraw": "आपकी निकासी सबमिट की जा रही है…",
+			"withdraw_started": "आपकी निकासी अब प्रोसेस हो रही है।",
+			"supplied_label": "जमा किया गया",
+			"withdrawable": "",
+			"reserved_by_debt": "खुले कर्ज के कारण आरक्षित",
+			"withdraw_exceeds_free_collateral": "जब तक कर्ज खुला है, आप अपने मुक्त कोलैटरल से अधिक नहीं निकाल सकते।",
+			"withdraw_exceeds_supplied": "राशि आपके जमा किए गए बैलेंस से अधिक है।",
+			"withdraw_prices_unavailable": "कीमतें अस्थायी रूप से अनुपलब्ध हैं। लोड होने तक निकासी अक्षम है।",
+			"withdraw_risk_info": "कोलैटरल निकालने से आपका स्वास्थ्य कारक कम हो जाता है। यदि यह बहुत कम हो जाए, तो आपका शेष कोलैटरल लिक्विडेट किया जा सकता है।",
+			"withdraw_at_risk_warning": "यह निकासी आपके स्वास्थ्य कारक को काफी कम कर देती है।",
+			"withdraw_high_risk_warning": "यह निकासी आपकी पोजीशन को लिक्विडेशन के करीब ले जाती है।",
+			"withdraw_risk_confirm": "मैं समझता/समझती हूं कि यह निकासी मेरे लिक्विडेशन जोखिम को बढ़ाती है।",
+			"repay_review": "चुकौती की समीक्षा करें",
+			"repay_review_subtitle": "आप चुका रहे हैं",
+			"repaying": "चुकौती हो रही है",
+			"starting_to_repay": "आपकी चुकौती सबमिट की जा रही है…",
+			"repay_started": "आपकी चुकौती अब प्रोसेस हो रही है।",
+			"current_debt": "मौजूदा कर्ज",
+			"interest_accrued": "अर्जित ब्याज",
+			"debt_after_repay": "चुकौती के बाद कर्ज",
+			"repay_exceeds_debt": "राशि आपके बकाया कर्ज से अधिक है।",
+			"repay_prices_unavailable": "कीमतें अस्थायी रूप से अनुपलब्ध हैं। लोड होने तक चुकौती अक्षम है।"
+		},
+		"info": {
+			"title": "Liquidium क्या है",
+			"description": "Liquidium एक विकेंद्रीकृत, नॉन-कस्टोडियल लेंडिंग प्रोटोकॉल है, जहां आप कई ब्लॉकचेन नेटवर्क में एसेट्स जमा कर सकते हैं या उधार ले सकते हैं। यह Internet Computer पर बना है और बिना केंद्रीकृत ब्रिज या रैप्ड टोकन के क्रॉस-चेन लेंडिंग को संभव बनाता है।",
+			"fact_1_title": "अपने BTC पर कमाएं",
+			"fact_1_description": "अपना Bitcoin उधार दें और ओवर-कोलैटरलाइज़्ड लोन से यील्ड कमाएं।",
+			"fact_2_title": "नॉन-कस्टोडियल",
+			"fact_2_description": "जमा राशि ऑनचेन स्मार्ट कॉन्ट्रैक्ट्स द्वारा सुरक्षित है, बिना किसी केंद्रीकृत नियंत्रण के।",
+			"fact_3_title": "नेटिव, क्रॉस-चेन",
+			"fact_3_description": "एसेट्स अपनी नेटिव चेन पर बने रहते हैं, इसलिए आप एक पर जमा कर सकते हैं और दूसरी पर उधार ले सकते हैं।"
 		}
 	},
 	"vaults": {
@@ -2089,9 +2809,7 @@
 			"title_empty_3": "",
 			"description_empty": "ऐसा लगता है कि आपने अभी तक कोई टोकन स्टेक नहीं किया है",
 			"full_history": "पूरा इतिहास दिखाएं",
-			"recent_history": "पूरा इतिहास बंद करें",
-			"harvest_autopilot_carousel_slide_title": "Harvest Autopilot Yield Farming के साथ OISY में कमाएं",
-			"harvest_autopilot_carousel_slide_cta": "और जानें"
+			"recent_history": "पूरा इतिहास बंद करें"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "टोकन निकालते समय कुछ गलत हो गया।",
@@ -2181,6 +2899,222 @@
 		"errors": {
 			"unknown": "क्षमा करें, LLM से प्रतिक्रिया प्राप्त करने में कुछ गलत हो गया।",
 			"no_response": "क्षमा करें, मुझे LLM से कोई प्रतिक्रिया नहीं मिली।"
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "नोट्स",
+			"note": "नोट",
+			"add_title": "नया नोट जोड़ें",
+			"edit_note": "नोट संपादित करें",
+			"delete_note": "नोट हटाएं",
+			"delete_confirm_text": "इससे नोट '$note' हट जाएगा। यह क्रिया पूर्ववत नहीं की जा सकती।",
+			"back": "वापस",
+			"empty_title": "आपके पास अभी कोई नोट नहीं है",
+			"empty_subtitle": "अपने वॉलेट के साथ विवरण सुरक्षित रखने के लिए निजी, एन्क्रिप्टेड नोट बनाएं।",
+			"empty_add": "नया नोट जोड़ें",
+			"unlocking_title": "आपके नोट अनलॉक हो रहे हैं",
+			"unlocking_subtitle": "आपकी निजी एन्क्रिप्शन कुंजी सेट की जा रही है — इसमें बस एक पल लगेगा।",
+			"add_note": "नोट जोड़ें",
+			"note_label": "नोट",
+			"placeholder": "एक नोट लिखें…",
+			"search_placeholder": "नोट खोजें",
+			"no_results": "आपकी खोज से कोई नोट मेल नहीं खाता।",
+			"encrypted_lead": "एंड-टू-एंड एन्क्रिप्टेड।",
+			"encrypted_info": "केवल आप ही अपने नोट पढ़ सकते हैं।",
+			"created": "$date को बनाया गया",
+			"updated": "$date को अपडेट किया गया",
+			"created_updated": "बनाया गया $created · अपडेट किया गया $updated",
+			"too_long": "नोट अधिकतम $maxCharacters अक्षरों का होना चाहिए।",
+			"cap_reached": "आपने अधिकतम $max सहेजे गए नोट की सीमा पूरी कर ली है। नया नोट जोड़ने के लिए एक हटाएं।",
+			"decryption_failed": "इस नोट को डिक्रिप्ट नहीं किया जा सका",
+			"unavailable_title": "नोट अस्थायी रूप से अनुपलब्ध हैं"
+		},
+		"alt": {
+			"edit": "नोट संपादित करें",
+			"delete": "नोट हटाएं"
+		},
+		"error": {
+			"load": "आपके नोट लोड नहीं हो सके। कृपया फिर से प्रयास करें।",
+			"save": "आपका नोट सहेजा नहीं जा सका। कृपया फिर से प्रयास करें।",
+			"delete": "आपका नोट हटाया नहीं जा सका। कृपया फिर से प्रयास करें।",
+			"rate_limited": "आपने अनुरोध सीमा पूरी कर ली है। कृपया कुछ पल प्रतीक्षा करें और फिर से प्रयास करें।"
+		},
+		"share": {
+			"text": {
+				"share_note": "नोट शेयर करें",
+				"snapshot_caption": "नोट की अभी की स्थिति की एक कॉपी शेयर करता है। बाद में नोट संपादित करने या हटाने से यह लिंक नहीं बदलेगा।",
+				"cap_reached": "आपने अधिकतम $max सक्रिय शेयर लिंक की सीमा पूरी कर ली है। ये समाप्त होने या उपयोग होने पर खाली हो जाते हैं।",
+				"expires_after": "लिंक इसके बाद समाप्त होगा",
+				"expiry_1h": "",
+				"expiry_24h": "24 घंटे",
+				"expiry_7d": "7 दिन",
+				"expiry_30d": "30 दिन",
+				"single_use": "एकल उपयोग",
+				"single_use_option": "लिंक केवल एक बार इस्तेमाल किया जा सकता है",
+				"protects_body": "इस लिंक को पाने वाला व्यक्ति ही आपका नोट पढ़ सकता है।",
+				"create_link": "लिंक बनाएं",
+				"link_ready_title": "शेयर लिंक तैयार है",
+				"link_ready_subtitle": "इस लिंक वाला कोई भी व्यक्ति नोट पढ़ सकता है",
+				"link_copied": "लिंक कॉपी हो गया!",
+				"recap_expires_in": "$duration में समाप्त होगा",
+				"recap_single_use": "एकल-उपयोग",
+				"reminder": "$oisy_short शेयर होने के बाद इस लिंक को न तो पुनर्प्राप्त कर सकता है और न ही रद्द कर सकता है। उपयोग होने या समाप्त होने के बाद यह काम करना बंद कर देता है।",
+				"done": "पूर्ण"
+			},
+			"error": {
+				"create": "शेयर लिंक नहीं बनाया जा सका। कृपया फिर से प्रयास करें।"
+			},
+			"recipient": {
+				"locked_title": "आपके साथ एक नोट शेयर किया गया था",
+				"reveal": "नोट दिखाएं",
+				"revealed_title": "शेयर किया गया नोट",
+				"single_use_caveat": "एकल-उपयोग लिंक — जैसे ही आप इस पेज को बंद करें या फिर से लोड करें, नोट हमेशा के लिए चला जाएगा। यदि आपको इसकी ज़रूरत है तो अभी इसे कॉपी कर लें।",
+				"copy_note": "नोट कॉपी करें",
+				"note_copied": "नोट कॉपी हो गया!",
+				"outro_title": "यह आपके एसेट्स को भी उतना ही सुरक्षित रखता है",
+				"outro_subtitle": "$oisy_short, Bitcoin, Ethereum, Solana, ICP और अन्य के लिए एक पूरी तरह ऑनचेन, सेल्फ-कस्टडी वॉलेट है।",
+				"outro_feature_multichain": "Bitcoin, Ethereum, Solana और ICP एक ही जगह पर",
+				"outro_feature_onchain": "100% ऑनचेन — न कोई एक्सटेंशन, न कोई सीड फ्रेज़",
+				"outro_feature_encrypted": "आपकी keys और आपका डेटा, एंड-टू-एंड एन्क्रिप्टेड",
+				"discover": "OISY के बारे में जानें",
+				"unavailable_title": "यह लिंक समाप्त हो चुका है या पहले ही इस्तेमाल किया जा चुका है"
+			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"overview_window": "",
+			"overview_failed": "",
+			"overview_failed_hint": "",
+			"overview_open": "",
+			"overview_none": "",
+			"overview_count_one": "",
+			"overview_count_other": "",
+			"overview_claimed": "",
+			"select_token": "",
+			"create_title": "",
+			"share_title": "",
+			"preparing_title": "",
+			"empty_balance_title": "",
+			"empty_balance_description": "",
+			"no_supported_tokens_title": "",
+			"no_supported_tokens_description": "",
+			"expiration": "",
+			"expiry_24h": "",
+			"expiry_3d": "",
+			"expiry_7d": "",
+			"message": "",
+			"message_placeholder": "",
+			"total_estimated_fee": "",
+			"reserve_fee": "",
+			"payout_fee": "",
+			"fees_are_yours": "",
+			"reserved_by_tips": "",
+			"lapse_notice": "",
+			"generate": "",
+			"share_heading": "",
+			"copy_link": "",
+			"share_link": "",
+			"they_will_receive": "",
+			"no_wallet_needed_title": "",
+			"no_wallet_needed": "",
+			"scan_or_photo": "",
+			"expires_at": "",
+			"done": "",
+			"step_reserving": "",
+			"step_creating": "",
+			"step_saving": "",
+			"recovering_link": "",
+			"link_not_saved": "",
+			"reserve_failed": "",
+			"status_title": "",
+			"claim_title": "",
+			"claim_amount": "",
+			"claim_expires": "",
+			"claim_ready_title": "",
+			"claim_ready_title_plain": "",
+			"claim_ready_description": "",
+			"claim_token": "",
+			"claim_status": "",
+			"open_or_create": "",
+			"open_or_create_hint": "",
+			"claimer_disclosure": "",
+			"claimed_title": "",
+			"claimed_description": "",
+			"claiming_title": "",
+			"claiming_description": "",
+			"claim_retry": "",
+			"received_title": "",
+			"received_description": "",
+			"network": "",
+			"status_completed": "",
+			"take_me_to_wallet": "",
+			"unavailable_title": "",
+			"unavailable_description": "",
+			"uncovered_title": "",
+			"uncovered_description": "",
+			"short_balance_title": "",
+			"short_balance_description": "",
+			"claim_failed_title": "",
+			"claim_failed": "",
+			"unreachable_title": "",
+			"unreachable_description": "",
+			"history_title": "",
+			"history_empty": "",
+			"history_failed": "",
+			"group_failed": "",
+			"group_failed_hint": "",
+			"failure_uncovered": "",
+			"failure_insufficient_funds": "",
+			"failure_transfer_failed": "",
+			"group_open": "",
+			"group_claimed": "",
+			"group_expired": "",
+			"status_reserved": "",
+			"status_failed": "",
+			"status_claimed": "",
+			"status_expired": "",
+			"status_cancelled": "",
+			"claimed_by": "",
+			"tip_amount": "",
+			"expires_in": "",
+			"link_unavailable": "",
+			"link_recovery_failed": "",
+			"cancel_tip": "",
+			"cancel_failed": "",
+			"cancelled_toast": "",
+			"cancelled_allowance_kept": "",
+			"token_unavailable": "",
+			"message_too_long": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": "",
+			"rate_limited": "",
+			"rate_limited_title": ""
+		},
+		"alt": {
+			"intro_illustration": "",
+			"claim_illustration": "",
+			"claim_failed_illustration": "",
+			"welcome_illustration": ""
+		},
+		"share": {
+			"title": "",
+			"description": ""
+		},
+		"welcome": {
+			"title": "",
+			"heading": "",
+			"body": "",
+			"point_access_title": "",
+			"point_access_text": "",
+			"point_stay_title": "",
+			"point_stay_text": "",
+			"cta": ""
 		}
 	}
 }

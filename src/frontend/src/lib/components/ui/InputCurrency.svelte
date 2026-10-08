@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Input } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
+	import InputBase from '$lib/components/ui/InputBase.svelte';
 
 	interface Props {
 		innerEnd?: Snippet;
@@ -43,7 +43,7 @@
 </script>
 
 <div class="input-currency-container">
-	<Input
+	<InputBase
 		{name}
 		autocomplete="off"
 		{decimals}

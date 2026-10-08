@@ -4,7 +4,13 @@
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 
 	const handleKeydown = (e: KeyboardEvent) => {
-		const isInputField = e?.target instanceof HTMLInputElement;
+		const { target } = e;
+		// Don't trigger shortcuts while the user is typing into a field: inputs,
+		// textareas (e.g. the note editor), or any contenteditable element.
+		const isInputField =
+			target instanceof HTMLInputElement ||
+			target instanceof HTMLTextAreaElement ||
+			(target instanceof HTMLElement && target.isContentEditable);
 		const hasModifier = e.ctrlKey || e.altKey || e.shiftKey || e.metaKey;
 
 		if (!isInputField) {

@@ -1,6 +1,8 @@
+import * as addressEnv from '$env/address.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import * as api from '$lib/api/backend.api';
 import { allowSigning } from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -8,7 +10,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { loadAddresses } from '$lib/services/addresses.services';
 import { trackRateLimited } from '$lib/services/analytics.services';
 import * as authServices from '$lib/services/auth.services';
-import { nullishSignOut, signOut } from '$lib/services/auth.services';
+import { infoSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { initLoader, initSignerAllowance } from '$lib/services/loader.services';
 import { authStore } from '$lib/stores/auth.store';
@@ -26,7 +28,7 @@ import { toNullable } from '@dfinity/utils';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/services/load-user-profile.services', () => ({
-	loadUserProfile: vi.fn(() => Promise.resolve({ success: true }))
+	loadUserProfile: vi.fn(() => Promise.resolve({ success: true, profileCreated: false }))
 }));
 
 vi.mock('$lib/services/addresses.services', () => ({
@@ -137,6 +139,7 @@ describe('loader.services', () => {
 			vi.resetAllMocks();
 
 			vi.spyOn(authServices, 'signOut').mockImplementation(vi.fn());
+			vi.spyOn(authServices, 'infoSignOut').mockImplementation(vi.fn());
 			vi.spyOn(authServices, 'nullishSignOut').mockImplementation(vi.fn());
 			vi.spyOn(api, 'allowSigning').mockResolvedValue(mockExecutedOutcome);
 
@@ -160,11 +163,60 @@ describe('loader.services', () => {
 		});
 
 		it('should sign out if the user profile is not loaded', async () => {
-			vi.mocked(loadUserProfile).mockResolvedValueOnce({ success: false });
+			vi.mocked(loadUserProfile).mockResolvedValueOnce({
+				success: false,
+				err: 'unknown',
+				profileCreated: false
+			});
 
 			await initLoader(mockParams);
 
 			expect(signOut).toHaveBeenCalledOnce();
+		});
+
+		it('should sign out via infoSignOut when signups are closed', async () => {
+			vi.mocked(loadUserProfile).mockResolvedValueOnce({
+				success: false,
+				err: 'signups-closed',
+				profileCreated: false
+			});
+
+			await initLoader(mockParams);
+
+			expect(infoSignOut).toHaveBeenCalledExactlyOnceWith({
+				text: expect.stringMatching(/sign-?ups/i),
+				source: 'signups-closed'
+			});
+			expect(signOut).not.toHaveBeenCalled();
+		});
+
+		it('should await the signer allowance when the profile was just created', async () => {
+			vi.spyOn(addressEnv, 'FRONTEND_DERIVATION_ENABLED', 'get').mockReturnValue(true);
+			vi.spyOn(authServices, 'errorSignOut').mockImplementation(vi.fn());
+			vi.mocked(loadUserProfile).mockResolvedValueOnce({
+				success: true,
+				profileCreated: true
+			});
+			vi.spyOn(api, 'allowSigning').mockRejectedValueOnce(new Error('no allowance'));
+
+			await initLoader(mockParams);
+
+			// Awaited: the failure short-circuits `initLoader` before the wallet workers start.
+			expect(loadAddresses).not.toHaveBeenCalled();
+		});
+
+		it('should not await the signer allowance for a returning user', async () => {
+			vi.spyOn(addressEnv, 'FRONTEND_DERIVATION_ENABLED', 'get').mockReturnValue(true);
+			vi.spyOn(authServices, 'errorSignOut').mockImplementation(vi.fn());
+			vi.mocked(loadUserProfile).mockResolvedValueOnce({
+				success: true,
+				profileCreated: false
+			});
+			vi.spyOn(api, 'allowSigning').mockRejectedValueOnce(new Error('no allowance'));
+
+			await initLoader(mockParams);
+
+			expect(loadAddresses).toHaveBeenCalledOnce();
 		});
 
 		it('should load addresses from the backend', async () => {
@@ -180,7 +232,8 @@ describe('loader.services', () => {
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, [
 				BTC_MAINNET_NETWORK_ID,
 				ETHEREUM_NETWORK_ID,
-				SOLANA_MAINNET_NETWORK_ID
+				SOLANA_MAINNET_NETWORK_ID,
+				XRP_MAINNET_NETWORK_ID
 			]);
 		});
 
@@ -201,7 +254,9 @@ describe('loader.services', () => {
 								[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
 								[{ PolygonMainnet: null }, { enabled: false, is_testnet: false }],
 								[{ ArbitrumMainnet: null }, { enabled: false, is_testnet: false }],
-								[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
+								[{ RobinhoodMainnet: null }, { enabled: false, is_testnet: false }],
+								[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }],
+								[{ XrpMainnet: null }, { enabled: false, is_testnet: false }]
 							]
 						}
 					})
@@ -235,7 +290,8 @@ describe('loader.services', () => {
 								[{ EthereumMainnet: null }, { enabled: false, is_testnet: false }],
 								[{ BaseMainnet: null }, { enabled: true, is_testnet: false }],
 								[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
-								[{ SolanaMainnet: null }, { enabled: false, is_testnet: false }]
+								[{ SolanaMainnet: null }, { enabled: false, is_testnet: false }],
+								[{ XrpMainnet: null }, { enabled: false, is_testnet: false }]
 							]
 						}
 					})

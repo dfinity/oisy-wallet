@@ -1,23 +1,31 @@
 use candid::{CandidType, Deserialize};
+use serde_bytes::ByteBuf;
 
 use super::{
     bitcoin::{
         BtcAddPendingTransactionError, BtcGetPendingTransactionsError,
-        BtcGetPendingTransactionsReponse, SelectedUtxosFeeError, SelectedUtxosFeeResponse,
+        BtcGetPendingTransactionsReponse,
     },
     dapp::AddDappSettingsError,
     notification::AddDismissedNotificationError,
     signer::{
         AllowSigningError, AllowSigningResponse, GetAllowedCyclesError, GetAllowedCyclesResponse,
     },
-    user_profile::{GetUserProfileError, UserProfile},
+    user_profile::{CreateUserProfileError, GetUserProfileError, UserProfile},
 };
 use crate::types::{
+    active_user_transaction::{
+        ActiveUserTransaction, ActiveUserTransactionError, GetActiveUserTransactionsResponse,
+    },
     agreement::{AgreementHistoryEntry, GetAgreementHistoryError, UpdateAgreementsError},
-    bitcoin::BtcGetFeePercentilesResponse,
+    bitcoin::{BtcGetFeePercentilesError, BtcGetFeePercentilesResponse},
     contact::{Contact, ContactError},
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
+    onramper::{SignOnramperWidgetUrlError, SignOnramperWidgetUrlResponse},
+    personal_note::{PersonalNoteEntry, PersonalNoteError},
+    personal_note_share::{PersonalNoteShareContent, PersonalNoteShareError},
+    tip::{MyTip, PublicTip, TipClaim, TipDetails, TipError},
     transaction_settings::UpdateTransactionFilterSettingsError,
     user_transaction::{GetUserTransactionsResponse, UserTransactionError},
 };
@@ -153,6 +161,22 @@ impl From<Result<UserProfile, GetUserProfileError>> for GetUserProfileResult {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum CreateUserProfileResult {
+    /// The user's profile was created (or already existed) and is returned.
+    Ok(Box<UserProfile>),
+    /// The profile could not be created due to an error.
+    Err(CreateUserProfileError),
+}
+impl From<Result<UserProfile, CreateUserProfileError>> for CreateUserProfileResult {
+    fn from(result: Result<UserProfile, CreateUserProfileError>) -> Self {
+        match result {
+            Ok(profile) => CreateUserProfileResult::Ok(Box::new(profile)),
+            Err(err) => CreateUserProfileResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum GetAllowedCyclesResult {
     /// The allowed cycles were retrieved successfully.
     Ok(GetAllowedCyclesResponse),
@@ -169,32 +193,16 @@ impl From<Result<GetAllowedCyclesResponse, GetAllowedCyclesError>> for GetAllowe
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum BtcSelectUserUtxosFeeResult {
-    /// The fee was selected successfully.
-    Ok(SelectedUtxosFeeResponse),
-    /// The fee was not selected due to an error.
-    Err(SelectedUtxosFeeError),
-}
-impl From<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>> for BtcSelectUserUtxosFeeResult {
-    fn from(result: Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>) -> Self {
-        match result {
-            Ok(response) => BtcSelectUserUtxosFeeResult::Ok(response),
-            Err(err) => BtcSelectUserUtxosFeeResult::Err(err),
-        }
-    }
-}
-
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum BtcGetFeePercentilesResult {
     /// The fee was selected successfully.
     Ok(BtcGetFeePercentilesResponse),
     /// The fee was not selected due to an error.
-    Err(SelectedUtxosFeeError),
+    Err(BtcGetFeePercentilesError),
 }
-impl From<Result<BtcGetFeePercentilesResponse, SelectedUtxosFeeError>>
+impl From<Result<BtcGetFeePercentilesResponse, BtcGetFeePercentilesError>>
     for BtcGetFeePercentilesResult
 {
-    fn from(result: Result<BtcGetFeePercentilesResponse, SelectedUtxosFeeError>) -> Self {
+    fn from(result: Result<BtcGetFeePercentilesResponse, BtcGetFeePercentilesError>) -> Self {
         match result {
             Ok(response) => BtcGetFeePercentilesResult::Ok(response),
             Err(err) => BtcGetFeePercentilesResult::Err(err),
@@ -390,6 +398,345 @@ impl From<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>
         match result {
             Ok(entries) => GetAgreementHistoryResult::Ok(entries),
             Err(err) => GetAgreementHistoryResult::Err(err),
+        }
+    }
+}
+
+/// Shared result for endpoints that return a single `ActiveUserTransaction`
+/// (both `create_active_user_transaction` and `update_active_user_transaction`).
+/// One type because the wire shape is identical — the candid extractor would
+/// dedupe twin variants anyway.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum ActiveUserTransactionResult {
+    Ok(Box<ActiveUserTransaction>),
+    Err(ActiveUserTransactionError),
+}
+impl From<Result<ActiveUserTransaction, ActiveUserTransactionError>>
+    for ActiveUserTransactionResult
+{
+    fn from(result: Result<ActiveUserTransaction, ActiveUserTransactionError>) -> Self {
+        match result {
+            Ok(tx) => ActiveUserTransactionResult::Ok(Box::new(tx)),
+            Err(err) => ActiveUserTransactionResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetActiveUserTransactionsResult {
+    Ok(GetActiveUserTransactionsResponse),
+    Err(ActiveUserTransactionError),
+}
+impl From<Result<GetActiveUserTransactionsResponse, ActiveUserTransactionError>>
+    for GetActiveUserTransactionsResult
+{
+    fn from(result: Result<GetActiveUserTransactionsResponse, ActiveUserTransactionError>) -> Self {
+        match result {
+            Ok(response) => GetActiveUserTransactionsResult::Ok(response),
+            Err(err) => GetActiveUserTransactionsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum DeleteActiveUserTransactionResult {
+    Ok(()),
+    Err(ActiveUserTransactionError),
+}
+impl From<Result<(), ActiveUserTransactionError>> for DeleteActiveUserTransactionResult {
+    fn from(result: Result<(), ActiveUserTransactionError>) -> Self {
+        match result {
+            Ok(()) => DeleteActiveUserTransactionResult::Ok(()),
+            Err(err) => DeleteActiveUserTransactionResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum SignOnramperWidgetUrlResult {
+    /// The signature plus the exact canonical query fragment that was signed.
+    Ok(SignOnramperWidgetUrlResponse),
+    Err(SignOnramperWidgetUrlError),
+}
+impl From<Result<SignOnramperWidgetUrlResponse, SignOnramperWidgetUrlError>>
+    for SignOnramperWidgetUrlResult
+{
+    fn from(result: Result<SignOnramperWidgetUrlResponse, SignOnramperWidgetUrlError>) -> Self {
+        match result {
+            Ok(response) => SignOnramperWidgetUrlResult::Ok(response),
+            Err(err) => SignOnramperWidgetUrlResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum SetPersonalNoteResult {
+    /// The note was created or updated successfully.
+    Ok(()),
+    /// The note could not be stored due to an error.
+    Err(PersonalNoteError),
+}
+impl From<Result<(), PersonalNoteError>> for SetPersonalNoteResult {
+    fn from(result: Result<(), PersonalNoteError>) -> Self {
+        match result {
+            Ok(()) => SetPersonalNoteResult::Ok(()),
+            Err(err) => SetPersonalNoteResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum DeletePersonalNoteResult {
+    /// The note was deleted (idempotent — also `Ok` when it did not exist).
+    Ok(()),
+    /// The note could not be deleted due to an error.
+    Err(PersonalNoteError),
+}
+impl From<Result<(), PersonalNoteError>> for DeletePersonalNoteResult {
+    fn from(result: Result<(), PersonalNoteError>) -> Self {
+        match result {
+            Ok(()) => DeletePersonalNoteResult::Ok(()),
+            Err(err) => DeletePersonalNoteResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetPersonalNotesResult {
+    /// All of the caller's (encrypted) notes.
+    Ok(Vec<PersonalNoteEntry>),
+    /// The notes could not be retrieved due to an error.
+    Err(PersonalNoteError),
+}
+impl From<Result<Vec<PersonalNoteEntry>, PersonalNoteError>> for GetPersonalNotesResult {
+    fn from(result: Result<Vec<PersonalNoteEntry>, PersonalNoteError>) -> Self {
+        match result {
+            Ok(entries) => GetPersonalNotesResult::Ok(entries),
+            Err(err) => GetPersonalNotesResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetPersonalNotesCountResult {
+    /// The caller's total note count.
+    Ok(u64),
+    /// The count could not be retrieved due to an error.
+    Err(PersonalNoteError),
+}
+impl From<Result<u64, PersonalNoteError>> for GetPersonalNotesCountResult {
+    fn from(result: Result<u64, PersonalNoteError>) -> Self {
+        match result {
+            Ok(count) => GetPersonalNotesCountResult::Ok(count),
+            Err(err) => GetPersonalNotesCountResult::Err(err),
+        }
+    }
+}
+
+/// Shared result for the two vetKey-derivation endpoints (the caller's encrypted
+/// vetKey and the store's public verification key). Both return opaque bytes on
+/// success; the wire shape is identical, so one enum serves both.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum PersonalNotesVetkeyResult {
+    /// vetKey bytes, opaque to the canister.
+    Ok(ByteBuf),
+    /// The vetKey could not be derived due to an error.
+    Err(PersonalNoteError),
+}
+impl From<Result<ByteBuf, PersonalNoteError>> for PersonalNotesVetkeyResult {
+    fn from(result: Result<ByteBuf, PersonalNoteError>) -> Self {
+        match result {
+            Ok(vetkey) => PersonalNotesVetkeyResult::Ok(vetkey),
+            Err(err) => PersonalNotesVetkeyResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum CreatePersonalNoteShareResult {
+    Ok(()),
+    Err(PersonalNoteShareError),
+}
+impl From<Result<(), PersonalNoteShareError>> for CreatePersonalNoteShareResult {
+    fn from(result: Result<(), PersonalNoteShareError>) -> Self {
+        match result {
+            Ok(()) => CreatePersonalNoteShareResult::Ok(()),
+            Err(err) => CreatePersonalNoteShareResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetPersonalNoteShareResult {
+    Ok(PersonalNoteShareContent),
+    Err(PersonalNoteShareError),
+}
+impl From<Result<PersonalNoteShareContent, PersonalNoteShareError>> for GetPersonalNoteShareResult {
+    fn from(result: Result<PersonalNoteShareContent, PersonalNoteShareError>) -> Self {
+        match result {
+            Ok(content) => GetPersonalNoteShareResult::Ok(content),
+            Err(err) => GetPersonalNoteShareResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum ConsumePersonalNoteShareResult {
+    Ok(PersonalNoteShareContent),
+    Err(PersonalNoteShareError),
+}
+impl From<Result<PersonalNoteShareContent, PersonalNoteShareError>>
+    for ConsumePersonalNoteShareResult
+{
+    fn from(result: Result<PersonalNoteShareContent, PersonalNoteShareError>) -> Self {
+        match result {
+            Ok(content) => ConsumePersonalNoteShareResult::Ok(content),
+            Err(err) => ConsumePersonalNoteShareResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetPersonalNoteSharesCountResult {
+    Ok(u64),
+    Err(PersonalNoteShareError),
+}
+impl From<Result<u64, PersonalNoteShareError>> for GetPersonalNoteSharesCountResult {
+    fn from(result: Result<u64, PersonalNoteShareError>) -> Self {
+        match result {
+            Ok(count) => GetPersonalNoteSharesCountResult::Ok(count),
+            Err(err) => GetPersonalNoteSharesCountResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum CreateTipResult {
+    Ok(()),
+    Err(TipError),
+}
+impl From<Result<(), TipError>> for CreateTipResult {
+    fn from(result: Result<(), TipError>) -> Self {
+        match result {
+            Ok(()) => CreateTipResult::Ok(()),
+            Err(err) => CreateTipResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetTipResult {
+    Ok(PublicTip),
+    Err(TipError),
+}
+impl From<Result<PublicTip, TipError>> for GetTipResult {
+    fn from(result: Result<PublicTip, TipError>) -> Self {
+        match result {
+            Ok(tip) => GetTipResult::Ok(tip),
+            Err(err) => GetTipResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetTipDetailsResult {
+    Ok(TipDetails),
+    Err(TipError),
+}
+impl From<Result<TipDetails, TipError>> for GetTipDetailsResult {
+    fn from(result: Result<TipDetails, TipError>) -> Self {
+        match result {
+            Ok(details) => GetTipDetailsResult::Ok(details),
+            Err(err) => GetTipDetailsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum ClaimTipResult {
+    Ok(TipClaim),
+    Err(TipError),
+}
+impl From<Result<TipClaim, TipError>> for ClaimTipResult {
+    fn from(result: Result<TipClaim, TipError>) -> Self {
+        match result {
+            Ok(claim) => ClaimTipResult::Ok(claim),
+            Err(err) => ClaimTipResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum CancelTipResult {
+    Ok(()),
+    Err(TipError),
+}
+impl From<Result<(), TipError>> for CancelTipResult {
+    fn from(result: Result<(), TipError>) -> Self {
+        match result {
+            Ok(()) => CancelTipResult::Ok(()),
+            Err(err) => CancelTipResult::Err(err),
+        }
+    }
+}
+
+/// vetKey material for the tip-secrets store, or why it could not be derived.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum TipVetkeyResult {
+    /// vetKey bytes, opaque to the canister.
+    Ok(ByteBuf),
+    Err(TipError),
+}
+impl From<Result<ByteBuf, TipError>> for TipVetkeyResult {
+    fn from(result: Result<ByteBuf, TipError>) -> Self {
+        match result {
+            Ok(vetkey) => TipVetkeyResult::Ok(vetkey),
+            Err(err) => TipVetkeyResult::Err(err),
+        }
+    }
+}
+
+/// The caller's encrypted claim code for one tip. `Ok(None)` means no secret is
+/// stored — a tip from before the store existed, or one already cleaned up.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum GetTipSecretResult {
+    Ok(Option<ByteBuf>),
+    Err(TipError),
+}
+impl From<Result<Option<ByteBuf>, TipError>> for GetTipSecretResult {
+    fn from(result: Result<Option<ByteBuf>, TipError>) -> Self {
+        match result {
+            Ok(secret) => GetTipSecretResult::Ok(secret),
+            Err(err) => GetTipSecretResult::Err(err),
+        }
+    }
+}
+
+/// Outcome of storing an encrypted claim code.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum SetTipSecretResult {
+    Ok,
+    Err(TipError),
+}
+impl From<Result<(), TipError>> for SetTipSecretResult {
+    fn from(result: Result<(), TipError>) -> Self {
+        match result {
+            Ok(()) => SetTipSecretResult::Ok,
+            Err(err) => SetTipSecretResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetMyTipsResult {
+    Ok(Vec<MyTip>),
+    Err(TipError),
+}
+impl From<Result<Vec<MyTip>, TipError>> for GetMyTipsResult {
+    fn from(result: Result<Vec<MyTip>, TipError>) -> Self {
+        match result {
+            Ok(tips) => GetMyTipsResult::Ok(tips),
+            Err(err) => GetMyTipsResult::Err(err),
         }
     }
 }

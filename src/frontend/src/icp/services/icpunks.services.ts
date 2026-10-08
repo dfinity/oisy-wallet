@@ -68,7 +68,8 @@ const mapIcPunksCustomToken = async ({
 		enabled,
 		version: versionNullable,
 		section: sectionNullable,
-		allow_external_content_source: allowExternalContentSourceNullable
+		allow_external_content_source: allowExternalContentSourceNullable,
+		allowed_external_content_source_urls: allowedExternalContentSourceUrlsNullable
 	},
 	identity,
 	certified
@@ -79,6 +80,7 @@ const mapIcPunksCustomToken = async ({
 	const section = fromNullable(sectionNullable);
 	const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
 	const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
+	const allowedExternalContentSourceUrls = fromNullable(allowedExternalContentSourceUrlsNullable);
 
 	const {
 		IcPunks: { canister_id: rawCanisterId }
@@ -109,7 +111,8 @@ const mapIcPunksCustomToken = async ({
 		...(nonNullish(mappedSection) && {
 			section: mappedSection
 		}),
-		allowExternalContentSource
+		allowExternalContentSource,
+		allowedExternalContentSourceUrls
 	};
 };
 

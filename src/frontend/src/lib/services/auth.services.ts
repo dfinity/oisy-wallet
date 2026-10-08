@@ -31,14 +31,14 @@ import { AUTH_LOCK_KEY } from '$lib/stores/locked.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import { InternetIdentityDomain } from '$lib/types/auth';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
-import type { ToastMsg } from '$lib/types/toast';
+import type { ToastLevel, ToastMsg } from '$lib/types/toast';
 import { consoleError, consoleWarn } from '$lib/utils/console.utils';
 import { emit } from '$lib/utils/events.utils';
 import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 import { replaceHistory } from '$lib/utils/route.utils';
 import { get as getStorage } from '$lib/utils/storage.utils';
 import { randomWait } from '$lib/utils/time.utils';
-import type { ToastLevel } from '@dfinity/gix-components';
+import { clearIdbSolTransactionDetails } from '$sol/api/idb-sol-transaction-details.api';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -139,6 +139,25 @@ export const errorSignOut = (text: string): Promise<void> => {
 	});
 };
 
+export const infoSignOut = ({
+	text,
+	source = ''
+}: {
+	text: string;
+	source?: string;
+}): Promise<void> => {
+	trackSignOut({
+		name: TRACK_SIGN_OUT_SUCCESS,
+		meta: { reason: 'info', text, source }
+	});
+	return logout({
+		msg: {
+			text,
+			level: 'info'
+		}
+	});
+};
+
 export const warnSignOut = (text: string): Promise<void> => {
 	trackSignOut({
 		name: TRACK_SIGN_OUT_WITH_WARNING,
@@ -204,6 +223,9 @@ const clearIdbStoreList = [
 	clearIdbEthTransactions,
 	clearIdbIcTransactions,
 	clearIdbSolTransactions,
+	// The details a Solana record is derived from are chain data rather than the user's, but they
+	// say which transactions this wallet looked at, so they go with the rest of the session.
+	clearIdbSolTransactionDetails,
 	// Balances
 	clearIdbBalances
 ];

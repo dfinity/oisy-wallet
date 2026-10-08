@@ -3,8 +3,13 @@ import { isIcToken } from '$icp/validation/ic-token.validation';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { swappableTokens } from '$lib/derived/swap.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import {
+	swapSupportedTokensStore,
+	type SwapSupportedTokensData
+} from '$lib/stores/swap-supported-tokens.store';
 import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
+import { computeReceiveSupportedTokens } from '$lib/utils/swap-tokens-filter.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 
@@ -28,6 +33,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const { update, set } = data;
 	const isTokensIcrc2 = writable<IsTokensIcrc2Map | undefined>();
 	const isErc20PermitSupported = writable<IsTokensIcrc2Map | undefined>();
+	const failedSwapError = writable<SwapError | undefined>(undefined);
 
 	const sourceToken = derived(
 		[data, swappableTokens],
@@ -83,6 +89,20 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		}
 	);
 
+	// Aggregated per-provider directed destinations reachable from the current source.
+	// Shared by the destination token list, the destination network filter, and the
+	// auto-clear effect, so the per-source aggregation runs once per (source, providers) change.
+	const receiveSupportedData = derived(
+		[sourceToken, swapSupportedTokensStore],
+		([$sourceToken, $swapSupportedTokensStore]) =>
+			nonNullish($sourceToken) && nonNullish($swapSupportedTokensStore)
+				? computeReceiveSupportedTokens({
+						sourceToken: $sourceToken,
+						providers: $swapSupportedTokensStore.providers
+					})
+				: undefined
+	);
+
 	return {
 		sourceToken,
 		destinationToken,
@@ -92,7 +112,8 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		destinationTokenExchangeRate,
 		isSourceTokenIcrc2,
 		isSourceTokenPermitSupported,
-		failedSwapError: writable<SwapError | undefined>(undefined),
+		receiveSupportedData,
+		failedSwapError,
 		setSourceToken: (token: Token) =>
 			update((state) => ({
 				...state,
@@ -142,6 +163,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 				sourceToken: undefined,
 				destinationToken: undefined
 			});
+			failedSwapError.set(undefined);
 		}
 	};
 };
@@ -155,6 +177,7 @@ export interface SwapContext {
 	destinationTokenExchangeRate: Readable<number | undefined>;
 	isSourceTokenIcrc2: Readable<boolean | undefined>;
 	isSourceTokenPermitSupported: Readable<boolean | undefined>;
+	receiveSupportedData: Readable<SwapSupportedTokensData | undefined>;
 	failedSwapError: Writable<SwapError | undefined>;
 	setIsTokensIcrc2: (args: { ledgerCanisterId: string; isIcrc2Supported: boolean }) => void;
 	setIsTokenPermitSupported: ({

@@ -74,7 +74,6 @@ export const payBtc = async ({
 		(await addPendingBtcTransaction({
 			identity,
 			network: mapToSignerBitcoinNetwork({ network: token.network.env }),
-			address,
 			txId: txidStringToUint8Array(txid),
 			utxos: validatedData.utxosFee.utxos,
 			iiDelegationChain: extractIIDelegationChain(identity)

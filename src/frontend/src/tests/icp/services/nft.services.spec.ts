@@ -4,14 +4,17 @@ import * as extTokenApi from '$icp/api/ext-v2-token.api';
 import { getTokensByOwner as getExtTokensByOwner } from '$icp/api/ext-v2-token.api';
 import * as icPunksApi from '$icp/api/icpunks.api';
 import { getTokensByOwner as getIcPunksTokensByOwner } from '$icp/api/icpunks.api';
+import * as icrc7Api from '$icp/api/icrc7.api';
+import { getTokensByOwner as getIcrc7TokensByOwner } from '$icp/api/icrc7.api';
 import { loadNfts } from '$icp/services/nft.services';
-import { mapDip721Nft, mapExtNft, mapIcPunksNft } from '$icp/utils/nft.utils';
+import { mapDip721Nft, mapExtNft, mapIcPunksNft, mapIcrc7Nft } from '$icp/utils/nft.utils';
 import { TRACK_COUNT_IC_LOADING_NFTS_FROM_COLLECTION_ERROR } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import { mockValidExtV2Token, mockValidExtV2Token2 } from '$tests/mocks/ext-tokens.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
+import { mockValidIcrc7Token } from '$tests/mocks/icrc7-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 
 vi.mock(import('$icp/api/icpunks.api'), async (importOriginal) => {
@@ -25,6 +28,15 @@ vi.mock(import('$icp/api/icpunks.api'), async (importOriginal) => {
 	};
 });
 
+vi.mock(import('$icp/api/icrc7.api'), async (importOriginal) => {
+	const actual = await importOriginal();
+
+	return {
+		...actual,
+		metadata: vi.fn().mockResolvedValue({ name: 'Mock ICRC-7 NFT' })
+	};
+});
+
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
 }));
@@ -34,9 +46,10 @@ describe('nft.services', () => {
 		const mockExtTokens = [mockValidExtV2Token, mockValidExtV2Token2];
 		const mockDip721Tokens = [mockValidDip721Token];
 		const mockIcPunksTokens = [mockValidIcPunksToken];
+		const mockIcrc7Tokens = [mockValidIcrc7Token];
 
 		const mockParams = {
-			tokens: [...mockExtTokens, ...mockDip721Tokens, ...mockIcPunksTokens],
+			tokens: [...mockExtTokens, ...mockDip721Tokens, ...mockIcPunksTokens, ...mockIcrc7Tokens],
 			identity: mockIdentity
 		};
 
@@ -44,6 +57,7 @@ describe('nft.services', () => {
 		const mockTokenIndices2 = [4, 5];
 		const mockTokenIndices3 = [6n, 7n, 8n];
 		const mockTokenIndices4 = [9n];
+		const mockTokenIndices5 = [10n, 11n];
 
 		const expected1 = await Promise.all(
 			mockTokenIndices1.map((index) =>
@@ -63,7 +77,12 @@ describe('nft.services', () => {
 				mapIcPunksNft({ index, token: mockValidIcPunksToken, identity: mockIdentity })
 			)
 		);
-		const expected = [...expected1, ...expected2, ...expected3, ...expected4];
+		const expected5 = await Promise.all(
+			mockTokenIndices5.map((index) =>
+				mapIcrc7Nft({ index, token: mockValidIcrc7Token, identity: mockIdentity })
+			)
+		);
+		const expected = [...expected1, ...expected2, ...expected3, ...expected4, ...expected5];
 
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -98,6 +117,15 @@ describe('nft.services', () => {
 
 				return [];
 			});
+
+			// @ts-expect-error This is a mocked implementation that is not asynchronous as the original method is.
+			vi.spyOn(icrc7Api, 'getTokensByOwner').mockImplementation(({ canisterId }) => {
+				if (canisterId === mockValidIcrc7Token.canisterId) {
+					return mockTokenIndices5;
+				}
+
+				return [];
+			});
 		});
 
 		it('should return an empty array if the identity is nullish', async () => {
@@ -108,6 +136,7 @@ describe('nft.services', () => {
 			expect(getExtTokensByOwner).not.toHaveBeenCalled();
 			expect(getDip721TokensByOwner).not.toHaveBeenCalled();
 			expect(getIcPunksTokensByOwner).not.toHaveBeenCalled();
+			expect(getIcrc7TokensByOwner).not.toHaveBeenCalled();
 		});
 
 		it('should return an empty array if the tokens list is empty', async () => {
@@ -116,12 +145,14 @@ describe('nft.services', () => {
 			expect(getExtTokensByOwner).not.toHaveBeenCalled();
 			expect(getDip721TokensByOwner).not.toHaveBeenCalled();
 			expect(getIcPunksTokensByOwner).not.toHaveBeenCalled();
+			expect(getIcrc7TokensByOwner).not.toHaveBeenCalled();
 		});
 
 		it('should return an empty array if there are not tokens owned by the user', async () => {
 			vi.spyOn(extTokenApi, 'getTokensByOwner').mockResolvedValue([]);
 			vi.spyOn(dip721Api, 'getTokensByOwner').mockResolvedValue([]);
 			vi.spyOn(icPunksApi, 'getTokensByOwner').mockResolvedValue([]);
+			vi.spyOn(icrc7Api, 'getTokensByOwner').mockResolvedValue([]);
 
 			await expect(loadNfts(mockParams)).resolves.toEqual([]);
 
@@ -151,6 +182,16 @@ describe('nft.services', () => {
 				expect(getIcPunksTokensByOwner).toHaveBeenCalledWith({
 					identity: mockIdentity,
 					owner: mockPrincipal,
+					canisterId
+				});
+			});
+
+			expect(getIcrc7TokensByOwner).toHaveBeenCalledTimes(mockIcrc7Tokens.length);
+
+			mockIcrc7Tokens.forEach(({ canisterId }) => {
+				expect(getIcrc7TokensByOwner).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					owner: { owner: mockPrincipal, subaccount: [] },
 					canisterId
 				});
 			});
@@ -188,6 +229,16 @@ describe('nft.services', () => {
 					canisterId
 				});
 			});
+
+			expect(getIcrc7TokensByOwner).toHaveBeenCalledTimes(mockIcrc7Tokens.length);
+
+			mockIcrc7Tokens.forEach(({ canisterId }) => {
+				expect(getIcrc7TokensByOwner).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					owner: { owner: mockPrincipal, subaccount: [] },
+					canisterId
+				});
+			});
 		});
 
 		it('should handle EXT service errors gracefully', async () => {
@@ -197,7 +248,8 @@ describe('nft.services', () => {
 			await expect(loadNfts(mockParams)).resolves.toEqual([
 				...expected2,
 				...expected3,
-				...expected4
+				...expected4,
+				...expected5
 			]);
 
 			expect(getExtTokensByOwner).toHaveBeenCalledTimes(mockExtTokens.length);
@@ -247,7 +299,8 @@ describe('nft.services', () => {
 			await expect(loadNfts(mockParams)).resolves.toEqual([
 				...expected1,
 				...expected2,
-				...expected4
+				...expected4,
+				...expected5
 			]);
 
 			expect(getExtTokensByOwner).toHaveBeenCalledTimes(mockExtTokens.length);
@@ -297,7 +350,8 @@ describe('nft.services', () => {
 			await expect(loadNfts(mockParams)).resolves.toEqual([
 				...expected1,
 				...expected2,
-				...expected3
+				...expected3,
+				...expected5
 			]);
 
 			expect(getExtTokensByOwner).toHaveBeenCalledTimes(mockExtTokens.length);
@@ -340,6 +394,37 @@ describe('nft.services', () => {
 			});
 		});
 
+		it('should handle ICRC-7 service errors gracefully', async () => {
+			const mockError = new Error('Mock ICRC-7 error');
+			vi.spyOn(icrc7Api, 'getTokensByOwner').mockRejectedValueOnce(mockError);
+
+			await expect(loadNfts(mockParams)).resolves.toEqual([
+				...expected1,
+				...expected2,
+				...expected3,
+				...expected4
+			]);
+
+			expect(getIcrc7TokensByOwner).toHaveBeenCalledTimes(mockIcrc7Tokens.length);
+
+			mockIcrc7Tokens.forEach(({ canisterId }) => {
+				expect(getIcrc7TokensByOwner).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					owner: { owner: mockPrincipal, subaccount: [] },
+					canisterId
+				});
+			});
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_IC_LOADING_NFTS_FROM_COLLECTION_ERROR,
+				metadata: {
+					error: mockError.message,
+					canisterId: mockValidIcrc7Token.canisterId,
+					standard: mockValidIcrc7Token.standard.code
+				}
+			});
+		});
+
 		it("should raise an error if the token's standard is not supported", async () => {
 			// @ts-expect-error we test this on purpose
 			await expect(loadNfts({ ...mockParams, tokens: [mockValidIcrcToken] })).rejects.toThrow(
@@ -349,6 +434,7 @@ describe('nft.services', () => {
 			expect(getExtTokensByOwner).not.toHaveBeenCalled();
 			expect(getDip721TokensByOwner).not.toHaveBeenCalled();
 			expect(getIcPunksTokensByOwner).not.toHaveBeenCalled();
+			expect(getIcrc7TokensByOwner).not.toHaveBeenCalled();
 		});
 	});
 });

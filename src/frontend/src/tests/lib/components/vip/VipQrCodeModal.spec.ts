@@ -1,6 +1,7 @@
 import type { NewVipRewardResponse } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
 import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
+import { CODE_REGENERATE_INTERVAL_IN_SECONDS } from '$lib/constants/app.constants';
 import {
 	VIP_CODE_REGENERATE_BUTTON,
 	VIP_QR_CODE_BINANCE_ICON,
@@ -11,6 +12,7 @@ import { QrCodeType } from '$lib/enums/qr-code-types';
 import { i18n } from '$lib/stores/i18n.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { render, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { get } from 'svelte/store';
 
 describe('VipQrCodeModal', () => {
@@ -89,6 +91,110 @@ describe('VipQrCodeModal', () => {
 			);
 
 			expect(vipCodeBinanceIcon).toBeInTheDocument();
+		});
+	});
+
+	describe('countdown timer', () => {
+		const countdownSelector = 'span.mb-4.block';
+
+		const readCounter = (container: HTMLElement): number | undefined => {
+			const text = container.querySelector(countdownSelector)?.textContent ?? '';
+			const match = text.match(/(\d+)\s*sec/);
+			return match ? Number(match[1]) : undefined;
+		};
+
+		// Advances fake time by `seconds * 1000ms` one second at a time, flushing the
+		// microtask queue between ticks so that the recursively scheduled `setTimeout`
+		// chain (behind `await intervalFunction()`) is picked up by the next advance.
+		const tickSeconds = async (seconds: number) => {
+			for (let i = 0; i < seconds; i++) {
+				await vi.advanceTimersByTimeAsync(1_000);
+				await tick();
+			}
+		};
+
+		const waitForInitialLoad = async () => {
+			await vi.advanceTimersByTimeAsync(0);
+			await tick();
+			await tick();
+		};
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('should decrement by 1 per second (no acceleration)', async () => {
+			mockAuthStore();
+			vi.spyOn(rewardApi, 'getNewVipReward').mockResolvedValue(mockedNewRewardResponse);
+
+			const { container } = render(VipQrCodeModal);
+
+			await waitForInitialLoad();
+			await tickSeconds(5);
+
+			expect(readCounter(container)).toBe(CODE_REGENERATE_INTERVAL_IN_SECONDS - 5);
+		});
+
+		it('should not accelerate after regeneration (serial timer guarantee)', async () => {
+			mockAuthStore();
+			vi.spyOn(rewardApi, 'getNewVipReward').mockResolvedValue(mockedNewRewardResponse);
+
+			const { container } = render(VipQrCodeModal);
+
+			await waitForInitialLoad();
+
+			// Run through a full cycle + a handful of ticks into the next cycle.
+			// If `scheduleNext` leaks a duplicate timer across `regenerateCode`, the
+			// counter will have decremented by more than 5 in the second cycle.
+			await tickSeconds(CODE_REGENERATE_INTERVAL_IN_SECONDS + 5);
+
+			expect(readCounter(container)).toBe(CODE_REGENERATE_INTERVAL_IN_SECONDS - 5);
+		});
+
+		it('should pause the countdown while the tab is hidden', async () => {
+			mockAuthStore();
+			vi.spyOn(rewardApi, 'getNewVipReward').mockResolvedValue(mockedNewRewardResponse);
+
+			const { container } = render(VipQrCodeModal);
+
+			await waitForInitialLoad();
+			await tickSeconds(3);
+
+			const beforeHidden = readCounter(container);
+
+			vi.spyOn(document, 'hidden', 'get').mockReturnValue(true);
+			document.dispatchEvent(new Event('visibilitychange'));
+			await tick();
+
+			await tickSeconds(5);
+
+			expect(readCounter(container)).toBe(beforeHidden);
+		});
+
+		it('should keep a single timer when visibility flips on repeatedly', async () => {
+			mockAuthStore();
+			vi.spyOn(rewardApi, 'getNewVipReward').mockResolvedValue(mockedNewRewardResponse);
+
+			const { container } = render(VipQrCodeModal);
+
+			await waitForInitialLoad();
+
+			const hiddenSpy = vi.spyOn(document, 'hidden', 'get');
+
+			// Multiple redundant "visible" events must not spawn extra timers.
+			for (let i = 0; i < 3; i++) {
+				hiddenSpy.mockReturnValue(false);
+				document.dispatchEvent(new Event('visibilitychange'));
+				await tick();
+			}
+
+			await tickSeconds(5);
+
+			expect(readCounter(container)).toBe(CODE_REGENERATE_INTERVAL_IN_SECONDS - 5);
 		});
 	});
 

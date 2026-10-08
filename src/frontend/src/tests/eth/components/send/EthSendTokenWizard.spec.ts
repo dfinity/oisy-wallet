@@ -1,6 +1,9 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
+import { InfuraProvider } from '$eth/providers/infura.providers';
+import * as ethBalanceServices from '$eth/services/eth-balance.services';
+import * as feeServices from '$eth/services/fee.services';
 import * as nftSendServices from '$eth/services/nft-send.services';
 import * as sendServices from '$eth/services/send.services';
 import * as feeStoreMod from '$eth/stores/eth-fee.store';
@@ -11,22 +14,30 @@ import {
 } from '$eth/stores/eth-fee.store';
 import * as tokenUtils from '$eth/utils/token.utils';
 import * as ckethServices from '$icp-eth/services/cketh.services';
-import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
+import {
+	MAX_BUTTON,
+	REVIEW_FORM_SEND_BUTTON,
+	SEND_FORM_NEXT_BUTTON
+} from '$lib/constants/test-ids.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import * as idDerived from '$lib/derived/auth.derived';
 import * as exchDerived from '$lib/derived/exchange.derived';
 import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
-import { SEND_CONTEXT_KEY } from '$lib/stores/send.store';
+import { balancesStore } from '$lib/stores/balances.store';
+import { initSendContext, SEND_CONTEXT_KEY } from '$lib/stores/send.store';
 import * as toasts from '$lib/stores/toasts.store';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
+import type { WizardStep } from '$lib/types/wizard';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import * as inputUtils from '$lib/utils/input.utils';
+import EthSendTokenWizardTestHost from '$tests/eth/components/send/EthSendTokenWizardTestHost.svelte';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
-import type { WizardStep } from '@dfinity/gix-components';
 import { fireEvent, render } from '@testing-library/svelte';
 import type { TransactionResponse } from 'ethers/providers';
 import { readable, writable, type Writable } from 'svelte/store';
@@ -44,25 +55,26 @@ describe('EthSendTokenWizard.spec', () => {
 	let feeState: Writable<FeeStoreData>;
 	let feeStore: EthFeeStore;
 
-	const mockContext = ({
+	const mockSendContext = ({
 		sendToken,
-		sendTokenId,
 		sendTokenDecimals
 	}: {
 		sendToken: Token | NonFungibleToken;
-		sendTokenId: string;
 		sendTokenDecimals: number;
-	}) =>
-		new Map([
+	}) => ({
+		sendToken: writable(sendToken),
+		sendTokenId: writable(sendToken.id),
+		sendTokenDecimals: writable(sendTokenDecimals),
+		sendEthCustomNonce: writable(undefined)
+	});
+
+	const mockContext = (params: {
+		sendToken: Token | NonFungibleToken;
+		sendTokenDecimals: number;
+	}): Map<unknown, unknown> =>
+		new Map<unknown, unknown>([
 			[ETH_FEE_CONTEXT_KEY, { feeStore }],
-			[
-				SEND_CONTEXT_KEY,
-				{
-					sendToken: writable(sendToken),
-					sendTokenId: writable(sendTokenId),
-					sendTokenDecimals: writable(sendTokenDecimals)
-				}
-			]
+			[SEND_CONTEXT_KEY, mockSendContext(params)]
 		]);
 
 	beforeEach(() => {
@@ -93,7 +105,9 @@ describe('EthSendTokenWizard.spec', () => {
 		vi.spyOn(feeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
 			...ctx,
 			maxGasFee: readable(undefined),
-			minGasFee: readable(undefined)
+			minGasFee: readable(undefined),
+			estimatedGasFee: readable(undefined),
+			feePrioritiesStore: writable(undefined)
 		}));
 
 		vi.spyOn(sendServices, 'send').mockResolvedValue({} as TransactionResponse);
@@ -109,7 +123,6 @@ describe('EthSendTokenWizard.spec', () => {
 		amount,
 		nativeEthereumToken,
 		sendToken,
-		sendTokenId,
 		sendTokenDecimals
 	}: {
 		currentStep: WizardStep;
@@ -120,7 +133,6 @@ describe('EthSendTokenWizard.spec', () => {
 		amount?: number | string;
 		nativeEthereumToken: Token;
 		sendToken: Token | NonFungibleToken;
-		sendTokenId: string;
 		sendTokenDecimals: number;
 	}) =>
 		render(EthSendTokenWizard, {
@@ -138,7 +150,7 @@ describe('EthSendTokenWizard.spec', () => {
 				onSendBack: vi.fn(),
 				onTokensList: vi.fn()
 			},
-			context: mockContext({ sendToken, sendTokenId, sendTokenDecimals })
+			context: mockContext({ sendToken, sendTokenDecimals })
 		});
 
 	it('sends token via executeSend on icSend', async () => {
@@ -150,7 +162,6 @@ describe('EthSendTokenWizard.spec', () => {
 			sourceNetwork: ETHEREUM_NETWORK,
 			nativeEthereumToken: ETHEREUM_TOKEN,
 			sendToken: ETHEREUM_TOKEN,
-			sendTokenId: String(ETHEREUM_TOKEN.id),
 			sendTokenDecimals: ETHEREUM_TOKEN.decimals
 		});
 
@@ -184,7 +195,6 @@ describe('EthSendTokenWizard.spec', () => {
 			sourceNetwork: ETHEREUM_NETWORK,
 			nativeEthereumToken: ETHEREUM_TOKEN,
 			sendToken: collectionToken,
-			sendTokenId: String(collectionToken.id),
 			sendTokenDecimals: 0
 		});
 
@@ -206,6 +216,421 @@ describe('EthSendTokenWizard.spec', () => {
 		expect(sendServices.send).not.toHaveBeenCalled();
 	});
 
+	it('marks NFT send progress as done before closing', async () => {
+		const nft: Nft = mockValidErc721Nft;
+		const collectionToken: NonFungibleToken = mockValidErc721Token;
+		const onCloseStep = vi.fn();
+
+		vi.mocked(nftSendServices.sendNft).mockImplementationOnce(({ progress }) => {
+			progress?.(ProgressStepsSend.SIGN_TRANSFER);
+			progress?.(ProgressStepsSend.TRANSFER);
+
+			return Promise.resolve();
+		});
+
+		const { getByTestId } = render(EthSendTokenWizardTestHost, {
+			props: {
+				currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+				destination,
+				sendContext: mockSendContext({
+					sendToken: collectionToken,
+					sendTokenDecimals: 0
+				}),
+				sourceNetwork: ETHEREUM_NETWORK,
+				nativeEthereumToken: ETHEREUM_TOKEN,
+				nft,
+				onCloseStep
+			}
+		});
+
+		await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+
+		expect(onCloseStep).not.toHaveBeenCalled();
+
+		await vi.runOnlyPendingTimersAsync();
+
+		expect(onCloseStep).toHaveBeenCalledExactlyOnceWith(ProgressStepsSend.DONE);
+	});
+
+	describe('fee observation', () => {
+		// The amount step needs the whole send context (balance, exchange rate, priority), so the
+		// real one stands in for the minimal mock the send assertions above get by with.
+		const renderStep = (name: WizardStepsSend) =>
+			render(EthSendTokenWizard, {
+				props: {
+					currentStep: { name, title: name },
+					sendProgressStep: ProgressStepsSend.INITIALIZATION,
+					destination,
+					sourceNetwork: ETHEREUM_NETWORK,
+					amount: 1,
+					nativeEthereumToken: ETHEREUM_TOKEN,
+					onBack: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn(),
+					onSendBack: vi.fn(),
+					onTokensList: vi.fn()
+				},
+				context: new Map<unknown, unknown>([
+					[ETH_FEE_CONTEXT_KEY, { feeStore }],
+					[SEND_CONTEXT_KEY, initSendContext({ token: ETHEREUM_TOKEN })]
+				])
+			});
+
+		beforeEach(() => {
+			vi.spyOn(feeServices, 'getEthFeeDataWithProvider').mockRejectedValue(new Error('offline'));
+		});
+
+		it('keeps fetching the fee on the amount step', async () => {
+			renderStep(WizardStepsSend.SEND);
+
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(feeServices.getEthFeeDataWithProvider).toHaveBeenCalled();
+		});
+
+		it('freezes the fee on the review step', async () => {
+			renderStep(WizardStepsSend.REVIEW);
+
+			await vi.runOnlyPendingTimersAsync();
+
+			// The amount shown for review was priced against the fee in hand; a fresh sample would
+			// move the fee underneath it, and a spike right before "Send" would be signed as is.
+			expect(feeServices.getEthFeeDataWithProvider).not.toHaveBeenCalled();
+		});
+
+		describe('when the inputs change', () => {
+			const otherDestination = '0x2222222222222222222222222222222222222222';
+
+			beforeEach(() => {
+				// Never settles: a failed sample schedules a retry, and a retry reads the current inputs
+				// too, so it would stand in for the re-estimate under test.
+				vi.mocked(feeServices.getEthFeeDataWithProvider).mockImplementation(
+					() => new Promise(() => {})
+				);
+			});
+
+			const renderSettled = async (name: WizardStepsSend) => {
+				const result = renderStep(name);
+
+				await vi.runOnlyPendingTimersAsync();
+
+				vi.mocked(feeServices.getEthFeeDataWithProvider).mockClear();
+
+				return result;
+			};
+
+			it('re-estimates the fee for a new recipient', async () => {
+				const { rerender } = await renderSettled(WizardStepsSend.SEND);
+
+				await rerender({ destination: otherDestination });
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(feeServices.getEthFeeDataWithProvider).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ to: otherDestination })
+				);
+			});
+
+			it('re-estimates the fee for a new amount', async () => {
+				const { rerender } = await renderSettled(WizardStepsSend.SEND);
+
+				await rerender({ amount: 2 });
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(feeServices.getEthFeeDataWithProvider).toHaveBeenCalledOnce();
+			});
+
+			it('keeps the fee frozen on the review step', async () => {
+				const { rerender } = await renderSettled(WizardStepsSend.REVIEW);
+
+				await rerender({ destination: otherDestination, amount: 2 });
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(feeServices.getEthFeeDataWithProvider).not.toHaveBeenCalled();
+			});
+		});
+
+		describe('when the amount changes on the amount step', () => {
+			// One fetch per sample, each released by the test with the gas its estimate came back with.
+			const releases: ((gas: bigint) => void)[] = [];
+
+			const sample = (
+				gas: bigint
+			): Awaited<ReturnType<typeof feeServices.getEthFeeDataWithProvider>> => {
+				const provider = new InfuraProvider(ETHEREUM_NETWORK);
+
+				vi.spyOn(provider, 'safeEstimateGas').mockResolvedValue(gas);
+
+				return {
+					feeData: { maxFeePerGas: 2_000_000n, maxPriorityFeePerGas: 1_000_000n },
+					priorities: undefined,
+					provider,
+					params: { from: fromAddr, to: destination }
+				};
+			};
+
+			beforeEach(() => {
+				releases.length = 0;
+
+				vi.mocked(feeServices.getEthFeeDataWithProvider).mockImplementation(
+					() => new Promise((resolve) => releases.push((gas) => resolve(sample(gas))))
+				);
+			});
+
+			// A balance that covers every amount below, so the fee is all that can hold "Next" back.
+			const renderAmountStep = async () => {
+				const result = render(EthSendTokenWizard, {
+					props: {
+						currentStep: { name: WizardStepsSend.SEND, title: WizardStepsSend.SEND },
+						sendProgressStep: ProgressStepsSend.INITIALIZATION,
+						destination,
+						sourceNetwork: ETHEREUM_NETWORK,
+						amount: 1,
+						nativeEthereumToken: ETHEREUM_TOKEN,
+						onBack: vi.fn(),
+						onClose: vi.fn(),
+						onNext: vi.fn(),
+						onSendBack: vi.fn(),
+						onTokensList: vi.fn()
+					},
+					context: new Map<unknown, unknown>([
+						[ETH_FEE_CONTEXT_KEY, { feeStore }],
+						[
+							SEND_CONTEXT_KEY,
+							initSendContext({ token: ETHEREUM_TOKEN, customSendBalance: 10n ** 19n })
+						]
+					])
+				});
+
+				await vi.advanceTimersByTimeAsync(1000);
+
+				releases[0](25_000n);
+				await vi.advanceTimersByTimeAsync(0);
+
+				return result;
+			};
+
+			const changeAmount = async (rerender: (props: { amount: number }) => Promise<void>) => {
+				await rerender({ amount: 2 });
+
+				// The re-estimate is in flight.
+				await vi.advanceTimersByTimeAsync(1000);
+
+				expect(releases).toHaveLength(2);
+			};
+
+			it('holds "Next" until the fee for the new amount has landed', async () => {
+				const { getByTestId, rerender } = await renderAmountStep();
+
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeEnabled();
+
+				await changeAmount(rerender);
+
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+
+				releases[1](30_000n);
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeEnabled();
+			});
+
+			it('keeps holding "Next" while the fee for the new amount cannot be fetched', async () => {
+				const { getByTestId, rerender } = await renderAmountStep();
+
+				vi.mocked(feeServices.getEthFeeDataWithProvider).mockRejectedValue(new Error('offline'));
+
+				await rerender({ amount: 2 });
+				await vi.advanceTimersByTimeAsync(1000);
+
+				// The sample in hand was estimated for the previous amount, so it does not count.
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+			});
+
+			it('signs the fee estimated for the amount under review', async () => {
+				const { getByTestId, rerender } = await renderAmountStep();
+
+				await changeAmount(rerender);
+
+				releases[1](30_000n);
+				await vi.advanceTimersByTimeAsync(0);
+
+				await rerender({
+					currentStep: { name: WizardStepsSend.REVIEW, title: WizardStepsSend.REVIEW }
+				});
+
+				await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(sendServices.send).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ amount: 2_000_000_000_000_000_000n, gas: 30_000n })
+				);
+			});
+		});
+	});
+
+	describe('max send', () => {
+		// The fee the amount is capped against, as the frozen `feeState` above prices it:
+		// `maxFeePerGas * gas`, with no L1 data fee on Ethereum.
+		const gasFee = 2_000_000n * 100n;
+		// What the poll last saw, and what "Max" therefore offers.
+		const staleBalance = 1_000_000_000_000_000_000n;
+		// What the account holds by the time the transaction is signed, the difference being gas
+		// already spent by a transfer the poll has not caught up with.
+		const freshBalance = staleBalance - 500_000_000n;
+
+		const renderMaxSend = () => {
+			balancesStore.set({
+				id: ETHEREUM_TOKEN.id,
+				data: { data: staleBalance, certified: false }
+			});
+
+			return render(EthSendTokenWizardTestHost, {
+				props: {
+					currentStep: { name: WizardStepsSend.SEND, title: WizardStepsSend.SEND },
+					destination,
+					sendContext: initSendContext({ token: ETHEREUM_TOKEN }),
+					sourceNetwork: ETHEREUM_NETWORK,
+					nativeEthereumToken: ETHEREUM_TOKEN,
+					onCloseStep: vi.fn()
+				}
+			});
+		};
+
+		beforeEach(() => {
+			vi.spyOn(feeServices, 'getEthFeeDataWithProvider').mockRejectedValue(new Error('offline'));
+
+			vi.spyOn(feeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
+				...ctx,
+				maxGasFee: readable(gasFee),
+				minGasFee: readable(gasFee),
+				estimatedGasFee: readable(gasFee),
+				feePrioritiesStore: writable(undefined)
+			}));
+
+			// The store is deliberately left untouched. In production the read stores its result
+			// through `batchSet`, which only lands on the next animation frame, so at the moment the
+			// amount is capped the store still holds `staleBalance`. A cap that read the balance back
+			// from the store would sign `staleBalance - gasFee` here and fail the test below.
+			vi.spyOn(ethBalanceServices, 'readEthBalance').mockResolvedValue(freshBalance);
+		});
+
+		afterEach(() => {
+			balancesStore.reset(ETHEREUM_TOKEN.id);
+		});
+
+		it('signs a Max amount that fits the balance as it is at signing time', async () => {
+			const { getByTestId, rerender } = renderMaxSend();
+
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			await rerender({
+				currentStep: { name: WizardStepsSend.REVIEW, title: WizardStepsSend.REVIEW }
+			});
+
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(ethBalanceServices.readEthBalance).toHaveBeenCalledExactlyOnceWith({
+				networkId: ETHEREUM_TOKEN.network.id,
+				tokenId: ETHEREUM_TOKEN.id
+			});
+
+			// Not `staleBalance - gasFee`: that amount plus the gas it reserves is more than the
+			// account holds, and the chain refuses such a transaction outright.
+			expect(sendServices.send).toHaveBeenCalledWith(
+				expect.objectContaining({ amount: freshBalance - gasFee })
+			);
+		});
+
+		it('caps against the last sample when the re-read fails', async () => {
+			// A failed read resets the stored balance, so the cap has to have taken its sample first.
+			vi.spyOn(ethBalanceServices, 'readEthBalance').mockImplementation(() => {
+				balancesStore.reset(ETHEREUM_TOKEN.id);
+
+				return Promise.resolve(undefined);
+			});
+
+			const { getByTestId, rerender } = renderMaxSend();
+
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			await rerender({
+				currentStep: { name: WizardStepsSend.REVIEW, title: WizardStepsSend.REVIEW }
+			});
+
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(sendServices.send).toHaveBeenCalledWith(
+				expect.objectContaining({ amount: staleBalance - gasFee })
+			);
+		});
+
+		it('refuses a Max send when neither the read nor the store knows the balance', async () => {
+			vi.spyOn(ethBalanceServices, 'readEthBalance').mockResolvedValue(undefined);
+
+			const { getByTestId, rerender } = renderMaxSend();
+
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			await rerender({
+				currentStep: { name: WizardStepsSend.REVIEW, title: WizardStepsSend.REVIEW }
+			});
+
+			// A failed poll while the user sits on the review step: the store has nothing left.
+			balancesStore.reset(ETHEREUM_TOKEN.id);
+
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			// Capping against no balance would leave the Max amount unbounded.
+			expect(sendServices.send).not.toHaveBeenCalled();
+
+			expect(toasts.toastsError).toHaveBeenCalledWith({
+				msg: {
+					text: replacePlaceholders(en.init.error.loading_balance, {
+						$symbol: ETHEREUM_TOKEN.symbol,
+						$network: ETHEREUM_NETWORK.name
+					})
+				}
+			});
+		});
+	});
+
+	it('explains a broadcast the balance could not cover, without the node text', async () => {
+		// The error a staging "send max" came back with, as ethers hands it over.
+		const err = Object.assign(new Error('could not coalesce error'), {
+			code: 'UNKNOWN_ERROR',
+			error: { code: -32000, message: 'gas required exceeds allowance (17277)' }
+		});
+
+		vi.spyOn(toasts, 'toastsErrorNoTrace').mockImplementation(() => Symbol('toast'));
+		vi.mocked(sendServices.send).mockRejectedValueOnce(err);
+
+		const { getByTestId } = renderHost({
+			currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+			sendProgressStep: ProgressStepsSend.INITIALIZATION,
+			nft: undefined,
+			destination,
+			sourceNetwork: ETHEREUM_NETWORK,
+			nativeEthereumToken: ETHEREUM_TOKEN,
+			sendToken: ETHEREUM_TOKEN,
+			sendTokenDecimals: ETHEREUM_TOKEN.decimals
+		});
+
+		await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+		await vi.runOnlyPendingTimersAsync();
+
+		expect(toasts.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
+			msg: { text: en.send.error.ethereum_insufficient_funds },
+			err
+		});
+
+		expect(toasts.toastsError).not.toHaveBeenCalled();
+	});
+
 	it('shows a toast and aborts when destination is empty', async () => {
 		const { getByTestId } = renderHost({
 			currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
@@ -215,7 +640,6 @@ describe('EthSendTokenWizard.spec', () => {
 			sourceNetwork: ETHEREUM_NETWORK,
 			nativeEthereumToken: ETHEREUM_TOKEN,
 			sendToken: ETHEREUM_TOKEN,
-			sendTokenId: String(ETHEREUM_TOKEN.id),
 			sendTokenDecimals: ETHEREUM_TOKEN.decimals
 		});
 
