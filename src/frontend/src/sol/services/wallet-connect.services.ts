@@ -148,6 +148,14 @@ export const decode = async ({
 		rpc: solanaHttpRpc(solNetwork)
 	});
 
+	// A send goes out with the wallet as its fee payer, which makes the wallet a signer. A message
+	// that names another account to pay is reviewed with the wallet as an account that does not
+	// sign, and a program can tell the two apart, so the run below would describe a different
+	// transaction from the one sent. Signing without sending keeps the fee payer the message names,
+	// so whether this refuses the request is decided where the method is known.
+	const feePaidByOthers =
+		nonNullish(address) && parsedTransactionMessage.feePayer.address !== address;
+
 	// The review is synchronous, so both the estimate the requested fee is judged against and the
 	// simulation are fetched here, where the request is already being decoded before the modal
 	// opens. A simulation that lands after the user has approved would be worthless.
@@ -294,6 +302,7 @@ export const decode = async ({
 		...(nonNullish(rentExemptMinimum) && { rentExemptMinimum }),
 		...(opensAccountBeyondRent === true && { opensAccountBeyondRent }),
 		...(keepsBatchWhole === true && { keepsBatchWhole }),
+		...(feePaidByOthers && { feePaidByOthers }),
 		parties
 	};
 };

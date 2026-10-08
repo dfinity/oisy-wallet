@@ -115,7 +115,11 @@ vi.mock('$sol/services/sol-simulation.services', () => ({
 }));
 
 describe('wallet-connect.services', () => {
-	const mockParsedTransaction = { mock: 'mockParsedTransaction', instructions: [] };
+	const mockParsedTransaction = {
+		mock: 'mockParsedTransaction',
+		feePayer: { address: mockSolAddress },
+		instructions: []
+	};
 	const mockMappedTransaction: MappedSolTransaction = {
 		amount: 123n,
 		destination: mockAtaAddress
@@ -319,6 +323,56 @@ describe('wallet-connect.services', () => {
 				destination: mockSolAddress2,
 				rentExemptMinimum: mockRentExemptMinimum,
 				parties: emptyPartialParties
+			});
+		});
+
+		// A send goes out with the wallet as its fee payer, which a message naming another payer was
+		// not reviewed with. The review refuses to send such a message, so the decode says which
+		// messages those are.
+		describe('the fee payer', () => {
+			const base64EncodedTransactionMessage = 'mockBase64Transaction';
+			const networkId = SOLANA_MAINNET_NETWORK_ID;
+
+			const paidBy = (address: string) =>
+				vi.spyOn(solTransactionsUtils, 'parseSolBase64TransactionMessage').mockResolvedValue({
+					...mockParsedTransaction,
+					feePayer: { address }
+				} as unknown as CompilableTransactionMessage);
+
+			it('should say when the message names another account to pay its fee', async () => {
+				paidBy(mockSolAddress2);
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(result.feePaidByOthers).toBeTruthy();
+			});
+
+			it('should say nothing when the wallet pays the fee', async () => {
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(result).not.toHaveProperty('feePaidByOthers');
+			});
+
+			// Without the wallet's address there is nothing to compare the payer with, and signing
+			// refuses the request on that ground already.
+			it('should say nothing without the wallet address', async () => {
+				paidBy(mockSolAddress2);
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: undefined
+				});
+
+				expect(result).not.toHaveProperty('feePaidByOthers');
 			});
 		});
 
