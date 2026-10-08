@@ -581,12 +581,28 @@ The result must show all of the following:
   top-level instruction is decoded and must match a pinned `(program, discriminator)`
   pair in `LIFI_SOLANA_ALLOWED_INSTRUCTIONS`: Compute Budget (`SetComputeUnitLimit`,
   `SetComputeUnitPrice`), Associated Token Account `CreateIdempotent` for the user,
-  System `Transfer` from the user to the user's own wSOL account, SPL Token `SyncNative`
-  and `CloseAccount` of accounts the transaction created, and the swap/route entrypoints
+  System `Transfer` from the user to the user's own wSOL account, SPL Token `SyncNative`, and
+  `CloseAccount` of accounts the transaction created **whose decoded `destination` is the
+  user** (as the WalletConnect review already requires, `sol-instructions.utils.ts`;
+  otherwise a forged transaction could create an empty account for the user and close it
+  to an attacker, a rent loss that neither `createdAccounts` nor `closedAccounts` sees and
+  that fits inside the SOL fee cap), and the swap/route entrypoints
   of the allowed Solana aggregators (Jupiter v6 route variants first; others added with
   their discriminators). Any other top-level instruction aborts. Calls _inside_ an
   allowed route are constrained by the aggregator program itself, plus the program check
   below.
+- **The route's own minimum output is bound.** Simulation shows the outcome at current
+  chain state only; what protects the user when state moves before the transaction lands
+  is the minimum the aggregator enforces on-chain, and that comes from the route
+  instruction's arguments, which LI.FI writes. So each allowed route entrypoint has a
+  pinned argument decoder, and its effective on-chain minimum must be at least the
+  displayed `toAmountMin`. For Jupiter v6 (`route` / `shared_accounts_route` and their
+  token-ledger variants; exact-out variants are not allowed), the arguments include
+  `quoted_out_amount` and `slippage_bps`, and the check is
+  `quoted_out_amount × (10 000 − slippage_bps) / 10 000 ≥ toAmountMin`. The implementer
+  takes the argument layout from Jupiter's published v6 IDL and adds a test from a real
+  LI.FI transaction fixture. An aggregator is added to `LIFI_SOLANA_ALLOWED_INSTRUCTIONS`
+  only together with its minimum-output decoder. Simulation stays as an additional check.
 - **Every program is known.** Every top-level instruction's program, and every entry of
   `unreadPrograms`, is in `SOLANA_KNOWN_PROGRAM_ADDRESSES` or in a new pinned
   `LIFI_SOLANA_PROGRAM_ADDRESSES`. `unreadPrograms` only lists programs called from
@@ -1087,7 +1103,8 @@ everywhere.
    no control change, leaves every token account it creates for the user with the user
    as owner and no foreign delegate or close authority, closes none of the user's
    pre-existing accounts, contains only top-level instructions from
-   `LIFI_SOLANA_ALLOWED_INSTRUCTIONS`, calls (top-level or nested)
+   `LIFI_SOLANA_ALLOWED_INSTRUCTIONS` (any `CloseAccount` paying the user, and the route's
+   decoded on-chain minimum output at least `toAmountMin`), calls (top-level or nested)
    only programs in `SOLANA_KNOWN_PROGRAM_ADDRESSES` or the pinned
    `LIFI_SOLANA_PROGRAM_ADDRESSES`, spends no more than `fromAmount` (plus the SOL fee
    cap) from the user's accounts and, Solana → Solana, credits at least `toAmountMin`
