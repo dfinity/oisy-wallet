@@ -20,6 +20,7 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { ProgressStepsTip } from '$lib/enums/progress-steps';
 	import { trackTip } from '$lib/services/tip-analytics.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
@@ -123,7 +124,13 @@
 	// Copy and share are tracked separately: which one a sender reaches for says
 	// whether the QR, the link or the share sheet is doing the work, and that is
 	// the only way to know which of the three earns its place on this screen.
-	const trackCopy = () => trackTip({ step: 'copy', side: 'sender', symbol: token.symbol });
+	const trackCopy = () =>
+		trackTip({
+			step: 'copy',
+			side: 'sender',
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+			symbol: token.symbol
+		});
 
 	// The absolute instant, not "in 24 hours": the sender may share this link days
 	// later, and a relative deadline stops being true the moment the modal closes.
@@ -312,7 +319,12 @@
 					ariaLabel={$i18n.tip.text.share_link}
 					link={false}
 					onclick={async () => {
-						trackTip({ step: 'share', side: 'sender', symbol: token.symbol });
+						trackTip({
+							step: 'share',
+							side: 'sender',
+							resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+							symbol: token.symbol
+						});
 
 						await shareText(link);
 					}}

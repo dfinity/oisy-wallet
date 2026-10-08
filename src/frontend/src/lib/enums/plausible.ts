@@ -86,6 +86,46 @@ export enum PLAUSIBLE_EVENT_TRANSACTION_SEND_ERROR_TYPES {
 	OUT_OF_GAS = 'out_of_gas'
 }
 
+// Why a tip step failed. `TipError` is OISY's own candid type, so its variant names are a closed
+// set we control and safe to send under invariant 4 in docs/ai/frontend/analytics.md; only the
+// name goes out, never the `msg` some variants carry. The ledger's refusals of the approve are
+// prefixed because `InsufficientFunds` exists on both sides and means different things there.
+export enum PLAUSIBLE_EVENT_TIP_ERROR_TYPES {
+	INVALID_EXPIRY = 'invalid_expiry',
+	CLAIM_IN_PROGRESS = 'claim_in_progress',
+	SECRET_CIPHERTEXT_TOO_LARGE = 'secret_ciphertext_too_large',
+	// The sender's allowance no longer covers the tip.
+	UNCOVERED = 'uncovered',
+	// Unknown id, expired, cancelled, already claimed or a wrong code: the canister answers all of
+	// them alike on purpose, so nobody can probe which.
+	NOT_FOUND = 'not_found',
+	NOT_YOUR_TIP = 'not_your_tip',
+	INVALID_CLAIM_CODE_HASH = 'invalid_claim_code_hash',
+	INVALID_TIP_ID = 'invalid_tip_id',
+	RATE_LIMITED = 'rate_limited',
+	DUPLICATE_TIP_ID = 'duplicate_tip_id',
+	NOT_CANCELLABLE = 'not_cancellable',
+	TRANSFER_FAILED = 'transfer_failed',
+	INTERNAL_ERROR = 'internal_error',
+	MESSAGE_TOO_LONG = 'message_too_long',
+	TOO_MANY_TIPS = 'too_many_tips',
+	// The claim was valid but the sender's balance was short.
+	INSUFFICIENT_FUNDS = 'insufficient_funds',
+	AMOUNT_TOO_SMALL = 'amount_too_small',
+	LEDGER_GENERIC_ERROR = 'ledger_generic_error',
+	LEDGER_TEMPORARILY_UNAVAILABLE = 'ledger_temporarily_unavailable',
+	LEDGER_DUPLICATE = 'ledger_duplicate',
+	LEDGER_BAD_FEE = 'ledger_bad_fee',
+	LEDGER_ALLOWANCE_CHANGED = 'ledger_allowance_changed',
+	LEDGER_CREATED_IN_FUTURE = 'ledger_created_in_future',
+	LEDGER_TOO_OLD = 'ledger_too_old',
+	LEDGER_EXPIRED = 'ledger_expired',
+	// The sender's balance does not cover the amount plus the fee.
+	LEDGER_INSUFFICIENT_FUNDS = 'ledger_insufficient_funds',
+	// Anything else: transport, agent, the vetKey decryption, or an unexpected throw.
+	UNKNOWN = 'unknown'
+}
+
 export enum PLAUSIBLE_EVENT_CONTEXTS {
 	BACKEND = 'backend',
 	NFT = 'nft',
@@ -221,7 +261,9 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	// The gas limit a transaction was signed with.
 	GAS_SENT = 'gas_sent',
 	// The gas the network estimates the same transaction needs, asked again after it failed.
-	GAS_NEEDED = 'gas_needed'
+	GAS_NEEDED = 'gas_needed',
+	// How long a tip stays claimable, as the label the sender picked.
+	EXPIRY = 'expiry'
 }
 
 export enum PLAUSIBLE_EVENT_FILTER_MODIFIERS {
