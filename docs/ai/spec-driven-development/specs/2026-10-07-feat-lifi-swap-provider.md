@@ -485,6 +485,19 @@ following:
 - `preview.controlChanges` is empty. No owner, delegate or close-authority change on any
   user account. An absent `preview` (the run changed nothing the user owns) passes this
   check but fails the receipt check below.
+- **Accounts the transaction creates have safe authorities.** `controlChanges` only
+  diffs accounts that existed before the run: `controlChanges` in
+  `sol/utils/sol-simulation.utils.ts` returns nothing when `pre` is absent, by design
+  for the WalletConnect review. A forged transaction could therefore create the user's
+  destination token account, credit it enough to pass the receipt check, and leave an
+  attacker as its `delegate` or `closeAuthority` (the user signs every instruction, so
+  an `Approve` / `SetAuthority` in the same transaction is valid). So every user-owned
+  token account with no pre-state must end the run with `owner` = the user, no
+  `delegate`, and `closeAuthority` absent or equal to the user. The preview does not
+  expose post-state authorities today, so `mapSolSimulationPreview` gains a
+  `createdAccounts: { account, owner, delegate?, closeAuthority? }[]` field (post-state
+  of user-owned accounts with no pre-state), filled from the same parsed states.
+  WalletConnect ignores the field, so its review is unchanged.
 - **Every program is known.** Every top-level instruction's program, and every entry of
   `unreadPrograms`, is in `SOLANA_KNOWN_PROGRAM_ADDRESSES` or in a new pinned
   `LIFI_SOLANA_PROGRAM_ADDRESSES`. `unreadPrograms` only lists programs called from
@@ -504,6 +517,13 @@ following:
 - **Receipt is bound (Solana → Solana).** The user's destination-token delta is at least
   the displayed quote's `toAmountMin`. A missing `preview`, or no delta for the
   destination token, fails this check.
+  - **Native SOL destination.** `solDelta` is the fee payer's **net** lamport change
+    (`mapSolSimulationPreview` diffs the user's own account), so a valid SPL → SOL swap
+    shows `received − transaction fee − rent` and would sit below LI.FI's gross
+    `toAmountMin`. For a native-SOL destination the check is therefore
+    `solDelta >= toAmountMin - LIFI_SOL_MAX_FEE_LAMPORTS`, using the same fee cap as the
+    spend bound. A forged route can underpay by at most that cap, which is the same
+    tolerance the spend bound already grants, and it can still only pay the user.
 
 `simulateSolTransaction` takes, besides the base64 bytes, a **decompiled**
 `transactionMessage` (it selects the accounts to snapshot from it) and a
@@ -799,7 +819,7 @@ loader's 5 s tick.
 | --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
 | 1   | **Backend AUT variant** — `Lifi(LifiData)`, validation, tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                             | —                                   |
 | 2   | **Scaffolding + EVM source** — `@lifi/sdk`, env, types, quote service + cache, trust checks + calldata binding, `exactAllowance` on `approve()`, LI.FI destination resolver + per-category wildcard, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana), provider sheet, EVM execution, Velora source-tx helper extraction, AUT utils/poller/loader/item | 1                                   |
-| 3   | **Solana source** — lift the Solana-source restriction on the Solana registry entry, `fetchLifiSolSwap` with simulation binding, `SwapSolWizard` dispatch, Solana source-chain check in the poller, `PRODUCT.md` update for Solana-source swaps                                                                                                                                              | 2                                   |
+| 3   | **Solana source** — lift the Solana-source restriction on the Solana registry entry, `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` in the simulation preview), `SwapSolWizard` dispatch, Solana source-chain check in the poller, `PRODUCT.md` update for Solana-source swaps                                                                                          | 2                                   |
 | 4   | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                     | 3, LI.FI's written key confirmation |
 
 If PR 2 is too large, split it into 2a (quoting + provider sheet) and 2b (execution,
@@ -870,11 +890,13 @@ everywhere.
    minimum output at least the displayed `toAmountMin`. A route with a destination call
    is never signed. A decode that reverts aborts the swap.
 9. A Solana swap is never signed unless a simulation of its exact bytes succeeds, shows
-   no control change, calls (top-level or nested) only programs in
-   `SOLANA_KNOWN_PROGRAM_ADDRESSES` or the pinned `LIFI_SOLANA_PROGRAM_ADDRESSES`, spends
-   no more than `fromAmount` (plus the SOL fee cap) from the user's accounts and, Solana →
-   Solana, credits at least `toAmountMin`. A failed or timed-out simulation aborts the
-   swap.
+   no control change, leaves every token account it creates for the user with the user
+   as owner and no foreign delegate or close authority, calls (top-level or nested)
+   only programs in `SOLANA_KNOWN_PROGRAM_ADDRESSES` or the pinned
+   `LIFI_SOLANA_PROGRAM_ADDRESSES`, spends no more than `fromAmount` (plus the SOL fee
+   cap) from the user's accounts and, Solana → Solana, credits at least `toAmountMin`
+   (for a native-SOL destination, net of at most the SOL fee cap). A failed or
+   timed-out simulation aborts the swap.
 10. The destination picker offers EVM and Solana tokens for an EVM source, and (from
     PR 3) EVM and Solana tokens for a Solana source, even when no other provider covers
     that category.
