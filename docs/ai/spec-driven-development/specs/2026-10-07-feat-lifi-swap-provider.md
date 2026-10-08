@@ -11,8 +11,10 @@ progress steps.
 
 v1 covers two **source** categories:
 
-- **EVM** (Ethereum, Arbitrum, BSC, Polygon, Base, Robinhood Chain) → EVM or Solana.
-- **Solana** → EVM or Solana.
+- **EVM** (Ethereum, Arbitrum, BSC, Polygon, Base, Robinhood Chain) → EVM or Solana
+  (EVM → Solana only through bridges whose Solana receiver can be verified; see
+  [Calldata binding](#calldata-binding-evm-execution-time-quote)).
+- **Solana** → Solana.
 
 Every LI.FI swap is tracked by **Active User Transactions** (AUT) from the moment its
 source transaction is broadcast, like Velora Market and NEAR Intents: the modal closes
@@ -28,6 +30,10 @@ LI.FI confirming browser use of our API key (see [API key](#api-key)).
 - **BTC as a source.** See [Why BTC source is out](#why-btc-source-is-out).
 - **BTC, XRP or ICP as a destination.** LI.FI has no ICP; BTC/XRP destinations can come
   later once the source side is proven.
+- **Solana → EVM.** The EVM recipient inside a Solana bridge program's instruction
+  cannot be verified client-side yet, so a forged `li.quest` response routed through an
+  allow-listed bridge could send the funds elsewhere. It follows in a later PR with a
+  per-bridge instruction decoder (see [Decisions](#decisions)).
 - Multi-step routes (`/advanced/routes`). v1 uses `/quote` only — one signed source
   transaction per swap.
 - LI.FI's gasless / Permit2 / EIP-2612 paths and Jito bundles.
@@ -82,7 +88,13 @@ Reference only; the integration recipe is the one Velora and NEAR Intents follow
   — a new enum member needs an entry (a throwing stub, as for other non-ICP providers).
 - `SUPPORTED_CROSS_SWAP_NETWORKS` (`lib/constants/swap.constants.ts`) is the static
   pre-filter of reachable destination networks per source network. EVM ↔ EVM/SOL and
-  SOL → EVM/SOL are already present, so **no change is needed** for v1's routes.
+  SOL → EVM/SOL are already present, so it needs **no change** for v1's routes.
+- It is not the only gate, though. `crossChainSwapNetworks`
+  (`lib/derived/cross-chain-networks.derived.ts`) and `allCrossChainSwapTokens`
+  (`lib/derived/all-tokens.derived.ts`) include Solana networks / tokens only when
+  `NEAR_INTENTS_SWAP_ENABLED` is on. That flag is hard-coded `true` today, but with NEAR
+  Intents off and LI.FI on, Solana would vanish from both pickers. Both conditions become
+  `NEAR_INTENTS_SWAP_ENABLED || LIFI_SWAP_ENABLED` (PR 2a).
 - `swapProvidersDetails` (same file) holds `{ website, name, logo }`. Velora, Chain
   Fusion and OISY Trade keep their entry **unconditional**, because a tracked row can
   outlive the flag (`ActiveUserTransactionItem` reads the provider name from it); NEAR
@@ -271,15 +283,17 @@ Because of the routing described in [Registries and fan-out](#registries-and-fan
 the two entries split the routes like this:
 
 - `evmSwapProviders` entry — EVM → EVM.
-- `solSwapProviders` entry — EVM → Solana, Solana → EVM and Solana → Solana. Its
-  `getQuote` therefore receives both EVM and Solana sources and maps the chain id and
-  token address from the source token's network, not from the registry it sits in.
+- `solSwapProviders` entry — EVM → Solana and Solana → Solana. Its `getQuote` therefore
+  receives both EVM and Solana sources and maps the chain id and token address from the
+  source token's network, not from the registry it sits in. A Solana source with an EVM
+  destination returns `undefined` (Solana → EVM is out of scope).
 
 Until `SwapSolWizard` can execute a LI.FI quote ([Solana execution](#solana-execution)),
 the `solSwapProviders` entry returns `undefined` for a **Solana source**, so it only
 offers EVM → Solana. Otherwise a LI.FI Solana-source offer could be shown and selected
 while `SwapSolWizard` still sends every swap to `fetchNearIntentsSolSwap`. PR 3 lifts
-that restriction together with the wizard dispatch (see [Delivery plan](#delivery-plan)).
+that restriction (for Solana → Solana only) together with the wizard dispatch (see
+[Delivery plan](#delivery-plan)).
 
 - Maps OISY network → LI.FI chain id (EVM: the network's `chainId`; Solana mainnet →
   `1151111081099710`). Non-mainnet networks → `undefined` (no quote).
@@ -326,10 +340,10 @@ Two changes fix that:
   and returns `undefined` for anything that is not a mainnet EVM or Solana token.
   Otherwise it returns the destinations that entry actually quotes:
 
-  | Entry              | EVM source       | Solana source                            |
-  | ------------------ | ---------------- | ---------------------------------------- |
-  | `evmSwapProviders` | `{ evm: 'any' }` | `undefined`                              |
-  | `solSwapProviders` | `{ sol: 'any' }` | `{ evm: 'any', sol: 'any' }` (from PR 3) |
+  | Entry              | EVM source       | Solana source                |
+  | ------------------ | ---------------- | ---------------------------- |
+  | `evmSwapProviders` | `{ evm: 'any' }` | `undefined`                  |
+  | `solSwapProviders` | `{ sol: 'any' }` | `{ sol: 'any' }` (from PR 3) |
 
   Until PR 3, the `solSwapProviders` entry returns `undefined` for a Solana source,
   matching the quote restriction above.
@@ -534,11 +548,10 @@ accounts: what is simulated, signed and broadcast are LI.FI's original bytes, so
 does not reintroduce the recompilation problem described under
 [Solana execution](#solana-execution).
 
-For **Solana → EVM**, the EVM recipient is inside the bridge program's own instruction
-data, which nothing in the repo decodes. That leaves the residual risk described above:
-funds can only leave through allow-listed programs and within the spend bound, but a
-forged bridge recipient is not caught. See [Risks](#risks) and
-[Pending decisions](#pending-decisions).
+**Solana → EVM is out of scope for v1.** Its EVM recipient sits inside the bridge
+program's own instruction data, which nothing in the repo decodes, so the checks above
+would bound _what_ leaves and _through which programs_ but not _to whom_. It follows in a
+later PR with a per-bridge instruction decoder (see [Decisions](#decisions)).
 
 ### EVM execution
 
@@ -758,15 +771,26 @@ to say, so a `/status` that never resolves would leave the row non-terminal fore
   fix itself. On `INVALID` the poller immediately re-queries `/status` with `txHash`,
   `fromChain` and `toChain` only (no `bridge`), in case the stored `lifi_tool` is what
   LI.FI rejects, and maps that answer instead.
-- If, with the source confirmed, the row still has no `PENDING` / `DONE` / `FAILED`
-  answer once it is older than `LIFI_STATUS_UNRESOLVED_AFTER_MS` (6 h, measured from the
-  row's `created_at_ns`, so it survives reloads without a ref — the Solana row has no
-  spare key), **and** the last two polls in this session both returned
-  `NOT_FOUND` / `INVALID`, the row ends `Failed` with `swap.error.lifi_status_unknown`
-  ("LI.FI could not report the outcome of this swap. Check your destination wallet; the
-  LI.FI explorer link has details."), not a claim that the funds were lost. 6 h is far
-  past LI.FI's slowest bridge ETAs; the constant sits next to the throttle constants so
-  it can be tuned.
+- The bound is counted in **loader ticks, not wall time**, and starts only **after the
+  source transaction is confirmed**. The poller keeps an in-memory
+  `unresolvedTicks: Map<rowId, number>`, incremented on every loader tick in which the
+  row's source is confirmed and the latest `/status` answer (after the `INVALID`
+  re-query) is still `NOT_FOUND` / `INVALID`, and cleared by any other answer. When it
+  reaches `LIFI_STATUS_UNRESOLVED_TICKS = Math.ceil(LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS /
+ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS)` (period 6 h), the row ends `Failed`
+  with `swap.error.lifi_status_unknown` ("LI.FI could not report the outcome of this
+  swap. Check your destination wallet."), not a claim that the funds were lost.
+  - Not wall time: the row's `created_at_ns` is the canister's clock and `Date.now()`
+    the browser's; subtracting one from the other makes the window depend on clock
+    skew. This is OISY Trade's precedent (`OISY_TRADE_SWAP_SETTLE_GRACE_OBSERVATIONS`,
+    `lib/constants/oisy-trade.constants.ts`).
+  - Not from row creation: a source that confirms late would otherwise be failed after
+    only a couple of status calls.
+  - In memory, with no ref (the Solana row has no spare key): a reload or a hidden tab
+    (the loader skips ticks while hidden) restarts or pauses the count, which can only
+    **delay** an irreversible verdict, never hasten it.
+  - 6 h is far past LI.FI's slowest bridge ETAs; the constant sits next to the throttle
+    constants so it can be tuned.
 - A `PENDING` answer at any time keeps the row `Executing` with no deadline: LI.FI is
   still tracking it.
 
@@ -795,9 +819,19 @@ loader's 5 s tick.
   `$ethAddress` / `$solAddressMainnet` (the loader imports only `ethAddress` today; add
   `solAddressMainnet` from `lib/derived/address.derived.ts`), and a terminal-status branch firing
   `TRACK_COUNT_SWAP_SUCCESS` / `_ERROR` with `buildLifiSwapTrackingMetadata`.
+- That terminal branch also sets `shouldRefresh` (→ `waitAndTriggerWallet()`) for
+  **every** terminal LI.FI row, not only `Succeeded`: the modal closed at broadcast, so
+  nothing else refreshes balances when the route settles, and a failed, reverted or
+  refunded swap still spent gas or returned funds. A redundant refresh (dropped or
+  expired source) only finds nothing new.
 - `ActiveUserTransactionItem.svelte`: `isLifi` in the `isSwap` list and the
   `providerName` chain; when `lifi_received_symbol` is present, the received token and
   amount replace the destination token in the row.
+- **Failure reasons are stored, not displayed**, as for Velora and NEAR Intents: a
+  `Failed` row shows the existing warning icon, and `tx.error` (refunded, outcome
+  unknown, LI.FI's `substatusMessage`) is kept on the row for support and analytics. No
+  toast, no new row layout, no explorer link. Surfacing errors for all swap providers
+  is a separate, cross-provider change.
 - Wizard tracks `TRACK_COUNT_SWAP_SUBMITTED` (it is an active-transaction swap).
 
 ### Presentation
@@ -815,19 +849,20 @@ loader's 5 s tick.
 
 ## Delivery plan
 
-| PR  | Scope                                                                                                                                                                                                                                                                                                                                                                                        | Depends on                          |
-| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| 1   | **Backend AUT variant** — `Lifi(LifiData)`, validation, tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                             | —                                   |
-| 2   | **Scaffolding + EVM source** — `@lifi/sdk`, env, types, quote service + cache, trust checks + calldata binding, `exactAllowance` on `approve()`, LI.FI destination resolver + per-category wildcard, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana), provider sheet, EVM execution, Velora source-tx helper extraction, AUT utils/poller/loader/item | 1                                   |
-| 3   | **Solana source** — lift the Solana-source restriction on the Solana registry entry, `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` in the simulation preview), `SwapSolWizard` dispatch, Solana source-chain check in the poller, `PRODUCT.md` update for Solana-source swaps                                                                                          | 2                                   |
-| 4   | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                     | 3, LI.FI's written key confirmation |
+| PR  | Scope                                                                                                                                                                                                                                                                                                                                                                                                      | Depends on                          |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| 1   | **Backend AUT variant** — `Lifi(LifiData)`, validation, tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                           | —                                   |
+| 2a  | **Scaffolding + quoting** — `@lifi/sdk`, env (flag **narrowed to `LOCAL`**), types, quote service + cache, form-time trust checks, LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges), provider sheet | 1                                   |
+| 2b  | **EVM execution + tracking** — calldata binding (pinned selectors + `CalldataVerificationFacet`), `exactAllowance` on `approve()`, `fetchLifiEvmSwap` + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound)/loader (incl. wallet refresh)/item; flag back to `LOCAL \|\| STAGING`, `PRODUCT.md` for EVM-source swaps          | 2a                                  |
+| 3   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` in the simulation preview), `SwapSolWizard` dispatch, Solana source-chain check in the poller, `PRODUCT.md` update for Solana-source swaps                                                                           | 2b                                  |
+| 4   | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                   | 3, LI.FI's written key confirmation |
 
-If PR 2 is too large, split it into 2a (quoting + provider sheet) and 2b (execution,
-AUT), with the flag narrowed to `LOCAL` until 2b lands, so no deployed environment ever
-shows an offer that cannot be executed.
+PR 2 is split up front so each PR stays reviewable. The flag stays on `LOCAL` through
+2a, so no deployed environment ever shows an offer that cannot be executed. Solana → EVM
+is a later, separate PR (see [Decisions](#decisions)).
 
 `docs/ai/PRODUCT.md` is updated in **every** PR that makes new behaviour reachable on a
-deployed environment, not after: PR 2 describes EVM-source swaps (including EVM →
+deployed environment, not after: PR 2b describes EVM-source swaps (including EVM →
 Solana) on staging, PR 3 adds Solana-source swaps, PR 4 records that LI.FI is live
 everywhere.
 
@@ -837,15 +872,11 @@ everywhere.
   exhaust it; the fan-out degrades gracefully (no LI.FI quote) and the 30 s cadence keeps
   each open Swap form to ≈ 2 quote requests per minute plus input changes.
 - **Unsigned quotes** — mitigated by the trust checks and, on the quote that is signed,
-  by binding the calldata (EVM) or the simulated effects (Solana) to the request. Two
-  residual risks remain:
-  - The bridge leg's minimum output cannot be decoded client-side. A forged cross-chain
-    route can underpay, but only to the user's own address.
-  - On **Solana → EVM**, the bridge program's EVM recipient is not decoded. A forged
-    transaction to an allow-listed bridge could send up to `fromAmount` elsewhere.
-
-  Both need a compromised `li.quest` response over TLS. Whether the second is
-  acceptable is an open product call — see [Pending decisions](#pending-decisions).
+  by binding the calldata (EVM) or the simulated effects (Solana) to the request. One
+  residual risk remains: the bridge leg's minimum output cannot be decoded client-side,
+  so a forged cross-chain route (which needs a compromised `li.quest` response over TLS)
+  can underpay, but only to the user's own address. Solana → EVM, whose recipient cannot
+  be verified yet, is out of scope for v1 for exactly this reason.
 
 - **Solana blockhash expiry** — between the execution re-quote and broadcast only one
   threshold Schnorr signature happens (seconds), well inside 60–90 s. A transaction
@@ -855,6 +886,9 @@ everywhere.
   row on their own; a source-chain failure, a LI.FI `DONE` / `FAILED`, or the 6 h
   [unresolved-status](#unresolved-status) bound does. The bound's verdict is worded as
   "outcome unknown", not as lost funds.
+- **Failure reasons are not shown to the user** — as for Velora and NEAR Intents, a
+  failed row shows only the warning icon; the reason is stored on the row. Accepted for
+  v1 for consistency across providers.
 - **Narrower EVM → Solana coverage** — only bridges whose calldata carries a decodable
   Solana receiver (Mayan, NEARIntents, AcrossV4) are offered for EVM → Solana; routes
   via AllBridge, Chainflip, Glacis, Eco… are not.
@@ -867,7 +901,8 @@ everywhere.
    shows a LI.FI offer (when LI.FI has a route) for same-chain EVM, cross-chain EVM and
    EVM → Solana destinations, ranked by receive amount with the other providers,
    including Velora.
-2. With the flag on, a Solana source shows LI.FI offers for Solana and EVM destinations.
+2. With the flag on, a Solana source shows LI.FI offers for Solana destinations, and
+   never requests a LI.FI quote for an EVM destination.
 3. BTC, XRP and ICP sources never request a LI.FI quote.
 4. Form-time LI.FI quotes are requested with `skipSimulation`, at most once per 30 s for
    unchanged inputs, and immediately on any input change; execution-time quotes are
@@ -898,19 +933,22 @@ everywhere.
    (for a native-SOL destination, net of at most the SOL fee cap). A failed or
    timed-out simulation aborts the swap.
 10. The destination picker offers EVM and Solana tokens for an EVM source, and (from
-    PR 3) EVM and Solana tokens for a Solana source, even when no other provider covers
-    that category.
+    PR 3) Solana tokens for a Solana source, even when no other provider covers that
+    category, and Solana networks and tokens stay in the swap pickers when NEAR Intents
+    is off but LI.FI is on.
 11. A Solana swap signs LI.FI's transaction bytes unchanged (no recompilation) and
     broadcasts them.
 12. After broadcast, the modal closes, an AUT row appears in the Active-transactions
     panel labelled "LI.FI", and it reaches `Succeeded` / `Failed` in the background,
-    including after a page reload.
+    including after a page reload. Every terminal LI.FI row triggers one wallet
+    balance refresh.
 13. `DONE/PARTIAL` ends `Succeeded` and the row shows the token actually received, with
     its amount correctly formatted; `DONE/REFUNDED` ends `Failed` with the refunded copy.
 14. A reverted / dropped (EVM) or reverted / expired (Solana) source transaction ends
     `Failed`; a `NOT_FOUND` / `INVALID` status alone never terminates a row before the
     source is confirmed and the 6 h unresolved-status bound has passed, after which the
-    row ends `Failed` with the "outcome unknown" copy. A Solana row is marked expired
+    row ends `Failed` with the "outcome unknown" copy. That bound counts loader ticks
+    after source confirmation, never wall-clock time against `created_at_ns`. A Solana row is marked expired
     only after two consecutive polls each find no signature status (searching
     transaction history) with the stored blockhash no longer valid.
 15. `swap_submitted` fires from the wizard; `swap_success` / `swap_error` fire once from
@@ -923,16 +961,26 @@ everywhere.
 19. Every LI.FI-supplied string written to a row (error or ref value) fits the backend's
     UTF-8 byte limits, including non-ASCII text.
 
-## Pending decisions
+## Decisions
 
-- **Ship Solana → EVM in PR 3, or Solana → Solana only?** The facts are clear: the
-  simulation binding bounds _what_ leaves the wallet and _through which programs_, but
-  the EVM recipient inside a Solana bridge program's instruction is not decoded, so a
-  forged `li.quest` response routed through an allow-listed bridge could send up to
-  `fromAmount` to someone else. Options: (a) accept that residual risk and ship
-  Solana → EVM in PR 3; (b) ship Solana → Solana only in PR 3, and add Solana → EVM later
-  with a per-bridge instruction decoder for the allowed bridges. **Owner: product (to be
-  assigned).** PR 3 does not start its Solana → EVM part until this is decided.
+Recorded so a future reader can tell "excluded on purpose" from "forgotten".
+
+- **Solana → EVM is not in v1.** The simulation binding bounds _what_ leaves the wallet
+  and _through which programs_, but not the EVM recipient inside a Solana bridge
+  program's instruction. PR 3 ships Solana → Solana only; Solana → EVM follows in a
+  later PR with a per-bridge instruction decoder for the allowed bridges.
+- **EVM → Solana is allow-listed to Mayan, NEARIntents and AcrossV4**, the facets whose
+  Solana receiver `extractNonEVMAddress` can verify. Other bridges are not offered.
+- **Failure reasons stay off-screen**, matching Velora and NEAR Intents (icon only).
+- **The unresolved-status bound counts loader ticks after source confirmation**, in
+  memory, rather than wall time.
+- **Native-SOL receipts are checked net of the SOL fee cap**, not by reconstructing gross
+  incoming lamports.
+- **`@lifi/sdk` (core only) is approved** as a new dependency.
+- **PR 2 is split into 2a / 2b** up front.
+- **The LI.FI integrator id and API key are registered.** Their values are set in the
+  environment outside the repository; the implementer asks before editing
+  `deploy-to-environment.yml`.
 
 ## References
 
