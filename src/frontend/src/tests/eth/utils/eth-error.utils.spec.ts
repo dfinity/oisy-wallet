@@ -4,6 +4,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import * as analytics from '$lib/services/analytics.services';
 import * as toasts from '$lib/stores/toasts.store';
+import * as i18nUtils from '$lib/utils/i18n.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { SigningKey } from 'ethers/crypto';
@@ -317,6 +318,33 @@ describe('eth-error.utils', () => {
 					);
 				} finally {
 					vi.useRealTimers();
+				}
+			});
+
+			it('falls back to the generic toast when composing the explanation throws', async () => {
+				const replace = vi.spyOn(i18nUtils, 'replacePlaceholders').mockImplementationOnce(() => {
+					throw new Error('cannot compose');
+				});
+
+				try {
+					const err = outOfGas({ withRequest: true });
+
+					toastEthereumTransactionError({
+						err,
+						fallbackMsg: en.send.error.unexpected,
+						...sendParams
+					});
+
+					await vi.waitFor(() => expect(toasts.toastsError).toHaveBeenCalledOnce());
+
+					expect(toasts.toastsError).toHaveBeenCalledExactlyOnceWith({
+						msg: { text: en.send.error.unexpected },
+						err
+					});
+
+					expect(toasts.toastsErrorNoTrace).not.toHaveBeenCalled();
+				} finally {
+					replace.mockRestore();
 				}
 			});
 

@@ -315,8 +315,12 @@ export const toastEthereumTransactionError = ({
 	const outOfGasAnswer = findNodeOutOfGasAnswer(err);
 
 	if (nonNullish(outOfGasAnswer)) {
-		// Never rejects: every step that can fail is caught, and the toast shows regardless.
-		toastOutOfGasError({ err, answer: outOfGasAnswer, token, context });
+		// Fire and forget: the toast follows once the gas needed is in. The decode and the estimate
+		// catch their own failures; anything else that throws while composing the explanation falls
+		// back to the generic toast, so the user always learns the send failed.
+		toastOutOfGasError({ err, answer: outOfGasAnswer, token, context }).catch(() =>
+			toastsError({ msg: { text: fallbackMsg }, err })
+		);
 		return;
 	}
 
