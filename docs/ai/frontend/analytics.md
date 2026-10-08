@@ -335,6 +335,12 @@ These are not guidelines. A PR that violates them does not merge.
    nothing else. Any other wording is free text and stays out. It is the
    JSON-RPC message itself, never the error ethers wraps around it, which
    embeds the signed request and so the wallet, the recipient and the amount.
+   When the error is a variant of a candid type with a fixed set of variants,
+   OISY's own (`TipError`) or a standard one (ICRC `ApproveError`), the variant
+   name is already a category. Send it through a map typed against the
+   declaration (`Record<KeysOfUnion<…>, …>`) so that a new variant fails the
+   build until it has a value, read only the name and never its payload, and fall
+   back to `unknown` for anything else (see `toTipErrorType`).
 5. **English, locale-independent labels.** Human-readable labels resolve against
    the bundled `en.json` (see `resolveEnglishLabel` / `replaceOisyPlaceholders`),
    never the user's locale, so dashboards stay consistent and no locale leaks.
