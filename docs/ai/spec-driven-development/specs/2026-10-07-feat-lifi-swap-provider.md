@@ -452,6 +452,30 @@ route kind, and any other selector aborts:
 - `LIFI_NON_EVM_RECEIVER_SELECTORS` — the subset of `LIFI_BRIDGE_SELECTORS` that may be
   used for a **Solana destination** (see below).
 
+**Bridges are curated, and each one's effective receiver is decoded.** `bridgeData.receiver`
+is not always the address the bridge pays: some facets carry the receiver again in their
+bridge-specific data, and that copy is what the bridge consumes (Across V4's
+`AcrossV4Data.receiverAddress`, for example). A forged response could keep
+`bridgeData.receiver` equal to the user while setting the effective receiver to an
+attacker. So `LIFI_BRIDGE_SELECTORS` holds **only** facets for which `lifi-swap.utils.ts`
+has a pinned ABI and a decoder for the bridge-specific struct, and every receiver-like
+and refund field in it must equal the user (an EVM address left-padded to `bytes32`, or
+the user's Solana key). v1 starts with:
+
+| Facet              | Fields bound to the user (bridge-specific data)          |
+| ------------------ | -------------------------------------------------------- |
+| `AcrossFacetV4`    | `receiverAddress`, `refundAddress`                       |
+| `NEARIntentsFacet` | `nonEVMReceiver` (Solana destination), `refundRecipient` |
+| `MayanFacet`       | `nonEVMReceiver` (Solana destination), `refundRecipient` |
+
+The field names are taken from `lifinance/contracts` `src/Facets/*.sol`. The implementer
+re-reads each struct (and, for Mayan, how the facet checks the receiver inside its opaque
+`protocolData` on-chain) before pinning the decoder, and adds a test per facet built from
+a real LI.FI calldata fixture. Adding a bridge later means adding its decoder, fixture
+and tool key together. Every other bridge gets no quote: the display quote passes
+`allowBridges` limited to the curated tool keys, so the form never offers a route that
+execution would refuse.
+
 Then the decoded values are compared with the request. For **every** route, the full
 `SwapData[]` is bound, not just its first entry: the Diamond's `LibAsset.depositAssets`
 pulls `fromAmount` of `sendingAssetId` from the user for **each** entry with
@@ -475,7 +499,8 @@ only aggregates.
   - The input is the user's: with `hasSourceSwaps`, `swapData[0].sendingAssetId` and
     `swapData[0].fromAmount`; without, `bridgeData.sendingAssetId` and
     `bridgeData.minAmount`. Either pair equals the source token and `fromAmount`.
-  - The recipient is the user's. For an EVM destination, `bridgeData.receiver` equals
+  - The recipient is the user's, both in `bridgeData` and in the facet's own data (see
+    the curated table above). For an EVM destination, `bridgeData.receiver` equals
     `toAddress`. For a Solana destination, `bridgeData.receiver` equals LI.FI's
     `NON_EVM_ADDRESS` sentinel (`0x11f111f111f111F111f111f111F111f111f111F1`), and
     `extractNonEVMAddress(data)` equals the user's Solana address as 32 bytes (the
@@ -550,6 +575,20 @@ The result must show all of the following:
   temporary wSOL account) have no pre-state and are not listed. A route that closes one
   of the user's existing accounts (for example, unwrapping into a pre-existing wSOL ATA)
   is refused: fail closed, at the cost of those rare routes.
+- **Every top-level instruction is pinned.** A program allow-list alone is not enough:
+  `SOLANA_KNOWN_PROGRAM_ADDRESSES` includes stateful DEX programs (Whirlpool, Raydium
+  CLMM…), and a forged transaction could append, say, a decrease-liquidity instruction
+  with the user as position authority that pays attacker accounts. The drained position
+  is program-owned, so the wallet's token and control deltas would not show it. So each
+  top-level instruction is decoded and must match a pinned `(program, discriminator)`
+  pair in `LIFI_SOLANA_ALLOWED_INSTRUCTIONS`: Compute Budget (`SetComputeUnitLimit`,
+  `SetComputeUnitPrice`), Associated Token Account `CreateIdempotent` for the user,
+  System `Transfer` from the user to the user's own wSOL account, SPL Token `SyncNative`
+  and `CloseAccount` of accounts the transaction created, and the swap/route entrypoints
+  of the allowed Solana aggregators (Jupiter v6 route variants first; others added with
+  their discriminators). Any other top-level instruction aborts. Calls _inside_ an
+  allowed route are constrained by the aggregator program itself, plus the program check
+  below.
 - **Every program is known.** Every top-level instruction's program, and every entry of
   `unreadPrograms`, is in `SOLANA_KNOWN_PROGRAM_ADDRESSES` or in a new pinned
   `LIFI_SOLANA_PROGRAM_ADDRESSES`. `unreadPrograms` only lists programs called from
@@ -558,7 +597,7 @@ The result must show all of the following:
   otherwise a bridge reached by CPI (or a bridge's own internal programs) would reject
   legitimate routes. LI.FI's `/tools` returns only tool keys, names, logos and chain
   pairs — no program ids — so `LIFI_SOLANA_PROGRAM_ADDRESSES` is **pinned by hand** from
-  each allowed bridge's published program ids (and verified on-chain), one commented
+  each allowed aggregator's published program ids (and verified on-chain), one commented
   line per program, like `sol-known-programs.constants.ts`. A tool removed via
   `LIFI_DENY_*` has its programs removed from the list in the same change.
 - **Spend is bounded.** The source token's delta on the user's accounts is no lower than
@@ -622,6 +661,13 @@ New `fetchLifiEvmSwap` in `lib/services/swap.services.ts`, mirroring
    allowance to the pinned Diamond (`erc20ContractAllowance`) when the quote is
    selected and reserves one approval fee for "no allowance", two for "non-zero, not
    equal" (reset + approve), none for "equal", on top of the swap fee below.
+
+   That read is repeated **immediately before dispatch**. The count can change in
+   between (another pending LI.FI swap can consume an "equal" allowance, or leave a
+   non-zero one where the form saw zero). If the approval transactions now needed exceed
+   what review acknowledged, nothing is sent: the flow returns to review with the same
+   `swap.error.lifi_fee_changed` message and the updated count, as for a higher gas
+   ceiling below.
 
 2. **Re-quote with simulation on** (same params, `skipSimulation` omitted). The
    allowance now exists, so the simulation reflects the real transaction. Run
@@ -890,9 +936,18 @@ The backend measures both limits in UTF-8 bytes and rejects the **whole** update
 status included — when one is exceeded (`ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES` = 512
 and `ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES` = 256 in
 `lib/constants/app.constants.ts`). A character-based `slice(0, 512)` of non-ASCII text can
-exceed them and leave a `Failed` row stuck pending. So every LI.FI-supplied string —
-`substatusMessage` for the error, and `lifi_received_symbol`, `lifi_received_amount`,
-`lifi_dest_tx_hash` as ref values — is cut with a byte-safe truncation:
+exceed them and leave a `Failed` row stuck pending.
+
+Truncation is only for **free text**. An atomic value cut short is corrupt, not safe, so
+those are validated and omitted instead:
+
+- `lifi_dest_tx_hash` must be a valid hash for the destination chain (`0x` + 64 hex for
+  EVM; base58, 64–88 characters, for Solana), or it is omitted.
+- `lifi_received_amount` must fit the ref limit after formatting, or the symbol/amount
+  **pair** is omitted (the row then shows the target token, as for malformed metadata).
+
+Free text — `substatusMessage` for the error and `lifi_received_symbol` as a ref value —
+is cut with a byte-safe truncation:
 `TextEncoder().encodeInto(text, new Uint8Array(limit))` and `text.slice(0, read)`, as
 `toCyclesMintRowError` (`lib/utils/cycles-mint-active-tx.utils.ts`) does. That helper is
 lifted into a shared util (`truncateUtf8Bytes`) used by both, with the constants above as
@@ -1024,13 +1079,15 @@ everywhere.
    its route kind and the Diamond's `CalldataVerificationFacet` decodes it to the
    requested source token and amount, the user's recipient (EVM, or the user's Solana
    address for a Solana destination — only via a selector in
-   `LIFI_NON_EVM_RECEIVER_SELECTORS`), the requested destination chain and, same-chain, a
+   `LIFI_NON_EVM_RECEIVER_SELECTORS`), with every receiver and refund field in the curated
+   facet's own data equal to the user, the requested destination chain and, same-chain, a
    minimum output at least the displayed `toAmountMin`. A route with a destination call
    is never signed. A decode that reverts aborts the swap.
 9. A Solana swap is never signed unless a simulation of its exact bytes succeeds, shows
    no control change, leaves every token account it creates for the user with the user
    as owner and no foreign delegate or close authority, closes none of the user's
-   pre-existing accounts, calls (top-level or nested)
+   pre-existing accounts, contains only top-level instructions from
+   `LIFI_SOLANA_ALLOWED_INSTRUCTIONS`, calls (top-level or nested)
    only programs in `SOLANA_KNOWN_PROGRAM_ADDRESSES` or the pinned
    `LIFI_SOLANA_PROGRAM_ADDRESSES`, spends no more than `fromAmount` (plus the SOL fee
    cap) from the user's accounts and, Solana → Solana, credits at least `toAmountMin`
@@ -1075,6 +1132,11 @@ Recorded so a future reader can tell "excluded on purpose" from "forgotten".
   later PR with a per-bridge instruction decoder for the allowed bridges.
 - **EVM → Solana is allow-listed to Mayan, NEARIntents and AcrossV4**, the facets whose
   Solana receiver `extractNonEVMAddress` can verify. Other bridges are not offered.
+- **All cross-chain EVM routes use curated bridge facets** whose bridge-specific receiver
+  and refund fields OISY decodes and binds (Across V4, NEAR Intents, Mayan to start).
+  Other bridges are not offered until a decoder is added.
+- **Solana top-level instructions are pinned** by `(program, discriminator)`, not just by
+  program, so a known DEX program cannot be used for anything but the allowed route.
 - **Failure reasons stay off-screen**, matching Velora and NEAR Intents (icon only).
 - **The unresolved-status bound counts loader ticks after source confirmation**, in
   memory, rather than wall time.
