@@ -2,6 +2,7 @@ import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { maxBigInt } from '$lib/utils/bigint.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
+import { SOLANA_KNOWN_PROGRAM_ADDRESSES } from '$sol/constants/sol-known-programs.constants';
 import {
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
@@ -205,15 +206,60 @@ const programAddressOf = (instruction: unknown): SolAddress | undefined => {
 	}
 };
 
+const stackHeightOf = (instruction: unknown): number | undefined =>
+	nonNullish(instruction) &&
+	typeof instruction === 'object' &&
+	'stackHeight' in instruction &&
+	typeof instruction.stackHeight === 'number'
+		? instruction.stackHeight
+		: undefined;
+
+/**
+ * The program that made each call inside one top-level instruction: the closest call before it one
+ * level up, from the depth the RPC reports for every nested call. A call reported without its depth
+ * is left without a caller rather than guessed at.
+ */
+const callersOf = ({
+	instruction,
+	inner
+}: {
+	instruction: unknown;
+	inner: readonly unknown[];
+}): (SolAddress | undefined)[] => {
+	const stack: (SolAddress | undefined)[] = [programAddressOf(instruction)];
+
+	return inner.map((nested) => {
+		const height = stackHeightOf(nested);
+
+		if (isNullish(height) || height < 2) {
+			return undefined;
+		}
+
+		const caller = stack[height - 2];
+
+		stack.length = height;
+		stack[height - 1] = programAddressOf(nested);
+
+		return caller;
+	});
+};
+
 const flatten = ({
 	instructions,
 	innerInstructions
 }: {
 	instructions: readonly unknown[];
 	innerInstructions: readonly SolInstructionGroup[];
-}): { parentIndex: number; topLevel: boolean; instruction: SolParsedRpcInstruction }[] =>
+}): {
+	parentIndex: number;
+	topLevel: boolean;
+	instruction: SolParsedRpcInstruction;
+	madeBy?: SolAddress;
+}[] =>
 	instructions.flatMap((instruction, parentIndex) => {
 		const inner = innerInstructions.find(({ index }) => index === parentIndex)?.instructions ?? [];
+
+		const callers = callersOf({ instruction, inner });
 
 		// Which of the two an instruction is has to survive the flattening: an account the message
 		// itself opens is one the user is paying for, while the same call made inside a program is
@@ -221,14 +267,19 @@ const flatten = ({
 		// Marked before the parse filter, so an unreadable top-level call does not promote its first
 		// inner one.
 		return [
-			{ instruction, topLevel: true },
-			...inner.map((nested) => ({ instruction: nested, topLevel: false }))
+			{ instruction, topLevel: true, madeBy: undefined },
+			...inner.map((nested, index) => ({
+				instruction: nested,
+				topLevel: false,
+				madeBy: callers[index]
+			}))
 		]
 			.filter(({ instruction: candidate }) => isParsed(candidate))
-			.map(({ instruction: parsed, topLevel }) => ({
+			.map(({ instruction: parsed, topLevel, madeBy }) => ({
 				parentIndex,
 				topLevel,
-				instruction: parsed as SolParsedRpcInstruction
+				instruction: parsed as SolParsedRpcInstruction,
+				...(nonNullish(madeBy) && { madeBy })
 			}));
 	});
 
@@ -1503,7 +1554,7 @@ export const mapSolInstructionSummaries = ({
 	]);
 
 	const effects = flattened.reduce<Effect[]>(
-		(acc, { parentIndex, topLevel, instruction }, position) => {
+		(acc, { parentIndex, topLevel, instruction, madeBy }, position) => {
 			const effect = toEffect({
 				instruction,
 				topLevel,
@@ -1541,7 +1592,26 @@ export const mapSolInstructionSummaries = ({
 						})
 					: undefined;
 
-			return [...acc, { ...wrapped, ...(nonNullish(rent) && { rent }), parentIndex }];
+			// The program that made a transfer, when it is not the one the line hangs under and not one
+			// of the known programs: a program the review's notice about programs OISY cannot read
+			// names. A known pool on every leg of every routed swap would only repeat itself.
+			const via =
+				['send', 'receive'].includes(wrapped.kind) &&
+				nonNullish(madeBy) &&
+				madeBy !== programs[parentIndex] &&
+				!SOLANA_KNOWN_PROGRAM_ADDRESSES.includes(madeBy)
+					? madeBy
+					: undefined;
+
+			return [
+				...acc,
+				{
+					...wrapped,
+					...(nonNullish(rent) && { rent }),
+					...(nonNullish(via) && { via }),
+					parentIndex
+				}
+			];
 		},
 		[]
 	);
