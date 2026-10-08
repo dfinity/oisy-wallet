@@ -365,7 +365,11 @@ request (chains, tokens, amount, both addresses, slippage):
 
 The other providers keep refreshing every 5 s; the fan-out is unchanged. A cached
 quote is only ever **displayed** — execution always re-quotes — so a 30 s-old price is
-never signed.
+never signed. The execution re-quote **never goes through the cache**: it calls the REST
+wrapper directly (not `fetchLifiSwapQuote`), neither reads nor writes the cache entry,
+and does not join an in-flight form request. Relying on the cache key would not be
+enough, because the key does not include `skipSimulation`, so an unsimulated display
+quote could otherwise come back as the "fresh simulated" one.
 
 No provider caches or throttles its quotes today (every provider is re-quoted on each
 5 s tick; `SwapAmountsContext.svelte` only debounces and guards with
@@ -660,6 +664,13 @@ value })` runs on the exact checked transaction through `infuraProviders(network
    execution, if the ceiling from OISY's own estimate exceeds the reviewed ceiling, the
    swap is **not signed**: it aborts back to the review step with a "network fee changed"
    message (a new `swap.error.lifi_fee_changed`), and the user confirms the new maximum.
+   For that to be reviewable, the abort **carries the execution-time gas estimate back**
+   into the wizard's fee state for the selected quote: review then shows
+   `max(quote-derived ceiling, carried ceiling)`, and that exact value becomes the newly
+   acknowledged bound the next execution compares against. Without it, review would
+   recompute the same lower `estimate.gasCosts` ceiling and every retry would abort
+   again. The carried estimate is cleared whenever the quote's inputs (the cache key)
+   change.
    Velora Market keeps signing its provider's gas, unchanged.
 
 5. Create the AUT row (best effort), `enableSwapDestinationToken`.
@@ -776,6 +787,13 @@ rather than in base units. The received token is usually one OISY does not know,
 decimals would otherwise be lost, and a Solana row has no spare key to store them
 separately.
 
+That metadata is untrusted and optional, so it can never block the terminal update.
+`receiving.amount` must match `/^\d+$/` and `receiving.token.decimals` must be an
+integer from 0 to 36 (the range `formatToken` handles); `receiving.token.symbol` must be a
+non-empty string. If any check fails, or formatting throws, the poller still writes
+`Succeeded` and simply omits the two received refs: the row then shows the target token
+as before, which is the same display as `COMPLETED`.
+
 #### Poller (`lib/services/lifi-active-tx.services.ts`)
 
 Each tick, per pending LI.FI row:
@@ -879,6 +897,18 @@ exceed them and leave a `Failed` row stuck pending. So every LI.FI-supplied stri
 `toCyclesMintRowError` (`lib/utils/cycles-mint-active-tx.utils.ts`) does. That helper is
 lifted into a shared util (`truncateUtf8Bytes`) used by both, with the constants above as
 limits, and recorded in `docs/ai/frontend/reusability.md`.
+
+The two LI.FI strings written **at creation** are validated rather than truncated, since a
+cut value would be wrong rather than shorter, and an oversized one would make the backend
+reject the best-effort creation, leaving the broadcast swap untracked:
+
+- `lifi_tool` (`step.tool`, later sent as `bridge` to `/status`) must match
+  `/^[A-Za-z0-9_-]{1,64}$/`;
+- `lifi_transaction_id` must match `/^0x[0-9a-fA-F]{1,128}$/`.
+
+A value that fails is **omitted** from the refs instead of failing creation. Without
+`lifi_tool`, the poller calls `/status` without `bridge` from the start (the same query as
+the `INVALID` fallback).
 
 Learned refs are merged on every poll. Errors are caught per row. Polls are throttled
 per row inside the poller to LI.FI's recommended cadence — every 10 s for the first
