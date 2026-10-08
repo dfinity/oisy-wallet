@@ -86,6 +86,11 @@ export interface SolInstructionSummary {
 	// The name that program publishes for itself, when it publishes one. Its own claim about
 	// itself, attested by nobody: a label for the address, never a statement about what it does.
 	programName?: string;
+	// The program that made a transfer inside the instruction it hangs under, when that is another
+	// program than the one the heading names: the pool a leg of a routed swap goes through.
+	via?: SolAddress;
+	// The name that program publishes for itself, when it publishes one. A label, as above.
+	viaName?: string;
 	// The lines of a single instruction the wallet could not read, the legs of a routed swap among
 	// them. They hang under it rather than sitting flat among the top-level effects, which is what
 	// keeps a four-leg route from reading as four unrelated transfers, and a line made inside an

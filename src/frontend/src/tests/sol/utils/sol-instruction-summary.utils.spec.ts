@@ -18,6 +18,7 @@ import {
 	mockSolAddress,
 	mockSolAddress2
 } from '$tests/mocks/sol.mock';
+import { nonNullish } from '@dfinity/utils';
 import { getCreateAccountInstruction, getTransferSolInstruction } from '@solana-program/system';
 import {
 	AuthorityType,
@@ -129,6 +130,121 @@ describe('sol-instruction-summary.utils', () => {
 
 				expect(total).toBe(24);
 				expect(views().length).toBeLessThan(total / 2);
+			});
+		});
+
+		describe('the program each leg of a route goes through', () => {
+			const router = 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4';
+			const fusion = 'fUSioN9YKKSa3CUC2YUc4tPkHJ5Y6XW1yz8y6F7qWz9';
+			const meteora = 'cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG';
+
+			// What the run reports: the depth of every nested call, which says who made it.
+			const call = ({ programId, stackHeight }: { programId: string; stackHeight?: number }) => ({
+				programId,
+				accounts: [],
+				data: '',
+				...(nonNullish(stackHeight) && { stackHeight })
+			});
+
+			const transfer = ({
+				outgoing,
+				amount,
+				stackHeight
+			}: {
+				outgoing: boolean;
+				amount: string;
+				stackHeight?: number;
+			}) => ({
+				program: 'spl-token',
+				programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+				parsed: {
+					type: 'transfer',
+					info: outgoing
+						? {
+								source: mockAtaAddress,
+								destination: mockAtaAddress2,
+								authority: mockSolAddress,
+								amount
+							}
+						: {
+								source: mockAtaAddress2,
+								destination: mockAtaAddress,
+								authority: mockSolAddress2,
+								amount
+							}
+				},
+				...(nonNullish(stackHeight) && { stackHeight })
+			});
+
+			const legs = ({
+				top,
+				inner
+			}: {
+				top: string;
+				inner: unknown[];
+			}): [string, string | undefined][] =>
+				flattenInstructions(
+					mapSolInstructionSummaries({
+						instructions: [call({ programId: top })],
+						innerInstructions: [{ index: 0, instructions: inner }],
+						ownedAddresses: [mockSolAddress, mockAtaAddress],
+						userAddress: mockSolAddress
+					})
+				)
+					.filter(({ kind }) => kind !== 'route')
+					.map(({ kind, via }) => [kind, via]);
+
+			it('should name the pool that made each leg', () => {
+				expect(
+					legs({
+						top: router,
+						inner: [
+							call({ programId: fusion, stackHeight: 2 }),
+							transfer({ outgoing: true, amount: '1000', stackHeight: 3 }),
+							transfer({ outgoing: false, amount: '900', stackHeight: 3 }),
+							call({ programId: meteora, stackHeight: 2 }),
+							transfer({ outgoing: true, amount: '500', stackHeight: 3 }),
+							transfer({ outgoing: false, amount: '450', stackHeight: 3 })
+						]
+					})
+				).toStrictEqual([
+					['send', fusion],
+					['receive', fusion],
+					['send', meteora],
+					['receive', meteora]
+				]);
+			});
+
+			// The heading already names the router, and a pool called directly is the heading itself.
+			it('should name nothing for a leg the heading program made itself', () => {
+				expect(
+					legs({
+						top: fusion,
+						inner: [
+							transfer({ outgoing: true, amount: '1000', stackHeight: 2 }),
+							transfer({ outgoing: false, amount: '900', stackHeight: 2 })
+						]
+					})
+				).toStrictEqual([
+					['send', undefined],
+					['receive', undefined]
+				]);
+			});
+
+			it('should name nothing when the run does not say how deep a call was', () => {
+				expect(
+					legs({
+						top: router,
+						inner: [
+							call({ programId: fusion }),
+							transfer({ outgoing: true, amount: '1000' }),
+							transfer({ outgoing: false, amount: '900' })
+						]
+					})
+				).toStrictEqual([
+					['send', undefined],
+					['receive', undefined]
+				]);
 			});
 		});
 
