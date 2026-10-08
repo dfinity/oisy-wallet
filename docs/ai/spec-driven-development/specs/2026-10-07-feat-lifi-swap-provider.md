@@ -58,10 +58,11 @@ user gets the better price without any new UI concept.
 
 ## Background — how swap providers work today
 
-Reference only; the integration recipe is the one Velora and NEAR Intents followed
-(see `2026-07-27-impr-velora-active-transactions.md`,
-`2026-07-24-impr-near-intents-active-transactions.md`,
-`2026-08-12-feat-ck-swap-provider.md`).
+Reference only; the integration recipe is the one Velora and NEAR Intents followed. Their
+specs are not in the repository, so the precedent is the merged code: commits
+`5a20eff6a` / `12dd69624` (NEAR Intents backend variant / frontend AUT), `78d5addbd` /
+`0c53b9421` (Velora backend variant / frontend AUT) and `2a8128636` (Chain Fusion as a
+swap provider), plus the spec `2026-08-25-feat-near-intents-btc-swap.md`.
 
 ### Registries and fan-out
 
@@ -296,6 +297,15 @@ offers EVM → Solana. Otherwise a LI.FI Solana-source offer could be shown and 
 while `SwapSolWizard` still sends every swap to `fetchNearIntentsSolSwap`. PR 3 lifts
 that restriction (for Solana → Solana only) together with the wizard dispatch (see
 [Delivery plan](#delivery-plan)).
+
+Solana-source quotes pass `allowExchanges` limited to `LIFI_SOLANA_ALLOWED_EXCHANGES`, the
+LI.FI tool keys of the aggregators that execution can bind: those with pinned
+instructions and a minimum-output decoder (see
+[Solana transaction binding](#solana-transaction-binding-execution-time-quote)). v1 is
+`['jupiter']` (the key LI.FI's `/tools` lists). Without it, LI.FI could display an OKX or
+DFlow route that would always abort at execution. The list and
+`LIFI_SOLANA_ALLOWED_INSTRUCTIONS` change together, as `allowBridges` and the curated
+bridge facets do on EVM.
 
 - Maps OISY network → LI.FI chain id (EVM: the network's `chainId`; Solana mainnet →
   `1151111081099710`). Non-mainnet networks → `undefined` (no quote).
@@ -656,7 +666,11 @@ New `fetchLifiEvmSwap` in `lib/services/swap.services.ts`, mirroring
    it is an inline `retryWithDelay({ maxRetries: 10, request })` around
    `erc20ContractAllowance` inside `fetchVeloraMarketSwap`
    (`lib/services/swap.services.ts`). Extract it into a small shared helper used by
-   both, or repeat the same shape; do not invent a different poll. The spender is the
+   both, or repeat the same shape; do not invent a different poll. For LI.FI the poll's
+   condition is **equality** (`allowance === fromAmount`), not Velora's `>=`: under
+   `exactAllowance`, a concurrently mined allowance change could otherwise leave the
+   Diamond with excess authority while the poll passes. A different value after the
+   retries aborts the swap before anything else is sent. The spender is the
    **pinned** Diamond (which the displayed quote's `approvalAddress` already matched),
    so approval does not depend on a fresh quote.
 
@@ -682,6 +696,13 @@ New `fetchLifiEvmSwap` in `lib/services/swap.services.ts`, mirroring
    what review acknowledged, nothing is sent: the flow returns to review with the same
    `swap.error.lifi_fee_changed` message and the updated count, as for a higher gas
    ceiling below.
+
+   That outer read still races with `approve()`'s own `checkExistingApproval`, which
+   decides between zero, one and two transactions a moment later. So the bound is also
+   enforced **inside** the approval: with `exactAllowance`, `ApproveParams` also takes
+   `maxApprovalTransactions` (the count review acknowledged), and `approve()` throws
+   before its first broadcast if its own read needs more. The wizard maps that error to
+   the same return-to-review flow. The decision and the broadcast then use one read.
 
 2. **Re-quote with simulation on** (same params, `skipSimulation` omitted). The
    allowance now exists, so the simulation reflects the real transaction. Run
@@ -1201,8 +1222,7 @@ Recorded so a future reader can tell "excluded on purpose" from "forgotten".
   https://docs.li.fi/introduction/user-flows-and-examples/bitcoin-tx-example,
   https://docs.li.fi/introduction/user-flows-and-examples/solana-tx-execution,
   https://github.com/lifinance/contracts/tree/main/deployments
-- Specs: `2026-07-27-impr-velora-active-transactions.md`,
-  `2026-07-24-impr-near-intents-active-transactions.md`,
-  `2026-08-25-feat-near-intents-btc-swap.md`, `2026-08-12-feat-ck-swap-provider.md`
-- Precedent commits: `78d5addbd` (Velora backend AUT variant), `0c53b9421` (Velora
+- Spec: `2026-08-25-feat-near-intents-btc-swap.md`
+- Precedent commits: `5a20eff6a` (NEAR Intents backend AUT variant), `12dd69624` (NEAR
+  Intents frontend AUT), `78d5addbd` (Velora backend AUT variant), `0c53b9421` (Velora
   frontend AUT), `2a8128636` (Chain Fusion as a swap provider)
