@@ -2164,6 +2164,7 @@
 			"instruction_unwrap": "$symbol 토큰 계정 언랩 후 닫기",
 			"instruction_create_account": "",
 			"instruction_create_program_account": "",
+			"instruction_close_program_account": "",
 			"instruction_close_account": "",
 			"instruction_close_account_for": "$symbol 토큰 계정 닫기",
 			"instruction_approve": "",

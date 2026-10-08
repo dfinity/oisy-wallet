@@ -1,3 +1,4 @@
+import { ZERO } from '$lib/constants/app.constants';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { getMultipleAccountsInfo, simulateTransactionAccounts } from '$sol/api/solana.api';
 import {
@@ -6,7 +7,7 @@ import {
 } from '$sol/constants/sol.constants';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type { SolSimulationResult } from '$sol/types/sol-simulation';
+import type { SolClosedAccount, SolSimulationResult } from '$sol/types/sol-simulation';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import type { SplTokenAddress } from '$sol/types/spl';
 import {
@@ -16,13 +17,16 @@ import {
 import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
 import { deriveSolMessageSummary } from '$sol/utils/sol-message-summary.utils';
 import {
+	findSolClosedAppAccounts,
 	findSolUnreadPrograms,
 	isEmptySolSimulationPreview,
 	mapSolSimulationAccountOwners,
 	mapSolSimulationPreview,
 	parseTokenAccountState,
-	selectSolSimulationAddresses
+	selectSolSimulationAddresses,
+	solClosedAccountsReachWallet
 } from '$sol/utils/sol-simulation.utils';
+import { solWalletLamportsStated } from '$sol/utils/sol-transaction-summary.utils';
 import {
 	deriveSolTransferParties,
 	mapSolSimulatedTransferLegs
@@ -58,7 +62,7 @@ const simulate = async ({
 	// read the difference as the balance, and nothing in the message says where the line falls.
 	// Best effort - without it the balance of an account this message opens is stated as unknown
 	// rather than guessed at.
-	const [preAccounts, { err, accounts: postAccounts, innerInstructions }, rentExemptMinimum] =
+	const [preAccounts, { err, accounts: postAccounts, innerInstructions, fee }, rentExemptMinimum] =
 		await Promise.all([
 			getMultipleAccountsInfo({ addresses, network }),
 			simulateTransactionAccounts({ base64EncodedTransactionMessage, addresses, network }),
@@ -163,22 +167,49 @@ const simulate = async ({
 
 	// The kit instructions are not parsed, so they contribute nothing themselves; iterating them is
 	// what attaches each simulated nested call to the instruction that made it.
-	const instructions = mapSolInstructionSummaries({
-		instructions: [...transactionMessage.instructions].map(asSolParsedRpcInstructionOrSelf),
-		innerInstructions: innerInstructionGroups,
-		ownedAddresses: [address, ...ownedAddresses],
-		userAddress: address,
-		addressToToken,
-		accountHolders,
-		accountMintsBefore,
-		accountLamports,
-		accountTokenAmounts,
-		rentExemptMinimum,
-		// A run whose calls all happen inside a program the wallet cannot read produces no effects
-		// at all, and the review then listed nothing for a transaction that plainly does something.
-		// Saying which programs it hands the instructions to is worth more than an empty list.
-		includeUnrecognised: true
-	});
+	const summarise = (closedAccounts: SolClosedAccount[] = []) =>
+		mapSolInstructionSummaries({
+			instructions: [...transactionMessage.instructions].map(asSolParsedRpcInstructionOrSelf),
+			innerInstructions: innerInstructionGroups,
+			ownedAddresses: [address, ...ownedAddresses],
+			userAddress: address,
+			addressToToken,
+			accountHolders,
+			accountMintsBefore,
+			accountLamports,
+			accountTokenAmounts,
+			rentExemptMinimum,
+			closedAccounts,
+			// A run whose calls all happen inside a program the wallet cannot read produces no effects
+			// at all, and the review then listed nothing for a transaction that plainly does something.
+			// Saying which programs it hands the instructions to is worth more than an empty list.
+			includeUnrecognised: true
+		});
+
+	const summaries = summarise();
+
+	// An application closing an account of its own, such as a liquidity position handing back its
+	// rent, moves the lamports itself, and only the account's state says it happened. Its close is
+	// listed when every lamport it held reached the wallet, which the wallet's own change has to show:
+	// with the fee and every line the list already states taken out, the rest must be exactly that.
+	const closedAccounts = findSolClosedAppAccounts({ addresses, preAccounts, postAccounts });
+
+	const walletIndex = addresses.indexOf(address);
+	const walletBefore = preAccounts[walletIndex]?.lamports;
+	const walletAfter = postAccounts[walletIndex]?.lamports;
+
+	const instructions = solClosedAccountsReachWallet({
+		closedAccounts,
+		walletChange:
+			walletIndex >= 0 && nonNullish(walletBefore) && nonNullish(walletAfter)
+				? BigInt(walletAfter) - BigInt(walletBefore)
+				: undefined,
+		statedChange: solWalletLamportsStated({ instructions: summaries, userAddress: address }),
+		// Charged to whoever pays the fee, which need not be the wallet.
+		fee: transactionMessage.feePayer.address === address ? (fee ?? ZERO) : ZERO
+	})
+		? summarise(closedAccounts)
+		: summaries;
 
 	// The message read on its own, without the nested calls the run reveals: a second account of
 	// the same transaction, which is what lets the review notice the two disagreeing.

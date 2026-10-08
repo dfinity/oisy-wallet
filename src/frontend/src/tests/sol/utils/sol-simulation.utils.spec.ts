@@ -8,11 +8,13 @@ import type { SolAddress } from '$sol/types/address';
 import type { SolanaParsedAccountInfo, SolanaSimulatedInnerInstructions } from '$sol/types/sol-rpc';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import {
+	findSolClosedAppAccounts,
 	findSolUnreadPrograms,
 	isEmptySolSimulationPreview,
 	mapSolSimulationAccountOwners,
 	mapSolSimulationPreview,
-	selectSolSimulationAddresses
+	selectSolSimulationAddresses,
+	solClosedAccountsReachWallet
 } from '$sol/utils/sol-simulation.utils';
 import {
 	mockAtaAddress,
@@ -400,6 +402,124 @@ describe('sol-simulation.utils', () => {
 					])
 				)
 			).toBeUndefined();
+		});
+	});
+
+	describe('findSolClosedAppAccounts', () => {
+		const application = 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo';
+
+		const appAccount = (lamports: bigint): NonNullable<SolanaParsedAccountInfo> =>
+			({
+				executable: false,
+				lamports,
+				owner: application,
+				space: 8120n,
+				data: ['', 'base64']
+			}) as unknown as NonNullable<SolanaParsedAccountInfo>;
+
+		it('should find an application account the run empties', () => {
+			expect(
+				findSolClosedAppAccounts({
+					addresses: [mockSolAddress2],
+					preAccounts: [appAccount(41_899_840n)],
+					postAccounts: [systemAccount({ lamports: ZERO })]
+				})
+			).toStrictEqual([{ account: mockSolAddress2, program: application, lamports: 41_899_840n }]);
+		});
+
+		it('should find one the run leaves no account of at all', () => {
+			expect(
+				findSolClosedAppAccounts({
+					addresses: [mockSolAddress2],
+					preAccounts: [appAccount(41_899_840n)],
+					postAccounts: [null]
+				})
+			).toHaveLength(1);
+		});
+
+		it('should leave out an account that keeps lamports', () => {
+			expect(
+				findSolClosedAppAccounts({
+					addresses: [mockSolAddress2],
+					preAccounts: [appAccount(41_899_840n)],
+					postAccounts: [appAccount(1n)]
+				})
+			).toStrictEqual([]);
+		});
+
+		// What leaves a wallet does so by a transfer the run states, and a token account is closed by
+		// an instruction that names where its balance goes.
+		it('should leave out wallets and token accounts', () => {
+			expect(
+				findSolClosedAppAccounts({
+					addresses: [mockSolAddress, mockAtaAddress],
+					preAccounts: [
+						systemAccount({ lamports: 1_000_000n }),
+						tokenAccount({ amount: ZERO, owner: mockSolAddress })
+					],
+					postAccounts: [null, null]
+				})
+			).toStrictEqual([]);
+		});
+
+		it('should say nothing of an account the run did not report on', () => {
+			expect(
+				findSolClosedAppAccounts({
+					addresses: [mockSolAddress2],
+					preAccounts: [appAccount(41_899_840n)],
+					postAccounts: []
+				})
+			).toStrictEqual([]);
+		});
+	});
+
+	describe('solClosedAccountsReachWallet', () => {
+		const closedAccounts = [
+			{ account: mockSolAddress2, program: mockSolAddress3, lamports: 41_899_840n }
+		];
+
+		it('should hold when the rest of the wallet’s change is exactly what the accounts held', () => {
+			expect(
+				solClosedAccountsReachWallet({
+					closedAccounts,
+					walletChange: 41_894_840n - 19_028n,
+					statedChange: -19_028n,
+					fee: 5_000n
+				})
+			).toBeTruthy();
+		});
+
+		it('should not hold when part of it went elsewhere', () => {
+			expect(
+				solClosedAccountsReachWallet({
+					closedAccounts,
+					walletChange: 41_000_000n,
+					statedChange: ZERO,
+					fee: 5_000n
+				})
+			).toBeFalsy();
+		});
+
+		it('should not hold when a line moves the wallet by an amount nobody read', () => {
+			expect(
+				solClosedAccountsReachWallet({
+					closedAccounts,
+					walletChange: 41_894_840n,
+					statedChange: undefined,
+					fee: 5_000n
+				})
+			).toBeFalsy();
+		});
+
+		it('should not hold when nothing was closed', () => {
+			expect(
+				solClosedAccountsReachWallet({
+					closedAccounts: [],
+					walletChange: -5_000n,
+					statedChange: ZERO,
+					fee: 5_000n
+				})
+			).toBeFalsy();
 		});
 	});
 });

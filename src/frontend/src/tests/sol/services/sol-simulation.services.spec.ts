@@ -115,13 +115,15 @@ describe('sol-simulation.services', () => {
 	const simulated = ({
 		err = null,
 		accounts,
-		innerInstructions = []
+		innerInstructions = [],
+		fee
 	}: {
 		err?: string | null;
 		accounts: SolanaParsedAccountsInfo;
 		innerInstructions?: SolanaSimulatedInnerInstructions;
+		fee?: bigint;
 	}) =>
-		({ err, accounts, innerInstructions }) as unknown as Awaited<
+		({ err, accounts, innerInstructions, fee }) as unknown as Awaited<
 			ReturnType<typeof simulateTransactionAccounts>
 		>;
 
@@ -296,6 +298,75 @@ describe('sol-simulation.services', () => {
 			const result = await simulateSolTransaction(params(message([])));
 
 			expect(result).not.toHaveProperty('opensAccountBeyondRent');
+		});
+	});
+
+	// An application closing an account of its own moves the lamports itself, and only the account's
+	// state before and after the run says so. It is listed when the wallet's change shows that every
+	// lamport of it came home.
+	describe('accounts an application closes', () => {
+		const application = 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo';
+		const rent = 41_899_840n;
+		const fee = 5_000n;
+
+		const closing = {
+			feePayer: { address: mockSolAddress },
+			instructions: [
+				{
+					programAddress: application,
+					accounts: [
+						{ address: mockSolAddress2, role: AccountRole.WRITABLE },
+						{ address: mockSolAddress, role: AccountRole.WRITABLE_SIGNER }
+					]
+				}
+			]
+		} as unknown as CompilableTransactionMessage;
+
+		const appAccount = {
+			executable: false,
+			lamports: rent,
+			owner: application,
+			space: 8120n,
+			data: ['', 'base64']
+		} as unknown as SolanaParsedAccountsInfo[number];
+
+		// The instruction's only call is the program logging an event about itself.
+		const eventLog = [
+			{ index: 0, instructions: [{ programId: application, accounts: [], data: '' }] }
+		] as unknown as SolanaSimulatedInnerInstructions;
+
+		const run = async (walletAfter: bigint) => {
+			vi.mocked(getMultipleAccountsInfo).mockResolvedValue([systemAccount(1_000_000n), appAccount]);
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({
+					accounts: [systemAccount(walletAfter), null],
+					innerInstructions: eventLog,
+					fee
+				})
+			);
+
+			return await simulateSolTransaction(params(closing));
+		};
+
+		it('should list the close under its instruction when the rent came home', async () => {
+			const result = await run(1_000_000n + rent - fee);
+
+			expect(result?.instructions).toStrictEqual([
+				{
+					kind: 'route',
+					program: application,
+					children: [
+						{ kind: 'closeAccount', account: mockSolAddress2, program: application, returned: rent }
+					]
+				}
+			]);
+		});
+
+		// Nothing then says where the rent went, and the instruction stays one nothing describes.
+		it('should leave the instruction undescribed when the rent went elsewhere', async () => {
+			const result = await run(1_000_000n - fee);
+
+			expect(result?.instructions).toStrictEqual([{ kind: 'unknown', program: application }]);
 		});
 	});
 

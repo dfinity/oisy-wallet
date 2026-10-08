@@ -20,6 +20,9 @@ export type SolInstructionSummaryKind =
 	// An account opened for an application's own program, its rent paid by the user. The account is
 	// the program's, and the rent is what the user hands over to open it.
 	| 'createAccount'
+	// An application's account its program emptied, every lamport of it paid back into the user's
+	// wallet. The program moves them itself, so only the run's account states say it happened.
+	| 'closeAccount'
 	| 'closeTokenAccount'
 	| 'approve'
 	| 'revoke'

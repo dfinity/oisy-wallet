@@ -2164,6 +2164,7 @@
 			"instruction_unwrap": "Unwrap and close token account for $symbol",
 			"instruction_create_account": "Create token account for $symbol",
 			"instruction_create_program_account": "Create app account for",
+			"instruction_close_program_account": "Close app account for",
 			"instruction_close_account": "Close token account",
 			"instruction_close_account_for": "Close token account for $symbol",
 			"instruction_approve": "Approve spender",

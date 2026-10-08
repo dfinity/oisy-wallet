@@ -15,6 +15,7 @@ import type {
 	SolInstructionSummaryKind
 } from '$sol/types/sol-instruction-summary';
 import type { SolParsedRpcInstruction } from '$sol/types/sol-instructions';
+import type { SolClosedAccount } from '$sol/types/sol-simulation';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { rentExemptMinimumFor } from '$sol/utils/sol-rent.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -205,6 +206,59 @@ const programAddressOf = (instruction: unknown): SolAddress | undefined => {
 		return instruction.programAddress;
 	}
 };
+
+/**
+ * The accounts an instruction names, however it spells them: a kit instruction carries each with
+ * its role, and an instruction the RPC could not parse carries their addresses alone.
+ */
+const accountsOf = (instruction: unknown): SolAddress[] =>
+	nonNullish(instruction) &&
+	typeof instruction === 'object' &&
+	'accounts' in instruction &&
+	Array.isArray(instruction.accounts)
+		? instruction.accounts.reduce<SolAddress[]>((acc, meta: unknown) => {
+				if (typeof meta === 'string') {
+					return [...acc, meta];
+				}
+
+				return nonNullish(meta) &&
+					typeof meta === 'object' &&
+					'address' in meta &&
+					typeof meta.address === 'string'
+					? [...acc, meta.address]
+					: acc;
+			}, [])
+		: [];
+
+/**
+ * The top-level instruction that emptied an account its program held: the last one in which that
+ * program runs and which names the account.
+ *
+ * Only the program that owns an account can take lamports out of it, and an account it has emptied
+ * is gone, so the last instruction that runs the program over the account is where it ended.
+ * Undefined when none does, which leaves the close without an instruction to hang under.
+ */
+const closingInstructionOf = ({
+	account,
+	program,
+	instructions,
+	innerInstructions
+}: {
+	account: SolAddress;
+	program: SolAddress;
+	instructions: readonly unknown[];
+	innerInstructions: readonly SolInstructionGroup[];
+}): number | undefined =>
+	instructions.reduce<number | undefined>((acc, instruction, index) => {
+		const inner =
+			innerInstructions.find(({ index: parent }) => parent === index)?.instructions ?? [];
+
+		const runs =
+			programAddressOf(instruction) === program ||
+			inner.some((nested) => programAddressOf(nested) === program);
+
+		return runs && accountsOf(instruction).includes(account) ? index : acc;
+	}, undefined);
 
 const stackHeightOf = (instruction: unknown): number | undefined =>
 	nonNullish(instruction) &&
@@ -1427,6 +1481,7 @@ export const mapSolInstructionSummaries = ({
 	accountLamports = {},
 	accountTokenAmounts = {},
 	rentExemptMinimum,
+	closedAccounts = [],
 	includeUnrecognised = false
 }: {
 	instructions: readonly unknown[];
@@ -1451,6 +1506,10 @@ export const mapSolInstructionSummaries = ({
 	// What a token account of the usual size costs to exist. Without it, an account this message
 	// opens holds an amount nobody can state rather than nothing.
 	rentExemptMinimum?: bigint;
+	// The accounts an application's program held before the run and emptied in it, each known to have
+	// paid every lamport it held into the wallet: a closed liquidity position handing back its rent.
+	// The program moves the lamports itself, so no call in the run states the close.
+	closedAccounts?: SolClosedAccount[];
 	// Whether to keep a line for each top-level instruction that produced no effect of its own.
 	// Off where the list stands beside the balance changes that vouch for it, on where it is the
 	// only account of the transaction there is.
@@ -1616,15 +1675,35 @@ export const mapSolInstructionSummaries = ({
 		[]
 	);
 
+	// Each close hangs under the instruction that made it, after that instruction's other lines: the
+	// account goes once the program is done with it. The sort is stable, so every other line keeps
+	// its place.
+	const closes = closedAccounts.reduce<Effect[]>((acc, { account, program, lamports }) => {
+		const parentIndex = closingInstructionOf({
+			account,
+			program,
+			instructions,
+			innerInstructions
+		});
+
+		return nonNullish(parentIndex)
+			? [...acc, { kind: 'closeAccount', account, program, returned: lamports, parentIndex }]
+			: acc;
+	}, []);
+
+	const described = [...effects, ...closes].sort(
+		({ parentIndex: first }, { parentIndex: second }) => first - second
+	);
+
 	// A top-level instruction none of the effects came from is one the wallet could not read: a
 	// program it does not know, or a message whose instructions carry raw bytes rather than the
 	// parsed form. Kept in the position it holds in the transaction, so the list reads in the
 	// order the run would take rather than as the recognised instructions with the gaps closed up.
-	const covered = new Set(effects.map(({ parentIndex }) => parentIndex));
+	const covered = new Set(described.map(({ parentIndex }) => parentIndex));
 
 	const listed = includeUnrecognised
 		? [
-				...effects,
+				...described,
 				...instructions.reduce<Effect[]>((acc, _, index) => {
 					if (covered.has(index)) {
 						return acc;
@@ -1649,7 +1728,7 @@ export const mapSolInstructionSummaries = ({
 					];
 				}, [])
 			].sort(({ parentIndex: first }, { parentIndex: second }) => first - second)
-		: effects;
+		: described;
 
 	const unread = new Set(
 		instructions.reduce<number[]>(

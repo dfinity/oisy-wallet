@@ -2164,6 +2164,7 @@
 			"instruction_unwrap": "Desenvolver y cerrar la cuenta de tokens de $symbol",
 			"instruction_create_account": "",
 			"instruction_create_program_account": "",
+			"instruction_close_program_account": "",
 			"instruction_close_account": "",
 			"instruction_close_account_for": "Cerrar la cuenta de tokens de $symbol",
 			"instruction_approve": "",

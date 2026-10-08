@@ -13,7 +13,8 @@ import {
 	formatSolTransactionSummary,
 	solAppAccountCost,
 	solAtaFee,
-	solClosesPayOthers
+	solClosesPayOthers,
+	solWalletLamportsStated
 } from '$sol/utils/sol-transaction-summary.utils';
 import en from '$tests/mocks/i18n.mock';
 import { MOCK_SOL_BALANCES } from '$tests/mocks/sol-balances.mock';
@@ -429,6 +430,58 @@ describe('sol-transaction-summary.utils', () => {
 
 		it('should cost nothing when no application account is opened', () => {
 			expect(solAppAccountCost({ instructions: [] })).toBe(ZERO);
+		});
+	});
+
+	describe('solWalletLamportsStated', () => {
+		const WALLET = mockSolAddress;
+
+		const stated = (instructions: SolInstructionSummary[]) =>
+			solWalletLamportsStated({ instructions, userAddress: WALLET });
+
+		it('should add up what the lines move in and out of the wallet', () => {
+			expect(
+				stated([
+					{ kind: 'send', amount: 19_028n, counterparty: mockSolAddress2 },
+					{ kind: 'receive', amount: 1_000n, counterparty: mockSolAddress2 },
+					{ kind: 'createTokenAccount', account: mockAtaAddress, rent: 1_488_440n },
+					{ kind: 'wrap', amount: 500_000n, account: mockAtaAddress },
+					{ kind: 'unwrap', returned: 2_000_000n, counterparty: WALLET },
+					{
+						kind: 'route',
+						children: [{ kind: 'createAccount', program: mockSolAddress3, rent: 41_899_840n }]
+					}
+				])
+			).toBe(-19_028n + 1_000n - 1_488_440n - 500_000n + 2_000_000n - 41_899_840n);
+		});
+
+		// Wrapped SOL and every other token move between token accounts, not the wallet.
+		it('should leave token transfers out', () => {
+			expect(
+				stated([
+					{
+						kind: 'send',
+						amount: 9_000n,
+						tokenAddress: mockSplAddress,
+						counterparty: mockSolAddress2
+					}
+				])
+			).toBe(ZERO);
+		});
+
+		it('should leave out a close that pays somebody else', () => {
+			expect(
+				stated([{ kind: 'closeTokenAccount', returned: 2_039_280n, counterparty: mockSolAddress2 }])
+			).toBe(ZERO);
+		});
+
+		it('should know nothing when a line moves the wallet by an amount nobody read', () => {
+			expect(stated([{ kind: 'send', counterparty: mockSolAddress2 }])).toBeUndefined();
+			expect(stated([{ kind: 'createTokenAccount', account: mockAtaAddress }])).toBeUndefined();
+		});
+
+		it('should know nothing of a close whose destination nobody read', () => {
+			expect(stated([{ kind: 'closeTokenAccount', returned: 2_039_280n }])).toBeUndefined();
 		});
 	});
 
@@ -1121,6 +1174,20 @@ describe('sol-transaction-summary.utils', () => {
 					rent: 41_899_840n
 				})
 			).toStrictEqual({ text: 'Create app account for', trailing: 'rent 0.04189984 SOL' });
+		});
+
+		it('should say what closing an application’s account hands back to the wallet', () => {
+			expect(
+				format({
+					kind: 'closeAccount',
+					account: mockSolAddress2,
+					program: mockSolAddress3,
+					returned: 41_899_840n
+				})
+			).toStrictEqual({
+				text: 'Close app account for',
+				trailing: '0.04189984 SOL returned to your wallet'
+			});
 		});
 
 		describe('the heading over the lines of an instruction it cannot read', () => {

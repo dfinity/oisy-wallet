@@ -1,8 +1,14 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { SOLANA_KNOWN_PROGRAM_ADDRESSES } from '$sol/constants/sol-known-programs.constants';
+import {
+	SYSTEM_PROGRAM_ADDRESS,
+	TOKEN_2022_PROGRAM_ADDRESS,
+	TOKEN_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaParsedAccountInfo, SolanaSimulatedInnerInstructions } from '$sol/types/sol-rpc';
 import type {
+	SolClosedAccount,
 	SolSimulationControlChange,
 	SolSimulationPreview,
 	SolSimulationTokenDelta
@@ -308,3 +314,70 @@ export const findSolUnreadPrograms = (
 
 	return [...new Set(programs)].filter((program) => !known.has(program));
 };
+
+/**
+ * The accounts an application's program held before a run and emptied in it.
+ *
+ * A program closing an account of its own moves the lamports itself, and no call in the run states
+ * it: only the account's state before and after says it happened. The System program and the token
+ * programs are left out. What leaves a wallet does so by a transfer the run states, and a token
+ * account is closed by an instruction that names where its balance goes.
+ *
+ * Emptied means no lamports after the run, or no account at all. An account the run did not report
+ * on says nothing, and is not counted as closed.
+ */
+export const findSolClosedAppAccounts = ({
+	addresses,
+	preAccounts,
+	postAccounts
+}: {
+	addresses: SolAddress[];
+	preAccounts: readonly SolanaParsedAccountInfo[];
+	postAccounts: readonly SolanaParsedAccountInfo[];
+}): SolClosedAccount[] =>
+	addresses.reduce<SolClosedAccount[]>((acc, account, index) => {
+		const pre = parseAccountState(preAccounts[index]);
+		const post = postAccounts[index];
+
+		if (
+			isNullish(pre) ||
+			[SYSTEM_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS, TOKEN_2022_PROGRAM_ADDRESS].includes(
+				pre.program
+			) ||
+			pre.lamports === ZERO
+		) {
+			return acc;
+		}
+
+		const emptied = post === null || (nonNullish(post) && BigInt(post.lamports) === ZERO);
+
+		return emptied ? [...acc, { account, program: pre.program, lamports: pre.lamports }] : acc;
+	}, []);
+
+/**
+ * Whether every lamport the closed accounts held reached the wallet.
+ *
+ * Nothing states where a program sends what it closes, so the wallet's own change is the witness:
+ * once the lines that state what moved the wallet's SOL and the fee are taken out, what is left
+ * must be exactly what the closed accounts held. Anything else - a part paid elsewhere, a movement
+ * no line accounts for - and none of them is said to have come home.
+ */
+export const solClosedAccountsReachWallet = ({
+	closedAccounts,
+	walletChange,
+	statedChange,
+	fee
+}: {
+	closedAccounts: SolClosedAccount[];
+	// The wallet's lamports after the run, less those before it.
+	walletChange: bigint | undefined;
+	// What the lines say the transaction does to the wallet's SOL.
+	statedChange: bigint | undefined;
+	// What the run charged the wallet as the transaction's fee.
+	fee: bigint;
+}): boolean =>
+	closedAccounts.length > 0 &&
+	nonNullish(walletChange) &&
+	nonNullish(statedChange) &&
+	walletChange ===
+		statedChange - fee + closedAccounts.reduce((acc, { lamports }) => acc + lamports, ZERO);

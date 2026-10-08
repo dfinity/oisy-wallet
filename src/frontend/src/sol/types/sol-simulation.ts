@@ -41,6 +41,16 @@ export interface SolSimulationPreview {
 }
 
 /**
+ * An account an application's program held before a simulated run and emptied in it, with every
+ * lamport it held then.
+ */
+export interface SolClosedAccount {
+	account: SolAddress;
+	program: SolAddress;
+	lamports: bigint;
+}
+
+/**
  * A program the simulated run calls from inside another program's instruction and that OISY does
  * not know, with the name it publishes for itself when it publishes one. The name is the program's
  * own claim, attested by nobody: a label for the address, never a statement about what it does.

@@ -1,15 +1,22 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
+import type { SolClosedAccount } from '$sol/types/sol-simulation';
 import {
 	mapSolInstructionSummaries,
 	solOpensAccountBeyondRent
 } from '$sol/utils/sol-instruction-summary.utils';
 import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
-import { flattenInstructions, solClosesPayOthers } from '$sol/utils/sol-transaction-summary.utils';
+import { solClosedAccountsReachWallet } from '$sol/utils/sol-simulation.utils';
+import {
+	flattenInstructions,
+	solClosesPayOthers,
+	solWalletLamportsStated
+} from '$sol/utils/sol-transaction-summary.utils';
 import { decodeTransactionMessage } from '$sol/utils/sol-transactions.utils';
 import {
 	MOCK_SOL_INSTRUCTIONS,
+	MOCK_SOL_METEORA_DLMM_CLOSE_POSITION,
 	MOCK_SOL_METEORA_DLMM_OPEN_POSITION
 } from '$tests/mocks/sol-instructions.mock';
 import {
@@ -743,6 +750,94 @@ describe('sol-instruction-summary.utils', () => {
 						['send', 810_249n]
 					]);
 				});
+			});
+		});
+
+		// An application closing an account of its own moves the lamports itself, so only the run's
+		// account states say it happened. The request exactly as Meteora sent it to close a position.
+		describe('an account an application closes', () => {
+			const {
+				transaction,
+				innerInstructions,
+				userAddress,
+				usdcAccount,
+				usdc,
+				position,
+				walletChange,
+				fee,
+				rentExemptMinimum
+			} = MOCK_SOL_METEORA_DLMM_CLOSE_POSITION;
+
+			const views = (closedAccounts: SolClosedAccount[] = []): SolInstructionSummary[] => {
+				const { messageBytes } = decodeTransactionMessage(transaction);
+				const { instructions } = decompileTransactionMessage(
+					getCompiledTransactionMessageDecoder().decode(messageBytes)
+				);
+
+				return mapSolInstructionSummaries({
+					instructions: [...instructions].map(asSolParsedRpcInstructionOrSelf),
+					innerInstructions,
+					ownedAddresses: [userAddress, usdcAccount],
+					userAddress,
+					accountHolders: { [usdcAccount]: userAddress },
+					accountMintsBefore: { [usdcAccount]: usdc },
+					rentExemptMinimum,
+					closedAccounts,
+					includeUnrecognised: true
+				});
+			};
+
+			// What made the request refuse: the instruction that closes the position calls nothing
+			// but its own event log.
+			it('should leave the closing instruction undescribed without the close', () => {
+				expect(kinds(views())).toContain('unknown');
+			});
+
+			it('should state the close under the instruction that closes the account', () => {
+				const lines = views([position]);
+
+				expect(kinds(lines)).not.toContain('unknown');
+
+				const closing = lines.filter(({ kind }) => kind === 'route').at(-1);
+
+				expect(closing?.program).toBe(position.program);
+				expect(closing?.children).toStrictEqual([
+					{
+						kind: 'closeAccount',
+						account: position.account,
+						program: position.program,
+						returned: position.lamports
+					}
+				]);
+			});
+
+			// The wallet's own change is the witness that the rent came home: with the fee and every
+			// line taken out, the rest is exactly what the position held.
+			it('should account for the wallet’s change with the position’s rent and nothing else', () => {
+				const statedChange = solWalletLamportsStated({ instructions: views(), userAddress });
+
+				expect(
+					solClosedAccountsReachWallet({
+						closedAccounts: [position],
+						walletChange,
+						statedChange,
+						fee
+					})
+				).toBeTruthy();
+				expect(
+					solClosedAccountsReachWallet({
+						closedAccounts: [{ ...position, lamports: position.lamports - 1n }],
+						walletChange,
+						statedChange,
+						fee
+					})
+				).toBeFalsy();
+			});
+
+			it('should not hang a close under an instruction that does not run its program', () => {
+				expect(
+					kinds(views([{ ...position, program: 'SomeOtherProgram111111111111111111111111111' }]))
+				).toContain('unknown');
 			});
 		});
 

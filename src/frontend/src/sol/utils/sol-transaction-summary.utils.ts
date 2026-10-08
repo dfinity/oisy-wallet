@@ -327,6 +327,56 @@ export const solAppAccountCost = ({
 	);
 
 /**
+ * What the lines say the transaction does to the SOL in the wallet itself: the SOL it sends and
+ * receives, the SOL it wraps, the rent it pays to open accounts, and what closes pay back into it.
+ * The fee is not a line and is left to the caller.
+ *
+ * Undefined when a line moves the wallet's SOL by an amount nobody read, or pays a close to a
+ * destination nobody read: the total is then unknown rather than short.
+ */
+export const solWalletLamportsStated = ({
+	instructions,
+	userAddress
+}: {
+	instructions: SolInstructionSummary[];
+	userAddress: OptionSolAddress;
+}): bigint | undefined =>
+	flattenInstructions(instructions).reduce<bigint | undefined>(
+		(acc, { kind, amount, tokenAddress, rent, returned, counterparty }) => {
+			if (isNullish(acc)) {
+				return acc;
+			}
+
+			// SOL itself, not a token: wrapped SOL moves between token accounts, not the wallet.
+			if ((kind === 'send' || kind === 'receive') && isNullish(tokenAddress)) {
+				return isNullish(amount) ? undefined : kind === 'send' ? acc - amount : acc + amount;
+			}
+
+			if (kind === 'wrap') {
+				return isNullish(amount) ? undefined : acc - amount;
+			}
+
+			if (kind === 'createTokenAccount' || kind === 'createAccount') {
+				return isNullish(rent) ? undefined : acc - rent;
+			}
+
+			if (kind === 'closeTokenAccount' || kind === 'unwrap' || kind === 'closeAccount') {
+				// A close paying somebody else leaves the wallet as it was.
+				if (nonNullish(counterparty) && counterparty !== userAddress) {
+					return acc;
+				}
+
+				return isNullish(returned) || (kind !== 'closeAccount' && isNullish(counterparty))
+					? undefined
+					: acc + returned;
+			}
+
+			return acc;
+		},
+		ZERO
+	);
+
+/**
  * The tokens the transaction actually trades, read from its legs.
  *
  * `undefined` in the set stands for native SOL. SOL makes the set only through a transfer or a
@@ -717,6 +767,15 @@ export const formatSolInstructionSummary = ({
 					displayDecimals: SOLANA_DEFAULT_DECIMALS
 				})
 			})
+		};
+	}
+
+	// Read like the close of a token account, with the program in place of the token, after which it
+	// is rendered. Only a close whose every lamport reached the wallet becomes this line.
+	if (kind === 'closeAccount') {
+		return {
+			text: i18n.transaction.text.instruction_close_program_account,
+			trailing: returnedDetail
 		};
 	}
 
