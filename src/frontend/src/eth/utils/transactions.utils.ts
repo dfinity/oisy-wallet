@@ -1,3 +1,4 @@
+import { CKETH_DEPOSIT_HASH } from '$eth/constants/cketh.constants';
 import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
 import {
 	ERC20_APPROVE_HASH,
@@ -28,8 +29,9 @@ import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { getTokenDisplayName, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
+import { Principal } from '@icp-sdk/core/principal';
 import { AbiCoder } from 'ethers/abi';
-import { dataSlice } from 'ethers/utils';
+import { dataSlice, getBytes, isHexString } from 'ethers/utils';
 
 export const isTransactionPending = ({ blockNumber }: EthTransactionUi): boolean =>
 	isNullish(blockNumber);
@@ -231,6 +233,43 @@ export const decodeSetApprovalForAllData = (
 	const [operator, approved] = abiCoder.decode(['address', 'bool'], dataSlice(data, 4));
 
 	return { operator, approved };
+};
+
+// `0x`, the four bytes of the selector and the one 32-byte argument `deposit(bytes32)` takes, as hex.
+const CKETH_DEPOSIT_DATA_LENGTH = SELECTOR_LENGTH + 64;
+
+// The longest a principal is, in bytes, which is what leaves room for its length byte in a `bytes32`.
+const PRINCIPAL_MAX_LENGTH = 29;
+
+/**
+ * Decodes the principal a ckETH helper contract `deposit(bytes32)` call converts ETH for.
+ *
+ * The `bytes32` carries the principal's length in its first byte, the principal after it and zeros
+ * for the rest, which is the layout `encodePrincipalToEthAddress` writes. Calldata in any other
+ * shape, including a deposit followed by bytes the call does not take, decodes to `undefined`
+ * rather than to a principal, so a principal returned here is the only one the calldata can name.
+ */
+export const decodeCkEthDepositPrincipal = (data: string | undefined): Principal | undefined => {
+	if (
+		isNullish(data) ||
+		data.length !== CKETH_DEPOSIT_DATA_LENGTH ||
+		!isHexString(data) ||
+		!hasSelector({ data, selector: CKETH_DEPOSIT_HASH })
+	) {
+		return;
+	}
+
+	const [length, ...bytes] = getBytes(dataSlice(data, 4));
+
+	if (length === 0 || length > PRINCIPAL_MAX_LENGTH) {
+		return;
+	}
+
+	if (bytes.slice(length).some((byte) => byte !== 0)) {
+		return;
+	}
+
+	return Principal.fromUint8Array(Uint8Array.from(bytes.slice(0, length)));
 };
 
 /**

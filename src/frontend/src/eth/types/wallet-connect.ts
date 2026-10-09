@@ -1,3 +1,4 @@
+import type { Principal } from '@icp-sdk/core/principal';
 import type { TypedDataDomain, TypedDataField } from 'ethers/hash';
 
 export type WalletConnectEthApproveRequestMessage = string;
@@ -34,6 +35,16 @@ export type WalletConnectEthCall =
 	// `increaseAllowance` / `decreaseAllowance`: an allowance granted or reduced by a delta rather
 	// than set to an absolute amount.
 	| { type: 'erc20AllowanceDelta'; increase: boolean }
+	// `deposit(bytes32)` to the ckETH helper contract, converting the native value to ckETH for the
+	// principal it names. That principal is read off the calldata and is always the user's own.
+	| { type: 'ckEthDeposit'; principal: Principal }
+	// Calldata addressed to the ckETH helper contract that is not a deposit to the user's own
+	// principal. OISY does not sign it.
+	| { type: 'ckEthDepositRefused' }
+	// A `deposit(bytes32)` on a network with a ckETH helper contract, while OISY has not yet confirmed
+	// the helper's address and so cannot tell whether the deposit converts ETH, or for whom. Held
+	// until it can.
+	| { type: 'ckEthHelperUnconfirmed' }
 	// The selector is carried so the review can name the call it could not decode. It is `undefined`
 	// when the calldata is too short to hold one.
 	| { type: 'unknown'; selector: string | undefined };

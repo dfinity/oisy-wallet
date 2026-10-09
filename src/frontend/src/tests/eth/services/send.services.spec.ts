@@ -1,5 +1,12 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { CKETH_ABI } from '$eth/constants/cketh.constants';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
+import {
+	infuraCkETHProviders,
+	type InfuraCkETHProvider
+} from '$eth/providers/infura-cketh.providers';
 import * as approveServices from '$eth/services/approve.services';
 import * as ethTransactionServices from '$eth/services/eth-transaction.services';
 import * as prepareServices from '$eth/services/prepare.services';
@@ -8,9 +15,16 @@ import * as signerApi from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
+import {
+	mockCkMinterInfo,
+	mockErc20HelperContractAddress,
+	mockEthHelperContractAddress
+} from '$tests/mocks/ck-minter.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
+import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
+import { Interface } from 'ethers/abi';
 import { get } from 'svelte/store';
 
 const { mockSendTransaction } = vi.hoisted(() => ({
@@ -161,6 +175,32 @@ describe('send.services', () => {
 			);
 		});
 
+		it('should keep the populated data when the caller passes data alongside', async () => {
+			const mockPopulate = vi.fn().mockResolvedValue({ data: '0xpopulateddata' });
+
+			await erc20PrepareTransaction({
+				from: '0xSender',
+				to: '0xRecipient',
+				amount: 1_000_000n,
+				maxPriorityFeePerGas: 100n,
+				maxFeePerGas: 200n,
+				nonce: 0,
+				gas: 60_000n,
+				chainId: 1n,
+				token: mockValidErc20Token,
+				populate: mockPopulate,
+				data: '0xcallerdata'
+			});
+
+			expect(prepareServices.prepare).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					data: '0xpopulateddata',
+					to: mockValidErc20Token.address,
+					amount: ZERO
+				})
+			);
+		});
+
 		it('should throw when data is undefined', async () => {
 			const mockPopulate = vi.fn().mockResolvedValue({ data: undefined });
 
@@ -290,6 +330,124 @@ describe('send.services', () => {
 			});
 
 			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSend.DONE);
+		});
+
+		describe('conversions to the Internet Computer', () => {
+			const minterInfo = { data: mockCkMinterInfo, certified: true };
+
+			const userPrincipalBytes32 = encodePrincipalToEthAddress(mockIdentity.getPrincipal());
+
+			const convertParams = {
+				progress: mockProgress,
+				identity: mockIdentity,
+				amount: 1_000_000n,
+				from: '0xSender',
+				sourceNetwork: ETHEREUM_NETWORK,
+				targetNetwork: ICP_NETWORK,
+				maxFeePerGas: 200n,
+				maxPriorityFeePerGas: 100n,
+				gas: 21_000n,
+				minterInfo,
+				lastProgressStep: ProgressStepsSend.DONE
+			};
+
+			beforeEach(() => {
+				vi.mocked(approveServices.approve).mockResolvedValue({
+					transactionNeededApproval: false,
+					nonce: 0
+				});
+			});
+
+			it('should deposit ETH to the ckETH helper contract for the principal of the user', async () => {
+				await send({
+					...convertParams,
+					token: ETHEREUM_TOKEN,
+					to: mockEthHelperContractAddress
+				});
+
+				const [{ value: provider }] = vi.mocked(infuraCkETHProviders).mock.results;
+
+				expect(provider.populateTransaction).toHaveBeenCalledExactlyOnceWith({
+					contract: { address: mockEthHelperContractAddress },
+					to: userPrincipalBytes32
+				});
+
+				expect(prepareServices.prepare).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						data: '0xdata',
+						to: mockEthHelperContractAddress,
+						amount: 1_000_000n
+					})
+				);
+			});
+
+			it('should keep the populated ckETH deposit when data is passed alongside', async () => {
+				await send({
+					...convertParams,
+					token: ETHEREUM_TOKEN,
+					to: mockEthHelperContractAddress,
+					data: '0xcallerdata'
+				});
+
+				expect(prepareServices.prepare).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						data: '0xdata',
+						to: mockEthHelperContractAddress
+					})
+				);
+			});
+
+			// A WalletConnect request to the helper is only approvable when it is this very deposit, so
+			// the transaction signed carries the calldata the app sent, byte for byte.
+			it('should sign the calldata of a deposit to the principal of the user unchanged', async () => {
+				const ckEthInterface = new Interface(CKETH_ABI);
+
+				const { prepare } = await vi.importActual<typeof prepareServices>(
+					'$eth/services/prepare.services'
+				);
+				vi.mocked(prepareServices.prepare).mockImplementationOnce(prepare);
+
+				vi.mocked(infuraCkETHProviders).mockReturnValueOnce({
+					populateTransaction: ({ to }: { to: string }) =>
+						Promise.resolve({ data: ckEthInterface.encodeFunctionData('deposit', [to]) })
+				} as unknown as InfuraCkETHProvider);
+
+				const data = ckEthInterface.encodeFunctionData('deposit', [userPrincipalBytes32]);
+
+				await send({
+					...convertParams,
+					token: ETHEREUM_TOKEN,
+					to: mockEthHelperContractAddress,
+					data
+				});
+
+				expect(signerApi.signTransaction).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						transaction: expect.objectContaining({
+							to: mockEthHelperContractAddress,
+							data: toNullable(data),
+							value: 1_000_000n
+						})
+					})
+				);
+			});
+
+			it('should keep the populated ckERC20 deposit when data is passed alongside', async () => {
+				await send({
+					...convertParams,
+					token: mockValidErc20Token,
+					to: mockErc20HelperContractAddress,
+					data: '0xcallerdata'
+				});
+
+				expect(prepareServices.prepare).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						data: '0xckerc20data',
+						to: mockErc20HelperContractAddress,
+						amount: ZERO
+					})
+				);
+			});
 		});
 	});
 });

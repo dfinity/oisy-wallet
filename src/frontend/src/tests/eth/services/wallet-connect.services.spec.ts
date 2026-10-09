@@ -1,5 +1,9 @@
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { CKETH_ABI } from '$eth/constants/cketh.constants';
 import {
 	SESSION_REQUEST_ETH_SIGN,
 	SESSION_REQUEST_ETH_SIGN_LEGACY,
@@ -13,9 +17,17 @@ import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api'
 import { ZERO } from '$lib/constants/app.constants';
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { authStore } from '$lib/stores/auth.store';
+import { i18n } from '$lib/stores/i18n.store';
+import * as toastsStore from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
+import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
+import { Principal } from '@icp-sdk/core/principal';
 import type { WalletKitTypes } from '@reown/walletkit';
+import { Interface } from 'ethers/abi';
+import { get } from 'svelte/store';
 
 vi.mock('$lib/api/signer.api', () => ({
 	signPrehash: vi.fn(),
@@ -271,6 +283,146 @@ describe('eth wallet-connect.services', () => {
 
 			expect(success).toBeTruthy();
 			expect(vi.mocked(executeSend).mock.calls[0][0]).toMatchObject({ gas: estimatedGas });
+		});
+
+		describe('ckETH helper contract', () => {
+			// The ckETH helper contract on Ethereum mainnet, as the minter returns it.
+			const CKETH_HELPER = '0x7574eB42cA208A4f6960ECCAfDF186D627dCC175';
+
+			const minterInfo = {
+				data: { ...mockCkMinterInfo, eth_helper_contract_address: toNullable(CKETH_HELPER) },
+				certified: true
+			};
+
+			const encodeDeposit = (principal: Principal): string =>
+				new Interface(CKETH_ABI).encodeFunctionData('deposit', [
+					encodePrincipalToEthAddress(principal)
+				]);
+
+			const buildDepositParams = ({ to, data }: { to: string; data: string }) => {
+				const params = buildParams();
+
+				return {
+					...params,
+					request: {
+						...params.request,
+						params: {
+							request: {
+								method: 'eth_sendTransaction',
+								params: [{ from: HOLDER, to, data }]
+							}
+						}
+					} as unknown as WalletKitTypes.SessionRequest,
+					amount: 1_000_000_000_000_000n,
+					minterInfo,
+					targetNetwork: ICP_NETWORK
+				};
+			};
+
+			it('should sign a deposit to the principal of the user as the app sent it', async () => {
+				const data = encodeDeposit(mockPrincipal);
+
+				const { success } = await send(buildDepositParams({ to: CKETH_HELPER, data }));
+
+				expect(success).toBeTruthy();
+				expect(vi.mocked(executeSend).mock.calls[0][0]).toMatchObject({
+					to: CKETH_HELPER,
+					data,
+					targetNetwork: ICP_NETWORK
+				});
+			});
+
+			it.each([
+				CKETH_HELPER,
+				CKETH_HELPER.toLowerCase(),
+				`0x${CKETH_HELPER.slice(2).toUpperCase()}`
+			])(
+				'should refuse a deposit to another principal sent to %s, and never sign it',
+				async (to) => {
+					const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+					const { success } = await send(
+						buildDepositParams({
+							to,
+							data: encodeDeposit(Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'))
+						})
+					);
+
+					expect(success).toBeFalsy();
+					expect(executeSend).not.toHaveBeenCalled();
+					expect(mockListener.approveRequest).not.toHaveBeenCalled();
+					expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+						msg: { text: get(i18n).wallet_connect.error.cketh_deposit_refused }
+					});
+				}
+			);
+
+			it('should refuse calldata to the helper that is not a deposit, and never sign it', async () => {
+				const { success } = await send(
+					buildDepositParams({ to: CKETH_HELPER, data: `${encodeDeposit(mockPrincipal)}00` })
+				);
+
+				expect(success).toBeFalsy();
+				expect(executeSend).not.toHaveBeenCalled();
+			});
+
+			describe('while the helper contract is not confirmed', () => {
+				const unconfirmed = [
+					{ state: 'not loaded', info: undefined },
+					{ state: 'not loadable', info: null },
+					{ state: 'not certified', info: { ...minterInfo, certified: false } }
+				];
+
+				const owners = [
+					{ owner: 'the user', principal: mockPrincipal },
+					{
+						owner: 'another principal',
+						principal: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai')
+					}
+				];
+
+				// Without a confirmed helper the modal does not route the request to the Internet Computer,
+				// so it reaches here as a contract call on Ethereum. The check is what stops it.
+				it.each(unconfirmed.flatMap((state) => owners.map((owner) => ({ ...state, ...owner }))))(
+					'should hold a deposit to $owner while the minter information is $state, and never sign it',
+					async ({ info, principal }) => {
+						const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+						const { success } = await send({
+							...buildDepositParams({ to: CKETH_HELPER, data: encodeDeposit(principal) }),
+							minterInfo: info,
+							targetNetwork: ETHEREUM_NETWORK
+						});
+
+						expect(success).toBeFalsy();
+						expect(executeSend).not.toHaveBeenCalled();
+						expect(mockListener.approveRequest).not.toHaveBeenCalled();
+						expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+							msg: { text: get(i18n).wallet_connect.error.cketh_helper_unconfirmed }
+						});
+					}
+				);
+			});
+
+			// Only Ethereum and Sepolia have a ckETH helper contract. Elsewhere the address the minter
+			// states is not one, so the request is the contract call it is there and not a conversion.
+			it('should not check a deposit on an EVM network without ckETH', async () => {
+				const data = encodeDeposit(Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
+
+				const { success } = await send({
+					...buildDepositParams({ to: CKETH_HELPER, data }),
+					token: BASE_ETH_TOKEN,
+					sourceNetwork: BASE_NETWORK,
+					targetNetwork: BASE_NETWORK
+				});
+
+				expect(success).toBeTruthy();
+				expect(vi.mocked(executeSend).mock.calls[0][0]).toMatchObject({
+					to: CKETH_HELPER,
+					data,
+					sourceNetwork: BASE_NETWORK
+				});
+			});
 		});
 	});
 });
