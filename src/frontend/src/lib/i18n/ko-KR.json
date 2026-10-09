@@ -2172,6 +2172,8 @@
 			"instruction_close_account": "",
 			"instruction_close_account_for": "$symbol 토큰 계정 닫기",
 			"instruction_approve": "",
+			"instruction_approve_amount": "",
+			"instruction_approve_unlimited": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
 			"instruction_route": "",

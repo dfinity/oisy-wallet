@@ -2172,6 +2172,8 @@
 			"instruction_close_account": "Close token account",
 			"instruction_close_account_for": "Close token account for $symbol",
 			"instruction_approve": "Approve spender",
+			"instruction_approve_amount": "Approve spender for $amount $symbol",
+			"instruction_approve_unlimited": "Approve spender for any amount of $symbol",
 			"instruction_revoke": "Revoke spender",
 			"instruction_set_authority": "Change account authority to",
 			"instruction_route": "Swap route via",
