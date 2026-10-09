@@ -663,7 +663,10 @@ describe('LoaderActiveUserTransactions', () => {
 			// This browser sent the terminal status, but the tab was gone before the answer came back.
 			it('reports a send this browser settled when the next session loads it', async () => {
 				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
-				activeUserTransactionsStore.markTerminalWriteSent({ id: 'xrp-a' });
+				activeUserTransactionsStore.markTerminalWriteSent({
+					principal: mockIdentity.getPrincipal(),
+					id: 'xrp-a'
+				});
 				activeUserTransactionsStore.reset();
 				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
 

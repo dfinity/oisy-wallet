@@ -15,7 +15,7 @@ import {
 	mockCreateActiveUserTransactionParams,
 	mockUpdateActiveUserTransactionParams
 } from '$tests/mocks/active-user-transactions.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
 
 vi.mock('$lib/api/backend.api', () => ({
@@ -192,27 +192,59 @@ describe('active-user-transactions.services', () => {
 			).rejects.toEqual(mockActiveUserTransactionErrorNotFound);
 		});
 
-		// The write can commit after this tab is gone, before anything reported the outcome.
-		it('records a terminal status as sent before the write resolves', async () => {
-			let resolveUpdate: (transaction: typeof mockActiveUserTransaction) => void = () => {};
-			vi.spyOn(backendApi, 'updateActiveUserTransaction').mockReturnValueOnce(
-				new Promise((resolve) => {
-					resolveUpdate = resolve;
-				})
-			);
+		// The write can commit after this tab is gone, before anything reported the outcome. The next
+		// session in this browser must then report it rather than claim it.
+		describe('a terminal status', () => {
+			const settled = { ...mockActiveUserTransaction, status: { Succeeded: null } };
 
-			const inFlight = updateActiveUserTransaction({
-				identity: mockIdentity,
-				id: mockActiveUserTransactionId,
-				status: { Succeeded: null }
+			const claimedOnNextLoad = (): boolean => {
+				activeUserTransactionsStore.reset();
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.set({ transactions: [settled] });
+
+				return get(activeUserTransactionsStore)?.terminalSideEffectsApplied[settled.id] === true;
+			};
+
+			it('is recorded as sent before the write resolves', () => {
+				vi.spyOn(backendApi, 'updateActiveUserTransaction').mockReturnValueOnce(
+					new Promise(() => {})
+				);
+
+				updateActiveUserTransaction({
+					identity: mockIdentity,
+					id: settled.id,
+					status: settled.status
+				});
+
+				expect(claimedOnNextLoad()).toBeFalsy();
 			});
 
-			expect(get(activeUserTransactionsStore)?.terminalWritesSent).toEqual({
-				[mockActiveUserTransactionId]: true
+			// A sign-out while a poll awaited its external call resets the store before the write.
+			it('is recorded for the identity that sends it when the store was reset', async () => {
+				vi.spyOn(backendApi, 'updateActiveUserTransaction').mockResolvedValue(settled);
+				activeUserTransactionsStore.reset();
+
+				await updateActiveUserTransaction({
+					identity: mockIdentity,
+					id: settled.id,
+					status: settled.status
+				});
+
+				expect(claimedOnNextLoad()).toBeFalsy();
 			});
 
-			resolveUpdate({ ...mockActiveUserTransaction, status: { Succeeded: null } });
-			await inFlight;
+			it('is recorded for the identity that sends it when the store holds another account', async () => {
+				vi.spyOn(backendApi, 'updateActiveUserTransaction').mockResolvedValue(settled);
+				activeUserTransactionsStore.init(mockPrincipal2);
+
+				await updateActiveUserTransaction({
+					identity: mockIdentity,
+					id: settled.id,
+					status: settled.status
+				});
+
+				expect(claimedOnNextLoad()).toBeFalsy();
+			});
 		});
 
 		it('does not record a status that is not terminal', async () => {
@@ -226,7 +258,15 @@ describe('active-user-transactions.services', () => {
 				status: { Executing: null }
 			});
 
-			expect(get(activeUserTransactionsStore)?.terminalWritesSent).toEqual({});
+			activeUserTransactionsStore.reset();
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.set({
+				transactions: [{ ...mockActiveUserTransaction, status: { Succeeded: null } }]
+			});
+
+			expect(
+				get(activeUserTransactionsStore)?.terminalSideEffectsApplied[mockActiveUserTransactionId]
+			).toBeTruthy();
 		});
 	});
 

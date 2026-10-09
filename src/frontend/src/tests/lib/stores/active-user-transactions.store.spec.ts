@@ -28,8 +28,7 @@ describe('active-user-transactions.store', () => {
 		expect(get(activeUserTransactionsStore)).toEqual({
 			data: {},
 			lastSeenUpdatedAtNs: {},
-			terminalSideEffectsApplied: {},
-			terminalWritesSent: {}
+			terminalSideEffectsApplied: {}
 		});
 	});
 
@@ -167,17 +166,65 @@ describe('active-user-transactions.store', () => {
 
 		// Its terminal write committed after the tab that sent it was gone, before anything reported
 		// the outcome.
-		it('leaves a settled row this browser sent the terminal status for', () => {
-			activeUserTransactionsStore.init(mockPrincipal);
-			activeUserTransactionsStore.markTerminalWriteSent({ id: 'mine' });
-			activeUserTransactionsStore.reset();
+		describe('a row this browser sent the terminal status for', () => {
+			const mine = buildTx({ id: 'mine', status: { Succeeded: null }, updated_at_ns: 2n });
 
-			activeUserTransactionsStore.init(mockPrincipal);
-			activeUserTransactionsStore.set({
-				transactions: [buildTx({ id: 'mine', status: { Succeeded: null }, updated_at_ns: 2n })]
+			const loadMine = () => {
+				activeUserTransactionsStore.reset();
+				activeUserTransactionsStore.init(mockPrincipal);
+				activeUserTransactionsStore.set({ transactions: [mine] });
+			};
+
+			it('is left to the loader', () => {
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+
+				loadMine();
+
+				expect(claimed()).toEqual({});
 			});
 
-			expect(claimed()).toEqual({});
+			it('is left to the loader even when no store holds that principal', () => {
+				activeUserTransactionsStore.init(mockPrincipal2);
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+
+				loadMine();
+
+				expect(claimed()).toEqual({});
+			});
+
+			// Another tab that loaded before the marker was written saves its own copy of the state.
+			it('is left to the loader after another tab saves its older copy of the state', () => {
+				activeUserTransactionsStore.init(mockPrincipal);
+				activeUserTransactionsStore.upsert({
+					transaction: pending({ id: 'other', updatedAtNs: 1n })
+				});
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+				activeUserTransactionsStore.markAllSeen();
+
+				loadMine();
+
+				expect(claimed()).toEqual({});
+			});
+
+			// The markers live in their own storage entry, so these read it directly.
+			const writesSent = (): Record<string, true> =>
+				JSON.parse(localStorage.getItem(`aut:terminal-writes:${mockPrincipal.toText()}`) ?? '{}');
+
+			it('stops being recorded once its outcome was reported', () => {
+				activeUserTransactionsStore.init(mockPrincipal);
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+				activeUserTransactionsStore.markTerminalSideEffectsApplied({ ids: ['mine'] });
+
+				expect(writesSent()).toEqual({});
+			});
+
+			it('stops being recorded once the row was dismissed', () => {
+				activeUserTransactionsStore.init(mockPrincipal);
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+				activeUserTransactionsStore.remove({ id: 'mine' });
+
+				expect(writesSent()).toEqual({});
+			});
 		});
 	});
 

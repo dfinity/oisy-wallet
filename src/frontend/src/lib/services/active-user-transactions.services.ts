@@ -65,9 +65,13 @@ export const updateActiveUserTransaction = async ({
 	...params
 }: { identity: Identity } & UpdateActiveUserTransactionParams): Promise<void> => {
 	// Before the write, which can commit after this tab is gone: the next load in this browser then
-	// reports the outcome instead of taking the row as settled elsewhere.
+	// reports the outcome instead of taking the row as settled elsewhere. Recorded for the identity
+	// that sends it, which the store may no longer hold after a sign-out or an account switch.
 	if (nonNullish(params.status) && isTerminalActiveUserTransactionStatus(params.status)) {
-		activeUserTransactionsStore.markTerminalWriteSent({ id: params.id });
+		activeUserTransactionsStore.markTerminalWriteSent({
+			principal: identity.getPrincipal(),
+			id: params.id
+		});
 	}
 
 	const transaction = await updateActiveUserTransactionApi({ identity, ...params });
