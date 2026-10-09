@@ -1844,6 +1844,8 @@ interface I18nTransaction {
 		instruction_close_account: string;
 		instruction_close_account_for: string;
 		instruction_approve: string;
+		instruction_approve_amount: string;
+		instruction_approve_unlimited: string;
 		instruction_revoke: string;
 		instruction_set_authority: string;
 		instruction_route: string;

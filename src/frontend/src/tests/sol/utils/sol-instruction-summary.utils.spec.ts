@@ -3159,6 +3159,8 @@ describe('sol-instruction-summary.utils', () => {
 
 				expect(approval?.kind).toBe('approve');
 				expect(approval?.amount).toBe(5_000_000n);
+				expect(approval?.decimals).toBe(6);
+				expect(approval?.tokenAddress).toBe(mint);
 				expect(approval?.counterparty).toBe(them);
 			});
 

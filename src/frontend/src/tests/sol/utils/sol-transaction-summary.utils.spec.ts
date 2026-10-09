@@ -2,6 +2,8 @@ import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { SPL_TOKEN_MAX_AMOUNT } from '$sol/constants/sol.constants';
 import type { SolAddress } from '$sol/types/address';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
@@ -1086,6 +1088,47 @@ describe('sol-transaction-summary.utils', () => {
 			format(instruction).detail;
 
 		const textOf = (instruction: SolInstructionSummary): string => format(instruction).text;
+
+		describe('approve', () => {
+			const approval: SolInstructionSummary = {
+				kind: 'approve',
+				amount: 5_000_000n,
+				decimals: 6,
+				tokenAddress: mockSplAddress,
+				counterparty: mockSolAddress2,
+				account: mockAtaAddress
+			};
+
+			it('should state how much the spender may spend', () => {
+				expect(textOf(approval)).toBe(
+					replacePlaceholders(en.transaction.text.instruction_approve_amount, {
+						$amount: '5',
+						$symbol: 'BONK'
+					})
+				);
+			});
+
+			it('should state the largest token amount as any amount', () => {
+				expect(textOf({ ...approval, amount: SPL_TOKEN_MAX_AMOUNT })).toBe(
+					replacePlaceholders(en.transaction.text.instruction_approve_unlimited, {
+						$symbol: 'BONK'
+					})
+				);
+			});
+
+			// Without the mint the symbol would fall back to SOL, which names the wrong token.
+			it('should name the spender alone when the mint was not read', () => {
+				const { tokenAddress: _, ...withoutMint } = approval;
+
+				expect(textOf(withoutMint)).toBe(en.transaction.text.instruction_approve);
+			});
+
+			it('should name the spender alone when the amount was not read', () => {
+				const { amount: _, ...withoutAmount } = approval;
+
+				expect(textOf(withoutAmount)).toBe(en.transaction.text.instruction_approve);
+			});
+		});
 
 		// The notice about programs OISY cannot read names a pool by itself; the leg the pool made has
 		// to name it the same way, or nothing on the screen matches it.
