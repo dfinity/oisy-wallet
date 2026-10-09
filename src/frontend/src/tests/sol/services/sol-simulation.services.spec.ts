@@ -470,6 +470,70 @@ describe('sol-simulation.services', () => {
 					{ kind: 'unknown', program: application }
 				]);
 			});
+
+			// Accounts whose last call is the same instruction share the run up to it, so a message
+			// closing many of them behind the same calls costs one second run rather than one each.
+			it('should check accounts that share their last call in a single run', async () => {
+				const both = pipe(
+					createTransactionMessage({ version: 0 }),
+					(tx) => setTransactionMessageFeePayer(address(mockSolAddress), tx),
+					(tx) =>
+						setTransactionMessageLifetimeUsingBlockhash(
+							{
+								blockhash: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+								lastValidBlockHeight: 100n
+							},
+							tx
+						),
+					(tx) =>
+						appendTransactionMessageInstructions(
+							[0, 1].map(() => ({
+								programAddress: address(application),
+								accounts: [
+									{ address: address(mockSolAddress2), role: AccountRole.WRITABLE },
+									{ address: address(mockSolAddress3), role: AccountRole.WRITABLE },
+									{ address: address(mockSolAddress), role: AccountRole.WRITABLE_SIGNER }
+								]
+							})),
+							tx
+						)
+				);
+
+				vi.mocked(getMultipleAccountsInfo).mockResolvedValue([
+					systemAccount(1_000_000n),
+					appAccount,
+					appAccount
+				]);
+				vi.mocked(simulateTransactionAccounts)
+					.mockResolvedValueOnce(
+						simulated({
+							accounts: [systemAccount(1_000_000n + rent * 2n - fee), null, null],
+							innerInstructions: eventLogs,
+							fee
+						})
+					)
+					.mockResolvedValueOnce(simulated({ accounts: [appAccount, appAccount] }));
+
+				const result = await simulateSolTransaction(params(both));
+
+				expect(simulateTransactionAccounts).toHaveBeenCalledTimes(2);
+				expect(simulateTransactionAccounts).toHaveBeenLastCalledWith(
+					expect.objectContaining({ addresses: [mockSolAddress2, mockSolAddress3] })
+				);
+				expect(result?.instructions).toStrictEqual([
+					{ kind: 'unknown', program: application },
+					{
+						kind: 'route',
+						program: application,
+						children: [mockSolAddress2, mockSolAddress3].map((account) => ({
+							kind: 'closeAccount',
+							account,
+							program: application,
+							returned: rent
+						}))
+					}
+				]);
+			});
 		});
 
 		// The closed account pays somebody else, and a second app account that stays open pays the

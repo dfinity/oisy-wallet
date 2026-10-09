@@ -38,39 +38,44 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import { compileTransaction, getBase64EncodedWireTransaction } from '@solana/kit';
 
 /**
- * Whether an account still holds lamports after the instructions of a message before the given one,
- * from a run of those instructions alone. Anything that keeps that run from answering - a message
- * that cannot be cut there, a run that fails - says no.
+ * Which of the given accounts still hold lamports after the instructions of a message before the
+ * given one, from a single run of those instructions alone. Anything that keeps that run from
+ * answering - a message that cannot be cut there, a run that fails - says none do.
  */
-const holdsLamportsBefore = async ({
+const fundedBefore = async ({
 	transactionMessage,
 	instruction,
-	account,
+	accounts,
 	network
 }: {
 	transactionMessage: CompilableTransactionMessage;
 	instruction: number;
-	account: SolAddress;
+	accounts: SolAddress[];
 	network: SolanaNetworkType;
-}): Promise<boolean> => {
+}): Promise<SolAddress[]> => {
 	try {
-		const {
-			err,
-			accounts: [state]
-		} = await simulateTransactionAccounts({
+		const { err, accounts: states } = await simulateTransactionAccounts({
 			base64EncodedTransactionMessage: getBase64EncodedWireTransaction(
 				compileTransaction({
 					...transactionMessage,
 					instructions: transactionMessage.instructions.slice(0, instruction)
 				})
 			),
-			addresses: [account],
+			addresses: accounts,
 			network
 		});
 
-		return isNullish(err) && nonNullish(state) && BigInt(state.lamports) > ZERO;
+		if (nonNullish(err)) {
+			return [];
+		}
+
+		return accounts.filter((_, index) => {
+			const state = states[index];
+
+			return nonNullish(state) && BigInt(state.lamports) > ZERO;
+		});
 	} catch (_: unknown) {
-		return false;
+		return [];
 	}
 };
 
@@ -82,8 +87,11 @@ const holdsLamportsBefore = async ({
  * name it again: the last of them is the one only if the account still held its lamports when that
  * call began, which a second run of the message up to it shows. Otherwise the close stays without an
  * instruction, and so without a line.
+ *
+ * Accounts whose last call is the same instruction share that run, which asks for all of them at
+ * once: one run per instruction at most, however many accounts the message closes.
  */
-const attributeClosedAccounts = ({
+const attributeClosedAccounts = async ({
 	closedAccounts,
 	transactionMessage,
 	innerInstructions,
@@ -93,36 +101,50 @@ const attributeClosedAccounts = ({
 	transactionMessage: CompilableTransactionMessage;
 	innerInstructions: SolInstructionGroup[];
 	network: SolanaNetworkType;
-}): Promise<SolClosedAccount[]> =>
-	Promise.all(
-		closedAccounts.map(async (closed) => {
-			const candidates = solClosingInstructionCandidates({
-				account: closed.account,
-				program: closed.program,
-				instructions: transactionMessage.instructions,
-				innerInstructions
-			});
-
-			const last = candidates.at(-1);
-
-			if (isNullish(last)) {
-				return closed;
-			}
-
-			if (candidates.length === 1) {
-				return { ...closed, instruction: last };
-			}
-
-			return (await holdsLamportsBefore({
-				transactionMessage,
-				instruction: last,
-				account: closed.account,
-				network
-			}))
-				? { ...closed, instruction: last }
-				: closed;
+}): Promise<SolClosedAccount[]> => {
+	const attributions = closedAccounts.map((closed) => ({
+		closed,
+		candidates: solClosingInstructionCandidates({
+			account: closed.account,
+			program: closed.program,
+			instructions: transactionMessage.instructions,
+			innerInstructions
 		})
+	}));
+
+	// The accounts each second run answers for, by the instruction it stops at.
+	const checks = attributions.reduce((acc, { closed: { account }, candidates }) => {
+		const last = candidates.at(-1);
+
+		if (candidates.length > 1 && nonNullish(last)) {
+			acc.set(last, [...(acc.get(last) ?? []), account]);
+		}
+
+		return acc;
+	}, new Map<number, SolAddress[]>());
+
+	const funded = new Set(
+		(
+			await Promise.all(
+				[...checks].map(([instruction, accounts]) =>
+					fundedBefore({ transactionMessage, instruction, accounts, network })
+				)
+			)
+		).flat()
 	);
+
+	return attributions.map(({ closed, candidates }) => {
+		const last = candidates.at(-1);
+
+		if (isNullish(last)) {
+			return closed;
+		}
+
+		return candidates.length === 1 || funded.has(closed.account)
+			? { ...closed, instruction: last }
+			: closed;
+	});
+};
 
 const simulate = async ({
 	base64EncodedTransactionMessage,
