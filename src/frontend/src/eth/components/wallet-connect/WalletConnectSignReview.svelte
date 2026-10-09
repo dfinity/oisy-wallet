@@ -4,6 +4,8 @@
 	import { hasInvalidTypedData, hasUnreviewableTypedData } from '$eth/utils/wallet-connect.utils';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
+	import WalletConnectScamWarning from '$lib/components/wallet-connect/WalletConnectScamWarning.svelte';
+	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
 
 	interface Props {
 		request: WalletKitTypes.SessionRequest;
@@ -12,6 +14,8 @@
 	}
 
 	let { request, onApprove, onReject }: Props = $props();
+
+	let flaggedAsScam = $derived(!acceptedContext(request.verifyContext));
 
 	// The signer rejects an eth_signTypedData_v4 request that fails to parse, validate, hash, or
 	// that is on a chain this session was not granted; mirror that in the review so the user sees a
@@ -36,9 +40,18 @@
 </script>
 
 <ContentWithToolbar>
+	{#if flaggedAsScam}
+		<WalletConnectScamWarning />
+	{/if}
+
 	<EthWalletConnectMessage {invalidTypedData} {request} {unreviewableTypedData} />
 
 	{#snippet toolbar()}
-		<WalletConnectActions approveDisabled={invalidTypedData} {onApprove} {onReject} />
+		<WalletConnectActions
+			approve={!flaggedAsScam}
+			approveDisabled={invalidTypedData}
+			{onApprove}
+			{onReject}
+		/>
 	{/snippet}
 </ContentWithToolbar>

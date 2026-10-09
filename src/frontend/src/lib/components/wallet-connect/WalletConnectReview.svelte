@@ -4,7 +4,6 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
-	import { acceptedContext } from '$eth/utils/wallet-connect.utils';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -22,6 +21,7 @@
 		walletConnectProposalStore
 	} from '$lib/stores/wallet-connect.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
 
 	let listener = $derived($walletConnectListenerStore);
 
