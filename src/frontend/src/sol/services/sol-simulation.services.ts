@@ -1,9 +1,5 @@
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
-import {
-	getMultipleAccountsInfo,
-	getSolCreateAccountFee,
-	simulateTransactionAccounts
-} from '$sol/api/solana.api';
+import { getMultipleAccountsInfo, simulateTransactionAccounts } from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
 	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS
@@ -13,10 +9,14 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolSimulationResult } from '$sol/types/sol-simulation';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
+import {
+	mapSolInstructionSummaries,
+	solOpensAccountBeyondRent
+} from '$sol/utils/sol-instruction-summary.utils';
 import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
 import { deriveSolMessageSummary } from '$sol/utils/sol-message-summary.utils';
 import {
+	findSolUnreadPrograms,
 	isEmptySolSimulationPreview,
 	mapSolSimulationAccountOwners,
 	mapSolSimulationPreview,
@@ -33,12 +33,16 @@ const simulate = async ({
 	base64EncodedTransactionMessage,
 	transactionMessage,
 	address,
-	network
+	network,
+	rentExemptMinimumRequest
 }: {
 	base64EncodedTransactionMessage: string;
 	transactionMessage: CompilableTransactionMessage;
 	address: SolAddress;
 	network: SolanaNetworkType;
+	// The decode's request for the reserve a token account costs to exist, still pending when the
+	// run starts, so that waiting for it falls inside the run's own timeout.
+	rentExemptMinimumRequest: Promise<bigint | undefined>;
 }): Promise<SolSimulationResult | undefined> => {
 	const addresses = selectSolSimulationAddresses(transactionMessage);
 
@@ -58,12 +62,20 @@ const simulate = async ({
 		await Promise.all([
 			getMultipleAccountsInfo({ addresses, network }),
 			simulateTransactionAccounts({ base64EncodedTransactionMessage, addresses, network }),
-			getSolCreateAccountFee(network).catch(() => undefined)
+			rentExemptMinimumRequest
 		]);
 
 	// A run that failed rolled its changes back, so its post-state describes nothing the user
 	// would actually get. Showing those deltas would be worse than showing none.
 	if (nonNullish(err)) {
+		return undefined;
+	}
+
+	// A run with a nested call that names no program cannot be said to call only known ones, and
+	// the review would read the empty list as exactly that.
+	const unreadPrograms = findSolUnreadPrograms(innerInstructions);
+
+	if (isNullish(unreadPrograms)) {
 		return undefined;
 	}
 
@@ -144,14 +156,16 @@ const simulate = async ({
 		{}
 	);
 
+	const innerInstructionGroups = [...innerInstructions].map(({ index, instructions: inner }) => ({
+		index: Number(index),
+		instructions: [...inner]
+	}));
+
 	// The kit instructions are not parsed, so they contribute nothing themselves; iterating them is
 	// what attaches each simulated nested call to the instruction that made it.
 	const instructions = mapSolInstructionSummaries({
 		instructions: [...transactionMessage.instructions].map(asSolParsedRpcInstructionOrSelf),
-		innerInstructions: [...innerInstructions].map(({ index, instructions: inner }) => ({
-			index: Number(index),
-			instructions: [...inner]
-		})),
+		innerInstructions: innerInstructionGroups,
 		ownedAddresses: [address, ...ownedAddresses],
 		userAddress: address,
 		addressToToken,
@@ -188,6 +202,10 @@ const simulate = async ({
 		// from one it opens.
 		instructions,
 		...(messageSummary.kind !== 'other' && { messageSummary }),
+		...(solOpensAccountBeyondRent({
+			innerInstructions: innerInstructionGroups,
+			rentExemptMinimum
+		}) && { opensAccountBeyondRent: true }),
 		parties: {
 			...deriveSolTransferParties({
 				legs,
@@ -195,7 +213,8 @@ const simulate = async ({
 				addressToOwner
 			}),
 			partial: false
-		}
+		},
+		unreadPrograms
 	};
 };
 
@@ -218,6 +237,7 @@ export const simulateSolTransaction = async (params: {
 	transactionMessage: CompilableTransactionMessage;
 	address: OptionSolAddress;
 	network: SolanaNetworkType;
+	rentExemptMinimumRequest: Promise<bigint | undefined>;
 }): Promise<SolSimulationResult | undefined> => {
 	const { address } = params;
 

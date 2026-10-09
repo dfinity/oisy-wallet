@@ -1128,6 +1128,11 @@
 			"unexpected_utxos_fee": "حدث خطأ ما أثناء حساب رسوم المعاملة.",
 			"unable_to_retrieve_amount": "غير متاح (لا يمكن استرداده)",
 			"ethereum_insufficient_funds": "",
+			"ethereum_out_of_gas": "",
+			"ethereum_out_of_gas_gas": "",
+			"ethereum_out_of_gas_gas_sent": "",
+			"ethereum_transaction_hash": "",
+			"ethereum_unsigned_transaction": "",
 			"solana_transaction_expired": "لم تتم معالجة معاملتك بواسطة شبكة Solana وانتهت صلاحيتها، على الأرجح لأن رسوم الأولوية المقدمة لم تكن كافية. لقد قمنا بتحديثها إلى أحدث مبلغ موصى به، لذا يرجى المحاولة مرة أخرى.",
 			"solana_confirmation_failed": "لم نتلق تأكيدًا للمعاملة التي أنشأتها للتو. يرجى الانتظار بضع ثوانٍ ثم التحقق من قائمة معاملات التوكن الخاصة بك إذا تم إنشاء معاملتك بشكل صحيح.",
 			"solana_insufficient_funds": "",
@@ -1709,7 +1714,8 @@
 			"prioritization_fee": "",
 			"base_kind": "",
 			"prioritization_kind": "",
-			"ata_kind": ""
+			"ata_kind": "",
+			"app_account_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "رصيد غير كافٍ لتغطية الرسوم."
@@ -1761,6 +1767,9 @@
 			"tab_operations": "",
 			"unreviewed_instructions": "",
 			"unreviewed_instructions_simulated": "",
+			"unread_programs_one": "",
+			"unread_programs_other": "",
+			"unread_programs_acknowledge": "",
 			"cannot_be_shown": "",
 			"close_pays_others": "",
 			"simulated_instructions": "",
@@ -1874,6 +1883,7 @@
 			"ambiguous_transaction": "تنقل هذه المعاملة الأموال بين عدة عناوين ولا يمكن عرضها بدقة للمراجعة. حفاظًا على أمانك، لم يتم توقيعها.",
 			"close_pays_others": "",
 			"unreviewed_without_simulation": "",
+			"unread_programs_unconfirmed": "",
 			"sol_transaction_as_message": "",
 			"request_not_defined": "خطأ غير متوقع: الطلب غير معرف وبالتالي لا يمكن معالجته.",
 			"unexpected_processing_request": "خطأ غير متوقع أثناء معالجة الطلب باستخدام WalletConnect."
@@ -2153,6 +2163,7 @@
 			"instruction_wrap": "",
 			"instruction_unwrap": "",
 			"instruction_create_account": "",
+			"instruction_create_program_account": "",
 			"instruction_close_account": "",
 			"instruction_close_account_for": "",
 			"instruction_approve": "",
@@ -2165,6 +2176,7 @@
 			"instruction_thaw": "",
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
+			"instruction_via": "",
 			"instruction_rent": "",
 			"instruction_balance_returned": "",
 			"instruction_balance_sent": "",

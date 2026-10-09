@@ -1128,6 +1128,11 @@
 			"unexpected_utxos_fee": "Algo salió mal al calcular la tarifa de la transacción.",
 			"unable_to_retrieve_amount": "n/d (no se puede recuperar)",
 			"ethereum_insufficient_funds": "",
+			"ethereum_out_of_gas": "Tu envío falló porque necesitaba más gas del estimado. Tus fondos siguen en tu cartera, pero es posible que la red haya cobrado igualmente una comisión por la transacción fallida. Inténtalo de nuevo.",
+			"ethereum_out_of_gas_gas": "Gas enviado: $gasSent · Gas necesario: $gasNeeded",
+			"ethereum_out_of_gas_gas_sent": "Gas enviado: $gasSent",
+			"ethereum_transaction_hash": "Hash de la transacción: $hash",
+			"ethereum_unsigned_transaction": "Transacción sin firmar: $transaction",
 			"solana_transaction_expired": "Su transacción no fue procesada por la red Solana y expiró, muy probablemente porque la tarifa de prioridad proporcionada no era suficiente. La hemos actualizado al importe recomendado más reciente, por lo que por favor inténtelo de nuevo.",
 			"solana_confirmation_failed": "No recibimos confirmación para la transacción que acaba de crear. Por favor, espere unos segundos y luego compruebe la lista de transacciones de su token para ver si su transacción se creó correctamente.",
 			"solana_insufficient_funds": "El saldo de su token no es suficiente para completar esta transacción. Su saldo puede haber cambiado desde la última vez que se mostró.",
@@ -1709,7 +1714,8 @@
 			"prioritization_fee": "",
 			"base_kind": "",
 			"prioritization_kind": "",
-			"ata_kind": ""
+			"ata_kind": "",
+			"app_account_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Saldo insuficiente para cubrir las comisiones."
@@ -1761,6 +1767,9 @@
 			"tab_operations": "Operaciones",
 			"unreviewed_instructions": "OISY no puede decodificar algunas de estas instrucciones, por lo que la revisión a continuación puede estar incompleta.",
 			"unreviewed_instructions_simulated": "Esta transacción contiene operaciones de una fuente externa que OISY no puede decodificar, por lo que OISY ejecutó una simulación de ella. Asegúrese de confiar en la aplicación y revise los cambios de saldo simulados y las operaciones antes de firmar. Tenga en cuenta que el resultado real puede diferir de la simulación.",
+			"unread_programs_one": "Esta transacción llama a un programa que OISY no puede leer. Puede mover fondos que usted tiene en otras aplicaciones, como SOL en staking o depósitos en protocolos de préstamos, y nada de lo que aparece abajo lo mostraría.",
+			"unread_programs_other": "Esta transacción llama a programas que OISY no puede leer. Pueden mover fondos que usted tiene en otras aplicaciones, como SOL en staking o depósitos en protocolos de préstamos, y nada de lo que aparece abajo lo mostraría.",
+			"unread_programs_acknowledge": "Entiendo que OISY no puede mostrar lo que hace esta aplicación",
 			"cannot_be_shown": "Esta transacción incluye acciones que no pueden mostrarse todas con precisión para su revisión, por lo que OISY no la firmará. Rechácela y pida a la aplicación una solicitud más sencilla.",
 			"close_pays_others": "Esta transacción cierra una de tus cuentas de tokens y envía su saldo a una dirección que no es tu monedero. Por tu seguridad, OISY no la firmará.",
 			"simulated_instructions": "Instrucciones simuladas",
@@ -1874,6 +1883,7 @@
 			"ambiguous_transaction": "Esta transacción mueve fondos entre varias direcciones y no se puede mostrar con precisión para su revisión. Por tu seguridad, no se ha firmado.",
 			"close_pays_others": "Esta transacción cierra una de tus cuentas de tokens y envía su saldo a una dirección que no es tu monedero. Por tu seguridad, no se ha firmado.",
 			"unreviewed_without_simulation": "OISY no pudo leer una parte de esta transacción y la red tampoco devolvió una simulación, por lo que nada describe lo que haría esa parte. Por su seguridad, no se firmó.",
+			"unread_programs_unconfirmed": "Esta transacción llama a un programa que OISY no puede leer y no se confirmó en la revisión. Por su seguridad, no se firmó.",
 			"sol_transaction_as_message": "Este mensaje es una transacción de Solana, que solo puede aprobarse mediante una revisión de transacción. Por su seguridad, no fue firmada.",
 			"request_not_defined": "Error inesperado: La solicitud no está definida, por lo tanto no se puede procesar.",
 			"unexpected_processing_request": "Error inesperado al procesar la solicitud con WalletConnect."
@@ -2153,6 +2163,7 @@
 			"instruction_wrap": "",
 			"instruction_unwrap": "Desenvolver y cerrar la cuenta de tokens de $symbol",
 			"instruction_create_account": "",
+			"instruction_create_program_account": "",
 			"instruction_close_account": "",
 			"instruction_close_account_for": "Cerrar la cuenta de tokens de $symbol",
 			"instruction_approve": "",
@@ -2165,6 +2176,7 @@
 			"instruction_thaw": "",
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
+			"instruction_via": "vía $program",
 			"instruction_rent": "",
 			"instruction_balance_returned": "Saldo de SOL devuelto a tu monedero",
 			"instruction_balance_sent": "Saldo de SOL enviado a tu monedero",

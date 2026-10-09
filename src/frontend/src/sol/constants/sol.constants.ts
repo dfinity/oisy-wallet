@@ -43,22 +43,19 @@ export const SOLANA_MAX_COMPUTE_UNIT_LIMIT = 1_400_000n;
 // collapses towards nothing, which would otherwise make an ordinary tip look enormous.
 export const SOLANA_PRIORITIZATION_FEE_BASELINE_FLOOR_USD = 0.1;
 
+/**
+ * The fixed header every account pays rent for on top of its own data, as the protocol states it.
+ *
+ * The price per byte is not reproduced here: it is chain state rather than a protocol constant, and
+ * the network lowers it in steps by feature gate, so the review reads what the chain charges instead.
+ * The header is what turns the chain's figure for one account size into the figure for another.
+ */
+export const SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES = 128n;
+
 // The simulated preview asks the RPC for the post-state of an explicit list of accounts. Only
 // writable accounts can change, which already discards most of a DeFi message's account set;
 // past this many the preview is dropped rather than truncated, because a truncated preview
 // would report "no changes" for accounts it never looked at.
-/**
- * What the runtime charges to keep an account alive, as the protocol states it: every account pays
- * for a fixed 128-byte header plus its own data, at a per-byte-year price, for a fixed number of
- * years up front. An account funded with this much is exempt and never pays again.
- *
- * Reproduced here rather than asked of a provider because the review needs it before it renders,
- * and because the three values are protocol constants rather than chain state.
- */
-export const SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES = 128n;
-export const SOLANA_RENT_LAMPORTS_PER_BYTE_YEAR = 3_480n;
-export const SOLANA_RENT_EXEMPTION_YEARS = 2n;
-
 export const SOLANA_SIMULATION_MAX_ACCOUNTS = 60;
 
 // The preview is fetched before the review renders, so a slow or unresponsive RPC would hold
@@ -85,6 +82,11 @@ export const SOLANA_MAX_SKIPPED_SIGNATURE_PAGES = 3;
 // The RPC rejects a `getMultipleAccounts` call that asks for more accounts than this.
 // https://solana.com/docs/rpc/http/getmultipleaccounts
 export const SOLANA_MAX_MULTIPLE_ACCOUNTS = 100;
+
+// The RPC refuses to return a transaction of a newer version than the caller declares support for,
+// and one such transaction in a wallet's history fails every load of it. Version 1 (SIMD-0385) is
+// accepted on mainnet since epoch 1035.
+export const SOLANA_MAX_SUPPORTED_TRANSACTION_VERSION = 1;
 
 // A page of signatures is resolved concurrently, but public RPC endpoints throttle bursts of
 // `getTransaction` calls, so only this many are in flight at once.

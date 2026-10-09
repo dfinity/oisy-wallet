@@ -1128,6 +1128,11 @@
 			"unexpected_utxos_fee": "Podczas obliczania opłaty transakcyjnej wystąpił błąd.",
 			"unable_to_retrieve_amount": "n/d (nie można pobrać)",
 			"ethereum_insufficient_funds": "",
+			"ethereum_out_of_gas": "Wysłanie nie powiodło się, ponieważ wymagało więcej gazu, niż oszacowano. Twoje środki nadal są w portfelu, ale sieć mogła mimo to pobrać opłatę za nieudaną transakcję. Spróbuj ponownie.",
+			"ethereum_out_of_gas_gas": "Wysłany gaz: $gasSent · Potrzebny gaz: $gasNeeded",
+			"ethereum_out_of_gas_gas_sent": "Wysłany gaz: $gasSent",
+			"ethereum_transaction_hash": "Hash transakcji: $hash",
+			"ethereum_unsigned_transaction": "Niepodpisana transakcja: $transaction",
 			"solana_transaction_expired": "Twoja transakcja nie została przetworzona przez sieć Solana i wygasła, najprawdopodobniej dlatego, że podana opłata priorytetowa była niewystarczająca. Zaktualizowaliśmy ją do najnowszej zalecanej kwoty, więc spróbuj ponownie.",
 			"solana_confirmation_failed": "Nie otrzymaliśmy potwierdzenia dla właśnie utworzonej transakcji. Poczekaj kilka sekund, a następnie sprawdź listę transakcji swojego tokena, czy Twoja transakcja została utworzona poprawnie.",
 			"solana_insufficient_funds": "Saldo Twojego tokena jest niewystarczające do zrealizowania tej transakcji. Twoje saldo mogło się zmienić od ostatniego wyświetlenia.",
@@ -1709,7 +1714,8 @@
 			"prioritization_fee": "",
 			"base_kind": "",
 			"prioritization_kind": "",
-			"ata_kind": ""
+			"ata_kind": "",
+			"app_account_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Niewystarczające saldo na pokrycie opłat."
@@ -1761,6 +1767,9 @@
 			"tab_operations": "Operacje",
 			"unreviewed_instructions": "OISY nie może zdekodować niektórych z tych instrukcji, więc poniższy przegląd może być niepełny.",
 			"unreviewed_instructions_simulated": "Ta transakcja zawiera operacje z zewnętrznego źródła, których OISY nie może zdekodować, dlatego OISY przeprowadził ich symulację. Upewnij się, że ufasz aplikacji, i przed podpisaniem sprawdź symulowane zmiany salda oraz operacje. Pamiętaj, że rzeczywisty wynik może różnić się od symulacji.",
+			"unread_programs_one": "Ta transakcja wywołuje program, którego OISY nie może odczytać. Może on przenieść środki, które przechowujesz w innych aplikacjach, na przykład stakowane SOL lub depozyty w protokołach pożyczkowych, a nic poniżej by tego nie pokazało.",
+			"unread_programs_other": "Ta transakcja wywołuje programy, których OISY nie może odczytać. Mogą one przenieść środki, które przechowujesz w innych aplikacjach, na przykład stakowane SOL lub depozyty w protokołach pożyczkowych, a nic poniżej by tego nie pokazało.",
+			"unread_programs_acknowledge": "Rozumiem, że OISY nie może pokazać, co robi ta aplikacja",
 			"cannot_be_shown": "Ta transakcja zawiera działania, których nie da się w całości dokładnie pokazać do sprawdzenia, więc OISY jej nie podpisze. Odrzuć ją i poproś aplikację o prostsze żądanie.",
 			"close_pays_others": "Ta transakcja zamyka jedno z Twoich kont tokenów i wypłaca jego saldo na adres, który nie jest Twoim portfelem. Dla Twojego bezpieczeństwa OISY jej nie podpisze.",
 			"simulated_instructions": "Symulowane instrukcje",
@@ -1874,6 +1883,7 @@
 			"ambiguous_transaction": "Ta transakcja przenosi środki między kilkoma adresami i nie może zostać dokładnie wyświetlona do weryfikacji. Dla Twojego bezpieczeństwa nie została podpisana.",
 			"close_pays_others": "Ta transakcja zamyka jedno z Twoich kont tokenów i wypłaca jego saldo na adres, który nie jest Twoim portfelem. Dla Twojego bezpieczeństwa nie została podpisana.",
 			"unreviewed_without_simulation": "OISY nie mogła odczytać części tej transakcji, a sieć nie zwróciła również jej symulacji, więc nic nie opisuje, co ta część by zrobiła. Dla Twojego bezpieczeństwa nie została podpisana.",
+			"unread_programs_unconfirmed": "Ta transakcja wywołuje program, którego OISY nie może odczytać, i nie została potwierdzona podczas przeglądu. Dla Twojego bezpieczeństwa nie została podpisana.",
 			"sol_transaction_as_message": "Ta wiadomość jest transakcją Solana, którą można zatwierdzić wyłącznie poprzez przegląd transakcji. Ze względów bezpieczeństwa nie została podpisana.",
 			"request_not_defined": "Nieoczekiwany błąd: Żądanie nie jest zdefiniowane, dlatego nie można go przetworzyć.",
 			"unexpected_processing_request": "Nieoczekiwany błąd podczas przetwarzania żądania za pomocą WalletConnect."
@@ -2153,6 +2163,7 @@
 			"instruction_wrap": "",
 			"instruction_unwrap": "Rozpakuj i zamknij konto tokenów $symbol",
 			"instruction_create_account": "",
+			"instruction_create_program_account": "",
 			"instruction_close_account": "",
 			"instruction_close_account_for": "Zamknij konto tokenów $symbol",
 			"instruction_approve": "",
@@ -2165,6 +2176,7 @@
 			"instruction_thaw": "",
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
+			"instruction_via": "przez $program",
 			"instruction_rent": "",
 			"instruction_balance_returned": "Saldo SOL zwrócone do Twojego portfela",
 			"instruction_balance_sent": "Saldo SOL wysłane do Twojego portfela",
