@@ -950,24 +950,28 @@ to say, so a `/status` that never resolves would leave the row non-terminal fore
   fix itself. On `INVALID` the poller immediately re-queries `/status` with `txHash`,
   `fromChain` and `toChain` only (no `bridge`), in case the stored `lifi_tool` is what
   LI.FI rejects, and maps that answer instead.
-- The bound is counted in **loader ticks, not wall time**, and starts only **after the
-  source transaction is confirmed**. The poller keeps an in-memory
-  `unresolvedTicks: Map<rowId, number>`, incremented on every loader tick in which the
-  row's source is confirmed and the latest `/status` answer (after the `INVALID`
-  re-query) is still `NOT_FOUND` / `INVALID`, and cleared by any other answer. When it
-  reaches `LIFI_STATUS_UNRESOLVED_TICKS = Math.ceil(LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS /
-ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS)` (period 6 h), the row ends `Failed`
-  with `swap.error.lifi_status_unknown` ("LI.FI could not report the outcome of this
-  swap. Check your destination wallet."), not a claim that the funds were lost.
-  - Not wall time: the row's `created_at_ns` is the canister's clock and `Date.now()`
-    the browser's; subtracting one from the other makes the window depend on clock
-    skew. This is OISY Trade's precedent (`OISY_TRADE_SWAP_SETTLE_GRACE_OBSERVATIONS`,
-    `lib/constants/oisy-trade.constants.ts`).
+- The bound starts only **after the source transaction is confirmed** and is measured
+  on the **browser's clock only**. The first time a poll sees the row's source confirmed
+  and the latest `/status` answer (after the `INVALID` re-query) still `NOT_FOUND` /
+  `INVALID`, the poller records `unresolvedSince = Date.now()` for that row in
+  `localStorage` (key `lifi-unresolved-since:<rowId>`, through the existing `get` / `set`
+  / `del` in `lib/utils/storage.utils.ts`). Any other answer, or a terminal status,
+  deletes the entry. When `Date.now() − unresolvedSince ≥
+LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS` (6 h) and the latest answer is still unresolved,
+  the row ends `Failed` with `swap.error.lifi_status_unknown` ("LI.FI could not report
+  the outcome of this swap. Check your destination wallet."), not a claim that the funds
+  were lost.
+  - Browser clock against browser clock: never the row's `created_at_ns`, which is the
+    canister's clock, so clock skew does not move the window (the concern behind OISY
+    Trade's tick counting, `lib/constants/oisy-trade.constants.ts`).
+  - Persisted, so reloads do not restart the window. It is not in the row's refs (the
+    Solana row has no spare key), so another device, a private window or cleared site
+    data starts its own window. That can only **delay** the irreversible verdict, never
+    hasten it.
+  - Storage is best-effort: reads and writes are wrapped in try/catch, and when storage
+    is unavailable the poller falls back to an in-memory timestamp for the session.
   - Not from row creation: a source that confirms late would otherwise be failed after
     only a couple of status calls.
-  - In memory, with no ref (the Solana row has no spare key): a reload or a hidden tab
-    (the loader skips ticks while hidden) restarts or pauses the count, which can only
-    **delay** an irreversible verdict, never hasten it.
   - 6 h is far past LI.FI's slowest bridge ETAs; the constant sits next to the throttle
     constants so it can be tuned.
 - A `PENDING` answer at any time keeps the row `Executing` with no deadline: LI.FI is
@@ -1167,8 +1171,9 @@ everywhere.
 14. A reverted / dropped (EVM) or reverted / expired (Solana) source transaction ends
     `Failed`; a `NOT_FOUND` / `INVALID` status alone never terminates a row before the
     source is confirmed and the 6 h unresolved-status bound has passed, after which the
-    row ends `Failed` with the "outcome unknown" copy. That bound counts loader ticks
-    after source confirmation, never wall-clock time against `created_at_ns`. A Solana row is marked expired
+    row ends `Failed` with the "outcome unknown" copy. That bound starts after source
+    confirmation, is measured on the browser clock only (persisted in `localStorage`), and
+    never compares against `created_at_ns`. A Solana row is marked expired
     only after two consecutive polls each find no signature status (searching
     transaction history) with the stored blockhash no longer valid.
 15. `swap_submitted` fires from the wizard; `swap_success` / `swap_error` fire once from
@@ -1208,8 +1213,9 @@ Recorded so a future reader can tell "excluded on purpose" from "forgotten".
 - **Solana top-level instructions are pinned** by `(program, discriminator)`, not just by
   program, so a known DEX program cannot be used for anything but the allowed route.
 - **Failure reasons stay off-screen**, matching Velora and NEAR Intents (icon only).
-- **The unresolved-status bound counts loader ticks after source confirmation**, in
-  memory, rather than wall time.
+- **The unresolved-status bound starts after source confirmation and is persisted in
+  `localStorage`** on the browser clock only, so reloads do not restart it; another
+  device starts its own window.
 - **Native-SOL receipts are checked net of the SOL fee cap**, not by reconstructing gross
   incoming lamports.
 - **`@lifi/sdk` (core only) is approved** as a new dependency.
