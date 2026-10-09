@@ -3,6 +3,7 @@ import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { getMultipleAccountsInfo, simulateTransactionAccounts } from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
+	SOLANA_SIMULATION_MAX_CLOSE_RUNS,
 	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS
 } from '$sol/constants/sol.constants';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
@@ -91,7 +92,9 @@ const fundedBefore = async ({
  * without an instruction, and so without a line.
  *
  * Accounts whose last call is the same instruction share that run, which asks for all of them at
- * once: one run per instruction at most, however many accounts the message closes.
+ * once: one run per instruction at most, however many accounts the message closes. A message that
+ * needs more runs than `SOLANA_SIMULATION_MAX_CLOSE_RUNS` gets none, and every close that needed
+ * one stays without an instruction.
  */
 const attributeClosedAccounts = async ({
 	closedAccounts,
@@ -125,10 +128,12 @@ const attributeClosedAccounts = async ({
 		return acc;
 	}, new Map<number, SolClosedAccount[]>());
 
+	const runs = checks.size > SOLANA_SIMULATION_MAX_CLOSE_RUNS ? [] : [...checks];
+
 	const funded = new Set(
 		(
 			await Promise.all(
-				[...checks].map(([instruction, accounts]) =>
+				runs.map(([instruction, accounts]) =>
 					fundedBefore({ transactionMessage, instruction, accounts, network })
 				)
 			)
