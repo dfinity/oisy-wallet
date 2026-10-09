@@ -23,6 +23,7 @@
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import {
+		acceptedContext,
 		classifyWalletConnectEthCall,
 		getSendParamsGas,
 		isWalletConnectEthApproval
@@ -235,6 +236,7 @@
 						{call}
 						{data}
 						{destination}
+						flaggedAsScam={!acceptedContext(request.verifyContext)}
 						onApprove={send}
 						onReject={reject}
 						{requestedGas}

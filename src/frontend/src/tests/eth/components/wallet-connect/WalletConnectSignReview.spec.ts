@@ -279,4 +279,32 @@ describe('WalletConnectSignReview', () => {
 		expect(getAllByText(en.wallet_connect.text.network)).toHaveLength(1);
 		expect(getByTestId('wallet-connect-domain-network')).toHaveTextContent(ETHEREUM_NETWORK.name);
 	});
+
+	it('does not warn about a request Verify does not flag', () => {
+		const { getByRole, queryByTestId } = render(WalletConnectSignReview, {
+			props: { ...props, request: daiPermitRequest(true) }
+		});
+
+		expect(queryByTestId('wallet-connect-scam-warning')).not.toBeInTheDocument();
+		expect(getByRole('button', { name: en.core.text.approve })).toBeInTheDocument();
+	});
+
+	// Verify states its verdict on every request, so a site flagged after it connected is caught here.
+	it('only offers to reject a request Verify flags as a scam, and says why', () => {
+		const request = daiPermitRequest(true);
+
+		const { getByRole, getByTestId, queryByRole } = render(WalletConnectSignReview, {
+			props: {
+				...props,
+				request: {
+					...request,
+					verifyContext: { verified: { ...request.verifyContext.verified, isScam: true } }
+				}
+			}
+		});
+
+		expect(getByTestId('wallet-connect-scam-warning')).toBeInTheDocument();
+		expect(queryByRole('button', { name: en.core.text.approve })).not.toBeInTheDocument();
+		expect(getByRole('button', { name: en.core.text.reject })).toBeInTheDocument();
+	});
 });
