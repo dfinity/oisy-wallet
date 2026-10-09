@@ -8,28 +8,33 @@ import type { Verify } from '@walletconnect/types';
 describe('WalletConnectReview', () => {
 	const proposal = (
 		verified: Pick<Verify.Context['verified'], 'validation' | 'isScam'>
-	): WalletKitTypes.SessionProposal =>
-		({
+	): WalletKitTypes.SessionProposal => ({
+		id: 1,
+		params: {
 			id: 1,
-			params: {
-				proposer: {
-					metadata: {
-						name: 'Test dApp',
-						description: 'A test dApp',
-						url: 'https://dapp.example',
-						icons: []
-					}
-				},
-				requiredNamespaces: {}
-			},
-			verifyContext: {
-				verified: {
-					verifyUrl: 'https://verify.walletconnect.org',
-					origin: 'https://dapp.example',
-					...verified
+			expiryTimestamp: 0,
+			relays: [{ protocol: 'irn' }],
+			proposer: {
+				publicKey: 'mock-public-key',
+				metadata: {
+					name: 'Test dApp',
+					description: 'A test dApp',
+					url: 'https://dapp.example',
+					icons: []
 				}
+			},
+			requiredNamespaces: {},
+			optionalNamespaces: {},
+			pairingTopic: 'mock-pairing-topic'
+		},
+		verifyContext: {
+			verified: {
+				verifyUrl: 'https://verify.walletconnect.org',
+				origin: 'https://dapp.example',
+				...verified
 			}
-		}) as unknown as WalletKitTypes.SessionProposal;
+		}
+	});
 
 	it('offers to approve a proposal Verify does not flag', () => {
 		walletConnectProposalStore.set(proposal({ validation: 'VALID', isScam: false }));
