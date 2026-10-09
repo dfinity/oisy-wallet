@@ -1,16 +1,14 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import Input from '$lib/components/ui/Input.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	// The same bound `sendXrp` enforces before signing, not a second copy of it: a tag is a
-	// protocol-level UInt32, so a local literal could not legitimately diverge — but nothing
-	// would have shown a reader that the form's limit and the signer's were meant to be one
-	// number. Aliased so the call site below reads unchanged.
-	import { XRP_MAX_DESTINATION_TAG as MAX_DESTINATION_TAG } from '$xrp/constants/xrp.constants';
+	// The same parser `fetchNearIntentsXrpSwap` reads a 1Click deposit memo with, so the form and
+	// the swap agree on what a tag is and on the `UInt32` bound `sendXrp` enforces before signing.
+	import { parseXrpDestinationTag } from '$xrp/utils/xrp-send.utils';
 
 	interface Props {
 		invalidDestinationTag?: boolean;
@@ -37,13 +35,11 @@
 			return;
 		}
 
-		const parsed = Number(trimmed);
-		const valid =
-			/^\d+$/.test(trimmed) && Number.isInteger(parsed) && parsed <= MAX_DESTINATION_TAG;
+		const parsed = parseXrpDestinationTag(trimmed);
 
-		invalidDestinationTag = !valid;
+		invalidDestinationTag = isNullish(parsed);
 
-		sendXrpDestinationTag.set(valid ? parsed : undefined);
+		sendXrpDestinationTag.set(parsed);
 	};
 </script>
 

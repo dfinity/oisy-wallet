@@ -144,6 +144,7 @@ import { sendXrp } from '$xrp/services/xrp-send.services';
 import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 import { XrpSendNotGuardedError } from '$xrp/types/xrp-send';
 import { toXrpExternalRefs } from '$xrp/utils/xrp-active-tx.utils';
+import { parseXrpDestinationTag } from '$xrp/utils/xrp-send.utils';
 import { isNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
@@ -903,6 +904,7 @@ const executeNearIntentsSwap = async ({
 	sendTransaction: (params: {
 		amount: bigint;
 		depositAddress: string;
+		depositMemo?: string;
 		registerSwap: () => Promise<void>;
 		swapRecord: (params: {
 			sourceAddress: string;
@@ -1015,6 +1017,7 @@ const executeNearIntentsSwap = async ({
 	const txHash = await sendTransaction({
 		amount: parsedSwapAmount,
 		depositAddress,
+		depositMemo: depositMemo ?? undefined,
 		registerSwap,
 		swapRecord
 	});
@@ -1190,7 +1193,21 @@ export const fetchNearIntentsXrpSwap = async ({
 		// under the swap's own row, which `sendXrp` creates after signing and before the submit —
 		// where the in-flight check needs it. `sendXrp` never throws once the payment may be on the
 		// wire, so nothing after the send can leave a broadcast deposit without that row.
-		sendTransaction: async ({ amount, depositAddress, swapRecord }) => {
+		sendTransaction: async ({ amount, depositAddress, depositMemo, swapRecord }) => {
+			// On XRPL the 1Click deposit memo is the payment's `DestinationTag`: it is what credits a
+			// deposit to a shared deposit address to this swap, so a payment without it could not be
+			// attributed. One that is not a `UInt32` cannot be carried at all, so the swap is refused
+			// before signing rather than paid untagged.
+			const destinationTag = nonNullish(depositMemo)
+				? parseXrpDestinationTag(depositMemo)
+				: undefined;
+
+			if (nonNullish(depositMemo) && isNullish(destinationTag)) {
+				throw new Error(
+					`XRP swap refused: the deposit memo "${depositMemo}" is not a valid destination tag.`
+				);
+			}
+
 			const { txHash } = await sendXrp({
 				identity,
 				network,
@@ -1198,6 +1215,7 @@ export const fetchNearIntentsXrpSwap = async ({
 				destination: depositAddress,
 				amount,
 				fee,
+				...(nonNullish(destinationTag) && { destinationTag }),
 				token: sourceToken,
 				record: ({ txHash: hash, lastLedgerSequence }) => {
 					const record = swapRecord({

@@ -3,7 +3,8 @@ import {
 	getXrpMaxAmount,
 	getXrpReserveDrops,
 	isInvalidDestinationXrp,
-	isXrpAmountSendable
+	isXrpAmountSendable,
+	parseXrpDestinationTag
 } from '$xrp/utils/xrp-send.utils';
 
 // Expected values are literals, not the constants or arithmetic these functions use. Restating the
@@ -107,5 +108,23 @@ describe('xrp-send.utils', () => {
 		it('refuses any positive amount when the reserve already exceeds the balance', () => {
 			expect(isXrpAmountSendable({ amount: 1n, balance: reserve, fee: 10n, reserve })).toBeFalsy();
 		});
+	});
+
+	describe('parseXrpDestinationTag', () => {
+		it.each([
+			{ value: '0', expected: 0 },
+			{ value: '12345', expected: 12_345 },
+			{ value: ' 42 ', expected: 42 },
+			{ value: '4294967295', expected: 4_294_967_295 }
+		])('parses $value', ({ value, expected }) => {
+			expect(parseXrpDestinationTag(value)).toBe(expected);
+		});
+
+		it.each(['', ' ', '-1', '1.5', '1e3', '0x10', 'abc', '4294967296', '9'.repeat(20)])(
+			'refuses %s',
+			(value) => {
+				expect(parseXrpDestinationTag(value)).toBeUndefined();
+			}
+		);
 	});
 });

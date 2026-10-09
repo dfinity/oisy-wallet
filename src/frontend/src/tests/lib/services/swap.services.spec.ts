@@ -3905,6 +3905,50 @@ describe('swap.services', () => {
 			);
 		});
 
+		// On XRPL the 1Click deposit memo is the destination tag that credits the deposit to the swap.
+		it('should pay the deposit with the quote memo as its destination tag', async () => {
+			await fetchNearIntentsXrpSwap({
+				...baseParams,
+				swapDetails: {
+					...mockNearIntentsQuoteResponse,
+					quote: { ...mockNearIntentsQuoteResponse.quote, depositMemo: '2701829354' }
+				}
+			});
+
+			expect(sendXrp).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ destination: depositAddress, destinationTag: 2_701_829_354 })
+			);
+			expect(builtRecord?.externalRefs).toEqual(
+				expect.arrayContaining([
+					{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_MEMO, value: '2701829354' }
+				])
+			);
+			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledExactlyOnceWith({
+				depositAddress,
+				txHash: xrpTxHash,
+				depositMemo: '2701829354'
+			});
+		});
+
+		// A memo that cannot be a tag must not be dropped: an untagged deposit could not be credited.
+		it.each(['not-a-tag', '-1', '1.5', '4294967296', ''])(
+			'should refuse the deposit when the quote memo %s is not a destination tag',
+			async (depositMemo) => {
+				await expect(
+					fetchNearIntentsXrpSwap({
+						...baseParams,
+						swapDetails: {
+							...mockNearIntentsQuoteResponse,
+							quote: { ...mockNearIntentsQuoteResponse.quote, depositMemo }
+						}
+					})
+				).rejects.toThrow('not a valid destination tag');
+
+				expect(sendXrp).not.toHaveBeenCalled();
+				expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
+			}
+		);
+
 		// One swap, one row: `sendXrp` creates it, so none is created after the send.
 		it('should not create a second row after the send', async () => {
 			await fetchNearIntentsXrpSwap(baseParams);

@@ -1,7 +1,11 @@
 import { ZERO } from '$lib/constants/app.constants';
 import type { Address } from '$lib/types/address';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
-import { XRP_BASE_RESERVE_DROPS, XRP_OWNER_RESERVE_DROPS } from '$xrp/constants/xrp.constants';
+import {
+	XRP_BASE_RESERVE_DROPS,
+	XRP_MAX_DESTINATION_TAG,
+	XRP_OWNER_RESERVE_DROPS
+} from '$xrp/constants/xrp.constants';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import { invalidXrpAddress } from '$xrp/utils/xrp-address.utils';
 
@@ -68,3 +72,22 @@ export const isXrpAmountSendable = ({
 	fee: XrpBalance;
 	reserve: XrpBalance;
 }): boolean => amount <= balance - fee - reserve;
+
+/**
+ * A `DestinationTag` written as decimal digits, as the `UInt32` the ledger takes, or `undefined`
+ * when it is not one.
+ *
+ * Digits only: `Number` alone would also accept `1e3`, `0x10` or `1.0`, none of which is how a tag
+ * is written, and a value that does not parse must never be read as "no tag" by the caller.
+ */
+export const parseXrpDestinationTag = (value: string): number | undefined => {
+	const trimmed = value.trim();
+
+	if (!/^\d+$/.test(trimmed)) {
+		return undefined;
+	}
+
+	const parsed = Number(trimmed);
+
+	return Number.isSafeInteger(parsed) && parsed <= XRP_MAX_DESTINATION_TAG ? parsed : undefined;
+};
