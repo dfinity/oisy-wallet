@@ -619,6 +619,38 @@ WalletConnect is unchanged; LI.FI passes `false`, so the RPC simulates the exact
 with their own blockhash, and an expired one comes back as an `err`
 (`BlockhashNotFound`) and aborts.
 
+**Pre- and post-state are read at the same slot.** The deltas below are only evidence of
+what the transaction does if both sides of the diff describe the same chain state.
+`simulate` in `sol-simulation.services.ts` fires `getMultipleAccountsInfo` and
+`simulateTransactionAccounts` concurrently, and `getMultipleAccountsInfo`
+(`sol/api/solana.api.ts`) discards the response's `context.slot`, so the two can observe
+different slots and any unrelated activity on the user's accounts in between (an incoming
+transfer, another pending transaction of the user's) is folded into the deltas. For the
+WalletConnect review that is noise; here it would let a credit the transaction did not
+cause satisfy the receipt bound, or hide part of the spend. So `simulateSolTransaction`
+gains a `consistentSnapshot` option, `false` by default (WalletConnect unchanged), and
+LI.FI passes `true`, which changes the run in three ways:
+
+- `getMultipleAccountsInfo` returns the response's `context.slot` next to `value`, and
+  `simulateTransactionAccounts` accepts the RPC's `minContextSlot` and returns its own
+  `context.slot`. Both calls already go to the same `solanaHttpRpc(network)` at the same
+  commitment.
+- The two reads become **sequential**: the pre-state is read first, at slot `S`, then the
+  simulation runs with `minContextSlot: S` and its `context.slot` must equal `S`. Two
+  nodes at the same confirmed slot hold the same state for it, so equality is the
+  consistency guarantee, whichever node answered.
+- A simulation at a later slot, or a `minContextSlot`-not-reached error from a lagging
+  node, repeats the pair, up to `LIFI_SOL_SIMULATION_SNAPSHOT_ATTEMPTS` (3) times inside
+  the existing `SOLANA_SIMULATION_TIMEOUT_MILLISECONDS`. If no attempt lands on one
+  slot, the result is `undefined` and the swap aborts (fail closed), like any other
+  simulation failure.
+
+The sequential read costs one extra round trip on the LI.FI path only. Binding the
+route's source and destination account metas statically instead would need a per-route
+instruction decoder for every allowed aggregator; the minimum-output decoder below is
+the part of that work v1 does take on, and the slot-consistent deltas are what makes
+the spend and receipt bounds meaningful on top of it.
+
 The result must show all of the following:
 
 - `preview.controlChanges` is empty. No owner, delegate or close-authority change on any
@@ -1183,7 +1215,7 @@ loader's 5 s tick.
 | 1   | **Backend AUT variant** — `Lifi(LifiData)`, validation, tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                                                                                                                                                         | —                                              |
 | 2a  | **Scaffolding + quoting** — `@lifi/sdk`, env (flag **`false` everywhere**; unit tests switch it on), types, quote service + cache, form-time trust checks, LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges, empty source list so the Solana source picker is unchanged), provider sheet                                           | 1                                              |
 | 2b  | **EVM execution + tracking** — calldata binding (pinned selectors + `CalldataVerificationFacet`), `fetchLifiEvmSwap` (pre-approval price check, unchanged `approve()`, form budget of 0/1/2 approval fees from one allowance read) + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound and the `/status` 404 → `NOT_FOUND` mapping)/loader (incl. wallet + EVM balance refresh)/item; flag back to `LOCAL \|\| STAGING`, `PRODUCT.md` for EVM-source swaps | 2a                                             |
-| 3   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (quote, destinations and source list; Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` / `closedAccounts` in the simulation preview), `SwapSolWizard` dispatch, Solana source-chain check in the poller (in-memory expiry observations), `PRODUCT.md` update for Solana-source swaps                                                                                                                 | 2b                                             |
+| 3   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (quote, destinations and source list; Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` / `closedAccounts` in the simulation preview and the slot-consistent pre/post snapshot), `SwapSolWizard` dispatch, Solana source-chain check in the poller (in-memory expiry observations), `PRODUCT.md` update for Solana-source swaps                                                                       | 2b                                             |
 | 4   | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 3, production key + rate-limit scope confirmed |
 
 PR 2 is split up front so each PR stays reviewable. In 2a the flag is `false` everywhere,
@@ -1280,8 +1312,9 @@ everywhere.
    facet's own data equal to the user, the requested destination chain and, same-chain, a
    minimum output at least the displayed `toAmountMin`. A route with a destination call
    is never signed. A decode that reverts aborts the swap.
-9. A Solana swap is never signed unless a simulation of its exact bytes succeeds, shows
-   no control change, leaves every token account it creates for the user with the user
+9. A Solana swap is never signed unless a simulation of its exact bytes, with the
+   pre-state read at the very slot the simulation ran at, succeeds, shows no control
+   change, leaves every token account it creates for the user with the user
    as owner and no foreign delegate or close authority, closes none of the user's
    pre-existing accounts, contains only top-level instructions from
    `LIFI_SOLANA_ALLOWED_INSTRUCTIONS` (any `CloseAccount` paying the user, and the route's
