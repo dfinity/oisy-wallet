@@ -2,6 +2,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy } from 'svelte';
+	import { acceptedContext } from '$eth/utils/wallet-connect.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
@@ -116,6 +117,7 @@
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<SolWalletConnectSignMessageReview
 				{application}
+				flaggedAsScam={!acceptedContext(request.verifyContext)}
 				{message}
 				{method}
 				onApprove={approve}

@@ -7,6 +7,7 @@
 		SOLANA_LOCAL_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
+	import { acceptedContext } from '$eth/utils/wallet-connect.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
@@ -293,6 +294,7 @@
 				{decoded}
 				destination={destination ?? ''}
 				feeToken={token}
+				flaggedAsScam={!acceptedContext(request.verifyContext)}
 				{instructions}
 				isApproval={isApproval ?? false}
 				{messageSummary}
