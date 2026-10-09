@@ -6,6 +6,7 @@
 	import { decodeMessage, sign as signService } from '$btc/services/wallet-connect.services';
 	import type { OptionBtcAddress } from '$btc/types/address';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
+	import { acceptedContext } from '$eth/utils/wallet-connect.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
@@ -95,6 +96,7 @@
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<BtcWalletConnectSignReview
 				{application}
+				flaggedAsScam={!acceptedContext(request.verifyContext)}
 				{message}
 				{method}
 				onApprove={approve}

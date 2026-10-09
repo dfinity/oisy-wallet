@@ -7,6 +7,7 @@
 	import type { OptionBtcAddress } from '$btc/types/address';
 	import type { WalletConnectBtcDecodedPsbt } from '$btc/types/wallet-connect';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
+	import { acceptedContext } from '$eth/utils/wallet-connect.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
@@ -110,6 +111,7 @@
 				{application}
 				{decodeError}
 				{decoded}
+				flaggedAsScam={!acceptedContext(request.verifyContext)}
 				onApprove={approve}
 				onReject={reject}
 				source={address ?? ''}
