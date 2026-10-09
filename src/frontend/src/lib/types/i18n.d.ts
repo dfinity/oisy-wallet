@@ -1848,6 +1848,7 @@ interface I18nTransaction {
 		instruction_thaw: string;
 		instruction_unknown: string;
 		instruction_unknown_via: string;
+		instruction_via: string;
 		instruction_rent: string;
 		instruction_balance_returned: string;
 		instruction_balance_sent: string;

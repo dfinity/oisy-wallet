@@ -14,10 +14,13 @@
 	import { DEFAULT_TIP_EXPIRY_MS, TIP_EXPIRY_OPTIONS } from '$lib/constants/tip.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
-	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
+	import {
+		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		PLAUSIBLE_EVENT_TIP_ERROR_TYPES
+	} from '$lib/enums/plausible';
 	import { ProgressStepsTip } from '$lib/enums/progress-steps';
 	import { WizardStepsTip } from '$lib/enums/wizard-steps';
-	import { trackTip } from '$lib/services/tip-analytics.services';
+	import { toTipErrorType, trackTip } from '$lib/services/tip-analytics.services';
 	import {
 		cancelTip,
 		newTipDraft,
@@ -80,7 +83,13 @@
 
 	// The top of the funnel. Every later step is the same `tip` event with a
 	// different modifier, so the drop-off between them is answerable.
-	onMount(() => trackTip({ step: 'open', side: 'sender' }));
+	onMount(() =>
+		trackTip({
+			step: 'open',
+			side: 'sender',
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+		})
+	);
 
 	// The label, not the millisecond count: `7d` is what a reader of the dashboard
 	// can act on, and it is already the vocabulary of the form.
@@ -180,8 +189,8 @@
 				step: 'cancel',
 				side: 'sender',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
-				symbol: selectedToken?.symbol,
-				...(nonNullish(limit) && { rateLimited: true })
+				errorType: toTipErrorType(err),
+				symbol: selectedToken?.symbol
 			});
 			toastsError(
 				nonNullish(limit)
@@ -243,13 +252,30 @@
 		reservedToken = token;
 		expiresAtNs = tip.expires_at_ns;
 		viewingTip = tip;
-		trackTip({ step: 'reopen', side: 'sender', symbol: token.symbol });
 		link = undefined;
 		linkMessage = undefined;
 		goToStep(WizardStepsTip.SHARE);
 
 		try {
 			const recovered = await recoverTipLink({ identity: $authIdentity, tipId: tip.tip_id });
+
+			// One event per reopen, sent once the recovery has answered, so a failed
+			// reopen is not also counted as a plain one. Before the stale check for the
+			// same reason as the failure below. No link is an error here even though
+			// the screen does not call it one: the reopen did not give the sender
+			// their link back, and counting it as a success would hide the tips whose
+			// copy was never saved.
+			trackTip({
+				step: 'reopen',
+				side: 'sender',
+				...(nonNullish(recovered)
+					? { resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS }
+					: {
+							resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+							errorType: PLAUSIBLE_EVENT_TIP_ERROR_TYPES.LINK_UNAVAILABLE
+						}),
+				symbol: token.symbol
+			});
 
 			if (isStaleRecovery(tip)) {
 				return;
@@ -270,15 +296,12 @@
 			// Reported even when nobody is looking at this tip any more: the recovery
 			// did fail, and that is a fact about the tip rather than about the screen.
 			// `token`, not `selectedToken`, which by now may belong to another row.
-			//
-			// The reopen itself was already reported as a plain step. This is the
-			// separate fact that it did not produce a link.
 			trackTip({
 				step: 'reopen',
 				side: 'sender',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
-				symbol: token.symbol,
-				...(nonNullish(limit) && { rateLimited: true })
+				errorType: toTipErrorType(err),
+				symbol: token.symbol
 			});
 
 			if (isStaleRecovery(tip)) {
@@ -362,17 +385,16 @@
 
 			// A rate limit is the one failure where the usual advice is wrong: every
 			// other reason here is worth retrying immediately, and this one cannot
-			// succeed until the window passes. Reported as its own flag so the funnel
-			// can answer how often people are being turned away.
+			// succeed until the window passes.
 			const limit = tipRateLimit(err);
 
 			trackTip({
 				step: 'create',
 				side: 'sender',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				errorType: toTipErrorType(err),
 				expiry: expiryLabel(durationMs),
-				symbol: selectedToken?.symbol,
-				...(nonNullish(limit) && { rateLimited: true })
+				symbol: selectedToken?.symbol
 			});
 
 			// Deliberately reassuring about the money: an approve either landed and is

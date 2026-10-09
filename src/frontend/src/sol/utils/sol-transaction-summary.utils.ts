@@ -1,7 +1,7 @@
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { absBigInt, maxBigInt } from '$lib/utils/bigint.utils';
-import { formatToken } from '$lib/utils/format.utils';
+import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { OptionSolAddress } from '$sol/types/address';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
@@ -578,6 +578,8 @@ export const formatSolInstructionSummary = ({
 		wrapped,
 		ownAccount,
 		program,
+		via,
+		viaName,
 		children
 	},
 	i18n,
@@ -600,13 +602,22 @@ export const formatSolInstructionSummary = ({
 
 	const ownDetail = own === true ? i18n.transaction.text.instruction_own_account : undefined;
 
+	// The pool a leg of a routed swap goes through, by the name it publishes or else by its address:
+	// the label the review's notice about programs OISY cannot read gives the same program.
+	const viaTrailing = nonNullish(via)
+		? replacePlaceholders(i18n.transaction.text.instruction_via, {
+				$program: viaName ?? shortenWithMiddleEllipsis({ text: via })
+			})
+		: undefined;
+
 	if (kind === 'send' && nonNullish(value) && nonNullish(counterparty)) {
 		return {
 			text: replacePlaceholders(i18n.transaction.text.instruction_send, {
 				$amount: amount(value),
 				$symbol: symbolOf(tokenAddress)
 			}),
-			...(nonNullish(ownDetail) && { detail: ownDetail })
+			...(nonNullish(ownDetail) && { detail: ownDetail }),
+			...(nonNullish(viaTrailing) && { trailing: viaTrailing })
 		};
 	}
 
@@ -616,7 +627,8 @@ export const formatSolInstructionSummary = ({
 				$amount: amount(value),
 				$symbol: symbolOf(tokenAddress)
 			}),
-			...(nonNullish(ownDetail) && { detail: ownDetail })
+			...(nonNullish(ownDetail) && { detail: ownDetail }),
+			...(nonNullish(viaTrailing) && { trailing: viaTrailing })
 		};
 	}
 

@@ -2176,6 +2176,7 @@
 			"instruction_thaw": "",
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
+			"instruction_via": "$program 経由",
 			"instruction_rent": "",
 			"instruction_balance_returned": "SOL 残高がウォレットに戻ります",
 			"instruction_balance_sent": "SOL 残高があなたのウォレットに送金されます",

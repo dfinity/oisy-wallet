@@ -2176,6 +2176,7 @@
 			"instruction_thaw": "",
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
+			"instruction_via": "via $program",
 			"instruction_rent": "",
 			"instruction_balance_returned": "Saldo de SOL devolvido à sua carteira",
 			"instruction_balance_sent": "Saldo de SOL enviado para a sua carteira",
