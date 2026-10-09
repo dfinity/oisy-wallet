@@ -13,7 +13,7 @@ use shared::types::{
     custom_token::ErcTokenId,
     result_types::{
         ActiveUserTransactionResult, DeleteActiveUserTransactionResult,
-        GetActiveUserTransactionsResult,
+        GetActiveUserTransactionsResult, MarkActiveUserTransactionsSeenResult,
     },
     token_id::TokenId,
 };
@@ -85,6 +85,30 @@ fn list_active(pic: &PicBackend, user: Principal) -> Vec<ActiveUserTransaction> 
     }
 }
 
+fn seen_up_to(pic: &PicBackend, user: Principal) -> u64 {
+    match pic
+        .query::<GetActiveUserTransactionsResult>(user, "get_active_user_transactions", ())
+        .expect("query should succeed")
+    {
+        GetActiveUserTransactionsResult::Ok(response) => response.seen_up_to_ns,
+        GetActiveUserTransactionsResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+}
+
+fn mark_seen(pic: &PicBackend, user: Principal, up_to_ns: u64) -> u64 {
+    match pic
+        .update::<MarkActiveUserTransactionsSeenResult>(
+            user,
+            "mark_active_user_transactions_seen",
+            up_to_ns,
+        )
+        .expect("mark_active_user_transactions_seen call should succeed")
+    {
+        MarkActiveUserTransactionsSeenResult::Ok(seen_up_to_ns) => seen_up_to_ns,
+        MarkActiveUserTransactionsSeenResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+}
+
 fn assert_rejection<T>(result: Result<T, String>, expected: &str) {
     match result {
         Err(err) => assert!(
@@ -138,6 +162,15 @@ fn mutations_reject_authenticated_caller_without_profile() {
             user,
             "delete_active_user_transaction",
             TX_ID.to_string(),
+        ),
+        "Caller has no user profile",
+    );
+
+    assert_rejection(
+        pic.update::<MarkActiveUserTransactionsSeenResult>(
+            user,
+            "mark_active_user_transactions_seen",
+            1u64,
         ),
         "Caller has no user profile",
     );
@@ -1018,10 +1051,52 @@ fn records_are_principal_scoped() {
 }
 
 #[test]
+fn seen_mark_moves_forward_only_and_is_principal_scoped() {
+    let pic = setup();
+    let user = caller();
+    let other = other_caller();
+
+    let created = match create_active(&pic, user, TX_ID) {
+        ActiveUserTransactionResult::Ok(tx) => *tx,
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    };
+    assert_eq!(seen_up_to(&pic, user), 0);
+
+    assert_eq!(
+        mark_seen(&pic, user, created.updated_at_ns),
+        created.updated_at_ns
+    );
+    assert_eq!(seen_up_to(&pic, user), created.updated_at_ns);
+
+    // Another device marking an older view must not turn the record unread again.
+    assert_eq!(
+        mark_seen(&pic, user, created.updated_at_ns - 1),
+        created.updated_at_ns
+    );
+    assert_eq!(seen_up_to(&pic, user), created.updated_at_ns);
+
+    pic.ensure_user_profile(other);
+    assert_eq!(seen_up_to(&pic, other), 0);
+}
+
+#[test]
+fn seen_mark_is_capped_at_now() {
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let seen_up_to_ns = mark_seen(&pic, user, u64::MAX);
+
+    assert!(seen_up_to_ns > 0);
+    assert!(seen_up_to_ns <= pic.pic.get_time().as_nanos_since_unix_epoch());
+}
+
+#[test]
 fn records_survive_canister_upgrade() {
     let pic = setup();
     let user = caller();
     create_active(&pic, user, TX_ID);
+    let seen_up_to_ns = mark_seen(&pic, user, u64::MAX);
 
     // PocketIC throttles install_code based on instructions used in recent
     // rounds; advance simulated time and drive ticks so the heavy `setup()`
@@ -1043,6 +1118,7 @@ fn records_survive_canister_upgrade() {
         GetActiveUserTransactionsResult::Ok(response) => {
             assert_eq!(response.transactions.len(), 1);
             assert_eq!(response.transactions[0].id, TX_ID);
+            assert_eq!(response.seen_up_to_ns, seen_up_to_ns);
         }
         GetActiveUserTransactionsResult::Err(err) => panic!("expected Ok, got {err:?}"),
     }

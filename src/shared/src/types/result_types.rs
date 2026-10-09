@@ -439,6 +439,14 @@ impl From<Result<GetActiveUserTransactionsResponse, ActiveUserTransactionError>>
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum MarkActiveUserTransactionsSeenResult {
+    /// The mark now stored, which is later than the one requested when another device has
+    /// already marked further.
+    Ok(u64),
+    Err(ActiveUserTransactionError),
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum DeleteActiveUserTransactionResult {
     Ok(()),
     Err(ActiveUserTransactionError),
