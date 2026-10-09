@@ -37,7 +37,7 @@ export const assertNoXrpPaymentInFlight = async ({
 	let transactions: ActiveUserTransaction[];
 
 	try {
-		transactions = await getActiveUserTransactions({ identity });
+		({ transactions } = await getActiveUserTransactions({ identity }));
 	} catch (err: unknown) {
 		throw new XrpSendNotGuardedError(
 			`XRP send refused: the wallet could not check for an unresolved payment. ${

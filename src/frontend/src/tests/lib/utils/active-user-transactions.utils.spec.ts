@@ -1,4 +1,5 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	activeUserTransactionsStateToList,
 	activeUserTransactionTimestampNs,
@@ -122,6 +123,7 @@ describe('active-user-transactions.utils', () => {
 					old: buildTx({ id: 'old', created_at_ns: 1n }),
 					new: buildTx({ id: 'new', created_at_ns: 9n })
 				},
+				seenUpToNs: ZERO,
 				lastSeenUpdatedAtNs: {},
 				terminalSideEffectsApplied: {}
 			});
@@ -142,6 +144,7 @@ describe('active-user-transactions.utils', () => {
 				isActiveUserTransactionUnseen({
 					state: {
 						data: { a: tx },
+						seenUpToNs: ZERO,
 						lastSeenUpdatedAtNs: {},
 						terminalSideEffectsApplied: {}
 					},
@@ -155,6 +158,7 @@ describe('active-user-transactions.utils', () => {
 				isActiveUserTransactionUnseen({
 					state: {
 						data: { a: tx },
+						seenUpToNs: ZERO,
 						lastSeenUpdatedAtNs: { a: '3' },
 						terminalSideEffectsApplied: {}
 					},
@@ -168,12 +172,42 @@ describe('active-user-transactions.utils', () => {
 				isActiveUserTransactionUnseen({
 					state: {
 						data: { a: tx },
+						seenUpToNs: ZERO,
 						lastSeenUpdatedAtNs: { a: '5' },
 						terminalSideEffectsApplied: {}
 					},
 					tx
 				})
 			).toBeFalsy();
+		});
+
+		// Seen on another device: this browser has no seen-state of its own for the row.
+		it('returns false when the seen mark covers updated_at_ns', () => {
+			expect(
+				isActiveUserTransactionUnseen({
+					state: {
+						data: { a: tx },
+						seenUpToNs: 5n,
+						lastSeenUpdatedAtNs: {},
+						terminalSideEffectsApplied: {}
+					},
+					tx
+				})
+			).toBeFalsy();
+		});
+
+		it('returns true when the row changed after the seen mark', () => {
+			expect(
+				isActiveUserTransactionUnseen({
+					state: {
+						data: { a: tx },
+						seenUpToNs: 4n,
+						lastSeenUpdatedAtNs: {},
+						terminalSideEffectsApplied: {}
+					},
+					tx
+				})
+			).toBeTruthy();
 		});
 	});
 

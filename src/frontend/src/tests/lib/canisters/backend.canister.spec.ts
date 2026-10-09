@@ -2018,10 +2018,12 @@ describe('backend.canister', () => {
 	describe('getActiveUserTransactions', () => {
 		const errorResponse = { Err: mockActiveUserTransactionErrorNotFound };
 
-		it('should return the unwrapped list of transactions', async () => {
-			service.get_active_user_transactions.mockResolvedValue({
-				Ok: { transactions: [mockActiveUserTransaction], seen_up_to_ns: ZERO }
-			});
+		it('should return the unwrapped transactions and seen mark', async () => {
+			const response = {
+				transactions: [mockActiveUserTransaction],
+				seen_up_to_ns: mockActiveUserTransaction.updated_at_ns
+			};
+			service.get_active_user_transactions.mockResolvedValue({ Ok: response });
 
 			const { getActiveUserTransactions } = await createBackendCanister({
 				serviceOverride: service
@@ -2030,10 +2032,10 @@ describe('backend.canister', () => {
 			const res = await getActiveUserTransactions();
 
 			expect(service.get_active_user_transactions).toHaveBeenCalledExactlyOnceWith();
-			expect(res).toEqual([mockActiveUserTransaction]);
+			expect(res).toEqual(response);
 		});
 
-		it('should return an empty array when the user has no records', async () => {
+		it('should return no transactions when the user has no records', async () => {
 			service.get_active_user_transactions.mockResolvedValue({
 				Ok: { transactions: [], seen_up_to_ns: ZERO }
 			});
@@ -2044,7 +2046,7 @@ describe('backend.canister', () => {
 
 			const res = await getActiveUserTransactions();
 
-			expect(res).toEqual([]);
+			expect(res).toEqual({ transactions: [], seen_up_to_ns: ZERO });
 		});
 
 		it('should throw if the canister returns Err', async () => {
@@ -2055,6 +2057,34 @@ describe('backend.canister', () => {
 			});
 
 			await expect(getActiveUserTransactions()).rejects.toEqual(errorResponse.Err);
+		});
+	});
+
+	describe('markActiveUserTransactionsSeen', () => {
+		const upToNs = mockActiveUserTransaction.updated_at_ns;
+
+		it('should return the mark the backend stored', async () => {
+			service.mark_active_user_transactions_seen.mockResolvedValue({ Ok: upToNs });
+
+			const { markActiveUserTransactionsSeen } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await markActiveUserTransactionsSeen(upToNs);
+
+			expect(service.mark_active_user_transactions_seen).toHaveBeenCalledExactlyOnceWith(upToNs);
+			expect(res).toBe(upToNs);
+		});
+
+		it('should throw if the canister returns Err', async () => {
+			const errorResponse = { Err: mockActiveUserTransactionErrorNotFound };
+			service.mark_active_user_transactions_seen.mockResolvedValue(errorResponse);
+
+			const { markActiveUserTransactionsSeen } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(markActiveUserTransactionsSeen(upToNs)).rejects.toEqual(errorResponse.Err);
 		});
 	});
 });
