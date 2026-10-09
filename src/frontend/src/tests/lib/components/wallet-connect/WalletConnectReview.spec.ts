@@ -1,9 +1,14 @@
 import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
-import { walletConnectProposalStore } from '$lib/stores/wallet-connect.store';
+import {
+	walletConnectListenerStore,
+	walletConnectProposalStore
+} from '$lib/stores/wallet-connect.store';
+import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import en from '$tests/mocks/i18n.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { render } from '@testing-library/svelte';
 import type { Verify } from '@walletconnect/types';
+import { tick } from 'svelte';
 
 describe('WalletConnectReview', () => {
 	const proposal = (
@@ -55,5 +60,55 @@ describe('WalletConnectReview', () => {
 		expect(getByRole('button', { name: en.core.text.reject })).toBeInTheDocument();
 
 		expect(getByText(en.wallet_connect.domain.security_risk_description)).toBeInTheDocument();
+	});
+
+	describe('approving', () => {
+		const approveSession = vi.fn();
+
+		const listener: WalletConnectListener = {
+			pair: vi.fn(),
+			approveSession,
+			rejectSession: vi.fn(),
+			attachHandlers: vi.fn(),
+			detachHandlers: vi.fn(),
+			rejectRequest: vi.fn(),
+			getActiveSessions: vi.fn().mockReturnValue({}),
+			approveRequest: vi.fn(),
+			disconnectSession: vi.fn(),
+			disconnect: vi.fn()
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			walletConnectListenerStore.set(listener);
+		});
+
+		it('approves the proposal under review', async () => {
+			const unflagged = proposal({ validation: 'VALID', isScam: false });
+			walletConnectProposalStore.set(unflagged);
+
+			const { getByRole } = render(WalletConnectReview);
+
+			getByRole('button', { name: en.core.text.approve }).click();
+			await tick();
+
+			expect(approveSession).toHaveBeenCalledExactlyOnceWith(unflagged);
+		});
+
+		// The click lands before the review re-renders without the Approve button.
+		it('does not approve a flagged proposal that replaced the one under review', async () => {
+			walletConnectProposalStore.set(proposal({ validation: 'VALID', isScam: false }));
+
+			const { getByRole } = render(WalletConnectReview);
+
+			const approve = getByRole('button', { name: en.core.text.approve });
+
+			walletConnectProposalStore.set(proposal({ validation: 'VALID', isScam: true }));
+			approve.click();
+			await tick();
+
+			expect(approveSession).not.toHaveBeenCalled();
+		});
 	});
 });
