@@ -771,11 +771,18 @@ export const formatSolInstructionSummary = ({
 	}
 
 	// Read like the close of a token account, with the program in place of the token, after which it
-	// is rendered. Only a close whose every lamport reached the wallet becomes this line.
-	if (kind === 'closeAccount') {
+	// is rendered. Only a close whose every lamport reached the wallet becomes this line, but nothing
+	// says who funded the account, so what arrives is said to be sent, not returned.
+	if (kind === 'closeAccount' && nonNullish(returned)) {
 		return {
 			text: i18n.transaction.text.instruction_close_program_account,
-			trailing: returnedDetail
+			trailing: replacePlaceholders(i18n.transaction.text.instruction_sent, {
+				$amount: formatToken({
+					value: returned,
+					unitName: SOLANA_DEFAULT_DECIMALS,
+					displayDecimals: SOLANA_DEFAULT_DECIMALS
+				})
+			})
 		};
 	}
 

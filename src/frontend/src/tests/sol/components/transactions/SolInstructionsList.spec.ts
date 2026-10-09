@@ -183,7 +183,7 @@ describe('SolInstructionsList', () => {
 			const [, line] = getAllByTestId('sol-instruction');
 
 			expect(line).toHaveTextContent(
-				/^Close app account for lb_clmm · 0\.04189984 SOL returned to your wallet$/
+				/^Close app account for lb_clmm · 0\.04189984 SOL sent to your wallet$/
 			);
 		});
 

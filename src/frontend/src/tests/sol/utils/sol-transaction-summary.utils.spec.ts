@@ -1176,7 +1176,7 @@ describe('sol-transaction-summary.utils', () => {
 			).toStrictEqual({ text: 'Create app account for', trailing: 'rent 0.04189984 SOL' });
 		});
 
-		it('should say what closing an application’s account hands back to the wallet', () => {
+		it('should say what closing an application’s account sends to the wallet', () => {
 			expect(
 				format({
 					kind: 'closeAccount',
@@ -1186,7 +1186,7 @@ describe('sol-transaction-summary.utils', () => {
 				})
 			).toStrictEqual({
 				text: 'Close app account for',
-				trailing: '0.04189984 SOL returned to your wallet'
+				trailing: '0.04189984 SOL sent to your wallet'
 			});
 		});
 
