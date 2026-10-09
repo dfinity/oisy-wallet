@@ -552,6 +552,8 @@ The XRP Ledger requires an account to keep a minimum balance on-ledger for the a
 
 The maximum sendable amount subtracts the whole reserve as well as the fee, so the full balance is never sendable and an account with several trust lines keeps noticeably more than a bare one. The balance shown is the full ledger balance rather than the spendable remainder.
 
+A payment to an address that has no account yet has to create it, so it must be at least the base reserve; a smaller one would fail on the ledger and still cost the fee. The send form looks the recipient up and shows this on the amount field, before the review step. The send checks again before signing, because the recipient can be funded in between, and that check is the only one when the form's lookup fails.
+
 ### One unresolved payment per address
 
 **At most one unresolved XRP payment per XRP address at a time**, held across a page reload and across two OISY sessions signed in as the same user.

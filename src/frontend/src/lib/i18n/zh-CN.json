@@ -1089,6 +1089,7 @@
 			"xrp_destination_tag_invalid": "XRP 目标标签必须是 0 到 4294967295 之间的整数。",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "资金不足：金额必须留出足够部分以支付手续费和所需的 XRP 账户储备金。",
+			"xrp_destination_unfunded": "此地址还没有 XRP 账户。创建账户需要至少 $reserve XRP 的首笔付款。",
 			"insufficient_funds_for_gas": "燃料费不足",
 			"insufficient_funds_for_amount": "金额不足",
 			"insufficient_ethereum_funds_to_cover_the_fees": "以太坊余额不足以支付手续费",

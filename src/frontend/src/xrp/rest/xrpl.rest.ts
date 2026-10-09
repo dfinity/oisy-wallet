@@ -225,8 +225,8 @@ const isXrpAccountErrorForAddress = ({
 	}
 
 	// The echo is required, not merely checked when present. It is the only thing that names the
-	// LEDGER, and a top-level `account` alone cannot: `tryDestination` reads the same destination
-	// from `current` and `validated` concurrently, so those two requests differ only in
+	// LEDGER, and a top-level `account` alone cannot: `loadXrpDestination` reads the same
+	// destination from `current` and `validated` concurrently, so those two requests differ only in
 	// `ledger_index` and the address is identical by construction. One absence answering both makes
 	// the destination absent in both snapshots — `settled` false, `requiresTag` false — and an
 	// untagged payment at or above the reserve goes to `tecDST_TAG_NEEDED`.

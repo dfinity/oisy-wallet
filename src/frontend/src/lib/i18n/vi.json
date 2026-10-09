@@ -1089,6 +1089,7 @@
 			"xrp_destination_tag_invalid": "Thẻ đích XRP phải là số nguyên từ 0 đến 4294967295.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Không đủ tiền: số tiền phải để lại đủ để trang trải phí và khoản dự trữ tài khoản XRP bắt buộc.",
+			"xrp_destination_unfunded": "Địa chỉ này chưa có tài khoản XRP. Việc tạo tài khoản cần một khoản thanh toán đầu tiên ít nhất $reserve XRP.",
 			"insufficient_funds_for_gas": "Không đủ tiền cho gas",
 			"insufficient_funds_for_amount": "Không đủ tiền cho số lượng",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Không đủ tiền Ethereum để trả phí",
