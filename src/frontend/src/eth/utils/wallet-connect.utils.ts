@@ -16,7 +16,6 @@ import {
 	isErcTransactionSetApprovalForAll
 } from '$eth/utils/transactions.utils';
 import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
-import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
 import { consoleError } from '$lib/utils/console.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Verify } from '@walletconnect/types';
@@ -891,5 +890,12 @@ export const convertHexToUtf8 = (value: string): string => {
 	return value;
 };
 
+/**
+ * Whether a session proposal may be approved: not when WalletConnect's Verify API flags the
+ * proposer as a scam.
+ *
+ * Verify states that verdict in `isScam` alone. `validation` only says whether the request came
+ * from the domain the dApp claims, so a flagged site served from its own domain is still `VALID`.
+ */
 export const acceptedContext = (context: Verify.Context | undefined): boolean =>
-	isNullish(context) || context.verified.validation.toUpperCase() !== CONTEXT_VALIDATION_ISSCAM;
+	context?.verified.isScam !== true;
