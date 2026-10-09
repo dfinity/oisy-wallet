@@ -20,7 +20,7 @@ describe('ModalTokensList', () => {
 		onTokenButtonClick: vi.fn()
 	};
 
-	it('renders tokens passed as props', () => {
+	it('renders tokens passed as props', async () => {
 		const { findByTestId } = render(ModalTokensListHost, {
 			props: {
 				...baseProps,
@@ -29,11 +29,11 @@ describe('ModalTokensList', () => {
 			}
 		});
 
-		mockTokens.forEach(async (token) => {
+		for (const token of mockTokens) {
 			const el = await findByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}${token.symbol}`);
 
 			expect(el).toBeInTheDocument();
-		});
+		}
 	});
 
 	it('renders toolbar snippet', async () => {
