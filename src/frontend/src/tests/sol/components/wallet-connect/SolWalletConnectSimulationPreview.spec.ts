@@ -1,7 +1,9 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { CONVERT_AMOUNT_EXCHANGE_VALUE } from '$lib/constants/test-ids.constants';
 import { exchangeStore } from '$lib/stores/exchange.store';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
+import { SPL_TOKEN_MAX_AMOUNT } from '$sol/constants/sol.constants';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 import en from '$tests/mocks/i18n.mock';
@@ -200,5 +202,65 @@ describe('SolWalletConnectSimulationPreview', () => {
 		);
 
 		expect(getByTestId('simulated-control-change')).toHaveTextContent(mockSolAddress2);
+	});
+
+	describe('allowance', () => {
+		const allowanceChange = (amount: bigint): SolSimulationPreview => ({
+			tokenDeltas: [],
+			controlChanges: [
+				{
+					account: mockAtaAddress,
+					field: 'allowance',
+					to: mockSolAddress2,
+					allowance: {
+						tokenAddress: mockValidSplToken.address,
+						decimals: mockValidSplToken.decimals,
+						amount
+					}
+				}
+			]
+		});
+
+		beforeEach(enableSplToken);
+
+		it('should render how much the delegate may spend', () => {
+			const { getByTestId } = render(
+				SolWalletConnectSimulationPreview,
+				props(allowanceChange(10n ** BigInt(mockValidSplToken.decimals)))
+			);
+
+			expect(getByTestId('simulated-control-change')).toHaveTextContent(
+				en.wallet_connect.text.simulation_new_allowance
+			);
+			expect(getByTestId('simulated-control-change')).toHaveTextContent(mockSolAddress2);
+			expect(getByTestId('simulated-allowance')).toHaveTextContent(
+				replacePlaceholders(en.wallet_connect.text.simulation_allowance, {
+					$amount: '1',
+					$symbol: mockValidSplToken.symbol
+				})
+			);
+		});
+
+		it('should render the largest token amount as any amount', () => {
+			const { getByTestId } = render(
+				SolWalletConnectSimulationPreview,
+				props(allowanceChange(SPL_TOKEN_MAX_AMOUNT))
+			);
+
+			expect(getByTestId('simulated-allowance')).toHaveTextContent(
+				replacePlaceholders(en.wallet_connect.text.simulation_allowance_unlimited, {
+					$symbol: mockValidSplToken.symbol
+				})
+			);
+		});
+
+		it('should render no allowance for a removed delegate', () => {
+			const { queryByTestId } = render(
+				SolWalletConnectSimulationPreview,
+				props({ tokenDeltas: [], controlChanges: [{ account: mockAtaAddress, field: 'delegate' }] })
+			);
+
+			expect(queryByTestId('simulated-allowance')).not.toBeInTheDocument();
+		});
 	});
 });
