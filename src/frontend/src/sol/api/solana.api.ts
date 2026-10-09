@@ -276,11 +276,13 @@ export const simulateTransactionAccounts = async ({
 	err: TransactionError | null;
 	accounts: SolanaParsedAccountsInfo;
 	innerInstructions: SolanaSimulatedInnerInstructions;
+	// What the run charged the fee payer, which a node that predates the field leaves out.
+	fee: bigint | undefined;
 }> => {
 	const { simulateTransaction } = solanaHttpRpc(network);
 
 	const {
-		value: { err, accounts, innerInstructions }
+		value: { err, accounts, innerInstructions, fee }
 	} = await simulateTransaction(base64EncodedTransactionMessage as Base64EncodedWireTransaction, {
 		encoding: 'base64',
 		innerInstructions: true,
@@ -291,7 +293,7 @@ export const simulateTransactionAccounts = async ({
 		}
 	}).send();
 
-	return { err, accounts, innerInstructions };
+	return { err, accounts, innerInstructions, fee: fee ?? undefined };
 };
 
 const addressToAccountInfo = new Map<
