@@ -68,6 +68,17 @@
 			return false;
 		}
 
+		let protocol: string;
+		try {
+			({ protocol } = new URL(href, window.location.href));
+		} catch {
+			return false;
+		}
+
+		if (protocol !== 'http:' && protocol !== 'https:') {
+			return false;
+		}
+
 		// Not `noopener` in the features: with it, a Safari web app ignores the popup size for links
 		// on the same site (e.g. docs.oisy.com) and opens a full-size window. The opener is cut by
 		// hand instead, and the `Referrer-Policy: same-origin` header already withholds the referrer.

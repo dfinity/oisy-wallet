@@ -99,6 +99,20 @@ describe('ExternalLink', () => {
 			expect(openSpy.mock.calls[0]?.[2]).not.toMatch(/noopener|noreferrer/);
 		});
 
+		it.each(['javascript:alert(1)', 'https://['])(
+			'keeps the browser default for the non-HTTP(S) or unparsable href %s',
+			async (unsafeHref) => {
+				const { getByRole } = render(ExternalLink, {
+					props: { href: unsafeHref, ariaLabel: 'Unsafe' }
+				});
+
+				const notCancelled = await fireEvent.click(getByRole('link', { name: 'Unsafe' }));
+
+				expect(notCancelled).toBeTruthy();
+				expect(openSpy).not.toHaveBeenCalled();
+			}
+		);
+
 		it('keeps the browser default when the popup is blocked', async () => {
 			openSpy.mockReturnValue(null);
 
