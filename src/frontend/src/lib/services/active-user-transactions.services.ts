@@ -13,6 +13,7 @@ import type {
 import type { NullishIdentity } from '$lib/types/identity';
 import {
 	hasActiveUserTransactionPollUpdateChanges,
+	isActiveUserTransactionError,
 	isTerminalActiveUserTransactionStatus,
 	type ActiveUserTransactionPollUpdate
 } from '$lib/utils/active-user-transactions.utils';
@@ -80,17 +81,30 @@ export const updateActiveUserTransaction = async ({
 	identity,
 	...params
 }: { identity: Identity } & UpdateActiveUserTransactionParams): Promise<void> => {
+	const principal = identity.getPrincipal();
+	const terminal =
+		nonNullish(params.status) && isTerminalActiveUserTransactionStatus(params.status);
+
 	// Before the write, which can commit after this tab is gone: the next load in this browser then
 	// reports the outcome instead of taking the row as settled elsewhere. Recorded for the identity
 	// that sends it, which the store may no longer hold after a sign-out or an account switch.
-	if (nonNullish(params.status) && isTerminalActiveUserTransactionStatus(params.status)) {
-		activeUserTransactionsStore.markTerminalWriteSent({
-			principal: identity.getPrincipal(),
-			id: params.id
-		});
+	if (terminal) {
+		activeUserTransactionsStore.markTerminalWriteSent({ principal, id: params.id });
 	}
 
-	const transaction = await updateActiveUserTransactionApi({ identity, ...params });
+	let transaction: ActiveUserTransaction;
+
+	try {
+		transaction = await updateActiveUserTransactionApi({ identity, ...params });
+	} catch (err: unknown) {
+		// The canister refused the write, so it never committed: a marker left behind would make a
+		// later load report the row once someone else settles it. A transport failure keeps it.
+		if (terminal && isActiveUserTransactionError(err)) {
+			activeUserTransactionsStore.clearTerminalWriteSent({ principal, id: params.id });
+		}
+
+		throw err;
+	}
 
 	upsertForIdentity({ identity, transaction });
 };

@@ -4,6 +4,7 @@ import {
 	activeUserTransactionTimestampNs,
 	advanceStatus,
 	hasActiveUserTransactionPollUpdateChanges,
+	isActiveUserTransactionError,
 	isActiveUserTransactionUnseen,
 	isTerminalActiveUserTransaction,
 	sortActiveUserTransactionsByTimestampDesc
@@ -28,6 +29,23 @@ describe('active-user-transactions.utils', () => {
 			expect(isTerminalActiveUserTransaction(buildTx({ status: { Pending: null } }))).toBeFalsy();
 			expect(isTerminalActiveUserTransaction(buildTx({ status: { Executing: null } }))).toBeFalsy();
 		});
+	});
+
+	describe('isActiveUserTransactionError', () => {
+		it.each([{ IllegalStatusTransition: null }, { NotFound: null }, { InvalidData: 'bad refs' }])(
+			'is true for the canister refusing the call (%o)',
+			(err) => {
+				expect(isActiveUserTransactionError(err)).toBeTruthy();
+			}
+		);
+
+		// A transport failure, after which the call may still have committed.
+		it.each([new Error('network'), undefined, null, 'refused', { Other: null }])(
+			'is false for anything else (%o)',
+			(err) => {
+				expect(isActiveUserTransactionError(err)).toBeFalsy();
+			}
+		);
 	});
 
 	describe('activeUserTransactionTimestampNs', () => {

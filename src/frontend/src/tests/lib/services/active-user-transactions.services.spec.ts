@@ -236,6 +236,38 @@ describe('active-user-transactions.services', () => {
 				return get(activeUserTransactionsStore)?.terminalSideEffectsApplied[settled.id] === true;
 			};
 
+			// The canister refused the write, so it never committed.
+			it('stops being recorded when the canister refuses the write', async () => {
+				vi.spyOn(backendApi, 'updateActiveUserTransaction').mockRejectedValue({
+					IllegalStatusTransition: null
+				});
+
+				await expect(
+					updateActiveUserTransaction({
+						identity: mockIdentity,
+						id: settled.id,
+						status: settled.status
+					})
+				).rejects.toEqual({ IllegalStatusTransition: null });
+
+				expect(claimedOnNextLoad()).toBeTruthy();
+			});
+
+			// The write may still have committed.
+			it('stays recorded when the call fails without an answer from the canister', async () => {
+				vi.spyOn(backendApi, 'updateActiveUserTransaction').mockRejectedValue(new Error('network'));
+
+				await expect(
+					updateActiveUserTransaction({
+						identity: mockIdentity,
+						id: settled.id,
+						status: settled.status
+					})
+				).rejects.toThrow('network');
+
+				expect(claimedOnNextLoad()).toBeFalsy();
+			});
+
 			it('is recorded as sent before the write resolves', () => {
 				vi.spyOn(backendApi, 'updateActiveUserTransaction').mockReturnValueOnce(
 					new Promise(() => {})

@@ -50,6 +50,8 @@ export interface ActiveUserTransactionsStore extends Readable<ActiveUserTransact
 	 * the principal given, whichever one the store holds by then.
 	 */
 	markTerminalWriteSent: (params: { principal: Principal; id: string }) => void;
+	/** Drops that record when the canister refused the write, which therefore never committed. */
+	clearTerminalWriteSent: (params: { principal: Principal; id: string }) => void;
 	reset: () => void;
 }
 
@@ -309,6 +311,11 @@ const initStore = (): ActiveUserTransactionsStore => {
 		storageSet({ key: `${terminalWritePrefix(principal)}${id}`, value: true });
 	};
 
+	const clearTerminalWriteSent: ActiveUserTransactionsStore['clearTerminalWriteSent'] = ({
+		principal,
+		id
+	}) => storageDel({ key: `${terminalWritePrefix(principal)}${id}` });
+
 	const reset: ActiveUserTransactionsStore['reset'] = () => {
 		storageKey = undefined;
 		terminalWriteKeyPrefix = undefined;
@@ -327,6 +334,7 @@ const initStore = (): ActiveUserTransactionsStore => {
 		markAllSeen,
 		markTerminalSideEffectsApplied,
 		markTerminalWriteSent,
+		clearTerminalWriteSent,
 		reset
 	};
 };
