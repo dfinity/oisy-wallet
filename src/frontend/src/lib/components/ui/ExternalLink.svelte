@@ -68,7 +68,16 @@
 			return false;
 		}
 
-		window.open(href, '_blank', `${features}, noopener, noreferrer`);
+		// Not `noopener` in the features: with it, a Safari web app ignores the popup size for links
+		// on the same site (e.g. docs.oisy.com) and opens a full-size window. The opener is cut by
+		// hand instead, and the `Referrer-Policy: same-origin` header already withholds the referrer.
+		const popup = window.open(href, '_blank', features);
+
+		if (isNullish(popup)) {
+			return false;
+		}
+
+		popup.opener = null;
 
 		return true;
 	};

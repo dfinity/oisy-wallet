@@ -67,8 +67,11 @@ describe('ExternalLink', () => {
 
 		let openSpy: MockInstance<typeof window.open>;
 
+		let popup: Window;
+
 		beforeEach(() => {
-			openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+			popup = { opener: window } as Window;
+			openSpy = vi.spyOn(window, 'open').mockReturnValue(popup);
 			vi.spyOn(deviceUtils, 'isDesktop').mockReturnValue(true);
 			vi.spyOn(deviceUtils, 'isPWAStandalone').mockReturnValue(true);
 		});
@@ -84,8 +87,25 @@ describe('ExternalLink', () => {
 			expect(openSpy).toHaveBeenCalledExactlyOnceWith(
 				href,
 				'_blank',
-				expect.stringMatching(/width=1024.*height=768.*noopener, noreferrer$/)
+				expect.stringMatching(/width=1024.*height=768/)
 			);
+			expect(popup.opener).toBeNull();
+		});
+
+		// `noopener` in the features makes a Safari web app ignore the popup size for same-site links
+		it('does not pass noopener or noreferrer in the window features', async () => {
+			await fireEvent.click(renderLink());
+
+			expect(openSpy.mock.calls[0]?.[2]).not.toMatch(/noopener|noreferrer/);
+		});
+
+		it('keeps the browser default when the popup is blocked', async () => {
+			openSpy.mockReturnValue(null);
+
+			const notCancelled = await fireEvent.click(renderLink());
+
+			expect(notCancelled).toBeTruthy();
+			expect(openSpy).toHaveBeenCalledOnce();
 		});
 
 		it('still fires the trackEvent params', async () => {
