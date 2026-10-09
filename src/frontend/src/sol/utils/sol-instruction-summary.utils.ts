@@ -781,7 +781,7 @@ const toEffect = ({
 				return undefined;
 			}
 
-			const { amount: checked } = tokenAmount(info);
+			const { amount: checked, decimals } = tokenAmount(info);
 			const delegate = address({ info, key: 'delegate' });
 			const approved = address({ info, key: 'mint' }) ?? mintAt({ account: source, position });
 
@@ -791,6 +791,7 @@ const toEffect = ({
 				...(nonNullish(checked ?? amount({ info, key: 'amount' })) && {
 					amount: checked ?? amount({ info, key: 'amount' })
 				}),
+				...(nonNullish(decimals) && { decimals }),
 				...(nonNullish(delegate) && {
 					counterparty: delegate,
 					own: isOwned({ account: delegate })
