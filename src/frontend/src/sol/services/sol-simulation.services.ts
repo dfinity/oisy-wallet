@@ -12,7 +12,9 @@ import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-me
 import type { SplTokenAddress } from '$sol/types/spl';
 import {
 	mapSolInstructionSummaries,
-	solOpensAccountBeyondRent
+	solClosingInstructionCandidates,
+	solOpensAccountBeyondRent,
+	type SolInstructionGroup
 } from '$sol/utils/sol-instruction-summary.utils';
 import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
 import { deriveSolMessageSummary } from '$sol/utils/sol-message-summary.utils';
@@ -32,6 +34,94 @@ import {
 	mapSolSimulatedTransferLegs
 } from '$sol/utils/sol-transfer-parties.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { compileTransaction, getBase64EncodedWireTransaction } from '@solana/kit';
+
+/**
+ * Whether an account still holds lamports after the instructions of a message before the given one,
+ * from a run of those instructions alone. Anything that keeps that run from answering - a message
+ * that cannot be cut there, a run that fails - says no.
+ */
+const holdsLamportsBefore = async ({
+	transactionMessage,
+	instruction,
+	account,
+	network
+}: {
+	transactionMessage: CompilableTransactionMessage;
+	instruction: number;
+	account: SolAddress;
+	network: SolanaNetworkType;
+}): Promise<boolean> => {
+	try {
+		const {
+			err,
+			accounts: [state]
+		} = await simulateTransactionAccounts({
+			base64EncodedTransactionMessage: getBase64EncodedWireTransaction(
+				compileTransaction({
+					...transactionMessage,
+					instructions: transactionMessage.instructions.slice(0, instruction)
+				})
+			),
+			addresses: [account],
+			network
+		});
+
+		return isNullish(err) && nonNullish(state) && BigInt(state.lamports) > ZERO;
+	} catch (_: unknown) {
+		return false;
+	}
+};
+
+/**
+ * The closed accounts, each with the instruction that emptied it where that can be established.
+ *
+ * The one instruction that calls the owning program with the account emptied it. When several do,
+ * an account the program has emptied stays loaded for the rest of the message, and a later call can
+ * name it again: the last of them is the one only if the account still held its lamports when that
+ * call began, which a second run of the message up to it shows. Otherwise the close stays without an
+ * instruction, and so without a line.
+ */
+const attributeClosedAccounts = ({
+	closedAccounts,
+	transactionMessage,
+	innerInstructions,
+	network
+}: {
+	closedAccounts: SolClosedAccount[];
+	transactionMessage: CompilableTransactionMessage;
+	innerInstructions: SolInstructionGroup[];
+	network: SolanaNetworkType;
+}): Promise<SolClosedAccount[]> =>
+	Promise.all(
+		closedAccounts.map(async (closed) => {
+			const candidates = solClosingInstructionCandidates({
+				account: closed.account,
+				program: closed.program,
+				instructions: transactionMessage.instructions,
+				innerInstructions
+			});
+
+			const last = candidates.at(-1);
+
+			if (isNullish(last)) {
+				return closed;
+			}
+
+			if (candidates.length === 1) {
+				return { ...closed, instruction: last };
+			}
+
+			return (await holdsLamportsBefore({
+				transactionMessage,
+				instruction: last,
+				account: closed.account,
+				network
+			}))
+				? { ...closed, instruction: last }
+				: closed;
+		})
+	);
 
 const simulate = async ({
 	base64EncodedTransactionMessage,
@@ -202,7 +292,7 @@ const simulate = async ({
 	// wallet pays leaves the comparison off by that fee, so no close is listed from it.
 	const walletFee = transactionMessage.feePayer.address === address ? fee : ZERO;
 
-	const instructions =
+	const reachWallet =
 		nonNullish(walletFee) &&
 		solClosedAccountsReachWallet({
 			closedAccounts,
@@ -212,9 +302,18 @@ const simulate = async ({
 					: undefined,
 			statedChange: solWalletLamportsStated({ instructions: summaries, userAddress: address }),
 			fee: walletFee
-		})
-			? summarise(closedAccounts)
-			: summaries;
+		});
+
+	const instructions = reachWallet
+		? summarise(
+				await attributeClosedAccounts({
+					closedAccounts,
+					transactionMessage,
+					innerInstructions: innerInstructionGroups,
+					network
+				})
+			)
+		: summaries;
 
 	// The message read on its own, without the nested calls the run reveals: a second account of
 	// the same transaction, which is what lets the review notice the two disagreeing.

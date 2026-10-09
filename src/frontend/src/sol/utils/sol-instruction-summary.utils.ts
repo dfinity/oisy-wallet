@@ -231,16 +231,16 @@ const accountsOf = (instruction: unknown): SolAddress[] =>
 		: [];
 
 /**
- * The top-level instruction that emptied an account its program held: the last one that calls that
- * program with the account, itself or inside it.
+ * The top-level instructions that could have emptied an account its program held, in order: those
+ * that call that program with the account, themselves or inside them.
  *
- * Only the program that owns an account can take lamports out of it, and an account it has emptied
- * is gone, so the last call of the program over the account is where it ended. The program and the
- * account meet in the same call: an instruction that names the account for something else and calls
- * the program without it never reached the account. Undefined when none does, which leaves the
- * close without an instruction to hang under.
+ * Only the program that owns an account can take lamports out of it, and the program and the account
+ * meet in the same call: an instruction that names the account for something else and calls the
+ * program without it never reached the account. Which of several emptied it, the list cannot say: an
+ * emptied account stays loaded for the rest of the message, and the program can be called with it
+ * again after the close.
  */
-const closingInstructionOf = ({
+export const solClosingInstructionCandidates = ({
 	account,
 	program,
 	instructions,
@@ -250,8 +250,8 @@ const closingInstructionOf = ({
 	program: SolAddress;
 	instructions: readonly unknown[];
 	innerInstructions: readonly SolInstructionGroup[];
-}): number | undefined =>
-	instructions.reduce<number | undefined>((acc, instruction, index) => {
+}): number[] =>
+	instructions.reduce<number[]>((acc, instruction, index) => {
 		const inner =
 			innerInstructions.find(({ index: parent }) => parent === index)?.instructions ?? [];
 
@@ -262,8 +262,8 @@ const closingInstructionOf = ({
 				programAddressOf(candidate) === program && accountsOf(candidate).includes(account)
 		);
 
-		return direct || nested ? index : acc;
-	}, undefined);
+		return direct || nested ? [...acc, index] : acc;
+	}, []);
 
 const stackHeightOf = (instruction: unknown): number | undefined =>
 	nonNullish(instruction) &&
@@ -1513,7 +1513,8 @@ export const mapSolInstructionSummaries = ({
 	rentExemptMinimum?: bigint;
 	// The accounts an application's program held before the run and emptied in it, each known to have
 	// paid every lamport it held into the wallet: a closed liquidity position handing back its rent.
-	// The program moves the lamports itself, so no call in the run states the close.
+	// The program moves the lamports itself, so no call in the run states the close, and each is
+	// listed under the instruction established to have emptied it, or not at all.
 	closedAccounts?: SolClosedAccount[];
 	// Whether to keep a line for each top-level instruction that produced no effect of its own.
 	// Off where the list stands beside the balance changes that vouch for it, on where it is the
@@ -1683,18 +1684,13 @@ export const mapSolInstructionSummaries = ({
 	// Each close hangs under the instruction that made it, after that instruction's other lines: the
 	// account goes once the program is done with it. The sort is stable, so every other line keeps
 	// its place.
-	const closes = closedAccounts.reduce<Effect[]>((acc, { account, program, lamports }) => {
-		const parentIndex = closingInstructionOf({
-			account,
-			program,
-			instructions,
-			innerInstructions
-		});
-
-		return nonNullish(parentIndex)
-			? [...acc, { kind: 'closeAccount', account, program, returned: lamports, parentIndex }]
-			: acc;
-	}, []);
+	const closes = closedAccounts.reduce<Effect[]>(
+		(acc, { account, program, lamports, instruction: parentIndex }) =>
+			nonNullish(parentIndex)
+				? [...acc, { kind: 'closeAccount', account, program, returned: lamports, parentIndex }]
+				: acc,
+		[]
+	);
 
 	const described = [...effects, ...closes].sort(
 		({ parentIndex: first }, { parentIndex: second }) => first - second

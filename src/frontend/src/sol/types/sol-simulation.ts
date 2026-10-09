@@ -48,6 +48,8 @@ export interface SolClosedAccount {
 	account: SolAddress;
 	program: SolAddress;
 	lamports: bigint;
+	// The top-level instruction that emptied it, once that is established.
+	instruction?: number;
 }
 
 /**

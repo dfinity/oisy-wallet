@@ -4,6 +4,7 @@ import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolClosedAccount } from '$sol/types/sol-simulation';
 import {
 	mapSolInstructionSummaries,
+	solClosingInstructionCandidates,
 	solOpensAccountBeyondRent
 } from '$sol/utils/sol-instruction-summary.utils';
 import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
@@ -795,7 +796,7 @@ describe('sol-instruction-summary.utils', () => {
 			});
 
 			it('should state the close under the instruction that closes the account', () => {
-				const lines = views([position]);
+				const lines = views([{ ...position, instruction: 7 }]);
 
 				expect(kinds(lines)).not.toContain('unknown');
 
@@ -835,81 +836,63 @@ describe('sol-instruction-summary.utils', () => {
 				).toBeFalsy();
 			});
 
+			// A close no instruction was established to have made has no line to hang under.
+			it('should list no close without an instruction that made it', () => {
+				expect(kinds(views([{ ...position, instruction: undefined }]))).toContain('unknown');
+			});
+		});
+
+		describe('solClosingInstructionCandidates', () => {
+			const account = 'c1osedAppAccount11111111111111111111111111';
+			const program = 'App1icationProgram111111111111111111111111';
+			const wrapper = 'WrapperProgram11111111111111111111111111111';
+
+			const candidates = (nestedAccounts: string[]) =>
+				solClosingInstructionCandidates({
+					account,
+					program,
+					instructions: [
+						{
+							programAddress: program,
+							accounts: [{ address: account, role: AccountRole.WRITABLE }]
+						},
+						{
+							programAddress: wrapper,
+							accounts: [{ address: account, role: AccountRole.WRITABLE }]
+						}
+					],
+					innerInstructions: [
+						{ index: 1, instructions: [{ programId: program, accounts: nestedAccounts }] }
+					]
+				});
+
+			it('should take an instruction that calls the program with the account, itself or inside it', () => {
+				expect(candidates([account])).toStrictEqual([0, 1]);
+			});
+
 			// The program and the account have to meet in the same call. An instruction that names the
 			// account and calls the program on something else never reached it.
-			it('should not hang a close under an instruction that calls its program without it', () => {
-				const closedAccount = {
-					account: 'c1osedAppAccount11111111111111111111111111',
-					program: 'App1icationProgram111111111111111111111111',
-					lamports: 41_899_840n
-				};
+			it('should leave out an instruction that calls the program without the account', () => {
+				expect(candidates(['SomethingE1se111111111111111111111111111111'])).toStrictEqual([0]);
+			});
+
+			// Meteora removes the liquidity, claims the fees and closes the position, each with the
+			// position: which of the three emptied it, the list cannot say.
+			it('should take every call of the program with the account in the Meteora close', () => {
+				const { transaction, innerInstructions, position } = MOCK_SOL_METEORA_DLMM_CLOSE_POSITION;
+				const { messageBytes } = decodeTransactionMessage(transaction);
+				const { instructions } = decompileTransactionMessage(
+					getCompiledTransactionMessageDecoder().decode(messageBytes)
+				);
 
 				expect(
-					mapSolInstructionSummaries({
-						instructions: [
-							{
-								programAddress: 'WrapperProgram11111111111111111111111111111',
-								accounts: [{ address: closedAccount.account, role: AccountRole.WRITABLE }]
-							}
-						],
-						innerInstructions: [
-							{
-								index: 0,
-								instructions: [
-									{
-										programId: closedAccount.program,
-										accounts: ['SomethingE1se111111111111111111111111111111']
-									}
-								]
-							}
-						],
-						ownedAddresses: [userAddress],
-						userAddress,
-						closedAccounts: [closedAccount],
-						includeUnrecognised: true
+					solClosingInstructionCandidates({
+						account: position.account,
+						program: position.program,
+						instructions,
+						innerInstructions
 					})
-				).toStrictEqual([
-					{ kind: 'unknown', program: 'WrapperProgram11111111111111111111111111111' }
-				]);
-			});
-
-			it('should hang it under an instruction that calls its program with it', () => {
-				const closedAccount = {
-					account: 'c1osedAppAccount11111111111111111111111111',
-					program: 'App1icationProgram111111111111111111111111',
-					lamports: 41_899_840n
-				};
-
-				expect(
-					kinds(
-						mapSolInstructionSummaries({
-							instructions: [
-								{
-									programAddress: 'WrapperProgram11111111111111111111111111111',
-									accounts: [{ address: closedAccount.account, role: AccountRole.WRITABLE }]
-								}
-							],
-							innerInstructions: [
-								{
-									index: 0,
-									instructions: [
-										{ programId: closedAccount.program, accounts: [closedAccount.account] }
-									]
-								}
-							],
-							ownedAddresses: [userAddress],
-							userAddress,
-							closedAccounts: [closedAccount],
-							includeUnrecognised: true
-						})
-					)
-				).toStrictEqual(['route']);
-			});
-
-			it('should not hang a close under an instruction that does not run its program', () => {
-				expect(
-					kinds(views([{ ...position, program: 'SomeOtherProgram111111111111111111111111111' }]))
-				).toContain('unknown');
+				).toStrictEqual([5, 6, 7]);
 			});
 		});
 
