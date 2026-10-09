@@ -553,6 +553,14 @@ describe('sol-transaction-summary.utils', () => {
 			expect(fee([{ ...create(), payer: WALLET }])).toBe(RENT);
 		});
 
+		// Without the wallet's address nothing says who another signer is, and the fee keeps the
+		// conservative reading it had before payers were read: every opening is charged.
+		it('should charge the rent of an opening another signer paid while the address is unknown', () => {
+			expect(
+				solAtaFee({ instructions: [{ ...create(), payer: STRANGER }], userAddress: undefined })
+			).toBe(RENT);
+		});
+
 		// Closed into the wallet, an account another signer opened hands the user money they did
 		// not have. Credited as rent, it would cancel the rent they did pay for another account.
 		it('should not credit the rent of an account another signer opened', () => {

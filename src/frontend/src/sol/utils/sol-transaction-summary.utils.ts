@@ -165,7 +165,7 @@ const fundedByOther = ({
 }: {
 	payer: OptionSolAddress;
 	userAddress: OptionSolAddress;
-}): boolean => nonNullish(payer) && payer !== userAddress;
+}): boolean => nonNullish(payer) && nonNullish(userAddress) && payer !== userAddress;
 
 /**
  * What earlier closes paid into the account a close is closing, since it last opened.
