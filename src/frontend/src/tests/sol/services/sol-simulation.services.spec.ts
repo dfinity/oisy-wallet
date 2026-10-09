@@ -2,6 +2,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { getMultipleAccountsInfo, simulateTransactionAccounts } from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
+	SOLANA_SIMULATION_MAX_CLOSE_RUNS,
 	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
 	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
@@ -18,9 +19,11 @@ import * as solInstructionSummaryUtils from '$sol/utils/sol-instruction-summary.
 import {
 	mockAtaAddress,
 	mockAtaAddress2,
+	mockAtaAddress3,
 	mockSolAddress,
 	mockSolAddress2,
 	mockSolAddress3,
+	mockSolAddress4,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { getCreateAssociatedTokenIdempotentInstruction } from '@solana-program/token';
@@ -471,6 +474,17 @@ describe('sol-simulation.services', () => {
 				]);
 			});
 
+			// The first call took part of the balance and the second closes the rest: the line under
+			// the second would credit it with the share the first one moved.
+			it('should leave the close without an instruction when an earlier call took part of it', async () => {
+				const result = await runTwice(rent / 2n);
+
+				expect(result?.instructions).toStrictEqual([
+					{ kind: 'unknown', program: application },
+					{ kind: 'unknown', program: application }
+				]);
+			});
+
 			// Accounts whose last call is the same instruction share the run up to it, so a message
 			// closing many of them behind the same calls costs one second run rather than one each.
 			it('should check accounts that share their last call in a single run', async () => {
@@ -533,6 +547,86 @@ describe('sol-simulation.services', () => {
 						}))
 					}
 				]);
+			});
+
+			describe('when each account has a last call of its own', () => {
+				// The first call names every account and one call after it names each alone, so every
+				// account needs a second run of its own.
+				const closingEach = (accounts: SolAddress[]) =>
+					pipe(
+						createTransactionMessage({ version: 0 }),
+						(tx) => setTransactionMessageFeePayer(address(mockSolAddress), tx),
+						(tx) =>
+							setTransactionMessageLifetimeUsingBlockhash(
+								{
+									blockhash: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+									lastValidBlockHeight: 100n
+								},
+								tx
+							),
+						(tx) =>
+							appendTransactionMessageInstructions(
+								[accounts, ...accounts.map((account) => [account])].map((named) => ({
+									programAddress: address(application),
+									accounts: [
+										...named.map((account) => ({
+											address: address(account),
+											role: AccountRole.WRITABLE
+										})),
+										{ address: address(mockSolAddress), role: AccountRole.WRITABLE_SIGNER }
+									]
+								})),
+								tx
+							)
+					);
+
+				const runEach = async (accounts: SolAddress[]) => {
+					vi.mocked(getMultipleAccountsInfo).mockResolvedValue([
+						systemAccount(1_000_000n),
+						...accounts.map(() => appAccount)
+					]);
+					vi.mocked(simulateTransactionAccounts).mockResolvedValueOnce(
+						simulated({
+							accounts: [
+								systemAccount(1_000_000n + rent * BigInt(accounts.length) - fee),
+								...accounts.map(() => null)
+							],
+							fee
+						})
+					);
+
+					return await simulateSolTransaction(params(closingEach(accounts)));
+				};
+
+				const closed = [
+					mockSolAddress2,
+					mockSolAddress3,
+					mockSolAddress4,
+					mockAtaAddress,
+					mockAtaAddress2,
+					mockAtaAddress3
+				];
+
+				it('should start a run for each of as many as the cap allows', async () => {
+					await runEach(closed.slice(0, SOLANA_SIMULATION_MAX_CLOSE_RUNS));
+
+					expect(simulateTransactionAccounts).toHaveBeenCalledTimes(
+						SOLANA_SIMULATION_MAX_CLOSE_RUNS + 1
+					);
+				});
+
+				// Past the cap a crafted message is the likelier reading: none of its runs starts, and
+				// its closes stay unlisted as they would without them.
+				it('should start no run past the cap and list none of those closes', async () => {
+					const accounts = closed.slice(0, SOLANA_SIMULATION_MAX_CLOSE_RUNS + 1);
+
+					const result = await runEach(accounts);
+
+					expect(simulateTransactionAccounts).toHaveBeenCalledOnce();
+					expect(result?.instructions?.map(({ kind }) => kind)).toStrictEqual(
+						Array(accounts.length + 1).fill('unknown')
+					);
+				});
 			});
 		});
 
