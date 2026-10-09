@@ -295,6 +295,7 @@
 		"symbol": "PUFFIN",
 		"fee": {
 			"__bigint__": "1000000"
-		}
+		},
+		"icon": "/icons/icrc/p7szh-maaaa-aaaab-qhgsa-cai.jpg"
 	}
 }
