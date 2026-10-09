@@ -50,7 +50,6 @@ export const TOKEN_GROUP = 'token-group';
 export const TOKEN_BALANCE = 'token-balance';
 export const TOKEN_SKELETON_TEXT = 'token-skeleton-text';
 
-export const NFT_CARD = 'nft-card';
 export const NFT_HIDDEN_BADGE = 'nft-hidden-badge';
 export const NFT_SPAM_BADGE = 'nft-hidden-badge';
 export const NFT_COLLECTION_ACTION_SPAM = 'nft-collection-action-spam';
@@ -266,7 +265,6 @@ export const REWARDS_EARNINGS_CARD = 'reward-earnings-card';
 export const REWARDS_EARNINGS_ACTIVITY_BUTTON = 'reward-earnings-activity-button';
 export const REWARDS_NETWORK_MULTIPLIER_IMAGE = 'reward-network-multiplier-image';
 
-export const EARNING_CARD = 'earning-card';
 export const EARNING_CARD_SKELETON = 'earning-card-skeleton';
 export const EARNING_NO_POSITION_PLACEHOLDER = 'earning-no-position-placeholder';
 export const EARNING_GOTO_BUTTON = 'earning-goto-button';
@@ -274,9 +272,6 @@ export const EARNING_GOTO_BUTTON = 'earning-goto-button';
 export const WELCOME_MODAL_IMAGE_BANNER = 'welcome-modal-image-banner';
 export const WELCOME_MODAL_LEARN_MORE_ANCHOR = 'welcome-modal-learn-more-anchor';
 export const WELCOME_MODAL_SHARE_ANCHOR = 'welcome-modal-share-anchor';
-
-export const REFERRAL_STATE_MODAL_IMAGE_BANNER = 'referral-state-modal-image-banner';
-export const REFERRAL_STATE_MODAL_SHARE_ANCHOR = 'referral-state-modal-share-anchor';
 
 export const NO_TRANSACTIONS_PLACEHOLDER = 'no-transactions-placeholder';
 
@@ -311,7 +306,6 @@ export const HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON = 'help-auth-user-identity-num
 export const HELP_AUTH_IDENTITY_IMAGE_BANNER = 'help-auth-identity-image-banner';
 export const HELP_AUTH_BACK_BUTTON = 'help-auth-back-button';
 export const HELP_AUTH_DONE_BUTTON = 'help-auth-done-button';
-export const HELP_AUTH_LEARN_MORE_LINK = 'help-auth-learn-more-link';
 export const HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK =
 	'help-auth-switch-to-new-internet-identity-link';
 export const HELP_AUTH_INTRODUCTION_LINK = 'help-auth-introduction-link';
@@ -333,17 +327,14 @@ export const MODAL_TOKENS_LIST = 'modal-tokens-list';
 
 export const ADDRESS_BOOK_MODAL = 'address-book-modal';
 export const ADDRESS_BOOK_ADD_CONTACT_BUTTON = 'address-book-add-contact-button';
-export const ADDRESS_BOOK_CONTACT_FORM = 'address-book-contact-form';
 export const ADDRESS_BOOK_CONTACT_NAME_INPUT = 'address-book-contact-name-input';
 export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
-export const ADDRESS_BOOK_BACK_BUTTON = 'address-book-back-button';
 export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';
 export const ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT = 'address-book-address-address-input';
 export const ADDRESS_BOOK_ADDRESS_ALIAS_INPUT = 'address-book-address-alisas-input';
 export const ADDRESS_BOOK_QR_CODE_SCAN = 'address-book-qr-code-scan';
 export const ADDRESS_BOOK_SEARCH_CONTACT_INPUT = 'address-book-search-contact-input';
 export const ADDRESS_EDIT_CANCEL_BUTTON = 'address-edit-cancel-button';
-export const ADDRESS_EDIT_SAVE_BUTTON = 'address-edit-save-button';
 export const ADDRESS_BOOK_FALLBACK_MESSAGE = 'address-book-fallback-message';
 
 export const NOTES_MODAL = 'notes-modal';
@@ -463,14 +454,12 @@ export const STAKE_REVIEW_FORM_BUTTON = 'stake-review-form-button';
 export const STAKE_FORM_REVIEW_BUTTON = 'stake-form-next-button';
 export const STAKE_PROVIDER_LOGO = 'stake-provider-logo';
 export const STAKE_PROVIDER_EXTERNAL_URL = 'stake-provider-external-url';
-export const STAKE_DISSOLVE_EVENTS_WITHDRAW_BUTTON = 'stake-dissolve-events-withdraw-button';
 
 // Trading
 export const TRADING_LIST_SKELETON = 'trading-list-skeleton';
 export const TRADING_GOTO_BUTTON = 'trading-goto-button';
 export const TRADING_DEPOSIT_FORM_REVIEW_BUTTON = 'trading-deposit-form-review-button';
 export const TRADING_DEPOSIT_REVIEW_CONFIRM_BUTTON = 'trading-deposit-review-confirm-button';
-export const TRADING_WITHDRAW_OPEN_BUTTON = 'trading-withdraw-open-button';
 export const TRADING_WITHDRAW_FORM_REVIEW_BUTTON = 'trading-withdraw-form-review-button';
 export const TRADING_WITHDRAW_REVIEW_BUTTON = 'trading-withdraw-review-button';
 export const TRADING_ORDER_DETAIL_CANCEL_BUTTON = 'trading-order-detail-cancel-button';
