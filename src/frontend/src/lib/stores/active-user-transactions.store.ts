@@ -1,4 +1,5 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import { ZERO } from '$lib/constants/app.constants';
 import { get as storageGet, set as storageSet } from '$lib/utils/storage.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
@@ -14,6 +15,8 @@ export interface ActiveUserTransactionsLocalState {
 export type ActiveUserTransactionsStoreData =
 	| ({
 			data: Record<string, ActiveUserTransaction>;
+			// From the backend, so it holds for every device: rows updated at or before it are seen.
+			seenUpToNs: bigint;
 	  } & ActiveUserTransactionsLocalState)
 	| undefined;
 
@@ -27,10 +30,16 @@ export interface ActiveUserTransactionsStore extends Readable<ActiveUserTransact
 	 * write committed, not after the row went away.
 	 */
 	beginLoad: () => number;
-	set: (params: { transactions: ActiveUserTransaction[]; since?: number }) => void;
+	set: (params: {
+		transactions: ActiveUserTransaction[];
+		since?: number;
+		seenUpToNs?: bigint;
+	}) => void;
 	upsert: (params: { transaction: ActiveUserTransaction }) => void;
 	remove: (params: { id: string }) => void;
 	markAllSeen: () => void;
+	/** Records the backend's seen mark. It only moves forward, as it does in the backend. */
+	setSeenUpTo: (params: { seenUpToNs: bigint }) => void;
 	markTerminalSideEffectsApplied: (params: { ids: string[] }) => void;
 	reset: () => void;
 }
@@ -65,6 +74,7 @@ const initStore = (): ActiveUserTransactionsStore => {
 
 		store.set({
 			data: {},
+			seenUpToNs: ZERO,
 			lastSeenUpdatedAtNs: persisted.lastSeenUpdatedAtNs ?? {},
 			terminalSideEffectsApplied: persisted.terminalSideEffectsApplied ?? {}
 		});
@@ -76,7 +86,7 @@ const initStore = (): ActiveUserTransactionsStore => {
 	// that commits while the read is in flight is already in the store by the time the snapshot lands
 	// — replacing wholesale erased it, and a row gone from the store is a row the poller never
 	// resolves.
-	const setAll: ActiveUserTransactionsStore['set'] = ({ transactions, since }) => {
+	const setAll: ActiveUserTransactionsStore['set'] = ({ transactions, since, seenUpToNs }) => {
 		store.update((current) => {
 			if (isNullish(current)) {
 				return current;
@@ -130,7 +140,16 @@ const initStore = (): ActiveUserTransactionsStore => {
 				persist({ lastSeenUpdatedAtNs, terminalSideEffectsApplied });
 			}
 
-			return { ...current, data, lastSeenUpdatedAtNs, terminalSideEffectsApplied };
+			return {
+				...current,
+				data,
+				seenUpToNs:
+					nonNullish(seenUpToNs) && seenUpToNs > current.seenUpToNs
+						? seenUpToNs
+						: current.seenUpToNs,
+				lastSeenUpdatedAtNs,
+				terminalSideEffectsApplied
+			};
 		});
 	};
 
@@ -206,6 +225,16 @@ const initStore = (): ActiveUserTransactionsStore => {
 		});
 	};
 
+	const setSeenUpTo: ActiveUserTransactionsStore['setSeenUpTo'] = ({ seenUpToNs }) => {
+		store.update((current) => {
+			if (isNullish(current) || seenUpToNs <= current.seenUpToNs) {
+				return current;
+			}
+
+			return { ...current, seenUpToNs };
+		});
+	};
+
 	const markTerminalSideEffectsApplied: ActiveUserTransactionsStore['markTerminalSideEffectsApplied'] =
 		({ ids }) => {
 			store.update((current) => {
@@ -250,6 +279,7 @@ const initStore = (): ActiveUserTransactionsStore => {
 		upsert,
 		remove,
 		markAllSeen,
+		setSeenUpTo,
 		markTerminalSideEffectsApplied,
 		reset
 	};

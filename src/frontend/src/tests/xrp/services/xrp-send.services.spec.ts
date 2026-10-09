@@ -45,6 +45,12 @@ vi.mock('$lib/utils/time.utils', () => ({
 	randomWait: vi.fn()
 }));
 
+// What the backend answers when the caller's records are `transactions`.
+const recordsResponse = (transactions: ActiveUserTransaction[]) => ({
+	transactions,
+	seen_up_to_ns: ZERO
+});
+
 describe('xrp-send.services', () => {
 	const source = 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD';
 	const destination = 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe';
@@ -99,7 +105,7 @@ describe('xrp-send.services', () => {
 		// The in-flight guard reads the caller's records before any node call, and the send opens
 		// one between signing and submitting. Nothing open by default, so only the tests that care
 		// set a record.
-		vi.spyOn(backendApi, 'getActiveUserTransactions').mockResolvedValue([]);
+		vi.spyOn(backendApi, 'getActiveUserTransactions').mockResolvedValue(recordsResponse([]));
 		vi.spyOn(activeUserTransactionsServices, 'createActiveUserTransaction').mockResolvedValue();
 	});
 
@@ -960,7 +966,9 @@ describe('xrp-send.services', () => {
 			}) as ActiveUserTransaction;
 
 		it('refuses a send while a non-terminal record for the same address is open', async () => {
-			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([withSource(source)]);
+			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue(
+				recordsResponse([withSource(source)])
+			);
 
 			await expect(sendXrp(params)).rejects.toThrow(XrpSendAlreadyInFlightError);
 		});
@@ -968,7 +976,9 @@ describe('xrp-send.services', () => {
 		// Before any node read and before anything is signed, so nothing left the wallet and no RPC
 		// budget was spent learning what the record already said.
 		it('refuses before reading the account or signing anything', async () => {
-			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([withSource(source)]);
+			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue(
+				recordsResponse([withSource(source)])
+			);
 
 			await expect(sendXrp(params)).rejects.toThrow(XrpSendAlreadyInFlightError);
 
@@ -992,7 +1002,7 @@ describe('xrp-send.services', () => {
 
 			it('is handed to the poller', async () => {
 				const open = withSource(source);
-				vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([open]);
+				vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue(recordsResponse([open]));
 
 				await expect(sendXrp(params)).rejects.toThrow(XrpSendAlreadyInFlightError);
 
@@ -1007,7 +1017,7 @@ describe('xrp-send.services', () => {
 					updated_at_ns: open.updated_at_ns + 1n
 				};
 				activeUserTransactionsStore.upsert({ transaction: newer });
-				vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([open]);
+				vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue(recordsResponse([open]));
 
 				await expect(sendXrp(params)).rejects.toThrow(XrpSendAlreadyInFlightError);
 
@@ -1018,9 +1028,9 @@ describe('xrp-send.services', () => {
 		// Per address, not per user: a record for a different address says nothing about this one's
 		// sequence.
 		it('does not refuse on a record for a different address', async () => {
-			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([
-				withSource('rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe')
-			]);
+			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue(
+				recordsResponse([withSource('rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe')])
+			);
 
 			await expect(sendXrp(params)).resolves.toBeDefined();
 		});
@@ -1028,9 +1038,9 @@ describe('xrp-send.services', () => {
 		it.each([{ Succeeded: null }, { Failed: null }])(
 			'does not refuse on a terminal record (%o)',
 			async (status) => {
-				vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([
-					{ ...withSource(source), status }
-				]);
+				vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue(
+					recordsResponse([{ ...withSource(source), status }])
+				);
 
 				await expect(sendXrp(params)).resolves.toBeDefined();
 			}
@@ -1039,9 +1049,9 @@ describe('xrp-send.services', () => {
 		// A swap's deposit is an XRP payment from the same address, and `Pending` means it has not
 		// resolved on the ledger yet.
 		it('refuses a send while a swap deposit from the same address is Pending', async () => {
-			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([
-				mockXrpSwapActiveUserTransaction
-			]);
+			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue(
+				recordsResponse([mockXrpSwapActiveUserTransaction])
+			);
 
 			await expect(sendXrp(params)).rejects.toThrow(XrpSendAlreadyInFlightError);
 
@@ -1050,17 +1060,17 @@ describe('xrp-send.services', () => {
 
 		// `Executing` means the deposit validated; the swap goes on at 1Click without the address.
 		it('does not refuse on a swap whose deposit has validated', async () => {
-			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([
-				{ ...mockXrpSwapActiveUserTransaction, status: { Executing: null } }
-			]);
+			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue(
+				recordsResponse([{ ...mockXrpSwapActiveUserTransaction, status: { Executing: null } }])
+			);
 
 			await expect(sendXrp(params)).resolves.toBeDefined();
 		});
 
 		it('does not refuse on an open record from another flow', async () => {
-			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([
-				mockLiquidiumActiveUserTransaction
-			]);
+			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue(
+				recordsResponse([mockLiquidiumActiveUserTransaction])
+			);
 
 			await expect(sendXrp(params)).resolves.toBeDefined();
 		});

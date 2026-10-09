@@ -57,7 +57,7 @@ export const isActiveUserTransactionUnseen = ({
 	state: ActiveUserTransactionsStoreData;
 	tx: ActiveUserTransaction;
 }): boolean => {
-	if (isNullish(state)) {
+	if (isNullish(state) || tx.updated_at_ns <= state.seenUpToNs) {
 		return false;
 	}
 

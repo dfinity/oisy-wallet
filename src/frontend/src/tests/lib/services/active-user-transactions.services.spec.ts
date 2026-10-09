@@ -1,10 +1,13 @@
+import type { GetActiveUserTransactionsResponse } from '$declarations/backend/backend.did';
 import * as backendApi from '$lib/api/backend.api';
+import { ZERO } from '$lib/constants/app.constants';
 import { activeUserTransactionsList } from '$lib/derived/active-user-transactions.derived';
 import {
 	applyActiveUserTransactionPollUpdate,
 	createActiveUserTransaction,
 	deleteActiveUserTransaction,
 	loadActiveUserTransactions,
+	markActiveUserTransactionsSeen,
 	updateActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
@@ -22,7 +25,8 @@ vi.mock('$lib/api/backend.api', () => ({
 	createActiveUserTransaction: vi.fn(),
 	updateActiveUserTransaction: vi.fn(),
 	deleteActiveUserTransaction: vi.fn(),
-	getActiveUserTransactions: vi.fn()
+	getActiveUserTransactions: vi.fn(),
+	markActiveUserTransactionsSeen: vi.fn()
 }));
 
 describe('active-user-transactions.services', () => {
@@ -46,13 +50,27 @@ describe('active-user-transactions.services', () => {
 		});
 
 		it('should init the store and prime it on success', async () => {
-			vi.spyOn(backendApi, 'getActiveUserTransactions').mockResolvedValue([
-				mockActiveUserTransaction
-			]);
+			vi.spyOn(backendApi, 'getActiveUserTransactions').mockResolvedValue({
+				transactions: [mockActiveUserTransaction],
+				seen_up_to_ns: ZERO
+			});
 
 			await loadActiveUserTransactions({ identity: mockIdentity });
 
 			expect(get(activeUserTransactionsList)).toEqual([mockActiveUserTransaction]);
+		});
+
+		it('should keep the seen mark the backend returns', async () => {
+			vi.spyOn(backendApi, 'getActiveUserTransactions').mockResolvedValue({
+				transactions: [mockActiveUserTransaction],
+				seen_up_to_ns: mockActiveUserTransaction.updated_at_ns
+			});
+
+			await loadActiveUserTransactions({ identity: mockIdentity });
+
+			expect(get(activeUserTransactionsStore)?.seenUpToNs).toBe(
+				mockActiveUserTransaction.updated_at_ns
+			);
 		});
 
 		it('should swallow API errors and leave the store empty', async () => {
@@ -71,7 +89,7 @@ describe('active-user-transactions.services', () => {
 		it('keeps a record created while the load is in flight', async () => {
 			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
 
-			let resolveLoad: (transactions: (typeof mockActiveUserTransaction)[]) => void = () => {};
+			let resolveLoad: (response: GetActiveUserTransactionsResponse) => void = () => {};
 			vi.spyOn(backendApi, 'getActiveUserTransactions').mockReturnValueOnce(
 				new Promise((resolve) => {
 					resolveLoad = resolve;
@@ -89,7 +107,7 @@ describe('active-user-transactions.services', () => {
 			});
 
 			// The snapshot was read before the create committed, so it does not have the row.
-			resolveLoad([]);
+			resolveLoad({ transactions: [], seen_up_to_ns: ZERO });
 			await inFlight;
 
 			expect(get(activeUserTransactionsStore)?.data[mockActiveUserTransaction.id]).toEqual(
@@ -101,7 +119,7 @@ describe('active-user-transactions.services', () => {
 			// Simulates: load(A) issues getActiveUserTransactions; before the
 			// response lands, the user signs out and the store is reset. A's
 			// late response must not resurrect data after the reset.
-			let resolveLoad: (transactions: (typeof mockActiveUserTransaction)[]) => void = () => {};
+			let resolveLoad: (response: GetActiveUserTransactionsResponse) => void = () => {};
 			vi.spyOn(backendApi, 'getActiveUserTransactions').mockReturnValueOnce(
 				new Promise((resolve) => {
 					resolveLoad = resolve;
@@ -113,7 +131,7 @@ describe('active-user-transactions.services', () => {
 			// Sign-out fires the reset path before A's response arrives.
 			activeUserTransactionsStore.reset();
 
-			resolveLoad([mockActiveUserTransaction]);
+			resolveLoad({ transactions: [mockActiveUserTransaction], seen_up_to_ns: ZERO });
 			await inFlight;
 
 			expect(get(activeUserTransactionsStore)).toBeUndefined();
@@ -228,6 +246,75 @@ describe('active-user-transactions.services', () => {
 				})
 			).rejects.toEqual(mockActiveUserTransactionErrorNotFound);
 			expect(get(activeUserTransactionsList)).toEqual([mockActiveUserTransaction]);
+		});
+	});
+
+	describe('markActiveUserTransactionsSeen', () => {
+		const older = { ...mockActiveUserTransaction, id: 'older', updated_at_ns: 5n };
+		const latest = { ...mockActiveUserTransaction, id: 'latest', updated_at_ns: 7n };
+
+		beforeEach(() => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.set({ transactions: [older, latest] });
+		});
+
+		it('marks every row seen here, and up to the latest update for the other devices', async () => {
+			vi.spyOn(backendApi, 'markActiveUserTransactionsSeen').mockResolvedValue(7n);
+
+			await markActiveUserTransactionsSeen({ identity: mockIdentity });
+
+			expect(get(activeUserTransactionsStore)?.lastSeenUpdatedAtNs).toEqual({
+				older: '5',
+				latest: '7'
+			});
+			expect(backendApi.markActiveUserTransactionsSeen).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				upToNs: 7n
+			});
+			expect(get(activeUserTransactionsStore)?.seenUpToNs).toBe(7n);
+		});
+
+		// Another device marked further in the meantime.
+		it('keeps the later mark the backend answers with', async () => {
+			vi.spyOn(backendApi, 'markActiveUserTransactionsSeen').mockResolvedValue(9n);
+
+			await markActiveUserTransactionsSeen({ identity: mockIdentity });
+
+			expect(get(activeUserTransactionsStore)?.seenUpToNs).toBe(9n);
+		});
+
+		it('does not call the backend when nothing changed since its mark', async () => {
+			activeUserTransactionsStore.setSeenUpTo({ seenUpToNs: 7n });
+
+			await markActiveUserTransactionsSeen({ identity: mockIdentity });
+
+			expect(backendApi.markActiveUserTransactionsSeen).not.toHaveBeenCalled();
+		});
+
+		it('marks the rows seen here without an identity', async () => {
+			await markActiveUserTransactionsSeen({ identity: null });
+
+			expect(get(activeUserTransactionsStore)?.lastSeenUpdatedAtNs).toEqual({
+				older: '5',
+				latest: '7'
+			});
+			expect(backendApi.markActiveUserTransactionsSeen).not.toHaveBeenCalled();
+		});
+
+		it('keeps the mark made here when the backend call fails', async () => {
+			vi.spyOn(backendApi, 'markActiveUserTransactionsSeen').mockRejectedValue(
+				mockActiveUserTransactionErrorNotFound
+			);
+
+			await expect(
+				markActiveUserTransactionsSeen({ identity: mockIdentity })
+			).resolves.toBeUndefined();
+
+			expect(get(activeUserTransactionsStore)?.lastSeenUpdatedAtNs).toEqual({
+				older: '5',
+				latest: '7'
+			});
+			expect(get(activeUserTransactionsStore)?.seenUpToNs).toBe(ZERO);
 		});
 	});
 

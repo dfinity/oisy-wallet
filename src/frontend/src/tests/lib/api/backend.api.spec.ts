@@ -13,6 +13,7 @@ import {
 	getUserProfile,
 	getUserTransactions,
 	listCustomTokens,
+	markActiveUserTransactionsSeen,
 	newUserSignupsAllowed,
 	removeCustomToken,
 	saveUserTransactions,
@@ -818,14 +819,19 @@ describe('backend.api', () => {
 	describe('getActiveUserTransactions', () => {
 		const mockParams: CanisterApiFunctionParams = baseParams;
 
+		const response = {
+			transactions: [mockActiveUserTransaction],
+			seen_up_to_ns: mockActiveUserTransaction.updated_at_ns
+		};
+
 		beforeEach(() => {
-			backendCanisterMock.getActiveUserTransactions.mockResolvedValue([mockActiveUserTransaction]);
+			backendCanisterMock.getActiveUserTransactions.mockResolvedValue(response);
 		});
 
 		it('should successfully call getActiveUserTransactions endpoint', async () => {
 			const result = await getActiveUserTransactions(mockParams);
 
-			expect(result).toEqual([mockActiveUserTransaction]);
+			expect(result).toEqual(response);
 			expect(backendCanisterMock.getActiveUserTransactions).toHaveBeenCalledExactlyOnceWith();
 		});
 
@@ -841,6 +847,42 @@ describe('backend.api', () => {
 			});
 
 			await expect(getActiveUserTransactions(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('markActiveUserTransactionsSeen', () => {
+		const upToNs = mockActiveUserTransaction.updated_at_ns;
+
+		const mockParams: CanisterApiFunctionParams<{ upToNs: bigint }> = {
+			...baseParams,
+			upToNs
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.markActiveUserTransactionsSeen.mockResolvedValue(upToNs);
+		});
+
+		it('should successfully call markActiveUserTransactionsSeen endpoint', async () => {
+			const result = await markActiveUserTransactionsSeen(mockParams);
+
+			expect(result).toBe(upToNs);
+			expect(backendCanisterMock.markActiveUserTransactionsSeen).toHaveBeenCalledExactlyOnceWith(
+				upToNs
+			);
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				markActiveUserTransactionsSeen({ ...mockParams, identity: undefined })
+			).rejects.toThrow();
+		});
+
+		it('should throw an error if markActiveUserTransactionsSeen throws', async () => {
+			backendCanisterMock.markActiveUserTransactionsSeen.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(markActiveUserTransactionsSeen(mockParams)).rejects.toThrow();
 		});
 	});
 });
