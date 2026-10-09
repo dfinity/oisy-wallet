@@ -495,6 +495,33 @@ same-chain routes decode it locally with the pinned GenericSwap ABI (the selecto
 already pinned, so the layout is known), because `extractGenericSwapParameters` returns
 only aggregates.
 
+**Every swap call in `SwapData[]` is bound too, not only its deposit flag.** The Diamond
+executes each entry's `callTo` with `callData` (after approving `approveTo`), so a forged
+quote could append a call with side effects unrelated to the bound deposit. Decoding
+every DEX's payload client-side is not practical, so the binding has two layers:
+
+- **LI.FI's on-chain allow-list is the trust anchor, checked before signing.** The
+  Diamond refuses any swap call whose `(callTo, selector)` is not whitelisted
+  (`LibAllowList.contractSelectorIsAllowed` in `SwapperV2` and `GenericSwapFacetV3`,
+  `lifinance/contracts`). OISY checks the same thing first: for each entry,
+  `isContractSelectorWhitelisted(callTo, callData[0:4])` (and for `approveTo` when it
+  differs from `callTo`, as LI.FI's own check does) through `WhitelistManagerFacet` on
+  the pinned Diamond, as an `eth_call`. Any `false` aborts. This turns an on-chain
+  revert into a pre-signing refusal and makes the trust explicit: OISY trusts LI.FI's
+  whitelist governance, not the unsigned quote.
+- **No call can target a token or the Diamond.** Whitelisted calls run with the Diamond
+  as `msg.sender`, so the only user funds they could reach are the user's allowances to
+  the Diamond. Each entry's `callTo` and `approveTo` must differ from the Diamond and
+  from every `sendingAssetId` / `receivingAssetId` in the route, and must not be any
+  ERC-20 the user holds on that network (no `transferFrom(user, …)` through the
+  Diamond).
+- **The user's allowance to the Diamond is exactly what is deposited.** With
+  `exactAllowance` and the equality poll, the source token's allowance equals
+  `fromAmount` and is consumed by the bound deposit. The residual case is a leftover
+  allowance for a **different** token from an earlier aborted LI.FI swap (no revoke is
+  sent on abort). Such an allowance can only be pulled through a token-contract call,
+  which the whitelist and the rule above both exclude.
+
 - **Same-chain** (`fromChainId === toChainId`): `extractGenericSwapParameters(data)`.
   `sendingAssetId` equals the source token, `amount` equals `fromAmount`, `receiver`
   equals `toAddress`, `receivingAssetId` equals the destination token, and
@@ -1103,6 +1130,10 @@ everywhere.
 - **Key quota exhaustion** — if LI.FI's limit turns out to be per key, heavy use could
   exhaust it; the fan-out degrades gracefully (no LI.FI quote) and the 30 s cadence keeps
   each open Swap form to ≈ 2 quote requests per minute plus input changes.
+- **Trust in LI.FI's on-chain whitelist** — the individual DEX calls inside a route are
+  not decoded client-side; OISY relies on the Diamond's `(contract, selector)`
+  whitelist (checked before signing, enforced on-chain) plus the no-token-target rule.
+  A compromised LI.FI whitelist governance is outside what OISY can bind.
 - **Unsigned quotes** — mitigated by the trust checks and, on the quote that is signed,
   by binding the calldata (EVM) or the simulated effects (Solana) to the request. One
   residual risk remains: the bridge leg's minimum output cannot be decoded client-side,
