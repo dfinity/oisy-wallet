@@ -444,15 +444,44 @@ describe('sol-transaction-summary.utils', () => {
 				stated([
 					{ kind: 'send', amount: 19_028n, counterparty: mockSolAddress2 },
 					{ kind: 'receive', amount: 1_000n, counterparty: mockSolAddress2 },
-					{ kind: 'createTokenAccount', account: mockAtaAddress, rent: 1_488_440n },
+					{ kind: 'createTokenAccount', account: mockAtaAddress, rent: 1_488_440n, payer: WALLET },
 					{ kind: 'wrap', amount: 500_000n, account: mockAtaAddress },
 					{ kind: 'unwrap', returned: 2_000_000n, counterparty: WALLET },
 					{
 						kind: 'route',
-						children: [{ kind: 'createAccount', program: mockSolAddress3, rent: 41_899_840n }]
+						children: [
+							{ kind: 'createAccount', program: mockSolAddress3, rent: 41_899_840n, payer: WALLET }
+						]
 					}
 				])
 			).toBe(-19_028n + 1_000n - 1_488_440n - 500_000n + 2_000_000n - 41_899_840n);
+		});
+
+		// A sender opening the recipient's account pays its rent, and so can any other signer.
+		it('should leave out the rent of an opening another signer paid', () => {
+			expect(
+				stated([
+					{
+						kind: 'createTokenAccount',
+						account: mockAtaAddress,
+						rent: 1_488_440n,
+						payer: mockSolAddress2
+					},
+					{
+						kind: 'createAccount',
+						program: mockSolAddress3,
+						rent: 41_899_840n,
+						payer: mockSolAddress2
+					},
+					{ kind: 'createTokenAccount', account: mockAtaAddress2, payer: mockSolAddress2 }
+				])
+			).toBe(ZERO);
+		});
+
+		it('should know nothing of an opening whose funder nobody read', () => {
+			expect(
+				stated([{ kind: 'createTokenAccount', account: mockAtaAddress, rent: 1_488_440n }])
+			).toBeUndefined();
 		});
 
 		// Wrapped SOL and every other token move between token accounts, not the wallet.
@@ -477,7 +506,9 @@ describe('sol-transaction-summary.utils', () => {
 
 		it('should know nothing when a line moves the wallet by an amount nobody read', () => {
 			expect(stated([{ kind: 'send', counterparty: mockSolAddress2 }])).toBeUndefined();
-			expect(stated([{ kind: 'createTokenAccount', account: mockAtaAddress }])).toBeUndefined();
+			expect(
+				stated([{ kind: 'createTokenAccount', account: mockAtaAddress, payer: WALLET }])
+			).toBeUndefined();
 		});
 
 		it('should know nothing of a close whose destination nobody read', () => {

@@ -331,8 +331,9 @@ export const solAppAccountCost = ({
  * receives, the SOL it wraps, the rent it pays to open accounts, and what closes pay back into it.
  * The fee is not a line and is left to the caller.
  *
- * Undefined when a line moves the wallet's SOL by an amount nobody read, or pays a close to a
- * destination nobody read: the total is then unknown rather than short.
+ * Undefined when a line moves the wallet's SOL by an amount nobody read, opens an account nobody
+ * read the funder of, or pays a close to a destination nobody read: the total is then unknown
+ * rather than short.
  */
 export const solWalletLamportsStated = ({
 	instructions,
@@ -342,7 +343,7 @@ export const solWalletLamportsStated = ({
 	userAddress: OptionSolAddress;
 }): bigint | undefined =>
 	flattenInstructions(instructions).reduce<bigint | undefined>(
-		(acc, { kind, amount, tokenAddress, rent, returned, counterparty }) => {
+		(acc, { kind, amount, tokenAddress, rent, payer, returned, counterparty }) => {
 			if (isNullish(acc)) {
 				return acc;
 			}
@@ -357,6 +358,15 @@ export const solWalletLamportsStated = ({
 			}
 
 			if (kind === 'createTokenAccount' || kind === 'createAccount') {
+				if (isNullish(payer)) {
+					return undefined;
+				}
+
+				// Rent another signer paid leaves the wallet as it was.
+				if (payer !== userAddress) {
+					return acc;
+				}
+
 				return isNullish(rent) ? undefined : acc - rent;
 			}
 

@@ -60,8 +60,11 @@ export interface SolInstructionSummary {
 	own?: boolean;
 	// The account created, closed, approved or handed over.
 	account?: SolAddress;
-	// Lamports the user pays to open an account.
+	// Lamports it costs to open an account.
 	rent?: bigint;
+	// Who funded the opening, which is not always the user: a sender opening the recipient's account
+	// pays its rent.
+	payer?: SolAddress;
 	// Lamports an account returns when it is closed. Closing hands the destination the account's
 	// whole balance, so for a wrapped SOL account this is the rent-exempt reserve plus the SOL that
 	// was wrapped, not the rent alone.

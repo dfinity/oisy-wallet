@@ -354,9 +354,79 @@ describe('sol-instruction-summary.utils', () => {
 						kind: 'createTokenAccount',
 						account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
 						tokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-						rent: 2039280n
+						rent: 2039280n,
+						payer: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
 					}
 				]);
+			});
+
+			// Rent another signer pays leaves the wallet as it was, so the line names who paid it.
+			it('should name another signer that funds the user’s account', () => {
+				const funder = '9zsjmwXjZzuKfArqhLDpvcvLKUxLZfCzeMcqhAcPr8Jm';
+
+				expect(
+					mapSolInstructionSummaries({
+						instructions: [
+							{
+								...creation,
+								parsed: { ...creation.parsed, info: { ...creation.parsed.info, source: funder } }
+							},
+							initialisation
+						],
+						ownedAddresses: ['5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'],
+						userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
+					})
+				).toStrictEqual([
+					{
+						kind: 'createTokenAccount',
+						account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
+						tokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+						rent: 2039280n,
+						payer: funder
+					}
+				]);
+			});
+
+			// The associated token account program funds what it opens from the account its
+			// instruction names as the source, which a sender opening the user's account is.
+			it('should name another signer that funds an associated account opened for the user', () => {
+				const user = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
+				const funder = '9zsjmwXjZzuKfArqhLDpvcvLKUxLZfCzeMcqhAcPr8Jm';
+
+				const [view] = mapSolInstructionSummaries({
+					instructions: [
+						{
+							program: 'spl-associated-token-account',
+							programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+							parsed: {
+								type: 'create',
+								info: {
+									account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
+									mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+									source: funder,
+									wallet: user
+								}
+							}
+						}
+					],
+					innerInstructions: [
+						{
+							index: 0,
+							instructions: [
+								{
+									...creation,
+									parsed: { ...creation.parsed, info: { ...creation.parsed.info, source: funder } }
+								}
+							]
+						}
+					],
+					ownedAddresses: [user],
+					userAddress: user
+				});
+
+				expect(view.kind).toBe('createTokenAccount');
+				expect(view.rent).toBe(2_039_280n);
+				expect(view.payer).toBe(funder);
 			});
 
 			it('should not list the same account twice when a program opened it', () => {
@@ -620,7 +690,13 @@ describe('sol-instruction-summary.utils', () => {
 						kind: 'route',
 						program: application,
 						children: [
-							{ kind: 'createAccount', account: position, program: application, rent: positionRent }
+							{
+								kind: 'createAccount',
+								account: position,
+								program: application,
+								rent: positionRent,
+								payer: user
+							}
 						]
 					}
 				]);
@@ -689,7 +765,13 @@ describe('sol-instruction-summary.utils', () => {
 						includeUnrecognised: true
 					})
 				).toStrictEqual([
-					{ kind: 'createAccount', account: position, program: application, rent: positionRent }
+					{
+						kind: 'createAccount',
+						account: position,
+						program: application,
+						rent: positionRent,
+						payer: user
+					}
 				]);
 			});
 
@@ -740,7 +822,13 @@ describe('sol-instruction-summary.utils', () => {
 					const [opening] = views();
 
 					expect(opening.children).toStrictEqual([
-						{ kind: 'createAccount', account: position, program: application, rent: positionRent }
+						{
+							kind: 'createAccount',
+							account: position,
+							program: application,
+							rent: positionRent,
+							payer: userAddress
+						}
 					]);
 				});
 

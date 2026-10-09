@@ -60,6 +60,13 @@ const amount = ({ info, key }: { info: object; key: string }): bigint | undefine
 };
 
 /**
+ * Who funds a System `createAccount`: `source` as the RPC parses the call, `payer` as the wallet
+ * decodes it.
+ */
+const funderOf = ({ info }: { info: object }): SolAddress | undefined =>
+	address({ info, key: 'source' }) ?? address({ info, key: 'payer' });
+
+/**
  * The amount of a `transferChecked`, which nests it with the decimals the mint uses.
  */
 const tokenAmount = (info: object): { amount?: bigint; decimals?: number } => {
@@ -578,7 +585,7 @@ const toEffect = ({
 			owner !== TOKEN_PROGRAM_ADDRESS &&
 			owner !== TOKEN_2022_PROGRAM_ADDRESS
 		) {
-			const source = address({ info, key: 'source' }) ?? address({ info, key: 'payer' });
+			const source = funderOf({ info });
 			const account = address({ info, key: 'newAccount' });
 			const lamports = amount({ info, key: 'lamports' });
 			const space = amount({ info, key: 'space' });
@@ -594,7 +601,7 @@ const toEffect = ({
 				nonNullish(lamports) &&
 				nonNullish(reserve) &&
 				lamports <= reserve
-				? { kind: 'createAccount', account, program: owner, rent: lamports }
+				? { kind: 'createAccount', account, program: owner, rent: lamports, payer: source }
 				: undefined;
 		}
 	}
@@ -1265,6 +1272,32 @@ const closePayouts = ({
 };
 
 /**
+ * The System `createAccount` that funds the account a line opens, which is the first from where
+ * the line stands: an address closed and opened again within the message is two accounts, each
+ * funded by its own.
+ */
+const creationOf = ({
+	account,
+	flattened,
+	from
+}: {
+	account: SolAddress;
+	flattened: { topLevel: boolean; instruction: SolParsedRpcInstruction }[];
+	from: number;
+}): { topLevel: boolean; instruction: SolParsedRpcInstruction } | undefined =>
+	flattened.slice(from).find(
+		({
+			instruction: {
+				program,
+				parsed: { type, info }
+			}
+		}) =>
+			program === 'system' &&
+			type === 'createAccount' &&
+			address({ info, key: 'newAccount' }) === account
+	);
+
+/**
  * The rent an account creation costs, from the System `createAccount` that funds it.
  *
  * The reserve and no more, where that is known. A creation can fund a wrapped SOL account with the
@@ -1278,46 +1311,21 @@ const closePayouts = ({
  * as it has a balance nobody can state, rather than one that includes whatever it was funded to
  * wrap. The associated token account program funds exactly the rent of what it opens, and an
  * account of any other mint has nothing to wrap, so those creations state it as they stand.
- *
- * The creation of the account the line opens, which is the first from where the line stands: an
- * address closed and opened again within the message is two accounts, each funded by its own.
  */
 const rentOf = ({
-	account,
-	flattened,
-	from,
-	native,
-	rentExemptMinimum
-}: {
-	account: SolAddress;
-	flattened: { topLevel: boolean; instruction: SolParsedRpcInstruction }[];
-	from: number;
-	native: boolean;
-	rentExemptMinimum: bigint | undefined;
-}): bigint | undefined => {
-	const creation = flattened.slice(from).find(
-		({
-			instruction: {
-				program,
-				parsed: { type, info }
-			}
-		}) =>
-			program === 'system' &&
-			type === 'createAccount' &&
-			address({ info, key: 'newAccount' }) === account
-	);
-
-	if (isNullish(creation)) {
-		return undefined;
-	}
-
-	const {
+	creation: {
 		topLevel,
 		instruction: {
 			parsed: { info }
 		}
-	} = creation;
-
+	},
+	native,
+	rentExemptMinimum
+}: {
+	creation: { topLevel: boolean; instruction: SolParsedRpcInstruction };
+	native: boolean;
+	rentExemptMinimum: bigint | undefined;
+}): bigint | undefined => {
 	const lamports = amount({ info, key: 'lamports' });
 
 	if (isNullish(lamports)) {
@@ -1646,16 +1654,22 @@ export const mapSolInstructionSummaries = ({
 					mintAt({ account, position }) ?? openedNext({ account, flattened, from: position }).mint
 			});
 
-			const rent =
+			const creation =
 				wrapped.kind === 'createTokenAccount' && nonNullish(wrapped.account)
-					? rentOf({
-							account: wrapped.account,
-							flattened,
-							from: position,
-							native: wrapped.tokenAddress === WSOL_TOKEN.address,
-							rentExemptMinimum
-						})
+					? creationOf({ account: wrapped.account, flattened, from: position })
 					: undefined;
+
+			const rent = nonNullish(creation)
+				? rentOf({
+						creation,
+						native: wrapped.tokenAddress === WSOL_TOKEN.address,
+						rentExemptMinimum
+					})
+				: undefined;
+
+			// Not always the user: a sender opening the recipient's account pays its rent, and so can
+			// any other signer of the message.
+			const payer = nonNullish(creation) ? funderOf(creation.instruction.parsed) : undefined;
 
 			// The program that made a transfer, when it is not the one the line hangs under and not one
 			// of the known programs: a program the review's notice about programs OISY cannot read
@@ -1673,6 +1687,7 @@ export const mapSolInstructionSummaries = ({
 				{
 					...wrapped,
 					...(nonNullish(rent) && { rent }),
+					...(nonNullish(payer) && { payer }),
 					...(nonNullish(via) && { via }),
 					parentIndex
 				}
