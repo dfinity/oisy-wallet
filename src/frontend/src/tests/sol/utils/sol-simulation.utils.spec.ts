@@ -6,13 +6,15 @@ import {
 } from '$sol/constants/sol.constants';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaParsedAccountInfo, SolanaSimulatedInnerInstructions } from '$sol/types/sol-rpc';
+import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import {
 	findSolUnreadPrograms,
 	isEmptySolSimulationPreview,
 	mapSolSimulationAccountOwners,
 	mapSolSimulationPreview,
-	selectSolSimulationAddresses
+	selectSolSimulationAddresses,
+	solSimulationReassignsWallet
 } from '$sol/utils/sol-simulation.utils';
 import {
 	mockAtaAddress,
@@ -276,6 +278,77 @@ describe('sol-simulation.utils', () => {
 
 			expect(preview).not.toHaveProperty('solDelta');
 			expect(isEmptySolSimulationPreview(preview)).toBeTruthy();
+		});
+	});
+
+	describe('solSimulationReassignsWallet', () => {
+		const preview = (
+			controlChanges: SolSimulationPreview['controlChanges']
+		): SolSimulationPreview => ({ tokenDeltas: [], controlChanges });
+
+		it('should be true when the run hands the wallet to another program', () => {
+			expect(
+				solSimulationReassignsWallet({
+					preview: preview([
+						{ account: mockSolAddress, field: 'program', to: STAKE_PROGRAM_ADDRESS }
+					]),
+					userAddress: mockSolAddress
+				})
+			).toBeTruthy();
+		});
+
+		// Only the wallet: a change to another of the user's accounts is shown by the preview, but is
+		// not this question.
+		it('should be false when another account of the user changes program', () => {
+			expect(
+				solSimulationReassignsWallet({
+					preview: preview([{ account: mockAtaAddress, field: 'program', to: mockSolAddress2 }]),
+					userAddress: mockSolAddress
+				})
+			).toBeFalsy();
+		});
+
+		it('should be false for a control change other than the owning program', () => {
+			expect(
+				solSimulationReassignsWallet({
+					preview: preview([{ account: mockSolAddress, field: 'owner', to: mockSolAddress2 }]),
+					userAddress: mockSolAddress
+				})
+			).toBeFalsy();
+		});
+
+		it('should be false without a preview', () => {
+			expect(
+				solSimulationReassignsWallet({ preview: undefined, userAddress: mockSolAddress })
+			).toBeFalsy();
+		});
+
+		it('should be false without a wallet', () => {
+			expect(
+				solSimulationReassignsWallet({
+					preview: preview([{ account: mockSolAddress, field: 'program', to: mockSolAddress2 }]),
+					userAddress: undefined
+				})
+			).toBeFalsy();
+		});
+
+		// End to end through the diff: a System-owned wallet the run leaves owned by another program.
+		it('should be true for the diff of a wallet assigned during the run', () => {
+			const diffed = mapSolSimulationPreview({
+				addresses: [mockSolAddress],
+				preAccounts: [systemAccount({ lamports: 1_000_000n })],
+				postAccounts: [
+					{
+						...systemAccount({ lamports: 995_000n }),
+						owner: mockSolAddress3
+					} as NonNullable<SolanaParsedAccountInfo>
+				],
+				userAddress: mockSolAddress
+			});
+
+			expect(
+				solSimulationReassignsWallet({ preview: diffed, userAddress: mockSolAddress })
+			).toBeTruthy();
 		});
 	});
 
