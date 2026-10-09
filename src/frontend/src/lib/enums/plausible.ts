@@ -86,6 +86,12 @@ export enum PLAUSIBLE_EVENT_TRANSACTION_SEND_ERROR_TYPES {
 	OUT_OF_GAS = 'out_of_gas'
 }
 
+// Why an offer that arrived was left out of the swap form.
+export enum PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES {
+	// A 1Click quote for an XRP deposit came with a deposit memo.
+	DEPOSIT_MEMO = 'deposit_memo'
+}
+
 // Why a tip step failed. `TipError` is OISY's own candid type, so its variant names are a closed
 // set we control and safe to send under invariant 4 in docs/ai/frontend/analytics.md; only the
 // name goes out, never the `msg` some variants carry. The ledger's refusals of the approve are
