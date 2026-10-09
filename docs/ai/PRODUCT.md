@@ -683,6 +683,8 @@ When a row reaches a terminal state it refreshes the wallet and reports into the
 
 **Finished rows make room for new ones.** A user holds at most 100 active user transactions, across every flow that writes them, and a finished row (succeeded or failed) keeps its place until the user dismisses it. When a new row would go over the limit, the finished row updated longest ago is removed to make room, so a user who never dismisses anything is not locked out of the flows that need a row. A row still in progress is never removed; only when all 100 are in progress is a new one refused. Finished rows do not expire on their own: below the limit they stay until dismissed.
 
+**Seen entries stay seen on every device.** When the user closes the notification list, every entry it showed counts as seen for the user, not only for that browser. Another browser or device shows an entry as unread only once it has changed since.
+
 ---
 
 ## Trade (OISY Trade)
