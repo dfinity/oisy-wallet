@@ -1,4 +1,3 @@
-import { LOCAL, STAGING, TEST } from '$lib/constants/app.constants';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { safeParse } from '$lib/validation/utils.validation';
 
@@ -6,10 +5,7 @@ export const NEAR_INTENTS_SWAP_ENABLED = true;
 
 export const NEAR_INTENTS_BTC_SWAP_ENABLED = true;
 
-// NEAR Intents swaps from and to native XRP, tested on local and staging before they reach users.
-// Off in unit tests too, so suite-wide swap expectations stay what they are until the flag is
-// turned on everywhere; the tests of the feature itself switch it on.
-export const NEAR_INTENTS_XRP_SWAP_ENABLED = (LOCAL || STAGING) && !TEST;
+export const NEAR_INTENTS_XRP_SWAP_ENABLED = true;
 
 // Apparently we do not need any API keys for Near Intents; we can make unauthorised calls
 export const NEAR_INTENTS_API_KEY = import.meta.env.VITE_NEAR_INTENTS_API_KEY;
