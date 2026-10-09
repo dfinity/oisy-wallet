@@ -43,7 +43,13 @@ import {
 import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
 import { ICP_SWAP_POOL_FEE, SWAP_SIDE } from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
-import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
+import {
+	PLAUSIBLE_EVENTS,
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_RESULT_STATUSES,
+	PLAUSIBLE_EVENT_SEVERITIES,
+	PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES
+} from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { btcSwapProviders } from '$lib/providers/btc-swap.providers';
 import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
@@ -1536,7 +1542,34 @@ export const fetchSwapAmountsXRP = async ({
 		)
 	);
 
-	return reduceSettledSwapResults(settledResults);
+	// An offer whose XRP deposit comes with a deposit memo is left out: nothing documents how such a
+	// memo has to travel with an XRP payment, and a deposit that does not carry it in the expected
+	// form may never be credited. Each one is reported, so a change on the provider's side shows up
+	// in the analytics and not only as a pair that is no longer offered.
+	return reduceSettledSwapResults(settledResults).filter((offer) => {
+		const hasDepositMemo =
+			offer.provider === SwapProvider.NEAR_INTENTS &&
+			nonNullish(offer.swapDetails.quote.depositMemo);
+
+		if (hasDepositMemo) {
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: {
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+					event_subcontext: offer.provider,
+					event_severity: PLAUSIBLE_EVENT_SEVERITIES.ERROR,
+					result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+					result_error_type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.DEPOSIT_MEMO,
+					token_symbol: sourceToken.symbol,
+					token_network: sourceToken.network.name,
+					token2_symbol: destinationToken.symbol,
+					token2_network: destinationToken.network.name
+				}
+			});
+		}
+
+		return !hasDepositMemo;
+	});
 };
 
 export const withdrawUserUnusedBalance = async ({

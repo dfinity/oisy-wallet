@@ -25,7 +25,13 @@ import * as kongBackendApi from '$lib/api/kong_backend.api';
 import { signPrehash } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
-import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
+import {
+	PLAUSIBLE_EVENTS,
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_RESULT_STATUSES,
+	PLAUSIBLE_EVENT_SEVERITIES,
+	PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES
+} from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -44,6 +50,7 @@ import {
 	fetchSwapAmounts,
 	fetchSwapAmountsEVM,
 	fetchSwapAmountsSOL,
+	fetchSwapAmountsXRP,
 	fetchVeloraDeltaSwap,
 	fetchVeloraMarketSwap,
 	loadKongSwapTokens,
@@ -1604,6 +1611,66 @@ describe('swap.services', () => {
 					slippage
 				})
 			).rejects.toThrow(SwapAmountTooLowError);
+		});
+	});
+
+	describe('fetchSwapAmountsXRP', () => {
+		const destinationToken = { ...mockValidErc20Token, network: ETHEREUM_NETWORK } as Erc20Token;
+
+		const params = {
+			sourceToken: XRP_TOKEN,
+			destinationToken,
+			amount: 10_000_000n,
+			userAddress: mockXrpAddress,
+			recipientAddress: mockEthAddress,
+			slippage: 1
+		};
+
+		const offer = {
+			provider: SwapProvider.NEAR_INTENTS as const,
+			receiveAmount: 500n,
+			swapDetails: mockNearIntentsQuoteResponse
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should keep an offer without a deposit memo', async () => {
+			mockXrpGetQuote.mockResolvedValueOnce(offer);
+
+			await expect(fetchSwapAmountsXRP(params)).resolves.toEqual([offer]);
+
+			expect(trackEvent).not.toHaveBeenCalled();
+		});
+
+		// Nothing documents how a deposit memo has to travel with an XRP payment, so the offer is left
+		// out, and reported so that the change shows up in the analytics.
+		it('should leave out an offer that comes with a deposit memo and report it', async () => {
+			mockXrpGetQuote.mockResolvedValueOnce({
+				...offer,
+				swapDetails: {
+					...mockNearIntentsQuoteResponse,
+					quote: { ...mockNearIntentsQuoteResponse.quote, depositMemo: '12345' }
+				}
+			});
+
+			await expect(fetchSwapAmountsXRP(params)).resolves.toEqual([]);
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: {
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+					event_subcontext: SwapProvider.NEAR_INTENTS,
+					event_severity: PLAUSIBLE_EVENT_SEVERITIES.ERROR,
+					result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+					result_error_type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.DEPOSIT_MEMO,
+					token_symbol: XRP_TOKEN.symbol,
+					token_network: XRP_TOKEN.network.name,
+					token2_symbol: destinationToken.symbol,
+					token2_network: ETHEREUM_NETWORK.name
+				}
+			});
 		});
 	});
 
