@@ -2,7 +2,6 @@
 	import { isNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy } from 'svelte';
-	import { acceptedContext } from '$eth/utils/wallet-connect.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
@@ -20,6 +19,7 @@
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
+	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
 	import SolWalletConnectSignMessageReview from '$sol/components/wallet-connect/SolWalletConnectSignMessageReview.svelte';
 	import { walletConnectSignSteps } from '$sol/constants/steps.constants';
 	import {

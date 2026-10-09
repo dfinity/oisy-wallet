@@ -18,7 +18,6 @@ import {
 import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
 import { consoleError } from '$lib/utils/console.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { Verify } from '@walletconnect/types';
 import { TypedDataEncoder, type TypedDataDomain, type TypedDataField } from 'ethers/hash';
 import { isHexString, toUtf8String } from 'ethers/utils';
 
@@ -889,13 +888,3 @@ export const convertHexToUtf8 = (value: string): string => {
 
 	return value;
 };
-
-/**
- * Whether a session proposal may be approved: not when WalletConnect's Verify API flags the
- * proposer as a scam.
- *
- * Verify states that verdict in `isScam` alone. `validation` only says whether the request came
- * from the domain the dApp claims, so a flagged site served from its own domain is still `VALID`.
- */
-export const acceptedContext = (context: Verify.Context | undefined): boolean =>
-	context?.verified.isScam !== true;

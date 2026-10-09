@@ -6,7 +6,6 @@
 	import { decodeMessage, sign as signService } from '$btc/services/wallet-connect.services';
 	import type { OptionBtcAddress } from '$btc/types/address';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
-	import { acceptedContext } from '$eth/utils/wallet-connect.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
@@ -18,6 +17,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
 
 	interface Props {
 		listener: OptionWalletConnectListener;

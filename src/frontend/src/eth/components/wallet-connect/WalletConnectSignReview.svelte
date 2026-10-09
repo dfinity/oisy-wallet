@@ -1,14 +1,11 @@
 <script lang="ts">
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import EthWalletConnectMessage from '$eth/components/wallet-connect/EthWalletConnectMessage.svelte';
-	import {
-		acceptedContext,
-		hasInvalidTypedData,
-		hasUnreviewableTypedData
-	} from '$eth/utils/wallet-connect.utils';
+	import { hasInvalidTypedData, hasUnreviewableTypedData } from '$eth/utils/wallet-connect.utils';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectScamWarning from '$lib/components/wallet-connect/WalletConnectScamWarning.svelte';
+	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
 
 	interface Props {
 		request: WalletKitTypes.SessionRequest;

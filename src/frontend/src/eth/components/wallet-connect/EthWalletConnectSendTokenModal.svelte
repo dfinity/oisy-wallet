@@ -23,7 +23,6 @@
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import {
-		acceptedContext,
 		classifyWalletConnectEthCall,
 		getSendParamsGas,
 		isWalletConnectEthApproval
@@ -49,6 +48,7 @@
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
 
 	interface Props {
 		request: WalletKitTypes.SessionRequest;
