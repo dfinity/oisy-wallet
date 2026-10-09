@@ -592,6 +592,7 @@ interface I18nSettings {
 	text: {
 		title: string;
 		general: string;
+		security: string;
 		preferences: string;
 		principal: string;
 		principal_copied: string;
