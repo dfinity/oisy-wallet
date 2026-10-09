@@ -48,6 +48,8 @@ const clearTerminalWrites = ({ key, ids }: { key: string; ids: string[] }) => {
 
 export interface ActiveUserTransactionsStore extends Readable<ActiveUserTransactionsStoreData> {
 	init: (principal: Principal) => void;
+	/** Whether the store holds this principal's rows, which an account switch can change mid-await. */
+	holds: (principal: Principal) => boolean;
 	/**
 	 * Marks the start of a load, to pass to `set` as `since` once its snapshot returns. A row written
 	 * locally after this mark survives a snapshot that lacks it: the snapshot was read before the
@@ -84,8 +86,10 @@ const initStore = (): ActiveUserTransactionsStore => {
 		storageSet({ key: storageKey, value: state });
 	};
 
+	const stateKey = (principal: Principal): string => `${STORAGE_PREFIX}${principal.toText()}`;
+
 	const init: ActiveUserTransactionsStore['init'] = (principal) => {
-		const key = `${STORAGE_PREFIX}${principal.toText()}`;
+		const key = stateKey(principal);
 
 		if (storageKey === key) {
 			return;
@@ -103,6 +107,9 @@ const initStore = (): ActiveUserTransactionsStore => {
 			terminalSideEffectsApplied: persisted.terminalSideEffectsApplied ?? {}
 		});
 	};
+
+	const holds: ActiveUserTransactionsStore['holds'] = (principal) =>
+		storageKey === stateKey(principal);
 
 	const beginLoad: ActiveUserTransactionsStore['beginLoad'] = () => writeSequence;
 
@@ -324,6 +331,7 @@ const initStore = (): ActiveUserTransactionsStore => {
 	return {
 		subscribe: store.subscribe,
 		init,
+		holds,
 		beginLoad,
 		set: setAll,
 		upsert,

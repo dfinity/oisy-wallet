@@ -51,13 +51,29 @@ export const loadActiveUserTransactions = async ({
 	}
 };
 
+// An account switch during the call leaves the store holding another principal's rows, whose loader
+// would report this one as its own. The row is left to its account's next load instead.
+const upsertForIdentity = ({
+	identity,
+	transaction
+}: {
+	identity: Identity;
+	transaction: ActiveUserTransaction;
+}) => {
+	if (!activeUserTransactionsStore.holds(identity.getPrincipal())) {
+		return;
+	}
+
+	activeUserTransactionsStore.upsert({ transaction });
+};
+
 export const createActiveUserTransaction = async ({
 	identity,
 	...params
 }: { identity: Identity } & CreateActiveUserTransactionParams): Promise<void> => {
 	const transaction = await createActiveUserTransactionApi({ identity, ...params });
 
-	activeUserTransactionsStore.upsert({ transaction });
+	upsertForIdentity({ identity, transaction });
 };
 
 export const updateActiveUserTransaction = async ({
@@ -76,7 +92,7 @@ export const updateActiveUserTransaction = async ({
 
 	const transaction = await updateActiveUserTransactionApi({ identity, ...params });
 
-	activeUserTransactionsStore.upsert({ transaction });
+	upsertForIdentity({ identity, transaction });
 };
 
 export const deleteActiveUserTransaction = async ({

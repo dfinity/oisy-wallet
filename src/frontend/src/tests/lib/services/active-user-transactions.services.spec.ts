@@ -142,6 +142,21 @@ describe('active-user-transactions.services', () => {
 			expect(get(activeUserTransactionsList)).toEqual([mockActiveUserTransaction]);
 		});
 
+		// The account switched while the call was in flight: the row is not this account's.
+		it('should not upsert into the store of another account', async () => {
+			vi.spyOn(backendApi, 'createActiveUserTransaction').mockResolvedValue(
+				mockActiveUserTransaction
+			);
+			activeUserTransactionsStore.init(mockPrincipal2);
+
+			await createActiveUserTransaction({
+				identity: mockIdentity,
+				...mockCreateActiveUserTransactionParams
+			});
+
+			expect(get(activeUserTransactionsList)).toEqual([]);
+		});
+
 		it('should propagate API errors so callers can surface them', async () => {
 			vi.spyOn(backendApi, 'createActiveUserTransaction').mockRejectedValue(
 				mockActiveUserTransactionErrorNotFound
@@ -177,6 +192,22 @@ describe('active-user-transactions.services', () => {
 				...mockUpdateActiveUserTransactionParams
 			});
 			expect(get(activeUserTransactionsList)).toEqual([mockActiveUserTransaction]);
+		});
+
+		// The account switched while the call was in flight: that account's loader would report the
+		// row as its own.
+		it('should not upsert into the store of another account', async () => {
+			vi.spyOn(backendApi, 'updateActiveUserTransaction').mockResolvedValue(
+				mockActiveUserTransaction
+			);
+			activeUserTransactionsStore.init(mockPrincipal2);
+
+			await updateActiveUserTransaction({
+				identity: mockIdentity,
+				...mockUpdateActiveUserTransactionParams
+			});
+
+			expect(get(activeUserTransactionsList)).toEqual([]);
 		});
 
 		it('should propagate API errors so callers can surface them', async () => {

@@ -55,6 +55,19 @@ describe('active-user-transactions.store', () => {
 		expect(get(activeUserTransactionsStore)?.data).toEqual({});
 	});
 
+	it('holds only the principal it was initialised for', () => {
+		expect(activeUserTransactionsStore.holds(mockPrincipal)).toBeFalsy();
+
+		activeUserTransactionsStore.init(mockPrincipal);
+
+		expect(activeUserTransactionsStore.holds(mockPrincipal)).toBeTruthy();
+		expect(activeUserTransactionsStore.holds(mockPrincipal2)).toBeFalsy();
+
+		activeUserTransactionsStore.reset();
+
+		expect(activeUserTransactionsStore.holds(mockPrincipal)).toBeFalsy();
+	});
+
 	it('set replaces the data map', () => {
 		activeUserTransactionsStore.init(mockPrincipal);
 		activeUserTransactionsStore.set({
