@@ -1179,6 +1179,17 @@ export const fetchNearIntentsXrpSwap = async ({
 	network,
 	fee
 }: SwapNearIntentsXrpParams): Promise<void> => {
+	// 1Click quotes XRP a fresh deposit address per swap, with no memo. A memo would mean a shared
+	// address that credits each deposit by its destination tag, and this payment carries none:
+	// `sendXrp` declines that only when the address flags the tag as required. Refused rather than
+	// mapped to a tag, since nothing documents how 1Click would encode one.
+	if (nonNullish(swapDetails.quote.depositMemo)) {
+		throwSwapError({
+			code: SwapErrorCodes.NEAR_INTENTS_QUOTE_DEPOSIT_MEMO,
+			message: get(i18n).swap.error.near_intents_quote_deposit_memo
+		});
+	}
+
 	await executeNearIntentsSwap({
 		identity,
 		progress,
