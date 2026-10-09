@@ -323,8 +323,9 @@
 
 				// The only place an XRP send's outcome is reported. The modal stops at the submit, so
 				// by the time the ledger decides there may be no modal — and this hook fires exactly
-				// once per row even when the ledger decided while the tab was shut: only a poller settles
-				// the row, so it is still open when the next session loads, and that session reports it.
+				// once per row even when the ledger decided while the tab was shut: a row no poller settled
+				// is still open when the next session loads, and a row whose terminal write committed after
+				// its tab closed is left to the next session in that browser by its persisted marker.
 				//
 				// The failure text comes off the record rather than being derived here: the two
 				// failures need different advice — nothing was sent, or the fee was charged — and
