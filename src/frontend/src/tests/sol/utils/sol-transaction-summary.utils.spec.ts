@@ -544,6 +544,47 @@ describe('sol-transaction-summary.utils', () => {
 			expect(fee([create(), create()])).toBe(RENT * 2n);
 		});
 
+		// A sender opening the recipient's account pays its rent, and so can any other signer.
+		it('should not charge the rent of an opening another signer paid', () => {
+			expect(fee([{ ...create(), payer: STRANGER }])).toBe(ZERO);
+		});
+
+		it('should charge the rent of an opening the wallet paid', () => {
+			expect(fee([{ ...create(), payer: WALLET }])).toBe(RENT);
+		});
+
+		// Closed into the wallet, an account another signer opened hands the user money they did
+		// not have. Credited as rent, it would cancel the rent they did pay for another account.
+		it('should not credit the rent of an account another signer opened', () => {
+			expect(
+				fee([
+					{ ...create(), payer: WALLET },
+					{ kind: 'createTokenAccount', account: mockAtaAddress2, rent: RENT, payer: STRANGER },
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress2,
+						returned: RENT,
+						counterparty: WALLET
+					}
+				])
+			).toBe(RENT);
+		});
+
+		it('should not credit the rent of a wrapped SOL account another signer opened', () => {
+			expect(
+				fee([
+					{ ...create(), payer: WALLET },
+					{ kind: 'createTokenAccount', account: mockAtaAddress2, rent: RENT, payer: STRANGER },
+					{
+						kind: 'unwrap',
+						account: mockAtaAddress2,
+						returned: RENT + 5_000_000n,
+						counterparty: WALLET
+					}
+				])
+			).toBe(RENT);
+		});
+
 		// Only a close that pays the wallet reduces what the transaction cost. Crediting a
 		// hand-over would report the smaller number exactly where the larger one matters.
 		it('should not credit a close that named somebody else', () => {

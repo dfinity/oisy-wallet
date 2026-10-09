@@ -132,29 +132,40 @@ const closesInto = ({
 };
 
 /**
- * The rent the transaction paid to open the account a close is closing: the opening since that
- * address was last closed, and before the close. An opening after it is another account's, whose
- * rent this close never held.
+ * The line that opened the account a close is closing: the opening since that address was last
+ * closed, and before the close. An opening after it is another account's, whose rent this close
+ * never held.
  */
-const openingRent = ({
+const openingOf = ({
 	closes,
 	index
 }: {
 	closes: SolInstructionSummary[];
 	index: number;
-}): bigint => {
+}): SolInstructionSummary | undefined => {
 	const { account } = closes[index] ?? {};
 
 	if (isNullish(account)) {
-		return ZERO;
+		return undefined;
 	}
 
-	const opening = closes
+	return closes
 		.slice(closedBefore({ closes, index }) + 1, index)
 		.findLast((summary) => summary.kind === 'createTokenAccount' && summary.account === account);
-
-	return opening?.rent ?? ZERO;
 };
+
+/**
+ * Whether another signer funded an opening: a sender opening the recipient's account pays its
+ * rent, and so can any other signer. That rent was never the user's, neither to pay nor to get
+ * back.
+ */
+const fundedByOther = ({
+	payer,
+	userAddress
+}: {
+	payer: OptionSolAddress;
+	userAddress: OptionSolAddress;
+}): boolean => nonNullish(payer) && payer !== userAddress;
 
 /**
  * What earlier closes paid into the account a close is closing, since it last opened.
@@ -172,7 +183,15 @@ const paidIn = ({ closes, index }: { closes: SolInstructionSummary[]; index: num
  * The rent a close hands back of what its own account cost, leaving aside anything other closes
  * paid into it.
  */
-const ownRent = ({ closes, index }: { closes: SolInstructionSummary[]; index: number }): bigint => {
+const ownRent = ({
+	closes,
+	index,
+	userAddress
+}: {
+	closes: SolInstructionSummary[];
+	index: number;
+	userAddress: OptionSolAddress;
+}): bigint => {
 	const { kind, returned, ownAccount, reserve } = closes[index] ?? {};
 
 	// An account that was never the user's cost them no rent.
@@ -180,10 +199,17 @@ const ownRent = ({ closes, index }: { closes: SolInstructionSummary[]; index: nu
 		return ZERO;
 	}
 
+	const opening = openingOf({ closes, index });
+
+	// Nor did one another signer opened for them: its rent comes home as money they did not have.
+	if (fundedByOther({ payer: opening?.payer, userAddress })) {
+		return ZERO;
+	}
+
 	// An unwrap's balance is mostly the SOL wrapped in it, so its rent is the rent the same
 	// transaction paid to open it.
 	if (kind === 'unwrap') {
-		return openingRent({ closes, index });
+		return opening?.rent ?? ZERO;
 	}
 
 	if (isNullish(returned)) {
@@ -224,16 +250,18 @@ const ownRent = ({ closes, index }: { closes: SolInstructionSummary[]; index: nu
  */
 const rentBrought = ({
 	closes,
-	index
+	index,
+	userAddress
 }: {
 	closes: SolInstructionSummary[];
 	index: number;
+	userAddress: OptionSolAddress;
 }): bigint => {
 	const { returned } = closes[index] ?? {};
 
 	const brought = closesInto({ closes, index }).reduce(
-		(acc, position) => acc + rentBrought({ closes, index: position }),
-		ownRent({ closes, index })
+		(acc, position) => acc + rentBrought({ closes, index: position, userAddress }),
+		ownRent({ closes, index, userAddress })
 	);
 
 	return nonNullish(returned) && returned < brought ? returned : brought;
@@ -265,6 +293,10 @@ const rentBrought = ({
  * spend. And what a close hands back is not the rent it brings: it can hold more, the SOL wrapped
  * in an account closed into it, and less, when the rent came home through an account that was
  * never the user's.
+ *
+ * Rent another signer funds is neither charged nor credited. The account is the user's, but its
+ * rent never was: opening it cost them nothing, and closing it into the wallet hands them money
+ * they did not have rather than a refund.
  */
 export const solAtaFee = ({
 	instructions,
@@ -277,10 +309,10 @@ export const solAtaFee = ({
 
 	return maxBigInt(
 		flattened.reduce((acc, current, index) => {
-			const { kind, rent, counterparty } = current;
+			const { kind, rent, payer, counterparty } = current;
 
 			if (kind === 'createTokenAccount' && nonNullish(rent)) {
-				return acc + rent;
+				return fundedByOther({ payer, userAddress }) ? acc : acc + rent;
 			}
 
 			if (!isClose(current)) {
@@ -303,7 +335,7 @@ export const solAtaFee = ({
 				return acc;
 			}
 
-			return acc - rentBrought({ closes: flattened, index });
+			return acc - rentBrought({ closes: flattened, index, userAddress });
 		}, ZERO),
 		ZERO
 	);
