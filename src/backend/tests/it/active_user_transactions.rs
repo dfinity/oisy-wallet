@@ -8,7 +8,7 @@ use shared::types::{
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
         ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, NearIntentsData,
         OisyTradeData, OisyTradeSide, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest,
-        VeloraData, VeloraSwapMode, XrpData,
+        VeloraData, VeloraSwapMode, XrpData, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
     },
     custom_token::ErcTokenId,
     result_types::{
@@ -945,6 +945,44 @@ fn delete_is_idempotent_and_filters_view() {
         GetActiveUserTransactionsResult::Ok(response) => assert!(response.transactions.is_empty()),
         GetActiveUserTransactionsResult::Err(err) => panic!("expected Ok, got {err:?}"),
     }
+}
+
+#[test]
+fn create_at_cap_removes_a_finished_record_and_refuses_when_none_is_left() {
+    let pic = setup();
+    let user = caller();
+    for i in 0..MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
+        let created = create_active(&pic, user, &format!("id-{i}"));
+        assert!(matches!(created, ActiveUserTransactionResult::Ok(_)));
+    }
+    let finished = pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "update_active_user_transaction",
+            update_status_req("id-42", ActiveUserTransactionStatus::Succeeded),
+        )
+        .expect("update call should succeed");
+    assert!(matches!(finished, ActiveUserTransactionResult::Ok(_)));
+
+    let made_room = create_active(&pic, user, "new-1");
+    assert!(matches!(made_room, ActiveUserTransactionResult::Ok(_)));
+    let ids: Vec<String> = list_active(&pic, user)
+        .into_iter()
+        .map(|tx| tx.id)
+        .collect();
+    assert_eq!(ids.len(), MAX_ACTIVE_USER_TRANSACTIONS_PER_USER);
+    assert!(!ids.iter().any(|id| id == "id-42"));
+    assert!(ids.iter().any(|id| id == "new-1"));
+
+    match create_active(&pic, user, "new-2") {
+        ActiveUserTransactionResult::Err(ActiveUserTransactionError::TooManyActiveTransactions) => {
+        }
+        other => panic!("expected TooManyActiveTransactions, got {other:?}"),
+    }
+    assert_eq!(
+        list_active(&pic, user).len(),
+        MAX_ACTIVE_USER_TRANSACTIONS_PER_USER
+    );
 }
 
 #[test]

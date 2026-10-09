@@ -2,8 +2,11 @@ import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { maxBigInt } from '$lib/utils/bigint.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
+import { SOLANA_KNOWN_PROGRAM_ADDRESSES } from '$sol/constants/sol-known-programs.constants';
 import {
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
+	SYSTEM_PROGRAM_ADDRESS,
+	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
@@ -13,6 +16,7 @@ import type {
 } from '$sol/types/sol-instruction-summary';
 import type { SolParsedRpcInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
+import { rentExemptMinimumFor } from '$sol/utils/sol-rent.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export interface SolInstructionGroup {
@@ -202,15 +206,60 @@ const programAddressOf = (instruction: unknown): SolAddress | undefined => {
 	}
 };
 
+const stackHeightOf = (instruction: unknown): number | undefined =>
+	nonNullish(instruction) &&
+	typeof instruction === 'object' &&
+	'stackHeight' in instruction &&
+	typeof instruction.stackHeight === 'number'
+		? instruction.stackHeight
+		: undefined;
+
+/**
+ * The program that made each call inside one top-level instruction: the closest call before it one
+ * level up, from the depth the RPC reports for every nested call. A call reported without its depth
+ * is left without a caller rather than guessed at.
+ */
+const callersOf = ({
+	instruction,
+	inner
+}: {
+	instruction: unknown;
+	inner: readonly unknown[];
+}): (SolAddress | undefined)[] => {
+	const stack: (SolAddress | undefined)[] = [programAddressOf(instruction)];
+
+	return inner.map((nested) => {
+		const height = stackHeightOf(nested);
+
+		if (isNullish(height) || height < 2) {
+			return undefined;
+		}
+
+		const caller = stack[height - 2];
+
+		stack.length = height;
+		stack[height - 1] = programAddressOf(nested);
+
+		return caller;
+	});
+};
+
 const flatten = ({
 	instructions,
 	innerInstructions
 }: {
 	instructions: readonly unknown[];
 	innerInstructions: readonly SolInstructionGroup[];
-}): { parentIndex: number; topLevel: boolean; instruction: SolParsedRpcInstruction }[] =>
+}): {
+	parentIndex: number;
+	topLevel: boolean;
+	instruction: SolParsedRpcInstruction;
+	madeBy?: SolAddress;
+}[] =>
 	instructions.flatMap((instruction, parentIndex) => {
 		const inner = innerInstructions.find(({ index }) => index === parentIndex)?.instructions ?? [];
+
+		const callers = callersOf({ instruction, inner });
 
 		// Which of the two an instruction is has to survive the flattening: an account the message
 		// itself opens is one the user is paying for, while the same call made inside a program is
@@ -218,14 +267,19 @@ const flatten = ({
 		// Marked before the parse filter, so an unreadable top-level call does not promote its first
 		// inner one.
 		return [
-			{ instruction, topLevel: true },
-			...inner.map((nested) => ({ instruction: nested, topLevel: false }))
+			{ instruction, topLevel: true, madeBy: undefined },
+			...inner.map((nested, index) => ({
+				instruction: nested,
+				topLevel: false,
+				madeBy: callers[index]
+			}))
 		]
 			.filter(({ instruction: candidate }) => isParsed(candidate))
-			.map(({ instruction: parsed, topLevel }) => ({
+			.map(({ instruction: parsed, topLevel, madeBy }) => ({
 				parentIndex,
 				topLevel,
-				instruction: parsed as SolParsedRpcInstruction
+				instruction: parsed as SolParsedRpcInstruction,
+				...(nonNullish(madeBy) && { madeBy })
 			}));
 	});
 
@@ -440,6 +494,50 @@ const toEffect = ({
 		}
 
 		return { kind: 'createTokenAccount', account, ...(nonNullish(mint) && { tokenAddress: mint }) };
+	}
+
+	// An account opened for a program other than the System and token programs, with rent from the
+	// user's wallet: a liquidity position, an order book's open orders. The rent leaves the wallet as surely
+	// as a send does, and an application opening its own account inside its instruction may have no
+	// other line to show for it - without this one, the instruction read as one nothing described.
+	//
+	// At any level: the associated token account program opens its accounts the same way, but for
+	// the token program, and those are read as the token accounts they become. Both spellings, since
+	// a run reports the call as the RPC parses it and a message carries it as the wallet decodes it.
+	//
+	// Rent and nothing above it. Lamports beyond what the account's size costs are a balance in an
+	// account the program controls, a payment that "rent" would understate, and stay unstated.
+	//
+	// Not an account left with the System program: that is a wallet, whoever holds its key spends
+	// what it holds, and funding one is a payment to them rather than rent.
+	if (program === 'system' && type === 'createAccount') {
+		const owner = address({ info, key: 'owner' }) ?? address({ info, key: 'programAddress' });
+
+		if (
+			nonNullish(owner) &&
+			owner !== SYSTEM_PROGRAM_ADDRESS &&
+			owner !== TOKEN_PROGRAM_ADDRESS &&
+			owner !== TOKEN_2022_PROGRAM_ADDRESS
+		) {
+			const source = address({ info, key: 'source' }) ?? address({ info, key: 'payer' });
+			const account = address({ info, key: 'newAccount' });
+			const lamports = amount({ info, key: 'lamports' });
+			const space = amount({ info, key: 'space' });
+
+			const reserve =
+				nonNullish(space) && nonNullish(rentExemptMinimum)
+					? rentExemptMinimumFor({ space, rentExemptMinimum })
+					: undefined;
+
+			return nonNullish(source) &&
+				isOwned({ account: source }) &&
+				nonNullish(account) &&
+				nonNullish(lamports) &&
+				nonNullish(reserve) &&
+				lamports <= reserve
+				? { kind: 'createAccount', account, program: owner, rent: lamports }
+				: undefined;
+		}
 	}
 
 	// An account the message opens for the token program, read as the token account it is about to
@@ -1202,24 +1300,24 @@ const asWrap = ({
 			}
 		: effect;
 
-/**
- * Consecutive legs of one top-level instruction, gathered under the route that produced them.
- *
- * A route is only a route when it has more than one leg: a plain send performs a single transfer
- * and would otherwise be indented under a heading that describes nothing. Runs are consecutive so
- * that an account closed midway through a swap breaks the route rather than disappearing into it.
- */
-const isLeg = ({ kind }: { kind: SolInstructionSummaryKind }): boolean =>
-	kind === 'send' || kind === 'receive';
-
 const strip = ({ parentIndex: _parentIndex, ...view }: Effect): SolInstructionSummary => view;
 
-const groupRoutes = ({
+/**
+ * Every line of a top-level instruction the wallet could not read, gathered under it.
+ *
+ * Such an instruction is described only by the calls it made inside itself, so each line found
+ * there is that instruction's doing. One line or several, they hang under a heading that names its
+ * program: flat, a line made inside an application reads like one the message states itself, and
+ * a four-leg swap like four unrelated transfers. An instruction the wallet read is its own line.
+ */
+const groupUnread = ({
 	effects,
-	programs
+	programs,
+	unread
 }: {
 	effects: Effect[];
 	programs: Record<number, SolAddress>;
+	unread: Set<number>;
 }): SolInstructionSummary[] =>
 	effects
 		.reduce<Effect[][]>((runs, effect) => {
@@ -1227,15 +1325,16 @@ const groupRoutes = ({
 
 			const continues =
 				nonNullish(run) &&
-				run[0].parentIndex === effect.parentIndex &&
-				isLeg(run[0]) === isLeg(effect);
+				unread.has(effect.parentIndex) &&
+				run[0].parentIndex === effect.parentIndex;
 
 			return continues ? [...runs.slice(0, -1), [...run, effect]] : [...runs, [effect]];
 		}, [])
 		.flatMap((run) => {
 			const [first] = run;
 
-			if (run.length < 2 || !isLeg(first)) {
+			// An instruction with nothing under it is already the line that names its program.
+			if (!unread.has(first.parentIndex) || first.kind === 'unknown') {
 				return run.map(strip);
 			}
 
@@ -1249,6 +1348,61 @@ const groupRoutes = ({
 				}
 			];
 		});
+
+/**
+ * Whether a simulated run opens an account inside another program's instruction with more than its
+ * size costs.
+ *
+ * The message's own openings are held to the rent when the message is mapped, which reads the top
+ * level only. One a program makes inside its own call reaches the review through the run alone, and
+ * the list leaves an over-funded one out rather than call it rent - which refuses the request only
+ * while nothing else in that instruction has a line. Anything above the rent is a balance in an
+ * account the program controls, a payment with no destination, wherever the account is opened.
+ *
+ * An account the System program owns counts whatever it is funded with: nothing governs its lamports
+ * but the key it is opened at, so none of them is rent, as when the message opens one itself. For
+ * any other owner the line is the chain's reserve, and without it the opening is not judged on this.
+ */
+export const solOpensAccountBeyondRent = ({
+	innerInstructions,
+	rentExemptMinimum
+}: {
+	innerInstructions: SolInstructionGroup[];
+	rentExemptMinimum: bigint | undefined;
+}): boolean =>
+	innerInstructions.some(({ instructions }) =>
+		instructions.some((instruction) => {
+			if (!isParsed(instruction)) {
+				return false;
+			}
+
+			const {
+				program,
+				parsed: { type, info }
+			} = instruction;
+
+			if (program !== 'system' || !['createAccount', 'createAccountWithSeed'].includes(type)) {
+				return false;
+			}
+
+			const owner = address({ info, key: 'owner' });
+
+			if (owner === SYSTEM_PROGRAM_ADDRESS) {
+				return true;
+			}
+
+			const lamports = amount({ info, key: 'lamports' });
+			const space = amount({ info, key: 'space' });
+
+			return (
+				nonNullish(owner) &&
+				nonNullish(lamports) &&
+				nonNullish(space) &&
+				nonNullish(rentExemptMinimum) &&
+				lamports > rentExemptMinimumFor({ space, rentExemptMinimum })
+			);
+		})
+	);
 
 /**
  * The instruction list the review shows, from a transaction's own instructions and the ones a
@@ -1400,7 +1554,7 @@ export const mapSolInstructionSummaries = ({
 	]);
 
 	const effects = flattened.reduce<Effect[]>(
-		(acc, { parentIndex, topLevel, instruction }, position) => {
+		(acc, { parentIndex, topLevel, instruction, madeBy }, position) => {
 			const effect = toEffect({
 				instruction,
 				topLevel,
@@ -1438,7 +1592,26 @@ export const mapSolInstructionSummaries = ({
 						})
 					: undefined;
 
-			return [...acc, { ...wrapped, ...(nonNullish(rent) && { rent }), parentIndex }];
+			// The program that made a transfer, when it is not the one the line hangs under and not one
+			// of the known programs: a program the review's notice about programs OISY cannot read
+			// names. A known pool on every leg of every routed swap would only repeat itself.
+			const via =
+				['send', 'receive'].includes(wrapped.kind) &&
+				nonNullish(madeBy) &&
+				madeBy !== programs[parentIndex] &&
+				!SOLANA_KNOWN_PROGRAM_ADDRESSES.includes(madeBy)
+					? madeBy
+					: undefined;
+
+			return [
+				...acc,
+				{
+					...wrapped,
+					...(nonNullish(rent) && { rent }),
+					...(nonNullish(via) && { via }),
+					parentIndex
+				}
+			];
 		},
 		[]
 	);
@@ -1478,5 +1651,12 @@ export const mapSolInstructionSummaries = ({
 			].sort(({ parentIndex: first }, { parentIndex: second }) => first - second)
 		: effects;
 
-	return groupRoutes({ effects: listed, programs });
+	const unread = new Set(
+		instructions.reduce<number[]>(
+			(acc, instruction, index) => (isParsed(instruction) ? acc : [...acc, index]),
+			[]
+		)
+	);
+
+	return groupUnread({ effects: listed, programs, unread });
 };

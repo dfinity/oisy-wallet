@@ -17,6 +17,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
+	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { trackTip } from '$lib/services/tip-analytics.services';
 	import { loadTipPreview, parseClaimCodeFromFragment } from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -227,7 +228,11 @@
 	onMount(() => {
 		// The top of the claimer's funnel: a link was opened. Fired before sign-in,
 		// so the drop-off at the sign-in step is visible.
-		trackTip({ step: 'open', side: 'claimer' });
+		trackTip({
+			step: 'open',
+			side: 'claimer',
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+		});
 
 		void preloadData(AppPath.Tokens);
 	});

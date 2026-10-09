@@ -6,7 +6,12 @@ import {
 	decodeSolProgramIdlName,
 	findSolProgramIdlAddress
 } from '$sol/utils/sol-program-idl.utils';
-import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import {
+	mockSolAddress,
+	mockSolAddress2,
+	mockSolAddress3,
+	mockSolAddress4
+} from '$tests/mocks/sol.mock';
 import { get } from 'svelte/store';
 
 vi.mock('$sol/api/solana.api', () => ({
@@ -47,6 +52,61 @@ describe('sol-program-name.services', () => {
 				address: mockSolAddress2,
 				network
 			});
+		});
+
+		// An account opened inside an application's instruction names the program it is opened for.
+		it('should name the programs of the lines under an instruction too', async () => {
+			const opening: SolInstructionSummary = {
+				kind: 'createAccount',
+				program: mockSolAddress,
+				rent: 41_899_840n
+			};
+
+			await expect(
+				loadSolProgramNames({ instructions: [{ ...route, children: [opening] }], network })
+			).resolves.toStrictEqual([
+				{ ...route, programName: 'jupiter', children: [{ ...opening, programName: 'jupiter' }] }
+			]);
+
+			expect(findSolProgramIdlAddress).toHaveBeenCalledOnce();
+		});
+
+		it('should name the pool a leg of a route goes through', async () => {
+			vi.mocked(decodeSolProgramIdlName).mockImplementation(({ length }) =>
+				Promise.resolve(length === 3 ? 'jupiter' : 'fusionamm')
+			);
+			vi.mocked(getAccountData).mockImplementation(({ address }) =>
+				Promise.resolve(new Uint8Array(address === mockSolAddress2 ? [1, 2, 3] : [1]))
+			);
+			vi.mocked(findSolProgramIdlAddress).mockImplementation(({ programAddress }) =>
+				Promise.resolve(programAddress === mockSolAddress ? mockSolAddress2 : mockSolAddress3)
+			);
+
+			const leg: SolInstructionSummary = { ...send, via: mockSolAddress4 };
+
+			await expect(
+				loadSolProgramNames({ instructions: [{ ...route, children: [leg] }], network })
+			).resolves.toStrictEqual([
+				{ ...route, programName: 'jupiter', children: [{ ...leg, viaName: 'fusionamm' }] }
+			]);
+		});
+
+		// The review names its instructions and the programs it cannot read in parallel, and the pool
+		// of a routed swap is often among both.
+		it('should read a program once when two lookups ask about it at the same time', async () => {
+			const unread: SolInstructionSummary = { kind: 'unknown', program: mockSolAddress };
+
+			await expect(
+				Promise.all([
+					loadSolProgramNames({ instructions: [route], network }),
+					loadSolProgramNames({ instructions: [unread], network })
+				])
+			).resolves.toStrictEqual([
+				[{ ...route, programName: 'jupiter' }],
+				[{ ...unread, programName: 'jupiter' }]
+			]);
+
+			expect(getAccountData).toHaveBeenCalledOnce();
 		});
 
 		it('should leave an instruction that names no program untouched', async () => {

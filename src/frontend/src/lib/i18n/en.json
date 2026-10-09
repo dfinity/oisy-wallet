@@ -139,7 +139,6 @@
 			"source_code": "Source code",
 			"documentation": "Documentation",
 			"support": "Support",
-			"help": "Help",
 			"confirm_navigate": "Are you sure you want to navigate away?",
 			"vip_qr_code": "VIP QR codes",
 			"binance_qr_code": "Binance Clubhouse QR",
@@ -1129,6 +1128,11 @@
 			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
 			"unable_to_retrieve_amount": "n/a (unable to retrieve)",
 			"ethereum_insufficient_funds": "Your balance is not sufficient to cover this transaction and its network fee. It may have changed since it was last displayed, so please check the amount and try again.",
+			"ethereum_out_of_gas": "Your send failed because it needed more gas than estimated. Your funds are still in your wallet, but the network may still have charged a fee for the failed transaction. Try again.",
+			"ethereum_out_of_gas_gas": "Gas sent: $gasSent · Gas needed: $gasNeeded",
+			"ethereum_out_of_gas_gas_sent": "Gas sent: $gasSent",
+			"ethereum_transaction_hash": "Transaction hash: $hash",
+			"ethereum_unsigned_transaction": "Unsigned transaction: $transaction",
 			"solana_transaction_expired": "Your transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try again.",
 			"solana_confirmation_failed": "We did not receive a confirmation for the transaction you just created. Please wait a few seconds and then check your token’s transaction list if your transaction was created correctly.",
 			"solana_insufficient_funds": "Your token balance is not sufficient to complete this transaction. Your balance may have changed since it was last displayed.",
@@ -1711,7 +1715,8 @@
 			"prioritization_fee": "Priority fee",
 			"base_kind": "Base",
 			"prioritization_kind": "Priority",
-			"ata_kind": "Account rent"
+			"ata_kind": "Account rent",
+			"app_account_kind": "App account cost"
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Insufficient balance to cover the fees."
@@ -1763,6 +1768,9 @@
 			"tab_operations": "Operations",
 			"unreviewed_instructions": "OISY can't decode some of these instructions, so the review below may be incomplete.",
 			"unreviewed_instructions_simulated": "This transaction contains operations from an external source that OISY can't decode, so OISY ran a simulation of it. Be sure you trust the application, and review the simulated balance changes and operations before signing. Note that the actual outcome can differ from the simulation.",
+			"unread_programs_one": "This transaction calls a program OISY can't read. It can move funds you hold in other apps, such as staked SOL or lending deposits, and nothing below would show it.",
+			"unread_programs_other": "This transaction calls programs OISY can't read. They can move funds you hold in other apps, such as staked SOL or lending deposits, and nothing below would show it.",
+			"unread_programs_acknowledge": "I understand OISY can't show what this app does",
 			"cannot_be_shown": "This transaction includes actions that can't all be shown accurately for review, so OISY won't sign it. Reject it and ask the app to send a simpler request.",
 			"close_pays_others": "This transaction closes one of your token accounts and pays its balance to an address that is not your wallet. For your security, OISY won't sign it.",
 			"simulated_instructions": "Simulated instructions",
@@ -1876,6 +1884,7 @@
 			"ambiguous_transaction": "This transaction includes multiple actions that can't all be shown accurately for review. For your security, it was not signed.",
 			"close_pays_others": "This transaction closes one of your token accounts and pays its balance to an address that is not your wallet. For your security, it was not signed.",
 			"unreviewed_without_simulation": "OISY couldn't read part of this transaction, and the network didn't return a simulation of it either, so nothing describes what that part would do. For your security, it was not signed.",
+			"unread_programs_unconfirmed": "This transaction calls a program OISY can't read, and it wasn't confirmed on the review. For your security, it was not signed.",
 			"sol_transaction_as_message": "This message is a Solana transaction, which can only be approved through a transaction review. For your security, it was not signed.",
 			"request_not_defined": "Unexpected error: Request is not defined therefore cannot be processed.",
 			"unexpected_processing_request": "Unexpected error while processing the request with WalletConnect."
@@ -2155,6 +2164,7 @@
 			"instruction_wrap": "Wrap $amount SOL",
 			"instruction_unwrap": "Unwrap and close token account for $symbol",
 			"instruction_create_account": "Create token account for $symbol",
+			"instruction_create_program_account": "Create app account for",
 			"instruction_close_account": "Close token account",
 			"instruction_close_account_for": "Close token account for $symbol",
 			"instruction_approve": "Approve spender",
@@ -2167,6 +2177,7 @@
 			"instruction_thaw": "Unfreeze token account",
 			"instruction_unknown": "Unrecognised instruction",
 			"instruction_unknown_via": "Unrecognised instruction via",
+			"instruction_via": "via $program",
 			"instruction_rent": "rent $amount SOL",
 			"instruction_balance_returned": "SOL balance returned to your wallet",
 			"instruction_balance_sent": "SOL balance sent to your wallet",
