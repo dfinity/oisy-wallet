@@ -40,6 +40,7 @@ import {
 	getTransferCheckedInstruction
 } from '@solana-program/token';
 import {
+	AccountRole,
 	decompileTransactionMessage,
 	getCompiledTransactionMessageDecoder,
 	address as toAddress
@@ -832,6 +833,77 @@ describe('sol-instruction-summary.utils', () => {
 						fee
 					})
 				).toBeFalsy();
+			});
+
+			// The program and the account have to meet in the same call. An instruction that names the
+			// account and calls the program on something else never reached it.
+			it('should not hang a close under an instruction that calls its program without it', () => {
+				const closedAccount = {
+					account: 'c1osedAppAccount11111111111111111111111111',
+					program: 'App1icationProgram111111111111111111111111',
+					lamports: 41_899_840n
+				};
+
+				expect(
+					mapSolInstructionSummaries({
+						instructions: [
+							{
+								programAddress: 'WrapperProgram11111111111111111111111111111',
+								accounts: [{ address: closedAccount.account, role: AccountRole.WRITABLE }]
+							}
+						],
+						innerInstructions: [
+							{
+								index: 0,
+								instructions: [
+									{
+										programId: closedAccount.program,
+										accounts: ['SomethingE1se111111111111111111111111111111']
+									}
+								]
+							}
+						],
+						ownedAddresses: [userAddress],
+						userAddress,
+						closedAccounts: [closedAccount],
+						includeUnrecognised: true
+					})
+				).toStrictEqual([
+					{ kind: 'unknown', program: 'WrapperProgram11111111111111111111111111111' }
+				]);
+			});
+
+			it('should hang it under an instruction that calls its program with it', () => {
+				const closedAccount = {
+					account: 'c1osedAppAccount11111111111111111111111111',
+					program: 'App1icationProgram111111111111111111111111',
+					lamports: 41_899_840n
+				};
+
+				expect(
+					kinds(
+						mapSolInstructionSummaries({
+							instructions: [
+								{
+									programAddress: 'WrapperProgram11111111111111111111111111111',
+									accounts: [{ address: closedAccount.account, role: AccountRole.WRITABLE }]
+								}
+							],
+							innerInstructions: [
+								{
+									index: 0,
+									instructions: [
+										{ programId: closedAccount.program, accounts: [closedAccount.account] }
+									]
+								}
+							],
+							ownedAddresses: [userAddress],
+							userAddress,
+							closedAccounts: [closedAccount],
+							includeUnrecognised: true
+						})
+					)
+				).toStrictEqual(['route']);
 			});
 
 			it('should not hang a close under an instruction that does not run its program', () => {

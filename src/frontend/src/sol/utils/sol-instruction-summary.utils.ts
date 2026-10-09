@@ -231,12 +231,14 @@ const accountsOf = (instruction: unknown): SolAddress[] =>
 		: [];
 
 /**
- * The top-level instruction that emptied an account its program held: the last one in which that
- * program runs and which names the account.
+ * The top-level instruction that emptied an account its program held: the last one that calls that
+ * program with the account, itself or inside it.
  *
  * Only the program that owns an account can take lamports out of it, and an account it has emptied
- * is gone, so the last instruction that runs the program over the account is where it ended.
- * Undefined when none does, which leaves the close without an instruction to hang under.
+ * is gone, so the last call of the program over the account is where it ended. The program and the
+ * account meet in the same call: an instruction that names the account for something else and calls
+ * the program without it never reached the account. Undefined when none does, which leaves the
+ * close without an instruction to hang under.
  */
 const closingInstructionOf = ({
 	account,
@@ -253,11 +255,14 @@ const closingInstructionOf = ({
 		const inner =
 			innerInstructions.find(({ index: parent }) => parent === index)?.instructions ?? [];
 
-		const runs =
-			programAddressOf(instruction) === program ||
-			inner.some((nested) => programAddressOf(nested) === program);
+		const direct =
+			programAddressOf(instruction) === program && accountsOf(instruction).includes(account);
+		const nested = inner.some(
+			(candidate) =>
+				programAddressOf(candidate) === program && accountsOf(candidate).includes(account)
+		);
 
-		return runs && accountsOf(instruction).includes(account) ? index : acc;
+		return direct || nested ? index : acc;
 	}, undefined);
 
 const stackHeightOf = (instruction: unknown): number | undefined =>
