@@ -754,23 +754,37 @@ New `fetchLifiEvmSwap` in `lib/services/swap.services.ts`, mirroring
    `approve()` is **not changed**. `checkExistingApproval`
    (`eth/services/approve.services.ts`) skips the approval when the current allowance is
    already `>= amount`, and when it is non-zero but smaller it resets to zero first and
-   then approves `amount` (two transactions — the case Velora Market already has today,
-   with `SwapEthForm.svelte` reserving `maxGasFee * 2` whenever approval is needed; LI.FI
-   inherits that reservation unchanged). A leftover larger allowance is accepted on
-   purpose: the Diamond can only use it inside a call the user signs, and the calldata
-   binding pins what that call deposits (see
+   then approves `amount`: zero, one or two approval transactions before the swap. A
+   leftover larger allowance is accepted on purpose: the Diamond can only use it inside
+   a call the user signs, and the calldata binding pins what that call deposits (see
    [Calldata binding](#calldata-binding-evm-execution-time-quote)). An earlier revision
    of this spec added an `exactAllowance` mode with a three-transaction path, two extra
    allowance reads and a return-to-review loop on the transaction count; it was dropped
    because it bought no additional guarantee.
 
+   **The form budgets the approval transactions it will actually send.**
+   `SwapEthForm.svelte` reserves a flat `maxGasFee * 2` whenever approval is needed,
+   which covers one approval but not the reset path, and it uses `EthFeeContext`'s
+   plain-transfer estimate rather than the swap leg's own ceiling (below). For LI.FI,
+   when an ERC-20 quote is selected, the form reads the current allowance to the pinned
+   Diamond once (`erc20ContractAllowance`) and reserves, on top of the swap-leg ceiling:
+   no approval fee when the allowance is `>= fromAmount`, one when it is zero, two
+   (reset + approve) when it is non-zero and smaller. The read is repeated when the
+   quote's inputs (the cache key) change and never otherwise: there is no pre-dispatch
+   re-read and no return-to-review on the count. If another pending transaction moves the
+   allowance between review and execution, `approve()` decides from its own read, and a
+   balance that no longer covers what it sends surfaces as the existing
+   insufficient-funds abort before the swap is signed — Velora Market's exposure today,
+   now limited to that race rather than to every reset.
+
 3. **Re-quote with simulation on** (same params, `skipSimulation` omitted). The
    allowance now exists, so the simulation reflects the real transaction. Run
    `assertLifiQuote` and the same `toAmountMin` check as step 1: the price can move
    while the approval mines, and this is the quote whose bytes are signed. An abort here
-   leaves an allowance of `fromAmount` to the pinned Diamond behind, as Velora Market's
-   aborts do; the next LI.FI swap's `approve()` reuses it when it is large enough. No
-   revoke transaction is sent on abort.
+   leaves an allowance of **at least** `fromAmount` to the pinned Diamond behind
+   (exactly `fromAmount` when the approval was just sent, more when a larger one was
+   already there and skipped), as Velora Market's aborts do; the next LI.FI swap's
+   `approve()` reuses it when it is large enough. No revoke transaction is sent on abort.
 
    Then run `assertLifiEvmCalldata` on the new quote
    ([Calldata binding](#calldata-binding-evm-execution-time-quote)); a failure aborts
@@ -1168,7 +1182,7 @@ loader's 5 s tick.
 | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
 | 1   | **Backend AUT variant** — `Lifi(LifiData)`, validation, tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                                                                                                               | —                                              |
 | 2a  | **Scaffolding + quoting** — `@lifi/sdk`, env (flag **`false` everywhere**; unit tests switch it on), types, quote service + cache, form-time trust checks, LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges, empty source list so the Solana source picker is unchanged), provider sheet | 1                                              |
-| 2b  | **EVM execution + tracking** — calldata binding (pinned selectors + `CalldataVerificationFacet`), `fetchLifiEvmSwap` (pre-approval price check, unchanged `approve()`) + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound and the `/status` 404 → `NOT_FOUND` mapping)/loader (incl. wallet + EVM balance refresh)/item; flag back to `LOCAL \|\| STAGING`, `PRODUCT.md` for EVM-source swaps                   | 2a                                             |
+| 2b  | **EVM execution + tracking** — calldata binding (pinned selectors + `CalldataVerificationFacet`), `fetchLifiEvmSwap` (pre-approval price check, unchanged `approve()`, form budget of 0/1/2 approval fees from one allowance read) + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound and the `/status` 404 → `NOT_FOUND` mapping)/loader (incl. wallet + EVM balance refresh)/item; flag back to `LOCAL \|\| STAGING`, `PRODUCT.md` for EVM-source swaps                   | 2a                                             |
 | 3   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (quote, destinations and source list; Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` / `closedAccounts` in the simulation preview), `SwapSolWizard` dispatch, Solana source-chain check in the poller (in-memory expiry observations), `PRODUCT.md` update for Solana-source swaps                                                                       | 2b                                             |
 | 4   | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                                                                                                       | 3, production key + rate-limit scope confirmed |
 
@@ -1223,7 +1237,14 @@ everywhere.
 - **An abort after approval still costs the approval** — the price check in step 1 of
   [EVM execution](#evm-execution) makes a price move free to abort, but the gas-ceiling
   check needs the allowance to exist and so runs after it; a user bounced to review by a
-  higher ceiling has paid one approval. Velora Market has the same exposure.
+  higher ceiling has paid up to two approval transactions (reset + approve). Velora
+  Market has the same exposure.
+- **The approval budget is read once** — the form reserves zero, one or two approval
+  fees from a single allowance read at quote selection. An allowance moved by another
+  pending transaction between review and execution is not re-budgeted; it ends in the
+  insufficient-funds abort before the swap is signed, after at most the approval
+  transactions `approve()` already sent. Accepted over a pre-dispatch re-read and a
+  return-to-review loop on the count.
 
 ## Acceptance criteria
 
@@ -1247,8 +1268,10 @@ everywhere.
    `approve()` with the pinned Diamond (which equals the quote's `approvalAddress`) as
    spender — skipped when the allowance already covers `fromAmount`, reset-then-approve
    when it is non-zero and smaller — waits for an allowance `>= fromAmount`, and only then
-   broadcasts the swap with OISY-computed EIP-1559 fees. A native swap does not approve.
-   `approve()` and its existing callers are unchanged.
+   broadcasts the swap with OISY-computed EIP-1559 fees. The form's balance validation
+   reserves the swap-leg ceiling plus zero, one or two approval fees according to one
+   allowance read at quote selection, so the reset path is budgeted. A native swap does
+   not approve. `approve()` and its existing callers are unchanged.
 8. An EVM swap is never signed unless its calldata selector is in the pinned list for
    its route kind and the Diamond's `CalldataVerificationFacet` decodes it to the
    requested source token and amount, the user's recipient (EVM, or the user's Solana
@@ -1335,11 +1358,14 @@ Recorded so a future reader can tell "excluded on purpose" from "forgotten".
   not restart it and clock jumps cannot hasten it; another device starts its own window.
 - **Native-SOL receipts are checked net of the SOL fee cap**, not by reconstructing gross
   incoming lamports.
-- **`approve()` is reused unchanged; there is no exact-allowance mode.** A leftover
-  allowance to the Diamond is only usable inside a user-signed call whose calldata OISY
-  binds, so pinning it to the exact amount would add a reset transaction, two allowance
-  reads and a return-to-review loop for no extra guarantee. The price is re-checked
-  **before** the approval instead, so a stale display quote aborts for free.
+- **`approve()` is reused unchanged; there is no exact-allowance mode.** The allowance
+  the Diamond is left with is **at least** `fromAmount`, not exactly that: a larger
+  pre-existing one is kept. It is only usable inside a user-signed call whose calldata
+  OISY binds, so pinning it to the exact amount would add a reset transaction, a
+  pre-dispatch allowance read and a return-to-review loop for no extra guarantee. The
+  price is re-checked **before** the approval instead, so a stale display quote aborts
+  for free, and the form budgets zero, one or two approval fees from a single allowance
+  read at quote selection rather than a flat two.
 - **The row's chain ids are not refs.** They are derived from `source_token` /
   `dest_token`, and the Solana expiry observation lives in memory like Velora's
   replacement counter, so both row kinds stay at 13 of the 16 refs.
