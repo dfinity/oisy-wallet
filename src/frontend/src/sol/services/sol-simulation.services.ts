@@ -38,9 +38,11 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import { compileTransaction, getBase64EncodedWireTransaction } from '@solana/kit';
 
 /**
- * Which of the given accounts still hold lamports after the instructions of a message before the
- * given one, from a single run of those instructions alone. Anything that keeps that run from
- * answering - a message that cannot be cut there, a run that fails - says none do.
+ * Which of the given closed accounts still hold every lamport they held before the message, after
+ * its instructions before the given one, from a single run of those instructions alone. One an
+ * earlier call already took part of would have its close credit the last call with that share too.
+ * Anything that keeps that run from answering - a message that cannot be cut there, a run that
+ * fails - says none do.
  */
 const fundedBefore = async ({
 	transactionMessage,
@@ -50,7 +52,7 @@ const fundedBefore = async ({
 }: {
 	transactionMessage: CompilableTransactionMessage;
 	instruction: number;
-	accounts: SolAddress[];
+	accounts: SolClosedAccount[];
 	network: SolanaNetworkType;
 }): Promise<SolAddress[]> => {
 	try {
@@ -61,7 +63,7 @@ const fundedBefore = async ({
 					instructions: transactionMessage.instructions.slice(0, instruction)
 				})
 			),
-			addresses: accounts,
+			addresses: accounts.map(({ account }) => account),
 			network
 		});
 
@@ -69,11 +71,11 @@ const fundedBefore = async ({
 			return [];
 		}
 
-		return accounts.filter((_, index) => {
+		return accounts.reduce<SolAddress[]>((acc, { account, lamports }, index) => {
 			const state = states[index];
 
-			return nonNullish(state) && BigInt(state.lamports) > ZERO;
-		});
+			return nonNullish(state) && BigInt(state.lamports) >= lamports ? [...acc, account] : acc;
+		}, []);
 	} catch (_: unknown) {
 		return [];
 	}
@@ -84,9 +86,9 @@ const fundedBefore = async ({
  *
  * The one instruction that calls the owning program with the account emptied it. When several do,
  * an account the program has emptied stays loaded for the rest of the message, and a later call can
- * name it again: the last of them is the one only if the account still held its lamports when that
- * call began, which a second run of the message up to it shows. Otherwise the close stays without an
- * instruction, and so without a line.
+ * name it again: the last of them is the one only if the account still held all its lamports when
+ * that call began, which a second run of the message up to it shows. Otherwise the close stays
+ * without an instruction, and so without a line.
  *
  * Accounts whose last call is the same instruction share that run, which asks for all of them at
  * once: one run per instruction at most, however many accounts the message closes.
@@ -113,15 +115,15 @@ const attributeClosedAccounts = async ({
 	}));
 
 	// The accounts each second run answers for, by the instruction it stops at.
-	const checks = attributions.reduce((acc, { closed: { account }, candidates }) => {
+	const checks = attributions.reduce((acc, { closed, candidates }) => {
 		const last = candidates.at(-1);
 
 		if (candidates.length > 1 && nonNullish(last)) {
-			acc.set(last, [...(acc.get(last) ?? []), account]);
+			acc.set(last, [...(acc.get(last) ?? []), closed]);
 		}
 
 		return acc;
-	}, new Map<number, SolAddress[]>());
+	}, new Map<number, SolClosedAccount[]>());
 
 	const funded = new Set(
 		(

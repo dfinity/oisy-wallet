@@ -471,6 +471,17 @@ describe('sol-simulation.services', () => {
 				]);
 			});
 
+			// The first call took part of the balance and the second closes the rest: the line under
+			// the second would credit it with the share the first one moved.
+			it('should leave the close without an instruction when an earlier call took part of it', async () => {
+				const result = await runTwice(rent / 2n);
+
+				expect(result?.instructions).toStrictEqual([
+					{ kind: 'unknown', program: application },
+					{ kind: 'unknown', program: application }
+				]);
+			});
+
 			// Accounts whose last call is the same instruction share the run up to it, so a message
 			// closing many of them behind the same calls costs one second run rather than one each.
 			it('should check accounts that share their last call in a single run', async () => {
