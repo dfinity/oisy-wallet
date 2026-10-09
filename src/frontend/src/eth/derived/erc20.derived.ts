@@ -120,8 +120,3 @@ export const erc20CustomTokensInitialized: Readable<boolean> = derived(
 	[erc20CustomTokensStore],
 	([$erc20CustomTokensStore]) => $erc20CustomTokensStore !== undefined
 );
-
-export const erc20CustomTokensNotInitialized: Readable<boolean> = derived(
-	[erc20CustomTokensInitialized],
-	([$erc20TokensInitialized]) => !$erc20TokensInitialized
-);

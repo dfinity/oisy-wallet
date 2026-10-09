@@ -27,7 +27,6 @@ export const TRACK_COUNT_ETH_LOADING_BALANCE_ERROR = 'eth_loading_balance_error'
 export const TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR = 'eth_loading_transactions_error';
 export const TRACK_COUNT_ETH_PENDING_TRANSACTIONS_ERROR = 'eth_pending_transactions_error';
 export const TRACK_ETH_ESTIMATE_GAS_ERROR = 'eth_estimate_gas_error';
-export const TRACK_ETH_LOADING_NFT_IDS_ERROR = 'eth_loading_nft_ids_error';
 
 // Internet Computer
 export const TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS = 'ic_ckbtc_to_btc_success';
@@ -58,7 +57,6 @@ export const TRACK_COUNT_XRP_SEND_SUCCESS = 'xrp_send_success';
 export const TRACK_COUNT_XRP_SEND_ERROR = 'xrp_send_error';
 
 // WalletConnect
-export const TRACK_COUNT_WALLET_CONNECT_MENU_OPEN = 'wallet_connect_menu_open';
 export const TRACK_COUNT_WALLET_CONNECT_QR_CODE = 'wallet_connect_qr_code';
 export const TRACK_COUNT_WALLET_CONNECT = 'wallet_connect';
 
@@ -137,17 +135,12 @@ export const TRACK_SNAPSHOT_SEND_ERROR = 'snapshot_send_error';
 
 // Analytics event source routes
 export const LANDING_PAGE_ROUTE = 'landing-page';
-export const HOME_PAGE_ROUTE = 'home-page';
 export const USER_MENU_ROUTE = 'user-menu';
 export const MORE_MENU_ROUTE = 'more-menu';
 export const HIDE_TOKEN_MODAL_ROUTE = 'hide-token-modal';
 export const MANAGE_TOKENS_MODAL_ROUTE = 'manage-tokens-modal';
-export const TOKEN_VIEW_ROUTE = 'token-view';
 export const NFT_COLLECTION_ROUTE = 'nft-collection-page';
 export const NFT_LIST_ROUTE = 'nft-list-page';
-export const NFT_COLLECTION_HERO = 'nft-collection-hero';
-export const NFT_CONSENT_MODAL = 'nft-consent-modal';
-export const NFT_COLLECTION_DESCRIPTION = 'nft-collection-description';
 
 // Privacymode change
 export const TRACK_PRIVACY_MODE_CHANGE = 'privacy_mode_change';
@@ -181,12 +174,5 @@ export const AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED = 'ai_assistant_tool_executio
 export const AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED = 'ai_assistant_textual_response_received';
 
 // NFTs
-export const TRACK_OPEN_ASSETS_TAB = 'open_assets_tab';
-export const TRACK_NFT_SETTINGS_CHANGE = 'nft_settings_change';
-export const TRACK_NFT_SORT_CHANGE = 'nft_sort_change';
 export const TRACK_NFT_SEND = 'nft_send';
-export const TRACK_NFT_CONSENT_GIVEN = 'nft_consent_given';
-export const TRACK_NFT_OPEN = 'nft_open';
-export const TRACK_NFT_OPEN_CONSENT_MODAL = 'nft_open_consent_modal';
-export const TRACK_NFT_SPAM_HIDE_ACTION = 'nft_spam_hide_action';
 export const TRACK_NFT_LOAD_ONCHAIN_IMAGE_URL = 'nft_load_onchain_image_url';

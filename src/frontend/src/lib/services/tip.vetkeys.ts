@@ -194,19 +194,6 @@ export const decryptClaimCodeWithKey = async ({
 	return new TextDecoder().decode(bytes);
 };
 
-export const encryptClaimCode = async ({
-	claimCode,
-	tipId,
-	identity
-}: {
-	claimCode: string;
-	tipId: string;
-	identity: Identity;
-}): Promise<Uint8Array> => {
-	const keyMaterial = await deriveTipKeyMaterial({ identity });
-	return encryptClaimCodeWithKey({ keyMaterial, claimCode, tipId });
-};
-
 export const decryptClaimCode = async ({
 	encrypted,
 	tipId,
