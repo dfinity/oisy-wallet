@@ -198,18 +198,23 @@ const simulate = async ({
 	const walletBefore = preAccounts[walletIndex]?.lamports;
 	const walletAfter = postAccounts[walletIndex]?.lamports;
 
-	const instructions = solClosedAccountsReachWallet({
-		closedAccounts,
-		walletChange:
-			walletIndex >= 0 && nonNullish(walletBefore) && nonNullish(walletAfter)
-				? BigInt(walletAfter) - BigInt(walletBefore)
-				: undefined,
-		statedChange: solWalletLamportsStated({ instructions: summaries, userAddress: address }),
-		// Charged to whoever pays the fee, which need not be the wallet.
-		fee: transactionMessage.feePayer.address === address ? (fee ?? ZERO) : ZERO
-	})
-		? summarise(closedAccounts)
-		: summaries;
+	// Charged to whoever pays the fee, which need not be the wallet. A run that leaves out a fee the
+	// wallet pays leaves the comparison off by that fee, so no close is listed from it.
+	const walletFee = transactionMessage.feePayer.address === address ? fee : ZERO;
+
+	const instructions =
+		nonNullish(walletFee) &&
+		solClosedAccountsReachWallet({
+			closedAccounts,
+			walletChange:
+				walletIndex >= 0 && nonNullish(walletBefore) && nonNullish(walletAfter)
+					? BigInt(walletAfter) - BigInt(walletBefore)
+					: undefined,
+			statedChange: solWalletLamportsStated({ instructions: summaries, userAddress: address }),
+			fee: walletFee
+		})
+			? summarise(closedAccounts)
+			: summaries;
 
 	// The message read on its own, without the nested calls the run reveals: a second account of
 	// the same transaction, which is what lets the review notice the two disagreeing.

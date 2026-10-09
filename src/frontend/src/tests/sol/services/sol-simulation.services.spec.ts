@@ -335,13 +335,19 @@ describe('sol-simulation.services', () => {
 			{ index: 0, instructions: [{ programId: application, accounts: [], data: '' }] }
 		] as unknown as SolanaSimulatedInnerInstructions;
 
-		const run = async (walletAfter: bigint) => {
+		const run = async ({
+			walletAfter,
+			withFee = true
+		}: {
+			walletAfter: bigint;
+			withFee?: boolean;
+		}) => {
 			vi.mocked(getMultipleAccountsInfo).mockResolvedValue([systemAccount(1_000_000n), appAccount]);
 			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
 				simulated({
 					accounts: [systemAccount(walletAfter), null],
 					innerInstructions: eventLog,
-					fee
+					...(withFee && { fee })
 				})
 			);
 
@@ -349,7 +355,7 @@ describe('sol-simulation.services', () => {
 		};
 
 		it('should list the close under its instruction when the rent came home', async () => {
-			const result = await run(1_000_000n + rent - fee);
+			const result = await run({ walletAfter: 1_000_000n + rent - fee });
 
 			expect(result?.instructions).toStrictEqual([
 				{
@@ -362,9 +368,17 @@ describe('sol-simulation.services', () => {
 			]);
 		});
 
+		// Without the fee the wallet paid, the comparison is off by that fee: here an inflow from
+		// elsewhere as large as the fee would make it pass.
+		it('should list no close from a run that leaves out the fee', async () => {
+			const result = await run({ walletAfter: 1_000_000n + rent, withFee: false });
+
+			expect(result?.instructions).toStrictEqual([{ kind: 'unknown', program: application }]);
+		});
+
 		// Nothing then says where the rent went, and the instruction stays one nothing describes.
 		it('should leave the instruction undescribed when the rent went elsewhere', async () => {
-			const result = await run(1_000_000n - fee);
+			const result = await run({ walletAfter: 1_000_000n - fee });
 
 			expect(result?.instructions).toStrictEqual([{ kind: 'unknown', program: application }]);
 		});
