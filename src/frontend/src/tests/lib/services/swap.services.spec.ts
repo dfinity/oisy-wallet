@@ -69,6 +69,7 @@ import {
 } from '$lib/types/near-intents';
 import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
 import { VELORA_EXTERNAL_REF_KEYS } from '$lib/types/velora-swap';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import {
 	isNearIntentsQuoteExpired,
 	verifyNearIntentsQuoteSignature
@@ -4020,9 +4021,9 @@ describe('swap.services', () => {
 			expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
 		});
 
-		// A memo is a destination tag the payment would not carry, so the deposit would arrive
-		// uncredited; the quote is refused before anything is signed, recorded or reported.
-		it('should refuse a quote that asks for a deposit memo', async () => {
+		// The offer list already leaves such a quote out. One that reaches the send by another route is
+		// refused before anything is signed, recorded or reported.
+		it('should refuse a quote that comes with a deposit memo', async () => {
 			await expect(
 				fetchNearIntentsXrpSwap({
 					...baseParams,
@@ -4033,7 +4034,7 @@ describe('swap.services', () => {
 				})
 			).rejects.toMatchObject({
 				code: SwapErrorCodes.NEAR_INTENTS_QUOTE_DEPOSIT_MEMO,
-				message: en.swap.error.near_intents_quote_deposit_memo
+				message: replaceOisyPlaceholders(en.swap.error.near_intents_quote_deposit_memo)
 			});
 
 			expect(sendXrp).not.toHaveBeenCalled();
