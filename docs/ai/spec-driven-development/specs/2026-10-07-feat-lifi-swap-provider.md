@@ -728,10 +728,16 @@ value })` runs on the exact checked transaction through `infuraProviders(network
    (the existing `estimateGas` on the Infura provider; the allowance exists by now, so the estimate reflects the real call), plus a new fixed buffer `LIFI_GAS_LIMIT_BUFFER_PERCENT` (20 %; the repo has no shared one). A failing estimate aborts. With OISY's EIP-1559
    `maxFeePerGas`, the transaction's fee ceiling is `gas × maxFeePerGas + l1Fee`, the same
    formula as `maxGasFee` (`eth/utils/fee.utils.ts`). `l1Fee` is the OP-stack L1 data fee
-   (Base), read with `getL1FeeUpperBound` on the Infura provider for the **actual**
-   unsigned transaction's RLP size: the shared `OP_STACK_UNSIGNED_TX_SIZE` (128 bytes,
+   (Base), read with `getL1FeeUpperBound` on the Infura provider for an **upper bound** of
+   the unsigned transaction's RLP size: the shared `OP_STACK_UNSIGNED_TX_SIZE` (128 bytes,
    `evm/base/constants/base.constants.ts`) is sized for transfers and would underprice
-   LI.FI's calldata. It is `undefined` (zero) off OP-stack chains. The native balance must
+   LI.FI's calldata. The exact size is not known here, because `swap()` reads the nonce
+   only later (`eth/services/swap.services.ts`) and the nonce changes the RLP length. So
+   the size is computed by encoding the unsigned EIP-1559 transaction with its real
+   `to`, `data`, `value`, `chainId`, gas and fee fields and the **largest possible
+   nonce** (`2^64 − 1`, the widest RLP encoding). That bounds every actual nonce, so the
+   reviewed `l1Fee` is never below the signed transaction's, and `swap()` keeps choosing
+   its nonce unchanged. It is `undefined` (zero) off OP-stack chains. The native balance must
    cover `value + ceiling`, or the swap aborts with the existing insufficient-funds error
    before signing.
 4. `swap({ to: tr.to, transaction: { data: tr.data, gas: estimatedGas, value: tr.value, chainId: tr.chainId }, maxFeePerGas, maxPriorityFeePerGas, … })`.
