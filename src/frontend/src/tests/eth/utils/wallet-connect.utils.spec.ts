@@ -24,6 +24,7 @@ import {
 	hasUnreviewableTypedData,
 	isEthSignTypedDataMethod,
 	isWalletConnectEthApproval,
+	isWalletConnectEthTokenCallWithValue,
 	toTypedDataDomainChainId,
 	WalletConnectEthTypedDataError
 } from '$eth/utils/wallet-connect.utils';
@@ -463,6 +464,32 @@ describe('wallet-connect.utils', () => {
 			{ type: 'unknown' as const, selector: '0xdeadbeef' }
 		])('should not treat $type as an approval', (call) => {
 			expect(isWalletConnectEthApproval(call)).toBeFalsy();
+		});
+	});
+
+	describe('isWalletConnectEthTokenCallWithValue', () => {
+		const tokenCalls = [
+			{ type: 'erc20Transfer' as const },
+			{ type: 'erc20Approve' as const },
+			{ type: 'erc20AllowanceDelta' as const, increase: true },
+			{ type: 'erc20AllowanceDelta' as const, increase: false }
+		];
+
+		it.each(tokenCalls)('should flag $type carrying native value', (call) => {
+			expect(isWalletConnectEthTokenCallWithValue({ call, value: 1n })).toBeTruthy();
+		});
+
+		it.each(tokenCalls)('should not flag $type carrying no native value', (call) => {
+			expect(isWalletConnectEthTokenCallWithValue({ call, value: ZERO })).toBeFalsy();
+		});
+
+		// Their review states the native value itself, so it has a line for it.
+		it.each([
+			{ type: 'native' as const },
+			{ type: 'setApprovalForAll' as const },
+			{ type: 'unknown' as const, selector: '0xdeadbeef' }
+		])('should not flag $type carrying native value', (call) => {
+			expect(isWalletConnectEthTokenCallWithValue({ call, value: 1n })).toBeFalsy();
 		});
 	});
 

@@ -1,6 +1,12 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import {
+	ERC20_APPROVE_HASH,
+	ERC20_DECREASE_ALLOWANCE_HASH,
+	ERC20_INCREASE_ALLOWANCE_HASH,
+	ERC20_TRANSFER_HASH
+} from '$eth/constants/erc20.constants';
+import {
 	SESSION_REQUEST_ETH_SIGN,
 	SESSION_REQUEST_ETH_SIGN_LEGACY,
 	SESSION_REQUEST_ETH_SIGN_V4,
@@ -13,9 +19,13 @@ import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api'
 import { ZERO } from '$lib/constants/app.constants';
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { authStore } from '$lib/stores/auth.store';
+import * as toastsStore from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/api/signer.api', () => ({
 	signPrehash: vi.fn(),
@@ -219,20 +229,24 @@ describe('eth wallet-connect.services', () => {
 
 		const estimatedGas = 250_000n;
 
-		const buildParams = (gas?: string) => ({
+		const buildParams = ({
+			gas,
+			data,
+			amount = ZERO
+		}: { gas?: string; data?: string; amount?: bigint } = {}) => ({
 			request: {
 				id: 1,
 				topic: 'mock-topic',
 				params: {
 					request: {
 						method: 'eth_sendTransaction',
-						params: [{ from: HOLDER, to: SPENDER, gas }]
+						params: [{ from: HOLDER, to: SPENDER, gas, data }]
 					}
 				}
 			} as unknown as WalletKitTypes.SessionRequest,
 			listener: mockListener,
 			address: HOLDER,
-			amount: ZERO,
+			amount,
 			fee: {
 				maxFeePerGas: 1_000_000_000n,
 				maxPriorityFeePerGas: 100_000_000n,
@@ -253,7 +267,7 @@ describe('eth wallet-connect.services', () => {
 		});
 
 		it('signs the gas limit the dApp requested', async () => {
-			const { success } = await send(buildParams('0x1e8480'));
+			const { success } = await send(buildParams({ gas: '0x1e8480' }));
 
 			expect(success).toBeTruthy();
 			expect(vi.mocked(executeSend).mock.calls[0][0]).toMatchObject({ gas: 2_000_000n });
@@ -267,10 +281,54 @@ describe('eth wallet-connect.services', () => {
 		});
 
 		it('signs the gas OISY resolved when the requested limit is not a usable quantity', async () => {
-			const { success } = await send(buildParams('0x'));
+			const { success } = await send(buildParams({ gas: '0x' }));
 
 			expect(success).toBeTruthy();
 			expect(vi.mocked(executeSend).mock.calls[0][0]).toMatchObject({ gas: estimatedGas });
+		});
+
+		describe('a token call that sends native value along with it', () => {
+			const args = 'de'.repeat(64);
+
+			const tokenCalls = [
+				ERC20_TRANSFER_HASH,
+				ERC20_APPROVE_HASH,
+				ERC20_INCREASE_ALLOWANCE_HASH,
+				ERC20_DECREASE_ALLOWANCE_HASH
+			];
+
+			let spyToastsError: MockInstance;
+
+			beforeEach(() => {
+				spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+			});
+
+			it.each(tokenCalls)('refuses selector %s and never signs', async (selector) => {
+				const params = buildParams({
+					data: `${selector}${args}`,
+					amount: 5_000_000_000_000_000_000n
+				});
+
+				const { success } = await send(params);
+
+				expect(success).toBeFalsy();
+				expect(executeSend).not.toHaveBeenCalled();
+				expect(params.modalNext).not.toHaveBeenCalled();
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: {
+						text: replacePlaceholders(en.wallet_connect.error.token_call_with_value, {
+							$amount: `5 ${ETHEREUM_TOKEN.symbol}`
+						})
+					}
+				});
+			});
+
+			it.each(tokenCalls)('signs selector %s carrying no native value', async (selector) => {
+				const { success } = await send(buildParams({ data: `${selector}${args}` }));
+
+				expect(success).toBeTruthy();
+				expect(executeSend).toHaveBeenCalledOnce();
+			});
 		});
 	});
 });
