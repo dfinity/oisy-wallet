@@ -314,10 +314,21 @@ selectable while LI.FI still refuses Solana sources, and the user would pick a t
 provider quotes. So until PR 3 the Solana entry declares
 `getSupportedTokens: () => Promise.resolve(new Set())`: an empty list contributes nothing
 to the union and keeps the category's coverage at `all`, so the source picker is exactly
-what it is today. PR 3 removes the `getSupportedTokens` entirely (the wildcard is then
-intended: LI.FI quotes any SPL token) in the same change that lifts the quote and
-destination restrictions. The EVM entry needs no such guard, because Velora is already a
-wildcard for the EVM category.
+what it is today. PR 3 replaces the empty list with a **mainnet-only list**, not with a
+wildcard: the `sol` category is a chain family, not an environment, so a wildcard would
+also admit the devnet and local SOL tokens that `enabledSolanaTokens`
+(`sol/derived/tokens.derived.ts`) includes when testnets are on, and `isPageTokenSwappable`
+would show the Swap action on them while the chain-id mapping below returns no quote.
+From PR 3 the Solana entry's `getSupportedTokens` returns the identifiers of every
+Solana **mainnet** token known at load time — native SOL on `SOLANA_MAINNET_NETWORK_ID`
+and every token of `splTokens` whose network is Solana mainnet, read with `get()` and
+keyed through `resolveSwapTokenLookup` so the identifiers stay in the filter's key
+space. `loadSwapSupportedTokens` runs on every Swap modal open (`SwapLoader.svelte`), so
+a custom SPL token the user added since the last load is covered the next time the
+modal opens. The category keeps coverage `all` (NEAR Intents and LI.FI both list), and
+the union is NEAR's list plus every known mainnet SPL token. The EVM entry needs no such
+guard, because Velora is already a wildcard for the EVM category; that Velora's wildcard
+admits Sepolia tokens the same way is pre-existing and out of scope here.
 
 Solana-source quotes pass `allowExchanges` limited to `LIFI_SOLANA_ALLOWED_EXCHANGES`, the
 LI.FI tool keys of the aggregators that execution can bind: those with pinned
@@ -631,10 +642,15 @@ cause satisfy the receipt bound, or hide part of the spend. So `simulateSolTrans
 gains a `consistentSnapshot` option, `false` by default (WalletConnect unchanged), and
 LI.FI passes `true`, which changes the run in three ways:
 
-- `getMultipleAccountsInfo` returns the response's `context.slot` next to `value`, and
-  `simulateTransactionAccounts` accepts the RPC's `minContextSlot` and returns its own
-  `context.slot`. Both calls already go to the same `solanaHttpRpc(network)` at the same
-  commitment.
+- `getMultipleAccountsInfo` keeps its current signature and return type: it is consumed
+  as a plain account array by `sol-balances.services.ts` (`results.flat()`) and by the
+  account-info cache in `solana.api.ts` itself, which indexes the result. A new sibling,
+  `getMultipleAccountsInfoWithContext`, returns `{ slot, value }` from the same RPC
+  response, and the existing helper becomes a thin wrapper over it that drops the slot,
+  so no caller or test changes. `simulateTransactionAccounts` gains an optional
+  `minContextSlot` and returns the response's `context.slot` next to its existing fields
+  (an added field; WalletConnect ignores it). Both calls already go to the same
+  `solanaHttpRpc(network)` at the same commitment.
 - The two reads become **sequential**: the pre-state is read first, at slot `S`, then the
   simulation runs with `minContextSlot: S` and its `context.slot` must equal `S`. Two
   nodes at the same confirmed slot hold the same state for it, so equality is the
@@ -944,11 +960,35 @@ pub struct LifiData {
 }
 ```
 
-`validate_data` arm: `require_valid_amount(&d.amount, "amount")`. Candid round-trip
-tests, an integration test in `src/backend/tests/it/active_user_transactions.rs`,
-regenerated `backend.did` and `src/declarations/backend/*` (rebuild the wasm before
-`npm run generate`, which otherwise no-ops silently). Precedent: commit `78d5addbd`
-(Velora's variant).
+`validate_data` arm: `require_valid_amount(&d.amount, "amount")` and a new
+`require_lifi_pair(d)`, in the style of `require_chain_fusion_pair` /
+`require_oisy_trade_pair`. A row is the poller's only input, and the poller derives both
+chains from the two `TokenId`s (see [External refs](#external-refs-lifi_external_ref_keys-libtypeslifits));
+a row it cannot map would never terminate and would sit in the user's 100-row quota
+(`MAX_ACTIVE_USER_TRANSACTIONS_PER_USER`) for good. So the backend refuses any pair
+outside the v1 matrix instead of storing it:
+
+- `source_token` is an EVM mainnet token — `EvmNative(c)`, `Erc20(_, c)` or
+  `Erc4626(_, c)` (vault tokens are ERC-20s to LI.FI and `toBackendTokenId` maps them
+  to that variant) with `c` in `LIFI_EVM_CHAIN_IDS` — or a Solana mainnet token
+  (`SplMainnet(_)`, `SolNativeMainnet`).
+- `dest_token` is one of the same kinds. A Solana source requires a Solana destination
+  (Solana → EVM is out of v1).
+- `source_token != dest_token`.
+
+`LIFI_EVM_CHAIN_IDS` is a `const` in `model.rs` holding the six mainnet chain ids
+(1, 42161, 56, 137, 8453, 4663), with a comment that it mirrors the keys of the
+frontend's `LIFI_DIAMOND_ADDRESSES`: a chain without a pinned Diamond cannot be swapped
+through, so adding one is a backend PR as well as a frontend one. NFT variants
+(`Erc721`, `Erc1155`), devnet Solana variants, ICP, BTC and XRP tokens are rejected with
+`InvalidData("token pair is outside the LI.FI v1 matrix")`. Unit tests cover one
+accepted pair per direction (EVM → EVM, EVM → Solana, Solana → Solana) and one rejection
+per rule (unknown chain id, devnet SPL, Solana → EVM, NFT kind, ICP, same token).
+The frontend poller keeps its `undefined`-chain skip as defence in depth, but no row
+OISY creates can reach it. Candid round-trip tests, an integration test in
+`src/backend/tests/it/active_user_transactions.rs`, regenerated `backend.did` and
+`src/declarations/backend/*` (rebuild the wasm before `npm run generate`, which
+otherwise no-ops silently). Precedent: commit `78d5addbd` (Velora's variant).
 
 #### External refs (`LIFI_EXTERNAL_REF_KEYS`, `lib/types/lifi.ts`)
 
@@ -977,7 +1017,8 @@ Two things one might expect in the refs are deliberately not there:
   `SplMainnet(_)`, `SolNativeMainnet` and so on. A small `lifiChainIdOfTokenId` in
   `lib/utils/lifi-active-tx.utils.ts` maps that to the LI.FI chain id (EVM: the chain id;
   Solana mainnet: `1151111081099710`; anything else: `undefined`, and the row is skipped
-  with `consoleError`). It serves both the poller's `/status` query and the EVM
+  with `consoleError` — unreachable for rows OISY creates, since the backend refuses
+  the pair first, see [Backend variant](#backend-variant)). It serves both the poller's `/status` query and the EVM
   source-chain check's network lookup.
 - **The Solana expiry observation.** The two-observation guard keeps its counter in an
   in-memory map, exactly like Velora Market's `replacementObservations`
@@ -1212,10 +1253,10 @@ loader's 5 s tick.
 
 | PR  | Scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Depends on                                     |
 | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| 1   | **Backend AUT variant** — `Lifi(LifiData)`, validation, tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                                                                                                                                                         | —                                              |
+| 1   | **Backend AUT variant** — `Lifi(LifiData)`, validation of the v1 token matrix (`require_lifi_pair`, pinned EVM chain ids), tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                                                                                      | —                                              |
 | 2a  | **Scaffolding + quoting** — `@lifi/sdk`, env (flag **`false` everywhere**; unit tests switch it on), types, quote service + cache, form-time trust checks, LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges, empty source list so the Solana source picker is unchanged), provider sheet                                           | 1                                              |
 | 2b  | **EVM execution + tracking** — calldata binding (pinned selectors + `CalldataVerificationFacet`), `fetchLifiEvmSwap` (pre-approval price check, unchanged `approve()`, form budget of 0/1/2 approval fees from one allowance read) + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound and the `/status` 404 → `NOT_FOUND` mapping)/loader (incl. wallet + EVM balance refresh)/item; flag back to `LOCAL \|\| STAGING`, `PRODUCT.md` for EVM-source swaps | 2a                                             |
-| 3   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (quote, destinations and source list; Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` / `closedAccounts` in the simulation preview and the slot-consistent pre/post snapshot), `SwapSolWizard` dispatch, Solana source-chain check in the poller (in-memory expiry observations), `PRODUCT.md` update for Solana-source swaps                                                                       | 2b                                             |
+| 3   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (quote, destinations, and a mainnet-only source list in place of the empty one; Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` / `closedAccounts` in the simulation preview and the slot-consistent pre/post snapshot), `SwapSolWizard` dispatch, Solana source-chain check in the poller (in-memory expiry observations), `PRODUCT.md` update for Solana-source swaps                             | 2b                                             |
 | 4   | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 3, production key + rate-limit scope confirmed |
 
 PR 2 is split up front so each PR stays reviewable. In 2a the flag is `false` everywhere,
@@ -1328,8 +1369,8 @@ everywhere.
     PR 3) Solana tokens for a Solana source, even when no other provider covers that
     category, and Solana networks and tokens stay in the swap pickers when NEAR Intents
     is off but LI.FI is on. Until PR 3 the Solana **source** picker is exactly what it
-    is without LI.FI (NEAR Intents' list); from PR 3 every enabled Solana token is
-    selectable as a source.
+    is without LI.FI (NEAR Intents' list); from PR 3 every known Solana **mainnet**
+    token is selectable as a source, and devnet or local SOL tokens never are.
 11. A Solana swap signs LI.FI's transaction bytes unchanged (no recompilation) and
     broadcasts them.
 12. After broadcast, the modal closes, an AUT row appears in the Active-transactions
@@ -1358,6 +1399,12 @@ everywhere.
     source-tx helper extraction.
 19. Every LI.FI-supplied string written to a row (error or ref value) fits the backend's
     UTF-8 byte limits, including non-ASCII text.
+20. The backend rejects a `Lifi` row whose token pair is outside the v1 matrix (an EVM
+    chain id without a pinned Diamond, a devnet Solana token, a Solana → EVM pair, an
+    NFT, ICP, BTC or XRP token, or the same token on both sides), so no stored row can
+    be one the poller cannot drive to a terminal status.
+21. `getMultipleAccountsInfo` keeps its array return type and every existing caller and
+    test is unchanged; only the LI.FI path uses the context-bearing sibling.
 
 ## Open questions
 
