@@ -20,6 +20,9 @@ export type SolInstructionSummaryKind =
 	// An account opened for an application's own program, its rent paid by the user. The account is
 	// the program's, and the rent is what the user hands over to open it.
 	| 'createAccount'
+	// An application's account its program emptied, every lamport of it paid back into the user's
+	// wallet. The program moves them itself, so only the run's account states say it happened.
+	| 'closeAccount'
 	| 'closeTokenAccount'
 	| 'approve'
 	| 'revoke'
@@ -57,8 +60,11 @@ export interface SolInstructionSummary {
 	own?: boolean;
 	// The account created, closed, approved or handed over.
 	account?: SolAddress;
-	// Lamports the user pays to open an account.
+	// Lamports it costs to open an account.
 	rent?: bigint;
+	// Who funded the opening, which is not always the user: a sender opening the recipient's account
+	// pays its rent.
+	payer?: SolAddress;
 	// Lamports an account returns when it is closed. Closing hands the destination the account's
 	// whole balance, so for a wrapped SOL account this is the rent-exempt reserve plus the SOL that
 	// was wrapped, not the rent alone.

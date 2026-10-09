@@ -2165,6 +2165,7 @@
 			"instruction_unwrap": "Развернуть и закрыть токен-аккаунт $symbol",
 			"instruction_create_account": "",
 			"instruction_create_program_account": "",
+			"instruction_close_program_account": "",
 			"instruction_close_account": "",
 			"instruction_close_account_for": "Закрыть токен-аккаунт $symbol",
 			"instruction_approve": "",

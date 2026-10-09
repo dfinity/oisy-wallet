@@ -2165,6 +2165,7 @@
 			"instruction_unwrap": "$symbol टोकन खाता अनरैप करके बंद करें",
 			"instruction_create_account": "",
 			"instruction_create_program_account": "",
+			"instruction_close_program_account": "",
 			"instruction_close_account": "",
 			"instruction_close_account_for": "$symbol टोकन खाता बंद करें",
 			"instruction_approve": "",
