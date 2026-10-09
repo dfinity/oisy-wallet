@@ -1,4 +1,5 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
 import { get as storageGet, set as storageSet } from '$lib/utils/storage.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
@@ -126,7 +127,23 @@ const initStore = (): ActiveUserTransactionsStore => {
 				}
 			}
 
-			if (prunedAny) {
+			// A row first met already settled was settled, and reported, by another device or an earlier
+			// session, so it is claimed without firing. Otherwise signing in on a new device replays the
+			// outcome of every row not yet dismissed. A row this tab already holds is left to the loader.
+			let claimedAny = false;
+
+			for (const [id, tx] of Object.entries(data)) {
+				if (
+					!(id in current.data) &&
+					isTerminalActiveUserTransaction(tx) &&
+					!terminalSideEffectsApplied[id]
+				) {
+					terminalSideEffectsApplied[id] = true;
+					claimedAny = true;
+				}
+			}
+
+			if (prunedAny || claimedAny) {
 				persist({ lastSeenUpdatedAtNs, terminalSideEffectsApplied });
 			}
 

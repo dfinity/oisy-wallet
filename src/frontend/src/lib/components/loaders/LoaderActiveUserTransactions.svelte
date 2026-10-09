@@ -181,9 +181,9 @@
 
 	onDestroy(stop);
 
-	// Fires wallet refresh + analytics exactly once per terminal row.
-	// Idempotency lives in `terminalSideEffectsApplied` on the store, so a
-	// row that finalizes across a refresh still fires once on next load.
+	// Fires wallet refresh + analytics exactly once per row this tab sees
+	// settle. Idempotency lives in `terminalSideEffectsApplied` on the store,
+	// which claims a row that loads already settled without firing it.
 	$effect(() => {
 		if (isNullish($activeUserTransactionsStore)) {
 			return;
@@ -323,7 +323,8 @@
 
 				// The only place an XRP send's outcome is reported. The modal stops at the submit, so
 				// by the time the ledger decides there may be no modal — and this hook fires exactly
-				// once per row even when the row terminalized while the tab was shut.
+				// once per row even when the ledger decided while the tab was shut: only a poller settles
+				// the row, so it is still open when the next session loads, and that session reports it.
 				//
 				// The failure text comes off the record rather than being derived here: the two
 				// failures need different advice — nothing was sent, or the fee was charged — and
