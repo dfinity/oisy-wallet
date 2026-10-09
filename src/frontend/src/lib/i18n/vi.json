@@ -2250,6 +2250,9 @@
 		"error": {
 			"get_block_number": "Không thể lấy số khối.",
 			"failed_get_transaction": "Không thể lấy giao dịch từ (hash: $hash) được cung cấp. Vui lòng tải lại ví."
+		},
+		"warning": {
+			"likely_spam": "Giao dịch này có thể là spam. Các khoản chuyển rất nhỏ thường được gửi từ những địa chỉ được tạo ra để trông giống địa chỉ bạn sử dụng, nhằm khiến bạn sao chép nhầm địa chỉ sau này. Đừng gửi tiền đến địa chỉ này."
 		}
 	},
 	"transactions": {

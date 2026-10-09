@@ -2250,6 +2250,9 @@
 		"error": {
 			"get_block_number": "Cannot get block number.",
 			"failed_get_transaction": "Failed to get the transaction from the provided (hash: $hash). Please reload the wallet dapp."
+		},
+		"warning": {
+			"likely_spam": "This transaction is likely spam. Very small transfers are often sent from addresses made to look like ones you use, so that you copy the wrong address later. Don't send funds to this address."
 		}
 	},
 	"transactions": {

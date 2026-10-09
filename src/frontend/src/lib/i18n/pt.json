@@ -2250,6 +2250,9 @@
 		"error": {
 			"get_block_number": "Não é possível obter o número do bloco.",
 			"failed_get_transaction": "Falha ao obter a transação a partir do hash fornecido ($hash). Por favor, recarregue o dApp da carteira."
+		},
+		"warning": {
+			"likely_spam": "Esta transação provavelmente é spam. Transferências muito pequenas costumam ser enviadas de endereços criados para se parecer com os que você usa, para que você copie o endereço errado depois. Não envie fundos para este endereço."
 		}
 	},
 	"transactions": {

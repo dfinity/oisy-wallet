@@ -32,6 +32,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
@@ -48,6 +49,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
+	import { isReceivedMicroTransaction } from '$lib/utils/transactions.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
 
 	interface Props {
@@ -260,6 +262,11 @@
 		)
 	);
 
+	// The same check that hides this transaction from lists while micro transactions are hidden.
+	let likelySpam = $derived(
+		nonNullish(token) && isReceivedMicroTransaction({ transaction, token, exchanges: $exchanges })
+	);
+
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openEthTransaction({
 			id: Symbol(),
@@ -358,6 +365,7 @@
 			<TransactionContactCard
 				{from}
 				{fromExplorerUrl}
+				{likelySpam}
 				{onSaveAddressComplete}
 				to={recipient}
 				toExplorerUrl={recipientExplorerUrl}

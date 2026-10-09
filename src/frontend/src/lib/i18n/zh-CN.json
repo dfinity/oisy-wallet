@@ -2250,6 +2250,9 @@
 		"error": {
 			"get_block_number": "无法获取区块号。",
 			"failed_get_transaction": "无法根据提供的信息（哈希：$hash）获取交易。请重新加载钱包 DApp。"
+		},
+		"warning": {
+			"likely_spam": "此交易很可能是垃圾交易。极小额的转账通常来自刻意仿冒您常用地址的地址，目的是让您日后误复制错误的地址。请勿向此地址发送资金。"
 		}
 	},
 	"transactions": {

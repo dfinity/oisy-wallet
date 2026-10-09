@@ -2250,6 +2250,9 @@
 		"error": {
 			"get_block_number": "No se puede obtener el número de bloque.",
 			"failed_get_transaction": "No se pudo obtener la transacción desde el (hash: $hash) proporcionado. Por favor, recarga la dapp de la billetera."
+		},
+		"warning": {
+			"likely_spam": "Es probable que esta transacción sea spam. Las transferencias muy pequeñas suelen enviarse desde direcciones creadas para parecerse a las que usas, para que más adelante copies la dirección equivocada. No envíes fondos a esta dirección."
 		}
 	},
 	"transactions": {

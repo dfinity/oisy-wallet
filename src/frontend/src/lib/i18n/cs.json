@@ -2250,6 +2250,9 @@
 		"error": {
 			"get_block_number": "Nelze získat číslo bloku.",
 			"failed_get_transaction": "Nepodařilo se získat transakci z poskytnutého hashe ($hash). Znovu načtěte dapp peněženky."
+		},
+		"warning": {
+			"likely_spam": "Tato transakce je pravděpodobně spam. Velmi malé převody často přicházejí z adres, které mají vypadat jako adresy, které používáte, abyste později zkopírovali špatnou adresu. Na tuto adresu neposílejte žádné prostředky."
 		}
 	},
 	"transactions": {

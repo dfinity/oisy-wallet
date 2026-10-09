@@ -2250,6 +2250,9 @@
 		"error": {
 			"get_block_number": "Impossibile ottenere il numero di blocco.",
 			"failed_get_transaction": "Impossibile ottenere la transazione dall'hash fornito ($hash). Si prega di ricaricare la dapp del wallet."
+		},
+		"warning": {
+			"likely_spam": "Questa transazione è probabilmente spam. I trasferimenti molto piccoli vengono spesso inviati da indirizzi creati per somigliare a quelli che usi, così che in seguito tu copi l'indirizzo sbagliato. Non inviare fondi a questo indirizzo."
 		}
 	},
 	"transactions": {

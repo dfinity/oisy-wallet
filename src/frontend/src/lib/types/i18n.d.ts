@@ -1920,6 +1920,7 @@ interface I18nTransaction {
 		open_for_block_explorer: string;
 	};
 	error: { get_block_number: string; failed_get_transaction: string };
+	warning: { likely_spam: string };
 }
 
 interface I18nTransactions {

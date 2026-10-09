@@ -246,6 +246,14 @@ On Ethereum and the EVM networks the retries are spaced out per wallet address a
 
 For IC tokens a failed page does not count towards the Index-canister outage warning above. That warning is still driven only by the regular 30-second check, so scrolling during an outage neither brings it on sooner nor clears it.
 
+### Very small received transactions
+
+A received transaction worth less than one US cent at the token's current price is treated as likely spam. Such transfers are typically sent from addresses made to look like ones the user knows, in the hope that the user later copies the wrong address from the history (address poisoning). Only received transactions count, since a tiny send is the user's own doing. A token without a USD price never qualifies, because its value is unknown.
+
+The "Hide transactions with very small values" setting, on by default, keeps them out of the Activity list and out of every token's own transaction list, and a dismissible info box above the list says that they are hidden. The balance still includes them.
+
+The details of such a transaction, which a user who turned the setting off can open, show a warning above the sender's address: the transaction is likely spam, and no funds should be sent to that address. The "Save address" action is not offered there, because a look-alike address saved as a contact would be easy to pick later. Copying the address and opening it on a block explorer stay available. The warning does not depend on the setting: with the setting on, these transactions cannot be opened from a list in the first place.
+
 ### Solana history
 
 A Solana transaction is only ever shown as OISY derived it from the chain: what it did to each of the user's balances, a one-line summary, and the instructions it ran. OISY also saves finalized Solana transactions to its backend, per token, but does **not** read them back to show history. The saved copy keeps a single amount and no summary, so a swap saved under the token it bought would read as the amount of the token it sold, and the backend never replaces a transaction it already holds, so a copy saved wrong would stay wrong. A new device or a cleared browser therefore loads its Solana history from the network. Transactions an earlier version cached in the browser without a summary are dropped from that cache when it loads, and fetched again from the network.
