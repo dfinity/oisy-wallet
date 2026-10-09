@@ -102,7 +102,13 @@
 		close();
 	};
 
-	const onApprove = async () =>
+	const onApprove = async () => {
+		// A new proposal replaces the one under review, so the click is held to the proposal it would
+		// approve rather than to the button rendered for the previous one.
+		if (!acceptedContext(proposal?.verifyContext)) {
+			return;
+		}
+
 		await answer({
 			callback: listener?.approveSession,
 			toast: () =>
@@ -112,6 +118,7 @@
 					duration: 2000
 				})
 		});
+	};
 
 	const onReject = async () =>
 		await answer({
