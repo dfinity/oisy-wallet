@@ -14,7 +14,8 @@ import {
 	mapSolSimulationAccountOwners,
 	mapSolSimulationPreview,
 	selectSolSimulationAddresses,
-	solClosedAccountsReachWallet
+	solClosedAccountsReachWallet,
+	solOpenAppAccountsLostLamports
 } from '$sol/utils/sol-simulation.utils';
 import {
 	mockAtaAddress,
@@ -470,6 +471,53 @@ describe('sol-simulation.utils', () => {
 					postAccounts: []
 				})
 			).toStrictEqual([]);
+		});
+	});
+
+	describe('solOpenAppAccountsLostLamports', () => {
+		const appAccount = (lamports: bigint): NonNullable<SolanaParsedAccountInfo> =>
+			({
+				executable: false,
+				lamports,
+				owner: 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo',
+				space: 8120n,
+				data: ['', 'base64']
+			}) as unknown as NonNullable<SolanaParsedAccountInfo>;
+
+		const lost = ({
+			pre,
+			post
+		}: {
+			pre: NonNullable<SolanaParsedAccountInfo>;
+			post: SolanaParsedAccountInfo;
+		}) =>
+			solOpenAppAccountsLostLamports({
+				addresses: [mockSolAddress2],
+				preAccounts: [pre],
+				postAccounts: [post]
+			});
+
+		// Its program could pay the wallet from it, which no line states.
+		it('should say so of an app account that stays open with fewer lamports', () => {
+			expect(lost({ pre: appAccount(100_000_000n), post: appAccount(58_100_160n) })).toBeTruthy();
+		});
+
+		it('should not of one that keeps its lamports', () => {
+			expect(lost({ pre: appAccount(41_899_840n), post: appAccount(41_899_840n) })).toBeFalsy();
+		});
+
+		// An emptied account is a close, which is checked on its own.
+		it('should not of one the run empties', () => {
+			expect(lost({ pre: appAccount(41_899_840n), post: null })).toBeFalsy();
+		});
+
+		it('should not of wallets and token accounts', () => {
+			expect(
+				lost({
+					pre: systemAccount({ lamports: 2_000_000n }),
+					post: systemAccount({ lamports: 1n })
+				})
+			).toBeFalsy();
 		});
 	});
 

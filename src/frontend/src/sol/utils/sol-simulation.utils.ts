@@ -315,6 +315,15 @@ export const findSolUnreadPrograms = (
 	return [...new Set(programs)].filter((program) => !known.has(program));
 };
 
+// The programs whose accounts a run's lines already account for: what leaves a wallet does so by a
+// transfer the run states, and a token account is closed by an instruction that names where its
+// balance goes.
+const NON_APPLICATION_PROGRAMS: SolAddress[] = [
+	SYSTEM_PROGRAM_ADDRESS,
+	TOKEN_PROGRAM_ADDRESS,
+	TOKEN_2022_PROGRAM_ADDRESS
+];
+
 /**
  * The accounts an application's program held before a run and emptied in it.
  *
@@ -339,13 +348,7 @@ export const findSolClosedAppAccounts = ({
 		const pre = parseAccountState(preAccounts[index]);
 		const post = postAccounts[index];
 
-		if (
-			isNullish(pre) ||
-			[SYSTEM_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS, TOKEN_2022_PROGRAM_ADDRESS].includes(
-				pre.program
-			) ||
-			pre.lamports === ZERO
-		) {
+		if (isNullish(pre) || NON_APPLICATION_PROGRAMS.includes(pre.program) || pre.lamports === ZERO) {
 			return acc;
 		}
 
@@ -353,6 +356,36 @@ export const findSolClosedAppAccounts = ({
 
 		return emptied ? [...acc, { account, program: pre.program, lamports: pre.lamports }] : acc;
 	}, []);
+
+/**
+ * Whether an application's account that stays open lost lamports in a run.
+ *
+ * Its program can pay the wallet straight from it, which no line states, and that inflow could stand
+ * in for a close paid somewhere else. Only writable accounts can change, and the run reports every
+ * one of them: with none of these, the closed accounts are the only source left for what reaches the
+ * wallet unstated.
+ */
+export const solOpenAppAccountsLostLamports = ({
+	addresses,
+	preAccounts,
+	postAccounts
+}: {
+	addresses: SolAddress[];
+	preAccounts: readonly SolanaParsedAccountInfo[];
+	postAccounts: readonly SolanaParsedAccountInfo[];
+}): boolean =>
+	addresses.some((_, index) => {
+		const pre = parseAccountState(preAccounts[index]);
+		const post = parseAccountState(postAccounts[index]);
+
+		return (
+			nonNullish(pre) &&
+			nonNullish(post) &&
+			!NON_APPLICATION_PROGRAMS.includes(pre.program) &&
+			post.lamports > ZERO &&
+			post.lamports < pre.lamports
+		);
+	});
 
 /**
  * Whether every lamport the closed accounts held reached the wallet.

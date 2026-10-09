@@ -20,6 +20,7 @@ import {
 	mockAtaAddress2,
 	mockSolAddress,
 	mockSolAddress2,
+	mockSolAddress3,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { getCreateAssociatedTokenIdempotentInstruction } from '@solana-program/token';
@@ -469,6 +470,46 @@ describe('sol-simulation.services', () => {
 					{ kind: 'unknown', program: application }
 				]);
 			});
+		});
+
+		// The closed account pays somebody else, and a second app account that stays open pays the
+		// wallet the same amount: the wallet's change alone would credit the close with it.
+		it('should list no close when an open app account pays the wallet', async () => {
+			const other = mockSolAddress3;
+
+			const withOther = {
+				feePayer: { address: mockSolAddress },
+				instructions: [
+					{
+						programAddress: application,
+						accounts: [
+							{ address: mockSolAddress2, role: AccountRole.WRITABLE },
+							{ address: mockSolAddress, role: AccountRole.WRITABLE_SIGNER },
+							{ address: other, role: AccountRole.WRITABLE }
+						]
+					}
+				]
+			} as unknown as CompilableTransactionMessage;
+
+			const holding = (lamports: bigint) =>
+				({ ...appAccount, lamports }) as unknown as SolanaParsedAccountsInfo[number];
+
+			vi.mocked(getMultipleAccountsInfo).mockResolvedValue([
+				systemAccount(1_000_000n),
+				appAccount,
+				holding(100_000_000n)
+			]);
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({
+					accounts: [systemAccount(1_000_000n + rent - fee), null, holding(100_000_000n - rent)],
+					innerInstructions: eventLog,
+					fee
+				})
+			);
+
+			const result = await simulateSolTransaction(params(withOther));
+
+			expect(result?.instructions).toStrictEqual([{ kind: 'unknown', program: application }]);
 		});
 
 		// Nothing then says where the rent went, and the instruction stays one nothing describes.

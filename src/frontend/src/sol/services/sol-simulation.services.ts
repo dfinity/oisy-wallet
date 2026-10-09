@@ -26,7 +26,8 @@ import {
 	mapSolSimulationPreview,
 	parseTokenAccountState,
 	selectSolSimulationAddresses,
-	solClosedAccountsReachWallet
+	solClosedAccountsReachWallet,
+	solOpenAppAccountsLostLamports
 } from '$sol/utils/sol-simulation.utils';
 import { solWalletLamportsStated } from '$sol/utils/sol-transaction-summary.utils';
 import {
@@ -292,8 +293,11 @@ const simulate = async ({
 	// wallet pays leaves the comparison off by that fee, so no close is listed from it.
 	const walletFee = transactionMessage.feePayer.address === address ? fee : ZERO;
 
+	// An open app account paying the wallet could stand in for a close paid elsewhere, so the closes
+	// are credited only when none of them lost lamports.
 	const reachWallet =
 		nonNullish(walletFee) &&
+		!solOpenAppAccountsLostLamports({ addresses, preAccounts, postAccounts }) &&
 		solClosedAccountsReachWallet({
 			closedAccounts,
 			walletChange:
