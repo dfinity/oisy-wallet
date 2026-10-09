@@ -268,6 +268,25 @@ describe('active-user-transactions.services', () => {
 				expect(claimedOnNextLoad()).toBeFalsy();
 			});
 
+			// The OISY Trade foreground reports its swap itself.
+			it('is not recorded when the caller reports the outcome itself', async () => {
+				vi.spyOn(backendApi, 'updateActiveUserTransaction').mockResolvedValue(settled);
+
+				await updateActiveUserTransaction({
+					identity: mockIdentity,
+					id: settled.id,
+					status: settled.status,
+					outcomeReportedByCaller: true
+				});
+
+				expect(backendApi.updateActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: settled.id,
+					status: settled.status
+				});
+				expect(claimedOnNextLoad()).toBeTruthy();
+			});
+
 			it('is recorded as sent before the write resolves', () => {
 				vi.spyOn(backendApi, 'updateActiveUserTransaction').mockReturnValueOnce(
 					new Promise(() => {})

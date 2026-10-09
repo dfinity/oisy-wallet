@@ -79,11 +79,18 @@ export const createActiveUserTransaction = async ({
 
 export const updateActiveUserTransaction = async ({
 	identity,
+	outcomeReportedByCaller = false,
 	...params
-}: { identity: Identity } & UpdateActiveUserTransactionParams): Promise<void> => {
+}: {
+	identity: Identity;
+	// The caller reports this write's outcome itself, so no later load has to.
+	outcomeReportedByCaller?: boolean;
+} & UpdateActiveUserTransactionParams): Promise<void> => {
 	const principal = identity.getPrincipal();
 	const terminal =
-		nonNullish(params.status) && isTerminalActiveUserTransactionStatus(params.status);
+		!outcomeReportedByCaller &&
+		nonNullish(params.status) &&
+		isTerminalActiveUserTransactionStatus(params.status);
 
 	// Before the write, which can commit after this tab is gone: the next load in this browser then
 	// reports the outcome instead of taking the row as settled elsewhere. Recorded for the identity
