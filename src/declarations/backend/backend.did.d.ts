@@ -953,6 +953,12 @@ export interface ExtV2Token {
 	canister_id: Principal;
 }
 export interface GetActiveUserTransactionsResponse {
+	/**
+	 * The user has seen every record updated at or before this time, on whichever device they
+	 * saw it, so a record reads as unread only once it changes after this. Zero until the user
+	 * first marks their records seen.
+	 */
+	seen_up_to_ns: bigint;
 	transactions: Array<ActiveUserTransaction>;
 }
 export type GetActiveUserTransactionsResult =
@@ -1298,6 +1304,15 @@ export interface LiquidiumData {
 	 */
 	amount: bigint;
 }
+export type MarkActiveUserTransactionsSeenResult =
+	| {
+			/**
+			 * The mark now stored, which is later than the one requested when another device has
+			 * already marked further.
+			 */
+			Ok: bigint;
+	  }
+	| { Err: ActiveUserTransactionError };
 /**
  * One of the caller's own tips, as returned by `get_my_tips`.
  */
@@ -3017,6 +3032,12 @@ export interface _SERVICE {
 	 * update method.
 	 */
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
+	/**
+	 * Marks every one of the caller's active user transactions updated at or before
+	 * `up_to_ns` as seen, on every device the caller signs in on. Returns the mark
+	 * now stored.
+	 */
+	mark_active_user_transactions_seen: ActorMethod<[bigint], MarkActiveUserTransactionsSeenResult>;
 	/**
 	 * Returns whether sign-ups of new users are currently allowed.
 	 *

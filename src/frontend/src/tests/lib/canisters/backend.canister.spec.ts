@@ -2020,7 +2020,7 @@ describe('backend.canister', () => {
 
 		it('should return the unwrapped list of transactions', async () => {
 			service.get_active_user_transactions.mockResolvedValue({
-				Ok: { transactions: [mockActiveUserTransaction] }
+				Ok: { transactions: [mockActiveUserTransaction], seen_up_to_ns: ZERO }
 			});
 
 			const { getActiveUserTransactions } = await createBackendCanister({
@@ -2035,7 +2035,7 @@ describe('backend.canister', () => {
 
 		it('should return an empty array when the user has no records', async () => {
 			service.get_active_user_transactions.mockResolvedValue({
-				Ok: { transactions: [] }
+				Ok: { transactions: [], seen_up_to_ns: ZERO }
 			});
 
 			const { getActiveUserTransactions } = await createBackendCanister({

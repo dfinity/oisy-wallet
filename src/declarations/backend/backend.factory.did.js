@@ -584,6 +584,7 @@ export const idlFactory = ({ IDL }) => {
 		Err: PersonalNoteError
 	});
 	const GetActiveUserTransactionsResponse = IDL.Record({
+		seen_up_to_ns: IDL.Nat64,
 		transactions: IDL.Vec(ActiveUserTransaction)
 	});
 	const GetActiveUserTransactionsResult = IDL.Variant({
@@ -870,6 +871,10 @@ export const idlFactory = ({ IDL }) => {
 		enabled: IDL.Bool,
 		allowed_external_content_source_urls: IDL.Opt(IDL.Vec(IDL.Text))
 	});
+	const MarkActiveUserTransactionsSeenResult = IDL.Variant({
+		Ok: IDL.Nat64,
+		Err: ActiveUserTransactionError
+	});
 	const SaveUserTransactionsRequest = IDL.Record({
 		token_id: TokenId,
 		transactions: IDL.Vec(UserTransaction)
@@ -1071,6 +1076,11 @@ export const idlFactory = ({ IDL }) => {
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
 		http_request_transform: IDL.Func([TransformArgs], [HttpRequestResult], ['query']),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
+		mark_active_user_transactions_seen: IDL.Func(
+			[IDL.Nat64],
+			[MarkActiveUserTransactionsSeenResult],
+			[]
+		),
 		new_user_signups_allowed: IDL.Func([], [IDL.Bool], ['query']),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
 		save_user_transactions: IDL.Func(
