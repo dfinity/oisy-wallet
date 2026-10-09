@@ -1329,6 +1329,20 @@ describe('oisy-trade-swap.services', () => {
 			expect(markSpy).toHaveBeenCalledExactlyOnceWith({ ids: ['swap-1'] });
 		});
 
+		// The claim lands under whichever account the store holds, which an account switch during
+		// settlement can change. The write itself says the outcome is reported here, so it leaves no
+		// marker for a later load of the swap's own account to report from.
+		it('closes its row with a write whose outcome it reports itself', async () => {
+			await run();
+
+			expect(vi.mocked(updateActiveUserTransaction).mock.calls.at(-1)?.[0]).toEqual(
+				expect.objectContaining({ status: { Succeeded: null }, outcomeReportedByCaller: true })
+			);
+			expect(vi.mocked(updateActiveUserTransaction).mock.calls[0][0]).not.toHaveProperty(
+				'outcomeReportedByCaller'
+			);
+		});
+
 		// The claim has to land *before* the terminal write, not after it.
 		// `updateActiveUserTransaction` upserts the row into the store before it resolves,
 		// and the loader's terminal-side-effects `$effect` flushes on that upsert — so a

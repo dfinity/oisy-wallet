@@ -55,6 +55,19 @@ describe('active-user-transactions.store', () => {
 		expect(get(activeUserTransactionsStore)?.data).toEqual({});
 	});
 
+	it('holds only the principal it was initialised for', () => {
+		expect(activeUserTransactionsStore.holds(mockPrincipal)).toBeFalsy();
+
+		activeUserTransactionsStore.init(mockPrincipal);
+
+		expect(activeUserTransactionsStore.holds(mockPrincipal)).toBeTruthy();
+		expect(activeUserTransactionsStore.holds(mockPrincipal2)).toBeFalsy();
+
+		activeUserTransactionsStore.reset();
+
+		expect(activeUserTransactionsStore.holds(mockPrincipal)).toBeFalsy();
+	});
+
 	it('set replaces the data map', () => {
 		activeUserTransactionsStore.init(mockPrincipal);
 		activeUserTransactionsStore.set({
@@ -121,6 +134,134 @@ describe('active-user-transactions.store', () => {
 			});
 
 			expect(get(activeUserTransactionsStore)?.data.a).toEqual(settled);
+		});
+	});
+
+	// A row that arrives settled was reported on the device that settled it. Reporting it again
+	// replays the outcome of every row not yet dismissed whenever the user signs in on a new device.
+	describe('set claims the side effects of a row it first meets settled', () => {
+		const claimed = () => get(activeUserTransactionsStore)?.terminalSideEffectsApplied;
+
+		it('claims settled rows it has not held before, and no open ones', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.set({
+				transactions: [
+					buildTx({ id: 'sent', status: { Succeeded: null }, updated_at_ns: 1n }),
+					buildTx({ id: 'expired', status: { Failed: null }, updated_at_ns: 1n }),
+					pending({ id: 'open', updatedAtNs: 1n })
+				]
+			});
+
+			expect(claimed()).toEqual({ sent: true, expired: true });
+		});
+
+		it('leaves a row it held open, so the loader reports it settling', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.set({ transactions: [pending({ id: 'a', updatedAtNs: 1n })] });
+
+			activeUserTransactionsStore.set({
+				transactions: [buildTx({ id: 'a', status: { Succeeded: null }, updated_at_ns: 2n })]
+			});
+
+			expect(claimed()).toEqual({});
+		});
+
+		// Settled by this tab's own write, which the loader may not have reported yet.
+		it('leaves a settled row it already holds', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			const settled = buildTx({ id: 'a', status: { Succeeded: null }, updated_at_ns: 2n });
+			activeUserTransactionsStore.upsert({ transaction: settled });
+
+			activeUserTransactionsStore.set({ transactions: [settled] });
+
+			expect(claimed()).toEqual({});
+		});
+
+		// Its terminal write committed after the tab that sent it was gone, before anything reported
+		// the outcome.
+		describe('a row this browser sent the terminal status for', () => {
+			const mine = buildTx({ id: 'mine', status: { Succeeded: null }, updated_at_ns: 2n });
+
+			const loadMine = () => {
+				activeUserTransactionsStore.reset();
+				activeUserTransactionsStore.init(mockPrincipal);
+				activeUserTransactionsStore.set({ transactions: [mine] });
+			};
+
+			it('is left to the loader', () => {
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+
+				loadMine();
+
+				expect(claimed()).toEqual({});
+			});
+
+			it('is left to the loader even when no store holds that principal', () => {
+				activeUserTransactionsStore.init(mockPrincipal2);
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+
+				loadMine();
+
+				expect(claimed()).toEqual({});
+			});
+
+			// Another tab that loaded before the marker was written saves its own copy of the state.
+			it('is left to the loader after another tab saves its older copy of the state', () => {
+				activeUserTransactionsStore.init(mockPrincipal);
+				activeUserTransactionsStore.upsert({
+					transaction: pending({ id: 'other', updatedAtNs: 1n })
+				});
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+				activeUserTransactionsStore.markAllSeen();
+
+				loadMine();
+
+				expect(claimed()).toEqual({});
+			});
+
+			// Each marker has a storage key of its own, so these read it directly.
+			const sent = (id: string): string | null =>
+				localStorage.getItem(`aut:terminal-write:${mockPrincipal.toText()}:${id}`);
+
+			it('stops being recorded once its outcome was reported', () => {
+				activeUserTransactionsStore.init(mockPrincipal);
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+				activeUserTransactionsStore.markTerminalSideEffectsApplied({ ids: ['mine'] });
+
+				expect(sent('mine')).toBeNull();
+			});
+
+			it('stops being recorded once the row was dismissed', () => {
+				activeUserTransactionsStore.init(mockPrincipal);
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+				activeUserTransactionsStore.remove({ id: 'mine' });
+
+				expect(sent('mine')).toBeNull();
+			});
+
+			// Two tabs never write the same key for different rows, so one row's marker never takes
+			// another's with it.
+			it('leaves the other rows recorded when one stops being recorded', () => {
+				activeUserTransactionsStore.init(mockPrincipal);
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+				activeUserTransactionsStore.markTerminalWriteSent({
+					principal: mockPrincipal,
+					id: 'other'
+				});
+				activeUserTransactionsStore.markTerminalSideEffectsApplied({ ids: ['other'] });
+
+				expect(sent('mine')).not.toBeNull();
+				expect(sent('other')).toBeNull();
+			});
+
+			// The OISY Trade foreground claims its row before it writes the terminal status.
+			it('is not recorded when its outcome is already recorded as reported', () => {
+				activeUserTransactionsStore.init(mockPrincipal);
+				activeUserTransactionsStore.markTerminalSideEffectsApplied({ ids: ['mine'] });
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+
+				expect(sent('mine')).toBeNull();
+			});
 		});
 	});
 
