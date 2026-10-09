@@ -751,13 +751,14 @@ value })` runs on the exact checked transaction through `infuraProviders(network
    execution, if the ceiling from OISY's own estimate exceeds the reviewed ceiling, the
    swap is **not signed**: it aborts back to the review step with a "network fee changed"
    message (a new `swap.error.lifi_fee_changed`), and the user confirms the new maximum.
-   For that to be reviewable, the abort **carries the execution-time gas estimate back**
-   into the wizard's fee state for the selected quote: review then shows
-   `max(quote-derived ceiling, carried ceiling)`, and that exact value becomes the newly
-   acknowledged bound the next execution compares against. Without it, review would
-   recompute the same lower `estimate.gasCosts` ceiling and every retry would abort
-   again. The carried estimate is cleared whenever the quote's inputs (the cache key)
-   change.
+   For that to be reviewable, the abort **carries the complete execution-time ceiling
+   back** — buffered gas × `maxFeePerGas` **plus that transaction's own `l1Fee`** — into
+   the wizard's fee state for the selected quote. The re-quote's calldata can differ from
+   the display quote's, so on Base its L1 fee can too; rebuilding the ceiling from the
+   carried gas and the display quote's `l1Fee` could understate it and loop again. Review
+   then shows `max(quote-derived ceiling, carried ceiling)`, and that exact value becomes
+   the newly acknowledged bound the next execution compares against. The carried ceiling
+   is cleared whenever the quote's inputs (the cache key) change.
    Velora Market keeps signing its provider's gas, unchanged.
 
 5. Create the AUT row (best effort), `enableSwapDestinationToken`.
@@ -953,14 +954,21 @@ to say, so a `/status` that never resolves would leave the row non-terminal fore
 - The bound starts only **after the source transaction is confirmed** and is measured
   on the **browser's clock only**. The first time a poll sees the row's source confirmed
   and the latest `/status` answer (after the `INVALID` re-query) still `NOT_FOUND` /
-  `INVALID`, the poller records `unresolvedSince = Date.now()` for that row in
-  `localStorage` (key `lifi-unresolved-since:<rowId>`, through the existing `get` / `set`
-  / `del` in `lib/utils/storage.utils.ts`). Any other answer, or a terminal status,
-  deletes the entry. When `Date.now() − unresolvedSince ≥
-LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS` (6 h) and the latest answer is still unresolved,
-  the row ends `Failed` with `swap.error.lifi_status_unknown` ("LI.FI could not report
-  the outcome of this swap. Check your destination wallet."), not a claim that the funds
-  were lost.
+  `INVALID`, the poller starts accumulating **observed unresolved time** for that row in
+  `localStorage` (key `lifi-unresolved:<rowId>`, value `{ elapsedMs, lastSeenAt }`,
+  through the existing `get` / `set` / `del` in `lib/utils/storage.utils.ts`). Each
+  later poll that still sees the source confirmed and an unresolved answer adds
+  `clamp(Date.now() − lastSeenAt, 0, LIFI_STATUS_UNRESOLVED_MAX_STEP_MILLIS)` to
+  `elapsedMs` and updates `lastSeenAt`; the step cap is 2 min (twice the slowest
+  per-row poll interval). Any other answer, or a terminal status, deletes the entry.
+  When `elapsedMs ≥ LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS` (6 h) and the latest answer
+  is still unresolved, the row ends `Failed` with `swap.error.lifi_status_unknown`
+  ("LI.FI could not report the outcome of this swap. Check your destination wallet."),
+  not a claim that the funds were lost.
+  - Accumulated, not `now − start`: a manual clock change or forward NTP correction can
+    add at most one capped step, and a backward jump adds nothing, so a clock jump
+    cannot hasten the irreversible verdict. Time the tab was closed or hidden is not
+    counted beyond one step, which only delays it.
   - Browser clock against browser clock: never the row's `created_at_ns`, which is the
     canister's clock, so clock skew does not move the window (the concern behind OISY
     Trade's tick counting, `lib/constants/oisy-trade.constants.ts`).
@@ -1068,16 +1076,21 @@ loader's 5 s tick.
 
 ## Delivery plan
 
-| PR  | Scope                                                                                                                                                                                                                                                                                                                                                                                                           | Depends on                                     |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| 1   | **Backend AUT variant** — `Lifi(LifiData)`, validation, tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                                | —                                              |
-| 2a  | **Scaffolding + quoting** — `@lifi/sdk`, env (flag **narrowed to `LOCAL`**), types, quote service + cache, form-time trust checks, LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges), provider sheet      | 1                                              |
-| 2b  | **EVM execution + tracking** — calldata binding (pinned selectors + `CalldataVerificationFacet`), `exactAllowance` on `approve()`, `fetchLifiEvmSwap` + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound)/loader (incl. wallet + EVM balance refresh)/item; flag back to `LOCAL \|\| STAGING`, `PRODUCT.md` for EVM-source swaps | 2a                                             |
-| 3   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` / `closedAccounts` in the simulation preview), `SwapSolWizard` dispatch, Solana source-chain check in the poller, `PRODUCT.md` update for Solana-source swaps                                                             | 2b                                             |
-| 4   | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                        | 3, production key + rate-limit scope confirmed |
+| PR  | Scope                                                                                                                                                                                                                                                                                                                                                                                                                              | Depends on                                     |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| 1   | **Backend AUT variant** — `Lifi(LifiData)`, validation, tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                                                   | —                                              |
+| 2a  | **Scaffolding + quoting** — `@lifi/sdk`, env (flag **`false` everywhere**; unit tests switch it on), types, quote service + cache, form-time trust checks, LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges), provider sheet | 1                                              |
+| 2b  | **EVM execution + tracking** — calldata binding (pinned selectors + `CalldataVerificationFacet`), `exactAllowance` on `approve()`, `fetchLifiEvmSwap` + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound)/loader (incl. wallet + EVM balance refresh)/item; flag back to `LOCAL \|\| STAGING`, `PRODUCT.md` for EVM-source swaps                    | 2a                                             |
+| 3   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` / `closedAccounts` in the simulation preview), `SwapSolWizard` dispatch, Solana source-chain check in the poller, `PRODUCT.md` update for Solana-source swaps                                                                                | 2b                                             |
+| 4   | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                                           | 3, production key + rate-limit scope confirmed |
 
-PR 2 is split up front so each PR stays reviewable. The flag stays on `LOCAL` through
-2a, so no deployed environment ever shows an offer that cannot be executed. Solana → EVM
+PR 2 is split up front so each PR stays reviewable. In 2a the flag is `false` everywhere,
+local included: 2a registers quotes but the wizard has no LI.FI dispatch yet, so a
+selected offer would hit `SwapEthWizard`'s unknown-provider branch. 2a is exercised by
+unit tests that switch the flag on (the `vi.doMock` pattern of `near-intents.env`), and
+2b, which adds the dispatch, sets it to `LOCAL || STAGING`. No environment, local
+included, ever shows an offer that cannot be executed. This is the same sequencing as
+the Solana-source guard above. Solana → EVM
 is a later, separate PR (see [Decisions](#decisions)).
 
 `docs/ai/PRODUCT.md` is updated in **every** PR that makes new behaviour reachable on a
@@ -1172,8 +1185,9 @@ everywhere.
     `Failed`; a `NOT_FOUND` / `INVALID` status alone never terminates a row before the
     source is confirmed and the 6 h unresolved-status bound has passed, after which the
     row ends `Failed` with the "outcome unknown" copy. That bound starts after source
-    confirmation, is measured on the browser clock only (persisted in `localStorage`), and
-    never compares against `created_at_ns`. A Solana row is marked expired
+    confirmation, accumulates observed time in capped per-poll steps (persisted in
+    `localStorage`, so a clock jump cannot hasten it), and never compares against
+    `created_at_ns`. A Solana row is marked expired
     only after two consecutive polls each find no signature status (searching
     transaction history) with the stored blockhash no longer valid.
 15. `swap_submitted` fires from the wizard; `swap_success` / `swap_error` fire once from
@@ -1213,9 +1227,9 @@ Recorded so a future reader can tell "excluded on purpose" from "forgotten".
 - **Solana top-level instructions are pinned** by `(program, discriminator)`, not just by
   program, so a known DEX program cannot be used for anything but the allowed route.
 - **Failure reasons stay off-screen**, matching Velora and NEAR Intents (icon only).
-- **The unresolved-status bound starts after source confirmation and is persisted in
-  `localStorage`** on the browser clock only, so reloads do not restart it; another
-  device starts its own window.
+- **The unresolved-status bound starts after source confirmation and accumulates
+  observed time in capped per-poll steps, persisted in `localStorage`**, so reloads do
+  not restart it and clock jumps cannot hasten it; another device starts its own window.
 - **Native-SOL receipts are checked net of the SOL fee cap**, not by reconstructing gross
   incoming lamports.
 - **`@lifi/sdk` (core only) is approved** as a new dependency.
