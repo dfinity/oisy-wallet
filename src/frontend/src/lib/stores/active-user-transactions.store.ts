@@ -10,6 +10,9 @@ import { writable, type Readable, type Writable } from 'svelte/store';
 export interface ActiveUserTransactionsLocalState {
 	lastSeenUpdatedAtNs: Record<string, string>;
 	terminalSideEffectsApplied: Record<string, true>;
+	// Rows this browser sent a terminal status for. Such a write can commit after the tab that sent
+	// it is gone, before anything reported its outcome, so a load leaves these rows to the loader.
+	terminalWritesSent: Record<string, true>;
 }
 
 export type ActiveUserTransactionsStoreData =
@@ -33,6 +36,8 @@ export interface ActiveUserTransactionsStore extends Readable<ActiveUserTransact
 	remove: (params: { id: string }) => void;
 	markAllSeen: () => void;
 	markTerminalSideEffectsApplied: (params: { ids: string[] }) => void;
+	/** Records, before the write is sent, that this browser is sending a row its terminal status. */
+	markTerminalWriteSent: (params: { id: string }) => void;
 	reset: () => void;
 }
 
@@ -67,7 +72,8 @@ const initStore = (): ActiveUserTransactionsStore => {
 		store.set({
 			data: {},
 			lastSeenUpdatedAtNs: persisted.lastSeenUpdatedAtNs ?? {},
-			terminalSideEffectsApplied: persisted.terminalSideEffectsApplied ?? {}
+			terminalSideEffectsApplied: persisted.terminalSideEffectsApplied ?? {},
+			terminalWritesSent: persisted.terminalWritesSent ?? {}
 		});
 	};
 
@@ -127,16 +133,28 @@ const initStore = (): ActiveUserTransactionsStore => {
 				}
 			}
 
+			const terminalWritesSent: Record<string, true> = {};
+
+			for (const id of Object.keys(current.terminalWritesSent)) {
+				if (id in data) {
+					terminalWritesSent[id] = true;
+				} else {
+					prunedAny = true;
+				}
+			}
+
 			// A row first met already settled was settled, and reported, by another device or an earlier
 			// session, so it is claimed without firing. Otherwise signing in on a new device replays the
-			// outcome of every row not yet dismissed. A row this tab already holds is left to the loader.
+			// outcome of every row not yet dismissed. A row this tab already holds is left to the loader,
+			// and so is one this browser sent the terminal status for.
 			let claimedAny = false;
 
 			for (const [id, tx] of Object.entries(data)) {
 				if (
 					!(id in current.data) &&
 					isTerminalActiveUserTransaction(tx) &&
-					!terminalSideEffectsApplied[id]
+					!terminalSideEffectsApplied[id] &&
+					!terminalWritesSent[id]
 				) {
 					terminalSideEffectsApplied[id] = true;
 					claimedAny = true;
@@ -144,10 +162,16 @@ const initStore = (): ActiveUserTransactionsStore => {
 			}
 
 			if (prunedAny || claimedAny) {
-				persist({ lastSeenUpdatedAtNs, terminalSideEffectsApplied });
+				persist({ lastSeenUpdatedAtNs, terminalSideEffectsApplied, terminalWritesSent });
 			}
 
-			return { ...current, data, lastSeenUpdatedAtNs, terminalSideEffectsApplied };
+			return {
+				...current,
+				data,
+				lastSeenUpdatedAtNs,
+				terminalSideEffectsApplied,
+				terminalWritesSent
+			};
 		});
 	};
 
@@ -185,10 +209,17 @@ const initStore = (): ActiveUserTransactionsStore => {
 			const { [id]: _removedSeen, ...lastSeenUpdatedAtNs } = current.lastSeenUpdatedAtNs;
 			const { [id]: _removedApplied, ...terminalSideEffectsApplied } =
 				current.terminalSideEffectsApplied;
+			const { [id]: _removedSent, ...terminalWritesSent } = current.terminalWritesSent;
 
-			persist({ lastSeenUpdatedAtNs, terminalSideEffectsApplied });
+			persist({ lastSeenUpdatedAtNs, terminalSideEffectsApplied, terminalWritesSent });
 
-			return { ...current, data, lastSeenUpdatedAtNs, terminalSideEffectsApplied };
+			return {
+				...current,
+				data,
+				lastSeenUpdatedAtNs,
+				terminalSideEffectsApplied,
+				terminalWritesSent
+			};
 		});
 	};
 
@@ -216,7 +247,8 @@ const initStore = (): ActiveUserTransactionsStore => {
 
 			persist({
 				lastSeenUpdatedAtNs,
-				terminalSideEffectsApplied: current.terminalSideEffectsApplied
+				terminalSideEffectsApplied: current.terminalSideEffectsApplied,
+				terminalWritesSent: current.terminalWritesSent
 			});
 
 			return { ...current, lastSeenUpdatedAtNs };
@@ -246,12 +278,34 @@ const initStore = (): ActiveUserTransactionsStore => {
 
 				persist({
 					lastSeenUpdatedAtNs: current.lastSeenUpdatedAtNs,
-					terminalSideEffectsApplied
+					terminalSideEffectsApplied,
+					terminalWritesSent: current.terminalWritesSent
 				});
 
 				return { ...current, terminalSideEffectsApplied };
 			});
 		};
+
+	const markTerminalWriteSent: ActiveUserTransactionsStore['markTerminalWriteSent'] = ({ id }) => {
+		store.update((current) => {
+			if (isNullish(current) || current.terminalWritesSent[id]) {
+				return current;
+			}
+
+			const terminalWritesSent: Record<string, true> = {
+				...current.terminalWritesSent,
+				[id]: true
+			};
+
+			persist({
+				lastSeenUpdatedAtNs: current.lastSeenUpdatedAtNs,
+				terminalSideEffectsApplied: current.terminalSideEffectsApplied,
+				terminalWritesSent
+			});
+
+			return { ...current, terminalWritesSent };
+		});
+	};
 
 	const reset: ActiveUserTransactionsStore['reset'] = () => {
 		storageKey = undefined;
@@ -268,6 +322,7 @@ const initStore = (): ActiveUserTransactionsStore => {
 		remove,
 		markAllSeen,
 		markTerminalSideEffectsApplied,
+		markTerminalWriteSent,
 		reset
 	};
 };

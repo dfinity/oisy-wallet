@@ -659,6 +659,29 @@ describe('LoaderActiveUserTransactions', () => {
 				expect(refreshSpy).not.toHaveBeenCalled();
 				expect(trackEventSpy).not.toHaveBeenCalled();
 			});
+
+			// This browser sent the terminal status, but the tab was gone before the answer came back.
+			it('reports a send this browser settled when the next session loads it', async () => {
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.markTerminalWriteSent({ id: 'xrp-a' });
+				activeUserTransactionsStore.reset();
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+
+				render(LoaderActiveUserTransactions);
+				await tick();
+
+				activeUserTransactionsStore.set({
+					transactions: [{ ...pendingXrp('xrp-a'), status: { Succeeded: null } }]
+				});
+				await tick();
+
+				expect(toasts.toastsShow).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ text: en.send.text.xrp_sent, level: 'success' })
+				);
+				expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ name: TRACK_COUNT_XRP_SEND_SUCCESS })
+				);
+			});
 		});
 
 		it('fires waitAndTriggerWallet and a swap_success event once when a row transitions to Succeeded', async () => {

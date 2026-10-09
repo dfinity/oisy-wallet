@@ -123,7 +123,8 @@ describe('active-user-transactions.utils', () => {
 					new: buildTx({ id: 'new', created_at_ns: 9n })
 				},
 				lastSeenUpdatedAtNs: {},
-				terminalSideEffectsApplied: {}
+				terminalSideEffectsApplied: {},
+				terminalWritesSent: {}
 			});
 
 			expect(result.map((t) => t.id)).toEqual(['new', 'old']);
@@ -143,7 +144,8 @@ describe('active-user-transactions.utils', () => {
 					state: {
 						data: { a: tx },
 						lastSeenUpdatedAtNs: {},
-						terminalSideEffectsApplied: {}
+						terminalSideEffectsApplied: {},
+						terminalWritesSent: {}
 					},
 					tx
 				})
@@ -156,7 +158,8 @@ describe('active-user-transactions.utils', () => {
 					state: {
 						data: { a: tx },
 						lastSeenUpdatedAtNs: { a: '3' },
-						terminalSideEffectsApplied: {}
+						terminalSideEffectsApplied: {},
+						terminalWritesSent: {}
 					},
 					tx
 				})
@@ -169,7 +172,8 @@ describe('active-user-transactions.utils', () => {
 					state: {
 						data: { a: tx },
 						lastSeenUpdatedAtNs: { a: '5' },
-						terminalSideEffectsApplied: {}
+						terminalSideEffectsApplied: {},
+						terminalWritesSent: {}
 					},
 					tx
 				})

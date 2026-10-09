@@ -28,7 +28,8 @@ describe('active-user-transactions.store', () => {
 		expect(get(activeUserTransactionsStore)).toEqual({
 			data: {},
 			lastSeenUpdatedAtNs: {},
-			terminalSideEffectsApplied: {}
+			terminalSideEffectsApplied: {},
+			terminalWritesSent: {}
 		});
 	});
 
@@ -160,6 +161,21 @@ describe('active-user-transactions.store', () => {
 			activeUserTransactionsStore.upsert({ transaction: settled });
 
 			activeUserTransactionsStore.set({ transactions: [settled] });
+
+			expect(claimed()).toEqual({});
+		});
+
+		// Its terminal write committed after the tab that sent it was gone, before anything reported
+		// the outcome.
+		it('leaves a settled row this browser sent the terminal status for', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.markTerminalWriteSent({ id: 'mine' });
+			activeUserTransactionsStore.reset();
+
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.set({
+				transactions: [buildTx({ id: 'mine', status: { Succeeded: null }, updated_at_ns: 2n })]
+			});
 
 			expect(claimed()).toEqual({});
 		});

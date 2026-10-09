@@ -13,10 +13,11 @@ import type {
 import type { NullishIdentity } from '$lib/types/identity';
 import {
 	hasActiveUserTransactionPollUpdateChanges,
+	isTerminalActiveUserTransactionStatus,
 	type ActiveUserTransactionPollUpdate
 } from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 
 /**
@@ -63,6 +64,12 @@ export const updateActiveUserTransaction = async ({
 	identity,
 	...params
 }: { identity: Identity } & UpdateActiveUserTransactionParams): Promise<void> => {
+	// Before the write, which can commit after this tab is gone: the next load in this browser then
+	// reports the outcome instead of taking the row as settled elsewhere.
+	if (nonNullish(params.status) && isTerminalActiveUserTransactionStatus(params.status)) {
+		activeUserTransactionsStore.markTerminalWriteSent({ id: params.id });
+	}
+
 	const transaction = await updateActiveUserTransactionApi({ identity, ...params });
 
 	activeUserTransactionsStore.upsert({ transaction });

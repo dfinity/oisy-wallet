@@ -191,6 +191,43 @@ describe('active-user-transactions.services', () => {
 				})
 			).rejects.toEqual(mockActiveUserTransactionErrorNotFound);
 		});
+
+		// The write can commit after this tab is gone, before anything reported the outcome.
+		it('records a terminal status as sent before the write resolves', async () => {
+			let resolveUpdate: (transaction: typeof mockActiveUserTransaction) => void = () => {};
+			vi.spyOn(backendApi, 'updateActiveUserTransaction').mockReturnValueOnce(
+				new Promise((resolve) => {
+					resolveUpdate = resolve;
+				})
+			);
+
+			const inFlight = updateActiveUserTransaction({
+				identity: mockIdentity,
+				id: mockActiveUserTransactionId,
+				status: { Succeeded: null }
+			});
+
+			expect(get(activeUserTransactionsStore)?.terminalWritesSent).toEqual({
+				[mockActiveUserTransactionId]: true
+			});
+
+			resolveUpdate({ ...mockActiveUserTransaction, status: { Succeeded: null } });
+			await inFlight;
+		});
+
+		it('does not record a status that is not terminal', async () => {
+			vi.spyOn(backendApi, 'updateActiveUserTransaction').mockResolvedValue(
+				mockActiveUserTransaction
+			);
+
+			await updateActiveUserTransaction({
+				identity: mockIdentity,
+				id: mockActiveUserTransactionId,
+				status: { Executing: null }
+			});
+
+			expect(get(activeUserTransactionsStore)?.terminalWritesSent).toEqual({});
+		});
 	});
 
 	describe('deleteActiveUserTransaction', () => {
