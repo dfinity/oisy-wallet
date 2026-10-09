@@ -15,6 +15,7 @@ import type {
 	SolInstructionSummaryKind
 } from '$sol/types/sol-instruction-summary';
 import type { SolParsedRpcInstruction } from '$sol/types/sol-instructions';
+import type { SolClosedAccount } from '$sol/types/sol-simulation';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { rentExemptMinimumFor } from '$sol/utils/sol-rent.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -57,6 +58,13 @@ const amount = ({ info, key }: { info: object; key: string }): bigint | undefine
 			? BigInt(value)
 			: undefined;
 };
+
+/**
+ * Who funds a System `createAccount`: `source` as the RPC parses the call, `payer` as the wallet
+ * decodes it.
+ */
+const funderOf = ({ info }: { info: object }): SolAddress | undefined =>
+	address({ info, key: 'source' }) ?? address({ info, key: 'payer' });
 
 /**
  * The amount of a `transferChecked`, which nests it with the decimals the mint uses.
@@ -205,6 +213,64 @@ const programAddressOf = (instruction: unknown): SolAddress | undefined => {
 		return instruction.programAddress;
 	}
 };
+
+/**
+ * The accounts an instruction names, however it spells them: a kit instruction carries each with
+ * its role, and an instruction the RPC could not parse carries their addresses alone.
+ */
+const accountsOf = (instruction: unknown): SolAddress[] =>
+	nonNullish(instruction) &&
+	typeof instruction === 'object' &&
+	'accounts' in instruction &&
+	Array.isArray(instruction.accounts)
+		? instruction.accounts.reduce<SolAddress[]>((acc, meta: unknown) => {
+				if (typeof meta === 'string') {
+					return [...acc, meta];
+				}
+
+				return nonNullish(meta) &&
+					typeof meta === 'object' &&
+					'address' in meta &&
+					typeof meta.address === 'string'
+					? [...acc, meta.address]
+					: acc;
+			}, [])
+		: [];
+
+/**
+ * The top-level instructions that could have emptied an account its program held, in order: those
+ * that call that program with the account, themselves or inside them.
+ *
+ * Only the program that owns an account can take lamports out of it, and the program and the account
+ * meet in the same call: an instruction that names the account for something else and calls the
+ * program without it never reached the account. Which of several emptied it, the list cannot say: an
+ * emptied account stays loaded for the rest of the message, and the program can be called with it
+ * again after the close.
+ */
+export const solClosingInstructionCandidates = ({
+	account,
+	program,
+	instructions,
+	innerInstructions
+}: {
+	account: SolAddress;
+	program: SolAddress;
+	instructions: readonly unknown[];
+	innerInstructions: readonly SolInstructionGroup[];
+}): number[] =>
+	instructions.reduce<number[]>((acc, instruction, index) => {
+		const inner =
+			innerInstructions.find(({ index: parent }) => parent === index)?.instructions ?? [];
+
+		const direct =
+			programAddressOf(instruction) === program && accountsOf(instruction).includes(account);
+		const nested = inner.some(
+			(candidate) =>
+				programAddressOf(candidate) === program && accountsOf(candidate).includes(account)
+		);
+
+		return direct || nested ? [...acc, index] : acc;
+	}, []);
 
 const stackHeightOf = (instruction: unknown): number | undefined =>
 	nonNullish(instruction) &&
@@ -519,7 +585,7 @@ const toEffect = ({
 			owner !== TOKEN_PROGRAM_ADDRESS &&
 			owner !== TOKEN_2022_PROGRAM_ADDRESS
 		) {
-			const source = address({ info, key: 'source' }) ?? address({ info, key: 'payer' });
+			const source = funderOf({ info });
 			const account = address({ info, key: 'newAccount' });
 			const lamports = amount({ info, key: 'lamports' });
 			const space = amount({ info, key: 'space' });
@@ -535,7 +601,7 @@ const toEffect = ({
 				nonNullish(lamports) &&
 				nonNullish(reserve) &&
 				lamports <= reserve
-				? { kind: 'createAccount', account, program: owner, rent: lamports }
+				? { kind: 'createAccount', account, program: owner, rent: lamports, payer: source }
 				: undefined;
 		}
 	}
@@ -1206,6 +1272,32 @@ const closePayouts = ({
 };
 
 /**
+ * The System `createAccount` that funds the account a line opens, which is the first from where
+ * the line stands: an address closed and opened again within the message is two accounts, each
+ * funded by its own.
+ */
+const creationOf = ({
+	account,
+	flattened,
+	from
+}: {
+	account: SolAddress;
+	flattened: { topLevel: boolean; instruction: SolParsedRpcInstruction }[];
+	from: number;
+}): { topLevel: boolean; instruction: SolParsedRpcInstruction } | undefined =>
+	flattened.slice(from).find(
+		({
+			instruction: {
+				program,
+				parsed: { type, info }
+			}
+		}) =>
+			program === 'system' &&
+			type === 'createAccount' &&
+			address({ info, key: 'newAccount' }) === account
+	);
+
+/**
  * The rent an account creation costs, from the System `createAccount` that funds it.
  *
  * The reserve and no more, where that is known. A creation can fund a wrapped SOL account with the
@@ -1219,46 +1311,21 @@ const closePayouts = ({
  * as it has a balance nobody can state, rather than one that includes whatever it was funded to
  * wrap. The associated token account program funds exactly the rent of what it opens, and an
  * account of any other mint has nothing to wrap, so those creations state it as they stand.
- *
- * The creation of the account the line opens, which is the first from where the line stands: an
- * address closed and opened again within the message is two accounts, each funded by its own.
  */
 const rentOf = ({
-	account,
-	flattened,
-	from,
-	native,
-	rentExemptMinimum
-}: {
-	account: SolAddress;
-	flattened: { topLevel: boolean; instruction: SolParsedRpcInstruction }[];
-	from: number;
-	native: boolean;
-	rentExemptMinimum: bigint | undefined;
-}): bigint | undefined => {
-	const creation = flattened.slice(from).find(
-		({
-			instruction: {
-				program,
-				parsed: { type, info }
-			}
-		}) =>
-			program === 'system' &&
-			type === 'createAccount' &&
-			address({ info, key: 'newAccount' }) === account
-	);
-
-	if (isNullish(creation)) {
-		return undefined;
-	}
-
-	const {
+	creation: {
 		topLevel,
 		instruction: {
 			parsed: { info }
 		}
-	} = creation;
-
+	},
+	native,
+	rentExemptMinimum
+}: {
+	creation: { topLevel: boolean; instruction: SolParsedRpcInstruction };
+	native: boolean;
+	rentExemptMinimum: bigint | undefined;
+}): bigint | undefined => {
 	const lamports = amount({ info, key: 'lamports' });
 
 	if (isNullish(lamports)) {
@@ -1427,6 +1494,7 @@ export const mapSolInstructionSummaries = ({
 	accountLamports = {},
 	accountTokenAmounts = {},
 	rentExemptMinimum,
+	closedAccounts = [],
 	includeUnrecognised = false
 }: {
 	instructions: readonly unknown[];
@@ -1451,6 +1519,11 @@ export const mapSolInstructionSummaries = ({
 	// What a token account of the usual size costs to exist. Without it, an account this message
 	// opens holds an amount nobody can state rather than nothing.
 	rentExemptMinimum?: bigint;
+	// The accounts an application's program held before the run and emptied in it, each known to have
+	// paid every lamport it held into the wallet: a closed liquidity position handing back its rent.
+	// The program moves the lamports itself, so no call in the run states the close, and each is
+	// listed under the instruction established to have emptied it, or not at all.
+	closedAccounts?: SolClosedAccount[];
 	// Whether to keep a line for each top-level instruction that produced no effect of its own.
 	// Off where the list stands beside the balance changes that vouch for it, on where it is the
 	// only account of the transaction there is.
@@ -1581,16 +1654,22 @@ export const mapSolInstructionSummaries = ({
 					mintAt({ account, position }) ?? openedNext({ account, flattened, from: position }).mint
 			});
 
-			const rent =
+			const creation =
 				wrapped.kind === 'createTokenAccount' && nonNullish(wrapped.account)
-					? rentOf({
-							account: wrapped.account,
-							flattened,
-							from: position,
-							native: wrapped.tokenAddress === WSOL_TOKEN.address,
-							rentExemptMinimum
-						})
+					? creationOf({ account: wrapped.account, flattened, from: position })
 					: undefined;
+
+			const rent = nonNullish(creation)
+				? rentOf({
+						creation,
+						native: wrapped.tokenAddress === WSOL_TOKEN.address,
+						rentExemptMinimum
+					})
+				: undefined;
+
+			// Not always the user: a sender opening the recipient's account pays its rent, and so can
+			// any other signer of the message.
+			const payer = nonNullish(creation) ? funderOf(creation.instruction.parsed) : undefined;
 
 			// The program that made a transfer, when it is not the one the line hangs under and not one
 			// of the known programs: a program the review's notice about programs OISY cannot read
@@ -1608,6 +1687,7 @@ export const mapSolInstructionSummaries = ({
 				{
 					...wrapped,
 					...(nonNullish(rent) && { rent }),
+					...(nonNullish(payer) && { payer }),
 					...(nonNullish(via) && { via }),
 					parentIndex
 				}
@@ -1616,15 +1696,30 @@ export const mapSolInstructionSummaries = ({
 		[]
 	);
 
+	// Each close hangs under the instruction that made it, after that instruction's other lines: the
+	// account goes once the program is done with it. The sort is stable, so every other line keeps
+	// its place.
+	const closes = closedAccounts.reduce<Effect[]>(
+		(acc, { account, program, lamports, instruction: parentIndex }) =>
+			nonNullish(parentIndex)
+				? [...acc, { kind: 'closeAccount', account, program, returned: lamports, parentIndex }]
+				: acc,
+		[]
+	);
+
+	const described = [...effects, ...closes].sort(
+		({ parentIndex: first }, { parentIndex: second }) => first - second
+	);
+
 	// A top-level instruction none of the effects came from is one the wallet could not read: a
 	// program it does not know, or a message whose instructions carry raw bytes rather than the
 	// parsed form. Kept in the position it holds in the transaction, so the list reads in the
 	// order the run would take rather than as the recognised instructions with the gaps closed up.
-	const covered = new Set(effects.map(({ parentIndex }) => parentIndex));
+	const covered = new Set(described.map(({ parentIndex }) => parentIndex));
 
 	const listed = includeUnrecognised
 		? [
-				...effects,
+				...described,
 				...instructions.reduce<Effect[]>((acc, _, index) => {
 					if (covered.has(index)) {
 						return acc;
@@ -1649,7 +1744,7 @@ export const mapSolInstructionSummaries = ({
 					];
 				}, [])
 			].sort(({ parentIndex: first }, { parentIndex: second }) => first - second)
-		: effects;
+		: described;
 
 	const unread = new Set(
 		instructions.reduce<number[]>(

@@ -2,6 +2,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { getMultipleAccountsInfo, simulateTransactionAccounts } from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
+	SOLANA_SIMULATION_MAX_CLOSE_RUNS,
 	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
 	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
@@ -18,8 +19,11 @@ import * as solInstructionSummaryUtils from '$sol/utils/sol-instruction-summary.
 import {
 	mockAtaAddress,
 	mockAtaAddress2,
+	mockAtaAddress3,
 	mockSolAddress,
 	mockSolAddress2,
+	mockSolAddress3,
+	mockSolAddress4,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { getCreateAssociatedTokenIdempotentInstruction } from '@solana-program/token';
@@ -27,6 +31,7 @@ import {
 	AccountRole,
 	address,
 	appendTransactionMessageInstruction,
+	appendTransactionMessageInstructions,
 	blockhash,
 	createNoopSigner,
 	createTransactionMessage,
@@ -115,13 +120,15 @@ describe('sol-simulation.services', () => {
 	const simulated = ({
 		err = null,
 		accounts,
-		innerInstructions = []
+		innerInstructions = [],
+		fee
 	}: {
 		err?: string | null;
 		accounts: SolanaParsedAccountsInfo;
 		innerInstructions?: SolanaSimulatedInnerInstructions;
+		fee?: bigint;
 	}) =>
-		({ err, accounts, innerInstructions }) as unknown as Awaited<
+		({ err, accounts, innerInstructions, fee }) as unknown as Awaited<
 			ReturnType<typeof simulateTransactionAccounts>
 		>;
 
@@ -296,6 +303,378 @@ describe('sol-simulation.services', () => {
 			const result = await simulateSolTransaction(params(message([])));
 
 			expect(result).not.toHaveProperty('opensAccountBeyondRent');
+		});
+	});
+
+	// An application closing an account of its own moves the lamports itself, and only the account's
+	// state before and after the run says so. It is listed when the wallet's change shows that every
+	// lamport of it came home.
+	describe('accounts an application closes', () => {
+		const application = 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo';
+		const rent = 41_899_840n;
+		const fee = 5_000n;
+
+		const closing = {
+			feePayer: { address: mockSolAddress },
+			instructions: [
+				{
+					programAddress: application,
+					accounts: [
+						{ address: mockSolAddress2, role: AccountRole.WRITABLE },
+						{ address: mockSolAddress, role: AccountRole.WRITABLE_SIGNER }
+					]
+				}
+			]
+		} as unknown as CompilableTransactionMessage;
+
+		const appAccount = {
+			executable: false,
+			lamports: rent,
+			owner: application,
+			space: 8120n,
+			data: ['', 'base64']
+		} as unknown as SolanaParsedAccountsInfo[number];
+
+		// The instruction's only call is the program logging an event about itself.
+		const eventLog = [
+			{ index: 0, instructions: [{ programId: application, accounts: [], data: '' }] }
+		] as unknown as SolanaSimulatedInnerInstructions;
+
+		const run = async ({
+			walletAfter,
+			withFee = true
+		}: {
+			walletAfter: bigint;
+			withFee?: boolean;
+		}) => {
+			vi.mocked(getMultipleAccountsInfo).mockResolvedValue([systemAccount(1_000_000n), appAccount]);
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({
+					accounts: [systemAccount(walletAfter), null],
+					innerInstructions: eventLog,
+					...(withFee && { fee })
+				})
+			);
+
+			return await simulateSolTransaction(params(closing));
+		};
+
+		it('should list the close under its instruction when the rent came home', async () => {
+			const result = await run({ walletAfter: 1_000_000n + rent - fee });
+
+			expect(result?.instructions).toStrictEqual([
+				{
+					kind: 'route',
+					program: application,
+					children: [
+						{ kind: 'closeAccount', account: mockSolAddress2, program: application, returned: rent }
+					]
+				}
+			]);
+		});
+
+		// Without the fee the wallet paid, the comparison is off by that fee: here an inflow from
+		// elsewhere as large as the fee would make it pass.
+		it('should list no close from a run that leaves out the fee', async () => {
+			const result = await run({ walletAfter: 1_000_000n + rent, withFee: false });
+
+			expect(result?.instructions).toStrictEqual([{ kind: 'unknown', program: application }]);
+		});
+
+		describe('when several instructions call the program with the account', () => {
+			// Two calls of the application's program with the account: which one emptied it, only a
+			// second run up to the last of them can say.
+			const twice = pipe(
+				createTransactionMessage({ version: 0 }),
+				(tx) => setTransactionMessageFeePayer(address(mockSolAddress), tx),
+				(tx) =>
+					setTransactionMessageLifetimeUsingBlockhash(
+						{
+							blockhash: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+							lastValidBlockHeight: 100n
+						},
+						tx
+					),
+				(tx) =>
+					appendTransactionMessageInstructions(
+						[0, 1].map(() => ({
+							programAddress: address(application),
+							accounts: [
+								{ address: address(mockSolAddress2), role: AccountRole.WRITABLE },
+								{ address: address(mockSolAddress), role: AccountRole.WRITABLE_SIGNER }
+							]
+						})),
+						tx
+					)
+			);
+
+			const eventLogs = [0, 1].map((index) => ({
+				index,
+				instructions: [{ programId: application, accounts: [], data: '' }]
+			})) as unknown as SolanaSimulatedInnerInstructions;
+
+			const runTwice = async (beforeLastCall: bigint) => {
+				vi.mocked(getMultipleAccountsInfo).mockResolvedValue([
+					systemAccount(1_000_000n),
+					appAccount
+				]);
+				vi.mocked(simulateTransactionAccounts)
+					.mockResolvedValueOnce(
+						simulated({
+							accounts: [systemAccount(1_000_000n + rent - fee), null],
+							innerInstructions: eventLogs,
+							fee
+						})
+					)
+					.mockResolvedValueOnce(
+						simulated({
+							accounts: [
+								{
+									...appAccount,
+									lamports: beforeLastCall
+								} as unknown as SolanaParsedAccountsInfo[number]
+							]
+						})
+					);
+
+				return await simulateSolTransaction(params(twice));
+			};
+
+			it('should give the close to the last call when the account held its lamports until then', async () => {
+				const result = await runTwice(rent);
+
+				expect(simulateTransactionAccounts).toHaveBeenLastCalledWith(
+					expect.objectContaining({ addresses: [mockSolAddress2] })
+				);
+				expect(result?.instructions).toStrictEqual([
+					{ kind: 'unknown', program: application },
+					{
+						kind: 'route',
+						program: application,
+						children: [
+							{
+								kind: 'closeAccount',
+								account: mockSolAddress2,
+								program: application,
+								returned: rent
+							}
+						]
+					}
+				]);
+			});
+
+			// The account was emptied by the first call, and the second one names it again: it must not
+			// borrow the close and with it a line.
+			it('should leave the close without an instruction when the account was already empty', async () => {
+				const result = await runTwice(ZERO);
+
+				expect(result?.instructions).toStrictEqual([
+					{ kind: 'unknown', program: application },
+					{ kind: 'unknown', program: application }
+				]);
+			});
+
+			// The first call took part of the balance and the second closes the rest: the line under
+			// the second would credit it with the share the first one moved.
+			it('should leave the close without an instruction when an earlier call took part of it', async () => {
+				const result = await runTwice(rent / 2n);
+
+				expect(result?.instructions).toStrictEqual([
+					{ kind: 'unknown', program: application },
+					{ kind: 'unknown', program: application }
+				]);
+			});
+
+			// Accounts whose last call is the same instruction share the run up to it, so a message
+			// closing many of them behind the same calls costs one second run rather than one each.
+			it('should check accounts that share their last call in a single run', async () => {
+				const both = pipe(
+					createTransactionMessage({ version: 0 }),
+					(tx) => setTransactionMessageFeePayer(address(mockSolAddress), tx),
+					(tx) =>
+						setTransactionMessageLifetimeUsingBlockhash(
+							{
+								blockhash: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+								lastValidBlockHeight: 100n
+							},
+							tx
+						),
+					(tx) =>
+						appendTransactionMessageInstructions(
+							[0, 1].map(() => ({
+								programAddress: address(application),
+								accounts: [
+									{ address: address(mockSolAddress2), role: AccountRole.WRITABLE },
+									{ address: address(mockSolAddress3), role: AccountRole.WRITABLE },
+									{ address: address(mockSolAddress), role: AccountRole.WRITABLE_SIGNER }
+								]
+							})),
+							tx
+						)
+				);
+
+				vi.mocked(getMultipleAccountsInfo).mockResolvedValue([
+					systemAccount(1_000_000n),
+					appAccount,
+					appAccount
+				]);
+				vi.mocked(simulateTransactionAccounts)
+					.mockResolvedValueOnce(
+						simulated({
+							accounts: [systemAccount(1_000_000n + rent * 2n - fee), null, null],
+							innerInstructions: eventLogs,
+							fee
+						})
+					)
+					.mockResolvedValueOnce(simulated({ accounts: [appAccount, appAccount] }));
+
+				const result = await simulateSolTransaction(params(both));
+
+				expect(simulateTransactionAccounts).toHaveBeenCalledTimes(2);
+				expect(simulateTransactionAccounts).toHaveBeenLastCalledWith(
+					expect.objectContaining({ addresses: [mockSolAddress2, mockSolAddress3] })
+				);
+				expect(result?.instructions).toStrictEqual([
+					{ kind: 'unknown', program: application },
+					{
+						kind: 'route',
+						program: application,
+						children: [mockSolAddress2, mockSolAddress3].map((account) => ({
+							kind: 'closeAccount',
+							account,
+							program: application,
+							returned: rent
+						}))
+					}
+				]);
+			});
+
+			describe('when each account has a last call of its own', () => {
+				// The first call names every account and one call after it names each alone, so every
+				// account needs a second run of its own.
+				const closingEach = (accounts: SolAddress[]) =>
+					pipe(
+						createTransactionMessage({ version: 0 }),
+						(tx) => setTransactionMessageFeePayer(address(mockSolAddress), tx),
+						(tx) =>
+							setTransactionMessageLifetimeUsingBlockhash(
+								{
+									blockhash: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+									lastValidBlockHeight: 100n
+								},
+								tx
+							),
+						(tx) =>
+							appendTransactionMessageInstructions(
+								[accounts, ...accounts.map((account) => [account])].map((named) => ({
+									programAddress: address(application),
+									accounts: [
+										...named.map((account) => ({
+											address: address(account),
+											role: AccountRole.WRITABLE
+										})),
+										{ address: address(mockSolAddress), role: AccountRole.WRITABLE_SIGNER }
+									]
+								})),
+								tx
+							)
+					);
+
+				const runEach = async (accounts: SolAddress[]) => {
+					vi.mocked(getMultipleAccountsInfo).mockResolvedValue([
+						systemAccount(1_000_000n),
+						...accounts.map(() => appAccount)
+					]);
+					vi.mocked(simulateTransactionAccounts).mockResolvedValueOnce(
+						simulated({
+							accounts: [
+								systemAccount(1_000_000n + rent * BigInt(accounts.length) - fee),
+								...accounts.map(() => null)
+							],
+							fee
+						})
+					);
+
+					return await simulateSolTransaction(params(closingEach(accounts)));
+				};
+
+				const closed = [
+					mockSolAddress2,
+					mockSolAddress3,
+					mockSolAddress4,
+					mockAtaAddress,
+					mockAtaAddress2,
+					mockAtaAddress3
+				];
+
+				it('should start a run for each of as many as the cap allows', async () => {
+					await runEach(closed.slice(0, SOLANA_SIMULATION_MAX_CLOSE_RUNS));
+
+					expect(simulateTransactionAccounts).toHaveBeenCalledTimes(
+						SOLANA_SIMULATION_MAX_CLOSE_RUNS + 1
+					);
+				});
+
+				// Past the cap a crafted message is the likelier reading: none of its runs starts, and
+				// its closes stay unlisted as they would without them.
+				it('should start no run past the cap and list none of those closes', async () => {
+					const accounts = closed.slice(0, SOLANA_SIMULATION_MAX_CLOSE_RUNS + 1);
+
+					const result = await runEach(accounts);
+
+					expect(simulateTransactionAccounts).toHaveBeenCalledOnce();
+					expect(result?.instructions?.map(({ kind }) => kind)).toStrictEqual(
+						Array(accounts.length + 1).fill('unknown')
+					);
+				});
+			});
+		});
+
+		// The closed account pays somebody else, and a second app account that stays open pays the
+		// wallet the same amount: the wallet's change alone would credit the close with it.
+		it('should list no close when an open app account pays the wallet', async () => {
+			const other = mockSolAddress3;
+
+			const withOther = {
+				feePayer: { address: mockSolAddress },
+				instructions: [
+					{
+						programAddress: application,
+						accounts: [
+							{ address: mockSolAddress2, role: AccountRole.WRITABLE },
+							{ address: mockSolAddress, role: AccountRole.WRITABLE_SIGNER },
+							{ address: other, role: AccountRole.WRITABLE }
+						]
+					}
+				]
+			} as unknown as CompilableTransactionMessage;
+
+			const holding = (lamports: bigint) =>
+				({ ...appAccount, lamports }) as unknown as SolanaParsedAccountsInfo[number];
+
+			vi.mocked(getMultipleAccountsInfo).mockResolvedValue([
+				systemAccount(1_000_000n),
+				appAccount,
+				holding(100_000_000n)
+			]);
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({
+					accounts: [systemAccount(1_000_000n + rent - fee), null, holding(100_000_000n - rent)],
+					innerInstructions: eventLog,
+					fee
+				})
+			);
+
+			const result = await simulateSolTransaction(params(withOther));
+
+			expect(result?.instructions).toStrictEqual([{ kind: 'unknown', program: application }]);
+		});
+
+		// Nothing then says where the rent went, and the instruction stays one nothing describes.
+		it('should leave the instruction undescribed when the rent went elsewhere', async () => {
+			const result = await run({ walletAfter: 1_000_000n - fee });
+
+			expect(result?.instructions).toStrictEqual([{ kind: 'unknown', program: application }]);
 		});
 	});
 

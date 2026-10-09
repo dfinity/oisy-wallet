@@ -2165,6 +2165,7 @@
 			"instruction_unwrap": "Sblocca e chiudi il conto token $symbol",
 			"instruction_create_account": "",
 			"instruction_create_program_account": "",
+			"instruction_close_program_account": "",
 			"instruction_close_account": "",
 			"instruction_close_account_for": "Chiudi il conto token $symbol",
 			"instruction_approve": "",
