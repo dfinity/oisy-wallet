@@ -253,6 +253,15 @@ describe('active-user-transactions.store', () => {
 				expect(sent('mine')).not.toBeNull();
 				expect(sent('other')).toBeNull();
 			});
+
+			// The OISY Trade foreground claims its row before it writes the terminal status.
+			it('is not recorded when its outcome is already recorded as reported', () => {
+				activeUserTransactionsStore.init(mockPrincipal);
+				activeUserTransactionsStore.markTerminalSideEffectsApplied({ ids: ['mine'] });
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+
+				expect(sent('mine')).toBeNull();
+			});
 		});
 	});
 

@@ -296,7 +296,18 @@ const initStore = (): ActiveUserTransactionsStore => {
 	const markTerminalWriteSent: ActiveUserTransactionsStore['markTerminalWriteSent'] = ({
 		principal,
 		id
-	}) => storageSet({ key: `${terminalWritePrefix(principal)}${id}`, value: true });
+	}) => {
+		// The OISY Trade foreground claims its row before it writes it, and nothing would clear this.
+		const alreadyApplied =
+			storageGet<Partial<ActiveUserTransactionsLocalState>>({ key: stateKey(principal) })
+				?.terminalSideEffectsApplied?.[id] === true;
+
+		if (alreadyApplied) {
+			return;
+		}
+
+		storageSet({ key: `${terminalWritePrefix(principal)}${id}`, value: true });
+	};
 
 	const reset: ActiveUserTransactionsStore['reset'] = () => {
 		storageKey = undefined;
