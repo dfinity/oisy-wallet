@@ -362,8 +362,10 @@ export const findSolClosedAppAccounts = ({
  *
  * Its program can pay the wallet straight from it, which no line states, and that inflow could stand
  * in for a close paid somewhere else. Only writable accounts can change, and the run reports every
- * one of them: with none of these, the closed accounts are the only source left for what reaches the
- * wallet unstated.
+ * one of them, so each such account that ends with less is found. One that is topped up from
+ * elsewhere and then drained by as much ends as it started, which no end balance can tell from a
+ * genuine close next to a payment between two other accounts; in both, the wallet receives what the
+ * lines state.
  */
 export const solOpenAppAccountsLostLamports = ({
 	addresses,
