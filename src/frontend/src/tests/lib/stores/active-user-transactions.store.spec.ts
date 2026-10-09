@@ -219,16 +219,16 @@ describe('active-user-transactions.store', () => {
 				expect(claimed()).toEqual({});
 			});
 
-			// The markers live in their own storage entry, so these read it directly.
-			const writesSent = (): Record<string, true> =>
-				JSON.parse(localStorage.getItem(`aut:terminal-writes:${mockPrincipal.toText()}`) ?? '{}');
+			// Each marker has a storage key of its own, so these read it directly.
+			const sent = (id: string): string | null =>
+				localStorage.getItem(`aut:terminal-write:${mockPrincipal.toText()}:${id}`);
 
 			it('stops being recorded once its outcome was reported', () => {
 				activeUserTransactionsStore.init(mockPrincipal);
 				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
 				activeUserTransactionsStore.markTerminalSideEffectsApplied({ ids: ['mine'] });
 
-				expect(writesSent()).toEqual({});
+				expect(sent('mine')).toBeNull();
 			});
 
 			it('stops being recorded once the row was dismissed', () => {
@@ -236,7 +236,22 @@ describe('active-user-transactions.store', () => {
 				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
 				activeUserTransactionsStore.remove({ id: 'mine' });
 
-				expect(writesSent()).toEqual({});
+				expect(sent('mine')).toBeNull();
+			});
+
+			// Two tabs never write the same key for different rows, so one row's marker never takes
+			// another's with it.
+			it('leaves the other rows recorded when one stops being recorded', () => {
+				activeUserTransactionsStore.init(mockPrincipal);
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+				activeUserTransactionsStore.markTerminalWriteSent({
+					principal: mockPrincipal,
+					id: 'other'
+				});
+				activeUserTransactionsStore.markTerminalSideEffectsApplied({ ids: ['other'] });
+
+				expect(sent('mine')).not.toBeNull();
+				expect(sent('other')).toBeNull();
 			});
 		});
 	});

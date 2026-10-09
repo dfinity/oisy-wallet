@@ -1,6 +1,6 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
 import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
-import { get as storageGet, set as storageSet } from '$lib/utils/storage.utils';
+import { del as storageDel, get as storageGet, set as storageSet } from '$lib/utils/storage.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
 import { writable, type Readable, type Writable } from 'svelte/store';
@@ -20,31 +20,15 @@ export type ActiveUserTransactionsStoreData =
 
 const STORAGE_PREFIX = 'aut:state:';
 
-// Rows this browser sent a terminal status for, per principal: such a write can commit after the tab
-// that sent it is gone, before anything reported its outcome, so a load leaves these rows to the
-// loader. Kept apart from the state above, which each tab saves whole from its own copy and would
-// wipe a marker another tab added since. So it is read from storage whenever it is used, and only
-// ever changed by read-modify-write.
-const TERMINAL_WRITES_PREFIX = 'aut:terminal-writes:';
+// Rows this browser sent a terminal status for: such a write can commit after the tab that sent it
+// is gone, before anything reported its outcome, so a load leaves these rows to the loader. Kept
+// apart from the state above, which each tab saves whole from its own copy, and one key per
+// principal and row, so that no tab ever rewrites another tab's markers: a marker is only set or
+// removed, and read from storage when a load decides what to claim.
+const TERMINAL_WRITE_PREFIX = 'aut:terminal-write:';
 
-const terminalWritesKey = (principal: Principal): string =>
-	`${TERMINAL_WRITES_PREFIX}${principal.toText()}`;
-
-const loadTerminalWrites = (key: string): Record<string, true> =>
-	storageGet<Record<string, true>>({ key }) ?? {};
-
-const clearTerminalWrites = ({ key, ids }: { key: string; ids: string[] }) => {
-	const writes = loadTerminalWrites(key);
-
-	if (!ids.some((id) => id in writes)) {
-		return;
-	}
-
-	storageSet({
-		key,
-		value: Object.fromEntries(Object.entries(writes).filter(([id]) => !ids.includes(id)))
-	});
-};
+const terminalWritePrefix = (principal: Principal): string =>
+	`${TERMINAL_WRITE_PREFIX}${principal.toText()}:`;
 
 export interface ActiveUserTransactionsStore extends Readable<ActiveUserTransactionsStoreData> {
 	init: (principal: Principal) => void;
@@ -72,7 +56,7 @@ export interface ActiveUserTransactionsStore extends Readable<ActiveUserTransact
 const initStore = (): ActiveUserTransactionsStore => {
 	const store: Writable<ActiveUserTransactionsStoreData> = writable(undefined);
 	let storageKey: string | undefined;
-	let terminalWritesStorageKey: string | undefined;
+	let terminalWriteKeyPrefix: string | undefined;
 
 	// A local write order, so a load can tell a row written after it began from one its snapshot no
 	// longer has. Per row, the sequence number of its last accepted local write.
@@ -96,7 +80,7 @@ const initStore = (): ActiveUserTransactionsStore => {
 		}
 
 		storageKey = key;
-		terminalWritesStorageKey = terminalWritesKey(principal);
+		terminalWriteKeyPrefix = terminalWritePrefix(principal);
 		lastLocalWrite = {};
 
 		const persisted = storageGet<Partial<ActiveUserTransactionsLocalState>>({ key }) ?? {};
@@ -171,9 +155,9 @@ const initStore = (): ActiveUserTransactionsStore => {
 			// session, so it is claimed without firing. Otherwise signing in on a new device replays the
 			// outcome of every row not yet dismissed. A row this tab already holds is left to the loader,
 			// and so is one this browser sent the terminal status for.
-			const terminalWritesSent = isNullish(terminalWritesStorageKey)
-				? {}
-				: loadTerminalWrites(terminalWritesStorageKey);
+			const sentHere = (id: string): boolean =>
+				nonNullish(terminalWriteKeyPrefix) &&
+				storageGet<boolean>({ key: `${terminalWriteKeyPrefix}${id}` }) === true;
 			let claimedAny = false;
 
 			for (const [id, tx] of Object.entries(data)) {
@@ -181,7 +165,7 @@ const initStore = (): ActiveUserTransactionsStore => {
 					!(id in current.data) &&
 					isTerminalActiveUserTransaction(tx) &&
 					!terminalSideEffectsApplied[id] &&
-					!terminalWritesSent[id]
+					!sentHere(id)
 				) {
 					terminalSideEffectsApplied[id] = true;
 					claimedAny = true;
@@ -233,8 +217,8 @@ const initStore = (): ActiveUserTransactionsStore => {
 
 			persist({ lastSeenUpdatedAtNs, terminalSideEffectsApplied });
 
-			if (nonNullish(terminalWritesStorageKey)) {
-				clearTerminalWrites({ key: terminalWritesStorageKey, ids: [id] });
+			if (nonNullish(terminalWriteKeyPrefix)) {
+				storageDel({ key: `${terminalWriteKeyPrefix}${id}` });
 			}
 
 			return { ...current, data, lastSeenUpdatedAtNs, terminalSideEffectsApplied };
@@ -299,8 +283,10 @@ const initStore = (): ActiveUserTransactionsStore => {
 				});
 
 				// Reported, or claimed by the flow that reports it, so the marker has done its job.
-				if (nonNullish(terminalWritesStorageKey)) {
-					clearTerminalWrites({ key: terminalWritesStorageKey, ids });
+				if (nonNullish(terminalWriteKeyPrefix)) {
+					for (const id of ids) {
+						storageDel({ key: `${terminalWriteKeyPrefix}${id}` });
+					}
 				}
 
 				return { ...current, terminalSideEffectsApplied };
@@ -310,20 +296,11 @@ const initStore = (): ActiveUserTransactionsStore => {
 	const markTerminalWriteSent: ActiveUserTransactionsStore['markTerminalWriteSent'] = ({
 		principal,
 		id
-	}) => {
-		const key = terminalWritesKey(principal);
-		const writes = loadTerminalWrites(key);
-
-		if (writes[id]) {
-			return;
-		}
-
-		storageSet({ key, value: { ...writes, [id]: true } });
-	};
+	}) => storageSet({ key: `${terminalWritePrefix(principal)}${id}`, value: true });
 
 	const reset: ActiveUserTransactionsStore['reset'] = () => {
 		storageKey = undefined;
-		terminalWritesStorageKey = undefined;
+		terminalWriteKeyPrefix = undefined;
 		lastLocalWrite = {};
 		store.set(undefined);
 	};
