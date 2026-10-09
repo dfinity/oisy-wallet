@@ -446,8 +446,8 @@ describe('swap.derived', () => {
 		});
 	});
 
-	// XRP joins the swap universe only while NEAR Intents, its only provider, is enabled for it. That
-	// flag excludes TEST, so each case here sets it.
+	// XRP joins the swap universe only while NEAR Intents, its only provider, is enabled for it. Each
+	// case here sets that flag explicitly.
 	describe('XRP', () => {
 		const loadWithXrp = async ({ nearIntentsXrp }: { nearIntentsXrp: boolean }) => {
 			vi.resetModules();

@@ -10,7 +10,7 @@ import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { assertNonNullish } from '@dfinity/utils';
 
 // Hoisted so every evaluation of the provider module below — it is re-imported with the flag
-// switched on — resolves to these same two mocks.
+// switched off and on — resolves to these same two mocks.
 const { fetchNearIntentsSwapQuote, nearIntentsSupportedTokens } = vi.hoisted(() => ({
 	fetchNearIntentsSwapQuote: vi.fn(),
 	nearIntentsSupportedTokens: vi.fn()
@@ -26,8 +26,25 @@ describe('xrp-swap.providers', () => {
 		vi.clearAllMocks();
 	});
 
-	it('should register no provider while the XRP swap flag is off', () => {
-		expect(xrpSwapProviders).toEqual([]);
+	it('should register no provider while the XRP swap flag is off', async () => {
+		vi.resetModules();
+		vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
+			...(await importOriginal<typeof nearIntentsEnv>()),
+			NEAR_INTENTS_XRP_SWAP_ENABLED: false
+		}));
+
+		try {
+			const { xrpSwapProviders: providers } = await import('$lib/providers/xrp-swap.providers');
+
+			expect(providers).toEqual([]);
+		} finally {
+			vi.doUnmock('$env/rest/near-intents.env');
+			vi.resetModules();
+		}
+	});
+
+	it('should register NEAR Intents with the default env', () => {
+		expect(xrpSwapProviders.map(({ key }) => key)).toEqual([SwapProvider.NEAR_INTENTS]);
 	});
 
 	describe('with the XRP swap flag on', () => {
