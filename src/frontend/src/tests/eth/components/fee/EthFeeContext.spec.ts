@@ -31,6 +31,7 @@ import type { Nft } from '$lib/types/nft';
 import type { OptionAmount } from '$lib/types/send';
 import type { Token, TokenId } from '$lib/types/token';
 import * as networkUtils from '$lib/utils/network.utils';
+import { parseToken } from '$lib/utils/parse.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
@@ -380,6 +381,143 @@ describe('EthFeeContext', () => {
 		});
 	});
 
+	describe('a sample taken before the inputs changed', () => {
+		// One fetch per sample, each released by the test, with a tip that tells the samples apart. The
+		// tips sit above the provider's own quote, which would otherwise floor them both to the same value.
+		const releases: ((maxPriorityFeePerGas: bigint) => void)[] = [];
+
+		const sample = (maxPriorityFeePerGas: bigint) => ({
+			baseFeePerGas: 5n,
+			perPriority: {
+				[EthFeePriority.SLOW]: { maxFeePerGas: 100n, maxPriorityFeePerGas },
+				[EthFeePriority.STANDARD]: { maxFeePerGas: 100n, maxPriorityFeePerGas },
+				[EthFeePriority.FAST]: { maxFeePerGas: 100n, maxPriorityFeePerGas }
+			}
+		});
+
+		beforeEach(() => {
+			releases.length = 0;
+
+			InfuraGasRest.prototype.getSuggestedFeeData = vi
+				.fn()
+				.mockImplementation(
+					async () =>
+						await new Promise((resolve) =>
+							releases.push((maxPriorityFeePerGas) => resolve(sample(maxPriorityFeePerGas)))
+						)
+				);
+
+			vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+		});
+
+		const renderWithTwoFetchesInFlight = async () => {
+			const rendered = renderWith();
+
+			// The fetch for the inputs before...
+			await vi.advanceTimersByTimeAsync(1000);
+
+			rendered.component.triggerUpdateFee();
+
+			// ...and the one for the inputs now entered.
+			await vi.advanceTimersByTimeAsync(1000);
+
+			expect(releases).toHaveLength(2);
+
+			const [releaseBefore, releaseAfter] = releases;
+
+			return { ...rendered, releaseBefore, releaseAfter };
+		};
+
+		it('is dropped when it lands first', async () => {
+			const { releaseBefore, releaseAfter } = await renderWithTwoFetchesInFlight();
+
+			releaseBefore(30n);
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(setFeeMock).not.toHaveBeenCalled();
+
+			releaseAfter(40n);
+			await vi.runAllTimersAsync();
+
+			expect(setFeeMock).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ maxPriorityFeePerGas: 40n })
+			);
+		});
+
+		it('is dropped when it lands last, over the sample for the inputs now entered', async () => {
+			const { releaseBefore, releaseAfter } = await renderWithTwoFetchesInFlight();
+
+			releaseAfter(40n);
+			await vi.advanceTimersByTimeAsync(0);
+
+			releaseBefore(30n);
+			await vi.runAllTimersAsync();
+
+			expect(setFeeMock).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ maxPriorityFeePerGas: 40n })
+			);
+			expect(get(feeState)).toEqual(expect.objectContaining({ maxPriorityFeePerGas: 40n }));
+		});
+	});
+
+	describe('a failed fetch for inputs that have changed since', () => {
+		// Only the first fetch is held and then failed; every later one resolves as usual.
+		const renderWithFirstFetchInFlight = async () => {
+			let failFirst: () => void = () => undefined;
+
+			const getFeeDataSpy = vi
+				.spyOn(infuraMod.infuraProviders(network.id), 'getFeeData')
+				.mockImplementationOnce(
+					() =>
+						new Promise((_, reject) => {
+							failFirst = () => reject(new Error('network down'));
+						})
+				);
+
+			vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+
+			const rendered = renderWith();
+
+			await vi.advanceTimersByTimeAsync(1000);
+
+			expect(getFeeDataSpy).toHaveBeenCalledOnce();
+
+			return { ...rendered, getFeeDataSpy, failFirst };
+		};
+
+		it('is neither reported nor retried once the sample for the current inputs has landed', async () => {
+			const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError');
+
+			const { component, getFeeDataSpy, failFirst } = await renderWithFirstFetchInFlight();
+
+			component.triggerUpdateFee();
+			await vi.advanceTimersByTimeAsync(1000);
+
+			expect(setFeeMock).toHaveBeenCalledOnce();
+
+			failFirst();
+			await vi.advanceTimersByTimeAsync(60_000);
+
+			expect(toastsErrorSpy).not.toHaveBeenCalled();
+			// A retry would have been a third fetch.
+			expect(getFeeDataSpy).toHaveBeenCalledTimes(2);
+		});
+
+		it('is not reported while the sample for the current inputs is still to come', async () => {
+			const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError');
+
+			const { component, failFirst } = await renderWithFirstFetchInFlight();
+
+			component.triggerUpdateFee();
+
+			failFirst();
+			await vi.advanceTimersByTimeAsync(60_000);
+
+			expect(toastsErrorSpy).not.toHaveBeenCalled();
+			expect(setFeeMock).toHaveBeenCalledOnce();
+		});
+	});
+
 	it('should set fee for native ETH / EVM-native tokens using max(safeEstimateGas, getEthFeeData)', async () => {
 		vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
 
@@ -414,6 +552,44 @@ describe('EthFeeContext', () => {
 			expect.objectContaining({
 				gas: 123n
 			})
+		);
+	});
+
+	describe('ERC-20 transfer fee estimation', () => {
+		const renderErc20 = (amount: OptionAmount) =>
+			renderWith({
+				amount,
+				sendToken: mockValidErc20Token,
+				sendTokenId: mockValidErc20Token.id
+			});
+
+		it('estimates the amount entered', async () => {
+			renderErc20('0.1');
+
+			await vi.runAllTimersAsync();
+
+			expect(feeServices.getErc20FeeData).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					amount: parseToken({ value: '0.1', unitName: mockValidErc20Token.decimals })
+				})
+			);
+		});
+
+		// Moving nothing skips the recipient's balance write, so a zero estimate falls short of the
+		// gas the transfer the user is typing will need.
+		it.each([0, '0', '0.', '0.0', undefined])(
+			'estimates one whole token instead of %s',
+			async (amount) => {
+				renderErc20(amount);
+
+				await vi.runAllTimersAsync();
+
+				expect(feeServices.getErc20FeeData).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						amount: parseToken({ value: '1', unitName: mockValidErc20Token.decimals })
+					})
+				);
+			}
 		);
 	});
 

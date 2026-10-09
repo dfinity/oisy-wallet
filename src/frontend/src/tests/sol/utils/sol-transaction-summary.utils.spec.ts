@@ -1,6 +1,7 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
+import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import type { SolAddress } from '$sol/types/address';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
@@ -937,7 +938,9 @@ describe('sol-transaction-summary.utils', () => {
 	});
 
 	describe('formatSolInstructionSummary', () => {
-		const format = (instruction: SolInstructionSummary): { text: string; detail?: string } =>
+		const format = (
+			instruction: SolInstructionSummary
+		): { text: string; detail?: string; trailing?: string } =>
 			formatSolInstructionSummary({
 				instruction,
 				i18n: en,
@@ -950,6 +953,32 @@ describe('sol-transaction-summary.utils', () => {
 			format(instruction).detail;
 
 		const textOf = (instruction: SolInstructionSummary): string => format(instruction).text;
+
+		// The notice about programs OISY cannot read names a pool by itself; the leg the pool made has
+		// to name it the same way, or nothing on the screen matches it.
+		it('should say which pool a leg of a route goes through', () => {
+			const leg: SolInstructionSummary = {
+				kind: 'send',
+				amount: 1_000_000_000n,
+				counterparty: mockSolAddress2,
+				via: mockSolAddress3,
+				viaName: 'fusionamm'
+			};
+
+			expect(format(leg).trailing).toBe('via fusionamm');
+			expect(format({ ...leg, kind: 'receive' }).trailing).toBe('via fusionamm');
+		});
+
+		it('should name that pool by its address when it publishes no name', () => {
+			expect(
+				format({
+					kind: 'receive',
+					amount: 1_000_000_000n,
+					counterparty: mockSolAddress2,
+					via: mockSolAddress3
+				}).trailing
+			).toBe(`via ${shortenWithMiddleEllipsis({ text: mockSolAddress3 })}`);
+		});
 
 		// The opening line names the token, and the closing one did not: "Close token account" left
 		// the user to work out which of their accounts a transaction was closing.

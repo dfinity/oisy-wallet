@@ -861,6 +861,11 @@ interface I18nSend {
 		unexpected_utxos_fee: string;
 		unable_to_retrieve_amount: string;
 		ethereum_insufficient_funds: string;
+		ethereum_out_of_gas: string;
+		ethereum_out_of_gas_gas: string;
+		ethereum_out_of_gas_gas_sent: string;
+		ethereum_transaction_hash: string;
+		ethereum_unsigned_transaction: string;
 		solana_transaction_expired: string;
 		solana_confirmation_failed: string;
 		solana_insufficient_funds: string;
@@ -1097,6 +1102,7 @@ interface I18nSwap {
 		swap_replaced_or_dropped: string;
 		near_intents_quote_unverified: string;
 		near_intents_quote_expired: string;
+		near_intents_quote_deposit_memo: string;
 		oisy_trade_not_trackable: string;
 		oisy_trade_order_killed: string;
 		oisy_trade_settlement_unresolved: string;
@@ -1843,6 +1849,7 @@ interface I18nTransaction {
 		instruction_thaw: string;
 		instruction_unknown: string;
 		instruction_unknown_via: string;
+		instruction_via: string;
 		instruction_rent: string;
 		instruction_balance_returned: string;
 		instruction_balance_sent: string;

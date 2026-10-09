@@ -39,6 +39,7 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -260,7 +261,12 @@
 				metadata: sendTrackingEventMetadata
 			});
 
-			toastEthereumTransactionError({ err, fallbackMsg: $i18n.send.error.unexpected });
+			toastEthereumTransactionError({
+				err,
+				fallbackMsg: $i18n.send.error.unexpected,
+				token: $sendToken,
+				context: PLAUSIBLE_EVENT_CONTEXTS.AI_ASSISTANT
+			});
 		}
 	};
 </script>

@@ -20,12 +20,14 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { ProgressStepsTip } from '$lib/enums/progress-steps';
-	import { trackTip } from '$lib/services/tip-analytics.services';
+	import { toTipErrorType, trackTip } from '$lib/services/tip-analytics.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { dirtyWizardState } from '$lib/stores/progressWizardState.store';
 	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
+	import { consoleWarn } from '$lib/utils/console.utils';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import {
 		formatCurrency,
@@ -123,7 +125,52 @@
 	// Copy and share are tracked separately: which one a sender reaches for says
 	// whether the QR, the link or the share sheet is doing the work, and that is
 	// the only way to know which of the three earns its place on this screen.
-	const trackCopy = () => trackTip({ step: 'copy', side: 'sender', symbol: token.symbol });
+	const trackCopy = () =>
+		trackTip({
+			step: 'copy',
+			side: 'sender',
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+			symbol: token.symbol
+		});
+
+	// Tracked once the share sheet has answered rather than on the tap. An
+	// `AbortError` is a `cancel`, not a dismissal: the Web Share API answers both a
+	// dismissed sheet and a device with no share target that way and says nothing
+	// about which. Either way nothing was shared and nothing in OISY failed.
+	const share = async () => {
+		if (isNullish(link)) {
+			return;
+		}
+
+		try {
+			await shareText(link);
+
+			trackTip({
+				step: 'share',
+				side: 'sender',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				symbol: token.symbol
+			});
+		} catch (err: unknown) {
+			const cancelled = err instanceof DOMException && err.name === 'AbortError';
+
+			if (!cancelled) {
+				consoleWarn('Could not share the tip link', err);
+			}
+
+			trackTip({
+				step: 'share',
+				side: 'sender',
+				...(cancelled
+					? { resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.CANCEL }
+					: {
+							resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+							errorType: toTipErrorType(err)
+						}),
+				symbol: token.symbol
+			});
+		}
+	};
 
 	// The absolute instant, not "in 24 hours": the sender may share this link days
 	// later, and a relative deadline stops being true the moment the modal closes.
@@ -308,15 +355,7 @@
 			/>
 
 			{#if canShare()}
-				<ButtonIcon
-					ariaLabel={$i18n.tip.text.share_link}
-					link={false}
-					onclick={async () => {
-						trackTip({ step: 'share', side: 'sender', symbol: token.symbol });
-
-						await shareText(link);
-					}}
-				>
+				<ButtonIcon ariaLabel={$i18n.tip.text.share_link} link={false} onclick={share}>
 					{#snippet icon()}
 						<IconShareArrow size="24" />
 					{/snippet}

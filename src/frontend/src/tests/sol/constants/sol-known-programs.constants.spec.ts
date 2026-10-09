@@ -13,6 +13,11 @@ describe('sol-known-programs.constants', () => {
 		);
 	});
 
+	// Jupiter routes swaps such as EURC to USDC through its pools.
+	it('should know the FusionAMM pools', () => {
+		expect(SOLANA_KNOWN_PROGRAM_ADDRESSES).toContain('fUSioN9YKKSa3CUC2YUc4tPkHJ5Y6XW1yz8y6F7qWz9');
+	});
+
 	// A stake account is held outside the wallet and its token accounts, which is exactly what the
 	// confirmation is for: a call to the stake program must always ask for it.
 	it('should leave out the stake program', () => {
