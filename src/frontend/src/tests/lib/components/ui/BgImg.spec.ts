@@ -4,6 +4,9 @@ import { render } from '@testing-library/svelte';
 
 const IMG = 'https://example.com/pic.png';
 
+const URL_WITH_DECLARATIONS =
+	'https://cdn.example/a.png);position:fixed;inset:0;width:100vw;height:100vh;z-index:2147483647;pointer-events:none;background-image:url(https://other.example/x.png';
+
 describe('BgImg', () => {
 	it('renders with aria-label and background image style', () => {
 		const { getByLabelText } = render(BgImg, {
@@ -146,5 +149,80 @@ describe('BgImg', () => {
 
 		expect(el).toHaveClass('flex', 'bg-center'); // base classes
 		expect(el).toHaveClass('rounded-xl', 'p-2'); // custom classes
+	});
+
+	describe('background image', () => {
+		const expectNoAddedDeclarations = (el: HTMLElement) => {
+			expect(el.style.position).toBe('');
+			expect(el.style.inset).toBe('');
+			expect(el.style.width).toBe('');
+			expect(el.style.height).toBe('');
+			expect(el.style.zIndex).toBe('');
+			expect(el.style.pointerEvents).toBe('');
+		};
+
+		it.each([
+			{ imageUrl: IMG, expected: `url("${IMG}")` },
+			{ imageUrl: 'ipfs://bafybeigdyrzt/1.png', expected: 'url("ipfs://bafybeigdyrzt/1.png")' },
+			{
+				imageUrl: 'data:image/png;base64,iVBORw0KGgo=',
+				expected: 'url("data:image/png;base64,iVBORw0KGgo=")'
+			},
+			{
+				imageUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg"></svg>',
+				expected:
+					'url("data:image/svg+xml;utf8,<svg xmlns=\\"http://www.w3.org/2000/svg\\"></svg>")'
+			}
+		])('sets $imageUrl as the background image', ({ imageUrl, expected }) => {
+			const { getByLabelText } = render(BgImg, { ariaLabel: 'image', imageUrl });
+
+			expect(getByLabelText('image').style.backgroundImage).toBe(expected);
+		});
+
+		it('keeps a URL that closes url() as a single background image', () => {
+			const { getByLabelText } = render(BgImg, {
+				ariaLabel: 'image',
+				imageUrl: URL_WITH_DECLARATIONS
+			});
+
+			const el = getByLabelText('image');
+
+			expect(el.style.backgroundImage).toBe(`url("${URL_WITH_DECLARATIONS}")`);
+
+			expectNoAddedDeclarations(el);
+		});
+
+		it('keeps a URL that closes url() as a single background image when it changes', async () => {
+			const { getByLabelText, rerender } = render(BgImg, { ariaLabel: 'image', imageUrl: IMG });
+
+			await rerender({ ariaLabel: 'image', imageUrl: URL_WITH_DECLARATIONS });
+
+			const el = getByLabelText('image');
+
+			expect(el.style.backgroundImage).toBe(`url("${URL_WITH_DECLARATIONS}")`);
+
+			expectNoAddedDeclarations(el);
+		});
+
+		it('escapes quotes and backslashes in the URL', () => {
+			const { getByLabelText } = render(BgImg, {
+				ariaLabel: 'image',
+				imageUrl: 'https://example.com/a\\");position:fixed;x:("b.png'
+			});
+
+			const el = getByLabelText('image');
+
+			expect(el.style.backgroundImage).toBe(
+				'url("https://example.com/a\\\\\\");position:fixed;x:(\\"b.png")'
+			);
+
+			expectNoAddedDeclarations(el);
+		});
+
+		it('sets no background image when imageUrl is nullish', () => {
+			const { getByLabelText } = render(BgImg, { ariaLabel: 'image', imageUrl: undefined });
+
+			expect(getByLabelText('image').style.backgroundImage).toBe('');
+		});
 	});
 });
