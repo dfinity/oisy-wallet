@@ -74,22 +74,29 @@ import {
 	AuthorityType,
 	getApproveCheckedInstruction,
 	getApproveInstruction,
+	getBatchInstruction,
+	getBatchInstructionDataEncoder,
 	getBurnCheckedInstruction,
 	getBurnInstruction,
+	getCloseAccountInstruction,
 	getCreateAssociatedTokenIdempotentInstruction,
 	getCreateAssociatedTokenInstruction,
 	getSetAuthorityInstruction,
 	getTransferCheckedInstruction,
+	getUnwrapLamportsInstruction,
 	TokenInstruction
 } from '@solana-program/token';
 import {
 	getApproveCheckedInstruction as getToken2022ApproveCheckedInstruction,
 	getApproveInstruction as getToken2022ApproveInstruction,
+	getBatchInstruction as getToken2022BatchInstruction,
 	getBurnCheckedInstruction as getToken2022BurnCheckedInstruction,
 	getBurnInstruction as getToken2022BurnInstruction,
 	getCloseAccountInstruction as getToken2022CloseAccountInstruction,
+	getPermissionedBurnInstruction as getToken2022PermissionedBurnInstruction,
 	getSetAuthorityInstruction as getToken2022SetAuthorityInstruction,
 	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction,
+	getUnwrapLamportsInstruction as getToken2022UnwrapLamportsInstruction,
 	AuthorityType as Token2022AuthorityType
 } from '@solana-program/token-2022';
 import {
@@ -1775,6 +1782,237 @@ describe('sol-instructions.utils', () => {
 			});
 
 			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		describe('an `UnwrapLamports` instruction', () => {
+			const unwrapTo = (destination: string) =>
+				getUnwrapLamportsInstruction({
+					source: address(mockSolAddress3),
+					destination: address(destination),
+					authority: address(mockSolAddress),
+					amount: 100n
+				});
+
+			it('should fail closed on an unwrap that pays somebody else', () => {
+				expect(
+					mapSolInstruction({ instruction: unwrapTo(mockSolAddress2), userAddress: mockSolAddress })
+				).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on an unwrap when the user is not known', () => {
+				expect(mapSolInstruction({ instruction: unwrapTo(mockSolAddress) })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should leave an unwrap that pays the user unread', () => {
+				expect(
+					mapSolInstruction({ instruction: unwrapTo(mockSolAddress), userAddress: mockSolAddress })
+				).toStrictEqual({ amount: undefined, unreviewed: true });
+			});
+
+			it('should fail closed on a Token-2022 unwrap that pays somebody else', () => {
+				const instruction = getToken2022UnwrapLamportsInstruction({
+					source: address(mockSolAddress3),
+					destination: address(mockSolAddress2),
+					authority: address(mockSolAddress),
+					amount: 100n
+				});
+
+				expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should leave a Token-2022 unwrap that pays the user unread', () => {
+				const instruction = getToken2022UnwrapLamportsInstruction({
+					source: address(mockSolAddress3),
+					destination: address(mockSolAddress),
+					authority: address(mockSolAddress),
+					amount: 100n
+				});
+
+				expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+					amount: undefined,
+					unreviewed: true
+				});
+			});
+		});
+
+		describe('a token batch', () => {
+			const setAuthority = getSetAuthorityInstruction({
+				owned: address(mockSolAddress3),
+				owner: address(mockSolAddress),
+				authorityType: AuthorityType.AccountOwner,
+				newAuthority: address(mockSolAddress2)
+			});
+
+			const transfer = getTransferCheckedInstruction({
+				source: address(mockSolAddress3),
+				mint: address(JUP_TOKEN.address),
+				destination: address(mockSolAddress2),
+				authority: address(mockSolAddress),
+				amount: 1n,
+				decimals: 6
+			});
+
+			const closeTo = (destination: string) =>
+				getCloseAccountInstruction({
+					account: address(mockSolAddress3),
+					destination: address(destination),
+					owner: address(mockSolAddress)
+				});
+
+			const map = (instruction: SolInstruction) =>
+				mapSolInstruction({ instruction, userAddress: mockSolAddress });
+
+			it('should fail closed on a batch carrying an authority change', () => {
+				expect(map(getBatchInstruction([setAuthority]))).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should fail closed on a batch carrying a burn', () => {
+				const burn = getBurnInstruction({
+					account: address(mockSolAddress3),
+					mint: address(JUP_TOKEN.address),
+					authority: address(mockSolAddress),
+					amount: 100n
+				});
+
+				expect(map(getBatchInstruction([burn]))).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should fail closed on a batch carrying a checked burn', () => {
+				const burn = getBurnCheckedInstruction({
+					account: address(mockSolAddress3),
+					mint: address(JUP_TOKEN.address),
+					authority: address(mockSolAddress),
+					amount: 100n,
+					decimals: 6
+				});
+
+				expect(map(getBatchInstruction([burn]))).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should fail closed on a batch carrying a close that pays somebody else', () => {
+				expect(map(getBatchInstruction([closeTo(mockSolAddress2)]))).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should fail closed on a batch carrying an unwrap that pays somebody else', () => {
+				const unwrap = getUnwrapLamportsInstruction({
+					source: address(mockSolAddress3),
+					destination: address(mockSolAddress2),
+					authority: address(mockSolAddress),
+					amount: 100n
+				});
+
+				expect(map(getBatchInstruction([unwrap]))).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should fail closed when any one of the instructions it carries is refused', () => {
+				expect(map(getBatchInstruction([transfer, setAuthority]))).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should leave a batch carrying only instructions that pass unread', () => {
+				expect(map(getBatchInstruction([transfer, closeTo(mockSolAddress)]))).toStrictEqual({
+					amount: undefined,
+					unreviewed: true
+				});
+			});
+
+			it('should fail closed on a batch nested in a batch', () => {
+				const inner = getBatchInstruction([transfer]);
+
+				const nested: SolInstruction = {
+					programAddress: inner.programAddress,
+					accounts: inner.accounts,
+					data: getBatchInstructionDataEncoder().encode({
+						data: [{ numberOfAccounts: inner.accounts.length, instructionData: inner.data }]
+					})
+				};
+
+				expect(map(nested)).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on a batch naming more accounts than it carries', () => {
+				const batch = getBatchInstruction([transfer]);
+
+				expect(map({ ...batch, accounts: batch.accounts.slice(0, -1) })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should fail closed on a batch carrying no instruction', () => {
+				const empty: SolInstruction = {
+					programAddress: address(TOKEN_PROGRAM_ADDRESS),
+					accounts: [],
+					data: getBatchInstructionDataEncoder().encode({ data: [] })
+				};
+
+				expect(map(empty)).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on a Token-2022 batch carrying an authority change', () => {
+				const instruction = getToken2022BatchInstruction([
+					getToken2022SetAuthorityInstruction({
+						owned: address(mockSolAddress3),
+						owner: address(mockSolAddress),
+						authorityType: Token2022AuthorityType.AccountOwner,
+						newAuthority: address(mockSolAddress2)
+					})
+				]);
+
+				expect(map(instruction)).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on a Token-2022 batch carrying a permissioned burn', () => {
+				const instruction = getToken2022BatchInstruction([
+					getToken2022PermissionedBurnInstruction({
+						account: address(mockSolAddress3),
+						mint: address(JUP_TOKEN.address),
+						permissionedBurnAuthority: createNoopSigner(address(mockSolAddress2)),
+						authority: address(mockSolAddress),
+						amount: 100n
+					})
+				]);
+
+				expect(map(instruction)).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should leave a Token-2022 batch carrying only transfers unread', () => {
+				const instruction = getToken2022BatchInstruction([
+					getToken2022TransferCheckedInstruction({
+						source: address(mockSolAddress3),
+						mint: address(JUP_TOKEN.address),
+						destination: address(mockSolAddress2),
+						authority: address(mockSolAddress),
+						amount: 1n,
+						decimals: 6
+					})
+				]);
+
+				expect(map(instruction)).toStrictEqual({ amount: undefined, unreviewed: true });
+			});
 		});
 
 		it('should ignore a Create Associated Token instruction', () => {

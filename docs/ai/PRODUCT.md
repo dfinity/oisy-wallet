@@ -474,6 +474,12 @@ Because the set is closed and published, an instruction OISY has never classifie
 
 The deliberate cost is that a legitimate System-owned creation is refused as well — a durable nonce account is System-owned and carries data. Recognising that specific pattern is a follow-up; until then the review errs toward refusing.
 
+### Token instructions in a batch
+
+The Token and Token-2022 programs can run several of their own instructions as one, a **batch**, which carries each with the accounts it names and runs them one after the other. The signing check reads a batch through what it carries: each instruction in it gets the reading it would get on its own, and one refused there — an authority change, a burn, or a close or an unwrap that pays anyone but the user's wallet — refuses the batch, and the request with it. A batch nested in another is refused too, since neither program runs one, and so is a batch that does not hold together: one that carries nothing, or names more accounts than it has. A batch that passes is still an instruction the review does not read, with the warning every such instruction gets, and the refusal when no simulated run accounts for it.
+
+**Unwrapping** lamports out of a wrapped SOL account pays them to the destination the instruction names, which, as for a close, need not be the user's wallet. One that names any other destination is refused; one that pays the wallet is an instruction the review does not read.
+
 ### Where a Solana transaction sends its value
 
 The review names **no recipient of its own**. It once answered "where does this go?" twice — with a Destinations list and with a single destination field the list suppressed — and two competing answers to one question are worse than one, so the question now belongs entirely to the simulated balance changes above. Those describe every account of the user's that moves, rather than picking counterparties out of the instructions, which a routed swap makes impossible anyway: such a swap performs every transfer inside a cross-program invocation that the unsigned message does not contain.
