@@ -49,6 +49,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { errorDetailToString, replaceHexValues } from '$lib/utils/error.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -262,7 +263,7 @@
 					address: nft.collection.address,
 					tokenId: String(nft.id),
 					network: sourceNetwork.name,
-					error: (err as Error).message
+					error: replaceHexValues(errorDetailToString(err) ?? '')
 				}
 			});
 
