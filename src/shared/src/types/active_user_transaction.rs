@@ -380,6 +380,10 @@ pub struct UpdateActiveUserTransactionRequest {
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct GetActiveUserTransactionsResponse {
     pub transactions: Vec<ActiveUserTransaction>,
+    /// The user has seen every record updated at or before this time, on whichever device they
+    /// saw it, so a record reads as unread only once it changes after this. Zero until the user
+    /// first marks their records seen.
+    pub seen_up_to_ns: u64,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -698,6 +702,7 @@ mod tests {
 
         let list = GetActiveUserTransactionsResponse {
             transactions: vec![sample_record()],
+            seen_up_to_ns: 42,
         };
         assert_eq!(roundtrip(&list), list);
     }

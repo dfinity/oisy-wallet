@@ -5,11 +5,10 @@ use shared::types::{
     active_user_transaction::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
-        ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData,
-        GetActiveUserTransactionsResponse, NearIntentsData, OisyTradeData,
-        UpdateActiveUserTransactionRequest, XrpData, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
-        MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS, MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN,
-        MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
+        ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, NearIntentsData,
+        OisyTradeData, UpdateActiveUserTransactionRequest, XrpData,
+        MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS,
+        MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN, MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_KEY_LEN,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN, MAX_ACTIVE_USER_TRANSACTION_ID_LEN,
         MAX_ACTIVE_USER_TRANSACTION_PROGRESS_STEP_LEN, MAX_EVM_ADDRESS_LEN,
@@ -22,7 +21,10 @@ use shared::types::{
 
 use crate::{
     signer::{CYCLES_LEDGER, ICP_LEDGER},
-    types::{ActiveUserTransactionKey, ActiveUserTransactionsMap, Candid, StoredPrincipal},
+    types::{
+        ActiveUserTransactionKey, ActiveUserTransactionsMap, ActiveUserTransactionsSeenMap, Candid,
+        StoredPrincipal,
+    },
 };
 
 /// Create a new active transaction. Checks are ordered so callers always see
@@ -161,17 +163,39 @@ pub fn delete(
     Ok(())
 }
 
-/// Build the response of active transactions visible to the caller. Records
-/// stay until the FE deletes them on user acknowledgement, or until `create`
-/// needs the room and they are the oldest finished ones.
-pub fn list(
-    map: &ActiveUserTransactionsMap,
-    principal: Principal,
-) -> GetActiveUserTransactionsResponse {
-    let transactions: Vec<ActiveUserTransaction> =
-        scan_principal(map, principal).map(|(_, c)| c.0).collect();
+/// The active transactions visible to the caller. Records stay until the FE
+/// deletes them on user acknowledgement, or until `create` needs the room and
+/// they are the oldest finished ones.
+pub fn list(map: &ActiveUserTransactionsMap, principal: Principal) -> Vec<ActiveUserTransaction> {
+    scan_principal(map, principal).map(|(_, c)| c.0).collect()
+}
 
-    GetActiveUserTransactionsResponse { transactions }
+/// The time up to which the caller has seen their records. Zero until they
+/// first mark them seen.
+pub fn seen_up_to(seen: &ActiveUserTransactionsSeenMap, principal: Principal) -> u64 {
+    seen.get(&StoredPrincipal(principal)).unwrap_or(0)
+}
+
+/// Moves the caller's seen mark up to `up_to_ns` and returns the mark stored
+/// afterwards.
+///
+/// Never backwards: two devices can mark out of order, and the later call must
+/// not turn records the earlier one marked unread again. Never past `now_ns`: a
+/// mark in the future would hide records that are yet to change.
+pub fn mark_seen(
+    seen: &mut ActiveUserTransactionsSeenMap,
+    principal: Principal,
+    up_to_ns: u64,
+    now_ns: u64,
+) -> u64 {
+    let current = seen_up_to(seen, principal);
+    let next = current.max(up_to_ns.min(now_ns));
+
+    if next > current {
+        seen.insert(StoredPrincipal(principal), next);
+    }
+
+    next
 }
 
 /// Whether an XRP payment from this source address can still apply.
@@ -773,8 +797,8 @@ mod tests {
         token_id::TokenId,
     };
 
-    use super::{create, delete, list, update};
-    use crate::types::maps::ActiveUserTransactionsMap;
+    use super::{create, delete, list, mark_seen, seen_up_to, update};
+    use crate::types::maps::{ActiveUserTransactionsMap, ActiveUserTransactionsSeenMap};
 
     const PRINCIPAL_TEXT: &str = "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
     const OTHER_PRINCIPAL_TEXT: &str =
@@ -787,6 +811,15 @@ mod tests {
         let mm = RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
         let map = ActiveUserTransactionsMap::init(mm.borrow().get(MemoryId::new(0)));
         (map, mm)
+    }
+
+    fn seen_setup() -> (
+        ActiveUserTransactionsSeenMap,
+        RefCell<MemoryManager<DefaultMemoryImpl>>,
+    ) {
+        let mm = RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
+        let seen = ActiveUserTransactionsSeenMap::init(mm.borrow().get(MemoryId::new(0)));
+        (seen, mm)
     }
 
     fn principal() -> Principal {
@@ -823,7 +856,7 @@ mod tests {
         assert_eq!(tx.created_at_ns, 1);
         assert_eq!(tx.updated_at_ns, 1);
 
-        let res = list(&map, principal()).transactions;
+        let res = list(&map, principal());
         assert_eq!(res.len(), 1);
         assert_eq!(res[0].id, "id-1");
     }
@@ -895,7 +928,7 @@ mod tests {
         req.data = data_with_amount(Nat::parse(OVER_WIDTH_AMOUNT).unwrap());
         let err = create(&mut map, principal(), req, 1).unwrap_err();
         assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
-        assert_eq!(list(&map, principal()).transactions.len(), 0);
+        assert_eq!(list(&map, principal()).len(), 0);
     }
 
     /// A `Nat` is variable-length on the wire, so the payload an attacker can
@@ -907,7 +940,7 @@ mod tests {
         req.data = data_with_amount(Nat::parse(&b"9".repeat(10_000)).unwrap());
         let err = create(&mut map, principal(), req, 1).unwrap_err();
         assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
-        assert_eq!(list(&map, principal()).transactions.len(), 0);
+        assert_eq!(list(&map, principal()).len(), 0);
     }
 
     #[test]
@@ -1037,7 +1070,7 @@ mod tests {
             assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
             assert_eq!(tx.data, data);
 
-            let listed = list(&map, principal()).transactions;
+            let listed = list(&map, principal());
             assert_eq!(listed.len(), 1);
             assert_eq!(listed[0].data, data);
         }
@@ -1147,7 +1180,7 @@ mod tests {
             let tx = create(&mut map, principal(), req, 1).expect("create");
             assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
 
-            let listed = list(&map, principal()).transactions;
+            let listed = list(&map, principal());
             assert_eq!(listed.len(), 1);
             assert_eq!(listed[0].data, chain_fusion_data(1_000, direction));
         }
@@ -1214,7 +1247,7 @@ mod tests {
             let tx = create(&mut map, principal(), req, 1).expect("create");
             assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
 
-            let listed = list(&map, principal()).transactions;
+            let listed = list(&map, principal());
             assert_eq!(listed.len(), 1);
             assert_eq!(
                 listed[0].data,
@@ -1245,7 +1278,7 @@ mod tests {
         });
         let err = create(&mut map, principal(), req, 1).unwrap_err();
         assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
-        assert_eq!(list(&map, principal()).transactions.len(), 0);
+        assert_eq!(list(&map, principal()).len(), 0);
     }
 
     #[test]
@@ -1344,7 +1377,7 @@ mod tests {
             let tx = create(&mut map, principal(), req, 1).expect("create");
             assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
 
-            let listed = list(&map, principal()).transactions;
+            let listed = list(&map, principal());
             assert_eq!(listed.len(), 1);
             assert_eq!(
                 listed[0].data,
@@ -1466,7 +1499,7 @@ mod tests {
             let tx = create(&mut map, principal(), req, 1).expect("create");
             assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
 
-            let listed = list(&map, principal()).transactions;
+            let listed = list(&map, principal());
             assert_eq!(listed.len(), 1);
             assert_eq!(
                 listed[0].data,
@@ -1813,7 +1846,7 @@ mod tests {
                 ActiveUserTransactionError::InvalidData(expected.to_string())
             );
             assert!(
-                list(&map, principal()).transactions.is_empty(),
+                list(&map, principal()).is_empty(),
                 "a rejected create must not leave a row behind"
             );
         }
@@ -2029,7 +2062,7 @@ mod tests {
         let tx = create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("create");
         assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
 
-        let listed = list(&map, principal()).transactions;
+        let listed = list(&map, principal());
         assert_eq!(listed.len(), 1);
         assert_eq!(listed[0].data, xrp_swap_data(25_000_000, Some(XRP_SOURCE)));
     }
@@ -2256,7 +2289,7 @@ mod tests {
             );
 
             assert_eq!(
-                list(&map, principal()).transactions[0].status,
+                list(&map, principal())[0].status,
                 ActiveUserTransactionStatus::Pending
             );
 
@@ -2459,11 +2492,7 @@ mod tests {
     }
 
     fn ids(map: &ActiveUserTransactionsMap, principal: Principal) -> BTreeSet<String> {
-        list(map, principal)
-            .transactions
-            .into_iter()
-            .map(|tx| tx.id)
-            .collect()
+        list(map, principal).into_iter().map(|tx| tx.id).collect()
     }
 
     #[test]
@@ -2801,7 +2830,7 @@ mod tests {
         )
         .expect("update b");
 
-        let all = list(&map, principal()).transactions;
+        let all = list(&map, principal());
         let mut ids: Vec<String> = all.iter().map(|tx| tx.id.clone()).collect();
         ids.sort();
         assert_eq!(ids, vec!["a".to_string(), "b".to_string()]);
@@ -2813,11 +2842,49 @@ mod tests {
         create(&mut map, principal(), create_req("a"), 1).expect("a");
         create(&mut map, other_principal(), create_req("a"), 1).expect("other");
 
-        let mine = list(&map, principal()).transactions;
+        let mine = list(&map, principal());
         assert_eq!(mine.len(), 1);
 
-        let theirs = list(&map, other_principal()).transactions;
+        let theirs = list(&map, other_principal());
         assert_eq!(theirs.len(), 1);
+    }
+
+    #[test]
+    fn seen_mark_starts_at_zero() {
+        let (seen, _mm) = seen_setup();
+        assert_eq!(seen_up_to(&seen, principal()), 0);
+    }
+
+    #[test]
+    fn seen_mark_moves_forward() {
+        let (mut seen, _mm) = seen_setup();
+        assert_eq!(mark_seen(&mut seen, principal(), 5, 10), 5);
+        assert_eq!(mark_seen(&mut seen, principal(), 7, 10), 7);
+        assert_eq!(seen_up_to(&seen, principal()), 7);
+    }
+
+    // Two devices can mark out of order. The later, lower mark must not turn
+    // records the earlier one marked unread again.
+    #[test]
+    fn seen_mark_never_moves_back() {
+        let (mut seen, _mm) = seen_setup();
+        mark_seen(&mut seen, principal(), 7, 10);
+        assert_eq!(mark_seen(&mut seen, principal(), 5, 10), 7);
+        assert_eq!(seen_up_to(&seen, principal()), 7);
+    }
+
+    #[test]
+    fn seen_mark_is_capped_at_now() {
+        let (mut seen, _mm) = seen_setup();
+        assert_eq!(mark_seen(&mut seen, principal(), u64::MAX, 10), 10);
+        assert_eq!(seen_up_to(&seen, principal()), 10);
+    }
+
+    #[test]
+    fn seen_mark_is_principal_scoped() {
+        let (mut seen, _mm) = seen_setup();
+        mark_seen(&mut seen, principal(), 5, 10);
+        assert_eq!(seen_up_to(&seen, other_principal()), 0);
     }
 
     #[test]
@@ -2826,7 +2893,7 @@ mod tests {
         create(&mut map, principal(), create_req("a"), 1).expect("create");
         delete(&mut map, principal(), "a".to_string()).expect("first delete");
         delete(&mut map, principal(), "a".to_string()).expect("second delete idempotent");
-        assert!(list(&map, principal()).transactions.is_empty());
+        assert!(list(&map, principal()).is_empty());
     }
 
     #[test]
@@ -2850,13 +2917,12 @@ mod tests {
         // No matter how far in the future we read, the terminal record stays
         // until the FE explicitly deletes it.
         let far_future = 10u64 + 30 * 24 * 60 * 60 * 1_000_000_000;
-        let res = list(&map, principal()).transactions;
+        let res = list(&map, principal());
         assert_eq!(res.len(), 1, "terminal entry must be retained");
 
         create(&mut map, principal(), create_req("b"), far_future).expect("create b");
         let after_write: Vec<String> = {
             let mut ids: Vec<String> = list(&map, principal())
-                .transactions
                 .into_iter()
                 .map(|tx| tx.id)
                 .collect();

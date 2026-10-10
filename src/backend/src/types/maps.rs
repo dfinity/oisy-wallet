@@ -76,6 +76,10 @@ pub type AgreementHistoryMap =
 pub type ActiveUserTransactionsMap =
     StableBTreeMap<ActiveUserTransactionKey, Candid<ActiveUserTransaction>, VMem>;
 
+/// Map of `user_principal` to the time up to which the user has seen their records in
+/// [`ActiveUserTransactionsMap`].
+pub type ActiveUserTransactionsSeenMap = StableBTreeMap<StoredPrincipal, Timestamp, VMem>;
+
 /// Primary personal-note-share store: token → record. Publicly readable by
 /// design (unlike every other map here) — see `personal_notes::share`.
 pub type PersonalNoteShareMap =
