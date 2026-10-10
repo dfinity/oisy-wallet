@@ -1,5 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	SPL_TOKEN_MAX_AMOUNT,
 	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
@@ -45,12 +46,14 @@ describe('sol-simulation.utils', () => {
 		amount,
 		owner,
 		delegate,
+		delegatedAmount,
 		closeAuthority,
 		program = TOKEN_PROGRAM_ADDRESS
 	}: {
 		amount: bigint;
 		owner: SolAddress;
 		delegate?: SolAddress;
+		delegatedAmount?: bigint;
 		closeAuthority?: SolAddress;
 		program?: SolAddress;
 	}): NonNullable<SolanaParsedAccountInfo> =>
@@ -68,6 +71,9 @@ describe('sol-simulation.utils', () => {
 						mint: mockSplAddress,
 						owner,
 						...(delegate !== undefined && { delegate }),
+						...(delegatedAmount !== undefined && {
+							delegatedAmount: { amount: `${delegatedAmount}`, decimals: 6 }
+						}),
 						...(closeAuthority !== undefined && { closeAuthority }),
 						tokenAmount: { amount: `${amount}`, decimals: 6 }
 					}
@@ -202,6 +208,118 @@ describe('sol-simulation.utils', () => {
 
 			expect(preview.controlChanges).toEqual([
 				{ account: mockAtaAddress, field: 'delegate', to: mockSolAddress2 }
+			]);
+		});
+
+		it('should state what a new delegate may spend', () => {
+			const preview = mapSolSimulationPreview({
+				addresses: [mockAtaAddress],
+				preAccounts: [tokenAccount({ amount: 5_000_000n, owner: mockSolAddress })],
+				postAccounts: [
+					tokenAccount({
+						amount: 5_000_000n,
+						owner: mockSolAddress,
+						delegate: mockSolAddress2,
+						delegatedAmount: 1_000_000n
+					})
+				],
+				userAddress: mockSolAddress
+			});
+
+			expect(preview.controlChanges).toEqual([
+				{
+					account: mockAtaAddress,
+					field: 'delegate',
+					to: mockSolAddress2,
+					allowance: { tokenAddress: mockSplAddress, decimals: 6, amount: 1_000_000n }
+				}
+			]);
+		});
+
+		// The delegate stays the same, so a diff of the delegate alone reads this as no change at all.
+		it('should report a raised allowance of the same delegate', () => {
+			const preview = mapSolSimulationPreview({
+				addresses: [mockAtaAddress],
+				preAccounts: [
+					tokenAccount({
+						amount: 5_000_000n,
+						owner: mockSolAddress,
+						delegate: mockSolAddress2,
+						delegatedAmount: 1n
+					})
+				],
+				postAccounts: [
+					tokenAccount({
+						amount: 5_000_000n,
+						owner: mockSolAddress,
+						delegate: mockSolAddress2,
+						delegatedAmount: SPL_TOKEN_MAX_AMOUNT
+					})
+				],
+				userAddress: mockSolAddress
+			});
+
+			expect(preview).toEqual({
+				tokenDeltas: [],
+				controlChanges: [
+					{
+						account: mockAtaAddress,
+						field: 'allowance',
+						to: mockSolAddress2,
+						allowance: { tokenAddress: mockSplAddress, decimals: 6, amount: SPL_TOKEN_MAX_AMOUNT }
+					}
+				]
+			});
+			expect(isEmptySolSimulationPreview(preview)).toBeFalsy();
+		});
+
+		it('should report nothing when the delegate and its allowance stay the same', () => {
+			const account = tokenAccount({
+				amount: 5_000_000n,
+				owner: mockSolAddress,
+				delegate: mockSolAddress2,
+				delegatedAmount: 1_000_000n
+			});
+
+			const preview = mapSolSimulationPreview({
+				addresses: [mockAtaAddress],
+				preAccounts: [account],
+				postAccounts: [account],
+				userAddress: mockSolAddress
+			});
+
+			expect(isEmptySolSimulationPreview(preview)).toBeTruthy();
+		});
+
+		it('should report a replaced delegate once, with what the new one may spend', () => {
+			const preview = mapSolSimulationPreview({
+				addresses: [mockAtaAddress],
+				preAccounts: [
+					tokenAccount({
+						amount: 5_000_000n,
+						owner: mockSolAddress,
+						delegate: mockSolAddress2,
+						delegatedAmount: 1n
+					})
+				],
+				postAccounts: [
+					tokenAccount({
+						amount: 5_000_000n,
+						owner: mockSolAddress,
+						delegate: mockSolAddress3,
+						delegatedAmount: 2n
+					})
+				],
+				userAddress: mockSolAddress
+			});
+
+			expect(preview.controlChanges).toEqual([
+				{
+					account: mockAtaAddress,
+					field: 'delegate',
+					to: mockSolAddress3,
+					allowance: { tokenAddress: mockSplAddress, decimals: 6, amount: 2n }
+				}
 			]);
 		});
 
