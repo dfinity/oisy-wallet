@@ -8,7 +8,7 @@ import { idlFactory as factoryIdlFactory } from '$declarations/icp_swap_factory/
 import { getAgent } from '$lib/actors/agents.ic';
 import { mapIcpSwapFactoryError } from '$lib/canisters/icp-swap.errors';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { Canister, createServices } from '@dfinity/utils';
+import { Canister, createServices, type QueryParams } from '@dfinity/utils';
 
 export class ICPSwapFactoryCanister extends Canister<SwapFactoryService> {
 	static async create({ identity, ...options }: CreateCanisterOptions<SwapFactoryService>) {
@@ -25,14 +25,15 @@ export class ICPSwapFactoryCanister extends Canister<SwapFactoryService> {
 
 	/**
 	 * Fetches pool information by given tokens and fee.
-	 * Read-only (uncertified query call).
+	 * Certified by default: the returned canister ID can become the spender of an ICRC-2 approval
+	 * and the target of a deposit, so only a caller that moves no funds should opt into the query.
 	 *
-	 * @param args - Pool search parameters: token0, token1, and fee.
+	 * @param params - Pool search parameters: token0, token1, and fee, plus whether to certify the call.
 	 * @returns Pool information containing the canister ID.
 	 * @throws CanisterInternalError if fetching pool fails.
 	 */
-	getPool = async (args: GetPoolArgs): Promise<PoolData> => {
-		const { getPool } = this.caller({ certified: false });
+	getPool = async ({ certified = true, ...args }: GetPoolArgs & QueryParams): Promise<PoolData> => {
+		const { getPool } = this.caller({ certified });
 		const result = await getPool(args);
 
 		if ('ok' in result) {

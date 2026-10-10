@@ -16,6 +16,7 @@ import {
 	withdraw
 } from '$lib/api/icp-swap-pool.api';
 import { ZERO } from '$lib/constants/app.constants';
+import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
 import { icpSwapAmounts, icpSwapSupportedTokens } from '$lib/services/icp-swap.services';
 import { fetchIcpSwap } from '$lib/services/swap.services';
 import { SwapErrorCodes } from '$lib/types/swap';
@@ -46,6 +47,7 @@ describe('icp-swap.services', () => {
 		};
 
 		beforeEach(() => {
+			vi.clearAllMocks();
 			vi.restoreAllMocks();
 		});
 
@@ -56,6 +58,23 @@ describe('icp-swap.services', () => {
 			const result = await icpSwapAmounts(params);
 
 			expect(result.receiveAmount).toBe(999n);
+		});
+
+		it('resolves the pool with a query, since a quote moves no funds', async () => {
+			const getPoolCanisterSpy = vi
+				.spyOn(factoryApi, 'getPoolCanister')
+				.mockResolvedValue(mockPool);
+			vi.spyOn(poolApi, 'getQuote').mockResolvedValue(999n);
+
+			await icpSwapAmounts(params);
+
+			expect(getPoolCanisterSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				token0: { address: 'token0', standard: 'icrc' },
+				token1: { address: 'token1', standard: 'icrc' },
+				fee: ICP_SWAP_POOL_FEE,
+				certified: false
+			});
 		});
 
 		it('uses correct zeroForOne = true when source is token0', async () => {
@@ -175,6 +194,42 @@ describe('icp-swap.services', () => {
 			expect(depositFrom).toHaveBeenCalled();
 			expect(swapIcp).toHaveBeenCalled();
 			expect(withdraw).toHaveBeenCalled();
+		});
+
+		it('resolves the pool through a certified call before approving it and depositing into it', async () => {
+			vi.mocked(getPoolCanister).mockResolvedValue(mockPool);
+			vi.mocked(hasSufficientIcrcAllowance).mockResolvedValue(false);
+
+			vi.mocked(approve).mockResolvedValue(1n);
+			vi.mocked(depositFrom).mockResolvedValue(1n);
+			vi.mocked(swapIcp).mockResolvedValue(1n);
+			vi.mocked(withdraw).mockResolvedValue(1n);
+			vi.mocked(waitAndTriggerWallet).mockResolvedValue();
+
+			await fetchIcpSwap(swapArgs);
+
+			expect(getPoolCanister).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					identity: mockIdentity,
+					token0: expect.objectContaining({ address: swapArgs.sourceToken.ledgerCanisterId }),
+					token1: expect.objectContaining({ address: swapArgs.destinationToken.ledgerCanisterId }),
+					fee: ICP_SWAP_POOL_FEE,
+					certified: true
+				})
+			);
+			expect(approve).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ spender: { owner: mockPool.canisterId } })
+			);
+			expect(depositFrom).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ canisterId: mockPool.canisterId.toText() })
+			);
+
+			const [lookupOrder] = vi.mocked(getPoolCanister).mock.invocationCallOrder;
+			const [approveOrder] = vi.mocked(approve).mock.invocationCallOrder;
+			const [depositOrder] = vi.mocked(depositFrom).mock.invocationCallOrder;
+
+			expect(lookupOrder).toBeLessThan(approveOrder);
+			expect(approveOrder).toBeLessThan(depositOrder);
 		});
 
 		it('Success swap for ICRC2 when allowance check fails', async () => {
