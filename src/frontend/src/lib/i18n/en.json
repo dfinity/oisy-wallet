@@ -2153,6 +2153,7 @@
 			"swap_on": "On",
 			"interacted_with": "Interacted with",
 			"unknown_token": "Unknown token",
+			"unknown_token_named": "Unknown token ($symbol)",
 			"summary_other": "Interacted with a Solana program",
 			"tab_summary": "Summary",
 			"tab_balance_changes": "Balance changes",

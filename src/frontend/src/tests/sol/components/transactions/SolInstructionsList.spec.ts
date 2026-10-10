@@ -1,7 +1,10 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolInstructionsList from '$sol/components/transactions/SolInstructionsList.svelte';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
+import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
+import { SolanaNetworks } from '$sol/types/network';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import en from '$tests/mocks/i18n.mock';
 import {
@@ -24,6 +27,39 @@ describe('SolInstructionsList', () => {
 
 	beforeEach(() => {
 		splCustomTokensStore.resetAll();
+		splTokenMetadataStore.reset();
+	});
+
+	// Any mint can carry the symbol of a token the wallet lists. Kept inside the placeholder, the
+	// line moving it cannot read as one that moves the listed token.
+	it('should keep a listed symbol carried by an unlisted mint inside the placeholder', () => {
+		splCustomTokensStore.setAll([
+			{ data: { ...mockValidSplToken, version: undefined, enabled: true }, certified: false }
+		]);
+		splTokenMetadataStore.set({
+			network: SolanaNetworks.mainnet,
+			metadata: {
+				'other-mint': { name: mockValidSplToken.name, symbol: mockValidSplToken.symbol }
+			}
+		});
+
+		const { getAllByTestId } = render(SolInstructionsList, {
+			props: {
+				instructions: [send(mockSplAddress), send('other-mint')],
+				token: SOLANA_TOKEN,
+				userAddress: mockSolAddress
+			}
+		});
+
+		const [listed, unlisted] = getAllByTestId('sol-instruction');
+
+		expect(listed).toHaveTextContent(mockValidSplToken.symbol);
+		expect(listed).not.toHaveTextContent(en.transaction.text.unknown_token);
+		expect(unlisted).toHaveTextContent(
+			replacePlaceholders(en.transaction.text.unknown_token_named, {
+				$symbol: mockValidSplToken.symbol
+			})
+		);
 	});
 
 	// Two lines both reading "Unknown token" say less than the addresses would, since nothing

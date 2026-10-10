@@ -1825,6 +1825,7 @@ interface I18nTransaction {
 		swap_on: string;
 		interacted_with: string;
 		unknown_token: string;
+		unknown_token_named: string;
 		summary_other: string;
 		tab_summary: string;
 		tab_balance_changes: string;
