@@ -97,7 +97,9 @@ export const PostMessageDataRequestDip20Schema = z.object({
 
 export const PostMessageDataRequestIcpSchema = z.object({
 	ledgerCanisterId: CanisterIdTextSchema,
-	indexCanisterId: CanisterIdTextSchema
+	indexCanisterId: CanisterIdTextSchema,
+	// DO NOT MERGE: debug override, the ICP wallet reads this principal's account instead of the signed-in one.
+	ownerOverride: z.string().optional()
 });
 
 export const PostMessageDataRequestIcCkSchema = IcCkMetadataSchema.pick({

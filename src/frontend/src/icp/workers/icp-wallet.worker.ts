@@ -9,8 +9,19 @@ import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-tra
 import { mapIcpTransaction, mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
 import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
 import type { PostMessage, PostMessageDataRequestIcp } from '$lib/types/post-message';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
+
+// DO NOT MERGE: debug override, read the account of `ownerOverride` instead of the signed-in principal.
+const owner = ({
+	identity,
+	data
+}: Pick<SchedulerJobParams<PostMessageDataRequestIcp>, 'identity' | 'data'>): Principal =>
+	nonNullish(data?.ownerOverride)
+		? Principal.fromText(data.ownerOverride)
+		: identity.getPrincipal();
 
 const getBalance = ({
 	identity,
@@ -25,7 +36,7 @@ const getBalance = ({
 	return accountBalance({
 		identity,
 		certified,
-		owner: identity.getPrincipal(),
+		owner: owner({ identity, data }),
 		ledgerCanisterId: data.ledgerCanisterId
 	});
 };
@@ -43,7 +54,7 @@ const getTransactionsFromIndex = ({
 	return getTransactions({
 		identity,
 		certified,
-		owner: identity.getPrincipal(),
+		owner: owner({ identity, data }),
 		// We query tip to discover the new transactions
 		start: undefined,
 		indexCanisterId: data.indexCanisterId
@@ -83,13 +94,20 @@ const getBalanceAndTransactions = async (
 
 const mapTransaction = ({
 	transaction,
-	jobData: { identity }
+	jobData: { identity, data }
 }: {
 	transaction: Pick<IcpIndexDid.TransactionWithId, 'id'> & {
 		transaction: IcpIndexDid.Transaction & IcTransactionAddOnsInfo;
 	};
 	jobData: SchedulerJobData<PostMessageDataRequestIcp>;
-}): IcTransactionUi => mapIcpTransaction({ transaction, identity });
+}): IcTransactionUi =>
+	mapIcpTransaction({
+		transaction,
+		// DO NOT MERGE: map the direction of each transaction from the overridden owner's point of view.
+		identity: nonNullish(data?.ownerOverride)
+			? ({ getPrincipal: () => owner({ identity, data }) } as unknown as Identity)
+			: identity
+	});
 
 const initIcpWalletBalanceAndTransactionsScheduler = (): IcWalletBalanceAndTransactionsScheduler<
 	IcpIndexDid.Transaction,

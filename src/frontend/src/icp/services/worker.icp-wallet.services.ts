@@ -5,6 +5,7 @@ import {
 } from '$icp/services/ic-transactions.services';
 import type { IndexCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic-token';
+import { PROD } from '$lib/constants/app.constants';
 import { AppWorker } from '$lib/services/_worker.services';
 import type { WalletWorker } from '$lib/types/listener';
 import type {
@@ -17,7 +18,23 @@ import type {
 } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import type { WorkerData } from '$lib/types/worker';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, nonNullish } from '@dfinity/utils';
+
+// DO NOT MERGE: debug override. Outside production, `localStorage.setItem('oisy-debug-icp-owner', '<principal>')`
+// makes the ICP wallet read that principal's account instead of the signed-in one. Workers have no
+// localStorage, so the main thread reads the key and passes it along.
+const ownerOverride = (): Pick<PostMessageDataRequestIcp, 'ownerOverride'> => {
+	if (PROD) {
+		return {};
+	}
+
+	try {
+		const value = localStorage.getItem('oisy-debug-icp-owner')?.trim();
+		return nonNullish(value) && value !== '' ? { ownerOverride: value } : {};
+	} catch (_: unknown) {
+		return {};
+	}
+};
 
 export class IcpWalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
@@ -96,7 +113,8 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 			msg: 'startIcpWalletTimer',
 			data: {
 				ledgerCanisterId: this.ledgerCanisterId,
-				indexCanisterId: this.indexCanisterId
+				indexCanisterId: this.indexCanisterId,
+				...ownerOverride()
 			}
 		});
 	};
@@ -110,7 +128,8 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 			msg: 'triggerIcpWalletTimer',
 			data: {
 				ledgerCanisterId: this.ledgerCanisterId,
-				indexCanisterId: this.indexCanisterId
+				indexCanisterId: this.indexCanisterId,
+				...ownerOverride()
 			}
 		});
 	};
