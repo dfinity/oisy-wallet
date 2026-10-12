@@ -1564,7 +1564,8 @@
 			"open_contract_address_block_explorer": "Открыть адрес контракта в блокчейн-обозревателе",
 			"open_token_address_block_explorer": "Открыть адрес токена в блокчейн-обозревателе",
 			"token_group_number": "Общее количество токенов в группе для нативного токена $token",
-			"filter_button": "Открыть/закрыть фильтр"
+			"filter_button": "Открыть/закрыть фильтр",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "Введите адрес контракта ERC20",

@@ -1564,7 +1564,8 @@
 			"open_contract_address_block_explorer": "在区块浏览器中打开合约地址",
 			"open_token_address_block_explorer": "在区块浏览器中打开代币地址",
 			"token_group_number": "原生代币 $token 所在分组中的代币总数",
-			"filter_button": "打开 / 关闭筛选器"
+			"filter_button": "打开 / 关闭筛选器",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "输入 ERC20 合约地址",
