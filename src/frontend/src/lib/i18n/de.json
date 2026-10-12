@@ -944,7 +944,8 @@
 			"pending_bitcoin_transaction": "Du kannst eine weitere Bitcoin-Transaktion senden, sobald die ausstehende abgeschlossen ist.",
 			"no_available_utxos": "Du hast keine verfügbaren UTXOs für diese Transaktion.",
 			"unknown_destination": "Du hast zuvor nicht mit dieser Adresse interagiert. Stelle sicher, dass du den Empfänger kennst.",
-			"fee_info": "Gebühr wird in $feeSymbol bezahlt. Verfügbar: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "Gebühr wird in $feeSymbol bezahlt. Verfügbar: <strong>$feeBalance $feeSymbol</strong>",
+			"icp_memo_methods": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "Ungültige Zieladresse",
