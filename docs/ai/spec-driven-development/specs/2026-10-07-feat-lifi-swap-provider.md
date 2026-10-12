@@ -990,6 +990,20 @@ XRP — is rejected with `InvalidData("token pair is outside the LI.FI v1 matrix
 tests cover one accepted pair per direction (EVM → EVM, EVM → Solana, Solana → Solana)
 and one rejection per rule (unpinned chain id, devnet Solana, Solana → EVM, unsupported
 kind, same token).
+
+The poll keys are required too, for the same reason: a row the poller cannot drive to a
+terminal status must not be stored. The row is opened after the source transaction is
+broadcast, so all of them are known. `create` (via `require_lifi_refs`, after the pair
+check) requires `lifi_tx_hash` plus `lifi_nonce` for an EVM source or `lifi_blockhash`
+for a Solana source, and `update` enforces the same keys whenever it replaces
+`external_refs` (it replaces the list wholesale), as `require_xrp_refs` does for XRP
+rows. The key names are shared constants (`LIFI_REF_TX_HASH`, `LIFI_REF_NONCE`,
+`LIFI_REF_BLOCKHASH` in `active_user_transaction.rs`), so the frontend's
+`LIFI_EXTERNAL_REF_KEYS` must use exactly these strings. Values are shape-checked:
+`0x` + 64 hex for an EVM tx hash, a decimal `u64` for the nonce, base58 of 64 bytes for a
+Solana signature and of 32 bytes for a blockhash. `lifi_tool`, `lifi_transaction_id`
+and the learned keys stay optional.
+
 The frontend poller keeps its `undefined`-chain skip as defence in depth, but no row
 OISY creates can reach it. Candid round-trip tests, an integration test in
 `src/backend/tests/it/active_user_transactions.rs`, regenerated `backend.did` and
@@ -998,16 +1012,16 @@ otherwise no-ops silently). Precedent: commit `78d5addbd` (Velora's variant).
 
 #### External refs (`LIFI_EXTERNAL_REF_KEYS`, `lib/types/lifi.ts`)
 
-| Key                    | Set           | Purpose                                              |
-| ---------------------- | ------------- | ---------------------------------------------------- |
-| `lifi_tx_hash`         | creation      | source tx hash / Solana signature; `/status` key     |
-| `lifi_tool`            | creation      | `step.tool`, passed as `bridge` to `/status`         |
-| `lifi_transaction_id`  | creation      | LI.FI's id, for support / explorer links             |
-| `lifi_nonce`           | creation, EVM | replaced/dropped detection (Velora Market)           |
-| `lifi_blockhash`       | creation, SOL | the transaction's recent blockhash; expiry detection |
-| `lifi_dest_tx_hash`    | learned       | `receiving.txHash`                                   |
-| `lifi_received_symbol` | learned       | `receiving.token.symbol` on every `DONE` / `PARTIAL` |
-| `lifi_received_amount` | learned       | that token's amount, **formatted** (see below)       |
+| Key                    | Set                     | Purpose                                              |
+| ---------------------- | ----------------------- | ---------------------------------------------------- |
+| `lifi_tx_hash`         | creation, required      | source tx hash / Solana signature; `/status` key     |
+| `lifi_tool`            | creation                | `step.tool`, passed as `bridge` to `/status`         |
+| `lifi_transaction_id`  | creation                | LI.FI's id, for support / explorer links             |
+| `lifi_nonce`           | creation, EVM, required | replaced/dropped detection (Velora Market)           |
+| `lifi_blockhash`       | creation, SOL, required | the transaction's recent blockhash; expiry detection |
+| `lifi_dest_tx_hash`    | learned                 | `receiving.txHash`                                   |
+| `lifi_received_symbol` | learned                 | `receiving.token.symbol` on every `DONE` / `PARTIAL` |
+| `lifi_received_amount` | learned                 | that token's amount, **formatted** (see below)       |
 
 Plus the shared display keys (`amount`, `source_token_symbol`, `source_network_symbol`,
 `destination_token_symbol`, `destination_network_symbol`, `usd_source_value`), so
@@ -1259,7 +1273,7 @@ loader's 5 s tick.
 
 | PR  | Scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Depends on                                     |
 | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| 1   | **Backend AUT variant** — `Lifi(LifiData)`, validation of the v1 token matrix (`require_lifi_pair`, pinned EVM chain ids), tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                                                                                      | —                                              |
+| 1   | **Backend AUT variant** — `Lifi(LifiData)`, validation of the v1 token matrix (`require_lifi_pair`, pinned EVM chain ids) and of the required poll keys (`require_lifi_refs`), tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                                  | —                                              |
 | 2a  | **Scaffolding + quoting** — `@lifi/sdk`, env (flag **`false` everywhere**; unit tests switch it on), types, quote service + cache, form-time trust checks, LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges, empty source list so the Solana source picker is unchanged), provider sheet                                           | 1                                              |
 | 2b  | **EVM execution + tracking** — calldata binding (pinned selectors + `CalldataVerificationFacet`), `fetchLifiEvmSwap` (pre-approval price check, unchanged `approve()`, form budget of 0/1/2 approval fees from one allowance read) + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound and the `/status` 404 → `NOT_FOUND` mapping)/loader (incl. wallet + EVM balance refresh)/item; flag back to `LOCAL \|\| STAGING`, `PRODUCT.md` for EVM-source swaps | 2a                                             |
 | 3   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (quote, destinations, and a mainnet-only source list in place of the empty one; Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` / `closedAccounts` in the simulation preview and the slot-consistent pre/post snapshot), `SwapSolWizard` dispatch, Solana source-chain check in the poller (in-memory expiry observations), `PRODUCT.md` update for Solana-source swaps                             | 2b                                             |

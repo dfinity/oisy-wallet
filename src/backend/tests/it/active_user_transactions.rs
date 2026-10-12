@@ -9,6 +9,7 @@ use shared::types::{
         ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, LifiData,
         NearIntentsData, OisyTradeData, OisyTradeSide, OneSecIcpToEvmData,
         UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode, XrpData,
+        LIFI_REF_BLOCKHASH, LIFI_REF_NONCE, LIFI_REF_TX_HASH,
         MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
     },
     custom_token::{ErcTokenId, SplTokenId},
@@ -784,12 +785,74 @@ fn xrp_create_without_poll_keys_is_rejected() {
     }
 }
 
+fn lifi_ref(key: &str, value: &str) -> ActiveUserTransactionRef {
+    ActiveUserTransactionRef {
+        key: key.to_string(),
+        value: value.to_string(),
+    }
+}
+
+/// The refs the frontend writes when it opens a row for a swap from an EVM
+/// source: the poll keys plus the route tool.
+fn lifi_evm_refs() -> Vec<ActiveUserTransactionRef> {
+    vec![
+        lifi_ref(LIFI_REF_NONCE, "7"),
+        lifi_ref("lifi_tool", "across"),
+        lifi_ref(
+            LIFI_REF_TX_HASH,
+            "0x1111111111111111111111111111111111111111111111111111111111111111",
+        ),
+    ]
+}
+
+/// The same for a Solana source, whose poll keys are the signature and the
+/// transaction's recent blockhash.
+fn lifi_solana_refs() -> Vec<ActiveUserTransactionRef> {
+    vec![
+        lifi_ref(
+            LIFI_REF_BLOCKHASH,
+            "7ppk9w8NHnH6ehajvJyU31VcMafwZ3ybRtJWumSyD2wd",
+        ),
+        lifi_ref("lifi_tool", "jupiter"),
+        lifi_ref(
+            LIFI_REF_TX_HASH,
+            "2Ana1pUpv2ZbMVkwF5FXapYeBEjdxDatLn7nvJkhgTSXbs59SyZSx866bXirPgj8QQVB57uxHJBG1YFvkRbFj4T",
+        ),
+    ]
+}
+
+fn lifi_data(source_token: TokenId, dest_token: TokenId) -> ActiveUserTransactionData {
+    ActiveUserTransactionData::Lifi(LifiData {
+        source_token,
+        dest_token,
+        amount: Nat::from(1_000_000u64),
+    })
+}
+
+fn create_lifi(
+    pic: &PicBackend,
+    user: Principal,
+    id: &str,
+    data: ActiveUserTransactionData,
+    external_refs: Vec<ActiveUserTransactionRef>,
+) -> ActiveUserTransactionResult {
+    pic.update::<ActiveUserTransactionResult>(
+        user,
+        "create_active_user_transaction",
+        CreateActiveUserTransactionRequest {
+            data,
+            external_refs,
+            ..create_req(id)
+        },
+    )
+    .expect("create_active_user_transaction call should succeed")
+}
+
 #[test]
 fn create_lifi_variant_roundtrip() {
     // One canister round-trip per route the variant covers, so `SplMainnet` and a
-    // pinned chain other than Ethereum both cross the wire. The pair rules
-    // themselves are covered in-process; the Solana → EVM create below proves
-    // they run behind the endpoint.
+    // pinned chain other than Ethereum both cross the wire, each with the poll
+    // keys its source chain needs.
     let pic = setup();
     let user = caller();
     pic.ensure_user_profile(user);
@@ -800,46 +863,33 @@ fn create_lifi_variant_roundtrip() {
     let rows = [
         (
             "lifi-evm-to-evm",
-            TokenId::Erc20(
-                ErcTokenId("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48".to_string()),
-                1,
+            lifi_data(
+                TokenId::Erc20(
+                    ErcTokenId("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48".to_string()),
+                    1,
+                ),
+                TokenId::EvmNative(42161),
             ),
-            TokenId::EvmNative(42161),
+            lifi_evm_refs(),
         ),
         (
             "lifi-evm-to-sol",
-            TokenId::EvmNative(4663),
-            usdc_solana.clone(),
+            lifi_data(TokenId::EvmNative(4663), usdc_solana.clone()),
+            lifi_evm_refs(),
         ),
-        ("lifi-sol-to-sol", TokenId::SolNativeMainnet, usdc_solana),
+        (
+            "lifi-sol-to-sol",
+            lifi_data(TokenId::SolNativeMainnet, usdc_solana),
+            lifi_solana_refs(),
+        ),
     ];
 
-    let create = |id: &str, source_token: TokenId, dest_token: TokenId| {
-        pic.update::<ActiveUserTransactionResult>(
-            user,
-            "create_active_user_transaction",
-            CreateActiveUserTransactionRequest {
-                data: ActiveUserTransactionData::Lifi(LifiData {
-                    source_token,
-                    dest_token,
-                    amount: Nat::from(1_000_000u64),
-                }),
-                external_refs: vec![ActiveUserTransactionRef {
-                    key: "lifi_tool".to_string(),
-                    value: "across".to_string(),
-                }],
-                ..create_req(id)
-            },
-        )
-        .expect("create_active_user_transaction call should succeed")
-    };
-
-    for (id, source_token, dest_token) in &rows {
-        match create(id, source_token.clone(), dest_token.clone()) {
+    for (id, data, refs) in &rows {
+        match create_lifi(&pic, user, id, data.clone(), refs.clone()) {
             ActiveUserTransactionResult::Ok(tx) => {
                 assert_eq!(tx.id, *id);
                 assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
-                assert_eq!(tx.external_refs.len(), 1);
+                assert_eq!(tx.external_refs, *refs);
             }
             ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
         }
@@ -849,39 +899,48 @@ fn create_lifi_variant_roundtrip() {
     // representation is what the assertion sees.
     let listed = list_active(&pic, user);
     assert_eq!(listed.len(), rows.len());
-    for (id, source_token, dest_token) in &rows {
+    for (id, data, _) in &rows {
         let tx = listed
             .iter()
             .find(|tx| tx.id == *id)
             .unwrap_or_else(|| panic!("{id} should be listed"));
-        assert_eq!(
-            tx.data,
-            ActiveUserTransactionData::Lifi(LifiData {
-                source_token: source_token.clone(),
-                dest_token: dest_token.clone(),
-                amount: Nat::from(1_000_000u64),
-            })
+        assert_eq!(tx.data, *data);
+    }
+}
+
+// Through the real endpoint, because a stored row the poller cannot drive to a
+// terminal status would hold one of the user's slots forever: the create has to
+// be what refuses it. The pair and ref rules themselves are covered in-process.
+#[test]
+fn lifi_create_with_unsupported_pair_or_without_poll_keys_is_rejected() {
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    for (data, refs, expected) in [
+        (
+            lifi_data(TokenId::SolNativeMainnet, TokenId::EvmNative(1)),
+            lifi_solana_refs(),
+            "token pair is outside the LI.FI v1 matrix",
+        ),
+        (
+            lifi_data(TokenId::EvmNative(1), TokenId::EvmNative(42161)),
+            vec![],
+            "lifi_tx_hash is required",
+        ),
+    ] {
+        match create_lifi(&pic, user, TX_ID, data, refs) {
+            ActiveUserTransactionResult::Ok(tx) => panic!("expected Err, got {tx:?}"),
+            ActiveUserTransactionResult::Err(err) => assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(expected.to_string())
+            ),
+        }
+        assert!(
+            list_active(&pic, user).is_empty(),
+            "a rejected create must not leave a row behind"
         );
     }
-
-    match create(
-        "lifi-sol-to-evm",
-        TokenId::SolNativeMainnet,
-        TokenId::EvmNative(1),
-    ) {
-        ActiveUserTransactionResult::Ok(tx) => panic!("expected Err, got {tx:?}"),
-        ActiveUserTransactionResult::Err(err) => assert_eq!(
-            err,
-            ActiveUserTransactionError::InvalidData(
-                "token pair is outside the LI.FI v1 matrix".to_string()
-            )
-        ),
-    }
-    assert_eq!(
-        list_active(&pic, user).len(),
-        rows.len(),
-        "a rejected create must not leave a row behind"
-    );
 }
 
 #[test]

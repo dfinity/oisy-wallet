@@ -54,6 +54,18 @@ pub const XRP_LEDGER_RESULT_EXPIRED: &str = "expired";
 /// Length of an XRPL transaction id in hex.
 pub const XRP_TX_HASH_LEN: usize = 64;
 
+/// The `external_refs` a LI.FI row is polled with. The row is opened once the
+/// source transaction is broadcast, so all of them are known to the caller and
+/// can be required: the source transaction hash (an EVM tx hash or a Solana
+/// signature) keys both the source-chain check and LI.FI's status endpoint; an
+/// EVM source's nonce is what tells a dropped or replaced transaction from a
+/// pending one; a Solana source's recent blockhash is what tells an expired
+/// transaction from one that can still land. Without them a row could never
+/// reach a terminal status.
+pub const LIFI_REF_TX_HASH: &str = "lifi_tx_hash";
+pub const LIFI_REF_NONCE: &str = "lifi_nonce";
+pub const LIFI_REF_BLOCKHASH: &str = "lifi_blockhash";
+
 /// Length bounds of an XRPL classic address. It is base58check over a 21-byte
 /// payload — the `0x00` version byte plus the 20-byte `AccountID` — with a
 /// 4-byte checksum appended, so 25 bytes are encoded and the result is 25 to 35
