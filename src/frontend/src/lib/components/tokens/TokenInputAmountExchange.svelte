@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { MouseEventHandler } from 'svelte/elements';
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import {
 		TOKEN_INPUT_AMOUNT_EXCHANGE,
@@ -14,7 +15,6 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
-	import { preventDefault } from '$lib/utils/event-modifiers.utils';
 	import { formatCurrency } from '$lib/utils/format.utils';
 
 	interface Props {
@@ -37,18 +37,11 @@
 		displayUnit = displayUnit === 'usd' ? 'token' : 'usd';
 	};
 
-	const handleValueClick = ({ currentTarget }: MouseEvent & { currentTarget: HTMLSpanElement }) => {
-		if (disabled) {
-			return;
-		}
+	const valueId = $props.id();
 
-		// A click that ends a drag-select must keep the text selected for copying, not switch the unit.
-		const selection = window.getSelection();
-		if (
-			nonNullish(selection) &&
-			!selection.isCollapsed &&
-			(currentTarget.contains(selection.anchorNode) || currentTarget.contains(selection.focusNode))
-		) {
+	const handleClick: MouseEventHandler<HTMLButtonElement> = ({ detail }) => {
+		// A double-click fires two clicks (detail 1, then 2); switch once, not back again.
+		if (detail > 1) {
 			return;
 		}
 
@@ -71,26 +64,22 @@
 
 <div class="flex items-center" data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE}>
 	{#if nonNullish(exchangeRate)}
-		<!-- The spacing before the value is the button's padding, not a flex gap, and the button is square (the global button radius would clip hits in its corners), so there is no dead zone between the two click targets. -->
+		<!-- Square and borderless: the global button radius would make the corners unclickable and its border would grow the row. pl-px and gap-1.25 keep the icon and value where they sat before. -->
 		<button
-			class="flex items-center self-stretch rounded-none pr-1"
+			class="gap-1.25 rounded-none border-0 pl-px"
 			class:hover:cursor-default={disabled}
+			aria-describedby={valueId}
 			aria-label={$i18n.tokens.alt.switch_amount_unit}
 			data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON}
 			{disabled}
-			onclick={preventDefault(handleUnitSwitch)}
+			onclick={handleClick}
+			type="button"
 		>
 			<IconArrowUpDown size="14" />
+			<span id={valueId} data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE}
+				>{displayUnit === 'usd' ? formattedUSDAmount : formattedTokenAmount}</span
+			>
 		</button>
-		<!-- The icon button above is the keyboard and screen-reader path; the value is an extra pointer target only. -->
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<span
-			class:cursor-pointer={!disabled}
-			data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE}
-			onclick={handleValueClick}
-			>{displayUnit === 'usd' ? formattedUSDAmount : formattedTokenAmount}</span
-		>
 	{:else}
 		<span data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE}
 			>{$i18n.tokens.text.exchange_is_not_available}</span

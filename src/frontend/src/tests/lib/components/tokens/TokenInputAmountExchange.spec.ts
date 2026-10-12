@@ -51,87 +51,48 @@ describe('TokenInputAmountExchange', () => {
 		expect(valueElement).toHaveTextContent(`100 ${mockValidIcToken.symbol}`);
 	});
 
-	it('names the switch button for assistive technology', () => {
+	it('names the switch button and describes it with the shown value', () => {
 		const { getByRole } = render(TokenInputAmountExchange, defaultProps);
+		const button = getByRole('button', { name: en.tokens.alt.switch_amount_unit });
 
-		expect(getByRole('button', { name: en.tokens.alt.switch_amount_unit })).toHaveAttribute(
-			'data-tid',
-			TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON
-		);
+		expect(button).toHaveAttribute('data-tid', TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON);
+		expect(button).toHaveAccessibleDescription(`100 ${mockValidIcToken.symbol}`);
 	});
 
-	describe('value label', () => {
-		const selectContentsOf = (node: Node) => {
-			const range = document.createRange();
-			range.selectNodeContents(node);
-			window.getSelection()?.removeAllRanges();
-			window.getSelection()?.addRange(range);
-		};
+	it('switches between token and USD display on value click', async () => {
+		const { getByTestId } = render(TokenInputAmountExchange, defaultProps);
+		const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
 
-		afterEach(() => {
-			window.getSelection()?.removeAllRanges();
+		await fireEvent.click(valueElement);
+
+		expect(valueElement).toHaveTextContent('$200.00');
+
+		await fireEvent.click(valueElement);
+
+		expect(valueElement).toHaveTextContent(`100 ${mockValidIcToken.symbol}`);
+	});
+
+	it('switches once on a double-click', async () => {
+		const { getByTestId } = render(TokenInputAmountExchange, defaultProps);
+		const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
+
+		await fireEvent.click(valueElement, { detail: 1 });
+		await fireEvent.click(valueElement, { detail: 2 });
+		await fireEvent.dblClick(valueElement, { detail: 2 });
+
+		expect(valueElement).toHaveTextContent('$200.00');
+	});
+
+	it('does not switch on value click when disabled', async () => {
+		const { getByTestId } = render(TokenInputAmountExchange, {
+			...defaultProps,
+			disabled: true
 		});
+		const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
 
-		it('switches between token and USD display on value click', async () => {
-			const { getByTestId } = render(TokenInputAmountExchange, defaultProps);
-			const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
+		await fireEvent.click(valueElement);
 
-			await fireEvent.click(valueElement);
-
-			expect(valueElement).toHaveTextContent('$200.00');
-
-			await fireEvent.click(valueElement);
-
-			expect(valueElement).toHaveTextContent(`100 ${mockValidIcToken.symbol}`);
-		});
-
-		it('keeps the unit when the click ends a text selection inside the value', async () => {
-			const { getByTestId } = render(TokenInputAmountExchange, defaultProps);
-			const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
-
-			selectContentsOf(valueElement);
-
-			await fireEvent.click(valueElement);
-
-			expect(valueElement).toHaveTextContent(`100 ${mockValidIcToken.symbol}`);
-			expect(window.getSelection()?.toString()).toBe(`100 ${mockValidIcToken.symbol}`);
-		});
-
-		it('switches when a text selection exists elsewhere on the page', async () => {
-			const outside = document.createElement('p');
-			outside.textContent = 'unrelated text';
-			document.body.appendChild(outside);
-
-			const { getByTestId } = render(TokenInputAmountExchange, defaultProps);
-			const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
-
-			selectContentsOf(outside);
-
-			await fireEvent.click(valueElement);
-
-			expect(valueElement).toHaveTextContent('$200.00');
-
-			outside.remove();
-		});
-
-		it('does not switch on value click when disabled', async () => {
-			const { getByTestId } = render(TokenInputAmountExchange, {
-				...defaultProps,
-				disabled: true
-			});
-			const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
-
-			await fireEvent.click(valueElement);
-
-			expect(valueElement).toHaveTextContent(`100 ${mockValidIcToken.symbol}`);
-			expect(valueElement).not.toHaveClass('cursor-pointer');
-		});
-
-		it('shows a pointer cursor on the value when enabled', () => {
-			const { getByTestId } = render(TokenInputAmountExchange, defaultProps);
-
-			expect(getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE)).toHaveClass('cursor-pointer');
-		});
+		expect(valueElement).toHaveTextContent(`100 ${mockValidIcToken.symbol}`);
 	});
 
 	it('shows exchange unavailable message when exchange rate is undefined', () => {
