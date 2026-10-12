@@ -10,7 +10,7 @@ import type { SignerMasterPubKeys } from '$lib/types/signer';
  * {@link https://github.com/dfinity/portal/blob/master/docs/building-apps/network-features/signatures/t-schnorr.mdx}
  *
  */
-const SIGNER_MASTER_PUB_KEYS: SignerMasterPubKeys = {
+export const SIGNER_MASTER_PUB_KEYS: SignerMasterPubKeys = {
 	key_1: {
 		ecdsa: {
 			secp256k1: {
@@ -20,6 +20,9 @@ const SIGNER_MASTER_PUB_KEYS: SignerMasterPubKeys = {
 		schnorr: {
 			ed25519: {
 				pubkey: '476374d9df3a8af28d3164dc2422cff894482eadd1295290b6d9ad92b2eeaa5c'
+			},
+			bip340secp256k1: {
+				pubkey: '02246e29785f06d37a8a50c49f6152a34df74738f8c13a44f59fef4cbe90eb13ac'
 			}
 		}
 	},
@@ -32,6 +35,9 @@ const SIGNER_MASTER_PUB_KEYS: SignerMasterPubKeys = {
 		schnorr: {
 			ed25519: {
 				pubkey: '6c0824beb37621bcca6eecc237ed1bc4e64c9c59dcb85344aa7f9cc8278ee31f'
+			},
+			bip340secp256k1: {
+				pubkey: '037a651a2e5ef3d1ef63e84c4c4caa029fa4a43a347a91e4d84a8e846853d51be1'
 			}
 		}
 	}

@@ -9,7 +9,8 @@ const SignerMasterPubKeySchema = z.object({
 		secp256k1: SignerPubKeySchema
 	}),
 	schnorr: z.object({
-		ed25519: SignerPubKeySchema
+		ed25519: SignerPubKeySchema,
+		bip340secp256k1: SignerPubKeySchema
 	})
 });
 

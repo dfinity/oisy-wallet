@@ -7,6 +7,7 @@
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import SettingsExperimentalFeatures from '$lib/components/settings/SettingsExperimentalFeatures.svelte';
 	import SettingsExportData from '$lib/components/settings/SettingsExportData.svelte';
+	import SettingsPlugImport from '$lib/components/settings/SettingsPlugImport.svelte';
 	import SettingsPreferences from '$lib/components/settings/SettingsPreferences.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -184,6 +185,8 @@
 </SettingsCard>
 
 <SettingsExportData />
+
+<SettingsPlugImport />
 
 {#if AI_ASSISTANT_CONSOLE_ENABLED}
 	<SettingsExperimentalFeatures />

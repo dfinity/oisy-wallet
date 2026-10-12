@@ -2509,6 +2509,34 @@ interface I18nNotes {
 	};
 }
 
+interface I18nPlug_import {
+	text: {
+		title: string;
+		settings_entry: string;
+		settings_entry_description: string;
+		settings_open: string;
+		intro: string;
+		phrase_label: string;
+		phrase_placeholder: string;
+		accounts_label: string;
+		accounts_hint: string;
+		submit: string;
+		reset: string;
+		account: string;
+		principal: string;
+		addresses: string;
+		balance_loading: string;
+		balance_unavailable: string;
+		empty_account: string;
+		unavailable_hint: string;
+		not_shown_title: string;
+		not_shown_description: string;
+		read_only_title: string;
+		read_only_description: string;
+	};
+	error: { invalid_phrase: string; derivation_failed: string };
+}
+
 interface I18nTip {
 	text: {
 		intro_title: string;
@@ -2702,5 +2730,6 @@ interface I18n {
 	temporal: I18nTemporal;
 	ai_assistant: I18nAi_assistant;
 	notes: I18nNotes;
+	plug_import: I18nPlug_import;
 	tip: I18nTip;
 }

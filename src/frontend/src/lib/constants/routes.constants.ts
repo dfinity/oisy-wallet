@@ -5,6 +5,7 @@ export enum AppPath {
 	Trading = '/trading/',
 	Explore = '/explore/',
 	Settings = '/settings/',
+	PlugImport = '/plug-import/',
 	Help = '/help/',
 	Transactions = '/transactions/',
 	Activity = '/activity/',

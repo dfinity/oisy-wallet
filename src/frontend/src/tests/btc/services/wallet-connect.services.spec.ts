@@ -41,7 +41,10 @@ describe('btc wallet-connect.services', () => {
 				}
 			},
 			schnorr: {
-				ed25519: { pubkey: '6c0824beb37621bcca6eecc237ed1bc4e64c9c59dcb85344aa7f9cc8278ee31f' }
+				ed25519: { pubkey: '6c0824beb37621bcca6eecc237ed1bc4e64c9c59dcb85344aa7f9cc8278ee31f' },
+				bip340secp256k1: {
+					pubkey: '037a651a2e5ef3d1ef63e84c4c4caa029fa4a43a347a91e4d84a8e846853d51be1'
+				}
 			}
 		};
 
