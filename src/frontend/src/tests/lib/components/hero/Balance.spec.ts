@@ -38,7 +38,9 @@ describe('Balance', () => {
 
 	describe('privacy mode toggle', () => {
 		it('should toggle privacy mode on when double-clicking the amount', async () => {
-			const setPrivacyModeSpy = vi.spyOn(privacyUtils, 'setPrivacyMode');
+			const setPrivacyModeSpy = vi
+				.spyOn(privacyUtils, 'setPrivacyMode')
+				.mockImplementation(() => undefined);
 
 			const { getByTestId } = renderComponent();
 
@@ -47,14 +49,16 @@ describe('Balance', () => {
 			expect(setPrivacyModeSpy).toHaveBeenCalledExactlyOnceWith({
 				enabled: true,
 				withToast: false,
-				source: 'Hero - Double click on the Balance'
+				source: 'Hero - Double click on the Balance amount'
 			});
 		});
 
 		it('should toggle privacy mode off when double-clicking the hidden amount', async () => {
 			mockPrivacyMode(true);
 
-			const setPrivacyModeSpy = vi.spyOn(privacyUtils, 'setPrivacyMode');
+			const setPrivacyModeSpy = vi
+				.spyOn(privacyUtils, 'setPrivacyMode')
+				.mockImplementation(() => undefined);
 
 			const { getByTestId } = renderComponent();
 
@@ -63,14 +67,16 @@ describe('Balance', () => {
 			expect(setPrivacyModeSpy).toHaveBeenCalledExactlyOnceWith({
 				enabled: false,
 				withToast: false,
-				source: 'Hero - Double click on the Balance'
+				source: 'Hero - Double click on the Balance amount'
 			});
 		});
 
 		it('should toggle privacy mode when double-clicking the amount while the balance is loading', async () => {
 			mockHeroContext.loading.set(true);
 
-			const setPrivacyModeSpy = vi.spyOn(privacyUtils, 'setPrivacyMode');
+			const setPrivacyModeSpy = vi
+				.spyOn(privacyUtils, 'setPrivacyMode')
+				.mockImplementation(() => undefined);
 
 			const { getByTestId } = renderComponent({ ...mockToken, balance: undefined });
 
@@ -79,12 +85,14 @@ describe('Balance', () => {
 			expect(setPrivacyModeSpy).toHaveBeenCalledExactlyOnceWith({
 				enabled: true,
 				withToast: false,
-				source: 'Hero - Double click on the Balance'
+				source: 'Hero - Double click on the Balance amount'
 			});
 		});
 
 		it('should toggle privacy mode when double-clicking the subtitle', async () => {
-			const setPrivacyModeSpy = vi.spyOn(privacyUtils, 'setPrivacyMode');
+			const setPrivacyModeSpy = vi
+				.spyOn(privacyUtils, 'setPrivacyMode')
+				.mockImplementation(() => undefined);
 
 			const { getByRole } = renderComponent();
 

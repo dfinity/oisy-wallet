@@ -64,18 +64,18 @@
 		})
 	);
 
-	const togglePrivacyMode = () =>
+	const togglePrivacyMode = (source: string) =>
 		setPrivacyMode({
 			enabled: !$isPrivacyMode,
 			withToast: false,
-			source: 'Hero - Double click on the ExchangeBalance'
+			source
 		});
 </script>
 
 <span class="flex flex-col items-center gap-1">
 	<output
-		class="mt-7 inline-block cursor-pointer text-4xl font-bold break-all select-none md:text-5xl"
-		ondblclick={togglePrivacyMode}
+		class="mt-7 inline-block touch-manipulation text-4xl font-bold break-all md:text-5xl"
+		ondblclick={() => togglePrivacyMode('Hero - Double click on the ExchangeBalance amount')}
 	>
 		{#if $loaded && nonNullish(balance)}
 			{#if hideBalance}
@@ -104,7 +104,7 @@
 	</output>
 	<span
 		class="flex cursor-pointer flex-col items-center gap-4 text-xl font-medium text-brand-secondary-alt"
-		ondblclick={togglePrivacyMode}
+		ondblclick={() => togglePrivacyMode('Hero - Double click on the ExchangeBalance')}
 		role="button"
 		tabindex="0"
 	>
