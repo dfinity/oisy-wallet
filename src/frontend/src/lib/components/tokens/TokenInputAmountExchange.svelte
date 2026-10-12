@@ -37,6 +37,24 @@
 		displayUnit = displayUnit === 'usd' ? 'token' : 'usd';
 	};
 
+	const handleValueClick = ({ currentTarget }: MouseEvent & { currentTarget: HTMLSpanElement }) => {
+		if (disabled) {
+			return;
+		}
+
+		// A click that ends a drag-select must keep the text selected for copying, not switch the unit.
+		const selection = window.getSelection();
+		if (
+			nonNullish(selection) &&
+			!selection.isCollapsed &&
+			(currentTarget.contains(selection.anchorNode) || currentTarget.contains(selection.focusNode))
+		) {
+			return;
+		}
+
+		handleUnitSwitch();
+	};
+
 	let formattedUSDAmount = $derived(
 		formatCurrency({
 			value: nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : 0,
@@ -61,7 +79,13 @@
 		>
 			<IconArrowUpDown size="14" />
 		</button>
-		<span data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE}
+		<!-- The icon button above is the keyboard and screen-reader path; the value is an extra pointer target only. -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<span
+			class:cursor-pointer={!disabled}
+			data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE}
+			onclick={handleValueClick}
 			>{displayUnit === 'usd' ? formattedUSDAmount : formattedTokenAmount}</span
 		>
 	{:else}

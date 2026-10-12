@@ -50,6 +50,80 @@ describe('TokenInputAmountExchange', () => {
 		expect(valueElement).toHaveTextContent(`100 ${mockValidIcToken.symbol}`);
 	});
 
+	describe('value label', () => {
+		const selectContentsOf = (node: Node) => {
+			const range = document.createRange();
+			range.selectNodeContents(node);
+			window.getSelection()?.removeAllRanges();
+			window.getSelection()?.addRange(range);
+		};
+
+		afterEach(() => {
+			window.getSelection()?.removeAllRanges();
+		});
+
+		it('switches between token and USD display on value click', async () => {
+			const { getByTestId } = render(TokenInputAmountExchange, defaultProps);
+			const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
+
+			await fireEvent.click(valueElement);
+
+			expect(valueElement).toHaveTextContent('$200.00');
+
+			await fireEvent.click(valueElement);
+
+			expect(valueElement).toHaveTextContent(`100 ${mockValidIcToken.symbol}`);
+		});
+
+		it('keeps the unit when the click ends a text selection inside the value', async () => {
+			const { getByTestId } = render(TokenInputAmountExchange, defaultProps);
+			const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
+
+			selectContentsOf(valueElement);
+
+			await fireEvent.click(valueElement);
+
+			expect(valueElement).toHaveTextContent(`100 ${mockValidIcToken.symbol}`);
+			expect(window.getSelection()?.toString()).toBe(`100 ${mockValidIcToken.symbol}`);
+		});
+
+		it('switches when a text selection exists elsewhere on the page', async () => {
+			const outside = document.createElement('p');
+			outside.textContent = 'unrelated text';
+			document.body.appendChild(outside);
+
+			const { getByTestId } = render(TokenInputAmountExchange, defaultProps);
+			const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
+
+			selectContentsOf(outside);
+
+			await fireEvent.click(valueElement);
+
+			expect(valueElement).toHaveTextContent('$200.00');
+
+			outside.remove();
+		});
+
+		it('does not switch on value click when disabled', async () => {
+			const { getByTestId } = render(TokenInputAmountExchange, {
+				...defaultProps,
+				disabled: true
+			});
+			const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
+
+			await fireEvent.click(valueElement);
+
+			expect(valueElement).toHaveTextContent(`100 ${mockValidIcToken.symbol}`);
+			expect(valueElement).not.toHaveClass('cursor-pointer');
+		});
+
+		it('shows a pointer cursor on the value when enabled', () => {
+			const { getByTestId } = render(TokenInputAmountExchange, defaultProps);
+
+			expect(getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE)).toHaveClass('cursor-pointer');
+		});
+	});
+
 	it('shows exchange unavailable message when exchange rate is undefined', () => {
 		const { getByTestId } = render(TokenInputAmountExchange, {
 			...defaultProps,
