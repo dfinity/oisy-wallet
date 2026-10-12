@@ -25,12 +25,20 @@
 	let { token }: Props = $props();
 
 	const { loading } = getContext<HeroContext>(HERO_CONTEXT_KEY);
+
+	const togglePrivacyMode = (source: string) =>
+		setPrivacyMode({
+			enabled: !$isPrivacyMode,
+			withToast: false,
+			source
+		});
 </script>
 
 <span class="flex flex-col gap-1">
 	<output
-		class="inline-flex w-full flex-row justify-center gap-3 text-4xl font-bold break-words md:text-5xl"
+		class="inline-flex touch-manipulation flex-row justify-center gap-3 self-center text-4xl font-bold break-words md:text-5xl"
 		data-tid={AMOUNT_DATA}
+		ondblclick={() => togglePrivacyMode('Hero - Double click on the Balance amount')}
 	>
 		{#if nonNullish(token?.balance) && nonNullish(token?.symbol)}
 			{#if $isPrivacyMode}
@@ -56,12 +64,7 @@
 		<Button
 			ariaLabel={$i18n.hero.alt.toggle_privacy_mode}
 			fullWidth
-			ondblclick={() =>
-				setPrivacyMode({
-					enabled: !$isPrivacyMode,
-					withToast: false,
-					source: 'Hero - Double click on the Balance'
-				})}
+			ondblclick={() => togglePrivacyMode('Hero - Double click on the Balance')}
 			styleClass="bg-transparent p-0 text-xl font-medium !text-current hover:!text-current active:!text-current focus-visible:!text-current"
 			transparent
 		>

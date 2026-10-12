@@ -63,10 +63,20 @@
 			language: $currentLanguage
 		})
 	);
+
+	const togglePrivacyMode = (source: string) =>
+		setPrivacyMode({
+			enabled: !$isPrivacyMode,
+			withToast: false,
+			source
+		});
 </script>
 
 <span class="flex flex-col items-center gap-1">
-	<output class="mt-7 inline-block text-4xl font-bold break-all md:text-5xl">
+	<output
+		class="mt-7 inline-block touch-manipulation text-4xl font-bold break-all md:text-5xl"
+		ondblclick={() => togglePrivacyMode('Hero - Double click on the ExchangeBalance amount')}
+	>
 		{#if $loaded && nonNullish(balance)}
 			{#if hideBalance}
 				<IconDots styleClass="my-4.25" times={6} variant="lg" />
@@ -94,12 +104,7 @@
 	</output>
 	<span
 		class="flex cursor-pointer flex-col items-center gap-4 text-xl font-medium text-brand-secondary-alt"
-		ondblclick={() =>
-			setPrivacyMode({
-				enabled: !$isPrivacyMode,
-				withToast: false,
-				source: 'Hero - Double click on the ExchangeBalance'
-			})}
+		ondblclick={() => togglePrivacyMode('Hero - Double click on the ExchangeBalance')}
 		role="button"
 		tabindex="0"
 	>
