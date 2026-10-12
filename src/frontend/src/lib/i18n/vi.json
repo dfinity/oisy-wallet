@@ -2714,10 +2714,12 @@
 			"starting_to_repay": "Đang gửi khoản hoàn trả của bạn…",
 			"repay_started": "Khoản hoàn trả của bạn hiện đang được xử lý.",
 			"current_debt": "Khoản nợ hiện tại",
+			"pending_repays": "",
 			"interest_accrued": "Lãi phát sinh",
 			"debt_after_repay": "Khoản nợ sau khi hoàn trả",
 			"repay_exceeds_debt": "Số tiền vượt quá khoản nợ chưa thanh toán của bạn.",
-			"repay_prices_unavailable": "Giá tạm thời không khả dụng. Việc hoàn trả bị vô hiệu hóa cho đến khi giá được tải."
+			"repay_prices_unavailable": "Giá tạm thời không khả dụng. Việc hoàn trả bị vô hiệu hóa cho đến khi giá được tải.",
+			"repay_pending_covers_debt": ""
 		},
 		"info": {
 			"title": "Liquidium là gì",

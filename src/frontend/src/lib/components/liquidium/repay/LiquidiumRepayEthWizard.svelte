@@ -47,6 +47,8 @@
 		amount: OptionAmount;
 		repayProgressStep: string;
 		maxRepay?: bigint;
+		// Net amount of this pool's repays still settling.
+		pendingRepay?: bigint;
 		inflowFee?: bigint;
 		inflowFeeUnavailable?: boolean;
 		currentStep?: WizardStep;
@@ -62,6 +64,7 @@
 		amount = $bindable(),
 		repayProgressStep = $bindable(),
 		maxRepay,
+		pendingRepay = ZERO,
 		inflowFee,
 		inflowFeeUnavailable,
 		currentStep,
@@ -83,10 +86,12 @@
 	);
 
 	// Pairwise USD from the position itself (no asset-price dependency): the repaid share of the
-	// position's debt. Repaying improves the (aggregate) projected health factor.
+	// position's debt, including repays still settling. Repaying improves the (aggregate) projected
+	// health factor.
 	let repayUsd = $derived(
-		reserve.borrowed > ZERO && nonNullish(parsedAmount)
-			? (Number(parsedAmount) / Number(reserve.borrowed)) * reserve.borrowedUsd
+		reserve.borrowed > ZERO
+			? (Number((parsedAmount ?? ZERO) + pendingRepay) / Number(reserve.borrowed)) *
+					reserve.borrowedUsd
 			: 0
 	);
 
@@ -258,6 +263,7 @@
 				{inflowFee}
 				{onBack}
 				onConfirm={repay}
+				{pendingRepay}
 				{preview}
 				{reserve}
 			/>
@@ -273,6 +279,7 @@
 				onCustomErrorValidate={validateRepayAmount}
 				{onNext}
 				{onSelectToken}
+				{pendingRepay}
 				{preview}
 				{reserve}
 				totalFee={$maxGasFee}

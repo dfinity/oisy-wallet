@@ -2714,10 +2714,12 @@
 			"starting_to_repay": "A enviar o teu reembolso…",
 			"repay_started": "O teu reembolso está a ser processado.",
 			"current_debt": "Dívida atual",
+			"pending_repays": "",
 			"interest_accrued": "Juros acumulados",
 			"debt_after_repay": "Dívida após reembolso",
 			"repay_exceeds_debt": "O montante excede a tua dívida pendente.",
-			"repay_prices_unavailable": "Os preços estão temporariamente indisponíveis. O reembolso está desativado até serem carregados."
+			"repay_prices_unavailable": "Os preços estão temporariamente indisponíveis. O reembolso está desativado até serem carregados.",
+			"repay_pending_covers_debt": ""
 		},
 		"info": {
 			"title": "O que é a Liquidium",

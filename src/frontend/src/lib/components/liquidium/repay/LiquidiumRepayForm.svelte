@@ -6,6 +6,7 @@
 	import LiquidiumProviderFee from '$lib/components/liquidium/supply/LiquidiumProviderFee.svelte';
 	import StakeForm from '$lib/components/stake/StakeForm.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import type { LiquidiumRepayPreview } from '$lib/services/liquidium-repay.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -19,8 +20,10 @@
 		reserve: LiquidiumReserve;
 		preview: LiquidiumRepayPreview;
 		amount: OptionAmount;
-		// Full outstanding debt (base units) — caps the "Max" shortcut.
+		// Outstanding debt net of pending repays (base units) — caps the "Max" shortcut.
 		maxRepay?: bigint;
+		// Net amount of this pool's repays still settling.
+		pendingRepay?: bigint;
 		// Network (gas/UTXO) fee, for the Max shortcut + disabled gate.
 		totalFee?: bigint;
 		// Provider fee (base units); shown as a row and reserved from Max.
@@ -43,6 +46,7 @@
 		preview,
 		amount = $bindable(),
 		maxRepay,
+		pendingRepay = ZERO,
 		totalFee,
 		inflowFee,
 		inflowFeeUnavailable = false,
@@ -59,6 +63,14 @@
 
 	// Both fees must be resolved before the form can submit.
 	let feeMissing = $derived(isNullish(totalFee) || isNullish(inflowFee));
+
+	// Pending repays already cover the whole debt: nothing is left to repay until they settle. The
+	// net cap rarely lands on exactly zero (interest accrued since the pending repay was quoted leaves
+	// dust that its own buffer already covers), so the debt itself is checked too.
+	let pendingCoversDebt = $derived(
+		pendingRepay > ZERO &&
+			(maxRepay === ZERO || pendingRepay >= reserve.borrowed + (reserve.debtInterest ?? ZERO))
+	);
 
 	// Repaying more than the outstanding debt is rejected before the rail-specific affordability
 	// check, so the user sees the relevant cap (mirrors Borrow's "exceeds power" / Withdraw's
@@ -89,7 +101,7 @@
 
 <StakeForm
 	autofocus={isDesktop()}
-	disabled={feeMissing || inflowFeeUnavailable}
+	disabled={feeMissing || inflowFeeUnavailable || pendingCoversDebt}
 	isSelectable={nonNullish(onSelectToken)}
 	maxAmount={maxRepay}
 	onClick={onSelectToken}
@@ -102,11 +114,17 @@
 	bind:error={amountError}
 >
 	{#snippet content()}
-		<LiquidiumRepayDebtRows {amount} {reserve} />
+		<LiquidiumRepayDebtRows {amount} {pendingRepay} {reserve} />
 
 		<LiquidiumProviderFee {inflowFee} />
 
 		{@render feeDisplay()}
+
+		{#if pendingCoversDebt}
+			<MessageBox level="info" styleClass="mt-3">
+				{$i18n.liquidium.text.repay_pending_covers_debt}
+			</MessageBox>
+		{/if}
 
 		{#if inflowFeeUnavailable}
 			<MessageBox level="warning" styleClass="mt-3">

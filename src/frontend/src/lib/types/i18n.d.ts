@@ -2254,10 +2254,12 @@ interface I18nLiquidium {
 		starting_to_repay: string;
 		repay_started: string;
 		current_debt: string;
+		pending_repays: string;
 		interest_accrued: string;
 		debt_after_repay: string;
 		repay_exceeds_debt: string;
 		repay_prices_unavailable: string;
+		repay_pending_covers_debt: string;
 	};
 	info: {
 		title: string;

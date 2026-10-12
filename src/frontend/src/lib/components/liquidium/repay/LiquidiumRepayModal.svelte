@@ -10,6 +10,8 @@
 	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { liquidiumRepayWizardSteps } from '$lib/config/lend-borrow.config';
+	import { ZERO } from '$lib/constants/app.constants';
+	import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { liquidiumPortfolio } from '$lib/derived/liquidium.derived';
@@ -28,6 +30,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { consoleError } from '$lib/utils/console.utils';
+	import { liquidiumPendingRepayAmount } from '$lib/utils/liquidium-active-tx.utils';
 	import { liquidiumMarketToken } from '$lib/utils/liquidium.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
@@ -62,8 +65,24 @@
 	// Account-based repay has no SDK-sanctioned fee fallback (that exists only for instant loans),
 	// so it degrades gracefully like Supply rather than guessing a fee.
 	let inflowFeeUnavailable = $state(false);
-	// Full outstanding debt (base units) — the "Max (full debt)" cap.
+	// Full outstanding debt (base units) as the protocol sees it — excludes repays still settling.
 	let maxRepay = $state<bigint | undefined>();
+
+	// Repays already sent for this pool (any rail) that the protocol has not credited yet.
+	let pendingRepay = $derived(
+		nonNullish(selectedReserve)
+			? liquidiumPendingRepayAmount({
+					transactions: $activeUserTransactionsPending,
+					poolId: selectedReserve.poolId
+				})
+			: ZERO
+	);
+
+	// The "Max (full debt)" cap, net of pending repays: until they settle the protocol still reports
+	// the full debt, and a second full repay would arrive with no debt left to apply it to.
+	let netMaxRepay = $derived(
+		nonNullish(maxRepay) ? (maxRepay > pendingRepay ? maxRepay - pendingRepay : ZERO) : undefined
+	);
 
 	$effect(() => {
 		const identity = $authIdentity;
@@ -171,11 +190,12 @@
 					{currentStep}
 					{inflowFee}
 					{inflowFeeUnavailable}
-					{maxRepay}
+					maxRepay={netMaxRepay}
 					onBack={modal.back}
 					onClose={close}
 					onNext={modal.next}
 					onSelectToken={enterTokensList}
+					{pendingRepay}
 					portfolio={$liquidiumPortfolio}
 					reserve={selectedReserve}
 					bind:amount
@@ -186,11 +206,12 @@
 					{currentStep}
 					{inflowFee}
 					{inflowFeeUnavailable}
-					{maxRepay}
+					maxRepay={netMaxRepay}
 					onBack={modal.back}
 					onClose={close}
 					onNext={modal.next}
 					onSelectToken={enterTokensList}
+					{pendingRepay}
 					portfolio={$liquidiumPortfolio}
 					reserve={selectedReserve}
 					bind:amount
@@ -201,11 +222,12 @@
 					{currentStep}
 					{inflowFee}
 					{inflowFeeUnavailable}
-					{maxRepay}
+					maxRepay={netMaxRepay}
 					onBack={modal.back}
 					onClose={close}
 					onNext={modal.next}
 					onSelectToken={enterTokensList}
+					{pendingRepay}
 					portfolio={$liquidiumPortfolio}
 					reserve={selectedReserve}
 					bind:amount

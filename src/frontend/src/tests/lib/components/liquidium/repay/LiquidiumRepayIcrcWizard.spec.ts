@@ -76,6 +76,23 @@ describe('LiquidiumRepayIcrcWizard', () => {
 		expect(container).toBeTruthy();
 	});
 
+	it('projects the health factor net of pending repays', () => {
+		const previewSpy = vi.spyOn(liquidiumRepayServices, 'computeLiquidiumRepayPreview');
+
+		render(LiquidiumRepayIcrcWizard, {
+			props: {
+				...baseProps,
+				amount: 0.25,
+				pendingRepay: 50_000_000n,
+				currentStep: step(WizardStepsLiquidiumRepay.REPAY)
+			},
+			context: context()
+		});
+
+		// (0.25 typed + 0.5 pending) / 1 ICP debt × $12.
+		expect(previewSpy).toHaveBeenLastCalledWith({ portfolio, repayUsd: 9 });
+	});
+
 	it('renders the progress step', () => {
 		const { container } = render(LiquidiumRepayIcrcWizard, {
 			props: { ...baseProps, currentStep: step(WizardStepsLiquidiumRepay.REPAYING) },

@@ -18,6 +18,8 @@
 		reserve: LiquidiumReserve;
 		amount: OptionAmount;
 		preview: LiquidiumRepayPreview;
+		// Net amount of this pool's repays still settling.
+		pendingRepay?: bigint;
 		// Provider fee (base units of the repaid token).
 		inflowFee?: bigint;
 		// Per-rail fee row (EthFeeDisplay / BtcUtxosFeeDisplay).
@@ -26,7 +28,8 @@
 		onConfirm: () => void;
 	}
 
-	let { reserve, amount, preview, inflowFee, feeDisplay, onBack, onConfirm }: Props = $props();
+	let { reserve, amount, preview, pendingRepay, inflowFee, feeDisplay, onBack, onConfirm }: Props =
+		$props();
 </script>
 
 <StakeReview actionButtonLabel={$i18n.liquidium.text.action_repay} {amount} {onBack} {onConfirm}>
@@ -40,7 +43,7 @@
 			{#snippet mainValue()}{liquidium.name}{/snippet}
 		</ModalValue>
 
-		<LiquidiumRepayDebtRows {amount} {reserve} />
+		<LiquidiumRepayDebtRows {amount} {pendingRepay} {reserve} />
 
 		<LiquidiumProviderFee {inflowFee} />
 
