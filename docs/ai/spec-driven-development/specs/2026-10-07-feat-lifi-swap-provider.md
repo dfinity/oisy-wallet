@@ -974,16 +974,22 @@ outside the v1 matrix instead of storing it:
   (`SplMainnet(_)`, `SolNativeMainnet`).
 - `dest_token` is one of the same kinds. A Solana source requires a Solana destination
   (Solana → EVM is out of v1).
-- `source_token != dest_token`.
+- `source_token` and `dest_token` are different tokens, rejected with
+  `InvalidData("dest_token must differ from source_token")`. ERC addresses are compared
+  case-insensitively: `TokenId` derives `Eq` over the raw address string, so a
+  checksummed and a lower-case spelling of one contract would otherwise pass as two
+  tokens. SPL mints are base58 and compared exactly.
 
 `LIFI_EVM_CHAIN_IDS` is a `const` in `model.rs` holding the six mainnet chain ids
 (1, 42161, 56, 137, 8453, 4663), with a comment that it mirrors the keys of the
 frontend's `LIFI_DIAMOND_ADDRESSES`: a chain without a pinned Diamond cannot be swapped
-through, so adding one is a backend PR as well as a frontend one. NFT variants
-(`Erc721`, `Erc1155`), devnet Solana variants, ICP, BTC and XRP tokens are rejected with
-`InvalidData("token pair is outside the LI.FI v1 matrix")`. Unit tests cover one
-accepted pair per direction (EVM → EVM, EVM → Solana, Solana → Solana) and one rejection
-per rule (unknown chain id, devnet SPL, Solana → EVM, NFT kind, ICP, same token).
+through, so adding one is a backend PR as well as a frontend one. The check is an
+allow-list: every other `TokenId` kind — NFT variants (`Erc721`, `Erc1155` and the IC
+NFT kinds), devnet Solana variants, `IcpNative` / `Icrc`, BTC (mainnet and testnet) and
+XRP — is rejected with `InvalidData("token pair is outside the LI.FI v1 matrix")`. Unit
+tests cover one accepted pair per direction (EVM → EVM, EVM → Solana, Solana → Solana)
+and one rejection per rule (unpinned chain id, devnet Solana, Solana → EVM, unsupported
+kind, same token).
 The frontend poller keeps its `undefined`-chain skip as defence in depth, but no row
 OISY creates can reach it. Candid round-trip tests, an integration test in
 `src/backend/tests/it/active_user_transactions.rs`, regenerated `backend.did` and

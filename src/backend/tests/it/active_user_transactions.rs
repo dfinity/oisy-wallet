@@ -6,11 +6,12 @@ use shared::types::{
     active_user_transaction::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
-        ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, NearIntentsData,
-        OisyTradeData, OisyTradeSide, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest,
-        VeloraData, VeloraSwapMode, XrpData, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
+        ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, LifiData,
+        NearIntentsData, OisyTradeData, OisyTradeSide, OneSecIcpToEvmData,
+        UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode, XrpData,
+        MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
     },
-    custom_token::ErcTokenId,
+    custom_token::{ErcTokenId, SplTokenId},
     result_types::{
         ActiveUserTransactionResult, DeleteActiveUserTransactionResult,
         GetActiveUserTransactionsResult,
@@ -781,6 +782,106 @@ fn xrp_create_without_poll_keys_is_rejected() {
         ActiveUserTransactionResult::Ok(tx) => assert_eq!(tx.external_refs, xrp_refs()),
         ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
     }
+}
+
+#[test]
+fn create_lifi_variant_roundtrip() {
+    // One canister round-trip per route the variant covers, so `SplMainnet` and a
+    // pinned chain other than Ethereum both cross the wire. The pair rules
+    // themselves are covered in-process; the Solana → EVM create below proves
+    // they run behind the endpoint.
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let usdc_solana = TokenId::SplMainnet(SplTokenId(
+        "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v".to_string(),
+    ));
+    let rows = [
+        (
+            "lifi-evm-to-evm",
+            TokenId::Erc20(
+                ErcTokenId("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48".to_string()),
+                1,
+            ),
+            TokenId::EvmNative(42161),
+        ),
+        (
+            "lifi-evm-to-sol",
+            TokenId::EvmNative(4663),
+            usdc_solana.clone(),
+        ),
+        ("lifi-sol-to-sol", TokenId::SolNativeMainnet, usdc_solana),
+    ];
+
+    let create = |id: &str, source_token: TokenId, dest_token: TokenId| {
+        pic.update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                data: ActiveUserTransactionData::Lifi(LifiData {
+                    source_token,
+                    dest_token,
+                    amount: Nat::from(1_000_000u64),
+                }),
+                external_refs: vec![ActiveUserTransactionRef {
+                    key: "lifi_tool".to_string(),
+                    value: "across".to_string(),
+                }],
+                ..create_req(id)
+            },
+        )
+        .expect("create_active_user_transaction call should succeed")
+    };
+
+    for (id, source_token, dest_token) in &rows {
+        match create(id, source_token.clone(), dest_token.clone()) {
+            ActiveUserTransactionResult::Ok(tx) => {
+                assert_eq!(tx.id, *id);
+                assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+                assert_eq!(tx.external_refs.len(), 1);
+            }
+            ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+        }
+    }
+
+    // Read back through the query path so the stored (not just echoed)
+    // representation is what the assertion sees.
+    let listed = list_active(&pic, user);
+    assert_eq!(listed.len(), rows.len());
+    for (id, source_token, dest_token) in &rows {
+        let tx = listed
+            .iter()
+            .find(|tx| tx.id == *id)
+            .unwrap_or_else(|| panic!("{id} should be listed"));
+        assert_eq!(
+            tx.data,
+            ActiveUserTransactionData::Lifi(LifiData {
+                source_token: source_token.clone(),
+                dest_token: dest_token.clone(),
+                amount: Nat::from(1_000_000u64),
+            })
+        );
+    }
+
+    match create(
+        "lifi-sol-to-evm",
+        TokenId::SolNativeMainnet,
+        TokenId::EvmNative(1),
+    ) {
+        ActiveUserTransactionResult::Ok(tx) => panic!("expected Err, got {tx:?}"),
+        ActiveUserTransactionResult::Err(err) => assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData(
+                "token pair is outside the LI.FI v1 matrix".to_string()
+            )
+        ),
+    }
+    assert_eq!(
+        list_active(&pic, user).len(),
+        rows.len(),
+        "a rejected create must not leave a row behind"
+    );
 }
 
 #[test]
