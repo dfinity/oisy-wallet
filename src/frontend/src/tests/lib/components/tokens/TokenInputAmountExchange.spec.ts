@@ -6,6 +6,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import type { OptionAmount } from '$lib/types/send';
 import type { DisplayUnit } from '$lib/types/swap';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
@@ -48,6 +49,15 @@ describe('TokenInputAmountExchange', () => {
 		await fireEvent.click(button);
 
 		expect(valueElement).toHaveTextContent(`100 ${mockValidIcToken.symbol}`);
+	});
+
+	it('names the switch button for assistive technology', () => {
+		const { getByRole } = render(TokenInputAmountExchange, defaultProps);
+
+		expect(getByRole('button', { name: en.tokens.alt.switch_amount_unit })).toHaveAttribute(
+			'data-tid',
+			TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON
+		);
 	});
 
 	describe('value label', () => {

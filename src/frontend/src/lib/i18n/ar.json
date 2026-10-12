@@ -1564,7 +1564,8 @@
 			"open_contract_address_block_explorer": "افتح عنوان العقد على مستكشف الكتل",
 			"open_token_address_block_explorer": "افتح عنوان التوكن على مستكشف الكتل",
 			"token_group_number": "العدد الإجمالي للتوكنات في المجموعة للتوكن الأصلي $token",
-			"filter_button": "فتح/إغلاق الفلتر"
+			"filter_button": "فتح/إغلاق الفلتر",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "أدخل عنوان عقد ERC20",

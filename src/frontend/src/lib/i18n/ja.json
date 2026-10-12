@@ -1564,7 +1564,8 @@
 			"open_contract_address_block_explorer": "ブロックエクスプローラーでコントラクトアドレスを開く",
 			"open_token_address_block_explorer": "ブロックエクスプローラーでトークンアドレスを開く",
 			"token_group_number": "ネイティブトークン$tokenのグループ内のトークン総数",
-			"filter_button": "フィルターを開く/閉じる"
+			"filter_button": "フィルターを開く/閉じる",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "ERC20コントラクトアドレスを入力",

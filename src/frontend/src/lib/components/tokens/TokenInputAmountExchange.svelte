@@ -69,10 +69,13 @@
 	);
 </script>
 
-<div class="flex items-center gap-1" data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE}>
+<div class="flex items-center" data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE}>
 	{#if nonNullish(exchangeRate)}
+		<!-- The spacing before the value is the button's padding, not a flex gap, and the button is square (the global button radius would clip hits in its corners), so there is no dead zone between the two click targets. -->
 		<button
+			class="flex items-center self-stretch rounded-none pr-1"
 			class:hover:cursor-default={disabled}
+			aria-label={$i18n.tokens.alt.switch_amount_unit}
 			data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON}
 			{disabled}
 			onclick={preventDefault(handleUnitSwitch)}

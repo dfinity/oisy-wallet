@@ -1564,7 +1564,8 @@
 			"open_contract_address_block_explorer": "Mở địa chỉ hợp đồng trên trình khám phá khối",
 			"open_token_address_block_explorer": "Mở địa chỉ token trên trình khám phá khối",
 			"token_group_number": "Tổng số token trong nhóm cho token gốc $token",
-			"filter_button": "Mở/đóng bộ lọc"
+			"filter_button": "Mở/đóng bộ lọc",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "Nhập địa chỉ hợp đồng ERC20",

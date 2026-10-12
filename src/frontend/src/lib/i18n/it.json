@@ -1564,7 +1564,8 @@
 			"open_contract_address_block_explorer": "Apri l'indirizzo del contratto su un block explorer",
 			"open_token_address_block_explorer": "Apri l'indirizzo del token su un block explorer",
 			"token_group_number": "Numero totale di token nel gruppo per il token nativo $token",
-			"filter_button": "Apri/chiudi filtro"
+			"filter_button": "Apri/chiudi filtro",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "Inserisci un indirizzo di contratto ERC20",

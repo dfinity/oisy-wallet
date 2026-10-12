@@ -1564,7 +1564,8 @@
 			"open_contract_address_block_explorer": "ब्लॉक एक्सप्लोरर पर अनुबंध पता खोलें",
 			"open_token_address_block_explorer": "ब्लॉक एक्सप्लोरर पर टोकन पता खोलें",
 			"token_group_number": "नेटिव टोकन $token के लिए समूह में टोकन की कुल संख्या",
-			"filter_button": "फ़िल्टर खोलें/बंद करें"
+			"filter_button": "फ़िल्टर खोलें/बंद करें",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "एक ERC20 अनुबंध पता दर्ज करें",
