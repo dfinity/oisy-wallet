@@ -514,6 +514,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"icforums": {
+				"name": "IC Forums",
+				"one_liner": "Internet Computer 上のコミュニティフォーラム。",
+				"description": "IC Forums は、Internet Computer 上で完全に動作するコミュニティプラットフォームです。100 以上のコミュニティで議論に参加したり、独自の構成・役割・モデレーションを持つ自分のコミュニティを作成したりできます。1つの ID ですべてのコミュニティを利用できます。"
 			}
 		}
 	},
