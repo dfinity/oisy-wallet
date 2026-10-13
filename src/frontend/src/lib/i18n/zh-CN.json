@@ -514,6 +514,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"storica": {
+				"name": "Storica",
+				"one_liner": "你在 Internet Computer 上的专属云存储。",
+				"description": "Storica 只需约一分钟即可在 Internet Computer 上部署一个私有存储容器，使用 ICP 付费。容器及其文件、权限和升级都由你掌控。你可以通过网页控制台、命令行工具或 TypeScript SDK 管理文件，并使用 OISY 或 Internet Identity 登录。"
 			}
 		}
 	},

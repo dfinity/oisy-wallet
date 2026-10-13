@@ -514,6 +514,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"storica": {
+				"name": "Storica",
+				"one_liner": "Собственное облачное хранилище на Internet Computer.",
+				"description": "Storica примерно за минуту развёртывает приватный контейнер-хранилище на Internet Computer с оплатой в ICP. Вы управляете контейнером, его файлами, правами доступа и обновлениями. Работайте с файлами через веб-консоль, инструмент командной строки или TypeScript SDK и входите через OISY или Internet Identity."
 			}
 		}
 	},

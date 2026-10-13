@@ -283,6 +283,20 @@
 		"screenshots": ["/images/dapps/motoko-tokyo-screenshot.webp"]
 	},
 	{
+		"id": "storica",
+		"name": "dapps.descriptions.storica.name",
+		"oneLiner": "dapps.descriptions.storica.one_liner",
+		"website": "https://storica.my/",
+		"twitter": "https://x.com/StoricaOSS",
+		"github": "https://github.com/storica-oss",
+		"tags": ["dapps.categories.tools", "dapps.categories.ab_icp", "dapps.categories.aa_new"],
+		"description": "dapps.descriptions.storica.description",
+		"usesInternetIdentity": true,
+		"stats": "",
+		"logo": "/images/dapps/storica-logo.svg",
+		"screenshots": ["/images/dapps/storica-screenshot.webp"]
+	},
+	{
 		"id": "icpanda-message",
 		"name": "dapps.descriptions.icpanda_message.name",
 		"oneLiner": "dapps.descriptions.icpanda_message.one_liner",

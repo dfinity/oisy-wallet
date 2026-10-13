@@ -514,6 +514,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"storica": {
+				"name": "Storica",
+				"one_liner": "Dein eigener Cloud-Speicher auf dem Internet Computer.",
+				"description": "Storica richtet in etwa einer Minute einen privaten Speicher-Canister auf dem Internet Computer ein, bezahlt mit ICP. Du kontrollierst den Canister, seine Dateien, Berechtigungen und Upgrades. Verwalte deine Dateien über die Web-Konsole, das Kommandozeilen-Tool oder das TypeScript-SDK und melde dich mit OISY oder Internet Identity an."
 			}
 		}
 	},
