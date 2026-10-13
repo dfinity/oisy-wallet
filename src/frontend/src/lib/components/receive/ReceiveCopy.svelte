@@ -18,9 +18,9 @@
 	ariaLabel={copyAriaLabel}
 	link={false}
 	onclick={async () => {
-		await copyToClipboard({ value: address, text: copyAriaLabel });
-
-		onCopy?.();
+		if (await copyToClipboard({ value: address, text: copyAriaLabel })) {
+			onCopy?.();
+		}
 	}}
 	{testId}
 >
