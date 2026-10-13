@@ -59,7 +59,7 @@ describe('ButtonSignInInternetIdentity', () => {
 		});
 
 		expect(container.querySelector(selector)).toHaveClass(
-			'active:scale-[0.96]',
+			'active:scale-[0.98]',
 			'motion-reduce:active:scale-100',
 			pressed
 		);
