@@ -1,6 +1,7 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
 import LiquidiumRepayModal from '$lib/components/liquidium/repay/LiquidiumRepayModal.svelte';
 import { ZERO } from '$lib/constants/app.constants';
+import { STAKE_FORM_REVIEW_BUTTON } from '$lib/constants/test-ids.constants';
 import * as addressesStore from '$lib/derived/address.derived';
 import * as liquidiumRepayServices from '$lib/services/liquidium-repay.services';
 import * as liquidiumSupplyServices from '$lib/services/liquidium-supply.services';
@@ -15,7 +16,8 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { render, waitFor } from '@testing-library/svelte';
+import { runResolvedPromises } from '$tests/utils/timers.test-utils';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 describe('LiquidiumRepayModal', () => {
@@ -107,6 +109,51 @@ describe('LiquidiumRepayModal', () => {
 		await new Promise((resolve) => setTimeout(resolve, 0));
 
 		expect(maxRepaySpy).toHaveBeenCalledOnce();
+	});
+
+	// Only the FIRST (pre-settlement) request is deferred, so the refetch can land before it. The
+	// stale answer carries the old, larger debt: if it won, the cap would re-open to that amount.
+	// Asserted on the Review button, not the error text, whose removal is animated.
+	it('ignores a max response superseded by a refetch', async () => {
+		let resolveStale: ((amount: bigint | null) => void) | undefined;
+
+		maxRepaySpy
+			.mockReturnValueOnce(
+				new Promise((res) => {
+					resolveStale = res;
+				})
+			)
+			.mockResolvedValue(50_000_000n);
+
+		const { getByPlaceholderText, getByTestId } = render(LiquidiumRepayModal, {
+			props: { reserve }
+		});
+
+		await waitFor(() => expect(maxRepaySpy).toHaveBeenCalledOnce());
+
+		activeUserTransactionsStore.upsert({
+			transaction: { ...pendingRepay, status: { Succeeded: null } }
+		});
+
+		await waitFor(() => expect(maxRepaySpy).toHaveBeenCalledTimes(2));
+
+		const input = getByPlaceholderText('0');
+
+		// Control: within the fresh 0.5 ICP cap the form submits, so the cap is the only gate below.
+		await fireEvent.input(input, { target: { value: '0.25' } });
+		await waitFor(() =>
+			expect(getByTestId(STAKE_FORM_REVIEW_BUTTON)).not.toHaveAttribute('disabled')
+		);
+
+		// 0.75 ICP: over the fresh 0.5 ICP cap, under the stale 1 ICP one.
+		await fireEvent.input(input, { target: { value: '0.75' } });
+		await waitFor(() => expect(getByTestId(STAKE_FORM_REVIEW_BUTTON)).toHaveAttribute('disabled'));
+
+		resolveStale?.(100_000_000n);
+		await runResolvedPromises();
+		await runResolvedPromises();
+
+		expect(getByTestId(STAKE_FORM_REVIEW_BUTTON)).toHaveAttribute('disabled');
 	});
 
 	it('says the debt is unavailable when the max request fails', async () => {
