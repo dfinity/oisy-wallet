@@ -514,6 +514,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"blitzgrid": {
+				"name": "Blitz Grid Fantasy Football",
+				"one_liner": "Internet Computer पर पूरी तरह चलने वाली फ़ैंटेसी फ़ुटबॉल लीग।",
+				"description": "Blitz Grid मोबाइल के लिए बनाया गया एक फ़ैंटेसी फ़ुटबॉल गेम है। लीग, ड्राफ़्ट, रोस्टर, ट्रेड और साप्ताहिक स्कोरिंग, सब कुछ Internet Computer पर कैनिस्टर में चलता है। अपनी लीग के दूसरे मैनेजरों को ICP भेजने के लिए OISY कनेक्ट करें। हर ट्रांसफ़र OISY में साइन होता है।"
 			}
 		}
 	},
