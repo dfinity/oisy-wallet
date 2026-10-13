@@ -223,10 +223,12 @@ layer and let the service own caching.
 
 ## Press feedback
 
-Every styled `Button` (any `colorStyle`, unless `link`) and every
-`ButtonIcon` shrinks to `scale: 0.96` while held
-(`lib/styles/mixins/_button.scss` `press`). Don't add your own
-`active:scale-*` to them.
+Every styled `Button` (any `colorStyle`, unless `link`) shrinks to
+`scale: 0.98` while held, and every `ButtonIcon` to `scale: 0.96`
+(`lib/styles/mixins/_button.scss` `press`). Text buttons get less because
+they are often full width, where 0.96 takes off far more pixels than on a
+40 px icon. Don't add your own `active:scale-*` to them; a custom button
+outside these components follows the same two values.
 
 - Opt out with the `static` prop where motion would distract, e.g. a
   button used only as a double-click target. It sets the `no-press`

@@ -94,7 +94,9 @@ a.as-button {
 	}
 
 	// PRESS
-	// Text links stay still; icon buttons press in their link style too.
+	// Text buttons press less than icon buttons: they are often full width, where the
+	// same scale removes far more pixels. Text links stay still; icon buttons press in
+	// their link style too.
 	&.primary,
 	&.secondary,
 	&.secondary-light,
@@ -105,8 +107,8 @@ a.as-button {
 	&.success,
 	&.success-light,
 	&.error {
-		&:not(.link) {
-			@include button.press;
+		&:not(.link):not(.icon) {
+			@include button.press(0.98);
 		}
 	}
 
