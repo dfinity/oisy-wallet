@@ -656,6 +656,10 @@ type ExperimentalFeaturesSettings = record {
 // An EXT v2 compliant token on the Internet Computer.
 type ExtV2Token = record { canister_id : principal };
 type GetActiveUserTransactionsResponse = record {
+	// The user has seen every record updated at or before this time, on whichever device they
+	// saw it, so a record reads as unread only once it changes after this. Zero until the user
+	// first marks their records seen.
+	seen_up_to_ns : nat64;
 	transactions : vec ActiveUserTransaction
 };
 type GetActiveUserTransactionsResult = variant {
@@ -875,6 +879,12 @@ type LiquidiumData = record {
 	pool_id : text;
 	// Amount in the token's base units.
 	amount : nat
+};
+type MarkActiveUserTransactionsSeenResult = variant {
+	// The mark now stored, which is later than the one requested when another device has
+	// already marked further.
+	Ok : nat64;
+	Err : ActiveUserTransactionError
 };
 // One of the caller's own tips, as returned by `get_my_tips`.
 type MyTip = record {
@@ -2035,6 +2045,12 @@ service : (Arg) -> {
 	// - Integrations that previously relied on query semantics must be updated to invoke this as an
 	// update method.
 	list_custom_tokens : () -> (vec CustomToken);
+	// Marks every one of the caller's active user transactions updated at or before
+	// `up_to_ns` as seen, on every device the caller signs in on. Returns the mark
+	// now stored.
+	mark_active_user_transactions_seen : (nat64) -> (
+		MarkActiveUserTransactionsSeenResult
+	);
 	// Returns whether sign-ups of new users are currently allowed.
 	//
 	// Exposed as an unauthenticated query so the landing page can display an info banner before the
