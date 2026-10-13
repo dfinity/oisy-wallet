@@ -1,5 +1,6 @@
 @use '../mixins/media';
 @use '../mixins/button';
+@use '../mixins/interaction';
 
 button,
 a.as-button {
@@ -104,7 +105,7 @@ a.as-button {
 			@apply bg-transparent;
 		}
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-primary-inverted;
 			@apply bg-brand-secondary;
 		}
@@ -143,7 +144,7 @@ a.as-button {
 			@apply bg-transparent;
 		}
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-primary-inverted-alt;
 			@apply bg-secondary-inverted;
 		}
@@ -182,7 +183,7 @@ a.as-button {
 			@apply bg-transparent;
 		}
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-brand-primary-alt;
 			@apply bg-brand-subtle-20;
 		}
@@ -221,7 +222,7 @@ a.as-button {
 			@apply bg-transparent;
 		}
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-success-primary;
 			@apply bg-success-subtle-20;
 		}
@@ -260,7 +261,7 @@ a.as-button {
 			@apply bg-transparent;
 		}
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-brand-primary-alt;
 			@apply bg-primary;
 		}
@@ -299,7 +300,7 @@ a.as-button {
 			@apply bg-transparent;
 		}
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-brand-primary-alt;
 			@apply bg-brand-subtle-10;
 		}
@@ -346,7 +347,7 @@ a.as-button {
 			@apply bg-transparent;
 		}
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-brand-primary-inverted;
 			@apply bg-secondary-alt;
 		}
@@ -377,7 +378,7 @@ a.as-button {
 		@apply text-tertiary;
 		@apply bg-transparent;
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-secondary;
 			@apply bg-primary;
 		}
@@ -423,7 +424,7 @@ a.as-button {
 			@apply bg-transparent;
 			@apply text-success-primary;
 
-			&:hover {
+			@include interaction.hover {
 				@apply text-success-primary;
 				@apply bg-success-subtle-20;
 			}
@@ -439,7 +440,7 @@ a.as-button {
 			}
 		}
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-primary-inverted;
 			@apply bg-success-secondary;
 		}
@@ -477,7 +478,7 @@ a.as-button {
 			@apply bg-transparent;
 			@apply text-error-primary;
 
-			&:hover {
+			@include interaction.hover {
 				@apply bg-error-subtle-20;
 				@apply text-error-primary;
 			}
@@ -493,7 +494,7 @@ a.as-button {
 			}
 		}
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-primary-inverted;
 			@apply bg-error-secondary;
 		}
@@ -523,7 +524,10 @@ a.as-button {
 	// OTHERS
 
 	&.text {
-		&:hover,
+		@include interaction.hover {
+			@apply text-brand-primary;
+		}
+
 		&:active {
 			@apply text-brand-primary;
 		}
@@ -567,8 +571,10 @@ a.as-button {
 		@apply text-tertiary;
 	}
 
-	&:hover:not(.disabled):not([disabled]) {
-		@apply bg-brand-subtle-20;
+	@include interaction.hover {
+		&:not(.disabled):not([disabled]) {
+			@apply bg-brand-subtle-20;
+		}
 	}
 
 	&.opened {
