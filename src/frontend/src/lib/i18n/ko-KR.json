@@ -2714,7 +2714,7 @@
 			"starting_to_repay": "상환을 제출하는 중…",
 			"repay_started": "상환이 처리되고 있습니다.",
 			"current_debt": "현재 부채",
-			"pending_repays": "대기 중인 상환",
+			"pending_repays": "처리 중인 상환",
 			"interest_accrued": "발생 이자",
 			"debt_after_repay": "상환 후 부채",
 			"repay_exceeds_debt": "금액이 미상환 부채를 초과합니다.",

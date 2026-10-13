@@ -2714,7 +2714,7 @@
 			"starting_to_repay": "Invio del tuo rimborso…",
 			"repay_started": "Il tuo rimborso è in fase di elaborazione.",
 			"current_debt": "Debito attuale",
-			"pending_repays": "Rimborsi in sospeso",
+			"pending_repays": "Rimborsi in elaborazione",
 			"interest_accrued": "Interessi maturati",
 			"debt_after_repay": "Debito dopo il rimborso",
 			"repay_exceeds_debt": "L'importo supera il tuo debito residuo.",

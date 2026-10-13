@@ -2714,7 +2714,7 @@
 			"starting_to_repay": "Đang gửi khoản hoàn trả của bạn…",
 			"repay_started": "Khoản hoàn trả của bạn hiện đang được xử lý.",
 			"current_debt": "Khoản nợ hiện tại",
-			"pending_repays": "Khoản hoàn trả đang chờ xử lý",
+			"pending_repays": "Khoản hoàn trả đang được xử lý",
 			"interest_accrued": "Lãi phát sinh",
 			"debt_after_repay": "Khoản nợ sau khi hoàn trả",
 			"repay_exceeds_debt": "Số tiền vượt quá khoản nợ chưa thanh toán của bạn.",

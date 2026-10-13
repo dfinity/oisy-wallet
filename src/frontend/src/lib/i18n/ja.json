@@ -2714,7 +2714,7 @@
 			"starting_to_repay": "返済を送信しています…",
 			"repay_started": "返済が処理されています。",
 			"current_debt": "現在の負債",
-			"pending_repays": "保留中の返済",
+			"pending_repays": "処理中の返済",
 			"interest_accrued": "発生した利息",
 			"debt_after_repay": "返済後の負債",
 			"repay_exceeds_debt": "金額が未払いの負債を超えています。",

@@ -2714,7 +2714,7 @@
 			"starting_to_repay": "Tvá splátka se odesílá…",
 			"repay_started": "Tvá splátka se nyní zpracovává.",
 			"current_debt": "Aktuální dluh",
-			"pending_repays": "Čekající splátky",
+			"pending_repays": "Splátky ve zpracování",
 			"interest_accrued": "Narostlý úrok",
 			"debt_after_repay": "Dluh po splacení",
 			"repay_exceeds_debt": "Částka přesahuje tvůj nesplacený dluh.",

@@ -2714,7 +2714,7 @@
 			"starting_to_repay": "A enviar o teu reembolso…",
 			"repay_started": "O teu reembolso está a ser processado.",
 			"current_debt": "Dívida atual",
-			"pending_repays": "Reembolsos pendentes",
+			"pending_repays": "Reembolsos em processamento",
 			"interest_accrued": "Juros acumulados",
 			"debt_after_repay": "Dívida após reembolso",
 			"repay_exceeds_debt": "O montante excede a tua dívida pendente.",

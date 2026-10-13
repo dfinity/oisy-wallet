@@ -2714,7 +2714,7 @@
 			"starting_to_repay": "Envoi de votre remboursement…",
 			"repay_started": "Votre remboursement est en cours de traitement.",
 			"current_debt": "Dette actuelle",
-			"pending_repays": "Remboursements en attente",
+			"pending_repays": "Remboursements en cours",
 			"interest_accrued": "Intérêts courus",
 			"debt_after_repay": "Dette après remboursement",
 			"repay_exceeds_debt": "Le montant dépasse votre dette impayée.",
