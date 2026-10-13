@@ -2719,6 +2719,7 @@
 			"debt_after_repay": "Debito dopo il rimborso",
 			"repay_exceeds_debt": "L'importo supera il tuo debito residuo.",
 			"repay_prices_unavailable": "I prezzi non sono temporaneamente disponibili. Il rimborso è disabilitato finché non vengono caricati.",
+			"repay_debt_unavailable": "",
 			"repay_pending_covers_debt": ""
 		},
 		"info": {

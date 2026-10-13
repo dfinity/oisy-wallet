@@ -2719,6 +2719,7 @@
 			"debt_after_repay": "Долг после погашения",
 			"repay_exceeds_debt": "Сумма превышает твой непогашенный долг.",
 			"repay_prices_unavailable": "Цены временно недоступны. Погашение отключено, пока они не загрузятся.",
+			"repay_debt_unavailable": "",
 			"repay_pending_covers_debt": ""
 		},
 		"info": {

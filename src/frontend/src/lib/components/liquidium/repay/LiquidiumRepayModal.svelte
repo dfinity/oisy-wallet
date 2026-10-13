@@ -67,6 +67,8 @@
 	let inflowFeeUnavailable = $state(false);
 	// Full outstanding debt (base units) as the protocol sees it — excludes repays still settling.
 	let maxRepay = $state<bigint | undefined>();
+	// The debt request failed: the form stays blocked (it has no cap to check against) and says why.
+	let maxRepayUnavailable = $state(false);
 
 	// Repays already sent for this pool (any rail) that the protocol has not credited yet.
 	let pendingRepay = $derived(
@@ -88,11 +90,10 @@
 		const identity = $authIdentity;
 
 		if (nonNullish(identity) && nonNullish(selectedReserve)) {
-			const { asset, chain, poolId } = selectedReserve;
+			const { asset, chain } = selectedReserve;
 
 			inflowFee = undefined;
 			inflowFeeUnavailable = false;
-			maxRepay = undefined;
 
 			// Reserve data widens asset/chain to open strings; narrow to the SDK's strict types here.
 			estimateLiquidiumInflowFee({
@@ -105,11 +106,47 @@
 					consoleError(err);
 					inflowFeeUnavailable = true;
 				});
-
-			getLiquidiumMaxRepayAmount({ identity, ethAddress: $ethAddress, poolId })
-				.then((amount) => (maxRepay = amount ?? undefined))
-				.catch(consoleError);
 		}
+	});
+
+	$effect(() => {
+		const identity = $authIdentity;
+		const address = $ethAddress;
+
+		// Refetched whenever the pending total changes: a repay that settles stops counting as
+		// pending, so the cap has to come from the protocol's debt after it, not the one quoted
+		// before. Until the fresh value lands the form stays blocked.
+		[pendingRepay];
+
+		maxRepay = undefined;
+		maxRepayUnavailable = false;
+
+		if (isNullish(identity) || isNullish(address) || isNullish(selectedReserve)) {
+			return;
+		}
+
+		// A slower earlier request must not overwrite the refetched cap.
+		let cancelled = false;
+
+		getLiquidiumMaxRepayAmount({ identity, ethAddress: address, poolId: selectedReserve.poolId })
+			.then((amount) => {
+				if (!cancelled) {
+					maxRepay = amount ?? undefined;
+					// `null` means no Liquidium profile, which a position with debt always has.
+					maxRepayUnavailable = isNullish(amount);
+				}
+			})
+			.catch((err: unknown) => {
+				consoleError(err);
+
+				if (!cancelled) {
+					maxRepayUnavailable = true;
+				}
+			});
+
+		return () => {
+			cancelled = true;
+		};
 	});
 
 	let modal: WizardModal<WizardStepsLiquidiumRepay> | undefined = $state();
@@ -158,6 +195,7 @@
 		inflowFee = undefined;
 		inflowFeeUnavailable = false;
 		maxRepay = undefined;
+		maxRepayUnavailable = false;
 		repayProgressStep = ProgressStepsLiquidiumRepay.INITIALIZATION;
 		currentStep = undefined;
 		tokensListContext.resetFilters();
@@ -191,6 +229,7 @@
 					{inflowFee}
 					{inflowFeeUnavailable}
 					maxRepay={netMaxRepay}
+					{maxRepayUnavailable}
 					onBack={modal.back}
 					onClose={close}
 					onNext={modal.next}
@@ -207,6 +246,7 @@
 					{inflowFee}
 					{inflowFeeUnavailable}
 					maxRepay={netMaxRepay}
+					{maxRepayUnavailable}
 					onBack={modal.back}
 					onClose={close}
 					onNext={modal.next}
@@ -223,6 +263,7 @@
 					{inflowFee}
 					{inflowFeeUnavailable}
 					maxRepay={netMaxRepay}
+					{maxRepayUnavailable}
 					onBack={modal.back}
 					onClose={close}
 					onNext={modal.next}

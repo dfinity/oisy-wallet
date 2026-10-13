@@ -2719,6 +2719,7 @@
 			"debt_after_repay": "Dette après remboursement",
 			"repay_exceeds_debt": "Le montant dépasse votre dette impayée.",
 			"repay_prices_unavailable": "Les prix sont temporairement indisponibles. Le remboursement est désactivé jusqu'à leur chargement.",
+			"repay_debt_unavailable": "",
 			"repay_pending_covers_debt": ""
 		},
 		"info": {

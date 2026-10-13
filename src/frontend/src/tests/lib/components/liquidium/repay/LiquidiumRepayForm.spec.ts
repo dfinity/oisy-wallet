@@ -118,6 +118,26 @@ describe('LiquidiumRepayForm', () => {
 		expect(container).not.toHaveTextContent(en.liquidium.text.repay_prices_unavailable);
 	});
 
+	it('keeps the form disabled until the debt cap has loaded', () => {
+		const { container, getByTestId } = render(LiquidiumRepayForm, {
+			props: { ...baseProps, amount: 0.5, maxRepay: undefined },
+			context: mockContext()
+		});
+
+		expect(getByTestId(STAKE_FORM_REVIEW_BUTTON)).toHaveAttribute('disabled');
+		expect(container).not.toHaveTextContent(en.liquidium.text.repay_debt_unavailable);
+	});
+
+	it('says the debt is unavailable when the cap failed to load', () => {
+		const { container, getByTestId } = render(LiquidiumRepayForm, {
+			props: { ...baseProps, amount: 0.5, maxRepay: undefined, maxRepayUnavailable: true },
+			context: mockContext()
+		});
+
+		expect(container).toHaveTextContent(en.liquidium.text.repay_debt_unavailable);
+		expect(getByTestId(STAKE_FORM_REVIEW_BUTTON)).toHaveAttribute('disabled');
+	});
+
 	it('shows pending repays in the debt breakdown', () => {
 		const { container } = render(LiquidiumRepayForm, {
 			props: { ...baseProps, maxRepay: 50_000_000n, pendingRepay: 50_000_000n },

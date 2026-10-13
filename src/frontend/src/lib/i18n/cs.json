@@ -2719,6 +2719,7 @@
 			"debt_after_repay": "Dluh po splacení",
 			"repay_exceeds_debt": "Částka přesahuje tvůj nesplacený dluh.",
 			"repay_prices_unavailable": "Ceny jsou dočasně nedostupné. Splácení je deaktivováno, dokud se nenačtou.",
+			"repay_debt_unavailable": "",
 			"repay_pending_covers_debt": ""
 		},
 		"info": {

@@ -48,6 +48,7 @@
 		amount: OptionAmount;
 		repayProgressStep: string;
 		maxRepay?: bigint;
+		maxRepayUnavailable?: boolean;
 		// Net amount of this pool's repays still settling.
 		pendingRepay?: bigint;
 		inflowFee?: bigint;
@@ -65,6 +66,7 @@
 		amount = $bindable(),
 		repayProgressStep = $bindable(),
 		maxRepay,
+		maxRepayUnavailable,
 		pendingRepay = ZERO,
 		inflowFee,
 		inflowFeeUnavailable,
@@ -249,6 +251,7 @@
 			{inflowFee}
 			{inflowFeeUnavailable}
 			{maxRepay}
+			{maxRepayUnavailable}
 			{onClose}
 			onCustomErrorValidate={validateRepayAmount}
 			{onNext}

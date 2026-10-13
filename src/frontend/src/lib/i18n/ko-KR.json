@@ -2719,6 +2719,7 @@
 			"debt_after_repay": "상환 후 부채",
 			"repay_exceeds_debt": "금액이 미상환 부채를 초과합니다.",
 			"repay_prices_unavailable": "가격 정보를 일시적으로 사용할 수 없습니다. 로드될 때까지 상환이 비활성화됩니다.",
+			"repay_debt_unavailable": "",
 			"repay_pending_covers_debt": ""
 		},
 		"info": {

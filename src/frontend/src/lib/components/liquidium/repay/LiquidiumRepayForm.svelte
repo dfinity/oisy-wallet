@@ -22,6 +22,8 @@
 		amount: OptionAmount;
 		// Outstanding debt net of pending repays (base units) — caps the "Max" shortcut.
 		maxRepay?: bigint;
+		// The debt request failed, so there is no cap: surfaces a retry message (stays disabled).
+		maxRepayUnavailable?: boolean;
 		// Net amount of this pool's repays still settling.
 		pendingRepay?: bigint;
 		// Network (gas/UTXO) fee, for the Max shortcut + disabled gate.
@@ -46,6 +48,7 @@
 		preview,
 		amount = $bindable(),
 		maxRepay,
+		maxRepayUnavailable = false,
 		pendingRepay = ZERO,
 		totalFee,
 		inflowFee,
@@ -63,6 +66,8 @@
 
 	// Both fees must be resolved before the form can submit.
 	let feeMissing = $derived(isNullish(totalFee) || isNullish(inflowFee));
+	// So must the cap: without it nothing stops a repay above the debt, pending repays included.
+	let maxRepayMissing = $derived(isNullish(maxRepay));
 
 	// Pending repays already cover the whole debt: nothing is left to repay until they settle. The
 	// net cap rarely lands on exactly zero (interest accrued since the pending repay was quoted leaves
@@ -101,7 +106,7 @@
 
 <StakeForm
 	autofocus={isDesktop()}
-	disabled={feeMissing || inflowFeeUnavailable || pendingCoversDebt}
+	disabled={feeMissing || maxRepayMissing || inflowFeeUnavailable || pendingCoversDebt}
 	isSelectable={nonNullish(onSelectToken)}
 	maxAmount={maxRepay}
 	onClick={onSelectToken}
@@ -123,6 +128,12 @@
 		{#if pendingCoversDebt}
 			<MessageBox level="info" styleClass="mt-3">
 				{$i18n.liquidium.text.repay_pending_covers_debt}
+			</MessageBox>
+		{/if}
+
+		{#if maxRepayUnavailable}
+			<MessageBox level="warning" styleClass="mt-3">
+				{$i18n.liquidium.text.repay_debt_unavailable}
 			</MessageBox>
 		{/if}
 
