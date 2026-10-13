@@ -179,7 +179,8 @@ describe('AddressListItem', () => {
 		// Check that copyToClipboard was called with the correct arguments
 		expect(clipboardUtils.copyToClipboard).toHaveBeenCalledWith({
 			text: en.wallet.text.address_copied,
-			value: icrcAddress.address
+			value: icrcAddress.address,
+			withToast: false
 		});
 	});
 

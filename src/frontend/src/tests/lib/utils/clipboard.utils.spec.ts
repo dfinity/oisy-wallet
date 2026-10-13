@@ -49,6 +49,13 @@ describe('clipboard.utils', () => {
 			await expect(copyToClipboard({ value, text })).resolves.toBeTruthy();
 		});
 
+		it('should not show the success toast when the caller confirms the copy itself', async () => {
+			await expect(copyToClipboard({ value, text, withToast: false })).resolves.toBeTruthy();
+
+			expect(mockCopyText).toHaveBeenCalledExactlyOnceWith(value);
+			expect(spyToastsShow).not.toHaveBeenCalled();
+		});
+
 		it('should handle empty string', async () => {
 			await copyToClipboard({ value: '', text });
 

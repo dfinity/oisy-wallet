@@ -140,7 +140,8 @@ describe('AddressItemActions', () => {
 		// Check that copyToClipboard was called with the correct arguments
 		expect(clipboardUtils.copyToClipboard).toHaveBeenCalledWith({
 			text: en.wallet.text.address_copied,
-			value: mockAddress.address
+			value: mockAddress.address,
+			withToast: false
 		});
 	});
 
