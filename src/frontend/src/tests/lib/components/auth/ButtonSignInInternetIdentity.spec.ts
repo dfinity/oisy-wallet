@@ -50,6 +50,32 @@ describe('ButtonSignInInternetIdentity', () => {
 		expect(container.querySelector(selector)?.classList.contains('md:w-[200px]')).toBeTruthy();
 	});
 
+	it.each([
+		{ variant: 'login' as const, pressed: 'active:bg-brand-subtle-30' },
+		{ variant: 'lock' as const, pressed: 'active:bg-brand-tertiary' }
+	])('should shrink and darken while pressed in the $variant style', ({ variant, pressed }) => {
+		const { container } = render(ButtonSignInInternetIdentity, {
+			props: { onclick: vi.fn(), variant }
+		});
+
+		expect(container.querySelector(selector)).toHaveClass(
+			'active:scale-[0.96]',
+			'motion-reduce:active:scale-100',
+			pressed
+		);
+	});
+
+	it('should fill and outline on hover in the login style', () => {
+		const { container } = render(ButtonSignInInternetIdentity, {
+			props: { onclick: vi.fn() }
+		});
+
+		expect(container.querySelector(selector)).toHaveClass(
+			'hover:bg-brand-subtle-10',
+			'hover:border-brand-primary-alt'
+		);
+	});
+
 	it('should not cap the width when fullWidth is true', () => {
 		const { container } = render(ButtonSignInInternetIdentity, {
 			props: { onclick: vi.fn(), fullWidth: true }
