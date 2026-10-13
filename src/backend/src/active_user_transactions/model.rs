@@ -1668,11 +1668,19 @@ mod tests {
 
     #[test]
     fn lifi_zero_amount_rejected() {
+        // Every poll key is present, so the amount is the only thing wrong and
+        // the message names the check that refused it: without the poll keys,
+        // the create would fail on them even if the amount check were gone.
         let (mut map, _mm) = setup();
-        let mut req = create_req("lifi-1");
-        req.data = lifi_data(0, erc20(USDC_ETHEREUM, 1), TokenId::EvmNative(1));
+        let req = CreateActiveUserTransactionRequest {
+            data: lifi_data(0, erc20(USDC_ETHEREUM, 1), TokenId::EvmNative(1)),
+            ..lifi_req(erc20(USDC_ETHEREUM, 1), TokenId::EvmNative(1))
+        };
         let err = create(&mut map, principal(), req, 1).unwrap_err();
-        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("amount must be greater than zero".to_string())
+        );
     }
 
     #[test]
@@ -1896,13 +1904,23 @@ mod tests {
                     error: None,
                 };
 
-            for key in [LIFI_REF_TX_HASH, LIFI_REF_NONCE, LIFI_REF_BLOCKHASH] {
+            for (key, expected) in [
+                (LIFI_REF_TX_HASH, "lifi_tx_hash is required"),
+                (LIFI_REF_NONCE, "lifi_nonce is required for an EVM source"),
+                (
+                    LIFI_REF_BLOCKHASH,
+                    "lifi_blockhash is required for a Solana source",
+                ),
+            ] {
                 if !refs.iter().any(|r| r.key == key) {
                     continue;
                 }
                 let stripped = refs.iter().filter(|r| r.key != key).cloned().collect();
                 let err = update(&mut map, principal(), update_refs(stripped), 2).unwrap_err();
-                assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+                assert_eq!(
+                    err,
+                    ActiveUserTransactionError::InvalidData(expected.to_string())
+                );
             }
 
             // Learned refs merged onto the creation ones are accepted.
