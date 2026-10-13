@@ -156,7 +156,13 @@
 
 		// Review can outlive the cap (a repay that settles refetches it; a new pending one lowers
 		// it), so it is re-checked at the point of broadcast rather than trusted from the form.
-		const capError = liquidiumRepayCapError({ amount: parsedAmount, maxRepay, i18n: $i18n });
+		const capError = liquidiumRepayCapError({
+			amount: parsedAmount,
+			maxRepay,
+			pendingRepay,
+			reserve,
+			i18n: $i18n
+		});
 
 		if (nonNullish(capError)) {
 			toastsError({ msg: { text: capError.message } });

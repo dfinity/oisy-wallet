@@ -8,7 +8,11 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { lendBorrowProvidersConfig } from '$lib/config/lend-borrow.config';
-	import type { LiquidiumRepayPreview } from '$lib/services/liquidium-repay.services';
+	import { ZERO } from '$lib/constants/app.constants';
+	import {
+		liquidiumPendingCoversDebt,
+		type LiquidiumRepayPreview
+	} from '$lib/services/liquidium-repay.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { LendBorrowProvider } from '$lib/types/lend-borrow';
 	import type { LiquidiumReserve } from '$lib/types/liquidium';
@@ -42,7 +46,7 @@
 		preview,
 		maxRepay,
 		maxRepayUnavailable = false,
-		pendingRepay,
+		pendingRepay = ZERO,
 		inflowFee,
 		feeDisplay,
 		onBack,
@@ -58,6 +62,7 @@
 	// The cap can change under an open Review: a repay that settles clears and refetches it, a new
 	// pending one lowers it. Confirm is gated on it here; the wizard re-checks before broadcasting.
 	let capMissing = $derived(isNullish(maxRepay));
+	let pendingCoversDebt = $derived(liquidiumPendingCoversDebt({ pendingRepay, maxRepay, reserve }));
 	let exceedsCap = $derived(
 		nonNullish(maxRepay) && nonNullish(parsedAmount) && parsedAmount > maxRepay
 	);
@@ -66,7 +71,7 @@
 <StakeReview
 	actionButtonLabel={$i18n.liquidium.text.action_repay}
 	{amount}
-	disabled={capMissing || exceedsCap}
+	disabled={capMissing || pendingCoversDebt || exceedsCap}
 	{onBack}
 	{onConfirm}
 >
@@ -89,6 +94,10 @@
 		{#if maxRepayUnavailable}
 			<MessageBox level="warning" styleClass="mt-3">
 				{$i18n.liquidium.text.repay_debt_unavailable}
+			</MessageBox>
+		{:else if pendingCoversDebt}
+			<MessageBox level="info" styleClass="mt-3">
+				{$i18n.liquidium.text.repay_pending_covers_debt}
 			</MessageBox>
 		{:else if exceedsCap}
 			<MessageBox level="error" styleClass="mt-3">

@@ -99,4 +99,17 @@ describe('LiquidiumRepayReview', () => {
 		expect(getByTestId(STAKE_REVIEW_FORM_BUTTON)).toHaveAttribute('disabled');
 		expect(container).toHaveTextContent(en.liquidium.text.repay_exceeds_debt);
 	});
+
+	it('disables Confirm and says a repayment is still processing when pending repays cover the debt', () => {
+		const { getByTestId, container } = render(LiquidiumRepayReview, {
+			// 1.005 BTC pending ≥ 1 BTC principal + 0.005 BTC interest; the protocol buffer leaves a
+			// dust cap that the 100-sat amount fits, so the plain cap check alone would let it through.
+			props: { ...baseProps, amount: 0.000001, maxRepay: 150n, pendingRepay: 100_500_000n },
+			context: mockContext()
+		});
+
+		expect(getByTestId(STAKE_REVIEW_FORM_BUTTON)).toHaveAttribute('disabled');
+		expect(container).toHaveTextContent(en.liquidium.text.repay_pending_covers_debt);
+		expect(container).not.toHaveTextContent(en.liquidium.text.repay_exceeds_debt);
+	});
 });

@@ -79,23 +79,45 @@ export const computeLiquidiumRepayPreview = ({
 	})
 });
 
+// Pending repays already cover the whole debt: nothing is left to repay until they settle. The net
+// cap rarely lands on exactly zero (interest accrued since the pending repay was quoted leaves dust
+// that its own buffer already covers), so the debt itself is checked too. Shared by the form, the
+// Review step and the broadcast guard so every gate agrees on "nothing left to repay".
+export const liquidiumPendingCoversDebt = ({
+	pendingRepay,
+	maxRepay,
+	reserve
+}: {
+	pendingRepay: bigint;
+	maxRepay: bigint | undefined;
+	reserve: LiquidiumReserve;
+}): boolean =>
+	pendingRepay > ZERO &&
+	(maxRepay === ZERO || pendingRepay >= reserve.borrowed + (reserve.debtInterest ?? ZERO));
+
 // Why `amount` can no longer be repaid under the cap, or `undefined` when it can. Review can
 // outlive the cap it was entered under (a repay that settles clears and refetches it; a new pending
 // one lowers it), so the wizards re-check at the point of broadcast rather than trust the form.
 export const liquidiumRepayCapError = ({
 	amount,
 	maxRepay,
+	pendingRepay,
+	reserve,
 	i18n
 }: {
 	amount: bigint;
 	maxRepay: bigint | undefined;
+	pendingRepay: bigint;
+	reserve: LiquidiumReserve;
 	i18n: I18n;
 }): Error | undefined =>
 	isNullish(maxRepay)
 		? new Error(i18n.liquidium.text.repay_debt_unavailable)
-		: amount > maxRepay
-			? new Error(i18n.liquidium.text.repay_exceeds_debt)
-			: undefined;
+		: liquidiumPendingCoversDebt({ pendingRepay, maxRepay, reserve })
+			? new Error(i18n.liquidium.text.repay_pending_covers_debt)
+			: amount > maxRepay
+				? new Error(i18n.liquidium.text.repay_exceeds_debt)
+				: undefined;
 
 // Broadcasts `amount` base units (gross = repay + provider fee) to the native target and returns
 // the txid the AUT poller correlates on. Implemented by the wizard (per-chain fee/UTXO machinery).

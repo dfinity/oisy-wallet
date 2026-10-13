@@ -127,6 +127,33 @@ describe('LiquidiumRepayIcrcWizard', () => {
 		expect(executeSpy).not.toHaveBeenCalled();
 	});
 
+	it('does not broadcast when pending repays cover the debt on confirm', async () => {
+		const executeSpy = vi
+			.spyOn(liquidiumRepayServices, 'executeLiquidiumRepay')
+			.mockResolvedValue(undefined);
+
+		const onNext = vi.fn();
+
+		const { getByTestId } = render(LiquidiumRepayIcrcWizard, {
+			// 1 ICP pending covers the 1 ICP debt; the protocol buffer leaves a dust cap that the
+			// 100-e8s amount fits, so the plain cap check alone would let it through.
+			props: {
+				...baseProps,
+				amount: 0.000001,
+				maxRepay: 150n,
+				pendingRepay: 100_000_000n,
+				currentStep: step(WizardStepsLiquidiumRepay.REVIEW),
+				onNext
+			},
+			context: context()
+		});
+
+		await fireEvent.click(getByTestId(STAKE_REVIEW_FORM_BUTTON));
+
+		expect(onNext).not.toHaveBeenCalled();
+		expect(executeSpy).not.toHaveBeenCalled();
+	});
+
 	it('repays the ICP pool on confirm', async () => {
 		const executeSpy = vi
 			.spyOn(liquidiumRepayServices, 'executeLiquidiumRepay')
