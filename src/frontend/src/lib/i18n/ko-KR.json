@@ -1564,7 +1564,8 @@
 			"open_contract_address_block_explorer": "블록 탐색기에서 컨트랙트 주소 열기",
 			"open_token_address_block_explorer": "블록 탐색기에서 토큰 주소 열기",
 			"token_group_number": "네이티브 토큰 $token 그룹의 총 토큰 수",
-			"filter_button": "필터 열기/닫기"
+			"filter_button": "필터 열기/닫기",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "ERC20 컨트랙트 주소 입력",
