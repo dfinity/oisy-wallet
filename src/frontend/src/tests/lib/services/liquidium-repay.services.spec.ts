@@ -9,11 +9,13 @@ import {
 	computeLiquidiumRepayPreview,
 	executeLiquidiumRepay,
 	getLiquidiumMaxRepayAmount,
-	liquidiumDebtInterestUsd
+	liquidiumDebtInterestUsd,
+	liquidiumRepayCapError
 } from '$lib/services/liquidium-repay.services';
 import * as liquidiumServices from '$lib/services/liquidium.services';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { SupplyFlow, SupplyTarget } from '@liquidium/client';
 
@@ -79,6 +81,28 @@ describe('liquidium-repay.services', () => {
 			const preview = computeLiquidiumRepayPreview({ portfolio, repayUsd: 1_000 });
 
 			expect(preview.projectedHealthPercent).toBe(100);
+		});
+	});
+
+	describe('liquidiumRepayCapError', () => {
+		it('is undefined within the cap', () => {
+			expect(liquidiumRepayCapError({ amount: 50n, maxRepay: 100n, i18n: en })).toBeUndefined();
+		});
+
+		it('accepts exactly the cap', () => {
+			expect(liquidiumRepayCapError({ amount: 100n, maxRepay: 100n, i18n: en })).toBeUndefined();
+		});
+
+		it('flags an amount over the cap', () => {
+			expect(liquidiumRepayCapError({ amount: 101n, maxRepay: 100n, i18n: en })?.message).toBe(
+				en.liquidium.text.repay_exceeds_debt
+			);
+		});
+
+		it('flags a missing cap as unavailable', () => {
+			expect(liquidiumRepayCapError({ amount: 1n, maxRepay: undefined, i18n: en })?.message).toBe(
+				en.liquidium.text.repay_debt_unavailable
+			);
 		});
 	});
 

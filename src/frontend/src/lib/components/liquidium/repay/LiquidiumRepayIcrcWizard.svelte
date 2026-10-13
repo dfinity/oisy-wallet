@@ -16,7 +16,8 @@
 	import { WizardStepsLiquidiumRepay } from '$lib/enums/wizard-steps';
 	import {
 		computeLiquidiumRepayPreview,
-		executeLiquidiumRepay
+		executeLiquidiumRepay,
+		liquidiumRepayCapError
 	} from '$lib/services/liquidium-repay.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -108,6 +109,15 @@
 			return;
 		}
 
+		// Review can outlive the cap (a repay that settles refetches it; a new pending one lowers
+		// it), so it is re-checked at the point of broadcast rather than trusted from the form.
+		const capError = liquidiumRepayCapError({ amount: parsedAmount, maxRepay, i18n: $i18n });
+
+		if (nonNullish(capError)) {
+			toastsError({ msg: { text: capError.message } });
+			return;
+		}
+
 		// ICP-chain assets (ICP / ckBTC / ckUSDC / ckUSDT) settle on their ICRC ledger.
 		const ledgerCanisterId = LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS[reserve.asset];
 
@@ -173,6 +183,8 @@
 		{amount}
 		{feeDisplay}
 		{inflowFee}
+		{maxRepay}
+		{maxRepayUnavailable}
 		{onBack}
 		onConfirm={repay}
 		{pendingRepay}

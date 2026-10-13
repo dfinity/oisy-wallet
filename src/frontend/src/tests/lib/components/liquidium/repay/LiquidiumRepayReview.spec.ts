@@ -1,6 +1,7 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import LiquidiumRepayReview from '$lib/components/liquidium/repay/LiquidiumRepayReview.svelte';
 import { ZERO } from '$lib/constants/app.constants';
+import { STAKE_REVIEW_FORM_BUTTON } from '$lib/constants/test-ids.constants';
 import type { LiquidiumRepayPreview } from '$lib/services/liquidium-repay.services';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import type { LiquidiumReserve } from '$lib/types/liquidium';
@@ -37,6 +38,7 @@ describe('LiquidiumRepayReview', () => {
 		reserve,
 		amount: 0.5,
 		preview,
+		maxRepay: 100_000_000n,
 		inflowFee: 50n,
 		feeDisplay,
 		onBack: () => {},
@@ -55,5 +57,46 @@ describe('LiquidiumRepayReview', () => {
 		expect(container).toHaveTextContent(en.liquidium.text.debt_after_repay);
 		expect(container).toHaveTextContent(en.liquidium.text.projected_health_factor);
 		expect(container).toHaveTextContent(en.liquidium.text.provider_fee);
+	});
+
+	it('enables Confirm for an amount within the cap', () => {
+		const { getByTestId, container } = render(LiquidiumRepayReview, {
+			props: baseProps,
+			context: mockContext()
+		});
+
+		expect(getByTestId(STAKE_REVIEW_FORM_BUTTON)).not.toHaveAttribute('disabled');
+		expect(container).not.toHaveTextContent(en.liquidium.text.repay_exceeds_debt);
+	});
+
+	it('disables Confirm while the cap is loading', () => {
+		const { getByTestId, container } = render(LiquidiumRepayReview, {
+			props: { ...baseProps, maxRepay: undefined },
+			context: mockContext()
+		});
+
+		expect(getByTestId(STAKE_REVIEW_FORM_BUTTON)).toHaveAttribute('disabled');
+		expect(container).not.toHaveTextContent(en.liquidium.text.repay_debt_unavailable);
+	});
+
+	it('disables Confirm and says the debt is unavailable when the cap failed to load', () => {
+		const { getByTestId, container } = render(LiquidiumRepayReview, {
+			props: { ...baseProps, maxRepay: undefined, maxRepayUnavailable: true },
+			context: mockContext()
+		});
+
+		expect(getByTestId(STAKE_REVIEW_FORM_BUTTON)).toHaveAttribute('disabled');
+		expect(container).toHaveTextContent(en.liquidium.text.repay_debt_unavailable);
+	});
+
+	it('disables Confirm and flags an amount over the cap', () => {
+		const { getByTestId, container } = render(LiquidiumRepayReview, {
+			// 2 BTC against a 1 BTC cap: the cap dropped under an open Review.
+			props: { ...baseProps, amount: 2 },
+			context: mockContext()
+		});
+
+		expect(getByTestId(STAKE_REVIEW_FORM_BUTTON)).toHaveAttribute('disabled');
+		expect(container).toHaveTextContent(en.liquidium.text.repay_exceeds_debt);
 	});
 });

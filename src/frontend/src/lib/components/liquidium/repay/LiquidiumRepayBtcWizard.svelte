@@ -30,7 +30,8 @@
 	import { WizardStepsLiquidiumRepay } from '$lib/enums/wizard-steps';
 	import {
 		computeLiquidiumRepayPreview,
-		executeLiquidiumRepay
+		executeLiquidiumRepay,
+		liquidiumRepayCapError
 	} from '$lib/services/liquidium-repay.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -153,6 +154,15 @@
 			return;
 		}
 
+		// Review can outlive the cap (a repay that settles refetches it; a new pending one lowers
+		// it), so it is re-checked at the point of broadcast rather than trusted from the form.
+		const capError = liquidiumRepayCapError({ amount: parsedAmount, maxRepay, i18n: $i18n });
+
+		if (nonNullish(capError)) {
+			toastsError({ msg: { text: capError.message } });
+			return;
+		}
+
 		// A failed UTXO selection (error or empty set) cannot fund the broadcast — e.g.
 		// the balance is only in unconfirmed UTXOs — and the signer would reject it.
 		if (isInvalidUtxosFee(utxosFee)) {
@@ -237,6 +247,8 @@
 			{amount}
 			{feeDisplay}
 			{inflowFee}
+			{maxRepay}
+			{maxRepayUnavailable}
 			{onBack}
 			onConfirm={repay}
 			{pendingRepay}

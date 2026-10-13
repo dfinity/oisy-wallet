@@ -102,6 +102,31 @@ describe('LiquidiumRepayIcrcWizard', () => {
 		expect(container).toHaveTextContent(en.liquidium.text.starting_to_repay);
 	});
 
+	it('does not broadcast an amount over the cap on confirm', async () => {
+		const executeSpy = vi
+			.spyOn(liquidiumRepayServices, 'executeLiquidiumRepay')
+			.mockResolvedValue(undefined);
+
+		const onNext = vi.fn();
+
+		const { getByTestId } = render(LiquidiumRepayIcrcWizard, {
+			// 1 ICP against a 0.5 ICP cap: the cap dropped under an open Review.
+			props: {
+				...baseProps,
+				maxRepay: 50_000_000n,
+				currentStep: step(WizardStepsLiquidiumRepay.REVIEW),
+				onNext
+			},
+			context: context()
+		});
+
+		await fireEvent.click(getByTestId(STAKE_REVIEW_FORM_BUTTON));
+
+		// The happy path calls `onNext` synchronously before awaiting the broadcast.
+		expect(onNext).not.toHaveBeenCalled();
+		expect(executeSpy).not.toHaveBeenCalled();
+	});
+
 	it('repays the ICP pool on confirm', async () => {
 		const executeSpy = vi
 			.spyOn(liquidiumRepayServices, 'executeLiquidiumRepay')

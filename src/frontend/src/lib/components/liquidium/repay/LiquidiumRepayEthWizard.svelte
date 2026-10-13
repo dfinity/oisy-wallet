@@ -28,7 +28,8 @@
 	import { WizardStepsLiquidiumRepay } from '$lib/enums/wizard-steps';
 	import {
 		computeLiquidiumRepayPreview,
-		executeLiquidiumRepay
+		executeLiquidiumRepay,
+		liquidiumRepayCapError
 	} from '$lib/services/liquidium-repay.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -191,6 +192,15 @@
 			return;
 		}
 
+		// Review can outlive the cap (a repay that settles refetches it; a new pending one lowers
+		// it), so it is re-checked at the point of broadcast rather than trusted from the form.
+		const capError = liquidiumRepayCapError({ amount: parsedAmount, maxRepay, i18n: $i18n });
+
+		if (nonNullish(capError)) {
+			toastsError({ msg: { text: capError.message } });
+			return;
+		}
+
 		const { maxFeePerGas, maxPriorityFeePerGas, gas } = $feeStore;
 
 		if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
@@ -263,6 +273,8 @@
 				{amount}
 				{feeDisplay}
 				{inflowFee}
+				{maxRepay}
+				{maxRepayUnavailable}
 				{onBack}
 				onConfirm={repay}
 				{pendingRepay}

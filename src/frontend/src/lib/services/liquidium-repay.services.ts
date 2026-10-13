@@ -79,6 +79,24 @@ export const computeLiquidiumRepayPreview = ({
 	})
 });
 
+// Why `amount` can no longer be repaid under the cap, or `undefined` when it can. Review can
+// outlive the cap it was entered under (a repay that settles clears and refetches it; a new pending
+// one lowers it), so the wizards re-check at the point of broadcast rather than trust the form.
+export const liquidiumRepayCapError = ({
+	amount,
+	maxRepay,
+	i18n
+}: {
+	amount: bigint;
+	maxRepay: bigint | undefined;
+	i18n: I18n;
+}): Error | undefined =>
+	isNullish(maxRepay)
+		? new Error(i18n.liquidium.text.repay_debt_unavailable)
+		: amount > maxRepay
+			? new Error(i18n.liquidium.text.repay_exceeds_debt)
+			: undefined;
+
 // Broadcasts `amount` base units (gross = repay + provider fee) to the native target and returns
 // the txid the AUT poller correlates on. Implemented by the wizard (per-chain fee/UTXO machinery).
 export type LiquidiumRepayBroadcast = (params: {

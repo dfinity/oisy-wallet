@@ -1,7 +1,10 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
 import LiquidiumRepayModal from '$lib/components/liquidium/repay/LiquidiumRepayModal.svelte';
 import { ZERO } from '$lib/constants/app.constants';
-import { STAKE_FORM_REVIEW_BUTTON } from '$lib/constants/test-ids.constants';
+import {
+	STAKE_FORM_REVIEW_BUTTON,
+	STAKE_REVIEW_FORM_BUTTON
+} from '$lib/constants/test-ids.constants';
 import * as addressesStore from '$lib/derived/address.derived';
 import * as liquidiumRepayServices from '$lib/services/liquidium-repay.services';
 import * as liquidiumSupplyServices from '$lib/services/liquidium-supply.services';
@@ -154,6 +157,33 @@ describe('LiquidiumRepayModal', () => {
 		await runResolvedPromises();
 
 		expect(getByTestId(STAKE_FORM_REVIEW_BUTTON)).toHaveAttribute('disabled');
+	});
+
+	// The refetch is left pending so the gap it opens on an already-open Review is observable.
+	it('disables Confirm on Review while a settled repay refreshes the cap', async () => {
+		maxRepaySpy.mockResolvedValueOnce(100_000_000n).mockReturnValue(new Promise(() => undefined));
+
+		const { getByPlaceholderText, getByTestId } = render(LiquidiumRepayModal, {
+			props: { reserve }
+		});
+
+		await waitFor(() => expect(maxRepaySpy).toHaveBeenCalledOnce());
+
+		await fireEvent.input(getByPlaceholderText('0'), { target: { value: '0.25' } });
+		await waitFor(() =>
+			expect(getByTestId(STAKE_FORM_REVIEW_BUTTON)).not.toHaveAttribute('disabled')
+		);
+
+		await fireEvent.click(getByTestId(STAKE_FORM_REVIEW_BUTTON));
+		await waitFor(() =>
+			expect(getByTestId(STAKE_REVIEW_FORM_BUTTON)).not.toHaveAttribute('disabled')
+		);
+
+		activeUserTransactionsStore.upsert({
+			transaction: { ...pendingRepay, status: { Succeeded: null } }
+		});
+
+		await waitFor(() => expect(getByTestId(STAKE_REVIEW_FORM_BUTTON)).toHaveAttribute('disabled'));
 	});
 
 	it('says the debt is unavailable when the max request fails', async () => {
