@@ -1,6 +1,10 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
 import { liquidiumClient } from '$lib/api/liquidium.api';
-import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
+import { LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS } from '$lib/constants/liquidium.constants';
+import {
+	applyActiveUserTransactionPollUpdate,
+	deleteActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
@@ -13,6 +17,42 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { ActivityFilter, type Activity, type LiquidiumClient } from '@liquidium/client';
 import { get } from 'svelte/store';
+
+/**
+ * How many ticks each repay row has been seen without its txid. In memory, like
+ * `cycles-mint-active-tx.services`: a refresh restarts the count, which only ever delays the
+ * cleanup.
+ */
+const repayTxidObservations = new Map<string, number>();
+
+// Test seam — module-level state would otherwise leak between cases.
+export const resetLiquidiumRepayTxidObservations = (): void => {
+	repayTxidObservations.clear();
+};
+
+// A repay records its row before the broadcast and adds the txid after it (see
+// `executeLiquidiumRepay`). Nothing can poll a row without one, and it would lower the repay max
+// for good, so once it has gone without one for the grace period it is deleted, as the repay
+// deletes the row of a broadcast that failed.
+const dropRepayWithoutTxid = async ({
+	tx,
+	identity
+}: {
+	tx: ActiveUserTransaction;
+	identity: Identity;
+}): Promise<void> => {
+	const count = (repayTxidObservations.get(tx.id) ?? 0) + 1;
+
+	if (count < LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS) {
+		repayTxidObservations.set(tx.id, count);
+		return;
+	}
+
+	// A failed delete leaves the count where it was, so the next tick tries again.
+	await deleteActiveUserTransaction({ identity, id: tx.id });
+
+	repayTxidObservations.delete(tx.id);
+};
 
 // Bridges `0x`/case differences between oisy's broadcast hash and the SDK's txid.
 const normalizeTxid = (value: string): string => value.toLowerCase().replace(/^0x/, '');
@@ -58,6 +98,13 @@ const pollLiquidiumActiveUserTransaction = async ({
 		const profileId = refs[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID];
 		const txid = refs[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID];
 		const outflowId = refs[LIQUIDIUM_EXTERNAL_REF_KEYS.OUTFLOW_ID];
+
+		if (isNullish(txid) && 'Liquidium' in tx.data && 'Repay' in tx.data.Liquidium.action) {
+			await dropRepayWithoutTxid({ tx, identity });
+			return;
+		}
+
+		repayTxidObservations.delete(tx.id);
 
 		// Not pollable without a profile and either a txid or an outflow id.
 		if (isNullish(profileId) || (isNullish(txid) && isNullish(outflowId))) {

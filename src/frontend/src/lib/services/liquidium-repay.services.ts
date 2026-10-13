@@ -3,12 +3,19 @@ import { liquidiumClient } from '$lib/api/liquidium.api';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsLiquidiumRepay } from '$lib/enums/progress-steps';
-import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
+import {
+	createActiveUserTransaction,
+	deleteActiveUserTransaction,
+	updateActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
 import { getOrCreateLiquidiumProfile } from '$lib/services/liquidium.services';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
-import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
+import {
+	LIQUIDIUM_EXTERNAL_REF_KEYS,
+	type LiquidiumExternalRefKey
+} from '$lib/types/liquidium-active-tx';
 import { consoleError } from '$lib/utils/console.utils';
 import {
 	liquidiumTrackingMetadata,
@@ -126,12 +133,12 @@ export type LiquidiumRepayBroadcast = (params: {
 	amount: bigint;
 }) => Promise<string>;
 
-// Repays `amount` (base units) of `asset`'s debt: resolve profile → broadcast the transfer →
-// record an AUT so the modal can close before settlement. Repaying is an inflow on the supply
-// path (`SupplyAction.repayment`), so this mirrors `executeLiquidiumSupply` exactly — we drive
-// the transfer rail and broadcast to the flat `SupplyTarget` address, and the protocol deducts
-// its inflow fee from the inflow, so we transfer `amount + inflowFee` to credit the net `amount`
-// against the debt.
+// Repays `amount` (base units) of `asset`'s debt: resolve profile → record an AUT → broadcast the
+// transfer → add its txid to the AUT, so the modal can close before settlement. Repaying is an
+// inflow on the supply path (`SupplyAction.repayment`), so this mirrors `executeLiquidiumSupply`
+// except for when the AUT is recorded — we drive the transfer rail and broadcast to the flat
+// `SupplyTarget` address, and the protocol deducts its inflow fee from the inflow, so we transfer
+// `amount + inflowFee` to credit the net `amount` against the debt.
 export const executeLiquidiumRepay = async ({
 	identity,
 	ethAddress,
@@ -170,8 +177,61 @@ export const executeLiquidiumRepay = async ({
 
 	progress?.(ProgressStepsLiquidiumRepay.TRANSFER);
 
-	// Gross transfer = net repayment + provider inflow fee (deducted on arrival).
-	const txid = await broadcast({ target: flow.target, amount: amount + inflowFee });
+	const id = crypto.randomUUID();
+
+	const refs: Partial<Record<LiquidiumExternalRefKey, string>> = {
+		[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
+		[LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT]: displayAmount,
+		[LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL]: asset
+	};
+
+	// For a row whose repay sent nothing: until it is gone it counts as a pending repay and lowers
+	// the repay max. Best-effort, because a row a failed delete leaves behind never gets a txid, and
+	// the poller drops it once the grace period for one is over.
+	const deleteRow = async () => {
+		try {
+			await deleteActiveUserTransaction({ identity, id });
+		} catch (err: unknown) {
+			consoleError(err);
+		}
+	};
+
+	// Before the broadcast: the row is what nets this repay out of the repay max until it settles,
+	// so a repay that cannot be recorded is not sent. Sent anyway, nothing would count it, and a
+	// second full repay could reach Liquidium with no debt left to apply it to.
+	try {
+		await createActiveUserTransaction({
+			identity,
+			id,
+			data: {
+				Liquidium: {
+					token: liquidiumAssetTokenId(asset),
+					action: { Repay: null },
+					pool_id: poolId,
+					amount
+				}
+			},
+			...(nonNullish(progressStep) ? { progressStep } : {}),
+			externalRefs: toLiquidiumExternalRefs(refs)
+		});
+	} catch (err: unknown) {
+		// The backend may have committed the row all the same, if only its answer was lost.
+		await deleteRow();
+
+		throw err;
+	}
+
+	let txid: string;
+
+	try {
+		// Gross transfer = net repayment + provider inflow fee (deducted on arrival).
+		txid = await broadcast({ target: flow.target, amount: amount + inflowFee });
+	} catch (err: unknown) {
+		// Taken as not sent, as the wizard reports it.
+		await deleteRow();
+
+		throw err;
+	}
 
 	// Submitted on-chain; success/error events fire from the AUT poller once it settles.
 	trackEvent({
@@ -185,36 +245,29 @@ export const executeLiquidiumRepay = async ({
 
 	progress?.(ProgressStepsLiquidiumRepay.REGISTER);
 
-	// Point of no return: the SDK submit (a txid indexing hint) and the AUT row are both
+	// Point of no return: the txid write and the SDK submit (a txid indexing hint) are both
 	// best-effort and independent (each its own try/catch). Neither fails the repay: the protocol
 	// detects the inflow on-chain regardless and positions self-heal from `client.positions`
 	// (mirrors the Supply flow).
+	//
+	// The txid first: it is what the poller correlates the row on, and a row still without one once
+	// the grace period is over is dropped. `external_refs` is replaced wholesale, so the other refs
+	// go along again.
 	try {
-		await flow.submit({ txid });
+		await updateActiveUserTransaction({
+			identity,
+			id,
+			externalRefs: toLiquidiumExternalRefs({
+				...refs,
+				[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid
+			})
+		});
 	} catch (err: unknown) {
 		consoleError(err);
 	}
 
 	try {
-		await createActiveUserTransaction({
-			identity,
-			id: crypto.randomUUID(),
-			data: {
-				Liquidium: {
-					token: liquidiumAssetTokenId(asset),
-					action: { Repay: null },
-					pool_id: poolId,
-					amount
-				}
-			},
-			...(nonNullish(progressStep) ? { progressStep } : {}),
-			externalRefs: toLiquidiumExternalRefs({
-				[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
-				[LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT]: displayAmount,
-				[LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL]: asset,
-				[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid
-			})
-		});
+		await flow.submit({ txid });
 	} catch (err: unknown) {
 		consoleError(err);
 	}
