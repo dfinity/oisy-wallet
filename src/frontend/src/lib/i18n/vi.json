@@ -514,6 +514,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"minglechat": {
+				"name": "Mingle Chat",
+				"one_liner": "Nhắn tin mã hóa, tích hợp sẵn token.",
+				"description": "Mingle Chat là ứng dụng nhắn tin mã hóa đầu cuối chạy hoàn toàn trên Internet Computer. Trò chuyện riêng hoặc theo nhóm, chia sẻ tin nhắn thoại, hình ảnh và tệp, và gửi token ngay trong cuộc trò chuyện. Mọi giao dịch chuyển đều được ký trong OISY."
 			}
 		}
 	},

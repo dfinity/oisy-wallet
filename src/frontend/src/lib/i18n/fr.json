@@ -514,6 +514,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"minglechat": {
+				"name": "Mingle Chat",
+				"one_liner": "Messagerie chiffrée avec jetons intégrés.",
+				"description": "Mingle Chat est une messagerie chiffrée de bout en bout qui fonctionne entièrement sur l'Internet Computer. Discutez en tête-à-tête ou en groupe, partagez des messages vocaux, des images et des fichiers, et envoyez des jetons directement depuis une conversation. Chaque transfert est signé dans OISY."
 			}
 		}
 	},

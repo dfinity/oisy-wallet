@@ -514,6 +514,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"minglechat": {
+				"name": "Mingle Chat",
+				"one_liner": "Mensagens criptografadas com tokens integrados.",
+				"description": "Mingle Chat é um mensageiro com criptografia de ponta a ponta que funciona inteiramente no Internet Computer. Converse a dois ou em grupo, compartilhe mensagens de voz, imagens e arquivos e envie tokens diretamente de uma conversa. Cada transferência é assinada no OISY."
 			}
 		}
 	},

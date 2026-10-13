@@ -514,6 +514,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"minglechat": {
+				"name": "Mingle Chat",
+				"one_liner": "トークン送信を備えた暗号化メッセンジャー。",
+				"description": "Mingle Chat は、Internet Computer 上で完全に動作するエンドツーエンド暗号化メッセンジャーです。1対1やグループでのチャット、ボイスメッセージ・画像・ファイルの共有に加え、会話の中から直接トークンを送ることができます。すべての送金は OISY で署名されます。"
 			}
 		}
 	},
