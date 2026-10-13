@@ -2714,13 +2714,13 @@
 			"starting_to_repay": "Отправка твоего погашения…",
 			"repay_started": "Твоё погашение сейчас обрабатывается.",
 			"current_debt": "Текущий долг",
-			"pending_repays": "",
+			"pending_repays": "Погашения в обработке",
 			"interest_accrued": "Начисленные проценты",
 			"debt_after_repay": "Долг после погашения",
 			"repay_exceeds_debt": "Сумма превышает твой непогашенный долг.",
 			"repay_prices_unavailable": "Цены временно недоступны. Погашение отключено, пока они не загрузятся.",
-			"repay_debt_unavailable": "",
-			"repay_pending_covers_debt": ""
+			"repay_debt_unavailable": "Твой непогашенный долг временно недоступен. Погашение отключено, пока он не загрузится.",
+			"repay_pending_covers_debt": "Погашение по этой позиции ещё обрабатывается. Ты сможешь погасить больше, когда оно завершится."
 		},
 		"info": {
 			"title": "Что такое Liquidium",

@@ -2714,13 +2714,13 @@
 			"starting_to_repay": "正在提交您的还款…",
 			"repay_started": "您的还款正在处理中。",
 			"current_debt": "当前债务",
-			"pending_repays": "",
+			"pending_repays": "处理中的还款",
 			"interest_accrued": "累计利息",
 			"debt_after_repay": "还款后债务",
 			"repay_exceeds_debt": "金额超过您的未偿债务。",
 			"repay_prices_unavailable": "价格暂时不可用。加载完成前，还款功能已禁用。",
-			"repay_debt_unavailable": "",
-			"repay_pending_covers_debt": ""
+			"repay_debt_unavailable": "您的未偿债务暂时不可用。加载完成前，还款功能已禁用。",
+			"repay_pending_covers_debt": "此仓位的一笔还款仍在处理中。完成后您可以继续还款。"
 		},
 		"info": {
 			"title": "什么是 Liquidium",
