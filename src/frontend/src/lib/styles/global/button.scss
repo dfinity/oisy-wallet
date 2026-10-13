@@ -14,7 +14,8 @@ a.as-button {
 	transition:
 		color 0.25s ease-out,
 		background 0.25s ease-out,
-		opacity 0.25s ease-out;
+		opacity 0.25s ease-out,
+		scale 0.15s ease-out;
 
 	border: 1px solid transparent;
 
@@ -90,6 +91,27 @@ a.as-button {
 				box-shadow: none;
 			}
 		}
+	}
+
+	// PRESS
+	// Text links stay still; icon buttons press in their link style too.
+	&.primary,
+	&.secondary,
+	&.secondary-light,
+	&.tertiary,
+	&.tertiary-alt,
+	&.tertiary-main-card,
+	&.muted,
+	&.success,
+	&.success-light,
+	&.error {
+		&:not(.link) {
+			@include button.press;
+		}
+	}
+
+	&.icon {
+		@include button.press;
 	}
 
 	// PRIMARY

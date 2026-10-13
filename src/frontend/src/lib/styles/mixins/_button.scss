@@ -1,3 +1,14 @@
+// Shrinks the button slightly while it is held. A transition rather than a keyframe,
+// so letting go mid-press eases back instead of snapping. The opt-out class is not
+// `static` because Tailwind already owns that name (`position: static`).
+@mixin press {
+	@media (prefers-reduced-motion: no-preference) {
+		&:active:not([disabled]):not(.disabled):not(.loading):not(.no-press) {
+			scale: 0.96;
+		}
+	}
+}
+
 @mixin icon {
 	span {
 		/*

@@ -221,6 +221,21 @@ layer and let the service own caching.
   [HACKING.md "Routes Styles"](../../../HACKING.md#routes-styles) are the
   preferred way to set route-specific colours.
 
+## Press feedback
+
+Every styled `Button` (any `colorStyle`, unless `link`) and every
+`ButtonIcon` shrinks to `scale: 0.96` while held
+(`lib/styles/mixins/_button.scss` `press`). Don't add your own
+`active:scale-*` to them.
+
+- Opt out with the `static` prop where motion would distract, e.g. a
+  button used only as a double-click target. It sets the `no-press`
+  class, because `static` is a Tailwind utility (`position: static`).
+- A Tailwind `transition-*` utility on a button replaces the base
+  transition, which carries `scale`. Use `transition-[...]` with `scale`
+  in the list if you need to change it.
+- Disabled, loading and reduced-motion states never scale.
+
 ## Icons
 
 The codebase uses several icon sources (Lucide, Tabler, Iconly, custom
