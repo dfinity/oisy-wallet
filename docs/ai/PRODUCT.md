@@ -64,6 +64,11 @@ Where it applies:
   the token and NFT settings menus) take the pressed fill. An expanded token group's header
   opens and closes the whole card, so hovering it outlines the whole card, sub-tokens
   included; a fill would not do, since on the white card the row hover is the page colour.
+- **Navigation.** In the desktop sidebar and the menus, a pressed entry darkens one step past
+  its hover and selected colour. On the mobile bar, a pressed entry's icon and label shrink
+  slightly (Finance shrinks its circle) with **no** colour change, so grey still means only
+  that a sheet is open and blue only the current page. The cards in the mobile group sheets
+  press like buttons.
 
 ---
 

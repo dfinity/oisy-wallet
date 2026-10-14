@@ -1,4 +1,5 @@
 @use '../mixins/media';
+@use '../mixins/interaction';
 @use '../theme/base-colors.scss';
 
 a.no-underline {
@@ -30,17 +31,23 @@ button.nav-item:not([disabled]):not(.disabled):not(.loading) {
 	@apply text-left;
 	@apply no-underline;
 	@apply transition-colors;
-	@apply duration-700;
+	@apply duration-150;
+	@apply ease-out;
 
-	&:hover,
+	@include interaction.hover {
+		@apply text-brand-primary-alt;
+		@apply bg-brand-subtle-10;
+	}
+
 	&.selected {
 		@apply text-brand-primary-alt;
 		@apply bg-brand-subtle-10;
 	}
 
+	// One step darker than hover and selected, so a press always shows.
 	&:active {
 		@apply text-brand-primary-alt;
-		@apply bg-brand-subtle-10;
+		@apply bg-brand-subtle-20;
 	}
 
 	&[focus],
@@ -106,6 +113,21 @@ div.mobile-nav {
 
 		&.selected {
 			@apply text-brand-primary-alt;
+		}
+	}
+
+	// Press: the icon and label shrink, not the entry, so nothing positioned against the bar
+	// moves; and no colour, so grey keeps meaning "sheet open" and blue "current page".
+	a.nav-item,
+	button.nav-item {
+		> * {
+			transition: scale 0.15s ease-out;
+		}
+
+		@media (prefers-reduced-motion: no-preference) {
+			&:active:not([disabled]):not(.disabled) > * {
+				scale: 0.96;
+			}
 		}
 	}
 }
