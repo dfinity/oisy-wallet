@@ -424,6 +424,32 @@ describe('liquidium-active-tx.services', () => {
 			expect(deleteTx).not.toHaveBeenCalled();
 		});
 
+		// A broadcast still pending in another tab renews the row; this tab's copy never sees it.
+		it("keeps a row the backend shows written since this tab's copy", async () => {
+			reload.mockResolvedValue({ ...repayWithoutTxid, updated_at_ns: 1n });
+
+			await pollTicks({ tx: repayWithoutTxid, ticks: LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS });
+
+			expect(reload).toHaveBeenCalledOnce();
+			expect(deleteTx).not.toHaveBeenCalled();
+		});
+
+		// A lease renewal from the broadcast pending in this tab reaches its own store.
+		it('restarts the count when the row is written', async () => {
+			const renewed = { ...repayWithoutTxid, updated_at_ns: 1n };
+
+			reload.mockResolvedValue(renewed);
+
+			await pollTicks({ tx: repayWithoutTxid, ticks: LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS - 1 });
+			await pollTicks({ tx: renewed, ticks: LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS - 1 });
+
+			expect(reload).not.toHaveBeenCalled();
+
+			await poll(renewed);
+
+			expect(deleteTx).toHaveBeenCalledOnce();
+		});
+
 		it('restarts the grace period for a stale copy that was reconciled', async () => {
 			reload.mockResolvedValueOnce(repayWithTxid);
 

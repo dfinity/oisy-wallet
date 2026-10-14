@@ -2,6 +2,7 @@ import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import { liquidiumClient } from '$lib/api/liquidium.api';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
+import { LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS } from '$lib/constants/liquidium.constants';
 import { ProgressStepsLiquidiumRepay } from '$lib/enums/progress-steps';
 import {
 	createActiveUserTransaction,
@@ -187,7 +188,7 @@ export const executeLiquidiumRepay = async ({
 
 	// For a row whose repay sent nothing: until it is gone it counts as a pending repay and lowers
 	// the repay max. Best-effort, because a row a failed delete leaves behind never gets a txid, and
-	// the poller drops it once the grace period for one is over.
+	// the poller drops it once nobody has written it for the grace period.
 	const deleteRow = async () => {
 		try {
 			await deleteActiveUserTransaction({ identity, id });
@@ -221,17 +222,35 @@ export const executeLiquidiumRepay = async ({
 		throw err;
 	}
 
+	// The poller drops a row without a txid that nobody has written for its grace period, and a
+	// broadcast can outlast that (a BTC send awaits a canister call with no deadline). A write with
+	// no fields still moves the row's `updated_at_ns`, which is what the poller watches, here and in
+	// any other tab.
+	const renewLease = async () => {
+		try {
+			await updateActiveUserTransaction({ identity, id });
+		} catch (err: unknown) {
+			consoleError(err);
+		}
+	};
+
+	const lease = setInterval(renewLease, LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS);
+
 	let txid: string;
 
 	try {
 		// Gross transfer = net repayment + provider inflow fee (deducted on arrival).
 		txid = await broadcast({ target: flow.target, amount: amount + inflowFee });
 	} catch (err: unknown) {
+		clearInterval(lease);
+
 		// Taken as not sent, as the wizard reports it.
 		await deleteRow();
 
 		throw err;
 	}
+
+	clearInterval(lease);
 
 	// Submitted on-chain; success/error events fire from the AUT poller once it settles.
 	trackEvent({

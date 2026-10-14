@@ -2,6 +2,7 @@ import type { EthAddress } from '$eth/types/address';
 import * as liquidiumApi from '$lib/api/liquidium.api';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
+import { LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS } from '$lib/constants/liquidium.constants';
 import { ProgressStepsLiquidiumRepay } from '$lib/enums/progress-steps';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import * as analyticsServices from '$lib/services/analytics.services';
@@ -381,6 +382,91 @@ describe('liquidium-repay.services', () => {
 			deleteActiveUserTransaction.mockRejectedValueOnce(new Error('backend unavailable'));
 
 			await expect(run()).rejects.toThrow('insufficient funds');
+		});
+
+		describe('while the broadcast is pending', () => {
+			beforeEach(() => {
+				vi.useFakeTimers();
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			const pendingBroadcast = () => {
+				let settle: { resolve: (txid: string) => void; reject: (err: Error) => void } = {
+					resolve: () => {},
+					reject: () => {}
+				};
+
+				broadcast.mockReturnValueOnce(
+					new Promise<string>((resolve, reject) => {
+						settle = { resolve, reject };
+					})
+				);
+
+				return () => settle;
+			};
+
+			it('renews the AUT, and stops once the transfer is sent', async () => {
+				supply.mockResolvedValue(buildFlow(nativeTarget));
+				const settle = pendingBroadcast();
+
+				const repaid = run();
+
+				await vi.advanceTimersByTimeAsync(LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS * 2);
+
+				const [[{ id }]] = createActiveUserTransaction.mock.calls;
+
+				// A write with nothing in it, so it cannot clobber the row's refs or status.
+				expect(updateActiveUserTransaction).toHaveBeenCalledTimes(2);
+				expect(updateActiveUserTransaction).toHaveBeenNthCalledWith(1, {
+					identity: mockIdentity,
+					id
+				});
+
+				settle().resolve('0xhash');
+				await repaid;
+
+				// + the txid write.
+				expect(updateActiveUserTransaction).toHaveBeenCalledTimes(3);
+
+				await vi.advanceTimersByTimeAsync(LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS * 2);
+
+				expect(updateActiveUserTransaction).toHaveBeenCalledTimes(3);
+			});
+
+			it('stops renewing the AUT once the broadcast fails', async () => {
+				supply.mockResolvedValue(buildFlow(nativeTarget));
+				const settle = pendingBroadcast();
+
+				const repaid = run();
+
+				await vi.advanceTimersByTimeAsync(LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS);
+
+				settle().reject(new Error('insufficient funds'));
+
+				await expect(repaid).rejects.toThrow('insufficient funds');
+
+				await vi.advanceTimersByTimeAsync(LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS * 2);
+
+				expect(updateActiveUserTransaction).toHaveBeenCalledOnce();
+				expect(deleteActiveUserTransaction).toHaveBeenCalledOnce();
+			});
+
+			it('keeps the repay going when a renewal fails', async () => {
+				supply.mockResolvedValue(buildFlow(nativeTarget));
+				updateActiveUserTransaction.mockRejectedValueOnce(new Error('backend unavailable'));
+				const settle = pendingBroadcast();
+
+				const repaid = run();
+
+				await vi.advanceTimersByTimeAsync(LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS);
+
+				settle().resolve('0xhash');
+
+				await expect(repaid).resolves.toBeUndefined();
+			});
 		});
 
 		it('resolves even if the txid write fails (funds already sent)', async () => {

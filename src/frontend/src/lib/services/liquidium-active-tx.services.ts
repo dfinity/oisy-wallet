@@ -20,21 +20,33 @@ import { ActivityFilter, type Activity, type LiquidiumClient } from '@liquidium/
 import { get } from 'svelte/store';
 
 /**
- * How many ticks each repay row has been seen without its txid. In memory, like
- * `cycles-mint-active-tx.services`: a refresh restarts the count, which only ever delays the
- * cleanup.
+ * How many consecutive ticks each repay row has been seen without its txid and unwritten. The repay
+ * renews its row while the broadcast is pending, so the count only runs once nobody is working on
+ * it. In memory, like `cycles-mint-active-tx.services`: a refresh restarts the count, which only
+ * ever delays the cleanup.
  */
-const repayTxidObservations = new Map<string, number>();
+const repayTxidObservations = new Map<string, { updatedAtNs: bigint; count: number }>();
 
 // Test seam — module-level state would otherwise leak between cases.
 export const resetLiquidiumRepayTxidObservations = (): void => {
 	repayTxidObservations.clear();
 };
 
+const recordRepayTxidObservation = ({ id, updated_at_ns }: ActiveUserTransaction): number => {
+	const previous = repayTxidObservations.get(id);
+
+	const count =
+		nonNullish(previous) && previous.updatedAtNs === updated_at_ns ? previous.count + 1 : 1;
+
+	repayTxidObservations.set(id, { updatedAtNs: updated_at_ns, count });
+
+	return count;
+};
+
 // A repay records its row before the broadcast and adds the txid after it (see
 // `executeLiquidiumRepay`). Nothing can poll a row without one, and it would lower the repay max
-// for good, so once it has gone without one for the grace period it is deleted, as the repay
-// deletes the row of a broadcast that failed.
+// for good, so once it has gone unwritten for the grace period it is deleted, as the repay deletes
+// the row of a broadcast that failed.
 const dropRepayWithoutTxid = async ({
 	tx,
 	identity
@@ -42,21 +54,23 @@ const dropRepayWithoutTxid = async ({
 	tx: ActiveUserTransaction;
 	identity: Identity;
 }): Promise<void> => {
-	const count = (repayTxidObservations.get(tx.id) ?? 0) + 1;
-
-	if (count < LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS) {
-		repayTxidObservations.set(tx.id, count);
+	if (recordRepayTxidObservation(tx) < LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS) {
 		return;
 	}
 
-	// This tab's copy can be stale: a txid write whose response was lost, or one made from another
-	// tab, never reached it. The backend's row decides, read right before the delete. A failed read
-	// or delete leaves the count where it was, so the next tick tries again.
+	// This tab's copy can be stale: a txid write whose response was lost, or a write made from
+	// another tab (the txid, or a lease renewal of a broadcast still pending there), never reached
+	// it. The backend's row decides, read right before the delete. Either write keeps the row, and
+	// the store now holds the backend's copy for the next tick to count from. A failed read or
+	// delete is retried on the next tick.
 	const current = await reloadActiveUserTransaction({ identity, id: tx.id });
 
 	if (
 		nonNullish(current) &&
-		nonNullish(toLiquidiumExternalRefsMap(current.external_refs)[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID])
+		(current.updated_at_ns > tx.updated_at_ns ||
+			nonNullish(
+				toLiquidiumExternalRefsMap(current.external_refs)[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]
+			))
 	) {
 		repayTxidObservations.delete(tx.id);
 		return;
