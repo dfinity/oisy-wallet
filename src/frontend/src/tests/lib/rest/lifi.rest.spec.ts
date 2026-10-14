@@ -1,4 +1,5 @@
 import type * as lifiEnv from '$env/rest/lifi.env';
+import { LIFI_QUOTE_TIMEOUT_MS } from '$lib/constants/swap.constants';
 import { fetchLifiQuote } from '$lib/rest/lifi.rest';
 import { mockLifiQuote } from '$tests/mocks/lifi.mock';
 import type * as lifiSdk from '@lifi/sdk';
@@ -47,5 +48,19 @@ describe('lifi.rest', () => {
 			preloadChains: false
 		});
 		expect(getQuote).toHaveBeenCalledWith(client, request, { signal: expect.any(AbortSignal) });
+	});
+
+	it('should give every quote request the quote deadline', async () => {
+		// The signal is substituted rather than waited out: vitest's fake timers do not drive
+		// `AbortSignal.timeout`.
+		const { signal } = new AbortController();
+		const timeout = vi.spyOn(AbortSignal, 'timeout').mockReturnValue(signal);
+
+		await fetchLifiQuote(request);
+
+		expect(timeout).toHaveBeenCalledExactlyOnceWith(LIFI_QUOTE_TIMEOUT_MS);
+		expect(getQuote).toHaveBeenLastCalledWith(client, request, { signal });
+
+		timeout.mockRestore();
 	});
 });

@@ -206,30 +206,90 @@ describe('lifi-swap.utils', () => {
 				vi.resetModules();
 			});
 
-			it('should send the deny lists when they name a tool', async () => {
+			const loadWithDenyLists = async ({
+				bridges,
+				exchanges
+			}: {
+				bridges: string[];
+				exchanges: string[];
+			}) => {
 				vi.doMock('$env/rest/lifi.env', async (importOriginal) => ({
 					...(await importOriginal<typeof lifiEnv>()),
-					LIFI_DENY_BRIDGES: ['someBridge'],
-					LIFI_DENY_EXCHANGES: ['someExchange']
+					LIFI_DENY_BRIDGES: bridges,
+					LIFI_DENY_EXCHANGES: exchanges
 				}));
 
-				const { buildLifiQuoteRequest: build } = await import('$lib/utils/lifi-swap.utils');
-				// Network ids are symbols, so the tokens come from the same module graph as the code.
-				const { BASE_ETH_TOKEN: baseEthToken } =
-					await import('$env/tokens/tokens-evm/tokens-base/tokens.eth.env');
-				const { BASE_NETWORK: baseNetwork } =
-					await import('$env/networks/networks-evm/networks.evm.base.env');
+				// Network ids are symbols, so the tokens and networks come from the same module graph
+				// as the code under test.
+				const [{ buildLifiQuoteRequest: build }, base, baseEth, arbitrum, robinhood, robinhoodEth] =
+					await Promise.all([
+						import('$lib/utils/lifi-swap.utils'),
+						import('$env/networks/networks-evm/networks.evm.base.env'),
+						import('$env/tokens/tokens-evm/tokens-base/tokens.eth.env'),
+						import('$env/networks/networks-evm/networks.evm.arbitrum.env'),
+						import('$env/networks/networks-evm/networks.evm.robinhood.env'),
+						import('$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env')
+					]);
+
+				return {
+					build,
+					baseEthToken: baseEth.BASE_ETH_TOKEN,
+					robinhoodEthToken: robinhoodEth.ROBINHOOD_ETH_TOKEN,
+					usdcOn: (network: typeof base.BASE_NETWORK) => ({ ...mockLifiBaseUsdcToken, network }),
+					baseNetwork: base.BASE_NETWORK,
+					arbitrumNetwork: arbitrum.ARBITRUM_MAINNET_NETWORK,
+					robinhoodNetwork: robinhood.ROBINHOOD_MAINNET_NETWORK
+				};
+			};
+
+			it('should drop a denied bridge from the allow-list rather than send a deny list', async () => {
+				const { build, baseEthToken, usdcOn, arbitrumNetwork } = await loadWithDenyLists({
+					bridges: ['near'],
+					exchanges: []
+				});
+
+				const request = build({
+					...baseParams,
+					sourceToken: baseEthToken,
+					destinationToken: usdcOn(arbitrumNetwork)
+				});
+
+				expect(request?.allowBridges).toStrictEqual(['across']);
+				expect(request).not.toHaveProperty('denyBridges');
+			});
+
+			it('should not quote across chains once every bridge of the source Diamond is denied', async () => {
+				const { build, robinhoodEthToken, usdcOn, arbitrumNetwork, robinhoodNetwork } =
+					await loadWithDenyLists({ bridges: ['across'], exchanges: [] });
 
 				expect(
 					build({
 						...baseParams,
-						sourceToken: baseEthToken,
-						destinationToken: { ...mockLifiBaseUsdcToken, network: baseNetwork }
+						sourceToken: robinhoodEthToken,
+						destinationToken: usdcOn(arbitrumNetwork)
 					})
-				).toMatchObject({
-					denyBridges: ['someBridge'],
-					denyExchanges: ['someExchange']
+				).toBeUndefined();
+
+				// A same-chain swap needs no bridge, so it is still quoted, without a bridge list.
+				const sameChain = build({
+					...baseParams,
+					sourceToken: robinhoodEthToken,
+					destinationToken: usdcOn(robinhoodNetwork)
 				});
+
+				expect(sameChain).toMatchObject({ fromChain: 4663, toChain: 4663 });
+				expect(sameChain).not.toHaveProperty('allowBridges');
+			});
+
+			it('should send the exchange deny list when it names a tool', async () => {
+				const { build, baseEthToken, usdcOn, baseNetwork } = await loadWithDenyLists({
+					bridges: [],
+					exchanges: ['someExchange']
+				});
+
+				expect(
+					build({ ...baseParams, sourceToken: baseEthToken, destinationToken: usdcOn(baseNetwork) })
+				).toMatchObject({ denyExchanges: ['someExchange'] });
 			});
 		});
 	});

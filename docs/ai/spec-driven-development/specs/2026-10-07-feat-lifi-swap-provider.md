@@ -241,8 +241,13 @@ createClient({
 ```
 
 The deny lists are not set as client `routeOptions`: the SDK would then serialise an
-empty list as an empty `denyBridges=` parameter on every request. The request builder
-adds `denyBridges` / `denyExchanges` only when they name a tool.
+empty list as an empty `denyBridges=` parameter on every request. Every quote already
+sends `allowBridges`, and LI.FI's docs do not say how an allow and a deny list combine (a
+probe on 2026-10-14 accepted both, with the deny list winning), so a denied bridge is
+removed from the allow-list before the request and `denyBridges` is never sent. Once
+every bridge of a Diamond is denied, its cross-chain pairs get no quote; same-chain
+pairs need no bridge and are still quoted. `denyExchanges` is sent only when it names a
+tool.
 
 ### Env
 
@@ -269,7 +274,8 @@ New `src/frontend/src/env/rest/lifi.env.ts`, modelled on `near-intents.env.ts`:
   it is confirmed that its calldata goes through `MayanFacet`.
 - `LIFI_DENY_BRIDGES: string[] = []` and `LIFI_DENY_EXCHANGES: string[] = []` — LI.FI's
   full exchange set is allowed; these exist so a misbehaving bridge or exchange can be
-  blocked with a one-line change (keys from LI.FI's `/tools`).
+  blocked with a one-line change (keys from LI.FI's `/tools`). A denied bridge is dropped
+  from `LIFI_ALLOWED_BRIDGES`; a denied exchange is sent as `denyExchanges`.
 - Solana's LI.FI chain id is the SDK's own `ChainId.SOL`, not a local constant.
 
 ### API key

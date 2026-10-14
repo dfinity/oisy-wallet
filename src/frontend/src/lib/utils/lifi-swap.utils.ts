@@ -84,13 +84,21 @@ export const buildLifiQuoteRequest = ({
 	// OISY's slippage is a percentage, LI.FI's a fraction.
 	const lifiSlippage = Number(slippage) / 100;
 
+	// A denied bridge is removed from the allow-list here rather than sent as `denyBridges`: how
+	// LI.FI combines the two lists is not documented, and the deny list is an emergency lever.
+	const allowBridges = (LIFI_ALLOWED_BRIDGES[sourceToken.network.id] ?? []).filter(
+		(bridge) => !LIFI_DENY_BRIDGES.includes(bridge)
+	);
+
 	if (
 		isNullish(fromChain) ||
 		isNullish(toChain) ||
 		isNullish(fromToken) ||
 		isNullish(toToken) ||
 		isNullish(toAddress) ||
-		!(lifiSlippage > 0 && lifiSlippage < 1)
+		!(lifiSlippage > 0 && lifiSlippage < 1) ||
+		// A cross-chain route needs a bridge whose receiver the swap can bind.
+		(fromChain !== toChain && allowBridges.length === 0)
 	) {
 		return;
 	}
@@ -110,8 +118,8 @@ export const buildLifiQuoteRequest = ({
 		skipSimulation: true,
 		// A destination call can forward the received funds anywhere, so no route may carry one.
 		allowDestinationCall: false,
-		allowBridges: LIFI_ALLOWED_BRIDGES[sourceToken.network.id],
-		...(LIFI_DENY_BRIDGES.length > 0 && { denyBridges: LIFI_DENY_BRIDGES }),
+		// An empty list would serialise as an empty `allowBridges=`; a same-chain route needs no bridge.
+		...(allowBridges.length > 0 && { allowBridges }),
 		...(LIFI_DENY_EXCHANGES.length > 0 && { denyExchanges: LIFI_DENY_EXCHANGES })
 	};
 };

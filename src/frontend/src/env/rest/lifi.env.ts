@@ -57,6 +57,7 @@ export const LIFI_ALLOWED_BRIDGES: Partial<Record<NetworkId, string[]>> = {
 };
 
 // Kept so that a misbehaving bridge or exchange can be blocked with a one-line change (LI.FI tool
-// keys from `/v1/tools`).
+// keys from `/v1/tools`). A denied bridge is dropped from `LIFI_ALLOWED_BRIDGES` before a quote is
+// requested; a denied exchange is sent as `denyExchanges`.
 export const LIFI_DENY_BRIDGES: string[] = [];
 export const LIFI_DENY_EXCHANGES: string[] = [];
