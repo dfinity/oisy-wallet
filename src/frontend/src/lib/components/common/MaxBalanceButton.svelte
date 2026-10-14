@@ -101,7 +101,8 @@
 </script>
 
 <button
-	class="font-semibold text-brand-primary-alt transition-all"
+	class="hit-area relative font-semibold text-brand-primary-alt transition-[color,scale] duration-150 ease-out press-icon"
+	class:hover:text-brand-secondary={!isZeroBalance && !error}
 	class:text-brand-primary-alt={!isZeroBalance && !error}
 	class:text-error-primary={isZeroBalance || error}
 	data-tid={MAX_BUTTON}

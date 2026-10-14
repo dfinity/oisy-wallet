@@ -64,6 +64,10 @@ Where it applies:
   the token and NFT settings menus) take the pressed fill. An expanded token group's header
   opens and closes the whole card, so hovering it outlines the whole card, sub-tokens
   included; a fill would not do, since on the white card the row hover is the page colour.
+- **Amount forms.** The swap flip button presses like an icon button, and its arrow turns a
+  half-turn each time the tokens swap, back the other way on the next swap (no turn with
+  reduced motion). **Max** presses, darkens on hover while the amount is valid, and can be hit
+  across 40 px without reaching the amount field above it.
 
 ---
 

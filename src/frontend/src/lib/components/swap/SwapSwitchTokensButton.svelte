@@ -10,6 +10,14 @@
 	}
 
 	let { disabled = false, onTokensSwitch }: Props = $props();
+
+	// Turns the arrow a half-turn per swap, and back the other way on the next one.
+	let flipped = $state(false);
+
+	const onclick = () => {
+		flipped = !flipped;
+		onTokensSwitch();
+	};
 </script>
 
 <div
@@ -19,11 +27,16 @@
 		ariaLabel={$i18n.swap.text.switch_tokens_button}
 		colorStyle="primary"
 		{disabled}
-		onclick={onTokensSwitch}
+		{onclick}
 		paddingSmall
-		styleClass="absolute bottom-0 left-0 right-0 top-0 m-auto rounded-lg border border-solid border-secondary"
+		styleClass="absolute bottom-0 left-0 right-0 top-0 m-auto rounded-lg border border-solid border-secondary press-icon"
 		testId={SWAP_SWITCH_TOKENS_BUTTON}
 	>
-		<IconArrowUpDown />
+		<span
+			class="flex transition-[rotate] duration-300 ease-out motion-reduce:transition-none"
+			class:rotate-180={flipped}
+		>
+			<IconArrowUpDown />
+		</span>
 	</Button>
 </div>

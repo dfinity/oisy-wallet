@@ -158,8 +158,11 @@
 
 	{#snippet balance()}
 		<button
-			class="font-semibold transition-all"
+			class="hit-area relative font-semibold transition-[color,scale] duration-150 ease-out press-icon"
 			class:animate-pulse={isNullish(cappedMaxAmount)}
+			class:hover:text-brand-secondary={!isZeroBalance &&
+				isNullish(errorType) &&
+				nonNullish(cappedMaxAmount)}
 			class:text-brand-primary={!isZeroBalance &&
 				isNullish(errorType) &&
 				nonNullish(cappedMaxAmount)}

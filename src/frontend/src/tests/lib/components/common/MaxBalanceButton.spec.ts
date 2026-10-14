@@ -15,6 +15,16 @@ describe('MaxBalanceButton', () => {
 	const amountTestId = 'max-balance-button-amount';
 	const amountSetToMaxTestId = 'max-balance-button-amount-set-to-max';
 
+	it('presses like an icon-size control and has a 40 px tap area', () => {
+		const { getByTestId } = render(MaxBalanceButton, { props: baseProps });
+
+		expect(getByTestId(MAX_BUTTON)).toHaveClass(
+			'hit-area',
+			'press-icon',
+			'hover:text-brand-secondary'
+		);
+	});
+
 	it('shows the affordable balance when no cap is set', () => {
 		const { getByTestId } = render(MaxBalanceButton, { props: baseProps });
 
