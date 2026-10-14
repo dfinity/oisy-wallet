@@ -69,7 +69,7 @@
 </script>
 
 <button
-	class="group flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300"
+	class={`group flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-[translate,scale,background-color] duration-150 ease-out ${disabled ? '' : 'press'}`}
 	class:cursor-not-allowed={disabled}
 	class:hover:-translate-y-1={!disabled}
 	class:hover:bg-primary={!disabled}

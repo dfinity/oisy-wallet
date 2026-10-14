@@ -99,6 +99,8 @@ describe('NftCard', () => {
 		expect(cardElement.getAttribute('class')?.includes(' bg-primary')).toBeTruthy();
 		expect(cardElement.getAttribute('class')?.includes(' group')).toBeFalsy();
 		expect(cardElement.getAttribute('class')?.includes(' hover:bg-primary')).toBeFalsy();
+		// A default card is not interactive, so it does not press either.
+		expect(cardElement).not.toHaveClass('press');
 
 		await rerender({
 			nft: { ...mockValidErc721Nft, imageUrl: undefined },
@@ -109,6 +111,7 @@ describe('NftCard', () => {
 		expect(cardElement.getAttribute('class')?.includes(' bg-primary')).toBeFalsy();
 		expect(cardElement.getAttribute('class')?.includes(' group')).toBeTruthy();
 		expect(cardElement.getAttribute('class')?.includes(' hover:bg-primary')).toBeTruthy();
+		expect(cardElement).toHaveClass('press');
 
 		await rerender({
 			nft: { ...mockValidErc721Nft, imageUrl: undefined },

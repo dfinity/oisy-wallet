@@ -64,6 +64,11 @@ Where it applies:
   the token and NFT settings menus) take the pressed fill. An expanded token group's header
   opens and closes the whole card, so hovering it outlines the whole card, sub-tokens
   included; a fill would not do, since on the white card the row hover is the page colour.
+- **Cards.** NFT and collection cards press like text buttons and keep their hover lift;
+  disabled cards and the non-interactive NFT card do not press. The Explore dApp cards and
+  the reward cards press too, with no hover of their own. Colours meant for dark mode follow
+  OISY's theme setting, not the device's, so a user who picked a theme different from their
+  system sees the matching NFT badges.
 
 ---
 

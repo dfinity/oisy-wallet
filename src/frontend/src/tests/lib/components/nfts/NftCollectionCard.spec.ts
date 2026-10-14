@@ -45,6 +45,20 @@ describe('NftCollectionCard', () => {
 		).toBeInTheDocument();
 	});
 
+	it('should press to 0.98 unless disabled', async () => {
+		const { container, rerender } = render(NftCollectionCard, {
+			props: { collection: mockNftCollectionUi, testId }
+		});
+
+		const button = container.querySelector('button');
+
+		expect(button).toHaveClass('press');
+
+		await rerender({ collection: mockNftCollectionUi, testId, disabled: true });
+
+		expect(button).not.toHaveClass('press');
+	});
+
 	it('should go to collection page if clicked', () => {
 		const { container } = render(NftCollectionCard, {
 			props: {
