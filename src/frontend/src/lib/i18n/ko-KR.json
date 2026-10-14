@@ -1024,7 +1024,6 @@
 			"approving": "승인 중...",
 			"approving_fees": "수수료 승인 중...",
 			"approving_transfer": "전송 승인 중...",
-			"approving_wallet_connect": "WalletConnect 요청 승인 중...",
 			"refreshing_ui": "UI 새로고침 중",
 			"initializing": "트랜잭션 초기화 중...",
 			"signing_transaction": "트랜잭션 서명 중...",

@@ -755,7 +755,6 @@ interface I18nSend {
 		approving: string;
 		approving_fees: string;
 		approving_transfer: string;
-		approving_wallet_connect: string;
 		refreshing_ui: string;
 		initializing: string;
 		signing_transaction: string;

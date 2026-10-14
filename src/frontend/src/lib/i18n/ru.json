@@ -1024,7 +1024,6 @@
 			"approving": "Одобрение...",
 			"approving_fees": "Одобрение комиссий...",
 			"approving_transfer": "Одобрение перевода...",
-			"approving_wallet_connect": "Одобрение запроса WalletConnect...",
 			"refreshing_ui": "Обновление пользовательского интерфейса",
 			"initializing": "Инициализация транзакции...",
 			"signing_transaction": "Подписание транзакции...",

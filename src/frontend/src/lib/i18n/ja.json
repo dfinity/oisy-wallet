@@ -1024,7 +1024,6 @@
 			"approving": "承認中...",
 			"approving_fees": "手数料を承認中...",
 			"approving_transfer": "送信を承認中...",
-			"approving_wallet_connect": "WalletConnectリクエスト承認中...",
 			"refreshing_ui": "UI更新中",
 			"initializing": "トランザクション初期化中...",
 			"signing_transaction": "トランザクション署名中...",

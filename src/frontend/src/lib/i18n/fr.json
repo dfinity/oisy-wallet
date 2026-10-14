@@ -1024,7 +1024,6 @@
 			"approving": "Approbation...",
 			"approving_fees": "Approbation des frais...",
 			"approving_transfer": "Approbation du transfert...",
-			"approving_wallet_connect": "Approbation de la demande WalletConnect...",
 			"refreshing_ui": "Actualisation de l'interface",
 			"initializing": "Initialisation de la transaction...",
 			"signing_transaction": "Signature de la transaction...",

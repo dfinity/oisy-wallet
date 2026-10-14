@@ -52,7 +52,7 @@ export const walletConnectSendSteps = ({
 	}),
 	{
 		step: ProgressStepsSend.APPROVE_WALLET_CONNECT,
-		text: i18n.send.text.approving_wallet_connect,
+		text: i18n.send.text.approving,
 		state: 'next'
 	}
 ];
@@ -70,7 +70,7 @@ export const walletConnectSignSteps = (i18n: I18n): ProgressSteps => [
 	},
 	{
 		step: ProgressStepsSign.APPROVE_WALLET_CONNECT,
-		text: i18n.send.text.approving_wallet_connect,
+		text: i18n.send.text.approving,
 		state: 'next'
 	}
 ];
