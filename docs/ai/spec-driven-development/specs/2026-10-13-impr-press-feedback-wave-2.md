@@ -24,7 +24,7 @@ Source: user request, following the Wave 1 PRs above.
 
 ### What Wave 1 settled (prerequisite)
 
-Wave 2 builds on two Wave 1 PRs and needs them on `main` first:
+Wave 2 builds on two Wave 1 PRs, both merged:
 
 - **#14294.** Styled `Button`s press to `scale: 0.98`, `ButtonIcon`s to `0.96`, through the
   `press` mixin in `src/frontend/src/lib/styles/mixins/_button.scss`. No scale when disabled,
@@ -42,15 +42,14 @@ Wave 2 builds on two Wave 1 PRs and needs them on `main` first:
 
 Paths are under `src/frontend/src/lib/`.
 
-| Area                   | Today                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Token rows             | `ui/LogoButton.svelte:54-65` paints its hover on an outer `<div>`, not on the button; 29 uses. Token rows in `tokens/TokensList.svelte:172,236` and `tokens/TokenGroupCard.svelte:106,122` hover with wrapper `div`s. No row has a pressed state. When a group is expanded, its header's hover colour equals its background, so hover disappears.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| Activity and list rows | All hand-rolled, all hover with a 10 % blue fill (`hover:bg-brand-subtle-10`, 15 uses), none has a pressed state: `transactions/Transaction.svelte:152`, `tip/TipHistory.svelte:202`, `notes/NoteListItem.svelte:63`, `contact/AddressListItem.svelte:35`, `trading/OisyTradeOrderRow.svelte:182`, `trading/OisyTradePositionRow.svelte:103`, `transactions/filter/TransactionsFilterMobileSheet.svelte:127`. `common/ListItemButton.svelte` is a full-width `Button`, so it already scales to 0.98.                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| Navigation             | `.nav-item` (`styles/global/links.scss:21-44`): hover and pressed look the same, colours fade over 700 ms, hover is not guarded, so it sticks on touch. On the mobile bar (`navigation/NavigationMenuMainItems.svelte:406-448`) the `div.mobile-nav` override suppresses every press colour. The group sheet cards (338-366) have no feedback at all.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| Cards                  | dApp cards (`dapps/DappCard.svelte:19`) and reward cards (`rewards/RewardCard.svelte:43`) have no hover or press. `nfts/NftCard.svelte:72-110`, `nfts/NftCollectionCard.svelte:71-127`: `transition-all`, a hover lift (`hover:-translate-y-1`), no press. Their `dark:` classes follow the OS theme, not OISY's, because Tailwind's `dark` variant is not tied to the `theme` attribute on `<html>`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| Amount forms           | `swap/SwapSwitchTokensButton.svelte:15-28`: nothing rotates when the tokens swap. `common/MaxBalanceButton.svelte:103-109`: a 22 px raw button with no hover or press and `transition-all`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Small controls         | About 13 close, info and clear buttons are 16 to 28 px: toast close 22 px (`ui/Toast.svelte:107`), modal close 26 px (`ui/Modal.svelte:92`), popover close 34 px (`ui/Popover.svelte:179`), `ui/ButtonControl.svelte` 28 px, info toggles 24 px (`settings/SettingsCardItem.svelte:28`, `settings/SettingsExportData.svelte:112`, `rewards/RewardsRequirements.svelte:62`), 20 px (`earning/EarningPotentialCard.svelte:30`, `BorrowingPowerCard.svelte:25`), 16 px (`trading/limit-order/LimitOrderForm.svelte:196`), and the closes in `info/InfoBox.svelte:22`, `core/Banner.svelte:21,29`, `core/PwaBanner.svelte:27`, `agreements/AgreementsBanner.svelte:47`, `ui/InputSearch.svelte:34`, `btc/components/transactions/BtcTransactionsHeader.svelte:22`. There is no shared hit-area helper. In `contact/AddressItemActions.svelte` the action icons already overlap each other by 4 to 8 px on mobile (`-m-1`). |
-| Carousel               | `carousel/Indicator.svelte:27-28`: dots 6 px tall, 4 px apart, `transition-all`, and a stray `}` in the class string that leaves the last dot with a margin. `carousel/Controls.svelte:16-19`: two 28 px `ButtonControl`s 4 px apart.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| Area                   | Today                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Token rows             | `ui/LogoButton.svelte:54-65` paints its hover on an outer `<div>`, not on the button; 29 uses. Token rows in `tokens/TokensList.svelte:172,236` and `tokens/TokenGroupCard.svelte:106,122` hover with wrapper `div`s. No row has a pressed state. When a group is expanded, its header's hover colour equals its background, so hover disappears.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Activity and list rows | All hand-rolled, all hover with a 10 % blue fill (`hover:bg-brand-subtle-10`, 15 uses), none has a pressed state: `transactions/Transaction.svelte:152`, `tip/TipHistory.svelte:202`, `notes/NoteListItem.svelte:63`, `contact/AddressListItem.svelte:35`, `trading/OisyTradeOrderRow.svelte:182`, `trading/OisyTradePositionRow.svelte:103`, `transactions/filter/TransactionsFilterMobileSheet.svelte:127`. `common/ListItemButton.svelte` is a full-width `Button`, so it already scales to 0.98.                                                                                                                                                                                                                                                                                                                                                                                  |
+| Navigation             | `.nav-item` (`styles/global/links.scss:21-44`): hover and pressed look the same, colours fade over 700 ms, hover is not guarded, so it sticks on touch. On the mobile bar (`navigation/NavigationMenuMainItems.svelte:406-448`) the `div.mobile-nav` override suppresses every press colour. The group sheet cards (338-366) have no feedback at all.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Cards                  | dApp cards (`dapps/DappCard.svelte:19`) and reward cards (`rewards/RewardCard.svelte:43`) have no hover or press. `nfts/NftCard.svelte:72-110`, `nfts/NftCollectionCard.svelte:71-127`: `transition-all`, a hover lift (`hover:-translate-y-1`), no press. Their `dark:` classes follow the OS theme, not OISY's, because Tailwind's `dark` variant is not tied to the `theme` attribute on `<html>`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Amount forms           | `swap/SwapSwitchTokensButton.svelte:15-28`: nothing rotates when the tokens swap. `common/MaxBalanceButton.svelte:103-109`: a 22 px raw button with no hover or press and `transition-all`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Small controls         | About 13 close, info and clear buttons are 16 to 28 px: toast close 22 px (`ui/Toast.svelte:107`), modal close 26 px (`ui/Modal.svelte:92`), popover close 34 px (`ui/Popover.svelte:179`), info toggles 24 px (`settings/SettingsCardItem.svelte:28`, `settings/SettingsExportData.svelte:112`, `rewards/RewardsRequirements.svelte:62`), 20 px (`earning/EarningPotentialCard.svelte:30`, `BorrowingPowerCard.svelte:25`), 16 px (`trading/limit-order/LimitOrderForm.svelte:196`), and the closes in `info/InfoBox.svelte:22`, `core/Banner.svelte:21,29`, `core/PwaBanner.svelte:27`, `agreements/AgreementsBanner.svelte:47`, `ui/InputSearch.svelte:34`, `btc/components/transactions/BtcTransactionsHeader.svelte:22`. There is no shared hit-area helper. In `contact/AddressItemActions.svelte` the action icons already overlap each other by 4 to 8 px on mobile (`-m-1`). |
 
 ### Constraints the code imposes
 
@@ -139,12 +138,6 @@ area. Where neighbours are closer (the contact row actions, the modal close next
 actions, the token details copy and edit, which are 4 px apart), each area stops halfway into
 the gap. The contact row actions lose their negative margins, so they stop overlapping.
 
-### 7. Carousel
-
-The dots get a tap area 40 px tall and as wide as their spacing allows. The previous and next
-buttons press to 0.96 and get tap areas capped by their 4 px gap. The last dot loses the
-stray margin. Transitions name their properties.
-
 ### Negative guarantees (what it does _not_ do)
 
 - It does **not** change any size, colour, radius, border or layout at rest.
@@ -162,8 +155,8 @@ stray margin. Transitions name their properties.
 
 ## Implementation
 
-Seven PRs, one per area, each branched from `main` once #14294 and #14295 have merged. Each
-updates `docs/ai/PRODUCT.md` (see below) and the tests for what it touches.
+Six PRs, one per area. #14294 and #14295 are on `main`. Each updates `docs/ai/PRODUCT.md`
+(see below) and the tests for what it touches.
 
 ### Shared pieces (land with the first PR that needs them)
 
@@ -246,13 +239,7 @@ and add `hit-area` and `pressed:` to `docs/ai/frontend/reusability.md`.
 For each control listed: `hit-area` (capped where a neighbour is closer than 40 px), an
 `active:scale-[0.96]` press with an explicit transition, and an `aria-label` where one is
 missing (the three settings and rewards info toggles, the two earning cards' info buttons).
-`ButtonControl` drops `transition-colors duration-700`. `AddressItemActions` drops `-m-1`.
-
-### 7. Carousel
-
-`Indicator.svelte`: remove the stray `}`, replace `transition-all duration-300 ease-linear`
-with an explicit list, and add `hit-area` capped horizontally by the 4 px gap.
-`Controls.svelte`: the same cap for the two `ButtonControl`s.
+`AddressItemActions` drops `-m-1`. `ButtonControl` is left alone: only the carousel uses it.
 
 ### `PRODUCT.md`
 
@@ -294,10 +281,9 @@ behaviour (as `ButtonSignInInternetIdentity.spec.ts` does), and visual QA happen
    neighbour), looks unchanged at rest, and presses to 0.96. No two tap areas overlap.
 9. The contact row actions no longer overlap on mobile, and Edit and Delete never open the
    row.
-10. The last carousel dot has no stray margin.
-11. Nothing scales under reduced motion; nothing shows on disabled controls.
-12. `docs/ai/PRODUCT.md` has an "Interaction feedback" section covering every area shipped.
-13. `npm run format`, `npm run lint -- --max-warnings 0`, `npm run check`, `npm run test`
+10. Nothing scales under reduced motion; nothing shows on disabled controls.
+11. `docs/ai/PRODUCT.md` has an "Interaction feedback" section covering every area shipped.
+12. `npm run format`, `npm run lint -- --max-warnings 0`, `npm run check`, `npm run test`
     pass on every PR.
 
 ---
@@ -307,13 +293,10 @@ behaviour (as `ButtonSignInInternetIdentity.spec.ts` does), and visual QA happen
 1. **Swap flip button size.** Its `Button` computes to 48 × 48 px inside a 36 px wrapper
    (`SwapSwitchTokensButton.svelte:15-28`). Confirm the rendered size on staging before PR 5;
    it decides how much tap area the button already has.
-2. **dApp carousel close button.** `dapps/DappsCarouselSlide.svelte:108` sits in two
-   `overflow: hidden` layers (`Carousel.svelte:288,293`), so its tap area would be clipped.
-   Confirm how much of a 40 px area is reachable before PR 7.
-3. **`IcTransaction` row.** `IcTransaction.svelte:78` passes `block w-full border-0` to the
+2. **`IcTransaction` row.** `IcTransaction.svelte:78` passes `block w-full border-0` to the
    `contents` button in `Transaction.svelte`. Confirm which wins in the browser before PR 2;
    it decides whether the fill goes on the button or the span for ICP rows.
-4. **Nested controls in `LogoButton`.** Its `action` snippet renders toggles inside the
+3. **Nested controls in `LogoButton`.** Its `action` snippet renders toggles inside the
    `<button>` (`TokensMenu`, `TokenCard` with `onToggle`). Confirm in Safari that pressing a
    toggle does not paint the row before PR 1.
 
@@ -334,3 +317,9 @@ behaviour (as `ButtonSignInInternetIdentity.spec.ts` does), and visual QA happen
    the colours to the outline palette.
 5. **`MaxBalanceButton` in error.** Its static `text-brand-primary-alt` competes with
    `text-error-primary` when the amount is invalid. Decide which wins.
+6. **Carousel.** Taken out of this wave: it needs its own treatment. What is known: the dots
+   in `carousel/Indicator.svelte:27-28` are 6 px tall and 4 px apart, use `transition-all`,
+   and a stray `}` in their class string leaves the last dot with a margin; the two
+   `ButtonControl`s in `carousel/Controls.svelte:16-19` are 28 px and 4 px apart; the close
+   button in `dapps/DappsCarouselSlide.svelte:108` sits in two `overflow: hidden` layers
+   (`Carousel.svelte:288,293`), which would clip any tap area.
