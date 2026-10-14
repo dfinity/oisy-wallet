@@ -2714,13 +2714,13 @@
 			"starting_to_repay": "返済を送信しています…",
 			"repay_started": "返済が処理されています。",
 			"current_debt": "現在の負債",
-			"pending_repays": "",
+			"pending_repays": "処理中の返済",
 			"interest_accrued": "発生した利息",
 			"debt_after_repay": "返済後の負債",
 			"repay_exceeds_debt": "金額が未払いの負債を超えています。",
 			"repay_prices_unavailable": "価格は一時的に利用できません。読み込まれるまで返済は無効になっています。",
-			"repay_debt_unavailable": "",
-			"repay_pending_covers_debt": ""
+			"repay_debt_unavailable": "未払いの負債は一時的に利用できません。読み込まれるまで返済は無効になっています。",
+			"repay_pending_covers_debt": "このポジションの返済はまだ処理中です。完了後に追加で返済できます。"
 		},
 		"info": {
 			"title": "Liquidiumとは",

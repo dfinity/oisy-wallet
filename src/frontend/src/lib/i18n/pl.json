@@ -2714,13 +2714,13 @@
 			"starting_to_repay": "Wysyłanie twojej spłaty…",
 			"repay_started": "Twoja spłata jest teraz przetwarzana.",
 			"current_debt": "Bieżący dług",
-			"pending_repays": "",
+			"pending_repays": "Spłaty w toku",
 			"interest_accrued": "Naliczone odsetki",
 			"debt_after_repay": "Dług po spłacie",
 			"repay_exceeds_debt": "Kwota przekracza twój zaległy dług.",
 			"repay_prices_unavailable": "Ceny są tymczasowo niedostępne. Spłacanie jest wyłączone do czasu ich wczytania.",
-			"repay_debt_unavailable": "",
-			"repay_pending_covers_debt": ""
+			"repay_debt_unavailable": "Twój zaległy dług jest tymczasowo niedostępny. Spłacanie jest wyłączone do czasu jego wczytania.",
+			"repay_pending_covers_debt": "Spłata tej pozycji jest nadal przetwarzana. Możesz spłacić więcej, gdy się zakończy."
 		},
 		"info": {
 			"title": "Czym jest Liquidium",

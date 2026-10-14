@@ -2714,7 +2714,7 @@
 			"starting_to_repay": "Submitting your repayment...",
 			"repay_started": "The repayment is now being processed.",
 			"current_debt": "Current debt",
-			"pending_repays": "Pending repays",
+			"pending_repays": "Repayments in progress",
 			"interest_accrued": "Interest accrued",
 			"debt_after_repay": "Debt after repay",
 			"repay_exceeds_debt": "Amount exceeds your outstanding debt.",

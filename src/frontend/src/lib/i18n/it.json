@@ -2714,13 +2714,13 @@
 			"starting_to_repay": "Invio del tuo rimborso…",
 			"repay_started": "Il tuo rimborso è in fase di elaborazione.",
 			"current_debt": "Debito attuale",
-			"pending_repays": "",
+			"pending_repays": "Rimborsi in elaborazione",
 			"interest_accrued": "Interessi maturati",
 			"debt_after_repay": "Debito dopo il rimborso",
 			"repay_exceeds_debt": "L'importo supera il tuo debito residuo.",
 			"repay_prices_unavailable": "I prezzi non sono temporaneamente disponibili. Il rimborso è disabilitato finché non vengono caricati.",
-			"repay_debt_unavailable": "",
-			"repay_pending_covers_debt": ""
+			"repay_debt_unavailable": "Il tuo debito residuo non è temporaneamente disponibile. Il rimborso è disabilitato finché non viene caricato.",
+			"repay_pending_covers_debt": "Un rimborso per questa posizione è ancora in elaborazione. Potrai rimborsare di più una volta completato."
 		},
 		"info": {
 			"title": "Cos'è Liquidium",
