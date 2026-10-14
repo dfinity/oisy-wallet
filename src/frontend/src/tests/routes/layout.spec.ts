@@ -49,6 +49,18 @@ describe('App Layout', () => {
 		expect(container).toBeTruthy();
 	});
 
+	it('should listen for touchstart on the document, passively, so iOS Safari applies :active', () => {
+		const spyAddEventListener = vi.spyOn(document, 'addEventListener');
+
+		render(App);
+
+		expect(spyAddEventListener).toHaveBeenCalledWith(
+			'touchstart',
+			expect.any(Function),
+			expect.objectContaining({ passive: true })
+		);
+	});
+
 	it('should initialize all services in parallel', () => {
 		const spyAuthSync = vi.spyOn(authStore, 'sync').mockImplementation(vi.fn());
 		const spyInitPlausibleAnalytics = vi.spyOn(analytics, 'initPlausibleAnalytics');

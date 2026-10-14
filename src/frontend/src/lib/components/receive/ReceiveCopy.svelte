@@ -1,30 +1,25 @@
 <script lang="ts">
-	import IconCopy from '$lib/components/icons/IconCopy.svelte';
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import { copyToClipboard } from '$lib/utils/clipboard.utils';
+	import Copy from '$lib/components/ui/Copy.svelte';
 
 	interface Props {
 		address: string;
 		copyAriaLabel: string;
+		/** Confirmation once copied; defaults to `copyAriaLabel`. */
+		copiedText?: string;
 		testId?: string;
 		/** Fired after a successful copy, for callers that want to know it happened. */
 		onCopy?: () => void;
 	}
 
-	let { address, copyAriaLabel, testId, onCopy }: Props = $props();
+	let { address, copyAriaLabel, copiedText, testId, onCopy }: Props = $props();
 </script>
 
-<ButtonIcon
+<Copy
 	ariaLabel={copyAriaLabel}
+	iconSize="24"
 	link={false}
-	onclick={async () => {
-		await copyToClipboard({ value: address, text: copyAriaLabel });
-
-		onCopy?.();
-	}}
+	{onCopy}
 	{testId}
->
-	{#snippet icon()}
-		<IconCopy size="24" />
-	{/snippet}
-</ButtonIcon>
+	text={copiedText ?? copyAriaLabel}
+	value={address}
+/>

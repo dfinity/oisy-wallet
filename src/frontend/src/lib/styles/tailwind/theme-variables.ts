@@ -94,6 +94,7 @@ export const themeVariables = {
 			'subtle-20': 'var(--color-border-brand-subtle-20)',
 			'subtle-30': 'var(--color-border-brand-subtle-30)',
 			primary: 'var(--color-border-brand-primary)',
+			'primary-alt': 'var(--color-border-brand-primary-alt)',
 			secondary: 'var(--color-border-brand-secondary)',
 			tertiary: 'var(--color-border-brand-tertiary)',
 			disabled: 'var(--color-border-brand-disabled)'

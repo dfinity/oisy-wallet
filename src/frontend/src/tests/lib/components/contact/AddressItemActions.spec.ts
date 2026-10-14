@@ -17,7 +17,7 @@ describe('AddressItemActions', () => {
 	const mockI18n = readable(en);
 
 	// Mock the clipboard utils
-	vi.spyOn(clipboardUtils, 'copyToClipboard').mockResolvedValue(undefined);
+	vi.spyOn(clipboardUtils, 'copyToClipboard').mockResolvedValue(true);
 
 	// Setup the context with the mocked i18n store
 	const mockContext = new Map([['i18n', mockI18n]]);
@@ -140,7 +140,8 @@ describe('AddressItemActions', () => {
 		// Check that copyToClipboard was called with the correct arguments
 		expect(clipboardUtils.copyToClipboard).toHaveBeenCalledWith({
 			text: en.wallet.text.address_copied,
-			value: mockAddress.address
+			value: mockAddress.address,
+			withToast: false
 		});
 	});
 

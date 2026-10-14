@@ -217,9 +217,33 @@ layer and let the service own caching.
   bikeshed it.
 - **Variants & responsive:** prefer Tailwind variants (`md:`, `dark:`,
   `data-[active=true]:`) over JS branches.
+- **Hover in SCSS:** write `@include interaction.hover { … }`
+  (`lib/styles/mixins/_interaction.scss`), not a bare `&:hover`, so a tap
+  on a touch screen doesn't leave the hover colour on. Tailwind's `hover:`
+  variant already does this.
 - The route-level prerendered backgrounds described in
   [HACKING.md "Routes Styles"](../../../HACKING.md#routes-styles) are the
   preferred way to set route-specific colours.
+
+## Press feedback
+
+Every styled `Button` (any `colorStyle`, unless `link`) shrinks to
+`scale: 0.98` while held, and every `ButtonIcon` to `scale: 0.96`
+(`lib/styles/mixins/_button.scss` `press`). Text buttons get less because
+they are often full width, where 0.96 takes off far more pixels than on a
+40 px icon. Don't add your own `active:scale-*` to them; a custom button
+outside these components follows the same two values.
+
+- Opt out with the `static` prop where motion would distract, e.g. a
+  button used only as a double-click target. It sets the `no-press`
+  class, because `static` is a Tailwind utility (`position: static`).
+- A Tailwind `transition-*` utility on a button replaces the base
+  transition, which carries `scale`. Use `transition-[...]` with `scale`
+  in the list if you need to change it.
+- Disabled, loading and reduced-motion states never scale.
+- iOS Safari applies `:active` on a tap only when the page has a touch
+  listener. The root layout (`routes/+layout.svelte`) registers a passive
+  no-op `touchstart` on the document for that; it is not dead code.
 
 ## Icons
 

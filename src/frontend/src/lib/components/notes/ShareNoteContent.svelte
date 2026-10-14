@@ -11,6 +11,7 @@
 	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import IconSwap from '$lib/components/ui/IconSwap.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PillButton from '$lib/components/ui/PillButton.svelte';
 	import { MAX_PERSONAL_NOTE_SHARES_PER_USER } from '$lib/constants/app.constants';
@@ -57,15 +58,23 @@
 	let createdLink = $state<string | undefined>();
 	let atCap = $state(false);
 	let copied = $state(false);
+	let copyFailed = $state(false);
 	let copiedTimeout: ReturnType<typeof setTimeout> | undefined;
 
-	// Confirm the copy inline on the control itself: a floating toast would be
-	// hidden behind the mobile share bottom sheet.
+	// Confirm the copy inline on the control itself, success and failure alike: a
+	// floating toast would be hidden behind the mobile share bottom sheet.
 	const onCopyLink = async () => {
 		if (createdLink === undefined) {
 			return;
 		}
-		await copyText(createdLink);
+		try {
+			await copyText(createdLink);
+		} catch {
+			copied = false;
+			copyFailed = true;
+			return;
+		}
+		copyFailed = false;
 		copied = true;
 		clearTimeout(copiedTimeout);
 		copiedTimeout = setTimeout(() => (copied = false), 2000);
@@ -235,14 +244,20 @@
 					testId={NOTES_SHARE_LINK_COPY}
 				>
 					{#snippet icon()}
-						{#if copied}
-							<span class="text-success-primary"><IconCircleCheck /></span>
-						{:else}
-							<IconCopy />
-						{/if}
+						<IconSwap swapped={copied}>
+							{#snippet icon()}
+								<IconCopy />
+							{/snippet}
+							{#snippet swappedIcon()}
+								<span class="text-success-primary"><IconCircleCheck /></span>
+							{/snippet}
+						</IconSwap>
 					{/snippet}
 				</ButtonIcon>
 			</div>
+			{#if copyFailed}
+				<span class="text-xs text-error-primary" role="alert">{$i18n.core.error.copy_failed}</span>
+			{/if}
 		</div>
 
 		<div class="flex flex-col gap-2">
