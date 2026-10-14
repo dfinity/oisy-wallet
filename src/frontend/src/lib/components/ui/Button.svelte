@@ -21,6 +21,7 @@
 		styleClass?: string;
 		innerStyleClass?: string;
 		transparent?: boolean;
+		static?: boolean;
 		onclick?: MouseEventHandler<HTMLButtonElement>;
 		ondblclick?: MouseEventHandler<HTMLButtonElement>;
 		children: Snippet;
@@ -43,6 +44,7 @@
 		styleClass = '',
 		innerStyleClass = '',
 		transparent,
+		static: isStatic = false, // no shrink on press
 		onclick,
 		ondblclick,
 		children
@@ -61,6 +63,7 @@
 	class:justify-start={alignLeft}
 	class:link
 	class:loading={loading || initialising}
+	class:no-press={isStatic}
 	class:padding-sm={paddingSmall}
 	class:text-tertiary={inlineLink}
 	class:transition={loading || initialising}
