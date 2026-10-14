@@ -77,8 +77,7 @@ describe('ButtonsSignInOpenId', () => {
 
 			cases.forEach(({ testId }) =>
 				expect(container.querySelector(`button[data-tid="${testId}"]`)).toHaveClass(
-					'active:scale-[0.96]',
-					'motion-reduce:active:scale-100',
+					'press-icon',
 					pressed
 				)
 			);

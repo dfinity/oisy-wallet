@@ -88,6 +88,31 @@ describe('TokenGroupCard', () => {
 	const getTokenCountBadge = (container: HTMLElement): HTMLElement | null =>
 		container.querySelector('[data-tid^="token-count"]');
 
+	describe('header hover', () => {
+		const card = (container: HTMLElement): Element | null =>
+			container.querySelector(':scope > div');
+
+		it('should hover the header with the page background while collapsed', () => {
+			const { container } = render(TokenGroupCard, { props: { tokenGroup } });
+
+			expect(card(container)?.firstElementChild).toHaveClass('hover:bg-primary');
+			expect(card(container)).not.toHaveClass('expanded');
+		});
+
+		it('should mark the whole card for the hover outline once expanded', async () => {
+			const { container } = render(TokenGroupCard, { props: { tokenGroup } });
+
+			const header = container.querySelector('button');
+			assertNonNullish(header);
+
+			await fireEvent.click(header);
+
+			// The outline itself is CSS (:has(> .group-header:hover)); the card opts in by class.
+			expect(card(container)).toHaveClass('expanded');
+			expect(card(container)?.firstElementChild).not.toHaveClass('hover:bg-primary');
+		});
+	});
+
 	it('should show total token count when no category filter is active', () => {
 		const { container } = render(TokenGroupCard, { props: { tokenGroup } });
 

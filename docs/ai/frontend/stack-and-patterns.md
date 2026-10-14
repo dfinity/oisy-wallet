@@ -227,23 +227,66 @@ layer and let the service own caching.
 
 ## Press feedback
 
-Every styled `Button` (any `colorStyle`, unless `link`) shrinks to
-`scale: 0.98` while held, and every `ButtonIcon` to `scale: 0.96`
-(`lib/styles/mixins/_button.scss` `press`). Text buttons get less because
-they are often full width, where 0.96 takes off far more pixels than on a
-40 px icon. Don't add your own `active:scale-*` to them; a custom button
-outside these components follows the same two values.
+Everything that can be pressed shows it while held. Pick the treatment by
+what the element is, and use the shared rule, never hand-written
+`active:scale-*` or `active:bg-*`:
 
-- Opt out with the `static` prop where motion would distract, e.g. a
-  button used only as a double-click target. It sets the `no-press`
-  class, because `static` is a Tailwind utility (`position: static`).
-- A Tailwind `transition-*` utility on a button replaces the base
-  transition, which carries `scale`. Use `transition-[...]` with `scale`
-  in the list if you need to change it.
-- Disabled, loading and reduced-motion states never scale.
-- iOS Safari applies `:active` on a tap only when the page has a touch
-  listener. The root layout (`routes/+layout.svelte`) registers a passive
+| Element                                                 | Use                                                          | Effect                                            |
+| ------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------- |
+| `Button` (any `colorStyle`, unless `link`)              | nothing, it is built in                                      | shrinks to 0.98                                   |
+| `ButtonIcon`                                            | nothing, it is built in                                      | shrinks to 0.96                                   |
+| Any other text button, or a whole-card button           | `press`                                                      | shrinks to 0.98                                   |
+| Any other icon-size control (close, help, toggle icons) | `press-icon` (+ `hit-area` if under 40 px)                   | shrinks to 0.96                                   |
+| A full-width row (list item, transaction, contact)      | `row-feedback`                                               | 10 % blue on hover, 20 % while pressed, no shrink |
+| A wrapper that paints the row around its `<button>`     | `hover:bg-brand-subtle-10 child-pressed:bg-brand-subtle-20`  | as `row-feedback`, on the wrapper                 |
+| Something the press would only distract on              | `static` prop (`Button`, `ButtonIcon`), or no utility at all | nothing                                           |
+
+`press`, `press-icon` and `row-feedback` are utilities in
+`lib/styles/global.scss`, built on the same `press` mixin
+(`lib/styles/mixins/_button.scss`) the shared buttons use, so changing a
+value there changes it everywhere. They skip disabled, `loading` and
+`no-press` elements, and reduced motion never scales.
+
+Wide things shrink less (0.98) than small ones (0.96) because the same
+scale takes far more pixels off a full-width element; full-width rows don't
+shrink at all.
+
+### Small controls: `hit-area`
+
+Anything you can tap that is under 40 × 40 px gets `hit-area`: an `::after`
+of at least 40 × 40 px around it, so it is easy to hit without looking
+bigger. Two tap areas must never overlap; where a neighbour sits closer,
+cap it: `[--hit-area:2rem]`, or one axis with `[--hit-area-x:...]` /
+`[--hit-area-y:...]` (`[--hit-area-x:0px]` grows it only up and down). It
+does not set `position`: add `relative` unless the control is already
+`absolute` or `fixed`.
+
+### Pitfalls
+
+- **`:active` reaches every ancestor** of the pressed element. A row with a
+  copy icon or a toggle inside it would light up when the icon is pressed;
+  `row-feedback`, `pressed:` and `child-pressed:` exclude that, plain
+  `active:` does not.
+- **`display: contents` buttons paint nothing.** Put `row-feedback` on the
+  element inside (as `Transaction` and `TipHistory` do).
+- **`scale` makes the element the containing block** of its absolutely
+  positioned children. If a child is positioned against something further
+  out (the mobile bar's Finance circle), scale the child, not the element
+  (`group-active:scale-[0.96]`).
+- **A `transition-*` utility replaces the base transition,** which carries
+  `scale`. Buttons already have `scale` in theirs; anything else, or a
+  button with its own transition, lists it: `transition-[color,scale]`.
+- **Custom variants must not start with `has-`** (Tailwind 4 reads `has-*`
+  as its built-in compound variant), and **must not nest `:has()` inside
+  `:has()`** (invalid CSS: the browser drops the whole rule). Check a new
+  variant actually lands in the stylesheet.
+- **Hover in SCSS** goes through `@include interaction.hover { … }` (see
+  above); in Tailwind, `hover:` is already guarded.
+- **iOS Safari applies `:active` on a tap only when the page has a touch
+  listener.** The root layout (`routes/+layout.svelte`) registers a passive
   no-op `touchstart` on the document for that; it is not dead code.
+- **Nested buttons:** a control inside a clickable row stops propagation
+  (`e.stopPropagation()`), or its click also runs the row's.
 
 ## Icons
 

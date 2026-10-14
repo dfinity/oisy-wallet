@@ -1,4 +1,5 @@
 @use 'sass:meta';
+@use 'mixins/button' as button-mixins;
 
 /*
 We explicitly need to import Tailwind with a plain CSS @import as described in their documentation.
@@ -15,7 +16,73 @@ Defined here instead of in the `screens` config because Tailwind v4 treats
 any entry in `screens` as a width breakpoint for the `container` utility,
 which breaks raw media queries like `(max-height: 68rem)`.
 */
-@custom-variant h-md (@media (max-height: 68rem)); // ~1090px
+@custom-variant h-md (@media (max-height: 68rem)); /* ~1090px */
+
+/*
+`pressed:` - the element is held down, but not because a control inside it is.
+`:active` applies to every ancestor of the pressed element, so without the `:has()`
+a row would light up while its copy icon or toggle is the thing being pressed.
+*/
+@custom-variant pressed (&:active:not(:has(:is(a, button, input, label, [role='button']):active)));
+
+/*
+`child-pressed:` - the same, for a wrapper that paints the row while its direct child is the
+button (`LogoButton` puts its hover on a `div` around the `<button>`). Two `:has()` side by
+side rather than one inside the other: a nested `:has()` is invalid and drops the rule.
+*/
+@custom-variant child-pressed (&:has(> :is(a, button):active):not(:has(> :is(a, button) :is(a, button, input, label, [role='button']):active)));
+
+/*
+`hit-area` - a tap target of at least 40 x 40 px around a small control, without changing
+how the control looks. Where a neighbour sits closer, cap it so the two never overlap:
+`[--hit-area:2rem]`, or one axis with `[--hit-area-x:...]` / `[--hit-area-y:...]`.
+The control must be positioned: add `relative` unless it is already `absolute` or `fixed`
+(the utility does not set it, so it never overrides a control's own positioning).
+*/
+@utility hit-area {
+	&::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: max(100%, var(--hit-area-x, var(--hit-area, 2.5rem)));
+		height: max(100%, var(--hit-area-y, var(--hit-area, 2.5rem)));
+		translate: -50% -50%;
+	}
+}
+
+/*
+Press and row feedback, as utilities so every interactive element shares one rule instead of
+re-spelling it. The shared `Button` / `ButtonIcon` get the same press from `button.scss`.
+
+- `press`: shrinks to 0.98 while held. Text buttons and whole-card buttons.
+- `press-icon`: shrinks to 0.96 while held. Icon-size controls.
+- `row-feedback`: full-width rows, which do not shrink: 10 % blue on hover, 20 % while pressed
+  (ignoring presses on controls inside the row), colour over 150 ms.
+
+The presses skip disabled and reduced motion. They need `scale` in the element's transition:
+buttons have it from the base button rule; anything else adds `transition-[scale]` (or a list
+that includes it).
+*/
+@utility press {
+	@include button-mixins.press(0.98);
+}
+
+@utility press-icon {
+	@include button-mixins.press(0.96);
+}
+
+@utility row-feedback {
+	transition: background-color 0.15s ease-out;
+
+	@variant hover {
+		background-color: var(--color-background-brand-subtle-10);
+	}
+
+	@variant pressed {
+		background-color: var(--color-background-brand-subtle-20);
+	}
+}
 
 @layer base {
 	::view-transition-old(header),

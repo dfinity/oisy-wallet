@@ -102,8 +102,11 @@
 	const notDisplayedCount: number = $derived(sortedFilteredTokens.length - tokensToShow.length);
 </script>
 
-<div class="flex flex-col" class:bg-primary={isExpanded}>
-	<div class="transition-colors duration-300 hover:bg-primary">
+<div class="group-card flex flex-col" class:bg-primary={isExpanded} class:expanded={isExpanded}>
+	<div
+		class="group-header transition-colors duration-150 ease-out"
+		class:hover:bg-primary={!isExpanded}
+	>
 		<TokenCard
 			data={{
 				...headerData,
@@ -119,7 +122,7 @@
 		<div class="ml-0 flex flex-col gap-1.5 p-2 md:ml-16" transition:slide={SLIDE_PARAMS}>
 			{#each tokensToShow as token (`token:${token.id.description}:${token.network.id.description}`)}
 				<div
-					class="flex overflow-hidden rounded-lg bg-secondary transition-colors duration-250 hover:bg-brand-subtle-10"
+					class="flex overflow-hidden rounded-lg bg-secondary transition-colors duration-150 ease-out hover:bg-brand-subtle-10"
 					transition:slide={SLIDE_PARAMS}
 				>
 					<TokenCard asNetwork data={token} onClick={() => goto(transactionsUrl({ token }))} />
@@ -143,3 +146,20 @@
 		</div>
 	{/if}
 </div>
+
+<style lang="scss">
+	.group-card {
+		// Follow the list's rounded clip, so the hover outline keeps its corners.
+		border-radius: inherit;
+		transition: box-shadow 0.15s ease-out;
+	}
+
+	// Expanded, the header opens and closes the whole card, so hovering it outlines the card,
+	// sub-tokens included. A fill would not do: on the white card, the 10 % blue row hover is
+	// the colour of the page behind it. Inset, because the list clips each card.
+	@media (hover: hover) {
+		.group-card.expanded:has(> .group-header:hover) {
+			box-shadow: inset 0 0 0 1px var(--color-border-brand-subtle-30);
+		}
+	}
+</style>
