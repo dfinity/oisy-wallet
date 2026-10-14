@@ -217,6 +217,10 @@ layer and let the service own caching.
   bikeshed it.
 - **Variants & responsive:** prefer Tailwind variants (`md:`, `dark:`,
   `data-[active=true]:`) over JS branches.
+- **Hover in SCSS:** write `@include interaction.hover { … }`
+  (`lib/styles/mixins/_interaction.scss`), not a bare `&:hover`, so a tap
+  on a touch screen doesn't leave the hover colour on. Tailwind's `hover:`
+  variant already does this.
 - The route-level prerendered backgrounds described in
   [HACKING.md "Routes Styles"](../../../HACKING.md#routes-styles) are the
   preferred way to set route-specific colours.
