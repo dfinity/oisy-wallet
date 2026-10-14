@@ -26,8 +26,9 @@
 	let { note, singleUse, onDone }: Props = $props();
 
 	const onCopy = async () => {
-		await copyToClipboard({ value: note, text: $i18n.notes.share.recipient.note_copied });
-		trackPersonalNoteShare({ step: 'copy', side: 'recipient' });
+		if (await copyToClipboard({ value: note, text: $i18n.notes.share.recipient.note_copied })) {
+			trackPersonalNoteShare({ step: 'copy', side: 'recipient' });
+		}
 	};
 </script>
 

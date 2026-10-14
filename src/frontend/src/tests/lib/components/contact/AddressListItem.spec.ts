@@ -19,7 +19,7 @@ describe('AddressListItem', () => {
 	const mockI18n = readable(en);
 
 	// Mock the clipboard utils
-	vi.spyOn(clipboardUtils, 'copyToClipboard').mockResolvedValue(undefined);
+	vi.spyOn(clipboardUtils, 'copyToClipboard').mockResolvedValue(true);
 
 	// Setup the context with the mocked i18n store
 	const mockContext = new Map([['i18n', mockI18n]]);
