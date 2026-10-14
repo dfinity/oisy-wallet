@@ -41,8 +41,9 @@
 	// bottom sheets already paint above the default Header at `z-14`,
 	// and bumping here would hide them behind the Header and capture
 	// pointer events on top of the modal backdrop. We also keep the
-	// `1.5xl` signed-in default at `z-10` so those banners render at
-	// the same level as the Header instead of behind it.
+	// signed-in default from `md` (where the Header sticks) at `z-10` so
+	// those banners render at the same level as the Header instead of
+	// behind it.
 	let popoverOpen = $derived(menuOpen || networkSwitcherOpen || activeUserTransactionsOpen);
 
 	let biggerOverlay = $derived(popoverOpen || modalsOpen);

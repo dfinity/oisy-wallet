@@ -32,9 +32,10 @@ On **mobile** the bottom bar has five slots: **Assets · Activity · Finance · 
 
 The desktop sidebar's logo header and social-links footer remain a follow-up.
 
-The **header** (logo, network switcher, scan, profile) stays at the top while the page scrolls on
-any window from 768 px wide, as the sidebar beside it does; on phones it scrolls away and the
-bottom bar stays. Where the content column leaves no room beside it, the header gets out of the
+Once signed in, the **header** (logo, network switcher, scan, profile) stays at the top while
+the page scrolls on any window from 768 px wide, as the sidebar beside it does; on phones it
+scrolls away and the bottom bar stays. Signed out (the landing page and public pages), it
+scrolls away at every width. Where the content column leaves no room beside it, the header gets out of the
 way: below 1280 px the network switcher shows only the network's logo, and below 1088 px, where
 even the icons sit over the content, a frosted band in the page colour appears behind them once
 the page is scrolled, so rows pass under it instead of showing through.
