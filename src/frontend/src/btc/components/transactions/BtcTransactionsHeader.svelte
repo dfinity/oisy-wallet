@@ -20,7 +20,7 @@
 
 		{#if isNetworkMainnet}
 			<button
-				class="ml-1 opacity-50"
+				class="hit-area relative ml-1 opacity-50 press-icon"
 				aria-label={$i18n.core.text.info}
 				onclick={onInfoButtonClick}
 				type="button"><IconGixInfo /></button

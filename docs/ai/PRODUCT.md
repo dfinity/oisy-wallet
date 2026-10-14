@@ -64,6 +64,14 @@ Where it applies:
   the token and NFT settings menus) take the pressed fill. An expanded token group's header
   opens and closes the whole card, so hovering it outlines the whole card, sub-tokens
   included; a fill would not do, since on the white card the row hover is the page colour.
+- **Small controls.** Close, clear and help buttons (toasts, banners, info boxes, modals,
+  popovers, the search field, the settings, rewards and earning help toggles, the copy and edit
+  icons next to addresses and IDs, the dismiss button on active transactions) press like icon
+  buttons and can be hit across at least 40 × 40 px while looking the same size. Where a
+  neighbour sits closer (a copy icon right next to a link, a modal's close next to its header
+  actions), the tap area only grows up and down, so two tap areas never overlap; the contact
+  row's action icons no longer overlap each other on phones. The help toggles say whether
+  their explanation is open.
 
 ---
 

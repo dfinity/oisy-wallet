@@ -3,6 +3,7 @@
 	import type { Snippet } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		permanentInfo?: boolean;
@@ -26,7 +27,9 @@
 		<span class="flex">{@render key()}</span>
 		{#if hasInfoSlot && !permanentInfo}
 			<button
-				class="ml-1 flex p-0.5 align-top text-tertiary"
+				class="hit-area relative ml-1 flex p-0.5 align-top text-tertiary press-icon"
+				aria-expanded={infoExpanded}
+				aria-label={$i18n.core.text.info}
 				onclick={() => (infoExpanded = !infoExpanded)}
 			>
 				<IconHelp size="18" />

@@ -194,7 +194,7 @@
 					</span>
 				</Checkbox>
 				<button
-					class="flex h-4 w-4 items-center text-tertiary"
+					class="hit-area relative flex h-4 w-4 items-center text-tertiary press-icon"
 					aria-label={$i18n.trading.limit_order.fok_title}
 					onclick={toggleFokHelp}
 					type="button"

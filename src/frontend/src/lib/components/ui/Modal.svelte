@@ -89,7 +89,10 @@
 						{@render headerRight?.()}
 
 						{#if !disablePointerEvents}
+							<!-- Flush against the header actions, so its tap area only grows up and down
+							     when there are any. -->
 							<button
+								class={`hit-area relative press-icon ${nonNullish(headerRight) ? '[--hit-area-x:0px]' : ''}`}
 								aria-label={$i18n.core.text.close}
 								data-tid="close-modal"
 								onclick={stopPropagation(close)}

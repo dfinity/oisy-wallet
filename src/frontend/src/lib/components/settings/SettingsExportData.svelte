@@ -110,7 +110,9 @@
 		<span class="inline-flex items-center">
 			{$i18n.settings.text.export_data}
 			<button
-				class="ml-1 flex p-0.5 align-top text-tertiary"
+				class="hit-area relative ml-1 flex p-0.5 align-top text-tertiary press-icon"
+				aria-expanded={helpExpanded}
+				aria-label={$i18n.core.text.info}
 				onclick={() => (helpExpanded = !helpExpanded)}
 			>
 				<IconHelp size="18" />
