@@ -1,7 +1,5 @@
 <script lang="ts">
-	import IconCopy from '$lib/components/icons/IconCopy.svelte';
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import { copyToClipboard } from '$lib/utils/clipboard.utils';
+	import Copy from '$lib/components/ui/Copy.svelte';
 
 	interface Props {
 		address: string;
@@ -16,17 +14,12 @@
 	let { address, copyAriaLabel, copiedText, testId, onCopy }: Props = $props();
 </script>
 
-<ButtonIcon
+<Copy
 	ariaLabel={copyAriaLabel}
+	iconSize="24"
 	link={false}
-	onclick={async () => {
-		if (await copyToClipboard({ value: address, text: copiedText ?? copyAriaLabel })) {
-			onCopy?.();
-		}
-	}}
+	{onCopy}
 	{testId}
->
-	{#snippet icon()}
-		<IconCopy size="24" />
-	{/snippet}
-</ButtonIcon>
+	text={copiedText ?? copyAriaLabel}
+	value={address}
+/>

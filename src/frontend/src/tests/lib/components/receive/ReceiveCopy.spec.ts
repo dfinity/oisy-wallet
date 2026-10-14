@@ -15,17 +15,26 @@ describe('ReceiveCopy', () => {
 		vi.clearAllMocks();
 	});
 
-	it('should copy the address', async () => {
+	it('should label the button with the given aria label', () => {
+		const { getByTestId } = render(ReceiveCopy, { props });
+
+		expect(getByTestId(testId)).toHaveAttribute('aria-label', props.copyAriaLabel);
+	});
+
+	it('should copy the address and confirm it in place instead of with a toast', async () => {
 		const spyCopy = vi.spyOn(clipboardUtils, 'copyToClipboard').mockResolvedValue(true);
 
-		const { getByTestId } = render(ReceiveCopy, { props });
+		const { getByTestId, getByRole } = render(ReceiveCopy, { props });
 
 		await fireEvent.click(getByTestId(testId));
 
 		expect(spyCopy).toHaveBeenCalledExactlyOnceWith({
 			value: props.address,
-			text: props.copyAriaLabel
+			text: props.copyAriaLabel,
+			withToast: false
 		});
+
+		await waitFor(() => expect(getByRole('status')).toHaveTextContent(props.copyAriaLabel));
 	});
 
 	it('should call onCopy after a successful copy', async () => {
