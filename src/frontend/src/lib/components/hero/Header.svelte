@@ -52,17 +52,28 @@
 	// For now, we apply a scale to the header when WalletConnect is trying to connect, to avoid that issue.
 	// TODO: remove this condition when we refactor the WalletConnect button to fit
 	let isCompact = $derived(nonNullish($walletConnectListenerStore));
+
+	let scrollY = $state(0);
+
+	// From 768 px the header sticks to the top while the page scrolls under it (from 1408 px it
+	// is fixed beside the content, as before). At the top of the page nothing is under it, so the
+	// band that keeps scrolled rows from showing behind the controls only appears once scrolled.
+	let scrolled = $derived($authSignedIn && scrollY > 0);
 </script>
+
+<svelte:window bind:scrollY />
 
 <header
 	style="view-transition-name: header"
 	class="pointer-events-none relative flex w-full max-w-screen-2.5xl items-center justify-between gap-y-5 px-4 pt-6 md:px-8"
 	class:1.5xl:fixed={$authSignedIn}
 	class:1.5xl:inset-x-0={$authSignedIn}
-	class:1.5xl:top-0={$authSignedIn}
-	class:1.5xl:z-10={$authSignedIn && !popoverOpen}
-	class:1.5xl:z-20={$authSignedIn && popoverOpen}
+	class:md:sticky={$authSignedIn}
+	class:md:top-0={$authSignedIn}
+	class:md:z-10={$authSignedIn && !popoverOpen}
+	class:md:z-20={$authSignedIn && popoverOpen}
 	class:pb-10={$authNotSignedIn}
+	class:scrolled
 	class:sm:pb-8={$authNotSignedIn}
 	class:z-20={popoverOpen}
 	class:z-3={!biggerOverlay}
@@ -113,3 +124,25 @@
 {#if $modalAboutWhyOisy}
 	<AboutWhyOisyModal />
 {/if}
+
+<style lang="scss">
+	// Between 768 px and 68rem (1088 px) even the compact controls sit over the content column,
+	// so scrolled rows would show through behind them: a band in the page colour covers them.
+	// From 68rem the controls clear the content and the header stays transparent, as from 1408 px.
+	@media (min-width: 48rem) and (max-width: 67.99rem) {
+		header::before {
+			content: '';
+			position: absolute;
+			inset: 0 0 -0.75rem;
+			z-index: -1;
+			background: color-mix(in srgb, var(--color-background-page) 85%, transparent);
+			backdrop-filter: blur(12px);
+			opacity: 0;
+			transition: opacity 0.15s ease-out;
+		}
+
+		header.scrolled::before {
+			opacity: 1;
+		}
+	}
+</style>
