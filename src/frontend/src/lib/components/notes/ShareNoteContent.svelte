@@ -58,15 +58,23 @@
 	let createdLink = $state<string | undefined>();
 	let atCap = $state(false);
 	let copied = $state(false);
+	let copyFailed = $state(false);
 	let copiedTimeout: ReturnType<typeof setTimeout> | undefined;
 
-	// Confirm the copy inline on the control itself: a floating toast would be
-	// hidden behind the mobile share bottom sheet.
+	// Confirm the copy inline on the control itself, success and failure alike: a
+	// floating toast would be hidden behind the mobile share bottom sheet.
 	const onCopyLink = async () => {
 		if (createdLink === undefined) {
 			return;
 		}
-		await copyText(createdLink);
+		try {
+			await copyText(createdLink);
+		} catch {
+			copied = false;
+			copyFailed = true;
+			return;
+		}
+		copyFailed = false;
 		copied = true;
 		clearTimeout(copiedTimeout);
 		copiedTimeout = setTimeout(() => (copied = false), 2000);
@@ -247,6 +255,9 @@
 					{/snippet}
 				</ButtonIcon>
 			</div>
+			{#if copyFailed}
+				<span class="text-xs text-error-primary" role="alert">{$i18n.core.error.copy_failed}</span>
+			{/if}
 		</div>
 
 		<div class="flex flex-col gap-2">
