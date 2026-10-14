@@ -91,7 +91,7 @@
 		"@solana-program/token": "^0.16.1",
 		"@solana-program/token-2022": "^0.17.0",
 		"@solana/kit": "^8.3.0",
-		"@velora-dex/sdk": "^10.2.2",
+		"@velora-dex/sdk": "^11.0.0",
 		"barcode-detector": "^3.2.1",
 		"bech32": "^1.1.4",
 		"bitcoinjs-lib": "^6.1.7",
