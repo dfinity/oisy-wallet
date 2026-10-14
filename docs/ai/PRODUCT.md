@@ -65,8 +65,8 @@ Where it applies:
   opens and closes the whole card, so hovering it outlines the whole card, sub-tokens
   included; a fill would not do, since on the white card the row hover is the page colour.
 - **Amount forms.** The swap flip button presses like an icon button, and its arrow turns a
-  half-turn each time the tokens swap, back the other way on the next swap (no turn with
-  reduced motion). **Max** presses, darkens on hover while the amount is valid, and can be hit
+  half-turn each time the tokens swap, back the other way on the next swap (with reduced
+  motion it flips at once, without the turning animation). **Max** presses, darkens on hover while the amount is valid, and can be hit
   across 40 px without reaching the amount field above it.
 
 ---
