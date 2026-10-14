@@ -90,9 +90,11 @@
 
 						{#if !disablePointerEvents}
 							<!-- Flush against the header actions, so its tap area only grows up and down
-							     when there are any. -->
+							     when one is actually rendered before it. Not keyed on the headerRight
+							     snippet: a snippet can render nothing (Notes shows Save only in its
+							     editor, on phones), and the close would then lose its width for nothing. -->
 							<button
-								class={`hit-area relative press-icon ${nonNullish(headerRight) ? '[--hit-area-x:0px]' : ''}`}
+								class="hit-area relative press-icon not-first:[--hit-area-x:0px]"
 								aria-label={$i18n.core.text.close}
 								data-tid="close-modal"
 								onclick={stopPropagation(close)}
