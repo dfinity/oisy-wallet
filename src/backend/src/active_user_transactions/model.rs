@@ -3360,7 +3360,7 @@ mod tests {
         create(&mut map, principal(), create_req("a"), 1).expect("create");
         delete(&mut map, principal(), "a".to_string()).expect("first delete");
         delete(&mut map, principal(), "a".to_string()).expect("second delete idempotent");
-        assert!(list(&map, principal()).transactions.is_empty());
+        assert_eq!(list(&map, principal()).transactions, vec![]);
     }
 
     #[test]
