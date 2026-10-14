@@ -252,11 +252,16 @@ have it built in; anything else that looks like a link adds
 Never hover a link to `text-brand-secondary`: it is the darker blue in both themes.
 An icon-only link also gets `press-icon`, like any icon button.
 
-`press`, `press-icon` and `row-feedback` are utilities in
-`lib/styles/global.scss`, built on the same `press` mixin
-(`lib/styles/mixins/_button.scss`) the shared buttons use, so changing a
-value there changes it everywhere. They skip disabled, `loading` and
-`no-press` elements, and reduced motion never scales.
+`press` and `press-icon` are utilities in `lib/styles/global.scss`, built
+on the same `press` mixin and the same two scales (`$press-scale-text`,
+`$press-scale-icon` in `lib/styles/mixins/_button.scss`) the shared buttons
+use, so changing a value there changes it everywhere. They skip disabled,
+`loading` and `no-press` elements, and reduced motion never scales.
+
+`row-feedback`, also in `global.scss`, is a colour change, not a shrink: it
+is not built on the press mixin, and `no-press` does not turn it off. A row
+button can therefore opt out of the shrink with `static` and keep the fill,
+as `ListItemButton` does.
 
 Wide things shrink less (0.98) than small ones (0.96) because the same
 scale takes far more pixels off a full-width element; full-width rows don't
