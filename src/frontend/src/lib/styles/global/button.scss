@@ -592,9 +592,11 @@ a.as-button {
 	@apply font-medium;
 	@apply leading-5;
 
+	// Border too: dropdowns such as MultiSelectDropdown and ModalFilterButton change it on hover.
 	transition:
 		color 0.15s ease-out,
 		background 0.15s ease-out,
+		border-color 0.15s ease-out,
 		opacity 0.15s ease-out,
 		scale 0.15s ease-out;
 

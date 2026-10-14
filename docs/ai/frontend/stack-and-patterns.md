@@ -256,9 +256,11 @@ Wide things shrink less (0.98) than small ones (0.96) because the same
 scale takes far more pixels off a full-width element; full-width rows don't
 shrink at all.
 
-Colour changes take 150 ms ease-out everywhere, the shared buttons included,
-and pressed is one step of OISY blue past hover (10 % → 20 %, or 20 % → 30 %);
-a state that stays on, such as an open popover's button, may go a step further.
+The shared buttons (`button.scss`), rows, links and navigation change colour
+in 150 ms ease-out; use the same for new feedback. A subtle OISY-blue fill
+presses one step past its hover (`brand-subtle-10` → `-20`, or `-20` → `-30`),
+and a state that stays on, such as an open popover's button, may go a step
+further. Success, error and other palettes keep their own steps.
 
 ### Small controls: `hit-area`
 
