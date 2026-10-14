@@ -1903,7 +1903,7 @@
 			"done": "Done. This window closes by itself.",
 			"failed": "OISY couldn't complete this request.",
 			"unsupported": "OISY can't handle this request yet.",
-			"testnets_off": "Turn on testnets in Settings to use Sepolia and Solana devnet with the extension.",
+			"networks_off": "The extension uses Sepolia and Solana Devnet. In Settings, open Active networks, turn on test networks, then switch on Sepolia and Solana Devnet.",
 			"wrong_account": "You're signed in to a different OISY account than the one this site is connected to. Sign in with that account, or forget it in the extension."
 		},
 		"connect": {

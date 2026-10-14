@@ -5,6 +5,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ethAddress, solAddressDevnet } from '$lib/derived/address.derived';
+	import { networkSepoliaEnabled, networkSolanaDevnetEnabled } from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type {
@@ -22,10 +23,15 @@
 
 	let { request, onApprove, onReject }: Props = $props();
 
-	// The extension works on Sepolia and Solana devnet only, so connecting needs testnets on: without
-	// them the site could connect but every Solana request and every send would then be refused.
+	// The extension works on Sepolia and Solana Devnet only. OISY loads the devnet address, and the
+	// review screens accept those networks, only while they are switched on; the testnets toggle
+	// alone is not enough. Without them a site could connect, then have every request refused.
+	let networksOn = $derived(
+		$testnetsEnabled && $networkSepoliaEnabled && $networkSolanaDevnetEnabled
+	);
+
 	let account = $derived<ExtensionAccount | undefined>(
-		$testnetsEnabled && nonNullish($ethAddress) && nonNullish($solAddressDevnet)
+		networksOn && nonNullish($ethAddress) && nonNullish($solAddressDevnet)
 			? { eth: $ethAddress, sol: $solAddressDevnet }
 			: undefined
 	);
@@ -60,8 +66,8 @@
 		<SignerOrigin payload={{ origin: request.origin }} />
 	{/if}
 
-	{#if !$testnetsEnabled}
-		<MessageBox level="warning">{$i18n.extension.text.testnets_off}</MessageBox>
+	{#if !networksOn}
+		<MessageBox level="warning">{$i18n.extension.text.networks_off}</MessageBox>
 	{:else if isNullish(account)}
 		<p class="mb-6 text-center">{$i18n.extension.text.loading_addresses}</p>
 	{:else}

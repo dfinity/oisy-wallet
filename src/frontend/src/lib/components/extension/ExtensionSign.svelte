@@ -82,7 +82,7 @@
 {#if isNullish(sessionRequest)}
 	{@render refusal($i18n.extension.text.unsupported)}
 {:else if networkMissing}
-	{@render refusal($i18n.extension.text.testnets_off)}
+	{@render refusal($i18n.extension.text.networks_off)}
 {:else if isNullish(currentAddress)}
 	<p class="text-center">{$i18n.extension.text.loading_addresses}</p>
 {:else if currentAddress !== request.address}

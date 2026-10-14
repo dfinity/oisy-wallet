@@ -34,8 +34,10 @@ Open http://localhost:8090.
 
 ## Try it
 
-1. In OISY (http://localhost:5175), sign in and turn on testnets in Settings. Localhost gets its own
-   II identity, so its addresses start empty.
+1. In OISY (http://localhost:5175), sign in. In Settings, open Active networks, turn on test networks,
+   then switch on Sepolia and Solana Devnet and save. The test networks toggle alone is not enough:
+   OISY loads the devnet address only while Solana Devnet is on. Localhost gets its own II identity,
+   so its addresses start empty.
 2. On the test dapp, click **Connect** under Ethereum. Approve in the OISY popup.
 3. **Sign a message** and **Sign typed data** need no funds. The result shows whether the signature
    recovers to your address.

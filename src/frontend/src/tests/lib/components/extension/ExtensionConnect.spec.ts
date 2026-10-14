@@ -1,3 +1,4 @@
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import ExtensionConnect from '$lib/components/extension/ExtensionConnect.svelte';
 import { ethAddressStore, solAddressDevnetStore } from '$lib/stores/address.store';
 import type { ExtensionConnectRequest, ExtensionPairRequest } from '$lib/types/extension';
@@ -5,6 +6,7 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('ExtensionConnect', () => {
@@ -26,6 +28,7 @@ describe('ExtensionConnect', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		setupUserNetworksStore('allEnabled');
 		setupTestnetsStore('enabled');
 		ethAddressStore.set({ certified: true, data: mockEthAddress });
 		solAddressDevnetStore.set({ certified: true, data: mockSolAddress });
@@ -73,12 +76,23 @@ describe('ExtensionConnect', () => {
 		expect(onApprove).not.toHaveBeenCalled();
 	});
 
-	it('asks to turn on testnets and holds Connect while they are off', () => {
+	it('asks to turn on test networks and holds Connect while they are off', () => {
 		setupTestnetsStore('disabled');
 
 		const { getByText, getByRole } = renderConnect(connectRequest);
 
-		expect(getByText(en.extension.text.testnets_off)).toBeInTheDocument();
+		expect(getByText(en.extension.text.networks_off)).toBeInTheDocument();
+		expect(getByRole('button', { name: en.extension.connect.connect })).toBeDisabled();
+	});
+
+	it('asks to switch on Solana Devnet when only the testnets toggle is on', () => {
+		setupUserNetworksStore([ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID]);
+		setupTestnetsStore('enabled');
+
+		const { getByText, getByRole, queryByText } = renderConnect(connectRequest);
+
+		expect(getByText(en.extension.text.networks_off)).toBeInTheDocument();
+		expect(queryByText(en.extension.text.loading_addresses)).not.toBeInTheDocument();
 		expect(getByRole('button', { name: en.extension.connect.connect })).toBeDisabled();
 	});
 

@@ -1581,7 +1581,7 @@ interface I18nExtension {
 		done: string;
 		failed: string;
 		unsupported: string;
-		testnets_off: string;
+		networks_off: string;
 		wrong_account: string;
 	};
 	connect: {

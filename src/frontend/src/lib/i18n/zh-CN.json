@@ -1903,7 +1903,7 @@
 			"done": "",
 			"failed": "",
 			"unsupported": "",
-			"testnets_off": "",
+			"networks_off": "",
 			"wrong_account": ""
 		},
 		"connect": {
