@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { notEmptyString } from '@dfinity/utils';
+	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import IconAddressType from '$lib/components/address/IconAddressType.svelte';
 	import AddressItemActions, {
 		type Props as AddressItemActionsProps
@@ -32,8 +32,11 @@
 	);
 </script>
 
+<!-- Without onClick (the edit-contact list) tapping the row does nothing, so it shows no
+     hover or pressed fill; only its Edit and Delete icons act. -->
 <button
-	class={`flex w-full items-center gap-3 rounded-xl row-feedback bg-primary p-2 text-left ${styleClass}`}
+	class={`flex w-full items-center gap-3 rounded-xl bg-primary p-2 text-left ${styleClass}`}
+	class:row-feedback={nonNullish(onClick)}
 	data-tid={ADDRESS_LIST_ITEM_BUTTON}
 	onclick={() => onClick?.()}
 >

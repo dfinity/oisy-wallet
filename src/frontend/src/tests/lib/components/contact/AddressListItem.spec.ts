@@ -48,6 +48,15 @@ describe('AddressListItem', () => {
 		address: mockSolAddress
 	};
 
+	it('shows no hover or pressed fill when the row itself does nothing', () => {
+		const { getByTestId } = render(AddressListItem, {
+			props: { address: icrcAddress },
+			context: mockContext
+		});
+
+		expect(getByTestId(ADDRESS_LIST_ITEM_BUTTON)).not.toHaveClass('row-feedback');
+	});
+
 	it('should darken while pressed, unless a control inside it is pressed', () => {
 		const { getByTestId } = render(AddressListItem, {
 			props: { address: icrcAddress, onClick: vi.fn() },
