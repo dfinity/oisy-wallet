@@ -188,7 +188,21 @@ try {
 		ok: reloadedProbe.request?.id === requestId
 	});
 
-	await popup.waitForTimeout(4000);
+	const signInShown = await popup
+		.getByText('Open or create your wallet', { exact: false })
+		.waitFor({ timeout: 20_000 })
+		.then(() => true)
+		.catch(() => false);
+	check({ name: 'the signed-out popup shows the OISY sign-in', ok: signInShown });
+
+	const navigationCount = await popup.locator('nav, footer, header').count();
+	check({
+		name: 'the popup shows no app navigation, header or footer',
+		ok: navigationCount === 0,
+		detail: navigationCount
+	});
+
+	await popup.setViewportSize({ width: 420, height: 720 });
 	await popup.screenshot({ path: join(SCREENSHOT_DIR, 'oisy-popup-signed-out.png') });
 	await popup.close();
 

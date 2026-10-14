@@ -115,7 +115,7 @@
 	});
 </script>
 
-<div class="mx-auto w-full max-w-md py-4">
+<div class="w-full">
 	{#if status === 'loading'}
 		<p class="text-center">{$i18n.extension.text.loading}</p>
 	{:else if status === 'unreachable'}
