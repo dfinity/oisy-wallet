@@ -157,8 +157,9 @@
 	{/snippet}
 
 	{#snippet balance()}
+		<!-- The amount field sits 9 px above, so the tap area grows at most 9 px up and down. -->
 		<button
-			class="hit-area relative font-semibold transition-[color,scale] duration-150 ease-out press-icon"
+			class="hit-area relative font-semibold transition-[color,scale] duration-150 ease-out [--hit-area-y:calc(100%+1.125rem)] press-icon"
 			class:animate-pulse={isNullish(cappedMaxAmount)}
 			class:hover:text-brand-secondary={!isZeroBalance &&
 				isNullish(errorType) &&

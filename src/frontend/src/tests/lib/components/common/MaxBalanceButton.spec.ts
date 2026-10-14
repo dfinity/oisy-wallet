@@ -20,6 +20,7 @@ describe('MaxBalanceButton', () => {
 
 		expect(getByTestId(MAX_BUTTON)).toHaveClass(
 			'hit-area',
+			'[--hit-area-y:calc(100%+1.125rem)]',
 			'press-icon',
 			'hover:text-brand-secondary'
 		);
