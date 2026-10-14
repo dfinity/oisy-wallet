@@ -14,7 +14,8 @@ import type { Activity, InflowActivity, LiquidiumState, OutflowActivity } from '
 vi.mock('$lib/api/liquidium.api', () => ({ liquidiumClient: vi.fn() }));
 vi.mock('$lib/services/active-user-transactions.services', () => ({
 	applyActiveUserTransactionPollUpdate: vi.fn(),
-	deleteActiveUserTransaction: vi.fn()
+	deleteActiveUserTransaction: vi.fn(),
+	reloadActiveUserTransaction: vi.fn()
 }));
 
 describe('liquidium-active-tx.services', () => {
@@ -26,6 +27,7 @@ describe('liquidium-active-tx.services', () => {
 	const getStatus = vi.fn();
 	const apply = vi.mocked(activeUserTransactionsServices.applyActiveUserTransactionPollUpdate);
 	const deleteTx = vi.mocked(activeUserTransactionsServices.deleteActiveUserTransaction);
+	const reload = vi.mocked(activeUserTransactionsServices.reloadActiveUserTransaction);
 
 	const outflowId = 'outflow-1';
 
@@ -371,6 +373,16 @@ describe('liquidium-active-tx.services', () => {
 
 		const repayWithoutTxid = buildRepayTx({ [LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId });
 
+		const repayWithTxid = buildRepayTx({
+			[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
+			[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid
+		});
+
+		beforeEach(() => {
+			// The backend agrees with this tab's copy unless a case says otherwise.
+			reload.mockResolvedValue(repayWithoutTxid);
+		});
+
 		const pollTicks = async ({ tx, ticks }: { tx: ActiveUserTransaction; ticks: number }) => {
 			for (let tick = 0; tick < ticks; tick++) {
 				await poll(tx);
@@ -380,6 +392,7 @@ describe('liquidium-active-tx.services', () => {
 		it('keeps the row through the grace period', async () => {
 			await pollTicks({ tx: repayWithoutTxid, ticks: LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS - 1 });
 
+			expect(reload).not.toHaveBeenCalled();
 			expect(deleteTx).not.toHaveBeenCalled();
 			expect(list).not.toHaveBeenCalled();
 			expect(apply).not.toHaveBeenCalled();
@@ -388,11 +401,58 @@ describe('liquidium-active-tx.services', () => {
 		it('deletes the row once the grace period is over', async () => {
 			await pollTicks({ tx: repayWithoutTxid, ticks: LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS });
 
+			expect(reload).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				id: repayWithoutTxid.id
+			});
 			expect(deleteTx).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				id: repayWithoutTxid.id
 			});
+			expect(reload.mock.invocationCallOrder[0]).toBeLessThan(deleteTx.mock.invocationCallOrder[0]);
 			expect(apply).not.toHaveBeenCalled();
+		});
+
+		// The txid write committed but its response was lost, or another tab made it: this tab's copy
+		// is stale, and deleting it would drop a repay that was sent.
+		it('keeps a row whose txid reached the backend but not this tab', async () => {
+			reload.mockResolvedValue(repayWithTxid);
+
+			await pollTicks({ tx: repayWithoutTxid, ticks: LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS });
+
+			expect(reload).toHaveBeenCalledOnce();
+			expect(deleteTx).not.toHaveBeenCalled();
+		});
+
+		it('restarts the grace period for a stale copy that was reconciled', async () => {
+			reload.mockResolvedValueOnce(repayWithTxid);
+
+			await pollTicks({ tx: repayWithoutTxid, ticks: LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS });
+			await pollTicks({ tx: repayWithoutTxid, ticks: LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS - 1 });
+
+			expect(reload).toHaveBeenCalledOnce();
+			expect(deleteTx).not.toHaveBeenCalled();
+		});
+
+		it("deletes a row the backend no longer has, clearing this tab's copy", async () => {
+			reload.mockResolvedValue(undefined);
+
+			await pollTicks({ tx: repayWithoutTxid, ticks: LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS });
+
+			expect(deleteTx).toHaveBeenCalledOnce();
+		});
+
+		it('does not delete while the backend row cannot be read, and retries on the next tick', async () => {
+			reload.mockRejectedValueOnce(new Error('backend unavailable'));
+
+			await pollTicks({ tx: repayWithoutTxid, ticks: LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS });
+
+			expect(deleteTx).not.toHaveBeenCalled();
+
+			await poll(repayWithoutTxid);
+
+			expect(reload).toHaveBeenCalledTimes(2);
+			expect(deleteTx).toHaveBeenCalledOnce();
 		});
 
 		it('retries a failed delete on the next tick', async () => {
@@ -420,14 +480,9 @@ describe('liquidium-active-tx.services', () => {
 		it('polls a repay row by its txid once it has one', async () => {
 			list.mockResolvedValue([buildActivity({ status: inflowStatus('completed') })]);
 
-			await pollTicks({
-				tx: buildRepayTx({
-					[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
-					[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid
-				}),
-				ticks: LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS
-			});
+			await pollTicks({ tx: repayWithTxid, ticks: LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS });
 
+			expect(reload).not.toHaveBeenCalled();
 			expect(deleteTx).not.toHaveBeenCalled();
 			expect(apply).toHaveBeenCalledWith(
 				expect.objectContaining({ update: { status: { Succeeded: null } } })

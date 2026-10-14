@@ -3,7 +3,8 @@ import { liquidiumClient } from '$lib/api/liquidium.api';
 import { LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS } from '$lib/constants/liquidium.constants';
 import {
 	applyActiveUserTransactionPollUpdate,
-	deleteActiveUserTransaction
+	deleteActiveUserTransaction,
+	reloadActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
@@ -48,7 +49,19 @@ const dropRepayWithoutTxid = async ({
 		return;
 	}
 
-	// A failed delete leaves the count where it was, so the next tick tries again.
+	// This tab's copy can be stale: a txid write whose response was lost, or one made from another
+	// tab, never reached it. The backend's row decides, read right before the delete. A failed read
+	// or delete leaves the count where it was, so the next tick tries again.
+	const current = await reloadActiveUserTransaction({ identity, id: tx.id });
+
+	if (
+		nonNullish(current) &&
+		nonNullish(toLiquidiumExternalRefsMap(current.external_refs)[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID])
+	) {
+		repayTxidObservations.delete(tx.id);
+		return;
+	}
+
 	await deleteActiveUserTransaction({ identity, id: tx.id });
 
 	repayTxidObservations.delete(tx.id);
