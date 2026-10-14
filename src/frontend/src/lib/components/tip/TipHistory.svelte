@@ -205,7 +205,9 @@
 						onclick={() => onOpenTip(tip)}
 						type="button"
 					>
-						<span class="block w-full rounded-xl row-feedback px-2 py-2 text-left">
+						<span
+							class="block w-full rounded-xl row-feedback px-2 py-2 text-left parent-pressed:bg-brand-subtle-20"
+						>
 							<Card noMargin>
 								{#snippet icon()}
 									<div class="relative shrink-0">

@@ -67,7 +67,9 @@ Where it applies:
 - **Activity and other lists.** Transaction rows, tip history, notes, contact addresses, OISY
   Trade orders and positions, and the mobile activity filter rows take the same pressed fill.
   In a contact address row, Edit and Delete act on their own: pressing them does not also
-  copy the address, which the row does when tapped as a whole.
+  copy the address, which the row does when tapped as a whole, and the row's action icons no
+  longer overlap each other on phones. Holding Space on a focused transaction or tip row
+  shows the same fill as a press.
 
 ---
 
