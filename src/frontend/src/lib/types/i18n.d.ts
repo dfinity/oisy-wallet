@@ -1572,6 +1572,29 @@ interface I18nWallet_connect {
 	};
 }
 
+interface I18nExtension {
+	text: {
+		loading: string;
+		loading_addresses: string;
+		no_extension: string;
+		not_found: string;
+		done: string;
+		failed: string;
+		unsupported: string;
+		testnets_off: string;
+		wrong_account: string;
+	};
+	connect: {
+		title_site: string;
+		title_extension: string;
+		site_sees: string;
+		extension_keeps: string;
+		eth_network: string;
+		sol_network: string;
+		connect: string;
+	};
+}
+
 interface I18nTrading {
 	text: {
 		tab_title: string;
@@ -2681,6 +2704,7 @@ interface I18n {
 	fee: I18nFee;
 	info: I18nInfo;
 	wallet_connect: I18nWallet_connect;
+	extension: I18nExtension;
 	trading: I18nTrading;
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;

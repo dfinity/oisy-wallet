@@ -1894,6 +1894,28 @@
 			"unexpected_processing_request": "Unexpected error while processing the request with WalletConnect."
 		}
 	},
+	"extension": {
+		"text": {
+			"loading": "Loading the request…",
+			"loading_addresses": "Loading your addresses…",
+			"no_extension": "This page can't reach the OISY extension. Check that it's installed and enabled in this browser.",
+			"not_found": "This request is no longer open. Close this window and try again from the site.",
+			"done": "Done. This window closes by itself.",
+			"failed": "OISY couldn't complete this request.",
+			"unsupported": "OISY can't handle this request yet.",
+			"testnets_off": "Turn on testnets in Settings to use Sepolia and Solana devnet with the extension.",
+			"wrong_account": "You're signed in to a different OISY account than the one this site is connected to. Sign in with that account, or forget it in the extension."
+		},
+		"connect": {
+			"title_site": "Connect this site",
+			"title_extension": "Connect the OISY extension",
+			"site_sees": "The site will see this address. Each signature still needs your approval in this window.",
+			"extension_keeps": "The extension keeps these addresses to show your balances. It holds no keys.",
+			"eth_network": "Ethereum · Sepolia",
+			"sol_network": "Solana · devnet",
+			"connect": "Connect"
+		}
+	},
 	"trading": {
 		"text": {
 			"tab_title": "Trading",
