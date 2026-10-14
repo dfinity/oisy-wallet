@@ -24,7 +24,7 @@
 </script>
 
 <button
-	class={`flex h-14 w-full items-center justify-center gap-3 rounded-2xl px-5 py-4 text-base leading-[22px] font-semibold whitespace-nowrap transition-[color,background-color,border-color,scale] duration-150 ease-out focus-visible:outline-2 focus-visible:outline-offset-2 active:scale-[0.98] motion-reduce:active:scale-100 ${variantClasses} ${widthClasses}`}
+	class={`flex h-14 w-full items-center justify-center gap-3 rounded-2xl px-5 py-4 text-base leading-[22px] font-semibold whitespace-nowrap transition-[color,background-color,border-color,scale] duration-150 ease-out press focus-visible:outline-2 focus-visible:outline-offset-2 ${variantClasses} ${widthClasses}`}
 	data-tid={LOGIN_BUTTON}
 	{onclick}
 	type="button"
