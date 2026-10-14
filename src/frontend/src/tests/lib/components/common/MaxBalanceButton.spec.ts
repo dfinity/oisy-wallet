@@ -26,6 +26,15 @@ describe('MaxBalanceButton', () => {
 		);
 	});
 
+	it('shows no hover when the fee uses up the balance, so Max would set 0', () => {
+		const { getByTestId } = render(MaxBalanceButton, {
+			props: { ...baseProps, fee: 200_000_000n }
+		});
+
+		expect(getByTestId(MAX_BUTTON)).toHaveTextContent('0 BTC');
+		expect(getByTestId(MAX_BUTTON)).not.toHaveClass('hover:text-brand-hover');
+	});
+
 	it('shows the affordable balance when no cap is set', () => {
 		const { getByTestId } = render(MaxBalanceButton, { props: baseProps });
 

@@ -63,6 +63,14 @@
 		});
 	});
 
+	// A balance the fee uses up computes to a max of 0: Max would set nothing worth having, so it
+	// shows no hover.
+	let hasPositiveMax = $derived(
+		nonNullish(cappedMaxAmount) &&
+			nonNullish(token) &&
+			parseToken({ value: cappedMaxAmount, unitName: token.decimals }) > ZERO
+	);
+
 	const setMax = () => {
 		if (!isZeroBalance && nonNullish(cappedMaxAmount)) {
 			amountSetToMax = true;
@@ -103,7 +111,7 @@
 <!-- The amount field sits 9 px above, so the tap area grows at most 9 px up and down. -->
 <button
 	class="hit-area relative font-semibold text-brand-primary-alt transition-[color,scale] duration-150 ease-out [--hit-area-y:calc(100%+1.125rem)] press-icon"
-	class:hover:text-brand-hover={!isZeroBalance && !error}
+	class:hover:text-brand-hover={!isZeroBalance && !error && hasPositiveMax}
 	class:text-brand-primary-alt={!isZeroBalance && !error}
 	class:text-error-primary={isZeroBalance || error}
 	data-tid={MAX_BUTTON}
