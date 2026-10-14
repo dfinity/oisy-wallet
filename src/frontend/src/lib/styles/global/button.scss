@@ -331,7 +331,8 @@ a.as-button {
 			@apply bg-brand-subtle-10;
 		}
 
-		// One step past the hover, as everywhere else; the open state below stays a step further.
+		// One step past the hover, as `row-feedback` rows and `secondary-light` do; the open
+		// state below stays a step further.
 		&:active {
 			@apply text-brand-primary-alt;
 			@apply bg-brand-subtle-20;
