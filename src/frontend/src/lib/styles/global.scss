@@ -72,11 +72,11 @@ buttons have it from the base button rule; anything else adds `transition-[scale
 that includes it).
 */
 @utility press {
-	@include button-mixins.press(0.98);
+	@include button-mixins.press(button-mixins.$press-scale-text);
 }
 
 @utility press-icon {
-	@include button-mixins.press(0.96);
+	@include button-mixins.press(button-mixins.$press-scale-icon);
 }
 
 @utility row-feedback {
