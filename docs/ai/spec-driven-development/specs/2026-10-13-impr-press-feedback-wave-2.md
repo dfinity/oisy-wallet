@@ -41,7 +41,9 @@ Wave 2 builds on two Wave 1 PRs, both merged:
 
 ### Where feedback is missing today
 
-Paths are under `src/frontend/src/lib/`.
+Component paths are under `src/frontend/src/lib/components/` (`ui/LogoButton.svelte`), style
+paths under `src/frontend/src/lib/` (`styles/global/links.scss`), and `btc/…` paths under
+`src/frontend/src/`.
 
 | Area                   | Today                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -91,8 +93,9 @@ Paths are under `src/frontend/src/lib/`.
 8. **A row is not pressed while a control inside it is pressed.** The control shows its own
    press; the row stays as it is.
 9. **Tap areas.** Every small control can be hit across at least 40 × 40 px, while its visible
-   size stays the same. Tap areas of neighbours never overlap: where two controls sit closer
-   than that, each area stops halfway into the gap between them.
+   size stays the same, except where a neighbour sits closer: on that axis the area stops
+   halfway into the gap (or, for controls that sit flush, does not grow at all), so it can stay
+   narrower than 40 px there. Tap areas of neighbours never overlap.
 
 ### 1. Token list rows
 
