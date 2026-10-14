@@ -1,9 +1,15 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
+	import {
+		EXTERNAL_LINK_POPUP_HEIGHT,
+		EXTERNAL_LINK_POPUP_WIDTH
+	} from '$lib/constants/app.constants';
 	import { trackEvent as trackEventServices } from '$lib/services/analytics.services';
 	import type { TrackEventParams } from '$lib/types/analytics';
+	import { isDesktop, isPWAStandalone } from '$lib/utils/device.utils';
+	import { popupCenter } from '$lib/utils/window.utils';
 
 	interface Props {
 		children?: Snippet;
@@ -41,12 +47,60 @@
 		iconAsLast = false
 	}: Props = $props();
 
-	const onclick = () => {
-		if (isNullish(trackEvent)) {
-			return;
+	// In a desktop PWA, a `target="_blank"` link opens in the last used browser window, which can
+	// sit on another desktop and pull the focus there. A popup window opens over the PWA instead.
+	// Modifier clicks keep the browser default so a real tab is still one Cmd/Ctrl-click away.
+	const openInPopup = (event: MouseEvent): boolean => {
+		if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+			return false;
 		}
 
-		trackEventServices(trackEvent);
+		if (!isDesktop() || !isPWAStandalone()) {
+			return false;
+		}
+
+		const features = popupCenter({
+			width: EXTERNAL_LINK_POPUP_WIDTH,
+			height: EXTERNAL_LINK_POPUP_HEIGHT
+		});
+
+		if (isNullish(features)) {
+			return false;
+		}
+
+		let protocol: string;
+		try {
+			({ protocol } = new URL(href, window.location.href));
+		} catch {
+			return false;
+		}
+
+		if (protocol !== 'http:' && protocol !== 'https:') {
+			return false;
+		}
+
+		// Not `noopener` in the features: with it, a Safari web app ignores the popup size for links
+		// on the same site (e.g. docs.oisy.com) and opens a full-size window. The opener is cut by
+		// hand instead, and the `Referrer-Policy: same-origin` header already withholds the referrer.
+		const popup = window.open(href, '_blank', features);
+
+		if (isNullish(popup)) {
+			return false;
+		}
+
+		popup.opener = null;
+
+		return true;
+	};
+
+	const onclick = (event: MouseEvent) => {
+		if (nonNullish(trackEvent)) {
+			trackEventServices(trackEvent);
+		}
+
+		if (openInPopup(event)) {
+			event.preventDefault();
+		}
 	};
 </script>
 

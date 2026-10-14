@@ -14,13 +14,13 @@
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
 	import IconPay from '$lib/components/icons/IconPay.svelte';
-	import IconQr from '$lib/components/icons/IconQr.svelte';
 	import IconUser from '$lib/components/icons/IconUser.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
+	import IconHeart from '$lib/components/icons/lucide/IconHeart.svelte';
 	import IconMaximize from '$lib/components/icons/lucide/IconMaximize.svelte';
 	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
 	import IconUsersRound from '$lib/components/icons/lucide/IconUsersRound.svelte';
@@ -291,7 +291,7 @@
 					onclick={() => modalStore.openTip(tipModalId)}
 					testId={NAVIGATION_MENU_TIP_BUTTON}
 				>
-					<IconQr size="20" />
+					<IconHeart size="20" />
 
 					<!--
 						The count, where the dot on the icon only said "something". Inside the

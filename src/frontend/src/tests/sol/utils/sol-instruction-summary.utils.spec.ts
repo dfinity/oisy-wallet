@@ -1,17 +1,34 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
-import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
+import type { SolClosedAccount } from '$sol/types/sol-simulation';
+import {
+	mapSolInstructionSummaries,
+	solClosingInstructionCandidates,
+	solOpensAccountBeyondRent
+} from '$sol/utils/sol-instruction-summary.utils';
 import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
-import { solClosesPayOthers } from '$sol/utils/sol-transaction-summary.utils';
-import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
+import { solClosedAccountsReachWallet } from '$sol/utils/sol-simulation.utils';
+import {
+	flattenInstructions,
+	solClosesPayOthers,
+	solWalletLamportsStated
+} from '$sol/utils/sol-transaction-summary.utils';
+import { decodeTransactionMessage } from '$sol/utils/sol-transactions.utils';
+import {
+	MOCK_SOL_INSTRUCTIONS,
+	MOCK_SOL_METEORA_DLMM_CLOSE_POSITION,
+	MOCK_SOL_METEORA_DLMM_OPEN_POSITION
+} from '$tests/mocks/sol-instructions.mock';
 import {
 	mockAtaAddress,
 	mockAtaAddress2,
 	mockSolAddress,
-	mockSolAddress2
+	mockSolAddress2,
+	mockSolAddress3
 } from '$tests/mocks/sol.mock';
-import { getTransferSolInstruction } from '@solana-program/system';
+import { nonNullish } from '@dfinity/utils';
+import { getCreateAccountInstruction, getTransferSolInstruction } from '@solana-program/system';
 import {
 	AuthorityType,
 	getApproveCheckedInstruction,
@@ -23,7 +40,12 @@ import {
 	getSetAuthorityInstruction,
 	getTransferCheckedInstruction
 } from '@solana-program/token';
-import { address as toAddress } from '@solana/kit';
+import {
+	AccountRole,
+	decompileTransactionMessage,
+	getCompiledTransactionMessageDecoder,
+	address as toAddress
+} from '@solana/kit';
 
 describe('sol-instruction-summary.utils', () => {
 	describe('mapSolInstructionSummaries', () => {
@@ -59,7 +81,7 @@ describe('sol-instruction-summary.utils', () => {
 			const views = () => mapSolInstructionSummaries(MOCK_SOL_INSTRUCTIONS.DFLOW_SWAP);
 
 			it('should recognise a System transfer into a wrapped SOL account as wrapping', () => {
-				const wrap = views().find(({ kind }) => kind === 'wrap');
+				const wrap = flattenInstructions(views()).find(({ kind }) => kind === 'wrap');
 
 				expect(wrap?.amount).toBe(5_000_000n);
 			});
@@ -67,7 +89,7 @@ describe('sol-instruction-summary.utils', () => {
 			// Closing a wrapped SOL account is how the swap gives the user their SOL back. Reported
 			// as an ordinary account close it would read as housekeeping.
 			it('should recognise closing that account as unwrapping', () => {
-				const unwrap = views().find(({ kind }) => kind === 'unwrap');
+				const unwrap = flattenInstructions(views()).find(({ kind }) => kind === 'unwrap');
 
 				expect(unwrap?.tokenAddress).toBe(WSOL_TOKEN.address);
 			});
@@ -91,14 +113,22 @@ describe('sol-instruction-summary.utils', () => {
 				expect(route?.program).toBe('DF1ow4tspfHX9JwWJsAb9epbkA8hmpSEAtxXy1V27QBH');
 			});
 
-			it('should gather consecutive legs under the route that produced them', () => {
-				const route = views().find(({ kind }) => kind === 'route');
+			// The router's three instructions each made their lines inside themselves: the account it
+			// opens and the SOL it wraps as much as the legs belong under the instruction that made them.
+			it('should gather every line of an instruction it cannot read under that instruction', () => {
+				const dflow = 'DF1ow4tspfHX9JwWJsAb9epbkA8hmpSEAtxXy1V27QBH';
 
-				expect(route?.children?.length).toBeGreaterThan(1);
-				expect(route?.program).toBe('DF1ow4tspfHX9JwWJsAb9epbkA8hmpSEAtxXy1V27QBH');
 				expect(
-					route?.children?.every(({ kind }) => kind === 'send' || kind === 'receive')
-				).toBeTruthy();
+					views().map(({ kind, program, children }) => [
+						kind,
+						program,
+						children?.map(({ kind: line }) => line)
+					])
+				).toStrictEqual([
+					['route', dflow, ['createTokenAccount', 'wrap']],
+					['route', dflow, ['send']],
+					['route', dflow, ['send', 'receive', 'unwrap', 'send', 'receive']]
+				]);
 			});
 
 			it('should keep far fewer rows than the transaction has instructions', () => {
@@ -110,6 +140,136 @@ describe('sol-instruction-summary.utils', () => {
 
 				expect(total).toBe(24);
 				expect(views().length).toBeLessThan(total / 2);
+			});
+		});
+
+		describe('the program each leg of a route goes through', () => {
+			const router = 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4';
+			// A pool OISY does not know, and one it does.
+			const unread = mockSolAddress3;
+			const meteora = 'cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG';
+
+			// What the run reports: the depth of every nested call, which says who made it.
+			const call = ({ programId, stackHeight }: { programId: string; stackHeight?: number }) => ({
+				programId,
+				accounts: [],
+				data: '',
+				...(nonNullish(stackHeight) && { stackHeight })
+			});
+
+			const transfer = ({
+				outgoing,
+				amount,
+				stackHeight
+			}: {
+				outgoing: boolean;
+				amount: string;
+				stackHeight?: number;
+			}) => ({
+				program: 'spl-token',
+				programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+				parsed: {
+					type: 'transfer',
+					info: outgoing
+						? {
+								source: mockAtaAddress,
+								destination: mockAtaAddress2,
+								authority: mockSolAddress,
+								amount
+							}
+						: {
+								source: mockAtaAddress2,
+								destination: mockAtaAddress,
+								authority: mockSolAddress2,
+								amount
+							}
+				},
+				...(nonNullish(stackHeight) && { stackHeight })
+			});
+
+			const legs = ({
+				top,
+				inner
+			}: {
+				top: string;
+				inner: unknown[];
+			}): [string, string | undefined][] =>
+				flattenInstructions(
+					mapSolInstructionSummaries({
+						instructions: [call({ programId: top })],
+						innerInstructions: [{ index: 0, instructions: inner }],
+						ownedAddresses: [mockSolAddress, mockAtaAddress],
+						userAddress: mockSolAddress
+					})
+				)
+					.filter(({ kind }) => kind !== 'route')
+					.map(({ kind, via }) => [kind, via]);
+
+			it('should name the pool OISY cannot read that made each leg', () => {
+				expect(
+					legs({
+						top: router,
+						inner: [
+							call({ programId: unread, stackHeight: 2 }),
+							transfer({ outgoing: true, amount: '1000', stackHeight: 3 }),
+							transfer({ outgoing: false, amount: '900', stackHeight: 3 })
+						]
+					})
+				).toStrictEqual([
+					['send', unread],
+					['receive', unread]
+				]);
+			});
+
+			// The notice names only programs off the list, and a known pool on every leg of every
+			// routed swap would only repeat itself.
+			it('should name no pool among the known programs', () => {
+				expect(
+					legs({
+						top: router,
+						inner: [
+							call({ programId: unread, stackHeight: 2 }),
+							transfer({ outgoing: true, amount: '1000', stackHeight: 3 }),
+							call({ programId: meteora, stackHeight: 2 }),
+							transfer({ outgoing: false, amount: '450', stackHeight: 3 })
+						]
+					})
+				).toStrictEqual([
+					['send', unread],
+					['receive', undefined]
+				]);
+			});
+
+			// The heading already names the router, and a pool called directly is the heading itself.
+			it('should name nothing for a leg the heading program made itself', () => {
+				expect(
+					legs({
+						top: unread,
+						inner: [
+							transfer({ outgoing: true, amount: '1000', stackHeight: 2 }),
+							transfer({ outgoing: false, amount: '900', stackHeight: 2 })
+						]
+					})
+				).toStrictEqual([
+					['send', undefined],
+					['receive', undefined]
+				]);
+			});
+
+			it('should name nothing when the run does not say how deep a call was', () => {
+				expect(
+					legs({
+						top: router,
+						inner: [
+							call({ programId: unread }),
+							transfer({ outgoing: true, amount: '1000' }),
+							transfer({ outgoing: false, amount: '900' })
+						]
+					})
+				).toStrictEqual([
+					['send', undefined],
+					['receive', undefined]
+				]);
 			});
 		});
 
@@ -194,9 +354,79 @@ describe('sol-instruction-summary.utils', () => {
 						kind: 'createTokenAccount',
 						account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
 						tokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-						rent: 2039280n
+						rent: 2039280n,
+						payer: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
 					}
 				]);
+			});
+
+			// Rent another signer pays leaves the wallet as it was, so the line names who paid it.
+			it('should name another signer that funds the user’s account', () => {
+				const funder = '9zsjmwXjZzuKfArqhLDpvcvLKUxLZfCzeMcqhAcPr8Jm';
+
+				expect(
+					mapSolInstructionSummaries({
+						instructions: [
+							{
+								...creation,
+								parsed: { ...creation.parsed, info: { ...creation.parsed.info, source: funder } }
+							},
+							initialisation
+						],
+						ownedAddresses: ['5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'],
+						userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
+					})
+				).toStrictEqual([
+					{
+						kind: 'createTokenAccount',
+						account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
+						tokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+						rent: 2039280n,
+						payer: funder
+					}
+				]);
+			});
+
+			// The associated token account program funds what it opens from the account its
+			// instruction names as the source, which a sender opening the user's account is.
+			it('should name another signer that funds an associated account opened for the user', () => {
+				const user = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
+				const funder = '9zsjmwXjZzuKfArqhLDpvcvLKUxLZfCzeMcqhAcPr8Jm';
+
+				const [view] = mapSolInstructionSummaries({
+					instructions: [
+						{
+							program: 'spl-associated-token-account',
+							programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+							parsed: {
+								type: 'create',
+								info: {
+									account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
+									mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+									source: funder,
+									wallet: user
+								}
+							}
+						}
+					],
+					innerInstructions: [
+						{
+							index: 0,
+							instructions: [
+								{
+									...creation,
+									parsed: { ...creation.parsed, info: { ...creation.parsed.info, source: funder } }
+								}
+							]
+						}
+					],
+					ownedAddresses: [user],
+					userAddress: user
+				});
+
+				expect(view.kind).toBe('createTokenAccount');
+				expect(view.rent).toBe(2_039_280n);
+				expect(view.payer).toBe(funder);
 			});
 
 			it('should not list the same account twice when a program opened it', () => {
@@ -408,6 +638,349 @@ describe('sol-instruction-summary.utils', () => {
 						2_074_080n
 					);
 				});
+			});
+		});
+
+		describe('an account opened for an application', () => {
+			const user = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
+			const application = 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo';
+			const position = 'BNzxjYNsUyyUyJgds2qYqtpThcd6FPnucFKXfWGzweDK';
+
+			// What the chain charges an account of the token account size, and what that price makes
+			// an account of 8,120 bytes cost.
+			const rentExemptMinimum = 1_488_440n;
+			const positionRent = 41_899_840n;
+
+			const opening = ({
+				lamports = positionRent,
+				source = user,
+				owner = application
+			}: {
+				lamports?: bigint;
+				source?: string;
+				owner?: string;
+			} = {}) => ({
+				program: 'system',
+				programId: '11111111111111111111111111111111',
+				parsed: {
+					type: 'createAccount',
+					info: { lamports: Number(lamports), newAccount: position, owner, source, space: 8120 }
+				}
+			});
+
+			const openedInside = ({
+				creation = opening(),
+				withPrice = true
+			}: {
+				creation?: ReturnType<typeof opening>;
+				withPrice?: boolean;
+			} = {}): SolInstructionSummary[] =>
+				mapSolInstructionSummaries({
+					instructions: [{ programId: application }],
+					innerInstructions: [{ index: 0, instructions: [creation] }],
+					ownedAddresses: [user],
+					userAddress: user,
+					...(withPrice && { rentExemptMinimum }),
+					includeUnrecognised: true
+				});
+
+			it('should state the rent an application opening its account inside its call costs', () => {
+				expect(openedInside()).toStrictEqual([
+					{
+						kind: 'route',
+						program: application,
+						children: [
+							{
+								kind: 'createAccount',
+								account: position,
+								program: application,
+								rent: positionRent,
+								payer: user
+							}
+						]
+					}
+				]);
+			});
+
+			// Lamports beyond what the size costs are a balance in an account the program controls.
+			// Calling them rent would understate a payment, so the instruction stays undescribed.
+			it('should not call lamports above what the account’s size costs rent', () => {
+				expect(
+					kinds(openedInside({ creation: opening({ lamports: positionRent + 1n }) }))
+				).toStrictEqual(['unknown']);
+			});
+
+			// An account left with the System program is a wallet: whoever holds its key spends what it
+			// is funded with, so the funding is a payment rather than rent.
+			it('should not call funding an account left with the System program rent', () => {
+				expect(
+					kinds(openedInside({ creation: opening({ owner: '11111111111111111111111111111111' }) }))
+				).toStrictEqual(['unknown']);
+			});
+
+			it('should leave out an account somebody else pays for', () => {
+				expect(
+					kinds(
+						openedInside({
+							creation: opening({ source: '9zsjmwXjZzuKfArqhLDpvcvLKUxLZfCzeMcqhAcPr8Jm' })
+						})
+					)
+				).toStrictEqual(['unknown']);
+			});
+
+			it('should state no rent without the price the chain charges', () => {
+				expect(kinds(openedInside({ withPrice: false }))).toStrictEqual(['unknown']);
+			});
+
+			// The associated token account program opens its accounts the same way, for the token
+			// program, and those are the token accounts its own instruction already lists.
+			it('should not read an account opened for the token program as an application’s', () => {
+				expect(
+					kinds(
+						mapSolInstructionSummaries({
+							...MOCK_SOL_INSTRUCTIONS.JUPITER_SWAP,
+							rentExemptMinimum
+						})
+					)
+				).not.toContain('createAccount');
+			});
+
+			it('should read the same opening stated by the message itself', () => {
+				const signer = (address: string) => ({ address }) as never;
+
+				expect(
+					mapSolInstructionSummaries({
+						instructions: [
+							getCreateAccountInstruction({
+								payer: signer(user),
+								newAccount: signer(position),
+								lamports: positionRent,
+								space: 8120,
+								programAddress: toAddress(application)
+							})
+						].map(asSolParsedRpcInstructionOrSelf),
+						ownedAddresses: [user],
+						userAddress: user,
+						rentExemptMinimum,
+						includeUnrecognised: true
+					})
+				).toStrictEqual([
+					{
+						kind: 'createAccount',
+						account: position,
+						program: application,
+						rent: positionRent,
+						payer: user
+					}
+				]);
+			});
+
+			// The request exactly as Meteora sent it to open a DLMM position, read the way the
+			// WalletConnect review reads it. An instruction left undescribed here is one the signing
+			// gate refuses the whole request over.
+			describe('a Meteora DLMM position opened over WalletConnect', () => {
+				const { transaction, innerInstructions, userAddress } = MOCK_SOL_METEORA_DLMM_OPEN_POSITION;
+
+				const views = (): SolInstructionSummary[] => {
+					const { messageBytes } = decodeTransactionMessage(transaction);
+					const { instructions } = decompileTransactionMessage(
+						getCompiledTransactionMessageDecoder().decode(messageBytes)
+					);
+
+					return mapSolInstructionSummaries({
+						instructions: [...instructions].map(asSolParsedRpcInstructionOrSelf),
+						innerInstructions,
+						ownedAddresses: [userAddress],
+						userAddress,
+						rentExemptMinimum: MOCK_SOL_METEORA_DLMM_OPEN_POSITION.rentExemptMinimum,
+						includeUnrecognised: true
+					});
+				};
+
+				it('should leave no instruction undescribed', () => {
+					expect(kinds(views())).not.toContain('unknown');
+				});
+
+				// Both lb_clmm instructions are ones the wallet cannot read, so each heads what it did.
+				it('should list each instruction with what it did beneath it', () => {
+					expect(
+						views().map(({ kind, program, children }) => [
+							kind,
+							program,
+							children?.map(({ kind: line }) => line)
+						])
+					).toStrictEqual([
+						['route', application, ['createAccount']],
+						['createTokenAccount', undefined, undefined],
+						['wrap', undefined, undefined],
+						['route', application, ['send', 'send']],
+						['unwrap', undefined, undefined]
+					]);
+				});
+
+				it('should state the rent of the position account under the instruction opening it', () => {
+					const [opening] = views();
+
+					expect(opening.children).toStrictEqual([
+						{
+							kind: 'createAccount',
+							account: position,
+							program: application,
+							rent: positionRent,
+							payer: userAddress
+						}
+					]);
+				});
+
+				it('should list the deposit as the two sends it makes', () => {
+					const [, , , deposit] = views();
+
+					expect(deposit.children?.map(({ kind, amount }) => [kind, amount])).toStrictEqual([
+						['send', 99_982n],
+						['send', 810_249n]
+					]);
+				});
+			});
+		});
+
+		// An application closing an account of its own moves the lamports itself, so only the run's
+		// account states say it happened. The request exactly as Meteora sent it to close a position.
+		describe('an account an application closes', () => {
+			const {
+				transaction,
+				innerInstructions,
+				userAddress,
+				usdcAccount,
+				usdc,
+				position,
+				walletChange,
+				fee,
+				rentExemptMinimum
+			} = MOCK_SOL_METEORA_DLMM_CLOSE_POSITION;
+
+			const views = (closedAccounts: SolClosedAccount[] = []): SolInstructionSummary[] => {
+				const { messageBytes } = decodeTransactionMessage(transaction);
+				const { instructions } = decompileTransactionMessage(
+					getCompiledTransactionMessageDecoder().decode(messageBytes)
+				);
+
+				return mapSolInstructionSummaries({
+					instructions: [...instructions].map(asSolParsedRpcInstructionOrSelf),
+					innerInstructions,
+					ownedAddresses: [userAddress, usdcAccount],
+					userAddress,
+					accountHolders: { [usdcAccount]: userAddress },
+					accountMintsBefore: { [usdcAccount]: usdc },
+					rentExemptMinimum,
+					closedAccounts,
+					includeUnrecognised: true
+				});
+			};
+
+			// What made the request refuse: the instruction that closes the position calls nothing
+			// but its own event log.
+			it('should leave the closing instruction undescribed without the close', () => {
+				expect(kinds(views())).toContain('unknown');
+			});
+
+			it('should state the close under the instruction that closes the account', () => {
+				const lines = views([{ ...position, instruction: 7 }]);
+
+				expect(kinds(lines)).not.toContain('unknown');
+
+				const closing = lines.filter(({ kind }) => kind === 'route').at(-1);
+
+				expect(closing?.program).toBe(position.program);
+				expect(closing?.children).toStrictEqual([
+					{
+						kind: 'closeAccount',
+						account: position.account,
+						program: position.program,
+						returned: position.lamports
+					}
+				]);
+			});
+
+			// The wallet's own change is the witness that the rent came home: with the fee and every
+			// line taken out, the rest is exactly what the position held.
+			it('should account for the wallet’s change with the position’s rent and nothing else', () => {
+				const statedChange = solWalletLamportsStated({ instructions: views(), userAddress });
+
+				expect(
+					solClosedAccountsReachWallet({
+						closedAccounts: [position],
+						walletChange,
+						statedChange,
+						fee
+					})
+				).toBeTruthy();
+				expect(
+					solClosedAccountsReachWallet({
+						closedAccounts: [{ ...position, lamports: position.lamports - 1n }],
+						walletChange,
+						statedChange,
+						fee
+					})
+				).toBeFalsy();
+			});
+
+			// A close no instruction was established to have made has no line to hang under.
+			it('should list no close without an instruction that made it', () => {
+				expect(kinds(views([{ ...position, instruction: undefined }]))).toContain('unknown');
+			});
+		});
+
+		describe('solClosingInstructionCandidates', () => {
+			const account = 'c1osedAppAccount11111111111111111111111111';
+			const program = 'App1icationProgram111111111111111111111111';
+			const wrapper = 'WrapperProgram11111111111111111111111111111';
+
+			const candidates = (nestedAccounts: string[]) =>
+				solClosingInstructionCandidates({
+					account,
+					program,
+					instructions: [
+						{
+							programAddress: program,
+							accounts: [{ address: account, role: AccountRole.WRITABLE }]
+						},
+						{
+							programAddress: wrapper,
+							accounts: [{ address: account, role: AccountRole.WRITABLE }]
+						}
+					],
+					innerInstructions: [
+						{ index: 1, instructions: [{ programId: program, accounts: nestedAccounts }] }
+					]
+				});
+
+			it('should take an instruction that calls the program with the account, itself or inside it', () => {
+				expect(candidates([account])).toStrictEqual([0, 1]);
+			});
+
+			// The program and the account have to meet in the same call. An instruction that names the
+			// account and calls the program on something else never reached it.
+			it('should leave out an instruction that calls the program without the account', () => {
+				expect(candidates(['SomethingE1se111111111111111111111111111111'])).toStrictEqual([0]);
+			});
+
+			// Meteora removes the liquidity, claims the fees and closes the position, each with the
+			// position: which of the three emptied it, the list cannot say.
+			it('should take every call of the program with the account in the Meteora close', () => {
+				const { transaction, innerInstructions, position } = MOCK_SOL_METEORA_DLMM_CLOSE_POSITION;
+				const { messageBytes } = decodeTransactionMessage(transaction);
+				const { instructions } = decompileTransactionMessage(
+					getCompiledTransactionMessageDecoder().decode(messageBytes)
+				);
+
+				expect(
+					solClosingInstructionCandidates({
+						account: position.account,
+						program: position.program,
+						instructions,
+						innerInstructions
+					})
+				).toStrictEqual([5, 6, 7]);
 			});
 		});
 
@@ -1773,7 +2346,7 @@ describe('sol-instruction-summary.utils', () => {
 				accountLamports: { [mockSolAddress]: 10_000_000n, [x]: 2_039_280n }
 			});
 
-			const close = views.find(({ kind }) => kind === 'closeTokenAccount');
+			const close = flattenInstructions(views).find(({ kind }) => kind === 'closeTokenAccount');
 
 			expect(close).toBeDefined();
 			expect(close).not.toHaveProperty('ownAccount');
@@ -2829,6 +3402,120 @@ describe('sol-instruction-summary.utils', () => {
 					)
 				).toStrictEqual(['createTokenAccount', 'send']);
 			});
+		});
+	});
+
+	describe('solOpensAccountBeyondRent', () => {
+		// What mainnet charged a token account to exist on 2026-10-06.
+		const rentExemptMinimum = 1_488_440n;
+
+		const opening = ({
+			type = 'createAccount',
+			lamports,
+			space,
+			owner = 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo'
+		}: {
+			type?: string;
+			lamports: bigint;
+			space: bigint;
+			owner?: string;
+		}) => [
+			{
+				index: 0,
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type,
+							info: {
+								source: mockSolAddress,
+								newAccount: mockSolAddress2,
+								lamports: Number(lamports),
+								space: Number(space),
+								owner
+							}
+						}
+					}
+				]
+			}
+		];
+
+		it('should not judge an opening funded with exactly its rent', () => {
+			expect(
+				solOpensAccountBeyondRent({
+					innerInstructions: opening({ lamports: 41_899_840n, space: 8_120n }),
+					rentExemptMinimum
+				})
+			).toBeFalsy();
+		});
+
+		it('should flag an opening funded a lamport above its rent', () => {
+			expect(
+				solOpensAccountBeyondRent({
+					innerInstructions: opening({ lamports: 41_899_841n, space: 8_120n }),
+					rentExemptMinimum
+				})
+			).toBeTruthy();
+		});
+
+		it('should flag the seed-derived form on the same terms', () => {
+			expect(
+				solOpensAccountBeyondRent({
+					innerInstructions: opening({
+						type: 'createAccountWithSeed',
+						lamports: 1_488_441n,
+						space: 165n
+					}),
+					rentExemptMinimum
+				})
+			).toBeTruthy();
+		});
+
+		it("should not judge the run without the chain's reserve", () => {
+			expect(
+				solOpensAccountBeyondRent({
+					innerInstructions: opening({ lamports: 1_000_000_000n, space: 165n }),
+					rentExemptMinimum: undefined
+				})
+			).toBeFalsy();
+		});
+
+		// Nothing governs a System-owned account's lamports but its key, so none of them is rent.
+		it('should flag a System-owned opening whatever its funding', () => {
+			expect(
+				solOpensAccountBeyondRent({
+					innerInstructions: opening({
+						lamports: 650_240n,
+						space: ZERO,
+						owner: '11111111111111111111111111111111'
+					}),
+					rentExemptMinimum
+				})
+			).toBeTruthy();
+		});
+
+		it("should flag a System-owned seed-derived opening without the chain's reserve", () => {
+			expect(
+				solOpensAccountBeyondRent({
+					innerInstructions: opening({
+						type: 'createAccountWithSeed',
+						lamports: 650_240n,
+						space: ZERO,
+						owner: '11111111111111111111111111111111'
+					}),
+					rentExemptMinimum: undefined
+				})
+			).toBeTruthy();
+		});
+
+		it('should not judge the Meteora DLMM position, opened with exactly its rent', () => {
+			expect(
+				solOpensAccountBeyondRent({
+					innerInstructions: MOCK_SOL_METEORA_DLMM_OPEN_POSITION.innerInstructions,
+					rentExemptMinimum: MOCK_SOL_METEORA_DLMM_OPEN_POSITION.rentExemptMinimum
+				})
+			).toBeFalsy();
 		});
 	});
 });

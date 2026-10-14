@@ -6,8 +6,9 @@ use shared::types::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
         ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData,
-        GetActiveUserTransactionsResponse, NearIntentsData, OisyTradeData,
-        UpdateActiveUserTransactionRequest, XrpData, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
+        GetActiveUserTransactionsResponse, LifiData, NearIntentsData, OisyTradeData,
+        UpdateActiveUserTransactionRequest, XrpData, LIFI_REF_BLOCKHASH, LIFI_REF_NONCE,
+        LIFI_REF_TX_HASH, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
         MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS, MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_KEY_LEN,
@@ -68,6 +69,14 @@ pub fn create(
         }
     }
 
+    if let ActiveUserTransactionData::Lifi(data) = &request.data {
+        // Required here and not only in `validate_data`, which cannot see the
+        // refs: the row is opened after the source transaction is broadcast, so
+        // a row arriving without its poll keys describes a swap nothing could
+        // ever drive to a terminal status.
+        require_lifi_refs(data, &request.external_refs)?;
+    }
+
     make_room(map, principal)?;
 
     let tx = ActiveUserTransaction {
@@ -113,6 +122,11 @@ pub fn update(
         // Held for terminal rows too: the invariant is the record's, not a phase's.
         if xrp_payment_source(&current.data).is_some() {
             require_xrp_refs(refs)?;
+        }
+        // Same reasoning for a LI.FI row, whose poll keys an update could strip
+        // just as well.
+        if let ActiveUserTransactionData::Lifi(data) = &current.data {
+            require_lifi_refs(data, refs)?;
         }
     }
     if let Some(err) = request.error.as_deref() {
@@ -396,6 +410,10 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
             require_xrp_address(&d.destination_address, "destination_address")?;
             require_distinct_xrp_accounts(d)?;
         }
+        ActiveUserTransactionData::Lifi(d) => {
+            require_valid_amount(&d.amount, "amount")?;
+            require_lifi_pair(d)?;
+        }
     }
     Ok(())
 }
@@ -507,6 +525,150 @@ fn require_oisy_trade_pair(data: &OisyTradeData) -> Result<(), ActiveUserTransac
             "oisy-trade tokens must both be Internet Computer ledgers".to_string(),
         ))
     }
+}
+
+/// The EVM chains a LI.FI row may name: the mainnets whose LI.FI Diamond the
+/// frontend pins (`LIFI_DIAMOND_ADDRESSES`). A chain without a pinned Diamond
+/// cannot be swapped through, so adding one here goes together with pinning its
+/// Diamond in the frontend.
+const LIFI_EVM_CHAIN_IDS: [u64; 6] = [
+    1,     // Ethereum
+    42161, // Arbitrum One
+    56,    // BNB Smart Chain
+    137,   // Polygon
+    8453,  // Base
+    4663,  // Robinhood Chain
+];
+
+/// The LI.FI poller derives both chains from the token ids, then asks the source
+/// chain and LI.FI's status endpoint about them. A pair LI.FI cannot swap for the
+/// wallet — an EVM chain without a pinned Diamond, a devnet, an NFT, a chain
+/// LI.FI does not serve, or Solana → EVM, which is not executed yet — could never
+/// reach a terminal status, and `data` is immutable after creation, so the row
+/// would occupy one of the user's slots forever. Reject it up front. Unlike the
+/// kind-only checks above, the EVM chains are pinned: they are exactly the
+/// chains LI.FI can be called on.
+fn require_lifi_pair(data: &LifiData) -> Result<(), ActiveUserTransactionError> {
+    let supported = if is_lifi_evm_token(&data.source_token) {
+        is_lifi_evm_token(&data.dest_token) || is_lifi_solana_token(&data.dest_token)
+    } else {
+        is_lifi_solana_token(&data.source_token) && is_lifi_solana_token(&data.dest_token)
+    };
+
+    if !supported {
+        return Err(ActiveUserTransactionError::InvalidData(
+            "token pair is outside the LI.FI v1 matrix".to_string(),
+        ));
+    }
+
+    if is_same_lifi_token(&data.source_token, &data.dest_token) {
+        return Err(ActiveUserTransactionError::InvalidData(
+            "dest_token must differ from source_token".to_string(),
+        ));
+    }
+
+    Ok(())
+}
+
+/// `TokenId` compares its ERC address as a raw string, so a checksummed and a
+/// lower-case spelling of one contract would count as two tokens. Hex is
+/// case-insensitive, so ERC addresses are compared without case; SPL mints are
+/// base58, where case is significant, so everything else compares as is.
+fn is_same_lifi_token(a: &TokenId, b: &TokenId) -> bool {
+    match (a, b) {
+        (
+            TokenId::Erc20(a_address, a_chain_id) | TokenId::Erc4626(a_address, a_chain_id),
+            TokenId::Erc20(b_address, b_chain_id) | TokenId::Erc4626(b_address, b_chain_id),
+        ) => a_chain_id == b_chain_id && a_address.0.eq_ignore_ascii_case(&b_address.0),
+        _ => a == b,
+    }
+}
+
+fn is_lifi_evm_token(token: &TokenId) -> bool {
+    match token {
+        // An ERC-4626 vault share is an ERC-20 to LI.FI.
+        TokenId::EvmNative(chain_id)
+        | TokenId::Erc20(_, chain_id)
+        | TokenId::Erc4626(_, chain_id) => LIFI_EVM_CHAIN_IDS.contains(chain_id),
+        _ => false,
+    }
+}
+
+fn is_lifi_solana_token(token: &TokenId) -> bool {
+    matches!(token, TokenId::SplMainnet(_) | TokenId::SolNativeMainnet)
+}
+
+/// The poll keys a LI.FI row needs (see `LIFI_REF_TX_HASH`), required because a
+/// row without them could never reach a terminal status and would occupy one of
+/// the user's slots forever. Which keys apply follows from the source chain,
+/// which `require_lifi_pair` has already confined to a pinned EVM chain or
+/// Solana mainnet. Shape checks only: the frontend reads every value from the
+/// transaction it just broadcast.
+fn require_lifi_refs(
+    data: &LifiData,
+    refs: &[ActiveUserTransactionRef],
+) -> Result<(), ActiveUserTransactionError> {
+    let value = |key: &str| {
+        refs.iter()
+            .find(|ActiveUserTransactionRef { key: k, .. }| k == key)
+            .map(|ActiveUserTransactionRef { value, .. }| value.as_str())
+    };
+    let invalid = |message: String| Err(ActiveUserTransactionError::InvalidData(message));
+
+    let Some(tx_hash) = value(LIFI_REF_TX_HASH) else {
+        return invalid(format!("{LIFI_REF_TX_HASH} is required"));
+    };
+
+    if is_lifi_solana_token(&data.source_token) {
+        if !is_base58_of_len(tx_hash, SOLANA_SIGNATURE_LEN) {
+            return invalid(format!("{LIFI_REF_TX_HASH} must be a Solana signature"));
+        }
+
+        let Some(blockhash) = value(LIFI_REF_BLOCKHASH) else {
+            return invalid(format!(
+                "{LIFI_REF_BLOCKHASH} is required for a Solana source"
+            ));
+        };
+        if !is_base58_of_len(blockhash, SOLANA_BLOCKHASH_LEN) {
+            return invalid(format!("{LIFI_REF_BLOCKHASH} must be a Solana blockhash"));
+        }
+    } else {
+        let is_evm_tx_hash = tx_hash.len() == EVM_TX_HASH_LEN
+            && tx_hash
+                .strip_prefix("0x")
+                .is_some_and(|hex| hex.chars().all(|c| c.is_ascii_hexdigit()));
+        if !is_evm_tx_hash {
+            return invalid(format!(
+                "{LIFI_REF_TX_HASH} must be 0x followed by 64 hex characters"
+            ));
+        }
+
+        let Some(nonce) = value(LIFI_REF_NONCE) else {
+            return invalid(format!("{LIFI_REF_NONCE} is required for an EVM source"));
+        };
+        // Digits only, then a `u64` parse: an EVM account nonce is a `u64`
+        // (EIP-2681), and `parse` alone would accept a leading `+`.
+        if !nonce.chars().all(|c| c.is_ascii_digit()) || nonce.parse::<u64>().is_err() {
+            return invalid(format!("{LIFI_REF_NONCE} must be a u64"));
+        }
+    }
+
+    Ok(())
+}
+
+/// `0x` plus the 32-byte hash in hex.
+const EVM_TX_HASH_LEN: usize = 66;
+/// An Ed25519 signature.
+const SOLANA_SIGNATURE_LEN: usize = 64;
+/// A SHA-256 hash.
+const SOLANA_BLOCKHASH_LEN: usize = 32;
+
+/// Whether `value` is the base58 encoding of exactly `len` bytes, which is how
+/// Solana writes signatures and blockhashes.
+fn is_base58_of_len(value: &str, len: usize) -> bool {
+    bs58::decode(value)
+        .into_vec()
+        .is_ok_and(|bytes| bytes.len() == len)
 }
 
 fn require_evm_address(addr: &str) -> Result<(), ActiveUserTransactionError> {
@@ -762,14 +924,14 @@ mod tests {
         active_user_transaction::{
             ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
             ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
-            ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData,
+            ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, LifiData,
             LiquidiumAction, LiquidiumData, NearIntentsData, OisyTradeData, OisyTradeSide,
             OneSecEvmToIcpData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData,
-            VeloraSwapMode, XrpData, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
-            MAX_LIQUIDIUM_POOL_ID_LEN, XRP_REF_LAST_LEDGER_SEQUENCE, XRP_REF_LEDGER_RESULT,
-            XRP_REF_TX_HASH, XRP_TX_HASH_LEN,
+            VeloraSwapMode, XrpData, LIFI_REF_BLOCKHASH, LIFI_REF_NONCE, LIFI_REF_TX_HASH,
+            MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_LIQUIDIUM_POOL_ID_LEN,
+            XRP_REF_LAST_LEDGER_SEQUENCE, XRP_REF_LEDGER_RESULT, XRP_REF_TX_HASH, XRP_TX_HASH_LEN,
         },
-        custom_token::ErcTokenId,
+        custom_token::{ErcTokenId, SplTokenId},
         token_id::TokenId,
     };
 
@@ -1396,6 +1558,378 @@ mod tests {
                     )
                 );
             }
+        }
+    }
+
+    const USDC_ETHEREUM_CHECKSUMMED: &str = "0xA0b86991c6218b36c1D19D4a2e9Eb0cE3606eB48";
+    const USDC_SOLANA: &str = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+
+    fn erc20(address: &str, chain_id: u64) -> TokenId {
+        TokenId::Erc20(ErcTokenId(address.to_string()), chain_id)
+    }
+
+    fn spl(mint: &str) -> TokenId {
+        TokenId::SplMainnet(SplTokenId(mint.to_string()))
+    }
+
+    fn lifi_data(
+        amount: u64,
+        source_token: TokenId,
+        dest_token: TokenId,
+    ) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::Lifi(LifiData {
+            source_token,
+            dest_token,
+            amount: Nat::from(amount),
+        })
+    }
+
+    const LIFI_EVM_TX_HASH: &str =
+        "0x1111111111111111111111111111111111111111111111111111111111111111";
+    // Base58 of the 64 bytes 1..=64 and of the 32 bytes 101..=132.
+    const LIFI_SOLANA_SIGNATURE: &str =
+        "2Ana1pUpv2ZbMVkwF5FXapYeBEjdxDatLn7nvJkhgTSXbs59SyZSx866bXirPgj8QQVB57uxHJBG1YFvkRbFj4T";
+    const LIFI_SOLANA_BLOCKHASH: &str = "7ppk9w8NHnH6ehajvJyU31VcMafwZ3ybRtJWumSyD2wd";
+
+    fn lifi_ref(key: &str, value: &str) -> ActiveUserTransactionRef {
+        ActiveUserTransactionRef {
+            key: key.to_string(),
+            value: value.to_string(),
+        }
+    }
+
+    /// The poll keys the frontend writes when it opens a row for a swap from
+    /// `source_token`.
+    fn lifi_refs(source_token: &TokenId) -> Vec<ActiveUserTransactionRef> {
+        if matches!(
+            source_token,
+            TokenId::SolNativeMainnet | TokenId::SplMainnet(_)
+        ) {
+            vec![
+                lifi_ref(LIFI_REF_BLOCKHASH, LIFI_SOLANA_BLOCKHASH),
+                lifi_ref(LIFI_REF_TX_HASH, LIFI_SOLANA_SIGNATURE),
+            ]
+        } else {
+            vec![
+                lifi_ref(LIFI_REF_NONCE, "7"),
+                lifi_ref(LIFI_REF_TX_HASH, LIFI_EVM_TX_HASH),
+            ]
+        }
+    }
+
+    fn lifi_req(source_token: TokenId, dest_token: TokenId) -> CreateActiveUserTransactionRequest {
+        CreateActiveUserTransactionRequest {
+            external_refs: lifi_refs(&source_token),
+            data: lifi_data(1_000_000, source_token, dest_token),
+            ..create_req("lifi-1")
+        }
+    }
+
+    fn assert_lifi_pair_rejected(source_token: TokenId, dest_token: TokenId, expected: &str) {
+        let (mut map, _mm) = setup();
+        let err = create(&mut map, principal(), lifi_req(source_token, dest_token), 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData(expected.to_string())
+        );
+    }
+
+    const LIFI_PAIR_ERROR: &str = "token pair is outside the LI.FI v1 matrix";
+
+    #[test]
+    fn lifi_create_roundtrip() {
+        // One pair per route the variant covers, spread so that every pinned EVM
+        // chain appears at least once.
+        for (source_token, dest_token) in [
+            // EVM → EVM, same chain.
+            (erc20(USDC_ETHEREUM, 1), TokenId::EvmNative(1)),
+            // EVM → EVM, cross-chain; a vault share is an ERC-20 to LI.FI.
+            (
+                TokenId::EvmNative(42161),
+                TokenId::Erc4626(
+                    ErcTokenId("0x0000000000000000000000000000000000000abc".to_string()),
+                    8453,
+                ),
+            ),
+            (TokenId::EvmNative(56), TokenId::EvmNative(137)),
+            // EVM → Solana.
+            (TokenId::EvmNative(4663), spl(USDC_SOLANA)),
+            // Solana → Solana.
+            (TokenId::SolNativeMainnet, spl(USDC_SOLANA)),
+        ] {
+            let (mut map, _mm) = setup();
+            let req = lifi_req(source_token.clone(), dest_token.clone());
+            let tx = create(&mut map, principal(), req, 1).expect("create");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+            assert_eq!(tx.external_refs, lifi_refs(&source_token));
+            assert_eq!(tx.data, lifi_data(1_000_000, source_token, dest_token));
+        }
+    }
+
+    #[test]
+    fn lifi_zero_amount_rejected() {
+        // Every poll key is present, so the amount is the only thing wrong and
+        // the message names the check that refused it: without the poll keys,
+        // the create would fail on them even if the amount check were gone.
+        let (mut map, _mm) = setup();
+        let req = CreateActiveUserTransactionRequest {
+            data: lifi_data(0, erc20(USDC_ETHEREUM, 1), TokenId::EvmNative(1)),
+            ..lifi_req(erc20(USDC_ETHEREUM, 1), TokenId::EvmNative(1))
+        };
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("amount must be greater than zero".to_string())
+        );
+    }
+
+    #[test]
+    fn lifi_evm_chain_without_pinned_diamond_rejected() {
+        // Optimism is a chain LI.FI serves but the frontend pins no Diamond for;
+        // Sepolia is a testnet. Either leg on such a chain is refused.
+        for chain_id in [10, 11_155_111] {
+            assert_lifi_pair_rejected(
+                TokenId::EvmNative(chain_id),
+                TokenId::EvmNative(1),
+                LIFI_PAIR_ERROR,
+            );
+            assert_lifi_pair_rejected(
+                TokenId::EvmNative(1),
+                erc20(USDC_ETHEREUM, chain_id),
+                LIFI_PAIR_ERROR,
+            );
+        }
+    }
+
+    #[test]
+    fn lifi_devnet_solana_rejected() {
+        for devnet in [
+            TokenId::SolNativeDevnet,
+            TokenId::SplDevnet(SplTokenId(USDC_SOLANA.to_string())),
+        ] {
+            assert_lifi_pair_rejected(devnet.clone(), TokenId::SolNativeMainnet, LIFI_PAIR_ERROR);
+            assert_lifi_pair_rejected(TokenId::SolNativeMainnet, devnet, LIFI_PAIR_ERROR);
+        }
+    }
+
+    #[test]
+    fn lifi_solana_to_evm_rejected() {
+        // Its EVM recipient cannot be verified before signing yet, so the
+        // frontend never executes it and no row may claim it.
+        assert_lifi_pair_rejected(
+            TokenId::SolNativeMainnet,
+            TokenId::EvmNative(1),
+            LIFI_PAIR_ERROR,
+        );
+        assert_lifi_pair_rejected(spl(USDC_SOLANA), erc20(USDC_ETHEREUM, 1), LIFI_PAIR_ERROR);
+    }
+
+    #[test]
+    fn lifi_unsupported_token_kinds_rejected() {
+        let address = || ErcTokenId(USDC_ETHEREUM.to_string());
+        for token in [
+            TokenId::Erc721(address(), 1),
+            TokenId::Erc1155(address(), 1),
+            TokenId::IcpNative,
+            icrc(CKUSDC_LEDGER),
+            TokenId::BtcNativeMainnet,
+            TokenId::XrpNativeMainnet,
+        ] {
+            assert_lifi_pair_rejected(token.clone(), TokenId::EvmNative(1), LIFI_PAIR_ERROR);
+            assert_lifi_pair_rejected(TokenId::EvmNative(1), token, LIFI_PAIR_ERROR);
+        }
+    }
+
+    #[test]
+    fn lifi_same_token_rejected() {
+        let same_token_error = "dest_token must differ from source_token";
+        for (source_token, dest_token) in [
+            (TokenId::EvmNative(1), TokenId::EvmNative(1)),
+            (TokenId::SolNativeMainnet, TokenId::SolNativeMainnet),
+            (spl(USDC_SOLANA), spl(USDC_SOLANA)),
+            // One contract in two spellings is still one token.
+            (erc20(USDC_ETHEREUM, 1), erc20(USDC_ETHEREUM_CHECKSUMMED, 1)),
+        ] {
+            assert_lifi_pair_rejected(source_token, dest_token, same_token_error);
+        }
+
+        // The same address on another chain is another token: a bridge.
+        let (mut map, _mm) = setup();
+        let req = lifi_req(erc20(USDC_ETHEREUM, 1), erc20(USDC_ETHEREUM, 8453));
+        create(&mut map, principal(), req, 1).expect("create");
+    }
+
+    fn assert_lifi_refs_rejected(
+        source_token: TokenId,
+        dest_token: TokenId,
+        external_refs: Vec<ActiveUserTransactionRef>,
+        expected: &str,
+    ) {
+        let (mut map, _mm) = setup();
+        let req = CreateActiveUserTransactionRequest {
+            external_refs,
+            ..lifi_req(source_token, dest_token)
+        };
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData(expected.to_string())
+        );
+        assert!(
+            list(&map, principal()).transactions.is_empty(),
+            "a rejected create must not leave a row behind"
+        );
+    }
+
+    #[test]
+    fn lifi_evm_source_without_poll_keys_rejected() {
+        let tx_hash = lifi_ref(LIFI_REF_TX_HASH, LIFI_EVM_TX_HASH);
+        let nonce = lifi_ref(LIFI_REF_NONCE, "7");
+        for (refs, expected) in [
+            (vec![], "lifi_tx_hash is required"),
+            (vec![nonce], "lifi_tx_hash is required"),
+            (vec![tx_hash], "lifi_nonce is required for an EVM source"),
+        ] {
+            assert_lifi_refs_rejected(
+                erc20(USDC_ETHEREUM, 1),
+                TokenId::EvmNative(1),
+                refs,
+                expected,
+            );
+        }
+    }
+
+    #[test]
+    fn lifi_solana_source_without_poll_keys_rejected() {
+        let tx_hash = lifi_ref(LIFI_REF_TX_HASH, LIFI_SOLANA_SIGNATURE);
+        let blockhash = lifi_ref(LIFI_REF_BLOCKHASH, LIFI_SOLANA_BLOCKHASH);
+        for (refs, expected) in [
+            (vec![], "lifi_tx_hash is required"),
+            (vec![blockhash], "lifi_tx_hash is required"),
+            (
+                // An EVM source's key does not stand in for a Solana one.
+                vec![tx_hash, lifi_ref(LIFI_REF_NONCE, "7")],
+                "lifi_blockhash is required for a Solana source",
+            ),
+        ] {
+            assert_lifi_refs_rejected(TokenId::SolNativeMainnet, spl(USDC_SOLANA), refs, expected);
+        }
+    }
+
+    #[test]
+    fn lifi_evm_source_malformed_poll_keys_rejected() {
+        let hash_error = "lifi_tx_hash must be 0x followed by 64 hex characters";
+        for tx_hash in [
+            // No prefix, one digit short, a non-hex digit, and a Solana
+            // signature on an EVM row.
+            &LIFI_EVM_TX_HASH[2..],
+            &LIFI_EVM_TX_HASH[..65],
+            "0x111111111111111111111111111111111111111111111111111111111111111g",
+            LIFI_SOLANA_SIGNATURE,
+        ] {
+            assert_lifi_refs_rejected(
+                TokenId::EvmNative(1),
+                erc20(USDC_ETHEREUM, 1),
+                vec![
+                    lifi_ref(LIFI_REF_NONCE, "7"),
+                    lifi_ref(LIFI_REF_TX_HASH, tx_hash),
+                ],
+                hash_error,
+            );
+        }
+
+        // Empty, signed, fractional, and one past `u64::MAX`.
+        for nonce in ["", "+7", "7.0", "18446744073709551616"] {
+            assert_lifi_refs_rejected(
+                TokenId::EvmNative(1),
+                erc20(USDC_ETHEREUM, 1),
+                vec![
+                    lifi_ref(LIFI_REF_NONCE, nonce),
+                    lifi_ref(LIFI_REF_TX_HASH, LIFI_EVM_TX_HASH),
+                ],
+                "lifi_nonce must be a u64",
+            );
+        }
+    }
+
+    #[test]
+    fn lifi_solana_source_malformed_poll_keys_rejected() {
+        // An EVM hash on a Solana row, base58 of the wrong length, and a
+        // character outside the base58 alphabet.
+        for tx_hash in [
+            LIFI_EVM_TX_HASH,
+            LIFI_SOLANA_BLOCKHASH,
+            &LIFI_SOLANA_SIGNATURE.replacen('2', "0", 1),
+        ] {
+            assert_lifi_refs_rejected(
+                TokenId::SolNativeMainnet,
+                spl(USDC_SOLANA),
+                vec![
+                    lifi_ref(LIFI_REF_BLOCKHASH, LIFI_SOLANA_BLOCKHASH),
+                    lifi_ref(LIFI_REF_TX_HASH, tx_hash),
+                ],
+                "lifi_tx_hash must be a Solana signature",
+            );
+        }
+
+        for blockhash in [LIFI_SOLANA_SIGNATURE, "", "0OIl"] {
+            assert_lifi_refs_rejected(
+                TokenId::SolNativeMainnet,
+                spl(USDC_SOLANA),
+                vec![
+                    lifi_ref(LIFI_REF_BLOCKHASH, blockhash),
+                    lifi_ref(LIFI_REF_TX_HASH, LIFI_SOLANA_SIGNATURE),
+                ],
+                "lifi_blockhash must be a Solana blockhash",
+            );
+        }
+    }
+
+    #[test]
+    fn lifi_update_cannot_strip_poll_keys() {
+        // `external_refs` is replaced wholesale, so an update that drops a poll
+        // key would leave the same row `create` refuses.
+        for source_token in [TokenId::EvmNative(1), TokenId::SolNativeMainnet] {
+            let (mut map, _mm) = setup();
+            let req = lifi_req(source_token.clone(), spl(USDC_SOLANA));
+            create(&mut map, principal(), req, 1).expect("create");
+
+            let refs = lifi_refs(&source_token);
+            let update_refs =
+                |external_refs: Vec<ActiveUserTransactionRef>| UpdateActiveUserTransactionRequest {
+                    id: "lifi-1".to_string(),
+                    status: Some(ActiveUserTransactionStatus::Executing),
+                    progress_step: None,
+                    external_refs: Some(external_refs),
+                    error: None,
+                };
+
+            for (key, expected) in [
+                (LIFI_REF_TX_HASH, "lifi_tx_hash is required"),
+                (LIFI_REF_NONCE, "lifi_nonce is required for an EVM source"),
+                (
+                    LIFI_REF_BLOCKHASH,
+                    "lifi_blockhash is required for a Solana source",
+                ),
+            ] {
+                if !refs.iter().any(|r| r.key == key) {
+                    continue;
+                }
+                let stripped = refs.iter().filter(|r| r.key != key).cloned().collect();
+                let err = update(&mut map, principal(), update_refs(stripped), 2).unwrap_err();
+                assert_eq!(
+                    err,
+                    ActiveUserTransactionError::InvalidData(expected.to_string())
+                );
+            }
+
+            // Learned refs merged onto the creation ones are accepted.
+            let mut learned = refs.clone();
+            learned.push(lifi_ref("lifi_dest_tx_hash", LIFI_EVM_TX_HASH));
+            let tx = update(&mut map, principal(), update_refs(learned.clone()), 3)
+                .expect("update with every poll key");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Executing);
+            assert_eq!(tx.external_refs, learned);
         }
     }
 

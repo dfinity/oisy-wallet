@@ -134,6 +134,10 @@ export const AUTH_POPUP_WIDTH = 576;
 // TODO: revert to 625 after II provides a fix on their end
 export const AUTH_POPUP_HEIGHT = 826;
 
+// Sized for a full third-party site (block explorers, docs) rather than a sign-in dialog
+export const EXTERNAL_LINK_POPUP_WIDTH = 1024;
+export const EXTERNAL_LINK_POPUP_HEIGHT = 768;
+
 // Workers
 export const AUTH_TIMER_INTERVAL = 1_000;
 // From FI team:

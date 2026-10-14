@@ -4,7 +4,6 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
-	import { acceptedContext } from '$eth/utils/wallet-connect.utils';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -22,6 +21,7 @@
 		walletConnectProposalStore
 	} from '$lib/stores/wallet-connect.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
 
 	let listener = $derived($walletConnectListenerStore);
 
@@ -102,7 +102,13 @@
 		close();
 	};
 
-	const onApprove = async () =>
+	const onApprove = async () => {
+		// A new proposal replaces the one under review, so the click is held to the proposal it would
+		// approve rather than to the button rendered for the previous one.
+		if (!acceptedContext(proposal?.verifyContext)) {
+			return;
+		}
+
 		await answer({
 			callback: listener?.approveSession,
 			toast: () =>
@@ -112,6 +118,7 @@
 					duration: 2000
 				})
 		});
+	};
 
 	const onReject = async () =>
 		await answer({
