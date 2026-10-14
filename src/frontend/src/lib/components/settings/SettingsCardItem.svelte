@@ -4,6 +4,7 @@
 	import { slide } from 'svelte/transition';
 	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { nextElementId } from '$lib/utils/html.utils';
 
 	interface Props {
 		permanentInfo?: boolean;
@@ -20,16 +21,23 @@
 	let hasInfoSlot = $derived(nonNullish(info));
 
 	let infoExpanded = $derived(permanentInfo);
+
+	// Several rows sit on one page, so each toggle is named "Info" plus its row's label
+	// ("Info Principal"), not just "Info".
+	const toggleId = nextElementId('settings-info-toggle-');
+	const keyId = nextElementId('settings-key-');
 </script>
 
 <div class="mt-3 flex w-full flex-row">
 	<span class="flex w-full flex-1 flex-row items-start">
-		<span class="flex">{@render key()}</span>
+		<span id={keyId} class="flex">{@render key()}</span>
 		{#if hasInfoSlot && !permanentInfo}
 			<button
+				id={toggleId}
 				class="hit-area relative ml-1 flex p-0.5 align-top text-tertiary press-icon"
 				aria-expanded={infoExpanded}
 				aria-label={$i18n.core.text.info}
+				aria-labelledby={`${toggleId} ${keyId}`}
 				onclick={() => (infoExpanded = !infoExpanded)}
 			>
 				<IconHelp size="18" />
