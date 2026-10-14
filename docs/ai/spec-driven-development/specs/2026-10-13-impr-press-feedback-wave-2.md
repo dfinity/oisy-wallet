@@ -14,7 +14,8 @@ components: token rows, activity rows, the navigation, NFT cards, the swap flip 
 and info buttons. They give no feedback on press today, several keep their hover colour after
 a tap, and many are 16 to 28 px targets.
 
-This improvement brings them to the Wave 1 standard, one area per PR.
+This improvement brings them to the Wave 1 standard, one area per PR. Area 7, links and icon
+links, was added while testing.
 
 Source: user request, following the Wave 1 PRs above.
 
@@ -139,6 +140,18 @@ area. Where neighbours are closer (the contact row actions, the modal close next
 actions, the token details copy and edit, which are 4 px apart), each area stops halfway into
 the gap. The contact row actions lose their negative margins, so they stop overlapping.
 
+### 7. Links and icon links
+
+Added on 2026-10-14 after testing in the mock: on the NFT page, Go to collection, Review
+preference, the copy and open-in-explorer icons and the breadcrumbs gave no sign of the
+pointer at all.
+
+Text links and link-style icons (copy, open in explorer, the NFT back arrows) turn one step
+of OISY blue on hover and show the same colour while pressed, so a tap on a phone shows it
+too: darker in light mode, lighter in dark mode, where the darker blue would drop to 2.3:1 on
+the card. Text links do not shrink; icon ones keep, or now get, the 0.96 press. A link given
+its own text colour keeps it, and buttons and menu items styled as such keep their own hover.
+
 ### Negative guarantees (what it does _not_ do)
 
 - It does **not** change any size, colour, radius, border or layout at rest.
@@ -248,6 +261,24 @@ For each control listed: `hit-area` (capped where a neighbour is closer than 40 
 missing (the three settings and rewards info toggles, the two earning cards' info buttons).
 `AddressItemActions` drops `-m-1`. `ButtonControl` is left alone: only the carousel uses it.
 
+### 7. Links and icon links
+
+- A theme token `--color-foreground-brand-hover` (light blue-800, dark blue-300), exposed as
+  `text-brand-hover` in `styles/tailwind/theme-variables.ts`.
+- `styles/global/button.scss`: the `.link` block (every `Button link` and the default
+  `ButtonIcon`, so `Copy`) gets a 150 ms colour transition and the token on hover (through
+  `interaction.hover`) and `:active`, skipping disabled and loading.
+- `ui/ExternalLink.svelte`: plain links (not `asButton` / `asMenuItem`) hover and press to the
+  token; icon-only ones also `press-icon`. The `color` prop only picked the hover colour, so
+  it goes, with its callers' `color="blue"`.
+- `ui/BreadcrumbNavigation.svelte` and the back arrows in `nfts/NftHero.svelte` and
+  `nfts/NftCollectionHero.svelte`: token on hover and press; the arrows `press-icon`.
+- Links that already hovered to `brand-secondary` move to the token: the terms, privacy and
+  licence links, `AboutItem`, `CollapsibleList`, `StakeTransactions`, `MaxBalanceButton`,
+  `ConvertAmountSource`.
+- `styles/global/theme.scss`: the global `a:hover` colour and underline go through
+  `interaction.hover`; `:active` stays unguarded.
+
 ### `PRODUCT.md`
 
 Add an **"Interaction feedback"** section after "Navigation". The first Wave 2 PR to merge
@@ -289,8 +320,11 @@ behaviour (as `ButtonSignInInternetIdentity.spec.ts` does), and visual QA happen
 9. The contact row actions no longer overlap on mobile, and Edit and Delete never open the
    row.
 10. Nothing scales under reduced motion; nothing shows on disabled controls.
-11. `docs/ai/PRODUCT.md` has an "Interaction feedback" section covering every area shipped.
-12. `npm run format`, `npm run lint -- --max-warnings 0`, `npm run check`, `npm run test`
+11. Text links and link-style icons change colour on hover and while pressed, light blue-600
+    → blue-800 and dark blue-500 → blue-300 (at least 4.5:1 on the card); text links do not
+    shrink, icon ones press to 0.96; no hover on touch, including the global `a:hover`.
+12. `docs/ai/PRODUCT.md` has an "Interaction feedback" section covering every area shipped.
+13. `npm run format`, `npm run lint -- --max-warnings 0`, `npm run check`, `npm run test`
     pass on every PR.
 
 ---
