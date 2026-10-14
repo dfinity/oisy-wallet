@@ -241,6 +241,17 @@ what the element is, and use the shared rule, never hand-written
 | A wrapper that paints the row around its `<button>`     | `hover:bg-brand-subtle-10 child-pressed:bg-brand-subtle-20`  | as `row-feedback`, on the wrapper                 |
 | Something the press would only distract on              | `static` prop (`Button`, `ButtonIcon`), or no utility at all | nothing                                           |
 
+### Links: `text-brand-hover`
+
+Text links and link-style icons answer with colour, not a shrink: one step of
+OISY blue on hover and the same while pressed (`text-brand-hover`, blue-800 in
+light mode, blue-300 in dark, where blue-800 would drop to 2.3:1). `Button link`,
+the default `ButtonIcon` (so `Copy`), `ExternalLink` and `BreadcrumbNavigation`
+have it built in; anything else that looks like a link adds
+`transition-colors duration-150 ease-out hover:text-brand-hover active:text-brand-hover`.
+Never hover a link to `text-brand-secondary`: it is the darker blue in both themes.
+An icon-only link also gets `press-icon`, like any icon button.
+
 `press`, `press-icon` and `row-feedback` are utilities in
 `lib/styles/global.scss`, built on the same `press` mixin
 (`lib/styles/mixins/_button.scss`) the shared buttons use, so changing a

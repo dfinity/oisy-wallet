@@ -562,10 +562,27 @@ a.as-button {
 	}
 
 	// LINK
+	// Text links and link-style icons (copy) answer with colour only: a text link does not
+	// shrink, and an icon one already presses through `.icon`. Pressed shows the hover colour,
+	// so a tap on a touch screen, which never hovers, still shows.
 	&.link {
 		@apply p-0;
 		@apply bg-transparent;
 		@apply text-brand-primary-alt;
+
+		transition:
+			color 0.15s ease-out,
+			scale 0.15s ease-out;
+
+		&:not([disabled]):not(.disabled):not(.loading) {
+			@include interaction.hover {
+				@apply text-brand-hover;
+			}
+
+			&:active {
+				@apply text-brand-hover;
+			}
+		}
 
 		&.disabled,
 		&[disabled] {
