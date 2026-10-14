@@ -69,8 +69,8 @@ Where it applies:
   blue on hover and while pressed; in dark mode a step lighter, so they stay readable on the
   dark card. Text links do not shrink; icon ones press like icon buttons.
 - **Amount forms.** The swap flip button presses like an icon button, and its arrow turns a
-  half-turn each time the tokens swap, back the other way on the next swap (no turn with
-  reduced motion). **Max** presses, darkens on hover while the amount is valid, and can be hit
+  half-turn each time the tokens swap, back the other way on the next swap (with reduced
+  motion it flips at once, without the turning animation). **Max** presses, darkens on hover while the amount is valid, and can be hit
   across 40 px without reaching the amount field above it.
 
 ---

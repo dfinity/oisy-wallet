@@ -77,6 +77,36 @@ describe('ConvertAmountSource', () => {
 		expect(getByTestId(balanceTestId)).toHaveTextContent(maxButtonText);
 	});
 
+	it('presses Max like an icon-size control, with a 40 px tap area', () => {
+		const { getByTestId } = render(ConvertAmountSource, {
+			props,
+			context: mockContext()
+		});
+
+		expect(getByTestId(balanceTestId)).toHaveClass('hit-area', 'press-icon');
+	});
+
+	it('darkens Max on hover while the max amount is valid', () => {
+		const { getByTestId } = render(ConvertAmountSource, {
+			props,
+			context: mockContext()
+		});
+
+		expect(getByTestId(balanceTestId)).toHaveClass('hover:text-brand-secondary');
+	});
+
+	it.each([
+		{ case: 'the balance is zero', testProps: props, balance: ZERO },
+		{ case: 'the max amount is still loading', testProps: { ...props, totalFee: undefined } }
+	])('does not darken Max on hover when $case', ({ testProps, balance }) => {
+		const { getByTestId } = render(ConvertAmountSource, {
+			props: testProps,
+			context: mockContext(balance)
+		});
+
+		expect(getByTestId(balanceTestId)).not.toHaveClass('hover:text-brand-secondary');
+	});
+
 	it('should display loading text if total fee is not available yet', () => {
 		const { getByTestId } = render(ConvertAmountSource, {
 			props: {
