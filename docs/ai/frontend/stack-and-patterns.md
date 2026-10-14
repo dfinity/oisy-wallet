@@ -237,6 +237,9 @@ outside these components follows the same two values.
   transition, which carries `scale`. Use `transition-[...]` with `scale`
   in the list if you need to change it.
 - Disabled, loading and reduced-motion states never scale.
+- iOS Safari applies `:active` on a tap only when the page has a touch
+  listener. The root layout (`routes/+layout.svelte`) registers a passive
+  no-op `touchstart` on the document for that; it is not dead code.
 
 ## Icons
 
