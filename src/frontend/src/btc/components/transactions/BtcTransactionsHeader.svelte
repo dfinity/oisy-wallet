@@ -6,6 +6,7 @@
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 
 	let cmp = $state<Collapsible | undefined>();
+	let expanded = $state(false);
 
 	const onInfoButtonClick = () => {
 		cmp?.toggleContent();
@@ -21,6 +22,7 @@
 		{#if isNetworkMainnet}
 			<button
 				class="hit-area relative ml-1 opacity-50 press-icon"
+				aria-expanded={expanded}
 				aria-label={$i18n.core.text.info}
 				onclick={onInfoButtonClick}
 				type="button"><IconGixInfo /></button
@@ -29,7 +31,7 @@
 	</div>
 
 	{#if isNetworkMainnet}
-		<Collapsible bind:this={cmp} expandButton={false} externalToggle={true}>
+		<Collapsible bind:this={cmp} expandButton={false} externalToggle={true} bind:expanded>
 			{#snippet header()}{/snippet}
 			<p class="mb-0 font-normal opacity-50">
 				{$i18n.transactions.text.mainnet_btc_transactions_info}

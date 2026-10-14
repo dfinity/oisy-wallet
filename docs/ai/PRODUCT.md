@@ -69,8 +69,7 @@ Where it applies:
   icons next to addresses and IDs, the dismiss button on active transactions) press like icon
   buttons and can be hit across at least 40 × 40 px while looking the same size. Where a
   neighbour sits closer (a copy icon right next to a link, a modal's close next to its header
-  actions), the tap area only grows up and down, so two tap areas never overlap; the contact
-  row's action icons no longer overlap each other on phones. The help toggles say whether
+  actions), the tap area only grows up and down, so two tap areas never overlap. The help toggles say whether
   their explanation is open.
 
 ---
