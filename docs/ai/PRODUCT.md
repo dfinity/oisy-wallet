@@ -44,6 +44,39 @@ it.
 
 ---
 
+## Interaction feedback
+
+Everything that can be pressed shows that it is being pressed, while it is held, and lets go
+smoothly when released.
+
+- **Buttons** with text shrink slightly, to 98 %; icon buttons shrink to 96 %. Wide buttons
+  get the smaller press because the same scale takes far more off a wide element.
+- **Rows** that span the full width do **not** shrink. They darken one step instead: a 20 %
+  OISY-blue fill over their 10 % hover.
+- **A row does not light up when a control inside it is pressed** (a copy icon, a toggle); the
+  control shows its own press.
+- **Hover** colours appear only on devices that can hover, so a tap on a phone does not leave
+  a button coloured until the next tap.
+- With **reduced motion** turned on in the system, nothing shrinks; colours still change.
+  **Disabled** buttons show nothing.
+- iOS Safari applies pressed styles only when the page listens for touches, so the app
+  registers a passive touch listener for that reason alone.
+- **Copying** an address, hash or ID confirms on the button: the copy icon turns into a check
+  for 2 seconds and screen readers hear the "… copied" text. Copy buttons show no toast; a
+  row that copies when tapped as a whole keeps its toast, since nothing on it changes. When
+  the browser blocks the clipboard, an error says so (inline on the note share screen, where
+  a toast would sit behind the sheet).
+
+Where it applies:
+
+- **Token lists.** Token rows on Assets, the rows inside a token group and every other list of
+  logo rows with a click (earning positions, swap providers, networks, recent destinations,
+  the token and NFT settings menus) take the pressed fill. An expanded token group's header
+  opens and closes the whole card, so hovering it outlines the whole card, sub-tokens
+  included; a fill would not do, since on the white card the row hover is the page colour.
+
+---
+
 ## Analytics
 
 OISY uses [Plausible](https://plausible.io/) for privacy-friendly, cookieless analytics. Plausible is initialized once at app boot via the `@plausible-analytics/tracker` npm package. All events are fired through the central `trackEvent()` function in `src/frontend/src/lib/services/analytics.services.ts`, which wraps the tracker in a try/catch so analytics never disrupts the user flow.
