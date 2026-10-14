@@ -109,7 +109,7 @@ a.as-button {
 	&.success-light,
 	&.error {
 		&:not(.link):not(.icon) {
-			@include button.press(0.98);
+			@include button.press(button.$press-scale-text);
 		}
 	}
 
