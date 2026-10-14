@@ -233,6 +233,10 @@
 	{@render children()}
 {/await}
 
+<!-- iOS Safari applies `:active` to a tapped element only when the page has a touch listener,
+     so without one the press on buttons never shows on iPhones. Svelte registers it passive. -->
+<svelte:document ontouchstart={() => undefined} />
+
 <Banner />
 <Toasts elevated={nonNullish($modalStore?.type)} maxVisible={3} />
 <Busy />

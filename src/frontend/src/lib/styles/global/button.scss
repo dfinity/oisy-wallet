@@ -15,7 +15,8 @@ a.as-button {
 	transition:
 		color 0.25s ease-out,
 		background 0.25s ease-out,
-		opacity 0.25s ease-out;
+		opacity 0.25s ease-out,
+		scale 0.15s ease-out;
 
 	border: 1px solid transparent;
 
@@ -91,6 +92,29 @@ a.as-button {
 				box-shadow: none;
 			}
 		}
+	}
+
+	// PRESS
+	// Text buttons press less than icon buttons: they are often full width, where the
+	// same scale removes far more pixels. Text links stay still; icon buttons press in
+	// their link style too.
+	&.primary,
+	&.secondary,
+	&.secondary-light,
+	&.tertiary,
+	&.tertiary-alt,
+	&.tertiary-main-card,
+	&.muted,
+	&.success,
+	&.success-light,
+	&.error {
+		&:not(.link):not(.icon) {
+			@include button.press(0.98);
+		}
+	}
+
+	&.icon {
+		@include button.press;
 	}
 
 	// PRIMARY
