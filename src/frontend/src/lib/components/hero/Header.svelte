@@ -130,6 +130,8 @@
 	// Between 768 px and 68rem (1088 px) even the compact controls sit over the content column,
 	// so scrolled rows would show through behind them: a band in the page colour covers them.
 	// From 68rem the controls clear the content and the header stays transparent, as from 1408 px.
+	// Same range as the `header-band:` variant in global.scss, which pinned section headers
+	// (`StickyHeader`) use to pin below the band; change both together.
 	@media (min-width: 48rem) and (max-width: 67.99rem) {
 		header::before {
 			content: '';

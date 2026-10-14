@@ -38,7 +38,9 @@ scrolls away and the bottom bar stays. Signed out (the landing page and public p
 scrolls away at every width. Where the content column leaves no room beside it, the header gets out of the
 way: below 1280 px the network switcher shows only the network's logo, and below 1088 px, where
 even the icons sit over the content, a frosted band in the page colour appears behind them once
-the page is scrolled, so rows pass under it instead of showing through.
+the page is scrolled, so rows pass under it instead of showing through. There, the pinned section
+headers (the Assets bar, the date labels in Activity) pin just below the band rather than under
+it.
 
 ---
 
