@@ -34,6 +34,16 @@ describe('SwapSwitchTokensButton', () => {
 		expect(arrow(button)).not.toHaveClass('rotate-180');
 	});
 
+	// The button's content box is 12 px wide: the turning wrapper must shrink with the arrow,
+	// or it keeps 24 px and pushes the arrow off-centre.
+	it('lets the turning wrapper shrink to the button', () => {
+		const { getByTestId } = render(SwapSwitchTokensButton, {
+			props: { onTokensSwitch: vi.fn() }
+		});
+
+		expect(arrow(getByTestId(SWAP_SWITCH_TOKENS_BUTTON))).toHaveClass('min-w-0');
+	});
+
 	it('should press like an icon-size control rather than a text button', () => {
 		const { getByTestId } = render(SwapSwitchTokensButton, {
 			props: { onTokensSwitch: vi.fn() }
