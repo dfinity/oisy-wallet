@@ -4,12 +4,14 @@
 	interface Props {
 		address: string;
 		copyAriaLabel: string;
+		/** Confirmation once copied; defaults to `copyAriaLabel`. */
+		copiedText?: string;
 		testId?: string;
 		/** Fired after a successful copy, for callers that want to know it happened. */
 		onCopy?: () => void;
 	}
 
-	let { address, copyAriaLabel, testId, onCopy }: Props = $props();
+	let { address, copyAriaLabel, copiedText, testId, onCopy }: Props = $props();
 </script>
 
 <Copy
@@ -18,6 +20,6 @@
 	link={false}
 	{onCopy}
 	{testId}
-	text={copyAriaLabel}
+	text={copiedText ?? copyAriaLabel}
 	value={address}
 />
