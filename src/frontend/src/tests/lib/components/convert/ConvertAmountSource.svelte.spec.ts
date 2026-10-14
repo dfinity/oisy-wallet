@@ -101,7 +101,11 @@ describe('ConvertAmountSource', () => {
 
 	it.each([
 		{ case: 'the balance is zero', testProps: props, balance: ZERO },
-		{ case: 'the max amount is still loading', testProps: { ...props, totalFee: undefined } }
+		{ case: 'the max amount is still loading', testProps: { ...props, totalFee: undefined } },
+		{
+			case: 'the fee uses up the balance, so Max would set 0',
+			testProps: { ...props, totalFee: defaultBalance }
+		}
 	])('does not darken Max on hover when $case', ({ testProps, balance }) => {
 		const { getByTestId } = render(ConvertAmountSource, {
 			props: testProps,

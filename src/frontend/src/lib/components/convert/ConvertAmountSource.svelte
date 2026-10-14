@@ -97,6 +97,13 @@
 		});
 	});
 
+	// A balance the fee uses up computes to a max of 0: Max would set nothing worth having, so it
+	// shows no hover.
+	let hasPositiveMax = $derived(
+		nonNullish(cappedMaxAmount) &&
+			parseToken({ value: cappedMaxAmount, unitName: $sourceToken.decimals }) > ZERO
+	);
+
 	let amountSetToMax = $state(false);
 	const setMax = () => {
 		if (!isZeroBalance && nonNullish(cappedMaxAmount)) {
@@ -161,9 +168,7 @@
 		<button
 			class="hit-area relative font-semibold transition-[color,scale] duration-150 ease-out [--hit-area-y:calc(100%+1.125rem)] press-icon"
 			class:animate-pulse={isNullish(cappedMaxAmount)}
-			class:hover:text-brand-secondary={!isZeroBalance &&
-				isNullish(errorType) &&
-				nonNullish(cappedMaxAmount)}
+			class:hover:text-brand-secondary={!isZeroBalance && isNullish(errorType) && hasPositiveMax}
 			class:text-brand-primary={!isZeroBalance &&
 				isNullish(errorType) &&
 				nonNullish(cappedMaxAmount)}
