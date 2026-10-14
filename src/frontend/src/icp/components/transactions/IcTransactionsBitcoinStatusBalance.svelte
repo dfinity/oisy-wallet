@@ -90,7 +90,7 @@
 			<span in:blur>{$i18n.receive.bitcoin.text.checking_status}</span>
 		</div>{:else}
 		<button
-			class="text flex gap-2 border-0 text-brand-primary hover:text-brand-secondary active:text-brand-secondary"
+			class="text flex gap-2 border-0 text-brand-primary transition-colors duration-150 ease-out hover:text-brand-hover active:text-brand-hover"
 			onclick={async () => await receive()}
 			in:blur><IconReimbursed size="24" /> {$i18n.core.text.refresh}</button
 		>
