@@ -12,10 +12,12 @@ a.as-button {
 	--button-border-radius: var(--border-radius-md);
 	border-radius: var(--button-border-radius);
 
+	// Same 150 ms as rows, links and navigation, so a button answers a pointer as fast as
+	// everything around it.
 	transition:
-		color 0.25s ease-out,
-		background 0.25s ease-out,
-		opacity 0.25s ease-out,
+		color 0.15s ease-out,
+		background 0.15s ease-out,
+		opacity 0.15s ease-out,
 		scale 0.15s ease-out;
 
 	border: 1px solid transparent;
@@ -329,9 +331,10 @@ a.as-button {
 			@apply bg-brand-subtle-10;
 		}
 
+		// One step past the hover, as everywhere else; the open state below stays a step further.
 		&:active {
 			@apply text-brand-primary-alt;
-			@apply bg-brand-subtle-30;
+			@apply bg-brand-subtle-20;
 		}
 
 		&:focus-visible {
@@ -339,9 +342,9 @@ a.as-button {
 			@apply bg-primary;
 		}
 
-		// Keep the active background while the linked popover is open, the way
-		// the network switcher dropdown does. Placed last so it also wins over
-		// the focus-visible reset when opened via keyboard.
+		// A step darker still while the linked popover is open, the way the
+		// network switcher dropdown does. Placed last so it also wins over the
+		// focus-visible reset when opened via keyboard.
 		&.opened {
 			@apply text-brand-primary-alt;
 			@apply bg-brand-subtle-30;
@@ -589,7 +592,11 @@ a.as-button {
 	@apply font-medium;
 	@apply leading-5;
 
-	transition: all 0.25s ease-out;
+	transition:
+		color 0.15s ease-out,
+		background 0.15s ease-out,
+		opacity 0.15s ease-out,
+		scale 0.15s ease-out;
 
 	&::placeholder {
 		@apply text-tertiary;

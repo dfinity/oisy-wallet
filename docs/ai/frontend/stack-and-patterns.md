@@ -256,6 +256,10 @@ Wide things shrink less (0.98) than small ones (0.96) because the same
 scale takes far more pixels off a full-width element; full-width rows don't
 shrink at all.
 
+Colour changes take 150 ms ease-out everywhere, the shared buttons included,
+and pressed is one step of OISY blue past hover (10 % → 20 %, or 20 % → 30 %);
+a state that stays on, such as an open popover's button, may go a step further.
+
 ### Small controls: `hit-area`
 
 Anything you can tap that is under 40 × 40 px gets `hit-area`: an `::after`

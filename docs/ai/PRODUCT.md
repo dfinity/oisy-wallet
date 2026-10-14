@@ -51,6 +51,8 @@ smoothly when released.
 
 - **Buttons** with text shrink slightly, to 98 %; icon buttons shrink to 96 %. Wide buttons
   get the smaller press because the same scale takes far more off a wide element.
+- **Colours** change in 150 ms everywhere, buttons included, and a pressed button is one step
+  darker than its hover.
 - **Rows** that span the full width do **not** shrink. They darken one step instead: a 20 %
   OISY-blue fill over their 10 % hover.
 - **A row does not light up when a control inside it is pressed** (a copy icon, a toggle); the
