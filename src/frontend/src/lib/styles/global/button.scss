@@ -12,8 +12,8 @@ a.as-button {
 	--button-border-radius: var(--border-radius-md);
 	border-radius: var(--button-border-radius);
 
-	// Same 150 ms as rows, links and navigation, so a button answers a pointer as fast as
-	// everything around it.
+	// Same 150 ms as the `row-feedback` rows, so a button answers a pointer as fast as the
+	// rows around it.
 	transition:
 		color 0.15s ease-out,
 		background 0.15s ease-out,
