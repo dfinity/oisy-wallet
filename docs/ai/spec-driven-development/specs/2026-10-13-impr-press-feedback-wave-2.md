@@ -98,8 +98,9 @@ Paths are under `src/frontend/src/lib/`.
 Token rows on Assets, the rows inside a token group, the group header, and every other
 `LogoButton` list with a click (earning positions, swap providers, networks, recent
 destinations, contacts in send, the token and NFT settings menus) show the pressed fill.
-An expanded group header keeps a visible hover. `ListItemButton` stops scaling and uses the
-pressed fill like the other rows.
+The header of an expanded group opens and closes the whole card, so hovering it outlines the
+whole card, sub-tokens included: a blue fill on the white card would be the colour of the page
+behind it. `ListItemButton` stops scaling and uses the pressed fill like the other rows.
 
 ### 2. Activity and list rows
 
@@ -163,38 +164,44 @@ Six PRs, one per area. #14294 and #14295 are on `main`. Each updates `docs/ai/PR
 In `src/frontend/src/lib/styles/global.scss`, next to the existing `@custom-variant h-md`:
 
 - **`pressed:` variant**:
-  `@custom-variant pressed (&:active:not(:has(:is(a, button, input, label, [role='button']):active)))`.
-  Rows use `pressed:bg-brand-subtle-20`, so a press on a nested control does not paint the row
-  (rule 8).
-- **`hit-area` utility** (Tailwind `@utility`): `position: relative` on the control and an
-  absolutely positioned, centred pseudo-element of
-  `max(100%, var(--hit-area, 2.5rem))` in each direction. A cramped control caps it with an
-  arbitrary property, for example `[--hit-area:2rem]`. Use `::after` unless the control
-  already uses it. A control inside an `overflow: hidden` parent keeps whatever part of the
-  area fits.
+  `&:active:not(:has(:is(a, button, input, label, [role='button']):active))`, so a press on a
+  nested control does not paint the row (rule 8).
+- **`child-pressed:` variant**, for a wrapper whose direct child is the button (`LogoButton`):
+  two `:has()` side by side, `&:has(> :is(a, button):active):not(:has(> :is(a, button) :is(...):active))`.
+  Not named `has-*` (Tailwind's own compound `has-*` variant takes it over) and not one
+  `:has()` inside another (invalid CSS, so the browser drops the rule).
+- **`press` / `press-icon` utilities**: 0.98 / 0.96 while held, built on the `press` mixin the
+  shared buttons use (`lib/styles/mixins/_button.scss`), so one rule serves both.
+- **`row-feedback` utility**: 10 % hover (guarded by `(hover: hover)`), 20 % with `pressed:`,
+  background over 150 ms.
+- **`hit-area` utility**: a centred `::after` of `max(100%, var(--hit-area, 2.5rem))` each
+  way, capped per axis with `[--hit-area-x:...]` / `[--hit-area-y:...]`. It does not set
+  `position`; the control adds `relative` unless it is already positioned.
 
 Touched elements replace `transition-colors`, `transition` and `transition-all` with explicit
 lists (`transition-[background-color,color,scale]` and so on), `duration-150 ease-out`.
 
-Document both pieces in `docs/ai/frontend/stack-and-patterns.md` next to "Press feedback",
-and add `hit-area` and `pressed:` to `docs/ai/frontend/reusability.md`.
+Document them in `docs/ai/frontend/stack-and-patterns.md` ("Press feedback": which element
+gets which utility, and the pitfalls), `docs/ai/frontend/reusability.md`, the pre-flight
+checklist in `docs/ai/frontend/README.md`, and the jsdom notes in `docs/ai/frontend/testing.md`.
 
 ### 1. Token list rows
 
-- `ui/LogoButton.svelte`: the wrapper `div` gets `has-[>button:active]:bg-brand-subtle-20`,
-  excluding nested controls the same way as `pressed:`. It applies only when the row has an
-  `onClick`. `hover` stays where it is.
-- `tokens/TokensList.svelte:172,236` and `tokens/TokenGroupCard.svelte:106,122`: the same
-  pressed fill on the wrappers. When the group is expanded, its header hovers with
-  `bg-brand-subtle-10` instead of the colour it already has.
-- `common/ListItemButton.svelte`: pass `static` and add the pressed fill.
+- `ui/LogoButton.svelte`: the wrapper `div` gets `child-pressed:bg-brand-subtle-20` when the
+  row has an `onClick`; `hover` stays where it is. That covers token rows, group rows and the
+  other `LogoButton` lists.
+- `tokens/TokenGroupCard.svelte`: when the group is expanded, hovering the header outlines the
+  whole card with an inset 1 px `--color-border-brand-subtle-30` ring under `(hover: hover)`
+  (inset because the list clips each card).
+- `common/ListItemButton.svelte`: pass `static` and use `row-feedback`.
 
 ### 2. Activity and list rows
 
-- `Transaction.svelte:152` and `TipHistory.svelte:202`: the inner span takes the fill through
-  `[button:active>&]:bg-brand-subtle-20`, plus `transition-colors duration-150`.
+- `Transaction.svelte:152` and `TipHistory.svelte:202`: `row-feedback` on the inner span, which
+  is itself the ancestor of whatever is tapped, so it works whether the button renders as
+  `contents` or `block`.
 - `NoteListItem`, `AddressListItem`, `OisyTradeOrderRow`, `OisyTradePositionRow` and
-  `TransactionsFilterMobileSheet`: `pressed:bg-brand-subtle-20` and an explicit transition.
+  `TransactionsFilterMobileSheet`: `row-feedback`.
 - `contact/AddressItemActions.svelte`: Edit and Delete stop propagation like Info already
   does, so pressing them never opens the row.
 
@@ -266,7 +273,7 @@ behaviour (as `ButtonSignInInternetIdentity.spec.ts` does), and visual QA happen
 
 1. Every listed row shows a 20 % blue fill while pressed, does not scale, and shows nothing
    extra when a control inside it is pressed.
-2. An expanded token group header shows a visible hover.
+2. Hovering an expanded token group's header outlines the whole card, sub-tokens included.
 3. Desktop navigation items: hover 10 %, pressed 20 %, 150 ms, no hover left after a tap on
    touch.
 4. Mobile bar: pressing an entry shrinks its icon and label to 0.96. The Finance circle does
@@ -293,9 +300,8 @@ behaviour (as `ButtonSignInInternetIdentity.spec.ts` does), and visual QA happen
 1. **Swap flip button size.** Its `Button` computes to 48 × 48 px inside a 36 px wrapper
    (`SwapSwitchTokensButton.svelte:15-28`). Confirm the rendered size on staging before PR 5;
    it decides how much tap area the button already has.
-2. **`IcTransaction` row.** `IcTransaction.svelte:78` passes `block w-full border-0` to the
-   `contents` button in `Transaction.svelte`. Confirm which wins in the browser before PR 2;
-   it decides whether the fill goes on the button or the span for ICP rows.
+2. ~~**`IcTransaction` row.**~~ Settled while building: the fill sits on the inner span,
+   which is pressed whichever display the button ends up with.
 3. **Nested controls in `LogoButton`.** Its `action` snippet renders toggles inside the
    `<button>` (`TokensMenu`, `TokenCard` with `onToggle`). Confirm in Safari that pressing a
    toggle does not paint the row before PR 1.
