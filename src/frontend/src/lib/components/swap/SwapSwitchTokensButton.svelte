@@ -32,8 +32,11 @@
 		styleClass="absolute bottom-0 left-0 right-0 top-0 m-auto rounded-lg border border-solid border-secondary press-icon"
 		testId={SWAP_SWITCH_TOKENS_BUTTON}
 	>
+		<!-- min-w-0: the button leaves 12 px for its content, and the arrow shrinks to fit it as it
+		     did before this wrapper; without it the wrapper keeps 24 px and pushes the arrow
+		     6 px off-centre. -->
 		<span
-			class="flex transition-[rotate] duration-300 ease-out motion-reduce:transition-none"
+			class="flex min-w-0 transition-[rotate] duration-300 ease-out motion-reduce:transition-none"
 			class:rotate-180={flipped}
 		>
 			<IconArrowUpDown />

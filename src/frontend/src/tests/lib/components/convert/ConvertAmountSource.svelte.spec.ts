@@ -83,7 +83,11 @@ describe('ConvertAmountSource', () => {
 			context: mockContext()
 		});
 
-		expect(getByTestId(balanceTestId)).toHaveClass('hit-area', 'press-icon');
+		expect(getByTestId(balanceTestId)).toHaveClass(
+			'hit-area',
+			'[--hit-area-y:calc(100%+1.125rem)]',
+			'press-icon'
+		);
 	});
 
 	it('darkens Max on hover while the max amount is valid', () => {
