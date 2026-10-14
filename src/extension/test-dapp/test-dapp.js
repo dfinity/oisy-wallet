@@ -35,12 +35,45 @@ const run =
 const onClick = ({ id, label, action }) =>
 	element(id).addEventListener('click', run({ label, action }));
 
+// --- Connected accounts ---------------------------------------------------------------------------
+
+const shorten = (address) =>
+	address.length > 16 ? `${address.slice(0, 6)}…${address.slice(-6)}` : address;
+
+const showAccount = ({ id, address }) => {
+	const connected = typeof address === 'string' && address.length > 0;
+	const label = element(`${id}-address`);
+	const copy = element(`${id}-copy`);
+
+	element(id).dataset.connected = String(connected);
+	label.textContent = connected ? shorten(address) : 'Not connected';
+	label.title = connected ? address : '';
+	copy.hidden = !connected;
+	copy.dataset.address = connected ? address : '';
+};
+
+for (const id of ['eth-account', 'sol-account']) {
+	element(`${id}-copy`).addEventListener('click', async ({ currentTarget: button }) => {
+		try {
+			await navigator.clipboard.writeText(button.dataset.address);
+			button.textContent = 'Copied';
+		} catch (_) {
+			button.textContent = 'Copy failed';
+		}
+		setTimeout(() => {
+			button.textContent = 'Copy';
+		}, 1500);
+	});
+}
+
 // --- Wallet discovery, the way wagmi and the Solana wallet adapter do it ------------------------
 
 const ethProviders = new Map();
 const solWallets = [];
 let eth = null;
 let sol = null;
+let ethAccount = null;
+let solAccount = null;
 
 const renderWallets = () => {
 	const entries = [
@@ -61,6 +94,44 @@ const renderWallets = () => {
 	eth = [...ethProviders.values()].find(({ info }) => info.rdns === 'com.oisy')?.provider ?? null;
 	sol = solWallets.find(({ name }) => name === 'OISY') ?? null;
 	window.oisyTest = { eth, sol, wallets: entries };
+
+	followWallets();
+};
+
+// Neither call opens a popup: a site that connected before gets its accounts back, any other gets none.
+let followingEth = false;
+let followingSol = false;
+
+const followWallets = () => {
+	if (eth !== null && !followingEth) {
+		followingEth = true;
+		eth.on('accountsChanged', (accounts) => {
+			ethAccount = accounts[0] ?? null;
+			showAccount({ id: 'eth-account', address: ethAccount });
+		});
+		eth
+			.request({ method: 'eth_accounts' })
+			.then(([account]) => {
+				ethAccount = account ?? null;
+				showAccount({ id: 'eth-account', address: ethAccount });
+			})
+			.catch(() => undefined);
+	}
+
+	if (sol !== null && !followingSol) {
+		followingSol = true;
+		sol.features['standard:events']?.on('change', ({ accounts }) => {
+			solAccount = accounts?.[0] ?? null;
+			showAccount({ id: 'sol-account', address: solAccount?.address });
+		});
+		sol.features['standard:connect']
+			.connect({ silent: true })
+			.then(({ accounts }) => {
+				solAccount = accounts[0] ?? null;
+				showAccount({ id: 'sol-account', address: solAccount?.address });
+			})
+			.catch(() => undefined);
+	}
 };
 
 window.addEventListener('eip6963:announceProvider', ({ detail }) => {
@@ -82,8 +153,6 @@ window.dispatchEvent(new CustomEvent('wallet-standard:app-ready', { detail: wall
 renderWallets();
 
 // --- Ethereum -----------------------------------------------------------------------------------
-
-let ethAccount = null;
 
 const ethRequest = ({ method, params }) => {
 	if (eth === null) {
@@ -123,7 +192,7 @@ onClick({
 	action: async () => {
 		const [account] = await ethRequest({ method: 'eth_requestAccounts' });
 		ethAccount = account;
-		element('eth-account').textContent = account;
+		showAccount({ id: 'eth-account', address: account });
 		const chainId = await ethRequest({ method: 'eth_chainId' });
 		return { text: `${account} on chain ${Number(chainId)}`, ok: true };
 	}
@@ -203,8 +272,6 @@ onClick({
 });
 
 // --- Solana -------------------------------------------------------------------------------------
-
-let solAccount = null;
 
 const base58Encode = (bytes) => {
 	let zeros = 0;
@@ -346,7 +413,7 @@ onClick({
 	action: async () => {
 		const { accounts } = await solFeature('standard:connect').connect();
 		[solAccount] = accounts;
-		element('sol-account').textContent = solAccount?.address ?? 'Not connected';
+		showAccount({ id: 'sol-account', address: solAccount?.address });
 		return { text: solAccount?.address ?? 'no account', ok: solAccount !== undefined };
 	}
 });

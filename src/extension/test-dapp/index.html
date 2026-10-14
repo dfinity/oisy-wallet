@@ -54,9 +54,53 @@
 				margin: 24px 0;
 			}
 			section {
+				min-width: 0;
 				padding: 16px;
 				border-radius: 12px;
 				background: var(--surface);
+			}
+			.account {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				min-height: 40px;
+				margin-bottom: 4px;
+				padding: 6px 6px 6px 12px;
+				border-radius: 10px;
+				background: var(--bg);
+			}
+			.account .dot {
+				flex: none;
+				width: 8px;
+				height: 8px;
+				border-radius: 50%;
+				background: var(--muted);
+			}
+			.account[data-connected='true'] .dot {
+				background: var(--ok);
+			}
+			.account .address {
+				flex: 1;
+				min-width: 0;
+				overflow: hidden;
+				color: var(--muted);
+				font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+				font-size: 13px;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+			.account[data-connected='true'] .address {
+				color: var(--text);
+			}
+			.account .copy {
+				flex: none;
+				width: auto;
+				margin: 0;
+				padding: 4px 10px;
+				border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+				background: transparent;
+				color: var(--accent);
+				font-size: 13px;
 			}
 			button {
 				display: block;
@@ -114,7 +158,11 @@
 
 			<section>
 				<h2>Ethereum · Sepolia</h2>
-				<p class="muted" id="eth-account">Not connected</p>
+				<div class="account" id="eth-account" data-connected="false">
+					<span class="dot" aria-hidden="true"></span>
+					<span class="address" id="eth-account-address">Not connected</span>
+					<button class="copy" id="eth-account-copy" type="button" hidden>Copy</button>
+				</div>
 				<button id="eth-accounts" type="button">eth_accounts</button>
 				<button id="eth-connect" type="button">Connect</button>
 				<button id="eth-sign" type="button">Sign a message</button>
@@ -125,7 +173,11 @@
 
 			<section>
 				<h2>Solana · devnet</h2>
-				<p class="muted" id="sol-account">Not connected</p>
+				<div class="account" id="sol-account" data-connected="false">
+					<span class="dot" aria-hidden="true"></span>
+					<span class="address" id="sol-account-address">Not connected</span>
+					<button class="copy" id="sol-account-copy" type="button" hidden>Copy</button>
+				</div>
 				<button id="sol-connect" type="button">Connect</button>
 				<button id="sol-sign" type="button">Sign a message</button>
 				<button id="sol-sign-tx" type="button">Sign a transaction</button>
