@@ -33,7 +33,7 @@
 </script>
 
 <button
-	class={`flex w-full items-center gap-3 rounded-xl bg-primary p-2 text-left hover:bg-brand-subtle-10 ${styleClass}`}
+	class={`flex w-full items-center gap-3 rounded-xl row-feedback bg-primary p-2 text-left ${styleClass}`}
 	data-tid={ADDRESS_LIST_ITEM_BUTTON}
 	onclick={() => onClick?.()}
 >

@@ -64,6 +64,10 @@ Where it applies:
   the token and NFT settings menus) take the pressed fill. An expanded token group's header
   opens and closes the whole card, so hovering it outlines the whole card, sub-tokens
   included; a fill would not do, since on the white card the row hover is the page colour.
+- **Activity and other lists.** Transaction rows, tip history, notes, contact addresses, OISY
+  Trade orders and positions, and the mobile activity filter rows take the same pressed fill.
+  In a contact address row, Edit and Delete act on their own: pressing them does not also
+  copy the address, which the row does when tapped as a whole.
 
 ---
 
