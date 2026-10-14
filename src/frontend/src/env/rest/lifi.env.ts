@@ -25,8 +25,9 @@ const LIFI_DIAMOND = '0x1231DEB6f5749EF6cE6943a275A1D3E7486F4EaE';
  * The LI.FI Diamond — the call target and ERC-20 spender of every LI.FI transaction — per network.
  *
  * Pinned from `deployments/<chain>.json` in https://github.com/lifinance/contracts and never taken
- * from a quote: a quote naming any other target or spender is refused. A network without an entry
- * is one LI.FI is never asked about, on either side of a swap.
+ * from a quote: a quote naming any other target or spender is refused. An EVM network without an
+ * entry is one LI.FI is never asked about, on either side of a swap. Solana mainnet has no entry
+ * and is still quoted, as a destination only: a Diamond is the call target of an EVM source.
  */
 export const LIFI_DIAMOND_ADDRESSES: Partial<Record<NetworkId, EthAddress>> = {
 	[ETHEREUM_NETWORK_ID]: LIFI_DIAMOND,

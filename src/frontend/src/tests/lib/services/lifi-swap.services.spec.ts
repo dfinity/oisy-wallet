@@ -138,6 +138,51 @@ describe('lifi-swap.services', () => {
 				expect(fetchLifiQuote).toHaveBeenCalledOnce();
 			});
 
+			describe('with a slow answer', () => {
+				let answer: (quote: typeof mockLifiQuote) => void = () => undefined;
+
+				beforeEach(() => {
+					vi.mocked(fetchLifiQuote).mockReturnValueOnce(
+						new Promise((resolve) => {
+							answer = resolve;
+						})
+					);
+				});
+
+				it('should share a request still in flight past the interval', async () => {
+					const first = fetchLifiSwapQuote(params);
+
+					vi.setSystemTime(now + LIFI_QUOTE_REFRESH_INTERVAL_MS + 1);
+
+					const second = fetchLifiSwapQuote(params);
+
+					answer(mockLifiQuote);
+
+					await expect(second).resolves.toBe(await first);
+					expect(fetchLifiQuote).toHaveBeenCalledOnce();
+				});
+
+				it('should count the interval from the answer, not from the request', async () => {
+					const answeredAt = now + 20_000;
+
+					const first = fetchLifiSwapQuote(params);
+
+					vi.setSystemTime(answeredAt);
+					answer(mockLifiQuote);
+					await first;
+
+					vi.setSystemTime(answeredAt + LIFI_QUOTE_REFRESH_INTERVAL_MS - 1);
+					await fetchLifiSwapQuote(params);
+
+					expect(fetchLifiQuote).toHaveBeenCalledOnce();
+
+					vi.setSystemTime(answeredAt + LIFI_QUOTE_REFRESH_INTERVAL_MS);
+					await fetchLifiSwapQuote(params);
+
+					expect(fetchLifiQuote).toHaveBeenCalledTimes(2);
+				});
+			});
+
 			it('should give the SDK its own copy of the request', async () => {
 				// The SDK writes its defaults into the object it is given. Were that object the
 				// service's own, the quote would then be checked against the altered request.

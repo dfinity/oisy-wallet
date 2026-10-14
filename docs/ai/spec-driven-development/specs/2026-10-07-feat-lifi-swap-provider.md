@@ -228,7 +228,7 @@ Permit2 / EIP-712 signing and Jito bundles, and pull a second `@solana/kit` vers
 (viem is already a runtime dependency, so it is not part of the cost).
 
 One module-level client in `lib/rest/lifi.rest.ts` (the layer NEAR Intents' REST calls
-live in), wrapping `getQuote` (PR 2a) and `getStatus` (PR 2b):
+live in), wrapping `getQuote` (PR 2a-1) and `getStatus` (PR 2b):
 
 ```ts
 createClient({
@@ -255,7 +255,9 @@ New `src/frontend/src/env/rest/lifi.env.ts`, modelled on `near-intents.env.ts`:
   quote instead of failing at import time.
 - `LIFI_DIAMOND_ADDRESSES: Partial<Record<NetworkId, EthAddress>>` — the six Diamonds
   listed in [Background — LI.FI](#background--lifi), pinned from LI.FI's deployment
-  files, never from a quote. A network without an entry is never quoted, on either side.
+  files, never from a quote. An EVM network without an entry is never quoted, on either
+  side. Solana mainnet has no entry and is quoted as a destination only (and as a source
+  from PR 3, where the Solana checks replace the Diamond).
 - `LIFI_ALLOWED_BRIDGES: Partial<Record<NetworkId, string[]>>` — the curated bridge tool
   keys per source Diamond (see [Calldata binding](#calldata-binding-evm-execution-time-quote)):
   `['across', 'near']` on the five Diamonds that carry both facets, `['across']` on
@@ -417,9 +419,13 @@ module-level cache entry `{ key, result, fetchedAt }`, where `key` is the serial
 request (chains, tokens, amount, both addresses, slippage):
 
 - a different key (any input change) fetches immediately and replaces the entry;
-- the same key returns the cached mapped result while it is younger than
-  `LIFI_QUOTE_REFRESH_INTERVAL_MS = 30_000`, and re-fetches after that;
-- an in-flight request for the same key is shared, not duplicated.
+- the same key returns the cached mapped result until `LIFI_QUOTE_REFRESH_INTERVAL_MS =
+30_000` after it **settled**, and re-fetches after that;
+- an in-flight request for the same key is shared, not duplicated, however long it takes;
+- every quote request times out after `LIFI_QUOTE_TIMEOUT_MS = 10_000` (the SDK sets no
+  timeout), so a stalled request settles as a failure instead of pinning the cache, and
+  cannot hold back the other providers' offers, which the swap form shows only once every
+  provider has answered.
 
 The other providers keep refreshing every 5 s; the fan-out is unchanged. A cached
 quote is only ever **displayed** — execution always re-quotes — so a 30 s-old price is
@@ -1293,7 +1299,7 @@ loader's 5 s tick.
 | 1    | **Backend AUT variant** — `Lifi(LifiData)`, validation of the v1 token matrix (`require_lifi_pair`, pinned EVM chain ids) and of the required poll keys (`require_lifi_refs`), tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                                  | —                                              |
 | 2a-1 | **Quote client** (not registered anywhere) — `@lifi/sdk`, env (flag **`false` everywhere**), `SwapProvider.LIFI` + mapped-result arm + `swapService` stub, REST client, EVM form-time trust checks, `fetchLifiSwapQuote` with the 30 s cache, `reusability.md` entry                                                                                                                                                                                                                                                                     | 1                                              |
 | 2a-2 | **Registration** — LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges, empty source list so the Solana source picker is unchanged), provider sheet                                                                                                                                                                                   | 2a-1                                           |
-| 2b   | **EVM execution + tracking** — calldata binding (pinned selectors + `CalldataVerificationFacet`), `fetchLifiEvmSwap` (pre-approval price check, unchanged `approve()`, form budget of 0/1/2 approval fees from one allowance read) + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound and the `/status` 404 → `NOT_FOUND` mapping)/loader (incl. wallet + EVM balance refresh)/item; flag back to `LOCAL \|\| STAGING`, `PRODUCT.md` for EVM-source swaps | 2a                                             |
+| 2b   | **EVM execution + tracking** — calldata binding (pinned selectors + `CalldataVerificationFacet`), `fetchLifiEvmSwap` (pre-approval price check, unchanged `approve()`, form budget of 0/1/2 approval fees from one allowance read) + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound and the `/status` 404 → `NOT_FOUND` mapping)/loader (incl. wallet + EVM balance refresh)/item; flag back to `LOCAL \|\| STAGING`, `PRODUCT.md` for EVM-source swaps | 2a-2                                           |
 | 3    | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (quote, destinations, and a mainnet-only source list in place of the empty one; Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` / `closedAccounts` in the simulation preview and the slot-consistent pre/post snapshot), `SwapSolWizard` dispatch, Solana source-chain check in the poller (in-memory expiry observations), `PRODUCT.md` update for Solana-source swaps                             | 2b                                             |
 | 4    | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 3, production key + rate-limit scope confirmed |
 

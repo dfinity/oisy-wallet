@@ -32,13 +32,18 @@ type LifiQuoteParams = EvmQuoteParams | NearIntentsQuoteParams;
 
 interface LifiQuoteCacheEntry {
 	key: string;
-	requestedAt: number;
 	result: Promise<SwapMappedResult | undefined>;
+	// Set once `result` settles. The refresh interval runs from the answer, not from the request,
+	// so a request still in flight is always shared, however long it takes.
+	settledAt?: number;
 }
 
 // A single entry: the swap form quotes one pair at a time, so a request with other inputs replaces
 // it. Holding the promise rather than its result lets a request still in flight be shared.
 let quoteCache: LifiQuoteCacheEntry | undefined;
+
+const isFresh = ({ settledAt }: LifiQuoteCacheEntry): boolean =>
+	isNullish(settledAt) || Date.now() - settledAt < LIFI_QUOTE_REFRESH_INTERVAL_MS;
 
 export const resetLifiQuoteCache = () => {
 	quoteCache = undefined;
@@ -158,9 +163,10 @@ const loadLifiSwapQuote = async ({
  * A LI.FI offer for the swap form's inputs, or `undefined` when LI.FI has none or is not asked.
  *
  * Unlike the other providers, LI.FI is not re-quoted on every periodic tick: a request with the same
- * inputs is answered from a single cache entry for `LIFI_QUOTE_REFRESH_INTERVAL_MS`, while any change
- * of inputs fetches immediately. Every outcome is cached, a missing route or a failure included, so
- * unchanged inputs reach LI.FI at most once per interval. The cached quote is only ever displayed:
+ * inputs is answered from a single cache entry, while any change of inputs fetches immediately. A
+ * request still in flight is shared; once it settles, its answer is reused for
+ * `LIFI_QUOTE_REFRESH_INTERVAL_MS`. Every outcome is cached, a missing route or a failure included,
+ * so unchanged inputs reach LI.FI at most once per interval. The cached quote is only ever displayed:
  * execution re-quotes through the REST layer directly, never through this cache.
  */
 export const fetchLifiSwapQuote = async (
@@ -177,21 +183,24 @@ export const fetchLifiSwapQuote = async (
 	}
 
 	const key = JSON.stringify(request);
-	const now = Date.now();
 
-	if (
-		nonNullish(quoteCache) &&
-		quoteCache.key === key &&
-		now - quoteCache.requestedAt < LIFI_QUOTE_REFRESH_INTERVAL_MS
-	) {
+	if (nonNullish(quoteCache) && quoteCache.key === key && isFresh(quoteCache)) {
 		return await quoteCache.result;
 	}
 
 	const { sourceToken, destinationToken, amount } = params;
 
-	const result = loadLifiSwapQuote({ request, sourceToken, destinationToken, amount });
+	const entry: LifiQuoteCacheEntry = {
+		key,
+		result: loadLifiSwapQuote({ request, sourceToken, destinationToken, amount })
+	};
 
-	quoteCache = { key, requestedAt: now, result };
+	quoteCache = entry;
 
-	return await result;
+	// `loadLifiSwapQuote` never rejects, so this always records when the answer arrived.
+	const result = await entry.result;
+
+	entry.settledAt = Date.now();
+
+	return result;
 };

@@ -1,4 +1,5 @@
 import { LIFI_API_KEY, LIFI_INTEGRATOR } from '$env/rest/lifi.env';
+import { LIFI_QUOTE_TIMEOUT_MS } from '$lib/constants/swap.constants';
 import {
 	createClient,
 	getQuote,
@@ -27,6 +28,6 @@ const lifiClient = (): SDKClient => {
 // https://docs.li.fi/api-reference/get-a-quote-for-a-token-transfer
 //
 // The SDK fills its defaults into the request object it is given, so the caller passes one it does
-// not keep.
+// not keep. The SDK sets no timeout of its own: without one, a stalled connection never settles.
 export const fetchLifiQuote = (request: QuoteRequestFromAmount): Promise<LiFiStep> =>
-	getQuote(lifiClient(), request);
+	getQuote(lifiClient(), request, { signal: AbortSignal.timeout(LIFI_QUOTE_TIMEOUT_MS) });

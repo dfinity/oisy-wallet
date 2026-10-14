@@ -51,6 +51,10 @@ export const SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS = 5_000;
 // its rate limit is tight, and a displayed quote is never signed — execution always re-quotes.
 export const LIFI_QUOTE_REFRESH_INTERVAL_MS = 30_000;
 
+// The swap form shows its offers once every provider has answered, so a stalled LI.FI request would
+// hold back every other offer, and a request that never settles would never be retried.
+export const LIFI_QUOTE_TIMEOUT_MS = 10_000;
+
 export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
 	[ETHEREUM_NETWORK_ID]: 'eth',
 	[ARBITRUM_MAINNET_NETWORK_ID]: 'arb',

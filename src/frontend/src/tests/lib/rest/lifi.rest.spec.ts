@@ -46,6 +46,6 @@ describe('lifi.rest', () => {
 			disableVersionCheck: true,
 			preloadChains: false
 		});
-		expect(getQuote).toHaveBeenCalledWith(client, request);
+		expect(getQuote).toHaveBeenCalledWith(client, request, { signal: expect.any(AbortSignal) });
 	});
 });
