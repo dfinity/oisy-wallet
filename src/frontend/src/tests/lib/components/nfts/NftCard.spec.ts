@@ -124,6 +124,19 @@ describe('NftCard', () => {
 		expect(cardElement.getAttribute('class')?.includes(' hover:bg-primary')).toBeTruthy();
 	});
 
+	it('should not press an interactive card while it is disabled', () => {
+		const { container } = render(NftCard, {
+			props: {
+				nft: { ...mockValidErc721Nft, imageUrl: undefined },
+				testId,
+				type: 'card-link',
+				disabled: true
+			}
+		});
+
+		expect(container.querySelector('button')).not.toHaveClass('press');
+	});
+
 	it('should track event with spam status on click when isSpam is true', () => {
 		const { container } = render(NftCard, {
 			props: {
