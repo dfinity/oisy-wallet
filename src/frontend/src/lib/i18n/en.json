@@ -3019,6 +3019,7 @@
 			"generate": "Create tip",
 			"share_heading": "Your tip is ready",
 			"copy_link": "Copy the tip link",
+			"link_copied": "Tip link copied to clipboard.",
 			"share_link": "Share the tip link",
 			"they_will_receive": "Tip amount",
 			"no_wallet_needed_title": "Scan to claim this tip",
