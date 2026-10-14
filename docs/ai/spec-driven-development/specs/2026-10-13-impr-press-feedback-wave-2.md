@@ -169,8 +169,10 @@ its own text colour keeps it, and buttons and menu items styled as such keep the
 
 ## Implementation
 
-Six PRs, one per area. #14294 and #14295 are on `main`. Each updates `docs/ai/PRODUCT.md`
-(see below) and the tests for what it touches.
+Seven PRs, one per area. #14294 and #14295 are on `main`. The token rows PR carries the shared
+pieces below; the other areas are stacked on it, and links and icon links on amount forms,
+since both change Max's hover colour. Each updates `docs/ai/PRODUCT.md` (see below) and the
+tests for what it touches.
 
 ### Shared pieces (land with the first PR that needs them)
 
@@ -238,8 +240,9 @@ checklist in `docs/ai/frontend/README.md`, and the jsdom notes in `docs/ai/front
   (`src/frontend/src/lib/utils/theme.utils.ts`). The PR also checks the other two `dark:`
   users (`address-book/ContactHeader.svelte:35` and the second NFT card).
 - `NftCard`, `NftCollectionCard`: `transition-all duration-300` becomes
-  `transition-[translate,scale,background-color] duration-150 ease-out`; add
-  `active:scale-[0.98] motion-reduce:active:scale-100`.
+  `transition-[translate,scale,background-color] duration-150 ease-out`; add `press` only
+  on a card that can be pressed: `NftCard` when it is not `disabled` and not the
+  non-interactive `default` type, `NftCollectionCard` when it is not `disabled`.
 - `dapps/DappCard.svelte:19` and `rewards/RewardCard.svelte:43`: the same press with an
   explicit transition. Both keep their absolutely positioned logo and badge inside `relative`
   boxes, so the scale does not move them.
