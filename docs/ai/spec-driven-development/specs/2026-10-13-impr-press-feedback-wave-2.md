@@ -31,6 +31,9 @@ Wave 2 builds on two Wave 1 PRs and needs them on `main` first:
   loading or under `prefers-reduced-motion`. The `static` prop opts out (class `no-press`,
   because `static` is a Tailwind utility). Text buttons got the smaller press after 0.96 felt
   too strong on full-width buttons: the same scale takes far more pixels off a wide element.
+  It also registers a passive no-op `touchstart` listener on the document in
+  `src/frontend/src/routes/+layout.svelte`: iOS Safari applies `:active` on a tap only when
+  the page has a touch listener, so every pressed state in this spec depends on it.
 - **#14295.** SCSS hover rules go through `interaction.hover`
   (`src/frontend/src/lib/styles/mixins/_interaction.scss`), which applies them only under
   `@media (hover: hover)`, as Tailwind's `hover:` already does.
