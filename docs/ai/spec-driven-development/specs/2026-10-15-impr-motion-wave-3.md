@@ -259,7 +259,9 @@ jsdom does not run transitions or CSS animations; tests assert the inputs that p
 - `transitions.utils.spec.ts`: each wrapper fills in the shared timing when none is passed,
   keeps a passed one, returns the reduced-motion form when `prefersReducedMotion.current` is
   true, and `scale` defaults to 0.96.
-- Area 2, the lint rule: a fixture importing `svelte/transition` outside the module fails.
+- Area 2, the lint rule: checked by probe both ways, as the `oisy-trade` boundary was (the repo
+  has no harness for lint-rule tests): a file importing `svelte/transition` outside the module
+  fails, the module and `transition.constants.ts` pass.
 - Area 3: the overlays pass the expected params (spy on the module's functions).
 - Area 5: each component renders `IconSwap` with the right `swapped` state.
 - Area 6: `PillButton` has `press`; `Tabs` has the pressed colour class.
@@ -296,8 +298,8 @@ jsdom does not run transitions or CSS animations; tests assert the inputs that p
 1. **Who awaits the backdrop.** List every awaiter of `BACKDROP_FADE_OUT_DURATION` and confirm
    none depends on 250 ms (for example a test with fake timers, or a navigation that must
    not start before the backdrop is gone).
-2. **Tests that wait on 400 ms.** Search the specs for fake-timer advances or `waitFor`
-   timeouts that assume the default transition length and would break when it shortens.
+2. ~~**Tests that wait on 400 ms.**~~ Settled while building area 2: none. The full suite
+   passes with every transition on the shared timings.
 3. ~~**The `a0_mo` … `a4c_mo` keyframes.**~~ Settled while building: they animate
    `icons/animated/AnimatedScanIcon` (the Scan QR icon), which is decorative and stops under
    reduced motion. `AnimatedIconLoader` turns to show progress and keeps running.
