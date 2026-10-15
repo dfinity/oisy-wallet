@@ -82,7 +82,9 @@ Component paths are under `src/frontend/src/lib/components/`, other paths under
      sheet) take 200 ms to leave;
    - the backdrop arrives in 75 ms, so the dimming is in place as the panel lands, and leaves
      on the shared 150 ms.
-3. **Small state changes** (an icon swapping, a chip changing) take 150 ms.
+3. **Icon swaps** cross-fade over 300 ms, `cubic-bezier(0.2, 0, 0, 1)`, as the copy check
+   already does (the make-interfaces-feel-better timing for icon swaps). **Other small state
+   changes** (a chip changing) take 150 ms.
 4. **Height changes** (a section expanding, an error line appearing under a field) keep their
    current 250 ms both ways; rules 1 and 2 do not apply to them.
 5. **Nothing grows from nothing.** Popovers and menus start at 96 % of their size, not at
@@ -128,7 +130,8 @@ The mobile bottom sheet casts the shadow its styles always asked for, in light a
 
 The progress steps' spinner turning into a check or a cross, the menu's privacy eye, the theme
 switch's sun and moon, and NFT hide's eye cross-fade like the copy check does, instead of
-cutting. Under reduced motion every icon swap, the copy check included, is a 100 ms fade.
+cutting, over the copy check's 300 ms. Under reduced motion every icon swap, the copy check
+included, is a 100 ms fade.
 
 ### 6. Pills, tabs and the toggle
 
@@ -144,6 +147,8 @@ cutting. Under reduced motion every icon swap, the copy check included, is a 100
 - It does **not** slow anything down: no motion gets longer than it is today.
 - It does **not** remove the press shrink, hover colours or focus rings from Waves 1 and 2.
 - It does **not** stop progress spinners under reduced motion.
+- It does **not** stagger entrances: content still appears as one piece, so flows like send
+  and swap feel no slower. A stagger can be tried later on screens outside those flows.
 - It does **not** touch the carousel (its own treatment), add a moving indicator to the tabs,
   or change shadows and borders on cards (design calls, not scheduled). Surfaces and
   typography (logo outlines, steady numbers, corners) are Wave 4.
@@ -157,7 +162,7 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
 ### 1. Shared motion rules
 
 - `lib/constants/transition.constants.ts`: named timings next to the existing slide ones:
-  enter 200 ms ease-out (`cubicOut`), exit 150 ms ease-in (`cubicIn`), swap 150 ms, the
+  enter 200 ms ease-out (`cubicOut`), exit 150 ms ease-in (`cubicIn`), 150 ms for small state changes other than icon swaps, the
   reduced-motion fade 100 ms. `SLIDE_*` stay at 250 ms. `BACKDROP_FADE_OUT_DURATION` is left
   for area 3, since changing it is visible.
 - A shared transitions module, `lib/utils/transitions.utils.ts`, exporting `fade`, `fly`,
@@ -225,10 +230,11 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
   cross; three states, so either nested swaps or a three-way variant of `IconSwap`),
   `core/Menu.svelte` privacy eye, `ui/ThemeSwitchButton.svelte:24-28`,
   `nfts/NftHideButton.svelte:88-116`.
-- `IconSwap` moves from 300 ms to the shared swap timing (150 ms), so every icon swap
-  matches, the copy check included. It is a CSS transition, not a Svelte one, so its
-  reduced-motion block (which already drops the scale and blur) also shortens the opacity
-  fade to the reduced-motion 100 ms.
+- `IconSwap` keeps its 300 ms, `cubic-bezier(0.2, 0, 0, 1)`, scale 0.25 and 4 px blur, the
+  values make-interfaces-feel-better gives icon swaps, so the four new swaps match the copy
+  check. It is a CSS transition, not a Svelte one, so its reduced-motion block (which
+  already drops the scale and blur) also shortens the opacity fade to the reduced-motion
+  100 ms.
 
 ### 6. Pills, tabs and the toggle
 
@@ -275,7 +281,7 @@ jsdom does not run transitions or CSS animations; tests assert the inputs that p
    still change.
 5. The toast leaves over 150 ms with no delay.
 6. The mobile bottom sheet shows a shadow in light and dark.
-7. The four icon state changes cross-fade.
+7. The four icon state changes cross-fade over 300 ms, like the copy check.
 8. Pills press like text buttons; tabs show a pressed label; the toggle animates in 150 ms and
    its hover does not stick on touch.
 9. Importing `svelte/transition` outside the shared module fails lint.
@@ -302,6 +308,7 @@ jsdom does not run transitions or CSS animations; tests assert the inputs that p
 
 1. ~~**Spinners under reduced motion.**~~ Decided: they keep turning, since a spinner is often
    the only sign that work is happening (WCAG treats such motion as essential).
-2. ~~**`IconSwap` at 300 ms.**~~ Decided: it moves to the shared 150 ms swap timing in area 5,
-   so every icon swap matches.
+2. ~~**`IconSwap` at 300 ms.**~~ Decided: it keeps 300 ms, the timing make-interfaces-feel-better
+   gives icon swaps, and the four new swaps in area 5 use it. (First decided as a move to
+   150 ms, then reversed against the skill.)
 3. ~~**Splitting area 2.**~~ Decided: one PR across the 125 files, with the lint rule.
