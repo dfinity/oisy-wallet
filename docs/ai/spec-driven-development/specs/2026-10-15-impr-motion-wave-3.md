@@ -128,14 +128,15 @@ The mobile bottom sheet casts the shadow its styles always asked for, in light a
 
 The progress steps' spinner turning into a check or a cross, the menu's privacy eye, the theme
 switch's sun and moon, and NFT hide's eye cross-fade like the copy check does, instead of
-cutting.
+cutting. Under reduced motion every icon swap, the copy check included, is a 100 ms fade.
 
 ### 6. Pills, tabs and the toggle
 
 - **Pills** shrink slightly while pressed, like text buttons.
 - **Tabs** show their label one step darker while pressed, without shrinking.
 - **The toggle** animates only what changes (its knob position and colours) over 150 ms, and
-  its hover shows only on devices that can hover.
+  its hover shows only on devices that can hover. Under reduced motion the knob jumps to its
+  new side; the colours still change over 150 ms.
 
 ### Negative guarantees (what it does _not_ do)
 
@@ -185,6 +186,11 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
 - Swap `from 'svelte/transition'` to `from '$lib/utils/transitions.utils'` in the 125 files.
   Call sites that pass no timing pick up the shared one; call sites that pass one
   (`SLIDE_PARAMS`, `SLIDE_DURATION`, the group sheet, `WizardTransition`) keep it.
+- Two call sites pass a timing over the limits and move onto the shared one:
+  `ui/Busy.svelte:35` (`out:fade` 200 ms → the shared exit) and
+  `routes/(sign)/sign/+page.svelte:45` (`in:fade` 250 ms → the shared entrance, keeping its
+  150 ms delay, which stops the idle state flashing while the relying party connects). The
+  overlays' own timings change in area 3.
 - One PR: every change is the same import line, so the diff is reviewed by search rather
   than by reading.
 - The module re-exports the parameter types (`FadeParams`, `FlyParams`, `SlideParams`,
@@ -217,7 +223,9 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
   `core/Menu.svelte` privacy eye, `ui/ThemeSwitchButton.svelte:24-28`,
   `nfts/NftHideButton.svelte:88-116`.
 - `IconSwap` moves from 300 ms to the shared swap timing (150 ms), so every icon swap
-  matches, the copy check included.
+  matches, the copy check included. It is a CSS transition, not a Svelte one, so its
+  reduced-motion block (which already drops the scale and blur) also shortens the opacity
+  fade to the reduced-motion 100 ms.
 
 ### 6. Pills, tabs and the toggle
 
@@ -226,7 +234,9 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
 - `ui/Toggle.svelte:44-130`: the track's and the knob's `transition: all ease-in-out 0.3s`
   become explicit properties at 150 ms ease-out: the track's `background-color`, and the
   knob's `transform` (it moves with `translateX`) and `background`. The wrapper's static
-  `scale` (1.45) is not animated. `&:hover` rules go through `interaction.hover`.
+  `scale` (1.45) is not animated. Under `prefers-reduced-motion: reduce` the knob's
+  `transform` is left out of its transition, so it moves at once. `&:hover` rules go through
+  `interaction.hover`.
 
 ### `PRODUCT.md`
 
