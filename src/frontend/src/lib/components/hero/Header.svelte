@@ -63,9 +63,11 @@
 
 	// The name keeps the header still between pages, but a named element also confines any
 	// `backdrop-filter` inside it to itself: the user menu's backdrop could dim the page and not
-	// blur it. So the name is dropped while a popover here is open. A menu entry closes the
-	// popover before the navigation it starts, so page changes still find the header named.
-	let viewTransitionName = $derived(popoverOpen ? 'none' : 'header');
+	// blur it. So the name is dropped while the user menu is open, the only popover here with a
+	// visible backdrop. Its entries close it before the navigation they start, so page changes
+	// still find the header named; the network switcher closes only after its navigation, so it
+	// must not touch the name.
+	let viewTransitionName = $derived(menuOpen ? 'none' : 'header');
 </script>
 
 <svelte:window bind:scrollY />
