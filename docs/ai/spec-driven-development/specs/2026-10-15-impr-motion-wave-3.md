@@ -185,12 +185,15 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
 
 - Swap `from 'svelte/transition'` to `from '$lib/utils/transitions.utils'` in the 125 files.
   Call sites that pass no timing pick up the shared one; call sites that pass one
-  (`SLIDE_PARAMS`, `SLIDE_DURATION`, the group sheet, `WizardTransition`) keep it.
-- Two call sites pass a timing over the limits and move onto the shared one:
-  `ui/Busy.svelte:35` (`out:fade` 200 ms → the shared exit) and
-  `routes/(sign)/sign/+page.svelte:45` (`in:fade` 250 ms → the shared entrance, keeping its
-  150 ms delay, which stops the idle state flashing while the relying party connects). The
-  overlays' own timings change in area 3.
+  (`SLIDE_PARAMS` and `SLIDE_DURATION` on height slides, the group sheet, `WizardTransition`)
+  keep it.
+- Three call sites pass a timing over the limits and move onto the shared one:
+  - `ui/Busy.svelte:35`: `out:fade` 200 ms → the shared exit;
+  - `routes/(sign)/sign/+page.svelte:45`: `in:fade` 250 ms → the shared entrance, keeping its
+    150 ms delay, which stops the idle state flashing while the relying party connects;
+  - `rewards/RewardEarnings.svelte:139`: `transition:fade={SLIDE_DURATION}` borrows the 250 ms
+    height timing for a fade → no params, so it takes the shared entrance and exit.
+- The overlays' own timings change in area 3. `SLIDE_*` stay on height slides only.
 - One PR: every change is the same import line, so the diff is reviewed by search rather
   than by reading.
 - The module re-exports the parameter types (`FadeParams`, `FlyParams`, `SlideParams`,
