@@ -326,6 +326,8 @@ setting. Svelte's own default is 400 ms, slower than anything OISY uses. The
 module also re-exports the parameter types (`FadeParams`, `SlideParams`,
 `TransitionConfig`, …), and a lint rule refuses `svelte/transition` everywhere
 else (`transition.constants.ts` excepted, since the module is built on it).
+The restriction uses `@typescript-eslint/no-restricted-imports` separately from
+the shared core rule, preserving its deprecated-package and `/dist/` import bans.
 
 | Kind of motion                        | Timing                              | Constant (`transition.constants.ts`) |
 | ------------------------------------- | ----------------------------------- | ------------------------------------ |

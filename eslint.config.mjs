@@ -54,8 +54,8 @@ export default [
 
 	// Svelte's transitions run at a 400 ms default and ignore the reduced-motion setting. The
 	// shared module wraps them with OISY's timings and that setting, so nothing else imports
-	// them directly. Listed before the oisy-trade block, whose own `no-restricted-imports`
-	// replaces this one for its files and already refuses every `svelte/*` import there.
+	// them directly. Use the TypeScript rule separately so the shared config
+	// retains its core import restrictions (deprecated packages and /dist/ paths).
 	{
 		files: ['src/frontend/src/**/*'],
 		ignores: [
@@ -63,7 +63,7 @@ export default [
 			'src/frontend/src/lib/constants/transition.constants.ts'
 		],
 		rules: {
-			'no-restricted-imports': [
+			'@typescript-eslint/no-restricted-imports': [
 				'error',
 				{
 					paths: [
