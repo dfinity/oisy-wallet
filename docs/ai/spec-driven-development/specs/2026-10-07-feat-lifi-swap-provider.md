@@ -409,9 +409,10 @@ Two changes fix that:
   the `some` / `none` coverage rules (every enabled token is offered). A `Set` entry is
   unchanged, and so is `{}`. Existing resolvers only ever produce `Set`s.
 - **LI.FI resolver** `buildLifiSupportedDestinations(registry: 'evm' | 'sol')` in
-  `lib/utils/lifi-swap.utils.ts`. It resolves the source with `resolveSwapTokenLookup`
-  and returns `undefined` for anything that is not a mainnet EVM or Solana token.
-  Otherwise it returns the destinations that entry actually quotes:
+  `lib/utils/lifi-swap.utils.ts`. It applies the same chain and token tests as the quote
+  request (`toLifiChainId`, `toLifiTokenAddress`), so it returns `undefined` for any
+  source LI.FI is never asked about — a chain without a pinned Diamond, a testnet, a
+  devnet, ICP. Otherwise it returns the destinations that entry actually quotes:
 
   | Entry              | EVM source       | Solana source                |
   | ------------------ | ---------------- | ---------------------------- |
@@ -420,6 +421,14 @@ Two changes fix that:
 
   Until PR 3, the `solSwapProviders` entry returns `undefined` for a Solana source and
   declares an empty source list, matching the quote restriction above.
+
+  A wildcard admits every **enabled** token of its category, testnets included. For EVM
+  destinations nothing changes, since Velora's `{}` already does that. For Solana
+  destinations of an EVM source it does: with testnets on, devnet SOL tokens now pass the
+  picker next to NEAR Intents' mainnet list, and selecting one yields no LI.FI offer (the
+  quote refuses a devnet). This is the destination-side twin of the source-side case PR 3
+  avoids with a mainnet-only list; it is accepted for v1 because it affects testnet users
+  only and offers nothing that could be executed.
 
 #### Cadence: on input change, then every 30 s
 
