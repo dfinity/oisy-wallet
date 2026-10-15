@@ -1,6 +1,7 @@
 <script lang="ts">
 	import IconCheckCircle from '$lib/components/icons/IconCheckCircle.svelte';
 	import IconCloseCircle from '$lib/components/icons/IconCloseCircle.svelte';
+	import IconSwap from '$lib/components/ui/IconSwap.svelte';
 	import LoaderSpinner from '$lib/components/ui/LoaderSpinner.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ProgressStep } from '$lib/types/progress-step';
@@ -15,17 +16,23 @@
 {#each steps as { step, text, state }, i (step)}
 	{@const last = i === steps.length - 1}
 	<div class={`step ${state} ${last ? 'last' : ''}`}>
-		{#if state === 'completed'}
-			<IconCheckCircle />
-		{:else if state === 'failed'}
-			<IconCloseCircle />
-		{:else if state === 'in_progress'}
-			<div class="spinner">
-				<span class="checkmark">{i + 1}</span>
-				<LoaderSpinner size="small" />
-			</div>
-		{:else}
+		{#if state === 'next'}
 			<span class="checkmark round">{i + 1}</span>
+		{:else}
+			<IconSwap swapped={state === 'completed' || state === 'failed'}>
+				{#snippet icon()}
+					<div class="spinner">
+						<span class="checkmark">{i + 1}</span>
+						<LoaderSpinner size="small" />
+					</div>
+				{/snippet}
+				{#snippet swappedIcon()}
+					<IconSwap swapped={state === 'failed'}>
+						{#snippet icon()}<IconCheckCircle />{/snippet}
+						{#snippet swappedIcon()}<IconCloseCircle />{/snippet}
+					</IconSwap>
+				{/snippet}
+			</IconSwap>
 		{/if}
 
 		<span class="text">{text}</span>

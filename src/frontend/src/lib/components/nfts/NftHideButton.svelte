@@ -5,6 +5,7 @@
 	import NftActionButton from '$lib/components/nfts/NftActionButton.svelte';
 	import ConfirmButtonWithModal from '$lib/components/ui/ConfirmButtonWithModal.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
+	import IconSwap from '$lib/components/ui/IconSwap.svelte';
 	import {
 		CONFIRMATION_MODAL,
 		NFT_COLLECTION_ACTION_HIDE,
@@ -59,6 +60,7 @@
 	};
 
 	let loading = $state(false);
+	const hidden = $derived(token.section === CustomTokenSection.HIDDEN);
 
 	const updateSection = async (section?: CustomTokenSection) => {
 		loading = true;
@@ -77,57 +79,48 @@
 	};
 </script>
 
-{#snippet hideButton(onclick: () => void)}
-	<NftActionButton
-		label={$i18n.nfts.text.hide}
-		{loading}
-		{onclick}
-		testId={NFT_COLLECTION_ACTION_HIDE}
-	>
-		{#snippet icon()}
-			<IconEyeOff size="18" />
-		{/snippet}
-	</NftActionButton>
-{/snippet}
-
 {#if token.section !== CustomTokenSection.SPAM}
-	{#if nonNullish(token.section) && token.section === CustomTokenSection.HIDDEN}
-		<NftActionButton
-			colorStyle="primary"
-			label={$i18n.nfts.text.unhide}
-			{loading}
-			onclick={() => updateSection()}
-			testId={NFT_COLLECTION_ACTION_UNHIDE}
-		>
-			{#snippet icon()}
-				<IconEye size="18" />
-			{/snippet}
-		</NftActionButton>
-	{:else if hasMultipleNfts}
-		<ConfirmButtonWithModal
-			button={hideButton}
-			onConfirm={() => updateSection(CustomTokenSection.HIDDEN)}
-			testId={CONFIRMATION_MODAL}
-		>
-			<div class="flex w-full flex-col items-center text-center">
-				<span
-					class="mb-3 inline-flex aspect-square w-[56px] rounded-full bg-brand-primary p-3 text-white"
-				>
-					<IconEyeOff size="32" />
-				</span>
-				<h4 class="my-3">
-					{replacePlaceholders($i18n.nfts.text.hide_warning, { $collection: token.name })}
-				</h4>
-				<p class="text-sm">
-					<Html
-						text={replacePlaceholders($i18n.nfts.text.hide_warning_text, {
-							$collection: token.name
-						})}
-					/>
-				</p>
-			</div>
-		</ConfirmButtonWithModal>
-	{:else}
-		{@render hideButton(() => updateSection(CustomTokenSection.HIDDEN))}
-	{/if}
+	<ConfirmButtonWithModal
+		onConfirm={() => updateSection(CustomTokenSection.HIDDEN)}
+		testId={CONFIRMATION_MODAL}
+	>
+		{#snippet button(confirmHide: () => void)}
+			<NftActionButton
+				colorStyle={hidden ? 'primary' : undefined}
+				label={hidden ? $i18n.nfts.text.unhide : $i18n.nfts.text.hide}
+				{loading}
+				onclick={() =>
+					hidden
+						? updateSection()
+						: hasMultipleNfts
+							? confirmHide()
+							: updateSection(CustomTokenSection.HIDDEN)}
+				testId={hidden ? NFT_COLLECTION_ACTION_UNHIDE : NFT_COLLECTION_ACTION_HIDE}
+			>
+				{#snippet icon()}
+					<IconSwap swapped={hidden}>
+						{#snippet icon()}<IconEyeOff size="18" />{/snippet}
+						{#snippet swappedIcon()}<IconEye size="18" />{/snippet}
+					</IconSwap>
+				{/snippet}
+			</NftActionButton>
+		{/snippet}
+		<div class="flex w-full flex-col items-center text-center">
+			<span
+				class="mb-3 inline-flex aspect-square w-[56px] rounded-full bg-brand-primary p-3 text-white"
+			>
+				<IconEyeOff size="32" />
+			</span>
+			<h4 class="my-3">
+				{replacePlaceholders($i18n.nfts.text.hide_warning, { $collection: token.name })}
+			</h4>
+			<p class="text-sm">
+				<Html
+					text={replacePlaceholders($i18n.nfts.text.hide_warning_text, {
+						$collection: token.name
+					})}
+				/>
+			</p>
+		</div>
+	</ConfirmButtonWithModal>
 {/if}

@@ -31,6 +31,28 @@ describe('NftHideButton', () => {
 		screensStore.set('md');
 	});
 
+	it('keeps the button and both icons mounted when its hidden state changes', async () => {
+		const { getByTestId, rerender } = render(NftHideButton, {
+			props: { token: mockToken, source: 'gallery' }
+		});
+		const button = getByTestId(NFT_COLLECTION_ACTION_HIDE);
+		const icons = [...button.querySelectorAll('svg')];
+		const layers = button.querySelectorAll('.layer');
+
+		expect(layers).toHaveLength(2);
+		expect(layers[0]).toHaveAttribute('aria-hidden', 'false');
+
+		await rerender({
+			token: { ...mockToken, section: CustomTokenSection.HIDDEN },
+			source: 'gallery'
+		});
+
+		expect(getByTestId(NFT_COLLECTION_ACTION_UNHIDE)).toBe(button);
+		expect([...button.querySelectorAll('svg')]).toEqual(icons);
+		expect(layers[0]).toHaveAttribute('aria-hidden', 'true');
+		expect(layers[1]).toHaveAttribute('aria-hidden', 'false');
+	});
+
 	it('renders Unhide button when token.section is HIDDEN', () => {
 		const token = { ...mockToken, section: CustomTokenSection.HIDDEN };
 		const { getByTestId } = render(NftHideButton, { props: { token, source: 'gallery' } });
