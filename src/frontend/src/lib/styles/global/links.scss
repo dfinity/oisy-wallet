@@ -10,6 +10,15 @@ a.no-underline {
 	}
 }
 
+a.blue-link {
+	@apply text-brand-primary-alt;
+
+	&:hover,
+	&.selected {
+		@apply text-brand-secondary;
+	}
+}
+
 // NAV ITEMS
 a.nav-item:not([disabled]):not(.disabled):not(.loading),
 button.nav-item:not([disabled]):not(.disabled):not(.loading) {
