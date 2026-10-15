@@ -16,6 +16,7 @@
 
 <Button
 	ariaLabel={label}
+	pressed={selected}
 	colorStyle={selected ? 'primary' : 'tertiary'}
 	{onclick}
 	paddingSmall

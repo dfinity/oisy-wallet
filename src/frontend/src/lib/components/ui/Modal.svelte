@@ -8,6 +8,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ModalProps } from '$lib/types/modal';
 	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
+	import { overlayFocus } from '$lib/utils/overlay.utils';
 	import { nextElementId } from '$lib/utils/html.utils';
 	import { fade } from '$lib/utils/transitions.utils';
 
@@ -46,15 +47,10 @@
 	const modalTitleId = nextElementId('modal-title-');
 	const modalContentId = nextElementId('modal-content-');
 
-	const handleKeyDown = ({ key }: KeyboardEvent) => {
-		// Check for $busy to mock the same behaviour as the close button being covered by the busy overlay
-		if (visible && !disablePointerEvents && !get(busy) && key === 'Escape') {
-			close();
-		}
+	const closeWithKeyboard = () => {
+		if (!disablePointerEvents && !get(busy)) close();
 	};
 </script>
-
-<svelte:window onkeydown={handleKeyDown} />
 
 {#if visible}
 	<div
@@ -65,7 +61,10 @@
 		data-tid={testId}
 		onclick={stopPropagation(onClick)}
 		onintroend={onIntroEnd}
-		{role}
+		role={role === 'alert' ? 'alertdialog' : role}
+		aria-modal="true"
+		tabindex="-1"
+		use:overlayFocus={{ onClose: closeWithKeyboard }}
 		in:fade|global={{ duration: 25 }}
 	>
 		<Backdrop {disablePointerEvents} onClose={() => onClose?.()} />

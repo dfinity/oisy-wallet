@@ -174,3 +174,18 @@ costs more than the duplication.
 Almost never. The taxonomy is closed. If you genuinely think a new bucket
 is needed (e.g. a new feature folder under `$lib/components/`), surface it
 in the PR description and ask the human owner before doing it.
+
+### Overlay keyboard behavior
+
+`overlayFocus` in `$lib/utils/overlay.utils.ts` is the shared Svelte action for
+blocking popovers, modal dialogs and dismissible bottom sheets. It enters focus,
+contains Tab and programmatic focus, handles Escape only on the topmost overlay,
+and restores the opener without stealing focus from a newly opened dialog.
+Use dialog semantics for mixed controls; do not assign `role="menu"` without
+implementing menu-item navigation.
+
+`Toggle` accepts `showLabel` for a full-row labelled switch. Use this instead of
+putting a switch inside a clickable row. Selection buttons expose `aria-pressed`
+through `Button.pressed` or the selectable list primitives.
+
+Token rows and navigation entries use an inset keyboard focus outline so rounded and scrolling list containers cannot clip it. Token-group headers pass their expanded state through `TokenCard` and `LogoButton` to the native button.

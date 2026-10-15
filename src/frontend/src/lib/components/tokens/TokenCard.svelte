@@ -26,6 +26,7 @@
 		data: CardData;
 		testIdPrefix?: typeof TOKEN_CARD | typeof TOKEN_GROUP;
 		asNetwork?: boolean;
+		expanded?: boolean;
 		hover?: boolean;
 		showNetwork?: boolean;
 		onClick?: () => void;
@@ -36,6 +37,7 @@
 		data,
 		testIdPrefix = TOKEN_CARD,
 		asNetwork = false,
+		expanded,
 		hover = false,
 		showNetwork = true,
 		onClick,
@@ -65,7 +67,15 @@
 </script>
 
 <div class="flex w-full flex-col">
-	<LogoButton condensed={asNetwork} dividers={false} {hover} {onClick} rounded={false} {testId}>
+	<LogoButton
+		{expanded}
+		condensed={asNetwork}
+		dividers={false}
+		{hover}
+		{onClick}
+		rounded={false}
+		{testId}
+	>
 		{#snippet logo()}
 			<span class="flex" class:mr-2={!asNetwork}>
 				<TokenLogo

@@ -108,6 +108,7 @@
 		class:hover:bg-primary={!isExpanded}
 	>
 		<TokenCard
+			expanded={isExpanded}
 			data={{
 				...headerData,
 				tokenCount: filteredTokens.length,

@@ -9,6 +9,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { PopoverDirection, PopoverPlacement } from '$lib/types/popover';
 	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
+	import { overlayFocus } from '$lib/utils/overlay.utils';
 	import { computePopoverPlacement } from '$lib/utils/popover.utils';
 	import { fade, scale } from '$lib/utils/transitions.utils';
 
@@ -21,6 +22,7 @@
 		invisibleBackdrop?: boolean;
 		testId?: string;
 		children?: Snippet;
+		ariaLabel?: string;
 	}
 
 	let {
@@ -31,6 +33,7 @@
 		closeButton = false,
 		invisibleBackdrop = false,
 		testId = 'popover-component',
+		ariaLabel,
 		children
 	}: Props = $props();
 
@@ -159,15 +162,17 @@
 	<div
 		style="--popover-top: {popoverTop}px; --popover-bottom: {popoverBottom}px; --popover-left: {popoverLeft}px; --popover-right: {popoverRight}px"
 		class="popover"
-		aria-orientation="vertical"
 		data-tid={testId}
-		role="menu"
-		tabindex="-1"
 		in:fade|global={{ duration: 25 }}
 	>
 		<Backdrop invisible={invisibleBackdrop} onClose={close} />
 		<div
 			class="wrapper"
+			role="dialog"
+			aria-modal="true"
+			aria-label={ariaLabel ?? anchor?.getAttribute('aria-label') ?? $i18n.navigation.alt.menu}
+			tabindex="-1"
+			use:overlayFocus={{ onClose: close, returnFocus: anchor }}
 			class:above={placement === 'above'}
 			class:placed={placementResolved}
 			class:rtl={effectiveDirection === 'rtl'}
@@ -283,5 +288,6 @@
 
 	.popover-content {
 		overflow-y: auto;
+		overscroll-behavior: contain;
 	}
 </style>

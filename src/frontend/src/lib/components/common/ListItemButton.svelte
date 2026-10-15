@@ -15,6 +15,7 @@
 </script>
 
 <Button
+	pressed={selectable ? selected : undefined}
 	alignLeft
 	colorStyle="tertiary-alt"
 	fullWidth

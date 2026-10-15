@@ -6,6 +6,7 @@
 		checked: boolean;
 		ariaLabel: string;
 		disabled?: boolean;
+		showLabel?: boolean;
 		testId?: string;
 		onToggle?: (checked: boolean) => void;
 	}
@@ -14,6 +15,7 @@
 		checked = $bindable(),
 		ariaLabel,
 		disabled = false,
+		showLabel = false,
 		testId = 'toggle',
 		onToggle
 	}: Props = $props();
@@ -21,8 +23,10 @@
 	const id = nextElementId('toggle-');
 </script>
 
-<div class="toggle" class:disabled data-tid={testId}>
+<div class="toggle" class:disabled class:row={showLabel} data-tid={testId}>
 	<input
+		class="sr-only"
+		role={showLabel ? 'switch' : undefined}
 		{id}
 		aria-label={ariaLabel}
 		{checked}
@@ -30,7 +34,10 @@
 		oninput={({ currentTarget }) => onToggle?.(currentTarget.checked)}
 		type="checkbox"
 	/>
-	<label for={id}></label>
+	<label for={id}>
+		{#if showLabel}<span class="toggle-text">{ariaLabel}</span>{/if}
+		<span class="track" aria-hidden="true"></span>
+	</label>
 </div>
 
 <style lang="scss">
@@ -91,11 +98,41 @@
 		}
 	}
 
-	.toggle input[type='checkbox'] {
-		display: none;
+	.toggle input:focus-visible + label {
+		outline: 2px solid var(--color-background-brand-primary);
+		outline-offset: 3px;
 	}
 
 	.toggle label {
+		display: inline-flex;
+		align-items: center;
+		cursor: pointer;
+	}
+	.toggle.row {
+		scale: 1;
+		margin: 0;
+		width: 100%;
+		label {
+			width: 100%;
+			justify-content: space-between;
+			gap: 16px;
+			padding: 12px 8px;
+			border-radius: var(--border-radius-sm);
+		}
+		.track {
+			flex-shrink: 0;
+			scale: 1.45;
+			margin-inline: var(--padding);
+		}
+	}
+	.toggle-text {
+		font-weight: var(--font-weight-normal);
+	}
+	.toggle.disabled label {
+		cursor: not-allowed;
+	}
+
+	.toggle .track {
 		background-color: var(--card-background-contrast);
 		border-radius: 50px;
 		cursor: pointer;
@@ -106,7 +143,7 @@
 		height: calc(var(--padding-2x) + 2px);
 	}
 
-	.toggle label::after {
+	.toggle .track::after {
 		border-radius: 50%;
 		content: '';
 		cursor: pointer;
@@ -121,7 +158,7 @@
 		background: var(--card-background);
 	}
 
-	.toggle input[type='checkbox']:checked ~ label::after {
+	.toggle input[type='checkbox']:checked ~ label .track::after {
 		transform: translateX(calc(var(--padding-2x) - 4px));
 	}
 </style>

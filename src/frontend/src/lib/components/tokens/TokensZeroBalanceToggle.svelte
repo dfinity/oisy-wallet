@@ -4,6 +4,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
 
+	interface Props {
+		showLabel?: boolean;
+	}
+	let { showLabel = false }: Props = $props();
+
 	let checked = $derived($hideZeroBalances);
 
 	const toggleHide = () =>
@@ -12,4 +17,9 @@
 
 <svelte:window onoisyToggleZeroBalances={toggleHide} />
 
-<Toggle ariaLabel={$i18n.tokens.text.hide_zero_balances} onToggle={toggleHide} bind:checked />
+<Toggle
+	{showLabel}
+	ariaLabel={$i18n.tokens.text.hide_zero_balances}
+	onToggle={toggleHide}
+	bind:checked
+/>

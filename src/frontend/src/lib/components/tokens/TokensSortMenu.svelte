@@ -37,7 +37,7 @@
 </script>
 
 <ButtonIcon
-	ariaLabel={$i18n.navigation.alt.menu}
+	ariaLabel={$i18n.core.text.sorting}
 	colorStyle="muted"
 	expanded={visible}
 	link={false}
@@ -49,7 +49,7 @@
 	{/snippet}
 </ButtonIcon>
 
-<ResponsivePopover {button} bind:visible>
+<ResponsivePopover ariaLabel={$i18n.core.text.sorting} {button} bind:visible>
 	{#snippet content()}
 		<span class="mb-2 flex text-sm font-bold">{$i18n.core.text.sorting}</span>
 
