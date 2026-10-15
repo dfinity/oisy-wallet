@@ -150,6 +150,12 @@ describe('TipHistory', () => {
 			)
 		);
 
+		// The row button is `display: contents`; the span inside paints it, also for a press made
+		// by holding Space on the focused button.
+		expect(
+			container.querySelector(`button[data-tid=${TIP_HISTORY_ROW_BUTTON}] > span`)
+		).toHaveClass('row-feedback', 'parent-pressed:bg-brand-subtle-20');
+
 		// Cancel moved to the detail screen, so no row carries one any more.
 		expect(
 			container.querySelector(`button[data-tid=${TIP_HISTORY_CANCEL_BUTTON}]`)
