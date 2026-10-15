@@ -93,6 +93,13 @@ Where it applies:
   motion it flips at once, without the turning animation). **Max** presses, darkens on hover while the amount is valid, and can be hit
   across 40 px without reaching the amount field above it.
 
+### Motion
+
+- With **reduced motion** turned on in the system, pulsing loading placeholders hold still,
+  and so do the decorative animations: the dApp Explorer's UFO in the navigation, the AI
+  assistant button, the Scan QR icon, and the astronaut on the idle signer screen. Progress
+  spinners keep turning, since they are often the only sign that something is happening.
+
 ---
 
 ## Analytics

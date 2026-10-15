@@ -101,7 +101,32 @@ that includes it).
 	}
 }
 
+/*
+`decorative-motion` - an illustration whose animation is decoration (an idle astronaut, an
+animated icon). Under the system's reduced-motion setting it holds still. Progress spinners
+don't take it: they are the sign that work is happening.
+*/
+@utility decorative-motion {
+	@media (prefers-reduced-motion: reduce) {
+		&,
+		& * {
+			animation: none !important;
+		}
+	}
+}
+
 @layer base {
+	/*
+	Pulsing loading placeholders hold still under reduced motion: the shape stays, the pulse
+	stops. `!important` because this base rule sits below the Tailwind utilities layer.
+	*/
+	@media (prefers-reduced-motion: reduce) {
+		.animate-pulse,
+		.animate-ping {
+			animation: none !important;
+		}
+	}
+
 	::view-transition-old(header),
 	::view-transition-new(header) {
 		animation: none;

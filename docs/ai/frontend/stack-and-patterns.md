@@ -315,6 +315,40 @@ does not set `position`: add `relative` unless the control is already
 - **Nested buttons:** a control inside a clickable row stops propagation
   (`e.stopPropagation()`), or its click also runs the row's.
 
+## Motion
+
+Import `fade`, `fly`, `slide`, `scale` and `blur` from
+`$lib/utils/transitions.utils`, not from `svelte/transition`. They take the
+same parameters and add OISY's timings and the system's reduced-motion
+setting. Svelte's own default is 400 ms, slower than anything OISY uses.
+
+| Kind of motion                        | Timing                       | Constant (`transition.constants.ts`) |
+| ------------------------------------- | ---------------------------- | ------------------------------------ |
+| Entrance                              | 200 ms ease-out (`cubicOut`) | `MOTION_ENTER`                       |
+| Exit                                  | 150 ms ease-in (`cubicIn`)   | `MOTION_EXIT`                        |
+| Small state change (icon swap, chip)  | 150 ms                       | `MOTION_SWAP_DURATION`               |
+| Height change (`slide`)               | 250 ms both ways             | `SLIDE_PARAMS`                       |
+| Any fade that replaces a reduced move | 100 ms                       | `MOTION_REDUCED_FADE_DURATION`       |
+
+- **Pass no `duration`** and the shared timing applies: a `transition:` gets
+  the entrance timing going in and the exit timing going out, so exits are
+  faster without any extra code.
+- **Pass a `duration`** only for a different kind of motion: a sheet that
+  travels the height of the screen, an instant close (`duration: 0`). A
+  passed `duration` is used exactly as Svelte would use it, easing included,
+  so pass `easing` with it.
+- **`scale` starts at 0.96** unless you pass `start`: nothing grows from
+  nothing.
+- **Reduced motion:** `fly`, `scale` and `blur` become a 100 ms fade, `fade`
+  is capped at 100 ms (a shorter one the call site chose stays shorter), and
+  `slide` happens at once, since a height change moves everything below it.
+  Colours still change.
+- **CSS animations:** under reduced motion `animate-pulse` and `animate-ping`
+  hold still. A decorative illustration with its own keyframes adds
+  `decorative-motion` to its root, which stops every animation inside it.
+  Progress indicators (`Spinner`, `AnimatedIconLoader`) keep turning: they
+  are often the only sign that work is happening.
+
 ## Icons
 
 The codebase uses several icon sources (Lucide, Tabler, Iconly, custom
