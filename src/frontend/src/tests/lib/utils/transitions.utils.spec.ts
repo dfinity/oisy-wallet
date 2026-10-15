@@ -56,6 +56,36 @@ describe('transitions.utils', () => {
 			expect(run({ result, direction: 'out' })).toMatchObject(MOTION_EXIT);
 		});
 
+		it('keeps the styles it started from when it reverses mid-way', () => {
+			// Svelte's fade reads the element's computed opacity when it is created.
+			const computedStyle = vi.spyOn(globalThis, 'getComputedStyle');
+			const result = fade(node, undefined, { direction: 'both' });
+
+			computedStyle.mockReturnValue({ opacity: '1' } as CSSStyleDeclaration);
+			const enter = run({ result, direction: 'in' });
+
+			// Halfway through the entrance, the computed opacity is the animated one.
+			computedStyle.mockReturnValue({ opacity: '0.5' } as CSSStyleDeclaration);
+			const exit = run({ result, direction: 'out' });
+
+			computedStyle.mockRestore();
+
+			expect(exit.css?.(0.5, 0.5)).toBe('opacity: 0.5');
+			expect(exit.css?.(0.5, 0.5)).toBe(enter.css?.(0.5, 0.5));
+			expect(exit).toMatchObject(MOTION_EXIT);
+		});
+
+		it('keeps the easing the call site passes when it reverses', () => {
+			const result = fade(node, { easing: linear }, { direction: 'both' });
+
+			run({ result, direction: 'in' });
+
+			expect(run({ result, direction: 'out' })).toMatchObject({
+				duration: MOTION_EXIT.duration,
+				easing: linear
+			});
+		});
+
 		it('keeps a height slide at the slide timing both ways', () => {
 			const enter = run({ result: slide(node, undefined, { direction: 'in' }), direction: 'in' });
 			const exit = run({ result: slide(node, undefined, { direction: 'out' }), direction: 'out' });

@@ -4,7 +4,7 @@ import {
 	MOTION_REDUCED_FADE_DURATION,
 	SLIDE_PARAMS
 } from '$lib/constants/transition.constants';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { prefersReducedMotion } from 'svelte/motion';
 import {
 	blur as svelteBlur,
@@ -74,12 +74,12 @@ const withSharedTiming =
 	// The signature Svelte calls a transition with, so the positional parameters are fixed.
 	// eslint-disable-next-line local-rules/prefer-object-params
 	(node: Element, params?: P, options?: TransitionOptions): TransitionResult => {
-		const config = (direction: RunDirection): TransitionConfig => {
-			// Defined keys only: a `duration: undefined` from the caller must not blank the timing.
-			const callerParams = Object.fromEntries(
-				Object.entries(params ?? {}).filter(([, value]) => value !== undefined)
-			) as P;
+		// Defined keys only: a `duration: undefined` from the caller must not blank the timing.
+		const callerParams = Object.fromEntries(
+			Object.entries(params ?? {}).filter(([, value]) => value !== undefined)
+		) as P;
 
+		const create = (direction: RunDirection): TransitionConfig => {
 			if (prefersReducedMotion.current) {
 				return reduced({ node, params: callerParams });
 			}
@@ -91,9 +91,35 @@ const withSharedTiming =
 
 		const direction = options?.direction ?? 'both';
 
-		return direction === 'both'
-			? (runOptions?: { direction?: RunDirection }) => config(runOptions?.direction ?? 'in')
-			: config(direction);
+		if (direction !== 'both') {
+			return create(direction);
+		}
+
+		// Svelte's transitions read the element's computed styles when they are created. A two-way
+		// transition that reverses mid-way would read its half-run styles as the new end point and
+		// jump, so the styles are captured once and a reversal changes only the timing.
+		const timingFor = (runDirection: RunDirection): TimingParams => {
+			if (prefersReducedMotion.current || nonNullish(callerParams.duration)) {
+				return {};
+			}
+
+			const { duration, easing } = timing(runDirection);
+
+			return { duration, easing: callerParams.easing ?? easing };
+		};
+
+		let created: TransitionConfig | undefined;
+
+		return (runOptions?: { direction?: RunDirection }) => {
+			const runDirection = runOptions?.direction ?? 'in';
+
+			if (isNullish(created)) {
+				created = create(runDirection);
+				return created;
+			}
+
+			return { ...created, ...timingFor(runDirection) };
+		};
 	};
 
 const enterOrExit = (direction: RunDirection): TimingParams =>
