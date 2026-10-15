@@ -122,6 +122,13 @@ Where it applies:
   and caps fades at 100 ms; height changes happen at once. Modal and popover panels
   and backdrops finish their individual exits before the overlay disappears.
 
+- **State icons** cross-fade over 300 ms: progress to success or failure, privacy, theme,
+  and hiding or showing an NFT. Like copy confirmation, each can reverse during a swap
+  and appears immediately in its initial state. With reduced motion, icons fade in
+  100 ms without shrinking or blurring. Failed progress steps transition directly to the
+  failure icon without briefly showing success. The NFT hide/show icon waits until loading ends
+  before swapping, so the change remains visible even after a slow response.
+
 - With **reduced motion** turned on in the system, pulsing loading placeholders hold still,
   and so do the decorative animations: the dApp Explorer's UFO in the navigation, the AI
   assistant button, the Scan QR icon, and the astronaut on the idle signer screen. Progress

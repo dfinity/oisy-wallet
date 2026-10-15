@@ -34,6 +34,7 @@
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import IconSwap from '$lib/components/ui/IconSwap.svelte';
 	import NotificationBlob from '$lib/components/ui/NotificationBlob.svelte';
 	import Popover from '$lib/components/ui/Popover.svelte';
 	import { USER_MENU_ROUTE } from '$lib/constants/analytics.constants';
@@ -234,13 +235,11 @@
 				tag={$i18n.shortcuts.privacy_mode}
 				testId={NAVIGATION_MENU_PRIVACY_MODE_BUTTON}
 			>
-				{#if $isPrivacyMode}
-					<IconEye />
-					{$i18n.navigation.text.show_balances}
-				{:else}
-					<IconEyeOff />
-					{$i18n.navigation.text.hide_balances}
-				{/if}
+				<IconSwap swapped={$isPrivacyMode}>
+					{#snippet icon()}<IconEyeOff />{/snippet}
+					{#snippet swappedIcon()}<IconEye />{/snippet}
+				</IconSwap>
+				{$isPrivacyMode ? $i18n.navigation.text.show_balances : $i18n.navigation.text.hide_balances}
 			</ButtonMenu>
 
 			<Hr />
