@@ -2,7 +2,6 @@
 	import { assertNonNullish, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import { slide } from 'svelte/transition';
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
@@ -43,6 +42,7 @@
 		isNetworkIdSOLLocal
 	} from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 	import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
 	import SolFeeDisplay from '$sol/components/fee/SolFeeDisplay.svelte';
 	import { sendSol } from '$sol/services/sol-send.services';

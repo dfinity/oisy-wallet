@@ -4,9 +4,16 @@ import {
 	MOTION_REDUCED_FADE_DURATION,
 	SLIDE_PARAMS
 } from '$lib/constants/transition.constants';
-import { backdrop, blur, fade, fly, scale, slide } from '$lib/utils/transitions.utils';
+import {
+	backdrop,
+	blur,
+	fade,
+	fly,
+	scale,
+	slide,
+	type TransitionConfig
+} from '$lib/utils/transitions.utils';
 import { linear } from 'svelte/easing';
-import type { TransitionConfig } from 'svelte/transition';
 
 const motion = vi.hoisted(() => ({ reduced: false }));
 

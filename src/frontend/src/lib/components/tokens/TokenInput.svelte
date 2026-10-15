@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import TokenInputContent from '$lib/components/tokens/TokenInputContent.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		token?: Token;

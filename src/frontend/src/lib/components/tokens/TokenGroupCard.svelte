@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
@@ -20,6 +19,7 @@
 	import { getFilteredTokenGroup } from '$lib/utils/token-list.utils.js';
 	import { filterTokensUiByCategory } from '$lib/utils/token-tag.utils';
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		tokenGroup: TokenUiGroup;
