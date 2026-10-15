@@ -74,18 +74,23 @@ Component paths are under `src/frontend/src/lib/components/`, other paths under
 
 ### Shared rules
 
-1. **Entrances** take at most 200 ms, ease-out: fast at the start, settling at the end.
-2. **Exits** take at most 150 ms, ease-in, and are never slower than the matching entrance.
-   Large surfaces that travel the height of the screen (the bottom sheet, the mobile group
-   sheet) may take 200 ms to leave.
+1. **Entrances** take at most 200 ms, ease-out: fast at the start, settling at the end. The
+   bottom sheet, which travels the height of the screen, takes 250 ms.
+2. **Exits** take at most 150 ms, ease-in, and are never slower than the matching entrance,
+   with two exceptions:
+   - large surfaces that travel the height of the screen (the bottom sheet, the mobile group
+     sheet) take 200 ms to leave;
+   - the backdrop arrives in 75 ms, so the dimming is in place as the panel lands, and leaves
+     on the shared 150 ms.
 3. **Small state changes** (an icon swapping, a chip changing) take 150 ms.
 4. **Height changes** (a section expanding, an error line appearing under a field) keep their
-   current 250 ms.
+   current 250 ms both ways; rules 1 and 2 do not apply to them.
 5. **Nothing grows from nothing.** Popovers and menus start at 96 % of their size, not at
    zero.
 6. **Reduced motion.** With the system's reduced-motion setting on:
    - nothing moves, slides or scales; content that would fly, slide or scale in appears with
-     a 100 ms fade instead;
+     a 100 ms fade instead, and one that already changes faster (an instant close) stays as
+     it is;
    - height changes happen at once;
    - pulsing loading placeholders hold still, and decorative illustration animations stop;
    - progress spinners keep turning;
@@ -159,8 +164,10 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
   the shared timing when the caller passes none (returning a function of `{ direction }`, so a
   `transition:` exit gets the exit timing), keeps any timing the caller passes, and under
   reduced motion (`prefersReducedMotion` from `svelte/motion`) turns `fly`, `scale` and
-  `blur` into a 100 ms fade, caps `fade` at 100 ms and makes `slide` an instant change.
-  `scale` defaults to `start: 0.96`.
+  `blur` into a 100 ms fade, caps `fade` at 100 ms and makes `slide` an instant change. A
+  shorter duration the call site passes is kept, so the group sheet's `duration: 0` close
+  (`navigation/NavigationGroupSheet.svelte:50`) stays instant. `scale` defaults to
+  `start: 0.96`.
 - `lib/styles/global.scss`: under `prefers-reduced-motion: reduce`, `animate-pulse` and
   `animate-ping` stop (`animation: none`), and a `decorative-motion` utility stops every
   animation inside the element that carries it. The decorative illustrations take it
@@ -180,8 +187,12 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
   (`SLIDE_PARAMS`, `SLIDE_DURATION`, the group sheet, `WizardTransition`) keep it.
 - One PR: every change is the same import line, so the diff is reviewed by search rather
   than by reading.
+- The module re-exports the parameter types (`FadeParams`, `FlyParams`, `SlideParams`,
+  `ScaleParams`, `BlurParams`, `TransitionConfig`, `EasingFunction`), so a file that imports a
+  type with a function (`routes/(sign)/sign/+page.svelte:4`) takes both from the module.
 - `eslint.config.mjs`: `no-restricted-imports` refuses `svelte/transition` outside the shared
-  module, with a message pointing to it.
+  module and `lib/constants/transition.constants.ts` (which holds the timings the module is
+  built on), with a message pointing to the module.
 
 ### 3. Overlays leave faster than they arrive
 
@@ -212,9 +223,10 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
 
 - `ui/PillButton.svelte`: `press` (0.98), `transition-[color,background-color,border-color,scale]`.
 - `ui/Tabs.svelte:56-70`: `active:` label colour one step past hover, 150 ms; no scale.
-- `ui/Toggle.svelte:44-104`: `transition: all ease-in-out 0.3s` becomes explicit properties
-  (the knob's `translate`, `background-color`, `border-color`) at 150 ms ease-out, keeping its
-  existing `scale`; `&:hover` rules go through `interaction.hover`.
+- `ui/Toggle.svelte:44-130`: the track's and the knob's `transition: all ease-in-out 0.3s`
+  become explicit properties at 150 ms ease-out: the track's `background-color`, and the
+  knob's `transform` (it moves with `translateX`) and `background`. The wrapper's static
+  `scale` (1.45) is not animated. `&:hover` rules go through `interaction.hover`.
 
 ### `PRODUCT.md`
 
@@ -241,11 +253,12 @@ jsdom does not run transitions or CSS animations; tests assert the inputs that p
 
 1. No Svelte transition runs at the 400 ms default: every one uses a shared timing or an
    explicit one its call site chose.
-2. Entrances take at most 200 ms; exits at most 150 ms (200 ms for the bottom sheet and the
-   group sheet) and never longer than the matching entrance.
+2. Entrances take at most 200 ms (the bottom sheet 250 ms); exits take at most 150 ms (the
+   bottom sheet and the group sheet 200 ms). No exit is longer than its entrance, except the
+   backdrop's (75 ms in, 150 ms out). Height changes take 250 ms both ways.
 3. Popovers grow from 96 %, not from zero.
-4. With reduced motion on: nothing flies, slides or scales; fades are 100 ms; height changes
-   are instant; pulsing placeholders and illustrations hold still; the spinner turns; colours
+4. With reduced motion on: nothing flies, slides or scales; fades take at most 100 ms, and an
+   instant close stays instant; height changes are instant; pulsing placeholders and illustrations hold still; the spinner turns; colours
    still change.
 5. The toast leaves over 150 ms with no delay.
 6. The mobile bottom sheet shows a shadow in light and dark.
