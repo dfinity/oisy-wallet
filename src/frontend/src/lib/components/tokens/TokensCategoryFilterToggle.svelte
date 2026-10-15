@@ -24,8 +24,6 @@
 	};
 </script>
 
-<svelte:window onoisyToggleTokenCategoryFilter={toggleHide} />
-
 <Toggle
 	ariaLabel={$i18n.tokens.text.hide_asset_types}
 	onToggle={toggleHide}

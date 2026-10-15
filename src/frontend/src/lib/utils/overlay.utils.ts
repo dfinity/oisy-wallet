@@ -7,26 +7,39 @@ interface OverlayOptions {
 
 // Only the topmost overlay handles keys. A dialog opened from a popover can
 // mount before that popover finishes its exit transition.
-const overlays: HTMLElement[] = [];
-const focusableSelector = 'button, a[href], input, select, textarea, [tabindex]';
+interface OverlayEntry {
+	node: HTMLElement;
+	returnTargets: HTMLElement[];
+}
 
-const focusableElements = (node: HTMLElement): HTMLElement[] =>
-	Array.from(node.querySelectorAll<HTMLElement>(focusableSelector)).filter((element) => {
-		if (
-			element.tabIndex < 0 ||
-			element.matches(':disabled') ||
-			element.closest('[hidden], [inert]')
-		) {
-			return false;
+const overlays: OverlayEntry[] = [];
+const focusableSelector = 'button, a[href], input, select, textarea, iframe, [tabindex]';
+
+const focusableElements = (node: HTMLElement): HTMLElement[] => {
+	// Cache shared ancestors for this pass, not across renders: visibility can change
+	// while an overlay is open, and long lists otherwise repeat the same style reads.
+	const visibility = new Map<HTMLElement, boolean>();
+	const isVisible = (element: HTMLElement): boolean => {
+		const cached = visibility.get(element);
+		if (cached !== undefined) {
+			return cached;
 		}
-		for (let parent: HTMLElement | null = element; parent; parent = parent.parentElement) {
-			const style = getComputedStyle(parent);
-			if (style.display === 'none' || style.visibility === 'hidden') {
-				return false;
-			}
-		}
-		return true;
-	});
+		const style = getComputedStyle(element);
+		const visible =
+			style.display !== 'none' &&
+			style.visibility !== 'hidden' &&
+			(!element.parentElement || isVisible(element.parentElement));
+		visibility.set(element, visible);
+		return visible;
+	};
+	return Array.from(node.querySelectorAll<HTMLElement>(focusableSelector)).filter(
+		(element) =>
+			element.tabIndex >= 0 &&
+			!element.matches(':disabled') &&
+			!element.closest('[hidden], [inert]') &&
+			isVisible(element)
+	);
+};
 
 /** Svelte action for blocking overlays, including nested dialogs and sheets. */
 // Svelte actions receive the node and parameters as positional arguments.
@@ -36,14 +49,21 @@ export const overlayFocus = (node: HTMLElement, options: OverlayOptions = {}) =>
 	const previous =
 		options.returnFocus ??
 		(document.activeElement instanceof HTMLElement ? document.activeElement : undefined);
-	overlays.push(node);
+	const parent = overlays.at(-1);
+	const entry: OverlayEntry = {
+		node,
+		returnTargets: previous
+			? [previous, ...(parent?.node.contains(previous) ? parent.returnTargets : [])]
+			: []
+	};
+	overlays.push(entry);
 	let mounted = true;
 
-	const isTopmost = () => overlays.at(-1) === node;
+	const isTopmost = () => overlays.at(-1) === entry;
 	const focusFirst = () => (focusableElements(node)[0] ?? node).focus({ preventScroll: true });
 
 	void tick().then(() => {
-		if (mounted && isTopmost()) {
+		if (mounted && isTopmost() && !node.contains(document.activeElement)) {
 			focusFirst();
 		}
 	});
@@ -96,12 +116,15 @@ export const overlayFocus = (node: HTMLElement, options: OverlayOptions = {}) =>
 		destroy: () => {
 			mounted = false;
 			const wasTopmost = isTopmost();
-			overlays.splice(overlays.indexOf(node), 1);
+			overlays.splice(overlays.indexOf(entry), 1);
 			window.removeEventListener('keydown', onKeyDown);
 			document.removeEventListener('focusin', onFocusIn);
-			const remaining = overlays.at(-1);
-			if (wasTopmost && previous?.isConnected && (!remaining || remaining.contains(previous))) {
-				previous.focus({ preventScroll: true });
+			const remaining = overlays.at(-1)?.node;
+			const target = entry.returnTargets.find(
+				(element) => element.isConnected && (!remaining || remaining.contains(element))
+			);
+			if (wasTopmost && target) {
+				target.focus({ preventScroll: true });
 			} else if (wasTopmost && remaining) {
 				(focusableElements(remaining)[0] ?? remaining).focus({ preventScroll: true });
 			}
