@@ -41,6 +41,9 @@ describe('overlayFocus', () => {
 	});
 
 	it('only dismisses the top overlay and does not steal focus when an underlying overlay leaves', async () => {
+		const trigger = document.createElement('button');
+		document.body.append(trigger);
+		trigger.focus();
 		const outer = mountOverlay();
 		const closeOuter = vi.fn();
 		const firstAction = overlayFocus(outer, { onClose: closeOuter });
@@ -58,8 +61,12 @@ describe('overlayFocus', () => {
 
 		expect(inner.contains(document.activeElement)).toBeTruthy();
 
-		secondAction.destroy();
 		outer.remove();
+		secondAction.destroy();
+
+		expect(document.activeElement).toBe(trigger);
+
+		trigger.remove();
 		inner.remove();
 	});
 
@@ -80,6 +87,41 @@ describe('overlayFocus', () => {
 		window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }));
 
 		expect(onClose).toHaveBeenCalledOnce();
+
+		action.destroy();
+		node.remove();
+	});
+
+	it('preserves a child that focuses itself before the initial tick', async () => {
+		const node = mountOverlay();
+		const input = document.createElement('input');
+		node.append(input);
+		const action = overlayFocus(node);
+		input.focus();
+		await tick();
+
+		expect(document.activeElement).toBe(input);
+
+		action.destroy();
+		node.remove();
+	});
+
+	it('allows Tab from Close to an iframe and wraps backwards to it', async () => {
+		const node = document.createElement('div');
+		node.innerHTML = '<button>Close</button><iframe title="Widget"></iframe>';
+		document.body.append(node);
+		const action = overlayFocus(node);
+		await tick();
+		const forward = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true });
+		window.dispatchEvent(forward);
+
+		expect(forward.defaultPrevented).toBeFalsy();
+
+		window.dispatchEvent(
+			new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, cancelable: true })
+		);
+
+		expect(document.activeElement).toBe(node.querySelector('iframe'));
 
 		action.destroy();
 		node.remove();

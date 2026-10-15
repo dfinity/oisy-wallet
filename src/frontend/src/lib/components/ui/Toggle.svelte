@@ -35,7 +35,7 @@
 		role={showLabel ? 'switch' : undefined}
 		type="checkbox"
 	/>
-	<label for={id}>
+	<label class:row-feedback={showLabel} for={id}>
 		{#if showLabel}<span class="toggle-text">{ariaLabel}</span>{/if}
 		<span class="track" aria-hidden="true"></span>
 	</label>
@@ -125,6 +125,12 @@
 			flex-shrink: 0;
 			scale: 1.45;
 			margin-inline: var(--padding);
+			@media (width < 1024px) {
+				scale: 1.6;
+			}
+			@media (width < 640px) {
+				scale: 1.8;
+			}
 		}
 	}
 	.toggle-text {

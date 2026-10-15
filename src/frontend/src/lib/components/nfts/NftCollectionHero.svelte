@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import IconBack from '$lib/components/icons/IconBack.svelte';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
@@ -18,6 +17,7 @@
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { getNftDisplayImageUrl } from '$lib/utils/nft.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		token?: NonFungibleToken;

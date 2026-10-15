@@ -1,7 +1,9 @@
 import Busy from '$lib/components/ui/Busy.svelte';
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
+import { overlayFocus } from '$lib/utils/overlay.utils';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { get } from 'svelte/store';
 
 describe('Busy', () => {
@@ -147,5 +149,28 @@ describe('Busy', () => {
 
 			expect(get(busy)).not.toBeNull();
 		}
+	});
+
+	it('keeps Cancel reachable above a modal and handles Escape itself', async () => {
+		const parent = document.createElement('div');
+		parent.innerHTML = '<button>Parent</button>';
+		document.body.append(parent);
+		const closeParent = vi.fn();
+		const parentAction = overlayFocus(parent, { onClose: closeParent });
+		await tick();
+		busy.show();
+		const { getByRole, unmount } = render(Busy);
+		await tick();
+
+		expect(document.activeElement).toBe(getByRole('button', { name: get(i18n).core.text.close }));
+
+		await fireEvent.keyDown(window, { key: 'Escape' });
+
+		expect(get(busy)).toBeUndefined();
+		expect(closeParent).not.toHaveBeenCalled();
+
+		unmount();
+		parentAction.destroy();
+		parent.remove();
 	});
 });

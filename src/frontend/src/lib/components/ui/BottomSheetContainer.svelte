@@ -9,12 +9,21 @@
 		transition?: boolean;
 		onClose?: () => void;
 		ariaLabel?: string;
+		ariaLabelledby?: string;
 		header?: Snippet;
 		footer?: Snippet;
 		children: Snippet;
 	}
 
-	let { transition = false, onClose, ariaLabel, header, footer, children }: Props = $props();
+	let {
+		transition = false,
+		onClose,
+		ariaLabel,
+		ariaLabelledby,
+		header,
+		footer,
+		children
+	}: Props = $props();
 
 	let transitionFn = $derived(transition ? slide : () => ({}));
 
@@ -25,6 +34,7 @@
 <div
 	class="bottom-sheet"
 	aria-label={ariaLabel}
+	aria-labelledby={ariaLabelledby}
 	aria-modal={onClose ? true : undefined}
 	data-tid="bottom-sheet"
 	role="dialog"

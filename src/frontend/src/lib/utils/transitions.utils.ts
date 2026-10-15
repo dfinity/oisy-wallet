@@ -25,6 +25,17 @@ import {
 // in. Import these instead of `svelte/transition`: a call site that passes no duration gets the
 // shared timing, and one that passes its own duration behaves exactly as Svelte's would.
 
+// Re-exported so call sites take the parameter types from here along with the functions.
+export type {
+	BlurParams,
+	EasingFunction,
+	FadeParams,
+	FlyParams,
+	ScaleParams,
+	SlideParams,
+	TransitionConfig
+} from 'svelte/transition';
+
 type RunDirection = 'in' | 'out';
 
 interface TransitionOptions {

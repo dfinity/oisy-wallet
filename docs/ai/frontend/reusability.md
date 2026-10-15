@@ -138,7 +138,7 @@ Add new feature folders only if your concern doesn't fit any of the above.
 | `token.utils` (`buildIcTokenLabels`)                                      | `$lib/utils/`                     | One unambiguous display label per IC ledger: the display symbol, plus the shortened ledger id wherever another ledger shares that symbol or spells out a suffixed label as its symbol. Build it once over every token the user can pick from and pass it down — labels computed per filtered list can present an impostor as unique. Never hand-roll symbol disambiguation. |
 | `swap-tokens-filter.utils`                                                | `$lib/utils/`                     | The swap provider identifier space. `nativeSwapTokenIdentifier` is the one way to key a contract-less token (native ETH / SOL / BTC) — the category sets have no network dimension, so a bare symbol collides across chains. Never hand-roll it.                                                                                                                            |
 | `nav.utils`, `before-navigate.utils`, `before-unload.utils`               | `$lib/utils/`                     | Navigation hooks.                                                                                                                                                                                                                                                                                                                                                           |
-| `transitions.utils` (`fade`, `fly`, `slide`, `scale`, `blur`, `backdrop`) | `$lib/utils/`                     | Svelte's transitions with OISY's timings and reduced motion built in. Import these, not `svelte/transition`.                                                                                                                                                                                                                                                                |
+| `transitions.utils` (`fade`, `fly`, `slide`, `scale`, `blur`, `backdrop`) | `$lib/utils/`                     | Svelte's transitions and their parameter types, with OISY's timings and reduced motion built in. Lint refuses `svelte/transition` elsewhere.                                                                                                                                                                                                                                |
 | `clipboard.utils`, `device.utils`, `events.utils`                         | `$lib/utils/`                     | Browser plumbing.                                                                                                                                                                                                                                                                                                                                                           |
 | `derived-memo.utils`, `certified-store.utils`                             | `$lib/utils/`                     | Store helpers.                                                                                                                                                                                                                                                                                                                                                              |
 
@@ -175,12 +175,12 @@ Almost never. The taxonomy is closed. If you genuinely think a new bucket
 is needed (e.g. a new feature folder under `$lib/components/`), surface it
 in the PR description and ask the human owner before doing it.
 
-### Overlay keyboard behavior
+## Overlay keyboard behavior
 
 `overlayFocus` in `$lib/utils/overlay.utils.ts` is the shared Svelte action for
 blocking popovers, modal dialogs and dismissible bottom sheets. It enters focus,
 contains Tab and programmatic focus, handles Escape only on the topmost overlay,
-and restores the opener without stealing focus from a newly opened dialog.
+and preserves child autofocus. It restores a connected opener through the overlay return chain, including when a popover closes while its child modal opens. Confirmation popups and the global busy overlay participate in the same stack.
 Use dialog semantics for mixed controls; do not assign `role="menu"` without
 implementing menu-item navigation.
 
