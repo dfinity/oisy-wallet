@@ -221,8 +221,8 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
 
 ### 4. The bottom sheet has a shadow
 
-- Define `--bottom-sheet-box-shadow` in the theme (light and dark), from the existing shadow
-  tokens if one fits; `ui/BottomSheetContainer.svelte:72` already uses it.
+- Define `--bottom-sheet-box-shadow` in the shared theme layer as an alias of the existing
+  `--overlay-box-shadow`, available in light and dark; `ui/BottomSheetContainer.svelte:72` already uses it.
 
 ### 5. Icon state changes cross-fade
 
