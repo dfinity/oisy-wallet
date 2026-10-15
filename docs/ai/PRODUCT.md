@@ -40,7 +40,8 @@ way: below 1280 px the network switcher shows only the network's logo, and below
 even the icons sit over the content, a frosted band in the page colour appears behind them once
 the page is scrolled, so rows pass under it instead of showing through. There, the pinned section
 headers (the Assets bar, the date labels in Activity) pin just below the band rather than under
-it.
+it. Opening the user menu from the header dims and blurs the page behind it, as the More menu
+and dialogs do.
 
 ---
 
