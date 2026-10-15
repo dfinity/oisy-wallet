@@ -3,14 +3,14 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { quintOut } from 'svelte/easing';
-	import { fade, scale } from 'svelte/transition';
+	import { cubicIn, cubicOut } from 'svelte/easing';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import Backdrop from '$lib/components/ui/Backdrop.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { PopoverDirection, PopoverPlacement } from '$lib/types/popover';
 	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
 	import { computePopoverPlacement } from '$lib/utils/popover.utils';
+	import { fade, scale } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		anchor?: HTMLElement;
@@ -163,7 +163,7 @@
 		data-tid={testId}
 		role="menu"
 		tabindex="-1"
-		transition:fade|global
+		transition:fade|global={{ duration: 25 }}
 	>
 		<Backdrop invisible={invisibleBackdrop} onClose={close} />
 		<div
@@ -173,7 +173,8 @@
 			class:rtl={effectiveDirection === 'rtl'}
 			class:with-border={invisibleBackdrop}
 			use:observePanelWidth
-			transition:scale|global={{ delay: 25, duration: 150, easing: quintOut }}
+			in:scale|global={{ delay: 25, duration: 150, easing: cubicOut, start: 0.96 }}
+			out:scale|global={{ duration: 100, easing: cubicIn, start: 0.96 }}
 		>
 			{#if closeButton}
 				<button

@@ -352,6 +352,10 @@ setting. Svelte's own default is 400 ms, slower than anything OISY uses.
   Progress indicators (`Spinner`, `AnimatedIconLoader`) keep turning: they
   are often the only sign that work is happening.
 
+For a page backdrop use `backdrop` from the same module: it animates the dim and blur
+radius without an opacity animation that hides the blur in Chrome. Under reduced motion
+it becomes the same capped fade.
+
 ## Icons
 
 The codebase uses several icon sources (Lucide, Tabler, Iconly, custom
