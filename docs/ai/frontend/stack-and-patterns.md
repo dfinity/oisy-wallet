@@ -247,7 +247,8 @@ Text links and link-style icons change colour: one step of OISY blue on hover
 and the same while pressed (`text-brand-hover`, blue-800 in
 light mode, blue-300 in dark, where blue-800 would drop to 2.3:1). `Button link`,
 the default `ButtonIcon` (so `Copy`), `ExternalLink` and `BreadcrumbNavigation`
-have it built in; anything else that looks like a link adds
+have it built in, and so does `a.blue-link` (`styles/global/links.scss`) for links
+inside translated strings rendered through `Html`; anything else that looks like a link adds
 `transition-colors duration-150 ease-out hover:text-brand-hover active:text-brand-hover`.
 Never hover a link to `text-brand-secondary`: it is the darker blue in both themes.
 A text link does not shrink on press; an icon-only link also gets `press-icon`,
