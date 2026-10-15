@@ -163,7 +163,7 @@
 		data-tid={testId}
 		role="menu"
 		tabindex="-1"
-		transition:fade|global={{ duration: 25 }}
+		in:fade|global={{ duration: 25 }}
 	>
 		<Backdrop invisible={invisibleBackdrop} onClose={close} />
 		<div

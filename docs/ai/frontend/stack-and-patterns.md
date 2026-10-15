@@ -356,6 +356,9 @@ For a page backdrop use `backdrop` from the same module: it animates the dim and
 radius without an opacity animation that hides the blur in Chrome. Under reduced motion
 it becomes the same capped fade.
 
+Modal and popover containers use an intro-only 25 ms fade. Their children own the exits;
+a container outro would hide the panel and backdrop before their longer outros finish.
+
 ## Icons
 
 The codebase uses several icon sources (Lucide, Tabler, Iconly, custom

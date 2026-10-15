@@ -41,7 +41,7 @@ describe('overlay motion', () => {
 		}
 	);
 
-	it('clears a modal panel before its backdrop and uses a short container fade', async () => {
+	it('clears a modal panel before its backdrop and only fades its container on entry', async () => {
 		const { rerender } = render(Modal, {
 			props: { visible: true, children: mockSnippet },
 			intro: true
@@ -55,7 +55,7 @@ describe('overlay motion', () => {
 			)
 		);
 
-		expect(fade).toHaveBeenCalledWith(expect.anything(), { duration: 25 }, { direction: 'both' });
+		expect(fade).toHaveBeenCalledWith(expect.anything(), { duration: 25 }, { direction: 'in' });
 		expect(backdrop).toHaveBeenCalledWith(
 			expect.anything(),
 			{ duration: 75, easing: cubicOut, blur: 4 },
@@ -89,7 +89,7 @@ describe('overlay motion', () => {
 			)
 		);
 
-		expect(fade).toHaveBeenCalledWith(expect.anything(), { duration: 25 }, { direction: 'both' });
+		expect(fade).toHaveBeenCalledWith(expect.anything(), { duration: 25 }, { direction: 'in' });
 
 		await rerender({ visible: false });
 		await waitFor(() =>

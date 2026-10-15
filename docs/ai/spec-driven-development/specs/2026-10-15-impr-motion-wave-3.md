@@ -120,7 +120,8 @@ motion they follow rule 6.
 - **Backdrop:** its dim and blur arrive smoothly in 75 ms and leave in 150 ms, without
   animating the element's opacity (which prevents Chrome from drawing the blur).
 - **Popover:** its panel grows from 96 % to full size in 150 ms and leaves in 100 ms.
-  Its container fades in 25 ms, like the modal, so the backdrop can draw its blur.
+  Its container fades in over 25 ms, like the modal, so the backdrop can draw its blur.
+  Both container fades run only on entry; the panels and backdrops control the visible exits.
 - **Bottom sheet:** slides up over 250 ms, down over 200 ms.
 
 ### 4. The bottom sheet has a shadow
@@ -213,11 +214,12 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
 
 - `ui/Toast.svelte:74-75`: `in:fly` 200 ms from a short distance (16 px, not 100 px); `out:fly`
   150 ms ease-in back the same way, no delay.
-- `ui/Modal.svelte:42-43,68-74`: `FADE_OUT_DURATION` 125 ms.
+- `ui/Modal.svelte:42-43,68-74`: `FADE_OUT_DURATION` 125 ms; container `in:fade` 25 ms. The container
+  stays opaque on exit so the panel and backdrop finish their own outros.
 - `ui/Backdrop.svelte` and `BACKDROP_FADE_OUT_DURATION`: out via the shared exit timing
   (150 ms). A shared `backdrop` transition interpolates the dim and blur radius rather
   than opacity; under reduced motion it uses the shared capped fade. Check every awaiter of `BACKDROP_FADE_OUT_DURATION` still behaves.
-- `ui/Popover.svelte:166,176`: wrapper `transition:fade` 25 ms; panel `in:scale` from
+- `ui/Popover.svelte:166,176`: wrapper `in:fade` 25 ms; panel `in:scale` from
   0.96 over 150 ms ease-out and `out:scale` 100 ms ease-in.
 - `ui/BottomSheetContainer.svelte:22`: `in:` 250 ms ease-out, `out:` 200 ms ease-in.
 

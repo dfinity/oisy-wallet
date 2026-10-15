@@ -66,7 +66,7 @@
 		onclick={stopPropagation(onClick)}
 		onintroend={onIntroEnd}
 		{role}
-		transition:fade|global={{ duration: 25 }}
+		in:fade|global={{ duration: 25 }}
 	>
 		<Backdrop {disablePointerEvents} onClose={() => onClose?.()} />
 		<div

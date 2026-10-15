@@ -118,7 +118,8 @@ Where it applies:
   movement; modal panels take 125 ms each way. Popovers grow from 96 % in 150 ms and
   leave in 100 ms. The page dims and blurs smoothly in 75 ms and clears in 150 ms;
   bottom sheets open in 250 ms and close in 200 ms. Reduced motion removes movement
-  and caps fades at 100 ms; height changes happen at once.
+  and caps fades at 100 ms; height changes happen at once. Modal and popover panels
+  and backdrops finish their individual exits before the overlay disappears.
 
 - With **reduced motion** turned on in the system, pulsing loading placeholders hold still,
   and so do the decorative animations: the dApp Explorer's UFO in the navigation, the AI
