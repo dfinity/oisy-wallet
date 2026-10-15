@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { MinterAlreadyProcessingError, MinterNoNewUtxosError } from '@icp-sdk/canisters/ckbtc';
-	import { blur } from 'svelte/transition';
 	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusProgress.svelte';
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { updateBalance } from '$icp/services/ckbtc.services';
@@ -16,6 +15,7 @@
 	import { token } from '$lib/stores/token.store';
 	import type { OisySyncStatusEvent } from '$lib/types/custom-events';
 	import type { SyncState } from '$lib/types/sync';
+	import { blur } from '$lib/utils/transitions.utils';
 
 	let receiveProgressStep = $state<string | undefined>();
 
