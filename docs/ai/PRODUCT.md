@@ -84,6 +84,16 @@ Where it applies:
   copy the address, which the row does when tapped as a whole, and the row's action icons no
   longer overlap each other on phones. Holding Space on a focused transaction or tip row
   shows the same fill as a press.
+- **Navigation.** In the desktop sidebar and the menus, a pressed entry darkens one step past
+  its hover and selected colour. On the mobile bar, a pressed entry's icon and label shrink
+  slightly (Finance shrinks its circle) with **no** colour change, so grey still means only
+  that a sheet is open and blue only the current page. The cards in the mobile group sheets
+  press like buttons.
+- **Cards.** NFT and collection cards press like text buttons and keep their hover lift;
+  disabled cards and the non-interactive NFT card do not press. The Explore dApp cards and
+  the reward cards press too, with no hover of their own. Colours meant for dark mode follow
+  OISY's theme setting, not the device's, so a user who picked a theme different from their
+  system sees the matching NFT badges.
 - **Links and icon links.** Text links (Go to collection, Learn more, breadcrumbs, the terms
   and privacy links) and link-style icons (copy, open in explorer, back) turn a step darker
   blue on hover and while pressed; in dark mode a step lighter, so they stay readable on the
