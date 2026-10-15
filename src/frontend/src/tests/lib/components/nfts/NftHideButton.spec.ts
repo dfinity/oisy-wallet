@@ -54,7 +54,7 @@ describe('NftHideButton', () => {
 	});
 
 	it('preserves the icon swap through a pending hide action', async () => {
-		const pending = Promise.withResolvers<void>();
+		const pending = Promise.withResolvers<undefined>();
 		vi.spyOn(nftsServices, 'updateNftSection').mockReturnValue(pending.promise);
 		const { getByTestId, rerender } = render(NftHideButton, {
 			props: { token: mockToken, source: 'gallery' }
@@ -71,7 +71,7 @@ describe('NftHideButton', () => {
 			token: { ...mockToken, section: CustomTokenSection.HIDDEN },
 			source: 'gallery'
 		});
-		pending.resolve();
+		pending.resolve(undefined);
 		await waitFor(() => expect(button).toBeEnabled());
 
 		expect(getByTestId(NFT_COLLECTION_ACTION_UNHIDE)).toBe(button);
