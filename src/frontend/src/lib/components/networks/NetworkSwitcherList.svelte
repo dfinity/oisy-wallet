@@ -49,12 +49,14 @@
 </script>
 
 {#if allNetworksEnabled}
-	<NetworkButton
-		{labelsSize}
-		{onSelected}
-		{selectedNetworkId}
-		usdBalance={mainnetTokensUsdBalance}
-	/>
+	<div class="menu-divider">
+		<NetworkButton
+			{labelsSize}
+			{onSelected}
+			{selectedNetworkId}
+			usdBalance={mainnetTokensUsdBalance}
+		/>
+	</div>
 {/if}
 
 <ul class="flex list-none flex-col">

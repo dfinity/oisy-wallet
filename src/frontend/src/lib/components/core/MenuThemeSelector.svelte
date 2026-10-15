@@ -39,7 +39,7 @@
 	});
 </script>
 
-<div class="flex justify-between pl-3">
+<div class="flex min-h-12 flex-wrap items-center justify-between gap-y-2 px-2 py-1">
 	<span class="mr-3 flex min-w-32 items-center text-tertiary">
 		<span class="mr-2 flex"><IconSunMoon /></span>
 		<span class="flex">{$i18n.settings.text.appearance}</span>

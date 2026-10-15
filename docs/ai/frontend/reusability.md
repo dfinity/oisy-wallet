@@ -189,3 +189,9 @@ putting a switch inside a clickable row. Selection buttons expose `aria-pressed`
 through `Button.pressed` or the selectable list primitives.
 
 Token rows and navigation entries use an inset keyboard focus outline so rounded and scrolling list containers cannot clip it. Token-group headers pass their expanded state through `TokenCard` and `LogoButton` to the native button.
+
+### Consistent app menu surfaces
+
+Popover panels share `--overlay-box-shadow` with modals and bottom sheets: a translucent edge and layered depth in light mode, a subtle white edge in dark mode. Do not add solid panel borders; retain real dividers and keyboard focus outlines. Popovers restore a system-color border in forced-colors mode, where shadows are suppressed.
+
+Use the opt-in `menu-surface` class for app menus built from existing list, logo and navigation buttons. Shared styles in `global/menus.scss` define 48px minimum rows (24px line-height plus 12px vertical padding, without button borders or inter-row gaps), 16px labels, 12px vertical / 8px horizontal padding, 8px row corners and inset keyboard focus. Use `menu-heading`, `menu-row-label`, and `menu-divider` within that surface. Network logos remain brand assets; action icons use the existing Lucide set. Theme changes temporarily suppress transitions through `data-theme-changing`, then restore them after painting the new theme.

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import IconCheck from '$lib/components/icons/IconCheck.svelte';
+	import IconGixCheck from '$lib/components/icons/IconGixCheck.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 
 	interface Props {
@@ -21,16 +21,22 @@
 	{onclick}
 	pressed={selectable ? selected : undefined}
 	static
-	styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28 row-feedback"
+	styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28 row-feedback menu-row"
 	{testId}
 	transparent
 >
 	{#if selectable}
-		<span class="w-[20px] pt-0.75 text-brand-primary">
+		<span class="flex w-5 shrink-0 items-center text-brand-primary">
 			{#if selected}
-				<IconCheck size="20" />
+				<IconGixCheck size="20px" />
 			{/if}
 		</span>
 	{/if}
 	<span class="font-normal">{@render children()}</span>
 </Button>
+
+<style lang="scss">
+	:global(button.menu-row) {
+		--focus-outline-offset: -3px;
+	}
+</style>

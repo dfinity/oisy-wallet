@@ -12,15 +12,15 @@
 	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
-	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
 	import IconPay from '$lib/components/icons/IconPay.svelte';
 	import IconUser from '$lib/components/icons/IconUser.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
-	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconHeart from '$lib/components/icons/lucide/IconHeart.svelte';
+	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
+	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
 	import IconMaximize from '$lib/components/icons/lucide/IconMaximize.svelte';
 	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
 	import IconUsersRound from '$lib/components/icons/lucide/IconUsersRound.svelte';
@@ -182,117 +182,120 @@
 </ButtonIcon>
 
 <Popover anchor={button} direction="rtl" bind:visible>
-	<div
-		class="mb-1 flex max-w-80 flex-col gap-1"
-		data-tid={NAVIGATION_MENU}
-		onclick={hidePopover}
-		role="none"
-	>
-		{#if $authNotSignedIn}
-			<div class="mb-2 text-center text-base font-semibold">
-				{$i18n.auth.text.sign_in_or_sign_up}
-			</div>
-			<span class="mb-2 text-center">
-				<ButtonAuthenticateWithHelp fullWidth helpAlignment="center" needHelpLink={false} />
-			</span>
-			<Hr />
+	<div class="menu-surface">
+		<div
+			class="flex max-w-80 flex-col"
+			data-tid={NAVIGATION_MENU}
+			onclick={hidePopover}
+			role="none"
+		>
+			{#if $authNotSignedIn}
+				<div class="mb-2 text-center text-base font-semibold">
+					{$i18n.auth.text.sign_in_or_sign_up}
+				</div>
+				<span class="mb-2 text-center">
+					<ButtonAuthenticateWithHelp fullWidth helpAlignment="center" needHelpLink={false} />
+				</span>
+				<Hr />
 
-			<AboutWhyOisy
-				asMenuItem
-				asMenuItemCondensed
-				onIcOpenAboutModal={hidePopover}
-				trackEventSource={USER_MENU_ROUTE}
-			/>
+				<AboutWhyOisy
+					asMenuItem
+					asMenuItemCondensed
+					onIcOpenAboutModal={hidePopover}
+					trackEventSource={USER_MENU_ROUTE}
+				/>
 
-			<DocumentationLink
-				asMenuItem
-				asMenuItemCondensed
-				testId={NAVIGATION_MENU_DOC_BUTTON}
-				trackEventSource={USER_MENU_ROUTE}
-			/>
+				<DocumentationLink
+					asMenuItem
+					asMenuItemCondensed
+					testId={NAVIGATION_MENU_DOC_BUTTON}
+					trackEventSource={USER_MENU_ROUTE}
+				/>
 
-			<SupportLink asMenuItem asMenuItemCondensed testId={NAVIGATION_MENU_SUPPORT_BUTTON} />
-		{/if}
-		{#if $authSignedIn}
-			{#if addressesOption}
-				<MenuAddresses onReceiveClick={hidePopover} />
+				<SupportLink asMenuItem asMenuItemCondensed testId={NAVIGATION_MENU_SUPPORT_BUTTON} />
 			{/if}
+			{#if $authSignedIn}
+				{#if addressesOption}
+					<MenuAddresses onReceiveClick={hidePopover} />
+				{/if}
 
-			<ButtonMenu
-				ariaLabel={$i18n.navigation.alt.address_book}
-				onclick={() => modalStore.openAddressBook({ id: addressModalId })}
-				testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
-			>
-				<IconUsersRound size="20" />
-				{$i18n.navigation.text.address_book}
-			</ButtonMenu>
-
-			<ButtonMenu
-				ariaLabel={$isPrivacyMode
-					? $i18n.navigation.alt.show_balances
-					: $i18n.navigation.alt.hide_balances}
-				onclick={handlePrivacyToggle}
-				tag={$i18n.shortcuts.privacy_mode}
-				testId={NAVIGATION_MENU_PRIVACY_MODE_BUTTON}
-			>
-				<IconSwap swapped={$isPrivacyMode}>
-					{#snippet icon()}<IconEyeOff />{/snippet}
-					{#snippet swappedIcon()}<IconEye />{/snippet}
-				</IconSwap>
-				{$isPrivacyMode ? $i18n.navigation.text.show_balances : $i18n.navigation.text.hide_balances}
-			</ButtonMenu>
-
-			<Hr />
-
-			<ButtonMenu
-				ariaLabel={$i18n.navigation.text.wallet_connect}
-				onclick={() => modalStore.openUniversalScanner({ id: universalScannerModalId })}
-				styleClass="group"
-				testId={NAVIGATION_MENU_SCANNER_BUTTON}
-			>
-				<IconMaximize />
-
-				<span class="flex w-full items-center justify-between">
-					{$i18n.navigation.text.wallet_connect}
-
-					<span
-						class="text-tertiary-inverted transition-colors duration-700 group-hover:text-brand-primary-alt"
-					>
-						<IconWalletConnect />
-					</span>
-				</span>
-			</ButtonMenu>
-
-			<ButtonMenu
-				ariaLabel={replaceOisyPlaceholders($i18n.navigation.text.pay)}
-				onclick={() => modalStore.openPayDialog(payDialogModalId)}
-				styleClass="group"
-				testId={NAVIGATION_MENU_PAY_BUTTON}
-			>
-				<IconMaximize />
-
-				<span class="flex w-full items-center justify-between">
-					{replaceOisyPlaceholders($i18n.navigation.text.pay)}
-
-					<span
-						class="text-tertiary-inverted transition-colors duration-700 group-hover:text-brand-primary-alt"
-					>
-						<IconPay />
-					</span>
-				</span>
-			</ButtonMenu>
-
-			<Hr />
-
-			{#if TIPS_ENABLED}
 				<ButtonMenu
-					ariaLabel={tipMenuLabel}
-					onclick={() => modalStore.openTip(tipModalId)}
-					testId={NAVIGATION_MENU_TIP_BUTTON}
+					ariaLabel={$i18n.navigation.alt.address_book}
+					onclick={() => modalStore.openAddressBook({ id: addressModalId })}
+					testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
 				>
-					<IconHeart size="20" />
+					<IconUsersRound size="20" />
+					{$i18n.navigation.text.address_book}
+				</ButtonMenu>
 
-					<!--
+				<ButtonMenu
+					ariaLabel={$isPrivacyMode
+						? $i18n.navigation.alt.show_balances
+						: $i18n.navigation.alt.hide_balances}
+					onclick={handlePrivacyToggle}
+					tag={$i18n.shortcuts.privacy_mode}
+					testId={NAVIGATION_MENU_PRIVACY_MODE_BUTTON}
+				>
+					<IconSwap swapped={$isPrivacyMode}>
+						{#snippet icon()}<IconEyeOff />{/snippet}
+						{#snippet swappedIcon()}<IconEye />{/snippet}
+					</IconSwap>
+					{$isPrivacyMode
+						? $i18n.navigation.text.show_balances
+						: $i18n.navigation.text.hide_balances}
+				</ButtonMenu>
+
+				<Hr />
+
+				<ButtonMenu
+					ariaLabel={$i18n.navigation.text.wallet_connect}
+					onclick={() => modalStore.openUniversalScanner({ id: universalScannerModalId })}
+					styleClass="group"
+					testId={NAVIGATION_MENU_SCANNER_BUTTON}
+				>
+					<IconMaximize />
+
+					<span class="flex w-full items-center justify-between">
+						{$i18n.navigation.text.wallet_connect}
+
+						<span
+							class="text-tertiary-inverted transition-colors duration-150 group-hover:text-brand-primary-alt"
+						>
+							<IconWalletConnect />
+						</span>
+					</span>
+				</ButtonMenu>
+
+				<ButtonMenu
+					ariaLabel={replaceOisyPlaceholders($i18n.navigation.text.pay)}
+					onclick={() => modalStore.openPayDialog(payDialogModalId)}
+					styleClass="group"
+					testId={NAVIGATION_MENU_PAY_BUTTON}
+				>
+					<IconMaximize />
+
+					<span class="flex w-full items-center justify-between">
+						{replaceOisyPlaceholders($i18n.navigation.text.pay)}
+
+						<span
+							class="text-tertiary-inverted transition-colors duration-150 group-hover:text-brand-primary-alt"
+						>
+							<IconPay />
+						</span>
+					</span>
+				</ButtonMenu>
+
+				<Hr />
+
+				{#if TIPS_ENABLED}
+					<ButtonMenu
+						ariaLabel={tipMenuLabel}
+						onclick={() => modalStore.openTip(tipModalId)}
+						testId={NAVIGATION_MENU_TIP_BUTTON}
+					>
+						<IconHeart size="20" />
+
+						<!--
 						The count, where the dot on the icon only said "something". Inside the
 						menu there is room to say how many.
 
@@ -302,113 +305,114 @@
 						construction, and the count has to be in the label or it is announced
 						nowhere.
 					-->
-					<span class="flex flex-1 items-center justify-between gap-2">
-						{$i18n.navigation.text.issue_tip}
+						<span class="flex flex-1 items-center justify-between gap-2">
+							{$i18n.navigation.text.issue_tip}
 
-						{#if $tipsOverview.failed > 0}
-							<Badge testId={NAVIGATION_MENU_TIP_COUNT} variant="warning" width="w-fit">
-								{$tipsOverview.failed}
-							</Badge>
-						{/if}
-					</span>
-				</ButtonMenu>
-			{/if}
+							{#if $tipsOverview.failed > 0}
+								<Badge testId={NAVIGATION_MENU_TIP_COUNT} variant="warning" width="w-fit">
+									{$tipsOverview.failed}
+								</Badge>
+							{/if}
+						</span>
+					</ButtonMenu>
+				{/if}
 
-			<ButtonMenu
-				ariaLabel={$i18n.navigation.alt.refer_a_friend}
-				onclick={() => modalStore.openReferralCode(referralModalId)}
-				testId={NAVIGATION_MENU_REFERRAL_BUTTON}
-			>
-				<IconShare size="20" />
-				{$i18n.navigation.text.refer_a_friend}
-			</ButtonMenu>
-
-			<ExternalLink
-				ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.support)}
-				asMenuItem
-				asMenuItemCondensed
-				href={OISY_SUPPORT_URL}
-				iconVisible={false}
-				styleClass="group"
-				testId={NAVIGATION_MENU_SUPPORT_BUTTON}
-			>
-				<IconHelpCircle />
-
-				<span class="flex w-full items-center justify-between">
-					{$i18n.navigation.text.support}
-
-					<span
-						class="text-tertiary-inverted transition-colors duration-700 group-hover:text-brand-primary-alt"
-					>
-						<IconExternalLink size="16" />
-					</span>
-				</span>
-			</ExternalLink>
-
-			<Hr />
-
-			{#if isVip}
 				<ButtonMenu
-					ariaLabel={$i18n.navigation.alt.vip_qr_code}
-					onclick={() => modalStore.openVipQrCode({ id: goldModalId, data: QrCodeType.VIP })}
-					testId={NAVIGATION_MENU_VIP_BUTTON}
+					ariaLabel={$i18n.navigation.alt.refer_a_friend}
+					onclick={() => modalStore.openReferralCode(referralModalId)}
+					testId={NAVIGATION_MENU_REFERRAL_BUTTON}
 				>
-					<IconVipQr size="20" />
-					{$i18n.navigation.text.vip_qr_code}
+					<IconShare size="20" />
+					{$i18n.navigation.text.refer_a_friend}
 				</ButtonMenu>
-			{/if}
 
-			{#if isGold}
-				<ButtonMenu
-					ariaLabel={$i18n.navigation.alt.binance_qr_code}
-					onclick={() => modalStore.openVipQrCode({ id: vipModalId, data: QrCodeType.GOLD })}
-					testId={NAVIGATION_MENU_GOLD_BUTTON}
+				<ExternalLink
+					ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.support)}
+					asMenuItem
+					asMenuItemCondensed
+					href={OISY_SUPPORT_URL}
+					iconVisible={false}
+					styleClass="group"
+					testId={NAVIGATION_MENU_SUPPORT_BUTTON}
 				>
-					<IconBinance size="20" />
-					{$i18n.navigation.text.binance_qr_code}
-				</ButtonMenu>
-			{/if}
+					<IconHelp size="20" />
 
-			{#if isGold || isVip}
+					<span class="flex w-full items-center justify-between">
+						{$i18n.navigation.text.support}
+
+						<span
+							class="text-tertiary-inverted transition-colors duration-150 group-hover:text-brand-primary-alt"
+						>
+							<IconExternalLink size="16" />
+						</span>
+					</span>
+				</ExternalLink>
+
 				<Hr />
-			{/if}
-		{/if}
-	</div>
 
-	<div class="flex max-w-80 flex-col gap-1 pt-5 pb-1">
-		{#if $authNotSignedIn}
-			<MenuLanguageSelector />
-		{/if}
+				{#if isVip}
+					<ButtonMenu
+						ariaLabel={$i18n.navigation.alt.vip_qr_code}
+						onclick={() => modalStore.openVipQrCode({ id: goldModalId, data: QrCodeType.VIP })}
+						testId={NAVIGATION_MENU_VIP_BUTTON}
+					>
+						<IconVipQr size="20" />
+						{$i18n.navigation.text.vip_qr_code}
+					</ButtonMenu>
+				{/if}
+
+				{#if isGold}
+					<ButtonMenu
+						ariaLabel={$i18n.navigation.alt.binance_qr_code}
+						onclick={() => modalStore.openVipQrCode({ id: vipModalId, data: QrCodeType.GOLD })}
+						testId={NAVIGATION_MENU_GOLD_BUTTON}
+					>
+						<IconBinance size="20" />
+						{$i18n.navigation.text.binance_qr_code}
+					</ButtonMenu>
+				{/if}
+
+				{#if isGold || isVip}
+					<Hr />
+				{/if}
+			{/if}
+		</div>
+
+		<div class="flex max-w-80 flex-col">
+			{#if $authNotSignedIn}
+				<MenuLanguageSelector />
+			{/if}
+
+			{#if $authSignedIn}
+				<MenuThemeSelector />
+
+				<ButtonMenu
+					ariaLabel={$i18n.navigation.alt.settings}
+					onclick={goToSettings}
+					testId={NAVIGATION_MENU_SETTINGS_BUTTON}
+				>
+					<IconManage size="20" />
+					{$i18n.navigation.text.settings}
+				</ButtonMenu>
+			{/if}
+		</div>
 
 		{#if $authSignedIn}
-			<MenuThemeSelector />
+			<Hr />
 
-			<ButtonMenu
-				ariaLabel={$i18n.navigation.alt.settings}
-				onclick={goToSettings}
-				testId={NAVIGATION_MENU_SETTINGS_BUTTON}
-			>
-				<IconlySettings size="20" />
-				{$i18n.navigation.text.settings}
-			</ButtonMenu>
+			<div class="my-4 flex max-w-80 flex-col">
+				<LockOrSignOut onHidePopover={hidePopover} />
+			</div>
 		{/if}
-	</div>
 
-	{#if $authSignedIn}
 		<Hr />
 
-		<div class="my-4 flex max-w-80 flex-col">
-			<LockOrSignOut onHidePopover={hidePopover} />
+		<div
+			class="mt-4 flex max-w-80 flex-wrap justify-center gap-x-2 gap-y-1 text-xs text-nowrap text-tertiary"
+		>
+			<TermsOfUseLink />
+			<PrivacyPolicyLink />
+			<LicenseAgreementLink />
 		</div>
-	{/if}
-
-	<Hr />
-
-	<div
-		class="mt-4 flex max-w-80 flex-wrap justify-center gap-x-2 gap-y-1 text-xs text-nowrap text-tertiary"
-	>
-		<TermsOfUseLink />
-		<PrivacyPolicyLink />
-		<LicenseAgreementLink />
 	</div>
 </Popover>

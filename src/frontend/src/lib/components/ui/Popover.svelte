@@ -171,7 +171,6 @@
 			class:above={placement === 'above'}
 			class:placed={placementResolved}
 			class:rtl={effectiveDirection === 'rtl'}
-			class:with-border={invisibleBackdrop}
 			aria-label={ariaLabel ?? anchor?.getAttribute('aria-label') ?? $i18n.navigation.alt.menu}
 			aria-modal="true"
 			role="dialog"
@@ -244,6 +243,7 @@
 		--border-radius: 16px;
 
 		border-radius: var(--border-radius);
+		box-shadow: var(--overlay-box-shadow);
 
 		// Loose cap used during the first paint so we can measure the panel's
 		// natural width. `.placed` swaps this for a side-aware cap that keeps the
@@ -277,8 +277,8 @@
 			max-width: calc(100vw - var(--popover-right) - var(--padding));
 		}
 
-		&.with-border {
-			border: var(--dropdown-border-size) solid var(--dropdown-border-color);
+		@media (forced-colors: active) {
+			border: 1px solid CanvasText;
 		}
 	}
 
