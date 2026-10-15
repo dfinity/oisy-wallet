@@ -115,8 +115,8 @@ motion they follow rule 6.
 
 - **Toast:** slides in from its edge over 200 ms and leaves over 150 ms with a short slide
   back, with no delay before it starts leaving.
-- **Modal:** the panel arrives as today (125 ms) and leaves in 125 ms, no longer slower than
-  it came.
+- **Modal:** the panel arrives in 125 ms ease-out and leaves in 125 ms ease-in, no longer
+  slower than it came.
 - **Backdrop:** its dim and blur arrive smoothly in 75 ms and leave in 150 ms, without
   animating the element's opacity (which prevents Chrome from drawing the blur).
 - **Popover:** its panel grows from 96 % to full size in 150 ms and leaves in 100 ms.
@@ -297,9 +297,9 @@ jsdom does not run transitions or CSS animations; tests assert the inputs that p
 
 ## Open questions (facts to confirm)
 
-1. **Who awaits the backdrop.** List every awaiter of `BACKDROP_FADE_OUT_DURATION` and confirm
-   none depends on 250 ms (for example a test with fake timers, or a navigation that must
-   not start before the backdrop is gone).
+1. ~~**Who awaits the backdrop.**~~ Settled in area 3: `core/Menu.svelte` and
+   `navigation/NavigationMoreMenu.svelte` both await the shared constant. The menu
+   navigation test advances that same constant; none hard-codes the old 250 ms.
 2. ~~**Tests that wait on 400 ms.**~~ Settled while building area 2: none. The full suite
    passes with every transition on the shared timings.
 3. ~~**The `a0_mo` … `a4c_mo` keyframes.**~~ Settled while building: they animate
