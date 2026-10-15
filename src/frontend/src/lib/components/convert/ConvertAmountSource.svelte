@@ -168,7 +168,7 @@
 		<button
 			class="hit-area relative font-semibold transition-[color,scale] duration-150 ease-out [--hit-area-y:calc(100%+1.125rem)] press-icon"
 			class:animate-pulse={isNullish(cappedMaxAmount)}
-			class:hover:text-brand-secondary={!isZeroBalance && isNullish(errorType) && hasPositiveMax}
+			class:hover:text-brand-hover={!isZeroBalance && isNullish(errorType) && hasPositiveMax}
 			class:text-brand-primary={!isZeroBalance &&
 				isNullish(errorType) &&
 				nonNullish(cappedMaxAmount)}

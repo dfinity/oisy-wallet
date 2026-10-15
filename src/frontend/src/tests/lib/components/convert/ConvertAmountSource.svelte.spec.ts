@@ -96,7 +96,7 @@ describe('ConvertAmountSource', () => {
 			context: mockContext()
 		});
 
-		expect(getByTestId(balanceTestId)).toHaveClass('hover:text-brand-secondary');
+		expect(getByTestId(balanceTestId)).toHaveClass('hover:text-brand-hover');
 	});
 
 	it.each([
@@ -112,7 +112,7 @@ describe('ConvertAmountSource', () => {
 			context: mockContext(balance)
 		});
 
-		expect(getByTestId(balanceTestId)).not.toHaveClass('hover:text-brand-secondary');
+		expect(getByTestId(balanceTestId)).not.toHaveClass('hover:text-brand-hover');
 	});
 
 	it('should display loading text if total fee is not available yet', () => {

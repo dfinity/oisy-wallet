@@ -22,7 +22,7 @@ describe('MaxBalanceButton', () => {
 			'hit-area',
 			'[--hit-area-y:calc(100%+1.125rem)]',
 			'press-icon',
-			'hover:text-brand-secondary'
+			'hover:text-brand-hover'
 		);
 	});
 
@@ -32,7 +32,7 @@ describe('MaxBalanceButton', () => {
 		});
 
 		expect(getByTestId(MAX_BUTTON)).toHaveTextContent('0 BTC');
-		expect(getByTestId(MAX_BUTTON)).not.toHaveClass('hover:text-brand-secondary');
+		expect(getByTestId(MAX_BUTTON)).not.toHaveClass('hover:text-brand-hover');
 	});
 
 	it('shows the affordable balance when no cap is set', () => {

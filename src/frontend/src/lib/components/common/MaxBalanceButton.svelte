@@ -111,7 +111,7 @@
 <!-- The amount field sits 9 px above, so the tap area grows at most 9 px up and down. -->
 <button
 	class="hit-area relative font-semibold text-brand-primary-alt transition-[color,scale] duration-150 ease-out [--hit-area-y:calc(100%+1.125rem)] press-icon"
-	class:hover:text-brand-secondary={!isZeroBalance && !error && hasPositiveMax}
+	class:hover:text-brand-hover={!isZeroBalance && !error && hasPositiveMax}
 	class:text-brand-primary-alt={!isZeroBalance && !error}
 	class:text-error-primary={isZeroBalance || error}
 	data-tid={MAX_BUTTON}
