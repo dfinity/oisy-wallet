@@ -25,6 +25,26 @@ describe('Transaction', () => {
 		contactsStore.reset();
 	});
 
+	// The button is `display: contents`, so the span inside paints the row. Holding Space on the
+	// focused button makes only the button `:active`, hence the parent-pressed fill as well.
+	it('darkens the row while pressed, by pointer or by keyboard', () => {
+		const { container } = render(Transaction, {
+			displayAmount: 42n,
+			type: 'receive',
+			status: 'confirmed',
+			timestamp: 1_690_000_000,
+			token: ICP_TOKEN,
+			iconType: 'transaction',
+			from: '0xfeedface',
+			children: mockSnippet
+		});
+
+		expect(container.querySelector('button > span')).toHaveClass(
+			'row-feedback',
+			'parent-pressed:bg-brand-subtle-20'
+		);
+	});
+
 	it('should render `from` when we RECEIVE address', () => {
 		const fromAddress = '0xfeedface';
 
