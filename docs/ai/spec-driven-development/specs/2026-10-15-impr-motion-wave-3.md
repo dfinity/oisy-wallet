@@ -227,12 +227,12 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
 ### 5. Icon state changes cross-fade
 
 - Wrap the four swaps in `IconSwap`: `ui/ProgressSteps.svelte:18-29` (spinner → check or
-  cross; three states, so either nested swaps or a three-way variant of `IconSwap`),
+  cross; select the terminal icon before revealing the result layer),
   `core/Menu.svelte` privacy eye, `ui/ThemeSwitchButton.svelte:24-28`,
   `nfts/NftHideButton.svelte:88-116`. Keep the NFT action mounted while its state changes;
   reuse its confirmation wrapper for both states but open it only when hiding a collection
   with multiple NFTs. Upcoming progress steps keep their numbered circle; active steps use
-  nested swaps for spinner, check and cross. `Button` keeps its children mounted through
+  one swap from the spinner to the selected check or cross, so failure never exposes a success icon. `Button` keeps its children mounted through
   loading so the NFT icon swap survives the pending action; the existing spinner and pulse stay.
   The NFT button retains its previous displayed icon during loading and starts the swap when
   its children are revealed, even if the token store updates before the NFT reload finishes.

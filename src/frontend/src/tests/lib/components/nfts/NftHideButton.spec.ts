@@ -13,6 +13,7 @@ import { screensStore } from '$lib/stores/screens.store';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
+import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 
@@ -29,6 +30,10 @@ describe('NftHideButton', () => {
 		vi.clearAllMocks();
 
 		screensStore.set('md');
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
 	});
 
 	it('keeps the button and both icons mounted when its hidden state changes', async () => {
@@ -54,6 +59,7 @@ describe('NftHideButton', () => {
 	});
 
 	it.each([false, true])('defers the icon swap until loading ends (hidden: %s)', async (hidden) => {
+		vi.useFakeTimers();
 		const pending = Promise.withResolvers<undefined>();
 		vi.spyOn(nftsServices, 'updateNftSection').mockReturnValue(pending.promise);
 		const { getByTestId, rerender } = render(NftHideButton, {
@@ -74,7 +80,7 @@ describe('NftHideButton', () => {
 			source: 'gallery'
 		});
 		// The token store can update before the remaining NFT reload finishes.
-		await new Promise((resolve) => setTimeout(resolve, 350));
+		await vi.advanceTimersByTimeAsync(350);
 
 		expect(button).toBeDisabled();
 		expect([...button.querySelectorAll('.layer')]).toEqual(layers);
@@ -82,7 +88,10 @@ describe('NftHideButton', () => {
 		expect(layers[1]).toHaveAttribute('aria-hidden', String(!hidden));
 
 		pending.resolve(undefined);
-		await waitFor(() => expect(button).toBeEnabled());
+		await runResolvedPromises();
+		await tick();
+
+		expect(button).toBeEnabled();
 
 		expect(getByTestId(hidden ? NFT_COLLECTION_ACTION_HIDE : NFT_COLLECTION_ACTION_UNHIDE)).toBe(
 			button

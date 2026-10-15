@@ -27,10 +27,11 @@
 					</div>
 				{/snippet}
 				{#snippet swappedIcon()}
-					<IconSwap swapped={state === 'failed'}>
-						{#snippet icon()}<IconCheckCircle />{/snippet}
-						{#snippet swappedIcon()}<IconCloseCircle />{/snippet}
-					</IconSwap>
+					{#if state === 'failed'}
+						<IconCloseCircle />
+					{:else}
+						<IconCheckCircle />
+					{/if}
 				{/snippet}
 			</IconSwap>
 		{/if}
