@@ -24,10 +24,10 @@
 
 <div
 	class="bottom-sheet"
+	aria-label={ariaLabel}
+	aria-modal={onClose ? true : undefined}
 	data-tid="bottom-sheet"
 	role="dialog"
-	aria-modal={onClose ? true : undefined}
-	aria-label={ariaLabel}
 	tabindex="-1"
 	use:manageFocus
 	in:transitionFn|global={{ axis: 'y', duration: 250, easing: cubicOut }}

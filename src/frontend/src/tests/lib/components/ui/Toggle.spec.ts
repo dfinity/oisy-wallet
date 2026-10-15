@@ -12,8 +12,11 @@ describe('Toggle', () => {
 			onToggle
 		});
 		const control = getByRole('switch', { name: en.tokens.text.hide_zero_balances });
+
 		expect(control).not.toBeChecked();
+
 		await fireEvent.click(getByText(en.tokens.text.hide_zero_balances));
+
 		expect(onToggle).toHaveBeenCalledExactlyOnceWith(true);
 		expect(control.closest('button')).toBeNull();
 	});
@@ -25,6 +28,7 @@ describe('Toggle', () => {
 			showLabel: true,
 			ariaLabel: en.tokens.text.hide_zero_balances
 		});
+
 		expect(getByRole('switch')).toBeChecked();
 		expect(getByRole('switch')).toBeDisabled();
 	});

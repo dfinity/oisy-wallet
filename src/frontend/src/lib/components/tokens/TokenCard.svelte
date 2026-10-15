@@ -68,9 +68,9 @@
 
 <div class="flex w-full flex-col">
 	<LogoButton
-		{expanded}
 		condensed={asNetwork}
 		dividers={false}
+		{expanded}
 		{hover}
 		{onClick}
 		rounded={false}

@@ -61,12 +61,12 @@
 	class:w-full={dividers || fullWidth}
 >
 	<button
-		class="flex w-full rounded-lg border-0 px-2"
 		style="--focus-outline-offset: -3px"
-		aria-expanded={expanded}
+		class="flex w-full rounded-lg border-0 px-2"
 		class:cursor-default={isNullish(onClick)}
-		data-tid={testId}
+		aria-expanded={expanded}
 		aria-pressed={selectable ? selected : undefined}
+		data-tid={testId}
 		onclick={onClick}
 	>
 		<span

@@ -61,7 +61,7 @@ export const overlayFocus = (node: HTMLElement, options: OverlayOptions = {}) =>
 			return;
 		}
 		const elements = focusableElements(node);
-		const first = elements[0];
+		const [first] = elements;
 		const last = elements.at(-1);
 		if (!first || !last) {
 			event.preventDefault();

@@ -58,7 +58,9 @@ describe('TokensMenu', () => {
 		const control = await waitFor(() =>
 			getByRole('switch', { name: en.tokens.text.hide_zero_balances })
 		);
+
 		expect(control.closest('button')).toBeNull();
+
 		await fireEvent.click(control);
 		await waitFor(() => expect(control).toBeChecked());
 		await fireEvent.click(control);

@@ -18,8 +18,8 @@
 <svelte:window onoisyToggleZeroBalances={toggleHide} />
 
 <Toggle
-	{showLabel}
 	ariaLabel={$i18n.tokens.text.hide_zero_balances}
 	onToggle={toggleHide}
+	{showLabel}
 	bind:checked
 />

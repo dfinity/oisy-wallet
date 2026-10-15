@@ -17,7 +17,7 @@
 </script>
 
 <Responsive up="sm">
-	<Popover anchor={button} {direction} {ariaLabel} invisibleBackdrop bind:visible>
+	<Popover anchor={button} {ariaLabel} {direction} invisibleBackdrop bind:visible>
 		{@render content()}
 	</Popover>
 </Responsive>

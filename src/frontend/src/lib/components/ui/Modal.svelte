@@ -8,8 +8,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ModalProps } from '$lib/types/modal';
 	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
-	import { overlayFocus } from '$lib/utils/overlay.utils';
 	import { nextElementId } from '$lib/utils/html.utils';
+	import { overlayFocus } from '$lib/utils/overlay.utils';
 	import { fade } from '$lib/utils/transitions.utils';
 
 	let {
@@ -48,7 +48,9 @@
 	const modalContentId = nextElementId('modal-content-');
 
 	const closeWithKeyboard = () => {
-		if (!disablePointerEvents && !get(busy)) close();
+		if (!disablePointerEvents && !get(busy)) {
+			close();
+		}
 	};
 </script>
 
@@ -58,18 +60,18 @@
 		aria-describedby={modalContentId}
 		aria-label={showHeader ? undefined : ariaLabel}
 		aria-labelledby={showHeader ? modalTitleId : undefined}
+		aria-modal="true"
 		data-tid={testId}
 		onclick={stopPropagation(onClick)}
 		onintroend={onIntroEnd}
 		role={role === 'alert' ? 'alertdialog' : role}
-		aria-modal="true"
-		tabindex="-1"
-		use:overlayFocus={{ onClose: closeWithKeyboard }}
 		in:fade|global={{ duration: 25 }}
 	>
 		<Backdrop {disablePointerEvents} onClose={() => onClose?.()} />
 		<div
 			class={`wrapper ${role}`}
+			tabindex="-1"
+			use:overlayFocus={{ onClose: closeWithKeyboard }}
 			in:fade|global={{ duration: FADE_IN_DURATION, easing: cubicOut }}
 			out:fade|global={{ duration: FADE_OUT_DURATION, easing: cubicIn }}
 		>

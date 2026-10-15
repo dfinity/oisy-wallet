@@ -168,16 +168,16 @@
 		<Backdrop invisible={invisibleBackdrop} onClose={close} />
 		<div
 			class="wrapper"
-			role="dialog"
-			aria-modal="true"
-			aria-label={ariaLabel ?? anchor?.getAttribute('aria-label') ?? $i18n.navigation.alt.menu}
-			tabindex="-1"
-			use:overlayFocus={{ onClose: close, returnFocus: anchor }}
 			class:above={placement === 'above'}
 			class:placed={placementResolved}
 			class:rtl={effectiveDirection === 'rtl'}
 			class:with-border={invisibleBackdrop}
+			aria-label={ariaLabel ?? anchor?.getAttribute('aria-label') ?? $i18n.navigation.alt.menu}
+			aria-modal="true"
+			role="dialog"
+			tabindex="-1"
 			use:observePanelWidth
+			use:overlayFocus={{ onClose: close, returnFocus: anchor }}
 			in:scale|global={{ delay: 25, duration: 150, easing: cubicOut, start: 0.96 }}
 			out:scale|global={{ duration: 100, easing: cubicIn, start: 0.96 }}
 		>

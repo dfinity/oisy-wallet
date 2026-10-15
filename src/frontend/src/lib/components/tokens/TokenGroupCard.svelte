@@ -108,12 +108,12 @@
 		class:hover:bg-primary={!isExpanded}
 	>
 		<TokenCard
-			expanded={isExpanded}
 			data={{
 				...headerData,
 				tokenCount: filteredTokens.length,
 				networks: sortedFilteredTokens.map((t) => t.network)
 			}}
+			expanded={isExpanded}
 			onClick={() => toggleIsExpanded(!isExpanded)}
 			testIdPrefix={TOKEN_GROUP}
 		/>

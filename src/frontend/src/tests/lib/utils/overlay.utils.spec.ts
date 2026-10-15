@@ -19,15 +19,23 @@ describe('overlayFocus', () => {
 		const action = overlayFocus(node);
 		await tick();
 		const [first, last] = Array.from(node.querySelectorAll('button')).slice(2);
+
 		expect(document.activeElement).toBe(first);
+
 		window.dispatchEvent(
 			new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, cancelable: true })
 		);
+
 		expect(document.activeElement).toBe(last);
+
 		window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', cancelable: true }));
+
 		expect(document.activeElement).toBe(first);
+
 		action.destroy();
+
 		expect(document.activeElement).toBe(trigger);
+
 		node.remove();
 		trigger.remove();
 	});
@@ -42,10 +50,14 @@ describe('overlayFocus', () => {
 		const secondAction = overlayFocus(inner, { onClose: closeInner });
 		await tick();
 		window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }));
+
 		expect(closeInner).toHaveBeenCalledExactlyOnceWith();
 		expect(closeOuter).not.toHaveBeenCalled();
+
 		firstAction.destroy();
-		expect(inner.contains(document.activeElement)).toBe(true);
+
+		expect(inner.contains(document.activeElement)).toBeTruthy();
+
 		secondAction.destroy();
 		outer.remove();
 		inner.remove();
@@ -59,12 +71,16 @@ describe('overlayFocus', () => {
 		await tick();
 		const event = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true });
 		window.dispatchEvent(event);
-		expect(event.defaultPrevented).toBe(true);
+
+		expect(event.defaultPrevented).toBeTruthy();
 		expect(document.activeElement).toBe(node);
+
 		const onClose = vi.fn();
 		action.update({ onClose });
 		window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }));
+
 		expect(onClose).toHaveBeenCalledOnce();
+
 		action.destroy();
 		node.remove();
 	});

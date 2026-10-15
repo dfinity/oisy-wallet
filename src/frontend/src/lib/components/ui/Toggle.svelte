@@ -25,13 +25,14 @@
 
 <div class="toggle" class:disabled class:row={showLabel} data-tid={testId}>
 	<input
-		class="sr-only"
-		role={showLabel ? 'switch' : undefined}
 		{id}
+		class:hidden={!showLabel}
+		class:sr-only={showLabel}
 		aria-label={ariaLabel}
 		{checked}
 		{disabled}
 		oninput={({ currentTarget }) => onToggle?.(currentTarget.checked)}
+		role={showLabel ? 'switch' : undefined}
 		type="checkbox"
 	/>
 	<label for={id}>
@@ -100,7 +101,7 @@
 
 	.toggle input:focus-visible + label {
 		outline: 2px solid var(--color-background-brand-primary);
-		outline-offset: 3px;
+		outline-offset: var(--focus-outline-offset, 3px);
 	}
 
 	.toggle label {
@@ -109,6 +110,7 @@
 		cursor: pointer;
 	}
 	.toggle.row {
+		--focus-outline-offset: -3px;
 		scale: 1;
 		margin: 0;
 		width: 100%;

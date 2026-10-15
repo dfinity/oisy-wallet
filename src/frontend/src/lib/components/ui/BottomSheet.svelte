@@ -46,7 +46,7 @@
 
 {#if visible}
 	<div class="fixed inset-0 z-14" data-tid={testId}>
-		<BottomSheetContainer transition onClose={handleClose} {ariaLabel}>
+		<BottomSheetContainer {ariaLabel} onClose={handleClose} transition>
 			{#snippet header()}
 				<div class="w-full p-4">
 					<ButtonIcon
