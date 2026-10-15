@@ -174,3 +174,7 @@ costs more than the duplication.
 Almost never. The taxonomy is closed. If you genuinely think a new bucket
 is needed (e.g. a new feature folder under `$lib/components/`), surface it
 in the PR description and ask the human owner before doing it.
+
+### Landing artwork
+
+`Img` defaults to lazy loading; above-the-fold artwork can explicitly opt into `loading="eager"`. Supply intrinsic dimensions to reserve layout space. The landing uses static asset URLs and a 300ms entrance (12px upward movement, 4px blur, opacity), staggered by 100ms per section. It starts on mount without waiting for artwork; keyboard focus reveals controls immediately. Reduced motion uses a 150ms opacity-only fade without stagger.
