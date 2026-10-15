@@ -28,7 +28,6 @@
 	ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.documentation)}
 	{asMenuItem}
 	{asMenuItemCondensed}
-	color={asMenuItem ? 'inherit' : 'blue'}
 	href={OISY_DOCS_URL}
 	iconVisible={false}
 	styleClass={asMenuItem ? '' : 'font-bold'}

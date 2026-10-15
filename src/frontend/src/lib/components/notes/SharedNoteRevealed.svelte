@@ -53,7 +53,6 @@
 		<strong>{`${$i18n.notes.text.encrypted_lead} `}</strong
 		>{`${$i18n.notes.text.encrypted_info.trimEnd()} `}<ExternalLink
 			ariaLabel={$i18n.core.text.learn_more}
-			color="blue"
 			href={OISY_NOTES_DOCS_URL}
 			iconVisible={false}
 		>

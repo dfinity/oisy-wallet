@@ -80,6 +80,14 @@ Where it applies:
   copy the address, which the row does when tapped as a whole, and the row's action icons no
   longer overlap each other on phones. Holding Space on a focused transaction or tip row
   shows the same fill as a press.
+- **Links and icon links.** Text links (Go to collection, Learn more, breadcrumbs, the terms
+  and privacy links) and link-style icons (copy, open in explorer, back) turn a step darker
+  blue on hover and while pressed; in dark mode a step lighter, so they stay readable on the
+  dark card. Text links do not shrink; icon ones press like icon buttons.
+- **Amount forms.** The swap flip button presses like an icon button, and its arrow turns a
+  half-turn each time the tokens swap, back the other way on the next swap (with reduced
+  motion it flips at once, without the turning animation). **Max** presses, darkens on hover while the amount is valid, and can be hit
+  across 40 px without reaching the amount field above it.
 
 ---
 

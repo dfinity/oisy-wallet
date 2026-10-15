@@ -162,7 +162,7 @@
 	{#snippet destination()}
 		<DestinationValue destination={destinationProp} {isDestinationCustom} token={$destinationToken}>
 			<button
-				class="text-brand-primary hover:text-brand-secondary active:text-brand-secondary"
+				class="text-brand-primary transition-colors duration-150 ease-out hover:text-brand-hover active:text-brand-hover"
 				aria-label={$i18n.core.text.change}
 				onclick={onDestination}
 			>
