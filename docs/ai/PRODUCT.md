@@ -148,6 +148,12 @@ Where it applies:
   - progress spinners keep turning, since they are often the only sign that something is
     happening.
 
+#### Landing artwork loading
+
+The landing illustration reserves its aspect ratio before downloading and loads eagerly without a dynamic-import waterfall. As a deliberate exception to the faster in-app motion timings, this one-time landing entrance runs over 300ms with a 12px upward movement and a subtle blur, with sections staggered by 100ms. The entrance begins with the page, without waiting for artwork; sign-in stays interactive and keyboard focus reveals controls immediately. Feature cards use translation only so their frosted backdrop stays intact. Reduced-motion users get the shared 100ms opacity-only fade with no stagger; feature cards stay still. Progress spinners keep turning. Focus reveals controls without restarting their entrance when focus leaves.
+
+The landing keeps the existing CircularXX font, preloads its regular and bold faces, balances headline wrapping, and uses comfortable line spacing for feature descriptions and sign-in terms. Signed-out header labels stay intact at narrow widths.
+
 ---
 
 ## Analytics
@@ -824,9 +830,3 @@ A **fill-or-kill** order is the exception to all of this: it can only execute by
 Users can buy crypto with fiat through an embedded OnRamper widget. OnRamper requires the destination wallet addresses in the widget URL to be HMAC-signed so they cannot be tampered with in transit; OISY holds the signing secret in the backend canister (it never reaches the browser) and the frontend asks the backend to sign the URL before loading the widget.
 
 The frontend supplies the wallet addresses it derived, but the backend signs them only after **re-deriving each one from the authenticated caller's principal and confirming it matches** — and it signs its own derived value, not the supplied string. So a caller can only ever obtain a signature over addresses they provably own (a signed OISY widget URL can only route a purchase to the signed-in user), and a frontend/backend derivation discrepancy fails the request loudly rather than signing an address the user may not control. If a supplied address does not match, cannot be derived, or the signing secret is not configured, the widget is shown as unavailable rather than loaded with an unverified URL.
-
-### Landing artwork loading
-
-The landing illustration reserves its aspect ratio before downloading and loads eagerly without a dynamic-import waterfall. Content enters over 300ms with a 12px upward movement and a subtle blur, with sections staggered by 100ms. The entrance begins with the page, without waiting for artwork; sign-in stays interactive and keyboard focus reveals controls immediately. Reduced-motion users get a 150ms opacity-only fade with no stagger and a stationary startup indicator.
-
-The landing keeps the existing CircularXX font, preloads its regular and bold faces, balances headline wrapping, and uses comfortable line spacing for feature descriptions and sign-in terms. Signed-out header labels stay intact at narrow widths.

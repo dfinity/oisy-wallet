@@ -7,6 +7,7 @@
 	import SignupsClosedBanner from '$lib/components/auth/SignupsClosedBanner.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
+	import { MOTION_REDUCED_FADE_DURATION } from '$lib/constants/transition.constants';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { themeStore } from '$lib/stores/theme.store';
@@ -19,6 +20,7 @@
 </script>
 
 <div
+	style:--landing-reduced-duration={`${MOTION_REDUCED_FADE_DURATION}ms`}
 	class="mx-auto flex w-full max-w-screen-xl flex-1 flex-col items-center gap-8 px-5 md:gap-12 md:px-8"
 >
 	<div class="landing-enter flex w-full max-w-screen-md flex-col items-center">
@@ -52,10 +54,15 @@
 	/* Start with the page, without waiting for artwork. Keyboard focus reveals
 	   controls immediately; intrinsic image dimensions keep the layout stable. */
 	.landing-enter {
+		// A one-time landing entrance deliberately settles more slowly than in-app controls.
 		animation: landing-enter 300ms ease-out backwards;
 
 		&:focus-within {
-			animation: none;
+			// Reveal focused controls without removing/restarting the animation timeline.
+			// Important declarations take precedence over animated property values.
+			opacity: 1 !important;
+			transform: none !important;
+			filter: none !important;
 		}
 	}
 
@@ -64,6 +71,8 @@
 	}
 
 	.features {
+		// Opacity/filter on an ancestor prevent Chrome from blurring the cards' backdrop.
+		animation-name: landing-rise;
 		animation-delay: 200ms;
 	}
 
@@ -80,6 +89,15 @@
 		}
 	}
 
+	@keyframes landing-rise {
+		from {
+			transform: translateY(12px);
+		}
+		to {
+			transform: translateY(0);
+		}
+	}
+
 	@keyframes landing-fade {
 		from {
 			opacity: 0;
@@ -91,11 +109,10 @@
 
 	@media (prefers-reduced-motion: reduce) {
 		.landing-enter {
-			animation: landing-fade 150ms ease-out backwards;
-
-			&:focus-within {
-				animation: none;
-			}
+			animation: landing-fade var(--landing-reduced-duration) ease-out backwards;
+		}
+		.features {
+			animation: none;
 		}
 	}
 </style>

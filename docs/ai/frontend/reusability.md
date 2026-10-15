@@ -175,6 +175,6 @@ Almost never. The taxonomy is closed. If you genuinely think a new bucket
 is needed (e.g. a new feature folder under `$lib/components/`), surface it
 in the PR description and ask the human owner before doing it.
 
-### Landing artwork
+## Landing artwork
 
-`Img` defaults to lazy loading; above-the-fold artwork can explicitly opt into `loading="eager"`. Supply intrinsic dimensions to reserve layout space. The landing uses static asset URLs and a 300ms entrance (12px upward movement, 4px blur, opacity), staggered by 100ms per section. It starts on mount without waiting for artwork; keyboard focus reveals controls immediately. Reduced motion uses a 150ms opacity-only fade without stagger.
+`Img` defaults to lazy loading; above-the-fold artwork can explicitly opt into `loading="eager"`. Supply intrinsic dimensions to reserve layout space. The landing uses static asset URLs and a deliberately slower, one-time 300ms entrance (12px upward movement, 4px blur, opacity), staggered by 100ms per section. It starts on mount without waiting for artwork; keyboard focus reveals controls immediately. Feature-card wrappers animate only translation to preserve descendant backdrop blur. Reduced motion uses `MOTION_REDUCED_FADE_DURATION` (100ms) without stagger; feature cards stay still. Reveal focused controls with visual overrides, preserving the animation timeline so it cannot replay on blur.

@@ -56,6 +56,8 @@
 		<!-- CONTENT_SECURITY_POLICY -->
 
 		<meta charset="utf-8" />
+		<!-- Keep font preloads multiline: the legacy script-preload regex in
+		     scripts/build.csp.mjs must not reinterpret them as script preloads. -->
 		<link
 			rel="preload"
 			href="/fonts/CircularXXWeb-Regular.woff2"
@@ -139,12 +141,6 @@
 				margin-left: -15px;
 				margin-top: -15px;
 				box-sizing: border-box;
-			}
-
-			@media (prefers-reduced-motion: reduce) {
-				#app-spinner {
-					animation: none;
-				}
 			}
 
 			@keyframes spin {
