@@ -2,8 +2,8 @@
 	import type { Snippet } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
-	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
+	import HelpToggle from '$lib/components/ui/HelpToggle.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
@@ -27,14 +27,7 @@
 		<div class="flex items-center justify-center gap-0.5">
 			<div class="text-sm font-bold">{$i18n.stake.text.earning_potential}</div>
 
-			<button
-				class="hit-area relative text-tertiary press-icon"
-				aria-expanded={infoExpanded}
-				aria-label={$i18n.core.text.info}
-				onclick={() => (infoExpanded = !infoExpanded)}
-			>
-				<IconHelp size="18" />
-			</button>
+			<HelpToggle styleClass="text-tertiary" bind:expanded={infoExpanded} />
 		</div>
 
 		{#if infoExpanded}

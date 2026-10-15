@@ -1,6 +1,7 @@
 <script lang="ts">
 	import IconGixInfo from '$lib/components/icons/IconGixInfo.svelte';
 	import Collapsible from '$lib/components/ui/Collapsible.svelte';
+	import HelpToggle from '$lib/components/ui/HelpToggle.svelte';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
@@ -20,13 +21,9 @@
 		<h2 class="text-base">{$i18n.transactions.text.title}</h2>
 
 		{#if isNetworkMainnet}
-			<button
-				class="hit-area relative ml-1 opacity-50 press-icon"
-				aria-expanded={expanded}
-				aria-label={$i18n.core.text.info}
-				onclick={onInfoButtonClick}
-				type="button"><IconGixInfo /></button
-			>
+			<HelpToggle {expanded} onToggle={onInfoButtonClick} styleClass="ml-1 opacity-50">
+				{#snippet icon()}<IconGixInfo />{/snippet}
+			</HelpToggle>
 		{/if}
 	</div>
 

@@ -1,3 +1,4 @@
+@use '../mixins/button';
 @use '../mixins/media';
 @use '../mixins/interaction';
 @use '../theme/base-colors.scss';
@@ -126,7 +127,7 @@ div.mobile-nav {
 
 		@media (prefers-reduced-motion: no-preference) {
 			&:active:not([disabled]):not(.disabled) > * {
-				scale: 0.96;
+				scale: button.$press-scale-icon;
 			}
 		}
 	}

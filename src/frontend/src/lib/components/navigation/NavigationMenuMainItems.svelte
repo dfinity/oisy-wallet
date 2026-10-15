@@ -434,7 +434,7 @@
 					     row (which the global `.mobile-nav` container padding lifts) so it clears the indicator.
 					     The label stays on the row (items-end). -->
 					<span
-						class="absolute bottom-[calc(1.75rem+env(safe-area-inset-bottom))] left-1/2 flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full border-[1.5px] border-current bg-primary transition-[color,background-color,border-color,scale] duration-150 ease-out group-active:scale-[0.96] motion-reduce:group-active:scale-100"
+						class="absolute bottom-[calc(1.75rem+env(safe-area-inset-bottom))] left-1/2 flex h-11 w-11 -translate-x-1/2 press-icon-in-group items-center justify-center rounded-full border-[1.5px] border-current bg-primary transition-[color,background-color,border-color,scale] duration-150 ease-out"
 					>
 						{#if nonNullish(GroupIcon)}
 							<GroupIcon />

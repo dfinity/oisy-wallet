@@ -236,6 +236,7 @@ what the element is, and use the shared rule, never hand-written
 | `Button` (any `colorStyle`, unless `link`)              | nothing, it is built in                                      | shrinks to 0.98                                   |
 | `ButtonIcon`                                            | nothing, it is built in                                      | shrinks to 0.96                                   |
 | Any other text button, or a whole-card button           | `press`                                                      | shrinks to 0.98                                   |
+| A help toggle (an info icon that shows an explanation)  | `HelpToggle` (`ui/HelpToggle.svelte`)                        | 0.96, tap area, `aria-expanded`                   |
 | Any other icon-size control (close, help, toggle icons) | `press-icon` (+ `hit-area` if under 40 px)                   | shrinks to 0.96                                   |
 | A full-width row (list item, transaction, contact)      | `row-feedback`                                               | 10 % blue on hover, 20 % while pressed, no shrink |
 | A wrapper that paints the row around its `<button>`     | `hover:bg-brand-subtle-10 child-pressed:bg-brand-subtle-20`  | as `row-feedback`, on the wrapper                 |
@@ -298,8 +299,8 @@ does not set `position`: add `relative` unless the control is already
   (as `Transaction` and `TipHistory` do).
 - **`scale` makes the element the containing block** of its absolutely
   positioned children. If a child is positioned against something further
-  out (the mobile bar's Finance circle), scale the child, not the element
-  (`group-active:scale-[0.96]`).
+  out (the mobile bar's Finance circle), scale the child, not the element:
+  put `group` on the button and `press-icon-in-group` on the child.
 - **A `transition-*` utility replaces the base transition,** which carries
   `scale`. Buttons already have `scale` in theirs; anything else, or a
   button with its own transition, lists it: `transition-[color,scale]`.
