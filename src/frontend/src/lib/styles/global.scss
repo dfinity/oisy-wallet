@@ -28,6 +28,20 @@ Prettier plugin reads this file as plain CSS, where `//` swallows the next state
 @custom-variant header-band (@media (min-width: 48rem) and (max-width: 67.99rem));
 
 /*
+`dark:` follows OISY's own theme setting (the `theme` attribute on <html>, see
+`lib/utils/theme.utils.ts`), not the OS. Tailwind's default reads `prefers-color-scheme`,
+which disagrees whenever the user picked a theme that differs from the system one.
+*/
+@custom-variant dark (&:where([theme='dark'], [theme='dark'] *));
+
+/*
+`pressed:`, `child-pressed:` and `parent-pressed:` below share one list of inner controls,
+`:is(a, button, input, label, [role='button'])`: change it in all three together. It is spelled
+out rather than kept in a Sass variable because the Tailwind Prettier plugin reads this file as
+plain CSS and would not see the variable's value.
+*/
+
+/*
 `pressed:` - the element is held down, but not because a control inside it is.
 `:active` applies to every ancestor of the pressed element, so without the `:has()`
 a row would light up while its copy icon or toggle is the thing being pressed.
@@ -87,6 +101,19 @@ that includes it).
 
 @utility press-icon {
 	@include button-mixins.press(button-mixins.$press-scale-icon);
+}
+
+/*
+`press-icon-in-group` - the same icon-size press, while the nearest `group` ancestor is held:
+for an element that must shrink instead of its button, because something is positioned
+against the button (the mobile bar's Finance circle).
+*/
+@utility press-icon-in-group {
+	@media (prefers-reduced-motion: no-preference) {
+		:where(.group):active:not([disabled]) & {
+			scale: button-mixins.$press-scale-icon;
+		}
+	}
 }
 
 @utility row-feedback {

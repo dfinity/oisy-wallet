@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
+	import HelpToggle from '$lib/components/ui/HelpToggle.svelte';
+	import { nextElementId } from '$lib/utils/html.utils';
 	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
@@ -19,18 +20,23 @@
 	let hasInfoSlot = $derived(nonNullish(info));
 
 	let infoExpanded = $derived(permanentInfo);
+
+	// Several rows sit on one page, so each toggle is named "Info" plus its row's label
+	// ("Info Principal"), not just "Info".
+	const toggleId = nextElementId('settings-info-toggle-');
+	const keyId = nextElementId('settings-key-');
 </script>
 
 <div class="mt-3 flex w-full flex-row">
 	<span class="flex w-full flex-1 flex-row items-start">
-		<span class="flex">{@render key()}</span>
+		<span id={keyId} class="flex">{@render key()}</span>
 		{#if hasInfoSlot && !permanentInfo}
-			<button
-				class="ml-1 flex p-0.5 align-top text-tertiary"
-				onclick={() => (infoExpanded = !infoExpanded)}
-			>
-				<IconHelp size="18" />
-			</button>
+			<HelpToggle
+				id={toggleId}
+				ariaLabelledby={`${toggleId} ${keyId}`}
+				styleClass="ml-1 flex p-0.5 align-top text-tertiary"
+				bind:expanded={infoExpanded}
+			/>
 		{/if}
 	</span>
 

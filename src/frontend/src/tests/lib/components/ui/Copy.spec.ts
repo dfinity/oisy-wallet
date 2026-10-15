@@ -45,6 +45,12 @@ describe('Copy', () => {
 		vi.useRealTimers();
 	});
 
+	it('should grow an inline copy tap area only up and down, so it never covers its neighbours', () => {
+		const { getByTestId } = render(Copy, { props: { ...props, inline: true } });
+
+		expect(getByTestId(testId)).toHaveClass('relative', 'hit-area', '[--hit-area-x:0px]');
+	});
+
 	it('should label the button with the value', () => {
 		const { getByTestId } = render(Copy, { props });
 

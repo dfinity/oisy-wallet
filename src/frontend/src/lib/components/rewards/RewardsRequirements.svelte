@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
-	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
 	import EligibilityBadge from '$lib/components/rewards/EligibilityBadge.svelte';
 	import NetworkBonusImage from '$lib/components/rewards/NetworkBonusImage.svelte';
 	import RewardRequirement from '$lib/components/rewards/RewardRequirement.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import HelpToggle from '$lib/components/ui/HelpToggle.svelte';
 	import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
@@ -59,9 +59,7 @@
 				/>
 
 				{#if type !== 'earnings-card'}
-					<button class="p-0.5 text-tertiary" onclick={() => (infoExpanded = !infoExpanded)}>
-						<IconHelp size="18" />
-					</button>
+					<HelpToggle styleClass="p-0.5 text-tertiary" bind:expanded={infoExpanded} />
 				{/if}
 			{/if}
 		</div>

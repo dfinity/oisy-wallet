@@ -236,6 +236,7 @@ what the element is, and use the shared rule, never hand-written
 | `Button` (any `colorStyle`, unless `link`)              | nothing, it is built in                                      | shrinks to 0.98                                   |
 | `ButtonIcon`                                            | nothing, it is built in                                      | shrinks to 0.96                                   |
 | Any other text button, or a whole-card button           | `press`                                                      | shrinks to 0.98                                   |
+| A help toggle (an info icon that shows an explanation)  | `HelpToggle` (`ui/HelpToggle.svelte`)                        | 0.96, tap area, `aria-expanded`                   |
 | Any other icon-size control (close, help, toggle icons) | `press-icon` (+ `hit-area` if under 40 px)                   | shrinks to 0.96                                   |
 | A full-width row (list item, transaction, contact)      | `row-feedback`                                               | 10 % blue on hover, 20 % while pressed, no shrink |
 | A wrapper that paints the row around its `<button>`     | `hover:bg-brand-subtle-10 child-pressed:bg-brand-subtle-20`  | as `row-feedback`, on the wrapper                 |
@@ -247,7 +248,8 @@ Text links and link-style icons change colour: one step of OISY blue on hover
 and the same while pressed (`text-brand-hover`, blue-800 in
 light mode, blue-300 in dark, where blue-800 would drop to 2.3:1). `Button link`,
 the default `ButtonIcon` (so `Copy`), `ExternalLink` and `BreadcrumbNavigation`
-have it built in; anything else that looks like a link adds
+have it built in, and so does `a.blue-link` (`styles/global/links.scss`) for links
+inside translated strings rendered through `Html`; anything else that looks like a link adds
 `transition-colors duration-150 ease-out hover:text-brand-hover active:text-brand-hover`.
 Never hover a link to `text-brand-secondary`: it is the darker blue in both themes.
 A text link does not shrink on press; an icon-only link also gets `press-icon`,
@@ -298,8 +300,8 @@ does not set `position`: add `relative` unless the control is already
   (as `Transaction` and `TipHistory` do).
 - **`scale` makes the element the containing block** of its absolutely
   positioned children. If a child is positioned against something further
-  out (the mobile bar's Finance circle), scale the child, not the element
-  (`group-active:scale-[0.96]`).
+  out (the mobile bar's Finance circle), scale the child, not the element:
+  put `group` on the button and `press-icon-in-group` on the child.
 - **A `transition-*` utility replaces the base transition,** which carries
   `scale`. Buttons already have `scale` in theirs; anything else, or a
   button with its own transition, lists it: `transition-[color,scale]`.

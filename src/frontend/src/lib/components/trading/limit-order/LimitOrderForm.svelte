@@ -10,6 +10,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import HelpToggle from '$lib/components/ui/HelpToggle.svelte';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
 		oisyTradeFreeBalanceBySymbol,
@@ -141,10 +142,6 @@
 	const toggleFok = () => {
 		fillOrKill = !fillOrKill;
 	};
-
-	const toggleFokHelp = () => {
-		fokHelpVisible = !fokHelpVisible;
-	};
 </script>
 
 <ContentWithToolbar>
@@ -193,14 +190,13 @@
 						{$i18n.trading.limit_order.fok_title}
 					</span>
 				</Checkbox>
-				<button
-					class="flex h-4 w-4 items-center text-tertiary"
-					aria-label={$i18n.trading.limit_order.fok_title}
-					onclick={toggleFokHelp}
-					type="button"
+				<HelpToggle
+					ariaLabel={$i18n.trading.limit_order.fok_title}
+					styleClass="flex h-4 w-4 items-center text-tertiary"
+					bind:expanded={fokHelpVisible}
 				>
-					<IconInfo />
-				</button>
+					{#snippet icon()}<IconInfo />{/snippet}
+				</HelpToggle>
 			</div>
 			{#if fokHelpVisible}
 				<p class="mt-2 text-xs text-tertiary" transition:slide

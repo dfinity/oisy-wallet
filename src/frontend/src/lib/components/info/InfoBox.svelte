@@ -20,7 +20,7 @@
 		transition:slide={SLIDE_PARAMS}
 	>
 		<button
-			class="absolute top-2 right-2 text-tertiary"
+			class="hit-area absolute top-2 right-2 text-tertiary press-icon"
 			aria-label={$i18n.core.text.close}
 			onclick={onClick}><IconCloseThin /></button
 		>

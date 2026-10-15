@@ -177,7 +177,7 @@
 		>
 			{#if closeButton}
 				<button
-					class="close icon-only"
+					class="close icon-only hit-area relative press-icon"
 					aria-label={$i18n.core.text.close}
 					onclick={stopPropagation(close)}
 					type="button"><IconClose /></button
