@@ -124,6 +124,14 @@ export const swapProvidersDetails: Partial<Record<SwapProvider, SwapProvidersCon
 		website: OISY_TRADE_LEARN_MORE_URL,
 		name: OISY_TRADE_PROVIDER_NAME,
 		logo: '/images/dapps/oisy-trade-logo.svg'
+	},
+	// Unconditional for the same reason as OISY Trade: a LI.FI active-transaction row outlives a
+	// flag rollback and is named through this map.
+	[SwapProvider.LIFI]: {
+		website: 'https://li.fi',
+		name: 'LI.FI',
+		// TODO: replace the placeholder with the official logo
+		logo: '/images/dapps/lifi-logo.svg'
 	}
 };
 

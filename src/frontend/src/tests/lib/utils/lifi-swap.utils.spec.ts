@@ -19,9 +19,12 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { LifiQuoteRejectedError } from '$lib/types/errors';
 import { SwapProvider } from '$lib/types/swap';
+import type { Token } from '$lib/types/token';
 import {
 	assertLifiQuote,
 	buildLifiQuoteRequest,
+	buildLifiSupportedDestinations,
+	lifiFeesUsd,
 	mapLifiSwapResult,
 	toLifiChainId,
 	toLifiTokenAddress
@@ -470,6 +473,85 @@ describe('lifi-swap.utils', () => {
 					sourceNetworkId: BASE_NETWORK_ID
 				})
 			).toThrow(LifiQuoteRejectedError);
+		});
+	});
+
+	describe('buildLifiSupportedDestinations', () => {
+		const destinations = ({
+			registry,
+			sourceToken
+		}: {
+			registry: 'evm' | 'sol';
+			sourceToken: Token;
+		}) =>
+			buildLifiSupportedDestinations(registry)({
+				sourceToken,
+				supportedSourceTokens: undefined,
+				findProviderSourceTokens: () => undefined
+			});
+
+		it.each([BASE_ETH_TOKEN, mockLifiBaseUsdcToken, ROBINHOOD_ETH_TOKEN])(
+			'should offer every EVM destination from the EVM registry for $symbol on $network.name',
+			(sourceToken) => {
+				expect(destinations({ registry: 'evm', sourceToken })).toStrictEqual({ evm: 'any' });
+			}
+		);
+
+		it('should offer every Solana destination from the Solana registry for an EVM source', () => {
+			expect(destinations({ registry: 'sol', sourceToken: BASE_ETH_TOKEN })).toStrictEqual({
+				sol: 'any'
+			});
+		});
+
+		it.each([
+			{ registry: 'evm' as const, sourceToken: SOLANA_TOKEN },
+			{ registry: 'sol' as const, sourceToken: SOLANA_TOKEN },
+			{ registry: 'sol' as const, sourceToken: mockValidSplToken },
+			{ registry: 'evm' as const, sourceToken: SEPOLIA_TOKEN },
+			{ registry: 'sol' as const, sourceToken: SEPOLIA_TOKEN },
+			{ registry: 'evm' as const, sourceToken: ICP_TOKEN }
+		])(
+			'should offer nothing from the $registry registry for $sourceToken.symbol on $sourceToken.network.name',
+			({ registry, sourceToken }) => {
+				expect(destinations({ registry, sourceToken })).toBeUndefined();
+			}
+		);
+	});
+
+	describe('lifiFeesUsd', () => {
+		const feeCost = (amountUSD: string) => ({
+			name: 'LIFI Fixed Fee',
+			description: 'Fixed LI.FI fee',
+			percentage: '0.0025',
+			token: mockLifiQuote.action.fromToken,
+			amount: '25000000000000',
+			amountUSD,
+			included: true
+		});
+
+		const withFees = (feeCosts: LiFiStep['estimate']['feeCosts']): LiFiStep => ({
+			...mockLifiQuote,
+			estimate: { ...mockLifiQuote.estimate, feeCosts }
+		});
+
+		it('should sum the fees in USD', () => {
+			expect(lifiFeesUsd(withFees([feeCost('0.0625'), feeCost('0.5')]))).toBe(0.5625);
+		});
+
+		it('should count a zero fee as zero', () => {
+			expect(lifiFeesUsd(withFees([feeCost('0.0625'), feeCost('0')]))).toBe(0.0625);
+		});
+
+		it.each([
+			{ case: 'no fee list', feeCosts: undefined },
+			{ case: 'an empty fee list', feeCosts: [] },
+			{ case: 'a non-numeric amount', feeCosts: [feeCost('0.0625'), feeCost('n/a')] },
+			// `Number` reads both as zero, which would understate the total.
+			{ case: 'an empty amount', feeCosts: [feeCost('0.0625'), feeCost('')] },
+			{ case: 'a blank amount', feeCosts: [feeCost('0.0625'), feeCost('  ')] },
+			{ case: 'an amount in exponent notation', feeCosts: [feeCost('0.0625'), feeCost('1e-7')] }
+		])('should report nothing for $case', ({ feeCosts }) => {
+			expect(lifiFeesUsd(withFees(feeCosts))).toBeUndefined();
 		});
 	});
 

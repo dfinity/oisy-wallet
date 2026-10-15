@@ -31,7 +31,9 @@ export type DisplayUnit = 'token' | 'usd';
 
 export type SwapTokenCategory = 'icp' | 'evm' | 'sol' | 'btc' | 'xrp';
 
-export type SwapCategorizedTokenIds = Partial<Record<SwapTokenCategory, Set<string>>>;
+// Per category, either the destination ids a provider can reach or `'any'`: a provider that
+// reaches every token of that category it has a route for, with no list of its own.
+export type SwapCategorizedTokenIds = Partial<Record<SwapTokenCategory, Set<string> | 'any'>>;
 
 export type FindProviderSourceTokens = (params: {
 	key: SwapProvider;

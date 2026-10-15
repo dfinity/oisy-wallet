@@ -1346,6 +1346,8 @@
 			"swap_fees": "スワップ手数料",
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します。",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
