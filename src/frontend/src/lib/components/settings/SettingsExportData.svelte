@@ -8,11 +8,11 @@
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import HelpToggle from '$lib/components/ui/HelpToggle.svelte';
 	import { OISY_EXPORT_DATA_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
 		btcAddressMainnet,
@@ -109,14 +109,10 @@
 	{#snippet title()}
 		<span class="inline-flex items-center">
 			{$i18n.settings.text.export_data}
-			<button
-				class="hit-area relative ml-1 flex p-0.5 align-top text-tertiary press-icon"
-				aria-expanded={helpExpanded}
-				aria-label={$i18n.core.text.info}
-				onclick={() => (helpExpanded = !helpExpanded)}
-			>
-				<IconHelp size="18" />
-			</button>
+			<HelpToggle
+				styleClass="ml-1 flex p-0.5 align-top text-tertiary"
+				bind:expanded={helpExpanded}
+			/>
 		</span>
 	{/snippet}
 

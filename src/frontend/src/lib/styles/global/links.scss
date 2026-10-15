@@ -1,3 +1,4 @@
+@use '../mixins/button';
 @use '../mixins/media';
 @use '../mixins/interaction';
 @use '../theme/base-colors.scss';
@@ -6,15 +7,6 @@ a.no-underline {
 	&:hover,
 	&:focus {
 		text-decoration: none;
-	}
-}
-
-a.blue-link {
-	@apply text-brand-primary-alt;
-
-	&:hover,
-	&.selected {
-		@apply text-brand-secondary;
 	}
 }
 
@@ -126,7 +118,7 @@ div.mobile-nav {
 
 		@media (prefers-reduced-motion: no-preference) {
 			&:active:not([disabled]):not(.disabled) > * {
-				scale: 0.96;
+				scale: button.$press-scale-icon;
 			}
 		}
 	}

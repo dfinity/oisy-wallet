@@ -167,7 +167,7 @@ describe('NavigationMainMenuItems', () => {
 		// Scaling the button would make it the circle's containing block and move the circle.
 		expect(cradle).toHaveClass('group');
 		expect(cradle).not.toHaveClass('press-icon');
-		expect(circle).toHaveClass('group-active:scale-[0.96]', 'motion-reduce:group-active:scale-100');
+		expect(circle).toHaveClass('press-icon-in-group');
 	});
 
 	it('presses the sheet cards to 0.98', async () => {
