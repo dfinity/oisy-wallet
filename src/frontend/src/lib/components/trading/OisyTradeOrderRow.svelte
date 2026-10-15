@@ -180,7 +180,7 @@
 
 <!-- The venue's own page, so no provider tag on the row. -->
 <button
-	class="-mx-2 flex w-full items-center gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-brand-subtle-10"
+	class="-mx-2 flex w-full items-center gap-3 rounded-lg row-feedback px-2 py-3 text-left"
 	onclick={openDetail}
 	type="button"
 >

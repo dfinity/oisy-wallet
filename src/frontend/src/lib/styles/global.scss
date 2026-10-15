@@ -19,6 +19,15 @@ which breaks raw media queries like `(max-height: 68rem)`.
 @custom-variant h-md (@media (max-height: 68rem)); /* ~1090px */
 
 /*
+`header-band:` - from 768 px up to 68rem (1088 px), where the pinned app header's controls sit
+over the content column and a band in the page colour covers what scrolls under them once
+the page is scrolled (`hero/Header.svelte`). Anything else pinned to the top of the window
+pins below that band in this range. (A CSS comment after `h-md`, not `//`: the Tailwind
+Prettier plugin reads this file as plain CSS, where `//` swallows the next statement.)
+*/
+@custom-variant header-band (@media (min-width: 48rem) and (max-width: 67.99rem));
+
+/*
 `pressed:` - the element is held down, but not because a control inside it is.
 `:active` applies to every ancestor of the pressed element, so without the `:has()`
 a row would light up while its copy icon or toggle is the thing being pressed.
@@ -31,6 +40,14 @@ button (`LogoButton` puts its hover on a `div` around the `<button>`). Two `:has
 side rather than one inside the other: a nested `:has()` is invalid and drops the rule.
 */
 @custom-variant child-pressed (&:has(> :is(a, button):active):not(:has(> :is(a, button) :is(a, button, input, label, [role='button']):active)));
+
+/*
+`parent-pressed:` - for a row painted by the direct child of a `display: contents` button,
+which paints nothing itself (`Transaction`, `TipHistory`). A pointer press makes that child
+`:active` too, but holding Space on the focused button makes only the button `:active`, so
+the child takes the pressed fill from its parent as well.
+*/
+@custom-variant parent-pressed (:is(a, button):active:not(:has(:is(a, button, input, label, [role='button']):active)) > &);
 
 /*
 `hit-area` - a tap target of at least 40 x 40 px around a small control, without changing

@@ -285,7 +285,9 @@ does not set `position`: add `relative` unless the control is already
   `row-feedback`, `pressed:` and `child-pressed:` exclude that, plain
   `active:` does not.
 - **`display: contents` buttons paint nothing.** Put `row-feedback` on the
-  element inside (as `Transaction` and `TipHistory` do).
+  element inside, plus `parent-pressed:bg-brand-subtle-20`: holding Space on
+  the focused button makes only the button `:active`, not the element inside
+  (as `Transaction` and `TipHistory` do).
 - **`scale` makes the element the containing block** of its absolutely
   positioned children. If a child is positioned against something further
   out (the mobile bar's Finance circle), scale the child, not the element

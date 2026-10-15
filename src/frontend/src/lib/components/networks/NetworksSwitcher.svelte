@@ -98,7 +98,7 @@
 >
 	<NetworkSwitcherLogo network={$selectedNetwork} />
 
-	<span class="hidden md:block">{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}</span>
+	<span class="hidden xl:block">{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 
 	{#snippet title()}
 		{$i18n.networks.filter}
