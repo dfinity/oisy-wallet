@@ -538,10 +538,18 @@ describe('lifi-swap.utils', () => {
 			expect(lifiFeesUsd(withFees([feeCost('0.0625'), feeCost('0.5')]))).toBe(0.5625);
 		});
 
+		it('should count a zero fee as zero', () => {
+			expect(lifiFeesUsd(withFees([feeCost('0.0625'), feeCost('0')]))).toBe(0.0625);
+		});
+
 		it.each([
 			{ case: 'no fee list', feeCosts: undefined },
 			{ case: 'an empty fee list', feeCosts: [] },
-			{ case: 'a fee without a readable USD amount', feeCosts: [feeCost('0.0625'), feeCost('n/a')] }
+			{ case: 'a non-numeric amount', feeCosts: [feeCost('0.0625'), feeCost('n/a')] },
+			// `Number` reads both as zero, which would understate the total.
+			{ case: 'an empty amount', feeCosts: [feeCost('0.0625'), feeCost('')] },
+			{ case: 'a blank amount', feeCosts: [feeCost('0.0625'), feeCost('  ')] },
+			{ case: 'an amount in exponent notation', feeCosts: [feeCost('0.0625'), feeCost('1e-7')] }
 		])('should report nothing for $case', ({ feeCosts }) => {
 			expect(lifiFeesUsd(withFees(feeCosts))).toBeUndefined();
 		});

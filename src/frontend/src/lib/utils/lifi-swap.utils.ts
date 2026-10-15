@@ -280,11 +280,13 @@ export const lifiFeesUsd = ({ estimate: { feeCosts } }: LiFiStep): number | unde
 		return;
 	}
 
-	const amounts = feeCosts.map(({ amountUSD }) => Number(amountUSD));
+	// A plain decimal only: `Number` reads a blank string as zero, which would let a missing amount
+	// pass as a free fee.
+	if (!feeCosts.every(({ amountUSD }) => /^\d+(\.\d+)?$/.test(amountUSD))) {
+		return;
+	}
 
-	return amounts.every(Number.isFinite)
-		? amounts.reduce((sum, amount) => sum + amount, 0)
-		: undefined;
+	return feeCosts.reduce((sum, { amountUSD }) => sum + Number(amountUSD), 0);
 };
 
 export const mapLifiSwapResult = (quote: LiFiStep): SwapMappedResult => ({
