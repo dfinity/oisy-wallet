@@ -88,7 +88,7 @@ Component paths are under `src/frontend/src/lib/components/`, other paths under
      a 100 ms fade instead;
    - height changes happen at once;
    - pulsing loading placeholders hold still, and decorative illustration animations stop;
-   - progress spinners keep turning (see Pending decisions);
+   - progress spinners keep turning;
    - colours still change, as they do today.
 7. **One timing per kind of motion**, the same everywhere: two fades in the app never run at
    different speeds by accident.
@@ -152,40 +152,44 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
 
 - `lib/constants/transition.constants.ts`: named timings next to the existing slide ones:
   enter 200 ms ease-out (`cubicOut`), exit 150 ms ease-in (`cubicIn`), swap 150 ms, the
-  reduced-motion fade 100 ms. `SLIDE_*` stay at 250 ms. `BACKDROP_FADE_OUT_DURATION` becomes
-  the exit timing (150 ms).
+  reduced-motion fade 100 ms. `SLIDE_*` stay at 250 ms. `BACKDROP_FADE_OUT_DURATION` is left
+  for area 3, since changing it is visible.
 - A shared transitions module, `lib/utils/transitions.utils.ts`, exporting `fade`, `fly`,
   `slide`, `scale` and `blur` with the same signatures as `svelte/transition`. Each fills in
   the shared timing when the caller passes none (returning a function of `{ direction }`, so a
   `transition:` exit gets the exit timing), keeps any timing the caller passes, and under
-  reduced motion (`prefersReducedMotion` from `svelte/motion`) turns `fly`, `slide` and
-  `scale` into a 100 ms fade (`slide` into an instant change). `scale` defaults to
-  `start: 0.96`.
-- `lib/styles/global.scss`: under `prefers-reduced-motion: reduce`, `animate-pulse`,
-  `animate-ping` and the illustration keyframes stop (`animation: none`); the `Spinner` keeps
-  turning.
-- `eslint.config.mjs`: `no-restricted-imports` refuses `svelte/transition` outside the shared
-  module, with a message pointing to it.
+  reduced motion (`prefersReducedMotion` from `svelte/motion`) turns `fly`, `scale` and
+  `blur` into a 100 ms fade, caps `fade` at 100 ms and makes `slide` an instant change.
+  `scale` defaults to `start: 0.96`.
+- `lib/styles/global.scss`: under `prefers-reduced-motion: reduce`, `animate-pulse` and
+  `animate-ping` stop (`animation: none`), and a `decorative-motion` utility stops every
+  animation inside the element that carries it. The decorative illustrations take it
+  (`icons/animated/AnimatedScanIcon`, `AnimatedIconAiAssistant`, `AnimatedIconUfo`,
+  `signer/SignerIdleAnimatedAstronaut`); the `Spinner` and `AnimatedIconLoader` show progress
+  and keep turning.
 - Docs: `docs/ai/frontend/stack-and-patterns.md` gets a "Motion" section (the timings, the
-  module, reduced motion, when a call site may pass its own timing);
-  `docs/ai/frontend/reusability.md` lists the module.
+  module, reduced motion, when a call site may pass its own timing, `decorative-motion`);
+  `docs/ai/frontend/reusability.md` lists the module and the utility.
+- No lint rule yet: until area 2 swaps the imports, 125 files still import
+  `svelte/transition`.
 
 ### 2. Every transition takes the shared timings
 
 - Swap `from 'svelte/transition'` to `from '$lib/utils/transitions.utils'` in the 125 files.
   Call sites that pass no timing pick up the shared one; call sites that pass one
   (`SLIDE_PARAMS`, `SLIDE_DURATION`, the group sheet, `WizardTransition`) keep it.
-- Mechanical but wide: split the review by folder (`lib/components/ui` and `core`; the
-  feature areas under `lib/components`; `icp`, `eth`, `btc`, `sol`, `xrp`) if the diff is too
-  long to read in one go (see Pending decisions).
+- One PR: every change is the same import line, so the diff is reviewed by search rather
+  than by reading.
+- `eslint.config.mjs`: `no-restricted-imports` refuses `svelte/transition` outside the shared
+  module, with a message pointing to it.
 
 ### 3. Overlays leave faster than they arrive
 
 - `ui/Toast.svelte:74-75`: `in:fly` 200 ms from a short distance (16 px, not 100 px); `out:fly`
   150 ms ease-in back the same way, no delay.
 - `ui/Modal.svelte:42-43,68-74`: `FADE_OUT_DURATION` 125 ms.
-- `ui/Backdrop.svelte`: out via the shared exit timing (150 ms). Check every awaiter of
-  `BACKDROP_FADE_OUT_DURATION` still behaves.
+- `ui/Backdrop.svelte` and `BACKDROP_FADE_OUT_DURATION`: out via the shared exit timing
+  (150 ms). Check every awaiter of `BACKDROP_FADE_OUT_DURATION` still behaves.
 - `ui/Popover.svelte:166,176`: wrapper `in:fade` 150 ms / `out:fade` 100 ms; panel `scale` from
   0.96 over 150 ms ease-out.
 - `ui/BottomSheetContainer.svelte:22`: `in:` 250 ms ease-out, `out:` 200 ms ease-in.
@@ -201,7 +205,8 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
   cross; three states, so either nested swaps or a three-way variant of `IconSwap`),
   `core/Menu.svelte` privacy eye, `ui/ThemeSwitchButton.svelte:24-28`,
   `nfts/NftHideButton.svelte:88-116`.
-- `IconSwap`'s own duration follows the shared swap timing (see Pending decisions).
+- `IconSwap` moves from 300 ms to the shared swap timing (150 ms), so every icon swap
+  matches, the copy check included.
 
 ### 6. Pills, tabs and the toggle
 
@@ -223,7 +228,7 @@ jsdom does not run transitions or CSS animations; tests assert the inputs that p
 - `transitions.utils.spec.ts`: each wrapper fills in the shared timing when none is passed,
   keeps a passed one, returns the reduced-motion form when `prefersReducedMotion.current` is
   true, and `scale` defaults to 0.96.
-- The lint rule: a fixture importing `svelte/transition` outside the module fails.
+- Area 2, the lint rule: a fixture importing `svelte/transition` outside the module fails.
 - Area 3: the overlays pass the expected params (spy on the module's functions).
 - Area 5: each component renders `IconSwap` with the right `swapped` state.
 - Area 6: `PillButton` has `press`; `Tabs` has the pressed colour class.
@@ -261,20 +266,16 @@ jsdom does not run transitions or CSS animations; tests assert the inputs that p
    not start before the backdrop is gone).
 2. **Tests that wait on 400 ms.** Search the specs for fake-timer advances or `waitFor`
    timeouts that assume the default transition length and would break when it shortens.
-3. **The `a0_mo` … `a4c_mo` keyframes.** Identify which icon they animate (an animated SVG
-   icon in the header) and whether it is decorative (stops under reduced motion) or shows
-   progress (keeps running).
+3. ~~**The `a0_mo` … `a4c_mo` keyframes.**~~ Settled while building: they animate
+   `icons/animated/AnimatedScanIcon` (the Scan QR icon), which is decorative and stops under
+   reduced motion. `AnimatedIconLoader` turns to show progress and keeps running.
 4. **A shadow token for the bottom sheet.** Check whether the theme already has a raised-
    surface shadow to reuse, or whether area 4 needs a new token.
 
 ## Pending decisions (facts are clear, a call is needed)
 
-1. **Spinners under reduced motion.** Recommended: keep turning, since a spinner is often the
-   only sign that work is happening (WCAG treats such motion as essential). The alternative is
-   a slower spin.
-2. **`IconSwap` at 300 ms.** The Wave 1 copy check swaps over 300 ms with a decelerating curve;
-   the shared swap timing is 150 ms. Recommended: move `IconSwap` to the shared timing so every
-   icon swap matches. The alternative is keeping 300 ms for icon swaps only.
-3. **Splitting area 2.** One mechanical PR touching 125 files, or three by folder. Recommended:
-   one PR, since every change is the same import line, with the per-file diff reviewed by
-   search rather than by reading.
+1. ~~**Spinners under reduced motion.**~~ Decided: they keep turning, since a spinner is often
+   the only sign that work is happening (WCAG treats such motion as essential).
+2. ~~**`IconSwap` at 300 ms.**~~ Decided: it moves to the shared 150 ms swap timing in area 5,
+   so every icon swap matches.
+3. ~~**Splitting area 2.**~~ Decided: one PR across the 125 files, with the lint rule.
