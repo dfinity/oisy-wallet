@@ -268,6 +268,14 @@ Wide things shrink less (0.98) than small ones (0.96) because the same
 scale takes far more pixels off a full-width element; full-width rows don't
 shrink at all.
 
+The shared buttons (`button.scss`) and `row-feedback` rows change colour in
+150 ms ease-out; use the same for new feedback. The `tertiary-alt` and
+`secondary-light` buttons and `row-feedback` rows press one step past their
+hover (`brand-subtle-10` → `-20`, or `-20` → `-30`), and a state that stays on,
+such as an open popover's button, may go a step further. `.dropdown-button`
+has no pressed fill of its own, and success, error and other palettes keep
+their own steps.
+
 ### Small controls: `hit-area`
 
 Anything you can tap that is under 40 × 40 px gets `hit-area`: an `::after`
