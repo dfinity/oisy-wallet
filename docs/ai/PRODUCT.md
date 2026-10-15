@@ -51,6 +51,10 @@ smoothly when released.
 
 - **Buttons** with text shrink slightly, to 98 %; icon buttons shrink to 96 %. Wide buttons
   get the smaller press because the same scale takes far more off a wide element.
+- **Colours** of the shared buttons and full-width rows change in 150 ms. Buttons that take a
+  light-blue fill on hover (the theme switch, contact actions, the profile menu) and the rows
+  are one step darker pressed than on hover; dropdowns are the exception and keep their hover
+  colour while held.
 - **Rows** that span the full width do **not** shrink. They darken one step instead: a 20 %
   OISY-blue fill over their 10 % hover.
 - **A row does not light up when a control inside it is pressed** (a copy icon, a toggle); the
@@ -85,6 +89,14 @@ Where it applies:
   slightly (Finance shrinks its circle) with **no** colour change, so grey still means only
   that a sheet is open and blue only the current page. The cards in the mobile group sheets
   press like buttons.
+- **Links and icon links.** Text links (Go to collection, Learn more, breadcrumbs, the terms
+  and privacy links) and link-style icons (copy, open in explorer, back) turn a step darker
+  blue on hover and while pressed; in dark mode a step lighter, so they stay readable on the
+  dark card. Text links do not shrink; icon ones press like icon buttons.
+- **Amount forms.** The swap flip button presses like an icon button, and its arrow turns a
+  half-turn each time the tokens swap, back the other way on the next swap (with reduced
+  motion it flips at once, without the turning animation). **Max** presses, darkens on hover while the amount is valid, and can be hit
+  across 40 px without reaching the amount field above it.
 
 ---
 

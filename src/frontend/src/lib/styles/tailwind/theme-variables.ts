@@ -138,7 +138,8 @@ export const themeVariables = {
 			'secondary-alt': 'var(--color-foreground-brand-secondary-alt)',
 			tertiary: 'var(--color-foreground-brand-tertiary)',
 			'tertiary-alt': 'var(--color-foreground-brand-tertiary-alt)',
-			disabled: 'var(--color-foreground-brand-disabled)'
+			disabled: 'var(--color-foreground-brand-disabled)',
+			hover: 'var(--color-foreground-brand-hover)'
 		},
 		'success-primary': 'var(--color-foreground-success-primary)',
 		'success-alt': 'var(--color-foreground-success-alt)',

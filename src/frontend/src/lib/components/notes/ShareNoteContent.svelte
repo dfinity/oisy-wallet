@@ -217,7 +217,6 @@
 			<strong>{`${$i18n.notes.text.encrypted_lead} `}</strong
 			>{`${$i18n.notes.share.text.protects_body.trimEnd()} `}<ExternalLink
 				ariaLabel={$i18n.core.text.learn_more}
-				color="blue"
 				href={OISY_NOTES_DOCS_URL}
 				iconVisible={false}
 			>
