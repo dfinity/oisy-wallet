@@ -114,6 +114,11 @@ Where it applies:
 
 ### Motion
 
+- **Pills** press like text buttons. **Tabs** emphasize their label while held without
+  shrinking. **Toggles** move their knob and change colours over 150 ms, with hover
+  only on devices that support it. Under reduced motion the knob moves at once while
+  the colours still change smoothly.
+
 - With **reduced motion** turned on in the system, pulsing loading placeholders hold still,
   and so do the decorative animations: the dApp Explorer's UFO in the navigation, the AI
   assistant button, the Scan QR icon, and the astronaut on the idle signer screen. Progress

@@ -75,7 +75,7 @@
 	 while they run does not start them over. -->
 <button
 	bind:this={button}
-	class={`relative shrink-0 cursor-pointer rounded-full border px-3 py-1 text-xs transition-colors ${
+	class={`relative shrink-0 cursor-pointer rounded-full border px-3 py-1 text-xs transition-[color,background-color,border-color,scale] duration-150 ease-out press ${
 		selected
 			? 'border-brand-primary bg-brand-primary text-primary-inverted hover:border-brand-secondary hover:bg-brand-secondary'
 			: 'border-primary bg-primary text-secondary hover:bg-brand-subtle-10'

@@ -34,6 +34,8 @@
 </div>
 
 <style lang="scss">
+	@use '$lib/styles/mixins/interaction';
+
 	.toggle {
 		display: inline-flex;
 		align-items: center;
@@ -48,7 +50,7 @@
 		--card-background-contrast: var(--color-background-disabled-alt);
 		--card-background: var(--color-base-white);
 
-		&:hover {
+		@include interaction.hover {
 			--card-background-contrast: var(--color-background-disabled-alt2);
 		}
 
@@ -63,7 +65,7 @@
 		&:has(input[type='checkbox']:checked) {
 			--card-background-contrast: var(--color-background-brand-primary);
 
-			&:hover {
+			@include interaction.hover {
 				--card-background-contrast: var(--color-background-brand-secondary);
 			}
 
@@ -101,7 +103,7 @@
 		cursor: pointer;
 		display: inline-block;
 		position: relative;
-		transition: all ease-in-out 0.3s;
+		transition: background-color 150ms ease-out;
 		width: var(--padding-4x);
 		height: calc(var(--padding-2x) + 2px);
 	}
@@ -114,14 +116,21 @@
 		position: absolute;
 		left: 2px;
 		top: 1px;
-		transition: all ease-in-out 0.3s;
+		transition:
+			transform 150ms ease-out,
+			background-color 150ms ease-out;
 		width: var(--padding-2x);
 		height: var(--padding-2x);
 
-		background: var(--card-background);
+		background-color: var(--card-background);
 	}
 
 	.toggle input[type='checkbox']:checked ~ label::after {
 		transform: translateX(calc(var(--padding-2x) - 4px));
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.toggle label::after {
+			transition-property: background-color;
+		}
 	}
 </style>
