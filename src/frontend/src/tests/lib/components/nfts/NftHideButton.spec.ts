@@ -53,30 +53,43 @@ describe('NftHideButton', () => {
 		expect(layers[1]).toHaveAttribute('aria-hidden', 'false');
 	});
 
-	it('preserves the icon swap through a pending hide action', async () => {
+	it.each([false, true])('defers the icon swap until loading ends (hidden: %s)', async (hidden) => {
 		const pending = Promise.withResolvers<undefined>();
 		vi.spyOn(nftsServices, 'updateNftSection').mockReturnValue(pending.promise);
 		const { getByTestId, rerender } = render(NftHideButton, {
-			props: { token: mockToken, source: 'gallery' }
+			props: {
+				token: { ...mockToken, section: hidden ? CustomTokenSection.HIDDEN : undefined },
+				source: 'gallery'
+			}
 		});
-		const button = getByTestId(NFT_COLLECTION_ACTION_HIDE);
+		const button = getByTestId(hidden ? NFT_COLLECTION_ACTION_UNHIDE : NFT_COLLECTION_ACTION_HIDE);
 		const layers = [...button.querySelectorAll('.layer')];
 
 		await fireEvent.click(button);
 
 		expect(button).toBeDisabled();
-		expect([...button.querySelectorAll('.layer')]).toEqual(layers);
 
 		await rerender({
-			token: { ...mockToken, section: CustomTokenSection.HIDDEN },
+			token: { ...mockToken, section: hidden ? undefined : CustomTokenSection.HIDDEN },
 			source: 'gallery'
 		});
+		// The token store can update before the remaining NFT reload finishes.
+		await new Promise((resolve) => setTimeout(resolve, 350));
+
+		expect(button).toBeDisabled();
+		expect([...button.querySelectorAll('.layer')]).toEqual(layers);
+		expect(layers[0]).toHaveAttribute('aria-hidden', String(hidden));
+		expect(layers[1]).toHaveAttribute('aria-hidden', String(!hidden));
+
 		pending.resolve(undefined);
 		await waitFor(() => expect(button).toBeEnabled());
 
-		expect(getByTestId(NFT_COLLECTION_ACTION_UNHIDE)).toBe(button);
+		expect(getByTestId(hidden ? NFT_COLLECTION_ACTION_HIDE : NFT_COLLECTION_ACTION_UNHIDE)).toBe(
+			button
+		);
 		expect([...button.querySelectorAll('.layer')]).toEqual(layers);
-		expect(layers[1]).toHaveAttribute('aria-hidden', 'false');
+		expect(layers[0]).toHaveAttribute('aria-hidden', String(!hidden));
+		expect(layers[1]).toHaveAttribute('aria-hidden', String(hidden));
 	});
 
 	it('renders Unhide button when token.section is HIDDEN', () => {

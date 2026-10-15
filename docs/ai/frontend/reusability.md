@@ -54,7 +54,9 @@
 | `IntervalLoader`                        | `$lib/components/core/IntervalLoader.svelte`   | Periodic refresh loader.       |
 
 `Button` keeps its child snippet mounted while loading, hiding it behind the existing spinner.
-Stateful children such as `IconSwap` retain their state when loading ends.
+Stateful children such as `IconSwap` retain their state when loading ends. If a state icon
+changes during loading, retain its displayed state until loading ends so the transition
+does not finish while the children are invisible (see `NftHideButton`).
 
 ### Common building blocks
 

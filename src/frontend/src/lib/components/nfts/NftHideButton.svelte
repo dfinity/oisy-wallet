@@ -61,8 +61,11 @@
 
 	let loading = $state(false);
 	const hidden = $derived(token.section === CustomTokenSection.HIDDEN);
+	let hiddenBeforeLoading = $state(false);
+	const displayedHidden = $derived(loading ? hiddenBeforeLoading : hidden);
 
 	const updateSection = async (section?: CustomTokenSection) => {
+		hiddenBeforeLoading = hidden;
 		loading = true;
 
 		try {
@@ -98,7 +101,7 @@
 				testId={hidden ? NFT_COLLECTION_ACTION_UNHIDE : NFT_COLLECTION_ACTION_HIDE}
 			>
 				{#snippet icon()}
-					<IconSwap swapped={hidden}>
+					<IconSwap swapped={displayedHidden}>
 						{#snippet icon()}<IconEyeOff size="18" />{/snippet}
 						{#snippet swappedIcon()}<IconEye size="18" />{/snippet}
 					</IconSwap>

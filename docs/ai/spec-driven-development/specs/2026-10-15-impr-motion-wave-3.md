@@ -234,6 +234,8 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
   with multiple NFTs. Upcoming progress steps keep their numbered circle; active steps use
   nested swaps for spinner, check and cross. `Button` keeps its children mounted through
   loading so the NFT icon swap survives the pending action; the existing spinner and pulse stay.
+  The NFT button retains its previous displayed icon during loading and starts the swap when
+  its children are revealed, even if the token store updates before the NFT reload finishes.
 - `IconSwap` keeps its 300 ms, `cubic-bezier(0.2, 0, 0, 1)`, scale 0.25 and 4 px blur, the
   values make-interfaces-feel-better gives icon swaps, so the four new swaps match the copy
   check. It is a CSS transition, not a Svelte one, so its reduced-motion block (which
