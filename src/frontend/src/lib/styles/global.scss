@@ -28,6 +28,13 @@ Prettier plugin reads this file as plain CSS, where `//` swallows the next state
 @custom-variant header-band (@media (min-width: 48rem) and (max-width: 67.99rem));
 
 /*
+`dark:` follows OISY's own theme setting (the `theme` attribute on <html>, see
+`lib/utils/theme.utils.ts`), not the OS. Tailwind's default reads `prefers-color-scheme`,
+which disagrees whenever the user picked a theme that differs from the system one.
+*/
+@custom-variant dark (&:where([theme='dark'], [theme='dark'] *));
+
+/*
 `pressed:` - the element is held down, but not because a control inside it is.
 `:active` applies to every ancestor of the pressed element, so without the `:has()`
 a row would light up while its copy icon or toggle is the thing being pressed.
