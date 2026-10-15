@@ -18,7 +18,6 @@
 		iconSize?: string;
 		iconVisible?: boolean;
 		inline?: boolean;
-		color?: 'blue' | 'inherit';
 		fullWidth?: boolean;
 		styleClass?: string;
 		trackEvent?: TrackEventParams;
@@ -36,7 +35,6 @@
 		iconSize = '20',
 		iconVisible = true,
 		inline = false,
-		color = 'inherit',
 		fullWidth = false,
 		styleClass = '',
 		trackEvent,
@@ -46,6 +44,10 @@
 		asButton = false,
 		iconAsLast = false
 	}: Props = $props();
+
+	// Buttons and menu items bring their own hover and press; a plain link gets the link ones.
+	const asLink = $derived(!asButton && !asMenuItem);
+	const iconOnly = $derived(iconVisible && isNullish(children));
 
 	// In a desktop PWA, a `target="_blank"` link opens in the last used browser window, which can
 	// sit on another desktop and pull the focus there. A popup window opens over the PWA instead.
@@ -107,15 +109,17 @@
 <a
 	style={`${inline ? 'vertical-align: sub;' : ''}`}
 	class="inline-flex items-center gap-2 no-underline {styleClass}"
-	class:active:text-brand-primary-alt={color === 'inherit' && !asButton && !asMenuItem}
-	class:active:text-brand-secondary={color === 'blue' && !asButton && !asMenuItem}
+	class:active:text-brand-hover={asLink}
 	class:as-button={asButton}
+	class:duration-150={asLink}
+	class:ease-out={asLink}
 	class:flex-row-reverse={iconAsLast}
-	class:hover:text-brand-primary-alt={color === 'inherit' && !asButton && !asMenuItem}
-	class:hover:text-brand-secondary={color === 'blue' && !asButton && !asMenuItem}
+	class:hover:text-brand-hover={asLink}
 	class:nav-item={asMenuItem}
 	class:nav-item-condensed={asMenuItemCondensed}
-	class:text-brand-primary-alt={!asButton && !asMenuItem}
+	class:press-icon={asLink && iconOnly}
+	class:text-brand-primary-alt={asLink}
+	class:transition-[color,scale]={asLink}
 	class:w-full={fullWidth}
 	aria-label={ariaLabel}
 	data-tid={testId}

@@ -2,6 +2,7 @@ import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 import { trackEvent } from '$lib/services/analytics.services';
 import type { TrackEventParams } from '$lib/types/analytics';
 import * as deviceUtils from '$lib/utils/device.utils';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 
@@ -42,6 +43,44 @@ describe('ExternalLink', () => {
 		await fireEvent.click(getByRole('link', { name: 'Learn more' }));
 
 		expect(trackEvent).toHaveBeenCalledExactlyOnceWith(params);
+	});
+
+	describe('hover and press', () => {
+		const props = { href: 'https://example.com/docs', ariaLabel: 'Docs' };
+
+		it('turns the link colour one step on hover and while pressed', () => {
+			const { getByRole } = render(ExternalLink, { props: { ...props, children: mockSnippet } });
+
+			expect(getByRole('link')).toHaveClass(
+				'text-brand-primary-alt',
+				'hover:text-brand-hover',
+				'active:text-brand-hover'
+			);
+		});
+
+		it('presses an icon-only link like an icon button', () => {
+			const { getByRole } = render(ExternalLink, { props });
+
+			expect(getByRole('link')).toHaveClass('press-icon');
+		});
+
+		it('does not shrink a link with text', () => {
+			const { getByRole } = render(ExternalLink, { props: { ...props, children: mockSnippet } });
+
+			expect(getByRole('link')).not.toHaveClass('press-icon');
+		});
+
+		it.each([{ asButton: true }, { asMenuItem: true }])(
+			'leaves the hover to the button or menu item styles (%o)',
+			(variant) => {
+				const { getByRole } = render(ExternalLink, {
+					props: { ...props, ...variant, children: mockSnippet }
+				});
+
+				expect(getByRole('link')).not.toHaveClass('hover:text-brand-hover');
+				expect(getByRole('link')).not.toHaveClass('text-brand-primary-alt');
+			}
+		);
 	});
 
 	it('does not fire trackEvent when the prop is not set', async () => {
