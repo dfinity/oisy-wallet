@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { btcStatusesStore } from '$icp/stores/btc.store';
@@ -38,6 +37,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { mapAllTransactionsUi } from '$lib/utils/transactions.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 

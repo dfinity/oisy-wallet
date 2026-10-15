@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
 	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
@@ -10,6 +9,7 @@
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		highestEarningPotentialUsd: number;

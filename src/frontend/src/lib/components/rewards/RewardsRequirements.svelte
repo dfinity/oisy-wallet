@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
 	import EligibilityBadge from '$lib/components/rewards/EligibilityBadge.svelte';
@@ -12,6 +11,7 @@
 	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CampaignCriterion } from '$lib/types/reward';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		isEligible: boolean;

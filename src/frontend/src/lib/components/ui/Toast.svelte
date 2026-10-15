@@ -2,7 +2,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount, type Component } from 'svelte';
-	import { fade, fly } from 'svelte/transition';
 	import IconCheckCircle from '$lib/components/icons/IconCheckCircle.svelte';
 	import IconCloseThin from '$lib/components/icons/IconCloseThin.svelte';
 	import IconError from '$lib/components/icons/IconError.svelte';
@@ -13,6 +12,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsStore } from '$lib/stores/toasts.store';
 	import type { ToastLevel, ToastMsgUI } from '$lib/types/toast';
+	import { fade, fly } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		msg: ToastMsgUI;

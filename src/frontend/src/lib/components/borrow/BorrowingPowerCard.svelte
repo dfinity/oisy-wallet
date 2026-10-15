@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
 	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
@@ -11,6 +10,7 @@
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	let infoExpanded = $state(false);
 

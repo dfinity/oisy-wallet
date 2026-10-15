@@ -320,7 +320,10 @@ does not set `position`: add `relative` unless the control is already
 Import `fade`, `fly`, `slide`, `scale` and `blur` from
 `$lib/utils/transitions.utils`, not from `svelte/transition`. They take the
 same parameters and add OISY's timings and the system's reduced-motion
-setting. Svelte's own default is 400 ms, slower than anything OISY uses.
+setting. Svelte's own default is 400 ms, slower than anything OISY uses. The
+module also re-exports the parameter types (`FadeParams`, `SlideParams`,
+`TransitionConfig`, …), and a lint rule refuses `svelte/transition` everywhere
+else (`transition.constants.ts` excepted, since the module is built on it).
 
 | Kind of motion                        | Timing                              | Constant (`transition.constants.ts`) |
 | ------------------------------------- | ----------------------------------- | ------------------------------------ |

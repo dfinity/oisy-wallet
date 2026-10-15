@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { get } from 'svelte/store';
-	import { fade } from 'svelte/transition';
 	import IconCloseThin from '$lib/components/icons/IconCloseThin.svelte';
 	import Backdrop from '$lib/components/ui/Backdrop.svelte';
 	import { busy } from '$lib/stores/busy.store';
@@ -9,6 +8,7 @@
 	import type { ModalProps } from '$lib/types/modal';
 	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
 	import { nextElementId } from '$lib/utils/html.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	let {
 		visible = true,

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
@@ -28,6 +27,7 @@
 		toPairView
 	} from '$lib/utils/oisy-trade.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		order: OisyTradeOrderView;

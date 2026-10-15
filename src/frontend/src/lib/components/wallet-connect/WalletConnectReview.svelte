@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy, onMount } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -21,6 +20,7 @@
 		walletConnectProposalStore
 	} from '$lib/stores/wallet-connect.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
 
 	let listener = $derived($walletConnectListenerStore);

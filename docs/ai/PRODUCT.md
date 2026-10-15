@@ -95,10 +95,17 @@ Where it applies:
 
 ### Motion
 
-- With **reduced motion** turned on in the system, pulsing loading placeholders hold still,
-  and so do the decorative animations: the dApp Explorer's UFO in the navigation, the AI
-  assistant button, the Scan QR icon, and the astronaut on the idle signer screen. Progress
-  spinners keep turning, since they are often the only sign that something is happening.
+- Things that fade, fly or scale in take **200 ms**, slowing as they settle, and leave in
+  **150 ms**, speeding up as they go; most used to take 400 ms both ways. Sections that
+  open and close, such as an error line appearing under a field, keep their 250 ms.
+- With **reduced motion** turned on in the system:
+  - nothing slides, flies or scales in: it fades in over 100 ms instead, and sections open
+    and close at once;
+  - pulsing loading placeholders hold still, and so do the decorative animations: the dApp
+    Explorer's UFO in the navigation, the AI assistant button, the Scan QR icon, and the
+    astronaut on the idle signer screen;
+  - progress spinners keep turning, since they are often the only sign that something is
+    happening.
 
 ---
 

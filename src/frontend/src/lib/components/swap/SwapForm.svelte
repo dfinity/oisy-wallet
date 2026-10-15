@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
@@ -35,6 +34,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;

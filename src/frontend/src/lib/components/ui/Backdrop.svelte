@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
 	import { BACKDROP_FADE_OUT_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
 	import { handleKeyPress } from '$lib/utils/keyboard.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		disablePointerEvents?: boolean;

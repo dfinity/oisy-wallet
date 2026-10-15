@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import { browser } from '$app/environment';
 	import Banner from '$lib/components/core/Banner.svelte';
 	import Busy from '$lib/components/ui/Busy.svelte';
@@ -35,6 +34,7 @@
 	import { consoleWarn } from '$lib/utils/console.utils';
 	import { isIOS } from '$lib/utils/device.utils';
 	import { initWorkerCleanupOnPageUnload } from '$lib/utils/page-unload.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		children: Snippet;
