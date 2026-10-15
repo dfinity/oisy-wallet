@@ -203,10 +203,13 @@ describe('velora-active-tx.utils', () => {
 							destinationTx: '0xdestination',
 							filledPercent: 100,
 							spentAmount: null,
-							receivedAmount: null
+							receivedAmount: null,
+							originReceivedAmount: null,
+							destinationReceivedAmount: null,
+							timestamp: null
 						}
 					],
-					refunds: [{ tx: '0xrefund', chainId: 1, token: '0xtoken', amount: '1' }]
+					refunds: [{ tx: '0xrefund', chainId: 1, token: '0xtoken', amount: '1', timestamp: null }]
 				})
 			).toEqual({
 				[VELORA_EXTERNAL_REF_KEYS.ORIGIN_TX_HASH]: '0xorigin',
@@ -224,7 +227,10 @@ describe('velora-active-tx.utils', () => {
 							destinationTx: null,
 							filledPercent: 50,
 							spentAmount: null,
-							receivedAmount: null
+							receivedAmount: null,
+							originReceivedAmount: null,
+							destinationReceivedAmount: null,
+							timestamp: null
 						}
 					],
 					refunds: []
