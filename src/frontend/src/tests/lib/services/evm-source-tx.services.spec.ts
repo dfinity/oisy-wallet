@@ -6,14 +6,22 @@ import {
 	resetEvmSourceTxObservations
 } from '$lib/services/evm-source-tx.services';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import type { TransactionReceipt } from 'ethers/providers';
+import type { Mock } from 'vitest';
 
 vi.mock('$eth/providers/infura.providers', () => ({
 	infuraProviders: vi.fn()
 }));
 
+type InfuraProvider = ReturnType<typeof infuraProviders>;
+
+// The helper reads nothing of a receipt but its `status`.
+const receiptWithStatus = (status: number): TransactionReceipt =>
+	({ status }) as TransactionReceipt;
+
 describe('evm-source-tx.services', () => {
-	let getTransactionReceipt: ReturnType<typeof vi.fn>;
-	let getTransactionCountLatest: ReturnType<typeof vi.fn>;
+	let getTransactionReceipt: Mock<InfuraProvider['getTransactionReceipt']>;
+	let getTransactionCountLatest: Mock<InfuraProvider['getTransactionCountLatest']>;
 
 	const read = ({
 		rowId = 'row-1',
@@ -39,15 +47,16 @@ describe('evm-source-tx.services', () => {
 
 		getTransactionReceipt = vi.fn();
 		getTransactionCountLatest = vi.fn();
-		vi.mocked(infuraProviders).mockReturnValue({
+		// A partial mock: only the two reads the helper makes are stubbed, and their shape is checked.
+		vi.mocked(infuraProviders, { partial: true }).mockReturnValue({
 			getTransactionReceipt,
 			getTransactionCountLatest
-		} as unknown as ReturnType<typeof infuraProviders>);
+		});
 	});
 
 	describe('readEvmSourceTxOutcome', () => {
 		it('should read the receipt on the given network', async () => {
-			getTransactionReceipt.mockResolvedValue({ status: 1 });
+			getTransactionReceipt.mockResolvedValue(receiptWithStatus(1));
 
 			await expect(read({ network: BASE_NETWORK })).resolves.toBe('succeeded');
 
@@ -56,7 +65,7 @@ describe('evm-source-tx.services', () => {
 		});
 
 		it('should read a mined, reverted transaction as reverted', async () => {
-			getTransactionReceipt.mockResolvedValue({ status: 0 });
+			getTransactionReceipt.mockResolvedValue(receiptWithStatus(0));
 
 			await expect(read()).resolves.toBe('reverted');
 		});
@@ -96,7 +105,9 @@ describe('evm-source-tx.services', () => {
 			});
 
 			it('should trust a receipt that lands between the nonce read and its re-read', async () => {
-				getTransactionReceipt.mockResolvedValueOnce(null).mockResolvedValueOnce({ status: 1 });
+				getTransactionReceipt
+					.mockResolvedValueOnce(null)
+					.mockResolvedValueOnce(receiptWithStatus(1));
 
 				await expect(read()).resolves.toBe('succeeded');
 			});
