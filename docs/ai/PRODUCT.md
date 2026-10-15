@@ -122,6 +122,9 @@ Where it applies:
   and caps fades at 100 ms; height changes happen at once. Modal and popover panels
   and backdrops finish their individual exits before the overlay disappears.
 
+- **Bottom sheets** cast the shared overlay shadow in both themes; their desktop inline
+  form stays flat.
+
 - With **reduced motion** turned on in the system, pulsing loading placeholders hold still,
   and so do the decorative animations: the dApp Explorer's UFO in the navigation, the AI
   assistant button, the Scan QR icon, and the astronaut on the idle signer screen. Progress
