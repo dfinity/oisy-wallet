@@ -75,6 +75,25 @@ describe('transitions.utils', () => {
 			expect(exit).toMatchObject(MOTION_EXIT);
 		});
 
+		it('stops moving if reduced motion turns on before it reverses', () => {
+			const computedStyle = vi.spyOn(globalThis, 'getComputedStyle');
+			const result = fly(node, { y: 100 }, { direction: 'both' });
+
+			computedStyle.mockReturnValue({ opacity: '1', transform: 'none' } as CSSStyleDeclaration);
+			const enter = run({ result, direction: 'in' });
+
+			motion.reduced = true;
+			computedStyle.mockReturnValue({ opacity: '0.5', transform: 'none' } as CSSStyleDeclaration);
+			const exit = run({ result, direction: 'out' });
+
+			computedStyle.mockRestore();
+
+			expect(enter.css?.(0.5, 0.5)).toMatch(/transform/);
+			expect(exit.duration).toBe(MOTION_REDUCED_FADE_DURATION);
+			// The fade still ends at the opacity the transition started from, not the half-run one.
+			expect(exit.css?.(0.5, 0.5)).toBe('opacity: 0.5');
+		});
+
 		it('keeps the easing the call site passes when it reverses', () => {
 			const result = fade(node, { easing: linear }, { direction: 'both' });
 

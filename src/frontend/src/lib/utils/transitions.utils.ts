@@ -79,27 +79,26 @@ const withSharedTiming =
 			Object.entries(params ?? {}).filter(([, value]) => value !== undefined)
 		) as P;
 
-		const create = (direction: RunDirection): TransitionConfig => {
-			if (prefersReducedMotion.current) {
-				return reduced({ node, params: callerParams });
-			}
-
+		const createMoving = (direction: RunDirection): TransitionConfig => {
 			const sharedTiming = nonNullish(callerParams.duration) ? {} : timing(direction);
 
 			return run(node, { ...sharedTiming, ...defaults, ...callerParams });
 		};
 
+		const createReduced = (): TransitionConfig => reduced({ node, params: callerParams });
+
 		const direction = options?.direction ?? 'both';
 
 		if (direction !== 'both') {
-			return create(direction);
+			return prefersReducedMotion.current ? createReduced() : createMoving(direction);
 		}
 
 		// Svelte's transitions read the element's computed styles when they are created. A two-way
 		// transition that reverses mid-way would read its half-run styles as the new end point and
-		// jump, so the styles are captured once and a reversal changes only the timing.
+		// jump, so both forms are created once, from the same starting styles: a reversal changes
+		// only the timing, or switches form if the reduced-motion setting changed in between.
 		const timingFor = (runDirection: RunDirection): TimingParams => {
-			if (prefersReducedMotion.current || nonNullish(callerParams.duration)) {
+			if (nonNullish(callerParams.duration)) {
 				return {};
 			}
 
@@ -108,17 +107,18 @@ const withSharedTiming =
 			return { duration, easing: callerParams.easing ?? easing };
 		};
 
-		let created: TransitionConfig | undefined;
+		let created: { moving: TransitionConfig; reduced: TransitionConfig } | undefined;
 
 		return (runOptions?: { direction?: RunDirection }) => {
 			const runDirection = runOptions?.direction ?? 'in';
 
 			if (isNullish(created)) {
-				created = create(runDirection);
-				return created;
+				created = { moving: createMoving(runDirection), reduced: createReduced() };
 			}
 
-			return { ...created, ...timingFor(runDirection) };
+			return prefersReducedMotion.current
+				? created.reduced
+				: { ...created.moving, ...timingFor(runDirection) };
 		};
 	};
 
