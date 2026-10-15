@@ -32,6 +32,16 @@ On **mobile** the bottom bar has five slots: **Assets · Activity · Finance · 
 
 The desktop sidebar's logo header and social-links footer remain a follow-up.
 
+Once signed in, the **header** (logo, network switcher, scan, profile) stays at the top while
+the page scrolls on any window from 768 px wide, as the sidebar beside it does; on phones it
+scrolls away and the bottom bar stays. Signed out (the landing page and public pages), it
+scrolls away at every width. Where the content column leaves no room beside it, the header gets out of the
+way: below 1280 px the network switcher shows only the network's logo, and below 1088 px, where
+even the icons sit over the content, a frosted band in the page colour appears behind them once
+the page is scrolled, so rows pass under it instead of showing through. There, the pinned section
+headers (the Assets bar, the date labels in Activity) pin just below the band rather than under
+it.
+
 ---
 
 ## Interaction feedback
@@ -64,6 +74,12 @@ Where it applies:
   the token and NFT settings menus) take the pressed fill. An expanded token group's header
   opens and closes the whole card, so hovering it outlines the whole card, sub-tokens
   included; a fill would not do, since on the white card the row hover is the page colour.
+- **Activity and other lists.** Transaction rows, tip history, notes, contact addresses, OISY
+  Trade orders and positions, and the mobile activity filter rows take the same pressed fill.
+  In a contact address row, Edit and Delete act on their own: pressing them does not also
+  copy the address, which the row does when tapped as a whole, and the row's action icons no
+  longer overlap each other on phones. Holding Space on a focused transaction or tip row
+  shows the same fill as a press.
 - **Navigation.** In the desktop sidebar and the menus, a pressed entry darkens one step past
   its hover and selected colour. On the mobile bar, a pressed entry's icon and label shrink
   slightly (Finance shrinks its circle) with **no** colour change, so grey still means only

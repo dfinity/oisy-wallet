@@ -166,6 +166,19 @@ describe('AddressItemActions', () => {
 		expect(onInfo).toHaveBeenCalled();
 	});
 
+	it('should not pull the action icons together, so their tap areas do not overlap', () => {
+		const { getByTestId } = render(AddressItemActions, {
+			props: { address: mockAddress, onInfo: vi.fn(), onEdit: vi.fn(), onDelete: vi.fn() },
+			context: mockContext
+		});
+
+		[
+			ADDRESS_LIST_ITEM_INFO_BUTTON,
+			ADDRESS_LIST_ITEM_EDIT_BUTTON,
+			ADDRESS_LIST_ITEM_DELETE_BUTTON
+		].forEach((testId) => expect(getByTestId(testId)).not.toHaveClass('-m-1'));
+	});
+
 	it('should call onEdit when edit button is clicked', async () => {
 		const onEdit = vi.fn();
 
