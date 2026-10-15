@@ -5,6 +5,7 @@ import {
 	mapIcErrorMetadata,
 	parseIcErrorMessage,
 	replaceErrorFields,
+	replaceHexValues,
 	replaceIcErrorFields
 } from '$lib/utils/error.utils';
 
@@ -234,6 +235,23 @@ describe('error.utils', () => {
 			const result = replaceIcErrorFields(error);
 
 			expect(result).toBe('Some unknown issue');
+		});
+	});
+
+	describe('replaceHexValues', () => {
+		it('replaces every hex value and keeps the rest of the text', () => {
+			const text =
+				'could not coalesce error (error={ "code": -32000, "message": "insufficient funds: address 0xaAaA0000000000000000000000000000000000bB" }, payload={ "method": "eth_sendRawTransaction", "params": [ "0x02f8b00107843b9aca00" ] }, code=UNKNOWN_ERROR)';
+
+			expect(replaceHexValues(text)).toBe(
+				'could not coalesce error (error={ "code": -32000, "message": "insufficient funds: address 0x…" }, payload={ "method": "eth_sendRawTransaction", "params": [ "0x…" ] }, code=UNKNOWN_ERROR)'
+			);
+		});
+
+		it('returns a text without hex values unchanged', () => {
+			expect(replaceHexValues('nonce too low: next nonce 8, tx nonce 7')).toBe(
+				'nonce too low: next nonce 8, tx nonce 7'
+			);
 		});
 	});
 
