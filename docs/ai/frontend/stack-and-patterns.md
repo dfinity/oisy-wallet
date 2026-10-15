@@ -241,6 +241,18 @@ what the element is, and use the shared rule, never hand-written
 | A wrapper that paints the row around its `<button>`     | `hover:bg-brand-subtle-10 child-pressed:bg-brand-subtle-20`  | as `row-feedback`, on the wrapper                 |
 | Something the press would only distract on              | `static` prop (`Button`, `ButtonIcon`), or no utility at all | nothing                                           |
 
+### Links: `text-brand-hover`
+
+Text links and link-style icons change colour: one step of OISY blue on hover
+and the same while pressed (`text-brand-hover`, blue-800 in
+light mode, blue-300 in dark, where blue-800 would drop to 2.3:1). `Button link`,
+the default `ButtonIcon` (so `Copy`), `ExternalLink` and `BreadcrumbNavigation`
+have it built in; anything else that looks like a link adds
+`transition-colors duration-150 ease-out hover:text-brand-hover active:text-brand-hover`.
+Never hover a link to `text-brand-secondary`: it is the darker blue in both themes.
+A text link does not shrink on press; an icon-only link also gets `press-icon`,
+like any icon button.
+
 `press` and `press-icon` are utilities in `lib/styles/global.scss`, built
 on the same `press` mixin and the same two scales (`$press-scale-text`,
 `$press-scale-icon` in `lib/styles/mixins/_button.scss`) the shared buttons
@@ -255,6 +267,14 @@ as `ListItemButton` does.
 Wide things shrink less (0.98) than small ones (0.96) because the same
 scale takes far more pixels off a full-width element; full-width rows don't
 shrink at all.
+
+The shared buttons (`button.scss`) and `row-feedback` rows change colour in
+150 ms ease-out; use the same for new feedback. The `tertiary-alt` and
+`secondary-light` buttons and `row-feedback` rows press one step past their
+hover (`brand-subtle-10` → `-20`, or `-20` → `-30`), and a state that stays on,
+such as an open popover's button, may go a step further. `.dropdown-button`
+has no pressed fill of its own, and success, error and other palettes keep
+their own steps.
 
 ### Small controls: `hit-area`
 
@@ -273,7 +293,9 @@ does not set `position`: add `relative` unless the control is already
   `row-feedback`, `pressed:` and `child-pressed:` exclude that, plain
   `active:` does not.
 - **`display: contents` buttons paint nothing.** Put `row-feedback` on the
-  element inside (as `Transaction` and `TipHistory` do).
+  element inside, plus `parent-pressed:bg-brand-subtle-20`: holding Space on
+  the focused button makes only the button `:active`, not the element inside
+  (as `Transaction` and `TipHistory` do).
 - **`scale` makes the element the containing block** of its absolutely
   positioned children. If a child is positioned against something further
   out (the mobile bar's Finance circle), scale the child, not the element

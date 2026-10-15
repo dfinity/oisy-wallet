@@ -32,6 +32,16 @@ On **mobile** the bottom bar has five slots: **Assets · Activity · Finance · 
 
 The desktop sidebar's logo header and social-links footer remain a follow-up.
 
+Once signed in, the **header** (logo, network switcher, scan, profile) stays at the top while
+the page scrolls on any window from 768 px wide, as the sidebar beside it does; on phones it
+scrolls away and the bottom bar stays. Signed out (the landing page and public pages), it
+scrolls away at every width. Where the content column leaves no room beside it, the header gets out of the
+way: below 1280 px the network switcher shows only the network's logo, and below 1088 px, where
+even the icons sit over the content, a frosted band in the page colour appears behind them once
+the page is scrolled, so rows pass under it instead of showing through. There, the pinned section
+headers (the Assets bar, the date labels in Activity) pin just below the band rather than under
+it.
+
 ---
 
 ## Interaction feedback
@@ -41,6 +51,10 @@ smoothly when released.
 
 - **Buttons** with text shrink slightly, to 98 %; icon buttons shrink to 96 %. Wide buttons
   get the smaller press because the same scale takes far more off a wide element.
+- **Colours** of the shared buttons and full-width rows change in 150 ms. Buttons that take a
+  light-blue fill on hover (the theme switch, contact actions, the profile menu) and the rows
+  are one step darker pressed than on hover; dropdowns are the exception and keep their hover
+  colour while held.
 - **Rows** that span the full width do **not** shrink. They darken one step instead: a 20 %
   OISY-blue fill over their 10 % hover.
 - **A row does not light up when a control inside it is pressed** (a copy icon, a toggle); the
@@ -64,6 +78,20 @@ Where it applies:
   the token and NFT settings menus) take the pressed fill. An expanded token group's header
   opens and closes the whole card, so hovering it outlines the whole card, sub-tokens
   included; a fill would not do, since on the white card the row hover is the page colour.
+- **Activity and other lists.** Transaction rows, tip history, notes, contact addresses, OISY
+  Trade orders and positions, and the mobile activity filter rows take the same pressed fill.
+  In a contact address row, Edit and Delete act on their own: pressing them does not also
+  copy the address, which the row does when tapped as a whole, and the row's action icons no
+  longer overlap each other on phones. Holding Space on a focused transaction or tip row
+  shows the same fill as a press.
+- **Links and icon links.** Text links (Go to collection, Learn more, breadcrumbs, the terms
+  and privacy links) and link-style icons (copy, open in explorer, back) turn a step darker
+  blue on hover and while pressed; in dark mode a step lighter, so they stay readable on the
+  dark card. Text links do not shrink; icon ones press like icon buttons.
+- **Amount forms.** The swap flip button presses like an icon button, and its arrow turns a
+  half-turn each time the tokens swap, back the other way on the next swap (with reduced
+  motion it flips at once, without the turning animation). **Max** presses, darkens on hover while the amount is valid, and can be hit
+  across 40 px without reaching the amount field above it.
 
 ---
 
