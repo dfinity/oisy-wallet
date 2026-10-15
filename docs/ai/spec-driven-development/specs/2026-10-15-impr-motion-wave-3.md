@@ -303,8 +303,8 @@ jsdom does not run transitions or CSS animations; tests assert the inputs that p
 3. ~~**The `a0_mo` … `a4c_mo` keyframes.**~~ Settled while building: they animate
    `icons/animated/AnimatedScanIcon` (the Scan QR icon), which is decorative and stops under
    reduced motion. `AnimatedIconLoader` turns to show progress and keeps running.
-4. **A shadow token for the bottom sheet.** Check whether the theme already has a raised-
-   surface shadow to reuse, or whether area 4 needs a new token.
+4. ~~**A shadow token for the bottom sheet.**~~ Settled in area 4: the existing
+   `--overlay-box-shadow` is reused through the missing bottom-sheet variable in both themes.
 
 ## Pending decisions (facts are clear, a call is needed)
 
