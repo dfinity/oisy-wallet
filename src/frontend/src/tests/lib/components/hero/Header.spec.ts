@@ -1,6 +1,7 @@
 import Header from '$lib/components/hero/Header.svelte';
+import { NAVIGATION_MENU_BUTTON } from '$lib/constants/test-ids.constants';
 import { mockAuthSignedIn } from '$tests/mocks/auth.mock';
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 describe('Header', () => {
 	const header = (container: HTMLElement): HTMLElement | null => container.querySelector('header');
@@ -38,5 +39,21 @@ describe('Header', () => {
 		await fireEvent.scroll(window);
 
 		expect(header(container)).not.toHaveClass('scrolled');
+	});
+
+	it('drops its view-transition name while the user menu is open, so the backdrop can blur the page', async () => {
+		mockAuthSignedIn();
+
+		const { container, getAllByTestId } = render(Header);
+
+		expect(header(container)?.style.viewTransitionName).toBe('header');
+
+		await fireEvent.click(getAllByTestId(NAVIGATION_MENU_BUTTON)[0]);
+
+		expect(header(container)?.style.viewTransitionName).toBe('none');
+
+		await fireEvent.click(container.querySelector('[data-tid="backdrop"]') as HTMLElement);
+
+		await waitFor(() => expect(header(container)?.style.viewTransitionName).toBe('header'));
 	});
 });

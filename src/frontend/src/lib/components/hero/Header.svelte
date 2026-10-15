@@ -60,12 +60,18 @@
 	// is fixed beside the content, as before). At the top of the page nothing is under it, so the
 	// band that keeps scrolled rows from showing behind the controls only appears once scrolled.
 	let scrolled = $derived($authSignedIn && scrollY > 0);
+
+	// The name keeps the header still between pages, but a named element also confines any
+	// `backdrop-filter` inside it to itself: the user menu's backdrop could dim the page and not
+	// blur it. So the name is dropped while a popover here is open. A menu entry closes the
+	// popover before the navigation it starts, so page changes still find the header named.
+	let viewTransitionName = $derived(popoverOpen ? 'none' : 'header');
 </script>
 
 <svelte:window bind:scrollY />
 
 <header
-	style="view-transition-name: header"
+	style:view-transition-name={viewTransitionName}
 	class="pointer-events-none relative flex w-full max-w-screen-2.5xl items-center justify-between gap-y-5 px-4 pt-6 md:px-8"
 	class:1.5xl:fixed={$authSignedIn}
 	class:1.5xl:inset-x-0={$authSignedIn}
