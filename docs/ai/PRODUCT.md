@@ -40,7 +40,8 @@ way: below 1280 px the network switcher shows only the network's logo, and below
 even the icons sit over the content, a frosted band in the page colour appears behind them once
 the page is scrolled, so rows pass under it instead of showing through. There, the pinned section
 headers (the Assets bar, the date labels in Activity) pin just below the band rather than under
-it.
+it. Opening the user menu from the header dims and blurs the page behind it, as the More menu
+and dialogs do.
 
 ---
 
@@ -113,6 +114,13 @@ Where it applies:
   their explanation is open.
 
 ### Motion
+
+- **Overlays** clear quickly: toasts enter over 200 ms and leave over 150 ms with a short
+  movement; modal panels take 125 ms each way. Popovers grow from 96 % in 150 ms and
+  leave in 100 ms. The page dims and blurs smoothly in 75 ms and clears in 150 ms;
+  bottom sheets open in 250 ms and close in 200 ms. Reduced motion removes movement
+  and caps fades at 100 ms; height changes happen at once. Modal and popover panels
+  and backdrops finish their individual exits before the overlay disappears.
 
 - With **reduced motion** turned on in the system, pulsing loading placeholders hold still,
   and so do the decorative animations: the dApp Explorer's UFO in the navigation, the AI

@@ -4,7 +4,15 @@ import {
 	MOTION_REDUCED_FADE_DURATION,
 	SLIDE_PARAMS
 } from '$lib/constants/transition.constants';
-import { blur, fade, fly, scale, slide, type TransitionConfig } from '$lib/utils/transitions.utils';
+import {
+	backdrop,
+	blur,
+	fade,
+	fly,
+	scale,
+	slide,
+	type TransitionConfig
+} from '$lib/utils/transitions.utils';
 import { linear } from 'svelte/easing';
 
 const motion = vi.hoisted(() => ({ reduced: false }));
@@ -28,6 +36,34 @@ describe('transitions.utils', () => {
 		result: TransitionConfig | ((options?: { direction?: 'in' | 'out' }) => TransitionConfig);
 		direction: 'in' | 'out';
 	}): TransitionConfig => (typeof result === 'function' ? result({ direction }) : result);
+
+	describe('backdrop', () => {
+		it('interpolates dim and blur without fading the element opacity', () => {
+			const node = document.createElement('div');
+			node.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
+			const transition = run({ result: backdrop(node, { blur: 4 }), direction: 'in' });
+
+			expect(transition.css?.(0.5, 0.5)).toContain('50%');
+			expect(transition.css?.(0.5, 0.5)).toContain('backdrop-filter: blur(2px)');
+			expect(transition.css?.(0.5, 0.5)).not.toContain('opacity');
+			expect(transition.css?.(1, 0)).toContain('100%');
+		});
+
+		it('keeps invisible backdrops unblurred', () => {
+			const transition = run({ result: backdrop(node, { blur: 0 }), direction: 'in' });
+
+			expect(transition.css?.(0.5, 0.5)).toContain('blur(0px)');
+		});
+
+		it('uses a capped fade under reduced motion', () => {
+			motion.reduced = true;
+			const transition = run({ result: backdrop(node, { duration: 150 }), direction: 'out' });
+
+			expect(transition.duration).toBe(MOTION_REDUCED_FADE_DURATION);
+			expect(transition.css?.(0.5, 0.5)).toContain('opacity');
+			expect(transition.css?.(0.5, 0.5)).not.toContain('blur');
+		});
+	});
 
 	beforeEach(() => {
 		motion.reduced = false;

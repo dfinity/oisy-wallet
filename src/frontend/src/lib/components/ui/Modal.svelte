@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { cubicIn, cubicOut } from 'svelte/easing';
 	import { get } from 'svelte/store';
 	import IconCloseThin from '$lib/components/icons/IconCloseThin.svelte';
 	import Backdrop from '$lib/components/ui/Backdrop.svelte';
@@ -38,9 +39,9 @@
 
 	const close = () => onClose?.();
 
-	// A bit faster fade in that backdrop IN, a bit slower on OUT
+	// The panel settles after the backdrop arrives and leaves before it clears.
 	const FADE_IN_DURATION = 125 as const;
-	const FADE_OUT_DURATION = 200 as const;
+	const FADE_OUT_DURATION = 125 as const;
 
 	const modalTitleId = nextElementId('modal-title-');
 	const modalContentId = nextElementId('modal-content-');
@@ -65,13 +66,13 @@
 		onclick={stopPropagation(onClick)}
 		onintroend={onIntroEnd}
 		{role}
-		transition:fade|global={{ duration: 25 }}
+		in:fade|global={{ duration: 25 }}
 	>
 		<Backdrop {disablePointerEvents} onClose={() => onClose?.()} />
 		<div
 			class={`wrapper ${role}`}
-			in:fade|global={{ duration: FADE_IN_DURATION }}
-			out:fade|global={{ duration: FADE_OUT_DURATION }}
+			in:fade|global={{ duration: FADE_IN_DURATION, easing: cubicOut }}
+			out:fade|global={{ duration: FADE_OUT_DURATION, easing: cubicIn }}
 		>
 			{#if showHeader}
 				<div class="header">

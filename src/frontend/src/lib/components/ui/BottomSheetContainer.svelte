@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import { cubicIn, cubicOut } from 'svelte/easing';
 	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
@@ -19,7 +20,8 @@
 	class="bottom-sheet"
 	data-tid="bottom-sheet"
 	role="dialog"
-	transition:transitionFn|global={{ axis: 'y', duration: 300 }}
+	in:transitionFn|global={{ axis: 'y', duration: 250, easing: cubicOut }}
+	out:transitionFn|global={{ axis: 'y', duration: 200, easing: cubicIn }}
 >
 	{#if nonNullish(header)}
 		<span>

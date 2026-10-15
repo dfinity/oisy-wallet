@@ -169,3 +169,25 @@ export const slide = withSharedTiming<SlideParams>({
 	timing: () => SLIDE_PARAMS,
 	reduced: reducedInstant
 });
+
+interface BackdropParams extends FadeParams {
+	blur?: number;
+}
+
+// Animating opacity makes Chrome stop sampling the page behind a backdrop. Keep the
+// element opaque and interpolate its translucent fill and blur instead.
+export const backdrop = withSharedTiming<BackdropParams>({
+	// The shared wrapper follows Svelte's positional transition signature.
+	// eslint-disable-next-line local-rules/prefer-object-params
+	run: (node, { blur = 4, ...params }) => {
+		const { backgroundColor } = getComputedStyle(node);
+
+		return {
+			...params,
+			css: (t) =>
+				`background-color: color-mix(in srgb, ${backgroundColor} ${t * 100}%, transparent); backdrop-filter: blur(${t * blur}px);`
+		};
+	},
+	timing: enterOrExit,
+	reduced: reducedFade
+});

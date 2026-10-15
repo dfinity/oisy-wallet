@@ -12,7 +12,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsStore } from '$lib/stores/toasts.store';
 	import type { ToastLevel, ToastMsgUI } from '$lib/types/toast';
-	import { fade, fly } from '$lib/utils/transitions.utils';
+	import { fly } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		msg: ToastMsgUI;
@@ -71,8 +71,8 @@
 	class={`toast ${level} ${theme ?? 'themed'}`}
 	data-tid="toast-component"
 	role="dialog"
-	in:fly|global={{ y: (position === 'top' ? -1 : 1) * 100, duration: 200 }}
-	out:fade|global={{ delay: 100 }}
+	in:fly|global={{ y: (position === 'top' ? -1 : 1) * 16 }}
+	out:fly|global={{ y: (position === 'top' ? -1 : 1) * 16 }}
 >
 	<div class="icon {level}" aria-hidden="true">
 		{#if spinner}
