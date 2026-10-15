@@ -110,6 +110,13 @@ Where it applies:
   actions), the tap area only grows up and down, so two tap areas never overlap. The help toggles say whether
   their explanation is open.
 
+### Motion
+
+- With **reduced motion** turned on in the system, pulsing loading placeholders hold still,
+  and so do the decorative animations: the dApp Explorer's UFO in the navigation, the AI
+  assistant button, the Scan QR icon, and the astronaut on the idle signer screen. Progress
+  spinners keep turning, since they are often the only sign that something is happening.
+
 ---
 
 ## Analytics

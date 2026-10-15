@@ -1,5 +1,5 @@
-import { quintOut } from 'svelte/easing';
-import type { SlideParams } from 'svelte/transition';
+import { cubicIn, cubicOut, quintOut } from 'svelte/easing';
+import type { SlideParams, TransitionConfig } from 'svelte/transition';
 
 export const SLIDE_DURATION: Pick<SlideParams, 'duration'> = { duration: 250 };
 
@@ -13,3 +13,24 @@ export const SLIDE_EASING: Pick<SlideParams, 'easing' | 'axis'> = {
 };
 
 export const SLIDE_PARAMS: SlideParams = { delay: 0, ...SLIDE_DURATION, ...SLIDE_EASING };
+
+// Shared motion timings. Things arrive quickly and settle (ease-out), and leave faster than
+// they came (ease-in), so an exit never holds up what the user does next. The transitions in
+// `$lib/utils/transitions.utils` apply these when a call site passes no duration of its own.
+export const MOTION_ENTER: Pick<TransitionConfig, 'duration' | 'easing'> = {
+	duration: 200,
+	easing: cubicOut
+};
+
+export const MOTION_EXIT: Pick<TransitionConfig, 'duration' | 'easing'> = {
+	duration: 150,
+	easing: cubicIn
+};
+
+// Small state changes that are not icon swaps, such as a chip changing. Icon swaps keep
+// `IconSwap`'s own 300 ms cross-fade, the timing the make-interfaces-feel-better rules give them.
+export const MOTION_SWAP_DURATION = 150;
+
+// With the system's reduced-motion setting on, anything that would move, slide or scale
+// fades in this long instead, so the change is still visible without movement.
+export const MOTION_REDUCED_FADE_DURATION = 100;
