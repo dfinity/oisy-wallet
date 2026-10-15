@@ -84,6 +84,11 @@ Where it applies:
   copy the address, which the row does when tapped as a whole, and the row's action icons no
   longer overlap each other on phones. Holding Space on a focused transaction or tip row
   shows the same fill as a press.
+- **Navigation.** In the desktop sidebar and the menus, a pressed entry darkens one step past
+  its hover and selected colour. On the mobile bar, a pressed entry's icon and label shrink
+  slightly (Finance shrinks its circle) with **no** colour change, so grey still means only
+  that a sheet is open and blue only the current page. The cards in the mobile group sheets
+  press like buttons.
 - **Cards.** NFT and collection cards press like text buttons and keep their hover lift;
   disabled cards and the non-interactive NFT card do not press. The Explore dApp cards and
   the reward cards press too, with no hover of their own. Colours meant for dark mode follow
@@ -97,6 +102,13 @@ Where it applies:
   half-turn each time the tokens swap, back the other way on the next swap (with reduced
   motion it flips at once, without the turning animation). **Max** presses, darkens on hover while the amount is valid, and can be hit
   across 40 px without reaching the amount field above it.
+- **Small controls.** Close, clear and help buttons (toasts, banners, info boxes, modals,
+  popovers, the search field, the settings, rewards and earning help toggles, the copy and edit
+  icons next to addresses and IDs, the dismiss button on active transactions) press like icon
+  buttons and can be hit across at least 40 × 40 px while looking the same size. Where a
+  neighbour sits closer (a copy icon right next to a link, a modal's close next to its header
+  actions), the tap area only grows up and down, so two tap areas never overlap. The help toggles say whether
+  their explanation is open.
 
 ---
 
