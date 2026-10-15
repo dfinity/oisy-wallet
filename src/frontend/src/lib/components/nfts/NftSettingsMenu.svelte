@@ -96,7 +96,7 @@
 				<ListItem>
 					<LogoButton fullWidth onClick={openManageTokens}>
 						{#snippet logo()}
-							<IconManage />
+							<IconManage size="20px" />
 						{/snippet}
 						{#snippet title()}
 							<span class="menu-row-label">{$i18n.tokens.manage.text.title_nft}</span>

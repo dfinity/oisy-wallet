@@ -120,7 +120,7 @@
 					modalStore.openSettings({ id: modalId, data: SettingsModalType.ENABLED_NETWORKS });
 				}}
 				static
-				styleClass="menu-row"
+				styleClass="menu-row row-feedback"
 			>
 				<span class="flex items-center gap-3 font-bold">
 					<IconManage size="20" />{$i18n.networks.manage}

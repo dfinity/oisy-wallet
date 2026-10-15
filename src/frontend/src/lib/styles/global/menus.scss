@@ -1,5 +1,3 @@
-@use '../mixins/interaction';
-
 .menu-surface {
 	font-size: 1rem;
 	line-height: 1.5;
@@ -65,14 +63,12 @@
 		border-radius: 8px;
 		--focus-outline-offset: -3px;
 		transition: background-color 150ms ease-out;
-		@include interaction.hover {
-			background-color: var(--color-background-brand-subtle-10);
-		}
 	}
 }
 
 html[data-theme-changing] *,
 html[data-theme-changing] *::before,
 html[data-theme-changing] *::after {
+	// Override both utility layers and unlayered component transitions for this paint.
 	transition: none !important;
 }

@@ -21,7 +21,7 @@
 	{onclick}
 	pressed={selectable ? selected : undefined}
 	static
-	styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28 row-feedback menu-row"
+	styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28 row-feedback menu-row [--focus-outline-offset:-3px]"
 	{testId}
 	transparent
 >
@@ -34,9 +34,3 @@
 	{/if}
 	<span class="font-normal">{@render children()}</span>
 </Button>
-
-<style lang="scss">
-	:global(button.menu-row) {
-		--focus-outline-offset: -3px;
-	}
-</style>

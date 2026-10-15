@@ -4,7 +4,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<div class="flex justify-between pl-3">
+<div class="flex justify-between pl-2">
 	<span class="mr-3 flex min-w-32 items-center text-tertiary">
 		<span class="mr-1 flex"><IconWorld /></span>
 		<span class="flex">{$i18n.core.text.language}</span>

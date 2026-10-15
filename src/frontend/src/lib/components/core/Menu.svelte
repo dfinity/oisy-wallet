@@ -253,13 +253,13 @@
 					styleClass="group"
 					testId={NAVIGATION_MENU_SCANNER_BUTTON}
 				>
-					<IconMaximize />
+					<IconMaximize size="20px" />
 
 					<span class="flex w-full items-center justify-between">
 						{$i18n.navigation.text.wallet_connect}
 
 						<span
-							class="text-tertiary-inverted transition-colors duration-150 group-hover:text-brand-primary-alt"
+							class="text-tertiary-inverted transition-colors duration-150 ease-out group-hover:text-brand-primary-alt"
 						>
 							<IconWalletConnect />
 						</span>
@@ -272,13 +272,13 @@
 					styleClass="group"
 					testId={NAVIGATION_MENU_PAY_BUTTON}
 				>
-					<IconMaximize />
+					<IconMaximize size="20px" />
 
 					<span class="flex w-full items-center justify-between">
 						{replaceOisyPlaceholders($i18n.navigation.text.pay)}
 
 						<span
-							class="text-tertiary-inverted transition-colors duration-150 group-hover:text-brand-primary-alt"
+							class="text-tertiary-inverted transition-colors duration-150 ease-out group-hover:text-brand-primary-alt"
 						>
 							<IconPay />
 						</span>
@@ -341,7 +341,7 @@
 						{$i18n.navigation.text.support}
 
 						<span
-							class="text-tertiary-inverted transition-colors duration-150 group-hover:text-brand-primary-alt"
+							class="text-tertiary-inverted transition-colors duration-150 ease-out group-hover:text-brand-primary-alt"
 						>
 							<IconExternalLink size="16" />
 						</span>
