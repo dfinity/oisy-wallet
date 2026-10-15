@@ -53,6 +53,9 @@
 | `LockOrSignOut`                         | `$lib/components/core/LockOrSignOut.svelte`    | Lock / sign-out user controls. |
 | `IntervalLoader`                        | `$lib/components/core/IntervalLoader.svelte`   | Periodic refresh loader.       |
 
+`Button` keeps its child snippet mounted while loading, hiding it behind the existing spinner.
+Stateful children such as `IconSwap` retain their state when loading ends.
+
 ### Common building blocks
 
 | Component                            | Where                             | Use it for                                                                                                                                                |

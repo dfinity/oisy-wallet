@@ -232,7 +232,8 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
   `nfts/NftHideButton.svelte:88-116`. Keep the NFT action mounted while its state changes;
   reuse its confirmation wrapper for both states but open it only when hiding a collection
   with multiple NFTs. Upcoming progress steps keep their numbered circle; active steps use
-  nested swaps for spinner, check and cross.
+  nested swaps for spinner, check and cross. `Button` keeps its children mounted through
+  loading so the NFT icon swap survives the pending action; the existing spinner and pulse stay.
 - `IconSwap` keeps its 300 ms, `cubic-bezier(0.2, 0, 0, 1)`, scale 0.25 and 4 px blur, the
   values make-interfaces-feel-better gives icon swaps, so the four new swaps match the copy
   check. It is a CSS transition, not a Svelte one, so its reduced-motion block (which

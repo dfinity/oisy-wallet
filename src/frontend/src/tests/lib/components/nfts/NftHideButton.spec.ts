@@ -53,6 +53,32 @@ describe('NftHideButton', () => {
 		expect(layers[1]).toHaveAttribute('aria-hidden', 'false');
 	});
 
+	it('preserves the icon swap through a pending hide action', async () => {
+		const pending = Promise.withResolvers<void>();
+		vi.spyOn(nftsServices, 'updateNftSection').mockReturnValue(pending.promise);
+		const { getByTestId, rerender } = render(NftHideButton, {
+			props: { token: mockToken, source: 'gallery' }
+		});
+		const button = getByTestId(NFT_COLLECTION_ACTION_HIDE);
+		const layers = [...button.querySelectorAll('.layer')];
+
+		await fireEvent.click(button);
+
+		expect(button).toBeDisabled();
+		expect([...button.querySelectorAll('.layer')]).toEqual(layers);
+
+		await rerender({
+			token: { ...mockToken, section: CustomTokenSection.HIDDEN },
+			source: 'gallery'
+		});
+		pending.resolve();
+		await waitFor(() => expect(button).toBeEnabled());
+
+		expect(getByTestId(NFT_COLLECTION_ACTION_UNHIDE)).toBe(button);
+		expect([...button.querySelectorAll('.layer')]).toEqual(layers);
+		expect(layers[1]).toHaveAttribute('aria-hidden', 'false');
+	});
+
 	it('renders Unhide button when token.section is HIDDEN', () => {
 		const token = { ...mockToken, section: CustomTokenSection.HIDDEN };
 		const { getByTestId } = render(NftHideButton, { props: { token, source: 'gallery' } });
