@@ -63,7 +63,7 @@
 	ariaLabel={ariaLabel ?? `${$i18n.core.text.copy}: ${value}`}
 	height={inline ? 'h-6' : undefined}
 	onclick={handleClick}
-	styleClass={`${inline ? 'inline-block align-sub' : 'flex'}`}
+	styleClass={`${inline ? 'relative inline-block align-sub hit-area [--hit-area-x:0px]' : 'flex'}`}
 	{testId}
 	width={inline ? 'w-6' : undefined}
 	{...rest}

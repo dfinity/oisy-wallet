@@ -27,7 +27,12 @@
 		<div class="flex items-center justify-center gap-0.5">
 			<div class="text-sm font-bold">{$i18n.stake.text.earning_potential}</div>
 
-			<button class="text-tertiary" onclick={() => (infoExpanded = !infoExpanded)}>
+			<button
+				class="hit-area relative text-tertiary press-icon"
+				aria-expanded={infoExpanded}
+				aria-label={$i18n.core.text.info}
+				onclick={() => (infoExpanded = !infoExpanded)}
+			>
 				<IconHelp size="18" />
 			</button>
 		</div>

@@ -104,8 +104,11 @@
 		{/if}
 	</p>
 
-	<button class="close" aria-label={$i18n.core.text.close} data-tid="close-button" onclick={close}
-		><IconCloseThin /></button
+	<button
+		class="close hit-area relative press-icon"
+		aria-label={$i18n.core.text.close}
+		data-tid="close-button"
+		onclick={close}><IconCloseThin /></button
 	>
 </div>
 
