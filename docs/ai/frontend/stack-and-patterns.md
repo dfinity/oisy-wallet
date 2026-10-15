@@ -322,13 +322,14 @@ Import `fade`, `fly`, `slide`, `scale` and `blur` from
 same parameters and add OISY's timings and the system's reduced-motion
 setting. Svelte's own default is 400 ms, slower than anything OISY uses.
 
-| Kind of motion                        | Timing                       | Constant (`transition.constants.ts`) |
-| ------------------------------------- | ---------------------------- | ------------------------------------ |
-| Entrance                              | 200 ms ease-out (`cubicOut`) | `MOTION_ENTER`                       |
-| Exit                                  | 150 ms ease-in (`cubicIn`)   | `MOTION_EXIT`                        |
-| Small state change (icon swap, chip)  | 150 ms                       | `MOTION_SWAP_DURATION`               |
-| Height change (`slide`)               | 250 ms both ways             | `SLIDE_PARAMS`                       |
-| Any fade that replaces a reduced move | 100 ms                       | `MOTION_REDUCED_FADE_DURATION`       |
+| Kind of motion                        | Timing                              | Constant (`transition.constants.ts`) |
+| ------------------------------------- | ----------------------------------- | ------------------------------------ |
+| Entrance                              | 200 ms ease-out (`cubicOut`)        | `MOTION_ENTER`                       |
+| Exit                                  | 150 ms ease-in (`cubicIn`)          | `MOTION_EXIT`                        |
+| Icon swap (`IconSwap`)                | 300 ms `cubic-bezier(0.2, 0, 0, 1)` | built into `IconSwap`                |
+| Other small state change (a chip)     | 150 ms                              | `MOTION_SWAP_DURATION`               |
+| Height change (`slide`)               | 250 ms both ways                    | `SLIDE_PARAMS`                       |
+| Any fade that replaces a reduced move | 100 ms                              | `MOTION_REDUCED_FADE_DURATION`       |
 
 - **Pass no `duration`** and the shared timing applies: a `transition:` gets
   the entrance timing going in and the exit timing going out, so exits are

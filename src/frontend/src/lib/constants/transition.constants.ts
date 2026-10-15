@@ -27,7 +27,8 @@ export const MOTION_EXIT: Pick<TransitionConfig, 'duration' | 'easing'> = {
 	easing: cubicIn
 };
 
-// Small state changes: an icon swapping, a chip changing.
+// Small state changes that are not icon swaps, such as a chip changing. Icon swaps keep
+// `IconSwap`'s own 300 ms cross-fade, the timing the make-interfaces-feel-better rules give them.
 export const MOTION_SWAP_DURATION = 150;
 
 // With the system's reduced-motion setting on, anything that would move, slide or scale
