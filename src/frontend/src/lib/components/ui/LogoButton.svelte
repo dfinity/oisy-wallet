@@ -2,9 +2,9 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import type { MouseEventHandler } from 'svelte/elements';
-	import { fade } from 'svelte/transition';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import IconGixCheck from '$lib/components/icons/IconGixCheck.svelte';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		selectable?: boolean;

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
-	import { fade, slide } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
@@ -59,6 +58,7 @@
 		isUSD1Token as isUSD1TokenUtil,
 		mapTokenUi
 	} from '$lib/utils/token.utils';
+	import { fade, slide } from '$lib/utils/transitions.utils';
 	import { isTrumpToken as isTrumpTokenUtil } from '$sol/utils/token.utils';
 
 	let pageTokenUi = $derived(

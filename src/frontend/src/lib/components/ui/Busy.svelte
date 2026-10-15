@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import LoaderSpinner from '$lib/components/ui/LoaderSpinner.svelte';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	const close = () => {
 		if (isNullish($busy) || !$busy.close) {
@@ -32,7 +32,7 @@
 		role="button"
 		tabindex="-1"
 		in:fade
-		out:fade={{ duration: 200 }}
+		out:fade
 	>
 		<div class="content">
 			{#if $busy.spinner}
