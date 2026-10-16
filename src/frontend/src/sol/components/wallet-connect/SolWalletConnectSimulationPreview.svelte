@@ -7,10 +7,16 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
+	import { SPL_TOKEN_MAX_AMOUNT } from '$sol/constants/sol.constants';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
-	import type { SolSimulationControlField, SolSimulationPreview } from '$sol/types/sol-simulation';
+	import type {
+		SolSimulationAllowance,
+		SolSimulationControlField,
+		SolSimulationPreview
+	} from '$sol/types/sol-simulation';
 	import type { SplTokenAddress } from '$sol/types/spl';
 	import type { SplCustomToken } from '$sol/types/spl-custom-token';
 	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
@@ -34,7 +40,10 @@
 	// left when neither does.
 	let unknownTokenAddresses = $derived(
 		solUnknownTokenAddresses({
-			tokenAddresses: tokenDeltas.map(({ tokenAddress }) => tokenAddress),
+			tokenAddresses: [
+				...tokenDeltas.map(({ tokenAddress }) => tokenAddress),
+				...controlChanges.map(({ allowance }) => allowance?.tokenAddress)
+			],
 			tokens: $splTokens,
 			networkId: feeToken.network.id,
 			metadata: $splTokenMetadataStore
@@ -65,9 +74,20 @@
 	const controlLabels: Record<SolSimulationControlField, string> = $derived({
 		owner: $i18n.wallet_connect.text.simulation_new_owner,
 		delegate: $i18n.wallet_connect.text.simulation_new_spender,
+		allowance: $i18n.wallet_connect.text.simulation_new_allowance,
 		closeAuthority: $i18n.wallet_connect.text.simulation_new_close_authority,
 		program: $i18n.wallet_connect.text.simulation_new_program
 	});
+
+	const allowanceText = ({ tokenAddress, decimals, amount }: SolSimulationAllowance): string =>
+		amount === SPL_TOKEN_MAX_AMOUNT
+			? replacePlaceholders($i18n.wallet_connect.text.simulation_allowance_unlimited, {
+					$symbol: symbol(tokenAddress)
+				})
+			: replacePlaceholders($i18n.wallet_connect.text.simulation_allowance, {
+					$amount: formatToken({ value: amount, unitName: decimals, displayDecimals: decimals }),
+					$symbol: symbol(tokenAddress)
+				});
 </script>
 
 {#snippet delta({
@@ -126,7 +146,7 @@
 			</div>
 		{/each}
 
-		{#each controlChanges as { account, field, to } (`${account}-${field}`)}
+		{#each controlChanges as { account, field, to, allowance } (`${account}-${field}`)}
 			<span class="flex flex-col gap-1" data-tid="simulated-control-change">
 				<span class="text-tertiary">
 					{`${controlLabels[field]} · ${shortenWithMiddleEllipsis({ text: account })}`}
@@ -134,6 +154,10 @@
 					<SolAddressActions address={account} network={feeToken.network} />
 				</span>
 				{to ?? $i18n.wallet_connect.text.simulation_control_removed}
+
+				{#if nonNullish(allowance)}
+					<span data-tid="simulated-allowance">{allowanceText(allowance)}</span>
+				{/if}
 			</span>
 		{/each}
 	</div>
