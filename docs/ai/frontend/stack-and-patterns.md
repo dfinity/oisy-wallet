@@ -354,8 +354,9 @@ the shared core rule, preserving its deprecated-package and `/dist/` import bans
 - **CSS animations:** under reduced motion `animate-pulse` and `animate-ping`
   hold still. A decorative illustration with its own keyframes adds
   `decorative-motion` to its root, which stops every animation inside it.
-  Progress indicators (`Spinner`, `AnimatedIconLoader`) keep turning: they
-  are often the only sign that work is happening.
+  Progress indicators (`Spinner`, plus the `LoaderSpinner` and `AnimatedIconLoader`
+  wrappers) show a static complete visor under reduced motion. Keep the owning
+  controls' loading states, translated labels and accessibility semantics intact.
 
 For a page backdrop use `backdrop` from the same module: it animates the dim and blur
 radius without an opacity animation that hides the blur in Chrome. Under reduced motion
