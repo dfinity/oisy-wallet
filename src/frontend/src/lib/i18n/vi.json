@@ -517,6 +517,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"storica": {
+				"name": "Storica",
+				"one_liner": "Kho lưu trữ đám mây của riêng bạn trên Internet Computer.",
+				"description": "Storica triển khai một canister lưu trữ riêng tư trên Internet Computer trong khoảng một phút, thanh toán bằng ICP. Bạn kiểm soát canister, các tệp, quyền truy cập và các bản nâng cấp của nó. Quản lý tệp qua bảng điều khiển web, công cụ dòng lệnh hoặc TypeScript SDK, và đăng nhập bằng OISY hoặc Internet Identity."
 			}
 		}
 	},

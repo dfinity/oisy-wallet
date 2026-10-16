@@ -517,6 +517,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"storica": {
+				"name": "Storica",
+				"one_liner": "Votre propre stockage cloud sur l'Internet Computer.",
+				"description": "Storica déploie en une minute environ un canister de stockage privé sur l'Internet Computer, payé en ICP. Vous contrôlez le canister, ses fichiers, ses autorisations et ses mises à jour. Gérez vos fichiers depuis la console web, l'outil en ligne de commande ou le SDK TypeScript, et connectez-vous avec OISY ou Internet Identity."
 			}
 		}
 	},

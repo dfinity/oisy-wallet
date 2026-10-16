@@ -517,6 +517,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"storica": {
+				"name": "Storica",
+				"one_liner": "Internet Computer 上の、あなた専用のクラウドストレージ。",
+				"description": "Storica は、約1分で Internet Computer 上にプライベートなストレージキャニスターをデプロイします。支払いは ICP で行います。キャニスターとそのファイル、権限、アップグレードはすべてあなたが管理します。Web コンソール、コマンドラインツール、TypeScript SDK からファイルを管理でき、OISY または Internet Identity でサインインできます。"
 			}
 		}
 	},
