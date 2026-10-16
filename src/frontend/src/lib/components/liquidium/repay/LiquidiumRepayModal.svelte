@@ -86,6 +86,12 @@
 		nonNullish(maxRepay) ? (maxRepay > pendingRepay ? maxRepay - pendingRepay : ZERO) : undefined
 	);
 
+	// The position as the portfolio reports it now: the copy picked from the list keeps the
+	// pre-settlement debt once a pending repay settles. The fee and max effects stay keyed on the pick,
+	// so a portfolio refresh does not refetch them.
+	const liveReserve = (picked: LiquidiumReserve): LiquidiumReserve =>
+		$liquidiumPortfolio?.reserves.find(({ poolId }) => poolId === picked.poolId) ?? picked;
+
 	$effect(() => {
 		const identity = $authIdentity;
 
@@ -236,7 +242,7 @@
 					onSelectToken={enterTokensList}
 					{pendingRepay}
 					portfolio={$liquidiumPortfolio}
-					reserve={selectedReserve}
+					reserve={liveReserve(selectedReserve)}
 					bind:amount
 					bind:repayProgressStep
 				/>
@@ -253,7 +259,7 @@
 					onSelectToken={enterTokensList}
 					{pendingRepay}
 					portfolio={$liquidiumPortfolio}
-					reserve={selectedReserve}
+					reserve={liveReserve(selectedReserve)}
 					bind:amount
 					bind:repayProgressStep
 				/>
@@ -270,7 +276,7 @@
 					onSelectToken={enterTokensList}
 					{pendingRepay}
 					portfolio={$liquidiumPortfolio}
-					reserve={selectedReserve}
+					reserve={liveReserve(selectedReserve)}
 					bind:amount
 					bind:repayProgressStep
 				/>

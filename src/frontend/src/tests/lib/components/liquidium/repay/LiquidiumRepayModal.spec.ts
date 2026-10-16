@@ -186,6 +186,32 @@ describe('LiquidiumRepayModal', () => {
 		await waitFor(() => expect(getByTestId(STAKE_REVIEW_FORM_BUTTON)).toHaveAttribute('disabled'));
 	});
 
+	// The debt rows follow the live portfolio, not the reserve picked when the modal opened.
+	it('shows the settled debt once the portfolio refreshes', async () => {
+		const { getAllByText, getByText, queryByText } = render(LiquidiumRepayModal, {
+			props: { reserve }
+		});
+
+		await waitFor(() => expect(getByText('1 ICP')).toBeInTheDocument());
+
+		liquidiumStore.set({
+			markets: [],
+			portfolio: {
+				...portfolio,
+				reserves: [{ ...reserve, borrowed: 50_000_000n, borrowedUsd: 6 }]
+			},
+			assetPrices: {}
+		});
+		activeUserTransactionsStore.upsert({
+			transaction: { ...pendingRepay, status: { Succeeded: null } }
+		});
+
+		await waitFor(() => expect(queryByText('1 ICP')).toBeNull());
+
+		// Current debt and Debt after repay (nothing typed).
+		expect(getAllByText('0.5 ICP')).toHaveLength(2);
+	});
+
 	it('says the debt is unavailable when the max request fails', async () => {
 		maxRepaySpy.mockRejectedValue(new Error('canister unreachable'));
 
