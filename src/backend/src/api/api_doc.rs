@@ -5,8 +5,9 @@ use ic_cdk::query;
 /// The Candid interface remains the source of truth for method signatures and
 /// exact error variants.
 #[query]
+#[must_use]
 pub fn get_api_doc() -> String {
-    r#"# OISY backend API guide
+    r"# OISY backend API guide
 
 This canister provides backend services for the OISY wallet application. Its
 Candid interface describes the available methods and their exact argument,
@@ -55,7 +56,7 @@ flow and its explicit user approval for any asset movement.
   cannot use them as plaintext user data.
 - Do not call controller-only configuration or administrative methods as an
   end user.
-"#
+"
     .to_string()
 }
 
