@@ -49,12 +49,14 @@
 </script>
 
 {#if allNetworksEnabled}
-	<NetworkButton
-		{labelsSize}
-		{onSelected}
-		{selectedNetworkId}
-		usdBalance={mainnetTokensUsdBalance}
-	/>
+	<div class="menu-divider">
+		<NetworkButton
+			{labelsSize}
+			{onSelected}
+			{selectedNetworkId}
+			usdBalance={mainnetTokensUsdBalance}
+		/>
+	</div>
 {/if}
 
 <ul class="flex list-none flex-col">
@@ -66,7 +68,7 @@
 </ul>
 
 {#if showTestnets && $testnetsEnabled && $networksTestnets.length && isNullish(supportedNetworks)}
-	<span class="mt-6 mb-3 flex px-3 font-bold" transition:slide={SLIDE_PARAMS}
+	<span class="mt-6 mb-3 flex px-2 font-bold" transition:slide={SLIDE_PARAMS}
 		>{$i18n.networks.test_networks}</span
 	>
 

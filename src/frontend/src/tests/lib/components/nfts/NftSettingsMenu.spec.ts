@@ -26,7 +26,7 @@ describe('NftsSettingsMenu', () => {
 		const button = container.querySelector('button');
 
 		expect(button).toBeInTheDocument();
-		expect(button).toHaveAttribute('aria-label', get(i18n).navigation.alt.menu);
+		expect(button).toHaveAttribute('aria-label', get(i18n).tokens.manage.text.list_settings);
 	});
 
 	it('should open the popover when button is clicked', async () => {

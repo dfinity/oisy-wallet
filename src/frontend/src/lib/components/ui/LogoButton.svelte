@@ -78,9 +78,9 @@
 		>
 			<span class="flex min-w-0 items-center">
 				{#if selectable}
-					<span class="mr-2 flex min-w-4 text-brand-primary" in:fade>
+					<span class="mr-3 flex min-w-5 items-center text-brand-primary" in:fade>
 						{#if selected}
-							<IconGixCheck size="16px" />
+							<IconGixCheck size="20px" />
 						{/if}
 					</span>
 				{/if}
@@ -91,7 +91,7 @@
 					<span class="flex min-w-0 items-center truncate text-nowrap">
 						{#if nonNullish(title)}
 							<span
-								class={`text-lg font-bold text-nowrap text-primary ${titleStyleClass}`}
+								class={`logo-button-title text-lg font-bold text-nowrap text-primary ${titleStyleClass}`}
 								class:min-w-0={isNullish(subtitle)}
 								class:truncate={isNullish(subtitle)}
 							>

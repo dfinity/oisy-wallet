@@ -25,7 +25,7 @@ describe('NftSorting', () => {
 		const button = container.querySelector('button');
 
 		expect(button).toBeInTheDocument();
-		expect(button).toHaveAttribute('aria-label', get(i18n).navigation.alt.menu);
+		expect(button).toHaveAttribute('aria-label', get(i18n).core.text.sorting);
 	});
 
 	it('should open the popover when button is clicked', async () => {
