@@ -3,6 +3,7 @@ import { AMOUNT_DATA } from '$lib/constants/test-ids.constants';
 import * as settingsDerived from '$lib/derived/settings.derived';
 import { HERO_CONTEXT_KEY, initHeroContext, type HeroContext } from '$lib/stores/hero.store';
 import type { TokenUi } from '$lib/types/token-ui';
+import * as deviceUtils from '$lib/utils/device.utils';
 import * as privacyUtils from '$lib/utils/privacy.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
@@ -34,6 +35,14 @@ describe('Balance', () => {
 		mockHeroContext.loading.set(false);
 
 		mockPrivacyMode(false);
+
+		vi.spyOn(deviceUtils, 'isDesktop').mockReturnValue(true);
+	});
+
+	it('should show a pointer on the amount and keep its digits unselectable', () => {
+		const { getByTestId } = renderComponent();
+
+		expect(getByTestId(AMOUNT_DATA)).toHaveClass('cursor-pointer', 'select-none');
 	});
 
 	describe('privacy mode toggle', () => {
@@ -48,7 +57,7 @@ describe('Balance', () => {
 
 			expect(setPrivacyModeSpy).toHaveBeenCalledExactlyOnceWith({
 				enabled: true,
-				withToast: false,
+				withToast: true,
 				source: 'Hero - Double click on the Balance amount'
 			});
 		});
@@ -66,7 +75,7 @@ describe('Balance', () => {
 
 			expect(setPrivacyModeSpy).toHaveBeenCalledExactlyOnceWith({
 				enabled: false,
-				withToast: false,
+				withToast: true,
 				source: 'Hero - Double click on the Balance amount'
 			});
 		});
@@ -84,7 +93,7 @@ describe('Balance', () => {
 
 			expect(setPrivacyModeSpy).toHaveBeenCalledExactlyOnceWith({
 				enabled: true,
-				withToast: false,
+				withToast: true,
 				source: 'Hero - Double click on the Balance amount'
 			});
 		});
@@ -100,8 +109,46 @@ describe('Balance', () => {
 
 			expect(setPrivacyModeSpy).toHaveBeenCalledExactlyOnceWith({
 				enabled: true,
-				withToast: false,
+				withToast: true,
 				source: 'Hero - Double click on the Balance'
+			});
+		});
+
+		describe('on mobile', () => {
+			beforeEach(() => {
+				vi.spyOn(deviceUtils, 'isDesktop').mockReturnValue(false);
+			});
+
+			it('should toggle privacy mode without a toast when double-clicking the amount', async () => {
+				const setPrivacyModeSpy = vi
+					.spyOn(privacyUtils, 'setPrivacyMode')
+					.mockImplementation(() => undefined);
+
+				const { getByTestId } = renderComponent();
+
+				await fireEvent.dblClick(getByTestId(AMOUNT_DATA));
+
+				expect(setPrivacyModeSpy).toHaveBeenCalledExactlyOnceWith({
+					enabled: true,
+					withToast: false,
+					source: 'Hero - Double click on the Balance amount'
+				});
+			});
+
+			it('should toggle privacy mode without a toast when double-clicking the subtitle', async () => {
+				const setPrivacyModeSpy = vi
+					.spyOn(privacyUtils, 'setPrivacyMode')
+					.mockImplementation(() => undefined);
+
+				const { getByRole } = renderComponent();
+
+				await fireEvent.dblClick(getByRole('button', { name: en.hero.alt.toggle_privacy_mode }));
+
+				expect(setPrivacyModeSpy).toHaveBeenCalledExactlyOnceWith({
+					enabled: true,
+					withToast: false,
+					source: 'Hero - Double click on the Balance'
+				});
 			});
 		});
 	});
