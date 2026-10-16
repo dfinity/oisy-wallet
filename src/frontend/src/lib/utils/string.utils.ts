@@ -14,6 +14,22 @@ export const normalizeTextFilter = (filter: string): string => filter.trim().toL
 export const textMatchesFilter = ({ value, filter }: { value: string; filter: string }): boolean =>
 	value.toLowerCase().includes(filter);
 
+// The longest prefix of `text` that fits in `maxBytes` of UTF-8, for limits measured in bytes —
+// such as the backend's `str::len()` — which a character count overruns on non-ASCII text.
+// `encodeInto` stops at the last whole code point that fits, and `read` counts the UTF-16 units it
+// took: one pass that ends at the limit, whatever the text's length, and never half a character.
+export const truncateUtf8Bytes = ({
+	text,
+	maxBytes
+}: {
+	text: string;
+	maxBytes: number;
+}): string => {
+	const { read } = new TextEncoder().encodeInto(text, new Uint8Array(maxBytes));
+
+	return text.slice(0, read);
+};
+
 // True when the filter is empty (match-all) or at least one candidate string
 // contains it. Candidates are meant to be the user-facing — typically already
 // localized — strings a row renders, so free-text search follows the user's
