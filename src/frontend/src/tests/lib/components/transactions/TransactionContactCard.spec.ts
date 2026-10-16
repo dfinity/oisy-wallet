@@ -128,6 +128,31 @@ describe('TransactionContactCard', () => {
 		expect(queryByRole('button', { name: get(i18n).address.save.title })).toBeNull();
 	});
 
+	// The sender of a likely-spam transaction is an address-poisoning suspect: saving it as a
+	// contact would make the look-alike address easy to pick later.
+	it('warns about likely spam and hides the save address button', () => {
+		mockContacts([]);
+
+		const { getByText, queryByRole } = render(TransactionContactCard, {
+			props: { type: 'receive', from: mockXrpAddress, likelySpam: true }
+		});
+
+		expect(getByText(get(i18n).transaction.warning.likely_spam)).toBeInTheDocument();
+		expect(getByText(mockXrpAddress)).toBeInTheDocument();
+		expect(queryByRole('button', { name: get(i18n).address.save.title })).toBeNull();
+	});
+
+	it('neither warns nor hides the save address button by default', () => {
+		mockContacts([]);
+
+		const { queryByText, getByRole } = render(TransactionContactCard, {
+			props: { type: 'receive', from: mockXrpAddress }
+		});
+
+		expect(queryByText(get(i18n).transaction.warning.likely_spam)).toBeNull();
+		expect(getByRole('button', { name: get(i18n).address.save.title })).toBeInTheDocument();
+	});
+
 	it('renders contact name if contact found (to)', () => {
 		mockContacts([toMockContact]);
 

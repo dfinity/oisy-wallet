@@ -1,6 +1,7 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
 import { ZERO } from '$lib/constants/app.constants';
+import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import {
 	formatNanosecondsToDate,
@@ -100,5 +101,33 @@ describe('IcTransactionModal', () => {
 		expect(
 			getByText(formatNanosecondsToDate({ nanoseconds: 1754910013783000000n }))
 		).toBeInTheDocument();
+	});
+
+	describe('likely spam', () => {
+		beforeEach(() => {
+			exchangeStore.set([{ 'internet-computer': { usd: 5 } }]);
+		});
+
+		afterEach(() => {
+			exchangeStore.reset();
+		});
+
+		it('warns about a received transaction worth less than a cent', () => {
+			const { getByText } = render(IcTransactionModal, {
+				transaction: { ...mockIcTransactionUi, type: 'receive', value: 1n },
+				token: ICP_TOKEN
+			});
+
+			expect(getByText(get(i18n).transaction.warning.likely_spam)).toBeInTheDocument();
+		});
+
+		it('does not warn about a received transaction worth more than a cent', () => {
+			const { queryByText } = render(IcTransactionModal, {
+				transaction: { ...mockIcTransactionUi, type: 'receive', value: 100_000_000n },
+				token: ICP_TOKEN
+			});
+
+			expect(queryByText(get(i18n).transaction.warning.likely_spam)).toBeNull();
+		});
 	});
 });

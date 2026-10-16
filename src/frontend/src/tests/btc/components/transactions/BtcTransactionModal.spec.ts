@@ -1,6 +1,7 @@
 import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ZERO } from '$lib/constants/app.constants';
+import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { mockBtcTransactionUi } from '$tests/mocks/blockchain-transactions.mock';
@@ -106,5 +107,33 @@ describe('BtcTransactionModal', () => {
 		});
 
 		expect(queryByText(get(i18n).fee.text.fee)).not.toBeInTheDocument();
+	});
+
+	describe('likely spam', () => {
+		beforeEach(() => {
+			exchangeStore.set([{ bitcoin: { usd: 100_000 } }]);
+		});
+
+		afterEach(() => {
+			exchangeStore.reset();
+		});
+
+		it('warns about a received transaction worth less than a cent', () => {
+			const { getByText } = render(BtcTransactionModal, {
+				transaction: { ...mockBtcTransactionUi, type: 'receive', value: 1n },
+				token: BTC_MAINNET_TOKEN
+			});
+
+			expect(getByText(get(i18n).transaction.warning.likely_spam)).toBeInTheDocument();
+		});
+
+		it('does not warn about a received transaction worth more than a cent', () => {
+			const { queryByText } = render(BtcTransactionModal, {
+				transaction: { ...mockBtcTransactionUi, type: 'receive', value: 100_000n },
+				token: BTC_MAINNET_TOKEN
+			});
+
+			expect(queryByText(get(i18n).transaction.warning.likely_spam)).toBeNull();
+		});
 	});
 });

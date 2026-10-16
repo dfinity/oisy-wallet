@@ -6,6 +6,7 @@
 	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { allContacts } from '$lib/derived/contacts.derived';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -23,6 +24,9 @@
 		approveSpender?: string;
 		approveSpenderExplorerUrl?: string;
 		onSaveAddressComplete?: (data: OpenTransactionParams<AnyTransactionUi>) => void;
+		// The transaction is likely spam (see `isReceivedMicroTransaction`): the card warns about
+		// it and does not offer to save the counterparty as a contact.
+		likelySpam?: boolean;
 	}
 
 	const {
@@ -33,7 +37,8 @@
 		fromExplorerUrl,
 		approveSpender,
 		approveSpenderExplorerUrl,
-		onSaveAddressComplete
+		onSaveAddressComplete,
+		likelySpam = false
 	}: Props = $props();
 
 	let address: string | undefined = $derived(
@@ -69,6 +74,10 @@
 </script>
 
 {#if nonNullish(address)}
+	{#if likelySpam}
+		<MessageBox level="warning">{$i18n.transaction.warning.likely_spam}</MessageBox>
+	{/if}
+
 	<AddressCard>
 		{#snippet logo()}
 			<AvatarWithBadge badge={{ type: 'addressType', address }} {contact} />
@@ -84,7 +93,7 @@
 				>
 				<span class="w-full truncate">{address}</span>
 
-				{#if isNullish(contact) && isSaveable}
+				{#if isNullish(contact) && isSaveable && !likelySpam}
 					<Button
 						ariaLabel={$i18n.address.save.title}
 						link
