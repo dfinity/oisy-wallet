@@ -35,4 +35,4 @@ const manifest = {
 
 const wellKnownDir = join(process.cwd(), 'build', '.well-known');
 mkdirSync(wellKnownDir, { recursive: true });
-writeFileSync(join(wellKnownDir, 'ic-architecture'), `${JSON.stringify(manifest, null, '\t')}\n`);
+writeFileSync(join(wellKnownDir, 'ic-architecture'), JSON.stringify(manifest));
