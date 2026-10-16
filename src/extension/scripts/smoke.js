@@ -224,15 +224,23 @@ try {
 	await dapp.reload();
 	check({ name: 'reloading the dapp closes its open popup', ok: await secondPopupClosed });
 
-	const toolbar = await context.newPage();
-	await toolbar.setViewportSize({ width: 372, height: 300 });
-	await toolbar.goto(`chrome-extension://${EXTENSION_ID}/popup.html`);
-	const emptyShown = await toolbar
+	const panelBehavior = await worker.evaluate(() => globalThis.chrome.sidePanel.getPanelBehavior());
+	check({
+		name: 'the toolbar icon opens the side panel',
+		ok: panelBehavior?.openPanelOnActionClick === true
+	});
+
+	// Playwright can't click the browser's own toolbar, so the panel page is opened as a tab at a
+	// typical side panel width.
+	const panel = await context.newPage();
+	await panel.setViewportSize({ width: 360, height: 640 });
+	await panel.goto(`chrome-extension://${EXTENSION_ID}/sidepanel.html`);
+	const emptyShown = await panel
 		.waitForSelector('#empty:not([hidden])', { timeout: 5000 })
 		.then(() => true)
 		.catch(() => false);
-	check({ name: 'toolbar popup shows the not-connected state', ok: emptyShown });
-	await toolbar.screenshot({ path: join(SCREENSHOT_DIR, 'toolbar-not-connected.png') });
+	check({ name: 'the side panel shows the not-connected state', ok: emptyShown });
+	await panel.screenshot({ path: join(SCREENSHOT_DIR, 'side-panel-not-connected.png') });
 } finally {
 	await context.close();
 	await rm(userDataDir, { recursive: true, force: true });

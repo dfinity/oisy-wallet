@@ -28,7 +28,7 @@
 }
 
 body {
-	width: 340px;
+	min-width: 0;
 	margin: 0;
 	padding: 16px;
 	background: var(--bg);

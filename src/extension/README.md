@@ -2,7 +2,8 @@
 
 Lets dapps that only support extension wallets connect to OISY and sign. The extension holds no keys:
 it announces OISY to the page, decides which sites may see which address, and opens an oisy.com
-popup where the existing review screens show and sign every request.
+popup where the existing review screens show and sign every request. Its own screen, with balances
+and connected sites, opens in Chrome's side panel (Chrome 116 or later).
 
 Local only, against staging, on Sepolia and Solana devnet. Chromium browsers only.
 
@@ -42,7 +43,9 @@ Open http://localhost:8090.
 3. **Sign a message** and **Sign typed data** need no funds. The result shows whether the signature
    recovers to your address.
 4. Under Solana, **Connect**, then **Sign a message**.
-5. Sending needs testnet funds: Sepolia ETH from a faucet for **Send 0 ETH to myself**, devnet SOL
+5. Click the OISY icon in Chrome's toolbar. The side panel shows your addresses, balances and
+   connected sites, and stays open next to the dapp.
+6. Sending needs testnet funds: Sepolia ETH from a faucet for **Send 0 ETH to myself**, devnet SOL
    (`solana airdrop` or faucet.solana.com) for the Solana transaction buttons.
 
 Real dapps on Sepolia or devnet work the same way, for example the MetaMask test dapp or the Solana

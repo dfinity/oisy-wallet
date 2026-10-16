@@ -11,6 +11,10 @@ import {
 
 const STORAGE_KEY = 'state';
 
+// Clicking the toolbar icon opens the side panel with balances and connected sites. It stays open
+// next to the dapp, unlike a toolbar popup that closes as soon as another window takes focus.
+chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => undefined);
+
 // Long enough for OISY's own success step to show before the popup closes, and for the user to
 // read why a request failed. A rejection closes right away.
 const CLOSE_AFTER_SUCCESS_MS = 900;
@@ -440,7 +444,7 @@ chrome.runtime.onConnect.addListener((port) => {
 	});
 });
 
-// --- Messages from the extension's own toolbar popup -------------------------------------------
+// --- Messages from the extension's own side panel ----------------------------------------------
 
 const handlePopupMessage = async (message) => {
 	switch (message?.type) {
@@ -448,7 +452,7 @@ const handlePopupMessage = async (message) => {
 			if (activeRequest !== null) {
 				throw new RpcError(ERRORS.requestPending);
 			}
-			// Not awaited: the toolbar popup closes as soon as the OISY window takes focus.
+			// Not awaited: the side panel re-renders from storage once the OISY window answers.
 			openOisy({ kind: 'pair' }).catch(() => undefined);
 			return null;
 		case 'revoke-site':
@@ -465,9 +469,9 @@ const handlePopupMessage = async (message) => {
 
 // eslint-disable-next-line local-rules/prefer-object-params -- Chrome API callback signature
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	const fromToolbarPopup =
+	const fromSidePanel =
 		sender.id === chrome.runtime.id && sender.url?.startsWith(chrome.runtime.getURL('')) === true;
-	if (!fromToolbarPopup) {
+	if (!fromSidePanel) {
 		return false;
 	}
 	handlePopupMessage(message).then(
