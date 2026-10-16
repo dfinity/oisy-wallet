@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, type Snippet } from 'svelte';
+	import { getContext, onDestroy, type Snippet, untrack } from 'svelte';
 	import ScannedPlainAddressNotice from '$lib/components/send/ScannedPlainAddressNotice.svelte';
 	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
@@ -11,8 +11,11 @@
 	import XrpFeeDisplay from '$xrp/components/fee/XrpFeeDisplay.svelte';
 	import XrpSendAmount from '$xrp/components/send/XrpSendAmount.svelte';
 	import XrpSendDestinationTag from '$xrp/components/send/XrpSendDestinationTag.svelte';
+	import { loadXrpDestination } from '$xrp/services/xrp-destination.services';
 	import { type XrpFeeContext, XRP_FEE_CONTEXT_KEY } from '$xrp/stores/xrp-fee.store';
-	import type { XrpAmountAssertionError } from '$xrp/types/xrp-send';
+	import type { XrpNetworkType } from '$xrp/types/network';
+	import type { XrpAmountAssertionError, XrpDestinationFacts } from '$xrp/types/xrp-send';
+	import { mapNetworkIdToNetwork } from '$xrp/utils/network.utils';
 	import { invalidXrpAddress } from '$xrp/utils/xrp-address.utils';
 
 	interface Props {
@@ -35,7 +38,7 @@
 		cancel
 	}: Props = $props();
 
-	const { sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendBalance, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const {
 		feeDecimalsStore,
@@ -53,6 +56,56 @@
 
 	let invalidDestination = $derived(
 		isNullishOrEmpty(destination) || invalidXrpAddress(destination)
+	);
+
+	let network = $derived(
+		nonNullish($sendToken) ? mapNetworkIdToNetwork($sendToken.network.id) : undefined
+	);
+
+	// The recipient as the ledger reports it, read with the same lookup `sendXrp` decides on, so the
+	// form can show a refusal before Next that the send would otherwise make only after Send.
+	// `undefined` while the lookup runs.
+	let destinationFacts = $state<XrpDestinationFacts | undefined>();
+
+	// One per lookup, so an answer for a destination the form has moved off, or one arriving after
+	// the form is gone, cannot land.
+	let generation = 0;
+
+	const loadDestination = async ({ id, network }: { id: number; network: XrpNetworkType }) => {
+		const facts = await loadXrpDestination({ destination, network });
+
+		if (id !== generation) {
+			return;
+		}
+
+		destinationFacts = facts;
+	};
+
+	$effect(() => {
+		[destination, network];
+
+		untrack(() => {
+			const id = ++generation;
+
+			destinationFacts = undefined;
+
+			if (invalidDestination || isNullish(network)) {
+				return;
+			}
+
+			void loadDestination({ id, network });
+		});
+	});
+
+	onDestroy(() => generation++);
+
+	// Only an answer counts: both snapshots read, and the account missing from at least one. A lookup
+	// still running, or one that failed, decides nothing here — the form does not wait for it, and
+	// `sendXrp` reads the destination again before signing and refuses there.
+	let destinationUnfunded = $derived(
+		nonNullish(destinationFacts) &&
+			isNullish(destinationFacts.unavailable) &&
+			!destinationFacts.settled
 	);
 
 	// `invalidAmount`, not `isNullish`, and it subsumes it. `TokenInputContent` treats an empty
@@ -93,7 +146,7 @@
 	{/snippet}
 
 	{#snippet sendAmount()}
-		<XrpSendAmount {onTokensList} bind:amount bind:amountError />
+		<XrpSendAmount {destinationUnfunded} {onTokensList} bind:amount bind:amountError />
 		<XrpSendDestinationTag bind:invalidDestinationTag />
 	{/snippet}
 

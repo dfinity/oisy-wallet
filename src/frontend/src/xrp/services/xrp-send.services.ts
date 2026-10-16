@@ -6,7 +6,6 @@ import type { Token } from '$lib/types/token';
 import { consoleError } from '$lib/utils/console.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import {
-	XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG,
 	XRP_BASE_RESERVE_DROPS,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
 	XRP_MAX_DESTINATION_TAG,
@@ -14,12 +13,8 @@ import {
 	XRP_MAX_UINT32
 } from '$xrp/constants/xrp.constants';
 import { XrpRpcNotConfiguredError } from '$xrp/providers/xrp-rpc.providers';
-import {
-	XrpAccountNotFoundError,
-	loadXrpAccountInfo,
-	loadXrpLedgerIndex,
-	submitXrpTransaction
-} from '$xrp/rest/xrpl.rest';
+import { loadXrpAccountInfo, loadXrpLedgerIndex, submitXrpTransaction } from '$xrp/rest/xrpl.rest';
+import { loadXrpDestination } from '$xrp/services/xrp-destination.services';
 import { assertNoXrpPaymentInFlight } from '$xrp/services/xrp-in-flight.services';
 import { getXrpSigningPublicKey, signXrpTransaction } from '$xrp/services/xrp-sign.services';
 import type { XrpAddress } from '$xrp/types/address';
@@ -190,69 +185,6 @@ export const sendXrp = async ({
 }): Promise<XrpSendResult> => {
 	progress?.(ProgressStepsSendXrp.INITIALIZATION);
 
-	// The node's error is the only thing that means unfunded. A zero balance does not: the
-	// transaction cost can take an existing account below its reserve, even to nothing, and the
-	// account still exists — at which point it can receive any amount, since receiving carries no
-	// reserve requirement of its own.
-	//
-	// Three states, not a boolean: "it is not there" and "I could not ask" lead to different
-	// decisions, and an unavailable lookup keeps its error rather than discarding it, because
-	// whether that matters depends on the amount and only the guards below know it. The flags come
-	// back with it — they are in the same response, so reading them costs nothing.
-	// Both snapshots, reduced to the three facts the guards below actually need. A creation, a
-	// deletion or an `lsfRequireDestTag` change that lives only in the open ledger may never
-	// validate, and trusting it lets a below-reserve or untagged payment through to a fee-claiming
-	// `tec*` — which is the outcome this function declines payments before signing to avoid.
-	//
-	// The pessimistic reading in both directions. `settled` requires the account in BOTH, so a
-	// creation that has not validated and a deletion that has not validated are equally unsettled
-	// without needing a rule each. `requiresTag` fires if EITHER snapshot has the bit, because a
-	// tag that turns out not to have been needed costs nothing — XRPL simply carries it — while a
-	// missing one claims the fee.
-	//
-	// A false decline here is cheap and actionable: it says the amount must reach the account
-	// reserve, before anything is signed. That is the trade this file makes everywhere else.
-	interface XrpDestinationFacts {
-		settled: boolean;
-		requiresTag: boolean;
-		// Kept rather than thrown, because whether an unanswerable lookup matters depends on the
-		// amount and only the guards know it.
-		unavailable: Error | undefined;
-	}
-
-	// `flags` is a number on the `exists` branch, not an optional one: `Flags` is a mandatory
-	// AccountRoot field, so a response without it fails the parse and lands on `error` — an
-	// unanswerable lookup — rather than arriving here as a snapshot with nothing to say.
-	type XrpDestinationRead = { exists: true; flags: number } | { exists: false } | { error: Error };
-
-	const readDestination = async (
-		ledgerIndex: 'current' | 'validated'
-	): Promise<XrpDestinationRead> => {
-		try {
-			const { flags } = await loadXrpAccountInfo({ address: destination, network, ledgerIndex });
-
-			return { exists: true, flags };
-		} catch (err: unknown) {
-			if (err instanceof XrpAccountNotFoundError) {
-				return { exists: false };
-			}
-
-			return { error: err instanceof Error ? err : new Error(String(err)) };
-		}
-	};
-
-	const tryDestination = async (): Promise<XrpDestinationFacts> => {
-		const reads = await Promise.all([readDestination('current'), readDestination('validated')]);
-
-		return {
-			settled: reads.every((read) => 'exists' in read && read.exists),
-			requiresTag: reads.some(
-				(read) => 'flags' in read && (read.flags & XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG) !== 0
-			),
-			unavailable: reads.find((read): read is { error: Error } => 'error' in read)?.error
-		};
-	};
-
 	// A payment to yourself is refused from the arguments alone, for the reason the bounds below
 	// are: the ledger rejects it — rippled's `Payment::preflight` answers `temREDUNDANT` for a
 	// payment whose destination is its sender — but only after this has spent five RPC reads, a
@@ -334,10 +266,11 @@ export const sendXrp = async ({
 	// broken deployment; an insufficient balance is something the user can act on.
 	// Both snapshots of the sender, because neither is safe alone, and every value below takes the
 	// direction that cannot hurt: the higher sequence, the lower balance, the higher owner count.
+	// The destination is read from both snapshots too; `loadXrpDestination` says how they combine.
 	const [openAccount, validatedAccount, destinationLookup, ledgerIndex] = await Promise.all([
 		loadXrpAccountInfo({ address: source, network, ledgerIndex: 'current' }),
 		loadXrpAccountInfo({ address: source, network, ledgerIndex: 'validated' }),
-		tryDestination(),
+		loadXrpDestination({ destination, network }),
 		loadXrpLedgerIndex({ network })
 	]);
 

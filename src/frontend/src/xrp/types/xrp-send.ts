@@ -6,6 +6,26 @@ import type {
 export class XrpAmountAssertionError extends Error {}
 
 /**
+ * The send form's refusal of an amount below the base reserve for a recipient with no account yet.
+ * Its own type because, unlike the other amount errors, the correction is to raise the amount, so
+ * nothing may point at the balance.
+ */
+export class XrpAmountBelowDestinationReserveError extends XrpAmountAssertionError {}
+
+/**
+ * A payment's destination as both ledger snapshots report it, reduced to what the pre-sign guards
+ * decide on: whether an account exists in both, whether either requires a destination tag, and
+ * whether a snapshot could not be read at all.
+ */
+export interface XrpDestinationFacts {
+	settled: boolean;
+	requiresTag: boolean;
+	// Kept rather than thrown, because whether an unanswerable lookup matters depends on the
+	// amount and only the guards know it.
+	unavailable: Error | undefined;
+}
+
+/**
  * A pre-sign refusal the caller can present as a correction rather than a fault. All three fire
  * before anything is signed or submitted, so nothing left the wallet and the user can fix the
  * input and send again.
