@@ -1039,6 +1039,7 @@ export const idlFactory = ({ IDL }) => {
 		get_account_creation_timestamps: IDL.Func([], [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat64))]),
 		get_active_user_transactions: IDL.Func([], [GetActiveUserTransactionsResult]),
 		get_allowed_cycles: IDL.Func([], [GetAllowedCyclesResult], []),
+		get_api_doc: IDL.Func([], [IDL.Text]),
 		get_api_keys: IDL.Func([], [ApiKeys]),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_contact: IDL.Func([IDL.Nat64], [GetContactResult]),

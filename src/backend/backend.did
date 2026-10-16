@@ -1837,6 +1837,11 @@ service : (Arg) -> {
 	// - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
 	// - `Other`: If another error occurred during the operation
 	get_allowed_cycles : () -> (GetAllowedCyclesResult);
+	// Returns usage guidance for AI agents and other API clients.
+	//
+	// The Candid interface remains the source of truth for method signatures and
+	// exact error variants.
+	get_api_doc : () -> (text) query;
 	// Returns the currently stored API keys.
 	//
 	// Restricted to canister controllers only.
