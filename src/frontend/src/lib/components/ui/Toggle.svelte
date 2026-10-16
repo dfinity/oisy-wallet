@@ -99,6 +99,12 @@
 		}
 	}
 
+	@media (prefers-reduced-motion: reduce) {
+		.toggle input ~ label .track::after {
+			transition-property: background-color;
+		}
+	}
+
 	.toggle input:focus-visible + label {
 		outline: 2px solid var(--color-background-brand-primary);
 		outline-offset: var(--focus-outline-offset, 3px);
