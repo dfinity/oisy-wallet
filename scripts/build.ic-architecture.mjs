@@ -3,7 +3,9 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-if (process.env.DFX_NETWORK !== 'ic') {
+const network = process.env.DFX_NETWORK ?? process.env.NETWORK;
+
+if (network !== 'ic') {
 	process.exit(0);
 }
 
