@@ -69,6 +69,8 @@ does not finish while the children are invisible (see `NftHideButton`).
 | `QrButton`                           | `$lib/components/common/`         | "Scan QR" entry-point button.                                                                                                                             |
 | `Copy`                               | `$lib/components/ui/`             | Copy-to-clipboard icon button. Confirms on the button (check for 2 s plus a screen-reader status), no toast. `ReceiveCopy` wraps it.                      |
 | `IconSwap`                           | `$lib/components/ui/`             | Animated swap between two icons on a state change (copy → check, eye → eye-off). Both stay mounted and cross-fade, so the swap can reverse mid-way.       |
+| `Spinner`                            | `$lib/components/ui/`             | OISY visor Trace. Inherits text colour; CSS-length `size`, opt-in `inline` footprint. Static under reduced motion.                                        |
+| `LoaderSpinner`                      | `$lib/components/ui/`             | Wrapper around `Spinner` preserving `tiny` / `small` / `medium` and `inline`. No separate SVG or motion.                                                  |
 | `press` / `press-icon`               | `lib/styles/global.scss`          | Press for any text or card button (0.98) / icon-size control (0.96) that is not a `Button` / `ButtonIcon`. Same rule as theirs.                           |
 | `row-feedback`                       | `lib/styles/global.scss`          | Full-width row: 10 % hover, 20 % while pressed, no shrink, ignoring presses on controls inside it.                                                        |
 | `pressed:` / `child-pressed:`        | `lib/styles/global.scss`          | Variants behind `row-feedback`: pressed on the element itself / on a wrapper whose direct child is the button (`LogoButton`).                             |
@@ -83,6 +85,13 @@ does not finish while the children are invisible (see `NftHideButton`).
 | `WalletConnectScamWarning`           | `$lib/components/wallet-connect/` | The security-risk notice on a WalletConnect sign or send review whose request Verify flags as a scam (`acceptedContext`); that review offers Reject only. |
 | `Loader*` and `loaders/`             | `$lib/components/loaders/`        | Loaders, suspense boundaries, skeletons.                                                                                                                  |
 | `icons/`                             | `$lib/components/icons/`          | Project's icon set.                                                                                                                                       |
+
+The pre-hydration loader in `src/frontend/src/app.html` mirrors `Spinner` because it must
+render before the Svelte bundle loads. `tests/app.spec.ts` checks their geometry and dash
+pattern stay aligned. Keep its 30-second animation cap and the existing auth-initialization
+removal boundary; pause its nested animation through `--spinner-play-state` before the
+next-frame removal in the root layout. The layout fallback uses the same 48px footprint
+and stays hidden while the pre-hydration loader exists, avoiding two overlapping traces.
 
 ### Cross-chain feature folders
 
