@@ -128,6 +128,25 @@ export const deleteActiveUserTransaction = async ({
 	activeUserTransactionsStore.remove({ id });
 };
 
+// Reads one of the caller's rows from the backend into the store, for a caller whose copy may be
+// stale: a write whose response was lost, or one made from another tab, never reached it. Returns
+// the row, or `undefined` once it is gone.
+export const reloadActiveUserTransaction = async ({
+	identity,
+	id
+}: {
+	identity: Identity;
+	id: UpdateActiveUserTransactionParams['id'];
+}): Promise<ActiveUserTransaction | undefined> => {
+	const transaction = (await getActiveUserTransactions({ identity })).find((tx) => tx.id === id);
+
+	if (nonNullish(transaction)) {
+		upsertForIdentity({ identity, transaction });
+	}
+
+	return transaction;
+};
+
 export const applyActiveUserTransactionPollUpdate = async ({
 	identity,
 	tx,

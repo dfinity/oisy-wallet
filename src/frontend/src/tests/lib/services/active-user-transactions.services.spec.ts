@@ -5,6 +5,7 @@ import {
 	createActiveUserTransaction,
 	deleteActiveUserTransaction,
 	loadActiveUserTransactions,
+	reloadActiveUserTransaction,
 	updateActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
@@ -387,6 +388,67 @@ describe('active-user-transactions.services', () => {
 				})
 			).rejects.toEqual(mockActiveUserTransactionErrorNotFound);
 			expect(get(activeUserTransactionsList)).toEqual([mockActiveUserTransaction]);
+		});
+	});
+
+	describe('reloadActiveUserTransaction', () => {
+		const staleTransaction = mockActiveUserTransaction;
+		const freshTransaction = {
+			...mockActiveUserTransaction,
+			external_refs: [{ key: 'tx_hash', value: '0xhash' }],
+			updated_at_ns: 2n
+		};
+
+		beforeEach(() => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: staleTransaction });
+		});
+
+		it('should return the backend row and replace the stale copy in the store', async () => {
+			vi.spyOn(backendApi, 'getActiveUserTransactions').mockResolvedValue([freshTransaction]);
+
+			await expect(
+				reloadActiveUserTransaction({ identity: mockIdentity, id: mockActiveUserTransactionId })
+			).resolves.toEqual(freshTransaction);
+
+			expect(backendApi.getActiveUserTransactions).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity
+			});
+			expect(get(activeUserTransactionsList)).toEqual([freshTransaction]);
+		});
+
+		it('should return undefined and leave the store untouched when the backend has no such row', async () => {
+			vi.spyOn(backendApi, 'getActiveUserTransactions').mockResolvedValue([]);
+
+			await expect(
+				reloadActiveUserTransaction({ identity: mockIdentity, id: mockActiveUserTransactionId })
+			).resolves.toBeUndefined();
+
+			expect(get(activeUserTransactionsList)).toEqual([staleTransaction]);
+		});
+
+		// The account switched while the call was in flight: the row is not this account's.
+		it('should not upsert into the store of another account', async () => {
+			vi.spyOn(backendApi, 'getActiveUserTransactions').mockResolvedValue([freshTransaction]);
+			activeUserTransactionsStore.init(mockPrincipal2);
+
+			await reloadActiveUserTransaction({
+				identity: mockIdentity,
+				id: mockActiveUserTransactionId
+			});
+
+			expect(get(activeUserTransactionsList)).toEqual([]);
+		});
+
+		it('should propagate API errors so callers do not act on a stale copy', async () => {
+			vi.spyOn(backendApi, 'getActiveUserTransactions').mockRejectedValue(
+				mockActiveUserTransactionErrorNotFound
+			);
+
+			await expect(
+				reloadActiveUserTransaction({ identity: mockIdentity, id: mockActiveUserTransactionId })
+			).rejects.toEqual(mockActiveUserTransactionErrorNotFound);
+			expect(get(activeUserTransactionsList)).toEqual([staleTransaction]);
 		});
 	});
 
