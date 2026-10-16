@@ -37,7 +37,12 @@ import { AddressLookupTableInstruction } from '@solana-program/address-lookup-ta
 import { ComputeBudgetInstruction } from '@solana-program/compute-budget';
 import { StakeInstruction } from '@solana-program/stake';
 import { SystemInstruction } from '@solana-program/system';
-import { AssociatedTokenInstruction, TokenInstruction } from '@solana-program/token';
+import {
+	AssociatedTokenInstruction,
+	BATCH_DISCRIMINATOR,
+	getBatchInstructionDataDecoder,
+	TokenInstruction
+} from '@solana-program/token';
 import { Token2022Instruction } from '@solana-program/token-2022';
 import { type Option, unwrapOption } from '@solana/kit';
 
@@ -738,6 +743,21 @@ const mapSolTokenInstruction = ({
 		return destination === userAddress ? ignoredInstruction() : unfaithfulInstruction();
 	}
 
+	// Unwrapping pays lamports out of a wrapped SOL account to the destination the instruction names,
+	// which is the question a close answers too, and it is refused on the same terms when the answer
+	// is not the user's wallet. Paid to the wallet it stays an instruction the review does not read.
+	if (instructionType === TokenInstruction.UnwrapLamports) {
+		const {
+			accounts: {
+				destination: { address: destination }
+			}
+		} = instruction;
+
+		if (destination !== userAddress) {
+			return unfaithfulInstruction();
+		}
+	}
+
 	if (
 		instructionType === TokenInstruction.SetAuthority ||
 		instructionType === TokenInstruction.Burn ||
@@ -840,6 +860,19 @@ const mapSolToken2022Instruction = ({
 		} = instruction;
 
 		return destination === userAddress ? ignoredInstruction() : unfaithfulInstruction();
+	}
+
+	// Same reading as the Token program's unwrap: only a payout to the user's wallet passes.
+	if (instructionType === Token2022Instruction.UnwrapLamports) {
+		const {
+			accounts: {
+				destination: { address: destination }
+			}
+		} = instruction;
+
+		if (destination !== userAddress) {
+			return unfaithfulInstruction();
+		}
 	}
 
 	if (
@@ -1208,6 +1241,53 @@ export const asSolParsedRpcInstruction = (
 export const asSolParsedRpcInstructionOrSelf = (instruction: unknown): unknown =>
 	asSolParsedRpcInstruction(instruction) ?? instruction;
 
+const isSolTokenBatch = ({ programAddress, data }: SolInstruction): boolean =>
+	(programAddress === TOKEN_PROGRAM_ADDRESS || programAddress === TOKEN_2022_PROGRAM_ADDRESS) &&
+	data?.[0] === BATCH_DISCRIMINATOR;
+
+/**
+ * The instructions a token batch carries, each with the accounts it names, in the order the program
+ * runs them. Both token programs lay a batch out the same way.
+ *
+ * Undefined when the batch does not hold together: no instruction at all, an entry naming more
+ * accounts than are left, or data that cannot be read. The program refuses to run any of those.
+ */
+const solBatchedInstructions = ({
+	programAddress,
+	accounts = [],
+	data
+}: SolInstruction): SolInstruction[] | undefined => {
+	if (isNullish(data)) {
+		return;
+	}
+
+	try {
+		const { data: entries } = getBatchInstructionDataDecoder().decode(data);
+
+		const { batched } = entries.reduce<{ batched: SolInstruction[] | undefined; offset: number }>(
+			({ batched, offset }, { numberOfAccounts, instructionData }) => ({
+				batched:
+					nonNullish(batched) && offset + numberOfAccounts <= accounts.length
+						? [
+								...batched,
+								{
+									programAddress,
+									accounts: accounts.slice(offset, offset + numberOfAccounts),
+									data: instructionData
+								}
+							]
+						: undefined,
+				offset: offset + numberOfAccounts
+			}),
+			{ batched: [], offset: 0 }
+		);
+
+		return nonNullish(batched) && batched.length > 0 ? batched : undefined;
+	} catch (_err: unknown) {
+		// A batch the decoder cannot read is one nothing can say anything about.
+	}
+};
+
 export const mapSolInstruction = ({
 	instruction,
 	userAddress,
@@ -1226,6 +1306,26 @@ export const mapSolInstruction = ({
 	// otherwise throw and crash the signing flow.
 	if (instruction.programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS) {
 		return mapSolComputeBudgetInstruction(instruction);
+	}
+
+	// A batch runs the token instructions it carries one after the other, each with the accounts it
+	// names, so it does what they would do stated one by one. Each is held to the reading it would
+	// get on its own, and one refused there is refused here too, with the whole message. A batch
+	// nested in a batch, which neither token program runs, and one that does not hold together are
+	// refused as well. A batch that passes stays an instruction the review does not read.
+	if (isSolTokenBatch(instruction)) {
+		const batched = solBatchedInstructions(instruction);
+
+		const refused =
+			isNullish(batched) ||
+			batched.some(
+				(inner) =>
+					isSolTokenBatch(inner) ||
+					(mapSolInstruction({ instruction: inner, userAddress, rentExemptMinimum }).ambiguous ??
+						false)
+			);
+
+		return refused ? unfaithfulInstruction() : unreviewedInstruction();
 	}
 
 	// Every parser here ends in an exhaustive switch that throws on a discriminator it does not
