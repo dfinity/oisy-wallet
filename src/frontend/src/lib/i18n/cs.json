@@ -517,6 +517,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"icforums": {
+				"name": "IC Forums",
+				"one_liner": "Komunitní fóra na Internet Computeru.",
+				"description": "IC Forums je komunitní platforma, která běží plně na Internet Computeru. Zapojte se do diskusí ve více než 100 komunitách, nebo založte vlastní s vlastní strukturou, rolemi a moderováním. Jedna identita platí pro všechny komunity."
 			}
 		}
 	},

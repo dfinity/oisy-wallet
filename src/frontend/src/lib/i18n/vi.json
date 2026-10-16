@@ -517,6 +517,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"icforums": {
+				"name": "IC Forums",
+				"one_liner": "Diễn đàn cộng đồng trên Internet Computer.",
+				"description": "IC Forums là nền tảng cộng đồng chạy hoàn toàn trên Internet Computer. Tham gia thảo luận trong hơn 100 cộng đồng, hoặc tạo cộng đồng của riêng bạn với cấu trúc, vai trò và cách kiểm duyệt riêng. Một danh tính dùng được cho mọi cộng đồng."
 			}
 		}
 	},

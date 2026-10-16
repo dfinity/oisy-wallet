@@ -517,6 +517,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"icforums": {
+				"name": "IC Forums",
+				"one_liner": "Fora społecznościowe na Internet Computer.",
+				"description": "IC Forums to platforma społecznościowa działająca w całości na Internet Computer. Dołącz do dyskusji w ponad 100 społecznościach albo załóż własną, z własną strukturą, rolami i moderacją. Jedna tożsamość działa we wszystkich społecznościach."
 			}
 		}
 	},
