@@ -89,7 +89,16 @@ export enum PLAUSIBLE_EVENT_TRANSACTION_SEND_ERROR_TYPES {
 // Why an offer that arrived was left out of the swap form.
 export enum PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES {
 	// A 1Click quote for an XRP deposit came with a deposit memo.
-	DEPOSIT_MEMO = 'deposit_memo'
+	DEPOSIT_MEMO = 'deposit_memo',
+	// The provider has no route for the pair and amount.
+	NO_ROUTE = 'no_route',
+	// The provider refused the request for exceeding its rate limit.
+	RATE_LIMITED = 'rate_limited',
+	// The quote failed OISY's own checks — a target, spender or echoed request that differs from
+	// what was asked — so it was never shown.
+	QUOTE_REJECTED = 'quote_rejected',
+	// Any other failure of the quote request.
+	REQUEST_FAILED = 'request_failed'
 }
 
 // Why a tip step failed. `TipError` is OISY's own candid type, so its variant names are a closed

@@ -156,7 +156,29 @@ Add new feature folders only if your concern doesn't fit any of the above.
 | `coingecko.rest`                                                                             | `$lib/rest/`    | Spot / token prices.      |
 | `blockchain.rest`, `blockstream.rest`                                                        | `$lib/rest/`    | BTC explorer endpoints.   |
 | `kongswap.rest`, `icpswap.rest`, `near-intents.rest`, `harvest.rest`, `open-crypto-pay.rest` | `$lib/rest/`    | Swap providers + harvest. |
+| `lifi.rest`                                                                                  | `$lib/rest/`    | LI.FI quotes (SDK-based). |
 | `exchange.worker`, `auth.worker`                                                             | `$lib/workers/` | Background polling.       |
+
+### Per-provider swap quote cache
+
+Every swap provider is re-quoted every `SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS`. A provider
+whose rate limit cannot take that cadence throttles inside its own quote service; the fan-out
+stays unchanged. The precedent is `fetchLifiSwapQuote` (`$lib/services/lifi-swap.services.ts`):
+
+- One module-level entry `{ key, result, settledAt? }`. `key` is the serialised request, and
+  `result` is the promise rather than its value, so a request still in flight is shared, however
+  long it takes.
+- The interval runs from `settledAt`, not from the request: the same key gets the cached answer,
+  a failure or "no route" included, until the interval has passed since it settled. Any other
+  key fetches immediately and replaces the entry.
+- Give the request a timeout (`AbortSignal.timeout`, as `xrpl.rest` does): a request that never
+  settles would otherwise pin the entry, and hold back every other provider's offer, since the
+  swap form shows its offers once all providers have answered.
+- Serialise the key from your own request object, and hand an SDK that writes into its argument
+  a copy.
+- Export a reset (`resetLifiQuoteCache`) as the test seam, as `clearNearIntentsTokensCache` does.
+- Only display quotes go through the cache. A quote that is executed is requested again from the
+  REST layer directly.
 
 ## When to extract a new shared block
 

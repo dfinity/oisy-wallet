@@ -22,6 +22,7 @@ import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import type { Identity } from '@icp-sdk/core/agent';
+import type { LiFiStep } from '@lifi/sdk';
 import type { DeltaPrice, OptimalRate, QuoteParams } from '@velora-dex/sdk';
 
 export type SwapSelectTokenType = 'source' | 'destination';
@@ -54,7 +55,8 @@ export enum SwapProvider {
 	NEAR_INTENTS = 'nearIntents',
 	ONE_SEC = 'oneSec',
 	CHAIN_FUSION = 'chainFusion',
-	OISY_TRADE = 'oisyTrade'
+	OISY_TRADE = 'oisyTrade',
+	LIFI = 'lifi'
 }
 
 export enum VeloraSwapTypes {
@@ -174,6 +176,15 @@ export type SwapMappedResult =
 			// it fills at the submitted price or is killed — so the slippage control
 			// must not affect this offer.
 			swapDetails: OisyTradeSwapDetails;
+			type?: string;
+	  }
+	| {
+			provider: SwapProvider.LIFI;
+			receiveAmount: bigint;
+			receiveOutMinimum: bigint;
+			// The whole quote: its estimate carries the duration, fees and route tool the
+			// provider sheet shows.
+			swapDetails: LiFiStep;
 			type?: string;
 	  };
 

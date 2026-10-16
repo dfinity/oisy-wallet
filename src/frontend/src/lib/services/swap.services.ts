@@ -1299,6 +1299,10 @@ export const swapService = {
 	// and never reaches this entry, exactly as it does for 1Sec and Chain Fusion.
 	[SwapProvider.OISY_TRADE]: () => {
 		throw new Error(get(i18n).swap.error.unexpected);
+	},
+	// LI.FI has no ICP side, so no swap from an ICP token can reach this entry.
+	[SwapProvider.LIFI]: () => {
+		throw new Error(get(i18n).swap.error.unexpected);
 	}
 } satisfies Record<SwapProvider, (params: SwapParams) => Promise<void>>;
 
