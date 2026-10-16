@@ -517,6 +517,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"minglechat": {
+				"name": "Mingle Chat",
+				"one_liner": "内置代币转账的加密通讯应用。",
+				"description": "Mingle Chat 是一款完全运行在 Internet Computer 上的端到端加密通讯应用。你可以单聊或群聊，分享语音消息、图片和文件，还能直接在对话中发送代币。每笔转账都在 OISY 中签名。"
 			}
 		}
 	},

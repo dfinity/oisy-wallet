@@ -517,6 +517,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"minglechat": {
+				"name": "Mingle Chat",
+				"one_liner": "Šifrované zprávy s vestavěnými tokeny.",
+				"description": "Mingle Chat je komunikátor s koncovým šifrováním, který běží plně na Internet Computeru. Pište si ve dvou nebo ve skupinách, sdílejte hlasové zprávy, obrázky a soubory a posílejte tokeny přímo z konverzace. Každý převod se podepisuje v OISY."
 			}
 		}
 	},

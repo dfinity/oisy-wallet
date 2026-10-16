@@ -517,6 +517,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"minglechat": {
+				"name": "Mingle Chat",
+				"one_liner": "Verschlüsselte Nachrichten mit integrierten Token.",
+				"description": "Mingle Chat ist ein Ende-zu-Ende-verschlüsselter Messenger, der vollständig auf dem Internet Computer läuft. Chatte zu zweit oder in Gruppen, teile Sprachnachrichten, Bilder und Dateien und sende Token direkt aus einer Unterhaltung. Jeder Transfer wird in OISY signiert."
 			}
 		}
 	},

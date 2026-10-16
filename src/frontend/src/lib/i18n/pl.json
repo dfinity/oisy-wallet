@@ -517,6 +517,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"minglechat": {
+				"name": "Mingle Chat",
+				"one_liner": "Szyfrowane wiadomości z wbudowanymi tokenami.",
+				"description": "Mingle Chat to komunikator z szyfrowaniem end-to-end, który działa w całości na Internet Computer. Rozmawiaj prywatnie lub w grupach, udostępniaj wiadomości głosowe, zdjęcia i pliki oraz wysyłaj tokeny prosto z rozmowy. Każdy przelew jest podpisywany w OISY."
 			}
 		}
 	},
