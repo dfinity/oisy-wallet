@@ -34,7 +34,7 @@
 		onkeydown={keyboardClose}
 		role="dialog"
 		tabindex="-1"
-		use:overlayFocus={{ onClose: close }}
+		use:overlayFocus={{ onClose: close, priority: 'high' }}
 		in:fade
 		out:fade
 	>

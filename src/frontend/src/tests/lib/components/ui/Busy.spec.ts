@@ -1,7 +1,9 @@
 import Busy from '$lib/components/ui/Busy.svelte';
+import Modal from '$lib/components/ui/Modal.svelte';
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { overlayFocus } from '$lib/utils/overlay.utils';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get } from 'svelte/store';
@@ -150,6 +152,65 @@ describe('Busy', () => {
 			expect(get(busy)).not.toBeNull();
 		}
 	});
+
+	it.each([true, false])(
+		'keeps focus above a later-mounted modal when cancellable is %s',
+		async (cancellable) => {
+			const trigger = document.createElement('button');
+			document.body.append(trigger);
+			trigger.focus();
+			if (cancellable) {
+				busy.show();
+			} else {
+				busy.start();
+			}
+			const busyRender = render(Busy);
+			await tick();
+			const busyDialog = busyRender.getByRole('dialog');
+			const busyFocus = document.activeElement;
+			const onClose = vi.fn();
+			const modalRender = render(Modal, { title: mockSnippet, children: mockSnippet, onClose });
+			try {
+				await tick();
+
+				expect(document.activeElement).toBe(busyFocus);
+
+				const modalClose = modalRender.getByTestId('close-modal');
+				modalClose.focus();
+
+				expect(busyDialog.contains(document.activeElement)).toBeTruthy();
+
+				for (const shiftKey of [false, true]) {
+					await fireEvent.keyDown(window, { key: 'Tab', shiftKey });
+
+					expect(document.activeElement).toBe(busyFocus);
+				}
+				await fireEvent.keyDown(window, { key: 'Escape' });
+
+				expect(onClose).not.toHaveBeenCalled();
+
+				if (cancellable) {
+					expect(get(busy)).toBeUndefined();
+				} else {
+					expect(get(busy)).toBeDefined();
+
+					busy.stop();
+				}
+				await waitFor(() => expect(document.activeElement).toBe(modalClose));
+				await fireEvent.keyDown(window, { key: 'Escape' });
+
+				expect(onClose).toHaveBeenCalledOnce();
+
+				modalRender.unmount();
+
+				expect(document.activeElement).toBe(trigger);
+			} finally {
+				modalRender.unmount();
+				busyRender.unmount();
+				trigger.remove();
+			}
+		}
+	);
 
 	it('keeps Cancel reachable above a modal and handles Escape itself', async () => {
 		const parent = document.createElement('div');

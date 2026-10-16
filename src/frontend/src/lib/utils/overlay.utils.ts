@@ -3,6 +3,7 @@ import { tick } from 'svelte';
 interface OverlayOptions {
 	onClose?: () => void;
 	returnFocus?: HTMLElement;
+	priority?: 'normal' | 'high';
 }
 
 // Only the topmost overlay handles keys. A dialog opened from a popover can
@@ -10,9 +11,17 @@ interface OverlayOptions {
 interface OverlayEntry {
 	node: HTMLElement;
 	returnTargets: HTMLElement[];
+	options: OverlayOptions;
 }
 
 const overlays: OverlayEntry[] = [];
+// Busy stays visually above dialogs even when they mount after it.
+const topmostOverlay = (): OverlayEntry | undefined =>
+	overlays.reduce<OverlayEntry | undefined>(
+		(topmost, entry) =>
+			topmost?.options.priority === 'high' && entry.options.priority !== 'high' ? topmost : entry,
+		undefined
+	);
 const focusableSelector = 'button, a[href], input, select, textarea, iframe, [tabindex]';
 
 const focusableElements = (node: HTMLElement): HTMLElement[] => {
@@ -45,13 +54,13 @@ const focusableElements = (node: HTMLElement): HTMLElement[] => {
 // Svelte actions receive the node and parameters as positional arguments.
 // eslint-disable-next-line local-rules/prefer-object-params
 export const overlayFocus = (node: HTMLElement, options: OverlayOptions = {}) => {
-	let current = options;
 	const previous =
 		options.returnFocus ??
 		(document.activeElement instanceof HTMLElement ? document.activeElement : undefined);
-	const parent = overlays.at(-1);
+	const parent = topmostOverlay();
 	const entry: OverlayEntry = {
 		node,
+		options,
 		returnTargets: previous
 			? [previous, ...(parent?.node.contains(previous) ? parent.returnTargets : [])]
 			: []
@@ -59,7 +68,7 @@ export const overlayFocus = (node: HTMLElement, options: OverlayOptions = {}) =>
 	overlays.push(entry);
 	let mounted = true;
 
-	const isTopmost = () => overlays.at(-1) === entry;
+	const isTopmost = () => topmostOverlay() === entry;
 	const focusFirst = () => (focusableElements(node)[0] ?? node).focus({ preventScroll: true });
 
 	void tick().then(() => {
@@ -75,7 +84,7 @@ export const overlayFocus = (node: HTMLElement, options: OverlayOptions = {}) =>
 		if (event.key === 'Escape') {
 			event.preventDefault();
 			event.stopImmediatePropagation();
-			current.onClose?.();
+			entry.options.onClose?.();
 		}
 		if (event.key !== 'Tab') {
 			return;
@@ -111,7 +120,7 @@ export const overlayFocus = (node: HTMLElement, options: OverlayOptions = {}) =>
 
 	return {
 		update: (options: OverlayOptions) => {
-			current = options;
+			entry.options = options;
 		},
 		destroy: () => {
 			mounted = false;
@@ -119,7 +128,7 @@ export const overlayFocus = (node: HTMLElement, options: OverlayOptions = {}) =>
 			overlays.splice(overlays.indexOf(entry), 1);
 			window.removeEventListener('keydown', onKeyDown);
 			document.removeEventListener('focusin', onFocusIn);
-			const remaining = overlays.at(-1)?.node;
+			const remaining = topmostOverlay()?.node;
 			const target = entry.returnTargets.find(
 				(element) => element.isConnected && (!remaining || remaining.contains(element))
 			);
