@@ -2717,10 +2717,13 @@
 			"starting_to_repay": "Submitting your repayment...",
 			"repay_started": "The repayment is now being processed.",
 			"current_debt": "Current debt",
+			"pending_repays": "Repayments in progress",
 			"interest_accrued": "Interest accrued",
 			"debt_after_repay": "Debt after repay",
 			"repay_exceeds_debt": "Amount exceeds your outstanding debt.",
-			"repay_prices_unavailable": "Prices are temporarily unavailable. Repaying is disabled until they load."
+			"repay_prices_unavailable": "Prices are temporarily unavailable. Repaying is disabled until they load.",
+			"repay_debt_unavailable": "Your outstanding debt is temporarily unavailable. Repaying is disabled until it loads.",
+			"repay_pending_covers_debt": "A repayment for this position is still processing. You can repay more once it settles."
 		},
 		"info": {
 			"title": "What is Liquidium",

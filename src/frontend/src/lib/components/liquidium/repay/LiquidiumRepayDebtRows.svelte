@@ -13,13 +13,16 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	// The debt breakdown shared by the repay Form and Review so they always agree:
-	// Current debt (principal) + Interest accrued = total owed; Debt after repay = total − amount.
+	// Current debt (principal) + Interest accrued = total owed;
+	// Debt after repay = total − pending repays − amount.
 	interface Props {
 		reserve: LiquidiumReserve;
 		amount: OptionAmount;
+		// Net amount of this pool's repays still settling.
+		pendingRepay?: bigint;
 	}
 
-	let { reserve, amount }: Props = $props();
+	let { reserve, amount, pendingRepay = ZERO }: Props = $props();
 
 	const formatUsd = (value: number) =>
 		formatCurrency({
@@ -38,19 +41,25 @@
 			: ZERO
 	);
 
-	let remainingBorrowed = $derived(totalDebt > parsedRepay ? totalDebt - parsedRepay : ZERO);
+	let totalRepay = $derived(pendingRepay + parsedRepay);
+
+	let remainingBorrowed = $derived(totalDebt > totalRepay ? totalDebt - totalRepay : ZERO);
+
+	// USD on the reserve's price basis (principal, interest and repays share the asset price).
+	const toReserveUsd = (value: bigint): number =>
+		reserve.borrowed > ZERO ? (Number(value) / Number(reserve.borrowed)) * reserve.borrowedUsd : 0;
 
 	let interestUsd = $derived(liquidiumDebtInterestUsd(reserve));
-	// Repaid USD on the reserve's price basis (principal and interest share the asset price).
-	let repayUsd = $derived(
-		reserve.borrowed > ZERO
-			? (Number(parsedRepay) / Number(reserve.borrowed)) * reserve.borrowedUsd
-			: 0
+	let pendingRepayUsd = $derived(toReserveUsd(pendingRepay));
+	let remainingDebtUsd = $derived(
+		Math.max(0, reserve.borrowedUsd + interestUsd - toReserveUsd(totalRepay))
 	);
-	let remainingDebtUsd = $derived(Math.max(0, reserve.borrowedUsd + interestUsd - repayUsd));
 
 	let currentDebt = $derived(
 		`${formatToken({ value: reserve.borrowed, unitName: reserve.borrowedDecimals })} ${reserve.asset}`
+	);
+	let pendingRepays = $derived(
+		`${formatToken({ value: pendingRepay, unitName: reserve.borrowedDecimals })} ${reserve.asset}`
 	);
 	let interestAccrued = $derived(
 		`${formatToken({ value: debtInterest, unitName: reserve.borrowedDecimals })} ${reserve.asset}`
@@ -66,6 +75,15 @@
 	{#snippet secondaryValue()}<span class="text-tertiary">{formatUsd(reserve.borrowedUsd)}</span
 		>{/snippet}
 </ModalValue>
+
+{#if pendingRepay > ZERO}
+	<ModalValue>
+		{#snippet label()}{$i18n.liquidium.text.pending_repays}{/snippet}
+		{#snippet mainValue()}{pendingRepays}{/snippet}
+		{#snippet secondaryValue()}<span class="text-tertiary">{formatUsd(pendingRepayUsd)}</span
+			>{/snippet}
+	</ModalValue>
+{/if}
 
 <ModalValue>
 	{#snippet label()}{$i18n.liquidium.text.interest_accrued}{/snippet}

@@ -2717,10 +2717,13 @@
 			"starting_to_repay": "",
 			"repay_started": "",
 			"current_debt": "",
+			"pending_repays": "",
 			"interest_accrued": "",
 			"debt_after_repay": "",
 			"repay_exceeds_debt": "",
-			"repay_prices_unavailable": ""
+			"repay_prices_unavailable": "",
+			"repay_debt_unavailable": "",
+			"repay_pending_covers_debt": ""
 		},
 		"info": {
 			"title": "",

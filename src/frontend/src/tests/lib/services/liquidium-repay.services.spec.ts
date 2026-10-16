@@ -9,11 +9,14 @@ import {
 	computeLiquidiumRepayPreview,
 	executeLiquidiumRepay,
 	getLiquidiumMaxRepayAmount,
-	liquidiumDebtInterestUsd
+	liquidiumDebtInterestUsd,
+	liquidiumPendingCoversDebt,
+	liquidiumRepayCapError
 } from '$lib/services/liquidium-repay.services';
 import * as liquidiumServices from '$lib/services/liquidium.services';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { SupplyFlow, SupplyTarget } from '@liquidium/client';
 
@@ -79,6 +82,78 @@ describe('liquidium-repay.services', () => {
 			const preview = computeLiquidiumRepayPreview({ portfolio, repayUsd: 1_000 });
 
 			expect(preview.projectedHealthPercent).toBe(100);
+		});
+	});
+
+	describe('liquidiumPendingCoversDebt', () => {
+		it('is false without pending repays', () => {
+			expect(
+				liquidiumPendingCoversDebt({ pendingRepay: ZERO, maxRepay: ZERO, reserve })
+			).toBeFalsy();
+		});
+
+		it('is true when the net cap is zero', () => {
+			expect(
+				liquidiumPendingCoversDebt({ pendingRepay: 1n, maxRepay: ZERO, reserve })
+			).toBeTruthy();
+		});
+
+		it('is true when pending repays reach principal plus interest, even with a dust cap', () => {
+			expect(
+				liquidiumPendingCoversDebt({
+					pendingRepay: 100_500_000n,
+					maxRepay: 150n,
+					reserve: { ...reserve, debtInterest: 500_000n }
+				})
+			).toBeTruthy();
+		});
+
+		it('is false while pending repays fall short of the debt', () => {
+			expect(
+				liquidiumPendingCoversDebt({ pendingRepay: 99_999_999n, maxRepay: 1n, reserve })
+			).toBeFalsy();
+		});
+
+		it('is false while the cap is still loading and the debt is not covered', () => {
+			expect(
+				liquidiumPendingCoversDebt({ pendingRepay: 1n, maxRepay: undefined, reserve })
+			).toBeFalsy();
+		});
+	});
+
+	describe('liquidiumRepayCapError', () => {
+		const cap = { maxRepay: 100n, pendingRepay: ZERO, reserve, i18n: en };
+
+		it('is undefined within the cap', () => {
+			expect(liquidiumRepayCapError({ ...cap, amount: 50n })).toBeUndefined();
+		});
+
+		it('accepts exactly the cap', () => {
+			expect(liquidiumRepayCapError({ ...cap, amount: 100n })).toBeUndefined();
+		});
+
+		it('flags an amount over the cap', () => {
+			expect(liquidiumRepayCapError({ ...cap, amount: 101n })?.message).toBe(
+				en.liquidium.text.repay_exceeds_debt
+			);
+		});
+
+		it('flags a missing cap as unavailable', () => {
+			expect(liquidiumRepayCapError({ ...cap, amount: 1n, maxRepay: undefined })?.message).toBe(
+				en.liquidium.text.repay_debt_unavailable
+			);
+		});
+
+		it('flags a dust amount once pending repays cover the debt', () => {
+			// 1 BTC pending covers the 1 BTC debt; the buffer leaves a 150-sat cap the amount fits.
+			expect(
+				liquidiumRepayCapError({
+					...cap,
+					amount: 100n,
+					maxRepay: 150n,
+					pendingRepay: 100_000_000n
+				})?.message
+			).toBe(en.liquidium.text.repay_pending_covers_debt);
 		});
 	});
 

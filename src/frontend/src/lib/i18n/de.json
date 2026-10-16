@@ -2717,10 +2717,13 @@
 			"starting_to_repay": "Deine Rückzahlung wird übermittelt…",
 			"repay_started": "Deine Rückzahlung wird jetzt bearbeitet.",
 			"current_debt": "Aktuelle Schulden",
+			"pending_repays": "Rückzahlungen in Bearbeitung",
 			"interest_accrued": "Aufgelaufene Zinsen",
 			"debt_after_repay": "Schulden nach Rückzahlung",
 			"repay_exceeds_debt": "Der Betrag übersteigt deine ausstehenden Schulden.",
-			"repay_prices_unavailable": "Preise sind vorübergehend nicht verfügbar. Zurückzahlen ist deaktiviert, bis sie geladen sind."
+			"repay_prices_unavailable": "Preise sind vorübergehend nicht verfügbar. Zurückzahlen ist deaktiviert, bis sie geladen sind.",
+			"repay_debt_unavailable": "Deine ausstehenden Schulden sind vorübergehend nicht verfügbar. Zurückzahlen ist deaktiviert, bis sie geladen sind.",
+			"repay_pending_covers_debt": "Eine Rückzahlung für diese Position wird noch bearbeitet. Du kannst mehr zurückzahlen, sobald sie abgeschlossen ist."
 		},
 		"info": {
 			"title": "Was ist Liquidium",
