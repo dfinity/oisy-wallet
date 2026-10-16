@@ -695,12 +695,15 @@ export const fetchIcpSwap = async ({
 		fee: destinationTokenFee
 	} = destinationToken;
 
+	// Certified, because this pool canister becomes the spender of the approval and the target of
+	// the deposit below.
 	const pool = await getPoolCanister({
 		identity,
 		token0: { address: sourceLedgerCanisterId, standard: sourceStandard.code },
 		token1: { address: destinationLedgerCanisterId, standard: destinationStandard.code },
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity,
-		fee: ICP_SWAP_POOL_FEE
+		fee: ICP_SWAP_POOL_FEE,
+		certified: true
 	});
 
 	if (isNullish(pool)) {
