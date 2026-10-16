@@ -855,6 +855,7 @@
 		"text": {
 			"title": "Configuración",
 			"general": "General",
+			"security": "Seguridad",
 			"preferences": "Preferencias",
 			"principal": " Principal",
 			"principal_copied": "Principal copiado al portapapeles",

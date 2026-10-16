@@ -26,4 +26,34 @@ describe('Settings', () => {
 		expect(getByText(en.core.text.currency)).toBeInTheDocument();
 		expect(getByTestId(CURRENCY_SWITCHER_BUTTON)).toBeInTheDocument();
 	});
+
+	it('renders the Security card between General and Preferences', () => {
+		const { getByText } = render(Settings);
+
+		const general = getByText(en.settings.text.general);
+		const security = getByText(en.settings.text.security);
+		const preferences = getByText(en.settings.text.preferences);
+
+		expect(
+			general.compareDocumentPosition(security) & Node.DOCUMENT_POSITION_FOLLOWING
+		).toBeTruthy();
+		expect(
+			security.compareDocumentPosition(preferences) & Node.DOCUMENT_POSITION_FOLLOWING
+		).toBeTruthy();
+	});
+
+	it('renders the small transactions filter in the Security card', () => {
+		const { getByText } = render(Settings);
+
+		const security = getByText(en.settings.text.security);
+		const preferences = getByText(en.settings.text.preferences);
+		const filter = getByText(en.settings.text.hide_micro_transactions);
+
+		expect(
+			security.compareDocumentPosition(filter) & Node.DOCUMENT_POSITION_FOLLOWING
+		).toBeTruthy();
+		expect(
+			filter.compareDocumentPosition(preferences) & Node.DOCUMENT_POSITION_FOLLOWING
+		).toBeTruthy();
+	});
 });
