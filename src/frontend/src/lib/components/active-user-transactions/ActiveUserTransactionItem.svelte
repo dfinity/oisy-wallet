@@ -181,7 +181,7 @@
 		disabled={dismissing}
 		height="h-6"
 		onclick={handleDismissClick}
-		styleClass="text-tertiary"
+		styleClass="relative text-tertiary hit-area"
 		width="w-6"
 	>
 		{#snippet icon()}

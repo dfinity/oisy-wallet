@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
 	import { AI_ASSISTANT_CONSOLE_ENABLED } from '$env/ai-assistant.env';
 	import AnimatedIconAiAssistant from '$lib/components/icons/animated/AnimatedIconAiAssistant.svelte';
 	import { AI_ASSISTANT_OPEN_CONSOLE } from '$lib/constants/analytics.constants';
@@ -10,6 +9,7 @@
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		styleClass?: string;

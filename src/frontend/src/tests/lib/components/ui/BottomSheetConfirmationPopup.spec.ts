@@ -1,8 +1,10 @@
 import BottomSheetConfirmationPopup from '$lib/components/ui/BottomSheetConfirmationPopup.svelte';
 import { CONFIRMATION_POPUP_MODAL } from '$lib/constants/test-ids.constants';
 import { screensStore } from '$lib/stores/screens.store';
+import { overlayFocus } from '$lib/utils/overlay.utils';
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
+import { tick } from 'svelte';
 
 describe('BottomSheetConfirmationPopup', () => {
 	const props = {
@@ -48,4 +50,41 @@ describe('BottomSheetConfirmationPopup', () => {
 		expect(getByTestId(CONFIRMATION_POPUP_MODAL)).toBeInTheDocument();
 		expect(queryByTestId('bottom-sheet')).toBeNull();
 	});
+
+	it.each(['xs', '1.5lg'] as const)(
+		'owns focus and Escape above a parent on %s',
+		async (screen) => {
+			screensStore.set(screen);
+			const parent = document.createElement('div');
+			parent.innerHTML = '<button>Parent</button>';
+			document.body.append(parent);
+			const closeParent = vi.fn();
+			const parentAction = overlayFocus(parent, { onClose: closeParent });
+			await tick();
+			const onCancel = vi.fn();
+			const { getByRole, rerender, unmount } = render(BottomSheetConfirmationPopup, {
+				props: { ...props, onCancel }
+			});
+			await tick();
+
+			expect(getByRole('dialog').contains(document.activeElement)).toBeTruthy();
+
+			await fireEvent.keyDown(window, { key: 'Escape' });
+
+			expect(onCancel).toHaveBeenCalledOnce();
+			expect(closeParent).not.toHaveBeenCalled();
+
+			await rerender({ ...props, onCancel, disabled: true });
+			await fireEvent.keyDown(window, { key: 'Escape' });
+
+			expect(onCancel).toHaveBeenCalledOnce();
+
+			unmount();
+
+			expect(document.activeElement).toBe(parent.querySelector('button'));
+
+			parentAction.destroy();
+			parent.remove();
+		}
+	);
 });

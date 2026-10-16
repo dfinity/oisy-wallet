@@ -108,6 +108,9 @@
 			"do_not_close": "لا تغلق هذه النافذة حتى تكتمل المعاملة",
 			"standalone_mode": "",
 			"video_not_supported": ""
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
@@ -3022,6 +3025,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

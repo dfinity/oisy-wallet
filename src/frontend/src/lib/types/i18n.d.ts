@@ -93,6 +93,7 @@ interface I18nCore {
 		up_one_level: string;
 	};
 	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
+	error: { copy_failed: string };
 }
 
 interface I18nProgress {
@@ -2549,6 +2550,7 @@ interface I18nTip {
 		generate: string;
 		share_heading: string;
 		copy_link: string;
+		link_copied: string;
 		share_link: string;
 		they_will_receive: string;
 		no_wallet_needed_title: string;

@@ -19,7 +19,9 @@
 	colorStyle="tertiary-alt"
 	fullWidth
 	{onclick}
-	styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28"
+	pressed={selectable ? selected : undefined}
+	static
+	styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28 row-feedback"
 	{testId}
 	transparent
 >

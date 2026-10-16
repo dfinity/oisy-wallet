@@ -274,7 +274,7 @@ mod tests {
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
-        assert!(pending_txs.is_empty());
+        assert_eq!(pending_txs, vec![]);
     }
 
     #[test]
@@ -299,7 +299,7 @@ mod tests {
 
         // Check that the transaction was added to the proper address
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_2);
-        assert!(pending_txs.is_empty());
+        assert_eq!(pending_txs, vec![]);
     }
 
     #[test]
@@ -318,7 +318,7 @@ mod tests {
         assert!(result.is_ok());
 
         let pending_txs = model.get_pending_transactions(&principal2, ADDRESS_1);
-        assert!(pending_txs.is_empty());
+        assert_eq!(pending_txs, vec![]);
     }
 
     // Test for add_pending_transaction when max_pending_transactions is reached
@@ -571,7 +571,7 @@ mod tests {
         model.prune_pending_transactions(principal, &[], now_ns);
 
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
-        assert!(pending_txs.is_empty());
+        assert_eq!(pending_txs, vec![]);
     }
 
     #[test]

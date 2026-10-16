@@ -65,6 +65,7 @@
 			ariaLabel={$i18n.hero.alt.toggle_privacy_mode}
 			fullWidth
 			ondblclick={() => togglePrivacyMode('Hero - Double click on the Balance')}
+			static
 			styleClass="bg-transparent p-0 text-xl font-medium !text-current hover:!text-current active:!text-current focus-visible:!text-current"
 			transparent
 		>

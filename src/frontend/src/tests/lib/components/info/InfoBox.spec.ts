@@ -17,6 +17,12 @@ describe('InfoBox', () => {
 	const getBox = (container: HTMLElement): HTMLElement | null =>
 		container.querySelector('div.relative');
 
+	it('should give the close button a 40 px tap area and an icon-size press', () => {
+		const { getByRole } = renderVisible();
+
+		expect(getByRole('button')).toHaveClass('hit-area', 'press-icon');
+	});
+
 	it('should render children content', () => {
 		const { getByText } = renderVisible();
 

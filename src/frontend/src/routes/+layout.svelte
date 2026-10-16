@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import { browser } from '$app/environment';
 	import Banner from '$lib/components/core/Banner.svelte';
 	import Busy from '$lib/components/ui/Busy.svelte';
@@ -35,6 +34,7 @@
 	import { consoleWarn } from '$lib/utils/console.utils';
 	import { isIOS } from '$lib/utils/device.utils';
 	import { initWorkerCleanupOnPageUnload } from '$lib/utils/page-unload.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		children: Snippet;
@@ -232,6 +232,10 @@
 {:then _}
 	{@render children()}
 {/await}
+
+<!-- iOS Safari applies `:active` to a tapped element only when the page has a touch listener,
+     so without one the press on buttons never shows on iPhones. Svelte registers it passive. -->
+<svelte:document ontouchstart={() => undefined} />
 
 <Banner />
 <Toasts elevated={nonNullish($modalStore?.type)} maxVisible={3} />
