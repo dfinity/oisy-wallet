@@ -192,6 +192,8 @@
 	class:from-sol-0={$networkSolana && !isTrumpToken}
 	class:from-trump-0={isTrumpToken}
 	class:from-xrp-0={$networkXrp}
+	class:selection:bg-white={!isIcpHero}
+	class:selection:text-brand-primary={!isIcpHero}
 	class:text-primary={isIcpHero}
 	class:text-primary-inverted={!isIcpHero}
 	class:to-arbitrum-100={$networkArbitrum}
