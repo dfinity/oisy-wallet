@@ -180,7 +180,7 @@ in the PR description and ask the human owner before doing it.
 `overlayFocus` in `$lib/utils/overlay.utils.ts` is the shared Svelte action for
 blocking popovers, modal dialogs and dismissible bottom sheets. It enters focus,
 contains Tab and programmatic focus, handles Escape only on the topmost overlay,
-and preserves child autofocus. It restores a connected opener through the overlay return chain, including when a popover closes while its child modal opens. Confirmation popups and the global busy overlay participate in the same stack.
+and preserves child autofocus. It restores a connected opener through the overlay return chain, including when a popover closes while its child modal opens. Confirmation popups and the global busy overlay participate in the same stack. Busy uses `priority: 'high'` to keep keyboard focus above later-mounted dialogs, matching its visual layer. Overlays at the same priority keep their mounting order; dismissing Busy activates the most recent remaining dialog and preserves the original opener for final focus restoration.
 Use dialog semantics for mixed controls; do not assign `role="menu"` without
 implementing menu-item navigation.
 
