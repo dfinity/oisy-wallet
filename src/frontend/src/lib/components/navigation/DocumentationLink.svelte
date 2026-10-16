@@ -30,7 +30,7 @@
 	{asMenuItemCondensed}
 	href={OISY_DOCS_URL}
 	iconVisible={false}
-	styleClass={asMenuItem ? '' : 'font-bold'}
+	styleClass={asMenuItem ? '' : 'shrink-0 font-bold whitespace-nowrap'}
 	{testId}
 	trackEvent={{
 		name: TRACK_COUNT_OPEN_DOCUMENTATION,
