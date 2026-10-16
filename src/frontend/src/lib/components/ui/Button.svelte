@@ -90,12 +90,11 @@
 			<span class="absolute flex h-full w-full items-center justify-center">
 				<Spinner />
 			</span>
-
-			<span class="invisible">
-				{@render children()}
-			</span>
-		{:else}
-			{@render children()}
 		{/if}
+
+		<!-- Keep stateful children mounted through loading, including icon swaps. -->
+		<span class:contents={!loading} class:invisible={loading}>
+			{@render children()}
+		</span>
 	</span>
 </button>

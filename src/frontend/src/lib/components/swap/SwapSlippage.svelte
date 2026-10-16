@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import IconExpandMore from '$lib/components/icons/IconExpandMore.svelte';
 	import IconGixWarning from '$lib/components/icons/IconGixWarning.svelte';
 	import TokenInputContainer from '$lib/components/tokens/TokenInputContainer.svelte';
@@ -15,6 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		slippageValue: OptionAmount;

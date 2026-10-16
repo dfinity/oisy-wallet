@@ -322,7 +322,12 @@ does not set `position`: add `relative` unless the control is already
 Import `fade`, `fly`, `slide`, `scale` and `blur` from
 `$lib/utils/transitions.utils`, not from `svelte/transition`. They take the
 same parameters and add OISY's timings and the system's reduced-motion
-setting. Svelte's own default is 400 ms, slower than anything OISY uses.
+setting. Svelte's own default is 400 ms, slower than anything OISY uses. The
+module also re-exports the parameter types (`FadeParams`, `SlideParams`,
+`TransitionConfig`, …), and a lint rule refuses `svelte/transition` everywhere
+else (`transition.constants.ts` excepted, since the module is built on it).
+The restriction uses `@typescript-eslint/no-restricted-imports` separately from
+the shared core rule, preserving its deprecated-package and `/dist/` import bans.
 
 | Kind of motion                        | Timing                              | Constant (`transition.constants.ts`) |
 | ------------------------------------- | ----------------------------------- | ------------------------------------ |
@@ -351,6 +356,13 @@ setting. Svelte's own default is 400 ms, slower than anything OISY uses.
   `decorative-motion` to its root, which stops every animation inside it.
   Progress indicators (`Spinner`, `AnimatedIconLoader`) keep turning: they
   are often the only sign that work is happening.
+
+For a page backdrop use `backdrop` from the same module: it animates the dim and blur
+radius without an opacity animation that hides the blur in Chrome. Under reduced motion
+it becomes the same capped fade.
+
+Modal and popover containers use an intro-only 25 ms fade. Their children own the exits;
+a container outro would hide the panel and backdrop before their longer outros finish.
 
 ## Icons
 

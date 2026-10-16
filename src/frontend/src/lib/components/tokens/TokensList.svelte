@@ -2,7 +2,6 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
-	import { slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
 	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
@@ -36,6 +35,7 @@
 	} from '$lib/utils/token-tag.utils';
 	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 

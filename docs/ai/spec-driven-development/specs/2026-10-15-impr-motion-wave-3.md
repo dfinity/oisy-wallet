@@ -115,11 +115,13 @@ motion they follow rule 6.
 
 - **Toast:** slides in from its edge over 200 ms and leaves over 150 ms with a short slide
   back, with no delay before it starts leaving.
-- **Modal:** the panel arrives as today (125 ms) and leaves in 125 ms, no longer slower than
-  it came.
-- **Backdrop:** arrives in 75 ms as today, leaves in 150 ms.
-- **Popover:** fades in over 150 ms and out over 100 ms; the panel grows from 96 % to full
-  size.
+- **Modal:** the panel arrives in 125 ms ease-out and leaves in 125 ms ease-in, no longer
+  slower than it came.
+- **Backdrop:** its dim and blur arrive smoothly in 75 ms and leave in 150 ms, without
+  animating the element's opacity (which prevents Chrome from drawing the blur).
+- **Popover:** its panel grows from 96 % to full size in 150 ms and leaves in 100 ms.
+  Its container fades in over 25 ms, like the modal, so the backdrop can draw its blur.
+  Both container fades run only on entry; the panels and backdrops control the visible exits.
 - **Bottom sheet:** slides up over 250 ms, down over 200 ms.
 
 ### 4. The bottom sheet has a shadow
@@ -212,11 +214,13 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
 
 - `ui/Toast.svelte:74-75`: `in:fly` 200 ms from a short distance (16 px, not 100 px); `out:fly`
   150 ms ease-in back the same way, no delay.
-- `ui/Modal.svelte:42-43,68-74`: `FADE_OUT_DURATION` 125 ms.
+- `ui/Modal.svelte:42-43,68-74`: `FADE_OUT_DURATION` 125 ms; container `in:fade` 25 ms. The container
+  stays opaque on exit so the panel and backdrop finish their own outros.
 - `ui/Backdrop.svelte` and `BACKDROP_FADE_OUT_DURATION`: out via the shared exit timing
-  (150 ms). Check every awaiter of `BACKDROP_FADE_OUT_DURATION` still behaves.
-- `ui/Popover.svelte:166,176`: wrapper `in:fade` 150 ms / `out:fade` 100 ms; panel `scale` from
-  0.96 over 150 ms ease-out.
+  (150 ms). A shared `backdrop` transition interpolates the dim and blur radius rather
+  than opacity; under reduced motion it uses the shared capped fade. Check every awaiter of `BACKDROP_FADE_OUT_DURATION` still behaves.
+- `ui/Popover.svelte:166,176`: wrapper `in:fade` 25 ms; panel `in:scale` from
+  0.96 over 150 ms ease-out and `out:scale` 100 ms ease-in.
 - `ui/BottomSheetContainer.svelte:22`: `in:` 250 ms ease-out, `out:` 200 ms ease-in.
 
 ### 4. The bottom sheet has a shadow
@@ -227,9 +231,15 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
 ### 5. Icon state changes cross-fade
 
 - Wrap the four swaps in `IconSwap`: `ui/ProgressSteps.svelte:18-29` (spinner → check or
-  cross; three states, so either nested swaps or a three-way variant of `IconSwap`),
+  cross; select the terminal icon before revealing the result layer),
   `core/Menu.svelte` privacy eye, `ui/ThemeSwitchButton.svelte:24-28`,
-  `nfts/NftHideButton.svelte:88-116`.
+  `nfts/NftHideButton.svelte:88-116`. Keep the NFT action mounted while its state changes;
+  reuse its confirmation wrapper for both states but open it only when hiding a collection
+  with multiple NFTs. Upcoming progress steps keep their numbered circle; active steps use
+  one swap from the spinner to the selected check or cross, so failure never exposes a success icon. `Button` keeps its children mounted through
+  loading so the NFT icon swap survives the pending action; the existing spinner and pulse stay.
+  The NFT button retains its previous displayed icon during loading and starts the swap when
+  its children are revealed, even if the token store updates before the NFT reload finishes.
 - `IconSwap` keeps its 300 ms, `cubic-bezier(0.2, 0, 0, 1)`, scale 0.25 and 4 px blur, the
   values make-interfaces-feel-better gives icon swaps, so the four new swaps match the copy
   check. It is a CSS transition, not a Svelte one, so its reduced-motion block (which
@@ -295,9 +305,9 @@ jsdom does not run transitions or CSS animations; tests assert the inputs that p
 
 ## Open questions (facts to confirm)
 
-1. **Who awaits the backdrop.** List every awaiter of `BACKDROP_FADE_OUT_DURATION` and confirm
-   none depends on 250 ms (for example a test with fake timers, or a navigation that must
-   not start before the backdrop is gone).
+1. ~~**Who awaits the backdrop.**~~ Settled in area 3: `core/Menu.svelte` and
+   `navigation/NavigationMoreMenu.svelte` both await the shared constant. The menu
+   navigation test advances that same constant; none hard-codes the old 250 ms.
 2. ~~**Tests that wait on 400 ms.**~~ Settled while building area 2: none. The full suite
    passes with every transition on the shared timings.
 3. ~~**The `a0_mo` … `a4c_mo` keyframes.**~~ Settled while building: they animate

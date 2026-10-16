@@ -40,7 +40,8 @@ way: below 1280 px the network switcher shows only the network's logo, and below
 even the icons sit over the content, a frosted band in the page colour appears behind them once
 the page is scrolled, so rows pass under it instead of showing through. There, the pinned section
 headers (the Assets bar, the date labels in Activity) pin just below the band rather than under
-it.
+it. Opening the user menu from the header dims and blurs the page behind it, as the More menu
+and dialogs do.
 
 ---
 
@@ -114,10 +115,44 @@ Where it applies:
 
 ### Motion
 
+- **Overlays** clear quickly: toasts enter over 200 ms and leave over 150 ms with a short
+  movement; modal panels take 125 ms each way. Popovers grow from 96 % in 150 ms and
+  leave in 100 ms. The page dims and blurs smoothly in 75 ms and clears in 150 ms;
+  bottom sheets open in 250 ms and close in 200 ms. Reduced motion removes movement
+  and caps fades at 100 ms; height changes happen at once. Modal and popover panels
+  and backdrops finish their individual exits before the overlay disappears.
+
+- **State icons** cross-fade over 300 ms: progress to success or failure, privacy, theme,
+  and hiding or showing an NFT. Like copy confirmation, each can reverse during a swap
+  and appears immediately in its initial state. With reduced motion, icons fade in
+  100 ms without shrinking or blurring. Failed progress steps transition directly to the
+  failure icon without briefly showing success. The NFT hide/show icon waits until loading ends
+  before swapping, so the change remains visible even after a slow response.
+
 - With **reduced motion** turned on in the system, pulsing loading placeholders hold still,
   and so do the decorative animations: the dApp Explorer's UFO in the navigation, the AI
   assistant button, the Scan QR icon, and the astronaut on the idle signer screen. Progress
   spinners keep turning, since they are often the only sign that something is happening.
+
+### Motion
+
+- Things that fade, fly or scale in take **200 ms**, slowing as they settle, and leave in
+  **150 ms**, speeding up as they go; most used to take 400 ms both ways. Sections that
+  open and close, such as an error line appearing under a field, keep their 250 ms.
+- With **reduced motion** turned on in the system:
+  - nothing slides, flies or scales in: it fades in over 100 ms instead, and sections open
+    and close at once;
+  - pulsing loading placeholders hold still, and so do the decorative animations: the dApp
+    Explorer's UFO in the navigation, the AI assistant button, the Scan QR icon, and the
+    astronaut on the idle signer screen;
+  - progress spinners keep turning, since they are often the only sign that something is
+    happening.
+
+#### Landing artwork loading
+
+The landing illustration reserves its aspect ratio before downloading and loads eagerly without a dynamic-import waterfall. As a deliberate exception to the faster in-app motion timings, this one-time landing entrance runs over 300ms with a 12px upward movement and a subtle blur, with sections staggered by 100ms. The entrance begins with the page, without waiting for artwork; sign-in stays interactive and keyboard focus reveals controls immediately. Feature cards use translation only so their frosted backdrop stays intact. Reduced-motion users get the shared 100ms opacity-only fade with no stagger; feature cards stay still. Progress spinners keep turning. Focus reveals controls without restarting their entrance when focus leaves.
+
+The landing keeps the existing CircularXX font, preloads its regular and bold faces, balances headline wrapping, and uses comfortable line spacing for feature descriptions and sign-in terms. Signed-out header labels stay intact at narrow widths.
 
 ---
 
