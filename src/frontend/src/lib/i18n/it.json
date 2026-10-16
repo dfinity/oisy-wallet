@@ -517,6 +517,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"blitzgrid": {
+				"name": "Blitz Grid Fantasy Football",
+				"one_liner": "Leghe di fantasy football che funzionano interamente su Internet Computer.",
+				"description": "Blitz Grid è un gioco di fantasy football pensato per il mobile. Leghe, draft, rose, scambi e punteggi settimanali funzionano tutti in canister su Internet Computer. Collega OISY per inviare ICP agli altri manager della tua lega. Ogni trasferimento viene firmato in OISY."
 			}
 		}
 	},

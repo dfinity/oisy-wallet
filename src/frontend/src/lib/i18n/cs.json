@@ -517,6 +517,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"blitzgrid": {
+				"name": "Blitz Grid Fantasy Football",
+				"one_liner": "Ligy fantasy amerického fotbalu, které běží plně na Internet Computeru.",
+				"description": "Blitz Grid je hra fantasy amerického fotbalu navržená pro mobil. Ligy, draft, soupisky, výměny i týdenní bodování běží v kanystrech na Internet Computeru. Připojte OISY a posílejte ICP ostatním manažerům ve své lize. Každý převod se podepisuje v OISY."
 			}
 		}
 	},

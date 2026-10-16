@@ -517,6 +517,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"blitzgrid": {
+				"name": "Blitz Grid Fantasy Football",
+				"one_liner": "Internet Computer 上で完全に動作するファンタジーフットボールリーグ。",
+				"description": "Blitz Grid は、モバイル向けに作られたファンタジーフットボールゲームです。リーグ、ドラフト、ロスター、トレード、毎週のスコア計算はすべて Internet Computer 上のキャニスターで動作します。OISY を接続すると、リーグ内の他のマネージャーに ICP を送れます。すべての送金は OISY で署名されます。"
 			}
 		}
 	},
