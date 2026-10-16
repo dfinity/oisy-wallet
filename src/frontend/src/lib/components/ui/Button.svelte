@@ -5,6 +5,7 @@
 	import type { ButtonColorStyle } from '$lib/types/style';
 
 	interface Props {
+		pressed?: boolean;
 		colorStyle?: ButtonColorStyle;
 		type?: 'submit' | 'reset' | 'button';
 		disabled?: boolean;
@@ -28,6 +29,7 @@
 	}
 
 	const {
+		pressed,
 		colorStyle = 'primary',
 		type = 'submit',
 		disabled,
@@ -71,6 +73,7 @@
 	class:underline={inlineLink}
 	class:w-full={fullWidth}
 	aria-label={ariaLabel}
+	aria-pressed={pressed}
 	data-tid={testId}
 	disabled={disabled ?? (loading || initialising)}
 	{onclick}

@@ -216,7 +216,7 @@ don't take it: they are the sign that work is happening.
 
 		&[focus],
 		&:focus {
-			outline-offset: 2px;
+			outline-offset: var(--focus-outline-offset, 2px);
 			outline: var(--color-background-brand-primary) solid 2px !important;
 		}
 

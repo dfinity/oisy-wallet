@@ -19,6 +19,7 @@
 	colorStyle="tertiary-alt"
 	fullWidth
 	{onclick}
+	pressed={selectable ? selected : undefined}
 	static
 	styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28 row-feedback"
 	{testId}

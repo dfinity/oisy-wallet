@@ -61,7 +61,7 @@ button.nav-item:not([disabled]):not(.disabled):not(.loading) {
 
 	&[focus],
 	&:focus {
-		outline-offset: 2px;
+		outline-offset: var(--focus-outline-offset, 2px);
 		outline: var(--color-background-brand-primary) solid 2px;
 	}
 
@@ -89,6 +89,7 @@ button.nav-item[disabled]:not(.loading) {
 }
 
 .nav-item {
+	--focus-outline-offset: -3px;
 	@apply py-3;
 }
 

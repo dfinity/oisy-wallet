@@ -4,6 +4,7 @@
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
+	import { overlayFocus } from '$lib/utils/overlay.utils';
 	import { fade } from '$lib/utils/transitions.utils';
 
 	const close = () => {
@@ -27,10 +28,13 @@
 	<div
 		class="busy"
 		class:close={$busy.close}
+		aria-label={$busy.msg ?? $i18n.init.info.hold_loading}
+		aria-modal="true"
 		onclick={close}
 		onkeydown={keyboardClose}
-		role="button"
+		role="dialog"
 		tabindex="-1"
+		use:overlayFocus={{ onClose: close, priority: 'high' }}
 		in:fade
 		out:fade
 	>

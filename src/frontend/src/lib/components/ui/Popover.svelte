@@ -9,6 +9,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { PopoverDirection, PopoverPlacement } from '$lib/types/popover';
 	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
+	import { overlayFocus } from '$lib/utils/overlay.utils';
 	import { computePopoverPlacement } from '$lib/utils/popover.utils';
 	import { fade, scale } from '$lib/utils/transitions.utils';
 
@@ -21,6 +22,7 @@
 		invisibleBackdrop?: boolean;
 		testId?: string;
 		children?: Snippet;
+		ariaLabel?: string;
 	}
 
 	let {
@@ -31,6 +33,7 @@
 		closeButton = false,
 		invisibleBackdrop = false,
 		testId = 'popover-component',
+		ariaLabel,
 		children
 	}: Props = $props();
 
@@ -159,10 +162,7 @@
 	<div
 		style="--popover-top: {popoverTop}px; --popover-bottom: {popoverBottom}px; --popover-left: {popoverLeft}px; --popover-right: {popoverRight}px"
 		class="popover"
-		aria-orientation="vertical"
 		data-tid={testId}
-		role="menu"
-		tabindex="-1"
 		in:fade|global={{ duration: 25 }}
 	>
 		<Backdrop invisible={invisibleBackdrop} onClose={close} />
@@ -172,7 +172,12 @@
 			class:placed={placementResolved}
 			class:rtl={effectiveDirection === 'rtl'}
 			class:with-border={invisibleBackdrop}
+			aria-label={ariaLabel ?? anchor?.getAttribute('aria-label') ?? $i18n.navigation.alt.menu}
+			aria-modal="true"
+			role="dialog"
+			tabindex="-1"
 			use:observePanelWidth
+			use:overlayFocus={{ onClose: close, returnFocus: anchor }}
 			in:scale|global={{ delay: 25, duration: 150, easing: cubicOut, start: 0.96 }}
 			out:scale|global={{ duration: 100, easing: cubicIn, start: 0.96 }}
 		>
@@ -283,5 +288,6 @@
 
 	.popover-content {
 		overflow-y: auto;
+		overscroll-behavior: contain;
 	}
 </style>

@@ -113,6 +113,7 @@
 				tokenCount: filteredTokens.length,
 				networks: sortedFilteredTokens.map((t) => t.network)
 			}}
+			expanded={isExpanded}
 			onClick={() => toggleIsExpanded(!isExpanded)}
 			testIdPrefix={TOKEN_GROUP}
 		/>

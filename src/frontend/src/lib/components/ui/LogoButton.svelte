@@ -8,6 +8,7 @@
 
 	interface Props {
 		selectable?: boolean;
+		expanded?: boolean;
 		selected?: boolean;
 		dividers?: boolean;
 		hover?: boolean;
@@ -30,6 +31,7 @@
 
 	let {
 		selectable = false,
+		expanded,
 		selected = false,
 		dividers = false,
 		hover = true,
@@ -59,8 +61,11 @@
 	class:w-full={dividers || fullWidth}
 >
 	<button
-		class="flex w-full border-0 px-2"
+		style="--focus-outline-offset: -3px"
+		class="flex w-full rounded-lg border-0 px-2"
 		class:cursor-default={isNullish(onClick)}
+		aria-expanded={expanded}
+		aria-pressed={selectable ? selected : undefined}
 		data-tid={testId}
 		onclick={onClick}
 	>
