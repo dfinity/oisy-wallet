@@ -117,6 +117,9 @@ Where it applies:
 
 Blocking popovers and dialogs move keyboard focus into their controls, keep it
 inside while open, close the topmost overlay with Escape, and restore the opener.
+Toasts stay reachable while a dialog is open: Tab moves on from the dialog's last
+control to their Close buttons and back, so a notification can be dismissed without
+closing the dialog. Escape that only cancels typing in an input method closes nothing.
 Token list settings expose labelled switches and their current checked state.
 Sorting, network selection and appearance buttons expose their selected state.
 

@@ -23,6 +23,9 @@ const topmostOverlay = (): OverlayEntry | undefined =>
 		undefined
 	);
 const focusableSelector = 'button, a[href], input, select, textarea, iframe, [tabindex]';
+// Regions drawn above overlays that must stay reachable while one is open, such as the
+// toasts: a persistent notification can be dismissed without closing the dialog.
+const reachableSelector = '[data-overlay-reachable]';
 
 const focusableElements = (node: HTMLElement): HTMLElement[] => {
 	// Cache shared ancestors for this pass, not across renders: visibility can change
@@ -49,6 +52,12 @@ const focusableElements = (node: HTMLElement): HTMLElement[] => {
 			isVisible(element)
 	);
 };
+
+const reachableElements = (): HTMLElement[] =>
+	Array.from(document.querySelectorAll<HTMLElement>(reachableSelector)).flatMap(focusableElements);
+
+const isReachable = (target: EventTarget | null): boolean =>
+	target instanceof Element && target.closest(reachableSelector) !== null;
 
 /** Svelte action for blocking overlays, including nested dialogs and sheets. */
 // Svelte actions receive the node and parameters as positional arguments.
@@ -78,7 +87,8 @@ export const overlayFocus = (node: HTMLElement, options: OverlayOptions = {}) =>
 	});
 
 	const onKeyDown = (event: KeyboardEvent) => {
-		if (!isTopmost() || event.defaultPrevented) {
+		// Escape during input-method composition only cancels the composition.
+		if (!isTopmost() || event.defaultPrevented || event.isComposing) {
 			return;
 		}
 		if (event.key === 'Escape') {
@@ -89,29 +99,44 @@ export const overlayFocus = (node: HTMLElement, options: OverlayOptions = {}) =>
 		if (event.key !== 'Tab') {
 			return;
 		}
-		const elements = focusableElements(node);
+		const own = focusableElements(node);
+		const reachable = reachableElements();
+		const elements = [...own, ...reachable];
 		const [first] = elements;
 		const last = elements.at(-1);
+		const active = document.activeElement;
+		const inScope = active instanceof Node && (node.contains(active) || isReachable(active));
 		if (!first || !last) {
 			event.preventDefault();
 			node.focus();
-		} else if (
-			event.shiftKey &&
-			(document.activeElement === first || !node.contains(document.activeElement))
-		) {
+			return;
+		}
+		// Within the overlay the browser moves focus itself (iframes included); step in only
+		// to wrap, to come back from outside, and to cross between the overlay and the toasts.
+		const target = event.shiftKey
+			? active === first || !inScope
+				? last
+				: active === reachable[0]
+					? own.at(-1)
+					: undefined
+			: active === last || !inScope
+				? first
+				: active === own.at(-1)
+					? reachable[0]
+					: undefined;
+		if (target) {
 			event.preventDefault();
-			last.focus();
-		} else if (
-			!event.shiftKey &&
-			(document.activeElement === last || !node.contains(document.activeElement))
-		) {
-			event.preventDefault();
-			first.focus();
+			target.focus();
 		}
 	};
 
 	const onFocusIn = (event: FocusEvent) => {
-		if (isTopmost() && event.target instanceof Node && !node.contains(event.target)) {
+		if (
+			isTopmost() &&
+			event.target instanceof Node &&
+			!node.contains(event.target) &&
+			!isReachable(event.target)
+		) {
 			focusFirst();
 		}
 	};
