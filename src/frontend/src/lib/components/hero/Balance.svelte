@@ -37,7 +37,7 @@
 
 <span class="flex flex-col gap-1">
 	<output
-		class="inline-flex cursor-pointer touch-manipulation flex-row justify-center gap-3 self-center text-4xl font-bold break-words select-none md:text-5xl"
+		class="inline-flex cursor-pointer touch-manipulation flex-row justify-center gap-3 self-center text-4xl font-bold break-words md:text-5xl"
 		data-tid={AMOUNT_DATA}
 		ondblclick={() => togglePrivacyMode('Hero - Double click on the Balance amount')}
 	>

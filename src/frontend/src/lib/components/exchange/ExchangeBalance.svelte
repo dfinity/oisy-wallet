@@ -75,7 +75,7 @@
 
 <span class="flex flex-col items-center gap-1">
 	<output
-		class="mt-7 inline-block cursor-pointer touch-manipulation text-4xl font-bold break-all select-none md:text-5xl"
+		class="mt-7 inline-block cursor-pointer touch-manipulation text-4xl font-bold break-all md:text-5xl"
 		ondblclick={() => togglePrivacyMode('Hero - Double click on the ExchangeBalance amount')}
 	>
 		{#if $loaded && nonNullish(balance)}

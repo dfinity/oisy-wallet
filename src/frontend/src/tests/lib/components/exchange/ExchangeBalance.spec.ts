@@ -296,12 +296,13 @@ describe('ExchangeBalance', () => {
 			vi.spyOn(deviceUtils, 'isDesktop').mockReturnValue(true);
 		});
 
-		it('should show a pointer on the amount and keep its digits unselectable', () => {
+		it('should show a pointer on the amount and keep it selectable', () => {
 			const { container } = renderComponent();
 
 			const amount = container.querySelector('output');
 
-			expect(amount).toHaveClass('cursor-pointer', 'select-none');
+			expect(amount).toHaveClass('cursor-pointer');
+			expect(amount).not.toHaveClass('select-none');
 		});
 
 		it('should call setPrivacyMode on double-click', async () => {

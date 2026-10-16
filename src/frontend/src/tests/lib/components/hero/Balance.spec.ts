@@ -39,10 +39,13 @@ describe('Balance', () => {
 		vi.spyOn(deviceUtils, 'isDesktop').mockReturnValue(true);
 	});
 
-	it('should show a pointer on the amount and keep its digits unselectable', () => {
+	it('should show a pointer on the amount and keep it selectable', () => {
 		const { getByTestId } = renderComponent();
 
-		expect(getByTestId(AMOUNT_DATA)).toHaveClass('cursor-pointer', 'select-none');
+		const amount = getByTestId(AMOUNT_DATA);
+
+		expect(amount).toHaveClass('cursor-pointer');
+		expect(amount).not.toHaveClass('select-none');
 	});
 
 	describe('privacy mode toggle', () => {
