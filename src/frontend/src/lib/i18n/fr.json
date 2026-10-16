@@ -1024,7 +1024,6 @@
 			"approving": "Approbation...",
 			"approving_fees": "Approbation des frais...",
 			"approving_transfer": "Approbation du transfert...",
-			"approving_wallet_connect": "Approbation de la demande WalletConnect...",
 			"refreshing_ui": "Actualisation de l'interface",
 			"initializing": "Initialisation de la transaction...",
 			"signing_transaction": "Signature de la transaction...",
@@ -1892,6 +1891,28 @@
 			"sol_transaction_as_message": "Ce message est une transaction Solana, qui ne peut être approuvée que via une vérification de transaction. Pour votre sécurité, elle n'a pas été signée.",
 			"request_not_defined": "Erreur inattendue : La demande n'est pas définie et ne peut donc pas être traitée.",
 			"unexpected_processing_request": "Erreur inattendue lors du traitement de la demande avec WalletConnect."
+		}
+	},
+	"extension": {
+		"text": {
+			"loading": "",
+			"loading_addresses": "",
+			"no_extension": "",
+			"not_found": "",
+			"done": "",
+			"failed": "",
+			"unsupported": "",
+			"networks_off": "",
+			"wrong_account": ""
+		},
+		"connect": {
+			"title_site": "",
+			"title_extension": "",
+			"site_sees": "",
+			"extension_keeps": "",
+			"eth_network": "",
+			"sol_network": "",
+			"connect": ""
 		}
 	},
 	"trading": {

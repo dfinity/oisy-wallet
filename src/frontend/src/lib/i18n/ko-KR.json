@@ -1024,7 +1024,6 @@
 			"approving": "승인 중...",
 			"approving_fees": "수수료 승인 중...",
 			"approving_transfer": "전송 승인 중...",
-			"approving_wallet_connect": "WalletConnect 요청 승인 중...",
 			"refreshing_ui": "UI 새로고침 중",
 			"initializing": "트랜잭션 초기화 중...",
 			"signing_transaction": "트랜잭션 서명 중...",
@@ -1892,6 +1891,28 @@
 			"sol_transaction_as_message": "이 메시지는 Solana 트랜잭션으로, 트랜잭션 검토를 통해서만 승인될 수 있습니다. 보안을 위해 서명되지 않았습니다.",
 			"request_not_defined": "예기치 않은 오류: 요청이 정의되지 않아 처리할 수 없습니다.",
 			"unexpected_processing_request": "WalletConnect로 요청을 처리하는 중 예기치 않은 오류가 발생했습니다."
+		}
+	},
+	"extension": {
+		"text": {
+			"loading": "",
+			"loading_addresses": "",
+			"no_extension": "",
+			"not_found": "",
+			"done": "",
+			"failed": "",
+			"unsupported": "",
+			"networks_off": "",
+			"wrong_account": ""
+		},
+		"connect": {
+			"title_site": "",
+			"title_extension": "",
+			"site_sees": "",
+			"extension_keeps": "",
+			"eth_network": "",
+			"sol_network": "",
+			"connect": ""
 		}
 	},
 	"trading": {

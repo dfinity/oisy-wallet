@@ -1024,7 +1024,6 @@
 			"approving": "Approving...",
 			"approving_fees": "Approving fees...",
 			"approving_transfer": "Approving transfer...",
-			"approving_wallet_connect": "Approving WalletConnect request...",
 			"refreshing_ui": "Refreshing UI",
 			"initializing": "Initializing transaction...",
 			"signing_transaction": "Signing transaction...",
@@ -1892,6 +1891,28 @@
 			"sol_transaction_as_message": "This message is a Solana transaction, which can only be approved through a transaction review. For your security, it was not signed.",
 			"request_not_defined": "Unexpected error: Request is not defined therefore cannot be processed.",
 			"unexpected_processing_request": "Unexpected error while processing the request with WalletConnect."
+		}
+	},
+	"extension": {
+		"text": {
+			"loading": "Loading the request…",
+			"loading_addresses": "Loading your addresses…",
+			"no_extension": "This page can't reach the OISY extension. Check that it's installed and enabled in this browser.",
+			"not_found": "This request is no longer open. Close this window and try again from the site.",
+			"done": "Done. This window closes by itself.",
+			"failed": "OISY couldn't complete this request.",
+			"unsupported": "OISY can't handle this request yet.",
+			"networks_off": "The extension uses Sepolia and Solana Devnet. In Settings, open Active networks, turn on test networks, then switch on Sepolia and Solana Devnet.",
+			"wrong_account": "You're signed in to a different OISY account than the one this site is connected to. Sign in with that account, or forget it in the extension."
+		},
+		"connect": {
+			"title_site": "Connect this site",
+			"title_extension": "Connect the OISY extension",
+			"site_sees": "The site will see this address. Each signature still needs your approval in this window.",
+			"extension_keeps": "The extension keeps these addresses to show your balances. It holds no keys.",
+			"eth_network": "Ethereum · Sepolia",
+			"sol_network": "Solana · devnet",
+			"connect": "Connect"
 		}
 	},
 	"trading": {

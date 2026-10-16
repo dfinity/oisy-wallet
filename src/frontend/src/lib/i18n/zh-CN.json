@@ -1024,7 +1024,6 @@
 			"approving": "正在批准...",
 			"approving_fees": "正在批准手续费...",
 			"approving_transfer": "正在批准转账...",
-			"approving_wallet_connect": "正在批准 WalletConnect 请求...",
 			"refreshing_ui": "正在刷新界面",
 			"initializing": "正在初始化交易...",
 			"signing_transaction": "正在签署交易...",
@@ -1892,6 +1891,28 @@
 			"sol_transaction_as_message": "此消息是一笔 Solana 交易，只能通过交易审查来批准。出于安全考虑，该交易未被签名。",
 			"request_not_defined": "意外错误：请求未定义，因此无法处理。",
 			"unexpected_processing_request": "处理 WalletConnect 请求时发生意外错误。"
+		}
+	},
+	"extension": {
+		"text": {
+			"loading": "",
+			"loading_addresses": "",
+			"no_extension": "",
+			"not_found": "",
+			"done": "",
+			"failed": "",
+			"unsupported": "",
+			"networks_off": "",
+			"wrong_account": ""
+		},
+		"connect": {
+			"title_site": "",
+			"title_extension": "",
+			"site_sees": "",
+			"extension_keeps": "",
+			"eth_network": "",
+			"sol_network": "",
+			"connect": ""
 		}
 	},
 	"trading": {
