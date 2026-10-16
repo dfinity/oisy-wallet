@@ -1044,6 +1044,7 @@ export const idlFactory = ({ IDL }) => {
 		),
 		get_active_user_transactions: IDL.Func([], [GetActiveUserTransactionsResult], ['query']),
 		get_allowed_cycles: IDL.Func([], [GetAllowedCyclesResult], []),
+		get_api_doc: IDL.Func([], [IDL.Text], ['query']),
 		get_api_keys: IDL.Func([], [ApiKeys], ['query']),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_contact: IDL.Func([IDL.Nat64], [GetContactResult], ['query']),
