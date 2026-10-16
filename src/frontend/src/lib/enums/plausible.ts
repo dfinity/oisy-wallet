@@ -59,6 +59,19 @@ export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
 	MINOR = 'minor'
 }
 
+// An ICP NFT collection writes its own text into some of its error variants, and a rejected call
+// carries the IC request id and the canister's reject text, so a raw message cannot satisfy
+// invariant 4 in docs/ai/frontend/analytics.md. ICP NFT send failures are categorised by error
+// class instead.
+export enum PLAUSIBLE_EVENT_NFT_SEND_ERROR_TYPES {
+	// The collection returned an error variant.
+	CANISTER_ERROR = 'canister_error',
+	// The collection rejected the call or trapped.
+	CALL_REJECTED = 'call_rejected',
+	// Anything else: transport, agent, or an unexpected throw.
+	UNKNOWN = 'unknown'
+}
+
 export enum PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES {
 	SECRET_NOT_CONFIGURED = 'secret_not_configured',
 	RATE_LIMITED = 'rate_limited',
