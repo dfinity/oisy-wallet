@@ -39,8 +39,8 @@ pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 10 * 60;
 const NANOS_PER_SEC: u64 = 1_000_000_000;
 
 /// A token's cached price is considered "fresh enough" if its
-/// [`ExchangeData::timestamp_ns`] (the provider-reported `last_updated_at`,
-/// or `time()` when the provider doesn't supply one) is within
+/// [`ExchangeData::timestamp_ns`] (the provider's `last_updated_at` capped at
+/// `time()`, or `time()` when the provider doesn't supply one) is within
 /// `PRICE_REFRESH_INTERVAL_SEC / 2` of now. Such tokens are skipped on the
 /// next refresh tick to avoid duplicate upstream calls when, e.g., a lazy
 /// bootstrap or a manual refresh has just populated the cache with a price
