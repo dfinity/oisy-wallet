@@ -43,27 +43,6 @@
 			});
 
 			onBack();
-
-			return;
-		}
-
-		// This does not happen at this point, but it is useful type-wise
-		assertIsNetworkEthereum(network);
-
-		if (
-			nonNullish(
-				[...$erc20Tokens, ...$erc721Tokens]?.find(
-					({ symbol, network: tokenNetwork }) =>
-						symbol.toLowerCase() === (metadata?.symbol?.toLowerCase() ?? '') &&
-						tokenNetwork.chainId === network.chainId
-				)
-			)
-		) {
-			toastsError({
-				msg: { text: $i18n.tokens.error.duplicate_metadata }
-			});
-
-			onBack();
 		}
 	};
 
