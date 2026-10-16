@@ -77,6 +77,7 @@
 	class="pointer-events-none relative flex w-full max-w-screen-2.5xl items-center justify-between gap-y-5 px-4 pt-6 md:px-8"
 	class:1.5xl:fixed={$authSignedIn}
 	class:1.5xl:inset-x-0={$authSignedIn}
+	class:flex-wrap={$authNotSignedIn}
 	class:md:sticky={$authSignedIn}
 	class:md:top-0={$authSignedIn}
 	class:md:z-10={$authSignedIn && !popoverOpen}
@@ -120,7 +121,7 @@
 		{#if $authSignedIn}
 			<Menu bind:visible={menuOpen} />
 		{:else}
-			<div class="mr-2 flex justify-end gap-3 sm:gap-5 md:mr-0">
+			<div class="flex flex-wrap items-center justify-end gap-2 sm:gap-5">
 				<AboutWhyOisy trackEventSource={LANDING_PAGE_ROUTE} />
 				<DocumentationLink shortTextOnMobile trackEventSource={LANDING_PAGE_ROUTE} />
 				<ThemeSwitchButton />

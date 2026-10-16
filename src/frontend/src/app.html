@@ -56,6 +56,22 @@
 		<!-- CONTENT_SECURITY_POLICY -->
 
 		<meta charset="utf-8" />
+		<!-- Keep font preloads multiline: the legacy script-preload regex in
+		     scripts/build.csp.mjs must not reinterpret them as script preloads. -->
+		<link
+			rel="preload"
+			href="/fonts/CircularXXWeb-Regular.woff2"
+			as="font"
+			type="font/woff2"
+			crossorigin="anonymous"
+		/>
+		<link
+			rel="preload"
+			href="/fonts/CircularXXWeb-Bold.woff2"
+			as="font"
+			type="font/woff2"
+			crossorigin="anonymous"
+		/>
 		<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport" />
 
 		<title>{{OISY_NAME}}</title>
@@ -142,6 +158,9 @@
 				left: 50%;
 
 				transform: translateX(-50%);
+
+				display: flex;
+				justify-content: center;
 
 				width: 100%;
 				height: 100%;
