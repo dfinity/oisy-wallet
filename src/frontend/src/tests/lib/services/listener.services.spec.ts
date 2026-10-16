@@ -1,5 +1,6 @@
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { getIdbBalances } from '$lib/api/idb-balances.api';
+import { IDB_DEADLINE_MILLIS } from '$lib/constants/app.constants';
 import { syncWalletFromIdbCache } from '$lib/services/listener.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { TransactionsStore } from '$lib/stores/transactions.store';
@@ -196,6 +197,34 @@ describe('listener.services', () => {
 			});
 
 			expect(balancesStore.batchSet).not.toHaveBeenCalled();
+		});
+
+		// A wallet worker does not start until this has resolved — `SolWalletWorker.init` awaits it for
+		// every enabled token — and IndexedDB can fail by answering nothing at all. Without a deadline
+		// the worker never starts and every balance of the network stays on a skeleton, silently.
+		it('should give up on a cache that never answers rather than hold up its caller', async () => {
+			vi.useFakeTimers();
+
+			mockGetIdbTransactions.mockReturnValue(new Promise(() => {}));
+
+			let settled = false;
+
+			const syncing = syncWalletFromIdbCache(mockParams).then(() => {
+				settled = true;
+			});
+
+			await vi.advanceTimersByTimeAsync(IDB_DEADLINE_MILLIS - 1);
+
+			expect(settled).toBeFalsy();
+
+			await vi.advanceTimersByTimeAsync(1);
+
+			await syncing;
+
+			expect(settled).toBeTruthy();
+			expect(mockAppend).not.toHaveBeenCalled();
+
+			vi.useRealTimers();
 		});
 	});
 });
