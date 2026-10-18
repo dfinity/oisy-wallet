@@ -3,8 +3,25 @@ import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import postcss from 'postcss';
 
 describe('app startup spinner', () => {
+	it('keeps the essential startup trace animated under reduced motion with its existing cap', () => {
+		const source = readFileSync(join(process.cwd(), 'src/frontend/src/app.html'), 'utf8');
+		const document = new DOMParser().parseFromString(source, 'text/html');
+		const animations: string[] = [];
+
+		for (const style of document.querySelectorAll('style')) {
+			postcss.parse(style.textContent ?? '').walkRules('#app-spinner .trace', (rule) => {
+				rule.walkDecls('animation', ({ value }) => {
+					animations.push(value);
+				});
+			});
+		}
+
+		expect(animations).toEqual(['app-spinner-trace 1200ms linear 25']);
+	});
+
 	it('shows the same visor before the Svelte bundle loads', () => {
 		const source = readFileSync(join(process.cwd(), 'src/frontend/src/app.html'), 'utf8');
 		const document = new DOMParser().parseFromString(source, 'text/html');

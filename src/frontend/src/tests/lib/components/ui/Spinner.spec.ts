@@ -1,6 +1,9 @@
 import Spinner from '$lib/components/ui/Spinner.svelte';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, screen } from '@testing-library/svelte';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import postcss from 'postcss';
 
 describe('Spinner.svelte', () => {
 	it('renders the smooth visor Trace outline instead of a circular spinner', () => {
@@ -19,6 +22,24 @@ describe('Spinner.svelte', () => {
 		expect(paths[1]).toHaveAttribute('stroke-dasharray', '25 75');
 		expect(paths[1]).toHaveAttribute('stroke-linecap', 'round');
 		expect(paths[1].getAttribute('d')).toBe(paths[0].getAttribute('d'));
+	});
+
+	it('keeps the essential progress trace animated under reduced motion', () => {
+		const source = readFileSync(
+			join(process.cwd(), 'src/frontend/src/lib/components/ui/Spinner.svelte'),
+			'utf8'
+		);
+		const styles = source.match(/<style[^>]*>([\s\S]*?)<\/style>/)?.[1];
+		assertNonNullish(styles);
+
+		const animations: string[] = [];
+		postcss.parse(styles).walkRules('.trace', (rule) => {
+			rule.walkDecls('animation', ({ value }) => {
+				animations.push(value);
+			});
+		});
+
+		expect(animations).toEqual(['spinner-trace 1200ms linear infinite']);
 	});
 
 	it('sets the default size to 16px', () => {

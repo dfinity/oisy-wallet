@@ -70,11 +70,4 @@
 			stroke-dashoffset: -100;
 		}
 	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.trace {
-			animation: none;
-			stroke-dasharray: none;
-		}
-	}
 </style>

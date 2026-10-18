@@ -355,7 +355,9 @@ the shared core rule, preserving its deprecated-package and `/dist/` import bans
   hold still. A decorative illustration with its own keyframes adds
   `decorative-motion` to its root, which stops every animation inside it.
   Progress indicators (`Spinner`, plus the `LoaderSpinner` and `AnimatedIconLoader`
-  wrappers) show a static complete visor under reduced motion. Keep the owning
+  wrappers) keep their trace moving under reduced motion: they are essential
+  progress cues, not decorative motion. The pre-hydration loader in `app.html`
+  follows the same rule, retaining its 30-second animation cap. Keep the owning
   controls' loading states, translated labels and accessibility semantics intact.
 
 For a page backdrop use `backdrop` from the same module: it animates the dim and blur
