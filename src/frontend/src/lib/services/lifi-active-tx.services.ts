@@ -48,50 +48,24 @@ import { get } from 'svelte/store';
 // When each row was last polled: LI.FI's per-row cadence runs on top of the loader's 5 s tick.
 const lastPolledAt = new Map<string, number>();
 
-// Rows whose source transaction this page has seen confirmed. From then on only `/status` is read;
-// after a reload, the receipt is read once more.
+// Rows whose source transaction this page has seen confirmed. From then on the receipt is not read
+// again (after a reload, once more), and only a cross-chain row asks `/status`.
 const sourceConfirmed = new Set<string>();
+
+// Rows whose stored tool LI.FI refused (`INVALID`): from then on, `/status` is asked without it.
+const toolRefused = new Set<string>();
 
 // The unresolved window of each row for the session; `localStorage` carries it across reloads.
 const unresolvedWindows = new Map<string, LifiUnresolvedWindow>();
 
-const UNRESOLVED_WINDOW_KEY_PREFIX = 'lifi-unresolved:';
-
-const unresolvedWindowKey = (rowId: string): string => `${UNRESOLVED_WINDOW_KEY_PREFIX}${rowId}`;
+const unresolvedWindowKey = (rowId: string): string => `lifi-unresolved:${rowId}`;
 
 // Test seam — module-level state would otherwise leak between cases.
 export const resetLifiActiveTxState = (): void => {
 	lastPolledAt.clear();
 	sourceConfirmed.clear();
+	toolRefused.clear();
 	unresolvedWindows.clear();
-};
-
-/**
- * Drops what this module keeps for rows that are no longer pending, wherever they settled: here, in
- * another tab or on another device. `pendingIds` is every pending LI.FI row, and the state is
- * LI.FI's alone, so nothing another provider relies on is dropped.
- */
-const forgetSettledRows = (pendingIds: Set<string>) => {
-	for (const rowId of [...lastPolledAt.keys(), ...sourceConfirmed, ...unresolvedWindows.keys()]) {
-		if (!pendingIds.has(rowId)) {
-			lastPolledAt.delete(rowId);
-			sourceConfirmed.delete(rowId);
-			unresolvedWindows.delete(rowId);
-		}
-	}
-
-	try {
-		Object.keys(localStorage)
-			.filter(
-				(key) =>
-					key.startsWith(UNRESOLVED_WINDOW_KEY_PREFIX) &&
-					!pendingIds.has(key.slice(UNRESOLVED_WINDOW_KEY_PREFIX.length))
-			)
-			.forEach((key) => localStorage.removeItem(key));
-	} catch (err: unknown) {
-		// Best effort: a window left behind is never read again, since its row is not pending.
-		consoleError(err);
-	}
 };
 
 // The session's own window first: should a write fail (a full storage), every poll would otherwise
@@ -133,7 +107,31 @@ const clearUnresolvedWindow = (rowId: string) => {
 const forgetRow = (rowId: string) => {
 	lastPolledAt.delete(rowId);
 	sourceConfirmed.delete(rowId);
+	toolRefused.delete(rowId);
 	clearUnresolvedWindow(rowId);
+};
+
+/**
+ * Drops what this module keeps for rows that are no longer pending, wherever they settled: here, in
+ * another tab or on another device. `pendingIds` is every pending LI.FI row, and the state is
+ * LI.FI's alone, so nothing another provider relies on is dropped.
+ *
+ * Only the stored windows of rows this tab keeps are removed. Every window it reads it also
+ * writes, so these are all it has touched; another tab's rows, or another principal's on the same
+ * browser, are missing from this tab's pending set but not settled. A window whose row settled
+ * while no tab of this browser polled it stays behind, and is never read again.
+ */
+const forgetSettledRows = (pendingIds: Set<string>) => {
+	for (const rowId of [
+		...lastPolledAt.keys(),
+		...sourceConfirmed,
+		...toolRefused,
+		...unresolvedWindows.keys()
+	]) {
+		if (!pendingIds.has(rowId)) {
+			forgetRow(rowId);
+		}
+	}
 };
 
 /**
@@ -181,11 +179,13 @@ const fetchLifiStatusAnswer = async (
 };
 
 const readLifiStatus = async ({
+	rowId,
 	txHash,
 	fromChain,
 	toChain,
 	bridge
 }: {
+	rowId: string;
 	txHash: string;
 	fromChain: number;
 	toChain: number;
@@ -193,15 +193,22 @@ const readLifiStatus = async ({
 }): Promise<LifiStatusAnswer> => {
 	const request = { txHash, fromChain, toChain };
 
-	if (isNullish(bridge)) {
+	if (isNullish(bridge) || toolRefused.has(rowId)) {
 		return await fetchLifiStatusAnswer(request);
 	}
 
 	const answer = await fetchLifiStatusAnswer({ ...request, bridge });
 
+	if (answer.status !== 'INVALID') {
+		return answer;
+	}
+
 	// `INVALID` means LI.FI cannot tie the hash to the bridge or chains asked about, which does not
-	// fix itself; the stored tool may be what it rejects.
-	return answer.status === 'INVALID' ? await fetchLifiStatusAnswer(request) : answer;
+	// fix itself; the stored tool may be what it rejects. Remembered, so that a row left unresolved
+	// costs one request per poll, not two.
+	toolRefused.add(rowId);
+
+	return await fetchLifiStatusAnswer(request);
 };
 
 const applyUpdate = async ({
@@ -232,7 +239,7 @@ const applyUpdate = async ({
 	// With it, that write is refused as an illegal transition.
 	const status = next ?? (hasNewRefs ? tx.status : undefined);
 
-	await applyActiveUserTransactionPollUpdate({
+	const written = await applyActiveUserTransactionPollUpdate({
 		identity,
 		tx,
 		update: {
@@ -245,9 +252,9 @@ const applyUpdate = async ({
 	});
 
 	// A row this poll settles leaves the pending set, and if it was the last LI.FI row, no later poll
-	// would prune it. Should the write have failed, the row stays pending and is polled afresh, which
-	// can only delay its verdict.
-	if (nonNullish(next) && isTerminalActiveUserTransactionStatus(next)) {
+	// would prune it. Only once the write landed: should it fail, the row stays pending with its
+	// state, so that the next poll repeats the verdict rather than reopening a 6 h window.
+	if (written && nonNullish(next) && isTerminalActiveUserTransactionStatus(next)) {
 		forgetRow(tx.id);
 	}
 };
@@ -383,7 +390,15 @@ const pollLifiActiveUserTransaction = async ({
 		return;
 	}
 
+	// A same-chain route swaps inside the source transaction itself, which reverts unless the user
+	// receives at least the minimum: its confirmed receipt is the outcome, as for Velora Market.
+	if (fromChain === toChain) {
+		await applyUpdate({ identity, tx, refs, update: { status: { Succeeded: null } }, learned: {} });
+		return;
+	}
+
 	const answer = await readLifiStatus({
+		rowId: tx.id,
 		txHash,
 		fromChain,
 		toChain,
@@ -410,8 +425,8 @@ const pollLifiActiveUserTransaction = async ({
 
 /**
  * Advances the pending LI.FI rows: the source chain decides until the source transaction is
- * confirmed, then LI.FI's `/status`, each row at LI.FI's recommended cadence. Errors are caught per
- * row and leave it untouched until its next poll.
+ * confirmed, which settles a same-chain swap, then LI.FI's `/status` a cross-chain one, each row at
+ * LI.FI's recommended cadence. Errors are caught per row and leave it untouched until its next poll.
  *
  * `userAddress` is the caller's EVM address, which signed every EVM-source row: rows are
  * principal-scoped and OISY derives one EVM address per principal. They are skipped while it is

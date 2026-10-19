@@ -53,6 +53,13 @@ describe('lifi-active-tx.services', () => {
 	const confirmedReceipt = { status: 1 };
 	const solanaSignature = '5'.repeat(88);
 
+	// Base ETH → Base USDC.
+	const sameChainData: LifiData = {
+		source_token: { EvmNative: 8453n },
+		dest_token: { Erc20: [mockLifiBaseUsdcToken.address, 8453n] },
+		amount: 10n
+	};
+
 	const buildTx = ({
 		refs = toLifiExternalRefsMap(mockLifiActiveUserTransaction.external_refs),
 		data = mockLifiData,
@@ -104,7 +111,7 @@ describe('lifi-active-tx.services', () => {
 		resetLifiActiveTxState();
 		resetEvmSourceTxObservations();
 
-		applySpy.mockResolvedValue();
+		applySpy.mockResolvedValue(true);
 
 		getTransactionReceipt = vi.fn().mockResolvedValue(confirmedReceipt);
 		getTransactionCountLatest = vi.fn().mockResolvedValue(7);
@@ -237,6 +244,24 @@ describe('lifi-active-tx.services', () => {
 			expect(getTransactionReceipt).toHaveBeenCalledOnce();
 			expect(fetchLifiStatus).toHaveBeenCalledTimes(2);
 		});
+
+		describe('a same-chain swap', () => {
+			it('succeeds from its confirmed receipt, without asking LI.FI', async () => {
+				await poll([buildTx({ data: sameChainData })]);
+
+				expect(fetchLifiStatus).not.toHaveBeenCalled();
+				expect(lastUpdate()).toEqual({ status: { Succeeded: null } });
+			});
+
+			it('fails from its reverted receipt, as any other', async () => {
+				getTransactionReceipt.mockResolvedValue({ status: 0 });
+
+				await poll([buildTx({ data: sameChainData })]);
+
+				expect(fetchLifiStatus).not.toHaveBeenCalled();
+				expect(lastUpdate()?.status).toEqual({ Failed: null });
+			});
+		});
 	});
 
 	describe('LI.FI status', () => {
@@ -347,6 +372,23 @@ describe('lifi-active-tx.services', () => {
 				toChain: ChainId.SOL
 			});
 			expect(lastUpdate()?.status).toEqual({ Succeeded: null });
+		});
+
+		it('asks without the refused tool from then on', async () => {
+			vi.mocked(fetchLifiStatus)
+				.mockResolvedValueOnce({ status: 'INVALID' } as StatusResponse)
+				.mockResolvedValue({ status: 'NOT_FOUND' } as StatusResponse);
+
+			await poll([buildTx()]);
+			await vi.advanceTimersByTimeAsync(10_000);
+			await poll([buildTx()]);
+
+			expect(fetchLifiStatus).toHaveBeenCalledTimes(3);
+			expect(fetchLifiStatus).toHaveBeenLastCalledWith({
+				txHash: mockLifiTxHash,
+				fromChain: 8453,
+				toChain: ChainId.SOL
+			});
 		});
 
 		it('asks without a bridge from the start when the row has no tool', async () => {
@@ -525,10 +567,45 @@ describe('lifi-active-tx.services', () => {
 		});
 
 		it('drops the window of a row that is no longer pending', async () => {
+			await poll([buildTx()]);
+
+			expect(storedWindow()).toEqual({ elapsedMs: 0 });
+
+			await poll([buildTx({ id: 'another-row' })]);
+
+			expect(localStorage.getItem(unresolvedKey(rowId))).toBeNull();
+		});
+
+		// Rows another tab opened since this one loaded, or another principal's, are missing from
+		// this tab's pending set without being settled.
+		it('keeps the stored window of a row this tab does not keep', async () => {
 			storeWindow({ elapsedMs: 60_000 });
 
 			await poll([buildTx({ id: 'another-row' })]);
 
+			expect(storedWindow()).toEqual({ elapsedMs: 60_000 });
+		});
+
+		it('repeats the verdict when its write failed, rather than opening a new window', async () => {
+			storeWindow({ elapsedMs: LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS - 30_000 });
+
+			await poll([buildTx()]);
+			await vi.advanceTimersByTimeAsync(60_000);
+
+			applySpy.mockResolvedValueOnce(false);
+
+			await poll([buildTx()]);
+
+			expect(storedWindow()).toEqual({ elapsedMs: LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS + 30_000 });
+
+			await vi.advanceTimersByTimeAsync(60_000);
+			await poll([buildTx()]);
+
+			expect(applySpy).toHaveBeenCalledTimes(3);
+			expect(lastUpdate()).toEqual({
+				status: { Failed: null },
+				error: en.swap.error.lifi_status_unknown
+			});
 			expect(localStorage.getItem(unresolvedKey(rowId))).toBeNull();
 		});
 	});
@@ -570,6 +647,26 @@ describe('lifi-active-tx.services', () => {
 			expect(fetchLifiStatus).toHaveBeenCalledTimes(2);
 		});
 
+		it('keeps the state of a row whose settling write failed', async () => {
+			vi.mocked(fetchLifiStatus).mockResolvedValue({
+				status: 'DONE',
+				substatus: 'COMPLETED'
+			} as StatusResponse);
+			applySpy.mockResolvedValueOnce(false);
+
+			await poll([buildTx()]);
+			await poll([buildTx()]);
+
+			// Polled at its cadence, and its confirmed source not read again.
+			expect(fetchLifiStatus).toHaveBeenCalledOnce();
+
+			await vi.advanceTimersByTimeAsync(10_000);
+			await poll([buildTx()]);
+
+			expect(getTransactionReceipt).toHaveBeenCalledOnce();
+			expect(fetchLifiStatus).toHaveBeenCalledTimes(2);
+		});
+
 		it('polls an older row less often', async () => {
 			const tx = buildTx({ createdAt: now - 20 * 60 * 1_000 });
 
@@ -587,12 +684,6 @@ describe('lifi-active-tx.services', () => {
 	});
 
 	describe('reloadLifiEvmBalances', () => {
-		const sameChainData: LifiData = {
-			source_token: { EvmNative: 8453n },
-			dest_token: { Erc20: [mockLifiBaseUsdcToken.address, 8453n] },
-			amount: 10n
-		};
-
 		beforeEach(() => {
 			vi.mocked(reloadEthereumBalance).mockResolvedValue({ success: true });
 		});

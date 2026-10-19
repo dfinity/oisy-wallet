@@ -133,7 +133,7 @@ describe('cycles-mint-active-tx.services', () => {
 
 		applySpy = vi
 			.spyOn(activeUserTransactionsServices, 'applyActiveUserTransactionPollUpdate')
-			.mockResolvedValue();
+			.mockResolvedValue(true);
 		deleteSpy = vi
 			.spyOn(activeUserTransactionsServices, 'deleteActiveUserTransaction')
 			.mockResolvedValue();

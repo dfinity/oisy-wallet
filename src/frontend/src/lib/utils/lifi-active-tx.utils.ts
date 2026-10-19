@@ -95,7 +95,8 @@ export interface LifiStatusUpdate {
 
 /**
  * The row's status while its EVM source transaction is not confirmed yet, from the source chain's
- * verdict. A confirmed source settles nothing: from there, `/status` decides.
+ * verdict. A confirmed source settles a same-chain swap, which the poller writes, and nothing
+ * else: from there, `/status` decides.
  */
 export const lifiSourceOutcomeToUpdate = (
 	outcome: EvmSourceTxOutcome
