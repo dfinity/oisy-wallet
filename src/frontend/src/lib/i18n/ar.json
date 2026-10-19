@@ -1888,6 +1888,7 @@
 			"ambiguous_transaction": "تنقل هذه المعاملة الأموال بين عدة عناوين ولا يمكن عرضها بدقة للمراجعة. حفاظًا على أمانك، لم يتم توقيعها.",
 			"close_pays_others": "",
 			"unreviewed_without_simulation": "",
+			"unreviewed_not_described_by_simulation": "",
 			"unread_programs_unconfirmed": "",
 			"sol_transaction_as_message": "",
 			"request_not_defined": "خطأ غير متوقع: الطلب غير معرف وبالتالي لا يمكن معالجته.",
