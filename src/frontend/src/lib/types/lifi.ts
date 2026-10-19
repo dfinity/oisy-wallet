@@ -10,9 +10,11 @@ export const LIFI_EXTERNAL_REF_KEYS = {
 	// transaction id is kept for support.
 	TOOL: 'lifi_tool',
 	TRANSACTION_ID: 'lifi_transaction_id',
-	// Learned as the poller reads `/status`. The received token is recorded on `DONE` / `PARTIAL`,
-	// when the user was paid in a token other than the one asked for.
+	// Learned as the poller reads `/status`. The substatus records how a `DONE` transfer ended; the
+	// received token is recorded on `DONE` / `PARTIAL`, when the user was paid in a token other than
+	// the one asked for.
 	DEST_TX_HASH: 'lifi_dest_tx_hash',
+	SUBSTATUS: 'lifi_substatus',
 	RECEIVED_SYMBOL: 'lifi_received_symbol',
 	RECEIVED_AMOUNT: 'lifi_received_amount',
 	// Display + analytics metadata snapshotted at creation, under the key names every swap

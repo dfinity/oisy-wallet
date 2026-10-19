@@ -1063,22 +1063,28 @@ otherwise no-ops silently). Precedent: commit `78d5addbd` (Velora's variant).
 
 #### External refs (`LIFI_EXTERNAL_REF_KEYS`, `lib/types/lifi.ts`)
 
-| Key                    | Set                     | Purpose                                              |
-| ---------------------- | ----------------------- | ---------------------------------------------------- |
-| `lifi_tx_hash`         | creation, required      | source tx hash / Solana signature; `/status` key     |
-| `lifi_tool`            | creation                | `step.tool`, passed as `bridge` to `/status`         |
-| `lifi_transaction_id`  | creation                | LI.FI's id, for support / explorer links             |
-| `lifi_nonce`           | creation, EVM, required | replaced/dropped detection (Velora Market)           |
-| `lifi_blockhash`       | creation, SOL, required | the transaction's recent blockhash; expiry detection |
-| `lifi_dest_tx_hash`    | learned                 | `receiving.txHash`                                   |
-| `lifi_received_symbol` | learned                 | `receiving.token.symbol` on every `DONE` / `PARTIAL` |
-| `lifi_received_amount` | learned                 | that token's amount, **formatted** (see below)       |
+| Key                    | Set                     | Purpose                                                |
+| ---------------------- | ----------------------- | ------------------------------------------------------ |
+| `lifi_tx_hash`         | creation, required      | source tx hash / Solana signature; `/status` key       |
+| `lifi_tool`            | creation                | `step.tool`, passed as `bridge` to `/status`           |
+| `lifi_transaction_id`  | creation                | LI.FI's id, for support / explorer links               |
+| `lifi_nonce`           | creation, EVM, required | replaced/dropped detection (Velora Market)             |
+| `lifi_blockhash`       | creation, SOL, required | the transaction's recent blockhash; expiry detection   |
+| `lifi_dest_tx_hash`    | learned                 | `receiving.txHash`                                     |
+| `lifi_substatus`       | learned                 | how a `DONE` ended: `COMPLETED`, `PARTIAL`, `REFUNDED` |
+| `lifi_received_symbol` | learned                 | `receiving.token.symbol` on every `DONE` / `PARTIAL`   |
+| `lifi_received_amount` | learned                 | that token's amount, **formatted** (see below)         |
 
 Plus the shared display keys (`amount`, `source_token_symbol`, `source_network_symbol`,
 `destination_token_symbol`, `destination_network_symbol`, `usd_source_value`), so
 `ActiveUserTransactionItem` renders the row without new layout. An EVM row uses at most
-13 of the 16 keys (`lifi_nonce`, no `lifi_blockhash`), a Solana row likewise 13
-(`lifi_blockhash`, no `lifi_nonce`), leaving three spare.
+14 of the 16 keys (`lifi_nonce`, no `lifi_blockhash`), a Solana row likewise 14
+(`lifi_blockhash`, no `lifi_nonce`), leaving two spare.
+
+`lifi_substatus` is written on every `DONE`, only when it is in the SDK's closed set
+(`isSubstatusDone`). It is what tells a partial payout apart for the balance reload (see
+[Loader and UI](#loader-and-ui)), independently of the received token's metadata, which is
+omitted when it fails its checks, and it records for support how a settled swap ended.
 
 Two things one might expect in the refs are deliberately not there:
 
@@ -1319,9 +1325,12 @@ prune to its own rows.
   - An explicit EVM reload with `reloadEthereumBalance` (`eth/services/eth-balance.services.ts`)
     for each affected EVM token: the source token and its network's native token (gas,
     `nativeTokenOf`) on every terminal status, since a refund can also land there, and the
-    destination token when it is on an EVM network. After a partial payout (the row holds
-    `lifi_received_symbol`), the token received is not one the row identifies, so every
-    enabled token of the destination chain is reloaded instead. `swap()` only reloads the source
+    destination token when it is on an EVM network. After a partial payout (the row's
+    `lifi_substatus` is `PARTIAL`), the token received is not one the row identifies, so
+    every enabled fungible token of the destination chain is reloaded too. The loader
+    passes `enabledFungibleTokens`, and only what `reloadEthereumBalance` can load (native
+    EVM coins, ERC-20s, ERC-4626 vaults) is reloaded: it hands anything else to its ERC-20
+    loader, where an NFT collection fails and resets its balance. `swap()` only reloads the source
     token once the source transaction is mined, so without this an EVM destination payout
     or a later refund stays stale until the periodic poll. The row stores backend
     `TokenId`s, and only the forward mapping exists (`toBackendTokenId`,
@@ -1493,7 +1502,8 @@ everywhere.
     panel labelled "LI.FI", and it reaches `Succeeded` / `Failed` in the background,
     including after a page reload. Every terminal LI.FI row triggers one wallet
     refresh and an explicit reload of its EVM source, gas and (EVM) destination
-    balances; after a partial payout, of every enabled token of the destination chain.
+    balances; after a partial payout, of every enabled fungible token of the destination
+    chain.
 13. `DONE/PARTIAL` ends `Succeeded` and the row shows the token actually received, with
     its amount correctly formatted; `DONE/REFUNDED` ends `Failed` with the refunded copy.
 14. A reverted / dropped (EVM) or reverted / expired (Solana) source transaction ends
@@ -1574,7 +1584,7 @@ Recorded so a future reader can tell "excluded on purpose" from "forgotten".
   read at quote selection rather than a flat two.
 - **The row's chain ids are not refs.** They are derived from `source_token` /
   `dest_token`, and the Solana expiry observation lives in memory like Velora's
-  replacement counter, so both row kinds stay at 13 of the 16 refs.
+  replacement counter, so both row kinds stay at 14 of the 16 refs.
 - **`@lifi/sdk` (core only) is approved** as a new dependency.
 - **PR 2 is split into 2a / 2b** up front, and 2a into 2a-1 (quote client) / 2a-2
   (registration).

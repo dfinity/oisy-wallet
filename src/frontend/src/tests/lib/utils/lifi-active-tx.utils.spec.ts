@@ -241,8 +241,38 @@ describe('lifi-active-tx.utils', () => {
 					},
 					toChain: ChainId.SOL
 				})
-			).toEqual({ [LIFI_EXTERNAL_REF_KEYS.DEST_TX_HASH]: solanaSignature });
+			).toEqual({
+				[LIFI_EXTERNAL_REF_KEYS.DEST_TX_HASH]: solanaSignature,
+				[LIFI_EXTERNAL_REF_KEYS.SUBSTATUS]: 'COMPLETED'
+			});
 		});
+
+		it.each(['COMPLETED', 'PARTIAL', 'REFUNDED'] as const)(
+			'should record that a DONE transfer ended %s, without a destination transaction too',
+			(substatus) => {
+				expect(
+					toLifiLearnedRefs({ answer: { status: 'DONE', substatus }, toChain: ChainId.SOL })
+				).toEqual({ [LIFI_EXTERNAL_REF_KEYS.SUBSTATUS]: substatus });
+			}
+		);
+
+		it.each([
+			{
+				case: 'a substatus outside the DONE set',
+				answer: { status: 'DONE', substatus: 'EXPIRED' }
+			},
+			{ case: 'an unknown substatus', answer: { status: 'DONE', substatus: 'SOMETHING_NEW' } },
+			{
+				case: 'a PENDING transfer',
+				answer: { status: 'PENDING', substatus: 'REFUND_IN_PROGRESS' }
+			},
+			{ case: 'a FAILED transfer', answer: { status: 'FAILED', substatus: 'SLIPPAGE_EXCEEDED' } }
+		] as { case: string; answer: LifiStatusAnswer }[])(
+			'should record no substatus for $case',
+			({ answer }) => {
+				expect(toLifiLearnedRefs({ answer, toChain: ChainId.SOL })).toEqual({});
+			}
+		);
 
 		it.each([
 			{ hash: evmHash, toChain: ChainId.SOL },
@@ -266,6 +296,7 @@ describe('lifi-active-tx.utils', () => {
 				})
 			).toEqual({
 				[LIFI_EXTERNAL_REF_KEYS.DEST_TX_HASH]: solanaSignature,
+				[LIFI_EXTERNAL_REF_KEYS.SUBSTATUS]: 'PARTIAL',
 				[LIFI_EXTERNAL_REF_KEYS.RECEIVED_SYMBOL]: 'USDC.e',
 				[LIFI_EXTERNAL_REF_KEYS.RECEIVED_AMOUNT]: '49.875'
 			});
@@ -285,7 +316,10 @@ describe('lifi-active-tx.utils', () => {
 					},
 					toChain: ChainId.SOL
 				})
-			).toEqual({ [LIFI_EXTERNAL_REF_KEYS.DEST_TX_HASH]: solanaSignature });
+			).toEqual({
+				[LIFI_EXTERNAL_REF_KEYS.DEST_TX_HASH]: solanaSignature,
+				[LIFI_EXTERNAL_REF_KEYS.SUBSTATUS]: 'COMPLETED'
+			});
 		});
 
 		it.each([
@@ -307,10 +341,11 @@ describe('lifi-active-tx.utils', () => {
 			},
 			{ case: 'an empty symbol', info: { amount: '1', token: { ...receivedToken, symbol: '' } } }
 		] as { case: string; info: Partial<ExtendedTransactionInfo> }[])(
-			'should omit the received pair for $case',
+			'should omit the received pair for $case, keeping the partial substatus',
 			({ info }) => {
 				expect(toLifiLearnedRefs({ answer: partial(info), toChain: ChainId.SOL })).toEqual({
-					[LIFI_EXTERNAL_REF_KEYS.DEST_TX_HASH]: solanaSignature
+					[LIFI_EXTERNAL_REF_KEYS.DEST_TX_HASH]: solanaSignature,
+					[LIFI_EXTERNAL_REF_KEYS.SUBSTATUS]: 'PARTIAL'
 				});
 			}
 		);

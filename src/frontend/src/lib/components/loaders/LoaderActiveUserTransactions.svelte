@@ -13,7 +13,7 @@
 	import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { enabledTokens } from '$lib/derived/tokens.derived';
+	import { enabledFungibleTokens } from '$lib/derived/tokens.derived';
 	import { loadActiveUserTransactions } from '$lib/services/active-user-transactions.services';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { pollChainFusionActiveUserTransactions } from '$lib/services/chain-fusion-swap-active-tx.services';
@@ -288,7 +288,7 @@
 				// route still spent gas or returned funds. The wallet refresh covers the Solana side; EVM
 				// balances have no wallet worker, so they are reloaded explicitly.
 				shouldRefresh = true;
-				reloadLifiEvmBalances({ tx, tokens: $enabledTokens });
+				reloadLifiEvmBalances({ tx, tokens: $enabledFungibleTokens });
 			} else if (
 				isTerminalActiveUserTransaction(tx) &&
 				!alreadyApplied &&

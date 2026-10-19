@@ -19,9 +19,10 @@ import { SwapProvider } from '$lib/types/swap';
 import type { EvmSourceTxOutcome } from '$lib/utils/evm-source-tx.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { truncateUtf8Bytes } from '$lib/utils/string.utils';
-import { isNullish, notEmptyString } from '@dfinity/utils';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import {
 	ChainId,
+	isSubstatusDone,
 	type BaseStatusData,
 	type ExtendedTransactionInfo,
 	type PendingReceivingInfo
@@ -210,9 +211,12 @@ const toLifiReceivedRefs = ({
 };
 
 /**
- * The refs a `/status` answer teaches: the destination tx hash once LI.FI reports one, and on
- * `DONE` / `PARTIAL` the token the user actually received. A hash that is not one for the
- * destination chain is omitted rather than stored.
+ * The refs a `/status` answer teaches: how a `DONE` transfer ended, the destination tx hash once
+ * LI.FI reports one, and on `DONE` / `PARTIAL` the token the user actually received. A hash that is
+ * not one for the destination chain is omitted rather than stored.
+ *
+ * The substatus is recorded on its own, from LI.FI's closed set, so that a partial payout is known
+ * even when the received token's metadata fails its checks and is left out.
  */
 export const toLifiLearnedRefs = ({
 	answer: { status, substatus, receiving },
@@ -221,8 +225,13 @@ export const toLifiLearnedRefs = ({
 	answer: LifiStatusAnswer;
 	toChain: number;
 }): Partial<Record<LifiExternalRefKey, string>> => {
+	const outcomeRefs =
+		status === 'DONE' && nonNullish(substatus) && isSubstatusDone(substatus)
+			? { [LIFI_EXTERNAL_REF_KEYS.SUBSTATUS]: substatus }
+			: {};
+
 	if (isNullish(receiving) || !('txHash' in receiving)) {
-		return {};
+		return outcomeRefs;
 	}
 
 	const { txHash } = receiving;
@@ -230,6 +239,7 @@ export const toLifiLearnedRefs = ({
 	const isDestinationHash = (toChain === ChainId.SOL ? SOLANA_SIGNATURE : EVM_TX_HASH).test(txHash);
 
 	return {
+		...outcomeRefs,
 		...(isDestinationHash ? { [LIFI_EXTERNAL_REF_KEYS.DEST_TX_HASH]: txHash } : {}),
 		...(status === 'DONE' && substatus === 'PARTIAL' ? toLifiReceivedRefs(receiving) : {})
 	};

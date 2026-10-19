@@ -6,6 +6,10 @@ import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import { nativeTokenOf } from '$eth/services/native-balance.services';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
+import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS } from '$lib/constants/swap.constants';
 import { fetchLifiStatus } from '$lib/rest/lifi.rest';
 import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
@@ -34,11 +38,7 @@ import {
 	type LifiStoredUnresolvedWindow,
 	type LifiUnresolvedWindow
 } from '$lib/utils/lifi-active-tx.utils';
-import {
-	findEvmNetworkByChainId,
-	isNetworkIdEthereum,
-	isNetworkIdEvm
-} from '$lib/utils/network.utils';
+import { findEvmNetworkByChainId } from '$lib/utils/network.utils';
 import { del, get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
 import { findTokenByBackendTokenId } from '$lib/utils/token-id.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -449,15 +449,21 @@ export const pollLifiActiveUserTransactions = async ({
 	);
 };
 
-const isEvmToken = ({ network: { id } }: Token): boolean =>
-	isNetworkIdEthereum(id) || isNetworkIdEvm(id);
+// What `reloadEthereumBalance` can load: native EVM coins, ERC-20s and ERC-4626 vaults. It hands
+// anything else to the ERC-20 loader, where an NFT collection fails and resets its balance.
+const isReloadableEvmToken = (token: Token): boolean =>
+	isSupportedEthTokenId(token.id) ||
+	isSupportedEvmNativeTokenId(token.id) ||
+	isTokenErc20(token) ||
+	isTokenErc4626(token);
 
 /**
  * Reloads the EVM balances a terminal LI.FI row may have moved: the source token and its network's
  * native token (gas, and where a refund may land) whatever the outcome, and the destination token
  * when it is on an EVM network, or after a partial payout every enabled token of the destination
- * chain. No wallet worker refreshes EVM balances, and the swap modal closed
- * at broadcast, so nothing else does when the route settles. A token no longer enabled is skipped.
+ * chain. No wallet worker refreshes EVM balances, and the swap modal closed at broadcast, so
+ * nothing else does when the route settles. A token no longer enabled is skipped, and so is any
+ * `tokens` entry that is not a fungible EVM token.
  *
  * Best effort and not awaited: a balance that fails to reload is what the periodic poll resolves.
  */
@@ -478,16 +484,15 @@ export const reloadLifiEvmBalances = ({
 
 	// A partial payout came in a token other than the one asked for, which the row does not
 	// identify, so every enabled token of the destination chain is reloaded.
-	const isPartialPayout = nonNullish(
-		toLifiExternalRefsMap(tx.external_refs)[LIFI_EXTERNAL_REF_KEYS.RECEIVED_SYMBOL]
-	);
+	const isPartialPayout =
+		toLifiExternalRefsMap(tx.external_refs)[LIFI_EXTERNAL_REF_KEYS.SUBSTATUS] === 'PARTIAL';
 
+	// Only EVM networks carry a `chainId`; what of them is not fungible is left out below.
 	const payoutTokens =
 		isPartialPayout && nonNullish(destinationChainId)
 			? tokens.filter(
-					(token) =>
-						isEvmToken(token) &&
-						(token.network as EthereumNetwork).chainId === BigInt(destinationChainId)
+					({ network }) =>
+						(network as Partial<EthereumNetwork>).chainId === BigInt(destinationChainId)
 				)
 			: [];
 
@@ -499,7 +504,7 @@ export const reloadLifiEvmBalances = ({
 		destinationToken,
 		...payoutTokens
 	]) {
-		if (nonNullish(token) && isEvmToken(token)) {
+		if (nonNullish(token) && isReloadableEvmToken(token)) {
 			evmTokens.set(token.id, token);
 		}
 	}

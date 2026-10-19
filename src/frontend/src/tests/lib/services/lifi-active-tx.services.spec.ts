@@ -21,6 +21,7 @@ import {
 	mockLifiData,
 	mockLifiTxHash
 } from '$tests/mocks/active-user-transactions.mock';
+import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -260,7 +261,8 @@ describe('lifi-active-tx.services', () => {
 			expect(update?.error).toBeUndefined();
 			expect(toLifiExternalRefsMap(update?.externalRefs ?? [])).toEqual({
 				...toLifiExternalRefsMap(mockLifiActiveUserTransaction.external_refs),
-				[LIFI_EXTERNAL_REF_KEYS.DEST_TX_HASH]: solanaSignature
+				[LIFI_EXTERNAL_REF_KEYS.DEST_TX_HASH]: solanaSignature,
+				[LIFI_EXTERNAL_REF_KEYS.SUBSTATUS]: 'COMPLETED'
 			});
 		});
 
@@ -303,7 +305,7 @@ describe('lifi-active-tx.services', () => {
 			).toBe(solanaSignature);
 		});
 
-		it('fails a refunded transfer with the refunded copy', async () => {
+		it('fails a refunded transfer with the refunded copy, recording how it ended', async () => {
 			vi.mocked(fetchLifiStatus).mockResolvedValue({
 				status: 'DONE',
 				substatus: 'REFUNDED'
@@ -311,10 +313,13 @@ describe('lifi-active-tx.services', () => {
 
 			await poll([buildTx()]);
 
-			expect(lastUpdate()).toEqual({
-				status: { Failed: null },
-				error: en.swap.error.swap_refunded
-			});
+			const update = lastUpdate();
+
+			expect(update?.status).toEqual({ Failed: null });
+			expect(update?.error).toBe(en.swap.error.swap_refunded);
+			expect(
+				toLifiExternalRefsMap(update?.externalRefs ?? [])[LIFI_EXTERNAL_REF_KEYS.SUBSTATUS]
+			).toBe('REFUNDED');
 		});
 
 		it("fails a FAILED transfer with LI.FI's reason", async () => {
@@ -618,27 +623,30 @@ describe('lifi-active-tx.services', () => {
 				amount: 10n
 			};
 
-			const tokens = [mockLifiBaseUsdcToken, ETHEREUM_TOKEN];
+			// An enabled NFT collection on the destination chain, which the ERC-20 loader would fail on.
+			const tokens = [mockLifiBaseUsdcToken, ETHEREUM_TOKEN, mockValidErc1155Token];
 
-			it('reloads every enabled token of the destination chain, the one received included', () => {
-				reloadLifiEvmBalances({
-					tx: buildTx({
-						data: baseToEthereumUsdc,
-						refs: {
-							...toLifiExternalRefsMap(mockLifiActiveUserTransaction.external_refs),
-							[LIFI_EXTERNAL_REF_KEYS.RECEIVED_SYMBOL]: 'ETH',
-							[LIFI_EXTERNAL_REF_KEYS.RECEIVED_AMOUNT]: '0.01'
-						}
-					}),
-					tokens
+			const withSubstatus = (substatus: string) =>
+				buildTx({
+					data: baseToEthereumUsdc,
+					refs: {
+						...toLifiExternalRefsMap(mockLifiActiveUserTransaction.external_refs),
+						[LIFI_EXTERNAL_REF_KEYS.SUBSTATUS]: substatus
+					}
 				});
+
+			// No received token on the row: its metadata failed the checks, and only the substatus
+			// tells the payout was partial.
+			it('reloads every enabled fungible token of the destination chain', () => {
+				reloadLifiEvmBalances({ tx: withSubstatus('PARTIAL'), tokens });
 
 				expect(reloadEthereumBalance).toHaveBeenCalledTimes(3);
 				expect(reloadEthereumBalance).toHaveBeenCalledWith(ETHEREUM_TOKEN);
+				expect(reloadEthereumBalance).not.toHaveBeenCalledWith(mockValidErc1155Token);
 			});
 
-			it('is not assumed without the received token on the row', () => {
-				reloadLifiEvmBalances({ tx: buildTx({ data: baseToEthereumUsdc }), tokens });
+			it('is not assumed for a transfer that completed', () => {
+				reloadLifiEvmBalances({ tx: withSubstatus('COMPLETED'), tokens });
 
 				expect(reloadEthereumBalance).toHaveBeenCalledTimes(2);
 				expect(reloadEthereumBalance).not.toHaveBeenCalledWith(ETHEREUM_TOKEN);
