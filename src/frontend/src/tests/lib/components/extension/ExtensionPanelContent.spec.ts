@@ -3,7 +3,8 @@ import {
 	OISY_EXTENSION_KEEP_ALIVE_MS,
 	OISY_EXTENSION_MIN_VERSION,
 	OISY_EXTENSION_PANEL_PORT_NAME,
-	OISY_EXTENSION_PANEL_RECONNECT_ATTEMPTS
+	OISY_EXTENSION_PANEL_RECONNECT_ATTEMPTS,
+	OISY_EXTENSION_PANEL_STATE_TIMEOUT_MS
 } from '$lib/constants/extension.constants';
 import * as extensionProviders from '$lib/providers/extension.providers';
 import { ethAddressStore, solAddressDevnetStore } from '$lib/stores/address.store';
@@ -184,6 +185,17 @@ describe('ExtensionPanelContent', () => {
 
 		expect(ports).toHaveLength(OISY_EXTENSION_PANEL_RECONNECT_ATTEMPTS + 1);
 		expect(getByText(en.extension.text.no_extension)).toBeInTheDocument();
+	});
+
+	it('treats an extension that never answers the panel as out of date', async () => {
+		vi.useFakeTimers();
+
+		const { getByText } = render(ExtensionPanelContent);
+		vi.advanceTimersByTime(OISY_EXTENSION_PANEL_STATE_TIMEOUT_MS);
+		await tick();
+
+		expect(getByText(en.extension.text.outdated)).toBeInTheDocument();
+		expect(sentMessages().filter(({ type }) => type === 'set-account')).toHaveLength(0);
 	});
 
 	it('pings the extension while the panel is open', () => {

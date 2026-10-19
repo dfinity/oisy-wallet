@@ -2,7 +2,7 @@
 // a person has to sign in to OISY. Needs the OISY dev server against staging on :5175 and the test
 // dapp on :8090. Run: node src/extension/scripts/smoke.js   (HEADED=1 to watch it)
 import { chromium } from '@playwright/test';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,6 +13,9 @@ const OISY_ORIGIN = 'http://localhost:5175';
 const SCREENSHOT_DIR = process.env.SMOKE_SCREENSHOTS ?? tmpdir();
 
 const extensionPath = join(dirname(fileURLToPath(import.meta.url)), '..');
+const { version: EXTENSION_VERSION } = JSON.parse(
+	await readFile(join(extensionPath, 'manifest.json'), 'utf8')
+);
 
 const results = [];
 
@@ -175,7 +178,7 @@ try {
 	const popupProbe = await probeExtension({ page: popup, id: requestId });
 	check({
 		name: 'the extension reports its version to OISY',
-		ok: popupProbe.version === '0.0.1',
+		ok: popupProbe.version === EXTENSION_VERSION,
 		detail: popupProbe.version
 	});
 	check({
@@ -278,7 +281,7 @@ try {
 				);
 	check({
 		name: "OISY's page in the panel gets the extension's state",
-		ok: panelState?.type === 'state' && panelState?.version === '0.0.1',
+		ok: panelState?.type === 'state' && panelState?.version === EXTENSION_VERSION,
 		detail: JSON.stringify(panelState)
 	});
 

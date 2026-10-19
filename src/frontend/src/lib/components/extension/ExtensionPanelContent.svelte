@@ -9,7 +9,8 @@
 	import {
 		OISY_EXTENSION_KEEP_ALIVE_MS,
 		OISY_EXTENSION_PANEL_PORT_NAME,
-		OISY_EXTENSION_PANEL_RECONNECT_ATTEMPTS
+		OISY_EXTENSION_PANEL_RECONNECT_ATTEMPTS,
+		OISY_EXTENSION_PANEL_STATE_TIMEOUT_MS
 	} from '$lib/constants/extension.constants';
 	import { extensionAccount, extensionNetworksOn } from '$lib/derived/extension.derived';
 	import { enabledFungibleNetworkTokensUi } from '$lib/derived/network-tokens-ui.derived';
@@ -92,8 +93,17 @@
 		// Pings keep the worker awake while the panel is open, so the state it pushes arrives at once.
 		const keepAlive = setInterval(() => send({ type: 'ping' }), OISY_EXTENSION_KEEP_ALIVE_MS);
 
+		// An extension that never answers predates the panel; without this the panel would show an
+		// empty list as if nothing were connected.
+		const stateTimeout = setTimeout(() => {
+			if (reachable && isNullish(extensionState)) {
+				versionStatus = 'outdated';
+			}
+		}, OISY_EXTENSION_PANEL_STATE_TIMEOUT_MS);
+
 		return () => {
 			clearInterval(keepAlive);
+			clearTimeout(stateTimeout);
 			port?.disconnect();
 		};
 	});

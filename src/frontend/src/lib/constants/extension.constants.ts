@@ -17,6 +17,9 @@ export const OISY_EXTENSION_KEEP_ALIVE_MS = 20_000;
 // How many times in a row the side panel reconnects to the extension before saying it can't reach it.
 export const OISY_EXTENSION_PANEL_RECONNECT_ATTEMPTS = 3;
 
+// An extension built before the side panel accepts the panel's connection but never answers it.
+export const OISY_EXTENSION_PANEL_STATE_TIMEOUT_MS = 5_000;
+
 // Extension requests reuse the WalletConnect review screens, which address a request by topic.
 export const OISY_EXTENSION_WALLET_CONNECT_TOPIC = 'oisy-extension';
 
@@ -29,7 +32,8 @@ export const OISY_EXTENSION_INTERNAL_ERROR_CODE = -32603;
 // production these would come from config OISY can change without a frontend release, so a bad
 // version can be turned off within minutes. Both rely on the version the extension reports about
 // itself: they keep old, honest versions out, but a malicious version can report any number.
-export const OISY_EXTENSION_MIN_VERSION = '0.0.1';
+// 0.0.2 is the first version that answers OISY's page in the side panel.
+export const OISY_EXTENSION_MIN_VERSION = '0.0.2';
 export const OISY_EXTENSION_BLOCKED_VERSIONS: readonly string[] = [];
 export const OISY_EXTENSION_OUTDATED_MESSAGE =
 	'The OISY extension is out of date. Update it and try again.';
