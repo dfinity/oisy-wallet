@@ -15,6 +15,10 @@ import { isNullish } from '@dfinity/utils';
  * Keyed by active-transaction row id, so one map serves every provider. Deliberately
  * in-memory: a refresh resets the count, which at worst delays terminalization by
  * one tick and never produces a wrong verdict.
+ *
+ * Not pruned: a row stops being polled only once it is terminal (here or in another
+ * tab), which is final, so an entry it leaves behind is never read again; sign-out
+ * reloads the page. A provider must not prune to its own rows, since the map is shared.
  */
 const replacementObservations = new Map<string, number>();
 
