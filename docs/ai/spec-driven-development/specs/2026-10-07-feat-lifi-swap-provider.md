@@ -501,7 +501,9 @@ execution-time — passes `assertLifiQuote` before it is shown or acted on:
 - **Route tools**: every `cross` step in `includedSteps` uses a bridge the request's
   `allowBridges` names, and no `swap` step uses an exchange in its `denyExchanges`. The
   lists are only request parameters, so this keeps the deny lists working if LI.FI ignores
-  or misreads them (step tool keys match the request's keys, checked 2026-10-19).
+  or misreads them (step tool keys match the request's keys, checked 2026-10-19). From
+  PR 2b-5, no `swap` step precedes an `across` `cross` step either, a route the calldata
+  binding would refuse (see [No DEX swap before Across](#calldata-binding-evm-execution-time-quote)).
 
 EVM addresses (`to`, `approvalAddress`, `from`, EVM token addresses, an EVM
 `toAddress`) are compared **case-insensitively**: LI.FI may return checksummed or
@@ -600,7 +602,7 @@ Then the decoded values are compared with the request. For **every** route, the 
 forged later entry could pull another asset the user has already approved to the
 Diamond. `swapData[0]` must have `requiresDeposit = true` with the source token and
 `fromAmount` (on real routes it is LI.FI's own fee collection, calling its
-`FeeCollector`); every later entry must have `requiresDeposit = false`.
+`FeeForwarder`); every later entry must have `requiresDeposit = false`.
 
 **Every swap call in `SwapData[]` is bound too, not only its deposit flag.** The Diamond
 executes each entry's `callTo` with `callData` (after approving `approveTo`), so a forged
@@ -635,6 +637,16 @@ every DEX's payload client-side is not practical, so the binding has two layers:
   token-contract call, which the whitelist and the rule above both exclude. Pinning the
   allowance to the exact amount would add nothing the binding does not already give,
   at the cost of an extra reset transaction and a second allowance read.
+- **LI.FI's fee forwarding is the one swap call whose arguments are decoded.** The
+  whitelist admits `FeeForwarder` (2.0.0) by contract and selector only, while its
+  arguments decide who is paid and how much of the deposit leaves: a forged first entry
+  could forward most of it elsewhere and bridge the rest. Every entry calling
+  `forwardERC20Fees` / `forwardNativeFees` (`LIFI_FEE_FORWARDER_ABI`) must forward the
+  source token and pass it through (`sendingAssetId`, `receivingAssetId` and `_token` all
+  the source token), and together they may forward at most `LIFI_FEE_BPS` (25) of
+  `fromAmount`, rounded down as LI.FI rounds it. That is what every captured route
+  forwards, to a single recipient (2026-10-19); OISY charges no fee of its own. If LI.FI
+  raises its fee, its routes are refused until the constant follows.
 
 - **Same-chain** (`fromChainId === toChainId`): the `GenericSwapFacetV3` arguments.
   `_receiver` equals `toAddress`, `_minAmountOut` (the on-chain minimum) is at least the
@@ -659,14 +671,59 @@ every DEX's payload client-side is not practical, so the binding has two layers:
     equals the user's Solana address as 32 bytes (the base58-decoded public key). Read
     from the facet's own struct by its decoder, that field means the same for every
     curated facet; a bridge whose data carries no non-EVM receiver cannot serve Solana.
+  - The bridge sends what the swaps produce: with source swaps, the last entry's
+    `receivingAssetId` equals `bridgeData.sendingAssetId`. `SwapperV2` floors the last
+    swap's output at `minAmount` while the facet sends `bridgeData.sendingAssetId`; were
+    they to differ, the bridge would send the Diamond's own balance of another token and
+    leave the user's behind. Across's own `sendingAssetId`, the SpokePool's input token
+    for an ERC-20, equals it too (a native token is sent as the facet's wrapped native,
+    whatever that field says).
+  - The payout is the requested one, read from the facet's own data (see below): its
+    destination asset is the requested token, as that bridge names it, and its minimum
+    output is at least the displayed quote's `toAmountMin`.
+  - Before Across, the only swap is LI.FI's fee forwarding (see below).
 
 Native tokens are `0x0000000000000000000000000000000000000000` on both sides of the
-comparison. Addresses are compared case-insensitively and amounts as `bigint`s.
+comparison, except in a bridge's own data. Addresses are compared case-insensitively and
+amounts as `bigint`s.
 
-The bridge leg's minimum output lives in bridge-specific data that the facet does not
-expose, so it cannot be bound client-side. What remains is a forged route that pays the
-user's own address too little through a real bridge. That is bounded by `fromAmount` and
-listed under [Risks](#risks). It can no longer redirect funds to someone else.
+**Each curated bridge's payout is decoded too.** `bridgeData` names neither the asset a
+bridge pays out nor how much, so a forged response could keep every field above and pay
+another token, or too little of it. v1:
+
+| Facet              | Destination asset (bridge-specific data)                                                                                                                                                      | Minimum output                                                                                                                       |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `AcrossFacetV4`    | `receivingAssetId`: the token left-padded, or its mint; a native coin as the destination chain's wrapped native (`LIFI_ACROSS_WRAPPED_NATIVE`), which the SpokePool unwraps; never native SOL | after source swaps, `minAmount × outputAmountMultiplier / 1e18` (the facet replaces `outputAmount` with it); without, `outputAmount` |
+| `NEARIntentsFacet` | `destinationAsset`: the token left-padded, or its mint; any native coin, EVM or SOL, as `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE` left-padded                                              | `minAmountOut`                                                                                                                       |
+
+`LIFI_ACROSS_WRAPPED_NATIVE` holds the WETH that LI.FI's Across quotes pay out on
+Ethereum, Arbitrum, Base and Robinhood Chain (2026-10-19). Across quoted no native output
+to Polygon or BSC, which have no entry, so native output there goes through NEAR Intents
+only.
+
+**No DEX swap before Across.** Across's minimum output is unsigned: after source swaps,
+the facet pays `minAmount × outputAmountMultiplier`, both from the response, and
+`SwapperV2` only makes the swaps produce `minAmount`. A DEX call's recipient is in
+calldata OISY does not decode, so a forged route could send a DEX swap's output
+elsewhere, lower `minAmount` to what is left and raise the multiplier to keep the
+product above `toAmountMin`. Every check would pass, no relayer would fill the deposit,
+and only what is left would be refunded. With LI.FI's fee forwarding alone before it, the
+bridge sends `fromAmount` less the bound fee, and a wrong multiplier can at worst leave
+the deposit unfilled until its fill deadline and refunded to the user. NEAR Intents is not
+exposed: LI.FI's backend signs `minAmountOut` together with `minAmount`, so a payload
+paying at least `toAmountMin` carries the `minAmount` LI.FI priced for it, and the swaps
+before the bridge must produce it. So an Across route whose `SwapData[]` holds anything
+but the fee forwarding is refused (decided 2026-10-19).
+
+LI.FI often quotes Across behind a DEX swap (ETH → USDC, DAI → USDC, USDC → USDT0 before
+the bridge, 2026-10-19), so the form must not offer such a route either: PR 2b-5 refuses it
+at quote time with the route-tools check (a `swap` step before an `across` `cross` step),
+and decides whether to re-request the quote once without `across`, so that NEAR Intents
+can serve the pair.
+
+What remains for a forged route is an Across deposit that no relayer fills and that is
+refunded to the user; see [Risks](#risks). It can no longer redirect funds to someone else,
+or pay the user less than displayed.
 
 This runs on the execution-time quote only. A display quote is never signed, and the
 execution quote is the one whose bytes are broadcast.
@@ -1348,14 +1405,14 @@ loader's 5 s tick.
 
 ## Delivery plan
 
-| PR   | Scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Depends on                                     |
-| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| 1    | **Backend AUT variant** — `Lifi(LifiData)`, validation of the v1 token matrix (`require_lifi_pair`, pinned EVM chain ids) and of the required poll keys (`require_lifi_refs`), tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                                                     | —                                              |
-| 2a-1 | **Quote client** (not registered anywhere) — `@lifi/sdk`, env (flag **`false` everywhere**), `SwapProvider.LIFI` + mapped-result arm + `swapService` stub, REST client, EVM form-time trust checks, `fetchLifiSwapQuote` with the 30 s cache, `reusability.md` entry                                                                                                                                                                                                                                                                                        | 1                                              |
-| 2a-2 | **Registration** — LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges, empty source list so the Solana source picker is unchanged), provider sheet                                                                                                                                                                                                      | 2a-1                                           |
-| 2b   | **EVM execution + tracking** — calldata binding (pinned facet ABIs decoded locally + the Diamond's whitelist), `fetchLifiEvmSwap` (pre-approval price check, unchanged `approve()`, form budget of 0/1/2 approval fees from one allowance read) + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound and the `/status` 404 → `NOT_FOUND` mapping)/loader (incl. wallet + EVM balance refresh)/item; flag to `(LOCAL \|\| STAGING) && !TEST`, `PRODUCT.md` for EVM-source swaps | 2a-2                                           |
-| 3    | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (quote, destinations, and a mainnet-only source list in place of the empty one; Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` / `closedAccounts` in the simulation preview and the slot-consistent pre/post snapshot), `SwapSolWizard` dispatch, Solana source-chain check in the poller (in-memory expiry observations), `PRODUCT.md` update for Solana-source swaps                                                | 2b                                             |
-| 4    | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 3, production key + rate-limit scope confirmed |
+| PR   | Scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Depends on                                     |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| 1    | **Backend AUT variant** — `Lifi(LifiData)`, validation of the v1 token matrix (`require_lifi_pair`, pinned EVM chain ids) and of the required poll keys (`require_lifi_refs`), tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                                                                                                                                                              | —                                              |
+| 2a-1 | **Quote client** (not registered anywhere) — `@lifi/sdk`, env (flag **`false` everywhere**), `SwapProvider.LIFI` + mapped-result arm + `swapService` stub, REST client, EVM form-time trust checks, `fetchLifiSwapQuote` with the 30 s cache, `reusability.md` entry                                                                                                                                                                                                                                                                                                                                                                                                 | 1                                              |
+| 2a-2 | **Registration** — LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges, empty source list so the Solana source picker is unchanged), provider sheet                                                                                                                                                                                                                                                                                                               | 2a-1                                           |
+| 2b   | **EVM execution + tracking** — calldata binding (pinned facet ABIs decoded locally, incl. each bridge's payout and LI.FI's fee forwarding, + the Diamond's whitelist), route-tools refusal of Across behind a DEX swap, `fetchLifiEvmSwap` (pre-approval price check, unchanged `approve()`, form budget of 0/1/2 approval fees from one allowance read) + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound and the `/status` 404 → `NOT_FOUND` mapping)/loader (incl. wallet + EVM balance refresh)/item; flag to `(LOCAL \|\| STAGING) && !TEST`, `PRODUCT.md` for EVM-source swaps | 2a-2                                           |
+| 3    | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (quote, destinations, and a mainnet-only source list in place of the empty one; Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` / `closedAccounts` in the simulation preview and the slot-consistent pre/post snapshot), `SwapSolWizard` dispatch, Solana source-chain check in the poller (in-memory expiry observations), `PRODUCT.md` update for Solana-source swaps                                                                                                                                                         | 2b                                             |
+| 4    | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | 3, production key + rate-limit scope confirmed |
 
 PR 2 is split up front so each PR stays reviewable, and 2a again into the quote client
 (2a-1) and its registration in the swap fan-out (2a-2). In 2a the flag is `false` everywhere,
@@ -1383,10 +1440,16 @@ everywhere.
   A compromised LI.FI whitelist governance is outside what OISY can bind.
 - **Unsigned quotes** — mitigated by the trust checks and, on the quote that is signed,
   by binding the calldata (EVM) or the simulated effects (Solana) to the request. One
-  residual risk remains: the bridge leg's minimum output cannot be decoded client-side,
-  so a forged cross-chain route (which needs a compromised `li.quest` response over TLS)
-  can underpay, but only to the user's own address. Solana → EVM, whose recipient cannot
-  be verified yet, is out of scope for v1 for exactly this reason.
+  residual risk remains: Across's output multiplier is unsigned and depends on a price,
+  so a forged Across route (which needs a compromised `li.quest` response over TLS) can
+  set one no relayer fills. The deposit then waits out its fill deadline and is refunded
+  to the user, less LI.FI's fee. Solana → EVM is out of scope for v1 because its
+  recipient cannot be verified yet.
+- **Fewer Across routes** — Across behind a DEX swap is refused (see
+  [Calldata binding](#calldata-binding-evm-execution-time-quote)), and LI.FI quotes it
+  often; such pairs go through NEAR Intents or get no LI.FI offer.
+- **LI.FI's fee is pinned** — a route forwarding more than 25 bps is refused, so a fee
+  increase by LI.FI stops its swaps until `LIFI_FEE_BPS` is updated.
 
 - **Solana blockhash expiry** — between the execution re-quote and broadcast only one
   threshold Schnorr signature happens (seconds), well inside 60–90 s. A transaction
@@ -1448,12 +1511,15 @@ everywhere.
    ABIs for its route kind (a bridge the request allowed, cross-chain), to the requested
    source token and amount, the user's recipient (EVM, or the user's Solana address for
    a Solana destination), with every receiver and refund field in the curated facet's
-   own data equal to the user, the requested destination chain and, same-chain, a
-   minimum output at least the displayed `toAmountMin`; and unless every swap call it
-   makes through the Diamond is on the Diamond's whitelist and targets neither the
-   Diamond, an asset of the route nor a token of the user. A route with a destination
-   call is never signed. Calldata that does not decode, or a whitelist that cannot be
-   read, aborts the swap.
+   own data equal to the user, the requested destination chain, the requested
+   destination token (cross-chain, as the facet's own data names it) and a minimum
+   output at least the displayed `toAmountMin` (cross-chain, as the facet computes it);
+   and unless every swap call it makes through the Diamond is on the Diamond's whitelist
+   and targets neither the Diamond, an asset of the route nor a token of the user, its
+   fee forwarding forwards the source token and at most LI.FI's 25 bps, and the only
+   swap before an Across bridge is that fee forwarding. A route with a destination call
+   is never signed. Calldata that does not decode, or a whitelist that cannot be read,
+   aborts the swap.
 9. A Solana swap is never signed unless a simulation of its exact bytes, with the
    pre-state read at the very slot the simulation ran at, succeeds, shows no control
    change, leaves every token account it creates for the user with the user
@@ -1550,6 +1616,12 @@ Recorded so a future reader can tell "excluded on purpose" from "forgotten".
   `CalldataVerificationFacet`: the deployed v1.1.1 on five of the six pinned Diamonds has
   no `extractNonEVMAddress`, and the bridge facets' own ABIs are needed anyway. Only the
   whitelist check is an on-chain read (2026-10-19).
+- **Across is offered behind LI.FI's fee forwarding only, never behind a DEX swap.** Its
+  minimum output is unsigned, so behind a DEX swap whose recipient OISY cannot decode it
+  could not be bound; NEAR Intents' minimum is signed by LI.FI and may follow DEX swaps
+  (2026-10-19).
+- **LI.FI's fee is bound to 25 bps** (`LIFI_FEE_BPS`), the fee every captured route
+  forwards, rather than read from the unsigned quote's `feeCosts`.
 - **Solana top-level instructions are pinned** by `(program, discriminator)`, not just by
   program, so a known DEX program cannot be used for anything but the allowed route.
 - **Failure reasons stay off-screen**, matching Velora and NEAR Intents (icon only).
