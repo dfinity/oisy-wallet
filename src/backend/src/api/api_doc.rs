@@ -67,8 +67,8 @@ and its explicit user approval for any asset movement.
 /// exact error variants.
 #[query]
 #[must_use]
-pub fn get_api_doc() -> String {
-    API_DOC.to_string()
+pub fn get_api_doc() -> &'static str {
+    API_DOC
 }
 
 #[cfg(test)]
