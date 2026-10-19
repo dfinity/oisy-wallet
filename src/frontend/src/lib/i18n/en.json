@@ -1899,6 +1899,7 @@
 			"loading_addresses": "Loading your addresses…",
 			"no_extension": "This page can't reach the OISY extension. Check that it's installed and enabled in this browser.",
 			"not_found": "This request is no longer open. Close this window and try again from the site.",
+			"outdated": "Your OISY extension is out of date. Update it, then try again from the site.",
 			"done": "Done. This window closes by itself.",
 			"failed": "OISY couldn't complete this request.",
 			"unsupported": "OISY can't handle this request yet.",

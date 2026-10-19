@@ -1577,6 +1577,7 @@ interface I18nExtension {
 		loading_addresses: string;
 		no_extension: string;
 		not_found: string;
+		outdated: string;
 		done: string;
 		failed: string;
 		unsupported: string;

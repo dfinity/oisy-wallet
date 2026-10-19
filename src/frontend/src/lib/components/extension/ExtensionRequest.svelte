@@ -6,7 +6,9 @@
 	import ExtensionSign from '$lib/components/extension/ExtensionSign.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import {
+		OISY_EXTENSION_INTERNAL_ERROR_CODE,
 		OISY_EXTENSION_KEEP_ALIVE_MS,
+		OISY_EXTENSION_OUTDATED_MESSAGE,
 		OISY_EXTENSION_REQUEST_PARAM,
 		OISY_EXTENSION_USER_REJECTED_CODE,
 		OISY_EXTENSION_USER_REJECTED_MESSAGE
@@ -20,8 +22,9 @@
 		ExtensionPort,
 		ExtensionRequest
 	} from '$lib/types/extension';
+	import { extensionVersionStatus } from '$lib/utils/extension.utils';
 
-	type Status = 'loading' | 'unreachable' | 'closed' | 'open' | 'done' | 'failed';
+	type Status = 'loading' | 'unreachable' | 'closed' | 'outdated' | 'open' | 'done' | 'failed';
 
 	let status = $state<Status>('loading');
 	let request = $state<ExtensionRequest | undefined>();
@@ -90,8 +93,31 @@
 				return;
 			}
 
-			request = parsed.data.request ?? undefined;
-			status = isNullish(request) ? 'closed' : 'open';
+			const { request: received, version } = parsed.data;
+
+			if (isNullish(received)) {
+				status = 'closed';
+				return;
+			}
+
+			// An extension too old for this OISY, or a pulled release, gets no answer but a refusal, and
+			// is asked to look for an update. This trusts the version the extension reports.
+			if (extensionVersionStatus({ version }) !== 'supported') {
+				send({
+					type: 'error',
+					id: received.id,
+					error: {
+						code: OISY_EXTENSION_INTERNAL_ERROR_CODE,
+						message: OISY_EXTENSION_OUTDATED_MESSAGE
+					}
+				});
+				send({ type: 'update-check' });
+				status = 'outdated';
+				return;
+			}
+
+			request = received;
+			status = 'open';
 		});
 
 		port.onDisconnect.addListener(() => {
@@ -122,6 +148,8 @@
 		<MessageBox level="error">{$i18n.extension.text.no_extension}</MessageBox>
 	{:else if status === 'closed'}
 		<MessageBox level="info">{$i18n.extension.text.not_found}</MessageBox>
+	{:else if status === 'outdated'}
+		<MessageBox level="warning">{$i18n.extension.text.outdated}</MessageBox>
 	{:else if status === 'done'}
 		<p class="text-center">{$i18n.extension.text.done}</p>
 	{:else if status === 'failed'}

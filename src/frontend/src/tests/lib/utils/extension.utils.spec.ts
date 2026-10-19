@@ -7,7 +7,12 @@ import {
 	OISY_EXTENSION_WALLET_CONNECT_TOPIC
 } from '$lib/constants/extension.constants';
 import type { ExtensionSignRequest } from '$lib/types/extension';
-import { toExtensionError, toWalletConnectSessionRequest } from '$lib/utils/extension.utils';
+import {
+	compareExtensionVersions,
+	extensionVersionStatus,
+	toExtensionError,
+	toWalletConnectSessionRequest
+} from '$lib/utils/extension.utils';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_MESSAGE,
@@ -123,6 +128,50 @@ describe('extension.utils', () => {
 				code: OISY_EXTENSION_INTERNAL_ERROR_CODE,
 				message: 'Unexpected error.'
 			});
+		});
+	});
+
+	describe('compareExtensionVersions', () => {
+		it.each([
+			{ a: '1.2.0', b: '1.10.0', expected: -1 },
+			{ a: '2.0', b: '1.9.9.9', expected: 1 },
+			{ a: '1.4', b: '1.4.0.0', expected: 0 }
+		])('compares $a with $b numerically, part by part', ({ a, b, expected }) => {
+			expect(Math.sign(compareExtensionVersions({ a, b }) ?? Number.NaN)).toBe(expected);
+		});
+
+		it.each(['', '1..2', '1.2.3.4.5', 'v1.2', '1.2-beta'])(
+			'returns undefined for the malformed version "%s"',
+			(version) => {
+				expect(compareExtensionVersions({ a: version, b: '1.0' })).toBeUndefined();
+			}
+		);
+	});
+
+	describe('extensionVersionStatus', () => {
+		const minimum = '1.2.0';
+
+		it('accepts the minimum version and anything newer', () => {
+			expect(extensionVersionStatus({ version: '1.2.0', minimum })).toBe('supported');
+			expect(extensionVersionStatus({ version: '1.3', minimum })).toBe('supported');
+		});
+
+		it('treats an older version as outdated', () => {
+			expect(extensionVersionStatus({ version: '1.1.9', minimum })).toBe('outdated');
+		});
+
+		it('treats an extension that reports no version as outdated', () => {
+			expect(extensionVersionStatus({ version: undefined, minimum })).toBe('outdated');
+		});
+
+		it('blocks a pulled release even when it is new enough', () => {
+			expect(extensionVersionStatus({ version: '1.4.0', minimum, blocked: ['1.4.0'] })).toBe(
+				'blocked'
+			);
+		});
+
+		it('blocks a version it cannot read', () => {
+			expect(extensionVersionStatus({ version: 'latest', minimum })).toBe('blocked');
 		});
 	});
 });

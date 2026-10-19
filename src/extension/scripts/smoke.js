@@ -174,6 +174,11 @@ try {
 
 	const popupProbe = await probeExtension({ page: popup, id: requestId });
 	check({
+		name: 'the extension reports its version to OISY',
+		ok: popupProbe.version === '0.0.1',
+		detail: popupProbe.version
+	});
+	check({
 		name: 'the popup itself can read the open request',
 		ok:
 			popupProbe.request?.kind === 'connect' &&

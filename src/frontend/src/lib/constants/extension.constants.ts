@@ -17,3 +17,12 @@ export const OISY_EXTENSION_WALLET_CONNECT_TOPIC = 'oisy-extension';
 export const OISY_EXTENSION_USER_REJECTED_CODE = 4001;
 export const OISY_EXTENSION_USER_REJECTED_MESSAGE = 'The user rejected the request.';
 export const OISY_EXTENSION_INTERNAL_ERROR_CODE = -32603;
+
+// The oldest extension version OISY still answers, and released versions that were pulled. In
+// production these would come from config OISY can change without a frontend release, so a bad
+// version can be turned off within minutes. Both rely on the version the extension reports about
+// itself: they keep old, honest versions out, but a malicious version can report any number.
+export const OISY_EXTENSION_MIN_VERSION = '0.0.1';
+export const OISY_EXTENSION_BLOCKED_VERSIONS: readonly string[] = [];
+export const OISY_EXTENSION_OUTDATED_MESSAGE =
+	'The OISY extension is out of date. Update it and try again.';

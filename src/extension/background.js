@@ -270,11 +270,20 @@ chrome.runtime.onConnectExternal.addListener((port) => {
 			entry !== null && port.sender?.tab?.windowId === entry.windowId && message?.id === entry.id;
 
 		// `ping` needs no answer: receiving it is what keeps the worker awake while the popup is open.
+		// The version lets OISY refuse an extension that is too old or a release that was pulled.
 		if (message?.type === 'get-request') {
 			post({
 				port,
-				message: { type: 'request', request: fromPopup ? publicRequest(entry) : null }
+				message: {
+					type: 'request',
+					request: fromPopup ? publicRequest(entry) : null,
+					version: chrome.runtime.getManifest().version
+				}
 			});
+		} else if (message?.type === 'update-check') {
+			// Chrome rate-limits this and installs an update on its own once one is found; an unpacked
+			// extension never gets one.
+			chrome.runtime.requestUpdateCheck().catch(() => undefined);
 		} else if (message?.type === 'response' && fromPopup) {
 			await onOisyResult({ entry, result: message.result });
 		} else if (message?.type === 'error' && fromPopup) {

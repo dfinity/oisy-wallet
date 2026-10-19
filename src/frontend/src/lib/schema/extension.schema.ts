@@ -34,5 +34,7 @@ export const ExtensionRequestSchema = z.discriminatedUnion('kind', [
 
 export const ExtensionRequestMessageSchema = z.object({
 	type: z.literal('request'),
-	request: ExtensionRequestSchema.nullable()
+	request: ExtensionRequestSchema.nullable(),
+	// Versions before the handshake did not report one.
+	version: z.string().optional()
 });
