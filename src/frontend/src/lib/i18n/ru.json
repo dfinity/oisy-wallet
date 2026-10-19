@@ -1914,6 +1914,16 @@
 			"eth_network": "",
 			"sol_network": "",
 			"connect": ""
+		},
+		"panel": {
+			"tokens": "",
+			"connected_sites": "",
+			"no_sites": "",
+			"disconnect": "",
+			"disconnect_site": "",
+			"chain_eth": "",
+			"chain_sol": "",
+			"open_oisy": ""
 		}
 	},
 	"trading": {

@@ -22,10 +22,7 @@
 		"type": "module"
 	},
 	"permissions": ["storage", "sidePanel"],
-	"host_permissions": [
-		"https://ethereum-sepolia-rpc.publicnode.com/*",
-		"https://api.devnet.solana.com/*"
-	],
+	"host_permissions": ["https://ethereum-sepolia-rpc.publicnode.com/*"],
 	"content_scripts": [
 		{
 			"matches": ["http://localhost/*", "http://127.0.0.1/*", "https://*/*"],

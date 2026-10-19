@@ -258,9 +258,60 @@ const normalizeOisyError = (error) => ({
 });
 
 // Only oisy.com may connect, and only the popup window opened for a request may answer it.
+// --- OISY's page in the side panel ------------------------------------------------------------
+
+const PANEL_PORT_NAME = 'oisy-panel';
+const panelPorts = new Set();
+
+const postState = async (port) => {
+	const { account, sites } = await loadState();
+	post({
+		port,
+		message: {
+			type: 'state',
+			state: { account, sites },
+			version: chrome.runtime.getManifest().version
+		}
+	});
+};
+
+chrome.storage.onChanged.addListener((changes) => {
+	if (changes[STORAGE_KEY] === undefined) {
+		return;
+	}
+	for (const port of panelPorts) {
+		postState(port);
+	}
+});
+
+// The panel is OISY's own page, so it may read the state, hand over the signed-in account and
+// disconnect sites. Answering dapp requests stays with the popup window opened for each one.
+const onPanelConnect = (port) => {
+	panelPorts.add(port);
+	port.onDisconnect.addListener(() => panelPorts.delete(port));
+
+	port.onMessage.addListener(async (message) => {
+		if (message?.type === 'get-state') {
+			await postState(port);
+		} else if (message?.type === 'set-account') {
+			const { eth, sol } = message.account ?? {};
+			if (typeof eth === 'string' && typeof sol === 'string') {
+				await storeAccount({ eth, sol });
+			}
+		} else if (message?.type === 'revoke-site' && typeof message.origin === 'string') {
+			await revokeSite({ origin: message.origin });
+		}
+	});
+};
+
 chrome.runtime.onConnectExternal.addListener((port) => {
 	if (port.sender?.origin !== OISY_ORIGIN) {
 		port.disconnect();
+		return;
+	}
+
+	if (port.name === PANEL_PORT_NAME) {
+		onPanelConnect(port);
 		return;
 	}
 
@@ -451,41 +502,4 @@ chrome.runtime.onConnect.addListener((port) => {
 			settle({ entry: activeRequest, error: ERRORS.userRejected });
 		}
 	});
-});
-
-// --- Messages from the extension's own side panel ----------------------------------------------
-
-const handlePopupMessage = async (message) => {
-	switch (message?.type) {
-		case 'pair':
-			if (activeRequest !== null) {
-				throw new RpcError(ERRORS.requestPending);
-			}
-			// Not awaited: the side panel re-renders from storage once the OISY window answers.
-			openOisy({ kind: 'pair' }).catch(() => undefined);
-			return null;
-		case 'revoke-site':
-			await revokeSite({ origin: message.origin });
-			return null;
-		case 'forget-account':
-			await saveState({ account: null, sites: {} });
-			notifyAccountGone();
-			return null;
-		default:
-			throw new RpcError(ERRORS.unsupportedMethod);
-	}
-};
-
-// eslint-disable-next-line local-rules/prefer-object-params -- Chrome API callback signature
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	const fromSidePanel =
-		sender.id === chrome.runtime.id && sender.url?.startsWith(chrome.runtime.getURL('')) === true;
-	if (!fromSidePanel) {
-		return false;
-	}
-	handlePopupMessage(message).then(
-		(result) => sendResponse({ result }),
-		(err) => sendResponse({ error: toRpcError(err) })
-	);
-	return true;
 });

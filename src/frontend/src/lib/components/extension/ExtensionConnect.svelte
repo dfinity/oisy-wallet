@@ -4,9 +4,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
-	import { ethAddress, solAddressDevnet } from '$lib/derived/address.derived';
-	import { networkSepoliaEnabled, networkSolanaDevnetEnabled } from '$lib/derived/networks.derived';
-	import { testnetsEnabled } from '$lib/derived/testnets.derived';
+	import { extensionAccount, extensionNetworksOn } from '$lib/derived/extension.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type {
 		ExtensionAccount,
@@ -23,18 +21,9 @@
 
 	let { request, onApprove, onReject }: Props = $props();
 
-	// The extension works on Sepolia and Solana Devnet only. OISY loads the devnet address, and the
-	// review screens accept those networks, only while they are switched on; the testnets toggle
-	// alone is not enough. Without them a site could connect, then have every request refused.
-	let networksOn = $derived(
-		$testnetsEnabled && $networkSepoliaEnabled && $networkSolanaDevnetEnabled
-	);
-
-	let account = $derived<ExtensionAccount | undefined>(
-		networksOn && nonNullish($ethAddress) && nonNullish($solAddressDevnet)
-			? { eth: $ethAddress, sol: $solAddressDevnet }
-			: undefined
-	);
+	// Without the extension's networks switched on, a site could connect, then have every request
+	// refused.
+	let account = $derived($extensionAccount);
 
 	// A site sees only the address of the chain it asked for; the extension itself keeps both.
 	let shared = $derived(
@@ -66,7 +55,7 @@
 		<SignerOrigin payload={{ origin: request.origin }} />
 	{/if}
 
-	{#if !networksOn}
+	{#if !$extensionNetworksOn}
 		<MessageBox level="warning">{$i18n.extension.text.networks_off}</MessageBox>
 	{:else if isNullish(account)}
 		<p class="mb-6 text-center">{$i18n.extension.text.loading_addresses}</p>

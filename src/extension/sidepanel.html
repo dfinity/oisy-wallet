@@ -7,48 +7,21 @@
 		<link rel="stylesheet" href="sidepanel.css" />
 	</head>
 	<body>
-		<header>
-			<img src="icons/icon-48.png" alt="" width="32" height="32" />
-			<div>
-				<h1>OISY</h1>
-				<p class="muted">Proof of concept · staging</p>
-			</div>
-		</header>
-
-		<section id="empty" hidden>
-			<p class="muted">Not connected to OISY yet.</p>
-			<button id="pair" type="button">Connect OISY</button>
-			<p id="pair-error" class="error" hidden></p>
+		<section id="loading" class="state">
+			<img src="icons/icon-48.png" alt="" width="40" height="40" />
+			<p class="muted">Loading OISY…</p>
 		</section>
 
-		<section id="account" hidden>
-			<ul class="balances">
-				<li>
-					<div>
-						<span class="label">Ethereum · Sepolia</span>
-						<span class="address" id="eth-address"></span>
-					</div>
-					<span class="amount" id="eth-balance">…</span>
-				</li>
-				<li>
-					<div>
-						<span class="label">Solana · devnet</span>
-						<span class="address" id="sol-address"></span>
-					</div>
-					<span class="amount" id="sol-balance">…</span>
-				</li>
-			</ul>
-			<p id="balance-error" class="error" hidden>
-				Balance unavailable.
-				<button id="retry" class="link" type="button">Retry</button>
-			</p>
-
-			<h2>Connected sites</h2>
-			<ul id="sites" class="sites"></ul>
-			<p id="no-sites" class="muted">No sites connected yet.</p>
-
-			<button id="forget" class="secondary" type="button">Forget this OISY account</button>
+		<section id="unreachable" class="state" hidden>
+			<img src="icons/icon-48.png" alt="" width="40" height="40" />
+			<h1>OISY didn't load</h1>
+			<p class="muted">Check your connection, then try again.</p>
+			<button id="retry" type="button">Retry</button>
+			<a id="open-oisy" target="_blank" rel="noopener noreferrer">Open oisy.com</a>
 		</section>
+
+		<!-- OISY's own page. Everything in the panel after this point is OISY, not extension code. -->
+		<iframe id="oisy" title="OISY" hidden></iframe>
 
 		<script type="module" src="sidepanel.js"></script>
 	</body>

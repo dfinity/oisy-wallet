@@ -1,4 +1,8 @@
-import { OISY_EXTENSION_ID, OISY_EXTENSION_PORT_NAME } from '$lib/constants/extension.constants';
+import {
+	OISY_EXTENSION_ID,
+	OISY_EXTENSION_PANEL_READY,
+	OISY_EXTENSION_PORT_NAME
+} from '$lib/constants/extension.constants';
 import type { ExtensionPort } from '$lib/types/extension';
 import {
 	WalletConnectListener,
@@ -17,7 +21,8 @@ interface ChromeRuntime {
  * extension lists it in `externally_connectable`, and the port reaches only the extension with
  * this ID, so no other extension can answer.
  */
-export const connectExtension = (): ExtensionPort | undefined => {
+export const connectExtension = ({ name = OISY_EXTENSION_PORT_NAME }: { name?: string } = {}):
+	ExtensionPort | undefined => {
 	const { chrome } = globalThis as { chrome?: { runtime?: ChromeRuntime } };
 	const runtime = chrome?.runtime;
 
@@ -26,11 +31,27 @@ export const connectExtension = (): ExtensionPort | undefined => {
 	}
 
 	try {
-		return runtime.connect(OISY_EXTENSION_ID, { name: OISY_EXTENSION_PORT_NAME });
+		return runtime.connect(OISY_EXTENSION_ID, { name });
 	} catch (_: unknown) {
 		// Chrome throws when the extension is missing or disabled; the popup shows that state.
 		return undefined;
 	}
+};
+
+/**
+ * Tell the extension's side panel that OISY's page inside it has started, so it can swap its
+ * loading state for the page. Only our extension's page can receive it: the target origin is
+ * pinned to our extension ID.
+ */
+export const announcePanelReady = () => {
+	if (window.parent === window) {
+		return;
+	}
+
+	window.parent.postMessage(
+		{ type: OISY_EXTENSION_PANEL_READY },
+		`chrome-extension://${OISY_EXTENSION_ID}`
+	);
 };
 
 const notAvailable = (): Promise<never> =>

@@ -32,6 +32,21 @@ export const ExtensionRequestSchema = z.discriminatedUnion('kind', [
 	ExtensionSignRequestSchema
 ]);
 
+// Which chains each connected site may see, keyed by the site's origin.
+export const ExtensionSitesSchema = z.record(
+	z.string(),
+	z.object({ eth: z.boolean(), sol: z.boolean() })
+);
+
+export const ExtensionPanelStateMessageSchema = z.object({
+	type: z.literal('state'),
+	state: z.object({
+		account: z.object({ eth: z.string(), sol: z.string() }).nullable(),
+		sites: ExtensionSitesSchema
+	}),
+	version: z.string().optional()
+});
+
 export const ExtensionRequestMessageSchema = z.object({
 	type: z.literal('request'),
 	request: ExtensionRequestSchema.nullable(),

@@ -2,8 +2,9 @@
 
 Lets dapps that only support extension wallets connect to OISY and sign. The extension holds no keys:
 it announces OISY to the page, decides which sites may see which address, and opens an oisy.com
-popup where the existing review screens show and sign every request. Its own screen, with balances
-and connected sites, opens in Chrome's side panel (Chrome 116 or later).
+popup where the existing review screens show and sign every request. Clicking the toolbar icon opens
+Chrome's side panel (Chrome 116 or later), which shows OISY's own page `/extension/panel/`: your
+tokens, connected sites and Open OISY. The extension itself has no wallet UI.
 
 Local only, against staging, on Sepolia and Solana devnet. Chromium browsers only.
 
@@ -43,8 +44,9 @@ Open http://localhost:8090.
 3. **Sign a message** and **Sign typed data** need no funds. The result shows whether the signature
    recovers to your address.
 4. Under Solana, **Connect**, then **Sign a message**.
-5. Click the OISY icon in Chrome's toolbar. The side panel shows your addresses, balances and
-   connected sites, and stays open next to the dapp.
+5. Click the OISY icon in Chrome's toolbar. The side panel shows OISY's page with your tokens and
+   connected sites, and stays open next to the dapp. Once you're signed in there, the extension
+   picks up your account by itself.
 6. Sending needs testnet funds: Sepolia ETH from a faucet for **Send 0 ETH to myself**, devnet SOL
    (`solana airdrop` or faucet.solana.com) for the Solana transaction buttons.
 
@@ -60,10 +62,34 @@ both servers above.
 node src/extension/scripts/smoke.js
 ```
 
+## Production notes: letting the side panel embed OISY
+
+oisy.com refuses to be embedded on every path (`X-Frame-Options: DENY` for `**/*` in
+`src/frontend/static/.ic-assets.json`). The side panel needs one exception, for its own page only and
+only for our extension. OISY's Content-Security-Policy is a `<meta>` tag, where browsers ignore
+`frame-ancestors`, so the exception has to be a response header:
+
+```json
+{
+	"match": "extension/panel/**/*",
+	"headers": {
+		"Content-Security-Policy": "frame-ancestors chrome-extension://<web-store-extension-id>"
+	}
+}
+```
+
+A header that sets only `frame-ancestors` adds no other restriction, and Chrome ignores
+`X-Frame-Options` when `frame-ancestors` is present. Each environment needs its own extension ID.
+This is not added to `.ic-assets.json` yet; check it on staging first. The local dev server sends no
+framing headers, which is why the proof of concept works without it.
+
 ## Known limits
 
 - One request at a time; a second one gets error `-32002` until the first is answered.
 - The background worker keeps open requests in memory. If Chrome stops it, the request is lost and
   the dapp gets an error.
 - `window.ethereum` is left alone; dapps must support EIP-6963.
+- The side panel shows OISY's page after about 1–2 s on the local dev server (the extension's own
+  panel used to show in about 0.1 s). If OISY doesn't answer within 15 s, the panel says so and
+  offers Retry.
 - No Bitcoin, no mainnet, no Firefox or Safari.

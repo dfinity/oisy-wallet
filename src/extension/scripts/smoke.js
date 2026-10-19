@@ -236,16 +236,64 @@ try {
 	});
 
 	// Playwright can't click the browser's own toolbar, so the panel page is opened as a tab at a
-	// typical side panel width.
+	// typical side panel width. Framing and storage rules are the same as in the real panel.
 	const panel = await context.newPage();
-	await panel.setViewportSize({ width: 360, height: 640 });
+	await panel.setViewportSize({ width: 360, height: 720 });
+	const panelStarted = Date.now();
 	await panel.goto(`chrome-extension://${EXTENSION_ID}/sidepanel.html`);
-	const emptyShown = await panel
-		.waitForSelector('#empty:not([hidden])', { timeout: 5000 })
+	const panelReady = await panel
+		.waitForSelector('#oisy:not([hidden])', { timeout: 30_000 })
 		.then(() => true)
 		.catch(() => false);
-	check({ name: 'the side panel shows the not-connected state', ok: emptyShown });
-	await panel.screenshot({ path: join(SCREENSHOT_DIR, 'side-panel-not-connected.png') });
+	const panelFrame = panel
+		.frames()
+		.find((frame) => frame.url().startsWith(`${OISY_ORIGIN}/extension/panel/`));
+	const panelSignIn =
+		panelReady &&
+		panelFrame !== undefined &&
+		(await panelFrame
+			.getByText('Open or create your wallet', { exact: false })
+			.waitFor({ timeout: 20_000 })
+			.then(() => true)
+			.catch(() => false));
+	check({
+		name: "the side panel shows OISY's page, signed out",
+		ok: panelSignIn,
+		detail: `${Date.now() - panelStarted} ms`
+	});
+	await panel.screenshot({ path: join(SCREENSHOT_DIR, 'side-panel-oisy-signed-out.png') });
+
+	const panelState =
+		panelFrame === undefined
+			? null
+			: await panelFrame.evaluate(
+					(extensionId) =>
+						new Promise((resolve) => {
+							const port = globalThis.chrome.runtime.connect(extensionId, { name: 'oisy-panel' });
+							port.onMessage.addListener((message) => resolve(message));
+							port.postMessage({ type: 'get-state' });
+							setTimeout(() => resolve(null), 3000);
+						}),
+					EXTENSION_ID
+				);
+	check({
+		name: "OISY's page in the panel gets the extension's state",
+		ok: panelState?.type === 'state' && panelState?.version === '0.0.1',
+		detail: JSON.stringify(panelState)
+	});
+
+	const offlinePanel = await context.newPage();
+	await offlinePanel.setViewportSize({ width: 360, height: 720 });
+	await offlinePanel.route(`${OISY_ORIGIN}/extension/panel/**`, (route) => route.abort());
+	await offlinePanel.clock.install();
+	await offlinePanel.goto(`chrome-extension://${EXTENSION_ID}/sidepanel.html`);
+	await offlinePanel.clock.runFor(16_000);
+	const unreachableShown = await offlinePanel
+		.waitForSelector('#unreachable:not([hidden])', { timeout: 5000 })
+		.then(() => true)
+		.catch(() => false);
+	check({ name: "the side panel says when OISY didn't load", ok: unreachableShown });
+	await offlinePanel.screenshot({ path: join(SCREENSHOT_DIR, 'side-panel-unreachable.png') });
 } finally {
 	await context.close();
 	await rm(userDataDir, { recursive: true, force: true });

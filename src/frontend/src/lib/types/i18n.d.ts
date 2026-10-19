@@ -1593,6 +1593,16 @@ interface I18nExtension {
 		sol_network: string;
 		connect: string;
 	};
+	panel: {
+		tokens: string;
+		connected_sites: string;
+		no_sites: string;
+		disconnect: string;
+		disconnect_site: string;
+		chain_eth: string;
+		chain_sol: string;
+		open_oisy: string;
+	};
 }
 
 interface I18nTrading {

@@ -3,6 +3,10 @@
 export const OISY_EXTENSION_ID = 'fcdljkamhcheddlldbaffbpiopkcjcog';
 
 export const OISY_EXTENSION_PORT_NAME = 'oisy-popup';
+export const OISY_EXTENSION_PANEL_PORT_NAME = 'oisy-panel';
+
+// Sent to the extension's side panel once OISY's page inside it has started.
+export const OISY_EXTENSION_PANEL_READY = 'oisy-panel-ready';
 
 export const OISY_EXTENSION_REQUEST_PARAM = 'request';
 

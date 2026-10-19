@@ -1,4 +1,8 @@
-import { OISY_EXTENSION_ID, OISY_EXTENSION_PORT_NAME } from '$lib/constants/extension.constants';
+import {
+	OISY_EXTENSION_ID,
+	OISY_EXTENSION_PANEL_PORT_NAME,
+	OISY_EXTENSION_PORT_NAME
+} from '$lib/constants/extension.constants';
 import {
 	connectExtension,
 	ExtensionWalletConnectListener
@@ -32,6 +36,17 @@ describe('extension.providers', () => {
 			expect(connectExtension()).toBe(port);
 			expect(connect).toHaveBeenCalledExactlyOnceWith(OISY_EXTENSION_ID, {
 				name: OISY_EXTENSION_PORT_NAME
+			});
+		});
+
+		it('connects under the name it is given, such as the side panel port', () => {
+			const connect = vi.fn().mockReturnValue(port);
+			vi.stubGlobal('chrome', { runtime: { connect } });
+
+			connectExtension({ name: OISY_EXTENSION_PANEL_PORT_NAME });
+
+			expect(connect).toHaveBeenCalledExactlyOnceWith(OISY_EXTENSION_ID, {
+				name: OISY_EXTENSION_PANEL_PORT_NAME
 			});
 		});
 

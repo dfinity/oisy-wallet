@@ -1,25 +1,19 @@
 :root {
 	--bg: #ffffff;
-	--surface: #f4f4f7;
 	--text: #14141a;
 	--muted: #6b6b78;
-	--border: #e3e3ea;
 	--accent: #3b00b9;
 	--accent-text: #ffffff;
-	--danger: #c0262d;
 	color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
 	:root {
 		--bg: #15151c;
-		--surface: #1f1f29;
 		--text: #f2f2f6;
 		--muted: #9a9aa8;
-		--border: #2e2e3a;
 		--accent: #8f6bff;
 		--accent-text: #0d0d12;
-		--danger: #ff6b70;
 	}
 }
 
@@ -27,10 +21,18 @@
 	box-sizing: border-box;
 }
 
+/* Flex sections would otherwise override the hidden attribute and stay on screen. */
+[hidden] {
+	display: none !important;
+}
+
+html,
 body {
-	min-width: 0;
+	height: 100%;
+}
+
+body {
 	margin: 0;
-	padding: 16px;
 	background: var(--bg);
 	color: var(--text);
 	font:
@@ -39,11 +41,22 @@ body {
 		sans-serif;
 }
 
-header {
+iframe {
+	display: block;
+	width: 100%;
+	height: 100%;
+	border: 0;
+}
+
+.state {
 	display: flex;
-	gap: 12px;
+	flex-direction: column;
 	align-items: center;
-	margin-bottom: 16px;
+	justify-content: center;
+	gap: 12px;
+	height: 100%;
+	padding: 24px;
+	text-align: center;
 }
 
 h1 {
@@ -52,83 +65,16 @@ h1 {
 	font-weight: 600;
 }
 
-h2 {
-	margin: 16px 0 8px;
-	font-size: 13px;
-	font-weight: 600;
-}
-
 p {
-	margin: 0 0 12px;
+	margin: 0;
 }
 
 .muted {
 	color: var(--muted);
-	font-size: 13px;
-}
-
-.error {
-	color: var(--danger);
-	font-size: 13px;
-}
-
-ul {
-	margin: 0;
-	padding: 0;
-	list-style: none;
-}
-
-.balances li,
-.sites li {
-	display: flex;
-	gap: 8px;
-	align-items: center;
-	justify-content: space-between;
-	padding: 10px 12px;
-	border-radius: 12px;
-	background: var(--surface);
-}
-
-.balances li + li,
-.sites li + li {
-	margin-top: 8px;
-}
-
-.balances li > div {
-	display: flex;
-	flex-direction: column;
-	min-width: 0;
-}
-
-.label {
-	font-weight: 500;
-}
-
-.address {
-	color: var(--muted);
-	font-family: ui-monospace, monospace;
-	font-size: 12px;
-}
-
-.amount {
-	font-variant-numeric: tabular-nums;
-	white-space: nowrap;
-}
-
-.sites li span {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
-.chips {
-	color: var(--muted);
-	font-size: 12px;
 }
 
 button {
-	width: 100%;
-	padding: 10px 12px;
+	padding: 10px 20px;
 	border: 0;
 	border-radius: 12px;
 	background: var(--accent);
@@ -138,23 +84,7 @@ button {
 	cursor: pointer;
 }
 
-button:active {
-	transform: translateY(1px);
-}
-
-button.secondary {
-	margin-top: 16px;
-	background: transparent;
-	color: var(--muted);
-	border: 1px solid var(--border);
-	font-weight: 500;
-}
-
-button.link,
-.sites button {
-	width: auto;
-	padding: 0;
-	background: none;
+a {
 	color: var(--accent);
 	font-weight: 500;
 }
