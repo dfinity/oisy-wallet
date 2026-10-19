@@ -384,9 +384,11 @@ bridge facets do on EVM.
   minimum). Fires `PLAUSIBLE_EVENTS.SWAP_OFFER` like Velora, but on failure without the
   error text: LI.FI's errors can carry the request URL and with it the user's address
   (analytics invariant 4). A failure reports an allow-listed `result_error_type` —
-  `no_route` (404, 422), `rate_limited` (429), `quote_rejected` (a failed trust check,
-  with `event_severity: error`) or `request_failed` — plus the HTTP status as
-  `result_error_code`.
+  `no_route` (404, 422), `rate_limited` (429), `quote_rejected` (a failed trust check),
+  `timeout` (aborted after `LIFI_QUOTE_TIMEOUT_MS`) or `request_failed` — plus the HTTP
+  status as `result_error_code`. `quote_rejected` carries `event_severity: error`;
+  `rate_limited`, `timeout` and `request_failed` carry `warn`, so a LI.FI outage shows on
+  severity-filtered monitoring; `no_route` is a normal answer and carries none.
 - **Mapped result**: new `SwapMappedResult` arm
   `{ provider: SwapProvider.LIFI, receiveAmount: toAmount, receiveOutMinimum: toAmountMin, swapDetails: LiFiStep, … }`
   with the estimated duration and fees from `estimate`.
@@ -491,6 +493,10 @@ execution-time — passes `assertLifiQuote` before it is shown or acted on:
 - **Echo**: `action.fromChainId`, `action.toChainId`, `action.fromToken.address`,
   `action.toToken.address`, `action.fromAmount` and `action.toAddress` equal what OISY
   asked for.
+- **Route tools**: every `cross` step in `includedSteps` uses a bridge the request's
+  `allowBridges` names, and no `swap` step uses an exchange in its `denyExchanges`. The
+  lists are only request parameters, so this keeps the deny lists working if LI.FI ignores
+  or misreads them (step tool keys match the request's keys, checked 2026-10-19).
 
 EVM addresses (`to`, `approvalAddress`, `from`, EVM token addresses, an EVM
 `toAddress`) are compared **case-insensitively**: LI.FI may return checksummed or
@@ -559,7 +565,10 @@ starts with `nonEVMReceiver` and carries `refundRecipient`, and the facet itself
 unless the receiver it parses out of `protocolData` equals `nonEVMReceiver` /
 `bridgeData.receiver`). The implementer still re-reads each struct before pinning the
 decoder, and adds a test per facet built from a real LI.FI calldata fixture. Adding a
-bridge later means adding its decoder, fixture and tool key together. Every other bridge
+bridge later means adding its decoder, fixture and tool key together, and, if it charges a
+native fee on top of the amount (`feeCosts` with `included: false`; Across's fees are all
+included, checked 2026-10-19), widening the `value` trust check to admit exactly that
+fee. Every other bridge
 gets no quote: the display quote passes `allowBridges` limited to the curated tool keys,
 so the form never offers a route that execution would refuse.
 

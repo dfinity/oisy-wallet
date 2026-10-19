@@ -224,6 +224,20 @@ export const assertLifiQuote = ({
 		throw rejected('recipient differs from the request');
 	}
 
+	// The bridge and exchange lists are only request parameters. A route through a tool outside them
+	// is refused here, so the deny lists still work if LI.FI ignores or misreads them.
+	const { allowBridges = [], denyExchanges = [] } = request;
+
+	if (
+		quote.includedSteps.some(
+			({ type, tool }) =>
+				(type === 'cross' && !allowBridges.includes(tool)) ||
+				(type === 'swap' && denyExchanges.includes(tool))
+		)
+	) {
+		throw rejected('route uses a bridge or exchange outside the requested lists');
+	}
+
 	const toAmount = parseAmount(estimate.toAmount);
 	const toAmountMin = parseAmount(estimate.toAmountMin);
 
@@ -262,7 +276,8 @@ export const assertLifiQuote = ({
 	}
 
 	// A native source travels as the transaction's value; an ERC-20 source is pulled through the
-	// allowance, so the transaction carries none.
+	// allowance, so the transaction carries none. A bridge that charges a native fee on top
+	// (`feeCosts` with `included: false`) is refused too; none of the allowed bridges does.
 	const expectedValue = fromToken === ZERO_ETH_ADDRESS ? amount : ZERO;
 
 	if (parseAmount(value ?? '0x0') !== expectedValue) {

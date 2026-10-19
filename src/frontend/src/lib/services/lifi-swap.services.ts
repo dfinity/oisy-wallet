@@ -84,6 +84,17 @@ const trackSwapOffer = ({
 	});
 };
 
+const SWAP_OFFER_ERROR_SEVERITIES: Partial<
+	Record<PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES, PLAUSIBLE_EVENT_SEVERITIES>
+> = {
+	// The response may have been forged or intercepted.
+	[PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.QUOTE_REJECTED]: PLAUSIBLE_EVENT_SEVERITIES.ERROR,
+	// Repeated, these are a LI.FI outage. A missing route is a normal answer and has no severity.
+	[PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.RATE_LIMITED]: PLAUSIBLE_EVENT_SEVERITIES.WARN,
+	[PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.TIMEOUT]: PLAUSIBLE_EVENT_SEVERITIES.WARN,
+	[PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.REQUEST_FAILED]: PLAUSIBLE_EVENT_SEVERITIES.WARN
+};
+
 // LI.FI's error text can carry the request URL, and with it the user's address, so only an
 // allow-listed category and the HTTP status are reported.
 const toSwapOfferError = (
@@ -91,6 +102,15 @@ const toSwapOfferError = (
 ): { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES; status?: number } => {
 	if (err instanceof LifiQuoteRejectedError) {
 		return { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.QUOTE_REJECTED };
+	}
+
+	// `LIFI_QUOTE_TIMEOUT_MS` aborts the fetch, and the SDK wraps that abort as it does any error.
+	if (
+		err instanceof SDKError &&
+		err.cause instanceof DOMException &&
+		err.cause.name === 'TimeoutError'
+	) {
+		return { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.TIMEOUT };
 	}
 
 	const status =
@@ -142,6 +162,7 @@ const loadLifiSwapQuote = async ({
 		return result;
 	} catch (err: unknown) {
 		const { type, status } = toSwapOfferError(err);
+		const severity = SWAP_OFFER_ERROR_SEVERITIES[type];
 
 		trackSwapOffer({
 			sourceToken,
@@ -151,9 +172,7 @@ const loadLifiSwapQuote = async ({
 				result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 				result_error_type: type,
 				...(nonNullish(status) && { result_error_code: String(status) }),
-				...(type === PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.QUOTE_REJECTED && {
-					event_severity: PLAUSIBLE_EVENT_SEVERITIES.ERROR
-				})
+				...(nonNullish(severity) && { event_severity: severity })
 			}
 		});
 	}

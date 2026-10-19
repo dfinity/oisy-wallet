@@ -29,5 +29,7 @@ const lifiClient = (): SDKClient => {
 //
 // The SDK fills its defaults into the request object it is given, so the caller passes one it does
 // not keep. The SDK sets no timeout of its own: without one, a stalled connection never settles.
-export const fetchLifiQuote = (request: QuoteRequestFromAmount): Promise<LiFiStep> =>
-	getQuote(lifiClient(), request, { signal: AbortSignal.timeout(LIFI_QUOTE_TIMEOUT_MS) });
+//
+// `async` so that a client that cannot be created (no integrator id) rejects rather than throws.
+export const fetchLifiQuote = async (request: QuoteRequestFromAmount): Promise<LiFiStep> =>
+	await getQuote(lifiClient(), request, { signal: AbortSignal.timeout(LIFI_QUOTE_TIMEOUT_MS) });
