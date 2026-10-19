@@ -35,6 +35,11 @@ describe('token-id.utils', () => {
 				expected: `Erc20:${USDC_ETHEREUM.toLowerCase()}:1`
 			},
 			{
+				name: 'Erc4626',
+				id: { Erc4626: [USDC_ETHEREUM, 1n] },
+				expected: `Erc4626:${USDC_ETHEREUM.toLowerCase()}:1`
+			},
+			{
 				name: 'SplMainnet',
 				id: { SplMainnet: USDC_SOLANA },
 				expected: `SplMainnet:${USDC_SOLANA}`
@@ -58,7 +63,6 @@ describe('token-id.utils', () => {
 			{ name: 'IcPunks', id: { IcPunks: mockPrincipal } },
 			{ name: 'BtcNativeTestnet', id: { BtcNativeTestnet: null } },
 			{ name: 'Erc1155', id: { Erc1155: [USDC_ETHEREUM, 1n] } },
-			{ name: 'Erc4626', id: { Erc4626: [USDC_ETHEREUM, 1n] } },
 			{ name: 'Dip721', id: { Dip721: mockPrincipal } },
 			{ name: 'Icrc7', id: { Icrc7: mockPrincipal } }
 		])('returns undefined for the unsupported variant $name', ({ id }) => {
@@ -194,11 +198,20 @@ describe('token-id.utils', () => {
 			expect(findTokenByBackendTokenId({ tokenId: { EvmNative: 1n }, tokens: [] })).toBeUndefined();
 		});
 
+		it('finds an ERC-4626 vault', () => {
+			expect(
+				findTokenByBackendTokenId({
+					tokenId: { Erc4626: [mockValidErc4626Token.address.toUpperCase(), 1n] },
+					tokens: [mockValidErc4626Token]
+				})
+			).toBe(mockValidErc4626Token);
+		});
+
 		it('returns undefined for a variant that has no key', () => {
 			expect(
 				findTokenByBackendTokenId({
-					tokenId: { Erc4626: [mockValidErc4626Token.address, 1n] },
-					tokens: [mockValidErc4626Token]
+					tokenId: { SolNativeDevnet: null },
+					tokens: [SOLANA_DEVNET_TOKEN]
 				})
 			).toBeUndefined();
 		});

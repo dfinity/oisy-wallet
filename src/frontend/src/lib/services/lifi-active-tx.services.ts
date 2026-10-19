@@ -12,7 +12,10 @@ import { readEvmSourceTxOutcome } from '$lib/services/evm-source-tx.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { LIFI_EXTERNAL_REF_KEYS, type LifiExternalRefKey } from '$lib/types/lifi';
 import type { Token } from '$lib/types/token';
-import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
+import {
+	advanceStatus,
+	isTerminalActiveUserTransactionStatus
+} from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import {
 	isLifiStatusUnresolved,
@@ -48,7 +51,7 @@ const lastPolledAt = new Map<string, number>();
 // after a reload, the receipt is read once more.
 const sourceConfirmed = new Set<string>();
 
-// The unresolved window of each row for the session, in case `localStorage` is unavailable.
+// The unresolved window of each row for the session; `localStorage` carries it across reloads.
 const unresolvedWindows = new Map<string, LifiUnresolvedWindow>();
 
 const UNRESOLVED_WINDOW_KEY_PREFIX = 'lifi-unresolved:';
@@ -90,10 +93,19 @@ const forgetSettledRows = (pendingIds: Set<string>) => {
 	}
 };
 
+// The session's own window first: should a write fail (a full storage), every poll would otherwise
+// start over from the same stale stored window, and the bound would never be reached. The stored
+// window only resumes it after a reload.
 const readUnresolvedWindow = (rowId: string): LifiUnresolvedWindow | undefined => {
+	const inMemory = unresolvedWindows.get(rowId);
+
+	if (nonNullish(inMemory)) {
+		return inMemory;
+	}
+
 	const stored = getStorage<unknown>({ key: unresolvedWindowKey(rowId) });
 
-	return isLifiUnresolvedWindow(stored) ? stored : unresolvedWindows.get(rowId);
+	return isLifiUnresolvedWindow(stored) ? stored : undefined;
 };
 
 const writeUnresolvedWindow = ({
@@ -110,6 +122,12 @@ const writeUnresolvedWindow = ({
 const clearUnresolvedWindow = (rowId: string) => {
 	unresolvedWindows.delete(rowId);
 	del({ key: unresolvedWindowKey(rowId) });
+};
+
+const forgetRow = (rowId: string) => {
+	lastPolledAt.delete(rowId);
+	sourceConfirmed.delete(rowId);
+	clearUnresolvedWindow(rowId);
 };
 
 /**
@@ -210,12 +228,20 @@ const applyUpdate = async ({
 			...(hasNewRefs ? { externalRefs: toLifiExternalRefs({ ...refs, ...learned }) } : {})
 		}
 	});
+
+	// A row this poll settles leaves the pending set, and if it was the last LI.FI row, no later poll
+	// would prune it. Should the write have failed, the row stays pending and is polled afresh, which
+	// can only delay its verdict.
+	if (nonNullish(next) && isTerminalActiveUserTransactionStatus(next)) {
+		forgetRow(tx.id);
+	}
 };
 
 const isDue = ({ tx, now }: { tx: ActiveUserTransaction; now: number }): boolean => {
 	const last = lastPolledAt.get(tx.id);
 
-	if (isNullish(last)) {
+	// A clock set back puts the last poll in the future: poll now, and count from here.
+	if (isNullish(last) || now < last) {
 		return true;
 	}
 

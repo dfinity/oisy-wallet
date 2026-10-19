@@ -36,6 +36,10 @@ export const tokenIdKey = (id: TokenId): string | undefined => {
 		return `Erc20:${id.Erc20[0].toLowerCase()}:${id.Erc20[1]}`;
 	}
 
+	if ('Erc4626' in id) {
+		return `Erc4626:${id.Erc4626[0].toLowerCase()}:${id.Erc4626[1]}`;
+	}
+
 	if ('SplMainnet' in id) {
 		return `SplMainnet:${id.SplMainnet}`;
 	}
@@ -68,7 +72,6 @@ export const tokenIdKey = (id: TokenId): string | undefined => {
 		'IcPunks' in id ||
 		'BtcNativeTestnet' in id ||
 		'Erc1155' in id ||
-		'Erc4626' in id ||
 		'Dip721' in id ||
 		'Icrc7' in id
 	) {

@@ -1226,8 +1226,10 @@ to say, so a `/status` that never resolves would leave the row non-terminal fore
     the window is a per-browser observation, not a fact about the swap), so another
     device, a private window or cleared site data starts its own window. That can only
     **delay** the irreversible verdict, never hasten it.
-  - Storage is best-effort: reads and writes are wrapped in try/catch, and when storage
-    is unavailable the poller falls back to an in-memory timestamp for the session.
+  - Storage is best-effort: reads and writes are wrapped in try/catch. The window is kept
+    in memory for the session and read from there first; `localStorage` only resumes it
+    after a reload. Read storage-first, a write that fails (a full storage) would restart
+    every poll from the same stale window, and the bound would never be reached.
   - Not from row creation: a source that confirms late would otherwise be failed after
     only a couple of status calls.
   - 6 h is far past LI.FI's slowest bridge ETAs; the constant sits next to the throttle
@@ -1274,11 +1276,15 @@ Learned refs are merged on every poll. Errors are caught per row, except the `/s
 404 described above, which is an answer rather than a failure. Polls are throttled
 per row inside the poller to LI.FI's recommended cadence — every 10 s for the first
 minute after creation, every 30 s until 10 minutes, then every 60 s — on top of the
-loader's 5 s tick. The last-poll times and the confirmed-source flags are kept in memory.
-Each poll drops them, and the unresolved windows in `localStorage`, for every row no longer
-in the pending set the loader passes, wherever it settled: here, in another tab or on
-another device. That state is LI.FI's alone, unlike the replacement observations of the
-shared EVM source-tx helper, which a provider must not prune to its own rows.
+loader's 5 s tick. A clock set back puts the last poll in the future, so the row is polled
+at once rather than once the clock catches up. The last-poll times and the
+confirmed-source flags are kept in memory. A row the poller settles is forgotten at once,
+its stored window included: if it was the last pending LI.FI row, the loader stops calling
+the poller, and nothing would prune it. Each poll also drops that state, and the stored
+windows, for every row no longer in the pending set the loader passes, for rows that
+settled in another tab or on another device. That state is LI.FI's alone, unlike the
+replacement observations of the shared EVM source-tx helper, which a provider must not
+prune to its own rows.
 
 #### Loader and UI
 
@@ -1310,9 +1316,9 @@ shared EVM source-tx helper, which a provider must not prune to its own rows.
     `TokenId`s, and only the forward mapping exists (`toBackendTokenId`,
     `lib/utils/token-id.utils.ts`), so the tokens are resolved by finding the enabled
     token whose `toBackendTokenId` equals the row's `source_token` / `dest_token`
-    (`findTokenByBackendTokenId`, compared through `tokenIdKey`); an unresolved token
-    (disabled since the swap, or an ERC-4626 vault, which `tokenIdKey` does not key) is
-    skipped.
+    (`findTokenByBackendTokenId`, compared through `tokenIdKey`, which keys ERC-4626
+    vaults too, since LI.FI quotes them as ERC-20s); an unresolved token (disabled since
+    the swap) is skipped.
   - Redundant refreshes (dropped or expired source) only find nothing new.
 - `ActiveUserTransactionItem.svelte`: `isLifi` in the `isSwap` list and the
   `providerName` chain; when `lifi_received_symbol` is present, the received token and

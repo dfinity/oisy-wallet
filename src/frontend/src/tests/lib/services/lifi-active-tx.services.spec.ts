@@ -1,5 +1,6 @@
 import type { ActiveUserTransaction, LifiData } from '$declarations/backend/backend.did';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import { LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS } from '$lib/constants/swap.constants';
@@ -20,10 +21,12 @@ import {
 	mockLifiData,
 	mockLifiTxHash
 } from '$tests/mocks/active-user-transactions.mock';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockLifiBaseUsdcToken } from '$tests/mocks/lifi.mock';
 import { ChainId, HTTPError, SDKError, type StatusResponse } from '@lifi/sdk';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$eth/providers/infura.providers', () => ({
 	infuraProviders: vi.fn()
@@ -415,6 +418,45 @@ describe('lifi-active-tx.services', () => {
 				status: { Failed: null },
 				error: en.swap.error.lifi_status_unknown
 			});
+			expect(localStorage.getItem(unresolvedKey(rowId))).toBeNull();
+		});
+
+		describe('with a full storage', () => {
+			let setItem: MockInstance<Storage['setItem']>;
+
+			beforeEach(() => {
+				storeWindow({ elapsedMs: LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS - 150_000, lastSeenAt: now });
+
+				setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+					throw new DOMException('The quota has been exceeded.', 'QuotaExceededError');
+				});
+			});
+
+			afterEach(() => {
+				setItem.mockRestore();
+			});
+
+			it('keeps counting in memory', async () => {
+				const tx = buildTx({ createdAt: now - 20 * 60 * 1_000 });
+
+				// Read back from the stale stored window, the four polls would add 0, 60, 120 and 120 s
+				// and stay short of the period.
+				await poll([tx]);
+				await vi.advanceTimersByTimeAsync(60_000);
+				await poll([tx]);
+				await vi.advanceTimersByTimeAsync(60_000);
+				await poll([tx]);
+
+				expect(lastUpdate()).toEqual({});
+
+				await vi.advanceTimersByTimeAsync(60_000);
+				await poll([tx]);
+
+				expect(lastUpdate()).toEqual({
+					status: { Failed: null },
+					error: en.swap.error.lifi_status_unknown
+				});
+			});
 		});
 
 		it('cannot be hastened by a clock jump: one poll adds at most one capped step', async () => {
@@ -469,6 +511,29 @@ describe('lifi-active-tx.services', () => {
 			expect(fetchLifiStatus).toHaveBeenCalledTimes(2);
 		});
 
+		it('polls again at once when the clock was set back', async () => {
+			await poll([buildTx()]);
+
+			vi.setSystemTime(now - 24 * 60 * 60 * 1_000);
+
+			await poll([buildTx()]);
+
+			expect(fetchLifiStatus).toHaveBeenCalledTimes(2);
+		});
+
+		it('forgets a row it settles, since no later poll might prune it', async () => {
+			vi.mocked(fetchLifiStatus).mockResolvedValue({
+				status: 'DONE',
+				substatus: 'COMPLETED'
+			} as StatusResponse);
+
+			await poll([buildTx()]);
+			await poll([buildTx()]);
+
+			expect(getTransactionReceipt).toHaveBeenCalledTimes(2);
+			expect(fetchLifiStatus).toHaveBeenCalledTimes(2);
+		});
+
 		it('polls an older row less often', async () => {
 			const tx = buildTx({ createdAt: now - 20 * 60 * 1_000 });
 
@@ -513,6 +578,22 @@ describe('lifi-active-tx.services', () => {
 			expect(reloadEthereumBalance).toHaveBeenCalledTimes(2);
 			expect(reloadEthereumBalance).toHaveBeenCalledWith(mockLifiBaseUsdcToken);
 			expect(reloadEthereumBalance).toHaveBeenCalledWith(BASE_ETH_TOKEN);
+		});
+
+		it('reloads an ERC-4626 vault source and its gas token', () => {
+			reloadLifiEvmBalances({
+				tx: buildTx({
+					data: {
+						...mockLifiData,
+						source_token: { Erc4626: [mockValidErc4626Token.address, 1n] }
+					}
+				}),
+				tokens: [mockValidErc4626Token]
+			});
+
+			expect(reloadEthereumBalance).toHaveBeenCalledTimes(2);
+			expect(reloadEthereumBalance).toHaveBeenCalledWith(mockValidErc4626Token);
+			expect(reloadEthereumBalance).toHaveBeenCalledWith(ETHEREUM_TOKEN);
 		});
 
 		it('skips tokens no longer enabled', () => {
