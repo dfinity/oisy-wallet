@@ -1,3 +1,4 @@
+import { Currency } from '$lib/enums/currency';
 import * as z from 'zod';
 
 export const ExtensionChainSchema = z.enum(['eth', 'sol']);
@@ -56,4 +57,31 @@ export const ExtensionRequestMessageSchema = z.object({
 	request: ExtensionRequestSchema.nullable(),
 	// Versions before the handshake did not report one.
 	version: z.string().optional()
+});
+
+// One row of the side panel's assets as last shown: a token or a group of the same token across
+// networks. Networks are kept by id and looked up again when the snapshot is shown.
+export const ExtensionPanelSnapshotRowSchema = z.object({
+	name: z.string(),
+	symbol: z.string(),
+	decimals: z.number(),
+	icon: z.string().optional(),
+	oisyName: z.object({ prefix: z.string().optional(), oisyName: z.string() }).optional(),
+	oisySymbol: z.object({ oisySymbol: z.string() }).optional(),
+	balance: z.bigint().nullable().optional(),
+	usdBalance: z.number().optional(),
+	usdPrice: z.number().optional(),
+	usdPriceChangePercentage24h: z.number().optional(),
+	networkId: z.string().optional(),
+	groupNetworkIds: z.array(z.string()).optional()
+});
+
+// What the side panel last showed while signed in, so it can still show the balances once the
+// session has ended.
+export const ExtensionPanelSnapshotSchema = z.object({
+	savedAt: z.number(),
+	usdTotal: z.number(),
+	currency: z.enum(Currency),
+	exchangeRateToUsd: z.number(),
+	rows: z.array(ExtensionPanelSnapshotRowSchema)
 });

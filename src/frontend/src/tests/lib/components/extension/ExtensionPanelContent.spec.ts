@@ -1,5 +1,3 @@
-import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
-import { SOLANA_DEVNET_TOKEN } from '$env/tokens/tokens.sol.env';
 import ExtensionPanelContent from '$lib/components/extension/ExtensionPanelContent.svelte';
 import {
 	OISY_EXTENSION_KEEP_ALIVE_MS,
@@ -8,13 +6,11 @@ import {
 	OISY_EXTENSION_PANEL_RECONNECT_ATTEMPTS,
 	OISY_EXTENSION_PANEL_STATE_TIMEOUT_MS
 } from '$lib/constants/extension.constants';
-import { TOKEN_CARD } from '$lib/constants/test-ids.constants';
-import * as networkTokensUiDerived from '$lib/derived/network-tokens-ui.derived';
+import { RECEIVE_TOKENS_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 import * as extensionProviders from '$lib/providers/extension.providers';
 import * as authServices from '$lib/services/auth.services';
 import { ethAddressStore, solAddressDevnetStore } from '$lib/stores/address.store';
 import type { ExtensionPort } from '$lib/types/extension';
-import type { TokenUi } from '$lib/types/token-ui';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -24,7 +20,10 @@ import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { fireEvent, render, within } from '@testing-library/svelte';
 import { tick } from 'svelte';
-import { readable } from 'svelte/store';
+
+vi.mock('$lib/services/extension-panel.services', () => ({
+	saveExtensionPanelSnapshot: vi.fn()
+}));
 
 interface FakePort {
 	port: ExtensionPort;
@@ -76,14 +75,11 @@ describe('ExtensionPanelContent', () => {
 		version?: string;
 	} = {}) => ({ type: 'state', state: { account, sites, locked, activeOrigin }, version });
 
-	const tokenCardId = ({ symbol, network }: TokenUi) =>
-		`${TOKEN_CARD}-${symbol}-${network.id.description}`;
-
 	const sentMessages = () =>
 		ports.flatMap(({ port }) => vi.mocked(port.postMessage).mock.calls.map(([message]) => message));
 
 	beforeEach(() => {
-		vi.clearAllMocks();
+		vi.restoreAllMocks();
 
 		ports = [];
 		vi.spyOn(extensionProviders, 'connectExtension').mockImplementation(createPort);
@@ -145,6 +141,10 @@ describe('ExtensionPanelContent', () => {
 			})
 		);
 		await tick();
+
+		await fireEvent.click(
+			getByText(replacePlaceholders(en.extension.panel.connected_sites_count, { $count: '1' }))
+		);
 
 		const row = getByText('app.example').closest('li');
 
@@ -303,31 +303,55 @@ describe('ExtensionPanelContent', () => {
 		});
 	});
 
-	it('shows only the balances sites can use', async () => {
-		const tokens = [ETHEREUM_TOKEN, SEPOLIA_TOKEN, SOLANA_DEVNET_TOKEN] as TokenUi[];
-
-		vi.spyOn(networkTokensUiDerived, 'enabledFungibleNetworkTokensUi', 'get').mockReturnValue(
-			readable(tokens)
-		);
-
-		const { queryByTestId, getByText } = render(ExtensionPanelContent);
+	it('shows the addresses sites can see with the connected sites', async () => {
+		const { getByText, getByTitle } = render(ExtensionPanelContent);
 
 		current().receive(state());
 		await tick();
 
-		expect(queryByTestId(tokenCardId(SEPOLIA_TOKEN as TokenUi))).toBeInTheDocument();
-		expect(queryByTestId(tokenCardId(SOLANA_DEVNET_TOKEN as TokenUi))).toBeInTheDocument();
-		expect(queryByTestId(tokenCardId(ETHEREUM_TOKEN as TokenUi))).not.toBeInTheDocument();
-		expect(getByText(en.extension.panel.all_tokens)).toBeInTheDocument();
+		expect(getByText(en.extension.panel.addresses_sites_see)).toBeInTheDocument();
+		expect(getByTitle(mockEthAddress)).toBeInTheDocument();
+		expect(getByTitle(mockSolAddress)).toBeInTheDocument();
 	});
 
-	it('shows the address the extension gives sites in the header', async () => {
-		const { getByTitle } = render(ExtensionPanelContent);
+	it('puts the site in the active tab above the wallet', async () => {
+		const { getByTestId } = render(ExtensionPanelContent);
+
+		current().receive(state({ activeOrigin: 'https://app.example' }));
+		await tick();
+
+		expect(
+			getByTestId('extension-this-site').compareDocumentPosition(
+				getByTestId(RECEIVE_TOKENS_MODAL_OPEN_BUTTON)
+			) & Node.DOCUMENT_POSITION_FOLLOWING
+		).toBeTruthy();
+	});
+
+	it('links to all assets and all activity in OISY, in new tabs', async () => {
+		const { getByRole } = render(ExtensionPanelContent);
 
 		current().receive(state());
 		await tick();
 
-		expect(getByTitle(mockEthAddress)).toBeInTheDocument();
+		const assets = getByRole('link', { name: en.extension.panel.all_tokens });
+		const activity = getByRole('link', { name: en.extension.panel.all_activity });
+
+		expect(assets).toHaveAttribute('href', 'http://localhost:5175/');
+		expect(activity).toHaveAttribute('href', 'http://localhost:5175/activity/');
+		expect(assets).toHaveAttribute('target', '_blank');
+		expect(activity).toHaveAttribute('target', '_blank');
+	});
+
+	it('removes the wallet sections while logging out, so no snapshot is written after', async () => {
+		const { getByRole, queryByTestId } = render(ExtensionPanelContent);
+
+		current().receive(state({ account: { eth: mockEthAddress, sol: mockSolAddress } }));
+		await tick();
+
+		await fireEvent.click(getByRole('button', { name: en.extension.panel.menu }));
+		await fireEvent.click(getByRole('button', { name: en.auth.text.logout }));
+
+		expect(queryByTestId(RECEIVE_TOKENS_MODAL_OPEN_BUTTON)).not.toBeInTheDocument();
 	});
 
 	it('refuses an outdated extension and does not hand it the account', async () => {

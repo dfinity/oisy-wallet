@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
-	import { page } from '$app/state';
-	import { SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
-	import { SOLANA_DEVNET_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 	import ExtensionPanelHeader from '$lib/components/extension/ExtensionPanelHeader.svelte';
-	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
+	import ExtensionRecentActivity from '$lib/components/extension/ExtensionRecentActivity.svelte';
+	import ExtensionWalletAssets from '$lib/components/extension/ExtensionWalletAssets.svelte';
+	import ExtensionWalletBalance from '$lib/components/extension/ExtensionWalletBalance.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Collapsible from '$lib/components/ui/Collapsible.svelte';
+	import Copy from '$lib/components/ui/Copy.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import {
 		OISY_EXTENSION_KEEP_ALIVE_MS,
@@ -16,7 +16,6 @@
 		OISY_EXTENSION_PANEL_STATE_TIMEOUT_MS
 	} from '$lib/constants/extension.constants';
 	import { extensionAccount, extensionNetworksOn } from '$lib/derived/extension.derived';
-	import { enabledFungibleNetworkTokensUi } from '$lib/derived/network-tokens-ui.derived';
 	import { connectExtension } from '$lib/providers/extension.providers';
 	import { ExtensionPanelStateMessageSchema } from '$lib/schema/extension.schema';
 	import { signOut } from '$lib/services/auth.services';
@@ -28,6 +27,7 @@
 		ExtensionVersionStatus
 	} from '$lib/types/extension';
 	import { extensionVersionStatus } from '$lib/utils/extension.utils';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	let port: ExtensionPort | undefined;
@@ -171,24 +171,28 @@
 			: undefined
 	);
 
-	// Sites only ever see the Sepolia and Solana devnet addresses, so those are the balances that matter
-	// here; the rest is one click away in OISY.
-	let tokens = $derived(
-		$enabledFungibleNetworkTokensUi.filter(
-			({ id }) => id === SEPOLIA_TOKEN_ID || id === SOLANA_DEVNET_TOKEN_ID
-		)
-	);
-
 	const disconnect = (origin: string) => send({ type: 'revoke-site', origin });
 
 	const disconnectAll = () => send({ type: 'revoke-all-sites' });
 
 	// The panel shares OISY's session, so logging out here logs out OISY tabs too. The extension is
 	// locked first, so sites lose the account even if the reload that follows is quick.
+	// Unmounting the wallet sections first cancels a pending snapshot, which logging out deletes.
+	let loggingOut = $state(false);
+
 	const logOut = async () => {
+		loggingOut = true;
 		send({ type: 'lock' });
 		await signOut({ source: 'extension-panel' });
 	};
+
+	// The addresses sites can see: the extension offers only these two test networks.
+	let addresses = $derived(
+		[
+			{ chain: $i18n.extension.panel.chain_eth, address: $extensionAccount?.eth },
+			{ chain: $i18n.extension.panel.chain_sol, address: $extensionAccount?.sol }
+		].filter((entry): entry is { chain: string; address: string } => nonNullish(entry.address))
+	);
 </script>
 
 {#snippet disconnectButton({ origin, host }: { origin: string; host: string })}
@@ -210,11 +214,7 @@
 	{:else if nonNullish(versionStatus) && versionStatus !== 'supported'}
 		<MessageBox level="warning">{$i18n.extension.text.outdated}</MessageBox>
 	{:else}
-		<ExtensionPanelHeader
-			address={$extensionAccount?.eth}
-			onDisconnectAll={disconnectAll}
-			onLogOut={logOut}
-		/>
+		<ExtensionPanelHeader onDisconnectAll={disconnectAll} onLogOut={logOut} />
 
 		{#if !$extensionNetworksOn}
 			<MessageBox level="warning">{$i18n.extension.text.networks_off}</MessageBox>
@@ -231,9 +231,9 @@
 				data-tid="extension-this-site"
 			>
 				<div class="min-w-0">
-					<p class="truncate font-bold" title={origin}>{host}</p>
+					<p class="m-0 truncate font-bold" title={origin}>{host}</p>
 					<p
-						class="text-sm"
+						class="m-0 text-sm"
 						class:text-success-primary={connected}
 						class:text-tertiary={!connected}
 					>
@@ -249,47 +249,62 @@
 			</section>
 		{/if}
 
-		<section class="flex flex-col gap-2">
-			<h2 class="text-base font-bold">
-				{replacePlaceholders($i18n.extension.panel.connected_sites_count, {
-					$count: `${sites.length}`
-				})}
-			</h2>
+		{#if !loggingOut}
+			<ExtensionWalletBalance />
 
-			{#if sites.length === 0}
-				<p class="text-sm text-tertiary">{$i18n.extension.panel.no_sites}</p>
-			{:else}
-				<ul class="flex list-none flex-col">
-					{#each sites as { origin, host, chains } (origin)}
-						<li
-							class="flex items-center justify-between gap-3 border-b border-secondary py-2 last:border-b-0"
-						>
-							<div class="min-w-0">
-								<p class="truncate text-sm font-bold" title={origin}>{host}</p>
-								<p class="text-xs text-tertiary">{chains}</p>
+			<ExtensionWalletAssets />
+
+			<ExtensionRecentActivity />
+		{/if}
+
+		<Collapsible testId="extension-connected-sites">
+			{#snippet header()}
+				<h2 class="text-base font-bold">
+					{replacePlaceholders($i18n.extension.panel.connected_sites_count, {
+						$count: `${sites.length}`
+					})}
+				</h2>
+			{/snippet}
+
+			<div class="flex flex-col gap-4 pb-2">
+				{#if addresses.length > 0}
+					<div class="flex flex-col gap-1">
+						<p class="m-0 text-sm text-tertiary">{$i18n.extension.panel.addresses_sites_see}</p>
+
+						{#each addresses as { chain, address } (chain)}
+							<div class="flex items-center justify-between gap-3">
+								<span class="text-sm">{chain}</span>
+
+								<span class="flex min-w-0 items-center gap-1">
+									<span class="font-mono truncate text-sm" title={address}
+										>{shortenWithMiddleEllipsis({ text: address, splitLength: 6 })}</span
+									>
+									<Copy inline text={$i18n.wallet.text.address_copied} value={address} />
+								</span>
 							</div>
+						{/each}
+					</div>
+				{/if}
 
-							{@render disconnectButton({ origin, host })}
-						</li>
-					{/each}
-				</ul>
-			{/if}
-		</section>
+				{#if sites.length === 0}
+					<p class="m-0 text-sm text-tertiary">{$i18n.extension.panel.no_sites}</p>
+				{:else}
+					<ul class="flex list-none flex-col">
+						{#each sites as { origin, host, chains } (origin)}
+							<li
+								class="flex items-center justify-between gap-3 border-b border-secondary py-2 last:border-b-0"
+							>
+								<div class="min-w-0">
+									<p class="m-0 truncate text-sm font-bold" title={origin}>{host}</p>
+									<p class="m-0 text-xs text-tertiary">{chains}</p>
+								</div>
 
-		<section class="flex flex-col gap-2">
-			<h2 class="text-base font-bold">{$i18n.extension.panel.balances}</h2>
-
-			<div class="flex flex-col">
-				{#each tokens as token (token.id)}
-					<TokenCard data={token} />
-				{/each}
+								{@render disconnectButton({ origin, host })}
+							</li>
+						{/each}
+					</ul>
+				{/if}
 			</div>
-
-			<div class="flex justify-center">
-				<ExternalLink ariaLabel={$i18n.extension.panel.all_tokens} href={page.url.origin}>
-					{$i18n.extension.panel.all_tokens}
-				</ExternalLink>
-			</div>
-		</section>
+		</Collapsible>
 	{/if}
 </div>

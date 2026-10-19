@@ -37,3 +37,10 @@ export const OISY_EXTENSION_MIN_VERSION = '0.0.3';
 export const OISY_EXTENSION_BLOCKED_VERSIONS: readonly string[] = [];
 export const OISY_EXTENSION_OUTDATED_MESSAGE =
 	'The OISY extension is out of date. Update it and try again.';
+
+// The side panel previews the wallet: the first rows of OISY's own lists, with the rest in OISY.
+export const OISY_EXTENSION_PANEL_ASSETS_LIMIT = 5;
+export const OISY_EXTENSION_PANEL_ACTIVITY_LIMIT = 3;
+
+// Balances settle over a few seconds after load; the snapshot is written once they stop changing.
+export const OISY_EXTENSION_PANEL_SNAPSHOT_DELAY_MS = 1_000;

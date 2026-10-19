@@ -1,5 +1,8 @@
-import { SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SOLANA_DEVNET_NETWORK } from '$env/networks/networks.sol.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SESSION_REQUEST_PERSONAL_SIGN } from '$eth/constants/wallet-connect.constants';
 import {
 	OISY_EXTENSION_INTERNAL_ERROR_CODE,
@@ -7,12 +10,17 @@ import {
 	OISY_EXTENSION_WALLET_CONNECT_TOPIC
 } from '$lib/constants/extension.constants';
 import type { ExtensionSignRequest } from '$lib/types/extension';
+import type { TokenUi } from '$lib/types/token-ui';
+import type { TokenUiGroup } from '$lib/types/token-ui-group';
 import {
 	compareExtensionVersions,
 	extensionVersionStatus,
 	toExtensionError,
+	toExtensionPanelSnapshotCardData,
+	toExtensionPanelSnapshotRow,
 	toWalletConnectSessionRequest
 } from '$lib/utils/extension.utils';
+import { parseTokenGroupId } from '$lib/validation/token-group.validation';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_MESSAGE,
@@ -172,6 +180,63 @@ describe('extension.utils', () => {
 
 		it('blocks a version it cannot read', () => {
 			expect(extensionVersionStatus({ version: 'latest', minimum })).toBe('blocked');
+		});
+	});
+
+	describe('panel snapshot', () => {
+		const eth: TokenUi = { ...ETHEREUM_TOKEN, balance: 2n, usdBalance: 4, usdPrice: 2 };
+		const icp: TokenUi = { ...ICP_TOKEN, balance: 3n, usdBalance: 6 };
+		const groupId = parseTokenGroupId('mixed');
+		const group: TokenUiGroup = {
+			id: groupId,
+			decimals: 8,
+			groupData: { id: groupId, symbol: 'MIX', name: 'Mixed' },
+			tokens: [eth, icp],
+			balance: 5n,
+			usdBalance: 10
+		};
+
+		it('keeps what a token row shows, with its network by id', () => {
+			expect(toExtensionPanelSnapshotRow({ token: eth })).toEqual(
+				expect.objectContaining({
+					name: eth.name,
+					symbol: eth.symbol,
+					decimals: eth.decimals,
+					balance: 2n,
+					usdBalance: 4,
+					usdPrice: 2,
+					networkId: ETHEREUM_NETWORK.id.description
+				})
+			);
+		});
+
+		it("keeps a group's header and its networks by id", () => {
+			expect(toExtensionPanelSnapshotRow({ group })).toEqual(
+				expect.objectContaining({
+					name: 'Mixed',
+					symbol: 'MIX',
+					balance: 5n,
+					usdBalance: 10,
+					groupNetworkIds: [ETHEREUM_NETWORK.id.description, ICP_NETWORK.id.description]
+				})
+			);
+		});
+
+		it('restores the networks for the token card', () => {
+			const tokenCard = toExtensionPanelSnapshotCardData(
+				toExtensionPanelSnapshotRow({ token: eth })
+			);
+			const groupCard = toExtensionPanelSnapshotCardData(toExtensionPanelSnapshotRow({ group }));
+
+			expect(tokenCard.network).toBe(ETHEREUM_NETWORK);
+			expect(groupCard.tokenCount).toBe(2);
+			expect(groupCard.networks).toEqual([ETHEREUM_NETWORK, ICP_NETWORK]);
+		});
+
+		it('survives being stored', () => {
+			const row = toExtensionPanelSnapshotRow({ token: eth });
+
+			expect(structuredClone(row)).toEqual(row);
 		});
 	});
 });

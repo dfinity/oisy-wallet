@@ -1924,11 +1924,15 @@
 			"disconnect": "Disconnect",
 			"disconnect_site": "Disconnect $origin",
 			"disconnect_all": "Disconnect all sites",
-			"chain_eth": "Ethereum",
-			"chain_sol": "Solana",
-			"balances": "Balances sites can use",
-			"all_tokens": "All your tokens in OISY",
-			"open_oisy": "Open OISY"
+			"chain_eth": "Sepolia",
+			"chain_sol": "Solana Devnet",
+			"all_tokens": "All your assets in OISY",
+			"open_oisy": "Open OISY",
+			"all_activity": "All your activity in OISY",
+			"view_all": "View all",
+			"addresses_sites_see": "Sites see these addresses",
+			"last_updated": "Last updated $time",
+			"sign_in_to_refresh": "Sign in to see your current balances and activity."
 		}
 	},
 	"trading": {

@@ -1926,9 +1926,13 @@
 			"disconnect_all": "",
 			"chain_eth": "",
 			"chain_sol": "",
-			"balances": "",
 			"all_tokens": "",
-			"open_oisy": ""
+			"open_oisy": "",
+			"all_activity": "",
+			"view_all": "",
+			"addresses_sites_see": "",
+			"last_updated": "",
+			"sign_in_to_refresh": ""
 		}
 	},
 	"trading": {

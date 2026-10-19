@@ -1604,9 +1604,13 @@ interface I18nExtension {
 		disconnect_all: string;
 		chain_eth: string;
 		chain_sol: string;
-		balances: string;
 		all_tokens: string;
 		open_oisy: string;
+		all_activity: string;
+		view_all: string;
+		addresses_sites_see: string;
+		last_updated: string;
+		sign_in_to_refresh: string;
 	};
 }
 

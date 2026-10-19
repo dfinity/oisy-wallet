@@ -2,6 +2,8 @@ import type {
 	ExtensionChainSchema,
 	ExtensionConnectRequestSchema,
 	ExtensionPairRequestSchema,
+	ExtensionPanelSnapshotRowSchema,
+	ExtensionPanelSnapshotSchema,
 	ExtensionPanelStateMessageSchema,
 	ExtensionRequestSchema,
 	ExtensionSignRequestSchema,
@@ -22,6 +24,10 @@ export type ExtensionRequest = z.infer<typeof ExtensionRequestSchema>;
 export type ExtensionSites = z.infer<typeof ExtensionSitesSchema>;
 
 export type ExtensionPanelState = z.infer<typeof ExtensionPanelStateMessageSchema>['state'];
+
+export type ExtensionPanelSnapshotRow = z.infer<typeof ExtensionPanelSnapshotRowSchema>;
+
+export type ExtensionPanelSnapshot = z.infer<typeof ExtensionPanelSnapshotSchema>;
 
 export type ExtensionVersionStatus = 'supported' | 'outdated' | 'blocked';
 

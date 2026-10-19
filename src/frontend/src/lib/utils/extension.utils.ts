@@ -1,3 +1,4 @@
+import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 import { SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { SOLANA_DEVNET_NETWORK } from '$env/networks/networks.sol.env';
 import {
@@ -9,15 +10,21 @@ import {
 } from '$lib/constants/extension.constants';
 import type {
 	ExtensionError,
+	ExtensionPanelSnapshotRow,
 	ExtensionSignRequest,
 	ExtensionVersionStatus
 } from '$lib/types/extension';
+import type { Network } from '$lib/types/network';
+import type { CardData } from '$lib/types/token-card';
+import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
+import { mapHeaderData } from '$lib/utils/token-card.utils';
+import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_MESSAGE,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
 } from '$sol/constants/wallet-connect.constants';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { WalletKitTypes } from '@reown/walletkit';
 import type { ErrorResponse } from '@walletconnect/jsonrpc-utils';
 import { getSdkError } from '@walletconnect/utils';
@@ -166,3 +173,87 @@ export const extensionVersionStatus = ({
 
 	return comparison < 0 ? 'outdated' : 'supported';
 };
+
+export const toExtensionPanelSnapshotRow = (
+	tokenOrGroup: TokenUiOrGroupUi
+): ExtensionPanelSnapshotRow => {
+	if (isTokenUiGroup(tokenOrGroup)) {
+		const { group } = tokenOrGroup;
+		const {
+			name,
+			symbol,
+			decimals,
+			icon,
+			oisyName,
+			oisySymbol,
+			balance,
+			usdBalance,
+			usdPrice,
+			usdPriceChangePercentage24h
+		} = mapHeaderData(group);
+
+		return {
+			name,
+			symbol,
+			decimals,
+			icon,
+			oisyName,
+			oisySymbol,
+			balance,
+			usdBalance,
+			usdPrice,
+			usdPriceChangePercentage24h,
+			groupNetworkIds: group.tokens.map(({ network: { id } }) => `${id.description}`)
+		};
+	}
+
+	const {
+		token: {
+			name,
+			symbol,
+			decimals,
+			icon,
+			oisyName,
+			oisySymbol,
+			balance,
+			usdBalance,
+			usdPrice,
+			usdPriceChangePercentage24h,
+			network
+		}
+	} = tokenOrGroup;
+
+	return {
+		name,
+		symbol,
+		decimals,
+		icon,
+		oisyName,
+		oisySymbol,
+		balance,
+		usdBalance,
+		usdPrice,
+		usdPriceChangePercentage24h,
+		networkId: `${network.id.description}`
+	};
+};
+
+const findNetwork = (networkId: string | undefined): Network | undefined =>
+	isNullish(networkId)
+		? undefined
+		: SUPPORTED_NETWORKS.find(({ id }) => id.description === networkId);
+
+export const toExtensionPanelSnapshotCardData = ({
+	networkId,
+	groupNetworkIds,
+	...row
+}: ExtensionPanelSnapshotRow): CardData => ({
+	...row,
+	network: findNetwork(networkId),
+	...(nonNullish(groupNetworkIds)
+		? {
+				tokenCount: groupNetworkIds.length,
+				networks: groupNetworkIds.map(findNetwork).filter(nonNullish)
+			}
+		: {})
+});

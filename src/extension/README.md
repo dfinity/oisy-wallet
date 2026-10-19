@@ -4,8 +4,12 @@ Lets dapps that only support extension wallets connect to OISY and sign. The ext
 it announces OISY to the page, decides which sites may see which address, and opens an oisy.com
 popup where the existing review screens show and sign every request. Clicking the toolbar icon opens
 Chrome's side panel (Chrome 116 or later), which shows OISY's own page `/extension/panel/`: whether
-the site in the active tab is connected, all connected sites, the balances sites can use, and a menu
-with Open OISY, Disconnect all sites and Log out. The extension itself has no wallet UI.
+the site in the active tab is connected, then the wallet as OISY's home shows it (the same total and
+the first rows of the same asset list, with Receive and Open OISY), recent activity, and the
+connected sites with the addresses they see. The menu has Open OISY, Disconnect all sites and Log
+out. After the 1-hour session ends, the panel keeps showing the last total and assets with the time
+they were saved, until you sign in again; Log out in any OISY tab deletes them, and nothing shows
+while OISY is locked. The extension itself has no wallet UI.
 
 Local only, against staging, on Sepolia and Solana devnet. Chromium browsers only.
 
