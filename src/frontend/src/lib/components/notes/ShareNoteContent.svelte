@@ -11,6 +11,7 @@
 	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import IconSwap from '$lib/components/ui/IconSwap.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PillButton from '$lib/components/ui/PillButton.svelte';
 	import { MAX_PERSONAL_NOTE_SHARES_PER_USER } from '$lib/constants/app.constants';
@@ -216,7 +217,6 @@
 			<strong>{`${$i18n.notes.text.encrypted_lead} `}</strong
 			>{`${$i18n.notes.share.text.protects_body.trimEnd()} `}<ExternalLink
 				ariaLabel={$i18n.core.text.learn_more}
-				color="blue"
 				href={OISY_NOTES_DOCS_URL}
 				iconVisible={false}
 			>
@@ -243,11 +243,14 @@
 					testId={NOTES_SHARE_LINK_COPY}
 				>
 					{#snippet icon()}
-						{#if copied}
-							<span class="text-success-primary"><IconCircleCheck /></span>
-						{:else}
-							<IconCopy />
-						{/if}
+						<IconSwap swapped={copied}>
+							{#snippet icon()}
+								<IconCopy />
+							{/snippet}
+							{#snippet swappedIcon()}
+								<span class="text-success-primary"><IconCircleCheck /></span>
+							{/snippet}
+						</IconSwap>
 					{/snippet}
 				</ButtonIcon>
 			</div>

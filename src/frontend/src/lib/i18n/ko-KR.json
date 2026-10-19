@@ -1348,6 +1348,8 @@
 			"swap_fees": "스왑 수수료",
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>에서 <b>$destinationNetwork</b> 네트워크로 토큰을 이동합니다",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -2758,10 +2760,13 @@
 			"starting_to_repay": "상환을 제출하는 중…",
 			"repay_started": "상환이 처리되고 있습니다.",
 			"current_debt": "현재 부채",
+			"pending_repays": "처리 중인 상환",
 			"interest_accrued": "발생 이자",
 			"debt_after_repay": "상환 후 부채",
 			"repay_exceeds_debt": "금액이 미상환 부채를 초과합니다.",
-			"repay_prices_unavailable": "가격 정보를 일시적으로 사용할 수 없습니다. 로드될 때까지 상환이 비활성화됩니다."
+			"repay_prices_unavailable": "가격 정보를 일시적으로 사용할 수 없습니다. 로드될 때까지 상환이 비활성화됩니다.",
+			"repay_debt_unavailable": "미상환 부채 정보를 일시적으로 사용할 수 없습니다. 로드될 때까지 상환이 비활성화됩니다.",
+			"repay_pending_covers_debt": "이 포지션의 상환이 아직 처리 중입니다. 처리가 완료되면 추가로 상환할 수 있습니다."
 		},
 		"info": {
 			"title": "Liquidium이란?",

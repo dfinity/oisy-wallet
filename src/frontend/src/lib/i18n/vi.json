@@ -1348,6 +1348,8 @@
 			"swap_fees": "Phí giao dịch",
 			"cross_chain_networks_info": "Bạn di chuyển token từ mạng <b>$sourceNetwork</b> sang mạng <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -2758,10 +2760,13 @@
 			"starting_to_repay": "Đang gửi khoản hoàn trả của bạn…",
 			"repay_started": "Khoản hoàn trả của bạn hiện đang được xử lý.",
 			"current_debt": "Khoản nợ hiện tại",
+			"pending_repays": "Khoản hoàn trả đang được xử lý",
 			"interest_accrued": "Lãi phát sinh",
 			"debt_after_repay": "Khoản nợ sau khi hoàn trả",
 			"repay_exceeds_debt": "Số tiền vượt quá khoản nợ chưa thanh toán của bạn.",
-			"repay_prices_unavailable": "Giá tạm thời không khả dụng. Việc hoàn trả bị vô hiệu hóa cho đến khi giá được tải."
+			"repay_prices_unavailable": "Giá tạm thời không khả dụng. Việc hoàn trả bị vô hiệu hóa cho đến khi giá được tải.",
+			"repay_debt_unavailable": "Khoản nợ chưa thanh toán của bạn tạm thời không khả dụng. Việc hoàn trả bị vô hiệu hóa cho đến khi khoản nợ được tải.",
+			"repay_pending_covers_debt": "Một khoản hoàn trả cho vị thế này vẫn đang được xử lý. Bạn có thể hoàn trả thêm khi khoản này hoàn tất."
 		},
 		"info": {
 			"title": "Liquidium là gì",

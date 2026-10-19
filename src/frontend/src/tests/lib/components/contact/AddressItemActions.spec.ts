@@ -140,7 +140,8 @@ describe('AddressItemActions', () => {
 		// Check that copyToClipboard was called with the correct arguments
 		expect(clipboardUtils.copyToClipboard).toHaveBeenCalledWith({
 			text: en.wallet.text.address_copied,
-			value: mockAddress.address
+			value: mockAddress.address,
+			withToast: false
 		});
 	});
 
@@ -163,6 +164,19 @@ describe('AddressItemActions', () => {
 
 		// Check that onInfo was called
 		expect(onInfo).toHaveBeenCalled();
+	});
+
+	it('should not pull the action icons together, so their tap areas do not overlap', () => {
+		const { getByTestId } = render(AddressItemActions, {
+			props: { address: mockAddress, onInfo: vi.fn(), onEdit: vi.fn(), onDelete: vi.fn() },
+			context: mockContext
+		});
+
+		[
+			ADDRESS_LIST_ITEM_INFO_BUTTON,
+			ADDRESS_LIST_ITEM_EDIT_BUTTON,
+			ADDRESS_LIST_ITEM_DELETE_BUTTON
+		].forEach((testId) => expect(getByTestId(testId)).not.toHaveClass('-m-1'));
 	});
 
 	it('should call onEdit when edit button is clicked', async () => {

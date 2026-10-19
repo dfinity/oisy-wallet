@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
 	import { anyLendBorrowProviderEnabled } from '$env/lend-borrow';
@@ -35,6 +34,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { activeAssetsTabStore } from '$lib/stores/settings.store';
 	import type { ManageTokensData } from '$lib/types/manage-tokens';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		tab: TokenTypes;

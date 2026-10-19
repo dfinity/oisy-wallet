@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import IconChevronRight from '$lib/components/icons/lucide/IconChevronRight.svelte';
 	import OisyTradeMark from '$lib/components/trading/OisyTradeMark.svelte';
 	import { OISY_TRADE_PROVIDER_NAME } from '$lib/constants/oisy-trade.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { feeBpsToPercent, type LimitOrderPairView } from '$lib/utils/oisy-trade.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		pairView?: LimitOrderPairView;

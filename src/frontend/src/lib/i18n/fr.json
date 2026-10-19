@@ -1348,6 +1348,8 @@
 			"swap_fees": "Frais d'échange",
 			"cross_chain_networks_info": "Vous déplacez des tokens du réseau <b>$sourceNetwork</b> vers le réseau <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -2758,10 +2760,13 @@
 			"starting_to_repay": "Envoi de votre remboursement…",
 			"repay_started": "Votre remboursement est en cours de traitement.",
 			"current_debt": "Dette actuelle",
+			"pending_repays": "Remboursements en cours",
 			"interest_accrued": "Intérêts courus",
 			"debt_after_repay": "Dette après remboursement",
 			"repay_exceeds_debt": "Le montant dépasse votre dette impayée.",
-			"repay_prices_unavailable": "Les prix sont temporairement indisponibles. Le remboursement est désactivé jusqu'à leur chargement."
+			"repay_prices_unavailable": "Les prix sont temporairement indisponibles. Le remboursement est désactivé jusqu'à leur chargement.",
+			"repay_debt_unavailable": "Votre dette impayée est temporairement indisponible. Le remboursement est désactivé jusqu'à son chargement.",
+			"repay_pending_covers_debt": "Un remboursement pour cette position est toujours en cours de traitement. Vous pourrez rembourser davantage une fois qu'il sera finalisé."
 		},
 		"info": {
 			"title": "Qu'est-ce que Liquidium",

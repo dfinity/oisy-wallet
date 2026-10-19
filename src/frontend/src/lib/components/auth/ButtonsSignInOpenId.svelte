@@ -56,7 +56,7 @@
 >
 	{#each providers as { provider, icon: Icon, ariaLabel, testId } (provider)}
 		<button
-			class={`flex size-14 items-center justify-center rounded-xl transition-[color,background-color,border-color,scale] duration-150 ease-out focus-visible:outline-2 focus-visible:outline-offset-2 active:scale-[0.96] motion-reduce:active:scale-100 ${variantClasses}`}
+			class={`flex size-14 items-center justify-center rounded-xl transition-[color,background-color,border-color,scale] duration-150 ease-out press-icon focus-visible:outline-2 focus-visible:outline-offset-2 ${variantClasses}`}
 			aria-label={ariaLabel}
 			data-tid={testId}
 			onclick={() => onProviderSelected(provider)}

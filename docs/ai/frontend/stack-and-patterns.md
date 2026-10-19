@@ -227,23 +227,145 @@ layer and let the service own caching.
 
 ## Press feedback
 
-Every styled `Button` (any `colorStyle`, unless `link`) shrinks to
-`scale: 0.98` while held, and every `ButtonIcon` to `scale: 0.96`
-(`lib/styles/mixins/_button.scss` `press`). Text buttons get less because
-they are often full width, where 0.96 takes off far more pixels than on a
-40 px icon. Don't add your own `active:scale-*` to them; a custom button
-outside these components follows the same two values.
+Everything that can be pressed shows it while held. Pick the treatment by
+what the element is, and use the shared rule, never hand-written
+`active:scale-*` or `active:bg-*`:
 
-- Opt out with the `static` prop where motion would distract, e.g. a
-  button used only as a double-click target. It sets the `no-press`
-  class, because `static` is a Tailwind utility (`position: static`).
-- A Tailwind `transition-*` utility on a button replaces the base
-  transition, which carries `scale`. Use `transition-[...]` with `scale`
-  in the list if you need to change it.
-- Disabled, loading and reduced-motion states never scale.
-- iOS Safari applies `:active` on a tap only when the page has a touch
-  listener. The root layout (`routes/+layout.svelte`) registers a passive
+| Element                                                 | Use                                                          | Effect                                            |
+| ------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------- |
+| `Button` (any `colorStyle`, unless `link`)              | nothing, it is built in                                      | shrinks to 0.98                                   |
+| `ButtonIcon`                                            | nothing, it is built in                                      | shrinks to 0.96                                   |
+| Any other text button, or a whole-card button           | `press`                                                      | shrinks to 0.98                                   |
+| A help toggle (an info icon that shows an explanation)  | `HelpToggle` (`ui/HelpToggle.svelte`)                        | 0.96, tap area, `aria-expanded`                   |
+| Any other icon-size control (close, help, toggle icons) | `press-icon` (+ `hit-area` if under 40 px)                   | shrinks to 0.96                                   |
+| A full-width row (list item, transaction, contact)      | `row-feedback`                                               | 10 % blue on hover, 20 % while pressed, no shrink |
+| A wrapper that paints the row around its `<button>`     | `hover:bg-brand-subtle-10 child-pressed:bg-brand-subtle-20`  | as `row-feedback`, on the wrapper                 |
+| Something the press would only distract on              | `static` prop (`Button`, `ButtonIcon`), or no utility at all | nothing                                           |
+
+### Links: `text-brand-hover`
+
+Text links and link-style icons change colour: one step of OISY blue on hover
+and the same while pressed (`text-brand-hover`, blue-800 in
+light mode, blue-300 in dark, where blue-800 would drop to 2.3:1). `Button link`,
+the default `ButtonIcon` (so `Copy`), `ExternalLink` and `BreadcrumbNavigation`
+have it built in, and so does `a.blue-link` (`styles/global/links.scss`) for links
+inside translated strings rendered through `Html`; anything else that looks like a link adds
+`transition-colors duration-150 ease-out hover:text-brand-hover active:text-brand-hover`.
+Never hover a link to `text-brand-secondary`: it is the darker blue in both themes.
+A text link does not shrink on press; an icon-only link also gets `press-icon`,
+like any icon button.
+
+`press` and `press-icon` are utilities in `lib/styles/global.scss`, built
+on the same `press` mixin and the same two scales (`$press-scale-text`,
+`$press-scale-icon` in `lib/styles/mixins/_button.scss`) the shared buttons
+use, so changing a value there changes it everywhere. They skip disabled,
+`loading` and `no-press` elements, and reduced motion never scales.
+
+`row-feedback`, also in `global.scss`, is a colour change, not a shrink: it
+is not built on the press mixin, and `no-press` does not turn it off. A row
+button can therefore opt out of the shrink with `static` and keep the fill,
+as `ListItemButton` does.
+
+Wide things shrink less (0.98) than small ones (0.96) because the same
+scale takes far more pixels off a full-width element; full-width rows don't
+shrink at all.
+
+The shared buttons (`button.scss`) and `row-feedback` rows change colour in
+150 ms ease-out; use the same for new feedback. The `tertiary-alt` and
+`secondary-light` buttons and `row-feedback` rows press one step past their
+hover (`brand-subtle-10` → `-20`, or `-20` → `-30`), and a state that stays on,
+such as an open popover's button, may go a step further. `.dropdown-button`
+has no pressed fill of its own, and success, error and other palettes keep
+their own steps.
+
+### Small controls: `hit-area`
+
+Anything you can tap that is under 40 × 40 px gets `hit-area`: an `::after`
+of at least 40 × 40 px around it, so it is easy to hit without looking
+bigger. Two tap areas must never overlap; where a neighbour sits closer,
+cap it: `[--hit-area:2rem]`, or one axis with `[--hit-area-x:...]` /
+`[--hit-area-y:...]` (`[--hit-area-x:0px]` grows it only up and down). It
+does not set `position`: add `relative` unless the control is already
+`absolute` or `fixed`.
+
+### Pitfalls
+
+- **`:active` reaches every ancestor** of the pressed element. A row with a
+  copy icon or a toggle inside it would light up when the icon is pressed;
+  `row-feedback`, `pressed:` and `child-pressed:` exclude that, plain
+  `active:` does not.
+- **`display: contents` buttons paint nothing.** Put `row-feedback` on the
+  element inside, plus `parent-pressed:bg-brand-subtle-20`: holding Space on
+  the focused button makes only the button `:active`, not the element inside
+  (as `Transaction` and `TipHistory` do).
+- **`scale` makes the element the containing block** of its absolutely
+  positioned children. If a child is positioned against something further
+  out (the mobile bar's Finance circle), scale the child, not the element:
+  put `group` on the button and `press-icon-in-group` on the child.
+- **A `transition-*` utility replaces the base transition,** which carries
+  `scale`. Buttons already have `scale` in theirs; anything else, or a
+  button with its own transition, lists it: `transition-[color,scale]`.
+- **Custom variants must not start with `has-`** (Tailwind 4 reads `has-*`
+  as its built-in compound variant), and **must not nest `:has()` inside
+  `:has()`** (invalid CSS: the browser drops the whole rule). Check a new
+  variant actually lands in the stylesheet.
+- **Hover in SCSS** goes through `@include interaction.hover { … }` (see
+  above); in Tailwind, `hover:` is already guarded.
+- **iOS Safari applies `:active` on a tap only when the page has a touch
+  listener.** The root layout (`routes/+layout.svelte`) registers a passive
   no-op `touchstart` on the document for that; it is not dead code.
+- **Nested buttons:** a control inside a clickable row stops propagation
+  (`e.stopPropagation()`), or its click also runs the row's.
+
+## Motion
+
+Import `fade`, `fly`, `slide`, `scale` and `blur` from
+`$lib/utils/transitions.utils`, not from `svelte/transition`. They take the
+same parameters and add OISY's timings and the system's reduced-motion
+setting. Svelte's own default is 400 ms, slower than anything OISY uses. The
+module also re-exports the parameter types (`FadeParams`, `SlideParams`,
+`TransitionConfig`, …), and a lint rule refuses `svelte/transition` everywhere
+else (`transition.constants.ts` excepted, since the module is built on it).
+The restriction uses `@typescript-eslint/no-restricted-imports` separately from
+the shared core rule, preserving its deprecated-package and `/dist/` import bans.
+
+| Kind of motion                        | Timing                              | Constant (`transition.constants.ts`) |
+| ------------------------------------- | ----------------------------------- | ------------------------------------ |
+| Entrance                              | 200 ms ease-out (`cubicOut`)        | `MOTION_ENTER`                       |
+| Exit                                  | 150 ms ease-in (`cubicIn`)          | `MOTION_EXIT`                        |
+| Icon swap (`IconSwap`)                | 300 ms `cubic-bezier(0.2, 0, 0, 1)` | built into `IconSwap`                |
+| Other small state change (a chip)     | 150 ms                              | `MOTION_SWAP_DURATION`               |
+| Height change (`slide`)               | 250 ms both ways                    | `SLIDE_PARAMS`                       |
+| Any fade that replaces a reduced move | 100 ms                              | `MOTION_REDUCED_FADE_DURATION`       |
+
+- **Pass no `duration`** and the shared timing applies: a `transition:` gets
+  the entrance timing going in and the exit timing going out, so exits are
+  faster without any extra code.
+- **Pass a `duration`** only for a different kind of motion: a sheet that
+  travels the height of the screen, an instant close (`duration: 0`). A
+  passed `duration` is used exactly as Svelte would use it, easing included,
+  so pass `easing` with it.
+- **`scale` starts at 0.96** unless you pass `start`: nothing grows from
+  nothing.
+- **Reduced motion:** `fly`, `scale` and `blur` become a 100 ms fade, `fade`
+  is capped at 100 ms (a shorter one the call site chose stays shorter), and
+  `slide` happens at once, since a height change moves everything below it.
+  Colours still change.
+- **CSS animations:** under reduced motion `animate-pulse` and `animate-ping`
+  hold still. A decorative illustration with its own keyframes adds
+  `decorative-motion` to its root, which stops every animation inside it.
+  Progress indicators (`Spinner`, plus the `LoaderSpinner` and `AnimatedIconLoader`
+  wrappers) keep their trace moving under reduced motion: they are essential
+  progress cues, not decorative motion. The pre-hydration loader in `app.html`
+  follows the same rule, retaining its 30-second animation cap. Keep the owning
+  controls' loading states, translated labels and accessibility semantics intact.
+
+For a page backdrop use `backdrop` from the same module: it animates the dim and blur
+radius without an opacity animation that hides the blur in Chrome. Under reduced motion
+it becomes the same capped fade.
+
+Modal and popover containers use an intro-only 25 ms fade. Their children own the exits;
+a container outro would hide the panel and backdrop before their longer outros finish.
 
 ## Icons
 

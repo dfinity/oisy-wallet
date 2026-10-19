@@ -5,6 +5,7 @@
 	import type { ButtonColorStyle } from '$lib/types/style';
 
 	interface Props {
+		pressed?: boolean;
 		colorStyle?: ButtonColorStyle;
 		type?: 'submit' | 'reset' | 'button';
 		disabled?: boolean;
@@ -28,6 +29,7 @@
 	}
 
 	const {
+		pressed,
 		colorStyle = 'primary',
 		type = 'submit',
 		disabled,
@@ -71,6 +73,7 @@
 	class:underline={inlineLink}
 	class:w-full={fullWidth}
 	aria-label={ariaLabel}
+	aria-pressed={pressed}
 	data-tid={testId}
 	disabled={disabled ?? (loading || initialising)}
 	{onclick}
@@ -90,12 +93,11 @@
 			<span class="absolute flex h-full w-full items-center justify-center">
 				<Spinner />
 			</span>
-
-			<span class="invisible">
-				{@render children()}
-			</span>
-		{:else}
-			{@render children()}
 		{/if}
+
+		<!-- Keep stateful children mounted through loading, including icon swaps. -->
+		<span class:contents={!loading} class:invisible={loading}>
+			{@render children()}
+		</span>
 	</span>
 </button>

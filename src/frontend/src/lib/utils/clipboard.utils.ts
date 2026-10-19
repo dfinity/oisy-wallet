@@ -6,13 +6,16 @@ import { get } from 'svelte/store';
 /**
  * @returns whether the value reached the clipboard. The browser rejects the write
  * without permission or focus; that case shows an error toast instead of throwing.
+ * Pass `withToast: false` when the caller confirms the copy itself.
  */
 export const copyToClipboard = async ({
 	value,
-	text
+	text,
+	withToast = true
 }: {
 	value: string;
 	text: string;
+	withToast?: boolean;
 }): Promise<boolean> => {
 	try {
 		await copyText(value);
@@ -22,11 +25,13 @@ export const copyToClipboard = async ({
 		return false;
 	}
 
-	toastsShow({
-		text,
-		level: 'success',
-		duration: 2000
-	});
+	if (withToast) {
+		toastsShow({
+			text,
+			level: 'success',
+			duration: 2000
+		});
+	}
 
 	return true;
 };

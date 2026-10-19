@@ -58,11 +58,7 @@ describe('ButtonSignInInternetIdentity', () => {
 			props: { onclick: vi.fn(), variant }
 		});
 
-		expect(container.querySelector(selector)).toHaveClass(
-			'active:scale-[0.98]',
-			'motion-reduce:active:scale-100',
-			pressed
-		);
+		expect(container.querySelector(selector)).toHaveClass('press', pressed);
 	});
 
 	it('should fill and outline on hover in the login style', () => {

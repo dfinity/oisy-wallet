@@ -12,10 +12,12 @@ a.as-button {
 	--button-border-radius: var(--border-radius-md);
 	border-radius: var(--button-border-radius);
 
+	// Same 150 ms as the `row-feedback` rows, so a button answers a pointer as fast as the
+	// rows around it.
 	transition:
-		color 0.25s ease-out,
-		background 0.25s ease-out,
-		opacity 0.25s ease-out,
+		color 0.15s ease-out,
+		background 0.15s ease-out,
+		opacity 0.15s ease-out,
 		scale 0.15s ease-out;
 
 	border: 1px solid transparent;
@@ -75,7 +77,7 @@ a.as-button {
 
 		&[focus],
 		&:focus {
-			outline-offset: 2px;
+			outline-offset: var(--focus-outline-offset, 2px);
 			outline: var(--color-background-brand-primary) solid 2px;
 		}
 
@@ -109,7 +111,7 @@ a.as-button {
 	&.success-light,
 	&.error {
 		&:not(.link):not(.icon) {
-			@include button.press(0.98);
+			@include button.press(button.$press-scale-text);
 		}
 	}
 
@@ -329,9 +331,11 @@ a.as-button {
 			@apply bg-brand-subtle-10;
 		}
 
+		// One step past the hover, as `row-feedback` rows and `secondary-light` do; the open
+		// state below stays a step further.
 		&:active {
 			@apply text-brand-primary-alt;
-			@apply bg-brand-subtle-30;
+			@apply bg-brand-subtle-20;
 		}
 
 		&:focus-visible {
@@ -339,9 +343,9 @@ a.as-button {
 			@apply bg-primary;
 		}
 
-		// Keep the active background while the linked popover is open, the way
-		// the network switcher dropdown does. Placed last so it also wins over
-		// the focus-visible reset when opened via keyboard.
+		// A step darker still while the linked popover is open, the way the
+		// network switcher dropdown does. Placed last so it also wins over the
+		// focus-visible reset when opened via keyboard.
 		&.opened {
 			@apply text-brand-primary-alt;
 			@apply bg-brand-subtle-30;
@@ -562,10 +566,27 @@ a.as-button {
 	}
 
 	// LINK
+	// Text links and link-style icons (copy) answer with colour only: a text link does not
+	// shrink, and an icon one already presses through `.icon`. Pressed shows the hover colour,
+	// so a tap on a touch screen, which never hovers, still shows.
 	&.link {
 		@apply p-0;
 		@apply bg-transparent;
 		@apply text-brand-primary-alt;
+
+		transition:
+			color 0.15s ease-out,
+			scale 0.15s ease-out;
+
+		&:not([disabled]):not(.disabled):not(.loading) {
+			@include interaction.hover {
+				@apply text-brand-hover;
+			}
+
+			&:active {
+				@apply text-brand-hover;
+			}
+		}
 
 		&.disabled,
 		&[disabled] {
@@ -589,7 +610,13 @@ a.as-button {
 	@apply font-medium;
 	@apply leading-5;
 
-	transition: all 0.25s ease-out;
+	// Border too: dropdowns such as MultiSelectDropdown and ModalFilterButton change it on hover.
+	transition:
+		color 0.15s ease-out,
+		background 0.15s ease-out,
+		border-color 0.15s ease-out,
+		opacity 0.15s ease-out,
+		scale 0.15s ease-out;
 
 	&::placeholder {
 		@apply text-tertiary;

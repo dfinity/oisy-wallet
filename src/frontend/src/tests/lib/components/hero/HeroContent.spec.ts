@@ -1,7 +1,9 @@
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import HeroContent from '$lib/components/hero/HeroContent.svelte';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import { RECEIVE_TOKENS_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 import * as networkDerived from '$lib/derived/network.derived';
+import * as pageTokenDerived from '$lib/derived/page-token.derived';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSnippet, mockSnippetTestId } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
@@ -128,6 +130,26 @@ describe('HeroContent', () => {
 
 			expect(getByTestId(mockSnippetTestId)).toBeInTheDocument();
 			expect(queryByTestId(RECEIVE_TOKENS_MODAL_OPEN_BUTTON)).not.toBeInTheDocument();
+		});
+	});
+
+	// The global highlight is a light OISY blue tint, which disappears on the coloured heroes.
+	describe('selection highlight', () => {
+		it('turns selected text into a white block with blue text on a coloured hero', () => {
+			const hero = renderHero();
+
+			expect(hero.classList.contains('selection:bg-white')).toBeTruthy();
+			expect(hero.classList.contains('selection:text-brand-primary')).toBeTruthy();
+		});
+
+		it('keeps the global highlight on the light ICP hero', () => {
+			vi.spyOn(pageTokenDerived, 'pageToken', 'get').mockReturnValue(readable(ICP_TOKEN));
+
+			const hero = renderHero();
+
+			expect(hero.classList.contains('bg-icp-token-hero-gradient')).toBeTruthy();
+			expect(hero.classList.contains('selection:bg-white')).toBeFalsy();
+			expect(hero.classList.contains('selection:text-brand-primary')).toBeFalsy();
 		});
 	});
 });

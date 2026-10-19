@@ -1348,6 +1348,8 @@
 			"swap_fees": "Opłaty za wymianę",
 			"cross_chain_networks_info": "Przenosisz tokeny z sieci <b>$sourceNetwork</b> do sieci <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -2758,10 +2760,13 @@
 			"starting_to_repay": "Wysyłanie twojej spłaty…",
 			"repay_started": "Twoja spłata jest teraz przetwarzana.",
 			"current_debt": "Bieżący dług",
+			"pending_repays": "Spłaty w toku",
 			"interest_accrued": "Naliczone odsetki",
 			"debt_after_repay": "Dług po spłacie",
 			"repay_exceeds_debt": "Kwota przekracza twój zaległy dług.",
-			"repay_prices_unavailable": "Ceny są tymczasowo niedostępne. Spłacanie jest wyłączone do czasu ich wczytania."
+			"repay_prices_unavailable": "Ceny są tymczasowo niedostępne. Spłacanie jest wyłączone do czasu ich wczytania.",
+			"repay_debt_unavailable": "Twój zaległy dług jest tymczasowo niedostępny. Spłacanie jest wyłączone do czasu jego wczytania.",
+			"repay_pending_covers_debt": "Spłata tej pozycji jest nadal przetwarzana. Możesz spłacić więcej, gdy się zakończy."
 		},
 		"info": {
 			"title": "Czym jest Liquidium",

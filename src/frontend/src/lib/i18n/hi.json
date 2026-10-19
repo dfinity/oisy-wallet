@@ -1348,6 +1348,8 @@
 			"swap_fees": "स्वैप शुल्क",
 			"cross_chain_networks_info": "आप टोकन <b>$sourceNetwork</b> से <b>$destinationNetwork</b> नेटवर्क पर ले जाते हैं",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -2758,10 +2760,13 @@
 			"starting_to_repay": "आपकी चुकौती सबमिट की जा रही है…",
 			"repay_started": "आपकी चुकौती अब प्रोसेस हो रही है।",
 			"current_debt": "मौजूदा कर्ज",
+			"pending_repays": "प्रोसेस हो रही चुकौतियां",
 			"interest_accrued": "अर्जित ब्याज",
 			"debt_after_repay": "चुकौती के बाद कर्ज",
 			"repay_exceeds_debt": "राशि आपके बकाया कर्ज से अधिक है।",
-			"repay_prices_unavailable": "कीमतें अस्थायी रूप से अनुपलब्ध हैं। लोड होने तक चुकौती अक्षम है।"
+			"repay_prices_unavailable": "कीमतें अस्थायी रूप से अनुपलब्ध हैं। लोड होने तक चुकौती अक्षम है।",
+			"repay_debt_unavailable": "आपका बकाया कर्ज अस्थायी रूप से अनुपलब्ध है। लोड होने तक चुकौती अक्षम है।",
+			"repay_pending_covers_debt": "इस पोजीशन की एक चुकौती अभी प्रोसेस हो रही है। इसके पूरा होने के बाद आप और चुका सकते हैं।"
 		},
 		"info": {
 			"title": "Liquidium क्या है",
