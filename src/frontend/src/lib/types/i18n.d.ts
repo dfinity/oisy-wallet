@@ -1594,13 +1594,18 @@ interface I18nExtension {
 		connect: string;
 	};
 	panel: {
-		tokens: string;
-		connected_sites: string;
+		menu: string;
+		this_site_connected: string;
+		this_site_not_connected: string;
+		connected_sites_count: string;
 		no_sites: string;
 		disconnect: string;
 		disconnect_site: string;
+		disconnect_all: string;
 		chain_eth: string;
 		chain_sol: string;
+		balances: string;
+		all_tokens: string;
 		open_oisy: string;
 	};
 }

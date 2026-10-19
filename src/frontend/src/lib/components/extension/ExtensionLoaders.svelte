@@ -8,6 +8,7 @@
 	import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import SolLoaderWallets from '$sol/components/core/SolLoaderWallets.svelte';
 
 	interface Props {
 		children: Snippet;
@@ -26,6 +27,8 @@
 		<LoaderTokens />
 
 		<LoaderEthBalances />
+
+		<SolLoaderWallets />
 
 		<MultipleListeners tokens={$enabledFungibleNetworkTokens} />
 

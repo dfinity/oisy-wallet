@@ -2,6 +2,9 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
+	import { SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+	import { SOLANA_DEVNET_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+	import ExtensionPanelHeader from '$lib/components/extension/ExtensionPanelHeader.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -16,6 +19,7 @@
 	import { enabledFungibleNetworkTokensUi } from '$lib/derived/network-tokens-ui.derived';
 	import { connectExtension } from '$lib/providers/extension.providers';
 	import { ExtensionPanelStateMessageSchema } from '$lib/schema/extension.schema';
+	import { signOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type {
 		ExtensionOutgoingMessage,
@@ -119,7 +123,13 @@
 
 		const stored = extensionState.account;
 
-		if (stored?.eth === account.eth && stored?.sol === account.sol) {
+		// Signing in again after logging out from the panel hands the same account back, which unlocks
+		// the extension.
+		if (
+			stored?.eth === account.eth &&
+			stored?.sol === account.sol &&
+			extensionState.locked !== true
+		) {
 			return;
 		}
 
@@ -149,66 +159,137 @@
 			}))
 	);
 
+	let activeOrigin = $derived(extensionState?.activeOrigin ?? undefined);
+
+	let thisSite = $derived(
+		nonNullish(activeOrigin)
+			? (sites.find(({ origin }) => origin === activeOrigin) ?? {
+					origin: activeOrigin,
+					host: hostOf(activeOrigin),
+					chains: undefined
+				})
+			: undefined
+	);
+
+	// Sites only ever see the Sepolia and Solana devnet addresses, so those are the balances that matter
+	// here; the rest is one click away in OISY.
+	let tokens = $derived(
+		$enabledFungibleNetworkTokensUi.filter(
+			({ id }) => id === SEPOLIA_TOKEN_ID || id === SOLANA_DEVNET_TOKEN_ID
+		)
+	);
+
 	const disconnect = (origin: string) => send({ type: 'revoke-site', origin });
+
+	const disconnectAll = () => send({ type: 'revoke-all-sites' });
+
+	// The panel shares OISY's session, so logging out here logs out OISY tabs too. The extension is
+	// locked first, so sites lose the account even if the reload that follows is quick.
+	const logOut = async () => {
+		send({ type: 'lock' });
+		await signOut({ source: 'extension-panel' });
+	};
 </script>
 
-<div class="flex w-full flex-col gap-8">
+{#snippet disconnectButton({ origin, host }: { origin: string; host: string })}
+	<Button
+		ariaLabel={replacePlaceholders($i18n.extension.panel.disconnect_site, { $origin: host })}
+		inlineLink
+		link
+		onclick={() => disconnect(origin)}
+		styleClass="shrink-0 text-sm"
+		type="button"
+	>
+		{$i18n.extension.panel.disconnect}
+	</Button>
+{/snippet}
+
+<div class="flex w-full flex-col gap-6">
 	{#if !reachable}
 		<MessageBox level="error">{$i18n.extension.text.no_extension}</MessageBox>
 	{:else if nonNullish(versionStatus) && versionStatus !== 'supported'}
 		<MessageBox level="warning">{$i18n.extension.text.outdated}</MessageBox>
 	{:else}
+		<ExtensionPanelHeader
+			address={$extensionAccount?.eth}
+			onDisconnectAll={disconnectAll}
+			onLogOut={logOut}
+		/>
+
 		{#if !$extensionNetworksOn}
 			<MessageBox level="warning">{$i18n.extension.text.networks_off}</MessageBox>
 		{/if}
 
+		{#if nonNullish(thisSite)}
+			{@const { origin, host, chains } = thisSite}
+			{@const connected = nonNullish(chains)}
+
+			<section
+				class="flex items-center justify-between gap-3 rounded-lg px-4 py-3"
+				class:bg-brand-subtle-20={!connected}
+				class:bg-success-subtle-20={connected}
+				data-tid="extension-this-site"
+			>
+				<div class="min-w-0">
+					<p class="truncate font-bold" title={origin}>{host}</p>
+					<p
+						class="text-sm"
+						class:text-success-primary={connected}
+						class:text-tertiary={!connected}
+					>
+						{connected
+							? replacePlaceholders($i18n.extension.panel.this_site_connected, { $chains: chains })
+							: $i18n.extension.panel.this_site_not_connected}
+					</p>
+				</div>
+
+				{#if connected}
+					{@render disconnectButton({ origin, host })}
+				{/if}
+			</section>
+		{/if}
+
 		<section class="flex flex-col gap-2">
-			<h2 class="text-lg font-bold">{$i18n.extension.panel.tokens}</h2>
-
-			<div class="flex flex-col">
-				{#each $enabledFungibleNetworkTokensUi as token (token.id)}
-					<TokenCard data={token} />
-				{/each}
-			</div>
-		</section>
-
-		<section class="flex flex-col gap-3">
-			<h2 class="text-lg font-bold">{$i18n.extension.panel.connected_sites}</h2>
+			<h2 class="text-base font-bold">
+				{replacePlaceholders($i18n.extension.panel.connected_sites_count, {
+					$count: `${sites.length}`
+				})}
+			</h2>
 
 			{#if sites.length === 0}
 				<p class="text-sm text-tertiary">{$i18n.extension.panel.no_sites}</p>
 			{:else}
-				<ul class="flex list-none flex-col gap-2">
+				<ul class="flex list-none flex-col">
 					{#each sites as { origin, host, chains } (origin)}
 						<li
-							class="flex items-center justify-between gap-3 rounded-lg bg-brand-subtle-20 px-4 py-3"
+							class="flex items-center justify-between gap-3 border-b border-secondary py-2 last:border-b-0"
 						>
 							<div class="min-w-0">
-								<p class="truncate font-bold" title={origin}>{host}</p>
-								<p class="text-sm text-tertiary">{chains}</p>
+								<p class="truncate text-sm font-bold" title={origin}>{host}</p>
+								<p class="text-xs text-tertiary">{chains}</p>
 							</div>
 
-							<Button
-								ariaLabel={replacePlaceholders($i18n.extension.panel.disconnect_site, {
-									$origin: host
-								})}
-								colorStyle="secondary-light"
-								onclick={() => disconnect(origin)}
-								paddingSmall
-								type="button"
-							>
-								{$i18n.extension.panel.disconnect}
-							</Button>
+							{@render disconnectButton({ origin, host })}
 						</li>
 					{/each}
 				</ul>
 			{/if}
 		</section>
 
-		<div class="flex justify-center">
-			<ExternalLink ariaLabel={$i18n.extension.panel.open_oisy} href={page.url.origin}>
-				{$i18n.extension.panel.open_oisy}
-			</ExternalLink>
-		</div>
+		<section class="flex flex-col gap-2">
+			<h2 class="text-base font-bold">{$i18n.extension.panel.balances}</h2>
+
+			<div class="flex flex-col">
+				{#each tokens as token (token.id)}
+					<TokenCard data={token} />
+				{/each}
+			</div>
+
+			<div class="flex justify-center">
+				<ExternalLink ariaLabel={$i18n.extension.panel.all_tokens} href={page.url.origin}>
+					{$i18n.extension.panel.all_tokens}
+				</ExternalLink>
+			</div>
+		</section>
 	{/if}
 </div>

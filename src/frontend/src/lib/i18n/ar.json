@@ -1916,13 +1916,18 @@
 			"connect": ""
 		},
 		"panel": {
-			"tokens": "",
-			"connected_sites": "",
+			"menu": "",
+			"this_site_connected": "",
+			"this_site_not_connected": "",
+			"connected_sites_count": "",
 			"no_sites": "",
 			"disconnect": "",
 			"disconnect_site": "",
+			"disconnect_all": "",
 			"chain_eth": "",
 			"chain_sol": "",
+			"balances": "",
+			"all_tokens": "",
 			"open_oisy": ""
 		}
 	},

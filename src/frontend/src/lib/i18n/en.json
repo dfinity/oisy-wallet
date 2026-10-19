@@ -1916,13 +1916,18 @@
 			"connect": "Connect"
 		},
 		"panel": {
-			"tokens": "Tokens",
-			"connected_sites": "Connected sites",
+			"menu": "Extension menu",
+			"this_site_connected": "Connected · $chains",
+			"this_site_not_connected": "Not connected",
+			"connected_sites_count": "Connected sites · $count",
 			"no_sites": "No sites connected yet. Connect OISY from a dapp to see it here.",
 			"disconnect": "Disconnect",
 			"disconnect_site": "Disconnect $origin",
+			"disconnect_all": "Disconnect all sites",
 			"chain_eth": "Ethereum",
 			"chain_sol": "Solana",
+			"balances": "Balances sites can use",
+			"all_tokens": "All your tokens in OISY",
 			"open_oisy": "Open OISY"
 		}
 	},
