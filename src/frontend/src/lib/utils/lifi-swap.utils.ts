@@ -13,6 +13,7 @@ import type { Network, NetworkId } from '$lib/types/network';
 import {
 	SwapProvider,
 	type EvmQuoteParams,
+	type GetSupportedDestinationsFn,
 	type NearIntentsQuoteParams,
 	type SwapMappedResult
 } from '$lib/types/swap';
@@ -51,6 +52,31 @@ export const toLifiTokenAddress = (token: Token): string | undefined => {
 
 	return isTokenSolanaNative(token) ? SYSTEM_PROGRAM_ADDRESS : undefined;
 };
+
+/**
+ * The `getSupportedDestinations` of a LI.FI registry entry. LI.FI keeps no token list — any token on
+ * a chain it serves may have a route, and a pair without one simply gets no quote — so an entry
+ * answers with a wildcard for the category it quotes into.
+ *
+ * The routing sends a pair to the Solana registry whenever either side is Solana, so the EVM entry
+ * quotes EVM → EVM (`{ evm: 'any' }`) and the Solana entry EVM → Solana (`{ sol: 'any' }`). A Solana
+ * source gets nothing from either until the Solana swap wizard can execute a LI.FI quote.
+ */
+export const buildLifiSupportedDestinations =
+	(registry: 'evm' | 'sol'): GetSupportedDestinationsFn =>
+	({ sourceToken }) => {
+		// The same tests the quote request applies, so no destination is offered for a source LI.FI
+		// is never asked about.
+		if (
+			!isNetworkEthereum(sourceToken.network) ||
+			isNullish(toLifiChainId(sourceToken.network)) ||
+			isNullish(toLifiTokenAddress(sourceToken))
+		) {
+			return;
+		}
+
+		return registry === 'evm' ? { evm: 'any' } : { sol: 'any' };
+	};
 
 /**
  * The quote request for a swap form's inputs, or `undefined` when LI.FI is not asked: an unsupported
@@ -257,6 +283,32 @@ export const assertLifiQuote = ({
 	if (parseAmount(value ?? '0x0') !== expectedValue) {
 		throw rejected('value differs from the request');
 	}
+};
+
+/**
+ * The quote's fees in USD — LI.FI's own 0.25 % and whatever the route's tools charge — for display
+ * only, as the fees already taken out of the receive amount. `undefined` when the quote lists none,
+ * lists one without a readable USD amount (a partial sum would understate what the swap costs), or
+ * lists one charged on top of the amount sent (`included: false`): added in, the total would match
+ * neither what is deducted nor what is extra. The value trust check refuses the routes that charge a
+ * native fee on top, so none is expected; a bridge admitted with one needs its own row.
+ */
+export const lifiFeesUsd = ({ estimate: { feeCosts } }: LiFiStep): number | undefined => {
+	if (isNullish(feeCosts) || feeCosts.length === 0) {
+		return;
+	}
+
+	if (feeCosts.some(({ included }) => !included)) {
+		return;
+	}
+
+	// A plain decimal only: `Number` reads a blank string as zero, which would let a missing amount
+	// pass as a free fee.
+	if (!feeCosts.every(({ amountUSD }) => /^\d+(\.\d+)?$/.test(amountUSD))) {
+		return;
+	}
+
+	return feeCosts.reduce((sum, { amountUSD }) => sum + Number(amountUSD), 0);
 };
 
 export const mapLifiSwapResult = (quote: LiFiStep): SwapMappedResult => ({
