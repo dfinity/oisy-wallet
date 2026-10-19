@@ -38,7 +38,7 @@ import {
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
-import { ChainId, type LiFiStep } from '@lifi/sdk';
+import { ChainId, type CrossStep, type LiFiStep, type SwapStep } from '@lifi/sdk';
 
 describe('lifi-swap.utils', () => {
 	const baseParams = {
@@ -432,6 +432,48 @@ describe('lifi-swap.utils', () => {
 					sourceNetworkId: BASE_NETWORK_ID
 				})
 			).toThrow(LifiQuoteRejectedError);
+		});
+
+		describe('route tools', () => {
+			// One branch per step type, so that each literal narrows to its own member of `Step`.
+			const withStep = (
+				step: Pick<SwapStep, 'type' | 'tool'> | Pick<CrossStep, 'type' | 'tool'>
+			): LiFiStep => ({
+				...mockLifiQuote,
+				includedSteps: [
+					step.type === 'swap' ? { ...mockLifiQuote, ...step } : { ...mockLifiQuote, ...step }
+				]
+			});
+
+			it('should accept a swap through an exchange that is not denied', () => {
+				expect(() => assertQuote(withStep({ type: 'swap', tool: 'nordstern' }))).not.toThrow();
+			});
+
+			it('should refuse a swap through a denied exchange', () => {
+				expect(() =>
+					assertLifiQuote({
+						quote: withStep({ type: 'swap', tool: 'nordstern' }),
+						request: { ...request, denyExchanges: ['nordstern'] },
+						sourceNetworkId: BASE_NETWORK_ID
+					})
+				).toThrow(LifiQuoteRejectedError);
+			});
+
+			it('should refuse a bridge the request did not allow', () => {
+				expect(() => assertQuote(withStep({ type: 'cross', tool: 'relay' }))).toThrow(
+					LifiQuoteRejectedError
+				);
+			});
+
+			it('should accept a bridge the request allowed', () => {
+				expect(() =>
+					assertLifiQuote({
+						quote: withStep({ type: 'cross', tool: 'across' }),
+						request: { ...request, allowBridges: ['across'] },
+						sourceNetworkId: BASE_NETWORK_ID
+					})
+				).not.toThrow();
+			});
 		});
 
 		it('should compare a Solana recipient exactly', () => {

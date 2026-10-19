@@ -86,7 +86,8 @@ export enum PLAUSIBLE_EVENT_TRANSACTION_SEND_ERROR_TYPES {
 	OUT_OF_GAS = 'out_of_gas'
 }
 
-// Why an offer that arrived was left out of the swap form.
+// Why a provider's offer is missing from the swap form: the request failed, or the offer that
+// arrived was left out.
 export enum PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES {
 	// A 1Click quote for an XRP deposit came with a deposit memo.
 	DEPOSIT_MEMO = 'deposit_memo',
@@ -97,6 +98,8 @@ export enum PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES {
 	// The quote failed OISY's own checks — a target, spender or echoed request that differs from
 	// what was asked — so it was never shown.
 	QUOTE_REJECTED = 'quote_rejected',
+	// The quote request was aborted after the provider's timeout.
+	TIMEOUT = 'timeout',
 	// Any other failure of the quote request.
 	REQUEST_FAILED = 'request_failed'
 }

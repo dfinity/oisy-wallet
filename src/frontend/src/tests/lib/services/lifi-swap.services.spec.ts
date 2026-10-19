@@ -21,6 +21,7 @@ import {
 } from '$tests/mocks/lifi.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
+import { nonNullish } from '@dfinity/utils';
 import { HTTPError, SDKError, type QuoteRequestFromAmount } from '@lifi/sdk';
 
 vi.mock('$env/rest/lifi.env', async (importOriginal) => ({
@@ -247,9 +248,17 @@ describe('lifi-swap.services', () => {
 			it.each([
 				{ status: 404, type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE },
 				{ status: 422, type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE },
-				{ status: 429, type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.RATE_LIMITED },
-				{ status: 500, type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.REQUEST_FAILED }
-			])('should report an HTTP $status as $type', async ({ status, type }) => {
+				{
+					status: 429,
+					type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.RATE_LIMITED,
+					severity: PLAUSIBLE_EVENT_SEVERITIES.WARN
+				},
+				{
+					status: 500,
+					type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.REQUEST_FAILED,
+					severity: PLAUSIBLE_EVENT_SEVERITIES.WARN
+				}
+			])('should report an HTTP $status as $type', async ({ status, type, severity }) => {
 				vi.mocked(fetchLifiQuote).mockRejectedValue(httpFailure(status));
 
 				await expect(fetchLifiSwapQuote(params)).resolves.toBeUndefined();
@@ -260,7 +269,8 @@ describe('lifi-swap.services', () => {
 						...baseMetadata,
 						result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 						result_error_type: type,
-						result_error_code: String(status)
+						result_error_code: String(status),
+						...(nonNullish(severity) && { event_severity: severity })
 					}
 				});
 			});
@@ -275,7 +285,29 @@ describe('lifi-swap.services', () => {
 					metadata: {
 						...baseMetadata,
 						result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
-						result_error_type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.REQUEST_FAILED
+						result_error_type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.REQUEST_FAILED,
+						event_severity: PLAUSIBLE_EVENT_SEVERITIES.WARN
+					}
+				});
+			});
+
+			it('should report a request aborted by the timeout', async () => {
+				// The SDK wraps the abort of `AbortSignal.timeout` as it does any error.
+				vi.mocked(fetchLifiQuote).mockRejectedValue(
+					Object.assign(httpFailure(500), {
+						cause: new DOMException('signal timed out', 'TimeoutError')
+					})
+				);
+
+				await expect(fetchLifiSwapQuote(params)).resolves.toBeUndefined();
+
+				expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+					name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+					metadata: {
+						...baseMetadata,
+						result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+						result_error_type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.TIMEOUT,
+						event_severity: PLAUSIBLE_EVENT_SEVERITIES.WARN
 					}
 				});
 			});

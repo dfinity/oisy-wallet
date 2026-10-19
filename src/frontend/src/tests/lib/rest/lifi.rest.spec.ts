@@ -63,4 +63,22 @@ describe('lifi.rest', () => {
 
 		timeout.mockRestore();
 	});
+
+	it('should reject rather than throw when the client cannot be created', async () => {
+		// A fresh module graph, since the client above is already cached.
+		vi.resetModules();
+
+		const sdk = await import('@lifi/sdk');
+
+		vi.mocked(sdk.createClient).mockImplementation(() => {
+			throw new Error('no integrator');
+		});
+
+		const rest = await import('$lib/rest/lifi.rest');
+
+		// Called outside `expect`, so that a synchronous throw fails the test.
+		const result = rest.fetchLifiQuote(request);
+
+		await expect(result).rejects.toThrow('no integrator');
+	});
 });
