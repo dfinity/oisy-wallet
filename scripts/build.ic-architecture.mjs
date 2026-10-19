@@ -1,17 +1,13 @@
 #!/usr/bin/env node
 
-import { notEmptyString } from '@dfinity/utils';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { ENV, IS_SIGNER_BUILD } from './build.utils.mjs';
 import OISY_DOMAINS from './domains.json' with { type: 'json' };
-
-const network = process.env.DFX_NETWORK ?? process.env.NETWORK;
 
 // Signer builds also target `ic`, but they are served by their own canisters and domains, which
 // this manifest does not describe.
-const IS_SIGNER_BUILD = notEmptyString(process.env.OISY_SIGNER_TARGET);
-
-if (network !== 'ic' || IS_SIGNER_BUILD) {
+if (ENV !== 'production' || IS_SIGNER_BUILD) {
 	process.exit(0);
 }
 
