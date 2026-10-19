@@ -1,13 +1,19 @@
 import {
+	LIFI_ACROSS_MULTIPLIER_BASE,
 	LIFI_ACROSS_V4_ABI,
+	LIFI_ACROSS_WRAPPED_NATIVE,
 	LIFI_APPROVE_TO_ONLY_SELECTOR,
+	LIFI_FEE_BPS,
+	LIFI_FEE_FORWARDER_ABI,
 	LIFI_GENERIC_SWAP_ABI,
 	LIFI_NEAR_INTENTS_ABI,
+	LIFI_NEAR_INTENTS_NATIVE_ASSET,
 	LIFI_NON_EVM_ADDRESS
 } from '$eth/constants/lifi.constants';
 import type { EthAddress } from '$eth/types/address';
-import { ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
+import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { LifiQuoteRejectedError } from '$lib/types/errors';
+import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { ChainId, type LiFiStep, type QuoteRequestFromAmount } from '@lifi/sdk';
 import { getAddressEncoder, type Address } from '@solana/kit';
@@ -48,12 +54,7 @@ export interface LifiWhitelistedCall {
 // selector, so a selector outside them is refused before anything is decoded.
 const genericSwapFacet = new Interface(LIFI_GENERIC_SWAP_ABI);
 
-// By LI.FI tool key. A bridge the request allows but which has no facet here is refused: its
-// receiver could not be bound.
-const bridgeFacets: Record<string, Interface> = {
-	across: new Interface(LIFI_ACROSS_V4_ABI),
-	near: new Interface(LIFI_NEAR_INTENTS_ABI)
-};
+const feeForwarder = new Interface(LIFI_FEE_FORWARDER_ABI);
 
 const rejected = (reason: string): LifiQuoteRejectedError =>
 	new LifiQuoteRejectedError(`LI.FI calldata rejected: ${reason}`);
@@ -111,8 +112,42 @@ const solanaAddressToBytes32 = (address: string): string => {
 	try {
 		return hexlify(Uint8Array.from(getAddressEncoder().encode(address as Address)));
 	} catch (_: unknown) {
-		throw rejected('the Solana recipient is not a Solana address');
+		throw rejected('a Solana address of the request is not one');
 	}
+};
+
+/**
+ * What a swap forwards as LI.FI's fee, or `undefined` if it does not call the fee forwarding. The
+ * whitelist admits the forwarder by contract and selector only, while its arguments say who is paid
+ * and how much of the deposit leaves: so the fee must be the source token, passed through untouched,
+ * and its distributions are summed for the cap on LI.FI's fee.
+ */
+const forwardedFee = ({
+	step: { callData, sendingAssetId, receivingAssetId },
+	sourceToken
+}: {
+	step: LifiSwapStep;
+	sourceToken: string;
+}): bigint | undefined => {
+	if (isNullish(feeForwarder.getFunction(callData.slice(0, 10)))) {
+		return undefined;
+	}
+
+	const { name, args } = parseCall({ facet: feeForwarder, data: callData });
+	const token = name === 'forwardERC20Fees' ? args[0] : ZERO_ETH_ADDRESS;
+
+	if (
+		![sendingAssetId, receivingAssetId, token].every((asset) =>
+			isSameHex({ actual: asset, expected: sourceToken })
+		)
+	) {
+		throw rejected("LI.FI's fee is not taken in the source token");
+	}
+
+	return (args.at(-1) as Result[]).reduce<bigint>(
+		(total, [, amount]: Result) => total + (amount as bigint),
+		ZERO
+	);
 };
 
 /**
@@ -126,6 +161,9 @@ const solanaAddressToBytes32 = (address: string): string => {
  * the returned calls are confirmed against before signing. An `approveTo` other than `callTo` is
  * looked up under `APPROVE_TO_ONLY_SELECTOR`, as `SwapperV2` does, except for a native sending
  * asset, which is not approved.
+ *
+ * The one call whose arguments are bound is LI.FI's fee forwarding: together, the route may forward
+ * no more than LI.FI's fee. Where `dexSwaps` is `false`, it is the only call allowed.
  */
 const bindSwapSteps = ({
 	steps,
@@ -133,7 +171,8 @@ const bindSwapSteps = ({
 	amount,
 	diamond,
 	routeAssets,
-	userTokenAddresses
+	userTokenAddresses,
+	dexSwaps
 }: {
 	steps: LifiSwapStep[];
 	sourceToken: string;
@@ -141,6 +180,7 @@ const bindSwapSteps = ({
 	diamond: EthAddress;
 	routeAssets: string[];
 	userTokenAddresses: string[];
+	dexSwaps: boolean;
 }): LifiWhitelistedCall[] => {
 	const [deposit, ...later] = steps;
 
@@ -174,7 +214,11 @@ const bindSwapSteps = ({
 	const addCall = (call: LifiWhitelistedCall) =>
 		calls.set(`${call.contract.toLowerCase()}:${call.selector.toLowerCase()}`, call);
 
-	for (const { callTo, approveTo, callData, sendingAssetId } of steps) {
+	let fees = ZERO;
+
+	for (const step of steps) {
+		const { callTo, approveTo, callData, sendingAssetId } = step;
+
 		if (
 			forbiddenTargets.has(callTo.toLowerCase()) ||
 			forbiddenTargets.has(approveTo.toLowerCase())
@@ -186,6 +230,14 @@ const bindSwapSteps = ({
 			throw rejected('a swap makes no call');
 		}
 
+		const fee = forwardedFee({ step, sourceToken });
+
+		if (isNullish(fee) && !dexSwaps) {
+			throw rejected('a DEX swap precedes a bridge that cannot bound its output');
+		}
+
+		fees += fee ?? ZERO;
+
 		addCall({ contract: callTo, selector: callData.slice(0, 10) });
 
 		if (
@@ -196,30 +248,130 @@ const bindSwapSteps = ({
 		}
 	}
 
+	// LI.FI rounds its fee down, so a single unit more is refused too.
+	if (fees * 10_000n > amount * LIFI_FEE_BPS) {
+		throw rejected("the fees forwarded exceed LI.FI's fee");
+	}
+
 	return [...calls.values()];
 };
 
-// Where each curated bridge pays and refunds: its own data, which is what the bridge consumes, not
-// `bridgeData.receiver` alone.
-const bridgeReceiversAreTheUser: Record<
-	string,
-	(params: {
-		facetData: Record<string, string>;
-		receiver: string;
-		refund: string;
+const isNativeToken = ({ token, toNonEvm }: { token: string; toNonEvm: boolean }): boolean =>
+	toNonEvm
+		? token === SYSTEM_PROGRAM_ADDRESS
+		: isSameHex({ actual: token, expected: ZERO_ETH_ADDRESS });
+
+// A token or address as a bridge's own data names it: 32 bytes, an EVM address left-padded, a Solana
+// one as its key.
+const toBytes32 = ({ address, toNonEvm }: { address: string; toNonEvm: boolean }): string =>
+	toNonEvm ? solanaAddressToBytes32(address) : evmAddressToBytes32(address);
+
+/**
+ * What a bridge's own data commits it to, which is what the bridge consumes: `bridgeData` alone does
+ * not say whom it pays, in which token, or at least how much. Addresses and assets as 32 bytes.
+ */
+interface LifiBridgeTerms {
+	// The address the bridge pays, or `undefined` where it pays `bridgeData.receiver` instead.
+	receiver?: string;
+	refund: string;
+	// The token the bridge sends, where its data names it apart from `bridgeData.sendingAssetId`.
+	sendingAsset?: string;
+	receivingAsset: string;
+	minimumOutput: bigint;
+}
+
+interface LifiBridge {
+	facet: Interface;
+	// Whether a DEX swap may precede the bridge, rather than LI.FI's fee forwarding alone.
+	dexSwaps: boolean;
+	terms: (params: {
+		facetData: Result;
+		bridgeData: LifiBridgeData;
+		withSourceSwaps: boolean;
 		toNonEvm: boolean;
-	}) => boolean
-> = {
-	// `AcrossV4Data` starts with the receiver the relayer pays, then the address a refund goes to.
-	across: ({ facetData: { receiverAddress, refundAddress }, receiver, refund }) =>
-		isSameHex({ actual: receiverAddress, expected: receiver }) &&
-		isSameHex({ actual: refundAddress, expected: evmAddressToBytes32(refund) }),
-	// `NEARIntentsData.nonEVMReceiver` is the receiver of a non-EVM route only: for an EVM one the
-	// facet signs over `bridgeData.receiver` and does not read it. Leftovers and refunds go to
-	// `refundRecipient`.
-	near: ({ facetData: { nonEVMReceiver, refundRecipient }, receiver, refund, toNonEvm }) =>
-		(!toNonEvm || isSameHex({ actual: nonEVMReceiver, expected: receiver })) &&
-		isSameHex({ actual: refundRecipient, expected: refund })
+	}) => LifiBridgeTerms;
+	// The requested token as the bridge's data names it, or `undefined` if the bridge cannot pay it.
+	receivingAsset: (params: {
+		toToken: string;
+		toChain: number;
+		toNonEvm: boolean;
+	}) => string | undefined;
+}
+
+// The curated bridges, by LI.FI tool key. A bridge the request allows but which has no entry here is
+// refused: what it pays, and to whom, could not be bound.
+const bridges: Record<string, LifiBridge> = {
+	across: {
+		facet: new Interface(LIFI_ACROSS_V4_ABI),
+		// Across's minimum output is unsigned: after source swaps, the facet pays at least `minAmount`
+		// times `outputAmountMultiplier`, both from the response. A DEX swap's recipient is in calldata
+		// the binding does not decode, so a response could send the swap's output elsewhere, lower
+		// `minAmount` to what is left and raise the multiplier to keep the product above the displayed
+		// minimum: no relayer would fill it, and only what is left would be refunded. Behind LI.FI's fee
+		// forwarding alone, the bridge sends the deposit less the bound fee, and a wrong multiplier can
+		// at worst leave it unfilled and refunded to the user.
+		dexSwaps: false,
+		terms: ({ facetData, bridgeData, withSourceSwaps }) => {
+			const {
+				receiverAddress,
+				refundAddress,
+				sendingAssetId,
+				receivingAssetId,
+				outputAmount,
+				outputAmountMultiplier
+			} = facetData.toObject();
+
+			return {
+				receiver: receiverAddress,
+				refund: refundAddress,
+				// A native token is sent as the facet's own wrapped native, whatever this says.
+				sendingAsset: isSameHex({ actual: bridgeData.sendingAssetId, expected: ZERO_ETH_ADDRESS })
+					? undefined
+					: sendingAssetId,
+				receivingAsset: receivingAssetId,
+				// After source swaps, the facet replaces `outputAmount` with what the swaps produce times
+				// the multiplier, and `SwapperV2` reverts unless they produce at least `minAmount`.
+				minimumOutput: withSourceSwaps
+					? (bridgeData.minAmount * outputAmountMultiplier) / LIFI_ACROSS_MULTIPLIER_BASE
+					: outputAmount
+			};
+		},
+		// A native coin is paid out as its wrapped native, which the SpokePool unwraps; there is none
+		// for native SOL.
+		receivingAsset: ({ toToken, toChain, toNonEvm }) => {
+			if (!isNativeToken({ token: toToken, toNonEvm })) {
+				return toBytes32({ address: toToken, toNonEvm });
+			}
+
+			const wrappedNative = toNonEvm ? undefined : LIFI_ACROSS_WRAPPED_NATIVE[toChain];
+
+			return nonNullish(wrappedNative) ? evmAddressToBytes32(wrappedNative) : undefined;
+		}
+	},
+	near: {
+		facet: new Interface(LIFI_NEAR_INTENTS_ABI),
+		// LI.FI's backend signs `minAmountOut` together with `minAmount`, so a payload paying at least
+		// the displayed minimum carries the `minAmount` LI.FI priced for it, and `SwapperV2` reverts
+		// unless the swaps before the bridge produce that much.
+		dexSwaps: true,
+		terms: ({ facetData, toNonEvm }) => {
+			const { nonEVMReceiver, refundRecipient, destinationAsset, minAmountOut } =
+				facetData.toObject();
+
+			return {
+				// For an EVM destination the facet signs over `bridgeData.receiver` and does not read this.
+				receiver: toNonEvm ? nonEVMReceiver : undefined,
+				// Leftovers and refunds.
+				refund: evmAddressToBytes32(refundRecipient),
+				receivingAsset: destinationAsset,
+				minimumOutput: minAmountOut
+			};
+		},
+		receivingAsset: ({ toToken, toNonEvm }) =>
+			isNativeToken({ token: toToken, toNonEvm })
+				? evmAddressToBytes32(LIFI_NEAR_INTENTS_NATIVE_ASSET)
+				: toBytes32({ address: toToken, toNonEvm })
+	}
 };
 
 /**
@@ -234,6 +386,11 @@ const bridgeReceiversAreTheUser: Record<
  * no destination call, the requested destination chain, the source token and amount
  * as input, and the user as receiver and refund address both in `bridgeData` and in the bridge's
  * own data (a Solana destination's receiver as its 32-byte key, behind LI.FI's non-EVM sentinel).
+ * The bridge's own data must also send the bridged token and pay out the destination token, at
+ * least `displayedToAmountMin` of it.
+ *
+ * On every route, LI.FI's fee forwarding may forward no more than LI.FI's fee. Before Across, it is
+ * the only swap allowed.
  *
  * Returns the swap calls that the Diamond's whitelist must still confirm.
  */
@@ -289,27 +446,27 @@ export const assertLifiCalldata = ({
 			amount,
 			diamond,
 			routeAssets: [fromToken, toToken],
-			userTokenAddresses
+			userTokenAddresses,
+			dexSwaps: true
 		});
 	}
 
 	const selector = data.slice(0, 10).toLowerCase();
 	const tool = request.allowBridges?.find((key) =>
-		nonNullish(bridgeFacets[key]?.getFunction(selector))
+		nonNullish(bridges[key]?.facet.getFunction(selector))
 	);
-	const facet = nonNullish(tool) ? bridgeFacets[tool] : undefined;
-	const receiversAreTheUser = nonNullish(tool) ? bridgeReceiversAreTheUser[tool] : undefined;
+	const bridge = nonNullish(tool) ? bridges[tool] : undefined;
 
-	if (isNullish(tool) || isNullish(facet) || isNullish(receiversAreTheUser)) {
+	if (isNullish(bridge)) {
 		throw rejected('a cross-chain route calls a function of no bridge the request allowed');
 	}
 
-	const { name, args } = parseCall({ facet, data });
+	const { name, args } = parseCall({ facet: bridge.facet, data });
 	const withSourceSwaps = name.startsWith('swapAndStart');
 
 	const bridgeData = toBridgeData(args[0]);
 	const steps = withSourceSwaps ? (args[1] as Result[]).map(toSwapStep) : [];
-	const facetData = (args[withSourceSwaps ? 2 : 1] as Result).toObject();
+	const facetData = args[withSourceSwaps ? 2 : 1] as Result;
 
 	if (bridgeData.hasDestinationCall) {
 		throw rejected('the route makes a destination call');
@@ -342,15 +499,50 @@ export const assertLifiCalldata = ({
 		throw rejected('the bridge data does not pay the user');
 	}
 
+	// `SwapperV2` floors the last swap's output at `minAmount`, while the facet sends
+	// `bridgeData.sendingAssetId`: if they differed, the bridge would send the Diamond's own balance
+	// of another token and leave the user's behind.
 	if (
-		!receiversAreTheUser({
-			facetData,
-			receiver: toNonEvm ? solanaAddressToBytes32(toAddress) : evmAddressToBytes32(toAddress),
-			refund: fromAddress,
-			toNonEvm
-		})
+		withSourceSwaps &&
+		!isSameHex({ actual: steps.at(-1)?.receivingAssetId, expected: bridgeData.sendingAssetId })
+	) {
+		throw rejected('the bridge does not send what the swaps before it produce');
+	}
+
+	const terms = bridge.terms({ facetData, bridgeData, withSourceSwaps, toNonEvm });
+
+	if (
+		(nonNullish(terms.receiver) &&
+			!isSameHex({
+				actual: terms.receiver,
+				expected: toBytes32({ address: toAddress, toNonEvm })
+			})) ||
+		!isSameHex({ actual: terms.refund, expected: evmAddressToBytes32(fromAddress) })
 	) {
 		throw rejected("the bridge's own data does not pay or refund the user");
+	}
+
+	if (
+		nonNullish(terms.sendingAsset) &&
+		!isSameHex({
+			actual: terms.sendingAsset,
+			expected: evmAddressToBytes32(bridgeData.sendingAssetId)
+		})
+	) {
+		throw rejected("the bridge's own data sends another token than the bridged one");
+	}
+
+	const receivingAsset = bridge.receivingAsset({ toToken, toChain: Number(toChain), toNonEvm });
+
+	if (
+		isNullish(receivingAsset) ||
+		!isSameHex({ actual: terms.receivingAsset, expected: receivingAsset })
+	) {
+		throw rejected('the bridge does not pay out the destination token');
+	}
+
+	if (terms.minimumOutput < displayedToAmountMin) {
+		throw rejected("the bridge's minimum output is below the one displayed");
 	}
 
 	return withSourceSwaps
@@ -360,7 +552,8 @@ export const assertLifiCalldata = ({
 				amount,
 				diamond,
 				routeAssets: [fromToken, bridgeData.sendingAssetId],
-				userTokenAddresses
+				userTokenAddresses,
+				dexSwaps: bridge.dexSwaps
 			})
 		: [];
 };
