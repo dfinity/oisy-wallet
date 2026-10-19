@@ -1128,8 +1128,8 @@ Each tick, per pending LI.FI row:
      (`lib/utils/velora-active-tx.utils.ts`). It is **extracted** into a
      provider-agnostic EVM source-tx helper (receipt + nonce → outcome, with the
      two-observation counter keyed per row) that both pollers call. Velora's behaviour
-     and existing tests stay unchanged; the refactor lands in the same PR as the LI.FI
-     EVM poller.
+     and existing tests stay unchanged; the refactor landed on its own, ahead of the
+     LI.FI EVM poller (2b-1, see [Delivery plan](#delivery-plan)).
    - Solana — new, since nothing in the repo reads signature statuses or blockhash
      validity yet:
      1. `getSignatureStatuses([signature], { searchTransactionHistory: true })`. The
@@ -1154,7 +1154,12 @@ Each tick, per pending LI.FI row:
 2. **Then `getStatus({ txHash, fromChain, toChain, bridge })`**, with `fromChain` /
    `toChain` derived from the row's `source_token` / `dest_token` (see
    [External refs](#external-refs-lifi_external_ref_keys-libtypeslifits)) and `bridge` from
-   `lifi_tool`. Two answers are not status objects and are normalised first:
+   `lifi_tool`. LI.FI is asked only once the source is confirmed: before that the source
+   chain decides, and `/status` could only answer `NOT_FOUND`. The poller remembers a
+   confirmed source in memory, so after a reload the receipt is read once more. Each request
+   times out after `LIFI_STATUS_TIMEOUT_MS` (10 s): the loader awaits each provider's poller
+   in turn, so a stalled `/status` would stall every other provider's rows. Two answers are
+   not status objects and are normalised first:
    - A **`NOT_FOUND` can arrive as an HTTP 404** (LI.FI error code `1003`) rather than as a
      `200` with `status: 'NOT_FOUND'`; the docs say to handle both. The SDK throws an
      `HTTPError` for the 404, so the poller catches that specific error (status 404, or
@@ -1173,7 +1178,7 @@ Each tick, per pending LI.FI row:
 | `PENDING` (any substatus) | `Executing`                                                           |
 | `DONE` / `COMPLETED`      | `Succeeded`                                                           |
 | `DONE` / `PARTIAL`        | `Succeeded`; `lifi_received_symbol` / `lifi_received_amount` recorded |
-| `DONE` / `REFUNDED`       | `Failed` with the "refunded" error (`swap.error.lifi_refunded`)       |
+| `DONE` / `REFUNDED`       | `Failed` with the "refunded" error (`swap.error.swap_refunded`)       |
 | `FAILED`                  | `Failed` with `substatusMessage`, byte-truncated (see below)          |
 
 `PARTIAL` is a success because the user received full value, only in a different token
@@ -1269,14 +1274,25 @@ Learned refs are merged on every poll. Errors are caught per row, except the `/s
 404 described above, which is an answer rather than a failure. Polls are throttled
 per row inside the poller to LI.FI's recommended cadence — every 10 s for the first
 minute after creation, every 30 s until 10 minutes, then every 60 s — on top of the
-loader's 5 s tick.
+loader's 5 s tick. The last-poll times and the confirmed-source flags are kept in memory.
+Each poll drops them, and the unresolved windows in `localStorage`, for every row no longer
+in the pending set the loader passes, wherever it settled: here, in another tab or on
+another device. That state is LI.FI's alone, unlike the replacement observations of the
+shared EVM source-tx helper, which a provider must not prune to its own rows.
 
 #### Loader and UI
 
 - `LoaderActiveUserTransactions.svelte`: a `tick` branch calling the LI.FI poller with
-  `$ethAddress` / `$solAddressMainnet` (the loader imports only `ethAddress` today; add
-  `solAddressMainnet` from `lib/derived/address.derived.ts`), and a terminal-status branch firing
-  `TRACK_COUNT_SWAP_SUCCESS` / `_ERROR` with `buildLifiSwapTrackingMetadata`.
+  `$ethAddress` (PR 3 adds `$solAddressMainnet` from `lib/derived/address.derived.ts` with
+  the Solana source check; until then a Solana-source row is skipped, and OISY opens none),
+  and a terminal-status branch firing `TRACK_COUNT_SWAP_SUCCESS` / `_ERROR` with
+  `buildLifiSwapTrackingMetadata`. That metadata carries no `error`, unlike the other
+  providers': for a `FAILED` transfer the row's error is LI.FI's own text, which never goes
+  to analytics (invariant 4 in `docs/ai/frontend/analytics.md`).
+- The tick creates one `confirmedNonceByChainId` and passes it to both the Velora and the
+  LI.FI pollers, so EVM rows on one chain cost one nonce read whatever their provider. They
+  run one after another, so LI.FI may reuse a nonce read before its own receipt read; an
+  earlier read can only be lower, which reads as still pending, never as replaced.
 - That terminal branch refreshes balances for **every** terminal LI.FI row, not only
   `Succeeded`: the modal closed at broadcast, so nothing else refreshes them when the
   route settles, and a failed, reverted or refunded swap still spent gas or returned
@@ -1293,15 +1309,17 @@ loader's 5 s tick.
     or a later refund stays stale until the periodic poll. The row stores backend
     `TokenId`s, and only the forward mapping exists (`toBackendTokenId`,
     `lib/utils/token-id.utils.ts`), so the tokens are resolved by finding the enabled
-    token whose `toBackendTokenId` equals the row's `source_token` / `dest_token`; an
-    unresolved token (disabled since the swap) is skipped.
+    token whose `toBackendTokenId` equals the row's `source_token` / `dest_token`
+    (`findTokenByBackendTokenId`, compared through `tokenIdKey`); an unresolved token
+    (disabled since the swap, or an ERC-4626 vault, which `tokenIdKey` does not key) is
+    skipped.
   - Redundant refreshes (dropped or expired source) only find nothing new.
 - `ActiveUserTransactionItem.svelte`: `isLifi` in the `isSwap` list and the
   `providerName` chain; when `lifi_received_symbol` is present, the received token and
   amount replace the destination token in the row.
 - **Failure reasons are stored, not displayed**, as for Velora and NEAR Intents: a
   `Failed` row shows the existing warning icon, and `tx.error` (refunded, outcome
-  unknown, LI.FI's `substatusMessage`) is kept on the row for support and analytics. No
+  unknown, LI.FI's `substatusMessage`) is kept on the row for support. No
   toast, no new row layout, no explorer link. Surfacing errors for all swap providers
   is a separate, cross-provider change.
 - Wizard tracks `TRACK_COUNT_SWAP_SUBMITTED` (it is an active-transaction swap).
@@ -1315,10 +1333,12 @@ loader's 5 s tick.
 - `SwapDetailsLifi.svelte` in the provider sheet: estimated duration, LI.FI's 0.25 %
   fee (from `feeCosts`), the route tool name and minimum received.
 - i18n keys in `en.json` + the other locales + `i18n.d.ts`: at least
-  `swap.text.lifi_route_via`, `swap.error.lifi_refunded`, `swap.error.lifi_status_unknown`,
-  `swap.error.lifi_fee_changed`,
-  `swap.text.lifi_received_other_token`; optionally
-  `help.text.explorers_lifi_description` for a help-page explorer entry.
+  `swap.text.lifi_route_via`, `swap.error.lifi_status_unknown`,
+  `swap.error.lifi_fee_changed`; optionally
+  `help.text.explorers_lifi_description` for a help-page explorer entry. A refund reuses
+  `swap.error.swap_refunded`, the copy Velora and NEAR Intents already write, and a route
+  that paid out in another token needs no copy of its own: the row shows the received
+  amount and symbol in place of the destination token.
 
 ## Delivery plan
 
@@ -1332,7 +1352,13 @@ loader's 5 s tick.
 | 4    | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 3, production key + rate-limit scope confirmed |
 
 PR 2 is split up front so each PR stays reviewable, and 2a again into the quote client
-(2a-1) and its registration in the swap fan-out (2a-2). In 2a the flag is `false` everywhere,
+(2a-1) and its registration in the swap fan-out (2a-2). 2b is split five ways: the EVM
+source-tx helper extraction (2b-1) and the byte-safe truncation util (2b-2), both
+refactors on `main`; the tracking — LI.FI's AUT utils, poller, loader branches and row
+item (2b-3); the calldata binding (2b-4); and execution, the wizard dispatch, the flag to
+`(LOCAL || STAGING) && !TEST` and `PRODUCT.md` (2b-5). Tracking lands before execution:
+with the flag off nothing opens a LI.FI row, so the poller has nothing to do until 2b-5,
+and rows are tracked from the first swap. In 2a the flag is `false` everywhere,
 local included: 2a registers quotes but the wizard has no LI.FI dispatch yet, so a
 selected offer would hit `SwapEthWizard`'s unknown-provider branch. 2a is exercised by
 unit tests that switch the flag on (the `vi.doMock` pattern of `near-intents.env`), and
