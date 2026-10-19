@@ -11,7 +11,7 @@ import {
 	buildLifiSwapTrackingMetadata,
 	isLifiActiveUserTransaction,
 	isLifiStatusUnresolved,
-	isLifiUnresolvedWindow,
+	isLifiStoredUnresolvedWindow,
 	lifiChainIdOfTokenId,
 	lifiSourceOutcomeToUpdate,
 	lifiStatusPollIntervalMillis,
@@ -328,21 +328,22 @@ describe('lifi-active-tx.utils', () => {
 		});
 	});
 
-	describe('isLifiUnresolvedWindow', () => {
-		it('should accept a window', () => {
-			expect(isLifiUnresolvedWindow({ elapsedMs: 0, lastSeenAt: 1 })).toBeTruthy();
+	describe('isLifiStoredUnresolvedWindow', () => {
+		it('should accept a stored window', () => {
+			expect(isLifiStoredUnresolvedWindow({ elapsedMs: 0 })).toBeTruthy();
+			expect(isLifiStoredUnresolvedWindow({ elapsedMs: 60_000, lastSeenAt: 1 })).toBeTruthy();
 		});
 
 		it.each([
 			{ case: 'null', value: null },
 			{ case: 'a string', value: 'window' },
-			{ case: 'a missing field', value: { elapsedMs: 0 } },
-			{ case: 'a negative elapsed time', value: { elapsedMs: -1, lastSeenAt: 1 } },
-			{ case: 'a NaN elapsed time', value: { elapsedMs: Number.NaN, lastSeenAt: 1 } },
-			{ case: 'an infinite timestamp', value: { elapsedMs: 0, lastSeenAt: Infinity } },
-			{ case: 'a string timestamp', value: { elapsedMs: 0, lastSeenAt: '1' } }
+			{ case: 'a missing elapsed time', value: { lastSeenAt: 1 } },
+			{ case: 'a negative elapsed time', value: { elapsedMs: -1 } },
+			{ case: 'a NaN elapsed time', value: { elapsedMs: Number.NaN } },
+			{ case: 'an infinite elapsed time', value: { elapsedMs: Infinity } },
+			{ case: 'a string elapsed time', value: { elapsedMs: '1' } }
 		])('should refuse $case', ({ value }) => {
-			expect(isLifiUnresolvedWindow(value)).toBeFalsy();
+			expect(isLifiStoredUnresolvedWindow(value)).toBeFalsy();
 		});
 	});
 
@@ -352,6 +353,13 @@ describe('lifi-active-tx.utils', () => {
 		it('should open the window at zero', () => {
 			expect(nextLifiUnresolvedWindow({ window: undefined, now })).toEqual({
 				elapsedMs: 0,
+				lastSeenAt: now
+			});
+		});
+
+		it('should resume a stored window without adding to it', () => {
+			expect(nextLifiUnresolvedWindow({ window: { elapsedMs: 5_000 }, now })).toEqual({
+				elapsedMs: 5_000,
 				lastSeenAt: now
 			});
 		});

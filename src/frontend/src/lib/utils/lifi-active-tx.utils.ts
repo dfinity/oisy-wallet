@@ -236,48 +236,51 @@ export const toLifiLearnedRefs = ({
 };
 
 /**
- * Observed time during which `/status` stayed unresolved after the row's source was confirmed, as
- * the browser saw it. Kept per row in `localStorage`, so that a reload does not restart it.
+ * Observed time during which `/status` stayed unresolved after the row's source was confirmed.
+ * `lastSeenAt` is a reading of the page's monotonic clock (`performance.now()`), which a change of
+ * the system clock does not move; it means nothing in another session.
  */
 export interface LifiUnresolvedWindow {
 	elapsedMs: number;
 	lastSeenAt: number;
 }
 
-// The window is read back from `localStorage`, which anything on the origin can write.
-export const isLifiUnresolvedWindow = (value: unknown): value is LifiUnresolvedWindow => {
+// What `localStorage` keeps across reloads: the elapsed time alone.
+export type LifiStoredUnresolvedWindow = Pick<LifiUnresolvedWindow, 'elapsedMs'>;
+
+// The stored window is read back from `localStorage`, which anything on the origin can write.
+export const isLifiStoredUnresolvedWindow = (
+	value: unknown
+): value is LifiStoredUnresolvedWindow => {
 	if (typeof value !== 'object' || value === null) {
 		return false;
 	}
 
-	const { elapsedMs, lastSeenAt } = value as Partial<Record<keyof LifiUnresolvedWindow, unknown>>;
+	const { elapsedMs } = value as Partial<Record<keyof LifiStoredUnresolvedWindow, unknown>>;
 
-	return (
-		typeof elapsedMs === 'number' &&
-		Number.isFinite(elapsedMs) &&
-		elapsedMs >= 0 &&
-		typeof lastSeenAt === 'number' &&
-		Number.isFinite(lastSeenAt)
-	);
+	return typeof elapsedMs === 'number' && Number.isFinite(elapsedMs) && elapsedMs >= 0;
 };
 
 /**
- * The window after one more poll that sees `/status` unresolved with the source confirmed. The first
- * one opens it at zero; each later one adds the time since the previous, clamped to
- * `[0, LIFI_STATUS_UNRESOLVED_MAX_STEP_MILLIS]`. Accumulated rather than `now − start`, so that a
- * clock jump, or a tab left closed, can only delay the verdict, never hasten it.
+ * The window after one more poll that sees `/status` unresolved with the source confirmed, `now`
+ * read off the monotonic clock. The first poll opens it at zero, and the first after a reload
+ * resumes the stored time without adding to it; each later one adds the time since the previous,
+ * at most `LIFI_STATUS_UNRESOLVED_MAX_STEP_MILLIS`. A change of the system clock adds nothing, and
+ * a tab left closed or hidden at most one step, so neither can hasten the verdict.
  */
 export const nextLifiUnresolvedWindow = ({
 	window,
 	now
 }: {
-	window: LifiUnresolvedWindow | undefined;
+	window: LifiUnresolvedWindow | LifiStoredUnresolvedWindow | undefined;
 	now: number;
 }): LifiUnresolvedWindow => ({
 	elapsedMs: isNullish(window)
 		? 0
 		: window.elapsedMs +
-			Math.min(Math.max(now - window.lastSeenAt, 0), LIFI_STATUS_UNRESOLVED_MAX_STEP_MILLIS),
+			('lastSeenAt' in window
+				? Math.min(Math.max(now - window.lastSeenAt, 0), LIFI_STATUS_UNRESOLVED_MAX_STEP_MILLIS)
+				: 0),
 	lastSeenAt: now
 });
 

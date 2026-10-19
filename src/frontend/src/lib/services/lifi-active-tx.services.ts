@@ -5,6 +5,7 @@ import type {
 import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import { nativeTokenOf } from '$eth/services/native-balance.services';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
+import type { EthereumNetwork } from '$eth/types/network';
 import { LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS } from '$lib/constants/swap.constants';
 import { fetchLifiStatus } from '$lib/rest/lifi.rest';
 import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
@@ -19,7 +20,7 @@ import {
 import { consoleError } from '$lib/utils/console.utils';
 import {
 	isLifiStatusUnresolved,
-	isLifiUnresolvedWindow,
+	isLifiStoredUnresolvedWindow,
 	lifiChainIdOfTokenId,
 	lifiSourceOutcomeToUpdate,
 	lifiStatusPollIntervalMillis,
@@ -30,6 +31,7 @@ import {
 	toLifiStatusUpdate,
 	type LifiStatusAnswer,
 	type LifiStatusUpdate,
+	type LifiStoredUnresolvedWindow,
 	type LifiUnresolvedWindow
 } from '$lib/utils/lifi-active-tx.utils';
 import {
@@ -96,7 +98,9 @@ const forgetSettledRows = (pendingIds: Set<string>) => {
 // The session's own window first: should a write fail (a full storage), every poll would otherwise
 // start over from the same stale stored window, and the bound would never be reached. The stored
 // window only resumes it after a reload.
-const readUnresolvedWindow = (rowId: string): LifiUnresolvedWindow | undefined => {
+const readUnresolvedWindow = (
+	rowId: string
+): LifiUnresolvedWindow | LifiStoredUnresolvedWindow | undefined => {
 	const inMemory = unresolvedWindows.get(rowId);
 
 	if (nonNullish(inMemory)) {
@@ -105,7 +109,7 @@ const readUnresolvedWindow = (rowId: string): LifiUnresolvedWindow | undefined =
 
 	const stored = getStorage<unknown>({ key: unresolvedWindowKey(rowId) });
 
-	return isLifiUnresolvedWindow(stored) ? stored : undefined;
+	return isLifiStoredUnresolvedWindow(stored) ? { elapsedMs: stored.elapsedMs } : undefined;
 };
 
 const writeUnresolvedWindow = ({
@@ -116,7 +120,10 @@ const writeUnresolvedWindow = ({
 	window: LifiUnresolvedWindow;
 }) => {
 	unresolvedWindows.set(rowId, window);
-	setStorage({ key: unresolvedWindowKey(rowId), value: window });
+	setStorage<LifiStoredUnresolvedWindow>({
+		key: unresolvedWindowKey(rowId),
+		value: { elapsedMs: window.elapsedMs }
+	});
 };
 
 const clearUnresolvedWindow = (rowId: string) => {
@@ -135,11 +142,14 @@ const forgetRow = (rowId: string) => {
  * `LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS`; then the row fails as "outcome unknown", not as lost
  * funds. Only reached once the source is confirmed: before that, an unresolved `/status` is
  * expected, and the source chain decides.
+ *
+ * Measured on the monotonic clock, not `Date.now()`: the verdict is irreversible, and a forward
+ * correction of the system clock must not bring it any closer.
  */
 const observeUnresolvedStatus = (rowId: string): LifiStatusUpdate | undefined => {
 	const window = nextLifiUnresolvedWindow({
 		window: readUnresolvedWindow(rowId),
-		now: Date.now()
+		now: performance.now()
 	});
 
 	writeUnresolvedWindow({ rowId, window });
@@ -217,11 +227,17 @@ const applyUpdate = async ({
 		(key) => refs[key] !== learned[key]
 	);
 
+	// New refs go out with a status, the one this poll read when it does not advance. The backend
+	// only checks a transition when a status is supplied, and replaces the refs wholesale: without
+	// it, a write based on a stale read could strip the refs another tab wrote as it settled the row.
+	// With it, that write is refused as an illegal transition.
+	const status = next ?? (hasNewRefs ? tx.status : undefined);
+
 	await applyActiveUserTransactionPollUpdate({
 		identity,
 		tx,
 		update: {
-			...(nonNullish(next) ? { status: next } : {}),
+			...(nonNullish(status) ? { status } : {}),
 			...(nonNullish(next) && 'Failed' in next && nonNullish(update?.error)
 				? { error: update.error }
 				: {}),
@@ -439,7 +455,8 @@ const isEvmToken = ({ network: { id } }: Token): boolean =>
 /**
  * Reloads the EVM balances a terminal LI.FI row may have moved: the source token and its network's
  * native token (gas, and where a refund may land) whatever the outcome, and the destination token
- * when it is on an EVM network. No wallet worker refreshes EVM balances, and the swap modal closed
+ * when it is on an EVM network, or after a partial payout every enabled token of the destination
+ * chain. No wallet worker refreshes EVM balances, and the swap modal closed
  * at broadcast, so nothing else does when the route settles. A token no longer enabled is skipped.
  *
  * Best effort and not awaited: a balance that fails to reload is what the periodic poll resolves.
@@ -457,13 +474,30 @@ export const reloadLifiEvmBalances = ({
 
 	const sourceToken = findTokenByBackendTokenId({ tokenId: tx.data.Lifi.source_token, tokens });
 	const destinationToken = findTokenByBackendTokenId({ tokenId: tx.data.Lifi.dest_token, tokens });
+	const destinationChainId = lifiChainIdOfTokenId(tx.data.Lifi.dest_token);
+
+	// A partial payout came in a token other than the one asked for, which the row does not
+	// identify, so every enabled token of the destination chain is reloaded.
+	const isPartialPayout = nonNullish(
+		toLifiExternalRefsMap(tx.external_refs)[LIFI_EXTERNAL_REF_KEYS.RECEIVED_SYMBOL]
+	);
+
+	const payoutTokens =
+		isPartialPayout && nonNullish(destinationChainId)
+			? tokens.filter(
+					(token) =>
+						isEvmToken(token) &&
+						(token.network as EthereumNetwork).chainId === BigInt(destinationChainId)
+				)
+			: [];
 
 	const evmTokens = new Map<Token['id'], Token>();
 
 	for (const token of [
 		sourceToken,
 		nonNullish(sourceToken) ? nativeTokenOf(sourceToken.network.id) : undefined,
-		destinationToken
+		destinationToken,
+		...payoutTokens
 	]) {
 		if (nonNullish(token) && isEvmToken(token)) {
 			evmTokens.set(token.id, token);

@@ -1201,24 +1201,28 @@ to say, so a `/status` that never resolves would leave the row non-terminal fore
   `fromChain` and `toChain` only (no `bridge`), in case the stored `lifi_tool` is what
   LI.FI rejects, and maps that answer instead.
 - The bound starts only **after the source transaction is confirmed** and is measured
-  on the **browser's clock only**. The first time a poll sees the row's source confirmed
-  and the latest `/status` answer (after the `INVALID` re-query) still `NOT_FOUND` /
-  `INVALID`, the poller starts accumulating **observed unresolved time** for that row in
-  `localStorage` (key `lifi-unresolved:<rowId>`, value `{ elapsedMs, lastSeenAt }`,
-  through the existing `get` / `set` / `del` in `lib/utils/storage.utils.ts`). Each
-  later poll that still sees the source confirmed and an unresolved answer adds
-  `clamp(Date.now() − lastSeenAt, 0, LIFI_STATUS_UNRESOLVED_MAX_STEP_MILLIS)` to
+  on the **page's monotonic clock** (`performance.now()`), which a change of the system
+  clock does not move. The first time a poll sees the row's source confirmed and the
+  latest `/status` answer (after the `INVALID` re-query) still `NOT_FOUND` / `INVALID`,
+  the poller starts accumulating **observed unresolved time** for that row: in memory as
+  `{ elapsedMs, lastSeenAt }`, and in `localStorage` as `{ elapsedMs }` (key
+  `lifi-unresolved:<rowId>`, through the existing `get` / `set` / `del` in
+  `lib/utils/storage.utils.ts`). Each later poll of the session that still sees the
+  source confirmed and an unresolved answer adds
+  `clamp(performance.now() − lastSeenAt, 0, LIFI_STATUS_UNRESOLVED_MAX_STEP_MILLIS)` to
   `elapsedMs` and updates `lastSeenAt`; the step cap is 2 min (twice the slowest
-  per-row poll interval). Any other answer, or a terminal status, deletes the entry.
+  per-row poll interval). The first poll after a reload resumes the stored `elapsedMs`
+  and adds nothing: a monotonic reading means nothing in another session. Any other
+  answer, or a terminal status, deletes the entry.
   When `elapsedMs ≥ LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS` (6 h) and the latest answer
   is still unresolved, the row ends `Failed` with `swap.error.lifi_status_unknown`
   ("LI.FI could not report the outcome of this swap. Check your destination wallet."),
   not a claim that the funds were lost.
-  - Accumulated, not `now − start`: a manual clock change or forward NTP correction can
-    add at most one capped step, and a backward jump adds nothing, so a clock jump
-    cannot hasten the irreversible verdict. Time the tab was closed or hidden is not
-    counted beyond one step, which only delays it.
-  - Browser clock against browser clock: never the row's `created_at_ns`, which is the
+  - Monotonic and accumulated, not `Date.now() − start`: a manual clock change or an
+    NTP correction, forward or back, adds nothing, so a clock jump cannot hasten the
+    irreversible verdict, not even by one step. Time the tab was hidden is not counted
+    beyond one step, and time it was closed not at all, which only delays it.
+  - The browser's own clock only: never the row's `created_at_ns`, which is the
     canister's clock, so clock skew does not move the window (the concern behind OISY
     Trade's tick counting, `lib/constants/oisy-trade.constants.ts`).
   - Persisted, so reloads do not restart the window. It is kept client-side rather than
@@ -1272,7 +1276,12 @@ A value that fails is **omitted** from the refs instead of failing creation. Wit
 `lifi_tool`, the poller calls `/status` without `bridge` from the start (the same query as
 the `INVALID` fallback).
 
-Learned refs are merged on every poll. Errors are caught per row, except the `/status`
+Learned refs are merged on every poll. A write that carries new refs without advancing the
+status sends the status the poll read, unchanged: the backend checks a transition only when
+a status is supplied, and replaces `external_refs` wholesale, so a refs-only write based on
+a stale read could strip the received token another tab recorded as it settled the row.
+With the status, that write is an illegal transition and the backend refuses it whole.
+Errors are caught per row, except the `/status`
 404 described above, which is an answer rather than a failure. Polls are throttled
 per row inside the poller to LI.FI's recommended cadence — every 10 s for the first
 minute after creation, every 30 s until 10 minutes, then every 60 s — on top of the
@@ -1310,7 +1319,9 @@ prune to its own rows.
   - An explicit EVM reload with `reloadEthereumBalance` (`eth/services/eth-balance.services.ts`)
     for each affected EVM token: the source token and its network's native token (gas,
     `nativeTokenOf`) on every terminal status, since a refund can also land there, and the
-    destination token when it is on an EVM network. `swap()` only reloads the source
+    destination token when it is on an EVM network. After a partial payout (the row holds
+    `lifi_received_symbol`), the token received is not one the row identifies, so every
+    enabled token of the destination chain is reloaded instead. `swap()` only reloads the source
     token once the source transaction is mined, so without this an EVM destination payout
     or a later refund stays stale until the periodic poll. The row stores backend
     `TokenId`s, and only the forward mapping exists (`toBackendTokenId`,
@@ -1482,15 +1493,16 @@ everywhere.
     panel labelled "LI.FI", and it reaches `Succeeded` / `Failed` in the background,
     including after a page reload. Every terminal LI.FI row triggers one wallet
     refresh and an explicit reload of its EVM source, gas and (EVM) destination
-    balances.
+    balances; after a partial payout, of every enabled token of the destination chain.
 13. `DONE/PARTIAL` ends `Succeeded` and the row shows the token actually received, with
     its amount correctly formatted; `DONE/REFUNDED` ends `Failed` with the refunded copy.
 14. A reverted / dropped (EVM) or reverted / expired (Solana) source transaction ends
     `Failed`; a `NOT_FOUND` / `INVALID` status alone never terminates a row before the
     source is confirmed and the 6 h unresolved-status bound has passed, after which the
     row ends `Failed` with the "outcome unknown" copy. That bound starts after source
-    confirmation, accumulates observed time in capped per-poll steps (persisted in
-    `localStorage`, so a clock jump cannot hasten it), and never compares against
+    confirmation, accumulates observed time on the page's monotonic clock in capped
+    per-poll steps (persisted in `localStorage` across reloads; a clock jump cannot
+    hasten it), and never compares against
     `created_at_ns`. A `/status` HTTP 404 (code 1003) counts as `NOT_FOUND`, never as a
     swallowed error. A Solana row is marked expired
     only after two consecutive polls each find no signature status (searching

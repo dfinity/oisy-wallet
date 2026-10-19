@@ -285,6 +285,24 @@ describe('lifi-active-tx.services', () => {
 			expect(refs[LIFI_EXTERNAL_REF_KEYS.RECEIVED_AMOUNT]).toBe('49.875');
 		});
 
+		it('sends the status it read with refs that do not advance it, so that a stale write is refused', async () => {
+			vi.mocked(fetchLifiStatus).mockResolvedValue({
+				status: 'PENDING',
+				receiving: { txHash: solanaSignature, chainId: ChainId.SOL }
+			} as StatusResponse);
+
+			await poll([{ ...buildTx(), status: { Executing: null } }]);
+
+			const update = lastUpdate();
+
+			// Should another tab have settled the row meanwhile, `Executing` is an illegal transition
+			// and the backend refuses the whole write, rather than replacing the settled row's refs.
+			expect(update?.status).toEqual({ Executing: null });
+			expect(
+				toLifiExternalRefsMap(update?.externalRefs ?? [])[LIFI_EXTERNAL_REF_KEYS.DEST_TX_HASH]
+			).toBe(solanaSignature);
+		});
+
 		it('fails a refunded transfer with the refunded copy', async () => {
 			vi.mocked(fetchLifiStatus).mockResolvedValue({
 				status: 'DONE',
@@ -394,24 +412,34 @@ describe('lifi-active-tx.services', () => {
 		it('opens a window, without settling the row', async () => {
 			await poll([buildTx()]);
 
-			expect(storedWindow()).toEqual({ elapsedMs: 0, lastSeenAt: now });
+			expect(storedWindow()).toEqual({ elapsedMs: 0 });
 			expect(lastUpdate()).toEqual({});
 		});
 
-		it('adds the time since the last poll', async () => {
-			storeWindow({ elapsedMs: 60_000, lastSeenAt: now - 30_000 });
+		it('adds the time between the polls of a session', async () => {
+			await poll([buildTx()]);
+			await vi.advanceTimersByTimeAsync(60_000);
+			await poll([buildTx()]);
+
+			expect(storedWindow()).toEqual({ elapsedMs: 60_000 });
+		});
+
+		it('resumes a stored window after a reload, without adding to it', async () => {
+			storeWindow({ elapsedMs: 60_000 });
 
 			await poll([buildTx()]);
 
-			expect(storedWindow()).toEqual({ elapsedMs: 90_000, lastSeenAt: now });
+			expect(storedWindow()).toEqual({ elapsedMs: 60_000 });
 		});
 
 		it('fails the row as "outcome unknown" once the window reaches the period', async () => {
-			storeWindow({
-				elapsedMs: LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS - 30_000,
-				lastSeenAt: now - 60_000
-			});
+			storeWindow({ elapsedMs: LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS - 30_000 });
 
+			await poll([buildTx()]);
+
+			expect(lastUpdate()).toEqual({});
+
+			await vi.advanceTimersByTimeAsync(60_000);
 			await poll([buildTx()]);
 
 			expect(lastUpdate()).toEqual({
@@ -421,11 +449,26 @@ describe('lifi-active-tx.services', () => {
 			expect(localStorage.getItem(unresolvedKey(rowId))).toBeNull();
 		});
 
+		it('cannot be hastened by a forward correction of the system clock', async () => {
+			storeWindow({ elapsedMs: LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS - 90_000 });
+
+			await poll([buildTx()]);
+			await vi.advanceTimersByTimeAsync(60_000);
+
+			// The system clock jumps an hour ahead; the monotonic clock does not.
+			vi.setSystemTime(Date.now() + 60 * 60 * 1_000);
+
+			await poll([buildTx()]);
+
+			expect(storedWindow()).toEqual({ elapsedMs: LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS - 30_000 });
+			expect(lastUpdate()).toEqual({});
+		});
+
 		describe('with a full storage', () => {
 			let setItem: MockInstance<Storage['setItem']>;
 
 			beforeEach(() => {
-				storeWindow({ elapsedMs: LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS - 150_000, lastSeenAt: now });
+				storeWindow({ elapsedMs: LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS - 150_000 });
 
 				setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
 					throw new DOMException('The quota has been exceeded.', 'QuotaExceededError');
@@ -439,8 +482,7 @@ describe('lifi-active-tx.services', () => {
 			it('keeps counting in memory', async () => {
 				const tx = buildTx({ createdAt: now - 20 * 60 * 1_000 });
 
-				// Read back from the stale stored window, the four polls would add 0, 60, 120 and 120 s
-				// and stay short of the period.
+				// Resumed from the stale stored window, every poll would add nothing.
 				await poll([tx]);
 				await vi.advanceTimersByTimeAsync(60_000);
 				await poll([tx]);
@@ -459,28 +501,17 @@ describe('lifi-active-tx.services', () => {
 			});
 		});
 
-		it('cannot be hastened by a clock jump: one poll adds at most one capped step', async () => {
-			storeWindow({
-				elapsedMs: LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS - 3 * 60 * 60 * 1_000,
-				lastSeenAt: now - 10 * 60 * 60 * 1_000
-			});
-
-			await poll([buildTx()]);
-
-			expect(lastUpdate()).toEqual({});
-		});
-
 		it('ignores a stored window that is not one', async () => {
-			storeWindow({ elapsedMs: LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS * 2, lastSeenAt: 'yesterday' });
+			storeWindow({ elapsedMs: `${LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS * 2}` });
 
 			await poll([buildTx()]);
 
-			expect(storedWindow()).toEqual({ elapsedMs: 0, lastSeenAt: now });
+			expect(storedWindow()).toEqual({ elapsedMs: 0 });
 			expect(lastUpdate()).toEqual({});
 		});
 
 		it('closes the window on any other answer', async () => {
-			storeWindow({ elapsedMs: 60_000, lastSeenAt: now - 30_000 });
+			storeWindow({ elapsedMs: 60_000 });
 			vi.mocked(fetchLifiStatus).mockResolvedValue({ status: 'PENDING' } as StatusResponse);
 
 			await poll([buildTx()]);
@@ -489,7 +520,7 @@ describe('lifi-active-tx.services', () => {
 		});
 
 		it('drops the window of a row that is no longer pending', async () => {
-			storeWindow({ elapsedMs: 60_000, lastSeenAt: now - 30_000 });
+			storeWindow({ elapsedMs: 60_000 });
 
 			await poll([buildTx({ id: 'another-row' })]);
 
@@ -578,6 +609,40 @@ describe('lifi-active-tx.services', () => {
 			expect(reloadEthereumBalance).toHaveBeenCalledTimes(2);
 			expect(reloadEthereumBalance).toHaveBeenCalledWith(mockLifiBaseUsdcToken);
 			expect(reloadEthereumBalance).toHaveBeenCalledWith(BASE_ETH_TOKEN);
+		});
+
+		describe('a partial payout', () => {
+			const baseToEthereumUsdc: LifiData = {
+				source_token: { Erc20: [mockLifiBaseUsdcToken.address, 8453n] },
+				dest_token: { Erc20: ['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 1n] },
+				amount: 10n
+			};
+
+			const tokens = [mockLifiBaseUsdcToken, ETHEREUM_TOKEN];
+
+			it('reloads every enabled token of the destination chain, the one received included', () => {
+				reloadLifiEvmBalances({
+					tx: buildTx({
+						data: baseToEthereumUsdc,
+						refs: {
+							...toLifiExternalRefsMap(mockLifiActiveUserTransaction.external_refs),
+							[LIFI_EXTERNAL_REF_KEYS.RECEIVED_SYMBOL]: 'ETH',
+							[LIFI_EXTERNAL_REF_KEYS.RECEIVED_AMOUNT]: '0.01'
+						}
+					}),
+					tokens
+				});
+
+				expect(reloadEthereumBalance).toHaveBeenCalledTimes(3);
+				expect(reloadEthereumBalance).toHaveBeenCalledWith(ETHEREUM_TOKEN);
+			});
+
+			it('is not assumed without the received token on the row', () => {
+				reloadLifiEvmBalances({ tx: buildTx({ data: baseToEthereumUsdc }), tokens });
+
+				expect(reloadEthereumBalance).toHaveBeenCalledTimes(2);
+				expect(reloadEthereumBalance).not.toHaveBeenCalledWith(ETHEREUM_TOKEN);
+			});
 		});
 
 		it('reloads an ERC-4626 vault source and its gas token', () => {
