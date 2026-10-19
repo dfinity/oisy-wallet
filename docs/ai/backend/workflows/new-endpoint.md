@@ -105,7 +105,7 @@ The default for user-facing endpoints is `caller_is_registered_user`.
    - If the endpoint adds a new method family, or changes what the backend
      can do on the caller's behalf (e.g. moving assets or signing), update
      the agent-facing guide returned by `get_api_doc` in
-     [`api/api_doc.rs`](../../../../src/backend/src/api/api_doc.rs) so ICP
+     [`api/api_doc.md`](../../../../src/backend/src/api/api_doc.md) so ICP
      MCP clients are not misled.
    - If the endpoint is user-visible, mention it in the PR body's
      `# Motivation` section.
