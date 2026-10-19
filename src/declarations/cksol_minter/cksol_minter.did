@@ -1,0 +1,547 @@
+// Address of a [Solana account][account].
+//
+// This is a base-58 encoded string with at most 44 characters.
+// Example: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+//
+// [account]: https://solana.com/docs/core/accounts
+type Address = text;
+
+// Represents an account on the ckSOL ledger.
+type Account = record {
+	owner : principal;
+	subaccount : opt blob
+};
+
+// The ID of one of the ICP root keys.
+type Ed25519KeyName = variant {
+	MainnetTestKey1;
+	LocalDevelopment;
+	MainnetProdKey1
+};
+
+// Arguments for a request to the `getDepositAddress` ckSOL minter endpoint.
+type GetDepositAddressArgs = record {
+	// The principal to deposit funds to.
+	//
+	// If not set, defaults to the caller's principal.
+	// The resolved owner must be a non-anonymous principal.
+	owner : opt principal;
+	// The subaccount to deposit funds to.
+	subaccount : opt blob
+};
+
+// Ed25519 signature.
+// This is a base-58 encoded string with at most 88 characters.
+// Example: "5LrcE2f6uvydKRquEJ8xp19heGxSvqsVbcqUeFoiWbXe8JNip7ftPQNTAVPyTK7ijVdpkzmKKaAQR7MWMmujAhXD"
+type Signature = text;
+
+// A 32-byte Solana hash as a base-58 encoded string,
+// such as the nonce value stored by a durable nonce account.
+type Hash = text;
+
+// Smallest denomination of SOL, the native token on Solana,
+// i.e. 1_000_000_000 Lamports is 1 SOL
+type Lamport = nat64;
+
+// Index of a burn transaction on the ckSOL ledger.
+type LedgerBurnIndex = nat64;
+
+// Index of a mint transaction on the ckSOL ledger.
+type LedgerMintIndex = nat64;
+
+// Insufficient cycles attached by the caller to complete the call.
+type InsufficientCyclesError = record {
+	// The amount of cycles the call requires.
+	expected : nat;
+	// The amount of cycles received by the minter.
+	received : nat
+};
+
+// Arguments for a request to the `deposit_sol` endpoint.
+type DepositSolArgs = record {
+	// The principal to credit with the deposit.
+	//
+	// If not set, defaults to the caller's principal.
+	// The resolved owner must be a non-anonymous principal.
+	owner : opt principal;
+	// The subaccount to credit with the deposit.
+	subaccount : opt blob
+};
+
+// Identifies a deposit queued by the `deposit_sol` endpoint.
+//
+// A sequence number assigned when the deposit is queued.
+type DepositSolId = nat64;
+
+// The status of a deposit queued by the `deposit_sol` endpoint.
+type DepositSolStatus = variant {
+	// No deposit with this identifier was queued.
+	NotFound;
+	// The deposit address is queued for a sweep to the minter's main account.
+	Queued : record {
+		// The amount that will be swept from the deposit address.
+		sweepable_amount : Lamport
+	};
+	// A Solana transaction sweeping the deposit address to the minter's main
+	// account has been submitted but is not yet finalized.
+	Swept : record {
+		// The signature of the sweep transaction.
+		signature : Signature
+	};
+	// The sweep transaction was finalized successfully, so the deposited SOL
+	// reached the minter's main account, but the ckSOL mint has not landed yet.
+	Finalized : record {
+		// The signature of the sweep transaction.
+		signature : Signature
+	};
+	// The minter minted ckSOL for the deposit on the ledger.
+	Minted : record {
+		// The mint transaction index on the ckSOL ledger.
+		block_index : LedgerMintIndex;
+		// The minted amount: the swept amount minus the deposit's share of the
+		// transaction fee of the sweep.
+		minted_amount : Lamport
+	};
+	// The sweep transaction failed, or expired without ever being seen on chain,
+	// so no ckSOL is owed. Calling `deposit_sol` again queues a new sweep of
+	// whatever balance the deposit address still holds.
+	Dropped : record {
+		// The signature of the sweep transaction.
+		signature : Signature
+	};
+	// The minter stopped processing the deposit: either the finalized sweep's
+	// outcome did not match the plan the minter submitted it with, so the
+	// amount to credit cannot be determined safely and no ckSOL was minted, or
+	// the ckSOL mint of the credited deposit could not be completed, in which
+	// case the mint may nevertheless have landed on the ledger. This is not
+	// expected to happen and resolving it requires a minter upgrade: before
+	// minting by hand, search the ledger for a mint whose memo carries the
+	// sweep signature and the deposit id, otherwise a double mint results.
+	// Meanwhile the account stays in flight, so `deposit_sol` keeps rejecting
+	// it and a new deposit has to use a different subaccount.
+	Quarantined : record {
+		// The signature of the sweep transaction.
+		signature : Signature
+	}
+};
+
+// An error from the `deposit_sol` endpoint.
+type DepositSolError = variant {
+	// Insufficient cycles attached by the caller to complete the `deposit_sol` call.
+	InsufficientCycles : InsufficientCyclesError;
+	// The minter experiences temporary issues, try the call again later.
+	TemporarilyUnavailable : text;
+	// There is already a concurrent `deposit_sol` invocation for the same account.
+	AlreadyProcessing;
+	// The balance of the deposit address is below the minimum deposit amount.
+	//
+	// The minimum deposit amount applies to the balance of the deposit address
+	// and includes the rent exemption threshold, so a deposit of exactly the
+	// minimum is accepted.
+	ValueTooSmall : record {
+		// The balance of the deposit address.
+		balance : Lamport;
+		// The minimum deposit amount for the deposit to be queued.
+		minimum_deposit_amount : Lamport
+	};
+	// The latest deposit of the account is quarantined: its sweep was finalized,
+	// but the outcome did not match the plan the minter submitted, so the deposit
+	// could not be credited safely. The account stays rejected until a minter
+	// upgrade resolves the quarantined deposit; a new deposit has to use a
+	// different subaccount.
+	Quarantined : record {
+		// The identifier of the quarantined deposit.
+		deposit_id : DepositSolId
+	}
+};
+
+// Represents the result of a call to the `deposit_sol` endpoint.
+type DepositSolResult = variant { Ok : DepositSolId; Err : DepositSolError };
+
+// The Solana network to connect to.
+type SolanaNetwork = variant {
+	Mainnet;
+	Devnet;
+	Testnet
+};
+
+// The installation args for the ckSOL minter canister.
+//
+// *WARNING*: Backwards-compatibility is not guaranteed. Fields may be added,
+// removed, or renamed across releases.
+type InitArgs = record {
+	sol_rpc_canister_id : principal;
+	ledger_canister_id : principal;
+	master_key_name : Ed25519KeyName;
+	deposit_sol_fee : nat64;
+	minimum_withdrawal_amount : Lamport;
+	minimum_deposit_amount : Lamport;
+	withdrawal_fee : Lamport;
+	deposit_sol_required_cycles : nat64;
+	solana_network : SolanaNetwork;
+	nonce_accounts : vec text
+};
+
+// Information about the ckSOL minter canister.
+type MinterInfo = record {
+	deposit_sol_fee : nat;
+	minimum_withdrawal_amount : Lamport;
+	minimum_deposit_amount : Lamport;
+	withdrawal_fee : Lamport;
+	deposit_sol_required_cycles : nat;
+	balance : Lamport;
+	minter_address : opt text;
+	nonce_accounts : vec text
+};
+
+// The ckSOL minter service arguments.
+//
+// *WARNING*: Backwards-compatibility is not guaranteed. Fields may be added,
+// removed, or renamed across releases.
+type MinterArg = variant {
+	Upgrade : UpgradeArgs;
+	Init : InitArgs
+};
+
+// The upgrade args for the ckSOL minter canister.
+//
+// *WARNING*: Backwards-compatibility is not guaranteed. Fields may be added,
+// removed, or renamed across releases.
+type UpgradeArgs = record {
+	sol_rpc_canister_id : opt principal;
+	deposit_sol_fee : opt nat64;
+	minimum_withdrawal_amount : opt Lamport;
+	minimum_deposit_amount : opt Lamport;
+	withdrawal_fee : opt Lamport;
+	deposit_sol_required_cycles : opt nat64;
+	nonce_accounts_to_add : opt vec text
+};
+
+type WithdrawSolArgs = record {
+	// The subaccount to burn ckSOL from.
+	from_subaccount : opt blob;
+	// The amount of ckSOL in Lamports that the client wants to withdraw.
+	amount : Lamport;
+	// The address to which the ckSOL minter should deposit Solana tokens.
+	address : Address
+};
+
+type WithdrawSolOk = record {
+	// Returns the burn transaction index corresponding to the withdrawal.
+	// You can use this index to query the withdrawal status.
+	block_index : LedgerBurnIndex
+};
+
+// Arguments for a request to the `withdraw_sol_status` endpoint.
+type WithdrawSolStatusArgs = record {
+	// The burn block index returned by the `withdraw_sol` endpoint.
+	block_index : LedgerBurnIndex
+};
+
+type WithdrawSolError = variant {
+	// The minter is already processing another retrieval request for the same
+	// principal.
+	AlreadyProcessing;
+	// The withdrawal amount is too low.
+	ValueTooSmall : record {
+		// The minimum withdrawal amount.
+		minimum_withdrawal_amount : Lamport;
+		// The requested withdrawal amount.
+		withdrawal_amount : Lamport
+	};
+	// The minter failed to parse the destination address.
+	MalformedAddress : Address;
+	// The destination address is not a valid withdrawal destination.
+	// The payload contains a human-readable message explaining why the destination was rejected.
+	InvalidDestination : text;
+	// The ckSOL balance of the withdrawal account is too low.
+	InsufficientFunds : record { balance : Lamport };
+	// The minter is not approved to transfer the requested amount.
+	InsufficientAllowance : record { allowance : Lamport };
+	// The minter is overloaded, retry the request.
+	// The payload contains a human-readable message explaining what caused the unavailability.
+	TemporarilyUnavailable : text
+};
+
+// The result of a call to the `withdraw_sol` endpoint.
+type WithdrawSolResult = variant { Ok : WithdrawSolOk; Err : WithdrawSolError };
+
+// Status of a finalized transaction.
+type TxFinalizedStatus = variant {
+	// Transaction was successful.
+	Success : record {
+		transaction_id : Signature
+	};
+	// Transaction failed.
+	Failure : record {
+		transaction_id : Signature
+	}
+};
+
+// Retrieve the status of a withdrawal request.
+type WithdrawSolStatus = variant {
+	// Withdrawal request is not found.
+	NotFound;
+	// Withdrawal request is waiting to be processed.
+	Pending;
+	// Solana transaction was signed and is sent to the network.
+	TxSent : record {
+		transaction_id : Signature
+	};
+	// Solana transaction is finalized.
+	TxFinalized : TxFinalizedStatus
+};
+
+// The mint enqueued for one deposit of a `CreditedSweep` event.
+//
+// *WARNING*: This type is used exclusively by the debug `get_events` endpoint.
+// Backwards-compatibility is not guaranteed.
+type CreditedDeposit = record {
+	// The identifier of the deposit.
+	deposit_id : DepositSolId;
+	// The sweepable amount minus the deposit's share of the transaction fee of the sweep.
+	amount_to_mint : Lamport
+};
+
+// Event payload for an accepted ckSOL-to-Solana withdrawal request.
+//
+// *WARNING*: This type is used exclusively by the debug `get_events` endpoint.
+// Backwards-compatibility is not guaranteed.
+type AcceptedWithdrawalRequest = record {
+	// The ckSOL ledger account.
+	account : Account;
+	// The solana address to receive the funds.
+	solana_address : Address;
+	// The index of the ledger block that burned the ckSOL tokens.
+	burn_block_index : LedgerBurnIndex;
+	// The total amount burned from the user.
+	burned_amount : Lamport;
+	// The net amount to transfer to the user (burned_amount minus fees).
+	amount_to_transfer : Lamport
+};
+
+// A versioned Solana transaction message.
+//
+// *WARNING*: This type is used exclusively by the debug `get_events` endpoint.
+// Backwards-compatibility is not guaranteed.
+type VersionedTransactionMessage = variant {
+	// A legacy Solana transaction message, serialized with bincode.
+	Legacy : blob
+};
+
+// The key that produced one signature of a submitted Solana transaction.
+//
+// *WARNING*: This type is used exclusively by the debug `get_events` endpoint.
+// Backwards-compatibility is not guaranteed.
+type Signer = variant {
+	// The minter itself, signing with the master key that controls
+	// the minter's main address.
+	Minter;
+	// A minter-controlled account, signing with the key derived
+	// for its deposit address.
+	Account : Account
+};
+
+// The purpose of a submitted Solana transaction.
+//
+// *WARNING*: This type is used exclusively by the debug `get_events` endpoint.
+// Backwards-compatibility is not guaranteed.
+type TransactionPurpose = variant {
+	// Sweep the deposit addresses of deposits queued by `deposit_sol` into the
+	// minter's main account. The transaction uses a recent blockhash and is
+	// dropped once the blockhash expires.
+	SweepDeposit : record {
+		// The ids of the swept deposits.
+		deposit_ids : vec DepositSolId;
+		// The block height of the block whose blockhash the transaction uses.
+		block_height : nat64
+	};
+	// Withdraw SOL to users' Solana addresses. The transaction carries the
+	// nonce value of a durable nonce account instead of a recent blockhash,
+	// so it never expires.
+	Withdrawal : record {
+		// The ledger burn indices of the withdrawal requests included in this transaction.
+		burn_indices : vec LedgerBurnIndex
+	}
+};
+
+// A minter event payload.
+//
+// *WARNING*: This type is used exclusively by the debug `get_events` endpoint.
+// Backwards-compatibility is not guaranteed.
+type EventType = variant {
+	// The minter initialization event.
+	// Must be the first event in the log.
+	Init : InitArgs;
+	// The minter upgraded with the specified arguments.
+	Upgrade : UpgradeArgs;
+	// The minter accepted the withdrawal request and
+	// burned the requested amount of ckSOL.
+	// The Solana transaction was not generated yet.
+	AcceptedWithdrawalRequest : AcceptedWithdrawalRequest;
+	// Submitted a Solana transaction.
+	SubmittedTransaction : record {
+		// The signature of the Solana transaction.
+		signature : Signature;
+		// The versioned transaction message.
+		transaction : VersionedTransactionMessage;
+		// The signers in signature order (fee payer first).
+		signers : vec Signer;
+		// The purpose of this transaction, with what the minter needs to
+		// track it until it is finalized.
+		purpose : TransactionPurpose
+	};
+	// A previously submitted Solana transaction has been finalized successfully.
+	SucceededTransaction : record {
+		// The signature of the succeeded Solana transaction.
+		signature : Signature
+	};
+	// A previously submitted Solana transaction has failed.
+	FailedTransaction : record {
+		// The signature of the failed Solana transaction.
+		signature : Signature
+	};
+	// A previously submitted Solana transaction has an expired blockhash
+	// and a null on-chain status, meaning it will never be executed.
+	// The deposits of the expired sweep transaction are dropped.
+	ExpiredTransaction : record {
+		// The signature of the expired Solana transaction.
+		signature : Signature
+	};
+	// A user queued the deposit address of an account for a sweep via `deposit_sol`.
+	QueuedDeposit : record {
+		// The identifier of the queued deposit.
+		deposit_id : DepositSolId;
+		// The account to which the minter should mint ckSOL once the sweep is finalized.
+		account : Account;
+		// The deposit address derived from the account.
+		address : Address;
+		// The balance of the deposit address when the deposit was queued.
+		balance : Lamport
+	};
+	// The minter read the amount that the finalized sweep transaction moved to
+	// its main account and enqueued a pending mint for each deposit of that sweep.
+	CreditedSweep : record {
+		// The signature of the finalized sweep transaction.
+		signature : Signature;
+		// The increase of the main account balance reported by the transaction metadata.
+		amount_received : Lamport;
+		// The mint enqueued for each deposit of the sweep, by increasing deposit id.
+		mints : vec CreditedDeposit
+	};
+	// The outcome of a finalized sweep transaction did not match the plan the
+	// minter submitted it with, so the amount to credit cannot be determined
+	// safely.
+	//
+	// The deposits are quarantined to avoid any double minting and will not be
+	// further processed without a minter upgrade.
+	QuarantinedSweep : record {
+		// The signature of the finalized sweep transaction.
+		signature : Signature
+	};
+	// The minter fetched its Schnorr Ed25519 master public key, from which
+	// its main address and all deposit addresses are derived.
+	MinterPublicKeyFetched : record {
+		// The raw Ed25519 master public key (32 bytes).
+		public_key : blob;
+		// The chain code used to derive subkeys (32 bytes).
+		chain_code : blob
+	};
+	// The minter minted ckSOL on the ledger for a swept deposit whose sweep
+	// was credited.
+	MintedSweptDeposit : record {
+		// The identifier of the minted deposit.
+		deposit_id : DepositSolId;
+		// The mint transaction index on the ckSOL ledger.
+		mint_block_index : LedgerMintIndex
+	};
+	// The pending mint of a swept deposit cannot be retried: either it became
+	// older than the 24-hour deduplication window of the ckSOL ledger, or the
+	// ledger definitively rejected it. Retrying the transfer with the same
+	// arguments fails forever, and fresh arguments could double mint.
+	//
+	// The deposit is quarantined to avoid any double minting and will not be
+	// further processed without manual intervention.
+	//
+	// If the minter was down past the deduplication window, the underlying
+	// transfer may nevertheless have landed on the ledger. Manual resolution
+	// must therefore first search the ledger for a mint whose memo carries the
+	// sweep signature before crediting by hand, otherwise a double mint
+	// results.
+	QuarantinedPendingMint : record {
+		// The identifier of the deposit whose pending mint was quarantined.
+		deposit_id : DepositSolId
+	};
+	// The minter bound a durable nonce account and its nonce value to the
+	// withdrawal requests of the given burn indices, before requesting the
+	// threshold signature. The binding determines the transaction message.
+	CreatedWithdrawalTransaction : record {
+		// The ledger burn indices of the withdrawal requests served by this transaction.
+		burn_indices : vec LedgerBurnIndex;
+		// The durable nonce account bound to this transaction.
+		nonce_account : Address;
+		// The nonce value the transaction carries in place of a recent blockhash.
+		nonce_value : Hash
+	}
+};
+
+// A minter event.
+//
+// *WARNING*: This type is used exclusively by the debug `get_events` endpoint.
+// Backwards-compatibility is not guaranteed.
+type Event = record {
+	timestamp : nat64;
+	payload : EventType
+};
+
+// Arguments for the `get_events` endpoint.
+//
+// *WARNING*: This type is used exclusively by the debug `get_events` endpoint.
+// Backwards-compatibility is not guaranteed.
+type GetEventsArgs = record {
+	start : nat64;
+	length : nat64
+};
+
+// The result of a `get_events` call.
+//
+// *WARNING*: This type is used exclusively by the debug `get_events` endpoint.
+// Backwards-compatibility is not guaranteed.
+type GetEventsResult = record {
+	events : vec Event;
+	total_event_count : nat64
+};
+
+service : (MinterArg) -> {
+	// Returns the Solana address to which the owner should send SOL.
+	//
+	// If the owner is not set, it defaults to the caller's principal.
+	// The resolved owner must be a non-anonymous principal.
+	get_deposit_address : (GetDepositAddressArgs) -> (Address);
+
+	// Queues the deposit address of the given account for a sweep
+	// to the minter's main account and returns the identifier of
+	// the queued deposit, which can be used to query its status.
+	//
+	// If the owner is not set, it defaults to the caller's principal.
+	// The resolved owner must be a non-anonymous principal.
+	deposit_sol : (DepositSolArgs) -> (DepositSolResult);
+
+	// Returns the status of the deposit with the given identifier,
+	// or `NotFound` if no deposit with this identifier was queued.
+	deposit_sol_status : (DepositSolId) -> (DepositSolStatus) query;
+
+	// Submits a request to convert ckSOL to Solana.
+	withdraw_sol : (WithdrawSolArgs) -> (WithdrawSolResult);
+
+	// Retrieve the status of a Solana withdrawal request.
+	withdraw_sol_status : (WithdrawSolStatusArgs) -> (WithdrawSolStatus);
+
+	// *WARNING*: This is a debug endpoint, backwards-compatibility is not guaranteed.
+	// Returns events from the event log starting at the given index.
+	// The response contains at most 2000 events.
+	get_events : (GetEventsArgs) -> (GetEventsResult) query;
+
+	// Returns information about the ckSOL minter canister.
+	get_minter_info : () -> (MinterInfo) query
+}
