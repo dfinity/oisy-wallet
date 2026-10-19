@@ -85,7 +85,11 @@ const post = ({ port, message }) => {
 
 const loadState = async () => {
 	const { [STORAGE_KEY]: state } = await chrome.storage.local.get(STORAGE_KEY);
-	return { account: state?.account ?? null, sites: state?.sites ?? {} };
+	return {
+		account: state?.account ?? null,
+		sites: state?.sites ?? {},
+		locked: state?.locked === true
+	};
 };
 
 const saveState = (state) => chrome.storage.local.set({ [STORAGE_KEY]: state });
@@ -105,17 +109,51 @@ const notifyAccountGone = (origin) => {
 	notify({ origin, chain: 'sol', name: 'accountChanged', data: null });
 };
 
-// A different OISY identity means different addresses, so earlier site approvals no longer apply.
+const notifyAccountsBack = ({ account, sites }) => {
+	for (const [origin, { eth, sol }] of Object.entries(sites)) {
+		if (eth) {
+			notify({ origin, chain: 'eth', name: 'accountsChanged', data: [account.eth] });
+		}
+		if (sol) {
+			notify({ origin, chain: 'sol', name: 'accountChanged', data: account.sol });
+		}
+	}
+};
+
+// The account only ever comes from a signed-in OISY, so handing it over also unlocks the
+// extension. A different OISY identity means different addresses, so earlier site approvals no
+// longer apply.
 const storeAccount = async (account) => {
 	const state = await loadState();
 	const unchanged = state.account?.eth === account.eth && state.account?.sol === account.sol;
 	if (unchanged) {
+		if (state.locked) {
+			await saveState({ ...state, locked: false });
+			notifyAccountsBack(state);
+		}
 		return;
 	}
-	await saveState({ account, sites: {} });
+	await saveState({ account, sites: {}, locked: false });
 	if (state.account !== null) {
 		notifyAccountGone();
 	}
+};
+
+// Logging out of OISY in the panel locks the extension, like locking an extension wallet: sites keep
+// their approval but see no account until OISY is signed in again.
+const lock = async () => {
+	const state = await loadState();
+	if (state.locked) {
+		return;
+	}
+	await saveState({ ...state, locked: true });
+	notifyAccountGone();
+};
+
+const revokeAllSites = async () => {
+	const state = await loadState();
+	await saveState({ ...state, sites: {} });
+	notifyAccountGone();
 };
 
 const grantSite = async ({ origin, chain }) => {
@@ -263,24 +301,68 @@ const normalizeOisyError = (error) => ({
 const PANEL_PORT_NAME = 'oisy-panel';
 const panelPorts = new Set();
 
+// The site in the active tab, if it is one the extension runs on. OISY itself is not a dapp.
+// Chrome hides tab addresses from extensions without the "tabs" permission, which would warn about
+// reading browsing history at install. The content script in the tab knows its own origin instead.
+const activeOrigin = async () => {
+	try {
+		const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+		if (tab?.id === undefined) {
+			return null;
+		}
+		const origin = await chrome.tabs.sendMessage(tab.id, { type: 'origin' }, { frameId: 0 });
+		return typeof origin === 'string' && origin !== OISY_ORIGIN ? origin : null;
+	} catch (_) {
+		// No content script answers on browser pages, on oisy.com, or in tabs opened before the
+		// extension loaded.
+		return null;
+	}
+};
+
 const postState = async (port) => {
-	const { account, sites } = await loadState();
+	const { account, sites, locked } = await loadState();
 	post({
 		port,
 		message: {
 			type: 'state',
-			state: { account, sites },
+			state: { account, sites, locked, activeOrigin: await activeOrigin() },
 			version: chrome.runtime.getManifest().version
 		}
 	});
 };
 
-chrome.storage.onChanged.addListener((changes) => {
-	if (changes[STORAGE_KEY] === undefined) {
-		return;
-	}
+const postStateToPanels = () => {
 	for (const port of panelPorts) {
 		postState(port);
+	}
+};
+
+// eslint-disable-next-line local-rules/prefer-object-params -- Chrome API callback signature
+const onTabUpdated = (_tabId, { status }) => {
+	if (status === 'complete') {
+		postStateToPanels();
+	}
+};
+
+// Tab events wake the worker, so they're only listened to while a panel is open.
+const watchTabs = (watch) => {
+	const listeners = [
+		[chrome.tabs.onActivated, postStateToPanels],
+		[chrome.tabs.onUpdated, onTabUpdated],
+		[chrome.windows.onFocusChanged, postStateToPanels]
+	];
+	for (const [event, listener] of listeners) {
+		if (watch) {
+			event.addListener(listener);
+		} else {
+			event.removeListener(listener);
+		}
+	}
+};
+
+chrome.storage.onChanged.addListener((changes) => {
+	if (changes[STORAGE_KEY] !== undefined) {
+		postStateToPanels();
 	}
 });
 
@@ -288,7 +370,15 @@ chrome.storage.onChanged.addListener((changes) => {
 // disconnect sites. Answering dapp requests stays with the popup window opened for each one.
 const onPanelConnect = (port) => {
 	panelPorts.add(port);
-	port.onDisconnect.addListener(() => panelPorts.delete(port));
+	if (panelPorts.size === 1) {
+		watchTabs(true);
+	}
+	port.onDisconnect.addListener(() => {
+		panelPorts.delete(port);
+		if (panelPorts.size === 0) {
+			watchTabs(false);
+		}
+	});
 
 	port.onMessage.addListener(async (message) => {
 		if (message?.type === 'get-state') {
@@ -300,6 +390,10 @@ const onPanelConnect = (port) => {
 			}
 		} else if (message?.type === 'revoke-site' && typeof message.origin === 'string') {
 			await revokeSite({ origin: message.origin });
+		} else if (message?.type === 'revoke-all-sites') {
+			await revokeAllSites();
+		} else if (message?.type === 'lock') {
+			await lock();
 		}
 	});
 };
@@ -370,8 +464,8 @@ const connectEth = async ({ origin, port }) => {
 };
 
 const handleEth = async ({ port, origin, method, params }) => {
-	const { account, sites } = await loadState();
-	const connected = account !== null && sites[origin]?.eth === true;
+	const { account, sites, locked } = await loadState();
+	const connected = account !== null && !locked && sites[origin]?.eth === true;
 
 	switch (method) {
 		case 'eth_chainId':
@@ -424,8 +518,8 @@ const handleEth = async ({ port, origin, method, params }) => {
 };
 
 const handleSol = async ({ port, origin, method, params }) => {
-	const { account, sites } = await loadState();
-	const connected = account !== null && sites[origin]?.sol === true;
+	const { account, sites, locked } = await loadState();
+	const connected = account !== null && !locked && sites[origin]?.sol === true;
 
 	switch (method) {
 		case 'sol_accounts':

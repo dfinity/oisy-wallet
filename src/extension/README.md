@@ -3,8 +3,9 @@
 Lets dapps that only support extension wallets connect to OISY and sign. The extension holds no keys:
 it announces OISY to the page, decides which sites may see which address, and opens an oisy.com
 popup where the existing review screens show and sign every request. Clicking the toolbar icon opens
-Chrome's side panel (Chrome 116 or later), which shows OISY's own page `/extension/panel/`: your
-tokens, connected sites and Open OISY. The extension itself has no wallet UI.
+Chrome's side panel (Chrome 116 or later), which shows OISY's own page `/extension/panel/`: whether
+the site in the active tab is connected, all connected sites, the balances sites can use, and a menu
+with Open OISY, Disconnect all sites and Log out. The extension itself has no wallet UI.
 
 Local only, against staging, on Sepolia and Solana devnet. Chromium browsers only.
 
@@ -44,9 +45,10 @@ Open http://localhost:8090.
 3. **Sign a message** and **Sign typed data** need no funds. The result shows whether the signature
    recovers to your address.
 4. Under Solana, **Connect**, then **Sign a message**.
-5. Click the OISY icon in Chrome's toolbar. The side panel shows OISY's page with your tokens and
-   connected sites, and stays open next to the dapp. Once you're signed in there, the extension
-   picks up your account by itself.
+5. Click the OISY icon in Chrome's toolbar. The side panel shows OISY's page and stays open next to
+   the dapp; its top card follows the tab you're on. Once you're signed in there, the extension
+   picks up your account by itself. **Log out** in the panel's menu signs you out of OISY and locks
+   the extension: sites see no account until you sign in again in the panel or approve a request.
 6. Sending needs testnet funds: Sepolia ETH from a faucet for **Send 0 ETH to myself**, devnet SOL
    (`solana airdrop` or faucet.solana.com) for the Solana transaction buttons.
 

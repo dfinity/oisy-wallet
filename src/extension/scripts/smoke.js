@@ -285,6 +285,133 @@ try {
 		detail: JSON.stringify(panelState)
 	});
 
+	// Drives the panel protocol from OISY's page the way the signed-in panel does, then reads the
+	// state the extension settles on.
+	const panelCall = (messages) =>
+		panelFrame === undefined
+			? null
+			: panelFrame.evaluate(
+					({ extensionId, messages }) =>
+						new Promise((resolve) => {
+							const port = globalThis.chrome.runtime.connect(extensionId, { name: 'oisy-panel' });
+							messages.forEach((message) => port.postMessage(message));
+							setTimeout(() => {
+								port.onMessage.addListener((message) => {
+									if (message.type === 'state') {
+										port.disconnect();
+										resolve(message.state);
+									}
+								});
+								port.postMessage({ type: 'get-state' });
+							}, 300);
+							setTimeout(() => resolve(null), 3000);
+						}),
+					{ extensionId: EXTENSION_ID, messages }
+				);
+
+	const solAccountCount = () =>
+		dapp.evaluate(async () => {
+			const { accounts } = await window.oisyTest.sol.features['standard:connect'].connect({
+				silent: true
+			});
+			return accounts.length;
+		});
+
+	const account = {
+		eth: '0x000000000000000000000000000000000000dEaD',
+		sol: 'So11111111111111111111111111111111111111112'
+	};
+	const dappOrigin = new URL(DAPP_URL).origin;
+
+	await panelCall([{ type: 'set-account', account }]);
+	// Stands in for the dapp's approved connect requests, which need a signed-in popup.
+	await worker.evaluate(async (origin) => {
+		const { state } = await globalThis.chrome.storage.local.get('state');
+		await globalThis.chrome.storage.local.set({
+			state: { ...state, sites: { [origin]: { eth: true, sol: true } } }
+		});
+	}, dappOrigin);
+	await dapp.bringToFront();
+
+	const connectedState = await panelCall([]);
+	check({
+		name: 'the panel learns which site is in the active tab',
+		ok: connectedState?.activeOrigin === dappOrigin,
+		detail: connectedState?.activeOrigin
+	});
+
+	// An open panel is told about tab switches without asking.
+	const pushedOrigin = panelFrame.evaluate(
+		(extensionId) =>
+			new Promise((resolve) => {
+				const port = globalThis.chrome.runtime.connect(extensionId, { name: 'oisy-panel' });
+				port.onMessage.addListener((message) => {
+					if (message.type === 'state' && message.state.activeOrigin === null) {
+						port.disconnect();
+						resolve(null);
+					}
+				});
+				setTimeout(() => resolve('no push'), 3000);
+			}),
+		EXTENSION_ID
+	);
+	await new Promise((resolve) => setTimeout(resolve, 300));
+	await panel.bringToFront();
+	check({
+		name: 'switching tabs updates the site the panel shows',
+		ok: (await pushedOrigin) === null
+	});
+	await dapp.bringToFront();
+
+	const connectedAccounts = await ethCall({ method: 'eth_accounts' });
+	check({
+		name: 'a connected dapp sees the account',
+		ok: connectedAccounts.result?.[0] === account.eth && (await solAccountCount()) === 1
+	});
+
+	const lockedState = await panelCall([{ type: 'lock' }]);
+	const lockedAccounts = await ethCall({ method: 'eth_accounts' });
+	check({
+		name: 'logging out locks the extension: sites see no account',
+		ok:
+			lockedState?.locked === true &&
+			Array.isArray(lockedAccounts.result) &&
+			lockedAccounts.result.length === 0 &&
+			(await solAccountCount()) === 0,
+		detail: JSON.stringify(lockedAccounts.result)
+	});
+
+	const lockedSign = await ethCall({
+		method: 'personal_sign',
+		params: ['0x68656c6c6f', account.eth]
+	});
+	check({
+		name: 'a locked extension refuses to sign without a popup',
+		ok: lockedSign.code === 4100,
+		detail: lockedSign.code
+	});
+
+	const unlockedState = await panelCall([{ type: 'set-account', account }]);
+	const unlockedAccounts = await ethCall({ method: 'eth_accounts' });
+	check({
+		name: 'signing in again unlocks the extension and keeps the sites',
+		ok:
+			unlockedState?.locked === false &&
+			unlockedState?.sites?.[dappOrigin]?.eth === true &&
+			unlockedAccounts.result?.[0] === account.eth
+	});
+
+	const clearedState = await panelCall([{ type: 'revoke-all-sites' }]);
+	const clearedAccounts = await ethCall({ method: 'eth_accounts' });
+	check({
+		name: 'disconnecting all sites removes every site',
+		ok:
+			Object.keys(clearedState?.sites ?? { pending: true }).length === 0 &&
+			Array.isArray(clearedAccounts.result) &&
+			clearedAccounts.result.length === 0 &&
+			(await solAccountCount()) === 0
+	});
+
 	const offlinePanel = await context.newPage();
 	await offlinePanel.setViewportSize({ width: 360, height: 720 });
 	await offlinePanel.route(`${OISY_ORIGIN}/extension/panel/**`, (route) => route.abort());

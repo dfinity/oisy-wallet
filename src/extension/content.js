@@ -33,6 +33,14 @@
 		});
 	};
 
+	// Tells the side panel which site is in the active tab.
+	// eslint-disable-next-line local-rules/prefer-object-params -- Chrome API callback signature
+	chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+		if (message?.type === 'origin') {
+			sendResponse(window.location.origin);
+		}
+	});
+
 	window.addEventListener('message', (event) => {
 		if (event.source !== window || event.origin !== window.location.origin) {
 			return;

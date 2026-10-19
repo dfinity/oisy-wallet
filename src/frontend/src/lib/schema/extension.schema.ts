@@ -42,7 +42,11 @@ export const ExtensionPanelStateMessageSchema = z.object({
 	type: z.literal('state'),
 	state: z.object({
 		account: z.object({ eth: z.string(), sol: z.string() }).nullable(),
-		sites: ExtensionSitesSchema
+		sites: ExtensionSitesSchema,
+		// Logged out from the panel: sites see no account until OISY hands the account back.
+		locked: z.boolean().optional(),
+		// The site in the active tab, or null where the extension does not run.
+		activeOrigin: z.string().nullable().optional()
 	}),
 	version: z.string().optional()
 });

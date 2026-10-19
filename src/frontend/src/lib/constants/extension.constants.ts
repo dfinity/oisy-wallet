@@ -32,8 +32,8 @@ export const OISY_EXTENSION_INTERNAL_ERROR_CODE = -32603;
 // production these would come from config OISY can change without a frontend release, so a bad
 // version can be turned off within minutes. Both rely on the version the extension reports about
 // itself: they keep old, honest versions out, but a malicious version can report any number.
-// 0.0.2 is the first version that answers OISY's page in the side panel.
-export const OISY_EXTENSION_MIN_VERSION = '0.0.2';
+// 0.0.3 is the first version that can lock, disconnect all sites and report the active tab's site.
+export const OISY_EXTENSION_MIN_VERSION = '0.0.3';
 export const OISY_EXTENSION_BLOCKED_VERSIONS: readonly string[] = [];
 export const OISY_EXTENSION_OUTDATED_MESSAGE =
 	'The OISY extension is out of date. Update it and try again.';

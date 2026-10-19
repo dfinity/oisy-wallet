@@ -42,6 +42,8 @@ export type ExtensionOutgoingMessage =
 	| { type: 'get-state' }
 	| { type: 'set-account'; account: ExtensionAccount }
 	| { type: 'revoke-site'; origin: string }
+	| { type: 'revoke-all-sites' }
+	| { type: 'lock' }
 	| { type: 'response'; id: string; result: unknown }
 	| { type: 'error'; id: string; error: ExtensionError };
 
