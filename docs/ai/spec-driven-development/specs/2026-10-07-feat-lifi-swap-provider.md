@@ -1158,7 +1158,16 @@ Each tick, per pending LI.FI row:
         status, or a still-valid blockhash, **deletes** the row's entry. A page reload
         empties the map, so the count restarts; that can only delay the verdict by one
         poll, never hasten it, which is why the observation is not persisted in a ref.
-2. **Then `getStatus({ txHash, fromChain, toChain, bridge })`**, with `fromChain` /
+   - **Same-chain** (`fromChain === toChain`): a confirmed source ends the row
+     `Succeeded`, as Velora Market's does, and `/status` is never asked. The swap runs
+     inside the source transaction, which `GenericSwapFacetV3` reverts unless the user
+     receives at least the on-chain minimum, so the receipt is the outcome. Waiting for
+     `/status` instead would leave a settled swap "in progress" whenever LI.FI does not
+     resolve its hash, and after the [unresolved-status](#unresolved-status) bound fail it,
+     with a `swap_error`, although the user holds the tokens. Same-chain rows therefore
+     record no destination hash or substatus; the source transaction is the swap's only
+     one.
+2. **Then, cross-chain, `getStatus({ txHash, fromChain, toChain, bridge })`**, with `fromChain` /
    `toChain` derived from the row's `source_token` / `dest_token` (see
    [External refs](#external-refs-lifi_external_ref_keys-libtypeslifits)) and `bridge` from
    `lifi_tool`. LI.FI is asked only once the source is confirmed: before that the source
@@ -1206,7 +1215,9 @@ to say, so a `/status` that never resolves would leave the row non-terminal fore
 - `INVALID` means LI.FI cannot tie the hash to the given `bridge` / chains, which does not
   fix itself. On `INVALID` the poller immediately re-queries `/status` with `txHash`,
   `fromChain` and `toChain` only (no `bridge`), in case the stored `lifi_tool` is what
-  LI.FI rejects, and maps that answer instead.
+  LI.FI rejects, and maps that answer instead. It remembers the refusal per row, in
+  memory, and asks without `bridge` from then on, so that a row left unresolved costs one
+  request per poll rather than two against the rate limit.
 - The bound starts only **after the source transaction is confirmed** and is measured
   on the **page's monotonic clock** (`performance.now()`), which a change of the system
   clock does not move. The first time a poll sees the row's source confirmed and the
@@ -1293,14 +1304,21 @@ Errors are caught per row, except the `/status`
 per row inside the poller to LI.FI's recommended cadence — every 10 s for the first
 minute after creation, every 30 s until 10 minutes, then every 60 s — on top of the
 loader's 5 s tick. A clock set back puts the last poll in the future, so the row is polled
-at once rather than once the clock catches up. The last-poll times and the
-confirmed-source flags are kept in memory. A row the poller settles is forgotten at once,
-its stored window included: if it was the last pending LI.FI row, the loader stops calling
-the poller, and nothing would prune it. Each poll also drops that state, and the stored
-windows, for every row no longer in the pending set the loader passes, for rows that
-settled in another tab or on another device. That state is LI.FI's alone, unlike the
-replacement observations of the shared EVM source-tx helper, which a provider must not
-prune to its own rows.
+at once rather than once the clock catches up. The last-poll times, the confirmed-source
+flags and the refused tools are kept in memory. A row the poller settles is forgotten once
+its terminal write has landed, its stored window included: if it was the last pending
+LI.FI row, the loader stops calling the poller, and nothing would prune it. A terminal
+write that fails keeps the row's state, so the next poll repeats the verdict rather than
+reopening a 6 h window (`applyActiveUserTransactionPollUpdate` reports whether it wrote).
+Each poll also drops that state for every row no longer in the pending set the loader
+passes, for rows that settled in another tab or on another device. Only the stored windows
+of rows this tab keeps are removed with it: every window the poller reads it also writes,
+so those are all it has touched, while rows another tab opened since this one loaded, or
+another principal's on the same browser, are missing from this tab's pending set without
+being settled. A window whose row settled while no tab of the browser polled it is left
+behind, and never read again. That state is LI.FI's alone, unlike the replacement
+observations of the shared EVM source-tx helper, which a provider must not prune to its own
+rows.
 
 #### Loader and UI
 
@@ -1513,14 +1531,16 @@ everywhere.
 13. `DONE/PARTIAL` ends `Succeeded` and the row shows the token actually received, with
     its amount correctly formatted; `DONE/REFUNDED` ends `Failed` with the refunded copy.
 14. A reverted / dropped (EVM) or reverted / expired (Solana) source transaction ends
-    `Failed`; a `NOT_FOUND` / `INVALID` status alone never terminates a row before the
+    `Failed`, and a confirmed one ends a same-chain row `Succeeded` without asking
+    `/status`; a `NOT_FOUND` / `INVALID` status alone never terminates a row before the
     source is confirmed and the 6 h unresolved-status bound has passed, after which the
     row ends `Failed` with the "outcome unknown" copy. That bound starts after source
     confirmation, accumulates observed time on the page's monotonic clock in capped
     per-poll steps (persisted in `localStorage` across reloads; a clock jump cannot
     hasten it), and never compares against
     `created_at_ns`. A `/status` HTTP 404 (code 1003) counts as `NOT_FOUND`, never as a
-    swallowed error. A Solana row is marked expired
+    swallowed error. A terminal write that fails leaves the row's window in place, and
+    the next poll repeats the verdict. A Solana row is marked expired
     only after two consecutive polls each find no signature status (searching
     transaction history) with the stored blockhash no longer valid.
 15. `swap_submitted` fires from the wizard; `swap_success` / `swap_error` fire once from
