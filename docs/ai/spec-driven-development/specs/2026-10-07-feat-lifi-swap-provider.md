@@ -22,7 +22,8 @@ once funds have left the wallet, and the global AUT poller drives the row to
 `Succeeded` / `Failed`, surviving a closed tab or a re-login.
 
 Behind a new feature flag, `LIFI_SWAP_ENABLED`, which is `LOCAL || STAGING` (and off in
-unit tests) until a separate one-line PR enables it everywhere. That PR is gated on the
+unit tests) once a LI.FI offer can be executed (PR 2b; `false` everywhere before that),
+until a separate one-line PR enables it everywhere. That PR is gated on the
 production key and the rate-limit check described under [API key](#api-key).
 
 **Out of scope:**
@@ -228,37 +229,54 @@ Permit2 / EIP-712 signing and Jito bundles, and pull a second `@solana/kit` vers
 (viem is already a runtime dependency, so it is not part of the cost).
 
 One module-level client in `lib/rest/lifi.rest.ts` (the layer NEAR Intents' REST calls
-live in), wrapping `getQuote` / `getStatus`:
+live in), wrapping `getQuote` (PR 2a-1) and `getStatus` (PR 2b):
 
 ```ts
 createClient({
 	integrator: LIFI_INTEGRATOR,
 	apiKey: LIFI_API_KEY,
 	disableVersionCheck: true, // createClient reads process.env.NODE_ENV otherwise
-	preloadChains: false, // avoid an eager /chains fetch at import time
-	routeOptions: {
-		bridges: { deny: LIFI_DENY_BRIDGES },
-		exchanges: { deny: LIFI_DENY_EXCHANGES }
-	}
+	preloadChains: false // avoid an eager /chains fetch at import time
 });
 ```
+
+The deny lists are not set as client `routeOptions`: the SDK would then serialise an
+empty list as an empty `denyBridges=` parameter on every request. Every quote already
+sends `allowBridges`, and LI.FI's docs do not say how an allow and a deny list combine (a
+probe on 2026-10-14 accepted both, with the deny list winning), so a denied bridge is
+removed from the allow-list before the request and `denyBridges` is never sent. Once
+every bridge of a Diamond is denied, its cross-chain pairs get no quote; same-chain
+pairs need no bridge and are still quoted. `denyExchanges` is sent only when it names a
+tool.
 
 ### Env
 
 New `src/frontend/src/env/rest/lifi.env.ts`, modelled on `near-intents.env.ts`:
 
-- `LIFI_SWAP_ENABLED = (LOCAL || STAGING) && !TEST` (feature tests switch it on).
+- `LIFI_SWAP_ENABLED` — `false` everywhere, local included, in PRs 2a-1 and 2a-2 (no
+  wizard can execute a LI.FI offer yet); `(LOCAL || STAGING) && !TEST` from PR 2b (feature
+  tests switch it on); `true` from PR 4. See [Delivery plan](#delivery-plan).
 - `LIFI_API_KEY = import.meta.env.VITE_LIFI_API_KEY` — see [API key](#api-key).
 - `LIFI_INTEGRATOR = import.meta.env.VITE_LIFI_INTEGRATOR` — the integrator id
   registered with LI.FI. `createClient` throws without one, so the client is created
   lazily on first use, and while the variable is unset the LI.FI provider returns no
   quote instead of failing at import time.
-- `LIFI_DIAMOND_ADDRESSES: Record<NetworkId, EthAddress>` — the six Diamonds listed in
-  [Background — LI.FI](#background--lifi), pinned from LI.FI's deployment files, never
-  from a quote.
+- `LIFI_DIAMOND_ADDRESSES: Partial<Record<NetworkId, EthAddress>>` — the six Diamonds
+  listed in [Background — LI.FI](#background--lifi), pinned from LI.FI's deployment
+  files, never from a quote. An EVM network without an entry is never quoted, on either
+  side. Solana mainnet has no entry and is quoted as a destination only (and as a source
+  from PR 3, where the Solana checks replace the Diamond).
+- `LIFI_ALLOWED_BRIDGES: Partial<Record<NetworkId, string[]>>` — the curated bridge tool
+  keys per source Diamond (see [Calldata binding](#calldata-binding-evm-execution-time-quote)):
+  `['across', 'near']` on the five Diamonds that carry both facets, `['across']` on
+  Robinhood Chain. LI.FI serves Mayan under four tool keys (`mayan`, `mayanWH`,
+  `mayanMCTP`, `mayanFastMCTP`, checked on `/v1/tools` 2026-10-14); none is listed until
+  it is confirmed that its calldata goes through `MayanFacet`.
 - `LIFI_DENY_BRIDGES: string[] = []` and `LIFI_DENY_EXCHANGES: string[] = []` — LI.FI's
-  full tool set is allowed; these exist so a misbehaving bridge or exchange can be
-  blocked with a one-line change (keys from LI.FI's `/tools`).
+  full exchange set is allowed; these exist so a misbehaving bridge or exchange can be
+  blocked with a one-line change (keys from LI.FI's `/tools`). A denied bridge is dropped
+  from `LIFI_ALLOWED_BRIDGES`; a denied exchange is sent as `denyExchanges`.
+- Solana's LI.FI chain id is the SDK's own `ChainId.SOL`, not a local constant.
 
 ### API key
 
@@ -346,10 +364,13 @@ bridge facets do on EVM.
   `11111111111111111111111111111111`.
 - `fromAddress` = the user's source-chain address (`userAddress`); `toAddress` = the
   `recipientAddress` quote param (already resolved by `fetchSwapAmounts`), falling back
-  to `userAddress` when absent, as other providers do — always passed explicitly to
-  LI.FI.
-- `slippage` = OISY's slippage percentage / 100.
+  to `userAddress` when absent only for an EVM destination — a Solana destination
+  without a Solana recipient gets no quote — and always passed explicitly to LI.FI.
+- `slippage` = OISY's slippage percentage / 100; a value outside (0, 1) gets no quote.
 - `order: 'CHEAPEST'`.
+- `allowBridges` = the source Diamond's `LIFI_ALLOWED_BRIDGES`, on every quote.
+- `allowDestinationCall: false` — the SDK's default is `true`, and execution refuses any
+  route whose bridge data has a destination call.
 - **`skipSimulation: true`** for every form-time quote. Display quotes must not vanish
   because an ERC-20 has no allowance yet or the user is mid-typing. The quote fetched
   right before signing is simulated (see [EVM execution](#evm-execution),
@@ -358,8 +379,16 @@ bridge facets do on EVM.
   checked transaction, not LI.FI's simulation, whose no-quote-on-failure behaviour the
   docs do not promise (see [Background — LI.FI](#background--lifi)).
 - Returns `undefined` on any error (Velora's convention), including the 404 "no
-  available quotes" (not `SwapAmountTooLowError`, since LI.FI does not tell us the
-  minimum). Fires `PLAUSIBLE_EVENTS.SWAP_OFFER` like Velora.
+  available quotes" and the 422 "none of the available routes could successfully
+  generate a tx" (not `SwapAmountTooLowError`, since LI.FI does not tell us the
+  minimum). Fires `PLAUSIBLE_EVENTS.SWAP_OFFER` like Velora, but on failure without the
+  error text: LI.FI's errors can carry the request URL and with it the user's address
+  (analytics invariant 4). A failure reports an allow-listed `result_error_type` —
+  `no_route` (404, 422), `rate_limited` (429), `quote_rejected` (a failed trust check),
+  `timeout` (aborted after `LIFI_QUOTE_TIMEOUT_MS`) or `request_failed` — plus the HTTP
+  status as `result_error_code`. `quote_rejected` carries `event_severity: error`;
+  `rate_limited`, `timeout` and `request_failed` carry `warn`, so a LI.FI outage shows on
+  severity-filtered monitoring; `no_route` is a normal answer and carries none.
 - **Mapped result**: new `SwapMappedResult` arm
   `{ provider: SwapProvider.LIFI, receiveAmount: toAmount, receiveOutMinimum: toAmountMin, swapDetails: LiFiStep, … }`
   with the estimated duration and fees from `estimate`.
@@ -397,13 +426,18 @@ Two changes fix that:
 #### Cadence: on input change, then every 30 s
 
 LI.FI does not ride the shared 5 s refresh. `fetchLifiSwapQuote` keeps a single
-module-level cache entry `{ key, result, fetchedAt }`, where `key` is the serialised
-request (chains, tokens, amount, both addresses, slippage):
+module-level cache entry `{ key, result, settledAt }`, where `key` is the serialised
+request (chains, tokens, amount, both addresses, slippage) and `settledAt` is set when
+`result` settles:
 
 - a different key (any input change) fetches immediately and replaces the entry;
-- the same key returns the cached mapped result while it is younger than
-  `LIFI_QUOTE_REFRESH_INTERVAL_MS = 30_000`, and re-fetches after that;
-- an in-flight request for the same key is shared, not duplicated.
+- the same key returns the cached mapped result until `LIFI_QUOTE_REFRESH_INTERVAL_MS`
+  (30 000 ms) has passed since `settledAt`, and re-fetches after that;
+- an in-flight request for the same key is shared, not duplicated, however long it takes;
+- every quote request times out after `LIFI_QUOTE_TIMEOUT_MS = 10_000` (the SDK sets no
+  timeout), so a stalled request settles as a failure instead of pinning the cache, and
+  cannot hold back the other providers' offers, which the swap form shows only once every
+  provider has answered.
 
 The other providers keep refreshing every 5 s; the fan-out is unchanged. A cached
 quote is only ever **displayed** — execution always re-quotes — so a 30 s-old price is
@@ -445,10 +479,15 @@ execution-time — passes `assertLifiQuote` before it is shown or acted on:
   `bigint`) is `0` for an ERC-20 source and `fromAmount` for a native one.
 - **Solana**: `transactionRequest.data` is a single base64 string (an array — a Jito
   bundle — is rejected); the decoded transaction's fee payer is the user's address and
-  it requires no signer other than the user.
+  it requires no signer other than the user. Lands in PR 3 with the first Solana-source
+  quote; until then no Solana-source quote is requested.
 - **Echo**: `action.fromChainId`, `action.toChainId`, `action.fromToken.address`,
   `action.toToken.address`, `action.fromAmount` and `action.toAddress` equal what OISY
   asked for.
+- **Route tools**: every `cross` step in `includedSteps` uses a bridge the request's
+  `allowBridges` names, and no `swap` step uses an exchange in its `denyExchanges`. The
+  lists are only request parameters, so this keeps the deny lists working if LI.FI ignores
+  or misreads them (step tool keys match the request's keys, checked 2026-10-19).
 
 EVM addresses (`to`, `approvalAddress`, `from`, EVM token addresses, an EVM
 `toAddress`) are compared **case-insensitively**: LI.FI may return checksummed or
@@ -517,7 +556,10 @@ starts with `nonEVMReceiver` and carries `refundRecipient`, and the facet itself
 unless the receiver it parses out of `protocolData` equals `nonEVMReceiver` /
 `bridgeData.receiver`). The implementer still re-reads each struct before pinning the
 decoder, and adds a test per facet built from a real LI.FI calldata fixture. Adding a
-bridge later means adding its decoder, fixture and tool key together. Every other bridge
+bridge later means adding its decoder, fixture and tool key together, and, if it charges a
+native fee on top of the amount (`feeCosts` with `included: false`; Across's fees are all
+included, checked 2026-10-19), widening the `value` trust check to admit exactly that
+fee. Every other bridge
 gets no quote: the display quote passes `allowBridges` limited to the curated tool keys,
 so the form never offers a route that execution would refuse.
 
@@ -1271,19 +1313,21 @@ loader's 5 s tick.
 
 ## Delivery plan
 
-| PR  | Scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Depends on                                     |
-| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| 1   | **Backend AUT variant** — `Lifi(LifiData)`, validation of the v1 token matrix (`require_lifi_pair`, pinned EVM chain ids) and of the required poll keys (`require_lifi_refs`), tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                                  | —                                              |
-| 2a  | **Scaffolding + quoting** — `@lifi/sdk`, env (flag **`false` everywhere**; unit tests switch it on), types, quote service + cache, form-time trust checks, LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges, empty source list so the Solana source picker is unchanged), provider sheet                                           | 1                                              |
-| 2b  | **EVM execution + tracking** — calldata binding (pinned selectors + `CalldataVerificationFacet`), `fetchLifiEvmSwap` (pre-approval price check, unchanged `approve()`, form budget of 0/1/2 approval fees from one allowance read) + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound and the `/status` 404 → `NOT_FOUND` mapping)/loader (incl. wallet + EVM balance refresh)/item; flag back to `LOCAL \|\| STAGING`, `PRODUCT.md` for EVM-source swaps | 2a                                             |
-| 3   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (quote, destinations, and a mainnet-only source list in place of the empty one; Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` / `closedAccounts` in the simulation preview and the slot-consistent pre/post snapshot), `SwapSolWizard` dispatch, Solana source-chain check in the poller (in-memory expiry observations), `PRODUCT.md` update for Solana-source swaps                             | 2b                                             |
-| 4   | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 3, production key + rate-limit scope confirmed |
+| PR   | Scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Depends on                                     |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| 1    | **Backend AUT variant** — `Lifi(LifiData)`, validation of the v1 token matrix (`require_lifi_pair`, pinned EVM chain ids) and of the required poll keys (`require_lifi_refs`), tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                                        | —                                              |
+| 2a-1 | **Quote client** (not registered anywhere) — `@lifi/sdk`, env (flag **`false` everywhere**), `SwapProvider.LIFI` + mapped-result arm + `swapService` stub, REST client, EVM form-time trust checks, `fetchLifiSwapQuote` with the 30 s cache, `reusability.md` entry                                                                                                                                                                                                                                                                           | 1                                              |
+| 2a-2 | **Registration** — LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges, empty source list so the Solana source picker is unchanged), provider sheet                                                                                                                                                                                         | 2a-1                                           |
+| 2b   | **EVM execution + tracking** — calldata binding (pinned selectors + `CalldataVerificationFacet`), `fetchLifiEvmSwap` (pre-approval price check, unchanged `approve()`, form budget of 0/1/2 approval fees from one allowance read) + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound and the `/status` 404 → `NOT_FOUND` mapping)/loader (incl. wallet + EVM balance refresh)/item; flag to `(LOCAL \|\| STAGING) && !TEST`, `PRODUCT.md` for EVM-source swaps | 2a-2                                           |
+| 3    | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (quote, destinations, and a mainnet-only source list in place of the empty one; Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` / `closedAccounts` in the simulation preview and the slot-consistent pre/post snapshot), `SwapSolWizard` dispatch, Solana source-chain check in the poller (in-memory expiry observations), `PRODUCT.md` update for Solana-source swaps                                   | 2b                                             |
+| 4    | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 3, production key + rate-limit scope confirmed |
 
-PR 2 is split up front so each PR stays reviewable. In 2a the flag is `false` everywhere,
+PR 2 is split up front so each PR stays reviewable, and 2a again into the quote client
+(2a-1) and its registration in the swap fan-out (2a-2). In 2a the flag is `false` everywhere,
 local included: 2a registers quotes but the wizard has no LI.FI dispatch yet, so a
 selected offer would hit `SwapEthWizard`'s unknown-provider branch. 2a is exercised by
 unit tests that switch the flag on (the `vi.doMock` pattern of `near-intents.env`), and
-2b, which adds the dispatch, sets it to `LOCAL || STAGING`. No environment, local
+2b, which adds the dispatch, sets it to `(LOCAL || STAGING) && !TEST`. No environment, local
 included, ever shows an offer that cannot be executed. This is the same sequencing as
 the Solana-source guard above. Solana → EVM
 is a later, separate PR (see [Decisions](#decisions)).
@@ -1428,7 +1472,8 @@ everywhere.
 
 ## Open questions
 
-Facts still to confirm. Both gate PR 4 (the flag flip), not PRs 1–3.
+Facts still to confirm. The first two gate PR 4 (the flag flip), not PRs 1–3; the
+third gates PR 2b.
 
 - **Production API key.** A separate key, scoped to OISY's production origins, must be
   registered on LI.FI's partner portal and set as a deployment secret. Owner: whoever
@@ -1436,6 +1481,14 @@ Facts still to confirm. Both gate PR 4 (the flag flip), not PRs 1–3.
 - **Rate-limit scope.** Is LI.FI's 100 requests / min limit per key or per IP? If per
   key, the 30 s [cadence](#cadence-on-input-change-then-every-30-s) must be checked
   against expected production traffic before the flip. Owner: ask LI.FI.
+- **EVM → Solana coverage with the curated bridges.** Keyless `/v1/quote` probes on
+  2026-10-14 (Arbitrum USDC → Solana USDC and → SOL, 50 USDC, an unregistered
+  integrator id) returned no route through the curated set: Across answered 404 "No
+  available quotes", NEAR Intents and Mayan answered 422 "None of the available routes
+  could successfully generate a tx". Without the allow-list LI.FI routed through Relay.
+  Re-run with the registered integrator id and key before PR 2b; if the curated set
+  still yields nothing, EVM → Solana needs either another decoded facet (Relay first)
+  or to leave v1. Owner: implementer, with the staging key.
 
 ## Decisions
 
@@ -1470,7 +1523,8 @@ Recorded so a future reader can tell "excluded on purpose" from "forgotten".
   `dest_token`, and the Solana expiry observation lives in memory like Velora's
   replacement counter, so both row kinds stay at 13 of the 16 refs.
 - **`@lifi/sdk` (core only) is approved** as a new dependency.
-- **PR 2 is split into 2a / 2b** up front.
+- **PR 2 is split into 2a / 2b** up front, and 2a into 2a-1 (quote client) / 2a-2
+  (registration).
 - **The LI.FI integrator id and the staging API key are registered.** Their values are
   set in the environment outside the repository; the implementer asks before editing
   `deploy-to-environment.yml`. The **production** key is not registered yet; it is a
