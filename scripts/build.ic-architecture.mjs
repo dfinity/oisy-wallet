@@ -34,7 +34,8 @@ const manifest = {
 		{
 			id: backendId,
 			name: 'backend',
-			role: 'OISY Wallet backend'
+			role: 'OISY Wallet backend',
+			description: 'OISY application services API; call get_api_doc first'
 		}
 	]
 };

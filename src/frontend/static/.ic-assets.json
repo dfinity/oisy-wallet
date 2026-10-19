@@ -20,6 +20,12 @@
 		}
 	},
 	{
+		"match": ".well-known/ii-derivation-origin",
+		"headers": {
+			"Content-Type": "text/plain"
+		}
+	},
+	{
 		"match": "**/icons/**/*",
 		"headers": {
 			"Cache-Control": "max-age=604800"
