@@ -10,9 +10,12 @@ export const OISY_EXTENSION_PANEL_READY = 'oisy-panel-ready';
 
 export const OISY_EXTENSION_REQUEST_PARAM = 'request';
 
-// The extension's background worker sleeps after 30 seconds without events. A request can stay open
-// longer than that while the user signs in, so the popup pings it.
+// The extension's background worker sleeps after 30 seconds without events and closes its ports.
+// The popup and the side panel stay open longer than that, so they ping it.
 export const OISY_EXTENSION_KEEP_ALIVE_MS = 20_000;
+
+// How many times in a row the side panel reconnects to the extension before saying it can't reach it.
+export const OISY_EXTENSION_PANEL_RECONNECT_ATTEMPTS = 3;
 
 // Extension requests reuse the WalletConnect review screens, which address a request by topic.
 export const OISY_EXTENSION_WALLET_CONNECT_TOPIC = 'oisy-extension';

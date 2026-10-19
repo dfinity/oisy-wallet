@@ -1,7 +1,9 @@
 import ExtensionPanelContent from '$lib/components/extension/ExtensionPanelContent.svelte';
 import {
+	OISY_EXTENSION_KEEP_ALIVE_MS,
 	OISY_EXTENSION_MIN_VERSION,
-	OISY_EXTENSION_PANEL_PORT_NAME
+	OISY_EXTENSION_PANEL_PORT_NAME,
+	OISY_EXTENSION_PANEL_RECONNECT_ATTEMPTS
 } from '$lib/constants/extension.constants';
 import * as extensionProviders from '$lib/providers/extension.providers';
 import { ethAddressStore, solAddressDevnetStore } from '$lib/stores/address.store';
@@ -15,9 +17,41 @@ import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { fireEvent, render, within } from '@testing-library/svelte';
 import { tick } from 'svelte';
 
+interface FakePort {
+	port: ExtensionPort;
+	receive: (message: unknown) => void;
+	drop: () => void;
+}
+
 describe('ExtensionPanelContent', () => {
-	let receive: (message: unknown) => void;
-	let port: ExtensionPort;
+	let ports: FakePort[];
+
+	// Every connection gets its own port, like `chrome.runtime.connect`.
+	const createPort = (): ExtensionPort => {
+		let onMessage: (message: unknown) => void = () => undefined;
+		let onDisconnect: () => void = () => undefined;
+
+		const port: ExtensionPort = {
+			postMessage: vi.fn(),
+			disconnect: vi.fn(),
+			onMessage: {
+				addListener: (listener) => {
+					onMessage = listener;
+				}
+			},
+			onDisconnect: {
+				addListener: (listener) => {
+					onDisconnect = listener;
+				}
+			}
+		};
+
+		ports.push({ port, receive: (message) => onMessage(message), drop: () => onDisconnect() });
+
+		return port;
+	};
+
+	const current = (): FakePort => ports[ports.length - 1];
 
 	const state = ({
 		account = null,
@@ -29,23 +63,14 @@ describe('ExtensionPanelContent', () => {
 		version?: string;
 	} = {}) => ({ type: 'state', state: { account, sites }, version });
 
-	const setAccountCalls = () =>
-		vi.mocked(port.postMessage).mock.calls.filter(([message]) => message.type === 'set-account');
+	const sentMessages = () =>
+		ports.flatMap(({ port }) => vi.mocked(port.postMessage).mock.calls.map(([message]) => message));
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		port = {
-			postMessage: vi.fn(),
-			disconnect: vi.fn(),
-			onMessage: {
-				addListener: (listener) => {
-					receive = listener;
-				}
-			},
-			onDisconnect: { addListener: vi.fn() }
-		};
-		vi.spyOn(extensionProviders, 'connectExtension').mockReturnValue(port);
+		ports = [];
+		vi.spyOn(extensionProviders, 'connectExtension').mockImplementation(createPort);
 
 		mockPage.mockUrl(new URL('http://localhost:5175/extension/panel/'));
 		setupUserNetworksStore('allEnabled');
@@ -55,6 +80,7 @@ describe('ExtensionPanelContent', () => {
 	});
 
 	afterEach(() => {
+		vi.useRealTimers();
 		setupTestnetsStore('reset');
 		ethAddressStore.reset();
 		solAddressDevnetStore.reset();
@@ -66,16 +92,16 @@ describe('ExtensionPanelContent', () => {
 		expect(extensionProviders.connectExtension).toHaveBeenCalledExactlyOnceWith({
 			name: OISY_EXTENSION_PANEL_PORT_NAME
 		});
-		expect(port.postMessage).toHaveBeenCalledWith({ type: 'get-state' });
+		expect(current().port.postMessage).toHaveBeenCalledWith({ type: 'get-state' });
 	});
 
 	it('hands the signed-in account to an extension that holds no account', async () => {
 		render(ExtensionPanelContent);
 
-		receive(state());
+		current().receive(state());
 		await tick();
 
-		expect(port.postMessage).toHaveBeenCalledWith({
+		expect(current().port.postMessage).toHaveBeenCalledWith({
 			type: 'set-account',
 			account: { eth: mockEthAddress, sol: mockSolAddress }
 		});
@@ -84,16 +110,16 @@ describe('ExtensionPanelContent', () => {
 	it('does not send the account the extension already holds', async () => {
 		render(ExtensionPanelContent);
 
-		receive(state({ account: { eth: mockEthAddress, sol: mockSolAddress } }));
+		current().receive(state({ account: { eth: mockEthAddress, sol: mockSolAddress } }));
 		await tick();
 
-		expect(setAccountCalls()).toHaveLength(0);
+		expect(sentMessages().filter(({ type }) => type === 'set-account')).toHaveLength(0);
 	});
 
 	it('lists sites that can see at least one chain, and disconnects one', async () => {
 		const { getByText, queryByText, getByRole } = render(ExtensionPanelContent);
 
-		receive(
+		current().receive(
 			state({
 				sites: {
 					'https://app.example': { eth: true, sol: false },
@@ -111,7 +137,7 @@ describe('ExtensionPanelContent', () => {
 
 		await fireEvent.click(getByRole('button', { name: 'Disconnect app.example' }));
 
-		expect(port.postMessage).toHaveBeenCalledWith({
+		expect(current().port.postMessage).toHaveBeenCalledWith({
 			type: 'revoke-site',
 			origin: 'https://app.example'
 		});
@@ -120,7 +146,7 @@ describe('ExtensionPanelContent', () => {
 	it('says no site is connected yet', async () => {
 		const { getByText } = render(ExtensionPanelContent);
 
-		receive(state());
+		current().receive(state());
 		await tick();
 
 		expect(getByText(en.extension.panel.no_sites)).toBeInTheDocument();
@@ -129,11 +155,44 @@ describe('ExtensionPanelContent', () => {
 	it('refuses an outdated extension and does not hand it the account', async () => {
 		const { getByText } = render(ExtensionPanelContent);
 
-		receive(state({ version: '0.0.0' }));
+		current().receive(state({ version: '0.0.0' }));
 		await tick();
 
 		expect(getByText(en.extension.text.outdated)).toBeInTheDocument();
-		expect(setAccountCalls()).toHaveLength(0);
+		expect(sentMessages().filter(({ type }) => type === 'set-account')).toHaveLength(0);
+	});
+
+	it('reconnects when Chrome stops the extension worker', async () => {
+		const { queryByText } = render(ExtensionPanelContent);
+
+		current().receive(state());
+		current().drop();
+		await tick();
+
+		expect(ports).toHaveLength(2);
+		expect(current().port.postMessage).toHaveBeenCalledWith({ type: 'get-state' });
+		expect(queryByText(en.extension.text.no_extension)).not.toBeInTheDocument();
+	});
+
+	it('says the extension is unreachable once reconnecting keeps failing', async () => {
+		const { getByText } = render(ExtensionPanelContent);
+
+		for (let attempt = 0; attempt <= OISY_EXTENSION_PANEL_RECONNECT_ATTEMPTS; attempt++) {
+			current().drop();
+		}
+		await tick();
+
+		expect(ports).toHaveLength(OISY_EXTENSION_PANEL_RECONNECT_ATTEMPTS + 1);
+		expect(getByText(en.extension.text.no_extension)).toBeInTheDocument();
+	});
+
+	it('pings the extension while the panel is open', () => {
+		vi.useFakeTimers();
+
+		render(ExtensionPanelContent);
+		vi.advanceTimersByTime(OISY_EXTENSION_KEEP_ALIVE_MS);
+
+		expect(current().port.postMessage).toHaveBeenCalledWith({ type: 'ping' });
 	});
 
 	it('says the extension is unreachable when no extension answers', () => {

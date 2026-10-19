@@ -6,7 +6,11 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
-	import { OISY_EXTENSION_PANEL_PORT_NAME } from '$lib/constants/extension.constants';
+	import {
+		OISY_EXTENSION_KEEP_ALIVE_MS,
+		OISY_EXTENSION_PANEL_PORT_NAME,
+		OISY_EXTENSION_PANEL_RECONNECT_ATTEMPTS
+	} from '$lib/constants/extension.constants';
 	import { extensionAccount, extensionNetworksOn } from '$lib/derived/extension.derived';
 	import { enabledFungibleNetworkTokensUi } from '$lib/derived/network-tokens-ui.derived';
 	import { connectExtension } from '$lib/providers/extension.providers';
@@ -35,33 +39,63 @@
 		}
 	};
 
-	onMount(() => {
-		port = connectExtension({ name: OISY_EXTENSION_PANEL_PORT_NAME });
+	// Disconnects since the extension last answered. A missing or disabled extension drops every new
+	// port at once, so a few in a row mean it is really gone.
+	let failedConnects = 0;
 
-		if (isNullish(port)) {
+	const connect = () => {
+		const next = connectExtension({ name: OISY_EXTENSION_PANEL_PORT_NAME });
+
+		if (isNullish(next)) {
 			reachable = false;
 			return;
 		}
 
-		port.onMessage.addListener((message) => {
+		port = next;
+
+		next.onMessage.addListener((message) => {
 			const parsed = ExtensionPanelStateMessageSchema.safeParse(message);
 
 			if (!parsed.success) {
 				return;
 			}
 
+			failedConnects = 0;
 			extensionState = parsed.data.state;
 			versionStatus = extensionVersionStatus({ version: parsed.data.version });
 		});
 
-		port.onDisconnect.addListener(() => {
+		// Chrome stops the extension's worker when it has nothing to do and closes its ports. A new port
+		// starts the worker again, so the panel reconnects before it calls the extension unreachable.
+		next.onDisconnect.addListener(() => {
+			if (port !== next) {
+				return;
+			}
+
 			port = undefined;
-			reachable = false;
+			failedConnects++;
+
+			if (failedConnects > OISY_EXTENSION_PANEL_RECONNECT_ATTEMPTS) {
+				reachable = false;
+				return;
+			}
+
+			connect();
 		});
 
 		send({ type: 'get-state' });
+	};
 
-		return () => port?.disconnect();
+	onMount(() => {
+		connect();
+
+		// Pings keep the worker awake while the panel is open, so the state it pushes arrives at once.
+		const keepAlive = setInterval(() => send({ type: 'ping' }), OISY_EXTENSION_KEEP_ALIVE_MS);
+
+		return () => {
+			clearInterval(keepAlive);
+			port?.disconnect();
+		};
 	});
 
 	// The panel is OISY itself, so once signed in it hands the extension the account directly; there is
