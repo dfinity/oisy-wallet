@@ -609,11 +609,20 @@ describe('lifi-active-tx.services', () => {
 		});
 
 		it('reloads the source and its gas token for a Solana destination', () => {
-			reloadLifiEvmBalances({ tx: buildTx(), tokens: [mockLifiBaseUsdcToken] });
+			reloadLifiEvmBalances({
+				tx: buildTx(),
+				tokens: [mockLifiBaseUsdcToken, BASE_ETH_TOKEN]
+			});
 
 			expect(reloadEthereumBalance).toHaveBeenCalledTimes(2);
 			expect(reloadEthereumBalance).toHaveBeenCalledWith(mockLifiBaseUsdcToken);
 			expect(reloadEthereumBalance).toHaveBeenCalledWith(BASE_ETH_TOKEN);
+		});
+
+		it('reloads the gas token of a source that was disabled since', () => {
+			reloadLifiEvmBalances({ tx: buildTx(), tokens: [BASE_ETH_TOKEN] });
+
+			expect(reloadEthereumBalance).toHaveBeenCalledExactlyOnceWith(BASE_ETH_TOKEN);
 		});
 
 		describe('a partial payout', () => {
@@ -624,7 +633,7 @@ describe('lifi-active-tx.services', () => {
 			};
 
 			// An enabled NFT collection on the destination chain, which the ERC-20 loader would fail on.
-			const tokens = [mockLifiBaseUsdcToken, ETHEREUM_TOKEN, mockValidErc1155Token];
+			const tokens = [mockLifiBaseUsdcToken, BASE_ETH_TOKEN, ETHEREUM_TOKEN, mockValidErc1155Token];
 
 			const withSubstatus = (substatus: string) =>
 				buildTx({
@@ -661,7 +670,7 @@ describe('lifi-active-tx.services', () => {
 						source_token: { Erc4626: [mockValidErc4626Token.address, 1n] }
 					}
 				}),
-				tokens: [mockValidErc4626Token]
+				tokens: [mockValidErc4626Token, ETHEREUM_TOKEN]
 			});
 
 			expect(reloadEthereumBalance).toHaveBeenCalledTimes(2);

@@ -3,7 +3,6 @@ import type {
 	ActiveUserTransactionStatus
 } from '$declarations/backend/backend.did';
 import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
-import { nativeTokenOf } from '$eth/services/native-balance.services';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
@@ -480,7 +479,14 @@ export const reloadLifiEvmBalances = ({
 
 	const sourceToken = findTokenByBackendTokenId({ tokenId: tx.data.Lifi.source_token, tokens });
 	const destinationToken = findTokenByBackendTokenId({ tokenId: tx.data.Lifi.dest_token, tokens });
+	const sourceChainId = lifiChainIdOfTokenId(tx.data.Lifi.source_token);
 	const destinationChainId = lifiChainIdOfTokenId(tx.data.Lifi.dest_token);
+
+	// Found from the row's source chain rather than from the source token, so that it is reloaded
+	// even when that token was disabled since. A non-EVM chain has no such token, and none is found.
+	const gasToken = nonNullish(sourceChainId)
+		? findTokenByBackendTokenId({ tokenId: { EvmNative: BigInt(sourceChainId) }, tokens })
+		: undefined;
 
 	// A partial payout came in a token other than the one asked for, which the row does not
 	// identify, so every enabled token of the destination chain is reloaded.
@@ -498,12 +504,7 @@ export const reloadLifiEvmBalances = ({
 
 	const evmTokens = new Map<Token['id'], Token>();
 
-	for (const token of [
-		sourceToken,
-		nonNullish(sourceToken) ? nativeTokenOf(sourceToken.network.id) : undefined,
-		destinationToken,
-		...payoutTokens
-	]) {
+	for (const token of [sourceToken, gasToken, destinationToken, ...payoutTokens]) {
 		if (nonNullish(token) && isReloadableEvmToken(token)) {
 			evmTokens.set(token.id, token);
 		}

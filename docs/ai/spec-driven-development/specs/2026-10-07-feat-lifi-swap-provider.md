@@ -1324,8 +1324,8 @@ prune to its own rows.
     (`LoaderEthBalances.svelte` does not listen for it, as `native-balance.services.ts`
     notes), so it refreshes nothing on EVM.
   - An explicit EVM reload with `reloadEthereumBalance` (`eth/services/eth-balance.services.ts`)
-    for each affected EVM token: the source token and its network's native token (gas,
-    `nativeTokenOf`) on every terminal status, since a refund can also land there, and the
+    for each affected EVM token: the source token and its chain's native token (gas) on
+    every terminal status, since a refund can also land there, and the
     destination token when it is on an EVM network. After a partial payout (the row's
     `lifi_substatus` is `PARTIAL`), the token received is not one the row identifies, so
     every enabled fungible token of the destination chain is reloaded too. The loader
@@ -1339,7 +1339,8 @@ prune to its own rows.
     token whose `toBackendTokenId` equals the row's `source_token` / `dest_token`
     (`findTokenByBackendTokenId`, compared through `tokenIdKey`, which keys ERC-4626
     vaults too, since LI.FI quotes them as ERC-20s); an unresolved token (disabled since
-    the swap) is skipped.
+    the swap) is skipped. The gas token is the enabled `EvmNative` of the row's source
+    chain, found on its own, so it is still reloaded when the source token was disabled.
   - Redundant refreshes (dropped or expired source) only find nothing new.
 - `ActiveUserTransactionItem.svelte`: `isLifi` in the `isSwap` list and the
   `providerName` chain; when `lifi_received_symbol` is present, the received token and
