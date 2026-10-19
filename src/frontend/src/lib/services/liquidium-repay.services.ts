@@ -17,6 +17,7 @@ import {
 	LIQUIDIUM_EXTERNAL_REF_KEYS,
 	type LiquidiumExternalRefKey
 } from '$lib/types/liquidium-active-tx';
+import { isActiveUserTransactionError } from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import {
 	liquidiumTrackingMetadata,
@@ -197,11 +198,8 @@ export const executeLiquidiumRepay = async ({
 		}
 	};
 
-	// Before the broadcast: the row is what nets this repay out of the repay max until it settles,
-	// so a repay that cannot be recorded is not sent. Sent anyway, nothing would count it, and a
-	// second full repay could reach Liquidium with no debt left to apply it to.
-	try {
-		await createActiveUserTransaction({
+	const createRow = (rowRefs: Partial<Record<LiquidiumExternalRefKey, string>>) =>
+		createActiveUserTransaction({
 			identity,
 			id,
 			data: {
@@ -213,8 +211,14 @@ export const executeLiquidiumRepay = async ({
 				}
 			},
 			...(nonNullish(progressStep) ? { progressStep } : {}),
-			externalRefs: toLiquidiumExternalRefs(refs)
+			externalRefs: toLiquidiumExternalRefs(rowRefs)
 		});
+
+	// Before the broadcast: the row is what nets this repay out of the repay max until it settles,
+	// so a repay that cannot be recorded is not sent. Sent anyway, nothing would count it, and a
+	// second full repay could reach Liquidium with no debt left to apply it to.
+	try {
+		await createRow(refs);
 	} catch (err: unknown) {
 		// The backend may have committed the row all the same, if only its answer was lost.
 		await deleteRow();
@@ -272,17 +276,27 @@ export const executeLiquidiumRepay = async ({
 	// The txid first: it is what the poller correlates the row on, and a row still without one once
 	// the grace period is over is dropped. `external_refs` is replaced wholesale, so the other refs
 	// go along again.
+	const sentRefs = { ...refs, [LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid };
+
 	try {
 		await updateActiveUserTransaction({
 			identity,
 			id,
-			externalRefs: toLiquidiumExternalRefs({
-				...refs,
-				[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid
-			})
+			externalRefs: toLiquidiumExternalRefs(sentRefs)
 		});
 	} catch (err: unknown) {
 		consoleError(err);
+
+		// Gone: a poller took the row for abandoned, the broadcast having outlasted the grace period
+		// with every renewal lost. The repay was sent, so it is recorded again under the same id, to
+		// keep counting until it settles.
+		if (isActiveUserTransactionError(err) && 'NotFound' in err) {
+			try {
+				await createRow(sentRefs);
+			} catch (createErr: unknown) {
+				consoleError(createErr);
+			}
+		}
 	}
 
 	try {

@@ -411,8 +411,10 @@ describe('active-user-transactions.services', () => {
 				reloadActiveUserTransaction({ identity: mockIdentity, id: mockActiveUserTransactionId })
 			).resolves.toEqual(freshTransaction);
 
+			// Certified: the answer decides whether a row is deleted.
 			expect(backendApi.getActiveUserTransactions).toHaveBeenCalledExactlyOnceWith({
-				identity: mockIdentity
+				identity: mockIdentity,
+				certified: true
 			});
 			expect(get(activeUserTransactionsList)).toEqual([freshTransaction]);
 		});

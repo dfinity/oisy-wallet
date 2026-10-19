@@ -255,6 +255,10 @@ describe('liquidium-repay.services', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
+			// Also drops `*Once` answers a case queued but did not use, so they cannot leak into the next.
+			createActiveUserTransaction.mockReset();
+			updateActiveUserTransaction.mockReset();
+			deleteActiveUserTransaction.mockReset();
 			vi.mocked(liquidiumServices.getOrCreateLiquidiumProfile).mockResolvedValue(profileId);
 			vi.mocked(liquidiumApi.liquidiumClient).mockReturnValue({
 				lending: { supply }
@@ -467,6 +471,54 @@ describe('liquidium-repay.services', () => {
 
 				await expect(repaid).resolves.toBeUndefined();
 			});
+		});
+
+		// A poller took the row for abandoned while the broadcast outlasted the grace period.
+		it('records the AUT again, with its txid, when it was deleted during the broadcast', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			broadcast.mockResolvedValue('0xhash');
+			updateActiveUserTransaction.mockRejectedValueOnce({ NotFound: null });
+
+			await expect(run()).resolves.toBeUndefined();
+
+			expect(createActiveUserTransaction).toHaveBeenCalledTimes(2);
+
+			const [[first], [second]] = createActiveUserTransaction.mock.calls;
+
+			expect(second).toEqual({
+				...first,
+				externalRefs: [
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }
+				]
+			});
+			expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
+		it('does not record the AUT again when the txid write fails for another reason', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			broadcast.mockResolvedValue('0xhash');
+			updateActiveUserTransaction.mockRejectedValueOnce(new Error('backend unavailable'));
+
+			await expect(run()).resolves.toBeUndefined();
+
+			expect(createActiveUserTransaction).toHaveBeenCalledOnce();
+		});
+
+		it('resolves when recording the AUT again fails (funds already sent)', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			broadcast.mockResolvedValue('0xhash');
+			updateActiveUserTransaction.mockRejectedValueOnce({ NotFound: null });
+			createActiveUserTransaction
+				.mockResolvedValueOnce(undefined)
+				.mockRejectedValueOnce({ TooManyActiveTransactions: null });
+
+			await expect(run()).resolves.toBeUndefined();
+
+			expect(createActiveUserTransaction).toHaveBeenCalledTimes(2);
+			expect(submit).toHaveBeenCalledOnce();
 		});
 
 		it('resolves even if the txid write fails (funds already sent)', async () => {
