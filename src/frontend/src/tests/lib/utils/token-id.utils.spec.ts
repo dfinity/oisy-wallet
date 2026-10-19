@@ -12,7 +12,7 @@ import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc4626Token } from '$eth/types/erc4626';
-import { toBackendTokenId, tokenIdKey } from '$lib/utils/token-id.utils';
+import { findTokenByBackendTokenId, toBackendTokenId, tokenIdKey } from '$lib/utils/token-id.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import type { SplToken } from '$sol/types/spl';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
@@ -158,6 +158,49 @@ describe('token-id.utils', () => {
 		// on the backend, so it must stay untrackable rather than borrow testnet's.
 		it('returns undefined for a token with no backend representation', () => {
 			expect(toBackendTokenId(BTC_REGTEST_TOKEN)).toBeUndefined();
+		});
+	});
+
+	describe('findTokenByBackendTokenId', () => {
+		const usdc: Erc20Token = {
+			...mockValidToken,
+			id: parseTokenId(`Erc20-${USDC_ETHEREUM}`),
+			standard: { code: 'erc20' },
+			address: USDC_ETHEREUM,
+			network: ETHEREUM_NETWORK
+		};
+
+		const tokens = [ETHEREUM_TOKEN, SOLANA_TOKEN, usdc];
+
+		it('finds the token a row stores, whatever the case of its address', () => {
+			expect(
+				findTokenByBackendTokenId({
+					tokenId: { Erc20: [USDC_ETHEREUM.toLowerCase(), 1n] },
+					tokens
+				})
+			).toBe(usdc);
+			expect(findTokenByBackendTokenId({ tokenId: { EvmNative: 1n }, tokens })).toBe(
+				ETHEREUM_TOKEN
+			);
+			expect(findTokenByBackendTokenId({ tokenId: { SolNativeMainnet: null }, tokens })).toBe(
+				SOLANA_TOKEN
+			);
+		});
+
+		it('returns undefined for a token that is not among them', () => {
+			expect(
+				findTokenByBackendTokenId({ tokenId: { Erc20: [USDC_ETHEREUM, 8453n] }, tokens })
+			).toBeUndefined();
+			expect(findTokenByBackendTokenId({ tokenId: { EvmNative: 1n }, tokens: [] })).toBeUndefined();
+		});
+
+		it('returns undefined for a variant that has no key', () => {
+			expect(
+				findTokenByBackendTokenId({
+					tokenId: { Erc4626: [mockValidErc4626Token.address, 1n] },
+					tokens: [mockValidErc4626Token]
+				})
+			).toBeUndefined();
 		});
 	});
 });
