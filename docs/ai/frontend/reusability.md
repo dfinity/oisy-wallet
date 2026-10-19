@@ -139,9 +139,11 @@ Add new feature folders only if your concern doesn't fit any of the above.
 | ------------------------------------------------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `format.utils`, `bigint.utils`, `array.utils`, `json.utils`               | `$lib/utils/`                     | Generic formatting helpers.                                                                                                                                                                                                                                                                                                                                                 |
 | `i18n.utils` (incl. `replacePlaceholders`)                                | `$lib/utils/`                     | i18n string interpolation.                                                                                                                                                                                                                                                                                                                                                  |
+| `string.utils` (`truncateUtf8Bytes`)                                      | `$lib/utils/`                     | Cuts text to a UTF-8 byte limit without splitting a character — for limits the backend measures in bytes, such as an active-transaction row's `error` and ref values (`ACTIVE_USER_TRANSACTION_*_MAX_BYTES`), which a character count overruns on non-ASCII text.                                                                                                           |
 | `console.utils` (`consoleError`, `consoleWarn`)                           | `$lib/utils/`                     | The only allowed console wrapper.                                                                                                                                                                                                                                                                                                                                           |
 | `error.utils`, `assert-amount.utils`, `validation` helpers                | `$lib/utils/`, `$lib/validation/` | Error & input validation.                                                                                                                                                                                                                                                                                                                                                   |
 | `network.utils`, `networks.utils`                                         | `$lib/utils/`                     | Network ID predicates, `findEvmNetworkByChainId`.                                                                                                                                                                                                                                                                                                                           |
+| `evm-source-tx.utils`, `evm-source-tx.services`                           | `$lib/utils/`, `$lib/services/`   | What the source chain says about an EVM transaction an active-transaction row tracks: receipt and confirmed nonce, with `replaced` only after two consecutive observations (`readEvmSourceTxOutcome`). Use it from any EVM swap poller rather than reading receipts by hand.                                                                                                |
 | `wallet-connect.utils` (`acceptedContext`)                                | `$lib/utils/`                     | Whether a WalletConnect proposal or request may be approved, from Verify's `isScam` verdict. Chain-agnostic: every review reads it from here.                                                                                                                                                                                                                               |
 | `token-id.utils`                                                          | `$lib/utils/`                     | Backend `TokenId` ↔ app token (`toBackendTokenId`, `tokenIdKey`).                                                                                                                                                                                                                                                                                                           |
 | `token.utils` (`buildIcTokenLabels`)                                      | `$lib/utils/`                     | One unambiguous display label per IC ledger: the display symbol, plus the shortened ledger id wherever another ledger shares that symbol or spells out a suffixed label as its symbol. Build it once over every token the user can pick from and pass it down — labels computed per filtered list can present an impostor as unique. Never hand-roll symbol disambiguation. |
@@ -150,6 +152,11 @@ Add new feature folders only if your concern doesn't fit any of the above.
 | `transitions.utils` (`fade`, `fly`, `slide`, `scale`, `blur`, `backdrop`) | `$lib/utils/`                     | Svelte's transitions and their parameter types, with OISY's timings and reduced motion built in. Lint refuses `svelte/transition` elsewhere.                                                                                                                                                                                                                                |
 | `clipboard.utils`, `device.utils`, `events.utils`                         | `$lib/utils/`                     | Browser plumbing.                                                                                                                                                                                                                                                                                                                                                           |
 | `derived-memo.utils`, `certified-store.utils`                             | `$lib/utils/`                     | Store helpers.                                                                                                                                                                                                                                                                                                                                                              |
+
+A swap provider without a token list answers `getSupportedDestinations` with a wildcard
+instead of a set: `{}` in its own registry's category (Velora), or `{ <category>: 'any' }`
+in another one (LI.FI's EVM → Solana). `computeReceiveSupportedTokens` in
+`swap-tokens-filter.utils` counts either as a provider for that category without a list.
 
 ### Chain-specific utils worth knowing
 
@@ -165,7 +172,29 @@ Add new feature folders only if your concern doesn't fit any of the above.
 | `coingecko.rest`                                                                             | `$lib/rest/`    | Spot / token prices.      |
 | `blockchain.rest`, `blockstream.rest`                                                        | `$lib/rest/`    | BTC explorer endpoints.   |
 | `kongswap.rest`, `icpswap.rest`, `near-intents.rest`, `harvest.rest`, `open-crypto-pay.rest` | `$lib/rest/`    | Swap providers + harvest. |
+| `lifi.rest`                                                                                  | `$lib/rest/`    | LI.FI quotes (SDK-based). |
 | `exchange.worker`, `auth.worker`                                                             | `$lib/workers/` | Background polling.       |
+
+### Per-provider swap quote cache
+
+Every swap provider is re-quoted every `SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS`. A provider
+whose rate limit cannot take that cadence throttles inside its own quote service; the fan-out
+stays unchanged. The precedent is `fetchLifiSwapQuote` (`$lib/services/lifi-swap.services.ts`):
+
+- One module-level entry `{ key, result, settledAt? }`. `key` is the serialised request, and
+  `result` is the promise rather than its value, so a request still in flight is shared, however
+  long it takes.
+- The interval runs from `settledAt`, not from the request: the same key gets the cached answer,
+  a failure or "no route" included, until the interval has passed since it settled. Any other
+  key fetches immediately and replaces the entry.
+- Give the request a timeout (`AbortSignal.timeout`, as `xrpl.rest` does): a request that never
+  settles would otherwise pin the entry, and hold back every other provider's offer, since the
+  swap form shows its offers once all providers have answered.
+- Serialise the key from your own request object, and hand an SDK that writes into its argument
+  a copy.
+- Export a reset (`resetLifiQuoteCache`) as the test seam, as `clearNearIntentsTokensCache` does.
+- Only display quotes go through the cache. A quote that is executed is requested again from the
+  REST layer directly.
 
 ## When to extract a new shared block
 

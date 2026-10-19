@@ -47,6 +47,14 @@ export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeee
 
 export const SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS = 5_000;
 
+// LI.FI is re-quoted at most this often for unchanged inputs, rather than on every periodic tick:
+// its rate limit is tight, and a displayed quote is never signed — execution always re-quotes.
+export const LIFI_QUOTE_REFRESH_INTERVAL_MS = 30_000;
+
+// The swap form shows its offers once every provider has answered, so a stalled LI.FI request would
+// hold back every other offer, and a request that never settles would never be retried.
+export const LIFI_QUOTE_TIMEOUT_MS = 10_000;
+
 export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
 	[ETHEREUM_NETWORK_ID]: 'eth',
 	[ARBITRUM_MAINNET_NETWORK_ID]: 'arb',
@@ -116,6 +124,15 @@ export const swapProvidersDetails: Partial<Record<SwapProvider, SwapProvidersCon
 		website: OISY_TRADE_LEARN_MORE_URL,
 		name: OISY_TRADE_PROVIDER_NAME,
 		logo: '/images/dapps/oisy-trade-logo.svg'
+	},
+	// Unconditional for the same reason as OISY Trade: a LI.FI active-transaction row outlives a
+	// flag rollback, and `ActiveUserTransactionItem` will name it through this map once the LI.FI
+	// tracking lands (PR 2b-3 of the spec).
+	[SwapProvider.LIFI]: {
+		website: 'https://li.fi',
+		name: 'LI.FI',
+		// TODO: replace the placeholder with the official logo
+		logo: '/images/dapps/lifi-logo.svg'
 	}
 };
 

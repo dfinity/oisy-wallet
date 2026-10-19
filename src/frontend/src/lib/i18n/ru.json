@@ -1349,6 +1349,8 @@
 			"swap_fees": "Комиссия за обмен",
 			"cross_chain_networks_info": "Информация о кросс-чейн сетях",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
