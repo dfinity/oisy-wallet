@@ -1,12 +1,12 @@
 <script lang="ts">
 	import ExtensionLoaders from '$lib/components/extension/ExtensionLoaders.svelte';
 	import ExtensionRequest from '$lib/components/extension/ExtensionRequest.svelte';
-	import SignerSignIn from '$lib/components/signer/SignerSignIn.svelte';
+	import ExtensionSignIn from '$lib/components/extension/ExtensionSignIn.svelte';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 </script>
 
 {#if $authNotSignedIn}
-	<SignerSignIn />
+	<ExtensionSignIn />
 {:else}
 	<ExtensionLoaders>
 		<ExtensionRequest />

@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import ExtensionLoaders from '$lib/components/extension/ExtensionLoaders.svelte';
 	import ExtensionPanelContent from '$lib/components/extension/ExtensionPanelContent.svelte';
-	import SignerSignIn from '$lib/components/signer/SignerSignIn.svelte';
+	import ExtensionSignIn from '$lib/components/extension/ExtensionSignIn.svelte';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { announcePanelReady } from '$lib/providers/extension.providers';
 
@@ -10,7 +10,7 @@
 </script>
 
 {#if $authNotSignedIn}
-	<SignerSignIn />
+	<ExtensionSignIn />
 {:else}
 	<ExtensionLoaders>
 		<ExtensionPanelContent />
