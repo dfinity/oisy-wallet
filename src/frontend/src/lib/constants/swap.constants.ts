@@ -147,8 +147,7 @@ export const swapProvidersDetails: Partial<Record<SwapProvider, SwapProvidersCon
 		logo: '/images/dapps/oisy-trade-logo.svg'
 	},
 	// Unconditional for the same reason as OISY Trade: a LI.FI active-transaction row outlives a
-	// flag rollback, and `ActiveUserTransactionItem` will name it through this map once the LI.FI
-	// tracking lands (PR 2b-3 of the spec).
+	// flag rollback, and `ActiveUserTransactionItem` names it through this map.
 	[SwapProvider.LIFI]: {
 		website: 'https://li.fi',
 		name: 'LI.FI',
