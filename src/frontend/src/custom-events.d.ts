@@ -18,8 +18,6 @@ declare module 'svelte/elements' {
 			event: CustomEvent<OisyIndexCanisterBalanceOutOfSyncEvent>
 		) => void;
 		onoisyRefreshUserProfile?: (event: CustomEvent<NoParamEvent>) => void;
-		onoisyToggleZeroBalances?: (event: CustomEvent<NoParamEvent>) => void;
-		onoisyToggleTokenCategoryFilter?: (event: CustomEvent<NoParamEvent>) => void;
 		onoisyRefreshContacts?: (event: CustomEvent<NoParamEvent>) => void;
 		onoisyRefreshTips?: (event: CustomEvent<NoParamEvent>) => void;
 		onoisyDisconnectWalletConnect?: (event: CustomEvent<NoParamEvent>) => void;

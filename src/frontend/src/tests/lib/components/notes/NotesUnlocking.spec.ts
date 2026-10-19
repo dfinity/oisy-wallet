@@ -5,6 +5,15 @@ import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 
 describe('NotesUnlocking', () => {
+	it('uses the shared visor loader while keeping the existing content', () => {
+		const { getByTestId } = render(NotesUnlocking);
+		const spinner = getByTestId('spinner');
+
+		expect(spinner.querySelectorAll('path')).toHaveLength(2);
+		expect(spinner.closest('span')).toHaveClass('inline');
+		expect(spinner.closest('span')?.getAttribute('style')).toContain('--spinner-size: 48px');
+	});
+
 	it('shows the unlocking title and subtitle', () => {
 		const { getByTestId, getByText } = render(NotesUnlocking);
 

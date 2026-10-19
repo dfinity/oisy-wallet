@@ -108,6 +108,9 @@
 			"do_not_close": "Ne fermez pas cet onglet tant que la transaction n'est pas terminée",
 			"standalone_mode": "Des problèmes de connexion connus surviennent lorsqu'une application et $oisy_short sont tous deux installés sur l'écran d'accueil. Si vous rencontrez des problèmes de connexion à $oisy_short ou de signature de transactions, veuillez lancer l'application depuis un navigateur classique. Nous travaillons sur un correctif qui sera bientôt disponible. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">En savoir plus</a>",
 			"video_not_supported": "Votre navigateur ne prend pas en charge la lecture vidéo."
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
@@ -2716,10 +2719,13 @@
 			"starting_to_repay": "Envoi de votre remboursement…",
 			"repay_started": "Votre remboursement est en cours de traitement.",
 			"current_debt": "Dette actuelle",
+			"pending_repays": "Remboursements en cours",
 			"interest_accrued": "Intérêts courus",
 			"debt_after_repay": "Dette après remboursement",
 			"repay_exceeds_debt": "Le montant dépasse votre dette impayée.",
-			"repay_prices_unavailable": "Les prix sont temporairement indisponibles. Le remboursement est désactivé jusqu'à leur chargement."
+			"repay_prices_unavailable": "Les prix sont temporairement indisponibles. Le remboursement est désactivé jusqu'à leur chargement.",
+			"repay_debt_unavailable": "Votre dette impayée est temporairement indisponible. Le remboursement est désactivé jusqu'à son chargement.",
+			"repay_pending_covers_debt": "Un remboursement pour cette position est toujours en cours de traitement. Vous pourrez rembourser davantage une fois qu'il sera finalisé."
 		},
 		"info": {
 			"title": "Qu'est-ce que Liquidium",
@@ -3021,6 +3027,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

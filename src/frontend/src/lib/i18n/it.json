@@ -108,6 +108,9 @@
 			"do_not_close": "Non chiudere questa scheda finché la transazione non è completata",
 			"standalone_mode": "Sono noti problemi di connessione quando sia un'app che $oisy_short sono installati nella schermata iniziale. Se riscontri problemi di connessione a $oisy_short o di firma delle transazioni, avvia l'app da un browser normale. Stiamo lavorando a una soluzione che sarà disponibile a breve. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Scopri di più</a>",
 			"video_not_supported": ""
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
@@ -2716,10 +2719,13 @@
 			"starting_to_repay": "Invio del tuo rimborso…",
 			"repay_started": "Il tuo rimborso è in fase di elaborazione.",
 			"current_debt": "Debito attuale",
+			"pending_repays": "Rimborsi in elaborazione",
 			"interest_accrued": "Interessi maturati",
 			"debt_after_repay": "Debito dopo il rimborso",
 			"repay_exceeds_debt": "L'importo supera il tuo debito residuo.",
-			"repay_prices_unavailable": "I prezzi non sono temporaneamente disponibili. Il rimborso è disabilitato finché non vengono caricati."
+			"repay_prices_unavailable": "I prezzi non sono temporaneamente disponibili. Il rimborso è disabilitato finché non vengono caricati.",
+			"repay_debt_unavailable": "Il tuo debito residuo non è temporaneamente disponibile. Il rimborso è disabilitato finché non viene caricato.",
+			"repay_pending_covers_debt": "Un rimborso per questa posizione è ancora in elaborazione. Potrai rimborsare di più una volta completato."
 		},
 		"info": {
 			"title": "Cos'è Liquidium",
@@ -3021,6 +3027,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

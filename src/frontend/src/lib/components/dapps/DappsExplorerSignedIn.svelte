@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 	import DappCard from '$lib/components/dapps/DappCard.svelte';
 	import DappPromoBanner from '$lib/components/dapps/DappPromoBanner.svelte';
@@ -17,6 +16,7 @@
 	import type { FeaturedOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	const enabledDappDescriptions = dAppDescriptions.filter(({ disabled }) => !disabled);
 

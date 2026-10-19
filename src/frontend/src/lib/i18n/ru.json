@@ -108,6 +108,9 @@
 			"do_not_close": "Не закрывайте эту вкладку, пока транзакция не завершится",
 			"standalone_mode": "При одновременной установке приложения и $oisy_short на главный экран возникают известные проблемы с подключением. Если у вас возникли проблемы с подключением $oisy_short или подписанием транзакций, запустите приложение из обычного браузера. Мы работаем над исправлением, которое скоро будет готово. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Подробнее</a>",
 			"video_not_supported": "Ваш браузер не поддерживает воспроизведение видео."
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
@@ -2716,10 +2719,13 @@
 			"starting_to_repay": "Отправка твоего погашения…",
 			"repay_started": "Твоё погашение сейчас обрабатывается.",
 			"current_debt": "Текущий долг",
+			"pending_repays": "Погашения в обработке",
 			"interest_accrued": "Начисленные проценты",
 			"debt_after_repay": "Долг после погашения",
 			"repay_exceeds_debt": "Сумма превышает твой непогашенный долг.",
-			"repay_prices_unavailable": "Цены временно недоступны. Погашение отключено, пока они не загрузятся."
+			"repay_prices_unavailable": "Цены временно недоступны. Погашение отключено, пока они не загрузятся.",
+			"repay_debt_unavailable": "Твой непогашенный долг временно недоступен. Погашение отключено, пока он не загрузится.",
+			"repay_pending_covers_debt": "Погашение по этой позиции ещё обрабатывается. Ты сможешь погасить больше, когда оно завершится."
 		},
 		"info": {
 			"title": "Что такое Liquidium",
@@ -3021,6 +3027,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

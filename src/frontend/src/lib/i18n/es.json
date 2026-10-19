@@ -108,6 +108,9 @@
 			"do_not_close": "No cierres esta pestaña hasta que la transacción esté completa",
 			"standalone_mode": "Se han detectado problemas de conexión conocidos cuando tanto una aplicación como $oisy_short están instalados en la pantalla de inicio. Si tiene problemas para conectar $oisy_short o firmar transacciones, inicie la aplicación desde un navegador normal. Estamos trabajando en una solución que estará disponible pronto. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Leer más</a>",
 			"video_not_supported": ""
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
@@ -2716,10 +2719,13 @@
 			"starting_to_repay": "Enviando tu reembolso…",
 			"repay_started": "Tu reembolso se está procesando.",
 			"current_debt": "Deuda actual",
+			"pending_repays": "Reembolsos en proceso",
 			"interest_accrued": "Interés acumulado",
 			"debt_after_repay": "Deuda después del reembolso",
 			"repay_exceeds_debt": "El importe supera tu deuda pendiente.",
-			"repay_prices_unavailable": "Los precios no están disponibles temporalmente. El reembolso está deshabilitado hasta que se carguen."
+			"repay_prices_unavailable": "Los precios no están disponibles temporalmente. El reembolso está deshabilitado hasta que se carguen.",
+			"repay_debt_unavailable": "Tu deuda pendiente no está disponible temporalmente. El reembolso está deshabilitado hasta que se cargue.",
+			"repay_pending_covers_debt": "Un reembolso de esta posición todavía se está procesando. Podrás reembolsar más cuando se complete."
 		},
 		"info": {
 			"title": "Qué es Liquidium",
@@ -3021,6 +3027,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

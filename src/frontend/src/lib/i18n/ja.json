@@ -108,6 +108,9 @@
 			"do_not_close": "トランザクション完了までタブを閉じないでください。",
 			"standalone_mode": "アプリと $oisy_short の両方がホーム画面にインストールされている場合、接続に関する既知の問題が発生することがあります。$oisy_short への接続やトランザクションの署名に問題が生じた場合は、通常のブラウザからアプリを起動してください。現在修正に取り組んでおり、近日中に解決される予定です。 <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">詳細を見る</a>",
 			"video_not_supported": "ブラウザがビデオ再生をサポートしていません。"
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
@@ -2716,10 +2719,13 @@
 			"starting_to_repay": "返済を送信しています…",
 			"repay_started": "返済が処理されています。",
 			"current_debt": "現在の負債",
+			"pending_repays": "処理中の返済",
 			"interest_accrued": "発生した利息",
 			"debt_after_repay": "返済後の負債",
 			"repay_exceeds_debt": "金額が未払いの負債を超えています。",
-			"repay_prices_unavailable": "価格は一時的に利用できません。読み込まれるまで返済は無効になっています。"
+			"repay_prices_unavailable": "価格は一時的に利用できません。読み込まれるまで返済は無効になっています。",
+			"repay_debt_unavailable": "未払いの負債は一時的に利用できません。読み込まれるまで返済は無効になっています。",
+			"repay_pending_covers_debt": "このポジションの返済はまだ処理中です。完了後に追加で返済できます。"
 		},
 		"info": {
 			"title": "Liquidiumとは",
@@ -3021,6 +3027,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

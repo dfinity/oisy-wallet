@@ -108,6 +108,9 @@
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",
 			"standalone_mode": "Có các sự cố kết nối đã biết khi cả ứng dụng và $oisy_short đều được cài đặt trên màn hình chính. Nếu gặp sự cố khi kết nối $oisy_short hoặc ký giao dịch, vui lòng khởi động ứng dụng từ trình duyệt thông thường. Chúng tôi đang khắc phục sự cố này và sẽ sớm được giải quyết. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Đọc thêm</a>",
 			"video_not_supported": ""
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
@@ -2716,10 +2719,13 @@
 			"starting_to_repay": "Đang gửi khoản hoàn trả của bạn…",
 			"repay_started": "Khoản hoàn trả của bạn hiện đang được xử lý.",
 			"current_debt": "Khoản nợ hiện tại",
+			"pending_repays": "Khoản hoàn trả đang được xử lý",
 			"interest_accrued": "Lãi phát sinh",
 			"debt_after_repay": "Khoản nợ sau khi hoàn trả",
 			"repay_exceeds_debt": "Số tiền vượt quá khoản nợ chưa thanh toán của bạn.",
-			"repay_prices_unavailable": "Giá tạm thời không khả dụng. Việc hoàn trả bị vô hiệu hóa cho đến khi giá được tải."
+			"repay_prices_unavailable": "Giá tạm thời không khả dụng. Việc hoàn trả bị vô hiệu hóa cho đến khi giá được tải.",
+			"repay_debt_unavailable": "Khoản nợ chưa thanh toán của bạn tạm thời không khả dụng. Việc hoàn trả bị vô hiệu hóa cho đến khi khoản nợ được tải.",
+			"repay_pending_covers_debt": "Một khoản hoàn trả cho vị thế này vẫn đang được xử lý. Bạn có thể hoàn trả thêm khi khoản này hoàn tất."
 		},
 		"info": {
 			"title": "Liquidium là gì",
@@ -3021,6 +3027,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

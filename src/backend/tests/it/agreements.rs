@@ -805,7 +805,7 @@ fn test_get_agreement_history_returns_empty_for_new_user() {
         .unwrap()
         .unwrap();
 
-    assert!(history.is_empty());
+    assert_eq!(history, vec![]);
 }
 
 #[test]
@@ -987,7 +987,7 @@ fn test_agreement_history_not_recorded_when_no_change() {
         .unwrap()
         .unwrap();
 
-    assert!(history.is_empty());
+    assert_eq!(history, vec![]);
 }
 
 // ---------------------------------------------------------------------------

@@ -2,7 +2,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount, type Component } from 'svelte';
-	import { fade, fly } from 'svelte/transition';
 	import IconCheckCircle from '$lib/components/icons/IconCheckCircle.svelte';
 	import IconCloseThin from '$lib/components/icons/IconCloseThin.svelte';
 	import IconError from '$lib/components/icons/IconError.svelte';
@@ -13,6 +12,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsStore } from '$lib/stores/toasts.store';
 	import type { ToastLevel, ToastMsgUI } from '$lib/types/toast';
+	import { fly } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		msg: ToastMsgUI;
@@ -71,8 +71,8 @@
 	class={`toast ${level} ${theme ?? 'themed'}`}
 	data-tid="toast-component"
 	role="dialog"
-	in:fly|global={{ y: (position === 'top' ? -1 : 1) * 100, duration: 200 }}
-	out:fade|global={{ delay: 100 }}
+	in:fly|global={{ y: (position === 'top' ? -1 : 1) * 16 }}
+	out:fly|global={{ y: (position === 'top' ? -1 : 1) * 16 }}
 >
 	<div class="icon {level}" aria-hidden="true">
 		{#if spinner}
@@ -104,8 +104,11 @@
 		{/if}
 	</p>
 
-	<button class="close" aria-label={$i18n.core.text.close} data-tid="close-button" onclick={close}
-		><IconCloseThin /></button
+	<button
+		class="close hit-area relative press-icon"
+		aria-label={$i18n.core.text.close}
+		data-tid="close-button"
+		onclick={close}><IconCloseThin /></button
 	>
 </div>
 

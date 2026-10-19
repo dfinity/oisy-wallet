@@ -32,7 +32,143 @@ On **mobile** the bottom bar has five slots: **Assets · Activity · Finance · 
 
 The desktop sidebar's logo header and social-links footer remain a follow-up.
 
+Once signed in, the **header** (logo, network switcher, scan, profile) stays at the top while
+the page scrolls on any window from 768 px wide, as the sidebar beside it does; on phones it
+scrolls away and the bottom bar stays. Signed out (the landing page and public pages), it
+scrolls away at every width. Where the content column leaves no room beside it, the header gets out of the
+way: below 1280 px the network switcher shows only the network's logo, and below 1088 px, where
+even the icons sit over the content, a frosted band in the page colour appears behind them once
+the page is scrolled, so rows pass under it instead of showing through. There, the pinned section
+headers (the Assets bar, the date labels in Activity) pin just below the band rather than under
+it. Opening the user menu from the header dims and blurs the page behind it, as the More menu
+and dialogs do.
+
 ---
+
+## Interaction feedback
+
+Everything that can be pressed shows that it is being pressed, while it is held, and lets go
+smoothly when released.
+
+- **Buttons** with text shrink slightly, to 98 %; icon buttons shrink to 96 %. Wide buttons
+  get the smaller press because the same scale takes far more off a wide element.
+- **Colours** of the shared buttons and full-width rows change in 150 ms. Buttons that take a
+  light-blue fill on hover (the theme switch, contact actions, the profile menu) and the rows
+  are one step darker pressed than on hover; dropdowns are the exception and keep their hover
+  colour while held.
+- **Rows** that span the full width do **not** shrink. They darken one step instead: a 20 %
+  OISY-blue fill over their 10 % hover.
+- **A row does not light up when a control inside it is pressed** (a copy icon, a toggle); the
+  control shows its own press.
+- **Hover** colours appear only on devices that can hover, so a tap on a phone does not leave
+  a button coloured until the next tap.
+- With **reduced motion** turned on in the system, nothing shrinks; colours still change.
+  **Disabled** buttons show nothing.
+- iOS Safari applies pressed styles only when the page listens for touches, so the app
+  registers a passive touch listener for that reason alone.
+- **Copying** an address, hash or ID confirms on the button: the copy icon turns into a check
+  for 2 seconds and screen readers hear the "… copied" text. Copy buttons show no toast; a
+  row that copies when tapped as a whole keeps its toast, since nothing on it changes. When
+  the browser blocks the clipboard, an error says so (inline on the note share screen, where
+  a toast would sit behind the sheet).
+
+Where it applies:
+
+- **Token lists.** Token rows on Assets, the rows inside a token group and every other list of
+  logo rows with a click (earning positions, swap providers, networks, recent destinations,
+  the token and NFT settings menus) take the pressed fill. An expanded token group's header
+  opens and closes the whole card, so hovering it outlines the whole card, sub-tokens
+  included; a fill would not do, since on the white card the row hover is the page colour.
+- **Activity and other lists.** Transaction rows, tip history, notes, contact addresses, OISY
+  Trade orders and positions, and the mobile activity filter rows take the same pressed fill.
+  In a contact address row, Edit and Delete act on their own: pressing them does not also
+  copy the address, which the row does when tapped as a whole, and the row's action icons no
+  longer overlap each other on phones. Holding Space on a focused transaction or tip row
+  shows the same fill as a press.
+- **Navigation.** In the desktop sidebar and the menus, a pressed entry darkens one step past
+  its hover and selected colour. On the mobile bar, a pressed entry's icon and label shrink
+  slightly (Finance shrinks its circle) with **no** colour change, so grey still means only
+  that a sheet is open and blue only the current page. The cards in the mobile group sheets
+  press like buttons.
+- **Cards.** NFT and collection cards press like text buttons and keep their hover lift;
+  disabled cards and the non-interactive NFT card do not press. The Explore dApp cards and
+  the reward cards press too, with no hover of their own. Colours meant for dark mode follow
+  OISY's theme setting, not the device's, so a user who picked a theme different from their
+  system sees the matching NFT badges.
+- **Links and icon links.** Text links (Go to collection, Learn more, breadcrumbs, the terms
+  and privacy links) and link-style icons (copy, open in explorer, back) turn a step darker
+  blue on hover and while pressed; in dark mode a step lighter, so they stay readable on the
+  dark card. Text links do not shrink; icon ones press like icon buttons.
+  Links inside explanatory text do the same: About OISY, the Harvest stake terms, the
+  home-screen warning and the note about hidden small transactions.
+- **Amount forms.** The swap flip button presses like an icon button, and its arrow turns a
+  half-turn each time the tokens swap, back the other way on the next swap (with reduced
+  motion it flips at once, without the turning animation). **Max** presses, darkens on hover while the amount is valid, and can be hit
+  across 40 px without reaching the amount field above it.
+- **Small controls.** Close, clear and help buttons (toasts, banners, info boxes, modals,
+  popovers, the search field, the settings, rewards and earning help toggles, the copy and edit
+  icons next to addresses and IDs, the dismiss button on active transactions) press like icon
+  buttons and can be hit across at least 40 × 40 px while looking the same size. Where a
+  neighbour sits closer (a copy icon right next to a link, a modal's close next to its header
+  actions), the tap area only grows up and down, so two tap areas never overlap. The help toggles say whether
+  their explanation is open.
+
+### Overlay interaction
+
+Blocking popovers and dialogs move keyboard focus into their controls, keep it
+inside while open, close the topmost overlay with Escape, and restore the opener.
+Toasts stay reachable while a dialog is open: Tab moves on from the dialog's last
+control to their Close buttons and back, so a notification can be dismissed without
+closing the dialog. Escape that only cancels typing in an input method closes nothing.
+Token list settings expose labelled switches and their current checked state.
+Sorting, network selection and appearance buttons expose their selected state.
+
+### Motion
+
+- **Overlays** clear quickly: toasts enter over 200 ms and leave over 150 ms with a short
+  movement; modal panels take 125 ms each way. Popovers grow from 96 % in 150 ms and
+  leave in 100 ms. The page dims and blurs smoothly in 75 ms and clears in 150 ms;
+  bottom sheets open in 250 ms and close in 200 ms. Reduced motion removes movement
+  and caps fades at 100 ms; height changes happen at once. Modal and popover panels
+  and backdrops finish their individual exits before the overlay disappears.
+
+- **State icons** cross-fade over 300 ms: progress to success or failure, privacy, theme,
+  and hiding or showing an NFT. Like copy confirmation, each can reverse during a swap
+  and appears immediately in its initial state. With reduced motion, icons fade in
+  100 ms without shrinking or blurring. Failed progress steps transition directly to the
+  failure icon without briefly showing success. The NFT hide/show icon waits until loading ends
+  before swapping, so the change remains visible even after a slow response.
+
+- With **reduced motion** turned on in the system, pulsing loading placeholders hold still,
+  and so do the decorative animations: the dApp Explorer's UFO in the navigation, the AI
+  assistant button, the Scan QR icon, and the astronaut on the idle signer screen. Progress
+  spinners keep turning, since they are often the only sign that something is happening.
+
+### Motion
+
+- Things that fade, fly or scale in take **200 ms**, slowing as they settle, and leave in
+  **150 ms**, speeding up as they go; most used to take 400 ms both ways. Sections that
+  open and close, such as an error line appearing under a field, keep their 250 ms.
+- With **reduced motion** turned on in the system:
+  - nothing slides, flies or scales in: it fades in over 100 ms instead, and sections open
+    and close at once;
+  - pulsing loading placeholders hold still, and so do the decorative animations: the dApp
+    Explorer's UFO in the navigation, the AI assistant button, the Scan QR icon, and the
+    astronaut on the idle signer screen;
+  - progress spinners keep turning, since they are often the only sign that something is
+    happening.
+
+#### Landing artwork loading
+
+The landing illustration reserves its aspect ratio before downloading and loads eagerly without a dynamic-import waterfall. As a deliberate exception to the faster in-app motion timings, this one-time landing entrance runs over 300ms with a 12px upward movement and a subtle blur, with sections staggered by 100ms. The entrance begins with the page, without waiting for artwork; sign-in stays interactive and keyboard focus reveals controls immediately. Feature cards use translation only so their frosted backdrop stays intact. Reduced-motion users get the shared 100ms opacity-only fade with no stagger; feature cards stay still. Progress spinners keep turning. Focus reveals controls without restarting their entrance when focus leaves.
+
+The landing keeps the existing CircularXX font, preloads its regular and bold faces, balances headline wrapping, and uses comfortable line spacing for feature descriptions and sign-in terms. Signed-out header labels stay intact at narrow widths.
+
+---
+
+### App menu consistency
+
+Token and NFT sorting and settings, network selection and the account menu share row sizing, typography, separators and keyboard focus treatment. Theme changes apply colors immediately without triggering every color transition.
 
 ## Analytics
 

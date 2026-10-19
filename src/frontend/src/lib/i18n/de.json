@@ -108,6 +108,9 @@
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist",
 			"standalone_mode": "Es sind bekannte Verbindungsprobleme aufgetreten, wenn sowohl eine App als auch $oisy_short auf dem Startbildschirm installiert sind. Wenn beim Verbinden von $oisy_short oder beim Signieren von Transaktionen Probleme auftreten, starten Sie die App bitte über einen regulären Browser. Wir arbeiten an einer Lösung, die bald verfügbar sein wird. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Mehr erfahren</a>",
 			"video_not_supported": ""
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
@@ -2716,10 +2719,13 @@
 			"starting_to_repay": "Deine Rückzahlung wird übermittelt…",
 			"repay_started": "Deine Rückzahlung wird jetzt bearbeitet.",
 			"current_debt": "Aktuelle Schulden",
+			"pending_repays": "Rückzahlungen in Bearbeitung",
 			"interest_accrued": "Aufgelaufene Zinsen",
 			"debt_after_repay": "Schulden nach Rückzahlung",
 			"repay_exceeds_debt": "Der Betrag übersteigt deine ausstehenden Schulden.",
-			"repay_prices_unavailable": "Preise sind vorübergehend nicht verfügbar. Zurückzahlen ist deaktiviert, bis sie geladen sind."
+			"repay_prices_unavailable": "Preise sind vorübergehend nicht verfügbar. Zurückzahlen ist deaktiviert, bis sie geladen sind.",
+			"repay_debt_unavailable": "Deine ausstehenden Schulden sind vorübergehend nicht verfügbar. Zurückzahlen ist deaktiviert, bis sie geladen sind.",
+			"repay_pending_covers_debt": "Eine Rückzahlung für diese Position wird noch bearbeitet. Du kannst mehr zurückzahlen, sobald sie abgeschlossen ist."
 		},
 		"info": {
 			"title": "Was ist Liquidium",
@@ -3021,6 +3027,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

@@ -108,6 +108,9 @@
 			"do_not_close": "जब तक लेनदेन पूरा न हो जाए, इस टैब को बंद न करें",
 			"standalone_mode": "जब किसी ऐप और $oisy_short दोनों को होम स्क्रीन पर इंस्टॉल किया गया हो, तो कनेक्शन संबंधी ज्ञात समस्याएं हो सकती हैं। यदि आपको $oisy_short से कनेक्ट करने या ट्रांज़ैक्शन साइन करने में समस्या आती है, तो कृपया ऐप को एक सामान्य ब्राउज़र से खोलें। हम एक समाधान पर काम कर रहे हैं जो जल्द ही उपलब्ध होगा। <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">अधिक पढ़ें</a>",
 			"video_not_supported": ""
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
@@ -2716,10 +2719,13 @@
 			"starting_to_repay": "आपकी चुकौती सबमिट की जा रही है…",
 			"repay_started": "आपकी चुकौती अब प्रोसेस हो रही है।",
 			"current_debt": "मौजूदा कर्ज",
+			"pending_repays": "प्रोसेस हो रही चुकौतियां",
 			"interest_accrued": "अर्जित ब्याज",
 			"debt_after_repay": "चुकौती के बाद कर्ज",
 			"repay_exceeds_debt": "राशि आपके बकाया कर्ज से अधिक है।",
-			"repay_prices_unavailable": "कीमतें अस्थायी रूप से अनुपलब्ध हैं। लोड होने तक चुकौती अक्षम है।"
+			"repay_prices_unavailable": "कीमतें अस्थायी रूप से अनुपलब्ध हैं। लोड होने तक चुकौती अक्षम है।",
+			"repay_debt_unavailable": "आपका बकाया कर्ज अस्थायी रूप से अनुपलब्ध है। लोड होने तक चुकौती अक्षम है।",
+			"repay_pending_covers_debt": "इस पोजीशन की एक चुकौती अभी प्रोसेस हो रही है। इसके पूरा होने के बाद आप और चुका सकते हैं।"
 		},
 		"info": {
 			"title": "Liquidium क्या है",
@@ -3021,6 +3027,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",
