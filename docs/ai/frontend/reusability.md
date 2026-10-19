@@ -153,6 +153,11 @@ Add new feature folders only if your concern doesn't fit any of the above.
 | `clipboard.utils`, `device.utils`, `events.utils`                         | `$lib/utils/`                     | Browser plumbing.                                                                                                                                                                                                                                                                                                                                                           |
 | `derived-memo.utils`, `certified-store.utils`                             | `$lib/utils/`                     | Store helpers.                                                                                                                                                                                                                                                                                                                                                              |
 
+A swap provider without a token list answers `getSupportedDestinations` with a wildcard
+instead of a set: `{}` in its own registry's category (Velora), or `{ <category>: 'any' }`
+in another one (LI.FI's EVM → Solana). `computeReceiveSupportedTokens` in
+`swap-tokens-filter.utils` counts either as a provider for that category without a list.
+
 ### Chain-specific utils worth knowing
 
 | Util                         | Where         | Purpose                                                                                                                                                                                                                 |
