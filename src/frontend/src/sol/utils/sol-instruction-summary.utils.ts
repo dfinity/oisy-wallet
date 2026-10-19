@@ -87,6 +87,14 @@ const tokenAmount = (info: object): { amount?: bigint; decimals?: number } => {
 const TOKEN_PROGRAMS = ['spl-token', 'spl-token-2022'];
 
 /**
+ * Whether a System instruction opens an account, at an address of its own or at one derived from a
+ * seed. Both fund and size the account the same way: Raydium, for one, opens the wrapped SOL account
+ * of a trade at a seed-derived address and closes it at the end.
+ */
+const isAccountCreation = (type: string): boolean =>
+	['createAccount', 'createAccountWithSeed'].includes(type);
+
+/**
  * Whether an idempotent account creation found the account already there and did nothing.
  *
  * The run reads every account an instruction writes, and the account a creation names is written,
@@ -614,7 +622,7 @@ const toEffect = ({
 	// Top level only. The associated token account program opens its accounts with the same call
 	// made inside itself, and that creation is already the line the program's own instruction
 	// produces - counting both would open one account twice.
-	if (program === 'system' && type === 'createAccount' && topLevel) {
+	if (program === 'system' && isAccountCreation(type) && topLevel) {
 		const account = address({ info, key: 'newAccount' });
 
 		// The mint the initialisation after this creation names. The run's single map holds whichever
@@ -922,7 +930,7 @@ const heldAtInstruction = ({
 			// unknown rather than nothing.
 			if (
 				program === 'system' &&
-				type === 'createAccount' &&
+				isAccountCreation(type) &&
 				address({ info, key: 'newAccount' }) === account
 			) {
 				if (!native) {
@@ -1253,12 +1261,11 @@ const closePayouts = ({
 				return;
 			}
 
-			const funded =
-				type === 'createAccount'
-					? address({ info, key: 'newAccount' })
-					: type === 'transfer'
-						? address({ info, key: 'destination' })
-						: undefined;
+			const funded = isAccountCreation(type)
+				? address({ info, key: 'newAccount' })
+				: type === 'transfer'
+					? address({ info, key: 'destination' })
+					: undefined;
 
 			const value = amount({ info, key: 'lamports' });
 
@@ -1272,9 +1279,9 @@ const closePayouts = ({
 };
 
 /**
- * The System `createAccount` that funds the account a line opens, which is the first from where
- * the line stands: an address closed and opened again within the message is two accounts, each
- * funded by its own.
+ * The System creation that funds the account a line opens, which is the first from where the line
+ * stands: an address closed and opened again within the message is two accounts, each funded by its
+ * own.
  */
 const creationOf = ({
 	account,
@@ -1293,7 +1300,7 @@ const creationOf = ({
 			}
 		}) =>
 			program === 'system' &&
-			type === 'createAccount' &&
+			isAccountCreation(type) &&
 			address({ info, key: 'newAccount' }) === account
 	);
 
