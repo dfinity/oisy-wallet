@@ -47,11 +47,14 @@
 		pauseAmountUpdates = false
 	}: Props = $props();
 
-	const { store } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+	const { store, activity } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
 	let timer: NodeJS.Timeout | undefined;
 	let debounceTimer = $state<NodeJS.Timeout | undefined>();
 	let fetchGeneration = 0;
+	let requestSequence = 0;
+	let currentRequestId: number | undefined;
+	let destroyed = false;
 
 	const clearTimer = () => {
 		if (nonNullish(timer)) {
@@ -78,7 +81,12 @@
 	};
 
 	const loadSwapAmounts = async (isPeriodicUpdate = false) => {
-		if (isNullish($authIdentity)) {
+		if (destroyed || pauseAmountUpdates || isNullish($authIdentity)) {
+			return;
+		}
+
+		// Do not overlap refreshes for the same inputs or race the foreground debounce.
+		if (isPeriodicUpdate && (nonNullish(currentRequestId) || nonNullish(debounceTimer))) {
 			return;
 		}
 
@@ -93,11 +101,25 @@
 			return;
 		}
 
-		if (!isPeriodicUpdate && nonNullish($store) && $store.amountForSwap === parsedAmount) {
+		if (
+			!isPeriodicUpdate &&
+			fetchGeneration === 1 &&
+			nonNullish($store) &&
+			$store.amountForSwap === parsedAmount
+		) {
 			return;
 		}
 
 		const currentGeneration = fetchGeneration;
+		const requestId = ++requestSequence;
+		currentRequestId = requestId;
+		const isCurrentRequest = () =>
+			!destroyed &&
+			!pauseAmountUpdates &&
+			nonNullish($authIdentity) &&
+			currentGeneration === fetchGeneration &&
+			currentRequestId === requestId;
+		activity?.start({ requestId, background: isPeriodicUpdate });
 
 		isSwapAmountsLoading = true;
 
@@ -113,10 +135,15 @@
 				userEthAddress: $ethAddress,
 				userSolAddress: $solAddressMainnet,
 				userBtcAddress: $btcAddressMainnet,
-				userXrpAddress: $xrpAddressMainnet
+				userXrpAddress: $xrpAddressMainnet,
+				onProviderParticipating: (provider) => {
+					if (isCurrentRequest()) {
+						activity?.addProvider({ requestId, provider });
+					}
+				}
 			});
 
-			if (currentGeneration !== fetchGeneration) {
+			if (!isCurrentRequest()) {
 				return;
 			}
 
@@ -135,7 +162,7 @@
 				selectedProvider: swapAmounts[0]
 			});
 		} catch (err: unknown) {
-			if (currentGeneration !== fetchGeneration) {
+			if (!isCurrentRequest()) {
 				return;
 			}
 
@@ -151,7 +178,9 @@
 				})
 			});
 		} finally {
-			if (currentGeneration === fetchGeneration) {
+			if (isCurrentRequest()) {
+				activity?.complete({ requestId });
+				currentRequestId = undefined;
 				isSwapAmountsLoading = false;
 			}
 		}
@@ -159,9 +188,6 @@
 
 	$effect(() => {
 		if (pauseAmountUpdates || !enableAmountUpdates) {
-			fetchGeneration++;
-			isSwapAmountsLoading = false;
-			untrack(clearDebounceTimer);
 			clearTimer();
 		} else {
 			startTimer();
@@ -169,19 +195,38 @@
 	});
 
 	$effect(() => {
-		[amount, sourceToken, destinationToken, isSourceTokenIcrc2];
+		[
+			amount,
+			sourceToken,
+			destinationToken,
+			isSourceTokenIcrc2,
+			slippageValue,
+			pauseAmountUpdates,
+			$authIdentity
+		];
 
 		untrack(() => {
 			fetchGeneration++;
+			currentRequestId = undefined;
+			activity?.reset();
+			isSwapAmountsLoading = false;
 			clearDebounceTimer();
+			if (pauseAmountUpdates) {
+				return;
+			}
 			debounceTimer = setTimeout(() => {
+				debounceTimer = undefined;
 				loadSwapAmounts(false);
 			}, 300);
 		});
 	});
 
 	onDestroy(() => {
+		destroyed = true;
 		fetchGeneration++;
+		currentRequestId = undefined;
+		activity?.reset();
+		isSwapAmountsLoading = false;
 		clearTimer();
 		clearDebounceTimer();
 	});

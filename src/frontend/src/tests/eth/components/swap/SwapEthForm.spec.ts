@@ -3,14 +3,20 @@ import SwapEthForm from '$eth/components/swap/SwapEthForm.svelte';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
 import type { Erc20Token } from '$eth/types/erc20';
 import {
+	CONVERT_AMOUNT_DISPLAY_SKELETON,
+	CONVERT_AMOUNT_DISPLAY_VALUE,
+	SWAP_FEE_INFO,
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
+import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockVeloraMarketProvider } from '$tests/mocks/swap.mocks';
 import { render } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { get, readable, writable } from 'svelte/store';
 
 vi.mock('$lib/utils/parse.utils', async () => {
@@ -79,6 +85,86 @@ describe('SwapFormEth', () => {
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
 	const switchButtonSelector = `button[data-tid="${SWAP_SWITCH_TOKENS_BUTTON}"]`;
+
+	it('retains Total fee without the swap-only fee-balance callout', () => {
+		const { getByText, queryByTestId } = render(SwapEthForm, { props, context: mockContext });
+
+		expect(getByText(get(i18n).fee.text.total_fee)).toBeInTheDocument();
+		expect(queryByTestId(SWAP_FEE_INFO)).not.toBeInTheDocument();
+	});
+
+	it.each([false, true])(
+		'shows an early Total fee skeleton while comparing (previous offer: %s)',
+		async (previousOffer) => {
+			const activity = initSwapQuoteActivityStore();
+			activity.start({ requestId: 2, background: false });
+			const store = initSwapAmountsStore();
+			if (previousOffer) {
+				store.setSwaps({
+					swaps: [mockVeloraMarketProvider],
+					selectedProvider: mockVeloraMarketProvider,
+					amountForSwap: '1'
+				});
+			}
+			mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store, activity });
+			const feeStore = initEthFeeStore();
+			feeStore.setFee({ gas: 21_000n, maxFeePerGas: 1_000_000_000n, maxPriorityFeePerGas: 1n });
+			mockContext.set(
+				ETH_FEE_CONTEXT_KEY,
+				initEthFeeContext({
+					feeStore,
+					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
+				})
+			);
+			const { getByText, getByTestId, queryByTestId } = render(SwapEthForm, {
+				props: { ...props, isSwapAmountsLoading: true },
+				context: mockContext
+			});
+
+			expect(getByText(get(i18n).fee.text.total_fee)).toBeInTheDocument();
+			expect(getByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON)).toBeInTheDocument();
+			expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_VALUE)).not.toBeInTheDocument();
+
+			if (previousOffer) {
+				activity.complete({ requestId: 2 });
+				await tick();
+
+				expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_VALUE)).toBeInTheDocument();
+				expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON)).not.toBeInTheDocument();
+
+				activity.start({ requestId: 3, background: true });
+				await tick();
+
+				expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_VALUE)).toBeInTheDocument();
+				expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON)).not.toBeInTheDocument();
+			}
+		}
+	);
+
+	it('compares providers before an offer or fee token exists without enabling Review', () => {
+		const activity = initSwapQuoteActivityStore();
+		activity.start({ requestId: 1, background: false });
+		mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: initSwapAmountsStore(), activity });
+		mockContext.set(
+			ETH_FEE_CONTEXT_KEY,
+			initEthFeeContext({
+				feeStore: initEthFeeStore(),
+				feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+				feeTokenIdStore: writable(undefined),
+				feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
+			})
+		);
+		const { getByText } = render(SwapEthForm, {
+			props: { ...props, isSwapAmountsLoading: true },
+			context: mockContext
+		});
+
+		expect(getByText(get(i18n).swap.text.smart_swap)).toBeInTheDocument();
+		expect(getByText(get(i18n).swap.text.comparing_providers)).toBeInTheDocument();
+		expect(getByText(get(i18n).swap.text.review_button).closest('button')).toBeDisabled();
+	});
 
 	it('should render all fields', () => {
 		const { container, getByTestId, getByText } = render(SwapEthForm, {
@@ -177,17 +263,5 @@ describe('SwapFormEth', () => {
 
 		expect(getByText(get(i18n).core.text.cancel)).toBeInTheDocument();
 		expect(getByText(get(i18n).swap.text.review_button)).toBeInTheDocument();
-	});
-
-	it('should show fee info message', () => {
-		const { container, getByText } = render(SwapEthForm, {
-			props,
-			context: mockContext
-		});
-
-		expect(container.querySelector('[data-tid="swap-fee-info"]')).toBeInTheDocument();
-		expect(
-			getByText(new RegExp(`${get(i18n).send.info.fee_info.split('$feeSymbol')[0]}ETH`))
-		).toBeInTheDocument();
 	});
 });

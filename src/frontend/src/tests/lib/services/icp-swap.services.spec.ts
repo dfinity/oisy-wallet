@@ -18,7 +18,7 @@ import {
 import { ZERO } from '$lib/constants/app.constants';
 import { icpSwapAmounts, icpSwapSupportedTokens } from '$lib/services/icp-swap.services';
 import { fetchIcpSwap } from '$lib/services/swap.services';
-import { SwapErrorCodes } from '$lib/types/swap';
+import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
 import * as swapUtils from '$lib/utils/swap.utils';
 import { isSwapError } from '$lib/utils/swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
@@ -47,6 +47,29 @@ describe('icp-swap.services', () => {
 
 		beforeEach(() => {
 			vi.restoreAllMocks();
+		});
+
+		it('reports pricing only after resolving a pool', async () => {
+			const onProviderParticipating = vi.fn();
+			vi.spyOn(factoryApi, 'getPoolCanister')
+				.mockResolvedValueOnce(mockPool)
+				.mockRejectedValueOnce(new Error('no pool'));
+			vi.spyOn(poolApi, 'getQuote').mockImplementationOnce(() => {
+				expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.ICP_SWAP);
+
+				return Promise.resolve(999n);
+			});
+
+			await expect(icpSwapAmounts({ ...params, onProviderParticipating })).resolves.toEqual({
+				receiveAmount: 999n
+			});
+
+			onProviderParticipating.mockClear();
+
+			await expect(icpSwapAmounts({ ...params, onProviderParticipating })).rejects.toThrow(
+				'no pool'
+			);
+			expect(onProviderParticipating).not.toHaveBeenCalled();
 		});
 
 		it('returns receiveAmount when everything succeeds', async () => {

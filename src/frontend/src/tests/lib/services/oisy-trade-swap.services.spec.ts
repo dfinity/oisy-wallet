@@ -36,7 +36,7 @@ import {
 	OISY_TRADE_EXTERNAL_REF_KEYS,
 	type OisyTradeResolvedOrder
 } from '$lib/types/oisy-trade-swap';
-import { SwapProvider } from '$lib/types/swap';
+import { SwapProvider, type SwapQuoteObserver } from '$lib/types/swap';
 import * as consoleUtils from '$lib/utils/console.utils';
 import { toOisyTradeExternalRefsMap } from '$lib/utils/oisy-trade-active-tx.utils';
 import * as walletUtils from '$lib/utils/wallet.utils';
@@ -210,15 +210,47 @@ describe('oisy-trade-swap.services', () => {
 	describe('fetchOisyTradeQuote', () => {
 		const mockDepth = () => vi.spyOn(oisyTradeApi, 'getOrderBookDepth').mockResolvedValue(depth);
 
-		const quote = (params: {
-			sourceToken: IcToken;
-			destinationToken: IcToken;
-			sourceAmount: bigint;
-		}) => fetchOisyTradeQuote({ identity: mockIdentity, ...params });
+		const quote = (
+			params: SwapQuoteObserver & {
+				sourceToken: IcToken;
+				destinationToken: IcToken;
+				sourceAmount: bigint;
+			}
+		) => fetchOisyTradeQuote({ identity: mockIdentity, ...params });
 
 		beforeEach(() => {
 			oisyTradeStore.setPairs([icpUsdc]);
 			mockDepth();
+		});
+
+		it('reports order-book pricing after rejecting unpaired and unorderable inputs', async () => {
+			const onProviderParticipating = vi.fn();
+			const spy = mockDepth();
+			await quote({
+				sourceToken: ICP,
+				destinationToken: CKUSDC,
+				sourceAmount: 200_000_000n,
+				onProviderParticipating
+			});
+
+			expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.OISY_TRADE);
+
+			onProviderParticipating.mockClear();
+			await quote({
+				sourceToken: ICP,
+				destinationToken: CKBTC,
+				sourceAmount: 200_000_000n,
+				onProviderParticipating
+			});
+			await quote({
+				sourceToken: ICP,
+				destinationToken: CKUSDC,
+				sourceAmount: 1n,
+				onProviderParticipating
+			});
+
+			expect(onProviderParticipating).not.toHaveBeenCalled();
+			expect(spy).toHaveBeenCalledOnce();
 		});
 
 		it('quotes a sell, netting both destination-denominated fees off the fill', async () => {
@@ -497,6 +529,29 @@ describe('oisy-trade-swap.services', () => {
 			oisyTradeStore.setPairs([icpUsdc]);
 			vi.spyOn(oisyTradeApi, 'getOrderBookDepth').mockResolvedValue(depth);
 		});
+
+		it.each([true, false])(
+			'only reports eligible OISY Trade pricing through the ICRC-2 gate (%s)',
+			async (isSourceTokenIcrc2) => {
+				const onProviderParticipating = vi.fn();
+				await fetchSwapAmounts({
+					...fanOutParams,
+					sourceToken: ICP,
+					destinationToken: CKUSDC,
+					amount: 2,
+					isSourceTokenIcrc2,
+					onProviderParticipating
+				});
+
+				expect(
+					onProviderParticipating.mock.calls.some(
+						([provider]) => provider === SwapProvider.OISY_TRADE
+					)
+				).toBe(isSourceTokenIcrc2);
+				// The existing fan-out still queries providers before its offer-mapping gate.
+				expect(oisyTradeApi.getOrderBookDepth).toHaveBeenCalledOnce();
+			}
+		);
 
 		it('carries an OISY Trade quote through the fan-out into the results', async () => {
 			const results = await fetchSwapAmounts({

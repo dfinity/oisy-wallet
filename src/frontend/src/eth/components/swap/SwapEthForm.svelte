@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { readable } from 'svelte/store';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
-	import SwapEthFeeInfo from '$eth/components/swap/SwapEthFeeInfo.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
+	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
@@ -56,7 +57,10 @@
 	const { sourceToken, destinationToken, sourceTokenBalance } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+	const { store: swapAmountsStore, activity } =
+		getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+	const quoteActivity = activity ?? readable(undefined);
+	const comparing = $derived($quoteActivity?.pending === true && !$quoteActivity.background);
 
 	let errorType = $state<TokenActionErrorType | undefined>();
 
@@ -164,13 +168,20 @@
 	bind:slippageValue
 >
 	{#snippet swapDetails()}
-		{#if nonNullish($destinationToken) && nonNullish($sourceToken) && nonNullish($feeTokenIdStore)}
+		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<Hr spacing="md" />
 
 			<div class="flex flex-col gap-3">
-				<SwapProvider {onShowProviderList} showSelectButton {slippageValue} />
+				<SwapProvider isForm {onShowProviderList} showSelectButton {slippageValue} />
 
-				{#if nonNullish($swapAmountsStore?.selectedProvider)}
+				{#if comparing}
+					<FeeDisplay
+						decimals={$feeDecimalsStore ?? nativeEthereumToken.decimals}
+						symbol={$feeSymbolStore ?? nativeEthereumToken.symbol}
+					>
+						{#snippet label()}<Html text={$i18n.fee.text.total_fee} />{/snippet}
+					</FeeDisplay>
+				{:else if nonNullish($swapAmountsStore?.selectedProvider) && nonNullish($feeTokenIdStore)}
 					{#if isGasless}
 						<SwapGaslessFee />
 					{:else}
@@ -179,12 +190,6 @@
 								<Html text={$i18n.fee.text.total_fee} />
 							{/snippet}
 						</EthFeeDisplay>
-
-						<SwapEthFeeInfo
-							decimals={$feeDecimalsStore}
-							feeSymbol={$feeSymbolStore}
-							feeTokenId={$feeTokenIdStore}
-						/>
 					{/if}
 				{/if}
 			</div>

@@ -67,7 +67,7 @@ import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsQuoteResponse
 } from '$lib/types/near-intents';
-import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
+import { SwapErrorCodes, SwapProvider, type SwapQuoteObserver } from '$lib/types/swap';
 import { VELORA_EXTERNAL_REF_KEYS } from '$lib/types/velora-swap';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import {
@@ -332,6 +332,49 @@ describe('swap.services', () => {
 		vi.mocked(isNearIntentsQuoteExpired).mockReturnValue(false);
 	});
 
+	describe('quote participation dispatch', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it.each([
+			{ label: 'EVM', sourceToken: mockValidErc20Token, getQuote: mockVeloraGetQuote },
+			{ label: 'SOL', sourceToken: mockValidSplToken, getQuote: mockSolGetQuote },
+			{ label: 'BTC', sourceToken: BTC_MAINNET_TOKEN, getQuote: mockBtcGetQuote },
+			{ label: 'XRP', sourceToken: XRP_TOKEN, getQuote: mockXrpGetQuote },
+			{ label: 'ICP bridge', sourceToken: mockValidIcToken, getQuote: mockIcpBridgeGetQuote }
+		] as const)(
+			'forwards the observer to $label pricing without announcing registry membership',
+			async ({ sourceToken, getQuote }) => {
+				const onProviderParticipating = vi.fn();
+				getQuote.mockImplementationOnce(
+					({ onProviderParticipating: participate }: SwapQuoteObserver) => {
+						expect(onProviderParticipating).not.toHaveBeenCalled();
+						expect(participate).toBe(onProviderParticipating);
+
+						participate?.(SwapProvider.NEAR_INTENTS);
+						return Promise.resolve(undefined);
+					}
+				);
+				await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken,
+					destinationToken: mockValidErc20Token,
+					amount: '10',
+					tokens: [],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: mockSolAddress,
+					userBtcAddress: mockBtcAddress,
+					userXrpAddress: mockXrpAddress,
+					onProviderParticipating
+				});
+
+				expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.NEAR_INTENTS);
+			}
+		);
+	});
+
 	describe('fetchSwapAmounts', () => {
 		const mockTokens = [mockValidIcToken as IcToken, mockValidIcrcToken as IcToken];
 
@@ -343,6 +386,45 @@ describe('swap.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 		});
+
+		it.each([true, false])(
+			'reports ICP pricing participation without changing the ICRC-2 offer gate (%s)',
+			async (isSourceTokenIcrc2) => {
+				const onProviderParticipating = vi.fn();
+				vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue({
+					receive_amount: 950n,
+					slippage: 0.5
+				} as SwapAmountsReply);
+				vi.mocked(icpSwapBackend.icpSwapAmounts).mockImplementationOnce(
+					(params: Parameters<typeof icpSwapBackend.icpSwapAmounts>[0] & SwapQuoteObserver) => {
+						params.onProviderParticipating?.(SwapProvider.ICP_SWAP);
+						return Promise.resolve({ receiveAmount: 975n });
+					}
+				);
+				await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken,
+					destinationToken,
+					amount,
+					tokens: mockTokens,
+					slippage,
+					userEthAddress: undefined,
+					userSolAddress: undefined,
+					userBtcAddress: undefined,
+					userXrpAddress: undefined,
+					isSourceTokenIcrc2,
+					onProviderParticipating
+				});
+
+				expect(onProviderParticipating.mock.calls).toEqual(
+					isSourceTokenIcrc2
+						? [[SwapProvider.KONG_SWAP], [SwapProvider.ICP_SWAP]]
+						: [[SwapProvider.KONG_SWAP]]
+				);
+				expect(icpSwapBackend.icpSwapAmounts).toHaveBeenCalledOnce();
+				expect(kongBackendApi.kongSwapAmounts).toHaveBeenCalledOnce();
+			}
+		);
 
 		it('should handle both KONG_SWAP and ICP_SWAP providers correctly', async () => {
 			const kongSwapResponse = {
@@ -2763,6 +2845,46 @@ describe('swap.services', () => {
 		afterEach(() => {
 			mockGetQuote.mockReset();
 			exchangeStore.reset();
+		});
+
+		it('reports Velora pricing after eligibility checks and before requesting the quote', async () => {
+			const onProviderParticipating = vi.fn();
+			mockGetQuote.mockImplementationOnce(() => {
+				expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.VELORA);
+
+				return Promise.resolve({ delta: mockVeloraDeltaPrice });
+			});
+			await fetchVeloraSwapAmount({
+				sourceToken,
+				destinationToken,
+				amount,
+				userAddress,
+				slippage,
+				onProviderParticipating
+			});
+
+			expect(onProviderParticipating).toHaveBeenCalledOnce();
+
+			onProviderParticipating.mockClear();
+			await fetchVeloraSwapAmount({
+				sourceToken,
+				destinationToken: mockValidIcToken,
+				amount,
+				userAddress,
+				slippage,
+				onProviderParticipating
+			});
+			await fetchVeloraSwapAmount({
+				sourceToken,
+				destinationToken,
+				amount,
+				userAddress: undefined,
+				slippage,
+				onProviderParticipating
+			});
+
+			expect(onProviderParticipating).not.toHaveBeenCalled();
+			expect(mockGetQuote).toHaveBeenCalledOnce();
 		});
 
 		it('returns undefined without calling the SDK when userAddress is nullish', async () => {

@@ -367,6 +367,45 @@ it becomes the same capped fade.
 Modal and popover containers use an intro-only 25 ms fade. Their children own the exits;
 a container outro would hide the panel and backdrop before their longer outros finish.
 
+### Programmatic swap comparison
+
+`SwapProviderAnimation` is a quote-state indicator, not a timer that controls quote acceptance.
+Its WAAPI entry/exit reuse the shared 200/150 ms durations with the selected Text Loop's
+reference spring phase (`SWAP_PROVIDER_TURN_EASING`): 33 equally spaced samples up to the
+first target crossing, normalized to each turn budget without overshoot or a long tail.
+The layer transform/opacity and sharp/soft opacity bridge share that curve. Feature-detect
+CSS `linear()` inside the client effect; unsupported or absent `CSS.supports` retains
+`MOTION_EASE_OUT_CSS`. Reduced motion retains its existing 100 ms opacity-only ease-out;
+confirmation timing and segment easing are separate. This feature-specific loop does not
+change the generic transitions' exit policy. Candidate dwell and the short borderless
+confirmation are configured in `swap.constants.ts`; neither adds a minimum quote wait.
+The multi-keyframe confirmation eases each segment on a linear effect clock; easing the
+entire clock again would hide the squeeze before the recalled text is readable.
+
+Read participants from `SwapAmountsContext.activity`, not the provider registry. The optional
+`SwapQuoteObserver.onProviderParticipating` runs after eligibility guards at pricing entry;
+cached quotes and local pricing count as participation, not fresh network requests. The
+coordinator owns input invalidation, per-round identity and the foreground/background flag.
+Always reveal the amounts store's accepted selection, preserving manual-provider policy.
+Only a foreground pending round actually observed by the mounted header may confirm: no
+replay from a completed snapshot, review remount, manual selection or periodic refresh.
+
+The five swap forms opt into this presentation with `SwapProvider isForm`; review/default
+callers retain the static provider label. Keep the brand nonshrinking in the single-line
+header; the adjacent status may truncate on narrow screens. During foreground comparison,
+`Collapsible` / `CollapsibleBottomSheet` use their optional `disabled` prop to close and block
+stale details. Custom sheet triggers receive `{ open, disabled }` and must forward disabled
+to their native control. Other disclosure callers retain the default enabled behavior.
+
+Keep visible layers keyed by provider through interruption. Sample their current poses before
+cancelling/retargeting WAAPI; an outgoing provider can immediately become the winner without
+being remounted hidden. Only transient exits remain, never persistent wheel neighbours.
+A static 2px soft layer crossfades through opacity, so no filter is animated. Reduced motion
+stops rotation and confirmation scale, retains the shared short opacity bridge on an actual
+provider change, and never dims an already-readable winner. Cancel timers/animations on
+invalidation and destruction. Verify real logo sources, clipping and current-pose continuity
+in a compiled-component browser probe: mocked WAAPI unit tests cannot prove those properties.
+
 ## Icons
 
 The codebase uses several icon sources (Lucide, Tabler, Iconly, custom

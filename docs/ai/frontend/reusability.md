@@ -60,31 +60,39 @@ does not finish while the children are invisible (see `NftHideButton`).
 
 ### Common building blocks
 
-| Component                            | Where                             | Use it for                                                                                                                                                |
-| ------------------------------------ | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `List`, `ListItem`, `ListItemButton` | `$lib/components/common/`         | Vertical lists of items.                                                                                                                                  |
-| `Divider`                            | `$lib/components/common/`         | Section separator. Don't roll your own border.                                                                                                            |
-| `MaxBalanceButton`                   | `$lib/components/common/`         | "Max" button on amount inputs.                                                                                                                            |
-| `ModalHero`, `ModalListItem`         | `$lib/components/common/`         | Modal headers and modal list items.                                                                                                                       |
-| `QrButton`                           | `$lib/components/common/`         | "Scan QR" entry-point button.                                                                                                                             |
-| `Copy`                               | `$lib/components/ui/`             | Copy-to-clipboard icon button. Confirms on the button (check for 2 s plus a screen-reader status), no toast. `ReceiveCopy` wraps it.                      |
-| `IconSwap`                           | `$lib/components/ui/`             | Animated swap between two icons on a state change (copy → check, eye → eye-off). Both stay mounted and cross-fade, so the swap can reverse mid-way.       |
-| `Spinner`                            | `$lib/components/ui/`             | OISY visor Trace. Inherits text colour; CSS-length `size`, opt-in `inline` footprint. Trace keeps moving under reduced motion.                            |
-| `LoaderSpinner`                      | `$lib/components/ui/`             | Wrapper around `Spinner` preserving `tiny` / `small` / `medium` and `inline`. No separate SVG or motion.                                                  |
-| `press` / `press-icon`               | `lib/styles/global.scss`          | Press for any text or card button (0.98) / icon-size control (0.96) that is not a `Button` / `ButtonIcon`. Same rule as theirs.                           |
-| `row-feedback`                       | `lib/styles/global.scss`          | Full-width row: 10 % hover, 20 % while pressed, no shrink, ignoring presses on controls inside it.                                                        |
-| `pressed:` / `child-pressed:`        | `lib/styles/global.scss`          | Variants behind `row-feedback`: pressed on the element itself / on a wrapper whose direct child is the button (`LogoButton`).                             |
-| `parent-pressed:`                    | `lib/styles/global.scss`          | Paints the direct child of a pressed `display: contents` button, so keyboard presses show too (`Transaction`).                                            |
-| `hit-area`                           | `lib/styles/global.scss`          | 40 × 40 px tap target around a small control without changing its look; cap with `[--hit-area:...]` where neighbours are closer.                          |
-| `decorative-motion`                  | `lib/styles/global.scss`          | On a decorative illustration's root: stops its animations under reduced motion. Not for progress indicators.                                              |
-| `text-brand-hover`                   | `theme-variables.ts`              | Link hover and pressed colour (blue-800 light, blue-300 dark), built into `Button link`, `ButtonIcon`, `ExternalLink` and breadcrumbs.                    |
-| `press-icon-in-group`                | `lib/styles/global.scss`          | The icon-size press while the `group` ancestor is held, for a child that must shrink instead of its button.                                               |
-| `HelpToggle`                         | `ui/HelpToggle.svelte`            | Info icon that shows and hides an explanation: tap area, press, `aria-expanded`, "Info" label.                                                            |
-| `GoToButton`                         | `$lib/components/common/`         | "Go to X" success CTA (label + testId + onclick); base for `GoToTradeButton`/`GoToEarnButton`/`GoToBorrowButton`.                                         |
-| `FirstTimeDestinationWarning`        | `$lib/components/send/`           | Warning that no send to an address is on record; gates its consumer's action when given an `onConfirm` callback.                                          |
-| `WalletConnectScamWarning`           | `$lib/components/wallet-connect/` | The security-risk notice on a WalletConnect sign or send review whose request Verify flags as a scam (`acceptedContext`); that review offers Reject only. |
-| `Loader*` and `loaders/`             | `$lib/components/loaders/`        | Loaders, suspense boundaries, skeletons.                                                                                                                  |
-| `icons/`                             | `$lib/components/icons/`          | Project's icon set.                                                                                                                                       |
+| Component                               | Where                             | Use it for                                                                                                                                                |
+| --------------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `List`, `ListItem`, `ListItemButton`    | `$lib/components/common/`         | Vertical lists of items.                                                                                                                                  |
+| `Divider`                               | `$lib/components/common/`         | Section separator. Don't roll your own border.                                                                                                            |
+| `MaxBalanceButton`                      | `$lib/components/common/`         | "Max" button on amount inputs.                                                                                                                            |
+| `ModalHero`, `ModalListItem`            | `$lib/components/common/`         | Modal headers and modal list items.                                                                                                                       |
+| `QrButton`                              | `$lib/components/common/`         | "Scan QR" entry-point button.                                                                                                                             |
+| `Copy`                                  | `$lib/components/ui/`             | Copy-to-clipboard icon button. Confirms on the button (check for 2 s plus a screen-reader status), no toast. `ReceiveCopy` wraps it.                      |
+| `IconSwap`                              | `$lib/components/ui/`             | Animated swap between two icons on a state change (copy → check, eye → eye-off). Both stay mounted and cross-fade, so the swap can reverse mid-way.       |
+| `Spinner`                               | `$lib/components/ui/`             | OISY visor Trace. Inherits text colour; CSS-length `size`, opt-in `inline` footprint. Trace keeps moving under reduced motion.                            |
+| `LoaderSpinner`                         | `$lib/components/ui/`             | Wrapper around `Spinner` preserving `tiny` / `small` / `medium` and `inline`. No separate SVG or motion.                                                  |
+| `press` / `press-icon`                  | `lib/styles/global.scss`          | Press for any text or card button (0.98) / icon-size control (0.96) that is not a `Button` / `ButtonIcon`. Same rule as theirs.                           |
+| `row-feedback`                          | `lib/styles/global.scss`          | Full-width row: 10 % hover, 20 % while pressed, no shrink, ignoring presses on controls inside it.                                                        |
+| `pressed:` / `child-pressed:`           | `lib/styles/global.scss`          | Variants behind `row-feedback`: pressed on the element itself / on a wrapper whose direct child is the button (`LogoButton`).                             |
+| `parent-pressed:`                       | `lib/styles/global.scss`          | Paints the direct child of a pressed `display: contents` button, so keyboard presses show too (`Transaction`).                                            |
+| `hit-area`                              | `lib/styles/global.scss`          | 40 × 40 px tap target around a small control without changing its look; cap with `[--hit-area:...]` where neighbours are closer.                          |
+| `decorative-motion`                     | `lib/styles/global.scss`          | On a decorative illustration's root: stops its animations under reduced motion. Not for progress indicators.                                              |
+| `text-brand-hover`                      | `theme-variables.ts`              | Link hover and pressed colour (blue-800 light, blue-300 dark), built into `Button link`, `ButtonIcon`, `ExternalLink` and breadcrumbs.                    |
+| `press-icon-in-group`                   | `lib/styles/global.scss`          | The icon-size press while the `group` ancestor is held, for a child that must shrink instead of its button.                                               |
+| `HelpToggle`                            | `ui/HelpToggle.svelte`            | Info icon that shows and hides an explanation: tap area, press, `aria-expanded`, "Info" label.                                                            |
+| `GoToButton`                            | `$lib/components/common/`         | "Go to X" success CTA (label + testId + onclick); base for `GoToTradeButton`/`GoToEarnButton`/`GoToBorrowButton`.                                         |
+| `FirstTimeDestinationWarning`           | `$lib/components/send/`           | Warning that no send to an address is on record; gates its consumer's action when given an `onConfirm` callback.                                          |
+| `Collapsible`, `CollapsibleBottomSheet` | `$lib/components/ui/`             | Shared disclosure; `disabled` closes and blocks it. Forward `{ open, disabled }` into custom sheet triggers.                                              |
+| `SwapProvider`                          | `$lib/components/swap/`           | `isForm` opts into Smart Swap activity/branding; review/default callers keep the static provider presentation.                                            |
+| `SwapProviderAnimation`                 | `$lib/components/swap/`           | Right-aligned pricing-participant loop, accepted-selection reveal and one foreground confirmation; reduced motion built in.                               |
+| `WalletConnectScamWarning`              | `$lib/components/wallet-connect/` | The security-risk notice on a WalletConnect sign or send review whose request Verify flags as a scam (`acceptedContext`); that review offers Reject only. |
+| `Loader*` and `loaders/`                | `$lib/components/loaders/`        | Loaders, suspense boundaries, skeletons.                                                                                                                  |
+| `icons/`                                | `$lib/components/icons/`          | Project's icon set.                                                                                                                                       |
+
+`Logo` defaults to lazy loading and its existing readiness opacity/fade, with transitions
+suppressed on iOS. Set `animateReadiness={false}` when a parent owns the whole reveal;
+`loading="eager"` forwards an eager policy to shared `Img`. `SwapProviderAnimation` uses
+both for its sharp/soft logo copies without making quote publication wait for images.
 
 The pre-hydration loader in `src/frontend/src/app.html` mirrors `Spinner` because it must
 render before the Svelte bundle loads. `tests/app.spec.ts` checks their geometry and dash
@@ -111,17 +119,18 @@ Add new feature folders only if your concern doesn't fit any of the above.
 
 ### Stores / derived worth knowing
 
-| Module                                                          | Where                              | Purpose                             |
-| --------------------------------------------------------------- | ---------------------------------- | ----------------------------------- |
-| `i18n.store`                                                    | `$lib/stores/i18n.store`           | Reactive translations.              |
-| `auth.store`, `auth.derived`                                    | `$lib/stores/`, `$lib/derived/`    | Auth identity + derived guards.     |
-| `toasts.store`                                                  | `$lib/stores/toasts.store`         | All user-visible toasts.            |
-| `busy.store`, `busy.derived`                                    | `$lib/stores/`, `$lib/derived/`    | Global busy indicator.              |
-| `modal.store`, `modal.derived`                                  | `$lib/stores/`, `$lib/derived/`    | Modal stack.                        |
-| `currency.store`, `currency-exchange.store`, `currency.derived` | `$lib/stores/`, `$lib/derived/`    | Currency + FX state.                |
-| `balances.store`, `balances.derived`                            | `$lib/stores/`, `$lib/derived/`    | Balances per token.                 |
-| `tokens.constants`, `*-tokens.derived`                          | `$lib/constants/`, `$lib/derived/` | Default + enabled tokens per chain. |
-| `network.derived`, `networks.derived`                           | `$lib/derived/`                    | Active network + chain predicates.  |
+| Module                                                          | Where                              | Purpose                                |
+| --------------------------------------------------------------- | ---------------------------------- | -------------------------------------- |
+| `i18n.store`                                                    | `$lib/stores/i18n.store`           | Reactive translations.                 |
+| `auth.store`, `auth.derived`                                    | `$lib/stores/`, `$lib/derived/`    | Auth identity + derived guards.        |
+| `toasts.store`                                                  | `$lib/stores/toasts.store`         | All user-visible toasts.               |
+| `busy.store`, `busy.derived`                                    | `$lib/stores/`, `$lib/derived/`    | Global busy indicator.                 |
+| `modal.store`, `modal.derived`                                  | `$lib/stores/`, `$lib/derived/`    | Modal stack.                           |
+| `currency.store`, `currency-exchange.store`, `currency.derived` | `$lib/stores/`, `$lib/derived/`    | Currency + FX state.                   |
+| `balances.store`, `balances.derived`                            | `$lib/stores/`, `$lib/derived/`    | Balances per token.                    |
+| `tokens.constants`, `*-tokens.derived`                          | `$lib/constants/`, `$lib/derived/` | Default + enabled tokens per chain.    |
+| `network.derived`, `networks.derived`                           | `$lib/derived/`                    | Active network + chain predicates.     |
+| `swap-amounts.store`, `swap-quote-activity.store`               | `$lib/stores/`                     | Accepted offers; pricing participants. |
 
 ### Constants worth knowing
 

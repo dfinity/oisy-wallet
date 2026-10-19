@@ -1330,6 +1330,8 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "Đang làm mới giao diện người dùng",
 			"swap_provider": "Nhà cung cấp hoán đổi",
+			"smart_swap": "",
+			"comparing_providers": "",
 			"swap_provider_website": "Trang web",
 			"swap_route": "Lộ trình hoán đổi",
 			"included_network_fees": "Phí mạng đã bao gồm",

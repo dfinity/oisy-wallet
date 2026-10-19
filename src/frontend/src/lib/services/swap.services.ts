@@ -440,7 +440,8 @@ export const fetchSwapAmounts = async ({
 	userEthAddress,
 	userSolAddress,
 	userBtcAddress,
-	userXrpAddress
+	userXrpAddress,
+	onProviderParticipating
 }: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
 	const sourceAmount = parseToken({
 		value: `${amount}`,
@@ -454,7 +455,8 @@ export const fetchSwapAmounts = async ({
 				destinationToken,
 				amount: sourceAmount,
 				userEthAddress,
-				slippage
+				slippage,
+				...(onProviderParticipating && { onProviderParticipating })
 			});
 		}
 
@@ -465,7 +467,8 @@ export const fetchSwapAmounts = async ({
 			amount: sourceAmount,
 			tokens,
 			slippage,
-			isSourceTokenIcrc2
+			isSourceTokenIcrc2,
+			...(onProviderParticipating && { onProviderParticipating })
 		});
 	}
 
@@ -497,7 +500,8 @@ export const fetchSwapAmounts = async ({
 			amount: sourceAmount,
 			userBtcAddress,
 			recipientAddress,
-			slippage
+			slippage,
+			...(onProviderParticipating && { onProviderParticipating })
 		});
 	}
 
@@ -510,7 +514,8 @@ export const fetchSwapAmounts = async ({
 			amount: sourceAmount,
 			userAddress: userXrpAddress,
 			recipientAddress,
-			slippage
+			slippage,
+			...(onProviderParticipating && { onProviderParticipating })
 		});
 	}
 
@@ -530,7 +535,8 @@ export const fetchSwapAmounts = async ({
 			amount: sourceAmount,
 			userAddress: sourceAddress,
 			recipientAddress,
-			slippage
+			slippage,
+			...(onProviderParticipating && { onProviderParticipating })
 		});
 	}
 
@@ -540,7 +546,8 @@ export const fetchSwapAmounts = async ({
 		amount: sourceAmount,
 		userAddress: userEthAddress,
 		recipientAddress,
-		slippage
+		slippage,
+		...(onProviderParticipating && { onProviderParticipating })
 	});
 };
 
@@ -551,7 +558,8 @@ const fetchSwapAmountsICP = async ({
 	amount,
 	tokens,
 	slippage,
-	isSourceTokenIcrc2
+	isSourceTokenIcrc2,
+	onProviderParticipating
 }: Omit<
 	FetchSwapAmountsParams,
 	'userEthAddress' | 'userSolAddress' | 'userBtcAddress' | 'userXrpAddress' | 'amount'
@@ -561,14 +569,27 @@ const fetchSwapAmountsICP = async ({
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
 
 	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({
+		enabledProviders.map(({ key, getQuote }) => {
+			// Kong has no provider-local eligibility guards. Its quote API must not receive
+			// the observer because it forwards the remaining arguments to the canister.
+			if (key === SwapProvider.KONG_SWAP) {
+				onProviderParticipating?.(key);
+			}
+
+			return getQuote({
 				identity,
 				sourceToken: sourceToken as IcToken,
 				destinationToken: destinationToken as IcToken,
-				sourceAmount: amount
-			})
-		)
+				sourceAmount: amount,
+				// Preserve quote calls and the existing ICRC-2 offer-mapping gates below,
+				// but do not advertise an ineligible provider as participating.
+				...(key !== SwapProvider.KONG_SWAP &&
+					isSourceTokenIcrc2 &&
+					onProviderParticipating && {
+						onProviderParticipating
+					})
+			});
+		})
 	);
 
 	const destinationUsdValue = get(exchanges)?.[destinationToken.id]?.usd;
@@ -1433,13 +1454,21 @@ const fetchSwapAmountsICPBridge = async ({
 	destinationToken,
 	amount,
 	userEthAddress,
-	slippage
+	slippage,
+	onProviderParticipating
 }: IcpBridgeQuoteParams): Promise<SwapMappedResult[]> => {
 	const enabledProviders = icpBridgeProviders.filter(({ isEnabled }) => isEnabled);
 
 	const settledResults = await Promise.allSettled(
 		enabledProviders.map(({ getQuote }) =>
-			getQuote({ sourceToken, destinationToken, amount, userEthAddress, slippage })
+			getQuote({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress,
+				slippage,
+				...(onProviderParticipating && { onProviderParticipating })
+			})
 		)
 	);
 
@@ -1455,7 +1484,8 @@ export const fetchSwapAmountsEVM = async ({
 	amount,
 	userAddress,
 	recipientAddress,
-	slippage
+	slippage,
+	onProviderParticipating
 }: EvmQuoteParams): Promise<SwapMappedResult[]> => {
 	if (isNullish(userAddress)) {
 		return [];
@@ -1465,7 +1495,15 @@ export const fetchSwapAmountsEVM = async ({
 
 	const settledResults = await Promise.allSettled(
 		enabledProviders.map(({ getQuote }) =>
-			getQuote({ sourceToken, destinationToken, amount, userAddress, recipientAddress, slippage })
+			getQuote({
+				sourceToken,
+				destinationToken,
+				amount,
+				userAddress,
+				recipientAddress,
+				slippage,
+				...(onProviderParticipating && { onProviderParticipating })
+			})
 		)
 	);
 
@@ -1480,7 +1518,8 @@ export const fetchSwapAmountsBTC = async ({
 	amount,
 	userBtcAddress,
 	recipientAddress,
-	slippage
+	slippage,
+	onProviderParticipating
 }: BtcQuoteParams): Promise<SwapMappedResult[]> => {
 	const enabledProviders = btcSwapProviders.filter(({ isEnabled }) => isEnabled);
 
@@ -1492,7 +1531,8 @@ export const fetchSwapAmountsBTC = async ({
 				amount,
 				userBtcAddress,
 				recipientAddress,
-				slippage
+				slippage,
+				...(onProviderParticipating && { onProviderParticipating })
 			})
 		)
 	);
@@ -1509,7 +1549,8 @@ export const fetchSwapAmountsSOL = async ({
 	amount,
 	userAddress,
 	recipientAddress,
-	slippage
+	slippage,
+	onProviderParticipating
 }: NearIntentsQuoteParams): Promise<SwapMappedResult[]> => {
 	if (isNullish(userAddress)) {
 		return [];
@@ -1519,7 +1560,15 @@ export const fetchSwapAmountsSOL = async ({
 
 	const settledResults = await Promise.allSettled(
 		enabledProviders.map(({ getQuote }) =>
-			getQuote({ sourceToken, destinationToken, amount, userAddress, recipientAddress, slippage })
+			getQuote({
+				sourceToken,
+				destinationToken,
+				amount,
+				userAddress,
+				recipientAddress,
+				slippage,
+				...(onProviderParticipating && { onProviderParticipating })
+			})
 		)
 	);
 
@@ -1532,7 +1581,8 @@ export const fetchSwapAmountsXRP = async ({
 	amount,
 	userAddress,
 	recipientAddress,
-	slippage
+	slippage,
+	onProviderParticipating
 }: NearIntentsQuoteParams): Promise<SwapMappedResult[]> => {
 	if (isNullish(userAddress)) {
 		return [];
@@ -1542,7 +1592,15 @@ export const fetchSwapAmountsXRP = async ({
 
 	const settledResults = await Promise.allSettled(
 		enabledProviders.map(({ getQuote }) =>
-			getQuote({ sourceToken, destinationToken, amount, userAddress, recipientAddress, slippage })
+			getQuote({
+				sourceToken,
+				destinationToken,
+				amount,
+				userAddress,
+				recipientAddress,
+				slippage,
+				...(onProviderParticipating && { onProviderParticipating })
+			})
 		)
 	);
 

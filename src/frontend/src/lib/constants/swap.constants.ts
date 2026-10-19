@@ -21,6 +21,7 @@ import {
 	OISY_TRADE_LEARN_MORE_URL,
 	OISY_TRADE_PROVIDER_NAME
 } from '$lib/constants/oisy-trade.constants';
+import { MOTION_EASE_OUT_CSS } from '$lib/constants/transition.constants';
 import type { NetworkId } from '$lib/types/network';
 import { SwapProvider, type ChainFusionPair, type SwapProvidersConfig } from '$lib/types/swap';
 import { toChainFusionPairs } from '$lib/utils/chain-fusion-swap.utils';
@@ -46,6 +47,28 @@ export const ICP_SWAP_SCAN_CONCURRENCY = 10;
 export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
 export const SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS = 5_000;
+
+// Candidate dwell time, not a minimum quote duration: a ready offer always wins immediately.
+export const SWAP_PROVIDER_CYCLE_INTERVAL_MS = 650;
+
+// Selected Text Loop spring (k=900, c=80, m=10), sampled at 33 equally spaced times.
+// p(t)=1-exp(-4t)*(cos(sqrt(74)t)+4/sqrt(74)*sin(sqrt(74)t)); first p=1 at
+// T=(PI-atan(sqrt(74)/4))/sqrt(74). Map [0,T] to the shared turn budget: no overshoot/tail.
+export const SWAP_PROVIDER_TURN_EASING =
+	'linear(0, 0.002343, 0.009184, 0.020235, 0.035208, 0.053811, 0.075752, 0.100739, 0.128485, 0.158705, 0.191118, 0.225449, 0.26143, 0.298802, 0.337312, 0.376716, 0.416781, 0.457285, 0.498013, 0.538764, 0.579348, 0.619586, 0.659311, 0.698368, 0.736612, 0.773913, 0.810151, 0.845217, 0.879016, 0.911463, 0.942482, 0.972012, 1)';
+
+// A brief borderless confirmation, not a celebration or a minimum quote delay.
+export const SWAP_PROVIDER_CONFIRMATION_MOTION = {
+	duration: 250,
+	// Ease each segment, not the whole clock: the squeeze must still be visible during recall.
+	easing: 'linear',
+	keyframes: [
+		{ transform: 'scale(1)', offset: 0, easing: MOTION_EASE_OUT_CSS },
+		{ transform: 'scale(1.01, 0.95)', offset: 0.35, easing: MOTION_EASE_OUT_CSS },
+		{ transform: 'scale(0.995, 1.02)', offset: 0.7, easing: MOTION_EASE_OUT_CSS },
+		{ transform: 'scale(1)', offset: 1 }
+	]
+} satisfies { duration: number; easing: string; keyframes: Keyframe[] };
 
 // LI.FI is re-quoted at most this often for unchanged inputs, rather than on every periodic tick:
 // its rate limit is tight, and a displayed quote is never signed — execution always re-quotes.

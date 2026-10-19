@@ -234,6 +234,7 @@ export const SWAP_SWITCH_TOKENS_BUTTON = 'swap-switch-tokens-button';
 export const SWAP_TOKENS_MODAL_OPEN_BUTTON = 'swap-tokens-modal-open-button';
 export const SWAP_TOKENS_MODAL = 'swap-tokens-modal';
 export const SWAP_MODAL_SELECT_PROVIDER_STEP = 'swap-modal-select-provider-step';
+export const SWAP_PROVIDER_ANIMATION = 'swap-provider-animation';
 
 export const MODAL_FILTER_NETWORKS = 'MODAL_FILTER_NETWORKS';
 

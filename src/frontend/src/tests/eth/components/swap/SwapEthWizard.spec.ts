@@ -309,7 +309,7 @@ describe('SwapEthWizard', () => {
 
 			const { getByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
 
-			expect(getByText(en.swap.text.swap_provider)).toBeInTheDocument();
+			expect(getByText(en.swap.text.smart_swap)).toBeInTheDocument();
 		});
 
 		it('renders fee information', () => {

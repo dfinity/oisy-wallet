@@ -213,7 +213,8 @@ const resolveQuoteFromPlan = async ({
 export const fetchOneSecEvmToIcpQuote = async ({
 	sourceToken,
 	destinationToken,
-	amount
+	amount,
+	onProviderParticipating
 }: EvmQuoteParams): Promise<SwapMappedResult | undefined> => {
 	const identity = get(authIdentity);
 	if (!ONESEC_SWAP_ENABLED || isNullish(identity) || !isNetworkIdICP(destinationToken.network.id)) {
@@ -226,6 +227,7 @@ export const fetchOneSecEvmToIcpQuote = async ({
 	}
 
 	try {
+		onProviderParticipating?.(SwapProvider.ONE_SEC);
 		const plan = await new EvmToIcpBridgeBuilder(sourceToken.network.name as EvmChain, entry.token)
 			.receiver(identity.getPrincipal())
 			.amountInUnits(amount)
@@ -241,7 +243,8 @@ export const fetchOneSecIcpToEvmQuote = async ({
 	sourceToken,
 	destinationToken,
 	amount,
-	userEthAddress
+	userEthAddress,
+	onProviderParticipating
 }: IcpBridgeQuoteParams): Promise<SwapMappedResult | undefined> => {
 	const identity = get(authIdentity);
 	if (
@@ -260,6 +263,7 @@ export const fetchOneSecIcpToEvmQuote = async ({
 
 	try {
 		const agent = await getAgent({ identity });
+		onProviderParticipating?.(SwapProvider.ONE_SEC);
 		const plan = await new IcpToEvmBridgeBuilder(
 			agent,
 			destinationToken.network.name as EvmChain,
