@@ -23,9 +23,11 @@
 
 	interface Props {
 		tokenGroup: TokenUiGroup;
+		onTokenClick?: (token: TokenUi) => void;
 	}
 
-	let { tokenGroup }: Props = $props();
+	let { tokenGroup, onTokenClick = (token: TokenUi) => goto(transactionsUrl({ token })) }: Props =
+		$props();
 
 	const isExpanded: boolean = $derived(
 		($tokenGroupStore ?? {})[tokenGroup.id]?.isExpanded ?? false
@@ -122,7 +124,7 @@
 					class="flex overflow-hidden rounded-lg bg-secondary transition-colors duration-250 hover:bg-brand-subtle-10"
 					transition:slide={SLIDE_PARAMS}
 				>
-					<TokenCard asNetwork data={token} onClick={() => goto(transactionsUrl({ token }))} />
+					<TokenCard asNetwork data={token} onClick={() => onTokenClick(token)} />
 				</div>
 			{/each}
 

@@ -56,6 +56,14 @@
 	import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 	import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
 
+	interface Props {
+		// The newest transactions only, for a summary elsewhere (the extension's side panel): no
+		// filters, no paging, and the Activity page's persisted filters are left alone.
+		preview?: { limit: number };
+	}
+
+	let { preview }: Props = $props();
+
 	// The tokens panel lists the selected network's tokens only, so a selection made on another
 	// network sticks around invisibly and keeps hiding transactions with no row left to untick it.
 	// Reconciling against the selectable set is the filter's own job, hence here rather than on a
@@ -67,7 +75,7 @@
 	$effect(() => {
 		// While the tokens are still loading the selectable set is empty; pruning then would wipe a
 		// persisted filter before the user ever sees it.
-		if (selectableTokenFilterKeys.length === 0) {
+		if (nonNullish(preview) || selectableTokenFilterKeys.length === 0) {
 			return;
 		}
 
@@ -83,7 +91,7 @@
 	$effect(() => {
 		// Unlike the tokens, an empty list is a legitimate state here (the user deleted their last
 		// contact), so we gate on the store being loaded rather than on the list being non-empty.
-		if ($contactsNotInitialized) {
+		if (nonNullish(preview) || $contactsNotInitialized) {
 			return;
 		}
 
@@ -120,11 +128,13 @@
 	);
 
 	let displayTransactions = $derived(
-		applyTransactionsFilter({
-			transactions: microFilteredTransactions,
-			filter: $transactionsFilterStore,
-			contacts: $allContacts
-		})
+		nonNullish(preview)
+			? microFilteredTransactions
+			: applyTransactionsFilter({
+					transactions: microFilteredTransactions,
+					filter: $transactionsFilterStore,
+					contacts: $allContacts
+				})
 	);
 
 	let sortedTransactions = $derived(
@@ -135,7 +145,11 @@
 
 	let transactionsToDisplay = $state<AllTransactionUiWithCmp[]>([]);
 
-	let groupedTransactions = $derived(groupTransactionsByDate(transactionsToDisplay));
+	let groupedTransactions = $derived(
+		groupTransactionsByDate(
+			nonNullish(preview) ? sortedTransactions.slice(0, preview.limit) : transactionsToDisplay
+		)
+	);
 
 	let { transaction: selectedBtcTransaction, token: selectedBtcToken } = $derived(
 		mapTransactionModalData<BtcTransactionUi>({
@@ -173,35 +187,41 @@
 	);
 </script>
 
-<TransactionsFilterToolbar />
+{#snippet dateGroups()}
+	{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+		<TransactionsDateGroup
+			{formattedDate}
+			testId={`all-transactions-date-group-${index}`}
+			{transactions}
+		/>
+	{:else}
+		<TransactionsPlaceholder />
+	{/each}
+{/snippet}
 
-<AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
-	<AllTransactionsLoader transactions={allTransactions}>
-		{#snippet children({ loadMore, exhausted, floor })}
-			<AllTransactionsScroll
-				{exhausted}
-				{floor}
-				onLoadMore={loadMore}
-				{sortedTransactions}
-				bind:transactionsToDisplay
-			>
-				{#if Object.values(groupedTransactions).length > 0}
-					{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
-						<TransactionsDateGroup
-							{formattedDate}
-							testId={`all-transactions-date-group-${index}`}
-							{transactions}
-						/>
-					{/each}
-				{/if}
+{#if nonNullish(preview)}
+	<AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
+		{@render dateGroups()}
+	</AllTransactionsSkeletons>
+{:else}
+	<TransactionsFilterToolbar />
 
-				{#if Object.values(groupedTransactions).length === 0}
-					<TransactionsPlaceholder />
-				{/if}
-			</AllTransactionsScroll>
-		{/snippet}
-	</AllTransactionsLoader>
-</AllTransactionsSkeletons>
+	<AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
+		<AllTransactionsLoader transactions={allTransactions}>
+			{#snippet children({ loadMore, exhausted, floor })}
+				<AllTransactionsScroll
+					{exhausted}
+					{floor}
+					onLoadMore={loadMore}
+					{sortedTransactions}
+					bind:transactionsToDisplay
+				>
+					{@render dateGroups()}
+				</AllTransactionsScroll>
+			{/snippet}
+		</AllTransactionsLoader>
+	</AllTransactionsSkeletons>
+{/if}
 
 {#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}
 	<BtcTransactionModal token={selectedBtcToken} transaction={selectedBtcTransaction} />
