@@ -40,6 +40,22 @@ describe('string.utils', () => {
 		it('should return nothing for a zero limit', () => {
 			expect(truncateUtf8Bytes({ text: 'hello', maxBytes: 0 })).toBe('');
 		});
+
+		it('should return nothing for a negative or NaN limit', () => {
+			expect(truncateUtf8Bytes({ text: 'hello', maxBytes: -3 })).toBe('');
+			expect(truncateUtf8Bytes({ text: 'hello', maxBytes: -Infinity })).toBe('');
+			expect(truncateUtf8Bytes({ text: 'hello', maxBytes: Number.NaN })).toBe('');
+		});
+
+		it('should keep the whole text for an unbounded limit', () => {
+			// `€` takes three bytes for one UTF-16 unit, the most UTF-8 needs per unit.
+			expect(truncateUtf8Bytes({ text: '€'.repeat(5), maxBytes: Infinity })).toBe('€'.repeat(5));
+			expect(truncateUtf8Bytes({ text: 'hé\u{1F600}', maxBytes: Infinity })).toBe('hé\u{1F600}');
+		});
+
+		it('should cut at the limit when it is below what the text could take', () => {
+			expect(truncateUtf8Bytes({ text: '€'.repeat(5), maxBytes: 14 })).toBe('€'.repeat(4));
+		});
 	});
 
 	describe('normalizeTextFilter', () => {

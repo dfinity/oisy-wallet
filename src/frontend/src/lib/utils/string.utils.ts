@@ -25,7 +25,17 @@ export const truncateUtf8Bytes = ({
 	text: string;
 	maxBytes: number;
 }): string => {
-	const { read } = new TextEncoder().encodeInto(text, new Uint8Array(maxBytes));
+	// `Uint8Array` throws on a negative length; no budget leaves no text.
+	if (Number.isNaN(maxBytes) || maxBytes <= 0) {
+		return '';
+	}
+
+	// UTF-8 takes at most three bytes per UTF-16 unit, so the buffer never outgrows what the text can
+	// fill, and an unbounded limit keeps the whole text.
+	const { read } = new TextEncoder().encodeInto(
+		text,
+		new Uint8Array(Math.min(maxBytes, text.length * 3))
+	);
 
 	return text.slice(0, read);
 };
