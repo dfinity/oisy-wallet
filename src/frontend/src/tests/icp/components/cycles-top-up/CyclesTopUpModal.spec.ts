@@ -1,7 +1,7 @@
 import * as canisterStateApi from '$icp/api/canister-state.api';
 import CyclesTopUpModal from '$icp/components/cycles-top-up/CyclesTopUpModal.svelte';
 import * as cyclesTopUpServices from '$icp/services/cycles-top-up.services';
-import { unansweredCyclesTopUp } from '$icp/stores/cycles-top-up.store';
+import { unansweredCyclesTopUps } from '$icp/stores/cycles-top-up.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { CanisterExistence } from '$icp/types/cycles-top-up';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
@@ -147,7 +147,7 @@ describe('CyclesTopUpModal', () => {
 			data: { data: 5_000_000_000_000n, certified: true }
 		});
 
-		unansweredCyclesTopUp.set(undefined);
+		unansweredCyclesTopUps.set({});
 		icTransactionsStore.reset(mockTcyclesToken.id);
 	});
 
@@ -700,6 +700,54 @@ describe('CyclesTopUpModal', () => {
 
 			expect(topUpSpy).toHaveBeenLastCalledWith(
 				expect.objectContaining({ createdAt: 2_000_000_000n })
+			);
+		});
+
+		it("keeps a principal's unanswered top-up while another principal tops up", async () => {
+			topUpSpy.mockResolvedValueOnce({ status: 'unknown' });
+
+			const first = await toReview();
+
+			await topUp(first);
+
+			await backOnReview(first);
+
+			first.unmount();
+
+			const identitySpy = vi
+				.spyOn(authDerived, 'authIdentity', 'get')
+				.mockReturnValue(readable({ ...mockIdentity, getPrincipal: () => mockPrincipal2 }));
+
+			vi.setSystemTime(new Date(2_000));
+
+			const other = await toReview();
+
+			await topUp(other);
+
+			await waitFor(() => {
+				expect(topUpSpy).toHaveBeenCalledTimes(2);
+			});
+
+			other.unmount();
+
+			identitySpy.mockReturnValue(readable(mockIdentity));
+
+			vi.setSystemTime(new Date(3_000));
+
+			const back = await toReview();
+
+			expect(back.container).toHaveTextContent(
+				replacePlaceholders(en.cycles_top_up.text.unknown, { $token: 'TCYCLES' })
+			);
+
+			await topUp(back);
+
+			await waitFor(() => {
+				expect(topUpSpy).toHaveBeenCalledTimes(3);
+			});
+
+			expect(topUpSpy).toHaveBeenLastCalledWith(
+				expect.objectContaining({ createdAt: 1_000_000_000n })
 			);
 		});
 	});

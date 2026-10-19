@@ -6,7 +6,7 @@
 	import CyclesTopUpProgress from '$icp/components/cycles-top-up/CyclesTopUpProgress.svelte';
 	import CyclesTopUpReview from '$icp/components/cycles-top-up/CyclesTopUpReview.svelte';
 	import { topUpCanister } from '$icp/services/cycles-top-up.services';
-	import { unansweredCyclesTopUp } from '$icp/stores/cycles-top-up.store';
+	import { unansweredCyclesTopUps } from '$icp/stores/cycles-top-up.store';
 	import type { CyclesTopUpRequest, CyclesTopUpResult } from '$icp/types/cycles-top-up';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { parseCanisterId } from '$icp/utils/cycles-top-up.utils';
@@ -41,14 +41,14 @@
 	let currentStep = $state<WizardStep<WizardStepsCyclesTopUp> | undefined>();
 	let modal = $state<WizardModal<WizardStepsCyclesTopUp>>();
 
-	// A top-up that got no answer, kept until the page reloads, so a later modal has it too.
+	// The signed-in principal's top-up that got no answer, kept until the page reloads, so a
+	// later modal has it too.
 	// Sending the same canister and amount again reuses its creation time, so the ledger
 	// answers with the first one's block if it went through, and the top-up runs at most
 	// once. The ledger keeps that for 24 hours; a resend after that stays unknown (below).
 	let unanswered = $derived(
-		nonNullish($unansweredCyclesTopUp) &&
-			$unansweredCyclesTopUp.principal === $authIdentity?.getPrincipal().toText()
-			? $unansweredCyclesTopUp.request
+		nonNullish($authIdentity)
+			? $unansweredCyclesTopUps[$authIdentity.getPrincipal().toText()]
 			: undefined
 	);
 
@@ -167,7 +167,7 @@
 				: answer;
 
 		if (result.status === 'topped_up') {
-			unansweredCyclesTopUp.set(undefined);
+			unansweredCyclesTopUps.update((all) => ({ ...all, [sender]: undefined }));
 
 			trackCyclesTopUp({ ...analytics, resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS });
 
@@ -197,9 +197,10 @@
 
 		// Only a top-up without an answer may be resent as it was. After a refund, the same
 		// request would be answered as a duplicate of the refunded one.
-		unansweredCyclesTopUp.set(
-			result.status === 'unknown' ? { principal: sender, request } : undefined
-		);
+		unansweredCyclesTopUps.update((all) => ({
+			...all,
+			[sender]: result.status === 'unknown' ? request : undefined
+		}));
 
 		// Review shows the warning for a top-up without an answer.
 		if (result.status === 'refused' || result.status === 'refunded') {
