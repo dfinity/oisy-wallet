@@ -460,6 +460,7 @@ fn require_chain_fusion_pair(data: &ChainFusionData) -> Result<(), ActiveUserTra
     let is_btc = |t: &TokenId| matches!(t, TokenId::BtcNativeMainnet | TokenId::BtcNativeTestnet);
     let is_eth = |t: &TokenId| matches!(t, TokenId::EvmNative(_));
     let is_erc20 = |t: &TokenId| matches!(t, TokenId::Erc20(..));
+    let is_sol = |t: &TokenId| matches!(t, TokenId::SolNativeMainnet | TokenId::SolNativeDevnet);
     let is_ck = |t: &TokenId| matches!(t, TokenId::Icrc(_));
 
     let ok = match data.direction {
@@ -473,6 +474,8 @@ fn require_chain_fusion_pair(data: &ChainFusionData) -> Result<(), ActiveUserTra
         ChainFusionDirection::CkErc20ToErc20 => {
             is_ck(&data.source_token) && is_erc20(&data.dest_token)
         }
+        ChainFusionDirection::SolToCkSol => is_sol(&data.source_token) && is_ck(&data.dest_token),
+        ChainFusionDirection::CkSolToSol => is_ck(&data.source_token) && is_sol(&data.dest_token),
     };
 
     if ok {
@@ -1262,6 +1265,7 @@ mod tests {
     const CKBTC_LEDGER: &str = "mxzaz-hqaaa-aaaar-qaada-cai";
     const CKETH_LEDGER: &str = "ss2fx-dyaaa-aaaar-qacoq-cai";
     const CKUSDC_LEDGER: &str = "xevnm-gaaaa-aaaar-qafnq-cai";
+    const CKSOL_LEDGER: &str = "ls5lp-lqaaa-aaaar-qb5oa-cai";
     const USDC_ETHEREUM: &str = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
 
     fn icrc(ledger: &str) -> TokenId {
@@ -1288,6 +1292,8 @@ mod tests {
                 icrc(CKUSDC_LEDGER),
                 TokenId::Erc20(ErcTokenId(USDC_ETHEREUM.to_string()), 1),
             ),
+            ChainFusionDirection::SolToCkSol => (TokenId::SolNativeMainnet, icrc(CKSOL_LEDGER)),
+            ChainFusionDirection::CkSolToSol => (icrc(CKSOL_LEDGER), TokenId::SolNativeMainnet),
         };
         ActiveUserTransactionData::ChainFusion(ChainFusionData {
             direction,
@@ -1299,7 +1305,7 @@ mod tests {
 
     #[test]
     fn chain_fusion_create_roundtrip() {
-        // All six directions share one variant, so each must survive create —
+        // All eight directions share one variant, so each must survive create —
         // and the stable-memory read path — unchanged; the direction is what
         // the FE poller routes on.
         for direction in ChainFusionDirection::ALL {
@@ -1341,6 +1347,61 @@ mod tests {
                 direction,
                 source_token: TokenId::BtcNativeMainnet,
                 dest_token: icrc(CKBTC_LEDGER),
+                amount: Nat::from(1_000u64),
+            });
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        }
+    }
+
+    #[test]
+    fn chain_fusion_sol_devnet_accepted() {
+        // Only kinds are checked, so Devnet SOL passes as Bitcoin testnet does.
+        for (direction, source_token, dest_token) in [
+            (
+                ChainFusionDirection::SolToCkSol,
+                TokenId::SolNativeDevnet,
+                icrc(CKSOL_LEDGER),
+            ),
+            (
+                ChainFusionDirection::CkSolToSol,
+                icrc(CKSOL_LEDGER),
+                TokenId::SolNativeDevnet,
+            ),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("ck-1");
+            req.data = ActiveUserTransactionData::ChainFusion(ChainFusionData {
+                direction,
+                source_token,
+                dest_token,
+                amount: Nat::from(1_000u64),
+            });
+            create(&mut map, principal(), req, 1).expect("create");
+        }
+    }
+
+    #[test]
+    fn chain_fusion_spl_token_rejected_as_sol() {
+        // An SPL token is not SOL, so it never stands in for the SOL side.
+        for (direction, source_token, dest_token) in [
+            (
+                ChainFusionDirection::SolToCkSol,
+                spl(USDC_SOLANA),
+                icrc(CKSOL_LEDGER),
+            ),
+            (
+                ChainFusionDirection::CkSolToSol,
+                icrc(CKSOL_LEDGER),
+                spl(USDC_SOLANA),
+            ),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("ck-1");
+            req.data = ActiveUserTransactionData::ChainFusion(ChainFusionData {
+                direction,
+                source_token,
+                dest_token,
                 amount: Nat::from(1_000u64),
             });
             let err = create(&mut map, principal(), req, 1).unwrap_err();
