@@ -1933,7 +1933,8 @@
 			"all_activity": "All your activity in OISY",
 			"view_all": "View all",
 			"addresses_sites_see": "Sites see these addresses",
-			"last_updated": "Last updated $time",
+			"snapshot_as_of": "Balances and prices as of $time",
+			"snapshot_prices_live": "Balances as of $time · prices live",
 			"sign_in_to_refresh": "Sign in to see your current balances and activity."
 		}
 	},

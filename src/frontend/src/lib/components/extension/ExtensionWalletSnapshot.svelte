@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import { EXCHANGE_DISABLED } from '$env/exchange.env';
 	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
@@ -9,11 +10,16 @@
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { ExchangeWorker } from '$lib/services/worker.exchange.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { exchangeStore } from '$lib/stores/exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ExtensionPanelSnapshot } from '$lib/types/extension';
-	import { toExtensionPanelSnapshotCardData } from '$lib/utils/extension.utils';
+	import {
+		extensionPanelSnapshotHasLivePrices,
+		extensionPanelSnapshotUsdTotal,
+		toExtensionPanelSnapshotCardData
+	} from '$lib/utils/extension.utils';
 	import { formatCurrency, formatSecondsToDate } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -23,15 +29,28 @@
 
 	let { snapshot }: Props = $props();
 
+	// Live prices once OISY's price worker has answered; until then, or without any, the saved ones.
+	let livePrices = $derived(
+		extensionPanelSnapshotHasLivePrices({ snapshot, prices: $exchangeStore })
+	);
+
+	// The live rate when the worker has fetched one for the saved currency, else the saved rate.
+	let exchangeRate = $derived(
+		$currencyExchangeStore.currency === snapshot.currency &&
+			nonNullish($currencyExchangeStore.exchangeRateToUsd)
+			? $currencyExchangeStore
+			: {
+					currency: snapshot.currency,
+					exchangeRateToUsd: snapshot.exchangeRateToUsd,
+					exchangeRate24hChangeMultiplier: null
+				}
+	);
+
 	let total = $derived(
 		formatCurrency({
-			value: snapshot.usdTotal,
+			value: extensionPanelSnapshotUsdTotal({ snapshot, prices: $exchangeStore }),
 			currency: snapshot.currency,
-			exchangeRate: {
-				currency: snapshot.currency,
-				exchangeRateToUsd: snapshot.exchangeRateToUsd,
-				exchangeRate24hChangeMultiplier: null
-			},
+			exchangeRate,
 			language: $currentLanguage
 		})
 	);
@@ -47,20 +66,58 @@
 		});
 	});
 
-	let rows = $derived(snapshot.rows.map(toExtensionPanelSnapshotCardData));
+	let rows = $derived(
+		snapshot.rows.map((row) => toExtensionPanelSnapshotCardData({ row, prices: $exchangeStore }))
+	);
 
-	// The rows show their saved fiat values, but OISY's token cards wait for the first live prices
-	// and for the exchange rate, and nothing loads either while signed out. Marking prices as loaded
-	// and lending the saved rate lets the cards show what was saved.
-	onMount(() => {
-		exchangeStore.set([]);
+	let worker: ExchangeWorker | undefined;
+	let destroyed = false;
 
-		if (snapshot.currency !== $currentCurrency) {
+	// OISY's own price worker, on the public sources: OISY's backend prices need a session.
+	const startLivePrices = async () => {
+		const priced = (snapshot.holdings ?? []).some(({ priceKey }) => nonNullish(priceKey));
+
+		if (EXCHANGE_DISABLED || !priced) {
 			return;
 		}
 
-		currencyExchangeStore.setExchangeRateCurrency(snapshot.currency);
-		currencyExchangeStore.setExchangeRate(snapshot.exchangeRateToUsd);
+		const started = await ExchangeWorker.init();
+
+		if (destroyed) {
+			started.destroy();
+			return;
+		}
+
+		worker = started;
+		worker.startExchangeTimer({
+			currentCurrency: snapshot.currency,
+			erc20Addresses: snapshot.prices?.erc20Addresses ?? [],
+			icrcCanisterIds: snapshot.prices?.icrcCanisterIds ?? [],
+			splAddresses: snapshot.prices?.splAddresses ?? [],
+			// Vault prices need an on-chain read with OISY's provider URLs, which the snapshot doesn't
+			// keep; vaults stay at their saved value.
+			erc4626TokensExchangeData: [],
+			backendExchangeEnabled: false
+		});
+	};
+
+	onDestroy(() => {
+		destroyed = true;
+		worker?.destroy();
+	});
+
+	// OISY's token cards wait for the first prices and for the exchange rate before showing fiat
+	// values. Marking prices as loaded and lending the saved rate lets them show the saved values
+	// until the live ones arrive.
+	onMount(() => {
+		exchangeStore.set([]);
+
+		if (snapshot.currency === $currentCurrency) {
+			currencyExchangeStore.setExchangeRateCurrency(snapshot.currency);
+			currencyExchangeStore.setExchangeRate(snapshot.exchangeRateToUsd);
+		}
+
+		void startLivePrices();
 	});
 </script>
 
@@ -78,7 +135,12 @@
 		</output>
 
 		<span class="text-xl font-medium text-brand-secondary-alt">
-			{replacePlaceholders($i18n.extension.panel.last_updated, { $time: updated })}
+			{replacePlaceholders(
+				livePrices
+					? $i18n.extension.panel.snapshot_prices_live
+					: $i18n.extension.panel.snapshot_as_of,
+				{ $time: updated }
+			)}
 		</span>
 	</section>
 

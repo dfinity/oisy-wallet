@@ -1611,7 +1611,8 @@ interface I18nExtension {
 		all_activity: string;
 		view_all: string;
 		addresses_sites_see: string;
-		last_updated: string;
+		snapshot_as_of: string;
+		snapshot_prices_live: string;
 		sign_in_to_refresh: string;
 	};
 }

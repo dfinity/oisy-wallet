@@ -12,8 +12,9 @@
 	import { loadExtensionPanelSnapshot } from '$lib/services/extension-panel.services';
 	import type { ExtensionPanelSnapshot } from '$lib/types/extension';
 
-	// `undefined` while reading, `null` when there is none.
-	let snapshot = $state<ExtensionPanelSnapshot | null | undefined>();
+	// `undefined` while reading, `null` when there is none. Raw, because its price lookups are posted
+	// to OISY's price worker, and a deeply reactive copy can't be cloned into a worker.
+	let snapshot = $state.raw<ExtensionPanelSnapshot | null | undefined>();
 
 	onMount(async () => {
 		announcePanelReady();

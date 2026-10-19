@@ -1933,7 +1933,8 @@
 			"all_activity": "",
 			"view_all": "",
 			"addresses_sites_see": "",
-			"last_updated": "",
+			"snapshot_as_of": "",
+			"snapshot_prices_live": "",
 			"sign_in_to_refresh": ""
 		}
 	},

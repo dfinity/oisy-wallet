@@ -2,6 +2,7 @@ import type {
 	ExtensionChainSchema,
 	ExtensionConnectRequestSchema,
 	ExtensionPairRequestSchema,
+	ExtensionPanelSnapshotHoldingSchema,
 	ExtensionPanelSnapshotRowSchema,
 	ExtensionPanelSnapshotSchema,
 	ExtensionPanelStateMessageSchema,
@@ -24,6 +25,8 @@ export type ExtensionRequest = z.infer<typeof ExtensionRequestSchema>;
 export type ExtensionSites = z.infer<typeof ExtensionSitesSchema>;
 
 export type ExtensionPanelState = z.infer<typeof ExtensionPanelStateMessageSchema>['state'];
+
+export type ExtensionPanelSnapshotHolding = z.infer<typeof ExtensionPanelSnapshotHoldingSchema>;
 
 export type ExtensionPanelSnapshotRow = z.infer<typeof ExtensionPanelSnapshotRowSchema>;
 

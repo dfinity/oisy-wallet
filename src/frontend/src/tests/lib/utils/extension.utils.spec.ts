@@ -4,19 +4,25 @@ import { SOLANA_DEVNET_NETWORK } from '$env/networks/networks.sol.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SESSION_REQUEST_PERSONAL_SIGN } from '$eth/constants/wallet-connect.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	OISY_EXTENSION_INTERNAL_ERROR_CODE,
 	OISY_EXTENSION_USER_REJECTED_CODE,
 	OISY_EXTENSION_WALLET_CONNECT_TOPIC
 } from '$lib/constants/extension.constants';
+import { Currency } from '$lib/enums/currency';
 import type { ExtensionSignRequest } from '$lib/types/extension';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiGroup } from '$lib/types/token-ui-group';
 import {
 	compareExtensionVersions,
+	extensionPanelSnapshotHasLivePrices,
+	extensionPanelSnapshotUsdTotal,
 	extensionVersionStatus,
+	findExtensionPriceKey,
 	toExtensionError,
 	toExtensionPanelSnapshotCardData,
+	toExtensionPanelSnapshotHolding,
 	toExtensionPanelSnapshotRow,
 	toWalletConnectSessionRequest
 } from '$lib/utils/extension.utils';
@@ -184,8 +190,14 @@ describe('extension.utils', () => {
 	});
 
 	describe('panel snapshot', () => {
-		const eth: TokenUi = { ...ETHEREUM_TOKEN, balance: 2n, usdBalance: 4, usdPrice: 2 };
-		const icp: TokenUi = { ...ICP_TOKEN, balance: 3n, usdBalance: 6 };
+		// 1 ETH at $2,000 and 3 ICP at $5 when saved.
+		const eth: TokenUi = {
+			...ETHEREUM_TOKEN,
+			balance: 1_000_000_000_000_000_000n,
+			usdBalance: 2000,
+			usdPrice: 2000
+		};
+		const icp: TokenUi = { ...ICP_TOKEN, balance: 300_000_000n, usdBalance: 15, usdPrice: 5 };
 		const groupId = parseTokenGroupId('mixed');
 		const group: TokenUiGroup = {
 			id: groupId,
@@ -193,48 +205,159 @@ describe('extension.utils', () => {
 			groupData: { id: groupId, symbol: 'MIX', name: 'Mixed' },
 			tokens: [eth, icp],
 			balance: 5n,
-			usdBalance: 10
+			usdBalance: 2015
 		};
 
-		it('keeps what a token row shows, with its network by id', () => {
-			expect(toExtensionPanelSnapshotRow({ token: eth })).toEqual(
+		const keys: Record<string, string> = {
+			[`${eth.id.description}`]: 'ethereum',
+			[`${icp.id.description}`]: 'internet-computer'
+		};
+		const priceKeyOf = ({ id }: TokenUi) => keys[`${id.description}`];
+
+		const livePrices = {
+			ethereum: { usd: 3000, usd_24h_change: 4.2 },
+			'internet-computer': { usd: 10, usd_24h_change: -1 }
+		};
+
+		describe('findExtensionPriceKey', () => {
+			const ethPrice = { usd: 2000, usd_market_cap: 1, usd_24h_change: 2 };
+			const prices = { bitcoin: { usd: 60000 }, ethereum: ethPrice };
+
+			it('finds the entry a price came from', () => {
+				expect(findExtensionPriceKey({ price: ethPrice, prices })).toBe('ethereum');
+			});
+
+			it('finds it by value once OISY has kept an older copy', () => {
+				expect(findExtensionPriceKey({ price: { ...ethPrice }, prices })).toBe('ethereum');
+			});
+
+			it('finds nothing for a token without a price', () => {
+				expect(findExtensionPriceKey({ price: undefined, prices })).toBeUndefined();
+				expect(findExtensionPriceKey({ price: { usd: 1 }, prices })).toBeUndefined();
+			});
+		});
+
+		it('keeps a held token with its amount and price lookup, and skips an empty one', () => {
+			expect(toExtensionPanelSnapshotHolding({ token: eth, priceKey: 'ethereum' })).toEqual({
+				priceKey: 'ethereum',
+				balance: eth.balance,
+				decimals: eth.decimals,
+				usdBalance: 2000
+			});
+			expect(
+				toExtensionPanelSnapshotHolding({ token: { ...eth, balance: ZERO }, priceKey: 'ethereum' })
+			).toBeUndefined();
+		});
+
+		it('keeps what a token row shows, with its network by id and its holding', () => {
+			expect(toExtensionPanelSnapshotRow({ tokenOrGroup: { token: eth }, priceKeyOf })).toEqual(
 				expect.objectContaining({
 					name: eth.name,
 					symbol: eth.symbol,
-					decimals: eth.decimals,
-					balance: 2n,
-					usdBalance: 4,
-					usdPrice: 2,
-					networkId: ETHEREUM_NETWORK.id.description
+					balance: eth.balance,
+					usdBalance: 2000,
+					networkId: ETHEREUM_NETWORK.id.description,
+					holdings: [expect.objectContaining({ priceKey: 'ethereum' })]
 				})
 			);
 		});
 
-		it("keeps a group's header and its networks by id", () => {
-			expect(toExtensionPanelSnapshotRow({ group })).toEqual(
+		it("keeps a group's header, its networks by id and each token's holding", () => {
+			expect(toExtensionPanelSnapshotRow({ tokenOrGroup: { group }, priceKeyOf })).toEqual(
 				expect.objectContaining({
 					name: 'Mixed',
 					symbol: 'MIX',
-					balance: 5n,
-					usdBalance: 10,
-					groupNetworkIds: [ETHEREUM_NETWORK.id.description, ICP_NETWORK.id.description]
+					usdBalance: 2015,
+					groupNetworkIds: [ETHEREUM_NETWORK.id.description, ICP_NETWORK.id.description],
+					holdings: [
+						expect.objectContaining({ priceKey: 'ethereum' }),
+						expect.objectContaining({ priceKey: 'internet-computer' })
+					]
 				})
 			);
 		});
 
 		it('restores the networks for the token card', () => {
-			const tokenCard = toExtensionPanelSnapshotCardData(
-				toExtensionPanelSnapshotRow({ token: eth })
-			);
-			const groupCard = toExtensionPanelSnapshotCardData(toExtensionPanelSnapshotRow({ group }));
+			const tokenCard = toExtensionPanelSnapshotCardData({
+				row: toExtensionPanelSnapshotRow({ tokenOrGroup: { token: eth }, priceKeyOf }),
+				prices: undefined
+			});
+			const groupCard = toExtensionPanelSnapshotCardData({
+				row: toExtensionPanelSnapshotRow({ tokenOrGroup: { group }, priceKeyOf }),
+				prices: undefined
+			});
 
 			expect(tokenCard.network).toBe(ETHEREUM_NETWORK);
 			expect(groupCard.tokenCount).toBe(2);
 			expect(groupCard.networks).toEqual([ETHEREUM_NETWORK, ICP_NETWORK]);
 		});
 
+		it('keeps the saved price and value without live prices', () => {
+			const card = toExtensionPanelSnapshotCardData({
+				row: toExtensionPanelSnapshotRow({ tokenOrGroup: { token: eth }, priceKeyOf }),
+				prices: {}
+			});
+
+			expect(card.usdPrice).toBe(2000);
+			expect(card.usdBalance).toBe(2000);
+		});
+
+		it('values a row at live prices', () => {
+			const tokenCard = toExtensionPanelSnapshotCardData({
+				row: toExtensionPanelSnapshotRow({ tokenOrGroup: { token: eth }, priceKeyOf }),
+				prices: livePrices
+			});
+			const groupCard = toExtensionPanelSnapshotCardData({
+				row: toExtensionPanelSnapshotRow({ tokenOrGroup: { group }, priceKeyOf }),
+				prices: livePrices
+			});
+
+			expect(tokenCard).toEqual(
+				expect.objectContaining({
+					usdPrice: 3000,
+					usdPriceChangePercentage24h: 4.2,
+					usdBalance: 3000
+				})
+			);
+			expect(groupCard.usdBalance).toBe(3030);
+		});
+
+		describe('total', () => {
+			const snapshot = {
+				savedAt: 0,
+				usdTotal: 2065,
+				currency: Currency.USD,
+				exchangeRateToUsd: 1,
+				rows: [],
+				holdings: [
+					{ priceKey: 'ethereum', balance: eth.balance as bigint, decimals: 18, usdBalance: 2000 },
+					{ priceKey: undefined, balance: 7n, decimals: 0, usdBalance: 15 }
+				],
+				providersUsd: 50
+			};
+
+			it('is the saved total without live prices', () => {
+				expect(extensionPanelSnapshotUsdTotal({ snapshot, prices: {} })).toBe(2065);
+				expect(extensionPanelSnapshotHasLivePrices({ snapshot, prices: {} })).toBeFalsy();
+			});
+
+			it('values held tokens at live prices and keeps the rest as saved', () => {
+				expect(extensionPanelSnapshotUsdTotal({ snapshot, prices: livePrices })).toBe(3065);
+				expect(extensionPanelSnapshotHasLivePrices({ snapshot, prices: livePrices })).toBeTruthy();
+			});
+
+			it('falls back to the saved total for a snapshot without holdings', () => {
+				expect(
+					extensionPanelSnapshotUsdTotal({
+						snapshot: { ...snapshot, holdings: undefined },
+						prices: livePrices
+					})
+				).toBe(2065);
+			});
+		});
+
 		it('survives being stored', () => {
-			const row = toExtensionPanelSnapshotRow({ token: eth });
+			const row = toExtensionPanelSnapshotRow({ tokenOrGroup: { group }, priceKeyOf });
 
 			expect(structuredClone(row)).toEqual(row);
 		});

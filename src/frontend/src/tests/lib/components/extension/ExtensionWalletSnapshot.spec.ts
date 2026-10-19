@@ -5,12 +5,18 @@ import { TOKEN_CARD } from '$lib/constants/test-ids.constants';
 import * as currencyDerived from '$lib/derived/currency.derived';
 import * as settingsDerived from '$lib/derived/settings.derived';
 import { Currency } from '$lib/enums/currency';
+import { ExchangeWorker } from '$lib/services/worker.exchange.services';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { ExtensionPanelSnapshot } from '$lib/types/extension';
 import en from '$tests/mocks/i18n.mock';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { get, readable } from 'svelte/store';
+
+vi.mock('$lib/services/worker.exchange.services', () => ({
+	ExchangeWorker: { init: vi.fn() }
+}));
 
 const snapshot: ExtensionPanelSnapshot = {
 	savedAt: Date.now(),
@@ -37,18 +43,96 @@ const snapshot: ExtensionPanelSnapshot = {
 	]
 };
 
+// 1 ETH, priced live through `ethereum`, and USDC without a price lookup.
+const priced: ExtensionPanelSnapshot = {
+	...snapshot,
+	rows: [
+		{
+			...snapshot.rows[0],
+			holdings: [
+				{
+					priceKey: 'ethereum',
+					balance: 1_000_000_000_000_000_000n,
+					decimals: 18,
+					usdBalance: 1000
+				}
+			]
+		},
+		snapshot.rows[1]
+	],
+	holdings: [
+		{ priceKey: 'ethereum', balance: 1_000_000_000_000_000_000n, decimals: 18, usdBalance: 1000 },
+		{ balance: 234_500_000n, decimals: 6, usdBalance: 234.5 }
+	],
+	providersUsd: 0,
+	prices: {
+		erc20Addresses: [],
+		icrcCanisterIds: ['mxzaz-hqaaa-aaaar-qaada-cai'],
+		splAddresses: []
+	}
+};
+
 describe('ExtensionWalletSnapshot', () => {
+	const worker = { startExchangeTimer: vi.fn(), destroy: vi.fn() };
+
 	beforeEach(() => {
 		vi.restoreAllMocks();
+		vi.clearAllMocks();
 		exchangeStore.reset();
 		vi.spyOn(settingsDerived, 'isPrivacyMode', 'get').mockReturnValue(readable(false));
+		vi.mocked(ExchangeWorker.init).mockResolvedValue(worker as unknown as ExchangeWorker);
 	});
 
-	it('shows the saved total and when it was saved', () => {
+	it('shows the saved total, and that balances and prices are as saved', () => {
 		const { getByText } = render(ExtensionWalletSnapshot, { props: { snapshot } });
 
 		expect(getByText('$1,234.50')).toBeInTheDocument();
-		expect(getByText(/^Last updated /)).toBeInTheDocument();
+		expect(getByText(/^Balances and prices as of /)).toBeInTheDocument();
+	});
+
+	it("starts OISY's price worker on the public sources with the saved lookups", async () => {
+		render(ExtensionWalletSnapshot, { props: { snapshot: priced } });
+
+		await waitFor(() =>
+			expect(worker.startExchangeTimer).toHaveBeenCalledExactlyOnceWith({
+				currentCurrency: Currency.USD,
+				erc20Addresses: [],
+				icrcCanisterIds: ['mxzaz-hqaaa-aaaar-qaada-cai'],
+				splAddresses: [],
+				erc4626TokensExchangeData: [],
+				backendExchangeEnabled: false
+			})
+		);
+	});
+
+	it('starts no price worker for a snapshot without price lookups', async () => {
+		render(ExtensionWalletSnapshot, { props: { snapshot } });
+		await tick();
+
+		expect(ExchangeWorker.init).not.toHaveBeenCalled();
+	});
+
+	it('values the wallet at live prices once they arrive', async () => {
+		const { getByText, getAllByText } = render(ExtensionWalletSnapshot, {
+			props: { snapshot: priced }
+		});
+
+		exchangeStore.set([{ ethereum: { usd: 3000, usd_24h_change: 2 } }]);
+		await tick();
+
+		// 1 ETH at $3,000 plus USDC as saved; the ETH row shows $3,000 as both price and value.
+		expect(getByText('$3,234.50')).toBeInTheDocument();
+		expect(getAllByText('$3,000.00')).toHaveLength(2);
+		expect(getByText(/^Balances as of .* · prices live$/)).toBeInTheDocument();
+	});
+
+	it('stops the price worker when it closes', async () => {
+		const { unmount } = render(ExtensionWalletSnapshot, { props: { snapshot: priced } });
+
+		await waitFor(() => expect(worker.startExchangeTimer).toHaveBeenCalled());
+		unmount();
+
+		expect(worker.destroy).toHaveBeenCalledOnce();
 	});
 
 	it('shows the saved rows with OISY token cards', () => {

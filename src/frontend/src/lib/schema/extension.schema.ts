@@ -1,3 +1,4 @@
+import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import { Currency } from '$lib/enums/currency';
 import * as z from 'zod';
 
@@ -59,6 +60,16 @@ export const ExtensionRequestMessageSchema = z.object({
 	version: z.string().optional()
 });
 
+// A token the user holds, with what it takes to value it again once the session has ended:
+// `priceKey` is the entry of OISY's price data its price came from. Without one, the saved
+// `usdBalance` stands.
+export const ExtensionPanelSnapshotHoldingSchema = z.object({
+	priceKey: z.string().optional(),
+	balance: z.bigint(),
+	decimals: z.number(),
+	usdBalance: z.number().optional()
+});
+
 // One row of the side panel's assets as last shown: a token or a group of the same token across
 // networks. Networks are kept by id and looked up again when the snapshot is shown.
 export const ExtensionPanelSnapshotRowSchema = z.object({
@@ -73,7 +84,9 @@ export const ExtensionPanelSnapshotRowSchema = z.object({
 	usdPrice: z.number().optional(),
 	usdPriceChangePercentage24h: z.number().optional(),
 	networkId: z.string().optional(),
-	groupNetworkIds: z.array(z.string()).optional()
+	groupNetworkIds: z.array(z.string()).optional(),
+	// The row's token, or each token of the group, for live prices.
+	holdings: z.array(ExtensionPanelSnapshotHoldingSchema).optional()
 });
 
 // What the side panel last showed while signed in, so it can still show the balances once the
@@ -83,5 +96,21 @@ export const ExtensionPanelSnapshotSchema = z.object({
 	usdTotal: z.number(),
 	currency: z.enum(Currency),
 	exchangeRateToUsd: z.number(),
-	rows: z.array(ExtensionPanelSnapshotRowSchema)
+	rows: z.array(ExtensionPanelSnapshotRowSchema),
+	// Every token held, so the total can follow live prices too, and the value held with OISY
+	// Trade and Liquidium, which needs a session and stays as saved.
+	holdings: z.array(ExtensionPanelSnapshotHoldingSchema).optional(),
+	providersUsd: z.number().optional(),
+	// What OISY's price worker needs for the held tokens beyond the native coins it always fetches.
+	prices: z
+		.object({
+			erc20Addresses: z.array(
+				z.custom<Erc20ContractAddressWithNetwork>(
+					(value) => typeof (value as { address?: unknown })?.address === 'string'
+				)
+			),
+			icrcCanisterIds: z.array(z.string()),
+			splAddresses: z.array(z.string())
+		})
+		.optional()
 });

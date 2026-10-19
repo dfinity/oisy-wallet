@@ -1,6 +1,7 @@
 import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 import { SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { SOLANA_DEVNET_NETWORK } from '$env/networks/networks.sol.env';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	OISY_EXTENSION_BLOCKED_VERSIONS,
 	OISY_EXTENSION_INTERNAL_ERROR_CODE,
@@ -8,15 +9,23 @@ import {
 	OISY_EXTENSION_USER_REJECTED_CODE,
 	OISY_EXTENSION_WALLET_CONNECT_TOPIC
 } from '$lib/constants/extension.constants';
+import type { ExchangeData } from '$lib/stores/exchange.store';
+import type { CoingeckoSimplePrice } from '$lib/types/coingecko';
+import type { ExchangesData } from '$lib/types/exchange';
 import type {
 	ExtensionError,
+	ExtensionPanelSnapshot,
+	ExtensionPanelSnapshotHolding,
 	ExtensionPanelSnapshotRow,
 	ExtensionSignRequest,
 	ExtensionVersionStatus
 } from '$lib/types/extension';
 import type { Network } from '$lib/types/network';
+import type { TokenId } from '$lib/types/token';
 import type { CardData } from '$lib/types/token-card';
+import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
+import { usdValue } from '$lib/utils/exchange.utils';
 import { mapHeaderData } from '$lib/utils/token-card.utils';
 import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 import {
@@ -174,9 +183,71 @@ export const extensionVersionStatus = ({
 	return comparison < 0 ? 'outdated' : 'supported';
 };
 
-export const toExtensionPanelSnapshotRow = (
-	tokenOrGroup: TokenUiOrGroupUi
-): ExtensionPanelSnapshotRow => {
+type PriceKeyOf = (token: TokenUi) => string | undefined;
+
+const priceOf = ({
+	prices,
+	priceKey
+}: {
+	prices: ExchangeData;
+	priceKey: string | undefined;
+}): CoingeckoSimplePrice | undefined =>
+	isNullish(priceKey)
+		? undefined
+		: (prices as Record<string, CoingeckoSimplePrice> | null | undefined)?.[priceKey];
+
+// OISY matches prices to tokens through token lists that need a session (`exchanges`). The panel
+// keeps, per token, the entry of OISY's price data that token's price came from instead, so it can
+// look the price up again once the session has ended.
+export const findExtensionPriceKey = ({
+	price,
+	prices
+}: {
+	price: ExchangesData[TokenId];
+	prices: ExchangeData;
+}): string | undefined => {
+	if (isNullish(price) || isNullish(prices)) {
+		return;
+	}
+
+	const same = (candidate: CoingeckoSimplePrice): boolean =>
+		candidate === price ||
+		(candidate.usd === price.usd &&
+			candidate.usd_market_cap === price.usd_market_cap &&
+			candidate.usd_24h_change === price.usd_24h_change);
+
+	return Object.entries(prices as Record<string, CoingeckoSimplePrice>).find(([, candidate]) =>
+		same(candidate)
+	)?.[0];
+};
+
+export const toExtensionPanelSnapshotHolding = ({
+	token: { balance, decimals, usdBalance },
+	priceKey
+}: {
+	token: TokenUi;
+	priceKey: string | undefined;
+}): ExtensionPanelSnapshotHolding | undefined =>
+	isNullish(balance) || balance === ZERO ? undefined : { priceKey, balance, decimals, usdBalance };
+
+const toHoldings = ({
+	tokens,
+	priceKeyOf
+}: {
+	tokens: TokenUi[];
+	priceKeyOf: PriceKeyOf;
+}): ExtensionPanelSnapshotHolding[] =>
+	tokens
+		.map((token) => toExtensionPanelSnapshotHolding({ token, priceKey: priceKeyOf(token) }))
+		.filter(nonNullish);
+
+export const toExtensionPanelSnapshotRow = ({
+	tokenOrGroup,
+	priceKeyOf
+}: {
+	tokenOrGroup: TokenUiOrGroupUi;
+	priceKeyOf: PriceKeyOf;
+}): ExtensionPanelSnapshotRow => {
 	if (isTokenUiGroup(tokenOrGroup)) {
 		const { group } = tokenOrGroup;
 		const {
@@ -203,25 +274,25 @@ export const toExtensionPanelSnapshotRow = (
 			usdBalance,
 			usdPrice,
 			usdPriceChangePercentage24h,
-			groupNetworkIds: group.tokens.map(({ network: { id } }) => `${id.description}`)
+			groupNetworkIds: group.tokens.map(({ network: { id } }) => `${id.description}`),
+			holdings: toHoldings({ tokens: group.tokens, priceKeyOf })
 		};
 	}
 
+	const { token } = tokenOrGroup;
 	const {
-		token: {
-			name,
-			symbol,
-			decimals,
-			icon,
-			oisyName,
-			oisySymbol,
-			balance,
-			usdBalance,
-			usdPrice,
-			usdPriceChangePercentage24h,
-			network
-		}
-	} = tokenOrGroup;
+		name,
+		symbol,
+		decimals,
+		icon,
+		oisyName,
+		oisySymbol,
+		balance,
+		usdBalance,
+		usdPrice,
+		usdPriceChangePercentage24h,
+		network
+	} = token;
 
 	return {
 		name,
@@ -234,7 +305,8 @@ export const toExtensionPanelSnapshotRow = (
 		usdBalance,
 		usdPrice,
 		usdPriceChangePercentage24h,
-		networkId: `${network.id.description}`
+		networkId: `${network.id.description}`,
+		holdings: toHoldings({ tokens: [token], priceKeyOf })
 	};
 };
 
@@ -243,17 +315,74 @@ const findNetwork = (networkId: string | undefined): Network | undefined =>
 		? undefined
 		: SUPPORTED_NETWORKS.find(({ id }) => id.description === networkId);
 
+// A holding at its live price when there is one, otherwise at its saved value.
+const holdingUsdValue = ({
+	holding: { priceKey, balance, decimals, usdBalance },
+	prices
+}: {
+	holding: ExtensionPanelSnapshotHolding;
+	prices: ExchangeData;
+}): number => {
+	const price = priceOf({ prices, priceKey });
+
+	return nonNullish(price)
+		? usdValue({ decimals, balance, exchangeRate: price.usd })
+		: (usdBalance ?? 0);
+};
+
 export const toExtensionPanelSnapshotCardData = ({
-	networkId,
-	groupNetworkIds,
-	...row
-}: ExtensionPanelSnapshotRow): CardData => ({
-	...row,
-	network: findNetwork(networkId),
-	...(nonNullish(groupNetworkIds)
-		? {
-				tokenCount: groupNetworkIds.length,
-				networks: groupNetworkIds.map(findNetwork).filter(nonNullish)
-			}
-		: {})
-});
+	row: { networkId, groupNetworkIds, holdings, ...row },
+	prices
+}: {
+	row: ExtensionPanelSnapshotRow;
+	prices: ExchangeData;
+}): CardData => {
+	const price = (holdings ?? [])
+		.map(({ priceKey }) => priceOf({ prices, priceKey }))
+		.find(nonNullish);
+
+	return {
+		...row,
+		...(nonNullish(price) && nonNullish(holdings)
+			? {
+					usdPrice: price.usd,
+					usdPriceChangePercentage24h: price.usd_24h_change,
+					usdBalance: holdings.reduce(
+						(sum, holding) => sum + holdingUsdValue({ holding, prices }),
+						0
+					)
+				}
+			: {}),
+		network: findNetwork(networkId),
+		...(nonNullish(groupNetworkIds)
+			? {
+					tokenCount: groupNetworkIds.length,
+					networks: groupNetworkIds.map(findNetwork).filter(nonNullish)
+				}
+			: {})
+	};
+};
+
+// The same sum as OISY's total: every held token, at live prices where there are some, plus the
+// value held with providers as saved.
+export const extensionPanelSnapshotUsdTotal = ({
+	snapshot: { usdTotal, holdings, providersUsd },
+	prices
+}: {
+	snapshot: ExtensionPanelSnapshot;
+	prices: ExchangeData;
+}): number =>
+	isNullish(holdings)
+		? usdTotal
+		: holdings.reduce(
+				(sum, holding) => sum + holdingUsdValue({ holding, prices }),
+				providersUsd ?? 0
+			);
+
+export const extensionPanelSnapshotHasLivePrices = ({
+	snapshot: { holdings },
+	prices
+}: {
+	snapshot: ExtensionPanelSnapshot;
+	prices: ExchangeData;
+}): boolean => (holdings ?? []).some(({ priceKey }) => nonNullish(priceOf({ prices, priceKey })));
