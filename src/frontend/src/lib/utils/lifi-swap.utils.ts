@@ -287,11 +287,18 @@ export const assertLifiQuote = ({
 
 /**
  * The quote's fees in USD — LI.FI's own 0.25 % and whatever the route's tools charge — for display
- * only. `undefined` when the quote lists none, or lists one without a readable USD amount: a partial
- * sum would understate what the swap costs.
+ * only, as the fees already taken out of the receive amount. `undefined` when the quote lists none,
+ * lists one without a readable USD amount (a partial sum would understate what the swap costs), or
+ * lists one charged on top of the amount sent (`included: false`): added in, the total would match
+ * neither what is deducted nor what is extra. The value trust check refuses the routes that charge a
+ * native fee on top, so none is expected; a bridge admitted with one needs its own row.
  */
 export const lifiFeesUsd = ({ estimate: { feeCosts } }: LiFiStep): number | undefined => {
 	if (isNullish(feeCosts) || feeCosts.length === 0) {
+		return;
+	}
+
+	if (feeCosts.some(({ included }) => !included)) {
 		return;
 	}
 

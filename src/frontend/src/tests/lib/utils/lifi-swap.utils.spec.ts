@@ -576,7 +576,7 @@ describe('lifi-swap.utils', () => {
 			estimate: { ...mockLifiQuote.estimate, feeCosts }
 		});
 
-		it('should sum the fees in USD', () => {
+		it('should sum the fees in USD, all taken out of the receive amount', () => {
 			expect(lifiFeesUsd(withFees([feeCost('0.0625'), feeCost('0.5')]))).toBe(0.5625);
 		});
 
@@ -591,7 +591,12 @@ describe('lifi-swap.utils', () => {
 			// `Number` reads both as zero, which would understate the total.
 			{ case: 'an empty amount', feeCosts: [feeCost('0.0625'), feeCost('')] },
 			{ case: 'a blank amount', feeCosts: [feeCost('0.0625'), feeCost('  ')] },
-			{ case: 'an amount in exponent notation', feeCosts: [feeCost('0.0625'), feeCost('1e-7')] }
+			{ case: 'an amount in exponent notation', feeCosts: [feeCost('0.0625'), feeCost('1e-7')] },
+			// Neither deducted from the receive amount nor the whole extra cost: the row would not add up.
+			{
+				case: 'a fee charged on top of the amount sent',
+				feeCosts: [feeCost('0.0625'), { ...feeCost('0.5'), included: false }]
+			}
 		])('should report nothing for $case', ({ feeCosts }) => {
 			expect(lifiFeesUsd(withFees(feeCosts))).toBeUndefined();
 		});

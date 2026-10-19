@@ -1,7 +1,10 @@
 import type * as lifiEnv from '$env/rest/lifi.env';
+import type * as nearIntentsEnv from '$env/rest/near-intents.env';
 import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { SwapProvider } from '$lib/types/swap';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { assertNonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 describe('sol-swap.providers', () => {
 	describe('LI.FI entry', () => {
@@ -81,6 +84,65 @@ describe('sol-swap.providers', () => {
 						findProviderSourceTokens: () => undefined
 					})
 				).toBeUndefined();
+			});
+
+			// The entry's empty source list and its `'any'` wildcard, through the same steps as the swap
+			// form: a step that started skipping providers whose list lacks the source would drop every
+			// EVM → Solana destination.
+			describe('through the registries', () => {
+				beforeEach(() => {
+					// NEAR Intents offers Solana destinations too; on, it would hide the loss of LI.FI's.
+					vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
+						...(await importOriginal<typeof nearIntentsEnv>()),
+						NEAR_INTENTS_SWAP_ENABLED: false,
+						NEAR_INTENTS_BTC_SWAP_ENABLED: false,
+						NEAR_INTENTS_XRP_SWAP_ENABLED: false
+					}));
+					// Registries of other source categories, which have no part in an EVM source.
+					vi.doMock('$lib/providers/swap.providers', () => ({ swapProviders: [] }));
+					vi.doMock('$lib/providers/icp-bridge-swap.providers', () => ({ icpBridgeProviders: [] }));
+					vi.doMock('$lib/providers/btc-swap.providers', () => ({ btcSwapProviders: [] }));
+					vi.doMock('$lib/providers/xrp-swap.providers', () => ({ xrpSwapProviders: [] }));
+				});
+
+				afterEach(() => {
+					vi.doUnmock('$env/rest/near-intents.env');
+					vi.doUnmock('$lib/providers/swap.providers');
+					vi.doUnmock('$lib/providers/icp-bridge-swap.providers');
+					vi.doUnmock('$lib/providers/btc-swap.providers');
+					vi.doUnmock('$lib/providers/xrp-swap.providers');
+				});
+
+				it('should offer Solana tokens for an EVM source', async () => {
+					const [
+						{ loadSwapSupportedTokens },
+						{ swapSupportedTokensStore },
+						{ computeReceiveSupportedTokens, filterSwapTokens },
+						{ BASE_ETH_TOKEN },
+						{ SOLANA_TOKEN }
+					] = await Promise.all([
+						import('$lib/services/swap-supported-tokens.services'),
+						import('$lib/stores/swap-supported-tokens.store'),
+						import('$lib/utils/swap-tokens-filter.utils'),
+						import('$env/tokens/tokens-evm/tokens-base/tokens.eth.env'),
+						import('$env/tokens/tokens.sol.env')
+					]);
+
+					await loadSwapSupportedTokens({ identity: mockIdentity });
+
+					const supported = get(swapSupportedTokensStore);
+
+					assertNonNullish(supported);
+
+					const supportedData = computeReceiveSupportedTokens({
+						sourceToken: BASE_ETH_TOKEN,
+						providers: supported.providers
+					});
+
+					expect(
+						filterSwapTokens({ tokens: [{ ...SOLANA_TOKEN, enabled: true }], supportedData })
+					).toHaveLength(1);
+				});
 			});
 		});
 	});

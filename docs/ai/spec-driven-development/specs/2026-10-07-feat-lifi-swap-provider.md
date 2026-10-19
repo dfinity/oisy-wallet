@@ -568,7 +568,8 @@ decoder, and adds a test per facet built from a real LI.FI calldata fixture. Add
 bridge later means adding its decoder, fixture and tool key together, and, if it charges a
 native fee on top of the amount (`feeCosts` with `included: false`; Across's fees are all
 included, checked 2026-10-19), widening the `value` trust check to admit exactly that
-fee. Every other bridge
+fee and showing it in a row of its own, since "Swap Fees" counts only the fees taken out
+of the receive amount. Every other bridge
 gets no quote: the display quote passes `allowBridges` limited to the curated tool keys,
 so the form never offers a route that execution would refuse.
 
@@ -1312,8 +1313,12 @@ loader's 5 s tick.
   `website: 'https://li.fi'`, logo `static/images/dapps/lifi-logo.svg`. The PR ships a
   **placeholder** SVG at that path (a neutral rounded square with the text "LI.FI"); the
   official logo replaces the file later without any code change.
-- `SwapDetailsLifi.svelte` in the provider sheet: estimated duration, LI.FI's 0.25 %
-  fee (from `feeCosts`), the route tool name and minimum received.
+- `SwapDetailsLifi.svelte` in the provider sheet: estimated duration, the route tool name,
+  minimum received, and "Swap Fees": LI.FI's 0.25 % and the route's other fees, summed
+  from `feeCosts` as the fees already taken out of the receive amount. The row is hidden
+  when any fee lacks a readable USD amount, or is charged on top of the amount sent
+  (`included: false`): added in, the total would match neither what is deducted nor what
+  is extra.
 - i18n keys in `en.json` + the other locales + `i18n.d.ts`: at least
   `swap.text.lifi_route_via`, `swap.error.lifi_refunded`, `swap.error.lifi_status_unknown`,
   `swap.error.lifi_fee_changed`,
