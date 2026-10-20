@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
+	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { IN_PROGRESS_MODAL } from '$lib/constants/test-ids.constants';
@@ -51,8 +52,16 @@
 	});
 </script>
 
+{#snippet infoIcon()}
+	<div class="min-w-5 py-0 text-tertiary sm:py-0.5">
+		<IconInfo />
+	</div>
+{/snippet}
+
 <div class="stretch" data-tid={IN_PROGRESS_MODAL}>
-	<MessageBox level="warning">
+	<!-- A quiet grey note rather than a warning: closing the tab is something to avoid, not
+	     something going wrong, and the steps below are what should hold the eye. -->
+	<MessageBox icon={infoIcon} level="plain" styleClass="bg-secondary!">
 		<span class="font-normal">
 			{replaceOisyPlaceholders(
 				warningType === 'manage'
