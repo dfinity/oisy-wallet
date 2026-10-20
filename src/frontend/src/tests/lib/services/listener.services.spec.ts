@@ -226,5 +226,65 @@ describe('listener.services', () => {
 
 			vi.useRealTimers();
 		});
+
+		// The deadline releases the caller but cannot stop the read. Once released, the worker may
+		// already be writing fresher data, so a cached row arriving afterwards must not land.
+		it('should not write transactions that answer after the deadline', async () => {
+			vi.useFakeTimers();
+
+			let resolveTransactions: (transactions: unknown[]) => void = () => {};
+
+			mockGetIdbTransactions.mockReturnValue(
+				new Promise((resolve) => {
+					resolveTransactions = resolve;
+				})
+			);
+
+			const syncing = syncWalletFromIdbCache(mockParams);
+
+			await vi.advanceTimersByTimeAsync(IDB_DEADLINE_MILLIS);
+
+			await syncing;
+
+			resolveTransactions([{ id: 'tx-1' }]);
+
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(mockAppend).not.toHaveBeenCalled();
+			expect(balancesStore.batchSet).not.toHaveBeenCalled();
+
+			vi.useRealTimers();
+		});
+
+		it('should not write a balance that answers after the deadline', async () => {
+			vi.useFakeTimers();
+
+			mockGetIdbTransactions.mockResolvedValue([{ id: 'tx-1' }]);
+
+			let resolveBalance: (balance: bigint) => void = () => {};
+
+			vi.mocked(getIdbBalances).mockReturnValue(
+				new Promise((resolve) => {
+					resolveBalance = resolve;
+				})
+			);
+
+			const syncing = syncWalletFromIdbCache(mockParams);
+
+			await vi.advanceTimersByTimeAsync(IDB_DEADLINE_MILLIS);
+
+			await syncing;
+
+			// The transactions answered in time, so they were applied; only the late balance is dropped.
+			expect(mockAppend).toHaveBeenCalledOnce();
+
+			resolveBalance(123n);
+
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(balancesStore.batchSet).not.toHaveBeenCalled();
+
+			vi.useRealTimers();
+		});
 	});
 });
