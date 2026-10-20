@@ -33,6 +33,13 @@ describe('ExtensionPanel', () => {
 		vi.clearAllMocks();
 		mockPage.mockUrl(new URL('http://localhost:5175/extension/panel/'));
 		vi.spyOn(extensionProviders, 'announcePanelReady').mockImplementation(() => undefined);
+		// The extension answers nothing here; the panel shows what it has while it waits.
+		vi.spyOn(extensionProviders, 'connectExtension').mockReturnValue({
+			postMessage: vi.fn(),
+			disconnect: vi.fn(),
+			onMessage: { addListener: vi.fn() },
+			onDisconnect: { addListener: vi.fn() }
+		});
 		vi.spyOn(lockedDerived, 'isAuthLocked', 'get').mockReturnValue(readable(false));
 		mockAuthSignedIn(false);
 	});

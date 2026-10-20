@@ -1,10 +1,10 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import LockPage from '$lib/components/auth/LockPage.svelte';
 	import ExtensionLoaders from '$lib/components/extension/ExtensionLoaders.svelte';
 	import ExtensionPanelContent from '$lib/components/extension/ExtensionPanelContent.svelte';
 	import ExtensionSignIn from '$lib/components/extension/ExtensionSignIn.svelte';
-	import ExtensionWalletSnapshot from '$lib/components/extension/ExtensionWalletSnapshot.svelte';
 	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { isAuthLocked } from '$lib/derived/locked.derived';
@@ -26,14 +26,13 @@
 	<!-- Locking OISY hides the wallet, so the panel shows nothing of it either. -->
 	<LockPage />
 {:else if $authNotSignedIn}
-	{#if snapshot !== undefined}
+	{#if snapshot === null}
 		<div class="flex justify-center"><OisyWalletLogo /></div>
 
-		{#if snapshot === null}
-			<ExtensionSignIn />
-		{:else}
-			<ExtensionWalletSnapshot {snapshot} />
-		{/if}
+		<ExtensionSignIn />
+	{:else if nonNullish(snapshot)}
+		<!-- The same panel as signed in, with the saved wallet: sites, addresses and the menu need no session. -->
+		<ExtensionPanelContent {snapshot} />
 	{/if}
 {:else}
 	<ExtensionLoaders walletOverview>

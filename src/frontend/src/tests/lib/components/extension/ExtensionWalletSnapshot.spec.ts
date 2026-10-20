@@ -5,12 +5,14 @@ import { TOKEN_CARD } from '$lib/constants/test-ids.constants';
 import * as currencyDerived from '$lib/derived/currency.derived';
 import * as settingsDerived from '$lib/derived/settings.derived';
 import { Currency } from '$lib/enums/currency';
+import * as authServices from '$lib/services/auth.services';
 import { ExchangeWorker } from '$lib/services/worker.exchange.services';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { ExtensionPanelSnapshot } from '$lib/types/extension';
 import en from '$tests/mocks/i18n.mock';
-import { render, waitFor } from '@testing-library/svelte';
+import { mockPage } from '$tests/mocks/page.store.mock';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get, readable } from 'svelte/store';
 
@@ -79,6 +81,7 @@ describe('ExtensionWalletSnapshot', () => {
 		vi.restoreAllMocks();
 		vi.clearAllMocks();
 		exchangeStore.reset();
+		mockPage.mockUrl(new URL('http://localhost:5175/extension/panel/'));
 		vi.spyOn(settingsDerived, 'isPrivacyMode', 'get').mockReturnValue(readable(false));
 		vi.mocked(ExchangeWorker.init).mockResolvedValue(worker as unknown as ExchangeWorker);
 	});
@@ -142,10 +145,19 @@ describe('ExtensionWalletSnapshot', () => {
 		expect(getByTestId(`${TOKEN_CARD}-USDC`)).toBeInTheDocument();
 	});
 
-	it('offers to sign in for current balances', () => {
-		const { getByText } = render(ExtensionWalletSnapshot, { props: { snapshot } });
+	it('offers a small sign-in link in place of recent activity', async () => {
+		const signIn = vi.spyOn(authServices, 'signIn').mockResolvedValue({ success: 'ok' });
+		const { getByText, getByRole, queryByText } = render(ExtensionWalletSnapshot, {
+			props: { snapshot }
+		});
 
-		expect(getByText(en.extension.panel.sign_in_to_refresh)).toBeInTheDocument();
+		expect(getByText(en.extension.panel.sign_in_for_activity)).toBeInTheDocument();
+		// No full sign-in block: the panel shows the wallet either way.
+		expect(queryByText('Internet Identity')).not.toBeInTheDocument();
+
+		await fireEvent.click(getByRole('button', { name: en.extension.panel.sign_in }));
+
+		expect(signIn).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ asPopup: true }));
 	});
 
 	it('hides the total in privacy mode', () => {

@@ -1,11 +1,9 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import HeroContent from '$lib/components/hero/HeroContent.svelte';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
-import { RECEIVE_TOKENS_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 import * as networkDerived from '$lib/derived/network.derived';
 import * as pageTokenDerived from '$lib/derived/page-token.derived';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { mockSnippet, mockSnippetTestId } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
@@ -113,23 +111,6 @@ describe('HeroContent', () => {
 
 			expect(hero.classList.contains('from-default-0')).toBeTruthy();
 			expect(hero.classList.contains('to-default-100')).toBeTruthy();
-		});
-	});
-
-	describe('actions', () => {
-		it("shows the app's actions by default", () => {
-			const { getByTestId } = render(HeroContent);
-
-			expect(getByTestId(RECEIVE_TOKENS_MODAL_OPEN_BUTTON)).toBeInTheDocument();
-		});
-
-		it('shows the given actions instead', () => {
-			const { getByTestId, queryByTestId } = render(HeroContent, {
-				props: { actions: mockSnippet }
-			});
-
-			expect(getByTestId(mockSnippetTestId)).toBeInTheDocument();
-			expect(queryByTestId(RECEIVE_TOKENS_MODAL_OPEN_BUTTON)).not.toBeInTheDocument();
 		});
 	});
 

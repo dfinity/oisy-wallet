@@ -6,11 +6,11 @@ import {
 	OISY_EXTENSION_PANEL_RECONNECT_ATTEMPTS,
 	OISY_EXTENSION_PANEL_STATE_TIMEOUT_MS
 } from '$lib/constants/extension.constants';
-import { RECEIVE_TOKENS_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
+import { Currency } from '$lib/enums/currency';
 import * as extensionProviders from '$lib/providers/extension.providers';
 import * as authServices from '$lib/services/auth.services';
 import { ethAddressStore, solAddressDevnetStore } from '$lib/stores/address.store';
-import type { ExtensionPort } from '$lib/types/extension';
+import type { ExtensionPanelSnapshot, ExtensionPort } from '$lib/types/extension';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -30,6 +30,8 @@ interface FakePort {
 	receive: (message: unknown) => void;
 	drop: () => void;
 }
+
+const WALLET_TOTAL = 'extension-wallet-total';
 
 describe('ExtensionPanelContent', () => {
 	let ports: FakePort[];
@@ -321,9 +323,8 @@ describe('ExtensionPanelContent', () => {
 		await tick();
 
 		expect(
-			getByTestId('extension-this-site').compareDocumentPosition(
-				getByTestId(RECEIVE_TOKENS_MODAL_OPEN_BUTTON)
-			) & Node.DOCUMENT_POSITION_FOLLOWING
+			getByTestId('extension-this-site').compareDocumentPosition(getByTestId(WALLET_TOTAL)) &
+				Node.DOCUMENT_POSITION_FOLLOWING
 		).toBeTruthy();
 	});
 
@@ -351,7 +352,7 @@ describe('ExtensionPanelContent', () => {
 		await fireEvent.click(getByRole('button', { name: en.extension.panel.menu }));
 		await fireEvent.click(getByRole('button', { name: en.auth.text.logout }));
 
-		expect(queryByTestId(RECEIVE_TOKENS_MODAL_OPEN_BUTTON)).not.toBeInTheDocument();
+		expect(queryByTestId(WALLET_TOTAL)).not.toBeInTheDocument();
 	});
 
 	it('refuses an outdated extension and does not hand it the account', async () => {
@@ -414,5 +415,54 @@ describe('ExtensionPanelContent', () => {
 		const { getByText } = render(ExtensionPanelContent);
 
 		expect(getByText(en.extension.text.no_extension)).toBeInTheDocument();
+	});
+
+	describe('after the session ends', () => {
+		const snapshot: ExtensionPanelSnapshot = {
+			savedAt: Date.now(),
+			usdTotal: 12,
+			currency: Currency.USD,
+			exchangeRateToUsd: 1,
+			rows: []
+		};
+
+		beforeEach(() => {
+			ethAddressStore.reset();
+			solAddressDevnetStore.reset();
+			setupTestnetsStore('reset');
+		});
+
+		it('shows the saved wallet with the rest of the panel', async () => {
+			const { getByTestId, getByRole, queryByText } = render(ExtensionPanelContent, {
+				props: { snapshot }
+			});
+
+			current().receive(state({ sites: { 'https://app.example': { eth: true, sol: false } } }));
+			await tick();
+
+			expect(getByTestId('extension-wallet-snapshot')).toBeInTheDocument();
+			expect(getByRole('button', { name: en.extension.panel.menu })).toBeInTheDocument();
+			expect(getByRole('button', { name: 'Disconnect app.example' })).toBeInTheDocument();
+			expect(queryByText(en.extension.text.networks_off)).not.toBeInTheDocument();
+		});
+
+		it('shows the addresses the extension still gives sites', async () => {
+			const { getByTitle } = render(ExtensionPanelContent, { props: { snapshot } });
+
+			current().receive(state({ account: { eth: mockEthAddress, sol: mockSolAddress } }));
+			await tick();
+
+			expect(getByTitle(mockEthAddress)).toBeInTheDocument();
+			expect(getByTitle(mockSolAddress)).toBeInTheDocument();
+		});
+
+		it('hands no account to the extension without a session', async () => {
+			render(ExtensionPanelContent, { props: { snapshot } });
+
+			current().receive(state());
+			await tick();
+
+			expect(sentMessages().filter(({ type }) => type === 'set-account')).toHaveLength(0);
+		});
 	});
 });

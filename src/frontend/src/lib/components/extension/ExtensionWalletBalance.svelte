@@ -1,29 +1,29 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import ButtonHero from '$lib/components/hero/ButtonHero.svelte';
-	import HeroContent from '$lib/components/hero/HeroContent.svelte';
-	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
-	import Receive from '$lib/components/receive/Receive.svelte';
-	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
+	import ExtensionWalletTotal from '$lib/components/extension/ExtensionWalletTotal.svelte';
+	import {
+		noPositiveBalanceAndNotAllBalancesZero,
+		providersUsdBalance
+	} from '$lib/derived/balances.derived';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { enabledFungibleNetworkTokensUi } from '$lib/derived/network-tokens-ui.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { sumTotalUsdBalance } from '$lib/utils/tokens.utils';
 
-	const openOisy = () => window.open(page.url.origin, '_blank', 'noopener,noreferrer');
+	// The same sum as OISY's home total with all networks: every enabled token plus the value held
+	// with providers. The panel selects no network.
+	let usdTotal = $derived(
+		sumTotalUsdBalance({
+			tokens: $enabledFungibleNetworkTokensUi,
+			providersUsdBalance: $providersUsdBalance
+		})
+	);
 </script>
 
-<!-- OISY's own hero card. The panel selects no network, so it shows the same total as the app's home with all networks. Sending, swapping and buying happen in the app. -->
-<HeroContent>
-	{#snippet actions()}
-		<HeroButtonGroup>
-			<Receive />
-
-			<ButtonHero ariaLabel={$i18n.extension.panel.open_oisy} onclick={openOisy}>
-				{#snippet icon()}
-					<IconExternalLink size="24" />
-				{/snippet}
-				{#snippet label()}
-					{$i18n.extension.panel.open_oisy}
-				{/snippet}
-			</ButtonHero>
-		</HeroButtonGroup>
-	{/snippet}
-</HeroContent>
+<ExtensionWalletTotal
+	currency={$currentCurrency}
+	exchangeRate={$currencyExchangeStore}
+	label={$i18n.hero.text.available_balance}
+	loading={$noPositiveBalanceAndNotAllBalancesZero}
+	{usdTotal}
+/>

@@ -1613,7 +1613,8 @@ interface I18nExtension {
 		addresses_sites_see: string;
 		snapshot_as_of: string;
 		snapshot_prices_live: string;
-		sign_in_to_refresh: string;
+		sign_in_for_activity: string;
+		sign_in: string;
 	};
 }
 

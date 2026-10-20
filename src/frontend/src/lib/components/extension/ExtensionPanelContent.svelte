@@ -5,6 +5,7 @@
 	import ExtensionRecentActivity from '$lib/components/extension/ExtensionRecentActivity.svelte';
 	import ExtensionWalletAssets from '$lib/components/extension/ExtensionWalletAssets.svelte';
 	import ExtensionWalletBalance from '$lib/components/extension/ExtensionWalletBalance.svelte';
+	import ExtensionWalletSnapshot from '$lib/components/extension/ExtensionWalletSnapshot.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Collapsible from '$lib/components/ui/Collapsible.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -22,6 +23,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type {
 		ExtensionOutgoingMessage,
+		ExtensionPanelSnapshot,
 		ExtensionPanelState,
 		ExtensionPort,
 		ExtensionVersionStatus
@@ -29,6 +31,14 @@
 	import { extensionVersionStatus } from '$lib/utils/extension.utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+
+	interface Props {
+		// After the session ends: the wallet as last saved, in place of the live sections. The rest of
+		// the panel needs no session.
+		snapshot?: ExtensionPanelSnapshot;
+	}
+
+	let { snapshot }: Props = $props();
 
 	let port: ExtensionPort | undefined;
 
@@ -186,11 +196,14 @@
 		await signOut({ source: 'extension-panel' });
 	};
 
-	// The addresses sites can see: the extension offers only these two test networks.
+	// The addresses sites can see: the extension offers only these two test networks. Taken from the
+	// extension, which keeps them after the session ends.
+	let siteAccount = $derived(extensionState?.account ?? $extensionAccount);
+
 	let addresses = $derived(
 		[
-			{ chain: $i18n.extension.panel.chain_eth, address: $extensionAccount?.eth },
-			{ chain: $i18n.extension.panel.chain_sol, address: $extensionAccount?.sol }
+			{ chain: $i18n.extension.panel.chain_eth, address: siteAccount?.eth },
+			{ chain: $i18n.extension.panel.chain_sol, address: siteAccount?.sol }
 		].filter((entry): entry is { chain: string; address: string } => nonNullish(entry.address))
 	);
 </script>
@@ -216,7 +229,8 @@
 	{:else}
 		<ExtensionPanelHeader onDisconnectAll={disconnectAll} onLogOut={logOut} />
 
-		{#if !$extensionNetworksOn}
+		<!-- Signed out, OISY has no network settings to read, so there is nothing to warn about. -->
+		{#if isNullish(snapshot) && !$extensionNetworksOn}
 			<MessageBox level="warning">{$i18n.extension.text.networks_off}</MessageBox>
 		{/if}
 
@@ -249,7 +263,11 @@
 			</section>
 		{/if}
 
-		{#if !loggingOut}
+		{#if loggingOut}
+			<!-- Nothing: unmounting cancels a pending snapshot, which logging out deletes. -->
+		{:else if nonNullish(snapshot)}
+			<ExtensionWalletSnapshot {snapshot} />
+		{:else}
 			<ExtensionWalletBalance />
 
 			<ExtensionWalletAssets />

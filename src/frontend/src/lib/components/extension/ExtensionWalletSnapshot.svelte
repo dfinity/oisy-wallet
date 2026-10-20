@@ -1,26 +1,32 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
+	import { page } from '$app/state';
 	import { EXCHANGE_DISABLED } from '$env/exchange.env';
 	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
-	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
-	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import ExtensionWalletTotal from '$lib/components/extension/ExtensionWalletTotal.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
-	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { signIn } from '$lib/services/auth.services';
 	import { ExchangeWorker } from '$lib/services/worker.exchange.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { exchangeStore } from '$lib/stores/exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { authLocked } from '$lib/stores/locked.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { InternetIdentityDomain } from '$lib/types/auth';
 	import type { ExtensionPanelSnapshot } from '$lib/types/extension';
 	import {
 		extensionPanelSnapshotHasLivePrices,
 		extensionPanelSnapshotUsdTotal,
 		toExtensionPanelSnapshotCardData
 	} from '$lib/utils/extension.utils';
-	import { formatCurrency, formatSecondsToDate } from '$lib/utils/format.utils';
+	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
@@ -46,14 +52,7 @@
 				}
 	);
 
-	let total = $derived(
-		formatCurrency({
-			value: extensionPanelSnapshotUsdTotal({ snapshot, prices: $exchangeStore }),
-			currency: snapshot.currency,
-			exchangeRate,
-			language: $currentLanguage
-		})
-	);
+	let usdTotal = $derived(extensionPanelSnapshotUsdTotal({ snapshot, prices: $exchangeStore }));
 
 	let updated = $derived.by(() => {
 		const savedAt = new Date(snapshot.savedAt);
@@ -101,6 +100,20 @@
 		});
 	};
 
+	const modalId = Symbol();
+
+	// The same sign-in as OISY's, in a popup, offered as a small link: the panel shows the wallet
+	// either way.
+	const signInAgain = async () => {
+		const { success } = await signIn({ domain: InternetIdentityDomain.VERSION_2_0, asPopup: true });
+
+		if (success === 'ok') {
+			authLocked.unlock({ source: 'login from extension panel' });
+		} else {
+			modalStore.openAuthHelp({ id: modalId, data: false });
+		}
+	};
+
 	onDestroy(() => {
 		destroyed = true;
 		worker?.destroy();
@@ -122,37 +135,33 @@
 </script>
 
 <div class="flex w-full flex-col gap-6" data-tid="extension-wallet-snapshot">
-	<!-- The look of OISY's hero card with all networks selected. The live card reads the signed-in session's stores, so it can't show a saved total. -->
-	<section
-		class="bg-pos-0 bg-size-200 flex w-full flex-col items-center justify-center gap-1 rounded-[24px] bg-brand-primary bg-linear-to-b from-default-0 to-default-100 p-3 pb-6 text-center text-primary-inverted"
-	>
-		<output class="mt-7 inline-block text-4xl font-bold break-all">
-			{#if $isPrivacyMode}
-				<IconDots styleClass="my-4.25" times={6} variant="lg" />
-			{:else}
-				{total}
-			{/if}
-		</output>
-
-		<span class="text-xl font-medium text-brand-secondary-alt">
-			{replacePlaceholders(
-				livePrices
-					? $i18n.extension.panel.snapshot_prices_live
-					: $i18n.extension.panel.snapshot_as_of,
-				{ $time: updated }
-			)}
-		</span>
-	</section>
-
-	<div class="flex flex-col gap-3">
-		<p class="m-0 text-center text-sm text-tertiary">{$i18n.extension.panel.sign_in_to_refresh}</p>
-
-		<ButtonAuthenticateWithHelp asPopup fullWidth helpAlignment="center" needHelpLink={false} />
-	</div>
+	<ExtensionWalletTotal
+		currency={snapshot.currency}
+		{exchangeRate}
+		label={replacePlaceholders(
+			livePrices
+				? $i18n.extension.panel.snapshot_prices_live
+				: $i18n.extension.panel.snapshot_as_of,
+			{ $time: updated }
+		)}
+		{usdTotal}
+	/>
 
 	{#if rows.length > 0}
 		<section class="flex flex-col gap-2">
-			<h2 class="text-base font-bold">{$i18n.navigation.text.tokens}</h2>
+			<div class="flex items-center justify-between gap-2">
+				<h2 class="text-base font-bold">{$i18n.navigation.text.tokens}</h2>
+
+				<ExternalLink
+					ariaLabel={$i18n.extension.panel.all_tokens}
+					href={`${page.url.origin}${AppPath.Tokens}`}
+					iconAsLast
+					iconSize="16"
+					styleClass="text-sm"
+				>
+					{$i18n.extension.panel.view_all}
+				</ExternalLink>
+			</div>
 
 			<div class="flex flex-col gap-3">
 				{#each rows as data, index (`${data.symbol}:${index}`)}
@@ -163,6 +172,14 @@
 			</div>
 		</section>
 	{/if}
+
+	<!-- Where the recent activity is when signed in: it isn't saved, so it needs a sign-in. -->
+	<p class="m-0 flex flex-wrap items-baseline gap-x-1 text-sm text-secondary">
+		{$i18n.extension.panel.sign_in_for_activity}
+		<Button inlineLink link onclick={signInAgain} styleClass="text-sm" type="button">
+			{$i18n.extension.panel.sign_in}
+		</Button>
+	</p>
 </div>
 
 {#if $modalAuthHelp && nonNullish($modalAuthHelpData)}

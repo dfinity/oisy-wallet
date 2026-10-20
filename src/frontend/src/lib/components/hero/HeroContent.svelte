@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { setContext, type Snippet } from 'svelte';
+	import { setContext } from 'svelte';
 	import { page } from '$app/state';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
@@ -60,13 +60,6 @@
 	} from '$lib/utils/token.utils';
 	import { fade, slide } from '$lib/utils/transitions.utils';
 	import { isTrumpToken as isTrumpTokenUtil } from '$sol/utils/token.utils';
-
-	interface Props {
-		// Replaces the default action buttons, for a surface that offers fewer actions than the app.
-		actions?: Snippet;
-	}
-
-	let { actions }: Props = $props();
 
 	let pageTokenUi = $derived(
 		nonNullish($pageToken)
@@ -281,11 +274,7 @@
 	{/if}
 
 	<div class="flex w-full justify-center text-left" in:slide|local={SLIDE_PARAMS}>
-		{#if nonNullish(actions)}
-			{@render actions()}
-		{:else}
-			<Actions />
-		{/if}
+		<Actions />
 	</div>
 
 	{#if isErc20Icp($pageToken)}
