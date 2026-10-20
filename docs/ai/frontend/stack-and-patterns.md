@@ -359,6 +359,13 @@ the shared core rule, preserving its deprecated-package and `/dist/` import bans
   progress cues, not decorative motion. The pre-hydration loader in `app.html`
   follows the same rule, retaining its 30-second animation cap. Keep the owning
   controls' loading states, translated labels and accessibility semantics intact.
+- **Progress steps (`ProgressSteps`):** a step's old marker leaves at once and
+  the new one comes in. A finished or failed badge springs in over 440 ms on a
+  spring sampled into CSS `linear()`, with an overshooting `cubic-bezier`
+  fallback. The active label grows from 16 to 18 px by `scale`, never by
+  `font-size`, and keeps one font weight, so nothing reflows. Its glint is a
+  copy of the text laid on top. Under reduced motion only the colours change
+  and the arc keeps turning.
 
 For a page backdrop use `backdrop` from the same module: it animates the dim and blur
 radius without an opacity animation that hides the blur in Chrome. Under reduced motion
