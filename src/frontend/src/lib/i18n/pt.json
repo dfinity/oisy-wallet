@@ -108,6 +108,9 @@
 			"do_not_close": "Não feche esta aba até que a transação esteja concluída",
 			"standalone_mode": "Há problemas de conexão conhecidos quando um aplicativo e o $oisy_short estão instalados na tela inicial. Se você tiver problemas para conectar o $oisy_short ou assinar transações, inicie o aplicativo em um navegador comum. Estamos trabalhando em uma correção que será resolvida em breve. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Leia mais</a>",
 			"video_not_supported": ""
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
@@ -1128,6 +1131,11 @@
 			"unexpected_utxos_fee": "Algo deu errado ao calcular a taxa de transação.",
 			"unable_to_retrieve_amount": "n/d (não foi possível recuperar)",
 			"ethereum_insufficient_funds": "",
+			"ethereum_out_of_gas": "Seu envio falhou porque precisava de mais gás do que o estimado. Seus fundos continuam na sua carteira, mas a rede pode ter cobrado uma taxa pela transação que falhou. Tente novamente.",
+			"ethereum_out_of_gas_gas": "Gás enviado: $gasSent · Gás necessário: $gasNeeded",
+			"ethereum_out_of_gas_gas_sent": "Gás enviado: $gasSent",
+			"ethereum_transaction_hash": "Hash da transação: $hash",
+			"ethereum_unsigned_transaction": "Transação não assinada: $transaction",
 			"solana_transaction_expired": "Sua transação não foi processada pela rede Solana e expirou, provavelmente porque a taxa de prioridade fornecida não era suficiente. Atualizamos para o valor recomendado mais recente, por isso tente novamente.",
 			"solana_confirmation_failed": "Não recebemos uma confirmação para a transação que você acabou de criar. Aguarde alguns segundos e verifique a lista de transações do seu token para ver se a sua transação foi criada corretamente.",
 			"solana_insufficient_funds": "O saldo do seu token não é suficiente para concluir esta transação. O seu saldo pode ter mudado desde a última vez que foi exibido.",
@@ -1341,6 +1349,8 @@
 			"swap_fees": "",
 			"cross_chain_networks_info": "",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -1375,6 +1385,7 @@
 			"swap_replaced_or_dropped": "",
 			"near_intents_quote_unverified": "",
 			"near_intents_quote_expired": "",
+			"near_intents_quote_deposit_memo": "",
 			"oisy_trade_not_trackable": "",
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
@@ -1558,7 +1569,8 @@
 			"open_contract_address_block_explorer": "Abrir o endereço do contrato no explorador de blocos",
 			"open_token_address_block_explorer": "Abrir o endereço do token em um explorador de blocos",
 			"token_group_number": "Número total de tokens no grupo para o token nativo $token",
-			"filter_button": "Abrir/fechar filtro"
+			"filter_button": "Abrir/fechar filtro",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "Insira um endereço de contrato ERC20",
@@ -2159,6 +2171,7 @@
 			"instruction_unwrap": "Desempacotar e encerrar a conta de tokens de $symbol",
 			"instruction_create_account": "",
 			"instruction_create_program_account": "",
+			"instruction_close_program_account": "",
 			"instruction_close_account": "",
 			"instruction_close_account_for": "Encerrar a conta de tokens de $symbol",
 			"instruction_approve": "",
@@ -2171,6 +2184,7 @@
 			"instruction_thaw": "",
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
+			"instruction_via": "via $program",
 			"instruction_rent": "",
 			"instruction_balance_returned": "Saldo de SOL devolvido à sua carteira",
 			"instruction_balance_sent": "Saldo de SOL enviado para a sua carteira",
@@ -2705,10 +2719,13 @@
 			"starting_to_repay": "A enviar o teu reembolso…",
 			"repay_started": "O teu reembolso está a ser processado.",
 			"current_debt": "Dívida atual",
+			"pending_repays": "Reembolsos em processamento",
 			"interest_accrued": "Juros acumulados",
 			"debt_after_repay": "Dívida após reembolso",
 			"repay_exceeds_debt": "O montante excede a tua dívida pendente.",
-			"repay_prices_unavailable": "Os preços estão temporariamente indisponíveis. O reembolso está desativado até serem carregados."
+			"repay_prices_unavailable": "Os preços estão temporariamente indisponíveis. O reembolso está desativado até serem carregados.",
+			"repay_debt_unavailable": "A tua dívida pendente está temporariamente indisponível. O reembolso está desativado até ser carregada.",
+			"repay_pending_covers_debt": "Um reembolso desta posição ainda está a ser processado. Podes reembolsar mais assim que for concluído."
 		},
 		"info": {
 			"title": "O que é a Liquidium",
@@ -3010,6 +3027,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

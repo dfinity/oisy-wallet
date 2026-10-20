@@ -39,7 +39,7 @@
 </script>
 
 <ButtonIcon
-	ariaLabel={$i18n.navigation.alt.menu}
+	ariaLabel={$i18n.core.text.sorting}
 	colorStyle="muted"
 	expanded={visible}
 	link={false}
@@ -51,59 +51,61 @@
 	{/snippet}
 </ButtonIcon>
 
-<ResponsivePopover {button} bind:visible>
+<ResponsivePopover ariaLabel={$i18n.core.text.sorting} {button} bind:visible>
 	{#snippet content()}
-		<span class="mb-2 flex text-sm font-bold">{$i18n.core.text.sorting}</span>
+		<div class="menu-surface min-w-56">
+			<span class="menu-heading">{$i18n.core.text.sorting}</span>
 
-		<List noPadding>
-			<ListItem>
-				<ListItemButton
-					onclick={() => {
-						trackSortingEvent({ order: 'desc', type: 'date' });
-						setSorting({ order: 'desc', type: 'date' });
-					}}
-					selectable
-					selected={$nftSortType === 'date' && $nftSortOrder === 'desc'}
-				>
-					{$i18n.nfts.text.recents_first}
-				</ListItemButton>
-			</ListItem>
-			<ListItem>
-				<ListItemButton
-					onclick={() => {
-						trackSortingEvent({ order: 'asc', type: 'date' });
-						setSorting({ order: 'asc', type: 'date' });
-					}}
-					selectable
-					selected={$nftSortType === 'date' && $nftSortOrder === 'asc'}
-				>
-					{$i18n.nfts.text.oldest_first}
-				</ListItemButton>
-			</ListItem>
-			<ListItem>
-				<ListItemButton
-					onclick={() => {
-						trackSortingEvent({ order: 'asc', type: 'collection-name' });
-						setSorting({ order: 'asc', type: 'collection-name' });
-					}}
-					selectable
-					selected={$nftSortType === 'collection-name' && $nftSortOrder === 'asc'}
-				>
-					{$i18n.nfts.text.collection_atoz}
-				</ListItemButton>
-			</ListItem>
-			<ListItem>
-				<ListItemButton
-					onclick={() => {
-						trackSortingEvent({ order: 'desc', type: 'collection-name' });
-						setSorting({ order: 'desc', type: 'collection-name' });
-					}}
-					selectable
-					selected={$nftSortType === 'collection-name' && $nftSortOrder === 'desc'}
-				>
-					{$i18n.nfts.text.collection_ztoa}
-				</ListItemButton>
-			</ListItem>
-		</List>
+			<List noPadding>
+				<ListItem>
+					<ListItemButton
+						onclick={() => {
+							trackSortingEvent({ order: 'desc', type: 'date' });
+							setSorting({ order: 'desc', type: 'date' });
+						}}
+						selectable
+						selected={$nftSortType === 'date' && $nftSortOrder === 'desc'}
+					>
+						{$i18n.nfts.text.recents_first}
+					</ListItemButton>
+				</ListItem>
+				<ListItem>
+					<ListItemButton
+						onclick={() => {
+							trackSortingEvent({ order: 'asc', type: 'date' });
+							setSorting({ order: 'asc', type: 'date' });
+						}}
+						selectable
+						selected={$nftSortType === 'date' && $nftSortOrder === 'asc'}
+					>
+						{$i18n.nfts.text.oldest_first}
+					</ListItemButton>
+				</ListItem>
+				<ListItem>
+					<ListItemButton
+						onclick={() => {
+							trackSortingEvent({ order: 'asc', type: 'collection-name' });
+							setSorting({ order: 'asc', type: 'collection-name' });
+						}}
+						selectable
+						selected={$nftSortType === 'collection-name' && $nftSortOrder === 'asc'}
+					>
+						{$i18n.nfts.text.collection_atoz}
+					</ListItemButton>
+				</ListItem>
+				<ListItem>
+					<ListItemButton
+						onclick={() => {
+							trackSortingEvent({ order: 'desc', type: 'collection-name' });
+							setSorting({ order: 'desc', type: 'collection-name' });
+						}}
+						selectable
+						selected={$nftSortType === 'collection-name' && $nftSortOrder === 'desc'}
+					>
+						{$i18n.nfts.text.collection_ztoa}
+					</ListItemButton>
+				</ListItem>
+			</List>
+		</div>
 	{/snippet}
 </ResponsivePopover>

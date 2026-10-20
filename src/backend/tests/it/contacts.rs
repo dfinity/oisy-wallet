@@ -166,7 +166,7 @@ fn test_create_contact_should_succeed_with_valid_name() {
 
     assert_eq!(contact.name, "John Doe");
     assert!(contact.id > 0); // Should have a valid ID
-    assert!(contact.addresses.is_empty()); // Should start with empty addresses
+    assert_eq!(contact.addresses, vec![]); // Should start with empty addresses
 }
 
 #[test]
@@ -318,7 +318,7 @@ fn test_create_contact_should_be_retrievable_by_get_contacts() {
 
     // Initially there should be no contacts
     let contacts = call_get_contacts(&pic_setup, caller);
-    assert!(contacts.is_empty());
+    assert_eq!(contacts, vec![]);
 
     // Create a contact
     let contact_name = "Alice Smith";
@@ -549,7 +549,7 @@ fn test_update_contact_should_succeed_with_valid_name_only() {
 
     assert_eq!(updated_contact.name, "Updated Name");
     assert!(updated_contact.id > 0);
-    assert!(updated_contact.addresses.is_empty());
+    assert_eq!(updated_contact.addresses, vec![]);
 }
 
 #[test]
@@ -1120,7 +1120,7 @@ fn test_update_contact_rejects_an_xrp_x_address() {
     // The rejected write left the stored contact untouched.
     let after =
         call_get_contact(&pic_setup, caller, contact.id).expect("that the contact survives");
-    assert!(after.addresses.is_empty());
+    assert_eq!(after.addresses, vec![]);
 }
 
 #[test]

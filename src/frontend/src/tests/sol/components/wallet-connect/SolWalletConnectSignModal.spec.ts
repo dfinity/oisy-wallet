@@ -340,4 +340,44 @@ describe('SolWalletConnectSignModal', () => {
 			expect(getByText(en.wallet_connect.text.sign_message)).toBeInTheDocument();
 		});
 	});
+
+	describe('a request Verify flags as a scam', () => {
+		const flaggedProps = (method: string) => {
+			const { request, ...rest } = props(method);
+
+			return {
+				...rest,
+				request: {
+					...request,
+					verifyContext: { verified: { ...request.verifyContext.verified, isScam: true } }
+				}
+			};
+		};
+
+		it('should only offer to reject a transaction, and say why', async () => {
+			const { getByRole, getByTestId, queryByRole } = render(SolWalletConnectSignModal, {
+				props: flaggedProps(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			await waitFor(() => {
+				expect(getByTestId('wallet-connect-scam-warning')).toBeInTheDocument();
+			});
+
+			expect(queryByRole('button', { name: en.core.text.approve })).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.reject })).toBeInTheDocument();
+		});
+
+		it('should only offer to reject a message, and say why', async () => {
+			const { getByRole, getByTestId, queryByRole } = render(SolWalletConnectSignMessageModal, {
+				props: flaggedProps(SESSION_REQUEST_SOL_SIGN_MESSAGE)
+			});
+
+			await waitFor(() => {
+				expect(getByTestId('wallet-connect-scam-warning')).toBeInTheDocument();
+			});
+
+			expect(queryByRole('button', { name: en.core.text.approve })).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.reject })).toBeInTheDocument();
+		});
+	});
 });

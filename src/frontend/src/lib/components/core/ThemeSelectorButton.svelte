@@ -19,6 +19,7 @@
 	colorStyle={selected ? 'primary' : 'tertiary'}
 	{onclick}
 	paddingSmall
+	pressed={selected}
 	styleClass={`rounded-none first-of-type:border-l-tertiary border-r-tertiary border-y-tertiary first-of-type:rounded-s-xl last-of-type:rounded-e-xl py-1.5 px-2.75 ${selected ? 'hover:bg-brand-primary' : 'hover:text-brand-primary hover:bg-brand-subtle-10'}`}
 	{testId}
 >

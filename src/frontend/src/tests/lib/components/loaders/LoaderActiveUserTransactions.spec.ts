@@ -540,7 +540,7 @@ describe('LoaderActiveUserTransactions', () => {
 
 		// The XRP send stops at the broadcast, so by the time the ledger decides there may be no
 		// modal left. This hook is the only place the outcome is reported — and it fires once per
-		// row even when the row terminalized while the tab was shut.
+		// row even when the ledger decided while the tab was shut.
 		describe('an XRP send reports its outcome here, because nothing else can', () => {
 			it('toasts success, refreshes the wallet and fires the success event', async () => {
 				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
@@ -612,7 +612,8 @@ describe('LoaderActiveUserTransactions', () => {
 			});
 
 			// Once per row, not once per store update — the same idempotency the seven other flows
-			// rely on, which is what makes a row that settled while the tab was shut safe to report.
+			// rely on, which is what makes a payment the ledger decided while the tab was shut safe
+			// to report.
 			it('reports once even when the row is written again', async () => {
 				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
 				activeUserTransactionsStore.upsert({
@@ -632,6 +633,57 @@ describe('LoaderActiveUserTransactions', () => {
 				await tick();
 
 				expect(toasts.toastsShow).toHaveBeenCalledOnce();
+			});
+
+			// Reported on the device that sent them. Signing in on another one loads them settled.
+			it('reports nothing for sends that load already settled', async () => {
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+
+				render(LoaderActiveUserTransactions);
+				await tick();
+
+				activeUserTransactionsStore.set({
+					transactions: [
+						{ ...pendingXrp('xrp-a'), status: { Succeeded: null } },
+						{
+							...pendingXrp('xrp-b'),
+							status: { Failed: null },
+							error: ['the network did not include it in time']
+						}
+					]
+				});
+				await tick();
+
+				expect(toasts.toastsShow).not.toHaveBeenCalled();
+				expect(toasts.toastsError).not.toHaveBeenCalled();
+				expect(refreshSpy).not.toHaveBeenCalled();
+				expect(trackEventSpy).not.toHaveBeenCalled();
+			});
+
+			// This browser sent the terminal status, but the tab was gone before the answer came back.
+			it('reports a send this browser settled when the next session loads it', async () => {
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.markTerminalWriteSent({
+					principal: mockIdentity.getPrincipal(),
+					id: 'xrp-a'
+				});
+				activeUserTransactionsStore.reset();
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+
+				render(LoaderActiveUserTransactions);
+				await tick();
+
+				activeUserTransactionsStore.set({
+					transactions: [{ ...pendingXrp('xrp-a'), status: { Succeeded: null } }]
+				});
+				await tick();
+
+				expect(toasts.toastsShow).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ text: en.send.text.xrp_sent, level: 'success' })
+				);
+				expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ name: TRACK_COUNT_XRP_SEND_SUCCESS })
+				);
 			});
 		});
 
@@ -1023,6 +1075,7 @@ describe('LoaderActiveUserTransactions', () => {
 
 		it('coalesces multiple Succeeded transitions in one update into a single refresh and one event per row', async () => {
 			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.set({ transactions: [pending('a'), pending('b'), pending('c')] });
 
 			render(LoaderActiveUserTransactions);
 			await tick();

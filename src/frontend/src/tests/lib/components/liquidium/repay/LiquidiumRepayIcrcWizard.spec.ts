@@ -76,6 +76,23 @@ describe('LiquidiumRepayIcrcWizard', () => {
 		expect(container).toBeTruthy();
 	});
 
+	it('projects the health factor net of pending repays', () => {
+		const previewSpy = vi.spyOn(liquidiumRepayServices, 'computeLiquidiumRepayPreview');
+
+		render(LiquidiumRepayIcrcWizard, {
+			props: {
+				...baseProps,
+				amount: 0.25,
+				pendingRepay: 50_000_000n,
+				currentStep: step(WizardStepsLiquidiumRepay.REPAY)
+			},
+			context: context()
+		});
+
+		// (0.25 typed + 0.5 pending) / 1 ICP debt × $12.
+		expect(previewSpy).toHaveBeenLastCalledWith({ portfolio, repayUsd: 9 });
+	});
+
 	it('renders the progress step', () => {
 		const { container } = render(LiquidiumRepayIcrcWizard, {
 			props: { ...baseProps, currentStep: step(WizardStepsLiquidiumRepay.REPAYING) },
@@ -83,6 +100,58 @@ describe('LiquidiumRepayIcrcWizard', () => {
 		});
 
 		expect(container).toHaveTextContent(en.liquidium.text.starting_to_repay);
+	});
+
+	it('does not broadcast an amount over the cap on confirm', async () => {
+		const executeSpy = vi
+			.spyOn(liquidiumRepayServices, 'executeLiquidiumRepay')
+			.mockResolvedValue(undefined);
+
+		const onNext = vi.fn();
+
+		const { getByTestId } = render(LiquidiumRepayIcrcWizard, {
+			// 1 ICP against a 0.5 ICP cap: the cap dropped under an open Review.
+			props: {
+				...baseProps,
+				maxRepay: 50_000_000n,
+				currentStep: step(WizardStepsLiquidiumRepay.REVIEW),
+				onNext
+			},
+			context: context()
+		});
+
+		await fireEvent.click(getByTestId(STAKE_REVIEW_FORM_BUTTON));
+
+		// The happy path calls `onNext` synchronously before awaiting the broadcast.
+		expect(onNext).not.toHaveBeenCalled();
+		expect(executeSpy).not.toHaveBeenCalled();
+	});
+
+	it('does not broadcast when pending repays cover the debt on confirm', async () => {
+		const executeSpy = vi
+			.spyOn(liquidiumRepayServices, 'executeLiquidiumRepay')
+			.mockResolvedValue(undefined);
+
+		const onNext = vi.fn();
+
+		const { getByTestId } = render(LiquidiumRepayIcrcWizard, {
+			// 1 ICP pending covers the 1 ICP debt; the protocol buffer leaves a dust cap that the
+			// 100-e8s amount fits, so the plain cap check alone would let it through.
+			props: {
+				...baseProps,
+				amount: 0.000001,
+				maxRepay: 150n,
+				pendingRepay: 100_000_000n,
+				currentStep: step(WizardStepsLiquidiumRepay.REVIEW),
+				onNext
+			},
+			context: context()
+		});
+
+		await fireEvent.click(getByTestId(STAKE_REVIEW_FORM_BUTTON));
+
+		expect(onNext).not.toHaveBeenCalled();
+		expect(executeSpy).not.toHaveBeenCalled();
 	});
 
 	it('repays the ICP pool on confirm', async () => {
