@@ -624,7 +624,7 @@ describe('CyclesTopUpModal', () => {
 			);
 		});
 
-		it('resends an unanswered top-up from a new modal', async () => {
+		it('opens a new modal on the unanswered top-up and resends it, even after the balance dropped', async () => {
 			topUpSpy.mockResolvedValueOnce({ status: 'unknown' });
 
 			const first = await toReview();
@@ -635,10 +635,19 @@ describe('CyclesTopUpModal', () => {
 
 			first.unmount();
 
+			// The first top-up went through: the refreshed balance no longer covers it.
+			balancesStore.set({
+				id: mockTcyclesToken.id,
+				data: { data: 500_000_000_000n, certified: true }
+			});
+
 			vi.setSystemTime(new Date(2_000));
 
-			const second = await toReview();
+			const second = renderModal();
 
+			await backOnReview(second);
+
+			expect(second.container).toHaveTextContent(canister);
 			expect(second.container).toHaveTextContent(
 				replacePlaceholders(en.cycles_top_up.text.unknown, { $token: 'TCYCLES' })
 			);
@@ -650,8 +659,9 @@ describe('CyclesTopUpModal', () => {
 			});
 
 			expect(topUpSpy).toHaveBeenLastCalledWith(
-				expect.objectContaining({ createdAt: 1_000_000_000n })
+				expect.objectContaining({ amount: 1_500_000_000_000n, createdAt: 1_000_000_000n })
 			);
+			expect(existenceSpy).toHaveBeenCalledOnce();
 		});
 
 		it('warns in a new modal that another top-up can top up again while the last outcome is unknown', async () => {
@@ -667,7 +677,33 @@ describe('CyclesTopUpModal', () => {
 
 			vi.setSystemTime(new Date(2_000));
 
-			const second = await toReview('2');
+			const second = renderModal();
+
+			await backOnReview(second);
+
+			await fireEvent.click(second.getByTestId(CYCLES_TOP_UP_REVIEW_BACK_BUTTON));
+
+			await waitFor(() => {
+				expect(second.getByTestId(CYCLES_TOP_UP_AMOUNT)).toBeInTheDocument();
+			});
+
+			const input = second.container.querySelector<HTMLInputElement>(
+				`input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`
+			);
+
+			assertNonNullish(input);
+
+			expect(input).toHaveValue('1.5');
+
+			await fireEvent.input(input, { target: { value: '2' } });
+
+			await waitFor(() => {
+				expect(second.getByTestId(CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON)).toBeEnabled();
+			});
+
+			await fireEvent.click(second.getByTestId(CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON));
+
+			await backOnReview(second);
 
 			expect(second.container).toHaveTextContent(
 				replacePlaceholders(en.cycles_top_up.text.unknown_fresh, { $token: 'TCYCLES' })
@@ -752,7 +788,9 @@ describe('CyclesTopUpModal', () => {
 
 			vi.setSystemTime(new Date(3_000));
 
-			const back = await toReview();
+			const back = renderModal();
+
+			await backOnReview(back);
 
 			expect(back.container).toHaveTextContent(
 				replacePlaceholders(en.cycles_top_up.text.unknown, { $token: 'TCYCLES' })

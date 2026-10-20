@@ -96,6 +96,33 @@
 	const formatAmount = (value: bigint): string =>
 		formatToken({ value, unitName: token.decimals, displayDecimals: token.decimals });
 
+	// A modal opened while the principal's last top-up has no answer starts on that top-up's
+	// Review, so Top up resends it: once the first one went through, the Amount step's balance
+	// check would refuse the same amount. Back leads to the usual steps, where any change is a
+	// new request. The full-precision amount parses back to the stored one.
+	let openedOnUnanswered = false;
+
+	$effect(() => {
+		if (openedOnUnanswered || isNullish(modal)) {
+			return;
+		}
+
+		openedOnUnanswered = true;
+
+		if (isNullish(unanswered)) {
+			return;
+		}
+
+		canisterIdText = unanswered.canisterId;
+		sendAmount = formatAmount(unanswered.amount);
+
+		const reviewIndex = steps.findIndex(({ name }) => name === WizardStepsCyclesTopUp.REVIEW);
+
+		if (reviewIndex >= 0) {
+			modal.set(reviewIndex);
+		}
+	});
+
 	const failureText = ({
 		result,
 		amount
