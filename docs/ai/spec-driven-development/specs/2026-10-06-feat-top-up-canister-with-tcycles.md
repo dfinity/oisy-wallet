@@ -41,7 +41,7 @@ Verified on 2026-10-06 against `dfinity/cycles-ledger` (`cycles-ledger/src/stora
 
 1. A **Top up** hero button on the TCYCLES page, after Mint, as the fifth button (§12, D1). Its icon is a fuel pump (§12, D5), drawn in the same filled two-tone style as the other hero icons. OISY has no such icon yet, so it is a new one.
 2. It appears only for the mainnet cycles ledger's token, with the same check as Mint.
-3. It is disabled exactly when Send is, since it spends TCYCLES: while the TCYCLES balance is zero or not loaded. Mint, which spends ICP, stays enabled.
+3. It is disabled exactly when Send is, since it spends TCYCLES: while the TCYCLES balance is zero or not loaded. Mint, which spends ICP, stays enabled. The one exception is a top-up of the signed-in principal without an answer (§5.4.5): the button stays enabled to resend it, since the ledger checks for a duplicate before the balance.
 4. It sits behind a rollout flag, on for local and staging builds and off in production until a real top-up on staging has been verified, and then kept as a kill switch (§12, D4).
 
 ## 5. Top up
