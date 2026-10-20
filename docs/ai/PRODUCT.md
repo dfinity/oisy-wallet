@@ -358,6 +358,20 @@ Burning is deliberately **not** exempt. Sending assets to a minter account by mi
 
 ---
 
+## Swap
+
+### LI.FI (local and staging)
+
+On local and staging builds, the swap form also asks **LI.FI** for an offer whenever the source is a token on one of the six EVM networks OISY supports (Ethereum, Arbitrum, BSC, Polygon, Base, Robinhood Chain). It covers swaps on the same network, to another of those networks, and to Solana, and is ranked by receive amount with the other providers. Solana as a _source_, beta and production come later. Cross-network routes go through two bridges only, Across and NEAR Intents, and only in shapes OISY can verify before signing; LI.FI is asked once more without Across when its best route through Across is not one of them, so NEAR Intents can serve the pair instead. A pair LI.FI has no verifiable route for simply gets no LI.FI offer.
+
+LI.FI's quotes are not signed, so nothing about the transaction is taken on trust. Before the user's key signs, OISY re-quotes, checks that the transaction calls LI.FI's own contract on that network, decodes it, and refuses it unless it pays the user, in the token asked for, at least the minimum the user reviewed, takes no more than LI.FI's 0.25 % fee, and makes only calls LI.FI's contract has whitelisted. A swap whose price got worse since the review stops with the usual slippage message before any approval is paid for.
+
+The fee shown is the most the swap can cost: the swap transaction's own limit, priced from LI.FI's gas estimate with a 20 % margin and, on Base, its L1 data fee, plus one or two approval transactions for a token that needs them (none when the existing approval already covers the amount, two when a smaller one must be reset first). The balance must cover all of it. If OISY's own gas estimate at the moment of signing comes out higher than what the user reviewed, nothing is signed: the review returns with the new maximum and a note that the network fee rose, for the user to confirm.
+
+Like the other cross-chain swaps, the modal closes once the transaction is sent, and the swap appears in the Active-transactions panel labelled "LI.FI" until it settles. The row is recorded before the transaction is broadcast, so a swap is never sent untracked; if the network refuses the transaction outright, the row is removed again.
+
+---
+
 ## Activity
 
 ### IC transactions and Index-canister outages
