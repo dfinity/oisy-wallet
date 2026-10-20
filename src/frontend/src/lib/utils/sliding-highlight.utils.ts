@@ -9,9 +9,9 @@ const HOST_ATTRIBUTE = 'data-sliding-highlight';
 // rewrites the whole class of an element whose `class` is reactive.
 const LIST_ATTRIBUTE = 'data-sliding-highlight-list';
 
-// Rows that are not list items: menu rows and LogoButtons such as "All networks".
+// Rows that are not list items: menu rows, nav items and LogoButtons such as "All networks".
 // `Popover.svelte` clears the hover fill of these rows and of the elements that paint it for them.
-const ROW_SELECTOR = '.menu-row, button:has(> .logo-button-wrapper)';
+const ROW_SELECTOR = '.menu-row, .nav-item, button:has(> .logo-button-wrapper)';
 const DISABLED_SELECTOR = ':disabled, [aria-disabled="true"], .disabled';
 
 // The highlight's fade-out in `Popover.svelte`. Once it has faded, the block is parked at the

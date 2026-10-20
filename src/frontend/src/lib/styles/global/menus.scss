@@ -4,8 +4,10 @@
 	font-size: 1rem;
 	line-height: 1.5;
 
+	// Start-aligned whatever the host: a menu opened from inside a button would inherit its centring.
 	.menu-heading {
 		display: block;
+		text-align: start;
 		margin-bottom: 8px;
 		padding-inline: var(--menu-row-padding-inline);
 		font-size: 0.875rem;

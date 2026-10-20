@@ -64,6 +64,7 @@
 	expanded={visible}
 	link={false}
 	onclick={() => (visible = true)}
+	styleClass="relative hit-area hit-area-touch"
 	bind:button
 >
 	{#snippet icon()}

@@ -290,7 +290,8 @@ bigger. Two tap areas must never overlap; where a neighbour sits closer,
 cap it: `[--hit-area:2rem]`, or one axis with `[--hit-area-x:...]` /
 `[--hit-area-y:...]` (`[--hit-area-x:0px]` grows it only up and down). It
 does not set `position`: add `relative` unless the control is already
-`absolute` or `fixed`.
+`absolute` or `fixed`. Add `hit-area-touch` for 44 × 44 px on a touch
+screen (`pointer: coarse`), as the icon triggers of menus and dropdowns do.
 
 ### Pitfalls
 
