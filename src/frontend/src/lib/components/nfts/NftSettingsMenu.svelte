@@ -68,7 +68,7 @@
 	bind:button
 >
 	{#snippet icon()}
-		<IconManage />
+		<IconManage size="20" />
 	{/snippet}
 </ButtonIcon>
 

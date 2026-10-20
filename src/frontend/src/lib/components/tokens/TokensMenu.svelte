@@ -34,7 +34,7 @@
 >
 	{#snippet icon()}
 		<NotificationBlob display={$hideZeroBalances} position="top-right">
-			<IconManage />
+			<IconManage size="20" />
 		</NotificationBlob>
 	{/snippet}
 </ButtonIcon>
