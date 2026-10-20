@@ -116,7 +116,9 @@
 	"progress": {
 		"completed": "مكتمل",
 		"in_progress": "قيد التقدم",
-		"failed": "فشل"
+		"failed": "فشل",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {

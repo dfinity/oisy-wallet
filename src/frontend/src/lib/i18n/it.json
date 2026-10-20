@@ -116,7 +116,9 @@
 	"progress": {
 		"completed": "Completato",
 		"in_progress": "In corso",
-		"failed": "Non riuscito"
+		"failed": "Non riuscito",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {

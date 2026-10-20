@@ -53,7 +53,7 @@
 
 <div class="stretch" data-tid={IN_PROGRESS_MODAL}>
 	<MessageBox level="warning">
-		<span>
+		<span class="font-normal">
 			{replaceOisyPlaceholders(
 				warningType === 'manage'
 					? $i18n.tokens.import.warning.do_not_close_manage

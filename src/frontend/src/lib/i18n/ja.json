@@ -116,7 +116,9 @@
 	"progress": {
 		"completed": "完了",
 		"in_progress": "進行中",
-		"failed": "失敗"
+		"failed": "失敗",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {

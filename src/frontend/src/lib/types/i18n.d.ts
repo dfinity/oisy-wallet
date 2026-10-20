@@ -100,6 +100,8 @@ interface I18nProgress {
 	completed: string;
 	in_progress: string;
 	failed: string;
+	step_of: string;
+	failed_at: string;
 }
 
 interface I18nNavigation {

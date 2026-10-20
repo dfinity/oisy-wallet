@@ -116,7 +116,9 @@
 	"progress": {
 		"completed": "पूर्ण",
 		"in_progress": "प्रगति में",
-		"failed": "विफल"
+		"failed": "विफल",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {
