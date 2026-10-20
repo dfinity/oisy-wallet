@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import { getCanisterExistence } from '$icp/api/canister-state.api';
 	import CyclesTopUpRecentCanisters from '$icp/components/cycles-top-up/CyclesTopUpRecentCanisters.svelte';
 	import type { IcToken } from '$icp/types/ic-token';
@@ -23,6 +22,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		canisterIdText: string;

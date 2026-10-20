@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import { getTokenFee } from '$icp/utils/token.utils';
 	import ConvertAmountSource from '$lib/components/convert/ConvertAmountSource.svelte';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
@@ -26,6 +25,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		sendAmount: OptionAmount;
