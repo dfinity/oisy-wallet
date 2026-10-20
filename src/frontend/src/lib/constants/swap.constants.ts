@@ -74,9 +74,12 @@ export const SWAP_PROVIDER_CONFIRMATION_MOTION = {
 // its rate limit is tight, and a displayed quote is never signed — execution always re-quotes.
 export const LIFI_QUOTE_REFRESH_INTERVAL_MS = 30_000;
 
-// The swap form shows its offers once every provider has answered, so a stalled LI.FI request would
-// hold back every other offer, and a request that never settles would never be retried.
-export const LIFI_QUOTE_TIMEOUT_MS = 10_000;
+// Display quote collection shares LI.FI's existing request budget. This bounds the whole
+// provider round (including prerequisite lookups), not execution or deposit validity.
+export const SWAP_QUOTE_TIMEOUT_MS = 10_000;
+
+// LI.FI also aborts its supported HTTP transport; other quote APIs may only be abandoned.
+export const LIFI_QUOTE_TIMEOUT_MS = SWAP_QUOTE_TIMEOUT_MS;
 
 export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
 	[ETHEREUM_NETWORK_ID]: 'eth',

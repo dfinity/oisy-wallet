@@ -41,7 +41,7 @@ import {
 	ZERO
 } from '$lib/constants/app.constants';
 import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
-import { ICP_SWAP_POOL_FEE, SWAP_SIDE } from '$lib/constants/swap.constants';
+import { ICP_SWAP_POOL_FEE, SWAP_QUOTE_TIMEOUT_MS, SWAP_SIDE } from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
 import {
 	PLAUSIBLE_EVENTS,
@@ -100,6 +100,7 @@ import {
 	type SwapNearIntentsSolParams,
 	type SwapNearIntentsXrpParams,
 	type SwapParams,
+	type SwapQuoteObserver,
 	type SwapVeloraDeltaParams,
 	type SwapVeloraMarketParams
 } from '$lib/types/swap';
@@ -568,12 +569,14 @@ const fetchSwapAmountsICP = async ({
 }): Promise<SwapMappedResult[]> => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ key, getQuote }) => {
+	const settledResults = await collectSwapQuotes<
+		SwapAmountsReply | ICPSwapResult | OisyTradeQuote | undefined
+	>({
+		requests: enabledProviders.map(({ key, getQuote }) => (observer) => {
 			// Kong has no provider-local eligibility guards. Its quote API must not receive
 			// the observer because it forwards the remaining arguments to the canister.
 			if (key === SwapProvider.KONG_SWAP) {
-				onProviderParticipating?.(key);
+				observer.onProviderParticipating?.(key);
 			}
 
 			return getQuote({
@@ -583,14 +586,11 @@ const fetchSwapAmountsICP = async ({
 				sourceAmount: amount,
 				// Preserve quote calls and the existing ICRC-2 offer-mapping gates below,
 				// but do not advertise an ineligible provider as participating.
-				...(key !== SwapProvider.KONG_SWAP &&
-					isSourceTokenIcrc2 &&
-					onProviderParticipating && {
-						onProviderParticipating
-					})
+				...(key !== SwapProvider.KONG_SWAP && isSourceTokenIcrc2 && observer)
 			});
-		})
-	);
+		}),
+		onProviderParticipating
+	});
 
 	const destinationUsdValue = get(exchanges)?.[destinationToken.id]?.usd;
 	const sourceTokenUsdValue = get(exchanges)?.[sourceToken.id]?.usd;
@@ -1419,6 +1419,68 @@ export const performManualWithdraw = async ({
 	}
 };
 
+// Preserve registry order for the existing reducers, even when providers finish out of order.
+// A deadline abandons pending quotes logically; it cannot abort APIs without signal support.
+const collectSwapQuotes = <T>({
+	requests,
+	onProviderParticipating
+}: {
+	requests: ((observer: SwapQuoteObserver) => Promise<T>)[];
+} & SwapQuoteObserver): Promise<PromiseSettledResult<T>[]> => {
+	if (requests.length === 0) {
+		return Promise.resolve([]);
+	}
+
+	return new Promise((resolve) => {
+		const results: PromiseSettledResult<T>[] = requests.map(() => ({
+			status: 'rejected',
+			reason: new Error('Swap quote collection timed out')
+		}));
+		let pending = requests.length;
+		let collecting = true;
+
+		const finish = () => {
+			collecting = false;
+			clearTimeout(timeout);
+			resolve(results);
+		};
+		const timeout = setTimeout(finish, SWAP_QUOTE_TIMEOUT_MS);
+		requests.forEach((request, index) => {
+			let quotePending = true;
+			const observer: SwapQuoteObserver = onProviderParticipating
+				? {
+						onProviderParticipating: (provider) => {
+							if (collecting && quotePending) {
+								onProviderParticipating(provider);
+							}
+						}
+					}
+				: {};
+			const settle = (result: PromiseSettledResult<T>) => {
+				quotePending = false;
+				if (!collecting) {
+					return;
+				}
+
+				results[index] = result;
+				pending -= 1;
+				if (pending === 0) {
+					finish();
+				}
+			};
+
+			// Contain synchronous throws as well as late rejections, without awaiting
+			// abandoned work or allowing it to mutate the completed round.
+			Promise.resolve()
+				.then(() => request(observer))
+				.then(
+					(value) => settle({ status: 'fulfilled', value }),
+					(reason: unknown) => settle({ status: 'rejected', reason })
+				);
+		});
+	});
+};
+
 // Shared tail of the provider fan-outs: keep the fulfilled quotes, best first. When no
 // provider quoted at all but one refused the amount as below its minimum, rethrow that
 // refusal so the UI can name the reason instead of the generic "swap is not offered".
@@ -1459,18 +1521,21 @@ const fetchSwapAmountsICPBridge = async ({
 }: IcpBridgeQuoteParams): Promise<SwapMappedResult[]> => {
 	const enabledProviders = icpBridgeProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({
-				sourceToken,
-				destinationToken,
-				amount,
-				userEthAddress,
-				slippage,
-				...(onProviderParticipating && { onProviderParticipating })
-			})
-		)
-	);
+	const settledResults = await collectSwapQuotes({
+		requests: enabledProviders.map(
+			({ getQuote }) =>
+				(observer) =>
+					getQuote({
+						sourceToken,
+						destinationToken,
+						amount,
+						userEthAddress,
+						slippage,
+						...observer
+					})
+		),
+		onProviderParticipating
+	});
 
 	return reduceSettledSwapResults(settledResults);
 };
@@ -1493,19 +1558,22 @@ export const fetchSwapAmountsEVM = async ({
 
 	const enabledProviders = evmSwapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({
-				sourceToken,
-				destinationToken,
-				amount,
-				userAddress,
-				recipientAddress,
-				slippage,
-				...(onProviderParticipating && { onProviderParticipating })
-			})
-		)
-	);
+	const settledResults = await collectSwapQuotes({
+		requests: enabledProviders.map(
+			({ getQuote }) =>
+				(observer) =>
+					getQuote({
+						sourceToken,
+						destinationToken,
+						amount,
+						userAddress,
+						recipientAddress,
+						slippage,
+						...observer
+					})
+		),
+		onProviderParticipating
+	});
 
 	return reduceSettledSwapResults(settledResults);
 };
@@ -1523,19 +1591,22 @@ export const fetchSwapAmountsBTC = async ({
 }: BtcQuoteParams): Promise<SwapMappedResult[]> => {
 	const enabledProviders = btcSwapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({
-				sourceToken,
-				destinationToken,
-				amount,
-				userBtcAddress,
-				recipientAddress,
-				slippage,
-				...(onProviderParticipating && { onProviderParticipating })
-			})
-		)
-	);
+	const settledResults = await collectSwapQuotes({
+		requests: enabledProviders.map(
+			({ getQuote }) =>
+				(observer) =>
+					getQuote({
+						sourceToken,
+						destinationToken,
+						amount,
+						userBtcAddress,
+						recipientAddress,
+						slippage,
+						...observer
+					})
+		),
+		onProviderParticipating
+	});
 
 	return reduceSettledSwapResults(settledResults);
 };
@@ -1558,19 +1629,22 @@ export const fetchSwapAmountsSOL = async ({
 
 	const enabledProviders = solSwapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({
-				sourceToken,
-				destinationToken,
-				amount,
-				userAddress,
-				recipientAddress,
-				slippage,
-				...(onProviderParticipating && { onProviderParticipating })
-			})
-		)
-	);
+	const settledResults = await collectSwapQuotes({
+		requests: enabledProviders.map(
+			({ getQuote }) =>
+				(observer) =>
+					getQuote({
+						sourceToken,
+						destinationToken,
+						amount,
+						userAddress,
+						recipientAddress,
+						slippage,
+						...observer
+					})
+		),
+		onProviderParticipating
+	});
 
 	return reduceSettledSwapResults(settledResults);
 };
@@ -1590,19 +1664,22 @@ export const fetchSwapAmountsXRP = async ({
 
 	const enabledProviders = xrpSwapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({
-				sourceToken,
-				destinationToken,
-				amount,
-				userAddress,
-				recipientAddress,
-				slippage,
-				...(onProviderParticipating && { onProviderParticipating })
-			})
-		)
-	);
+	const settledResults = await collectSwapQuotes({
+		requests: enabledProviders.map(
+			({ getQuote }) =>
+				(observer) =>
+					getQuote({
+						sourceToken,
+						destinationToken,
+						amount,
+						userAddress,
+						recipientAddress,
+						slippage,
+						...observer
+					})
+		),
+		onProviderParticipating
+	});
 
 	// An offer whose XRP deposit comes with a deposit memo is left out: nothing documents how such a
 	// memo has to travel with an XRP payment, and a deposit that does not carry it in the expected

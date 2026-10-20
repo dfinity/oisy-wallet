@@ -390,6 +390,20 @@ Always reveal the amounts store's accepted selection, preserving manual-provider
 Only a foreground pending round actually observed by the mounted header may confirm: no
 replay from a completed snapshot, review remount, manual selection or periodic refresh.
 
+Foreground activity starts when the coordinator queues the round, before its 300 ms debounce,
+and keeps one request identity through pricing. The shared form blocks Review throughout that
+queued/pending foreground work; background refresh may retain a usable quote and enabled Review.
+Cancelling queued/pending foreground work discards offers priced for the previous inputs before
+clearing activity, so a same-amount remount cannot accidentally reuse them. Completed quotes and
+background refresh retain the existing Review-remount and manual-provider behavior.
+
+All six quote fan-outs use the same collector and `SWAP_QUOTE_TIMEOUT_MS` budget (10 seconds,
+aligned with LI.FI's existing display-quote timeout). Finish early when every provider settles;
+at the deadline, pass completed results to the existing mapping, ordering and minimum-error
+policy, ignoring unfinished providers and late participation/results. This is logical abandonment,
+not universal transport cancellation: nonabortable SDK/canister work may continue underneath.
+Do not apply this quote budget to swap execution, signing, deposit validity or animation timing.
+
 The five swap forms opt into this presentation with `SwapProvider isForm`; review/default
 callers retain the static provider label. Keep the brand nonshrinking in the single-line
 header; the adjacent status may truncate on narrow screens. During foreground comparison,

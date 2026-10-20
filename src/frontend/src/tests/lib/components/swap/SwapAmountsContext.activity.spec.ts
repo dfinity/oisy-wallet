@@ -83,7 +83,7 @@ describe('SwapAmountsContext quote activity', () => {
 		unmount();
 	});
 
-	it('clears invalidated activity immediately and rejects every stale callback', async () => {
+	it('replaces invalidated activity immediately with the queued round and rejects every stale callback', async () => {
 		const rounds: {
 			params: FetchSwapAmountsParams;
 			resolve: (offers: SwapMappedResult[]) => void;
@@ -99,11 +99,13 @@ describe('SwapAmountsContext quote activity', () => {
 
 		await rerender({ amount: '20' });
 
-		expect(get(activity)).toBeUndefined();
+		const queued = { requestId: 2, pending: true, background: false, providers: [] };
+
+		expect(get(activity)).toEqual(queued);
 
 		rounds[0].params.onProviderParticipating?.(SwapProvider.VELORA);
 
-		expect(get(activity)).toBeUndefined();
+		expect(get(activity)).toEqual(queued);
 
 		await advance();
 
@@ -159,7 +161,7 @@ describe('SwapAmountsContext quote activity', () => {
 			await runResolvedPromises();
 
 			expect(get(activity)).toBeUndefined();
-			expect(get(store)).toBeUndefined();
+			expect(get(store)).toBeNull();
 
 			if (mode !== 'destroy') {
 				await rerender({ amount: '20' });
@@ -244,7 +246,12 @@ describe('SwapAmountsContext quote activity', () => {
 		await advance();
 		await rerender(change);
 
-		expect(get(activity)).toBeUndefined();
+		expect(get(activity)).toEqual({
+			requestId: 2,
+			pending: true,
+			background: false,
+			providers: []
+		});
 
 		await advance();
 
@@ -281,7 +288,7 @@ describe('SwapAmountsContext quote activity', () => {
 		await runResolvedPromises();
 
 		expect(get(activity)).toBeUndefined();
-		expect(get(store)).toBeUndefined();
+		expect(get(store)).toBeNull();
 
 		unmount();
 	});

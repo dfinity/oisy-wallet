@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
+	import { readable } from 'svelte/store';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
@@ -92,7 +93,12 @@
 		switchTokens
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+	const { store: swapAmountsStore, activity } =
+		getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+	const quoteActivity = activity ?? readable(undefined);
+	const foregroundQuotePending = $derived(
+		$quoteActivity?.pending === true && !$quoteActivity.background
+	);
 
 	let amountSetToMax = $state(false);
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
@@ -151,6 +157,7 @@
 			isNullish(receiveAmount) ||
 			isNullish(fee) ||
 			swapAmountsLoading ||
+			foregroundQuotePending ||
 			(nonNullish(slippageValue) && Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE)
 	);
 

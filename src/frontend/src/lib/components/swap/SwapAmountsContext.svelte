@@ -53,7 +53,7 @@
 	let debounceTimer = $state<NodeJS.Timeout | undefined>();
 	let fetchGeneration = 0;
 	let requestSequence = 0;
-	let currentRequestId: number | undefined;
+	let currentRequest: { requestId: number; background: boolean } | undefined;
 	let destroyed = false;
 
 	const clearTimer = () => {
@@ -80,13 +80,26 @@
 		}
 	};
 
+	const invalidateRequest = (discardForegroundQuote = false) => {
+		// A cancelled foreground round leaves the retained offers priced for old inputs.
+		// Background work, unlike foreground work, may still have a usable accepted quote.
+		if (discardForegroundQuote && currentRequest?.background === false) {
+			store.reset();
+		}
+		fetchGeneration++;
+		currentRequest = undefined;
+		activity?.reset();
+		isSwapAmountsLoading = false;
+		clearDebounceTimer();
+	};
+
 	const loadSwapAmounts = async (isPeriodicUpdate = false) => {
 		if (destroyed || pauseAmountUpdates || isNullish($authIdentity)) {
 			return;
 		}
 
 		// Do not overlap refreshes for the same inputs or race the foreground debounce.
-		if (isPeriodicUpdate && (nonNullish(currentRequestId) || nonNullish(debounceTimer))) {
+		if (isPeriodicUpdate && (nonNullish(currentRequest) || nonNullish(debounceTimer))) {
 			return;
 		}
 
@@ -101,25 +114,21 @@
 			return;
 		}
 
-		if (
-			!isPeriodicUpdate &&
-			fetchGeneration === 1 &&
-			nonNullish($store) &&
-			$store.amountForSwap === parsedAmount
-		) {
-			return;
-		}
-
 		const currentGeneration = fetchGeneration;
-		const requestId = ++requestSequence;
-		currentRequestId = requestId;
+		// A foreground round already owns its identity while queued in the debounce.
+		const requestId = isPeriodicUpdate
+			? ++requestSequence
+			: (currentRequest?.requestId ?? ++requestSequence);
+		currentRequest = { requestId, background: isPeriodicUpdate };
 		const isCurrentRequest = () =>
 			!destroyed &&
 			!pauseAmountUpdates &&
 			nonNullish($authIdentity) &&
 			currentGeneration === fetchGeneration &&
-			currentRequestId === requestId;
-		activity?.start({ requestId, background: isPeriodicUpdate });
+			currentRequest?.requestId === requestId;
+		if (isPeriodicUpdate) {
+			activity?.start({ requestId, background: true });
+		}
 
 		isSwapAmountsLoading = true;
 
@@ -180,7 +189,7 @@
 		} finally {
 			if (isCurrentRequest()) {
 				activity?.complete({ requestId });
-				currentRequestId = undefined;
+				currentRequest = undefined;
 				isSwapAmountsLoading = false;
 			}
 		}
@@ -206,14 +215,30 @@
 		];
 
 		untrack(() => {
-			fetchGeneration++;
-			currentRequestId = undefined;
-			activity?.reset();
-			isSwapAmountsLoading = false;
-			clearDebounceTimer();
+			invalidateRequest(pauseAmountUpdates);
+			if (isNullish($authIdentity)) {
+				store.reset();
+				return;
+			}
 			if (pauseAmountUpdates) {
 				return;
 			}
+			if (isNullish(amount) || isNullish(sourceToken) || isNullish(destinationToken)) {
+				store.reset();
+				return;
+			}
+			if (isNullish(isSourceTokenIcrc2) && isIcToken(sourceToken)) {
+				store.reset();
+				return;
+			}
+			// A remounted wizard may reuse its accepted quote without replaying comparison.
+			if (fetchGeneration === 1 && nonNullish($store) && $store.amountForSwap === Number(amount)) {
+				return;
+			}
+			const requestId = ++requestSequence;
+			currentRequest = { requestId, background: false };
+			activity?.start({ requestId, background: false });
+			isSwapAmountsLoading = true;
 			debounceTimer = setTimeout(() => {
 				debounceTimer = undefined;
 				loadSwapAmounts(false);
@@ -223,12 +248,8 @@
 
 	onDestroy(() => {
 		destroyed = true;
-		fetchGeneration++;
-		currentRequestId = undefined;
-		activity?.reset();
-		isSwapAmountsLoading = false;
+		invalidateRequest(true);
 		clearTimer();
-		clearDebounceTimer();
 	});
 </script>
 
