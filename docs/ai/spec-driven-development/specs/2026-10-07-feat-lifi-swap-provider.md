@@ -1064,22 +1064,28 @@ otherwise no-ops silently). Precedent: commit `78d5addbd` (Velora's variant).
 
 #### External refs (`LIFI_EXTERNAL_REF_KEYS`, `lib/types/lifi.ts`)
 
-| Key                    | Set                     | Purpose                                              |
-| ---------------------- | ----------------------- | ---------------------------------------------------- |
-| `lifi_tx_hash`         | creation, required      | source tx hash / Solana signature; `/status` key     |
-| `lifi_tool`            | creation                | `step.tool`, passed as `bridge` to `/status`         |
-| `lifi_transaction_id`  | creation                | LI.FI's id, for support / explorer links             |
-| `lifi_nonce`           | creation, EVM, required | replaced/dropped detection (Velora Market)           |
-| `lifi_blockhash`       | creation, SOL, required | the transaction's recent blockhash; expiry detection |
-| `lifi_dest_tx_hash`    | learned                 | `receiving.txHash`                                   |
-| `lifi_received_symbol` | learned                 | `receiving.token.symbol` on every `DONE` / `PARTIAL` |
-| `lifi_received_amount` | learned                 | that token's amount, **formatted** (see below)       |
+| Key                    | Set                     | Purpose                                                |
+| ---------------------- | ----------------------- | ------------------------------------------------------ |
+| `lifi_tx_hash`         | creation, required      | source tx hash / Solana signature; `/status` key       |
+| `lifi_tool`            | creation                | `step.tool`, passed as `bridge` to `/status`           |
+| `lifi_transaction_id`  | creation                | LI.FI's id, for support / explorer links               |
+| `lifi_nonce`           | creation, EVM, required | replaced/dropped detection (Velora Market)             |
+| `lifi_blockhash`       | creation, SOL, required | the transaction's recent blockhash; expiry detection   |
+| `lifi_dest_tx_hash`    | learned                 | `receiving.txHash`                                     |
+| `lifi_substatus`       | learned                 | how a `DONE` ended: `COMPLETED`, `PARTIAL`, `REFUNDED` |
+| `lifi_received_symbol` | learned                 | `receiving.token.symbol` on every `DONE` / `PARTIAL`   |
+| `lifi_received_amount` | learned                 | that token's amount, **formatted** (see below)         |
 
 Plus the shared display keys (`amount`, `source_token_symbol`, `source_network_symbol`,
 `destination_token_symbol`, `destination_network_symbol`, `usd_source_value`), so
 `ActiveUserTransactionItem` renders the row without new layout. An EVM row uses at most
-13 of the 16 keys (`lifi_nonce`, no `lifi_blockhash`), a Solana row likewise 13
-(`lifi_blockhash`, no `lifi_nonce`), leaving three spare.
+14 of the 16 keys (`lifi_nonce`, no `lifi_blockhash`), a Solana row likewise 14
+(`lifi_blockhash`, no `lifi_nonce`), leaving two spare.
+
+`lifi_substatus` is written on every `DONE`, only when it is in the SDK's closed set
+(`isSubstatusDone`). It is what tells a partial payout apart for the balance reload (see
+[Loader and UI](#loader-and-ui)), independently of the received token's metadata, which is
+omitted when it fails its checks, and it records for support how a settled swap ended.
 
 Two things one might expect in the refs are deliberately not there:
 
@@ -1129,8 +1135,8 @@ Each tick, per pending LI.FI row:
      (`lib/utils/velora-active-tx.utils.ts`). It is **extracted** into a
      provider-agnostic EVM source-tx helper (receipt + nonce → outcome, with the
      two-observation counter keyed per row) that both pollers call. Velora's behaviour
-     and existing tests stay unchanged; the refactor lands in the same PR as the LI.FI
-     EVM poller.
+     and existing tests stay unchanged; the refactor landed on its own, ahead of the
+     LI.FI EVM poller (2b-1, see [Delivery plan](#delivery-plan)).
    - Solana — new, since nothing in the repo reads signature statuses or blockhash
      validity yet:
      1. `getSignatureStatuses([signature], { searchTransactionHistory: true })`. The
@@ -1152,10 +1158,24 @@ Each tick, per pending LI.FI row:
         status, or a still-valid blockhash, **deletes** the row's entry. A page reload
         empties the map, so the count restarts; that can only delay the verdict by one
         poll, never hasten it, which is why the observation is not persisted in a ref.
-2. **Then `getStatus({ txHash, fromChain, toChain, bridge })`**, with `fromChain` /
+   - **Same-chain** (`fromChain === toChain`): a confirmed source ends the row
+     `Succeeded`, as Velora Market's does, and `/status` is never asked. The swap runs
+     inside the source transaction, which `GenericSwapFacetV3` reverts unless the user
+     receives at least the on-chain minimum, so the receipt is the outcome. Waiting for
+     `/status` instead would leave a settled swap "in progress" whenever LI.FI does not
+     resolve its hash, and after the [unresolved-status](#unresolved-status) bound fail it,
+     with a `swap_error`, although the user holds the tokens. Same-chain rows therefore
+     record no destination hash or substatus; the source transaction is the swap's only
+     one.
+2. **Then, cross-chain, `getStatus({ txHash, fromChain, toChain, bridge })`**, with `fromChain` /
    `toChain` derived from the row's `source_token` / `dest_token` (see
    [External refs](#external-refs-lifi_external_ref_keys-libtypeslifits)) and `bridge` from
-   `lifi_tool`. Two answers are not status objects and are normalised first:
+   `lifi_tool`. LI.FI is asked only once the source is confirmed: before that the source
+   chain decides, and `/status` could only answer `NOT_FOUND`. The poller remembers a
+   confirmed source in memory, so after a reload the receipt is read once more. Each request
+   times out after `LIFI_STATUS_TIMEOUT_MS` (10 s): the loader awaits each provider's poller
+   in turn, so a stalled `/status` would stall every other provider's rows. Two answers are
+   not status objects and are normalised first:
    - A **`NOT_FOUND` can arrive as an HTTP 404** (LI.FI error code `1003`) rather than as a
      `200` with `status: 'NOT_FOUND'`; the docs say to handle both. The SDK throws an
      `HTTPError` for the 404, so the poller catches that specific error (status 404, or
@@ -1174,7 +1194,7 @@ Each tick, per pending LI.FI row:
 | `PENDING` (any substatus) | `Executing`                                                           |
 | `DONE` / `COMPLETED`      | `Succeeded`                                                           |
 | `DONE` / `PARTIAL`        | `Succeeded`; `lifi_received_symbol` / `lifi_received_amount` recorded |
-| `DONE` / `REFUNDED`       | `Failed` with the "refunded" error (`swap.error.lifi_refunded`)       |
+| `DONE` / `REFUNDED`       | `Failed` with the "refunded" error (`swap.error.swap_refunded`)       |
 | `FAILED`                  | `Failed` with `substatusMessage`, byte-truncated (see below)          |
 
 `PARTIAL` is a success because the user received full value, only in a different token
@@ -1195,26 +1215,32 @@ to say, so a `/status` that never resolves would leave the row non-terminal fore
 - `INVALID` means LI.FI cannot tie the hash to the given `bridge` / chains, which does not
   fix itself. On `INVALID` the poller immediately re-queries `/status` with `txHash`,
   `fromChain` and `toChain` only (no `bridge`), in case the stored `lifi_tool` is what
-  LI.FI rejects, and maps that answer instead.
+  LI.FI rejects, and maps that answer instead. It remembers the refusal per row, in
+  memory, and asks without `bridge` from then on, so that a row left unresolved costs one
+  request per poll rather than two against the rate limit.
 - The bound starts only **after the source transaction is confirmed** and is measured
-  on the **browser's clock only**. The first time a poll sees the row's source confirmed
-  and the latest `/status` answer (after the `INVALID` re-query) still `NOT_FOUND` /
-  `INVALID`, the poller starts accumulating **observed unresolved time** for that row in
-  `localStorage` (key `lifi-unresolved:<rowId>`, value `{ elapsedMs, lastSeenAt }`,
-  through the existing `get` / `set` / `del` in `lib/utils/storage.utils.ts`). Each
-  later poll that still sees the source confirmed and an unresolved answer adds
-  `clamp(Date.now() − lastSeenAt, 0, LIFI_STATUS_UNRESOLVED_MAX_STEP_MILLIS)` to
+  on the **page's monotonic clock** (`performance.now()`), which a change of the system
+  clock does not move. The first time a poll sees the row's source confirmed and the
+  latest `/status` answer (after the `INVALID` re-query) still `NOT_FOUND` / `INVALID`,
+  the poller starts accumulating **observed unresolved time** for that row: in memory as
+  `{ elapsedMs, lastSeenAt }`, and in `localStorage` as `{ elapsedMs }` (key
+  `lifi-unresolved:<rowId>`, through the existing `get` / `set` / `del` in
+  `lib/utils/storage.utils.ts`). Each later poll of the session that still sees the
+  source confirmed and an unresolved answer adds
+  `clamp(performance.now() − lastSeenAt, 0, LIFI_STATUS_UNRESOLVED_MAX_STEP_MILLIS)` to
   `elapsedMs` and updates `lastSeenAt`; the step cap is 2 min (twice the slowest
-  per-row poll interval). Any other answer, or a terminal status, deletes the entry.
+  per-row poll interval). The first poll after a reload resumes the stored `elapsedMs`
+  and adds nothing: a monotonic reading means nothing in another session. Any other
+  answer, or a terminal status, deletes the entry.
   When `elapsedMs ≥ LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS` (6 h) and the latest answer
   is still unresolved, the row ends `Failed` with `swap.error.lifi_status_unknown`
   ("LI.FI could not report the outcome of this swap. Check your destination wallet."),
   not a claim that the funds were lost.
-  - Accumulated, not `now − start`: a manual clock change or forward NTP correction can
-    add at most one capped step, and a backward jump adds nothing, so a clock jump
-    cannot hasten the irreversible verdict. Time the tab was closed or hidden is not
-    counted beyond one step, which only delays it.
-  - Browser clock against browser clock: never the row's `created_at_ns`, which is the
+  - Monotonic and accumulated, not `Date.now() − start`: a manual clock change or an
+    NTP correction, forward or back, adds nothing, so a clock jump cannot hasten the
+    irreversible verdict, not even by one step. Time the tab was hidden is not counted
+    beyond one step, and time it was closed not at all, which only delays it.
+  - The browser's own clock only: never the row's `created_at_ns`, which is the
     canister's clock, so clock skew does not move the window (the concern behind OISY
     Trade's tick counting, `lib/constants/oisy-trade.constants.ts`).
   - Persisted, so reloads do not restart the window. It is kept client-side rather than
@@ -1222,8 +1248,10 @@ to say, so a `/status` that never resolves would leave the row non-terminal fore
     the window is a per-browser observation, not a fact about the swap), so another
     device, a private window or cleared site data starts its own window. That can only
     **delay** the irreversible verdict, never hasten it.
-  - Storage is best-effort: reads and writes are wrapped in try/catch, and when storage
-    is unavailable the poller falls back to an in-memory timestamp for the session.
+  - Storage is best-effort: reads and writes are wrapped in try/catch. The window is kept
+    in memory for the session and read from there first; `localStorage` only resumes it
+    after a reload. Read storage-first, a write that fails (a full storage) would restart
+    every poll from the same stale window, and the bound would never be reached.
   - Not from row creation: a source that confirms late would otherwise be failed after
     only a couple of status calls.
   - 6 h is far past LI.FI's slowest bridge ETAs; the constant sits next to the throttle
@@ -1266,18 +1294,45 @@ A value that fails is **omitted** from the refs instead of failing creation. Wit
 `lifi_tool`, the poller calls `/status` without `bridge` from the start (the same query as
 the `INVALID` fallback).
 
-Learned refs are merged on every poll. Errors are caught per row, except the `/status`
+Learned refs are merged on every poll. A write that carries new refs without advancing the
+status sends the status the poll read, unchanged: the backend checks a transition only when
+a status is supplied, and replaces `external_refs` wholesale, so a refs-only write based on
+a stale read could strip the received token another tab recorded as it settled the row.
+With the status, that write is an illegal transition and the backend refuses it whole.
+Errors are caught per row, except the `/status`
 404 described above, which is an answer rather than a failure. Polls are throttled
 per row inside the poller to LI.FI's recommended cadence — every 10 s for the first
 minute after creation, every 30 s until 10 minutes, then every 60 s — on top of the
-loader's 5 s tick.
+loader's 5 s tick. A clock set back puts the last poll in the future, so the row is polled
+at once rather than once the clock catches up. The last-poll times, the confirmed-source
+flags and the refused tools are kept in memory. A row the poller settles is forgotten once
+its terminal write has landed, its stored window included: if it was the last pending
+LI.FI row, the loader stops calling the poller, and nothing would prune it. A terminal
+write that fails keeps the row's state, so the next poll repeats the verdict rather than
+reopening a 6 h window (`applyActiveUserTransactionPollUpdate` reports whether it wrote).
+Each poll also drops that state for every row no longer in the pending set the loader
+passes, for rows that settled in another tab or on another device. Only the stored windows
+of rows this tab keeps are removed with it: every window the poller reads it also writes,
+so those are all it has touched, while rows another tab opened since this one loaded, or
+another principal's on the same browser, are missing from this tab's pending set without
+being settled. A window whose row settled while no tab of the browser polled it is left
+behind, and never read again. That state is LI.FI's alone, unlike the replacement
+observations of the shared EVM source-tx helper, which a provider must not prune to its own
+rows.
 
 #### Loader and UI
 
 - `LoaderActiveUserTransactions.svelte`: a `tick` branch calling the LI.FI poller with
-  `$ethAddress` / `$solAddressMainnet` (the loader imports only `ethAddress` today; add
-  `solAddressMainnet` from `lib/derived/address.derived.ts`), and a terminal-status branch firing
-  `TRACK_COUNT_SWAP_SUCCESS` / `_ERROR` with `buildLifiSwapTrackingMetadata`.
+  `$ethAddress` (PR 3 adds `$solAddressMainnet` from `lib/derived/address.derived.ts` with
+  the Solana source check; until then a Solana-source row is skipped, and OISY opens none),
+  and a terminal-status branch firing `TRACK_COUNT_SWAP_SUCCESS` / `_ERROR` with
+  `buildLifiSwapTrackingMetadata`. That metadata carries no `error`, unlike the other
+  providers': for a `FAILED` transfer the row's error is LI.FI's own text, which never goes
+  to analytics (invariant 4 in `docs/ai/frontend/analytics.md`).
+- The tick creates one `confirmedNonceByChainId` and passes it to both the Velora and the
+  LI.FI pollers, so EVM rows on one chain cost one nonce read whatever their provider. They
+  run one after another, so LI.FI may reuse a nonce read before its own receipt read; an
+  earlier read can only be lower, which reads as still pending, never as replaced.
 - That terminal branch refreshes balances for **every** terminal LI.FI row, not only
   `Succeeded`: the modal closed at broadcast, so nothing else refreshes them when the
   route settles, and a failed, reverted or refunded swap still spent gas or returned
@@ -1287,22 +1342,30 @@ loader's 5 s tick.
     (`LoaderEthBalances.svelte` does not listen for it, as `native-balance.services.ts`
     notes), so it refreshes nothing on EVM.
   - An explicit EVM reload with `reloadEthereumBalance` (`eth/services/eth-balance.services.ts`)
-    for each affected EVM token: the source token and its network's native token (gas,
-    `nativeTokenOf`) on every terminal status, since a refund can also land there, and the
-    destination token when it is on an EVM network. `swap()` only reloads the source
+    for each affected EVM token: the source token and its chain's native token (gas) on
+    every terminal status, since a refund can also land there, and the
+    destination token when it is on an EVM network. After a partial payout (the row's
+    `lifi_substatus` is `PARTIAL`), the token received is not one the row identifies, so
+    every enabled fungible token of the destination chain is reloaded too. The loader
+    passes `enabledFungibleTokens`, and only what `reloadEthereumBalance` can load (native
+    EVM coins, ERC-20s, ERC-4626 vaults) is reloaded: it hands anything else to its ERC-20
+    loader, where an NFT collection fails and resets its balance. `swap()` only reloads the source
     token once the source transaction is mined, so without this an EVM destination payout
     or a later refund stays stale until the periodic poll. The row stores backend
     `TokenId`s, and only the forward mapping exists (`toBackendTokenId`,
     `lib/utils/token-id.utils.ts`), so the tokens are resolved by finding the enabled
-    token whose `toBackendTokenId` equals the row's `source_token` / `dest_token`; an
-    unresolved token (disabled since the swap) is skipped.
+    token whose `toBackendTokenId` equals the row's `source_token` / `dest_token`
+    (`findTokenByBackendTokenId`, compared through `tokenIdKey`, which keys ERC-4626
+    vaults too, since LI.FI quotes them as ERC-20s); an unresolved token (disabled since
+    the swap) is skipped. The gas token is the enabled `EvmNative` of the row's source
+    chain, found on its own, so it is still reloaded when the source token was disabled.
   - Redundant refreshes (dropped or expired source) only find nothing new.
 - `ActiveUserTransactionItem.svelte`: `isLifi` in the `isSwap` list and the
   `providerName` chain; when `lifi_received_symbol` is present, the received token and
   amount replace the destination token in the row.
 - **Failure reasons are stored, not displayed**, as for Velora and NEAR Intents: a
   `Failed` row shows the existing warning icon, and `tx.error` (refunded, outcome
-  unknown, LI.FI's `substatusMessage`) is kept on the row for support and analytics. No
+  unknown, LI.FI's `substatusMessage`) is kept on the row for support. No
   toast, no new row layout, no explorer link. Surfacing errors for all swap providers
   is a separate, cross-provider change.
 - Wizard tracks `TRACK_COUNT_SWAP_SUBMITTED` (it is an active-transaction swap).
@@ -1320,10 +1383,12 @@ loader's 5 s tick.
   (`included: false`): added in, the total would match neither what is deducted nor what
   is extra.
 - i18n keys in `en.json` + the other locales + `i18n.d.ts`: at least
-  `swap.text.lifi_route_via`, `swap.error.lifi_refunded`, `swap.error.lifi_status_unknown`,
-  `swap.error.lifi_fee_changed`,
-  `swap.text.lifi_received_other_token`; optionally
-  `help.text.explorers_lifi_description` for a help-page explorer entry.
+  `swap.text.lifi_route_via`, `swap.error.lifi_status_unknown`,
+  `swap.error.lifi_fee_changed`; optionally
+  `help.text.explorers_lifi_description` for a help-page explorer entry. A refund reuses
+  `swap.error.swap_refunded`, the copy Velora and NEAR Intents already write, and a route
+  that paid out in another token needs no copy of its own: the row shows the received
+  amount and symbol in place of the destination token.
 
 ## Delivery plan
 
@@ -1337,7 +1402,13 @@ loader's 5 s tick.
 | 4    | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 3, production key + rate-limit scope confirmed |
 
 PR 2 is split up front so each PR stays reviewable, and 2a again into the quote client
-(2a-1) and its registration in the swap fan-out (2a-2). In 2a the flag is `false` everywhere,
+(2a-1) and its registration in the swap fan-out (2a-2). 2b is split five ways: the EVM
+source-tx helper extraction (2b-1) and the byte-safe truncation util (2b-2), both
+refactors on `main`; the tracking — LI.FI's AUT utils, poller, loader branches and row
+item (2b-3); the calldata binding (2b-4); and execution, the wizard dispatch, the flag to
+`(LOCAL || STAGING) && !TEST` and `PRODUCT.md` (2b-5). Tracking lands before execution:
+with the flag off nothing opens a LI.FI row, so the poller has nothing to do until 2b-5,
+and rows are tracked from the first swap. In 2a the flag is `false` everywhere,
 local included: 2a registers quotes but the wizard has no LI.FI dispatch yet, so a
 selected offer would hit `SwapEthWizard`'s unknown-provider branch. 2a is exercised by
 unit tests that switch the flag on (the `vi.doMock` pattern of `near-intents.env`), and
@@ -1455,17 +1526,21 @@ everywhere.
     panel labelled "LI.FI", and it reaches `Succeeded` / `Failed` in the background,
     including after a page reload. Every terminal LI.FI row triggers one wallet
     refresh and an explicit reload of its EVM source, gas and (EVM) destination
-    balances.
+    balances; after a partial payout, of every enabled fungible token of the destination
+    chain.
 13. `DONE/PARTIAL` ends `Succeeded` and the row shows the token actually received, with
     its amount correctly formatted; `DONE/REFUNDED` ends `Failed` with the refunded copy.
 14. A reverted / dropped (EVM) or reverted / expired (Solana) source transaction ends
-    `Failed`; a `NOT_FOUND` / `INVALID` status alone never terminates a row before the
+    `Failed`, and a confirmed one ends a same-chain row `Succeeded` without asking
+    `/status`; a `NOT_FOUND` / `INVALID` status alone never terminates a row before the
     source is confirmed and the 6 h unresolved-status bound has passed, after which the
     row ends `Failed` with the "outcome unknown" copy. That bound starts after source
-    confirmation, accumulates observed time in capped per-poll steps (persisted in
-    `localStorage`, so a clock jump cannot hasten it), and never compares against
+    confirmation, accumulates observed time on the page's monotonic clock in capped
+    per-poll steps (persisted in `localStorage` across reloads; a clock jump cannot
+    hasten it), and never compares against
     `created_at_ns`. A `/status` HTTP 404 (code 1003) counts as `NOT_FOUND`, never as a
-    swallowed error. A Solana row is marked expired
+    swallowed error. A terminal write that fails leaves the row's window in place, and
+    the next poll repeats the verdict. A Solana row is marked expired
     only after two consecutive polls each find no signature status (searching
     transaction history) with the stored blockhash no longer valid.
 15. `swap_submitted` fires from the wizard; `swap_success` / `swap_error` fire once from
@@ -1535,7 +1610,7 @@ Recorded so a future reader can tell "excluded on purpose" from "forgotten".
   read at quote selection rather than a flat two.
 - **The row's chain ids are not refs.** They are derived from `source_token` /
   `dest_token`, and the Solana expiry observation lives in memory like Velora's
-  replacement counter, so both row kinds stay at 13 of the 16 refs.
+  replacement counter, so both row kinds stay at 14 of the 16 refs.
 - **`@lifi/sdk` (core only) is approved** as a new dependency.
 - **PR 2 is split into 2a / 2b** up front, and 2a into 2a-1 (quote client) / 2a-2
   (registration).

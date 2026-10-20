@@ -5,6 +5,7 @@ import type {
 	ActiveUserTransactionRef,
 	ChainFusionData,
 	CyclesMintData,
+	LifiData,
 	LiquidiumData,
 	NearIntentsData,
 	OisyTradeData,
@@ -19,6 +20,7 @@ import type {
 } from '$lib/types/api';
 import { CHAIN_FUSION_EXTERNAL_REF_KEYS } from '$lib/types/chain-fusion-swap';
 import { CYCLES_MINT_EXTERNAL_REF_KEYS } from '$lib/types/cycles-mint-active-tx';
+import { LIFI_EXTERNAL_REF_KEYS } from '$lib/types/lifi';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import { NEAR_INTENTS_EXTERNAL_REF_KEYS } from '$lib/types/near-intents';
 import { OISY_TRADE_EXTERNAL_REF_KEYS } from '$lib/types/oisy-trade-swap';
@@ -88,6 +90,36 @@ export const mockVeloraActiveUserTransaction: ActiveUserTransaction = {
 		{ key: VELORA_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL, value: 'Ethereum' },
 		{ key: VELORA_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL, value: 'USDT' },
 		{ key: VELORA_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL, value: 'Ethereum' }
+	],
+	created_at_ns: ZERO,
+	updated_at_ns: ZERO,
+	error: []
+};
+
+export const mockLifiTxHash = `0x${'ab'.repeat(32)}`;
+
+// Base USDC → Solana USDC: an EVM → Solana route through Across.
+export const mockLifiData: LifiData = {
+	source_token: { Erc20: ['0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', 8453n] },
+	dest_token: { SplMainnet: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
+	amount: 50_000_000n
+};
+
+export const mockLifiActiveUserTransaction: ActiveUserTransaction = {
+	id: '77777777-7777-4777-8777-777777777777',
+	status: { Pending: null },
+	data: { Lifi: mockLifiData },
+	progress_step: [],
+	external_refs: [
+		{ key: LIFI_EXTERNAL_REF_KEYS.TX_HASH, value: mockLifiTxHash },
+		{ key: LIFI_EXTERNAL_REF_KEYS.TX_NONCE, value: '7' },
+		{ key: LIFI_EXTERNAL_REF_KEYS.TOOL, value: 'across' },
+		{ key: LIFI_EXTERNAL_REF_KEYS.AMOUNT, value: '50' },
+		{ key: LIFI_EXTERNAL_REF_KEYS.USD_SOURCE_VALUE, value: '50.01' },
+		{ key: LIFI_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL, value: 'USDC' },
+		{ key: LIFI_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL, value: 'Base' },
+		{ key: LIFI_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL, value: 'USDC' },
+		{ key: LIFI_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL, value: 'Solana' }
 	],
 	created_at_ns: ZERO,
 	updated_at_ns: ZERO,
