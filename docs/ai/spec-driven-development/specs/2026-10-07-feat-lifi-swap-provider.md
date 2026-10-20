@@ -628,8 +628,12 @@ every DEX's payload client-side is not practical, so the binding has two layers:
   as `msg.sender`, so the only user funds they could reach are the user's allowances to
   the Diamond. Each entry's `callTo` and `approveTo` must differ from the Diamond and
   from every asset of the route (the source and destination tokens, and every
-  `sendingAssetId` / `receivingAssetId`), and must not be any ERC-20 the user holds on
-  that network (no `transferFrom(user, …)` through the Diamond).
+  `sendingAssetId` / `receivingAssetId`), and must not be any ERC-20 of the user's on
+  that network with an allowance to the Diamond (no `transferFrom(user, …)` through the
+  Diamond). Those allowances are read before signing, one per token the user holds there;
+  a read that fails counts the token as approved. A token without an allowance cannot be
+  spent through the Diamond, and some are DEX pools a route may call (a Uniswap V2 pair,
+  a Curve or Balancer pool token), so it is not refused.
 - **A leftover allowance cannot be pulled outside a bound call.** `approve()` keeps its
   existing "at least" semantics (see [EVM execution](#evm-execution)), so the Diamond may
   hold an allowance larger than `fromAmount`, or one for a different token left by an
@@ -727,7 +731,8 @@ elsewhere, lower `minAmount` to what is left and raise the multiplier to keep th
 product above `toAmountMin`. Every check would pass, no relayer would fill the deposit,
 and only what is left would be refunded. With LI.FI's fee forwarding alone before it, the
 bridge sends `fromAmount` less the bound fee, and a wrong multiplier can at worst leave
-the deposit unfilled until its fill deadline and refunded to the user. NEAR Intents is not
+the deposit unfilled until its fill deadline and refunded to the user (see below for how
+long that can be). NEAR Intents is not
 exposed: LI.FI's backend signs `minAmountOut` together with `minAmount`, so a payload
 paying at least `toAmountMin` carries the `minAmount` LI.FI priced for it, and the swaps
 before the bridge must produce it. So an Across route whose `SwapData[]` holds anything
@@ -739,9 +744,20 @@ at quote time with the route-tools check (a `swap` step before an `across` `cros
 and decides whether to re-request the quote once without `across`, so that NEAR Intents
 can serve the pair.
 
+**Across's fill is open, and its refund comes soon.** `AcrossV4Data` also sets who may fill
+the deposit and until when. A forged response could name an exclusive relayer it controls,
+which never fills, and the latest fill deadline the SpokePool accepts: the user's funds
+would wait that long for their refund. So exclusivity must be off (no `exclusiveRelayer`,
+or an `exclusivityParameter` of zero, either of which leaves the fill to any relayer), and
+the `fillDeadline` at most `LIFI_ACROSS_MAX_FILL_DEADLINE_SECONDS` (3 h) after the time of
+signing. Every live LI.FI Across quote sets no exclusivity and a deadline 2.5 h ahead,
+while the SpokePools accept up to 6 h (`fillDeadlineBuffer`, read on Arbitrum, Base and
+Robinhood Chain, 2026-10-20); the margin covers the quote's age and a client clock off by
+minutes. `quoteTimestamp` needs no check: the SpokePool refuses one more than an hour old.
+
 What remains for a forged route is an Across deposit that no relayer fills and that is
-refunded to the user; see [Risks](#risks). It can no longer redirect funds to someone else,
-or pay the user less than displayed.
+refunded to the user within 3 h; see [Risks](#risks). It can no longer redirect funds to
+someone else, or pay the user less than displayed.
 
 This runs on the execution-time quote only. A display quote is never signed, and the
 execution quote is the one whose bytes are broadcast.
@@ -1542,8 +1558,8 @@ everywhere.
   by binding the calldata (EVM) or the simulated effects (Solana) to the request. One
   residual risk remains: Across's output multiplier is unsigned and depends on a price,
   so a forged Across route (which needs a compromised `li.quest` response over TLS) can
-  set one no relayer fills. The deposit then waits out its fill deadline and is refunded
-  to the user, less LI.FI's fee. Solana → EVM is out of scope for v1 because its
+  set one no relayer fills. The deposit then waits out its fill deadline, at most 3 h
+  ahead, and is refunded to the user, less LI.FI's fee. Solana → EVM is out of scope for v1 because its
   recipient cannot be verified yet.
 - **Fewer Across routes** — Across behind a DEX swap, or paying out a wrapped native
   token such as WETH, is refused (see
@@ -1621,9 +1637,10 @@ everywhere.
    destination token (cross-chain, as the facet's own data names it) and a minimum
    output at least the displayed `toAmountMin` (cross-chain, as the facet computes it);
    and unless every swap call it makes through the Diamond is on the Diamond's whitelist
-   and targets neither the Diamond, an asset of the route nor a token of the user, its
-   fee forwarding forwards the source token and at most LI.FI's 25 bps, and the only
-   swap before an Across bridge is that fee forwarding. A route with a destination call
+   and targets neither the Diamond, an asset of the route nor a token the user approved
+   to the Diamond, its fee forwarding forwards the source token and at most LI.FI's
+   25 bps, and the only swap before an Across bridge is that fee forwarding, its fill open
+   to any relayer and its deadline at most 3 h ahead. A route with a destination call
    is never signed. Calldata that does not decode, or a whitelist that cannot be read,
    aborts the swap.
 9. A Solana swap is never signed unless a simulation of its exact bytes, with the
