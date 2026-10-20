@@ -808,6 +808,120 @@ describe('CyclesTopUpModal', () => {
 			);
 		});
 
+		describe('while a top-up is in flight', () => {
+			const pendingTopUp = (): ((result: CyclesTopUpResult) => void) => {
+				let answer: (result: CyclesTopUpResult) => void = () => undefined;
+
+				topUpSpy.mockImplementationOnce(
+					() =>
+						new Promise<CyclesTopUpResult>((resolve) => {
+							answer = resolve;
+						})
+				);
+
+				return (result) => answer(result);
+			};
+
+			// Leaving the page closes the modal, and the call carries on.
+			const leaveDuringTopUp = async () => {
+				const answerFirst = pendingTopUp();
+
+				const first = await toReview();
+
+				await topUp(first);
+
+				await waitFor(() => {
+					expect(topUpSpy).toHaveBeenCalledOnce();
+				});
+
+				first.unmount();
+
+				return answerFirst;
+			};
+
+			const stored = () => get(unansweredCyclesTopUps)[mockPrincipalText];
+
+			it('opens a later modal on it, and a late unknown answer does not bring it back once resent', async () => {
+				const answerFirst = await leaveDuringTopUp();
+
+				const second = renderModal();
+
+				await backOnReview(second);
+
+				expect(second.container).toHaveTextContent(
+					replacePlaceholders(en.cycles_top_up.text.unknown, { $token: 'TCYCLES' })
+				);
+
+				await topUp(second);
+
+				await waitFor(() => {
+					expect(topUpSpy).toHaveBeenCalledTimes(2);
+				});
+
+				expect(topUpSpy).toHaveBeenLastCalledWith(
+					expect.objectContaining({ createdAt: 1_000_000_000n })
+				);
+
+				await waitFor(() => {
+					expect(stored()).toBeUndefined();
+				});
+
+				answerFirst({ status: 'unknown' });
+
+				// Let the first answer be handled before looking.
+				await new Promise((resolve) => setTimeout(resolve, 0));
+
+				expect(stored()).toBeUndefined();
+			});
+
+			it('keeps a newer top-up when the first answers late', async () => {
+				const answerFirst = await leaveDuringTopUp();
+
+				vi.setSystemTime(new Date(2_000));
+
+				topUpSpy.mockResolvedValueOnce({ status: 'unknown' });
+
+				const second = renderModal();
+
+				await backOnReview(second);
+
+				await fireEvent.click(second.getByTestId(CYCLES_TOP_UP_REVIEW_BACK_BUTTON));
+
+				await waitFor(() => {
+					expect(second.getByTestId(CYCLES_TOP_UP_AMOUNT)).toBeInTheDocument();
+				});
+
+				const input = second.container.querySelector<HTMLInputElement>(
+					`input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`
+				);
+
+				assertNonNullish(input);
+
+				await fireEvent.input(input, { target: { value: '2' } });
+
+				await waitFor(() => {
+					expect(second.getByTestId(CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON)).toBeEnabled();
+				});
+
+				await fireEvent.click(second.getByTestId(CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON));
+
+				await backOnReview(second);
+
+				await topUp(second);
+
+				await waitFor(() => {
+					expect(stored()?.createdAt).toBe(2_000_000_000n);
+				});
+
+				answerFirst({ status: 'topped_up', blockIndex: 7n });
+
+				// Let the first answer be handled before looking.
+				await new Promise((resolve) => setTimeout(resolve, 0));
+
+				expect(stored()?.createdAt).toBe(2_000_000_000n);
+			});
+		});
+
 		describe('when another identity signs in', () => {
 			const switchIdentity = async () => {
 				const identity = writable(mockIdentity);

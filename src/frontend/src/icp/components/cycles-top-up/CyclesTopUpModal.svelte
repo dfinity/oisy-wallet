@@ -198,6 +198,11 @@
 				? unanswered
 				: { canisterId: principal.toText(), amount, createdAt: nowInBigIntNanoSeconds() };
 
+		// Stored before it is sent, so a modal opened while it is in flight, after this one was
+		// closed by leaving the page, starts on its Review and resends it rather than sending a
+		// second withdrawal.
+		unansweredCyclesTopUps.update((all) => ({ ...all, [sender]: request }));
+
 		const analytics = { step: 'top_up' as const, tokenSymbol: token.symbol };
 
 		progressStep = ProgressStepsCyclesTopUp.INITIALIZATION;
@@ -223,9 +228,17 @@
 				? { status: 'unknown' }
 				: answer;
 
-		if (result.status === 'topped_up') {
-			unansweredCyclesTopUps.update((all) => ({ ...all, [sender]: undefined }));
+		// Only a top-up without an answer may be resent as it was. After a refund, the same
+		// request would be answered as a duplicate of the refunded one. The stored request is
+		// updated only while it is still this one: a resend from a later modal, or a newer
+		// top-up, may have settled or replaced it while this answer was on its way.
+		unansweredCyclesTopUps.update((all) =>
+			all[sender]?.createdAt === request.createdAt
+				? { ...all, [sender]: result.status === 'unknown' ? request : undefined }
+				: all
+		);
 
+		if (result.status === 'topped_up') {
 			trackCyclesTopUp({ ...analytics, resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS });
 
 			progressStep = ProgressStepsCyclesTopUp.DONE;
@@ -253,13 +266,6 @@
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 			errorCode: result.status
 		});
-
-		// Only a top-up without an answer may be resent as it was. After a refund, the same
-		// request would be answered as a duplicate of the refunded one.
-		unansweredCyclesTopUps.update((all) => ({
-			...all,
-			[sender]: result.status === 'unknown' ? request : undefined
-		}));
 
 		// Review shows the warning for a top-up without an answer.
 		if (result.status === 'refused' || result.status === 'refunded') {
