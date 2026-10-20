@@ -3,7 +3,7 @@ import CyclesTopUpModal from '$icp/components/cycles-top-up/CyclesTopUpModal.sve
 import * as cyclesTopUpServices from '$icp/services/cycles-top-up.services';
 import { unansweredCyclesTopUps } from '$icp/stores/cycles-top-up.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-import type { CanisterExistence } from '$icp/types/cycles-top-up';
+import type { CanisterExistence, CyclesTopUpResult } from '$icp/types/cycles-top-up';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import {
 	CYCLES_TOP_UP_AMOUNT,
@@ -20,6 +20,7 @@ import * as authDerived from '$lib/derived/auth.derived';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import * as cyclesTopUpAnalytics from '$lib/services/cycles-top-up-analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
+import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -30,7 +31,7 @@ import { mockIdentity, mockPrincipal2, mockPrincipalText } from '$tests/mocks/id
 import { assertNonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { readable, writable } from 'svelte/store';
+import { get, readable, writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 describe('CyclesTopUpModal', () => {
@@ -828,6 +829,46 @@ describe('CyclesTopUpModal', () => {
 				await waitFor(() => {
 					expect(result.queryByTestId(CYCLES_TOP_UP_REVIEW)).toBeNull();
 				});
+			});
+
+			it('leaves a modal opened since alone when the first top-up answers late', async () => {
+				let answer: (result: CyclesTopUpResult) => void = () => undefined;
+
+				topUpSpy.mockImplementationOnce(
+					() =>
+						new Promise<CyclesTopUpResult>((resolve) => {
+							answer = resolve;
+						})
+				);
+
+				const identity = writable(mockIdentity);
+
+				vi.spyOn(authDerived, 'authIdentity', 'get').mockReturnValue(identity);
+
+				const result = await toReview();
+
+				await topUp(result);
+
+				await waitFor(() => {
+					expect(topUpSpy).toHaveBeenCalledOnce();
+				});
+
+				identity.set({ ...mockIdentity, getPrincipal: () => mockPrincipal2 });
+
+				// The identity change closes this modal, and the page removes it.
+				result.unmount();
+
+				const other = Symbol();
+
+				modalStore.openCyclesTopUp(other);
+
+				answer({ status: 'topped_up', blockIndex: 7n });
+
+				// Past the 750 ms a topped-up modal waits before closing.
+				await new Promise((resolve) => setTimeout(resolve, 900));
+
+				expect(get(modalStore)?.id).toBe(other);
+				expect(toastsShowSpy).toHaveBeenCalledOnce();
 			});
 
 			it('sends nothing for it, even before the modal closes', async () => {

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import CyclesTopUpAmount from '$icp/components/cycles-top-up/CyclesTopUpAmount.svelte';
 	import CyclesTopUpCanister from '$icp/components/cycles-top-up/CyclesTopUpCanister.svelte';
@@ -92,6 +92,17 @@
 	]);
 
 	onMount(() => trackCyclesTopUp({ step: 'open' }));
+
+	// A top-up can answer after the modal is gone, closed when another identity signed in. The
+	// outcome is still recorded for its sender and shown in a toast, but the modal's own steps
+	// are skipped, and so is its closing, which would close any modal opened since.
+	let destroyed = false;
+	let closeTimer: ReturnType<typeof setTimeout> | undefined;
+
+	onDestroy(() => {
+		destroyed = true;
+		clearTimeout(closeTimer);
+	});
 
 	const close = () =>
 		closeModal(() => {
@@ -231,7 +242,9 @@
 
 			waitAndTriggerWallet();
 
-			setTimeout(close, 750);
+			if (!destroyed) {
+				closeTimer = setTimeout(close, 750);
+			}
 			return;
 		}
 
@@ -257,7 +270,9 @@
 			waitAndTriggerWallet();
 		}
 
-		modal?.back();
+		if (!destroyed) {
+			modal?.back();
+		}
 	};
 </script>
 
