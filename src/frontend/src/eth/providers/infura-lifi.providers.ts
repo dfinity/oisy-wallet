@@ -1,5 +1,6 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
+import { ERC20_ABI } from '$eth/constants/erc20.constants';
 import { LIFI_WHITELIST_MANAGER_ABI } from '$eth/constants/lifi.constants';
 import { ethersProvider } from '$eth/providers/ethers.providers';
 import type { EthAddress } from '$eth/types/address';
@@ -34,6 +35,17 @@ export class InfuraLifiProvider {
 			contract,
 			selector
 		);
+
+	// What `owner` allows `spender` to take of the ERC-20 at `token`, read by its address alone.
+	allowance = ({
+		token,
+		owner,
+		spender
+	}: {
+		token: string;
+		owner: string;
+		spender: EthAddress;
+	}): Promise<bigint> => new Contract(token, ERC20_ABI, this.provider).allowance(owner, spender);
 }
 
 const providers: Record<NetworkId, InfuraLifiProvider> = [

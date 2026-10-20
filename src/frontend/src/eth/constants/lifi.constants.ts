@@ -73,6 +73,12 @@ export const LIFI_FEE_BPS = 25n;
 // `AcrossFacetV4.MULTIPLIER_BASE`: the facet pays `minAmount * outputAmountMultiplier` over this.
 export const LIFI_ACROSS_MULTIPLIER_BASE = 10n ** 18n;
 
+// How far ahead an Across deposit's fill deadline may be, after which an unfilled deposit is
+// refunded: LI.FI sets it 2.5 h ahead in every live quote, while the SpokePools accept up to 6 h
+// (`fillDeadlineBuffer`, read on Arbitrum, Base and Robinhood Chain, 2026-10-20). The margin covers
+// the quote's age and a client clock off by minutes.
+export const LIFI_ACROSS_MAX_FILL_DEADLINE_SECONDS = 3n * 60n * 60n;
+
 // The wrapped native token of Across's SpokePool on each destination chain: what its
 // `wrappedNativeToken()` answered on 2026-10-20, at the SpokePools of LI.FI's `config/across.json`
 // (the same tokens as its `config/networks.json`). The SpokePool unwraps it for a wallet

@@ -1,4 +1,5 @@
 import {
+	LIFI_ACROSS_MAX_FILL_DEADLINE_SECONDS,
 	LIFI_ACROSS_MULTIPLIER_BASE,
 	LIFI_ACROSS_V4_ABI,
 	LIFI_ACROSS_WRAPPED_NATIVE,
@@ -12,7 +13,8 @@ import {
 } from '$eth/constants/lifi.constants';
 import type { EthAddress } from '$eth/types/address';
 import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
-import { LifiQuoteRejectedError } from '$lib/types/errors';
+import type { LifiQuoteRejectedError } from '$lib/types/errors';
+import { isSameHex, lifiRejectedError } from '$lib/utils/lifi-swap.utils';
 import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { ChainId, type LiFiStep, type QuoteRequestFromAmount } from '@lifi/sdk';
@@ -57,10 +59,7 @@ const genericSwapFacet = new Interface(LIFI_GENERIC_SWAP_ABI);
 const feeForwarder = new Interface(LIFI_FEE_FORWARDER_ABI);
 
 const rejected = (reason: string): LifiQuoteRejectedError =>
-	new LifiQuoteRejectedError(`LI.FI calldata rejected: ${reason}`);
-
-const isSameHex = ({ actual, expected }: { actual: string | undefined; expected: string }) =>
-	nonNullish(actual) && actual.toLowerCase() === expected.toLowerCase();
+	lifiRejectedError({ subject: 'calldata', reason });
 
 const toBridgeData = (value: Result): LifiBridgeData => {
 	const struct = value.toObject();
@@ -157,7 +156,9 @@ const forwardedFee = ({
  *
  * Each entry's call runs with the Diamond as `msg.sender`, so the only user funds it could reach are
  * the user's allowances to the Diamond: no call or approval may target the Diamond, an asset of the
- * route, or a token the user holds. What the calls do is left to LI.FI's on-chain whitelist, which
+ * route, or a token of the user with an allowance to the Diamond (`approvedTokenAddresses`). A token
+ * without one cannot be spent that way, and some are DEX pools a route may call, so it is not
+ * forbidden. What the calls do is left to LI.FI's on-chain whitelist, which
  * the returned calls are confirmed against before signing. An `approveTo` other than `callTo` is
  * looked up under `APPROVE_TO_ONLY_SELECTOR`, as `SwapperV2` does, except for a native sending
  * asset, which is not approved.
@@ -171,7 +172,7 @@ const bindSwapSteps = ({
 	amount,
 	diamond,
 	routeAssets,
-	userTokenAddresses,
+	approvedTokenAddresses,
 	dexSwaps
 }: {
 	steps: LifiSwapStep[];
@@ -179,7 +180,7 @@ const bindSwapSteps = ({
 	amount: bigint;
 	diamond: EthAddress;
 	routeAssets: string[];
-	userTokenAddresses: string[];
+	approvedTokenAddresses: string[];
 	dexSwaps: boolean;
 }): LifiWhitelistedCall[] => {
 	const [deposit, ...later] = steps;
@@ -205,7 +206,7 @@ const bindSwapSteps = ({
 				sendingAssetId,
 				receivingAssetId
 			]),
-			...userTokenAddresses
+			...approvedTokenAddresses
 		].map((address) => address.toLowerCase())
 	);
 
@@ -223,7 +224,9 @@ const bindSwapSteps = ({
 			forbiddenTargets.has(callTo.toLowerCase()) ||
 			forbiddenTargets.has(approveTo.toLowerCase())
 		) {
-			throw rejected('a swap targets the Diamond, an asset of the route or a token of the user');
+			throw rejected(
+				'a swap targets the Diamond, an asset of the route or a token the user approved to it'
+			);
 		}
 
 		if (callData.length < 10) {
@@ -293,6 +296,11 @@ interface LifiBridgeTerms {
 	sendingAsset?: string;
 	receivingAsset: string;
 	minimumOutput: bigint;
+	// Where the bridge's data sets them: the time its deposit may still be filled until, in seconds,
+	// after which an unfilled deposit is refunded, and whether one relayer alone may fill it for a
+	// while. A response may otherwise choose how long the user's funds wait.
+	fillDeadline?: bigint;
+	exclusiveFill?: boolean;
 }
 
 interface LifiBridge {
@@ -324,7 +332,7 @@ const bridges: Record<string, LifiBridge> = {
 		// `minAmount` to what is left and raise the multiplier to keep the product above the displayed
 		// minimum: no relayer would fill it, and only what is left would be refunded. Behind LI.FI's fee
 		// forwarding alone, the bridge sends the deposit less the bound fee, and a wrong multiplier can
-		// at worst leave it unfilled and refunded to the user.
+		// at worst leave it unfilled and refunded to the user once its fill deadline passes.
 		dexSwaps: false,
 		terms: ({ facetData, bridgeData, withSourceSwaps }) => {
 			const {
@@ -333,7 +341,10 @@ const bridges: Record<string, LifiBridge> = {
 				sendingAssetId,
 				receivingAssetId,
 				outputAmount,
-				outputAmountMultiplier
+				outputAmountMultiplier,
+				exclusiveRelayer,
+				fillDeadline,
+				exclusivityParameter
 			} = facetData.toObject();
 
 			return {
@@ -348,7 +359,11 @@ const bridges: Record<string, LifiBridge> = {
 				// the multiplier, and `SwapperV2` reverts unless they produce at least `minAmount`.
 				minimumOutput: withSourceSwaps
 					? (bridgeData.minAmount * outputAmountMultiplier) / LIFI_ACROSS_MULTIPLIER_BASE
-					: outputAmount
+					: outputAmount,
+				fillDeadline: BigInt(fillDeadline),
+				// The SpokePool reserves the fill to `exclusiveRelayer` only when it names one and the
+				// exclusivity parameter is non-zero.
+				exclusiveFill: BigInt(exclusiveRelayer) !== ZERO && BigInt(exclusivityParameter) !== ZERO
 			};
 		},
 		// On an EVM chain, the SpokePool unwraps its wrapped native for a wallet recipient whatever was
@@ -409,7 +424,8 @@ const bridges: Record<string, LifiBridge> = {
  * as input, and the user as receiver and refund address both in `bridgeData` and in the bridge's
  * own data (a Solana destination's receiver as its 32-byte key, behind LI.FI's non-EVM sentinel).
  * The bridge's own data must also send the bridged token and pay out the destination token, at
- * least `displayedToAmountMin` of it.
+ * least `displayedToAmountMin` of it, and where it sets a fill deadline and exclusivity, leave the
+ * fill to any relayer and the refund of an unfilled deposit no later than LI.FI sets it.
  *
  * On every route, LI.FI's fee forwarding may forward no more than LI.FI's fee. Before Across, it is
  * the only swap allowed.
@@ -421,13 +437,16 @@ export const assertLifiCalldata = ({
 	request,
 	diamond,
 	displayedToAmountMin,
-	userTokenAddresses
+	approvedTokenAddresses,
+	nowSeconds
 }: {
 	quote: LiFiStep;
 	request: QuoteRequestFromAmount;
 	diamond: EthAddress;
 	displayedToAmountMin: bigint;
-	userTokenAddresses: string[];
+	approvedTokenAddresses: string[];
+	// The current time, which a bridge's fill deadline is measured from.
+	nowSeconds: bigint;
 }): LifiWhitelistedCall[] => {
 	const data = quote.transactionRequest?.data;
 	const { fromChain, toChain, fromToken, toToken, fromAddress, toAddress, fromAmount } = request;
@@ -478,7 +497,7 @@ export const assertLifiCalldata = ({
 			amount,
 			diamond,
 			routeAssets: [fromToken, toToken],
-			userTokenAddresses,
+			approvedTokenAddresses,
 			dexSwaps: true
 		});
 	}
@@ -577,6 +596,19 @@ export const assertLifiCalldata = ({
 		throw rejected("the bridge's minimum output is below the one displayed");
 	}
 
+	// A relayer named by the response could hold the deposit unfilled, and a far deadline postpone
+	// its refund: the user's funds would wait as long as the response chose.
+	if (terms.exclusiveFill === true) {
+		throw rejected("the bridge's own data reserves the fill to one relayer");
+	}
+
+	if (
+		nonNullish(terms.fillDeadline) &&
+		terms.fillDeadline > nowSeconds + LIFI_ACROSS_MAX_FILL_DEADLINE_SECONDS
+	) {
+		throw rejected("the bridge's fill deadline is further away than LI.FI sets it");
+	}
+
 	return withSourceSwaps
 		? bindSwapSteps({
 				steps,
@@ -584,7 +616,7 @@ export const assertLifiCalldata = ({
 				amount,
 				diamond,
 				routeAssets: [fromToken, bridgeData.sendingAssetId],
-				userTokenAddresses,
+				approvedTokenAddresses,
 				dexSwaps: bridge.dexSwaps
 			})
 		: [];

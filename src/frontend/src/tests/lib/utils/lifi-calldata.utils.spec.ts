@@ -45,19 +45,23 @@ describe('lifi-calldata.utils', () => {
 
 	const padded = (address: string): string => zeroPadValue(address.toLowerCase(), 32);
 
+	// When the Across fixture was quoted: its `quoteTimestamp`. Its fill deadline is 9,171 s later.
+	const nowSeconds = 1_792_412_903n;
+
 	const assertFixture = ({
 		fixture: { request, toAmountMin, quote },
-		userTokenAddresses = []
+		approvedTokenAddresses = []
 	}: {
 		fixture: LifiCalldataFixture;
-		userTokenAddresses?: string[];
+		approvedTokenAddresses?: string[];
 	}) =>
 		assertLifiCalldata({
 			quote,
 			request,
 			diamond,
 			displayedToAmountMin: toAmountMin,
-			userTokenAddresses
+			approvedTokenAddresses,
+			nowSeconds
 		});
 
 	const dataOf = ({ quote }: LifiCalldataFixture): string => {
@@ -292,7 +296,8 @@ describe('lifi-calldata.utils', () => {
 					request: mockLifiCalldataSameChain.request,
 					diamond,
 					displayedToAmountMin: mockLifiCalldataSameChain.toAmountMin + 1n,
-					userTokenAddresses: []
+					approvedTokenAddresses: [],
+					nowSeconds
 				})
 			).toThrow(LifiQuoteRejectedError);
 		});
@@ -460,7 +465,10 @@ describe('lifi-calldata.utils', () => {
 
 		it('should refuse a swap that calls a token the user holds', () => {
 			expect(() =>
-				assertFixture({ fixture: mockLifiCalldataAcrossEvm, userTokenAddresses: [feeCollector] })
+				assertFixture({
+					fixture: mockLifiCalldataAcrossEvm,
+					approvedTokenAddresses: [feeCollector]
+				})
 			).toThrow(LifiQuoteRejectedError);
 		});
 
@@ -823,7 +831,8 @@ describe('lifi-calldata.utils', () => {
 						request: fixture.request,
 						diamond,
 						displayedToAmountMin: fixture.toAmountMin + 1n,
-						userTokenAddresses: []
+						approvedTokenAddresses: [],
+						nowSeconds
 					})
 				).toThrow(LifiQuoteRejectedError);
 			});
@@ -1053,6 +1062,41 @@ describe('lifi-calldata.utils', () => {
 						toSolana({ toToken: SYSTEM_PROGRAM_ADDRESS, receivingAssetId: `0x${'00'.repeat(32)}` })
 					);
 				});
+			});
+		});
+
+		// Every live LI.FI Across quote leaves the fill to any relayer, with a deadline 2.5 h ahead.
+		describe('Across fill', () => {
+			const withFill = (fill: Struct) =>
+				changeAcross((args) => {
+					Object.assign(bridgeArgs(args).facetData, fill);
+				});
+
+			it('should refuse a fill reserved to one relayer', () => {
+				expectRejected(withFill({ exclusiveRelayer: padded(elsewhere), exclusivityParameter: 60 }));
+			});
+
+			// The SpokePool reserves nothing unless both are set.
+			it.each([
+				{
+					case: 'a relayer without exclusivity',
+					fill: { exclusiveRelayer: padded(elsewhere), exclusivityParameter: 0 }
+				},
+				{
+					case: 'exclusivity without a relayer',
+					fill: { exclusiveRelayer: `0x${'00'.repeat(32)}`, exclusivityParameter: 60 }
+				}
+			])('should accept $case', ({ fill }) => {
+				expectAccepted(withFill(fill));
+			});
+
+			it('should accept a fill deadline up to 3 h ahead', () => {
+				expectAccepted(withFill({ fillDeadline: nowSeconds + 3n * 60n * 60n }));
+			});
+
+			// The SpokePools accept up to 6 h, which would keep an unfilled deposit from its refund.
+			it('should refuse a fill deadline further ahead', () => {
+				expectRejected(withFill({ fillDeadline: nowSeconds + 3n * 60n * 60n + 1n }));
 			});
 		});
 

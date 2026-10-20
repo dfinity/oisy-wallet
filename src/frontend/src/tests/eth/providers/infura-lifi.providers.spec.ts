@@ -1,5 +1,6 @@
 import { BASE_NETWORK, BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { ERC20_ABI } from '$eth/constants/erc20.constants';
 import { LIFI_WHITELIST_MANAGER_ABI } from '$eth/constants/lifi.constants';
 import { InfuraLifiProvider, infuraLifiProviders } from '$eth/providers/infura-lifi.providers';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -58,6 +59,28 @@ describe('infura-lifi.providers', () => {
 					selector
 				})
 			).resolves.toBeFalsy();
+		});
+	});
+
+	describe('allowance', () => {
+		it('should read the allowance from the token contract', async () => {
+			const tokenAllowance = vi.fn().mockResolvedValue(5n);
+			const token = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+			const owner = '0x000000000000000000000000000000000000dEaD';
+
+			mockContract.prototype.allowance =
+				tokenAllowance as unknown as typeof mockContract.prototype.allowance;
+
+			await expect(
+				new InfuraLifiProvider(BASE_NETWORK).allowance({ token, owner, spender: diamond })
+			).resolves.toBe(5n);
+
+			expect(mockContract).toHaveBeenCalledExactlyOnceWith(
+				token,
+				ERC20_ABI,
+				new (vi.mocked(InfuraProviderLib))()
+			);
+			expect(tokenAllowance).toHaveBeenCalledExactlyOnceWith(owner, diamond);
 		});
 	});
 
