@@ -1,4 +1,6 @@
 import type { TokenId } from '$declarations/backend/backend.did';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import { BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
 import {
 	ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES,
 	ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES
@@ -16,6 +18,8 @@ import {
 	lifiSourceOutcomeToUpdate,
 	lifiStatusPollIntervalMillis,
 	nextLifiUnresolvedWindow,
+	toLifiCreationRefs,
+	toLifiData,
 	toLifiExternalRefs,
 	toLifiExternalRefsMap,
 	toLifiLearnedRefs,
@@ -26,6 +30,7 @@ import {
 	mockLifiActiveUserTransaction,
 	mockVeloraActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
+import { mockLifiBaseUsdcToken } from '$tests/mocks/lifi.mock';
 import { Principal } from '@icp-sdk/core/principal';
 import { ChainId, type ExtendedTransactionInfo } from '@lifi/sdk';
 
@@ -444,6 +449,86 @@ describe('lifi-active-tx.utils', () => {
 			});
 
 			expect(metadata).not.toHaveProperty('error');
+		});
+	});
+
+	describe('toLifiData', () => {
+		it("should name both tokens by their backend id, with the amount in the source's units", () => {
+			expect(
+				toLifiData({
+					sourceToken: BASE_ETH_TOKEN,
+					destinationToken: mockLifiBaseUsdcToken,
+					amount: 10n
+				})
+			).toStrictEqual({
+				Lifi: {
+					source_token: { EvmNative: 8453n },
+					dest_token: { Erc20: [mockLifiBaseUsdcToken.address, 8453n] },
+					amount: 10n
+				}
+			});
+		});
+
+		it.each([
+			{ side: 'source', sourceToken: BTC_REGTEST_TOKEN, destinationToken: mockLifiBaseUsdcToken },
+			{ side: 'destination', sourceToken: BASE_ETH_TOKEN, destinationToken: BTC_REGTEST_TOKEN }
+		])('should be undefined for a $side token without a backend id', (tokens) => {
+			expect(toLifiData({ ...tokens, amount: 10n })).toBeUndefined();
+		});
+	});
+
+	describe('toLifiCreationRefs', () => {
+		const params = {
+			hash: `0x${'ab'.repeat(32)}`,
+			nonce: 7,
+			quote: { tool: 'across', transactionId: `0x${'cd'.repeat(32)}` },
+			sourceToken: BASE_ETH_TOKEN,
+			destinationToken: mockLifiBaseUsdcToken,
+			amount: '0.01',
+			usdSourceValue: '25'
+		};
+
+		it('should carry the poll keys, the tool, the transaction id and the display metadata', () => {
+			expect(toLifiCreationRefs(params)).toStrictEqual({
+				[LIFI_EXTERNAL_REF_KEYS.TX_HASH]: params.hash,
+				[LIFI_EXTERNAL_REF_KEYS.TX_NONCE]: '7',
+				[LIFI_EXTERNAL_REF_KEYS.TOOL]: 'across',
+				[LIFI_EXTERNAL_REF_KEYS.TRANSACTION_ID]: params.quote.transactionId,
+				[LIFI_EXTERNAL_REF_KEYS.AMOUNT]: '0.01',
+				[LIFI_EXTERNAL_REF_KEYS.USD_SOURCE_VALUE]: '25',
+				[LIFI_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL]: BASE_ETH_TOKEN.symbol,
+				[LIFI_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL]: BASE_ETH_TOKEN.network.name,
+				[LIFI_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]: mockLifiBaseUsdcToken.symbol,
+				[LIFI_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL]: mockLifiBaseUsdcToken.network.name
+			});
+		});
+
+		// Cut, it would be wrong rather than shorter; oversized, the backend would refuse the row.
+		it.each([
+			{ case: 'a tool key', quote: { ...params.quote, tool: 'across bridge' } },
+			{ case: 'an overlong tool key', quote: { ...params.quote, tool: 'a'.repeat(65) } },
+			{ case: 'a transaction id', quote: { ...params.quote, transactionId: 'not-hex' } },
+			{
+				case: 'an overlong transaction id',
+				quote: { ...params.quote, transactionId: `0x${'a'.repeat(129)}` }
+			}
+		])('should leave out $case that is not valid', ({ quote }) => {
+			const refs = toLifiCreationRefs({ ...params, quote });
+
+			expect(refs[LIFI_EXTERNAL_REF_KEYS.TX_HASH]).toBe(params.hash);
+			expect(
+				quote.tool === params.quote.tool
+					? refs[LIFI_EXTERNAL_REF_KEYS.TRANSACTION_ID]
+					: refs[LIFI_EXTERNAL_REF_KEYS.TOOL]
+			).toBeUndefined();
+		});
+
+		it('should leave out a USD value it was not given', () => {
+			expect(
+				toLifiCreationRefs({ ...params, usdSourceValue: undefined })[
+					LIFI_EXTERNAL_REF_KEYS.USD_SOURCE_VALUE
+				]
+			).toBeUndefined();
 		});
 	});
 });

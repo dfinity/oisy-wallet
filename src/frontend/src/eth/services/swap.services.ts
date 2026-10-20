@@ -10,6 +10,7 @@ import type { TransferParams } from '$lib/types/send';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import { isNullish, toNullable } from '@dfinity/utils';
 import type { TransactionParams } from '@velora-dex/sdk';
+import { keccak256 } from 'ethers/crypto';
 import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 
@@ -46,39 +47,29 @@ const prepareTransactionParams = ({
 	};
 };
 
-const sendTransaction = async ({
+const signSwapTransaction = ({
 	transaction,
 	to,
 	maxFeePerGas,
 	maxPriorityFeePerGas,
-	sourceNetwork,
 	identity,
 	nonce
-}: Pick<TransferParams, 'from' | 'to'> &
-	Omit<SwapParams, 'lastProgressStep'> &
+}: Pick<TransferParams, 'to'> &
+	Pick<SwapParams, 'identity'> &
 	Omit<RequiredTransactionFeeData, 'gas'> & { nonce: number } & {
 		transaction: TransactionParams;
-	}): Promise<TransactionResponse> => {
-	const { id: networkId } = sourceNetwork;
-
-	const { sendTransaction } = infuraProviders(networkId);
-
-	const transactionParams = prepareTransactionParams({
-		maxPriorityFeePerGas,
-		maxFeePerGas,
-		nonce,
-		to,
-		transaction
-	});
-
-	const rawTransaction = await signTransaction({
+	}): Promise<string> =>
+	signTransaction({
 		identity,
-		transaction: transactionParams,
+		transaction: prepareTransactionParams({
+			maxPriorityFeePerGas,
+			maxFeePerGas,
+			nonce,
+			to,
+			transaction
+		}),
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
-
-	return await sendTransaction(rawTransaction);
-};
 
 export const swap = async ({
 	progress,
@@ -87,10 +78,16 @@ export const swap = async ({
 	transaction,
 	from,
 	sourceNetwork,
+	beforeBroadcast,
 	...rest
 }: Pick<TransferParams, 'from' | 'to'> &
 	Omit<RequiredTransactionFeeData, 'gas'> &
-	SwapParams & { transaction: TransactionParams }): Promise<{
+	SwapParams & {
+		transaction: TransactionParams;
+		// Runs once the transaction is signed and before it is broadcast, with what identifies it on
+		// chain. Should it reject, nothing is broadcast.
+		beforeBroadcast?: (params: { hash: string; nonce: number }) => Promise<void>;
+	}): Promise<{
 	hash: string;
 	nonce: number;
 }> => {
@@ -100,16 +97,18 @@ export const swap = async ({
 
 	const nonce = await getNonce({ from, networkId });
 
-	const transactionSent = await sendTransaction({
-		progress,
+	const rawTransaction = await signSwapTransaction({
 		nonce,
-		token,
 		identity,
-		from,
 		transaction,
-		sourceNetwork,
 		...rest
 	});
+
+	// The hash of a typed transaction is the hash of its signed bytes.
+	await beforeBroadcast?.({ hash: keccak256(rawTransaction), nonce });
+
+	const transactionSent: TransactionResponse =
+		await infuraProviders(networkId).sendTransaction(rawTransaction);
 
 	processTransactionSent({ identity, token, transaction: transactionSent });
 

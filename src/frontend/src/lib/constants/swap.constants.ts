@@ -55,6 +55,16 @@ export const LIFI_QUOTE_REFRESH_INTERVAL_MS = 30_000;
 // hold back every other offer, and a request that never settles would never be retried.
 export const LIFI_QUOTE_TIMEOUT_MS = 10_000;
 
+// Added to the gas a LI.FI transaction is estimated at, in the form and at execution alike: the
+// route's swaps can cost more when mined than when estimated, and a transaction that runs out of
+// gas still pays for it.
+export const LIFI_GAS_LIMIT_BUFFER_PERCENT = 20n;
+
+// A LI.FI row whose transaction the node refused outright is deleted, retried as a cycles mint's
+// is: a few attempts, a second apart.
+export const LIFI_ROW_DELETE_ATTEMPTS = 3;
+export const LIFI_ROW_DELETE_RETRY_DELAY_MILLIS = 1_000;
+
 // The active-transaction tick awaits each provider's poller in turn, so a stalled `/status` request
 // would stall every other provider's rows.
 export const LIFI_STATUS_TIMEOUT_MS = 10_000;

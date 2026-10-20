@@ -23,12 +23,14 @@ import * as swapServices from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, type SwapError } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
+import { LifiFeeChangedError } from '$lib/types/errors';
 import { SwapProvider, VeloraSwapTypes, type SwapMappedResult } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockLifiQuote } from '$tests/mocks/lifi.mock';
 import {
 	mockNearIntentsProvider,
 	mockOneSecProvider,
@@ -37,6 +39,7 @@ import {
 	mockVeloraMarketProvider
 } from '$tests/mocks/swap.mocks';
 import { mockVeloraOptimalRate } from '$tests/mocks/velora.mock';
+import type { QuoteRequestFromAmount } from '@lifi/sdk';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get, readable, writable, type Writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -66,6 +69,16 @@ vi.mock('$lib/services/swap.services', () => ({
 	fetchVeloraDeltaSwap: (...args: unknown[]) => mockFetchVeloraDeltaSwap(...args),
 	fetchVeloraMarketSwap: (...args: unknown[]) => mockFetchVeloraMarketSwap(...args),
 	fetchOneSecEvmToIcpSwap: (...args: unknown[]) => mockFetchOneSecEvmToIcpSwap(...args)
+}));
+
+const mockFetchLifiEvmSwap = vi.fn();
+const mockLifiQuoteFeeCeiling = vi.fn();
+const mockLifiApprovalTransactions = vi.fn();
+
+vi.mock('$lib/services/lifi-evm-swap.services', () => ({
+	fetchLifiEvmSwap: (...args: unknown[]) => mockFetchLifiEvmSwap(...args),
+	lifiQuoteFeeCeiling: (...args: unknown[]) => mockLifiQuoteFeeCeiling(...args),
+	lifiApprovalTransactions: (...args: unknown[]) => mockLifiApprovalTransactions(...args)
 }));
 
 const mockAcceptProviderAgreement = vi.fn();
@@ -1056,6 +1069,191 @@ describe('SwapEthWizard', () => {
 			expect(toasts.toastsError).toHaveBeenCalled();
 			expect(onBack).toHaveBeenCalledOnce();
 			expect(onStartTriggerAmount).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe('LI.FI swap', () => {
+		const mockEthAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+		// 0.002 ETH for the swap transaction, 0.001 ETH per approval.
+		const quoteFeeCeiling = 2_000_000_000_000_000n;
+		const approvalFee = 1_000_000_000_000_000n;
+
+		const lifiOffer = {
+			provider: SwapProvider.LIFI,
+			receiveAmount: 25_003_034n,
+			receiveOutMinimum: 24_878_019n,
+			swapDetails: mockLifiQuote,
+			request: { fromChain: 1, fromAmount: '1' } as QuoteRequestFromAmount
+		} satisfies SwapMappedResult;
+
+		let feeState: Writable<FeeStoreData>;
+		let feeStore: EthFeeStore;
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+
+			feeState = writable({
+				gas: 100n,
+				maxFeePerGas: 2_000_000n,
+				maxPriorityFeePerGas: 1_000_000n
+			});
+			feeStore = {
+				subscribe: feeState.subscribe,
+				setFee: vi.fn((partial) => {
+					feeState.update((cur) => ({ ...cur, ...partial }));
+				})
+			};
+
+			vi.spyOn(feeStoreMod, 'initEthFeeStore').mockReturnValue(feeStore);
+			vi.spyOn(feeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
+				...ctx,
+				maxGasFee: readable(approvalFee),
+				minGasFee: readable(undefined),
+				estimatedGasFee: readable(undefined),
+				feePrioritiesStore: writable(undefined)
+			}));
+			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
+			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
+			vi.spyOn(toasts, 'toastsError').mockImplementation(() => Symbol('toast'));
+
+			mockFetchLifiEvmSwap.mockResolvedValue(undefined);
+			mockLifiQuoteFeeCeiling.mockResolvedValue(quoteFeeCeiling);
+			mockLifiApprovalTransactions.mockResolvedValue(1);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		const renderLifi = () => {
+			const swapAmountsStore = initSwapAmountsStore();
+			swapAmountsStore.setSwaps({
+				swaps: [lifiOffer],
+				amountForSwap: 1,
+				selectedProvider: lifiOffer
+			});
+
+			const failedSwapError: Writable<SwapError | undefined> = writable(undefined);
+
+			const ctx = new Map();
+
+			ctx.set(SWAP_CONTEXT_KEY, {
+				sourceToken: readable(mockToken),
+				destinationToken: readable(mockDestToken),
+				failedSwapError,
+				sourceTokenExchangeRate: readable(10),
+				sourceTokenBalance: readable(undefined),
+				destinationTokenBalance: readable(undefined),
+				destinationTokenExchangeRate: readable(20),
+				isSourceTokenIcrc2: readable(false),
+				isSourceTokenPermitSupported: readable(false),
+				setSourceToken: () => {},
+				setDestinationToken: () => {},
+				setIsTokenPermitSupported: () => {},
+				switchTokens: () => {}
+			});
+
+			ctx.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
+
+			const onClose = vi.fn();
+			const onBack = vi.fn();
+
+			const result = render(SwapEthWizard, {
+				props: {
+					...BASE_PROPS,
+					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' },
+					onClose,
+					onBack,
+					onNext: vi.fn(),
+					onStartTriggerAmount: vi.fn(),
+					onStopTriggerAmount: vi.fn()
+				},
+				context: ctx
+			});
+
+			return { ...result, onClose, onBack, failedSwapError };
+		};
+
+		const confirmSwap = async ({
+			getByText,
+			queryByRole
+		}: Pick<ReturnType<typeof renderLifi>, 'getByText' | 'queryByRole'>) => {
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+
+			// Ticked once, it stays ticked when the review is shown again.
+			if (valueDifferenceCheckbox instanceof HTMLInputElement && !valueDifferenceCheckbox.checked) {
+				await fireEvent.click(valueDifferenceCheckbox);
+			}
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+		};
+
+		it('reviews the swap transaction and its approval as one fee', async () => {
+			const { getByText } = renderLifi();
+
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(getByText(/0\.003/)).toBeInTheDocument();
+		});
+
+		it('prices its fee from the quote, and reads the approvals once', async () => {
+			renderLifi();
+
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(mockLifiQuoteFeeCeiling).toHaveBeenCalledWith(
+				expect.objectContaining({
+					quote: mockLifiQuote,
+					maxFeePerGas: 2_000_000n,
+					maxPriorityFeePerGas: 1_000_000n
+				})
+			);
+			expect(mockLifiApprovalTransactions).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ userAddress: mockEthAddress, amount: 1n })
+			);
+		});
+
+		it('executes the offer with the fee ceiling the user reviewed, then closes', async () => {
+			const { onClose, ...rendered } = renderLifi();
+
+			await vi.runOnlyPendingTimersAsync();
+			await confirmSwap(rendered);
+
+			expect(mockFetchLifiEvmSwap).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					offer: lifiOffer,
+					reviewedFeeCeiling: quoteFeeCeiling,
+					userTokenAddresses: expect.any(Array)
+				})
+			);
+			expect(onClose).toHaveBeenCalledOnce();
+		});
+
+		it('returns to the review with the higher fee when it rose, and signs no more than that', async () => {
+			const carriedFeeCeiling = 3_000_000_000_000_000n;
+
+			mockFetchLifiEvmSwap.mockRejectedValueOnce(new LifiFeeChangedError(carriedFeeCeiling));
+
+			const { onBack, failedSwapError, ...rendered } = renderLifi();
+
+			await vi.runOnlyPendingTimersAsync();
+			await confirmSwap(rendered);
+
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(get(failedSwapError)).toEqual({
+				message: en.swap.error.lifi_fee_changed,
+				variant: 'info'
+			});
+			// The carried ceiling and the approval, for the user to confirm.
+			expect(rendered.getByText(/0\.004/)).toBeInTheDocument();
+
+			await confirmSwap(rendered);
+
+			expect(mockFetchLifiEvmSwap).toHaveBeenCalledTimes(2);
+			expect(mockFetchLifiEvmSwap).toHaveBeenLastCalledWith(
+				expect.objectContaining({ reviewedFeeCeiling: carriedFeeCeiling })
+			);
 		});
 	});
 });

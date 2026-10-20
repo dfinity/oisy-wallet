@@ -1,3 +1,4 @@
+import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import type * as lifiEnv from '$env/rest/lifi.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
@@ -13,6 +14,7 @@ import { fetchLifiQuote } from '$lib/rest/lifi.rest';
 import { trackEvent } from '$lib/services/analytics.services';
 import { fetchLifiSwapQuote, resetLifiQuoteCache } from '$lib/services/lifi-swap.services';
 import { SwapProvider } from '$lib/types/swap';
+import { parseTokenId } from '$lib/validation/token.validation';
 import {
 	mockLifiBaseUsdcToken,
 	mockLifiFromAmount,
@@ -22,7 +24,17 @@ import {
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { nonNullish } from '@dfinity/utils';
-import { HTTPError, SDKError, type QuoteRequestFromAmount } from '@lifi/sdk';
+import {
+	ChainId,
+	HTTPError,
+	SDKError,
+	type CrossStep,
+	type LiFiStep,
+	type ProtocolStep,
+	type QuoteRequestFromAmount,
+	type Step,
+	type SwapStep
+} from '@lifi/sdk';
 
 vi.mock('$env/rest/lifi.env', async (importOriginal) => ({
 	...(await importOriginal<typeof lifiEnv>()),
@@ -71,7 +83,8 @@ describe('lifi-swap.services', () => {
 				provider: SwapProvider.LIFI,
 				receiveAmount: 25_003_034n,
 				receiveOutMinimum: 24_878_019n,
-				swapDetails: mockLifiQuote
+				swapDetails: mockLifiQuote,
+				request: expect.objectContaining({ fromChain: 8453, toChain: 8453 })
 			});
 
 			expect(fetchLifiQuote).toHaveBeenCalledExactlyOnceWith(
@@ -97,6 +110,116 @@ describe('lifi-swap.services', () => {
 			).resolves.toBeUndefined();
 
 			expect(fetchLifiQuote).not.toHaveBeenCalled();
+		});
+
+		describe('a cross-chain route', () => {
+			const arbitrumUsdc = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831';
+
+			const crossChainParams = {
+				...params,
+				destinationToken: {
+					...mockLifiBaseUsdcToken,
+					id: parseTokenId('LifiArbitrumUsdc'),
+					network: ARBITRUM_MAINNET_NETWORK,
+					address: arbitrumUsdc
+				}
+			};
+
+			// One branch per step type, so that each literal narrows to its own member of `Step`.
+			const step = (
+				step:
+					| Pick<SwapStep, 'type' | 'tool'>
+					| Pick<CrossStep, 'type' | 'tool'>
+					| Pick<ProtocolStep, 'type' | 'tool'>
+			): Step =>
+				step.type === 'swap'
+					? { ...mockLifiQuote, ...step }
+					: step.type === 'cross'
+						? { ...mockLifiQuote, ...step }
+						: { ...mockLifiQuote, ...step };
+
+			const feeCollection = step({ type: 'protocol', tool: 'feeCollection' });
+			const dexSwap = step({ type: 'swap', tool: 'nordstern' });
+			const across = step({ type: 'cross', tool: 'across' });
+			const near = step({ type: 'cross', tool: 'near' });
+
+			// The ETH → Arbitrum USDC quote, through `includedSteps`.
+			const routeVia = (includedSteps: Step[]): LiFiStep => ({
+				...mockLifiQuote,
+				action: {
+					...mockLifiQuote.action,
+					toChainId: ChainId.ARB,
+					toToken: { ...mockLifiQuote.action.toToken, chainId: ChainId.ARB, address: arbitrumUsdc }
+				},
+				includedSteps
+			});
+
+			const bridgesOfCall = (call: number) =>
+				vi.mocked(fetchLifiQuote).mock.calls[call]?.[0].allowBridges;
+
+			it('should offer Across bridging directly, with the request it answers', async () => {
+				const quote = routeVia([feeCollection, across]);
+
+				vi.mocked(fetchLifiQuote).mockResolvedValue(quote);
+
+				const offer = await fetchLifiSwapQuote(crossChainParams);
+
+				expect(offer?.swapDetails).toStrictEqual(quote);
+				expect(offer?.provider === SwapProvider.LIFI && offer.request.allowBridges).toEqual([
+					'across',
+					'near'
+				]);
+				expect(fetchLifiQuote).toHaveBeenCalledOnce();
+			});
+
+			it.each([
+				{ route: 'behind a DEX swap', steps: [feeCollection, dexSwap, across] },
+				{ route: 'followed by another step', steps: [feeCollection, across, dexSwap] }
+			])(
+				'should re-quote without Across when its route goes $route, and offer that route',
+				async ({ steps }) => {
+					const fallback = routeVia([feeCollection, dexSwap, near]);
+
+					vi.mocked(fetchLifiQuote)
+						.mockResolvedValueOnce(routeVia(steps))
+						.mockResolvedValueOnce(fallback);
+
+					const offer = await fetchLifiSwapQuote(crossChainParams);
+
+					expect(offer?.swapDetails).toStrictEqual(fallback);
+					// The request execution re-quotes with.
+					expect(offer?.provider === SwapProvider.LIFI && offer.request.allowBridges).toEqual([
+						'near'
+					]);
+					expect(fetchLifiQuote).toHaveBeenCalledTimes(2);
+					expect(bridgesOfCall(1)).toEqual(['near']);
+				}
+			);
+
+			it('should offer nothing when the route without Across cannot be executed either', async () => {
+				vi.mocked(fetchLifiQuote)
+					.mockResolvedValueOnce(routeVia([feeCollection, dexSwap, across]))
+					.mockResolvedValueOnce(routeVia([feeCollection, near, dexSwap]));
+
+				await expect(fetchLifiSwapQuote(crossChainParams)).resolves.toBeUndefined();
+
+				expect(trackEvent).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						metadata: expect.objectContaining({
+							result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+							result_error_type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE
+						})
+					})
+				);
+			});
+
+			it('should not re-quote a route that another bridge cannot execute', async () => {
+				vi.mocked(fetchLifiQuote).mockResolvedValue(routeVia([feeCollection, near, dexSwap]));
+
+				await expect(fetchLifiSwapQuote(crossChainParams)).resolves.toBeUndefined();
+
+				expect(fetchLifiQuote).toHaveBeenCalledOnce();
+			});
 		});
 
 		describe('cadence', () => {

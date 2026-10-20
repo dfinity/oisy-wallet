@@ -24,6 +24,7 @@ import {
 	assertLifiQuote,
 	buildLifiQuoteRequest,
 	buildLifiSupportedDestinations,
+	isLifiRouteExecutable,
 	lifiFeesUsd,
 	mapLifiSwapResult,
 	toLifiChainId,
@@ -41,7 +42,15 @@ import {
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
-import { ChainId, type CrossStep, type LiFiStep, type SwapStep } from '@lifi/sdk';
+import {
+	ChainId,
+	type CrossStep,
+	type LiFiStep,
+	type ProtocolStep,
+	type QuoteRequestFromAmount,
+	type Step,
+	type SwapStep
+} from '@lifi/sdk';
 
 describe('lifi-swap.utils', () => {
 	const baseParams = {
@@ -603,13 +612,57 @@ describe('lifi-swap.utils', () => {
 	});
 
 	describe('mapLifiSwapResult', () => {
-		it('should map the estimate to the offer', () => {
-			expect(mapLifiSwapResult(mockLifiQuote)).toStrictEqual({
+		it('should map the estimate to the offer, with the request the quote answers', () => {
+			const request = { fromChain: ChainId.BAS } as QuoteRequestFromAmount;
+
+			expect(mapLifiSwapResult({ quote: mockLifiQuote, request })).toStrictEqual({
 				provider: SwapProvider.LIFI,
 				receiveAmount: 25_003_034n,
 				receiveOutMinimum: 24_878_019n,
-				swapDetails: mockLifiQuote
+				swapDetails: mockLifiQuote,
+				request
 			});
+		});
+	});
+
+	describe('isLifiRouteExecutable', () => {
+		// One branch per step type, so that each literal narrows to its own member of `Step`.
+		const step = (
+			step:
+				| Pick<SwapStep, 'type' | 'tool'>
+				| Pick<CrossStep, 'type' | 'tool'>
+				| Pick<ProtocolStep, 'type' | 'tool'>
+		): Step =>
+			step.type === 'swap'
+				? { ...mockLifiQuote, ...step }
+				: step.type === 'cross'
+					? { ...mockLifiQuote, ...step }
+					: { ...mockLifiQuote, ...step };
+
+		const feeCollection = step({ type: 'protocol', tool: 'feeCollection' });
+		const dexSwap = step({ type: 'swap', tool: 'nordstern' });
+		const across = step({ type: 'cross', tool: 'across' });
+		const near = step({ type: 'cross', tool: 'near' });
+
+		const routeOf = (includedSteps: Step[]): LiFiStep => ({
+			...mockLifiQuote,
+			includedSteps
+		});
+
+		it.each([
+			{ route: 'a same-chain swap', steps: [feeCollection, dexSwap] },
+			{ route: 'Across behind the fee collection', steps: [feeCollection, across] },
+			{ route: 'NEAR Intents behind a DEX swap', steps: [feeCollection, dexSwap, near] }
+		])('should accept $route', ({ steps }) => {
+			expect(isLifiRouteExecutable(routeOf(steps))).toBeTruthy();
+		});
+
+		it.each([
+			{ route: 'Across behind a DEX swap', steps: [feeCollection, dexSwap, across] },
+			{ route: 'a swap after the bridge', steps: [feeCollection, near, dexSwap] },
+			{ route: 'a second bridge', steps: [feeCollection, near, across] }
+		])('should refuse $route', ({ steps }) => {
+			expect(isLifiRouteExecutable(routeOf(steps))).toBeFalsy();
 		});
 	});
 });

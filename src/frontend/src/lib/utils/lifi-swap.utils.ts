@@ -4,6 +4,7 @@ import {
 	LIFI_DENY_EXCHANGES,
 	LIFI_DIAMOND_ADDRESSES
 } from '$env/rest/lifi.env';
+import { LIFI_ACROSS_TOOL } from '$eth/constants/lifi.constants';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
@@ -336,9 +337,37 @@ export const lifiFeesUsd = ({ estimate: { feeCosts } }: LiFiStep): number | unde
 	return feeCosts.reduce((sum, { amountUSD }) => sum + Number(amountUSD), 0);
 };
 
-export const mapLifiSwapResult = (quote: LiFiStep): SwapMappedResult => ({
+export const mapLifiSwapResult = ({
+	quote,
+	request
+}: {
+	quote: LiFiStep;
+	request: QuoteRequestFromAmount;
+}): SwapMappedResult => ({
 	provider: SwapProvider.LIFI,
 	receiveAmount: BigInt(quote.estimate.toAmount),
 	receiveOutMinimum: BigInt(quote.estimate.toAmountMin),
-	swapDetails: quote
+	swapDetails: quote,
+	request
 });
+
+/**
+ * Whether the calldata binding could accept the route, judged from its steps: no step after the
+ * bridge, which would pay out another token than the one asked for, and no DEX swap before an
+ * Across bridge, whose unsigned minimum such a swap could undercut (see `assertLifiCalldata`). A
+ * route that fails is not offered, so the form never shows what execution would refuse.
+ */
+export const isLifiRouteExecutable = ({ includedSteps }: LiFiStep): boolean => {
+	const bridgeIndex = includedSteps.findIndex(({ type }) => type === 'cross');
+
+	if (bridgeIndex === -1) {
+		return true;
+	}
+
+	const bridge = includedSteps[bridgeIndex];
+	const swapsBefore = includedSteps.slice(0, bridgeIndex).some(({ type }) => type === 'swap');
+
+	return (
+		bridgeIndex === includedSteps.length - 1 && !(bridge?.tool === LIFI_ACROSS_TOOL && swapsBefore)
+	);
+};

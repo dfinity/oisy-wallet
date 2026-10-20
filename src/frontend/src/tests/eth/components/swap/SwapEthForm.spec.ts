@@ -6,6 +6,7 @@ import {
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
+import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
@@ -177,6 +178,78 @@ describe('SwapFormEth', () => {
 
 		expect(getByText(get(i18n).core.text.cancel)).toBeInTheDocument();
 		expect(getByText(get(i18n).swap.text.review_button)).toBeInTheDocument();
+	});
+
+	describe('a LI.FI offer', () => {
+		const lifiFee = 2_000_000_000_000_000n;
+
+		// A fee sample in hand, which the form validates against, and an ETH balance.
+		const withFeeAndEthBalance = (ethBalance: bigint) => {
+			const feeStore = initEthFeeStore();
+
+			feeStore.setFee({ gas: 21_000n, maxFeePerGas: 1n, maxPriorityFeePerGas: 1n });
+
+			mockContext.set(
+				ETH_FEE_CONTEXT_KEY,
+				initEthFeeContext({
+					feeStore,
+					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
+				})
+			);
+
+			balancesStore.set({ id: ETHEREUM_TOKEN.id, data: { data: ethBalance, certified: false } });
+		};
+
+		const reviewButton = (getByText: (text: string) => HTMLElement) =>
+			getByText(get(i18n).swap.text.review_button).closest('button');
+
+		afterEach(() => {
+			balancesStore.reset(ETHEREUM_TOKEN.id);
+		});
+
+		it("should show LI.FI's own fee rather than the fee context's", () => {
+			const { getByText } = render(SwapEthForm, {
+				props: { ...props, isLifi: true, lifiFee },
+				context: mockContext
+			});
+
+			expect(getByText(/0\.002/)).toBeInTheDocument();
+		});
+
+		it('should hold the review while the fee is unknown', () => {
+			withFeeAndEthBalance(lifiFee);
+
+			const { getByText } = render(SwapEthForm, {
+				props: { ...props, isLifi: true, lifiFee: undefined },
+				context: mockContext
+			});
+
+			expect(reviewButton(getByText)).toBeDisabled();
+		});
+
+		it('should let the review through when the ETH balance covers the fee', () => {
+			withFeeAndEthBalance(lifiFee);
+
+			const { getByText } = render(SwapEthForm, {
+				props: { ...props, isLifi: true, lifiFee },
+				context: mockContext
+			});
+
+			expect(reviewButton(getByText)).toBeEnabled();
+		});
+
+		it('should refuse an ETH balance below the fee of an ERC-20 swap', () => {
+			withFeeAndEthBalance(lifiFee - 1n);
+
+			const { getByText } = render(SwapEthForm, {
+				props: { ...props, isLifi: true, lifiFee },
+				context: mockContext
+			});
+
+			expect(reviewButton(getByText)).toBeDisabled();
+		});
 	});
 
 	it('should show fee info message', () => {

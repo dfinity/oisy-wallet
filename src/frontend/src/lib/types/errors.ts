@@ -56,3 +56,21 @@ export class SwapAmountTooLowError extends Error {
  * is never shown nor acted on.
  */
 export class LifiQuoteRejectedError extends Error {}
+
+/**
+ * A LI.FI quote passed the trust checks, but its route is one the calldata binding would refuse
+ * (see `isLifiRouteExecutable`), even after re-quoting without Across. There is no route OISY can
+ * execute.
+ */
+export class LifiRouteUnsupportedError extends Error {}
+
+/**
+ * The LI.FI swap's network fee ceiling, from OISY's own gas estimate at execution, exceeds the one
+ * the user reviewed, so it was not signed. It carries that ceiling — gas, fee per gas and the L1
+ * data fee of that very transaction — back to the review, which shows it for the user to confirm.
+ */
+export class LifiFeeChangedError extends Error {
+	constructor(readonly feeCeiling: bigint) {
+		super('The network fee of the LI.FI swap rose above the one reviewed.');
+	}
+}

@@ -1,6 +1,7 @@
 import {
 	LIFI_ACROSS_MAX_FILL_DEADLINE_SECONDS,
 	LIFI_ACROSS_MULTIPLIER_BASE,
+	LIFI_ACROSS_TOOL,
 	LIFI_ACROSS_V4_ABI,
 	LIFI_ACROSS_WRAPPED_NATIVE,
 	LIFI_APPROVE_TO_ONLY_SELECTOR,
@@ -324,7 +325,7 @@ interface LifiBridge {
 // The curated bridges, by LI.FI tool key. A bridge the request allows but which has no entry here is
 // refused: what it pays, and to whom, could not be bound.
 const bridges: Record<string, LifiBridge> = {
-	across: {
+	[LIFI_ACROSS_TOOL]: {
 		facet: new Interface(LIFI_ACROSS_V4_ABI),
 		// Across's minimum output is unsigned: after source swaps, the facet pays at least `minAmount`
 		// times `outputAmountMultiplier`, both from the response. A DEX swap's recipient is in calldata

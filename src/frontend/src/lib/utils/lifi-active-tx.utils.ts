@@ -1,5 +1,6 @@
 import type {
 	ActiveUserTransaction,
+	ActiveUserTransactionData,
 	ActiveUserTransactionRef,
 	ActiveUserTransactionStatus,
 	TokenId
@@ -16,15 +17,18 @@ import {
 import { i18n } from '$lib/stores/i18n.store';
 import { LIFI_EXTERNAL_REF_KEYS, type LifiExternalRefKey } from '$lib/types/lifi';
 import { SwapProvider } from '$lib/types/swap';
+import type { Token } from '$lib/types/token';
 import type { EvmSourceTxOutcome } from '$lib/utils/evm-source-tx.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { truncateUtf8Bytes } from '$lib/utils/string.utils';
+import { toBackendTokenId } from '$lib/utils/token-id.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import {
 	ChainId,
 	isSubstatusDone,
 	type BaseStatusData,
 	type ExtendedTransactionInfo,
+	type LiFiStep,
 	type PendingReceivingInfo
 } from '@lifi/sdk';
 import { get } from 'svelte/store';
@@ -318,3 +322,66 @@ export const buildLifiSwapTrackingMetadata = ({
 		destinationNetwork: refs[LIFI_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL] ?? ''
 	};
 };
+
+/**
+ * The row's data for a LI.FI swap, or `undefined` for a token without a backend `TokenId`; the
+ * backend still refuses a pair outside LI.FI's v1 matrix.
+ */
+export const toLifiData = ({
+	sourceToken,
+	destinationToken,
+	amount
+}: {
+	sourceToken: Token;
+	destinationToken: Token;
+	amount: bigint;
+}): ActiveUserTransactionData | undefined => {
+	const source_token = toBackendTokenId(sourceToken);
+	const dest_token = toBackendTokenId(destinationToken);
+
+	if (nonNullish(source_token) && nonNullish(dest_token)) {
+		return { Lifi: { source_token, dest_token, amount } };
+	}
+};
+
+// A cut tool key or transaction id would be wrong rather than shorter, and an oversized one would
+// make the backend refuse the row, so a value that fails is left out instead.
+const LIFI_TOOL_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
+const LIFI_TRANSACTION_ID_PATTERN = /^0x[0-9a-fA-F]{1,128}$/;
+
+/**
+ * The refs a LI.FI row is created with: the poll keys of its signed EVM source transaction, the
+ * route's tool (sent as `bridge` to `/status`) and LI.FI's transaction id when they are valid, and
+ * the display metadata every swap provider shares.
+ */
+export const toLifiCreationRefs = ({
+	hash,
+	nonce,
+	quote: { tool, transactionId },
+	sourceToken,
+	destinationToken,
+	amount,
+	usdSourceValue
+}: {
+	hash: string;
+	nonce: number;
+	quote: Pick<LiFiStep, 'tool' | 'transactionId'>;
+	sourceToken: Token;
+	destinationToken: Token;
+	amount: string;
+	usdSourceValue?: string;
+}): Partial<Record<LifiExternalRefKey, string>> => ({
+	[LIFI_EXTERNAL_REF_KEYS.TX_HASH]: hash,
+	[LIFI_EXTERNAL_REF_KEYS.TX_NONCE]: `${nonce}`,
+	...(LIFI_TOOL_PATTERN.test(tool) && { [LIFI_EXTERNAL_REF_KEYS.TOOL]: tool }),
+	...(nonNullish(transactionId) &&
+		LIFI_TRANSACTION_ID_PATTERN.test(transactionId) && {
+			[LIFI_EXTERNAL_REF_KEYS.TRANSACTION_ID]: transactionId
+		}),
+	[LIFI_EXTERNAL_REF_KEYS.AMOUNT]: amount,
+	...(nonNullish(usdSourceValue) && { [LIFI_EXTERNAL_REF_KEYS.USD_SOURCE_VALUE]: usdSourceValue }),
+	[LIFI_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL]: sourceToken.symbol,
+	[LIFI_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL]: sourceToken.network.name,
+	[LIFI_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]: destinationToken.symbol,
+	[LIFI_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL]: destinationToken.network.name
+});

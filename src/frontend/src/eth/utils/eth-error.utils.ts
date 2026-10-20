@@ -269,6 +269,28 @@ const toastOutOfGasError = async ({
  * the error is not one we can explain, allowing callers to fall through to their own generic
  * message rather than claiming a cause we have not established.
  */
+// The node's answers to a transaction it did not take, and that nothing else will mine as it is.
+// Any other refusal can hide a transaction that was taken all the same: `already known` is one in
+// the mempool, `nonce too low` one whose nonce is spent, possibly by itself, and `out of gas` on one
+// node does not stop another from mining it.
+const DEFINITIVE_REFUSAL_PATTERN =
+	/max fee per gas less than block base fee|fee cap less than block base fee|intrinsic gas too low|exceeds block gas limit|oversized data|invalid sender|invalid signature|transaction type not supported/i;
+
+/**
+ * Whether a broadcast failed because the node refused the transaction outright, so that it was
+ * neither taken nor relayed: the account cannot pay for it, or the transaction is invalid. Only the
+ * node's own answer to the broadcast counts, never a transport failure, which may have relayed it.
+ */
+export const isDefinitiveTransactionRefusal = (err: unknown): boolean =>
+	!answersOtherRequest(err) &&
+	(isInsufficientBalanceError(err) ||
+		collectErrorRecords({ err }).some(
+			({ code, message }) =>
+				typeof code === 'number' &&
+				typeof message === 'string' &&
+				DEFINITIVE_REFUSAL_PATTERN.test(message)
+		));
+
 export const mapEthereumErrorMsg = (err: unknown): string | undefined => {
 	const {
 		send: { error }

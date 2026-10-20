@@ -3,6 +3,7 @@
 	import { getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import SwapEthFeeInfo from '$eth/components/swap/SwapEthFeeInfo.svelte';
+	import SwapLifiFeeDisplay from '$eth/components/swap/SwapLifiFeeDisplay.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -37,6 +38,10 @@
 		onClose: () => void;
 		onNext: () => void;
 		isGasless: boolean;
+		// A LI.FI offer is priced by the wizard: its swap transaction's own fee ceiling plus the
+		// approvals it needs, `undefined` until both are known.
+		isLifi?: boolean;
+		lifiFee?: bigint;
 	}
 
 	let {
@@ -50,7 +55,9 @@
 		onShowProviderList,
 		onClose,
 		onNext,
-		isGasless
+		isGasless,
+		isLifi = false,
+		lifiFee
 	}: Props = $props();
 
 	const { sourceToken, destinationToken, sourceTokenBalance } =
@@ -71,7 +78,13 @@
 
 	// TODO: improve this fee calculation at the source, depending on the method (or methods) that is going to be used
 	const totalFee = $derived(
-		isGasless ? ZERO : isApproveNeeded && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee
+		isGasless
+			? ZERO
+			: isLifi
+				? lifiFee
+				: isApproveNeeded && nonNullish($maxGasFee)
+					? $maxGasFee * 2n
+					: $maxGasFee
 	);
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType | undefined => {
@@ -98,6 +111,25 @@
 
 		if (isGasless) {
 			return;
+		}
+
+		// LI.FI's fee is a ceiling OISY signs with, so the balance must cover all of it: on top of the
+		// amount for a native source, on its own for an ERC-20 one. Not known yet, the form waits.
+		if (isLifi) {
+			if (isNullish(lifiFee)) {
+				return;
+			}
+
+			const isNativeSource =
+				isSupportedEthTokenId($sourceToken?.id) || isSupportedEvmNativeTokenId($sourceToken?.id);
+
+			const nativeBalance = isNativeSource
+				? parsedSendBalance
+				: ($balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO);
+
+			return (isNativeSource ? userAmount : ZERO) + lifiFee > nativeBalance
+				? 'insufficient-funds-for-fee'
+				: undefined;
 		}
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
@@ -173,6 +205,18 @@
 				{#if nonNullish($swapAmountsStore?.selectedProvider)}
 					{#if isGasless}
 						<SwapGaslessFee />
+					{:else if isLifi}
+						<SwapLifiFeeDisplay fee={lifiFee}>
+							{#snippet label()}
+								<Html text={$i18n.fee.text.total_fee} />
+							{/snippet}
+						</SwapLifiFeeDisplay>
+
+						<SwapEthFeeInfo
+							decimals={$feeDecimalsStore}
+							feeSymbol={$feeSymbolStore}
+							feeTokenId={$feeTokenIdStore}
+						/>
 					{:else}
 						<EthFeeDisplay {isApproveNeeded}>
 							{#snippet label()}

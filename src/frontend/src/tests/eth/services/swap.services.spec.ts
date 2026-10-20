@@ -13,6 +13,7 @@ import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TransactionParams } from '@velora-dex/sdk';
+import { keccak256 } from 'ethers/crypto';
 import { InfuraProvider as InfuraProviderLib, type TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -258,6 +259,34 @@ describe('swap.services', () => {
 			expect(signTransaction).toHaveBeenCalled();
 			expect(mockSendTransaction).toHaveBeenCalledWith(mockRawTransaction);
 			expect(processTransactionSent).not.toHaveBeenCalled();
+		});
+
+		describe('beforeBroadcast', () => {
+			it('should run between signing and broadcasting, with the signed hash and the nonce', async () => {
+				const beforeBroadcast = vi.fn().mockResolvedValue(undefined);
+
+				await swap({ ...mockSwapParams, beforeBroadcast });
+
+				expect(beforeBroadcast).toHaveBeenCalledExactlyOnceWith({
+					hash: keccak256(mockRawTransaction),
+					nonce: mockNonce
+				});
+				expect(vi.mocked(signTransaction).mock.invocationCallOrder[0]).toBeLessThan(
+					beforeBroadcast.mock.invocationCallOrder[0] ?? 0
+				);
+				expect(beforeBroadcast.mock.invocationCallOrder[0]).toBeLessThan(
+					mockSendTransaction.mock.invocationCallOrder[0] ?? 0
+				);
+			});
+
+			it('should broadcast nothing when it rejects', async () => {
+				const beforeBroadcast = vi.fn().mockRejectedValue(mockError);
+
+				await expect(swap({ ...mockSwapParams, beforeBroadcast })).rejects.toThrow(mockError);
+
+				expect(mockSendTransaction).not.toHaveBeenCalled();
+				expect(processTransactionSent).not.toHaveBeenCalled();
+			});
 		});
 	});
 });

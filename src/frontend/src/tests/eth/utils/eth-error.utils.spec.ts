@@ -1,5 +1,9 @@
 import * as sendAnalytics from '$eth/services/eth-transaction-send-analytics.services';
-import { mapEthereumErrorMsg, toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
+import {
+	isDefinitiveTransactionRefusal,
+	mapEthereumErrorMsg,
+	toastEthereumTransactionError
+} from '$eth/utils/eth-error.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import * as analytics from '$lib/services/analytics.services';
@@ -31,6 +35,73 @@ describe('eth-error.utils', () => {
 			error: { code: -32000, message: 'gas required exceeds allowance (17277)' }
 		}
 	);
+
+	describe('isDefinitiveTransactionRefusal', () => {
+		// The node's answer to the broadcast, as ethers nests it.
+		const broadcastRefused = (message: string) =>
+			Object.assign(new Error(`could not coalesce error (${message})`), {
+				code: 'UNKNOWN_ERROR',
+				error: { code: -32000, message },
+				payload: { id: 1, jsonrpc: '2.0', method: 'eth_sendRawTransaction' }
+			});
+
+		it.each([
+			'insufficient funds for gas * price + value',
+			'max fee per gas less than block base fee: address 0x0, maxFeePerGas: 1, baseFee: 2',
+			'intrinsic gas too low',
+			'exceeds block gas limit',
+			'oversized data',
+			'invalid sender',
+			'transaction type not supported'
+		])('should be a refusal when the node answers "%s"', (message) => {
+			expect(isDefinitiveTransactionRefusal(broadcastRefused(message))).toBeTruthy();
+		});
+
+		it('should be a refusal when ethers itself found the funds insufficient', () => {
+			expect(
+				isDefinitiveTransactionRefusal(
+					Object.assign(new Error('insufficient funds'), { code: 'INSUFFICIENT_FUNDS' })
+				)
+			).toBeTruthy();
+		});
+
+		// Each can hide a transaction that was taken: in the mempool, mined, or held by another node.
+		it.each([
+			'already known',
+			'nonce too low: next nonce 8, tx nonce 7',
+			'replacement transaction underpriced',
+			'out of gas: gas required exceeds: 21000'
+		])('should not be a refusal when the node answers "%s"', (message) => {
+			expect(isDefinitiveTransactionRefusal(broadcastRefused(message))).toBeFalsy();
+		});
+
+		it('should not be a refusal for a transport failure', () => {
+			expect(
+				isDefinitiveTransactionRefusal(
+					Object.assign(new Error('request timeout'), { code: 'TIMEOUT' })
+				)
+			).toBeFalsy();
+		});
+
+		it("should not read the phrases in ethers' own message, only in the node's answer", () => {
+			expect(
+				isDefinitiveTransactionRefusal(
+					Object.assign(new Error('intrinsic gas too low'), { code: 'UNKNOWN_ERROR' })
+				)
+			).toBeFalsy();
+		});
+
+		it('should not count an answer to another request than the broadcast', () => {
+			expect(
+				isDefinitiveTransactionRefusal(
+					Object.assign(new Error('intrinsic gas too low'), {
+						error: { code: -32000, message: 'intrinsic gas too low' },
+						payload: { id: 1, jsonrpc: '2.0', method: 'eth_estimateGas' }
+					})
+				)
+			).toBeFalsy();
+		});
+	});
 
 	describe('mapEthereumErrorMsg', () => {
 		it('explains a balance that cannot cover what the transaction reserves', () => {
