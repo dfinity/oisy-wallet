@@ -59,8 +59,9 @@
 
 <button
 	bind:this={button}
-	class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary hover:border-brand-primary"
+	class="dropdown-button border"
 	class:opened={visible}
+	aria-expanded={visible}
 	aria-label={ariaLabel}
 	data-tid={testId}
 	onclick={onTriggerClick}
@@ -72,13 +73,15 @@
 		</span>
 	{/if}
 
-	<span class="min-w-0 flex-1 truncate font-medium">{triggerLabel}</span>
+	<span class="min-w-0 flex-1 truncate">{triggerLabel}</span>
 
 	{#if count > 0}
 		<Badge variant="info" width="w-fit">{count}</Badge>
 	{/if}
 
-	<IconExpandMore size="20" />
+	<span class="dropdown-chevron" aria-hidden="true">
+		<IconExpandMore />
+	</span>
 </button>
 
 <ResponsivePopover {button} direction="ltr" bind:visible>

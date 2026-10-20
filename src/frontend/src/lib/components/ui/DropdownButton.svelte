@@ -31,17 +31,18 @@
 	bind:this={button}
 	class="dropdown-button"
 	class:border
-	class:border-tertiary={border}
 	class:disabled
 	class:opened
 	class:w-full={fullWidth}
+	aria-expanded={opened}
 	aria-label={ariaLabel}
 	data-tid={testId}
 	{disabled}
 	onclick={onClick}
+	type="button"
 >
 	{@render children?.()}
-	<div class="transform transition-transform duration-300 ease-in-out" class:-scale-y-100={opened}>
-		<IconExpandMore size="24" />
-	</div>
+	<span class="dropdown-chevron" aria-hidden="true">
+		<IconExpandMore />
+	</span>
 </button>

@@ -75,9 +75,6 @@
 
 <style lang="scss">
 	:global .lang-selector {
-		button {
-			font-weight: normal !important;
-		}
 		.wrapper {
 			padding: var(--padding-1_25x) !important;
 		}

@@ -120,4 +120,21 @@ describe('MultiSelectDropdown', () => {
 
 		expect(onToggle).toHaveBeenCalledTimes(2);
 	});
+
+	it('shows and announces the open state on its trigger', async () => {
+		const { getByTestId } = render(MultiSelectDropdownTest);
+
+		const trigger = getByTestId('multi-select-dropdown');
+
+		expect(trigger).not.toHaveClass('opened');
+		expect(trigger).toHaveAttribute('aria-expanded', 'false');
+		expect(trigger.querySelector('.dropdown-chevron')).toHaveAttribute('aria-hidden', 'true');
+
+		await fireEvent.click(trigger);
+
+		await waitFor(() => {
+			expect(trigger).toHaveClass('opened');
+			expect(trigger).toHaveAttribute('aria-expanded', 'true');
+		});
+	});
 });

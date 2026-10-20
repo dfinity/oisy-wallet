@@ -280,4 +280,23 @@ describe('TokenCategoryFilterDropdown', () => {
 			expect(tokenCategoryFilterStoreSpy).not.toHaveBeenCalled();
 		});
 	});
+
+	it('shows the open state on its trigger while the options are open', async () => {
+		const { getByRole, getByText } = render(TokenCategoryFilterDropdown);
+
+		const trigger = getByRole('button', { name: get(i18n).tokens.text.asset_type_all });
+
+		expect(trigger).not.toHaveClass('opened');
+
+		await fireEvent.click(trigger);
+
+		await waitFor(() => {
+			expect(trigger).toHaveClass('opened');
+			expect(trigger).toHaveAttribute('aria-expanded', 'true');
+		});
+
+		await fireEvent.click(getByText(get(i18n).token_tag.category.stablecoin));
+
+		await waitFor(() => expect(trigger).not.toHaveClass('opened'));
+	});
 });

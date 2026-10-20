@@ -123,9 +123,6 @@
 
 <style lang="scss">
 	:global .help-token-selector {
-		button {
-			font-weight: normal !important;
-		}
 		.wrapper {
 			padding: var(--padding-1_25x) !important;
 		}
