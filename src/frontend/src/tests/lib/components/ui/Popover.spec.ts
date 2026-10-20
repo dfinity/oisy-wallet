@@ -99,4 +99,12 @@ describe('Popover', () => {
 
 		expect(container.querySelector('.wrapper.dropdown')).not.toBeNull();
 	});
+
+	it('turns on the sliding highlight for a dropdown only', () => {
+		const { container: dropdown } = render(Popover, { props: { visible: true, dropdown: true } });
+		const { container: menu } = render(Popover, { props: { visible: true } });
+
+		expect(dropdown.querySelector('.popover-content')).toHaveAttribute('data-sliding-highlight');
+		expect(menu.querySelector('.popover-content')).not.toHaveAttribute('data-sliding-highlight');
+	});
 });
