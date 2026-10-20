@@ -50,6 +50,6 @@
 	bind:inputValue
 >
 	{#snippet icon()}
-		<IconSearch />
+		<IconSearch size="20" />
 	{/snippet}
 </SlidingInput>
