@@ -128,6 +128,11 @@ export const deleteActiveUserTransaction = async ({
 	activeUserTransactionsStore.remove({ id });
 };
 
+/**
+ * Writes a poller's update, if it changes anything. A failed write is reported and swallowed, so
+ * that the row stays as it was for the next poll; the result says whether the update was written,
+ * for a poller whose own state must outlive a failed write.
+ */
 export const applyActiveUserTransactionPollUpdate = async ({
 	identity,
 	tx,
@@ -136,9 +141,9 @@ export const applyActiveUserTransactionPollUpdate = async ({
 	identity: Identity;
 	tx: ActiveUserTransaction;
 	update?: ActiveUserTransactionPollUpdate;
-}): Promise<void> => {
+}): Promise<boolean> => {
 	if (isNullish(update) || !hasActiveUserTransactionPollUpdateChanges(update)) {
-		return;
+		return false;
 	}
 
 	try {
@@ -147,7 +152,11 @@ export const applyActiveUserTransactionPollUpdate = async ({
 			id: tx.id,
 			...update
 		});
+
+		return true;
 	} catch (err: unknown) {
 		consoleError(err);
+
+		return false;
 	}
 };
