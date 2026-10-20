@@ -256,6 +256,21 @@ const bindSwapSteps = ({
 	return [...calls.values()];
 };
 
+/**
+ * Whether a `GenericSwapFacetV3` function takes a native input and pays a native output, as its name
+ * says. The functions share one layout but not their behaviour: a `…ToNative` one pays out the
+ * Diamond's whole native balance and checks the minimum against it, whatever the swaps produced.
+ * Called for an ERC-20 destination, it would leave the user's swapped tokens in the Diamond and pay
+ * them its native dust, should that reach the minimum in wei.
+ */
+const genericSwapModes = (name: string): { nativeIn: boolean; nativeOut: boolean } | undefined => {
+	const [, input, output] = /V3(ERC20|Native)To(ERC20|Native)$/.exec(name) ?? [];
+
+	return nonNullish(input) && nonNullish(output)
+		? { nativeIn: input === 'Native', nativeOut: output === 'Native' }
+		: undefined;
+};
+
 const isNativeToken = ({ token, toNonEvm }: { token: string; toNonEvm: boolean }): boolean =>
 	toNonEvm
 		? token === SYSTEM_PROGRAM_ADDRESS
@@ -434,6 +449,16 @@ export const assertLifiCalldata = ({
 		const steps = name.startsWith('swapTokensSingle')
 			? [toSwapStep(swapData)]
 			: (swapData as Result[]).map(toSwapStep);
+
+		const modes = genericSwapModes(name);
+
+		if (
+			isNullish(modes) ||
+			modes.nativeIn !== isSameHex({ actual: fromToken, expected: ZERO_ETH_ADDRESS }) ||
+			modes.nativeOut !== isSameHex({ actual: toToken, expected: ZERO_ETH_ADDRESS })
+		) {
+			throw rejected("the swap function's native input or output differs from the request");
+		}
 
 		if (!isSameHex({ actual: receiver, expected: toAddress })) {
 			throw rejected('the swap does not pay the user');

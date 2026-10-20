@@ -309,6 +309,83 @@ describe('lifi-calldata.utils', () => {
 				})
 			);
 		});
+
+		// The six functions share one layout, so only the name tells their native input and output.
+		describe('function direction', () => {
+			// The fixture's arguments, encoded as the function `name`. With `wethSource`, the route
+			// swaps Base WETH instead of native ETH, behind LI.FI's ERC-20 fee forwarding.
+			const via = ({
+				name,
+				wethSource = false
+			}: {
+				name: string;
+				wethSource?: boolean;
+			}): LifiCalldataFixture => {
+				const facet = new Interface(LIFI_GENERIC_SWAP_ABI);
+				const call = facet.parseTransaction({ data: dataOf(mockLifiCalldataSameChain) });
+
+				assertNonNullish(call);
+
+				const args = call.fragment.inputs.map((type, index) =>
+					toPlain({ value: call.args[index], type })
+				);
+
+				if (wethSource) {
+					const fee = stepAt({ steps: genericArgs(args).steps, index: 0 });
+					const nativeFee = feeForwarder.parseTransaction({ data: fee.callData as string });
+
+					assertNonNullish(nativeFee);
+
+					const [distributions] = nativeFee.fragment.inputs.map((type, index) =>
+						toPlain({ value: nativeFee.args[index], type })
+					);
+
+					fee.callData = feeForwarder.encodeFunctionData('forwardERC20Fees', [
+						baseWeth,
+						distributions
+					]);
+
+					for (const step of genericArgs(args).steps) {
+						step.sendingAssetId = baseWeth;
+					}
+
+					fee.receivingAssetId = baseWeth;
+				}
+
+				const fixture = withData({
+					fixture: mockLifiCalldataSameChain,
+					data: facet.encodeFunctionData(name, args)
+				});
+
+				return wethSource
+					? { ...fixture, request: { ...fixture.request, fromToken: baseWeth } }
+					: fixture;
+			};
+
+			it.each([
+				{ route: 'ETH → USDC', name: 'swapTokensMultipleV3NativeToERC20', wethSource: false },
+				{ route: 'WETH → USDC', name: 'swapTokensMultipleV3ERC20ToERC20', wethSource: true }
+			])('should accept $route through $name', ({ name, wethSource }) => {
+				expectAccepted(via({ name, wethSource }));
+			});
+
+			// The same arguments under another selector, with every other check still passing.
+			it.each(['swapTokensMultipleV3ERC20ToNative', 'swapTokensMultipleV3ERC20ToERC20'])(
+				'should refuse ETH → USDC through %s',
+				(name) => {
+					expectRejected(via({ name }));
+				}
+			);
+
+			// It would pay out the Diamond's native balance and leave the user's USDC in the Diamond.
+			it('should refuse WETH → USDC through a function paying a native output', () => {
+				expectRejected(via({ name: 'swapTokensMultipleV3ERC20ToNative', wethSource: true }));
+			});
+
+			it('should refuse WETH → USDC through a function taking a native input', () => {
+				expectRejected(via({ name: 'swapTokensMultipleV3NativeToERC20', wethSource: true }));
+			});
+		});
 	});
 
 	describe('swap steps', () => {

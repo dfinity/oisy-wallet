@@ -654,7 +654,15 @@ every DEX's payload client-side is not practical, so the binding has two layers:
 - **Same-chain** (`fromChainId === toChainId`): the `GenericSwapFacetV3` arguments.
   `_receiver` equals `toAddress`, `_minAmountOut` (the on-chain minimum) is at least the
   displayed quote's `toAmountMin`, the last entry's `receivingAssetId` is the destination
-  token, and `SwapData[]` is bound as above.
+  token, and `SwapData[]` is bound as above. The function itself must match the request
+  too: its name's input (`…V3ERC20To…` / `…V3NativeTo…`) is native exactly when the source
+  token is, and its output (`…ToERC20` / `…ToNative`) exactly when the destination token
+  is. The six functions share one layout, so a response can swap the selector and keep
+  every argument above intact, while each function moves funds by its own mode: a
+  `…ToNative` one pays out the Diamond's whole native balance and checks the minimum
+  against it, whatever the swaps produced. Called for an ERC-20 destination, it would leave
+  the user's swapped tokens in the Diamond and pay them its native dust, which reaches a
+  minimum counted in the token's units as soon as it holds that many wei.
 - **Cross-chain**: `(bridgeData, swapData[], facetData)`, or `(bridgeData, facetData)`
   for a `startBridgeTokensVia*` function.
   - `bridgeData.hasDestinationCall` is `false`. v1 has single-step routes only, and a
@@ -1605,7 +1613,8 @@ everywhere.
    allowance read at quote selection, so the reset path is budgeted. A native swap does
    not approve. `approve()` and its existing callers are unchanged.
 8. An EVM swap is never signed unless its calldata decodes, as a function of the pinned
-   ABIs for its route kind (a bridge the request allowed, cross-chain), to the requested
+   ABIs for its route kind (a bridge the request allowed, cross-chain; same-chain, the
+   one whose native input and output match the source and destination tokens), to the requested
    source token and amount, the user's recipient (EVM, or the user's Solana address for
    a Solana destination), with every receiver and refund field in the curated facet's
    own data equal to the user, the requested destination chain, the requested
