@@ -147,7 +147,6 @@
 	}
 
 	.step {
-		position: relative;
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
@@ -203,7 +202,9 @@
 	}
 
 	// Set at 18 px and drawn at 16 px, so growing into the active step is a transform rather than
-	// a reflow. One weight in every state: a weight change would shift the glyphs.
+	// a reflow. One weight in every state: a weight change would shift the glyphs. Waiting and
+	// finished labels share the tertiary grey, the lightest that keeps 4.5:1 in both themes; their
+	// markers tell them apart.
 	.text {
 		position: relative;
 		flex: 0 1 19rem;
@@ -211,7 +212,7 @@
 		overflow: hidden;
 		font-size: 1.125rem;
 		line-height: 1.4;
-		color: var(--color-foreground-disabled);
+		color: var(--color-foreground-tertiary);
 		white-space: nowrap;
 		text-overflow: ellipsis;
 		transform-origin: 0 50%;
@@ -219,10 +220,6 @@
 		transition:
 			color var(--animation-time-normal) ease-out,
 			scale 240ms $ease-out;
-	}
-
-	.completed .text {
-		color: var(--color-foreground-tertiary);
 	}
 
 	.in_progress .text {
@@ -263,13 +260,11 @@
 		opacity: 1;
 	}
 
-	// Failure is written out, not left to colour. Laid over the row so it never takes room from
-	// the label.
+	// Failure is written out, not left to colour. It sits at the row's end in the flow, so a long
+	// label is cut short before it instead of running underneath; the label does not move.
 	.failed-tag {
-		position: absolute;
-		top: 50%;
-		right: 0.25rem;
-		translate: 0 -50%;
+		flex-shrink: 0;
+		margin-left: auto;
 		padding: 0.25rem 0.5rem;
 		border-radius: 999px;
 		font-size: var(--font-size-small);
@@ -314,11 +309,7 @@
 	@keyframes tag-in {
 		from {
 			opacity: 0;
-			translate: 4px -50%;
-		}
-		to {
-			opacity: 1;
-			translate: 0 -50%;
+			translate: 4px 0;
 		}
 	}
 
