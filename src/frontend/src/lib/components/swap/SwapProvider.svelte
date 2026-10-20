@@ -130,6 +130,7 @@
 									event.stopPropagation();
 									onShowProviderList?.();
 								}}
+								styleClass="flex-none"
 								type="button">{$i18n.swap.text.select}</Button
 							>
 						{/if}

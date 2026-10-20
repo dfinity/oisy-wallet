@@ -93,6 +93,19 @@ describe('SwapProvider form header', () => {
 		expect(canonical?.closest('[aria-hidden="true"]')).toBeNull();
 	});
 
+	it('keeps the manual selection link content-sized beside the Smart Swap label', () => {
+		store.setSwaps({
+			swaps: [offer, mockOneSecProvider],
+			selectedProvider: offer,
+			amountForSwap: '1'
+		});
+		const { getByRole, getByText } = render(SwapProviderHeader, { props, context });
+		const select = getByRole('button', { name: en.swap.text.select });
+
+		expect(getByText(en.swap.text.smart_swap).nextElementSibling).toBe(select);
+		expect(select).toHaveClass('flex-none');
+	});
+
 	it('opens manual selection without submitting or opening provider details', async () => {
 		store.setSwaps({
 			swaps: [offer, mockOneSecProvider],
