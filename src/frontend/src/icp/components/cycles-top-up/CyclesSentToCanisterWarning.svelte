@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
 	import { CYCLES_TOP_UP_ENABLED } from '$env/cycles-top-up.env';
 	import { isTokenCyclesLedger } from '$icp/utils/cycles-mint.utils';
 	import { isCanisterAccount } from '$icp/utils/cycles-top-up.utils';
@@ -9,6 +8,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		destination: string;
