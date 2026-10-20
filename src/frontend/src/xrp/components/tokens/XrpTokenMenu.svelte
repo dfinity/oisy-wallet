@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import TokenMenu from '$lib/components/tokens/TokenMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { TOKEN_MENU_XRP, TOKEN_MENU_XRP_EXPLORER_LINK } from '$lib/constants/test-ids.constants';
@@ -8,6 +7,7 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isNetworkXrp } from '$lib/utils/network.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	// XRPScan explorer URLs are built directly: its base URL carries no `$args` placeholder.
 	let explorerUrl = $derived(
