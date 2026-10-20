@@ -633,10 +633,14 @@ every DEX's payload client-side is not practical, so the binding has two layers:
   from every asset of the route (the source and destination tokens, and every
   `sendingAssetId` / `receivingAssetId`), and must not be any ERC-20 of the user's on
   that network with an allowance to the Diamond (no `transferFrom(user, …)` through the
-  Diamond). Those allowances are read before signing, one per token the user holds there;
-  a read that fails counts the token as approved. A token without an allowance cannot be
+  Diamond). Those allowances are read before signing, one per ERC-20 and ERC-4626 OISY
+  knows on that network, enabled or not, since hiding a token does not revoke its
+  allowance (`lifiUserTokenAddresses`; up to 75 reads, on Robinhood Chain, in parallel); a
+  read that fails counts the token as approved. A token without an allowance cannot be
   spent through the Diamond, and some are DEX pools a route may call (a Uniswap V2 pair,
-  a Curve or Balancer pool token), so it is not refused.
+  a Curve or Balancer pool token), so it is not refused. An allowance the user granted the
+  Diamond through another dapp, for a token OISY does not know, cannot be listed: there,
+  LI.FI's whitelist, which lists no token's transfer functions, remains the guard.
 - **A leftover allowance cannot be pulled outside a bound call.** `approve()` keeps its
   existing "at least" semantics (see [EVM execution](#evm-execution)), so the Diamond may
   hold an allowance larger than `fromAmount`, or one for a different token left by an
@@ -1065,11 +1069,14 @@ value })` runs on the exact checked transaction through `infuraProviders(network
    once its nonce is used): a JSON-RPC error does not prove the transaction absent
    (`already known` means it is in the mempool, `nonce too low` that its nonce is used,
    possibly by this very transaction, `replacement transaction underpriced` that another
-   one holds it), and a transport failure may have relayed it. A refusal missing from the
-   list leaves its row pending until the nonce is used, then `Failed` as replaced or
-   dropped; it never drops the tracking of a swap that happened. A delete that keeps
-   failing leaves the row to the poller in the same way. Then
-   `enableSwapDestinationToken`.
+   one holds it), and a transport failure may have relayed it. Such a failure does not
+   abort the swap either: returned to the review, the user could sign again, with the next
+   nonce, and a relayed transaction would then swap twice. So the swap goes on as sent —
+   the error is logged, the modal closes as after a broadcast — and its row settles it. A
+   refusal missing from the list leaves its row pending until the nonce is used, then
+   `Failed` as replaced or dropped; it never drops the tracking of a swap that happened,
+   nor offers it for signing twice. A delete that keeps failing leaves the row to the
+   poller in the same way. Then `enableSwapDestinationToken`.
 
 Wizard: add `SwapProvider.LIFI` to `isActiveTransactionSwap` and
 `swapEmitsApprovalSteps` in `SwapEthWizard.svelte`, plus a dispatch branch that passes
@@ -1518,7 +1525,12 @@ rows.
   unknown, LI.FI's `substatusMessage`) is kept on the row for support. No
   toast, no new row layout, no explorer link. Surfacing errors for all swap providers
   is a separate, cross-provider change.
-- Wizard tracks `TRACK_COUNT_SWAP_SUBMITTED` (it is an active-transaction swap).
+- Wizard tracks `TRACK_COUNT_SWAP_SUBMITTED` (it is an active-transaction swap). Its
+  `TRACK_COUNT_SWAP_ERROR` for a LI.FI swap carries an allow-listed category
+  (`toLifiSwapErrorType`: `fee_changed`, `slippage_exceeded`, `quote_rejected`,
+  `insufficient_funds`, `unknown`) in place of the error text, which can come from LI.FI's
+  SDK (the request URL, with the user's addresses) or from the node and ethers (the signed
+  transaction); invariant 4 in `docs/ai/frontend/analytics.md`.
 
 ### Presentation
 
@@ -1693,7 +1705,8 @@ everywhere.
 12. The AUT row is created after signing and before the broadcast: a swap whose row
     cannot be created is not broadcast, and a row is deleted only when the node's error
     proves the transaction was not accepted; an ambiguous error (`already known`,
-    `nonce too low`) or a transport failure keeps it for the poller.
+    `nonce too low`) or a transport failure keeps it for the poller, and the swap goes on
+    as sent, never offered for signing again.
     After broadcast, the modal closes, the row appears in the Active-transactions
     panel labelled "LI.FI", and it reaches `Succeeded` / `Failed` in the background,
     including after a page reload. Every terminal LI.FI row triggers one wallet

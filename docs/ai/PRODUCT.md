@@ -368,7 +368,7 @@ LI.FI's quotes are not signed, so nothing about the transaction is taken on trus
 
 The fee shown is the most the swap can cost: the swap transaction's own limit, priced from LI.FI's gas estimate with a 20 % margin and, on Base, its L1 data fee, plus one or two approval transactions for a token that needs them (none when the existing approval already covers the amount, two when a smaller one must be reset first). The balance must cover all of it. If OISY's own gas estimate at the moment of signing comes out higher than what the user reviewed, nothing is signed: the review returns with the new maximum and a note that the network fee rose, for the user to confirm.
 
-Like the other cross-chain swaps, the modal closes once the transaction is sent, and the swap appears in the Active-transactions panel labelled "LI.FI" until it settles. The row is recorded before the transaction is broadcast, so a swap is never sent untracked; if the network refuses the transaction outright, the row is removed again.
+Like the other cross-chain swaps, the modal closes once the transaction is sent, and the swap appears in the Active-transactions panel labelled "LI.FI" until it settles. The row is recorded before the transaction is broadcast, so a swap is never sent untracked; if the network refuses the transaction outright, the row is removed again. If the network's answer is lost instead, the swap counts as sent and stays tracked until it settles: it is never offered for signing a second time, which could make it run twice.
 
 ---
 
