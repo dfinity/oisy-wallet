@@ -36,10 +36,11 @@ describe('lifi-calldata.utils', () => {
 	const ethereumUsdc = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 	const elsewhere = '0x000000000000000000000000000000000000bEEF';
 
-	// As LI.FI's quotes name them (2026-10-19): Across pays native ETH on Arbitrum out as its WETH, and
-	// NEAR Intents names any native coin, EVM or Solana, with this sentinel.
+	// Across pays a native coin out as its SpokePool's wrapped native (`wrappedNativeToken()`, read on
+	// chain 2026-10-20), and NEAR Intents names any native coin, EVM or Solana, with this sentinel.
 	const arbitrumWeth = '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1';
 	const baseWeth = '0x4200000000000000000000000000000000000006';
+	const polygonWpol = '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270';
 	const nearNative = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
 	const padded = (address: string): string => zeroPadValue(address.toLowerCase(), 32);
@@ -843,21 +844,27 @@ describe('lifi-calldata.utils', () => {
 					request: { ...fixture.request, toChain, toToken }
 				});
 
-				it('should accept Across paying native ETH out as its wrapped native', () => {
-					expectAccepted(
-						toNative({
-							fixture: mockLifiCalldataAcrossEvm,
-							abi: LIFI_ACROSS_V4_ABI,
-							toToken: ZERO_ETH_ADDRESS,
-							receivingAsset: { field: 'receivingAssetId', value: padded(arbitrumWeth) }
-						})
-					);
-				});
+				it.each([
+					{ coin: 'ETH on Arbitrum', toChain: ChainId.ARB, wrappedNative: arbitrumWeth },
+					{ coin: 'POL on Polygon', toChain: ChainId.POL, wrappedNative: polygonWpol }
+				])(
+					'should accept Across paying native $coin out as its SpokePool wrapped native',
+					({ toChain, wrappedNative }) => {
+						expectAccepted(
+							toNative({
+								fixture: mockLifiCalldataAcrossEvm,
+								abi: LIFI_ACROSS_V4_ABI,
+								toChain,
+								toToken: ZERO_ETH_ADDRESS,
+								receivingAsset: { field: 'receivingAssetId', value: padded(wrappedNative) }
+							})
+						);
+					}
+				);
 
 				it.each([
 					{ case: 'as itself', toChain: ChainId.ARB, value: padded(ZERO_ETH_ADDRESS) },
-					// Across quotes no native output to Polygon, so it has no wrapped native pinned.
-					{ case: 'to a chain without one pinned', toChain: ChainId.POL, value: padded(elsewhere) }
+					{ case: 'to a chain without one pinned', toChain: ChainId.OPT, value: padded(elsewhere) }
 				])('should refuse Across paying a native coin out $case', ({ toChain, value }) => {
 					expectRejected(
 						toNative({
@@ -866,6 +873,31 @@ describe('lifi-calldata.utils', () => {
 							toChain,
 							toToken: ZERO_ETH_ADDRESS,
 							receivingAsset: { field: 'receivingAssetId', value }
+						})
+					);
+				});
+
+				// The SpokePool unwraps it for a wallet recipient: the calldata of a native ETH payout,
+				// which would pay ETH for a WETH request.
+				it('should refuse Across paying the wrapped native out as a token', () => {
+					expectRejected(
+						toNative({
+							fixture: mockLifiCalldataAcrossEvm,
+							abi: LIFI_ACROSS_V4_ABI,
+							toToken: arbitrumWeth,
+							receivingAsset: { field: 'receivingAssetId', value: padded(arbitrumWeth) }
+						})
+					);
+				});
+
+				it('should refuse any token through Across to a chain without its wrapped native pinned', () => {
+					expectRejected(
+						toNative({
+							fixture: mockLifiCalldataAcrossEvm,
+							abi: LIFI_ACROSS_V4_ABI,
+							toChain: ChainId.OPT,
+							toToken: elsewhere,
+							receivingAsset: { field: 'receivingAssetId', value: padded(elsewhere) }
 						})
 					);
 				});
@@ -937,10 +969,11 @@ describe('lifi-calldata.utils', () => {
 					);
 				});
 
-				// Across has no wrapped native to name native SOL by.
+				// Across has no wrapped native to name native SOL by, so not even the System Program's own
+				// key (32 zero bytes) passes for it.
 				it('should refuse native SOL', () => {
 					expectRejected(
-						toSolana({ toToken: SYSTEM_PROGRAM_ADDRESS, receivingAssetId: padded(nearNative) })
+						toSolana({ toToken: SYSTEM_PROGRAM_ADDRESS, receivingAssetId: `0x${'00'.repeat(32)}` })
 					);
 				});
 			});

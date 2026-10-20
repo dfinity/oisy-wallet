@@ -73,14 +73,17 @@ export const LIFI_FEE_BPS = 25n;
 // `AcrossFacetV4.MULTIPLIER_BASE`: the facet pays `minAmount * outputAmountMultiplier` over this.
 export const LIFI_ACROSS_MULTIPLIER_BASE = 10n ** 18n;
 
-// The token Across pays out for a destination chain's native coin: its wrapped native, which the
-// SpokePool unwraps for a recipient without a message. As LI.FI quoted them on 2026-10-19 (Base's
-// native-out quote timed out; its WETH is the one Across's data names for a native Base source).
-// Across quoted no native output to Polygon or BSC, which have no entry and so get none through it.
+// The wrapped native token of Across's SpokePool on each destination chain: what its
+// `wrappedNativeToken()` answered on 2026-10-20, at the SpokePools of LI.FI's `config/across.json`
+// (the same tokens as its `config/networks.json`). The SpokePool unwraps it for a wallet
+// recipient, whatever was asked for, so it is both how Across pays out a native coin and a token
+// Across can never pay out as itself. A chain without an entry gets no payout through Across.
 export const LIFI_ACROSS_WRAPPED_NATIVE: Partial<Record<number, string>> = {
 	[ChainId.ETH]: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
 	[ChainId.ARB]: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
 	[ChainId.BAS]: '0x4200000000000000000000000000000000000006',
+	[ChainId.POL]: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+	[ChainId.BSC]: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
 	// Robinhood Chain
 	[ChainId.OUT]: '0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73'
 };

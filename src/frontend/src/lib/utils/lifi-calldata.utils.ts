@@ -336,16 +336,23 @@ const bridges: Record<string, LifiBridge> = {
 					: outputAmount
 			};
 		},
-		// A native coin is paid out as its wrapped native, which the SpokePool unwraps; there is none
-		// for native SOL.
+		// On an EVM chain, the SpokePool unwraps its wrapped native for a wallet recipient whatever was
+		// asked for: a native coin is paid out as that token, and that token can never be paid out as
+		// itself. A chain without it pinned gets nothing, and there is no such token for native SOL.
 		receivingAsset: ({ toToken, toChain, toNonEvm }) => {
-			if (!isNativeToken({ token: toToken, toNonEvm })) {
-				return toBytes32({ address: toToken, toNonEvm });
+			const isNative = isNativeToken({ token: toToken, toNonEvm });
+
+			if (toNonEvm) {
+				return isNative ? undefined : solanaAddressToBytes32(toToken);
 			}
 
-			const wrappedNative = toNonEvm ? undefined : LIFI_ACROSS_WRAPPED_NATIVE[toChain];
+			const wrappedNative = LIFI_ACROSS_WRAPPED_NATIVE[toChain];
 
-			return nonNullish(wrappedNative) ? evmAddressToBytes32(wrappedNative) : undefined;
+			if (isNullish(wrappedNative) || isSameHex({ actual: toToken, expected: wrappedNative })) {
+				return undefined;
+			}
+
+			return evmAddressToBytes32(isNative ? wrappedNative : toToken);
 		}
 	},
 	near: {
