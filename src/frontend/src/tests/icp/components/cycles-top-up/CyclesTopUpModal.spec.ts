@@ -20,7 +20,6 @@ import * as authDerived from '$lib/derived/auth.derived';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import * as cyclesTopUpAnalytics from '$lib/services/cycles-top-up-analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
-import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -808,24 +807,36 @@ describe('CyclesTopUpModal', () => {
 			);
 		});
 
-		it('closes without topping up when another identity signs in', async () => {
-			const identity = writable(mockIdentity);
+		describe('when another identity signs in', () => {
+			const switchIdentity = async () => {
+				const identity = writable(mockIdentity);
 
-			vi.spyOn(authDerived, 'authIdentity', 'get').mockReturnValue(identity);
+				vi.spyOn(authDerived, 'authIdentity', 'get').mockReturnValue(identity);
 
-			const closeSpy = vi.spyOn(modalStore, 'close');
+				const result = await toReview();
 
-			const result = await toReview();
+				identity.set({ ...mockIdentity, getPrincipal: () => mockPrincipal2 });
 
-			identity.set({ ...mockIdentity, getPrincipal: () => mockPrincipal2 });
+				return result;
+			};
 
-			await waitFor(() => {
-				expect(closeSpy).toHaveBeenCalledOnce();
+			// Its own reset, not a global count of `modalStore.close`: earlier tests leave timers
+			// that close their modals while this one runs.
+			it('closes the modal', async () => {
+				const result = await switchIdentity();
+
+				await waitFor(() => {
+					expect(result.queryByTestId(CYCLES_TOP_UP_REVIEW)).toBeNull();
+				});
 			});
 
-			await topUp(result);
+			it('sends nothing for it, even before the modal closes', async () => {
+				const result = await switchIdentity();
 
-			expect(topUpSpy).not.toHaveBeenCalled();
+				await topUp(result);
+
+				expect(topUpSpy).not.toHaveBeenCalled();
+			});
 		});
 	});
 });
