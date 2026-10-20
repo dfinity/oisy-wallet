@@ -106,9 +106,9 @@ A token / network add is naturally cross-cutting. To stay reviewable:
 
 - Hand-edit `src/declarations/**` after a backend variant change — run
   `npm run generate`.
-- Hand-edit a generated field in `tokens.{sns,ckerc20,icrc,ext}.json`.
-  Run the matching `npm run build:tokens-*` script (or let the
-  `update-tokens` workflow do it). Only the
+- Hand-edit a generated field in `tokens.{sns,ckerc20,icrc}.json` or
+  `tokens-ext/tokens.ext.json`. Run the matching `npm run build:tokens-*`
+  script (or let the `update-tokens` workflow do it). Only the
   [hand-set fields](#hand-set-fields-in-the-token-json) are edited by
   hand.
 - Add a coingecko platform to `coingecko.schema.ts` and forget the
