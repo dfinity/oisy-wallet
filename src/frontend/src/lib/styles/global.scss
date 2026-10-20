@@ -233,3 +233,8 @@ don't take it: they are the sign that work is happening.
 		}
 	}
 }
+
+/* Opt-in menu sizing overrides primitive utility defaults. */
+@layer utilities {
+	@include meta.load-css('global/menus');
+}

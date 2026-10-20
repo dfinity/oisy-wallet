@@ -1069,6 +1069,8 @@ interface I18nSwap {
 		swap_fees: string;
 		cross_chain_networks_info: string;
 		near_intents_estimated_time: string;
+		lifi_route_via: string;
+		lifi_route_via_estimated_time: string;
 		near_intents_tos: string;
 		onesec_transfer_fee: string;
 		onesec_protocol_fee: string;
@@ -1109,6 +1111,7 @@ interface I18nSwap {
 		oisy_trade_settlement_unresolved: string;
 		oisy_trade_order_not_placed: string;
 		oisy_trade_recovery_failed: string;
+		lifi_status_unknown: string;
 	};
 }
 

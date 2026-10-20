@@ -166,6 +166,10 @@ The landing keeps the existing CircularXX font, preloads its regular and bold fa
 
 ---
 
+### App menu consistency
+
+Token and NFT sorting and settings, network selection and the account menu share row sizing, typography, separators and keyboard focus treatment. Theme changes apply colors immediately without triggering every color transition.
+
 ## Analytics
 
 OISY uses [Plausible](https://plausible.io/) for privacy-friendly, cookieless analytics. Plausible is initialized once at app boot via the `@plausible-analytics/tracker` npm package. All events are fired through the central `trackEvent()` function in `src/frontend/src/lib/services/analytics.services.ts`, which wraps the tracker in a try/catch so analytics never disrupts the user flow.

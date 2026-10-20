@@ -40,26 +40,28 @@
 
 <ResponsivePopover ariaLabel={$i18n.tokens.manage.text.list_settings} {button} bind:visible>
 	{#snippet content()}
-		<span class="mb-2 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
-		<List condensed noPadding>
-			<ListItem>
-				<TokensCategoryFilterToggle showLabel />
-			</ListItem>
+		<div class="menu-surface min-w-56">
+			<span class="menu-heading">{$i18n.tokens.manage.text.list_settings}</span>
+			<List condensed noPadding>
+				<ListItem>
+					<TokensCategoryFilterToggle showLabel />
+				</ListItem>
 
-			<ListItem>
-				<TokensZeroBalanceToggle showLabel />
-			</ListItem>
+				<ListItem>
+					<TokensZeroBalanceToggle showLabel />
+				</ListItem>
 
-			<ListItem>
-				<LogoButton fullWidth onClick={openManageTokens}>
-					{#snippet logo()}
-						<IconManage />
-					{/snippet}
-					{#snippet title()}
-						<span class="text-sm font-normal">{$i18n.tokens.manage.text.title}</span>
-					{/snippet}
-				</LogoButton>
-			</ListItem>
-		</List>
+				<ListItem>
+					<LogoButton fullWidth onClick={openManageTokens}>
+						{#snippet logo()}
+							<IconManage size="20" />
+						{/snippet}
+						{#snippet title()}
+							<span class="menu-row-label">{$i18n.tokens.manage.text.title}</span>
+						{/snippet}
+					</LogoButton>
+				</ListItem>
+			</List>
+		</div>
 	{/snippet}
 </ResponsivePopover>

@@ -4,9 +4,9 @@
 	import { browser } from '$app/environment';
 	import Banner from '$lib/components/core/Banner.svelte';
 	import Busy from '$lib/components/ui/Busy.svelte';
-	import LoaderSpinner from '$lib/components/ui/LoaderSpinner.svelte';
 	import ModalExitHandler from '$lib/components/ui/ModalExitHandler.svelte';
 	import ResponsiveListener from '$lib/components/ui/ResponsiveListener.svelte';
+	import Spinner from '$lib/components/ui/Spinner.svelte';
 	import SystemThemeListener from '$lib/components/ui/SystemThemeListener.svelte';
 	import Toasts from '$lib/components/ui/Toasts.svelte';
 	import {
@@ -141,6 +141,7 @@
 		// Due to an issue in mobile safari we cleanly detach all running animations and request an animation frame to be sure all animations are halted to safely remove the dom element
 		if (nonNullish(spinner) && spinner instanceof HTMLElement) {
 			// stop animation first
+			spinner.style.setProperty('--spinner-play-state', 'paused');
 			spinner.style.animation = 'none';
 			spinner.style.transition = 'none';
 
@@ -226,8 +227,11 @@
 </script>
 
 {#await init()}
-	<div class="text-brand-primary" in:fade>
-		<LoaderSpinner />
+	<div
+		class="app-initializing pointer-events-none fixed inset-0 flex items-center justify-center text-brand-primary dark:text-primary"
+		in:fade
+	>
+		<Spinner inline size="48px" />
 	</div>
 {:then _}
 	{@render children()}
@@ -243,3 +247,10 @@
 <ModalExitHandler />
 <SystemThemeListener />
 <ResponsiveListener />
+
+<style lang="scss">
+	/* The pre-hydration loader owns the same position until it is removed. */
+	:global(body:has(> #app-spinner)) .app-initializing {
+		visibility: hidden;
+	}
+</style>

@@ -2,8 +2,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import IconCheck from '$lib/components/icons/IconCheck.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import ListItemButton from '$lib/components/common/ListItemButton.svelte';
 	import ModalFilterButton from '$lib/components/ui/ModalFilterButton.svelte';
 	import Popover from '$lib/components/ui/Popover.svelte';
 	import { tokenCategoryFilter } from '$lib/derived/settings.derived';
@@ -48,47 +47,29 @@
 </ModalFilterButton>
 
 <Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
-	<List condensed noPadding>
-		<ListItem>
-			<Button
-				alignLeft
-				colorStyle="tertiary-alt"
-				fullWidth
-				innerStyleClass="font-normal text-primary"
-				onclick={() => select(undefined)}
-				paddingSmall
-				styleClass="py-1 rounded-md pl-0.5 min-w-28"
-				transparent
-			>
-				<span class="w-[20px] pt-0.75 text-brand-primary">
-					{#if isNullish(activeCategory)}
-						<IconCheck size="20" />
-					{/if}
-				</span>
-				{$i18n.tokens.text.asset_type_all}
-			</Button>
-		</ListItem>
-
-		{#each categories as category (category)}
+	<div class="menu-surface">
+		<List condensed noPadding>
 			<ListItem>
-				<Button
-					alignLeft
-					colorStyle="tertiary-alt"
-					fullWidth
-					innerStyleClass="font-normal text-primary"
-					onclick={() => select(category)}
-					paddingSmall
-					styleClass="py-1 rounded-md pl-0.5 min-w-28"
-					transparent
+				<ListItemButton
+					onclick={() => select(undefined)}
+					selectable
+					selected={isNullish(activeCategory)}
 				>
-					<span class="w-[20px] pt-0.75 text-brand-primary">
-						{#if activeCategory === category}
-							<IconCheck size="20" />
-						{/if}
-					</span>
-					{getCategoryLabel(category)}
-				</Button>
+					{$i18n.tokens.text.asset_type_all}
+				</ListItemButton>
 			</ListItem>
-		{/each}
-	</List>
+
+			{#each categories as category (category)}
+				<ListItem>
+					<ListItemButton
+						onclick={() => select(category)}
+						selectable
+						selected={activeCategory === category}
+					>
+						{getCategoryLabel(category)}
+					</ListItemButton>
+				</ListItem>
+			{/each}
+		</List>
+	</div>
 </Popover>

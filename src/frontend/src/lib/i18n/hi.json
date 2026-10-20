@@ -1349,6 +1349,8 @@
 			"swap_fees": "स्वैप शुल्क",
 			"cross_chain_networks_info": "आप टोकन <b>$sourceNetwork</b> से <b>$destinationNetwork</b> नेटवर्क पर ले जाते हैं",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -1388,7 +1390,8 @@
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
-			"oisy_trade_recovery_failed": ""
+			"oisy_trade_recovery_failed": "",
+			"lifi_status_unknown": ""
 		}
 	},
 	"buy": {

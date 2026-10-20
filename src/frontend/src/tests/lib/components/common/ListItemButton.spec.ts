@@ -75,7 +75,7 @@ describe('ListItemButton', () => {
 		});
 
 		const host = container.querySelector(`[data-tid="${testId}"]`);
-		const selectableSpan = host?.querySelector('span.w-\\[20px\\]');
+		const selectableSpan = host?.querySelector('span.w-5');
 
 		expect(selectableSpan).toBeInTheDocument();
 

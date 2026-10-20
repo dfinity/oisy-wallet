@@ -69,6 +69,8 @@ does not finish while the children are invisible (see `NftHideButton`).
 | `QrButton`                           | `$lib/components/common/`         | "Scan QR" entry-point button.                                                                                                                             |
 | `Copy`                               | `$lib/components/ui/`             | Copy-to-clipboard icon button. Confirms on the button (check for 2 s plus a screen-reader status), no toast. `ReceiveCopy` wraps it.                      |
 | `IconSwap`                           | `$lib/components/ui/`             | Animated swap between two icons on a state change (copy → check, eye → eye-off). Both stay mounted and cross-fade, so the swap can reverse mid-way.       |
+| `Spinner`                            | `$lib/components/ui/`             | OISY visor Trace. Inherits text colour; CSS-length `size`, opt-in `inline` footprint. Trace keeps moving under reduced motion.                            |
+| `LoaderSpinner`                      | `$lib/components/ui/`             | Wrapper around `Spinner` preserving `tiny` / `small` / `medium` and `inline`. No separate SVG or motion.                                                  |
 | `press` / `press-icon`               | `lib/styles/global.scss`          | Press for any text or card button (0.98) / icon-size control (0.96) that is not a `Button` / `ButtonIcon`. Same rule as theirs.                           |
 | `row-feedback`                       | `lib/styles/global.scss`          | Full-width row: 10 % hover, 20 % while pressed, no shrink, ignoring presses on controls inside it.                                                        |
 | `pressed:` / `child-pressed:`        | `lib/styles/global.scss`          | Variants behind `row-feedback`: pressed on the element itself / on a wrapper whose direct child is the button (`LogoButton`).                             |
@@ -83,6 +85,13 @@ does not finish while the children are invisible (see `NftHideButton`).
 | `WalletConnectScamWarning`           | `$lib/components/wallet-connect/` | The security-risk notice on a WalletConnect sign or send review whose request Verify flags as a scam (`acceptedContext`); that review offers Reject only. |
 | `Loader*` and `loaders/`             | `$lib/components/loaders/`        | Loaders, suspense boundaries, skeletons.                                                                                                                  |
 | `icons/`                             | `$lib/components/icons/`          | Project's icon set.                                                                                                                                       |
+
+The pre-hydration loader in `src/frontend/src/app.html` mirrors `Spinner` because it must
+render before the Svelte bundle loads. `tests/app.spec.ts` checks their geometry and dash
+pattern stay aligned. Keep its 30-second animation cap and the existing auth-initialization
+removal boundary; pause its nested animation through `--spinner-play-state` before the
+next-frame removal in the root layout. The layout fallback uses the same 48px footprint
+and stays hidden while the pre-hydration loader exists, avoiding two overlapping traces.
 
 ### Cross-chain feature folders
 
@@ -130,17 +139,24 @@ Add new feature folders only if your concern doesn't fit any of the above.
 | ------------------------------------------------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `format.utils`, `bigint.utils`, `array.utils`, `json.utils`               | `$lib/utils/`                     | Generic formatting helpers.                                                                                                                                                                                                                                                                                                                                                 |
 | `i18n.utils` (incl. `replacePlaceholders`)                                | `$lib/utils/`                     | i18n string interpolation.                                                                                                                                                                                                                                                                                                                                                  |
+| `string.utils` (`truncateUtf8Bytes`)                                      | `$lib/utils/`                     | Cuts text to a UTF-8 byte limit without splitting a character — for limits the backend measures in bytes, such as an active-transaction row's `error` and ref values (`ACTIVE_USER_TRANSACTION_*_MAX_BYTES`), which a character count overruns on non-ASCII text.                                                                                                           |
 | `console.utils` (`consoleError`, `consoleWarn`)                           | `$lib/utils/`                     | The only allowed console wrapper.                                                                                                                                                                                                                                                                                                                                           |
 | `error.utils`, `assert-amount.utils`, `validation` helpers                | `$lib/utils/`, `$lib/validation/` | Error & input validation.                                                                                                                                                                                                                                                                                                                                                   |
 | `network.utils`, `networks.utils`                                         | `$lib/utils/`                     | Network ID predicates, `findEvmNetworkByChainId`.                                                                                                                                                                                                                                                                                                                           |
+| `evm-source-tx.utils`, `evm-source-tx.services`                           | `$lib/utils/`, `$lib/services/`   | What the source chain says about an EVM transaction an active-transaction row tracks: receipt and confirmed nonce, with `replaced` only after two consecutive observations (`readEvmSourceTxOutcome`). Use it from any EVM swap poller rather than reading receipts by hand, with the one `confirmedNonceByChainId` the loader creates per tick.                            |
 | `wallet-connect.utils` (`acceptedContext`)                                | `$lib/utils/`                     | Whether a WalletConnect proposal or request may be approved, from Verify's `isScam` verdict. Chain-agnostic: every review reads it from here.                                                                                                                                                                                                                               |
-| `token-id.utils`                                                          | `$lib/utils/`                     | Backend `TokenId` ↔ app token (`toBackendTokenId`, `tokenIdKey`).                                                                                                                                                                                                                                                                                                           |
+| `token-id.utils`                                                          | `$lib/utils/`                     | Backend `TokenId` ↔ app token (`toBackendTokenId`, `tokenIdKey`), and `findTokenByBackendTokenId` for the token a row's stored `TokenId` refers to.                                                                                                                                                                                                                         |
 | `token.utils` (`buildIcTokenLabels`)                                      | `$lib/utils/`                     | One unambiguous display label per IC ledger: the display symbol, plus the shortened ledger id wherever another ledger shares that symbol or spells out a suffixed label as its symbol. Build it once over every token the user can pick from and pass it down — labels computed per filtered list can present an impostor as unique. Never hand-roll symbol disambiguation. |
 | `swap-tokens-filter.utils`                                                | `$lib/utils/`                     | The swap provider identifier space. `nativeSwapTokenIdentifier` is the one way to key a contract-less token (native ETH / SOL / BTC) — the category sets have no network dimension, so a bare symbol collides across chains. Never hand-roll it.                                                                                                                            |
 | `nav.utils`, `before-navigate.utils`, `before-unload.utils`               | `$lib/utils/`                     | Navigation hooks.                                                                                                                                                                                                                                                                                                                                                           |
 | `transitions.utils` (`fade`, `fly`, `slide`, `scale`, `blur`, `backdrop`) | `$lib/utils/`                     | Svelte's transitions and their parameter types, with OISY's timings and reduced motion built in. Lint refuses `svelte/transition` elsewhere.                                                                                                                                                                                                                                |
 | `clipboard.utils`, `device.utils`, `events.utils`                         | `$lib/utils/`                     | Browser plumbing.                                                                                                                                                                                                                                                                                                                                                           |
 | `derived-memo.utils`, `certified-store.utils`                             | `$lib/utils/`                     | Store helpers.                                                                                                                                                                                                                                                                                                                                                              |
+
+A swap provider without a token list answers `getSupportedDestinations` with a wildcard
+instead of a set: `{}` in its own registry's category (Velora), or `{ <category>: 'any' }`
+in another one (LI.FI's EVM → Solana). `computeReceiveSupportedTokens` in
+`swap-tokens-filter.utils` counts either as a provider for that category without a list.
 
 ### Chain-specific utils worth knowing
 
@@ -156,7 +172,29 @@ Add new feature folders only if your concern doesn't fit any of the above.
 | `coingecko.rest`                                                                             | `$lib/rest/`    | Spot / token prices.      |
 | `blockchain.rest`, `blockstream.rest`                                                        | `$lib/rest/`    | BTC explorer endpoints.   |
 | `kongswap.rest`, `icpswap.rest`, `near-intents.rest`, `harvest.rest`, `open-crypto-pay.rest` | `$lib/rest/`    | Swap providers + harvest. |
+| `lifi.rest`                                                                                  | `$lib/rest/`    | LI.FI quotes (SDK-based). |
 | `exchange.worker`, `auth.worker`                                                             | `$lib/workers/` | Background polling.       |
+
+### Per-provider swap quote cache
+
+Every swap provider is re-quoted every `SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS`. A provider
+whose rate limit cannot take that cadence throttles inside its own quote service; the fan-out
+stays unchanged. The precedent is `fetchLifiSwapQuote` (`$lib/services/lifi-swap.services.ts`):
+
+- One module-level entry `{ key, result, settledAt? }`. `key` is the serialised request, and
+  `result` is the promise rather than its value, so a request still in flight is shared, however
+  long it takes.
+- The interval runs from `settledAt`, not from the request: the same key gets the cached answer,
+  a failure or "no route" included, until the interval has passed since it settled. Any other
+  key fetches immediately and replaces the entry.
+- Give the request a timeout (`AbortSignal.timeout`, as `xrpl.rest` does): a request that never
+  settles would otherwise pin the entry, and hold back every other provider's offer, since the
+  swap form shows its offers once all providers have answered.
+- Serialise the key from your own request object, and hand an SDK that writes into its argument
+  a copy.
+- Export a reset (`resetLifiQuoteCache`) as the test seam, as `clearNearIntentsTokensCache` does.
+- Only display quotes go through the cache. A quote that is executed is requested again from the
+  REST layer directly.
 
 ## When to extract a new shared block
 
@@ -196,3 +234,9 @@ putting a switch inside a clickable row. Selection buttons expose `aria-pressed`
 through `Button.pressed` or the selectable list primitives.
 
 Token rows and navigation entries use an inset keyboard focus outline so rounded and scrolling list containers cannot clip it. Token-group headers pass their expanded state through `TokenCard` and `LogoButton` to the native button.
+
+## Consistent app menu surfaces
+
+Popover panels share `--overlay-box-shadow` with modals: a translucent edge and layered depth in light mode, a subtle white edge in dark mode. Do not add solid panel borders; retain real dividers and keyboard focus outlines. Bottom sheets retain their separate `--bottom-sheet-box-shadow`. Popovers restore a system-color border in forced-colors mode, where shadows are suppressed.
+
+Use the opt-in `menu-surface` class for app menus built from existing list, logo and navigation buttons. Shared styles in `global/menus.scss` define 48px minimum rows (24px line-height plus 12px vertical padding, without button borders or inter-row gaps), 16px labels, 12px vertical / 8px horizontal padding, 8px row corners and inset keyboard focus. Use `menu-heading`, `menu-row-label`, and `menu-divider` within that surface. Network logos remain brand assets; action icons use the existing Lucide set. Theme changes temporarily suppress transitions through `data-theme-changing`, then restore them after painting the new theme.

@@ -1,0 +1,74 @@
+.menu-surface {
+	font-size: 1rem;
+	line-height: 1.5;
+
+	.menu-heading {
+		display: block;
+		margin-bottom: 8px;
+		padding-inline: 8px;
+		font-size: 0.875rem;
+		font-weight: var(--font-weight-bold);
+	}
+
+	.menu-row,
+	.nav-item,
+	button:has(> .logo-button-wrapper) {
+		--focus-outline-offset: -3px;
+		min-height: 48px;
+		padding: 12px 8px;
+		border-width: 0;
+		border-radius: 8px;
+		align-items: center;
+		gap: 12px;
+		font-size: 1rem;
+		line-height: 1.5;
+		font-weight: var(--font-weight-normal);
+	}
+
+	.menu-row > span {
+		align-items: center;
+		gap: 12px;
+	}
+
+	.logo-button-wrapper {
+		padding-block: 0;
+		border: 0;
+	}
+
+	.logo-button-title {
+		font-size: inherit;
+		line-height: inherit;
+		font-weight: inherit;
+	}
+
+	.menu-row-label {
+		font-size: 1rem;
+		line-height: 1.5;
+	}
+
+	.menu-divider,
+	.logo-button-list-item:not(:last-child) {
+		border-bottom: 1px solid var(--color-border-brand-subtle-10);
+	}
+
+	.nav-item > svg,
+	.nav-item > span > svg {
+		flex-shrink: 0;
+	}
+
+	.toggle.row label {
+		min-height: 48px;
+		font-size: 1rem;
+		line-height: 1.5;
+		border-radius: 8px;
+		--focus-outline-offset: -3px;
+		transition: background-color 150ms ease-out;
+	}
+}
+
+html[data-theme-changing] *,
+html[data-theme-changing] *::before,
+html[data-theme-changing] *::after {
+	// Override both utility layers and unlayered component transitions for this paint.
+	transition: none !important;
+}

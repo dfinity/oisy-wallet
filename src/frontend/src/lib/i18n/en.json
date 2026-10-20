@@ -1349,6 +1349,8 @@
 			"swap_fees": "Swap Fees",
 			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network",
 			"near_intents_estimated_time": "NEAR Intents (~$minutes min)",
+			"lifi_route_via": "LI.FI via $tool",
+			"lifi_route_via_estimated_time": "LI.FI via $tool (~$minutes min)",
 			"near_intents_tos": "By clicking the \"Swap now\" button, you agree to the <a href=\"$link\" target=\"_blank\" rel=\"external noopener noreferrer\" class=\"underline\">Terms of Service</a> of 1Click Swap API. If you do not agree with those terms, do not use this swap provider.",
 			"onesec_transfer_fee": "Transfer fee",
 			"onesec_protocol_fee": "Protocol fee",
@@ -1388,7 +1390,8 @@
 			"oisy_trade_order_killed": "The order could not be filled in full at the reviewed price, so it was canceled and your funds were returned to your wallet. You were only charged network fees.",
 			"oisy_trade_settlement_unresolved": "The order could no longer be found, and neither token is held on OISY Trade. Please check your balances in the Trading tab before trying again.",
 			"oisy_trade_order_not_placed": "OISY Trade did not accept the order, so your funds were returned to your wallet. You were only charged network fees.",
-			"oisy_trade_recovery_failed": "OISY Trade did not accept the order, and your funds could not be returned to your wallet automatically. Please check your balances in the Trading tab to withdraw them."
+			"oisy_trade_recovery_failed": "OISY Trade did not accept the order, and your funds could not be returned to your wallet automatically. Please check your balances in the Trading tab to withdraw them.",
+			"lifi_status_unknown": "LI.FI could not report the outcome of this swap. Please check your destination wallet."
 		}
 	},
 	"buy": {

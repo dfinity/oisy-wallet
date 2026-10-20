@@ -126,26 +126,38 @@
 
 		<style>
 			#app-spinner {
-				--spinner-size: 30px;
+				--spinner-size: 48px;
 
-				width: 30px;
-				height: 30px;
-				border: 3px solid rgb(0, 102, 255);
-				border-top-color: transparent;
-				border-radius: 50%;
-				animation: spin 0.75s ease-in-out 40; /* limit to 40*0.75 to avoid gpu leaks, shouldnt take longer than 30s */
-				position: absolute;
+				color: var(--color-foreground-brand-primary, #0066ff);
+				width: var(--spinner-size);
+				height: var(--spinner-size);
+				position: fixed;
 				top: 50%;
 				left: 50%;
-				transform: rotate(0deg);
-				margin-left: -15px;
-				margin-top: -15px;
-				box-sizing: border-box;
+				margin-left: calc(var(--spinner-size) / -2);
+				margin-top: calc(var(--spinner-size) / -2);
+				pointer-events: none;
 			}
 
-			@keyframes spin {
+			:root[theme='dark'] #app-spinner {
+				color: var(--color-foreground-primary, #f4f6fa);
+			}
+
+			#app-spinner svg {
+				display: block;
+				width: 100%;
+				height: 100%;
+			}
+
+			#app-spinner .trace {
+				/* Preserve the startup loader's existing 30-second animation cap. */
+				animation: app-spinner-trace 1200ms linear 25;
+				animation-play-state: var(--spinner-play-state, running);
+			}
+
+			@keyframes app-spinner-trace {
 				to {
-					transform: rotate(360deg);
+					stroke-dashoffset: -100;
 				}
 			}
 
@@ -252,7 +264,30 @@
 		<!-- All resources required to boot the dapp can take some times to be downloaded on the IC. -->
 		<!-- That's why we are displaying a spinner while the dapp is starting. -->
 		<!-- Spinner which is then removed as soon as the authentication is initialized (regardless if sign-in or sign-out) -->
-		<div id="app-spinner" aria-hidden="true" data-tid="spinner"></div>
+		<div id="app-spinner" aria-hidden="true" data-tid="spinner">
+			<!-- Keep this pre-hydration visor in sync with ui/Spinner.svelte. -->
+			<svg
+				viewBox="0 0 46 40"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="3.2"
+				stroke-linejoin="round"
+				focusable="false"
+			>
+				<path
+					d="M41.9679 20.9668V19.3807C42.1127 8.8544 33.3268 6.93179 22.996 6.7876C12.617 6.93179 3.83106 8.8544 3.97589 19.3807V20.9668C3.83106 31.5412 12.617 33.4638 22.996 33.608C33.3268 33.4638 42.1127 31.5412 41.9679 20.9668Z"
+					pathLength="100"
+					opacity="0.2"
+				/>
+				<path
+					class="trace"
+					d="M41.9679 20.9668V19.3807C42.1127 8.8544 33.3268 6.93179 22.996 6.7876C12.617 6.93179 3.83106 8.8544 3.97589 19.3807V20.9668C3.83106 31.5412 12.617 33.4638 22.996 33.608C33.3268 33.4638 42.1127 31.5412 41.9679 20.9668Z"
+					pathLength="100"
+					stroke-dasharray="25 75"
+					stroke-linecap="round"
+				/>
+			</svg>
+		</div>
 
 		<!-- SCRIPT_LOADER -->
 	</body>

@@ -460,35 +460,41 @@ describe('active-user-transactions.services', () => {
 		});
 
 		it('does nothing when update is undefined', async () => {
-			await applyActiveUserTransactionPollUpdate({
-				identity: mockIdentity,
-				tx: mockActiveUserTransaction,
-				update: undefined
-			});
+			await expect(
+				applyActiveUserTransactionPollUpdate({
+					identity: mockIdentity,
+					tx: mockActiveUserTransaction,
+					update: undefined
+				})
+			).resolves.toBeFalsy();
 
 			expect(backendApi.updateActiveUserTransaction).not.toHaveBeenCalled();
 		});
 
 		it('skips no-op updates', async () => {
-			await applyActiveUserTransactionPollUpdate({
-				identity: mockIdentity,
-				tx: mockActiveUserTransaction,
-				update: {}
-			});
+			await expect(
+				applyActiveUserTransactionPollUpdate({
+					identity: mockIdentity,
+					tx: mockActiveUserTransaction,
+					update: {}
+				})
+			).resolves.toBeFalsy();
 
 			expect(backendApi.updateActiveUserTransaction).not.toHaveBeenCalled();
 		});
 
-		it('forwards the update when something changes', async () => {
+		it('forwards the update when something changes, and reports it written', async () => {
 			vi.spyOn(backendApi, 'updateActiveUserTransaction').mockResolvedValue(
 				mockActiveUserTransaction
 			);
 
-			await applyActiveUserTransactionPollUpdate({
-				identity: mockIdentity,
-				tx: mockActiveUserTransaction,
-				update: { status: { Succeeded: null }, progressStep: 'done' }
-			});
+			await expect(
+				applyActiveUserTransactionPollUpdate({
+					identity: mockIdentity,
+					tx: mockActiveUserTransaction,
+					update: { status: { Succeeded: null }, progressStep: 'done' }
+				})
+			).resolves.toBeTruthy();
 
 			expect(backendApi.updateActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
@@ -498,7 +504,7 @@ describe('active-user-transactions.services', () => {
 			});
 		});
 
-		it('swallows backend errors so the next tick can retry', async () => {
+		it('swallows backend errors so the next tick can retry, reporting nothing written', async () => {
 			vi.spyOn(backendApi, 'updateActiveUserTransaction').mockRejectedValue(new Error('boom'));
 
 			await expect(
@@ -507,7 +513,7 @@ describe('active-user-transactions.services', () => {
 					tx: mockActiveUserTransaction,
 					update: { status: { Succeeded: null } }
 				})
-			).resolves.toBeUndefined();
+			).resolves.toBeFalsy();
 		});
 	});
 });

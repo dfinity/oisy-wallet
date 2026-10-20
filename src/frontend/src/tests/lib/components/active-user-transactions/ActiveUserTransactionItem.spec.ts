@@ -1,10 +1,12 @@
 import ActiveUserTransactionItem from '$lib/components/active-user-transactions/ActiveUserTransactionItem.svelte';
 import { NANO_SECONDS_IN_MILLISECOND, NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
 import en from '$lib/i18n/en.json';
+import { LIFI_EXTERNAL_REF_KEYS } from '$lib/types/lifi';
 import { formatNanosecondsToShortRelativeTime } from '$lib/utils/format.utils';
 import {
 	mockChainFusionActiveUserTransaction,
 	mockCyclesMintActiveUserTransaction,
+	mockLifiActiveUserTransaction,
 	mockLiquidiumActiveUserTransaction,
 	mockNearIntentsActiveUserTransaction,
 	mockOisyTradeActiveUserTransaction,
@@ -46,6 +48,36 @@ describe('ActiveUserTransactionItem', () => {
 		// Source and destination share a network, so it reads once, not "Ethereum → Ethereum".
 		expect(container).not.toHaveTextContent('Ethereum → Ethereum');
 		expect(container).toHaveTextContent('Ethereum');
+	});
+
+	describe('LI.FI rows', () => {
+		const renderItem = (tx: typeof mockLifiActiveUserTransaction) =>
+			render(ActiveUserTransactionItem, {
+				props: { tx, isUnseen: false, dismissing: false, onDismiss: vi.fn() }
+			});
+
+		// The provider entry is unconditional, so a row keeps its name with `LIFI_SWAP_ENABLED` off.
+		it('renders as a swap with the provider and the cross-chain networks', () => {
+			const { container } = renderItem(mockLifiActiveUserTransaction);
+
+			expect(screen.getByText(`${en.swap.text.swap} 50 USDC → USDC`)).toBeInTheDocument();
+			expect(container).toHaveTextContent('Base → Solana');
+			expect(container).toHaveTextContent('LI.FI');
+		});
+
+		it('shows the token actually received when the route paid out in another one', () => {
+			renderItem({
+				...mockLifiActiveUserTransaction,
+				status: { Succeeded: null },
+				external_refs: [
+					...mockLifiActiveUserTransaction.external_refs,
+					{ key: LIFI_EXTERNAL_REF_KEYS.RECEIVED_SYMBOL, value: 'USDC.e' },
+					{ key: LIFI_EXTERNAL_REF_KEYS.RECEIVED_AMOUNT, value: '49.875' }
+				]
+			});
+
+			expect(screen.getByText(`${en.swap.text.swap} 50 USDC → 49.875 USDC.e`)).toBeInTheDocument();
+		});
 	});
 
 	// A ck conversion joins the swap union and reuses the shared display refs, so it

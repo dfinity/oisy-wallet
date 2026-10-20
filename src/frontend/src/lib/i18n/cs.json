@@ -1349,6 +1349,8 @@
 			"swap_fees": "Poplatky za swap",
 			"cross_chain_networks_info": "Přesouváte tokeny ze sítě <b>$sourceNetwork</b> do sítě <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -1388,7 +1390,8 @@
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
-			"oisy_trade_recovery_failed": ""
+			"oisy_trade_recovery_failed": "",
+			"lifi_status_unknown": ""
 		}
 	},
 	"buy": {
