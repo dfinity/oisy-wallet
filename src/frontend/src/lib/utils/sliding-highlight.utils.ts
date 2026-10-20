@@ -45,9 +45,10 @@ const findRow = ({
 };
 
 // A wrapper around rows, such as a group with a divider, that the pointer reaches through its
-// border or a gap between rows.
+// border or a gap between rows; or a divider between groups, which is such a gap.
 const holdsRows = (target: EventTarget | null): boolean =>
-	target instanceof Element && nonNullish(target.querySelector(`li, ${ROW_SELECTOR}`));
+	target instanceof HTMLHRElement ||
+	(target instanceof Element && nonNullish(target.querySelector(`li, ${ROW_SELECTOR}`)));
 
 const scrollContainerOf = ({ node, row }: { node: HTMLElement; row: HTMLElement }): HTMLElement => {
 	for (

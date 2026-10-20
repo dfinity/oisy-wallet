@@ -319,6 +319,25 @@ describe('slidingHighlight', () => {
 		expect(highlightOf(node)).toHaveClass('visible');
 	});
 
+	it('stays put on a divider between groups', () => {
+		const node = document.createElement('div');
+		node.innerHTML = `
+			<button class="nav-item">Contacts</button>
+			<hr />
+			<button class="nav-item">WalletConnect</button>
+		`;
+		document.body.append(node);
+		const [first, second] = Array.from(node.querySelectorAll<HTMLElement>('.nav-item'));
+		place({ row: first, top: 0, height: 36 });
+		place({ row: second, top: 37, height: 36 });
+		slidingHighlight(node, true);
+
+		pointer({ type: 'pointerover', target: first });
+		pointer({ type: 'pointerover', target: node.querySelector('hr') as Element });
+
+		expect(highlightOf(node)).toHaveClass('visible');
+	});
+
 	it('takes LogoButton rows outside a list, and skips a row whose button is disabled', () => {
 		const node = document.createElement('div');
 		node.innerHTML = `
