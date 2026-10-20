@@ -10,6 +10,7 @@ import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import { ETH_TOKEN_GROUP_ID } from '$env/tokens/groups/groups.eth.env';
 import { ICP_TOKEN_GROUP_ID } from '$env/tokens/groups/groups.icp.env';
+import { SOL_TOKEN_GROUP_ID } from '$env/tokens/groups/groups.sol.env';
 import { ICRC_LEDGER_CANISTER_TESTNET_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.testnet.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
@@ -202,7 +203,10 @@ describe('user-snapshot.services', () => {
 						network_id: SOLANA_MAINNET_NETWORK_ID.description
 					},
 					account: mockSolAddress,
-					token_address: { token_symbol: SOLANA_TOKEN_ID.description, wraps: toNullable() },
+					token_address: {
+						token_symbol: SOLANA_TOKEN_ID.description,
+						wraps: toNullable(SOL_TOKEN_GROUP_ID.description)
+					},
 					last_transactions: []
 				}
 			},
