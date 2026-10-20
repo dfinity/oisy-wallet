@@ -24,7 +24,7 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import { parseToken } from '$lib/utils/parse.utils';
+	import { tryParseToken } from '$lib/utils/parse.utils';
 	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
@@ -44,7 +44,7 @@
 
 	let amount = $derived(
 		nonNullish(sendAmount) && !invalidAmount(sendAmount)
-			? parseToken({ value: `${sendAmount}`, unitName: $sourceToken.decimals })
+			? tryParseToken({ value: `${sendAmount}`, unitName: $sourceToken.decimals })
 			: undefined
 	);
 

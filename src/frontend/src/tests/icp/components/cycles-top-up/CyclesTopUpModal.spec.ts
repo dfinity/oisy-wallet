@@ -385,6 +385,24 @@ describe('CyclesTopUpModal', () => {
 
 			expect(result.getByTestId(CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON)).toBeDisabled();
 		});
+
+		it.each([
+			{ name: 'a lone decimal point', value: '.' },
+			{ name: 'an amount too large to parse', value: '1'.padEnd(160, '0') }
+		])('keeps Next disabled for $name', async ({ value }) => {
+			const result = await toAmount();
+
+			const input = result.container.querySelector<HTMLInputElement>(
+				`input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`
+			);
+
+			assertNonNullish(input);
+
+			await fireEvent.input(input, { target: { value } });
+
+			expect(input).toHaveValue(value);
+			expect(result.getByTestId(CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON)).toBeDisabled();
+		});
 	});
 
 	describe('review', () => {
