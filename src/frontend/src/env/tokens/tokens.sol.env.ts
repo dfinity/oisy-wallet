@@ -1,11 +1,13 @@
+import { CKSOL_ENABLED } from '$env/cksol.env';
 import {
 	SOL_MAINNET_ENABLED,
 	SOLANA_DEVNET_NETWORK,
 	SOLANA_LOCAL_NETWORK,
 	SOLANA_MAINNET_NETWORK
 } from '$env/networks/networks.sol.env';
+import { SOL_TOKEN_GROUP } from '$env/tokens/groups/groups.sol.env';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
-import type { RequiredToken, TokenId } from '$lib/types/token';
+import type { RequiredToken, RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import sol from '$sol/assets/sol.svg';
@@ -16,7 +18,7 @@ const SOLANA_SYMBOL = 'SOL';
 
 export const SOLANA_TOKEN_ID: TokenId = parseTokenId(SOLANA_SYMBOL);
 
-export const SOLANA_TOKEN: RequiredToken = {
+export const SOLANA_TOKEN: RequiredTokenWithLinkedData = {
 	id: SOLANA_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
 	standard: { code: 'solana' },
@@ -26,6 +28,10 @@ export const SOLANA_TOKEN: RequiredToken = {
 	symbol: SOLANA_SYMBOL,
 	decimals: SOLANA_DEFAULT_DECIMALS,
 	icon: sol,
+	twinTokenSymbol: 'ckSOL',
+	// Behind the flag rather than always set: the group also names what a token wraps in
+	// the user snapshot, and production must not change before ckSOL ships.
+	...(CKSOL_ENABLED && { groupData: SOL_TOKEN_GROUP }),
 	buy: {
 		onramperId: 'sol'
 	}
