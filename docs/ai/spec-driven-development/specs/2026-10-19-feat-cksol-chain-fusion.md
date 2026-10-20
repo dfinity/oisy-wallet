@@ -50,7 +50,7 @@ Local builds cannot convert: they carry no mainnet ck tokens, there is no local 
 
 ## 5. The ckSOL token
 
-1. ckSOL is a curated Chain Fusion token like ckBTC and ckETH: the mainnet ledger, index and minter, the SOL price (`exchangeCoinId` `solana`), SOL on Solana mainnet as its twin, and the ckSOL logo from `dfinity/cksol` (`static/images/cksol-token.svg`) shipped as a static icon.
+1. ckSOL is a curated Chain Fusion token like ckBTC and ckETH: the mainnet ledger, index and minter, the SOL price (`exchangeCoinId` `solana`), SOL on Solana mainnet as its twin, and the ledger's own logo (`icrc1:logo`), which OISY shows for ck tokens as it does for ckBTC and ckETH, so no icon file is shipped.
 2. It is **not enabled by default** (D4). A conversion to ckSOL enables it, as it does for every Chain Fusion destination, and users can enable it in Manage tokens.
 3. SOL and ckSOL appear as one **Solana** token group, as BTC / ckBTC and ETH / ckETH do (D9).
 4. The ckSOL page has the actions of any ICRC token. It gets no Convert button (D2).
