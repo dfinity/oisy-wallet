@@ -146,12 +146,13 @@
 		gap: 0.125rem;
 	}
 
+	// 36 px for a one-line step; a longer explanation wraps and the row grows with the same padding.
 	.step {
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
-		height: 2.25rem;
-		padding: 0 0.25rem;
+		min-height: 2.25rem;
+		padding: 0.3125rem 0.25rem;
 	}
 
 	.marker {
@@ -202,19 +203,19 @@
 	}
 
 	// Set at 18 px and drawn at 16 px, so growing into the active step is a transform rather than
-	// a reflow. One weight in every state: a weight change would shift the glyphs. Waiting and
-	// finished labels share the tertiary grey, the lightest that keeps 4.5:1 in both themes; their
-	// markers tell them apart.
+	// a reflow: the lines always break where the 18 px text breaks. Labels wrap rather than
+	// truncate, since some are full explanations ("We'll keep bridging in the background").
+	// One weight in every state: a weight change would shift the glyphs. Waiting and finished
+	// labels share the tertiary grey, the lightest that keeps 4.5:1 in both themes; their markers
+	// tell them apart.
 	.text {
 		position: relative;
 		flex: 0 1 19rem;
 		min-width: 0;
-		overflow: hidden;
 		font-size: 1.125rem;
 		line-height: 1.4;
 		color: var(--color-foreground-tertiary);
-		white-space: nowrap;
-		text-overflow: ellipsis;
+		overflow-wrap: anywhere;
 		transform-origin: 0 50%;
 		scale: calc(16 / 18);
 		transition:
@@ -236,10 +237,7 @@
 	.text::after {
 		position: absolute;
 		inset: 0;
-		overflow: hidden;
 		color: transparent;
-		white-space: nowrap;
-		text-overflow: ellipsis;
 		content: attr(data-label) #{'/'} '';
 		background-image: linear-gradient(
 			90deg,
