@@ -1,4 +1,6 @@
 import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { CYCLES_LEDGER_DEPOSIT_FEE } from '$icp/constants/cmc.constants';
+import type { IcrcTransaction } from '$icp/types/ic-transaction';
 import {
 	getTopUpCanister,
 	isCyclesLedger,
@@ -12,6 +14,7 @@ import {
 	createMockIcrcTransferTransaction
 } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity, mockPrincipalText2 } from '$tests/mocks/identity.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 describe('cycles-ledger-transactions.utils', () => {
@@ -79,21 +82,40 @@ describe('cycles-ledger-transactions.utils', () => {
 			expect(result).toEqual({
 				...mapIcrcTransaction({ transaction, identity: mockIdentity }),
 				to: canister.toText(),
-				typeLabel: 'transaction.label.top_up'
+				typeLabel: 'transaction.label.top_up',
+				fee: CYCLES_LEDGER_DEPOSIT_FEE
 			});
 			expect(result.type).toBe('burn');
 		});
 
-		it('should keep a burn with another memo, or none, a plain burn', () => {
+		it('should keep a burn with another memo, or none, a plain burn with the ledger fee', () => {
 			const otherMemo = createMockIcrcBurnTransaction({ memo: new Uint8Array(32).fill(0xfe) });
 			const noMemo = createMockIcrcBurnTransaction();
 
 			expect(
 				mapCyclesLedgerTransaction({ transaction: otherMemo, identity: mockIdentity })
-			).toEqual(mapIcrcTransaction({ transaction: otherMemo, identity: mockIdentity }));
-			expect(mapCyclesLedgerTransaction({ transaction: noMemo, identity: mockIdentity })).toEqual(
-				mapIcrcTransaction({ transaction: noMemo, identity: mockIdentity })
-			);
+			).toEqual({
+				...mapIcrcTransaction({ transaction: otherMemo, identity: mockIdentity }),
+				fee: CYCLES_LEDGER_DEPOSIT_FEE
+			});
+			expect(mapCyclesLedgerTransaction({ transaction: noMemo, identity: mockIdentity })).toEqual({
+				...mapIcrcTransaction({ transaction: noMemo, identity: mockIdentity }),
+				fee: CYCLES_LEDGER_DEPOSIT_FEE
+			});
+		});
+
+		it('should keep the fee the index gives a burn', () => {
+			const indexed = createMockIcrcBurnTransaction({ memo: topUpMemo });
+			const [burn] = indexed.transaction.burn;
+
+			assertNonNullish(burn);
+
+			const transaction = {
+				...indexed,
+				transaction: { ...indexed.transaction, burn: [{ ...burn, fee: [123n] }] }
+			} as IcrcTransaction;
+
+			expect(mapCyclesLedgerTransaction({ transaction, identity: mockIdentity }).fee).toBe(123n);
 		});
 
 		it('should label the refund of a failed top-up', () => {

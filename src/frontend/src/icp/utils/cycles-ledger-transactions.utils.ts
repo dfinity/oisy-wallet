@@ -1,4 +1,5 @@
 import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { CYCLES_LEDGER_DEPOSIT_FEE } from '$icp/constants/cmc.constants';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi, IcrcTransaction } from '$icp/types/ic-transaction';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
@@ -43,6 +44,11 @@ export const isTopUpRefundMemo = (memo: Uint8Array | undefined): boolean =>
  * Maps a cycles-ledger transaction like any ICRC one, and labels a top-up, naming the
  * canister as its destination, and the mint that refunds a failed one. Every other burn
  * and mint keeps its plain label.
+ *
+ * A burn also gets the ledger's fee. `withdraw` and `create_canister` take the amount plus
+ * the ledger's one fee (`config::FEE`, the same 0.0001 TCYCLES a deposit pays), but the
+ * cycles ledger's index leaves the burn's `fee` empty. With it, a burn shows like a send:
+ * the amount plus the fee out of the balance, and the fee in its details.
  */
 export const mapCyclesLedgerTransaction = ({
 	transaction,
@@ -57,15 +63,21 @@ export const mapCyclesLedgerTransaction = ({
 		transaction: { burn, mint }
 	} = transaction;
 
-	const topUpCanister = getTopUpCanister(fromNullishNullable(fromNullable(burn)?.memo));
+	const burnData = fromNullable(burn);
+
+	const charged: IcTransactionUi = nonNullish(burnData)
+		? { ...mapped, fee: fromNullable(burnData.fee) ?? CYCLES_LEDGER_DEPOSIT_FEE }
+		: mapped;
+
+	const topUpCanister = getTopUpCanister(fromNullishNullable(burnData?.memo));
 
 	if (nonNullish(topUpCanister)) {
-		return { ...mapped, to: topUpCanister.toText(), typeLabel: 'transaction.label.top_up' };
+		return { ...charged, to: topUpCanister.toText(), typeLabel: 'transaction.label.top_up' };
 	}
 
 	if (isTopUpRefundMemo(fromNullishNullable(fromNullable(mint)?.memo))) {
 		return { ...mapped, typeLabel: 'transaction.label.top_up_refund' };
 	}
 
-	return mapped;
+	return charged;
 };
