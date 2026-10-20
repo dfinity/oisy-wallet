@@ -72,7 +72,7 @@ describe('velora-active-tx.services', () => {
 		vi.clearAllMocks();
 		resetEvmSourceTxObservations();
 
-		applySpy.mockResolvedValue();
+		applySpy.mockResolvedValue(true);
 
 		getDeltaOrderById = vi.fn();
 		vi.mocked(constructSimpleSDK).mockReturnValue({
