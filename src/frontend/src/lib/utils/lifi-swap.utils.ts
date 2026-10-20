@@ -352,6 +352,25 @@ export const mapLifiSwapResult = ({
 });
 
 /**
+ * The addresses of every ERC-20 and ERC-4626 OISY knows on a network, enabled or not, whose
+ * allowances to the Diamond the calldata binding reads: hiding a token does not revoke its
+ * allowance. A token OISY does not know, approved through another dapp, cannot be listed; LI.FI's
+ * whitelist remains the guard there.
+ */
+export const lifiUserTokenAddresses = ({
+	tokens,
+	networkId
+}: {
+	tokens: Token[];
+	networkId: NetworkId;
+}): string[] =>
+	tokens.flatMap((token) =>
+		token.network.id === networkId && (isTokenErc20(token) || isTokenErc4626(token))
+			? [token.address]
+			: []
+	);
+
+/**
  * Whether the calldata binding could accept the route, judged from its steps: no step after the
  * bridge, which would pay out another token than the one asked for, and no DEX swap before an
  * Across bridge, whose unsigned minimum such a swap could undercut (see `assertLifiCalldata`). A

@@ -513,7 +513,8 @@ export interface SwapLifiEvmParams extends RequiredTransactionFeeData {
 	// The swap transaction's network fee ceiling the user reviewed, `undefined` when none could be
 	// shown. Execution never signs one above it.
 	reviewedFeeCeiling: bigint | undefined;
-	// The ERC-20s the user holds on the source network, which no call of the route may target.
+	// The ERC-20s OISY knows on the source network, enabled or not: those with an allowance to the
+	// Diamond are what no call of the route may target (`lifiUserTokenAddresses`).
 	userTokenAddresses: string[];
 }
 

@@ -41,8 +41,9 @@ const approvedTokenAddresses = async ({
  * revert into a refusal before signing, and makes explicit that OISY relies on LI.FI's whitelist
  * governance rather than on the unsigned quote.
  *
- * `userTokenAddresses` are the ERC-20s the user holds on the source network. Those with an
- * allowance to the Diamond, read here, are what a swap call could spend, and may not be called.
+ * `userTokenAddresses` are the ERC-20s OISY knows on the source network, enabled or not: hiding a
+ * token does not revoke its allowance. Those with an allowance to the Diamond, read here, are what a
+ * swap call could spend, and may not be called.
  *
  * Run on the execution-time quote, the one whose bytes are signed. A failed read of the whitelist
  * refuses the swap too: the check fails closed.

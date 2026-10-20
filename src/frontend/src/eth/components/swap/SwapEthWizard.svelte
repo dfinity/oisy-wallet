@@ -21,7 +21,6 @@
 	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErcFungible } from '$eth/utils/erc-fungible.utils';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
-	import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 	import { mapEthereumErrorMsg } from '$eth/utils/eth-error.utils';
 	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import { isIcToken } from '$icp/validation/ic-token.validation';
@@ -43,7 +42,7 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import { enabledFungibleTokens } from '$lib/derived/tokens.derived';
+	import { fungibleTokens } from '$lib/derived/tokens.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { hasAcknowledgedNearIntentsSwap } from '$lib/derived/user-provider-agreements.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -80,6 +79,8 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { toLifiSwapErrorType } from '$lib/utils/lifi-swap-error.utils';
+	import { lifiUserTokenAddresses } from '$lib/utils/lifi-swap.utils';
 	import { isNetworkEthereum } from '$lib/utils/network.utils';
 	import { nearIntentsQuoteRejectedMessage } from '$lib/utils/swap.utils';
 
@@ -519,19 +520,16 @@
 					await fetchVeloraMarketSwap({ ...params, swapDetails: selectedProvider.swapDetails });
 				}
 			} else if (selectedProvider?.provider === SwapProvider.LIFI) {
-				const sourceNetworkId = $sourceToken.network.id;
-
 				await fetchLifiEvmSwap({
 					...baseParams,
 					destinationToken: $destinationToken,
 					offer: selectedProvider,
 					reviewedFeeCeiling: lifiReviewedFeeCeiling,
-					// No call of the route may target a token the user holds there.
-					userTokenAddresses: $enabledFungibleTokens.flatMap((token) =>
-						token.network.id === sourceNetworkId && (isTokenErc20(token) || isTokenErc4626(token))
-							? [token.address]
-							: []
-					)
+					// Disabled ones too: hiding a token does not revoke its allowance to the Diamond.
+					userTokenAddresses: lifiUserTokenAddresses({
+						tokens: $fungibleTokens,
+						networkId: $sourceToken.network.id
+					})
 				});
 			} else if (selectedProvider?.provider === SwapProvider.ONE_SEC) {
 				if (!isIcToken($destinationToken) || isNullish($ethAddress)) {
@@ -660,7 +658,12 @@
 				name: TRACK_COUNT_SWAP_ERROR,
 				metadata: {
 					...swapTrackingMetadata,
-					error: errorDetail ?? ''
+					// LI.FI's error text can carry the user's addresses or signed transaction: only an
+					// allow-listed category is reported.
+					error:
+						selectedProvider?.provider === SwapProvider.LIFI
+							? toLifiSwapErrorType(err)
+							: (errorDetail ?? '')
 				}
 			});
 

@@ -26,11 +26,13 @@ import {
 	buildLifiSupportedDestinations,
 	isLifiRouteExecutable,
 	lifiFeesUsd,
+	lifiUserTokenAddresses,
 	mapLifiSwapResult,
 	toLifiChainId,
 	toLifiTokenAddress
 } from '$lib/utils/lifi-swap.utils';
 import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import {
 	mockLifiBaseUsdcAddress,
 	mockLifiBaseUsdcToken,
@@ -622,6 +624,25 @@ describe('lifi-swap.utils', () => {
 				swapDetails: mockLifiQuote,
 				request
 			});
+		});
+	});
+
+	describe('lifiUserTokenAddresses', () => {
+		const baseVault = { ...mockValidErc4626Token, network: BASE_NETWORK };
+
+		it('should list every ERC-20 and ERC-4626 of the network, a disabled one too', () => {
+			expect(
+				lifiUserTokenAddresses({
+					tokens: [
+						{ ...mockLifiBaseUsdcToken, enabled: false },
+						baseVault,
+						BASE_ETH_TOKEN,
+						ETHEREUM_TOKEN,
+						{ ...mockLifiBaseUsdcToken, network: ARBITRUM_MAINNET_NETWORK, address: '0xA1' }
+					] as Token[],
+					networkId: BASE_NETWORK_ID
+				})
+			).toEqual([mockLifiBaseUsdcAddress, baseVault.address]);
 		});
 	});
 

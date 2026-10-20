@@ -513,13 +513,20 @@ describe('lifi-evm-swap.services', () => {
 					case: 'whose answer was lost',
 					err: Object.assign(new Error('timeout'), { code: 'TIMEOUT' })
 				}
-			])('should keep the row of a transaction $case, for the poller', async ({ err }) => {
-				broadcast = () => Promise.reject(err);
+			])(
+				'should go on as sent with a transaction $case, never to be signed twice',
+				async ({ err }) => {
+					const params = nativeParams();
 
-				await expect(fetchLifiEvmSwap(nativeParams())).rejects.toBe(err);
+					broadcast = () => Promise.reject(err);
 
-				expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
-			});
+					await expect(fetchLifiEvmSwap(params)).resolves.toBeUndefined();
+
+					expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+					expect(params.progress).toHaveBeenLastCalledWith(ProgressStepsSwap.UPDATE_UI);
+					expect(enableSwapDestinationToken).toHaveBeenCalledOnce();
+				}
+			);
 
 			it('should retry a delete that fails, then leave the row to the poller', async () => {
 				const refusal = broadcastRefused('intrinsic gas too low');

@@ -11,6 +11,7 @@ import {
 	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
 import {
+	TRACK_COUNT_SWAP_ERROR,
 	TRACK_COUNT_SWAP_SUBMITTED,
 	TRACK_COUNT_SWAP_SUCCESS
 } from '$lib/constants/analytics.constants';
@@ -1228,6 +1229,28 @@ describe('SwapEthWizard', () => {
 				})
 			);
 			expect(onClose).toHaveBeenCalledOnce();
+		});
+
+		// LI.FI's SDK names the request URL, addresses included, in its messages.
+		it('reports a failure to analytics by its category, never its message', async () => {
+			const message = `Request failed https://li.quest/v1/quote?fromAddress=${mockEthAddress}`;
+
+			mockFetchLifiEvmSwap.mockRejectedValueOnce(new Error(message));
+
+			const rendered = renderLifi();
+
+			await vi.runOnlyPendingTimersAsync();
+			await confirmSwap(rendered);
+
+			expect(analytics.trackEvent).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: TRACK_COUNT_SWAP_ERROR,
+					metadata: expect.objectContaining({ error: 'unknown' })
+				})
+			);
+			expect(JSON.stringify(vi.mocked(analytics.trackEvent).mock.calls)).not.toContain(
+				mockEthAddress
+			);
 		});
 
 		it('returns to the review with the higher fee when it rose, and signs no more than that', async () => {

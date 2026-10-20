@@ -228,7 +228,8 @@ const deleteLifiRow = async ({ identity, id }: { identity: Identity; id: string 
  * not exceed the one the user reviewed.
  *
  * The row is created once the transaction is signed and before it is broadcast, so that no swap is
- * ever broadcast untracked; it is deleted if the node refuses the transaction outright.
+ * ever broadcast untracked; it is deleted if the node refuses the transaction outright. A broadcast
+ * whose outcome is unknown counts as sent: the swap is never offered for signing twice.
  */
 export const fetchLifiEvmSwap = async ({
 	identity,
@@ -406,13 +407,22 @@ export const fetchLifiEvmSwap = async ({
 			beforeBroadcast: createRow
 		});
 	} catch (err: unknown) {
-		// Only a transaction the node refused outright never started; any other failure may have
-		// relayed it, and its row is left to the poller.
-		if (nonNullish(rowId) && isDefinitiveTransactionRefusal(err)) {
-			await deleteLifiRow({ identity, id: rowId });
+		// Nothing was broadcast before the row existed.
+		if (isNullish(rowId)) {
+			throw err;
 		}
 
-		throw err;
+		// Only a transaction the node refused outright never started.
+		if (isDefinitiveTransactionRefusal(err)) {
+			await deleteLifiRow({ identity, id: rowId });
+
+			throw err;
+		}
+
+		// Any other failure may have relayed the transaction. Signing again would read the next
+		// nonce and could swap twice, so the swap goes on as sent: its row settles it, as mined, or as
+		// replaced or dropped once its nonce is used.
+		consoleError(err);
 	}
 
 	progress(ProgressStepsSwap.UPDATE_UI);
