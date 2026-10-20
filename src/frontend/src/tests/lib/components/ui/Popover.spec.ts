@@ -6,13 +6,13 @@ describe('Popover', () => {
 	it('should be closed by default', () => {
 		const { getByRole } = render(Popover);
 
-		expect(() => getByRole('menu')).toThrow();
+		expect(() => getByRole('dialog')).toThrow();
 	});
 
 	it('should be visible', async () => {
 		const { getByRole } = render(Popover, { props: { visible: true } });
 
-		await waitFor(() => expect(getByRole('menu')).not.toBeNull());
+		await waitFor(() => expect(getByRole('dialog')).not.toBeNull());
 	});
 
 	it('should render a backdrop', () => {

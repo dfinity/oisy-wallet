@@ -24,6 +24,20 @@ describe('RewardCard', () => {
 	mockContext.set(REWARD_ELIGIBILITY_CONTEXT_KEY, initRewardEligibilityContext(store));
 	store.setCampaignEligibilities(mockCampaignEligibilities);
 
+	it('should press to 0.98 like other whole-card buttons', () => {
+		const mockedReward: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
+			(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
+		);
+		assertNonNullish(mockedReward);
+
+		const { getByTestId } = render(RewardCard, {
+			props: { onclick: vi.fn(), reward: mockedReward, testId },
+			context: mockContext
+		});
+
+		expect(getByTestId(testId)).toHaveClass('press');
+	});
+
 	it('should render active reward card content', () => {
 		const mockedReward: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
 			(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID

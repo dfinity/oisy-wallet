@@ -11,7 +11,7 @@ import {
 	CYCLES_LEDGER_DEPOSIT_FEE
 } from '$icp/constants/cmc.constants';
 import type { CyclesMintNotifyResult } from '$icp/types/cycles-mint';
-import { ZERO } from '$lib/constants/app.constants';
+import { ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES, ZERO } from '$lib/constants/app.constants';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import type { TrackCyclesMintParams } from '$lib/services/cycles-mint-analytics.services';
 import {
@@ -21,6 +21,7 @@ import {
 } from '$lib/types/cycles-mint-active-tx';
 import type { Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
+import { truncateUtf8Bytes } from '$lib/utils/string.utils';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
 import { fromNullable, nonNullish } from '@dfinity/utils';
 import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
@@ -165,18 +166,11 @@ export const isCyclesMintDeposit = ({
 export const toCyclesMintCredited = (minted: bigint): bigint =>
 	minted > CYCLES_LEDGER_DEPOSIT_FEE ? minted - CYCLES_LEDGER_DEPOSIT_FEE : ZERO;
 
-// The backend refuses an `error` longer than 512 bytes, and a refused terminal write would
+// The backend refuses an `error` longer than its byte limit, and a refused terminal write would
 // leave the row notifying the same final answer forever. The CMC's reasons are its own
 // free text, so they are cut to fit rather than trusted to.
-const MAX_ROW_ERROR_BYTES = 512;
-
-const toCyclesMintRowError = (reason: string): string => {
-	// `encodeInto` stops at the last whole code point that fits, and `read` counts the UTF-16
-	// units it took: one pass that ends at the limit, whatever the reason's length.
-	const { read } = new TextEncoder().encodeInto(reason, new Uint8Array(MAX_ROW_ERROR_BYTES));
-
-	return reason.slice(0, read);
-};
+const toCyclesMintRowError = (reason: string): string =>
+	truncateUtf8Bytes({ text: reason, maxBytes: ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES });
 
 /**
  * What a notify outcome means for the row, shared by the modal and the poller so the two
