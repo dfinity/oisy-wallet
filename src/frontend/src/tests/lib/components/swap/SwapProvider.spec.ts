@@ -106,6 +106,37 @@ describe('SwapProvider form header', () => {
 		expect(select).toHaveClass('flex-none');
 	});
 
+	it('allows provider names to use the remaining header width instead of a percentage cap', () => {
+		store.setSwaps({
+			swaps: [mockNearIntentsProvider, mockOneSecProvider],
+			selectedProvider: mockNearIntentsProvider,
+			amountForSwap: '1'
+		});
+		const { getByTestId, getByText } = render(SwapProviderHeader, { props, context });
+		const providerGroup = getByTestId(SWAP_PROVIDER_ANIMATION).parentElement;
+
+		expect(providerGroup).not.toHaveClass('max-w-[45%]');
+		expect(providerGroup).not.toHaveClass('shrink-0');
+		expect(getByText(en.swap.text.smart_swap).parentElement).toHaveClass(
+			'min-w-min',
+			'flex-auto',
+			'whitespace-nowrap'
+		);
+	});
+
+	it('does not offset the Best Rate badge below the centered form row', () => {
+		store.setSwaps({
+			swaps: [mockNearIntentsProvider, mockOneSecProvider],
+			selectedProvider: mockNearIntentsProvider,
+			amountForSwap: '1'
+		});
+		const { getByText } = render(SwapProviderHeader, { props, context });
+		const badge = getByText(en.swap.text.best_rate).closest('.bg-success-subtle-20');
+
+		expect(badge).toHaveClass('mt-0');
+		expect(badge).not.toHaveClass('mt-1');
+	});
+
 	it('opens manual selection without submitting or opening provider details', async () => {
 		store.setSwaps({
 			swaps: [offer, mockOneSecProvider],
@@ -536,11 +567,10 @@ describe('SwapProvider form header', () => {
 		const status = getByText(en.swap.text.comparing_providers);
 
 		expect(status.parentElement).toBe(label.parentElement);
-		expect(label.parentElement).toHaveClass('flex-nowrap', 'min-w-0', 'text-sm', 'text-tertiary');
+		expect(label.parentElement).toHaveClass('flex-nowrap', 'min-w-min', 'text-sm', 'text-tertiary');
 		expect(status).toHaveClass('truncate');
 		expect(label).toHaveClass('shrink-0');
 		expect(getByTestId(SWAP_PROVIDER_ANIMATION).parentElement).toHaveClass(
-			'max-w-[45%]',
 			'min-w-0',
 			'justify-end'
 		);

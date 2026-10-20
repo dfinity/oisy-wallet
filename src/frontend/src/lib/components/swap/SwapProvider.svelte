@@ -119,7 +119,9 @@
 		{#snippet contentHeader({ isInBottomSheet })}
 			{#if isForm}
 				<div class="flex w-full min-w-0 items-center justify-between gap-2">
-					<div class="flex min-w-0 flex-1 flex-nowrap items-center gap-2 text-sm text-tertiary">
+					<div
+						class="flex min-w-min flex-auto flex-nowrap items-center gap-2 text-sm whitespace-nowrap text-tertiary"
+					>
 						<span class="shrink-0">{$i18n.swap.text.smart_swap}</span>
 						{#if comparing}
 							<span class="truncate" role="status">{$i18n.swap.text.comparing_providers}</span>
@@ -135,11 +137,9 @@
 							>
 						{/if}
 					</div>
-					<div
-						class="ml-auto flex max-w-[45%] min-w-0 shrink-0 items-center justify-end gap-2 text-sm text-primary"
-					>
+					<div class="ml-auto flex min-w-0 items-center justify-end gap-2 text-sm text-primary">
 						{#if !comparing && isBestRate && ($swapAmountsStore?.swaps.length ?? 0) > 1}
-							<BestRateBadge />
+							<BestRateBadge styleClass="mt-0" />
 						{/if}
 						<SwapProviderAnimation
 							animate={!isInBottomSheet && animate}
