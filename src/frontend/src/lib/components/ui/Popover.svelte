@@ -20,6 +20,7 @@
 		placement?: PopoverPlacement;
 		closeButton?: boolean;
 		invisibleBackdrop?: boolean;
+		dropdown?: boolean;
 		testId?: string;
 		children?: Snippet;
 		ariaLabel?: string;
@@ -32,6 +33,7 @@
 		placement = 'below',
 		closeButton = false,
 		invisibleBackdrop = false,
+		dropdown = false,
 		testId = 'popover-component',
 		ariaLabel,
 		children
@@ -169,6 +171,7 @@
 		<div
 			class="wrapper"
 			class:above={placement === 'above'}
+			class:dropdown
 			class:placed={placementResolved}
 			class:rtl={effectiveDirection === 'rtl'}
 			aria-label={ariaLabel ?? anchor?.getAttribute('aria-label') ?? $i18n.navigation.alt.menu}
@@ -198,6 +201,7 @@
 
 <style lang="scss">
 	@use '$lib/styles/mixins/display';
+	@use '$lib/styles/mixins/interaction';
 
 	.popover {
 		position: fixed;
@@ -279,6 +283,41 @@
 
 		@media (forced-colors: active) {
 			border: 1px solid CanvasText;
+		}
+	}
+
+	// Dropdowns and short option menus: an 8px inset instead of the menus' 14px, so the 8px-cornered
+	// rows and search box sit concentric in the 16px corners. Everything inside takes its
+	// density from these properties: menu-surface rows (global/menus.scss), ListItemCheckbox, Toggle
+	// rows and the shared InputSearch (InputBase hooks). Rows are 36px with a 12px inset, in line
+	// with the search text, and 44px on a touch screen.
+	.wrapper.dropdown {
+		padding: 8px;
+
+		.popover-content {
+			--border-radius: 8px;
+			--menu-row-min-height: 36px;
+			--menu-row-padding-block: 6px;
+			--menu-row-padding-inline: 12px;
+			--input-padding-block: 7px;
+			--input-padding-inline: 11px;
+			--input-padding-inner-end: 40px;
+			// InputSearch renders an empty label row above the box; its gap would push the box down.
+			--input-block-gap: 0;
+
+			// Rows only ever stack: never offer a horizontal scrollbar for a fraction of a pixel.
+			overflow-x: hidden;
+
+			@include interaction.coarse {
+				--menu-row-min-height: var(--touch-target-min-height);
+				--menu-row-padding-block: 10px;
+				--input-padding-block: 9px;
+			}
+		}
+
+		// Compact rows go without dividers; `.menu-divider` between groups stays.
+		.popover-content :global(li) {
+			border-bottom-width: 0;
 		}
 	}
 

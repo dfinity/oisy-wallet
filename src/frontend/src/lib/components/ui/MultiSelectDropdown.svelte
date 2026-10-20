@@ -84,10 +84,10 @@
 	</span>
 </button>
 
-<ResponsivePopover {button} direction="ltr" bind:visible>
+<ResponsivePopover {button} direction="ltr" dropdown bind:visible>
 	{#snippet content()}
 		<div
-			class="flex flex-col gap-2 p-1 {panelWidthClass ?? 'w-full min-w-60'}"
+			class="flex flex-col gap-2 {panelWidthClass ?? 'w-full min-w-60'}"
 			data-tid={MULTI_SELECT_DROPDOWN_PANEL_SHELL}
 		>
 			{#if searchable}

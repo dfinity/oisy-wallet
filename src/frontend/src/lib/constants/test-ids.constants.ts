@@ -285,6 +285,8 @@ export const TRANSACTIONS_FILTER_TOOLBAR = 'transactions-filter-toolbar';
 export const TRANSACTIONS_FILTER_TYPES_DROPDOWN = 'transactions-filter-types-dropdown';
 export const TRANSACTIONS_FILTER_TOKENS_DROPDOWN = 'transactions-filter-tokens-dropdown';
 export const TRANSACTIONS_FILTER_CONTACTS_DROPDOWN = 'transactions-filter-contacts-dropdown';
+export const TRANSACTIONS_FILTER_TYPE_LABEL = 'transactions-filter-type-label';
+export const TRANSACTIONS_FILTER_CONTACT_NAME = 'transactions-filter-contact-name';
 export const TRANSACTIONS_FILTER_CONTACTS_EMPTY_CTA = 'transactions-filter-contacts-empty-cta';
 export const TRANSACTIONS_FILTER_CLEAR_BUTTON = 'transactions-filter-clear-button';
 
