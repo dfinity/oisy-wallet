@@ -13,6 +13,10 @@ import {
 	getTransactionDecoder,
 	getTransactionMessageComputeUnitLimit,
 	getTransactionMessagePriorityFeeLamports,
+	TRANSACTION_CONFIG_COMPUTE_UNIT_LIMIT_BIT_MASK,
+	TRANSACTION_CONFIG_HEAP_SIZE_BIT_MASK,
+	TRANSACTION_CONFIG_LOADED_ACCOUNTS_DATA_SIZE_LIMIT_BIT_MASK,
+	TRANSACTION_CONFIG_PRIORITY_FEE_LAMPORTS_BIT_MASK,
 	type Rpc,
 	type SolanaRpcApi,
 	type Transaction,
@@ -23,6 +27,14 @@ export const decodeTransactionMessage = (transactionMessage: string): Transactio
 	const transactionBytes = getBase64Encoder().encode(transactionMessage);
 	return getTransactionDecoder().decode(transactionBytes);
 };
+
+// The config bits a version 1 message may set: the priority fee (two bits), the compute unit limit,
+// the loaded accounts data size limit and the heap size.
+const SOLANA_V1_CONFIG_MASK =
+	TRANSACTION_CONFIG_PRIORITY_FEE_LAMPORTS_BIT_MASK |
+	TRANSACTION_CONFIG_COMPUTE_UNIT_LIMIT_BIT_MASK |
+	TRANSACTION_CONFIG_LOADED_ACCOUNTS_DATA_SIZE_LIMIT_BIT_MASK |
+	TRANSACTION_CONFIG_HEAP_SIZE_BIT_MASK;
 
 /**
  * It parses a base64 encoded transaction message into a compilable transaction message with lookup tables and instruction
@@ -36,6 +48,20 @@ export const parseSolBase64TransactionMessage = async ({
 }): Promise<CompilableTransactionMessage> => {
 	const { messageBytes } = decodeTransactionMessage(transactionMessage);
 	const compiledTransactionMessage = getCompiledTransactionMessageDecoder().decode(messageBytes);
+
+	// The network refuses a version 1 message that sets any other config bit. The decoder does not:
+	// it skips the bit, and the value the format adds for it. Refused here too, so that a request is
+	// never reviewed as something the network would read differently, nor signed when the network
+	// would refuse it.
+	if (
+		compiledTransactionMessage.version === 1 &&
+		(compiledTransactionMessage.configMask & ~SOLANA_V1_CONFIG_MASK) !== 0
+	) {
+		throw new Error(
+			`Unsupported Solana version 1 transaction config mask: ${compiledTransactionMessage.configMask}`
+		);
+	}
+
 	return await decompileTransactionMessageFetchingLookupTables(compiledTransactionMessage, rpc);
 };
 

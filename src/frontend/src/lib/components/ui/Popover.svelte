@@ -3,14 +3,15 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { quintOut } from 'svelte/easing';
-	import { fade, scale } from 'svelte/transition';
+	import { cubicIn, cubicOut } from 'svelte/easing';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import Backdrop from '$lib/components/ui/Backdrop.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { PopoverDirection, PopoverPlacement } from '$lib/types/popover';
 	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
+	import { overlayFocus } from '$lib/utils/overlay.utils';
 	import { computePopoverPlacement } from '$lib/utils/popover.utils';
+	import { fade, scale } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		anchor?: HTMLElement;
@@ -21,6 +22,7 @@
 		invisibleBackdrop?: boolean;
 		testId?: string;
 		children?: Snippet;
+		ariaLabel?: string;
 	}
 
 	let {
@@ -31,6 +33,7 @@
 		closeButton = false,
 		invisibleBackdrop = false,
 		testId = 'popover-component',
+		ariaLabel,
 		children
 	}: Props = $props();
 
@@ -159,11 +162,8 @@
 	<div
 		style="--popover-top: {popoverTop}px; --popover-bottom: {popoverBottom}px; --popover-left: {popoverLeft}px; --popover-right: {popoverRight}px"
 		class="popover"
-		aria-orientation="vertical"
 		data-tid={testId}
-		role="menu"
-		tabindex="-1"
-		transition:fade|global
+		in:fade|global={{ duration: 25 }}
 	>
 		<Backdrop invisible={invisibleBackdrop} onClose={close} />
 		<div
@@ -171,13 +171,18 @@
 			class:above={placement === 'above'}
 			class:placed={placementResolved}
 			class:rtl={effectiveDirection === 'rtl'}
-			class:with-border={invisibleBackdrop}
+			aria-label={ariaLabel ?? anchor?.getAttribute('aria-label') ?? $i18n.navigation.alt.menu}
+			aria-modal="true"
+			role="dialog"
+			tabindex="-1"
 			use:observePanelWidth
-			transition:scale|global={{ delay: 25, duration: 150, easing: quintOut }}
+			use:overlayFocus={{ onClose: close, returnFocus: anchor }}
+			in:scale|global={{ delay: 25, duration: 150, easing: cubicOut, start: 0.96 }}
+			out:scale|global={{ duration: 100, easing: cubicIn, start: 0.96 }}
 		>
 			{#if closeButton}
 				<button
-					class="close icon-only"
+					class="close icon-only hit-area relative press-icon"
 					aria-label={$i18n.core.text.close}
 					onclick={stopPropagation(close)}
 					type="button"><IconClose /></button
@@ -238,6 +243,7 @@
 		--border-radius: 16px;
 
 		border-radius: var(--border-radius);
+		box-shadow: var(--overlay-box-shadow);
 
 		// Loose cap used during the first paint so we can measure the panel's
 		// natural width. `.placed` swaps this for a side-aware cap that keeps the
@@ -271,8 +277,8 @@
 			max-width: calc(100vw - var(--popover-right) - var(--padding));
 		}
 
-		&.with-border {
-			border: var(--dropdown-border-size) solid var(--dropdown-border-color);
+		@media (forced-colors: active) {
+			border: 1px solid CanvasText;
 		}
 	}
 
@@ -282,5 +288,6 @@
 
 	.popover-content {
 		overflow-y: auto;
+		overscroll-behavior: contain;
 	}
 </style>

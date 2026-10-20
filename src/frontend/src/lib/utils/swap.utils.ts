@@ -340,7 +340,8 @@ export const isSwapError = (err: unknown): err is SwapError => err instanceof Sw
 // it into their generic "something went wrong" text.
 const NEAR_INTENTS_QUOTE_REJECTED_CODES: SwapErrorCodes[] = [
 	SwapErrorCodes.NEAR_INTENTS_QUOTE_UNVERIFIED,
-	SwapErrorCodes.NEAR_INTENTS_QUOTE_EXPIRED
+	SwapErrorCodes.NEAR_INTENTS_QUOTE_EXPIRED,
+	SwapErrorCodes.NEAR_INTENTS_QUOTE_DEPOSIT_MEMO
 ];
 
 export const nearIntentsQuoteRejectedMessage = (err: unknown): string | undefined =>

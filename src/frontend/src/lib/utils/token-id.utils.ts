@@ -14,7 +14,7 @@ import {
 	isNetworkIdXRPMainnet
 } from '$lib/utils/network.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
-import { assertNever } from '@dfinity/utils';
+import { assertNever, isNullish, nonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 /**
@@ -34,6 +34,10 @@ export const tokenIdKey = (id: TokenId): string | undefined => {
 
 	if ('Erc20' in id) {
 		return `Erc20:${id.Erc20[0].toLowerCase()}:${id.Erc20[1]}`;
+	}
+
+	if ('Erc4626' in id) {
+		return `Erc4626:${id.Erc4626[0].toLowerCase()}:${id.Erc4626[1]}`;
 	}
 
 	if ('SplMainnet' in id) {
@@ -68,7 +72,6 @@ export const tokenIdKey = (id: TokenId): string | undefined => {
 		'IcPunks' in id ||
 		'BtcNativeTestnet' in id ||
 		'Erc1155' in id ||
-		'Erc4626' in id ||
 		'Dip721' in id ||
 		'Icrc7' in id
 	) {
@@ -145,4 +148,31 @@ export const toBackendTokenId = (token: Token): TokenId | undefined => {
 	}
 
 	return undefined;
+};
+
+/**
+ * The token among `tokens` that {@link toBackendTokenId} maps to `tokenId`: the reverse lookup
+ * for a row that stores backend `TokenId`s. `undefined` when none does (the token was disabled
+ * since), or for a variant {@link tokenIdKey} does not key.
+ *
+ * Takes the candidate tokens rather than reading a store, so that it can be tested without one.
+ */
+export const findTokenByBackendTokenId = ({
+	tokenId,
+	tokens
+}: {
+	tokenId: TokenId;
+	tokens: Token[];
+}): Token | undefined => {
+	const key = tokenIdKey(tokenId);
+
+	if (isNullish(key)) {
+		return;
+	}
+
+	return tokens.find((token) => {
+		const backendId = toBackendTokenId(token);
+
+		return nonNullish(backendId) && tokenIdKey(backendId) === key;
+	});
 };

@@ -57,7 +57,7 @@ describe('xrp-active-tx.services', () => {
 
 		applySpy = vi
 			.spyOn(activeUserTransactionsServices, 'applyActiveUserTransactionPollUpdate')
-			.mockResolvedValue();
+			.mockResolvedValue(true);
 		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(mockXrpLastLedgerSequence);
 	});
 
