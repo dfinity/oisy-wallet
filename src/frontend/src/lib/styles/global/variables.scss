@@ -23,11 +23,15 @@
 
 	--touch-target-min-height: 2.75rem;
 
-	// List row density: full-menu rows by default; the dropdown `Popover` sets denser values for its
-	// rows (menu-surface rows, ListItemCheckbox, Toggle rows).
+	--backdrop: var(--color-background-modal-overlay);
+}
+
+// List row density: full-size rows by default; the dropdown `Popover` sets denser values on its
+// content (menu-surface rows, ListItemCheckbox, Toggle rows). Restated on a modal, so one opened
+// from inside a dropdown gets full-size rows instead of inheriting the dropdown's.
+:root,
+.modal {
 	--menu-row-min-height: 48px;
 	--menu-row-padding-block: 12px;
 	--menu-row-padding-inline: 8px;
-
-	--backdrop: var(--color-background-modal-overlay);
 }

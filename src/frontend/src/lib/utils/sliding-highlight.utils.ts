@@ -13,6 +13,7 @@ const LIST_ATTRIBUTE = 'data-sliding-highlight-list';
 // `Popover.svelte` clears the hover fill of these rows and of the elements that paint it for them.
 const ROW_SELECTOR = '.menu-row, .nav-item, button:has(> .logo-button-wrapper)';
 const DISABLED_SELECTOR = ':disabled, [aria-disabled="true"], .disabled';
+const DIALOG_SELECTOR = '[role="dialog"], [role="alertdialog"]';
 
 // The highlight's fade-out in `Popover.svelte`. Once it has faded, the block is parked at the
 // top: left at an old row, it would keep a filtered list's scroll area as long as before.
@@ -21,6 +22,12 @@ const FADE_OUT_MS = 100;
 const isDisabled = (row: HTMLElement): boolean =>
 	row.matches(DISABLED_SELECTOR) ||
 	nonNullish(row.querySelector(`:scope > :is(${DISABLED_SELECTOR})`));
+
+// A dialog opened from a row renders inline, inside the host: the language picker in the signed-out
+// user menu is a popover, or a modal on phones. Its rows are its own, with its own highlight or
+// none, so only elements whose nearest dialog is the host's count here.
+const isOwnedBy = ({ node, element }: { node: HTMLElement; element: Element }): boolean =>
+	element.closest(DIALOG_SELECTOR) === node.closest(DIALOG_SELECTOR);
 
 const findRow = ({
 	node,
@@ -35,7 +42,12 @@ const findRow = ({
 
 	// The popover itself may sit inside a list item elsewhere on the page: only rows within it count.
 	const within = (element: HTMLElement | null): HTMLElement | undefined =>
-		nonNullish(element) && element !== node && node.contains(element) ? element : undefined;
+		nonNullish(element) &&
+		element !== node &&
+		node.contains(element) &&
+		isOwnedBy({ node, element })
+			? element
+			: undefined;
 
 	// A list item wins over the button inside it: it is the box whose siblings are the other rows.
 	const found =
@@ -46,9 +58,10 @@ const findRow = ({
 
 // A wrapper around rows, such as a group with a divider, that the pointer reaches through its
 // border or a gap between rows; or a divider between groups, which is such a gap.
-const holdsRows = (target: EventTarget | null): boolean =>
-	target instanceof HTMLHRElement ||
-	(target instanceof Element && nonNullish(target.querySelector(`li, ${ROW_SELECTOR}`)));
+const holdsRows = ({ node, target }: { node: HTMLElement; target: EventTarget | null }): boolean =>
+	target instanceof Element &&
+	isOwnedBy({ node, element: target }) &&
+	(target instanceof HTMLHRElement || nonNullish(target.querySelector(`li, ${ROW_SELECTOR}`)));
 
 const scrollContainerOf = ({ node, row }: { node: HTMLElement; row: HTMLElement }): HTMLElement => {
 	for (
@@ -180,7 +193,7 @@ export const slidingHighlight = (node: HTMLElement, enabled: boolean) => {
 		}
 
 		// Between rows, the block stays put so it slides on to the next row instead of blinking.
-		if (holdsRows(target)) {
+		if (holdsRows({ node, target })) {
 			return;
 		}
 

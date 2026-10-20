@@ -204,6 +204,11 @@
 	@use '$lib/styles/mixins/display';
 	@use '$lib/styles/mixins/interaction';
 
+	// A modal opened from a row renders inline, inside the content: the language picker in the
+	// signed-out user menu, on phones. Its rows keep their own look; global/variables.scss gives it
+	// back the full-size row properties.
+	$nested-modal: '.popover-content .modal';
+
 	.popover {
 		position: fixed;
 		@include display.inset;
@@ -309,6 +314,11 @@
 			// Rows only ever stack: never offer a horizontal scrollbar for a fraction of a pixel.
 			overflow-x: hidden;
 
+			// The content clips 4px from the panel edge rather than 8px, so a control that reaches the
+			// inset keeps its outside focus ring (2px at a 2px offset). Nothing inside moves.
+			margin: -4px;
+			padding: 4px;
+
 			@include interaction.coarse {
 				--menu-row-min-height: var(--touch-target-min-height);
 				--menu-row-padding-block: 10px;
@@ -317,16 +327,16 @@
 		}
 
 		// Compact rows go without dividers; `.menu-divider` between groups stays.
-		.popover-content :global(li) {
+		.popover-content :global(li:not(#{$nested-modal} li)) {
 			border-bottom-width: 0;
 		}
 
 		// 4px either side of a divider between groups, so a row's highlight never touches it.
-		.popover-content :global(hr) {
+		.popover-content :global(hr:not(#{$nested-modal} hr)) {
 			margin-block: 4px;
 		}
 
-		.popover-content :global(.menu-divider) {
+		.popover-content :global(.menu-divider:not(#{$nested-modal} .menu-divider)) {
 			padding-bottom: 4px;
 			margin-bottom: 4px;
 		}
@@ -356,7 +366,7 @@
 			.nav-item:not(:disabled, .disabled),
 			.row-feedback,
 			:has(> button > .logo-button-wrapper)
-		) {
+		):not(#{$nested-modal} *) {
 			&:focus-visible:not(:active) {
 				background-color: transparent;
 			}
@@ -368,7 +378,7 @@
 			}
 		}
 
-		.nav-item:not(:disabled, .disabled) {
+		.nav-item:not(:disabled, .disabled, #{$nested-modal} *) {
 			color: var(--color-foreground-primary);
 		}
 

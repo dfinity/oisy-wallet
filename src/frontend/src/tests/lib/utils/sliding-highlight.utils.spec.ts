@@ -338,6 +338,36 @@ describe('slidingHighlight', () => {
 		expect(highlightOf(node)).toHaveClass('visible');
 	});
 
+	it('leaves the rows of a dialog opened inside it to that dialog', () => {
+		const dialog = document.createElement('div');
+		dialog.setAttribute('role', 'dialog');
+		dialog.innerHTML = `
+			<div class="host">
+				<button class="nav-item">Support</button>
+				<div class="modal" role="dialog"><ul><li><button>English</button></li></ul></div>
+			</div>
+		`;
+		document.body.append(dialog);
+		const node = dialog.querySelector('.host') as HTMLElement;
+		const ownRow = node.querySelector('.nav-item') as HTMLElement;
+		const nestedRow = node.querySelector('li') as HTMLElement;
+		place({ row: ownRow, top: 0, height: 36 });
+		place({ row: nestedRow, top: 36, height: 48 });
+		slidingHighlight(node, true);
+
+		pointer({ type: 'pointerover', target: nestedRow });
+
+		expect(highlightOf(node)).toBeNull();
+
+		pointer({ type: 'pointerover', target: ownRow });
+
+		expect(highlightOf(node)).toHaveClass('visible');
+
+		pointer({ type: 'pointerover', target: node.querySelector('ul') as Element });
+
+		expect(highlightOf(node)).not.toHaveClass('visible');
+	});
+
 	it('takes LogoButton rows outside a list, and skips a row whose button is disabled', () => {
 		const node = document.createElement('div');
 		node.innerHTML = `
