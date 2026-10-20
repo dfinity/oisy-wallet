@@ -128,6 +128,29 @@ export const deleteActiveUserTransaction = async ({
 	activeUserTransactionsStore.remove({ id });
 };
 
+// Reads one of the caller's rows from the backend into the store, for a caller whose copy may be
+// stale: a write whose response was lost, or one made from another tab, never reached it. Returns
+// the row, or `undefined` once it is gone. Certified, since the caller acts on the answer (the
+// Liquidium poller deletes on it): a lagging or misbehaving replica must not be able to hand back
+// an older copy.
+export const reloadActiveUserTransaction = async ({
+	identity,
+	id
+}: {
+	identity: Identity;
+	id: UpdateActiveUserTransactionParams['id'];
+}): Promise<ActiveUserTransaction | undefined> => {
+	const transaction = (await getActiveUserTransactions({ identity, certified: true })).find(
+		(tx) => tx.id === id
+	);
+
+	if (nonNullish(transaction)) {
+		upsertForIdentity({ identity, transaction });
+	}
+
+	return transaction;
+};
+
 /**
  * Writes a poller's update, if it changes anything. A failed write is reported and swallowed, so
  * that the row stays as it was for the next poll; the result says whether the update was written,
