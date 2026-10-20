@@ -27,8 +27,8 @@ to skip.
 
 This is a resilience property, not a defect report. One way of provoking it was fixed at its cause
 in #14106; this makes the class of failure survivable regardless of what causes the next one, for
-every listener rather than only Solana. Notably, XRP was never affected by that defect for exactly
-this reason: `XrpWalletWorker.init` reads no cache at all.
+the Bitcoin and ICP listeners as well as Solana's. Notably, XRP was never affected by that defect
+for exactly this reason: `XrpWalletWorker.init` reads no cache at all.
 
 ## The change
 
@@ -40,13 +40,13 @@ and a failure stays the caller's business.
 
 `syncWalletFromIdbCache` in `$lib/services/listener.services` runs under it, with a shared
 `IDB_DEADLINE_MILLIS` in `$lib/constants/app.constants`. A cache that has not answered in time is
-left behind and the chain is read as on a first start. Bitcoin, Ethereum/EVM and ICP share that
-function, so all of them are covered.
+left behind and the chain is read as on a first start. The Bitcoin, ICP and Solana listeners share
+that function, so all three are covered.
 
 ## Acceptance criteria
 
-- A wallet worker starts even when the transactions or balances cache never answers, so no
-  network's balances depend on a cache being readable.
+- A wallet worker starts even when the transactions or balances cache never answers, so no balance
+  of those networks depends on a cache being readable.
 - The cache is still applied normally when it answers in time.
 - An operation that rejects still rejects; it is not reported as a timeout.
 - Nothing else in the sign-out or details-cache paths changes — those belong to #14106.
@@ -59,6 +59,12 @@ function, so all of them are covered.
   what made the original defect take so long to find. A blocked delete at sign-out should be
   surfaced, not swallowed on a timer.
 - **Deciding what sign-out does when a cache cannot be cleared.** Recorded as a follow-up in #14106.
+- **The Ethereum loaders.** `LoaderMultipleEthTransactions`, `LoaderEthBalances` and
+  `LoadersHarvestAutopilotBalances` call `syncTransactionsFromCache` and `syncBalancesFromCache`
+  directly, under `Promise.allSettled` after setting `loading = true`. A read that never settles
+  leaves `loading` set, and each `onLoad` reschedules itself while it is, so the chain fetch never
+  runs. That is pre-existing and not touched here: covering it needs the gated read and apply
+  exposed to those three components, each with tests of its own, which belongs in its own change.
 
 ## Open questions (facts to confirm)
 
