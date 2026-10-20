@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 	import { onMount } from 'svelte';
+	import { get } from 'svelte/store';
 	import CyclesTopUpAmount from '$icp/components/cycles-top-up/CyclesTopUpAmount.svelte';
 	import CyclesTopUpCanister from '$icp/components/cycles-top-up/CyclesTopUpCanister.svelte';
 	import CyclesTopUpProgress from '$icp/components/cycles-top-up/CyclesTopUpProgress.svelte';
@@ -40,6 +41,13 @@
 	let progressStep = $state<ProgressStepsCyclesTopUp>(ProgressStepsCyclesTopUp.INITIALIZATION);
 	let currentStep = $state<WizardStep<WizardStepsCyclesTopUp> | undefined>();
 	let modal = $state<WizardModal<WizardStepsCyclesTopUp>>();
+
+	// The principal this modal opened for. A sign-in in another tab can switch this tab's
+	// identity without a reload, and the inputs, with any resend they hold, belong to this
+	// principal: the modal closes rather than top up from another account.
+	const openedFor = get(authIdentity)?.getPrincipal().toText();
+
+	let signedInAsOther = $derived($authIdentity?.getPrincipal().toText() !== openedFor);
 
 	// The signed-in principal's top-up that got no answer, kept until the page reloads, so a
 	// later modal has it too.
@@ -92,6 +100,12 @@
 			progressStep = ProgressStepsCyclesTopUp.INITIALIZATION;
 			currentStep = undefined;
 		});
+
+	$effect(() => {
+		if (signedInAsOther) {
+			close();
+		}
+	});
 
 	const formatAmount = (value: bigint): string =>
 		formatToken({ value, unitName: token.decimals, displayDecimals: token.decimals });
@@ -160,6 +174,11 @@
 		}
 
 		const sender = $authIdentity.getPrincipal().toText();
+
+		if (sender !== openedFor) {
+			close();
+			return;
+		}
 
 		const resent = nonNullish(unanswered) && resendsUnanswered;
 

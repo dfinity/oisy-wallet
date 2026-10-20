@@ -20,6 +20,7 @@ import * as authDerived from '$lib/derived/auth.derived';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import * as cyclesTopUpAnalytics from '$lib/services/cycles-top-up-analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
+import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -30,7 +31,7 @@ import { mockIdentity, mockPrincipal2, mockPrincipalText } from '$tests/mocks/id
 import { assertNonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
+import { readable, writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 describe('CyclesTopUpModal', () => {
@@ -805,6 +806,26 @@ describe('CyclesTopUpModal', () => {
 			expect(topUpSpy).toHaveBeenLastCalledWith(
 				expect.objectContaining({ createdAt: 1_000_000_000n })
 			);
+		});
+
+		it('closes without topping up when another identity signs in', async () => {
+			const identity = writable(mockIdentity);
+
+			vi.spyOn(authDerived, 'authIdentity', 'get').mockReturnValue(identity);
+
+			const closeSpy = vi.spyOn(modalStore, 'close');
+
+			const result = await toReview();
+
+			identity.set({ ...mockIdentity, getPrincipal: () => mockPrincipal2 });
+
+			await waitFor(() => {
+				expect(closeSpy).toHaveBeenCalledOnce();
+			});
+
+			await topUp(result);
+
+			expect(topUpSpy).not.toHaveBeenCalled();
 		});
 	});
 });
