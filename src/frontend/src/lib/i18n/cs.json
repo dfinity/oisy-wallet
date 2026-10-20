@@ -116,7 +116,9 @@
 	"progress": {
 		"completed": "Dokončeno",
 		"in_progress": "Probíhá",
-		"failed": "Selhalo"
+		"failed": "Selhalo",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {

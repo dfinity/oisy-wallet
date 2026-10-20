@@ -116,7 +116,9 @@
 	"progress": {
 		"completed": "Completed",
 		"in_progress": "In progress",
-		"failed": "Failed"
+		"failed": "Failed",
+		"step_of": "Step $current of $total: $step",
+		"failed_at": "Failed at $step"
 	},
 	"navigation": {
 		"text": {

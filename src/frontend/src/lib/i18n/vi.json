@@ -116,7 +116,9 @@
 	"progress": {
 		"completed": "Hoàn tất",
 		"in_progress": "Đang xử lý",
-		"failed": "Thất bại"
+		"failed": "Thất bại",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {
