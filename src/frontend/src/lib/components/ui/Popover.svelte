@@ -319,6 +319,16 @@
 		.popover-content :global(li) {
 			border-bottom-width: 0;
 		}
+
+		// 4px either side of a divider between groups, so a row's highlight never touches it.
+		.popover-content :global(hr) {
+			margin-block: 4px;
+		}
+
+		.popover-content :global(.menu-divider) {
+			padding-bottom: 4px;
+			margin-bottom: 4px;
+		}
 	}
 
 	.close {
