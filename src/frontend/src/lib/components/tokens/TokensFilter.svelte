@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
-	import IconSearch from '$lib/components/icons/IconSearch.svelte';
+	import IconSearch from '$lib/components/icons/lucide/IconSearch.svelte';
 	import SlidingInput from '$lib/components/ui/SlidingInput.svelte';
 	import { TOKEN_LIST_FILTER } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
