@@ -47,7 +47,7 @@
 	bind:button
 >
 	{#snippet icon()}
-		<IconArrowUpDown />
+		<IconArrowUpDown size="20" />
 	{/snippet}
 </ButtonIcon>
 
