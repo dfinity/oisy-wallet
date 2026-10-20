@@ -142,9 +142,10 @@ swap provider), plus the spec `2026-08-25-feat-near-intents-btc-swap.md`.
   return** (the broadcast), with try/catch + `consoleError`. LI.FI does not (decided
   2026-10-19): its row is created **after signing and before the broadcast**, as XRP
   sends record theirs, and a swap whose row cannot be created is not broadcast. A row
-  whose broadcast the node refuses is deleted, as a cycles mint deletes a row whose ICP
-  never moved (`deleteRow` in `icp/services/cycles-mint.services.ts`). So no LI.FI swap
-  is ever broadcast untracked.
+  whose transaction the node definitively refuses is deleted, as a cycles mint deletes a
+  row whose ICP never moved (`deleteRow` in `icp/services/cycles-mint.services.ts`); any
+  other broadcast failure keeps it (see [EVM execution](#evm-execution), step 6). So no
+  LI.FI swap is ever broadcast untracked.
 
 ## Background — LI.FI
 
@@ -502,8 +503,10 @@ execution-time — passes `assertLifiQuote` before it is shown or acted on:
   `allowBridges` names, and no `swap` step uses an exchange in its `denyExchanges`. The
   lists are only request parameters, so this keeps the deny lists working if LI.FI ignores
   or misreads them (step tool keys match the request's keys, checked 2026-10-19). From
-  PR 2b-5, no `swap` step precedes an `across` `cross` step either, a route the calldata
-  binding would refuse (see [No DEX swap before Across](#calldata-binding-evm-execution-time-quote)).
+  PR 2b-5, no `swap` step precedes an `across` `cross` step either, and no step follows
+  the `cross` step: routes the calldata binding would refuse (see
+  [No DEX swap before Across](#calldata-binding-evm-execution-time-quote); a step after
+  the bridge pays out another token than the one requested).
 
 EVM addresses (`to`, `approvalAddress`, `from`, EVM token addresses, an EVM
 `toAddress`) are compared **case-insensitively**: LI.FI may return checksummed or
@@ -691,15 +694,22 @@ amounts as `bigint`s.
 bridge pays out nor how much, so a forged response could keep every field above and pay
 another token, or too little of it. v1:
 
-| Facet              | Destination asset (bridge-specific data)                                                                                                                                                      | Minimum output                                                                                                                       |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `AcrossFacetV4`    | `receivingAssetId`: the token left-padded, or its mint; a native coin as the destination chain's wrapped native (`LIFI_ACROSS_WRAPPED_NATIVE`), which the SpokePool unwraps; never native SOL | after source swaps, `minAmount × outputAmountMultiplier / 1e18` (the facet replaces `outputAmount` with it); without, `outputAmount` |
-| `NEARIntentsFacet` | `destinationAsset`: the token left-padded, or its mint; any native coin, EVM or SOL, as `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE` left-padded                                              | `minAmountOut`                                                                                                                       |
+| Facet              | Destination asset (bridge-specific data)                                                                                                                                                                                  | Minimum output                                                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `AcrossFacetV4`    | `receivingAssetId`: the token left-padded, or its mint; a native coin as its SpokePool's wrapped native (`LIFI_ACROSS_WRAPPED_NATIVE`), which the SpokePool unwraps; never that wrapped native as a token, nor native SOL | after source swaps, `minAmount × outputAmountMultiplier / 1e18` (the facet replaces `outputAmount` with it); without, `outputAmount` |
+| `NEARIntentsFacet` | `destinationAsset`: the token left-padded, or its mint; any native coin, EVM or SOL, as `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE` left-padded                                                                          | `minAmountOut`                                                                                                                       |
 
-`LIFI_ACROSS_WRAPPED_NATIVE` holds the WETH that LI.FI's Across quotes pay out on
-Ethereum, Arbitrum, Base and Robinhood Chain (2026-10-19). Across quoted no native output
-to Polygon or BSC, which have no entry, so native output there goes through NEAR Intents
-only.
+`LIFI_ACROSS_WRAPPED_NATIVE` holds the wrapped native of Across's SpokePool on each of the
+six EVM chains, as each SpokePool's `wrappedNativeToken()` answered on 2026-10-20 (the
+SpokePools of LI.FI's `config/across.json`; the same tokens as its `config/networks.json`):
+WETH on Ethereum, Arbitrum, Base and Robinhood Chain, WPOL on Polygon, WBNB on BSC. When
+that token is the output, the SpokePool unwraps it for a wallet recipient
+(`_unwrapwrappedNativeTokenTo`, which keeps it wrapped only for a contract), whatever was
+asked for. So it pays out a native coin, and it can never pay out that token as itself: a
+request for WETH as an ERC-20 is refused through Across, since calldata naming WETH is
+exactly a native ETH payout. A chain without an entry gets no payout through Across.
+LI.FI's own Across routes to WETH bridge another token and swap after the bridge
+(`smartDeposits`, 2026-10-20), which the binding refuses as paying out another token.
 
 **No DEX swap before Across.** Across's minimum output is unsigned: after source swaps,
 the facet pays `minAmount × outputAmountMultiplier`, both from the response, and
@@ -1000,12 +1010,21 @@ value })` runs on the exact checked transaction through `infuraProviders(network
 
 6. Create the AUT row once the transaction is signed, with its hash and nonce, and only
    then broadcast it. A row that cannot be created aborts the swap before the broadcast:
-   no funds have moved. If the node refuses the broadcast (a JSON-RPC error), the swap
-   never started, and the row is deleted, retried as `deleteRow` in
-   `icp/services/cycles-mint.services.ts` does. A transport failure is not a refusal: the
-   transaction may have been relayed, so its row stays and the poller settles it (mined,
-   or replaced or dropped once its nonce is used). A delete that keeps failing leaves the
-   row to the poller in the same way. Then `enableSwapDestinationToken`.
+   no funds have moved. The row is deleted only when the node's error proves it did not
+   accept the transaction, so that the swap never started: an allow-list of
+   definitive refusals matched on the error (ethers' `INSUFFICIENT_FUNDS`, a fee cap below
+   the base fee, intrinsic gas too low, a gas limit above the block's, oversized data, an
+   invalid signature or sender, an unsupported transaction type). The delete is retried as
+   `deleteRow` in `icp/services/cycles-mint.services.ts` does. Any other failure keeps the
+   row, and the poller settles it by its hash and nonce (mined, or replaced or dropped
+   once its nonce is used): a JSON-RPC error does not prove the transaction absent
+   (`already known` means it is in the mempool, `nonce too low` that its nonce is used,
+   possibly by this very transaction, `replacement transaction underpriced` that another
+   one holds it), and a transport failure may have relayed it. A refusal missing from the
+   list leaves its row pending until the nonce is used, then `Failed` as replaced or
+   dropped; it never drops the tracking of a swap that happened. A delete that keeps
+   failing leaves the row to the poller in the same way. Then
+   `enableSwapDestinationToken`.
 
 Wizard: add `SwapProvider.LIFI` to `isActiveTransactionSwap`, `isApproveNeeded` and
 `swapEmitsApprovalSteps` in `SwapEthWizard.svelte`, plus a dispatch branch.
@@ -1049,9 +1068,11 @@ New `fetchLifiSolSwap`:
 3. Create the AUT row once the transaction is signed and before `sendSignedTransaction`
    in step 2, with the signature as the tx hash and the transaction's **recent
    blockhash** as a ref. As on EVM, a row that cannot be created aborts the swap before
-   it is sent, a send the RPC refuses deletes the row, and a transport failure leaves it
-   to the poller, which settles it as landed or, once the blockhash expires, never
-   landed. Then `enableSwapDestinationToken`. The blockhash is read from the compiled
+   it is sent, and only a definitive refusal deletes it: a failed preflight simulation,
+   after which the RPC forwards nothing. Any other failure (`already processed` means it
+   landed; a transport failure may have relayed it) leaves the row to the poller, which
+   settles it as landed or, once the blockhash expires, never landed. Then
+   `enableSwapDestinationToken`. The blockhash is read from the compiled
    message (`getCompiledTransactionMessageDecoder` → `lifetimeToken`). LI.FI's
    transaction carries only the blockhash, not its `lastValidBlockHeight`, and the expiry
    check in the [poller](#poller-libserviceslifi-active-txservicests) needs nothing more.
@@ -1516,9 +1537,14 @@ everywhere.
   set one no relayer fills. The deposit then waits out its fill deadline and is refunded
   to the user, less LI.FI's fee. Solana → EVM is out of scope for v1 because its
   recipient cannot be verified yet.
-- **Fewer Across routes** — Across behind a DEX swap is refused (see
-  [Calldata binding](#calldata-binding-evm-execution-time-quote)), and LI.FI quotes it
-  often; such pairs go through NEAR Intents or get no LI.FI offer.
+- **Fewer Across routes** — Across behind a DEX swap, or paying out a wrapped native
+  token such as WETH, is refused (see
+  [Calldata binding](#calldata-binding-evm-execution-time-quote)), and LI.FI quotes the
+  first often; such pairs go through NEAR Intents or get no LI.FI offer.
+- **A refusal the allow-list misses keeps its row** — only errors proving the node did
+  not accept a transaction delete its row; any other leaves it pending until its nonce is
+  used (EVM) or its blockhash expires (Solana), then `Failed`. Accepted over deleting
+  the tracking of a swap that may have been broadcast.
 - **LI.FI's fee is pinned** — a route forwarding more than 25 bps is refused, so a fee
   increase by LI.FI stops its swaps until `LIFI_FEE_BPS` is updated.
 
@@ -1612,7 +1638,9 @@ everywhere.
 11. A Solana swap signs LI.FI's transaction bytes unchanged (no recompilation) and
     broadcasts them.
 12. The AUT row is created after signing and before the broadcast: a swap whose row
-    cannot be created is not broadcast, and a row whose broadcast is refused is deleted.
+    cannot be created is not broadcast, and a row is deleted only when the node's error
+    proves the transaction was not accepted; an ambiguous error (`already known`,
+    `nonce too low`) or a transport failure keeps it for the poller.
     After broadcast, the modal closes, the row appears in the Active-transactions
     panel labelled "LI.FI", and it reaches `Succeeded` / `Failed` in the background,
     including after a page reload. Every terminal LI.FI row triggers one wallet
