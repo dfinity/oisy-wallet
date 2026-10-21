@@ -11,7 +11,13 @@ import type { CyclesTopUpResult } from '$icp/types/cycles-top-up';
 import { isTopUpRefundMemo } from '$icp/utils/cycles-ledger.utils';
 import type { NullishIdentity } from '$lib/types/identity';
 import { consoleError } from '$lib/utils/console.utils';
-import { assertNonNullish, fromNullable, fromNullishNullable, nonNullish } from '@dfinity/utils';
+import {
+	assertNonNullish,
+	fromNullable,
+	fromNullishNullable,
+	isNullish,
+	nonNullish
+} from '@dfinity/utils';
 import type { IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
 import type { Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
@@ -26,7 +32,8 @@ const DUPLICATE_LOOKUP_TRANSACTIONS = 100n;
  *
  * Sending the same top-up again must reuse its `createdAt`: the ledger then answers with
  * the burn of the first one instead of running it twice. That burn may have been refunded,
- * so its outcome is read from the caller's transactions on `indexCanisterId`.
+ * so its outcome is read from the caller's transactions on `indexCanisterId`, and stays
+ * unknown without one.
  */
 export const topUpCanister = async ({
 	identity,
@@ -40,7 +47,7 @@ export const topUpCanister = async ({
 	// In cycles, without the ledger fee.
 	amount: bigint;
 	createdAt: bigint;
-	indexCanisterId: IndexCanisterIdText;
+	indexCanisterId?: IndexCanisterIdText;
 }): Promise<CyclesTopUpResult> => {
 	assertNonNullish(identity);
 
@@ -50,6 +57,10 @@ export const topUpCanister = async ({
 		return { status: 'topped_up', blockIndex };
 	} catch (err: unknown) {
 		if (err instanceof CyclesLedgerWithdrawDuplicateError) {
+			if (isNullish(indexCanisterId)) {
+				return { status: 'unknown' };
+			}
+
 			return await duplicateOutcome({
 				identity,
 				indexCanisterId,

@@ -148,6 +148,13 @@ describe('cycles-top-up.services', () => {
 				await expect(topUpCanister(params)).resolves.toEqual({ status: 'unknown' });
 			});
 
+			it('should report it as unknown without an index to read it from', async () => {
+				await expect(topUpCanister({ ...params, indexCanisterId: undefined })).resolves.toEqual({
+					status: 'unknown'
+				});
+				expect(getTransactions).not.toHaveBeenCalled();
+			});
+
 			it('should report it as unknown when the lookup fails', async () => {
 				const err = new Error('Index unavailable');
 				vi.mocked(getTransactions).mockRejectedValue(err);
