@@ -933,8 +933,12 @@ New `fetchLifiEvmSwap` in `lib/services/lifi-evm-swap.services.ts` (its own modu
 than the 1,900-line `swap.services.ts`, next to the form's `lifiQuoteFeeCeiling` and
 `lifiApprovalTransactions`), mirroring `fetchVeloraMarketSwap`. Every re-quote below uses
 the offer's own request (`SwapMappedResult.request`, the one its quote answers), with its
-bridges narrowed to the one the reviewed route took, so execution can only re-quote the
-same kind of route; its `fromAmount` must equal the amount being swapped. Narrowing the
+bridges narrowed to the one the reviewed route took and its exchanges to the ones its swap
+steps used (`allowExchanges`; none when the route has no swap), so execution can only
+re-quote the same kind of route; its `fromAmount` must equal the amount being swapped.
+Left free, LI.FI re-routes from one quote to the next through exchanges whose gas differs
+up to twofold (258k for Nordstern, 577k for OKX, USDC → ETH on Base, 2026-10-21), and a
+heavier route than the one reviewed refused the swap as a fee change. Narrowing the
 bridges does not fix the route's shape, so every re-quote is also refused, with
 `LifiRouteUnsupportedError` (the generic swap error; `quote_rejected` in analytics), when
 `isLifiRouteExecutable` refuses it: a refreshed Across route can put a DEX swap before the
@@ -1047,28 +1051,36 @@ value })` runs on the exact checked transaction through `infuraProviders(network
    reads an offset (544) or throws, leaving no pending row. The given amount replaces the
    decode; Velora Market, whose calldata is no transfer either, passes its own.
 
-   **Review shows the same ceiling it signs.** In the form and review, the swap leg's
+   **Review shows a ceiling execution fits under.** In the form and review, the swap leg's
    maximum fee (displayed, and used for balance validation and "Max") is computed with
    the **same formula** as above (`lifiQuoteFeeCeiling`, sharing the computation with
    execution): the gas units of the quote's `estimate.gasCosts` of type `SEND`, the swap
    transaction's own — every live quote carries exactly one (2026-10-20); an `APPROVE`
    cost is left out, the approvals being budgeted on their own — (LI.FI's own estimate
    for the route, not its `amount`, which is an expected cost at
-   LI.FI's gas price) × the same buffer × OISY's `maxFeePerGas` + `l1Fee` for that
-   transaction's size, rather than `EthFeeContext`'s plain-transfer estimate. A quote
+   LI.FI's gas price) × a larger buffer (`LIFI_REVIEW_GAS_BUFFER_PERCENT`, 30 %) × OISY's
+   `maxFeePerGas` + `l1Fee` for that transaction's size, rather than `EthFeeContext`'s
+   plain-transfer estimate. Larger than execution's 20 % because the node estimates the very
+   same transaction a few percent above LI.FI: 3–5 % for USDC → ETH on Base, on every
+   exchange (2026-10-21), so a review buffered alike refused every first attempt from an
+   ERC-20 as a fee change. A quote
    without one shows no fee, and the form waits. At
    execution, if the ceiling from OISY's own estimate exceeds the reviewed ceiling, the
    swap is **not signed**: it aborts back to the review step with a "network fee changed"
    message (a new `swap.error.lifi_fee_changed`), and the user confirms the new maximum.
-   For that to be reviewable, the abort **carries the complete execution-time ceiling
-   back** — buffered gas × `maxFeePerGas` **plus that transaction's own `l1Fee`** — into
+   For that to be reviewable, the abort **carries what the execution-time ceiling was made
+   of back** — the buffered gas **and that transaction's own `l1Fee`** — into
    the swap context (`lifiCarriedFee`, next to `failedSwapError`) for the selected
    quote's inputs. Not the wizard's own state: every step change rebuilds the wizard, so
    the review the abort returns to is another instance. The re-quote's calldata can differ from
    the display quote's, so on Base its L1 fee can too; rebuilding the ceiling from the
-   carried gas and the display quote's `l1Fee` could understate it and loop again. Review
-   then shows `max(quote-derived ceiling, carried ceiling)`, and that exact value becomes
-   the newly acknowledged bound the next execution compares against. The carried ceiling
+   carried gas and the display quote's `l1Fee` could understate it and loop again. The
+   review prices the carried gas at its own `maxFeePerGas`, with 10 % headroom on the gas
+   and the L1 fee alike (`lifiCarriedFeeCeiling`): kept as a fixed amount priced at the
+   refused attempt's gas price, the ceiling refused the retry again whenever the gas price
+   ticked up or the re-estimate came out a little higher. Review then shows
+   `max(quote-derived ceiling, carried ceiling)`, and that exact value becomes the newly
+   acknowledged bound the next execution compares against. The carried ceiling
    is cleared whenever the quote's inputs (the cache key) change. This abort, unlike the
    price check in step 1, necessarily comes after the approval: the estimate needs the
    allowance to exist. Velora Market keeps signing its provider's gas, unchanged.
