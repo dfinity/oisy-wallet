@@ -486,9 +486,12 @@ const mapSolSystemInstruction = ({
 		// whoever the close names. Either way the payment cannot be shown, so neither is signed.
 		//
 		// Unless that close names the wallet: then the funding is the SOL a trade wraps, and what the
-		// trade leaves of it comes back with the close.
+		// trade leaves of it comes back with the close. Only with the reserve known, as for any
+		// creation for a program: without it the review states neither the account's rent nor the SOL
+		// it wraps.
 		if (
 			owner === SYSTEM_PROGRAM_ADDRESS ||
+			isNullish(rentExemptMinimum) ||
 			(!returnsToWallet && fundsBeyondRent({ lamports, space, rentExemptMinimum }))
 		) {
 			return unfaithfulInstruction();
@@ -517,6 +520,7 @@ const mapSolSystemInstruction = ({
 
 		if (
 			owner === SYSTEM_PROGRAM_ADDRESS ||
+			isNullish(rentExemptMinimum) ||
 			(!returnsToWallet && fundsBeyondRent({ lamports: amount, space, rentExemptMinimum }))
 		) {
 			return unfaithfulInstruction();

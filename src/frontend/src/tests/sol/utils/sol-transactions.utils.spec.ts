@@ -635,6 +635,23 @@ describe('sol-transactions.utils', () => {
 					map([seeded(), initialisation(), close(), seeded(), initialisation()]).ambiguous
 				).toBeTruthy();
 			});
+
+			// Without the reserve nothing separates the account's rent from the SOL it wraps, so it is
+			// refused as any creation for a program is.
+			it.each([
+				{ form: 'a seed', opening: () => seeded() },
+				{ form: 'a key of its own', opening: plain }
+			])('should refuse one opened at $form without the reserve', ({ opening }) => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [opening(), initialisation(), close()]
+						},
+						userAddress: user
+					}).ambiguous
+				).toBeTruthy();
+			});
 		});
 
 		it('should ignore instructions with undefined amount (no change to accumulator)', () => {
