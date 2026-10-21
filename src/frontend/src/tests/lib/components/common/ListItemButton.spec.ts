@@ -13,6 +13,18 @@ describe('ListItemButton', () => {
 		expect(getByRole('button', { name: LABEL })).toBeInTheDocument();
 	});
 
+	it('darkens while pressed instead of shrinking, like other full-width rows', () => {
+		const { getByRole } = render(ListItemButtonTest, {
+			onclick: vi.fn(),
+			children: LABEL
+		});
+
+		const button = getByRole('button', { name: LABEL });
+
+		expect(button).toHaveClass('no-press');
+		expect(button).toHaveClass('row-feedback');
+	});
+
 	it('calls onclick when clicked', async () => {
 		const onClick = vi.fn();
 		const { getByRole } = render(ListItemButtonTest, {
@@ -63,7 +75,7 @@ describe('ListItemButton', () => {
 		});
 
 		const host = container.querySelector(`[data-tid="${testId}"]`);
-		const selectableSpan = host?.querySelector('span.w-\\[20px\\]');
+		const selectableSpan = host?.querySelector('span.w-5');
 
 		expect(selectableSpan).toBeInTheDocument();
 
@@ -83,5 +95,15 @@ describe('ListItemButton', () => {
 		const host = container.querySelector(`[data-tid="${testId}"]`);
 
 		expect(host?.querySelector('svg')).toBeInTheDocument();
+	});
+
+	it('lets the label fill the row when contentFullWidth is set', () => {
+		const { getByText } = render(ListItemButtonTest, {
+			onclick: vi.fn(),
+			children: LABEL,
+			contentFullWidth: true
+		});
+
+		expect(getByText(LABEL)).toHaveClass('flex-1');
 	});
 });

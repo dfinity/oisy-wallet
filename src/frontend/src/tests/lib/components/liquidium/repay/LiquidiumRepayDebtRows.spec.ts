@@ -50,6 +50,33 @@ describe('LiquidiumRepayDebtRows', () => {
 		expect(container).toHaveTextContent(en.liquidium.text.interest_accrued);
 	});
 
+	it('hides the pending repays row when nothing is pending', () => {
+		const { container } = render(LiquidiumRepayDebtRows, {
+			props: { reserve, amount: undefined, pendingRepay: ZERO }
+		});
+
+		expect(container).not.toHaveTextContent(en.liquidium.text.pending_repays);
+	});
+
+	it('shows pending repays and deducts them from the debt after repay', () => {
+		const { container } = render(LiquidiumRepayDebtRows, {
+			props: { reserve, amount: 0.2, pendingRepay: 50_000_000n }
+		});
+
+		expect(container).toHaveTextContent(en.liquidium.text.pending_repays);
+		expect(container).toHaveTextContent('0.5 BTC');
+		// 1.005 BTC owed − 0.5 BTC pending − 0.2 BTC repaid = 0.305 BTC.
+		expect(container).toHaveTextContent('0.305 BTC');
+	});
+
+	it('clamps the remaining debt to zero when pending repays cover it', () => {
+		const { container } = render(LiquidiumRepayDebtRows, {
+			props: { reserve, amount: undefined, pendingRepay: 100_500_000n }
+		});
+
+		expect(container).toHaveTextContent('0 BTC');
+	});
+
 	it('renders without dividing by zero when there is no principal debt', () => {
 		const { container } = render(LiquidiumRepayDebtRows, {
 			props: { reserve: { ...reserve, borrowed: ZERO, borrowedUsd: 0 }, amount: 0.5 }

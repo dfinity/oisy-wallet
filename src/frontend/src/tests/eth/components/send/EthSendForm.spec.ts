@@ -514,6 +514,23 @@ describe('EthSendForm', () => {
 				'text-error-primary'
 			);
 		});
+
+		it('blocks Next for that same amount while the fee is outdated', async () => {
+			const { input, getByTestId, rerender } = setup({
+				token: ETHEREUM_TOKEN,
+				nativeEthereumBalance: nativeBalance
+			});
+
+			await fireEvent.input(input, { target: { value: toEther(nativeBalance - ceiling) } });
+
+			await waitFor(() => {
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeEnabled();
+			});
+
+			await rerender({ feeOutdated: true });
+
+			expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+		});
 	});
 
 	// The amount step is fully remounted every time the wizard leaves and returns to it (e.g.
