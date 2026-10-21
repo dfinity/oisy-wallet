@@ -161,7 +161,9 @@ export const markActiveUserTransactionsSeen = async ({
 	try {
 		const seenUpToNs = await markActiveUserTransactionsSeenApi({ identity, upToNs });
 
-		activeUserTransactionsStore.setSeenUpTo({ seenUpToNs });
+		if (activeUserTransactionsStore.holds(identity.getPrincipal())) {
+			activeUserTransactionsStore.setSeenUpTo({ seenUpToNs });
+		}
 	} catch (err: unknown) {
 		consoleError(err);
 	}

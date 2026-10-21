@@ -451,6 +451,24 @@ describe('active-user-transactions.services', () => {
 			expect(get(activeUserTransactionsStore)?.lastSeenUpdatedAtNs['written-here']).toBe('9');
 		});
 
+		// The account switched while the call was in flight: the answer is the previous account's.
+		it('does not apply the answer to the store of another account', async () => {
+			let resolveMark: (seenUpToNs: bigint) => void = () => {};
+			vi.spyOn(backendApi, 'markActiveUserTransactionsSeen').mockReturnValueOnce(
+				new Promise((resolve) => {
+					resolveMark = resolve;
+				})
+			);
+
+			const inFlight = markActiveUserTransactionsSeen({ identity: mockIdentity });
+
+			activeUserTransactionsStore.init(mockPrincipal2);
+			resolveMark(7n);
+			await inFlight;
+
+			expect(get(activeUserTransactionsStore)?.seenUpToNs).toBe(ZERO);
+		});
+
 		// Another device marked further in the meantime.
 		it('keeps the later mark the backend answers with', async () => {
 			vi.spyOn(backendApi, 'markActiveUserTransactionsSeen').mockResolvedValue(9n);
