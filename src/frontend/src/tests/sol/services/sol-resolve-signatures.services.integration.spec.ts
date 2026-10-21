@@ -84,7 +84,7 @@ describe('sol-resolve-signatures.services integration', () => {
 			cursor
 		});
 
-		const records = await resolveSolSignatures({
+		const { transactions: records } = await resolveSolSignatures({
 			address: wallet,
 			network,
 			tokens,
@@ -197,7 +197,7 @@ describe('sol-resolve-signatures.services integration', () => {
 		// One of the 62 recipients of a version 1 transaction that sends a lamport to each.
 		const recipient = solAddress('E2EMB6T6vaXTpnsqcnmggh2TKQQGeAfHarm8gGz6kBAY');
 
-		const records = await resolveSolSignatures({
+		const { transactions: records, unreadable } = await resolveSolSignatures({
 			address: recipient,
 			network,
 			tokens: [],
@@ -216,6 +216,7 @@ describe('sol-resolve-signatures.services integration', () => {
 			]
 		});
 
+		expect(unreadable).toEqual([]);
 		expect(records).toHaveLength(1);
 		expect(records[0].transaction).toEqual(
 			expect.objectContaining({
