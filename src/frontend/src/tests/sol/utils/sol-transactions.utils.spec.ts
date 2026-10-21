@@ -2,7 +2,11 @@ import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
-import { SYSTEM_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import {
+	STAKE_PROGRAM_ADDRESS,
+	SYSTEM_PROGRAM_ADDRESS,
+	TOKEN_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
 import {
@@ -26,6 +30,11 @@ import {
 	getSetComputeUnitLimitInstruction,
 	getSetComputeUnitPriceInstruction
 } from '@solana-program/compute-budget';
+import {
+	getInitializeCheckedInstruction,
+	getInitializeInstruction,
+	getSetLockupInstruction
+} from '@solana-program/stake';
 import {
 	getCreateAccountInstruction,
 	getCreateAccountWithSeedInstruction,
@@ -976,6 +985,121 @@ describe('sol-transactions.utils', () => {
 					source: mockAtaAddress,
 					destination: mockSolAddress2,
 					tokenAddress: JUP_TOKEN.address
+				});
+			});
+		});
+
+		describe('with a stake account opened and initialised', () => {
+			// These exercise the real instruction mapper end to end.
+			beforeEach(() => {
+				spyMapSolInstruction.mockRestore();
+			});
+
+			// A stake account is 200 bytes. With a token account's 165 costing 2_039_280 lamports, its
+			// rent is 2_039_280 * (128 + 200) / (128 + 165) = 2_282_880 lamports.
+			const rentExemptMinimum = 2_039_280n;
+
+			const createStakeAccount = getCreateAccountInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: createNoopSigner(address(mockSolAddress3)),
+				lamports: 2_282_880n,
+				space: 200n,
+				programAddress: address(STAKE_PROGRAM_ADDRESS)
+			});
+
+			const initialize = ({ withdrawer }: { withdrawer: string }) =>
+				getInitializeInstruction({
+					stake: address(mockSolAddress3),
+					arg0: { staker: address(mockSolAddress), withdrawer: address(withdrawer) },
+					arg1: { unixTimestamp: ZERO, epoch: ZERO, custodian: address(SYSTEM_PROGRAM_ADDRESS) }
+				});
+
+			it('should refuse one initialised with somebody else as the withdraw authority', () => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [createStakeAccount, initialize({ withdrawer: mockSolAddress2 })]
+						},
+						userAddress: mockSolAddress,
+						rentExemptMinimum
+					})
+				).toStrictEqual({
+					amount: 2_282_880n,
+					payer: mockSolAddress,
+					ambiguous: true
+				});
+			});
+
+			it('should keep one initialised for the user signable, with the review marked incomplete', () => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [createStakeAccount, initialize({ withdrawer: mockSolAddress })]
+						},
+						userAddress: mockSolAddress,
+						rentExemptMinimum
+					})
+				).toStrictEqual({
+					amount: 2_282_880n,
+					payer: mockSolAddress,
+					unreviewed: true
+				});
+			});
+
+			it('should refuse one initialised with somebody else as both authorities by the checked form', () => {
+				const initializeChecked = getInitializeCheckedInstruction({
+					stake: address(mockSolAddress3),
+					stakeAuthority: address(mockSolAddress2),
+					withdrawAuthority: createNoopSigner(address(mockSolAddress2))
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [createStakeAccount, initializeChecked]
+						},
+						userAddress: mockSolAddress,
+						rentExemptMinimum
+					})
+				).toStrictEqual({
+					amount: 2_282_880n,
+					payer: mockSolAddress,
+					ambiguous: true
+				});
+			});
+
+			// While no lockup is in force the withdraw authority sets one alone, so an initialisation
+			// without a lockup does not keep the account free of one.
+			it('should refuse one initialised for the user and locked by the next instruction', () => {
+				const setLockup = getSetLockupInstruction({
+					stake: address(mockSolAddress3),
+					authority: createNoopSigner(address(mockSolAddress)),
+					unixTimestamp: null,
+					epoch: 1_000n,
+					custodian: address(mockSolAddress2)
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [
+								createStakeAccount,
+								initialize({ withdrawer: mockSolAddress }),
+								setLockup
+							]
+						},
+						userAddress: mockSolAddress,
+						rentExemptMinimum
+					})
+				).toStrictEqual({
+					amount: 2_282_880n,
+					payer: mockSolAddress,
+					unreviewed: true,
+					ambiguous: true
 				});
 			});
 		});

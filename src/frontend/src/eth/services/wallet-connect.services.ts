@@ -6,7 +6,9 @@ import {
 	getSendParamsGas,
 	getSignParamsMessageHex,
 	getSignParamsMessageTypedDataV4Hash,
-	isEthSignTypedDataMethod
+	getWalletConnectEthCkEthDeposit,
+	isEthSignTypedDataMethod,
+	WalletConnectEthCkEthHelperUnconfirmedError
 } from '$eth/utils/wallet-connect.utils';
 import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
@@ -75,7 +77,9 @@ export const send = ({
 						unknown_parameter,
 						wallet_not_initialized,
 						from_address_not_wallet,
-						unknown_destination
+						unknown_destination,
+						cketh_deposit_refused,
+						cketh_helper_unconfirmed
 					}
 				}
 			} = get(i18n);
@@ -106,6 +110,29 @@ export const send = ({
 			if (isNullish(firstParam.to)) {
 				toastsError({
 					msg: { text: unknown_destination }
+				});
+				return { success: false };
+			}
+
+			// The review refuses these requests through the same check. Running it here as well, against
+			// the minter information the transaction is then prepared with, keeps a refused request from
+			// being signed however this is reached.
+			try {
+				getWalletConnectEthCkEthDeposit({
+					to: firstParam.to,
+					data: firstParam.data,
+					networkId: sourceNetwork.id,
+					minterInfo,
+					principal: identity?.getPrincipal()
+				});
+			} catch (err: unknown) {
+				toastsError({
+					msg: {
+						text:
+							err instanceof WalletConnectEthCkEthHelperUnconfirmedError
+								? cketh_helper_unconfirmed
+								: cketh_deposit_refused
+					}
 				});
 				return { success: false };
 			}
