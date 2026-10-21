@@ -265,6 +265,7 @@ describe('SwapTokenWizard', () => {
 				isSourceTokenIcrc2: readable(undefined),
 				failedSwapError: writable(undefined),
 				amountSetToMax: writable(false),
+				lifiMaxFee: writable(undefined),
 				sourceTokenBalance: readable(undefined),
 				destinationTokenBalance: readable(undefined),
 				isSourceTokenPermitSupported: readable(undefined),

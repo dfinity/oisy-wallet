@@ -65,6 +65,7 @@ describe('SwapXrpWizard', () => {
 			destinationToken: readable(destinationToken),
 			failedSwapError: writable(undefined),
 			amountSetToMax: writable(false),
+			lifiMaxFee: writable(undefined),
 			sourceTokenExchangeRate: readable(2),
 			sourceTokenBalance: readable(sourceBalance),
 			destinationTokenBalance: readable(undefined),

@@ -61,7 +61,7 @@
 		lifiFee
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, sourceTokenBalance, amountSetToMax } =
+	const { sourceToken, destinationToken, sourceTokenBalance, amountSetToMax, lifiMaxFee } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
@@ -91,20 +91,20 @@
 	// LI.FI's fee comes with each quote, and each quote with the amount: a "Max" that followed it
 	// would set an amount, get another fee for it, and set another amount, never settling. While
 	// "Max" holds a LI.FI amount it follows the highest fee seen since, so the amount only steps down.
-	let lifiMaxFee = $state<bigint | undefined>();
-
+	// Kept in the swap context with the held "Max": this form is rebuilt at every step change, and a
+	// fee that fell meanwhile would otherwise raise the amount.
 	$effect(() => {
 		const fee = lifiFee;
 
 		if (!isLifi || !$amountSetToMax) {
-			lifiMaxFee = undefined;
+			lifiMaxFee.set(undefined);
 			return;
 		}
 
 		if (nonNullish(fee)) {
 			untrack(() => {
-				if (isNullish(lifiMaxFee) || fee > lifiMaxFee) {
-					lifiMaxFee = fee;
+				if (isNullish($lifiMaxFee) || fee > $lifiMaxFee) {
+					lifiMaxFee.set(fee);
 				}
 			});
 		}
@@ -114,13 +114,15 @@
 	// would otherwise keep the amount below the max for good.
 	const onMax = () => {
 		if (isLifi) {
-			lifiMaxFee = lifiFee;
+			lifiMaxFee.set(lifiFee);
 		}
 	};
 
 	// The fee "Max" leaves room for; `undefined` while the fee is, which holds the form.
 	const maxFee = $derived(
-		nonNullish(totalFee) && nonNullish(lifiMaxFee) && lifiMaxFee > totalFee ? lifiMaxFee : totalFee
+		nonNullish(totalFee) && nonNullish($lifiMaxFee) && $lifiMaxFee > totalFee
+			? $lifiMaxFee
+			: totalFee
 	);
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType | undefined => {

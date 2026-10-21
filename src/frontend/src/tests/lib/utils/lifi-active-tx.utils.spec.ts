@@ -503,6 +503,29 @@ describe('lifi-active-tx.utils', () => {
 			});
 		});
 
+		// A custom token's symbol has no bound, and the backend refuses a ref over 256 bytes, and with
+		// it the row and the swap.
+		it('should cut a token symbol to the ref limit without splitting a character', () => {
+			const symbol = '€'.repeat(100);
+
+			const refs = toLifiCreationRefs({
+				...params,
+				sourceToken: { ...BASE_ETH_TOKEN, symbol },
+				destinationToken: { ...mockLifiBaseUsdcToken, symbol }
+			});
+
+			for (const key of [
+				LIFI_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL,
+				LIFI_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL
+			]) {
+				const value = refs[key] ?? '';
+
+				expect(new TextEncoder().encode(value).length).toBeLessThanOrEqual(256);
+				expect(symbol.startsWith(value)).toBeTruthy();
+				expect(value.length).toBeGreaterThan(0);
+			}
+		});
+
 		// Cut, it would be wrong rather than shorter; oversized, the backend would refuse the row.
 		it.each([
 			{ case: 'a tool key', quote: { ...params.quote, tool: 'across bridge' } },

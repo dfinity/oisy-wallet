@@ -120,6 +120,33 @@ describe('MaxBalanceButton', () => {
 		}
 	});
 
+	// One pending re-application, restarted by each change: the fee settles before Max follows it.
+	it('restarts the delay on each fee change', async () => {
+		vi.useFakeTimers();
+
+		try {
+			const { getByTestId, rerender } = render(MaxBalanceButtonTestHost, {
+				props: { ...baseProps, fee: 10_000_000n }
+			});
+
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+			await vi.advanceTimersByTimeAsync(500);
+
+			await rerender({ ...baseProps, fee: 30_000_000n });
+			await vi.advanceTimersByTimeAsync(300);
+			await rerender({ ...baseProps, fee: 50_000_000n });
+			await vi.advanceTimersByTimeAsync(300);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('1.9');
+
+			await vi.advanceTimersByTimeAsync(200);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('1.5');
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
 	it('reapplies max after the fee changes when the amount is set to max', async () => {
 		vi.useFakeTimers();
 

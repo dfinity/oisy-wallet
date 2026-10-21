@@ -39,6 +39,8 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	// destination would otherwise release "Max", and the amount would keep the max of a fee that
 	// no longer applies.
 	const amountSetToMax = writable(false);
+	// The highest LI.FI fee seen while "Max" holds a LI.FI amount, kept with it for the same reason.
+	const lifiMaxFee = writable<bigint | undefined>(undefined);
 
 	const sourceToken = derived(
 		[data, swappableTokens],
@@ -121,9 +123,11 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		failedSwapError,
 		lifiCarriedFee,
 		amountSetToMax,
+		lifiMaxFee,
 		// The amount is kept as it is for another source, not refilled with that token's max.
 		setSourceToken: (token: Token) => {
 			amountSetToMax.set(false);
+			lifiMaxFee.set(undefined);
 
 			update((state) => ({
 				...state,
@@ -138,6 +142,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		// TODO: Ideally, this function should be used with reactive statements, exported outside the store.
 		switchTokens: () => {
 			amountSetToMax.set(false);
+			lifiMaxFee.set(undefined);
 
 			update((state) => {
 				const $swappableTokens = get(swappableTokens);
@@ -180,6 +185,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			failedSwapError.set(undefined);
 			lifiCarriedFee.set(undefined);
 			amountSetToMax.set(false);
+			lifiMaxFee.set(undefined);
 		}
 	};
 };
@@ -209,6 +215,8 @@ export interface SwapContext {
 	// Whether "Max" holds the source amount, re-applied whenever the fee changes until the user
 	// types or the source changes.
 	amountSetToMax: Writable<boolean>;
+	// The highest LI.FI fee seen while "Max" holds a LI.FI amount, which "Max" leaves room for.
+	lifiMaxFee: Writable<bigint | undefined>;
 	setIsTokensIcrc2: (args: { ledgerCanisterId: string; isIcrc2Supported: boolean }) => void;
 	setIsTokenPermitSupported: ({
 		address,

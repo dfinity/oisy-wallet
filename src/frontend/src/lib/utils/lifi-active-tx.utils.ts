@@ -380,8 +380,16 @@ export const toLifiCreationRefs = ({
 		}),
 	[LIFI_EXTERNAL_REF_KEYS.AMOUNT]: amount,
 	...(nonNullish(usdSourceValue) && { [LIFI_EXTERNAL_REF_KEYS.USD_SOURCE_VALUE]: usdSourceValue }),
-	[LIFI_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL]: sourceToken.symbol,
+	// A custom token's symbol has no bound, and a ref over the backend's limit refuses the row, and
+	// with it the swap, after its approval was paid.
+	[LIFI_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL]: truncateUtf8Bytes({
+		text: sourceToken.symbol,
+		maxBytes: ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES
+	}),
 	[LIFI_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL]: sourceToken.network.name,
-	[LIFI_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]: destinationToken.symbol,
+	[LIFI_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]: truncateUtf8Bytes({
+		text: destinationToken.symbol,
+		maxBytes: ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES
+	}),
 	[LIFI_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL]: destinationToken.network.name
 });

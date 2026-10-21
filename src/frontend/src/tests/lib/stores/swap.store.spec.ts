@@ -105,6 +105,7 @@ describe('swapStore', () => {
 			failedSwapError,
 			lifiCarriedFee,
 			amountSetToMax,
+			lifiMaxFee,
 			reset
 		} = initSwapContext({
 			destinationToken: mockToken1,
@@ -125,6 +126,7 @@ describe('swapStore', () => {
 		failedSwapError.set({ message: 'stale error from previous swap', variant: 'error' });
 		lifiCarriedFee.set({ key: 'stale inputs', gas: 1n, l1Fee: 1n });
 		amountSetToMax.set(true);
+		lifiMaxFee.set(1n);
 
 		reset();
 
@@ -140,42 +142,51 @@ describe('swapStore', () => {
 		expect(get(failedSwapError)).toBe(undefined);
 		expect(get(lifiCarriedFee)).toBe(undefined);
 		expect(get(amountSetToMax)).toBeFalsy();
+		expect(get(lifiMaxFee)).toBeUndefined();
 	});
 
 	// A held "Max" survives the steps that rebuild the form, but not a new source: the amount is
 	// kept as it is rather than refilled with the new token's max.
 	describe('amountSetToMax', () => {
 		it('should be released when the source token changes', () => {
-			const { amountSetToMax, setSourceToken } = initSwapContext({ sourceToken: mockToken1 });
+			const { amountSetToMax, lifiMaxFee, setSourceToken } = initSwapContext({
+				sourceToken: mockToken1
+			});
 
 			amountSetToMax.set(true);
+			lifiMaxFee.set(1n);
 			setSourceToken(mockToken2);
 
 			expect(get(amountSetToMax)).toBeFalsy();
+			expect(get(lifiMaxFee)).toBeUndefined();
 		});
 
 		it('should be released when the tokens switch', () => {
-			const { amountSetToMax, switchTokens } = initSwapContext({
+			const { amountSetToMax, lifiMaxFee, switchTokens } = initSwapContext({
 				sourceToken: mockToken1,
 				destinationToken: mockToken2
 			});
 
 			amountSetToMax.set(true);
+			lifiMaxFee.set(1n);
 			switchTokens();
 
 			expect(get(amountSetToMax)).toBeFalsy();
+			expect(get(lifiMaxFee)).toBeUndefined();
 		});
 
 		it('should hold when only the destination token changes', () => {
-			const { amountSetToMax, setDestinationToken } = initSwapContext({
+			const { amountSetToMax, lifiMaxFee, setDestinationToken } = initSwapContext({
 				sourceToken: mockToken1,
 				destinationToken: mockToken2
 			});
 
 			amountSetToMax.set(true);
+			lifiMaxFee.set(1n);
 			setDestinationToken(mockToken1);
 
 			expect(get(amountSetToMax)).toBeTruthy();
+			expect(get(lifiMaxFee)).toBe(1n);
 		});
 	});
 

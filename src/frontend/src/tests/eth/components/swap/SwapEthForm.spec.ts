@@ -347,6 +347,45 @@ describe('SwapFormEth', () => {
 				expect(amountOf(container)).toBe(maxFor(lifiFee + 1_000n));
 			});
 
+			// The form is rebuilt at every step change, and a fee that fell meanwhile must not raise the
+			// amount: that is a step up and a re-quote nobody asked for.
+			it('should keep the highest fee across the form being rebuilt', async () => {
+				const { unmount } = await renderWithMax();
+
+				await setFee(lifiFee + 1_000n);
+
+				unmount();
+
+				fee.set(lifiFee - 1_000n);
+
+				renderForm();
+				await vi.advanceTimersByTimeAsync(500);
+
+				expect(get(amount)).toBe(maxFor(lifiFee + 1_000n));
+			});
+
+			// A destroyed form's pending re-application must not write the amount while the rebuilt one
+			// does not know its fee yet.
+			it('should hold the amount while a rebuilt form does not know its fee', async () => {
+				const { unmount } = await renderWithMax();
+
+				fee.set(lifiFee + 1_000n);
+				await vi.advanceTimersByTimeAsync(100);
+
+				unmount();
+
+				fee.set(undefined);
+
+				renderForm();
+				await vi.advanceTimersByTimeAsync(1_000);
+
+				expect(get(amount)).toBe(maxFor(lifiFee));
+
+				await setFee(lifiFee - 1_000n);
+
+				expect(get(amount)).toBe(maxFor(lifiFee + 1_000n));
+			});
+
 			it('should start from the fee of the moment when "Max" is pressed again', async () => {
 				const { container, getByTestId } = await renderWithMax();
 
