@@ -90,15 +90,19 @@
 
 <Dropdown
 	bind:this={dropdown}
-	ariaLabel={$i18n.networks.title}
+	ariaDescription={$i18n.networks.title}
 	asModalOnMobile
 	{disabled}
 	testId={NETWORKS_SWITCHER_DROPDOWN}
 	bind:visible
 >
-	<NetworkSwitcherLogo network={$selectedNetwork} />
+	<!-- The name follows as text, so the logo's alt would only repeat it. -->
+	<span aria-hidden="true">
+		<NetworkSwitcherLogo network={$selectedNetwork} />
+	</span>
 
-	<span class="hidden xl:block">{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}</span>
+	<!-- sr-only, not hidden: below xl the logo alone shows, and the name still has to name the button. -->
+	<span class="max-xl:sr-only">{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 
 	{#snippet title()}
 		{$i18n.networks.filter}
