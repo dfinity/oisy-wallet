@@ -190,6 +190,57 @@ describe('sol-transaction-summary.utils', () => {
 			expect(result.received?.tokenAddress).toBe(orca);
 		});
 
+		// A program can run its legs in a token batch, whose lines hang under a heading of their own
+		// beneath its instruction. They are still that instruction's trade, and the tip is not.
+		it('should not take a tip for the trade when the swap runs its legs in a token batch', () => {
+			const usdc = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+			const orca = 'orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE';
+
+			const result = deriveSolTransactionSummary({
+				netChanges: [
+					{ tokenAddress: usdc, decimals: 6, delta: -1_000_000n },
+					{ delta: -5_000_000n },
+					{ tokenAddress: orca, decimals: 6, delta: 2_000_000n }
+				],
+				instructions: [
+					{
+						kind: 'route',
+						program: mockSolAddress3,
+						children: [{ kind: 'send', amount: 5_000_000n, counterparty: mockSolAddress2 }]
+					},
+					{
+						kind: 'route',
+						program: mockSolAddress2,
+						children: [
+							{
+								kind: 'batch',
+								program: mockSolAddress3,
+								children: [
+									{
+										kind: 'send',
+										amount: 1_000_000n,
+										tokenAddress: usdc,
+										counterparty: mockAtaAddress
+									},
+									{
+										kind: 'receive',
+										amount: 2_000_000n,
+										tokenAddress: orca,
+										counterparty: mockAtaAddress2
+									}
+								]
+							}
+						]
+					}
+				],
+				userAddress: mockSolAddress
+			});
+
+			expect(result.kind).toBe('swap');
+			expect(result.spent?.tokenAddress).toBe(usdc);
+			expect(result.received?.tokenAddress).toBe(orca);
+		});
+
 		it('should call a transaction that touches nothing of the user’s other', () => {
 			expect(summary('THIRD_PARTY').kind).toBe('other');
 		});
@@ -1319,6 +1370,18 @@ describe('sol-transaction-summary.utils', () => {
 				expect(textOf({ kind: 'route', program: mockSolAddress3, children: [send, receive] })).toBe(
 					en.transaction.text.instruction_route
 				);
+			});
+
+			// A program can run its legs in a token batch, whose lines hang under a heading of their
+			// own beneath its instruction.
+			it('should call legs going both ways inside a token batch a swap route', () => {
+				expect(
+					textOf({
+						kind: 'route',
+						program: mockSolAddress3,
+						children: [{ kind: 'batch', program: mockSolAddress2, children: [send, receive] }]
+					})
+				).toBe(en.transaction.text.instruction_route);
 			});
 
 			// Something leaving and nothing arriving is what a deposit looks like too.

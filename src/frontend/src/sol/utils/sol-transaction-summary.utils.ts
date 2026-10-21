@@ -22,14 +22,30 @@ export const flattenInstructions = (
 	]);
 
 /**
+ * The lines an instruction made inside itself, a token batch it ran included: the batch's lines
+ * hang one level down under a heading of their own, and are still that instruction's doing.
+ */
+const routeLegs = (children: SolInstructionSummary[]): SolInstructionSummary[] =>
+	children.flatMap((child) => (child.kind === 'batch' ? (child.children ?? []) : [child]));
+
+/**
  * Whether the lines an instruction made inside itself make a swap: something leaves and something
  * else arrives. Lines that all leave, or all arrive, are what a deposit or a withdrawal looks like
- * too, and one opening an account trades nothing.
+ * too, and one opening an account trades nothing. A batch the message states is a batch heading of
+ * its own and never a route, whatever its lines do.
  */
-export const isSolSwapRoute = ({ kind, children = [] }: SolInstructionSummary): boolean =>
-	kind === 'route' &&
-	children.some(({ kind: line }) => line === 'send') &&
-	children.some(({ kind: line }) => line === 'receive');
+export const isSolSwapRoute = ({ kind, children = [] }: SolInstructionSummary): boolean => {
+	if (kind !== 'route') {
+		return false;
+	}
+
+	const legs = routeLegs(children);
+
+	return (
+		legs.some(({ kind: line }) => line === 'send') &&
+		legs.some(({ kind: line }) => line === 'receive')
+	);
+};
 
 /**
  * Whether the message closes an account of the user's and pays its balance to an address that is
@@ -471,7 +487,7 @@ const routeTradedTokens = (
 			return acc;
 		}
 
-		children
+		routeLegs(children)
 			.filter((child) => ['send', 'receive'].includes(child.kind))
 			.forEach((child) => acc.add(child.tokenAddress));
 
