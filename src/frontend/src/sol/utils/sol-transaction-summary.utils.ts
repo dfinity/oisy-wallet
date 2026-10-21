@@ -443,15 +443,20 @@ export const solWalletLamportsStated = ({
 /**
  * The tokens the transaction actually trades, read from its legs.
  *
- * `undefined` in the set stands for native SOL. SOL makes the set only through a transfer or a
- * wrap: an SPL send that opens the recipient an account also moves SOL, but that SOL is rent, and
- * counting it would turn every such send into a swap.
+ * `undefined` in the set stands for native SOL. SOL makes the set only through a transfer, a wrap
+ * or an unwrap: an SPL send that opens the recipient an account also moves SOL, but that SOL is
+ * rent, and counting it would turn every such send into a swap.
  */
 const tradedTokens = (instructions: SolInstructionSummary[]): Set<SplTokenAddress | undefined> =>
 	flattenInstructions(instructions).reduce<Set<SplTokenAddress | undefined>>(
-		(acc, { kind, tokenAddress }) => {
+		(acc, { kind, tokenAddress, unwrapsToWallet }) => {
 			if (['send', 'receive'].includes(kind)) {
 				acc.add(tokenAddress);
+			}
+
+			// Wrapped SOL an unwrap pays into the wallet arrives there as SOL itself.
+			if (unwrapsToWallet) {
+				acc.add(undefined);
 			}
 
 			if (['wrap', 'unwrap'].includes(kind)) {
@@ -489,7 +494,14 @@ const routeTradedTokens = (
 
 		routeLegs(children)
 			.filter((child) => ['send', 'receive'].includes(child.kind))
-			.forEach((child) => acc.add(child.tokenAddress));
+			.forEach(({ tokenAddress, unwrapsToWallet }) => {
+				acc.add(tokenAddress);
+
+				// A leg unwrapped into the wallet trades the SOL it arrives as.
+				if (unwrapsToWallet) {
+					acc.add(undefined);
+				}
+			});
 
 		return acc;
 	}, new Set());

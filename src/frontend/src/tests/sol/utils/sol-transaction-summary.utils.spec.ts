@@ -241,6 +241,61 @@ describe('sol-transaction-summary.utils', () => {
 			expect(result.received?.tokenAddress).toBe(orca);
 		});
 
+		// The line names the wrapped SOL that leaves a program's account; what the wallet gains is
+		// SOL itself.
+		describe('with SOL a program unwraps into the wallet', () => {
+			const usdc = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
+			const payout: SolInstructionSummary = {
+				kind: 'receive',
+				amount: 5_000_000n,
+				tokenAddress: WSOL_TOKEN.address,
+				counterparty: mockAtaAddress3,
+				own: false,
+				unwrapsToWallet: true
+			};
+
+			it('should call the payout alone a receive', () => {
+				const result = deriveSolTransactionSummary({
+					netChanges: [{ delta: 5_000_000n }],
+					instructions: [{ kind: 'route', program: mockSolAddress3, children: [payout] }],
+					userAddress: mockSolAddress
+				});
+
+				expect(result.kind).toBe('receive');
+				expect(result.received?.delta).toBe(5_000_000n);
+			});
+
+			it('should call a swap that pays out that way a swap for SOL', () => {
+				const result = deriveSolTransactionSummary({
+					netChanges: [
+						{ tokenAddress: usdc, decimals: 6, delta: -1_000_000n },
+						{ delta: 5_000_000n }
+					],
+					instructions: [
+						{
+							kind: 'route',
+							program: mockSolAddress3,
+							children: [
+								{
+									kind: 'send',
+									amount: 1_000_000n,
+									tokenAddress: usdc,
+									counterparty: mockAtaAddress
+								},
+								payout
+							]
+						}
+					],
+					userAddress: mockSolAddress
+				});
+
+				expect(result.kind).toBe('swap');
+				expect(result.spent?.tokenAddress).toBe(usdc);
+				expect(result.received?.tokenAddress).toBeUndefined();
+			});
+		});
+
 		it('should call a transaction that touches nothing of the user’s other', () => {
 			expect(summary('THIRD_PARTY').kind).toBe('other');
 		});
