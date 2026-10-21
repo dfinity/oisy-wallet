@@ -91,7 +91,7 @@
 	<span id={descriptionId} hidden>{ariaDescription}</span>
 </button>
 
-<ResponsivePopover {button} direction="ltr" bind:visible>
+<ResponsivePopover ariaLabel={ariaDescription} {button} direction="ltr" bind:visible>
 	{#snippet content()}
 		<div
 			class="flex flex-col gap-2 p-1 {panelWidthClass ?? 'w-full min-w-60'}"
