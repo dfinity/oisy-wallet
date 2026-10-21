@@ -122,6 +122,25 @@ describe('sol-token-name.utils', () => {
 					})
 				).toBe('Unknown token');
 			});
+
+			// A variation selector is a mark and a Hangul filler a letter, so neither is a control or
+			// a format character, yet Unicode marks both as ignorable by default and neither shows.
+			it.each([
+				{ kind: 'a variation selector', symbol: '\uFE0F' },
+				{ kind: 'a Hangul filler', symbol: '\u3164' }
+			])(
+				'should fall back to the bare placeholder for a symbol made only of $kind',
+				({ symbol }) => {
+					expect(
+						solTokenSymbol({
+							...args,
+							tokenAddress: 'blank-mint',
+							metadata: on({ 'blank-mint': { name: 'Name', symbol } }),
+							unknownTokenAddresses: ['blank-mint']
+						})
+					).toBe('Unknown token');
+				}
+			);
 		});
 
 		// The same mint address exists on several clusters and carries different data on each, so a
@@ -230,6 +249,25 @@ describe('sol-token-name.utils', () => {
 					})
 				})
 			).toStrictEqual(['blank-mint']);
+		});
+
+		it('should number the mints whose own symbols are ignorable by default', () => {
+			const metadata = on({
+				'selector-mint': { name: 'Name', symbol: '\uFE0F' },
+				'filler-mint': { name: 'Name', symbol: '\u3164' }
+			});
+
+			const unknownTokenAddresses = solUnknownTokenAddresses({
+				tokenAddresses: ['selector-mint', 'filler-mint'],
+				tokens,
+				networkId: network.id,
+				metadata
+			});
+
+			expect(unknownTokenAddresses).toStrictEqual(['selector-mint', 'filler-mint']);
+			expect(
+				solTokenSymbol({ ...args, tokenAddress: 'filler-mint', metadata, unknownTokenAddresses })
+			).toBe('Unknown token 2');
 		});
 
 		// The counting reads the same per-cluster map the naming does, so it counts a mint as

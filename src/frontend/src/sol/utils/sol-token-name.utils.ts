@@ -28,9 +28,10 @@ const namesOn = ({
 const OWN_SYMBOL_MAX_LENGTH = 12;
 
 // Characters that show nothing themselves or rearrange the ones around them: controls, format
-// characters such as the bidirectional overrides and the zero-width joiners, and code points that
-// are private, unassigned or half of a pair.
-const INVISIBLE_CHARACTERS = /[\p{Cc}\p{Cf}\p{Co}\p{Cn}\p{Cs}]/gu;
+// characters such as the bidirectional overrides and the zero-width joiners, code points that are
+// private, unassigned or half of a pair, and the ones Unicode marks as ignorable by default, such
+// as the variation selectors and the Hangul fillers, which are marks and letters by category.
+const INVISIBLE_CHARACTERS = /[\p{Cc}\p{Cf}\p{Co}\p{Cn}\p{Cs}\p{Default_Ignorable_Code_Point}]/gu;
 
 /**
  * The symbol a mint carries in its own account, as it may be shown. Whoever creates the mint
