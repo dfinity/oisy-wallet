@@ -1393,8 +1393,24 @@ const closePayouts = ({
 	const held = (account: SolAddress): bigint | undefined =>
 		lamports.has(account) ? lamports.get(account) : accountLamports[account];
 
-	const add = ({ account, value }: { account: SolAddress; value: bigint }) =>
-		lamports.set(account, (held(account) ?? ZERO) + value);
+	// Paying in adds to what an account holds. One nobody read and nothing has touched yet starts
+	// from nothing, as an account the message opens does; one this walk has lost track of stays
+	// unknown, rather than holding only what arrived since.
+	const add = ({ account, value }: { account: SolAddress; value: bigint }) => {
+		const balance = held(account);
+
+		lamports.set(
+			account,
+			isNullish(balance) && lamports.has(account) ? undefined : (balance ?? ZERO) + value
+		);
+	};
+
+	// Paying out of an amount nobody knows leaves one nobody knows.
+	const take = ({ account, value }: { account: SolAddress; value: bigint }) => {
+		const balance = held(account);
+
+		lamports.set(account, isNullish(balance) ? undefined : maxBigInt(balance - value, ZERO));
+	};
 
 	const payouts = new Map<number, bigint | undefined>();
 
@@ -1423,8 +1439,14 @@ const closePayouts = ({
 				payouts.set(position, payout);
 				lamports.set(account, ZERO);
 
-				if (nonNullish(destination) && destination !== account && nonNullish(payout)) {
-					add({ account: destination, value: payout });
+				// What arrives at the destination is all of it, so an amount nobody knows leaves the
+				// destination holding one nobody knows either.
+				if (nonNullish(destination) && destination !== account) {
+					if (nonNullish(payout)) {
+						add({ account: destination, value: payout });
+					} else {
+						lamports.set(destination, undefined);
+					}
 				}
 
 				return;
@@ -1453,7 +1475,7 @@ const closePayouts = ({
 				}
 
 				if (nonNullish(source) && mintAt({ account: source, position }) === WSOL_TOKEN.address) {
-					lamports.set(source, maxBigInt((held(source) ?? ZERO) - moved, ZERO));
+					take({ account: source, value: moved });
 				}
 
 				return;
@@ -1484,7 +1506,7 @@ const closePayouts = ({
 					return;
 				}
 
-				lamports.set(source, maxBigInt((held(source) ?? ZERO) - moved, ZERO));
+				take({ account: source, value: moved });
 
 				if (nonNullish(destination)) {
 					add({ account: destination, value: moved });

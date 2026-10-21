@@ -3885,6 +3885,95 @@ describe('sol-instruction-summary.utils', () => {
 			});
 		});
 
+		// Counted from nothing, an account the walk lost track of would have its close state what
+		// arrived since as all it hands back, or nothing at all.
+		describe('a balance nobody knows', () => {
+			const TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+			const wrapped = mockAtaAddress2;
+			const other = mockAtaAddress;
+
+			const unwrap = ({
+				source,
+				destination,
+				authority = mockSolAddress,
+				amount
+			}: {
+				source: string;
+				destination: string;
+				authority?: string;
+				amount?: string;
+			}) => ({
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'unwrapLamports',
+					info: { source, destination, authority, ...(amount !== undefined && { amount }) }
+				}
+			});
+
+			const close = ({
+				account,
+				destination = mockSolAddress
+			}: {
+				account: string;
+				destination?: string;
+			}) => ({
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'closeAccount',
+					info: { account, destination, owner: mockSolAddress }
+				}
+			});
+
+			const read = (instructions: unknown[]) =>
+				mapSolInstructionSummaries({
+					instructions,
+					ownedAddresses: [mockSolAddress, wrapped, other],
+					userAddress: mockSolAddress,
+					addressToToken: {
+						[wrapped]: WSOL_TOKEN.address,
+						[other]: WSOL_TOKEN.address,
+						[mockSolAddress3]: WSOL_TOKEN.address
+					},
+					accountLamports: { [wrapped]: 2_046_280n, [other]: 2_039_280n }
+				});
+
+			it('should know nothing of what a close hands back after a stated unwrap follows one nobody read', () => {
+				const views = read([
+					unwrap({ source: wrapped, destination: mockSolAddress }),
+					unwrap({ source: wrapped, destination: mockSolAddress2, amount: '5000' }),
+					close({ account: wrapped })
+				]);
+
+				expect(views.at(-1)).not.toHaveProperty('returned');
+			});
+
+			it('should know nothing of what a close hands back once an unwrap nobody read paid into the account', () => {
+				const views = read([
+					unwrap({ source: mockSolAddress3, destination: other, authority: mockSolAddress2 }),
+					unwrap({
+						source: mockSolAddress3,
+						destination: other,
+						authority: mockSolAddress2,
+						amount: '5000'
+					}),
+					close({ account: other })
+				]);
+
+				expect(views.at(-1)).not.toHaveProperty('returned');
+			});
+
+			it('should know nothing of what a close hands back once a close nobody read paid into the account', () => {
+				const views = read([
+					close({ account: mockSolAddress3, destination: other }),
+					close({ account: other })
+				]);
+
+				expect(views.at(-1)).not.toHaveProperty('returned');
+			});
+		});
+
 		describe('instructions it cannot read', () => {
 			it('should ignore an instruction the RPC did not parse', () => {
 				expect(
