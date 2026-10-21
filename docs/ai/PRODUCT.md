@@ -32,7 +32,143 @@ On **mobile** the bottom bar has five slots: **Assets · Activity · Finance · 
 
 The desktop sidebar's logo header and social-links footer remain a follow-up.
 
+Once signed in, the **header** (logo, network switcher, scan, profile) stays at the top while
+the page scrolls on any window from 768 px wide, as the sidebar beside it does; on phones it
+scrolls away and the bottom bar stays. Signed out (the landing page and public pages), it
+scrolls away at every width. Where the content column leaves no room beside it, the header gets out of the
+way: below 1280 px the network switcher shows only the network's logo, and below 1088 px, where
+even the icons sit over the content, a frosted band in the page colour appears behind them once
+the page is scrolled, so rows pass under it instead of showing through. There, the pinned section
+headers (the Assets bar, the date labels in Activity) pin just below the band rather than under
+it. Opening the user menu from the header dims and blurs the page behind it, as the More menu
+and dialogs do.
+
 ---
+
+## Interaction feedback
+
+Everything that can be pressed shows that it is being pressed, while it is held, and lets go
+smoothly when released.
+
+- **Buttons** with text shrink slightly, to 98 %; icon buttons shrink to 96 %. Wide buttons
+  get the smaller press because the same scale takes far more off a wide element.
+- **Colours** of the shared buttons and full-width rows change in 150 ms. Buttons that take a
+  light-blue fill on hover (the theme switch, contact actions, the profile menu) and the rows
+  are one step darker pressed than on hover; dropdowns are the exception and keep their hover
+  colour while held.
+- **Rows** that span the full width do **not** shrink. They darken one step instead: a 20 %
+  OISY-blue fill over their 10 % hover.
+- **A row does not light up when a control inside it is pressed** (a copy icon, a toggle); the
+  control shows its own press.
+- **Hover** colours appear only on devices that can hover, so a tap on a phone does not leave
+  a button coloured until the next tap.
+- With **reduced motion** turned on in the system, nothing shrinks; colours still change.
+  **Disabled** buttons show nothing.
+- iOS Safari applies pressed styles only when the page listens for touches, so the app
+  registers a passive touch listener for that reason alone.
+- **Copying** an address, hash or ID confirms on the button: the copy icon turns into a check
+  for 2 seconds and screen readers hear the "… copied" text. Copy buttons show no toast; a
+  row that copies when tapped as a whole keeps its toast, since nothing on it changes. When
+  the browser blocks the clipboard, an error says so (inline on the note share screen, where
+  a toast would sit behind the sheet).
+
+Where it applies:
+
+- **Token lists.** Token rows on Assets, the rows inside a token group and every other list of
+  logo rows with a click (earning positions, swap providers, networks, recent destinations,
+  the token and NFT settings menus) take the pressed fill. An expanded token group's header
+  opens and closes the whole card, so hovering it outlines the whole card, sub-tokens
+  included; a fill would not do, since on the white card the row hover is the page colour.
+- **Activity and other lists.** Transaction rows, tip history, notes, contact addresses, OISY
+  Trade orders and positions, and the mobile activity filter rows take the same pressed fill.
+  In a contact address row, Edit and Delete act on their own: pressing them does not also
+  copy the address, which the row does when tapped as a whole, and the row's action icons no
+  longer overlap each other on phones. Holding Space on a focused transaction or tip row
+  shows the same fill as a press.
+- **Navigation.** In the desktop sidebar and the menus, a pressed entry darkens one step past
+  its hover and selected colour. On the mobile bar, a pressed entry's icon and label shrink
+  slightly (Finance shrinks its circle) with **no** colour change, so grey still means only
+  that a sheet is open and blue only the current page. The cards in the mobile group sheets
+  press like buttons.
+- **Cards.** NFT and collection cards press like text buttons and keep their hover lift;
+  disabled cards and the non-interactive NFT card do not press. The Explore dApp cards and
+  the reward cards press too, with no hover of their own. Colours meant for dark mode follow
+  OISY's theme setting, not the device's, so a user who picked a theme different from their
+  system sees the matching NFT badges.
+- **Links and icon links.** Text links (Go to collection, Learn more, breadcrumbs, the terms
+  and privacy links) and link-style icons (copy, open in explorer, back) turn a step darker
+  blue on hover and while pressed; in dark mode a step lighter, so they stay readable on the
+  dark card. Text links do not shrink; icon ones press like icon buttons.
+  Links inside explanatory text do the same: About OISY, the Harvest stake terms, the
+  home-screen warning and the note about hidden small transactions.
+- **Amount forms.** The swap flip button presses like an icon button, and its arrow turns a
+  half-turn each time the tokens swap, back the other way on the next swap (with reduced
+  motion it flips at once, without the turning animation). **Max** presses, darkens on hover while the amount is valid, and can be hit
+  across 40 px without reaching the amount field above it.
+- **Small controls.** Close, clear and help buttons (toasts, banners, info boxes, modals,
+  popovers, the search field, the settings, rewards and earning help toggles, the copy and edit
+  icons next to addresses and IDs, the dismiss button on active transactions) press like icon
+  buttons and can be hit across at least 40 × 40 px while looking the same size. Where a
+  neighbour sits closer (a copy icon right next to a link, a modal's close next to its header
+  actions), the tap area only grows up and down, so two tap areas never overlap. The help toggles say whether
+  their explanation is open.
+
+### Overlay interaction
+
+Blocking popovers and dialogs move keyboard focus into their controls, keep it
+inside while open, close the topmost overlay with Escape, and restore the opener.
+Toasts stay reachable while a dialog is open: Tab moves on from the dialog's last
+control to their Close buttons and back, so a notification can be dismissed without
+closing the dialog. Escape that only cancels typing in an input method closes nothing.
+Token list settings expose labelled switches and their current checked state.
+Sorting, network selection and appearance buttons expose their selected state.
+
+### Motion
+
+- **Overlays** clear quickly: toasts enter over 200 ms and leave over 150 ms with a short
+  movement; modal panels take 125 ms each way. Popovers grow from 96 % in 150 ms and
+  leave in 100 ms. The page dims and blurs smoothly in 75 ms and clears in 150 ms;
+  bottom sheets open in 250 ms and close in 200 ms. Reduced motion removes movement
+  and caps fades at 100 ms; height changes happen at once. Modal and popover panels
+  and backdrops finish their individual exits before the overlay disappears.
+
+- **State icons** cross-fade over 300 ms: progress to success or failure, privacy, theme,
+  and hiding or showing an NFT. Like copy confirmation, each can reverse during a swap
+  and appears immediately in its initial state. With reduced motion, icons fade in
+  100 ms without shrinking or blurring. Failed progress steps transition directly to the
+  failure icon without briefly showing success. The NFT hide/show icon waits until loading ends
+  before swapping, so the change remains visible even after a slow response.
+
+- With **reduced motion** turned on in the system, pulsing loading placeholders hold still,
+  and so do the decorative animations: the dApp Explorer's UFO in the navigation, the AI
+  assistant button, the Scan QR icon, and the astronaut on the idle signer screen. Progress
+  spinners keep turning, since they are often the only sign that something is happening.
+
+### Motion
+
+- Things that fade, fly or scale in take **200 ms**, slowing as they settle, and leave in
+  **150 ms**, speeding up as they go; most used to take 400 ms both ways. Sections that
+  open and close, such as an error line appearing under a field, keep their 250 ms.
+- With **reduced motion** turned on in the system:
+  - nothing slides, flies or scales in: it fades in over 100 ms instead, and sections open
+    and close at once;
+  - pulsing loading placeholders hold still, and so do the decorative animations: the dApp
+    Explorer's UFO in the navigation, the AI assistant button, the Scan QR icon, and the
+    astronaut on the idle signer screen;
+  - progress spinners keep turning, since they are often the only sign that something is
+    happening.
+
+#### Landing artwork loading
+
+The landing illustration reserves its aspect ratio before downloading and loads eagerly without a dynamic-import waterfall. As a deliberate exception to the faster in-app motion timings, this one-time landing entrance runs over 300ms with a 12px upward movement and a subtle blur, with sections staggered by 100ms. The entrance begins with the page, without waiting for artwork; sign-in stays interactive and keyboard focus reveals controls immediately. Feature cards use translation only so their frosted backdrop stays intact. Reduced-motion users get the shared 100ms opacity-only fade with no stagger; feature cards stay still. Progress spinners keep turning. Focus reveals controls without restarting their entrance when focus leaves.
+
+The landing keeps the existing CircularXX font, preloads its regular and bold faces, balances headline wrapping, and uses comfortable line spacing for feature descriptions and sign-in terms. Signed-out header labels stay intact at narrow widths.
+
+---
+
+### App menu consistency
+
+Token and NFT sorting and settings, network selection and the account menu share row sizing, typography, separators and keyboard focus treatment. Theme changes apply colors immediately without triggering every color transition.
 
 ## Analytics
 
@@ -157,7 +293,7 @@ The same invariant keeps the destination URL out of both `explorer` subcontexts,
 | `open`           | the Mint modal opens       | none                            | none                                                            |
 | `mint`           | a mint starts and finishes | `executing` → `success`/`error` | `token_symbol`, `token2_symbol`; `result_error_code` on failure |
 
-`result_error_code` says why a mint ended in `error`: `refunded` (the CMC returned the ICP, minus its fees), `failed` (another final CMC answer), and, for mints where nothing moved, `transfer_failed`, `not_trackable`, `timed_out` and `not_sent`. A mint that ends in the modal before any ICP moves reports from there, once its row is deleted (the modal tries the delete up to three times, since a delete also succeeds for a row an earlier, unanswered one already removed); a row the modal could not delete reports the ending itself, as `not_sent`, so the modal and the row never both report it. Every other ending, `not_sent` included, fires from the mint's active user transaction, whichever session closes it, under the loader's rule for every flow it tracks: once in every tab open when the mint ends, never in a tab or session started after one of them has recorded it, and once in any other browser or device that later loads the finished row. The event never carries a principal, and never the CMC's own reason text, which can name the caller's account.
+`result_error_code` says why a mint ended in `error`: `refunded` (the CMC returned the ICP, minus its fees), `failed` (another final CMC answer), and, for mints where nothing moved, `transfer_failed`, `not_trackable`, `timed_out` and `not_sent`. A mint that ends in the modal before any ICP moves reports from there, once its row is deleted (the modal tries the delete up to three times, since a delete also succeeds for a row an earlier, unanswered one already removed); a row the modal could not delete reports the ending itself, as `not_sent`, so the modal and the row never both report it. Every other ending, `not_sent` included, fires from the mint's active user transaction, whichever session closes it, under the loader's rule for every flow it tracks: once in every tab open when the mint ends, never in a tab or session started after one of them has recorded it, and never in another browser or device that loads the row already finished. The event never carries a principal, and never the CMC's own reason text, which can name the caller's account.
 
 ### Transaction send tracking
 
@@ -254,7 +390,11 @@ The details of the newest Solana transactions are kept in the browser once read 
 
 OISY keeps the balances and the newest history of each Solana network up to date with one background loader for the whole network, not one per token. On every refresh it reads all the balances of the network in one request, asks the wallet and the token account of each enabled token for their newest transactions, and fetches only the ones it has not seen yet, each of them once however many of the user's tokens it touched. A transaction then appears in the history of every token whose account returned it, so both sides of a swap arrive together. When the user enables or disables a Solana token, or the network's address changes, the loader of that network starts over.
 
-The balances do not wait on the history, because only the balances are essential. If the balances cannot be read, the refresh is retried up to ten times, one to two seconds apart, and then fails, and the network's balances are dropped, since a wrong balance is worse than none. If only the newest history cannot be read, the balances still update. That happens when the network refuses one of the transactions, as it does for a transaction format OISY cannot read yet, or when a lookup fails. The transactions already loaded stay on screen, and a token whose history has not loaded yet keeps showing it as loading rather than as empty. The history is asked for again on the next refresh, a minute later, with no faster retry and no point at which it gives up. This matters because anyone can send a transaction to any address: one the history cannot read would otherwise keep every Solana balance of the wallet from showing for as long as it stays among the newest transactions. Unlike an IC Index-canister outage, the user is not shown a warning.
+The balances do not wait on the history, because only the balances are essential. If the balances cannot be read, the refresh is retried up to ten times, one to two seconds apart, and then fails, and the network's balances are dropped, since a wrong balance is worse than none. If only the newest history cannot be read, because a lookup fails, the balances still update. The transactions already loaded stay on screen, and a token whose history has not loaded yet keeps showing it as loading rather than as empty. The history is asked for again on the next refresh, a minute later, with no faster retry and no point at which it gives up. However long it keeps failing, it never keeps the balances from showing. Unlike an IC Index-canister outage, the user is not shown a warning for it.
+
+A transaction the network refuses to return, as it does for a transaction format OISY cannot read yet, does not fail the history at all, and neither does one the network returns but OISY fails to read. Anyone can send a transaction to any address, so one such transaction would otherwise stop the newest history of every token it touches for as long as it stays among the newest. It is left out instead, and everything else loads as usual, in the background refresh and while scrolling back. The data export is refused instead while a transaction of an exported token is left out, since a file that silently misses a transaction is worse than none: it fails with the usual export error until OISY can read that transaction. A rate limit or a network error is not treated this way. Those clear by themselves, so the page is asked for again rather than a transaction dropped for good. Once OISY reads them, a reload shows the transactions it left out.
+
+The user is told about the transactions left out, with a warning that names the tokens whose history misses one: on the Activity page every such token, on a token's own page that token only, even when its list is otherwise empty. It shows as soon as a transaction is left out, without waiting for repeated failures as the IC warning does, since nothing but an update of OISY clears it. The warning can be dismissed, and the dismissal is remembered per token and per transaction for the browser session, shared between the two places. A transaction the token misses later raises the warning again, and so does the same transaction missing from another token's history. OISY also counts these transactions in its anonymous usage statistics, once per transaction and page load, with the network and why it failed, but never the transaction or an address, so that a new kind of transaction shows up before users report it.
 
 Balances and history stay in one loader on purpose, rather than in two independent ones as on Ethereum and the EVM networks. One refresh reads everything the network needs and hands it over in one step, so balances and the transactions that changed them arrive together. The cost is that a history lookup that is slow, rather than failing, still delays that refresh's balances. Splitting the two would remove that delay but not change what the user sees when the history fails.
 
@@ -432,9 +572,9 @@ That last part is the reason the preview exists in the form it does. Handing a t
 
 A delegate comes with how much it may spend, and the two are one grant: a one-unit approval and an unlimited one name the same delegate. So every change that leaves a delegate in place states its **allowance** after the run, and an approval that keeps the delegate but changes what it may spend, typically raising an existing allowance to the maximum, is a change of its own (**New spending allowance**). An allowance of the largest amount a token account can hold, which is how applications ask for an unlimited one, reads as **any amount** of the token.
 
-The instruction list reads an account the message opens for the user as the token account it is about to become, with the rent it costs, taking the mint from the initialisation that follows it — that one, and not the last one at the same address, since an address closed and opened again is two accounts. The rent is the reserve the account costs to exist and no more: a creation can fund a wrapped SOL account with the SOL to wrap along with its rent, and that SOL is the account's balance, not its rent. Where the reserve is not known, as in the activity list, the two cannot be told apart, so the rent of a wrapped SOL account the message opens itself is left unstated, as its balance is. An account the associated token account program opens is funded with exactly its rent, and one of any other mint has nothing to wrap, so those state their funding as it stands. An account a program opens inside itself is not listed again: that creation is already described by the program's own instruction. Nor is an instruction the wallet read and chose not to state — initialising an account it just opened, syncing a wrapped balance — listed as one it could not read: those are absent from the list because they say nothing, not because nothing understood them. A run with nothing at all to list stays an empty list rather than being replaced by the message's own reading, which cannot see an account the run found already there.
+The instruction list reads an account the message opens for the user, at an address of its own or at one derived from a seed, as the token account it is about to become, with the rent it costs, taking the mint from the initialisation that follows it — that one, and not the last one at the same address, since an address closed and opened again is two accounts. The rent is the reserve the account costs to exist and no more: a creation can fund a wrapped SOL account with the SOL to wrap along with its rent, and that SOL is the account's balance, not its rent. Where the reserve is not known, as in the activity list, the two cannot be told apart, so the rent of a wrapped SOL account the message opens itself is left unstated, as its balance is. An account the associated token account program opens is funded with exactly its rent, and one of any other mint has nothing to wrap, so those state their funding as it stands. An account a program opens inside itself is not listed again: that creation is already described by the program's own instruction. Nor is an instruction the wallet read and chose not to state — initialising an account it just opened, syncing a wrapped balance — listed as one it could not read: those are absent from the list because they say nothing, not because nothing understood them. A run with nothing at all to list stays an empty list rather than being replaced by the message's own reading, which cannot see an account the run found already there.
 
-An account opened for an application rather than for the System or token program, such as a liquidity position, is listed with the rent the user's wallet pays to open it and the program it is opened for, whether the message opens it or the application does inside its own instruction. An account opened for the System program is a wallet, whose key holder spends what it holds, so funding one is a payment rather than rent and is not listed this way. That line is often the only one such an instruction has, so without it the instruction would count as one nothing described. Only rent is called rent: lamports beyond what the account's size costs are a payment into an account the program controls, which the line would understate, so such an opening is not listed. What the size costs is scaled from the reserve the chain charges a token account, so where that is not known, as in the activity list, the line is left out as well. The review's fee section states that rent as **App account cost**, a line of its own beside **Account rent**: the user can always close a token account and get its rent back, while the rent in an application's account comes back only if the application's code returns it, so nothing nets it.
+An account opened for an application rather than for the System or token program, such as a liquidity position, is listed with the rent the user's wallet pays to open it and the program it is opened for, whether the message opens it or the application does inside its own instruction, and whether its address is a key of its own or derived from a seed. An account opened for the System program is a wallet, whose key holder spends what it holds, so funding one is a payment rather than rent and is not listed this way. That line is often the only one such an instruction has, so without it the instruction would count as one nothing described. Only rent is called rent: lamports beyond what the account's size costs are a payment into an account the program controls, which the line would understate, so such an opening is not listed. What the size costs is scaled from the reserve the chain charges a token account, so where that is not known, as in the activity list, the line is left out as well. The review's fee section states that rent as **App account cost**, a line of its own beside **Account rent**: the user can always close a token account and get its rent back, while the rent in an application's account comes back only if the application's code returns it, so nothing nets it.
 
 An account an application's own program closes, such as a liquidity position handing back its rent, is listed as **Close app account for** the program, with what it sent to the wallet (sent rather than returned: nothing in the request says who funded the account), under the instruction that closed it, since only the program that owns an account can take lamports out of it: the one instruction that calls that program with the account, or, when several do, the last of them once a second simulated run of the message up to it shows the account still held all its lamports there. An emptied account stays loaded for the rest of the message, so a later call can name it again, and a close no instruction can be shown to have made is not listed. The program moves the lamports itself, so no call in the run states the close, and only the account's state before and after the run shows it. Nothing states where the lamports went either, so the close is listed only when the wallet's own change accounts for every lamport the closed accounts held, once the fee and every other line are taken out (an opening counts only when the wallet funded it: a sender opening the recipient's account pays its rent, and so can any other signer), and when no app account that stays open lost lamports, since its program could have paid the wallet from it instead. One that is topped up from elsewhere and then drained by as much ends as it started and passes: no end balance can tell that from a genuine close next to a payment between two other accounts, and in both the wallet receives what the lines state. Otherwise the instruction stays one nothing describes, and the request is refused as before.
 
@@ -466,7 +606,7 @@ It is orange and not red because red on this screen means OISY will not sign, an
 
 The review reduces a message to a single source, destination and amount, so an instruction whose effect that single figure cannot carry is **refused outright** rather than shown in part. Two families of System-program instruction fall there.
 
-An idempotent creation of an account that is already there did nothing, and is not stated: a line saying an account was opened, for a message that opened none, states an operation that did not happen, along with a rent nobody paid. Whether it was already there is read as of that instruction rather than before the message: an account this one opens and then names again was opened once, and a close between the two puts the address back to nothing, so what follows opens it again. What says it was there is a token account in the state before the message, not lamports at the address: an associated account's address can hold lamports before anything opens an account at it, and the creation then opens one on top of them. Without a run and without a creation earlier in the message, nothing says it existed and the creation stands. An **account creation** is read by what will own the new account. One opened for a program — the wrapped SOL account a routed swap opens before initialising it, or an associated token account's rent — is governed by that program, and its lamports are the cost of the operation the creation belongs to, so it reads as it always has. One owned by the **System program** is different: no application program decides what may leave it, so it is an address with a balance and a key that can spend it, and the review has no field for that — its single destination belongs to the transfer it displays. Those are refused, in all three forms the System program offers (plain, seed-derived, and prefunding). A creation for a program is refused too when it funds the account **beyond the rent its stated size costs**: rent is what the account existing costs, but anything above it is a balance the owning program decides the fate of, and closing an SPL token account hands every lamport it holds to a destination the close names — which one message can open, initialise and close. Funded with exactly its rent, a creation reads as the cost of the operation it belongs to, which is what opening one legitimately costs. That rent is what the network charges when the request is reviewed, read from it rather than kept in OISY: Solana lowers the price per byte in steps, and a price kept in the wallet would let each cut pass as rent. When the network does not answer, a creation for a program is refused, since there is no line to hold it to. An account a program opens inside its own instruction, which the review learns of from the simulation alone, is held to the same rent: funded above it, the request is refused as one the review cannot show. That check needs the network's figure, so it applies when the network answers. One the System program owns is refused whatever its funding, as when the message opens it. The plain and seed-derived forms answer that question the same way. The prefunding form is refused whatever it opens the account for: it exists to open an account that already holds lamports, so what it states is what it adds rather than what the account ends up with, and the review has no way to learn the difference. The seed-derived form is included because a derived address has no key of its own, yet lamports can still be moved out of it against a signature from the base it was derived from.
+An idempotent creation of an account that is already there did nothing, and is not stated: a line saying an account was opened, for a message that opened none, states an operation that did not happen, along with a rent nobody paid. Whether it was already there is read as of that instruction rather than before the message: an account this one opens and then names again was opened once, and a close between the two puts the address back to nothing, so what follows opens it again. What says it was there is a token account in the state before the message, not lamports at the address: an associated account's address can hold lamports before anything opens an account at it, and the creation then opens one on top of them. Without a run and without a creation earlier in the message, nothing says it existed and the creation stands. An **account creation** is read by what will own the new account. One opened for a program — the wrapped SOL account a routed swap opens before initialising it, or an associated token account's rent — is governed by that program, and its lamports are the cost of the operation the creation belongs to, so it reads as it always has. One owned by the **System program** is different: no application program decides what may leave it, so it is an address with a balance and a key that can spend it, and the review has no field for that — its single destination belongs to the transfer it displays. Those are refused, in all three forms the System program offers (plain, seed-derived, and prefunding). A creation for a program is refused too when it funds the account **beyond the rent its stated size costs**: rent is what the account existing costs, but anything above it is a balance the owning program decides the fate of, and closing an SPL token account hands every lamport it holds to a destination the close names — which one message can open, initialise and close. The exception is a **wrapped SOL account the message hands back to the wallet**: opened for the Token program at a token account's size, initialised for wrapped SOL held by the wallet and closed into the wallet, all by the message's own instructions and in that order, which is how a dApp such as Raydium wraps the SOL a trade spends. There the funding above the rent is the SOL being wrapped, and whatever the trade leaves of it comes back with the close. That close needs the wallet's signature as the account's holder, so a program that hands the account to anyone else or closes it first makes the close fail, and the whole transaction with it; what a program moves out of the account on the way is a transfer the simulation shows, as for any token account of the user's. An address closed and opened again is a second account, and only the opening a close answers for is accepted. Funded with exactly its rent, a creation reads as the cost of the operation it belongs to, which is what opening one legitimately costs. That rent is what the network charges when the request is reviewed, read from it rather than kept in OISY: Solana lowers the price per byte in steps, and a price kept in the wallet would let each cut pass as rent. When the network does not answer, a creation for a program is refused, since there is no line to hold it to. An account a program opens inside its own instruction, which the review learns of from the simulation alone, is held to the same rent: funded above it, the request is refused as one the review cannot show. That check needs the network's figure, so it applies when the network answers. One the System program owns is refused whatever its funding, as when the message opens it. The plain and seed-derived forms answer that question the same way. The prefunding form is refused whatever it opens the account for: it exists to open an account that already holds lamports, so what it states is what it adds rather than what the account ends up with, and the review has no way to learn the difference. The seed-derived form is included because a derived address has no key of its own, yet lamports can still be moved out of it against a signature from the base it was derived from.
 
 An **account assignment** hands an account to a different program. A plain `assign` names the account as its only account meta and requires that account to sign, so a message can name the connected wallet itself. `assignWithSeed` instead requires the derivation base to sign. In either form, the authorized signer can hand the account to the named program, after which that program, not the System program, governs it. Nothing about that fits an amount, a source or a destination, which is the same reason a token account's authority change is refused, so an assignment is refused too.
 
@@ -572,7 +712,7 @@ Sending XRP finishes at the moment the payment is broadcast — it does not hold
 
 The outcome arrives on its own, once: a confirmation that the payment went through, or a message saying what went wrong. Those messages are deliberately different from each other, because they call for different things — _nothing left your wallet and it is safe to send again_ is not the same as _the payment failed but the network fee was still charged_.
 
-Because the outcome is reported by the record and not by the send window, it reaches the user whether or not that window is still open, whether or not the tab was reloaded, and whether or not they signed out in between. A payment whose session died mid-flight is picked up by the next session that loads.
+Because the outcome is reported by the record and not by the send window, it reaches the user whether or not that window is still open, whether or not the tab was reloaded, and whether or not they signed out in between. A payment whose session died mid-flight is picked up by the next session that loads, on any browser or device; one whose session died just after writing the outcome is reported by the next session in the same browser. A payment that has already resolved is not reported again when the user signs in on another browser or device.
 
 The payment appears in the notification list while it is settling, showing the amount and the network, and can be dismissed once it has resolved.
 

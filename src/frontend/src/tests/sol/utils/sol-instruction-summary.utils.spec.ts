@@ -28,7 +28,11 @@ import {
 	mockSolAddress3
 } from '$tests/mocks/sol.mock';
 import { nonNullish } from '@dfinity/utils';
-import { getCreateAccountInstruction, getTransferSolInstruction } from '@solana-program/system';
+import {
+	getCreateAccountInstruction,
+	getCreateAccountWithSeedInstruction,
+	getTransferSolInstruction
+} from '@solana-program/system';
 import {
 	AuthorityType,
 	getApproveCheckedInstruction,
@@ -542,6 +546,89 @@ describe('sol-instruction-summary.utils', () => {
 				]);
 			});
 
+			// Raydium opens the wrapped SOL account of a trade at an address derived from a seed. The
+			// call funds and sizes it as the plain one does, so the list reads it the same way.
+			describe('at an address derived from a seed', () => {
+				const user = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
+				const reserve = 2_039_280n;
+
+				const seeded = ({ lamports }: { lamports: number }) => ({
+					...creation,
+					parsed: {
+						type: 'createAccountWithSeed',
+						info: { ...creation.parsed.info, base: user, seed: 'wsol', lamports }
+					}
+				});
+
+				const plain = ({ lamports }: { lamports: number }) => ({
+					...creation,
+					parsed: { ...creation.parsed, info: { ...creation.parsed.info, lamports } }
+				});
+
+				const wrapping = ({
+					opening
+				}: {
+					opening: (params: { lamports: number }) => typeof creation;
+				}) =>
+					mapSolInstructionSummaries({
+						instructions: [
+							opening({ lamports: 1_002_039_280 }),
+							{
+								...initialisation,
+								parsed: {
+									...initialisation.parsed,
+									info: { ...initialisation.parsed.info, mint: WSOL_TOKEN.address }
+								}
+							},
+							{
+								program: 'spl-token',
+								programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								parsed: {
+									type: 'closeAccount',
+									info: {
+										account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
+										destination: user,
+										owner: user
+									}
+								}
+							}
+						],
+						ownedAddresses: [user],
+						userAddress: user,
+						rentExemptMinimum: reserve,
+						includeUnrecognised: true
+					});
+
+				it('should read it as the token account it becomes, carrying its rent', () => {
+					expect(
+						mapSolInstructionSummaries({
+							instructions: [seeded({ lamports: 2_039_280 }), initialisation],
+							ownedAddresses: [user],
+							userAddress: user,
+							includeUnrecognised: true
+						})
+					).toStrictEqual([
+						{
+							kind: 'createTokenAccount',
+							account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
+							tokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+							rent: 2_039_280n,
+							payer: user
+						}
+					]);
+				});
+
+				// Its rent is the reserve, and the rest is the balance its close hands back: the same
+				// split, and the same lines, as for an account opened at an address of its own.
+				it('should read a wrapped SOL account it funds and closes as the plain call’s', () => {
+					const views = wrapping({ opening: seeded });
+
+					expect(views.map(({ kind }) => kind)).toStrictEqual(['createTokenAccount', 'unwrap']);
+					expect(views[0]?.rent).toBe(reserve);
+					expect(views).toStrictEqual(wrapping({ opening: plain }));
+				});
+			});
+
 			describe('funded with the SOL it wraps', () => {
 				const user = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
 				const reserve = 2_039_280n;
@@ -773,6 +860,97 @@ describe('sol-instruction-summary.utils', () => {
 						payer: user
 					}
 				]);
+			});
+
+			// The address is derived from a base rather than being a key of its own, and the program
+			// the account is opened for governs it all the same.
+			describe('at an address derived from a seed', () => {
+				const seedOpening = ({
+					lamports = positionRent,
+					owner = application
+				}: {
+					lamports?: bigint;
+					owner?: string;
+				} = {}) => {
+					const {
+						parsed: { info }
+					} = opening({ lamports, owner });
+
+					return {
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccountWithSeed',
+							info: { ...info, base: user, seed: 'position' }
+						}
+					};
+				};
+
+				it('should state its rent as it does for an account at a key of its own', () => {
+					expect(openedInside({ creation: seedOpening() })).toStrictEqual([
+						{
+							kind: 'route',
+							program: application,
+							children: [
+								{
+									kind: 'createAccount',
+									account: position,
+									program: application,
+									rent: positionRent,
+									payer: user
+								}
+							]
+						}
+					]);
+				});
+
+				it('should not call lamports above what the account’s size costs rent', () => {
+					expect(
+						kinds(openedInside({ creation: seedOpening({ lamports: positionRent + 1n }) }))
+					).toStrictEqual(['unknown']);
+				});
+
+				it('should not call funding an account left with the System program rent', () => {
+					expect(
+						kinds(
+							openedInside({
+								creation: seedOpening({ owner: '11111111111111111111111111111111' })
+							})
+						)
+					).toStrictEqual(['unknown']);
+				});
+
+				it('should read the same opening stated by the message itself', () => {
+					const signer = (address: string) => ({ address }) as never;
+
+					expect(
+						mapSolInstructionSummaries({
+							instructions: [
+								getCreateAccountWithSeedInstruction({
+									payer: signer(user),
+									newAccount: toAddress(position),
+									base: toAddress(user),
+									seed: 'position',
+									amount: positionRent,
+									space: 8120,
+									programAddress: toAddress(application)
+								})
+							].map(asSolParsedRpcInstructionOrSelf),
+							ownedAddresses: [user],
+							userAddress: user,
+							rentExemptMinimum,
+							includeUnrecognised: true
+						})
+					).toStrictEqual([
+						{
+							kind: 'createAccount',
+							account: position,
+							program: application,
+							rent: positionRent,
+							payer: user
+						}
+					]);
+				});
 			});
 
 			// The request exactly as Meteora sent it to open a DLMM position, read the way the

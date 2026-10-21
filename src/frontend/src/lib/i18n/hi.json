@@ -108,12 +108,17 @@
 			"do_not_close": "जब तक लेनदेन पूरा न हो जाए, इस टैब को बंद न करें",
 			"standalone_mode": "जब किसी ऐप और $oisy_short दोनों को होम स्क्रीन पर इंस्टॉल किया गया हो, तो कनेक्शन संबंधी ज्ञात समस्याएं हो सकती हैं। यदि आपको $oisy_short से कनेक्ट करने या ट्रांज़ैक्शन साइन करने में समस्या आती है, तो कृपया ऐप को एक सामान्य ब्राउज़र से खोलें। हम एक समाधान पर काम कर रहे हैं जो जल्द ही उपलब्ध होगा। <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">अधिक पढ़ें</a>",
 			"video_not_supported": ""
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
 		"completed": "पूर्ण",
 		"in_progress": "प्रगति में",
-		"failed": "विफल"
+		"failed": "विफल",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {
@@ -1346,6 +1351,8 @@
 			"swap_fees": "स्वैप शुल्क",
 			"cross_chain_networks_info": "आप टोकन <b>$sourceNetwork</b> से <b>$destinationNetwork</b> नेटवर्क पर ले जाते हैं",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -1385,7 +1392,8 @@
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
-			"oisy_trade_recovery_failed": ""
+			"oisy_trade_recovery_failed": "",
+			"lifi_status_unknown": ""
 		}
 	},
 	"buy": {
@@ -1564,7 +1572,8 @@
 			"open_contract_address_block_explorer": "ब्लॉक एक्सप्लोरर पर अनुबंध पता खोलें",
 			"open_token_address_block_explorer": "ब्लॉक एक्सप्लोरर पर टोकन पता खोलें",
 			"token_group_number": "नेटिव टोकन $token के लिए समूह में टोकन की कुल संख्या",
-			"filter_button": "फ़िल्टर खोलें/बंद करें"
+			"filter_button": "फ़िल्टर खोलें/बंद करें",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "एक ERC20 अनुबंध पता दर्ज करें",
@@ -1887,6 +1896,7 @@
 			"ambiguous_transaction": "यह लेनदेन कई पतों के बीच धनराशि स्थानांतरित करता है और समीक्षा के लिए सटीक रूप से नहीं दिखाया जा सकता। आपकी सुरक्षा के लिए, इसे साइन नहीं किया गया।",
 			"close_pays_others": "यह लेनदेन आपके किसी एक टोकन खाते को बंद करता है और उसकी शेष राशि ऐसे पते पर भेजता है जो आपका वॉलेट नहीं है। आपकी सुरक्षा के लिए इस पर हस्ताक्षर नहीं किए गए।",
 			"unreviewed_without_simulation": "OISY इस लेनदेन का एक हिस्सा नहीं पढ़ सका, और नेटवर्क ने इसका सिमुलेशन भी नहीं दिया, इसलिए कुछ भी यह नहीं बताता कि वह हिस्सा क्या करेगा। आपकी सुरक्षा के लिए, इस पर हस्ताक्षर नहीं किए गए।",
+			"unreviewed_not_described_by_simulation": "OISY इस लेनदेन का एक हिस्सा नहीं पढ़ सका, और इसके सिमुलेशन से भी यह पता नहीं चला कि वह हिस्सा क्या करेगा। आपकी सुरक्षा के लिए, इस पर हस्ताक्षर नहीं किए गए।",
 			"unread_programs_unconfirmed": "यह लेनदेन एक ऐसे प्रोग्राम को कॉल करता है जिसे OISY नहीं पढ़ सकता, और समीक्षा में इसकी पुष्टि नहीं की गई। आपकी सुरक्षा के लिए, इस पर हस्ताक्षर नहीं किए गए।",
 			"sol_transaction_as_message": "यह संदेश एक सोलाना लेनदेन है, जिसे केवल लेनदेन समीक्षा के माध्यम से स्वीकृत किया जा सकता है। आपकी सुरक्षा के लिए, इस पर हस्ताक्षर नहीं किए गए।",
 			"request_not_defined": "अप्रत्याशित त्रुटि: अनुरोध परिभाषित नहीं है इसलिए इसे संसाधित नहीं किया जा सकता है।",
@@ -2587,7 +2597,8 @@
 		},
 		"warning": {
 			"no_index_canister": "$oisy_short, $token_list के लेनदेन लोड नहीं कर सकता — टोकन जारीकर्ता लेनदेन ट्रैकिंग की सुविधा नहीं देता।",
-			"unavailable_index_canister": "$token_list के नवीनतम लेनदेन इस समय लोड नहीं किए जा सकते, क्योंकि उनकी ट्रैकिंग सेवा प्रतिक्रिया नहीं दे रही है। सेवा के वापस आते ही वे अपने आप लोड हो जाएंगे।"
+			"unavailable_index_canister": "$token_list के नवीनतम लेनदेन इस समय लोड नहीं किए जा सकते, क्योंकि उनकी ट्रैकिंग सेवा प्रतिक्रिया नहीं दे रही है। सेवा के वापस आते ही वे अपने आप लोड हो जाएंगे।",
+			"unsupported_sol_transactions": "$token_list के कुछ लेनदेन लोड नहीं हो सके, क्योंकि उनका फ़ॉर्मैट समर्थित नहीं है। यह समस्या हल होते ही वे अपने आप दिखाई देंगे।"
 		}
 	},
 	"earning": {
@@ -2718,10 +2729,13 @@
 			"starting_to_repay": "आपकी चुकौती सबमिट की जा रही है…",
 			"repay_started": "आपकी चुकौती अब प्रोसेस हो रही है।",
 			"current_debt": "मौजूदा कर्ज",
+			"pending_repays": "प्रोसेस हो रही चुकौतियां",
 			"interest_accrued": "अर्जित ब्याज",
 			"debt_after_repay": "चुकौती के बाद कर्ज",
 			"repay_exceeds_debt": "राशि आपके बकाया कर्ज से अधिक है।",
-			"repay_prices_unavailable": "कीमतें अस्थायी रूप से अनुपलब्ध हैं। लोड होने तक चुकौती अक्षम है।"
+			"repay_prices_unavailable": "कीमतें अस्थायी रूप से अनुपलब्ध हैं। लोड होने तक चुकौती अक्षम है।",
+			"repay_debt_unavailable": "आपका बकाया कर्ज अस्थायी रूप से अनुपलब्ध है। लोड होने तक चुकौती अक्षम है।",
+			"repay_pending_covers_debt": "इस पोजीशन की एक चुकौती अभी प्रोसेस हो रही है। इसके पूरा होने के बाद आप और चुका सकते हैं।"
 		},
 		"info": {
 			"title": "Liquidium क्या है",
@@ -3023,6 +3037,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

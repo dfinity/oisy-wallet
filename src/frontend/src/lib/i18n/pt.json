@@ -108,12 +108,17 @@
 			"do_not_close": "Não feche esta aba até que a transação esteja concluída",
 			"standalone_mode": "Há problemas de conexão conhecidos quando um aplicativo e o $oisy_short estão instalados na tela inicial. Se você tiver problemas para conectar o $oisy_short ou assinar transações, inicie o aplicativo em um navegador comum. Estamos trabalhando em uma correção que será resolvida em breve. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Leia mais</a>",
 			"video_not_supported": ""
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
 		"completed": "Concluído",
 		"in_progress": "Em andamento",
-		"failed": "Falhou"
+		"failed": "Falhou",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {
@@ -1346,6 +1351,8 @@
 			"swap_fees": "",
 			"cross_chain_networks_info": "",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -1385,7 +1392,8 @@
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
-			"oisy_trade_recovery_failed": ""
+			"oisy_trade_recovery_failed": "",
+			"lifi_status_unknown": ""
 		}
 	},
 	"buy": {
@@ -1564,7 +1572,8 @@
 			"open_contract_address_block_explorer": "Abrir o endereço do contrato no explorador de blocos",
 			"open_token_address_block_explorer": "Abrir o endereço do token em um explorador de blocos",
 			"token_group_number": "Número total de tokens no grupo para o token nativo $token",
-			"filter_button": "Abrir/fechar filtro"
+			"filter_button": "Abrir/fechar filtro",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "Insira um endereço de contrato ERC20",
@@ -1887,6 +1896,7 @@
 			"ambiguous_transaction": "Esta transação movimenta fundos entre vários endereços e não pode ser exibida com precisão para revisão. Para sua segurança, ela não foi assinada.",
 			"close_pays_others": "Esta transação encerra uma das suas contas de tokens e envia o saldo dela para um endereço que não é a sua carteira. Para a sua segurança, não foi assinada.",
 			"unreviewed_without_simulation": "A OISY não conseguiu ler parte desta transação e a rede também não devolveu uma simulação, por isso nada descreve o que essa parte faria. Para a sua segurança, não foi assinada.",
+			"unreviewed_not_described_by_simulation": "A OISY não conseguiu ler parte desta transação e a simulação também não mostrou o que essa parte faria. Para a sua segurança, não foi assinada.",
 			"unread_programs_unconfirmed": "Esta transação chama um programa que a OISY não consegue ler e não foi confirmada na revisão. Para a sua segurança, não foi assinada.",
 			"sol_transaction_as_message": "Esta mensagem é uma transação Solana, que só pode ser aprovada por meio de uma revisão de transação. Por sua segurança, ela não foi assinada.",
 			"request_not_defined": "Erro inesperado: A solicitação não está definida, portanto, não pode ser processada.",
@@ -2587,7 +2597,8 @@
 		},
 		"warning": {
 			"no_index_canister": "$oisy_short não consegue carregar as transações de $token_list — o emissor do token não oferece rastreamento de transações.",
-			"unavailable_index_canister": "No momento, as transações mais recentes de $token_list não podem ser carregadas, porque o serviço de rastreamento delas não está respondendo. Elas serão carregadas automaticamente assim que ele voltar."
+			"unavailable_index_canister": "No momento, as transações mais recentes de $token_list não podem ser carregadas, porque o serviço de rastreamento delas não está respondendo. Elas serão carregadas automaticamente assim que ele voltar.",
+			"unsupported_sol_transactions": "Algumas transações de $token_list não puderam ser carregadas, porque têm um formato não suportado. Elas aparecerão automaticamente assim que este problema for resolvido."
 		}
 	},
 	"earning": {
@@ -2718,10 +2729,13 @@
 			"starting_to_repay": "A enviar o teu reembolso…",
 			"repay_started": "O teu reembolso está a ser processado.",
 			"current_debt": "Dívida atual",
+			"pending_repays": "Reembolsos em processamento",
 			"interest_accrued": "Juros acumulados",
 			"debt_after_repay": "Dívida após reembolso",
 			"repay_exceeds_debt": "O montante excede a tua dívida pendente.",
-			"repay_prices_unavailable": "Os preços estão temporariamente indisponíveis. O reembolso está desativado até serem carregados."
+			"repay_prices_unavailable": "Os preços estão temporariamente indisponíveis. O reembolso está desativado até serem carregados.",
+			"repay_debt_unavailable": "A tua dívida pendente está temporariamente indisponível. O reembolso está desativado até ser carregada.",
+			"repay_pending_covers_debt": "Um reembolso desta posição ainda está a ser processado. Podes reembolsar mais assim que for concluído."
 		},
 		"info": {
 			"title": "O que é a Liquidium",
@@ -3023,6 +3037,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

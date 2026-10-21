@@ -108,12 +108,17 @@
 			"do_not_close": "Nie zamykaj tej karty, dopóki transakcja nie zostanie zakończona",
 			"standalone_mode": "Znane są problemy z połączeniem, gdy zarówno aplikacja, jak i $oisy_short są zainstalowane na ekranie głównym. Jeśli napotkasz problemy z połączeniem z $oisy_short lub podpisywaniem transakcji, uruchom aplikację z poziomu zwykłej przeglądarki. Pracujemy nad poprawką, która zostanie wkrótce wdrożona. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Dowiedz się więcej</a>",
 			"video_not_supported": ""
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
 		"completed": "Zakończono",
 		"in_progress": "W toku",
-		"failed": "Niepowodzenie"
+		"failed": "Niepowodzenie",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {
@@ -1346,6 +1351,8 @@
 			"swap_fees": "Opłaty za wymianę",
 			"cross_chain_networks_info": "Przenosisz tokeny z sieci <b>$sourceNetwork</b> do sieci <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -1385,7 +1392,8 @@
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
-			"oisy_trade_recovery_failed": ""
+			"oisy_trade_recovery_failed": "",
+			"lifi_status_unknown": ""
 		}
 	},
 	"buy": {
@@ -1564,7 +1572,8 @@
 			"open_contract_address_block_explorer": "Otwórz adres kontraktu w eksploratorze bloków",
 			"open_token_address_block_explorer": "Otwórz adres tokena w eksploratorze bloków",
 			"token_group_number": "Całkowita liczba tokenów w grupie dla tokena natywnego $token",
-			"filter_button": "Otwórz/zamknij filtr"
+			"filter_button": "Otwórz/zamknij filtr",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "Wprowadź adres kontraktu ERC20",
@@ -1887,6 +1896,7 @@
 			"ambiguous_transaction": "Ta transakcja przenosi środki między kilkoma adresami i nie może zostać dokładnie wyświetlona do weryfikacji. Dla Twojego bezpieczeństwa nie została podpisana.",
 			"close_pays_others": "Ta transakcja zamyka jedno z Twoich kont tokenów i wypłaca jego saldo na adres, który nie jest Twoim portfelem. Dla Twojego bezpieczeństwa nie została podpisana.",
 			"unreviewed_without_simulation": "OISY nie mogła odczytać części tej transakcji, a sieć nie zwróciła również jej symulacji, więc nic nie opisuje, co ta część by zrobiła. Dla Twojego bezpieczeństwa nie została podpisana.",
+			"unreviewed_not_described_by_simulation": "OISY nie mogła odczytać części tej transakcji, a jej symulacja również nie pokazała, co ta część by zrobiła. Dla Twojego bezpieczeństwa nie została podpisana.",
 			"unread_programs_unconfirmed": "Ta transakcja wywołuje program, którego OISY nie może odczytać, i nie została potwierdzona podczas przeglądu. Dla Twojego bezpieczeństwa nie została podpisana.",
 			"sol_transaction_as_message": "Ta wiadomość jest transakcją Solana, którą można zatwierdzić wyłącznie poprzez przegląd transakcji. Ze względów bezpieczeństwa nie została podpisana.",
 			"request_not_defined": "Nieoczekiwany błąd: Żądanie nie jest zdefiniowane, dlatego nie można go przetworzyć.",
@@ -2587,7 +2597,8 @@
 		},
 		"warning": {
 			"no_index_canister": "$oisy_short nie może załadować transakcji dla $token_list – wydawca tokena nie udostępnia śledzenia transakcji.",
-			"unavailable_index_canister": "Najnowszych transakcji dla $token_list nie można w tej chwili załadować, ponieważ ich usługa śledzenia nie odpowiada. Zostaną załadowane automatycznie, gdy znów będzie dostępna."
+			"unavailable_index_canister": "Najnowszych transakcji dla $token_list nie można w tej chwili załadować, ponieważ ich usługa śledzenia nie odpowiada. Zostaną załadowane automatycznie, gdy znów będzie dostępna.",
+			"unsupported_sol_transactions": "Nie udało się załadować niektórych transakcji dla $token_list, ponieważ mają nieobsługiwany format. Pojawią się automatycznie, gdy ten problem zostanie rozwiązany."
 		}
 	},
 	"earning": {
@@ -2718,10 +2729,13 @@
 			"starting_to_repay": "Wysyłanie twojej spłaty…",
 			"repay_started": "Twoja spłata jest teraz przetwarzana.",
 			"current_debt": "Bieżący dług",
+			"pending_repays": "Spłaty w toku",
 			"interest_accrued": "Naliczone odsetki",
 			"debt_after_repay": "Dług po spłacie",
 			"repay_exceeds_debt": "Kwota przekracza twój zaległy dług.",
-			"repay_prices_unavailable": "Ceny są tymczasowo niedostępne. Spłacanie jest wyłączone do czasu ich wczytania."
+			"repay_prices_unavailable": "Ceny są tymczasowo niedostępne. Spłacanie jest wyłączone do czasu ich wczytania.",
+			"repay_debt_unavailable": "Twój zaległy dług jest tymczasowo niedostępny. Spłacanie jest wyłączone do czasu jego wczytania.",
+			"repay_pending_covers_debt": "Spłata tej pozycji jest nadal przetwarzana. Możesz spłacić więcej, gdy się zakończy."
 		},
 		"info": {
 			"title": "Czym jest Liquidium",
@@ -3023,6 +3037,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",
