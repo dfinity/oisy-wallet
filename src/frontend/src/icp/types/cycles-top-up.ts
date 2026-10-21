@@ -7,7 +7,8 @@ import type { CyclesLedgerWithdrawRefusal } from '$icp/canisters/cycles-ledger.e
  * - `refused`: the ledger refused before burning anything, so nothing moved.
  * - `refunded`: the canister could not receive the cycles, and the ledger returned the
  *   amount minus its fees. Without a refund block, nothing came back.
- * - `unknown`: the call got no answer, so the top-up may or may not have gone through.
+ * - `unknown`: the call got no answer, or the ledger answered with an earlier burn whose
+ *   outcome could not be read, so the top-up may or may not have gone through.
  */
 export type CyclesTopUpResult =
 	| { status: 'topped_up'; blockIndex: bigint }
