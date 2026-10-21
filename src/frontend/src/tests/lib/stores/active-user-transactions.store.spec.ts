@@ -296,8 +296,9 @@ describe('active-user-transactions.store', () => {
 			expect(seenUpToNs()).toBe(9n);
 		});
 
-		// Every row updated at or before a snapshot's latest update was in that snapshot.
-		it('set records the latest update a load returns, and keeps a later one', () => {
+		// Every row updated at or before a snapshot's latest update was in that snapshot, and only the
+		// snapshot last applied says what the list holds now.
+		it('set records the latest update of the snapshot it applies', () => {
 			activeUserTransactionsStore.init(mockPrincipal);
 			activeUserTransactionsStore.set({
 				transactions: [pending({ id: 'a', updatedAtNs: 5n }), pending({ id: 'b', updatedAtNs: 7n })]
@@ -307,7 +308,7 @@ describe('active-user-transactions.store', () => {
 
 			activeUserTransactionsStore.set({ transactions: [pending({ id: 'a', updatedAtNs: 5n })] });
 
-			expect(get(activeUserTransactionsStore)?.loadedUpToNs).toBe(7n);
+			expect(get(activeUserTransactionsStore)?.loadedUpToNs).toBe(5n);
 		});
 
 		// A local write says nothing about a row another device created in between.

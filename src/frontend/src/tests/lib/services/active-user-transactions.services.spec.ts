@@ -142,6 +142,39 @@ describe('active-user-transactions.services', () => {
 			expect(state?.loadedUpToNs).toBe(ZERO);
 		});
 
+		// Two loads of the same account finish out of order: the older one, applied last, lacks a row the
+		// newer one had, so the list no longer shows it and the cutoff must not cover it.
+		it('takes the cutoff from the snapshot it applied last when loads finish out of order', async () => {
+			const a = { ...mockActiveUserTransaction, id: 'a', updated_at_ns: 5n };
+			const b = { ...mockActiveUserTransaction, id: 'b', updated_at_ns: 7n };
+			let resolveOlder: (response: GetActiveUserTransactionsResponse) => void = () => {};
+			let resolveNewer: (response: GetActiveUserTransactionsResponse) => void = () => {};
+			vi.spyOn(backendApi, 'getActiveUserTransactions')
+				.mockReturnValueOnce(
+					new Promise((resolve) => {
+						resolveOlder = resolve;
+					})
+				)
+				.mockReturnValueOnce(
+					new Promise((resolve) => {
+						resolveNewer = resolve;
+					})
+				);
+
+			const older = loadActiveUserTransactions({ identity: mockIdentity });
+			const newer = loadActiveUserTransactions({ identity: mockIdentity });
+
+			resolveNewer({ transactions: [a, b], seen_up_to_ns: ZERO });
+			await newer;
+			resolveOlder({ transactions: [a], seen_up_to_ns: ZERO });
+			await older;
+
+			const state = get(activeUserTransactionsStore);
+
+			expect(Object.keys(state?.data ?? {})).toEqual(['a']);
+			expect(state?.loadedUpToNs).toBe(5n);
+		});
+
 		it('drops a late response when the store has been reset mid-flight', async () => {
 			// Simulates: load(A) issues getActiveUserTransactions; before the
 			// response lands, the user signs out and the store is reset. A's

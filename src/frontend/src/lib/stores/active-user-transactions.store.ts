@@ -18,9 +18,10 @@ export type ActiveUserTransactionsStoreData =
 			data: Record<string, ActiveUserTransaction>;
 			// From the backend, so it holds for every device: rows updated at or before it are seen.
 			seenUpToNs: bigint;
-			// The latest update in the snapshots loaded so far. Every row updated at or before it was in
-			// one of them, so this list has it, which a row written locally since does not establish: a
-			// row another device created in between may be missing here.
+			// The latest update in the snapshot last applied. Every row updated at or before it was in
+			// that snapshot, so this list has it, which neither a row written locally since nor an earlier
+			// snapshot establishes: a row another device created in between may be missing here, and an
+			// older snapshot landing late drops rows a newer one had.
 			loadedUpToNs: bigint;
 	  } & ActiveUserTransactionsLocalState)
 	| undefined;
@@ -202,7 +203,7 @@ const initStore = (): ActiveUserTransactionsStore => {
 						: current.seenUpToNs,
 				loadedUpToNs: transactions.reduce(
 					(latest, { updated_at_ns }) => (updated_at_ns > latest ? updated_at_ns : latest),
-					current.loadedUpToNs
+					ZERO
 				),
 				lastSeenUpdatedAtNs,
 				terminalSideEffectsApplied
