@@ -161,6 +161,8 @@ describe('lifi-evm-swap.services', () => {
 		maxFeePerGas,
 		maxPriorityFeePerGas,
 		reviewedFeeCeiling: swapGas * maxFeePerGas + l1Fee,
+		// The swap transaction's ceiling and one approval.
+		reviewedFee: swapGas * maxFeePerGas + l1Fee + 65_000n * maxFeePerGas,
 		userTokenAddresses: [mockLifiBaseUsdcToken.address]
 	};
 
@@ -408,6 +410,26 @@ describe('lifi-evm-swap.services', () => {
 				vi.mocked(fetchLifiQuote).mockRejectedValue(failure);
 
 				await expect(fetchLifiEvmSwap(erc20Params())).rejects.toBe(failure);
+			});
+
+			// The balance check before signing comes after the approval is paid.
+			it('should abort with the insufficient-funds error before approving when the balance cannot cover the reviewed fee', async () => {
+				balance.mockResolvedValue(erc20Params().reviewedFee - 1n);
+
+				const err = await fetchLifiEvmSwap(erc20Params()).catch((err: unknown) => err);
+
+				expect(mapEthereumErrorMsg(err)).toBe(en.send.error.ethereum_insufficient_funds);
+				expect(fetchLifiQuote).not.toHaveBeenCalled();
+				expect(approve).not.toHaveBeenCalled();
+			});
+
+			it('should approve and swap when the balance covers the reviewed fee exactly', async () => {
+				balance.mockResolvedValue(erc20Params().reviewedFee);
+
+				await fetchLifiEvmSwap(erc20Params());
+
+				expect(approve).toHaveBeenCalledOnce();
+				expect(swap).toHaveBeenCalledOnce();
 			});
 		});
 

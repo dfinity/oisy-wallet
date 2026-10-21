@@ -1,5 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	isLifiFeeAffordable,
 	lifiApprovalCount,
 	lifiQuoteGas,
 	lifiUnsignedTxSize,
@@ -109,5 +110,26 @@ describe('lifi-fee.utils', () => {
 		])('should count $count when the allowance $case', ({ allowance, count }) => {
 			expect(lifiApprovalCount({ allowance, amount: 100n })).toBe(count);
 		});
+	});
+
+	describe('isLifiFeeAffordable', () => {
+		it.each([
+			{
+				case: 'covers the amount and the fee',
+				isNativeSource: true,
+				nativeBalance: 110n,
+				ok: true
+			},
+			{ case: 'covers the fee only', isNativeSource: true, nativeBalance: 109n, ok: false },
+			{ case: 'covers the fee', isNativeSource: false, nativeBalance: 10n, ok: true },
+			{ case: 'falls a wei short of the fee', isNativeSource: false, nativeBalance: 9n, ok: false }
+		])(
+			'should be $ok when the native balance $case (native source: $isNativeSource)',
+			({ isNativeSource, nativeBalance, ok }) => {
+				expect(isLifiFeeAffordable({ fee: 10n, amount: 100n, isNativeSource, nativeBalance })).toBe(
+					ok
+				);
+			}
+		);
 	});
 });

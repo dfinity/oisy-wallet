@@ -79,3 +79,19 @@ export const lifiApprovalCount = ({
 	allowance: bigint;
 	amount: bigint;
 }): 0 | 1 | 2 => (allowance >= amount ? 0 : allowance === ZERO ? 1 : 2);
+
+/**
+ * LI.FI's fee is a ceiling OISY signs with, so the native balance must cover all of it: on top of
+ * the amount for a native source, on its own for an ERC-20 one.
+ */
+export const isLifiFeeAffordable = ({
+	fee,
+	amount,
+	isNativeSource,
+	nativeBalance
+}: {
+	fee: bigint;
+	amount: bigint;
+	isNativeSource: boolean;
+	nativeBalance: bigint;
+}): boolean => (isNativeSource ? amount : ZERO) + fee <= nativeBalance;

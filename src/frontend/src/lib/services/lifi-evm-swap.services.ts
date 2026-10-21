@@ -42,6 +42,7 @@ import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { HTTPError, SDKError, type LiFiStep, type QuoteRequestFromAmount } from '@lifi/sdk';
+import type { TransactionRequest } from 'ethers/providers';
 import { makeError } from 'ethers/utils';
 import { get } from 'svelte/store';
 
@@ -50,6 +51,12 @@ const isNoRouteError = (err: unknown): boolean =>
 	err instanceof SDKError &&
 	err.cause instanceof HTTPError &&
 	(err.cause.status === 404 || err.cause.status === 422);
+
+// Ethers' own error, which the wizard maps to the existing insufficient-funds copy.
+const insufficientFundsError = (transaction: TransactionRequest) =>
+	makeError('insufficient funds for the swap and its network fee', 'INSUFFICIENT_FUNDS', {
+		transaction
+	});
 
 /**
  * Re-quotes `request` and refuses a quote that fails the trust checks. When no route comes back, or
@@ -244,6 +251,7 @@ export const fetchLifiEvmSwap = async ({
 	maxPriorityFeePerGas,
 	offer,
 	reviewedFeeCeiling,
+	reviewedFee,
 	userTokenAddresses
 }: SwapLifiEvmParams): Promise<void> => {
 	const { id: sourceNetworkId } = sourceNetwork;
@@ -257,6 +265,12 @@ export const fetchLifiEvmSwap = async ({
 	}
 
 	if (request.fromToken !== ZERO_ETH_ADDRESS) {
+		// The balance check below comes after the approval is paid, so the balance must first cover
+		// what the review showed: the swap is never signed above it.
+		if ((await infuraProviders(sourceNetworkId).balance(userAddress)) < reviewedFee) {
+			throw insufficientFundsError({ from: userAddress });
+		}
+
 		// The price is checked before the approval costs anything, against a quote that is not
 		// simulated: the allowance it would need does not exist yet.
 		await requoteAtLeast({
@@ -337,9 +351,7 @@ export const fetchLifiEvmSwap = async ({
 	}
 
 	if ((await provider.balance(userAddress)) < value + feeCeiling) {
-		throw makeError('insufficient funds for the swap and its network fee', 'INSUFFICIENT_FUNDS', {
-			transaction: { from: userAddress, to, data, value }
-		});
+		throw insufficientFundsError({ from: userAddress, to, data, value });
 	}
 
 	const rowData = toLifiData({ sourceToken, destinationToken, amount });

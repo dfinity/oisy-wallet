@@ -24,6 +24,7 @@
 	import type { Token } from '$lib/types/token';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { isLifiFeeAffordable } from '$lib/utils/lifi-fee.utils';
 	import { parseToken, tryParseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
@@ -113,8 +114,7 @@
 			return;
 		}
 
-		// LI.FI's fee is a ceiling OISY signs with, so the balance must cover all of it: on top of the
-		// amount for a native source, on its own for an ERC-20 one. Not known yet, the form waits.
+		// Not known yet, the form waits.
 		if (isLifi) {
 			if (isNullish(lifiFee)) {
 				return;
@@ -127,9 +127,14 @@
 				? parsedSendBalance
 				: ($balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO);
 
-			return (isNativeSource ? userAmount : ZERO) + lifiFee > nativeBalance
-				? 'insufficient-funds-for-fee'
-				: undefined;
+			return isLifiFeeAffordable({
+				fee: lifiFee,
+				amount: userAmount,
+				isNativeSource,
+				nativeBalance
+			})
+				? undefined
+				: 'insufficient-funds-for-fee';
 		}
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee

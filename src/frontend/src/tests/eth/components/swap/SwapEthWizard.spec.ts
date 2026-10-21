@@ -16,11 +16,13 @@ import {
 	TRACK_COUNT_SWAP_SUCCESS
 } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
+import { SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE } from '$lib/constants/test-ids.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
 import * as swapServices from '$lib/services/swap.services';
+import { balancesStore } from '$lib/stores/balances.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, type SwapError } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
@@ -1080,6 +1082,10 @@ describe('SwapEthWizard', () => {
 		const quoteFeeCeiling = 2_000_000_000_000_000n;
 		const approvalFee = 1_000_000_000_000_000n;
 
+		// What pays the fee of an ERC-20 source.
+		const setNativeBalance = (balance: bigint) =>
+			balancesStore.set({ id: ETHEREUM_TOKEN.id, data: { data: balance, certified: true } });
+
 		const lifiOffer = {
 			provider: SwapProvider.LIFI,
 			receiveAmount: 25_003_034n,
@@ -1121,10 +1127,14 @@ describe('SwapEthWizard', () => {
 			mockFetchLifiEvmSwap.mockResolvedValue(undefined);
 			mockLifiQuoteFeeCeiling.mockResolvedValue(quoteFeeCeiling);
 			mockLifiApprovalTransactions.mockResolvedValue(1);
+
+			setNativeBalance(10_000_000_000_000_000n);
 		});
 
 		afterEach(() => {
 			vi.useRealTimers();
+
+			balancesStore.reset(ETHEREUM_TOKEN.id);
 		});
 
 		const lifiContext = () => {
@@ -1326,6 +1336,50 @@ describe('SwapEthWizard', () => {
 			await vi.runOnlyPendingTimersAsync();
 
 			expect(confirm).toBeEnabled();
+		});
+
+		// The form checked its own total; the review reads the fee again, and execution checks the
+		// balance only after an ERC-20's approval is paid.
+		it.each([
+			{ case: 'holds', balance: quoteFeeCeiling + approvalFee - 1n, affordable: false },
+			{ case: 'confirms', balance: quoteFeeCeiling + approvalFee, affordable: true }
+		])('$case a refreshed fee against the balance it needs', async ({ balance, affordable }) => {
+			setNativeBalance(balance);
+
+			const { getByRole, queryByRole, queryByTestId } = renderLifi();
+
+			await vi.runOnlyPendingTimersAsync();
+			await tickValueDifference({ queryByRole });
+
+			const confirm = getByRole('button', { name: en.swap.text.swap_button });
+
+			if (affordable) {
+				expect(confirm).toBeEnabled();
+				expect(queryByTestId(SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE)).toBeNull();
+			} else {
+				expect(confirm).toBeDisabled();
+				expect(queryByTestId(SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE)).toBeInTheDocument();
+			}
+		});
+
+		it('holds a higher fee carried back when the balance cannot cover it', async () => {
+			// Enough for the quote's fee and its approval, not for the higher fee execution found.
+			setNativeBalance(quoteFeeCeiling + approvalFee);
+
+			mockFetchLifiEvmSwap.mockRejectedValueOnce(new LifiFeeChangedError(3_000_000_000_000_000n));
+
+			const { ctx } = lifiContext();
+
+			const { onNext: _, onBack: __, ...props } = BASE_PROPS;
+
+			const rendered = render(SwapEthWizardStepsTest, { props, context: ctx });
+
+			await vi.runOnlyPendingTimersAsync();
+			await confirmSwap(rendered);
+			await tickValueDifference(rendered);
+
+			expect(rendered.getByRole('button', { name: en.swap.text.swap_button })).toBeDisabled();
+			expect(rendered.getByTestId(SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE)).toBeInTheDocument();
 		});
 	});
 });

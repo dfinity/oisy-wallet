@@ -30,6 +30,7 @@
 		toCkErc20HelperContractAddress,
 		toCkEthHelperContractAddress
 	} from '$icp-eth/utils/cketh.utils';
+	import InsufficientFundsForFee from '$lib/components/fee/InsufficientFundsForFee.svelte';
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
@@ -39,6 +40,8 @@
 		TRACK_COUNT_SWAP_SUBMITTED,
 		TRACK_COUNT_SWAP_SUCCESS
 	} from '$lib/constants/analytics.constants';
+	import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
+	import { SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -62,6 +65,7 @@
 		fetchVeloraDeltaSwap,
 		fetchVeloraMarketSwap
 	} from '$lib/services/swap.services';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -79,6 +83,7 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isLifiFeeAffordable } from '$lib/utils/lifi-fee.utils';
 	import { toLifiSwapErrorType } from '$lib/utils/lifi-swap-error.utils';
 	import { lifiUserTokenAddresses } from '$lib/utils/lifi-swap.utils';
 	import { isNetworkEthereum } from '$lib/utils/network.utils';
@@ -359,6 +364,22 @@
 	// the fee with the one reviewed, and the total shown includes the approvals.
 	const isLifiFeeLoading = $derived(isLifiProvider && isNullish(lifiFee));
 
+	// The refreshed total, a carried ceiling included, is checked against the balance as the form
+	// checked its own: execution checks the balance only after an ERC-20's approval is paid.
+	const isLifiFeeUnaffordable = $derived(
+		nonNullish(lifiOffer) &&
+			nonNullish(lifiFee) &&
+			!isLifiFeeAffordable({
+				fee: lifiFee,
+				amount: BigInt(lifiOffer.request.fromAmount),
+				isNativeSource: lifiOffer.request.fromToken === ZERO_ETH_ADDRESS,
+				nativeBalance:
+					(nonNullish(nativeEthereumToken)
+						? $balancesStore?.[nativeEthereumToken.id]?.data
+						: undefined) ?? ZERO
+			})
+	);
+
 	// Velora, OneSec, NEAR Intents, Chain Fusion and LI.FI all close the modal at initiation
 	// and settle in the background via the Active User Transactions store. Only the
 	// ICP-native providers still complete inside the modal.
@@ -526,13 +547,15 @@
 				}
 			} else if (
 				selectedProvider?.provider === SwapProvider.LIFI &&
-				nonNullish(lifiReviewedFeeCeiling)
+				nonNullish(lifiReviewedFeeCeiling) &&
+				nonNullish(lifiFee)
 			) {
 				await fetchLifiEvmSwap({
 					...baseParams,
 					destinationToken: $destinationToken,
 					offer: selectedProvider,
 					reviewedFeeCeiling: lifiReviewedFeeCeiling,
+					reviewedFee: lifiFee,
 					// Disabled ones too: hiding a token does not revoke its allowance to the Diamond.
 					userTokenAddresses: lifiUserTokenAddresses({
 						tokens: $fungibleTokens,
@@ -743,14 +766,14 @@
 				/>
 			{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 				<SwapReview
-					isSwapAmountsLoading={(isSwapAmountsLoading &&
-						receiveAmount !== $swapAmountsStore?.selectedProvider?.receiveAmount) ||
-						isLifiFeeLoading}
+					isSwapAmountsLoading={isSwapAmountsLoading &&
+						receiveAmount !== $swapAmountsStore?.selectedProvider?.receiveAmount}
 					{onBack}
 					onSwap={swap}
 					{receiveAmount}
 					{slippageValue}
 					{swapAmount}
+					swapDisabled={isLifiFeeLoading || isLifiFeeUnaffordable}
 				>
 					{#snippet swapFees()}
 						{#if isGasless}
@@ -761,6 +784,10 @@
 									<Html text={$i18n.fee.text.total_fee} />
 								{/snippet}
 							</SwapLifiFeeDisplay>
+
+							{#if isLifiFeeUnaffordable}
+								<InsufficientFundsForFee testId={SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE} />
+							{/if}
 						{:else}
 							<EthFeeDisplay>
 								{#snippet label()}
