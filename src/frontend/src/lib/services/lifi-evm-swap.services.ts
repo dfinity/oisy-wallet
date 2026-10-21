@@ -21,7 +21,7 @@ import {
 import { assertLifiEvmCalldata } from '$lib/services/lifi-calldata.services';
 import { enableSwapDestinationToken, waitForSwapAllowance } from '$lib/services/swap.services';
 import { i18n } from '$lib/stores/i18n.store';
-import { LifiFeeChangedError } from '$lib/types/errors';
+import { LifiFeeChangedError, LifiRouteUnsupportedError } from '$lib/types/errors';
 import type { NetworkId } from '$lib/types/network';
 import type { SwapLifiEvmParams } from '$lib/types/swap';
 import { consoleError } from '$lib/utils/console.utils';
@@ -36,7 +36,7 @@ import {
 	lifiUnsignedTxSize,
 	withLifiGasBuffer
 } from '$lib/utils/lifi-fee.utils';
-import { assertLifiQuote } from '$lib/utils/lifi-swap.utils';
+import { assertLifiQuote, isLifiRouteExecutable } from '$lib/utils/lifi-swap.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -59,9 +59,10 @@ const insufficientFundsError = (transaction: TransactionRequest) =>
 	});
 
 /**
- * Re-quotes `request` and refuses a quote that fails the trust checks. When no route comes back, or
- * its minimum is below the one displayed, the swap aborts as a slippage error, whose message the
- * wizard recognises by its `Slippage exceeded.` prefix.
+ * Re-quotes `request` and refuses a quote that fails the trust checks, or whose route the calldata
+ * binding would refuse. When no route comes back, or its minimum is below the one displayed, the
+ * swap aborts as a slippage error, whose message the wizard recognises by its `Slippage exceeded.`
+ * prefix.
  */
 const requoteAtLeast = async ({
 	request,
@@ -88,6 +89,14 @@ const requoteAtLeast = async ({
 	}
 
 	assertLifiQuote({ quote, request, sourceNetworkId });
+
+	// The pinned bridge does not pin the route's shape: a refreshed Across route can put a DEX swap
+	// before the bridge. Refused here, it costs no approval.
+	if (!isLifiRouteExecutable(quote)) {
+		throw new LifiRouteUnsupportedError(
+			`LI.FI's refreshed route via ${quote.tool} cannot be executed`
+		);
+	}
 
 	const toAmountMin = BigInt(quote.estimate.toAmountMin);
 

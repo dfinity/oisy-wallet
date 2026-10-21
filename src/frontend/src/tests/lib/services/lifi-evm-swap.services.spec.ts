@@ -20,7 +20,11 @@ import {
 	lifiQuoteFeeCeiling
 } from '$lib/services/lifi-evm-swap.services';
 import { enableSwapDestinationToken, waitForSwapAllowance } from '$lib/services/swap.services';
-import { LifiFeeChangedError, LifiQuoteRejectedError } from '$lib/types/errors';
+import {
+	LifiFeeChangedError,
+	LifiQuoteRejectedError,
+	LifiRouteUnsupportedError
+} from '$lib/types/errors';
 import { LIFI_EXTERNAL_REF_KEYS } from '$lib/types/lifi';
 import { SwapProvider, type SwapLifiEvmParams } from '$lib/types/swap';
 import { toLifiExternalRefsMap } from '$lib/utils/lifi-active-tx.utils';
@@ -44,7 +48,8 @@ import {
 	type GasCost,
 	type LiFiStep,
 	type ProtocolStep,
-	type Step
+	type Step,
+	type SwapStep
 } from '@lifi/sdk';
 
 vi.mock('$lib/rest/lifi.rest', () => ({
@@ -576,9 +581,16 @@ describe('lifi-evm-swap.services', () => {
 
 			// One branch per step type, so that each literal narrows to its own member of `Step`.
 			const step = (
-				step: Pick<CrossStep, 'type' | 'tool'> | Pick<ProtocolStep, 'type' | 'tool'>
+				step:
+					| Pick<CrossStep, 'type' | 'tool'>
+					| Pick<ProtocolStep, 'type' | 'tool'>
+					| Pick<SwapStep, 'type' | 'tool'>
 			): Step =>
-				step.type === 'cross' ? { ...mockLifiQuote, ...step } : { ...mockLifiQuote, ...step };
+				step.type === 'cross'
+					? { ...mockLifiQuote, ...step }
+					: step.type === 'swap'
+						? { ...mockLifiQuote, ...step }
+						: { ...mockLifiQuote, ...step };
 
 			const quote: LiFiStep = {
 				...mockLifiQuote,
@@ -618,6 +630,77 @@ describe('lifi-evm-swap.services', () => {
 					...request,
 					allowBridges: ['near'],
 					skipSimulation: false
+				});
+			});
+
+			describe('through Across from an ERC-20', () => {
+				// 50 USDC on Base to USDC on Arbitrum, with the same minimum whatever the route.
+				const acrossQuote = (includedSteps: Step[]): LiFiStep => ({
+					...erc20Quote,
+					tool: 'across',
+					action: {
+						...erc20Quote.action,
+						toChainId: ChainId.ARB,
+						toToken: { ...erc20Quote.action.toToken, chainId: ChainId.ARB, address: arbitrumUsdc }
+					},
+					includedSteps
+				});
+
+				const reviewed = acrossQuote([
+					step({ type: 'protocol', tool: 'feeCollection' }),
+					step({ type: 'cross', tool: 'across' })
+				]);
+
+				// The pinned bridge, but a DEX swap before it, which the calldata binding refuses.
+				const refreshed = acrossQuote([
+					step({ type: 'protocol', tool: 'feeCollection' }),
+					step({ type: 'swap', tool: 'uniswap' }),
+					step({ type: 'cross', tool: 'across' })
+				]);
+
+				const acrossParams = (): SwapLifiEvmParams => ({
+					...erc20Params(),
+					destinationToken,
+					offer: offerOf({
+						quote: reviewed,
+						request: toRequest({
+							sourceToken: mockLifiBaseUsdcToken,
+							destinationToken,
+							amount: 50_000_000n,
+							userAddress: mockLifiUserAddress,
+							slippage: 1.5
+						})
+					})
+				});
+
+				it('should refuse a refreshed route the binding would refuse before approving', async () => {
+					vi.mocked(fetchLifiQuote).mockResolvedValue(refreshed);
+
+					await expect(fetchLifiEvmSwap(acrossParams())).rejects.toThrow(LifiRouteUnsupportedError);
+
+					expect(approve).not.toHaveBeenCalled();
+					expect(swap).not.toHaveBeenCalled();
+				});
+
+				it('should refuse it when only the simulated quote takes that shape', async () => {
+					vi.mocked(fetchLifiQuote)
+						.mockResolvedValueOnce(reviewed)
+						.mockResolvedValueOnce(refreshed);
+
+					await expect(fetchLifiEvmSwap(acrossParams())).rejects.toThrow(LifiRouteUnsupportedError);
+
+					expect(approve).toHaveBeenCalledOnce();
+					expect(assertLifiEvmCalldata).not.toHaveBeenCalled();
+					expect(swap).not.toHaveBeenCalled();
+				});
+
+				it('should approve and swap when the route keeps its shape', async () => {
+					vi.mocked(fetchLifiQuote).mockResolvedValue(reviewed);
+
+					await fetchLifiEvmSwap(acrossParams());
+
+					expect(approve).toHaveBeenCalledOnce();
+					expect(swap).toHaveBeenCalledOnce();
 				});
 			});
 		});

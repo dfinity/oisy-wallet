@@ -1,5 +1,9 @@
 import { mapEthereumErrorMsg } from '$eth/utils/eth-error.utils';
-import { LifiFeeChangedError, LifiQuoteRejectedError } from '$lib/types/errors';
+import {
+	LifiFeeChangedError,
+	LifiQuoteRejectedError,
+	LifiRouteUnsupportedError
+} from '$lib/types/errors';
 import { errorDetailToString } from '$lib/utils/error.utils';
 import { nonNullish } from '@dfinity/utils';
 
@@ -22,7 +26,8 @@ export const toLifiSwapErrorType = (err: unknown): LifiSwapErrorType => {
 		return 'slippage_exceeded';
 	}
 
-	if (err instanceof LifiQuoteRejectedError) {
+	// A re-quote OISY refuses, by its trust checks or by its route.
+	if (err instanceof LifiQuoteRejectedError || err instanceof LifiRouteUnsupportedError) {
 		return 'quote_rejected';
 	}
 

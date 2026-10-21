@@ -1,4 +1,8 @@
-import { LifiFeeChangedError, LifiQuoteRejectedError } from '$lib/types/errors';
+import {
+	LifiFeeChangedError,
+	LifiQuoteRejectedError,
+	LifiRouteUnsupportedError
+} from '$lib/types/errors';
 import { toLifiSwapErrorType } from '$lib/utils/lifi-swap-error.utils';
 
 describe('lifi-swap-error.utils', () => {
@@ -10,6 +14,10 @@ describe('lifi-swap-error.utils', () => {
 				err: new Error('Slippage exceeded. LI.FI no longer has a route for the swap.')
 			},
 			{ type: 'quote_rejected', err: new LifiQuoteRejectedError('LI.FI calldata rejected: x') },
+			{
+				type: 'quote_rejected',
+				err: new LifiRouteUnsupportedError("LI.FI's refreshed route via across cannot be executed")
+			},
 			{
 				type: 'insufficient_funds',
 				err: Object.assign(new Error('insufficient funds'), { code: 'INSUFFICIENT_FUNDS' })
