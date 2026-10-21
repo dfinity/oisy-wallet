@@ -221,6 +221,10 @@ layer and let the service own caching.
   (`lib/styles/mixins/_interaction.scss`), not a bare `&:hover`, so a tap
   on a touch screen doesn't leave the hover colour on. Tailwind's `hover:`
   variant already does this.
+- **Touch sizes in SCSS:** write `@include interaction.coarse { … }` for sizes
+  a touch screen needs (44 px targets). It follows the main pointer, not the
+  width: a breakpoint cannot tell a tablet from a narrow laptop window.
+  Tailwind's `pointer-coarse:` variant does the same in markup.
 - The route-level prerendered backgrounds described in
   [HACKING.md "Routes Styles"](../../../HACKING.md#routes-styles) are the
   preferred way to set route-specific colours.

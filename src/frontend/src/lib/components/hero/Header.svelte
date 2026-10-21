@@ -94,7 +94,7 @@
 	</div>
 
 	<div
-		class="pointer-events-auto flex justify-end"
+		class="pointer-events-auto flex items-center justify-end"
 		class:gap-1={isCompact}
 		class:gap-2={!isCompact}
 		class:max-w-full={isCompact}

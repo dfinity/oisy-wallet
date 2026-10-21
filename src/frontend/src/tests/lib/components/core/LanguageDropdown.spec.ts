@@ -7,6 +7,7 @@ import { Languages } from '$lib/enums/languages';
 import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import type { TrackEventParams } from '$lib/types/analytics';
+import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -111,5 +112,22 @@ describe('LanguageDropdown', () => {
 				source: 'landing-page'
 			}
 		} as TrackEventParams);
+	});
+
+	it('shows and announces the open state on its trigger', async () => {
+		const { container } = render(LanguageDropdown, {});
+
+		const dropdownBtn = container.querySelector('.dropdown-button');
+
+		assertNonNullish(dropdownBtn);
+
+		expect(dropdownBtn).toHaveAttribute('aria-expanded', 'false');
+
+		await fireEvent.click(dropdownBtn);
+
+		await waitFor(() => {
+			expect(dropdownBtn).toHaveClass('opened');
+			expect(dropdownBtn).toHaveAttribute('aria-expanded', 'true');
+		});
 	});
 });
