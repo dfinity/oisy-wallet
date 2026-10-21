@@ -13,8 +13,8 @@ pointer; the detailed step-by-step lives in [HACKING.md](../../../../HACKING.md)
 - **Networks (catalog):** `$env/networks/<chain>/`. EVM networks live
   under `$env/networks/networks-evm/`.
 - **Tokens (catalog):** `$env/tokens/<chain>/`. Generated catalogues
-  (`tokens.{sns,ckerc20,icrc,ext}.json` and `tokens-erc20/`,
-  `tokens-ext/`) are produced by `build:tokens-*` scripts and the
+  (`tokens.{sns,ckerc20,icrc}.json` and `tokens-ext/tokens.ext.json`)
+  are produced by `build:tokens-*` scripts and the
   `update-tokens` workflow — do not hand-edit the fields they produce.
   Curated fields no script produces (such as `tags`) are set by hand in
   the JSON; see [Hand-set fields](#hand-set-fields-in-the-token-json).
