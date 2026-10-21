@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import type { ZodError } from 'zod';
 	import QrButton from '$lib/components/common/QrButton.svelte';
 	import Input, { type InputProps } from '$lib/components/ui/Input.svelte';
@@ -12,6 +11,7 @@
 		getDiscriminatorForTokenAccountId,
 		getNetworksForTokenAccountIdType
 	} from '$lib/utils/token-account-id.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface InputAddressProps {
 		onQRCodeScan?: () => void;

@@ -1,15 +1,25 @@
 import { ZERO } from '$lib/constants/app.constants';
+import { COMPUTE_BUDGET_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { OptionSolAddress } from '$sol/types/address';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import { calculateSolPrioritizationFee, resolveSolComputeUnitLimit } from '$sol/utils/fee.utils';
-import { mapSolInstruction } from '$sol/utils/sol-instructions.utils';
+import {
+	mapSolInstruction,
+	solWrappedSolOpeningsReturnedToWallet
+} from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	decompileTransactionMessageFetchingLookupTables,
 	getBase64Encoder,
 	getCompiledTransactionMessageDecoder,
 	getTransactionDecoder,
+	getTransactionMessageComputeUnitLimit,
+	getTransactionMessagePriorityFeeLamports,
+	TRANSACTION_CONFIG_COMPUTE_UNIT_LIMIT_BIT_MASK,
+	TRANSACTION_CONFIG_HEAP_SIZE_BIT_MASK,
+	TRANSACTION_CONFIG_LOADED_ACCOUNTS_DATA_SIZE_LIMIT_BIT_MASK,
+	TRANSACTION_CONFIG_PRIORITY_FEE_LAMPORTS_BIT_MASK,
 	type Rpc,
 	type SolanaRpcApi,
 	type Transaction,
@@ -20,6 +30,14 @@ export const decodeTransactionMessage = (transactionMessage: string): Transactio
 	const transactionBytes = getBase64Encoder().encode(transactionMessage);
 	return getTransactionDecoder().decode(transactionBytes);
 };
+
+// The config bits a version 1 message may set: the priority fee (two bits), the compute unit limit,
+// the loaded accounts data size limit and the heap size.
+const SOLANA_V1_CONFIG_MASK =
+	TRANSACTION_CONFIG_PRIORITY_FEE_LAMPORTS_BIT_MASK |
+	TRANSACTION_CONFIG_COMPUTE_UNIT_LIMIT_BIT_MASK |
+	TRANSACTION_CONFIG_LOADED_ACCOUNTS_DATA_SIZE_LIMIT_BIT_MASK |
+	TRANSACTION_CONFIG_HEAP_SIZE_BIT_MASK;
 
 /**
  * It parses a base64 encoded transaction message into a compilable transaction message with lookup tables and instruction
@@ -33,6 +51,20 @@ export const parseSolBase64TransactionMessage = async ({
 }): Promise<CompilableTransactionMessage> => {
 	const { messageBytes } = decodeTransactionMessage(transactionMessage);
 	const compiledTransactionMessage = getCompiledTransactionMessageDecoder().decode(messageBytes);
+
+	// The network refuses a version 1 message that sets any other config bit. The decoder does not:
+	// it skips the bit, and the value the format adds for it. Refused here too, so that a request is
+	// never reviewed as something the network would read differently, nor signed when the network
+	// would refuse it.
+	if (
+		compiledTransactionMessage.version === 1 &&
+		(compiledTransactionMessage.configMask & ~SOLANA_V1_CONFIG_MASK) !== 0
+	) {
+		throw new Error(
+			`Unsupported Solana version 1 transaction config mask: ${compiledTransactionMessage.configMask}`
+		);
+	}
+
 	return await decompileTransactionMessageFetchingLookupTables(compiledTransactionMessage, rpc);
 };
 
@@ -71,16 +103,33 @@ const conflicts = ({
 }): boolean => nonNullish(current) && nonNullish(next) && current !== next;
 
 export const mapSolTransactionMessage = ({
-	transactionMessage: { instructions },
-	userAddress
+	transactionMessage,
+	userAddress,
+	rentExemptMinimum
 }: {
 	transactionMessage: TransactionMessage;
 	userAddress?: OptionSolAddress;
+	// What the chain charges a token account of the usual size to exist, which every account
+	// creation in the message is held to.
+	rentExemptMinimum?: bigint;
 }): MappedSolTransaction => {
-	const instructionsList = Array.from(instructions);
+	// A version 1 message states its priority fee and compute unit limit in its config. The network
+	// ignores Compute Budget instructions there, even invalid ones, and runs them as no-ops, so they
+	// neither price the message nor leave its review unfaithful.
+	const instructionsList = Array.from(transactionMessage.instructions).filter(
+		({ programAddress }) =>
+			transactionMessage.version !== 1 || programAddress !== COMPUTE_BUDGET_PROGRAM_ADDRESS
+	);
+
+	// A creation can only be told apart from a payment by what the rest of the message does with the
+	// account it opens, so that is read once, over the whole message, before any instruction is.
+	const returnedToWallet = solWrappedSolOpeningsReturnedToWallet({
+		instructions: instructionsList,
+		userAddress
+	});
 
 	const mapped = instructionsList.reduce<MappedSolTransaction>(
-		(acc, instruction) => {
+		(acc, instruction, index) => {
 			const {
 				amount,
 				source,
@@ -93,7 +142,12 @@ export const mapSolTransactionMessage = ({
 				computeUnitLimit,
 				ambiguous: instructionAmbiguous,
 				reassignsWallet
-			} = mapSolInstruction({ instruction, userAddress });
+			} = mapSolInstruction({
+				instruction,
+				userAddress,
+				rentExemptMinimum,
+				returnsToWallet: returnedToWallet.has(index)
+			});
 
 			// The summary holds a single value per field, so any later instruction that
 			// disagrees on source, destination or payer would be silently dropped from the
@@ -152,6 +206,25 @@ export const mapSolTransactionMessage = ({
 	);
 
 	const { computeUnitPrice, computeUnitLimit, ...rest } = mapped;
+
+	// The config states the fee as a total rather than a price per compute unit, and a limit it
+	// leaves unset is zero rather than a default derived from the instruction count.
+	if (transactionMessage.version === 1) {
+		const prioritizationFee = getTransactionMessagePriorityFeeLamports(transactionMessage);
+
+		if (isNullish(prioritizationFee) || prioritizationFee <= ZERO) {
+			return rest;
+		}
+
+		return {
+			...rest,
+			prioritizationFee,
+			computeUnitLimit: resolveSolComputeUnitLimit({
+				computeUnitLimit: BigInt(getTransactionMessageComputeUnitLimit(transactionMessage) ?? 0),
+				instructionsCount: instructionsList.length
+			})
+		};
+	}
 
 	// The prioritisation fee needs the whole message: the price and the limit come from separate
 	// instructions, and the limit falls back to a default derived from the instruction count.

@@ -31,7 +31,7 @@ import {
 	mockSolAddress2,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
-import { jsonReplacer } from '@dfinity/utils';
+import { isNullish, jsonReplacer } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 vi.mock(import('$lib/api/idb-transactions.api'), async (importOriginal) => ({
@@ -176,6 +176,43 @@ describe('sol-listener.services', () => {
 			syncWallet({ data: mockPostMessage({}), routing });
 
 			tokenIds.forEach((tokenId) => expect(storedTransactions(tokenId)).toEqual([]));
+		});
+
+		describe('when the history was unavailable', () => {
+			const unavailable: SolPostMessageDataResponseWallet = {
+				wallet: { ...mockPostMessage({}).wallet, transactionsUnavailable: true }
+			};
+
+			// Balances are flushed on the next frame, which may already be scheduled by an earlier test.
+			it('should still set the balances', async () => {
+				syncWallet({ data: unavailable, routing });
+
+				await vi.waitFor(() => {
+					expect(get(balancesStore)?.[nativeTokenId]).toEqual({ data: 1000n, certified: false });
+					expect(get(balancesStore)?.[splTokenId]).toEqual({ data: 5n, certified: false });
+				});
+			});
+
+			it('should keep the records a token holds', () => {
+				solTransactionsStore.set({
+					tokenId: nativeTokenId,
+					transactions: [toCertified(transaction2)]
+				});
+
+				syncWallet({ data: unavailable, routing });
+
+				expect(storedTransactions(nativeTokenId)).toEqual([toCertified(transaction2)]);
+			});
+
+			// An empty list would read as a token without any history.
+			it('should leave a token whose history never loaded still loading', () => {
+				const before = tokenIds.map(storedTransactions);
+
+				syncWallet({ data: unavailable, routing });
+
+				expect(tokenIds.map(storedTransactions)).toEqual(before);
+				expect(before.every(isNullish)).toBeTruthy();
+			});
 		});
 
 		it('should prepend new records to the ones a token holds', () => {

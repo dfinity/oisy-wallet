@@ -42,7 +42,11 @@
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 	import { solAccountExplorerUrl } from '$sol/utils/sol-explorer.utils';
 	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
-	import { formatSolTransactionSummary, solAtaFee } from '$sol/utils/sol-transaction-summary.utils';
+	import {
+		formatSolTransactionSummary,
+		isSolSwapRoute,
+		solAtaFee
+	} from '$sol/utils/sol-transaction-summary.utils';
 	import { findSplToken } from '$sol/utils/spl.utils';
 
 	interface Props {
@@ -174,11 +178,10 @@
 
 	let ataFee = $derived(solAtaFee({ instructions: instructions ?? [], userAddress }));
 
-	// The venue of a routed swap: the program its legs ran through.
+	// The venue of a routed swap: the program its legs ran through. Not any instruction the wallet
+	// could not read, which has its lines gathered under it the same way whatever they do.
 	let routeProgram = $derived(
-		summary?.kind === 'swap'
-			? instructions?.find(({ kind }) => kind === 'route')?.program
-			: undefined
+		summary?.kind === 'swap' ? instructions?.find(isSolSwapRoute)?.program : undefined
 	);
 
 	let from = $derived<SolTransactionUi['from'] | SolTransactionUi['fromOwner'] | undefined>(

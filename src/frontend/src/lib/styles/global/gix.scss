@@ -24,8 +24,6 @@
 	--overlay-background-contrast: var(--color-foreground-primary);
 
 	--dropdown-background: var(--overlay-background);
-	--dropdown-border-size: 1.5px;
-	--dropdown-border-color: var(--color-border-secondary);
 
 	--overlay-z-index: calc(var(--z-index) + 1);
 	--modal-z-index: calc(var(--overlay-z-index) + 3);
@@ -36,7 +34,8 @@
 	// failures (e.g. duplicate token import) remain visible.
 	--toast-error-z-index: calc(var(--overlay-z-index) + 4);
 
-	--overlay-box-shadow: 0 4px 16px 0 #0000001f;
+	--overlay-box-shadow:
+		0 0 0 1px rgb(0 0 0 / 6%), 0 2px 4px -1px rgb(0 0 0 / 4%), 0 8px 24px -4px rgb(0 0 0 / 10%);
 
 	--bottom-sheet-border-color: var(--color-border-primary);
 	--bottom-sheet-z-index: var(--modal-z-index);
@@ -112,6 +111,10 @@
 	@media (min-width: 768px) and (min-height: 560px) {
 		--dialog-min-height: 200px;
 	}
+}
+
+:root[theme='dark'] {
+	--overlay-box-shadow: 0 0 0 1px rgb(255 255 255 / 8%);
 }
 
 article.gix {

@@ -5,6 +5,7 @@ import {
 	setIdbSolTransactionDetail
 } from '$sol/api/idb-sol-transaction-details.api';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
+import { SOLANA_MAX_SUPPORTED_TRANSACTION_VERSION } from '$sol/constants/sol.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
@@ -86,7 +87,7 @@ export const getRpcTransaction = async ({
 	const { getTransaction } = solanaHttpRpc(network);
 
 	return await getTransaction(signature, {
-		maxSupportedTransactionVersion: 0,
+		maxSupportedTransactionVersion: SOLANA_MAX_SUPPORTED_TRANSACTION_VERSION,
 		encoding: 'jsonParsed'
 	}).send();
 };
@@ -275,11 +276,13 @@ export const simulateTransactionAccounts = async ({
 	err: TransactionError | null;
 	accounts: SolanaParsedAccountsInfo;
 	innerInstructions: SolanaSimulatedInnerInstructions;
+	// What the run charged the fee payer, which a node that predates the field leaves out.
+	fee: bigint | undefined;
 }> => {
 	const { simulateTransaction } = solanaHttpRpc(network);
 
 	const {
-		value: { err, accounts, innerInstructions }
+		value: { err, accounts, innerInstructions, fee }
 	} = await simulateTransaction(base64EncodedTransactionMessage as Base64EncodedWireTransaction, {
 		encoding: 'base64',
 		innerInstructions: true,
@@ -290,7 +293,7 @@ export const simulateTransactionAccounts = async ({
 		}
 	}).send();
 
-	return { err, accounts, innerInstructions };
+	return { err, accounts, innerInstructions, fee: fee ?? undefined };
 };
 
 const addressToAccountInfo = new Map<
