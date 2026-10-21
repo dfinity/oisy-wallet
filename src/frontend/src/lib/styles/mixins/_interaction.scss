@@ -1,3 +1,14 @@
+// Hover styles only for pointers that can hover, like Tailwind's `hover:` variant.
+// On a touch screen a tap would otherwise leave the hover colour on until the next
+// tap somewhere else.
+@mixin hover {
+	@media (hover: hover) {
+		&:hover {
+			@content;
+		}
+	}
+}
+
 @mixin tappable {
 	touch-action: manipulation;
 	cursor: pointer;

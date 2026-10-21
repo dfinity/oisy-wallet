@@ -53,7 +53,6 @@
 				e.stopPropagation();
 				onInfo();
 			}}
-			styleClass="-m-1 md:m-0"
 			testId={ADDRESS_LIST_ITEM_INFO_BUTTON}
 			transparent
 		>
@@ -67,8 +66,11 @@
 			ariaLabel={$i18n.core.text.edit}
 			colorStyle="tertiary-alt"
 			link={false}
-			onclick={onEdit}
-			styleClass="-m-1 md:m-0"
+			onclick={(e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				onEdit();
+			}}
 			testId={ADDRESS_LIST_ITEM_EDIT_BUTTON}
 			transparent
 		>
@@ -82,8 +84,11 @@
 			ariaLabel={$i18n.core.text.delete}
 			colorStyle="error"
 			link={false}
-			onclick={onDelete}
-			styleClass="-m-1 md:m-0"
+			onclick={(e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				onDelete();
+			}}
 			testId={ADDRESS_LIST_ITEM_DELETE_BUTTON}
 			transparent
 		>

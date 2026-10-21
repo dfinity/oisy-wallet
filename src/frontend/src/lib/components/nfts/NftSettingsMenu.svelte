@@ -1,14 +1,11 @@
 <script lang="ts">
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import IconWarning from '$lib/components/icons/IconWarning.svelte';
-	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
-	import NftsShowHiddenToggle from '$lib/components/nfts/NftsShowHiddenToggle.svelte';
-	import NftsShowSpamToggle from '$lib/components/nfts/NftsShowSpamToggle.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
+	import Toggle from '$lib/components/ui/Toggle.svelte';
 	import { showHidden, showSpam } from '$lib/derived/settings.derived';
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
@@ -19,7 +16,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { showHiddenStore, showSpamStore } from '$lib/stores/settings.store';
-	import { preventDefault } from '$lib/utils/event-modifiers.utils';
 
 	let visible = $state(false);
 
@@ -63,7 +59,7 @@
 </script>
 
 <ButtonIcon
-	ariaLabel={$i18n.navigation.alt.menu}
+	ariaLabel={$i18n.tokens.manage.text.list_settings}
 	colorStyle="muted"
 	expanded={visible}
 	link={false}
@@ -71,51 +67,43 @@
 	bind:button
 >
 	{#snippet icon()}
-		<IconManage />
+		<IconManage size="20" />
 	{/snippet}
 </ButtonIcon>
 
-<ResponsivePopover {button} bind:visible>
+<ResponsivePopover ariaLabel={$i18n.tokens.manage.text.list_settings} {button} bind:visible>
 	{#snippet content()}
-		<span class="mb-2 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
+		<div class="menu-surface min-w-56">
+			<span class="menu-heading">{$i18n.tokens.manage.text.list_settings}</span>
 
-		<List condensed noPadding>
-			<ListItem>
-				<LogoButton fullWidth onClick={preventDefault(toggleShowHidden)}>
-					{#snippet logo()}
-						<IconEyeOff />
-					{/snippet}
-					{#snippet title()}
-						<span class="text-sm font-normal">{$i18n.nfts.text.show_hidden}</span>
-					{/snippet}
-					{#snippet action()}
-						<NftsShowHiddenToggle />
-					{/snippet}
-				</LogoButton>
-			</ListItem>
-			<ListItem>
-				<LogoButton fullWidth onClick={preventDefault(toggleShowSpam)}>
-					{#snippet logo()}
-						<IconWarning />
-					{/snippet}
-					{#snippet title()}
-						<span class="text-sm font-normal">{$i18n.nfts.text.show_spam}</span>
-					{/snippet}
-					{#snippet action()}
-						<NftsShowSpamToggle />
-					{/snippet}
-				</LogoButton>
-			</ListItem>
-			<ListItem>
-				<LogoButton fullWidth onClick={openManageTokens}>
-					{#snippet logo()}
-						<IconManage />
-					{/snippet}
-					{#snippet title()}
-						<span class="text-sm font-normal">{$i18n.tokens.manage.text.title_nft}</span>
-					{/snippet}
-				</LogoButton>
-			</ListItem>
-		</List>
+			<List condensed noPadding>
+				<ListItem>
+					<Toggle
+						ariaLabel={$i18n.nfts.text.show_hidden}
+						checked={$showHidden}
+						onToggle={toggleShowHidden}
+						showLabel
+					/>
+				</ListItem>
+				<ListItem>
+					<Toggle
+						ariaLabel={$i18n.nfts.text.show_spam}
+						checked={$showSpam}
+						onToggle={toggleShowSpam}
+						showLabel
+					/>
+				</ListItem>
+				<ListItem>
+					<LogoButton fullWidth onClick={openManageTokens}>
+						{#snippet logo()}
+							<IconManage size="20px" />
+						{/snippet}
+						{#snippet title()}
+							<span class="menu-row-label">{$i18n.tokens.manage.text.title_nft}</span>
+						{/snippet}
+					</LogoButton>
+				</ListItem>
+			</List>
+		</div>
 	{/snippet}
 </ResponsivePopover>

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import Input from '$lib/components/ui/Input.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import { slide } from '$lib/utils/transitions.utils';
 	// The same bound `sendXrp` enforces before signing, not a second copy of it: a tag is a
 	// protocol-level UInt32, so a local literal could not legitimately diverge — but nothing
 	// would have shown a reader that the form's limit and the signer's were meant to be one

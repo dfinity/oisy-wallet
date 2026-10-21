@@ -1,6 +1,8 @@
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import HeroContent from '$lib/components/hero/HeroContent.svelte';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import * as networkDerived from '$lib/derived/network.derived';
+import * as pageTokenDerived from '$lib/derived/page-token.derived';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
@@ -109,6 +111,26 @@ describe('HeroContent', () => {
 
 			expect(hero.classList.contains('from-default-0')).toBeTruthy();
 			expect(hero.classList.contains('to-default-100')).toBeTruthy();
+		});
+	});
+
+	// The global highlight is a light OISY blue tint, which disappears on the coloured heroes.
+	describe('selection highlight', () => {
+		it('turns selected text into a white block with blue text on a coloured hero', () => {
+			const hero = renderHero();
+
+			expect(hero.classList.contains('selection:bg-white')).toBeTruthy();
+			expect(hero.classList.contains('selection:text-brand-primary')).toBeTruthy();
+		});
+
+		it('keeps the global highlight on the light ICP hero', () => {
+			vi.spyOn(pageTokenDerived, 'pageToken', 'get').mockReturnValue(readable(ICP_TOKEN));
+
+			const hero = renderHero();
+
+			expect(hero.classList.contains('bg-icp-token-hero-gradient')).toBeTruthy();
+			expect(hero.classList.contains('selection:bg-white')).toBeFalsy();
+			expect(hero.classList.contains('selection:text-brand-primary')).toBeFalsy();
 		});
 	});
 });

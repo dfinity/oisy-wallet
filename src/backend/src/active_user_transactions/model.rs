@@ -6,8 +6,9 @@ use shared::types::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
         ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData,
-        GetActiveUserTransactionsResponse, NearIntentsData, OisyTradeData,
-        UpdateActiveUserTransactionRequest, XrpData, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
+        GetActiveUserTransactionsResponse, LifiData, NearIntentsData, OisyTradeData,
+        UpdateActiveUserTransactionRequest, XrpData, LIFI_REF_BLOCKHASH, LIFI_REF_NONCE,
+        LIFI_REF_TX_HASH, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
         MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS, MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_KEY_LEN,
@@ -30,7 +31,9 @@ use crate::{
 /// retries land here even at the cap) → `InvalidData` → `AlreadyInFlight` →
 /// `TooManyActiveTransactions`. `AlreadyInFlight` precedes the cap because it
 /// names the specific reason this create is refused and tells the caller what to
-/// wait for, where the cap only says the store is full.
+/// wait for, where the cap only says the store is full. The cap comes last for a
+/// second reason: at the cap, `make_room` deletes finished rows, and a create
+/// refused for any other reason must delete nothing.
 pub fn create(
     map: &mut ActiveUserTransactionsMap,
     principal: Principal,
@@ -66,9 +69,15 @@ pub fn create(
         }
     }
 
-    if count_records(map, principal) >= MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
-        return Err(ActiveUserTransactionError::TooManyActiveTransactions);
+    if let ActiveUserTransactionData::Lifi(data) = &request.data {
+        // Required here and not only in `validate_data`, which cannot see the
+        // refs: the row is opened after the source transaction is broadcast, so
+        // a row arriving without its poll keys describes a swap nothing could
+        // ever drive to a terminal status.
+        require_lifi_refs(data, &request.external_refs)?;
     }
+
+    make_room(map, principal)?;
 
     let tx = ActiveUserTransaction {
         id: request.id,
@@ -113,6 +122,11 @@ pub fn update(
         // Held for terminal rows too: the invariant is the record's, not a phase's.
         if xrp_payment_source(&current.data).is_some() {
             require_xrp_refs(refs)?;
+        }
+        // Same reasoning for a LI.FI row, whose poll keys an update could strip
+        // just as well.
+        if let ActiveUserTransactionData::Lifi(data) = &current.data {
+            require_lifi_refs(data, refs)?;
         }
     }
     if let Some(err) = request.error.as_deref() {
@@ -162,7 +176,8 @@ pub fn delete(
 }
 
 /// Build the response of active transactions visible to the caller. Records
-/// are never auto-pruned — the FE deletes them on user acknowledgement.
+/// stay until the FE deletes them on user acknowledgement, or until `create`
+/// needs the room and they are the oldest finished ones.
 pub fn list(
     map: &ActiveUserTransactionsMap,
     principal: Principal,
@@ -216,6 +231,51 @@ fn holds_xrp_address(tx: &ActiveUserTransaction) -> bool {
         }
         _ => false,
     }
+}
+
+/// Make room for one more of the caller's records. Below the cap this does
+/// nothing. At the cap it deletes as many of the caller's finished rows —
+/// `Succeeded` or `Failed` — as the new record needs, least recently updated
+/// first, and refuses with `TooManyActiveTransactions`, deleting nothing, when
+/// there are not enough of them.
+///
+/// Finished rows otherwise stay until the user dismisses them, so without this a
+/// user who never does is locked out of every flow that needs a record.
+/// `Pending` and `Executing` rows are never deleted: they are still settling, and
+/// an open XRP row is what refuses a second payment from its address. Among
+/// finished rows, the one updated longest ago is the outcome the user is least
+/// likely still to look at.
+fn make_room(
+    map: &mut ActiveUserTransactionsMap,
+    principal: Principal,
+) -> Result<(), ActiveUserTransactionError> {
+    let count = count_records(map, principal);
+    if count < MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
+        return Ok(());
+    }
+
+    // One past the cap's excess, so the new record fits. More than one only if
+    // the cap was ever lowered below what users already hold.
+    let needed = count + 1 - MAX_ACTIVE_USER_TRANSACTIONS_PER_USER;
+
+    let mut finished: Vec<(u64, ActiveUserTransactionKey)> = scan_principal(map, principal)
+        .filter(|(_, Candid(tx))| tx.status.is_terminal())
+        .map(|(key, Candid(tx))| (tx.updated_at_ns, key))
+        .collect();
+
+    if finished.len() < needed {
+        return Err(ActiveUserTransactionError::TooManyActiveTransactions);
+    }
+
+    // Stable, so rows updated at the same instant keep key order and the choice
+    // is deterministic.
+    finished.sort_by_key(|(updated_at_ns, _)| *updated_at_ns);
+
+    for (_, key) in finished.into_iter().take(needed) {
+        map.remove(&key);
+    }
+
+    Ok(())
 }
 
 fn count_records(map: &ActiveUserTransactionsMap, principal: Principal) -> usize {
@@ -350,6 +410,10 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
             require_xrp_address(&d.destination_address, "destination_address")?;
             require_distinct_xrp_accounts(d)?;
         }
+        ActiveUserTransactionData::Lifi(d) => {
+            require_valid_amount(&d.amount, "amount")?;
+            require_lifi_pair(d)?;
+        }
     }
     Ok(())
 }
@@ -461,6 +525,150 @@ fn require_oisy_trade_pair(data: &OisyTradeData) -> Result<(), ActiveUserTransac
             "oisy-trade tokens must both be Internet Computer ledgers".to_string(),
         ))
     }
+}
+
+/// The EVM chains a LI.FI row may name: the mainnets whose LI.FI Diamond the
+/// frontend pins (`LIFI_DIAMOND_ADDRESSES`). A chain without a pinned Diamond
+/// cannot be swapped through, so adding one here goes together with pinning its
+/// Diamond in the frontend.
+const LIFI_EVM_CHAIN_IDS: [u64; 6] = [
+    1,     // Ethereum
+    42161, // Arbitrum One
+    56,    // BNB Smart Chain
+    137,   // Polygon
+    8453,  // Base
+    4663,  // Robinhood Chain
+];
+
+/// The LI.FI poller derives both chains from the token ids, then asks the source
+/// chain and LI.FI's status endpoint about them. A pair LI.FI cannot swap for the
+/// wallet — an EVM chain without a pinned Diamond, a devnet, an NFT, a chain
+/// LI.FI does not serve, or Solana → EVM, which is not executed yet — could never
+/// reach a terminal status, and `data` is immutable after creation, so the row
+/// would occupy one of the user's slots forever. Reject it up front. Unlike the
+/// kind-only checks above, the EVM chains are pinned: they are exactly the
+/// chains LI.FI can be called on.
+fn require_lifi_pair(data: &LifiData) -> Result<(), ActiveUserTransactionError> {
+    let supported = if is_lifi_evm_token(&data.source_token) {
+        is_lifi_evm_token(&data.dest_token) || is_lifi_solana_token(&data.dest_token)
+    } else {
+        is_lifi_solana_token(&data.source_token) && is_lifi_solana_token(&data.dest_token)
+    };
+
+    if !supported {
+        return Err(ActiveUserTransactionError::InvalidData(
+            "token pair is outside the LI.FI v1 matrix".to_string(),
+        ));
+    }
+
+    if is_same_lifi_token(&data.source_token, &data.dest_token) {
+        return Err(ActiveUserTransactionError::InvalidData(
+            "dest_token must differ from source_token".to_string(),
+        ));
+    }
+
+    Ok(())
+}
+
+/// `TokenId` compares its ERC address as a raw string, so a checksummed and a
+/// lower-case spelling of one contract would count as two tokens. Hex is
+/// case-insensitive, so ERC addresses are compared without case; SPL mints are
+/// base58, where case is significant, so everything else compares as is.
+fn is_same_lifi_token(a: &TokenId, b: &TokenId) -> bool {
+    match (a, b) {
+        (
+            TokenId::Erc20(a_address, a_chain_id) | TokenId::Erc4626(a_address, a_chain_id),
+            TokenId::Erc20(b_address, b_chain_id) | TokenId::Erc4626(b_address, b_chain_id),
+        ) => a_chain_id == b_chain_id && a_address.0.eq_ignore_ascii_case(&b_address.0),
+        _ => a == b,
+    }
+}
+
+fn is_lifi_evm_token(token: &TokenId) -> bool {
+    match token {
+        // An ERC-4626 vault share is an ERC-20 to LI.FI.
+        TokenId::EvmNative(chain_id)
+        | TokenId::Erc20(_, chain_id)
+        | TokenId::Erc4626(_, chain_id) => LIFI_EVM_CHAIN_IDS.contains(chain_id),
+        _ => false,
+    }
+}
+
+fn is_lifi_solana_token(token: &TokenId) -> bool {
+    matches!(token, TokenId::SplMainnet(_) | TokenId::SolNativeMainnet)
+}
+
+/// The poll keys a LI.FI row needs (see `LIFI_REF_TX_HASH`), required because a
+/// row without them could never reach a terminal status and would occupy one of
+/// the user's slots forever. Which keys apply follows from the source chain,
+/// which `require_lifi_pair` has already confined to a pinned EVM chain or
+/// Solana mainnet. Shape checks only: the frontend reads every value from the
+/// transaction it just broadcast.
+fn require_lifi_refs(
+    data: &LifiData,
+    refs: &[ActiveUserTransactionRef],
+) -> Result<(), ActiveUserTransactionError> {
+    let value = |key: &str| {
+        refs.iter()
+            .find(|ActiveUserTransactionRef { key: k, .. }| k == key)
+            .map(|ActiveUserTransactionRef { value, .. }| value.as_str())
+    };
+    let invalid = |message: String| Err(ActiveUserTransactionError::InvalidData(message));
+
+    let Some(tx_hash) = value(LIFI_REF_TX_HASH) else {
+        return invalid(format!("{LIFI_REF_TX_HASH} is required"));
+    };
+
+    if is_lifi_solana_token(&data.source_token) {
+        if !is_base58_of_len(tx_hash, SOLANA_SIGNATURE_LEN) {
+            return invalid(format!("{LIFI_REF_TX_HASH} must be a Solana signature"));
+        }
+
+        let Some(blockhash) = value(LIFI_REF_BLOCKHASH) else {
+            return invalid(format!(
+                "{LIFI_REF_BLOCKHASH} is required for a Solana source"
+            ));
+        };
+        if !is_base58_of_len(blockhash, SOLANA_BLOCKHASH_LEN) {
+            return invalid(format!("{LIFI_REF_BLOCKHASH} must be a Solana blockhash"));
+        }
+    } else {
+        let is_evm_tx_hash = tx_hash.len() == EVM_TX_HASH_LEN
+            && tx_hash
+                .strip_prefix("0x")
+                .is_some_and(|hex| hex.chars().all(|c| c.is_ascii_hexdigit()));
+        if !is_evm_tx_hash {
+            return invalid(format!(
+                "{LIFI_REF_TX_HASH} must be 0x followed by 64 hex characters"
+            ));
+        }
+
+        let Some(nonce) = value(LIFI_REF_NONCE) else {
+            return invalid(format!("{LIFI_REF_NONCE} is required for an EVM source"));
+        };
+        // Digits only, then a `u64` parse: an EVM account nonce is a `u64`
+        // (EIP-2681), and `parse` alone would accept a leading `+`.
+        if !nonce.chars().all(|c| c.is_ascii_digit()) || nonce.parse::<u64>().is_err() {
+            return invalid(format!("{LIFI_REF_NONCE} must be a u64"));
+        }
+    }
+
+    Ok(())
+}
+
+/// `0x` plus the 32-byte hash in hex.
+const EVM_TX_HASH_LEN: usize = 66;
+/// An Ed25519 signature.
+const SOLANA_SIGNATURE_LEN: usize = 64;
+/// A SHA-256 hash.
+const SOLANA_BLOCKHASH_LEN: usize = 32;
+
+/// Whether `value` is the base58 encoding of exactly `len` bytes, which is how
+/// Solana writes signatures and blockhashes.
+fn is_base58_of_len(value: &str, len: usize) -> bool {
+    bs58::decode(value)
+        .into_vec()
+        .is_ok_and(|bytes| bytes.len() == len)
 }
 
 fn require_evm_address(addr: &str) -> Result<(), ActiveUserTransactionError> {
@@ -704,7 +912,7 @@ fn validate_transition(
 
 #[cfg(test)]
 mod tests {
-    use std::cell::RefCell;
+    use std::{cell::RefCell, collections::BTreeSet};
 
     use candid::{Nat, Principal};
     use ic_stable_structures::{
@@ -716,14 +924,14 @@ mod tests {
         active_user_transaction::{
             ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
             ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
-            ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData,
+            ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, LifiData,
             LiquidiumAction, LiquidiumData, NearIntentsData, OisyTradeData, OisyTradeSide,
             OneSecEvmToIcpData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData,
-            VeloraSwapMode, XrpData, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
-            MAX_LIQUIDIUM_POOL_ID_LEN, XRP_REF_LAST_LEDGER_SEQUENCE, XRP_REF_LEDGER_RESULT,
-            XRP_REF_TX_HASH, XRP_TX_HASH_LEN,
+            VeloraSwapMode, XrpData, LIFI_REF_BLOCKHASH, LIFI_REF_NONCE, LIFI_REF_TX_HASH,
+            MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_LIQUIDIUM_POOL_ID_LEN,
+            XRP_REF_LAST_LEDGER_SEQUENCE, XRP_REF_LEDGER_RESULT, XRP_REF_TX_HASH, XRP_TX_HASH_LEN,
         },
-        custom_token::ErcTokenId,
+        custom_token::{ErcTokenId, SplTokenId},
         token_id::TokenId,
     };
 
@@ -1350,6 +1558,378 @@ mod tests {
                     )
                 );
             }
+        }
+    }
+
+    const USDC_ETHEREUM_CHECKSUMMED: &str = "0xA0b86991c6218b36c1D19D4a2e9Eb0cE3606eB48";
+    const USDC_SOLANA: &str = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+
+    fn erc20(address: &str, chain_id: u64) -> TokenId {
+        TokenId::Erc20(ErcTokenId(address.to_string()), chain_id)
+    }
+
+    fn spl(mint: &str) -> TokenId {
+        TokenId::SplMainnet(SplTokenId(mint.to_string()))
+    }
+
+    fn lifi_data(
+        amount: u64,
+        source_token: TokenId,
+        dest_token: TokenId,
+    ) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::Lifi(LifiData {
+            source_token,
+            dest_token,
+            amount: Nat::from(amount),
+        })
+    }
+
+    const LIFI_EVM_TX_HASH: &str =
+        "0x1111111111111111111111111111111111111111111111111111111111111111";
+    // Base58 of the 64 bytes 1..=64 and of the 32 bytes 101..=132.
+    const LIFI_SOLANA_SIGNATURE: &str =
+        "2Ana1pUpv2ZbMVkwF5FXapYeBEjdxDatLn7nvJkhgTSXbs59SyZSx866bXirPgj8QQVB57uxHJBG1YFvkRbFj4T";
+    const LIFI_SOLANA_BLOCKHASH: &str = "7ppk9w8NHnH6ehajvJyU31VcMafwZ3ybRtJWumSyD2wd";
+
+    fn lifi_ref(key: &str, value: &str) -> ActiveUserTransactionRef {
+        ActiveUserTransactionRef {
+            key: key.to_string(),
+            value: value.to_string(),
+        }
+    }
+
+    /// The poll keys the frontend writes when it opens a row for a swap from
+    /// `source_token`.
+    fn lifi_refs(source_token: &TokenId) -> Vec<ActiveUserTransactionRef> {
+        if matches!(
+            source_token,
+            TokenId::SolNativeMainnet | TokenId::SplMainnet(_)
+        ) {
+            vec![
+                lifi_ref(LIFI_REF_BLOCKHASH, LIFI_SOLANA_BLOCKHASH),
+                lifi_ref(LIFI_REF_TX_HASH, LIFI_SOLANA_SIGNATURE),
+            ]
+        } else {
+            vec![
+                lifi_ref(LIFI_REF_NONCE, "7"),
+                lifi_ref(LIFI_REF_TX_HASH, LIFI_EVM_TX_HASH),
+            ]
+        }
+    }
+
+    fn lifi_req(source_token: TokenId, dest_token: TokenId) -> CreateActiveUserTransactionRequest {
+        CreateActiveUserTransactionRequest {
+            external_refs: lifi_refs(&source_token),
+            data: lifi_data(1_000_000, source_token, dest_token),
+            ..create_req("lifi-1")
+        }
+    }
+
+    fn assert_lifi_pair_rejected(source_token: TokenId, dest_token: TokenId, expected: &str) {
+        let (mut map, _mm) = setup();
+        let err = create(&mut map, principal(), lifi_req(source_token, dest_token), 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData(expected.to_string())
+        );
+    }
+
+    const LIFI_PAIR_ERROR: &str = "token pair is outside the LI.FI v1 matrix";
+
+    #[test]
+    fn lifi_create_roundtrip() {
+        // One pair per route the variant covers, spread so that every pinned EVM
+        // chain appears at least once.
+        for (source_token, dest_token) in [
+            // EVM → EVM, same chain.
+            (erc20(USDC_ETHEREUM, 1), TokenId::EvmNative(1)),
+            // EVM → EVM, cross-chain; a vault share is an ERC-20 to LI.FI.
+            (
+                TokenId::EvmNative(42161),
+                TokenId::Erc4626(
+                    ErcTokenId("0x0000000000000000000000000000000000000abc".to_string()),
+                    8453,
+                ),
+            ),
+            (TokenId::EvmNative(56), TokenId::EvmNative(137)),
+            // EVM → Solana.
+            (TokenId::EvmNative(4663), spl(USDC_SOLANA)),
+            // Solana → Solana.
+            (TokenId::SolNativeMainnet, spl(USDC_SOLANA)),
+        ] {
+            let (mut map, _mm) = setup();
+            let req = lifi_req(source_token.clone(), dest_token.clone());
+            let tx = create(&mut map, principal(), req, 1).expect("create");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+            assert_eq!(tx.external_refs, lifi_refs(&source_token));
+            assert_eq!(tx.data, lifi_data(1_000_000, source_token, dest_token));
+        }
+    }
+
+    #[test]
+    fn lifi_zero_amount_rejected() {
+        // Every poll key is present, so the amount is the only thing wrong and
+        // the message names the check that refused it: without the poll keys,
+        // the create would fail on them even if the amount check were gone.
+        let (mut map, _mm) = setup();
+        let req = CreateActiveUserTransactionRequest {
+            data: lifi_data(0, erc20(USDC_ETHEREUM, 1), TokenId::EvmNative(1)),
+            ..lifi_req(erc20(USDC_ETHEREUM, 1), TokenId::EvmNative(1))
+        };
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("amount must be greater than zero".to_string())
+        );
+    }
+
+    #[test]
+    fn lifi_evm_chain_without_pinned_diamond_rejected() {
+        // Optimism is a chain LI.FI serves but the frontend pins no Diamond for;
+        // Sepolia is a testnet. Either leg on such a chain is refused.
+        for chain_id in [10, 11_155_111] {
+            assert_lifi_pair_rejected(
+                TokenId::EvmNative(chain_id),
+                TokenId::EvmNative(1),
+                LIFI_PAIR_ERROR,
+            );
+            assert_lifi_pair_rejected(
+                TokenId::EvmNative(1),
+                erc20(USDC_ETHEREUM, chain_id),
+                LIFI_PAIR_ERROR,
+            );
+        }
+    }
+
+    #[test]
+    fn lifi_devnet_solana_rejected() {
+        for devnet in [
+            TokenId::SolNativeDevnet,
+            TokenId::SplDevnet(SplTokenId(USDC_SOLANA.to_string())),
+        ] {
+            assert_lifi_pair_rejected(devnet.clone(), TokenId::SolNativeMainnet, LIFI_PAIR_ERROR);
+            assert_lifi_pair_rejected(TokenId::SolNativeMainnet, devnet, LIFI_PAIR_ERROR);
+        }
+    }
+
+    #[test]
+    fn lifi_solana_to_evm_rejected() {
+        // Its EVM recipient cannot be verified before signing yet, so the
+        // frontend never executes it and no row may claim it.
+        assert_lifi_pair_rejected(
+            TokenId::SolNativeMainnet,
+            TokenId::EvmNative(1),
+            LIFI_PAIR_ERROR,
+        );
+        assert_lifi_pair_rejected(spl(USDC_SOLANA), erc20(USDC_ETHEREUM, 1), LIFI_PAIR_ERROR);
+    }
+
+    #[test]
+    fn lifi_unsupported_token_kinds_rejected() {
+        let address = || ErcTokenId(USDC_ETHEREUM.to_string());
+        for token in [
+            TokenId::Erc721(address(), 1),
+            TokenId::Erc1155(address(), 1),
+            TokenId::IcpNative,
+            icrc(CKUSDC_LEDGER),
+            TokenId::BtcNativeMainnet,
+            TokenId::XrpNativeMainnet,
+        ] {
+            assert_lifi_pair_rejected(token.clone(), TokenId::EvmNative(1), LIFI_PAIR_ERROR);
+            assert_lifi_pair_rejected(TokenId::EvmNative(1), token, LIFI_PAIR_ERROR);
+        }
+    }
+
+    #[test]
+    fn lifi_same_token_rejected() {
+        let same_token_error = "dest_token must differ from source_token";
+        for (source_token, dest_token) in [
+            (TokenId::EvmNative(1), TokenId::EvmNative(1)),
+            (TokenId::SolNativeMainnet, TokenId::SolNativeMainnet),
+            (spl(USDC_SOLANA), spl(USDC_SOLANA)),
+            // One contract in two spellings is still one token.
+            (erc20(USDC_ETHEREUM, 1), erc20(USDC_ETHEREUM_CHECKSUMMED, 1)),
+        ] {
+            assert_lifi_pair_rejected(source_token, dest_token, same_token_error);
+        }
+
+        // The same address on another chain is another token: a bridge.
+        let (mut map, _mm) = setup();
+        let req = lifi_req(erc20(USDC_ETHEREUM, 1), erc20(USDC_ETHEREUM, 8453));
+        create(&mut map, principal(), req, 1).expect("create");
+    }
+
+    fn assert_lifi_refs_rejected(
+        source_token: TokenId,
+        dest_token: TokenId,
+        external_refs: Vec<ActiveUserTransactionRef>,
+        expected: &str,
+    ) {
+        let (mut map, _mm) = setup();
+        let req = CreateActiveUserTransactionRequest {
+            external_refs,
+            ..lifi_req(source_token, dest_token)
+        };
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData(expected.to_string())
+        );
+        assert!(
+            list(&map, principal()).transactions.is_empty(),
+            "a rejected create must not leave a row behind"
+        );
+    }
+
+    #[test]
+    fn lifi_evm_source_without_poll_keys_rejected() {
+        let tx_hash = lifi_ref(LIFI_REF_TX_HASH, LIFI_EVM_TX_HASH);
+        let nonce = lifi_ref(LIFI_REF_NONCE, "7");
+        for (refs, expected) in [
+            (vec![], "lifi_tx_hash is required"),
+            (vec![nonce], "lifi_tx_hash is required"),
+            (vec![tx_hash], "lifi_nonce is required for an EVM source"),
+        ] {
+            assert_lifi_refs_rejected(
+                erc20(USDC_ETHEREUM, 1),
+                TokenId::EvmNative(1),
+                refs,
+                expected,
+            );
+        }
+    }
+
+    #[test]
+    fn lifi_solana_source_without_poll_keys_rejected() {
+        let tx_hash = lifi_ref(LIFI_REF_TX_HASH, LIFI_SOLANA_SIGNATURE);
+        let blockhash = lifi_ref(LIFI_REF_BLOCKHASH, LIFI_SOLANA_BLOCKHASH);
+        for (refs, expected) in [
+            (vec![], "lifi_tx_hash is required"),
+            (vec![blockhash], "lifi_tx_hash is required"),
+            (
+                // An EVM source's key does not stand in for a Solana one.
+                vec![tx_hash, lifi_ref(LIFI_REF_NONCE, "7")],
+                "lifi_blockhash is required for a Solana source",
+            ),
+        ] {
+            assert_lifi_refs_rejected(TokenId::SolNativeMainnet, spl(USDC_SOLANA), refs, expected);
+        }
+    }
+
+    #[test]
+    fn lifi_evm_source_malformed_poll_keys_rejected() {
+        let hash_error = "lifi_tx_hash must be 0x followed by 64 hex characters";
+        for tx_hash in [
+            // No prefix, one digit short, a non-hex digit, and a Solana
+            // signature on an EVM row.
+            &LIFI_EVM_TX_HASH[2..],
+            &LIFI_EVM_TX_HASH[..65],
+            "0x111111111111111111111111111111111111111111111111111111111111111g",
+            LIFI_SOLANA_SIGNATURE,
+        ] {
+            assert_lifi_refs_rejected(
+                TokenId::EvmNative(1),
+                erc20(USDC_ETHEREUM, 1),
+                vec![
+                    lifi_ref(LIFI_REF_NONCE, "7"),
+                    lifi_ref(LIFI_REF_TX_HASH, tx_hash),
+                ],
+                hash_error,
+            );
+        }
+
+        // Empty, signed, fractional, and one past `u64::MAX`.
+        for nonce in ["", "+7", "7.0", "18446744073709551616"] {
+            assert_lifi_refs_rejected(
+                TokenId::EvmNative(1),
+                erc20(USDC_ETHEREUM, 1),
+                vec![
+                    lifi_ref(LIFI_REF_NONCE, nonce),
+                    lifi_ref(LIFI_REF_TX_HASH, LIFI_EVM_TX_HASH),
+                ],
+                "lifi_nonce must be a u64",
+            );
+        }
+    }
+
+    #[test]
+    fn lifi_solana_source_malformed_poll_keys_rejected() {
+        // An EVM hash on a Solana row, base58 of the wrong length, and a
+        // character outside the base58 alphabet.
+        for tx_hash in [
+            LIFI_EVM_TX_HASH,
+            LIFI_SOLANA_BLOCKHASH,
+            &LIFI_SOLANA_SIGNATURE.replacen('2', "0", 1),
+        ] {
+            assert_lifi_refs_rejected(
+                TokenId::SolNativeMainnet,
+                spl(USDC_SOLANA),
+                vec![
+                    lifi_ref(LIFI_REF_BLOCKHASH, LIFI_SOLANA_BLOCKHASH),
+                    lifi_ref(LIFI_REF_TX_HASH, tx_hash),
+                ],
+                "lifi_tx_hash must be a Solana signature",
+            );
+        }
+
+        for blockhash in [LIFI_SOLANA_SIGNATURE, "", "0OIl"] {
+            assert_lifi_refs_rejected(
+                TokenId::SolNativeMainnet,
+                spl(USDC_SOLANA),
+                vec![
+                    lifi_ref(LIFI_REF_BLOCKHASH, blockhash),
+                    lifi_ref(LIFI_REF_TX_HASH, LIFI_SOLANA_SIGNATURE),
+                ],
+                "lifi_blockhash must be a Solana blockhash",
+            );
+        }
+    }
+
+    #[test]
+    fn lifi_update_cannot_strip_poll_keys() {
+        // `external_refs` is replaced wholesale, so an update that drops a poll
+        // key would leave the same row `create` refuses.
+        for source_token in [TokenId::EvmNative(1), TokenId::SolNativeMainnet] {
+            let (mut map, _mm) = setup();
+            let req = lifi_req(source_token.clone(), spl(USDC_SOLANA));
+            create(&mut map, principal(), req, 1).expect("create");
+
+            let refs = lifi_refs(&source_token);
+            let update_refs =
+                |external_refs: Vec<ActiveUserTransactionRef>| UpdateActiveUserTransactionRequest {
+                    id: "lifi-1".to_string(),
+                    status: Some(ActiveUserTransactionStatus::Executing),
+                    progress_step: None,
+                    external_refs: Some(external_refs),
+                    error: None,
+                };
+
+            for (key, expected) in [
+                (LIFI_REF_TX_HASH, "lifi_tx_hash is required"),
+                (LIFI_REF_NONCE, "lifi_nonce is required for an EVM source"),
+                (
+                    LIFI_REF_BLOCKHASH,
+                    "lifi_blockhash is required for a Solana source",
+                ),
+            ] {
+                if !refs.iter().any(|r| r.key == key) {
+                    continue;
+                }
+                let stripped = refs.iter().filter(|r| r.key != key).cloned().collect();
+                let err = update(&mut map, principal(), update_refs(stripped), 2).unwrap_err();
+                assert_eq!(
+                    err,
+                    ActiveUserTransactionError::InvalidData(expected.to_string())
+                );
+            }
+
+            // Learned refs merged onto the creation ones are accepted.
+            let mut learned = refs.clone();
+            learned.push(lifi_ref("lifi_dest_tx_hash", LIFI_EVM_TX_HASH));
+            let tx = update(&mut map, principal(), update_refs(learned.clone()), 3)
+                .expect("update with every poll key");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Executing);
+            assert_eq!(tx.external_refs, learned);
         }
     }
 
@@ -2381,32 +2961,255 @@ mod tests {
             .expect("other principal not throttled");
     }
 
-    #[test]
-    fn cap_counts_terminal_rows() {
-        let (mut map, _mm) = setup();
+    /// Fills the caller's store to the cap with `Pending` rows `id-0`…`id-99`,
+    /// all created at time 1.
+    fn fill_to_cap(map: &mut ActiveUserTransactionsMap) {
         for i in 0..MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
-            let id = format!("id-{i}");
-            create(&mut map, principal(), create_req(&id), 1).expect("within cap");
-            update(
+            create(map, principal(), create_req(&format!("id-{i}")), 1).expect("within cap");
+        }
+    }
+
+    /// Moves a row to `status` at `now_ns`, which becomes its `updated_at_ns`.
+    fn set_status_at(
+        map: &mut ActiveUserTransactionsMap,
+        principal: Principal,
+        id: &str,
+        status: ActiveUserTransactionStatus,
+        now_ns: u64,
+    ) {
+        update(
+            map,
+            principal,
+            UpdateActiveUserTransactionRequest {
+                id: id.to_string(),
+                status: Some(status),
+                progress_step: None,
+                external_refs: None,
+                error: None,
+            },
+            now_ns,
+        )
+        .expect("status update");
+    }
+
+    fn ids(map: &ActiveUserTransactionsMap, principal: Principal) -> BTreeSet<String> {
+        list(map, principal)
+            .transactions
+            .into_iter()
+            .map(|tx| tx.id)
+            .collect()
+    }
+
+    #[test]
+    fn at_cap_the_finished_row_updated_longest_ago_makes_room() {
+        let (mut map, _mm) = setup();
+        fill_to_cap(&mut map);
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-10",
+            ActiveUserTransactionStatus::Succeeded,
+            5,
+        );
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-20",
+            ActiveUserTransactionStatus::Failed,
+            3,
+        );
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-30",
+            ActiveUserTransactionStatus::Succeeded,
+            4,
+        );
+
+        let mut expected = ids(&map, principal());
+        create(&mut map, principal(), create_req("new-1"), 10).expect("room made");
+        expected.remove("id-20");
+        expected.insert("new-1".to_string());
+        assert_eq!(ids(&map, principal()), expected);
+
+        create(&mut map, principal(), create_req("new-2"), 11).expect("room made");
+        expected.remove("id-30");
+        expected.insert("new-2".to_string());
+        assert_eq!(ids(&map, principal()), expected);
+        assert_eq!(expected.len(), MAX_ACTIVE_USER_TRANSACTIONS_PER_USER);
+    }
+
+    #[test]
+    fn finished_rows_updated_at_the_same_time_lose_exactly_one() {
+        let (mut map, _mm) = setup();
+        fill_to_cap(&mut map);
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-5",
+            ActiveUserTransactionStatus::Succeeded,
+            3,
+        );
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-7",
+            ActiveUserTransactionStatus::Failed,
+            3,
+        );
+
+        create(&mut map, principal(), create_req("new"), 4).expect("room made");
+
+        let after = ids(&map, principal());
+        assert_eq!(after.len(), MAX_ACTIVE_USER_TRANSACTIONS_PER_USER);
+        assert_eq!(
+            usize::from(after.contains("id-5")) + usize::from(after.contains("id-7")),
+            1
+        );
+    }
+
+    #[test]
+    fn at_cap_pending_and_executing_rows_are_never_removed() {
+        let (mut map, _mm) = setup();
+        fill_to_cap(&mut map);
+        for i in 0..50 {
+            set_status_at(
                 &mut map,
                 principal(),
-                UpdateActiveUserTransactionRequest {
-                    id,
-                    status: Some(ActiveUserTransactionStatus::Succeeded),
-                    progress_step: None,
-                    external_refs: None,
-                    error: None,
-                },
+                &format!("id-{i}"),
+                ActiveUserTransactionStatus::Executing,
                 2,
-            )
-            .expect("succeed");
+            );
         }
-        let err = create(&mut map, principal(), create_req("overflow"), 3).unwrap_err();
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-99",
+            ActiveUserTransactionStatus::Failed,
+            3,
+        );
+
+        create(&mut map, principal(), create_req("new-1"), 4).expect("room made");
+        let before = ids(&map, principal());
+        assert!(!before.contains("id-99"));
+
+        // Nothing finished is left: refused, and nothing is removed.
+        let err = create(&mut map, principal(), create_req("new-2"), 5).unwrap_err();
+        assert_eq!(err, ActiveUserTransactionError::TooManyActiveTransactions);
+        assert_eq!(ids(&map, principal()), before);
+    }
+
+    // Pruning must come after every other check, or a create that is refused
+    // anyway would still cost the user a row.
+    #[test]
+    fn a_create_refused_at_cap_for_another_reason_removes_nothing() {
+        let (mut map, _mm) = setup();
+
+        let mut open = create_req("xrp-open");
+        open.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        open.external_refs = xrp_refs();
+        create(&mut map, principal(), open, 1).expect("open send");
+        for i in 1..MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
+            let id = format!("id-{i}");
+            create(&mut map, principal(), create_req(&id), 1).expect("within cap");
+            set_status_at(
+                &mut map,
+                principal(),
+                &id,
+                ActiveUserTransactionStatus::Succeeded,
+                2,
+            );
+        }
+        let before = ids(&map, principal());
+        assert_eq!(before.len(), MAX_ACTIVE_USER_TRANSACTIONS_PER_USER);
+
+        let err = create(&mut map, principal(), create_req(""), 3).unwrap_err();
+        assert_eq!(err, ActiveUserTransactionError::InvalidId);
+        assert_eq!(ids(&map, principal()), before);
+
+        let err = create(&mut map, principal(), create_req("id-1"), 3).unwrap_err();
+        assert_eq!(err, ActiveUserTransactionError::AlreadyExists);
+        assert_eq!(ids(&map, principal()), before);
+
+        let mut invalid = create_req("invalid");
+        invalid.data = xrp_data(0, 12, None, XRP_OTHER_SOURCE, XRP_DESTINATION);
+        invalid.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), invalid, 3).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        assert_eq!(ids(&map, principal()), before);
+
+        let mut second = create_req("xrp-second");
+        second.data = xrp_data(1, 12, None, XRP_SOURCE, XRP_OTHER_DESTINATION);
+        second.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), second, 3).unwrap_err();
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+        assert_eq!(ids(&map, principal()), before);
+    }
+
+    #[test]
+    fn below_cap_a_create_removes_nothing() {
+        let (mut map, _mm) = setup();
+        for i in 1..MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
+            let id = format!("id-{i}");
+            create(&mut map, principal(), create_req(&id), 1).expect("within cap");
+            set_status_at(
+                &mut map,
+                principal(),
+                &id,
+                ActiveUserTransactionStatus::Succeeded,
+                2,
+            );
+        }
+        let mut expected = ids(&map, principal());
+
+        create(&mut map, principal(), create_req("last"), 3).expect("within cap");
+
+        expected.insert("last".to_string());
+        assert_eq!(ids(&map, principal()), expected);
+        assert_eq!(expected.len(), MAX_ACTIVE_USER_TRANSACTIONS_PER_USER);
+    }
+
+    #[test]
+    fn making_room_never_touches_another_users_rows() {
+        let (mut map, _mm) = setup();
+        // Finished before anything of the caller's, so they would go first if
+        // the scan crossed principals.
+        for id in ["other-1", "other-2"] {
+            create(&mut map, other_principal(), create_req(id), 1).expect("other user");
+            set_status_at(
+                &mut map,
+                other_principal(),
+                id,
+                ActiveUserTransactionStatus::Succeeded,
+                1,
+            );
+        }
+        let others = ids(&map, other_principal());
+
+        fill_to_cap(&mut map);
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-0",
+            ActiveUserTransactionStatus::Succeeded,
+            5,
+        );
+
+        create(&mut map, principal(), create_req("new"), 6).expect("room made");
+
+        assert!(!ids(&map, principal()).contains("id-0"));
+        assert_eq!(ids(&map, other_principal()), others);
+    }
+
+    #[test]
+    fn dismissing_a_row_frees_its_slot() {
+        let (mut map, _mm) = setup();
+        fill_to_cap(&mut map);
+        let err = create(&mut map, principal(), create_req("overflow"), 2).unwrap_err();
         assert_eq!(err, ActiveUserTransactionError::TooManyActiveTransactions);
 
-        // FE acknowledges one row, freeing a slot.
         delete(&mut map, principal(), "id-0".to_string()).expect("delete");
-        create(&mut map, principal(), create_req("after-delete"), 4)
+        create(&mut map, principal(), create_req("after-delete"), 3)
             .expect("slot freed after delete");
     }
 
@@ -2557,7 +3360,7 @@ mod tests {
         create(&mut map, principal(), create_req("a"), 1).expect("create");
         delete(&mut map, principal(), "a".to_string()).expect("first delete");
         delete(&mut map, principal(), "a".to_string()).expect("second delete idempotent");
-        assert!(list(&map, principal()).transactions.is_empty());
+        assert_eq!(list(&map, principal()).transactions, vec![]);
     }
 
     #[test]

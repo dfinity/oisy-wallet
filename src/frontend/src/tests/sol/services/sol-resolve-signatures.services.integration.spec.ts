@@ -13,7 +13,12 @@ import {
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import * as solProgramToken from '@solana-program/token';
-import { signature, address as solAddress, type ProgramDerivedAddressBump } from '@solana/kit';
+import {
+	signature,
+	address as solAddress,
+	type ProgramDerivedAddressBump,
+	type UnixTimestamp
+} from '@solana/kit';
 
 const { getTransactionCalls } = vi.hoisted(() => ({ getTransactionCalls: [] as string[] }));
 
@@ -187,4 +192,38 @@ describe('sol-resolve-signatures.services integration', () => {
 			});
 		}
 	}, 600000);
+
+	it('should resolve a version 1 transaction', async () => {
+		// One of the 62 recipients of a version 1 transaction that sends a lamport to each.
+		const recipient = solAddress('E2EMB6T6vaXTpnsqcnmggh2TKQQGeAfHarm8gGz6kBAY');
+
+		const records = await resolveSolSignatures({
+			address: recipient,
+			network,
+			tokens: [],
+			signatures: [
+				{
+					signature: signature(
+						'5GeffXeSHieCMdVWzBuLfLEvJa86JGPSRxEx6tnnnks67TGh6VELH45oGubr78VKRn2PHsD3mn3PNNwKkbVR5PFd'
+					),
+					slot: 452555670n,
+					blockTime: 1790929559n as UnixTimestamp,
+					confirmationStatus: 'finalized',
+					err: null,
+					memo: null,
+					sources: [recipient]
+				}
+			]
+		});
+
+		expect(records).toHaveLength(1);
+		expect(records[0].transaction).toEqual(
+			expect.objectContaining({
+				type: 'receive',
+				value: 1n,
+				from: 'A4NxFxKwNXJkhNQ5ZCEGNPVjNhYQyKnE18DASKEWasrV',
+				to: recipient
+			})
+		);
+	});
 });
