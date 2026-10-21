@@ -79,7 +79,7 @@
 </script>
 
 <ContentWithToolbar testId={CYCLES_TOP_UP_AMOUNT}>
-	<ConvertAmountSource totalFee={fee} bind:sendAmount />
+	<ConvertAmountSource autofocus totalFee={fee} bind:sendAmount />
 
 	<div class="mt-6">
 		{#if nonNullish(errorMessage)}

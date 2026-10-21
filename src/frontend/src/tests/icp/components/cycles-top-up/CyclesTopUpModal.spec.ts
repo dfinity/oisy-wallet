@@ -369,6 +369,18 @@ describe('CyclesTopUpModal', () => {
 	});
 
 	describe('amount step', () => {
+		it('focuses the amount, as the send forms do', async () => {
+			const result = await toAmount();
+
+			const input = result.container.querySelector<HTMLInputElement>(
+				`input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`
+			);
+
+			await waitFor(() => {
+				expect(input).toHaveFocus();
+			});
+		});
+
 		it('refuses an amount that does not exceed the fee', async () => {
 			const result = await toAmount();
 
