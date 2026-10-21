@@ -5,6 +5,8 @@ import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 import { STAKE_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
+import { SolanaNetworks } from '$sol/types/network';
 import en from '$tests/mocks/i18n.mock';
 import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -654,6 +656,60 @@ describe('SolWalletConnectSignReview', () => {
 			});
 
 			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
+		});
+
+		describe('a swap into a token the wallet does not list', () => {
+			const swap = {
+				kind: 'swap' as const,
+				spent: { delta: -1_000_000n },
+				received: { tokenAddress: 'unlisted-mint', delta: 2_500_000n, decimals: 6 }
+			};
+
+			const preview = {
+				solDelta: -1_005_000n,
+				tokenDeltas: [
+					{ account: mockAtaAddress, tokenAddress: 'unlisted-mint', decimals: 6, delta: 2_500_000n }
+				],
+				controlChanges: []
+			};
+
+			beforeEach(() => {
+				splTokenMetadataStore.set({
+					network: SolanaNetworks.mainnet,
+					metadata: { 'unlisted-mint': { name: 'Ping', symbol: 'PING' } }
+				});
+			});
+
+			afterEach(() => {
+				splTokenMetadataStore.reset();
+			});
+
+			// The sentence names what the user receives, and the symbol the mint carries is its
+			// creator's choice: it is stated inside the placeholder, never as the token's name.
+			it('should state the symbol the mint carries inside the placeholder', () => {
+				const { getByTestId } = render(SolWalletConnectSignReview, {
+					props: { ...props, messageSummary: swap, preview }
+				});
+
+				expect(getByTestId('message-summary')).toHaveTextContent(
+					replacePlaceholders(en.transaction.text.summary_swap, {
+						$spent_symbol: SOLANA_TOKEN.symbol,
+						$received_symbol: replacePlaceholders(en.transaction.text.unknown_token_named, {
+							$symbol: 'PING'
+						})
+					})
+				);
+			});
+
+			// The swap is a plain one the run agrees with, which the warning about several operations
+			// would misdescribe. The placeholder in the sentence already says the token is unlisted.
+			it('should not warn about multiple operations', () => {
+				const { queryByText } = render(SolWalletConnectSignReview, {
+					props: { ...props, messageSummary: swap, preview }
+				});
+
+				expect(queryByText(en.wallet_connect.text.multiple_operations)).not.toBeInTheDocument();
+			});
 		});
 	});
 

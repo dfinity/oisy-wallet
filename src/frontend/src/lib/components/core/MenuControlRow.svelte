@@ -12,7 +12,7 @@
 
 <!-- A labelled control in the user menu, such as the theme or language picker. The label keeps
      the row inset, in line with the menu rows' icons; the control's box reaches the panel's inset,
-     in line with the row highlight and the buttons below. -->
+     in line with the rows' hover fill and the buttons below. -->
 <div
 	class="flex min-h-(--menu-row-min-height) flex-wrap items-center justify-between gap-x-3 gap-y-2 py-1 ps-(--menu-row-padding-inline)"
 >

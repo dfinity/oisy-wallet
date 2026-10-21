@@ -9,6 +9,7 @@ import type { SolAddress } from '$sol/types/address';
 import type { SolanaParsedAccountInfo, SolanaSimulatedInnerInstructions } from '$sol/types/sol-rpc';
 import type {
 	SolClosedAccount,
+	SolSimulationAllowance,
 	SolSimulationControlChange,
 	SolSimulationPreview,
 	SolSimulationTokenDelta
@@ -22,6 +23,8 @@ interface SolTokenAccountState {
 	tokenAddress: SplTokenAddress;
 	owner: SolAddress;
 	delegate?: SolAddress;
+	// What the delegate may still spend. Present whenever a delegate is.
+	delegatedAmount?: bigint;
 	closeAuthority?: SolAddress;
 	amount: bigint;
 	decimals: number;
@@ -68,11 +71,12 @@ export const parseTokenAccountState = (
 		return undefined;
 	}
 
-	const { mint, owner, delegate, closeAuthority, tokenAmount } = (data.parsed.info ??
-		{}) as Partial<{
+	const { mint, owner, delegate, delegatedAmount, closeAuthority, tokenAmount } = (data.parsed
+		.info ?? {}) as Partial<{
 		mint: SplTokenAddress;
 		owner: SolAddress;
 		delegate: SolAddress;
+		delegatedAmount: { amount: string };
 		closeAuthority: SolAddress;
 		tokenAmount: { amount: string; decimals: number };
 	}>;
@@ -85,6 +89,7 @@ export const parseTokenAccountState = (
 		tokenAddress: mint,
 		owner,
 		...(nonNullish(delegate) && { delegate }),
+		...(nonNullish(delegatedAmount) && { delegatedAmount: BigInt(delegatedAmount.amount) }),
 		...(nonNullish(closeAuthority) && { closeAuthority }),
 		amount: BigInt(tokenAmount.amount),
 		decimals: tokenAmount.decimals
@@ -194,6 +199,17 @@ const controlChanges = ({
 		return [];
 	}
 
+	// What a delegate left in place may spend, stated with every change that leaves one: a
+	// one-unit approval and an unlimited one name the same delegate.
+	const allowance: SolSimulationAllowance | undefined =
+		nonNullish(post.token?.delegate) && nonNullish(post.token.delegatedAmount)
+			? {
+					tokenAddress: post.token.tokenAddress,
+					decimals: post.token.decimals,
+					amount: post.token.delegatedAmount
+				}
+			: undefined;
+
 	const changed: [
 		SolSimulationControlChange['field'],
 		SolAddress | undefined,
@@ -205,13 +221,42 @@ const controlChanges = ({
 		['closeAuthority', pre.token?.closeAuthority, post.token?.closeAuthority]
 	];
 
-	return changed.reduce<SolSimulationControlChange[]>(
-		(acc, [field, from, to]) => [
-			...acc,
-			...(from !== to ? [{ account, field, ...(nonNullish(to) && { to }) }] : [])
-		],
-		[]
-	);
+	// The same delegate with a different limit. Comparing the delegate alone reads an approval that
+	// raises an existing allowance as no change at all.
+	const delegate = post.token?.delegate;
+	const allowanceChanged =
+		nonNullish(delegate) &&
+		pre.token?.delegate === delegate &&
+		pre.token.delegatedAmount !== post.token?.delegatedAmount;
+
+	return [
+		...changed.reduce<SolSimulationControlChange[]>(
+			(acc, [field, from, to]) => [
+				...acc,
+				...(from !== to
+					? [
+							{
+								account,
+								field,
+								...(nonNullish(to) && { to }),
+								...(field === 'delegate' && nonNullish(allowance) && { allowance })
+							}
+						]
+					: [])
+			],
+			[]
+		),
+		...(allowanceChanged
+			? [
+					{
+						account,
+						field: 'allowance' as const,
+						to: delegate,
+						...(nonNullish(allowance) && { allowance })
+					}
+				]
+			: [])
+	];
 };
 
 /**
