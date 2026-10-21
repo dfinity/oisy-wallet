@@ -30,7 +30,11 @@ import {
 	getSetComputeUnitLimitInstruction,
 	getSetComputeUnitPriceInstruction
 } from '@solana-program/compute-budget';
-import { getInitializeCheckedInstruction, getInitializeInstruction } from '@solana-program/stake';
+import {
+	getInitializeCheckedInstruction,
+	getInitializeInstruction,
+	getSetLockupInstruction
+} from '@solana-program/stake';
 import {
 	getCreateAccountInstruction,
 	getCreateAccountWithSeedInstruction,
@@ -1023,6 +1027,38 @@ describe('sol-transactions.utils', () => {
 				).toStrictEqual({
 					amount: 2_282_880n,
 					payer: mockSolAddress,
+					ambiguous: true
+				});
+			});
+
+			// While no lockup is in force the withdraw authority sets one alone, so an initialisation
+			// without a lockup does not keep the account free of one.
+			it('should refuse one initialised for the user and locked by the next instruction', () => {
+				const setLockup = getSetLockupInstruction({
+					stake: address(mockSolAddress3),
+					authority: createNoopSigner(address(mockSolAddress)),
+					unixTimestamp: null,
+					epoch: 1_000n,
+					custodian: address(mockSolAddress2)
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [
+								createStakeAccount,
+								initialize({ withdrawer: mockSolAddress }),
+								setLockup
+							]
+						},
+						userAddress: mockSolAddress,
+						rentExemptMinimum
+					})
+				).toStrictEqual({
+					amount: 2_282_880n,
+					payer: mockSolAddress,
+					unreviewed: true,
 					ambiguous: true
 				});
 			});

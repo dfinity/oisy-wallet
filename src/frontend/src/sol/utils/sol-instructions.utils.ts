@@ -1041,13 +1041,26 @@ const mapSolStakeInstruction = ({
 			: unfaithfulInstruction();
 	}
 
+	// A lockup set once the account exists holds the balance just as one set at initialisation does,
+	// and while none is in force the withdraw authority sets it alone: a message can initialise an
+	// account without a lockup and lock it in the next instruction, and an account the user already
+	// holds can be locked the same way. Both forms fail closed whatever they set, for the reason the
+	// initialisation's lockup does - the summary cannot state when the balance becomes withdrawable,
+	// or who may lift the lockup.
+	if (
+		instructionType === StakeInstruction.SetLockup ||
+		instructionType === StakeInstruction.SetLockupChecked
+	) {
+		return unfaithfulInstruction();
+	}
+
 	// Reading the runtime's minimum delegation changes nothing at all.
 	if (instructionType === StakeInstruction.GetMinimumDelegation) {
 		return ignoredInstruction();
 	}
 
 	// The rest do something real to the user's stake — delegate it, split it, merge it, move it
-	// between accounts they control, lock it up — and the review has no vocabulary for any of it.
+	// between accounts they control — and the review has no vocabulary for any of it.
 	// Decoded or not, the honest answer is that this message does more than the summary shows.
 	return unreviewedInstruction();
 };

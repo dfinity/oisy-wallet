@@ -57,6 +57,8 @@ import {
 	getGetMinimumDelegationInstruction,
 	getInitializeCheckedInstruction,
 	getInitializeInstruction,
+	getSetLockupCheckedInstruction,
+	getSetLockupInstruction,
 	getWithdrawInstruction,
 	StakeAuthorize,
 	type LockupArgs
@@ -2258,6 +2260,49 @@ describe('sol-instructions.utils', () => {
 						expect(console.warn).not.toHaveBeenCalled();
 					}
 				);
+			});
+
+			// A lockup set once the account exists holds the balance as one set at initialisation
+			// does, and while none is in force the withdraw authority sets it alone. Refused whatever
+			// it sets, the wallet as custodian included.
+			it.each([
+				{
+					name: 'SetLockup instruction',
+					instruction: getSetLockupInstruction({
+						stake: address(mockSolAddress2),
+						authority: mockStakeAuthority,
+						unixTimestamp: null,
+						epoch: 1_000n,
+						custodian: address(mockSolAddress3)
+					})
+				},
+				{
+					name: 'SetLockupChecked instruction',
+					instruction: getSetLockupCheckedInstruction({
+						stake: address(mockSolAddress2),
+						authority: mockStakeAuthority,
+						newAuthority: createNoopSigner(address(mockSolAddress3)),
+						unixTimestamp: null,
+						epoch: 1_000n
+					})
+				},
+				{
+					name: 'SetLockup instruction naming the wallet as custodian',
+					instruction: getSetLockupInstruction({
+						stake: address(mockSolAddress2),
+						authority: mockStakeAuthority,
+						unixTimestamp: 1_900_000_000n,
+						epoch: null,
+						custodian: address(mockSolAddress)
+					})
+				}
+			])('should fail closed on a $name', ({ instruction }) => {
+				expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+
+				expect(console.warn).not.toHaveBeenCalled();
 			});
 		});
 
