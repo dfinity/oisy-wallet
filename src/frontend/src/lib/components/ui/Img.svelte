@@ -1,6 +1,7 @@
 <script lang="ts">
 	interface Props {
 		src: string;
+		loading?: 'eager' | 'lazy';
 		alt?: string;
 		role?: string;
 		width?: string;
@@ -16,6 +17,7 @@
 
 	let {
 		src,
+		loading = 'lazy',
 		alt = '',
 		role = 'presentation',
 		width,
@@ -39,7 +41,7 @@
 	data-tid={testId}
 	decoding="async"
 	{height}
-	loading="lazy"
+	{loading}
 	onerror={onError}
 	onload={onLoad}
 	{role}

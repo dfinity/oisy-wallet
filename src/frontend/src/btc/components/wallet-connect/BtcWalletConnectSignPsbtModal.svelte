@@ -19,6 +19,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
 
 	interface Props {
 		listener: OptionWalletConnectListener;
@@ -110,6 +111,7 @@
 				{application}
 				{decodeError}
 				{decoded}
+				flaggedAsScam={!acceptedContext(request.verifyContext)}
 				onApprove={approve}
 				onReject={reject}
 				source={address ?? ''}

@@ -108,12 +108,17 @@
 			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena",
 			"standalone_mode": "Při instalaci aplikace i $oisy_short na domovskou obrazovku jsou známy problémy s připojením. Pokud narazíte na problémy s připojením $oisy_short nebo podepisováním transakcí, spusťte prosím aplikaci z běžného prohlížeče. Pracujeme na opravě, která bude brzy k dispozici. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Více informací</a>",
 			"video_not_supported": "Váš prohlížeč nepodporuje přehrávání videa."
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
 		"completed": "Dokončeno",
 		"in_progress": "Probíhá",
-		"failed": "Selhalo"
+		"failed": "Selhalo",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {
@@ -1128,6 +1133,11 @@
 			"unexpected_utxos_fee": "Při výpočtu poplatku za transakci došlo k chybě.",
 			"unable_to_retrieve_amount": "n/a (nelze načíst)",
 			"ethereum_insufficient_funds": "",
+			"ethereum_out_of_gas": "Vaše odeslání selhalo, protože vyžadovalo více gasu, než byl odhad. Vaše prostředky jsou stále ve vaší peněžence, ale síť mohla za neúspěšnou transakci přesto účtovat poplatek. Zkuste to znovu.",
+			"ethereum_out_of_gas_gas": "Odeslaný gas: $gasSent · Potřebný gas: $gasNeeded",
+			"ethereum_out_of_gas_gas_sent": "Odeslaný gas: $gasSent",
+			"ethereum_transaction_hash": "Hash transakce: $hash",
+			"ethereum_unsigned_transaction": "Nepodepsaná transakce: $transaction",
 			"solana_transaction_expired": "Vaše transakce nebyla zpracována sítí Solana a vypršela, nejpravděpodobněji proto, že zadaný prioritní poplatek nebyl dostatečný. Aktualizovali jsme ho na nejnovější doporučenou částku, zkuste to prosím znovu.",
 			"solana_confirmation_failed": "Neobdrželi jsme potvrzení pro transakci, kterou jste právě vytvořili. Počkejte prosím několik sekund a poté zkontrolujte seznam transakcí vašeho tokenu, zda byla vaše transakce vytvořena správně.",
 			"solana_insufficient_funds": "Zůstatek vašeho tokenu není dostatečný k dokončení této transakce. Váš zůstatek se mohl od posledního zobrazení změnit.",
@@ -1341,6 +1351,8 @@
 			"swap_fees": "Poplatky za swap",
 			"cross_chain_networks_info": "Přesouváte tokeny ze sítě <b>$sourceNetwork</b> do sítě <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -1375,11 +1387,13 @@
 			"swap_replaced_or_dropped": "",
 			"near_intents_quote_unverified": "",
 			"near_intents_quote_expired": "",
+			"near_intents_quote_deposit_memo": "",
 			"oisy_trade_not_trackable": "",
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
-			"oisy_trade_recovery_failed": ""
+			"oisy_trade_recovery_failed": "",
+			"lifi_status_unknown": ""
 		}
 	},
 	"buy": {
@@ -1558,7 +1572,8 @@
 			"open_contract_address_block_explorer": "Otevřít adresu smlouvy v blockchainovém průzkumníku",
 			"open_token_address_block_explorer": "Otevřít adresu tokenu v blockchainovém průzkumníku",
 			"token_group_number": "Celkový počet tokenů ve skupině pro nativní token $token",
-			"filter_button": "Otevřít/zavřít filtr"
+			"filter_button": "Otevřít/zavřít filtr",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "Zadejte adresu smlouvy ERC20",
@@ -1878,6 +1893,7 @@
 			"ambiguous_transaction": "Tato transakce přesouvá prostředky mezi několika adresami a nelze ji přesně zobrazit ke kontrole. Z důvodu vaší bezpečnosti nebyla podepsána.",
 			"close_pays_others": "Tato transakce zavírá jeden z vašich tokenových účtů a vyplácí jeho zůstatek na adresu, která není vaše peněženka. Pro vaši bezpečnost nebyla podepsána.",
 			"unreviewed_without_simulation": "OISY nedokázala přečíst část této transakce a síť k ní nevrátila ani simulaci, takže nic nepopisuje, co by tato část udělala. Z důvodu vaší bezpečnosti nebyla podepsána.",
+			"unreviewed_not_described_by_simulation": "OISY nedokázala přečíst část této transakce a ani její simulace neukázala, co by tato část udělala. Z důvodu vaší bezpečnosti nebyla podepsána.",
 			"unread_programs_unconfirmed": "Tato transakce volá program, který OISY nedokáže přečíst, a při kontrole nebyla potvrzena. Z důvodu vaší bezpečnosti nebyla podepsána.",
 			"sol_transaction_as_message": "Tato zpráva je solanská transakce, kterou lze schválit pouze prostřednictvím kontroly transakce. Z bezpečnostních důvodů nebyla podepsána.",
 			"request_not_defined": "Neočekávaná chyba: Požadavek není definován, proto jej nelze zpracovat.",
@@ -2159,6 +2175,7 @@
 			"instruction_unwrap": "Rozbalit a zavřít tokenový účet $symbol",
 			"instruction_create_account": "",
 			"instruction_create_program_account": "",
+			"instruction_close_program_account": "",
 			"instruction_close_account": "",
 			"instruction_close_account_for": "Zavřít tokenový účet $symbol",
 			"instruction_approve": "",
@@ -2171,6 +2188,7 @@
 			"instruction_thaw": "",
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
+			"instruction_via": "přes $program",
 			"instruction_rent": "",
 			"instruction_balance_returned": "Zůstatek SOL vrácen do vaší peněženky",
 			"instruction_balance_sent": "Zůstatek SOL odeslán do vaší peněženky",
@@ -2574,7 +2592,8 @@
 		},
 		"warning": {
 			"no_index_canister": "$oisy_short nemůže načíst transakce pro $token_list – vydavatel tokenu neposkytuje sledování transakcí.",
-			"unavailable_index_canister": "Nejnovější transakce pro $token_list se teď nedají načíst, protože jejich sledovací služba neodpovídá. Načtou se automaticky, jakmile bude opět dostupná."
+			"unavailable_index_canister": "Nejnovější transakce pro $token_list se teď nedají načíst, protože jejich sledovací služba neodpovídá. Načtou se automaticky, jakmile bude opět dostupná.",
+			"unsupported_sol_transactions": "Některé transakce pro $token_list se nepodařilo načíst, protože mají nepodporovaný formát. Zobrazí se automaticky, jakmile bude tento problém vyřešen."
 		}
 	},
 	"earning": {
@@ -2705,10 +2724,13 @@
 			"starting_to_repay": "Tvá splátka se odesílá…",
 			"repay_started": "Tvá splátka se nyní zpracovává.",
 			"current_debt": "Aktuální dluh",
+			"pending_repays": "Splátky ve zpracování",
 			"interest_accrued": "Narostlý úrok",
 			"debt_after_repay": "Dluh po splacení",
 			"repay_exceeds_debt": "Částka přesahuje tvůj nesplacený dluh.",
-			"repay_prices_unavailable": "Ceny jsou dočasně nedostupné. Splácení je deaktivováno, dokud se nenačtou."
+			"repay_prices_unavailable": "Ceny jsou dočasně nedostupné. Splácení je deaktivováno, dokud se nenačtou.",
+			"repay_debt_unavailable": "Tvůj nesplacený dluh je dočasně nedostupný. Splácení je deaktivováno, dokud se nenačte.",
+			"repay_pending_covers_debt": "Splátka této pozice se stále zpracovává. Splatit víc můžeš, jakmile se dokončí."
 		},
 		"info": {
 			"title": "Co je Liquidium",
@@ -3010,6 +3032,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

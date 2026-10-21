@@ -1,4 +1,5 @@
 import TransactionsFilterContactsPanel from '$lib/components/transactions/filter/TransactionsFilterContactsPanel.svelte';
+import { TRANSACTIONS_FILTER_CONTACT_NAME } from '$lib/constants/test-ids.constants';
 import * as contactsDerived from '$lib/derived/contacts.derived';
 import {
 	PLAUSIBLE_EVENT_EVENTS_KEYS,
@@ -45,9 +46,9 @@ describe('TransactionsFilterContactsPanel', () => {
 	it('renders one row per contact, alphabetically sorted by name', () => {
 		const { container } = render(TransactionsFilterContactsPanel);
 
-		const names = Array.from(container.querySelectorAll('li span.text-sm')).map(
-			(el) => el.textContent?.trim() ?? ''
-		);
+		const names = Array.from(
+			container.querySelectorAll(`[data-tid="${TRANSACTIONS_FILTER_CONTACT_NAME}"]`)
+		).map((el) => el.textContent?.trim() ?? '');
 
 		expect(names).toEqual(['Alice', 'Bob']);
 	});
@@ -88,9 +89,9 @@ describe('TransactionsFilterContactsPanel', () => {
 		const search = getByPlaceholderText(get(i18n).transaction.filter.search_contacts_placeholder);
 		await fireEvent.input(search, { target: { value: 'ali' } });
 
-		const names = Array.from(container.querySelectorAll('li span.text-sm')).map(
-			(el) => el.textContent?.trim() ?? ''
-		);
+		const names = Array.from(
+			container.querySelectorAll(`[data-tid="${TRANSACTIONS_FILTER_CONTACT_NAME}"]`)
+		).map((el) => el.textContent?.trim() ?? '');
 
 		expect(names).toEqual(['Alice']);
 	});
@@ -101,9 +102,9 @@ describe('TransactionsFilterContactsPanel', () => {
 		const search = getByPlaceholderText(get(i18n).transaction.filter.search_contacts_placeholder);
 		await fireEvent.input(search, { target: { value: mockContactEthAddressUi.address } });
 
-		const names = Array.from(container.querySelectorAll('li span.text-sm')).map(
-			(el) => el.textContent?.trim() ?? ''
-		);
+		const names = Array.from(
+			container.querySelectorAll(`[data-tid="${TRANSACTIONS_FILTER_CONTACT_NAME}"]`)
+		).map((el) => el.textContent?.trim() ?? '');
 
 		expect(names).toEqual(['Alice']);
 	});

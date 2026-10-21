@@ -3,7 +3,7 @@ import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import {
 	SwapProvider,
 	type FindProviderSourceTokens,
-	type SwapCategorizedTokenIds
+	type SwapTokenCategory
 } from '$lib/types/swap';
 import { buildNearIntentsSupportedDestinations } from '$lib/utils/near-intents-swap.utils';
 import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
@@ -251,7 +251,10 @@ describe('buildNearIntentsSupportedDestinations', () => {
 			const sisterEvm = new Set([evmId]);
 			const sisterSol = new Set([solId]);
 
-			const siblings: SwapCategorizedTokenIds = { evm: sisterEvm, sol: sisterSol };
+			const siblings: Partial<Record<SwapTokenCategory, Set<string>>> = {
+				evm: sisterEvm,
+				sol: sisterSol
+			};
 
 			const findProviderSourceTokens: FindProviderSourceTokens = ({ key, category }) =>
 				key === SwapProvider.NEAR_INTENTS ? siblings[category] : undefined;
@@ -307,7 +310,11 @@ describe('buildNearIntentsSupportedDestinations', () => {
 			const sisterSol = new Set([solId]);
 			const sisterBtc = new Set([btcId]);
 
-			const siblings: SwapCategorizedTokenIds = { evm: sisterEvm, sol: sisterSol, btc: sisterBtc };
+			const siblings: Partial<Record<SwapTokenCategory, Set<string>>> = {
+				evm: sisterEvm,
+				sol: sisterSol,
+				btc: sisterBtc
+			};
 
 			const findProviderSourceTokens: FindProviderSourceTokens = ({ key, category }) =>
 				key === SwapProvider.NEAR_INTENTS ? siblings[category] : undefined;

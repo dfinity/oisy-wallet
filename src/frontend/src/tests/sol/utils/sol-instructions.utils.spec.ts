@@ -100,6 +100,7 @@ import {
 	AuthorityType as Token2022AuthorityType
 } from '@solana-program/token-2022';
 import {
+	AccountRole,
 	address,
 	createNoopSigner,
 	type Base58EncodedBytes,
@@ -2160,12 +2161,14 @@ describe('sol-instructions.utils', () => {
 
 		describe('with a Stake instruction', () => {
 			const mockStakeAuthority = createNoopSigner(address(mockSolAddress));
+			// Distinct from the recipient, so a parser reading the wrong position cannot pass unnoticed.
+			const mockWithdrawAuthority = createNoopSigner(address(mockSolAddress3));
 
 			it('should state a Withdraw instruction in full', () => {
 				const instruction = getWithdrawInstruction({
 					stake: address(mockSolAddress2),
 					recipient: address(mockSolAddress),
-					withdrawAuthority: mockStakeAuthority,
+					withdrawAuthority: mockWithdrawAuthority,
 					args: 5_000_000n
 				});
 
@@ -2177,6 +2180,66 @@ describe('sol-instructions.utils', () => {
 
 				expect(parseSolStakeInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
 				expect(console.warn).not.toHaveBeenCalled();
+			});
+
+			// Since stake program v5 the sysvar accounts are optional and the builders no longer emit
+			// them, but dApps on older clients still send the legacy layout. The parser reads accounts
+			// by position, so the review must keep stating the same parties for both layouts.
+			describe('in the legacy account layout', () => {
+				const clockSysvar = {
+					address: address('SysvarC1ock11111111111111111111111111111111'),
+					role: AccountRole.READONLY
+				};
+				const stakeHistorySysvar = {
+					address: address('SysvarStakeHistory1111111111111111111111111'),
+					role: AccountRole.READONLY
+				};
+				const stakeConfig = {
+					address: address('StakeConfig11111111111111111111111111111111'),
+					role: AccountRole.READONLY
+				};
+
+				it('should state a Withdraw instruction in full', () => {
+					const withdraw = getWithdrawInstruction({
+						stake: address(mockSolAddress2),
+						recipient: address(mockSolAddress),
+						withdrawAuthority: mockWithdrawAuthority,
+						args: 5_000_000n
+					});
+					const [stake, recipient, withdrawAuthority] = withdraw.accounts;
+					const instruction = {
+						...withdraw,
+						accounts: [stake, recipient, clockSysvar, stakeHistorySysvar, withdrawAuthority]
+					};
+
+					expect(mapSolInstruction({ instruction })).toStrictEqual({
+						amount: 5_000_000n,
+						source: mockSolAddress2,
+						destination: mockSolAddress
+					});
+
+					expect(console.warn).not.toHaveBeenCalled();
+				});
+
+				it('should mark a DelegateStake instruction unreviewed', () => {
+					const delegateStake = getDelegateStakeInstruction({
+						stake: address(mockSolAddress2),
+						vote: address(mockSolAddress),
+						stakeAuthority: mockStakeAuthority
+					});
+					const [stake, vote, stakeAuthority] = delegateStake.accounts;
+					const instruction = {
+						...delegateStake,
+						accounts: [stake, vote, clockSysvar, stakeHistorySysvar, stakeConfig, stakeAuthority]
+					};
+
+					expect(mapSolInstruction({ instruction })).toStrictEqual({
+						amount: undefined,
+						unreviewed: true
+					});
+
+					expect(console.warn).not.toHaveBeenCalled();
+				});
 			});
 
 			// Handing over the withdraw authority hands over everything the account holds, and the
@@ -2216,7 +2279,6 @@ describe('sol-instructions.utils', () => {
 				const instruction = getDelegateStakeInstruction({
 					stake: address(mockSolAddress2),
 					vote: address(mockSolAddress),
-					unused: address(mockSolAddress),
 					stakeAuthority: mockStakeAuthority
 				});
 

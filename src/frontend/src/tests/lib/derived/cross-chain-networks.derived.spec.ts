@@ -15,6 +15,8 @@ import {
 	SOLANA_MAINNET_NETWORK,
 	SUPPORTED_SOLANA_MAINNET_NETWORKS
 } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
+import type * as lifiEnv from '$env/rest/lifi.env';
 import type * as nearIntentsEnv from '$env/rest/near-intents.env';
 import {
 	crossChainSwapNetwoksEnvs,
@@ -33,7 +35,7 @@ describe('cross-chain-swap derived stores', () => {
 	});
 
 	describe('crossChainSwapNetworks', () => {
-		it('should combine ICP, enabled Ethereum, EVM, Solana, and Bitcoin networks', () => {
+		it('should combine ICP, enabled Ethereum, EVM, Solana, Bitcoin, and XRP networks', () => {
 			const result = get(crossChainSwapNetworks);
 
 			expect(result).toEqual([
@@ -41,7 +43,8 @@ describe('cross-chain-swap derived stores', () => {
 				ETHEREUM_NETWORK,
 				...SUPPORTED_EVM_MAINNET_NETWORKS,
 				...SUPPORTED_SOLANA_MAINNET_NETWORKS,
-				BTC_MAINNET_NETWORK
+				BTC_MAINNET_NETWORK,
+				XRP_MAINNET_NETWORK
 			]);
 		});
 
@@ -82,6 +85,48 @@ describe('cross-chain-swap derived stores', () => {
 			expect(result).not.toContain(SOLANA_MAINNET_NETWORK);
 			expect(result).not.toContain(SOLANA_DEVNET_NETWORK);
 		});
+
+		// Solana's providers are NEAR Intents and LI.FI: either flag keeps its networks.
+		it.each([
+			{ nearIntents: false, lifi: true, included: true },
+			{ nearIntents: false, lifi: false, included: false }
+		])(
+			'should include Solana networks: $included with NEAR Intents $nearIntents and LI.FI $lifi',
+			async ({ nearIntents, lifi, included }) => {
+				vi.resetModules();
+				vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
+					...(await importOriginal<typeof nearIntentsEnv>()),
+					NEAR_INTENTS_SWAP_ENABLED: nearIntents
+				}));
+				vi.doMock('$env/rest/lifi.env', async (importOriginal) => ({
+					...(await importOriginal<typeof lifiEnv>()),
+					LIFI_SWAP_ENABLED: lifi
+				}));
+
+				try {
+					const [
+						{ crossChainSwapNetworks: networks },
+						{ setupTestnetsStore: setupTestnets },
+						{ setupUserNetworksStore: setupNetworks },
+						{ SOLANA_MAINNET_NETWORK: solanaMainnet }
+					] = await Promise.all([
+						import('$lib/derived/cross-chain-networks.derived'),
+						import('$tests/utils/testnets.test-utils'),
+						import('$tests/utils/user-networks.test-utils'),
+						import('$env/networks/networks.sol.env')
+					]);
+
+					setupTestnets('reset');
+					setupNetworks('allEnabled');
+
+					expect(get(networks).includes(solanaMainnet)).toBe(included);
+				} finally {
+					vi.doUnmock('$env/rest/lifi.env');
+					vi.doUnmock('$env/rest/near-intents.env');
+					vi.resetModules();
+				}
+			}
+		);
 
 		// Both BTC providers are on in the default env, so the assertions above already
 		// cover the both-on combination; the cases below drop one flag at a time.
@@ -155,8 +200,8 @@ describe('cross-chain-swap derived stores', () => {
 		});
 	});
 
-	// The swap flag excludes TEST, so the cases above run without XRP although its network is
-	// enabled; these switch the flag on and off.
+	// The NEAR Intents XRP flag is on in the default env, so the assertions above already cover it;
+	// these switch it on and off explicitly.
 	describe('XRP', () => {
 		const loadWithXrp = async ({ nearIntentsXrp }: { nearIntentsXrp: boolean }) => {
 			vi.resetModules();
@@ -227,7 +272,8 @@ describe('cross-chain-swap derived stores', () => {
 				ETHEREUM_NETWORK,
 				...SUPPORTED_EVM_MAINNET_NETWORKS,
 				...SUPPORTED_SOLANA_MAINNET_NETWORKS,
-				BTC_MAINNET_NETWORK
+				BTC_MAINNET_NETWORK,
+				XRP_MAINNET_NETWORK
 			]);
 
 			expect(testnets).toEqual([
@@ -248,7 +294,8 @@ describe('cross-chain-swap derived stores', () => {
 				ETHEREUM_NETWORK,
 				...SUPPORTED_EVM_MAINNET_NETWORKS,
 				...SUPPORTED_SOLANA_MAINNET_NETWORKS,
-				BTC_MAINNET_NETWORK
+				BTC_MAINNET_NETWORK,
+				XRP_MAINNET_NETWORK
 			]);
 
 			expect(testnets).toEqual([]);
@@ -264,7 +311,8 @@ describe('cross-chain-swap derived stores', () => {
 				ETHEREUM_NETWORK,
 				...SUPPORTED_EVM_MAINNET_NETWORKS,
 				...SUPPORTED_SOLANA_MAINNET_NETWORKS,
-				BTC_MAINNET_NETWORK
+				BTC_MAINNET_NETWORK,
+				XRP_MAINNET_NETWORK
 			]);
 		});
 	});
@@ -278,7 +326,8 @@ describe('cross-chain-swap derived stores', () => {
 				ETHEREUM_NETWORK.id,
 				...SUPPORTED_EVM_MAINNET_NETWORKS.map((network) => network.id),
 				...SUPPORTED_SOLANA_MAINNET_NETWORKS.map((network) => network.id),
-				BTC_MAINNET_NETWORK.id
+				BTC_MAINNET_NETWORK.id,
+				XRP_MAINNET_NETWORK.id
 			]);
 		});
 	});
