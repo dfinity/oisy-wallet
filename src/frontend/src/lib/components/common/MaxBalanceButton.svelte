@@ -22,6 +22,9 @@
 		// Optional hard cap (base units). When set, "Max" never exceeds it even if the
 		// affordable balance is higher (e.g. full debt for repay).
 		maxAmount?: bigint;
+		// Called when the user presses "Max", before it is applied: re-applying it for a new fee
+		// does not call it.
+		onMax?: () => void;
 	}
 
 	let {
@@ -31,7 +34,8 @@
 		balance,
 		token,
 		fee,
-		maxAmount
+		maxAmount,
+		onMax
 	}: Props = $props();
 
 	let isZeroBalance = $derived(!$isIcMintingAccount && (isNullish(balance) || balance === ZERO));
@@ -115,7 +119,10 @@
 	class:text-brand-primary-alt={!isZeroBalance && !error}
 	class:text-error-primary={isZeroBalance || error}
 	data-tid={MAX_BUTTON}
-	onclick={preventDefault(setMax)}
+	onclick={preventDefault(() => {
+		onMax?.();
+		setMax();
+	})}
 >
 	{$i18n.core.text.max}:
 	{nonNullish(cappedMaxAmount) && nonNullish(token)

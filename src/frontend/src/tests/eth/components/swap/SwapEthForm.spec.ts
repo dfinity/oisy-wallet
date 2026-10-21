@@ -347,6 +347,20 @@ describe('SwapFormEth', () => {
 				expect(amountOf(container)).toBe(maxFor(lifiFee + 1_000n));
 			});
 
+			it('should start from the fee of the moment when "Max" is pressed again', async () => {
+				const { container, getByTestId } = await renderWithMax();
+
+				await setFee(lifiFee + 1_000n);
+				await setFee(lifiFee - 1_000n);
+
+				expect(amountOf(container)).toBe(maxFor(lifiFee + 1_000n));
+
+				// At once, not after the debounce a fee change waits out.
+				await fireEvent.click(getByTestId(MAX_BUTTON));
+
+				expect(amountOf(container)).toBe(maxFor(lifiFee - 1_000n));
+			});
+
 			it('should follow the fee anew once the amount is typed and "Max" pressed again', async () => {
 				const { container, getByTestId } = await renderWithMax();
 

@@ -262,13 +262,6 @@ const toastOutOfGasError = async ({
 	});
 };
 
-/**
- * Maps an error raised while broadcasting an Ethereum or EVM transaction to a user-friendly message.
- *
- * Resolves i18n strings imperatively so callers don't need to pass them. Returns `undefined` when
- * the error is not one we can explain, allowing callers to fall through to their own generic
- * message rather than claiming a cause we have not established.
- */
 // The node's answers to a transaction it did not take, and that nothing else will mine as it is.
 // Any other refusal can hide a transaction that was taken all the same: `already known` is one in
 // the mempool, `nonce too low` one whose nonce is spent, possibly by itself, and `out of gas` on one
@@ -293,6 +286,13 @@ export const isDefinitiveTransactionRefusal = (err: unknown): boolean =>
 				!EXECUTION_REVERTED_PATTERN.test(message)
 		));
 
+/**
+ * Maps an error raised while broadcasting an Ethereum or EVM transaction to a user-friendly message.
+ *
+ * Resolves i18n strings imperatively so callers don't need to pass them. Returns `undefined` when
+ * the error is not one we can explain, allowing callers to fall through to their own generic
+ * message rather than claiming a cause we have not established.
+ */
 export const mapEthereumErrorMsg = (err: unknown): string | undefined => {
 	const {
 		send: { error }

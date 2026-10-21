@@ -110,6 +110,14 @@
 		}
 	});
 
+	// Pressing "Max" again starts from the fee of the moment: the highest seen since the last press
+	// would otherwise keep the amount below the max for good.
+	const onMax = () => {
+		if (isLifi) {
+			lifiMaxFee = lifiFee;
+		}
+	};
+
 	// The fee "Max" leaves room for; `undefined` while the fee is, which holds the form.
 	const maxFee = $derived(
 		nonNullish(totalFee) && nonNullish(lifiMaxFee) && lifiMaxFee > totalFee ? lifiMaxFee : totalFee
@@ -221,6 +229,7 @@
 	{isSwapAmountsLoading}
 	{onClose}
 	onCustomValidate={customValidate}
+	{onMax}
 	{onNext}
 	{onShowTokensList}
 	bind:swapAmount

@@ -646,6 +646,11 @@ describe('lifi-evm-swap.services', () => {
 					{
 						case: 'they have no route',
 						fail: () => vi.mocked(fetchLifiQuote).mockRejectedValueOnce(httpFailure(404))
+					},
+					// LI.FI validates `allowExchanges` against its own exchange keys.
+					{
+						case: 'their pin is refused',
+						fail: () => vi.mocked(fetchLifiQuote).mockRejectedValueOnce(httpFailure(400))
 					}
 				])('should re-quote through any exchange when $case', async ({ fail }) => {
 					fail();
@@ -659,6 +664,10 @@ describe('lifi-evm-swap.services', () => {
 						...nativeRequest,
 						skipSimulation: false
 					});
+					// Bound to the request the signed quote answers, not the pinned one.
+					expect(assertLifiEvmCalldata).toHaveBeenCalledExactlyOnceWith(
+						expect.objectContaining({ request: { ...nativeRequest, skipSimulation: false } })
+					);
 					expect(swap).toHaveBeenCalledOnce();
 				});
 

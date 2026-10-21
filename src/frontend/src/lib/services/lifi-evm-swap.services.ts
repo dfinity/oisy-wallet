@@ -115,27 +115,36 @@ const requoteAtLeast = async ({
 	return quote;
 };
 
+// LI.FI validates `allowExchanges` against its own list of exchange keys, and a route's swap step can
+// name a tool outside it: the pin is then refused as a bad request (400, code 1011, 2026-10-21).
+const isRefusedRequest = (err: unknown): boolean =>
+	err instanceof SDKError && err.cause instanceof HTTPError && err.cause.status === 400;
+
 /**
  * `requoteAtLeast` through the exchanges the reviewed route used, for a fee like the one reviewed,
- * and once more through any exchange when they no longer reach the minimum displayed or have no
- * route. The pin is for the fee, while the minimum is what the user agreed to: another exchange that
- * still meets it is no reason to abort, all the more as the review the abort returns to does not
- * refresh its quote, so every retry against that minimum would fail alike.
+ * and once more through any exchange when they no longer reach the minimum displayed, have no route,
+ * or are refused as a pin. The pin is for the fee, while the minimum is what the user agreed to:
+ * another exchange that still meets it is no reason to abort, all the more as the review the abort
+ * returns to does not refresh its quote, so every retry against that minimum would fail alike.
+ * Returns the quote with the request it answers.
  */
 const requoteReviewedRoute = async ({
 	request,
 	...rest
-}: Parameters<typeof requoteAtLeast>[0]): Promise<LiFiStep> => {
+}: Parameters<typeof requoteAtLeast>[0]): Promise<{
+	quote: LiFiStep;
+	request: QuoteRequestFromAmount;
+}> => {
 	try {
-		return await requoteAtLeast({ request, ...rest });
+		return { quote: await requoteAtLeast({ request, ...rest }), request };
 	} catch (err: unknown) {
-		if (isNullish(request.allowExchanges) || !isSlippageExceeded(err)) {
+		if (isNullish(request.allowExchanges) || !(isSlippageExceeded(err) || isRefusedRequest(err))) {
 			throw err;
 		}
 
 		const { allowExchanges: _, ...anyExchange } = request;
 
-		return await requoteAtLeast({ request: anyExchange, ...rest });
+		return { quote: await requoteAtLeast({ request: anyExchange, ...rest }), request: anyExchange };
 	}
 };
 
@@ -358,11 +367,10 @@ export const fetchLifiEvmSwap = async ({
 
 	progress(ProgressStepsSwap.SWAP);
 
-	// Simulated: the allowance exists by now, and these are the bytes that are signed.
-	const executionRequest = { ...request, skipSimulation: false };
-
-	const quote = await requoteReviewedRoute({
-		request: executionRequest,
+	// Simulated: the allowance exists by now, and these are the bytes that are signed. The binding
+	// checks them against the request they answer, the exchange pin dropped if it fell back.
+	const { quote, request: executionRequest } = await requoteReviewedRoute({
+		request: { ...request, skipSimulation: false },
 		sourceNetworkId,
 		displayedToAmountMin
 	});

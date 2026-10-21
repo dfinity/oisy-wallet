@@ -60,6 +60,8 @@
 		 * Left unset, "Max" is the balance minus the fee as before.
 		 */
 		maxAmount?: bigint;
+		// Called when the user presses "Max", before it is applied.
+		onMax?: () => void;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
 		onClose: () => void;
 		onNext: () => void;
@@ -77,6 +79,7 @@
 		onCustomValidate,
 		fee,
 		maxAmount,
+		onMax,
 		onShowTokensList,
 		onClose,
 		onNext
@@ -232,6 +235,7 @@
 											error={nonNullish(errorType)}
 											{fee}
 											{maxAmount}
+											{onMax}
 											token={$sourceToken}
 											bind:amountSetToMax={$amountSetToMax}
 											bind:amount={swapAmount}
