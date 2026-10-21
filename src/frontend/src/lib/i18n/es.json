@@ -2163,7 +2163,7 @@
 			"swap_on": "",
 			"interacted_with": "Interactuado con",
 			"unknown_token": "",
-			"unknown_token_named": "",
+			"unknown_token_named": "Token desconocido ($symbol)",
 			"summary_other": "",
 			"tab_summary": "",
 			"tab_balance_changes": "",

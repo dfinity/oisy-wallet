@@ -2163,7 +2163,7 @@
 			"swap_on": "",
 			"interacted_with": "상호작용 대상",
 			"unknown_token": "",
-			"unknown_token_named": "",
+			"unknown_token_named": "알 수 없는 토큰 ($symbol)",
 			"summary_other": "",
 			"tab_summary": "",
 			"tab_balance_changes": "",

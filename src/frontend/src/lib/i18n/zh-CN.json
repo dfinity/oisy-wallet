@@ -2163,7 +2163,7 @@
 			"swap_on": "",
 			"interacted_with": "交互对象",
 			"unknown_token": "",
-			"unknown_token_named": "",
+			"unknown_token_named": "未知代币（$symbol）",
 			"summary_other": "",
 			"tab_summary": "",
 			"tab_balance_changes": "",
