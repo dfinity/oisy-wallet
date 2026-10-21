@@ -1,4 +1,5 @@
 import * as appNavigation from '$app/navigation';
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
@@ -10,6 +11,7 @@ import { BACKDROP_FADE_OUT_DURATION } from '$lib/constants/transition.constants'
 import { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
+import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -62,6 +64,7 @@ describe('NetworksSwitcher', () => {
 
 		const icpRow = rowTestId(ICP_NETWORK.id);
 		const ethRow = rowTestId(ETHEREUM_NETWORK.id);
+		const btcRow = rowTestId(BTC_MAINNET_NETWORK.id);
 
 		let goto: MockInstance<typeof appNavigation.goto>;
 
@@ -135,6 +138,39 @@ describe('NetworksSwitcher', () => {
 			await fireEvent.click(getByTestId(NETWORKS_SWITCHER_DROPDOWN));
 
 			expect(getByTestId(ethRow)).toHaveAttribute('aria-pressed', 'true');
+			expect(getByTestId(icpRow)).toHaveAttribute('aria-pressed', 'false');
+		});
+
+		it('keeps a newer selection checked when an earlier navigation settles', async () => {
+			const settleNavigation: (() => void)[] = [];
+
+			goto.mockImplementation(
+				() => new Promise<void>((resolve) => settleNavigation.push(() => resolve()))
+			);
+
+			const { getByTestId, queryByRole } = render(NetworksSwitcher, {
+				props: { visible: true }
+			});
+
+			await fireEvent.click(getByTestId(ethRow));
+
+			await waitFor(() => expect(goto).toHaveBeenCalledOnce());
+			await waitFor(() => expect(queryByRole('dialog')).not.toBeInTheDocument());
+
+			await fireEvent.click(getByTestId(NETWORKS_SWITCHER_DROPDOWN));
+			await fireEvent.click(getByTestId(btcRow));
+
+			await waitFor(() => expect(goto).toHaveBeenCalledTimes(2));
+			await waitFor(() => expect(queryByRole('dialog')).not.toBeInTheDocument());
+
+			settleNavigation[0]?.();
+
+			await waitForMilliseconds(0);
+
+			await fireEvent.click(getByTestId(NETWORKS_SWITCHER_DROPDOWN));
+
+			expect(getByTestId(btcRow)).toHaveAttribute('aria-pressed', 'true');
+			expect(getByTestId(ethRow)).toHaveAttribute('aria-pressed', 'false');
 			expect(getByTestId(icpRow)).toHaveAttribute('aria-pressed', 'false');
 		});
 

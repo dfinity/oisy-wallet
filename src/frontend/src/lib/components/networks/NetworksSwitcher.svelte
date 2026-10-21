@@ -56,15 +56,17 @@
 	};
 
 	// The check follows the route, which only changes once the navigation lands. Until then it
-	// stays on the row that was clicked.
-	let pendingSelection = $state<{ networkId: OptionNetworkId } | undefined>();
+	// stays on the row that was clicked. Raw, so each click's selection keeps its identity.
+	let pendingSelection = $state.raw<{ networkId: OptionNetworkId } | undefined>();
 
 	let checkedNetworkId = $derived(
 		nonNullish(pendingSelection) ? (pendingSelection.networkId ?? undefined) : $networkId
 	);
 
 	const onNetworkSelect = async (networkId: OptionNetworkId) => {
-		pendingSelection = { networkId };
+		const selection = { networkId };
+
+		pendingSelection = selection;
 
 		// A panel that is leaving no longer updates, so the check moves before it closes.
 		await tick();
@@ -93,7 +95,10 @@
 			});
 		}
 
-		pendingSelection = undefined;
+		// A network picked while this navigation was pending owns the check now.
+		if (pendingSelection === selection) {
+			pendingSelection = undefined;
+		}
 	};
 
 	let enabledNetworks = $derived(
