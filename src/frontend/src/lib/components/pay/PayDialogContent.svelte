@@ -14,7 +14,6 @@
 	<div class="inline-flex items-center text-left font-medium">
 		<ExternalLink
 			ariaLabel={$i18n.pay.alt.where_you_can_pay}
-			color="blue"
 			href={OPEN_CRYPTO_PAY_ECOSYSTEM_URL}
 			iconAsLast
 			iconSize="18"

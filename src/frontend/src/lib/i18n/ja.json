@@ -108,12 +108,17 @@
 			"do_not_close": "トランザクション完了までタブを閉じないでください。",
 			"standalone_mode": "アプリと $oisy_short の両方がホーム画面にインストールされている場合、接続に関する既知の問題が発生することがあります。$oisy_short への接続やトランザクションの署名に問題が生じた場合は、通常のブラウザからアプリを起動してください。現在修正に取り組んでおり、近日中に解決される予定です。 <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">詳細を見る</a>",
 			"video_not_supported": "ブラウザがビデオ再生をサポートしていません。"
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
 		"completed": "完了",
 		"in_progress": "進行中",
-		"failed": "失敗"
+		"failed": "失敗",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {
@@ -1346,6 +1351,8 @@
 			"swap_fees": "スワップ手数料",
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します。",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -1385,7 +1392,8 @@
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
-			"oisy_trade_recovery_failed": ""
+			"oisy_trade_recovery_failed": "",
+			"lifi_status_unknown": ""
 		}
 	},
 	"buy": {
@@ -1564,7 +1572,8 @@
 			"open_contract_address_block_explorer": "ブロックエクスプローラーでコントラクトアドレスを開く",
 			"open_token_address_block_explorer": "ブロックエクスプローラーでトークンアドレスを開く",
 			"token_group_number": "ネイティブトークン$tokenのグループ内のトークン総数",
-			"filter_button": "フィルターを開く/閉じる"
+			"filter_button": "フィルターを開く/閉じる",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "ERC20コントラクトアドレスを入力",
@@ -1887,6 +1896,7 @@
 			"ambiguous_transaction": "このトランザクションは複数のアドレス間で資金を移動するため、確認のために正確に表示できません。安全のため、署名されませんでした。",
 			"close_pays_others": "このトランザクションはあなたのトークンアカウントの一つを閉じ、その残高をあなたのウォレット以外のアドレスに支払います。安全のため、署名されませんでした。",
 			"unreviewed_without_simulation": "OISY はこのトランザクションの一部を読み取れず、ネットワークからシミュレーションも返されなかったため、その部分が何を行うのかを示すものがありません。安全のため、署名されませんでした。",
+			"unreviewed_not_described_by_simulation": "OISY はこのトランザクションの一部を読み取れず、シミュレーションでもその部分が何を行うのかは示されませんでした。安全のため、署名されませんでした。",
 			"unread_programs_unconfirmed": "このトランザクションはOISYが読み取れないプログラムを呼び出しており、レビューで確認されませんでした。安全のため、署名されませんでした。",
 			"sol_transaction_as_message": "このメッセージはSolanaのトランザクションであり、トランザクションレビューを通じてのみ承認できます。安全のため、署名されませんでした。",
 			"request_not_defined": "予期しないエラー: リクエストが定義されていないため、処理できません。",
@@ -2716,10 +2726,13 @@
 			"starting_to_repay": "返済を送信しています…",
 			"repay_started": "返済が処理されています。",
 			"current_debt": "現在の負債",
+			"pending_repays": "処理中の返済",
 			"interest_accrued": "発生した利息",
 			"debt_after_repay": "返済後の負債",
 			"repay_exceeds_debt": "金額が未払いの負債を超えています。",
-			"repay_prices_unavailable": "価格は一時的に利用できません。読み込まれるまで返済は無効になっています。"
+			"repay_prices_unavailable": "価格は一時的に利用できません。読み込まれるまで返済は無効になっています。",
+			"repay_debt_unavailable": "未払いの負債は一時的に利用できません。読み込まれるまで返済は無効になっています。",
+			"repay_pending_covers_debt": "このポジションの返済はまだ処理中です。完了後に追加で返済できます。"
 		},
 		"info": {
 			"title": "Liquidiumとは",
@@ -3021,6 +3034,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

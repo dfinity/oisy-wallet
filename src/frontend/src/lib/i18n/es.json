@@ -108,12 +108,17 @@
 			"do_not_close": "No cierres esta pestaña hasta que la transacción esté completa",
 			"standalone_mode": "Se han detectado problemas de conexión conocidos cuando tanto una aplicación como $oisy_short están instalados en la pantalla de inicio. Si tiene problemas para conectar $oisy_short o firmar transacciones, inicie la aplicación desde un navegador normal. Estamos trabajando en una solución que estará disponible pronto. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Leer más</a>",
 			"video_not_supported": ""
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
 		"completed": "Completado",
 		"in_progress": "En curso",
-		"failed": "Fallido"
+		"failed": "Fallido",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {
@@ -1346,6 +1351,8 @@
 			"swap_fees": "Comisiones de Intercambio",
 			"cross_chain_networks_info": "Mover tokens de la red <b>$sourceNetwork</b> a la red <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -1385,7 +1392,8 @@
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
-			"oisy_trade_recovery_failed": ""
+			"oisy_trade_recovery_failed": "",
+			"lifi_status_unknown": ""
 		}
 	},
 	"buy": {
@@ -1564,7 +1572,8 @@
 			"open_contract_address_block_explorer": "Abrir la dirección del contrato en un explorador de bloques",
 			"open_token_address_block_explorer": "Abrir la dirección del token en un explorador de bloques",
 			"token_group_number": "Número total de tokens en el grupo para el token nativo $token",
-			"filter_button": "Abrir/cerrar filtro"
+			"filter_button": "Abrir/cerrar filtro",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "Introduce una dirección de contrato ERC20",
@@ -1887,6 +1896,7 @@
 			"ambiguous_transaction": "Esta transacción mueve fondos entre varias direcciones y no se puede mostrar con precisión para su revisión. Por tu seguridad, no se ha firmado.",
 			"close_pays_others": "Esta transacción cierra una de tus cuentas de tokens y envía su saldo a una dirección que no es tu monedero. Por tu seguridad, no se ha firmado.",
 			"unreviewed_without_simulation": "OISY no pudo leer una parte de esta transacción y la red tampoco devolvió una simulación, por lo que nada describe lo que haría esa parte. Por su seguridad, no se firmó.",
+			"unreviewed_not_described_by_simulation": "OISY no pudo leer una parte de esta transacción y su simulación tampoco mostró lo que haría esa parte. Por su seguridad, no se firmó.",
 			"unread_programs_unconfirmed": "Esta transacción llama a un programa que OISY no puede leer y no se confirmó en la revisión. Por su seguridad, no se firmó.",
 			"sol_transaction_as_message": "Este mensaje es una transacción de Solana, que solo puede aprobarse mediante una revisión de transacción. Por su seguridad, no fue firmada.",
 			"request_not_defined": "Error inesperado: La solicitud no está definida, por lo tanto no se puede procesar.",
@@ -2716,10 +2726,13 @@
 			"starting_to_repay": "Enviando tu reembolso…",
 			"repay_started": "Tu reembolso se está procesando.",
 			"current_debt": "Deuda actual",
+			"pending_repays": "Reembolsos en proceso",
 			"interest_accrued": "Interés acumulado",
 			"debt_after_repay": "Deuda después del reembolso",
 			"repay_exceeds_debt": "El importe supera tu deuda pendiente.",
-			"repay_prices_unavailable": "Los precios no están disponibles temporalmente. El reembolso está deshabilitado hasta que se carguen."
+			"repay_prices_unavailable": "Los precios no están disponibles temporalmente. El reembolso está deshabilitado hasta que se carguen.",
+			"repay_debt_unavailable": "Tu deuda pendiente no está disponible temporalmente. El reembolso está deshabilitado hasta que se cargue.",
+			"repay_pending_covers_debt": "Un reembolso de esta posición todavía se está procesando. Podrás reembolsar más cuando se complete."
 		},
 		"info": {
 			"title": "Qué es Liquidium",
@@ -3021,6 +3034,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

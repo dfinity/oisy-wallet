@@ -93,12 +93,15 @@ interface I18nCore {
 		up_one_level: string;
 	};
 	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
+	error: { copy_failed: string };
 }
 
 interface I18nProgress {
 	completed: string;
 	in_progress: string;
 	failed: string;
+	step_of: string;
+	failed_at: string;
 }
 
 interface I18nNavigation {
@@ -1068,6 +1071,8 @@ interface I18nSwap {
 		swap_fees: string;
 		cross_chain_networks_info: string;
 		near_intents_estimated_time: string;
+		lifi_route_via: string;
+		lifi_route_via_estimated_time: string;
 		near_intents_tos: string;
 		onesec_transfer_fee: string;
 		onesec_protocol_fee: string;
@@ -1108,6 +1113,7 @@ interface I18nSwap {
 		oisy_trade_settlement_unresolved: string;
 		oisy_trade_order_not_placed: string;
 		oisy_trade_recovery_failed: string;
+		lifi_status_unknown: string;
 	};
 }
 
@@ -1264,6 +1270,7 @@ interface I18nTokens {
 		open_token_address_block_explorer: string;
 		token_group_number: string;
 		filter_button: string;
+		switch_amount_unit: string;
 	};
 	placeholder: {
 		enter_contract_address: string;
@@ -1566,6 +1573,7 @@ interface I18nWallet_connect {
 		ambiguous_transaction: string;
 		close_pays_others: string;
 		unreviewed_without_simulation: string;
+		unreviewed_not_described_by_simulation: string;
 		unread_programs_unconfirmed: string;
 		sol_transaction_as_message: string;
 		request_not_defined: string;
@@ -2256,10 +2264,13 @@ interface I18nLiquidium {
 		starting_to_repay: string;
 		repay_started: string;
 		current_debt: string;
+		pending_repays: string;
 		interest_accrued: string;
 		debt_after_repay: string;
 		repay_exceeds_debt: string;
 		repay_prices_unavailable: string;
+		repay_debt_unavailable: string;
+		repay_pending_covers_debt: string;
 	};
 	info: {
 		title: string;
@@ -2548,6 +2559,7 @@ interface I18nTip {
 		generate: string;
 		share_heading: string;
 		copy_link: string;
+		link_copied: string;
 		share_link: string;
 		they_will_receive: string;
 		no_wallet_needed_title: string;

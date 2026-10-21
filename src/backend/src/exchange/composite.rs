@@ -230,7 +230,7 @@ mod tests {
             },
         );
         let requested = vec![t.clone()];
-        assert!(still_missing(&requested, &map).is_empty());
+        assert_eq!(still_missing(&requested, &map), vec![]);
     }
 
     #[test]
@@ -345,6 +345,6 @@ mod tests {
             &requested,
         ));
 
-        assert!(prices.is_empty());
+        assert_eq!(prices, vec![]);
     }
 }

@@ -146,19 +146,7 @@
 			})
 		);
 	};
-
-	// `Popover` has no key handling of its own — its backdrop answers Enter and
-	// Space, not Escape — so a menu that is expected to close on Escape does it
-	// here. Scoped to this menu on purpose: teaching every popover in the app the
-	// key would change the account menu and every dropdown along with it.
-	const onKeydown = ({ key }: KeyboardEvent) => {
-		if (visible && key === 'Escape') {
-			close();
-		}
-	};
 </script>
-
-<svelte:window onkeydown={onKeydown} />
 
 <!--
 	A plain button with the `nav-item` class rather than a `NavigationItem`, for
@@ -170,7 +158,7 @@
 	bind:this={button}
 	class="nav-item flex min-w-0 flex-1"
 	aria-expanded={visible}
-	aria-haspopup="menu"
+	aria-haspopup="dialog"
 	aria-label={replaceOisyPlaceholders($i18n.navigation.alt.more)}
 	data-tid={NAVIGATION_MORE_MENU_BUTTON}
 	onclick={() => (visible = !visible)}
@@ -183,9 +171,9 @@
 <!-- Opens upward: the footer is pinned to the bottom of the viewport, so a panel
      opened the usual way would have nowhere to go. -->
 <div use:portal>
-	<Popover anchor={button} placement="above" bind:visible>
+	<Popover anchor={button} dropdown placement="above" bind:visible>
 		<div
-			class="flex max-w-80 flex-col gap-1"
+			class="menu-surface flex max-w-80 flex-col"
 			data-tid={NAVIGATION_MORE_MENU}
 			onclick={close}
 			role="none"

@@ -108,12 +108,17 @@
 			"do_not_close": "Don't close this tab until the transaction is done",
 			"standalone_mode": "There are known connection issues when both an app and $oisy_short are installed on a home&nbsp;screen. If you encounter issues connecting $oisy_short or signing transactions, please start the app from a regular browser. We are working on a fix and it will be resolved soon. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Read more</a>",
 			"video_not_supported": "Your browser does not support video playback."
+		},
+		"error": {
+			"copy_failed": "Couldn't copy. Your browser blocked access to the clipboard. Try again."
 		}
 	},
 	"progress": {
 		"completed": "Completed",
 		"in_progress": "In progress",
-		"failed": "Failed"
+		"failed": "Failed",
+		"step_of": "Step $current of $total: $step",
+		"failed_at": "Failed at $step"
 	},
 	"navigation": {
 		"text": {
@@ -1346,6 +1351,8 @@
 			"swap_fees": "Swap Fees",
 			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network",
 			"near_intents_estimated_time": "NEAR Intents (~$minutes min)",
+			"lifi_route_via": "LI.FI via $tool",
+			"lifi_route_via_estimated_time": "LI.FI via $tool (~$minutes min)",
 			"near_intents_tos": "By clicking the \"Swap now\" button, you agree to the <a href=\"$link\" target=\"_blank\" rel=\"external noopener noreferrer\" class=\"underline\">Terms of Service</a> of 1Click Swap API. If you do not agree with those terms, do not use this swap provider.",
 			"onesec_transfer_fee": "Transfer fee",
 			"onesec_protocol_fee": "Protocol fee",
@@ -1385,7 +1392,8 @@
 			"oisy_trade_order_killed": "The order could not be filled in full at the reviewed price, so it was canceled and your funds were returned to your wallet. You were only charged network fees.",
 			"oisy_trade_settlement_unresolved": "The order could no longer be found, and neither token is held on OISY Trade. Please check your balances in the Trading tab before trying again.",
 			"oisy_trade_order_not_placed": "OISY Trade did not accept the order, so your funds were returned to your wallet. You were only charged network fees.",
-			"oisy_trade_recovery_failed": "OISY Trade did not accept the order, and your funds could not be returned to your wallet automatically. Please check your balances in the Trading tab to withdraw them."
+			"oisy_trade_recovery_failed": "OISY Trade did not accept the order, and your funds could not be returned to your wallet automatically. Please check your balances in the Trading tab to withdraw them.",
+			"lifi_status_unknown": "LI.FI could not report the outcome of this swap. Please check your destination wallet."
 		}
 	},
 	"buy": {
@@ -1564,7 +1572,8 @@
 			"open_contract_address_block_explorer": "Open the contract address on a block explorer",
 			"open_token_address_block_explorer": "Open the token address on a block explorer",
 			"token_group_number": "Total number of tokens in the group for native token $token",
-			"filter_button": "Open/close filter"
+			"filter_button": "Open/close filter",
+			"switch_amount_unit": "Switch between currency and token amount"
 		},
 		"placeholder": {
 			"enter_contract_address": "Enter an ERC20 contract address",
@@ -1887,6 +1896,7 @@
 			"ambiguous_transaction": "This transaction includes multiple actions that can't all be shown accurately for review. For your security, it was not signed.",
 			"close_pays_others": "This transaction closes one of your token accounts and pays its balance to an address that is not your wallet. For your security, it was not signed.",
 			"unreviewed_without_simulation": "OISY couldn't read part of this transaction, and the network didn't return a simulation of it either, so nothing describes what that part would do. For your security, it was not signed.",
+			"unreviewed_not_described_by_simulation": "OISY couldn't read part of this transaction, and its simulation didn't show what that part would do either. For your security, it was not signed.",
 			"unread_programs_unconfirmed": "This transaction calls a program OISY can't read, and it wasn't confirmed on the review. For your security, it was not signed.",
 			"sol_transaction_as_message": "This message is a Solana transaction, which can only be approved through a transaction review. For your security, it was not signed.",
 			"request_not_defined": "Unexpected error: Request is not defined therefore cannot be processed.",
@@ -2716,10 +2726,13 @@
 			"starting_to_repay": "Submitting your repayment...",
 			"repay_started": "The repayment is now being processed.",
 			"current_debt": "Current debt",
+			"pending_repays": "Repayments in progress",
 			"interest_accrued": "Interest accrued",
 			"debt_after_repay": "Debt after repay",
 			"repay_exceeds_debt": "Amount exceeds your outstanding debt.",
-			"repay_prices_unavailable": "Prices are temporarily unavailable. Repaying is disabled until they load."
+			"repay_prices_unavailable": "Prices are temporarily unavailable. Repaying is disabled until they load.",
+			"repay_debt_unavailable": "Your outstanding debt is temporarily unavailable. Repaying is disabled until it loads.",
+			"repay_pending_covers_debt": "A repayment for this position is still processing. You can repay more once it settles."
 		},
 		"info": {
 			"title": "What is Liquidium",
@@ -3021,6 +3034,7 @@
 			"generate": "Create tip",
 			"share_heading": "Your tip is ready",
 			"copy_link": "Copy the tip link",
+			"link_copied": "Tip link copied to clipboard.",
 			"share_link": "Share the tip link",
 			"they_will_receive": "Tip amount",
 			"no_wallet_needed_title": "Scan to claim this tip",
