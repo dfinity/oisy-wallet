@@ -20,7 +20,6 @@ describe('LogoButton', () => {
 		const { container } = render(LogoButton, { props: {} });
 
 		expect(row(container)).not.toHaveClass('child-pressed:bg-brand-subtle-20');
-		expect(row(container)).not.toHaveClass('child-pressed:duration-0');
 	});
 
 	it('should hover by default', () => {

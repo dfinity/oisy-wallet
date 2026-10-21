@@ -101,10 +101,10 @@ re-spelling it. The shared `Button` / `ButtonIcon` get the same press from `butt
 - `press`: shrinks to 0.98 while held. Text buttons and whole-card buttons.
 - `press-icon`: shrinks to 0.96 while held. Icon-size controls.
 - `row-feedback`: full-width rows, which do not shrink: 10 % blue on hover, 20 % while pressed
-  (ignoring presses on controls inside the row). The hover fades in over 150 ms; the pressed fill
-  shows at once and fades back over 150 ms on release: a quick click is held for about 80 ms, and a
-  fill that faded in would only peak as the button is let go. Rows that paint their press
-  elsewhere (`child-pressed:`, `parent-pressed:`, `.nav-item`, `ListItemCheckbox`) press at once too.
+  (ignoring presses on controls inside the row). The hover fades over 150 ms; the pressed fill
+  shows at once and fades back on release, since a quick click is held about 80 ms and a fill
+  that faded in would only peak as it is let go. A row painted through `child-pressed:` or
+  `parent-pressed:` adds `*-pressed:duration-0` beside its fill.
 
 The presses skip disabled and reduced motion. They need `scale` in the element's transition:
 buttons have it from the base button rule; anything else adds `transition-[scale]` (or a list
