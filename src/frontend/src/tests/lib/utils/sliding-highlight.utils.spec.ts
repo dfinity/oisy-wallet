@@ -187,6 +187,21 @@ describe('slidingHighlight', () => {
 		expect(highlightOf(node)).toHaveClass('visible');
 	});
 
+	it('rests on the keyboard-focused row when the pointer leaves', () => {
+		const { node, rows } = mount();
+		slidingHighlight(node, true);
+
+		(rows[0].querySelector('button') as HTMLButtonElement).focus();
+		pointer({ type: 'pointerover', target: rows[1] });
+
+		expect(highlightOf(node)?.style.getPropertyValue('--highlight-y')).toBe('36px');
+
+		pointer({ type: 'pointerleave', target: node });
+
+		expect(highlightOf(node)).toHaveClass('visible');
+		expect(highlightOf(node)?.style.getPropertyValue('--highlight-y')).toBe('0px');
+	});
+
 	it('hides when keyboard focus leaves the rows while the pointer is elsewhere', () => {
 		const { node, rows, input } = mount();
 		slidingHighlight(node, true);
