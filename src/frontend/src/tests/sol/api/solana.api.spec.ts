@@ -411,7 +411,7 @@ describe('solana.api', () => {
 				signature: signature.signature
 			});
 			expect(mockGetTransaction).toHaveBeenCalledExactlyOnceWith(signature.signature, {
-				maxSupportedTransactionVersion: 0,
+				maxSupportedTransactionVersion: 1,
 				encoding: 'jsonParsed'
 			});
 

@@ -63,9 +63,10 @@
 <ButtonIcon
 	ariaLabel={$i18n.address_book.edit_avatar.replace_image}
 	colorStyle="tertiary-alt"
+	expanded={visible}
 	link={false}
 	onclick={() => (visible = true)}
-	styleClass="w-auto h-auto p-0"
+	styleClass="w-auto h-auto p-0 relative hit-area hit-area-touch"
 	testId={CONTACT_POPOVER_TRIGGER}
 	transparent
 	bind:button
@@ -75,13 +76,15 @@
 	{/snippet}
 </ButtonIcon>
 
-<Popover anchor={button} invisibleBackdrop bind:visible>
-	<div
-		class="avatar-edit-popover max-w-[60%] min-w-60 text-left"
-		data-tid={CONTACT_POPOVER_MENU}
-		role="menu"
-	>
-		<h3 class="popover-title pt-1 pb-2 text-base">{$i18n.address_book.edit_avatar.menu_title}</h3>
+<Popover
+	anchor={button}
+	ariaLabel={$i18n.address_book.edit_avatar.menu_title}
+	dropdown
+	invisibleBackdrop
+	bind:visible
+>
+	<div class="menu-surface min-w-60" data-tid={CONTACT_POPOVER_MENU}>
+		<span class="menu-heading">{$i18n.address_book.edit_avatar.menu_title}</span>
 		<ul class="flex flex-col">
 			{#each items as { title: itemTitle, logo: ItemLogo, action, testId } (itemTitle)}
 				<li class="logo-button-list-item">
@@ -98,7 +101,7 @@
 							<ItemLogo />
 						{/snippet}
 						{#snippet title()}
-							<span class="text-base font-normal">{itemTitle}</span>
+							{itemTitle}
 						{/snippet}
 					</LogoButton>
 				</li>

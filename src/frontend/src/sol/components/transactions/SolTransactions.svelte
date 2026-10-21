@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import HiddenMicroTransactionsInfoBox from '$lib/components/transactions/HiddenMicroTransactionsInfoBox.svelte';
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
@@ -60,20 +60,22 @@
 <HiddenMicroTransactionsInfoBox />
 
 <SolTransactionsSkeletons>
-	{#if filteredTransactions.length > 0}
-		<SolTransactionsScroll {token}>
-			{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
-				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
-					<TransactionsDateGroup
-						{formattedDate}
-						singleToken
-						testId={`${TRANSACTIONS_DATE_GROUP_PREFIX}-sol-${index}`}
-						{transactions}
-					/>
-				{/each}
-			{/if}
-		</SolTransactionsScroll>
-	{:else if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
+	<!-- Mounted over an empty list too, so that it pages the token's own history: the worker's first
+		page holds only the network's newest transactions, which can include none of this token's. -->
+	<SolTransactionsScroll {token}>
+		{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
+			{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+				<TransactionsDateGroup
+					{formattedDate}
+					singleToken
+					testId={`${TRANSACTIONS_DATE_GROUP_PREFIX}-sol-${index}`}
+					{transactions}
+				/>
+			{/each}
+		{/if}
+	</SolTransactionsScroll>
+
+	{#if filteredTransactions.length === 0}
 		<TransactionsPlaceholder />
 	{/if}
 </SolTransactionsSkeletons>

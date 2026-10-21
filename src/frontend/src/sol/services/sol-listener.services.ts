@@ -75,7 +75,8 @@ export const syncWallet = ({
 	const {
 		wallet: {
 			balances: { sol, spl },
-			newTransactions
+			newTransactions,
+			transactionsUnavailable
 		}
 	} = data;
 
@@ -89,6 +90,12 @@ export const syncWallet = ({
 			balancesStore.batchSet({ id: tokenId, data: { data: balance, certified: false } });
 		}
 	});
+
+	// The lists keep what they hold, and a token whose history never loaded keeps loading: an empty
+	// list would tell the user the token has no history at all.
+	if (transactionsUnavailable === true) {
+		return;
+	}
 
 	const resolved: SolResolvedTransaction[] = JSON.parse(newTransactions, jsonReviver);
 

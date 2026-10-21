@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { type HideInfoKey, saveHideInfo, shouldHideInfo } from '$lib/utils/info.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		children: Snippet;

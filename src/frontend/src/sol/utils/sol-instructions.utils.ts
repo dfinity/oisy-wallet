@@ -1,16 +1,15 @@
+import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { NullishIdentity } from '$lib/types/identity';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { getAccountInfo } from '$sol/api/solana.api';
+import { ATA_SIZE } from '$sol/constants/ata.constants';
 import {
 	ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	MEMO_LEGACY_PROGRAM_ADDRESS,
 	MEMO_PROGRAM_ADDRESS,
-	SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES,
-	SOLANA_RENT_EXEMPTION_YEARS,
-	SOLANA_RENT_LAMPORTS_PER_BYTE_YEAR,
 	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
@@ -34,6 +33,7 @@ import { parseSolStakeInstruction } from '$sol/utils/sol-instructions-stake.util
 import { parseSolSystemInstruction } from '$sol/utils/sol-instructions-system.utils';
 import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
 import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
+import { rentExemptMinimumFor } from '$sol/utils/sol-rent.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { AddressLookupTableInstruction } from '@solana-program/address-lookup-table';
 import { ComputeBudgetInstruction } from '@solana-program/compute-budget';
@@ -421,15 +421,6 @@ const parseSolInstruction = (
 };
 
 /**
- * The lamports an account of this size must hold to be rent-exempt, which is what opening one
- * legitimately costs.
- */
-const solRentExemptLamports = (space: bigint): bigint =>
-	(SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES + space) *
-	SOLANA_RENT_LAMPORTS_PER_BYTE_YEAR *
-	SOLANA_RENT_EXEMPTION_YEARS;
-
-/**
  * Whether a creation funds the account beyond what its size costs.
  *
  * Rent is the price of the account existing, and the review carries it as the cost of the operation
@@ -438,11 +429,33 @@ const solRentExemptLamports = (space: bigint): bigint =>
  * account hands its whole balance to a destination the closing instruction names, and a message can
  * open, initialise and close one in a single request. That is a payment, and the creation states no
  * destination for the review to show it against.
+ *
+ * What the size costs is what the chain charges now, which the network lowers in steps: a price
+ * kept here would let each cut pass as rent. Without the chain's figure there is no line to hold the
+ * creation to, so it counts as funded beyond it.
  */
-const fundsBeyondRent = ({ lamports, space }: { lamports: bigint; space: bigint }): boolean =>
-	lamports > solRentExemptLamports(space);
+const fundsBeyondRent = ({
+	lamports,
+	space,
+	rentExemptMinimum
+}: {
+	lamports: bigint;
+	space: bigint;
+	rentExemptMinimum: bigint | undefined;
+}): boolean =>
+	isNullish(rentExemptMinimum) || lamports > rentExemptMinimumFor({ space, rentExemptMinimum });
 
-const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+const mapSolSystemInstruction = ({
+	instruction,
+	rentExemptMinimum,
+	returnsToWallet
+}: {
+	instruction: SolParsedInstruction;
+	rentExemptMinimum: bigint | undefined;
+	// Whether this creation opens a wrapped SOL account the message closes back to the wallet, whose
+	// funding beyond the rent is the SOL it wraps rather than a payment.
+	returnsToWallet: boolean;
+}): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
 	if (instructionType === SystemInstruction.CreateAccount) {
@@ -471,7 +484,16 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 		// Over-funded means a program governs them and the creation still states no destination: an
 		// SPL token account opened, initialised and closed in one message hands its whole balance to
 		// whoever the close names. Either way the payment cannot be shown, so neither is signed.
-		if (owner === SYSTEM_PROGRAM_ADDRESS || fundsBeyondRent({ lamports, space })) {
+		//
+		// Unless that close names the wallet: then the funding is the SOL a trade wraps, and what the
+		// trade leaves of it comes back with the close. Only with the reserve known, as for any
+		// creation for a program: without it the review states neither the account's rent nor the SOL
+		// it wraps.
+		if (
+			owner === SYSTEM_PROGRAM_ADDRESS ||
+			isNullish(rentExemptMinimum) ||
+			(!returnsToWallet && fundsBeyondRent({ lamports, space, rentExemptMinimum }))
+		) {
 			return unfaithfulInstruction();
 		}
 
@@ -496,7 +518,11 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 			}
 		} = instruction;
 
-		if (owner === SYSTEM_PROGRAM_ADDRESS || fundsBeyondRent({ lamports: amount, space })) {
+		if (
+			owner === SYSTEM_PROGRAM_ADDRESS ||
+			isNullish(rentExemptMinimum) ||
+			(!returnsToWallet && fundsBeyondRent({ lamports: amount, space, rentExemptMinimum }))
+		) {
 			return unfaithfulInstruction();
 		}
 
@@ -1195,12 +1221,119 @@ export const asSolParsedRpcInstruction = (
 export const asSolParsedRpcInstructionOrSelf = (instruction: unknown): unknown =>
 	asSolParsedRpcInstruction(instruction) ?? instruction;
 
+const INITIALIZE_ACCOUNT_TYPES = ['initializeAccount', 'initializeAccount2', 'initializeAccount3'];
+
+/**
+ * The positions of the creations that open a wrapped SOL account the message hands back to the
+ * wallet: opened for the Token program at a token account's size, initialised for wrapped SOL held
+ * by the wallet, then closed with the wallet as destination, all by the message's own instructions
+ * and in that order.
+ *
+ * Funding such an account beyond its rent is how a dApp wraps the SOL a trade spends - Raydium opens
+ * it at an address derived from a seed - and what the trade leaves of it comes back with the close.
+ * That close is the message's own and needs the wallet's signature as the account's holder, so a
+ * program that hands the account to anyone else, or closes it first, makes the close fail and the
+ * whole transaction with it. What a program moves out of it on the way is a transfer the simulated
+ * run shows, as it does for any token account of the user's.
+ *
+ * By position rather than by address: an address closed and opened again is a second account, and
+ * only the opening the close answers for is vouched for.
+ */
+export const solWrappedSolOpeningsReturnedToWallet = ({
+	instructions,
+	userAddress
+}: {
+	instructions: readonly unknown[];
+	userAddress: OptionSolAddress;
+}): Set<number> => {
+	const returned = new Set<number>();
+
+	if (isNullish(userAddress)) {
+		return returned;
+	}
+
+	// The accounts opened so far and not closed yet, each with the position of its opening and
+	// whether it has since been initialised as the wallet's wrapped SOL.
+	const open = new Map<SolAddress, { opening: number; walletWrappedSol: boolean }>();
+
+	instructions.forEach((instruction, position) => {
+		const parsed = asSolParsedRpcInstruction(instruction);
+
+		if (isNullish(parsed)) {
+			return;
+		}
+
+		const {
+			program,
+			programId,
+			parsed: { type, info }
+		} = parsed;
+
+		const read = (key: string): unknown => fieldOf({ info, key });
+
+		if (program === 'system' && ['createAccount', 'createAccountWithSeed'].includes(type)) {
+			const account = read('newAccount');
+
+			if (typeof account !== 'string') {
+				return;
+			}
+
+			open.delete(account);
+
+			if (read('programAddress') === TOKEN_PROGRAM_ADDRESS && read('space') === ATA_SIZE) {
+				open.set(account, { opening: position, walletWrappedSol: false });
+			}
+
+			return;
+		}
+
+		if (programId !== TOKEN_PROGRAM_ADDRESS) {
+			return;
+		}
+
+		const account = read('account');
+		const opened = typeof account === 'string' ? open.get(account) : undefined;
+
+		if (typeof account !== 'string' || isNullish(opened)) {
+			return;
+		}
+
+		if (INITIALIZE_ACCOUNT_TYPES.includes(type)) {
+			open.set(account, {
+				...opened,
+				walletWrappedSol: read('mint') === WSOL_TOKEN.address && read('owner') === userAddress
+			});
+
+			return;
+		}
+
+		if (type === 'closeAccount') {
+			open.delete(account);
+
+			if (opened.walletWrappedSol && read('destination') === userAddress) {
+				returned.add(opened.opening);
+			}
+		}
+	});
+
+	return returned;
+};
+
 export const mapSolInstruction = ({
 	instruction,
-	userAddress
+	userAddress,
+	rentExemptMinimum,
+	returnsToWallet = false
 }: {
 	instruction: SolInstruction;
 	userAddress?: OptionSolAddress;
+	// What the chain charges a token account of the usual size to exist, which an account creation
+	// is held to. Without it a creation for a program is refused, since nothing says where its rent
+	// ends.
+	rentExemptMinimum?: bigint;
+	// Whether this instruction opens a wrapped SOL account the message closes back to the wallet,
+	// which only the whole message can say. See `solWrappedSolOpeningsReturnedToWallet`.
+	returnsToWallet?: boolean;
 }): MappedSolTransaction => {
 	// Compute budget instructions can never move funds, but they do set the prioritisation
 	// fee the wallet pays in SOL, so their directives are surfaced rather than ignored.
@@ -1235,7 +1368,11 @@ export const mapSolInstruction = ({
 	const { programAddress } = parsedInstruction;
 
 	if (programAddress === SYSTEM_PROGRAM_ADDRESS) {
-		return mapSolSystemInstruction(parsedInstruction);
+		return mapSolSystemInstruction({
+			instruction: parsedInstruction,
+			rentExemptMinimum,
+			returnsToWallet
+		});
 	}
 
 	if (programAddress === TOKEN_PROGRAM_ADDRESS) {
