@@ -3,10 +3,8 @@ import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import en from '$lib/i18n/en.json';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
-import {
-	pollVeloraActiveUserTransactions,
-	resetVeloraReplacementObservations
-} from '$lib/services/velora-active-tx.services';
+import { resetEvmSourceTxObservations } from '$lib/services/evm-source-tx.services';
+import { pollVeloraActiveUserTransactions } from '$lib/services/velora-active-tx.services';
 import { VELORA_EXTERNAL_REF_KEYS, type VeloraExternalRefKey } from '$lib/types/velora-swap';
 import {
 	mockVeloraActiveUserTransaction,
@@ -72,9 +70,9 @@ describe('velora-active-tx.services', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		resetVeloraReplacementObservations();
+		resetEvmSourceTxObservations();
 
-		applySpy.mockResolvedValue();
+		applySpy.mockResolvedValue(true);
 
 		getDeltaOrderById = vi.fn();
 		vi.mocked(constructSimpleSDK).mockReturnValue({

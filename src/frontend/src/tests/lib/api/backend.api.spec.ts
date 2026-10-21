@@ -832,7 +832,15 @@ describe('backend.api', () => {
 			const result = await getActiveUserTransactions(mockParams);
 
 			expect(result).toEqual(response);
-			expect(backendCanisterMock.getActiveUserTransactions).toHaveBeenCalledExactlyOnceWith();
+			expect(backendCanisterMock.getActiveUserTransactions).toHaveBeenCalledExactlyOnceWith({});
+		});
+
+		it('should forward the certified flag', async () => {
+			await getActiveUserTransactions({ ...mockParams, certified: true });
+
+			expect(backendCanisterMock.getActiveUserTransactions).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
 		});
 
 		it('should throw an error if identity is undefined', async () => {

@@ -8,8 +8,10 @@
 	import { MULTI_SELECT_DROPDOWN_PANEL_SHELL } from '$lib/constants/test-ids.constants';
 
 	interface Props {
+		// Names the trigger. Extra context goes in ariaDescription, not a label that would replace the
+		// visible text voice-control users say to reach it (WCAG 2.5.3).
 		triggerLabel: string;
-		ariaLabel: string;
+		ariaDescription: string;
 		count?: number;
 		searchable?: boolean;
 		searchPlaceholder?: string;
@@ -23,7 +25,7 @@
 
 	let {
 		triggerLabel,
-		ariaLabel,
+		ariaDescription,
 		count = 0,
 		searchable = false,
 		searchPlaceholder = '',
@@ -34,6 +36,8 @@
 		panelWidthClass,
 		onToggle
 	}: Props = $props();
+
+	const descriptionId = $props.id();
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
@@ -59,9 +63,10 @@
 
 <button
 	bind:this={button}
-	class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary hover:border-brand-primary"
+	class="dropdown-button border"
 	class:opened={visible}
-	aria-label={ariaLabel}
+	aria-describedby={descriptionId}
+	aria-expanded={visible}
 	data-tid={testId}
 	onclick={onTriggerClick}
 	type="button"
@@ -72,19 +77,24 @@
 		</span>
 	{/if}
 
-	<span class="min-w-0 flex-1 truncate font-medium">{triggerLabel}</span>
+	<span class="min-w-0 flex-1 truncate">{triggerLabel}</span>
 
 	{#if count > 0}
 		<Badge variant="info" width="w-fit">{count}</Badge>
 	{/if}
 
-	<IconExpandMore size="20" />
+	<span class="dropdown-chevron" aria-hidden="true">
+		<IconExpandMore />
+	</span>
+
+	<!-- hidden keeps it out of the button's name; aria-describedby still reads it. -->
+	<span id={descriptionId} hidden>{ariaDescription}</span>
 </button>
 
-<ResponsivePopover {button} direction="ltr" bind:visible>
+<ResponsivePopover ariaLabel={ariaDescription} {button} direction="ltr" dropdown bind:visible>
 	{#snippet content()}
 		<div
-			class="flex flex-col gap-2 p-1 {panelWidthClass ?? 'w-full min-w-60'}"
+			class="flex flex-col gap-2 {panelWidthClass ?? 'w-full min-w-60'}"
 			data-tid={MULTI_SELECT_DROPDOWN_PANEL_SHELL}
 		>
 			{#if searchable}

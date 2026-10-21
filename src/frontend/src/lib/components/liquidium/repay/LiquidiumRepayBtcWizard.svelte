@@ -30,7 +30,8 @@
 	import { WizardStepsLiquidiumRepay } from '$lib/enums/wizard-steps';
 	import {
 		computeLiquidiumRepayPreview,
-		executeLiquidiumRepay
+		executeLiquidiumRepay,
+		liquidiumRepayCapError
 	} from '$lib/services/liquidium-repay.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -48,6 +49,9 @@
 		amount: OptionAmount;
 		repayProgressStep: string;
 		maxRepay?: bigint;
+		maxRepayUnavailable?: boolean;
+		// Net amount of this pool's repays still settling.
+		pendingRepay?: bigint;
 		inflowFee?: bigint;
 		inflowFeeUnavailable?: boolean;
 		currentStep?: WizardStep;
@@ -63,6 +67,8 @@
 		amount = $bindable(),
 		repayProgressStep = $bindable(),
 		maxRepay,
+		maxRepayUnavailable,
+		pendingRepay = ZERO,
 		inflowFee,
 		inflowFeeUnavailable,
 		currentStep,
@@ -84,10 +90,12 @@
 	);
 
 	// Pairwise USD from the position itself (no asset-price dependency): the repaid share of the
-	// position's debt. Repaying improves the (aggregate) projected health factor.
+	// position's debt, including repays still settling. Repaying improves the (aggregate) projected
+	// health factor.
 	let repayUsd = $derived(
-		reserve.borrowed > ZERO && nonNullish(parsedAmount)
-			? (Number(parsedAmount) / Number(reserve.borrowed)) * reserve.borrowedUsd
+		reserve.borrowed > ZERO
+			? (Number((parsedAmount ?? ZERO) + pendingRepay) / Number(reserve.borrowed)) *
+					reserve.borrowedUsd
 			: 0
 	);
 
@@ -143,6 +151,21 @@
 
 		if (isNullish(parsedAmount)) {
 			toastsError({ msg: { text: $i18n.send.assertion.amount_invalid } });
+			return;
+		}
+
+		// Review can outlive the cap (a repay that settles refetches it; a new pending one lowers
+		// it), so it is re-checked at the point of broadcast rather than trusted from the form.
+		const capError = liquidiumRepayCapError({
+			amount: parsedAmount,
+			maxRepay,
+			pendingRepay,
+			reserve,
+			i18n: $i18n
+		});
+
+		if (nonNullish(capError)) {
+			toastsError({ msg: { text: capError.message } });
 			return;
 		}
 
@@ -230,8 +253,11 @@
 			{amount}
 			{feeDisplay}
 			{inflowFee}
+			{maxRepay}
+			{maxRepayUnavailable}
 			{onBack}
 			onConfirm={repay}
+			{pendingRepay}
 			{preview}
 			{reserve}
 		/>
@@ -243,10 +269,12 @@
 			{inflowFee}
 			{inflowFeeUnavailable}
 			{maxRepay}
+			{maxRepayUnavailable}
 			{onClose}
 			onCustomErrorValidate={validateRepayAmount}
 			{onNext}
 			{onSelectToken}
+			{pendingRepay}
 			{preview}
 			{reserve}
 			totalFee={utxosFee?.feeSatoshis}

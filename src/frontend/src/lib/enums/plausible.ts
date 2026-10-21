@@ -13,6 +13,9 @@ export enum PLAUSIBLE_EVENTS {
 	STAKE = 'stake',
 	UNSTAKE = 'unstake',
 	LOAD_TRANSACTIONS = 'load_transactions',
+	// Loading transactions, sent when something notable happens to it. The outcome is in
+	// `result_status`, never in the name.
+	TRANSACTION_LOAD = 'transaction_load',
 	SIGNER_PAGE_VISIT = 'signer_page_visit',
 	SIGNER_INTERACTION = 'signer_interaction',
 	NETWORK_FILTER = 'network_filter',
@@ -84,6 +87,24 @@ export enum PLAUSIBLE_EVENT_HELP_ERROR_TYPES {
 export enum PLAUSIBLE_EVENT_TRANSACTION_SEND_ERROR_TYPES {
 	// The node simulated the transaction and it ran out of the gas it was signed with.
 	OUT_OF_GAS = 'out_of_gas'
+}
+
+// Why a provider's offer is missing from the swap form: the request failed, or the offer that
+// arrived was left out.
+export enum PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES {
+	// A 1Click quote for an XRP deposit came with a deposit memo.
+	DEPOSIT_MEMO = 'deposit_memo',
+	// The provider has no route for the pair and amount.
+	NO_ROUTE = 'no_route',
+	// The provider refused the request for exceeding its rate limit.
+	RATE_LIMITED = 'rate_limited',
+	// The quote failed OISY's own checks — a target, spender or echoed request that differs from
+	// what was asked — so it was never shown.
+	QUOTE_REJECTED = 'quote_rejected',
+	// The quote request was aborted after the provider's timeout.
+	TIMEOUT = 'timeout',
+	// Any other failure of the quote request.
+	REQUEST_FAILED = 'request_failed'
 }
 
 // Why a tip step failed. `TipError` is OISY's own candid type, so its variant names are a closed
@@ -176,6 +197,19 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_NETWORKS {
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS {
 	UNCERTIFIED_REMOVED = 'uncertified_removed'
+}
+
+// What a `transaction_load` event is about: one transaction, or a whole load of them.
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTION_LOAD {
+	SINGLE = 'single'
+}
+
+// Why a `transaction_load` failed, in `result_error_type`.
+export enum PLAUSIBLE_EVENT_TRANSACTION_LOAD_ERROR_TYPES {
+	// The RPC refused to return the transaction.
+	LOAD_REFUSED = 'load_refused',
+	// The RPC returned it, but OISY failed to read it.
+	PARSE_FAILED = 'parse_failed'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER {
