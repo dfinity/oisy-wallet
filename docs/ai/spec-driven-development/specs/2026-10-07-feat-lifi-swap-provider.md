@@ -1091,7 +1091,9 @@ value })` runs on the exact checked transaction through `infuraProviders(network
    accept the transaction, so that the swap never started: an allow-list of
    definitive refusals matched on the error (ethers' `INSUFFICIENT_FUNDS`, a fee cap below
    the base fee, intrinsic gas too low, a gas limit above the block's, oversized data, an
-   invalid signature or sender, an unsupported transaction type). The delete is retried as
+   invalid signature or sender, an unsupported transaction type). A contract revert never
+   counts, whatever its reason says (`execution reverted: invalid signature` is a contract's
+   check, and another node can still mine the transaction). The delete is retried as
    `deleteRow` in `icp/services/cycles-mint.services.ts` does. Any other failure keeps the
    row, and the poller settles it by its hash and nonce (mined, or replaced or dropped
    once its nonce is used): a JSON-RPC error does not prove the transaction absent
