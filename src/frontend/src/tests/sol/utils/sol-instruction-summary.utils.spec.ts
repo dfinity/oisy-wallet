@@ -3726,6 +3726,61 @@ describe('sol-instruction-summary.utils', () => {
 				expect(close?.returned).toBe(2_041_280n);
 				expect(close?.wrapped).toBe(2_000n);
 			});
+
+			describe('into the account', () => {
+				const into = (amount?: string) => ({
+					program: 'spl-token',
+					programId: TOKEN,
+					parsed: {
+						type: 'unwrapLamports',
+						info: {
+							source: mockSolAddress3,
+							destination: wrapped,
+							authority: mockSolAddress2,
+							...(amount !== undefined && { amount })
+						}
+					}
+				});
+
+				const sync = {
+					program: 'spl-token',
+					programId: TOKEN,
+					parsed: { type: 'syncNative', info: { account: wrapped } }
+				};
+
+				// The lamports raise its balance the way a wrapping does, so an unwrap of everything it
+				// wraps afterwards hands on what arrived.
+				it('should count what arrived toward a later unwrap of everything', () => {
+					const views = read({
+						instructions: [into('5000'), sync, unwrap({ destination: mockSolAddress })],
+						accountTokenAmounts: { [wrapped]: ZERO }
+					});
+
+					expect(views.at(-1)?.amount).toBe(5_000n);
+				});
+
+				it('should know nothing of a later unwrap of everything when the first names no amount', () => {
+					const views = read({
+						instructions: [into(), sync, unwrap({ destination: mockSolAddress })],
+						accountTokenAmounts: { [wrapped]: ZERO }
+					});
+
+					expect(views.at(-1)).not.toHaveProperty('amount');
+				});
+
+				// Both token programs lower the balance and leave the lamports where they are.
+				it('should lower the balance for an unwrap into the account itself', () => {
+					const views = read({
+						instructions: [
+							unwrap({ amount: '5000', destination: wrapped }),
+							unwrap({ destination: mockSolAddress })
+						],
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					expect(views.at(-1)?.amount).toBe(2_000n);
+				});
+			});
 		});
 
 		describe('instructions it cannot read', () => {

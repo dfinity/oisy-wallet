@@ -1075,20 +1075,27 @@ const heldAtInstruction = ({
 			}
 
 			// Unwrapping takes lamports out of a wrapped SOL account, whose token balance they are: the
-			// amount it states, or everything the account wraps.
+			// amount it states, or everything the account wraps. An unwrap into the account itself
+			// lowers it too: the lamports stay, and the balance drops all the same. Paid into another
+			// wrapped SOL account, they raise its balance the way a wrapping does, by an amount nobody
+			// knows when the unwrap states none.
 			if (
 				native &&
 				nonNullish(program) &&
 				TOKEN_PROGRAMS.includes(program) &&
 				type === 'unwrapLamports'
 			) {
-				if (address({ info, key: 'source' }) !== account) {
+				const unwrapped = amount({ info, key: 'amount' });
+
+				if (address({ info, key: 'source' }) === account) {
+					return nonNullish(unwrapped) ? maxBigInt(acc - unwrapped, ZERO) : ZERO;
+				}
+
+				if (address({ info, key: 'destination' }) !== account) {
 					return acc;
 				}
 
-				const unwrapped = amount({ info, key: 'amount' });
-
-				return nonNullish(unwrapped) ? maxBigInt(acc - unwrapped, ZERO) : ZERO;
+				return nonNullish(unwrapped) ? acc + unwrapped : undefined;
 			}
 
 			if (
