@@ -30,6 +30,10 @@ export const SOLANA_TRANSACTION_FEE_IN_LAMPORTS = 5_000n;
 
 export const MICROLAMPORTS_PER_LAMPORT = 1_000_000n;
 
+// The largest amount an SPL token account holds or approves (a `u64`). An approval of exactly this
+// much is how applications ask for an unlimited allowance.
+export const SPL_TOKEN_MAX_AMOUNT = (1n << 64n) - 1n;
+
 // When a transaction does not request a compute unit limit, the runtime budgets a fixed
 // amount per instruction, capped transaction-wide. The prioritisation fee is charged on the
 // requested (or defaulted) limit, not on the units actually consumed.
