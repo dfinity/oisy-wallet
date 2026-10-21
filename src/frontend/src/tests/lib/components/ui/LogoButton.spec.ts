@@ -7,16 +7,20 @@ describe('LogoButton', () => {
 	const row = (container: HTMLElement): Nullish<HTMLElement> =>
 		container.querySelector('button')?.parentElement;
 
-	it('should darken the row while pressed when it has a click', () => {
+	it('should darken the row at once while pressed when it has a click', () => {
 		const { container } = render(LogoButton, { props: { onClick: vi.fn() } });
 
-		expect(row(container)).toHaveClass('child-pressed:bg-brand-subtle-20');
+		expect(row(container)).toHaveClass(
+			'child-pressed:bg-brand-subtle-20',
+			'child-pressed:duration-0'
+		);
 	});
 
 	it('should not show a pressed state when there is nothing to click', () => {
 		const { container } = render(LogoButton, { props: {} });
 
 		expect(row(container)).not.toHaveClass('child-pressed:bg-brand-subtle-20');
+		expect(row(container)).not.toHaveClass('child-pressed:duration-0');
 	});
 
 	it('should hover by default', () => {

@@ -53,10 +53,12 @@ button.nav-item:not([disabled]):not(.disabled):not(.loading) {
 		@apply bg-brand-subtle-10;
 	}
 
-	// One step darker than hover and selected, so a press always shows.
+	// One step darker than hover and selected, so a press always shows; at once, as `row-feedback`
+	// rows press (global.scss), and fading back on release.
 	&:active {
 		@apply text-brand-primary-alt;
 		@apply bg-brand-subtle-20;
+		@apply duration-0;
 	}
 
 	&[focus],

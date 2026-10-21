@@ -44,6 +44,7 @@
 
 		&:active {
 			background-color: var(--color-background-brand-subtle-20);
+			transition-duration: 0s;
 		}
 	}
 
