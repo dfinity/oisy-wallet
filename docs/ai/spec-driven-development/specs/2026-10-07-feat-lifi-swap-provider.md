@@ -1125,6 +1125,12 @@ gas estimate changed). While "Max" holds a LI.FI amount, `SwapEthForm` gives it 
 fee seen since it was pressed, so the amount only steps down; typing releases it. The fee
 shown, the form's validation and the review keep the current one.
 
+Whether "Max" holds lives in the swap context (`amountSetToMax`), not in the form: picking a
+provider or a token is a wizard step, and every step change rebuilds the form, which used to
+release "Max" and leave the amount at the previous provider's max. That was invisible while
+every EVM provider shared the fee context's estimate; LI.FI's own, higher fee turned the
+amount red. A new source token, switching the tokens and closing the modal release it.
+
 ### Solana execution
 
 New `fetchLifiSolSwap`:
