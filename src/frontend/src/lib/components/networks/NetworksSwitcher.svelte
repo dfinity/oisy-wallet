@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { tick } from 'svelte';
 	import { page } from '$app/state';
 	import { SUPPORTED_MAINNET_NETWORKS, SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
@@ -8,6 +9,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import { NETWORKS_SWITCHER_DROPDOWN } from '$lib/constants/test-ids.constants';
+	import { BACKDROP_FADE_OUT_DURATION } from '$lib/constants/transition.constants';
 	import { selectedNetwork, networkId } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
@@ -24,6 +26,7 @@
 	import type { OptionNetworkId } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
+	import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 
 	interface Props {
 		visible: boolean;
@@ -52,7 +55,26 @@
 		});
 	};
 
+	// The check follows the route, which only changes once the navigation lands. Until then it
+	// stays on the row that was clicked.
+	let pendingSelection = $state<{ networkId: OptionNetworkId } | undefined>();
+
+	let checkedNetworkId = $derived(
+		nonNullish(pendingSelection) ? (pendingSelection.networkId ?? undefined) : $networkId
+	);
+
 	const onNetworkSelect = async (networkId: OptionNetworkId) => {
+		pendingSelection = { networkId };
+
+		// A panel that is leaving no longer updates, so the check moves before it closes.
+		await tick();
+
+		dropdown?.close();
+
+		// The route change runs a view transition, which holds the page still while the new state
+		// renders: a panel still leaving would stop mid-fade. So the route changes once it has gone.
+		await waitForMilliseconds(BACKDROP_FADE_OUT_DURATION);
+
 		try {
 			await switchNetwork({ networkId });
 
@@ -71,7 +93,7 @@
 			});
 		}
 
-		dropdown?.close();
+		pendingSelection = undefined;
 	};
 
 	let enabledNetworks = $derived(
@@ -111,7 +133,7 @@
 	{#snippet items()}
 		<div class="menu-surface">
 			<div class="menu-divider">
-				<NetworkSwitcherList onSelected={onNetworkSelect} selectedNetworkId={$networkId} />
+				<NetworkSwitcherList onSelected={onNetworkSelect} selectedNetworkId={checkedNetworkId} />
 			</div>
 
 			<Button
