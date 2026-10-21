@@ -529,6 +529,11 @@
 				"name": "IC Forums",
 				"one_liner": "Des forums communautaires sur l'Internet Computer.",
 				"description": "IC Forums est une plateforme communautaire qui fonctionne entièrement sur l'Internet Computer. Participez aux discussions de plus de 100 communautés, ou créez la vôtre avec sa propre structure, ses rôles et sa modération. Une seule identité suffit pour toutes les communautés."
+			},
+			"storica": {
+				"name": "Storica",
+				"one_liner": "Votre propre stockage cloud sur l'Internet Computer.",
+				"description": "Storica déploie en une minute environ un canister de stockage privé sur l'Internet Computer, payé en ICP. Vous contrôlez le canister, ses fichiers, ses autorisations et ses mises à jour. Gérez vos fichiers depuis la console web, l'outil en ligne de commande ou le SDK TypeScript, et connectez-vous avec OISY ou Internet Identity."
 			}
 		}
 	},
