@@ -865,4 +865,25 @@ describe('EthWalletConnectSendReview', () => {
 		expect(queryByTestId(warningTestId)).not.toBeInTheDocument();
 		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 	});
+
+	it('does not warn about a request Verify does not flag', () => {
+		const { getByRole, queryByTestId } = render(EthWalletConnectSendReview, {
+			props: { ...props, destination: RECIPIENT },
+			context: mockContext
+		});
+
+		expect(queryByTestId('wallet-connect-scam-warning')).not.toBeInTheDocument();
+		expect(getByRole('button', { name: en.core.text.approve })).toBeInTheDocument();
+	});
+
+	it('only offers to reject a request Verify flags as a scam, and says why', () => {
+		const { getByRole, getByTestId, queryByRole } = render(EthWalletConnectSendReview, {
+			props: { ...props, destination: RECIPIENT, flaggedAsScam: true },
+			context: mockContext
+		});
+
+		expect(getByTestId('wallet-connect-scam-warning')).toBeInTheDocument();
+		expect(queryByRole('button', { name: en.core.text.approve })).not.toBeInTheDocument();
+		expect(getByRole('button', { name: en.core.text.reject })).toBeInTheDocument();
+	});
 });

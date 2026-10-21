@@ -9,13 +9,41 @@ describe('MultiSelectDropdown', () => {
 		screensStore.set('lg');
 	});
 
-	it('renders the trigger button with the supplied label and ariaLabel', () => {
-		const { getByTestId, getByText } = render(MultiSelectDropdownTest);
+	it('names the trigger by its visible label and describes it with ariaDescription', () => {
+		const { getByRole } = render(MultiSelectDropdownTest);
 
-		const trigger = getByTestId('multi-select-dropdown');
+		const trigger = getByRole('button', { name: 'Type' });
 
-		expect(trigger).toHaveAttribute('aria-label', 'Filter');
-		expect(getByText('Filter')).toBeInTheDocument();
+		expect(trigger).not.toHaveAttribute('aria-label');
+		expect(trigger).toHaveAccessibleDescription('Filter by type');
+	});
+
+	it('keeps the visible label at the start of the name when the count shows', () => {
+		const { getByTestId } = render(MultiSelectDropdownTest, { props: { count: 3 } });
+
+		expect(getByTestId('multi-select-dropdown')).toHaveAccessibleName('Type 3');
+	});
+
+	it('names its panel by the description, not the menu fallback', async () => {
+		const { getByRole, getByTestId } = render(MultiSelectDropdownTest);
+
+		await fireEvent.click(getByTestId('multi-select-dropdown'));
+
+		await waitFor(() => {
+			expect(getByRole('dialog', { name: 'Filter by type' })).toBeInTheDocument();
+		});
+	});
+
+	it('names its bottom sheet by the description on phones', async () => {
+		screensStore.set('xs');
+
+		const { getByRole, getByTestId } = render(MultiSelectDropdownTest);
+
+		await fireEvent.click(getByTestId('multi-select-dropdown'));
+
+		await waitFor(() => {
+			expect(getByRole('dialog', { name: 'Filter by type' })).toBeInTheDocument();
+		});
 	});
 
 	it('does not render the count badge when count is zero', () => {
@@ -119,5 +147,30 @@ describe('MultiSelectDropdown', () => {
 		});
 
 		expect(onToggle).toHaveBeenCalledTimes(2);
+	});
+
+	it('shows and announces the open state on its trigger', async () => {
+		const { getByTestId } = render(MultiSelectDropdownTest);
+
+		const trigger = getByTestId('multi-select-dropdown');
+
+		expect(trigger).not.toHaveClass('opened');
+		expect(trigger).toHaveAttribute('aria-expanded', 'false');
+		expect(trigger.querySelector('.dropdown-chevron')).toHaveAttribute('aria-hidden', 'true');
+
+		await fireEvent.click(trigger);
+
+		await waitFor(() => {
+			expect(trigger).toHaveClass('opened');
+			expect(trigger).toHaveAttribute('aria-expanded', 'true');
+		});
+	});
+
+	it('opens a compact dropdown panel', async () => {
+		const { getByTestId } = render(MultiSelectDropdownTest);
+
+		await fireEvent.click(getByTestId('multi-select-dropdown'));
+
+		await waitFor(() => expect(document.querySelector('.wrapper.dropdown')).not.toBeNull());
 	});
 });

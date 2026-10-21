@@ -23,6 +23,14 @@ describe('Toasts', () => {
 		expect(getByTestId('toast-message').textContent).toContain('Hello toast');
 	});
 
+	it('stays reachable by keyboard while an overlay is open', () => {
+		toastsStore.show({ level: 'info', text: 'Hello toast' });
+
+		const { getByTestId } = render(ToastsTest);
+
+		expect(getByTestId('toasts-component')).toHaveAttribute('data-overlay-reachable');
+	});
+
 	it('applies the error class when a toast is an error or warning', () => {
 		toastsStore.show({ level: 'error', text: 'boom' });
 

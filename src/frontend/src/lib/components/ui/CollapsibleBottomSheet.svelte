@@ -58,7 +58,7 @@
 
 	{#if expanded}
 		<div class="fixed inset-0 z-14">
-			<BottomSheetContainer transition>
+			<BottomSheetContainer ariaLabel={sheetTitle} onClose={() => (expanded = false)} transition>
 				{#snippet header()}
 					<div class="flex w-full items-center justify-between p-4">
 						{#if nonNullish(sheetTitle)}
