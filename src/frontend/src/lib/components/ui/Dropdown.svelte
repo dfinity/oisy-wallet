@@ -12,7 +12,8 @@
 		items: Snippet;
 		disabled?: boolean;
 		asModalOnMobile?: boolean;
-		ariaLabel: string;
+		ariaLabel?: string;
+		ariaDescription?: string;
 		buttonFullWidth?: boolean;
 		buttonBorder?: boolean;
 		testId?: string;
@@ -26,6 +27,7 @@
 		disabled = false,
 		asModalOnMobile = false,
 		ariaLabel,
+		ariaDescription,
 		buttonFullWidth = false,
 		buttonBorder = false,
 		testId
@@ -37,6 +39,7 @@
 </script>
 
 <DropdownButton
+	{ariaDescription}
 	{ariaLabel}
 	border={buttonBorder}
 	{disabled}

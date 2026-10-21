@@ -26,6 +26,15 @@ describe('LanguageDropdown', () => {
 		expect(container.querySelector('.lang-selector')).toBeInTheDocument();
 	});
 
+	it('is named by the current language and described by what it does', () => {
+		const { getByRole } = render(LanguageDropdown, {});
+
+		const trigger = getByRole('button', { name: LANGUAGES[Languages.ENGLISH] });
+
+		expect(trigger).not.toHaveAttribute('aria-label');
+		expect(trigger).toHaveAccessibleDescription(get(i18n).core.alt.switch_language);
+	});
+
 	it('should display the current language', () => {
 		const { container } = render(LanguageDropdown, {});
 

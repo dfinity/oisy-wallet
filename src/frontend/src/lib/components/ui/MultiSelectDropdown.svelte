@@ -8,8 +8,10 @@
 	import { MULTI_SELECT_DROPDOWN_PANEL_SHELL } from '$lib/constants/test-ids.constants';
 
 	interface Props {
+		// Names the trigger. Extra context goes in ariaDescription, not a label that would replace the
+		// visible text voice-control users say to reach it (WCAG 2.5.3).
 		triggerLabel: string;
-		ariaLabel: string;
+		ariaDescription: string;
 		count?: number;
 		searchable?: boolean;
 		searchPlaceholder?: string;
@@ -23,7 +25,7 @@
 
 	let {
 		triggerLabel,
-		ariaLabel,
+		ariaDescription,
 		count = 0,
 		searchable = false,
 		searchPlaceholder = '',
@@ -34,6 +36,8 @@
 		panelWidthClass,
 		onToggle
 	}: Props = $props();
+
+	const descriptionId = $props.id();
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
@@ -61,8 +65,8 @@
 	bind:this={button}
 	class="dropdown-button border"
 	class:opened={visible}
+	aria-describedby={descriptionId}
 	aria-expanded={visible}
-	aria-label={ariaLabel}
 	data-tid={testId}
 	onclick={onTriggerClick}
 	type="button"
@@ -82,6 +86,9 @@
 	<span class="dropdown-chevron" aria-hidden="true">
 		<IconExpandMore />
 	</span>
+
+	<!-- hidden keeps it out of the button's name; aria-describedby still reads it. -->
+	<span id={descriptionId} hidden>{ariaDescription}</span>
 </button>
 
 <ResponsivePopover {button} direction="ltr" bind:visible>

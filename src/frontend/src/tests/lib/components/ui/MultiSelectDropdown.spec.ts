@@ -9,13 +9,19 @@ describe('MultiSelectDropdown', () => {
 		screensStore.set('lg');
 	});
 
-	it('renders the trigger button with the supplied label and ariaLabel', () => {
-		const { getByTestId, getByText } = render(MultiSelectDropdownTest);
+	it('names the trigger by its visible label and describes it with ariaDescription', () => {
+		const { getByRole } = render(MultiSelectDropdownTest);
 
-		const trigger = getByTestId('multi-select-dropdown');
+		const trigger = getByRole('button', { name: 'Type' });
 
-		expect(trigger).toHaveAttribute('aria-label', 'Filter');
-		expect(getByText('Filter')).toBeInTheDocument();
+		expect(trigger).not.toHaveAttribute('aria-label');
+		expect(trigger).toHaveAccessibleDescription('Filter by type');
+	});
+
+	it('keeps the visible label at the start of the name when the count shows', () => {
+		const { getByTestId } = render(MultiSelectDropdownTest, { props: { count: 3 } });
+
+		expect(getByTestId('multi-select-dropdown')).toHaveAccessibleName('Type 3');
 	});
 
 	it('does not render the count badge when count is zero', () => {

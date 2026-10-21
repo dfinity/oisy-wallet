@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IconExpandMore from '$lib/components/icons/IconExpandMore.svelte';
 
@@ -7,7 +8,10 @@
 		onClick: () => void;
 		disabled?: boolean;
 		button?: HTMLButtonElement;
-		ariaLabel: string;
+		// Only for a trigger without visible text: a label would replace the text voice-control users
+		// say to reach it (WCAG 2.5.3). Put extra context in ariaDescription instead.
+		ariaLabel?: string;
+		ariaDescription?: string;
 		opened?: boolean;
 		fullWidth?: boolean;
 		border?: boolean;
@@ -20,11 +24,14 @@
 		disabled = false,
 		button = $bindable(),
 		ariaLabel,
+		ariaDescription,
 		opened = false,
 		fullWidth = false,
 		border = false,
 		testId
 	}: Props = $props();
+
+	const descriptionId = $props.id();
 </script>
 
 <button
@@ -34,6 +41,7 @@
 	class:disabled
 	class:opened
 	class:w-full={fullWidth}
+	aria-describedby={nonNullish(ariaDescription) ? descriptionId : undefined}
 	aria-expanded={opened}
 	aria-label={ariaLabel}
 	data-tid={testId}
@@ -45,4 +53,8 @@
 	<span class="dropdown-chevron" aria-hidden="true">
 		<IconExpandMore />
 	</span>
+	<!-- hidden keeps it out of the button's name; aria-describedby still reads it. -->
+	{#if nonNullish(ariaDescription)}
+		<span id={descriptionId} hidden>{ariaDescription}</span>
+	{/if}
 </button>
