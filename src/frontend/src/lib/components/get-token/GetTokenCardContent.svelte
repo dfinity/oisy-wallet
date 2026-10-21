@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
 	import { GET_TOKEN_MODAL_POTENTIAL_USD_BALANCE } from '$lib/constants/test-ids.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
@@ -11,6 +10,7 @@
 	import type { Token } from '$lib/types/token';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		token: Token;

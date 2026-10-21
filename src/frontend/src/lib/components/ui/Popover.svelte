@@ -3,14 +3,16 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { quintOut } from 'svelte/easing';
-	import { fade, scale } from 'svelte/transition';
+	import { cubicIn, cubicOut } from 'svelte/easing';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import Backdrop from '$lib/components/ui/Backdrop.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { PopoverDirection, PopoverPlacement } from '$lib/types/popover';
 	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
+	import { overlayFocus } from '$lib/utils/overlay.utils';
 	import { computePopoverPlacement } from '$lib/utils/popover.utils';
+	import { slidingHighlight } from '$lib/utils/sliding-highlight.utils';
+	import { fade, scale } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		anchor?: HTMLElement;
@@ -19,8 +21,10 @@
 		placement?: PopoverPlacement;
 		closeButton?: boolean;
 		invisibleBackdrop?: boolean;
+		dropdown?: boolean;
 		testId?: string;
 		children?: Snippet;
+		ariaLabel?: string;
 	}
 
 	let {
@@ -30,7 +34,9 @@
 		placement = 'below',
 		closeButton = false,
 		invisibleBackdrop = false,
+		dropdown = false,
 		testId = 'popover-component',
+		ariaLabel,
 		children
 	}: Props = $props();
 
@@ -159,32 +165,35 @@
 	<div
 		style="--popover-top: {popoverTop}px; --popover-bottom: {popoverBottom}px; --popover-left: {popoverLeft}px; --popover-right: {popoverRight}px"
 		class="popover"
-		aria-orientation="vertical"
 		data-tid={testId}
-		role="menu"
-		tabindex="-1"
-		transition:fade|global
+		in:fade|global={{ duration: 25 }}
 	>
 		<Backdrop invisible={invisibleBackdrop} onClose={close} />
 		<div
 			class="wrapper"
 			class:above={placement === 'above'}
+			class:dropdown
 			class:placed={placementResolved}
 			class:rtl={effectiveDirection === 'rtl'}
-			class:with-border={invisibleBackdrop}
+			aria-label={ariaLabel ?? anchor?.getAttribute('aria-label') ?? $i18n.navigation.alt.menu}
+			aria-modal="true"
+			role="dialog"
+			tabindex="-1"
 			use:observePanelWidth
-			transition:scale|global={{ delay: 25, duration: 150, easing: quintOut }}
+			use:overlayFocus={{ onClose: close, returnFocus: anchor }}
+			in:scale|global={{ delay: 25, duration: 150, easing: cubicOut, start: 0.96 }}
+			out:scale|global={{ duration: 100, easing: cubicIn, start: 0.96 }}
 		>
 			{#if closeButton}
 				<button
-					class="close icon-only"
+					class="close icon-only hit-area relative press-icon"
 					aria-label={$i18n.core.text.close}
 					onclick={stopPropagation(close)}
 					type="button"><IconClose /></button
 				>
 			{/if}
 
-			<div class="popover-content" data-tid="popover-content">
+			<div class="popover-content" data-tid="popover-content" use:slidingHighlight={dropdown}>
 				{@render children?.()}
 			</div>
 		</div>
@@ -193,6 +202,16 @@
 
 <style lang="scss">
 	@use '$lib/styles/mixins/display';
+	@use '$lib/styles/mixins/interaction';
+
+	// A row counts as pressed when it or its direct button or link is: holding Space presses only
+	// the button, and a LogoButton paints its pressed fill on the wrapper (`child-pressed`).
+	$pressed: ':active, :has(> :is(a, button):active)';
+
+	// A modal opened from a row renders inline, inside the content: the language picker in the
+	// signed-out user menu, on phones. Its rows keep their own look; global/variables.scss gives it
+	// back the full-size row properties.
+	$nested-modal: '.popover-content .modal';
 
 	.popover {
 		position: fixed;
@@ -238,6 +257,7 @@
 		--border-radius: 16px;
 
 		border-radius: var(--border-radius);
+		box-shadow: var(--overlay-box-shadow);
 
 		// Loose cap used during the first paint so we can measure the panel's
 		// natural width. `.placed` swaps this for a side-aware cap that keeps the
@@ -271,9 +291,144 @@
 			max-width: calc(100vw - var(--popover-right) - var(--padding));
 		}
 
-		&.with-border {
-			border: var(--dropdown-border-size) solid var(--dropdown-border-color);
+		@media (forced-colors: active) {
+			border: 1px solid CanvasText;
 		}
+	}
+
+	// Dropdowns and short option menus: an 8px inset instead of the menus' 14px, so the 8px-cornered
+	// rows and search box sit concentric in the 16px corners. Everything inside takes its
+	// density from these properties: menu-surface rows (global/menus.scss), ListItemCheckbox, Toggle
+	// rows and the shared InputSearch (InputBase hooks). Rows are 36px with a 12px inset, in line
+	// with the search text, and 44px on a touch screen.
+	.wrapper.dropdown {
+		padding: 8px;
+
+		.popover-content {
+			--border-radius: 8px;
+			--menu-row-min-height: 36px;
+			--menu-row-padding-block: 6px;
+			--menu-row-padding-inline: 12px;
+			--input-padding-block: 7px;
+			--input-padding-inline: 11px;
+			--input-padding-inner-end: 40px;
+			// InputSearch renders an empty label row above the box; its gap would push the box down.
+			--input-block-gap: 0;
+
+			// Rows only ever stack: never offer a horizontal scrollbar for a fraction of a pixel.
+			overflow-x: hidden;
+
+			// The content clips 4px from the panel edge rather than 8px, so a control that reaches the
+			// inset keeps its outside focus ring (2px at a 2px offset). Nothing inside moves.
+			margin: -4px;
+			padding: 4px;
+
+			@include interaction.coarse {
+				--menu-row-min-height: var(--touch-target-min-height);
+				--menu-row-padding-block: 10px;
+				--input-padding-block: 9px;
+			}
+		}
+
+		// Compact rows go without dividers; `.menu-divider` between groups stays.
+		.popover-content :global(li:not(#{$nested-modal} li)) {
+			border-bottom-width: 0;
+		}
+
+		// 4px either side of a divider between groups, so a row's highlight never touches it.
+		.popover-content :global(hr:not(#{$nested-modal} hr)) {
+			margin-block: 4px;
+		}
+
+		.popover-content :global(.menu-divider:not(#{$nested-modal} .menu-divider)) {
+			padding-bottom: 4px;
+			margin-bottom: 4px;
+		}
+	}
+
+	// The block `slidingHighlight` moves between rows (sliding-highlight.utils.ts). It sits behind
+	// them, so the elements that paint a row's own hover or focus fill (the row, a list item's child,
+	// a `row-feedback` control, a LogoButton's wrapper) stay transparent while it is there, and nav
+	// items keep their text colour. Row styles live in the base and utility layers, which these
+	// unlayered rules out-rank; ListItemCheckbox's own unlayered hover loses on specificity. The
+	// block sits in the content itself, or in a list that scrolls on its own inside it.
+	.popover-content:global([data-sliding-highlight]) {
+		position: relative;
+		isolation: isolate;
+	}
+
+	.popover-content:global([data-sliding-highlight]) :global {
+		[data-sliding-highlight-list] {
+			position: relative;
+			isolation: isolate;
+		}
+
+		:is(
+			li,
+			li > *,
+			.menu-row,
+			.nav-item:not(:disabled, .disabled),
+			.row-feedback,
+			:has(> button > .logo-button-wrapper)
+		):not(#{$nested-modal} *) {
+			&:focus-visible:not(#{$pressed}) {
+				background-color: transparent;
+			}
+
+			@include interaction.hover {
+				&:not(#{$pressed}) {
+					background-color: transparent;
+				}
+			}
+		}
+
+		.nav-item:not(:disabled, .disabled, #{$nested-modal} *) {
+			color: var(--color-foreground-primary);
+		}
+
+		.sliding-highlight {
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: -1;
+
+			width: var(--highlight-width);
+			height: var(--highlight-height);
+			translate: var(--highlight-x) var(--highlight-y);
+
+			margin: 0;
+			padding: 0;
+			list-style: none;
+			border-radius: 8px;
+			background-color: var(--color-background-brand-subtle-10);
+			pointer-events: none;
+
+			opacity: 0;
+			transition: opacity 0.1s ease-out;
+
+			&.visible {
+				opacity: 1;
+			}
+
+			// Reduced motion keeps only the fade: the block jumps to the next row.
+			@media (prefers-reduced-motion: no-preference) {
+				&:not(.instant) {
+					transition:
+						translate 0.15s cubic-bezier(0.2, 0, 0, 1),
+						width 0.15s cubic-bezier(0.2, 0, 0, 1),
+						height 0.15s cubic-bezier(0.2, 0, 0, 1),
+						opacity 0.1s ease-out;
+				}
+			}
+		}
+	}
+
+	// While a row is pressed, by pointer or keyboard, the block fades out as the row's own pressed
+	// fill fades in, so the two never add up. Any button counts: a keyboard press makes only the
+	// button active, not the list item around it.
+	.popover-content:global([data-sliding-highlight]:has(:is(li, a, button, .row-feedback):active))
+		:global(.sliding-highlight) {
+		opacity: 0;
 	}
 
 	.close {
@@ -282,5 +437,6 @@
 
 	.popover-content {
 		overflow-y: auto;
+		overscroll-behavior: contain;
 	}
 </style>

@@ -1,7 +1,7 @@
 import { screensStore } from '$lib/stores/screens.store';
 import CollapsibleBottomSheetTest from '$tests/lib/components/ui/CollapsibleBottomSheetTest.svelte';
 import en from '$tests/mocks/i18n.mock';
-import { render, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 
 describe('CollapsibleBottomSheet', () => {
 	beforeEach(() => {
@@ -58,5 +58,34 @@ describe('CollapsibleBottomSheet', () => {
 		await waitFor(() => {
 			expect(getByLabelText(en.core.alt.close_details)).toBeInTheDocument();
 		});
+	});
+
+	it('contains focus and dismisses only the mobile sheet above a parent modal', async () => {
+		const onCloseModal = vi.fn();
+		const { getByTestId, getByRole, queryByTestId } = render(CollapsibleBottomSheetTest, {
+			props: { withTrigger: true, sheetTitle: 'Priority', withinModal: true, onCloseModal }
+		});
+		const trigger = getByTestId('custom-trigger');
+		trigger.focus();
+		await fireEvent.click(trigger);
+		const sheet = within(getByTestId('bottom-sheet'));
+		const close = sheet.getByRole('button', { name: en.core.alt.close_details });
+		const action = sheet.getByRole('button', { name: 'Sheet action' });
+		await waitFor(() => expect(document.activeElement).toBe(close));
+
+		await fireEvent.keyDown(close, { key: 'Tab', shiftKey: true });
+
+		expect(document.activeElement).toBe(action);
+
+		await fireEvent.keyDown(action, { key: 'Tab' });
+
+		expect(document.activeElement).toBe(close);
+
+		await fireEvent.keyDown(close, { key: 'Escape' });
+		await waitFor(() => expect(queryByTestId('bottom-sheet')).not.toBeInTheDocument());
+
+		expect(onCloseModal).not.toHaveBeenCalled();
+		expect(getByRole('dialog', { name: 'Parent dialog' })).toBeInTheDocument();
+		expect(document.activeElement).toBe(trigger);
 	});
 });

@@ -90,9 +90,7 @@
 
 					<AddressActions
 						copyAddress={token.address}
-						copyAddressText={replacePlaceholders($i18n.transaction.text.hash_copied, {
-							$hash: token.address
-						})}
+						copyAddressText={$i18n.wallet.text.address_copied}
 						externalLink={href}
 						externalLinkAriaLabel={$i18n.stake.text.vault_info}
 					/>

@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import { slide } from 'svelte/transition';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { send as executeSend } from '$eth/services/send.services';
@@ -39,6 +38,7 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -49,6 +49,7 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		nativeEthereumToken: Token;
@@ -260,7 +261,12 @@
 				metadata: sendTrackingEventMetadata
 			});
 
-			toastEthereumTransactionError({ err, fallbackMsg: $i18n.send.error.unexpected });
+			toastEthereumTransactionError({
+				err,
+				fallbackMsg: $i18n.send.error.unexpected,
+				token: $sendToken,
+				context: PLAUSIBLE_EVENT_CONTEXTS.AI_ASSISTANT
+			});
 		}
 	};
 </script>

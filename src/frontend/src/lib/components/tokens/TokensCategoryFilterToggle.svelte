@@ -7,6 +7,11 @@
 		tokenCategoryFilterStore
 	} from '$lib/stores/settings.store';
 
+	interface Props {
+		showLabel?: boolean;
+	}
+	let { showLabel = false }: Props = $props();
+
 	let checked = $derived($hideTokenCategoryFilter);
 
 	const toggleHide = () => {
@@ -19,6 +24,9 @@
 	};
 </script>
 
-<svelte:window onoisyToggleTokenCategoryFilter={toggleHide} />
-
-<Toggle ariaLabel={$i18n.tokens.text.hide_asset_types} onToggle={toggleHide} bind:checked />
+<Toggle
+	ariaLabel={$i18n.tokens.text.hide_asset_types}
+	onToggle={toggleHide}
+	{showLabel}
+	bind:checked
+/>
