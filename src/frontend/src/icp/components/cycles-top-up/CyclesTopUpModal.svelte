@@ -68,8 +68,15 @@
 			: undefined
 	);
 
+	// The top-up this modal opened on (below). Top up keeps resending it after its stored entry
+	// is cleared, because an answer arrived while this modal was open: the same canister and
+	// amount as a fresh request would run a second withdrawal.
+	let resumed = $state<CyclesTopUpRequest | undefined>();
+
+	let resendable = $derived(unanswered ?? resumed);
+
 	let resendsUnanswered = $derived(
-		nonNullish(unanswered) && unanswered.canisterId === canisterId && unanswered.amount === amount
+		nonNullish(resendable) && resendable.canisterId === canisterId && resendable.amount === amount
 	);
 
 	let steps = $derived<WizardSteps<WizardStepsCyclesTopUp>>([
@@ -138,6 +145,7 @@
 			return;
 		}
 
+		resumed = unanswered;
 		canisterIdText = unanswered.canisterId;
 		sendAmount = formatAmount(unanswered.amount);
 
@@ -191,11 +199,11 @@
 			return;
 		}
 
-		const resent = nonNullish(unanswered) && resendsUnanswered;
+		const resent = nonNullish(resendable) && resendsUnanswered;
 
 		const request: CyclesTopUpRequest =
-			nonNullish(unanswered) && resendsUnanswered
-				? unanswered
+			nonNullish(resendable) && resendsUnanswered
+				? resendable
 				: { canisterId: principal.toText(), amount, createdAt: nowInBigIntNanoSeconds() };
 
 		// Stored before it is sent, so a modal opened while it is in flight, after this one was
@@ -312,7 +320,7 @@
 					onBack={() => modal?.back()}
 					onTopUp={topUp}
 					{sendAmount}
-					unknownOutcome={nonNullish(unanswered)
+					unknownOutcome={nonNullish(resendable)
 						? resendsUnanswered
 							? 'resend'
 							: 'fresh'

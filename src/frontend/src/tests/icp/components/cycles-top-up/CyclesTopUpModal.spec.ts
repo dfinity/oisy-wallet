@@ -874,6 +874,32 @@ describe('CyclesTopUpModal', () => {
 				expect(stored()).toBeUndefined();
 			});
 
+			it('resends the top-up it opened on, even once that one answered meanwhile', async () => {
+				const answerFirst = await leaveDuringTopUp();
+
+				const second = renderModal();
+
+				await backOnReview(second);
+
+				answerFirst({ status: 'topped_up', blockIndex: 7n });
+
+				await waitFor(() => {
+					expect(stored()).toBeUndefined();
+				});
+
+				vi.setSystemTime(new Date(2_000));
+
+				await topUp(second);
+
+				await waitFor(() => {
+					expect(topUpSpy).toHaveBeenCalledTimes(2);
+				});
+
+				expect(topUpSpy).toHaveBeenLastCalledWith(
+					expect.objectContaining({ createdAt: 1_000_000_000n })
+				);
+			});
+
 			it('keeps a newer top-up when the first answers late', async () => {
 				const answerFirst = await leaveDuringTopUp();
 
