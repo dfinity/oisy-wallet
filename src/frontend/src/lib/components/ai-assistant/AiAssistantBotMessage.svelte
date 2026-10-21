@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
 	import IconRetry from '$lib/components/icons/IconRetry.svelte';
 	import Markdown from '$lib/components/ui/Markdown.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		content: string;

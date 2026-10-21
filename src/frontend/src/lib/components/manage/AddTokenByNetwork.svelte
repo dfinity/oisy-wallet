@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import EthAddTokenForm from '$eth/components/tokens/EthAddTokenForm.svelte';
 	import IcAddIcrcTokenForm from '$icp/components/tokens/IcAddIcrcTokenForm.svelte';
 	import IcAddNftForm from '$icp/components/tokens/IcAddNftForm.svelte';
@@ -22,6 +21,7 @@
 		isNetworkIdSolana,
 		isNetworkIdXrp
 	} from '$lib/utils/network.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 	import SolAddTokenForm from '$sol/components/tokens/SolAddTokenForm.svelte';
 
 	interface Props {

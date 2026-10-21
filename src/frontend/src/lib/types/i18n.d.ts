@@ -93,12 +93,15 @@ interface I18nCore {
 		up_one_level: string;
 	};
 	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
+	error: { copy_failed: string };
 }
 
 interface I18nProgress {
 	completed: string;
 	in_progress: string;
 	failed: string;
+	step_of: string;
+	failed_at: string;
 }
 
 interface I18nNavigation {
@@ -861,6 +864,11 @@ interface I18nSend {
 		unexpected_utxos_fee: string;
 		unable_to_retrieve_amount: string;
 		ethereum_insufficient_funds: string;
+		ethereum_out_of_gas: string;
+		ethereum_out_of_gas_gas: string;
+		ethereum_out_of_gas_gas_sent: string;
+		ethereum_transaction_hash: string;
+		ethereum_unsigned_transaction: string;
 		solana_transaction_expired: string;
 		solana_confirmation_failed: string;
 		solana_insufficient_funds: string;
@@ -1063,6 +1071,8 @@ interface I18nSwap {
 		swap_fees: string;
 		cross_chain_networks_info: string;
 		near_intents_estimated_time: string;
+		lifi_route_via: string;
+		lifi_route_via_estimated_time: string;
 		near_intents_tos: string;
 		onesec_transfer_fee: string;
 		onesec_protocol_fee: string;
@@ -1097,11 +1107,13 @@ interface I18nSwap {
 		swap_replaced_or_dropped: string;
 		near_intents_quote_unverified: string;
 		near_intents_quote_expired: string;
+		near_intents_quote_deposit_memo: string;
 		oisy_trade_not_trackable: string;
 		oisy_trade_order_killed: string;
 		oisy_trade_settlement_unresolved: string;
 		oisy_trade_order_not_placed: string;
 		oisy_trade_recovery_failed: string;
+		lifi_status_unknown: string;
 	};
 }
 
@@ -1258,6 +1270,7 @@ interface I18nTokens {
 		open_token_address_block_explorer: string;
 		token_group_number: string;
 		filter_button: string;
+		switch_amount_unit: string;
 	};
 	placeholder: {
 		enter_contract_address: string;
@@ -1557,6 +1570,7 @@ interface I18nWallet_connect {
 		ambiguous_transaction: string;
 		close_pays_others: string;
 		unreviewed_without_simulation: string;
+		unreviewed_not_described_by_simulation: string;
 		unread_programs_unconfirmed: string;
 		sol_transaction_as_message: string;
 		request_not_defined: string;
@@ -1831,6 +1845,7 @@ interface I18nTransaction {
 		instruction_unwrap: string;
 		instruction_create_account: string;
 		instruction_create_program_account: string;
+		instruction_close_program_account: string;
 		instruction_close_account: string;
 		instruction_close_account_for: string;
 		instruction_approve: string;
@@ -1843,6 +1858,7 @@ interface I18nTransaction {
 		instruction_thaw: string;
 		instruction_unknown: string;
 		instruction_unknown_via: string;
+		instruction_via: string;
 		instruction_rent: string;
 		instruction_balance_returned: string;
 		instruction_balance_sent: string;
@@ -2127,7 +2143,11 @@ interface I18nPrivacy_policy {
 interface I18nActivity {
 	text: { title: string };
 	info: { btc_transactions: string; hidden_micro_transactions: string };
-	warning: { no_index_canister: string; unavailable_index_canister: string };
+	warning: {
+		no_index_canister: string;
+		unavailable_index_canister: string;
+		unsupported_sol_transactions: string;
+	};
 }
 
 interface I18nEarning {
@@ -2245,10 +2265,13 @@ interface I18nLiquidium {
 		starting_to_repay: string;
 		repay_started: string;
 		current_debt: string;
+		pending_repays: string;
 		interest_accrued: string;
 		debt_after_repay: string;
 		repay_exceeds_debt: string;
 		repay_prices_unavailable: string;
+		repay_debt_unavailable: string;
+		repay_pending_covers_debt: string;
 	};
 	info: {
 		title: string;
@@ -2537,6 +2560,7 @@ interface I18nTip {
 		generate: string;
 		share_heading: string;
 		copy_link: string;
+		link_copied: string;
 		share_link: string;
 		they_will_receive: string;
 		no_wallet_needed_title: string;

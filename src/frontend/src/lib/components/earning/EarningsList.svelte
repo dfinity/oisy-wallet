@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { anyLendBorrowProviderEnabled } from '$env/lend-borrow';
 	import { erc4626CustomTokensLoading } from '$eth/derived/erc4626.derived';
@@ -18,6 +17,7 @@
 	import { showTokenFilteredBySelectedNetwork } from '$lib/utils/network.utils';
 	import { getFilteredTokenGroup } from '$lib/utils/token-list.utils';
 	import { filterEnabledToken } from '$lib/utils/token.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	let loading = $derived($erc4626CustomTokensLoading || $liquidiumPortfolioLoading);
 
