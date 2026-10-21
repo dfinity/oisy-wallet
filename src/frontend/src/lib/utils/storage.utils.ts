@@ -24,7 +24,7 @@ export const delByPrefix = ({ prefix }: { prefix: string }) => {
 	try {
 		Object.keys(localStorage)
 			.filter((key) => key.startsWith(prefix))
-			.forEach((key) => localStorage.removeItem(key));
+			.forEach((key) => del({ key }));
 	} catch (err: unknown) {
 		// We use the local storage for the operational part of the app but, not crucial
 		consoleError(err);

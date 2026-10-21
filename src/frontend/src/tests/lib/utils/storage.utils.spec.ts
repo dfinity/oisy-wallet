@@ -2,7 +2,13 @@ import { delByPrefix } from '$lib/utils/storage.utils';
 
 describe('storage.utils', () => {
 	beforeEach(() => {
+		vi.clearAllMocks();
+
 		localStorage.clear();
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
 	});
 
 	describe('delByPrefix', () => {
@@ -53,6 +59,34 @@ describe('storage.utils', () => {
 			expect(spyConsoleError).toHaveBeenCalledOnce();
 
 			spyRemoveItem.mockRestore();
+		});
+
+		it('should still remove the other entries if one removal fails', () => {
+			const spyRemoveItem = vi.spyOn(Storage.prototype, 'removeItem').mockImplementationOnce(() => {
+				throw new Error('Storage failure');
+			});
+			const spyConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+			localStorage.setItem('prefix_a', 'a');
+			localStorage.setItem('prefix_b', 'b');
+
+			expect(() => delByPrefix({ prefix: 'prefix_' })).not.toThrow();
+
+			expect(spyRemoveItem).toHaveBeenCalledTimes(2);
+			expect(localStorage).toHaveLength(1);
+			expect(spyConsoleError).toHaveBeenCalledOnce();
+
+			spyRemoveItem.mockRestore();
+		});
+
+		it('should not throw and log the error if the local storage cannot be read', () => {
+			vi.stubGlobal('localStorage', undefined);
+
+			const spyConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+			expect(() => delByPrefix({ prefix: 'prefix_' })).not.toThrow();
+
+			expect(spyConsoleError).toHaveBeenCalledOnce();
 		});
 	});
 });
