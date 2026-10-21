@@ -20,24 +20,27 @@ import { get } from 'svelte/store';
 export const processTransactionSent = async ({
 	identity,
 	token,
-	transaction
+	transaction,
+	value
 }: {
 	identity: NullishIdentity;
 	token: Token;
 	transaction: TransactionResponse;
+	// The amount of an ERC-20 the transaction moves, required where its calldata is not a transfer
+	// to read it from: a swap contract's arguments decoded as `(address, uint256)` give an offset or
+	// throw.
+	value?: bigint;
 }) => {
 	if (isSupportedEthTokenId(token.id) || isSupportedEvmNativeTokenId(token.id)) {
 		await processEthTransaction({ identity, hash: transaction.hash, token });
 		return;
 	}
 
-	// We adapt the value for display purpose because the transaction we get has an ETH value of 0x00
-	const value = decodeErc20AbiDataValue({ data: transaction.data });
-
 	await processErc20Transaction({
 		identity,
 		hash: transaction.hash,
-		value,
+		// We adapt the value for display purpose because the transaction we get has an ETH value of 0x00
+		value: value ?? decodeErc20AbiDataValue({ data: transaction.data }),
 		token,
 		type: 'pending'
 	});

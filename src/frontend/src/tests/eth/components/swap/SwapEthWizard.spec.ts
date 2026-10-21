@@ -27,6 +27,7 @@ import * as toasts from '$lib/stores/toasts.store';
 import { LifiFeeChangedError } from '$lib/types/errors';
 import { SwapProvider, VeloraSwapTypes, type SwapMappedResult } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import SwapEthWizardStepsTest from '$tests/eth/components/swap/SwapEthWizardStepsTest.svelte';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -1126,7 +1127,7 @@ describe('SwapEthWizard', () => {
 			vi.useRealTimers();
 		});
 
-		const renderLifi = () => {
+		const lifiContext = () => {
 			const swapAmountsStore = initSwapAmountsStore();
 			swapAmountsStore.setSwaps({
 				swaps: [lifiOffer],
@@ -1142,6 +1143,7 @@ describe('SwapEthWizard', () => {
 				sourceToken: readable(mockToken),
 				destinationToken: readable(mockDestToken),
 				failedSwapError,
+				lifiCarriedFee: writable(undefined),
 				sourceTokenExchangeRate: readable(10),
 				sourceTokenBalance: readable(undefined),
 				destinationTokenBalance: readable(undefined),
@@ -1155,6 +1157,12 @@ describe('SwapEthWizard', () => {
 			});
 
 			ctx.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
+
+			return { ctx, failedSwapError };
+		};
+
+		const renderLifi = () => {
+			const { ctx, failedSwapError } = lifiContext();
 
 			const onClose = vi.fn();
 			const onBack = vi.fn();
@@ -1175,16 +1183,22 @@ describe('SwapEthWizard', () => {
 			return { ...result, onClose, onBack, failedSwapError };
 		};
 
+		const tickValueDifference = async ({
+			queryByRole
+		}: Pick<ReturnType<typeof renderLifi>, 'queryByRole'>) => {
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+
+			// Ticked once, it stays ticked while the same review is shown.
+			if (valueDifferenceCheckbox instanceof HTMLInputElement && !valueDifferenceCheckbox.checked) {
+				await fireEvent.click(valueDifferenceCheckbox);
+			}
+		};
+
 		const confirmSwap = async ({
 			getByText,
 			queryByRole
 		}: Pick<ReturnType<typeof renderLifi>, 'getByText' | 'queryByRole'>) => {
-			const valueDifferenceCheckbox = queryByRole('checkbox');
-
-			// Ticked once, it stays ticked when the review is shown again.
-			if (valueDifferenceCheckbox instanceof HTMLInputElement && !valueDifferenceCheckbox.checked) {
-				await fireEvent.click(valueDifferenceCheckbox);
-			}
+			await tickValueDifference({ queryByRole });
 
 			await fireEvent.click(getByText(en.swap.text.swap_button));
 			await vi.runOnlyPendingTimersAsync();
@@ -1253,21 +1267,27 @@ describe('SwapEthWizard', () => {
 			);
 		});
 
-		it('returns to the review with the higher fee when it rose, and signs no more than that', async () => {
+		it('returns to a rebuilt review with the higher fee when it rose, and signs no more than that', async () => {
 			const carriedFeeCeiling = 3_000_000_000_000_000n;
 
 			mockFetchLifiEvmSwap.mockRejectedValueOnce(new LifiFeeChangedError(carriedFeeCeiling));
 
-			const { onBack, failedSwapError, ...rendered } = renderLifi();
+			const { ctx, failedSwapError } = lifiContext();
+
+			const { onNext: _, onBack: __, ...props } = BASE_PROPS;
+
+			const rendered = render(SwapEthWizardStepsTest, { props, context: ctx });
 
 			await vi.runOnlyPendingTimersAsync();
 			await confirmSwap(rendered);
 
-			expect(onBack).toHaveBeenCalledOnce();
 			expect(get(failedSwapError)).toEqual({
 				message: en.swap.error.lifi_fee_changed,
 				variant: 'info'
 			});
+			// Read once per instance, the progress's included: the review shown is another instance than
+			// the one that confirmed.
+			expect(mockLifiApprovalTransactions).toHaveBeenCalledTimes(3);
 			// The carried ceiling and the approval, for the user to confirm.
 			expect(rendered.getByText(/0\.004/)).toBeInTheDocument();
 
@@ -1277,6 +1297,35 @@ describe('SwapEthWizard', () => {
 			expect(mockFetchLifiEvmSwap).toHaveBeenLastCalledWith(
 				expect.objectContaining({ reviewedFeeCeiling: carriedFeeCeiling })
 			);
+		});
+
+		// An ERC-20's approval is paid before execution compares the fee with the one reviewed, and the
+		// total shown includes the approvals.
+		it.each([
+			{ read: 'the swap transaction fee', mock: mockLifiQuoteFeeCeiling, value: quoteFeeCeiling },
+			{ read: 'the allowance', mock: mockLifiApprovalTransactions, value: 1 }
+		])('holds the confirmation while $read is still being read', async ({ mock, value }) => {
+			let release: (() => void) | undefined;
+
+			mock.mockReturnValue(
+				new Promise((resolve) => {
+					release = () => resolve(value);
+				})
+			);
+
+			const { getByRole, queryByRole } = renderLifi();
+
+			await vi.runOnlyPendingTimersAsync();
+			await tickValueDifference({ queryByRole });
+
+			const confirm = getByRole('button', { name: en.swap.text.swap_button });
+
+			expect(confirm).toBeDisabled();
+
+			release?.();
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(confirm).toBeEnabled();
 		});
 	});
 });

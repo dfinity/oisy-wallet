@@ -260,6 +260,7 @@ describe('lifi-evm-swap.services', () => {
 				expect(swap).toHaveBeenCalledExactlyOnceWith(
 					expect.objectContaining({
 						to: mockLifiDiamond,
+						amount: mockLifiFromAmount,
 						maxFeePerGas,
 						maxPriorityFeePerGas,
 						transaction: {
@@ -358,6 +359,10 @@ describe('lifi-evm-swap.services', () => {
 					networkId: BASE_NETWORK_ID,
 					amount: 50_000_000n
 				});
+				// What the pending activity shows: the Diamond's calldata is no transfer to read it from.
+				expect(swap).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ token: mockLifiBaseUsdcToken, amount: 50_000_000n })
+				);
 
 				const [priceCheck, simulated] = vi.mocked(fetchLifiQuote).mock.invocationCallOrder;
 				const [approval] = vi.mocked(approve).mock.invocationCallOrder;
@@ -437,22 +442,19 @@ describe('lifi-evm-swap.services', () => {
 				expect(swap).not.toHaveBeenCalled();
 			});
 
-			it.each([
-				{ case: 'above the one reviewed', reviewedFeeCeiling: swapGas * maxFeePerGas + l1Fee - 1n },
-				{ case: 'when none was reviewed', reviewedFeeCeiling: undefined }
-			])(
-				'should not sign a fee $case, carrying its own back to the review',
-				async ({ reviewedFeeCeiling }) => {
-					const failure = fetchLifiEvmSwap({ ...nativeParams(), reviewedFeeCeiling });
+			it('should not sign a fee above the one reviewed, carrying its own back to the review', async () => {
+				const failure = fetchLifiEvmSwap({
+					...nativeParams(),
+					reviewedFeeCeiling: swapGas * maxFeePerGas + l1Fee - 1n
+				});
 
-					await expect(failure).rejects.toThrow(LifiFeeChangedError);
-					await expect(failure).rejects.toMatchObject({
-						feeCeiling: swapGas * maxFeePerGas + l1Fee
-					});
+				await expect(failure).rejects.toThrow(LifiFeeChangedError);
+				await expect(failure).rejects.toMatchObject({
+					feeCeiling: swapGas * maxFeePerGas + l1Fee
+				});
 
-					expect(swap).not.toHaveBeenCalled();
-				}
-			);
+				expect(swap).not.toHaveBeenCalled();
+			});
 
 			it('should abort with the insufficient-funds error when the balance cannot cover it all', async () => {
 				balance.mockResolvedValue(mockLifiFromAmount + swapGas * maxFeePerGas + l1Fee - 1n);

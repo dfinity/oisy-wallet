@@ -103,6 +103,7 @@ describe('swapStore', () => {
 			destinationTokenBalance,
 			destinationToken,
 			failedSwapError,
+			lifiCarriedFee,
 			reset
 		} = initSwapContext({
 			destinationToken: mockToken1,
@@ -121,6 +122,7 @@ describe('swapStore', () => {
 		});
 
 		failedSwapError.set({ message: 'stale error from previous swap', variant: 'error' });
+		lifiCarriedFee.set({ key: 'stale inputs', feeCeiling: 1n });
 
 		reset();
 
@@ -134,6 +136,7 @@ describe('swapStore', () => {
 		expect(get(destinationTokenExchangeRate)).toBe(undefined);
 
 		expect(get(failedSwapError)).toBe(undefined);
+		expect(get(lifiCarriedFee)).toBe(undefined);
 	});
 
 	it('should set tokens correctly', () => {

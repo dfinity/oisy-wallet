@@ -1,10 +1,14 @@
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
+import * as alchemyProvidersLib from '$eth/providers/alchemy.providers';
 import * as infuraProvidersLib from '$eth/providers/infura.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import * as ethTransactionServicesLib from '$eth/services/eth-transaction.services';
 import { processTransactionSent } from '$eth/services/eth-transaction.services';
 import { swap } from '$eth/services/swap.services';
+import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import * as signerApiLib from '$lib/api/signer.api';
 import { signTransaction } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
@@ -12,6 +16,10 @@ import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import {
+	mockLifiCalldataAcrossEvm,
+	mockLifiCalldataSameChain
+} from '$tests/mocks/lifi-calldata.mock';
 import type { TransactionParams } from '@velora-dex/sdk';
 import { keccak256 } from 'ethers/crypto';
 import { InfuraProvider as InfuraProviderLib, type TransactionResponse } from 'ethers/providers';
@@ -21,12 +29,18 @@ import type { MockInstance } from 'vitest';
 // `JsonRpcProvider` and `Network` are needed even though this suite only exercises Infura
 // chains: the registry is built eagerly over every supported network, and the ones Infura does
 // not host take the fallback transport. Both share one implementation, as the shared setup mock
-// does — nothing here tells the two apart.
+// does — nothing here tells the two apart. `EtherscanProvider` is for the pending-activity tests,
+// whose real `processTransactionSent` loads the Etherscan registry with its dependencies.
 vi.mock('ethers/providers', () => {
 	const provider = vi.fn();
 	provider.prototype.getTransactionCount = vi.fn();
 	provider.prototype.sendTransaction = vi.fn();
-	return { InfuraProvider: provider, JsonRpcProvider: provider, Network: vi.fn() };
+	return {
+		InfuraProvider: provider,
+		JsonRpcProvider: provider,
+		EtherscanProvider: vi.fn(),
+		Network: vi.fn()
+	};
 });
 
 vi.mock('$eth/services/eth-transaction.services', () => ({
@@ -56,6 +70,7 @@ describe('swap.services', () => {
 			progress: vi.fn(),
 			token: ETHEREUM_TOKEN,
 			transaction: mockTransactionParams,
+			amount: 50_000_000n,
 			from: mockEthAddress,
 			to: mockEthAddress2,
 			sourceNetwork: ETHEREUM_NETWORK,
@@ -160,7 +175,52 @@ describe('swap.services', () => {
 			expect(processTransactionSent).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				token: ETHEREUM_TOKEN,
-				transaction: mockTransactionResponse
+				transaction: mockTransactionResponse,
+				value: 50_000_000n
+			});
+		});
+
+		describe('pending activity of an ERC-20 source', () => {
+			const getTransaction = vi.fn();
+
+			const pendingValues = () =>
+				get(ethTransactionsStore)?.[USDC_TOKEN.id]?.map(({ data }) => data.value);
+
+			const swapWithCalldata = async (data: string) => {
+				mockSendTransaction.mockResolvedValue({ ...mockTransactionResponse, data });
+				getTransaction.mockResolvedValue({ ...mockTransactionResponse, data, value: ZERO });
+
+				await swap({ ...mockSwapParams, token: USDC_TOKEN });
+			};
+
+			beforeEach(async () => {
+				const { processTransactionSent: actual } = await vi.importActual<
+					typeof ethTransactionServicesLib
+				>('$eth/services/eth-transaction.services');
+
+				vi.mocked(processTransactionSent).mockImplementation(actual);
+
+				vi.spyOn(alchemyProvidersLib, 'alchemyProviders').mockReturnValue({
+					getTransaction,
+					// Stays pending, so the row is the one the swap added.
+					wait: () => new Promise(() => {})
+				} as unknown as AlchemyProvider);
+
+				ethTransactionsStore.reset(USDC_TOKEN.id);
+			});
+
+			it('shows the amount swapped, not an offset read from the swap calldata', async () => {
+				// The calldata's second word is an offset, 544, that a transfer decode reads as the amount.
+				await swapWithCalldata(mockLifiCalldataAcrossEvm.quote.transactionRequest?.data as string);
+
+				await vi.waitFor(() => expect(pendingValues()).toEqual([50_000_000n]));
+			});
+
+			it('shows the amount swapped for calldata a transfer decode throws on', async () => {
+				// Its first word, a bytes32 transaction id, is no address.
+				await swapWithCalldata(mockLifiCalldataSameChain.quote.transactionRequest?.data as string);
+
+				await vi.waitFor(() => expect(pendingValues()).toEqual([50_000_000n]));
 			});
 		});
 

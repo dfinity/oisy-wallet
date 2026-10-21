@@ -510,9 +510,10 @@ export interface SwapLifiEvmParams extends RequiredTransactionFeeData {
 	sourceNetwork: EthereumNetwork;
 	userAddress: EthAddress;
 	offer: Extract<SwapMappedResult, { provider: SwapProvider.LIFI }>;
-	// The swap transaction's network fee ceiling the user reviewed, `undefined` when none could be
-	// shown. Execution never signs one above it.
-	reviewedFeeCeiling: bigint | undefined;
+	// The swap transaction's network fee ceiling the user reviewed: the review cannot confirm until it
+	// is known, since an ERC-20's approval is paid before execution compares against it. Execution
+	// never signs one above it.
+	reviewedFeeCeiling: bigint;
 	// The ERC-20s OISY knows on the source network, enabled or not: those with an allowance to the
 	// Diamond are what no call of the route may target (`lifiUserTokenAddresses`).
 	userTokenAddresses: string[];

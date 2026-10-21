@@ -1943,6 +1943,7 @@ export const fetchVeloraMarketSwap = async ({
 		from: userAddress,
 		to: txParams.to,
 		transaction: txParams,
+		amount: parsedSwapAmount,
 		identity,
 		token: sourceToken,
 		sourceNetwork,

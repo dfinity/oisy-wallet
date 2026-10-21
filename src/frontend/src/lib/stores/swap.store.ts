@@ -34,6 +34,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const isTokensIcrc2 = writable<IsTokensIcrc2Map | undefined>();
 	const isErc20PermitSupported = writable<IsTokensIcrc2Map | undefined>();
 	const failedSwapError = writable<SwapError | undefined>(undefined);
+	const lifiCarriedFee = writable<LifiCarriedFee | undefined>(undefined);
 
 	const sourceToken = derived(
 		[data, swappableTokens],
@@ -114,6 +115,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		isSourceTokenPermitSupported,
 		receiveSupportedData,
 		failedSwapError,
+		lifiCarriedFee,
 		setSourceToken: (token: Token) =>
 			update((state) => ({
 				...state,
@@ -164,9 +166,18 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 				destinationToken: undefined
 			});
 			failedSwapError.set(undefined);
+			lifiCarriedFee.set(undefined);
 		}
 	};
 };
+
+// A LI.FI fee ceiling that an execution found above the reviewed one, for the quote inputs it was
+// found for. Kept here rather than in the wizard, which every step change rebuilds: the review the
+// failed execution returns to is another instance.
+export interface LifiCarriedFee {
+	key: string;
+	feeCeiling: bigint;
+}
 
 export interface SwapContext {
 	sourceToken: Readable<Token | undefined>;
@@ -179,6 +190,7 @@ export interface SwapContext {
 	isSourceTokenPermitSupported: Readable<boolean | undefined>;
 	receiveSupportedData: Readable<SwapSupportedTokensData | undefined>;
 	failedSwapError: Writable<SwapError | undefined>;
+	lifiCarriedFee: Writable<LifiCarriedFee | undefined>;
 	setIsTokensIcrc2: (args: { ledgerCanisterId: string; isIcrc2Supported: boolean }) => void;
 	setIsTokenPermitSupported: ({
 		address,

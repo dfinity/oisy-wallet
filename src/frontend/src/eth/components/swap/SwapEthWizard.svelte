@@ -120,6 +120,7 @@
 		sourceToken,
 		destinationToken,
 		failedSwapError,
+		lifiCarriedFee,
 		sourceTokenExchangeRate,
 		setIsTokenPermitSupported,
 		isSourceTokenPermitSupported
@@ -334,10 +335,9 @@
 
 	// A ceiling that an execution found above the reviewed one, which the review then shows, for the
 	// inputs it was found for.
-	let lifiCarriedFee = $state<{ key: string; feeCeiling: bigint } | undefined>();
-
 	const lifiReviewedFeeCeiling = $derived.by(() => {
-		const carried = lifiCarriedFee?.key === lifiInputsKey ? lifiCarriedFee?.feeCeiling : undefined;
+		const carried =
+			$lifiCarriedFee?.key === lifiInputsKey ? $lifiCarriedFee?.feeCeiling : undefined;
 
 		if (isNullish(lifiQuoteFee) || isNullish(carried)) {
 			return lifiQuoteFee ?? carried;
@@ -353,6 +353,11 @@
 			? lifiReviewedFeeCeiling + BigInt(lifiApprovals) * $maxGasFee
 			: undefined
 	);
+
+	// Every step change rebuilds this wizard, so the review reads the fee and the allowance again.
+	// It confirms only once both are known: an ERC-20's approval is paid before execution compares
+	// the fee with the one reviewed, and the total shown includes the approvals.
+	const isLifiFeeLoading = $derived(isLifiProvider && isNullish(lifiFee));
 
 	// Velora, OneSec, NEAR Intents, Chain Fusion and LI.FI all close the modal at initiation
 	// and settle in the background via the Active User Transactions store. Only the
@@ -519,7 +524,10 @@
 				} else {
 					await fetchVeloraMarketSwap({ ...params, swapDetails: selectedProvider.swapDetails });
 				}
-			} else if (selectedProvider?.provider === SwapProvider.LIFI) {
+			} else if (
+				selectedProvider?.provider === SwapProvider.LIFI &&
+				nonNullish(lifiReviewedFeeCeiling)
+			) {
 				await fetchLifiEvmSwap({
 					...baseParams,
 					destinationToken: $destinationToken,
@@ -670,7 +678,7 @@
 			if (err instanceof LifiFeeChangedError) {
 				// Carried back to the review, which shows the higher fee for the user to confirm.
 				if (nonNullish(lifiInputsKey)) {
-					lifiCarriedFee = { key: lifiInputsKey, feeCeiling: err.feeCeiling };
+					lifiCarriedFee.set({ key: lifiInputsKey, feeCeiling: err.feeCeiling });
 				}
 
 				failedSwapError.set({
@@ -735,8 +743,9 @@
 				/>
 			{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 				<SwapReview
-					isSwapAmountsLoading={isSwapAmountsLoading &&
-						receiveAmount !== $swapAmountsStore?.selectedProvider?.receiveAmount}
+					isSwapAmountsLoading={(isSwapAmountsLoading &&
+						receiveAmount !== $swapAmountsStore?.selectedProvider?.receiveAmount) ||
+						isLifiFeeLoading}
 					{onBack}
 					onSwap={swap}
 					{receiveAmount}

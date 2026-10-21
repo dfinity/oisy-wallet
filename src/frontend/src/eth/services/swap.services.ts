@@ -78,12 +78,16 @@ export const swap = async ({
 	transaction,
 	from,
 	sourceNetwork,
+	amount,
 	beforeBroadcast,
 	...rest
 }: Pick<TransferParams, 'from' | 'to'> &
 	Omit<RequiredTransactionFeeData, 'gas'> &
 	SwapParams & {
 		transaction: TransactionParams;
+		// The amount of `token` swapped, which the pending activity shows: the calldata calls a swap
+		// contract, not a transfer the amount could be read from.
+		amount: bigint;
 		// Runs once the transaction is signed and before it is broadcast, with what identifies it on
 		// chain. Should it reject, nothing is broadcast.
 		beforeBroadcast?: (params: { hash: string; nonce: number }) => Promise<void>;
@@ -110,7 +114,7 @@ export const swap = async ({
 	const transactionSent: TransactionResponse =
 		await infuraProviders(networkId).sendTransaction(rawTransaction);
 
-	processTransactionSent({ identity, token, transaction: transactionSent });
+	processTransactionSent({ identity, token, transaction: transactionSent, value: amount });
 
 	// The nonce is returned so callers can persist it: it is what later tells a
 	// transaction that is merely unmined from one that was replaced or dropped.

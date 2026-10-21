@@ -332,7 +332,7 @@ export const fetchLifiEvmSwap = async ({
 		maxPriorityFeePerGas
 	});
 
-	if (isNullish(reviewedFeeCeiling) || feeCeiling > reviewedFeeCeiling) {
+	if (feeCeiling > reviewedFeeCeiling) {
 		throw new LifiFeeChangedError(feeCeiling);
 	}
 
@@ -398,6 +398,7 @@ export const fetchLifiEvmSwap = async ({
 				gas: `${swapGas}`,
 				chainId: Number(sourceNetwork.chainId)
 			},
+			amount,
 			identity,
 			token: sourceToken,
 			sourceNetwork,
