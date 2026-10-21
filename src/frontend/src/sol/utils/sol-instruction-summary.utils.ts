@@ -867,7 +867,7 @@ const toEffect = ({
 			// What it held when it closed, not before the transaction ran: the swaps that open one
 			// wrap into it and unwrap out of it within the same message, and one that pre-dates the
 			// message can be emptied before its close just the same.
-			const wrapped = heldAtInstruction({
+			const wrapped = heldAboveReserveAtInstruction({
 				account,
 				native: mint === WSOL_TOKEN.address,
 				flattened,
@@ -986,17 +986,46 @@ const toEffect = ({
 };
 
 /**
- * What a token account holds by the time an instruction reaches it.
- *
- * The same walk the lamports take, over the token balance: from what it held before the
+ * What a token account holds as a walk stands, in the two parts the token programs keep apart for
+ * wrapped SOL: the token amount, which transfers and unwraps move, and lamports paid in on top of
+ * the amount and the reserve that no sync has counted yet. A close hands back both. An unwrap of
+ * everything moves the amount alone, until `syncNative` folds the rest into it. An account of any
+ * other mint holds its amount alone.
+ */
+interface HeldBalance {
+	amount: bigint | undefined;
+	unsynced: bigint | undefined;
+}
+
+// A sum is known only when every part of it is.
+const plus = (parts: (bigint | undefined)[]): bigint | undefined =>
+	parts.reduce<bigint | undefined>(
+		(acc, part) => (nonNullish(acc) && nonNullish(part) ? acc + part : undefined),
+		ZERO
+	);
+
+// The instructions that set a wrapped SOL account's amount to every lamport above its reserve:
+// syncing it, and initialising it, which is where an opening's funding becomes its balance.
+const SYNCING_TYPES = [
+	'syncNative',
+	'initializeAccount',
+	'initializeAccount2',
+	'initializeAccount3'
+];
+
+/**
+ * The same walk the lamports take, over the token balance: from what the account held before the
  * transaction, or from nothing when this message opened it, plus every transfer in and out since.
  * Reading the state from before the transaction instead says a wrapped SOL account emptied on the
  * way still holds what it started with, and calls its close an unwrap of something already gone.
  *
+ * Going in, an account is taken as synced: what the run read as its amount is everything it
+ * wraps, and only lamports the message pays in wait for a sync.
+ *
  * Undefined when there is nothing to start from: an account that pre-dates the message and whose
  * state no run read is one whose balance nobody knows.
  */
-const heldAtInstruction = ({
+const balanceAtInstruction = ({
 	account,
 	native,
 	flattened,
@@ -1005,8 +1034,9 @@ const heldAtInstruction = ({
 	until
 }: {
 	account: SolAddress;
-	// Whether the account holds wrapped SOL, whose balance is its lamports: a System transfer into
-	// one is the wrapping, and raises the token balance with them. Of any other mint it does not.
+	// Whether the account holds wrapped SOL, whose token amount is lamports: a System transfer into
+	// one is the wrapping, counted in the amount once the account is synced. Of any other mint,
+	// lamports paid in stay lamports.
 	native: boolean;
 	flattened: { instruction: SolParsedRpcInstruction }[];
 	accountTokenAmounts: Partial<Record<SolAddress, bigint>>;
@@ -1015,10 +1045,12 @@ const heldAtInstruction = ({
 	// two cannot be told apart without knowing where the line falls.
 	rentExemptMinimum: bigint | undefined;
 	until: number;
-}): bigint | undefined =>
-	flattened.slice(0, until).reduce<bigint | undefined>(
+}): HeldBalance | undefined => {
+	const amountBefore = accountTokenAmounts[account];
+
+	return flattened.slice(0, until).reduce<HeldBalance | undefined>(
 		(
-			acc,
+			held,
 			{
 				instruction: {
 					program,
@@ -1026,14 +1058,11 @@ const heldAtInstruction = ({
 				}
 			}
 		) => {
+			const token = nonNullish(program) && TOKEN_PROGRAMS.includes(program);
+
 			// A close of this account ends it, and an address closed and opened again within the one
 			// message is two accounts. Until something opens it again there is no balance to state.
-			if (
-				nonNullish(program) &&
-				TOKEN_PROGRAMS.includes(program) &&
-				type === 'closeAccount' &&
-				address({ info, key: 'account' }) === account
-			) {
+			if (token && type === 'closeAccount' && address({ info, key: 'account' }) === account) {
 				return undefined;
 			}
 
@@ -1047,70 +1076,79 @@ const heldAtInstruction = ({
 				address({ info, key: 'newAccount' }) === account
 			) {
 				if (!native) {
-					return ZERO;
+					return { amount: ZERO, unsynced: ZERO };
 				}
 
 				const lamports = amount({ info, key: 'lamports' });
 
-				return nonNullish(lamports) &&
-					nonNullish(rentExemptMinimum) &&
-					amount({ info, key: 'space' }) === ATA_SIZE
-					? maxBigInt(lamports - rentExemptMinimum, ZERO)
-					: undefined;
+				return {
+					amount:
+						nonNullish(lamports) &&
+						nonNullish(rentExemptMinimum) &&
+						amount({ info, key: 'space' }) === ATA_SIZE
+							? maxBigInt(lamports - rentExemptMinimum, ZERO)
+							: undefined,
+					unsynced: ZERO
+				};
 			}
 
-			// An amount nobody knows stays unknown whatever moves after it.
-			if (isNullish(acc)) {
-				return acc;
+			// Nothing to start from stays nothing whatever moves after it.
+			if (isNullish(held)) {
+				return held;
 			}
 
-			// Wrapping: a System transfer into a wrapped SOL account raises its token balance with
-			// its lamports, because there the two are the same thing.
+			// Wrapping: a System transfer into a wrapped SOL account pays lamports in, which its token
+			// amount counts once the account is synced.
 			if (native && program === 'system' && type === 'transfer') {
-				const wrapping = amount({ info, key: 'lamports' });
-
-				return nonNullish(wrapping) && address({ info, key: 'destination' }) === account
-					? acc + wrapping
-					: acc;
+				return address({ info, key: 'destination' }) === account
+					? { ...held, unsynced: plus([held.unsynced, amount({ info, key: 'lamports' })]) }
+					: held;
 			}
 
-			// Unwrapping takes lamports out of a wrapped SOL account, whose token balance they are: the
-			// amount it states, or everything the account wraps. An unwrap into the account itself
-			// lowers it too: the lamports stay, and the balance drops all the same. Paid into another
-			// wrapped SOL account, they raise its balance the way a wrapping does, by an amount nobody
-			// knows when the unwrap states none.
 			if (
 				native &&
-				nonNullish(program) &&
-				TOKEN_PROGRAMS.includes(program) &&
-				type === 'unwrapLamports'
+				token &&
+				SYNCING_TYPES.includes(type) &&
+				address({ info, key: 'account' }) === account
 			) {
-				const unwrapped = amount({ info, key: 'amount' });
-
-				if (address({ info, key: 'source' }) === account) {
-					return nonNullish(unwrapped) ? maxBigInt(acc - unwrapped, ZERO) : ZERO;
-				}
-
-				if (address({ info, key: 'destination' }) !== account) {
-					return acc;
-				}
-
-				return nonNullish(unwrapped) ? acc + unwrapped : undefined;
+				return { amount: plus([held.amount, held.unsynced]), unsynced: ZERO };
 			}
 
-			if (
-				isNullish(program) ||
-				!TOKEN_PROGRAMS.includes(program) ||
-				!['transfer', 'transferChecked'].includes(type)
-			) {
-				return acc;
+			// Unwrapping takes the amount it states, or the whole amount, out of the token amount. Paid
+			// elsewhere, the lamports leave with it; into the account itself they stay, on top of an
+			// amount that dropped all the same. Paid into another wrapped SOL account, they arrive
+			// there the way a wrapping does, by an amount nobody knows when the unwrap states none.
+			if (native && token && type === 'unwrapLamports') {
+				const unwrapped = amount({ info, key: 'amount' });
+				const outOf = address({ info, key: 'source' }) === account;
+				const into = address({ info, key: 'destination' }) === account;
+
+				if (!outOf) {
+					return into ? { ...held, unsynced: plus([held.unsynced, unwrapped]) } : held;
+				}
+
+				const remaining = isNullish(unwrapped)
+					? ZERO
+					: nonNullish(held.amount)
+						? maxBigInt(held.amount - unwrapped, ZERO)
+						: undefined;
+
+				return {
+					amount: remaining,
+					unsynced: into ? plus([held.unsynced, unwrapped ?? held.amount]) : held.unsynced
+				};
+			}
+
+			if (!token || !['transfer', 'transferChecked'].includes(type)) {
+				return held;
 			}
 
 			const moved =
 				type === 'transferChecked' ? tokenAmount(info).amount : amount({ info, key: 'amount' });
 
-			if (isNullish(moved)) {
-				return acc;
+			// An amount nobody knows stays unknown whatever moves after it.
+			if (isNullish(moved) || isNullish(held.amount)) {
+				return held;
 			}
 
 			const into = address({ info, key: 'destination' }) === account;
@@ -1119,13 +1157,36 @@ const heldAtInstruction = ({
 			// Moving nothing for the account unless exactly one end is it: a transfer from it to itself
 			// leaves the balance where it was, and reading the destination alone counts it in.
 			if (into === outOf) {
-				return acc;
+				return held;
 			}
 
-			return into ? acc + moved : maxBigInt(acc - moved, ZERO);
+			return {
+				...held,
+				amount: into ? held.amount + moved : maxBigInt(held.amount - moved, ZERO)
+			};
 		},
-		accountTokenAmounts[account]
+		nonNullish(amountBefore) ? { amount: amountBefore, unsynced: ZERO } : undefined
 	);
+};
+
+type BalanceParams = Parameters<typeof balanceAtInstruction>[0];
+
+/**
+ * What a token account holds in tokens by the time an instruction reaches it, which is what an
+ * unwrap naming no amount moves.
+ */
+const heldAtInstruction = (params: BalanceParams): bigint | undefined =>
+	balanceAtInstruction(params)?.amount;
+
+/**
+ * Everything a token account holds above its reserve by the time an instruction reaches it: what
+ * it wraps, and lamports paid in that no sync counted yet. A close hands both back.
+ */
+const heldAboveReserveAtInstruction = (params: BalanceParams): bigint | undefined => {
+	const held = balanceAtInstruction(params);
+
+	return plus([held?.amount, held?.unsynced]);
+};
 
 /**
  * Whose a token account is and which mint it holds, as of an instruction: what it was opened as,
