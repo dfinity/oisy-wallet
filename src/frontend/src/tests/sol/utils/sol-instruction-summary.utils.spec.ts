@@ -3817,6 +3817,153 @@ describe('sol-instruction-summary.utils', () => {
 			});
 		});
 
+		// SOL paid out of an account no application holds: a seed-derived account, a nonce account, or
+		// a token account handing over its excess lamports. Each pays the wallet as surely as a plain
+		// transfer, and only a line says so.
+		describe('SOL paid out of a System or token account', () => {
+			const TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+			const SYSTEM = '11111111111111111111111111111111';
+			const wrapped = mockAtaAddress2;
+
+			const withSeed = (destination: string) => ({
+				program: 'system',
+				programId: SYSTEM,
+				parsed: {
+					type: 'transferWithSeed',
+					info: {
+						source: mockSolAddress3,
+						sourceBase: mockSolAddress2,
+						destination,
+						lamports: 5_000,
+						sourceSeed: 'vault',
+						sourceOwner: SYSTEM
+					}
+				}
+			});
+
+			const fromNonce = (destination: string) => ({
+				program: 'system',
+				programId: SYSTEM,
+				parsed: {
+					type: 'withdrawFromNonce',
+					info: {
+						nonceAccount: mockSolAddress3,
+						destination,
+						nonceAuthority: mockSolAddress2,
+						lamports: 5_000
+					}
+				}
+			});
+
+			const excess = ({
+				source = mockSolAddress3,
+				destination
+			}: {
+				source?: string;
+				destination: string;
+			}) => ({
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'withdrawExcessLamports',
+					info: { source, destination, authority: mockSolAddress2 }
+				}
+			});
+
+			const unwrapAll = {
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'unwrapLamports',
+					info: { source: wrapped, destination: mockSolAddress, authority: mockSolAddress }
+				}
+			};
+
+			const read = ({
+				instructions,
+				accountLamports,
+				accountTokenAmounts
+			}: {
+				instructions: unknown[];
+				accountLamports?: Record<string, bigint>;
+				accountTokenAmounts?: Record<string, bigint>;
+			}) =>
+				mapSolInstructionSummaries({
+					instructions,
+					ownedAddresses: [mockSolAddress, wrapped],
+					userAddress: mockSolAddress,
+					addressToToken: { [wrapped]: WSOL_TOKEN.address },
+					accountLamports,
+					accountTokenAmounts
+				});
+
+			const payouts = [
+				{ name: 'a seed-derived account', payout: withSeed },
+				{ name: 'a nonce account', payout: fromNonce }
+			];
+
+			it.each(payouts)('should state what $name pays the wallet as SOL received', ({ payout }) => {
+				expect(read({ instructions: [payout(mockSolAddress)] })).toStrictEqual([
+					{ kind: 'receive', amount: 5_000n, counterparty: mockSolAddress3, own: false }
+				]);
+			});
+
+			// Paid into a wrapped SOL account, the lamports raise its balance the way a plain transfer
+			// into it does.
+			it.each(payouts)(
+				'should count what $name pays into a wrapped SOL account toward a later unwrap of everything',
+				({ payout }) => {
+					const views = read({
+						instructions: [payout(wrapped), unwrapAll],
+						accountTokenAmounts: { [wrapped]: ZERO }
+					});
+
+					expect(views.at(-1)?.amount).toBe(5_000n);
+				}
+			);
+
+			it('should state excess lamports paid to the wallet as SOL received by an amount nobody read', () => {
+				expect(read({ instructions: [excess({ destination: mockSolAddress })] })).toStrictEqual([
+					{ kind: 'receive', counterparty: mockSolAddress3, own: false }
+				]);
+			});
+
+			it('should state nothing of excess lamports paid anywhere else', () => {
+				expect(read({ instructions: [excess({ destination: mockSolAddress2 })] })).toStrictEqual(
+					[]
+				);
+			});
+
+			it('should know nothing of what a wrapped SOL account wraps once excess lamports reach it', () => {
+				const views = read({
+					instructions: [excess({ destination: wrapped }), unwrapAll],
+					accountTokenAmounts: { [wrapped]: ZERO }
+				});
+
+				expect(views.at(-1)).not.toHaveProperty('amount');
+			});
+
+			it('should know nothing of what a close hands back once excess lamports left the account', () => {
+				const views = read({
+					instructions: [
+						excess({ source: wrapped, destination: mockSolAddress }),
+						{
+							program: 'spl-token',
+							programId: TOKEN,
+							parsed: {
+								type: 'closeAccount',
+								info: { account: wrapped, destination: mockSolAddress, owner: mockSolAddress }
+							}
+						}
+					],
+					accountLamports: { [wrapped]: 2_046_280n },
+					accountTokenAmounts: { [wrapped]: 7_000n }
+				});
+
+				expect(views.at(-1)).not.toHaveProperty('returned');
+			});
+		});
+
 		describe('instructions it cannot read', () => {
 			it('should ignore an instruction the RPC did not parse', () => {
 				expect(

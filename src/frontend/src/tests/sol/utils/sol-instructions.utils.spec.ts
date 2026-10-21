@@ -2679,4 +2679,57 @@ describe('sol-instructions.utils', () => {
 			});
 		});
 	});
+
+	// The RPC names both after what they do, and the effects are read against its names.
+	describe('asSolParsedRpcInstruction', () => {
+		it('should state a seed-derived transfer the way the RPC returns one', () => {
+			expect(
+				asSolParsedRpcInstruction(
+					getTransferSolWithSeedInstruction({
+						source: address(mockSolAddress2),
+						baseAccount: createNoopSigner(address(mockSolAddress)),
+						destination: address(mockSolAddress3),
+						amount: 7_000n,
+						fromSeed: 'vault',
+						fromOwner: address(SYSTEM_PROGRAM_ADDRESS)
+					})
+				)
+			).toStrictEqual({
+				program: 'system',
+				programId: SYSTEM_PROGRAM_ADDRESS,
+				parsed: {
+					type: 'transferWithSeed',
+					info: expect.objectContaining({
+						source: mockSolAddress2,
+						destination: mockSolAddress3,
+						lamports: 7_000n
+					})
+				}
+			});
+		});
+
+		it('should state a withdrawal from a nonce account the way the RPC returns one', () => {
+			expect(
+				asSolParsedRpcInstruction(
+					getWithdrawNonceAccountInstruction({
+						nonceAccount: address(mockSolAddress2),
+						recipientAccount: address(mockSolAddress3),
+						nonceAuthority: createNoopSigner(address(mockSolAddress)),
+						withdrawAmount: 5_000n
+					})
+				)
+			).toStrictEqual({
+				program: 'system',
+				programId: SYSTEM_PROGRAM_ADDRESS,
+				parsed: {
+					type: 'withdrawFromNonce',
+					info: expect.objectContaining({
+						nonceAccount: mockSolAddress2,
+						destination: mockSolAddress3,
+						lamports: 5_000n
+					})
+				}
+			});
+		});
+	});
 });
