@@ -155,7 +155,19 @@ export const buildLifiQuoteRequest = ({
 const parseAmount = (value: string | undefined): bigint | undefined =>
 	nonNullish(value) && /^(\d+|0x[\da-fA-F]+)$/.test(value) ? BigInt(value) : undefined;
 
-// EVM hex is case-insensitive, and LI.FI may answer checksummed or lower-case whatever was sent;
+/**
+ * Whether two EVM hex values are the same: addresses, or 32-byte words. EVM hex is
+ * case-insensitive, and LI.FI may answer checksummed or lower-case whatever was sent. Shared by the
+ * quote trust checks and the calldata binding, so that both compare alike.
+ */
+export const isSameHex = ({
+	actual,
+	expected
+}: {
+	actual: string | undefined;
+	expected: string;
+}): boolean => nonNullish(actual) && actual.toLowerCase() === expected.toLowerCase();
+
 // Solana's base58 is case-sensitive.
 const isSameAddress = ({
 	chainId,
@@ -166,11 +178,24 @@ const isSameAddress = ({
 	actual: string | undefined;
 	expected: string;
 }): boolean =>
-	nonNullish(actual) &&
-	(chainId === ChainId.SOL ? actual === expected : actual.toLowerCase() === expected.toLowerCase());
+	chainId === ChainId.SOL
+		? nonNullish(actual) && actual === expected
+		: isSameHex({ actual, expected });
+
+/**
+ * The error a LI.FI check refuses with, its message naming what was refused: the quote (the trust
+ * checks) or its calldata (the binding).
+ */
+export const lifiRejectedError = ({
+	subject,
+	reason
+}: {
+	subject: 'quote' | 'calldata';
+	reason: string;
+}): LifiQuoteRejectedError => new LifiQuoteRejectedError(`LI.FI ${subject} rejected: ${reason}`);
 
 const rejected = (reason: string): LifiQuoteRejectedError =>
-	new LifiQuoteRejectedError(`LI.FI quote rejected: ${reason}`);
+	lifiRejectedError({ subject: 'quote', reason });
 
 /**
  * Refuses a LI.FI quote that OISY did not ask for. Quotes are unsigned, so a compromised or

@@ -51,7 +51,7 @@ describe('near-intents-active-tx.services', () => {
 
 			applySpy = vi
 				.spyOn(activeUserTransactionsServices, 'applyActiveUserTransactionPollUpdate')
-				.mockResolvedValue();
+				.mockResolvedValue(true);
 		});
 
 		it('no-ops on an empty list and does not call the status endpoint', async () => {

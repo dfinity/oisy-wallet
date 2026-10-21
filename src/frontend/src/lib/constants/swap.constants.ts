@@ -55,6 +55,27 @@ export const LIFI_QUOTE_REFRESH_INTERVAL_MS = 30_000;
 // hold back every other offer, and a request that never settles would never be retried.
 export const LIFI_QUOTE_TIMEOUT_MS = 10_000;
 
+// The active-transaction tick awaits each provider's poller in turn, so a stalled `/status` request
+// would stall every other provider's rows.
+export const LIFI_STATUS_TIMEOUT_MS = 10_000;
+
+// LI.FI's recommended `/status` cadence: every 10 s for the first minute after the row is created,
+// every 30 s until 10 minutes, then every minute.
+export const LIFI_STATUS_POLL_CADENCE: { maxAgeMillis: number; intervalMillis: number }[] = [
+	{ maxAgeMillis: 60_000, intervalMillis: 10_000 },
+	{ maxAgeMillis: 600_000, intervalMillis: 30_000 }
+];
+
+export const LIFI_STATUS_POLL_SLOWEST_INTERVAL_MILLIS = 60_000;
+
+// How long `/status` may stay unresolved (`NOT_FOUND` / `INVALID`) once the source transaction is
+// confirmed before the row is failed as "outcome unknown"; far past LI.FI's slowest bridge ETAs.
+export const LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS = 6 * 60 * 60 * 1_000;
+
+// The most observed time one poll can add to that window: twice the slowest poll interval, so a
+// clock jump or a tab left closed can only delay the verdict, never hasten it.
+export const LIFI_STATUS_UNRESOLVED_MAX_STEP_MILLIS = 2 * LIFI_STATUS_POLL_SLOWEST_INTERVAL_MILLIS;
+
 export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
 	[ETHEREUM_NETWORK_ID]: 'eth',
 	[ARBITRUM_MAINNET_NETWORK_ID]: 'arb',
@@ -126,8 +147,7 @@ export const swapProvidersDetails: Partial<Record<SwapProvider, SwapProvidersCon
 		logo: '/images/dapps/oisy-trade-logo.svg'
 	},
 	// Unconditional for the same reason as OISY Trade: a LI.FI active-transaction row outlives a
-	// flag rollback, and `ActiveUserTransactionItem` will name it through this map once the LI.FI
-	// tracking lands (PR 2b-3 of the spec).
+	// flag rollback, and `ActiveUserTransactionItem` names it through this map.
 	[SwapProvider.LIFI]: {
 		website: 'https://li.fi',
 		name: 'LI.FI',
