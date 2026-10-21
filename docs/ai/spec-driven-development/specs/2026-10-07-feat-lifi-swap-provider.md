@@ -1032,6 +1032,12 @@ value })` runs on the exact checked transaction through `infuraProviders(network
    between the two. The hash is the hash of the signed bytes, the transaction's own; a
    rejecting hook broadcasts nothing. Velora passes no hook and is unchanged.
 
+   `swap()` also takes the **amount swapped**, which the pending activity shows.
+   `processTransactionSent` read an ERC-20 source's amount by decoding the calldata as a
+   transfer, and a swap contract's calldata is none: on the captured Diamond calldata it
+   reads an offset (544) or throws, leaving no pending row. The given amount replaces the
+   decode; Velora Market, whose calldata is no transfer either, passes its own.
+
    **Review shows the same ceiling it signs.** In the form and review, the swap leg's
    maximum fee (displayed, and used for balance validation and "Max") is computed with
    the **same formula** as above (`lifiQuoteFeeCeiling`, sharing the computation with
@@ -1047,7 +1053,9 @@ value })` runs on the exact checked transaction through `infuraProviders(network
    message (a new `swap.error.lifi_fee_changed`), and the user confirms the new maximum.
    For that to be reviewable, the abort **carries the complete execution-time ceiling
    back** — buffered gas × `maxFeePerGas` **plus that transaction's own `l1Fee`** — into
-   the wizard's fee state for the selected quote. The re-quote's calldata can differ from
+   the swap context (`lifiCarriedFee`, next to `failedSwapError`) for the selected
+   quote's inputs. Not the wizard's own state: every step change rebuilds the wizard, so
+   the review the abort returns to is another instance. The re-quote's calldata can differ from
    the display quote's, so on Base its L1 fee can too; rebuilding the ceiling from the
    carried gas and the display quote's `l1Fee` could understate it and loop again. Review
    then shows `max(quote-derived ceiling, carried ceiling)`, and that exact value becomes
@@ -1055,6 +1063,12 @@ value })` runs on the exact checked transaction through `infuraProviders(network
    is cleared whenever the quote's inputs (the cache key) change. This abort, unlike the
    price check in step 1, necessarily comes after the approval: the estimate needs the
    allowance to exist. Velora Market keeps signing its provider's gas, unchanged.
+
+   **The review confirms only once the fee is known.** Being rebuilt, each review reads
+   the quote-derived ceiling and the approval count again, and confirming before both are
+   back would pay an ERC-20's approval before execution could compare the fee with any,
+   or sign approvals the total did not show. So the review's confirm is disabled until
+   the total is known, and the reviewed ceiling is a required parameter of execution.
 
 6. Create the AUT row once the transaction is signed, with its hash and nonce, and only
    then broadcast it. A row that cannot be created aborts the swap before the broadcast:
@@ -1084,8 +1098,8 @@ the offer, the reviewed ceiling and the ERC-20s the user holds on the source net
 `isApproveNeeded` stays Velora Market's: it only doubles the fee context's estimate, which
 LI.FI replaces with its own total. The wizard holds LI.FI's fee state — the quote-derived
 ceiling (re-priced when the offer or OISY's fees change), the approval count (read once
-per set of inputs) and a carried ceiling (kept for the inputs it was found for) — and
-hands the total to the form and the review.
+per set of inputs) and reads the carried ceiling from the swap context (kept for the
+inputs it was found for) — and hands the total to the form and the review.
 
 ### Solana execution
 
