@@ -16,7 +16,7 @@ vi.mock('$lib/derived/network-tokens.derived', async () => {
 });
 
 describe('sol-unreadable-transactions.derived', () => {
-	const enabledTokens = enabledFungibleNetworkTokens as unknown as Writable<Token[]>;
+	const enabledTokens = enabledFungibleNetworkTokens as Writable<Token[]>;
 
 	const { signature } = mockSolSignatureResponse();
 	const { signature: signature2 } = mockSolSignatureResponse();
