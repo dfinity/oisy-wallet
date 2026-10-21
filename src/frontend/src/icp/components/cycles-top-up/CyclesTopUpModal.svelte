@@ -277,6 +277,13 @@
 
 		// Review shows the warning for a top-up without an answer.
 		if (result.status === 'refused' || result.status === 'refunded') {
+			if (
+				resumed?.createdAt === request.createdAt &&
+				resumed.canisterId === request.canisterId &&
+				resumed.amount === request.amount
+			) {
+				resumed = undefined;
+			}
 			toastsError({ msg: { text: failureText({ result, amount: request.amount }) } });
 		}
 

@@ -808,6 +808,60 @@ describe('CyclesTopUpModal', () => {
 			);
 		});
 
+		it.each([
+			{
+				name: 'refunded',
+				answer: { status: 'refunded', refundBlockIndex: 9n } as CyclesTopUpResult
+			},
+			{
+				name: 'refused as created in the future',
+				answer: { status: 'refused', refusal: 'created_in_future' } as CyclesTopUpResult
+			}
+		])(
+			'starts over with a new request once the resend from a new modal is $name',
+			async ({ answer }) => {
+				topUpSpy.mockResolvedValueOnce({ status: 'unknown' });
+
+				const first = await toReview();
+
+				await topUp(first);
+
+				await backOnReview(first);
+
+				first.unmount();
+
+				topUpSpy.mockResolvedValueOnce(answer);
+
+				const second = renderModal();
+
+				await backOnReview(second);
+
+				await topUp(second);
+
+				await waitFor(() => {
+					expect(toastsErrorSpy).toHaveBeenCalledOnce();
+				});
+
+				expect(topUpSpy).toHaveBeenLastCalledWith(
+					expect.objectContaining({ createdAt: 1_000_000_000n })
+				);
+
+				await backOnReview(second);
+
+				vi.setSystemTime(new Date(3_000));
+
+				await topUp(second);
+
+				await waitFor(() => {
+					expect(topUpSpy).toHaveBeenCalledTimes(3);
+				});
+
+				expect(topUpSpy).toHaveBeenLastCalledWith(
+					expect.objectContaining({ createdAt: 3_000_000_000n })
+				);
+			}
+		);
+
 		describe('while a top-up is in flight', () => {
 			const pendingTopUp = (): ((result: CyclesTopUpResult) => void) => {
 				let answer: (result: CyclesTopUpResult) => void = () => undefined;
