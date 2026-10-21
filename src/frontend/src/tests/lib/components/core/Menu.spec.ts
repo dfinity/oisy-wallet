@@ -138,6 +138,21 @@ describe('Menu', () => {
 		});
 	});
 
+	it('cross-fades the privacy icons without replacing them', async () => {
+		await openMenu();
+		await waitForElement({ selector: menuItemPrivacyModeButtonSelector });
+		const button = document.querySelector(menuItemPrivacyModeButtonSelector);
+		const layers = button?.querySelectorAll('.layer');
+
+		expect(layers).toHaveLength(2);
+		expect(layers?.[0]).toHaveAttribute('aria-hidden', 'false');
+
+		setPrivacyMode({ enabled: true });
+		await waitFor(() => expect(layers?.[0]).toHaveAttribute('aria-hidden', 'true'));
+
+		expect(layers?.[1]).toHaveAttribute('aria-hidden', 'false');
+	});
+
 	it('renders the privacy mode menu item', async () => {
 		await openMenu();
 		await waitForElement({ selector: menuItemPrivacyModeButtonSelector });

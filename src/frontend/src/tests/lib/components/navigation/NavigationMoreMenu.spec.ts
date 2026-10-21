@@ -207,4 +207,11 @@ describe('NavigationMoreMenu', () => {
 
 		await waitFor(() => expect(queryByTestId(NAVIGATION_MORE_MENU)).toBeNull());
 	});
+
+	it('opens as a compact dropdown with menu rows', async () => {
+		const { getByTestId } = await open();
+
+		expect(getByTestId(NAVIGATION_MORE_MENU)).toHaveClass('menu-surface');
+		expect(getByTestId(NAVIGATION_MORE_MENU).closest('.wrapper.dropdown')).not.toBeNull();
+	});
 });

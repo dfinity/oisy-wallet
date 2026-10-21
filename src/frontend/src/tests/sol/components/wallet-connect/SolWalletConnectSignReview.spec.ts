@@ -1237,4 +1237,23 @@ describe('SolWalletConnectSignReview', () => {
 
 		expect(logo).toBeInTheDocument();
 	});
+
+	describe('scam flag', () => {
+		it('does not warn about a request Verify does not flag', () => {
+			const { getByRole, queryByTestId } = render(SolWalletConnectSignReview, { props });
+
+			expect(queryByTestId('wallet-connect-scam-warning')).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeInTheDocument();
+		});
+
+		it('only offers to reject a request Verify flags as a scam, and says why', () => {
+			const { getByRole, getByTestId, queryByRole } = render(SolWalletConnectSignReview, {
+				props: { ...props, flaggedAsScam: true }
+			});
+
+			expect(getByTestId('wallet-connect-scam-warning')).toBeInTheDocument();
+			expect(queryByRole('button', { name: en.core.text.approve })).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.reject })).toBeInTheDocument();
+		});
+	});
 });

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import AiAssistantBotMessage from '$lib/components/ai-assistant/AiAssistantBotMessage.svelte';
 	import AiAssistantToolResults from '$lib/components/ai-assistant/AiAssistantToolResults.svelte';
 	import AiAssistantUserMessage from '$lib/components/ai-assistant/AiAssistantUserMessage.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ChatMessage } from '$lib/types/ai-assistant';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		messages: ChatMessage[];

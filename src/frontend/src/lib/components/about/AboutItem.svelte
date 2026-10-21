@@ -22,7 +22,7 @@
 
 <button
 	class:font-bold={!asMenuItem}
-	class:hover:text-brand-secondary={!asMenuItem}
+	class:hover:text-brand-hover={!asMenuItem}
 	class:nav-item={asMenuItem}
 	class:nav-item-condensed={asMenuItemCondensed}
 	class:text={asMenuItem}

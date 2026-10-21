@@ -108,12 +108,17 @@
 			"do_not_close": "Не закрывайте эту вкладку, пока транзакция не завершится",
 			"standalone_mode": "При одновременной установке приложения и $oisy_short на главный экран возникают известные проблемы с подключением. Если у вас возникли проблемы с подключением $oisy_short или подписанием транзакций, запустите приложение из обычного браузера. Мы работаем над исправлением, которое скоро будет готово. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Подробнее</a>",
 			"video_not_supported": "Ваш браузер не поддерживает воспроизведение видео."
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
 		"completed": "Завершено",
 		"in_progress": "В процессе",
-		"failed": "Ошибка"
+		"failed": "Ошибка",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {
@@ -1128,6 +1133,11 @@
 			"unexpected_utxos_fee": "При расчёте комиссии за транзакцию произошла ошибка.",
 			"unable_to_retrieve_amount": "н/д (не удаётся получить)",
 			"ethereum_insufficient_funds": "",
+			"ethereum_out_of_gas": "Отправка не удалась, потому что ей потребовалось больше газа, чем было оценено. Ваши средства остаются в вашем кошельке, но сеть всё равно могла взять комиссию за неудавшуюся транзакцию. Попробуйте снова.",
+			"ethereum_out_of_gas_gas": "Отправлено газа: $gasSent · Требуется газа: $gasNeeded",
+			"ethereum_out_of_gas_gas_sent": "Отправлено газа: $gasSent",
+			"ethereum_transaction_hash": "Хеш транзакции: $hash",
+			"ethereum_unsigned_transaction": "Неподписанная транзакция: $transaction",
 			"solana_transaction_expired": "Ваша транзакция не была обработана сетью Solana и истекла, скорее всего, потому что указанная приоритетная комиссия была недостаточной. Мы обновили её до последней рекомендованной суммы, поэтому повторите попытку.",
 			"solana_confirmation_failed": "Мы не получили подтверждения для только что созданной вами транзакции. Подождите несколько секунд, а затем проверьте список транзакций вашего токена, чтобы убедиться, что транзакция была создана корректно.",
 			"solana_insufficient_funds": "Баланс вашего токена недостаточен для выполнения этой транзакции. Ваш баланс мог измениться с момента последнего отображения.",
@@ -1341,6 +1351,8 @@
 			"swap_fees": "Комиссия за обмен",
 			"cross_chain_networks_info": "Информация о кросс-чейн сетях",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -1375,11 +1387,13 @@
 			"swap_replaced_or_dropped": "",
 			"near_intents_quote_unverified": "",
 			"near_intents_quote_expired": "",
+			"near_intents_quote_deposit_memo": "",
 			"oisy_trade_not_trackable": "",
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
-			"oisy_trade_recovery_failed": ""
+			"oisy_trade_recovery_failed": "",
+			"lifi_status_unknown": ""
 		}
 	},
 	"buy": {
@@ -1558,7 +1572,8 @@
 			"open_contract_address_block_explorer": "Открыть адрес контракта в блокчейн-обозревателе",
 			"open_token_address_block_explorer": "Открыть адрес токена в блокчейн-обозревателе",
 			"token_group_number": "Общее количество токенов в группе для нативного токена $token",
-			"filter_button": "Открыть/закрыть фильтр"
+			"filter_button": "Открыть/закрыть фильтр",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "Введите адрес контракта ERC20",
@@ -1878,6 +1893,7 @@
 			"ambiguous_transaction": "Эта транзакция перемещает средства между несколькими адресами и не может быть точно отображена для проверки. В целях вашей безопасности она не была подписана.",
 			"close_pays_others": "Эта транзакция закрывает один из ваших токен-аккаунтов и переводит его баланс на адрес, который не является вашим кошельком. В целях вашей безопасности она не была подписана.",
 			"unreviewed_without_simulation": "OISY не смогла прочитать часть этой транзакции, и сеть также не вернула её симуляцию, поэтому ничто не описывает, что сделала бы эта часть. В целях вашей безопасности она не была подписана.",
+			"unreviewed_not_described_by_simulation": "OISY не смогла прочитать часть этой транзакции, и её симуляция тоже не показала, что сделала бы эта часть. В целях вашей безопасности она не была подписана.",
 			"unread_programs_unconfirmed": "Эта транзакция вызывает программу, которую OISY не может прочитать, и она не была подтверждена при проверке. В целях вашей безопасности она не была подписана.",
 			"sol_transaction_as_message": "Это сообщение является транзакцией Solana, которая может быть одобрена только через проверку транзакции. В целях вашей безопасности она не была подписана.",
 			"request_not_defined": "Непредвиденная ошибка: Запрос не определен, поэтому не может быть обработан.",
@@ -2159,6 +2175,7 @@
 			"instruction_unwrap": "Развернуть и закрыть токен-аккаунт $symbol",
 			"instruction_create_account": "",
 			"instruction_create_program_account": "",
+			"instruction_close_program_account": "",
 			"instruction_close_account": "",
 			"instruction_close_account_for": "Закрыть токен-аккаунт $symbol",
 			"instruction_approve": "",
@@ -2171,6 +2188,7 @@
 			"instruction_thaw": "",
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
+			"instruction_via": "через $program",
 			"instruction_rent": "",
 			"instruction_balance_returned": "Баланс SOL возвращён в ваш кошелёк",
 			"instruction_balance_sent": "Баланс SOL отправлен в ваш кошелёк",
@@ -2705,10 +2723,13 @@
 			"starting_to_repay": "Отправка твоего погашения…",
 			"repay_started": "Твоё погашение сейчас обрабатывается.",
 			"current_debt": "Текущий долг",
+			"pending_repays": "Погашения в обработке",
 			"interest_accrued": "Начисленные проценты",
 			"debt_after_repay": "Долг после погашения",
 			"repay_exceeds_debt": "Сумма превышает твой непогашенный долг.",
-			"repay_prices_unavailable": "Цены временно недоступны. Погашение отключено, пока они не загрузятся."
+			"repay_prices_unavailable": "Цены временно недоступны. Погашение отключено, пока они не загрузятся.",
+			"repay_debt_unavailable": "Твой непогашенный долг временно недоступен. Погашение отключено, пока он не загрузится.",
+			"repay_pending_covers_debt": "Погашение по этой позиции ещё обрабатывается. Ты сможешь погасить больше, когда оно завершится."
 		},
 		"info": {
 			"title": "Что такое Liquidium",
@@ -3010,6 +3031,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",
