@@ -3793,6 +3793,60 @@ describe('sol-instruction-summary.utils', () => {
 					expect(views.at(-1)?.amount).toBe(5_000n);
 				});
 
+				// Until a sync counts them, they sit beside the amount, which is all an unwrap of
+				// everything moves.
+				it('should leave what arrived out of a later unwrap of everything without a sync', () => {
+					const views = read({
+						instructions: [into('5000'), unwrap({ destination: mockSolAddress })],
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					expect(views.at(-1)?.amount).toBe(7_000n);
+				});
+
+				it('should leave SOL a System transfer paid in out of a later unwrap of everything without a sync', () => {
+					const views = read({
+						instructions: [
+							{
+								program: 'system',
+								programId: '11111111111111111111111111111111',
+								parsed: {
+									type: 'transfer',
+									info: { source: mockSolAddress, destination: wrapped, lamports: 5_000 }
+								}
+							},
+							unwrap({ destination: mockSolAddress })
+						],
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					expect(views.at(-1)?.amount).toBe(7_000n);
+				});
+
+				// A close hands back every lamport, synced or not, so for it the account wraps both.
+				it('should have a close state what arrived as wrapped without a sync', () => {
+					const views = read({
+						instructions: [
+							into('5000'),
+							{
+								program: 'spl-token',
+								programId: TOKEN,
+								parsed: {
+									type: 'closeAccount',
+									info: { account: wrapped, destination: mockSolAddress, owner: mockSolAddress }
+								}
+							}
+						],
+						accountLamports: { [wrapped]: 2_046_280n },
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					const closing = views.find(({ kind }) => kind === 'unwrap');
+
+					expect(closing?.wrapped).toBe(12_000n);
+					expect(closing?.returned).toBe(2_051_280n);
+				});
+
 				it('should know nothing of a later unwrap of everything when the first names no amount', () => {
 					const views = read({
 						instructions: [into(), sync, unwrap({ destination: mockSolAddress })],
@@ -3814,6 +3868,109 @@ describe('sol-instruction-summary.utils', () => {
 
 					expect(views.at(-1)?.amount).toBe(2_000n);
 				});
+
+				// The lamports it left in place are counted again once the account is synced.
+				it('should count what an unwrap into the account itself left once a sync does', () => {
+					const views = read({
+						instructions: [
+							unwrap({ amount: '5000', destination: wrapped }),
+							sync,
+							unwrap({ destination: mockSolAddress })
+						],
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					expect(views.at(-1)?.amount).toBe(7_000n);
+				});
+			});
+		});
+
+		// Counted from nothing, an account the walk lost track of would have its close state what
+		// arrived since as all it hands back, or nothing at all.
+		describe('a balance nobody knows', () => {
+			const TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+			const wrapped = mockAtaAddress2;
+			const other = mockAtaAddress;
+
+			const unwrap = ({
+				source,
+				destination,
+				authority = mockSolAddress,
+				amount
+			}: {
+				source: string;
+				destination: string;
+				authority?: string;
+				amount?: string;
+			}) => ({
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'unwrapLamports',
+					info: { source, destination, authority, ...(amount !== undefined && { amount }) }
+				}
+			});
+
+			const close = ({
+				account,
+				destination = mockSolAddress
+			}: {
+				account: string;
+				destination?: string;
+			}) => ({
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'closeAccount',
+					info: { account, destination, owner: mockSolAddress }
+				}
+			});
+
+			const read = (instructions: unknown[]) =>
+				mapSolInstructionSummaries({
+					instructions,
+					ownedAddresses: [mockSolAddress, wrapped, other],
+					userAddress: mockSolAddress,
+					addressToToken: {
+						[wrapped]: WSOL_TOKEN.address,
+						[other]: WSOL_TOKEN.address,
+						[mockSolAddress3]: WSOL_TOKEN.address
+					},
+					accountLamports: { [wrapped]: 2_046_280n, [other]: 2_039_280n }
+				});
+
+			it('should know nothing of what a close hands back after a stated unwrap follows one nobody read', () => {
+				const views = read([
+					unwrap({ source: wrapped, destination: mockSolAddress }),
+					unwrap({ source: wrapped, destination: mockSolAddress2, amount: '5000' }),
+					close({ account: wrapped })
+				]);
+
+				expect(views.at(-1)).not.toHaveProperty('returned');
+			});
+
+			it('should know nothing of what a close hands back once an unwrap nobody read paid into the account', () => {
+				const views = read([
+					unwrap({ source: mockSolAddress3, destination: other, authority: mockSolAddress2 }),
+					unwrap({
+						source: mockSolAddress3,
+						destination: other,
+						authority: mockSolAddress2,
+						amount: '5000'
+					}),
+					close({ account: other })
+				]);
+
+				expect(views.at(-1)).not.toHaveProperty('returned');
+			});
+
+			it('should know nothing of what a close hands back once a close nobody read paid into the account', () => {
+				const views = read([
+					close({ account: mockSolAddress3, destination: other }),
+					close({ account: other })
+				]);
+
+				expect(views.at(-1)).not.toHaveProperty('returned');
 			});
 		});
 
@@ -3879,6 +4036,12 @@ describe('sol-instruction-summary.utils', () => {
 				}
 			};
 
+			const sync = {
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: { type: 'syncNative', info: { account: wrapped } }
+			};
+
 			const read = ({
 				instructions,
 				accountLamports,
@@ -3919,13 +4082,13 @@ describe('sol-instruction-summary.utils', () => {
 			});
 
 			// Paid into a wrapped SOL account, the lamports raise its balance the way a plain transfer
-			// into it does. They reach the wallet only with the unwrap, which is what the wallet's
-			// change counts them at.
+			// into it does, once the account is synced. They reach the wallet only with the unwrap,
+			// which is what the wallet's change counts them at.
 			it.each(payouts)(
 				'should count what $name pays into a wrapped SOL account toward a later unwrap of everything',
 				({ payout }) => {
 					const views = read({
-						instructions: [payout(wrapped), unwrapAll],
+						instructions: [payout(wrapped), sync, unwrapAll],
 						accountTokenAmounts: { [wrapped]: ZERO }
 					});
 
@@ -3957,7 +4120,7 @@ describe('sol-instruction-summary.utils', () => {
 
 			it('should know nothing of what a wrapped SOL account wraps once excess lamports reach it', () => {
 				const views = read({
-					instructions: [excess({ destination: wrapped }), unwrapAll],
+					instructions: [excess({ destination: wrapped }), sync, unwrapAll],
 					accountTokenAmounts: { [wrapped]: ZERO }
 				});
 
