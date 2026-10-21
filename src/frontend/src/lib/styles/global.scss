@@ -166,7 +166,15 @@ don't take it: they are the sign that work is happening.
 		}
 	}
 
-	::view-transition-old(header),
+	/*
+	The header holds still between pages, and only its new state shows: the old one would stay
+	under it for the whole transition, and a control that changed, such as the network switcher's
+	label, would show its old version beside the new one.
+	*/
+	::view-transition-old(header) {
+		display: none;
+	}
+
 	::view-transition-new(header) {
 		animation: none;
 	}
