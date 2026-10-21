@@ -498,6 +498,31 @@ describe('sol-transaction-summary.utils', () => {
 			).toBe(ZERO);
 		});
 
+		// Except for an unwrap paying the wallet: what leaves the wrapped SOL account, the user's or
+		// somebody else's, arrives there as SOL itself.
+		it('should add what an unwrap pays into the wallet', () => {
+			expect(
+				stated([
+					{
+						kind: 'send',
+						amount: 5_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						counterparty: WALLET,
+						own: true,
+						unwrapsToWallet: true
+					},
+					{
+						kind: 'receive',
+						amount: 3_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						counterparty: mockAtaAddress3,
+						own: false,
+						unwrapsToWallet: true
+					}
+				])
+			).toBe(5_000n + 3_000n);
+		});
+
 		it('should leave out a close that pays somebody else', () => {
 			expect(
 				stated([{ kind: 'closeTokenAccount', returned: 2_039_280n, counterparty: mockSolAddress2 }])
@@ -508,6 +533,17 @@ describe('sol-transaction-summary.utils', () => {
 			expect(stated([{ kind: 'send', counterparty: mockSolAddress2 }])).toBeUndefined();
 			expect(
 				stated([{ kind: 'createTokenAccount', account: mockAtaAddress, payer: WALLET }])
+			).toBeUndefined();
+			expect(
+				stated([
+					{
+						kind: 'send',
+						tokenAddress: WSOL_TOKEN.address,
+						counterparty: WALLET,
+						own: true,
+						unwrapsToWallet: true
+					}
+				])
 			).toBeUndefined();
 		});
 

@@ -360,8 +360,8 @@ export const solAppAccountCost = ({
 
 /**
  * What the lines say the transaction does to the SOL in the wallet itself: the SOL it sends and
- * receives, the SOL it wraps, the rent it pays to open accounts, and what closes pay back into it.
- * The fee is not a line and is left to the caller.
+ * receives, the SOL it wraps and unwraps into it, the rent it pays to open accounts, and what
+ * closes pay back into it. The fee is not a line and is left to the caller.
  *
  * Undefined when a line moves the wallet's SOL by an amount nobody read, opens an account nobody
  * read the funder of, or pays a close to a destination nobody read: the total is then unknown
@@ -375,9 +375,15 @@ export const solWalletLamportsStated = ({
 	userAddress: OptionSolAddress;
 }): bigint | undefined =>
 	flattenInstructions(instructions).reduce<bigint | undefined>(
-		(acc, { kind, amount, tokenAddress, rent, payer, returned, counterparty }) => {
+		(acc, { kind, amount, tokenAddress, rent, payer, returned, counterparty, unwrapsToWallet }) => {
 			if (isNullish(acc)) {
 				return acc;
+			}
+
+			// Wrapped SOL an unwrap pays into the wallet, out of the user's own account or somebody
+			// else's, arrives there as SOL itself.
+			if (unwrapsToWallet) {
+				return isNullish(amount) ? undefined : acc + amount;
 			}
 
 			// SOL itself, not a token: wrapped SOL moves between token accounts, not the wallet.

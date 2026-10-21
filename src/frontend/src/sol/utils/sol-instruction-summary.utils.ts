@@ -766,6 +766,7 @@ const toEffect = ({
 		// unstated is everything the account wraps, as it stands at this instruction.
 		if (type === 'unwrapLamports') {
 			const source = address({ info, key: 'source' });
+			const destination = address({ info, key: 'destination' });
 			const stated = amount({ info, key: 'amount' });
 
 			const wrapped =
@@ -780,11 +781,17 @@ const toEffect = ({
 						})
 					: undefined;
 
-			return transferEffect({
+			const effect = transferEffect({
 				info: nonNullish(wrapped) ? { ...info, amount: wrapped } : info,
 				isOwned,
 				mintOf: (account) => mintAt({ account, position })
 			});
+
+			// Paid to the wallet, what leaves the account arrives there as SOL itself, whoever held
+			// it, and what the wallet holds has to count it.
+			return nonNullish(effect) && nonNullish(destination) && destination === userAddress
+				? { ...effect, unwrapsToWallet: true }
+				: effect;
 		}
 
 		if (type === 'closeAccount') {

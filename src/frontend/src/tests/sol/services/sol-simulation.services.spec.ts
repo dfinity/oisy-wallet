@@ -1,3 +1,4 @@
+import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { getMultipleAccountsInfo, simulateTransactionAccounts } from '$sol/api/solana.api';
 import {
@@ -668,6 +669,121 @@ describe('sol-simulation.services', () => {
 			const result = await simulateSolTransaction(params(withOther));
 
 			expect(result?.instructions).toStrictEqual([{ kind: 'unknown', program: application }]);
+		});
+
+		// The program also pays the wallet out of a wrapped SOL account of its own, as much as the
+		// closed account held. That inflow is the unwrap's, and only what the wallet gains beyond it
+		// can be the close's.
+		describe('next to an unwrap paying the wallet', () => {
+			const vault = mockAtaAddress3;
+
+			const withUnwrap = {
+				feePayer: { address: mockSolAddress },
+				instructions: [
+					{
+						programAddress: application,
+						accounts: [
+							{ address: mockSolAddress2, role: AccountRole.WRITABLE },
+							{ address: mockSolAddress, role: AccountRole.WRITABLE_SIGNER },
+							{ address: vault, role: AccountRole.WRITABLE }
+						]
+					}
+				]
+			} as unknown as CompilableTransactionMessage;
+
+			const wrapped = (lamports: bigint) =>
+				({
+					executable: false,
+					lamports,
+					owner: TOKEN_PROGRAM_ADDRESS,
+					space: 165n,
+					data: {
+						parsed: {
+							type: 'account',
+							info: {
+								mint: WSOL_TOKEN.address,
+								owner: mockSolAddress3,
+								isNative: true,
+								tokenAmount: { amount: `${lamports - 2_039_280n}`, decimals: 9 }
+							}
+						}
+					}
+				}) as unknown as SolanaParsedAccountsInfo[number];
+
+			const unwrapping = [
+				{
+					index: 0,
+					instructions: [
+						{
+							program: 'spl-token',
+							programId: TOKEN_PROGRAM_ADDRESS,
+							parsed: {
+								type: 'unwrapLamports',
+								info: {
+									source: vault,
+									destination: mockSolAddress,
+									authority: mockSolAddress3,
+									amount: `${rent}`
+								}
+							}
+						}
+					]
+				}
+			] as unknown as SolanaSimulatedInnerInstructions;
+
+			const unwrapped = {
+				kind: 'receive',
+				amount: rent,
+				tokenAddress: WSOL_TOKEN.address,
+				counterparty: vault,
+				own: false,
+				unwrapsToWallet: true
+			};
+
+			const run = async (walletAfter: bigint) => {
+				vi.mocked(getMultipleAccountsInfo).mockResolvedValue([
+					systemAccount(1_000_000n),
+					appAccount,
+					wrapped(100_000_000n)
+				]);
+				vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+					simulated({
+						accounts: [systemAccount(walletAfter), null, wrapped(100_000_000n - rent)],
+						innerInstructions: unwrapping,
+						fee
+					})
+				);
+
+				return await simulateSolTransaction(params(withUnwrap));
+			};
+
+			it('should list no close when the account paid somebody else', async () => {
+				const result = await run(1_000_000n + rent - fee);
+
+				expect(result?.instructions).toStrictEqual([
+					{ kind: 'route', program: application, children: [unwrapped] }
+				]);
+			});
+
+			it('should list the close when the account paid the wallet too', async () => {
+				const result = await run(1_000_000n + rent + rent - fee);
+
+				expect(result?.instructions).toStrictEqual([
+					{
+						kind: 'route',
+						program: application,
+						children: [
+							unwrapped,
+							{
+								kind: 'closeAccount',
+								account: mockSolAddress2,
+								program: application,
+								returned: rent
+							}
+						]
+					}
+				]);
+			});
 		});
 
 		// Nothing then says where the rent went, and the instruction stays one nothing describes.

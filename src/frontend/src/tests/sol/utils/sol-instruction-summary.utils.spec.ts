@@ -3598,14 +3598,17 @@ describe('sol-instruction-summary.utils', () => {
 			const TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 			const wrapped = mockAtaAddress2;
 
-			const unwrap = (amount?: string) => ({
+			const unwrap = ({
+				amount,
+				destination = mockSolAddress2
+			}: { amount?: string; destination?: string } = {}) => ({
 				program: 'spl-token',
 				programId: TOKEN,
 				parsed: {
 					type: 'unwrapLamports',
 					info: {
 						source: wrapped,
-						destination: mockSolAddress2,
+						destination,
 						authority: mockSolAddress,
 						...(amount !== undefined && { amount })
 					}
@@ -3631,13 +3634,63 @@ describe('sol-instruction-summary.utils', () => {
 				});
 
 			it('should state the wrapped SOL leaving the account for its destination', () => {
-				expect(read({ instructions: [unwrap('5000')] })).toStrictEqual([
+				expect(read({ instructions: [unwrap({ amount: '5000' })] })).toStrictEqual([
 					{
 						kind: 'send',
 						amount: 5_000n,
 						tokenAddress: WSOL_TOKEN.address,
 						counterparty: mockSolAddress2,
 						own: false
+					}
+				]);
+			});
+
+			// What it pays the wallet arrives there as SOL itself, which the wallet's own change counts.
+			it('should mark an unwrap paying the wallet', () => {
+				expect(
+					read({ instructions: [unwrap({ amount: '5000', destination: mockSolAddress })] })
+				).toStrictEqual([
+					{
+						kind: 'send',
+						amount: 5_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						counterparty: mockSolAddress,
+						own: true,
+						unwrapsToWallet: true
+					}
+				]);
+			});
+
+			it('should mark an unwrap paying the wallet out of somebody else’s account', () => {
+				expect(
+					mapSolInstructionSummaries({
+						instructions: [
+							{
+								program: 'spl-token',
+								programId: TOKEN,
+								parsed: {
+									type: 'unwrapLamports',
+									info: {
+										source: mockSolAddress3,
+										destination: mockSolAddress,
+										authority: mockSolAddress2,
+										amount: '5000'
+									}
+								}
+							}
+						],
+						ownedAddresses: [mockSolAddress],
+						userAddress: mockSolAddress,
+						addressToToken: { [mockSolAddress3]: WSOL_TOKEN.address }
+					})
+				).toStrictEqual([
+					{
+						kind: 'receive',
+						amount: 5_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						counterparty: mockSolAddress3,
+						own: false,
+						unwrapsToWallet: true
 					}
 				]);
 			});
@@ -3654,7 +3707,7 @@ describe('sol-instruction-summary.utils', () => {
 			it('should have a later close of the account hand back what the unwrap left', () => {
 				const views = read({
 					instructions: [
-						unwrap('5000'),
+						unwrap({ amount: '5000' }),
 						{
 							program: 'spl-token',
 							programId: TOKEN,

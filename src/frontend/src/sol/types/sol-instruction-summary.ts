@@ -61,6 +61,10 @@ export interface SolInstructionSummary {
 	// Whether the counterparty is an account the user owns. A swap pays the user's own account, so
 	// without this every route reads as if it were sending value to a stranger.
 	own?: boolean;
+	// Set on an unwrap paying the user's wallet, whichever account it leaves. The line states the
+	// wrapped SOL leaving its account, and it arrives in the wallet as SOL itself, which no transfer
+	// of wrapped SOL does.
+	unwrapsToWallet?: boolean;
 	// The account created, closed, approved or handed over.
 	account?: SolAddress;
 	// Lamports it costs to open an account.
