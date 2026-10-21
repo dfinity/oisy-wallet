@@ -1025,7 +1025,11 @@ value })` runs on the exact checked transaction through `infuraProviders(network
    `eth/services/fee.services.ts`, which now takes the size). The native balance must
    cover `value + ceiling`, or the swap aborts before signing with an ethers
    `INSUFFICIENT_FUNDS` error, which the wizard maps to the existing insufficient-funds
-   copy (`mapEthereumErrorMsg`).
+   copy (`mapEthereumErrorMsg`). That check comes after an ERC-20's approval is paid, so
+   an ERC-20 source first checks, before the price re-check of step 1, that the native
+   balance covers the total the review showed (`reviewedFee`, the approvals included):
+   the swap is never signed above it, so a balance that covers it never leaves an
+   approval paid for a swap the balance cannot finish.
 5. `swap({ to: tr.to, transaction: { data: tr.data, gas: estimatedGas, value: tr.value, chainId: tr.chainId }, maxFeePerGas, maxPriorityFeePerGas, … })`,
    with the row created between signing and broadcasting (step 6): `swap()` signed and
    broadcast in one call, so it gains an optional `beforeBroadcast({ hash, nonce })` hook
@@ -1069,6 +1073,11 @@ value })` runs on the exact checked transaction through `infuraProviders(network
    back would pay an ERC-20's approval before execution could compare the fee with any,
    or sign approvals the total did not show. So the review's confirm is disabled until
    the total is known, and the reviewed ceiling is a required parameter of execution.
+   The refreshed total, a ceiling carried back by a fee change included, is also checked
+   against the native balance as the form checks its own (`isLifiFeeAffordable`): when
+   it does not fit, confirm stays disabled and the review says why
+   (`InsufficientFundsForFee`). `SwapReview` takes the provider's reason to hold the
+   swap as `swapDisabled`.
 
 6. Create the AUT row once the transaction is signed, with its hash and nonce, and only
    then broadcast it. A row that cannot be created aborts the swap before the broadcast:
