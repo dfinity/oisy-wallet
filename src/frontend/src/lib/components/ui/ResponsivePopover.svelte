@@ -11,15 +11,23 @@
 		content: Snippet;
 		ariaLabel?: string;
 		direction?: 'rtl' | 'ltr';
+		dropdown?: boolean;
 	}
 
-	let { visible = $bindable(), button, content, ariaLabel, direction = 'rtl' }: Props = $props();
+	let {
+		visible = $bindable(),
+		button,
+		content,
+		ariaLabel,
+		direction = 'rtl',
+		dropdown = false
+	}: Props = $props();
 </script>
 
 <!-- The ranges must not overlap: at a width where both render, the popover mounts under the
 visible sheet yet counts as the topmost overlay, and pulls keyboard focus away from the sheet. -->
 <Responsive up="md">
-	<Popover anchor={button} {ariaLabel} {direction} invisibleBackdrop bind:visible>
+	<Popover anchor={button} {ariaLabel} {direction} {dropdown} invisibleBackdrop bind:visible>
 		{@render content()}
 	</Popover>
 </Responsive>

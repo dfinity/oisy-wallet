@@ -121,15 +121,15 @@
 			</div>
 
 			{#if step === 'root'}
-				<ul class="m-0 flex list-none flex-col gap-1 p-0">
+				<ul class="menu-surface m-0 flex list-none flex-col p-0">
 					{#each rows as { step: rowStep, label, count } (rowStep)}
 						<li>
 							<button
-								class="flex w-full items-center justify-between rounded-md row-feedback px-3 py-3 text-left"
+								class="menu-row flex w-full items-center justify-between row-feedback text-left"
 								onclick={() => enterStep(rowStep)}
 								type="button"
 							>
-								<span class="flex items-center gap-3 text-sm">
+								<span class="flex">
 									{#if rowStep === 'types'}
 										<IconListFilter size="20" />
 									{:else if rowStep === 'tokens'}
@@ -139,7 +139,7 @@
 									{/if}
 									{label}
 								</span>
-								<span class="flex items-center gap-2">
+								<span class="flex">
 									{#if count > 0}
 										<Badge variant="info" width="w-fit">{count}</Badge>
 									{/if}
