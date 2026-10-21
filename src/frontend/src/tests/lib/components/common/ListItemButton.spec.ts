@@ -96,4 +96,14 @@ describe('ListItemButton', () => {
 
 		expect(host?.querySelector('svg')).toBeInTheDocument();
 	});
+
+	it('lets the label fill the row when contentFullWidth is set', () => {
+		const { getByText } = render(ListItemButtonTest, {
+			onclick: vi.fn(),
+			children: LABEL,
+			contentFullWidth: true
+		});
+
+		expect(getByText(LABEL)).toHaveClass('flex-1');
+	});
 });

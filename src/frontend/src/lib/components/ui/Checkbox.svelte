@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { handleKeyPress } from '$lib/utils/keyboard.utils';
 
 	interface Props {
 		inputId: string;
@@ -38,8 +37,21 @@
 
 		onChange?.();
 	};
+
+	// A native checkbox toggles on Space only. Enter toggled the row when the row took focus;
+	// keep that, and keep Enter from submitting a surrounding form.
+	const onKeyDown = (event: KeyboardEvent) => {
+		if (event.code !== 'Enter') {
+			return;
+		}
+
+		event.preventDefault();
+		onChange?.();
+	};
 </script>
 
+<!-- The input is the control: it takes focus, toggles on Space and tells assistive tech its
+	 checked state. The row only widens the click target, so it carries no role of its own. -->
 <div
 	class="checkbox"
 	class:disabled
@@ -48,10 +60,7 @@
 		event.preventDefault();
 		onClick(event);
 	}}
-	onkeypress={(event) =>
-		!disabled && handleKeyPress({ $event: event, callback: () => onChange?.() })}
-	role="button"
-	tabindex="0"
+	role="presentation"
 >
 	<label class={text} for={inputId}>{@render children?.()}</label>
 	<input
@@ -63,7 +72,7 @@
 			event.stopPropagation();
 			onClick(event);
 		}}
-		tabindex="-1"
+		onkeydown={onKeyDown}
 		type="checkbox"
 	/>
 </div>
@@ -123,6 +132,13 @@
 		&.disabled {
 			pointer-events: none;
 		}
+
+		// The input takes focus, but the ring stays round the whole row, where the global focus
+		// rule drew it when the row itself was focusable.
+		&:has(input:focus-visible) {
+			outline: var(--color-background-brand-primary) solid 2px;
+			outline-offset: var(--focus-outline-offset, 2px);
+		}
 	}
 
 	label {
@@ -136,6 +152,15 @@
 
 		&.inline {
 			@include text.truncate;
+		}
+	}
+
+	// One ring only: the row draws it, so the global one on the box goes. That rule is an
+	// `!important` inside `@layer base`, which outranks any unlayered `!important`, so the reset
+	// joins the same layer and wins there on specificity.
+	@layer base {
+		input[type='checkbox']:focus-visible {
+			outline: none !important;
 		}
 	}
 

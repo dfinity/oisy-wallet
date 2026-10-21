@@ -89,4 +89,22 @@ describe('Popover', () => {
 
 		expect(container.querySelector('button.close')).not.toBeNull();
 	});
+
+	it('lays out a dropdown when asked, and a menu by default', async () => {
+		const { container, rerender } = render(Popover, { props: { visible: true } });
+
+		expect(container.querySelector('.wrapper.dropdown')).toBeNull();
+
+		await rerender({ visible: true, dropdown: true });
+
+		expect(container.querySelector('.wrapper.dropdown')).not.toBeNull();
+	});
+
+	it('turns on the sliding highlight for a dropdown only', () => {
+		const { container: dropdown } = render(Popover, { props: { visible: true, dropdown: true } });
+		const { container: menu } = render(Popover, { props: { visible: true } });
+
+		expect(dropdown.querySelector('.popover-content')).toHaveAttribute('data-sliding-highlight');
+		expect(menu.querySelector('.popover-content')).not.toHaveAttribute('data-sliding-highlight');
+	});
 });

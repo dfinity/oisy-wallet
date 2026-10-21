@@ -254,6 +254,7 @@
 				nonNullish(instructions) &&
 				instructions.length > 0 &&
 				!instructions.some(({ kind }) => kind === 'unknown'),
+			simulationRan: simulatedInstructions ?? false,
 			closesPayOthers,
 			unreadProgramsAcknowledged: !callsUnreadPrograms || unreadProgramsAcknowledged,
 			rentExemptMinimum,

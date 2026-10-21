@@ -3,9 +3,8 @@
 	import type { IcToken } from '$icp/types/ic-token';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import IconCheck from '$lib/components/icons/IconCheck.svelte';
+	import ListItemButton from '$lib/components/common/ListItemButton.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -87,47 +86,29 @@
 		{/snippet}
 
 		{#snippet items()}
-			<List condensed noPadding testId={`${testId}-list`}>
-				{#each options as { token, label, name } (token.ledgerCanisterId)}
-					<ListItem>
-						<Button
-							alignLeft
-							colorStyle="tertiary-alt"
-							contentFullWidth
-							fullWidth
-							onclick={() => handleSelect(token)}
-							paddingSmall
-							styleClass="py-1 rounded-md font-normal text-primary underline-none pl-0.5 min-w-32"
-							testId={`${testId}-option-${token.ledgerCanisterId}`}
-							transparent
-						>
-							<span class="w-[20px] pt-0.75 text-brand-primary">
-								{#if selected?.ledgerCanisterId === token.ledgerCanisterId}
-									<IconCheck size="20" />
-								{/if}
-							</span>
-							<span class="flex w-full min-w-0 flex-row items-center gap-2">
-								<TokenLogo data={token} logoSize="xs" />
-								<span class="flex min-w-0 flex-col">
-									<span class="truncate">{label}</span>
-									<span class="truncate text-xs text-tertiary">{name}</span>
+			<div class="menu-surface">
+				<List condensed noPadding testId={`${testId}-list`}>
+					{#each options as { token, label, name } (token.ledgerCanisterId)}
+						<ListItem>
+							<ListItemButton
+								contentFullWidth
+								onclick={() => handleSelect(token)}
+								selectable
+								selected={selected?.ledgerCanisterId === token.ledgerCanisterId}
+								testId={`${testId}-option-${token.ledgerCanisterId}`}
+							>
+								<span class="flex min-w-0 items-center gap-2">
+									<TokenLogo data={token} logoSize="xs" />
+									<span class="flex min-w-0 flex-col text-left">
+										<span class="truncate">{label}</span>
+										<span class="truncate text-xs text-tertiary">{name}</span>
+									</span>
 								</span>
-							</span>
-						</Button>
-					</ListItem>
-				{/each}
-			</List>
+							</ListItemButton>
+						</ListItem>
+					{/each}
+				</List>
+			</div>
 		{/snippet}
 	</Dropdown>
 </span>
-
-<style lang="scss">
-	:global .help-token-selector {
-		button {
-			font-weight: normal !important;
-		}
-		.wrapper {
-			padding: var(--padding-1_25x) !important;
-		}
-	}
-</style>
