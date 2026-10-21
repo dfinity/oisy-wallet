@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { CKETH_ABI, CKETH_DEPOSIT_HASH } from '$eth/constants/cketh.constants';
 import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
 import {
 	ERC20_APPROVE_HASH,
@@ -17,6 +18,7 @@ import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { ErcTransfer } from '$eth/types/eth-transaction';
 import {
+	decodeCkEthDepositPrincipal,
 	decodeErc20AbiData,
 	decodeErc20AbiDataValue,
 	decodeErc20TransferRecipient,
@@ -55,8 +57,10 @@ import {
 } from '$tests/mocks/ck-minter.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
-import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
-import { AbiCoder } from 'ethers/abi';
+import { mockPrincipal } from '$tests/mocks/identity.mock';
+import { encodePrincipalToEthAddress, type CkEthMinterDid } from '@icp-sdk/canisters/cketh';
+import { Principal } from '@icp-sdk/core/principal';
+import { AbiCoder, Interface } from 'ethers/abi';
 
 const transaction: Transaction = {
 	blockNumber: 123456,
@@ -737,6 +741,77 @@ describe('transactions.utils', () => {
 
 		it('should throw on truncated calldata rather than inventing an operator', () => {
 			expect(() => decodeSetApprovalForAllData(`${ERC_SET_APPROVAL_FOR_ALL_HASH}00`)).toThrow();
+		});
+	});
+
+	describe('decodeCkEthDepositPrincipal', () => {
+		const encodeDeposit = (principal: Principal): string =>
+			new Interface(CKETH_ABI).encodeFunctionData('deposit', [
+				encodePrincipalToEthAddress(principal)
+			]);
+
+		const data = encodeDeposit(mockPrincipal);
+
+		it.each([
+			{ kind: 'a user principal', principal: mockPrincipal },
+			{
+				kind: 'a canister principal',
+				principal: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai')
+			},
+			{ kind: 'the anonymous principal', principal: Principal.anonymous() }
+		])('should decode $kind from a deposit encoded the way OISY encodes one', ({ principal }) => {
+			expect(decodeCkEthDepositPrincipal(encodeDeposit(principal))?.toText()).toBe(
+				principal.toText()
+			);
+		});
+
+		it('should decode the selector and the argument regardless of the case of their hex digits', () => {
+			expect(decodeCkEthDepositPrincipal(`0x${data.slice(2).toUpperCase()}`)?.toText()).toBe(
+				mockPrincipal.toText()
+			);
+		});
+
+		it('should name the selector the helper contract ABI encodes `deposit` with', () => {
+			expect(data.startsWith(CKETH_DEPOSIT_HASH)).toBeTruthy();
+		});
+
+		it('should return undefined for nullish or empty calldata', () => {
+			expect(decodeCkEthDepositPrincipal(undefined)).toBeUndefined();
+			expect(decodeCkEthDepositPrincipal('0x')).toBeUndefined();
+		});
+
+		it('should return undefined for the same argument behind another selector', () => {
+			expect(decodeCkEthDepositPrincipal(`${ERC20_APPROVE_HASH}${data.slice(10)}`)).toBeUndefined();
+		});
+
+		it('should return undefined for a deposit followed by bytes the call does not take', () => {
+			expect(decodeCkEthDepositPrincipal(`${data}00`)).toBeUndefined();
+			expect(decodeCkEthDepositPrincipal(`${data}${'00'.repeat(32)}`)).toBeUndefined();
+		});
+
+		it('should return undefined for a truncated deposit', () => {
+			expect(decodeCkEthDepositPrincipal(data.slice(0, -2))).toBeUndefined();
+			expect(decodeCkEthDepositPrincipal(CKETH_DEPOSIT_HASH)).toBeUndefined();
+		});
+
+		it('should return undefined when the length byte names no principal', () => {
+			expect(
+				decodeCkEthDepositPrincipal(`${CKETH_DEPOSIT_HASH}${'00'.repeat(32)}`)
+			).toBeUndefined();
+		});
+
+		it('should return undefined when the length byte names more bytes than a principal has', () => {
+			expect(
+				decodeCkEthDepositPrincipal(`${CKETH_DEPOSIT_HASH}1e${'01'.repeat(30)}00`)
+			).toBeUndefined();
+		});
+
+		it('should return undefined when the bytes past the principal are not zero', () => {
+			expect(decodeCkEthDepositPrincipal(`${data.slice(0, -2)}01`)).toBeUndefined();
+		});
+
+		it('should return undefined for an argument that is not hex', () => {
+			expect(decodeCkEthDepositPrincipal(`${data.slice(0, -2)}zz`)).toBeUndefined();
 		});
 	});
 

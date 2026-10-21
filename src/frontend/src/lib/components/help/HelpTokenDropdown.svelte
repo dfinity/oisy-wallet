@@ -20,13 +20,23 @@
 		// excludes the token picked on the other side - so labels derived from it alone could lose
 		// an impostor's twin and present the impostor as unique.
 		labels?: Map<string, string>;
-		ariaLabel: string;
+		// What the picker is for. The visible token label names the button (WCAG 2.5.3), so this is
+		// its description, and the title of the mobile modal.
+		ariaDescription: string;
 		disabled?: boolean;
 		testId: string;
 		onSelect: (token: IcToken) => void;
 	}
 
-	let { tokens, selected, labels, ariaLabel, disabled = false, testId, onSelect }: Props = $props();
+	let {
+		tokens,
+		selected,
+		labels,
+		ariaDescription,
+		disabled = false,
+		testId,
+		onSelect
+	}: Props = $props();
 
 	let dropdown = $state<Dropdown>();
 
@@ -65,7 +75,7 @@
 <span class="help-token-selector min-w-36">
 	<Dropdown
 		bind:this={dropdown}
-		{ariaLabel}
+		{ariaDescription}
 		asModalOnMobile
 		buttonBorder
 		buttonFullWidth
@@ -74,7 +84,10 @@
 	>
 		{#if nonNullish(selected)}
 			<span class="flex items-center gap-2">
-				<TokenLogo data={selected} logoSize="xs" />
+				<!-- The label follows, so the logo's alt would only put the token name before it. -->
+				<span aria-hidden="true">
+					<TokenLogo data={selected} logoSize="xs" />
+				</span>
 				{labelOf(selected)}
 			</span>
 		{:else}
@@ -82,7 +95,7 @@
 		{/if}
 
 		{#snippet title()}
-			{ariaLabel}
+			{ariaDescription}
 		{/snippet}
 
 		{#snippet items()}

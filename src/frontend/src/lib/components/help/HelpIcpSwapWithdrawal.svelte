@@ -430,7 +430,7 @@
 
 			{#snippet value()}
 				<HelpTokenDropdown
-					ariaLabel={$i18n.help.alt.select_token_first}
+					ariaDescription={$i18n.help.alt.select_token_first}
 					disabled={withdrawing || noTokensToPick}
 					labels={tokenLabels}
 					onSelect={onSelectA}
@@ -448,7 +448,7 @@
 
 			{#snippet value()}
 				<HelpTokenDropdown
-					ariaLabel={$i18n.help.alt.select_token_second}
+					ariaDescription={$i18n.help.alt.select_token_second}
 					disabled={withdrawing || noTokensToPick}
 					labels={tokenLabels}
 					onSelect={onSelectB}
