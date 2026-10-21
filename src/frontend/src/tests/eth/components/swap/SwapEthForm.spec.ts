@@ -3,6 +3,7 @@ import SwapEthForm from '$eth/components/swap/SwapEthForm.svelte';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
 import type { Erc20Token } from '$eth/types/erc20';
 import {
+	MAX_BUTTON,
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
@@ -10,8 +11,10 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
+import { formatToken } from '$lib/utils/format.utils';
+import SwapEthFormLifiTest from '$tests/eth/components/swap/SwapEthFormLifiTest.svelte';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 import { get, readable, writable } from 'svelte/store';
 
 vi.mock('$lib/utils/parse.utils', async () => {
@@ -249,6 +252,97 @@ describe('SwapFormEth', () => {
 			});
 
 			expect(reviewButton(getByText)).toBeDisabled();
+		});
+
+		// LI.FI's fee comes with each quote, and each quote with the amount "Max" sets: following
+		// the fee both ways, "Max" would re-quote with every amount it sets and never settle.
+		describe('"Max" from an ETH source', () => {
+			const balance = 1_000_000_000_000_000_000n;
+
+			const maxFor = (fee: bigint) =>
+				formatToken({
+					value: balance - fee,
+					unitName: ETHEREUM_TOKEN.decimals,
+					displayDecimals: ETHEREUM_TOKEN.decimals
+				});
+
+			const amountOf = (container: HTMLElement) =>
+				(container.querySelector(amountSelector) as HTMLInputElement).value;
+
+			beforeEach(() => {
+				vi.useFakeTimers();
+
+				mockContext.set(SWAP_CONTEXT_KEY, {
+					...initSwapContext({
+						sourceToken: ETHEREUM_TOKEN,
+						destinationToken: mockValidErc20Token
+					}),
+					sourceTokenExchangeRate: readable(10),
+					destinationTokenExchangeRate: readable(2)
+				});
+
+				withFeeAndEthBalance(balance);
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			const fee = writable<bigint | undefined>(lifiFee);
+
+			const setFee = async (value: bigint) => {
+				fee.set(value);
+				await vi.advanceTimersByTimeAsync(500);
+			};
+
+			const renderWithMax = async () => {
+				fee.set(lifiFee);
+
+				const { swapAmount: _, ...rest } = props;
+
+				const result = render(SwapEthFormLifiTest, {
+					props: { ...rest, lifiFee: fee },
+					context: mockContext
+				});
+
+				await fireEvent.click(result.getByTestId(MAX_BUTTON));
+				await vi.advanceTimersByTimeAsync(500);
+
+				return result;
+			};
+
+			it('should step down to a higher fee and hold there when the fee falls back', async () => {
+				const { container } = await renderWithMax();
+
+				expect(amountOf(container)).toBe(maxFor(lifiFee));
+
+				await setFee(lifiFee + 1_000n);
+
+				expect(amountOf(container)).toBe(maxFor(lifiFee + 1_000n));
+
+				await setFee(lifiFee - 1_000n);
+
+				expect(amountOf(container)).toBe(maxFor(lifiFee + 1_000n));
+			});
+
+			it('should follow the fee anew once the amount is typed and "Max" pressed again', async () => {
+				const { container, getByTestId } = await renderWithMax();
+
+				await setFee(lifiFee + 1_000n);
+
+				await fireEvent.input(container.querySelector(amountSelector) as HTMLInputElement, {
+					target: { value: '0.5' }
+				});
+
+				await setFee(lifiFee - 1_000n);
+
+				expect(amountOf(container)).toBe('0.5');
+
+				await fireEvent.click(getByTestId(MAX_BUTTON));
+				await vi.advanceTimersByTimeAsync(500);
+
+				expect(amountOf(container)).toBe(maxFor(lifiFee - 1_000n));
+			});
 		});
 	});
 

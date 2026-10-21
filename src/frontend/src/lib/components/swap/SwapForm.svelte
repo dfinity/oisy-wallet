@@ -60,6 +60,8 @@
 		 * Left unset, "Max" is the balance minus the fee as before.
 		 */
 		maxAmount?: bigint;
+		// Whether "Max" holds the amount, re-applied whenever `fee` changes until the user types.
+		amountSetToMax?: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
 		onClose: () => void;
 		onNext: () => void;
@@ -77,6 +79,7 @@
 		onCustomValidate,
 		fee,
 		maxAmount,
+		amountSetToMax = $bindable(false),
 		onShowTokensList,
 		onClose,
 		onNext
@@ -94,7 +97,6 @@
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	let amountSetToMax = $state(false);
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 

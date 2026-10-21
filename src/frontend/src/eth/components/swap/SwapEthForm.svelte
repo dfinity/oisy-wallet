@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, untrack } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import SwapEthFeeInfo from '$eth/components/swap/SwapEthFeeInfo.svelte';
 	import SwapLifiFeeDisplay from '$eth/components/swap/SwapLifiFeeDisplay.svelte';
@@ -86,6 +86,35 @@
 				: isApproveNeeded && nonNullish($maxGasFee)
 					? $maxGasFee * 2n
 					: $maxGasFee
+	);
+
+	let amountSetToMax = $state(false);
+
+	// LI.FI's fee comes with each quote, and each quote with the amount: a "Max" that followed it
+	// would set an amount, get another fee for it, and set another amount, never settling. While
+	// "Max" holds a LI.FI amount it follows the highest fee seen since, so the amount only steps down.
+	let lifiMaxFee = $state<bigint | undefined>();
+
+	$effect(() => {
+		const fee = lifiFee;
+
+		if (!isLifi || !amountSetToMax) {
+			lifiMaxFee = undefined;
+			return;
+		}
+
+		if (nonNullish(fee)) {
+			untrack(() => {
+				if (isNullish(lifiMaxFee) || fee > lifiMaxFee) {
+					lifiMaxFee = fee;
+				}
+			});
+		}
+	});
+
+	// The fee "Max" leaves room for; `undefined` while the fee is, which holds the form.
+	const maxFee = $derived(
+		nonNullish(totalFee) && nonNullish(lifiMaxFee) && lifiMaxFee > totalFee ? lifiMaxFee : totalFee
 	);
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType | undefined => {
@@ -190,7 +219,7 @@
 
 <SwapForm
 	{errorType}
-	fee={totalFee}
+	fee={maxFee}
 	{isSwapAmountsLoading}
 	{onClose}
 	onCustomValidate={customValidate}
@@ -199,6 +228,7 @@
 	bind:swapAmount
 	bind:receiveAmount
 	bind:slippageValue
+	bind:amountSetToMax
 >
 	{#snippet swapDetails()}
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken) && nonNullish($feeTokenIdStore)}
