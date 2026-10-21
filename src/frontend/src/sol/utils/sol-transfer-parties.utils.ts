@@ -226,7 +226,7 @@ const mapSolInnerTransferLegs = async ({
 	// How many lifecycle events came before the first of these instructions.
 	from: number;
 }): Promise<{ legs: PlacedLeg[]; events: LifecycleEvent[] }> =>
-	// A token batch a program runs is reported as the instructions it carries, each of which is
+	// A token batch a program runs is returned as the instructions it carries, each of which is
 	// read like any other call the program makes.
 	await instructions
 		.flatMap<SolanaSimulatedInnerInstruction>((instruction) =>

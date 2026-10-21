@@ -207,7 +207,7 @@ const isParsedStep = (entry: unknown): entry is { type: string; info: object } =
 	typeof entry.info === 'object';
 
 /**
- * A token batch as the RPC reports one: the parsed instructions it carries, which come without a
+ * A token batch as the RPC returns one: the parsed instructions it carries, which come without a
  * program of their own, since they run in the batch's. Each is given the batch's in turn. A batch
  * whose contents are not in that shape stays whole, and describes nothing.
  */

@@ -3475,8 +3475,8 @@ describe('sol-instruction-summary.utils', () => {
 				own: false
 			});
 
-			// What the RPC reports for a batch a program runs inside its own instruction.
-			const reportedBatch = (instructions: unknown) => ({
+			// What the RPC returns for a batch a program runs inside its own instruction.
+			const returnedBatch = (instructions: unknown) => ({
 				program: 'spl-token',
 				programId: TOKEN,
 				parsed: { type: 'batch', info: { instructions } },
@@ -3517,7 +3517,7 @@ describe('sol-instruction-summary.utils', () => {
 						{
 							index: 0,
 							instructions: [
-								reportedBatch([
+								returnedBatch([
 									{
 										type: 'transferChecked',
 										info: {
@@ -3559,7 +3559,7 @@ describe('sol-instruction-summary.utils', () => {
 						{
 							index: 0,
 							instructions: [
-								reportedBatch([
+								returnedBatch([
 									{
 										type: 'closeAccount',
 										info: {
@@ -3584,7 +3584,7 @@ describe('sol-instruction-summary.utils', () => {
 
 			it('should leave a batch whose contents it cannot read unrecognised', () => {
 				const views = mapSolInstructionSummaries({
-					instructions: [reportedBatch('not a list')],
+					instructions: [returnedBatch('not a list')],
 					ownedAddresses: [mockSolAddress, mockAtaAddress],
 					userAddress: mockSolAddress,
 					includeUnrecognised: true

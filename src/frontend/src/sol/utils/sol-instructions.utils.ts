@@ -1192,7 +1192,7 @@ export const asSolParsedRpcInstruction = (
 		return;
 	}
 
-	// Read the way the RPC reports a batch, as the instructions it carries, each read on its own: a
+	// Read the way the RPC returns a batch, as the instructions it carries, each read on its own: a
 	// batch the message states is then read exactly like one a program runs inside its own call. One
 	// that does not hold together, or nests another, stays unread.
 	if (isSolTokenBatch(instruction)) {

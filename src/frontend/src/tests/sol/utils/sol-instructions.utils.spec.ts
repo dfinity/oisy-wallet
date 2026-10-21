@@ -2394,7 +2394,7 @@ describe('sol-instructions.utils', () => {
 		});
 
 		describe('asSolParsedRpcInstruction', () => {
-			it('should state a batch the way the RPC reports one', () => {
+			it('should state a batch the way the RPC returns one', () => {
 				expect(
 					asSolParsedRpcInstruction(
 						getBatchInstruction([transferTo(mockSolAddress2), transferTo(mockSolAddress)])
