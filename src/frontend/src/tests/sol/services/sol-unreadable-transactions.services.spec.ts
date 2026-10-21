@@ -22,6 +22,7 @@ describe('sol-unreadable-transactions.services', () => {
 	// The tracking is once per page load, so each test reports signatures no other test has.
 	const unreadable = (tokenIds: TokenId[]) => ({
 		signature: mockSolSignatureResponse().signature,
+		reason: 'refused' as const,
 		errorCode,
 		network,
 		tokenIds
@@ -65,10 +66,14 @@ describe('sol-unreadable-transactions.services', () => {
 			expect(get(solUnreadableTransactionsStore)[tokenId2]).toBeUndefined();
 		});
 
-		it('should track each transaction once, with its network and the code it was refused with', () => {
+		it('should track each transaction once, with its network, why and the code it was refused with', () => {
 			reportUnreadableSolTransactions({ transactions: [unreadable([tokenId, tokenId2])] });
 
-			expect(trackSolUnreadableTransaction).toHaveBeenCalledExactlyOnceWith({ network, errorCode });
+			expect(trackSolUnreadableTransaction).toHaveBeenCalledExactlyOnceWith({
+				network,
+				reason: 'refused',
+				errorCode
+			});
 		});
 
 		// The pagers meet a transaction again on every pass over its page.

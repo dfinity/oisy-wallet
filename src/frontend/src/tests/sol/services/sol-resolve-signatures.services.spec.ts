@@ -1,6 +1,7 @@
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { SPYX_TOKEN } from '$env/tokens/tokens-spl/tokens.spyx.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
+import * as consoleUtils from '$lib/utils/console.utils';
 import {
 	SOLANA_TRANSACTION_DETAIL_CONCURRENCY,
 	TOKEN_2022_PROGRAM_ADDRESS,
@@ -13,7 +14,11 @@ import {
 import * as solTransactionsServices from '$sol/services/sol-transactions.services';
 import type { SolAddress } from '$sol/types/address';
 import { SolanaNetworks } from '$sol/types/network';
-import type { SolSignatureWithSources, SolTransactionUi } from '$sol/types/sol-transaction';
+import {
+	SolTransactionReadError,
+	type SolSignatureWithSources,
+	type SolTransactionUi
+} from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
 import { createMockSolTransactionUi } from '$tests/mocks/sol-transactions.mock';
@@ -350,6 +355,7 @@ describe('sol-resolve-signatures.services', () => {
 						{
 							signature: refused.signature,
 							sources: [walletSource, usdcSource],
+							reason: 'refused',
 							errorCode: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION
 						}
 					]
@@ -367,6 +373,7 @@ describe('sol-resolve-signatures.services', () => {
 						{
 							signature: refused.signature,
 							sources: [walletSource],
+							reason: 'refused',
 							errorCode: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION
 						}
 					]
@@ -398,6 +405,55 @@ describe('sol-resolve-signatures.services', () => {
 				failWith({ failing: unreachable, error: networkError });
 
 				await expect(resolve({ signatures: [unreachable] })).rejects.toThrow(networkError);
+			});
+		});
+
+		describe('a transaction OISY fails to read', () => {
+			const cause = new TypeError("Cannot destructure property 'pubkey' of null");
+
+			const readError = new SolTransactionReadError('A Solana transaction could not be read', {
+				cause
+			});
+
+			let spyConsoleError: MockInstance;
+
+			beforeEach(() => {
+				spyConsoleError = vi.spyOn(consoleUtils, 'consoleError').mockImplementation(() => {});
+			});
+
+			it('should leave it out and list it as unparsable, without a code', async () => {
+				const read = withSources([walletSource]);
+				const unparsable = withSources([walletSource, bonkSource]);
+
+				spyFetchSolTransactionsForSignature.mockImplementation(
+					({ signature }: { signature: SolSignatureWithSources }) =>
+						signature.signature === unparsable.signature
+							? Promise.reject(readError)
+							: Promise.resolve([recordFor(signature)])
+				);
+
+				await expect(resolve({ signatures: [read, unparsable] })).resolves.toStrictEqual({
+					transactions: [{ transaction: recordFor(read), sources: [walletSource] }],
+					unreadable: [
+						{
+							signature: unparsable.signature,
+							sources: [walletSource, bonkSource],
+							reason: 'unparsable'
+						}
+					]
+				});
+			});
+
+			// The event that reports it carries no detail of what went wrong.
+			it('should log what went wrong', async () => {
+				spyFetchSolTransactionsForSignature.mockRejectedValue(readError);
+
+				await resolve({ signatures: [withSources([walletSource])] });
+
+				expect(spyConsoleError).toHaveBeenCalledExactlyOnceWith(
+					'Reading a Solana transaction failed:',
+					cause
+				);
 			});
 		});
 	});

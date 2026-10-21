@@ -441,6 +441,7 @@ describe('sol-history-pagers.services', () => {
 							.map(({ signature, sources }) => ({
 								signature,
 								sources,
+								reason: 'refused',
 								errorCode: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION
 							}))
 					})
@@ -456,6 +457,7 @@ describe('sol-history-pagers.services', () => {
 					transactions: [
 						{
 							signature: refused.signature,
+							reason: 'refused',
 							errorCode: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION,
 							network: SOLANA_TOKEN.network,
 							tokenIds: [SOLANA_TOKEN.id, USDC_TOKEN.id]
