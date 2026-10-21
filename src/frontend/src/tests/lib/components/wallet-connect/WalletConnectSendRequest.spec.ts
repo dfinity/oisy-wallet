@@ -1,7 +1,8 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import { CKETH_ABI } from '$eth/constants/cketh.constants';
+import { CKETH_ABI, CKETH_FEE } from '$eth/constants/cketh.constants';
 import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
 import {
 	ERC20_APPROVE_HASH,
@@ -9,20 +10,28 @@ import {
 	ERC20_TRANSFER_HASH
 } from '$eth/constants/erc20.constants';
 import { MULTICALL_HASH } from '$eth/constants/multicall.constants';
+import * as tokenDerived from '$eth/derived/token.derived';
+import type { InfuraProvider } from '$eth/providers/infura.providers';
+import * as feeServices from '$eth/services/fee.services';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
+import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import WalletConnectSend from '$lib/components/wallet-connect/WalletConnectSend.svelte';
 import { MAX_UINT_256 } from '$lib/constants/app.constants';
+import * as addressDerived from '$lib/derived/address.derived';
 import { modalStore } from '$lib/stores/modal.store';
+import { formatToken } from '$lib/utils/format.utils';
+import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import en from '$tests/mocks/i18n.mock';
-import { nonNullish } from '@dfinity/utils';
+import { nonNullish, toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { AbiCoder, Interface } from 'ethers/abi';
+import { readable } from 'svelte/store';
 
-// The ckETH minter information is never loaded here.
+// The ckETH minter information is never loaded here. A test that needs it puts it in the store.
 vi.mock(import('$icp-eth/services/cketh.services'), async (importOriginal) => ({
 	...(await importOriginal()),
 	loadCkEthMinterInfo: vi.fn()
@@ -51,7 +60,13 @@ describe('an eth_sendTransaction request reaching the review', () => {
 	const encodeCall = ({ selector, value }: { selector: string; value: bigint }) =>
 		encodeArgs({ selector, types: ['address', 'uint256'], values: [SPENDER, value] });
 
-	const request = (data: string | undefined): WalletKitTypes.SessionRequest =>
+	const request = ({
+		data,
+		to = USDC_TOKEN.address
+	}: {
+		data: string | undefined;
+		to?: string;
+	}): WalletKitTypes.SessionRequest =>
 		({
 			id: 1,
 			topic: 'mock-topic',
@@ -61,7 +76,7 @@ describe('an eth_sendTransaction request reaching the review', () => {
 					params: [
 						{
 							from: '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a',
-							to: USDC_TOKEN.address,
+							to,
 							value: '0x0',
 							data
 						}
@@ -79,15 +94,17 @@ describe('an eth_sendTransaction request reaching the review', () => {
 			}
 		}) as unknown as WalletKitTypes.SessionRequest;
 
-	const deliver = async (data: string | undefined) => {
+	const deliverRequest = async (sessionRequest: WalletKitTypes.SessionRequest) => {
 		const rendered = render(WalletConnectSend);
 
-		modalStore.openWalletConnectSend({ id: Symbol(), data: request(data) });
+		modalStore.openWalletConnectSend({ id: Symbol(), data: sessionRequest });
 
 		await waitFor(() => expect(rendered.container).toHaveTextContent('https://dapp.example'));
 
 		return rendered;
 	};
+
+	const deliver = (data: string | undefined) => deliverRequest(request({ data }));
 
 	beforeEach(() => {
 		modalStore.close();
@@ -146,6 +163,57 @@ describe('an eth_sendTransaction request reaching the review', () => {
 
 		expect(container).toHaveTextContent(en.wallet_connect.text.cketh_helper_unconfirmed);
 		expect(container).not.toHaveTextContent(en.wallet_connect.text.unknown_call);
+	});
+
+	// A request without calldata to the ckETH helper is signed as a deposit, so it is priced as one.
+	// The fee has to be read off the helper of the network the request is on, as `send()` reads it,
+	// not off the network selected in OISY.
+	it('should price a ckETH conversion on the helper of the network the request is on', async () => {
+		// The ckETH helper contract on Ethereum mainnet, as the minter returns it.
+		const CKETH_HELPER = '0x7574eB42cA208A4f6960ECCAfDF186D627dCC175';
+
+		const MAX_FEE_PER_GAS = 1_000_000_000n;
+
+		ckEthMinterInfoStore.set({
+			id: ETHEREUM_TOKEN.id,
+			data: {
+				data: { ...mockCkMinterInfo, eth_helper_contract_address: toNullable(CKETH_HELPER) },
+				certified: true
+			}
+		});
+
+		const spies = [
+			// Base is selected in OISY while the request is on Ethereum.
+			vi
+				.spyOn(tokenDerived, 'nativeEthereumTokenWithFallback', 'get')
+				.mockReturnValue(readable(BASE_ETH_TOKEN)),
+			vi.spyOn(addressDerived, 'ethAddress', 'get').mockReturnValue(readable(HOLDER)),
+			// The estimate of a bare transfer to the helper fails, which leaves the fee to `getEthFeeData`.
+			vi.spyOn(feeServices, 'getEthFeeDataWithProvider').mockImplementation(({ from, to }) =>
+				Promise.resolve({
+					feeData: { maxFeePerGas: MAX_FEE_PER_GAS, maxPriorityFeePerGas: 100_000_000n },
+					priorities: undefined,
+					provider: {
+						safeEstimateGas: vi.fn().mockResolvedValue(undefined),
+						estimateGas: vi.fn()
+					} as unknown as InfuraProvider,
+					params: { from, to }
+				})
+			)
+		];
+
+		const formatFee = (gas: bigint) =>
+			`${formatToken({ value: gas * MAX_FEE_PER_GAS, unitName: ETHEREUM_TOKEN.decimals })} ${ETHEREUM_TOKEN.symbol}`;
+
+		try {
+			const { container } = await deliverRequest(request({ data: undefined, to: CKETH_HELPER }));
+
+			await waitFor(() => expect(container).toHaveTextContent(formatFee(CKETH_FEE)));
+		} finally {
+			spies.forEach((spy) => spy.mockRestore());
+
+			ckEthMinterInfoStore.reset(ETHEREUM_TOKEN.id);
+		}
 	});
 
 	// Every selector a researcher demonstrated could move assets through this review, each carrying
