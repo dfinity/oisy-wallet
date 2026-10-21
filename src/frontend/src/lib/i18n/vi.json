@@ -524,6 +524,11 @@
 				"name": "Mingle Chat",
 				"one_liner": "Nhắn tin mã hóa, tích hợp sẵn token.",
 				"description": "Mingle Chat là ứng dụng nhắn tin mã hóa đầu cuối chạy hoàn toàn trên Internet Computer. Trò chuyện riêng hoặc theo nhóm, chia sẻ tin nhắn thoại, hình ảnh và tệp, và gửi token ngay trong cuộc trò chuyện. Mọi giao dịch chuyển đều được ký trong OISY."
+			},
+			"icforums": {
+				"name": "IC Forums",
+				"one_liner": "Diễn đàn cộng đồng trên Internet Computer.",
+				"description": "IC Forums là nền tảng cộng đồng chạy hoàn toàn trên Internet Computer. Tham gia thảo luận trong hơn 100 cộng đồng, hoặc tạo cộng đồng của riêng bạn với cấu trúc, vai trò và cách kiểm duyệt riêng. Một danh tính dùng được cho mọi cộng đồng."
 			}
 		}
 	},

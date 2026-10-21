@@ -344,6 +344,7 @@ interface I18nDapps {
 		};
 		hyperliquid: { name: string; one_liner: string; description: string };
 		minglechat: { name: string; one_liner: string; description: string };
+		icforums: { name: string; one_liner: string; description: string };
 	};
 }
 

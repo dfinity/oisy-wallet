@@ -524,6 +524,11 @@
 				"name": "Mingle Chat",
 				"one_liner": "内置代币转账的加密通讯应用。",
 				"description": "Mingle Chat 是一款完全运行在 Internet Computer 上的端到端加密通讯应用。你可以单聊或群聊，分享语音消息、图片和文件，还能直接在对话中发送代币。每笔转账都在 OISY 中签名。"
+			},
+			"icforums": {
+				"name": "IC Forums",
+				"one_liner": "Internet Computer 上的社区论坛。",
+				"description": "IC Forums 是一个完全运行在 Internet Computer 上的社区平台。你可以参与 100 多个社区的讨论，也可以创建自己的社区，并设置独立的结构、角色和管理规则。一个身份即可通行所有社区。"
 			}
 		}
 	},

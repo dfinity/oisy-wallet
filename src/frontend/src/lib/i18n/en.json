@@ -524,6 +524,11 @@
 				"name": "Mingle Chat",
 				"one_liner": "Encrypted messaging with tokens built in.",
 				"description": "Mingle Chat is an end-to-end encrypted messenger that runs fully on the Internet Computer. Chat one to one or in groups, share voice messages, images and files, and send tokens straight from a conversation. Every transfer is signed in OISY."
+			},
+			"icforums": {
+				"name": "IC Forums",
+				"one_liner": "Community forums on the Internet Computer.",
+				"description": "IC Forums is a community platform that runs fully on the Internet Computer. Join discussions in more than 100 communities, or start your own with its own structure, roles and moderation. One identity works across every community."
 			}
 		}
 	},

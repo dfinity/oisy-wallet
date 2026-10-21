@@ -524,6 +524,11 @@
 				"name": "Mingle Chat",
 				"one_liner": "Mensagens criptografadas com tokens integrados.",
 				"description": "Mingle Chat é um mensageiro com criptografia de ponta a ponta que funciona inteiramente no Internet Computer. Converse a dois ou em grupo, compartilhe mensagens de voz, imagens e arquivos e envie tokens diretamente de uma conversa. Cada transferência é assinada no OISY."
+			},
+			"icforums": {
+				"name": "IC Forums",
+				"one_liner": "Fóruns de comunidade no Internet Computer.",
+				"description": "IC Forums é uma plataforma de comunidades que funciona inteiramente no Internet Computer. Participe de discussões em mais de 100 comunidades ou crie a sua, com estrutura, funções e moderação próprias. Uma única identidade vale para todas as comunidades."
 			}
 		}
 	},
