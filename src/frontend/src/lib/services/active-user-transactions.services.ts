@@ -50,7 +50,9 @@ export const loadActiveUserTransactions = async ({
 			identity
 		});
 
-		activeUserTransactionsStore.set({ transactions, since, seenUpToNs });
+		if (activeUserTransactionsStore.holds(identity.getPrincipal())) {
+			activeUserTransactionsStore.set({ transactions, since, seenUpToNs });
+		}
 	} catch (err: unknown) {
 		consoleError(err);
 	}

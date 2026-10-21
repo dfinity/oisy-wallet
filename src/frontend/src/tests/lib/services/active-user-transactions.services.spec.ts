@@ -116,6 +116,32 @@ describe('active-user-transactions.services', () => {
 			);
 		});
 
+		// The account switched while the read was in flight: the snapshot and its marks are the
+		// previous account's, and both marks only move forward.
+		it('keeps a late response out of the store of another account', async () => {
+			let resolveLoad: (response: GetActiveUserTransactionsResponse) => void = () => {};
+			vi.spyOn(backendApi, 'getActiveUserTransactions').mockReturnValueOnce(
+				new Promise((resolve) => {
+					resolveLoad = resolve;
+				})
+			);
+
+			const inFlight = loadActiveUserTransactions({ identity: mockIdentity });
+
+			activeUserTransactionsStore.init(mockPrincipal2);
+			resolveLoad({
+				transactions: [{ ...mockActiveUserTransaction, updated_at_ns: 7n }],
+				seen_up_to_ns: 7n
+			});
+			await inFlight;
+
+			const state = get(activeUserTransactionsStore);
+
+			expect(state?.data).toEqual({});
+			expect(state?.seenUpToNs).toBe(ZERO);
+			expect(state?.loadedUpToNs).toBe(ZERO);
+		});
+
 		it('drops a late response when the store has been reset mid-flight', async () => {
 			// Simulates: load(A) issues getActiveUserTransactions; before the
 			// response lands, the user signs out and the store is reset. A's
