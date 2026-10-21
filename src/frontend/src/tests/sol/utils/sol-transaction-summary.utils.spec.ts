@@ -1128,6 +1128,58 @@ describe('sol-transaction-summary.utils', () => {
 
 				expect(textOf(withoutAmount)).toBe(en.transaction.text.instruction_approve);
 			});
+
+			describe('an unchecked approval, which states no decimals', () => {
+				const { decimals: _, ...unchecked } = approval;
+
+				const textWith = (decimalsOf: () => number | undefined): string =>
+					formatSolInstructionSummary({
+						instruction: unchecked,
+						i18n: en,
+						symbolOf: () => 'BONK',
+						decimalsOf,
+						userAddress: mockSolAddress
+					}).text;
+
+				// Read as a token with no decimals, 5 BONK would be stated as 5,000,000.
+				it('should name the spender alone when nothing gives the decimals', () => {
+					expect(textWith(() => undefined)).toBe(en.transaction.text.instruction_approve);
+				});
+
+				it('should state the amount of a token with no decimals', () => {
+					expect(textWith(() => 0)).toBe(
+						replacePlaceholders(en.transaction.text.instruction_approve_amount, {
+							$amount: '5000000',
+							$symbol: 'BONK'
+						})
+					);
+				});
+
+				it('should state the amount in the decimals the wallet knows', () => {
+					expect(textWith(() => 6)).toBe(
+						replacePlaceholders(en.transaction.text.instruction_approve_amount, {
+							$amount: '5',
+							$symbol: 'BONK'
+						})
+					);
+				});
+
+				it('should state the largest token amount as any amount without the decimals', () => {
+					expect(
+						formatSolInstructionSummary({
+							instruction: { ...unchecked, amount: SPL_TOKEN_MAX_AMOUNT },
+							i18n: en,
+							symbolOf: () => 'BONK',
+							decimalsOf: () => undefined,
+							userAddress: mockSolAddress
+						}).text
+					).toBe(
+						replacePlaceholders(en.transaction.text.instruction_approve_unlimited, {
+							$symbol: 'BONK'
+						})
+					);
+				});
+			});
 		});
 
 		// The notice about programs OISY cannot read names a pool by itself; the leg the pool made has
