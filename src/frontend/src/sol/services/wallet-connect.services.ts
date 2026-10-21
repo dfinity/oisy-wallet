@@ -193,8 +193,14 @@ export const decode = async ({
 			})),
 			network: solNetwork
 		}),
+		// An allowance names its token too, and moves no balance that would name it otherwise.
 		loadSplTokenMetadata({
-			tokenAddresses: (preview?.tokenDeltas ?? []).map(({ tokenAddress }) => tokenAddress),
+			tokenAddresses: [
+				...(preview?.tokenDeltas ?? []).map(({ tokenAddress }) => tokenAddress),
+				...(preview?.controlChanges ?? [])
+					.map(({ allowance }) => allowance?.tokenAddress)
+					.filter(nonNullish)
+			],
 			network: solNetwork
 		})
 	]);
