@@ -23,5 +23,11 @@
 
 	--touch-target-min-height: 2.75rem;
 
+	// List row density: full-menu rows by default; the dropdown `Popover` sets denser values for its
+	// rows (menu-surface rows, ListItemCheckbox, Toggle rows).
+	--menu-row-min-height: 48px;
+	--menu-row-padding-block: 12px;
+	--menu-row-padding-inline: 8px;
+
 	--backdrop: var(--color-background-modal-overlay);
 }

@@ -3,8 +3,7 @@
 	import { SUPPORTED_CURRENCIES } from '$env/currency.env';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import IconCheck from '$lib/components/icons/IconCheck.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import ListItemButton from '$lib/components/common/ListItemButton.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import {
 		CURRENCY_SWITCHER_BUTTON,
@@ -70,41 +69,26 @@
 		{/snippet}
 
 		{#snippet items()}
-			<List condensed noPadding testId={CURRENCY_SWITCHER_DROPDOWN}>
-				{#each sortedCurrencies as { key, currency, name, symbol }, index (index + key)}
-					<ListItem>
-						<Button
-							alignLeft
-							colorStyle="tertiary-alt"
-							contentFullWidth
-							fullWidth
-							onclick={() => handleCurrencyChange(currency)}
-							paddingSmall
-							styleClass="py-1 rounded-md font-normal text-primary underline-none pl-0.5 min-w-28"
-							testId={`${CURRENCY_SWITCHER_DROPDOWN_BUTTON}-${currency}`}
-							transparent
-						>
-							<span class="w-[20px] pt-0.75 text-brand-primary">
-								{#if $currentCurrency === currency}
-									<IconCheck size="20" />
-								{/if}
-							</span>
-							<div class="flex w-full flex-row justify-between gap-5">
-								<span class="first-letter:uppercase">{name}</span>
-								<span class="text-right text-tertiary">{symbol}</span>
-							</div>
-						</Button>
-					</ListItem>
-				{/each}
-			</List>
+			<div class="menu-surface">
+				<List condensed noPadding testId={CURRENCY_SWITCHER_DROPDOWN}>
+					{#each sortedCurrencies as { key, currency, name, symbol }, index (index + key)}
+						<ListItem>
+							<ListItemButton
+								contentFullWidth
+								onclick={() => handleCurrencyChange(currency)}
+								selectable
+								selected={$currentCurrency === currency}
+								testId={`${CURRENCY_SWITCHER_DROPDOWN_BUTTON}-${currency}`}
+							>
+								<span class="flex justify-between gap-5">
+									<span class="first-letter:uppercase">{name}</span>
+									<span class="text-right text-tertiary">{symbol}</span>
+								</span>
+							</ListItemButton>
+						</ListItem>
+					{/each}
+				</List>
+			</div>
 		{/snippet}
 	</Dropdown>
 </span>
-
-<style lang="scss">
-	:global .currency-selector {
-		.wrapper {
-			padding: var(--padding-1_25x) !important;
-		}
-	}
-</style>

@@ -1,4 +1,5 @@
 import TransactionsFilterTypesPanel from '$lib/components/transactions/filter/TransactionsFilterTypesPanel.svelte';
+import { TRANSACTIONS_FILTER_TYPE_LABEL } from '$lib/constants/test-ids.constants';
 import {
 	PLAUSIBLE_EVENT_EVENTS_KEYS,
 	PLAUSIBLE_EVENT_FILTER_MODIFIERS
@@ -19,9 +20,9 @@ describe('TransactionsFilterTypesPanel', () => {
 	it('renders one row per known transaction type, sorted alphabetically', () => {
 		const { container } = render(TransactionsFilterTypesPanel);
 
-		const labels = Array.from(container.querySelectorAll('li span.text-sm')).map(
-			(el) => el.textContent?.trim() ?? ''
-		);
+		const labels = Array.from(
+			container.querySelectorAll(`[data-tid="${TRANSACTIONS_FILTER_TYPE_LABEL}"]`)
+		).map((el) => el.textContent?.trim() ?? '');
 
 		const expected = ['Approve', 'Burn', 'Deposit', 'Mint', 'Receive', 'Send', 'Withdraw'];
 

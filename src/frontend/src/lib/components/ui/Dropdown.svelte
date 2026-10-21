@@ -51,7 +51,7 @@
 
 {#if asModalOnMobile}
 	<Responsive up="1.5md">
-		<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
+		<Popover anchor={button} direction="rtl" dropdown invisibleBackdrop bind:visible>
 			{@render items()}
 		</Popover>
 	</Responsive>
@@ -66,7 +66,7 @@
 		{/if}
 	</Responsive>
 {:else}
-	<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
+	<Popover anchor={button} direction="rtl" dropdown invisibleBackdrop bind:visible>
 		{@render items()}
 	</Popover>
 {/if}

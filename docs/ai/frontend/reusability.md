@@ -63,6 +63,7 @@ does not finish while the children are invisible (see `NftHideButton`).
 | Component                            | Where                             | Use it for                                                                                                                                                |
 | ------------------------------------ | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `List`, `ListItem`, `ListItemButton` | `$lib/components/common/`         | Vertical lists of items.                                                                                                                                  |
+| `ListItemCheckbox`                   | `$lib/components/common/`         | Multi-select row; renders its own `<li>`. Sized by the menu-row properties: 36 px in a dropdown (44 px on touch), 48 px in a sheet.                       |
 | `Dropdown` and its triggers          | `$lib/components/ui/`             | `Dropdown` for a picker (modal on phones), `ModalFilterButton` for a filter opening a step or popover, `MultiSelectDropdown` for multi-select.            |
 | `Divider`                            | `$lib/components/common/`         | Section separator. Don't roll your own border.                                                                                                            |
 | `MaxBalanceButton`                   | `$lib/components/common/`         | "Max" button on amount inputs.                                                                                                                            |
@@ -243,6 +244,12 @@ Popover panels share `--overlay-box-shadow` with modals: a translucent edge and 
 
 Use the opt-in `menu-surface` class for app menus built from existing list, logo and navigation buttons. Shared styles in `global/menus.scss` define 48px minimum rows (24px line-height plus 12px vertical padding, without button borders or inter-row gaps), 16px labels, 12px vertical / 8px horizontal padding, 8px row corners and inset keyboard focus. Use `menu-heading`, `menu-row-label`, and `menu-divider` within that surface. Network logos remain brand assets; action icons use the existing Lucide set. Theme changes temporarily suppress transitions through `data-theme-changing`, then restore them after painting the new theme.
 
+Row density comes from `--menu-row-min-height`, `--menu-row-padding-block` and `--menu-row-padding-inline` (`global/variables.scss`, 48 / 12 / 8 px), so a denser host changes the numbers without restating the row selectors.
+
 ### Dropdown triggers
 
 Every dropdown trigger except the native `Select` uses `.dropdown-button` (`DropdownButton`, `ModalFilterButton`, `MultiSelectDropdown`). The shared rule in `global/button.scss` owns its whole look: 40 px (44 px under `pointer: coarse`), 16 px medium text, the border colour, the open state (`opened`, announced with `aria-expanded`) and the chevron, `IconExpandMore` in `.dropdown-chevron`, which turns over while open. Set only the `border` class in markup: a `border-*` colour utility would out-rank the open-state border, because `button.scss` is in the base layer.
+
+### Dropdown panels
+
+Pickers, filters and short option menus open a `Popover` (or `ResponsivePopover`) with `dropdown`, which `Dropdown` and `MultiSelectDropdown` set themselves: an 8 px inset, 36 px rows with a 12 px inset in line with the search text, a 40 px `InputSearch` (through the `--input-padding-*` and `--input-block-gap` hooks in `InputBase`), an inset focus ring and no row dividers. Under `pointer: coarse` rows and search grow to 44 px. Build the content from `menu-surface` rows, `ListItemButton` or `ListItemCheckbox`; do not override row sizes per component. Full app menus (the user menu) keep the 48 px menu rows. On phones, `ResponsivePopover` and `Dropdown` with `asModalOnMobile` switch to a sheet or modal at their `Responsive` breakpoints; a bare `Popover` stays a popover, with 44 px rows on touch.

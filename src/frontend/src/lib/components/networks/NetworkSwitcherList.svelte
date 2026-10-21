@@ -68,8 +68,9 @@
 </ul>
 
 {#if showTestnets && $testnetsEnabled && $networksTestnets.length && isNullish(supportedNetworks)}
-	<span class="mt-6 mb-3 flex px-2 font-bold" transition:slide={SLIDE_PARAMS}
-		>{$i18n.networks.test_networks}</span
+	<span
+		class="mt-6 mb-3 flex px-(--menu-row-padding-inline) font-bold"
+		transition:slide={SLIDE_PARAMS}>{$i18n.networks.test_networks}</span
 	>
 
 	<ul class="flex list-none flex-col" transition:slide={SLIDE_PARAMS}>
