@@ -9,9 +9,9 @@ const HOST_ATTRIBUTE = 'data-sliding-highlight';
 // rewrites the whole class of an element whose `class` is reactive.
 const LIST_ATTRIBUTE = 'data-sliding-highlight-list';
 
-// Rows that are not list items: menu rows and LogoButtons such as "All networks".
+// Rows that are not list items: menu rows, nav items and LogoButtons such as "All networks".
 // `Popover.svelte` clears the hover fill of these rows and of the elements that paint it for them.
-const ROW_SELECTOR = '.menu-row, button:has(> .logo-button-wrapper)';
+const ROW_SELECTOR = '.menu-row, .nav-item, button:has(> .logo-button-wrapper)';
 const DISABLED_SELECTOR = ':disabled, [aria-disabled="true"], .disabled';
 
 // The highlight's fade-out in `Popover.svelte`. Once it has faded, the block is parked at the
@@ -45,9 +45,10 @@ const findRow = ({
 };
 
 // A wrapper around rows, such as a group with a divider, that the pointer reaches through its
-// border or a gap between rows.
+// border or a gap between rows; or a divider between groups, which is such a gap.
 const holdsRows = (target: EventTarget | null): boolean =>
-	target instanceof Element && nonNullish(target.querySelector(`li, ${ROW_SELECTOR}`));
+	target instanceof HTMLHRElement ||
+	(target instanceof Element && nonNullish(target.querySelector(`li, ${ROW_SELECTOR}`)));
 
 const scrollContainerOf = ({ node, row }: { node: HTMLElement; row: HTMLElement }): HTMLElement => {
 	for (

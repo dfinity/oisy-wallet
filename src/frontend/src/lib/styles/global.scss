@@ -1,5 +1,6 @@
 @use 'sass:meta';
 @use 'mixins/button' as button-mixins;
+@use 'mixins/interaction';
 
 /*
 We explicitly need to import Tailwind with a plain CSS @import as described in their documentation.
@@ -79,6 +80,17 @@ The control must be positioned: add `relative` unless it is already `absolute` o
 		width: max(100%, var(--hit-area-x, var(--hit-area, 2.5rem)));
 		height: max(100%, var(--hit-area-y, var(--hit-area, 2.5rem)));
 		translate: -50% -50%;
+	}
+}
+
+/*
+`hit-area-touch` - with `hit-area`: grows the tap target to 44 px when a touch screen is the main
+input (`pointer: coarse`), for the icon triggers of menus and dropdowns. A width breakpoint
+cannot tell a tablet from a narrow laptop window, so this follows the pointer instead.
+*/
+@utility hit-area-touch {
+	@include interaction.coarse {
+		--hit-area: var(--touch-target-min-height);
 	}
 }
 

@@ -381,6 +381,25 @@ describe('slidingHighlight', () => {
 		expect(highlightOf(node)).toHaveClass('visible');
 	});
 
+	it('stays put on a divider between groups', () => {
+		const node = document.createElement('div');
+		node.innerHTML = `
+			<button class="nav-item">Contacts</button>
+			<hr />
+			<button class="nav-item">WalletConnect</button>
+		`;
+		document.body.append(node);
+		const [first, second] = Array.from(node.querySelectorAll<HTMLElement>('.nav-item'));
+		place({ row: first, top: 0, height: 36 });
+		place({ row: second, top: 37, height: 36 });
+		slidingHighlight(node, true);
+
+		pointer({ type: 'pointerover', target: first });
+		pointer({ type: 'pointerover', target: node.querySelector('hr') as Element });
+
+		expect(highlightOf(node)).toHaveClass('visible');
+	});
+
 	it('takes LogoButton rows outside a list, and skips a row whose button is disabled', () => {
 		const node = document.createElement('div');
 		node.innerHTML = `
@@ -399,6 +418,33 @@ describe('slidingHighlight', () => {
 		expect(highlightOf(node)).toHaveClass('visible');
 
 		pointer({ type: 'pointerover', target: disabledRow });
+
+		expect(highlightOf(node)).not.toHaveClass('visible');
+	});
+
+	it('takes nav-item rows, buttons and links alike, but not disabled ones', () => {
+		const node = document.createElement('div');
+		node.innerHTML = `
+			<button class="nav-item">Help</button>
+			<a class="nav-item" href="https://oisy.com">Docs</a>
+			<button class="nav-item" disabled>Soon</button>
+		`;
+		document.body.append(node);
+		const [button, link, disabled] = Array.from(node.querySelectorAll<HTMLElement>('.nav-item'));
+		place({ row: button, top: 0, height: 36 });
+		place({ row: link, top: 36, height: 36 });
+		place({ row: disabled, top: 72, height: 36 });
+		slidingHighlight(node, true);
+
+		pointer({ type: 'pointerover', target: link });
+
+		expect(highlightOf(node)?.style.getPropertyValue('--highlight-y')).toBe('36px');
+
+		pointer({ type: 'pointerover', target: button });
+
+		expect(highlightOf(node)?.style.getPropertyValue('--highlight-y')).toBe('0px');
+
+		pointer({ type: 'pointerover', target: disabled });
 
 		expect(highlightOf(node)).not.toHaveClass('visible');
 	});

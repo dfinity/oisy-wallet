@@ -338,7 +338,8 @@
 
 	// The block `slidingHighlight` moves between rows (sliding-highlight.utils.ts). It sits behind
 	// them, so the elements that paint a row's own hover or focus fill (the row, a list item's child,
-	// a `row-feedback` control, a LogoButton's wrapper) stay transparent while it is there. Row styles live in the base and utility layers, which these
+	// a `row-feedback` control, a LogoButton's wrapper) stay transparent while it is there, and nav
+	// items keep their text colour. Row styles live in the base and utility layers, which these
 	// unlayered rules out-rank; ListItemCheckbox's own unlayered hover loses on specificity. The
 	// block sits in the content itself, or in a list that scrolls on its own inside it.
 	.popover-content:global([data-sliding-highlight]) {
@@ -352,7 +353,14 @@
 			isolation: isolate;
 		}
 
-		:is(li, li > *, .menu-row, .row-feedback, :has(> button > .logo-button-wrapper)) {
+		:is(
+			li,
+			li > *,
+			.menu-row,
+			.nav-item:not(:disabled, .disabled),
+			.row-feedback,
+			:has(> button > .logo-button-wrapper)
+		) {
 			&:focus-visible:not(#{$pressed}) {
 				background-color: transparent;
 			}
@@ -362,6 +370,10 @@
 					background-color: transparent;
 				}
 			}
+		}
+
+		.nav-item:not(:disabled, .disabled) {
+			color: var(--color-foreground-primary);
 		}
 
 		.sliding-highlight {
