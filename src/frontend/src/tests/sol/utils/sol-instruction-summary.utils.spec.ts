@@ -3727,6 +3727,40 @@ describe('sol-instruction-summary.utils', () => {
 				expect(close?.wrapped).toBe(2_000n);
 			});
 
+			describe('of everything, then a close', () => {
+				const close = {
+					program: 'spl-token',
+					programId: TOKEN,
+					parsed: {
+						type: 'closeAccount',
+						info: { account: wrapped, destination: mockSolAddress, owner: mockSolAddress }
+					}
+				};
+
+				// What it moves is what the account wraps there, as its own line says, so the close
+				// hands back what is left rather than an amount nobody knows.
+				it('should have the close hand back what the unwrap left', () => {
+					const views = read({
+						instructions: [unwrap(), close],
+						accountLamports: { [wrapped]: 2_046_280n },
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					const closing = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+					expect(closing?.returned).toBe(2_039_280n);
+				});
+
+				it('should know nothing of what the close hands back when nobody read what it wraps', () => {
+					const views = read({
+						instructions: [unwrap(), close],
+						accountLamports: { [wrapped]: 2_046_280n }
+					});
+
+					expect(views.at(-1)).not.toHaveProperty('returned');
+				});
+			});
+
 			describe('into the account', () => {
 				const into = (amount?: string) => ({
 					program: 'spl-token',

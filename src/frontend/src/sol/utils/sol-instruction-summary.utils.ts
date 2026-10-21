@@ -1312,7 +1312,8 @@ const initialisedInMessage = ({
 const closePayouts = ({
 	flattened,
 	accountLamports,
-	mintAt
+	mintAt,
+	wrappedAt
 }: {
 	flattened: { instruction: SolParsedRpcInstruction }[];
 	// What each account held going in, so a chain can start from an account that already existed.
@@ -1320,6 +1321,9 @@ const closePayouts = ({
 	// Which mint an account holds as of an instruction. A wrapped SOL account's token balance is
 	// its lamports, so a token transfer in or out of one moves lamports; of any other mint, none.
 	mintAt: (params: { account: SolAddress; position: number }) => SplTokenAddress | undefined;
+	// What a wrapped SOL account wraps as of an instruction, which is what an unwrap naming no
+	// amount moves.
+	wrappedAt: (params: { account: SolAddress; position: number }) => bigint | undefined;
 }): Map<number, bigint | undefined> => {
 	// What each account holds as the walk stands. Absent means untouched so far, and an untouched
 	// account holds what it held going in, which may be unknown.
@@ -1395,16 +1399,19 @@ const closePayouts = ({
 			}
 
 			// Unwrapping moves lamports out of a wrapped SOL account and leaves it open. An amount left
-			// unstated is what it wraps, which this walk does not know apart from its rent: both ends
-			// then hold an amount nobody can state, rather than one this walk made up.
+			// unstated is everything it wraps as of this instruction, which this walk does not know
+			// apart from its rent but the token balance walk does, as for the unwrap's own line. Only
+			// when that is unknown too do both ends hold an amount nobody can state, rather than one
+			// this walk made up.
 			if (nonNullish(program) && TOKEN_PROGRAMS.includes(program) && type === 'unwrapLamports') {
 				const source = address({ info, key: 'source' });
 				const destination = address({ info, key: 'destination' });
-				const moved = amount({ info, key: 'amount' });
 
 				if (isNullish(source) || source === destination) {
 					return;
 				}
+
+				const moved = amount({ info, key: 'amount' }) ?? wrappedAt({ account: source, position });
 
 				if (isNullish(moved)) {
 					lamports.set(source, undefined);
@@ -1769,7 +1776,21 @@ export const mapSolInstructionSummaries = ({
 		);
 	};
 
-	const payouts = closePayouts({ flattened, accountLamports, mintAt });
+	const payouts = closePayouts({
+		flattened,
+		accountLamports,
+		mintAt,
+		// The source of an unwrap holds wrapped SOL, or the program refuses it.
+		wrappedAt: ({ account, position }) =>
+			heldAtInstruction({
+				account,
+				native: true,
+				flattened,
+				accountTokenAmounts,
+				rentExemptMinimum,
+				until: position
+			})
+	});
 
 	const owned = expandOwnedAccounts({ flattened, ownedAddresses });
 
