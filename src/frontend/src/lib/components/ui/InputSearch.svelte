@@ -31,7 +31,11 @@
 >
 	{#snippet innerEnd()}
 		{#if showResetButton}
-			<button aria-label={$i18n.core.text.clear_filter} onclick={() => (filter = '')}>
+			<button
+				class="hit-area relative press-icon"
+				aria-label={$i18n.core.text.clear_filter}
+				onclick={() => (filter = '')}
+			>
 				<IconCloseThin />
 			</button>
 		{:else}

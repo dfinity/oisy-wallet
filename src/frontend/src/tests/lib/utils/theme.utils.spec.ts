@@ -13,6 +13,7 @@ const importThemeUtils = async ({ nodeRuntime }: { nodeRuntime: boolean }) => {
 
 const resetThemeDom = () => {
 	document.documentElement.removeAttribute('theme');
+	document.documentElement.removeAttribute('data-theme-changing');
 	document.documentElement.removeAttribute('style');
 	document.head.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
 		meta.remove();
@@ -90,6 +91,33 @@ describe('theme.utils', () => {
 	});
 
 	describe('applyTheme', () => {
+		it('restores transitions after a rapid sequence of theme changes', async () => {
+			const frames = new Map<number, FrameRequestCallback>();
+			let id = 0;
+			vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+				frames.set(++id, callback);
+				return id;
+			});
+			vi.stubGlobal('cancelAnimationFrame', (frame: number) => frames.delete(frame));
+			const paint = () => {
+				const pending = [...frames.values()];
+				frames.clear();
+				pending.forEach((callback) => callback(0));
+			};
+			const { applyTheme } = await importThemeUtils({ nodeRuntime: false });
+			applyTheme({ theme: Theme.LIGHT });
+			paint();
+			applyTheme({ theme: Theme.DARK });
+			paint();
+
+			expect(document.documentElement).toHaveAttribute('data-theme-changing');
+
+			paint();
+
+			expect(document.documentElement).not.toHaveAttribute('data-theme-changing');
+			expect(document.documentElement).toHaveAttribute('theme', Theme.DARK);
+		});
+
 		it('should set the DOM theme, update the theme-color meta tag, and preserve the selection by default', async () => {
 			const { applyTheme, LOCALSTORAGE_THEME_KEY, THEME_ATTRIBUTE } = await importThemeUtils({
 				nodeRuntime: false

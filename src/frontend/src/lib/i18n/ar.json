@@ -108,12 +108,17 @@
 			"do_not_close": "لا تغلق هذه النافذة حتى تكتمل المعاملة",
 			"standalone_mode": "",
 			"video_not_supported": ""
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
 		"completed": "مكتمل",
 		"in_progress": "قيد التقدم",
-		"failed": "فشل"
+		"failed": "فشل",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {
@@ -1351,6 +1356,8 @@
 			"swap_fees": "",
 			"cross_chain_networks_info": "",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -1390,7 +1397,8 @@
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
-			"oisy_trade_recovery_failed": ""
+			"oisy_trade_recovery_failed": "",
+			"lifi_status_unknown": ""
 		}
 	},
 	"buy": {
@@ -1890,6 +1898,7 @@
 			"ambiguous_transaction": "تنقل هذه المعاملة الأموال بين عدة عناوين ولا يمكن عرضها بدقة للمراجعة. حفاظًا على أمانك، لم يتم توقيعها.",
 			"close_pays_others": "",
 			"unreviewed_without_simulation": "",
+			"unreviewed_not_described_by_simulation": "",
 			"unread_programs_unconfirmed": "",
 			"sol_transaction_as_message": "",
 			"request_not_defined": "خطأ غير متوقع: الطلب غير معرف وبالتالي لا يمكن معالجته.",
@@ -2588,7 +2597,8 @@
 		},
 		"warning": {
 			"no_index_canister": "لا يمكن عرض معاملات $token_list. لا يتوفر حاوية فهرس.",
-			"unavailable_index_canister": "لا يمكن عرض معاملات $token_list. حاوية الفهرس غير متاحة حاليًا."
+			"unavailable_index_canister": "لا يمكن عرض معاملات $token_list. حاوية الفهرس غير متاحة حاليًا.",
+			"unsupported_sol_transactions": ""
 		}
 	},
 	"earning": {
@@ -2719,10 +2729,13 @@
 			"starting_to_repay": "",
 			"repay_started": "",
 			"current_debt": "",
+			"pending_repays": "",
 			"interest_accrued": "",
 			"debt_after_repay": "",
 			"repay_exceeds_debt": "",
-			"repay_prices_unavailable": ""
+			"repay_prices_unavailable": "",
+			"repay_debt_unavailable": "",
+			"repay_pending_covers_debt": ""
 		},
 		"info": {
 			"title": "",
@@ -3024,6 +3037,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

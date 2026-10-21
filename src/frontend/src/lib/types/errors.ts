@@ -49,3 +49,10 @@ export class SwapAmountTooLowError extends Error {
 		super(message);
 	}
 }
+
+/**
+ * A LI.FI quote failed OISY's own checks: it names a target or spender other than the pinned
+ * Diamond, or echoes a request other than the one sent. LI.FI quotes are unsigned, so such a quote
+ * is never shown nor acted on.
+ */
+export class LifiQuoteRejectedError extends Error {}

@@ -15,6 +15,26 @@ describe('MaxBalanceButton', () => {
 	const amountTestId = 'max-balance-button-amount';
 	const amountSetToMaxTestId = 'max-balance-button-amount-set-to-max';
 
+	it('presses like an icon-size control and has a 40 px tap area', () => {
+		const { getByTestId } = render(MaxBalanceButton, { props: baseProps });
+
+		expect(getByTestId(MAX_BUTTON)).toHaveClass(
+			'hit-area',
+			'[--hit-area-y:calc(100%+1.125rem)]',
+			'press-icon',
+			'hover:text-brand-hover'
+		);
+	});
+
+	it('shows no hover when the fee uses up the balance, so Max would set 0', () => {
+		const { getByTestId } = render(MaxBalanceButton, {
+			props: { ...baseProps, fee: 200_000_000n }
+		});
+
+		expect(getByTestId(MAX_BUTTON)).toHaveTextContent('0 BTC');
+		expect(getByTestId(MAX_BUTTON)).not.toHaveClass('hover:text-brand-hover');
+	});
+
 	it('shows the affordable balance when no cap is set', () => {
 		const { getByTestId } = render(MaxBalanceButton, { props: baseProps });
 
