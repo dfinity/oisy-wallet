@@ -43,7 +43,10 @@ describe('CyclesTopUpModal', () => {
 	let toastsShowSpy: MockInstance;
 	let toastsErrorSpy: MockInstance;
 
-	const renderModal = () => render(CyclesTopUpModal, { props: { token: mockTcyclesToken } });
+	// The TCYCLES index, where the service reads a duplicate's outcome.
+	const token = { ...mockTcyclesToken, indexCanisterId: 'ul4oc-4iaaa-aaaaq-qaabq-cai' };
+
+	const renderModal = () => render(CyclesTopUpModal, { props: { token } });
 
 	const enterCanister = async ({
 		result,
@@ -481,7 +484,8 @@ describe('CyclesTopUpModal', () => {
 				identity: mockIdentity,
 				canisterId: Principal.fromText(canister),
 				amount: 1_500_000_000_000n,
-				createdAt: 1_000_000_000n
+				createdAt: 1_000_000_000n,
+				indexCanisterId: 'ul4oc-4iaaa-aaaaq-qaabq-cai'
 			});
 			expect(trackSpy).toHaveBeenNthCalledWith(2, {
 				step: 'top_up',

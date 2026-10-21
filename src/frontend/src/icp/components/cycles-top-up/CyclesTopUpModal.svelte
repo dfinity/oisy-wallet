@@ -241,7 +241,8 @@
 			identity: $authIdentity,
 			canisterId: principal,
 			amount: request.amount,
-			createdAt: request.createdAt
+			createdAt: request.createdAt,
+			indexCanisterId: token.indexCanisterId
 		});
 
 		// A resend past the ledger's 24-hour window is refused as too old whatever happened to the
