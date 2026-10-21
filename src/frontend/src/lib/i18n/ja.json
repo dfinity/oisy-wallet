@@ -534,6 +534,11 @@
 				"name": "Storica",
 				"one_liner": "Internet Computer 上の、あなた専用のクラウドストレージ。",
 				"description": "Storica は、約1分で Internet Computer 上にプライベートなストレージキャニスターをデプロイします。支払いは ICP で行います。キャニスターとそのファイル、権限、アップグレードはすべてあなたが管理します。Web コンソール、コマンドラインツール、TypeScript SDK からファイルを管理でき、OISY または Internet Identity でサインインできます。"
+			},
+			"blitzgrid": {
+				"name": "Blitz Grid Fantasy Football",
+				"one_liner": "Internet Computer 上で完全に動作するファンタジーフットボールリーグ。",
+				"description": "Blitz Grid は、モバイル向けに作られたファンタジーフットボールゲームです。リーグ、ドラフト、ロスター、トレード、毎週のスコア計算はすべて Internet Computer 上のキャニスターで動作します。OISY を接続すると、リーグ内の他のマネージャーに ICP を送れます。すべての送金は OISY で署名されます。"
 			}
 		}
 	},

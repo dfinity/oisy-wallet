@@ -346,6 +346,7 @@ interface I18nDapps {
 		minglechat: { name: string; one_liner: string; description: string };
 		icforums: { name: string; one_liner: string; description: string };
 		storica: { name: string; one_liner: string; description: string };
+		blitzgrid: { name: string; one_liner: string; description: string };
 	};
 }
 

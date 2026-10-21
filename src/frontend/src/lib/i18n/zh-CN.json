@@ -534,6 +534,11 @@
 				"name": "Storica",
 				"one_liner": "你在 Internet Computer 上的专属云存储。",
 				"description": "Storica 只需约一分钟即可在 Internet Computer 上部署一个私有存储容器，使用 ICP 付费。容器及其文件、权限和升级都由你掌控。你可以通过网页控制台、命令行工具或 TypeScript SDK 管理文件，并使用 OISY 或 Internet Identity 登录。"
+			},
+			"blitzgrid": {
+				"name": "Blitz Grid Fantasy Football",
+				"one_liner": "完全运行在 Internet Computer 上的梦幻橄榄球联赛。",
+				"description": "Blitz Grid 是一款为移动端打造的梦幻橄榄球游戏。联赛、选秀、阵容、交易和每周计分都在 Internet Computer 的容器中运行。连接 OISY 后，你可以向联赛中的其他经理发送 ICP。每笔转账都在 OISY 中签名。"
 			}
 		}
 	},

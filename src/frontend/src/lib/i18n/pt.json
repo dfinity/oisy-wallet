@@ -534,6 +534,11 @@
 				"name": "Storica",
 				"one_liner": "Seu próprio armazenamento em nuvem no Internet Computer.",
 				"description": "Storica implanta em cerca de um minuto um canister de armazenamento privado no Internet Computer, pago com ICP. Você controla o canister, seus arquivos, permissões e atualizações. Gerencie seus arquivos pelo console web, pela ferramenta de linha de comando ou pelo SDK TypeScript, e entre com OISY ou Internet Identity."
+			},
+			"blitzgrid": {
+				"name": "Blitz Grid Fantasy Football",
+				"one_liner": "Ligas de fantasy football que funcionam inteiramente no Internet Computer.",
+				"description": "Blitz Grid é um jogo de fantasy football pensado para celular. Ligas, draft, elencos, trocas e a pontuação semanal funcionam em canisters no Internet Computer. Conecte o OISY para enviar ICP a outros técnicos da sua liga. Cada transferência é assinada no OISY."
 			}
 		}
 	},
