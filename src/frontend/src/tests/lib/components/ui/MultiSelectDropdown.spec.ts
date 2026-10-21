@@ -165,4 +165,12 @@ describe('MultiSelectDropdown', () => {
 			expect(trigger).toHaveAttribute('aria-expanded', 'true');
 		});
 	});
+
+	it('opens a compact dropdown panel', async () => {
+		const { getByTestId } = render(MultiSelectDropdownTest);
+
+		await fireEvent.click(getByTestId('multi-select-dropdown'));
+
+		await waitFor(() => expect(document.querySelector('.wrapper.dropdown')).not.toBeNull());
+	});
 });

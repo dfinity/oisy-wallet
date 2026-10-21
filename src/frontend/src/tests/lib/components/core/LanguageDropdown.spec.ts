@@ -152,4 +152,21 @@ describe('LanguageDropdown', () => {
 			expect(dropdownBtn).toHaveAttribute('aria-expanded', 'true');
 		});
 	});
+
+	it('announces the current language as the selected option', async () => {
+		const { container, getByTestId } = render(LanguageDropdown, {});
+
+		const dropdownBtn = container.querySelector('.dropdown-button');
+
+		assertNonNullish(dropdownBtn);
+
+		await fireEvent.click(dropdownBtn);
+
+		await waitFor(() => expect(getByTestId(LANGUAGE_DROPDOWN)).toBeInTheDocument());
+
+		const selected = [...getByTestId(LANGUAGE_DROPDOWN).querySelectorAll('[aria-pressed="true"]')];
+
+		expect(selected).toHaveLength(1);
+		expect(selected[0]).toHaveTextContent(LANGUAGES[get(currentLanguage)]);
+	});
 });

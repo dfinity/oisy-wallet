@@ -51,7 +51,7 @@
 	{/snippet}
 </ButtonIcon>
 
-<ResponsivePopover ariaLabel={$i18n.core.text.sorting} {button} bind:visible>
+<ResponsivePopover ariaLabel={$i18n.core.text.sorting} {button} dropdown bind:visible>
 	{#snippet content()}
 		<div class="menu-surface min-w-56">
 			<span class="menu-heading">{$i18n.core.text.sorting}</span>

@@ -7,16 +7,26 @@
 		onclick: () => void;
 		selectable?: boolean;
 		selected?: boolean;
+		// For a label with parts spread across the row, e.g. a name and a symbol.
+		contentFullWidth?: boolean;
 		children: Snippet;
 		testId?: string;
 	}
 
-	const { onclick, selectable, selected, children, testId }: Props = $props();
+	const {
+		onclick,
+		selectable,
+		selected,
+		contentFullWidth = false,
+		children,
+		testId
+	}: Props = $props();
 </script>
 
 <Button
 	alignLeft
 	colorStyle="tertiary-alt"
+	{contentFullWidth}
 	fullWidth
 	{onclick}
 	pressed={selectable ? selected : undefined}
@@ -32,5 +42,7 @@
 			{/if}
 		</span>
 	{/if}
-	<span class="font-normal">{@render children()}</span>
+	<span class="font-normal" class:flex-1={contentFullWidth} class:min-w-0={contentFullWidth}
+		>{@render children()}</span
+	>
 </Button>
