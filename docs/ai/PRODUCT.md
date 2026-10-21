@@ -320,7 +320,7 @@ The two gas figures show how far estimates fall short, per token and network. Th
 | `open`           | the Top up modal opens       | none                            | none                                           |
 | `top_up`         | a top-up starts and finishes | `executing` → `success`/`error` | `token_symbol`; `result_error_code` on failure |
 
-`result_error_code` says why a top-up ended in `error`: `refused` (the ledger refused before burning anything, so nothing moved), `refunded` (the canister could not receive the cycles, which came back minus the ledger's fees) or `unknown` (no answer, so the top-up may or may not have gone through).
+`result_error_code` says why a top-up ended in `error`: `refused` (the ledger refused before burning anything, so nothing moved), `refunded` (the canister could not receive the cycles, which came back minus the ledger's fees) or `unknown` (no answer, so the top-up may or may not have gone through). A failed top-up also carries `event_severity` for the monitoring dashboards: `warn` for `refused` and `unknown`, `error` for `refunded`, which cost twice the fee.
 
 ---
 
