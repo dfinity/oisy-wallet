@@ -56,7 +56,7 @@
 <span class="currency-selector min-w-32">
 	<Dropdown
 		bind:this={dropdown}
-		ariaLabel={$i18n.core.alt.switch_currency}
+		ariaDescription={$i18n.core.alt.switch_currency}
 		asModalOnMobile
 		buttonBorder
 		buttonFullWidth
