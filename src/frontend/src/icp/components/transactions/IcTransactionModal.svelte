@@ -11,12 +11,14 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
+	import { isReceivedMicroTransaction } from '$lib/utils/transactions.utils';
 
 	interface Props {
 		transaction: IcTransactionUi;
@@ -42,6 +44,11 @@
 	} = $derived(transaction);
 
 	let isIncoming = $derived(type === 'receive' || type === 'mint');
+
+	// The same check that hides this transaction from lists while micro transactions are hidden.
+	let likelySpam = $derived(
+		nonNullish(token) && isReceivedMicroTransaction({ transaction, token, exchanges: $exchanges })
+	);
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openIcTransaction({
@@ -86,6 +93,7 @@
 				{approveSpender}
 				{from}
 				{fromExplorerUrl}
+				{likelySpam}
 				{onSaveAddressComplete}
 				{to}
 				{toExplorerUrl}

@@ -5,6 +5,7 @@ import { ERC20_DEPOSIT_HASH, ERC20_TRANSFER_HASH } from '$eth/constants/erc20.co
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { mapAddressToName } from '$eth/utils/transactions.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { getTokenDisplayName } from '$lib/utils/token.utils';
@@ -599,6 +600,34 @@ describe('EthTransactionModal', () => {
 
 				expect(getByText(mockTransferRecipient)).toBeInTheDocument();
 			});
+		});
+	});
+
+	describe('likely spam', () => {
+		beforeEach(() => {
+			exchangeStore.set([{ ethereum: { usd: 3_000 } }]);
+		});
+
+		afterEach(() => {
+			exchangeStore.reset();
+		});
+
+		it('warns about a received transaction worth less than a cent', () => {
+			const { getByText } = render(EthTransactionModal, {
+				transaction: { ...mockEthTransactionUi, type: 'receive', value: 1n },
+				token: ETHEREUM_TOKEN
+			});
+
+			expect(getByText(get(i18n).transaction.warning.likely_spam)).toBeInTheDocument();
+		});
+
+		it('does not warn about a received transaction worth more than a cent', () => {
+			const { queryByText } = render(EthTransactionModal, {
+				transaction: { ...mockEthTransactionUi, type: 'receive', value: 10n ** 18n },
+				token: ETHEREUM_TOKEN
+			});
+
+			expect(queryByText(get(i18n).transaction.warning.likely_spam)).toBeNull();
 		});
 	});
 });

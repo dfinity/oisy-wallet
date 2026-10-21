@@ -39,6 +39,7 @@ import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 import { ZERO } from '$lib/constants/app.constants';
+import type { ExchangesData } from '$lib/types/exchange';
 import type { Token } from '$lib/types/token';
 import type { AllTransactionUiWithCmp, AnyTransactionUi } from '$lib/types/transaction-ui';
 import {
@@ -48,6 +49,7 @@ import {
 	findOldestTransaction,
 	getKnownDestinations,
 	getReceivedMicroTransactions,
+	isReceivedMicroTransaction,
 	isTransactionsStoreEmpty,
 	isTransactionsStoreInitialized,
 	isTransactionsStoreNotInitialized,
@@ -886,6 +888,62 @@ describe('transactions.utils', () => {
 				});
 
 				expect(microTransactions).toHaveLength(5);
+			});
+		});
+
+		describe('isReceivedMicroTransaction', () => {
+			// 10 drops (0.00001 XRP), the dust a bot sends to newly created XRP accounts.
+			const transaction: XrpTransactionUi = {
+				id: 'ABC123',
+				type: 'receive',
+				status: 'confirmed',
+				value: 10n,
+				from: 'rSenderAddress',
+				to: 'rReceiverAddress'
+			};
+
+			const exchanges: ExchangesData = { [XRP_TOKEN_ID]: { usd: 2.5 } };
+
+			it('returns true for a received transaction worth less than a cent', () => {
+				expect(
+					isReceivedMicroTransaction({ transaction, token: XRP_TOKEN, exchanges })
+				).toBeTruthy();
+			});
+
+			it('returns false for a received transaction worth more than a cent', () => {
+				expect(
+					isReceivedMicroTransaction({
+						transaction: { ...transaction, value: 1_000_000n },
+						token: XRP_TOKEN,
+						exchanges
+					})
+				).toBeFalsy();
+			});
+
+			it('returns false for a sent transaction', () => {
+				expect(
+					isReceivedMicroTransaction({
+						transaction: { ...transaction, type: 'send' },
+						token: XRP_TOKEN,
+						exchanges
+					})
+				).toBeFalsy();
+			});
+
+			it('returns false for a token without a USD price', () => {
+				expect(
+					isReceivedMicroTransaction({ transaction, token: XRP_TOKEN, exchanges: {} })
+				).toBeFalsy();
+			});
+
+			it('returns false for a transaction without a value', () => {
+				expect(
+					isReceivedMicroTransaction({
+						transaction: { ...transaction, value: undefined },
+						token: XRP_TOKEN,
+						exchanges
+					})
+				).toBeFalsy();
 			});
 		});
 	});
