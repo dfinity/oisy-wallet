@@ -934,7 +934,12 @@ than the 1,900-line `swap.services.ts`, next to the form's `lifiQuoteFeeCeiling`
 `lifiApprovalTransactions`), mirroring `fetchVeloraMarketSwap`. Every re-quote below uses
 the offer's own request (`SwapMappedResult.request`, the one its quote answers), with its
 bridges narrowed to the one the reviewed route took, so execution can only re-quote the
-same kind of route; its `fromAmount` must equal the amount being swapped.
+same kind of route; its `fromAmount` must equal the amount being swapped. Narrowing the
+bridges does not fix the route's shape, so every re-quote is also refused, with
+`LifiRouteUnsupportedError` (the generic swap error; `quote_rejected` in analytics), when
+`isLifiRouteExecutable` refuses it: a refreshed Across route can put a DEX swap before the
+bridge that the calldata binding refuses, and refused at step 1 it costs no approval.
+Execution does not fall back to another bridge, which would change the route reviewed.
 
 1. **Price check before any gas is spent.** The displayed quote can be up to 30 s old
    (see [Cadence](#cadence-on-input-change-then-every-30-s)), and an ERC-20 source is
