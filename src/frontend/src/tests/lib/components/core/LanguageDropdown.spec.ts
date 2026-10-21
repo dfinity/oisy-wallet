@@ -6,6 +6,7 @@ import { currentLanguage } from '$lib/derived/i18n.derived';
 import { Languages } from '$lib/enums/languages';
 import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
+import { screensStore } from '$lib/stores/screens.store';
 import type { TrackEventParams } from '$lib/types/analytics';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -33,6 +34,18 @@ describe('LanguageDropdown', () => {
 
 		expect(trigger).not.toHaveAttribute('aria-label');
 		expect(trigger).toHaveAccessibleDescription(get(i18n).core.alt.switch_language);
+	});
+
+	it('names its popover by what the trigger does', async () => {
+		screensStore.set('lg');
+
+		const { getByRole } = render(LanguageDropdown, {});
+
+		await fireEvent.click(getByRole('button', { name: LANGUAGES[Languages.ENGLISH] }));
+
+		await waitFor(() => {
+			expect(getByRole('dialog', { name: get(i18n).core.alt.switch_language })).toBeInTheDocument();
+		});
 	});
 
 	it('should display the current language', () => {
@@ -138,5 +151,22 @@ describe('LanguageDropdown', () => {
 			expect(dropdownBtn).toHaveClass('opened');
 			expect(dropdownBtn).toHaveAttribute('aria-expanded', 'true');
 		});
+	});
+
+	it('announces the current language as the selected option', async () => {
+		const { container, getByTestId } = render(LanguageDropdown, {});
+
+		const dropdownBtn = container.querySelector('.dropdown-button');
+
+		assertNonNullish(dropdownBtn);
+
+		await fireEvent.click(dropdownBtn);
+
+		await waitFor(() => expect(getByTestId(LANGUAGE_DROPDOWN)).toBeInTheDocument());
+
+		const selected = [...getByTestId(LANGUAGE_DROPDOWN).querySelectorAll('[aria-pressed="true"]')];
+
+		expect(selected).toHaveLength(1);
+		expect(selected[0]).toHaveTextContent(LANGUAGES[get(currentLanguage)]);
 	});
 });

@@ -24,6 +24,28 @@ describe('MultiSelectDropdown', () => {
 		expect(getByTestId('multi-select-dropdown')).toHaveAccessibleName('Type 3');
 	});
 
+	it('names its panel by the description, not the menu fallback', async () => {
+		const { getByRole, getByTestId } = render(MultiSelectDropdownTest);
+
+		await fireEvent.click(getByTestId('multi-select-dropdown'));
+
+		await waitFor(() => {
+			expect(getByRole('dialog', { name: 'Filter by type' })).toBeInTheDocument();
+		});
+	});
+
+	it('names its bottom sheet by the description on phones', async () => {
+		screensStore.set('xs');
+
+		const { getByRole, getByTestId } = render(MultiSelectDropdownTest);
+
+		await fireEvent.click(getByTestId('multi-select-dropdown'));
+
+		await waitFor(() => {
+			expect(getByRole('dialog', { name: 'Filter by type' })).toBeInTheDocument();
+		});
+	});
+
 	it('does not render the count badge when count is zero', () => {
 		const { queryByText } = render(MultiSelectDropdownTest);
 
@@ -142,5 +164,13 @@ describe('MultiSelectDropdown', () => {
 			expect(trigger).toHaveClass('opened');
 			expect(trigger).toHaveAttribute('aria-expanded', 'true');
 		});
+	});
+
+	it('opens a compact dropdown panel', async () => {
+		const { getByTestId } = render(MultiSelectDropdownTest);
+
+		await fireEvent.click(getByTestId('multi-select-dropdown'));
+
+		await waitFor(() => expect(document.querySelector('.wrapper.dropdown')).not.toBeNull());
 	});
 });
