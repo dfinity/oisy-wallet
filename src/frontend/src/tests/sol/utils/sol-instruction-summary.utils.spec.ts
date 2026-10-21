@@ -546,6 +546,89 @@ describe('sol-instruction-summary.utils', () => {
 				]);
 			});
 
+			// Raydium opens the wrapped SOL account of a trade at an address derived from a seed. The
+			// call funds and sizes it as the plain one does, so the list reads it the same way.
+			describe('at an address derived from a seed', () => {
+				const user = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
+				const reserve = 2_039_280n;
+
+				const seeded = ({ lamports }: { lamports: number }) => ({
+					...creation,
+					parsed: {
+						type: 'createAccountWithSeed',
+						info: { ...creation.parsed.info, base: user, seed: 'wsol', lamports }
+					}
+				});
+
+				const plain = ({ lamports }: { lamports: number }) => ({
+					...creation,
+					parsed: { ...creation.parsed, info: { ...creation.parsed.info, lamports } }
+				});
+
+				const wrapping = ({
+					opening
+				}: {
+					opening: (params: { lamports: number }) => typeof creation;
+				}) =>
+					mapSolInstructionSummaries({
+						instructions: [
+							opening({ lamports: 1_002_039_280 }),
+							{
+								...initialisation,
+								parsed: {
+									...initialisation.parsed,
+									info: { ...initialisation.parsed.info, mint: WSOL_TOKEN.address }
+								}
+							},
+							{
+								program: 'spl-token',
+								programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								parsed: {
+									type: 'closeAccount',
+									info: {
+										account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
+										destination: user,
+										owner: user
+									}
+								}
+							}
+						],
+						ownedAddresses: [user],
+						userAddress: user,
+						rentExemptMinimum: reserve,
+						includeUnrecognised: true
+					});
+
+				it('should read it as the token account it becomes, carrying its rent', () => {
+					expect(
+						mapSolInstructionSummaries({
+							instructions: [seeded({ lamports: 2_039_280 }), initialisation],
+							ownedAddresses: [user],
+							userAddress: user,
+							includeUnrecognised: true
+						})
+					).toStrictEqual([
+						{
+							kind: 'createTokenAccount',
+							account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
+							tokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+							rent: 2_039_280n,
+							payer: user
+						}
+					]);
+				});
+
+				// Its rent is the reserve, and the rest is the balance its close hands back: the same
+				// split, and the same lines, as for an account opened at an address of its own.
+				it('should read a wrapped SOL account it funds and closes as the plain call’s', () => {
+					const views = wrapping({ opening: seeded });
+
+					expect(views.map(({ kind }) => kind)).toStrictEqual(['createTokenAccount', 'unwrap']);
+					expect(views[0]?.rent).toBe(reserve);
+					expect(views).toStrictEqual(wrapping({ opening: plain }));
+				});
+			});
+
 			describe('funded with the SOL it wraps', () => {
 				const user = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
 				const reserve = 2_039_280n;
