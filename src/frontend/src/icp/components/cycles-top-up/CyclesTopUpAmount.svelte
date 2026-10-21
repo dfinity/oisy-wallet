@@ -35,7 +35,8 @@
 
 	let { sendAmount = $bindable(), onBack, onNext }: Props = $props();
 
-	const { sourceToken, sourceTokenExchangeRate } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
+	const { sourceToken, sourceTokenBalance, sourceTokenExchangeRate } =
+		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
 	const { insufficientFunds, insufficientFundsForFee } =
 		getContext<TokenActionValidationErrorsContext>(TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY);
@@ -52,11 +53,18 @@
 	// return nothing.
 	let tooSmall = $derived(nonNullish(amount) && amount > ZERO && amount <= fee);
 
+	// The balance flags come from a validation that runs 300 ms after the amount changes, so
+	// until then they would let Review through with an amount the wallet cannot pay.
+	let unaffordable = $derived(
+		nonNullish(amount) && nonNullish($sourceTokenBalance) && amount + fee > $sourceTokenBalance
+	);
+
 	let invalid = $derived(
 		isNullish(amount) ||
 			amount === ZERO ||
 			$insufficientFunds ||
 			$insufficientFundsForFee ||
+			unaffordable ||
 			tooSmall
 	);
 

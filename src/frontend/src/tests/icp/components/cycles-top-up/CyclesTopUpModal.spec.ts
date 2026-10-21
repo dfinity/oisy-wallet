@@ -399,6 +399,40 @@ describe('CyclesTopUpModal', () => {
 			expect(result.getByTestId(CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON)).toBeDisabled();
 		});
 
+		// The balance flags are set by a validation that runs 300 ms after the amount changes.
+		it.each([
+			{ name: 'above the balance', value: '6' },
+			{ name: 'that the fee takes above the balance', value: '5' }
+		])('keeps Review disabled for an amount $name before it is validated', async ({ value }) => {
+			const result = await toAmount();
+
+			const input = result.container.querySelector<HTMLInputElement>(
+				`input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`
+			);
+
+			assertNonNullish(input);
+
+			await fireEvent.input(input, { target: { value } });
+
+			expect(result.getByTestId(CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON)).toBeDisabled();
+		});
+
+		it('keeps Review enabled for the whole balance with the fee', async () => {
+			const result = await toAmount();
+
+			const input = result.container.querySelector<HTMLInputElement>(
+				`input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`
+			);
+
+			assertNonNullish(input);
+
+			await fireEvent.input(input, { target: { value: '4.9999' } });
+
+			await waitFor(() => {
+				expect(result.getByTestId(CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON)).toBeEnabled();
+			});
+		});
+
 		it.each([
 			{ name: 'a lone decimal point', value: '.' },
 			{ name: 'an amount too large to parse', value: '1'.padEnd(160, '0') }
