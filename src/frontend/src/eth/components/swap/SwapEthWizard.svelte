@@ -83,7 +83,7 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isLifiFeeAffordable } from '$lib/utils/lifi-fee.utils';
+	import { isLifiFeeAffordable, lifiCarriedFeeCeiling } from '$lib/utils/lifi-fee.utils';
 	import { toLifiSwapErrorType } from '$lib/utils/lifi-swap-error.utils';
 	import { lifiUserTokenAddresses } from '$lib/utils/lifi-swap.utils';
 	import { isNetworkEthereum } from '$lib/utils/network.utils';
@@ -339,10 +339,16 @@
 	});
 
 	// A ceiling that an execution found above the reviewed one, which the review then shows, for the
-	// inputs it was found for.
+	// inputs it was found for: its gas and L1 data fee priced at the fee per gas execution will sign
+	// with now, not the one of the refused attempt.
 	const lifiReviewedFeeCeiling = $derived.by(() => {
+		const maxFeePerGas = $feeStore?.maxFeePerGas;
+		const carriedFee = $lifiCarriedFee;
+
 		const carried =
-			$lifiCarriedFee?.key === lifiInputsKey ? $lifiCarriedFee?.feeCeiling : undefined;
+			nonNullish(carriedFee) && carriedFee.key === lifiInputsKey && nonNullish(maxFeePerGas)
+				? lifiCarriedFeeCeiling({ gas: carriedFee.gas, l1Fee: carriedFee.l1Fee, maxFeePerGas })
+				: undefined;
 
 		if (isNullish(lifiQuoteFee) || isNullish(carried)) {
 			return lifiQuoteFee ?? carried;
@@ -701,7 +707,7 @@
 			if (err instanceof LifiFeeChangedError) {
 				// Carried back to the review, which shows the higher fee for the user to confirm.
 				if (nonNullish(lifiInputsKey)) {
-					lifiCarriedFee.set({ key: lifiInputsKey, feeCeiling: err.feeCeiling });
+					lifiCarriedFee.set({ key: lifiInputsKey, gas: err.gas, l1Fee: err.l1Fee });
 				}
 
 				failedSwapError.set({

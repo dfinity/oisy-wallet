@@ -123,7 +123,7 @@ describe('swapStore', () => {
 		});
 
 		failedSwapError.set({ message: 'stale error from previous swap', variant: 'error' });
-		lifiCarriedFee.set({ key: 'stale inputs', feeCeiling: 1n });
+		lifiCarriedFee.set({ key: 'stale inputs', gas: 1n, l1Fee: 1n });
 		amountSetToMax.set(true);
 
 		reset();

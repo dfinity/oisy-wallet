@@ -242,6 +242,19 @@ describe('lifi-evm-swap.services', () => {
 	});
 
 	describe('fetchLifiEvmSwap', () => {
+		// One branch per step type, so that each literal narrows to its own member of `Step`.
+		const step = (
+			step:
+				| Pick<CrossStep, 'type' | 'tool'>
+				| Pick<ProtocolStep, 'type' | 'tool'>
+				| Pick<SwapStep, 'type' | 'tool'>
+		): Step =>
+			step.type === 'cross'
+				? { ...mockLifiQuote, ...step }
+				: step.type === 'swap'
+					? { ...mockLifiQuote, ...step }
+					: { ...mockLifiQuote, ...step };
+
 		describe('a native source', () => {
 			it('should re-quote once, simulated, and sign it with the gas OISY estimated', async () => {
 				await fetchLifiEvmSwap(nativeParams());
@@ -476,9 +489,8 @@ describe('lifi-evm-swap.services', () => {
 				});
 
 				await expect(failure).rejects.toThrow(LifiFeeChangedError);
-				await expect(failure).rejects.toMatchObject({
-					feeCeiling: swapGas * maxFeePerGas + l1Fee
-				});
+				// What the ceiling is made of, for the review to price at its own fee per gas.
+				await expect(failure).rejects.toMatchObject({ gas: swapGas, l1Fee });
 
 				expect(swap).not.toHaveBeenCalled();
 			});
@@ -569,6 +581,46 @@ describe('lifi-evm-swap.services', () => {
 			});
 		});
 
+		// Left free, LI.FI re-routes from one quote to the next through exchanges whose gas differs up
+		// to twofold, and a heavier route than the one reviewed refuses the swap as a fee change.
+		describe('the exchanges of the reviewed route', () => {
+			const withSteps = (includedSteps: Step[]): LiFiStep => ({ ...mockLifiQuote, includedSteps });
+
+			it('should re-quote through the exchanges the reviewed route took', async () => {
+				const reviewed = withSteps([
+					step({ type: 'protocol', tool: 'feeCollection' }),
+					step({ type: 'swap', tool: 'nordstern' })
+				]);
+
+				vi.mocked(fetchLifiQuote).mockResolvedValue(reviewed);
+
+				await fetchLifiEvmSwap({
+					...nativeParams(),
+					offer: offerOf({ quote: reviewed, request: nativeRequest })
+				});
+
+				expect(fetchLifiQuote).toHaveBeenCalledExactlyOnceWith({
+					...nativeRequest,
+					allowExchanges: ['nordstern'],
+					skipSimulation: false
+				});
+			});
+
+			// An empty list would forbid every exchange.
+			it('should pin no exchange for a route without a swap', async () => {
+				const reviewed = withSteps([step({ type: 'protocol', tool: 'feeCollection' })]);
+
+				vi.mocked(fetchLifiQuote).mockResolvedValue(reviewed);
+
+				await fetchLifiEvmSwap({
+					...nativeParams(),
+					offer: offerOf({ quote: reviewed, request: nativeRequest })
+				});
+
+				expect(vi.mocked(fetchLifiQuote).mock.calls[0]?.[0]).not.toHaveProperty('allowExchanges');
+			});
+		});
+
 		describe('a cross-chain route', () => {
 			const arbitrumUsdc = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831';
 
@@ -578,19 +630,6 @@ describe('lifi-evm-swap.services', () => {
 				network: ARBITRUM_MAINNET_NETWORK,
 				address: arbitrumUsdc
 			};
-
-			// One branch per step type, so that each literal narrows to its own member of `Step`.
-			const step = (
-				step:
-					| Pick<CrossStep, 'type' | 'tool'>
-					| Pick<ProtocolStep, 'type' | 'tool'>
-					| Pick<SwapStep, 'type' | 'tool'>
-			): Step =>
-				step.type === 'cross'
-					? { ...mockLifiQuote, ...step }
-					: step.type === 'swap'
-						? { ...mockLifiQuote, ...step }
-						: { ...mockLifiQuote, ...step };
 
 			const quote: LiFiStep = {
 				...mockLifiQuote,
@@ -717,7 +756,9 @@ describe('lifi-evm-swap.services', () => {
 			token: mockLifiQuote.action.fromToken
 		});
 
-		it("should price LI.FI's gas estimate, buffered, at OISY's fees, plus the L1 data fee", async () => {
+		// 30 %, above the 20 % execution adds to the node's estimate: the node estimates the same
+		// transaction a few percent above LI.FI.
+		it("should price LI.FI's gas estimate, buffered beyond execution's, at OISY's fees, plus the L1 data fee", async () => {
 			await expect(
 				lifiQuoteFeeCeiling({
 					quote: {
@@ -728,7 +769,7 @@ describe('lifi-evm-swap.services', () => {
 					maxFeePerGas,
 					maxPriorityFeePerGas
 				})
-			).resolves.toBe(swapGas * maxFeePerGas + l1Fee);
+			).resolves.toBe(390_000n * maxFeePerGas + l1Fee);
 		});
 
 		it('should be undefined for a quote without a gas estimate', async () => {

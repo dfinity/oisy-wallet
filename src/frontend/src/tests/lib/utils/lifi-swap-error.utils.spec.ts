@@ -8,7 +8,7 @@ import { toLifiSwapErrorType } from '$lib/utils/lifi-swap-error.utils';
 describe('lifi-swap-error.utils', () => {
 	describe('toLifiSwapErrorType', () => {
 		it.each([
-			{ type: 'fee_changed', err: new LifiFeeChangedError(1n) },
+			{ type: 'fee_changed', err: new LifiFeeChangedError({ gas: 1n, l1Fee: 1n }) },
 			{
 				type: 'slippage_exceeded',
 				err: new Error('Slippage exceeded. LI.FI no longer has a route for the swap.')

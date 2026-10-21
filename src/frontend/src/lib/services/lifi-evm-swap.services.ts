@@ -34,7 +34,8 @@ import {
 	lifiApprovalCount,
 	lifiQuoteGas,
 	lifiUnsignedTxSize,
-	withLifiGasBuffer
+	withLifiGasBuffer,
+	withLifiReviewGasBuffer
 } from '$lib/utils/lifi-fee.utils';
 import { assertLifiQuote, isLifiRouteExecutable } from '$lib/utils/lifi-swap.utils';
 import { parseToken } from '$lib/utils/parse.utils';
@@ -109,15 +110,26 @@ const requoteAtLeast = async ({
 	return quote;
 };
 
-// The offer's own request, its bridge pinned to the one the user reviewed, so that execution can
-// only re-quote the same kind of route.
+// The offer's own request, its bridge and exchanges pinned to the ones the user reviewed, so that
+// execution can only re-quote the same kind of route. The exchanges matter to the fee: left free,
+// LI.FI re-routes from one quote to the next through exchanges whose gas differs up to twofold
+// (258k for Nordstern, 577k for OKX, USDC → ETH on Base, 2026-10-21), and a heavier route than the
+// one reviewed refuses the swap as a fee change.
 const toExecutionRequest = ({
 	swapDetails,
 	request
 }: SwapLifiEvmParams['offer']): QuoteRequestFromAmount => {
 	const bridge = swapDetails.includedSteps.find(({ type }) => type === 'cross')?.tool;
+	const exchanges = swapDetails.includedSteps
+		.filter(({ type }) => type === 'swap')
+		.map(({ tool }) => tool);
 
-	return nonNullish(bridge) ? { ...request, allowBridges: [bridge] } : request;
+	return {
+		...request,
+		...(nonNullish(bridge) && { allowBridges: [bridge] }),
+		// An empty list would forbid every exchange, while a route without a swap needs none.
+		...(exchanges.length > 0 && { allowExchanges: exchanges })
+	};
 };
 
 /**
@@ -138,28 +150,29 @@ const swapFeeCeiling = async ({
 	data: string;
 	value: bigint;
 	gas: bigint;
-}): Promise<bigint> => {
-	const l1Fee = await getL1DataFee({
-		chainId,
-		provider: infuraProviders(networkId),
-		unsignedTxSize: lifiUnsignedTxSize({
+}): Promise<{ feeCeiling: bigint; l1Fee: bigint }> => {
+	const l1Fee =
+		(await getL1DataFee({
 			chainId,
-			to,
-			data,
-			value,
-			gas,
-			maxFeePerGas,
-			maxPriorityFeePerGas
-		})
-	});
+			provider: infuraProviders(networkId),
+			unsignedTxSize: lifiUnsignedTxSize({
+				chainId,
+				to,
+				data,
+				value,
+				gas,
+				maxFeePerGas,
+				maxPriorityFeePerGas
+			})
+		})) ?? ZERO;
 
-	return gas * maxFeePerGas + (l1Fee ?? ZERO);
+	return { feeCeiling: gas * maxFeePerGas + l1Fee, l1Fee };
 };
 
 /**
  * The network fee ceiling of the swap transaction a displayed LI.FI quote describes, for the form
- * and the review: LI.FI's own gas estimate for the route, buffered as execution buffers OISY's, at
- * OISY's fees. `undefined` when the quote carries no usable gas estimate or transaction.
+ * and the review: LI.FI's own gas estimate for the route, buffered more than execution buffers the
+ * node's, at OISY's fees. `undefined` when the quote carries no usable gas estimate or transaction.
  */
 export const lifiQuoteFeeCeiling = async ({
 	quote,
@@ -174,13 +187,15 @@ export const lifiQuoteFeeCeiling = async ({
 		return;
 	}
 
-	return await swapFeeCeiling({
+	const { feeCeiling } = await swapFeeCeiling({
 		...rest,
 		to,
 		data,
 		value: BigInt(value ?? '0x0'),
-		gas: withLifiGasBuffer(quoteGas)
+		gas: withLifiReviewGasBuffer(quoteGas)
 	});
+
+	return feeCeiling;
 };
 
 /**
@@ -345,7 +360,7 @@ export const fetchLifiEvmSwap = async ({
 		await provider.estimateGas({ from: userAddress, to: to as EthAddress, data, value })
 	);
 
-	const feeCeiling = await swapFeeCeiling({
+	const { feeCeiling, l1Fee } = await swapFeeCeiling({
 		sourceNetwork,
 		to,
 		data,
@@ -356,7 +371,7 @@ export const fetchLifiEvmSwap = async ({
 	});
 
 	if (feeCeiling > reviewedFeeCeiling) {
-		throw new LifiFeeChangedError(feeCeiling);
+		throw new LifiFeeChangedError({ gas: swapGas, l1Fee });
 	}
 
 	if ((await provider.balance(userAddress)) < value + feeCeiling) {

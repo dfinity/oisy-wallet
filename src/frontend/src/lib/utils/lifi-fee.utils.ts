@@ -1,5 +1,9 @@
 import { ZERO } from '$lib/constants/app.constants';
-import { LIFI_GAS_LIMIT_BUFFER_PERCENT } from '$lib/constants/swap.constants';
+import {
+	LIFI_CARRIED_FEE_HEADROOM_PERCENT,
+	LIFI_GAS_LIMIT_BUFFER_PERCENT,
+	LIFI_REVIEW_GAS_BUFFER_PERCENT
+} from '$lib/constants/swap.constants';
 import type { LiFiStep } from '@lifi/sdk';
 import { dataLength, encodeRlp, toBeArray } from 'ethers/utils';
 
@@ -22,8 +26,34 @@ export const lifiQuoteGas = ({ estimate: { gasCosts } }: LiFiStep): bigint | und
 	return sends.reduce((sum, { estimate }) => sum + BigInt(estimate), ZERO);
 };
 
+const withPercent = ({ value, percent }: { value: bigint; percent: bigint }): bigint =>
+	(value * (100n + percent)) / 100n;
+
+// What execution signs with, on top of the node's estimate.
 export const withLifiGasBuffer = (gas: bigint): bigint =>
-	(gas * (100n + LIFI_GAS_LIMIT_BUFFER_PERCENT)) / 100n;
+	withPercent({ value: gas, percent: LIFI_GAS_LIMIT_BUFFER_PERCENT });
+
+// What the review prices, on top of LI.FI's estimate: more than execution's buffer, because the
+// node estimates the same transaction a little above LI.FI.
+export const withLifiReviewGasBuffer = (gas: bigint): bigint =>
+	withPercent({ value: gas, percent: LIFI_REVIEW_GAS_BUFFER_PERCENT });
+
+/**
+ * The fee ceiling a refused execution carried back, re-priced at the fee per gas the review now
+ * uses, with headroom on the gas and the L1 data fee alike. Re-priced rather than kept as it was:
+ * a gas price that ticked up since would otherwise refuse the retry again.
+ */
+export const lifiCarriedFeeCeiling = ({
+	gas,
+	l1Fee,
+	maxFeePerGas
+}: {
+	gas: bigint;
+	l1Fee: bigint;
+	maxFeePerGas: bigint;
+}): bigint =>
+	withPercent({ value: gas, percent: LIFI_CARRIED_FEE_HEADROOM_PERCENT }) * maxFeePerGas +
+	withPercent({ value: l1Fee, percent: LIFI_CARRIED_FEE_HEADROOM_PERCENT });
 
 /**
  * The size of the unsigned EIP-1559 transaction, in bytes: the type byte and the RLP of its fields.

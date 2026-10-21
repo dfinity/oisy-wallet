@@ -184,12 +184,14 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	};
 };
 
-// A LI.FI fee ceiling that an execution found above the reviewed one, for the quote inputs it was
-// found for. Kept here rather than in the wizard, which every step change rebuilds: the review the
-// failed execution returns to is another instance.
+// The gas and L1 data fee of a LI.FI fee ceiling that an execution found above the reviewed one,
+// for the quote inputs it was found for; the review prices them at its own fee per gas. Kept here
+// rather than in the wizard, which every step change rebuilds: the review the failed execution
+// returns to is another instance.
 export interface LifiCarriedFee {
 	key: string;
-	feeCeiling: bigint;
+	gas: bigint;
+	l1Fee: bigint;
 }
 
 export interface SwapContext {

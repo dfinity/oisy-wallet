@@ -66,11 +66,18 @@ export class LifiRouteUnsupportedError extends Error {}
 
 /**
  * The LI.FI swap's network fee ceiling, from OISY's own gas estimate at execution, exceeds the one
- * the user reviewed, so it was not signed. It carries that ceiling — gas, fee per gas and the L1
- * data fee of that very transaction — back to the review, which shows it for the user to confirm.
+ * the user reviewed, so it was not signed. It carries what that ceiling was made of — the gas and
+ * the L1 data fee of that very transaction — back to the review, which prices them at its own fee
+ * per gas and shows the result for the user to confirm.
  */
 export class LifiFeeChangedError extends Error {
-	constructor(readonly feeCeiling: bigint) {
+	readonly gas: bigint;
+	readonly l1Fee: bigint;
+
+	constructor({ gas, l1Fee }: { gas: bigint; l1Fee: bigint }) {
 		super('The network fee of the LI.FI swap rose above the one reviewed.');
+
+		this.gas = gas;
+		this.l1Fee = l1Fee;
 	}
 }

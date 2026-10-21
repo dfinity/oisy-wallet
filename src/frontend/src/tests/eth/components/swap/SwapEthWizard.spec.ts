@@ -29,6 +29,7 @@ import * as toasts from '$lib/stores/toasts.store';
 import { LifiFeeChangedError } from '$lib/types/errors';
 import { SwapProvider, VeloraSwapTypes, type SwapMappedResult } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import { lifiCarriedFeeCeiling } from '$lib/utils/lifi-fee.utils';
 import SwapEthWizardStepsTest from '$tests/eth/components/swap/SwapEthWizardStepsTest.svelte';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
@@ -1283,10 +1284,16 @@ describe('SwapEthWizard', () => {
 			);
 		});
 
-		it('returns to a rebuilt review with the higher fee when it rose, and signs no more than that', async () => {
-			const carriedFeeCeiling = 3_000_000_000_000_000n;
+		// What execution found the swap's fee made of; at the review's 0.002 gwei with its headroom,
+		// 0.003 ETH.
+		const carried = { gas: 1_363_636_364n, l1Fee: ZERO };
 
-			mockFetchLifiEvmSwap.mockRejectedValueOnce(new LifiFeeChangedError(carriedFeeCeiling));
+		it('returns to a rebuilt review with the higher fee when it rose, and signs no more than that', async () => {
+			const carriedFeeCeiling = lifiCarriedFeeCeiling({ ...carried, maxFeePerGas: 2_000_000n });
+
+			expect(carriedFeeCeiling).toBe(3_000_000_000_000_000n);
+
+			mockFetchLifiEvmSwap.mockRejectedValueOnce(new LifiFeeChangedError(carried));
 
 			const { ctx, failedSwapError } = lifiContext();
 
@@ -1312,6 +1319,31 @@ describe('SwapEthWizard', () => {
 			expect(mockFetchLifiEvmSwap).toHaveBeenCalledTimes(2);
 			expect(mockFetchLifiEvmSwap).toHaveBeenLastCalledWith(
 				expect.objectContaining({ reviewedFeeCeiling: carriedFeeCeiling })
+			);
+		});
+
+		// A gas price that ticked up since the refused attempt must not refuse the retry again.
+		it('prices the higher fee at the fee per gas of the review it returns to', async () => {
+			mockFetchLifiEvmSwap.mockRejectedValueOnce(new LifiFeeChangedError(carried));
+
+			const { ctx } = lifiContext();
+
+			const { onNext: _, onBack: __, ...props } = BASE_PROPS;
+
+			const rendered = render(SwapEthWizardStepsTest, { props, context: ctx });
+
+			await vi.runOnlyPendingTimersAsync();
+			await confirmSwap(rendered);
+
+			feeState.set({ gas: 100n, maxFeePerGas: 3_000_000n, maxPriorityFeePerGas: 1_000_000n });
+			await vi.runOnlyPendingTimersAsync();
+
+			await confirmSwap(rendered);
+
+			expect(mockFetchLifiEvmSwap).toHaveBeenLastCalledWith(
+				expect.objectContaining({
+					reviewedFeeCeiling: lifiCarriedFeeCeiling({ ...carried, maxFeePerGas: 3_000_000n })
+				})
 			);
 		});
 
@@ -1372,7 +1404,7 @@ describe('SwapEthWizard', () => {
 			// Enough for the quote's fee and its approval, not for the higher fee execution found.
 			setNativeBalance(quoteFeeCeiling + approvalFee);
 
-			mockFetchLifiEvmSwap.mockRejectedValueOnce(new LifiFeeChangedError(3_000_000_000_000_000n));
+			mockFetchLifiEvmSwap.mockRejectedValueOnce(new LifiFeeChangedError(carried));
 
 			const { ctx } = lifiContext();
 

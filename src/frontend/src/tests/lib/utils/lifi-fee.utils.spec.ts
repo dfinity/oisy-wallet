@@ -2,9 +2,11 @@ import { ZERO } from '$lib/constants/app.constants';
 import {
 	isLifiFeeAffordable,
 	lifiApprovalCount,
+	lifiCarriedFeeCeiling,
 	lifiQuoteGas,
 	lifiUnsignedTxSize,
-	withLifiGasBuffer
+	withLifiGasBuffer,
+	withLifiReviewGasBuffer
 } from '$lib/utils/lifi-fee.utils';
 import { mockLifiDiamond, mockLifiQuote } from '$tests/mocks/lifi.mock';
 import type { GasCost, LiFiStep } from '@lifi/sdk';
@@ -59,6 +61,34 @@ describe('lifi-fee.utils', () => {
 	describe('withLifiGasBuffer', () => {
 		it('should add 20 %', () => {
 			expect(withLifiGasBuffer(300_000n)).toBe(360_000n);
+		});
+	});
+
+	// More than execution adds to the node's estimate, which runs a few percent above LI.FI's.
+	describe('withLifiReviewGasBuffer', () => {
+		it('should add 30 %', () => {
+			expect(withLifiReviewGasBuffer(300_000n)).toBe(390_000n);
+		});
+
+		it("should cover execution's buffer on an estimate 5 % above LI.FI's", () => {
+			expect(withLifiReviewGasBuffer(258_163n)).toBeGreaterThanOrEqual(
+				withLifiGasBuffer((258_163n * 105n) / 100n)
+			);
+		});
+	});
+
+	describe('lifiCarriedFeeCeiling', () => {
+		it('should price the gas at the fee per gas given, with 10 % headroom on the gas and the L1 fee', () => {
+			expect(lifiCarriedFeeCeiling({ gas: 400_000n, l1Fee: 1_000n, maxFeePerGas: 10n })).toBe(
+				440_000n * 10n + 1_100n
+			);
+		});
+
+		// A gas price that ticked up since the refused attempt must not refuse the retry again.
+		it('should follow the fee per gas of the moment', () => {
+			expect(lifiCarriedFeeCeiling({ gas: 400_000n, l1Fee: ZERO, maxFeePerGas: 12n })).toBe(
+				440_000n * 12n
+			);
 		});
 	});
 

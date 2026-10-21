@@ -60,6 +60,17 @@ export const LIFI_QUOTE_TIMEOUT_MS = 10_000;
 // gas still pays for it.
 export const LIFI_GAS_LIMIT_BUFFER_PERCENT = 20n;
 
+// Added to LI.FI's own gas estimate for the fee the user reviews, where execution adds the buffer
+// above to the node's: the node estimates the very same transaction a few percent higher (3–5 %
+// for USDC → ETH on Base, on every exchange, 2026-10-21), and a review priced below execution
+// refused every first attempt from an ERC-20.
+export const LIFI_REVIEW_GAS_BUFFER_PERCENT = 30n;
+
+// Added to the gas and the L1 data fee a refused execution carries back to the review, which
+// re-prices them at the fee per gas of the moment: the retry re-quotes and re-estimates, and an
+// estimate a little above the last must not refuse it again.
+export const LIFI_CARRIED_FEE_HEADROOM_PERCENT = 10n;
+
 // A LI.FI row whose transaction the node refused outright is deleted, retried as a cycles mint's
 // is: a few attempts, a second apart.
 export const LIFI_ROW_DELETE_ATTEMPTS = 3;
