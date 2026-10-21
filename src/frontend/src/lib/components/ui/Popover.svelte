@@ -204,6 +204,10 @@
 	@use '$lib/styles/mixins/display';
 	@use '$lib/styles/mixins/interaction';
 
+	// A row counts as pressed when it or its direct button or link is: holding Space presses only
+	// the button, and a LogoButton paints its pressed fill on the wrapper (`child-pressed`).
+	$pressed: ':active, :has(> :is(a, button):active)';
+
 	.popover {
 		position: fixed;
 		@include display.inset;
@@ -357,12 +361,12 @@
 			.row-feedback,
 			:has(> button > .logo-button-wrapper)
 		) {
-			&:focus-visible:not(:active) {
+			&:focus-visible:not(#{$pressed}) {
 				background-color: transparent;
 			}
 
 			@include interaction.hover {
-				&:not(:active) {
+				&:not(#{$pressed}) {
 					background-color: transparent;
 				}
 			}

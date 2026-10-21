@@ -165,6 +165,23 @@ export const slidingHighlight = (node: HTMLElement, enabled: boolean) => {
 		block.classList.add('visible');
 	};
 
+	// The pointer left the rows. A keyboard-focused row keeps the block: the highlight clears the
+	// row's own focus fill, so hiding would leave it with only its ring.
+	const restOrHide = () => {
+		const { activeElement } = document;
+		const focusedRow =
+			activeElement instanceof Element && activeElement.matches(':focus-visible')
+				? findRow({ node, target: activeElement })
+				: undefined;
+
+		if (nonNullish(focusedRow)) {
+			moveTo(focusedRow);
+			return;
+		}
+
+		hide();
+	};
+
 	const onPointerOver = ({ pointerType, target }: PointerEvent) => {
 		// Touch has no hover: a tapped row keeps its own pressed fill and nothing slides.
 		if (pointerType !== 'mouse' && pointerType !== 'pen') {
@@ -185,12 +202,12 @@ export const slidingHighlight = (node: HTMLElement, enabled: boolean) => {
 		}
 
 		hoveredRow = undefined;
-		hide();
+		restOrHide();
 	};
 
 	const onPointerLeave = () => {
 		hoveredRow = undefined;
-		hide();
+		restOrHide();
 	};
 
 	// Typing in a search re-renders the list under a mouse that does not move, so no pointer event
