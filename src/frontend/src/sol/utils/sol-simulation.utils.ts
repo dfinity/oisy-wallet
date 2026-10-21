@@ -28,6 +28,9 @@ interface SolTokenAccountState {
 	closeAuthority?: SolAddress;
 	amount: bigint;
 	decimals: number;
+	// The rent-exempt reserve a wrapped SOL account states for itself. Every lamport above it and the
+	// amount is one no sync has counted yet.
+	nativeReserve?: bigint;
 }
 
 interface SolAccountState {
@@ -71,15 +74,16 @@ export const parseTokenAccountState = (
 		return undefined;
 	}
 
-	const { mint, owner, delegate, delegatedAmount, closeAuthority, tokenAmount } = (data.parsed
-		.info ?? {}) as Partial<{
-		mint: SplTokenAddress;
-		owner: SolAddress;
-		delegate: SolAddress;
-		delegatedAmount: { amount: string };
-		closeAuthority: SolAddress;
-		tokenAmount: { amount: string; decimals: number };
-	}>;
+	const { mint, owner, delegate, delegatedAmount, closeAuthority, tokenAmount, rentExemptReserve } =
+		(data.parsed.info ?? {}) as Partial<{
+			mint: SplTokenAddress;
+			owner: SolAddress;
+			delegate: SolAddress;
+			delegatedAmount: { amount: string };
+			closeAuthority: SolAddress;
+			tokenAmount: { amount: string; decimals: number };
+			rentExemptReserve: { amount: string };
+		}>;
 
 	if (isNullish(mint) || isNullish(owner) || isNullish(tokenAmount)) {
 		return undefined;
@@ -92,7 +96,8 @@ export const parseTokenAccountState = (
 		...(nonNullish(delegatedAmount) && { delegatedAmount: BigInt(delegatedAmount.amount) }),
 		...(nonNullish(closeAuthority) && { closeAuthority }),
 		amount: BigInt(tokenAmount.amount),
-		decimals: tokenAmount.decimals
+		decimals: tokenAmount.decimals,
+		...(nonNullish(rentExemptReserve) && { nativeReserve: BigInt(rentExemptReserve.amount) })
 	};
 };
 

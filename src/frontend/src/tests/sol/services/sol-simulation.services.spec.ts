@@ -794,6 +794,89 @@ describe('sol-simulation.services', () => {
 		});
 	});
 
+	// The reserve a wrapped SOL account states for itself tells its amount apart from lamports paid in
+	// that no sync counted yet, which a sync in the message folds in.
+	it('should read what a wrapped SOL account held unsynced going in from the reserve it states', async () => {
+		const application = 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo';
+		const fee = 5_000n;
+		const wrapped = mockAtaAddress3;
+
+		const wrappedAccount = ({ lamports, amount }: { lamports: bigint; amount: bigint }) =>
+			({
+				executable: false,
+				lamports,
+				owner: TOKEN_PROGRAM_ADDRESS,
+				space: 165n,
+				data: {
+					parsed: {
+						type: 'account',
+						info: {
+							mint: WSOL_TOKEN.address,
+							owner: mockSolAddress,
+							isNative: true,
+							tokenAmount: { amount: `${amount}`, decimals: 9 },
+							rentExemptReserve: { amount: '2039280', decimals: 9 }
+						}
+					}
+				}
+			}) as unknown as SolanaParsedAccountsInfo[number];
+
+		vi.mocked(getMultipleAccountsInfo).mockResolvedValue([
+			systemAccount(1_000_000n),
+			wrappedAccount({ lamports: 2_051_280n, amount: 7_000n })
+		]);
+		vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+			simulated({
+				accounts: [
+					systemAccount(1_000_000n + 12_000n - fee),
+					wrappedAccount({ lamports: 2_039_280n, amount: ZERO })
+				],
+				innerInstructions: [
+					{
+						index: 0,
+						instructions: [
+							{
+								program: 'spl-token',
+								programId: TOKEN_PROGRAM_ADDRESS,
+								parsed: { type: 'syncNative', info: { account: wrapped } }
+							},
+							{
+								program: 'spl-token',
+								programId: TOKEN_PROGRAM_ADDRESS,
+								parsed: {
+									type: 'unwrapLamports',
+									info: { source: wrapped, destination: mockSolAddress, authority: mockSolAddress }
+								}
+							}
+						]
+					}
+				] as unknown as SolanaSimulatedInnerInstructions,
+				fee
+			})
+		);
+
+		const result = await simulateSolTransaction(
+			params({
+				feePayer: { address: mockSolAddress },
+				instructions: [
+					{
+						programAddress: application,
+						accounts: [
+							{ address: wrapped, role: AccountRole.WRITABLE },
+							{ address: mockSolAddress, role: AccountRole.WRITABLE_SIGNER }
+						]
+					}
+				]
+			} as unknown as CompilableTransactionMessage)
+		);
+
+		const unwrapped = (result?.instructions ?? [])
+			.flatMap(({ children = [] }) => children)
+			.find(({ unwrapsToWallet }) => unwrapsToWallet === true);
+
+		expect(unwrapped?.amount).toBe(12_000n);
+	});
+
 	it('should keep an empty list for a run with nothing to list', async () => {
 		const accountAt = ({ addresses }: { addresses: SolAddress[] }) =>
 			addresses.map((account) =>
