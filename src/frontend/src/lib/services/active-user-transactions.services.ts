@@ -6,7 +6,6 @@ import {
 	markActiveUserTransactionsSeen as markActiveUserTransactionsSeenApi,
 	updateActiveUserTransaction as updateActiveUserTransactionApi
 } from '$lib/api/backend.api';
-import { ZERO } from '$lib/constants/app.constants';
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import type {
 	CreateActiveUserTransactionParams,
@@ -134,9 +133,9 @@ export const deleteActiveUserTransaction = async ({
 };
 
 /**
- * Marks every row in the store seen: at once in this browser, and in the backend for the user's
- * other devices. Best-effort, like the load: a failed write leaves the mark in this browser, and the
- * next call writes it again.
+ * Marks every row in the store seen: at once in this browser, and in the backend, up to its latest
+ * load, for the user's other devices. Best-effort, like the load: a failed write leaves the mark in
+ * this browser, and the next call writes it again.
  */
 export const markActiveUserTransactionsSeen = async ({
 	identity
@@ -151,10 +150,9 @@ export const markActiveUserTransactionsSeen = async ({
 		return;
 	}
 
-	const upToNs = Object.values(state.data).reduce(
-		(latest, { updated_at_ns }) => (updated_at_ns > latest ? updated_at_ns : latest),
-		ZERO
-	);
+	// Up to the latest load, not the newest row: a row written here since says nothing about one
+	// another device created in between, which this list never had.
+	const upToNs = state.loadedUpToNs;
 
 	if (upToNs <= state.seenUpToNs) {
 		return;

@@ -142,6 +142,7 @@ describe('active-user-transactions.utils', () => {
 					new: buildTx({ id: 'new', created_at_ns: 9n })
 				},
 				seenUpToNs: ZERO,
+				loadedUpToNs: ZERO,
 				lastSeenUpdatedAtNs: {},
 				terminalSideEffectsApplied: {}
 			});
@@ -163,6 +164,7 @@ describe('active-user-transactions.utils', () => {
 					state: {
 						data: { a: tx },
 						seenUpToNs: ZERO,
+						loadedUpToNs: ZERO,
 						lastSeenUpdatedAtNs: {},
 						terminalSideEffectsApplied: {}
 					},
@@ -177,6 +179,7 @@ describe('active-user-transactions.utils', () => {
 					state: {
 						data: { a: tx },
 						seenUpToNs: ZERO,
+						loadedUpToNs: ZERO,
 						lastSeenUpdatedAtNs: { a: '3' },
 						terminalSideEffectsApplied: {}
 					},
@@ -191,6 +194,7 @@ describe('active-user-transactions.utils', () => {
 					state: {
 						data: { a: tx },
 						seenUpToNs: ZERO,
+						loadedUpToNs: ZERO,
 						lastSeenUpdatedAtNs: { a: '5' },
 						terminalSideEffectsApplied: {}
 					},
@@ -206,6 +210,7 @@ describe('active-user-transactions.utils', () => {
 					state: {
 						data: { a: tx },
 						seenUpToNs: 5n,
+						loadedUpToNs: ZERO,
 						lastSeenUpdatedAtNs: {},
 						terminalSideEffectsApplied: {}
 					},
@@ -220,6 +225,7 @@ describe('active-user-transactions.utils', () => {
 					state: {
 						data: { a: tx },
 						seenUpToNs: 4n,
+						loadedUpToNs: ZERO,
 						lastSeenUpdatedAtNs: {},
 						terminalSideEffectsApplied: {}
 					},

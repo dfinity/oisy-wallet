@@ -434,6 +434,23 @@ describe('active-user-transactions.services', () => {
 			expect(get(activeUserTransactionsStore)?.seenUpToNs).toBe(7n);
 		});
 
+		// This device wrote a row after its load, and another device may have created one in between
+		// that this list never had: the mark must not cover that one.
+		it('marks for the other devices only up to the latest load', async () => {
+			vi.spyOn(backendApi, 'markActiveUserTransactionsSeen').mockResolvedValue(7n);
+			activeUserTransactionsStore.upsert({
+				transaction: { ...mockActiveUserTransaction, id: 'written-here', updated_at_ns: 9n }
+			});
+
+			await markActiveUserTransactionsSeen({ identity: mockIdentity });
+
+			expect(backendApi.markActiveUserTransactionsSeen).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				upToNs: 7n
+			});
+			expect(get(activeUserTransactionsStore)?.lastSeenUpdatedAtNs['written-here']).toBe('9');
+		});
+
 		// Another device marked further in the meantime.
 		it('keeps the later mark the backend answers with', async () => {
 			vi.spyOn(backendApi, 'markActiveUserTransactionsSeen').mockResolvedValue(9n);
