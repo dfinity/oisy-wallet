@@ -96,6 +96,10 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	// describe a review they never read. A run that completed and reported nothing is not a
 	// description - an effect outside what the preview measures produces exactly that.
 	simulated: boolean;
+	// Whether a simulated run came back at all, described anything or not. The review told the user
+	// it ran one, so a refusal for a run that left part of the message undescribed says that, rather
+	// than that there was no run.
+	simulationRan: boolean;
 	// Whether a close in the reviewed instruction list pays an account's balance to an address
 	// that is not the user's wallet. Decided from that list rather than from the message, which
 	// cannot see a close a program makes inside its own call, and handed on for the same reason
@@ -517,6 +521,7 @@ export const sign = ({
 	progress,
 	identity,
 	simulated,
+	simulationRan,
 	closesPayOthers,
 	unreadProgramsAcknowledged,
 	rentExemptMinimum,
@@ -616,7 +621,11 @@ export const sign = ({
 			// the wallet understands still signs.
 			if ((unreviewed ?? false) && !simulated) {
 				toastsError({
-					msg: { text: get(i18n).wallet_connect.error.unreviewed_without_simulation }
+					msg: {
+						text: simulationRan
+							? get(i18n).wallet_connect.error.unreviewed_not_described_by_simulation
+							: get(i18n).wallet_connect.error.unreviewed_without_simulation
+					}
 				});
 
 				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });

@@ -45,6 +45,7 @@
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
 
 	interface Props {
 		request: WalletKitTypes.SessionRequest;
@@ -261,6 +262,7 @@
 						{call}
 						{data}
 						{destination}
+						flaggedAsScam={!acceptedContext(request.verifyContext)}
 						onApprove={send}
 						onReject={reject}
 						{requestedGas}

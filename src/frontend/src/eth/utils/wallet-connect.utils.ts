@@ -22,13 +22,11 @@ import {
 import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
-import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
 import type { NetworkId } from '$lib/types/network';
 import { consoleError } from '$lib/utils/console.utils';
 import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
-import type { Verify } from '@walletconnect/types';
 import { TypedDataEncoder, type TypedDataDomain, type TypedDataField } from 'ethers/hash';
 import { isHexString, toUtf8String } from 'ethers/utils';
 
@@ -1032,6 +1030,3 @@ export const convertHexToUtf8 = (value: string): string => {
 
 	return value;
 };
-
-export const acceptedContext = (context: Verify.Context | undefined): boolean =>
-	isNullish(context) || context.verified.validation.toUpperCase() !== CONTEXT_VALIDATION_ISSCAM;

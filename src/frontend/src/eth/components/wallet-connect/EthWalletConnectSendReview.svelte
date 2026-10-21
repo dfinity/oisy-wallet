@@ -23,6 +23,7 @@
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
+	import WalletConnectScamWarning from '$lib/components/wallet-connect/WalletConnectScamWarning.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -46,6 +47,9 @@
 		requestedGas?: bigint;
 		sourceNetwork: EthereumNetwork;
 		targetNetwork?: Network;
+		// WalletConnect's Verify API flags the requesting site as a scam: the review says so and
+		// offers Reject only.
+		flaggedAsScam?: boolean;
 		approveDisabled?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
@@ -60,6 +64,7 @@
 		requestedGas,
 		sourceNetwork: sourceNetworkProp,
 		targetNetwork,
+		flaggedAsScam = false,
 		approveDisabled = false,
 		onApprove,
 		onReject
@@ -189,6 +194,10 @@
 </script>
 
 <ContentWithToolbar>
+	{#if flaggedAsScam}
+		<WalletConnectScamWarning />
+	{/if}
+
 	{#if ckEthDepositRefused}
 		<MessageBox level="error" testId="wallet-connect-cketh-deposit-refused">
 			{$i18n.wallet_connect.text.cketh_deposit_refused}
@@ -329,6 +338,7 @@
 
 	{#snippet toolbar()}
 		<WalletConnectActions
+			approve={!flaggedAsScam}
 			approveDisabled={approveDisabled ||
 				unverifiableErc20 ||
 				unverifiableSetApprovalForAll ||

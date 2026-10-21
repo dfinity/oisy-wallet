@@ -654,6 +654,57 @@ describe('computeReceiveSupportedTokens', () => {
 		expect(data.evm.supportedTokenIds).toEqual(new Set([evmSourceId, evmOtherTokenId]));
 	});
 
+	describe("a per-category 'any' wildcard", () => {
+		const solListed = new Set([mockValidSplToken.address]);
+
+		const anySolProvider: SwapProviderSupport = {
+			key: SwapProvider.LIFI,
+			sourceCategory: 'sol',
+			supportedSourceTokens: new Set(),
+			getSupportedDestinations: () => ({ sol: 'any' })
+		};
+
+		it('should open its category to every enabled token when it is the only provider there', () => {
+			const data = computeReceiveSupportedTokens({
+				sourceToken: evmSourceToken,
+				providers: [anySolProvider]
+			});
+
+			expect(data.sol.coverage).toBe('none');
+			expect(data.sol.supportedTokenIds.size).toBe(0);
+		});
+
+		it('should fall back to coverage=some next to a provider that lists the category', () => {
+			const data = computeReceiveSupportedTokens({
+				sourceToken: evmSourceToken,
+				providers: [
+					anySolProvider,
+					{
+						key: SwapProvider.NEAR_INTENTS,
+						sourceCategory: 'evm',
+						supportedSourceTokens: new Set([evmSourceId]),
+						getSupportedDestinations: () => ({ sol: solListed })
+					}
+				]
+			});
+
+			expect(data.sol.coverage).toBe('some');
+			expect(data.sol.supportedTokenIds).toEqual(solListed);
+		});
+
+		it('should count towards its own category only, not the registry it sits in', () => {
+			const data = computeReceiveSupportedTokens({
+				sourceToken: evmSourceToken,
+				providers: [{ ...anySolProvider, sourceCategory: 'evm' }]
+			});
+
+			expect(data.sol.coverage).toBe('none');
+			// No provider reaches EVM here, so the category stays blocked.
+			expect(data.evm.coverage).toBe('all');
+			expect(data.evm.supportedTokenIds.size).toBe(0);
+		});
+	});
+
 	it('NEAR Intents EVM source exposes both EVM and SOL destinations', () => {
 		const evmTokens = new Set([evmSourceId]);
 		const solTokens = new Set([mockValidSplToken.address]);

@@ -12,14 +12,14 @@
 </script>
 
 <MultiSelectDropdown
-	ariaLabel="Filter"
+	ariaDescription="Filter by type"
 	{count}
 	{onToggle}
 	{panelWidthClass}
 	searchPlaceholder="Search items"
 	{searchable}
 	testId="multi-select-dropdown"
-	triggerLabel="Filter"
+	triggerLabel="Type"
 >
 	{#snippet panel()}
 		<div data-tid="multi-select-dropdown-panel">Panel content</div>

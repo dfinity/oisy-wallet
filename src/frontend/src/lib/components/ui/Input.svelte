@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import ButtonPaste from '$lib/components/ui/ButtonPaste.svelte';
 	import ButtonReset from '$lib/components/ui/ButtonReset.svelte';
 	import InputBase from '$lib/components/ui/InputBase.svelte';
 	import type { InputProps as InputBaseProps } from '$lib/types/input';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	export interface InputProps extends InputBaseProps {
 		showResetButton?: boolean;
