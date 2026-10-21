@@ -265,7 +265,13 @@ describe('SolWalletConnectSimulationPreview', () => {
 	});
 
 	describe('allowance', () => {
-		const allowanceChange = (amount: bigint): SolSimulationPreview => ({
+		const allowanceChange = ({
+			amount,
+			tokenAddress = mockValidSplToken.address
+		}: {
+			amount: bigint;
+			tokenAddress?: string;
+		}): SolSimulationPreview => ({
 			tokenDeltas: [],
 			controlChanges: [
 				{
@@ -273,7 +279,7 @@ describe('SolWalletConnectSimulationPreview', () => {
 					field: 'allowance',
 					to: mockSolAddress2,
 					allowance: {
-						tokenAddress: mockValidSplToken.address,
+						tokenAddress,
 						decimals: mockValidSplToken.decimals,
 						amount
 					}
@@ -286,7 +292,7 @@ describe('SolWalletConnectSimulationPreview', () => {
 		it('should render how much the delegate may spend', () => {
 			const { getByTestId } = render(
 				SolWalletConnectSimulationPreview,
-				props(allowanceChange(10n ** BigInt(mockValidSplToken.decimals)))
+				props(allowanceChange({ amount: 10n ** BigInt(mockValidSplToken.decimals) }))
 			);
 
 			expect(getByTestId('simulated-control-change')).toHaveTextContent(
@@ -304,7 +310,7 @@ describe('SolWalletConnectSimulationPreview', () => {
 		it('should render the largest token amount as any amount', () => {
 			const { getByTestId } = render(
 				SolWalletConnectSimulationPreview,
-				props(allowanceChange(SPL_TOKEN_MAX_AMOUNT))
+				props(allowanceChange({ amount: SPL_TOKEN_MAX_AMOUNT }))
 			);
 
 			expect(getByTestId('simulated-allowance')).toHaveTextContent(
@@ -312,6 +318,40 @@ describe('SolWalletConnectSimulationPreview', () => {
 					$symbol: mockValidSplToken.symbol
 				})
 			);
+		});
+
+		// The same reason as for a balance change: the placeholder says the wallet does not list the
+		// token, and the address is what the user can look it up by.
+		it('should show the address of an unlisted token with controls to copy it and open its page', () => {
+			const unlistedMint = 'notAKnownMint11111111111111111111111111111';
+
+			const { getByTestId } = render(
+				SolWalletConnectSimulationPreview,
+				props(allowanceChange({ amount: SPL_TOKEN_MAX_AMOUNT, tokenAddress: unlistedMint }))
+			);
+
+			const address = within(getByTestId('simulated-control-change')).getByTestId(
+				'simulated-token-address'
+			);
+
+			expect(address).toHaveTextContent(shortenWithMiddleEllipsis({ text: unlistedMint }));
+			expect(
+				within(address).getByRole('button', { name: `${en.core.text.copy}: ${unlistedMint}` })
+			).toBeInTheDocument();
+			expect(
+				within(address).getByRole('link', {
+					name: en.tokens.alt.open_token_address_block_explorer
+				})
+			).toHaveAttribute('href', `https://solscan.io/token/${unlistedMint}/`);
+		});
+
+		it('should show no token address for a token the wallet lists', () => {
+			const { queryByTestId } = render(
+				SolWalletConnectSimulationPreview,
+				props(allowanceChange({ amount: SPL_TOKEN_MAX_AMOUNT }))
+			);
+
+			expect(queryByTestId('simulated-token-address')).not.toBeInTheDocument();
 		});
 
 		it('should render no allowance for a removed delegate', () => {

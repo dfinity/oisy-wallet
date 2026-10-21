@@ -93,6 +93,23 @@
 				});
 </script>
 
+<!-- A token the wallet does not list is named by the placeholder, and whatever symbol it carries
+     is its creator's choice. The address is what the user can look up, so the row carries it, with
+     the controls to copy it and open the token's page. -->
+{#snippet unlistedToken(tokenAddress: SplTokenAddress)}
+	<span class="flex items-center text-tertiary" data-tid="simulated-token-address">
+		{shortenWithMiddleEllipsis({ text: tokenAddress })}
+
+		<AddressActions
+			copyAddress={tokenAddress}
+			copyAddressText={$i18n.tokens.details.token_address_copied}
+			externalLink={solTokenExplorerUrl({ network: feeToken.network, tokenAddress })}
+			externalLinkAriaLabel={$i18n.tokens.alt.open_token_address_block_explorer}
+			inline
+		/>
+	</span>
+{/snippet}
+
 {#snippet delta({
 	value,
 	decimals,
@@ -123,24 +140,8 @@
 		</div>
 	{/if}
 
-	<!-- A token the wallet does not list is named by the placeholder, and whatever symbol it
-	     carries is its creator's choice. The address is what the user can look up, so the row
-	     carries it, with the controls to copy it and open the token's page. -->
 	{#if nonNullish(unlistedTokenAddress)}
-		<span class="flex items-center text-tertiary" data-tid="simulated-token-address">
-			{shortenWithMiddleEllipsis({ text: unlistedTokenAddress })}
-
-			<AddressActions
-				copyAddress={unlistedTokenAddress}
-				copyAddressText={$i18n.tokens.details.token_address_copied}
-				externalLink={solTokenExplorerUrl({
-					network: feeToken.network,
-					tokenAddress: unlistedTokenAddress
-				})}
-				externalLinkAriaLabel={$i18n.tokens.alt.open_token_address_block_explorer}
-				inline
-			/>
-		</span>
+		{@render unlistedToken(unlistedTokenAddress)}
 	{/if}
 {/snippet}
 
@@ -183,6 +184,10 @@
 
 				{#if nonNullish(allowance)}
 					<span data-tid="simulated-allowance">{allowanceText(allowance)}</span>
+
+					{#if isNullish(splToken(allowance.tokenAddress))}
+						{@render unlistedToken(allowance.tokenAddress)}
+					{/if}
 				{/if}
 			</span>
 		{/each}
