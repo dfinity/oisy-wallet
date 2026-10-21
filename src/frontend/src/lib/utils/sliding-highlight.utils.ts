@@ -83,6 +83,16 @@ const boxWithin = ({ row, container }: { row: HTMLElement; container: HTMLElemen
 	};
 };
 
+type Box = ReturnType<typeof boxWithin>;
+
+// Half a pixel either way is the same place: a fresh measure of an unmoved row differs only by
+// float noise.
+const isSameBox = ({ a, b }: { a: Box; b: Box }): boolean =>
+	Math.abs(a.x - b.x) < 0.5 &&
+	Math.abs(a.y - b.y) < 0.5 &&
+	Math.abs(a.width - b.width) < 0.5 &&
+	Math.abs(a.height - b.height) < 0.5;
+
 const createHighlight = (container: HTMLElement): HTMLElement => {
 	const isList = container instanceof HTMLUListElement || container instanceof HTMLOListElement;
 	const highlight = document.createElement(isList ? 'li' : 'span');
@@ -105,6 +115,11 @@ export const slidingHighlight = (node: HTMLElement, enabled: boolean) => {
 	let hoveredRow: HTMLElement | undefined;
 	let parkTimer: ReturnType<typeof setTimeout> | undefined;
 	const lists = new Set<HTMLElement>();
+	// The row the block sits on and the box last written for it. A panel capped by a narrower
+	// viewport reflows its rows with no pointer or focus event, so their size is watched.
+	let currentRow: HTMLElement | undefined;
+	let placed: Box | undefined;
+	let resizeObserver: ResizeObserver | undefined;
 
 	const isVisible = (): boolean => highlight?.classList.contains('visible') ?? false;
 
@@ -114,14 +129,70 @@ export const slidingHighlight = (node: HTMLElement, enabled: boolean) => {
 		}
 
 		highlight.classList.remove('visible');
+		currentRow = undefined;
+		resizeObserver?.disconnect();
 
 		clearTimeout(parkTimer);
 		parkTimer = setTimeout(() => {
 			if (nonNullish(highlight) && !isVisible()) {
 				highlight.style.setProperty('--highlight-y', '0px');
 				highlight.style.setProperty('--highlight-height', '0px');
+				placed = undefined;
 			}
 		}, FADE_OUT_MS);
+	};
+
+	const place = ({ block, box, instant }: { block: HTMLElement; box: Box; instant: boolean }) => {
+		block.classList.toggle('instant', instant);
+		block.style.setProperty('--highlight-x', `${box.x}px`);
+		block.style.setProperty('--highlight-y', `${box.y}px`);
+		block.style.setProperty('--highlight-width', `${box.width}px`);
+		block.style.setProperty('--highlight-height', `${box.height}px`);
+		placed = box;
+
+		if (instant) {
+			// Commit the new box before transitions come back on.
+			block.getBoundingClientRect();
+			block.classList.remove('instant');
+		}
+	};
+
+	// A resize keeps the block on its row at once, without sliding. Observing a row reports its
+	// size straight away; that report changes nothing, so a slide in progress runs on.
+	const remeasure = () => {
+		const row = currentRow;
+		const container = highlight?.parentElement;
+
+		if (
+			isNullish(highlight) ||
+			isNullish(container) ||
+			isNullish(row) ||
+			!row.isConnected ||
+			!isVisible()
+		) {
+			return;
+		}
+
+		const box = boxWithin({ row, container });
+
+		if (nonNullish(placed) && isSameBox({ a: box, b: placed })) {
+			return;
+		}
+
+		place({ block: highlight, box, instant: true });
+	};
+
+	const watchSize = ({ row, container }: { row: HTMLElement; container: HTMLElement }) => {
+		currentRow = row;
+
+		if (typeof ResizeObserver === 'undefined') {
+			return;
+		}
+
+		resizeObserver ??= new ResizeObserver(remeasure);
+		resizeObserver.disconnect();
+		resizeObserver.observe(row);
+		resizeObserver.observe(container);
 	};
 
 	const moveTo = (row: HTMLElement) => {
@@ -147,22 +218,10 @@ export const slidingHighlight = (node: HTMLElement, enabled: boolean) => {
 
 		// A block that is not showing appears in place: it only ever slides from one row to the
 		// next, never in from wherever it was last hidden.
-		const appearing = !isVisible();
-		const { x, y, width, height } = boxWithin({ row, container });
-
-		block.classList.toggle('instant', appearing);
-		block.style.setProperty('--highlight-x', `${x}px`);
-		block.style.setProperty('--highlight-y', `${y}px`);
-		block.style.setProperty('--highlight-width', `${width}px`);
-		block.style.setProperty('--highlight-height', `${height}px`);
-
-		if (appearing) {
-			// Commit the new position before transitions come back on.
-			block.getBoundingClientRect();
-			block.classList.remove('instant');
-		}
+		place({ block, box: boxWithin({ row, container }), instant: !isVisible() });
 
 		block.classList.add('visible');
+		watchSize({ row, container });
 	};
 
 	// The pointer left the rows. A keyboard-focused row keeps the block: the highlight clears the
@@ -203,6 +262,21 @@ export const slidingHighlight = (node: HTMLElement, enabled: boolean) => {
 
 		hoveredRow = undefined;
 		restOrHide();
+	};
+
+	// A click moves the block to the clicked row: no pointerover follows when the pointer has not
+	// moved since it hovered there, and focus from a click does not count as keyboard focus.
+	const onPointerDown = ({ pointerType, target }: PointerEvent) => {
+		if (pointerType !== 'mouse' && pointerType !== 'pen') {
+			return;
+		}
+
+		const row = findRow({ node, target });
+
+		if (nonNullish(row)) {
+			hoveredRow = row;
+			moveTo(row);
+		}
 	};
 
 	const onPointerLeave = () => {
@@ -254,6 +328,7 @@ export const slidingHighlight = (node: HTMLElement, enabled: boolean) => {
 	const attach = () => {
 		node.setAttribute(HOST_ATTRIBUTE, '');
 		node.addEventListener('pointerover', onPointerOver);
+		node.addEventListener('pointerdown', onPointerDown);
 		node.addEventListener('pointerleave', onPointerLeave);
 		node.addEventListener('input', onInput);
 		node.addEventListener('focusin', onFocusIn);
@@ -263,15 +338,20 @@ export const slidingHighlight = (node: HTMLElement, enabled: boolean) => {
 	const detach = () => {
 		node.removeAttribute(HOST_ATTRIBUTE);
 		node.removeEventListener('pointerover', onPointerOver);
+		node.removeEventListener('pointerdown', onPointerDown);
 		node.removeEventListener('pointerleave', onPointerLeave);
 		node.removeEventListener('input', onInput);
 		node.removeEventListener('focusin', onFocusIn);
 		node.removeEventListener('focusout', onFocusOut);
 
 		clearTimeout(parkTimer);
+		resizeObserver?.disconnect();
+		resizeObserver = undefined;
 		highlight?.remove();
 		highlight = undefined;
 		hoveredRow = undefined;
+		currentRow = undefined;
+		placed = undefined;
 
 		lists.forEach((list) => list.removeAttribute(LIST_ATTRIBUTE));
 		lists.clear();

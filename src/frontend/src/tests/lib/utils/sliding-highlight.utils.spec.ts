@@ -43,6 +43,7 @@ describe('slidingHighlight', () => {
 	afterEach(() => {
 		document.body.innerHTML = '';
 		vi.useRealTimers();
+		vi.unstubAllGlobals();
 	});
 
 	it('marks its host and does nothing else until a row is hovered', () => {
@@ -200,6 +201,52 @@ describe('slidingHighlight', () => {
 
 		expect(highlightOf(node)).toHaveClass('visible');
 		expect(highlightOf(node)?.style.getPropertyValue('--highlight-y')).toBe('0px');
+	});
+
+	it('moves to a row clicked without moving the pointer', () => {
+		const { node, rows } = mount();
+		slidingHighlight(node, true);
+
+		pointer({ type: 'pointerover', target: rows[0] });
+		(rows[1].querySelector('button') as HTMLButtonElement).focus();
+
+		expect(highlightOf(node)?.style.getPropertyValue('--highlight-y')).toBe('36px');
+
+		pointer({ type: 'pointerdown', target: rows[0].querySelector('button') as Element });
+
+		expect(highlightOf(node)?.style.getPropertyValue('--highlight-y')).toBe('0px');
+	});
+
+	it('follows its row when the row changes size, and stops watching once hidden', () => {
+		let notify: ResizeObserverCallback = () => undefined;
+		const disconnect = vi.fn();
+		vi.stubGlobal(
+			'ResizeObserver',
+			class {
+				constructor(callback: ResizeObserverCallback) {
+					notify = callback;
+				}
+				observe = vi.fn();
+				unobserve = vi.fn();
+				disconnect = disconnect;
+			}
+		);
+		const { node, rows } = mount();
+		slidingHighlight(node, true);
+
+		pointer({ type: 'pointerover', target: rows[0] });
+
+		expect(highlightOf(node)?.style.getPropertyValue('--highlight-width')).toBe('200px');
+
+		rows[0].getBoundingClientRect = () => new DOMRect(0, 0, 160, 36);
+		notify([], {} as ResizeObserver);
+
+		expect(highlightOf(node)?.style.getPropertyValue('--highlight-width')).toBe('160px');
+
+		disconnect.mockClear();
+		pointer({ type: 'pointerleave', target: node });
+
+		expect(disconnect).toHaveBeenCalled();
 	});
 
 	it('hides when keyboard focus leaves the rows while the pointer is elsewhere', () => {
