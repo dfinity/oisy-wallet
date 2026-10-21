@@ -40,9 +40,29 @@ describe('trackCyclesTopUp', () => {
 				source_location: 'token_details',
 				result_status: 'error',
 				token_symbol: 'TCYCLES',
-				result_error_code: 'refunded'
+				result_error_code: 'refunded',
+				event_severity: 'error'
 			}
 		});
+	});
+
+	it.each([
+		{ errorCode: 'refused' as const, severity: 'warn' },
+		{ errorCode: 'unknown' as const, severity: 'warn' },
+		{ errorCode: 'refunded' as const, severity: 'error' }
+	])('rates a top-up that ended $errorCode as $severity', ({ errorCode, severity }) => {
+		trackCyclesTopUp({
+			step: 'top_up',
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+			tokenSymbol: 'TCYCLES',
+			errorCode
+		});
+
+		expect(track).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({
+				metadata: expect.objectContaining({ event_severity: severity })
+			})
+		);
 	});
 
 	it('never carries an amount or a canister', () => {
