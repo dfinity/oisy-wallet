@@ -13,6 +13,9 @@ export enum PLAUSIBLE_EVENTS {
 	STAKE = 'stake',
 	UNSTAKE = 'unstake',
 	LOAD_TRANSACTIONS = 'load_transactions',
+	// Loading transactions, sent when something notable happens to it. The outcome is in
+	// `result_status`, never in the name.
+	TRANSACTION_LOAD = 'transaction_load',
 	SIGNER_PAGE_VISIT = 'signer_page_visit',
 	SIGNER_INTERACTION = 'signer_interaction',
 	NETWORK_FILTER = 'network_filter',
@@ -194,6 +197,19 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_NETWORKS {
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS {
 	UNCERTIFIED_REMOVED = 'uncertified_removed'
+}
+
+// What a `transaction_load` event is about: one transaction, or a whole load of them.
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTION_LOAD {
+	SINGLE = 'single'
+}
+
+// Why a `transaction_load` failed, in `result_error_type`.
+export enum PLAUSIBLE_EVENT_TRANSACTION_LOAD_ERROR_TYPES {
+	// The RPC refused to return the transaction.
+	LOAD_REFUSED = 'load_refused',
+	// The RPC returned it, but OISY failed to read it.
+	PARSE_FAILED = 'parse_failed'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER {
