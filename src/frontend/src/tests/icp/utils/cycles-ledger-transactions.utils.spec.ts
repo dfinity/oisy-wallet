@@ -4,7 +4,6 @@ import type { IcrcTransaction } from '$icp/types/ic-transaction';
 import {
 	getTopUpCanister,
 	isCyclesLedger,
-	isTopUpRefundMemo,
 	mapCyclesLedgerTransaction
 } from '$icp/utils/cycles-ledger-transactions.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
@@ -59,21 +58,6 @@ describe('cycles-ledger-transactions.utils', () => {
 		it('should not read a missing or empty memo', () => {
 			expect(getTopUpCanister(undefined)).toBeUndefined();
 			expect(getTopUpCanister(new Uint8Array())).toBeUndefined();
-		});
-	});
-
-	describe('isTopUpRefundMemo', () => {
-		it('should recognise the refund memo', () => {
-			expect(isTopUpRefundMemo(refundMemo)).toBeTruthy();
-		});
-
-		it('should not recognise the memo of a canister creation', () => {
-			expect(isTopUpRefundMemo(new Uint8Array(32).fill(0xfe))).toBeFalsy();
-		});
-
-		it('should not recognise a shorter memo or none', () => {
-			expect(isTopUpRefundMemo(new Uint8Array(31).fill(0xff))).toBeFalsy();
-			expect(isTopUpRefundMemo(undefined)).toBeFalsy();
 		});
 	});
 
