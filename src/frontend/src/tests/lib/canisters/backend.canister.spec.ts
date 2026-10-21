@@ -2033,6 +2033,21 @@ describe('backend.canister', () => {
 			expect(res).toEqual([mockActiveUserTransaction]);
 		});
 
+		it('should return the unwrapped list of transactions from a certified call', async () => {
+			service.get_active_user_transactions.mockResolvedValue({
+				Ok: { transactions: [mockActiveUserTransaction], seen_up_to_ns: ZERO }
+			});
+
+			const { getActiveUserTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await getActiveUserTransactions({ certified: true });
+
+			expect(service.get_active_user_transactions).toHaveBeenCalledExactlyOnceWith();
+			expect(res).toEqual([mockActiveUserTransaction]);
+		});
+
 		it('should return an empty array when the user has no records', async () => {
 			service.get_active_user_transactions.mockResolvedValue({
 				Ok: { transactions: [], seen_up_to_ns: ZERO }

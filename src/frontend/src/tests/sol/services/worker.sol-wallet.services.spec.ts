@@ -219,6 +219,7 @@ describe('worker.sol-wallet.services', () => {
 				expect(syncWallet).toHaveBeenCalledExactlyOnceWith({
 					data: mockWalletData,
 					routing: {
+						network: SOLANA_TOKEN.network,
 						nativeTokenId: SOLANA_TOKEN.id,
 						splTokenIds: new Map([
 							[mockValidSplToken.address, mockValidSplToken.id],

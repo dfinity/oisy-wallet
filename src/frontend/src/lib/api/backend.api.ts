@@ -360,11 +360,12 @@ export const deleteActiveUserTransaction = async ({
 };
 
 export const getActiveUserTransactions = async ({
-	identity
-}: CanisterApiFunctionParams): Promise<ActiveUserTransaction[]> => {
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<ActiveUserTransaction[]> => {
 	const { getActiveUserTransactions } = await backendCanister({ identity });
 
-	return getActiveUserTransactions();
+	return getActiveUserTransactions({ certified });
 };
 
 export const setPersonalNote = async ({

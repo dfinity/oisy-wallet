@@ -108,12 +108,17 @@
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist",
 			"standalone_mode": "Es sind bekannte Verbindungsprobleme aufgetreten, wenn sowohl eine App als auch $oisy_short auf dem Startbildschirm installiert sind. Wenn beim Verbinden von $oisy_short oder beim Signieren von Transaktionen Probleme auftreten, starten Sie die App bitte über einen regulären Browser. Wir arbeiten an einer Lösung, die bald verfügbar sein wird. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Mehr erfahren</a>",
 			"video_not_supported": ""
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
 		"completed": "Abgeschlossen",
 		"in_progress": "In Bearbeitung",
-		"failed": "Fehlgeschlagen"
+		"failed": "Fehlgeschlagen",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {
@@ -1346,6 +1351,8 @@
 			"swap_fees": "Swap Gebühren",
 			"cross_chain_networks_info": "Du tauschst deine Token vom Netzwerk <b>$sourceNetwork</b> ins <b>$destinationNetwork</b> Netzwerk",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -1380,11 +1387,13 @@
 			"swap_replaced_or_dropped": "",
 			"near_intents_quote_unverified": "",
 			"near_intents_quote_expired": "",
+			"near_intents_quote_deposit_memo": "",
 			"oisy_trade_not_trackable": "",
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
-			"oisy_trade_recovery_failed": ""
+			"oisy_trade_recovery_failed": "",
+			"lifi_status_unknown": ""
 		}
 	},
 	"buy": {
@@ -1563,7 +1572,8 @@
 			"open_contract_address_block_explorer": "Vertragsadresse im Block-Explorer öffnen",
 			"open_token_address_block_explorer": "Token-Adresse im Block-Explorer öffnen",
 			"token_group_number": "Gesamtanzahl der Token in der Gruppe für das native Token $token",
-			"filter_button": "Filter öffnen/schließen"
+			"filter_button": "Filter öffnen/schließen",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "Gib eine ERC20-Vertragsadresse ein",
@@ -1883,6 +1893,7 @@
 			"ambiguous_transaction": "Diese Transaktion bewegt Gelder zwischen mehreren Adressen und kann nicht korrekt zur Überprüfung angezeigt werden. Zu deiner Sicherheit wurde sie nicht signiert.",
 			"close_pays_others": "Diese Transaktion schliesst eines deiner Token-Konten und zahlt dessen Guthaben an eine Adresse aus, die nicht deine Wallet ist. Zu deiner Sicherheit wurde sie nicht signiert.",
 			"unreviewed_without_simulation": "OISY konnte einen Teil dieser Transaktion nicht lesen, und das Netzwerk hat dazu auch keine Simulation zurückgegeben – es beschreibt also nichts, was dieser Teil tun würde. Zu Ihrer Sicherheit wurde sie nicht signiert.",
+			"unreviewed_not_described_by_simulation": "OISY konnte einen Teil dieser Transaktion nicht lesen, und auch ihre Simulation hat nicht gezeigt, was dieser Teil tun würde. Zu Ihrer Sicherheit wurde sie nicht signiert.",
 			"unread_programs_unconfirmed": "Diese Transaktion ruft ein Programm auf, das OISY nicht lesen kann, und wurde in der Überprüfung nicht bestätigt. Zu Ihrer Sicherheit wurde sie nicht signiert.",
 			"sol_transaction_as_message": "Diese Nachricht ist eine Solana-Transaktion, die nur durch eine Transaktionsüberprüfung genehmigt werden kann. Aus Sicherheitsgründen wurde sie nicht signiert.",
 			"request_not_defined": "Unerwarteter Fehler: Anfrage ist nicht definiert und kann daher nicht verarbeitet werden.",
@@ -2164,6 +2175,7 @@
 			"instruction_unwrap": "Token-Konto für $symbol entpacken und schliessen",
 			"instruction_create_account": "",
 			"instruction_create_program_account": "",
+			"instruction_close_program_account": "",
 			"instruction_close_account": "",
 			"instruction_close_account_for": "Token-Konto für $symbol schliessen",
 			"instruction_approve": "",
@@ -2580,7 +2592,8 @@
 		},
 		"warning": {
 			"no_index_canister": "$oisy_short kann keine Transaktionen für $token_list laden – der Herausgeber des Tokens bietet keine Transaktionsverfolgung an.",
-			"unavailable_index_canister": "Die neuesten Transaktionen für $token_list können im Moment nicht geladen werden, da ihr Tracking-Dienst nicht antwortet. Sie werden automatisch geladen, sobald er wieder erreichbar ist."
+			"unavailable_index_canister": "Die neuesten Transaktionen für $token_list können im Moment nicht geladen werden, da ihr Tracking-Dienst nicht antwortet. Sie werden automatisch geladen, sobald er wieder erreichbar ist.",
+			"unsupported_sol_transactions": "Einige Transaktionen für $token_list konnten nicht geladen werden, da sie ein nicht unterstütztes Format haben. Sie werden automatisch angezeigt, sobald dieses Problem behoben ist."
 		}
 	},
 	"earning": {
@@ -2711,10 +2724,13 @@
 			"starting_to_repay": "Deine Rückzahlung wird übermittelt…",
 			"repay_started": "Deine Rückzahlung wird jetzt bearbeitet.",
 			"current_debt": "Aktuelle Schulden",
+			"pending_repays": "Rückzahlungen in Bearbeitung",
 			"interest_accrued": "Aufgelaufene Zinsen",
 			"debt_after_repay": "Schulden nach Rückzahlung",
 			"repay_exceeds_debt": "Der Betrag übersteigt deine ausstehenden Schulden.",
-			"repay_prices_unavailable": "Preise sind vorübergehend nicht verfügbar. Zurückzahlen ist deaktiviert, bis sie geladen sind."
+			"repay_prices_unavailable": "Preise sind vorübergehend nicht verfügbar. Zurückzahlen ist deaktiviert, bis sie geladen sind.",
+			"repay_debt_unavailable": "Deine ausstehenden Schulden sind vorübergehend nicht verfügbar. Zurückzahlen ist deaktiviert, bis sie geladen sind.",
+			"repay_pending_covers_debt": "Eine Rückzahlung für diese Position wird noch bearbeitet. Du kannst mehr zurückzahlen, sobald sie abgeschlossen ist."
 		},
 		"info": {
 			"title": "Was ist Liquidium",
@@ -3016,6 +3032,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

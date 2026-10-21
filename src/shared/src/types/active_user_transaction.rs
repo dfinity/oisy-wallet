@@ -54,6 +54,18 @@ pub const XRP_LEDGER_RESULT_EXPIRED: &str = "expired";
 /// Length of an XRPL transaction id in hex.
 pub const XRP_TX_HASH_LEN: usize = 64;
 
+/// The `external_refs` a LI.FI row is polled with. The row is opened once the
+/// source transaction is broadcast, so all of them are known to the caller and
+/// can be required: the source transaction hash (an EVM tx hash or a Solana
+/// signature) keys both the source-chain check and LI.FI's status endpoint; an
+/// EVM source's nonce is what tells a dropped or replaced transaction from a
+/// pending one; a Solana source's recent blockhash is what tells an expired
+/// transaction from one that can still land. Without them a row could never
+/// reach a terminal status.
+pub const LIFI_REF_TX_HASH: &str = "lifi_tx_hash";
+pub const LIFI_REF_NONCE: &str = "lifi_nonce";
+pub const LIFI_REF_BLOCKHASH: &str = "lifi_blockhash";
+
 /// Length bounds of an XRPL classic address. It is base58check over a 21-byte
 /// payload — the `0x00` version byte plus the 20-byte `AccountID` — with a
 /// 4-byte checksum appended, so 25 bytes are encoded and the result is 25 to 35
@@ -144,6 +156,12 @@ pub enum ActiveUserTransactionData {
     /// has to outlive the tab to do that. The locally derived transaction id and
     /// the signed `LastLedgerSequence` ride in `external_refs`.
     Xrp(XrpData),
+    /// LI.FI swap or bridge. A single variant covers every source chain (EVM,
+    /// Solana) and every route; the source tx hash, the route tool, LI.FI's
+    /// transaction id and the learned destination tx hash ride in
+    /// `external_refs`. The two chains are those of `source_token` /
+    /// `dest_token`.
+    Lifi(LifiData),
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -334,6 +352,19 @@ pub struct XrpData {
     pub fee: Nat,
 }
 
+/// LI.FI swap payload. Settlement is tracked off-chain — first on the source
+/// chain, by transaction hash, then by LI.FI's status endpoint — so those
+/// pointers, and the learned destination tx hash, live in `external_refs`; only
+/// the values fixed at creation are captured here. No chain id is stored: the
+/// token ids already carry both chains.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct LifiData {
+    pub source_token: TokenId,
+    pub dest_token: TokenId,
+    /// Source-token amount in base units.
+    pub amount: Nat,
+}
+
 /// In-flight high-level user operation, persisted so the FE can resume polling
 /// across logout / tab close.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -409,11 +440,14 @@ mod tests {
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
         ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData,
-        GetActiveUserTransactionsResponse, LiquidiumAction, LiquidiumData, NearIntentsData,
-        OisyTradeData, OisyTradeSide, OneSecEvmToIcpData, OneSecIcpToEvmData,
+        GetActiveUserTransactionsResponse, LifiData, LiquidiumAction, LiquidiumData,
+        NearIntentsData, OisyTradeData, OisyTradeSide, OneSecEvmToIcpData, OneSecIcpToEvmData,
         UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode, XrpData,
     };
-    use crate::types::{custom_token::ErcTokenId, token_id::TokenId};
+    use crate::types::{
+        custom_token::{ErcTokenId, SplTokenId},
+        token_id::TokenId,
+    };
 
     fn sample_record() -> ActiveUserTransaction {
         ActiveUserTransaction {
@@ -676,6 +710,28 @@ mod tests {
                 destination_tag,
                 amount: Nat::from(25_000_000u64),
                 fee: Nat::from(12u64),
+            });
+            assert_eq!(roundtrip(&original), original);
+        }
+    }
+
+    const USDC_SOLANA: &str = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+
+    #[test]
+    fn lifi_variant_roundtrips() {
+        // One pair per route the variant covers — EVM → EVM, EVM → Solana and
+        // Solana → Solana — so the round-trip also covers `SplMainnet`, which no
+        // other `ActiveUserTransactionData` variant carries.
+        let usdc_solana = TokenId::SplMainnet(SplTokenId(USDC_SOLANA.to_string()));
+        for (source_token, dest_token) in [
+            (erc20(USDC_ETHEREUM, 1), TokenId::EvmNative(42161)),
+            (TokenId::EvmNative(8453), usdc_solana.clone()),
+            (TokenId::SolNativeMainnet, usdc_solana),
+        ] {
+            let original = ActiveUserTransactionData::Lifi(LifiData {
+                source_token,
+                dest_token,
+                amount: Nat::from(1_000_000u64),
             });
             assert_eq!(roundtrip(&original), original);
         }

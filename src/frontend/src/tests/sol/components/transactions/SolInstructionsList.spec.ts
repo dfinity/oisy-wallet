@@ -163,6 +163,30 @@ describe('SolInstructionsList', () => {
 			expect(getAllByText(shortenWithMiddleEllipsis({ text: mockSolAddress3 }))).toHaveLength(1);
 		});
 
+		// The close reads like the opening, and says the rent came home.
+		it('should say a closed account handed its rent back to the wallet', () => {
+			const { getAllByTestId } = render$({
+				kind: 'route',
+				program: mockSolAddress3,
+				programName: 'lb_clmm',
+				children: [
+					{
+						kind: 'closeAccount',
+						account: mockSolAddress2,
+						program: mockSolAddress3,
+						programName: 'lb_clmm',
+						returned: 41_899_840n
+					}
+				]
+			});
+
+			const [, line] = getAllByTestId('sol-instruction');
+
+			expect(line).toHaveTextContent(
+				/^Close app account for lb_clmm · 0\.04189984 SOL sent to your wallet$/
+			);
+		});
+
 		it('should name it by its address when it publishes no name', () => {
 			const { getAllByTestId } = render$({
 				kind: 'route',
