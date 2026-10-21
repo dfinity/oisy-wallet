@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
 	import type { LogoSize } from '$lib/types/components';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		icons: string[];

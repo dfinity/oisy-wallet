@@ -21,7 +21,15 @@ import type {
 	TransactionReceipt,
 	TransactionResponse
 } from 'ethers/providers';
+import type { EthersError } from 'ethers/utils';
 import { get } from 'svelte/store';
+
+// Ethers appends what it knows about a failure to the error's message: for `eth_estimateGas`, the
+// transaction with the wallet address and the calldata (recipient and amount), and at times the
+// node's answer, which can name the address and its balance. Its `shortMessage` can still end with
+// a revert reason written by the contract, so only `code`, one of a fixed set, is tracked.
+const isEthersError = (err: unknown): err is EthersError =>
+	err instanceof Error && 'shortMessage' in err && typeof err.shortMessage === 'string';
 
 export class InfuraProvider {
 	private readonly provider: JsonRpcProvider;
@@ -50,7 +58,7 @@ export class InfuraProvider {
 			trackEvent({
 				name: TRACK_ETH_ESTIMATE_GAS_ERROR,
 				metadata: {
-					error: `${err}`,
+					error: isEthersError(err) ? `${err.code}` : `${err}`,
 					network: this.networkLabel
 				},
 				warning: `Error estimating gas for network ${this.networkLabel}: ${err}`
