@@ -939,9 +939,11 @@ re-quote the same kind of route; its `fromAmount` must equal the amount being sw
 Left free, LI.FI re-routes from one quote to the next through exchanges whose gas differs
 up to twofold (258k for Nordstern, 577k for OKX, USDC → ETH on Base, 2026-10-21), and a
 heavier route than the one reviewed refused the swap as a fee change. The exchange pin is
-for the fee, not the price: when the pinned re-quote has no route or a minimum below the
-one displayed, it is asked once more through any exchange (the bridge still pinned), and
-only that answer can abort as a slippage error. Pinned alone, it aborted every retry once
+for the fee, not the price: when the pinned re-quote has no route, a minimum below the one
+displayed, or LI.FI refuses the pin (a swap step's tool outside its `allowExchanges` keys
+is a 400), it is asked once more through any exchange (the bridge still pinned), and only
+that answer can abort as a slippage error; the calldata binding then checks the quote
+against the request it answers. Pinned alone, it aborted every retry once
 the reviewed exchange's price slipped, the review the abort returns to never refreshing
 its quote (fe4, 2026-10-21). Narrowing the
 bridges does not fix the route's shape, so every re-quote is also refused, with
@@ -1139,7 +1141,8 @@ LI.FI's fee comes with each quote and each quote with the amount, so a "Max" re-
 every fee change sets an amount, gets another fee for it and sets another amount, never
 settling (fe4, 2026-10-21: twelve amounts and fourteen quotes in 34 s as LI.FI's route and
 gas estimate changed). While "Max" holds a LI.FI amount, `SwapEthForm` gives it the highest
-fee seen since it was pressed, so the amount only steps down; typing releases it. The fee
+fee seen since it was pressed, so the amount only steps down; typing releases it, and
+pressing "Max" again starts it over from the fee of the moment. The fee
 shown, the form's validation and the review keep the current one.
 
 Whether "Max" holds lives in the swap context (`amountSetToMax`), not in the form: picking a
