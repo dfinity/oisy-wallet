@@ -24,6 +24,7 @@ import {
 } from '$lib/utils/export-data.utils';
 import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
 import { loadOlderSolTransactions } from '$sol/services/sol-history-pagers.services';
+import { solUnreadableTransactionsStore } from '$sol/stores/sol-unreadable-transactions.store';
 import type { Identity } from '@dfinity/agent';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
@@ -188,6 +189,20 @@ const loadAllTransactionsHistory = async ({
 
 	if (pageFailures.length > 0) {
 		throw pageFailures[0];
+	}
+
+	// The Solana pager resolves a page that holds a transaction it cannot load and leaves that
+	// transaction out, so the CSV would stop short of it just as after a failed page. The wallet worker
+	// or an earlier scroll may have met it before this walk did, so the store is read, not this walk's
+	// pages.
+	const unreadable = get(solUnreadableTransactionsStore);
+
+	const tokensMissingTransactions = tokens.filter(({ id }) => (unreadable[id] ?? []).length > 0);
+
+	if (tokensMissingTransactions.length > 0) {
+		throw new Error(
+			`Transactions left out of the history of ${tokensMissingTransactions.length} token(s)`
+		);
 	}
 };
 

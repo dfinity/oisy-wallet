@@ -4,7 +4,11 @@ import type { OptionSolAddress } from '$sol/types/address';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import { calculateSolPrioritizationFee, resolveSolComputeUnitLimit } from '$sol/utils/fee.utils';
-import { mapSolInstruction, solUnbatchedInstructions } from '$sol/utils/sol-instructions.utils';
+import {
+	mapSolInstruction,
+	solUnbatchedInstructions,
+	solWrappedSolOpeningsReturnedToWallet
+} from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	decompileTransactionMessageFetchingLookupTables,
@@ -13,6 +17,10 @@ import {
 	getTransactionDecoder,
 	getTransactionMessageComputeUnitLimit,
 	getTransactionMessagePriorityFeeLamports,
+	TRANSACTION_CONFIG_COMPUTE_UNIT_LIMIT_BIT_MASK,
+	TRANSACTION_CONFIG_HEAP_SIZE_BIT_MASK,
+	TRANSACTION_CONFIG_LOADED_ACCOUNTS_DATA_SIZE_LIMIT_BIT_MASK,
+	TRANSACTION_CONFIG_PRIORITY_FEE_LAMPORTS_BIT_MASK,
 	type Rpc,
 	type SolanaRpcApi,
 	type Transaction,
@@ -23,6 +31,14 @@ export const decodeTransactionMessage = (transactionMessage: string): Transactio
 	const transactionBytes = getBase64Encoder().encode(transactionMessage);
 	return getTransactionDecoder().decode(transactionBytes);
 };
+
+// The config bits a version 1 message may set: the priority fee (two bits), the compute unit limit,
+// the loaded accounts data size limit and the heap size.
+const SOLANA_V1_CONFIG_MASK =
+	TRANSACTION_CONFIG_PRIORITY_FEE_LAMPORTS_BIT_MASK |
+	TRANSACTION_CONFIG_COMPUTE_UNIT_LIMIT_BIT_MASK |
+	TRANSACTION_CONFIG_LOADED_ACCOUNTS_DATA_SIZE_LIMIT_BIT_MASK |
+	TRANSACTION_CONFIG_HEAP_SIZE_BIT_MASK;
 
 /**
  * It parses a base64 encoded transaction message into a compilable transaction message with lookup tables and instruction
@@ -36,6 +52,20 @@ export const parseSolBase64TransactionMessage = async ({
 }): Promise<CompilableTransactionMessage> => {
 	const { messageBytes } = decodeTransactionMessage(transactionMessage);
 	const compiledTransactionMessage = getCompiledTransactionMessageDecoder().decode(messageBytes);
+
+	// The network refuses a version 1 message that sets any other config bit. The decoder does not:
+	// it skips the bit, and the value the format adds for it. Refused here too, so that a request is
+	// never reviewed as something the network would read differently, nor signed when the network
+	// would refuse it.
+	if (
+		compiledTransactionMessage.version === 1 &&
+		(compiledTransactionMessage.configMask & ~SOLANA_V1_CONFIG_MASK) !== 0
+	) {
+		throw new Error(
+			`Unsupported Solana version 1 transaction config mask: ${compiledTransactionMessage.configMask}`
+		);
+	}
+
 	return await decompileTransactionMessageFetchingLookupTables(compiledTransactionMessage, rpc);
 };
 
@@ -95,8 +125,19 @@ export const mapSolTransactionMessage = ({
 	// A token batch runs the instructions it carries one after the other, so they are read as if the
 	// message stated each itself, held to the same rules as their neighbours. The count that sizes
 	// the default compute limit stays the message's own: the batch is one instruction to the network.
-	const mapped = instructionsList.flatMap(solUnbatchedInstructions).reduce<MappedSolTransaction>(
-		(acc, instruction) => {
+	const unbatched = instructionsList.flatMap(solUnbatchedInstructions);
+
+	// A creation can only be told apart from a payment by what the rest of the message does with the
+	// account it opens, so that is read once, over the whole message, before any instruction is. The
+	// instructions a batch carries are the message's own too, so a close among them answers for the
+	// opening as one stated on its own does.
+	const returnedToWallet = solWrappedSolOpeningsReturnedToWallet({
+		instructions: unbatched,
+		userAddress
+	});
+
+	const mapped = unbatched.reduce<MappedSolTransaction>(
+		(acc, instruction, index) => {
 			const {
 				amount,
 				source,
@@ -108,7 +149,12 @@ export const mapSolTransactionMessage = ({
 				computeUnitPrice,
 				computeUnitLimit,
 				ambiguous: instructionAmbiguous
-			} = mapSolInstruction({ instruction, userAddress, rentExemptMinimum });
+			} = mapSolInstruction({
+				instruction,
+				userAddress,
+				rentExemptMinimum,
+				returnsToWallet: returnedToWallet.has(index)
+			});
 
 			// The summary holds a single value per field, so any later instruction that
 			// disagrees on source, destination or payer would be silently dropped from the

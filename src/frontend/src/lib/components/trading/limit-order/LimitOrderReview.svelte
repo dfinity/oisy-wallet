@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import LimitOrderIntentHero from '$lib/components/trading/limit-order/LimitOrderIntentHero.svelte';
 	import LimitOrderPriceSummary from '$lib/components/trading/limit-order/LimitOrderPriceSummary.svelte';
 	import LimitOrderTermsList from '$lib/components/trading/limit-order/LimitOrderTermsList.svelte';
@@ -27,6 +26,7 @@
 		restsAgainstValue,
 		valueDifferencePercent
 	} from '$lib/utils/oisy-trade.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		side: LimitOrderSide;
