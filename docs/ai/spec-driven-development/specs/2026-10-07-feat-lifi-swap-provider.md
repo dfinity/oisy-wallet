@@ -1151,7 +1151,10 @@ release "Max" and leave the amount at the previous provider's max. That was invi
 every EVM provider shared the fee context's estimate; LI.FI's own, higher fee turned the
 amount red. A new source token, switching the tokens and closing the modal release it. The
 highest LI.FI fee seen lives there too (`lifiMaxFee`), for the same reason: a rebuilt form
-that forgot it would raise the amount when the fee had fallen meanwhile. The Max button keeps
+that forgot it would raise the amount when the fee had fallen meanwhile. Only another
+provider's offer ends it: none is selected while the offers reload, as after a token picker
+cleared them, and the plain estimate the form falls back to then stays below the kept
+reservation, so "Max" holds. The Max button keeps
 a single pending re-application, restarted by each change and cancelled with the button, so a
 destroyed form's cannot write the amount while the rebuilt one does not know its fee yet.
 
