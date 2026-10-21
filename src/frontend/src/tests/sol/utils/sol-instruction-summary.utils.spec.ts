@@ -3897,7 +3897,17 @@ describe('sol-instruction-summary.utils', () => {
 					accountTokenAmounts
 				});
 
+			const plain = (destination: string) => ({
+				program: 'system',
+				programId: SYSTEM,
+				parsed: {
+					type: 'transfer',
+					info: { source: mockSolAddress3, destination, lamports: 5_000 }
+				}
+			});
+
 			const payouts = [
+				{ name: 'a plain transfer', payout: plain },
 				{ name: 'a seed-derived account', payout: withSeed },
 				{ name: 'a nonce account', payout: fromNonce }
 			];
@@ -3909,7 +3919,8 @@ describe('sol-instruction-summary.utils', () => {
 			});
 
 			// Paid into a wrapped SOL account, the lamports raise its balance the way a plain transfer
-			// into it does.
+			// into it does. They reach the wallet only with the unwrap, which is what the wallet's
+			// change counts them at.
 			it.each(payouts)(
 				'should count what $name pays into a wrapped SOL account toward a later unwrap of everything',
 				({ payout }) => {
@@ -3918,7 +3929,17 @@ describe('sol-instruction-summary.utils', () => {
 						accountTokenAmounts: { [wrapped]: ZERO }
 					});
 
+					expect(views[0]).toStrictEqual({
+						kind: 'receive',
+						amount: 5_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						counterparty: mockSolAddress3,
+						own: false
+					});
 					expect(views.at(-1)?.amount).toBe(5_000n);
+					expect(
+						solWalletLamportsStated({ instructions: views, userAddress: mockSolAddress })
+					).toBe(5_000n);
 				}
 			);
 

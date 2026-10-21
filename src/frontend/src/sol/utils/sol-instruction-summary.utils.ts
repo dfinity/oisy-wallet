@@ -753,11 +753,23 @@ const toEffect = ({
 
 		const counterparty = outgoing ? destination : source;
 
+		// Paid by somebody else into a wrapped SOL account of the user's, the lamports become wrapped
+		// SOL there rather than SOL in the wallet, which only the unwrap or the close that pays them
+		// on reaches. The account as of the transfer, or the one opened there next.
+		const wrappedForUser =
+			!outgoing &&
+			nonNullish(destination) &&
+			destination !== userAddress &&
+			(mintAt({ account: destination, position }) ??
+				openedNext({ account: destination, flattened, from: position }).mint) ===
+				WSOL_TOKEN.address;
+
 		return {
 			kind: outgoing ? 'send' : 'receive',
 			...(nonNullish(amount({ info, key: 'lamports' })) && {
 				amount: amount({ info, key: 'lamports' })
 			}),
+			...(wrappedForUser && { tokenAddress: WSOL_TOKEN.address }),
 			...(nonNullish(counterparty) && {
 				counterparty,
 				own: isOwned({ account: counterparty, arriving: outgoing })
