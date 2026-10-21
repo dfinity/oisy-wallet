@@ -3,6 +3,16 @@ import { nonNullish } from '@dfinity/utils';
 import type { Verify } from '@walletconnect/types';
 
 /**
+ * Whether a WalletConnect session proposal or request may be approved: not when WalletConnect's
+ * Verify API flags the site it comes from as a scam.
+ *
+ * Verify states that verdict in `isScam` alone. `validation` only says whether the request came
+ * from the domain the dApp claims, so a flagged site served from its own domain is still `VALID`.
+ */
+export const acceptedContext = (context: Verify.Context | undefined): boolean =>
+	context?.verified.isScam !== true;
+
+/**
  * Whether the Settings switch that allows signing the WalletConnect transactions OISY can't check is
  * on at `now`.
  *
@@ -26,4 +36,4 @@ export const isWalletConnectUncheckedSigningActive = ({
  * no way past a refusal.
  */
 export const isWalletConnectDomainFlagged = (context: Verify.Context | undefined): boolean =>
-	context?.verified.isScam === true || context?.verified.validation === 'INVALID';
+	!acceptedContext(context) || context?.verified.validation === 'INVALID';

@@ -1,5 +1,6 @@
 import type { solTransactionTypes } from '$lib/schema/transaction.schema';
 import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
+import { SOLANA_MAX_SUPPORTED_TRANSACTION_VERSION } from '$sol/constants/sol.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolAddress } from '$sol/types/address';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
@@ -54,7 +55,7 @@ const aux = async () => {
 	const { getTransaction } = solanaHttpRpc('mainnet');
 
 	return await getTransaction(mockSolSignature(), {
-		maxSupportedTransactionVersion: 0,
+		maxSupportedTransactionVersion: SOLANA_MAX_SUPPORTED_TRANSACTION_VERSION,
 		encoding: 'jsonParsed'
 	}).send();
 };
@@ -114,7 +115,8 @@ export interface MappedSolTransaction {
 	computeUnitPrice?: bigint;
 	computeUnitLimit?: bigint;
 	// The prioritisation fee, in lamports, the message will be charged on top of the base
-	// transaction fee. Only set at message level, where the whole instruction list is known.
+	// transaction fee. Only set at message level, where the whole instruction list, or the config
+	// of a version 1 message, is known.
 	prioritizationFee?: bigint;
 	// What OISY itself would pay to prioritise this same message, in lamports, from the network's
 	// recent fees. The review compares the requested fee against it. Absent when the estimate
@@ -125,6 +127,10 @@ export interface MappedSolTransaction {
 	// so such a transaction cannot be faithfully represented on the review screen and
 	// must not be signed without the user seeing every fund movement.
 	ambiguous?: boolean;
+	// `true` when the message hands the connected wallet itself to another program. It sets
+	// `ambiguous` too, and is kept apart because no acknowledgement signs past it: no app needs the
+	// wallet handed over, and the wallet cannot pay a fee afterwards.
+	reassignsWallet?: boolean;
 }
 
 export interface SolMappedTransaction {

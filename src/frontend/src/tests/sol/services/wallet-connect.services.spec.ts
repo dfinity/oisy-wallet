@@ -12,7 +12,11 @@ import { trackWalletConnectUncheckedSigning } from '$lib/services/wallet-connect
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { estimatePriorityFee, getAccountInfo } from '$sol/api/solana.api';
+import { estimatePriorityFee, getAccountInfo, getSolCreateAccountFee } from '$sol/api/solana.api';
+import {
+	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
+	STAKE_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_MESSAGE,
@@ -25,11 +29,13 @@ import * as solSignServices from '$sol/services/sol-sign.services';
 import { signTransaction as executeSign } from '$sol/services/sol-sign.services';
 import { simulateSolTransaction } from '$sol/services/sol-simulation.services';
 import { decode, decodeMessage, sign, signMessage } from '$sol/services/wallet-connect.services';
+import { solProgramNameStore } from '$sol/stores/sol-program-name.store';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 import type { MappedSolTransaction, SolTransferParties } from '$sol/types/sol-transaction';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
+import * as solInstructionSummaryUtils from '$sol/utils/sol-instruction-summary.utils';
 import * as solSignUtils from '$sol/utils/sol-sign.utils';
 import { signTransaction } from '$sol/utils/sol-sign.utils';
 import * as solTransactionsUtils from '$sol/utils/sol-transactions.utils';
@@ -49,6 +55,7 @@ import {
 	mockAtaAddress,
 	mockSolAddress,
 	mockSolAddress2,
+	mockSolAddress3,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
@@ -57,6 +64,7 @@ import {
 	getBase58Decoder,
 	getBase58Encoder,
 	isTransactionMessageWithBlockhashLifetime,
+	lamports,
 	type Rpc,
 	type SolanaRpcApi
 } from '@solana/kit';
@@ -88,6 +96,7 @@ vi.mock('$sol/api/solana.api', () => ({
 	getAccountInfo: vi.fn(),
 	estimatePriorityFee: vi.fn(),
 	getMultipleAccountsInfo: vi.fn(),
+	getSolCreateAccountFee: vi.fn(),
 	simulateTransactionAccounts: vi.fn()
 }));
 
@@ -110,6 +119,8 @@ describe('wallet-connect.services', () => {
 		destination: mockAtaAddress
 	};
 	const mockTransactionMessage = { mock: 'mockTransactionMessage' };
+	// What mainnet charged a token account to exist on 2026-10-06.
+	const mockRentExemptMinimum = lamports(1_488_440n);
 
 	// Without a simulation the lists come from the message's own instructions and say so. The mock
 	// message states none, so both are empty and the partial marker is the whole answer.
@@ -154,6 +165,8 @@ describe('wallet-connect.services', () => {
 		vi.mocked(getAccountInfo).mockResolvedValue({
 			value: null
 		} as unknown as Awaited<ReturnType<typeof getAccountInfo>>);
+
+		vi.mocked(getSolCreateAccountFee).mockResolvedValue(mockRentExemptMinimum);
 
 		vi.mocked(isTransactionMessageWithBlockhashLifetime).mockReturnValue(true);
 
@@ -202,9 +215,14 @@ describe('wallet-connect.services', () => {
 			});
 			expect(mapSolTransactionMessage).toHaveBeenCalledWith({
 				transactionMessage: mockParsedTransaction,
-				userAddress: mockSolAddress
+				userAddress: mockSolAddress,
+				rentExemptMinimum: mockRentExemptMinimum
 			});
-			expect(result).toEqual({ ...mockMappedTransaction, parties: emptyPartialParties });
+			expect(result).toEqual({
+				...mockMappedTransaction,
+				rentExemptMinimum: mockRentExemptMinimum,
+				parties: emptyPartialParties
+			});
 		});
 
 		it('should recover the SPL mint from the token account when the mapper did not surface it', async () => {
@@ -235,6 +253,7 @@ describe('wallet-connect.services', () => {
 				source: mockAtaAddress,
 				destination: mockSolAddress2,
 				tokenAddress: mockSplAddress,
+				rentExemptMinimum: mockRentExemptMinimum,
 				parties: emptyPartialParties
 			});
 		});
@@ -269,6 +288,7 @@ describe('wallet-connect.services', () => {
 				amount: 5n,
 				source: mockSolAddress,
 				destination: mockAtaAddress,
+				rentExemptMinimum: mockRentExemptMinimum,
 				parties: emptyPartialParties
 			});
 		});
@@ -295,7 +315,116 @@ describe('wallet-connect.services', () => {
 				amount: 7n,
 				source: mockAtaAddress,
 				destination: mockSolAddress2,
+				rentExemptMinimum: mockRentExemptMinimum,
 				parties: emptyPartialParties
+			});
+		});
+
+		// Every account creation in the message is held to what the chain charges a token account to
+		// exist: funded above it, a creation is a payment rather than rent, and is refused.
+		describe('the rent reserve', () => {
+			const base64EncodedTransactionMessage = 'mockBase64Transaction';
+			const networkId = SOLANA_MAINNET_NETWORK_ID;
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			it('should hold the message to the reserve the chain charges and hand it on', async () => {
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(getSolCreateAccountFee).toHaveBeenCalledExactlyOnceWith('mainnet');
+				expect(mapSolTransactionMessage).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ rentExemptMinimum: mockRentExemptMinimum })
+				);
+				expect(simulateSolTransaction).toHaveBeenCalledOnce();
+
+				const [[{ rentExemptMinimumRequest }]] = vi.mocked(simulateSolTransaction).mock.calls;
+
+				await expect(rentExemptMinimumRequest).resolves.toBe(mockRentExemptMinimum);
+
+				expect(result).toEqual(
+					expect.objectContaining({ rentExemptMinimum: mockRentExemptMinimum })
+				);
+			});
+
+			// Without it a creation for a program has no line to be held to, which the mapper refuses,
+			// so the review holds the button rather than offering what signing would refuse.
+			it('should decode without a reserve when the chain does not answer', async () => {
+				vi.mocked(getSolCreateAccountFee).mockRejectedValueOnce(new Error('RPC down'));
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(mapSolTransactionMessage).toHaveBeenCalledExactlyOnceWith({
+					transactionMessage: mockParsedTransaction,
+					userAddress: mockSolAddress,
+					rentExemptMinimum: undefined
+				});
+				expect(simulateSolTransaction).toHaveBeenCalledOnce();
+
+				const [[{ rentExemptMinimumRequest }]] = vi.mocked(simulateSolTransaction).mock.calls;
+
+				await expect(rentExemptMinimumRequest).resolves.toBeUndefined();
+
+				expect(result).not.toHaveProperty('rentExemptMinimum');
+			});
+
+			// An RPC that never answers is given up on after the simulation's timeout, so it cannot leave
+			// the review unapprovable.
+			it('should decode without a reserve when the chain does not answer in time', async () => {
+				vi.useFakeTimers();
+
+				vi.mocked(getSolCreateAccountFee).mockReturnValueOnce(new Promise(() => undefined));
+
+				const pending = decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				await vi.advanceTimersByTimeAsync(SOLANA_SIMULATION_TIMEOUT_MILLISECONDS);
+
+				const result = await pending;
+
+				expect(mapSolTransactionMessage).toHaveBeenCalledExactlyOnceWith({
+					transactionMessage: mockParsedTransaction,
+					userAddress: mockSolAddress,
+					rentExemptMinimum: undefined
+				});
+				expect(result).not.toHaveProperty('rentExemptMinimum');
+			});
+
+			// The run waits for the reserve inside its own timeout, so a stalled reserve and a stalled
+			// run cost one timeout rather than two in a row.
+			it('should start the simulation before the reserve arrives', async () => {
+				vi.useFakeTimers();
+
+				vi.mocked(getSolCreateAccountFee).mockReturnValueOnce(new Promise(() => undefined));
+
+				const pending = decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(simulateSolTransaction).toHaveBeenCalledOnce();
+				expect(mapSolTransactionMessage).not.toHaveBeenCalled();
+
+				await vi.advanceTimersByTimeAsync(SOLANA_SIMULATION_TIMEOUT_MILLISECONDS);
+
+				await pending;
+
+				expect(mapSolTransactionMessage).toHaveBeenCalledOnce();
 			});
 		});
 
@@ -318,7 +447,8 @@ describe('wallet-connect.services', () => {
 			it('should attach the preview to the decoded review', async () => {
 				vi.mocked(simulateSolTransaction).mockResolvedValue({
 					preview: mockPreview,
-					parties: mockParties
+					parties: mockParties,
+					unreadPrograms: []
 				});
 
 				const result = await decode({
@@ -331,13 +461,18 @@ describe('wallet-connect.services', () => {
 					base64EncodedTransactionMessage,
 					transactionMessage: mockParsedTransaction,
 					address: mockSolAddress,
-					network: 'mainnet'
+					network: 'mainnet',
+					rentExemptMinimumRequest: expect.any(Promise)
 				});
 				expect(result).toEqual(expect.objectContaining({ preview: mockPreview }));
 			});
 
-			it('should decode without a preview when the simulation yields none', async () => {
-				vi.mocked(simulateSolTransaction).mockResolvedValue({ parties: mockParties });
+			it('should pass on that the run opens an account above its rent', async () => {
+				vi.mocked(simulateSolTransaction).mockResolvedValue({
+					parties: mockParties,
+					unreadPrograms: [],
+					opensAccountBeyondRent: true
+				});
 
 				const result = await decode({
 					base64EncodedTransactionMessage,
@@ -345,7 +480,27 @@ describe('wallet-connect.services', () => {
 					address: mockSolAddress
 				});
 
-				expect(result).toEqual({ ...mockMappedTransaction, parties: mockParties });
+				expect(result).toEqual(expect.objectContaining({ opensAccountBeyondRent: true }));
+			});
+
+			it('should decode without a preview when the simulation yields none', async () => {
+				vi.mocked(simulateSolTransaction).mockResolvedValue({
+					parties: mockParties,
+					unreadPrograms: []
+				});
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(result).toEqual({
+					...mockMappedTransaction,
+					rentExemptMinimum: mockRentExemptMinimum,
+					parties: mockParties,
+					unreadPrograms: []
+				});
 				expect(result).not.toHaveProperty('preview');
 			});
 		});
@@ -370,7 +525,8 @@ describe('wallet-connect.services', () => {
 			it('should call the list simulated when the run produced one', async () => {
 				vi.mocked(simulateSolTransaction).mockResolvedValue({
 					instructions: simulated,
-					parties: mockParties
+					parties: mockParties,
+					unreadPrograms: []
 				});
 
 				const result = await decode({
@@ -387,7 +543,10 @@ describe('wallet-connect.services', () => {
 			// A run reports its parties whether or not it produced any instruction summaries, so
 			// this is the state where only the list falls back.
 			it('should read the message when the run produced no list', async () => {
-				vi.mocked(simulateSolTransaction).mockResolvedValue({ parties: mockParties });
+				vi.mocked(simulateSolTransaction).mockResolvedValue({
+					parties: mockParties,
+					unreadPrograms: []
+				});
 
 				const result = await decode({
 					base64EncodedTransactionMessage,
@@ -396,7 +555,36 @@ describe('wallet-connect.services', () => {
 				});
 
 				expect(result).not.toHaveProperty('simulatedInstructions');
-				expect(result).toEqual({ ...mockMappedTransaction, parties: mockParties });
+				expect(result).toEqual({
+					...mockMappedTransaction,
+					rentExemptMinimum: mockRentExemptMinimum,
+					parties: mockParties,
+					unreadPrograms: []
+				});
+			});
+
+			// Read from the message, the list states the rent of what the message opens and of what it
+			// closes against the same reserve a run's list is given.
+			it('should hand the reserve to the list read from the message', async () => {
+				const spyMapSolInstructionSummaries = vi.spyOn(
+					solInstructionSummaryUtils,
+					'mapSolInstructionSummaries'
+				);
+
+				vi.mocked(simulateSolTransaction).mockResolvedValue({
+					parties: mockParties,
+					unreadPrograms: []
+				});
+
+				await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(spyMapSolInstructionSummaries).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ rentExemptMinimum: mockRentExemptMinimum })
+				);
 			});
 
 			// An empty list is the run's answer that there is nothing to list. Rebuilt from the
@@ -405,7 +593,8 @@ describe('wallet-connect.services', () => {
 			it('should pass on an empty list from the run rather than read the message', async () => {
 				vi.mocked(simulateSolTransaction).mockResolvedValue({
 					instructions: [],
-					parties: mockParties
+					parties: mockParties,
+					unreadPrograms: []
 				});
 
 				const result = await decode({
@@ -431,7 +620,7 @@ describe('wallet-connect.services', () => {
 					partial: false
 				};
 
-				vi.mocked(simulateSolTransaction).mockResolvedValue({ parties });
+				vi.mocked(simulateSolTransaction).mockResolvedValue({ parties, unreadPrograms: [] });
 
 				const result = await decode({
 					base64EncodedTransactionMessage,
@@ -452,6 +641,68 @@ describe('wallet-connect.services', () => {
 				});
 
 				expect(result).toEqual(expect.objectContaining({ parties: emptyPartialParties }));
+			});
+
+			describe('unread programs', () => {
+				const parties: SolTransferParties = { sources: [], destinations: [], partial: false };
+
+				// Named from the store so nothing is read from the chain: the stake program publishes
+				// no interface, the other one does.
+				beforeEach(() => {
+					solProgramNameStore.set({
+						network: 'mainnet',
+						names: { [STAKE_PROGRAM_ADDRESS]: '', [mockSolAddress3]: 'lending_app' }
+					});
+				});
+
+				afterEach(() => {
+					solProgramNameStore.reset();
+				});
+
+				it('should pass on the programs the run calls that it does not know, with their names', async () => {
+					vi.mocked(simulateSolTransaction).mockResolvedValue({
+						parties,
+						unreadPrograms: [STAKE_PROGRAM_ADDRESS, mockSolAddress3]
+					});
+
+					const result = await decode({
+						base64EncodedTransactionMessage,
+						networkId,
+						address: mockSolAddress
+					});
+
+					expect(result.unreadPrograms).toEqual([
+						{ address: STAKE_PROGRAM_ADDRESS },
+						{ address: mockSolAddress3, name: 'lending_app' }
+					]);
+				});
+
+				it('should pass on none when the run calls only programs it knows', async () => {
+					vi.mocked(simulateSolTransaction).mockResolvedValue({
+						parties,
+						unreadPrograms: []
+					});
+
+					const result = await decode({
+						base64EncodedTransactionMessage,
+						networkId,
+						address: mockSolAddress
+					});
+
+					expect(result.unreadPrograms).toEqual([]);
+				});
+
+				it('should leave them out without a run to name them from', async () => {
+					vi.mocked(simulateSolTransaction).mockResolvedValue(undefined);
+
+					const result = await decode({
+						base64EncodedTransactionMessage,
+						networkId,
+						address: mockSolAddress
+					});
+
+					expect(result).not.toHaveProperty('unreadPrograms');
+				});
 			});
 		});
 
@@ -549,8 +800,13 @@ describe('wallet-connect.services', () => {
 			request: mockRequest,
 			listener: mockListener,
 			simulated: true,
+			simulationRan: true,
 			closesPayOthers: false,
-			acknowledgedRefusals: []
+			unreadProgramsAcknowledged: true,
+			rentExemptMinimum: mockRentExemptMinimum,
+			opensAccountBeyondRent: false,
+			acknowledgedRefusals: [],
+			reassignsWallet: false
 		};
 
 		describe(`with method ${SESSION_REQUEST_SOL_SIGN_TRANSACTION}`, () => {
@@ -571,8 +827,13 @@ describe('wallet-connect.services', () => {
 				request: mockRequest,
 				listener: mockListener,
 				simulated: true,
+				simulationRan: true,
 				closesPayOthers: false,
-				acknowledgedRefusals: []
+				unreadProgramsAcknowledged: true,
+				rentExemptMinimum: mockRentExemptMinimum,
+				opensAccountBeyondRent: false,
+				acknowledgedRefusals: [],
+				reassignsWallet: false
 			};
 
 			const expected = {
@@ -608,8 +869,13 @@ describe('wallet-connect.services', () => {
 
 				expect(mapSolTransactionMessage).toHaveBeenCalledExactlyOnceWith({
 					transactionMessage: mockParsedTransaction,
-					userAddress: mockSolAddress
+					userAddress: mockSolAddress,
+					rentExemptMinimum: mockRentExemptMinimum
 				});
+
+				// Signing holds the message to the reserve the review was computed with rather than
+				// asking the chain again.
+				expect(getSolCreateAccountFee).not.toHaveBeenCalled();
 
 				expect(decodeTransactionMessage).toHaveBeenCalledExactlyOnceWith(mockTransaction);
 
@@ -711,8 +977,13 @@ describe('wallet-connect.services', () => {
 				request: mockRequest,
 				listener: mockListener,
 				simulated: true,
+				simulationRan: true,
 				closesPayOthers: false,
-				acknowledgedRefusals: []
+				unreadProgramsAcknowledged: true,
+				rentExemptMinimum: mockRentExemptMinimum,
+				opensAccountBeyondRent: false,
+				acknowledgedRefusals: [],
+				reassignsWallet: false
 			};
 
 			it('should show an error if the address is nullish', async () => {
@@ -746,7 +1017,8 @@ describe('wallet-connect.services', () => {
 
 				expect(mapSolTransactionMessage).toHaveBeenCalledExactlyOnceWith({
 					transactionMessage: mockParsedTransaction,
-					userAddress: mockSolAddress
+					userAddress: mockSolAddress,
+					rentExemptMinimum: mockRentExemptMinimum
 				});
 
 				expect(decodeTransactionMessage).toHaveBeenCalledExactlyOnceWith(mockTransaction);
@@ -1015,7 +1287,7 @@ describe('wallet-connect.services', () => {
 			});
 
 			it('should refuse to sign when no simulation described it', async () => {
-				const result = await sign({ ...mockParams, simulated: false });
+				const result = await sign({ ...mockParams, simulated: false, simulationRan: false });
 
 				expect(result).toEqual({ success: false });
 
@@ -1033,6 +1305,22 @@ describe('wallet-connect.services', () => {
 					id: mockRequest.id,
 					error: UNEXPECTED_ERROR
 				});
+			});
+
+			// The review said a run took place, so the refusal says the run left that part undescribed
+			// rather than that there was none.
+			it('should say the simulation did not describe it when a run came back', async () => {
+				const result = await sign({ ...mockParams, simulated: false, simulationRan: true });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.wallet_connect.error.unreviewed_not_described_by_simulation }
+				});
+
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+				expect(mockListener.rejectRequest).toHaveBeenCalledOnce();
 			});
 
 			it('should sign when a simulation described it', async () => {
@@ -1103,6 +1391,38 @@ describe('wallet-connect.services', () => {
 			});
 		});
 
+		describe('with a program the run calls that OISY does not know', () => {
+			it('should refuse to sign when the review did not confirm it', async () => {
+				const result = await sign({ ...mockParams, unreadProgramsAcknowledged: false });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.unread_programs_unconfirmed }
+				});
+
+				expect(mockParams.modalNext).not.toHaveBeenCalled();
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(sendSignedTransaction).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: mockRequest.topic,
+					id: mockRequest.id,
+					error: UNEXPECTED_ERROR
+				});
+			});
+
+			it('should sign once the review confirmed it', async () => {
+				const result = await sign({ ...mockParams, unreadProgramsAcknowledged: true });
+
+				expect(result).toEqual(expect.objectContaining({ success: true }));
+
+				expect(spyToastsError).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).toHaveBeenCalledOnce();
+			});
+		});
+
 		describe('with a transaction OISY read in full', () => {
 			it('should sign even when no simulation was obtained', async () => {
 				// The simulation stays best effort for a message the wallet understands: a provider that
@@ -1113,6 +1433,30 @@ describe('wallet-connect.services', () => {
 
 				expect(spyToastsError).not.toHaveBeenCalled();
 				expect(mockListener.approveRequest).toHaveBeenCalledOnce();
+			});
+		});
+
+		// Only the run shows an account a program opens inside its own instruction, so the decode's
+		// verdict on it is handed in rather than read from the message.
+		describe('with an account opened above its rent inside an instruction', () => {
+			it('should refuse to sign and reject the request', async () => {
+				const result = await sign({ ...mockParams, opensAccountBeyondRent: true });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.ambiguous_transaction }
+				});
+
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(sendSignedTransaction).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: mockRequest.topic,
+					id: mockRequest.id,
+					error: UNEXPECTED_ERROR
+				});
 			});
 		});
 
@@ -1216,6 +1560,43 @@ describe('wallet-connect.services', () => {
 					msg: { text: en.wallet_connect.error.ambiguous_transaction }
 				});
 				expect(executeSign).not.toHaveBeenCalled();
+			});
+
+			// The wallet itself handed to another program is never signed past: no app needs it.
+			it('should refuse handing over the wallet the message states, acknowledged or not', async () => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					...mockMappedTransaction,
+					ambiguous: true,
+					reassignsWallet: true
+				});
+
+				const result = await sign({ ...mockParams, acknowledgedRefusals: ['cannot_be_shown'] });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.ambiguous_transaction }
+				});
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+				expect(trackWalletConnectUncheckedSigning).not.toHaveBeenCalled();
+			});
+
+			it('should refuse handing over the wallet the run shows, acknowledged or not', async () => {
+				const result = await sign({
+					...mockParams,
+					reassignsWallet: true,
+					acknowledgedRefusals: ['cannot_be_shown']
+				});
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.ambiguous_transaction }
+				});
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+				expect(trackWalletConnectUncheckedSigning).not.toHaveBeenCalled();
 			});
 
 			it('should not count a request that needed no acknowledgement', async () => {
@@ -1329,6 +1710,7 @@ describe('wallet-connect.services', () => {
 			request: mockRequest,
 			listener: mockListener,
 			simulated: true,
+			simulationRan: true,
 			closesPayOthers: false
 		};
 

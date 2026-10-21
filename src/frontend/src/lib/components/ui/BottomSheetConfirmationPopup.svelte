@@ -7,6 +7,8 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { CONFIRMATION_POPUP_MODAL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { nextElementId } from '$lib/utils/html.utils';
+	import { overlayFocus } from '$lib/utils/overlay.utils';
 
 	interface Props {
 		onCancel: () => void;
@@ -17,12 +19,22 @@
 	}
 
 	let { onCancel, title, content, disabled = false, showCloseButton = true }: Props = $props();
+	const titleId = nextElementId('confirmation-title-');
+	const cancel = () => {
+		if (!disabled) {
+			onCancel();
+		}
+	};
 </script>
 
 {#snippet body()}
 	<div class="flex w-full flex-col">
 		<div class="flex w-full items-center justify-between gap-4 px-5 pt-5 pb-2">
-			<h3 class="m-0 min-w-0 text-xl font-bold break-words" class:w-full={!showCloseButton}>
+			<h3
+				id={titleId}
+				class="m-0 min-w-0 text-xl font-bold break-words"
+				class:w-full={!showCloseButton}
+			>
 				{@render title()}
 			</h3>
 
@@ -30,7 +42,7 @@
 				<ButtonIcon
 					ariaLabel={$i18n.core.alt.close_details}
 					{disabled}
-					onclick={onCancel}
+					onclick={cancel}
 					styleClass="text-disabled"
 				>
 					{#snippet icon()}
@@ -50,24 +62,27 @@
      this popup still renders as a full-width mobile sheet. -->
 <Responsive down="sm">
 	<div class="fixed inset-0 z-50">
-		<BottomSheetContainer transition>
+		<BottomSheetContainer ariaLabelledby={titleId} onClose={cancel} transition>
 			{@render body()}
 		</BottomSheetContainer>
 
-		<Backdrop onClose={onCancel} />
+		<Backdrop onClose={cancel} />
 	</div>
 </Responsive>
 
 <!-- Desktop: a smaller modal stacked over the underlying modal. -->
 <Responsive up="md">
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-		<Backdrop onClose={onCancel} />
+		<Backdrop onClose={cancel} />
 
 		<div
 			class="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl bg-primary shadow-[var(--overlay-box-shadow)]"
+			aria-labelledby={titleId}
 			aria-modal="true"
 			data-tid={CONFIRMATION_POPUP_MODAL}
 			role="dialog"
+			tabindex="-1"
+			use:overlayFocus={{ onClose: cancel }}
 		>
 			{@render body()}
 		</div>

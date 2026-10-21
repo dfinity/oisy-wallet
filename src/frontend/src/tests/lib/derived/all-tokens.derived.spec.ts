@@ -1,5 +1,7 @@
 import * as btcEnv from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
+import type * as lifiEnv from '$env/rest/lifi.env';
+import type * as nearIntentsEnv from '$env/rest/near-intents.env';
 import {
 	ARBITRUM_ETH_TOKEN,
 	ARBITRUM_SEPOLIA_ETH_TOKEN
@@ -594,5 +596,47 @@ describe('all-tokens.derived', () => {
 				{ ...SOLANA_DEVNET_TOKEN, enabled: true }
 			]);
 		});
+
+		// Solana's providers are NEAR Intents and LI.FI: either flag keeps its tokens.
+		it.each([
+			{ nearIntents: false, lifi: true, included: true },
+			{ nearIntents: false, lifi: false, included: false }
+		])(
+			'should include Solana tokens: $included with NEAR Intents $nearIntents and LI.FI $lifi',
+			async ({ nearIntents, lifi, included }) => {
+				vi.resetModules();
+				vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
+					...(await importOriginal<typeof nearIntentsEnv>()),
+					NEAR_INTENTS_SWAP_ENABLED: nearIntents
+				}));
+				vi.doMock('$env/rest/lifi.env', async (importOriginal) => ({
+					...(await importOriginal<typeof lifiEnv>()),
+					LIFI_SWAP_ENABLED: lifi
+				}));
+
+				try {
+					const [
+						{ allCrossChainSwapTokens: tokens },
+						{ enabledSolanaTokens: solanaTokens },
+						{ SOLANA_TOKEN: solanaToken }
+					] = await Promise.all([
+						import('$lib/derived/all-tokens.derived'),
+						import('$sol/derived/tokens.derived'),
+						import('$env/tokens/tokens.sol.env')
+					]);
+
+					vi.spyOn(solanaTokens, 'subscribe').mockImplementation((fn) => {
+						fn([solanaToken]);
+						return () => {};
+					});
+
+					expect(get(tokens).some(({ id }) => id === solanaToken.id)).toBe(included);
+				} finally {
+					vi.doUnmock('$env/rest/lifi.env');
+					vi.doUnmock('$env/rest/near-intents.env');
+					vi.resetModules();
+				}
+			}
+		);
 	});
 });

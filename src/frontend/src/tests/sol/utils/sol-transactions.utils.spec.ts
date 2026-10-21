@@ -1,11 +1,14 @@
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
+import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
-import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import { ATA_SIZE } from '$sol/constants/ata.constants';
+import { SYSTEM_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
 import {
 	isSolCompiledTransactionMessage,
-	mapSolTransactionMessage
+	mapSolTransactionMessage,
+	parseSolBase64TransactionMessage
 } from '$sol/utils/sol-transactions.utils';
 import { bn1Bi, bn3Bi } from '$tests/mocks/balances.mock';
 import {
@@ -19,13 +22,21 @@ import {
 	mockSolAddress3
 } from '$tests/mocks/sol.mock';
 import {
+	getRequestUnitsInstruction,
 	getSetComputeUnitLimitInstruction,
 	getSetComputeUnitPriceInstruction
 } from '@solana-program/compute-budget';
-import { getCreateAccountInstruction, getTransferSolInstruction } from '@solana-program/system';
+import {
+	getCreateAccountInstruction,
+	getCreateAccountWithSeedInstruction,
+	getTransferSolInstruction
+} from '@solana-program/system';
 import {
 	AuthorityType,
 	getBurnInstruction,
+	getCloseAccountInstruction,
+	getInitializeAccount3Instruction,
+	getInitializeAccountInstruction,
 	getSetAuthorityInstruction,
 	getTransferCheckedInstruction
 } from '@solana-program/token';
@@ -35,7 +46,25 @@ import {
 	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction,
 	AuthorityType as Token2022AuthorityType
 } from '@solana-program/token-2022';
-import { address, createNoopSigner, type TransactionMessage } from '@solana/kit';
+import {
+	address,
+	appendTransactionMessageInstructions,
+	blockhash,
+	compileTransaction,
+	createNoopSigner,
+	createSolanaRpc,
+	createTransactionMessage,
+	getBase64Decoder,
+	getBase64EncodedWireTransaction,
+	getBase64Encoder,
+	pipe,
+	setTransactionMessageConfig,
+	setTransactionMessageFeePayer,
+	setTransactionMessageLifetimeUsingBlockhash,
+	type Instruction,
+	type TransactionMessage,
+	type V1TransactionConfig
+} from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 describe('sol-transactions.utils', () => {
@@ -56,11 +85,13 @@ describe('sol-transactions.utils', () => {
 
 		it('should map a sol transaction message', () => {
 			// The message's close names the signer as its destination, so it states nothing rather
-			// than failing closed. Passing anybody else here is covered in `mapSolInstruction`.
+			// than failing closed. Passing anybody else here is covered in `mapSolInstruction`. Its
+			// creation is funded with the reserve the chain charged when it was recorded.
 			expect(
 				mapSolTransactionMessage({
 					transactionMessage: mockSolParsedTransactionMessage,
-					userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
+					userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
+					rentExemptMinimum: 2_039_280n
 				})
 			).toStrictEqual({
 				amount: 2044380n,
@@ -104,8 +135,26 @@ describe('sol-transactions.utils', () => {
 
 			expect(spyMapSolInstruction).toHaveBeenCalledExactlyOnceWith({
 				instruction: instruction1,
-				userAddress: undefined
+				userAddress: undefined,
+				returnsToWallet: false
 			});
+		});
+
+		it('should hold every instruction to the reserve it is given', () => {
+			spyMapSolInstruction.mockReturnValue({ amount: undefined });
+
+			mapSolTransactionMessage({ transactionMessage: mockParams, rentExemptMinimum: 1_488_440n });
+
+			expect(spyMapSolInstruction).toHaveBeenCalledTimes(3);
+
+			[instruction1, instruction2, instruction3].forEach((instruction, index) =>
+				expect(spyMapSolInstruction).toHaveBeenNthCalledWith(index + 1, {
+					instruction,
+					userAddress: undefined,
+					rentExemptMinimum: 1_488_440n,
+					returnsToWallet: false
+				})
+			);
 		});
 
 		it('should sum amounts across multiple instructions', () => {
@@ -121,15 +170,18 @@ describe('sol-transactions.utils', () => {
 			expect(spyMapSolInstruction).toHaveBeenCalledTimes(3);
 			expect(spyMapSolInstruction).toHaveBeenNthCalledWith(1, {
 				instruction: instruction1,
-				userAddress: undefined
+				userAddress: undefined,
+				returnsToWallet: false
 			});
 			expect(spyMapSolInstruction).toHaveBeenNthCalledWith(2, {
 				instruction: instruction2,
-				userAddress: undefined
+				userAddress: undefined,
+				returnsToWallet: false
 			});
 			expect(spyMapSolInstruction).toHaveBeenNthCalledWith(3, {
 				instruction: instruction3,
-				userAddress: undefined
+				userAddress: undefined,
+				returnsToWallet: false
 			});
 		});
 
@@ -473,6 +525,135 @@ describe('sol-transactions.utils', () => {
 			).toStrictEqual({ amount: undefined, ambiguous: true });
 		});
 
+		// A dApp wraps the SOL a trade spends by funding the wrapped SOL account it opens with it, and
+		// closes the account back to the wallet at the end. Raydium opens it at a seed-derived address.
+		describe('a wrapped SOL account the message closes back to the wallet', () => {
+			const user = mockSolAddress;
+			const account = mockAtaAddress;
+			const reserve = 2_039_280n;
+			const funding = 1_002_039_280n;
+
+			beforeEach(() => {
+				// the surrounding suite stubs the instruction mapper; these cases exercise the real one
+				spyMapSolInstruction.mockRestore();
+			});
+
+			const seeded = ({ amount = funding, space = ATA_SIZE } = {}) =>
+				getCreateAccountWithSeedInstruction({
+					payer: createNoopSigner(address(user)),
+					newAccount: address(account),
+					base: address(user),
+					seed: 'wsol',
+					amount,
+					space,
+					programAddress: address(TOKEN_PROGRAM_ADDRESS)
+				});
+
+			const plain = () =>
+				getCreateAccountInstruction({
+					payer: createNoopSigner(address(user)),
+					newAccount: createNoopSigner(address(account)),
+					lamports: funding,
+					space: ATA_SIZE,
+					programAddress: address(TOKEN_PROGRAM_ADDRESS)
+				});
+
+			const initialisation = ({ mint = WSOL_TOKEN.address, owner = user } = {}) =>
+				getInitializeAccount3Instruction({
+					account: address(account),
+					mint: address(mint),
+					owner: address(owner)
+				});
+
+			const close = () =>
+				getCloseAccountInstruction({
+					account: address(account),
+					destination: address(user),
+					owner: createNoopSigner(address(user))
+				});
+
+			const map = (instructions: Instruction[]) =>
+				mapSolTransactionMessage({
+					transactionMessage: { ...mockSolParsedTransactionMessage, instructions },
+					userAddress: user,
+					rentExemptMinimum: reserve
+				});
+
+			it.each([
+				{ form: 'a seed', opening: () => seeded() },
+				{ form: 'a key of its own', opening: plain }
+			])('should accept the funding of one opened at $form', ({ opening }) => {
+				const mapped = map([opening(), initialisation(), close()]);
+
+				expect(mapped.ambiguous).toBeUndefined();
+				expect(mapped.amount).toBe(funding);
+				expect(mapped.payer).toBe(user);
+			});
+
+			it('should accept one initialised by the original instruction', () => {
+				expect(
+					map([
+						seeded(),
+						getInitializeAccountInstruction({
+							account: address(account),
+							mint: address(WSOL_TOKEN.address),
+							owner: address(user)
+						}),
+						close()
+					]).ambiguous
+				).toBeUndefined();
+			});
+
+			it('should refuse one the message does not close', () => {
+				expect(map([seeded(), initialisation()]).ambiguous).toBeTruthy();
+			});
+
+			it('should refuse one closed before it is initialised', () => {
+				expect(map([seeded(), close(), initialisation()]).ambiguous).toBeTruthy();
+			});
+
+			it('should refuse an account of another mint', () => {
+				expect(
+					map([seeded(), initialisation({ mint: JUP_TOKEN.address }), close()]).ambiguous
+				).toBeTruthy();
+			});
+
+			it('should refuse an account held by someone else', () => {
+				expect(
+					map([seeded(), initialisation({ owner: mockSolAddress2 }), close()]).ambiguous
+				).toBeTruthy();
+			});
+
+			it('should refuse an account of another size', () => {
+				expect(map([seeded({ space: 170n }), initialisation(), close()]).ambiguous).toBeTruthy();
+			});
+
+			// An address closed and opened again is a second account. The close answers for the first
+			// opening only, so the second one's funding still has nowhere to go.
+			it('should refuse an opening at the same address that no close answers for', () => {
+				expect(
+					map([seeded(), initialisation(), close(), seeded(), initialisation()]).ambiguous
+				).toBeTruthy();
+			});
+
+			// Without the reserve nothing separates the account's rent from the SOL it wraps, so it is
+			// refused as any creation for a program is.
+			it.each([
+				{ form: 'a seed', opening: () => seeded() },
+				{ form: 'a key of its own', opening: plain }
+			])('should refuse one opened at $form without the reserve', ({ opening }) => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [opening(), initialisation(), close()]
+						},
+						userAddress: user
+					}).ambiguous
+				).toBeTruthy();
+			});
+		});
+
 		it('should ignore instructions with undefined amount (no change to accumulator)', () => {
 			spyMapSolInstruction
 				.mockReturnValueOnce({ amount: undefined })
@@ -759,6 +940,147 @@ describe('sol-transactions.utils', () => {
 			});
 		});
 
+		describe('with a version 1 message', () => {
+			// The real instruction mapper, so that a Compute Budget instruction is priced as it would
+			// be in an older message.
+			beforeEach(() => {
+				spyMapSolInstruction.mockRestore();
+			});
+
+			const transfer = getTransferSolInstruction({
+				source: createNoopSigner(address(mockSolAddress)),
+				destination: address(mockSolAddress2),
+				amount: 1n
+			});
+
+			const mappedTransfer = {
+				amount: 1n,
+				source: mockSolAddress,
+				destination: mockSolAddress2
+			};
+
+			const v1Message = ({
+				instructions = [transfer],
+				config
+			}: {
+				instructions?: readonly Instruction[];
+				config: V1TransactionConfig;
+			}) =>
+				pipe(
+					createTransactionMessage({ version: 1 }),
+					(tx) => appendTransactionMessageInstructions(instructions, tx),
+					(tx) => setTransactionMessageConfig(config, tx)
+				);
+
+			it('should report the priority fee and the compute unit limit its config states', () => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: v1Message({
+							config: { priorityFeeLamports: 1_000_000_001n, computeUnitLimit: 300_000 }
+						})
+					})
+				).toStrictEqual({
+					...mappedTransfer,
+					prioritizationFee: 1_000_000_001n,
+					computeUnitLimit: 300_000n
+				});
+			});
+
+			it('should not report a priority fee when its config sets none', () => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: v1Message({ config: { computeUnitLimit: 300_000 } })
+					})
+				).toStrictEqual(mappedTransfer);
+			});
+
+			it('should budget a compute unit limit its config leaves unset at zero', () => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: v1Message({ config: { priorityFeeLamports: 10_000n } })
+					})
+				).toStrictEqual({ ...mappedTransfer, prioritizationFee: 10_000n, computeUnitLimit: ZERO });
+			});
+
+			// The network ignores them in a version 1 message: a price they state is never charged, and
+			// they cannot lower the fee the config states.
+			it('should not price the message from its Compute Budget instructions', () => {
+				const instructions = [
+					getSetComputeUnitLimitInstruction({ units: 1_400_000 }),
+					getSetComputeUnitPriceInstruction({ microLamports: 714_285_715 }),
+					transfer
+				];
+
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: v1Message({
+							instructions,
+							config: { priorityFeeLamports: 5_000n, computeUnitLimit: 200_000 }
+						})
+					})
+				).toStrictEqual({
+					...mappedTransfer,
+					prioritizationFee: 5_000n,
+					computeUnitLimit: 200_000n
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: v1Message({ instructions, config: { computeUnitLimit: 200_000 } })
+					})
+				).toStrictEqual(mappedTransfer);
+			});
+
+			it('should not refuse a Compute Budget instruction it cannot price, which the network runs as a no-op', () => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: v1Message({
+							instructions: [
+								getRequestUnitsInstruction({ units: 300_000, additionalFee: 1_000 }),
+								transfer
+							],
+							config: { computeUnitLimit: 300_000 }
+						})
+					})
+				).toStrictEqual(mappedTransfer);
+			});
+
+			it('should read the config of a request decoded from its wire format', async () => {
+				const transactionMessage = pipe(
+					createTransactionMessage({ version: 1 }),
+					(tx) => setTransactionMessageFeePayer(address(mockSolAddress), tx),
+					(tx) =>
+						setTransactionMessageLifetimeUsingBlockhash(
+							{
+								blockhash: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+								lastValidBlockHeight: 100n
+							},
+							tx
+						),
+					(tx) => appendTransactionMessageInstructions([transfer], tx),
+					(tx) =>
+						setTransactionMessageConfig(
+							{ priorityFeeLamports: 50_000n, computeUnitLimit: 300_000 },
+							tx
+						)
+				);
+
+				// A version 1 message has no lookup tables, so decoding it never reaches the RPC.
+				const decoded = await parseSolBase64TransactionMessage({
+					transactionMessage: getBase64EncodedWireTransaction(
+						compileTransaction(transactionMessage)
+					),
+					rpc: createSolanaRpc('http://127.0.0.1:8899')
+				});
+
+				expect(mapSolTransactionMessage({ transactionMessage: decoded })).toStrictEqual({
+					...mappedTransfer,
+					prioritizationFee: 50_000n,
+					computeUnitLimit: 300_000n
+				});
+			});
+		});
+
 		it('should correctly initialise sum from ZERO', () => {
 			spyMapSolInstruction
 				.mockReturnValueOnce({ amount: undefined })
@@ -769,6 +1091,80 @@ describe('sol-transactions.utils', () => {
 				amount: 60n
 			});
 		});
+	});
+
+	describe('parseSolBase64TransactionMessage', () => {
+		// A version 1 message has no lookup tables, so decoding it never reaches the RPC.
+		const rpc = createSolanaRpc('http://127.0.0.1:8899');
+
+		const v1Request = getBase64EncodedWireTransaction(
+			compileTransaction(
+				pipe(
+					createTransactionMessage({ version: 1 }),
+					(tx) => setTransactionMessageFeePayer(address(mockSolAddress), tx),
+					(tx) =>
+						setTransactionMessageLifetimeUsingBlockhash(
+							{
+								blockhash: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+								lastValidBlockHeight: 100n
+							},
+							tx
+						),
+					(tx) =>
+						appendTransactionMessageInstructions(
+							[
+								getTransferSolInstruction({
+									source: createNoopSigner(address(mockSolAddress)),
+									destination: address(mockSolAddress2),
+									amount: 1n
+								})
+							],
+							tx
+						),
+					(tx) =>
+						setTransactionMessageConfig(
+							{ priorityFeeLamports: 50_000n, computeUnitLimit: 300_000 },
+							tx
+						)
+				)
+			)
+		);
+
+		// A version 1 transaction opens with its message: the version byte and the three header bytes,
+		// then the config mask, a little-endian u32. The config values stay as they are, which is the
+		// layout the decoder reads for a bit it does not know.
+		const withConfigBits = ({ request, bits }: { request: string; bits: number }): string => {
+			const bytes = new Uint8Array(getBase64Encoder().encode(request));
+			const view = new DataView(bytes.buffer);
+
+			view.setUint32(4, view.getUint32(4, true) | bits, true);
+
+			return getBase64Decoder().decode(bytes);
+		};
+
+		it('should decode a version 1 request that sets only the config bits the network accepts', async () => {
+			const decoded = await parseSolBase64TransactionMessage({
+				transactionMessage: v1Request,
+				rpc
+			});
+
+			expect(decoded.version === 1 && decoded.config).toStrictEqual({
+				priorityFeeLamports: 50_000n,
+				computeUnitLimit: 300_000
+			});
+		});
+
+		it.each([5, 31])(
+			'should refuse a version 1 request whose config mask sets bit %i, which the network refuses',
+			async (bit) => {
+				await expect(
+					parseSolBase64TransactionMessage({
+						transactionMessage: withConfigBits({ request: v1Request, bits: 1 << bit }),
+						rpc
+					})
+				).rejects.toThrow('Unsupported Solana version 1 transaction config mask');
+			}
+		);
 	});
 
 	describe('isSolCompiledTransactionMessage', () => {

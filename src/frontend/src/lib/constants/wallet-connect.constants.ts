@@ -14,8 +14,6 @@ export const UNEXPECTED_ERROR: ErrorResponse = {
 	message: 'Unexpected error.'
 };
 
-export const CONTEXT_VALIDATION_ISSCAM = 'ISSCAM';
-
 // How long the Settings switch lets the user sign the WalletConnect transactions OISY refuses because
 // its review cannot show what they do: long enough for a flow of a few requests, short enough that
 // it is never left on and forgotten.

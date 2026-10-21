@@ -1,5 +1,5 @@
-@use '../mixins/media';
 @use '../mixins/button';
+@use '../mixins/interaction';
 
 button,
 a.as-button {
@@ -11,10 +11,13 @@ a.as-button {
 	--button-border-radius: var(--border-radius-md);
 	border-radius: var(--button-border-radius);
 
+	// Same 150 ms as the `row-feedback` rows, so a button answers a pointer as fast as the
+	// rows around it.
 	transition:
-		color 0.25s ease-out,
-		background 0.25s ease-out,
-		opacity 0.25s ease-out;
+		color 0.15s ease-out,
+		background 0.15s ease-out,
+		opacity 0.15s ease-out,
+		scale 0.15s ease-out;
 
 	border: 1px solid transparent;
 
@@ -73,7 +76,7 @@ a.as-button {
 
 		&[focus],
 		&:focus {
-			outline-offset: 2px;
+			outline-offset: var(--focus-outline-offset, 2px);
 			outline: var(--color-background-brand-primary) solid 2px;
 		}
 
@@ -92,6 +95,29 @@ a.as-button {
 		}
 	}
 
+	// PRESS
+	// Text buttons press less than icon buttons: they are often full width, where the
+	// same scale removes far more pixels. Text links stay still; icon buttons press in
+	// their link style too.
+	&.primary,
+	&.secondary,
+	&.secondary-light,
+	&.tertiary,
+	&.tertiary-alt,
+	&.tertiary-main-card,
+	&.muted,
+	&.success,
+	&.success-light,
+	&.error {
+		&:not(.link):not(.icon) {
+			@include button.press(button.$press-scale-text);
+		}
+	}
+
+	&.icon {
+		@include button.press;
+	}
+
 	// PRIMARY
 	&.primary:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-primary-inverted;
@@ -104,7 +130,7 @@ a.as-button {
 			@apply bg-transparent;
 		}
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-primary-inverted;
 			@apply bg-brand-secondary;
 		}
@@ -143,7 +169,7 @@ a.as-button {
 			@apply bg-transparent;
 		}
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-primary-inverted-alt;
 			@apply bg-secondary-inverted;
 		}
@@ -182,7 +208,7 @@ a.as-button {
 			@apply bg-transparent;
 		}
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-brand-primary-alt;
 			@apply bg-brand-subtle-20;
 		}
@@ -221,7 +247,7 @@ a.as-button {
 			@apply bg-transparent;
 		}
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-success-primary;
 			@apply bg-success-subtle-20;
 		}
@@ -260,7 +286,7 @@ a.as-button {
 			@apply bg-transparent;
 		}
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-brand-primary-alt;
 			@apply bg-primary;
 		}
@@ -299,14 +325,16 @@ a.as-button {
 			@apply bg-transparent;
 		}
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-brand-primary-alt;
 			@apply bg-brand-subtle-10;
 		}
 
+		// One step past the hover, as `row-feedback` rows and `secondary-light` do; the open
+		// state below stays a step further.
 		&:active {
 			@apply text-brand-primary-alt;
-			@apply bg-brand-subtle-30;
+			@apply bg-brand-subtle-20;
 		}
 
 		&:focus-visible {
@@ -314,9 +342,9 @@ a.as-button {
 			@apply bg-primary;
 		}
 
-		// Keep the active background while the linked popover is open, the way
-		// the network switcher dropdown does. Placed last so it also wins over
-		// the focus-visible reset when opened via keyboard.
+		// A step darker still while the linked popover is open, the way the
+		// network switcher dropdown does. Placed last so it also wins over the
+		// focus-visible reset when opened via keyboard.
 		&.opened {
 			@apply text-brand-primary-alt;
 			@apply bg-brand-subtle-30;
@@ -346,7 +374,7 @@ a.as-button {
 			@apply bg-transparent;
 		}
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-brand-primary-inverted;
 			@apply bg-secondary-alt;
 		}
@@ -377,7 +405,7 @@ a.as-button {
 		@apply text-tertiary;
 		@apply bg-transparent;
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-secondary;
 			@apply bg-primary;
 		}
@@ -423,7 +451,7 @@ a.as-button {
 			@apply bg-transparent;
 			@apply text-success-primary;
 
-			&:hover {
+			@include interaction.hover {
 				@apply text-success-primary;
 				@apply bg-success-subtle-20;
 			}
@@ -439,7 +467,7 @@ a.as-button {
 			}
 		}
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-primary-inverted;
 			@apply bg-success-secondary;
 		}
@@ -477,7 +505,7 @@ a.as-button {
 			@apply bg-transparent;
 			@apply text-error-primary;
 
-			&:hover {
+			@include interaction.hover {
 				@apply bg-error-subtle-20;
 				@apply text-error-primary;
 			}
@@ -493,7 +521,7 @@ a.as-button {
 			}
 		}
 
-		&:hover {
+		@include interaction.hover {
 			@apply text-primary-inverted;
 			@apply bg-error-secondary;
 		}
@@ -523,7 +551,10 @@ a.as-button {
 	// OTHERS
 
 	&.text {
-		&:hover,
+		@include interaction.hover {
+			@apply text-brand-primary;
+		}
+
 		&:active {
 			@apply text-brand-primary;
 		}
@@ -534,10 +565,27 @@ a.as-button {
 	}
 
 	// LINK
+	// Text links and link-style icons (copy) answer with colour only: a text link does not
+	// shrink, and an icon one already presses through `.icon`. Pressed shows the hover colour,
+	// so a tap on a touch screen, which never hovers, still shows.
 	&.link {
 		@apply p-0;
 		@apply bg-transparent;
 		@apply text-brand-primary-alt;
+
+		transition:
+			color 0.15s ease-out,
+			scale 0.15s ease-out;
+
+		&:not([disabled]):not(.disabled):not(.loading) {
+			@include interaction.hover {
+				@apply text-brand-hover;
+			}
+
+			&:active {
+				@apply text-brand-hover;
+			}
+		}
 
 		&.disabled,
 		&[disabled] {
@@ -549,53 +597,93 @@ a.as-button {
 }
 
 // DROPDOWN BUTTON
-.dropdown-button:not(.loading) {
+// Every dropdown trigger. The end padding is 2px under the start: the chevron glyph carries
+// ~3.5px of blank space on each side, so both edges read ~15-16px.
+.dropdown-button {
 	@apply text-primary;
 	@apply bg-primary;
-	@apply rounded-xl;
-	@apply px-4;
+	@apply rounded-lg;
+	@apply min-h-10;
+	@apply ps-3.5;
+	@apply pe-3;
 	@apply py-1;
 	@apply justify-between;
 	@apply gap-2;
-	@apply text-left;
+	@apply text-start;
+	@apply text-base;
 	@apply font-medium;
-	@apply leading-5;
 
-	transition: all 0.25s ease-out;
+	transition:
+		color 0.15s ease-out,
+		background 0.15s ease-out,
+		border-color 0.15s ease-out;
 
-	&::placeholder {
-		@apply text-tertiary;
+	// The resting border colour lives here rather than as a utility in the markup: a utility
+	// would out-rank the open-state colour below, since this file is in the base layer.
+	&.border {
+		@apply border-tertiary;
+		@apply shadow-xs;
 	}
 
-	&:hover:not(.disabled):not([disabled]) {
-		@apply bg-brand-subtle-20;
+	@include interaction.coarse {
+		min-height: var(--touch-target-min-height);
+	}
+
+	@include interaction.hover {
+		&:not(.disabled):not([disabled]) {
+			@apply bg-brand-subtle-10;
+		}
 	}
 
 	&.opened {
-		@apply bg-brand-subtle-30;
-	}
-}
+		@apply bg-brand-subtle-10;
 
-.dropdown-button.disabled:not(.loading),
-.dropdown-button[disabled]:not(.loading) {
-	@apply text-disabled;
-	@apply bg-disabled;
-}
-
-@media (width <= theme(--breakpoint-sm)) {
-	.dropdown-button:not(.loading) {
-		@apply px-2;
-	}
-}
-
-// Mobile-only increased list item height for selector dropdowns (language, currency)
-@media (max-width: #{media.$breakpoint-medium - 1px}) {
-	.lang-selector,
-	.currency-selector {
-		button {
-			min-height: var(--touch-target-min-height);
-			padding-top: var(--padding-1_5x);
-			padding-bottom: var(--padding-1_5x);
+		&.border {
+			@apply border-brand-subtle-20;
 		}
+	}
+
+	// IconExpandMore at 14px with a 2.5 stroke (1.75px on screen), so the glyph stays light
+	// beside 16px text.
+	.dropdown-chevron {
+		display: flex;
+		flex-shrink: 0;
+		@apply text-tertiary;
+
+		svg {
+			width: 14px;
+			height: 14px;
+		}
+
+		path {
+			stroke-width: 2.5;
+		}
+
+		@media (prefers-reduced-motion: no-preference) {
+			transition: rotate 0.2s cubic-bezier(0.2, 0, 0, 1);
+		}
+	}
+
+	&.opened .dropdown-chevron {
+		rotate: 180deg;
+	}
+
+	&.disabled,
+	&[disabled] {
+		@apply text-disabled;
+		@apply bg-disabled;
+		@apply shadow-none;
+
+		.dropdown-chevron {
+			color: inherit;
+		}
+	}
+}
+
+// Tighter on phones, keeping the 2px start/end split for the chevron's blank space.
+@media (width <= theme(--breakpoint-sm)) {
+	.dropdown-button {
+		@apply ps-2.5;
+		@apply pe-2;
 	}
 }

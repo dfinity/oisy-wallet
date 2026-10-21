@@ -10,7 +10,10 @@ const SolPostMessageWalletDataSchema = z.object({
 	// keyed by mint.
 	balances: z.custom<SolNetworkBalances>(),
 	// `SolResolvedTransaction[]`: each record with the sources whose history returned it.
-	newTransactions: JsonTransactionsTextSchema
+	newTransactions: JsonTransactionsTextSchema,
+	// Set when the balances were read but the history was not: the message carries no word on the
+	// transactions, not an empty page of them.
+	transactionsUnavailable: z.boolean().optional()
 });
 
 export const SolPostMessageDataResponseWalletSchema = PostMessageDataResponseSchema.extend({

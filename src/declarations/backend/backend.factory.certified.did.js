@@ -285,6 +285,11 @@ export const idlFactory = ({ IDL }) => {
 		amount: IDL.Nat,
 		dest_token: TokenId
 	});
+	const LifiData = IDL.Record({
+		source_token: TokenId,
+		amount: IDL.Nat,
+		dest_token: TokenId
+	});
 	const OisyTradeSide = IDL.Variant({ Buy: IDL.Null, Sell: IDL.Null });
 	const OisyTradeData = IDL.Record({
 		side: OisyTradeSide,
@@ -344,6 +349,7 @@ export const idlFactory = ({ IDL }) => {
 		Xrp: XrpData,
 		OneSecEvmToIcp: OneSecEvmToIcpData,
 		OneSecIcpToEvm: OneSecIcpToEvmData,
+		Lifi: LifiData,
 		OisyTrade: OisyTradeData,
 		NearIntents: NearIntentsData,
 		CyclesMint: CyclesMintData,

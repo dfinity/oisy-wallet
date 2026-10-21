@@ -10,6 +10,7 @@
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
+	import WalletConnectScamWarning from '$lib/components/wallet-connect/WalletConnectScamWarning.svelte';
 	import WalletConnectUncheckedSigning from '$lib/components/wallet-connect/WalletConnectUncheckedSigning.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -21,6 +22,7 @@
 	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
 	import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
 	import SolWalletConnectTransferParties from '$sol/components/wallet-connect/SolWalletConnectTransferParties.svelte';
+	import SolWalletConnectUnreadPrograms from '$sol/components/wallet-connect/SolWalletConnectUnreadPrograms.svelte';
 	import {
 		SOLANA_PRIORITIZATION_FEE_BASELINE_FLOOR_USD,
 		SOLANA_PRIORITIZATION_FEE_NOTICE_MULTIPLIER,
@@ -30,7 +32,7 @@
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
-	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
+	import type { SolSimulationPreview, SolUnreadProgram } from '$sol/types/sol-simulation';
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
 	import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
 	import { solMessageMatchesSimulation } from '$sol/utils/sol-message-summary.utils';
@@ -38,6 +40,7 @@
 	import {
 		flattenInstructions,
 		formatSolTransactionSummary,
+		solAppAccountCost,
 		solAtaFee
 	} from '$sol/utils/sol-transaction-summary.utils';
 
@@ -79,12 +82,26 @@
 		// user's wallet. Read from the list rather than the message, which cannot see a close made
 		// inside another program.
 		closesPayOthers?: boolean;
+		// The programs the simulated run calls from inside another program's instruction that OISY
+		// does not know. What such a call does to funds the user holds in an application is in
+		// neither the balance changes nor the operations, so the review names them and asks the user
+		// to confirm; the confirmation is bound back to the caller, which holds the button on it.
+		unreadPrograms?: SolUnreadProgram[];
+		unreadProgramsAcknowledged?: boolean;
+		// WalletConnect's Verify API flags the requesting site as a scam: the review says so and
+		// offers Reject only.
+		flaggedAsScam?: boolean;
 		// Whether the message carries an instruction nobody read that no run described, which the
-		// signing flow refuses like the two above.
+		// signing flow refuses like the two above, and whether a run came back at all: the refusal says
+		// which of the two it is.
 		unreviewedWithoutSimulation?: boolean;
+		simulationRan?: boolean;
 		// Whether WalletConnect's domain verification flagged the site. No way past a refusal is
 		// offered then, and the review does not point at the Settings switch either.
 		domainFlagged?: boolean;
+		// Whether the request hands the connected wallet itself to another program. Like a flagged site,
+		// no way past the refusal is offered, and the review does not point at the Settings switch.
+		reassignsWallet?: boolean;
 		// Whether the Settings switch was on when the review opened, so that a refusal can be signed
 		// past once the user acknowledges it, and whether they have.
 		uncheckedSigningOffered?: boolean;
@@ -115,8 +132,13 @@
 		messageSummary,
 		parties,
 		closesPayOthers = false,
+		unreadPrograms = [],
+		unreadProgramsAcknowledged = $bindable(false),
+		flaggedAsScam = false,
 		unreviewedWithoutSimulation = false,
+		simulationRan = false,
 		domainFlagged = false,
+		reassignsWallet = false,
 		uncheckedSigningOffered = false,
 		uncheckedSigningAcknowledged = false,
 		approveDisabled = false,
@@ -130,16 +152,30 @@
 
 	let activeTab = $state('summary');
 
+	// The confirmation the unread programs ask for holds the button, and only the button: the notices
+	// read `approveDisabled` as whether the request can be acted on at all, which it can.
+	let approveHeld = $derived(
+		approveDisabled || (unreadPrograms.length > 0 && !unreadProgramsAcknowledged)
+	);
+
 	// What the token accounts cost this message: the rent of the ones it opens, less what the ones
 	// it closes hand back. Charged like a fee and part of neither the base nor the bid, so it is
 	// stated as its own line rather than folded into either.
 	let ataFee = $derived(solAtaFee({ instructions: instructions ?? [], userAddress: source }));
 
+	// What the message pays to open accounts for applications. A line of its own rather than part of
+	// the rent above: the user can always close a token account and get its rent back, while an
+	// application's account returns its rent only if the application chooses to.
+	let appAccountCost = $derived(solAppAccountCost({ instructions: instructions ?? [] }));
+
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
-	// What the transaction costs beyond what it moves. The simulated SOL balance carries all of it
-	// and the message states none of it, so it is the room the comparison of the two allows.
-	let costs = $derived(SOLANA_TRANSACTION_FEE_IN_LAMPORTS + (prioritizationFee ?? ZERO) + ataFee);
+	// What the transaction costs beyond what it moves: every line of the fee section. The simulated
+	// SOL balance carries all of it and the message states none of it, so it is the room the
+	// comparison of the two allows.
+	let costs = $derived(
+		SOLANA_TRANSACTION_FEE_IN_LAMPORTS + (prioritizationFee ?? ZERO) + ataFee + appAccountCost
+	);
 
 	// The message read on its own says a plain send, receive or swap, and the run agrees that this
 	// is all it does. Anything less than agreement is left unsaid: a confident sentence over a
@@ -266,6 +302,10 @@
 {/snippet}
 
 <ContentWithToolbar>
+	{#if flaggedAsScam}
+		<WalletConnectScamWarning />
+	{/if}
+
 	<!-- One notice, whichever fits, and the refusal comes first: a message the signing flow will not
 	     sign makes every caveat below it moot, since they qualify a review nobody is going to act
 	     on. It is the only notice here that is an error rather than a warning, because it describes
@@ -281,6 +321,18 @@
 	     refuses one the message states and so marks the request ambiguous as well: the two would
 	     both be true of the commonest case, and the general sentence would be shown for the
 	     specific thing that is wrong with it. -->
+	<!-- Above the caveats, because it is the one notice that asks something of the user: approving
+	     waits for the confirmation it carries. A refusal hides it, since there is nothing left to
+	     confirm on a request OISY will not sign, unless the Settings switch lets it be signed after
+	     all. -->
+	{#if (!refused || uncheckedSigningOffered) && unreadPrograms.length > 0}
+		<SolWalletConnectUnreadPrograms
+			network={token.network}
+			programs={unreadPrograms}
+			bind:acknowledged={unreadProgramsAcknowledged}
+		/>
+	{/if}
+
 	<!-- With the Settings switch on, the review is going to be acted on after all, so it says what is
 	     wrong without saying OISY won't sign it, and gives every reason rather than the first: the
 	     acknowledgement below covers each of them. -->
@@ -297,7 +349,11 @@
 					{/if}
 
 					{#if unreviewedWithoutSimulation}
-						<span>{$i18n.wallet_connect.text.unreviewed_without_simulation_reason}</span>
+						<span>
+							{simulationRan
+								? $i18n.wallet_connect.text.unreviewed_not_described_by_simulation_reason
+								: $i18n.wallet_connect.text.unreviewed_without_simulation_reason}
+						</span>
 					{/if}
 				</span>
 			</MessageBox>
@@ -320,7 +376,9 @@
 		<!-- Same live region, same reason. -->
 		<div role="alert">
 			<MessageBox level="error">
-				{$i18n.wallet_connect.text.unreviewed_without_simulation}
+				{simulationRan
+					? $i18n.wallet_connect.text.unreviewed_not_described_by_simulation
+					: $i18n.wallet_connect.text.unreviewed_without_simulation}
 			</MessageBox>
 		</div>
 	{:else if unreviewed}
@@ -335,7 +393,7 @@
 		<MessageBox level="info">{$i18n.wallet_connect.text.simulated_review}</MessageBox>
 	{/if}
 
-	{#if refused && !domainFlagged}
+	{#if refused && !domainFlagged && !reassignsWallet}
 		<WalletConnectUncheckedSigning
 			acknowledged={uncheckedSigningAcknowledged}
 			offered={uncheckedSigningOffered}
@@ -489,6 +547,15 @@
 								{@render feeValue({ kind: $i18n.fee.text.ata_kind, feeAmount: ataFee })}
 							</div>
 						{/if}
+
+						{#if appAccountCost > ZERO}
+							<div data-tid="app-account-fee">
+								{@render feeValue({
+									kind: $i18n.fee.text.app_account_kind,
+									feeAmount: appAccountCost
+								})}
+							</div>
+						{/if}
 					</div>
 				</WalletConnectModalValue>
 
@@ -528,6 +595,11 @@
 	</Tabs>
 
 	{#snippet toolbar()}
-		<WalletConnectActions {approveDisabled} {onApprove} {onReject} />
+		<WalletConnectActions
+			approve={!flaggedAsScam}
+			approveDisabled={approveHeld}
+			{onApprove}
+			{onReject}
+		/>
 	{/snippet}
 </ContentWithToolbar>

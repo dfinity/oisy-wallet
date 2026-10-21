@@ -93,6 +93,7 @@ import {
 	AuthorityType as Token2022AuthorityType
 } from '@solana-program/token-2022';
 import {
+	AccountRole,
 	address,
 	createNoopSigner,
 	type Base58EncodedBytes,
@@ -1010,7 +1011,10 @@ describe('sol-instructions.utils', () => {
 				destination: 'ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49',
 				source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
 			});
-			expect(mapSolInstruction({ instruction: mockInstruction2 })).toStrictEqual({
+			// The recorded message opens a token account with the reserve the chain charged at the time.
+			expect(
+				mapSolInstruction({ instruction: mockInstruction2, rentExemptMinimum: 2_039_280n })
+			).toStrictEqual({
 				amount: 2039280n,
 				payer: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
 			});
@@ -1049,13 +1053,13 @@ describe('sol-instructions.utils', () => {
 			const instruction = getCreateAccountInstruction({
 				payer: createNoopSigner(address(mockSolAddress)),
 				newAccount: createNoopSigner(address(mockSolAddress2)),
-				lamports: 2_039_280n,
+				lamports: 1_488_440n,
 				space: 165n,
 				programAddress: address(TOKEN_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction({ instruction })).toStrictEqual({
-				amount: 2_039_280n,
+			expect(mapSolInstruction({ instruction, rentExemptMinimum: 1_488_440n })).toStrictEqual({
+				amount: 1_488_440n,
 				payer: mockSolAddress
 			});
 
@@ -1094,13 +1098,13 @@ describe('sol-instructions.utils', () => {
 				base: address(mockSolAddress3),
 				baseAccount: createNoopSigner(address(mockSolAddress3)),
 				seed: 'vault',
-				amount: 2_039_280n,
+				amount: 1_488_440n,
 				space: 165n,
 				programAddress: address(TOKEN_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction({ instruction })).toStrictEqual({
-				amount: 2_039_280n,
+			expect(mapSolInstruction({ instruction, rentExemptMinimum: 1_488_440n })).toStrictEqual({
+				amount: 1_488_440n,
 				payer: mockSolAddress
 			});
 
@@ -1180,6 +1184,33 @@ describe('sol-instructions.utils', () => {
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
+		// Handing over the wallet itself is the one assignment no acknowledgement signs past, so the
+		// mapper says which account it names.
+		it('should mark an `Assign` naming the connected wallet as handing it over', () => {
+			const instruction = getAssignInstruction({
+				account: createNoopSigner(address(mockSolAddress)),
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+				amount: undefined,
+				ambiguous: true,
+				reassignsWallet: true
+			});
+		});
+
+		it('should not mark an `Assign` of another account as handing over the wallet', () => {
+			const instruction = getAssignInstruction({
+				account: createNoopSigner(address(mockSolAddress2)),
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+		});
+
 		it('should fail closed on an `AssignWithSeed` instruction', () => {
 			const instruction = getAssignWithSeedInstruction({
 				account: address(mockSolAddress2),
@@ -1200,7 +1231,7 @@ describe('sol-instructions.utils', () => {
 		it('should fail closed on a `CreateAccount` instruction that funds beyond the rent of its size', () => {
 			// A token account opened, initialised and closed in one message hands its whole balance to
 			// whoever the close names, so anything above rent is a payment the creation states no
-			// destination for. 165 bytes cost (128 + 165) * 3480 * 2 = 2_039_280 lamports.
+			// destination for. 165 bytes cost what the chain charges a token account, here 1_488_440.
 			const instruction = getCreateAccountInstruction({
 				payer: createNoopSigner(address(mockSolAddress)),
 				newAccount: createNoopSigner(address(mockSolAddress2)),
@@ -1209,7 +1240,7 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(TOKEN_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction({ instruction })).toStrictEqual({
+			expect(mapSolInstruction({ instruction, rentExemptMinimum: 1_488_440n })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1221,7 +1252,61 @@ describe('sol-instructions.utils', () => {
 			const instruction = getCreateAccountInstruction({
 				payer: createNoopSigner(address(mockSolAddress)),
 				newAccount: createNoopSigner(address(mockSolAddress2)),
-				lamports: 2_039_281n,
+				lamports: 1_488_441n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction({ instruction, rentExemptMinimum: 1_488_440n })).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+		});
+
+		it('should fail closed on a creation funded at the rent the chain charged before lowering it', () => {
+			// 2_039_280 lamports was a token account's reserve at 6_960 lamports per byte. The network
+			// lowers that price in steps, and a price kept in the wallet let each cut pass as rent.
+			const instruction = getCreateAccountInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				lamports: 2_039_280n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction({ instruction, rentExemptMinimum: 1_488_440n })).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+		});
+
+		it('should hold a creation of another size to the reserve scaled to it', () => {
+			// A Meteora DLMM position is 8_120 bytes, which mainnet charged 41_899_840 lamports for while
+			// a token account cost 1_488_440.
+			const creation = (lamports: bigint) =>
+				getCreateAccountInstruction({
+					payer: createNoopSigner(address(mockSolAddress)),
+					newAccount: createNoopSigner(address(mockSolAddress2)),
+					lamports,
+					space: 8_120n,
+					programAddress: address(mockSolAddress3)
+				});
+
+			expect(
+				mapSolInstruction({ instruction: creation(41_899_840n), rentExemptMinimum: 1_488_440n })
+			).toStrictEqual({ amount: 41_899_840n, payer: mockSolAddress });
+
+			expect(
+				mapSolInstruction({ instruction: creation(41_899_841n), rentExemptMinimum: 1_488_440n })
+			).toStrictEqual({ amount: undefined, ambiguous: true });
+		});
+
+		it('should fail closed on a creation for a program when the chain did not say what rent costs', () => {
+			// Without the chain's figure there is no line to hold the creation to.
+			const instruction = getCreateAccountInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				lamports: 1_488_440n,
 				space: 165n,
 				programAddress: address(TOKEN_PROGRAM_ADDRESS)
 			});
@@ -1246,12 +1331,30 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(TOKEN_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction({ instruction })).toStrictEqual({
+			expect(mapSolInstruction({ instruction, rentExemptMinimum: 1_488_440n })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
 
 			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a `CreateAccountWithSeed` instruction when the chain did not say what rent costs', () => {
+			const instruction = getCreateAccountWithSeedInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: address(mockSolAddress2),
+				base: address(mockSolAddress3),
+				baseAccount: createNoopSigner(address(mockSolAddress3)),
+				seed: 'vault',
+				amount: 1_488_440n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
 		});
 
 		it('should state a `WithdrawNonceAccount` instruction as the transfer it is', () => {
@@ -1847,12 +1950,14 @@ describe('sol-instructions.utils', () => {
 
 		describe('with a Stake instruction', () => {
 			const mockStakeAuthority = createNoopSigner(address(mockSolAddress));
+			// Distinct from the recipient, so a parser reading the wrong position cannot pass unnoticed.
+			const mockWithdrawAuthority = createNoopSigner(address(mockSolAddress3));
 
 			it('should state a Withdraw instruction in full', () => {
 				const instruction = getWithdrawInstruction({
 					stake: address(mockSolAddress2),
 					recipient: address(mockSolAddress),
-					withdrawAuthority: mockStakeAuthority,
+					withdrawAuthority: mockWithdrawAuthority,
 					args: 5_000_000n
 				});
 
@@ -1864,6 +1969,66 @@ describe('sol-instructions.utils', () => {
 
 				expect(parseSolStakeInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
 				expect(console.warn).not.toHaveBeenCalled();
+			});
+
+			// Since stake program v5 the sysvar accounts are optional and the builders no longer emit
+			// them, but dApps on older clients still send the legacy layout. The parser reads accounts
+			// by position, so the review must keep stating the same parties for both layouts.
+			describe('in the legacy account layout', () => {
+				const clockSysvar = {
+					address: address('SysvarC1ock11111111111111111111111111111111'),
+					role: AccountRole.READONLY
+				};
+				const stakeHistorySysvar = {
+					address: address('SysvarStakeHistory1111111111111111111111111'),
+					role: AccountRole.READONLY
+				};
+				const stakeConfig = {
+					address: address('StakeConfig11111111111111111111111111111111'),
+					role: AccountRole.READONLY
+				};
+
+				it('should state a Withdraw instruction in full', () => {
+					const withdraw = getWithdrawInstruction({
+						stake: address(mockSolAddress2),
+						recipient: address(mockSolAddress),
+						withdrawAuthority: mockWithdrawAuthority,
+						args: 5_000_000n
+					});
+					const [stake, recipient, withdrawAuthority] = withdraw.accounts;
+					const instruction = {
+						...withdraw,
+						accounts: [stake, recipient, clockSysvar, stakeHistorySysvar, withdrawAuthority]
+					};
+
+					expect(mapSolInstruction({ instruction })).toStrictEqual({
+						amount: 5_000_000n,
+						source: mockSolAddress2,
+						destination: mockSolAddress
+					});
+
+					expect(console.warn).not.toHaveBeenCalled();
+				});
+
+				it('should mark a DelegateStake instruction unreviewed', () => {
+					const delegateStake = getDelegateStakeInstruction({
+						stake: address(mockSolAddress2),
+						vote: address(mockSolAddress),
+						stakeAuthority: mockStakeAuthority
+					});
+					const [stake, vote, stakeAuthority] = delegateStake.accounts;
+					const instruction = {
+						...delegateStake,
+						accounts: [stake, vote, clockSysvar, stakeHistorySysvar, stakeConfig, stakeAuthority]
+					};
+
+					expect(mapSolInstruction({ instruction })).toStrictEqual({
+						amount: undefined,
+						unreviewed: true
+					});
+
+					expect(console.warn).not.toHaveBeenCalled();
+				});
 			});
 
 			// Handing over the withdraw authority hands over everything the account holds, and the
@@ -1903,7 +2068,6 @@ describe('sol-instructions.utils', () => {
 				const instruction = getDelegateStakeInstruction({
 					stake: address(mockSolAddress2),
 					vote: address(mockSolAddress),
-					unused: address(mockSolAddress),
 					stakeAuthority: mockStakeAuthority
 				});
 

@@ -55,6 +55,7 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import {
+		acceptedContext,
 		isWalletConnectDomainFlagged,
 		isWalletConnectUncheckedSigningActive
 	} from '$lib/utils/wallet-connect.utils';
@@ -291,6 +292,7 @@
 						{data}
 						{destination}
 						{domainFlagged}
+						flaggedAsScam={!acceptedContext(request.verifyContext)}
 						onApprove={send}
 						onOpenSettings={openSettings}
 						onReject={reject}

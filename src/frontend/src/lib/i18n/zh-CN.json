@@ -108,12 +108,17 @@
 			"do_not_close": "在交易完成之前请勿关闭此标签页",
 			"standalone_mode": "将应用程序和 $oisy_short 同时安装到主屏幕时，存在已知的连接问题。如果在连接 $oisy_short 或签署交易时遇到问题，请从普通浏览器启动应用程序。我们正在修复此问题，将很快解决。 <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">了解更多</a>",
 			"video_not_supported": "你的浏览器不支持视频播放。"
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
 		"completed": "已完成",
 		"in_progress": "进行中",
-		"failed": "失败"
+		"failed": "失败",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {
@@ -1140,6 +1145,11 @@
 			"unexpected_utxos_fee": "计算交易费用时出现错误。",
 			"unable_to_retrieve_amount": "n/a（无法获取）",
 			"ethereum_insufficient_funds": "",
+			"ethereum_out_of_gas": "发送失败，因为所需的 Gas 超过了预估。您的资金仍在钱包中，但网络可能仍已就这笔失败的交易收取了手续费。请重试。",
+			"ethereum_out_of_gas_gas": "已发送 Gas：$gasSent · 所需 Gas：$gasNeeded",
+			"ethereum_out_of_gas_gas_sent": "已发送 Gas：$gasSent",
+			"ethereum_transaction_hash": "交易哈希：$hash",
+			"ethereum_unsigned_transaction": "未签名交易：$transaction",
 			"solana_transaction_expired": "您的交易未被Solana网络处理并已过期，很可能是因为提供的优先费用不足。我们已将其更新为最新推荐金额，请重试。",
 			"solana_confirmation_failed": "我们未收到您刚刚创建的交易的确认。请等待几秒钟，然后检查您的代币交易列表，确认您的交易是否已正确创建。",
 			"solana_insufficient_funds": "您的代币余额不足以完成此交易。您的余额自上次显示以来可能已发生变化。",
@@ -1353,6 +1363,8 @@
 			"swap_fees": "交易费",
 			"cross_chain_networks_info": "跨链网络信息",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -1387,11 +1399,13 @@
 			"swap_replaced_or_dropped": "",
 			"near_intents_quote_unverified": "",
 			"near_intents_quote_expired": "",
+			"near_intents_quote_deposit_memo": "",
 			"oisy_trade_not_trackable": "",
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
-			"oisy_trade_recovery_failed": ""
+			"oisy_trade_recovery_failed": "",
+			"lifi_status_unknown": ""
 		}
 	},
 	"buy": {
@@ -1570,7 +1584,8 @@
 			"open_contract_address_block_explorer": "在区块浏览器中打开合约地址",
 			"open_token_address_block_explorer": "在区块浏览器中打开代币地址",
 			"token_group_number": "原生代币 $token 所在分组中的代币总数",
-			"filter_button": "打开 / 关闭筛选器"
+			"filter_button": "打开 / 关闭筛选器",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "输入 ERC20 合约地址",
@@ -1721,7 +1736,8 @@
 			"prioritization_fee": "",
 			"base_kind": "",
 			"prioritization_kind": "",
-			"ata_kind": ""
+			"ata_kind": "",
+			"app_account_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "余额不足以支付手续费。"
@@ -1773,12 +1789,17 @@
 			"tab_operations": "操作",
 			"unreviewed_instructions": "OISY 无法解码其中部分指令，因此以下审查可能不完整。",
 			"unreviewed_instructions_simulated": "此交易包含来自外部来源的操作，OISY 无法解码，因此 OISY 对其运行了模拟。请确保您信任该应用程序，并在签名前查看模拟的余额变化和操作。请注意，实际结果可能与模拟不同。",
+			"unread_programs_one": "此交易调用了一个 OISY 无法读取的程序。它能够转移您在其他应用中持有的资金，例如质押的 SOL 或借贷存款，而下方的任何内容都不会显示这一点。",
+			"unread_programs_other": "此交易调用了多个 OISY 无法读取的程序。它们能够转移您在其他应用中持有的资金，例如质押的 SOL 或借贷存款，而下方的任何内容都不会显示这一点。",
+			"unread_programs_acknowledge": "我了解 OISY 无法显示此应用会做什么",
 			"cannot_be_shown": "此交易包含无法全部准确显示以供审核的操作，因此 OISY 不会签名。请拒绝，并要求该应用发送更简单的请求。",
 			"close_pays_others": "此交易会关闭您的一个代币账户，并将其余额支付到不属于您钱包的地址。为了您的安全，OISY 不会签署该交易。",
 			"unreviewed_without_simulation": "OISY 无法读取此交易的一部分，网络也未返回其模拟结果，因此没有任何信息说明该部分会做什么。为了您的安全，OISY 不会签署该交易。",
 			"cannot_be_shown_reason": "此交易包含无法全部准确显示以供审核的操作。",
 			"close_pays_others_reason": "此交易会关闭您的一个代币账户，并将其余额支付到不属于您钱包的地址。",
 			"unreviewed_without_simulation_reason": "OISY 无法读取此交易的一部分，网络也未返回其模拟结果，因此没有任何信息说明该部分会做什么。",
+			"unreviewed_not_described_by_simulation": "OISY 无法读取此交易的一部分，其模拟结果也未显示该部分会做什么。为了您的安全，OISY 不会签署该交易。",
+			"unreviewed_not_described_by_simulation_reason": "OISY 无法读取此交易的一部分，其模拟结果也未显示该部分会做什么。",
 			"unchecked_signing_pointer": "如果您信任此应用，可以在设置中允许此类交易 5 分钟，然后从该应用重新发送请求。",
 			"unchecked_signing_open_settings": "打开设置",
 			"unchecked_signing_acknowledge": "我明白 OISY 无法显示此交易的作用，我仍要签署它。",
@@ -1898,6 +1919,8 @@
 			"ambiguous_transaction": "此交易在多个地址之间转移资金，无法准确显示以供审核。为了您的安全，该交易未被签名。",
 			"close_pays_others": "此交易会关闭您的一个代币账户，并将其余额支付到不属于您钱包的地址。为了您的安全，该交易未被签署。",
 			"unreviewed_without_simulation": "OISY 无法读取此交易的一部分，网络也未返回其模拟结果，因此没有任何信息说明该部分会做什么。为了您的安全，该交易未被签名。",
+			"unreviewed_not_described_by_simulation": "OISY 无法读取此交易的一部分，其模拟结果也未显示该部分会做什么。为了您的安全，该交易未被签名。",
+			"unread_programs_unconfirmed": "此交易调用了一个 OISY 无法读取的程序，且未在审查中得到确认。为了您的安全，该交易未被签署。",
 			"sol_transaction_as_message": "此消息是一笔 Solana 交易，只能通过交易审查来批准。出于安全考虑，该交易未被签名。",
 			"request_not_defined": "意外错误：请求未定义，因此无法处理。",
 			"unexpected_processing_request": "处理 WalletConnect 请求时发生意外错误。"
@@ -2177,6 +2200,8 @@
 			"instruction_wrap": "",
 			"instruction_unwrap": "解包并关闭 $symbol 代币账户",
 			"instruction_create_account": "",
+			"instruction_create_program_account": "",
+			"instruction_close_program_account": "",
 			"instruction_close_account": "",
 			"instruction_close_account_for": "关闭 $symbol 代币账户",
 			"instruction_approve": "",
@@ -2189,6 +2214,7 @@
 			"instruction_thaw": "",
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
+			"instruction_via": "经由 $program",
 			"instruction_rent": "",
 			"instruction_balance_returned": "SOL 余额返还到您的钱包",
 			"instruction_balance_sent": "SOL 余额已发送到您的钱包",
@@ -2723,10 +2749,13 @@
 			"starting_to_repay": "正在提交您的还款…",
 			"repay_started": "您的还款正在处理中。",
 			"current_debt": "当前债务",
+			"pending_repays": "处理中的还款",
 			"interest_accrued": "累计利息",
 			"debt_after_repay": "还款后债务",
 			"repay_exceeds_debt": "金额超过您的未偿债务。",
-			"repay_prices_unavailable": "价格暂时不可用。加载完成前，还款功能已禁用。"
+			"repay_prices_unavailable": "价格暂时不可用。加载完成前，还款功能已禁用。",
+			"repay_debt_unavailable": "您的未偿债务暂时不可用。加载完成前，还款功能已禁用。",
+			"repay_pending_covers_debt": "此仓位的一笔还款仍在处理中。完成后您可以继续还款。"
 		},
 		"info": {
 			"title": "什么是 Liquidium",
@@ -3028,6 +3057,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

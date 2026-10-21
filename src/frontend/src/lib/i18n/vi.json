@@ -108,12 +108,17 @@
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",
 			"standalone_mode": "Có các sự cố kết nối đã biết khi cả ứng dụng và $oisy_short đều được cài đặt trên màn hình chính. Nếu gặp sự cố khi kết nối $oisy_short hoặc ký giao dịch, vui lòng khởi động ứng dụng từ trình duyệt thông thường. Chúng tôi đang khắc phục sự cố này và sẽ sớm được giải quyết. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Đọc thêm</a>",
 			"video_not_supported": ""
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
 		"completed": "Hoàn tất",
 		"in_progress": "Đang xử lý",
-		"failed": "Thất bại"
+		"failed": "Thất bại",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {
@@ -1140,6 +1145,11 @@
 			"unexpected_utxos_fee": "Đã xảy ra lỗi khi tính phí giao dịch.",
 			"unable_to_retrieve_amount": "n/a (không thể lấy được)",
 			"ethereum_insufficient_funds": "",
+			"ethereum_out_of_gas": "Việc gửi của bạn thất bại vì cần nhiều gas hơn ước tính. Tiền của bạn vẫn còn trong ví, nhưng mạng có thể vẫn đã thu phí cho giao dịch thất bại. Hãy thử lại.",
+			"ethereum_out_of_gas_gas": "Gas đã gửi: $gasSent · Gas cần thiết: $gasNeeded",
+			"ethereum_out_of_gas_gas_sent": "Gas đã gửi: $gasSent",
+			"ethereum_transaction_hash": "Hash giao dịch: $hash",
+			"ethereum_unsigned_transaction": "Giao dịch chưa ký: $transaction",
 			"solana_transaction_expired": "Giao dịch của bạn không được mạng Solana xử lý và đã hết hạn, rất có thể là do phí ưu tiên được cung cấp không đủ. Chúng tôi đã cập nhật lên số tiền được khuyến nghị mới nhất, vì vậy vui lòng thử lại.",
 			"solana_confirmation_failed": "Chúng tôi không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây rồi kiểm tra danh sách giao dịch của token để xem giao dịch của bạn có được tạo chính xác không.",
 			"solana_insufficient_funds": "Số dư token của bạn không đủ để hoàn tất giao dịch này. Số dư của bạn có thể đã thay đổi kể từ lần hiển thị cuối cùng.",
@@ -1353,6 +1363,8 @@
 			"swap_fees": "Phí giao dịch",
 			"cross_chain_networks_info": "Bạn di chuyển token từ mạng <b>$sourceNetwork</b> sang mạng <b>$destinationNetwork</b>",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -1387,11 +1399,13 @@
 			"swap_replaced_or_dropped": "",
 			"near_intents_quote_unverified": "",
 			"near_intents_quote_expired": "",
+			"near_intents_quote_deposit_memo": "",
 			"oisy_trade_not_trackable": "",
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
-			"oisy_trade_recovery_failed": ""
+			"oisy_trade_recovery_failed": "",
+			"lifi_status_unknown": ""
 		}
 	},
 	"buy": {
@@ -1570,7 +1584,8 @@
 			"open_contract_address_block_explorer": "Mở địa chỉ hợp đồng trên trình khám phá khối",
 			"open_token_address_block_explorer": "Mở địa chỉ token trên trình khám phá khối",
 			"token_group_number": "Tổng số token trong nhóm cho token gốc $token",
-			"filter_button": "Mở/đóng bộ lọc"
+			"filter_button": "Mở/đóng bộ lọc",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "Nhập địa chỉ hợp đồng ERC20",
@@ -1721,7 +1736,8 @@
 			"prioritization_fee": "",
 			"base_kind": "",
 			"prioritization_kind": "",
-			"ata_kind": ""
+			"ata_kind": "",
+			"app_account_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Số dư không đủ để trả phí."
@@ -1773,12 +1789,17 @@
 			"tab_operations": "Thao tác",
 			"unreviewed_instructions": "OISY không thể giải mã một số chỉ dẫn này, vì vậy phần xem xét bên dưới có thể chưa đầy đủ.",
 			"unreviewed_instructions_simulated": "Giao dịch này chứa các thao tác từ một nguồn bên ngoài mà OISY không thể giải mã, vì vậy OISY đã chạy mô phỏng cho nó. Hãy đảm bảo bạn tin tưởng ứng dụng này và xem lại các thay đổi số dư được mô phỏng cùng các thao tác trước khi ký. Lưu ý rằng kết quả thực tế có thể khác với mô phỏng.",
+			"unread_programs_one": "Giao dịch này gọi một chương trình mà OISY không thể đọc. Chương trình đó có thể chuyển tiền bạn đang giữ trong các ứng dụng khác, chẳng hạn SOL đang stake hoặc tiền gửi cho vay, và không có nội dung nào bên dưới cho thấy điều đó.",
+			"unread_programs_other": "Giao dịch này gọi các chương trình mà OISY không thể đọc. Các chương trình đó có thể chuyển tiền bạn đang giữ trong các ứng dụng khác, chẳng hạn SOL đang stake hoặc tiền gửi cho vay, và không có nội dung nào bên dưới cho thấy điều đó.",
+			"unread_programs_acknowledge": "Tôi hiểu rằng OISY không thể cho biết ứng dụng này làm gì",
 			"cannot_be_shown": "Giao dịch này bao gồm các hành động không thể hiển thị đầy đủ và chính xác để xem xét, nên OISY sẽ không ký. Hãy từ chối và yêu cầu ứng dụng gửi một yêu cầu đơn giản hơn.",
 			"close_pays_others": "Giao dịch này đóng một trong các tài khoản token của bạn và trả số dư của nó cho một địa chỉ không phải ví của bạn. Vì sự an toàn của bạn, OISY sẽ không ký giao dịch này.",
 			"unreviewed_without_simulation": "OISY không thể đọc một phần của giao dịch này và mạng cũng không trả về bản mô phỏng, nên không có gì mô tả phần đó sẽ làm gì. Vì sự an toàn của bạn, OISY sẽ không ký giao dịch này.",
 			"cannot_be_shown_reason": "Giao dịch này bao gồm các hành động không thể hiển thị đầy đủ và chính xác để xem xét.",
 			"close_pays_others_reason": "Giao dịch này đóng một trong các tài khoản token của bạn và trả số dư của nó cho một địa chỉ không phải ví của bạn.",
 			"unreviewed_without_simulation_reason": "OISY không thể đọc một phần của giao dịch này và mạng cũng không trả về bản mô phỏng, nên không có gì mô tả phần đó sẽ làm gì.",
+			"unreviewed_not_described_by_simulation": "OISY không thể đọc một phần của giao dịch này và bản mô phỏng của nó cũng không cho thấy phần đó sẽ làm gì. Vì sự an toàn của bạn, OISY sẽ không ký giao dịch này.",
+			"unreviewed_not_described_by_simulation_reason": "OISY không thể đọc một phần của giao dịch này và bản mô phỏng của nó cũng không cho thấy phần đó sẽ làm gì.",
 			"unchecked_signing_pointer": "Nếu bạn tin tưởng ứng dụng này, bạn có thể cho phép các giao dịch như vậy trong 5 phút trong Cài đặt, rồi gửi lại yêu cầu từ ứng dụng.",
 			"unchecked_signing_open_settings": "Mở Cài đặt",
 			"unchecked_signing_acknowledge": "Tôi hiểu rằng OISY không thể hiển thị giao dịch này làm gì, và tôi vẫn muốn ký nó.",
@@ -1898,6 +1919,8 @@
 			"ambiguous_transaction": "Giao dịch này chuyển tiền giữa nhiều địa chỉ và không thể hiển thị chính xác để xem xét. Vì sự an toàn của bạn, giao dịch này đã không được ký.",
 			"close_pays_others": "Giao dịch này đóng một trong các tài khoản token của bạn và trả số dư của nó cho một địa chỉ không phải ví của bạn. Vì sự an toàn của bạn, giao dịch đã không được ký.",
 			"unreviewed_without_simulation": "OISY không thể đọc một phần của giao dịch này và mạng cũng không trả về bản mô phỏng, nên không có gì mô tả phần đó sẽ làm gì. Vì sự an toàn của bạn, giao dịch đã không được ký.",
+			"unreviewed_not_described_by_simulation": "OISY không thể đọc một phần của giao dịch này và bản mô phỏng của nó cũng không cho thấy phần đó sẽ làm gì. Vì sự an toàn của bạn, giao dịch đã không được ký.",
+			"unread_programs_unconfirmed": "Giao dịch này gọi một chương trình mà OISY không thể đọc và chưa được xác nhận trong phần xem xét. Vì sự an toàn của bạn, giao dịch đã không được ký.",
 			"sol_transaction_as_message": "Thông báo này là một giao dịch Solana, chỉ có thể được phê duyệt thông qua việc xem xét giao dịch. Vì lý do bảo mật, giao dịch chưa được ký.",
 			"request_not_defined": "Lỗi không mong muốn: Yêu cầu không được xác định nên không thể xử lý.",
 			"unexpected_processing_request": "Lỗi không mong muốn trong khi xử lý yêu cầu với WalletConnect."
@@ -2177,6 +2200,8 @@
 			"instruction_wrap": "",
 			"instruction_unwrap": "Mở gói và đóng tài khoản token $symbol",
 			"instruction_create_account": "",
+			"instruction_create_program_account": "",
+			"instruction_close_program_account": "",
 			"instruction_close_account": "",
 			"instruction_close_account_for": "Đóng tài khoản token $symbol",
 			"instruction_approve": "",
@@ -2189,6 +2214,7 @@
 			"instruction_thaw": "",
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
+			"instruction_via": "qua $program",
 			"instruction_rent": "",
 			"instruction_balance_returned": "Số dư SOL được trả về ví của bạn",
 			"instruction_balance_sent": "Số dư SOL được gửi đến ví của bạn",
@@ -2723,10 +2749,13 @@
 			"starting_to_repay": "Đang gửi khoản hoàn trả của bạn…",
 			"repay_started": "Khoản hoàn trả của bạn hiện đang được xử lý.",
 			"current_debt": "Khoản nợ hiện tại",
+			"pending_repays": "Khoản hoàn trả đang được xử lý",
 			"interest_accrued": "Lãi phát sinh",
 			"debt_after_repay": "Khoản nợ sau khi hoàn trả",
 			"repay_exceeds_debt": "Số tiền vượt quá khoản nợ chưa thanh toán của bạn.",
-			"repay_prices_unavailable": "Giá tạm thời không khả dụng. Việc hoàn trả bị vô hiệu hóa cho đến khi giá được tải."
+			"repay_prices_unavailable": "Giá tạm thời không khả dụng. Việc hoàn trả bị vô hiệu hóa cho đến khi giá được tải.",
+			"repay_debt_unavailable": "Khoản nợ chưa thanh toán của bạn tạm thời không khả dụng. Việc hoàn trả bị vô hiệu hóa cho đến khi khoản nợ được tải.",
+			"repay_pending_covers_debt": "Một khoản hoàn trả cho vị thế này vẫn đang được xử lý. Bạn có thể hoàn trả thêm khi khoản này hoàn tất."
 		},
 		"info": {
 			"title": "Liquidium là gì",
@@ -3028,6 +3057,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

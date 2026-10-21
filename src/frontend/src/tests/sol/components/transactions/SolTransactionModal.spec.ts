@@ -6,7 +6,7 @@ import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils'
 import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
-import { mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
+import { mockSolAddress2, mockSolAddress3, mockSplAddress } from '$tests/mocks/sol.mock';
 import { capitalizeFirstLetter } from '$tests/utils/string-utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -173,7 +173,15 @@ describe('SolTransactionModal', () => {
 							{
 								kind: 'route' as const,
 								program: mockSolAddress2,
-								children: []
+								children: [
+									{ kind: 'send' as const, amount: 1_000_000_000n },
+									{
+										kind: 'receive' as const,
+										amount: 46_099n,
+										tokenAddress: mockSplAddress,
+										decimals: 6
+									}
+								]
 							}
 						]
 					},
@@ -184,6 +192,48 @@ describe('SolTransactionModal', () => {
 			expect(queryByText(en.address.save.title)).not.toBeInTheDocument();
 			expect(getByText(en.transaction.text.interacted_with)).toBeInTheDocument();
 			expect(getByText(shortenWithMiddleEllipsis({ text: mockSolAddress2 }))).toBeInTheDocument();
+		});
+
+		// The heading over an instruction the wallet cannot read is no venue unless it is the swap.
+		it('should name the swap as the venue, not an instruction before it', () => {
+			const { getByText, queryByText } = render(SolTransactionModal, {
+				props: {
+					transaction: {
+						...transaction,
+						summary: {
+							kind: 'swap' as const,
+							spent: { delta: -1_000_000_000n },
+							received: { delta: 46_099n, tokenAddress: mockSplAddress, decimals: 6 }
+						},
+						instructions: [
+							{
+								kind: 'route' as const,
+								program: mockSolAddress3,
+								children: [{ kind: 'createAccount' as const, rent: 41_899_840n }]
+							},
+							{
+								kind: 'route' as const,
+								program: mockSolAddress2,
+								children: [
+									{ kind: 'send' as const, amount: 1_000_000_000n },
+									{
+										kind: 'receive' as const,
+										amount: 46_099n,
+										tokenAddress: mockSplAddress,
+										decimals: 6
+									}
+								]
+							}
+						]
+					},
+					token: SOLANA_TOKEN
+				}
+			});
+
+			expect(getByText(shortenWithMiddleEllipsis({ text: mockSolAddress2 }))).toBeInTheDocument();
+			expect(
+				queryByText(shortenWithMiddleEllipsis({ text: mockSolAddress3 }))
+			).not.toBeInTheDocument();
 		});
 
 		// The sentence the rows carry, over the figures this view exists to show.

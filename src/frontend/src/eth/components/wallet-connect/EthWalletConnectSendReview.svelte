@@ -27,6 +27,7 @@
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
+	import WalletConnectScamWarning from '$lib/components/wallet-connect/WalletConnectScamWarning.svelte';
 	import WalletConnectUncheckedSigning from '$lib/components/wallet-connect/WalletConnectUncheckedSigning.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -57,6 +58,9 @@
 		// past once the user acknowledges it, and whether they have.
 		uncheckedSigningOffered?: boolean;
 		uncheckedSigningAcknowledged?: boolean;
+		// WalletConnect's Verify API flags the requesting site as a scam: the review says so and
+		// offers Reject only.
+		flaggedAsScam?: boolean;
 		approveDisabled?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
@@ -76,6 +80,7 @@
 		domainFlagged = false,
 		uncheckedSigningOffered = false,
 		uncheckedSigningAcknowledged = false,
+		flaggedAsScam = false,
 		approveDisabled = false,
 		onApprove,
 		onReject,
@@ -206,6 +211,10 @@
 </script>
 
 <ContentWithToolbar>
+	{#if flaggedAsScam}
+		<WalletConnectScamWarning />
+	{/if}
+
 	{#if unknownCall}
 		<MessageBox level="error" testId="wallet-connect-unknown-call">
 			{$i18n.wallet_connect.text.unknown_call}
@@ -344,6 +353,7 @@
 
 	{#snippet toolbar()}
 		<WalletConnectActions
+			approve={!flaggedAsScam}
 			approveDisabled={approveDisabled ||
 				unlistedErc20 ||
 				(refused && !(uncheckedSigningOffered && uncheckedSigningAcknowledged))}

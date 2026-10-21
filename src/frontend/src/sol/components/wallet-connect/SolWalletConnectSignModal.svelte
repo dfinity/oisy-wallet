@@ -32,6 +32,7 @@
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import {
+		acceptedContext,
 		isWalletConnectDomainFlagged,
 		isWalletConnectUncheckedSigningActive
 	} from '$lib/utils/wallet-connect.utils';
@@ -46,10 +47,11 @@
 	import type { OptionSolAddress } from '$sol/types/address';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
-	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
+	import type { SolSimulationPreview, SolUnreadProgram } from '$sol/types/sol-simulation';
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
 	import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
 	import type { SolWalletConnectRefusal } from '$sol/types/wallet-connect';
+	import { solSimulationReassignsWallet } from '$sol/utils/sol-simulation.utils';
 	import { solClosesPayOthers } from '$sol/utils/sol-transaction-summary.utils';
 	import { findSplToken } from '$sol/utils/spl.utils';
 
@@ -96,6 +98,9 @@
 	// is decoded and still cannot be stated. `sign()` refuses such a message, so the review says so
 	// and holds the button rather than letting the user press it and bounce.
 	let ambiguous = $state<boolean | undefined>();
+	// Set when the message hands the connected wallet itself to another program, which it also refuses
+	// as ambiguous.
+	let messageReassignsWallet = $state<boolean | undefined>();
 	let unreviewed = $state<boolean | undefined>();
 	let prioritizationFee = $state<bigint | undefined>();
 	let prioritizationFeeEstimate = $state<bigint | undefined>();
@@ -105,6 +110,17 @@
 	let simulatedInstructions = $state<boolean | undefined>();
 	let messageSummary = $state<SolTransactionSummary | undefined>();
 	let parties = $state<SolTransferParties | undefined>();
+	let unreadPrograms = $state<SolUnreadProgram[] | undefined>();
+	// Whether the user confirmed on the review that OISY cannot say what those programs do. Cleared
+	// with every request: a confirmation given for one set of programs says nothing about another.
+	let unreadProgramsAcknowledged = $state(false);
+	let callsUnreadPrograms = $derived((unreadPrograms ?? []).length > 0);
+	// What the chain charged a token account to exist when the review was computed. Signing holds the
+	// message's account creations to it, so what the review allowed is what gets signed.
+	let rentExemptMinimum = $state<bigint | undefined>();
+	// An account the run opens inside another program's instruction with more than its size costs.
+	// `sign()` refuses it as it does an ambiguous message, so the review says so the same way.
+	let opensAccountBeyondRent = $state<boolean | undefined>();
 	// The decode is asynchronous, so until it settles the review shows an empty summary and no
 	// warning. Approval waits for it: signing on the strength of a review that has not been
 	// computed yet is exactly what the warnings exist to prevent. A failed decode never flips it,
@@ -116,6 +132,13 @@
 	// is signed.
 	let closesPayOthers = $derived(
 		solClosesPayOthers({ instructions: instructions ?? [], userAddress: address })
+	);
+	// The wallet itself handed to another program, whether the message states it or a program does it
+	// inside its own call, where only the run shows it. Refused like an ambiguous message and never
+	// offered past: no app needs it, and the wallet cannot pay a fee afterwards.
+	let reassignsWallet = $derived(
+		(messageReassignsWallet ?? false) ||
+			solSimulationReassignsWallet({ preview, userAddress: address })
 	);
 
 	// Whether the run described the instructions nobody read, which neither the run happening nor the
@@ -130,12 +153,10 @@
 	// left in it is the description; anything else leaves an instruction the review cannot account
 	// for.
 	//
-	// One shape escapes it. An instruction is marked accounted for as soon as any one of its
-	// invocations produced an effect, so an unread instruction making both a transfer we model and a
-	// call we do not - a stake delegation among them - leaves no unknown entry and passes here with
-	// that call unstated. Closing it needs each inner effect accounted for by name, which means
-	// separating a call that genuinely does nothing from one this wallet has never modelled, for every
-	// program an invocation can reach.
+	// An instruction is marked accounted for as soon as any one of its invocations produced an effect,
+	// so an unread instruction making both a transfer we model and a call we do not leaves no unknown
+	// entry here. That call is what the unread programs below cover: a run reaching a program outside
+	// the known ones names it on the review, and approving waits for the user to confirm it.
 	//
 	// And a list with something in it. A run's empty list reaches here now, where before it was
 	// dropped on the way, and whether a run with nothing to list vouches for an instruction nobody read
@@ -154,7 +175,9 @@
 
 	let refusals = $derived<SolWalletConnectRefusal[]>([
 		...(closesPayOthers ? (['close_pays_others'] as const) : []),
-		...((ambiguous ?? false) ? (['cannot_be_shown'] as const) : []),
+		...((ambiguous ?? false) || reassignsWallet || (opensAccountBeyondRent ?? false)
+			? (['cannot_be_shown'] as const)
+			: []),
 		...(unreviewedWithoutSimulation ? (['unreviewed_without_simulation'] as const) : [])
 	]);
 
@@ -170,7 +193,7 @@
 		now: Date.now()
 	});
 
-	let uncheckedSigningOffered = $derived(uncheckedSigningOn && !domainFlagged);
+	let uncheckedSigningOffered = $derived(uncheckedSigningOn && !domainFlagged && !reassignsWallet);
 
 	let uncheckedSigningAcknowledged = $state(false);
 
@@ -192,6 +215,7 @@
 		try {
 			({
 				ambiguous,
+				reassignsWallet: messageReassignsWallet,
 				destination,
 				tokenAddress,
 				isApproval,
@@ -202,7 +226,10 @@
 				instructions,
 				simulatedInstructions,
 				messageSummary,
-				parties
+				parties,
+				unreadPrograms,
+				rentExemptMinimum,
+				opensAccountBeyondRent
 			} = await decodeService({
 				base64EncodedTransactionMessage: data,
 				networkId,
@@ -231,6 +258,7 @@
 
 		untrack(() => {
 			decoded = false;
+			unreadProgramsAcknowledged = false;
 
 			updateData();
 		});
@@ -309,8 +337,13 @@
 			progress: (step: ProgressStepsSign | ProgressStepsSendSol.SEND) => (signProgressStep = step),
 			identity: $authIdentity,
 			simulated,
+			simulationRan: simulatedInstructions ?? false,
 			closesPayOthers,
-			acknowledgedRefusals: uncheckedSigningOffered && uncheckedSigningAcknowledged ? refusals : []
+			unreadProgramsAcknowledged: !callsUnreadPrograms || unreadProgramsAcknowledged,
+			rentExemptMinimum,
+			opensAccountBeyondRent: opensAccountBeyondRent ?? false,
+			acknowledgedRefusals: uncheckedSigningOffered && uncheckedSigningAcknowledged ? refusals : [],
+			reassignsWallet
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
@@ -336,7 +369,7 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<SolWalletConnectSignReview
-				ambiguous={ambiguous ?? false}
+				ambiguous={(ambiguous ?? false) || reassignsWallet || (opensAccountBeyondRent ?? false)}
 				{application}
 				{approveDisabled}
 				{closesPayOthers}
@@ -345,6 +378,7 @@
 				destination={destination ?? ''}
 				{domainFlagged}
 				feeToken={token}
+				flaggedAsScam={!acceptedContext(request.verifyContext)}
 				{instructions}
 				isApproval={isApproval ?? false}
 				{messageSummary}
@@ -357,13 +391,17 @@
 				{preview}
 				{prioritizationFee}
 				{prioritizationFeeEstimate}
+				{reassignsWallet}
 				simulatedInstructions={simulatedInstructions ?? false}
+				simulationRan={simulatedInstructions ?? false}
 				source={address ?? ''}
 				token={reviewToken}
 				{uncheckedSigningAcknowledged}
 				{uncheckedSigningOffered}
+				unreadPrograms={unreadPrograms ?? []}
 				unreviewed={unreviewed ?? false}
 				{unreviewedWithoutSimulation}
+				bind:unreadProgramsAcknowledged
 			/>
 		{/if}
 	{/key}

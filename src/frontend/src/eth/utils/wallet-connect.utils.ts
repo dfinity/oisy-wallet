@@ -19,12 +19,10 @@ import {
 	isErcTransactionSetApprovalForAll
 } from '$eth/utils/transactions.utils';
 import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
-import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
 import type { NetworkId } from '$lib/types/network';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { Verify } from '@walletconnect/types';
 import { TypedDataEncoder, type TypedDataDomain, type TypedDataField } from 'ethers/hash';
 import { isHexString, toUtf8String } from 'ethers/utils';
 
@@ -958,6 +956,3 @@ export const convertHexToUtf8 = (value: string): string => {
 
 	return value;
 };
-
-export const acceptedContext = (context: Verify.Context | undefined): boolean =>
-	isNullish(context) || context.verified.validation.toUpperCase() !== CONTEXT_VALIDATION_ISSCAM;
