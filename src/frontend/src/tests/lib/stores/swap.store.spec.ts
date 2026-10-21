@@ -104,6 +104,7 @@ describe('swapStore', () => {
 			destinationToken,
 			failedSwapError,
 			lifiCarriedFee,
+			amountSetToMax,
 			reset
 		} = initSwapContext({
 			destinationToken: mockToken1,
@@ -123,6 +124,7 @@ describe('swapStore', () => {
 
 		failedSwapError.set({ message: 'stale error from previous swap', variant: 'error' });
 		lifiCarriedFee.set({ key: 'stale inputs', feeCeiling: 1n });
+		amountSetToMax.set(true);
 
 		reset();
 
@@ -137,6 +139,44 @@ describe('swapStore', () => {
 
 		expect(get(failedSwapError)).toBe(undefined);
 		expect(get(lifiCarriedFee)).toBe(undefined);
+		expect(get(amountSetToMax)).toBeFalsy();
+	});
+
+	// A held "Max" survives the steps that rebuild the form, but not a new source: the amount is
+	// kept as it is rather than refilled with the new token's max.
+	describe('amountSetToMax', () => {
+		it('should be released when the source token changes', () => {
+			const { amountSetToMax, setSourceToken } = initSwapContext({ sourceToken: mockToken1 });
+
+			amountSetToMax.set(true);
+			setSourceToken(mockToken2);
+
+			expect(get(amountSetToMax)).toBeFalsy();
+		});
+
+		it('should be released when the tokens switch', () => {
+			const { amountSetToMax, switchTokens } = initSwapContext({
+				sourceToken: mockToken1,
+				destinationToken: mockToken2
+			});
+
+			amountSetToMax.set(true);
+			switchTokens();
+
+			expect(get(amountSetToMax)).toBeFalsy();
+		});
+
+		it('should hold when only the destination token changes', () => {
+			const { amountSetToMax, setDestinationToken } = initSwapContext({
+				sourceToken: mockToken1,
+				destinationToken: mockToken2
+			});
+
+			amountSetToMax.set(true);
+			setDestinationToken(mockToken1);
+
+			expect(get(amountSetToMax)).toBeTruthy();
+		});
 	});
 
 	it('should set tokens correctly', () => {

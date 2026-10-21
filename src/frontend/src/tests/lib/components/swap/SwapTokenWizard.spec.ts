@@ -264,6 +264,7 @@ describe('SwapTokenWizard', () => {
 				destinationTokenExchangeRate: readable(2),
 				isSourceTokenIcrc2: readable(undefined),
 				failedSwapError: writable(undefined),
+				amountSetToMax: writable(false),
 				sourceTokenBalance: readable(undefined),
 				destinationTokenBalance: readable(undefined),
 				isSourceTokenPermitSupported: readable(undefined),

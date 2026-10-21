@@ -11,6 +11,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
+import type { OptionAmount } from '$lib/types/send';
 import { formatToken } from '$lib/utils/format.utils';
 import SwapEthFormLifiTest from '$tests/eth/components/swap/SwapEthFormLifiTest.svelte';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
@@ -289,27 +290,48 @@ describe('SwapFormEth', () => {
 			});
 
 			const fee = writable<bigint | undefined>(lifiFee);
+			const amount = writable<OptionAmount>();
 
 			const setFee = async (value: bigint) => {
 				fee.set(value);
 				await vi.advanceTimersByTimeAsync(500);
 			};
 
-			const renderWithMax = async () => {
-				fee.set(lifiFee);
-
+			const renderForm = () => {
 				const { swapAmount: _, ...rest } = props;
 
-				const result = render(SwapEthFormLifiTest, {
-					props: { ...rest, lifiFee: fee },
+				return render(SwapEthFormLifiTest, {
+					props: { ...rest, lifiFee: fee, amount },
 					context: mockContext
 				});
+			};
+
+			const renderWithMax = async () => {
+				fee.set(lifiFee);
+				amount.set(undefined);
+
+				const result = renderForm();
 
 				await fireEvent.click(result.getByTestId(MAX_BUTTON));
 				await vi.advanceTimersByTimeAsync(500);
 
 				return result;
 			};
+
+			// Picking a provider is a step of its own, and every step change rebuilds the form: "Max"
+			// must survive it, or the amount keeps the max of the fee that no longer applies.
+			it('should hold "Max" across the form being rebuilt, stepping to the new fee', async () => {
+				const { unmount } = await renderWithMax();
+
+				unmount();
+
+				fee.set(lifiFee + 1_000n);
+
+				renderForm();
+				await vi.advanceTimersByTimeAsync(500);
+
+				expect(get(amount)).toBe(maxFor(lifiFee + 1_000n));
+			});
 
 			it('should step down to a higher fee and hold there when the fee falls back', async () => {
 				const { container } = await renderWithMax();

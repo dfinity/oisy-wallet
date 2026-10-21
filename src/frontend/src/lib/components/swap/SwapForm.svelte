@@ -60,8 +60,6 @@
 		 * Left unset, "Max" is the balance minus the fee as before.
 		 */
 		maxAmount?: bigint;
-		// Whether "Max" holds the amount, re-applied whenever `fee` changes until the user types.
-		amountSetToMax?: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
 		onClose: () => void;
 		onNext: () => void;
@@ -79,7 +77,6 @@
 		onCustomValidate,
 		fee,
 		maxAmount,
-		amountSetToMax = $bindable(false),
 		onShowTokensList,
 		onClose,
 		onNext
@@ -92,6 +89,7 @@
 		sourceTokenExchangeRate,
 		sourceTokenBalance,
 		destinationTokenExchangeRate,
+		amountSetToMax,
 		switchTokens
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
@@ -175,7 +173,6 @@
 		const newSourceDecimals = $destinationToken?.decimals;
 
 		swapAmountsStore.reset();
-		amountSetToMax = false;
 
 		swapAmount =
 			nonNullish(tempAmount) && nonNullish(newSourceDecimals)
@@ -210,7 +207,7 @@
 							token={$sourceToken}
 							bind:amount={swapAmount}
 							bind:errorType
-							bind:amountSetToMax
+							bind:amountSetToMax={$amountSetToMax}
 						>
 							{#snippet title()}{$i18n.tokens.text.source_token_title}{/snippet}
 
@@ -236,7 +233,7 @@
 											{fee}
 											{maxAmount}
 											token={$sourceToken}
-											bind:amountSetToMax
+											bind:amountSetToMax={$amountSetToMax}
 											bind:amount={swapAmount}
 										/>
 									{:else}

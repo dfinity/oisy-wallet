@@ -61,7 +61,7 @@
 		lifiFee
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, sourceTokenBalance } =
+	const { sourceToken, destinationToken, sourceTokenBalance, amountSetToMax } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
@@ -88,8 +88,6 @@
 					: $maxGasFee
 	);
 
-	let amountSetToMax = $state(false);
-
 	// LI.FI's fee comes with each quote, and each quote with the amount: a "Max" that followed it
 	// would set an amount, get another fee for it, and set another amount, never settling. While
 	// "Max" holds a LI.FI amount it follows the highest fee seen since, so the amount only steps down.
@@ -98,7 +96,7 @@
 	$effect(() => {
 		const fee = lifiFee;
 
-		if (!isLifi || !amountSetToMax) {
+		if (!isLifi || !$amountSetToMax) {
 			lifiMaxFee = undefined;
 			return;
 		}
@@ -228,7 +226,6 @@
 	bind:swapAmount
 	bind:receiveAmount
 	bind:slippageValue
-	bind:amountSetToMax
 >
 	{#snippet swapDetails()}
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken) && nonNullish($feeTokenIdStore)}

@@ -35,6 +35,10 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const isErc20PermitSupported = writable<IsTokensIcrc2Map | undefined>();
 	const failedSwapError = writable<SwapError | undefined>(undefined);
 	const lifiCarriedFee = writable<LifiCarriedFee | undefined>(undefined);
+	// Kept here rather than in the form, which every step change rebuilds: picking a provider or a
+	// destination would otherwise release "Max", and the amount would keep the max of a fee that
+	// no longer applies.
+	const amountSetToMax = writable(false);
 
 	const sourceToken = derived(
 		[data, swappableTokens],
@@ -116,18 +120,25 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		receiveSupportedData,
 		failedSwapError,
 		lifiCarriedFee,
-		setSourceToken: (token: Token) =>
+		amountSetToMax,
+		// The amount is kept as it is for another source, not refilled with that token's max.
+		setSourceToken: (token: Token) => {
+			amountSetToMax.set(false);
+
 			update((state) => ({
 				...state,
 				sourceToken: token
-			})),
+			}));
+		},
 		setDestinationToken: (token: Token | undefined) =>
 			update((state) => ({
 				...state,
 				destinationToken: token
 			})),
 		// TODO: Ideally, this function should be used with reactive statements, exported outside the store.
-		switchTokens: () =>
+		switchTokens: () => {
+			amountSetToMax.set(false);
+
 			update((state) => {
 				const $swappableTokens = get(swappableTokens);
 
@@ -136,7 +147,8 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 					sourceToken: state.destinationToken ?? $swappableTokens.destinationToken,
 					destinationToken: state.sourceToken ?? $swappableTokens.sourceToken
 				};
-			}),
+			});
+		},
 		setIsTokensIcrc2: ({
 			ledgerCanisterId,
 			isIcrc2Supported
@@ -167,6 +179,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			});
 			failedSwapError.set(undefined);
 			lifiCarriedFee.set(undefined);
+			amountSetToMax.set(false);
 		}
 	};
 };
@@ -191,6 +204,9 @@ export interface SwapContext {
 	receiveSupportedData: Readable<SwapSupportedTokensData | undefined>;
 	failedSwapError: Writable<SwapError | undefined>;
 	lifiCarriedFee: Writable<LifiCarriedFee | undefined>;
+	// Whether "Max" holds the source amount, re-applied whenever the fee changes until the user
+	// types or the source changes.
+	amountSetToMax: Writable<boolean>;
 	setIsTokensIcrc2: (args: { ledgerCanisterId: string; isIcrc2Supported: boolean }) => void;
 	setIsTokenPermitSupported: ({
 		address,
