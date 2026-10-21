@@ -10,10 +10,12 @@ import {
 import { balancesStore } from '$lib/stores/balances.store';
 import { parseTokenId } from '$lib/validation/token.validation';
 import SolLoaderWallets from '$sol/components/core/SolLoaderWallets.svelte';
+import { splTokens } from '$sol/derived/spl.derived';
 import { SolWalletWorker } from '$sol/services/worker.sol-wallet.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { solUnreadableTransactionsStore } from '$sol/stores/sol-unreadable-transactions.store';
 import type { SplToken } from '$sol/types/spl';
+import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
 import { createMockSolTransactionUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
@@ -33,8 +35,18 @@ vi.mock(import('$lib/derived/tokens.derived'), async (importOriginal) => {
 	};
 });
 
+vi.mock(import('$sol/derived/spl.derived'), async (importOriginal) => {
+	const { writable } = await import('svelte/store');
+
+	return {
+		...(await importOriginal()),
+		splTokens: writable([])
+	};
+});
+
 describe('SolLoaderWallets', () => {
 	const splTokensStore = enabledSplTokens as Writable<SplToken[]>;
+	const allSplTokensStore = splTokens as Writable<SplCustomToken[]>;
 
 	const splToken2: SplToken = {
 		...mockValidSplToken,
@@ -56,6 +68,7 @@ describe('SolLoaderWallets', () => {
 		solAddressMainnetStore.reset();
 
 		splTokensStore.set([]);
+		allSplTokensStore.set([]);
 
 		setupTestnetsStore('enabled');
 		setupUserNetworksStore('allEnabled');
@@ -196,6 +209,32 @@ describe('SolLoaderWallets', () => {
 				splTokens: [mockValidSplToken],
 				cachedTokenIds: new Set()
 			});
+		});
+
+		// A token disabled before the address changes is in neither worker, and what was found
+		// unreadable for it is held in memory only.
+		it('should clear the unreadable transactions of a token disabled before the address changes', async () => {
+			allSplTokensStore.set([{ ...mockValidSplToken, enabled: false }]);
+
+			render(SolLoaderWallets);
+
+			await settle();
+
+			fillStores();
+
+			splTokensStore.set([]);
+
+			await settle();
+
+			solAddressMainnetStore.set({ data: mockSolAddress2, certified: true });
+
+			await settle();
+
+			splTokensStore.set([mockValidSplToken]);
+
+			await settle();
+
+			expect(get(solUnreadableTransactionsStore)[mockValidSplToken.id]).toBeUndefined();
 		});
 
 		it('should keep the rows, balances and unreadable transactions when only the token list changes', async () => {

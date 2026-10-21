@@ -16,6 +16,7 @@
 		isNetworkIdSOLLocal,
 		isNetworkIdSOLMainnet
 	} from '$lib/utils/network.utils';
+	import { splTokens as allSplTokens } from '$sol/derived/spl.derived';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { SolWalletWorker } from '$sol/services/worker.sol-wallet.services';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
@@ -122,6 +123,12 @@
 							balancesStore.reset(tokenId);
 						}
 					);
+
+					// What was found unreadable lives in memory only, and a token disabled before the address
+					// changed is in neither worker: enabled again, it would show the old wallet's.
+					$allSplTokens
+						.filter(({ network: { id } }) => id === networkId)
+						.forEach(({ id }) => solUnreadableTransactionsStore.reset(id));
 				}
 
 				const worker = await SolWalletWorker.init({
