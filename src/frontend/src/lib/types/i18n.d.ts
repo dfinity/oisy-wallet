@@ -1472,6 +1472,9 @@ interface I18nWallet_connect {
 		simulation_control_change: string;
 		simulation_new_owner: string;
 		simulation_new_spender: string;
+		simulation_new_allowance: string;
+		simulation_allowance: string;
+		simulation_allowance_unlimited: string;
 		simulation_new_close_authority: string;
 		simulation_new_program: string;
 		simulation_control_removed: string;
@@ -1498,6 +1501,10 @@ interface I18nWallet_connect {
 		unverifiable_approval_for_all_request: string;
 		approval_for_all_grant: string;
 		approval_for_all_revoke: string;
+		cketh_deposit: string;
+		cketh_deposit_principal: string;
+		cketh_deposit_refused: string;
+		cketh_helper_unconfirmed: string;
 		raw_copied: string;
 		sign_message: string;
 		sign_psbt: string;
@@ -1568,6 +1575,8 @@ interface I18nWallet_connect {
 		btc_psbt_input_ambiguous: string;
 		from_address_not_wallet: string;
 		unknown_destination: string;
+		cketh_deposit_refused: string;
+		cketh_helper_unconfirmed: string;
 		token_call_with_value: string;
 		ambiguous_transaction: string;
 		close_pays_others: string;
@@ -1835,6 +1844,7 @@ interface I18nTransaction {
 		swap_on: string;
 		interacted_with: string;
 		unknown_token: string;
+		unknown_token_named: string;
 		summary_other: string;
 		tab_summary: string;
 		tab_balance_changes: string;

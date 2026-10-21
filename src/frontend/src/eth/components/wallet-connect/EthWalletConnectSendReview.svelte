@@ -111,6 +111,14 @@
 
 	let unknownCall = $derived(call.type === 'unknown');
 
+	// A deposit to the ckETH helper contract only reaches this review as `ckEthDeposit` when the
+	// principal it mints to is the user's own, so the principal shown is the one the calldata names.
+	let ckEthDepositPrincipal = $derived(call.type === 'ckEthDeposit' ? call.principal : undefined);
+
+	let ckEthDepositRefused = $derived(call.type === 'ckEthDepositRefused');
+
+	let ckEthHelperUnconfirmed = $derived(call.type === 'ckEthHelperUnconfirmed');
+
 	let erc20 = $derived(erc20Approve || erc20Transfer || allowanceDelta);
 
 	let decodedErc20Data = $derived.by(() => {
@@ -204,7 +212,19 @@
 		<WalletConnectScamWarning />
 	{/if}
 
-	{#if unknownCall}
+	{#if ckEthDepositRefused}
+		<MessageBox level="error" testId="wallet-connect-cketh-deposit-refused">
+			{$i18n.wallet_connect.text.cketh_deposit_refused}
+		</MessageBox>
+	{:else if ckEthHelperUnconfirmed}
+		<MessageBox level="warning" testId="wallet-connect-cketh-helper-unconfirmed">
+			{$i18n.wallet_connect.text.cketh_helper_unconfirmed}
+		</MessageBox>
+	{:else if nonNullish(ckEthDepositPrincipal)}
+		<MessageBox level="info" testId="wallet-connect-cketh-deposit">
+			{$i18n.wallet_connect.text.cketh_deposit}
+		</MessageBox>
+	{:else if unknownCall}
 		<MessageBox level="error" testId="wallet-connect-unknown-call">
 			{$i18n.wallet_connect.text.unknown_call}
 		</MessageBox>
@@ -300,6 +320,13 @@
 						ref="operator"
 						spender={decodedSetApprovalForAll.operator}
 					/>
+				{:else if nonNullish(ckEthDepositPrincipal)}
+					<WalletConnectModalValue
+						label={$i18n.wallet_connect.text.cketh_deposit_principal}
+						ref="cketh-deposit-principal"
+					>
+						{ckEthDepositPrincipal.toText()}
+					</WalletConnectModalValue>
 				{/if}
 
 				<!-- The fee is two rows that belong together, so it takes a heading like every other
@@ -333,7 +360,9 @@
 			approveDisabled={approveDisabled ||
 				tokenCallWithValue ||
 				unverifiableErc20 ||
-				unverifiableSetApprovalForAll}
+				unverifiableSetApprovalForAll ||
+				ckEthDepositRefused ||
+				ckEthHelperUnconfirmed}
 			{onApprove}
 			{onReject}
 		/>
