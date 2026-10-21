@@ -1117,6 +1117,14 @@ ceiling (re-priced when the offer or OISY's fees change), the approval count (re
 per set of inputs) and reads the carried ceiling from the swap context (kept for the
 inputs it was found for) — and hands the total to the form and the review.
 
+"Max" from a native source leaves room for that total, but does not follow it both ways:
+LI.FI's fee comes with each quote and each quote with the amount, so a "Max" re-applied on
+every fee change sets an amount, gets another fee for it and sets another amount, never
+settling (fe4, 2026-10-21: twelve amounts and fourteen quotes in 34 s as LI.FI's route and
+gas estimate changed). While "Max" holds a LI.FI amount, `SwapEthForm` gives it the highest
+fee seen since it was pressed, so the amount only steps down; typing releases it. The fee
+shown, the form's validation and the review keep the current one.
+
 ### Solana execution
 
 New `fetchLifiSolSwap`:
