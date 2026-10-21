@@ -938,7 +938,12 @@ steps used (`allowExchanges`; none when the route has no swap), so execution can
 re-quote the same kind of route; its `fromAmount` must equal the amount being swapped.
 Left free, LI.FI re-routes from one quote to the next through exchanges whose gas differs
 up to twofold (258k for Nordstern, 577k for OKX, USDC → ETH on Base, 2026-10-21), and a
-heavier route than the one reviewed refused the swap as a fee change. Narrowing the
+heavier route than the one reviewed refused the swap as a fee change. The exchange pin is
+for the fee, not the price: when the pinned re-quote has no route or a minimum below the
+one displayed, it is asked once more through any exchange (the bridge still pinned), and
+only that answer can abort as a slippage error. Pinned alone, it aborted every retry once
+the reviewed exchange's price slipped, the review the abort returns to never refreshing
+its quote (fe4, 2026-10-21). Narrowing the
 bridges does not fix the route's shape, so every re-quote is also refused, with
 `LifiRouteUnsupportedError` (the generic swap error; `quote_rejected` in analytics), when
 `isLifiRouteExecutable` refuses it: a refreshed Across route can put a DEX swap before the
