@@ -40,10 +40,14 @@ describe('cycles-ledger-transactions.utils', () => {
 			expect(getTopUpCanister(topUpMemo)?.toText()).toBe(canister.toText());
 		});
 
-		it('should not read a memo without the top-up prefix', () => {
-			// The same canister as a one-entry CBOR map instead of an array.
+		// A one-entry CBOR map instead of an array, and a 9-byte string instead of a 10-byte one:
+		// 12 bytes each, so only the prefix check can turn them away.
+		it.each([
+			{ first: 0xa1, second: 0x4a },
+			{ first: 0x81, second: 0x49 }
+		])('should reject the incorrect prefix [$first, $second]', ({ first, second }) => {
 			expect(
-				getTopUpCanister(Uint8Array.from([0xa1, 0x00, 0x4a, ...canister.toUint8Array()]))
+				getTopUpCanister(Uint8Array.from([first, second, ...canister.toUint8Array()]))
 			).toBeUndefined();
 		});
 
