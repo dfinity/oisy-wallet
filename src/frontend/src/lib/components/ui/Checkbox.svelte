@@ -155,6 +155,15 @@
 		}
 	}
 
+	// One ring only: the row draws it, so the global one on the box goes. That rule is an
+	// `!important` inside `@layer base`, which outranks any unlayered `!important`, so the reset
+	// joins the same layer and wins there on specificity.
+	@layer base {
+		input[type='checkbox']:focus-visible {
+			outline: none !important;
+		}
+	}
+
 	/** https://moderncss.dev/pure-css-custom-styled-radio-buttons/ **/
 	/** accent-color not supported yet on Safari 😩 **/
 
@@ -189,11 +198,6 @@
 			border: var(--input-border-size) solid var(--secondary);
 			background: var(--focus-background);
 			color: var(--focus-background-contrast);
-		}
-
-		// One ring only: the row draws it, so the global one on the box goes.
-		&:focus-visible {
-			outline: none !important;
 		}
 
 		&::placeholder {
