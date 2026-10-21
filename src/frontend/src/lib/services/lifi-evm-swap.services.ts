@@ -59,11 +59,16 @@ const insufficientFundsError = (transaction: TransactionRequest) =>
 		transaction
 	});
 
+// The prefix the wizard recognises a slippage error by.
+const SLIPPAGE_EXCEEDED = 'Slippage exceeded.';
+
+const isSlippageExceeded = (err: unknown): boolean =>
+	err instanceof Error && err.message.startsWith(SLIPPAGE_EXCEEDED);
+
 /**
  * Re-quotes `request` and refuses a quote that fails the trust checks, or whose route the calldata
  * binding would refuse. When no route comes back, or its minimum is below the one displayed, the
- * swap aborts as a slippage error, whose message the wizard recognises by its `Slippage exceeded.`
- * prefix.
+ * swap aborts as a slippage error.
  */
 const requoteAtLeast = async ({
 	request,
@@ -81,7 +86,7 @@ const requoteAtLeast = async ({
 		quote = await fetchLifiQuote({ ...request });
 	} catch (err: unknown) {
 		if (isNoRouteError(err)) {
-			throw new Error('Slippage exceeded. LI.FI no longer has a route for the swap.', {
+			throw new Error(`${SLIPPAGE_EXCEEDED} LI.FI no longer has a route for the swap.`, {
 				cause: err
 			});
 		}
@@ -103,11 +108,35 @@ const requoteAtLeast = async ({
 
 	if (toAmountMin < displayedToAmountMin) {
 		throw new Error(
-			`Slippage exceeded. LI.FI now guarantees ${toAmountMin}, below the ${displayedToAmountMin} displayed.`
+			`${SLIPPAGE_EXCEEDED} LI.FI now guarantees ${toAmountMin}, below the ${displayedToAmountMin} displayed.`
 		);
 	}
 
 	return quote;
+};
+
+/**
+ * `requoteAtLeast` through the exchanges the reviewed route used, for a fee like the one reviewed,
+ * and once more through any exchange when they no longer reach the minimum displayed or have no
+ * route. The pin is for the fee, while the minimum is what the user agreed to: another exchange that
+ * still meets it is no reason to abort, all the more as the review the abort returns to does not
+ * refresh its quote, so every retry against that minimum would fail alike.
+ */
+const requoteReviewedRoute = async ({
+	request,
+	...rest
+}: Parameters<typeof requoteAtLeast>[0]): Promise<LiFiStep> => {
+	try {
+		return await requoteAtLeast({ request, ...rest });
+	} catch (err: unknown) {
+		if (isNullish(request.allowExchanges) || !isSlippageExceeded(err)) {
+			throw err;
+		}
+
+		const { allowExchanges: _, ...anyExchange } = request;
+
+		return await requoteAtLeast({ request: anyExchange, ...rest });
+	}
 };
 
 // The offer's own request, its bridge and exchanges pinned to the ones the user reviewed, so that
@@ -297,7 +326,7 @@ export const fetchLifiEvmSwap = async ({
 
 		// The price is checked before the approval costs anything, against a quote that is not
 		// simulated: the allowance it would need does not exist yet.
-		await requoteAtLeast({
+		await requoteReviewedRoute({
 			request: { ...request, skipSimulation: true },
 			sourceNetworkId,
 			displayedToAmountMin
@@ -332,7 +361,7 @@ export const fetchLifiEvmSwap = async ({
 	// Simulated: the allowance exists by now, and these are the bytes that are signed.
 	const executionRequest = { ...request, skipSimulation: false };
 
-	const quote = await requoteAtLeast({
+	const quote = await requoteReviewedRoute({
 		request: executionRequest,
 		sourceNetworkId,
 		displayedToAmountMin

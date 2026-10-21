@@ -619,6 +619,105 @@ describe('lifi-evm-swap.services', () => {
 
 				expect(vi.mocked(fetchLifiQuote).mock.calls[0]?.[0]).not.toHaveProperty('allowExchanges');
 			});
+
+			// The pin is for the fee; the minimum is what the user agreed to, and the review the abort
+			// returns to does not refresh its quote, so every retry against it would fail alike.
+			describe('when they no longer reach the minimum', () => {
+				const reviewed = withSteps([
+					step({ type: 'protocol', tool: 'feeCollection' }),
+					step({ type: 'swap', tool: 'nordstern' })
+				]);
+
+				const pinned = { ...nativeRequest, allowExchanges: ['nordstern'], skipSimulation: false };
+
+				const swapReviewed = () =>
+					fetchLifiEvmSwap({
+						...nativeParams(),
+						offer: offerOf({ quote: reviewed, request: nativeRequest })
+					});
+
+				const below = withMinimum({ quote: reviewed, toAmountMin: '24878018' });
+
+				it.each([
+					{
+						case: 'their minimum fell',
+						fail: () => vi.mocked(fetchLifiQuote).mockResolvedValueOnce(below)
+					},
+					{
+						case: 'they have no route',
+						fail: () => vi.mocked(fetchLifiQuote).mockRejectedValueOnce(httpFailure(404))
+					}
+				])('should re-quote through any exchange when $case', async ({ fail }) => {
+					fail();
+					vi.mocked(fetchLifiQuote).mockResolvedValueOnce(reviewed);
+
+					await swapReviewed();
+
+					expect(fetchLifiQuote).toHaveBeenCalledTimes(2);
+					expect(fetchLifiQuote).toHaveBeenNthCalledWith(1, pinned);
+					expect(fetchLifiQuote).toHaveBeenNthCalledWith(2, {
+						...nativeRequest,
+						skipSimulation: false
+					});
+					expect(swap).toHaveBeenCalledOnce();
+				});
+
+				it('should abort as a slippage error when no exchange reaches it', async () => {
+					vi.mocked(fetchLifiQuote).mockResolvedValue(below);
+
+					await expect(swapReviewed()).rejects.toThrow(/^Slippage exceeded\./);
+
+					expect(fetchLifiQuote).toHaveBeenCalledTimes(2);
+					expect(swap).not.toHaveBeenCalled();
+				});
+
+				it('should not re-quote any other failure', async () => {
+					const failure = httpFailure(500);
+
+					vi.mocked(fetchLifiQuote).mockRejectedValue(failure);
+
+					await expect(swapReviewed()).rejects.toBe(failure);
+
+					expect(fetchLifiQuote).toHaveBeenCalledOnce();
+				});
+
+				it('should not re-quote a route that pinned no exchange', async () => {
+					vi.mocked(fetchLifiQuote).mockResolvedValue(
+						withMinimum({ quote: mockLifiQuote, toAmountMin: '24878018' })
+					);
+
+					await expect(fetchLifiEvmSwap(nativeParams())).rejects.toThrow(/^Slippage exceeded\./);
+
+					expect(fetchLifiQuote).toHaveBeenCalledOnce();
+				});
+
+				// The same for the price check an ERC-20's approval waits on.
+				it('should check the price through any exchange before approving', async () => {
+					const reviewedErc20 = {
+						...erc20Quote,
+						includedSteps: [
+							step({ type: 'protocol', tool: 'feeCollection' }),
+							step({ type: 'swap', tool: 'nordstern' })
+						]
+					};
+
+					vi.mocked(fetchLifiQuote)
+						.mockResolvedValueOnce(withMinimum({ quote: reviewedErc20, toAmountMin: '24878018' }))
+						.mockResolvedValue(reviewedErc20);
+
+					await fetchLifiEvmSwap({
+						...erc20Params(),
+						offer: offerOf({ quote: reviewedErc20, request: erc20Request })
+					});
+
+					expect(fetchLifiQuote).toHaveBeenNthCalledWith(2, {
+						...erc20Request,
+						skipSimulation: true
+					});
+					expect(approve).toHaveBeenCalledOnce();
+					expect(swap).toHaveBeenCalledOnce();
+				});
+			});
 		});
 
 		describe('a cross-chain route', () => {
