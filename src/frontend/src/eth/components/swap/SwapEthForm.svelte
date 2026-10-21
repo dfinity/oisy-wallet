@@ -92,16 +92,17 @@
 	// would set an amount, get another fee for it, and set another amount, never settling. While
 	// "Max" holds a LI.FI amount it follows the highest fee seen since, so the amount only steps down.
 	// Kept in the swap context with the held "Max": this form is rebuilt at every step change, and a
-	// fee that fell meanwhile would otherwise raise the amount.
+	// fee that fell meanwhile would otherwise raise the amount. Only another provider's offer ends it:
+	// none is selected while the offers reload, as after a token picker cleared them.
 	$effect(() => {
 		const fee = lifiFee;
 
-		if (!isLifi || !$amountSetToMax) {
+		if (!$amountSetToMax || (nonNullish($swapAmountsStore?.selectedProvider) && !isLifi)) {
 			lifiMaxFee.set(undefined);
 			return;
 		}
 
-		if (nonNullish(fee)) {
+		if (isLifi && nonNullish(fee)) {
 			untrack(() => {
 				if (isNullish($lifiMaxFee) || fee > $lifiMaxFee) {
 					lifiMaxFee.set(fee);
@@ -118,7 +119,9 @@
 		}
 	};
 
-	// The fee "Max" leaves room for; `undefined` while the fee is, which holds the form.
+	// The fee "Max" leaves room for; `undefined` while the fee is, which holds the form. While the
+	// offers reload, the plain estimate the form falls back to stays below a LI.FI reservation kept
+	// through them, so "Max" holds.
 	const maxFee = $derived(
 		nonNullish(totalFee) && nonNullish($lifiMaxFee) && $lifiMaxFee > totalFee
 			? $lifiMaxFee

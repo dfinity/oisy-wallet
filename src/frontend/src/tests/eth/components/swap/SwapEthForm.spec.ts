@@ -297,11 +297,11 @@ describe('SwapFormEth', () => {
 				await vi.advanceTimersByTimeAsync(500);
 			};
 
-			const renderForm = () => {
+			const renderForm = ({ isLifi = true }: { isLifi?: boolean } = {}) => {
 				const { swapAmount: _, ...rest } = props;
 
 				return render(SwapEthFormLifiTest, {
-					props: { ...rest, lifiFee: fee, amount },
+					props: { ...rest, lifiFee: fee, amount, isLifi },
 					context: mockContext
 				});
 			};
@@ -384,6 +384,74 @@ describe('SwapFormEth', () => {
 				await setFee(lifiFee - 1_000n);
 
 				expect(get(amount)).toBe(maxFor(lifiFee + 1_000n));
+			});
+
+			// A token picker clears the offers, and cancelling it rebuilds this form while they reload,
+			// with none selected: that is no provider switch.
+			describe('while the offers reload', () => {
+				// What the fee context estimates a plain transfer at here, far below LI.FI's fee.
+				const plainFee = 21_000n;
+
+				const offers = writable<unknown>(null);
+
+				const offerOf = (provider: string) => ({
+					selectedProvider: { provider, receiveAmount: 1n },
+					swaps: []
+				});
+
+				// Max held at a fee that rose, then the picker cleared the offers and the form is rebuilt.
+				const renderReloading = async () => {
+					offers.set(offerOf('lifi'));
+					mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: offers });
+
+					const { unmount } = await renderWithMax();
+
+					await setFee(lifiFee + 1_000n);
+
+					unmount();
+
+					offers.set(null);
+					fee.set(undefined);
+
+					const reloading = renderForm({ isLifi: false });
+
+					await vi.advanceTimersByTimeAsync(1_000);
+
+					return reloading;
+				};
+
+				it('should hold "Max" rather than follow the plain estimate', async () => {
+					await renderReloading();
+
+					expect(get(amount)).toBe(maxFor(lifiFee + 1_000n));
+				});
+
+				it('should keep the highest fee for LI.FI back with a lower one', async () => {
+					const { unmount } = await renderReloading();
+
+					unmount();
+
+					offers.set(offerOf('lifi'));
+					fee.set(lifiFee - 1_000n);
+
+					renderForm();
+					await vi.advanceTimersByTimeAsync(1_000);
+
+					expect(get(amount)).toBe(maxFor(lifiFee + 1_000n));
+				});
+
+				it("should follow another provider's fee once one is chosen", async () => {
+					const { unmount } = await renderReloading();
+
+					unmount();
+
+					offers.set(offerOf('velora'));
+
+					renderForm({ isLifi: false });
+					await vi.advanceTimersByTimeAsync(1_000);
+
+					expect(get(amount)).toBe(maxFor(plainFee));
+				});
 			});
 
 			it('should start from the fee of the moment when "Max" is pressed again', async () => {
