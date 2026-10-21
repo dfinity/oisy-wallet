@@ -52,6 +52,7 @@ describe('eth-error.utils', () => {
 			'exceeds block gas limit',
 			'oversized data',
 			'invalid sender',
+			'invalid signature',
 			'transaction type not supported'
 		])('should be a refusal when the node answers "%s"', (message) => {
 			expect(isDefinitiveTransactionRefusal(broadcastRefused(message))).toBeTruthy();
@@ -74,6 +75,14 @@ describe('eth-error.utils', () => {
 		])('should not be a refusal when the node answers "%s"', (message) => {
 			expect(isDefinitiveTransactionRefusal(broadcastRefused(message))).toBeFalsy();
 		});
+
+		// A contract's reason, not the node's verdict on the transaction: another node can still mine it.
+		it.each(['execution reverted: invalid signature', 'execution reverted: intrinsic gas too low'])(
+			'should not be a refusal when a revert reads "%s"',
+			(message) => {
+				expect(isDefinitiveTransactionRefusal(broadcastRefused(message))).toBeFalsy();
+			}
+		);
 
 		it('should not be a refusal for a transport failure', () => {
 			expect(

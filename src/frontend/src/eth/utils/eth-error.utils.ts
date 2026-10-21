@@ -272,7 +272,8 @@ const toastOutOfGasError = async ({
 // The node's answers to a transaction it did not take, and that nothing else will mine as it is.
 // Any other refusal can hide a transaction that was taken all the same: `already known` is one in
 // the mempool, `nonce too low` one whose nonce is spent, possibly by itself, and `out of gas` on one
-// node does not stop another from mining it.
+// node does not stop another from mining it. Nor does a revert, whatever its reason says: a
+// contract's own `invalid signature` is not the transaction's.
 const DEFINITIVE_REFUSAL_PATTERN =
 	/max fee per gas less than block base fee|fee cap less than block base fee|intrinsic gas too low|exceeds block gas limit|oversized data|invalid sender|invalid signature|transaction type not supported/i;
 
@@ -288,7 +289,8 @@ export const isDefinitiveTransactionRefusal = (err: unknown): boolean =>
 			({ code, message }) =>
 				typeof code === 'number' &&
 				typeof message === 'string' &&
-				DEFINITIVE_REFUSAL_PATTERN.test(message)
+				DEFINITIVE_REFUSAL_PATTERN.test(message) &&
+				!EXECUTION_REVERTED_PATTERN.test(message)
 		));
 
 export const mapEthereumErrorMsg = (err: unknown): string | undefined => {
