@@ -777,6 +777,7 @@ const toEffect = ({
 							flattened,
 							accountTokenAmounts,
 							rentExemptMinimum,
+							payoutAt: returnedAt,
 							until: position
 						})
 					: undefined;
@@ -873,6 +874,7 @@ const toEffect = ({
 				flattened,
 				accountTokenAmounts,
 				rentExemptMinimum,
+				payoutAt: returnedAt,
 				until: position
 			});
 
@@ -1031,6 +1033,7 @@ const balanceAtInstruction = ({
 	flattened,
 	accountTokenAmounts,
 	rentExemptMinimum,
+	payoutAt,
 	until
 }: {
 	account: SolAddress;
@@ -1044,6 +1047,8 @@ const balanceAtInstruction = ({
 	// with more than that and let its initialisation read the difference as the balance, so the
 	// two cannot be told apart without knowing where the line falls.
 	rentExemptMinimum: bigint | undefined;
+	// What the close at a position pays out, as the close walk has it.
+	payoutAt: (position: number) => bigint | undefined;
 	until: number;
 }): HeldBalance | undefined => {
 	const amountBefore = accountTokenAmounts[account];
@@ -1056,7 +1061,8 @@ const balanceAtInstruction = ({
 					program,
 					parsed: { type, info }
 				}
-			}
+			},
+			position
 		) => {
 			const token = nonNullish(program) && TOKEN_PROGRAMS.includes(program);
 
@@ -1095,6 +1101,17 @@ const balanceAtInstruction = ({
 			// Nothing to start from stays nothing whatever moves after it.
 			if (isNullish(held)) {
 				return held;
+			}
+
+			// A close of another account pays everything it held into the one it names, and in a
+			// wrapped SOL account those are lamports no sync counted yet.
+			if (
+				native &&
+				token &&
+				type === 'closeAccount' &&
+				address({ info, key: 'destination' }) === account
+			) {
+				return { ...held, unsynced: plus([held.unsynced, payoutAt(position)]) };
 			}
 
 			// Wrapping: a System transfer into a wrapped SOL account pays lamports in, which its token
@@ -1384,7 +1401,11 @@ const closePayouts = ({
 	mintAt: (params: { account: SolAddress; position: number }) => SplTokenAddress | undefined;
 	// What a wrapped SOL account wraps as of an instruction, which is what an unwrap naming no
 	// amount moves.
-	wrappedAt: (params: { account: SolAddress; position: number }) => bigint | undefined;
+	wrappedAt: (params: {
+		account: SolAddress;
+		position: number;
+		payoutAt: (position: number) => bigint | undefined;
+	}) => bigint | undefined;
 }): Map<number, bigint | undefined> => {
 	// What each account holds as the walk stands. Absent means untouched so far, and an untouched
 	// account holds what it held going in, which may be unknown.
@@ -1494,7 +1515,9 @@ const closePayouts = ({
 					return;
 				}
 
-				const moved = amount({ info, key: 'amount' }) ?? wrappedAt({ account: source, position });
+				const moved =
+					amount({ info, key: 'amount' }) ??
+					wrappedAt({ account: source, position, payoutAt: (at) => payouts.get(at) });
 
 				if (isNullish(moved)) {
 					lamports.set(source, undefined);
@@ -1864,13 +1887,14 @@ export const mapSolInstructionSummaries = ({
 		accountLamports,
 		mintAt,
 		// The source of an unwrap holds wrapped SOL, or the program refuses it.
-		wrappedAt: ({ account, position }) =>
+		wrappedAt: ({ account, position, payoutAt }) =>
 			heldAtInstruction({
 				account,
 				native: true,
 				flattened,
 				accountTokenAmounts,
 				rentExemptMinimum,
+				payoutAt,
 				until: position
 			})
 	});

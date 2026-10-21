@@ -3869,6 +3869,39 @@ describe('sol-instruction-summary.utils', () => {
 					expect(views.at(-1)?.amount).toBe(2_000n);
 				});
 
+				// A close paying into the account hands it every lamport the closed account held, which a
+				// sync counts like any other paid in.
+				describe('after a close paid into it', () => {
+					const closeInto = {
+						program: 'spl-token',
+						programId: TOKEN,
+						parsed: {
+							type: 'closeAccount',
+							info: { account: mockSolAddress3, destination: wrapped, owner: mockSolAddress2 }
+						}
+					};
+
+					it('should count what the close paid in toward a later unwrap of everything once synced', () => {
+						const views = read({
+							instructions: [closeInto, sync, unwrap({ destination: mockSolAddress })],
+							accountLamports: { [wrapped]: 2_046_280n, [mockSolAddress3]: 2_039_280n },
+							accountTokenAmounts: { [wrapped]: 7_000n }
+						});
+
+						expect(views.at(-1)?.amount).toBe(2_046_280n);
+					});
+
+					it('should know nothing of a later unwrap of everything when nobody read what the close paid in', () => {
+						const views = read({
+							instructions: [closeInto, sync, unwrap({ destination: mockSolAddress })],
+							accountLamports: { [wrapped]: 2_046_280n },
+							accountTokenAmounts: { [wrapped]: 7_000n }
+						});
+
+						expect(views.at(-1)).not.toHaveProperty('amount');
+					});
+				});
+
 				// The lamports it left in place are counted again once the account is synced.
 				it('should count what an unwrap into the account itself left once a sync does', () => {
 					const views = read({
