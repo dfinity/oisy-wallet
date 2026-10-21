@@ -4146,6 +4146,41 @@ describe('sol-instruction-summary.utils', () => {
 
 				expect(views.at(-1)).not.toHaveProperty('returned');
 			});
+
+			// Counted from nothing after the withdrawal, a payment in would have the close of either
+			// account state what arrived since as all it hands back.
+			describe('and a payment in after it', () => {
+				const other = mockAtaAddress;
+
+				const close = (account: string) => ({
+					program: 'spl-token',
+					programId: TOKEN,
+					parsed: {
+						type: 'closeAccount',
+						info: { account, destination: mockSolAddress, owner: mockSolAddress }
+					}
+				});
+
+				it.each([
+					{ end: 'source', account: wrapped },
+					{ end: 'destination', account: other }
+				])('should know nothing of what a close of its $end hands back', ({ account }) => {
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							excess({ source: wrapped, destination: other }),
+							plain(account),
+							close(account)
+						],
+						ownedAddresses: [mockSolAddress, wrapped, other],
+						userAddress: mockSolAddress,
+						addressToToken: { [wrapped]: WSOL_TOKEN.address, [other]: WSOL_TOKEN.address },
+						accountLamports: { [wrapped]: 2_046_280n, [other]: 2_039_280n },
+						accountTokenAmounts: { [wrapped]: 7_000n, [other]: ZERO }
+					});
+
+					expect(views.at(-1)).not.toHaveProperty('returned');
+				});
+			});
 		});
 
 		describe('instructions it cannot read', () => {
