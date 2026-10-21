@@ -966,6 +966,43 @@ describe('CyclesTopUpModal', () => {
 				);
 			});
 
+			it('keeps the resend when the first call is refused while the resend is pending', async () => {
+				const answerFirst = await leaveDuringTopUp();
+
+				const answerSecond = pendingTopUp();
+
+				const second = renderModal();
+
+				await backOnReview(second);
+
+				await topUp(second);
+
+				await waitFor(() => {
+					expect(topUpSpy).toHaveBeenCalledTimes(2);
+				});
+
+				answerFirst({ status: 'refused', refusal: 'temporarily_unavailable' });
+
+				// Let the first answer be handled before looking.
+				await new Promise((resolve) => setTimeout(resolve, 0));
+
+				expect(stored()?.request.createdAt).toBe(1_000_000_000n);
+
+				answerSecond({ status: 'unknown' });
+
+				await backOnReview(second);
+
+				second.unmount();
+
+				const third = renderModal();
+
+				await backOnReview(third);
+
+				expect(third.container).toHaveTextContent(
+					replacePlaceholders(en.cycles_top_up.text.unknown, { $token: 'TCYCLES' })
+				);
+			});
+
 			it('keeps a newer top-up when the first answers late', async () => {
 				const answerFirst = await leaveDuringTopUp();
 
@@ -1002,7 +1039,7 @@ describe('CyclesTopUpModal', () => {
 				await topUp(second);
 
 				await waitFor(() => {
-					expect(stored()?.createdAt).toBe(2_000_000_000n);
+					expect(stored()?.request.createdAt).toBe(2_000_000_000n);
 				});
 
 				answerFirst({ status: 'topped_up', blockIndex: 7n });
@@ -1010,7 +1047,7 @@ describe('CyclesTopUpModal', () => {
 				// Let the first answer be handled before looking.
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
-				expect(stored()?.createdAt).toBe(2_000_000_000n);
+				expect(stored()?.request.createdAt).toBe(2_000_000_000n);
 			});
 		});
 

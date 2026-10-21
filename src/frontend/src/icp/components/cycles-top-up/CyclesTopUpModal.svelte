@@ -56,7 +56,7 @@
 	// once. The ledger keeps that for 24 hours; a resend after that stays unknown (below).
 	let unanswered = $derived(
 		nonNullish($authIdentity)
-			? $unansweredCyclesTopUps[$authIdentity.getPrincipal().toText()]
+			? $unansweredCyclesTopUps[$authIdentity.getPrincipal().toText()]?.request
 			: undefined
 	);
 
@@ -209,7 +209,9 @@
 		// Stored before it is sent, so a modal opened while it is in flight, after this one was
 		// closed by leaving the page, starts on its Review and resends it rather than sending a
 		// second withdrawal.
-		unansweredCyclesTopUps.update((all) => ({ ...all, [sender]: request }));
+		const send = Symbol();
+
+		unansweredCyclesTopUps.update((all) => ({ ...all, [sender]: { request, send } }));
 
 		const analytics = { step: 'top_up' as const, tokenSymbol: token.symbol };
 
@@ -238,11 +240,11 @@
 
 		// Only a top-up without an answer may be resent as it was. After a refund, the same
 		// request would be answered as a duplicate of the refunded one. The stored request is
-		// updated only while it is still this one: a resend from a later modal, or a newer
-		// top-up, may have settled or replaced it while this answer was on its way.
+		// updated only while this send still owns it: a resend from a later modal, or a newer
+		// top-up, may have taken it over, settled or replaced it while this answer was on its way.
 		unansweredCyclesTopUps.update((all) =>
-			all[sender]?.createdAt === request.createdAt
-				? { ...all, [sender]: result.status === 'unknown' ? request : undefined }
+			all[sender]?.send === send
+				? { ...all, [sender]: result.status === 'unknown' ? { request, send } : undefined }
 				: all
 		);
 

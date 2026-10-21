@@ -84,7 +84,9 @@ describe('CyclesTopUpButton', () => {
 		// A Max top-up that went through without an answer leaves nothing to spend, and the
 		// resend is still how its outcome gets settled.
 		it('opens that top-up on Review even without a balance', async () => {
-			unansweredCyclesTopUps.set({ [mockIdentity.getPrincipal().toText()]: unanswered });
+			unansweredCyclesTopUps.set({
+				[mockIdentity.getPrincipal().toText()]: { request: unanswered, send: Symbol() }
+			});
 
 			const { getByTestId } = render(CyclesTopUpButton, {
 				props: { token: mockTcyclesToken },
@@ -103,7 +105,7 @@ describe('CyclesTopUpButton', () => {
 		});
 
 		it("stays disabled without a balance for another principal's top-up", () => {
-			unansweredCyclesTopUps.set({ [mockPrincipalText2]: unanswered });
+			unansweredCyclesTopUps.set({ [mockPrincipalText2]: { request: unanswered, send: Symbol() } });
 
 			const { getByTestId } = render(CyclesTopUpButton, {
 				props: { token: mockTcyclesToken },
