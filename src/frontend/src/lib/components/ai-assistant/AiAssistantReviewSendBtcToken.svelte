@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
 	import BtcUtxosFeeDisplay from '$btc/components/send/BtcUtxosFeeDisplay.svelte';
 	import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
@@ -42,6 +41,7 @@
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		amount: number;

@@ -1,50 +1,73 @@
 <script lang="ts">
 	interface Props {
 		size?: string;
+		inline?: boolean;
 	}
 
-	const { size = '16px' }: Props = $props();
+	const { size = '16px', inline = false }: Props = $props();
 </script>
 
-<span style="--spinner-size: {size}" class="relative flex">
+<span style="--spinner-size: {size}" class="relative flex" class:inline>
 	<svg
 		class="spinner"
 		aria-hidden="true"
 		data-tid="spinner"
+		fill="none"
 		focusable="false"
 		preserveAspectRatio="xMidYMid meet"
-		viewBox="0 0 100 100"
+		stroke="currentColor"
+		stroke-linejoin="round"
+		stroke-width="3.2"
+		viewBox="0 0 46 40"
 	>
-		<circle cx="50%" cy="50%" r="45" />
+		<!-- OISY's smooth helmet glass, without the outer helmet tabs or face. -->
+		<path
+			d="M41.9679 20.9668V19.3807C42.1127 8.8544 33.3268 6.93179 22.996 6.7876C12.617 6.93179 3.83106 8.8544 3.97589 19.3807V20.9668C3.83106 31.5412 12.617 33.4638 22.996 33.608C33.3268 33.4638 42.1127 31.5412 41.9679 20.9668Z"
+			opacity="0.2"
+			pathLength="100"
+		/>
+		<path
+			class="trace"
+			d="M41.9679 20.9668V19.3807C42.1127 8.8544 33.3268 6.93179 22.996 6.7876C12.617 6.93179 3.83106 8.8544 3.97589 19.3807V20.9668C3.83106 31.5412 12.617 33.4638 22.996 33.608C33.3268 33.4638 42.1127 31.5412 41.9679 20.9668Z"
+			pathLength="100"
+			stroke-dasharray="25 75"
+			stroke-linecap="round"
+		/>
 	</svg>
 </span>
 
 <style lang="scss">
-	.spinner {
-		color: inherit;
-
+	.inline {
+		display: inline-flex;
+		flex-shrink: 0;
 		width: var(--spinner-size);
 		height: var(--spinner-size);
+		vertical-align: middle;
 
-		animation: app-spinner-rotate 800ms linear infinite;
-
-		position: absolute;
-		top: calc(50% - (var(--spinner-size) / 2));
-		left: calc(50% - (var(--spinner-size) / 2));
-
-		circle {
-			// r=45 in a 100x100 viewBox → circumference ≈ 283; show a ~25% arc, hide the rest.
-			stroke-dasharray: 70 213;
-			stroke-width: 10%;
-			stroke-linecap: round;
-			fill: transparent;
-			stroke: currentColor;
+		.spinner {
+			width: 100%;
+			height: 100%;
+			top: 0;
+			left: 0;
 		}
 	}
 
-	@keyframes app-spinner-rotate {
+	.spinner {
+		color: inherit;
+		width: var(--spinner-size);
+		height: var(--spinner-size);
+		position: absolute;
+		top: calc(50% - (var(--spinner-size) / 2));
+		left: calc(50% - (var(--spinner-size) / 2));
+	}
+
+	.trace {
+		animation: spinner-trace 1200ms linear infinite;
+	}
+
+	@keyframes spinner-trace {
 		to {
-			transform: rotate(360deg);
+			stroke-dashoffset: -100;
 		}
 	}
 </style>
