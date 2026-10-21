@@ -59,7 +59,8 @@ first two and holds Approve (`SolWalletConnectSignModal.svelte`).
 changes, System assignments (one of the connected wallet itself is the Never row above), sizing and
 nonce set-up, System-owned, over-funded or prefunded account creations, unclassified System
 instructions, closing a lookup table, Compute Budget directives OISY cannot price, and instructions
-of known programs that fail to parse.
+of known programs that fail to parse. The same refusal covers an account a program opens inside its
+own instruction with more than its rent, which only the simulated run shows.
 
 The no-simulation refusal (`unreviewed && !simulated`) is the odd one out: the review only warns,
 Approve stays usable, and the refusal arrives as a toast afterwards.
