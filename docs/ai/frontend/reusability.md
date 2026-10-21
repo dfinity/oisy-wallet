@@ -251,7 +251,7 @@ Row density comes from `--menu-row-min-height`, `--menu-row-padding-block` and `
 
 ### Dropdown triggers
 
-Every dropdown trigger except the native `Select` uses `.dropdown-button` (`DropdownButton`, `ModalFilterButton`, `MultiSelectDropdown`). The shared rule in `global/button.scss` owns its whole look: 40 px (44 px under `pointer: coarse`), 16 px medium text, the border colour, the open state (`opened`, announced with `aria-expanded`) and the chevron, `IconExpandMore` in `.dropdown-chevron`, which turns over while open. Set only the `border` class in markup: a `border-*` colour utility would out-rank the open-state border, because `button.scss` is in the base layer.
+Every dropdown trigger except the native `Select` uses `.dropdown-button` (`DropdownButton`, `ModalFilterButton`, `MultiSelectDropdown`). The shared rule in `global/button.scss` owns its whole look: 40 px (44 px under `pointer: coarse`), 16 px medium text, the border colour, the open state (`opened`, announced with `aria-expanded`), the pressed fill and the chevron, `IconExpandMore` in `.dropdown-chevron`, which turns over while open. Set only the `border` class in markup: a `border-*` colour utility would out-rank the open-state border, because `button.scss` is in the base layer.
 
 ### Dropdown panels
 
