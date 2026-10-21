@@ -326,9 +326,7 @@ describe('onesec-swap.utils', () => {
 					networkIds: [ETHEREUM_NETWORK.id]
 				});
 
-				expect(result?.icp).toBeDefined();
-				expect(result?.icp).toContain(ICP_LEDGER);
-				expect(result?.icp?.size).toBe(1);
+				expect(result?.icp).toEqual(new Set([ICP_LEDGER]));
 			});
 
 			it('is case-insensitive when matching the source EVM address', () => {
@@ -346,8 +344,7 @@ describe('onesec-swap.utils', () => {
 					networkIds: [ETHEREUM_NETWORK.id]
 				});
 
-				expect(result?.icp).toBeDefined();
-				expect(result?.icp?.size).toBe(0);
+				expect(result?.icp).toEqual(new Set());
 			});
 
 			it('returns empty icp set for USDT on Arbitrum (no Arbitrum address in OneSec config)', () => {
@@ -359,8 +356,7 @@ describe('onesec-swap.utils', () => {
 					networkIds: [ARBITRUM_MAINNET_NETWORK.id]
 				});
 
-				expect(result?.icp).toBeDefined();
-				expect(result?.icp?.size).toBe(0);
+				expect(result?.icp).toEqual(new Set());
 			});
 
 			it('does not set evm or sol keys for EVM source', () => {

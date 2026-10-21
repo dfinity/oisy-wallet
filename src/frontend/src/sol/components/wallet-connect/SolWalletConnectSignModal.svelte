@@ -25,6 +25,7 @@
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { consoleError } from '$lib/utils/console.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
+	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
 	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$sol/constants/steps.constants';
 	import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
@@ -257,6 +258,7 @@
 				nonNullish(instructions) &&
 				instructions.length > 0 &&
 				!instructions.some(({ kind }) => kind === 'unknown'),
+			simulationRan: simulatedInstructions ?? false,
 			closesPayOthers,
 			unreadProgramsAcknowledged: !callsUnreadPrograms || unreadProgramsAcknowledged,
 			rentExemptMinimum,
@@ -299,6 +301,7 @@
 				{decoded}
 				destination={destination ?? ''}
 				feeToken={token}
+				flaggedAsScam={!acceptedContext(request.verifyContext)}
 				{instructions}
 				isApproval={isApproval ?? false}
 				{messageSummary}

@@ -1,6 +1,7 @@
 import { enabledBitcoinNetworks } from '$btc/derived/networks.derived';
 import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { LIFI_SWAP_ENABLED } from '$env/rest/lifi.env';
 import {
 	NEAR_INTENTS_BTC_SWAP_ENABLED,
 	NEAR_INTENTS_SWAP_ENABLED,
@@ -36,7 +37,8 @@ export const crossChainSwapNetworks: Readable<Network[]> = derived(
 		ICP_NETWORK,
 		...$enabledEthereumNetworks,
 		...$enabledEvmNetworks,
-		...(NEAR_INTENTS_SWAP_ENABLED ? $enabledSolanaNetworks : []),
+		// Solana's providers are NEAR Intents and LI.FI; either one keeps it in the swap filter.
+		...(NEAR_INTENTS_SWAP_ENABLED || LIFI_SWAP_ENABLED ? $enabledSolanaNetworks : []),
 		// Bitcoin only joins the swap filter when a provider reaches it: Chain Fusion
 		// (ck conversion) or NEAR Intents (bridging). `crossChainSwapNetworksMainnets`
 		// drops the testnets below.

@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
+	import { cubicIn, cubicOut } from 'svelte/easing';
 	import { BACKDROP_FADE_OUT_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
 	import { handleKeyPress } from '$lib/utils/keyboard.utils';
+	import { backdrop } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		disablePointerEvents?: boolean;
@@ -34,8 +35,12 @@
 	onkeypress={($event) => handleKeyPress({ $event, callback: close })}
 	role="button"
 	tabindex="-1"
-	in:fade|global={{ duration: FADE_IN_DURATION }}
-	out:fade|global={{ duration: BACKDROP_FADE_OUT_DURATION }}
+	in:backdrop|global={{ duration: FADE_IN_DURATION, easing: cubicOut, blur: invisible ? 0 : 4 }}
+	out:backdrop|global={{
+		duration: BACKDROP_FADE_OUT_DURATION,
+		easing: cubicIn,
+		blur: invisible ? 0 : 4
+	}}
 ></div>
 
 <style lang="scss">

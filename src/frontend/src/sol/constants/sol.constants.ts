@@ -58,6 +58,13 @@ export const SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES = 128n;
 // would report "no changes" for accounts it never looked at.
 export const SOLANA_SIMULATION_MAX_ACCOUNTS = 60;
 
+// A close an application's program makes inside one of several calls naming the account goes to
+// the last of them only after a second run of the message up to it, one run per distinct call.
+// Nothing short of the account limit bounds how many a crafted message asks for, and the timeout
+// below does not cancel runs in flight, so past this many none is started and those closes stay
+// unlisted.
+export const SOLANA_SIMULATION_MAX_CLOSE_RUNS = 5;
+
 // The preview is fetched before the review renders, so a slow or unresponsive RPC would hold
 // the request behind it. Past this it is abandoned and the review renders without it.
 export const SOLANA_SIMULATION_TIMEOUT_MILLISECONDS = 5_000;

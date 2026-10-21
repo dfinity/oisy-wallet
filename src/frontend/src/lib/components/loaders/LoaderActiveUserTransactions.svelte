@@ -13,11 +13,16 @@
 	import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { enabledFungibleTokens } from '$lib/derived/tokens.derived';
 	import { loadActiveUserTransactions } from '$lib/services/active-user-transactions.services';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { pollChainFusionActiveUserTransactions } from '$lib/services/chain-fusion-swap-active-tx.services';
 	import { pollCyclesMintActiveUserTransactions } from '$lib/services/cycles-mint-active-tx.services';
 	import { trackCyclesMint } from '$lib/services/cycles-mint-analytics.services';
+	import {
+		pollLifiActiveUserTransactions,
+		reloadLifiEvmBalances
+	} from '$lib/services/lifi-active-tx.services';
 	import { pollLiquidiumActiveUserTransactions } from '$lib/services/liquidium-active-tx.services';
 	import { loadLiquidium } from '$lib/services/liquidium.services';
 	import { pollNearIntentsActiveUserTransactions } from '$lib/services/near-intents-active-tx.services';
@@ -37,6 +42,10 @@
 		isCyclesMintActiveUserTransaction,
 		toCyclesMintTrackingParams
 	} from '$lib/utils/cycles-mint-active-tx.utils';
+	import {
+		buildLifiSwapTrackingMetadata,
+		isLifiActiveUserTransaction
+	} from '$lib/utils/lifi-active-tx.utils';
 	import {
 		buildLiquidiumTrackingMetadata,
 		isLiquidiumActiveUserTransaction
@@ -113,13 +122,30 @@
 				await pollNearIntentsActiveUserTransactions({ identity, transactions: nearIntents });
 			}
 
+			// Shared by the EVM pollers of this tick, so rows on one chain cost one nonce read whatever
+			// their provider. They run one after another: a nonce read earlier in the tick can only be
+			// lower, which reads as still pending, never as replaced.
+			const confirmedNonceByChainId = new Map<string, Promise<number>>();
+
 			const velora = $activeUserTransactionsPending.filter(isVeloraActiveUserTransaction);
 
 			if (velora.length > 0) {
 				await pollVeloraActiveUserTransactions({
 					identity,
 					transactions: velora,
-					userAddress: $ethAddress
+					userAddress: $ethAddress,
+					confirmedNonceByChainId
+				});
+			}
+
+			const lifi = $activeUserTransactionsPending.filter(isLifiActiveUserTransaction);
+
+			if (lifi.length > 0) {
+				await pollLifiActiveUserTransactions({
+					identity,
+					transactions: lifi,
+					userAddress: $ethAddress,
+					confirmedNonceByChainId
 				});
 			}
 
@@ -181,9 +207,9 @@
 
 	onDestroy(stop);
 
-	// Fires wallet refresh + analytics exactly once per terminal row.
-	// Idempotency lives in `terminalSideEffectsApplied` on the store, so a
-	// row that finalizes across a refresh still fires once on next load.
+	// Fires wallet refresh + analytics exactly once per row this tab sees
+	// settle. Idempotency lives in `terminalSideEffectsApplied` on the store,
+	// which claims a row that loads already settled without firing it.
 	$effect(() => {
 		if (isNullish($activeUserTransactionsStore)) {
 			return;
@@ -246,6 +272,23 @@
 				if (isSucceeded) {
 					shouldRefresh = true;
 				}
+			} else if (
+				isTerminalActiveUserTransaction(tx) &&
+				!alreadyApplied &&
+				isLifiActiveUserTransaction(tx)
+			) {
+				newlyAppliedIds.push(tx.id);
+
+				trackEvent({
+					name: isSucceeded ? TRACK_COUNT_SWAP_SUCCESS : TRACK_COUNT_SWAP_ERROR,
+					metadata: buildLifiSwapTrackingMetadata({ tx })
+				});
+
+				// Whatever the outcome: the modal closed at broadcast, and a failed, reverted or refunded
+				// route still spent gas or returned funds. The wallet refresh covers the Solana side; EVM
+				// balances have no wallet worker, so they are reloaded explicitly.
+				shouldRefresh = true;
+				reloadLifiEvmBalances({ tx, tokens: $enabledFungibleTokens });
 			} else if (
 				isTerminalActiveUserTransaction(tx) &&
 				!alreadyApplied &&
@@ -323,7 +366,9 @@
 
 				// The only place an XRP send's outcome is reported. The modal stops at the submit, so
 				// by the time the ledger decides there may be no modal — and this hook fires exactly
-				// once per row even when the row terminalized while the tab was shut.
+				// once per row even when the ledger decided while the tab was shut: a row no poller settled
+				// is still open when the next session loads, and a row whose terminal write committed after
+				// its tab closed is left to the next session in that browser by its persisted marker.
 				//
 				// The failure text comes off the record rather than being derived here: the two
 				// failures need different advice — nothing was sent, or the fee was charged — and

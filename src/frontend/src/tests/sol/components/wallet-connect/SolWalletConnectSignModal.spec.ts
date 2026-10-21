@@ -213,6 +213,30 @@ describe('SolWalletConnectSignModal', () => {
 		});
 	});
 
+	// Which refusal the signing service gives for a message it cannot describe depends on whether a
+	// run came back at all, described anything or not.
+	describe('the run flag it hands the signing service', () => {
+		it('should be true when a run came back and left an instruction unaccounted for', async () => {
+			const args = await approve({
+				amount: 1n,
+				simulatedInstructions: true,
+				instructions: [{ kind: 'unknown' }],
+				parties: { sources: [], destinations: [], partial: false }
+			});
+
+			expect(args).toEqual(expect.objectContaining({ simulated: false, simulationRan: true }));
+		});
+
+		it('should be false when there was no run at all', async () => {
+			const args = await approve({
+				amount: 1n,
+				parties: { sources: [], destinations: [], partial: true }
+			});
+
+			expect(args).toEqual(expect.objectContaining({ simulated: false, simulationRan: false }));
+		});
+	});
+
 	// An account the run opens inside another program's instruction with more than its size costs is
 	// refused by signing like an ambiguous message, so the review holds the button the same way.
 	it('should hold approval when the run opens an account above its rent', async () => {
@@ -388,6 +412,46 @@ describe('SolWalletConnectSignModal', () => {
 
 		await waitFor(() => {
 			expect(getByText(en.wallet_connect.text.sign_message)).toBeInTheDocument();
+		});
+	});
+
+	describe('a request Verify flags as a scam', () => {
+		const flaggedProps = (method: string) => {
+			const { request, ...rest } = props(method);
+
+			return {
+				...rest,
+				request: {
+					...request,
+					verifyContext: { verified: { ...request.verifyContext.verified, isScam: true } }
+				}
+			};
+		};
+
+		it('should only offer to reject a transaction, and say why', async () => {
+			const { getByRole, getByTestId, queryByRole } = render(SolWalletConnectSignModal, {
+				props: flaggedProps(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			await waitFor(() => {
+				expect(getByTestId('wallet-connect-scam-warning')).toBeInTheDocument();
+			});
+
+			expect(queryByRole('button', { name: en.core.text.approve })).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.reject })).toBeInTheDocument();
+		});
+
+		it('should only offer to reject a message, and say why', async () => {
+			const { getByRole, getByTestId, queryByRole } = render(SolWalletConnectSignMessageModal, {
+				props: flaggedProps(SESSION_REQUEST_SOL_SIGN_MESSAGE)
+			});
+
+			await waitFor(() => {
+				expect(getByTestId('wallet-connect-scam-warning')).toBeInTheDocument();
+			});
+
+			expect(queryByRole('button', { name: en.core.text.approve })).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.reject })).toBeInTheDocument();
 		});
 	});
 });
