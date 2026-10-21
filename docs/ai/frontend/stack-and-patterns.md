@@ -279,7 +279,9 @@ The shared buttons (`button.scss`) and `row-feedback` rows change colour in
 `secondary-light` buttons and `row-feedback` rows press one step past their
 hover (`brand-subtle-10` → `-20`, or `-20` → `-30`), and a state that stays on,
 such as an open popover's button, may go a step further. `.dropdown-button`
-has no pressed fill of its own, and success, error and other palettes keep
+presses one step past its hover and open fill too (`brand-subtle-20`, and that
+border when bordered), shown at once rather than faded in, so even a quick
+click shows it before the panel opens. Success, error and other palettes keep
 their own steps.
 
 ### Small controls: `hit-area`
