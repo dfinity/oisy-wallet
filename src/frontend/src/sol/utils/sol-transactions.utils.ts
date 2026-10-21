@@ -4,7 +4,10 @@ import type { OptionSolAddress } from '$sol/types/address';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import { calculateSolPrioritizationFee, resolveSolComputeUnitLimit } from '$sol/utils/fee.utils';
-import { mapSolInstruction } from '$sol/utils/sol-instructions.utils';
+import {
+	mapSolInstruction,
+	solWrappedSolOpeningsReturnedToWallet
+} from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	decompileTransactionMessageFetchingLookupTables,
@@ -118,8 +121,15 @@ export const mapSolTransactionMessage = ({
 			transactionMessage.version !== 1 || programAddress !== COMPUTE_BUDGET_PROGRAM_ADDRESS
 	);
 
+	// A creation can only be told apart from a payment by what the rest of the message does with the
+	// account it opens, so that is read once, over the whole message, before any instruction is.
+	const returnedToWallet = solWrappedSolOpeningsReturnedToWallet({
+		instructions: instructionsList,
+		userAddress
+	});
+
 	const mapped = instructionsList.reduce<MappedSolTransaction>(
-		(acc, instruction) => {
+		(acc, instruction, index) => {
 			const {
 				amount,
 				source,
@@ -131,7 +141,12 @@ export const mapSolTransactionMessage = ({
 				computeUnitPrice,
 				computeUnitLimit,
 				ambiguous: instructionAmbiguous
-			} = mapSolInstruction({ instruction, userAddress, rentExemptMinimum });
+			} = mapSolInstruction({
+				instruction,
+				userAddress,
+				rentExemptMinimum,
+				returnsToWallet: returnedToWallet.has(index)
+			});
 
 			// The summary holds a single value per field, so any later instruction that
 			// disagrees on source, destination or payer would be silently dropped from the

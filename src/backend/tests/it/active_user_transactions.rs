@@ -425,7 +425,7 @@ fn create_cycles_mint_variant_roundtrip() {
             assert_eq!(tx.id, TX_ID);
             assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
             assert_eq!(tx.data, data);
-            assert!(tx.external_refs.is_empty());
+            assert_eq!(tx.external_refs, vec![]);
         }
         ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
     }
@@ -1102,7 +1102,7 @@ fn delete_is_idempotent_and_filters_view() {
         .query::<GetActiveUserTransactionsResult>(user, "get_active_user_transactions", ())
         .expect("query should succeed");
     match listed {
-        GetActiveUserTransactionsResult::Ok(response) => assert!(response.transactions.is_empty()),
+        GetActiveUserTransactionsResult::Ok(response) => assert_eq!(response.transactions, vec![]),
         GetActiveUserTransactionsResult::Err(err) => panic!("expected Ok, got {err:?}"),
     }
 }

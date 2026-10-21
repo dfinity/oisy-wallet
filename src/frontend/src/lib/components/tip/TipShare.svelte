@@ -349,6 +349,7 @@
 
 			<ReceiveCopy
 				address={link}
+				copiedText={$i18n.tip.text.link_copied}
 				copyAriaLabel={$i18n.tip.text.copy_link}
 				onCopy={trackCopy}
 				testId={TIP_SHARE_COPY_BUTTON}

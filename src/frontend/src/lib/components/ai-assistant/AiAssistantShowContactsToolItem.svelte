@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
@@ -10,6 +9,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactAddressUiWithId, ExtendedAddressContactUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		contact: ExtendedAddressContactUi;

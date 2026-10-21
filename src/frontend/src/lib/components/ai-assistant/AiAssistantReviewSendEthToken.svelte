@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import { slide } from 'svelte/transition';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { send as executeSend } from '$eth/services/send.services';
@@ -50,6 +49,7 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		nativeEthereumToken: Token;

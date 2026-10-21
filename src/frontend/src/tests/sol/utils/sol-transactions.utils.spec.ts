@@ -1,6 +1,8 @@
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
+import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
-import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import { ATA_SIZE } from '$sol/constants/ata.constants';
+import { SYSTEM_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
 import {
@@ -24,10 +26,17 @@ import {
 	getSetComputeUnitLimitInstruction,
 	getSetComputeUnitPriceInstruction
 } from '@solana-program/compute-budget';
-import { getCreateAccountInstruction, getTransferSolInstruction } from '@solana-program/system';
+import {
+	getCreateAccountInstruction,
+	getCreateAccountWithSeedInstruction,
+	getTransferSolInstruction
+} from '@solana-program/system';
 import {
 	AuthorityType,
 	getBurnInstruction,
+	getCloseAccountInstruction,
+	getInitializeAccount3Instruction,
+	getInitializeAccountInstruction,
 	getSetAuthorityInstruction,
 	getTransferCheckedInstruction
 } from '@solana-program/token';
@@ -126,7 +135,8 @@ describe('sol-transactions.utils', () => {
 
 			expect(spyMapSolInstruction).toHaveBeenCalledExactlyOnceWith({
 				instruction: instruction1,
-				userAddress: undefined
+				userAddress: undefined,
+				returnsToWallet: false
 			});
 		});
 
@@ -141,7 +151,8 @@ describe('sol-transactions.utils', () => {
 				expect(spyMapSolInstruction).toHaveBeenNthCalledWith(index + 1, {
 					instruction,
 					userAddress: undefined,
-					rentExemptMinimum: 1_488_440n
+					rentExemptMinimum: 1_488_440n,
+					returnsToWallet: false
 				})
 			);
 		});
@@ -159,15 +170,18 @@ describe('sol-transactions.utils', () => {
 			expect(spyMapSolInstruction).toHaveBeenCalledTimes(3);
 			expect(spyMapSolInstruction).toHaveBeenNthCalledWith(1, {
 				instruction: instruction1,
-				userAddress: undefined
+				userAddress: undefined,
+				returnsToWallet: false
 			});
 			expect(spyMapSolInstruction).toHaveBeenNthCalledWith(2, {
 				instruction: instruction2,
-				userAddress: undefined
+				userAddress: undefined,
+				returnsToWallet: false
 			});
 			expect(spyMapSolInstruction).toHaveBeenNthCalledWith(3, {
 				instruction: instruction3,
-				userAddress: undefined
+				userAddress: undefined,
+				returnsToWallet: false
 			});
 		});
 
@@ -509,6 +523,135 @@ describe('sol-transactions.utils', () => {
 					transactionMessage: { ...mockSolParsedTransactionMessage, instructions }
 				})
 			).toStrictEqual({ amount: undefined, ambiguous: true });
+		});
+
+		// A dApp wraps the SOL a trade spends by funding the wrapped SOL account it opens with it, and
+		// closes the account back to the wallet at the end. Raydium opens it at a seed-derived address.
+		describe('a wrapped SOL account the message closes back to the wallet', () => {
+			const user = mockSolAddress;
+			const account = mockAtaAddress;
+			const reserve = 2_039_280n;
+			const funding = 1_002_039_280n;
+
+			beforeEach(() => {
+				// the surrounding suite stubs the instruction mapper; these cases exercise the real one
+				spyMapSolInstruction.mockRestore();
+			});
+
+			const seeded = ({ amount = funding, space = ATA_SIZE } = {}) =>
+				getCreateAccountWithSeedInstruction({
+					payer: createNoopSigner(address(user)),
+					newAccount: address(account),
+					base: address(user),
+					seed: 'wsol',
+					amount,
+					space,
+					programAddress: address(TOKEN_PROGRAM_ADDRESS)
+				});
+
+			const plain = () =>
+				getCreateAccountInstruction({
+					payer: createNoopSigner(address(user)),
+					newAccount: createNoopSigner(address(account)),
+					lamports: funding,
+					space: ATA_SIZE,
+					programAddress: address(TOKEN_PROGRAM_ADDRESS)
+				});
+
+			const initialisation = ({ mint = WSOL_TOKEN.address, owner = user } = {}) =>
+				getInitializeAccount3Instruction({
+					account: address(account),
+					mint: address(mint),
+					owner: address(owner)
+				});
+
+			const close = () =>
+				getCloseAccountInstruction({
+					account: address(account),
+					destination: address(user),
+					owner: createNoopSigner(address(user))
+				});
+
+			const map = (instructions: Instruction[]) =>
+				mapSolTransactionMessage({
+					transactionMessage: { ...mockSolParsedTransactionMessage, instructions },
+					userAddress: user,
+					rentExemptMinimum: reserve
+				});
+
+			it.each([
+				{ form: 'a seed', opening: () => seeded() },
+				{ form: 'a key of its own', opening: plain }
+			])('should accept the funding of one opened at $form', ({ opening }) => {
+				const mapped = map([opening(), initialisation(), close()]);
+
+				expect(mapped.ambiguous).toBeUndefined();
+				expect(mapped.amount).toBe(funding);
+				expect(mapped.payer).toBe(user);
+			});
+
+			it('should accept one initialised by the original instruction', () => {
+				expect(
+					map([
+						seeded(),
+						getInitializeAccountInstruction({
+							account: address(account),
+							mint: address(WSOL_TOKEN.address),
+							owner: address(user)
+						}),
+						close()
+					]).ambiguous
+				).toBeUndefined();
+			});
+
+			it('should refuse one the message does not close', () => {
+				expect(map([seeded(), initialisation()]).ambiguous).toBeTruthy();
+			});
+
+			it('should refuse one closed before it is initialised', () => {
+				expect(map([seeded(), close(), initialisation()]).ambiguous).toBeTruthy();
+			});
+
+			it('should refuse an account of another mint', () => {
+				expect(
+					map([seeded(), initialisation({ mint: JUP_TOKEN.address }), close()]).ambiguous
+				).toBeTruthy();
+			});
+
+			it('should refuse an account held by someone else', () => {
+				expect(
+					map([seeded(), initialisation({ owner: mockSolAddress2 }), close()]).ambiguous
+				).toBeTruthy();
+			});
+
+			it('should refuse an account of another size', () => {
+				expect(map([seeded({ space: 170n }), initialisation(), close()]).ambiguous).toBeTruthy();
+			});
+
+			// An address closed and opened again is a second account. The close answers for the first
+			// opening only, so the second one's funding still has nowhere to go.
+			it('should refuse an opening at the same address that no close answers for', () => {
+				expect(
+					map([seeded(), initialisation(), close(), seeded(), initialisation()]).ambiguous
+				).toBeTruthy();
+			});
+
+			// Without the reserve nothing separates the account's rent from the SOL it wraps, so it is
+			// refused as any creation for a program is.
+			it.each([
+				{ form: 'a seed', opening: () => seeded() },
+				{ form: 'a key of its own', opening: plain }
+			])('should refuse one opened at $form without the reserve', ({ opening }) => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [opening(), initialisation(), close()]
+						},
+						userAddress: user
+					}).ambiguous
+				).toBeTruthy();
+			});
 		});
 
 		it('should ignore instructions with undefined amount (no change to accumulator)', () => {

@@ -795,6 +795,7 @@ describe('wallet-connect.services', () => {
 			request: mockRequest,
 			listener: mockListener,
 			simulated: true,
+			simulationRan: true,
 			closesPayOthers: false,
 			unreadProgramsAcknowledged: true,
 			rentExemptMinimum: mockRentExemptMinimum,
@@ -819,6 +820,7 @@ describe('wallet-connect.services', () => {
 				request: mockRequest,
 				listener: mockListener,
 				simulated: true,
+				simulationRan: true,
 				closesPayOthers: false,
 				unreadProgramsAcknowledged: true,
 				rentExemptMinimum: mockRentExemptMinimum,
@@ -966,6 +968,7 @@ describe('wallet-connect.services', () => {
 				request: mockRequest,
 				listener: mockListener,
 				simulated: true,
+				simulationRan: true,
 				closesPayOthers: false,
 				unreadProgramsAcknowledged: true,
 				rentExemptMinimum: mockRentExemptMinimum,
@@ -1273,7 +1276,7 @@ describe('wallet-connect.services', () => {
 			});
 
 			it('should refuse to sign when no simulation described it', async () => {
-				const result = await sign({ ...mockParams, simulated: false });
+				const result = await sign({ ...mockParams, simulated: false, simulationRan: false });
 
 				expect(result).toEqual({ success: false });
 
@@ -1291,6 +1294,22 @@ describe('wallet-connect.services', () => {
 					id: mockRequest.id,
 					error: UNEXPECTED_ERROR
 				});
+			});
+
+			// The review said a run took place, so the refusal says the run left that part undescribed
+			// rather than that there was none.
+			it('should say the simulation did not describe it when a run came back', async () => {
+				const result = await sign({ ...mockParams, simulated: false, simulationRan: true });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.wallet_connect.error.unreviewed_not_described_by_simulation }
+				});
+
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+				expect(mockListener.rejectRequest).toHaveBeenCalledOnce();
 			});
 
 			it('should sign when a simulation described it', async () => {
@@ -1529,6 +1548,7 @@ describe('wallet-connect.services', () => {
 			request: mockRequest,
 			listener: mockListener,
 			simulated: true,
+			simulationRan: true,
 			closesPayOthers: false
 		};
 

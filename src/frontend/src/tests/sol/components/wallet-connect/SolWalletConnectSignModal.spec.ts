@@ -211,6 +211,30 @@ describe('SolWalletConnectSignModal', () => {
 		});
 	});
 
+	// Which refusal the signing service gives for a message it cannot describe depends on whether a
+	// run came back at all, described anything or not.
+	describe('the run flag it hands the signing service', () => {
+		it('should be true when a run came back and left an instruction unaccounted for', async () => {
+			const args = await approve({
+				amount: 1n,
+				simulatedInstructions: true,
+				instructions: [{ kind: 'unknown' }],
+				parties: { sources: [], destinations: [], partial: false }
+			});
+
+			expect(args).toEqual(expect.objectContaining({ simulated: false, simulationRan: true }));
+		});
+
+		it('should be false when there was no run at all', async () => {
+			const args = await approve({
+				amount: 1n,
+				parties: { sources: [], destinations: [], partial: true }
+			});
+
+			expect(args).toEqual(expect.objectContaining({ simulated: false, simulationRan: false }));
+		});
+	});
+
 	// An account the run opens inside another program's instruction with more than its size costs is
 	// refused by signing like an ambiguous message, so the review holds the button the same way.
 	it('should hold approval when the run opens an account above its rent', async () => {
