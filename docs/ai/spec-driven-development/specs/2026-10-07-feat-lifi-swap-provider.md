@@ -1149,7 +1149,15 @@ Whether "Max" holds lives in the swap context (`amountSetToMax`), not in the for
 provider or a token is a wizard step, and every step change rebuilds the form, which used to
 release "Max" and leave the amount at the previous provider's max. That was invisible while
 every EVM provider shared the fee context's estimate; LI.FI's own, higher fee turned the
-amount red. A new source token, switching the tokens and closing the modal release it.
+amount red. A new source token, switching the tokens and closing the modal release it. The
+highest LI.FI fee seen lives there too (`lifiMaxFee`), for the same reason: a rebuilt form
+that forgot it would raise the amount when the fee had fallen meanwhile. The Max button keeps
+a single pending re-application, restarted by each change and cancelled with the button, so a
+destroyed form's cannot write the amount while the rebuilt one does not know its fee yet.
+
+The row's token symbols are cut to the backend's 256-byte ref limit (`truncateUtf8Bytes`): a
+custom ERC-20's symbol has no bound, and a ref over the limit refused the row, and with it the
+swap, after its approval was paid.
 
 ### Solana execution
 
