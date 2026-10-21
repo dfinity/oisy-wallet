@@ -583,6 +583,7 @@ const toEffect = ({
 	mintAt,
 	returnedAt,
 	accountTokenAmounts,
+	accountUnsynced,
 	rentExemptMinimum,
 	flattened
 }: {
@@ -615,6 +616,8 @@ const toEffect = ({
 	// What each token account held going in, so a close of an empty wrapped SOL account is not
 	// described as unwrapping something.
 	accountTokenAmounts: Partial<Record<SolAddress, bigint>>;
+	// What each wrapped SOL account held going in that no sync has counted yet.
+	accountUnsynced: Partial<Record<SolAddress, bigint>>;
 	// What a token account of the usual size costs to exist, read from the chain.
 	rentExemptMinimum: bigint | undefined;
 	flattened: { instruction: SolParsedRpcInstruction }[];
@@ -801,7 +804,9 @@ const toEffect = ({
 							native: true,
 							flattened,
 							accountTokenAmounts,
+							accountUnsynced,
 							rentExemptMinimum,
+							payoutAt: returnedAt,
 							until: position
 						})
 					: undefined;
@@ -913,7 +918,9 @@ const toEffect = ({
 				native: mint === WSOL_TOKEN.address,
 				flattened,
 				accountTokenAmounts,
+				accountUnsynced,
 				rentExemptMinimum,
+				payoutAt: returnedAt,
 				until: position
 			});
 
@@ -1060,8 +1067,9 @@ const SYNCING_TYPES = [
  * Reading the state from before the transaction instead says a wrapped SOL account emptied on the
  * way still holds what it started with, and calls its close an unwrap of something already gone.
  *
- * Going in, an account is taken as synced: what the run read as its amount is everything it
- * wraps, and only lamports the message pays in wait for a sync.
+ * Going in, an account holds what the run read: its amount, and the lamports above the reserve it
+ * states and that amount, which a sync in the message folds in. Where no run read the reserve the
+ * account is taken as synced, and only lamports the message pays in wait for a sync.
  *
  * Undefined when there is nothing to start from: an account that pre-dates the message and whose
  * state no run read is one whose balance nobody knows.
@@ -1071,7 +1079,9 @@ const balanceAtInstruction = ({
 	native,
 	flattened,
 	accountTokenAmounts,
+	accountUnsynced,
 	rentExemptMinimum,
+	payoutAt,
 	until
 }: {
 	account: SolAddress;
@@ -1081,10 +1091,14 @@ const balanceAtInstruction = ({
 	native: boolean;
 	flattened: { instruction: SolParsedRpcInstruction }[];
 	accountTokenAmounts: Partial<Record<SolAddress, bigint>>;
+	// What each wrapped SOL account held going in that no sync has counted yet, where a run read it.
+	accountUnsynced: Partial<Record<SolAddress, bigint>>;
 	// What the chain charges a token account of the usual size to exist. A creation may fund one
 	// with more than that and let its initialisation read the difference as the balance, so the
 	// two cannot be told apart without knowing where the line falls.
 	rentExemptMinimum: bigint | undefined;
+	// What the close at a position pays out, as the close walk has it.
+	payoutAt: (position: number) => bigint | undefined;
 	until: number;
 }): HeldBalance | undefined => {
 	const amountBefore = accountTokenAmounts[account];
@@ -1097,7 +1111,8 @@ const balanceAtInstruction = ({
 					program,
 					parsed: { type, info }
 				}
-			}
+			},
+			position
 		) => {
 			const token = nonNullish(program) && TOKEN_PROGRAMS.includes(program);
 
@@ -1136,6 +1151,17 @@ const balanceAtInstruction = ({
 			// Nothing to start from stays nothing whatever moves after it.
 			if (isNullish(held)) {
 				return held;
+			}
+
+			// A close of another account pays everything it held into the one it names, and in a
+			// wrapped SOL account those are lamports no sync counted yet.
+			if (
+				native &&
+				token &&
+				type === 'closeAccount' &&
+				address({ info, key: 'destination' }) === account
+			) {
+				return { ...held, unsynced: plus([held.unsynced, payoutAt(position)]) };
 			}
 
 			// Wrapping: a System payment into a wrapped SOL account pays lamports in, which its token
@@ -1216,7 +1242,9 @@ const balanceAtInstruction = ({
 				amount: into ? held.amount + moved : maxBigInt(held.amount - moved, ZERO)
 			};
 		},
-		nonNullish(amountBefore) ? { amount: amountBefore, unsynced: ZERO } : undefined
+		nonNullish(amountBefore)
+			? { amount: amountBefore, unsynced: native ? (accountUnsynced[account] ?? ZERO) : ZERO }
+			: undefined
 	);
 };
 
@@ -1435,7 +1463,11 @@ const closePayouts = ({
 	mintAt: (params: { account: SolAddress; position: number }) => SplTokenAddress | undefined;
 	// What a wrapped SOL account wraps as of an instruction, which is what an unwrap naming no
 	// amount moves.
-	wrappedAt: (params: { account: SolAddress; position: number }) => bigint | undefined;
+	wrappedAt: (params: {
+		account: SolAddress;
+		position: number;
+		payoutAt: (position: number) => bigint | undefined;
+	}) => bigint | undefined;
 }): Map<number, bigint | undefined> => {
 	// What each account holds as the walk stands. Absent means untouched so far, and an untouched
 	// account holds what it held going in, which may be unknown.
@@ -1545,7 +1577,9 @@ const closePayouts = ({
 					return;
 				}
 
-				const moved = amount({ info, key: 'amount' }) ?? wrappedAt({ account: source, position });
+				const moved =
+					amount({ info, key: 'amount' }) ??
+					wrappedAt({ account: source, position, payoutAt: (at) => payouts.get(at) });
 
 				if (isNullish(moved)) {
 					lamports.set(source, undefined);
@@ -1867,6 +1901,7 @@ export const mapSolInstructionSummaries = ({
 	accountMintsBefore = {},
 	accountLamports = {},
 	accountTokenAmounts = {},
+	accountUnsynced = {},
 	rentExemptMinimum,
 	closedAccounts = [],
 	includeUnrecognised = false
@@ -1890,6 +1925,11 @@ export const mapSolInstructionSummaries = ({
 	// What each token account held before the transaction ran. A wrapped SOL account holding
 	// nothing is closed rather than unwrapped, and the line says so.
 	accountTokenAmounts?: Partial<Record<SolAddress, bigint>>;
+	// What each wrapped SOL account held before the transaction ran beyond the reserve it states and
+	// its amount, where a run read that reserve: lamports no sync has counted yet. An account absent
+	// here is taken as synced, as a transaction already on chain has to be, its records stating no
+	// reserve.
+	accountUnsynced?: Partial<Record<SolAddress, bigint>>;
 	// What a token account of the usual size costs to exist. Without it, an account this message
 	// opens holds an amount nobody can state rather than nothing.
 	rentExemptMinimum?: bigint;
@@ -1937,13 +1977,15 @@ export const mapSolInstructionSummaries = ({
 		accountLamports,
 		mintAt,
 		// The source of an unwrap holds wrapped SOL, or the program refuses it.
-		wrappedAt: ({ account, position }) =>
+		wrappedAt: ({ account, position, payoutAt }) =>
 			heldAtInstruction({
 				account,
 				native: true,
 				flattened,
 				accountTokenAmounts,
+				accountUnsynced,
 				rentExemptMinimum,
+				payoutAt,
 				until: position
 			})
 	});
@@ -2028,6 +2070,7 @@ export const mapSolInstructionSummaries = ({
 				mintAt,
 				returnedAt: (at) => payouts.get(at),
 				accountTokenAmounts,
+				accountUnsynced,
 				rentExemptMinimum,
 				flattened
 			});

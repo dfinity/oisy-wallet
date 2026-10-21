@@ -3618,11 +3618,13 @@ describe('sol-instruction-summary.utils', () => {
 			const read = ({
 				instructions,
 				accountLamports,
-				accountTokenAmounts
+				accountTokenAmounts,
+				accountUnsynced
 			}: {
 				instructions: unknown[];
 				accountLamports?: Record<string, bigint>;
 				accountTokenAmounts?: Record<string, bigint>;
+				accountUnsynced?: Record<string, bigint>;
 			}) =>
 				mapSolInstructionSummaries({
 					instructions,
@@ -3630,7 +3632,8 @@ describe('sol-instruction-summary.utils', () => {
 					userAddress: mockSolAddress,
 					addressToToken: { [wrapped]: WSOL_TOKEN.address },
 					accountLamports,
-					accountTokenAmounts
+					accountTokenAmounts,
+					accountUnsynced
 				});
 
 			it('should state the wrapped SOL leaving the account for its destination', () => {
@@ -3867,6 +3870,61 @@ describe('sol-instruction-summary.utils', () => {
 					});
 
 					expect(views.at(-1)?.amount).toBe(2_000n);
+				});
+
+				// A close paying into the account hands it every lamport the closed account held, which a
+				// sync counts like any other paid in.
+				describe('after a close paid into it', () => {
+					const closeInto = {
+						program: 'spl-token',
+						programId: TOKEN,
+						parsed: {
+							type: 'closeAccount',
+							info: { account: mockSolAddress3, destination: wrapped, owner: mockSolAddress2 }
+						}
+					};
+
+					it('should count what the close paid in toward a later unwrap of everything once synced', () => {
+						const views = read({
+							instructions: [closeInto, sync, unwrap({ destination: mockSolAddress })],
+							accountLamports: { [wrapped]: 2_046_280n, [mockSolAddress3]: 2_039_280n },
+							accountTokenAmounts: { [wrapped]: 7_000n }
+						});
+
+						expect(views.at(-1)?.amount).toBe(2_046_280n);
+					});
+
+					it('should know nothing of a later unwrap of everything when nobody read what the close paid in', () => {
+						const views = read({
+							instructions: [closeInto, sync, unwrap({ destination: mockSolAddress })],
+							accountLamports: { [wrapped]: 2_046_280n },
+							accountTokenAmounts: { [wrapped]: 7_000n }
+						});
+
+						expect(views.at(-1)).not.toHaveProperty('amount');
+					});
+				});
+
+				// Lamports already in the account beyond its reserve and its amount wait for a sync, like
+				// those the message pays in.
+				it('should count what the account held unsynced going in once a sync does', () => {
+					const views = read({
+						instructions: [sync, unwrap({ destination: mockSolAddress })],
+						accountTokenAmounts: { [wrapped]: 7_000n },
+						accountUnsynced: { [wrapped]: 5_000n }
+					});
+
+					expect(views.at(-1)?.amount).toBe(12_000n);
+				});
+
+				it('should leave what the account held unsynced going in out of an unwrap of everything without a sync', () => {
+					const views = read({
+						instructions: [unwrap({ destination: mockSolAddress })],
+						accountTokenAmounts: { [wrapped]: 7_000n },
+						accountUnsynced: { [wrapped]: 5_000n }
+					});
+
+					expect(views.at(-1)?.amount).toBe(7_000n);
 				});
 
 				// The lamports it left in place are counted again once the account is synced.
