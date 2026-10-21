@@ -1,7 +1,7 @@
 import * as canisterStateApi from '$icp/api/canister-state.api';
 import CyclesTopUpModal from '$icp/components/cycles-top-up/CyclesTopUpModal.svelte';
 import * as cyclesTopUpServices from '$icp/services/cycles-top-up.services';
-import { unansweredCyclesTopUps } from '$icp/stores/cycles-top-up.store';
+import { lastCyclesTopUps } from '$icp/stores/cycles-top-up.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { CanisterExistence, CyclesTopUpResult } from '$icp/types/cycles-top-up';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
@@ -148,7 +148,7 @@ describe('CyclesTopUpModal', () => {
 			data: { data: 5_000_000_000_000n, certified: true }
 		});
 
-		unansweredCyclesTopUps.set({});
+		lastCyclesTopUps.set({});
 		icTransactionsStore.reset(mockTcyclesToken.id);
 	});
 
@@ -939,7 +939,7 @@ describe('CyclesTopUpModal', () => {
 				return answerFirst;
 			};
 
-			const stored = () => get(unansweredCyclesTopUps)[mockPrincipalText];
+			const stored = () => get(lastCyclesTopUps)[mockPrincipalText];
 
 			it('opens a later modal on it, and a late unknown answer does not bring it back once resent', async () => {
 				const answerFirst = await leaveDuringTopUp();
@@ -963,7 +963,7 @@ describe('CyclesTopUpModal', () => {
 				);
 
 				await waitFor(() => {
-					expect(stored()).toBeUndefined();
+					expect(stored()?.outcome).toBe('topped_up');
 				});
 
 				answerFirst({ status: 'unknown' });
@@ -971,7 +971,7 @@ describe('CyclesTopUpModal', () => {
 				// Let the first answer be handled before looking.
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
-				expect(stored()).toBeUndefined();
+				expect(stored()?.outcome).toBe('topped_up');
 			});
 
 			it('resends the top-up it opened on, even once that one answered meanwhile', async () => {
@@ -984,7 +984,7 @@ describe('CyclesTopUpModal', () => {
 				answerFirst({ status: 'topped_up', blockIndex: 7n });
 
 				await waitFor(() => {
-					expect(stored()).toBeUndefined();
+					expect(stored()?.outcome).toBe('topped_up');
 				});
 
 				vi.setSystemTime(new Date(2_000));
@@ -999,6 +999,42 @@ describe('CyclesTopUpModal', () => {
 					expect.objectContaining({ createdAt: 1_000_000_000n })
 				);
 			});
+
+			it.each([
+				{ outcome: 'refunded', answer: { status: 'refunded', refundBlockIndex: 9n } },
+				{ outcome: 'refused', answer: { status: 'refused', refusal: 'insufficient_funds' } }
+			] satisfies { outcome: string; answer: CyclesTopUpResult }[])(
+				'drops the top-up it opened on once that one is $outcome meanwhile',
+				async ({ answer }) => {
+					const answerFirst = await leaveDuringTopUp();
+
+					const second = renderModal();
+
+					await backOnReview(second);
+
+					const warning = replacePlaceholders(en.cycles_top_up.text.unknown, { $token: 'TCYCLES' });
+
+					expect(second.container).toHaveTextContent(warning);
+
+					answerFirst(answer);
+
+					await waitFor(() => {
+						expect(second.container).not.toHaveTextContent(warning);
+					});
+
+					vi.setSystemTime(new Date(2_000));
+
+					await topUp(second);
+
+					await waitFor(() => {
+						expect(topUpSpy).toHaveBeenCalledTimes(2);
+					});
+
+					expect(topUpSpy).toHaveBeenLastCalledWith(
+						expect.objectContaining({ createdAt: 2_000_000_000n })
+					);
+				}
+			);
 
 			it('keeps the resend when the first call is refused while the resend is pending', async () => {
 				const answerFirst = await leaveDuringTopUp();

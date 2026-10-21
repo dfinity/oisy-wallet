@@ -7,7 +7,7 @@
 	import CyclesTopUpProgress from '$icp/components/cycles-top-up/CyclesTopUpProgress.svelte';
 	import CyclesTopUpReview from '$icp/components/cycles-top-up/CyclesTopUpReview.svelte';
 	import { topUpCanister } from '$icp/services/cycles-top-up.services';
-	import { unansweredCyclesTopUps } from '$icp/stores/cycles-top-up.store';
+	import { lastCyclesTopUps } from '$icp/stores/cycles-top-up.store';
 	import type { CyclesTopUpRequest, CyclesTopUpResult } from '$icp/types/cycles-top-up';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { parseCanisterId } from '$icp/utils/cycles-top-up.utils';
@@ -54,11 +54,11 @@
 	// Sending the same canister and amount again reuses its creation time, so the ledger
 	// answers with the first one's block if it went through, and the top-up runs at most
 	// once. The ledger keeps that for 24 hours; a resend after that stays unknown (below).
-	let unanswered = $derived(
-		nonNullish($authIdentity)
-			? $unansweredCyclesTopUps[$authIdentity.getPrincipal().toText()]?.request
-			: undefined
+	let last = $derived(
+		nonNullish($authIdentity) ? $lastCyclesTopUps[$authIdentity.getPrincipal().toText()] : undefined
 	);
+
+	let unanswered = $derived(isNullish(last?.outcome) ? last?.request : undefined);
 
 	let canisterId = $derived(parseCanisterId(canisterIdText)?.toText());
 
@@ -68,10 +68,15 @@
 			: undefined
 	);
 
-	// The top-up this modal opened on (below). Top up keeps resending it after its stored entry
-	// is cleared, because an answer arrived while this modal was open: the same canister and
-	// amount as a fresh request would run a second withdrawal.
+	// The top-up this modal opened on (below). Top up keeps resending it after an answer to it
+	// arrived while this modal was open: the same canister and amount as a fresh request would
+	// run a second withdrawal. A refusal or a refund settles it instead (below).
 	let resumed = $state<CyclesTopUpRequest | undefined>();
+
+	const isResumed = ({ createdAt, canisterId, amount }: CyclesTopUpRequest): boolean =>
+		resumed?.createdAt === createdAt &&
+		resumed.canisterId === canisterId &&
+		resumed.amount === amount;
 
 	let resendable = $derived(unanswered ?? resumed);
 
@@ -156,6 +161,15 @@
 		}
 	});
 
+	// The modal that sent the top-up, closed by leaving the page, may get its answer while this
+	// one is open on it. A refusal or a refund settles the request then too, as an answer here
+	// does: nothing is left to resend, and the next top-up is a new request.
+	$effect(() => {
+		if ((last?.outcome === 'refused' || last?.outcome === 'refunded') && isResumed(last.request)) {
+			resumed = undefined;
+		}
+	});
+
 	const failureText = ({
 		result,
 		amount
@@ -211,7 +225,7 @@
 		// second withdrawal.
 		const send = Symbol();
 
-		unansweredCyclesTopUps.update((all) => ({ ...all, [sender]: { request, send } }));
+		lastCyclesTopUps.update((all) => ({ ...all, [sender]: { request, send } }));
 
 		const analytics = { step: 'top_up' as const, tokenSymbol: token.symbol };
 
@@ -238,13 +252,20 @@
 				? { status: 'unknown' }
 				: answer;
 
-		// Only a top-up without an answer may be resent as it was. After a refund, the same
-		// request would be answered as a duplicate of the refunded one. The stored request is
+		// Only a top-up without an answer may be resent as it was: any other answer settles it,
+		// and its outcome stays with it for a modal opened on it (above). The stored request is
 		// updated only while this send still owns it: a resend from a later modal, or a newer
 		// top-up, may have taken it over, settled or replaced it while this answer was on its way.
-		unansweredCyclesTopUps.update((all) =>
+		lastCyclesTopUps.update((all) =>
 			all[sender]?.send === send
-				? { ...all, [sender]: result.status === 'unknown' ? { request, send } : undefined }
+				? {
+						...all,
+						[sender]: {
+							request,
+							send,
+							...(result.status !== 'unknown' && { outcome: result.status })
+						}
+					}
 				: all
 		);
 
@@ -279,11 +300,7 @@
 
 		// Review shows the warning for a top-up without an answer.
 		if (result.status === 'refused' || result.status === 'refunded') {
-			if (
-				resumed?.createdAt === request.createdAt &&
-				resumed.canisterId === request.canisterId &&
-				resumed.amount === request.amount
-			) {
+			if (isResumed(request)) {
 				resumed = undefined;
 			}
 			toastsError({ msg: { text: failureText({ result, amount: request.amount }) } });

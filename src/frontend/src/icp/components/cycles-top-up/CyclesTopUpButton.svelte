@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import CyclesTopUpModal from '$icp/components/cycles-top-up/CyclesTopUpModal.svelte';
-	import { unansweredCyclesTopUps } from '$icp/stores/cycles-top-up.store';
+	import { lastCyclesTopUps } from '$icp/stores/cycles-top-up.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import ButtonHero from '$lib/components/hero/ButtonHero.svelte';
 	import IconFuelPump from '$lib/components/icons/IconFuelPump.svelte';
@@ -27,10 +27,11 @@
 	// top-up suggests.
 	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
-	let hasUnanswered = $derived(
-		nonNullish($authIdentity) &&
-			nonNullish($unansweredCyclesTopUps[$authIdentity.getPrincipal().toText()])
+	let last = $derived(
+		nonNullish($authIdentity) ? $lastCyclesTopUps[$authIdentity.getPrincipal().toText()] : undefined
 	);
+
+	let hasUnanswered = $derived(nonNullish(last) && isNullish(last.outcome));
 
 	const modalId = Symbol();
 </script>

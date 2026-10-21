@@ -1,5 +1,5 @@
 import CyclesTopUpButton from '$icp/components/cycles-top-up/CyclesTopUpButton.svelte';
-import { unansweredCyclesTopUps } from '$icp/stores/cycles-top-up.store';
+import { lastCyclesTopUps } from '$icp/stores/cycles-top-up.store';
 import {
 	CYCLES_TOP_UP_BUTTON,
 	CYCLES_TOP_UP_CANISTER_INPUT,
@@ -28,7 +28,7 @@ describe('CyclesTopUpButton', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		modalStore.close();
-		unansweredCyclesTopUps.set({});
+		lastCyclesTopUps.set({});
 
 		vi.spyOn(cyclesTopUpAnalytics, 'trackCyclesTopUp').mockImplementation(() => undefined);
 	});
@@ -84,7 +84,7 @@ describe('CyclesTopUpButton', () => {
 		// A Max top-up that went through without an answer leaves nothing to spend, and the
 		// resend is still how its outcome gets settled.
 		it('opens that top-up on Review even without a balance', async () => {
-			unansweredCyclesTopUps.set({
+			lastCyclesTopUps.set({
 				[mockIdentity.getPrincipal().toText()]: { request: unanswered, send: Symbol() }
 			});
 
@@ -104,8 +104,25 @@ describe('CyclesTopUpButton', () => {
 			});
 		});
 
+		it('stays disabled without a balance once that top-up was answered', () => {
+			lastCyclesTopUps.set({
+				[mockIdentity.getPrincipal().toText()]: {
+					request: unanswered,
+					send: Symbol(),
+					outcome: 'refunded'
+				}
+			});
+
+			const { getByTestId } = render(CyclesTopUpButton, {
+				props: { token: mockTcyclesToken },
+				context: heroContext({ outflowActionsDisabled: true })
+			});
+
+			expect(getByTestId(CYCLES_TOP_UP_BUTTON)).toBeDisabled();
+		});
+
 		it("stays disabled without a balance for another principal's top-up", () => {
-			unansweredCyclesTopUps.set({ [mockPrincipalText2]: { request: unanswered, send: Symbol() } });
+			lastCyclesTopUps.set({ [mockPrincipalText2]: { request: unanswered, send: Symbol() } });
 
 			const { getByTestId } = render(CyclesTopUpButton, {
 				props: { token: mockTcyclesToken },
