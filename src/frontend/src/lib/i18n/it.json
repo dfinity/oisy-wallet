@@ -2162,7 +2162,7 @@
 			"summary_self": "",
 			"swap_on": "",
 			"interacted_with": "Interagito con",
-			"unknown_token": "",
+			"unknown_token": "Token sconosciuto",
 			"unknown_token_named": "Token sconosciuto ($symbol)",
 			"summary_other": "",
 			"tab_summary": "",

@@ -2162,7 +2162,7 @@
 			"summary_self": "",
 			"swap_on": "",
 			"interacted_with": "Interakcja z",
-			"unknown_token": "",
+			"unknown_token": "Nieznany token",
 			"unknown_token_named": "Nieznany token ($symbol)",
 			"summary_other": "",
 			"tab_summary": "",
