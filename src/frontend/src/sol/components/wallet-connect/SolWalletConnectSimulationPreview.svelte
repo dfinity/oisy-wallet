@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -19,6 +20,7 @@
 	} from '$sol/types/sol-simulation';
 	import type { SplTokenAddress } from '$sol/types/spl';
 	import type { SplCustomToken } from '$sol/types/spl-custom-token';
+	import { solTokenExplorerUrl } from '$sol/utils/sol-explorer.utils';
 	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
 	import { findSplToken } from '$sol/utils/spl.utils';
 
@@ -36,8 +38,8 @@
 		findSplToken({ tokens: $splTokens, tokenAddress, networkId: feeToken.network.id });
 
 	// Mints nothing can name, in the order they appear. The wallet's own list answers first, then
-	// the name a Token-2022 mint carries in its own account; the numbered placeholder is what is
-	// left when neither does.
+	// the placeholder carrying the symbol a Token-2022 mint has in its own account; the numbered
+	// placeholder alone is what is left when neither does.
 	let unknownTokenAddresses = $derived(
 		solUnknownTokenAddresses({
 			tokenAddresses: [
@@ -58,6 +60,7 @@
 			metadata: $splTokenMetadataStore,
 			unknownTokenAddresses,
 			unknownTokenLabel: $i18n.transaction.text.unknown_token,
+			unknownTokenNamedLabel: $i18n.transaction.text.unknown_token_named,
 			nativeSymbol: feeToken.symbol
 		});
 
@@ -90,16 +93,35 @@
 				});
 </script>
 
+<!-- A token the wallet does not list is named by the placeholder, and whatever symbol it carries
+     is its creator's choice. The address is what the user can look up, so the row carries it, with
+     the controls to copy it and open the token's page. -->
+{#snippet unlistedToken(tokenAddress: SplTokenAddress)}
+	<span class="flex items-center text-tertiary" data-tid="simulated-token-address">
+		{shortenWithMiddleEllipsis({ text: tokenAddress })}
+
+		<AddressActions
+			copyAddress={tokenAddress}
+			copyAddressText={$i18n.tokens.details.token_address_copied}
+			externalLink={solTokenExplorerUrl({ network: feeToken.network, tokenAddress })}
+			externalLinkAriaLabel={$i18n.tokens.alt.open_token_address_block_explorer}
+			inline
+		/>
+	</span>
+{/snippet}
+
 {#snippet delta({
 	value,
 	decimals,
 	tokenSymbol,
-	exchangeRate
+	exchangeRate,
+	unlistedTokenAddress
 }: {
 	value: bigint;
 	decimals: number;
 	tokenSymbol: string;
 	exchangeRate?: number;
+	unlistedTokenAddress?: SplTokenAddress;
 })}
 	{@const magnitude = formatToken({
 		value: value > ZERO ? value : -value,
@@ -116,6 +138,10 @@
 		<div class="text-tertiary">
 			<ConvertAmountExchange amount={magnitude} {exchangeRate} />
 		</div>
+	{/if}
+
+	{#if nonNullish(unlistedTokenAddress)}
+		{@render unlistedToken(unlistedTokenAddress)}
 	{/if}
 {/snippet}
 
@@ -136,12 +162,13 @@
 		{/if}
 
 		{#each tokenDeltas as { account, tokenAddress, decimals, delta: tokenDelta } (`${account}-${tokenAddress}`)}
-			<div class="flex gap-4" data-tid="simulated-token-delta">
+			<div class="flex flex-wrap gap-x-4 gap-y-1" data-tid="simulated-token-delta">
 				{@render delta({
 					value: tokenDelta,
 					decimals,
 					tokenSymbol: symbol(tokenAddress),
-					exchangeRate: splExchangeRate(tokenAddress)
+					exchangeRate: splExchangeRate(tokenAddress),
+					unlistedTokenAddress: isNullish(splToken(tokenAddress)) ? tokenAddress : undefined
 				})}
 			</div>
 		{/each}
@@ -157,6 +184,10 @@
 
 				{#if nonNullish(allowance)}
 					<span data-tid="simulated-allowance">{allowanceText(allowance)}</span>
+
+					{#if isNullish(splToken(allowance.tokenAddress))}
+						{@render unlistedToken(allowance.tokenAddress)}
+					{/if}
 				{/if}
 			</span>
 		{/each}

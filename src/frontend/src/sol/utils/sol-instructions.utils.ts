@@ -960,7 +960,13 @@ const mapSolLookupTableInstruction = (instruction: SolParsedInstruction): Mapped
 	return unreviewedInstruction();
 };
 
-const mapSolStakeInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+const mapSolStakeInstruction = ({
+	instruction,
+	userAddress
+}: {
+	instruction: SolParsedInstruction;
+	userAddress?: OptionSolAddress;
+}): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
 	// A withdrawal is the one stake instruction the summary can state in full: it names the amount,
@@ -994,13 +1000,67 @@ const mapSolStakeInstruction = (instruction: SolParsedInstruction): MappedSolTra
 		return unfaithfulInstruction();
 	}
 
+	// Initialising a stake account names the two authorities that govern it: the withdraw authority
+	// can take out everything the account holds, and the stake authority decides where it is
+	// delegated and whether it is ever deactivated, which a withdrawal of delegated stake waits on.
+	// Naming anybody but the user for either is the handover above, made when the account is set up
+	// rather than later, so it fails closed on the same terms. Naming the user for both hands nothing
+	// to anybody, and the account then holds stake the review has no vocabulary for, like the other
+	// stake operations below.
+	//
+	// The unchecked form also sets a lockup, which holds the balance until a date or an epoch and
+	// lets only its custodian lift or extend it in the meantime. A staking flow sets none - no date
+	// and no epoch, which is never in force and leaves the custodian nothing to decide - so any
+	// other lockup fails closed whoever the custodian is: the summary cannot state when the balance
+	// becomes withdrawable. The checked form sets no lockup.
+	if (instructionType === StakeInstruction.Initialize) {
+		const {
+			data: {
+				arg0: { staker, withdrawer },
+				arg1: { unixTimestamp, epoch }
+			}
+		} = instruction;
+
+		const lockedUp = unixTimestamp !== ZERO || epoch !== ZERO;
+
+		return staker === userAddress && withdrawer === userAddress && !lockedUp
+			? unreviewedInstruction()
+			: unfaithfulInstruction();
+	}
+
+	if (instructionType === StakeInstruction.InitializeChecked) {
+		const {
+			accounts: {
+				stakeAuthority: { address: staker },
+				withdrawAuthority: { address: withdrawer }
+			}
+		} = instruction;
+
+		return staker === userAddress && withdrawer === userAddress
+			? unreviewedInstruction()
+			: unfaithfulInstruction();
+	}
+
+	// A lockup set once the account exists holds the balance just as one set at initialisation does,
+	// and while none is in force the withdraw authority sets it alone: a message can initialise an
+	// account without a lockup and lock it in the next instruction, and an account the user already
+	// holds can be locked the same way. Both forms fail closed whatever they set, for the reason the
+	// initialisation's lockup does - the summary cannot state when the balance becomes withdrawable,
+	// or who may lift the lockup.
+	if (
+		instructionType === StakeInstruction.SetLockup ||
+		instructionType === StakeInstruction.SetLockupChecked
+	) {
+		return unfaithfulInstruction();
+	}
+
 	// Reading the runtime's minimum delegation changes nothing at all.
 	if (instructionType === StakeInstruction.GetMinimumDelegation) {
 		return ignoredInstruction();
 	}
 
 	// The rest do something real to the user's stake — delegate it, split it, merge it, move it
-	// between accounts they control, lock it up — and the review has no vocabulary for any of it.
+	// between accounts they control — and the review has no vocabulary for any of it.
 	// Decoded or not, the honest answer is that this message does more than the summary shows.
 	return unreviewedInstruction();
 };
@@ -1396,7 +1456,7 @@ export const mapSolInstruction = ({
 	}
 
 	if (programAddress === STAKE_PROGRAM_ADDRESS) {
-		return mapSolStakeInstruction(parsedInstruction);
+		return mapSolStakeInstruction({ instruction: parsedInstruction, userAddress });
 	}
 
 	consoleWarn(`Could not map Solana instruction for program ${programAddress}`);
