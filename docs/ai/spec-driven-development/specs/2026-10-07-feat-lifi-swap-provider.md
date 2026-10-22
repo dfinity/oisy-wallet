@@ -289,8 +289,12 @@ New `src/frontend/src/env/rest/lifi.env.ts`, modelled on `near-intents.env.ts`:
 The key and the integrator id ship in the client bundle as `VITE_LIFI_API_KEY` and
 `VITE_LIFI_INTEGRATOR`, exactly like `VITE_INFURA_API_KEY`: both are added (empty) to
 `.env.example` and `.env.test`, and to the CI secret plumbing in
-`.github/workflows/deploy-to-environment.yml` (a restricted path — the implementer asks
-before editing it). Their values are set outside the repository.
+`.github/workflows/deploy-to-environment.yml` and its release callers. The workflow builds
+staging, `test_fe_*`, audit and beta from the repository secrets `VITE_LIFI_API_KEY_STAGING`
+/ `VITE_LIFI_INTEGRATOR_STAGING` (overridable per `test_*` / audit deploy, like the other
+keys) and `VITE_LIFI_API_KEY_BETA` / `VITE_LIFI_INTEGRATOR_BETA`, all optional: a deploy
+without them builds with no LI.FI quote. Local and production builds read
+`.env.development` and `.env.production`. Their values are set outside the repository.
 
 Shipping the key in the bundle is acceptable because each key is **scoped to an origin
 allow-list registered on LI.FI's partner portal**, and staging and production use
@@ -1774,9 +1778,9 @@ Recorded so a future reader can tell "excluded on purpose" from "forgotten".
 - **PR 2 is split into 2a / 2b** up front, and 2a into 2a-1 (quote client) / 2a-2
   (registration).
 - **The LI.FI integrator id and the staging API key are registered.** Their values are
-  set in the environment outside the repository; the implementer asks before editing
-  `deploy-to-environment.yml`. The **production** key is not registered yet; it is a
-  prerequisite for PR 4 (see [Open questions](#open-questions)).
+  set in the environment outside the repository, as the repository secrets the deploy
+  workflow reads ([API key](#api-key)). The **production** key is not registered yet; it
+  is a prerequisite for PR 4 (see [Open questions](#open-questions)).
 
 ## References
 
