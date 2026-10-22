@@ -2,6 +2,7 @@ import { send as executeSend } from '$eth/services/send.services';
 import type { FeeStoreData } from '$eth/stores/eth-fee.store';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { SendParams } from '$eth/types/send';
+import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
 import {
 	classifyWalletConnectEthCall,
 	getSendParamsGas,
@@ -19,6 +20,7 @@ import {
 	TRACK_COUNT_WC_ETH_SEND_SUCCESS
 } from '$lib/constants/analytics.constants';
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
+import { PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSend, ProgressStepsSign } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
@@ -82,7 +84,8 @@ export const send = ({
 						from_address_not_wallet,
 						unknown_destination,
 						cketh_deposit_refused,
-						cketh_helper_unconfirmed
+						cketh_helper_unconfirmed,
+						unexpected_processing_request
 					}
 				}
 			} = get(i18n);
@@ -231,9 +234,18 @@ export const send = ({
 					}
 				});
 
+				// Reported here rather than left to the generic toast of `execute`: a refused broadcast
+				// carries the signed transaction, which stays valid until its nonce is used.
+				toastEthereumTransactionError({
+					err,
+					fallbackMsg: unexpected_processing_request,
+					token,
+					context: PLAUSIBLE_EVENT_CONTEXTS.WALLET_CONNECT
+				});
+
 				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
 
-				throw err;
+				return { success: false, err };
 			}
 		},
 		toastMsg: replacePlaceholders(get(i18n).wallet_connect.info.transaction_executed, {

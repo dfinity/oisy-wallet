@@ -199,7 +199,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	COMPUTE = 'compute',
 	SEND = 'send',
 	CONVERT = 'convert',
-	AI_ASSISTANT = 'ai_assistant'
+	AI_ASSISTANT = 'ai_assistant',
+	WALLET_CONNECT = 'wallet_connect'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
