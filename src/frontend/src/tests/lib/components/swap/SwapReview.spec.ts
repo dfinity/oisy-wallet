@@ -224,6 +224,19 @@ describe('SwapReview', () => {
 			expect(swapButton).toBeDisabled();
 		});
 
+		it('should disable swap button when the wizard holds the swap back', () => {
+			const { context } = createSwapContext();
+
+			const { getByText } = render(SwapReview, {
+				props: { ...baseProps, swapDisabled: true },
+				context
+			});
+
+			const swapButton = getByText(en.swap.text.swap_button).closest('button');
+
+			expect(swapButton).toBeDisabled();
+		});
+
 		it('should enable swap button when isSwapAmountsLoading is false and no value difference error', () => {
 			const { context } = createSwapContext();
 

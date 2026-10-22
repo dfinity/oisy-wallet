@@ -1,6 +1,7 @@
 import {
 	LIFI_ACROSS_MAX_FILL_DEADLINE_SECONDS,
 	LIFI_ACROSS_MULTIPLIER_BASE,
+	LIFI_ACROSS_TOOL,
 	LIFI_ACROSS_V4_ABI,
 	LIFI_ACROSS_WRAPPED_NATIVE,
 	LIFI_APPROVE_TO_ONLY_SELECTOR,
@@ -324,7 +325,7 @@ interface LifiBridge {
 // The curated bridges, by LI.FI tool key. A bridge the request allows but which has no entry here is
 // refused: what it pays, and to whom, could not be bound.
 const bridges: Record<string, LifiBridge> = {
-	across: {
+	[LIFI_ACROSS_TOOL]: {
 		facet: new Interface(LIFI_ACROSS_V4_ABI),
 		// Across's minimum output is unsigned: after source swaps, the facet pays at least `minAmount`
 		// times `outputAmountMultiplier`, both from the response. A DEX swap's recipient is in calldata
@@ -411,6 +412,103 @@ const bridges: Record<string, LifiBridge> = {
 	}
 };
 
+// The table's own entries only: a route's tool key comes from LI.FI's response.
+const bridgeOf = (tool: string | undefined): LifiBridge | undefined =>
+	nonNullish(tool) && Object.hasOwn(bridges, tool) ? bridges[tool] : undefined;
+
+// The call the calldata makes, decoded with the pinned ABI its selector names: same-chain,
+// `GenericSwapFacetV3`'s, and cross-chain, that of a bridge the request allowed. With the swap steps
+// it carries, each one a call the Diamond makes.
+const decodeLifiCall = ({
+	data,
+	request: { fromChain, toChain, allowBridges }
+}: {
+	data: string;
+	request: QuoteRequestFromAmount;
+}): { name: string; args: Result; steps: LifiSwapStep[]; bridge?: LifiBridge } => {
+	if (Number(fromChain) === Number(toChain)) {
+		const { name, args } = parseCall({ facet: genericSwapFacet, data });
+		const [, , , , , swapData] = args;
+
+		return {
+			name,
+			args,
+			steps: name.startsWith('swapTokensSingle')
+				? [toSwapStep(swapData)]
+				: (swapData as Result[]).map(toSwapStep)
+		};
+	}
+
+	const selector = data.slice(0, 10).toLowerCase();
+	const bridge = bridgeOf(
+		allowBridges?.find((key) => nonNullish(bridgeOf(key)?.facet.getFunction(selector)))
+	);
+
+	if (isNullish(bridge)) {
+		throw rejected('a cross-chain route calls a function of no bridge the request allowed');
+	}
+
+	const { name, args } = parseCall({ facet: bridge.facet, data });
+
+	return {
+		name,
+		args,
+		steps: name.startsWith('swapAndStart') ? (args[1] as Result[]).map(toSwapStep) : [],
+		bridge
+	};
+};
+
+/**
+ * Every address a swap step of the calldata calls or approves: of the user's tokens, the only ones
+ * whose allowance to the Diamond `assertLifiCalldata` can be refused for. Calldata that does not
+ * decode has none, and the binding refuses it.
+ */
+export const lifiCalldataSwapTargets = ({
+	quote,
+	request
+}: {
+	quote: LiFiStep;
+	request: QuoteRequestFromAmount;
+}): string[] => {
+	const data = quote.transactionRequest?.data;
+
+	if (isNullish(data)) {
+		return [];
+	}
+
+	try {
+		return decodeLifiCall({ data, request }).steps.flatMap(({ callTo, approveTo }) => [
+			callTo,
+			approveTo
+		]);
+	} catch (_: unknown) {
+		return [];
+	}
+};
+
+/**
+ * Whether the calldata binding could accept the route, judged from its steps: no step after the
+ * bridge, which would pay out another token than the one asked for, and a bridge the binding knows,
+ * after a DEX swap only if it can bound the swap's output (`dexSwaps`). A route that fails is not
+ * offered, so the form never shows what execution would refuse.
+ */
+export const isLifiRouteExecutable = ({ includedSteps }: LiFiStep): boolean => {
+	const bridgeIndex = includedSteps.findIndex(({ type }) => type === 'cross');
+
+	if (bridgeIndex === -1) {
+		return true;
+	}
+
+	const bridge = bridgeOf(includedSteps[bridgeIndex]?.tool);
+	const swapsBefore = includedSteps.slice(0, bridgeIndex).some(({ type }) => type === 'swap');
+
+	return (
+		nonNullish(bridge) &&
+		bridgeIndex === includedSteps.length - 1 &&
+		(bridge.dexSwaps || !swapsBefore)
+	);
+};
+
 /**
  * Binds an EVM LI.FI transaction's calldata to the request, by decoding it with the pinned ABI of the
  * function its selector names. LI.FI quotes are unsigned, and `assertLifiQuote` only binds where the
@@ -449,7 +547,7 @@ export const assertLifiCalldata = ({
 	nowSeconds: bigint;
 }): LifiWhitelistedCall[] => {
 	const data = quote.transactionRequest?.data;
-	const { fromChain, toChain, fromToken, toToken, fromAddress, toAddress, fromAmount } = request;
+	const { toChain, fromToken, toToken, fromAddress, toAddress, fromAmount } = request;
 
 	if (isNullish(data) || !/^0x[\da-fA-F]{8,}$/.test(data)) {
 		throw rejected('no calldata');
@@ -461,13 +559,10 @@ export const assertLifiCalldata = ({
 
 	const amount = BigInt(fromAmount);
 
-	if (Number(fromChain) === Number(toChain)) {
-		const { name, args } = parseCall({ facet: genericSwapFacet, data });
-		const [, , , receiver, minAmountOut, swapData] = args;
+	const { name, args, steps, bridge } = decodeLifiCall({ data, request });
 
-		const steps = name.startsWith('swapTokensSingle')
-			? [toSwapStep(swapData)]
-			: (swapData as Result[]).map(toSwapStep);
+	if (isNullish(bridge)) {
+		const [, , , receiver, minAmountOut] = args;
 
 		const modes = genericSwapModes(name);
 
@@ -502,21 +597,9 @@ export const assertLifiCalldata = ({
 		});
 	}
 
-	const selector = data.slice(0, 10).toLowerCase();
-	const tool = request.allowBridges?.find((key) =>
-		nonNullish(bridges[key]?.facet.getFunction(selector))
-	);
-	const bridge = nonNullish(tool) ? bridges[tool] : undefined;
-
-	if (isNullish(bridge)) {
-		throw rejected('a cross-chain route calls a function of no bridge the request allowed');
-	}
-
-	const { name, args } = parseCall({ facet: bridge.facet, data });
 	const withSourceSwaps = name.startsWith('swapAndStart');
 
 	const bridgeData = toBridgeData(args[0]);
-	const steps = withSourceSwaps ? (args[1] as Result[]).map(toSwapStep) : [];
 	const facetData = args[withSourceSwaps ? 2 : 1] as Result;
 
 	if (bridgeData.hasDestinationCall) {

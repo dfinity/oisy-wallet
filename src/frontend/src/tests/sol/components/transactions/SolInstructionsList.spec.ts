@@ -215,6 +215,50 @@ describe('SolInstructionsList', () => {
 		);
 	});
 
+	describe('an unchecked approval, which states no decimals', () => {
+		const approval = (tokenAddress: string): SolInstructionSummary => ({
+			kind: 'approve',
+			amount: 1_000_000n,
+			tokenAddress,
+			counterparty: mockSolAddress2
+		});
+
+		// A transaction that only approves moves no balance, so no net change gives the decimals of
+		// a mint the wallet does not list, and the base units are not an amount.
+		it('should name the spender alone for a mint the wallet does not list', () => {
+			const { getByTestId } = render(SolInstructionsList, {
+				props: {
+					instructions: [approval('unlisted-mint')],
+					token: SOLANA_TOKEN,
+					userAddress: mockSolAddress
+				}
+			});
+
+			expect(getByTestId('sol-instructions-list')).toHaveTextContent(
+				en.transaction.text.instruction_approve
+			);
+			expect(getByTestId('sol-instructions-list')).not.toHaveTextContent('Approve spender for');
+		});
+
+		it('should scale the amount with the decimals of a token the wallet lists', () => {
+			splCustomTokensStore.setAll([
+				{ data: { ...mockValidSplToken, version: undefined, enabled: false }, certified: false }
+			]);
+
+			const { getByTestId } = render(SolInstructionsList, {
+				props: {
+					instructions: [approval(mockSplAddress)],
+					token: SOLANA_TOKEN,
+					userAddress: mockSolAddress
+				}
+			});
+
+			expect(getByTestId('sol-instructions-list')).toHaveTextContent(
+				`Approve spender for 0.01 ${mockValidSplToken.symbol}`
+			);
+		});
+	});
+
 	// The program names the account, so it follows the line the way the program of a route does.
 	it('should name the program an account is opened for', () => {
 		const { getByTestId } = render(SolInstructionsList, {

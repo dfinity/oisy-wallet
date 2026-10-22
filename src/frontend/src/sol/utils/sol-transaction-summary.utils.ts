@@ -3,6 +3,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { absBigInt, maxBigInt } from '$lib/utils/bigint.utils';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { SPL_TOKEN_MAX_AMOUNT } from '$sol/constants/sol.constants';
 import type { OptionSolAddress } from '$sol/types/address';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type {
@@ -720,14 +721,17 @@ export const formatSolInstructionSummary = ({
 	instruction: SolInstructionSummary;
 	i18n: I18n;
 	symbolOf: (tokenAddress: SplTokenAddress | undefined) => string;
-	decimalsOf: (tokenAddress: SplTokenAddress | undefined) => number;
+	// Absent when nothing gives the mint's decimals, which a token with none must not be read as.
+	decimalsOf: (tokenAddress: SplTokenAddress | undefined) => number | undefined;
 	userAddress: OptionSolAddress;
 }): { text: string; detail?: string; trailing?: string } => {
+	const scale = decimals ?? decimalsOf(tokenAddress);
+
 	const amount = (raw: bigint): string =>
 		formatToken({
 			value: raw < ZERO ? -raw : raw,
-			unitName: decimals ?? decimalsOf(tokenAddress),
-			displayDecimals: decimals ?? decimalsOf(tokenAddress)
+			unitName: scale ?? 0,
+			displayDecimals: scale ?? 0
 		});
 
 	const ownDetail = own === true ? i18n.transaction.text.instruction_own_account : undefined;
@@ -901,9 +905,30 @@ export const formatSolInstructionSummary = ({
 		};
 	}
 
+	// What the spender may spend, which is the whole of what an approval grants: a one-unit approval
+	// and an unlimited one name the same spender. The largest amount a token account can hold is how
+	// applications ask for an unlimited one, whatever the token's decimals. Without a mint the line
+	// cannot say which token, and without the decimals it cannot say how much, so it names the
+	// spender alone: an unchecked approval states no decimals, and a transaction that only approves
+	// moves no balance that would give them.
 	if (kind === 'approve' && nonNullish(counterparty)) {
+		if (nonNullish(tokenAddress) && value === SPL_TOKEN_MAX_AMOUNT) {
+			return {
+				text: replacePlaceholders(i18n.transaction.text.instruction_approve_unlimited, {
+					$symbol: symbolOf(tokenAddress)
+				})
+			};
+		}
+
+		if (isNullish(value) || isNullish(tokenAddress) || isNullish(scale)) {
+			return { text: i18n.transaction.text.instruction_approve };
+		}
+
 		return {
-			text: i18n.transaction.text.instruction_approve
+			text: replacePlaceholders(i18n.transaction.text.instruction_approve_amount, {
+				$amount: amount(value),
+				$symbol: symbolOf(tokenAddress)
+			})
 		};
 	}
 

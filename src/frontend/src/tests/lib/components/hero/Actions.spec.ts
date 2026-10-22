@@ -1,4 +1,5 @@
 import * as cyclesMintEnv from '$env/cycles-mint.env';
+import * as cyclesTopUpEnv from '$env/cycles-top-up.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -9,6 +10,7 @@ import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import {
 	BUY_TOKENS_MODAL_OPEN_BUTTON,
 	CYCLES_MINT_BUTTON,
+	CYCLES_TOP_UP_BUTTON,
 	NFT_HERO_CHECK_NEW_BUTTON,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	SEND_TOKENS_MODAL_OPEN_BUTTON,
@@ -348,6 +350,59 @@ describe('Actions', () => {
 			const { container } = renderActions();
 
 			expect(container.querySelector(cyclesMintButtonSelector)).not.toBeInTheDocument();
+		});
+	});
+
+	describe('cycles top-up button visibility', () => {
+		const cyclesTopUpButtonSelector = `button[data-tid="${CYCLES_TOP_UP_BUTTON}"]`;
+
+		const setTokenPage = (token: typeof mockTcyclesToken) => {
+			setTransactionsPage();
+			mockPage.mockToken(token);
+			vi.spyOn(pageTokenDerived, 'pageToken', 'get').mockReturnValue(readable(token));
+			vi.spyOn(swapDerived, 'isPageTokenSwappable', 'get').mockReturnValue(readable(true));
+		};
+
+		const enable = (enabled: boolean) => {
+			vi.spyOn(cyclesMintEnv, 'CYCLES_MINT_ENABLED', 'get').mockReturnValue(true);
+			vi.spyOn(cyclesTopUpEnv, 'CYCLES_TOP_UP_ENABLED', 'get').mockReturnValue(enabled);
+		};
+
+		it('should show Top up on the TCYCLES page as the fifth button, after Mint', () => {
+			enable(true);
+			setTokenPage(mockTcyclesToken);
+
+			const { container } = renderActions();
+
+			const testIds = [...container.querySelectorAll('button[data-tid]')].map((button) =>
+				button.getAttribute('data-tid')
+			);
+
+			expect(testIds.slice(0, 5)).toEqual([
+				RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
+				SEND_TOKENS_MODAL_OPEN_BUTTON,
+				SWAP_TOKENS_MODAL_OPEN_BUTTON,
+				CYCLES_MINT_BUTTON,
+				CYCLES_TOP_UP_BUTTON
+			]);
+		});
+
+		it('should hide Top up on any other token page', () => {
+			enable(true);
+			setTokenPage(mockValidIcrcToken);
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(cyclesTopUpButtonSelector)).not.toBeInTheDocument();
+		});
+
+		it('should hide Top up while the rollout flag is off', () => {
+			enable(false);
+			setTokenPage(mockTcyclesToken);
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(cyclesTopUpButtonSelector)).not.toBeInTheDocument();
 		});
 	});
 });

@@ -855,7 +855,8 @@ describe('wallet-connect.services', () => {
 			unreadProgramsAcknowledged: true,
 			rentExemptMinimum: mockRentExemptMinimum,
 			opensAccountBeyondRent: false,
-			keepsBatchWhole: false
+			keepsBatchWhole: false,
+			reassignsWallet: false
 		};
 
 		describe(`with method ${SESSION_REQUEST_SOL_SIGN_TRANSACTION}`, () => {
@@ -881,7 +882,8 @@ describe('wallet-connect.services', () => {
 				unreadProgramsAcknowledged: true,
 				rentExemptMinimum: mockRentExemptMinimum,
 				opensAccountBeyondRent: false,
-				keepsBatchWhole: false
+				keepsBatchWhole: false,
+				reassignsWallet: false
 			};
 
 			const expected = {
@@ -1030,7 +1032,8 @@ describe('wallet-connect.services', () => {
 				unreadProgramsAcknowledged: true,
 				rentExemptMinimum: mockRentExemptMinimum,
 				opensAccountBeyondRent: false,
-				keepsBatchWhole: false
+				keepsBatchWhole: false,
+				reassignsWallet: false
 			};
 
 			it('should show an error if the address is nullish', async () => {
@@ -1520,6 +1523,31 @@ describe('wallet-connect.services', () => {
 					msg: { text: en.wallet_connect.error.ambiguous_transaction }
 				});
 
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(sendSignedTransaction).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: mockRequest.topic,
+					id: mockRequest.id,
+					error: UNEXPECTED_ERROR
+				});
+			});
+		});
+
+		// A program can hand the wallet to another program inside its own call, which only the run
+		// shows, so the review's verdict on it is handed in rather than read from the message.
+		describe('with the wallet handed to another program inside an instruction', () => {
+			it('should refuse to sign and reject the request', async () => {
+				const result = await sign({ ...mockParams, reassignsWallet: true });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.ambiguous_transaction }
+				});
+
+				expect(mockParams.modalNext).not.toHaveBeenCalled();
 				expect(executeSign).not.toHaveBeenCalled();
 				expect(sendSignedTransaction).not.toHaveBeenCalled();
 				expect(mockListener.approveRequest).not.toHaveBeenCalled();

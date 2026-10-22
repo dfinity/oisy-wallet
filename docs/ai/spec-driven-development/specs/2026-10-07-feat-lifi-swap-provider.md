@@ -289,8 +289,12 @@ New `src/frontend/src/env/rest/lifi.env.ts`, modelled on `near-intents.env.ts`:
 The key and the integrator id ship in the client bundle as `VITE_LIFI_API_KEY` and
 `VITE_LIFI_INTEGRATOR`, exactly like `VITE_INFURA_API_KEY`: both are added (empty) to
 `.env.example` and `.env.test`, and to the CI secret plumbing in
-`.github/workflows/deploy-to-environment.yml` (a restricted path — the implementer asks
-before editing it). Their values are set outside the repository.
+`.github/workflows/deploy-to-environment.yml` and its release callers. The workflow builds
+staging, `test_fe_*`, audit and beta from the repository secrets `VITE_LIFI_API_KEY_STAGING`
+/ `VITE_LIFI_INTEGRATOR_STAGING` (overridable per `test_*` / audit deploy, like the other
+keys) and `VITE_LIFI_API_KEY_BETA` / `VITE_LIFI_INTEGRATOR_BETA`, all optional: a deploy
+without them builds with no LI.FI quote. Local and production builds read
+`.env.development` and `.env.production`. Their values are set outside the repository.
 
 Shipping the key in the bundle is acceptable because each key is **scoped to an origin
 allow-list registered on LI.FI's partner portal**, and staging and production use
@@ -502,11 +506,16 @@ execution-time — passes `assertLifiQuote` before it is shown or acted on:
 - **Route tools**: every `cross` step in `includedSteps` uses a bridge the request's
   `allowBridges` names, and no `swap` step uses an exchange in its `denyExchanges`. The
   lists are only request parameters, so this keeps the deny lists working if LI.FI ignores
-  or misreads them (step tool keys match the request's keys, checked 2026-10-19). From
-  PR 2b-5, no `swap` step precedes an `across` `cross` step either, and no step follows
-  the `cross` step: routes the calldata binding would refuse (see
-  [No DEX swap before Across](#calldata-binding-evm-execution-time-quote); a step after
-  the bridge pays out another token than the one requested).
+  or misreads them (step tool keys match the request's keys, checked 2026-10-19).
+- **Route shape** (from PR 2b-5): a trusted quote is offered only if the calldata binding
+  could accept its route, judged from its steps (`isLifiRouteExecutable`, next to the
+  binding's bridge table in `lifi-calldata.utils.ts` and read from it): a bridge the table
+  has, no `swap` step before a bridge that cannot bound a swap's output (`dexSwaps: false`,
+  Across; see [No DEX swap before Across](#calldata-binding-evm-execution-time-quote)),
+  and no step after the `cross` step, whose bridge would then pay out another token than
+  the one requested. Read from the table, a bridge added to it, or to the allowed keys
+  without it, cannot be offered where the binding would refuse it. This is not a trust check: such a quote is a route OISY cannot execute, not
+  a forged one, and is tracked as no route.
 
 EVM addresses (`to`, `approvalAddress`, `from`, EVM token addresses, an EVM
 `toAddress`) are compared **case-insensitively**: LI.FI may return checksummed or
@@ -630,10 +639,16 @@ every DEX's payload client-side is not practical, so the binding has two layers:
   from every asset of the route (the source and destination tokens, and every
   `sendingAssetId` / `receivingAssetId`), and must not be any ERC-20 of the user's on
   that network with an allowance to the Diamond (no `transferFrom(user, …)` through the
-  Diamond). Those allowances are read before signing, one per token the user holds there;
-  a read that fails counts the token as approved. A token without an allowance cannot be
+  Diamond). Those allowances are read before signing, of the ERC-20s and ERC-4626s OISY
+  knows on that network, enabled or not, since hiding a token does not revoke its
+  allowance (`lifiUserTokenAddresses`), for the ones a swap step calls or approves
+  (`lifiCalldataSwapTargets`), the only ones the check could refuse: reading every one
+  cost up to 75 reads per execution, on Robinhood Chain. A read that fails counts the token
+  as approved. A token without an allowance cannot be
   spent through the Diamond, and some are DEX pools a route may call (a Uniswap V2 pair,
-  a Curve or Balancer pool token), so it is not refused.
+  a Curve or Balancer pool token), so it is not refused. An allowance the user granted the
+  Diamond through another dapp, for a token OISY does not know, cannot be listed: there,
+  LI.FI's whitelist, which lists no token's transfer functions, remains the guard.
 - **A leftover allowance cannot be pulled outside a bound call.** `approve()` keeps its
   existing "at least" semantics (see [EVM execution](#evm-execution)), so the Diamond may
   hold an allowance larger than `fromAmount`, or one for a different token left by an
@@ -739,10 +754,17 @@ before the bridge must produce it. So an Across route whose `SwapData[]` holds a
 but the fee forwarding is refused (decided 2026-10-19).
 
 LI.FI often quotes Across behind a DEX swap (ETH → USDC, DAI → USDC, USDC → USDT0 before
-the bridge, 2026-10-19), so the form must not offer such a route either: PR 2b-5 refuses it
-at quote time with the route-tools check (a `swap` step before an `across` `cross` step),
-and decides whether to re-request the quote once without `across`, so that NEAR Intents
-can serve the pair.
+the bridge, 2026-10-19), and quotes WETH destinations through Across followed by a
+destination swap (2026-10-20), so the form must not offer such routes either. When LI.FI's
+best route goes through a bridge in a shape the binding refuses (Across behind a DEX swap,
+any bridge followed by another step), `fetchLifiSwapQuote` asks it once more without that
+bridge, so that another allowed one can serve the pair, and offers nothing if that route
+cannot be executed either (decided 2026-10-20, any bridge since 2026-10-22). A route
+through a bridge the request did not allow is not re-quoted: asking without it would ask
+the same. Both requests share one `LIFI_QUOTE_TIMEOUT_MS` deadline: the form shows its
+offers once every provider has answered, and two in turn could hold it for 20 s. The offer
+carries the request it answers (`SwapMappedResult.request`), so execution re-quotes
+without that bridge too.
 
 **Across's fill is open, and its refund comes soon.** `AcrossV4Data` also sets who may fill
 the deposit and until when. A forged response could name an exclusive relayer it controls,
@@ -919,33 +941,60 @@ later PR with a per-bridge instruction decoder (see [Decisions](#decisions)).
 
 ### EVM execution
 
-New `fetchLifiEvmSwap` in `lib/services/swap.services.ts`, mirroring
-`fetchVeloraMarketSwap`:
+New `fetchLifiEvmSwap` in `lib/services/lifi-evm-swap.services.ts` (its own module rather
+than the 1,900-line `swap.services.ts`, next to the form's `lifiQuoteFeeCeiling` and
+`lifiApprovalTransactions`), mirroring `fetchVeloraMarketSwap`. Every re-quote below uses
+the offer's own request (`SwapMappedResult.request`, the one its quote answers), with its
+bridges narrowed to the one the reviewed route took and its exchanges to the ones its swap
+steps used (`allowExchanges`; none when the route has no swap), so execution can only
+re-quote the same kind of route; its `fromAmount` must equal the amount being swapped.
+Left free, LI.FI re-routes from one quote to the next through exchanges whose gas differs
+up to twofold (258k for Nordstern, 577k for OKX, USDC → ETH on Base, 2026-10-21), and a
+heavier route than the one reviewed refused the swap as a fee change. The exchange pin is
+for the fee, not the price: when the pinned re-quote has no route, a minimum below the one
+displayed, or LI.FI refuses the pin (a swap step's tool outside its `allowExchanges` keys
+is a 400), it is asked once more through any exchange (the bridge still pinned), and only
+that answer can abort as a slippage error; the calldata binding then checks the quote
+against the request it answers. Pinned alone, it aborted every retry once
+the reviewed exchange's price slipped, the review the abort returns to never refreshing
+its quote (fe4, 2026-10-21). Narrowing the
+bridges does not fix the route's shape, so every re-quote is also refused, with
+`LifiRouteUnsupportedError` (the generic swap error; `quote_rejected` in analytics), when
+`isLifiRouteExecutable` refuses it: a refreshed Across route can put a DEX swap before the
+bridge that the calldata binding refuses, and refused at step 1 it costs no approval.
+Execution does not fall back to another bridge, which would change the route reviewed.
 
 1. **Price check before any gas is spent.** The displayed quote can be up to 30 s old
    (see [Cadence](#cadence-on-input-change-then-every-30-s)), and an ERC-20 source is
    about to pay for an approval, so the price is re-checked first, while aborting is
    still free. Re-quote through the REST wrapper (never the cache) with
    `skipSimulation: true` — no allowance exists yet, so a simulated quote may not come
-   back — run `assertLifiQuote`, and if no route comes back or the new `toAmountMin` is
+   back — run `assertLifiQuote`, and if no route comes back (404 / 422) or the new `toAmountMin` is
    below the displayed quote's `toAmountMin`, abort with the existing slippage-exceeded
    error mapping (Velora Delta's precedent). That mapping is a string-prefix check —
    `SwapEthWizard.svelte` turns an error whose message `startsWith('Slippage exceeded.')`
    into `swap.error.slippage_exceeded` — so the thrown error's message must start with
-   exactly `Slippage exceeded.` (as `fetchVeloraDeltaSwap`'s does). Nothing has been
+   exactly `Slippage exceeded.` (as `fetchVeloraDeltaSwap`'s does). Then
+   `assertLifiEvmCalldata` binds that quote's calldata to the request it answers: nothing
+   the binding reads waits on the allowance, so a route it refuses costs no approval (it
+   runs again in step 3, on the quote that is signed). Nothing has been
    broadcast at this point. For a native source this re-quote is skipped: step 3 is the
-   first quote and does the same check.
+   first quote and does the same checks.
 
 2. If the source is not native:
    `approve({ to: LIFI_DIAMOND_ADDRESSES[sourceNetworkId], amount: fromAmount, shouldSwapWithApproval: true, … })`
    (`approve` names the spender `to`; see `ApproveParams` in `eth/types/send.ts`),
    exactly as `fetchVeloraMarketSwap` calls it, then the same allowance poll Velora
-   Market uses. That poll is not a named function: it is an inline
-   `retryWithDelay({ maxRetries: 10, request })` around `erc20ContractAllowance` inside
-   `fetchVeloraMarketSwap` (`lib/services/swap.services.ts`), with the condition
-   `allowance >= fromAmount`. Extract it into a small shared helper used by both, or
-   repeat the same shape; do not invent a different poll. A smaller allowance after the
-   retries aborts the swap before anything else is sent. The spender is the **pinned**
+   Market uses: its inline `retryWithDelay({ maxRetries: 10, request })` around
+   `erc20ContractAllowance` is extracted, unchanged, into `waitForSwapAllowance`
+   (`lib/services/swap.services.ts`), which both call with the condition
+   `allowance >= fromAmount`. A smaller allowance after the
+   retries aborts the swap before anything else is sent. `approve()` returns once the
+   approval is broadcast, and the poll gives up within 10–20 s, under two Ethereum blocks:
+   a slow approval sent the swap back to the review still pending, where a retry signed a
+   second one. So LI.FI first waits for the approval's receipt (`waitForApproval`, every
+   3 s for up to 3 minutes); a reverted approval aborts at once, and one still unmined is
+   left to the poll. The spender is the **pinned**
    Diamond (which the displayed quote's `approvalAddress` already matched), so approval
    does not depend on a fresh quote.
 
@@ -967,7 +1016,11 @@ New `fetchLifiEvmSwap` in `lib/services/swap.services.ts`, mirroring
    when an ERC-20 quote is selected, the form reads the current allowance to the pinned
    Diamond once (`erc20ContractAllowance`) and reserves, on top of the swap-leg ceiling:
    no approval fee when the allowance is `>= fromAmount`, one when it is zero, two
-   (reset + approve) when it is non-zero and smaller. The read is repeated when the
+   (reset + approve) when it is non-zero and smaller (`lifiApprovalTransactions`); a read
+   that fails budgets two. Each approval is priced at the fee context's `maxGasFee`, the
+   gas `approve()` signs it with, and the form, its validation, "Max" and the review all
+   show the total — the swap leg's ceiling plus the approvals — instead of the fee
+   context's own estimate. The read is repeated when the
    quote's inputs (the cache key) change and never otherwise: there is no pre-dispatch
    re-read and no return-to-review on the count. If another pending transaction moves the
    allowance between review and execution, `approve()` decides from its own read, and a
@@ -984,7 +1037,7 @@ New `fetchLifiEvmSwap` in `lib/services/swap.services.ts`, mirroring
    already there and skipped), as Velora Market's aborts do; the next LI.FI swap's
    `approve()` reuses it when it is large enough. No revoke transaction is sent on abort.
 
-   Then run `assertLifiEvmCalldata` on the new quote
+   Then run `assertLifiEvmCalldata` again, on the new quote
    ([Calldata binding](#calldata-binding-evm-execution-time-quote)); a failure aborts
    with a generic swap error, not the slippage one.
 
@@ -1004,54 +1057,158 @@ value })` runs on the exact checked transaction through `infuraProviders(network
    `to`, `data`, `value`, `chainId`, gas and fee fields and the **largest possible
    nonce** (`2^64 − 1`, the widest RLP encoding). That bounds every actual nonce, so the
    reviewed `l1Fee` is never below the signed transaction's, and `swap()` keeps choosing
-   its nonce unchanged. It is `undefined` (zero) off OP-stack chains. The native balance must
-   cover `value + ceiling`, or the swap aborts with the existing insufficient-funds error
-   before signing.
+   its nonce unchanged. It is `undefined` (zero) off OP-stack chains (`getL1DataFee` in
+   `eth/services/fee.services.ts`, which now takes the size). The native balance must
+   cover `value + ceiling`, or the swap aborts before signing with an ethers
+   `INSUFFICIENT_FUNDS` error, which the wizard maps to the existing insufficient-funds
+   copy (`mapEthereumErrorMsg`). That check comes after an ERC-20's approval is paid, so
+   an ERC-20 source first checks, before the price re-check of step 1, that the native
+   balance covers the total the review showed (`reviewedFee`, the approvals included):
+   the swap is never signed above it, so a balance that covers it never leaves an
+   approval paid for a swap the balance cannot finish.
 5. `swap({ to: tr.to, transaction: { data: tr.data, gas: estimatedGas, value: tr.value, chainId: tr.chainId }, maxFeePerGas, maxPriorityFeePerGas, … })`,
-   with the row created between signing and broadcasting (step 6): `swap()` signs and
-   broadcasts in one call today, so the LI.FI path splits it, or gains a hook between
-   the two.
+   with the row created between signing and broadcasting (step 6): `swap()` signed and
+   broadcast in one call, so it gains an optional `beforeBroadcast({ hash, nonce })` hook
+   between the two. The hash is the hash of the signed bytes, the transaction's own; a
+   rejecting hook broadcasts nothing. Velora passes no hook and is unchanged.
 
-   **Review shows the same ceiling it signs.** In the form and review, the swap leg's
+   `swap()` sends the **same signed bytes again**, up to 3 attempts a second apart, while
+   the node has neither refused them outright nor answered that they, or their nonce, are
+   in (`isBroadcastRetriable`): a transport failure, a server error or `transaction
+underpriced` would otherwise leave a swap that counts as sent (step 6) unsent. With one
+   hash and one nonce they cannot swap twice, so Velora Market's broadcast is retried too.
+   `processTransactionSent`, which `swap()` does not await, has its failure logged rather
+   than left unhandled, and a transaction viem cannot find yet (`TransactionNotFoundError`,
+   where the provider's own contract says `null`) is skipped as that `null` was meant to be.
+
+   `swap()` also takes the **amount swapped**, which the pending activity shows.
+   `processTransactionSent` read an ERC-20 source's amount by decoding the calldata as a
+   transfer, and a swap contract's calldata is none: on the captured Diamond calldata it
+   reads an offset (544) or throws, leaving no pending row. The given amount replaces the
+   decode; Velora Market, whose calldata is no transfer either, passes its own.
+
+   **Review shows a ceiling execution fits under.** In the form and review, the swap leg's
    maximum fee (displayed, and used for balance validation and "Max") is computed with
-   the **same formula** as above: the gas units from the quote's `estimate.gasCosts`
-   (LI.FI's own estimate for the route, not its `amount`, which is an expected cost at
-   LI.FI's gas price) × the same buffer × OISY's `maxFeePerGas` + `l1Fee` for that
-   transaction's size, rather than `EthFeeContext`'s plain-transfer estimate. At
+   the **same formula** as above (`lifiQuoteFeeCeiling`, sharing the computation with
+   execution): the gas units of the quote's `estimate.gasCosts` of type `SEND`, the swap
+   transaction's own — every live quote carries exactly one (2026-10-20); an `APPROVE`
+   cost is left out, the approvals being budgeted on their own — (LI.FI's own estimate
+   for the route, not its `amount`, which is an expected cost at
+   LI.FI's gas price) × a larger buffer (`LIFI_REVIEW_GAS_BUFFER_PERCENT`, 30 %) × OISY's
+   `maxFeePerGas` + `l1Fee` for that transaction's size, rather than `EthFeeContext`'s
+   plain-transfer estimate. Larger than execution's 20 % because the node estimates the very
+   same transaction a few percent above LI.FI: 3–5 % for USDC → ETH on Base, on every
+   exchange (2026-10-21), so a review buffered alike refused every first attempt from an
+   ERC-20 as a fee change. A quote
+   without one shows no fee, and the form waits. At
    execution, if the ceiling from OISY's own estimate exceeds the reviewed ceiling, the
    swap is **not signed**: it aborts back to the review step with a "network fee changed"
    message (a new `swap.error.lifi_fee_changed`), and the user confirms the new maximum.
-   For that to be reviewable, the abort **carries the complete execution-time ceiling
-   back** — buffered gas × `maxFeePerGas` **plus that transaction's own `l1Fee`** — into
-   the wizard's fee state for the selected quote. The re-quote's calldata can differ from
+   For that to be reviewable, the abort **carries what the execution-time ceiling was made
+   of back** — the buffered gas **and that transaction's own `l1Fee`** — into
+   the swap context (`lifiCarriedFee`, next to `failedSwapError`) for the selected
+   quote's inputs. Not the wizard's own state: every step change rebuilds the wizard, so
+   the review the abort returns to is another instance. The re-quote's calldata can differ from
    the display quote's, so on Base its L1 fee can too; rebuilding the ceiling from the
-   carried gas and the display quote's `l1Fee` could understate it and loop again. Review
-   then shows `max(quote-derived ceiling, carried ceiling)`, and that exact value becomes
-   the newly acknowledged bound the next execution compares against. The carried ceiling
-   is cleared whenever the quote's inputs (the cache key) change. This abort, unlike the
+   carried gas and the display quote's `l1Fee` could understate it and loop again. The
+   review prices the carried gas at its own `maxFeePerGas`, with 10 % headroom on the gas
+   and the L1 fee alike (`lifiCarriedFeeCeiling`): kept as a fixed amount priced at the
+   refused attempt's gas price, the ceiling refused the retry again whenever the gas price
+   ticked up or the re-estimate came out a little higher. Review then shows
+   `max(quote-derived ceiling, carried ceiling)`, and that exact value becomes the newly
+   acknowledged bound the next execution compares against. The carried ceiling
+   is kept for the inputs (the cache key) it was found for until the modal closes, and
+   ignored for others: back at the same inputs, the route needs what the refused attempt
+   measured, and dropping it would only have execution refuse again and carry it back.
+   This abort, unlike the
    price check in step 1, necessarily comes after the approval: the estimate needs the
    allowance to exist. Velora Market keeps signing its provider's gas, unchanged.
 
+   **The review confirms only once the fee is known.** Being rebuilt, each review reads
+   the quote-derived ceiling and the approval count again, and confirming before both are
+   back would pay an ERC-20's approval before execution could compare the fee with any,
+   or sign approvals the total did not show. So the review's confirm is disabled until
+   the total is known, and the reviewed ceiling is a required parameter of execution.
+   The refreshed total, a ceiling carried back by a fee change included, is also checked
+   against the native balance as the form checks its own (`isLifiFeeAffordable`): when
+   it does not fit, confirm stays disabled and the review says why
+   (`InsufficientFundsForFee`). `SwapReview` takes the provider's reason to hold the
+   swap as `swapDisabled`.
+
 6. Create the AUT row once the transaction is signed, with its hash and nonce, and only
    then broadcast it. A row that cannot be created aborts the swap before the broadcast:
-   no funds have moved. The row is deleted only when the node's error proves it did not
+   no funds have moved. It is deleted all the same, in case the backend committed it and
+   only its answer was lost, as a cycles mint does. The row is deleted only when the node's error proves it did not
    accept the transaction, so that the swap never started: an allow-list of
    definitive refusals matched on the error (ethers' `INSUFFICIENT_FUNDS`, a fee cap below
    the base fee, intrinsic gas too low, a gas limit above the block's, oversized data, an
-   invalid signature or sender, an unsupported transaction type). The delete is retried as
+   invalid signature or sender, an unsupported transaction type). A contract revert never
+   counts, whatever its reason says (`execution reverted: invalid signature` is a contract's
+   check, and another node can still mine the transaction). The delete is retried as
    `deleteRow` in `icp/services/cycles-mint.services.ts` does. Any other failure keeps the
    row, and the poller settles it by its hash and nonce (mined, or replaced or dropped
    once its nonce is used): a JSON-RPC error does not prove the transaction absent
    (`already known` means it is in the mempool, `nonce too low` that its nonce is used,
    possibly by this very transaction, `replacement transaction underpriced` that another
-   one holds it), and a transport failure may have relayed it. A refusal missing from the
-   list leaves its row pending until the nonce is used, then `Failed` as replaced or
-   dropped; it never drops the tracking of a swap that happened. A delete that keeps
-   failing leaves the row to the poller in the same way. Then
+   one holds it), and a transport failure may have relayed it. Such a failure does not
+   abort the swap either: returned to the review, the user could sign again, with the next
+   nonce, and a relayed transaction would then swap twice. So the swap goes on as sent —
+   the error is logged, the modal closes as after a broadcast — and its row settles it. A
+   refusal missing from the list leaves its row pending until the nonce is used, then
+   `Failed` as replaced or dropped; it never drops the tracking of a swap that happened,
+   nor offers it for signing twice. A delete that keeps failing leaves the row to the
+   poller in the same way. The failure meant here is the last attempt's of step 5. Then
    `enableSwapDestinationToken`.
 
-Wizard: add `SwapProvider.LIFI` to `isActiveTransactionSwap`, `isApproveNeeded` and
-`swapEmitsApprovalSteps` in `SwapEthWizard.svelte`, plus a dispatch branch.
+Wizard: add `SwapProvider.LIFI` to `isActiveTransactionSwap` and
+`swapEmitsApprovalSteps` in `SwapEthWizard.svelte`, plus a dispatch branch that passes
+the offer, the reviewed ceiling and every ERC-20 and ERC-4626 OISY knows on the source
+network, enabled or not (`lifiUserTokenAddresses`), whose allowances the calldata binding
+reads where a swap step targets one.
+`isApproveNeeded` stays Velora Market's: it only doubles the fee context's estimate, which
+LI.FI replaces with its own total. The wizard holds LI.FI's fee state — the quote-derived
+ceiling (re-priced when the offer or OISY's fees change), the approval count (read once
+per set of inputs) and reads the carried ceiling from the swap context (kept for the
+inputs it was found for) — and hands the total to the form and the review.
+
+"Max" from a native source leaves room for that total, but does not follow it both ways:
+LI.FI's fee comes with each quote and each quote with the amount, so a "Max" re-applied on
+every fee change sets an amount, gets another fee for it and sets another amount, never
+settling (fe4, 2026-10-21: twelve amounts and fourteen quotes in 34 s as LI.FI's route and
+gas estimate changed). While "Max" holds a LI.FI amount, `SwapEthForm` gives it the highest
+fee seen since it was pressed for the same destination, so the amount only steps down;
+typing releases it, and pressing "Max" again starts it over from the fee of the moment. A
+new destination is a new route, whose fee the old one says nothing about: its first LI.FI
+fee starts the reservation over (`raiseLifiMaxFee`), the old one held while its offers
+reload. The fee shown, the form's validation and the review keep the current one.
+
+From a native source, "Max" leaves 10 % more than that fee (`LIFI_MAX_FEE_HEADROOM_PERCENT`):
+the review is rebuilt and prices the fee again at a fee per gas read anew, and on Ethereum
+that read came out higher than the form's 4–10 s earlier in 39–64 % of samples, by up to
+5.5 % (2026-10-22; on Base in 2 of 67, by 0.6 %), so an amount with no room above the form's
+fee could not be confirmed. A review that still cannot fit its total — a larger rise, or a
+ceiling carried back by a fee change, which always exceeds the fee the form knew — raises
+the fee "Max" leaves room for to that total, so that back on the form "Max" steps down to
+an amount that fits instead of landing on the same one again.
+
+Whether "Max" holds lives in the swap context (`amountSetToMax`), not in the form: picking a
+provider or a token is a wizard step, and every step change rebuilds the form, which used to
+release "Max" and leave the amount at the previous provider's max. That was invisible while
+every EVM provider shared the fee context's estimate; LI.FI's own, higher fee turned the
+amount red. A new source token, switching the tokens and closing the modal release it,
+whether by its own close or by a navigation, which destroys it without that close (the
+swap context lives in the app layout, so `SwapModal` resets it on destroy too). The
+highest LI.FI fee seen lives there too (`lifiMaxFee`), for the same reason: a rebuilt form
+that forgot it would raise the amount when the fee had fallen meanwhile. Only another
+provider's offer ends it: none is selected while the offers reload, as after a token picker
+cleared them, and the plain estimate the form falls back to then stays below the kept
+reservation, so "Max" holds. The Max button keeps
+a single pending re-application, restarted by each change and cancelled with the button, so a
+destroyed form's cannot write the amount while the rebuilt one does not know its fee yet.
+
+The row's token symbols are cut to the backend's 256-byte ref limit (`truncateUtf8Bytes`): a
+custom ERC-20's symbol has no bound, and a ref over the limit refused the row, and with it the
+swap, after its approval was paid.
 
 ### Solana execution
 
@@ -1491,7 +1648,13 @@ rows.
   unknown, LI.FI's `substatusMessage`) is kept on the row for support. No
   toast, no new row layout, no explorer link. Surfacing errors for all swap providers
   is a separate, cross-provider change.
-- Wizard tracks `TRACK_COUNT_SWAP_SUBMITTED` (it is an active-transaction swap).
+- Wizard tracks `TRACK_COUNT_SWAP_SUBMITTED` (it is an active-transaction swap). Its
+  `TRACK_COUNT_SWAP_ERROR` for a LI.FI swap carries an allow-listed category as
+  `result_error_type` (`toLifiSwapErrorType`, `PLAUSIBLE_EVENT_SWAP_ERROR_TYPES`:
+  `fee_changed`, `slippage_exceeded`, `quote_rejected`, `insufficient_funds`, `unknown`)
+  in place of the error text under `error`, which can come from LI.FI's
+  SDK (the request URL, with the user's addresses) or from the node and ethers (the signed
+  transaction); invariant 4 in `docs/ai/frontend/analytics.md`.
 
 ### Presentation
 
@@ -1666,7 +1829,8 @@ everywhere.
 12. The AUT row is created after signing and before the broadcast: a swap whose row
     cannot be created is not broadcast, and a row is deleted only when the node's error
     proves the transaction was not accepted; an ambiguous error (`already known`,
-    `nonce too low`) or a transport failure keeps it for the poller.
+    `nonce too low`) or a transport failure keeps it for the poller, and the swap goes on
+    as sent, never offered for signing again.
     After broadcast, the modal closes, the row appears in the Active-transactions
     panel labelled "LI.FI", and it reaches `Succeeded` / `Failed` in the background,
     including after a page reload. Every terminal LI.FI row triggers one wallet
@@ -1751,6 +1915,10 @@ Recorded so a future reader can tell "excluded on purpose" from "forgotten".
   (2026-10-19).
 - **LI.FI's fee is bound to 25 bps** (`LIFI_FEE_BPS`), the fee every captured route
   forwards, rather than read from the unsigned quote's `feeCosts`.
+- **A route through Across that the binding would refuse is re-quoted once without
+  Across** at quote time, so that NEAR Intents can serve the pair, rather than leaving the
+  pair without a LI.FI offer. It costs one more quote request, only for such routes
+  (2026-10-20).
 - **Solana top-level instructions are pinned** by `(program, discriminator)`, not just by
   program, so a known DEX program cannot be used for anything but the allowed route.
 - **Failure reasons stay off-screen**, matching Velora and NEAR Intents (icon only).
@@ -1774,9 +1942,9 @@ Recorded so a future reader can tell "excluded on purpose" from "forgotten".
 - **PR 2 is split into 2a / 2b** up front, and 2a into 2a-1 (quote client) / 2a-2
   (registration).
 - **The LI.FI integrator id and the staging API key are registered.** Their values are
-  set in the environment outside the repository; the implementer asks before editing
-  `deploy-to-environment.yml`. The **production** key is not registered yet; it is a
-  prerequisite for PR 4 (see [Open questions](#open-questions)).
+  set in the environment outside the repository, as the repository secrets the deploy
+  workflow reads ([API key](#api-key)). The **production** key is not registered yet; it
+  is a prerequisite for PR 4 (see [Open questions](#open-questions)).
 
 ## References
 
