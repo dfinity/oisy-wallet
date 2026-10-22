@@ -2418,6 +2418,7 @@
 			"create": "创建联系人失败",
 			"update": "更新联系人失败",
 			"delete": "删除联系人失败",
+			"load": "",
 			"name_too_long": "请将名称控制在 $maxCharacters 个字符以内。"
 		}
 	},

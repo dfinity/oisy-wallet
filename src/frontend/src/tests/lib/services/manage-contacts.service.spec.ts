@@ -1,13 +1,17 @@
 import type { ContactImage } from '$declarations/backend/backend.did';
 import * as backendApi from '$lib/api/backend.api';
+import * as analytics from '$lib/services/analytics.services';
 import { createContact, loadContacts, updateContact } from '$lib/services/manage-contacts.service';
 import { contactsStore } from '$lib/stores/contacts.store';
+import * as toastsStore from '$lib/stores/toasts.store';
 import type { ContactUi } from '$lib/types/contact';
+import { replaceIcErrorFields } from '$lib/utils/error.utils';
 import {
 	mockBackendContactAddressBtc,
 	mockBackendContactAddressEth,
 	mockBackendContactAddressSol
 } from '$tests/mocks/contacts.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -99,6 +103,135 @@ describe('manage-contacts.service', () => {
 
 			// Verify that addresses array is empty
 			expect(contact.addresses).toHaveLength(0);
+		});
+
+		describe('retries', () => {
+			const mockContacts = [
+				{
+					id: BigInt(1),
+					name: 'Test Contact',
+					update_timestamp_ns: BigInt(Date.now()),
+					addresses: [mockBackendContactAddressBtc],
+					image: [] as []
+				}
+			];
+
+			const mockError = new Error('Request ID: 0x1234\nReject text: Canister is stopped');
+
+			let spyTrackEvent: MockInstance<typeof analytics.trackEvent>;
+			let spyToastsError: MockInstance<typeof toastsStore.toastsError>;
+
+			beforeEach(() => {
+				vi.useFakeTimers();
+
+				spyTrackEvent = vi.spyOn(analytics, 'trackEvent').mockImplementation(() => {});
+				spyToastsError = vi.spyOn(toastsStore, 'toastsError').mockReturnValue(Symbol('toast'));
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			it('should neither track nor toast when the first attempt loads the contacts', async () => {
+				mockGetContacts.mockResolvedValue(mockContacts);
+
+				await loadContacts(mockIdentity);
+
+				expect(mockGetContacts).toHaveBeenCalledOnce();
+				expect(get(contactsStore)).toHaveLength(1);
+				expect(spyTrackEvent).not.toHaveBeenCalled();
+				expect(spyToastsError).not.toHaveBeenCalled();
+			});
+
+			it('should retry after 2 s and track a warn when the retry loads the contacts', async () => {
+				mockGetContacts.mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockContacts);
+
+				const promise = loadContacts(mockIdentity);
+
+				await vi.advanceTimersByTimeAsync(1_999);
+
+				expect(mockGetContacts).toHaveBeenCalledOnce();
+				expect(get(contactsStore)).toBeUndefined();
+
+				await vi.advanceTimersByTimeAsync(1);
+				await promise;
+
+				expect(mockGetContacts).toHaveBeenCalledTimes(2);
+				expect(get(contactsStore)).toHaveLength(1);
+				expect(spyTrackEvent).toHaveBeenCalledExactlyOnceWith({
+					name: 'contact',
+					metadata: {
+						event_context: 'contacts',
+						event_modifier: 'load_all',
+						result_status: 'success',
+						event_severity: 'warn'
+					}
+				});
+				expect(spyToastsError).not.toHaveBeenCalled();
+			});
+
+			it('should give up after the third attempt, waiting 2 s and then 4 s', async () => {
+				mockGetContacts.mockRejectedValue(mockError);
+
+				const promise = loadContacts(mockIdentity);
+
+				await vi.advanceTimersByTimeAsync(2_000);
+
+				expect(mockGetContacts).toHaveBeenCalledTimes(2);
+
+				await vi.advanceTimersByTimeAsync(3_999);
+
+				expect(mockGetContacts).toHaveBeenCalledTimes(2);
+
+				await vi.advanceTimersByTimeAsync(1);
+				await promise;
+
+				expect(mockGetContacts).toHaveBeenCalledTimes(3);
+
+				await vi.advanceTimersByTimeAsync(60_000);
+
+				expect(mockGetContacts).toHaveBeenCalledTimes(3);
+			});
+
+			it('should leave the store unset and toast and track the failure once', async () => {
+				mockGetContacts.mockRejectedValue(mockError);
+
+				const promise = loadContacts(mockIdentity);
+
+				await vi.runAllTimersAsync();
+				await promise;
+
+				expect(get(contactsStore)).toBeUndefined();
+				expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.contact.error.load },
+					err: mockError
+				});
+				expect(spyTrackEvent).toHaveBeenCalledExactlyOnceWith({
+					name: 'contact',
+					metadata: {
+						event_context: 'contacts',
+						event_modifier: 'load_all',
+						result_status: 'error',
+						event_severity: 'error',
+						result_error: replaceIcErrorFields(mockError)
+					}
+				});
+			});
+
+			it('should strip the request ID from the tracked error', async () => {
+				mockGetContacts.mockRejectedValue(mockError);
+
+				const promise = loadContacts(mockIdentity);
+
+				await vi.runAllTimersAsync();
+				await promise;
+
+				const [[{ metadata }]] = spyTrackEvent.mock.calls;
+
+				expect(metadata?.result_error).toContain('Canister is stopped');
+				expect(metadata?.result_error).not.toContain('Request ID');
+				expect(metadata?.result_error).not.toContain('0x1234');
+			});
 		});
 	});
 

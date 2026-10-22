@@ -2418,6 +2418,7 @@
 			"create": "No se pudo crear el contacto",
 			"update": "No se pudo actualizar el contacto",
 			"delete": "No se pudo eliminar el contacto",
+			"load": "",
 			"name_too_long": "Por favor, mantén el nombre con $maxCharacters caracteres o menos."
 		}
 	},

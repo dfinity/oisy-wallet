@@ -4,6 +4,7 @@
 	import { loadContacts } from '$lib/services/manage-contacts.service';
 	import { contactsStore } from '$lib/stores/contacts.store';
 	import type { NullishIdentity } from '$lib/types/identity';
+	import { consoleError } from '$lib/utils/console.utils';
 
 	const load = (identity: NullishIdentity) => {
 		if (isNullish(identity)) {
@@ -11,7 +12,7 @@
 			return;
 		}
 
-		loadContacts(identity);
+		loadContacts(identity).catch(consoleError);
 	};
 
 	$effect(() => {

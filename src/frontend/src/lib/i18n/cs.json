@@ -2418,6 +2418,7 @@
 			"create": "Nepodařilo se vytvořit kontakt",
 			"update": "Nepodařilo se aktualizovat kontakt",
 			"delete": "Nepodařilo se smazat kontakt",
+			"load": "",
 			"name_too_long": "Název nesmí být delší než $maxCharacters znaků."
 		}
 	},
