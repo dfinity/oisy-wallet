@@ -921,6 +921,38 @@ interface I18nCycles_mint {
 	};
 }
 
+interface I18nCycles_top_up {
+	text: {
+		top_up: string;
+		title: string;
+		description: string;
+		canister_id_placeholder: string;
+		checking_canister: string;
+		recently_topped_up: string;
+		canister: string;
+		you_top_up: string;
+		total: string;
+		one_way: string;
+		topping_up: string;
+		topped_up: string;
+		unknown: string;
+		unknown_fresh: string;
+		sent_to_canister: string;
+		sent_to_canister_top_up: string;
+	};
+	error: {
+		invalid_canister_id: string;
+		canister_not_found: string;
+		canister_check_failed: string;
+		amount_too_small: string;
+		refused: string;
+		insufficient_funds: string;
+		clock: string;
+		refunded: string;
+		refunded_nothing: string;
+	};
+}
+
 interface I18nActive_user_transactions {
 	text: {
 		button_label: string;
@@ -1114,6 +1146,7 @@ interface I18nSwap {
 		oisy_trade_order_not_placed: string;
 		oisy_trade_recovery_failed: string;
 		lifi_status_unknown: string;
+		lifi_fee_changed: string;
 	};
 }
 
@@ -1497,6 +1530,7 @@ interface I18nWallet_connect {
 		allowance_increase: string;
 		allowance_decrease: string;
 		unverifiable_erc20_request: string;
+		token_call_with_value: string;
 		unverifiable_approval_for_all_request: string;
 		approval_for_all_grant: string;
 		approval_for_all_revoke: string;
@@ -1576,6 +1610,7 @@ interface I18nWallet_connect {
 		unknown_destination: string;
 		cketh_deposit_refused: string;
 		cketh_helper_unconfirmed: string;
+		token_call_with_value: string;
 		ambiguous_transaction: string;
 		close_pays_others: string;
 		unreviewed_without_simulation: string;
@@ -1862,6 +1897,8 @@ interface I18nTransaction {
 		instruction_close_account: string;
 		instruction_close_account_for: string;
 		instruction_approve: string;
+		instruction_approve_amount: string;
+		instruction_approve_unlimited: string;
 		instruction_revoke: string;
 		instruction_set_authority: string;
 		instruction_route: string;
@@ -1936,6 +1973,8 @@ interface I18nTransaction {
 		twin_network: string;
 		no_date_available: string;
 		pending: string;
+		top_up: string;
+		top_up_refund: string;
 	};
 	alt: {
 		open_block_explorer: string;
@@ -2696,6 +2735,7 @@ interface I18n {
 	mint: I18nMint;
 	burn: I18nBurn;
 	cycles_mint: I18nCycles_mint;
+	cycles_top_up: I18nCycles_top_up;
 	active_user_transactions: I18nActive_user_transactions;
 	scanner: I18nScanner;
 	convert: I18nConvert;

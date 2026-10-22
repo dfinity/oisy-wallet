@@ -40,6 +40,7 @@
 	import type { SolSimulationPreview, SolUnreadProgram } from '$sol/types/sol-simulation';
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
 	import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
+	import { solSimulationReassignsWallet } from '$sol/utils/sol-simulation.utils';
 	import { solClosesPayOthers } from '$sol/utils/sol-transaction-summary.utils';
 	import { findSplToken } from '$sol/utils/spl.utils';
 
@@ -121,6 +122,9 @@
 	let closesPayOthers = $derived(
 		solClosesPayOthers({ instructions: instructions ?? [], userAddress: address })
 	);
+	// The run hands the wallet itself to another program. `sign()` refuses it as it does an
+	// assignment the message states, so the review says so the same way.
+	let reassignsWallet = $derived(solSimulationReassignsWallet({ preview, userAddress: address }));
 
 	const updateData = async () => {
 		try {
@@ -263,7 +267,8 @@
 			unreadProgramsAcknowledged: !callsUnreadPrograms || unreadProgramsAcknowledged,
 			rentExemptMinimum,
 			opensAccountBeyondRent: opensAccountBeyondRent ?? false,
-			keepsBatchWhole: keepsBatchWhole ?? false
+			keepsBatchWhole: keepsBatchWhole ?? false,
+			reassignsWallet
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
@@ -291,12 +296,14 @@
 			<SolWalletConnectSignReview
 				ambiguous={(ambiguous ?? false) ||
 					(opensAccountBeyondRent ?? false) ||
-					(keepsBatchWhole ?? false)}
+					(keepsBatchWhole ?? false) ||
+					reassignsWallet}
 				{application}
 				approveDisabled={!decoded ||
 					(ambiguous ?? false) ||
 					(opensAccountBeyondRent ?? false) ||
 					(keepsBatchWhole ?? false) ||
+					reassignsWallet ||
 					closesPayOthers}
 				{closesPayOthers}
 				{data}

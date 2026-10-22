@@ -1194,6 +1194,37 @@
 			"unconfirmed": "Převod $token se nepodařilo potvrdit. Pokud proběhl, ražení se dokončí na pozadí: sledovat ho můžete v aktivních transakcích."
 		}
 	},
+	"cycles_top_up": {
+		"text": {
+			"top_up": "Dobít",
+			"title": "Dobít kanistr",
+			"description": "Cykly se převedou z vašeho zůstatku $token do kanistru, který je spotřebuje na výpočty a úložiště.",
+			"canister_id_placeholder": "Zadejte ID kanistru",
+			"checking_canister": "Kontrola kanistru...",
+			"recently_topped_up": "Nedávno dobité",
+			"canister": "Kanistr",
+			"you_top_up": "Dobíjíte",
+			"total": "Celkem",
+			"one_way": "Dobití nelze vrátit: cykly zůstanou v kanistru.",
+			"topping_up": "Dobíjení $canister...",
+			"topped_up": "Kanistr $canister byl dobit o $amount $token.",
+			"unknown": "OISY zatím nedokáže určit, zda dobití proběhlo. Pokud ano, uvidíte ho v aktivitě $token. Dobijte znovu, abyste stejné dobití odeslali znovu: může proběhnout jen jednou. Nové nebo změněné dobití by přidalo cykly znovu, pokud toto proběhlo.",
+			"unknown_fresh": "OISY zatím nedokáže určit, zda vaše poslední dobití proběhlo. Pokud ano, toto dobití přidá cykly znovu. Nejprve zkontrolujte aktivitu $token.",
+			"sent_to_canister": "Odesláním $token do kanistru se kanistr nedobije. $token skončí na účtu kanistru a kanistr získá cykly, jen pokud si je vybere jeho vlastní kód.",
+			"sent_to_canister_top_up": "Chcete-li kanistru přidat cykly, použijte „Dobít“ na stránce $token."
+		},
+		"error": {
+			"invalid_canister_id": "Zadejte ID kanistru. Uživatelské principaly, ID účtů a adresy v jiných sítích nelze dobít.",
+			"canister_not_found": "Kanistr s tímto ID na Internet Computeru neexistuje. Zkontrolujte ID.",
+			"canister_check_failed": "OISY nemohl tento kanistr zkontrolovat. Zkuste to za chvíli znovu.",
+			"amount_too_small": "Zadejte více než poplatek $fee $token.",
+			"refused": "Dobití neproběhlo. Z peněženky nic neodešlo. Zkuste to za chvíli znovu.",
+			"insufficient_funds": "Nemáte dost $token na toto dobití a poplatek. Z peněženky nic neodešlo. Snižte částku.",
+			"clock": "Dobití neproběhlo, protože hodiny vašeho zařízení nejdou správně. Z peněženky nic neodešlo. Nastavte správný čas a zkuste to znovu.",
+			"refunded": "Kanistr nemohl cykly přijmout. Do peněženky se vrátilo $refund $token a pokus stál $fees $token na poplatcích. Zkontrolujte ID kanistru.",
+			"refunded_nothing": "Kanistr nemohl cykly přijmout a poplatky spotřebovaly celou částku. Zkontrolujte ID kanistru."
+		}
+	},
 	"active_user_transactions": {
 		"text": {
 			"button_label": "",
@@ -1393,7 +1424,8 @@
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
-			"lifi_status_unknown": ""
+			"lifi_status_unknown": "",
+			"lifi_fee_changed": ""
 		}
 	},
 	"buy": {
@@ -1817,6 +1849,7 @@
 			"allowance_increase": "Tento požadavek zvyšuje limit útraty níže uvedeného příjemce o zobrazenou částku, nad rámec toho, co již může utratit. Příjemce může tuto částku tokenu kdykoli převést z vaší peněženky, dokud toto oprávnění neodvoláte.",
 			"allowance_decrease": "Tento požadavek snižuje limit útraty níže uvedeného příjemce o zobrazenou částku. Sám o sobě nepřevádí žádné prostředky.",
 			"unverifiable_erc20_request": "Tento požadavek se týká tokenu, který OISY nedokáže identifikovat ani dekódovat. Zobrazený obsah se může lišit od toho, co by bylo skutečně podepsáno, proto je schválení zakázáno.",
+			"token_call_with_value": "Kromě níže uvedené částky tokenu posílá tento požadavek $amount na smlouvu tokenu. Převod ani schválení tokenu $symbol neposílá, proto ho OISY pro vaši bezpečnost nepodepíše.",
 			"unverifiable_approval_for_all_request": "Tento požadavek by předal operátorovi kontrolu nad NFT kolekcí a OISY nedokáže dekódovat, o kterého operátora se jedná. Zobrazený obsah se může lišit od toho, co by bylo skutečně podepsáno, proto je schválení zakázáno.",
 			"approval_for_all_grant": "Tento požadavek umožňuje níže uvedenému operátorovi převést jakékoli NFT v této kolekci, které nyní vlastníte nebo v budoucnu získáte, kdykoli, dokud toto oprávnění neodvoláte. Sám o sobě nepřevádí žádné prostředky.",
 			"approval_for_all_revoke": "Tento požadavek odvolává níže uvedeného operátora, takže již nebude moci převádět NFT, které v této kolekci vlastníte.",
@@ -1899,6 +1932,7 @@
 			"unknown_destination": "Neznámá cílová adresa.",
 			"cketh_deposit_refused": "Tento požadavek volá kontrakt pro převod ckETH pro principal na Internet Computeru, který není váš, nebo s daty, která OISY nedokáže přečíst. Pro vaši bezpečnost nebyl podepsán.",
 			"cketh_helper_unconfirmed": "OISY nedokázal ověřit kontrakt pro převod ckETH, a proto nemohl tento vklad zkontrolovat. Pro vaši bezpečnost nebyl podepsán.",
+			"token_call_with_value": "Tento požadavek posílá kromě částky tokenu také $amount na smlouvu tokenu. Pro vaši bezpečnost nebyl podepsán.",
 			"ambiguous_transaction": "Tato transakce přesouvá prostředky mezi několika adresami a nelze ji přesně zobrazit ke kontrole. Z důvodu vaší bezpečnosti nebyla podepsána.",
 			"close_pays_others": "Tato transakce zavírá jeden z vašich tokenových účtů a vyplácí jeho zůstatek na adresu, která není vaše peněženka. Pro vaši bezpečnost nebyla podepsána.",
 			"unreviewed_without_simulation": "OISY nedokázala přečíst část této transakce a síť k ní nevrátila ani simulaci, takže nic nepopisuje, co by tato část udělala. Z důvodu vaší bezpečnosti nebyla podepsána.",
@@ -2192,6 +2226,8 @@
 			"instruction_close_account": "",
 			"instruction_close_account_for": "Zavřít tokenový účet $symbol",
 			"instruction_approve": "",
+			"instruction_approve_amount": "",
+			"instruction_approve_unlimited": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
 			"instruction_route": "",
@@ -2265,7 +2301,9 @@
 			"converting_ck_token": "Převádění $ckToken na $twinToken",
 			"twin_network": "síť $twinNetwork",
 			"no_date_available": "Datum není k dispozici",
-			"pending": "Čeká na vyřízení"
+			"pending": "Čeká na vyřízení",
+			"top_up": "Dobití",
+			"top_up_refund": "Vrácení dobití"
 		},
 		"alt": {
 			"open_block_explorer": "Otevřít tuto transakci v blockchainovém průzkumníku",

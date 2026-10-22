@@ -1194,6 +1194,37 @@
 			"unconfirmed": "Die $token-Überweisung konnte nicht bestätigt werden. Falls sie durchgegangen ist, wird das Minten im Hintergrund abgeschlossen: Du kannst es in den aktiven Transaktionen verfolgen."
 		}
 	},
+	"cycles_top_up": {
+		"text": {
+			"top_up": "Aufladen",
+			"title": "Canister aufladen",
+			"description": "Die Cycles gehen von deinem $token-Guthaben in den Canister, der sie für Rechenleistung und Speicher verbraucht.",
+			"canister_id_placeholder": "Canister-ID eingeben",
+			"checking_canister": "Canister wird geprüft...",
+			"recently_topped_up": "Zuletzt aufgeladen",
+			"canister": "Canister",
+			"you_top_up": "Du lädst auf",
+			"total": "Gesamt",
+			"one_way": "Eine Aufladung lässt sich nicht rückgängig machen: Die Cycles bleiben im Canister.",
+			"topping_up": "$canister wird aufgeladen...",
+			"topped_up": "$canister mit $amount $token aufgeladen.",
+			"unknown": "OISY kann noch nicht sagen, ob die Aufladung durchgegangen ist. Falls ja, zeigt deine $token-Aktivität sie an. Lade erneut auf, um dieselbe Aufladung noch einmal zu senden: Sie kann nur einmal durchgehen. Eine neue oder geänderte Aufladung würde erneut Cycles hinzufügen, falls diese durchgegangen ist.",
+			"unknown_fresh": "OISY kann noch nicht sagen, ob deine letzte Aufladung durchgegangen ist. Falls ja, fügt diese Aufladung erneut Cycles hinzu. Prüfe zuerst deine $token-Aktivität.",
+			"sent_to_canister": "$token an einen Canister zu senden, lädt ihn nicht auf. Die $token landen auf dem Konto des Canisters, und der Canister erhält nur dann Cycles, wenn sein eigener Code sie abhebt.",
+			"sent_to_canister_top_up": "Um einem Canister Cycles hinzuzufügen, nutze „Aufladen“ auf der $token-Seite."
+		},
+		"error": {
+			"invalid_canister_id": "Gib eine Canister-ID ein. User-Principals, Konto-IDs und Adressen in anderen Netzwerken können nicht aufgeladen werden.",
+			"canister_not_found": "Auf dem Internet Computer gibt es keinen Canister mit dieser ID. Prüfe die ID.",
+			"canister_check_failed": "OISY konnte diesen Canister nicht prüfen. Versuche es gleich noch einmal.",
+			"amount_too_small": "Gib mehr als die Gebühr von $fee $token ein.",
+			"refused": "Die Aufladung ist nicht durchgegangen. Nichts hat deine Wallet verlassen. Versuche es gleich noch einmal.",
+			"insufficient_funds": "Nicht genug $token für diese Aufladung und die Gebühr. Nichts hat deine Wallet verlassen. Verringere den Betrag.",
+			"clock": "Die Aufladung ist nicht durchgegangen, weil die Uhr deines Geräts falsch geht. Nichts hat deine Wallet verlassen. Stelle die richtige Zeit ein und versuche es erneut.",
+			"refunded": "Der Canister konnte die Cycles nicht empfangen. $refund $token sind in deine Wallet zurückgekommen, und der Versuch hat $fees $token an Gebühren gekostet. Prüfe die Canister-ID.",
+			"refunded_nothing": "Der Canister konnte die Cycles nicht empfangen, und die Gebühren haben den ganzen Betrag aufgebraucht. Prüfe die Canister-ID."
+		}
+	},
 	"active_user_transactions": {
 		"text": {
 			"button_label": "",
@@ -1393,7 +1424,8 @@
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
-			"lifi_status_unknown": ""
+			"lifi_status_unknown": "",
+			"lifi_fee_changed": ""
 		}
 	},
 	"buy": {
@@ -1817,6 +1849,7 @@
 			"allowance_increase": "Diese Anfrage erhöht die Ausgabengenehmigung des unten stehenden Berechtigten um den angezeigten Betrag, zusätzlich zu dem, was er bereits ausgeben kann. Der Berechtigte kann diesen Betrag des Tokens jederzeit aus Ihrer Wallet übertragen, bis Sie ihn widerrufen.",
 			"allowance_decrease": "Diese Anfrage senkt die Ausgabengenehmigung des unten stehenden Berechtigten um den angezeigten Betrag. Sie bewegt selbst keine Mittel.",
 			"unverifiable_erc20_request": "Diese Anfrage betrifft einen Token, den OISY nicht identifizieren oder entschlüsseln kann. Was angezeigt wird, kann von dem abweichen, was tatsächlich signiert würde, daher ist die Genehmigung deaktiviert.",
+			"token_call_with_value": "Zusätzlich zum unten angezeigten Token-Betrag sendet diese Anfrage $amount an den Token-Vertrag. Eine Token-Übertragung oder -Genehmigung sendet kein $symbol, daher signiert OISY sie zu deiner Sicherheit nicht.",
 			"unverifiable_approval_for_all_request": "Diese Anfrage würde einem Operator die Kontrolle über eine NFT-Sammlung übergeben, und OISY kann nicht entschlüsseln, welcher Operator. Was angezeigt wird, kann von dem abweichen, was tatsächlich signiert würde, daher ist die Genehmigung deaktiviert.",
 			"approval_for_all_grant": "Diese Anfrage erlaubt dem unten stehenden Operator, jedes NFT in dieser Sammlung zu übertragen, das Sie jetzt besitzen oder später erwerben, jederzeit, bis Sie es widerrufen. Sie bewegt selbst keine Mittel.",
 			"approval_for_all_revoke": "Diese Anfrage widerruft den unten stehenden Operator, sodass er die NFTs, die Sie in dieser Sammlung halten, nicht mehr übertragen kann.",
@@ -1899,6 +1932,7 @@
 			"unknown_destination": "Unbekannte Zieladresse.",
 			"cketh_deposit_refused": "Diese Anfrage ruft den ckETH-Umwandlungsvertrag für einen Internet Computer Principal auf, der nicht deiner ist, oder mit Daten, die OISY nicht lesen kann. Zu deiner Sicherheit wurde sie nicht signiert.",
 			"cketh_helper_unconfirmed": "OISY konnte den ckETH-Umwandlungsvertrag nicht bestätigen und diese Einzahlung daher nicht prüfen. Zu deiner Sicherheit wurde sie nicht signiert.",
+			"token_call_with_value": "Diese Anfrage sendet zusätzlich zum Token-Betrag $amount an den Token-Vertrag. Zu deiner Sicherheit wurde sie nicht signiert.",
 			"ambiguous_transaction": "Diese Transaktion bewegt Gelder zwischen mehreren Adressen und kann nicht korrekt zur Überprüfung angezeigt werden. Zu deiner Sicherheit wurde sie nicht signiert.",
 			"close_pays_others": "Diese Transaktion schliesst eines deiner Token-Konten und zahlt dessen Guthaben an eine Adresse aus, die nicht deine Wallet ist. Zu deiner Sicherheit wurde sie nicht signiert.",
 			"unreviewed_without_simulation": "OISY konnte einen Teil dieser Transaktion nicht lesen, und das Netzwerk hat dazu auch keine Simulation zurückgegeben – es beschreibt also nichts, was dieser Teil tun würde. Zu Ihrer Sicherheit wurde sie nicht signiert.",
@@ -2192,6 +2226,8 @@
 			"instruction_close_account": "",
 			"instruction_close_account_for": "Token-Konto für $symbol schliessen",
 			"instruction_approve": "",
+			"instruction_approve_amount": "",
+			"instruction_approve_unlimited": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
 			"instruction_route": "",
@@ -2265,7 +2301,9 @@
 			"converting_ck_token": "$ckToken in $twinToken umwandeln",
 			"twin_network": "$twinNetwork-Netzwerk",
 			"no_date_available": "Kein Datum verfügbar",
-			"pending": "Ausstehend"
+			"pending": "Ausstehend",
+			"top_up": "Aufladung",
+			"top_up_refund": "Erstattung der Aufladung"
 		},
 		"alt": {
 			"open_block_explorer": "Diese Transaktion in einem Block-Explorer öffnen",
