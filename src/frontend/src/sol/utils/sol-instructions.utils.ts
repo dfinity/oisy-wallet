@@ -448,13 +448,15 @@ const fundsBeyondRent = ({
 const mapSolSystemInstruction = ({
 	instruction,
 	rentExemptMinimum,
-	returnsToWallet
+	returnsToWallet,
+	userAddress
 }: {
 	instruction: SolParsedInstruction;
 	rentExemptMinimum: bigint | undefined;
 	// Whether this creation opens a wrapped SOL account the message closes back to the wallet, whose
 	// funding beyond the rent is the SOL it wraps rather than a payment.
 	returnsToWallet: boolean;
+	userAddress?: OptionSolAddress;
 }): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
@@ -572,8 +574,10 @@ const mapSolSystemInstruction = ({
 	}
 
 	// A nonce account hands its balance to a recipient it names, against a signature from the
-	// authority that governs it. Amount, source and destination are all stated, so this is a
-	// transfer and reads as one rather than as something the summary cannot carry.
+	// authority that governs it. Amount, source and destination are all stated, but the nonce
+	// account is not the wallet, and the review reads the wallet alone, as it does for a stake
+	// withdrawal: paid to the wallet it is a transfer and reads as one, paid anywhere else nothing on
+	// the review would show the lamports leaving, so it fails closed.
 	if (instructionType === SystemInstruction.WithdrawNonceAccount) {
 		const {
 			data: { withdrawAmount: amount },
@@ -582,6 +586,10 @@ const mapSolSystemInstruction = ({
 				recipientAccount: { address: destination }
 			}
 		} = instruction;
+
+		if (destination !== userAddress) {
+			return unfaithfulInstruction();
+		}
 
 		return {
 			amount,
@@ -592,7 +600,9 @@ const mapSolSystemInstruction = ({
 
 	// The seed-derived transfer states its own source, destination and amount exactly as the plain
 	// one does; only the signature authorising it differs, coming from the base the source was
-	// derived from rather than from the source itself.
+	// derived from rather than from the source itself. That source is an address derived from the
+	// signer and never the wallet itself, so it is held to the nonce withdrawal's rule: it reads as
+	// a transfer only when it pays the wallet.
 	if (instructionType === SystemInstruction.TransferSolWithSeed) {
 		const {
 			data: { amount },
@@ -601,6 +611,10 @@ const mapSolSystemInstruction = ({
 				destination: { address: destination }
 			}
 		} = instruction;
+
+		if (destination !== userAddress) {
+			return unfaithfulInstruction();
+		}
 
 		return {
 			amount,
@@ -969,8 +983,12 @@ const mapSolStakeInstruction = ({
 }): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
-	// A withdrawal is the one stake instruction the summary can state in full: it names the amount,
-	// the account it leaves and the account it arrives at, exactly as a plain SOL transfer does.
+	// A withdrawal names the amount, the account it leaves and the account it arrives at, exactly as
+	// a plain SOL transfer does. But the account it leaves is a stake account, and the review reads
+	// the wallet alone: the balance changes measure the wallet and its token accounts, and the review
+	// names no recipient of its own. Paid to the wallet, the lamports arrive where the balance
+	// changes show them. Paid anywhere else, nothing on the review would show them leaving or say
+	// where they went, so it fails closed, as a close paying anywhere but the wallet does.
 	if (instructionType === StakeInstruction.Withdraw) {
 		const {
 			data: { args: amount },
@@ -979,6 +997,10 @@ const mapSolStakeInstruction = ({
 				recipient: { address: destination }
 			}
 		} = instruction;
+
+		if (destination !== userAddress) {
+			return unfaithfulInstruction();
+		}
 
 		return {
 			amount,
@@ -1431,7 +1453,8 @@ export const mapSolInstruction = ({
 		return mapSolSystemInstruction({
 			instruction: parsedInstruction,
 			rentExemptMinimum,
-			returnsToWallet
+			returnsToWallet,
+			userAddress
 		});
 	}
 
