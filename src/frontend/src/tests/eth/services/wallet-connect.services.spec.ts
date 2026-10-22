@@ -274,7 +274,7 @@ describe('eth wallet-connect.services', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
-			vi.mocked(executeSend).mockResolvedValue({ hash: '0xHASH' });
+			vi.mocked(executeSend).mockResolvedValue({ hash: '0xHASH', nonce: 1 });
 		});
 
 		it('signs the gas limit the dApp requested', async () => {

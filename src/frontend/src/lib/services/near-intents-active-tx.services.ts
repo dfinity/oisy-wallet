@@ -1,9 +1,8 @@
-import type {
-	ActiveUserTransaction,
-	ActiveUserTransactionStatus
-} from '$declarations/backend/backend.did';
+import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import type { OptionEthAddress } from '$eth/types/address';
 import { fetchNearIntentsStatus } from '$lib/rest/near-intents.rest';
 import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
+import { readEvmSourceTxOutcome } from '$lib/services/evm-source-tx.services';
 import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsExternalRefKey
@@ -13,14 +12,61 @@ import { consoleError } from '$lib/utils/console.utils';
 import {
 	isNearIntentsDepositExpired,
 	nearIntentsDepositExpiredError,
+	nearIntentsDepositOutcomeToUpdate,
 	nearIntentsStatusError,
 	toNearIntentsActiveUserTransactionStatus,
 	toNearIntentsExternalRefs,
 	toNearIntentsExternalRefsMap,
 	toNearIntentsLearnedRefs
 } from '$lib/utils/near-intents-active-tx.utils';
+import { findEvmNetworkByChainId } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
+
+// The outcome of the row's EVM deposit transaction, for a row that recorded one. Not readable
+// without the transaction's hash, nonce and chain, or the address that signed it.
+const readEvmDepositUpdate = async ({
+	tx,
+	refs,
+	userAddress,
+	confirmedNonceByChainId
+}: {
+	tx: ActiveUserTransaction;
+	refs: Partial<Record<NearIntentsExternalRefKey, string>>;
+	userAddress: OptionEthAddress;
+	confirmedNonceByChainId: Map<string, Promise<number>>;
+}): Promise<ReturnType<typeof nearIntentsDepositOutcomeToUpdate>> => {
+	const hash = refs[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_TX_HASH];
+	const nonce = refs[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_TX_NONCE];
+	const chainId = refs[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_CHAIN_ID];
+
+	if (isNullish(hash) || isNullish(nonce) || isNullish(chainId) || isNullish(userAddress)) {
+		return;
+	}
+
+	const network = findEvmNetworkByChainId(BigInt(chainId));
+	const txNonce = Number(nonce);
+
+	if (isNullish(network) || Number.isNaN(txNonce)) {
+		consoleError(`NEAR Intents row ${tx.id} has no usable deposit chain or nonce`);
+		return;
+	}
+
+	const outcome = await readEvmSourceTxOutcome({
+		rowId: tx.id,
+		hash,
+		txNonce,
+		network,
+		userAddress,
+		confirmedNonceByChainId
+	});
+
+	if (outcome === 'unknown') {
+		consoleError(`Unexpected receipt for NEAR Intents deposit transaction ${hash}`);
+	}
+
+	return nearIntentsDepositOutcomeToUpdate(outcome);
+};
 
 // 1Click `/status` is a stateless REST endpoint keyed by depositAddress (+ the
 // optional depositMemo), both snapshotted in `external_refs` at creation time.
@@ -29,10 +75,14 @@ import type { Identity } from '@icp-sdk/core/agent';
 // the durable poll key).
 const pollNearIntentsActiveUserTransaction = async ({
 	tx,
-	identity
+	identity,
+	userAddress,
+	confirmedNonceByChainId
 }: {
 	tx: ActiveUserTransaction;
 	identity: Identity;
+	userAddress: OptionEthAddress;
+	confirmedNonceByChainId: Map<string, Promise<number>>;
 }): Promise<void> => {
 	try {
 		const refs = toNearIntentsExternalRefsMap(tx.external_refs);
@@ -49,15 +99,21 @@ const pollNearIntentsActiveUserTransaction = async ({
 			depositMemo
 		});
 
-		const depositExpired = await isNearIntentsDepositExpired({
-			status,
-			quoteResponse,
-			depositAddress
-		});
+		// Until 1Click processes the deposit: a submitted hash (`KNOWN_DEPOSIT_TX`) does not
+		// establish that funds have arrived.
+		const evmDepositUpdate =
+			status === 'PENDING_DEPOSIT' || status === 'KNOWN_DEPOSIT_TX'
+				? await readEvmDepositUpdate({ tx, refs, userAddress, confirmedNonceByChainId })
+				: undefined;
 
-		const candidate: ActiveUserTransactionStatus | undefined = depositExpired
-			? { Failed: null }
-			: toNearIntentsActiveUserTransactionStatus(status);
+		// The source chain's verdict names the cause, so it wins over the signed quote deadline.
+		const depositUpdate =
+			evmDepositUpdate ??
+			((await isNearIntentsDepositExpired({ status, quoteResponse, depositAddress }))
+				? { status: { Failed: null }, error: nearIntentsDepositExpiredError() }
+				: undefined);
+
+		const candidate = depositUpdate?.status ?? toNearIntentsActiveUserTransactionStatus(status);
 
 		const next = nonNullish(candidate)
 			? advanceStatus({ current: tx.status, candidate })
@@ -75,9 +131,7 @@ const pollNearIntentsActiveUserTransaction = async ({
 
 		const error =
 			nonNullish(next) && 'Failed' in next
-				? depositExpired
-					? nearIntentsDepositExpiredError()
-					: nearIntentsStatusError(status)
+				? (depositUpdate?.error ?? nearIntentsStatusError(status))
 				: undefined;
 
 		const update = {
@@ -96,18 +150,33 @@ const pollNearIntentsActiveUserTransaction = async ({
 	}
 };
 
+/**
+ * Advances the pending NEAR Intents rows from 1Click's `/status`, and, until 1Click processes the
+ * deposit, a row with an EVM deposit transaction from the source chain too.
+ *
+ * `userAddress` is the caller's EVM address, which signed every EVM deposit: rows are
+ * principal-scoped and OISY derives one EVM address per principal. While it is unavailable only
+ * the source-chain check is skipped. `confirmedNonceByChainId` is shared with the other EVM
+ * pollers of the same tick, so rows on one chain cost one nonce read whatever their provider.
+ */
 export const pollNearIntentsActiveUserTransactions = async ({
 	identity,
-	transactions
+	transactions,
+	userAddress,
+	confirmedNonceByChainId = new Map<string, Promise<number>>()
 }: {
 	identity: Identity;
 	transactions: ActiveUserTransaction[];
+	userAddress: OptionEthAddress;
+	confirmedNonceByChainId?: Map<string, Promise<number>>;
 }): Promise<void> => {
 	if (transactions.length === 0) {
 		return;
 	}
 
 	await Promise.all(
-		transactions.map((tx) => pollNearIntentsActiveUserTransaction({ tx, identity }))
+		transactions.map((tx) =>
+			pollNearIntentsActiveUserTransaction({ tx, identity, userAddress, confirmedNonceByChainId })
+		)
 	);
 };

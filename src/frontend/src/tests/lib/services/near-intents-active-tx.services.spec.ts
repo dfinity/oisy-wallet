@@ -1,6 +1,8 @@
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import en from '$lib/i18n/en.json';
 import * as nearIntentsRest from '$lib/rest/near-intents.rest';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
+import { readEvmSourceTxOutcome } from '$lib/services/evm-source-tx.services';
 import { pollNearIntentsActiveUserTransactions } from '$lib/services/near-intents-active-tx.services';
 import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
@@ -15,12 +17,17 @@ import {
 	mockXrpSwapActiveUserTransaction,
 	mockXrpTxHash
 } from '$tests/mocks/active-user-transactions.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockNearIntentsStatusPending } from '$tests/mocks/near-intents.mock';
 import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 
 vi.mock('$lib/rest/near-intents.rest', () => ({
 	fetchNearIntentsStatus: vi.fn()
+}));
+
+vi.mock('$lib/services/evm-source-tx.services', () => ({
+	readEvmSourceTxOutcome: vi.fn()
 }));
 
 vi.mock('$lib/utils/near-intents-quote.utils', () => ({
@@ -64,7 +71,11 @@ describe('near-intents-active-tx.services', () => {
 		});
 
 		it('no-ops on an empty list and does not call the status endpoint', async () => {
-			await pollNearIntentsActiveUserTransactions({ identity: mockIdentity, transactions: [] });
+			await pollNearIntentsActiveUserTransactions({
+				identity: mockIdentity,
+				userAddress: mockEthAddress,
+				transactions: []
+			});
 
 			expect(nearIntentsRest.fetchNearIntentsStatus).not.toHaveBeenCalled();
 			expect(applySpy).not.toHaveBeenCalled();
@@ -73,6 +84,7 @@ describe('near-intents-active-tx.services', () => {
 		it('skips a row without a deposit-address ref', async () => {
 			await pollNearIntentsActiveUserTransactions({
 				identity: mockIdentity,
+				userAddress: mockEthAddress,
 				transactions: [{ ...pendingTx, external_refs: [] }]
 			});
 
@@ -87,6 +99,7 @@ describe('near-intents-active-tx.services', () => {
 
 			await pollNearIntentsActiveUserTransactions({
 				identity: mockIdentity,
+				userAddress: mockEthAddress,
 				transactions: [
 					{
 						...pendingTx,
@@ -111,6 +124,7 @@ describe('near-intents-active-tx.services', () => {
 
 			await pollNearIntentsActiveUserTransactions({
 				identity: mockIdentity,
+				userAddress: mockEthAddress,
 				transactions: [pendingTx]
 			});
 
@@ -128,6 +142,7 @@ describe('near-intents-active-tx.services', () => {
 
 			await pollNearIntentsActiveUserTransactions({
 				identity: mockIdentity,
+				userAddress: mockEthAddress,
 				transactions: [pendingTx]
 			});
 
@@ -151,6 +166,7 @@ describe('near-intents-active-tx.services', () => {
 
 			await pollNearIntentsActiveUserTransactions({
 				identity: mockIdentity,
+				userAddress: mockEthAddress,
 				transactions: [pendingTx]
 			});
 
@@ -174,6 +190,7 @@ describe('near-intents-active-tx.services', () => {
 
 			await pollNearIntentsActiveUserTransactions({
 				identity: mockIdentity,
+				userAddress: mockEthAddress,
 				transactions: [pendingTx]
 			});
 
@@ -194,6 +211,7 @@ describe('near-intents-active-tx.services', () => {
 
 			await pollNearIntentsActiveUserTransactions({
 				identity: mockIdentity,
+				userAddress: mockEthAddress,
 				transactions: [pendingTx]
 			});
 
@@ -232,6 +250,7 @@ describe('near-intents-active-tx.services', () => {
 
 					await pollNearIntentsActiveUserTransactions({
 						identity: mockIdentity,
+						userAddress: mockEthAddress,
 						transactions: [{ ...pendingTx, status: { Executing: null } }]
 					});
 
@@ -251,9 +270,197 @@ describe('near-intents-active-tx.services', () => {
 
 				await pollNearIntentsActiveUserTransactions({
 					identity: mockIdentity,
+					userAddress: mockEthAddress,
 					transactions: [{ ...pendingTx, status: { Executing: null } }]
 				});
 
+				expect(applySpy).not.toHaveBeenCalled();
+			});
+		});
+
+		describe('a row with an EVM deposit transaction', () => {
+			const depositTxHash = '0xDepositTxHash';
+
+			const evmTx = {
+				...pendingTx,
+				status: { Executing: null },
+				external_refs: [
+					...pendingTx.external_refs,
+					{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_TX_HASH, value: depositTxHash },
+					{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_TX_NONCE, value: '5' },
+					{
+						key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_CHAIN_ID,
+						value: `${ETHEREUM_NETWORK.chainId}`
+					}
+				]
+			};
+
+			beforeEach(() => {
+				vi.mocked(nearIntentsRest.fetchNearIntentsStatus).mockResolvedValue(
+					statusResponse({ status: 'PENDING_DEPOSIT' })
+				);
+			});
+
+			// `KNOWN_DEPOSIT_TX` follows the hash OISY submits to `/deposit/submit`, so it does not
+			// establish that funds arrived either.
+			it.each<NearIntentsSwapStatus>(['PENDING_DEPOSIT', 'KNOWN_DEPOSIT_TX'])(
+				'fails the swap at %s when its deposit was replaced or dropped',
+				async (status) => {
+					vi.mocked(nearIntentsRest.fetchNearIntentsStatus).mockResolvedValue(
+						statusResponse({ status })
+					);
+					vi.mocked(readEvmSourceTxOutcome).mockResolvedValue('replaced');
+
+					const confirmedNonceByChainId = new Map<string, Promise<number>>();
+
+					await pollNearIntentsActiveUserTransactions({
+						identity: mockIdentity,
+						userAddress: mockEthAddress,
+						transactions: [evmTx],
+						confirmedNonceByChainId
+					});
+
+					expect(readEvmSourceTxOutcome).toHaveBeenCalledExactlyOnceWith({
+						rowId: evmTx.id,
+						hash: depositTxHash,
+						txNonce: 5,
+						network: ETHEREUM_NETWORK,
+						userAddress: mockEthAddress,
+						confirmedNonceByChainId
+					});
+					expect(applySpy).toHaveBeenCalledExactlyOnceWith(
+						expect.objectContaining({
+							update: {
+								status: { Failed: null },
+								error: en.swap.error.swap_replaced_or_dropped
+							}
+						})
+					);
+				}
+			);
+
+			it.each<NearIntentsSwapStatus>(['PENDING_DEPOSIT', 'KNOWN_DEPOSIT_TX'])(
+				'fails the swap at %s when its deposit reverted',
+				async (status) => {
+					vi.mocked(nearIntentsRest.fetchNearIntentsStatus).mockResolvedValue(
+						statusResponse({ status })
+					);
+					vi.mocked(readEvmSourceTxOutcome).mockResolvedValue('reverted');
+
+					await pollNearIntentsActiveUserTransactions({
+						identity: mockIdentity,
+						userAddress: mockEthAddress,
+						transactions: [evmTx]
+					});
+
+					expect(applySpy).toHaveBeenCalledExactlyOnceWith(
+						expect.objectContaining({
+							update: {
+								status: { Failed: null },
+								error: en.swap.error.failed_unexpectedly
+							}
+						})
+					);
+				}
+			);
+
+			it('names the replaced deposit over the passed quote deadline', async () => {
+				vi.mocked(nearIntentsRest.fetchNearIntentsStatus).mockResolvedValue(
+					statusResponse({
+						status: 'PENDING_DEPOSIT',
+						quoteResponse: mockNearIntentsStatusPending.quoteResponse
+					})
+				);
+				vi.mocked(readEvmSourceTxOutcome).mockResolvedValue('replaced');
+				vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(true);
+
+				await pollNearIntentsActiveUserTransactions({
+					identity: mockIdentity,
+					userAddress: mockEthAddress,
+					transactions: [evmTx]
+				});
+
+				expect(verifyNearIntentsQuoteSignature).not.toHaveBeenCalled();
+				expect(applySpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						update: {
+							status: { Failed: null },
+							error: en.swap.error.swap_replaced_or_dropped
+						}
+					})
+				);
+			});
+
+			it.each(['pending', 'succeeded'] as const)(
+				'leaves the swap to 1Click when its deposit is %s',
+				async (outcome) => {
+					vi.mocked(readEvmSourceTxOutcome).mockResolvedValue(outcome);
+
+					await pollNearIntentsActiveUserTransactions({
+						identity: mockIdentity,
+						userAddress: mockEthAddress,
+						transactions: [evmTx]
+					});
+
+					expect(applySpy).not.toHaveBeenCalled();
+				}
+			);
+
+			it('does not read the deposit once 1Click processes it', async () => {
+				vi.mocked(nearIntentsRest.fetchNearIntentsStatus).mockResolvedValue(
+					statusResponse({ status: 'PROCESSING' })
+				);
+
+				await pollNearIntentsActiveUserTransactions({
+					identity: mockIdentity,
+					userAddress: mockEthAddress,
+					transactions: [evmTx]
+				});
+
+				expect(readEvmSourceTxOutcome).not.toHaveBeenCalled();
+			});
+
+			it('still follows 1Click without the EVM address', async () => {
+				await pollNearIntentsActiveUserTransactions({
+					identity: mockIdentity,
+					userAddress: undefined,
+					transactions: [{ ...evmTx, status: { Pending: null } }]
+				});
+
+				expect(readEvmSourceTxOutcome).not.toHaveBeenCalled();
+				expect(applySpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ update: { status: { Executing: null } } })
+				);
+			});
+
+			it('does not read a deposit the row did not record', async () => {
+				await pollNearIntentsActiveUserTransactions({
+					identity: mockIdentity,
+					userAddress: mockEthAddress,
+					transactions: [{ ...pendingTx, status: { Executing: null } }]
+				});
+
+				expect(readEvmSourceTxOutcome).not.toHaveBeenCalled();
+				expect(applySpy).not.toHaveBeenCalled();
+			});
+
+			it('does not read a deposit on a chain OISY does not know', async () => {
+				await pollNearIntentsActiveUserTransactions({
+					identity: mockIdentity,
+					userAddress: mockEthAddress,
+					transactions: [
+						{
+							...evmTx,
+							external_refs: evmTx.external_refs.map((ref) =>
+								ref.key === NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_CHAIN_ID
+									? { ...ref, value: '999999999' }
+									: ref
+							)
+						}
+					]
+				});
+
+				expect(readEvmSourceTxOutcome).not.toHaveBeenCalled();
 				expect(applySpy).not.toHaveBeenCalled();
 			});
 		});
@@ -265,6 +472,7 @@ describe('near-intents-active-tx.services', () => {
 
 			await pollNearIntentsActiveUserTransactions({
 				identity: mockIdentity,
+				userAddress: mockEthAddress,
 				transactions: [{ ...pendingTx, status: { Executing: null } }]
 			});
 
@@ -283,6 +491,7 @@ describe('near-intents-active-tx.services', () => {
 
 			await pollNearIntentsActiveUserTransactions({
 				identity: mockIdentity,
+				userAddress: mockEthAddress,
 				transactions: [{ ...pendingTx, status: { Executing: null } }]
 			});
 
@@ -312,6 +521,7 @@ describe('near-intents-active-tx.services', () => {
 
 			await pollNearIntentsActiveUserTransactions({
 				identity: mockIdentity,
+				userAddress: mockEthAddress,
 				transactions: [{ ...mockXrpSwapActiveUserTransaction, status: { Executing: null } }]
 			});
 
@@ -338,6 +548,7 @@ describe('near-intents-active-tx.services', () => {
 			await expect(
 				pollNearIntentsActiveUserTransactions({
 					identity: mockIdentity,
+					userAddress: mockEthAddress,
 					transactions: [pendingTx]
 				})
 			).resolves.toBeUndefined();
@@ -352,6 +563,7 @@ describe('near-intents-active-tx.services', () => {
 
 			await pollNearIntentsActiveUserTransactions({
 				identity: mockIdentity,
+				userAddress: mockEthAddress,
 				transactions: [pendingTx, { ...pendingTx, id: 'second-row' }]
 			});
 

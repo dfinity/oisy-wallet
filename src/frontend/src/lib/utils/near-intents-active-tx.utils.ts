@@ -14,6 +14,7 @@ import {
 } from '$lib/types/near-intents';
 import { SwapProvider } from '$lib/types/swap';
 import type { Token as AppToken } from '$lib/types/token';
+import type { EvmSourceTxOutcome } from '$lib/utils/evm-source-tx.utils';
 import { verifyNearIntentsQuoteSignature } from '$lib/utils/near-intents-quote.utils';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
 import { nonNullish, toNullable } from '@dfinity/utils';
@@ -197,6 +198,24 @@ export const isNearIntentsDepositExpired = async ({
 
 export const nearIntentsDepositExpiredError = (): string =>
 	get(i18n).swap.error.near_intents_deposit_expired;
+
+/**
+ * The swap's outcome from its EVM deposit transaction, read until 1Click processes the deposit.
+ * A deposit that reverted, or whose nonce another transaction took, can never reach the deposit
+ * address, and 1Click keeps waiting for it. Any other verdict leaves the swap to 1Click.
+ */
+export const nearIntentsDepositOutcomeToUpdate = (
+	outcome: EvmSourceTxOutcome
+): { status: ActiveUserTransactionStatus; error: string } | undefined => {
+	switch (outcome) {
+		case 'reverted':
+			return { status: { Failed: null }, error: get(i18n).swap.error.failed_unexpectedly };
+		case 'replaced':
+			return { status: { Failed: null }, error: get(i18n).swap.error.swap_replaced_or_dropped };
+		default:
+			return undefined;
+	}
+};
 
 /**
  * Builds the analytics metadata for a NEAR Intents AUT row that has just reached
