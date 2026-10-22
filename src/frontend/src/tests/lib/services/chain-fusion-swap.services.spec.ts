@@ -743,7 +743,7 @@ describe('chain-fusion-swap.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.mocked(sendEth).mockResolvedValue({ hash: DEPOSIT_TX_HASH });
+			vi.mocked(sendEth).mockResolvedValue({ hash: DEPOSIT_TX_HASH, nonce: 1 });
 		});
 
 		it('should create an active user transaction carrying what the mint poller needs', async () => {
