@@ -777,3 +777,88 @@ mod agreement {
         ]
     );
 }
+
+mod stored_contacts {
+    //! Tests for decoding `StoredContacts`, the per-principal contact value in stable memory.
+    use std::collections::BTreeMap;
+
+    use candid::{decode_one, encode_one, CandidType};
+    use pretty_assertions::assert_eq;
+    use serde_bytes::ByteBuf;
+
+    use crate::types::contact::{
+        Contact, ContactAddressData, ContactImage, ImageMimeType, StoredContacts,
+        MAX_IMAGE_SIZE_BYTES,
+    };
+
+    fn contact(id: u64, image: Option<ContactImage>) -> Contact {
+        Contact {
+            id,
+            name: format!("Contact {id}"),
+            addresses: vec![],
+            update_timestamp_ns: 1,
+            image,
+        }
+    }
+
+    fn image(size: usize) -> ContactImage {
+        ContactImage {
+            data: ByteBuf::from(vec![0u8; size]),
+            mime_type: ImageMimeType::Png,
+        }
+    }
+
+    #[test]
+    fn decoding_drops_an_inline_image_that_fails_validation() {
+        // Encoding does not validate, so this is the value a contact written before the image size
+        // check holds.
+        let stored = StoredContacts {
+            contacts: BTreeMap::from([
+                (1, contact(1, Some(image(MAX_IMAGE_SIZE_BYTES + 1)))),
+                (2, contact(2, Some(image(MAX_IMAGE_SIZE_BYTES)))),
+                (3, contact(3, None)),
+            ]),
+            update_timestamp_ns: 1,
+        };
+
+        let decoded: StoredContacts = decode_one(&encode_one(&stored).unwrap()).unwrap();
+
+        assert_eq!(decoded.contacts[&1], contact(1, None));
+        assert_eq!(decoded.contacts[&2], stored.contacts[&2]);
+        assert_eq!(decoded.contacts[&3], stored.contacts[&3]);
+    }
+
+    #[test]
+    fn decoding_accepts_contacts_stored_without_an_image_field() {
+        #[derive(CandidType)]
+        struct ContactWithoutImage {
+            id: u64,
+            name: String,
+            addresses: Vec<ContactAddressData>,
+            update_timestamp_ns: u64,
+        }
+
+        #[derive(CandidType)]
+        struct StoredContactsWithoutImages {
+            contacts: BTreeMap<u64, ContactWithoutImage>,
+            update_timestamp_ns: u64,
+        }
+
+        let stored = StoredContactsWithoutImages {
+            contacts: BTreeMap::from([(
+                1,
+                ContactWithoutImage {
+                    id: 1,
+                    name: "Contact 1".to_string(),
+                    addresses: vec![],
+                    update_timestamp_ns: 1,
+                },
+            )]),
+            update_timestamp_ns: 1,
+        };
+
+        let decoded: StoredContacts = decode_one(&encode_one(&stored).unwrap()).unwrap();
+
+        assert_eq!(decoded.contacts[&1], contact(1, None));
+    }
+}

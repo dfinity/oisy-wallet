@@ -144,6 +144,12 @@ adding migration tests.
 - Don't change a struct's field name or type "in place" without a
   migration plan — Candid records are name-keyed, and `Storable` decoding
   will fail.
+- Don't add or tighten a `Validate` rule on a stored type without
+  checking the rows already stored. A type that uses
+  `validate_on_deserialize!` runs the current rules every time a row is
+  read, so a row written under the old rules can stop decoding. Migrate
+  those rows first, or decode the affected field leniently, as
+  `Contact::image` does for images stored inline.
 - Don't run the migration outside `post_upgrade`. `init` is for fresh
   installs, not upgrades.
 - Don't assume `Cell::init` writes the value you hand it. It **loads** the
