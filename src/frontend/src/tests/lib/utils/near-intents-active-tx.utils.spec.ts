@@ -15,6 +15,8 @@ import { SwapProvider } from '$lib/types/swap';
 import {
 	buildNearIntentsSwapTrackingMetadata,
 	isNearIntentsActiveUserTransaction,
+	isNearIntentsDepositExpired,
+	nearIntentsDepositExpiredError,
 	nearIntentsStatusError,
 	toNearIntentsActiveUserTransactionStatus,
 	toNearIntentsData,
@@ -23,6 +25,7 @@ import {
 	toNearIntentsExternalRefsMap,
 	toNearIntentsLearnedRefs
 } from '$lib/utils/near-intents-active-tx.utils';
+import { verifyNearIntentsQuoteSignature } from '$lib/utils/near-intents-quote.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import type { SplToken } from '$sol/types/spl';
 import {
@@ -30,10 +33,15 @@ import {
 	mockNearIntentsActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockNearIntentsStatusPending } from '$tests/mocks/near-intents.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { Principal } from '@icp-sdk/core/principal';
+
+vi.mock('$lib/utils/near-intents-quote.utils', () => ({
+	verifyNearIntentsQuoteSignature: vi.fn()
+}));
 
 const USDC_ETHEREUM = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 const USDC_SOLANA = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
@@ -255,6 +263,94 @@ describe('near-intents-active-tx.utils', () => {
 		it('returns undefined for non-terminal statuses', () => {
 			expect(nearIntentsStatusError('SUCCESS')).toBeUndefined();
 			expect(nearIntentsStatusError('PROCESSING')).toBeUndefined();
+		});
+	});
+
+	describe('isNearIntentsDepositExpired', () => {
+		const { quoteResponse } = mockNearIntentsStatusPending;
+		const { depositAddress, deadline } = quoteResponse.quote;
+
+		const afterDeadline = new Date(Date.parse(deadline) + 1);
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(true);
+			vi.useFakeTimers().setSystemTime(afterDeadline);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('is true for a pending deposit past the deadline of its verified quote', async () => {
+			await expect(
+				isNearIntentsDepositExpired({ status: 'PENDING_DEPOSIT', quoteResponse, depositAddress })
+			).resolves.toBeTruthy();
+
+			expect(verifyNearIntentsQuoteSignature).toHaveBeenCalledExactlyOnceWith(quoteResponse);
+		});
+
+		it('is false up to the deadline itself', async () => {
+			vi.setSystemTime(new Date(deadline));
+
+			await expect(
+				isNearIntentsDepositExpired({ status: 'PENDING_DEPOSIT', quoteResponse, depositAddress })
+			).resolves.toBeFalsy();
+		});
+
+		it.each<NearIntentsSwapStatus>([
+			'KNOWN_DEPOSIT_TX',
+			'INCOMPLETE_DEPOSIT',
+			'PROCESSING',
+			'SUCCESS',
+			'REFUNDED',
+			'FAILED'
+		])('is false for %s, where a deposit has arrived or the swap ended', async (status) => {
+			await expect(
+				isNearIntentsDepositExpired({ status, quoteResponse, depositAddress })
+			).resolves.toBeFalsy();
+
+			expect(verifyNearIntentsQuoteSignature).not.toHaveBeenCalled();
+		});
+
+		it('is false for a quote of another deposit address', async () => {
+			await expect(
+				isNearIntentsDepositExpired({
+					status: 'PENDING_DEPOSIT',
+					quoteResponse,
+					depositAddress: '0xAnotherDepositAddress'
+				})
+			).resolves.toBeFalsy();
+
+			expect(verifyNearIntentsQuoteSignature).not.toHaveBeenCalled();
+		});
+
+		it('is false when the quote signature does not verify', async () => {
+			vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(false);
+
+			await expect(
+				isNearIntentsDepositExpired({ status: 'PENDING_DEPOSIT', quoteResponse, depositAddress })
+			).resolves.toBeFalsy();
+		});
+
+		it('is false when the deadline cannot be read', async () => {
+			await expect(
+				isNearIntentsDepositExpired({
+					status: 'PENDING_DEPOSIT',
+					quoteResponse: {
+						...quoteResponse,
+						quote: { ...quoteResponse.quote, deadline: 'not-a-date' }
+					},
+					depositAddress
+				})
+			).resolves.toBeFalsy();
+		});
+	});
+
+	describe('nearIntentsDepositExpiredError', () => {
+		it('returns the deposit expired message', () => {
+			expect(nearIntentsDepositExpiredError()).toBe(en.swap.error.near_intents_deposit_expired);
 		});
 	});
 

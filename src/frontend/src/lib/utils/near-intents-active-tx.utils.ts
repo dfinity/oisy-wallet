@@ -8,11 +8,13 @@ import { i18n } from '$lib/stores/i18n.store';
 import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsExternalRefKey,
+	type NearIntentsStatusResponse,
 	type NearIntentsSwapDetails,
 	type NearIntentsSwapStatus
 } from '$lib/types/near-intents';
 import { SwapProvider } from '$lib/types/swap';
 import type { Token as AppToken } from '$lib/types/token';
+import { verifyNearIntentsQuoteSignature } from '$lib/utils/near-intents-quote.utils';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
 import { nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -155,6 +157,39 @@ export const nearIntentsStatusError = (status: NearIntentsSwapStatus): string | 
 
 	return undefined;
 };
+
+/**
+ * Whether a swap's deposit can no longer arrive: 1Click still reports none (`PENDING_DEPOSIT`)
+ * after the signed quote deadline, the moment its deposit address becomes inactive.
+ *
+ * 1Click itself never moves such an address on, so without this a deposit that never reached it
+ * (an EVM transaction the network accepted and then dropped, for example) would leave the row
+ * in progress forever. The deadline is read from the quote embedded in `/status` and counts only
+ * when that quote is the one for the row's deposit address and its signature verifies, which
+ * also covers rows created before the signature was stored.
+ */
+export const isNearIntentsDepositExpired = async ({
+	status,
+	quoteResponse,
+	depositAddress
+}: Pick<NearIntentsStatusResponse, 'status' | 'quoteResponse'> & {
+	depositAddress: string;
+}): Promise<boolean> => {
+	if (status !== 'PENDING_DEPOSIT' || quoteResponse?.quote?.depositAddress !== depositAddress) {
+		return false;
+	}
+
+	const deadline = Date.parse(quoteResponse.quote.deadline);
+
+	if (Number.isNaN(deadline) || Date.now() <= deadline) {
+		return false;
+	}
+
+	return await verifyNearIntentsQuoteSignature(quoteResponse);
+};
+
+export const nearIntentsDepositExpiredError = (): string =>
+	get(i18n).swap.error.near_intents_deposit_expired;
 
 /**
  * Builds the analytics metadata for a NEAR Intents AUT row that has just reached
