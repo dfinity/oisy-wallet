@@ -18,7 +18,7 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
 	import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
-	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+	import { isEthersError, isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { capSendAmountToFee, shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -49,7 +49,6 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
-	import { errorDetailToString, replaceHexValues } from '$lib/utils/error.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -263,7 +262,8 @@
 					address: nft.collection.address,
 					tokenId: String(nft.id),
 					network: sourceNetwork.name,
-					error: replaceHexValues(errorDetailToString(err) ?? '')
+					// Only the code: ethers' message holds the signed transaction and the node's answer.
+					...(isEthersError(err) && { error: err.code })
 				}
 			});
 

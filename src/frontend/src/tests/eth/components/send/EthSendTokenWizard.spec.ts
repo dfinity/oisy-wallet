@@ -253,7 +253,7 @@ describe('EthSendTokenWizard.spec', () => {
 		expect(onCloseStep).toHaveBeenCalledExactlyOnceWith(ProgressStepsSend.DONE);
 	});
 
-	it('tracks a refused NFT broadcast without the signed transaction', async () => {
+	describe('when the NFT broadcast fails', () => {
 		const nft: Nft = mockValidErc721Nft;
 		const collectionToken: NonFungibleToken = mockValidErc721Token;
 
@@ -261,53 +261,72 @@ describe('EthSendTokenWizard.spec', () => {
 		// recipient.
 		const signedTransaction = `0x02f8b10107843b9aca00${fromAddr.slice(2)}${destination.slice(2)}`;
 
-		// What ethers raises when the node refuses the broadcast: the request it sent, signed
-		// transaction included, is part of the message.
-		const err = makeError('could not coalesce error', 'UNKNOWN_ERROR', {
-			error: { code: -32000, message: 'already known' },
-			payload: {
-				id: 9,
-				jsonrpc: '2.0',
-				method: 'eth_sendRawTransaction',
-				params: [signedTransaction]
+		it.each([
+			{
+				answer: 'an answer ethers passes on',
+				// The request ethers sent, signed transaction included, is part of the message.
+				err: makeError('could not coalesce error', 'UNKNOWN_ERROR', {
+					error: { code: -32000, message: 'already known' },
+					payload: {
+						id: 9,
+						jsonrpc: '2.0',
+						method: 'eth_sendRawTransaction',
+						params: [signedTransaction]
+					}
+				}),
+				tracked: { error: 'UNKNOWN_ERROR' }
+			},
+			{
+				answer: 'an answer ethers maps to a code of its own',
+				// The node's answer names the wallet, its balance and the cost of the transfer.
+				err: makeError('insufficient funds for intrinsic transaction cost', 'INSUFFICIENT_FUNDS', {
+					transaction: { from: fromAddr, to: destination },
+					info: {
+						error: {
+							code: -32000,
+							message: `insufficient funds for gas * price + value: address ${fromAddr} have 1234567890123 want 9876543210987`
+						}
+					}
+				}),
+				tracked: { error: 'INSUFFICIENT_FUNDS' }
+			},
+			{
+				answer: 'an error that does not come from ethers',
+				err: new Error(`Signing failed for ${fromAddr}`),
+				tracked: {}
 			}
+		])('tracks only the ethers code for $answer', async ({ err, tracked }) => {
+			vi.spyOn(toasts, 'toastsErrorNoTrace').mockImplementation(() => Symbol('toast'));
+			vi.mocked(nftSendServices.sendNft).mockRejectedValueOnce(err);
+
+			const { getByTestId } = renderHost({
+				currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+				sendProgressStep: ProgressStepsSend.INITIALIZATION,
+				nft,
+				destination,
+				sourceNetwork: ETHEREUM_NETWORK,
+				nativeEthereumToken: ETHEREUM_TOKEN,
+				sendToken: collectionToken,
+				sendTokenDecimals: 0
+			});
+
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(analytics.trackEvent).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					metadata: {
+						resultStatus: 'error',
+						token: collectionToken.symbol,
+						collection: nft.collection.name,
+						address: nft.collection.address,
+						tokenId: String(nft.id),
+						network: ETHEREUM_NETWORK.name,
+						...tracked
+					}
+				})
+			);
 		});
-
-		expect(err.message).toContain(signedTransaction);
-
-		vi.mocked(nftSendServices.sendNft).mockRejectedValueOnce(err);
-
-		const { getByTestId } = renderHost({
-			currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
-			sendProgressStep: ProgressStepsSend.INITIALIZATION,
-			nft,
-			destination,
-			sourceNetwork: ETHEREUM_NETWORK,
-			nativeEthereumToken: ETHEREUM_TOKEN,
-			sendToken: collectionToken,
-			sendTokenDecimals: 0
-		});
-
-		await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
-		await vi.runOnlyPendingTimersAsync();
-
-		expect(analytics.trackEvent).toHaveBeenCalledExactlyOnceWith(
-			expect.objectContaining({
-				metadata: {
-					resultStatus: 'error',
-					token: collectionToken.symbol,
-					collection: nft.collection.name,
-					address: nft.collection.address,
-					tokenId: String(nft.id),
-					network: ETHEREUM_NETWORK.name,
-					error: expect.stringContaining('"message": "already known"')
-				}
-			})
-		);
-
-		const [[{ metadata }]] = vi.mocked(analytics.trackEvent).mock.calls;
-
-		expect(JSON.stringify(metadata)).not.toContain(signedTransaction);
 	});
 
 	describe('fee observation', () => {
