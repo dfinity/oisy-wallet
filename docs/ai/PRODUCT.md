@@ -58,7 +58,8 @@ smoothly when released.
   picker) darken one step the moment they are pressed, then keep their light-blue fill while
   their list is open.
 - **Rows** that span the full width do **not** shrink. They darken one step instead: a 20 %
-  OISY-blue fill over their 10 % hover.
+  OISY-blue fill over their 10 % hover, shown the moment the row is pressed and fading back on
+  release, so even a quick click shows it.
 - **A row does not light up when a control inside it is pressed** (a copy icon, a toggle); the
   control shows its own press.
 - **Hover** colours appear only on devices that can hover, so a tap on a phone does not leave
