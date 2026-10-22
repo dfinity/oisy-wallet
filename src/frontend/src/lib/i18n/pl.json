@@ -1062,6 +1062,7 @@
 			"enter_recipient_address": "Wprowadź adres odbiorcy, nazwę lub alias",
 			"enter_wallet_address": "Wprowadź adres portfela, nazwę lub alias",
 			"enter_memo": "Wpisz notatkę (opcjonalnie)",
+			"enter_memo_nat64": "",
 			"xrp_destination_tag": "Wprowadź tag docelowy XRP (opcjonalnie)",
 			"select_network": "Wybierz sieć",
 			"search_nfts": ""
@@ -1093,6 +1094,7 @@
 			"unknown_cketh": "Nie można pobrać tokena ckETH.",
 			"destination_address_invalid": "Adres docelowy jest nieprawidłowy.",
 			"amount_invalid": "Kwota jest nieprawidłowa.",
+			"invalid_nat64_memo": "",
 			"xrp_destination_tag_invalid": "Tag docelowy XRP musi być liczbą całkowitą od 0 do 4294967295.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Niewystarczające środki: kwota musi pozostawić dość na pokrycie opłaty i wymaganej rezerwy konta XRP.",

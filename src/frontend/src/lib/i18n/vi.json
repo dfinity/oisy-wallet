@@ -1062,6 +1062,7 @@
 			"enter_recipient_address": "Nhập địa chỉ người nhận, tên hoặc biệt danh",
 			"enter_wallet_address": "Nhập địa chỉ ví, tên hoặc biệt danh",
 			"enter_memo": "Nhập ghi chú (tuỳ chọn)",
+			"enter_memo_nat64": "",
 			"xrp_destination_tag": "Nhập thẻ đích XRP (không bắt buộc)",
 			"select_network": "Chọn mạng",
 			"search_nfts": "Tìm kiếm vật phẩm sưu tầm"
@@ -1093,6 +1094,7 @@
 			"unknown_cketh": "Không thể truy xuất token ckETH.",
 			"destination_address_invalid": "Địa chỉ ví không hợp lệ.",
 			"amount_invalid": "Số lượng không hợp lệ.",
+			"invalid_nat64_memo": "",
 			"xrp_destination_tag_invalid": "Thẻ đích XRP phải là số nguyên từ 0 đến 4294967295.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Không đủ tiền: số tiền phải để lại đủ để trang trải phí và khoản dự trữ tài khoản XRP bắt buộc.",
