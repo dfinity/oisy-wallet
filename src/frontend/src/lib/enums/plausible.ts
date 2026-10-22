@@ -33,6 +33,8 @@ export enum PLAUSIBLE_EVENTS {
 	// Sending a transaction, sent when something notable happens to it. The outcome is in
 	// `result_status`, never in the name.
 	TRANSACTION_SEND = 'transaction_send',
+	// The user's contacts. The step is in `event_modifier` and the outcome in `result_status`.
+	CONTACT = 'contact',
 	// An invariant we believed unreachable was reached. Not for flows that can legitimately
 	// fail — those keep their own event and report the outcome via `result_status`.
 	ERROR = 'error'
@@ -167,7 +169,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	COMPUTE = 'compute',
 	SEND = 'send',
 	CONVERT = 'convert',
-	AI_ASSISTANT = 'ai_assistant'
+	AI_ASSISTANT = 'ai_assistant',
+	CONTACTS = 'contacts'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
