@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { tick } from 'svelte';
-	import { page } from '$app/state';
+	import { navigating, page } from '$app/state';
 	import { SUPPORTED_MAINNET_NETWORKS, SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
 	import NetworkSwitcherList from '$lib/components/networks/NetworkSwitcherList.svelte';
@@ -63,6 +63,13 @@
 		nonNullish(pendingSelection) ? (pendingSelection.networkId ?? undefined) : $networkId
 	);
 
+	// A network picked while an earlier switch was pending owns the check now.
+	const clearPendingSelection = (selection: { networkId: OptionNetworkId }) => {
+		if (pendingSelection === selection) {
+			pendingSelection = undefined;
+		}
+	};
+
 	const onNetworkSelect = async (networkId: OptionNetworkId) => {
 		const selection = { networkId };
 
@@ -73,9 +80,19 @@
 
 		dropdown?.close();
 
+		const { href } = page.url;
+
 		// The route change runs a view transition, which holds the page still while the new state
 		// renders: a panel still leaving would stop mid-fade. So the route changes once it has gone.
 		await waitForMilliseconds(BACKDROP_FADE_OUT_DURATION);
+
+		// The closed panel no longer covers the page, so the user may have set off elsewhere during
+		// the wait. Switching now would abort that navigation and bring them back here.
+		if (nonNullish(navigating.to) || page.url.href !== href) {
+			clearPendingSelection(selection);
+
+			return;
+		}
 
 		try {
 			await switchNetwork({ networkId });
@@ -95,10 +112,7 @@
 			});
 		}
 
-		// A network picked while this navigation was pending owns the check now.
-		if (pendingSelection === selection) {
-			pendingSelection = undefined;
-		}
+		clearPendingSelection(selection);
 	};
 
 	let enabledNetworks = $derived(

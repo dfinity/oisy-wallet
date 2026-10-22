@@ -1,4 +1,5 @@
 import * as appNavigation from '$app/navigation';
+import { navigating } from '$app/state';
 import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
@@ -18,10 +19,15 @@ import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 describe('NetworksSwitcher', () => {
+	const homeUrl = new URL('https://oisy.com/');
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 
 		mockPage.reset();
+		mockPage.mockUrl(homeUrl);
+
+		Object.assign(navigating, { to: null });
 	});
 
 	// The name is the text the trigger shows, so voice control reaches it by that text (WCAG
@@ -120,6 +126,49 @@ describe('NetworksSwitcher', () => {
 				expect(goto.mock.calls[0]?.[0].toString()).toContain(
 					`network=${ETHEREUM_NETWORK.id.description}`
 				);
+			});
+		});
+
+		// The closed panel no longer covers the page: a switch made after the user set off elsewhere
+		// would abort their navigation and bring them back.
+		describe('when the user navigates elsewhere while the panel leaves', () => {
+			const activityUrl = new URL('https://oisy.com/activity');
+
+			beforeEach(() => {
+				goto.mockResolvedValue();
+			});
+
+			it('skips the switch while that navigation is running', async () => {
+				const { getByTestId } = render(NetworksSwitcher, { props: { visible: true } });
+
+				await fireEvent.click(getByTestId(ethRow));
+
+				Object.assign(navigating, { to: { url: activityUrl } });
+
+				await waitForMilliseconds(BACKDROP_FADE_OUT_DURATION + 50);
+
+				expect(goto).not.toHaveBeenCalled();
+			});
+
+			it('skips the switch once the route has changed, and checks the route network again', async () => {
+				const { getByTestId, queryByRole } = render(NetworksSwitcher, {
+					props: { visible: true }
+				});
+
+				await fireEvent.click(getByTestId(ethRow));
+
+				mockPage.mockUrl(activityUrl);
+
+				await waitForMilliseconds(BACKDROP_FADE_OUT_DURATION + 50);
+
+				expect(goto).not.toHaveBeenCalled();
+
+				await waitFor(() => expect(queryByRole('dialog')).not.toBeInTheDocument());
+
+				await fireEvent.click(getByTestId(NETWORKS_SWITCHER_DROPDOWN));
+
+				expect(getByTestId(icpRow)).toHaveAttribute('aria-pressed', 'true');
+				expect(getByTestId(ethRow)).toHaveAttribute('aria-pressed', 'false');
 			});
 		});
 
