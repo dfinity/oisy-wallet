@@ -10,6 +10,8 @@ import {
 import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import {
+	isNearIntentsDepositExpired,
+	nearIntentsDepositExpiredError,
 	nearIntentsDepositOutcomeToUpdate,
 	nearIntentsStatusError,
 	toNearIntentsActiveUserTransactionStatus,
@@ -92,14 +94,24 @@ const pollNearIntentsActiveUserTransaction = async ({
 			return;
 		}
 
-		const { status, swapDetails } = await fetchNearIntentsStatus({ depositAddress, depositMemo });
+		const { status, swapDetails, quoteResponse } = await fetchNearIntentsStatus({
+			depositAddress,
+			depositMemo
+		});
 
 		// Until 1Click processes the deposit: a submitted hash (`KNOWN_DEPOSIT_TX`) does not
 		// establish that funds have arrived.
-		const depositUpdate =
+		const evmDepositUpdate =
 			status === 'PENDING_DEPOSIT' || status === 'KNOWN_DEPOSIT_TX'
 				? await readEvmDepositUpdate({ tx, refs, userAddress, confirmedNonceByChainId })
 				: undefined;
+
+		// The source chain's verdict names the cause, so it wins over the signed quote deadline.
+		const depositUpdate =
+			evmDepositUpdate ??
+			((await isNearIntentsDepositExpired({ status, quoteResponse, depositAddress }))
+				? { status: { Failed: null }, error: nearIntentsDepositExpiredError() }
+				: undefined);
 
 		const candidate = depositUpdate?.status ?? toNearIntentsActiveUserTransactionStatus(status);
 

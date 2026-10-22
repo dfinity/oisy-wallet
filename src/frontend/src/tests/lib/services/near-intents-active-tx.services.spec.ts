@@ -6,9 +6,11 @@ import { readEvmSourceTxOutcome } from '$lib/services/evm-source-tx.services';
 import { pollNearIntentsActiveUserTransactions } from '$lib/services/near-intents-active-tx.services';
 import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
+	type NearIntentsQuoteResponse,
 	type NearIntentsSwapDetails,
 	type NearIntentsSwapStatus
 } from '$lib/types/near-intents';
+import { verifyNearIntentsQuoteSignature } from '$lib/utils/near-intents-quote.utils';
 import {
 	mockNearIntentsActiveUserTransaction,
 	mockXrpLastLedgerSequence,
@@ -17,6 +19,7 @@ import {
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockNearIntentsStatusPending } from '$tests/mocks/near-intents.mock';
 import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 
 vi.mock('$lib/rest/near-intents.rest', () => ({
@@ -25,6 +28,10 @@ vi.mock('$lib/rest/near-intents.rest', () => ({
 
 vi.mock('$lib/services/evm-source-tx.services', () => ({
 	readEvmSourceTxOutcome: vi.fn()
+}));
+
+vi.mock('$lib/utils/near-intents-quote.utils', () => ({
+	verifyNearIntentsQuoteSignature: vi.fn()
 }));
 
 vi.mock('$lib/utils/console.utils', () => ({
@@ -37,15 +44,17 @@ const pendingTx = mockNearIntentsActiveUserTransaction;
 
 const statusResponse = ({
 	status,
-	swapDetails = {}
+	swapDetails = {},
+	quoteResponse = {} as never
 }: {
 	status: NearIntentsSwapStatus;
 	swapDetails?: NearIntentsSwapDetails;
+	quoteResponse?: NearIntentsQuoteResponse;
 }) => ({
 	correlationId: 'id',
 	status,
 	updatedAt: '2026-03-16T00:00:00.000Z',
-	quoteResponse: {} as never,
+	quoteResponse,
 	swapDetails
 });
 
@@ -216,6 +225,59 @@ describe('near-intents-active-tx.services', () => {
 			);
 		});
 
+		describe('a deposit that never arrived', () => {
+			const { quoteResponse } = mockNearIntentsStatusPending;
+
+			beforeEach(() => {
+				vi.useFakeTimers().setSystemTime(new Date(Date.parse(quoteResponse.quote.deadline) + 1));
+
+				vi.mocked(nearIntentsRest.fetchNearIntentsStatus).mockResolvedValue(
+					statusResponse({ status: 'PENDING_DEPOSIT', quoteResponse })
+				);
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			it.each<NearIntentsSwapStatus>(['PENDING_DEPOSIT', 'KNOWN_DEPOSIT_TX'])(
+				'fails the swap at %s once the signed quote deadline has passed',
+				async (status) => {
+					vi.mocked(nearIntentsRest.fetchNearIntentsStatus).mockResolvedValue(
+						statusResponse({ status, quoteResponse })
+					);
+					vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(true);
+
+					await pollNearIntentsActiveUserTransactions({
+						identity: mockIdentity,
+						userAddress: mockEthAddress,
+						transactions: [{ ...pendingTx, status: { Executing: null } }]
+					});
+
+					expect(applySpy).toHaveBeenCalledExactlyOnceWith(
+						expect.objectContaining({
+							update: {
+								status: { Failed: null },
+								error: en.swap.error.near_intents_deposit_expired
+							}
+						})
+					);
+				}
+			);
+
+			it('keeps the swap in progress when the quote signature does not verify', async () => {
+				vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(false);
+
+				await pollNearIntentsActiveUserTransactions({
+					identity: mockIdentity,
+					userAddress: mockEthAddress,
+					transactions: [{ ...pendingTx, status: { Executing: null } }]
+				});
+
+				expect(applySpy).not.toHaveBeenCalled();
+			});
+		});
+
 		describe('a row with an EVM deposit transaction', () => {
 			const depositTxHash = '0xDepositTxHash';
 
@@ -301,6 +363,33 @@ describe('near-intents-active-tx.services', () => {
 					);
 				}
 			);
+
+			it('names the replaced deposit over the passed quote deadline', async () => {
+				vi.mocked(nearIntentsRest.fetchNearIntentsStatus).mockResolvedValue(
+					statusResponse({
+						status: 'PENDING_DEPOSIT',
+						quoteResponse: mockNearIntentsStatusPending.quoteResponse
+					})
+				);
+				vi.mocked(readEvmSourceTxOutcome).mockResolvedValue('replaced');
+				vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(true);
+
+				await pollNearIntentsActiveUserTransactions({
+					identity: mockIdentity,
+					userAddress: mockEthAddress,
+					transactions: [evmTx]
+				});
+
+				expect(verifyNearIntentsQuoteSignature).not.toHaveBeenCalled();
+				expect(applySpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						update: {
+							status: { Failed: null },
+							error: en.swap.error.swap_replaced_or_dropped
+						}
+					})
+				);
+			});
 
 			it.each(['pending', 'succeeded'] as const)(
 				'leaves the swap to 1Click when its deposit is %s',
