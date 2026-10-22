@@ -213,6 +213,7 @@ export const decode = async ({
 	const mapped = {
 		...mappedTransaction,
 		requiredSignatures: countSolRequiredSignatures(base64EncodedTransactionMessage),
+		feePayer: parsedTransactionMessage.feePayer.address,
 		...(nonNullish(prioritizationFeeEstimate) && { prioritizationFeeEstimate }),
 		...(nonNullish(preview) && { preview }),
 		...(nonNullish(messageSummary) && { messageSummary })

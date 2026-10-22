@@ -58,6 +58,9 @@
 		// message carries at least its fee payer's, so that is what the review assumes until the
 		// decode settles.
 		requiredSignatures?: number;
+		// Who pays the base and priority fees: the message's first signer, which is the dApp rather
+		// than the user when the dApp sponsors the request.
+		feePayer?: string;
 		isApproval?: boolean;
 		// Whether the message cannot be stated faithfully, which is what the signing flow refuses on.
 		ambiguous?: boolean;
@@ -109,6 +112,7 @@
 		prioritizationFee,
 		prioritizationFeeEstimate,
 		requiredSignatures = 1,
+		feePayer,
 		isApproval = false,
 		ambiguous = false,
 		decoded = false,
@@ -151,10 +155,17 @@
 	// dApp co-signs pays it twice.
 	let baseFee = $derived(SOLANA_LAMPORTS_PER_SIGNATURE * BigInt(requiredSignatures));
 
-	// What the transaction costs beyond what it moves: every line of the fee section. The simulated
-	// SOL balance carries all of it and the message states none of it, so it is the room the
-	// comparison of the two allows.
-	let costs = $derived(baseFee + (prioritizationFee ?? ZERO) + ataFee + appAccountCost);
+	// A fee payer nobody has read yet is taken to be the user, as the review has always assumed.
+	let walletPaysFees = $derived(isNullish(feePayer) || feePayer === source);
+
+	// What the transaction costs the user beyond what it moves: every line of the fee section the
+	// wallet pays. The simulated SOL balance carries all of it and the message states none of it, so
+	// it is the room the comparison of the two allows. A request the dApp sponsors leaves the base and
+	// priority fees out: the user's balance pays neither, so allowing for them would make room for an
+	// outflow nothing explains.
+	let costs = $derived(
+		(walletPaysFees ? baseFee + (prioritizationFee ?? ZERO) : ZERO) + ataFee + appAccountCost
+	);
 
 	// The message read on its own says a plain send, receive or swap, and the run agrees that this
 	// is all it does. Anything less than agreement is left unsaid: a confident sentence over a

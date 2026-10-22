@@ -641,6 +641,7 @@ describe('SolWalletConnectSignReview', () => {
 					...props,
 					messageSummary,
 					requiredSignatures: 2,
+					feePayer: mockSolAddress,
 					preview: { solDelta: -1_010_000n, tokenDeltas: [], controlChanges: [] }
 				}
 			});
@@ -658,6 +659,50 @@ describe('SolWalletConnectSignReview', () => {
 			});
 
 			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
+		});
+
+		// A dApp that sponsors the request pays its fees, so the user's balance carries none of them: a
+		// run that takes them from it anyway moved something the message did not state.
+		it('should not allow for the base fee of a request the dApp sponsors', () => {
+			const { queryByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					messageSummary,
+					requiredSignatures: 2,
+					feePayer: mockSolAddress2,
+					preview: { solDelta: -1_010_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
+		});
+
+		it('should not allow for the priority fee of a request the dApp sponsors', () => {
+			const { queryByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					messageSummary,
+					prioritizationFee: 7_000n,
+					feePayer: mockSolAddress2,
+					preview: { solDelta: -1_007_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
+		});
+
+		it('should state a sponsored request whose run takes only what it moves', () => {
+			const { getByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					messageSummary,
+					requiredSignatures: 2,
+					feePayer: mockSolAddress2,
+					preview: { solDelta: -1_000_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(getByTestId('message-summary')).toHaveTextContent(en.send.text.send);
 		});
 
 		// A sentence the user would check the figures against, over a transaction that does

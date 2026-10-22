@@ -11,7 +11,7 @@ import { decode, sign } from '$sol/services/wallet-connect.services';
 import en from '$tests/mocks/i18n.mock';
 import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
-import { lamports } from '@solana/kit';
+import { address, lamports } from '@solana/kit';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 vi.mock('$sol/services/wallet-connect.services', () => ({
@@ -101,6 +101,7 @@ describe('SolWalletConnectSignModal', () => {
 		resolveDecode({
 			amount: 1n,
 			requiredSignatures: 1,
+			feePayer: address(mockSolAddress),
 			parties: { sources: [], destinations: [], partial: true }
 		});
 
@@ -116,6 +117,7 @@ describe('SolWalletConnectSignModal', () => {
 			amount: 1n,
 			ambiguous: true,
 			requiredSignatures: 1,
+			feePayer: address(mockSolAddress),
 			parties: { sources: [], destinations: [], partial: true }
 		});
 
@@ -134,6 +136,7 @@ describe('SolWalletConnectSignModal', () => {
 		vi.mocked(decode).mockResolvedValueOnce({
 			amount: 1n,
 			requiredSignatures: 2,
+			feePayer: address(mockSolAddress),
 			parties: { sources: [], destinations: [], partial: true }
 		});
 
@@ -143,6 +146,56 @@ describe('SolWalletConnectSignModal', () => {
 
 		await waitFor(() => {
 			expect(getByTestId('network-fee')).toHaveTextContent('0.00001 SOL');
+		});
+	});
+
+	// The review allows for the fees only when the wallet pays them, so it has to be told who does.
+	describe('the fee payer it hands the review', () => {
+		beforeEach(() => {
+			solAddressMainnetStore.set({ data: mockSolAddress, certified: true });
+		});
+
+		afterEach(() => {
+			solAddressMainnetStore.reset();
+		});
+
+		// A two-signature send whose run takes both base fees from the wallet.
+		const renderSend = async (feePayer: string) => {
+			vi.mocked(decode).mockResolvedValueOnce({
+				amount: 1n,
+				requiredSignatures: 2,
+				feePayer: address(feePayer),
+				messageSummary: {
+					kind: 'send',
+					spent: { delta: -1_000_000n },
+					counterparty: mockSolAddress2
+				},
+				preview: { solDelta: -1_010_000n, tokenDeltas: [], controlChanges: [] },
+				parties: { sources: [], destinations: [], partial: false }
+			});
+
+			const result = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			// Once the base fee reads two signatures, the decode has reached the review.
+			await waitFor(() => {
+				expect(result.getByTestId('network-fee')).toHaveTextContent('0.00001 SOL');
+			});
+
+			return result;
+		};
+
+		it('should state a send the wallet pays the fees of', async () => {
+			const { getByTestId } = await renderSend(mockSolAddress);
+
+			expect(getByTestId('message-summary')).toHaveTextContent(en.send.text.send);
+		});
+
+		it('should not state a send whose run takes fees the dApp sponsors', async () => {
+			const { queryByTestId } = await renderSend(mockSolAddress2);
+
+			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
 		});
 	});
 
@@ -179,6 +232,7 @@ describe('SolWalletConnectSignModal', () => {
 			const args = await approve({
 				amount: 1n,
 				requiredSignatures: 1,
+				feePayer: address(mockSolAddress),
 				simulatedInstructions: true,
 				instructions: [{ kind: 'route' }, { kind: 'send', amount: 1n }],
 				parties: { sources: [], destinations: [], partial: false }
@@ -193,6 +247,7 @@ describe('SolWalletConnectSignModal', () => {
 			const args = await approve({
 				amount: 1n,
 				requiredSignatures: 1,
+				feePayer: address(mockSolAddress),
 				simulatedInstructions: true,
 				instructions: [{ kind: 'unknown' }],
 				preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] },
@@ -206,6 +261,7 @@ describe('SolWalletConnectSignModal', () => {
 			const args = await approve({
 				amount: 1n,
 				requiredSignatures: 1,
+				feePayer: address(mockSolAddress),
 				simulatedInstructions: false,
 				instructions: [{ kind: 'send', amount: 1n }],
 				parties: { sources: [], destinations: [], partial: true }
@@ -220,6 +276,7 @@ describe('SolWalletConnectSignModal', () => {
 			const args = await approve({
 				amount: 1n,
 				requiredSignatures: 1,
+				feePayer: address(mockSolAddress),
 				simulatedInstructions: true,
 				instructions: [],
 				parties: { sources: [], destinations: [], partial: false }
@@ -232,6 +289,7 @@ describe('SolWalletConnectSignModal', () => {
 			const args = await approve({
 				amount: 1n,
 				requiredSignatures: 1,
+				feePayer: address(mockSolAddress),
 				parties: { sources: [], destinations: [], partial: true }
 			});
 
@@ -246,6 +304,7 @@ describe('SolWalletConnectSignModal', () => {
 			const args = await approve({
 				amount: 1n,
 				requiredSignatures: 1,
+				feePayer: address(mockSolAddress),
 				simulatedInstructions: true,
 				instructions: [{ kind: 'unknown' }],
 				parties: { sources: [], destinations: [], partial: false }
@@ -258,6 +317,7 @@ describe('SolWalletConnectSignModal', () => {
 			const args = await approve({
 				amount: 1n,
 				requiredSignatures: 1,
+				feePayer: address(mockSolAddress),
 				parties: { sources: [], destinations: [], partial: true }
 			});
 
@@ -271,6 +331,7 @@ describe('SolWalletConnectSignModal', () => {
 		vi.mocked(decode).mockResolvedValueOnce({
 			amount: 1n,
 			requiredSignatures: 1,
+			feePayer: address(mockSolAddress),
 			opensAccountBeyondRent: true,
 			parties: { sources: [], destinations: [], partial: false }
 		});
@@ -290,6 +351,7 @@ describe('SolWalletConnectSignModal', () => {
 		const args = await approve({
 			amount: 1n,
 			requiredSignatures: 1,
+			feePayer: address(mockSolAddress),
 			parties: { sources: [], destinations: [], partial: true }
 		});
 
@@ -311,6 +373,7 @@ describe('SolWalletConnectSignModal', () => {
 			vi.mocked(decode).mockResolvedValueOnce({
 				amount: 1n,
 				requiredSignatures: 1,
+				feePayer: address(mockSolAddress),
 				preview: {
 					solDelta: -5_000n,
 					tokenDeltas: [],
@@ -334,6 +397,7 @@ describe('SolWalletConnectSignModal', () => {
 			const args = await approve({
 				amount: 1n,
 				requiredSignatures: 1,
+				feePayer: address(mockSolAddress),
 				preview: {
 					solDelta: -5_000n,
 					tokenDeltas: [],
@@ -353,6 +417,7 @@ describe('SolWalletConnectSignModal', () => {
 			const args = await approve({
 				amount: 1n,
 				requiredSignatures: 1,
+				feePayer: address(mockSolAddress),
 				rentExemptMinimum: lamports(1_488_440n),
 				parties: { sources: [], destinations: [], partial: true }
 			});
@@ -364,6 +429,7 @@ describe('SolWalletConnectSignModal', () => {
 			const args = await approve({
 				amount: 1n,
 				requiredSignatures: 1,
+				feePayer: address(mockSolAddress),
 				parties: { sources: [], destinations: [], partial: true }
 			});
 
@@ -375,6 +441,7 @@ describe('SolWalletConnectSignModal', () => {
 		const decoded = (unreadPrograms: { address: string; name?: string }[]) => ({
 			amount: 1n,
 			requiredSignatures: 1,
+			feePayer: address(mockSolAddress),
 			unreadPrograms,
 			parties: { sources: [], destinations: [], partial: false }
 		});

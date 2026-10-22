@@ -116,7 +116,11 @@ vi.mock('$sol/services/sol-simulation.services', () => ({
 }));
 
 describe('wallet-connect.services', () => {
-	const mockParsedTransaction = { mock: 'mockParsedTransaction', instructions: [] };
+	const mockParsedTransaction = {
+		mock: 'mockParsedTransaction',
+		feePayer: { address: mockSolAddress },
+		instructions: []
+	};
 	const mockMappedTransaction: MappedSolTransaction = {
 		amount: 123n,
 		destination: mockAtaAddress
@@ -225,6 +229,7 @@ describe('wallet-connect.services', () => {
 			expect(result).toEqual({
 				...mockMappedTransaction,
 				requiredSignatures: 1,
+				feePayer: mockSolAddress,
 				rentExemptMinimum: mockRentExemptMinimum,
 				parties: emptyPartialParties
 			});
@@ -246,6 +251,23 @@ describe('wallet-connect.services', () => {
 				base64EncodedTransactionMessage
 			);
 			expect(result).toEqual(expect.objectContaining({ requiredSignatures: 2 }));
+		});
+
+		// A dApp that sponsors a request names itself as the fee payer, and pays the fees in the user's
+		// place.
+		it('should state who pays the fee', async () => {
+			vi.spyOn(solTransactionsUtils, 'parseSolBase64TransactionMessage').mockResolvedValue({
+				...mockParsedTransaction,
+				feePayer: { address: mockSolAddress2 }
+			} as unknown as CompilableTransactionMessage);
+
+			const result = await decode({
+				base64EncodedTransactionMessage: 'mockBase64Transaction',
+				networkId: SOLANA_MAINNET_NETWORK_ID,
+				address: mockSolAddress
+			});
+
+			expect(result).toEqual(expect.objectContaining({ feePayer: mockSolAddress2 }));
 		});
 
 		it('should recover the SPL mint from the token account when the mapper did not surface it', async () => {
@@ -277,6 +299,7 @@ describe('wallet-connect.services', () => {
 				destination: mockSolAddress2,
 				tokenAddress: mockSplAddress,
 				requiredSignatures: 1,
+				feePayer: mockSolAddress,
 				rentExemptMinimum: mockRentExemptMinimum,
 				parties: emptyPartialParties
 			});
@@ -313,6 +336,7 @@ describe('wallet-connect.services', () => {
 				source: mockSolAddress,
 				destination: mockAtaAddress,
 				requiredSignatures: 1,
+				feePayer: mockSolAddress,
 				rentExemptMinimum: mockRentExemptMinimum,
 				parties: emptyPartialParties
 			});
@@ -341,6 +365,7 @@ describe('wallet-connect.services', () => {
 				source: mockAtaAddress,
 				destination: mockSolAddress2,
 				requiredSignatures: 1,
+				feePayer: mockSolAddress,
 				rentExemptMinimum: mockRentExemptMinimum,
 				parties: emptyPartialParties
 			});
@@ -524,6 +549,7 @@ describe('wallet-connect.services', () => {
 				expect(result).toEqual({
 					...mockMappedTransaction,
 					requiredSignatures: 1,
+					feePayer: mockSolAddress,
 					rentExemptMinimum: mockRentExemptMinimum,
 					parties: mockParties,
 					unreadPrograms: []
@@ -617,6 +643,7 @@ describe('wallet-connect.services', () => {
 				expect(result).toEqual({
 					...mockMappedTransaction,
 					requiredSignatures: 1,
+					feePayer: mockSolAddress,
 					rentExemptMinimum: mockRentExemptMinimum,
 					parties: mockParties,
 					unreadPrograms: []
