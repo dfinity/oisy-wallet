@@ -1,13 +1,16 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
-	import { page } from '$app/state';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { tick } from 'svelte';
+	import { navigating, page } from '$app/state';
 	import { SUPPORTED_MAINNET_NETWORKS, SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
 	import NetworkSwitcherList from '$lib/components/networks/NetworkSwitcherList.svelte';
 	import NetworkSwitcherLogo from '$lib/components/networks/NetworkSwitcherLogo.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
+	import { NETWORK_PARAM } from '$lib/constants/routes.constants';
 	import { NETWORKS_SWITCHER_DROPDOWN } from '$lib/constants/test-ids.constants';
+	import { BACKDROP_FADE_OUT_DURATION } from '$lib/constants/transition.constants';
 	import { selectedNetwork, networkId } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
@@ -24,6 +27,7 @@
 	import type { OptionNetworkId } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
+	import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 
 	interface Props {
 		visible: boolean;
@@ -52,7 +56,59 @@
 		});
 	};
 
+	// The check follows the route, which only changes once the navigation lands. Until then it
+	// stays on the row that was clicked. Raw, so each click's selection keeps its identity.
+	let pendingSelection = $state.raw<{ networkId: OptionNetworkId } | undefined>();
+
+	let checkedNetworkId = $derived(
+		nonNullish(pendingSelection) ? (pendingSelection.networkId ?? undefined) : $networkId
+	);
+
+	// A network picked while an earlier switch was pending owns the check now.
+	const clearPendingSelection = (selection: { networkId: OptionNetworkId }) => {
+		if (pendingSelection === selection) {
+			pendingSelection = undefined;
+		}
+	};
+
+	// The view a URL opens, apart from its network: the part a switch from this menu leaves alone.
+	const viewOf = (url: URL): string => {
+		const { pathname, searchParams } = new URL(url);
+
+		searchParams.delete(NETWORK_PARAM);
+
+		return `${pathname}?${searchParams}`;
+	};
+
 	const onNetworkSelect = async (networkId: OptionNetworkId) => {
+		const selection = { networkId };
+
+		pendingSelection = selection;
+
+		// A panel that is leaving no longer updates, so the check moves before it closes.
+		await tick();
+
+		dropdown?.close();
+
+		const view = viewOf(page.url);
+
+		// The route change runs a view transition, which holds the page still while the new state
+		// renders: a panel still leaving would stop mid-fade. So the route changes once it has gone.
+		await waitForMilliseconds(BACKDROP_FADE_OUT_DURATION);
+
+		// The closed panel no longer covers the page, so the user may have opened another view during
+		// the wait, such as a page or an NFT collection. Switching now would abort that navigation or
+		// change the network of the view they just opened. An earlier switch from this menu keeps the
+		// view, so a second pick still goes through.
+		if (
+			(nonNullish(navigating.to) && viewOf(navigating.to.url) !== view) ||
+			viewOf(page.url) !== view
+		) {
+			clearPendingSelection(selection);
+
+			return;
+		}
+
 		try {
 			await switchNetwork({ networkId });
 
@@ -71,7 +127,7 @@
 			});
 		}
 
-		dropdown?.close();
+		clearPendingSelection(selection);
 	};
 
 	let enabledNetworks = $derived(
@@ -111,7 +167,7 @@
 	{#snippet items()}
 		<div class="menu-surface">
 			<div class="menu-divider">
-				<NetworkSwitcherList onSelected={onNetworkSelect} selectedNetworkId={$networkId} />
+				<NetworkSwitcherList onSelected={onNetworkSelect} selectedNetworkId={checkedNetworkId} />
 			</div>
 
 			<Button
