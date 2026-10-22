@@ -8,6 +8,7 @@
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import SwapEthForm from '$eth/components/swap/SwapEthForm.svelte';
+	import SwapLifiFeeDisplay from '$eth/components/swap/SwapLifiFeeDisplay.svelte';
 	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import {
@@ -29,6 +30,7 @@
 		toCkErc20HelperContractAddress,
 		toCkEthHelperContractAddress
 	} from '$icp-eth/utils/cketh.utils';
+	import InsufficientFundsForFee from '$lib/components/fee/InsufficientFundsForFee.svelte';
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
@@ -38,15 +40,23 @@
 		TRACK_COUNT_SWAP_SUBMITTED,
 		TRACK_COUNT_SWAP_SUCCESS
 	} from '$lib/constants/analytics.constants';
+	import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
+	import { SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { fungibleTokens } from '$lib/derived/tokens.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { hasAcknowledgedNearIntentsSwap } from '$lib/derived/user-provider-agreements.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { fetchChainFusionEvmSwap } from '$lib/services/chain-fusion-swap.services';
+	import {
+		fetchLifiEvmSwap,
+		lifiApprovalTransactions,
+		lifiQuoteFeeCeiling
+	} from '$lib/services/lifi-evm-swap.services';
 	import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
 	import {
 		enableSwapDestinationToken,
@@ -55,6 +65,7 @@
 		fetchVeloraDeltaSwap,
 		fetchVeloraMarketSwap
 	} from '$lib/services/swap.services';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -62,14 +73,23 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import { LifiFeeChangedError } from '$lib/types/errors';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapProvider, VeloraSwapTypes } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
 	import { asCkTwinOf } from '$lib/utils/chain-fusion-swap.utils';
+	import { consoleError } from '$lib/utils/console.utils';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import {
+		isLifiFeeAffordable,
+		lifiCarriedFeeCeiling,
+		raiseLifiMaxFee
+	} from '$lib/utils/lifi-fee.utils';
+	import { toLifiSwapErrorType } from '$lib/utils/lifi-swap-error.utils';
+	import { lifiUserTokenAddresses } from '$lib/utils/lifi-swap.utils';
 	import { isNetworkEthereum } from '$lib/utils/network.utils';
 	import { nearIntentsQuoteRejectedMessage } from '$lib/utils/swap.utils';
 
@@ -109,6 +129,9 @@
 		sourceToken,
 		destinationToken,
 		failedSwapError,
+		lifiCarriedFee,
+		amountSetToMax,
+		lifiMaxFee,
 		sourceTokenExchangeRate,
 		setIsTokenPermitSupported,
 		isSourceTokenPermitSupported
@@ -186,7 +209,7 @@
 	let feeContext = $state<EthFeeContext | undefined>();
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
 
-	setContext<FeeContextType>(
+	const { maxGasFee } = setContext<FeeContextType>(
 		ETH_FEE_CONTEXT_KEY,
 		initEthFeeContext({
 			feeStore,
@@ -228,13 +251,183 @@
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
 	);
 
-	// Velora, OneSec, NEAR Intents and Chain Fusion all close the modal at initiation
+	const lifiOffer = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.LIFI
+			? $swapAmountsStore.selectedProvider
+			: undefined
+	);
+
+	const isLifiProvider = $derived(nonNullish(lifiOffer));
+
+	// What LI.FI's fee is read for: the inputs of the quote, as its cache keys them. The bridges are
+	// left out, which a re-quote without Across narrows for the same inputs.
+	const lifiInputsKey = $derived(
+		nonNullish(lifiOffer) ? JSON.stringify({ ...lifiOffer.request, allowBridges: [] }) : undefined
+	);
+
+	// The swap transaction's fee ceiling, priced from the displayed quote at OISY's fees.
+	let lifiQuoteFee = $state<bigint | undefined>();
+	let lifiQuoteFeeGeneration = 0;
+
+	$effect(() => {
+		const offer = lifiOffer;
+		const token = $sourceToken;
+		const maxFeePerGas = $feeStore?.maxFeePerGas;
+		const maxPriorityFeePerGas = $feeStore?.maxPriorityFeePerGas;
+
+		const generation = ++lifiQuoteFeeGeneration;
+
+		if (
+			isNullish(offer) ||
+			isNullish(token) ||
+			!isNetworkEthereum(token.network) ||
+			isNullish(maxFeePerGas) ||
+			isNullish(maxPriorityFeePerGas)
+		) {
+			lifiQuoteFee = undefined;
+
+			return;
+		}
+
+		lifiQuoteFeeCeiling({
+			quote: offer.swapDetails,
+			sourceNetwork: token.network,
+			maxFeePerGas,
+			maxPriorityFeePerGas
+		})
+			.then((feeCeiling) => {
+				if (generation === lifiQuoteFeeGeneration) {
+					lifiQuoteFee = feeCeiling;
+				}
+			})
+			.catch((err: unknown) => {
+				consoleError(err);
+
+				if (generation === lifiQuoteFeeGeneration) {
+					lifiQuoteFee = undefined;
+				}
+			});
+	});
+
+	// The approvals an ERC-20 source needs, from one allowance read per set of inputs.
+	let lifiApprovals = $state<0 | 1 | 2 | undefined>();
+	let lifiApprovalsGeneration = 0;
+
+	$effect(() => {
+		// Read again for new inputs only, never for a re-quote of the same ones.
+		[lifiInputsKey];
+
+		untrack(() => {
+			const generation = ++lifiApprovalsGeneration;
+
+			lifiApprovals = undefined;
+
+			if (
+				isNullish(lifiOffer) ||
+				isNullish($sourceToken) ||
+				isNullish($ethAddress) ||
+				!isNetworkEthereum($sourceToken.network)
+			) {
+				return;
+			}
+
+			lifiApprovalTransactions({
+				sourceToken: $sourceToken as Erc20Token,
+				userAddress: $ethAddress,
+				amount: BigInt(lifiOffer.request.fromAmount),
+				sourceNetwork: $sourceToken.network
+			}).then((approvals) => {
+				if (generation === lifiApprovalsGeneration) {
+					lifiApprovals = approvals;
+				}
+			});
+		});
+	});
+
+	// A ceiling that an execution found above the reviewed one, which the review then shows, for the
+	// inputs it was found for: its gas and L1 data fee priced at the fee per gas execution will sign
+	// with now, not the one of the refused attempt.
+	const lifiReviewedFeeCeiling = $derived.by(() => {
+		const maxFeePerGas = $feeStore?.maxFeePerGas;
+		const carriedFee = $lifiCarriedFee;
+
+		const carried =
+			nonNullish(carriedFee) && carriedFee.key === lifiInputsKey && nonNullish(maxFeePerGas)
+				? lifiCarriedFeeCeiling({ gas: carriedFee.gas, l1Fee: carriedFee.l1Fee, maxFeePerGas })
+				: undefined;
+
+		if (isNullish(lifiQuoteFee) || isNullish(carried)) {
+			return lifiQuoteFee ?? carried;
+		}
+
+		return carried > lifiQuoteFee ? carried : lifiQuoteFee;
+	});
+
+	// Each approval is a transaction priced as the fee context prices one: `approve()` signs it with
+	// that gas.
+	const lifiFee = $derived(
+		nonNullish(lifiReviewedFeeCeiling) && nonNullish(lifiApprovals) && nonNullish($maxGasFee)
+			? lifiReviewedFeeCeiling + BigInt(lifiApprovals) * $maxGasFee
+			: undefined
+	);
+
+	// Every step change rebuilds this wizard, so the review reads the fee and the allowance again.
+	// It confirms only once both are known: an ERC-20's approval is paid before execution compares
+	// the fee with the one reviewed, and the total shown includes the approvals.
+	const isLifiFeeLoading = $derived(isLifiProvider && isNullish(lifiFee));
+
+	// The refreshed total, a carried ceiling included, is checked against the balance as the form
+	// checked its own: execution checks the balance only after an ERC-20's approval is paid.
+	const isLifiFeeUnaffordable = $derived(
+		nonNullish(lifiOffer) &&
+			nonNullish(lifiFee) &&
+			!isLifiFeeAffordable({
+				fee: lifiFee,
+				amount: BigInt(lifiOffer.request.fromAmount),
+				isNativeSource: lifiOffer.request.fromToken === ZERO_ETH_ADDRESS,
+				nativeBalance:
+					(nonNullish(nativeEthereumToken)
+						? $balancesStore?.[nativeEthereumToken.id]?.data
+						: undefined) ?? ZERO
+			})
+	);
+
+	// "Max" from a native source left room for the form's fee, with headroom. A review that prices it
+	// higher still, at a fee per gas that rose further or with a ceiling carried back from a refused
+	// execution, raises what "Max" leaves room for: back on the form, it then steps down to an amount
+	// that fits, instead of landing on the same one again.
+	$effect(() => {
+		const fee = lifiFee;
+		const destinationTokenId = $destinationToken?.id;
+
+		if (
+			currentStep?.name !== WizardStepsSwap.REVIEW ||
+			!isLifiFeeUnaffordable ||
+			!$amountSetToMax ||
+			lifiOffer?.request.fromToken !== ZERO_ETH_ADDRESS ||
+			isNullish(fee) ||
+			isNullish(destinationTokenId)
+		) {
+			return;
+		}
+
+		untrack(() => {
+			const reserved = raiseLifiMaxFee({ reserved: $lifiMaxFee, fee, destinationTokenId });
+
+			if (reserved !== $lifiMaxFee) {
+				lifiMaxFee.set(reserved);
+			}
+		});
+	});
+
+	// Velora, OneSec, NEAR Intents, Chain Fusion and LI.FI all close the modal at initiation
 	// and settle in the background via the Active User Transactions store. Only the
 	// ICP-native providers still complete inside the modal.
 	const isActiveTransactionSwap = $derived(
 		isNearIntentsProvider ||
 			isOneSecProvider ||
 			isChainFusionProvider ||
+			isLifiProvider ||
 			$swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA
 	);
 
@@ -247,7 +440,8 @@
 	const swapEmitsApprovalSteps = $derived(
 		!isNearIntentsProvider &&
 			($swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA ||
-				isChainFusionProvider) &&
+				isChainFusionProvider ||
+				isLifiProvider) &&
 			isNotDefaultEthereumToken($sourceToken)
 	);
 
@@ -391,6 +585,23 @@
 				} else {
 					await fetchVeloraMarketSwap({ ...params, swapDetails: selectedProvider.swapDetails });
 				}
+			} else if (
+				selectedProvider?.provider === SwapProvider.LIFI &&
+				nonNullish(lifiReviewedFeeCeiling) &&
+				nonNullish(lifiFee)
+			) {
+				await fetchLifiEvmSwap({
+					...baseParams,
+					destinationToken: $destinationToken,
+					offer: selectedProvider,
+					reviewedFeeCeiling: lifiReviewedFeeCeiling,
+					reviewedFee: lifiFee,
+					// Disabled ones too: hiding a token does not revoke its allowance to the Diamond.
+					userTokenAddresses: lifiUserTokenAddresses({
+						tokens: $fungibleTokens,
+						networkId: $sourceToken.network.id
+					})
+				});
 			} else if (selectedProvider?.provider === SwapProvider.ONE_SEC) {
 				if (!isIcToken($destinationToken) || isNullish($ethAddress)) {
 					toastsError({
@@ -518,11 +729,25 @@
 				name: TRACK_COUNT_SWAP_ERROR,
 				metadata: {
 					...swapTrackingMetadata,
-					error: errorDetail ?? ''
+					// LI.FI's error text can carry the user's addresses or signed transaction: only an
+					// allow-listed category is reported.
+					...(selectedProvider?.provider === SwapProvider.LIFI
+						? { result_error_type: toLifiSwapErrorType(err) }
+						: { error: errorDetail ?? '' })
 				}
 			});
 
-			if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
+			if (err instanceof LifiFeeChangedError) {
+				// Carried back to the review, which shows the higher fee for the user to confirm.
+				if (nonNullish(lifiInputsKey)) {
+					lifiCarriedFee.set({ key: lifiInputsKey, gas: err.gas, l1Fee: err.l1Fee });
+				}
+
+				failedSwapError.set({
+					message: $i18n.swap.error.lifi_fee_changed,
+					variant: 'info'
+				});
+			} else if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
 				failedSwapError.set({
 					message: replacePlaceholders(
 						replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded),
@@ -566,7 +791,9 @@
 				<SwapEthForm
 					{isApproveNeeded}
 					{isGasless}
+					isLifi={isLifiProvider}
 					{isSwapAmountsLoading}
+					{lifiFee}
 					{nativeEthereumToken}
 					{onClose}
 					{onNext}
@@ -585,10 +812,21 @@
 					{receiveAmount}
 					{slippageValue}
 					{swapAmount}
+					swapDisabled={isLifiFeeLoading || isLifiFeeUnaffordable}
 				>
 					{#snippet swapFees()}
 						{#if isGasless}
 							<SwapGaslessFee />
+						{:else if isLifiProvider}
+							<SwapLifiFeeDisplay fee={lifiFee}>
+								{#snippet label()}
+									<Html text={$i18n.fee.text.total_fee} />
+								{/snippet}
+							</SwapLifiFeeDisplay>
+
+							{#if isLifiFeeUnaffordable}
+								<InsufficientFundsForFee testId={SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE} />
+							{/if}
 						{:else}
 							<EthFeeDisplay>
 								{#snippet label()}

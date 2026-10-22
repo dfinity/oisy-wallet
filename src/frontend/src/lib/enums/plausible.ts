@@ -107,6 +107,21 @@ export enum PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES {
 	REQUEST_FAILED = 'request_failed'
 }
 
+// Why a swap failed after the user confirmed it, for a provider whose error text cannot be sent:
+// LI.FI's carries the user's addresses or the signed transaction.
+export enum PLAUSIBLE_EVENT_SWAP_ERROR_TYPES {
+	// The network fee at signing exceeded the one reviewed, so nothing was signed.
+	FEE_CHANGED = 'fee_changed',
+	// The re-quote no longer reaches the minimum the user reviewed, or has no route.
+	SLIPPAGE_EXCEEDED = 'slippage_exceeded',
+	// The re-quote failed OISY's own checks, or its route is one OISY cannot execute.
+	QUOTE_REJECTED = PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.QUOTE_REJECTED,
+	// The balance does not cover the swap and its network fee.
+	INSUFFICIENT_FUNDS = 'insufficient_funds',
+	// Any other failure.
+	UNKNOWN = 'unknown'
+}
+
 // Why a tip step failed. `TipError` is OISY's own candid type, so its variant names are a closed
 // set we control and safe to send under invariant 4 in docs/ai/frontend/analytics.md; only the
 // name goes out, never the `msg` some variants carry. The ledger's refusals of the approve are

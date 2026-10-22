@@ -10,6 +10,7 @@ import { createPermit } from '$eth/services/eip2612-permit.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
 import { send as sendEvm } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
+import type { EthAddress } from '$eth/types/address';
 import type { ErcFungibleToken } from '$eth/types/erc-fungible';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
@@ -78,6 +79,7 @@ import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsQuoteResponse
 } from '$lib/types/near-intents';
+import type { NetworkId } from '$lib/types/network';
 import type { OisyTradeQuote } from '$lib/types/oisy-trade-swap';
 import type { Amount } from '$lib/types/send';
 import {
@@ -1840,6 +1842,36 @@ export const fetchVeloraDeltaSwap = async ({
 	await enableSwapDestinationToken({ destinationToken, identity });
 };
 
+/**
+ * Waits until `spender` may spend at least `amount` of `token` for `owner`: an approval just mined
+ * can take a few reads to show. Throws when it still cannot after the retries, so that the swap is
+ * not sent against an allowance it would fail on.
+ */
+export const waitForSwapAllowance = async ({
+	token,
+	owner,
+	spender,
+	networkId,
+	amount
+}: {
+	token: ErcFungibleToken;
+	owner: EthAddress;
+	spender: EthAddress;
+	networkId: NetworkId;
+	amount: bigint;
+}): Promise<void> => {
+	await retryWithDelay({
+		maxRetries: 10,
+		request: async () => {
+			const currentAllowance = await erc20ContractAllowance({ token, owner, spender, networkId });
+
+			if (currentAllowance < amount) {
+				throw new Error(get(i18n).swap.error.unexpected);
+			}
+		}
+	});
+};
+
 export const fetchVeloraMarketSwap = async ({
 	identity,
 	progress,
@@ -1882,19 +1914,12 @@ export const fetchVeloraMarketSwap = async ({
 			progressSteps: ProgressStepsSwap
 		});
 
-		await retryWithDelay({
-			maxRetries: 10,
-			request: async () => {
-				const currentAllowance = await erc20ContractAllowance({
-					token: sourceToken,
-					owner: userAddress,
-					spender: TokenTransferProxy,
-					networkId: sourceNetwork.id
-				});
-				if (currentAllowance < parsedSwapAmount) {
-					throw new Error(get(i18n).swap.error.unexpected);
-				}
-			}
+		await waitForSwapAllowance({
+			token: sourceToken,
+			owner: userAddress,
+			spender: TokenTransferProxy,
+			networkId: sourceNetwork.id,
+			amount: parsedSwapAmount
 		});
 	}
 
@@ -1918,6 +1943,7 @@ export const fetchVeloraMarketSwap = async ({
 		from: userAddress,
 		to: txParams.to,
 		transaction: txParams,
+		amount: parsedSwapAmount,
 		identity,
 		token: sourceToken,
 		sourceNetwork,

@@ -78,6 +78,26 @@ describe('lifi-calldata.services', () => {
 			).rejects.toThrow(LifiQuoteRejectedError);
 		});
 
+		it('should read the allowance only of the ones a swap calls or approves', async () => {
+			const untouched = '0x000000000000000000000000000000000000bEEF';
+
+			allowance.mockResolvedValue(1n);
+			allowance.mockResolvedValueOnce(ZERO);
+
+			await expect(
+				assertFixture({
+					fixture: mockLifiCalldataAcrossEvm,
+					userTokenAddresses: [untouched, feeCollector.toLowerCase()]
+				})
+			).resolves.toBeUndefined();
+
+			expect(allowance).toHaveBeenCalledExactlyOnceWith({
+				token: feeCollector.toLowerCase(),
+				owner: mockLifiCalldataAcrossEvm.request.fromAddress,
+				spender: diamond
+			});
+		});
+
 		it('should refuse a call to one whose allowance cannot be read', async () => {
 			allowance.mockRejectedValue(new Error('rpc down'));
 
