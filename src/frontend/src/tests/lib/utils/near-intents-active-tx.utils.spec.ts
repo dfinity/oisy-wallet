@@ -326,6 +326,23 @@ describe('near-intents-active-tx.utils', () => {
 			expect(verifyNearIntentsQuoteSignature).not.toHaveBeenCalled();
 		});
 
+		// A dry quote's signature covers its amounts only, so a dry quote carrying this row's address
+		// and a past deadline would still verify.
+		it('is false for a dry quote, whatever address and deadline it carries', async () => {
+			await expect(
+				isNearIntentsDepositExpired({
+					status: 'PENDING_DEPOSIT',
+					quoteResponse: {
+						...quoteResponse,
+						quoteRequest: { ...quoteResponse.quoteRequest, dry: true }
+					},
+					depositAddress
+				})
+			).resolves.toBeFalsy();
+
+			expect(verifyNearIntentsQuoteSignature).not.toHaveBeenCalled();
+		});
+
 		it('is false when the quote signature does not verify', async () => {
 			vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(false);
 

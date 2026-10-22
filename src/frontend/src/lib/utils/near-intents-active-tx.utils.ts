@@ -166,7 +166,8 @@ export const nearIntentsStatusError = (status: NearIntentsSwapStatus): string | 
  * (an EVM transaction the network accepted and then dropped, for example) would leave the row
  * in progress forever. The deadline is read from the quote embedded in `/status` and counts only
  * when that quote is the one for the row's deposit address and its signature verifies, which
- * also covers rows created before the signature was stored.
+ * also covers rows created before the signature was stored. The quote must not be a dry one: a
+ * dry quote's signature covers its amounts only, not the deposit address or the deadline.
  */
 export const isNearIntentsDepositExpired = async ({
 	status,
@@ -175,7 +176,11 @@ export const isNearIntentsDepositExpired = async ({
 }: Pick<NearIntentsStatusResponse, 'status' | 'quoteResponse'> & {
 	depositAddress: string;
 }): Promise<boolean> => {
-	if (status !== 'PENDING_DEPOSIT' || quoteResponse?.quote?.depositAddress !== depositAddress) {
+	if (
+		status !== 'PENDING_DEPOSIT' ||
+		quoteResponse?.quoteRequest?.dry !== false ||
+		quoteResponse?.quote?.depositAddress !== depositAddress
+	) {
 		return false;
 	}
 
