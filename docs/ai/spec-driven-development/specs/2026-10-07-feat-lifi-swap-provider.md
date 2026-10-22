@@ -362,10 +362,13 @@ Solana-source quotes pass `allowExchanges` limited to `LIFI_SOLANA_ALLOWED_EXCHA
 LI.FI tool keys of the aggregators that execution can bind: those with pinned
 instructions and a minimum-output decoder (see
 [Solana transaction binding](#solana-transaction-binding-execution-time-quote)). v1 is
-`['jupiter']` (the key LI.FI's `/tools` lists). Without it, LI.FI could display an OKX or
-DFlow route that would always abort at execution. The list and
+`['jupiter']` (the key LI.FI's `/tools` lists). Without it, LI.FI displays a route that
+would always abort at execution: its best Solana → Solana route is DFlow's (SOL → USDC and
+USDC → SOL, 2026-10-22), and `/tools` lists Fly, OKX, Titan and others besides. Pinned to
+`jupiter`, the same requests come back as Jupiter routes. The list and
 `LIFI_SOLANA_ALLOWED_INSTRUCTIONS` change together, as `allowBridges` and the curated
-bridge facets do on EVM.
+bridge facets do on EVM; DFlow joins only with its own pinned instructions and
+minimum-output decoder (see [Decisions](#decisions)).
 
 - Maps OISY network → LI.FI chain id (EVM: the network's `chainId`; Solana mainnet →
   `1151111081099710`). Non-mainnet networks → `undefined` (no quote).
@@ -498,7 +501,9 @@ execution-time — passes `assertLifiQuote` before it is shown or acted on:
   `bigint`) is `0` for an ERC-20 source and `fromAmount` for a native one.
 - **Solana**: `transactionRequest.data` is a single base64 string (an array — a Jito
   bundle — is rejected); the decoded transaction's fee payer is the user's address and
-  it requires no signer other than the user. Lands in PR 3 with the first Solana-source
+  it requires no signer other than the user; every `swap` step of the route uses an
+  exchange of `LIFI_SOLANA_ALLOWED_EXCHANGES` (the request pins them, and the check keeps
+  that pin working if LI.FI ignores it). Lands in PR 3 with the first Solana-source
   quote; until then no Solana-source quote is requested.
 - **Echo**: `action.fromChainId`, `action.toChainId`, `action.fromToken.address`,
   `action.toToken.address`, `action.fromAmount` and `action.toAddress` equal what OISY
@@ -881,23 +886,56 @@ The result must show all of the following:
   user** (as the WalletConnect review already requires, `sol-instructions.utils.ts`;
   otherwise a forged transaction could create an empty account for the user and close it
   to an attacker, a rent loss that neither `createdAccounts` nor `closedAccounts` sees and
-  that fits inside the SOL fee cap), and the swap/route entrypoints
-  of the allowed Solana aggregators (Jupiter v6 route variants first; others added with
-  their discriminators). Any other top-level instruction aborts. Calls _inside_ an
-  allowed route are constrained by the aggregator program itself, plus the program check
-  below.
+  that fits inside the SOL fee cap), LI.FI's fee instructions (next bullet), and the
+  route entrypoints of the allowed Solana aggregators: for Jupiter v6, `route_v2`
+  (discriminator `bb64facc31c4af14`, the one LI.FI's transactions call, 2026-10-22) and
+  `shared_accounts_route_v2` (`d19853937cfed8e9`, the same arguments behind an `id: u8`);
+  others are added with their discriminators. At most one `SetComputeUnitLimit` and one
+  `SetComputeUnitPrice`, whose values set the fee bounded below. Any other top-level
+  instruction aborts. Calls _inside_ an allowed route are constrained by the aggregator
+  program itself, plus the program check below.
+- **LI.FI's fee is bound.** LI.FI takes its 25 bps on Solana with two top-level
+  instructions of its own, in every captured route (DFlow and Jupiter, SOL and USDC
+  sources, 2026-10-22), not with a swap step:
+  - an instruction of LI.FI's program `3i5JeuZuUxeKtVysUnwQNGerJP2bSMX9fTFfS4Nxe3Br`
+    (an upgradeable program): discriminator `0x00`, 9 bytes of data, and as its only
+    accounts the Clock sysvar and `BHwZCcfDTgSAz8eBFrKqPfNFVFsdBnUtH8zkXs7LM3dG`, an
+    address that holds no account. No account of the user's is passed to it, so it cannot
+    move the user's funds whatever the program does; it is pinned with exactly those
+    accounts.
+  - the fee itself, paid to LI.FI's fee wallet `34FKjAdVcTax2DHqV2XnbXa9J3zmyKcFuFKWbcmgxjgm`
+    (a system account): a System `Transfer` from the user to that wallet for a native-SOL
+    source (250,000 lamports of 0.1 SOL), an SPL `TransferChecked` from the user's
+    source-token account to that wallet's associated token account for the source mint
+    otherwise (`8jjWmLhYdqrtFMcEkiMDdqkEN85cvEFnNS4LFgNf5NRv` for USDC, 50,000 of 20
+    USDC; both verified on chain).
+
+  Both are pinned as `LIFI_SOLANA_FEE_PROGRAM` and `LIFI_SOLANA_FEE_WALLET`. At most one fee
+  transfer is allowed, to that wallet (its associated token account derived, not read from
+  the transaction), of at most `fromAmount × LIFI_FEE_BPS / 10 000`; a System `Transfer`
+  to anyone but the user's own wSOL account or the fee wallet aborts. As on EVM, a fee
+  LI.FI raises, or a fee wallet it moves, stops its Solana swaps until the constants
+  follow.
+
 - **The route's own minimum output is bound.** Simulation shows the outcome at current
   chain state only; what protects the user when state moves before the transaction lands
   is the minimum the aggregator enforces on-chain, and that comes from the route
   instruction's arguments, which LI.FI writes. So each allowed route entrypoint has a
   pinned argument decoder, and its effective on-chain minimum must be at least the
-  displayed `toAmountMin`. For Jupiter v6 (`route` / `shared_accounts_route` and their
-  token-ledger variants; exact-out variants are not allowed), the arguments include
-  `quoted_out_amount` and `slippage_bps`, and the check is
-  `quoted_out_amount × (10 000 − slippage_bps) / 10 000 ≥ toAmountMin`. The implementer
-  takes the argument layout from Jupiter's published v6 IDL and adds a test from a real
-  LI.FI transaction fixture. An aggregator is added to `LIFI_SOLANA_ALLOWED_INSTRUCTIONS`
-  only together with its minimum-output decoder. Simulation stays as an additional check.
+  displayed `toAmountMin`. For Jupiter v6's `route_v2`, the arguments are, from the
+  program's on-chain IDL (read 2026-10-22): `in_amount: u64`, `quoted_out_amount: u64`,
+  `slippage_bps: u16`, `platform_fee_bps: u16`, `positive_slippage_bps: u16`,
+  `route_plan: Vec<RoutePlanStepV2>`. The check is
+  `quoted_out_amount × (10 000 − slippage_bps) / 10 000 ≥ toAmountMin`; on a live
+  0.1 SOL → USDC route it gives exactly LI.FI's `toAmountMin` (10,288,450). Besides,
+  `platform_fee_bps` and `positive_slippage_bps` must be `0` — no platform takes a share
+  of the user's output, LI.FI's fee being the separate transfer above — and `in_amount`
+  plus that fee must not exceed `fromAmount` (99,750,000 + 250,000 on the same route).
+  The v1 variants (`route`, `shared_accounts_route`, their token-ledger variants) and every
+  exact-out variant are not allowed: none came from LI.FI, and each would need its own
+  decoder. A test from a real LI.FI transaction fixture covers each allowed variant. An
+  aggregator is added to `LIFI_SOLANA_ALLOWED_INSTRUCTIONS` only together with its
+  minimum-output decoder. Simulation stays as an additional check.
 - **Every program is known.** Every top-level instruction's program, and every entry of
   `unreadPrograms`, is in `SOLANA_KNOWN_PROGRAM_ADDRESSES` or in a new pinned
   `LIFI_SOLANA_PROGRAM_ADDRESSES`. `unreadPrograms` only lists programs called from
@@ -908,12 +946,26 @@ The result must show all of the following:
   pairs — no program ids — so `LIFI_SOLANA_PROGRAM_ADDRESSES` is **pinned by hand** from
   each allowed aggregator's published program ids (and verified on-chain), one commented
   line per program, like `sol-known-programs.constants.ts`. A tool removed via
-  `LIFI_DENY_*` has its programs removed from the list in the same change.
+  `LIFI_DENY_*` has its programs removed from the list in the same change. Jupiter reaches
+  the DEXes of its route plan by CPI, so `unreadPrograms` lists every one outside
+  `SOLANA_KNOWN_PROGRAM_ADDRESSES`, and a hand-pinned list would refuse each route through
+  a DEX it misses; which programs live LI.FI routes reach, and so how this bullet holds
+  for Jupiter, is still open (see [Open questions](#open-questions)).
 - **Spend is bounded.** The source token's delta on the user's accounts is no lower than
   `-fromAmount`. No other user token account decreases. `solDelta` is no lower than
   `-(fromAmount if the source is native SOL) - LIFI_SOL_MAX_FEE_LAMPORTS`. The cap is a
   new constant sized for priority fees plus ATA rent, with a measured value recorded next
   to it.
+- **The network fee is bounded by the review.** The fee a Solana transaction pays is set
+  by its own Compute Budget instructions: the unit limit times the unit price, in
+  micro-lamports, as priority fee, plus 5,000 lamports per signature (LI.FI's `SEND` gas
+  cost is exactly that sum: 435,534 units at 299,999 micro-lamports, 135,660 lamports, on
+  the DFlow route of 2026-10-22). LI.FI chooses the price, and the spend bound's
+  `LIFI_SOL_MAX_FEE_LAMPORTS` would let a high one through, so the
+  [LI.FI ceiling](#solana-execution) of the transaction about to be signed — that fee plus
+  the rent of the accounts it creates — may not exceed the one the user reviewed. Above it,
+  nothing is signed and the review returns with the higher ceiling and the
+  `lifi_fee_changed` note, as on EVM.
 - **Receipt is bound (Solana → Solana).** The user's destination-token delta is at least
   the displayed quote's `toAmountMin`. A missing `preview`, or no delta for the
   destination token, fails this check.
@@ -1215,10 +1267,12 @@ swap, after its approval was paid.
 New `fetchLifiSolSwap`:
 
 1. **Re-quote immediately before signing, with simulation on** (the displayed quote's
-   blockhash is likely stale), run `assertLifiQuote`, apply the same `toAmountMin`
-   check as EVM, then `assertLifiSolTransaction`
+   blockhash is likely stale), with the offer's own request (its exchanges pinned), run
+   `assertLifiQuote`, apply the same `toAmountMin` check as EVM, then
+   `assertLifiSolTransaction`
    ([Solana transaction binding](#solana-transaction-binding-execution-time-quote)) on
-   the exact bytes that step 2 signs.
+   the exact bytes that step 2 signs, including its fee bound against the reviewed
+   ceiling.
 2. `decodeTransactionMessage(data)` → sign the **original message bytes** with
    `signTransaction` from **`sol/utils/sol-sign.utils.ts`** (threshold Schnorr over
    `transaction.messageBytes`; it returns a `{ [address]: signature }` dictionary) →
@@ -1250,9 +1304,13 @@ New `fetchLifiSolSwap`:
    in step 2, with the signature as the tx hash and the transaction's **recent
    blockhash** as a ref. As on EVM, a row that cannot be created aborts the swap before
    it is sent, and only a definitive refusal deletes it: a failed preflight simulation,
-   after which the RPC forwards nothing. Any other failure (`already processed` means it
-   landed; a transport failure may have relayed it) leaves the row to the poller, which
-   settles it as landed or, once the blockhash expires, never landed. Then
+   after which the RPC forwards nothing. Any other failure first **sends the same signed
+   bytes again**, up to `SWAP_BROADCAST_ATTEMPTS` (3) attempts a second apart, as EVM's
+   `swap()` does: one signature can land once only, and a transport failure would
+   otherwise leave unsent a swap that counts as sent. It stops at a definitive refusal or
+   at `already processed` (it landed). Any end but a definitive refusal (`already
+processed`, or a transport failure that may have relayed it) leaves the row to the
+   poller, which settles it as landed or, once the blockhash expires, never landed. Then
    `enableSwapDestinationToken`. The blockhash is read from the compiled
    message (`getCompiledTransactionMessageDecoder` → `lifetimeToken`). LI.FI's
    transaction carries only the blockhash, not its `lastValidBlockHeight`, and the expiry
@@ -1271,6 +1329,33 @@ Wizard: `SwapSolWizard.svelte` gets an if/else on `selectedProvider.provider`
 (NEAR Intents vs LI.FI). The NEAR Intents branch keeps its terms gate unchanged. The
 same PR removes the "no Solana source" restriction from the `solSwapProviders` LI.FI
 entry (see [Quoting](#quoting)).
+
+**The form budgets LI.FI's own transaction.** `SwapSolForm` validates the amount and fills
+"Max" against `SolFeeContext`'s estimate (`feeStore`, plus `ataFeeStore` for an SPL
+source), which prices NEAR Intents' deposit transfer, not a LI.FI route. The route sets
+its own compute budget — 135,660 lamports with the base fee on the DFlow probe, many times
+a plain transfer's — and creates accounts: the user's destination token account when it is
+missing, and for a native-SOL source a temporary wSOL account, funded with the rent-exempt
+minimum while the transaction runs and refunded when it closes. With the transfer
+estimate, "Max" from SOL leaves too little, and the simulation refuses the swap at
+execution. So for a LI.FI offer the wizard prices **LI.FI's ceiling** from the display
+quote's own transaction, decoded as the trust checks already decode it: the Compute Budget
+fee, 5,000 lamports per signature, and the rent-exempt minimum of a token account
+(`rentExemptMinimumFor`) for each `CreateIdempotent`, a temporary account included because
+it must be funded until it is closed, and an existing one included because nothing in the
+message says it exists (an upper bound, like EVM's largest nonce). Not LI.FI's `gasCosts` /
+`feeCosts`, which are unsigned and list the rent as not included.
+
+As on EVM, the form, its validation, "Max" and the review use that total
+(`SwapLifiFeeDisplay`) instead of the fee context's estimate; the review confirms only
+once it is known, and shows `InsufficientFundsForFee` when the balance cannot cover it.
+"Max" from SOL leaves room for it with the same swap-context reservation as on EVM
+(`amountSetToMax`, `lifiMaxFee` per destination, raised by a review that cannot fit its
+total), the ceiling coming with each quote and each quote with the amount. Whether it
+also needs headroom, as `LIFI_MAX_FEE_HEADROOM_PERCENT` gives EVM, depends on how much
+LI.FI's compute price moves between the display quote and the execution re-quote; 3d
+measures it, as 2b measured the EVM gas estimate, and the review buffers the ceiling if
+the re-quote's comes out higher.
 
 ### Active User Transactions
 
@@ -1678,14 +1763,17 @@ rows.
 
 ## Delivery plan
 
-| PR   | Scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Depends on                                     |
-| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| 1    | **Backend AUT variant** — `Lifi(LifiData)`, validation of the v1 token matrix (`require_lifi_pair`, pinned EVM chain ids) and of the required poll keys (`require_lifi_refs`), tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                                                                                                                                                              | —                                              |
-| 2a-1 | **Quote client** (not registered anywhere) — `@lifi/sdk`, env (flag **`false` everywhere**), `SwapProvider.LIFI` + mapped-result arm + `swapService` stub, REST client, EVM form-time trust checks, `fetchLifiSwapQuote` with the 30 s cache, `reusability.md` entry                                                                                                                                                                                                                                                                                                                                                                                                 | 1                                              |
-| 2a-2 | **Registration** — LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges, empty source list so the Solana source picker is unchanged), provider sheet                                                                                                                                                                                                                                                                                                               | 2a-1                                           |
-| 2b   | **EVM execution + tracking** — calldata binding (pinned facet ABIs decoded locally, incl. each bridge's payout and LI.FI's fee forwarding, + the Diamond's whitelist), route-tools refusal of Across behind a DEX swap, `fetchLifiEvmSwap` (pre-approval price check, unchanged `approve()`, form budget of 0/1/2 approval fees from one allowance read) + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound and the `/status` 404 → `NOT_FOUND` mapping)/loader (incl. wallet + EVM balance refresh)/item; flag to `(LOCAL \|\| STAGING) && !TEST`, `PRODUCT.md` for EVM-source swaps | 2a-2                                           |
-| 3    | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (quote, destinations, and a mainnet-only source list in place of the empty one; Solana destinations only), `fetchLifiSolSwap` with simulation binding (incl. `createdAccounts` / `closedAccounts` in the simulation preview and the slot-consistent pre/post snapshot), `SwapSolWizard` dispatch, Solana source-chain check in the poller (in-memory expiry observations), `PRODUCT.md` update for Solana-source swaps                                                                                                                                                         | 2b                                             |
-| 4    | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | 3, production key + rate-limit scope confirmed |
+| PR   | Scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Depends on                                      |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| 1    | **Backend AUT variant** — `Lifi(LifiData)`, validation of the v1 token matrix (`require_lifi_pair`, pinned EVM chain ids) and of the required poll keys (`require_lifi_refs`), tests, regenerated `.did` / declarations                                                                                                                                                                                                                                                                                                                                                                                                                                              | —                                               |
+| 2a-1 | **Quote client** (not registered anywhere) — `@lifi/sdk`, env (flag **`false` everywhere**), `SwapProvider.LIFI` + mapped-result arm + `swapService` stub, REST client, EVM form-time trust checks, `fetchLifiSwapQuote` with the 30 s cache, `reusability.md` entry                                                                                                                                                                                                                                                                                                                                                                                                 | 1                                               |
+| 2a-2 | **Registration** — LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges, empty source list so the Solana source picker is unchanged), provider sheet                                                                                                                                                                                                                                                                                                               | 2a-1                                            |
+| 2b   | **EVM execution + tracking** — calldata binding (pinned facet ABIs decoded locally, incl. each bridge's payout and LI.FI's fee forwarding, + the Diamond's whitelist), route-tools refusal of Across behind a DEX swap, `fetchLifiEvmSwap` (pre-approval price check, unchanged `approve()`, form budget of 0/1/2 approval fees from one allowance read) + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound and the `/status` 404 → `NOT_FOUND` mapping)/loader (incl. wallet + EVM balance refresh)/item; flag to `(LOCAL \|\| STAGING) && !TEST`, `PRODUCT.md` for EVM-source swaps | 2a-2                                            |
+| 3a   | **Solana simulation plumbing** (a refactor on `main`) — `replaceRecentBlockhash` and `consistentSnapshot` options on `simulateSolTransaction` / `simulateTransactionAccounts` (`minContextSlot`, the response's slot), `getMultipleAccountsInfoWithContext` behind an unchanged `getMultipleAccountsInfo`, `createdAccounts` / `closedAccounts` in the simulation preview; every default as today, so the WalletConnect review and Solana balances are unchanged                                                                                                                                                                                                     | 2b                                              |
+| 3b   | **Solana transaction binding** (not wired in) — `assertLifiSolTransaction`: pinned top-level instructions incl. LI.FI's fee instructions, Jupiter `route_v2` / `shared_accounts_route_v2` minimum-output decoder, the program, spend, receipt and network-fee bounds, on real LI.FI fixtures; the [CPI question](#open-questions) answered first                                                                                                                                                                                                                                                                                                                     | 3a                                              |
+| 3c   | **Solana tracking** — the poller's Solana source-chain check (in-memory expiry observations), the loader's `$solAddressMainnet`; nothing opens a Solana row until 3d                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 2b                                              |
+| 3d   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (quote with the Jupiter pin, destinations, and a mainnet-only source list in place of the empty one; Solana destinations only), the Solana trust checks, `fetchLifiSolSwap` (re-sent broadcast), LI.FI's ceiling in the form, "Max" and the review, `SwapSolWizard` dispatch, `PRODUCT.md` update for Solana-source swaps                                                                                                                                                                                                                                                      | 3b, 3c                                          |
+| 4    | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | 3d, production key + rate-limit scope confirmed |
 
 PR 2 is split up front so each PR stays reviewable, and 2a again into the quote client
 (2a-1) and its registration in the swap fan-out (2a-2). 2b is split five ways: the EVM
@@ -1702,6 +1790,12 @@ unit tests that switch the flag on (the `vi.doMock` pattern of `near-intents.env
 included, ever shows an offer that cannot be executed. This is the same sequencing as
 the Solana-source guard above. Solana → EVM
 is a later, separate PR (see [Decisions](#decisions)).
+
+PR 3 is split the same way, up front (2026-10-22): the shared Solana simulation changes
+first, as a refactor that leaves every existing caller as it is (3a), then the
+transaction binding on its own (3b) and the tracking (3c), and execution last (3d), which
+alone makes anything reachable, on local and staging. "PR 3" elsewhere in this spec means
+the four together.
 
 `docs/ai/PRODUCT.md` is updated in **every** PR that makes new behaviour reachable on a
 deployed environment, not after: PR 2b describes EVM-source swaps (including EVM →
@@ -1735,6 +1829,12 @@ everywhere.
 - **LI.FI's fee is pinned** — a route forwarding more than 25 bps is refused, so a fee
   increase by LI.FI stops its swaps until `LIFI_FEE_BPS` is updated.
 
+- **Solana routes through Jupiter only** — LI.FI's best Solana → Solana route was
+  DFlow's in both directions probed (2026-10-22), which v1 does not offer; a Jupiter route
+  may pay a little less. Accepted until DFlow's instructions are pinned and decoded.
+- **LI.FI's Solana fee wallet is pinned** — a wallet LI.FI moves stops its Solana swaps at
+  the binding until `LIFI_SOLANA_FEE_WALLET` follows, as a fee increase does on both
+  chains.
 - **Solana blockhash expiry** — between the execution re-quote and broadcast only one
   threshold Schnorr signature happens (seconds), well inside 60–90 s. A transaction
   that still expires is detected by the poller (no signature status + an invalid
@@ -1811,8 +1911,10 @@ everywhere.
    change, leaves every token account it creates for the user with the user
    as owner and no foreign delegate or close authority, closes none of the user's
    pre-existing accounts, contains only top-level instructions from
-   `LIFI_SOLANA_ALLOWED_INSTRUCTIONS` (any `CloseAccount` paying the user, and the route's
-   decoded on-chain minimum output at least `toAmountMin`), calls (top-level or nested)
+   `LIFI_SOLANA_ALLOWED_INSTRUCTIONS` (any `CloseAccount` paying the user, LI.FI's fee paid
+   only to its pinned wallet and at most 25 bps, and the route's decoded on-chain minimum
+   output at least `toAmountMin`, with no platform fee), sets a network fee within the
+   reviewed ceiling, calls (top-level or nested)
    only programs in `SOLANA_KNOWN_PROGRAM_ADDRESSES` or the pinned
    `LIFI_SOLANA_PROGRAM_ADDRESSES`, spends no more than `fromAmount` (plus the SOL fee
    cap) from the user's accounts and, Solana → Solana, credits at least `toAmountMin`
@@ -1825,7 +1927,10 @@ everywhere.
     is without LI.FI (NEAR Intents' list); from PR 3 every known Solana **mainnet**
     token is selectable as a source, and devnet or local SOL tokens never are.
 11. A Solana swap signs LI.FI's transaction bytes unchanged (no recompilation) and
-    broadcasts them.
+    broadcasts them, sending the same bytes again while the outcome is unknown. With a
+    LI.FI offer from a Solana source, the form, its validation, "Max" and the review use
+    LI.FI's ceiling (the transaction's compute budget, base fee and the rent of every
+    account it creates), not the fee context's transfer estimate.
 12. The AUT row is created after signing and before the broadcast: a swap whose row
     cannot be created is not broadcast, and a row is deleted only when the node's error
     proves the transaction was not accepted; an ambiguous error (`already known`,
@@ -1871,7 +1976,7 @@ everywhere.
 ## Open questions
 
 Facts still to confirm. The first two gate PR 4 (the flag flip), not PRs 1–3; the
-third is answered for NEAR Intents.
+third is answered for NEAR Intents; the fourth gates 3b.
 
 - **Production API key.** A separate key, scoped to OISY's production origins, must be
   registered on LI.FI's partner portal and set as a deployment secret. Owner: whoever
@@ -1890,6 +1995,14 @@ third is answered for NEAR Intents.
   therefore ships through NEAR Intents. Still to re-run with the registered integrator
   id and key: whether Across serves EVM → Solana then. Owner: implementer, with the
   staging key.
+
+- **Programs a Jupiter route reaches by CPI** (gates 3b). The binding requires every
+  program in `unreadPrograms` to be known, and Jupiter calls the DEXes of its route plan by
+  CPI. Pinning them by hand refuses every route through a DEX the list misses, and the set
+  changes as Jupiter adds venues. To measure on live LI.FI routes which programs they
+  reach, then decide whether to pin them, or to leave the calls inside a pinned
+  `route_v2` to Jupiter, whose minimum output is bound and whose effects the simulation's
+  spend and receipt bounds already cover. Owner: implementer, before 3b.
 
 ## Decisions
 
@@ -1919,6 +2032,16 @@ Recorded so a future reader can tell "excluded on purpose" from "forgotten".
   Across** at quote time, so that NEAR Intents can serve the pair, rather than leaving the
   pair without a LI.FI offer. It costs one more quote request, only for such routes
   (2026-10-20).
+- **Solana routes go through Jupiter only in v1** (`LIFI_SOLANA_ALLOWED_EXCHANGES`):
+  through `route_v2`, the variant LI.FI's transactions call (2026-10-22), or its
+  shared-accounts form `shared_accounts_route_v2`. DFlow, LI.FI's best Solana route in
+  both directions probed, follows only with its own pinned instructions and
+  minimum-output decoder.
+- **LI.FI's Solana fee is bound like its EVM one**: at most 25 bps, paid only to its pinned
+  fee wallet, by a pinned transfer next to a pinned instruction of LI.FI's program that
+  receives no account of the user's (2026-10-22).
+- **A Solana broadcast is sent again with the same bytes** while its outcome is unknown,
+  as EVM's is since 2b-5: one signature lands once at most.
 - **Solana top-level instructions are pinned** by `(program, discriminator)`, not just by
   program, so a known DEX program cannot be used for anything but the allowed route.
 - **Failure reasons stay off-screen**, matching Velora and NEAR Intents (icon only).
