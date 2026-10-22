@@ -1,7 +1,10 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolInstructionsList from '$sol/components/transactions/SolInstructionsList.svelte';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
+import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
+import { SolanaNetworks } from '$sol/types/network';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import en from '$tests/mocks/i18n.mock';
 import {
@@ -24,6 +27,39 @@ describe('SolInstructionsList', () => {
 
 	beforeEach(() => {
 		splCustomTokensStore.resetAll();
+		splTokenMetadataStore.reset();
+	});
+
+	// Any mint can carry the symbol of a token the wallet lists. Kept inside the placeholder, the
+	// line moving it cannot read as one that moves the listed token.
+	it('should keep a listed symbol carried by an unlisted mint inside the placeholder', () => {
+		splCustomTokensStore.setAll([
+			{ data: { ...mockValidSplToken, version: undefined, enabled: true }, certified: false }
+		]);
+		splTokenMetadataStore.set({
+			network: SolanaNetworks.mainnet,
+			metadata: {
+				'other-mint': { name: mockValidSplToken.name, symbol: mockValidSplToken.symbol }
+			}
+		});
+
+		const { getAllByTestId } = render(SolInstructionsList, {
+			props: {
+				instructions: [send(mockSplAddress), send('other-mint')],
+				token: SOLANA_TOKEN,
+				userAddress: mockSolAddress
+			}
+		});
+
+		const [listed, unlisted] = getAllByTestId('sol-instruction');
+
+		expect(listed).toHaveTextContent(mockValidSplToken.symbol);
+		expect(listed).not.toHaveTextContent(en.transaction.text.unknown_token);
+		expect(unlisted).toHaveTextContent(
+			replacePlaceholders(en.transaction.text.unknown_token_named, {
+				$symbol: mockValidSplToken.symbol
+			})
+		);
 	});
 
 	// Two lines both reading "Unknown token" say less than the addresses would, since nothing
@@ -163,6 +199,30 @@ describe('SolInstructionsList', () => {
 			expect(getAllByText(shortenWithMiddleEllipsis({ text: mockSolAddress3 }))).toHaveLength(1);
 		});
 
+		// The close reads like the opening, and says the rent came home.
+		it('should say a closed account handed its rent back to the wallet', () => {
+			const { getAllByTestId } = render$({
+				kind: 'route',
+				program: mockSolAddress3,
+				programName: 'lb_clmm',
+				children: [
+					{
+						kind: 'closeAccount',
+						account: mockSolAddress2,
+						program: mockSolAddress3,
+						programName: 'lb_clmm',
+						returned: 41_899_840n
+					}
+				]
+			});
+
+			const [, line] = getAllByTestId('sol-instruction');
+
+			expect(line).toHaveTextContent(
+				/^Close app account for lb_clmm · 0\.04189984 SOL sent to your wallet$/
+			);
+		});
+
 		it('should name it by its address when it publishes no name', () => {
 			const { getAllByTestId } = render$({
 				kind: 'route',
@@ -187,6 +247,35 @@ describe('SolInstructionsList', () => {
 			expect(getAllByText(shortenWithMiddleEllipsis({ text: mockSolAddress3 }))).toHaveLength(1);
 			expect(getAllByText(shortenWithMiddleEllipsis({ text: mockSolAddress }))).toHaveLength(1);
 		});
+	});
+
+	// The notice about programs OISY cannot read names a pool by itself; the leg the pool made has to
+	// say so too, or the name matches nothing on the screen.
+	it('should name the pool a leg of a route goes through', () => {
+		const { getAllByTestId } = render(SolInstructionsList, {
+			props: {
+				instructions: [
+					{
+						kind: 'route',
+						program: mockSolAddress3,
+						programName: 'jupiter',
+						children: [
+							{
+								...send(mockSplAddress),
+								via: 'fUSioN9YKKSa3CUC2YUc4tPkHJ5Y6XW1yz8y6F7qWz9',
+								viaName: 'fusionamm'
+							}
+						]
+					}
+				],
+				token: SOLANA_TOKEN,
+				userAddress: mockSolAddress
+			}
+		});
+
+		const [, leg] = getAllByTestId('sol-instruction');
+
+		expect(leg).toHaveTextContent(/· via fusionamm$/);
 	});
 
 	it('should not call sends that all leave a swap', () => {

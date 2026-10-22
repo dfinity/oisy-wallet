@@ -1,5 +1,6 @@
 import type {
 	ActiveUserTransaction,
+	ActiveUserTransactionError,
 	ActiveUserTransactionRef,
 	ActiveUserTransactionStatus
 } from '$declarations/backend/backend.did';
@@ -19,6 +20,32 @@ export const isTerminalActiveUserTransactionStatus = (
 
 export const isTerminalActiveUserTransaction = (tx: ActiveUserTransaction): boolean =>
 	isTerminalActiveUserTransactionStatus(tx.status);
+
+type VariantOf<T> = T extends unknown ? keyof T : never;
+
+// Every variant of the candid error. A `Record`, so a variant added to the interface fails to
+// compile until it is listed here.
+const ACTIVE_USER_TRANSACTION_ERROR_VARIANTS: Record<
+	VariantOf<ActiveUserTransactionError>,
+	null
+> = {
+	NotFound: null,
+	AlreadyExists: null,
+	TooManyActiveTransactions: null,
+	InvalidId: null,
+	InvalidData: null,
+	IllegalStatusTransition: null,
+	AlreadyInFlight: null
+};
+
+/**
+ * Whether a failed call is the canister refusing it: the raw candid `Err` the canister throws. A
+ * transport failure is not, and after one the call may still have committed.
+ */
+export const isActiveUserTransactionError = (err: unknown): err is ActiveUserTransactionError =>
+	nonNullish(err) &&
+	typeof err === 'object' &&
+	Object.keys(ACTIVE_USER_TRANSACTION_ERROR_VARIANTS).some((variant) => variant in err);
 
 // The timestamp a row is presented (and ordered) by: the moment it reached its
 // last status, not the moment it was opened. A terminal row is never written

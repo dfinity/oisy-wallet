@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, untrack } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import SwapEthFeeInfo from '$eth/components/swap/SwapEthFeeInfo.svelte';
+	import SwapLifiFeeDisplay from '$eth/components/swap/SwapLifiFeeDisplay.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -23,6 +24,11 @@
 	import type { Token } from '$lib/types/token';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatToken } from '$lib/utils/format.utils';
+	import {
+		isLifiFeeAffordable,
+		raiseLifiMaxFee,
+		withLifiMaxFeeHeadroom
+	} from '$lib/utils/lifi-fee.utils';
 	import { parseToken, tryParseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
@@ -37,6 +43,10 @@
 		onClose: () => void;
 		onNext: () => void;
 		isGasless: boolean;
+		// A LI.FI offer is priced by the wizard: its swap transaction's own fee ceiling plus the
+		// approvals it needs, `undefined` until both are known.
+		isLifi?: boolean;
+		lifiFee?: bigint;
 	}
 
 	let {
@@ -50,10 +60,12 @@
 		onShowProviderList,
 		onClose,
 		onNext,
-		isGasless
+		isGasless,
+		isLifi = false,
+		lifiFee
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, sourceTokenBalance } =
+	const { sourceToken, destinationToken, sourceTokenBalance, amountSetToMax, lifiMaxFee } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
@@ -71,8 +83,70 @@
 
 	// TODO: improve this fee calculation at the source, depending on the method (or methods) that is going to be used
 	const totalFee = $derived(
-		isGasless ? ZERO : isApproveNeeded && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee
+		isGasless
+			? ZERO
+			: isLifi
+				? lifiFee
+				: isApproveNeeded && nonNullish($maxGasFee)
+					? $maxGasFee * 2n
+					: $maxGasFee
 	);
+
+	// LI.FI's fee comes with each quote, and each quote with the amount: a "Max" that followed it
+	// would set an amount, get another fee for it, and set another amount, never settling. While
+	// "Max" holds a LI.FI amount it follows the highest fee seen since for the same destination, so
+	// the amount only steps down; a new destination's fee starts it over. Kept in the swap context
+	// with the held "Max": this form is rebuilt at every step change, and a fee that fell meanwhile
+	// would otherwise raise the amount. Only another provider's offer ends it: none is selected while
+	// the offers reload, as after a token picker cleared them.
+	$effect(() => {
+		const fee = lifiFee;
+		const destinationTokenId = $destinationToken?.id;
+
+		if (!$amountSetToMax || (nonNullish($swapAmountsStore?.selectedProvider) && !isLifi)) {
+			lifiMaxFee.set(undefined);
+			return;
+		}
+
+		if (isLifi && nonNullish(fee) && nonNullish(destinationTokenId)) {
+			untrack(() => {
+				const reserved = raiseLifiMaxFee({ reserved: $lifiMaxFee, fee, destinationTokenId });
+
+				if (reserved !== $lifiMaxFee) {
+					lifiMaxFee.set(reserved);
+				}
+			});
+		}
+	});
+
+	// Pressing "Max" again starts from the fee of the moment: the highest seen since the last press
+	// would otherwise keep the amount below the max for good.
+	const onMax = () => {
+		if (isLifi) {
+			lifiMaxFee.set(
+				nonNullish(lifiFee) && nonNullish($destinationToken)
+					? { fee: lifiFee, destinationTokenId: $destinationToken.id }
+					: undefined
+			);
+		}
+	};
+
+	// The fee "Max" leaves room for; `undefined` while the fee is, which holds the form. While the
+	// offers reload, the plain estimate the form falls back to stays below a LI.FI reservation kept
+	// through them, so "Max" holds. A LI.FI fee gets headroom, the review pricing it again.
+	const maxFee = $derived.by(() => {
+		if (isNullish(totalFee)) {
+			return;
+		}
+
+		if (!isLifi && isNullish($lifiMaxFee)) {
+			return totalFee;
+		}
+
+		return withLifiMaxFeeHeadroom(
+			nonNullish($lifiMaxFee) && $lifiMaxFee.fee > totalFee ? $lifiMaxFee.fee : totalFee
+		);
+	});
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType | undefined => {
 		if (isNullish($storeFeeData) || isNullish($sourceToken?.id)) {
@@ -98,6 +172,29 @@
 
 		if (isGasless) {
 			return;
+		}
+
+		// Not known yet, the form waits.
+		if (isLifi) {
+			if (isNullish(lifiFee)) {
+				return;
+			}
+
+			const isNativeSource =
+				isSupportedEthTokenId($sourceToken?.id) || isSupportedEvmNativeTokenId($sourceToken?.id);
+
+			const nativeBalance = isNativeSource
+				? parsedSendBalance
+				: ($balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO);
+
+			return isLifiFeeAffordable({
+				fee: lifiFee,
+				amount: userAmount,
+				isNativeSource,
+				nativeBalance
+			})
+				? undefined
+				: 'insufficient-funds-for-fee';
 		}
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
@@ -153,10 +250,11 @@
 
 <SwapForm
 	{errorType}
-	fee={totalFee}
+	fee={maxFee}
 	{isSwapAmountsLoading}
 	{onClose}
 	onCustomValidate={customValidate}
+	{onMax}
 	{onNext}
 	{onShowTokensList}
 	bind:swapAmount
@@ -173,6 +271,18 @@
 				{#if nonNullish($swapAmountsStore?.selectedProvider)}
 					{#if isGasless}
 						<SwapGaslessFee />
+					{:else if isLifi}
+						<SwapLifiFeeDisplay fee={lifiFee}>
+							{#snippet label()}
+								<Html text={$i18n.fee.text.total_fee} />
+							{/snippet}
+						</SwapLifiFeeDisplay>
+
+						<SwapEthFeeInfo
+							decimals={$feeDecimalsStore}
+							feeSymbol={$feeSymbolStore}
+							feeTokenId={$feeTokenIdStore}
+						/>
 					{:else}
 						<EthFeeDisplay {isApproveNeeded}>
 							{#snippet label()}

@@ -49,6 +49,48 @@ describe('App Layout', () => {
 		expect(container).toBeTruthy();
 	});
 
+	it('should listen for touchstart on the document, passively, so iOS Safari applies :active', () => {
+		const spyAddEventListener = vi.spyOn(document, 'addEventListener');
+
+		render(App);
+
+		expect(spyAddEventListener).toHaveBeenCalledWith(
+			'touchstart',
+			expect.any(Function),
+			expect.objectContaining({ passive: true })
+		);
+	});
+
+	it('pauses the nested startup animation before removing its container', async () => {
+		const spinner = document.createElement('div');
+		spinner.id = 'app-spinner';
+		document.body.append(spinner);
+
+		try {
+			render(App, { children: mockSnippet });
+
+			await waitFor(() =>
+				expect(spinner.style.getPropertyValue('--spinner-play-state')).toBe('paused')
+			);
+			await waitFor(() => expect(spinner.isConnected).toBeFalsy());
+		} finally {
+			spinner.remove();
+		}
+	});
+
+	it('uses the matching 48px visor while initialization is pending', () => {
+		const sync = vi.spyOn(authStore, 'sync').mockReturnValue(new Promise(() => {}));
+
+		try {
+			const { getByTestId } = render(App, { children: mockSnippet });
+			const wrapper = getByTestId('spinner').closest('span');
+
+			expect(wrapper?.getAttribute('style')).toContain('--spinner-size: 48px');
+		} finally {
+			sync.mockRestore();
+		}
+	});
+
 	it('should initialize all services in parallel', () => {
 		const spyAuthSync = vi.spyOn(authStore, 'sync').mockImplementation(vi.fn());
 		const spyInitPlausibleAnalytics = vi.spyOn(analytics, 'initPlausibleAnalytics');

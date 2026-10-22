@@ -88,10 +88,11 @@ export const erc20PrepareTransaction = async ({
 	const { address: contractAddress } = token as Erc20Token;
 
 	return prepare({
+		// First, so that a `data` the caller passes along cannot replace the calldata populated here.
+		...rest,
 		data,
 		to: contractAddress,
-		amount: ZERO,
-		...rest
+		amount: ZERO
 	});
 };
 
@@ -126,10 +127,11 @@ const ethHelperContractPrepareTransaction = async ({
 	const { address: contractAddress } = contract;
 
 	return prepare({
+		// First, so that a `data` the caller passes along cannot replace the calldata populated here.
+		...rest,
 		data,
 		to: contractAddress,
-		amount,
-		...rest
+		amount
 	});
 };
 
@@ -164,10 +166,11 @@ const ckErc20HelperContractPrepareTransaction = async ({
 	const { address: contractAddress } = contract;
 
 	return prepare({
+		// First, so that a `data` the caller passes along cannot replace the calldata populated here.
+		...rest,
 		data,
 		to: contractAddress,
-		amount: ZERO,
-		...rest
+		amount: ZERO
 	});
 };
 

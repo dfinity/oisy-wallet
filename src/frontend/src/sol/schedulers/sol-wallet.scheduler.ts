@@ -26,7 +26,8 @@ import type {
 	SolResolvedTransaction,
 	SolSignature,
 	SolSignatureWithSources,
-	SolTransactionUi
+	SolTransactionUi,
+	SolUnreadableTransaction
 } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { solBackendTokenId } from '$sol/utils/user-transactions.utils';
@@ -81,6 +82,8 @@ interface SolWalletHead {
 	// Every new signature the head check collected, including those that derive to no record.
 	signatures: SolSignatureWithSources[];
 	transactions: SolResolvedTransaction[];
+	// Held like the others once committed: the RPC gives the same answer on every tick.
+	unreadable: SolUnreadableTransaction[];
 	catchUp: SolWalletCatchUp[];
 }
 
@@ -277,20 +280,18 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		];
 
 		if (newSignatures.length === 0) {
-			return { signatures: [], transactions: [], catchUp: resumed.catchUp };
+			return { signatures: [], transactions: [], unreadable: [], catchUp: resumed.catchUp };
 		}
 
-		return {
+		const { transactions, unreadable } = await resolveSolSignatures({
+			address,
+			network,
+			tokens,
 			signatures: newSignatures,
-			catchUp: resumed.catchUp,
-			transactions: await resolveSolSignatures({
-				address,
-				network,
-				tokens,
-				signatures: newSignatures,
-				known: new Set(known.keys())
-			})
-		};
+			known: new Set(known.keys())
+		});
+
+		return { signatures: newSignatures, catchUp: resumed.catchUp, transactions, unreadable };
 	};
 
 	// The backend cache stays per token: each token's records under its own key, one save per token.
@@ -385,7 +386,8 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		this.postMessageWallet({
 			wallet: {
 				balances,
-				newTransactions: JSON.stringify(head.transactions, jsonReplacer)
+				newTransactions: JSON.stringify(head.transactions, jsonReplacer),
+				...(head.unreadable.length > 0 && { unreadableTransactions: head.unreadable })
 			}
 		});
 	};
@@ -431,7 +433,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 
 	private syncWalletData = ({
 		balances,
-		head: { signatures, transactions, catchUp }
+		head: { signatures, transactions, unreadable, catchUp }
 	}: {
 		balances: SolNetworkBalances;
 		head: SolWalletHead;
@@ -461,7 +463,9 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 			catchUp
 		};
 
-		return { hasChanges: newBalances || !historyPosted || transactions.length > 0 };
+		return {
+			hasChanges: newBalances || !historyPosted || transactions.length > 0 || unreadable.length > 0
+		};
 	};
 
 	private postMessageWallet(data: SolPostMessageDataResponseWallet) {

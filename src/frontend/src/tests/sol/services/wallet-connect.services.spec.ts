@@ -11,7 +11,12 @@ import { trackEvent } from '$lib/services/analytics.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { estimatePriorityFee, getAccountInfo, getSolCreateAccountFee } from '$sol/api/solana.api';
+import {
+	estimatePriorityFee,
+	getAccountInfo,
+	getSolCreateAccountFee,
+	getSplTokenMetadata
+} from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
 	STAKE_PROGRAM_ADDRESS
@@ -29,6 +34,7 @@ import { signTransaction as executeSign } from '$sol/services/sol-sign.services'
 import { simulateSolTransaction } from '$sol/services/sol-simulation.services';
 import { decode, decodeMessage, sign, signMessage } from '$sol/services/wallet-connect.services';
 import { solProgramNameStore } from '$sol/stores/sol-program-name.store';
+import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSimulationPreview } from '$sol/types/sol-simulation';
@@ -96,6 +102,7 @@ vi.mock('$sol/api/solana.api', () => ({
 	estimatePriorityFee: vi.fn(),
 	getMultipleAccountsInfo: vi.fn(),
 	getSolCreateAccountFee: vi.fn(),
+	getSplTokenMetadata: vi.fn(),
 	simulateTransactionAccounts: vi.fn()
 }));
 
@@ -498,6 +505,38 @@ describe('wallet-connect.services', () => {
 				});
 				expect(result).not.toHaveProperty('preview');
 			});
+
+			// An allowance moves no balance, so no token delta names its mint.
+			it('should read the metadata of the token an allowance names', async () => {
+				splTokenMetadataStore.reset();
+				vi.mocked(getSplTokenMetadata).mockResolvedValue({});
+				vi.mocked(simulateSolTransaction).mockResolvedValue({
+					preview: {
+						tokenDeltas: [],
+						controlChanges: [
+							{
+								account: mockAtaAddress,
+								field: 'allowance',
+								to: mockSolAddress2,
+								allowance: { tokenAddress: mockSplAddress, decimals: 6, amount: 1n }
+							}
+						]
+					},
+					parties: mockParties,
+					unreadPrograms: []
+				});
+
+				await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(getSplTokenMetadata).toHaveBeenCalledExactlyOnceWith({
+					addresses: [mockSplAddress],
+					network: 'mainnet'
+				});
+			});
 		});
 
 		// The Operations tab lists what the message contains. A run reveals the calls made inside
@@ -795,6 +834,7 @@ describe('wallet-connect.services', () => {
 			request: mockRequest,
 			listener: mockListener,
 			simulated: true,
+			simulationRan: true,
 			closesPayOthers: false,
 			unreadProgramsAcknowledged: true,
 			rentExemptMinimum: mockRentExemptMinimum,
@@ -819,6 +859,7 @@ describe('wallet-connect.services', () => {
 				request: mockRequest,
 				listener: mockListener,
 				simulated: true,
+				simulationRan: true,
 				closesPayOthers: false,
 				unreadProgramsAcknowledged: true,
 				rentExemptMinimum: mockRentExemptMinimum,
@@ -966,6 +1007,7 @@ describe('wallet-connect.services', () => {
 				request: mockRequest,
 				listener: mockListener,
 				simulated: true,
+				simulationRan: true,
 				closesPayOthers: false,
 				unreadProgramsAcknowledged: true,
 				rentExemptMinimum: mockRentExemptMinimum,
@@ -1273,7 +1315,7 @@ describe('wallet-connect.services', () => {
 			});
 
 			it('should refuse to sign when no simulation described it', async () => {
-				const result = await sign({ ...mockParams, simulated: false });
+				const result = await sign({ ...mockParams, simulated: false, simulationRan: false });
 
 				expect(result).toEqual({ success: false });
 
@@ -1291,6 +1333,22 @@ describe('wallet-connect.services', () => {
 					id: mockRequest.id,
 					error: UNEXPECTED_ERROR
 				});
+			});
+
+			// The review said a run took place, so the refusal says the run left that part undescribed
+			// rather than that there was none.
+			it('should say the simulation did not describe it when a run came back', async () => {
+				const result = await sign({ ...mockParams, simulated: false, simulationRan: true });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.wallet_connect.error.unreviewed_not_described_by_simulation }
+				});
+
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+				expect(mockListener.rejectRequest).toHaveBeenCalledOnce();
 			});
 
 			it('should sign when a simulation described it', async () => {
@@ -1529,6 +1587,7 @@ describe('wallet-connect.services', () => {
 			request: mockRequest,
 			listener: mockListener,
 			simulated: true,
+			simulationRan: true,
 			closesPayOthers: false
 		};
 
