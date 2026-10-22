@@ -6,6 +6,7 @@ import { SOLANA_KNOWN_PROGRAM_ADDRESSES } from '$sol/constants/sol-known-program
 import {
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
+	TOKEN_2022_NATIVE_MINT_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
@@ -863,9 +864,17 @@ const toEffect = ({
 				return undefined;
 			}
 
-			// The amount is lamports, which the native mint counts with the same precision on every
-			// network, whether or not the wallet lists wrapped SOL there.
-			const unwrapping = { ...effect, decimals: WSOL_DECIMALS };
+			// The source holds the native mint of the program that runs the unwrap, or the program
+			// refuses it, so that is the mint whether or not a run read the account. The amount is
+			// lamports, which a native mint counts with the same precision on every network.
+			const unwrapping = {
+				...effect,
+				tokenAddress:
+					programId === TOKEN_2022_PROGRAM_ADDRESS
+						? TOKEN_2022_NATIVE_MINT_ADDRESS
+						: WSOL_TOKEN.address,
+				decimals: WSOL_DECIMALS
+			};
 
 			// Paid to the wallet, what leaves the account arrives there as SOL itself, whoever held
 			// it, and what the wallet holds has to count it.

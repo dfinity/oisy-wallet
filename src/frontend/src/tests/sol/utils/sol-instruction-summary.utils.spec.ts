@@ -1,5 +1,9 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
+import {
+	TOKEN_2022_NATIVE_MINT_ADDRESS,
+	TOKEN_2022_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolClosedAccount } from '$sol/types/sol-simulation';
 import {
@@ -3794,6 +3798,26 @@ describe('sol-instruction-summary.utils', () => {
 						unwrapsToWallet: true
 					}
 				]);
+			});
+
+			// Read from the message alone, nothing names the source's mint, and the program settles it:
+			// it refuses an unwrap out of any account but one of its native mint.
+			it('should name the native mint of the program that runs an unwrap nobody read the source of', () => {
+				const [token, token2022] = mapSolInstructionSummaries({
+					instructions: [
+						unwrap({ amount: '5000' }),
+						{
+							...unwrap({ amount: '5000' }),
+							program: 'spl-token-2022',
+							programId: TOKEN_2022_PROGRAM_ADDRESS
+						}
+					],
+					ownedAddresses: [mockSolAddress, wrapped],
+					userAddress: mockSolAddress
+				});
+
+				expect(token?.tokenAddress).toBe(WSOL_TOKEN.address);
+				expect(token2022?.tokenAddress).toBe(TOKEN_2022_NATIVE_MINT_ADDRESS);
 			});
 
 			it('should state everything the account wraps when it names no amount', () => {
