@@ -118,14 +118,19 @@
 				(tx) => isNearIntentsActiveUserTransaction(tx) && !isXrpPaymentInFlight(tx)
 			);
 
-			if (nearIntents.length > 0) {
-				await pollNearIntentsActiveUserTransactions({ identity, transactions: nearIntents });
-			}
-
 			// Shared by the EVM pollers of this tick, so rows on one chain cost one nonce read whatever
 			// their provider. They run one after another: a nonce read earlier in the tick can only be
 			// lower, which reads as still pending, never as replaced.
 			const confirmedNonceByChainId = new Map<string, Promise<number>>();
+
+			if (nearIntents.length > 0) {
+				await pollNearIntentsActiveUserTransactions({
+					identity,
+					transactions: nearIntents,
+					userAddress: $ethAddress,
+					confirmedNonceByChainId
+				});
+			}
 
 			const velora = $activeUserTransactionsPending.filter(isVeloraActiveUserTransaction);
 

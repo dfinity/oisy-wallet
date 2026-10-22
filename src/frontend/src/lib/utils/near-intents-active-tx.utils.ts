@@ -13,6 +13,7 @@ import {
 } from '$lib/types/near-intents';
 import { SwapProvider } from '$lib/types/swap';
 import type { Token as AppToken } from '$lib/types/token';
+import type { EvmSourceTxOutcome } from '$lib/utils/evm-source-tx.utils';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
 import { nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -154,6 +155,24 @@ export const nearIntentsStatusError = (status: NearIntentsSwapStatus): string | 
 	}
 
 	return undefined;
+};
+
+/**
+ * The swap's outcome from its EVM deposit transaction, read while 1Click has seen no deposit yet.
+ * A deposit that reverted, or whose nonce another transaction took, can never reach the deposit
+ * address, and 1Click keeps waiting for it. Any other verdict leaves the swap to 1Click.
+ */
+export const nearIntentsDepositOutcomeToUpdate = (
+	outcome: EvmSourceTxOutcome
+): { status: ActiveUserTransactionStatus; error: string } | undefined => {
+	switch (outcome) {
+		case 'reverted':
+			return { status: { Failed: null }, error: get(i18n).swap.error.failed_unexpectedly };
+		case 'replaced':
+			return { status: { Failed: null }, error: get(i18n).swap.error.swap_replaced_or_dropped };
+		default:
+			return undefined;
+	}
 };
 
 /**

@@ -12,9 +12,11 @@ import {
 	type NearIntentsSwapStatus
 } from '$lib/types/near-intents';
 import { SwapProvider } from '$lib/types/swap';
+import type { EvmSourceTxOutcome } from '$lib/utils/evm-source-tx.utils';
 import {
 	buildNearIntentsSwapTrackingMetadata,
 	isNearIntentsActiveUserTransaction,
+	nearIntentsDepositOutcomeToUpdate,
 	nearIntentsStatusError,
 	toNearIntentsActiveUserTransactionStatus,
 	toNearIntentsData,
@@ -256,6 +258,29 @@ describe('near-intents-active-tx.utils', () => {
 			expect(nearIntentsStatusError('SUCCESS')).toBeUndefined();
 			expect(nearIntentsStatusError('PROCESSING')).toBeUndefined();
 		});
+	});
+
+	describe('nearIntentsDepositOutcomeToUpdate', () => {
+		it('fails the swap with the replaced-or-dropped message for a replaced deposit', () => {
+			expect(nearIntentsDepositOutcomeToUpdate('replaced')).toEqual({
+				status: { Failed: null },
+				error: en.swap.error.swap_replaced_or_dropped
+			});
+		});
+
+		it('fails the swap with the generic failure message for a reverted deposit', () => {
+			expect(nearIntentsDepositOutcomeToUpdate('reverted')).toEqual({
+				status: { Failed: null },
+				error: en.swap.error.failed_unexpectedly
+			});
+		});
+
+		it.each<EvmSourceTxOutcome>(['pending', 'succeeded', 'unknown'])(
+			'leaves the swap to 1Click for a %s deposit',
+			(outcome) => {
+				expect(nearIntentsDepositOutcomeToUpdate(outcome)).toBeUndefined();
+			}
+		);
 	});
 
 	describe('buildNearIntentsSwapTrackingMetadata', () => {
