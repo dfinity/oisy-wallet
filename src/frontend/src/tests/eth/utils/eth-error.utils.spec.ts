@@ -14,7 +14,9 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { nonNullish } from '@dfinity/utils';
 import { SigningKey } from 'ethers/crypto';
+import type { JsonRpcPayload } from 'ethers/providers';
 import { Transaction } from 'ethers/transaction';
+import { makeError } from 'ethers/utils';
 
 const { estimateGas, safeEstimateGas } = vi.hoisted(() => ({
 	estimateGas: vi.fn(),
@@ -651,6 +653,65 @@ describe('eth-error.utils', () => {
 				expect(toastText()).not.toContain(`${transaction.signature?.r}`.slice(2));
 			});
 
+			// Built as `JsonRpcProvider.getRpcError` builds a broadcast failure it recognises: the raw
+			// transaction taken from the request into `transaction`, the node's answer under `info`.
+			const request: JsonRpcPayload = {
+				id: 9,
+				jsonrpc: '2.0',
+				method: 'eth_sendRawTransaction',
+				params: [signedTransaction]
+			};
+
+			// The request's first parameter, as untyped as ethers reads it.
+			const requestedTransaction = () =>
+				Array.isArray(request.params) ? request.params[0] : undefined;
+
+			it.each([
+				{
+					code: 'NONCE_EXPIRED',
+					node: 'nonce too low',
+					err: () =>
+						makeError('nonce has already been used', 'NONCE_EXPIRED', {
+							transaction: requestedTransaction(),
+							info: { error: { code: -32000, message: 'nonce too low' } }
+						})
+				},
+				{
+					code: 'REPLACEMENT_UNDERPRICED',
+					node: 'replacement transaction underpriced',
+					err: () =>
+						makeError('replacement fee too low', 'REPLACEMENT_UNDERPRICED', {
+							transaction: requestedTransaction(),
+							info: { error: { code: -32000, message: 'replacement transaction underpriced' } }
+						})
+				}
+			])(
+				'keeps the signed transaction of a $code failure out of the toast',
+				({ node, err: error }) => {
+					const err = error();
+
+					// The message ethers writes carries the signed transaction.
+					expect(err.message).toContain(signedTransaction);
+
+					toastEthereumTransactionError({
+						err,
+						fallbackMsg: en.send.error.unexpected,
+						...sendParams
+					});
+
+					expect(toasts.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
+						msg: {
+							text: [`${en.send.error.unexpected} / ${node}`, ...transactionLines()].join('<br>'),
+							renderAsHtml: true
+						},
+						err
+					});
+
+					expect(toasts.toastsError).not.toHaveBeenCalled();
+					expect(toastText()).not.toContain(signedTransaction);
+				}
+			);
+
 			it('shows the hash and the unsigned transaction when the node gave no message', () => {
 				toastEthereumTransactionError({
 					err: refused({}),
@@ -673,15 +734,23 @@ describe('eth-error.utils', () => {
 				);
 			});
 
-			it('takes the signed transaction out of a node message that echoes it', () => {
+			// The same bytes still broadcast in any case and without their prefix.
+			it.each([
+				{ form: 'as sent', echo: () => signedTransaction },
+				{ form: 'in uppercase', echo: () => `0x${signedTransaction.slice(2).toUpperCase()}` },
+				{ form: 'without its prefix', echo: () => signedTransaction.slice(2) },
+				{ form: 'in uppercase with its prefix', echo: () => signedTransaction.toUpperCase() }
+			])('takes the signed transaction out of a node message that echoes it $form', ({ echo }) => {
 				toastEthereumTransactionError({
-					err: refused({ message: `rejected ${signedTransaction}` }),
+					err: refused({ message: `rejected ${echo()}` }),
 					fallbackMsg: en.send.error.unexpected,
 					...sendParams
 				});
 
 				expect(toastText()).toContain(`${en.send.error.unexpected} / rejected …`);
-				expect(toastText()).not.toContain(signedTransaction);
+				expect(`${toastText()}`.toLowerCase()).not.toContain(
+					signedTransaction.slice(2).toLowerCase()
+				);
 			});
 
 			it('shows the message alone when the signed transaction cannot be decoded', () => {

@@ -138,9 +138,12 @@ const requestedSignedTransaction = ({ payload }: Record<string, unknown>): unkno
 		? (payload.params as unknown[])[0]
 		: undefined;
 
+// Ethers carries the signed transaction in one of two places: in the request it attaches to an error
+// it could not classify, and in the `transaction` field of a broadcast failure it recognised, such
+// as `NONCE_EXPIRED` or `REPLACEMENT_UNDERPRICED`.
 const findSignedTransaction = (err: unknown): string | undefined =>
 	collectErrorRecords({ err })
-		.map(requestedSignedTransaction)
+		.flatMap((record) => [requestedSignedTransaction(record), record.transaction])
 		.find(
 			(candidate): candidate is string =>
 				typeof candidate === 'string' && SIGNED_TRANSACTION_PATTERN.test(candidate)
@@ -228,7 +231,8 @@ const escapeHtml = (text: string): string =>
 // The generic toast appends the error ethers throws, and for a broadcast that error carries the
 // signed transaction. Such an error shows the node's own message instead, followed by the hash and
 // the unsigned transaction; the signed bytes are taken out of the message too, should a node echo
-// them.
+// them, in any case and with or without their prefix. `findSignedTransaction` only returns hex,
+// which is safe inside the pattern.
 const toastBroadcastError = ({
 	err,
 	fallbackMsg,
@@ -238,7 +242,10 @@ const toastBroadcastError = ({
 	fallbackMsg: string;
 	signedTransaction: string;
 }) => {
-	const nodeMessage = findNodeMessage(err)?.replaceAll(signedTransaction, '…');
+	const nodeMessage = findNodeMessage(err)?.replace(
+		new RegExp(`(?:0x)?${signedTransaction.slice(2)}`, 'gi'),
+		'…'
+	);
 
 	toastsErrorNoTrace({
 		msg: {
