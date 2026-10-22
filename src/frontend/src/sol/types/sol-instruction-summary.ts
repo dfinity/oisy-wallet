@@ -65,7 +65,8 @@ export interface SolInstructionSummary {
 	// wrapped SOL leaving its account, and it arrives in the wallet as SOL itself, which no transfer
 	// of wrapped SOL does.
 	unwrapsToWallet?: boolean;
-	// The account created, closed, approved or handed over.
+	// The account created, closed, approved or handed over. On SOL somebody else pays the user, the
+	// account of theirs it arrives in when that is not the wallet.
 	account?: SolAddress;
 	// Lamports it costs to open an account.
 	rent?: bigint;

@@ -391,7 +391,10 @@ export const solWalletLamportsStated = ({
 	userAddress: OptionSolAddress;
 }): bigint | undefined =>
 	flattenInstructions(instructions).reduce<bigint | undefined>(
-		(acc, { kind, amount, tokenAddress, rent, payer, returned, counterparty, unwrapsToWallet }) => {
+		(
+			acc,
+			{ kind, amount, tokenAddress, rent, payer, returned, counterparty, unwrapsToWallet, account }
+		) => {
 			if (isNullish(acc)) {
 				return acc;
 			}
@@ -404,6 +407,12 @@ export const solWalletLamportsStated = ({
 
 			// SOL itself, not a token: wrapped SOL moves between token accounts, not the wallet.
 			if ((kind === 'send' || kind === 'receive') && isNullish(tokenAddress)) {
+				// Paid into another account of the user's, it stays there, and reaches the wallet only
+				// with the close that pays it on, which states it.
+				if (kind === 'receive' && nonNullish(account) && account !== userAddress) {
+					return acc;
+				}
+
 				return isNullish(amount) ? undefined : kind === 'send' ? acc - amount : acc + amount;
 			}
 

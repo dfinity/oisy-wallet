@@ -829,16 +829,18 @@ const toEffect = ({
 
 		const counterparty = outgoing ? destination : source;
 
-		// Paid by somebody else into a wrapped SOL account of the user's, the lamports become wrapped
-		// SOL there rather than SOL in the wallet, which only the unwrap or the close that pays them
-		// on reaches. The account as of the transfer, or the one opened there next, under the native
-		// mint of either token program. The amount is lamports, which a native mint counts with the
-		// same precision on every network.
-		const destinationMint =
-			!outgoing && nonNullish(destination) && destination !== userAddress
-				? (mintAt({ account: destination, position }) ??
-					openedNext({ account: destination, flattened, from: position }).mint)
-				: undefined;
+		// Paid by somebody else into an account of the user's other than the wallet, the lamports stay
+		// in that account, which only the unwrap or the close that pays them on reaches, and the line
+		// names it. In a wrapped SOL account they become wrapped SOL there: the account as of the
+		// transfer, or the one opened there next, under the native mint of either token program. The
+		// amount is lamports, which a native mint counts with the same precision on every network.
+		const intoAccount =
+			!outgoing && nonNullish(destination) && destination !== userAddress ? destination : undefined;
+
+		const destinationMint = nonNullish(intoAccount)
+			? (mintAt({ account: intoAccount, position }) ??
+				openedNext({ account: intoAccount, flattened, from: position }).mint)
+			: undefined;
 
 		const wrappedMint = isNativeMint(destinationMint) ? destinationMint : undefined;
 
@@ -848,6 +850,7 @@ const toEffect = ({
 				amount: amount({ info, key: 'lamports' })
 			}),
 			...(nonNullish(wrappedMint) && { tokenAddress: wrappedMint, decimals: WSOL_DECIMALS }),
+			...(nonNullish(intoAccount) && { account: intoAccount }),
 			...(nonNullish(counterparty) && {
 				counterparty,
 				own: isOwned({ account: counterparty, arriving: outgoing })

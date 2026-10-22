@@ -30,7 +30,8 @@ import {
 	mockAtaAddress3,
 	mockSolAddress,
 	mockSolAddress2,
-	mockSolAddress3
+	mockSolAddress3,
+	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { nonNullish } from '@dfinity/utils';
 import {
@@ -4402,6 +4403,7 @@ describe('sol-instruction-summary.utils', () => {
 						amount: 5_000n,
 						tokenAddress: WSOL_TOKEN.address,
 						decimals: WSOL_TOKEN.decimals,
+						account: wrapped,
 						counterparty: mockSolAddress3,
 						own: false
 					});
@@ -4434,12 +4436,58 @@ describe('sol-instruction-summary.utils', () => {
 						amount: 5_000n,
 						tokenAddress: TOKEN_2022_NATIVE_MINT_ADDRESS,
 						decimals: WSOL_TOKEN.decimals,
+						account: wrapped,
 						counterparty: mockSolAddress3,
 						own: false
 					});
 					expect(
 						solWalletLamportsStated({ instructions: views, userAddress: mockSolAddress })
 					).toBe(5_000n);
+				}
+			);
+
+			// In an account of any other token the lamports stay in that account rather than reaching the
+			// wallet, which they do only with its close: the line names the account, and the wallet's
+			// change counts them once, at the close.
+			it.each(payouts)(
+				'should count what $name pays into a token account of another mint once, at its close',
+				({ payout }) => {
+					const tokenAccount = mockAtaAddress3;
+
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							payout(tokenAccount),
+							{
+								program: 'spl-token',
+								programId: TOKEN,
+								parsed: {
+									type: 'closeAccount',
+									info: {
+										account: tokenAccount,
+										destination: mockSolAddress,
+										owner: mockSolAddress
+									}
+								}
+							}
+						],
+						ownedAddresses: [mockSolAddress, tokenAccount],
+						userAddress: mockSolAddress,
+						addressToToken: { [tokenAccount]: mockSplAddress },
+						accountLamports: { [tokenAccount]: 2_039_280n },
+						accountTokenAmounts: { [tokenAccount]: ZERO }
+					});
+
+					expect(views[0]).toStrictEqual({
+						kind: 'receive',
+						amount: 5_000n,
+						account: tokenAccount,
+						counterparty: mockSolAddress3,
+						own: false
+					});
+					expect(views.at(-1)?.returned).toBe(2_044_280n);
+					expect(
+						solWalletLamportsStated({ instructions: views, userAddress: mockSolAddress })
+					).toBe(2_044_280n);
 				}
 			);
 
