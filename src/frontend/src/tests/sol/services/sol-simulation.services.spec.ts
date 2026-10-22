@@ -735,6 +735,7 @@ describe('sol-simulation.services', () => {
 				kind: 'receive',
 				amount: rent,
 				tokenAddress: WSOL_TOKEN.address,
+				decimals: WSOL_TOKEN.decimals,
 				counterparty: vault,
 				own: false,
 				unwrapsToWallet: true
