@@ -1,4 +1,5 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import { ZERO } from '$lib/constants/app.constants';
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import { mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
@@ -27,6 +28,8 @@ describe('active-user-transactions.store', () => {
 
 		expect(get(activeUserTransactionsStore)).toEqual({
 			data: {},
+			seenUpToNs: ZERO,
+			loadedUpToNs: ZERO,
 			lastSeenUpdatedAtNs: {},
 			terminalSideEffectsApplied: {}
 		});
@@ -262,6 +265,67 @@ describe('active-user-transactions.store', () => {
 
 				expect(sent('mine')).toBeNull();
 			});
+		});
+	});
+
+	// The backend's seen mark only moves forward, and a load or a mark answered out of order must not
+	// move the store's copy back either.
+	describe('the seen mark', () => {
+		const seenUpToNs = () => get(activeUserTransactionsStore)?.seenUpToNs;
+
+		it('set takes the mark a load returns', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.set({ transactions: [], seenUpToNs: 7n });
+
+			expect(seenUpToNs()).toBe(7n);
+		});
+
+		it('set keeps a later mark than the one a load returns', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.setSeenUpTo({ seenUpToNs: 9n });
+			activeUserTransactionsStore.set({ transactions: [], seenUpToNs: 7n });
+
+			expect(seenUpToNs()).toBe(9n);
+		});
+
+		it('setSeenUpTo moves the mark forward only', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.setSeenUpTo({ seenUpToNs: 9n });
+			activeUserTransactionsStore.setSeenUpTo({ seenUpToNs: 7n });
+
+			expect(seenUpToNs()).toBe(9n);
+		});
+
+		// Every row updated at or before a snapshot's latest update was in that snapshot, and only the
+		// snapshot last applied says what the list holds now.
+		it('set records the latest update of the snapshot it applies', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.set({
+				transactions: [pending({ id: 'a', updatedAtNs: 5n }), pending({ id: 'b', updatedAtNs: 7n })]
+			});
+
+			expect(get(activeUserTransactionsStore)?.loadedUpToNs).toBe(7n);
+
+			activeUserTransactionsStore.set({ transactions: [pending({ id: 'a', updatedAtNs: 5n })] });
+
+			expect(get(activeUserTransactionsStore)?.loadedUpToNs).toBe(5n);
+		});
+
+		// A local write says nothing about a row another device created in between.
+		it('upsert leaves the latest loaded update as it was', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.set({ transactions: [pending({ id: 'a', updatedAtNs: 5n })] });
+			activeUserTransactionsStore.upsert({ transaction: pending({ id: 'b', updatedAtNs: 9n }) });
+
+			expect(get(activeUserTransactionsStore)?.loadedUpToNs).toBe(5n);
+		});
+
+		it('starts again from zero for another principal', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.setSeenUpTo({ seenUpToNs: 9n });
+			activeUserTransactionsStore.init(mockPrincipal2);
+
+			expect(seenUpToNs()).toBe(ZERO);
 		});
 	});
 
