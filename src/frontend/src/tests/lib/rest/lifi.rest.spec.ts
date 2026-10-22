@@ -1,9 +1,16 @@
 import type * as lifiEnv from '$env/rest/lifi.env';
-import { LIFI_QUOTE_TIMEOUT_MS } from '$lib/constants/swap.constants';
-import { fetchLifiQuote } from '$lib/rest/lifi.rest';
+import { LIFI_QUOTE_TIMEOUT_MS, LIFI_STATUS_TIMEOUT_MS } from '$lib/constants/swap.constants';
+import { fetchLifiQuote, fetchLifiStatus } from '$lib/rest/lifi.rest';
 import { mockLifiQuote } from '$tests/mocks/lifi.mock';
 import type * as lifiSdk from '@lifi/sdk';
-import { createClient, getQuote, type QuoteRequestFromAmount, type SDKClient } from '@lifi/sdk';
+import {
+	createClient,
+	getQuote,
+	getStatus,
+	type QuoteRequestFromAmount,
+	type SDKClient,
+	type StatusResponse
+} from '@lifi/sdk';
 
 vi.mock('$env/rest/lifi.env', async (importOriginal) => ({
 	...(await importOriginal<typeof lifiEnv>()),
@@ -14,7 +21,8 @@ vi.mock('$env/rest/lifi.env', async (importOriginal) => ({
 vi.mock('@lifi/sdk', async (importOriginal) => ({
 	...(await importOriginal<typeof lifiSdk>()),
 	createClient: vi.fn(),
-	getQuote: vi.fn()
+	getQuote: vi.fn(),
+	getStatus: vi.fn()
 }));
 
 describe('lifi.rest', () => {
@@ -60,6 +68,36 @@ describe('lifi.rest', () => {
 
 		expect(timeout).toHaveBeenCalledExactlyOnceWith(LIFI_QUOTE_TIMEOUT_MS);
 		expect(getQuote).toHaveBeenLastCalledWith(client, request, { signal });
+
+		timeout.mockRestore();
+	});
+
+	// Several requests in turn can share one, and it is not sent as part of the request.
+	it('should take the deadline it is given instead', async () => {
+		const { signal } = new AbortController();
+		const timeout = vi.spyOn(AbortSignal, 'timeout');
+
+		await fetchLifiQuote({ ...request, signal });
+
+		expect(timeout).not.toHaveBeenCalled();
+		expect(getQuote).toHaveBeenLastCalledWith(client, request, { signal });
+
+		timeout.mockRestore();
+	});
+
+	it('should ask for a status through the same client, with its own deadline', async () => {
+		const { signal } = new AbortController();
+		const timeout = vi.spyOn(AbortSignal, 'timeout').mockReturnValue(signal);
+		const status = { status: 'PENDING' } as StatusResponse;
+		const statusRequest = { txHash: '0xhash', fromChain: 8453, toChain: 1, bridge: 'across' };
+
+		vi.mocked(getStatus).mockResolvedValue(status);
+
+		await expect(fetchLifiStatus(statusRequest)).resolves.toBe(status);
+
+		expect(timeout).toHaveBeenCalledExactlyOnceWith(LIFI_STATUS_TIMEOUT_MS);
+		expect(getStatus).toHaveBeenCalledExactlyOnceWith(client, statusRequest, { signal });
+		expect(createClient).toHaveBeenCalledOnce();
 
 		timeout.mockRestore();
 	});

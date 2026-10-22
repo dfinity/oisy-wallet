@@ -22,7 +22,7 @@ import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import type { Identity } from '@icp-sdk/core/agent';
-import type { LiFiStep } from '@lifi/sdk';
+import type { LiFiStep, QuoteRequestFromAmount } from '@lifi/sdk';
 import type { DeltaPrice, OptimalRate, QuoteParams } from '@velora-dex/sdk';
 
 export type SwapSelectTokenType = 'source' | 'destination';
@@ -194,6 +194,9 @@ export type SwapMappedResult =
 			// The whole quote: its estimate carries the duration, fees and route tool the
 			// provider sheet shows.
 			swapDetails: LiFiStep;
+			// The request the quote answers, which execution re-quotes with: it may differ from the
+			// one built for the form's inputs (see `fetchLifiSwapQuote`).
+			request: QuoteRequestFromAmount;
 			type?: string;
 	  };
 
@@ -503,6 +506,27 @@ export interface SwapVeloraDeltaParams extends SwapVeloraParams {
 
 export interface SwapVeloraMarketParams extends SwapVeloraParams {
 	swapDetails: OptimalRate;
+}
+
+export interface SwapLifiEvmParams extends RequiredTransactionFeeData {
+	identity: Identity;
+	progress: (step: ProgressStep) => void;
+	sourceToken: ErcFungibleToken;
+	destinationToken: Token;
+	swapAmount: Amount;
+	sourceNetwork: EthereumNetwork;
+	userAddress: EthAddress;
+	offer: Extract<SwapMappedResult, { provider: SwapProvider.LIFI }>;
+	// The swap transaction's network fee ceiling the user reviewed: the review cannot confirm until it
+	// is known, since an ERC-20's approval is paid before execution compares against it. Execution
+	// never signs one above it.
+	reviewedFeeCeiling: bigint;
+	// The total network fee the review showed, the approvals included: an ERC-20 source's balance
+	// must cover it before the approval is paid.
+	reviewedFee: bigint;
+	// The ERC-20s OISY knows on the source network, enabled or not: those with an allowance to the
+	// Diamond are what no call of the route may target (`lifiUserTokenAddresses`).
+	userTokenAddresses: string[];
 }
 
 interface SwapNearIntentsParams {

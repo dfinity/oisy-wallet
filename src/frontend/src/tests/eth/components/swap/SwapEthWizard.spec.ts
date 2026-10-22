@@ -11,24 +11,32 @@ import {
 	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
 import {
+	TRACK_COUNT_SWAP_ERROR,
 	TRACK_COUNT_SWAP_SUBMITTED,
 	TRACK_COUNT_SWAP_SUCCESS
 } from '$lib/constants/analytics.constants';
-import { ZERO } from '$lib/constants/app.constants';
+import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
+import { SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE } from '$lib/constants/test-ids.constants';
 import * as addrDerived from '$lib/derived/address.derived';
+import { PLAUSIBLE_EVENT_SWAP_ERROR_TYPES } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
 import * as swapServices from '$lib/services/swap.services';
+import { balancesStore } from '$lib/stores/balances.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
-import { SWAP_CONTEXT_KEY, type SwapError } from '$lib/stores/swap.store';
+import { SWAP_CONTEXT_KEY, type LifiMaxFee, type SwapError } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
+import { LifiFeeChangedError } from '$lib/types/errors';
 import { SwapProvider, VeloraSwapTypes, type SwapMappedResult } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import { lifiCarriedFeeCeiling } from '$lib/utils/lifi-fee.utils';
+import SwapEthWizardStepsTest from '$tests/eth/components/swap/SwapEthWizardStepsTest.svelte';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockLifiQuote } from '$tests/mocks/lifi.mock';
 import {
 	mockNearIntentsProvider,
 	mockOneSecProvider,
@@ -37,6 +45,7 @@ import {
 	mockVeloraMarketProvider
 } from '$tests/mocks/swap.mocks';
 import { mockVeloraOptimalRate } from '$tests/mocks/velora.mock';
+import type { QuoteRequestFromAmount } from '@lifi/sdk';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get, readable, writable, type Writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -66,6 +75,16 @@ vi.mock('$lib/services/swap.services', () => ({
 	fetchVeloraDeltaSwap: (...args: unknown[]) => mockFetchVeloraDeltaSwap(...args),
 	fetchVeloraMarketSwap: (...args: unknown[]) => mockFetchVeloraMarketSwap(...args),
 	fetchOneSecEvmToIcpSwap: (...args: unknown[]) => mockFetchOneSecEvmToIcpSwap(...args)
+}));
+
+const mockFetchLifiEvmSwap = vi.fn();
+const mockLifiQuoteFeeCeiling = vi.fn();
+const mockLifiApprovalTransactions = vi.fn();
+
+vi.mock('$lib/services/lifi-evm-swap.services', () => ({
+	fetchLifiEvmSwap: (...args: unknown[]) => mockFetchLifiEvmSwap(...args),
+	lifiQuoteFeeCeiling: (...args: unknown[]) => mockLifiQuoteFeeCeiling(...args),
+	lifiApprovalTransactions: (...args: unknown[]) => mockLifiApprovalTransactions(...args)
 }));
 
 const mockAcceptProviderAgreement = vi.fn();
@@ -114,6 +133,8 @@ describe('SwapEthWizard', () => {
 			sourceToken: readable(mockToken),
 			destinationToken: readable(mockDestToken),
 			failedSwapError: writable(undefined),
+			amountSetToMax: writable(false),
+			lifiMaxFee: writable(undefined),
 			sourceTokenExchangeRate: readable(10),
 			sourceTokenBalance: readable(undefined),
 			destinationTokenBalance: readable(undefined),
@@ -503,6 +524,8 @@ describe('SwapEthWizard', () => {
 				sourceToken: readable(mockToken),
 				destinationToken: readable(mockDestToken),
 				failedSwapError,
+				amountSetToMax: writable(false),
+				lifiMaxFee: writable(undefined),
 				sourceTokenExchangeRate: readable(10),
 				sourceTokenBalance: readable(undefined),
 				destinationTokenBalance: readable(undefined),
@@ -723,6 +746,8 @@ describe('SwapEthWizard', () => {
 				sourceToken: readable(mockToken),
 				destinationToken: readable(mockDestToken),
 				failedSwapError: writable(undefined),
+				amountSetToMax: writable(false),
+				lifiMaxFee: writable(undefined),
 				sourceTokenExchangeRate: readable(10),
 				sourceTokenBalance: readable(undefined),
 				destinationTokenBalance: readable(undefined),
@@ -832,6 +857,8 @@ describe('SwapEthWizard', () => {
 				sourceToken: readable(mockToken),
 				destinationToken: readable(mockDestToken),
 				failedSwapError: writable(undefined),
+				amountSetToMax: writable(false),
+				lifiMaxFee: writable(undefined),
 				sourceTokenExchangeRate: readable(10),
 				sourceTokenBalance: readable(undefined),
 				destinationTokenBalance: readable(undefined),
@@ -937,6 +964,8 @@ describe('SwapEthWizard', () => {
 				sourceToken: readable(mockToken),
 				destinationToken: readable(destinationToken),
 				failedSwapError,
+				amountSetToMax: writable(false),
+				lifiMaxFee: writable(undefined),
 				sourceTokenExchangeRate: readable(10),
 				sourceTokenBalance: readable(undefined),
 				destinationTokenBalance: readable(undefined),
@@ -1056,6 +1085,432 @@ describe('SwapEthWizard', () => {
 			expect(toasts.toastsError).toHaveBeenCalled();
 			expect(onBack).toHaveBeenCalledOnce();
 			expect(onStartTriggerAmount).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe('LI.FI swap', () => {
+		const mockEthAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+		// 0.002 ETH for the swap transaction, 0.001 ETH per approval.
+		const quoteFeeCeiling = 2_000_000_000_000_000n;
+		const approvalFee = 1_000_000_000_000_000n;
+
+		// What pays the fee of an ERC-20 source.
+		const setNativeBalance = (balance: bigint) =>
+			balancesStore.set({ id: ETHEREUM_TOKEN.id, data: { data: balance, certified: true } });
+
+		const lifiOffer = {
+			provider: SwapProvider.LIFI,
+			receiveAmount: 25_003_034n,
+			receiveOutMinimum: 24_878_019n,
+			swapDetails: mockLifiQuote,
+			request: { fromChain: 1, fromAmount: '1' } as QuoteRequestFromAmount
+		} satisfies SwapMappedResult;
+
+		let feeState: Writable<FeeStoreData>;
+		let feeStore: EthFeeStore;
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+
+			feeState = writable({
+				gas: 100n,
+				maxFeePerGas: 2_000_000n,
+				maxPriorityFeePerGas: 1_000_000n
+			});
+			feeStore = {
+				subscribe: feeState.subscribe,
+				setFee: vi.fn((partial) => {
+					feeState.update((cur) => ({ ...cur, ...partial }));
+				})
+			};
+
+			vi.spyOn(feeStoreMod, 'initEthFeeStore').mockReturnValue(feeStore);
+			vi.spyOn(feeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
+				...ctx,
+				maxGasFee: readable(approvalFee),
+				minGasFee: readable(undefined),
+				estimatedGasFee: readable(undefined),
+				feePrioritiesStore: writable(undefined)
+			}));
+			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
+			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
+			vi.spyOn(toasts, 'toastsError').mockImplementation(() => Symbol('toast'));
+
+			mockFetchLifiEvmSwap.mockResolvedValue(undefined);
+			mockLifiQuoteFeeCeiling.mockResolvedValue(quoteFeeCeiling);
+			mockLifiApprovalTransactions.mockResolvedValue(1);
+
+			setNativeBalance(10_000_000_000_000_000n);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+
+			balancesStore.reset(ETHEREUM_TOKEN.id);
+		});
+
+		interface LifiContextOptions {
+			offer?: SwapMappedResult;
+			amountSetToMax?: Writable<boolean>;
+			lifiMaxFee?: Writable<LifiMaxFee | undefined>;
+		}
+
+		const lifiContext = ({
+			offer = lifiOffer,
+			amountSetToMax = writable(false),
+			lifiMaxFee = writable(undefined)
+		}: LifiContextOptions = {}) => {
+			const swapAmountsStore = initSwapAmountsStore();
+			swapAmountsStore.setSwaps({
+				swaps: [offer],
+				amountForSwap: 1,
+				selectedProvider: offer
+			});
+
+			const failedSwapError: Writable<SwapError | undefined> = writable(undefined);
+
+			const ctx = new Map();
+
+			ctx.set(SWAP_CONTEXT_KEY, {
+				sourceToken: readable(mockToken),
+				destinationToken: readable(mockDestToken),
+				failedSwapError,
+				amountSetToMax,
+				lifiMaxFee,
+				lifiCarriedFee: writable(undefined),
+				sourceTokenExchangeRate: readable(10),
+				sourceTokenBalance: readable(undefined),
+				destinationTokenBalance: readable(undefined),
+				destinationTokenExchangeRate: readable(20),
+				isSourceTokenIcrc2: readable(false),
+				isSourceTokenPermitSupported: readable(false),
+				setSourceToken: () => {},
+				setDestinationToken: () => {},
+				setIsTokenPermitSupported: () => {},
+				switchTokens: () => {}
+			});
+
+			ctx.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
+
+			return { ctx, failedSwapError };
+		};
+
+		const renderLifi = (options: LifiContextOptions = {}) => {
+			const { ctx, failedSwapError } = lifiContext(options);
+
+			const onClose = vi.fn();
+			const onBack = vi.fn();
+
+			const result = render(SwapEthWizard, {
+				props: {
+					...BASE_PROPS,
+					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' },
+					onClose,
+					onBack,
+					onNext: vi.fn(),
+					onStartTriggerAmount: vi.fn(),
+					onStopTriggerAmount: vi.fn()
+				},
+				context: ctx
+			});
+
+			return { ...result, onClose, onBack, failedSwapError };
+		};
+
+		const tickValueDifference = async ({
+			queryByRole
+		}: Pick<ReturnType<typeof renderLifi>, 'queryByRole'>) => {
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+
+			// Ticked once, it stays ticked while the same review is shown.
+			if (valueDifferenceCheckbox instanceof HTMLInputElement && !valueDifferenceCheckbox.checked) {
+				await fireEvent.click(valueDifferenceCheckbox);
+			}
+		};
+
+		const confirmSwap = async ({
+			getByText,
+			queryByRole
+		}: Pick<ReturnType<typeof renderLifi>, 'getByText' | 'queryByRole'>) => {
+			await tickValueDifference({ queryByRole });
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+		};
+
+		it('reviews the swap transaction and its approval as one fee', async () => {
+			const { getByText } = renderLifi();
+
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(getByText(/0\.003/)).toBeInTheDocument();
+		});
+
+		it('prices its fee from the quote, and reads the approvals once', async () => {
+			renderLifi();
+
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(mockLifiQuoteFeeCeiling).toHaveBeenCalledWith(
+				expect.objectContaining({
+					quote: mockLifiQuote,
+					maxFeePerGas: 2_000_000n,
+					maxPriorityFeePerGas: 1_000_000n
+				})
+			);
+			expect(mockLifiApprovalTransactions).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ userAddress: mockEthAddress, amount: 1n })
+			);
+		});
+
+		it('executes the offer with the fee ceiling the user reviewed, then closes', async () => {
+			const { onClose, ...rendered } = renderLifi();
+
+			await vi.runOnlyPendingTimersAsync();
+			await confirmSwap(rendered);
+
+			expect(mockFetchLifiEvmSwap).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					offer: lifiOffer,
+					reviewedFeeCeiling: quoteFeeCeiling,
+					userTokenAddresses: expect.any(Array)
+				})
+			);
+			expect(onClose).toHaveBeenCalledOnce();
+		});
+
+		// LI.FI's SDK names the request URL, addresses included, in its messages.
+		it('reports a failure to analytics by its category, never its message', async () => {
+			const message = `Request failed https://li.quest/v1/quote?fromAddress=${mockEthAddress}`;
+
+			mockFetchLifiEvmSwap.mockRejectedValueOnce(new Error(message));
+
+			const rendered = renderLifi();
+
+			await vi.runOnlyPendingTimersAsync();
+			await confirmSwap(rendered);
+
+			expect(analytics.trackEvent).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: TRACK_COUNT_SWAP_ERROR,
+					metadata: expect.objectContaining({
+						result_error_type: PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.UNKNOWN
+					})
+				})
+			);
+			expect(vi.mocked(analytics.trackEvent).mock.calls).not.toContainEqual([
+				expect.objectContaining({ metadata: expect.objectContaining({ error: expect.anything() }) })
+			]);
+			expect(JSON.stringify(vi.mocked(analytics.trackEvent).mock.calls)).not.toContain(
+				mockEthAddress
+			);
+		});
+
+		// "Max" from ETH left room for the form's fee; a review that prices it higher must not land the
+		// user on the same amount again once back on the form.
+		describe('a "Max" amount the review cannot fit', () => {
+			// 0.009 ETH of a 0.01 ETH balance: no room for the review's 0.002 ETH.
+			const nativeOffer = {
+				...lifiOffer,
+				request: {
+					fromChain: 1,
+					fromAmount: '9000000000000000',
+					fromToken: ZERO_ETH_ADDRESS
+				} as QuoteRequestFromAmount
+			} satisfies SwapMappedResult;
+
+			const formReservation = { fee: 1_000_000_000_000_000n, destinationTokenId: mockDestToken.id };
+
+			beforeEach(() => {
+				mockLifiApprovalTransactions.mockResolvedValue(0);
+			});
+
+			it('should raise what "Max" leaves room for to the review\'s fee', async () => {
+				const lifiMaxFee = writable<LifiMaxFee | undefined>(formReservation);
+
+				const { getByTestId } = renderLifi({
+					offer: nativeOffer,
+					amountSetToMax: writable(true),
+					lifiMaxFee
+				});
+
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(getByTestId(SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE)).toBeInTheDocument();
+				expect(get(lifiMaxFee)).toEqual({
+					fee: quoteFeeCeiling,
+					destinationTokenId: mockDestToken.id
+				});
+			});
+
+			it.each([
+				{
+					case: 'when "Max" does not hold the amount',
+					options: { offer: nativeOffer, amountSetToMax: writable(false) }
+				},
+				{
+					case: 'for an ERC-20 source, whose "Max" the fee does not touch',
+					options: { offer: lifiOffer, amountSetToMax: writable(true) }
+				}
+			])('should leave it $case', async ({ options }) => {
+				setNativeBalance(1_000_000_000_000_000n);
+
+				const lifiMaxFee = writable<LifiMaxFee | undefined>(formReservation);
+
+				renderLifi({ ...options, lifiMaxFee });
+
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(get(lifiMaxFee)).toBe(formReservation);
+			});
+
+			it('should leave it when the review fits its fee', async () => {
+				setNativeBalance(11_000_000_000_000_000n);
+
+				const lifiMaxFee = writable<LifiMaxFee | undefined>(formReservation);
+
+				renderLifi({ offer: nativeOffer, amountSetToMax: writable(true), lifiMaxFee });
+
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(get(lifiMaxFee)).toBe(formReservation);
+			});
+		});
+
+		// What execution found the swap's fee made of; at the review's 0.002 gwei with its headroom,
+		// 0.003 ETH.
+		const carried = { gas: 1_363_636_364n, l1Fee: ZERO };
+
+		it('returns to a rebuilt review with the higher fee when it rose, and signs no more than that', async () => {
+			const carriedFeeCeiling = lifiCarriedFeeCeiling({ ...carried, maxFeePerGas: 2_000_000n });
+
+			expect(carriedFeeCeiling).toBe(3_000_000_000_000_000n);
+
+			mockFetchLifiEvmSwap.mockRejectedValueOnce(new LifiFeeChangedError(carried));
+
+			const { ctx, failedSwapError } = lifiContext();
+
+			const { onNext: _, onBack: __, ...props } = BASE_PROPS;
+
+			const rendered = render(SwapEthWizardStepsTest, { props, context: ctx });
+
+			await vi.runOnlyPendingTimersAsync();
+			await confirmSwap(rendered);
+
+			expect(get(failedSwapError)).toEqual({
+				message: en.swap.error.lifi_fee_changed,
+				variant: 'info'
+			});
+			// Read once per instance, the progress's included: the review shown is another instance than
+			// the one that confirmed.
+			expect(mockLifiApprovalTransactions).toHaveBeenCalledTimes(3);
+			// The carried ceiling and the approval, for the user to confirm.
+			expect(rendered.getByText(/0\.004/)).toBeInTheDocument();
+
+			await confirmSwap(rendered);
+
+			expect(mockFetchLifiEvmSwap).toHaveBeenCalledTimes(2);
+			expect(mockFetchLifiEvmSwap).toHaveBeenLastCalledWith(
+				expect.objectContaining({ reviewedFeeCeiling: carriedFeeCeiling })
+			);
+		});
+
+		// A gas price that ticked up since the refused attempt must not refuse the retry again.
+		it('prices the higher fee at the fee per gas of the review it returns to', async () => {
+			mockFetchLifiEvmSwap.mockRejectedValueOnce(new LifiFeeChangedError(carried));
+
+			const { ctx } = lifiContext();
+
+			const { onNext: _, onBack: __, ...props } = BASE_PROPS;
+
+			const rendered = render(SwapEthWizardStepsTest, { props, context: ctx });
+
+			await vi.runOnlyPendingTimersAsync();
+			await confirmSwap(rendered);
+
+			feeState.set({ gas: 100n, maxFeePerGas: 3_000_000n, maxPriorityFeePerGas: 1_000_000n });
+			await vi.runOnlyPendingTimersAsync();
+
+			await confirmSwap(rendered);
+
+			expect(mockFetchLifiEvmSwap).toHaveBeenLastCalledWith(
+				expect.objectContaining({
+					reviewedFeeCeiling: lifiCarriedFeeCeiling({ ...carried, maxFeePerGas: 3_000_000n })
+				})
+			);
+		});
+
+		// An ERC-20's approval is paid before execution compares the fee with the one reviewed, and the
+		// total shown includes the approvals.
+		it.each([
+			{ read: 'the swap transaction fee', mock: mockLifiQuoteFeeCeiling, value: quoteFeeCeiling },
+			{ read: 'the allowance', mock: mockLifiApprovalTransactions, value: 1 }
+		])('holds the confirmation while $read is still being read', async ({ mock, value }) => {
+			let release: (() => void) | undefined;
+
+			mock.mockReturnValue(
+				new Promise((resolve) => {
+					release = () => resolve(value);
+				})
+			);
+
+			const { getByRole, queryByRole } = renderLifi();
+
+			await vi.runOnlyPendingTimersAsync();
+			await tickValueDifference({ queryByRole });
+
+			const confirm = getByRole('button', { name: en.swap.text.swap_button });
+
+			expect(confirm).toBeDisabled();
+
+			release?.();
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(confirm).toBeEnabled();
+		});
+
+		// The form checked its own total; the review reads the fee again, and execution checks the
+		// balance only after an ERC-20's approval is paid.
+		it.each([
+			{ case: 'holds', balance: quoteFeeCeiling + approvalFee - 1n, affordable: false },
+			{ case: 'confirms', balance: quoteFeeCeiling + approvalFee, affordable: true }
+		])('$case a refreshed fee against the balance it needs', async ({ balance, affordable }) => {
+			setNativeBalance(balance);
+
+			const { getByRole, queryByRole, queryByTestId } = renderLifi();
+
+			await vi.runOnlyPendingTimersAsync();
+			await tickValueDifference({ queryByRole });
+
+			const confirm = getByRole('button', { name: en.swap.text.swap_button });
+
+			if (affordable) {
+				expect(confirm).toBeEnabled();
+				expect(queryByTestId(SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE)).toBeNull();
+			} else {
+				expect(confirm).toBeDisabled();
+				expect(queryByTestId(SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE)).toBeInTheDocument();
+			}
+		});
+
+		it('holds a higher fee carried back when the balance cannot cover it', async () => {
+			// Enough for the quote's fee and its approval, not for the higher fee execution found.
+			setNativeBalance(quoteFeeCeiling + approvalFee);
+
+			mockFetchLifiEvmSwap.mockRejectedValueOnce(new LifiFeeChangedError(carried));
+
+			const { ctx } = lifiContext();
+
+			const { onNext: _, onBack: __, ...props } = BASE_PROPS;
+
+			const rendered = render(SwapEthWizardStepsTest, { props, context: ctx });
+
+			await vi.runOnlyPendingTimersAsync();
+			await confirmSwap(rendered);
+			await tickValueDifference(rendered);
+
+			expect(rendered.getByRole('button', { name: en.swap.text.swap_button })).toBeDisabled();
+			expect(rendered.getByTestId(SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE)).toBeInTheDocument();
 		});
 	});
 });

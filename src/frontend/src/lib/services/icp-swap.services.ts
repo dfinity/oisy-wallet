@@ -14,6 +14,10 @@ export const icpSwapAmounts = async ({
 	onProviderParticipating,
 	fee = ICP_SWAP_POOL_FEE // The only supported pool fee on ICPSwap at the moment (0.3%)
 }: ICPSwapQuoteParams & SwapQuoteObserver): Promise<ICPSwapAmountReply> => {
+	// A quote moves no funds, and this pool is never reused: the swap resolves its own, certified,
+	// before approving or depositing anything. The quote itself comes from an uncertified pool
+	// query, so certifying this lookup alone would not make it trustworthy - it would only slow
+	// down every quote refresh.
 	const pool = await getPoolCanister({
 		identity,
 		token0: { address: sourceToken.ledgerCanisterId, standard: sourceToken.standard.code },
@@ -21,7 +25,8 @@ export const icpSwapAmounts = async ({
 			address: destinationToken.ledgerCanisterId,
 			standard: destinationToken.standard.code
 		},
-		fee
+		fee,
+		certified: false
 	});
 
 	onProviderParticipating?.(SwapProvider.ICP_SWAP);

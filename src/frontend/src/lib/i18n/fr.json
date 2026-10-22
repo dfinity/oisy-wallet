@@ -116,7 +116,9 @@
 	"progress": {
 		"completed": "Terminé",
 		"in_progress": "En cours",
-		"failed": "Échec"
+		"failed": "Échec",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {
@@ -1192,6 +1194,37 @@
 			"unconfirmed": "Le transfert des $token n’a pas pu être confirmé. S’il a abouti, le mint se termine en arrière-plan : suivez-le dans les transactions actives."
 		}
 	},
+	"cycles_top_up": {
+		"text": {
+			"top_up": "Recharger",
+			"title": "Recharger un canister",
+			"description": "Les cycles passent de votre solde $token au canister, qui les utilise pour le calcul et le stockage.",
+			"canister_id_placeholder": "Saisissez un ID de canister",
+			"checking_canister": "Vérification du canister...",
+			"recently_topped_up": "Rechargés récemment",
+			"canister": "Canister",
+			"you_top_up": "Vous rechargez",
+			"total": "Total",
+			"one_way": "Une recharge est irréversible : les cycles restent dans le canister.",
+			"topping_up": "Recharge de $canister...",
+			"topped_up": "$canister rechargé avec $amount $token.",
+			"unknown": "OISY ne peut pas encore dire si la recharge a abouti. Si c'est le cas, votre activité $token l'affichera. Rechargez à nouveau pour renvoyer la même recharge : elle ne peut aboutir qu'une seule fois. Une recharge nouvelle ou modifiée ajouterait à nouveau des cycles si celle-ci a abouti.",
+			"unknown_fresh": "OISY ne peut pas encore dire si votre dernière recharge a abouti. Si c'est le cas, cette recharge ajoute à nouveau des cycles. Vérifiez d'abord votre activité $token.",
+			"sent_to_canister": "Envoyer des $token à un canister ne le recharge pas. Les $token arrivent sur le compte du canister, et le canister ne reçoit des cycles que si son propre code les retire.",
+			"sent_to_canister_top_up": "Pour ajouter des cycles à un canister, utilisez « Recharger » sur la page $token."
+		},
+		"error": {
+			"invalid_canister_id": "Saisissez un ID de canister. Les principals d'utilisateur, les ID de compte et les adresses d'autres réseaux ne peuvent pas être rechargés.",
+			"canister_not_found": "Aucun canister avec cet ID n'existe sur l'Internet Computer. Vérifiez l'ID.",
+			"canister_check_failed": "OISY n'a pas pu vérifier ce canister. Réessayez dans un instant.",
+			"amount_too_small": "Saisissez plus que les frais de $fee $token.",
+			"refused": "La recharge n'a pas abouti. Rien n'a quitté votre portefeuille. Réessayez dans un instant.",
+			"insufficient_funds": "Pas assez de $token pour cette recharge et les frais. Rien n'a quitté votre portefeuille. Réduisez le montant.",
+			"clock": "La recharge n'a pas abouti car l'horloge de votre appareil est décalée. Rien n'a quitté votre portefeuille. Réglez l'heure correcte et réessayez.",
+			"refunded": "Le canister n'a pas pu recevoir les cycles. $refund $token sont revenus dans votre portefeuille, et la tentative a coûté $fees $token de frais. Vérifiez l'ID du canister.",
+			"refunded_nothing": "Le canister n'a pas pu recevoir les cycles, et les frais ont absorbé tout le montant. Vérifiez l'ID du canister."
+		}
+	},
 	"active_user_transactions": {
 		"text": {
 			"button_label": "",
@@ -1392,7 +1425,9 @@
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
-			"oisy_trade_recovery_failed": ""
+			"oisy_trade_recovery_failed": "",
+			"lifi_status_unknown": "",
+			"lifi_fee_changed": ""
 		}
 	},
 	"buy": {
@@ -1791,6 +1826,9 @@
 			"simulation_control_change": "Cette transaction changerait qui contrôle un ou plusieurs de vos comptes. L'approuver peut céder le compte lui-même, pas seulement ce qu'il contient.",
 			"simulation_new_owner": "Nouveau propriétaire du compte",
 			"simulation_new_spender": "Nouveau dépensier approuvé",
+			"simulation_new_allowance": "",
+			"simulation_allowance": "",
+			"simulation_allowance_unlimited": "",
 			"simulation_new_close_authority": "Nouvelle autorité de clôture",
 			"simulation_new_program": "Nouveau programme propriétaire",
 			"simulation_control_removed": "Supprimé",
@@ -1813,9 +1851,14 @@
 			"allowance_increase": "Cette demande augmente l'allocation du dépensier ci-dessous du montant indiqué, en plus de ce qu'il peut déjà dépenser. Le dépensier peut transférer ce montant de ce token hors de votre portefeuille, à tout moment, jusqu'à ce que vous la révoquiez.",
 			"allowance_decrease": "Cette demande réduit l'allocation du dépensier ci-dessous du montant indiqué. Elle ne déplace aucun fonds par elle-même.",
 			"unverifiable_erc20_request": "Cette demande concerne un token qu'OISY ne peut pas identifier ni décoder. Ce qui est affiché peut différer de ce qui serait réellement signé, l'approbation est donc désactivée.",
+			"token_call_with_value": "En plus du montant de jetons ci-dessous, cette demande envoie $amount au contrat du jeton. Un transfert ou une approbation de jetons n'envoie pas de $symbol, donc pour votre sécurité, OISY ne la signe pas.",
 			"unverifiable_approval_for_all_request": "Cette demande donnerait à un opérateur le contrôle d'une collection de NFT, et OISY ne peut pas décoder quel opérateur. Ce qui est affiché peut différer de ce qui serait réellement signé, l'approbation est donc désactivée.",
 			"approval_for_all_grant": "Cette demande permet à l'opérateur ci-dessous de transférer tout NFT de cette collection que vous possédez maintenant ou acquérez plus tard, à tout moment, jusqu'à ce que vous la révoquiez. Elle ne déplace aucun fonds par elle-même.",
 			"approval_for_all_revoke": "Cette demande révoque l'opérateur ci-dessous, qui ne pourra donc plus transférer les NFT que vous détenez dans cette collection.",
+			"cketh_deposit": "Cette demande convertit de l'ETH en ckETH pour votre principal Internet Computer, affiché ci-dessous.",
+			"cketh_deposit_principal": "Destinataire des ckETH",
+			"cketh_deposit_refused": "Cette demande appelle le contrat de conversion ckETH pour un principal Internet Computer qui n'est pas le vôtre, ou avec des données qu'OISY ne peut pas lire. Pour votre sécurité, OISY ne la signe pas.",
+			"cketh_helper_unconfirmed": "OISY ne peut pas encore confirmer le contrat de conversion ckETH et ne peut donc pas vérifier ce dépôt. L'approbation reste désactivée jusqu'à ce que ce soit possible.",
 			"raw_copied": "Données brutes de la transaction copiées dans le presse-papiers.",
 			"sign_message": "Signer le message",
 			"sign_psbt": "Signer la transaction",
@@ -1889,9 +1932,13 @@
 			"btc_psbt_input_ambiguous": "OISY ne peut pas déterminer à quelle sortie précédente se réfère l'une des entrées de cette transaction, de sorte que les montants affichés pour vérification pourraient différer des montants réellement signés. Pour votre sécurité, elle n'a pas été signée.",
 			"from_address_not_wallet": "L'adresse 'From' demandée pour la transaction n'est pas l'adresse de ce portefeuille.",
 			"unknown_destination": "Adresse de destination inconnue.",
+			"cketh_deposit_refused": "Cette demande appelle le contrat de conversion ckETH pour un principal Internet Computer qui n'est pas le vôtre, ou avec des données qu'OISY ne peut pas lire. Pour votre sécurité, elle n'a pas été signée.",
+			"cketh_helper_unconfirmed": "OISY n'a pas pu confirmer le contrat de conversion ckETH et n'a donc pas pu vérifier ce dépôt. Pour votre sécurité, il n'a pas été signé.",
+			"token_call_with_value": "Cette demande envoie $amount au contrat du jeton, en plus du montant de jetons. Pour votre sécurité, elle n'a pas été signée.",
 			"ambiguous_transaction": "Cette transaction déplace des fonds entre plusieurs adresses et ne peut pas être affichée correctement pour vérification. Pour votre sécurité, elle n'a pas été signée.",
 			"close_pays_others": "Cette transaction ferme l'un de vos comptes de jetons et verse son solde à une adresse qui n'est pas votre portefeuille. Pour votre sécurité, elle n'a pas été signée.",
 			"unreviewed_without_simulation": "OISY n'a pas pu lire une partie de cette transaction et le réseau n'en a pas renvoyé de simulation, donc rien ne décrit ce que ferait cette partie. Pour votre sécurité, elle n'a pas été signée.",
+			"unreviewed_not_described_by_simulation": "OISY n'a pas pu lire une partie de cette transaction et sa simulation n'a pas non plus montré ce que ferait cette partie. Pour votre sécurité, elle n'a pas été signée.",
 			"unread_programs_unconfirmed": "Cette transaction appelle un programme qu'OISY ne peut pas lire, et elle n'a pas été confirmée lors de la vérification. Pour votre sécurité, elle n'a pas été signée.",
 			"sol_transaction_as_message": "Ce message est une transaction Solana, qui ne peut être approuvée que via une vérification de transaction. Pour votre sécurité, elle n'a pas été signée.",
 			"request_not_defined": "Erreur inattendue : La demande n'est pas définie et ne peut donc pas être traitée.",
@@ -2160,7 +2207,8 @@
 			"summary_self": "",
 			"swap_on": "",
 			"interacted_with": "Interagi avec",
-			"unknown_token": "",
+			"unknown_token": "Token inconnu",
+			"unknown_token_named": "Token inconnu ($symbol)",
 			"summary_other": "",
 			"tab_summary": "",
 			"tab_balance_changes": "",
@@ -2177,6 +2225,8 @@
 			"instruction_close_account": "",
 			"instruction_close_account_for": "Fermer le compte de jetons $symbol",
 			"instruction_approve": "",
+			"instruction_approve_amount": "",
+			"instruction_approve_unlimited": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
 			"instruction_route": "",
@@ -2249,7 +2299,9 @@
 			"converting_ck_token": "Conversion de $ckToken en $twinToken",
 			"twin_network": "Réseau $twinNetwork",
 			"no_date_available": "Aucune date disponible",
-			"pending": "En attente"
+			"pending": "En attente",
+			"top_up": "Recharge",
+			"top_up_refund": "Remboursement de recharge"
 		},
 		"alt": {
 			"open_block_explorer": "Ouvrir cette transaction sur un explorateur de blocs",
@@ -2590,7 +2642,8 @@
 		},
 		"warning": {
 			"no_index_canister": "$oisy_short ne peut pas charger les transactions de $token_list : l'émetteur du token ne propose pas de suivi des transactions.",
-			"unavailable_index_canister": "Les dernières transactions de $token_list ne peuvent pas être chargées pour le moment, car leur service de suivi ne répond pas. Elles seront chargées automatiquement dès qu'il sera de nouveau disponible."
+			"unavailable_index_canister": "Les dernières transactions de $token_list ne peuvent pas être chargées pour le moment, car leur service de suivi ne répond pas. Elles seront chargées automatiquement dès qu'il sera de nouveau disponible.",
+			"unsupported_sol_transactions": "Certaines transactions de $token_list n'ont pas pu être chargées, car leur format n'est pas pris en charge. Elles apparaîtront automatiquement dès que ce problème sera résolu."
 		}
 	},
 	"earning": {

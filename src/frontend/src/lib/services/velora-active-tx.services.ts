@@ -166,21 +166,24 @@ const pollVeloraMarketTransaction = async ({
  * OISY derives one EVM address per principal, so it is by construction the
  * address that signed every Market row in the set; Market rows are skipped when
  * it is unavailable, while Delta rows are unaffected.
+ *
+ * `confirmedNonceByChainId` is shared with the other EVM pollers of the same tick, so Market rows
+ * cost one nonce read per chain whatever the provider of the rows next to them.
  */
 export const pollVeloraActiveUserTransactions = async ({
 	identity,
 	transactions,
-	userAddress
+	userAddress,
+	confirmedNonceByChainId = new Map<string, Promise<number>>()
 }: {
 	identity: Identity;
 	transactions: ActiveUserTransaction[];
 	userAddress: OptionEthAddress;
+	confirmedNonceByChainId?: Map<string, Promise<number>>;
 }): Promise<void> => {
 	if (transactions.length === 0) {
 		return;
 	}
-
-	const confirmedNonceByChainId = new Map<string, Promise<number>>();
 
 	await Promise.all(
 		transactions.map(async (tx) => {

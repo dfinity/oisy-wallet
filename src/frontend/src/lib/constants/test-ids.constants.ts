@@ -235,6 +235,7 @@ export const SWAP_TOKENS_MODAL_OPEN_BUTTON = 'swap-tokens-modal-open-button';
 export const SWAP_TOKENS_MODAL = 'swap-tokens-modal';
 export const SWAP_MODAL_SELECT_PROVIDER_STEP = 'swap-modal-select-provider-step';
 export const SWAP_PROVIDER_ANIMATION = 'swap-provider-animation';
+export const SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE = 'swap-lifi-insufficient-funds-for-fee';
 
 export const MODAL_FILTER_NETWORKS = 'MODAL_FILTER_NETWORKS';
 
@@ -286,6 +287,8 @@ export const TRANSACTIONS_FILTER_TOOLBAR = 'transactions-filter-toolbar';
 export const TRANSACTIONS_FILTER_TYPES_DROPDOWN = 'transactions-filter-types-dropdown';
 export const TRANSACTIONS_FILTER_TOKENS_DROPDOWN = 'transactions-filter-tokens-dropdown';
 export const TRANSACTIONS_FILTER_CONTACTS_DROPDOWN = 'transactions-filter-contacts-dropdown';
+export const TRANSACTIONS_FILTER_TYPE_LABEL = 'transactions-filter-type-label';
+export const TRANSACTIONS_FILTER_CONTACT_NAME = 'transactions-filter-contact-name';
 export const TRANSACTIONS_FILTER_CONTACTS_EMPTY_CTA = 'transactions-filter-contacts-empty-cta';
 export const TRANSACTIONS_FILTER_CLEAR_BUTTON = 'transactions-filter-clear-button';
 
@@ -300,6 +303,17 @@ export const CYCLES_MINT_REVIEW = 'cycles-mint-review';
 export const CYCLES_MINT_REVIEW_BACK_BUTTON = 'cycles-mint-review-back-button';
 export const CYCLES_MINT_REVIEW_MINT_BUTTON = 'cycles-mint-review-mint-button';
 export const CYCLES_MINT_RATE = 'cycles-mint-rate';
+export const CYCLES_TOP_UP_BUTTON = 'cycles-top-up-button';
+export const CYCLES_TOP_UP_CANISTER = 'cycles-top-up-canister';
+export const CYCLES_TOP_UP_CANISTER_INPUT = 'cycles-top-up-canister-input';
+export const CYCLES_TOP_UP_CANISTER_NEXT_BUTTON = 'cycles-top-up-canister-next-button';
+export const CYCLES_TOP_UP_RECENT_CANISTER = 'cycles-top-up-recent-canister';
+export const CYCLES_TOP_UP_AMOUNT = 'cycles-top-up-amount';
+export const CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON = 'cycles-top-up-amount-next-button';
+export const CYCLES_TOP_UP_REVIEW = 'cycles-top-up-review';
+export const CYCLES_TOP_UP_REVIEW_BACK_BUTTON = 'cycles-top-up-review-back-button';
+export const CYCLES_TOP_UP_REVIEW_TOP_UP_BUTTON = 'cycles-top-up-review-top-up-button';
+export const CYCLES_SENT_TO_CANISTER_WARNING = 'cycles-sent-to-canister-warning';
 
 export const HELP_AUTH_IMAGE_BANNER = 'help-auth-image-banner';
 export const HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON = 'help-auth-new-identity-version-button';

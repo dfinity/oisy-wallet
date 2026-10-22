@@ -82,6 +82,7 @@ import {
 	isNearIntentsQuoteExpired,
 	verifyNearIntentsQuoteSignature
 } from '$lib/utils/near-intents-quote.utils';
+import { parseToken } from '$lib/utils/parse.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
@@ -2729,6 +2730,32 @@ describe('swap.services', () => {
 
 			expect(mockSwapGetSpender).toHaveBeenCalled();
 			expect(mockSwapBuildTx).toHaveBeenCalled();
+		});
+
+		it('passes the amount swapped for the pending activity, which the calldata does not carry as a transfer', async () => {
+			await fetchVeloraMarketSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				slippageValue: mockSlippageValue,
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: mockSwapDetails,
+				receiveAmount: BigInt(1000),
+				isGasless: false
+			});
+
+			expect(sendEvmSwap).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					token: mockSourceToken,
+					amount: parseToken({ value: mockSwapAmount, unitName: mockSourceToken.decimals })
+				})
+			);
 		});
 
 		it('rounds the slippage to integer basis points when building the transaction', async () => {

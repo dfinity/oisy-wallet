@@ -1,5 +1,8 @@
 import { LIFI_INTEGRATOR } from '$env/rest/lifi.env';
-import { LIFI_QUOTE_REFRESH_INTERVAL_MS } from '$lib/constants/swap.constants';
+import {
+	LIFI_QUOTE_REFRESH_INTERVAL_MS,
+	LIFI_QUOTE_TIMEOUT_MS
+} from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
 import {
 	PLAUSIBLE_EVENT_CONTEXTS,
@@ -10,7 +13,8 @@ import {
 } from '$lib/enums/plausible';
 import { fetchLifiQuote } from '$lib/rest/lifi.rest';
 import { trackEvent } from '$lib/services/analytics.services';
-import { LifiQuoteRejectedError } from '$lib/types/errors';
+import { LifiQuoteRejectedError, LifiRouteUnsupportedError } from '$lib/types/errors';
+import type { NetworkId } from '$lib/types/network';
 import {
 	SwapProvider,
 	type EvmQuoteParams,
@@ -19,13 +23,14 @@ import {
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
+import { isLifiRouteExecutable } from '$lib/utils/lifi-calldata.utils';
 import {
 	assertLifiQuote,
 	buildLifiQuoteRequest,
 	mapLifiSwapResult
 } from '$lib/utils/lifi-swap.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-import { HTTPError, SDKError, type QuoteRequestFromAmount } from '@lifi/sdk';
+import { HTTPError, SDKError, type LiFiStep, type QuoteRequestFromAmount } from '@lifi/sdk';
 import { get } from 'svelte/store';
 
 type LifiQuoteParams = EvmQuoteParams | NearIntentsQuoteParams;
@@ -104,6 +109,11 @@ const toSwapOfferError = (
 		return { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.QUOTE_REJECTED };
 	}
 
+	// No route OISY can execute is no route at all.
+	if (err instanceof LifiRouteUnsupportedError) {
+		return { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE };
+	}
+
 	// `LIFI_QUOTE_TIMEOUT_MS` aborts the fetch, and the SDK wraps that abort as it does any error.
 	if (
 		err instanceof SDKError &&
@@ -129,6 +139,66 @@ const toSwapOfferError = (
 	return { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.REQUEST_FAILED, status };
 };
 
+const fetchTrustedLifiQuote = async ({
+	request,
+	sourceNetworkId,
+	signal
+}: {
+	request: QuoteRequestFromAmount;
+	sourceNetworkId: NetworkId;
+	signal: AbortSignal;
+}): Promise<LiFiStep> => {
+	// A copy, because the SDK fills its defaults into the object it is given.
+	const quote = await fetchLifiQuote({ ...request, signal });
+
+	assertLifiQuote({ quote, request, sourceNetworkId });
+
+	return quote;
+};
+
+/**
+ * A trusted quote whose route the calldata binding could accept, with the request it answers. When
+ * LI.FI's best route goes through a bridge in a shape the binding refuses (Across behind a DEX swap,
+ * or any bridge followed by another step), LI.FI is asked once more without that bridge, so that
+ * another allowed one can serve the pair; that request is the one execution re-quotes with. Both
+ * requests share one deadline: the form waits for every provider's answer.
+ */
+const fetchExecutableLifiQuote = async ({
+	request,
+	sourceNetworkId
+}: {
+	request: QuoteRequestFromAmount;
+	sourceNetworkId: NetworkId;
+}): Promise<{ quote: LiFiStep; request: QuoteRequestFromAmount }> => {
+	const signal = AbortSignal.timeout(LIFI_QUOTE_TIMEOUT_MS);
+	const quote = await fetchTrustedLifiQuote({ request, sourceNetworkId, signal });
+
+	if (isLifiRouteExecutable(quote)) {
+		return { quote, request };
+	}
+
+	const bridge = quote.includedSteps.find(({ type }) => type === 'cross')?.tool;
+	const allowBridges = request.allowBridges ?? [];
+	const otherBridges = allowBridges.filter((key) => key !== bridge);
+
+	if (
+		isNullish(bridge) ||
+		otherBridges.length === allowBridges.length ||
+		otherBridges.length === 0
+	) {
+		throw new LifiRouteUnsupportedError(`LI.FI route via ${bridge} cannot be executed`);
+	}
+
+	const withoutBridge = { ...request, allowBridges: otherBridges };
+	const fallback = await fetchTrustedLifiQuote({ request: withoutBridge, sourceNetworkId, signal });
+
+	if (!isLifiRouteExecutable(fallback)) {
+		throw new LifiRouteUnsupportedError(`LI.FI route without ${bridge} cannot be executed`);
+	}
+
+	return { quote: fallback, request: withoutBridge };
+};
+
 const loadLifiSwapQuote = async ({
 	request,
 	sourceToken,
@@ -138,12 +208,9 @@ const loadLifiSwapQuote = async ({
 	request: QuoteRequestFromAmount;
 }): Promise<SwapMappedResult | undefined> => {
 	try {
-		// A copy, because the SDK fills its defaults into the object it is given.
-		const quote = await fetchLifiQuote({ ...request });
-
-		assertLifiQuote({ quote, request, sourceNetworkId: sourceToken.network.id });
-
-		const result = mapLifiSwapResult(quote);
+		const result = mapLifiSwapResult(
+			await fetchExecutableLifiQuote({ request, sourceNetworkId: sourceToken.network.id })
+		);
 
 		const destinationUsdValue = get(exchanges)?.[destinationToken.id]?.usd;
 

@@ -42,11 +42,16 @@
 	};
 </script>
 
-<ModalFilterButton ariaLabel={currentLabel} onclick={() => (visible = !visible)} bind:button>
+<ModalFilterButton
+	ariaLabel={currentLabel}
+	onclick={() => (visible = !visible)}
+	opened={visible}
+	bind:button
+>
 	{currentLabel}
 </ModalFilterButton>
 
-<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
+<Popover anchor={button} direction="rtl" dropdown invisibleBackdrop bind:visible>
 	<div class="menu-surface">
 		<List condensed noPadding>
 			<ListItem>

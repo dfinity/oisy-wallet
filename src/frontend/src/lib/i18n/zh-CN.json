@@ -116,7 +116,9 @@
 	"progress": {
 		"completed": "已完成",
 		"in_progress": "进行中",
-		"failed": "失败"
+		"failed": "失败",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {
@@ -1192,6 +1194,37 @@
 			"unconfirmed": "无法确认 $token 转账。如果转账已完成，铸造将在后台完成：可在活跃交易中查看进度。"
 		}
 	},
+	"cycles_top_up": {
+		"text": {
+			"top_up": "充值",
+			"title": "为 Canister 充值",
+			"description": "Cycles 会从您的 $token 余额转入 Canister，Canister 用它们支付计算和存储。",
+			"canister_id_placeholder": "输入 Canister ID",
+			"checking_canister": "正在检查 Canister...",
+			"recently_topped_up": "最近充值",
+			"canister": "Canister",
+			"you_top_up": "您充值",
+			"total": "合计",
+			"one_way": "充值无法撤销：Cycles 会留在 Canister 中。",
+			"topping_up": "正在为 $canister 充值...",
+			"topped_up": "已为 $canister 充值 $amount $token。",
+			"unknown": "OISY 暂时无法确定充值是否成功。如果成功，您的 $token 活动中会显示。再次充值会重新发送同一笔充值：它只能成功一次。如果这笔充值已成功，新的或修改过的充值会再次添加 Cycles。",
+			"unknown_fresh": "OISY 暂时无法确定您上一笔充值是否成功。如果已成功，这笔充值会再次添加 Cycles。请先检查您的 $token 活动。",
+			"sent_to_canister": "向 Canister 发送 $token 不会为其充值。这些 $token 会进入该 Canister 的账户，只有当 Canister 自己的代码将其提取时，它才能获得 Cycles。",
+			"sent_to_canister_top_up": "要为 Canister 添加 Cycles，请在 $token 页面使用“充值”。"
+		},
+		"error": {
+			"invalid_canister_id": "请输入 Canister ID。用户 Principal、账户 ID 和其他网络的地址无法充值。",
+			"canister_not_found": "Internet Computer 上不存在此 ID 的 Canister。请检查 ID。",
+			"canister_check_failed": "OISY 无法检查此 Canister。请稍后再试。",
+			"amount_too_small": "请输入高于 $fee $token 手续费的金额。",
+			"refused": "充值未成功。您的钱包中没有资金转出。请稍后再试。",
+			"insufficient_funds": "$token 不足以支付本次充值和手续费。您的钱包中没有资金转出。请降低金额。",
+			"clock": "由于您的设备时钟不准，充值未成功。您的钱包中没有资金转出。请设置正确的时间后再试。",
+			"refunded": "该 Canister 无法接收 Cycles。$refund $token 已退回您的钱包，此次尝试共花费 $fees $token 手续费。请检查 Canister ID。",
+			"refunded_nothing": "该 Canister 无法接收 Cycles，手续费耗尽了全部金额。请检查 Canister ID。"
+		}
+	},
 	"active_user_transactions": {
 		"text": {
 			"button_label": "",
@@ -1392,7 +1425,9 @@
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
-			"oisy_trade_recovery_failed": ""
+			"oisy_trade_recovery_failed": "",
+			"lifi_status_unknown": "",
+			"lifi_fee_changed": ""
 		}
 	},
 	"buy": {
@@ -1791,6 +1826,9 @@
 			"simulation_control_change": "此交易将改变您一个或多个账户的控制权归属。批准它可能会交出账户本身，而不仅仅是其中的资产。",
 			"simulation_new_owner": "新账户所有者",
 			"simulation_new_spender": "新批准的支出方",
+			"simulation_new_allowance": "",
+			"simulation_allowance": "",
+			"simulation_allowance_unlimited": "",
 			"simulation_new_close_authority": "新的关闭权限方",
 			"simulation_new_program": "新的拥有程序",
 			"simulation_control_removed": "已移除",
@@ -1813,9 +1851,14 @@
 			"allowance_increase": "此请求会在下方支出方已能支出的额度基础上，再增加所示金额的授权额度。在您撤销授权之前，支出方可随时从您的钱包转出该数量的此代币。",
 			"allowance_decrease": "此请求会将下方支出方的授权额度减少所示金额。此操作本身不会转移任何资金。",
 			"unverifiable_erc20_request": "此请求涉及 OISY 无法识别或解码的代币。显示的内容可能与实际将被签名的内容不同，因此批准功能已被禁用。",
+			"token_call_with_value": "除了下方显示的代币数量外，此请求还会向代币合约发送 $amount。代币转账或授权不会发送 $symbol，因此为了您的安全，OISY 不会签署该请求。",
 			"unverifiable_approval_for_all_request": "此请求将把某个 NFT 收藏集的控制权交给一个操作员，而 OISY 无法解码具体是哪个操作员。显示的内容可能与实际将被签名的内容不同，因此批准功能已被禁用。",
 			"approval_for_all_grant": "此请求允许下方的操作员随时转移您现在拥有或以后获得的此收藏集中的任何 NFT，直到您撤销授权为止。此操作本身不会转移任何资金。",
 			"approval_for_all_revoke": "此请求将撤销下方操作员的权限，使其无法再转移您在此收藏集中持有的 NFT。",
+			"cketh_deposit": "此请求会将 ETH 转换为 ckETH，并存入下方显示的您的 Internet Computer 主标识。",
+			"cketh_deposit_principal": "ckETH 接收方",
+			"cketh_deposit_refused": "此请求会为不属于您的 Internet Computer 主标识，或使用 OISY 无法读取的数据，调用 ckETH 转换合约。为了您的安全，OISY 不会签署该请求。",
+			"cketh_helper_unconfirmed": "OISY 暂时无法确认 ckETH 转换合约，因此无法检查此存入请求。在能够检查之前，批准功能将保持禁用。",
 			"raw_copied": "原始交易数据已复制到剪贴板。",
 			"sign_message": "签署消息",
 			"sign_psbt": "签署交易",
@@ -1889,9 +1932,13 @@
 			"btc_psbt_input_ambiguous": "OISY 无法确定此交易的某个输入引用的是哪个先前输出，因此审查时显示的金额可能与实际签名的金额不同。出于安全考虑，该交易未被签名。",
 			"from_address_not_wallet": "请求交易的发起地址不是本钱包的地址。",
 			"unknown_destination": "未知的接收地址。",
+			"cketh_deposit_refused": "此请求会为不属于您的 Internet Computer 主标识，或使用 OISY 无法读取的数据，调用 ckETH 转换合约。为了您的安全，该请求未被签署。",
+			"cketh_helper_unconfirmed": "OISY 无法确认 ckETH 转换合约，因此无法检查此存入请求。为了您的安全，该请求未被签署。",
+			"token_call_with_value": "此请求除代币数量外，还会向代币合约发送 $amount。为了您的安全，该请求未被签署。",
 			"ambiguous_transaction": "此交易在多个地址之间转移资金，无法准确显示以供审核。为了您的安全，该交易未被签名。",
 			"close_pays_others": "此交易会关闭您的一个代币账户，并将其余额支付到不属于您钱包的地址。为了您的安全，该交易未被签署。",
 			"unreviewed_without_simulation": "OISY 无法读取此交易的一部分，网络也未返回其模拟结果，因此没有任何信息说明该部分会做什么。为了您的安全，该交易未被签名。",
+			"unreviewed_not_described_by_simulation": "OISY 无法读取此交易的一部分，其模拟结果也未显示该部分会做什么。为了您的安全，该交易未被签名。",
 			"unread_programs_unconfirmed": "此交易调用了一个 OISY 无法读取的程序，且未在审查中得到确认。为了您的安全，该交易未被签署。",
 			"sol_transaction_as_message": "此消息是一笔 Solana 交易，只能通过交易审查来批准。出于安全考虑，该交易未被签名。",
 			"request_not_defined": "意外错误：请求未定义，因此无法处理。",
@@ -2160,7 +2207,8 @@
 			"summary_self": "",
 			"swap_on": "",
 			"interacted_with": "交互对象",
-			"unknown_token": "",
+			"unknown_token": "未知代币",
+			"unknown_token_named": "未知代币（$symbol）",
 			"summary_other": "",
 			"tab_summary": "",
 			"tab_balance_changes": "",
@@ -2177,6 +2225,8 @@
 			"instruction_close_account": "",
 			"instruction_close_account_for": "关闭 $symbol 代币账户",
 			"instruction_approve": "",
+			"instruction_approve_amount": "",
+			"instruction_approve_unlimited": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
 			"instruction_route": "",
@@ -2249,7 +2299,9 @@
 			"converting_ck_token": "正在将 $ckToken 转换为 $twinToken",
 			"twin_network": "$twinNetwork 网络",
 			"no_date_available": "无可用日期",
-			"pending": "处理中"
+			"pending": "处理中",
+			"top_up": "充值",
+			"top_up_refund": "充值退款"
 		},
 		"alt": {
 			"open_block_explorer": "在区块浏览器中打开此交易",
@@ -2590,7 +2642,8 @@
 		},
 		"warning": {
 			"no_index_canister": "$oisy_short 无法加载 $token_list 的交易——代币发行方未提供交易记录功能。",
-			"unavailable_index_canister": "目前无法加载 $token_list 的最新交易，因为其交易记录服务没有响应。服务恢复后将自动加载。"
+			"unavailable_index_canister": "目前无法加载 $token_list 的最新交易，因为其交易记录服务没有响应。服务恢复后将自动加载。",
+			"unsupported_sol_transactions": "$token_list 的部分交易因格式不受支持而无法加载。此问题解决后，它们将自动显示。"
 		}
 	},
 	"earning": {

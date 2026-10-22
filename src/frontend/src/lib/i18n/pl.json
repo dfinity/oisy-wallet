@@ -116,7 +116,9 @@
 	"progress": {
 		"completed": "Zakończono",
 		"in_progress": "W toku",
-		"failed": "Niepowodzenie"
+		"failed": "Niepowodzenie",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {
@@ -1192,6 +1194,37 @@
 			"unconfirmed": "Nie udało się potwierdzić przelewu $token. Jeśli doszedł do skutku, wybijanie zakończy się w tle: możesz je śledzić w aktywnych transakcjach."
 		}
 	},
+	"cycles_top_up": {
+		"text": {
+			"top_up": "Doładuj",
+			"title": "Doładuj kanister",
+			"description": "Cykle trafiają z Twojego salda $token do kanistra, który zużywa je na obliczenia i przechowywanie danych.",
+			"canister_id_placeholder": "Wpisz ID kanistra",
+			"checking_canister": "Sprawdzanie kanistra...",
+			"recently_topped_up": "Ostatnio doładowane",
+			"canister": "Kanister",
+			"you_top_up": "Doładowujesz",
+			"total": "Razem",
+			"one_way": "Doładowania nie można cofnąć: cykle zostają w kanistrze.",
+			"topping_up": "Doładowywanie $canister...",
+			"topped_up": "Doładowano $canister kwotą $amount $token.",
+			"unknown": "OISY nie wie jeszcze, czy doładowanie się powiodło. Jeśli tak, zobaczysz je w aktywności $token. Doładuj ponownie, aby wysłać to samo doładowanie jeszcze raz: może się powieść tylko raz. Nowe lub zmienione doładowanie dodałoby cykle ponownie, jeśli to się powiodło.",
+			"unknown_fresh": "OISY nie wie jeszcze, czy Twoje ostatnie doładowanie się powiodło. Jeśli tak, to doładowanie doda cykle ponownie. Najpierw sprawdź aktywność $token.",
+			"sent_to_canister": "Wysłanie $token do kanistra go nie doładowuje. $token trafiają na konto kanistra, a kanister dostaje cykle tylko wtedy, gdy wypłaci je jego własny kod.",
+			"sent_to_canister_top_up": "Aby dodać cykle do kanistra, użyj opcji „Doładuj” na stronie $token."
+		},
+		"error": {
+			"invalid_canister_id": "Wpisz ID kanistra. Principali użytkowników, ID kont i adresów w innych sieciach nie można doładować.",
+			"canister_not_found": "Na Internet Computer nie ma kanistra o tym ID. Sprawdź ID.",
+			"canister_check_failed": "OISY nie mógł sprawdzić tego kanistra. Spróbuj ponownie za chwilę.",
+			"amount_too_small": "Wpisz więcej niż opłata $fee $token.",
+			"refused": "Doładowanie się nie powiodło. Nic nie opuściło Twojego portfela. Spróbuj ponownie za chwilę.",
+			"insufficient_funds": "Za mało $token na to doładowanie i opłatę. Nic nie opuściło Twojego portfela. Zmniejsz kwotę.",
+			"clock": "Doładowanie się nie powiodło, ponieważ zegar Twojego urządzenia jest źle ustawiony. Nic nie opuściło Twojego portfela. Ustaw prawidłowy czas i spróbuj ponownie.",
+			"refunded": "Kanister nie mógł przyjąć cykli. Do Twojego portfela wróciło $refund $token, a próba kosztowała $fees $token opłat. Sprawdź ID kanistra.",
+			"refunded_nothing": "Kanister nie mógł przyjąć cykli, a opłaty pochłonęły całą kwotę. Sprawdź ID kanistra."
+		}
+	},
 	"active_user_transactions": {
 		"text": {
 			"button_label": "",
@@ -1392,7 +1425,9 @@
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
-			"oisy_trade_recovery_failed": ""
+			"oisy_trade_recovery_failed": "",
+			"lifi_status_unknown": "",
+			"lifi_fee_changed": ""
 		}
 	},
 	"buy": {
@@ -1791,6 +1826,9 @@
 			"simulation_control_change": "Ta transakcja zmieniłaby, kto kontroluje jedno lub więcej Twoich kont. Zatwierdzenie jej może oddać samo konto, a nie tylko jego zawartość.",
 			"simulation_new_owner": "Nowy właściciel konta",
 			"simulation_new_spender": "Nowy zatwierdzony upoważniony",
+			"simulation_new_allowance": "",
+			"simulation_allowance": "",
+			"simulation_allowance_unlimited": "",
 			"simulation_new_close_authority": "Nowy organ zamykający",
 			"simulation_new_program": "Nowy program właścicielski",
 			"simulation_control_removed": "Usunięto",
@@ -1813,9 +1851,14 @@
 			"allowance_increase": "To żądanie zwiększa limit wydatków upoważnionego poniżej o pokazaną kwotę, oprócz tego, co już może wydać. Upoważniony może przenieść tę kwotę tego tokena z Twojego portfela w dowolnym momencie, dopóki nie odwołasz uprawnienia.",
 			"allowance_decrease": "To żądanie zmniejsza limit wydatków upoważnionego poniżej o pokazaną kwotę. Samo w sobie nie przenosi żadnych środków.",
 			"unverifiable_erc20_request": "To żądanie dotyczy tokena, którego OISY nie może zidentyfikować ani zdekodować. Wyświetlana treść może różnić się od tej, która faktycznie zostałaby podpisana, dlatego zatwierdzenie jest wyłączone.",
+			"token_call_with_value": "Oprócz poniższej kwoty tokenów to żądanie wysyła $amount do kontraktu tokena. Transfer ani zatwierdzenie tokena nie wysyła $symbol, dlatego dla Twojego bezpieczeństwa OISY go nie podpisze.",
 			"unverifiable_approval_for_all_request": "To żądanie przekazałoby operatorowi kontrolę nad kolekcją NFT, a OISY nie może zdekodować, o którego operatora chodzi. Wyświetlana treść może różnić się od tej, która faktycznie zostałaby podpisana, dlatego zatwierdzenie jest wyłączone.",
 			"approval_for_all_grant": "To żądanie pozwala operatorowi poniżej przenosić dowolny NFT z tej kolekcji, który posiadasz teraz lub nabędziesz później, w dowolnym momencie, dopóki nie odwołasz uprawnienia. Samo w sobie nie przenosi żadnych środków.",
 			"approval_for_all_revoke": "To żądanie odwołuje operatora poniżej, dzięki czemu nie będzie już mógł przenosić NFT posiadanych przez Ciebie w tej kolekcji.",
+			"cketh_deposit": "To żądanie konwertuje ETH na ckETH dla Twojego principala Internet Computer, widocznego poniżej.",
+			"cketh_deposit_principal": "Odbiorca ckETH",
+			"cketh_deposit_refused": "To żądanie wywołuje kontrakt konwersji ckETH dla principala Internet Computer, który nie jest Twój, lub z danymi, których OISY nie potrafi odczytać. Dla Twojego bezpieczeństwa OISY go nie podpisze.",
+			"cketh_helper_unconfirmed": "OISY nie może jeszcze potwierdzić kontraktu konwersji ckETH, więc nie może sprawdzić tej wpłaty. Zatwierdzenie pozostanie wyłączone, dopóki nie będzie to możliwe.",
 			"raw_copied": "Surowe dane transakcji skopiowane do schowka.",
 			"sign_message": "Podpisz wiadomość",
 			"sign_psbt": "Podpisz transakcję",
@@ -1889,9 +1932,13 @@
 			"btc_psbt_input_ambiguous": "OISY nie może ustalić, do którego poprzedniego wyjścia odnosi się jedno z wejść tej transakcji, więc kwoty pokazane do przeglądu mogą różnić się od kwot faktycznie podpisywanych. Ze względów bezpieczeństwa nie została podpisana.",
 			"from_address_not_wallet": "Adres nadawcy żądany dla transakcji nie jest adresem tego portfela.",
 			"unknown_destination": "Nieznany adres docelowy.",
+			"cketh_deposit_refused": "To żądanie wywołuje kontrakt konwersji ckETH dla principala Internet Computer, który nie jest Twój, lub z danymi, których OISY nie potrafi odczytać. Dla Twojego bezpieczeństwa nie zostało podpisane.",
+			"cketh_helper_unconfirmed": "OISY nie mogła potwierdzić kontraktu konwersji ckETH, więc nie mogła sprawdzić tej wpłaty. Dla Twojego bezpieczeństwa nie została podpisana.",
+			"token_call_with_value": "To żądanie wysyła $amount do kontraktu tokena oprócz kwoty tokenów. Dla Twojego bezpieczeństwa nie zostało podpisane.",
 			"ambiguous_transaction": "Ta transakcja przenosi środki między kilkoma adresami i nie może zostać dokładnie wyświetlona do weryfikacji. Dla Twojego bezpieczeństwa nie została podpisana.",
 			"close_pays_others": "Ta transakcja zamyka jedno z Twoich kont tokenów i wypłaca jego saldo na adres, który nie jest Twoim portfelem. Dla Twojego bezpieczeństwa nie została podpisana.",
 			"unreviewed_without_simulation": "OISY nie mogła odczytać części tej transakcji, a sieć nie zwróciła również jej symulacji, więc nic nie opisuje, co ta część by zrobiła. Dla Twojego bezpieczeństwa nie została podpisana.",
+			"unreviewed_not_described_by_simulation": "OISY nie mogła odczytać części tej transakcji, a jej symulacja również nie pokazała, co ta część by zrobiła. Dla Twojego bezpieczeństwa nie została podpisana.",
 			"unread_programs_unconfirmed": "Ta transakcja wywołuje program, którego OISY nie może odczytać, i nie została potwierdzona podczas przeglądu. Dla Twojego bezpieczeństwa nie została podpisana.",
 			"sol_transaction_as_message": "Ta wiadomość jest transakcją Solana, którą można zatwierdzić wyłącznie poprzez przegląd transakcji. Ze względów bezpieczeństwa nie została podpisana.",
 			"request_not_defined": "Nieoczekiwany błąd: Żądanie nie jest zdefiniowane, dlatego nie można go przetworzyć.",
@@ -2160,7 +2207,8 @@
 			"summary_self": "",
 			"swap_on": "",
 			"interacted_with": "Interakcja z",
-			"unknown_token": "",
+			"unknown_token": "Nieznany token",
+			"unknown_token_named": "Nieznany token ($symbol)",
 			"summary_other": "",
 			"tab_summary": "",
 			"tab_balance_changes": "",
@@ -2177,6 +2225,8 @@
 			"instruction_close_account": "",
 			"instruction_close_account_for": "Zamknij konto tokenów $symbol",
 			"instruction_approve": "",
+			"instruction_approve_amount": "",
+			"instruction_approve_unlimited": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
 			"instruction_route": "",
@@ -2249,7 +2299,9 @@
 			"converting_ck_token": "Konwersja $ckToken na $twinToken",
 			"twin_network": "Sieć $twinNetwork",
 			"no_date_available": "Brak dostępnej daty",
-			"pending": "Oczekuje"
+			"pending": "Oczekuje",
+			"top_up": "Doładowanie",
+			"top_up_refund": "Zwrot doładowania"
 		},
 		"alt": {
 			"open_block_explorer": "Otwórz tę transakcję w eksploratorze bloków",
@@ -2590,7 +2642,8 @@
 		},
 		"warning": {
 			"no_index_canister": "$oisy_short nie może załadować transakcji dla $token_list – wydawca tokena nie udostępnia śledzenia transakcji.",
-			"unavailable_index_canister": "Najnowszych transakcji dla $token_list nie można w tej chwili załadować, ponieważ ich usługa śledzenia nie odpowiada. Zostaną załadowane automatycznie, gdy znów będzie dostępna."
+			"unavailable_index_canister": "Najnowszych transakcji dla $token_list nie można w tej chwili załadować, ponieważ ich usługa śledzenia nie odpowiada. Zostaną załadowane automatycznie, gdy znów będzie dostępna.",
+			"unsupported_sol_transactions": "Nie udało się załadować niektórych transakcji dla $token_list, ponieważ mają nieobsługiwany format. Pojawią się automatycznie, gdy ten problem zostanie rozwiązany."
 		}
 	},
 	"earning": {

@@ -1,5 +1,6 @@
 @use 'sass:meta';
 @use 'mixins/button' as button-mixins;
+@use 'mixins/interaction';
 
 /*
 We explicitly need to import Tailwind with a plain CSS @import as described in their documentation.
@@ -83,13 +84,27 @@ The control must be positioned: add `relative` unless it is already `absolute` o
 }
 
 /*
+`hit-area-touch` - with `hit-area`: grows the tap target to 44 px when a touch screen is the main
+input (`pointer: coarse`), for the icon triggers of menus and dropdowns. A width breakpoint
+cannot tell a tablet from a narrow laptop window, so this follows the pointer instead.
+*/
+@utility hit-area-touch {
+	@include interaction.coarse {
+		--hit-area: var(--touch-target-min-height);
+	}
+}
+
+/*
 Press and row feedback, as utilities so every interactive element shares one rule instead of
 re-spelling it. The shared `Button` / `ButtonIcon` get the same press from `button.scss`.
 
 - `press`: shrinks to 0.98 while held. Text buttons and whole-card buttons.
 - `press-icon`: shrinks to 0.96 while held. Icon-size controls.
 - `row-feedback`: full-width rows, which do not shrink: 10 % blue on hover, 20 % while pressed
-  (ignoring presses on controls inside the row), colour over 150 ms.
+  (ignoring presses on controls inside the row). The hover fades over 150 ms; the pressed fill
+  shows at once and fades back on release, since a quick click is held about 80 ms and a fill
+  that faded in would only peak as it is let go. A row painted through `child-pressed:` or
+  `parent-pressed:` adds `*-pressed:duration-0` beside its fill.
 
 The presses skip disabled and reduced motion. They need `scale` in the element's transition:
 buttons have it from the base button rule; anything else adds `transition-[scale]` (or a list
@@ -125,6 +140,7 @@ against the button (the mobile bar's Finance circle).
 
 	@variant pressed {
 		background-color: var(--color-background-brand-subtle-20);
+		transition-duration: 0s;
 	}
 }
 
@@ -154,7 +170,15 @@ don't take it: they are the sign that work is happening.
 		}
 	}
 
-	::view-transition-old(header),
+	/*
+	The header holds still between pages, and only its new state shows: the old one would stay
+	under it for the whole transition, and a control that changed, such as the network switcher's
+	label, would show its old version beside the new one.
+	*/
+	::view-transition-old(header) {
+		display: none;
+	}
+
 	::view-transition-new(header) {
 		animation: none;
 	}

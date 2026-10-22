@@ -90,6 +90,8 @@ describe('SwapIcpWizard', () => {
 			destinationToken: readable(mockDestToken),
 			isSourceTokenIcrc2: readable(true),
 			failedSwapError: writable(undefined),
+			amountSetToMax: writable(false),
+			lifiMaxFee: writable(undefined),
 			sourceTokenExchangeRate: readable(10),
 			setIsTokensIcrc2: vi.fn()
 		};
