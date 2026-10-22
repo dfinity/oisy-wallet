@@ -172,6 +172,54 @@ describe('NetworksSwitcher', () => {
 			});
 		});
 
+		// A switch only changes the `network` param, so an earlier one still under way is not the user
+		// leaving the page.
+		it.each([
+			{ firstSwitch: 'still running', landsFirst: false },
+			{ firstSwitch: 'already landed', landsFirst: true }
+		])(
+			'switches to a second pick while the first switch is $firstSwitch',
+			async ({ landsFirst }) => {
+				const settleNavigation: (() => void)[] = [];
+
+				goto.mockImplementation((target) => {
+					const url = new URL(target.toString());
+
+					Object.assign(navigating, { to: { url } });
+
+					return new Promise<void>((resolve) =>
+						settleNavigation.push(() => {
+							mockPage.mockUrl(url);
+							Object.assign(navigating, { to: null });
+							resolve();
+						})
+					);
+				});
+
+				const { getByTestId, queryByRole } = render(NetworksSwitcher, {
+					props: { visible: true }
+				});
+
+				await fireEvent.click(getByTestId(ethRow));
+
+				await waitFor(() => expect(goto).toHaveBeenCalledOnce());
+				await waitFor(() => expect(queryByRole('dialog')).not.toBeInTheDocument());
+
+				await fireEvent.click(getByTestId(NETWORKS_SWITCHER_DROPDOWN));
+				await fireEvent.click(getByTestId(btcRow));
+
+				if (landsFirst) {
+					settleNavigation[0]?.();
+				}
+
+				await waitFor(() => expect(goto).toHaveBeenCalledTimes(2));
+
+				expect(goto.mock.calls[1]?.[0].toString()).toContain(
+					`network=${BTC_MAINNET_NETWORK.id.description}`
+				);
+			}
+		);
+
 		it('keeps the clicked network checked while the navigation is pending', async () => {
 			goto.mockReturnValue(new Promise(() => {}));
 

@@ -80,15 +80,19 @@
 
 		dropdown?.close();
 
-		const { href } = page.url;
+		const { pathname } = page.url;
 
 		// The route change runs a view transition, which holds the page still while the new state
 		// renders: a panel still leaving would stop mid-fade. So the route changes once it has gone.
 		await waitForMilliseconds(BACKDROP_FADE_OUT_DURATION);
 
-		// The closed panel no longer covers the page, so the user may have set off elsewhere during
-		// the wait. Switching now would abort that navigation and bring them back here.
-		if (nonNullish(navigating.to) || page.url.href !== href) {
+		// The closed panel no longer covers the page, so the user may have set off for another page
+		// during the wait. Switching now would abort that navigation and bring them back here. An
+		// earlier switch from this menu only changes the `network` param, so it keeps the path.
+		if (
+			(nonNullish(navigating.to) && navigating.to.url.pathname !== pathname) ||
+			page.url.pathname !== pathname
+		) {
 			clearPendingSelection(selection);
 
 			return;
