@@ -1,7 +1,9 @@
+import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { NullishIdentity } from '$lib/types/identity';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { getAccountInfo } from '$sol/api/solana.api';
+import { ATA_SIZE } from '$sol/constants/ata.constants';
 import {
 	ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
@@ -445,10 +447,14 @@ const fundsBeyondRent = ({
 
 const mapSolSystemInstruction = ({
 	instruction,
-	rentExemptMinimum
+	rentExemptMinimum,
+	returnsToWallet
 }: {
 	instruction: SolParsedInstruction;
 	rentExemptMinimum: bigint | undefined;
+	// Whether this creation opens a wrapped SOL account the message closes back to the wallet, whose
+	// funding beyond the rent is the SOL it wraps rather than a payment.
+	returnsToWallet: boolean;
 }): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
@@ -478,9 +484,15 @@ const mapSolSystemInstruction = ({
 		// Over-funded means a program governs them and the creation still states no destination: an
 		// SPL token account opened, initialised and closed in one message hands its whole balance to
 		// whoever the close names. Either way the payment cannot be shown, so neither is signed.
+		//
+		// Unless that close names the wallet: then the funding is the SOL a trade wraps, and what the
+		// trade leaves of it comes back with the close. Only with the reserve known, as for any
+		// creation for a program: without it the review states neither the account's rent nor the SOL
+		// it wraps.
 		if (
 			owner === SYSTEM_PROGRAM_ADDRESS ||
-			fundsBeyondRent({ lamports, space, rentExemptMinimum })
+			isNullish(rentExemptMinimum) ||
+			(!returnsToWallet && fundsBeyondRent({ lamports, space, rentExemptMinimum }))
 		) {
 			return unfaithfulInstruction();
 		}
@@ -508,7 +520,8 @@ const mapSolSystemInstruction = ({
 
 		if (
 			owner === SYSTEM_PROGRAM_ADDRESS ||
-			fundsBeyondRent({ lamports: amount, space, rentExemptMinimum })
+			isNullish(rentExemptMinimum) ||
+			(!returnsToWallet && fundsBeyondRent({ lamports: amount, space, rentExemptMinimum }))
 		) {
 			return unfaithfulInstruction();
 		}
@@ -947,7 +960,13 @@ const mapSolLookupTableInstruction = (instruction: SolParsedInstruction): Mapped
 	return unreviewedInstruction();
 };
 
-const mapSolStakeInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+const mapSolStakeInstruction = ({
+	instruction,
+	userAddress
+}: {
+	instruction: SolParsedInstruction;
+	userAddress?: OptionSolAddress;
+}): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
 	// A withdrawal is the one stake instruction the summary can state in full: it names the amount,
@@ -981,13 +1000,67 @@ const mapSolStakeInstruction = (instruction: SolParsedInstruction): MappedSolTra
 		return unfaithfulInstruction();
 	}
 
+	// Initialising a stake account names the two authorities that govern it: the withdraw authority
+	// can take out everything the account holds, and the stake authority decides where it is
+	// delegated and whether it is ever deactivated, which a withdrawal of delegated stake waits on.
+	// Naming anybody but the user for either is the handover above, made when the account is set up
+	// rather than later, so it fails closed on the same terms. Naming the user for both hands nothing
+	// to anybody, and the account then holds stake the review has no vocabulary for, like the other
+	// stake operations below.
+	//
+	// The unchecked form also sets a lockup, which holds the balance until a date or an epoch and
+	// lets only its custodian lift or extend it in the meantime. A staking flow sets none - no date
+	// and no epoch, which is never in force and leaves the custodian nothing to decide - so any
+	// other lockup fails closed whoever the custodian is: the summary cannot state when the balance
+	// becomes withdrawable. The checked form sets no lockup.
+	if (instructionType === StakeInstruction.Initialize) {
+		const {
+			data: {
+				arg0: { staker, withdrawer },
+				arg1: { unixTimestamp, epoch }
+			}
+		} = instruction;
+
+		const lockedUp = unixTimestamp !== ZERO || epoch !== ZERO;
+
+		return staker === userAddress && withdrawer === userAddress && !lockedUp
+			? unreviewedInstruction()
+			: unfaithfulInstruction();
+	}
+
+	if (instructionType === StakeInstruction.InitializeChecked) {
+		const {
+			accounts: {
+				stakeAuthority: { address: staker },
+				withdrawAuthority: { address: withdrawer }
+			}
+		} = instruction;
+
+		return staker === userAddress && withdrawer === userAddress
+			? unreviewedInstruction()
+			: unfaithfulInstruction();
+	}
+
+	// A lockup set once the account exists holds the balance just as one set at initialisation does,
+	// and while none is in force the withdraw authority sets it alone: a message can initialise an
+	// account without a lockup and lock it in the next instruction, and an account the user already
+	// holds can be locked the same way. Both forms fail closed whatever they set, for the reason the
+	// initialisation's lockup does - the summary cannot state when the balance becomes withdrawable,
+	// or who may lift the lockup.
+	if (
+		instructionType === StakeInstruction.SetLockup ||
+		instructionType === StakeInstruction.SetLockupChecked
+	) {
+		return unfaithfulInstruction();
+	}
+
 	// Reading the runtime's minimum delegation changes nothing at all.
 	if (instructionType === StakeInstruction.GetMinimumDelegation) {
 		return ignoredInstruction();
 	}
 
 	// The rest do something real to the user's stake — delegate it, split it, merge it, move it
-	// between accounts they control, lock it up — and the review has no vocabulary for any of it.
+	// between accounts they control — and the review has no vocabulary for any of it.
 	// Decoded or not, the honest answer is that this message does more than the summary shows.
 	return unreviewedInstruction();
 };
@@ -1208,10 +1281,109 @@ export const asSolParsedRpcInstruction = (
 export const asSolParsedRpcInstructionOrSelf = (instruction: unknown): unknown =>
 	asSolParsedRpcInstruction(instruction) ?? instruction;
 
+const INITIALIZE_ACCOUNT_TYPES = ['initializeAccount', 'initializeAccount2', 'initializeAccount3'];
+
+/**
+ * The positions of the creations that open a wrapped SOL account the message hands back to the
+ * wallet: opened for the Token program at a token account's size, initialised for wrapped SOL held
+ * by the wallet, then closed with the wallet as destination, all by the message's own instructions
+ * and in that order.
+ *
+ * Funding such an account beyond its rent is how a dApp wraps the SOL a trade spends - Raydium opens
+ * it at an address derived from a seed - and what the trade leaves of it comes back with the close.
+ * That close is the message's own and needs the wallet's signature as the account's holder, so a
+ * program that hands the account to anyone else, or closes it first, makes the close fail and the
+ * whole transaction with it. What a program moves out of it on the way is a transfer the simulated
+ * run shows, as it does for any token account of the user's.
+ *
+ * By position rather than by address: an address closed and opened again is a second account, and
+ * only the opening the close answers for is vouched for.
+ */
+export const solWrappedSolOpeningsReturnedToWallet = ({
+	instructions,
+	userAddress
+}: {
+	instructions: readonly unknown[];
+	userAddress: OptionSolAddress;
+}): Set<number> => {
+	const returned = new Set<number>();
+
+	if (isNullish(userAddress)) {
+		return returned;
+	}
+
+	// The accounts opened so far and not closed yet, each with the position of its opening and
+	// whether it has since been initialised as the wallet's wrapped SOL.
+	const open = new Map<SolAddress, { opening: number; walletWrappedSol: boolean }>();
+
+	instructions.forEach((instruction, position) => {
+		const parsed = asSolParsedRpcInstruction(instruction);
+
+		if (isNullish(parsed)) {
+			return;
+		}
+
+		const {
+			program,
+			programId,
+			parsed: { type, info }
+		} = parsed;
+
+		const read = (key: string): unknown => fieldOf({ info, key });
+
+		if (program === 'system' && ['createAccount', 'createAccountWithSeed'].includes(type)) {
+			const account = read('newAccount');
+
+			if (typeof account !== 'string') {
+				return;
+			}
+
+			open.delete(account);
+
+			if (read('programAddress') === TOKEN_PROGRAM_ADDRESS && read('space') === ATA_SIZE) {
+				open.set(account, { opening: position, walletWrappedSol: false });
+			}
+
+			return;
+		}
+
+		if (programId !== TOKEN_PROGRAM_ADDRESS) {
+			return;
+		}
+
+		const account = read('account');
+		const opened = typeof account === 'string' ? open.get(account) : undefined;
+
+		if (typeof account !== 'string' || isNullish(opened)) {
+			return;
+		}
+
+		if (INITIALIZE_ACCOUNT_TYPES.includes(type)) {
+			open.set(account, {
+				...opened,
+				walletWrappedSol: read('mint') === WSOL_TOKEN.address && read('owner') === userAddress
+			});
+
+			return;
+		}
+
+		if (type === 'closeAccount') {
+			open.delete(account);
+
+			if (opened.walletWrappedSol && read('destination') === userAddress) {
+				returned.add(opened.opening);
+			}
+		}
+	});
+
+	return returned;
+};
+
 export const mapSolInstruction = ({
 	instruction,
 	userAddress,
-	rentExemptMinimum
+	rentExemptMinimum,
+	returnsToWallet = false
 }: {
 	instruction: SolInstruction;
 	userAddress?: OptionSolAddress;
@@ -1219,6 +1391,9 @@ export const mapSolInstruction = ({
 	// is held to. Without it a creation for a program is refused, since nothing says where its rent
 	// ends.
 	rentExemptMinimum?: bigint;
+	// Whether this instruction opens a wrapped SOL account the message closes back to the wallet,
+	// which only the whole message can say. See `solWrappedSolOpeningsReturnedToWallet`.
+	returnsToWallet?: boolean;
 }): MappedSolTransaction => {
 	// Compute budget instructions can never move funds, but they do set the prioritisation
 	// fee the wallet pays in SOL, so their directives are surfaced rather than ignored.
@@ -1253,7 +1428,11 @@ export const mapSolInstruction = ({
 	const { programAddress } = parsedInstruction;
 
 	if (programAddress === SYSTEM_PROGRAM_ADDRESS) {
-		return mapSolSystemInstruction({ instruction: parsedInstruction, rentExemptMinimum });
+		return mapSolSystemInstruction({
+			instruction: parsedInstruction,
+			rentExemptMinimum,
+			returnsToWallet
+		});
 	}
 
 	if (programAddress === TOKEN_PROGRAM_ADDRESS) {
@@ -1277,7 +1456,7 @@ export const mapSolInstruction = ({
 	}
 
 	if (programAddress === STAKE_PROGRAM_ADDRESS) {
-		return mapSolStakeInstruction(parsedInstruction);
+		return mapSolStakeInstruction({ instruction: parsedInstruction, userAddress });
 	}
 
 	consoleWarn(`Could not map Solana instruction for program ${programAddress}`);

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
@@ -21,6 +20,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OisyTradeOrderBook, OisyTradeOrderView } from '$lib/types/oisy-trade';
 	import { toTradingPair } from '$lib/utils/oisy-trade.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	// A row is keyed to its pair's order book by the symbol pair, so multiple orders
 	// on the same pair share one book — polled once per distinct pair, not per order.

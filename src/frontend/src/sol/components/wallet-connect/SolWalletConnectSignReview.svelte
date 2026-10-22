@@ -10,6 +10,7 @@
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
+	import WalletConnectScamWarning from '$lib/components/wallet-connect/WalletConnectScamWarning.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -86,6 +87,9 @@
 		// to confirm; the confirmation is bound back to the caller, which holds the button on it.
 		unreadPrograms?: SolUnreadProgram[];
 		unreadProgramsAcknowledged?: boolean;
+		// WalletConnect's Verify API flags the requesting site as a scam: the review says so and
+		// offers Reject only.
+		flaggedAsScam?: boolean;
 		approveDisabled?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
@@ -112,6 +116,7 @@
 		closesPayOthers = false,
 		unreadPrograms = [],
 		unreadProgramsAcknowledged = $bindable(false),
+		flaggedAsScam = false,
 		approveDisabled = false,
 		onApprove,
 		onReject
@@ -200,6 +205,7 @@
 							metadata: $splTokenMetadataStore,
 							unknownTokenAddresses: summaryTokenAddresses,
 							unknownTokenLabel: $i18n.transaction.text.unknown_token,
+							unknownTokenNamedLabel: $i18n.transaction.text.unknown_token_named,
 							nativeSymbol: feeToken.symbol
 						}),
 					amountOf: ({ delta, decimals }) =>
@@ -269,6 +275,10 @@
 {/snippet}
 
 <ContentWithToolbar>
+	{#if flaggedAsScam}
+		<WalletConnectScamWarning />
+	{/if}
+
 	<!-- One notice, whichever fits, and the refusal comes first: a message the signing flow will not
 	     sign makes every caveat below it moot, since they qualify a review nobody is going to act
 	     on. It is the only notice here that is an error rather than a warning, because it describes
@@ -513,6 +523,11 @@
 	</Tabs>
 
 	{#snippet toolbar()}
-		<WalletConnectActions approveDisabled={approveHeld} {onApprove} {onReject} />
+		<WalletConnectActions
+			approve={!flaggedAsScam}
+			approveDisabled={approveHeld}
+			{onApprove}
+			{onReject}
+		/>
 	{/snippet}
 </ContentWithToolbar>

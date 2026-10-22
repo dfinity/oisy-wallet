@@ -25,7 +25,13 @@ import * as kongBackendApi from '$lib/api/kong_backend.api';
 import { signPrehash } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
-import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
+import {
+	PLAUSIBLE_EVENTS,
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_RESULT_STATUSES,
+	PLAUSIBLE_EVENT_SEVERITIES,
+	PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES
+} from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -44,6 +50,7 @@ import {
 	fetchSwapAmounts,
 	fetchSwapAmountsEVM,
 	fetchSwapAmountsSOL,
+	fetchSwapAmountsXRP,
 	fetchVeloraDeltaSwap,
 	fetchVeloraMarketSwap,
 	loadKongSwapTokens,
@@ -62,10 +69,12 @@ import {
 } from '$lib/types/near-intents';
 import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
 import { VELORA_EXTERNAL_REF_KEYS } from '$lib/types/velora-swap';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import {
 	isNearIntentsQuoteExpired,
 	verifyNearIntentsQuoteSignature
 } from '$lib/utils/near-intents-quote.utils';
+import { parseToken } from '$lib/utils/parse.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
@@ -73,6 +82,7 @@ import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import en from '$tests/mocks/i18n.mock';
 import {
 	mockValidIcCkToken,
 	mockValidIcToken,
@@ -1606,6 +1616,66 @@ describe('swap.services', () => {
 		});
 	});
 
+	describe('fetchSwapAmountsXRP', () => {
+		const destinationToken = { ...mockValidErc20Token, network: ETHEREUM_NETWORK } as Erc20Token;
+
+		const params = {
+			sourceToken: XRP_TOKEN,
+			destinationToken,
+			amount: 10_000_000n,
+			userAddress: mockXrpAddress,
+			recipientAddress: mockEthAddress,
+			slippage: 1
+		};
+
+		const offer = {
+			provider: SwapProvider.NEAR_INTENTS as const,
+			receiveAmount: 500n,
+			swapDetails: mockNearIntentsQuoteResponse
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should keep an offer without a deposit memo', async () => {
+			mockXrpGetQuote.mockResolvedValueOnce(offer);
+
+			await expect(fetchSwapAmountsXRP(params)).resolves.toEqual([offer]);
+
+			expect(trackEvent).not.toHaveBeenCalled();
+		});
+
+		// Nothing documents how a deposit memo has to travel with an XRP payment, so the offer is left
+		// out, and reported so that the change shows up in the analytics.
+		it('should leave out an offer that comes with a deposit memo and report it', async () => {
+			mockXrpGetQuote.mockResolvedValueOnce({
+				...offer,
+				swapDetails: {
+					...mockNearIntentsQuoteResponse,
+					quote: { ...mockNearIntentsQuoteResponse.quote, depositMemo: '12345' }
+				}
+			});
+
+			await expect(fetchSwapAmountsXRP(params)).resolves.toEqual([]);
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: {
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+					event_subcontext: SwapProvider.NEAR_INTENTS,
+					event_severity: PLAUSIBLE_EVENT_SEVERITIES.ERROR,
+					result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+					result_error_type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.DEPOSIT_MEMO,
+					token_symbol: XRP_TOKEN.symbol,
+					token_network: XRP_TOKEN.network.name,
+					token2_symbol: destinationToken.symbol,
+					token2_network: ETHEREUM_NETWORK.name
+				}
+			});
+		});
+	});
+
 	describe('fetchVeloraDeltaSwap', () => {
 		const mockSourceToken = {
 			...mockValidErc20Token,
@@ -2128,6 +2198,32 @@ describe('swap.services', () => {
 
 			expect(mockSwapGetSpender).toHaveBeenCalled();
 			expect(mockSwapBuildTx).toHaveBeenCalled();
+		});
+
+		it('passes the amount swapped for the pending activity, which the calldata does not carry as a transfer', async () => {
+			await fetchVeloraMarketSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				slippageValue: mockSlippageValue,
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: mockSwapDetails,
+				receiveAmount: BigInt(1000),
+				isGasless: false
+			});
+
+			expect(sendEvmSwap).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					token: mockSourceToken,
+					amount: parseToken({ value: mockSwapAmount, unitName: mockSourceToken.decimals })
+				})
+			);
 		});
 
 		it('rounds the slippage to integer basis points when building the transaction', async () => {
@@ -3950,6 +4046,28 @@ describe('swap.services', () => {
 
 			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
 			expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
+		});
+
+		// The offer list already leaves such a quote out. One that reaches the send by another route is
+		// refused before anything is signed, recorded or reported.
+		it('should refuse a quote that comes with a deposit memo', async () => {
+			await expect(
+				fetchNearIntentsXrpSwap({
+					...baseParams,
+					swapDetails: {
+						...mockNearIntentsQuoteResponse,
+						quote: { ...mockNearIntentsQuoteResponse.quote, depositMemo: '12345' }
+					}
+				})
+			).rejects.toMatchObject({
+				code: SwapErrorCodes.NEAR_INTENTS_QUOTE_DEPOSIT_MEMO,
+				message: replaceOisyPlaceholders(en.swap.error.near_intents_quote_deposit_memo)
+			});
+
+			expect(sendXrp).not.toHaveBeenCalled();
+			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+			expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
+			expect(mockProgress).not.toHaveBeenCalled();
 		});
 	});
 

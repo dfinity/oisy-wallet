@@ -2,7 +2,6 @@
 	import { isEmptyString, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { Principal } from '@icp-sdk/core/principal';
 	import { getContext, onDestroy } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import { enabledMainnetBitcoinToken } from '$btc/derived/tokens.derived';
 	import { allUtxosStore } from '$btc/stores/all-utxos.store';
 	import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
@@ -38,6 +37,7 @@
 	import { AVAILABLE_SCREENS, filterScreens, MIN_SCREEN } from '$lib/utils/screens.utils';
 	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
 	import { waitReady } from '$lib/utils/timeout.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 	import { isSolAddress } from '$sol/utils/sol-address.utils';
 
 	interface Props {

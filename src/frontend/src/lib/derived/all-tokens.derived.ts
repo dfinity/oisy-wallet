@@ -1,4 +1,5 @@
 import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
+import { LIFI_SWAP_ENABLED } from '$env/rest/lifi.env';
 import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
@@ -86,7 +87,8 @@ export const allCrossChainSwapTokens: Readable<
 	([$ercFungibleTokens, $ethEvmNativeTokens, $splTokens, $enabledSolanaTokens]) => [
 		...$ethEvmNativeTokens.map((token) => ({ ...token, enabled: true })),
 		...$ercFungibleTokens,
-		...(NEAR_INTENTS_SWAP_ENABLED
+		// Solana's providers are NEAR Intents and LI.FI; either one keeps its tokens in the pickers.
+		...(NEAR_INTENTS_SWAP_ENABLED || LIFI_SWAP_ENABLED
 			? [...$enabledSolanaTokens.map((token) => ({ ...token, enabled: true })), ...$splTokens]
 			: [])
 	]

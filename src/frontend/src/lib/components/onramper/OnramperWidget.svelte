@@ -203,7 +203,7 @@
 		class:opacity-0={themeLoaded && nonNullish(src)}
 		class:opacity-100={!themeLoaded || isNullish(src)}
 	>
-		<LoaderSpinner inline />
+		<LoaderSpinner />
 	</div>
 
 	{#if nonNullish(src)}

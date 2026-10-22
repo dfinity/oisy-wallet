@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import IconOisyEmptyState from '$lib/components/icons/IconOisyEmptyState.svelte';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		title: string;

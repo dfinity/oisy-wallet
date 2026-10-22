@@ -4,11 +4,13 @@
 	import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
 	import { oisyTradeSwapEnabled } from '$env/oisy-trade-swap';
 	import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
+	import { LIFI_SWAP_ENABLED } from '$env/rest/lifi.env';
 	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 	import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
 	import SwapDetailsChainFusion from '$lib/components/swap/SwapDetailsChainFusion.svelte';
 	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
 	import SwapDetailsKong from '$lib/components/swap/SwapDetailsKongSwap.svelte';
+	import SwapDetailsLifi from '$lib/components/swap/SwapDetailsLifi.svelte';
 	import SwapDetailsNearIntents from '$lib/components/swap/SwapDetailsNearIntents.svelte';
 	import SwapDetailsOisyTrade from '$lib/components/swap/SwapDetailsOisyTrade.svelte';
 	import SwapDetailsOneSec from '$lib/components/swap/SwapDetailsOneSec.svelte';
@@ -125,6 +127,8 @@
 				<SwapDetailsChainFusion provider={selectedProvider} />
 			{:else if selectedProvider.provider === SwapProvider.OISY_TRADE && oisyTradeSwapEnabled}
 				<SwapDetailsOisyTrade provider={selectedProvider} />
+			{:else if selectedProvider.provider === SwapProvider.LIFI && LIFI_SWAP_ENABLED}
+				<SwapDetailsLifi provider={selectedProvider} />
 			{/if}
 		{/snippet}
 		{#snippet contentFooter(closeFn)}
