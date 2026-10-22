@@ -228,7 +228,8 @@ const escapeHtml = (text: string): string =>
 // The generic toast appends the error ethers throws, and for a broadcast that error carries the
 // signed transaction. Such an error shows the node's own message instead, followed by the hash and
 // the unsigned transaction; the signed bytes are taken out of the message too, should a node echo
-// them.
+// them, in any case and with or without their prefix. `findSignedTransaction` only returns hex,
+// which is safe inside the pattern.
 const toastBroadcastError = ({
 	err,
 	fallbackMsg,
@@ -238,7 +239,10 @@ const toastBroadcastError = ({
 	fallbackMsg: string;
 	signedTransaction: string;
 }) => {
-	const nodeMessage = findNodeMessage(err)?.replaceAll(signedTransaction, '…');
+	const nodeMessage = findNodeMessage(err)?.replace(
+		new RegExp(`(?:0x)?${signedTransaction.slice(2)}`, 'gi'),
+		'…'
+	);
 
 	toastsErrorNoTrace({
 		msg: {

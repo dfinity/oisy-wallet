@@ -673,15 +673,23 @@ describe('eth-error.utils', () => {
 				);
 			});
 
-			it('takes the signed transaction out of a node message that echoes it', () => {
+			// The same bytes still broadcast in any case and without their prefix.
+			it.each([
+				{ form: 'as sent', echo: () => signedTransaction },
+				{ form: 'in uppercase', echo: () => `0x${signedTransaction.slice(2).toUpperCase()}` },
+				{ form: 'without its prefix', echo: () => signedTransaction.slice(2) },
+				{ form: 'in uppercase with its prefix', echo: () => signedTransaction.toUpperCase() }
+			])('takes the signed transaction out of a node message that echoes it $form', ({ echo }) => {
 				toastEthereumTransactionError({
-					err: refused({ message: `rejected ${signedTransaction}` }),
+					err: refused({ message: `rejected ${echo()}` }),
 					fallbackMsg: en.send.error.unexpected,
 					...sendParams
 				});
 
 				expect(toastText()).toContain(`${en.send.error.unexpected} / rejected …`);
-				expect(toastText()).not.toContain(signedTransaction);
+				expect(`${toastText()}`.toLowerCase()).not.toContain(
+					signedTransaction.slice(2).toLowerCase()
+				);
 			});
 
 			it('shows the message alone when the signed transaction cannot be decoded', () => {
