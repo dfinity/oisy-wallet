@@ -879,6 +879,7 @@ interface I18nSend {
 		solana_insufficient_funds_for_fee: string;
 		solana_insufficient_funds_for_rent: string;
 		fee_calc_unsupported_standard: string;
+		memo_too_long: string;
 		xrp_send_expired: string;
 		xrp_send_already_in_flight: string;
 		xrp_send_not_guarded: string;
