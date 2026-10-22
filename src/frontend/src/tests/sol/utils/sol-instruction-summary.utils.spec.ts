@@ -3592,6 +3592,101 @@ describe('sol-instruction-summary.utils', () => {
 
 				expect(kinds(views)).toStrictEqual(['unknown']);
 			});
+
+			// The RPC returns the calls made inside a batch after all its steps, and a step can make
+			// them in the middle of it, such as a transfer running its mint's hook.
+			describe('with calls made inside it', () => {
+				const paidIn = {
+					program: 'system',
+					programId: '11111111111111111111111111111111',
+					parsed: {
+						type: 'transfer',
+						info: { source: mockSolAddress3, destination: mockSolAddress, lamports: 5_000 }
+					},
+					stackHeight: 3
+				};
+
+				const received = {
+					kind: 'receive',
+					amount: 5_000n,
+					counterparty: mockSolAddress3,
+					own: false
+				};
+
+				it('should keep a batch of several steps whole and list it as nobody read it', () => {
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							getBatchInstruction([
+								transferTo({ destination: mockSolAddress2, amount: 1n }),
+								transferTo({ destination: mockAtaAddress2, amount: 2n })
+							])
+						].map(asSolParsedRpcInstructionOrSelf),
+						innerInstructions: [{ index: 0, instructions: [paidIn] }],
+						ownedAddresses: [mockSolAddress, mockAtaAddress],
+						userAddress: mockSolAddress,
+						includeUnrecognised: true
+					});
+
+					expect(views).toStrictEqual([received, { kind: 'unknown', program: TOKEN }]);
+				});
+
+				it('should read a batch of one step with the calls made after it', () => {
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							getBatchInstruction([transferTo({ destination: mockSolAddress2, amount: 1n })])
+						].map(asSolParsedRpcInstructionOrSelf),
+						innerInstructions: [{ index: 0, instructions: [paidIn] }],
+						ownedAddresses: [mockSolAddress, mockAtaAddress],
+						userAddress: mockSolAddress,
+						includeUnrecognised: true
+					});
+
+					expect(views).toStrictEqual([
+						{
+							kind: 'batch',
+							program: TOKEN,
+							children: [send({ counterparty: mockSolAddress2, amount: 1n })]
+						},
+						received
+					]);
+				});
+
+				it('should keep a batch a program runs whole when a call one level deeper follows it', () => {
+					const steps = [
+						{
+							type: 'transferChecked',
+							info: {
+								source: mockAtaAddress,
+								destination: mockSolAddress2,
+								authority: mockSolAddress,
+								mint,
+								tokenAmount: { amount: '5', decimals: 6 }
+							}
+						},
+						{
+							type: 'transferChecked',
+							info: {
+								source: mockAtaAddress,
+								destination: mockAtaAddress2,
+								authority: mockSolAddress,
+								mint,
+								tokenAmount: { amount: '6', decimals: 6 }
+							}
+						}
+					];
+
+					const views = mapSolInstructionSummaries({
+						instructions: [unreadCall],
+						innerInstructions: [{ index: 0, instructions: [returnedBatch(steps), paidIn] }],
+						ownedAddresses: [mockSolAddress, mockAtaAddress],
+						userAddress: mockSolAddress,
+						includeUnrecognised: true
+					});
+
+					expect(kinds(views)).not.toContain('batch');
+					expect(views).toContainEqual({ kind: 'unknown', program: APP });
+				});
+			});
 		});
 
 		describe('an unwrap', () => {

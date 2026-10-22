@@ -1,6 +1,7 @@
 import type { SolAddress } from '$sol/types/address';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolRpcInstruction } from '$sol/types/sol-instructions';
+import type { SolanaSimulatedInnerInstructions } from '$sol/types/sol-rpc';
 import type { MappedSolTransaction, SolTransferLeg } from '$sol/types/sol-transaction';
 import {
 	deriveSolTransferParties,
@@ -356,6 +357,27 @@ describe('sol-transfer-parties.utils', () => {
 					amount: 5n
 				})
 			);
+		});
+
+		// The RPC returns the calls made inside a batch after all its steps, and nothing says
+		// between which of them a call ran, so a batch of several steps gives no legs in an order
+		// that cannot be trusted.
+		it('should give no leg for a batch the message states when the run returns calls made inside it', async () => {
+			await expect(
+				mapSolSimulatedTransferLegs({
+					instructions: [batch()],
+					innerInstructions: [
+						{
+							index: 0,
+							instructions: [
+								{ programId: address(mockSolAddress4), accounts: [], data: '', stackHeight: 2 }
+							]
+						}
+					] as unknown as SolanaSimulatedInnerInstructions,
+					network: SolanaNetworks.mainnet,
+					addressToToken: {}
+				})
+			).resolves.toStrictEqual([]);
 		});
 	});
 });
