@@ -1,4 +1,7 @@
-import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import type {
+	ActiveUserTransaction,
+	ActiveUserTransactionStatus
+} from '$declarations/backend/backend.did';
 import { fetchNearIntentsStatus } from '$lib/rest/near-intents.rest';
 import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
 import {
@@ -8,6 +11,8 @@ import {
 import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import {
+	isNearIntentsDepositExpired,
+	nearIntentsDepositExpiredError,
 	nearIntentsStatusError,
 	toNearIntentsActiveUserTransactionStatus,
 	toNearIntentsExternalRefs,
@@ -39,9 +44,20 @@ const pollNearIntentsActiveUserTransaction = async ({
 			return;
 		}
 
-		const { status, swapDetails } = await fetchNearIntentsStatus({ depositAddress, depositMemo });
+		const { status, swapDetails, quoteResponse } = await fetchNearIntentsStatus({
+			depositAddress,
+			depositMemo
+		});
 
-		const candidate = toNearIntentsActiveUserTransactionStatus(status);
+		const depositExpired = await isNearIntentsDepositExpired({
+			status,
+			quoteResponse,
+			depositAddress
+		});
+
+		const candidate: ActiveUserTransactionStatus | undefined = depositExpired
+			? { Failed: null }
+			: toNearIntentsActiveUserTransactionStatus(status);
 
 		const next = nonNullish(candidate)
 			? advanceStatus({ current: tx.status, candidate })
@@ -57,7 +73,12 @@ const pollNearIntentsActiveUserTransaction = async ({
 			? toNearIntentsExternalRefs({ ...refs, ...learned })
 			: undefined;
 
-		const error = nonNullish(next) && 'Failed' in next ? nearIntentsStatusError(status) : undefined;
+		const error =
+			nonNullish(next) && 'Failed' in next
+				? depositExpired
+					? nearIntentsDepositExpiredError()
+					: nearIntentsStatusError(status)
+				: undefined;
 
 		const update = {
 			...(nonNullish(next) ? { status: next } : {}),

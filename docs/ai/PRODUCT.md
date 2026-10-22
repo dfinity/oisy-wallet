@@ -873,6 +873,10 @@ Funds cannot move before the user has acknowledged the NEAR Intents terms of ser
 
 What this deliberately does not do: no XRPL testnet, no issued currencies (native XRP only, the only asset 1Click lists on the XRP Ledger), no Chain Fusion route, and no production enablement. With the flag off, swaps and XRP sends behave exactly as the previous sections describe.
 
+### NEAR Intents deposits that never arrive
+
+A NEAR Intents swap from any chain fails on its own once its deposit can no longer arrive. 1Click keeps reporting a deposit address that never received anything as waiting for its deposit, indefinitely, so a deposit that never reached it (an EVM transaction the network accepted and later dropped, for example) would otherwise leave the swap in progress forever, with no way for the user to dismiss it. When 1Click still reports no deposit, or only the deposit transaction's hash that OISY passed to it, after the deadline of the quote it signed, the moment the deposit address becomes inactive (about three days after the swap), the swap fails with a message saying that no deposit arrived before the quote expired and nothing was swapped. The deadline counts only when the quote 1Click returns with the status is the one for the swap's deposit address and its signature verifies.
+
 ### 1Sec restricted to the unwrapping direction
 
 1Sec (OneSec) bridges tokens between ICP and Ethereum, Base and Arbitrum. OISY offers only the way back out of a bridged position, never the way in: a user who already holds a bridged balance keeps a working exit, and nobody acquires a new one through OISY.
