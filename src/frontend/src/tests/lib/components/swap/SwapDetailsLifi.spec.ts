@@ -5,7 +5,7 @@ import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockLifiBaseUsdcToken, mockLifiQuote } from '$tests/mocks/lifi.mock';
-import type { LiFiStep } from '@lifi/sdk';
+import { ChainId, type LiFiStep, type QuoteRequestFromAmount } from '@lifi/sdk';
 import { render } from '@testing-library/svelte';
 
 describe('SwapDetailsLifi', () => {
@@ -17,7 +17,8 @@ describe('SwapDetailsLifi', () => {
 		provider: SwapProvider.LIFI as const,
 		receiveAmount: 25_003_034n,
 		receiveOutMinimum: 24_878_019n,
-		swapDetails
+		swapDetails,
+		request: { fromChain: ChainId.BAS } as QuoteRequestFromAmount
 	});
 
 	const withEstimate = (estimate: Partial<LiFiStep['estimate']>): LiFiStep => ({

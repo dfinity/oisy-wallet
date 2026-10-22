@@ -1194,6 +1194,37 @@
 			"unconfirmed": "The $token transfer could not be confirmed. If it went through, the mint finishes in the background: follow it under Active transactions."
 		}
 	},
+	"cycles_top_up": {
+		"text": {
+			"top_up": "Top up",
+			"title": "Top up a canister",
+			"description": "The cycles go from your $token balance into the canister, which spends them on computation and storage.",
+			"canister_id_placeholder": "Enter a canister ID",
+			"checking_canister": "Checking the canister...",
+			"recently_topped_up": "Recently topped up",
+			"canister": "Canister",
+			"you_top_up": "You top up",
+			"total": "Total",
+			"one_way": "A top-up cannot be undone: the cycles stay in the canister.",
+			"topping_up": "Topping up $canister...",
+			"topped_up": "Topped up $canister with $amount $token.",
+			"unknown": "OISY can't tell yet whether the top-up went through. Your $token activity will show it if it did. Top up again to resend the same top-up: it can only go through once. A new or changed top-up would add cycles again if this one went through.",
+			"unknown_fresh": "OISY can't tell yet whether your last top-up went through. If it did, this top-up adds cycles again. Check your $token activity first.",
+			"sent_to_canister": "Sending $token to a canister doesn't top it up. The $token land in the canister's account, and the canister only gets cycles if its own code withdraws them.",
+			"sent_to_canister_top_up": "To add cycles to a canister, use Top up on the $token page."
+		},
+		"error": {
+			"invalid_canister_id": "Enter a canister ID. User principals, account IDs and addresses on other networks can't be topped up.",
+			"canister_not_found": "No canister with this ID exists on the Internet Computer. Check the ID.",
+			"canister_check_failed": "OISY couldn't check this canister. Try again in a moment.",
+			"amount_too_small": "Enter more than the $fee $token fee.",
+			"refused": "The top-up didn't go through. Nothing left your wallet. Try again in a moment.",
+			"insufficient_funds": "Not enough $token for this top-up and the fee. Nothing left your wallet. Lower the amount.",
+			"clock": "The top-up didn't go through because your device's clock is off. Nothing left your wallet. Set the correct time and try again.",
+			"refunded": "The canister couldn't receive the cycles. $refund $token came back to your wallet, and the attempt cost $fees $token in fees. Check the canister ID.",
+			"refunded_nothing": "The canister couldn't receive the cycles, and the fees took the whole amount. Check the canister ID."
+		}
+	},
 	"active_user_transactions": {
 		"text": {
 			"button_label": "Active transactions",
@@ -1393,7 +1424,8 @@
 			"oisy_trade_settlement_unresolved": "The order could no longer be found, and neither token is held on OISY Trade. Please check your balances in the Trading tab before trying again.",
 			"oisy_trade_order_not_placed": "OISY Trade did not accept the order, so your funds were returned to your wallet. You were only charged network fees.",
 			"oisy_trade_recovery_failed": "OISY Trade did not accept the order, and your funds could not be returned to your wallet automatically. Please check your balances in the Trading tab to withdraw them.",
-			"lifi_status_unknown": "LI.FI could not report the outcome of this swap. Please check your destination wallet."
+			"lifi_status_unknown": "LI.FI could not report the outcome of this swap. Please check your destination wallet.",
+			"lifi_fee_changed": "The network fee for this swap rose since you reviewed it. Please check the new maximum fee and confirm the swap again."
 		}
 	},
 	"buy": {
@@ -2189,6 +2221,8 @@
 			"instruction_close_account": "Close token account",
 			"instruction_close_account_for": "Close token account for $symbol",
 			"instruction_approve": "Approve spender",
+			"instruction_approve_amount": "Approve spender for $amount $symbol",
+			"instruction_approve_unlimited": "Approve spender for any amount of $symbol",
 			"instruction_revoke": "Revoke spender",
 			"instruction_set_authority": "Change account authority to",
 			"instruction_route": "Swap route via",
@@ -2261,7 +2295,9 @@
 			"converting_ck_token": "Converting $ckToken to $twinToken",
 			"twin_network": "$twinNetwork network",
 			"no_date_available": "No Date Available",
-			"pending": "Pending"
+			"pending": "Pending",
+			"top_up": "Top up",
+			"top_up_refund": "Top-up refund"
 		},
 		"alt": {
 			"open_block_explorer": "Open this transaction on a block explorer",

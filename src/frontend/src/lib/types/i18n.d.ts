@@ -921,6 +921,38 @@ interface I18nCycles_mint {
 	};
 }
 
+interface I18nCycles_top_up {
+	text: {
+		top_up: string;
+		title: string;
+		description: string;
+		canister_id_placeholder: string;
+		checking_canister: string;
+		recently_topped_up: string;
+		canister: string;
+		you_top_up: string;
+		total: string;
+		one_way: string;
+		topping_up: string;
+		topped_up: string;
+		unknown: string;
+		unknown_fresh: string;
+		sent_to_canister: string;
+		sent_to_canister_top_up: string;
+	};
+	error: {
+		invalid_canister_id: string;
+		canister_not_found: string;
+		canister_check_failed: string;
+		amount_too_small: string;
+		refused: string;
+		insufficient_funds: string;
+		clock: string;
+		refunded: string;
+		refunded_nothing: string;
+	};
+}
+
 interface I18nActive_user_transactions {
 	text: {
 		button_label: string;
@@ -1114,6 +1146,7 @@ interface I18nSwap {
 		oisy_trade_order_not_placed: string;
 		oisy_trade_recovery_failed: string;
 		lifi_status_unknown: string;
+		lifi_fee_changed: string;
 	};
 }
 
@@ -1859,6 +1892,8 @@ interface I18nTransaction {
 		instruction_close_account: string;
 		instruction_close_account_for: string;
 		instruction_approve: string;
+		instruction_approve_amount: string;
+		instruction_approve_unlimited: string;
 		instruction_revoke: string;
 		instruction_set_authority: string;
 		instruction_route: string;
@@ -1932,6 +1967,8 @@ interface I18nTransaction {
 		twin_network: string;
 		no_date_available: string;
 		pending: string;
+		top_up: string;
+		top_up_refund: string;
 	};
 	alt: {
 		open_block_explorer: string;
@@ -2692,6 +2729,7 @@ interface I18n {
 	mint: I18nMint;
 	burn: I18nBurn;
 	cycles_mint: I18nCycles_mint;
+	cycles_top_up: I18nCycles_top_up;
 	active_user_transactions: I18nActive_user_transactions;
 	scanner: I18nScanner;
 	convert: I18nConvert;

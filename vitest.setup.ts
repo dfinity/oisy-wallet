@@ -55,7 +55,8 @@ vi.mock('$app/stores', () => ({
 }));
 
 vi.mock('$app/state', () => ({
-	page: {}
+	page: {},
+	navigating: { to: null }
 }));
 
 vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
