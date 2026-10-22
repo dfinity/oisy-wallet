@@ -2,6 +2,7 @@ import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { SolAddress } from '$sol/types/address';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
@@ -1255,6 +1256,33 @@ describe('sol-transaction-summary.utils', () => {
 					via: mockSolAddress3
 				}).trailing
 			).toBe(`via ${shortenWithMiddleEllipsis({ text: mockSolAddress3 })}`);
+		});
+
+		// An unwrap of everything an account wraps still says what leaves it, and for whom, when
+		// nobody read how much that is. It leaves the account open, which the close's label does not.
+		it('should state an unwrap of everything nobody read the amount of on either side', () => {
+			const unwrap: SolInstructionSummary = {
+				kind: 'send',
+				tokenAddress: WSOL_TOKEN.address,
+				decimals: WSOL_TOKEN.decimals,
+				counterparty: mockSolAddress2,
+				own: false,
+				unwrapsAll: true
+			};
+
+			expect(textOf(unwrap)).toBe(
+				replacePlaceholders(en.transaction.text.instruction_unwrap_all_to, { $symbol: 'WSOL' })
+			);
+			expect(
+				textOf({
+					...unwrap,
+					kind: 'receive',
+					counterparty: mockSolAddress3,
+					unwrapsToWallet: true
+				})
+			).toBe(
+				replacePlaceholders(en.transaction.text.instruction_unwrap_all_from, { $symbol: 'WSOL' })
+			);
 		});
 
 		// The opening line names the token, and the closing one did not: "Close token account" left
