@@ -154,7 +154,7 @@ describe('TipHistory', () => {
 		// by holding Space on the focused button.
 		expect(
 			container.querySelector(`button[data-tid=${TIP_HISTORY_ROW_BUTTON}] > span`)
-		).toHaveClass('row-feedback', 'parent-pressed:bg-brand-subtle-20');
+		).toHaveClass('row-feedback', 'parent-pressed:bg-brand-subtle-20', 'parent-pressed:duration-0');
 
 		// Cancel moved to the detail screen, so no row carries one any more.
 		expect(

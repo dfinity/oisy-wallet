@@ -45,6 +45,24 @@ describe('ConvertAmountSource', () => {
 
 	const balanceTestId = 'convert-amount-source-balance';
 
+	it('should focus the amount field only when asked', () => {
+		const { getByTestId, unmount } = render(ConvertAmountSource, {
+			props,
+			context: mockContext()
+		});
+
+		expect(getByTestId(TOKEN_INPUT_CURRENCY_TOKEN)).not.toHaveFocus();
+
+		unmount();
+
+		const focused = render(ConvertAmountSource, {
+			props: { ...props, autofocus: true },
+			context: mockContext()
+		});
+
+		expect(focused.getByTestId(TOKEN_INPUT_CURRENCY_TOKEN)).toHaveFocus();
+	});
+
 	it('should display values correctly without error if insufficientFundsForFee is false', () => {
 		const { getByTestId } = render(ConvertAmountSource, {
 			props,
