@@ -1,9 +1,11 @@
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { CKETH_ABI } from '$eth/constants/cketh.constants';
+import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
 import {
 	ERC20_APPROVE_HASH,
 	ERC20_DECREASE_ALLOWANCE_HASH,
@@ -18,22 +20,29 @@ import {
 } from '$eth/constants/wallet-connect.constants';
 import { send as executeSend } from '$eth/services/send.services';
 import { send, signMessage } from '$eth/services/wallet-connect.services';
-import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect';
+import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
+import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
+import type {
+	EthWalletConnectRefusal,
+	WalletConnectEthSignTypedDataV4
+} from '$eth/types/wallet-connect';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
+import { trackWalletConnectUncheckedSigning } from '$lib/services/wallet-connect-analytics.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
 import type { WalletKitTypes } from '@reown/walletkit';
-import { Interface } from 'ethers/abi';
+import { AbiCoder, Interface } from 'ethers/abi';
 import { get } from 'svelte/store';
 
 vi.mock('$lib/api/signer.api', () => ({
@@ -43,6 +52,10 @@ vi.mock('$lib/api/signer.api', () => ({
 
 vi.mock('$eth/services/send.services', () => ({
 	send: vi.fn()
+}));
+
+vi.mock('$lib/services/wallet-connect-analytics.services', () => ({
+	trackWalletConnectUncheckedSigning: vi.fn()
 }));
 
 const HOLDER = '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a';
@@ -240,19 +253,38 @@ describe('eth wallet-connect.services', () => {
 
 		const buildParams = ({
 			gas,
+			to = SPENDER,
 			data,
-			amount = ZERO
-		}: { gas?: string; data?: string; amount?: bigint } = {}) => ({
+			amount = ZERO,
+			acknowledgedRefusals = [],
+			isScam = false
+		}: {
+			gas?: string;
+			to?: string;
+			data?: string;
+			amount?: bigint;
+			acknowledgedRefusals?: EthWalletConnectRefusal[];
+			isScam?: boolean;
+		} = {}) => ({
 			request: {
 				id: 1,
 				topic: 'mock-topic',
 				params: {
 					request: {
 						method: 'eth_sendTransaction',
-						params: [{ from: HOLDER, to: SPENDER, gas, data }]
+						params: [{ from: HOLDER, to, gas, data }]
+					}
+				},
+				verifyContext: {
+					verified: {
+						verifyUrl: 'https://verify.walletconnect.org',
+						validation: 'VALID',
+						origin: 'https://dapp.example',
+						isScam
 					}
 				}
 			} as unknown as WalletKitTypes.SessionRequest,
+			acknowledgedRefusals,
 			listener: mockListener,
 			address: HOLDER,
 			amount,
@@ -273,6 +305,108 @@ describe('eth wallet-connect.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 			vi.mocked(executeSend).mockResolvedValue({ hash: '0xHASH' });
+		});
+
+		describe('a request the review refuses', () => {
+			const encodeCall = ({ selector, value }: { selector: string; value: bigint }) =>
+				`${selector}${AbiCoder.defaultAbiCoder().encode(['address', 'uint256'], [SPENDER, value]).slice(2)}`;
+
+			const undecodableTransfer = `${ERC20_TRANSFER_HASH}deadbeef`;
+
+			let spyToastsError: ReturnType<typeof vi.spyOn>;
+
+			beforeEach(() => {
+				spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+				erc20DefaultTokensStore.reset();
+				erc20CustomTokensStore.resetAll();
+				erc20DefaultTokensStore.add(USDC_TOKEN);
+			});
+
+			it('refuses an ERC-20 call on a token the wallet does not list, acknowledged or not', async () => {
+				const { success } = await send(
+					buildParams({
+						data: encodeCall({ selector: ERC20_APPROVE_HASH, value: 1n }),
+						acknowledgedRefusals: ['unverifiable_erc20']
+					})
+				);
+
+				expect(success).toBeFalsy();
+				expect(executeSend).not.toHaveBeenCalled();
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.unlisted_token }
+				});
+			});
+
+			it('signs an ERC-20 call on a listed token whose arguments decode', async () => {
+				const { success } = await send(
+					buildParams({
+						to: USDC_TOKEN.address,
+						data: encodeCall({ selector: ERC20_TRANSFER_HASH, value: 1n })
+					})
+				);
+
+				expect(success).toBeTruthy();
+				expect(trackWalletConnectUncheckedSigning).not.toHaveBeenCalled();
+			});
+
+			it('refuses calldata it cannot decode that was not acknowledged', async () => {
+				const { success } = await send(
+					buildParams({ to: USDC_TOKEN.address, data: undecodableTransfer })
+				);
+
+				expect(success).toBeFalsy();
+				expect(executeSend).not.toHaveBeenCalled();
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.unverifiable_request }
+				});
+			});
+
+			it('signs calldata it cannot decode once that was acknowledged, and counts it', async () => {
+				const { success } = await send(
+					buildParams({
+						to: USDC_TOKEN.address,
+						data: undecodableTransfer,
+						acknowledgedRefusals: ['unverifiable_erc20']
+					})
+				);
+
+				expect(success).toBeTruthy();
+				expect(executeSend).toHaveBeenCalledOnce();
+				expect(trackWalletConnectUncheckedSigning).toHaveBeenCalledExactlyOnceWith({
+					modifier: 'sign',
+					network: 'ETH',
+					reasons: ['unverifiable_erc20']
+				});
+			});
+
+			it('refuses an operator grant it cannot decode unless that was acknowledged', async () => {
+				const data = `${ERC_SET_APPROVAL_FOR_ALL_HASH}deadbeef`;
+
+				const refused = await send(buildParams({ data }));
+
+				expect(refused.success).toBeFalsy();
+
+				const signed = await send(
+					buildParams({ data, acknowledgedRefusals: ['unverifiable_approval_for_all'] })
+				);
+
+				expect(signed.success).toBeTruthy();
+			});
+
+			it('refuses a site the domain check flagged, acknowledged or not', async () => {
+				const { success } = await send(
+					buildParams({
+						to: USDC_TOKEN.address,
+						data: undecodableTransfer,
+						acknowledgedRefusals: ['unverifiable_erc20'],
+						isScam: true
+					})
+				);
+
+				expect(success).toBeFalsy();
+				expect(executeSend).not.toHaveBeenCalled();
+			});
 		});
 
 		it('signs the gas limit the dApp requested', async () => {
@@ -297,7 +431,17 @@ describe('eth wallet-connect.services', () => {
 		});
 
 		describe('a token call that sends native value along with it', () => {
-			const args = 'de'.repeat(64);
+			// Arguments that decode, so that only the native value decides: signing also refuses a token
+			// call whose arguments do not decode, or on a token the wallet does not list.
+			const args = AbiCoder.defaultAbiCoder()
+				.encode(['address', 'uint256'], [SPENDER, 1n])
+				.slice(2);
+
+			beforeEach(() => {
+				erc20DefaultTokensStore.reset();
+				erc20CustomTokensStore.resetAll();
+				erc20DefaultTokensStore.add(USDC_TOKEN);
+			});
 
 			const tokenCalls = [
 				ERC20_TRANSFER_HASH,
@@ -329,7 +473,9 @@ describe('eth wallet-connect.services', () => {
 			});
 
 			it.each(tokenCalls)('signs selector %s carrying no native value', async (selector) => {
-				const { success } = await send(buildParams({ data: `${selector}${args}` }));
+				const { success } = await send(
+					buildParams({ to: USDC_TOKEN.address, data: `${selector}${args}` })
+				);
 
 				expect(success).toBeTruthy();
 				expect(executeSend).toHaveBeenCalledOnce();

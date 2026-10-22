@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
-	import { getContext, onDestroy, setContext } from 'svelte';
-	import { writable } from 'svelte/store';
+	import { getContext, onDestroy, setContext, untrack } from 'svelte';
+	import { get, writable } from 'svelte/store';
+	import { goto } from '$app/navigation';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthWalletConnectSendReview from '$eth/components/wallet-connect/EthWalletConnectSendReview.svelte';
@@ -22,7 +23,8 @@
 		classifyWalletConnectEthSendTransaction,
 		getSendParamsGas,
 		isWalletConnectEthApproval,
-		toWalletConnectCkEthHelperContractAddress
+		toWalletConnectCkEthHelperContractAddress,
+		walletConnectEthRefusals
 	} from '$eth/utils/wallet-connect.utils';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
@@ -31,6 +33,7 @@
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -40,12 +43,19 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
+	import { walletConnectUncheckedSigningStore } from '$lib/stores/wallet-connect-unchecked-signing.store';
 	import type { TokenId } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { networkUrl } from '$lib/utils/nav.utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
+	import {
+		acceptedContext,
+		isWalletConnectDomainFlagged,
+		isWalletConnectUncheckedSigningActive
+	} from '$lib/utils/wallet-connect.utils';
 
 	interface Props {
 		request: WalletKitTypes.SessionRequest;
@@ -99,6 +109,35 @@
 	let ckEthDepositBlocked = $derived(
 		call.type === 'ckEthDepositRefused' || call.type === 'ckEthHelperUnconfirmed'
 	);
+
+	// What the Settings switch can sign past, read the way the review and the signing service read
+	// it, so the acknowledgement handed on names exactly what the review showed.
+	let refusals = $derived(walletConnectEthRefusals({ call, data: firstTransaction.data }));
+
+	// WalletConnect's domain verification flagged the site: no way past a refusal is offered, and the
+	// review does not point at the switch either.
+	let domainFlagged = $derived(isWalletConnectDomainFlagged(request.verifyContext));
+
+	// Read once, when the review opens: one that opened while the Settings switch was on keeps the
+	// offer until it closes, and one that opened after it turned off never gains it.
+	const uncheckedSigningOn = isWalletConnectUncheckedSigningActive({
+		expiresAt: get(walletConnectUncheckedSigningStore),
+		now: Date.now()
+	});
+
+	let uncheckedSigningOffered = $derived(uncheckedSigningOn && !domainFlagged);
+
+	let uncheckedSigningAcknowledged = $state(false);
+
+	// A tick agrees to the refusals the review showed when it was given, and starts over should they
+	// change.
+	let refusalsKey = $derived(refusals.join());
+
+	$effect(() => {
+		[refusalsKey];
+
+		untrack(() => (uncheckedSigningAcknowledged = false));
+	});
 
 	/**
 	 * Fee context store
@@ -185,6 +224,21 @@
 		close();
 	};
 
+	// Leaving the review rejects the request, as closing it does: the user turns the switch on and the
+	// app sends the request again.
+	const openSettings = async () => {
+		await reject();
+
+		await goto(
+			networkUrl({
+				path: AppPath.Settings,
+				networkId: $userSelectedNetworkStore,
+				usePreviousRoute: false,
+				fromRoute: null
+			})
+		);
+	};
+
 	/**
 	 * Send and approve
 	 */
@@ -212,7 +266,8 @@
 			identity: $authIdentity,
 			minterInfo,
 			sourceNetwork,
-			targetNetwork
+			targetNetwork,
+			acknowledgedRefusals: uncheckedSigningOffered && uncheckedSigningAcknowledged ? refusals : []
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
@@ -262,12 +317,18 @@
 						{call}
 						{data}
 						{destination}
+						{domainFlagged}
 						flaggedAsScam={!acceptedContext(request.verifyContext)}
 						onApprove={send}
+						onOpenSettings={openSettings}
 						onReject={reject}
+						onUncheckedSigningAcknowledge={() =>
+							(uncheckedSigningAcknowledged = !uncheckedSigningAcknowledged)}
 						{requestedGas}
 						{sourceNetwork}
 						{targetNetwork}
+						{uncheckedSigningAcknowledged}
+						{uncheckedSigningOffered}
 					/>
 				{/if}
 			{/key}
