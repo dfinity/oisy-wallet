@@ -56,6 +56,7 @@
 <div
 	class={`flex transition-[background-color] duration-150 ease-out ${styleClass ?? ''}`}
 	class:child-pressed:bg-brand-subtle-20={nonNullish(onClick)}
+	class:child-pressed:duration-0={nonNullish(onClick)}
 	class:hover:bg-brand-subtle-10={hover}
 	class:rounded-lg={rounded}
 	class:w-full={dividers || fullWidth}

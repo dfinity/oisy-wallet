@@ -1,11 +1,15 @@
+// Row density comes from the `--menu-row-*` properties (global/variables.scss), so a denser host
+// (the dropdown `Popover`) changes the numbers without restating the row selectors.
 .menu-surface {
 	font-size: 1rem;
 	line-height: 1.5;
 
+	// Start-aligned whatever the host: a menu opened from inside a button would inherit its centring.
 	.menu-heading {
 		display: block;
+		text-align: start;
 		margin-bottom: 8px;
-		padding-inline: 8px;
+		padding-inline: var(--menu-row-padding-inline);
 		font-size: 0.875rem;
 		font-weight: var(--font-weight-bold);
 	}
@@ -14,8 +18,8 @@
 	.nav-item,
 	button:has(> .logo-button-wrapper) {
 		--focus-outline-offset: -3px;
-		min-height: 48px;
-		padding: 12px 8px;
+		min-height: var(--menu-row-min-height);
+		padding: var(--menu-row-padding-block) var(--menu-row-padding-inline);
 		border-width: 0;
 		border-radius: 8px;
 		align-items: center;
@@ -57,7 +61,7 @@
 	}
 
 	.toggle.row label {
-		min-height: 48px;
+		min-height: var(--menu-row-min-height);
 		font-size: 1rem;
 		line-height: 1.5;
 		border-radius: 8px;

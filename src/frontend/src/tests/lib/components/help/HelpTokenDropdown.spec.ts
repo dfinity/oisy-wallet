@@ -1,4 +1,5 @@
 import HelpTokenDropdown from '$lib/components/help/HelpTokenDropdown.svelte';
+import { screensStore } from '$lib/stores/screens.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -19,7 +20,7 @@ const testId = 'token-dropdown';
 
 const props = {
 	tokens: [icp, usdc],
-	ariaLabel: 'Pick a token',
+	ariaDescription: 'Pick a token',
 	testId,
 	onSelect: () => undefined
 };
@@ -29,6 +30,46 @@ describe('HelpTokenDropdown', () => {
 		const { getByText } = render(HelpTokenDropdown, { props });
 
 		expect(getByText(en.help.text.select_token)).toBeInTheDocument();
+	});
+
+	// The visible text names the trigger, so voice control reaches it by that text (WCAG 2.5.3).
+	// What the picker is for is the description.
+	it('is named by its placeholder while nothing is selected', () => {
+		const { getByRole } = render(HelpTokenDropdown, { props });
+
+		const trigger = getByRole('button', { name: en.help.text.select_token });
+
+		expect(trigger).not.toHaveAttribute('aria-label');
+		expect(trigger).toHaveAccessibleDescription(props.ariaDescription);
+	});
+
+	it('keeps its name and description when no token is available', () => {
+		const { getByRole } = render(HelpTokenDropdown, { props: { ...props, tokens: [] } });
+
+		const trigger = getByRole('button', { name: en.help.text.select_token });
+
+		expect(trigger).toBeDisabled();
+		expect(trigger).toHaveAccessibleDescription(props.ariaDescription);
+	});
+
+	it('is named by the selected token label alone, not the logo alt before it', () => {
+		const { getByRole } = render(HelpTokenDropdown, {
+			props: { ...props, selected: usdc }
+		});
+
+		expect(getByRole('button', { name: 'ckUSDC' })).toHaveAccessibleDescription(
+			props.ariaDescription
+		);
+	});
+
+	it('titles the mobile modal with its purpose', async () => {
+		screensStore.set('xs');
+
+		const { getByRole } = render(HelpTokenDropdown, { props });
+
+		await fireEvent.click(getByRole('button', { name: en.help.text.select_token }));
+
+		expect(getByRole('dialog')).toHaveTextContent(props.ariaDescription);
 	});
 
 	it('shows the selected symbol on the button', () => {

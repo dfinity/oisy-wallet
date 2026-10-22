@@ -8,7 +8,11 @@ import {
 } from '$eth/constants/lifi.constants';
 import { ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { LifiQuoteRejectedError } from '$lib/types/errors';
-import { assertLifiCalldata } from '$lib/utils/lifi-calldata.utils';
+import {
+	assertLifiCalldata,
+	isLifiRouteExecutable,
+	lifiCalldataSwapTargets
+} from '$lib/utils/lifi-calldata.utils';
 import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import {
 	mockLifiCalldataAcrossEvm,
@@ -19,8 +23,16 @@ import {
 	mockLifiCalldataUser,
 	type LifiCalldataFixture
 } from '$tests/mocks/lifi-calldata.mock';
+import { mockLifiQuote } from '$tests/mocks/lifi.mock';
 import { assertNonNullish } from '@dfinity/utils';
-import { ChainId, type LiFiStep } from '@lifi/sdk';
+import {
+	ChainId,
+	type CrossStep,
+	type LiFiStep,
+	type ProtocolStep,
+	type Step,
+	type SwapStep
+} from '@lifi/sdk';
 import { Interface, type ParamType, type Result } from 'ethers/abi';
 import { zeroPadValue } from 'ethers/utils';
 
@@ -1170,6 +1182,106 @@ describe('lifi-calldata.utils', () => {
 					request: { ...fixture.request, fromToken: ZERO_ETH_ADDRESS }
 				});
 			});
+		});
+	});
+
+	describe('isLifiRouteExecutable', () => {
+		// One branch per step type, so that each literal narrows to its own member of `Step`.
+		const step = (
+			step:
+				| Pick<SwapStep, 'type' | 'tool'>
+				| Pick<CrossStep, 'type' | 'tool'>
+				| Pick<ProtocolStep, 'type' | 'tool'>
+		): Step =>
+			step.type === 'swap'
+				? { ...mockLifiQuote, ...step }
+				: step.type === 'cross'
+					? { ...mockLifiQuote, ...step }
+					: { ...mockLifiQuote, ...step };
+
+		const feeCollection = step({ type: 'protocol', tool: 'feeCollection' });
+		const dexSwap = step({ type: 'swap', tool: 'nordstern' });
+		const across = step({ type: 'cross', tool: 'across' });
+		const near = step({ type: 'cross', tool: 'near' });
+
+		const routeOf = (includedSteps: Step[]): LiFiStep => ({
+			...mockLifiQuote,
+			includedSteps
+		});
+
+		it.each([
+			{ route: 'a same-chain swap', steps: [feeCollection, dexSwap] },
+			{ route: 'Across behind the fee collection', steps: [feeCollection, across] },
+			{ route: 'NEAR Intents behind a DEX swap', steps: [feeCollection, dexSwap, near] }
+		])('should accept $route', ({ steps }) => {
+			expect(isLifiRouteExecutable(routeOf(steps))).toBeTruthy();
+		});
+
+		it.each([
+			{ route: 'Across behind a DEX swap', steps: [feeCollection, dexSwap, across] },
+			{ route: 'a swap after the bridge', steps: [feeCollection, near, dexSwap] },
+			{ route: 'a second bridge', steps: [feeCollection, near, across] },
+			{
+				route: 'a bridge the binding has no entry for',
+				steps: [feeCollection, step({ type: 'cross', tool: 'relay' })]
+			},
+			{
+				route: 'a key the table only inherits',
+				steps: [feeCollection, step({ type: 'cross', tool: 'constructor' })]
+			}
+		])('should refuse $route', ({ steps }) => {
+			expect(isLifiRouteExecutable(routeOf(steps))).toBeFalsy();
+		});
+	});
+
+	describe('lifiCalldataSwapTargets', () => {
+		const lowerCased = (addresses: string[]) => addresses.map((address) => address.toLowerCase());
+
+		const targetsOf = ({ quote, request }: LifiCalldataFixture) =>
+			lowerCased(lifiCalldataSwapTargets({ quote, request }));
+
+		it("should list every swap's call target, as the binding returns them", () => {
+			expect(targetsOf(mockLifiCalldataSameChain)).toEqual(
+				expect.arrayContaining(lowerCased([feeCollector, dexRouter]))
+			);
+		});
+
+		// The binding refuses an approved token there too, although it returns no call for it.
+		it('should list an approval target of a native sending asset', () => {
+			const fixture = withArgs({
+				fixture: mockLifiCalldataSameChain,
+				abi: LIFI_GENERIC_SWAP_ABI,
+				change: (args) => {
+					const [first] = genericArgs(args).steps;
+
+					assertNonNullish(first);
+
+					first.approveTo = elsewhere;
+				}
+			});
+
+			expect(targetsOf(fixture)).toContain(elsewhere.toLowerCase());
+		});
+
+		it("should list a bridge route's swaps before the bridge", () => {
+			expect(targetsOf(mockLifiCalldataAcrossEvm)).toContain(feeCollector.toLowerCase());
+		});
+
+		it('should list none for calldata that does not decode, which the binding refuses', () => {
+			const fixture = withData({ fixture: mockLifiCalldataSameChain, data: '0xdeadbeef' });
+
+			expect(targetsOf(fixture)).toEqual([]);
+
+			expectRejected(fixture);
+		});
+
+		it('should list none without calldata', () => {
+			expect(
+				lifiCalldataSwapTargets({
+					quote: {} as LiFiStep,
+					request: mockLifiCalldataSameChain.request
+				})
+			).toEqual([]);
 		});
 	});
 });

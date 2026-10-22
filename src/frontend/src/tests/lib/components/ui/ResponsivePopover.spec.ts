@@ -64,4 +64,12 @@ describe('ResponsivePopover', () => {
 			expect(queryByTestId('bottom-sheet')).not.toBeInTheDocument();
 		});
 	});
+
+	it('passes the dropdown layout on to the popover', async () => {
+		screensStore.set('lg');
+
+		render(ResponsivePopoverTest, { props: { dropdown: true } });
+
+		await waitFor(() => expect(document.querySelector('.wrapper.dropdown')).not.toBeNull());
+	});
 });

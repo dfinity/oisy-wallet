@@ -124,7 +124,7 @@
 			width: 100%;
 			justify-content: space-between;
 			gap: 16px;
-			padding: 12px 8px;
+			padding: var(--menu-row-padding-block) var(--menu-row-padding-inline);
 			border-radius: var(--border-radius-sm);
 		}
 		.track {

@@ -181,7 +181,7 @@
 	{$i18n.navigation.alt.menu}
 </ButtonIcon>
 
-<Popover anchor={button} direction="rtl" bind:visible>
+<Popover anchor={button} direction="rtl" dropdown bind:visible>
 	<div class="menu-surface">
 		<div
 			class="flex max-w-80 flex-col"
@@ -193,7 +193,7 @@
 				<div class="mb-2 text-center text-base font-semibold">
 					{$i18n.auth.text.sign_in_or_sign_up}
 				</div>
-				<span class="mb-2 text-center">
+				<span class="mb-1 text-center">
 					<ButtonAuthenticateWithHelp fullWidth helpAlignment="center" needHelpLink={false} />
 				</span>
 				<Hr />
@@ -250,7 +250,6 @@
 				<ButtonMenu
 					ariaLabel={$i18n.navigation.text.wallet_connect}
 					onclick={() => modalStore.openUniversalScanner({ id: universalScannerModalId })}
-					styleClass="group"
 					testId={NAVIGATION_MENU_SCANNER_BUTTON}
 				>
 					<IconMaximize size="20px" />
@@ -258,18 +257,13 @@
 					<span class="flex w-full items-center justify-between">
 						{$i18n.navigation.text.wallet_connect}
 
-						<span
-							class="text-tertiary-inverted transition-colors duration-150 ease-out group-hover:text-brand-primary-alt"
-						>
-							<IconWalletConnect />
-						</span>
+						<span class="text-tertiary-inverted"><IconWalletConnect /></span>
 					</span>
 				</ButtonMenu>
 
 				<ButtonMenu
 					ariaLabel={replaceOisyPlaceholders($i18n.navigation.text.pay)}
 					onclick={() => modalStore.openPayDialog(payDialogModalId)}
-					styleClass="group"
 					testId={NAVIGATION_MENU_PAY_BUTTON}
 				>
 					<IconMaximize size="20px" />
@@ -277,11 +271,7 @@
 					<span class="flex w-full items-center justify-between">
 						{replaceOisyPlaceholders($i18n.navigation.text.pay)}
 
-						<span
-							class="text-tertiary-inverted transition-colors duration-150 ease-out group-hover:text-brand-primary-alt"
-						>
-							<IconPay />
-						</span>
+						<span class="text-tertiary-inverted"><IconPay /></span>
 					</span>
 				</ButtonMenu>
 
@@ -332,7 +322,6 @@
 					asMenuItemCondensed
 					href={OISY_SUPPORT_URL}
 					iconVisible={false}
-					styleClass="group"
 					testId={NAVIGATION_MENU_SUPPORT_BUTTON}
 				>
 					<IconHelp size="20" />
@@ -340,11 +329,7 @@
 					<span class="flex w-full items-center justify-between">
 						{$i18n.navigation.text.support}
 
-						<span
-							class="text-tertiary-inverted transition-colors duration-150 ease-out group-hover:text-brand-primary-alt"
-						>
-							<IconExternalLink size="16" />
-						</span>
+						<span class="text-tertiary-inverted"><IconExternalLink size="16" /></span>
 					</span>
 				</ExternalLink>
 
@@ -400,7 +385,7 @@
 		{#if $authSignedIn}
 			<Hr />
 
-			<div class="my-4 flex max-w-80 flex-col">
+			<div class="my-2 flex max-w-80 flex-col">
 				<LockOrSignOut onHidePopover={hidePopover} />
 			</div>
 		{/if}
@@ -408,7 +393,7 @@
 		<Hr />
 
 		<div
-			class="mt-4 flex max-w-80 flex-wrap justify-center gap-x-2 gap-y-1 text-xs text-nowrap text-tertiary"
+			class="mt-2 mb-1 flex max-w-80 flex-wrap justify-center gap-x-2 gap-y-1 text-xs text-nowrap text-tertiary"
 		>
 			<TermsOfUseLink />
 			<PrivacyPolicyLink />

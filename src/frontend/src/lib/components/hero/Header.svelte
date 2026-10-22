@@ -65,8 +65,8 @@
 	// `backdrop-filter` inside it to itself: the user menu's backdrop could dim the page and not
 	// blur it. So the name is dropped while the user menu is open, the only popover here with a
 	// visible backdrop. Its entries close it before the navigation they start, so page changes
-	// still find the header named; the network switcher closes only after its navigation, so it
-	// must not touch the name.
+	// still find the header named. The network switcher also closes before its navigation, and its
+	// backdrop is invisible, so it leaves the name alone.
 	let viewTransitionName = $derived(menuOpen ? 'none' : 'header');
 </script>
 
@@ -94,7 +94,7 @@
 	</div>
 
 	<div
-		class="pointer-events-auto flex justify-end"
+		class="pointer-events-auto flex items-center justify-end"
 		class:gap-1={isCompact}
 		class:gap-2={!isCompact}
 		class:max-w-full={isCompact}

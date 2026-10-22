@@ -29,6 +29,7 @@
 	expanded={visible}
 	link={false}
 	onclick={() => (visible = true)}
+	styleClass="relative hit-area hit-area-touch"
 	bind:button
 >
 	{#snippet icon()}
@@ -38,7 +39,12 @@
 	{/snippet}
 </ButtonIcon>
 
-<ResponsivePopover ariaLabel={$i18n.tokens.manage.text.list_settings} {button} bind:visible>
+<ResponsivePopover
+	ariaLabel={$i18n.tokens.manage.text.list_settings}
+	{button}
+	dropdown
+	bind:visible
+>
 	{#snippet content()}
 		<div class="menu-surface min-w-56">
 			<span class="menu-heading">{$i18n.tokens.manage.text.list_settings}</span>

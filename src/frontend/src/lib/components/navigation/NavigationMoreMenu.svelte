@@ -171,9 +171,9 @@
 <!-- Opens upward: the footer is pinned to the bottom of the viewport, so a panel
      opened the usual way would have nowhere to go. -->
 <div use:portal>
-	<Popover anchor={button} placement="above" bind:visible>
+	<Popover anchor={button} dropdown placement="above" bind:visible>
 		<div
-			class="flex max-w-80 flex-col gap-1"
+			class="menu-surface flex max-w-80 flex-col"
 			data-tid={NAVIGATION_MORE_MENU}
 			onclick={close}
 			role="none"
