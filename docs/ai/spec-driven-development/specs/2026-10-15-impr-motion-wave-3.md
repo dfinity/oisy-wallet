@@ -225,8 +225,8 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
 
 ### 4. The bottom sheet has a shadow
 
-- Define `--bottom-sheet-box-shadow` in the theme (light and dark), from the existing shadow
-  tokens if one fits; `ui/BottomSheetContainer.svelte:72` already uses it.
+- Define `--bottom-sheet-box-shadow` in the shared theme layer as an alias of the existing
+  `--overlay-box-shadow`, available in light and dark; `ui/BottomSheetContainer.svelte:72` already uses it.
 
 ### 5. Icon state changes cross-fade
 
@@ -313,8 +313,8 @@ jsdom does not run transitions or CSS animations; tests assert the inputs that p
 3. ~~**The `a0_mo` … `a4c_mo` keyframes.**~~ Settled while building: they animate
    `icons/animated/AnimatedScanIcon` (the Scan QR icon), which is decorative and stops under
    reduced motion. `AnimatedIconLoader` turns to show progress and keeps running.
-4. **A shadow token for the bottom sheet.** Check whether the theme already has a raised-
-   surface shadow to reuse, or whether area 4 needs a new token.
+4. ~~**A shadow token for the bottom sheet.**~~ Settled in area 4: the existing
+   `--overlay-box-shadow` is reused through the missing bottom-sheet variable in both themes.
 
 ## Pending decisions (facts are clear, a call is needed)
 

@@ -134,6 +134,9 @@ Sorting, network selection and appearance buttons expose their selected state.
   and caps fades at 100 ms; height changes happen at once. Modal and popover panels
   and backdrops finish their individual exits before the overlay disappears.
 
+- **Bottom sheets** cast the shared overlay shadow in both themes; their desktop inline
+  form stays flat.
+
 - **State icons** cross-fade over 300 ms: progress to success or failure, privacy, theme,
   and hiding or showing an NFT. Like copy confirmation, each can reverse during a swap
   and appears immediately in its initial state. With reduced motion, icons fade in
