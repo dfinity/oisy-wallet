@@ -5,6 +5,7 @@ import {
 	createActiveUserTransaction,
 	deleteActiveUserTransaction,
 	loadActiveUserTransactions,
+	reloadActiveUserTransaction,
 	updateActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
@@ -15,7 +16,7 @@ import {
 	mockCreateActiveUserTransactionParams,
 	mockUpdateActiveUserTransactionParams
 } from '$tests/mocks/active-user-transactions.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
 
 vi.mock('$lib/api/backend.api', () => ({
@@ -142,6 +143,21 @@ describe('active-user-transactions.services', () => {
 			expect(get(activeUserTransactionsList)).toEqual([mockActiveUserTransaction]);
 		});
 
+		// The account switched while the call was in flight: the row is not this account's.
+		it('should not upsert into the store of another account', async () => {
+			vi.spyOn(backendApi, 'createActiveUserTransaction').mockResolvedValue(
+				mockActiveUserTransaction
+			);
+			activeUserTransactionsStore.init(mockPrincipal2);
+
+			await createActiveUserTransaction({
+				identity: mockIdentity,
+				...mockCreateActiveUserTransactionParams
+			});
+
+			expect(get(activeUserTransactionsList)).toEqual([]);
+		});
+
 		it('should propagate API errors so callers can surface them', async () => {
 			vi.spyOn(backendApi, 'createActiveUserTransaction').mockRejectedValue(
 				mockActiveUserTransactionErrorNotFound
@@ -179,6 +195,22 @@ describe('active-user-transactions.services', () => {
 			expect(get(activeUserTransactionsList)).toEqual([mockActiveUserTransaction]);
 		});
 
+		// The account switched while the call was in flight: that account's loader would report the
+		// row as its own.
+		it('should not upsert into the store of another account', async () => {
+			vi.spyOn(backendApi, 'updateActiveUserTransaction').mockResolvedValue(
+				mockActiveUserTransaction
+			);
+			activeUserTransactionsStore.init(mockPrincipal2);
+
+			await updateActiveUserTransaction({
+				identity: mockIdentity,
+				...mockUpdateActiveUserTransactionParams
+			});
+
+			expect(get(activeUserTransactionsList)).toEqual([]);
+		});
+
 		it('should propagate API errors so callers can surface them', async () => {
 			vi.spyOn(backendApi, 'updateActiveUserTransaction').mockRejectedValue(
 				mockActiveUserTransactionErrorNotFound
@@ -190,6 +222,134 @@ describe('active-user-transactions.services', () => {
 					...mockUpdateActiveUserTransactionParams
 				})
 			).rejects.toEqual(mockActiveUserTransactionErrorNotFound);
+		});
+
+		// The write can commit after this tab is gone, before anything reported the outcome. The next
+		// session in this browser must then report it rather than claim it.
+		describe('a terminal status', () => {
+			const settled = { ...mockActiveUserTransaction, status: { Succeeded: null } };
+
+			const claimedOnNextLoad = (): boolean => {
+				activeUserTransactionsStore.reset();
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.set({ transactions: [settled] });
+
+				return get(activeUserTransactionsStore)?.terminalSideEffectsApplied[settled.id] === true;
+			};
+
+			// The canister refused the write, so it never committed.
+			it('stops being recorded when the canister refuses the write', async () => {
+				vi.spyOn(backendApi, 'updateActiveUserTransaction').mockRejectedValue({
+					IllegalStatusTransition: null
+				});
+
+				await expect(
+					updateActiveUserTransaction({
+						identity: mockIdentity,
+						id: settled.id,
+						status: settled.status
+					})
+				).rejects.toEqual({ IllegalStatusTransition: null });
+
+				expect(claimedOnNextLoad()).toBeTruthy();
+			});
+
+			// The write may still have committed.
+			it('stays recorded when the call fails without an answer from the canister', async () => {
+				vi.spyOn(backendApi, 'updateActiveUserTransaction').mockRejectedValue(new Error('network'));
+
+				await expect(
+					updateActiveUserTransaction({
+						identity: mockIdentity,
+						id: settled.id,
+						status: settled.status
+					})
+				).rejects.toThrow('network');
+
+				expect(claimedOnNextLoad()).toBeFalsy();
+			});
+
+			// The OISY Trade foreground reports its swap itself.
+			it('is not recorded when the caller reports the outcome itself', async () => {
+				vi.spyOn(backendApi, 'updateActiveUserTransaction').mockResolvedValue(settled);
+
+				await updateActiveUserTransaction({
+					identity: mockIdentity,
+					id: settled.id,
+					status: settled.status,
+					outcomeReportedByCaller: true
+				});
+
+				expect(backendApi.updateActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: settled.id,
+					status: settled.status
+				});
+				expect(claimedOnNextLoad()).toBeTruthy();
+			});
+
+			it('is recorded as sent before the write resolves', () => {
+				vi.spyOn(backendApi, 'updateActiveUserTransaction').mockReturnValueOnce(
+					new Promise(() => {})
+				);
+
+				updateActiveUserTransaction({
+					identity: mockIdentity,
+					id: settled.id,
+					status: settled.status
+				});
+
+				expect(claimedOnNextLoad()).toBeFalsy();
+			});
+
+			// A sign-out while a poll awaited its external call resets the store before the write.
+			it('is recorded for the identity that sends it when the store was reset', async () => {
+				vi.spyOn(backendApi, 'updateActiveUserTransaction').mockResolvedValue(settled);
+				activeUserTransactionsStore.reset();
+
+				await updateActiveUserTransaction({
+					identity: mockIdentity,
+					id: settled.id,
+					status: settled.status
+				});
+
+				expect(claimedOnNextLoad()).toBeFalsy();
+			});
+
+			it('is recorded for the identity that sends it when the store holds another account', async () => {
+				vi.spyOn(backendApi, 'updateActiveUserTransaction').mockResolvedValue(settled);
+				activeUserTransactionsStore.init(mockPrincipal2);
+
+				await updateActiveUserTransaction({
+					identity: mockIdentity,
+					id: settled.id,
+					status: settled.status
+				});
+
+				expect(claimedOnNextLoad()).toBeFalsy();
+			});
+		});
+
+		it('does not record a status that is not terminal', async () => {
+			vi.spyOn(backendApi, 'updateActiveUserTransaction').mockResolvedValue(
+				mockActiveUserTransaction
+			);
+
+			await updateActiveUserTransaction({
+				identity: mockIdentity,
+				id: mockActiveUserTransactionId,
+				status: { Executing: null }
+			});
+
+			activeUserTransactionsStore.reset();
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.set({
+				transactions: [{ ...mockActiveUserTransaction, status: { Succeeded: null } }]
+			});
+
+			expect(
+				get(activeUserTransactionsStore)?.terminalSideEffectsApplied[mockActiveUserTransactionId]
+			).toBeTruthy();
 		});
 	});
 
@@ -231,41 +391,110 @@ describe('active-user-transactions.services', () => {
 		});
 	});
 
+	describe('reloadActiveUserTransaction', () => {
+		const staleTransaction = mockActiveUserTransaction;
+		const freshTransaction = {
+			...mockActiveUserTransaction,
+			external_refs: [{ key: 'tx_hash', value: '0xhash' }],
+			updated_at_ns: 2n
+		};
+
+		beforeEach(() => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: staleTransaction });
+		});
+
+		it('should return the backend row and replace the stale copy in the store', async () => {
+			vi.spyOn(backendApi, 'getActiveUserTransactions').mockResolvedValue([freshTransaction]);
+
+			await expect(
+				reloadActiveUserTransaction({ identity: mockIdentity, id: mockActiveUserTransactionId })
+			).resolves.toEqual(freshTransaction);
+
+			// Certified: the answer decides whether a row is deleted.
+			expect(backendApi.getActiveUserTransactions).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				certified: true
+			});
+			expect(get(activeUserTransactionsList)).toEqual([freshTransaction]);
+		});
+
+		it('should return undefined and leave the store untouched when the backend has no such row', async () => {
+			vi.spyOn(backendApi, 'getActiveUserTransactions').mockResolvedValue([]);
+
+			await expect(
+				reloadActiveUserTransaction({ identity: mockIdentity, id: mockActiveUserTransactionId })
+			).resolves.toBeUndefined();
+
+			expect(get(activeUserTransactionsList)).toEqual([staleTransaction]);
+		});
+
+		// The account switched while the call was in flight: the row is not this account's.
+		it('should not upsert into the store of another account', async () => {
+			vi.spyOn(backendApi, 'getActiveUserTransactions').mockResolvedValue([freshTransaction]);
+			activeUserTransactionsStore.init(mockPrincipal2);
+
+			await reloadActiveUserTransaction({
+				identity: mockIdentity,
+				id: mockActiveUserTransactionId
+			});
+
+			expect(get(activeUserTransactionsList)).toEqual([]);
+		});
+
+		it('should propagate API errors so callers do not act on a stale copy', async () => {
+			vi.spyOn(backendApi, 'getActiveUserTransactions').mockRejectedValue(
+				mockActiveUserTransactionErrorNotFound
+			);
+
+			await expect(
+				reloadActiveUserTransaction({ identity: mockIdentity, id: mockActiveUserTransactionId })
+			).rejects.toEqual(mockActiveUserTransactionErrorNotFound);
+			expect(get(activeUserTransactionsList)).toEqual([staleTransaction]);
+		});
+	});
+
 	describe('applyActiveUserTransactionPollUpdate', () => {
 		beforeEach(() => {
 			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
 		});
 
 		it('does nothing when update is undefined', async () => {
-			await applyActiveUserTransactionPollUpdate({
-				identity: mockIdentity,
-				tx: mockActiveUserTransaction,
-				update: undefined
-			});
+			await expect(
+				applyActiveUserTransactionPollUpdate({
+					identity: mockIdentity,
+					tx: mockActiveUserTransaction,
+					update: undefined
+				})
+			).resolves.toBeFalsy();
 
 			expect(backendApi.updateActiveUserTransaction).not.toHaveBeenCalled();
 		});
 
 		it('skips no-op updates', async () => {
-			await applyActiveUserTransactionPollUpdate({
-				identity: mockIdentity,
-				tx: mockActiveUserTransaction,
-				update: {}
-			});
+			await expect(
+				applyActiveUserTransactionPollUpdate({
+					identity: mockIdentity,
+					tx: mockActiveUserTransaction,
+					update: {}
+				})
+			).resolves.toBeFalsy();
 
 			expect(backendApi.updateActiveUserTransaction).not.toHaveBeenCalled();
 		});
 
-		it('forwards the update when something changes', async () => {
+		it('forwards the update when something changes, and reports it written', async () => {
 			vi.spyOn(backendApi, 'updateActiveUserTransaction').mockResolvedValue(
 				mockActiveUserTransaction
 			);
 
-			await applyActiveUserTransactionPollUpdate({
-				identity: mockIdentity,
-				tx: mockActiveUserTransaction,
-				update: { status: { Succeeded: null }, progressStep: 'done' }
-			});
+			await expect(
+				applyActiveUserTransactionPollUpdate({
+					identity: mockIdentity,
+					tx: mockActiveUserTransaction,
+					update: { status: { Succeeded: null }, progressStep: 'done' }
+				})
+			).resolves.toBeTruthy();
 
 			expect(backendApi.updateActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
@@ -275,7 +504,7 @@ describe('active-user-transactions.services', () => {
 			});
 		});
 
-		it('swallows backend errors so the next tick can retry', async () => {
+		it('swallows backend errors so the next tick can retry, reporting nothing written', async () => {
 			vi.spyOn(backendApi, 'updateActiveUserTransaction').mockRejectedValue(new Error('boom'));
 
 			await expect(
@@ -284,7 +513,7 @@ describe('active-user-transactions.services', () => {
 					tx: mockActiveUserTransaction,
 					update: { status: { Succeeded: null } }
 				})
-			).resolves.toBeUndefined();
+			).resolves.toBeFalsy();
 		});
 	});
 });

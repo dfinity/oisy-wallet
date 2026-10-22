@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import TokenMenu from '$lib/components/tokens/TokenMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { TOKEN_MENU_SOL, TOKEN_MENU_SOL_EXPLORER_LINK } from '$lib/constants/test-ids.constants';
@@ -14,6 +13,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
 

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { btcStatusesStore } from '$icp/stores/btc.store';
@@ -8,11 +7,11 @@
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import HelpToggle from '$lib/components/ui/HelpToggle.svelte';
 	import { OISY_EXPORT_DATA_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
 		btcAddressMainnet,
@@ -38,6 +37,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { mapAllTransactionsUi } from '$lib/utils/transactions.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 
@@ -109,12 +109,10 @@
 	{#snippet title()}
 		<span class="inline-flex items-center">
 			{$i18n.settings.text.export_data}
-			<button
-				class="ml-1 flex p-0.5 align-top text-tertiary"
-				onclick={() => (helpExpanded = !helpExpanded)}
-			>
-				<IconHelp size="18" />
-			</button>
+			<HelpToggle
+				styleClass="ml-1 flex p-0.5 align-top text-tertiary"
+				bind:expanded={helpExpanded}
+			/>
 		</span>
 	{/snippet}
 

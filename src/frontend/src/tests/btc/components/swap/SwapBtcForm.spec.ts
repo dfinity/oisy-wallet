@@ -86,6 +86,8 @@ describe('SwapBtcForm', () => {
 			sourceToken: readable({ ...BTC_MAINNET_TOKEN, enabled: true }),
 			destinationToken: readable(ckBtcToken),
 			failedSwapError: writable(undefined),
+			amountSetToMax: writable(false),
+			lifiMaxFee: writable(undefined),
 			sourceTokenExchangeRate: readable(60_000),
 			sourceTokenBalance: readable(balance),
 			destinationTokenBalance: readable(undefined),

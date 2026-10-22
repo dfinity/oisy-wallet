@@ -90,41 +90,54 @@
 
 <Dropdown
 	bind:this={dropdown}
-	ariaLabel={$i18n.networks.title}
+	ariaDescription={$i18n.networks.title}
 	asModalOnMobile
 	{disabled}
 	testId={NETWORKS_SWITCHER_DROPDOWN}
 	bind:visible
 >
-	<NetworkSwitcherLogo network={$selectedNetwork} />
+	<!-- The name follows as text, so the logo's alt would only repeat it. -->
+	<span aria-hidden="true">
+		<NetworkSwitcherLogo network={$selectedNetwork} />
+	</span>
 
-	<span class="hidden md:block">{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}</span>
+	<!-- sr-only, not hidden: below xl the logo alone shows, and the name still has to name the button. -->
+	<span class="max-xl:sr-only">{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 
 	{#snippet title()}
 		{$i18n.networks.filter}
 	{/snippet}
 
 	{#snippet items()}
-		<NetworkSwitcherList onSelected={onNetworkSelect} selectedNetworkId={$networkId} />
+		<div class="menu-surface">
+			<div class="menu-divider">
+				<NetworkSwitcherList onSelected={onNetworkSelect} selectedNetworkId={$networkId} />
+			</div>
 
-		<div class="mt-6 mb-3 ml-2 flex flex-row justify-between text-nowrap">
-			<span class="flex">
-				<Button
-					link
-					onclick={() => {
-						dropdown?.close();
-						modalStore.openSettings({ id: modalId, data: SettingsModalType.ENABLED_NETWORKS });
-					}}><IconManage />{$i18n.networks.manage}</Button
-				>
-			</span>
-			{#if enabledNetworks < totalNetworks}
-				<span class="mr-2 ml-4 flex text-right text-base text-nowrap">
-					{replacePlaceholders($i18n.networks.number_of_enabled, {
-						$numNetworksEnabled: `${enabledNetworks}`,
-						$numNetworksTotal: `${totalNetworks}`
-					})}
+			<Button
+				contentFullWidth
+				fullWidth
+				innerStyleClass="flex-wrap justify-between"
+				link
+				onclick={() => {
+					dropdown?.close();
+					modalStore.openSettings({ id: modalId, data: SettingsModalType.ENABLED_NETWORKS });
+				}}
+				static
+				styleClass="menu-row row-feedback"
+			>
+				<span class="flex items-center gap-3 font-bold">
+					<IconManage size="20" />{$i18n.networks.manage}
 				</span>
-			{/if}
+				{#if enabledNetworks < totalNetworks}
+					<span class="ml-auto text-right font-normal text-nowrap text-primary">
+						{replacePlaceholders($i18n.networks.number_of_enabled, {
+							$numNetworksEnabled: `${enabledNetworks}`,
+							$numNetworksTotal: `${totalNetworks}`
+						})}
+					</span>
+				{/if}
+			</Button>
 		</div>
 	{/snippet}
 </Dropdown>

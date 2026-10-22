@@ -1,8 +1,15 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { SOLANA_KNOWN_PROGRAM_ADDRESSES } from '$sol/constants/sol-known-programs.constants';
+import {
+	SYSTEM_PROGRAM_ADDRESS,
+	TOKEN_2022_PROGRAM_ADDRESS,
+	TOKEN_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaParsedAccountInfo, SolanaSimulatedInnerInstructions } from '$sol/types/sol-rpc';
 import type {
+	SolClosedAccount,
+	SolSimulationAllowance,
 	SolSimulationControlChange,
 	SolSimulationPreview,
 	SolSimulationTokenDelta
@@ -16,6 +23,8 @@ interface SolTokenAccountState {
 	tokenAddress: SplTokenAddress;
 	owner: SolAddress;
 	delegate?: SolAddress;
+	// What the delegate may still spend. Present whenever a delegate is.
+	delegatedAmount?: bigint;
 	closeAuthority?: SolAddress;
 	amount: bigint;
 	decimals: number;
@@ -62,11 +71,12 @@ export const parseTokenAccountState = (
 		return undefined;
 	}
 
-	const { mint, owner, delegate, closeAuthority, tokenAmount } = (data.parsed.info ??
-		{}) as Partial<{
+	const { mint, owner, delegate, delegatedAmount, closeAuthority, tokenAmount } = (data.parsed
+		.info ?? {}) as Partial<{
 		mint: SplTokenAddress;
 		owner: SolAddress;
 		delegate: SolAddress;
+		delegatedAmount: { amount: string };
 		closeAuthority: SolAddress;
 		tokenAmount: { amount: string; decimals: number };
 	}>;
@@ -79,6 +89,7 @@ export const parseTokenAccountState = (
 		tokenAddress: mint,
 		owner,
 		...(nonNullish(delegate) && { delegate }),
+		...(nonNullish(delegatedAmount) && { delegatedAmount: BigInt(delegatedAmount.amount) }),
 		...(nonNullish(closeAuthority) && { closeAuthority }),
 		amount: BigInt(tokenAmount.amount),
 		decimals: tokenAmount.decimals
@@ -188,6 +199,17 @@ const controlChanges = ({
 		return [];
 	}
 
+	// What a delegate left in place may spend, stated with every change that leaves one: a
+	// one-unit approval and an unlimited one name the same delegate.
+	const allowance: SolSimulationAllowance | undefined =
+		nonNullish(post.token?.delegate) && nonNullish(post.token.delegatedAmount)
+			? {
+					tokenAddress: post.token.tokenAddress,
+					decimals: post.token.decimals,
+					amount: post.token.delegatedAmount
+				}
+			: undefined;
+
 	const changed: [
 		SolSimulationControlChange['field'],
 		SolAddress | undefined,
@@ -199,13 +221,42 @@ const controlChanges = ({
 		['closeAuthority', pre.token?.closeAuthority, post.token?.closeAuthority]
 	];
 
-	return changed.reduce<SolSimulationControlChange[]>(
-		(acc, [field, from, to]) => [
-			...acc,
-			...(from !== to ? [{ account, field, ...(nonNullish(to) && { to }) }] : [])
-		],
-		[]
-	);
+	// The same delegate with a different limit. Comparing the delegate alone reads an approval that
+	// raises an existing allowance as no change at all.
+	const delegate = post.token?.delegate;
+	const allowanceChanged =
+		nonNullish(delegate) &&
+		pre.token?.delegate === delegate &&
+		pre.token.delegatedAmount !== post.token?.delegatedAmount;
+
+	return [
+		...changed.reduce<SolSimulationControlChange[]>(
+			(acc, [field, from, to]) => [
+				...acc,
+				...(from !== to
+					? [
+							{
+								account,
+								field,
+								...(nonNullish(to) && { to }),
+								...(field === 'delegate' && nonNullish(allowance) && { allowance })
+							}
+						]
+					: [])
+			],
+			[]
+		),
+		...(allowanceChanged
+			? [
+					{
+						account,
+						field: 'allowance' as const,
+						to: delegate,
+						...(nonNullish(allowance) && { allowance })
+					}
+				]
+			: [])
+	];
 };
 
 /**
@@ -308,3 +359,105 @@ export const findSolUnreadPrograms = (
 
 	return [...new Set(programs)].filter((program) => !known.has(program));
 };
+
+// The programs whose accounts a run's lines already account for: what leaves a wallet does so by a
+// transfer the run states, and a token account is closed by an instruction that names where its
+// balance goes.
+const NON_APPLICATION_PROGRAMS: SolAddress[] = [
+	SYSTEM_PROGRAM_ADDRESS,
+	TOKEN_PROGRAM_ADDRESS,
+	TOKEN_2022_PROGRAM_ADDRESS
+];
+
+/**
+ * The accounts an application's program held before a run and emptied in it.
+ *
+ * A program closing an account of its own moves the lamports itself, and no call in the run states
+ * it: only the account's state before and after says it happened. The System program and the token
+ * programs are left out. What leaves a wallet does so by a transfer the run states, and a token
+ * account is closed by an instruction that names where its balance goes.
+ *
+ * Emptied means no lamports after the run, or no account at all. An account the run did not report
+ * on says nothing, and is not counted as closed.
+ */
+export const findSolClosedAppAccounts = ({
+	addresses,
+	preAccounts,
+	postAccounts
+}: {
+	addresses: SolAddress[];
+	preAccounts: readonly SolanaParsedAccountInfo[];
+	postAccounts: readonly SolanaParsedAccountInfo[];
+}): SolClosedAccount[] =>
+	addresses.reduce<SolClosedAccount[]>((acc, account, index) => {
+		const pre = parseAccountState(preAccounts[index]);
+		const post = postAccounts[index];
+
+		if (isNullish(pre) || NON_APPLICATION_PROGRAMS.includes(pre.program) || pre.lamports === ZERO) {
+			return acc;
+		}
+
+		const emptied = post === null || (nonNullish(post) && BigInt(post.lamports) === ZERO);
+
+		return emptied ? [...acc, { account, program: pre.program, lamports: pre.lamports }] : acc;
+	}, []);
+
+/**
+ * Whether an application's account that stays open lost lamports in a run.
+ *
+ * Its program can pay the wallet straight from it, which no line states, and that inflow could stand
+ * in for a close paid somewhere else. Only writable accounts can change, and the run reports every
+ * one of them, so each such account that ends with less is found. One that is topped up from
+ * elsewhere and then drained by as much ends as it started, which no end balance can tell from a
+ * genuine close next to a payment between two other accounts; in both, the wallet receives what the
+ * lines state.
+ */
+export const solOpenAppAccountsLostLamports = ({
+	addresses,
+	preAccounts,
+	postAccounts
+}: {
+	addresses: SolAddress[];
+	preAccounts: readonly SolanaParsedAccountInfo[];
+	postAccounts: readonly SolanaParsedAccountInfo[];
+}): boolean =>
+	addresses.some((_, index) => {
+		const pre = parseAccountState(preAccounts[index]);
+		const post = parseAccountState(postAccounts[index]);
+
+		return (
+			nonNullish(pre) &&
+			nonNullish(post) &&
+			!NON_APPLICATION_PROGRAMS.includes(pre.program) &&
+			post.lamports > ZERO &&
+			post.lamports < pre.lamports
+		);
+	});
+
+/**
+ * Whether every lamport the closed accounts held reached the wallet.
+ *
+ * Nothing states where a program sends what it closes, so the wallet's own change is the witness:
+ * once the lines that state what moved the wallet's SOL and the fee are taken out, what is left
+ * must be exactly what the closed accounts held. Anything else - a part paid elsewhere, a movement
+ * no line accounts for - and none of them is said to have come home.
+ */
+export const solClosedAccountsReachWallet = ({
+	closedAccounts,
+	walletChange,
+	statedChange,
+	fee
+}: {
+	closedAccounts: SolClosedAccount[];
+	// The wallet's lamports after the run, less those before it.
+	walletChange: bigint | undefined;
+	// What the lines say the transaction does to the wallet's SOL.
+	statedChange: bigint | undefined;
+	// What the run charged the wallet as the transaction's fee.
+	fee: bigint;
+}): boolean =>
+	closedAccounts.length > 0 &&
+	nonNullish(walletChange) &&
+	nonNullish(statedChange) &&
+	walletChange ===
+		statedChange - fee + closedAccounts.reduce((acc, { lamports }) => acc + lamports, ZERO);
