@@ -500,11 +500,17 @@ execution-time — passes `assertLifiQuote` before it is shown or acted on:
   `transactionRequest.from` equals the user's address; `value` (hex, compared as a
   `bigint`) is `0` for an ERC-20 source and `fromAmount` for a native one.
 - **Solana**: `transactionRequest.data` is a single base64 string (an array — a Jito
-  bundle — is rejected); the decoded transaction's fee payer is the user's address and
-  it requires no signer other than the user; every `swap` step of the route uses an
-  exchange of `LIFI_SOLANA_ALLOWED_EXCHANGES` (the request pins them, and the check keeps
-  that pin working if LI.FI ignores it). Lands in PR 3 with the first Solana-source
-  quote; until then no Solana-source quote is requested.
+  bundle — is rejected); the decoded transaction is a **version 0** message, its fee
+  payer is the user's address and it requires no signer other than the user; every
+  `swap` step of the route uses an exchange of `LIFI_SOLANA_ALLOWED_EXCHANGES` (the
+  request pins them, and the check keeps that pin working if LI.FI ignores it). Version
+  0 is what LI.FI sends (every captured transaction, DFlow's and Jupiter's, with address
+  lookup tables, 2026-10-22), and what the fee is priced for: a version 1 message states
+  its priority fee and compute unit limit in its config, and the network runs its Compute
+  Budget instructions as no-ops (`mapSolTransactionMessage` already prices WalletConnect's
+  that way), so a fee read from its instructions would not be the fee it pays. A legacy
+  or version 1 message is refused at display and at execution alike. Lands in PR 3 with
+  the first Solana-source quote; until then no Solana-source quote is requested.
 - **Echo**: `action.fromChainId`, `action.toChainId`, `action.fromToken.address`,
   `action.toToken.address`, `action.fromAmount` and `action.toAddress` equal what OISY
   asked for.
@@ -957,8 +963,9 @@ The result must show all of the following:
   new constant sized for priority fees plus the rent of the accounts a route creates,
   Token-2022 ones at their larger size (see [Solana execution](#solana-execution)), with a
   measured value recorded next to it.
-- **The network fee is bounded by the review.** The fee a Solana transaction pays is set
-  by its own Compute Budget instructions: the unit limit times the unit price, in
+- **The network fee is bounded by the review.** The fee a version 0 Solana transaction
+  pays — the only version the trust checks let through — is set by its own Compute
+  Budget instructions: the unit limit times the unit price, in
   micro-lamports, as priority fee, plus 5,000 lamports per signature (LI.FI's `SEND` gas
   cost is exactly that sum: 435,534 units at 299,999 micro-lamports, 135,660 lamports, on
   the DFlow route of 2026-10-22). LI.FI chooses the price, and the spend bound's
@@ -1354,8 +1361,9 @@ missing, and for a native-SOL source a temporary wSOL account, funded with the r
 minimum while the transaction runs and refunded when it closes. With the transfer
 estimate, "Max" from SOL leaves too little, and the simulation refuses the swap at
 execution. So for a LI.FI offer the wizard prices **LI.FI's ceiling** from the display
-quote's own transaction, decoded as the trust checks already decode it: the Compute Budget
-fee, 5,000 lamports per signature, and for each `CreateIdempotent` the rent-exempt minimum
+quote's own transaction, a version 0 message decoded as the trust checks already decode it:
+the Compute Budget fee, 5,000 lamports per signature, and for each `CreateIdempotent` the
+rent-exempt minimum
 (`rentExemptMinimumFor`) of the account it creates, a temporary account included because
 it must be funded until it is closed, and an existing one included because nothing in the
 message says it exists (an upper bound, like EVM's largest nonce). Not LI.FI's `gasCosts` /
@@ -1911,8 +1919,8 @@ everywhere.
 5. No LI.FI request carries a `fee` parameter.
 6. A LI.FI quote whose `to` / `approvalAddress` is not the pinned Diamond for the source
    chain, whose echoed request differs from what was asked, whose Solana `data` is an
-   array, or whose Solana transaction needs another signer, is never shown and never
-   executed.
+   array, whose Solana transaction is not a version 0 message, or whose Solana
+   transaction needs another signer, is never shown and never executed.
 7. An ERC-20 swap first re-checks the price without touching the chain and aborts with
    the slippage copy if `toAmountMin` dropped, then goes through the unchanged
    `approve()` with the pinned Diamond (which equals the quote's `approvalAddress`) as
@@ -2073,6 +2081,10 @@ Recorded so a future reader can tell "excluded on purpose" from "forgotten".
 - **LI.FI's Solana fee is bound like its EVM one**: at most 25 bps, paid only to its pinned
   fee wallet, by a pinned transfer next to a pinned instruction of LI.FI's program that
   receives no account of the user's (2026-10-22).
+- **LI.FI's Solana transactions must be version 0 messages** (2026-10-22): the fee is
+  bounded from their Compute Budget instructions, which a version 1 message replaces with
+  its config. Accepting version 1 would need version-aware pricing in the form's ceiling
+  and in execution's fee bound alike.
 - **A Solana broadcast is sent again with the same bytes** while its outcome is unknown,
   as EVM's is since 2b-5: one signature lands once at most. A refusal deletes the row only
   when it answers the first attempt; EVM's `swap()` takes the same rule in 3d, as hardening
