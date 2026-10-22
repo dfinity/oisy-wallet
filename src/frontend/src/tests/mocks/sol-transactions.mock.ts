@@ -30,6 +30,7 @@ import {
 	type Blockhash,
 	type SignaturesMap,
 	type TransactionMessageBytes,
+	type TransactionVersion,
 	type UnixTimestamp
 } from '@solana/kit';
 
@@ -1101,7 +1102,7 @@ const createMockSolTransferMessage = ({
 	version,
 	coSigners = []
 }: {
-	version: 'legacy' | 0;
+	version: TransactionVersion;
 	coSigners?: SolAddress[];
 }) => {
 	const feePayer = address(mockSolAddress);
@@ -1153,7 +1154,7 @@ export const createMockSolCompiledTransactionMessageBytes = (version: 'legacy' |
  * transfer above, carrying an empty signature slot for each signature its message requires.
  */
 export const createMockSolBase64Transaction = (params: {
-	version: 'legacy' | 0;
+	version: TransactionVersion;
 	coSigners?: SolAddress[];
 }): string =>
 	getBase64EncodedWireTransaction(compileTransaction(createMockSolTransferMessage(params)));

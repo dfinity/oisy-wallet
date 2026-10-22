@@ -1442,14 +1442,14 @@ describe('sol-transactions.utils', () => {
 	});
 
 	describe('countSolRequiredSignatures', () => {
-		it.each(['legacy', 0] as const)(
+		it.each(['legacy', 0, 1] as const)(
 			'should count the fee payer alone as one signature in a message of version %s',
 			(version) => {
 				expect(countSolRequiredSignatures(createMockSolBase64Transaction({ version }))).toBe(1);
 			}
 		);
 
-		it.each(['legacy', 0] as const)(
+		it.each(['legacy', 0, 1] as const)(
 			'should count a co-signer the message requires in a message of version %s',
 			(version) => {
 				expect(
