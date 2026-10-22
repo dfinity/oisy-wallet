@@ -1,11 +1,13 @@
 use std::collections::BTreeMap;
 
 use candid::{CandidType, Deserialize};
+use serde::Deserializer;
 use serde_bytes::ByteBuf;
 
 use super::account::TokenAccountId;
 // Re-export image size limit used by validation so tests and external modules can reference it
 pub use crate::impls::MAX_IMAGE_SIZE_BYTES;
+use crate::validate::Validate;
 
 /// Maximum number of contacts per principal
 pub const MAX_CONTACTS_PER_USER: usize = 500;
@@ -52,7 +54,30 @@ pub struct Contact {
     pub name: String,
     pub addresses: Vec<ContactAddressData>,
     pub update_timestamp_ns: u64,
+    #[serde(default, deserialize_with = "deserialize_inline_image")]
     pub image: Option<ContactImage>,
+}
+
+/// Decodes [`Contact::image`], dropping an image that fails [`Validate`].
+///
+/// A principal's contacts are decoded as one [`StoredContacts`] value, and contacts written before
+/// images moved to their own stable map still hold their image inline. Dropping an inline image
+/// that fails validation keeps the rest of that value readable. Requests and the image map still
+/// decode [`ContactImage`] with its validation.
+fn deserialize_inline_image<'de, D>(deserializer: D) -> Result<Option<ContactImage>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    /// [`ContactImage`] through its `remote = "Self"` derive, which skips the validation that
+    /// `validate_on_deserialize!` adds.
+    #[derive(Deserialize)]
+    #[serde(transparent)]
+    struct UnvalidatedImage(#[serde(with = "ContactImage")] ContactImage);
+
+    let image = Option::<UnvalidatedImage>::deserialize(deserializer)?;
+    Ok(image
+        .map(|UnvalidatedImage(image)| image)
+        .filter(|image| image.validate().is_ok()))
 }
 
 #[derive(CandidType, Deserialize, serde::Serialize, Clone, Debug, Eq, PartialEq)]
