@@ -311,6 +311,19 @@ An Ethereum or EVM transaction that [runs out of gas](#a-send-that-runs-out-of-g
 
 The two gas figures show how far estimates fall short, per token and network. The event never carries the signed transaction, its hash, an address other than the token's contract, the amount or its USD value: the signed transaction alone names the sender, the recipient and the amount, which is why the error ethers wraps around the node's message, with the signed request inside it, stays out too.
 
+### Contacts tracking
+
+Loading the user's contacts emits one structured **`contact`** event under `event_context: contacts`, following the domain-service pattern (the step in `event_modifier`, the outcome in `result_status`). It never carries a contact name, an address, a contact id, or PII.
+
+The contacts load when the user signs in or opens OISY already signed in. A load that fails is tried again after 2 seconds and, if that fails too, after another 4 seconds. Once the third attempt fails, the user sees a "Failed to load contacts" error toast.
+
+| `event_modifier` | Fires when                 | `result_status` | `event_severity` | Extra                                     |
+| ---------------- | -------------------------- | --------------- | ---------------- | ----------------------------------------- |
+| `load_all`       | the third attempt fails    | `error`         | `error`          | `result_error`, without the IC request ID |
+| `load_all`       | a retry loads the contacts | `success`       | `warn`           | —                                         |
+
+A load that succeeds on the first attempt sends nothing.
+
 ---
 
 ## Tokens
