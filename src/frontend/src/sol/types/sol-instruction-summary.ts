@@ -12,6 +12,9 @@ export type SolInstructionSummaryKind =
 	// Not an effect at all: the heading the lines of one instruction the wallet could not read hang
 	// under, a routed swap's legs among them.
 	| 'route'
+	// Not an effect either: the heading the lines of one token batch hang under, naming the program
+	// the batch runs in.
+	| 'batch'
 	| 'send'
 	| 'receive'
 	| 'wrap'
@@ -58,6 +61,13 @@ export interface SolInstructionSummary {
 	// Whether the counterparty is an account the user owns. A swap pays the user's own account, so
 	// without this every route reads as if it were sending value to a stranger.
 	own?: boolean;
+	// Set on an unwrap paying the user's wallet, whichever account it leaves. The line states the
+	// wrapped SOL leaving its account, and it arrives in the wallet as SOL itself, which no transfer
+	// of wrapped SOL does.
+	unwrapsToWallet?: boolean;
+	// Set on an unwrap that names no amount, which moves everything its account wraps: what the line
+	// can still state when nobody read how much that is.
+	unwrapsAll?: boolean;
 	// The account created, closed, approved or handed over.
 	account?: SolAddress;
 	// Lamports it costs to open an account.
@@ -99,8 +109,8 @@ export interface SolInstructionSummary {
 	// The name that program publishes for itself, when it publishes one. A label, as above.
 	viaName?: string;
 	// The lines of a single instruction the wallet could not read, the legs of a routed swap among
-	// them. They hang under it rather than sitting flat among the top-level effects, which is what
-	// keeps a four-leg route from reading as four unrelated transfers, and a line made inside an
-	// application from reading as one the message states itself.
+	// them, or of a token batch. They hang under it rather than sitting flat among the top-level
+	// effects, which is what keeps a four-leg route from reading as four unrelated transfers, and a
+	// line made inside an application from reading as one the message states itself.
 	children?: SolInstructionSummary[];
 }
