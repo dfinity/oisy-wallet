@@ -74,9 +74,10 @@ const toPoolToken = (token: IcToken): ICPSwapToken => ({
 	standard: token.standard.code
 });
 
-// Resolves the pool exactly the way a swap does: the same factory lookup at the same fee tier.
-// Since OISY only ever swaps on ICP_SWAP_POOL_FEE, only that tier can hold funds stranded by OISY.
-// The factory canonicalises the pair, so the order the two tokens are passed in does not matter.
+// Resolves the pool exactly the way a swap does: the same certified factory lookup at the same fee
+// tier. Certified because the withdrawal is then sent to the canister it returns. Since OISY only
+// ever swaps on ICP_SWAP_POOL_FEE, only that tier can hold funds stranded by OISY. The factory
+// canonicalises the pair, so the order the two tokens are passed in does not matter.
 const findPool = async ({
 	identity,
 	tokenA,
@@ -91,7 +92,8 @@ const findPool = async ({
 			identity,
 			token0: toPoolToken(tokenA),
 			token1: toPoolToken(tokenB),
-			fee: ICP_SWAP_POOL_FEE
+			fee: ICP_SWAP_POOL_FEE,
+			certified: true
 		});
 
 		if (isNullish(pool)) {

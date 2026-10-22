@@ -60,7 +60,7 @@ describe('Header', () => {
 		await waitFor(() => expect(header(container)?.style.viewTransitionName).toBe('header'));
 	});
 
-	it('keeps its view-transition name while the network switcher is open, which navigates before it closes', async () => {
+	it('keeps its view-transition name while the network switcher is open, whose backdrop is invisible', async () => {
 		mockAuthSignedIn();
 
 		const { container, getAllByTestId } = render(Header);

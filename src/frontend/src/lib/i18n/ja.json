@@ -1194,6 +1194,37 @@
 			"unconfirmed": "$tokenの送金を確認できませんでした。送金が完了していれば、ミントはバックグラウンドで完了します。進行状況はアクティブなトランザクションで確認できます。"
 		}
 	},
+	"cycles_top_up": {
+		"text": {
+			"top_up": "チャージ",
+			"title": "キャニスターにチャージ",
+			"description": "サイクルは$tokenの残高からキャニスターに送られ、キャニスターはそれを計算とストレージに使います。",
+			"canister_id_placeholder": "キャニスターIDを入力",
+			"checking_canister": "キャニスターを確認しています...",
+			"recently_topped_up": "最近チャージしたキャニスター",
+			"canister": "キャニスター",
+			"you_top_up": "チャージ額",
+			"total": "合計",
+			"one_way": "チャージは取り消せません。サイクルはキャニスターに残ります。",
+			"topping_up": "$canisterにチャージしています...",
+			"topped_up": "$canisterに$amount $tokenをチャージしました。",
+			"unknown": "チャージが完了したかどうか、OISYはまだ判断できません。完了していれば$tokenのアクティビティに表示されます。もう一度チャージすると同じチャージが再送信されますが、完了するのは1回だけです。このチャージが完了していた場合、新しいチャージや内容を変えたチャージを行うと、サイクルがもう一度追加されます。",
+			"unknown_fresh": "前回のチャージが完了したかどうか、OISYはまだ判断できません。完了していた場合、このチャージでサイクルがもう一度追加されます。先に$tokenのアクティビティを確認してください。",
+			"sent_to_canister": "キャニスターに$tokenを送ってもチャージにはなりません。$tokenはキャニスターのアカウントに届き、キャニスター自身のコードが引き出した場合にのみサイクルになります。",
+			"sent_to_canister_top_up": "キャニスターにサイクルを追加するには、$tokenのページで「チャージ」を使ってください。"
+		},
+		"error": {
+			"invalid_canister_id": "キャニスターIDを入力してください。ユーザーのプリンシパル、アカウントID、他のネットワークのアドレスにはチャージできません。",
+			"canister_not_found": "このIDのキャニスターはInternet Computer上に存在しません。IDを確認してください。",
+			"canister_check_failed": "OISYはこのキャニスターを確認できませんでした。しばらくしてからもう一度お試しください。",
+			"amount_too_small": "手数料の$fee $tokenより多い額を入力してください。",
+			"refused": "チャージは完了しませんでした。ウォレットからは何も出ていません。しばらくしてからもう一度お試しください。",
+			"insufficient_funds": "このチャージと手数料に必要な$tokenが足りません。ウォレットからは何も出ていません。金額を減らしてください。",
+			"clock": "デバイスの時計がずれているため、チャージは完了しませんでした。ウォレットからは何も出ていません。正しい時刻に設定して、もう一度お試しください。",
+			"refunded": "キャニスターがサイクルを受け取れませんでした。$refund $tokenがウォレットに戻り、この試行には手数料として$fees $tokenがかかりました。キャニスターIDを確認してください。",
+			"refunded_nothing": "キャニスターがサイクルを受け取れず、手数料で全額がなくなりました。キャニスターIDを確認してください。"
+		}
+	},
 	"active_user_transactions": {
 		"text": {
 			"button_label": "",
@@ -1818,6 +1849,7 @@
 			"allowance_increase": "このリクエストは、以下の使用者の許可額を、既に使用可能な分に加えて表示された金額だけ引き上げます。使用者は、取り消すまでいつでもこのトークンをその金額分だけウォレットから送金できます。",
 			"allowance_decrease": "このリクエストは、以下の使用者の許可額を表示された金額だけ引き下げます。それ自体は資金を移動しません。",
 			"unverifiable_erc20_request": "このリクエストは、OISYが識別またはデコードできないトークンに関するものです。表示内容と実際に署名される内容が異なる可能性があるため、承認は無効になっています。",
+			"token_call_with_value": "このリクエストは、下に表示されているトークンの金額に加えて、$amount をトークンのコントラクトに送信します。トークンの送金や承認で $symbol が送信されることはないため、安全のため、OISY はこれに署名しません。",
 			"unverifiable_approval_for_all_request": "このリクエストは、NFTコレクションの管理権をオペレーターに引き渡しますが、OISYはどのオペレーターかをデコードできません。表示内容と実際に署名される内容が異なる可能性があるため、承認は無効になっています。",
 			"approval_for_all_grant": "このリクエストにより、以下のオペレーターは、あなたが現在所有している、または後で取得するこのコレクション内の任意のNFTを、取り消すまでいつでも転送できるようになります。それ自体は資金を移動しません。",
 			"approval_for_all_revoke": "このリクエストは以下のオペレーターを取り消すため、このコレクション内であなたが保有するNFTを転送できなくなります。",
@@ -1900,6 +1932,7 @@
 			"unknown_destination": "不明な宛先アドレスです。",
 			"cketh_deposit_refused": "このリクエストは、あなたのものではない Internet Computer プリンシパル宛てに、または OISY が読み取れないデータで、ckETH 変換コントラクトを呼び出します。安全のため、署名されませんでした。",
 			"cketh_helper_unconfirmed": "OISY は ckETH 変換コントラクトを確認できなかったため、この入金を検証できませんでした。安全のため、署名されませんでした。",
+			"token_call_with_value": "このリクエストは、トークンの金額に加えて、$amount をトークンのコントラクトに送信します。安全のため、署名されませんでした。",
 			"ambiguous_transaction": "このトランザクションは複数のアドレス間で資金を移動するため、確認のために正確に表示できません。安全のため、署名されませんでした。",
 			"close_pays_others": "このトランザクションはあなたのトークンアカウントの一つを閉じ、その残高をあなたのウォレット以外のアドレスに支払います。安全のため、署名されませんでした。",
 			"unreviewed_without_simulation": "OISY はこのトランザクションの一部を読み取れず、ネットワークからシミュレーションも返されなかったため、その部分が何を行うのかを示すものがありません。安全のため、署名されませんでした。",
@@ -2190,6 +2223,8 @@
 			"instruction_close_account": "",
 			"instruction_close_account_for": "$symbol のトークンアカウントを閉じる",
 			"instruction_approve": "",
+			"instruction_approve_amount": "",
+			"instruction_approve_unlimited": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
 			"instruction_route": "",
@@ -2262,7 +2297,9 @@
 			"converting_ck_token": "$ckTokenを$twinTokenに変換中",
 			"twin_network": "$twinNetworkネットワーク",
 			"no_date_available": "日付情報なし",
-			"pending": "保留中"
+			"pending": "保留中",
+			"top_up": "チャージ",
+			"top_up_refund": "チャージの返金"
 		},
 		"alt": {
 			"open_block_explorer": "ブロックエクスプローラーでこのトランザクションを開く",
