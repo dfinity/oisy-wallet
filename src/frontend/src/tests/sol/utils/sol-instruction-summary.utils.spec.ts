@@ -4224,10 +4224,12 @@ describe('sol-instruction-summary.utils', () => {
 
 			const read = ({
 				instructions,
+				mint = WSOL_TOKEN.address,
 				accountLamports,
 				accountTokenAmounts
 			}: {
 				instructions: unknown[];
+				mint?: string;
 				accountLamports?: Record<string, bigint>;
 				accountTokenAmounts?: Record<string, bigint>;
 			}) =>
@@ -4235,7 +4237,7 @@ describe('sol-instruction-summary.utils', () => {
 					instructions,
 					ownedAddresses: [mockSolAddress, wrapped],
 					userAddress: mockSolAddress,
-					addressToToken: { [wrapped]: WSOL_TOKEN.address },
+					addressToToken: { [wrapped]: mint },
 					accountLamports,
 					accountTokenAmounts
 				});
@@ -4281,6 +4283,37 @@ describe('sol-instruction-summary.utils', () => {
 						own: false
 					});
 					expect(views.at(-1)?.amount).toBe(5_000n);
+					expect(
+						solWalletLamportsStated({ instructions: views, userAddress: mockSolAddress })
+					).toBe(5_000n);
+				}
+			);
+
+			// Token-2022 wraps SOL under a native mint of its own, and what is paid into an account
+			// holding it becomes wrapped SOL there just the same.
+			it.each(payouts)(
+				'should count what $name pays into a Token-2022 wrapped SOL account toward a later unwrap of everything',
+				({ payout }) => {
+					const token2022 = { program: 'spl-token-2022', programId: TOKEN_2022_PROGRAM_ADDRESS };
+
+					const views = read({
+						instructions: [
+							payout(wrapped),
+							{ ...sync, ...token2022 },
+							{ ...unwrapAll, ...token2022 }
+						],
+						mint: TOKEN_2022_NATIVE_MINT_ADDRESS,
+						accountTokenAmounts: { [wrapped]: ZERO }
+					});
+
+					expect(views[0]).toStrictEqual({
+						kind: 'receive',
+						amount: 5_000n,
+						tokenAddress: TOKEN_2022_NATIVE_MINT_ADDRESS,
+						decimals: WSOL_TOKEN.decimals,
+						counterparty: mockSolAddress3,
+						own: false
+					});
 					expect(
 						solWalletLamportsStated({ instructions: views, userAddress: mockSolAddress })
 					).toBe(5_000n);
