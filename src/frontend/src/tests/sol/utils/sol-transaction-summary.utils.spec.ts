@@ -264,6 +264,8 @@ describe('sol-transaction-summary.utils', () => {
 
 				expect(result.kind).toBe('receive');
 				expect(result.received?.delta).toBe(5_000_000n);
+				// The account the SOL left is the sender, not the wallet it arrived in.
+				expect(result.counterparty).toBe(mockAtaAddress3);
 			});
 
 			it('should call a swap that pays out that way a swap for SOL', () => {

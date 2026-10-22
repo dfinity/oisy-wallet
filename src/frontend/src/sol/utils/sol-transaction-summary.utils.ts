@@ -525,7 +525,10 @@ const counterpartyOf = ({
 	flattenInstructions(instructions).find(
 		(view) =>
 			view.kind === kind &&
-			view.tokenAddress === tokenAddress &&
+			// Wrapped SOL unwrapped into the wallet arrives there as SOL itself, so its line is the one
+			// a receive of SOL names the sender from.
+			(view.tokenAddress === tokenAddress ||
+				(kind === 'receive' && isNullish(tokenAddress) && (view.unwrapsToWallet ?? false))) &&
 			nonNullish(view.counterparty) &&
 			view.own !== true
 	)?.counterparty;
