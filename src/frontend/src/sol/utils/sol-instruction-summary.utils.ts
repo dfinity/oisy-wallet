@@ -1,4 +1,4 @@
-import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
+import { WSOL_DECIMALS, WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { maxBigInt } from '$lib/utils/bigint.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
@@ -792,11 +792,19 @@ const toEffect = ({
 				mintOf: (account) => mintAt({ account, position })
 			});
 
+			if (isNullish(effect)) {
+				return undefined;
+			}
+
+			// The amount is lamports, which the native mint counts with the same precision on every
+			// network, whether or not the wallet lists wrapped SOL there.
+			const unwrapping = { ...effect, decimals: WSOL_DECIMALS };
+
 			// Paid to the wallet, what leaves the account arrives there as SOL itself, whoever held
 			// it, and what the wallet holds has to count it.
-			return nonNullish(effect) && nonNullish(destination) && destination === userAddress
-				? { ...effect, unwrapsToWallet: true }
-				: effect;
+			return nonNullish(destination) && destination === userAddress
+				? { ...unwrapping, unwrapsToWallet: true }
+				: unwrapping;
 		}
 
 		if (type === 'closeAccount') {

@@ -3642,6 +3642,7 @@ describe('sol-instruction-summary.utils', () => {
 						kind: 'send',
 						amount: 5_000n,
 						tokenAddress: WSOL_TOKEN.address,
+						decimals: WSOL_TOKEN.decimals,
 						counterparty: mockSolAddress2,
 						own: false
 					}
@@ -3657,6 +3658,7 @@ describe('sol-instruction-summary.utils', () => {
 						kind: 'send',
 						amount: 5_000n,
 						tokenAddress: WSOL_TOKEN.address,
+						decimals: WSOL_TOKEN.decimals,
 						counterparty: mockSolAddress,
 						own: true,
 						unwrapsToWallet: true
@@ -3691,6 +3693,7 @@ describe('sol-instruction-summary.utils', () => {
 						kind: 'receive',
 						amount: 5_000n,
 						tokenAddress: WSOL_TOKEN.address,
+						decimals: WSOL_TOKEN.decimals,
 						counterparty: mockSolAddress3,
 						own: false,
 						unwrapsToWallet: true

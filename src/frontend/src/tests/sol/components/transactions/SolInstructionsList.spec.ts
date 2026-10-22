@@ -1,13 +1,17 @@
-import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
+import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolInstructionsList from '$sol/components/transactions/SolInstructionsList.svelte';
+import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
+import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
 import en from '$tests/mocks/i18n.mock';
 import {
+	mockAtaAddress3,
 	mockSolAddress,
 	mockSolAddress2,
 	mockSolAddress3,
@@ -140,6 +144,37 @@ describe('SolInstructionsList', () => {
 		expect(getByTestId('sol-instructions-list')).toHaveTextContent(
 			`0.01 ${mockValidSplToken.symbol}`
 		);
+	});
+
+	// An unwrap names lamports, and wrapped SOL is a listed token on mainnet only: elsewhere only the
+	// line itself can say what precision its amount has.
+	it('should state an unwrap in the precision of SOL where wrapped SOL is not listed', () => {
+		const [unwrap] = mapSolInstructionSummaries({
+			instructions: [
+				{
+					program: 'spl-token',
+					programId: TOKEN_PROGRAM_ADDRESS,
+					parsed: {
+						type: 'unwrapLamports',
+						info: {
+							source: mockAtaAddress3,
+							destination: mockSolAddress,
+							authority: mockSolAddress2,
+							amount: '5000000'
+						}
+					}
+				}
+			],
+			ownedAddresses: [mockSolAddress],
+			userAddress: mockSolAddress,
+			addressToToken: { [mockAtaAddress3]: WSOL_TOKEN.address }
+		});
+
+		const { getByTestId } = render(SolInstructionsList, {
+			props: { instructions: [unwrap], token: SOLANA_DEVNET_TOKEN, userAddress: mockSolAddress }
+		});
+
+		expect(getByTestId('sol-instructions-list')).toHaveTextContent('0.005');
 	});
 
 	// The program names the account, so it follows the line the way the program of a route does.
