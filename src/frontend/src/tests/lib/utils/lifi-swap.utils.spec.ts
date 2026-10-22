@@ -25,11 +25,13 @@ import {
 	buildLifiQuoteRequest,
 	buildLifiSupportedDestinations,
 	lifiFeesUsd,
+	lifiUserTokenAddresses,
 	mapLifiSwapResult,
 	toLifiChainId,
 	toLifiTokenAddress
 } from '$lib/utils/lifi-swap.utils';
 import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import {
 	mockLifiBaseUsdcAddress,
 	mockLifiBaseUsdcToken,
@@ -41,7 +43,13 @@ import {
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
-import { ChainId, type CrossStep, type LiFiStep, type SwapStep } from '@lifi/sdk';
+import {
+	ChainId,
+	type CrossStep,
+	type LiFiStep,
+	type QuoteRequestFromAmount,
+	type SwapStep
+} from '@lifi/sdk';
 
 describe('lifi-swap.utils', () => {
 	const baseParams = {
@@ -603,13 +611,35 @@ describe('lifi-swap.utils', () => {
 	});
 
 	describe('mapLifiSwapResult', () => {
-		it('should map the estimate to the offer', () => {
-			expect(mapLifiSwapResult(mockLifiQuote)).toStrictEqual({
+		it('should map the estimate to the offer, with the request the quote answers', () => {
+			const request = { fromChain: ChainId.BAS } as QuoteRequestFromAmount;
+
+			expect(mapLifiSwapResult({ quote: mockLifiQuote, request })).toStrictEqual({
 				provider: SwapProvider.LIFI,
 				receiveAmount: 25_003_034n,
 				receiveOutMinimum: 24_878_019n,
-				swapDetails: mockLifiQuote
+				swapDetails: mockLifiQuote,
+				request
 			});
+		});
+	});
+
+	describe('lifiUserTokenAddresses', () => {
+		const baseVault = { ...mockValidErc4626Token, network: BASE_NETWORK };
+
+		it('should list every ERC-20 and ERC-4626 of the network, a disabled one too', () => {
+			expect(
+				lifiUserTokenAddresses({
+					tokens: [
+						{ ...mockLifiBaseUsdcToken, enabled: false },
+						baseVault,
+						BASE_ETH_TOKEN,
+						ETHEREUM_TOKEN,
+						{ ...mockLifiBaseUsdcToken, network: ARBITRUM_MAINNET_NETWORK, address: '0xA1' }
+					] as Token[],
+					networkId: BASE_NETWORK_ID
+				})
+			).toEqual([mockLifiBaseUsdcAddress, baseVault.address]);
 		});
 	});
 });

@@ -30,6 +30,8 @@
 		maxAmount?: bigint;
 		exchangeValueUnit?: DisplayUnit;
 		inputUnit?: DisplayUnit;
+		// Focuses the amount field when the form opens, as the send forms do.
+		autofocus?: boolean;
 	}
 
 	let {
@@ -39,7 +41,8 @@
 		ethereumEstimateFee,
 		maxAmount,
 		exchangeValueUnit = $bindable('usd'),
-		inputUnit = 'token'
+		inputUnit = 'token',
+		autofocus = false
 	}: Props = $props();
 
 	let errorType = $state<TokenActionErrorType | undefined>();
@@ -143,6 +146,7 @@
 </script>
 
 <TokenInput
+	{autofocus}
 	displayUnit={inputUnit}
 	exchangeRate={$sourceTokenExchangeRate}
 	isSelectable={false}

@@ -112,6 +112,8 @@ describe('SwapBtcWizard', () => {
 			sourceToken: readable({ ...BTC_MAINNET_TOKEN, enabled: true }),
 			destinationToken: readable(ckBtcToken),
 			failedSwapError: writable(undefined),
+			amountSetToMax: writable(false),
+			lifiMaxFee: writable(undefined),
 			sourceTokenExchangeRate: readable(60_000),
 			sourceTokenBalance: readable(100_000_000n),
 			destinationTokenBalance: readable(undefined),

@@ -36,14 +36,15 @@
 		border-radius: 8px;
 		transition: background-color 0.15s ease-out;
 
-		// `row-feedback`'s fills, spelled out: Checkbox takes no class, and the `pressed:` variant
-		// on the list item would skip presses on the Checkbox's own `[role='button']`.
+		// `row-feedback`'s fills and timing, spelled out: Checkbox takes no class, and the `pressed:`
+		// variant on the list item would skip presses on the Checkbox's own `[role='button']`.
 		@include interaction.hover {
 			background-color: var(--color-background-brand-subtle-10);
 		}
 
 		&:active {
 			background-color: var(--color-background-brand-subtle-20);
+			transition-duration: 0s;
 		}
 	}
 

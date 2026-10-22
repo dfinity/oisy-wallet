@@ -65,6 +65,10 @@ export const LIFI_NON_EVM_ADDRESS = '0x11f111f111f111F111f111f111F111f111f111F1'
 // whitelisted under this selector, rather than under the call's.
 export const LIFI_APPROVE_TO_ONLY_SELECTOR = '0xffffffff';
 
+// LI.FI's tool key for Across, whose minimum output is unsigned: it is offered behind LI.FI's fee
+// forwarding only, never behind a DEX swap (see `assertLifiCalldata`).
+export const LIFI_ACROSS_TOOL = 'across';
+
 // LI.FI's fee, in basis points of the amount: what every captured route forwards (2026-10-19), and
 // OISY charges none on top. A route may forward no more; if LI.FI raises it, its routes are refused
 // rather than charged more than was quoted.

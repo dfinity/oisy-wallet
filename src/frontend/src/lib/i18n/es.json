@@ -1194,6 +1194,37 @@
 			"unconfirmed": "No se pudo confirmar la transferencia de $token. Si se realizó, la acuñación se completará en segundo plano: puedes seguirla en las transacciones activas."
 		}
 	},
+	"cycles_top_up": {
+		"text": {
+			"top_up": "Recargar",
+			"title": "Recargar un canister",
+			"description": "Los ciclos pasan de tu saldo de $token al canister, que los gasta en computación y almacenamiento.",
+			"canister_id_placeholder": "Introduce un ID de canister",
+			"checking_canister": "Comprobando el canister...",
+			"recently_topped_up": "Recargados recientemente",
+			"canister": "Canister",
+			"you_top_up": "Recargas",
+			"total": "Total",
+			"one_way": "Una recarga no se puede deshacer: los ciclos se quedan en el canister.",
+			"topping_up": "Recargando $canister...",
+			"topped_up": "$canister recargado con $amount $token.",
+			"unknown": "OISY aún no puede saber si la recarga se completó. Si fue así, tu actividad de $token la mostrará. Vuelve a recargar para reenviar la misma recarga: solo puede completarse una vez. Una recarga nueva o modificada añadiría ciclos otra vez si esta se completó.",
+			"unknown_fresh": "OISY aún no puede saber si tu última recarga se completó. Si fue así, esta recarga añade ciclos otra vez. Revisa primero tu actividad de $token.",
+			"sent_to_canister": "Enviar $token a un canister no lo recarga. Los $token llegan a la cuenta del canister, y el canister solo recibe ciclos si su propio código los retira.",
+			"sent_to_canister_top_up": "Para añadir ciclos a un canister, usa «Recargar» en la página de $token."
+		},
+		"error": {
+			"invalid_canister_id": "Introduce un ID de canister. Los principals de usuario, los ID de cuenta y las direcciones de otras redes no se pueden recargar.",
+			"canister_not_found": "No existe ningún canister con este ID en Internet Computer. Comprueba el ID.",
+			"canister_check_failed": "OISY no pudo comprobar este canister. Inténtalo de nuevo en un momento.",
+			"amount_too_small": "Introduce más que la comisión de $fee $token.",
+			"refused": "La recarga no se completó. No salió nada de tu billetera. Inténtalo de nuevo en un momento.",
+			"insufficient_funds": "No tienes suficientes $token para esta recarga y la comisión. No salió nada de tu billetera. Reduce el importe.",
+			"clock": "La recarga no se completó porque el reloj de tu dispositivo no está en hora. No salió nada de tu billetera. Ajusta la hora correcta e inténtalo de nuevo.",
+			"refunded": "El canister no pudo recibir los ciclos. $refund $token volvieron a tu billetera, y el intento costó $fees $token en comisiones. Comprueba el ID del canister.",
+			"refunded_nothing": "El canister no pudo recibir los ciclos y las comisiones se llevaron todo el importe. Comprueba el ID del canister."
+		}
+	},
 	"active_user_transactions": {
 		"text": {
 			"button_label": "",
@@ -1393,7 +1424,8 @@
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
-			"lifi_status_unknown": ""
+			"lifi_status_unknown": "",
+			"lifi_fee_changed": ""
 		}
 	},
 	"buy": {
@@ -1817,6 +1849,7 @@
 			"allowance_increase": "Esta solicitud aumenta la asignación del gastador indicado abajo en la cantidad mostrada, además de lo que ya puede gastar. El gastador puede transferir esa cantidad de este token desde su billetera, en cualquier momento, hasta que la revoque.",
 			"allowance_decrease": "Esta solicitud reduce la asignación del gastador indicado abajo en la cantidad mostrada. No mueve fondos por sí sola.",
 			"unverifiable_erc20_request": "Esta solicitud involucra un token que OISY no puede identificar ni decodificar. Lo que se muestra puede diferir de lo que realmente se firmaría, por lo que la aprobación está deshabilitada.",
+			"token_call_with_value": "Además del importe de tokens que se muestra abajo, esta solicitud envía $amount al contrato del token. Una transferencia o aprobación de tokens no envía $symbol, así que, por tu seguridad, OISY no la firmará.",
 			"unverifiable_approval_for_all_request": "Esta solicitud entregaría a un operador el control de una colección de NFT, y OISY no puede decodificar cuál operador. Lo que se muestra puede diferir de lo que realmente se firmaría, por lo que la aprobación está deshabilitada.",
 			"approval_for_all_grant": "Esta solicitud permite que el operador indicado abajo transfiera cualquier NFT de esta colección que usted posea ahora o adquiera después, en cualquier momento, hasta que lo revoque. No mueve fondos por sí sola.",
 			"approval_for_all_revoke": "Esta solicitud revoca al operador indicado abajo, de modo que ya no podrá transferir los NFT que usted posea en esta colección.",
@@ -1899,6 +1932,7 @@
 			"unknown_destination": "Dirección de destino desconocida.",
 			"cketh_deposit_refused": "Esta solicitud llama al contrato de conversión de ckETH para un principal de Internet Computer que no es tuyo, o con datos que OISY no puede leer. Por tu seguridad, no se ha firmado.",
 			"cketh_helper_unconfirmed": "OISY no pudo confirmar el contrato de conversión de ckETH, así que no pudo comprobar este depósito. Por tu seguridad, no se ha firmado.",
+			"token_call_with_value": "Esta solicitud envía $amount al contrato del token, además del importe de tokens. Por tu seguridad, no se ha firmado.",
 			"ambiguous_transaction": "Esta transacción mueve fondos entre varias direcciones y no se puede mostrar con precisión para su revisión. Por tu seguridad, no se ha firmado.",
 			"close_pays_others": "Esta transacción cierra una de tus cuentas de tokens y envía su saldo a una dirección que no es tu monedero. Por tu seguridad, no se ha firmado.",
 			"unreviewed_without_simulation": "OISY no pudo leer una parte de esta transacción y la red tampoco devolvió una simulación, por lo que nada describe lo que haría esa parte. Por su seguridad, no se firmó.",
@@ -2189,6 +2223,8 @@
 			"instruction_close_account": "",
 			"instruction_close_account_for": "Cerrar la cuenta de tokens de $symbol",
 			"instruction_approve": "",
+			"instruction_approve_amount": "",
+			"instruction_approve_unlimited": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
 			"instruction_route": "",
@@ -2261,7 +2297,9 @@
 			"converting_ck_token": "Convirtiendo $ckToken a $twinToken",
 			"twin_network": "Red $twinNetwork",
 			"no_date_available": "No hay fecha disponible",
-			"pending": "Pendiente"
+			"pending": "Pendiente",
+			"top_up": "Recarga",
+			"top_up_refund": "Reembolso de recarga"
 		},
 		"alt": {
 			"open_block_explorer": "Abrir esta transacción en un explorador de bloques",
