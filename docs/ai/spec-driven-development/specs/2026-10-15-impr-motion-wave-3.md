@@ -138,7 +138,7 @@ included, is a 100 ms fade.
 ### 6. Pills, tabs and the toggle
 
 - **Pills** shrink slightly while pressed, like text buttons.
-- **Tabs** show their label one step darker while pressed, without shrinking.
+- **Tabs** show their label in the theme's stronger link/press colour while pressed, without shrinking.
 - **The toggle** animates only what changes (its knob position and colours) over 150 ms, and
   its hover shows only on devices that can hover. Under reduced motion the knob jumps to its
   new side; the colours still change over 150 ms.
@@ -249,7 +249,9 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
 ### 6. Pills, tabs and the toggle
 
 - `ui/PillButton.svelte`: `press` (0.98), `transition-[color,background-color,border-color,scale]`.
-- `ui/Tabs.svelte:56-70`: `active:` label colour one step past hover, 150 ms; no scale.
+- `ui/Tabs.svelte:56-70`: `active:text-brand-hover` label colour, 150 ms; no scale. Menu tabs already hover
+  in the primary text colour, so their pressed label uses the same themed emphasis as links
+  rather than trying to darken pure black.
 - `ui/Toggle.svelte:44-130`: the track's and the knob's `transition: all ease-in-out 0.3s`
   become explicit properties at 150 ms ease-out: the track's `background-color`, and the
   knob's `transform` (it moves with `translateX`) and `background`. The wrapper's static
