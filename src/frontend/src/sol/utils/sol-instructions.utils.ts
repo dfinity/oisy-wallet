@@ -39,7 +39,12 @@ import { AddressLookupTableInstruction } from '@solana-program/address-lookup-ta
 import { ComputeBudgetInstruction } from '@solana-program/compute-budget';
 import { StakeInstruction } from '@solana-program/stake';
 import { SystemInstruction } from '@solana-program/system';
-import { AssociatedTokenInstruction, TokenInstruction } from '@solana-program/token';
+import {
+	AssociatedTokenInstruction,
+	BATCH_DISCRIMINATOR,
+	getBatchInstructionDataDecoder,
+	TokenInstruction
+} from '@solana-program/token';
 import { Token2022Instruction } from '@solana-program/token-2022';
 import { type Option, unwrapOption } from '@solana/kit';
 
@@ -448,13 +453,15 @@ const fundsBeyondRent = ({
 const mapSolSystemInstruction = ({
 	instruction,
 	rentExemptMinimum,
-	returnsToWallet
+	returnsToWallet,
+	userAddress
 }: {
 	instruction: SolParsedInstruction;
 	rentExemptMinimum: bigint | undefined;
 	// Whether this creation opens a wrapped SOL account the message closes back to the wallet, whose
 	// funding beyond the rent is the SOL it wraps rather than a payment.
 	returnsToWallet: boolean;
+	userAddress?: OptionSolAddress;
 }): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
@@ -572,8 +579,10 @@ const mapSolSystemInstruction = ({
 	}
 
 	// A nonce account hands its balance to a recipient it names, against a signature from the
-	// authority that governs it. Amount, source and destination are all stated, so this is a
-	// transfer and reads as one rather than as something the summary cannot carry.
+	// authority that governs it. Amount, source and destination are all stated, but the nonce
+	// account is not the wallet, and the review reads the wallet alone, as it does for a stake
+	// withdrawal: paid to the wallet it is a transfer and reads as one, paid anywhere else nothing on
+	// the review would show the lamports leaving, so it fails closed.
 	if (instructionType === SystemInstruction.WithdrawNonceAccount) {
 		const {
 			data: { withdrawAmount: amount },
@@ -582,6 +591,10 @@ const mapSolSystemInstruction = ({
 				recipientAccount: { address: destination }
 			}
 		} = instruction;
+
+		if (destination !== userAddress) {
+			return unfaithfulInstruction();
+		}
 
 		return {
 			amount,
@@ -592,7 +605,9 @@ const mapSolSystemInstruction = ({
 
 	// The seed-derived transfer states its own source, destination and amount exactly as the plain
 	// one does; only the signature authorising it differs, coming from the base the source was
-	// derived from rather than from the source itself.
+	// derived from rather than from the source itself. That source is an address derived from the
+	// signer and never the wallet itself, so it is held to the nonce withdrawal's rule: it reads as
+	// a transfer only when it pays the wallet.
 	if (instructionType === SystemInstruction.TransferSolWithSeed) {
 		const {
 			data: { amount },
@@ -601,6 +616,10 @@ const mapSolSystemInstruction = ({
 				destination: { address: destination }
 			}
 		} = instruction;
+
+		if (destination !== userAddress) {
+			return unfaithfulInstruction();
+		}
 
 		return {
 			amount,
@@ -751,6 +770,21 @@ const mapSolTokenInstruction = ({
 		return destination === userAddress ? ignoredInstruction() : unfaithfulInstruction();
 	}
 
+	// Unwrapping pays lamports out of a wrapped SOL account to the destination the instruction names,
+	// which is the question a close answers too, and it is refused on the same terms when the answer
+	// is not the user's wallet. Paid to the wallet it stays an instruction the review does not read.
+	if (instructionType === TokenInstruction.UnwrapLamports) {
+		const {
+			accounts: {
+				destination: { address: destination }
+			}
+		} = instruction;
+
+		if (destination !== userAddress) {
+			return unfaithfulInstruction();
+		}
+	}
+
 	if (
 		instructionType === TokenInstruction.SetAuthority ||
 		instructionType === TokenInstruction.Burn ||
@@ -853,6 +887,19 @@ const mapSolToken2022Instruction = ({
 		} = instruction;
 
 		return destination === userAddress ? ignoredInstruction() : unfaithfulInstruction();
+	}
+
+	// Same reading as the Token program's unwrap: only a payout to the user's wallet passes.
+	if (instructionType === Token2022Instruction.UnwrapLamports) {
+		const {
+			accounts: {
+				destination: { address: destination }
+			}
+		} = instruction;
+
+		if (destination !== userAddress) {
+			return unfaithfulInstruction();
+		}
 	}
 
 	if (
@@ -960,11 +1007,21 @@ const mapSolLookupTableInstruction = (instruction: SolParsedInstruction): Mapped
 	return unreviewedInstruction();
 };
 
-const mapSolStakeInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+const mapSolStakeInstruction = ({
+	instruction,
+	userAddress
+}: {
+	instruction: SolParsedInstruction;
+	userAddress?: OptionSolAddress;
+}): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
-	// A withdrawal is the one stake instruction the summary can state in full: it names the amount,
-	// the account it leaves and the account it arrives at, exactly as a plain SOL transfer does.
+	// A withdrawal names the amount, the account it leaves and the account it arrives at, exactly as
+	// a plain SOL transfer does. But the account it leaves is a stake account, and the review reads
+	// the wallet alone: the balance changes measure the wallet and its token accounts, and the review
+	// names no recipient of its own. Paid to the wallet, the lamports arrive where the balance
+	// changes show them. Paid anywhere else, nothing on the review would show them leaving or say
+	// where they went, so it fails closed, as a close paying anywhere but the wallet does.
 	if (instructionType === StakeInstruction.Withdraw) {
 		const {
 			data: { args: amount },
@@ -973,6 +1030,10 @@ const mapSolStakeInstruction = (instruction: SolParsedInstruction): MappedSolTra
 				recipient: { address: destination }
 			}
 		} = instruction;
+
+		if (destination !== userAddress) {
+			return unfaithfulInstruction();
+		}
 
 		return {
 			amount,
@@ -994,13 +1055,67 @@ const mapSolStakeInstruction = (instruction: SolParsedInstruction): MappedSolTra
 		return unfaithfulInstruction();
 	}
 
+	// Initialising a stake account names the two authorities that govern it: the withdraw authority
+	// can take out everything the account holds, and the stake authority decides where it is
+	// delegated and whether it is ever deactivated, which a withdrawal of delegated stake waits on.
+	// Naming anybody but the user for either is the handover above, made when the account is set up
+	// rather than later, so it fails closed on the same terms. Naming the user for both hands nothing
+	// to anybody, and the account then holds stake the review has no vocabulary for, like the other
+	// stake operations below.
+	//
+	// The unchecked form also sets a lockup, which holds the balance until a date or an epoch and
+	// lets only its custodian lift or extend it in the meantime. A staking flow sets none - no date
+	// and no epoch, which is never in force and leaves the custodian nothing to decide - so any
+	// other lockup fails closed whoever the custodian is: the summary cannot state when the balance
+	// becomes withdrawable. The checked form sets no lockup.
+	if (instructionType === StakeInstruction.Initialize) {
+		const {
+			data: {
+				arg0: { staker, withdrawer },
+				arg1: { unixTimestamp, epoch }
+			}
+		} = instruction;
+
+		const lockedUp = unixTimestamp !== ZERO || epoch !== ZERO;
+
+		return staker === userAddress && withdrawer === userAddress && !lockedUp
+			? unreviewedInstruction()
+			: unfaithfulInstruction();
+	}
+
+	if (instructionType === StakeInstruction.InitializeChecked) {
+		const {
+			accounts: {
+				stakeAuthority: { address: staker },
+				withdrawAuthority: { address: withdrawer }
+			}
+		} = instruction;
+
+		return staker === userAddress && withdrawer === userAddress
+			? unreviewedInstruction()
+			: unfaithfulInstruction();
+	}
+
+	// A lockup set once the account exists holds the balance just as one set at initialisation does,
+	// and while none is in force the withdraw authority sets it alone: a message can initialise an
+	// account without a lockup and lock it in the next instruction, and an account the user already
+	// holds can be locked the same way. Both forms fail closed whatever they set, for the reason the
+	// initialisation's lockup does - the summary cannot state when the balance becomes withdrawable,
+	// or who may lift the lockup.
+	if (
+		instructionType === StakeInstruction.SetLockup ||
+		instructionType === StakeInstruction.SetLockupChecked
+	) {
+		return unfaithfulInstruction();
+	}
+
 	// Reading the runtime's minimum delegation changes nothing at all.
 	if (instructionType === StakeInstruction.GetMinimumDelegation) {
 		return ignoredInstruction();
 	}
 
 	// The rest do something real to the user's stake — delegate it, split it, merge it, move it
-	// between accounts they control, lock it up — and the review has no vocabulary for any of it.
+	// between accounts they control — and the review has no vocabulary for any of it.
 	// Decoded or not, the honest answer is that this message does more than the summary shows.
 	return unreviewedInstruction();
 };
@@ -1221,6 +1336,53 @@ export const asSolParsedRpcInstruction = (
 export const asSolParsedRpcInstructionOrSelf = (instruction: unknown): unknown =>
 	asSolParsedRpcInstruction(instruction) ?? instruction;
 
+const isSolTokenBatch = ({ programAddress, data }: SolInstruction): boolean =>
+	(programAddress === TOKEN_PROGRAM_ADDRESS || programAddress === TOKEN_2022_PROGRAM_ADDRESS) &&
+	data?.[0] === BATCH_DISCRIMINATOR;
+
+/**
+ * The instructions a token batch carries, each with the accounts it names, in the order the program
+ * runs them. Both token programs lay a batch out the same way.
+ *
+ * Undefined when the batch does not hold together: no instruction at all, an entry naming more
+ * accounts than are left, or data that cannot be read. The program refuses to run any of those.
+ */
+const solBatchedInstructions = ({
+	programAddress,
+	accounts = [],
+	data
+}: SolInstruction): SolInstruction[] | undefined => {
+	if (isNullish(data)) {
+		return;
+	}
+
+	try {
+		const { data: entries } = getBatchInstructionDataDecoder().decode(data);
+
+		const { batched } = entries.reduce<{ batched: SolInstruction[] | undefined; offset: number }>(
+			({ batched, offset }, { numberOfAccounts, instructionData }) => ({
+				batched:
+					nonNullish(batched) && offset + numberOfAccounts <= accounts.length
+						? [
+								...batched,
+								{
+									programAddress,
+									accounts: accounts.slice(offset, offset + numberOfAccounts),
+									data: instructionData
+								}
+							]
+						: undefined,
+				offset: offset + numberOfAccounts
+			}),
+			{ batched: [], offset: 0 }
+		);
+
+		return nonNullish(batched) && batched.length > 0 ? batched : undefined;
+	} catch (_err: unknown) {
+		// A batch the decoder cannot read is one nothing can say anything about.
+	}
+};
+
 const INITIALIZE_ACCOUNT_TYPES = ['initializeAccount', 'initializeAccount2', 'initializeAccount3'];
 
 /**
@@ -1343,6 +1505,26 @@ export const mapSolInstruction = ({
 		return mapSolComputeBudgetInstruction(instruction);
 	}
 
+	// A batch runs the token instructions it carries one after the other, each with the accounts it
+	// names, so it does what they would do stated one by one. Each is held to the reading it would
+	// get on its own, and one refused there is refused here too, with the whole message. A batch
+	// nested in a batch, which neither token program runs, and one that does not hold together are
+	// refused as well. A batch that passes stays an instruction the review does not read.
+	if (isSolTokenBatch(instruction)) {
+		const batched = solBatchedInstructions(instruction);
+
+		const refused =
+			isNullish(batched) ||
+			batched.some(
+				(inner) =>
+					isSolTokenBatch(inner) ||
+					(mapSolInstruction({ instruction: inner, userAddress, rentExemptMinimum }).ambiguous ??
+						false)
+			);
+
+		return refused ? unfaithfulInstruction() : unreviewedInstruction();
+	}
+
 	// Every parser here ends in an exhaustive switch that throws on a discriminator it does not
 	// know, so a program that gains an instruction the wallet has never seen would throw out of the
 	// decode rather than reach the readings below. Crashing is not the answer a review can show,
@@ -1371,7 +1553,8 @@ export const mapSolInstruction = ({
 		return mapSolSystemInstruction({
 			instruction: parsedInstruction,
 			rentExemptMinimum,
-			returnsToWallet
+			returnsToWallet,
+			userAddress
 		});
 	}
 
@@ -1396,7 +1579,7 @@ export const mapSolInstruction = ({
 	}
 
 	if (programAddress === STAKE_PROGRAM_ADDRESS) {
-		return mapSolStakeInstruction(parsedInstruction);
+		return mapSolStakeInstruction({ instruction: parsedInstruction, userAddress });
 	}
 
 	consoleWarn(`Could not map Solana instruction for program ${programAddress}`);

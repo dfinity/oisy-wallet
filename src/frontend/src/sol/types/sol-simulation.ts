@@ -10,8 +10,12 @@ import type { SplTokenAddress } from '$sol/types/spl';
  * `program` is the account-level owner (the program the account is assigned to); the other
  * three live inside a parsed SPL token account. They are kept apart because they hand over
  * different things: the account itself, the right to spend from it, or the right to close it.
+ *
+ * `allowance` is how much a delegate that stays the same may spend. Raising it hands over more of
+ * the account without changing who holds the right, so it is a change of its own.
  */
-export type SolSimulationControlField = 'owner' | 'delegate' | 'closeAuthority' | 'program';
+export type SolSimulationControlField =
+	'owner' | 'delegate' | 'allowance' | 'closeAuthority' | 'program';
 
 export interface SolSimulationTokenDelta {
 	account: SolAddress;
@@ -20,11 +24,23 @@ export interface SolSimulationTokenDelta {
 	delta: bigint;
 }
 
+/**
+ * What a delegate may spend from a token account once the run is through, in the account's token.
+ */
+export interface SolSimulationAllowance {
+	tokenAddress: SplTokenAddress;
+	decimals: number;
+	amount: bigint;
+}
+
 export interface SolSimulationControlChange {
 	account: SolAddress;
 	field: SolSimulationControlField;
-	// Absent when the field was cleared (e.g. a revoked delegate).
+	// Absent when the field was cleared (e.g. a revoked delegate). For `allowance`, the delegate the
+	// limit belongs to.
 	to?: SolAddress;
+	// On a `delegate` or `allowance` change that leaves a delegate in place: how much it may spend.
+	allowance?: SolSimulationAllowance;
 }
 
 /**

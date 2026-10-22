@@ -1195,6 +1195,37 @@
 			"unconfirmed": ""
 		}
 	},
+	"cycles_top_up": {
+		"text": {
+			"top_up": "",
+			"title": "",
+			"description": "",
+			"canister_id_placeholder": "",
+			"checking_canister": "",
+			"recently_topped_up": "",
+			"canister": "",
+			"you_top_up": "",
+			"total": "",
+			"one_way": "",
+			"topping_up": "",
+			"topped_up": "",
+			"unknown": "",
+			"unknown_fresh": "",
+			"sent_to_canister": "",
+			"sent_to_canister_top_up": ""
+		},
+		"error": {
+			"invalid_canister_id": "",
+			"canister_not_found": "",
+			"canister_check_failed": "",
+			"amount_too_small": "",
+			"refused": "",
+			"insufficient_funds": "",
+			"clock": "",
+			"refunded": "",
+			"refunded_nothing": ""
+		}
+	},
 	"active_user_transactions": {
 		"text": {
 			"button_label": "",
@@ -1394,7 +1425,8 @@
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
-			"lifi_status_unknown": ""
+			"lifi_status_unknown": "",
+			"lifi_fee_changed": ""
 		}
 	},
 	"buy": {
@@ -1793,6 +1825,9 @@
 			"simulation_control_change": "",
 			"simulation_new_owner": "",
 			"simulation_new_spender": "",
+			"simulation_new_allowance": "",
+			"simulation_allowance": "",
+			"simulation_allowance_unlimited": "",
 			"simulation_new_close_authority": "",
 			"simulation_new_program": "",
 			"simulation_control_removed": "",
@@ -1815,9 +1850,14 @@
 			"allowance_increase": "",
 			"allowance_decrease": "",
 			"unverifiable_erc20_request": "",
+			"token_call_with_value": "",
 			"unverifiable_approval_for_all_request": "",
 			"approval_for_all_grant": "",
 			"approval_for_all_revoke": "",
+			"cketh_deposit": "",
+			"cketh_deposit_principal": "",
+			"cketh_deposit_refused": "",
+			"cketh_helper_unconfirmed": "",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
 			"sign_message": "توقيع الرسالة",
 			"sign_psbt": "",
@@ -1891,6 +1931,9 @@
 			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "عنوان المرسل المطلوب للمعاملة ليس عنوان هذه المحفظة.",
 			"unknown_destination": "عنوان الوجهة غير معروف.",
+			"cketh_deposit_refused": "",
+			"cketh_helper_unconfirmed": "",
+			"token_call_with_value": "",
 			"ambiguous_transaction": "تنقل هذه المعاملة الأموال بين عدة عناوين ولا يمكن عرضها بدقة للمراجعة. حفاظًا على أمانك، لم يتم توقيعها.",
 			"close_pays_others": "",
 			"unreviewed_without_simulation": "",
@@ -2164,6 +2207,7 @@
 			"swap_on": "",
 			"interacted_with": "تم التفاعل مع (إلى)",
 			"unknown_token": "",
+			"unknown_token_named": "",
 			"summary_other": "",
 			"tab_summary": "",
 			"tab_balance_changes": "",
@@ -2180,6 +2224,8 @@
 			"instruction_close_account": "",
 			"instruction_close_account_for": "",
 			"instruction_approve": "",
+			"instruction_approve_amount": "",
+			"instruction_approve_unlimited": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
 			"instruction_route": "",
@@ -2252,7 +2298,9 @@
 			"converting_ck_token": "جاري تحويل $ckToken إلى $twinToken",
 			"twin_network": "شبكة $twinNetwork",
 			"no_date_available": "لا يوجد تاريخ متاح",
-			"pending": "معلق"
+			"pending": "معلق",
+			"top_up": "",
+			"top_up_refund": ""
 		},
 		"alt": {
 			"open_block_explorer": "افتح هذه المعاملة في مستكشف الكتل",
@@ -2593,7 +2641,8 @@
 		},
 		"warning": {
 			"no_index_canister": "لا يمكن عرض معاملات $token_list. لا يتوفر حاوية فهرس.",
-			"unavailable_index_canister": "لا يمكن عرض معاملات $token_list. حاوية الفهرس غير متاحة حاليًا."
+			"unavailable_index_canister": "لا يمكن عرض معاملات $token_list. حاوية الفهرس غير متاحة حاليًا.",
+			"unsupported_sol_transactions": ""
 		}
 	},
 	"earning": {

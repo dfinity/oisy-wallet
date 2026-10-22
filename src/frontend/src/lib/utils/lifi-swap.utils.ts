@@ -336,9 +336,35 @@ export const lifiFeesUsd = ({ estimate: { feeCosts } }: LiFiStep): number | unde
 	return feeCosts.reduce((sum, { amountUSD }) => sum + Number(amountUSD), 0);
 };
 
-export const mapLifiSwapResult = (quote: LiFiStep): SwapMappedResult => ({
+export const mapLifiSwapResult = ({
+	quote,
+	request
+}: {
+	quote: LiFiStep;
+	request: QuoteRequestFromAmount;
+}): SwapMappedResult => ({
 	provider: SwapProvider.LIFI,
 	receiveAmount: BigInt(quote.estimate.toAmount),
 	receiveOutMinimum: BigInt(quote.estimate.toAmountMin),
-	swapDetails: quote
+	swapDetails: quote,
+	request
 });
+
+/**
+ * The addresses of every ERC-20 and ERC-4626 OISY knows on a network, enabled or not, whose
+ * allowances to the Diamond the calldata binding reads: hiding a token does not revoke its
+ * allowance. A token OISY does not know, approved through another dapp, cannot be listed; LI.FI's
+ * whitelist remains the guard there.
+ */
+export const lifiUserTokenAddresses = ({
+	tokens,
+	networkId
+}: {
+	tokens: Token[];
+	networkId: NetworkId;
+}): string[] =>
+	tokens.flatMap((token) =>
+		token.network.id === networkId && (isTokenErc20(token) || isTokenErc4626(token))
+			? [token.address]
+			: []
+	);

@@ -1,6 +1,7 @@
 mod active_user_transactions;
 mod agreements;
 mod bitcoin;
+mod canister_status;
 mod config;
 mod contacts;
 mod custom_token;
