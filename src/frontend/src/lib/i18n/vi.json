@@ -1078,6 +1078,7 @@
 			"xrp_destination_tag_missing": "Không có thẻ đích XRP. Nếu bạn gửi đến sàn giao dịch, hãy kiểm tra xem sàn có yêu cầu thẻ không, nếu không bạn có thể mất tiền.",
 			"fee_expired": "",
 			"fee_info": "Phí sẽ được thanh toán bằng $feeSymbol. Khả dụng: <strong>$feeBalance $feeSymbol</strong>",
+			"icp_memo_methods": "",
 			"scanned_address_only_destination": "Mã đã quét chỉ chứa địa chỉ đích. Hãy đảm bảo bạn chọn đúng token, nhập đúng số lượng và kiểm tra cẩn thận địa chỉ đích!",
 			"scanned_address_only_destination_single_token": "Mã đã quét chỉ chứa địa chỉ đích. Hãy đảm bảo bạn nhập đúng số lượng và kiểm tra cẩn thận địa chỉ đích!"
 		},
