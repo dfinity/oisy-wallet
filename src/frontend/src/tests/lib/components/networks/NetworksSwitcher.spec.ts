@@ -129,35 +129,35 @@ describe('NetworksSwitcher', () => {
 			});
 		});
 
-		// The closed panel no longer covers the page: a switch made after the user set off elsewhere
-		// would abort their navigation and bring them back.
-		describe('when the user navigates elsewhere while the panel leaves', () => {
+		// The closed panel no longer covers the page: a switch made after the user opened another view
+		// would abort that navigation, or change the network of the view they just opened.
+		describe('when the user opens another view while the panel leaves', () => {
+			const collectiblesUrl = new URL('https://oisy.com/collectibles/');
 			const activityUrl = new URL('https://oisy.com/activity');
+			const collectionUrl = new URL('https://oisy.com/collectibles/?collection=0x1&network=ETH');
+
+			const loading = (url: URL) => () => Object.assign(navigating, { to: { url } });
+			const loaded = (url: URL) => () => mockPage.mockUrl(url);
 
 			beforeEach(() => {
 				goto.mockResolvedValue();
+
+				mockPage.mockUrl(collectiblesUrl);
 			});
 
-			it('skips the switch while that navigation is running', async () => {
-				const { getByTestId } = render(NetworksSwitcher, { props: { visible: true } });
-
-				await fireEvent.click(getByTestId(ethRow));
-
-				Object.assign(navigating, { to: { url: activityUrl } });
-
-				await waitForMilliseconds(BACKDROP_FADE_OUT_DURATION + 50);
-
-				expect(goto).not.toHaveBeenCalled();
-			});
-
-			it('skips the switch once the route has changed, and checks the route network again', async () => {
+			it.each([
+				{ view: 'another page is loading', open: loading(activityUrl) },
+				{ view: 'another page has loaded', open: loaded(activityUrl) },
+				{ view: 'a collection on this page is loading', open: loading(collectionUrl) },
+				{ view: 'a collection on this page has loaded', open: loaded(collectionUrl) }
+			])('skips the switch when $view, and checks the route network again', async ({ open }) => {
 				const { getByTestId, queryByRole } = render(NetworksSwitcher, {
 					props: { visible: true }
 				});
 
 				await fireEvent.click(getByTestId(ethRow));
 
-				mockPage.mockUrl(activityUrl);
+				open();
 
 				await waitForMilliseconds(BACKDROP_FADE_OUT_DURATION + 50);
 
