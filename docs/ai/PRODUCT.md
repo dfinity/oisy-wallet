@@ -869,6 +869,10 @@ Funds cannot move before the user has acknowledged the NEAR Intents terms of ser
 
 What this deliberately does not do: no XRPL testnet, no issued currencies (native XRP only, the only asset 1Click lists on the XRP Ledger), no Chain Fusion route, and no production enablement. With the flag off, swaps and XRP sends behave exactly as the previous sections describe.
 
+### NEAR Intents deposits replaced or dropped on an EVM network
+
+A NEAR Intents swap from an EVM network records its deposit transaction (hash, nonce and network) when the deposit is sent. While 1Click has seen no deposit, the swap is also followed on that network, the same way LI.FI and Velora swaps are: when another transaction has taken the deposit's nonce on two polls in a row, the deposit can never arrive, and the swap fails with the message that the transaction was replaced or dropped. A deposit that reverted fails the swap with the generic failure message. A deposit that is only slow to confirm stays in progress, and once 1Click has seen the deposit, 1Click alone decides. A dropped deposit whose nonce no later transaction takes reads as still in flight on the network, so this does not settle it. Swaps sent before this was added carry no deposit transaction and are followed through 1Click only.
+
 ### 1Sec restricted to the unwrapping direction
 
 1Sec (OneSec) bridges tokens between ICP and Ethereum, Base and Arbitrum. OISY offers only the way back out of a bridged position, never the way in: a user who already holds a bridged balance keeps a working exit, and nobody acquires a new one through OISY.
