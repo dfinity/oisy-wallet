@@ -1891,6 +1891,7 @@ interface I18nTransaction {
 		instruction_unwrap: string;
 		instruction_unwrap_all_to: string;
 		instruction_unwrap_all_from: string;
+		instruction_receive_excess_from: string;
 		instruction_create_account: string;
 		instruction_create_program_account: string;
 		instruction_close_program_account: string;
