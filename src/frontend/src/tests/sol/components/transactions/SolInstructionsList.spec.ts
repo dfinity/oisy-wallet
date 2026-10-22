@@ -177,6 +177,44 @@ describe('SolInstructionsList', () => {
 		expect(getByTestId('sol-instructions-list')).toHaveTextContent('0.005');
 	});
 
+	// Read from the message alone, nothing says how much an unwrap of everything moves, but the line
+	// still says what leaves the account and for whom, rather than that a program was called.
+	it('should state an unwrap of everything nobody read the amount of as one', () => {
+		const instructions = mapSolInstructionSummaries({
+			instructions: [
+				{
+					program: 'spl-token',
+					programId: TOKEN_PROGRAM_ADDRESS,
+					parsed: {
+						type: 'unwrapLamports',
+						info: {
+							source: mockAtaAddress3,
+							destination: mockSolAddress,
+							authority: mockSolAddress
+						}
+					}
+				}
+			],
+			ownedAddresses: [mockSolAddress, mockAtaAddress3],
+			userAddress: mockSolAddress,
+			includeUnrecognised: true
+		});
+
+		const { getByTestId } = render(SolInstructionsList, {
+			props: { instructions, token: SOLANA_TOKEN, userAddress: mockSolAddress }
+		});
+
+		// No wrapped SOL token is listed here, so its symbol is the placeholder.
+		expect(getByTestId('sol-instructions-list')).toHaveTextContent(
+			replacePlaceholders(en.transaction.text.instruction_unwrap_all_to, {
+				$symbol: en.transaction.text.unknown_token
+			})
+		);
+		expect(getByTestId('sol-instructions-list')).not.toHaveTextContent(
+			en.transaction.text.summary_other
+		);
+	});
+
 	// The program names the account, so it follows the line the way the program of a route does.
 	it('should name the program an account is opened for', () => {
 		const { getByTestId } = render(SolInstructionsList, {

@@ -709,7 +709,8 @@ export const formatSolInstructionSummary = ({
 		program,
 		via,
 		viaName,
-		children
+		children,
+		unwrapsAll
 	},
 	i18n,
 	symbolOf,
@@ -756,6 +757,27 @@ export const formatSolInstructionSummary = ({
 				$amount: amount(value),
 				$symbol: symbolOf(tokenAddress)
 			}),
+			...(nonNullish(ownDetail) && { detail: ownDetail }),
+			...(nonNullish(viaTrailing) && { trailing: viaTrailing })
+		};
+	}
+
+	// An unwrap of everything its account wraps, where nobody read how much that is: the line still
+	// says what leaves the account and for whom. It leaves the account open, unlike the close that
+	// unwraps.
+	if (
+		(kind === 'send' || kind === 'receive') &&
+		isNullish(value) &&
+		(unwrapsAll ?? false) &&
+		nonNullish(counterparty)
+	) {
+		return {
+			text: replacePlaceholders(
+				kind === 'send'
+					? i18n.transaction.text.instruction_unwrap_all_to
+					: i18n.transaction.text.instruction_unwrap_all_from,
+				{ $symbol: symbolOf(tokenAddress) }
+			),
 			...(nonNullish(ownDetail) && { detail: ownDetail }),
 			...(nonNullish(viaTrailing) && { trailing: viaTrailing })
 		};

@@ -871,13 +871,15 @@ const toEffect = ({
 
 			// The source holds the native mint of the program that runs the unwrap, or the program
 			// refuses it, so that is the mint whether or not a run read the account. The amount is
-			// lamports, which a native mint counts with the same precision on every network.
+			// lamports, which a native mint counts with the same precision on every network. One that
+			// names none says so, which is what the line can still state when nobody read the amount.
 			const unwrapping = {
 				...effect,
 				tokenAddress:
 					programId === TOKEN_2022_PROGRAM_ADDRESS
 						? TOKEN_2022_NATIVE_MINT_ADDRESS
 						: WSOL_TOKEN.address,
+				...(isNullish(stated) && { unwrapsAll: true }),
 				decimals: WSOL_DECIMALS
 			};
 

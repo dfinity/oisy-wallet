@@ -2183,6 +2183,8 @@
 			"instruction_receive": "",
 			"instruction_wrap": "",
 			"instruction_unwrap": "Sblocca e chiudi il conto token $symbol",
+			"instruction_unwrap_all_to": "",
+			"instruction_unwrap_all_from": "",
 			"instruction_create_account": "",
 			"instruction_create_program_account": "",
 			"instruction_close_program_account": "",

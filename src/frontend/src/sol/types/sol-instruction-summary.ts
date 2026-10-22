@@ -65,6 +65,9 @@ export interface SolInstructionSummary {
 	// wrapped SOL leaving its account, and it arrives in the wallet as SOL itself, which no transfer
 	// of wrapped SOL does.
 	unwrapsToWallet?: boolean;
+	// Set on an unwrap that names no amount, which moves everything its account wraps: what the line
+	// can still state when nobody read how much that is.
+	unwrapsAll?: boolean;
 	// The account created, closed, approved or handed over.
 	account?: SolAddress;
 	// Lamports it costs to open an account.
