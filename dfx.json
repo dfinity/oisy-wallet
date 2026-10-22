@@ -278,6 +278,28 @@
 				}
 			}
 		},
+		"cksol_minter": {
+			"type": "custom",
+			"candid": "https://raw.githubusercontent.com/dfinity/cksol/bb61dcf2045bca4333a732268c1b6d19e113ba93/minter/cksol_minter.did",
+			"wasm": "https://github.com/dfinity/cksol/releases/download/cksol_minter-v0.1.0/cksol_minter.wasm.gz",
+			"remote": {
+				"id": {
+					"ic": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"beta": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"staging": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"audit": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"test_be_1": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"test_fe_1": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"test_fe_2": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"test_fe_3": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"test_fe_4": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"test_fe_5": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"test_fe_6": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"local": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"old-backend": "lh22c-kyaaa-aaaar-qb5nq-cai"
+				}
+			}
+		},
 		"sol_rpc": {
 			"type": "custom",
 			"build": "scripts/build.sol_rpc.sh",
