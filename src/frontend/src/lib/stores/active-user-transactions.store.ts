@@ -1,4 +1,5 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import { ZERO } from '$lib/constants/app.constants';
 import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
 import { del as storageDel, get as storageGet, set as storageSet } from '$lib/utils/storage.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -15,6 +16,13 @@ export interface ActiveUserTransactionsLocalState {
 export type ActiveUserTransactionsStoreData =
 	| ({
 			data: Record<string, ActiveUserTransaction>;
+			// From the backend, so it holds for every device: rows updated at or before it are seen.
+			seenUpToNs: bigint;
+			// The latest update in the snapshot last applied. Every row updated at or before it was in
+			// that snapshot, so this list has it, which neither a row written locally since nor an earlier
+			// snapshot establishes: a row another device created in between may be missing here, and an
+			// older snapshot landing late drops rows a newer one had.
+			loadedUpToNs: bigint;
 	  } & ActiveUserTransactionsLocalState)
 	| undefined;
 
@@ -40,10 +48,16 @@ export interface ActiveUserTransactionsStore extends Readable<ActiveUserTransact
 	 * write committed, not after the row went away.
 	 */
 	beginLoad: () => number;
-	set: (params: { transactions: ActiveUserTransaction[]; since?: number }) => void;
+	set: (params: {
+		transactions: ActiveUserTransaction[];
+		since?: number;
+		seenUpToNs?: bigint;
+	}) => void;
 	upsert: (params: { transaction: ActiveUserTransaction }) => void;
 	remove: (params: { id: string }) => void;
 	markAllSeen: () => void;
+	/** Records the backend's seen mark. It only moves forward, as it does in the backend. */
+	setSeenUpTo: (params: { seenUpToNs: bigint }) => void;
 	markTerminalSideEffectsApplied: (params: { ids: string[] }) => void;
 	/**
 	 * Records, before the write is sent, that this browser is sending a row its terminal status. For
@@ -89,6 +103,8 @@ const initStore = (): ActiveUserTransactionsStore => {
 
 		store.set({
 			data: {},
+			seenUpToNs: ZERO,
+			loadedUpToNs: ZERO,
 			lastSeenUpdatedAtNs: persisted.lastSeenUpdatedAtNs ?? {},
 			terminalSideEffectsApplied: persisted.terminalSideEffectsApplied ?? {}
 		});
@@ -103,7 +119,7 @@ const initStore = (): ActiveUserTransactionsStore => {
 	// that commits while the read is in flight is already in the store by the time the snapshot lands
 	// — replacing wholesale erased it, and a row gone from the store is a row the poller never
 	// resolves.
-	const setAll: ActiveUserTransactionsStore['set'] = ({ transactions, since }) => {
+	const setAll: ActiveUserTransactionsStore['set'] = ({ transactions, since, seenUpToNs }) => {
 		store.update((current) => {
 			if (isNullish(current)) {
 				return current;
@@ -178,7 +194,20 @@ const initStore = (): ActiveUserTransactionsStore => {
 				persist({ lastSeenUpdatedAtNs, terminalSideEffectsApplied });
 			}
 
-			return { ...current, data, lastSeenUpdatedAtNs, terminalSideEffectsApplied };
+			return {
+				...current,
+				data,
+				seenUpToNs:
+					nonNullish(seenUpToNs) && seenUpToNs > current.seenUpToNs
+						? seenUpToNs
+						: current.seenUpToNs,
+				loadedUpToNs: transactions.reduce(
+					(latest, { updated_at_ns }) => (updated_at_ns > latest ? updated_at_ns : latest),
+					ZERO
+				),
+				lastSeenUpdatedAtNs,
+				terminalSideEffectsApplied
+			};
 		});
 	};
 
@@ -258,6 +287,16 @@ const initStore = (): ActiveUserTransactionsStore => {
 		});
 	};
 
+	const setSeenUpTo: ActiveUserTransactionsStore['setSeenUpTo'] = ({ seenUpToNs }) => {
+		store.update((current) => {
+			if (isNullish(current) || seenUpToNs <= current.seenUpToNs) {
+				return current;
+			}
+
+			return { ...current, seenUpToNs };
+		});
+	};
+
 	const markTerminalSideEffectsApplied: ActiveUserTransactionsStore['markTerminalSideEffectsApplied'] =
 		({ ids }) => {
 			store.update((current) => {
@@ -332,6 +371,7 @@ const initStore = (): ActiveUserTransactionsStore => {
 		upsert,
 		remove,
 		markAllSeen,
+		setSeenUpTo,
 		markTerminalSideEffectsApplied,
 		markTerminalWriteSent,
 		clearTerminalWriteSent,

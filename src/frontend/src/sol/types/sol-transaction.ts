@@ -1,4 +1,5 @@
 import type { solTransactionTypes } from '$lib/schema/transaction.schema';
+import type { Token } from '$lib/types/token';
 import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 import { SOLANA_MAX_SUPPORTED_TRANSACTION_VERSION } from '$sol/constants/sol.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
@@ -84,6 +85,38 @@ export interface SolResolvedTransaction {
 	// The sources whose history returned the signature, as the pager tagged it: the record belongs
 	// to the token of each of them.
 	sources: SolAddress[];
+}
+
+// Thrown when OISY fails to read a transaction the RPC returned: unlike a failed lookup, it fails
+// again however often the transaction is fetched again.
+export class SolTransactionReadError extends Error {}
+
+export type SolUnreadableTransactionReason =
+	// The RPC refused to return it, as it does for a version newer than the request declares.
+	| 'refused'
+	// The RPC returned it, but OISY failed to read it.
+	| 'unparsable';
+
+// A signature whose transaction OISY cannot show, left out of the history it was on rather than
+// failing it.
+export interface SolUnreadableTransaction {
+	signature: Signature;
+	// As for a resolved transaction: the history of the token of each of them is missing it.
+	sources: SolAddress[];
+	reason: SolUnreadableTransactionReason;
+	// The code the RPC refused it with.
+	errorCode?: number;
+}
+
+export interface SolResolvedSignatures {
+	transactions: SolResolvedTransaction[];
+	unreadable: SolUnreadableTransaction[];
+}
+
+export interface SolUnreadableTransactionsWarning {
+	token: Token;
+	// The transactions missing from its history whose warning the user has not dismissed.
+	signatures: SolUnreadableTransaction['signature'][];
 }
 
 export type SolSignedTransaction = Transaction &

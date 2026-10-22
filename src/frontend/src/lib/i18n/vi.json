@@ -1206,6 +1206,37 @@
 			"unconfirmed": "Không thể xác nhận việc chuyển $token. Nếu đã chuyển thành công, việc đúc sẽ hoàn tất trong nền: theo dõi trong các giao dịch đang hoạt động."
 		}
 	},
+	"cycles_top_up": {
+		"text": {
+			"top_up": "Nạp",
+			"title": "Nạp cho canister",
+			"description": "Cycles được chuyển từ số dư $token của bạn vào canister, nơi chúng được dùng cho tính toán và lưu trữ.",
+			"canister_id_placeholder": "Nhập ID canister",
+			"checking_canister": "Đang kiểm tra canister...",
+			"recently_topped_up": "Đã nạp gần đây",
+			"canister": "Canister",
+			"you_top_up": "Bạn nạp",
+			"total": "Tổng",
+			"one_way": "Không thể hoàn tác việc nạp: cycles ở lại trong canister.",
+			"topping_up": "Đang nạp cho $canister...",
+			"topped_up": "Đã nạp $amount $token cho $canister.",
+			"unknown": "OISY chưa thể biết việc nạp đã thành công hay chưa. Nếu đã thành công, hoạt động $token của bạn sẽ hiển thị. Hãy nạp lại để gửi lại cùng một lần nạp: lần nạp đó chỉ có thể thành công một lần. Một lần nạp mới hoặc đã thay đổi sẽ thêm cycles một lần nữa nếu lần nạp này đã thành công.",
+			"unknown_fresh": "OISY chưa thể biết lần nạp gần nhất của bạn đã thành công hay chưa. Nếu đã thành công, lần nạp này sẽ thêm cycles một lần nữa. Hãy kiểm tra hoạt động $token trước.",
+			"sent_to_canister": "Gửi $token đến một canister không nạp cho canister đó. Số $token sẽ vào tài khoản của canister, và canister chỉ nhận được cycles nếu mã của chính nó rút chúng ra.",
+			"sent_to_canister_top_up": "Để thêm cycles cho một canister, hãy dùng “Nạp” trên trang $token."
+		},
+		"error": {
+			"invalid_canister_id": "Nhập ID canister. Không thể nạp cho principal người dùng, ID tài khoản và địa chỉ trên các mạng khác.",
+			"canister_not_found": "Không có canister nào với ID này trên Internet Computer. Hãy kiểm tra ID.",
+			"canister_check_failed": "OISY không thể kiểm tra canister này. Vui lòng thử lại sau giây lát.",
+			"amount_too_small": "Nhập số lớn hơn phí $fee $token.",
+			"refused": "Việc nạp không thành công. Không có gì rời khỏi ví của bạn. Vui lòng thử lại sau giây lát.",
+			"insufficient_funds": "Không đủ $token cho lần nạp này và phí. Không có gì rời khỏi ví của bạn. Hãy giảm số tiền.",
+			"clock": "Việc nạp không thành công vì đồng hồ trên thiết bị của bạn bị lệch. Không có gì rời khỏi ví của bạn. Hãy đặt đúng giờ và thử lại.",
+			"refunded": "Canister không thể nhận cycles. $refund $token đã được hoàn lại vào ví của bạn, và lần thử này tốn $fees $token phí. Hãy kiểm tra ID canister.",
+			"refunded_nothing": "Canister không thể nhận cycles, và phí đã tiêu hết toàn bộ số tiền. Hãy kiểm tra ID canister."
+		}
+	},
 	"active_user_transactions": {
 		"text": {
 			"button_label": "",
@@ -1405,7 +1436,8 @@
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
-			"lifi_status_unknown": ""
+			"lifi_status_unknown": "",
+			"lifi_fee_changed": ""
 		}
 	},
 	"buy": {
@@ -1813,6 +1845,9 @@
 			"simulation_control_change": "Giao dịch này sẽ thay đổi ai kiểm soát một hoặc nhiều tài khoản của bạn. Việc phê duyệt nó có thể giao lại chính tài khoản đó, chứ không chỉ những gì bên trong.",
 			"simulation_new_owner": "Chủ sở hữu tài khoản mới",
 			"simulation_new_spender": "Người chi tiêu mới được chấp thuận",
+			"simulation_new_allowance": "",
+			"simulation_allowance": "",
+			"simulation_allowance_unlimited": "",
 			"simulation_new_close_authority": "Quyền đóng tài khoản mới",
 			"simulation_new_program": "Chương trình sở hữu mới",
 			"simulation_control_removed": "Đã xoá",
@@ -1837,10 +1872,15 @@
 			"undecodable_erc20_request": "OISY không thể giải mã yêu cầu token này. Nội dung hiển thị có thể khác với nội dung thực sự sẽ được ký, vì vậy việc phê duyệt đã bị vô hiệu hóa.",
 			"undecodable_erc20_reason": "OISY không thể giải mã yêu cầu token này, vì vậy nội dung hiển thị có thể khác với nội dung thực sự sẽ được ký.",
 			"unlisted_erc20_request": "Yêu cầu này liên quan đến một token không có trong danh sách của OISY, vì vậy việc phê duyệt đã bị vô hiệu hóa. Hãy thêm token vào OISY, rồi gửi lại yêu cầu để xem xét.",
+			"token_call_with_value": "Ngoài số lượng token hiển thị bên dưới, yêu cầu này còn gửi $amount đến hợp đồng token. Giao dịch chuyển hoặc phê duyệt token không gửi $symbol, vì vậy vì sự an toàn của bạn, OISY sẽ không ký yêu cầu này.",
 			"unverifiable_approval_for_all_request": "Yêu cầu này sẽ trao cho một bên vận hành quyền kiểm soát một bộ sưu tập NFT, và OISY không thể giải mã đó là bên vận hành nào. Nội dung hiển thị có thể khác với nội dung thực sự sẽ được ký, vì vậy việc phê duyệt đã bị vô hiệu hóa.",
 			"unverifiable_approval_for_all_reason": "Yêu cầu này sẽ trao cho một bên vận hành quyền kiểm soát một bộ sưu tập NFT, và OISY không thể giải mã đó là bên vận hành nào.",
 			"approval_for_all_grant": "Yêu cầu này cho phép bên vận hành bên dưới chuyển bất kỳ NFT nào trong bộ sưu tập này mà bạn sở hữu hiện tại hoặc có được sau này, vào bất kỳ lúc nào, cho đến khi bạn thu hồi quyền này. Bản thân yêu cầu này không chuyển bất kỳ khoản tiền nào.",
 			"approval_for_all_revoke": "Yêu cầu này thu hồi quyền của bên vận hành bên dưới, vì vậy họ sẽ không thể chuyển các NFT bạn đang nắm giữ trong bộ sưu tập này nữa.",
+			"cketh_deposit": "Yêu cầu này chuyển đổi ETH sang ckETH cho principal Internet Computer của bạn, hiển thị bên dưới.",
+			"cketh_deposit_principal": "Người nhận ckETH",
+			"cketh_deposit_refused": "Yêu cầu này gọi hợp đồng chuyển đổi ckETH cho một principal Internet Computer không phải của bạn, hoặc với dữ liệu mà OISY không đọc được. Vì sự an toàn của bạn, OISY sẽ không ký yêu cầu này.",
+			"cketh_helper_unconfirmed": "OISY chưa thể xác nhận hợp đồng chuyển đổi ckETH nên chưa thể kiểm tra khoản nạp này. Việc phê duyệt sẽ bị vô hiệu hóa cho đến khi kiểm tra được.",
 			"raw_copied": "Dữ liệu giao dịch thô đã được sao chép vào khay nhớ tạm.",
 			"sign_message": "Ký Tin Nhắn",
 			"sign_psbt": "Ký giao dịch",
@@ -1916,6 +1956,9 @@
 			"unknown_destination": "Địa chỉ đích không xác định.",
 			"unlisted_token": "Yêu cầu này liên quan đến một token không có trong danh sách của OISY. Hãy thêm token vào OISY, rồi gửi lại yêu cầu. Chưa có gì được ký.",
 			"unverifiable_request": "OISY không thể hiển thị chính xác yêu cầu này làm gì. Vì sự an toàn của bạn, yêu cầu đã không được ký.",
+			"cketh_deposit_refused": "Yêu cầu này gọi hợp đồng chuyển đổi ckETH cho một principal Internet Computer không phải của bạn, hoặc với dữ liệu mà OISY không đọc được. Vì sự an toàn của bạn, yêu cầu đã không được ký.",
+			"cketh_helper_unconfirmed": "OISY không thể xác nhận hợp đồng chuyển đổi ckETH nên không thể kiểm tra khoản nạp này. Vì sự an toàn của bạn, yêu cầu đã không được ký.",
+			"token_call_with_value": "Yêu cầu này gửi $amount đến hợp đồng token, ngoài số lượng token. Vì sự an toàn của bạn, yêu cầu đã không được ký.",
 			"ambiguous_transaction": "Giao dịch này chuyển tiền giữa nhiều địa chỉ và không thể hiển thị chính xác để xem xét. Vì sự an toàn của bạn, giao dịch này đã không được ký.",
 			"close_pays_others": "Giao dịch này đóng một trong các tài khoản token của bạn và trả số dư của nó cho một địa chỉ không phải ví của bạn. Vì sự an toàn của bạn, giao dịch đã không được ký.",
 			"unreviewed_without_simulation": "OISY không thể đọc một phần của giao dịch này và mạng cũng không trả về bản mô phỏng, nên không có gì mô tả phần đó sẽ làm gì. Vì sự an toàn của bạn, giao dịch đã không được ký.",
@@ -2188,7 +2231,8 @@
 			"summary_self": "",
 			"swap_on": "",
 			"interacted_with": "Đã tương tác với",
-			"unknown_token": "",
+			"unknown_token": "Token không xác định",
+			"unknown_token_named": "Token không xác định ($symbol)",
 			"summary_other": "",
 			"tab_summary": "",
 			"tab_balance_changes": "",
@@ -2205,6 +2249,8 @@
 			"instruction_close_account": "",
 			"instruction_close_account_for": "Đóng tài khoản token $symbol",
 			"instruction_approve": "",
+			"instruction_approve_amount": "",
+			"instruction_approve_unlimited": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
 			"instruction_route": "",
@@ -2277,7 +2323,9 @@
 			"converting_ck_token": "Đang chuyển đổi $ckToken sang $twinToken",
 			"twin_network": "mạng $twinNetwork",
 			"no_date_available": "Không có ngày khả dụng",
-			"pending": "Đang chờ xử lý"
+			"pending": "Đang chờ xử lý",
+			"top_up": "Nạp",
+			"top_up_refund": "Hoàn tiền nạp"
 		},
 		"alt": {
 			"open_block_explorer": "Mở giao dịch này trên trình khám phá khối",
@@ -2618,7 +2666,8 @@
 		},
 		"warning": {
 			"no_index_canister": "$oisy_short không thể tải giao dịch của $token_list — đơn vị phát hành token không cung cấp tính năng theo dõi giao dịch.",
-			"unavailable_index_canister": "Hiện không thể tải các giao dịch mới nhất của $token_list, vì dịch vụ theo dõi của chúng không phản hồi. Chúng sẽ được tải tự động ngay khi dịch vụ hoạt động trở lại."
+			"unavailable_index_canister": "Hiện không thể tải các giao dịch mới nhất của $token_list, vì dịch vụ theo dõi của chúng không phản hồi. Chúng sẽ được tải tự động ngay khi dịch vụ hoạt động trở lại.",
+			"unsupported_sol_transactions": "Không thể tải một số giao dịch của $token_list, vì chúng có định dạng không được hỗ trợ. Chúng sẽ tự động xuất hiện ngay khi sự cố này được khắc phục."
 		}
 	},
 	"earning": {

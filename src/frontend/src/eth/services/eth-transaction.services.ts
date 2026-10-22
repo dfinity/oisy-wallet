@@ -16,28 +16,32 @@ import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
+import { TransactionNotFoundError } from 'viem';
 
 export const processTransactionSent = async ({
 	identity,
 	token,
-	transaction
+	transaction,
+	value
 }: {
 	identity: NullishIdentity;
 	token: Token;
 	transaction: TransactionResponse;
+	// The amount of an ERC-20 the transaction moves, required where its calldata is not a transfer
+	// to read it from: a swap contract's arguments decoded as `(address, uint256)` give an offset or
+	// throw.
+	value?: bigint;
 }) => {
 	if (isSupportedEthTokenId(token.id) || isSupportedEvmNativeTokenId(token.id)) {
 		await processEthTransaction({ identity, hash: transaction.hash, token });
 		return;
 	}
 
-	// We adapt the value for display purpose because the transaction we get has an ETH value of 0x00
-	const value = decodeErc20AbiDataValue({ data: transaction.data });
-
 	await processErc20Transaction({
 		identity,
 		hash: transaction.hash,
-		value,
+		// We adapt the value for display purpose because the transaction we get has an ETH value of 0x00
+		value: value ?? decodeErc20AbiDataValue({ data: transaction.data }),
 		token,
 		type: 'pending'
 	});
@@ -84,7 +88,15 @@ const processPendingTransaction = async ({
 	} = token;
 
 	const { getTransaction, wait } = alchemyProviders(networkId);
-	const transaction = await getTransaction(hash);
+
+	// Viem throws for a transaction it cannot find rather than returning `null`.
+	const transaction = await getTransaction(hash).catch((err: unknown) => {
+		if (err instanceof TransactionNotFoundError) {
+			return null;
+		}
+
+		throw err;
+	});
 
 	if (isNullish(transaction)) {
 		// The provider searches in the transaction pool for pending transactions. But that does not guarantee that it found it.

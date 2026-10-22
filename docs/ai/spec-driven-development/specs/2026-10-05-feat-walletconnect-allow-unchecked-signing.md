@@ -56,11 +56,14 @@ first two and holds Approve (`SolWalletConnectSignModal.svelte`).
 `ambiguous` covers instructions that disagree on source, destination, payer, token or action type
 (`mapSolTransactionMessage`), and instructions decoded in full that the summary cannot carry
 (`unfaithfulInstruction()` in `sol-instructions.utils.ts`): burns, token and stake authority
-changes, System assignments (one of the connected wallet itself is the Never row above), sizing and
-nonce set-up, System-owned, over-funded or prefunded account creations, unclassified System
-instructions, closing a lookup table, Compute Budget directives OISY cannot price, and instructions
-of known programs that fail to parse. The same refusal covers an account a program opens inside its
-own instruction with more than its rent, which only the simulated run shows.
+changes, stake accounts initialised for somebody else or with a lockup, lockup changes, stake, nonce
+and seed-derived withdrawals and wrapped SOL unwraps that pay anyone but the connected wallet, token
+batches that carry a refused instruction, nest a batch or do not hold together, System assignments
+(one of the connected wallet itself is the Never row above), sizing and nonce set-up, System-owned,
+over-funded or prefunded account creations, unclassified System instructions, closing a lookup
+table, Compute Budget directives OISY cannot price, and instructions of known programs that fail to
+parse. The same refusal covers an account a program opens inside its own instruction with more than
+its rent, which only the simulated run shows.
 
 The no-simulation refusal (`unreviewed && !simulated`) is the odd one out: the review only warns,
 Approve stays usable, and the refusal arrives as a toast afterwards.

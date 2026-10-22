@@ -8,10 +8,6 @@
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthWalletConnectSendReview from '$eth/components/wallet-connect/EthWalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
-	import {
-		nativeEthereumTokenWithFallback,
-		nativeEthereumTokenId
-	} from '$eth/derived/token.derived';
 	import { send as sendServices } from '$eth/services/wallet-connect.services';
 	import {
 		ETH_FEE_CONTEXT_KEY,
@@ -22,17 +18,17 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
-	import { shouldSendWithApproval } from '$eth/utils/send.utils';
+	import { isDestinationContractAddress, shouldSendWithApproval } from '$eth/utils/send.utils';
 	import {
-		classifyWalletConnectEthCall,
+		classifyWalletConnectEthSendTransaction,
 		getSendParamsGas,
 		isWalletConnectEthApproval,
+		toWalletConnectCkEthHelperContractAddress,
 		walletConnectEthRefusals
 	} from '$eth/utils/wallet-connect.utils';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
@@ -54,6 +50,7 @@
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
+	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import {
 		acceptedContext,
 		isWalletConnectDomainFlagged,
@@ -69,7 +66,35 @@
 
 	let { request, firstTransaction, sourceNetwork, listener }: Props = $props();
 
-	let call = $derived(classifyWalletConnectEthCall(firstTransaction.data));
+	/**
+	 * Send context store
+	 */
+
+	const { sendTokenId, sendToken, sendEthFeePriority } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	// The ckETH minter information for the network the request is signed on. The review and the
+	// signing step both read it, so they hold the request to the same helper contract.
+	let minterInfo = $derived($ckEthMinterInfoStore?.[$sendTokenId]);
+
+	// A deposit on a network with a ckETH helper contract is held until the minter information
+	// confirms the helper, so on those networks it is loaded whenever a request is reviewed.
+	let ckEthNetwork = $derived(isNetworkIdEthereum(sourceNetwork.id));
+
+	let ckEthHelperContractAddress = $derived(
+		toWalletConnectCkEthHelperContractAddress({ networkId: sourceNetwork.id, minterInfo })
+	);
+
+	// Classified from where the request goes as well as from its calldata: a `deposit(bytes32)` is a
+	// ckETH conversion only at the helper contract, and only one to the user's own principal is signed.
+	let call = $derived(
+		classifyWalletConnectEthSendTransaction({
+			to: firstTransaction.to,
+			data: firstTransaction.data,
+			networkId: sourceNetwork.id,
+			minterInfo,
+			principal: $authIdentity?.getPrincipal()
+		})
+	);
 
 	// An approval authorizes someone else to move the user's tokens. It is not a send, whatever
 	// native value the request carries alongside it.
@@ -79,6 +104,11 @@
 	// might do anything, and titling it "Send" is the misstatement that let an `increaseAllowance`
 	// granting an unlimited allowance be presented as a zero-value transfer.
 	let unknownCall = $derived(call.type === 'unknown');
+
+	// A deposit OISY refuses to sign, or holds until it can check it, is not a send either.
+	let ckEthDepositBlocked = $derived(
+		call.type === 'ckEthDepositRefused' || call.type === 'ckEthHelperUnconfirmed'
+	);
 
 	// What the Settings switch can sign past, read the way the review and the signing service read
 	// it, so the acknowledgement handed on names exactly what the review showed.
@@ -108,12 +138,6 @@
 
 		untrack(() => (uncheckedSigningAcknowledged = false));
 	});
-
-	/**
-	 * Send context store
-	 */
-
-	const { sendTokenId, sendToken, sendEthFeePriority } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Fee context store
@@ -150,8 +174,10 @@
 
 	let destination = $derived(firstTransaction.to ?? '');
 
+	// Compared however the address is cased, as the signing path compares it, so that casing cannot
+	// change where the review says the request goes.
 	let targetNetwork = $derived(
-		destination === toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId])
+		isDestinationContractAddress({ destination, contractAddress: ckEthHelperContractAddress })
 			? ICP_NETWORK
 			: $sendToken.network
 	);
@@ -238,7 +264,7 @@
 			token: $sendToken,
 			progress: (step: ProgressStep) => (sendProgressStep = step),
 			identity: $authIdentity,
-			minterInfo: $ckEthMinterInfoStore?.[$nativeEthereumTokenId],
+			minterInfo,
 			sourceNetwork,
 			targetNetwork,
 			acknowledgedRefusals: uncheckedSigningOffered && uncheckedSigningAcknowledged ? refusals : []
@@ -257,7 +283,7 @@
 		<WalletConnectModalTitle>
 			{#if approve}
 				{$i18n.core.text.approve}
-			{:else if unknownCall}
+			{:else if unknownCall || ckEthDepositBlocked}
 				{$i18n.wallet_connect.text.unknown_call_title}
 			{:else}
 				{$i18n.send.text.send}
@@ -269,14 +295,14 @@
 		amount={formatToken({ value: amount, unitName: $sendToken.decimals })}
 		{data}
 		{destination}
-		nativeEthereumToken={$nativeEthereumTokenWithFallback}
+		nativeEthereumToken={$sendToken}
 		observe={currentStep?.name !== WizardStepsSend.SENDING}
 		priority={$sendEthFeePriority}
 		sendToken={$sendToken}
 		sendTokenId={$sendTokenId}
 		{sourceNetwork}
 	>
-		<CkEthLoader nativeTokenId={$sendTokenId}>
+		<CkEthLoader isSendFlow={ckEthNetwork} nativeTokenId={$sendTokenId}>
 			{#key currentStep?.name}
 				{#if currentStep?.name === WizardStepsSend.SENDING}
 					<InProgressWizard

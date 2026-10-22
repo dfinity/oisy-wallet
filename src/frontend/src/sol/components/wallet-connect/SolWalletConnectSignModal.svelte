@@ -369,7 +369,7 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<SolWalletConnectSignReview
-				ambiguous={(ambiguous ?? false) || reassignsWallet || (opensAccountBeyondRent ?? false)}
+				ambiguous={(ambiguous ?? false) || (opensAccountBeyondRent ?? false) || reassignsWallet}
 				{application}
 				{approveDisabled}
 				{closesPayOthers}

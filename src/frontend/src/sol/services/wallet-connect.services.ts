@@ -204,8 +204,14 @@ export const decode = async ({
 			})),
 			network: solNetwork
 		}),
+		// An allowance names its token too, and moves no balance that would name it otherwise.
 		loadSplTokenMetadata({
-			tokenAddresses: (preview?.tokenDeltas ?? []).map(({ tokenAddress }) => tokenAddress),
+			tokenAddresses: [
+				...(preview?.tokenDeltas ?? []).map(({ tokenAddress }) => tokenAddress),
+				...(preview?.controlChanges ?? [])
+					.map(({ allowance }) => allowance?.tokenAddress)
+					.filter(nonNullish)
+			],
 			network: solNetwork
 		})
 	]);
@@ -640,6 +646,10 @@ export const sign = ({
 			// An account a program opens inside its own instruction with more than its size costs is
 			// refused on the same terms as an over-funded opening the message states itself: what
 			// sits above the rent is a payment with no destination, which no line can show.
+			//
+			// The wallet handed to another program inside a program's call is refused on the same terms
+			// as an assignment the message states: from then on that program, not the wallet's key,
+			// decides what leaves the wallet, and no amount, source or destination says so.
 			if ((ambiguous || opensAccountBeyondRent) && !acknowledged.includes('cannot_be_shown')) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.ambiguous_transaction }
