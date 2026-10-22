@@ -330,6 +330,46 @@ const toastOutOfGasError = async ({
 	});
 };
 
+// The node's answers to a transaction it did not take, and that nothing else will mine as it is.
+// Any other refusal can hide a transaction that was taken all the same: `already known` is one in
+// the mempool, `nonce too low` one whose nonce is spent, possibly by itself, and `out of gas` on one
+// node does not stop another from mining it. Nor does a revert, whatever its reason says: a
+// contract's own `invalid signature` is not the transaction's.
+const DEFINITIVE_REFUSAL_PATTERN =
+	/max fee per gas less than block base fee|fee cap less than block base fee|intrinsic gas too low|exceeds block gas limit|oversized data|invalid sender|invalid signature|transaction type not supported/i;
+
+/**
+ * Whether a broadcast failed because the node refused the transaction outright, so that it was
+ * neither taken nor relayed: the account cannot pay for it, or the transaction is invalid. Only the
+ * node's own answer to the broadcast counts, never a transport failure, which may have relayed it.
+ */
+export const isDefinitiveTransactionRefusal = (err: unknown): boolean =>
+	!answersOtherRequest(err) &&
+	(isInsufficientBalanceError(err) ||
+		collectErrorRecords({ err }).some(
+			({ code, message }) =>
+				typeof code === 'number' &&
+				typeof message === 'string' &&
+				DEFINITIVE_REFUSAL_PATTERN.test(message) &&
+				!EXECUTION_REVERTED_PATTERN.test(message)
+		));
+
+// The node's answers that the transaction, or another with its nonce, is already in.
+const ALREADY_SENT_PATTERN = /already known|known transaction|nonce too low/i;
+
+/**
+ * Whether broadcasting the same signed transaction again could still send it: the node neither
+ * refused it outright nor answered that it, or its nonce, is already in. A transport failure, a
+ * server error or `transaction underpriced` leave it unsent as far as anyone can tell, and the same
+ * bytes have one hash and one nonce, so sending them again cannot send them twice.
+ */
+export const isBroadcastRetriable = (err: unknown): boolean =>
+	!isDefinitiveTransactionRefusal(err) &&
+	!collectErrorRecords({ err }).some(
+		({ code, message }) =>
+			typeof code === 'number' && typeof message === 'string' && ALREADY_SENT_PATTERN.test(message)
+	);
+
 /**
  * Maps an error raised while broadcasting an Ethereum or EVM transaction to a user-friendly message.
  *

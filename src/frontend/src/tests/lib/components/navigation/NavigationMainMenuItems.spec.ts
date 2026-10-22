@@ -158,6 +158,26 @@ describe('NavigationMainMenuItems', () => {
 		expect(get(bottomSheetOpenStore)).toBeFalsy();
 	});
 
+	it('shrinks the Finance circle on press, not the cradle button that anchors it', () => {
+		const { getByTestId } = render(NavigationMainMenuItems, { props: { layout: 'mobile' } });
+
+		const cradle = getByTestId(NAVIGATION_GROUP_FINANCE);
+		const circle = cradle.querySelector('span');
+
+		// Scaling the button would make it the circle's containing block and move the circle.
+		expect(cradle).toHaveClass('group');
+		expect(cradle).not.toHaveClass('press-icon');
+		expect(circle).toHaveClass('press-icon-in-group');
+	});
+
+	it('presses the sheet cards to 0.98', async () => {
+		const { getByTestId } = render(NavigationMainMenuItems, { props: { layout: 'mobile' } });
+
+		await fireEvent.click(getByTestId(NAVIGATION_GROUP_FINANCE));
+
+		expect(getByTestId(NAVIGATION_ITEM_BORROW)).toHaveClass('press');
+	});
+
 	it('closes the open group sheet when a navigation completes', async () => {
 		const { getByTestId, queryByTestId } = render(NavigationMainMenuItems, {
 			props: { layout: 'mobile' }

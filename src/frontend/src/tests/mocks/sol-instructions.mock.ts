@@ -852,3 +852,182 @@ export const MOCK_SOL_METEORA_DLMM_OPEN_POSITION = {
 	// What the chain charged an account of the token account size when the run was made.
 	rentExemptMinimum: 1_488_440n
 };
+
+// The same position closed over WalletConnect: the request exactly as Meteora sent it, the inner
+// instructions a simulated run of it reported, and what the run did to the wallet. Its last lb_clmm
+// instruction, `close_position_if_empty`, empties the position account and pays its rent into the
+// wallet by moving the lamports itself, so no inner instruction states it.
+export const MOCK_SOL_METEORA_DLMM_CLOSE_POSITION = {
+	transaction:
+		'AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAkUPrjnV0R7UZkboB+1mKcFcrChp9qws9X5jz+9aBrqo78SODtgog4GuIah8LiRetGQxokS9gjX6xXoLIg/gOhfuAE99HZStt1Osji+irIy8O6UBQjLLjVAZpz/AE+mcRBDT5SLkxgMo+bNl0xzuQiYHNDB553TZX/FGfsHxvJvGapYVvWhY+VMS6SerMRWA5hiT348G9ljXcRvYLpsQnoZWXYJZME08UrZ2J2XicKqWZf6Wx40F3GitSjBxdW+ez7DiPH/o6Lf5he9xONXMlGjIuP8roHlpFc5DmR1HACkZeKcqMIjlhDIgqRW+pynoBCxCsges/G/SeImcgFW5iOpJ69frZbeoPqr6Upv3p3ixa4nPIa3aZLTj4H3hSgAdOmvtNLPFUvaBXDz5cbxAZC55qHIsUunLKubzB2l7Vq2c5PJSJlnLnmUpTrMngO1OaOUlAPGmZRz7OrcxR6p6JFrJgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjJclj04kifG7PRApFI4NgwtaE5na/xCEBI572Nvp+FkDBkZv5SEXMv/srbpyw5vnvIzlu8X3EmssQ5s6QAAAALJw1n+pjFHPAhMFE1iWK681dCvtWcnZRF6cDQyFx82Rxvp6877brTo9ZfNqq8l0MbG75MLS9uDkfKYCA0UvXWEE6eEvvIToJskyzOniZAzOFVkMHGJzsJJXCLo7hSCwvAVKU1qZKSEGTSTocWDaOHx8NbXdvJK7geQfqEBBBUSNBpuIV/6rgYT7aH9jRhjANdrEOdwa6ztVmKDwAAAAAAEG3fbh12Whk9nL4UbO63msHLSF7V9bN5E6jPWFfv8AqdZs3GviSkz8W7UNk5aWjNKQ6m/sjdFwc+pg1flIfyZ9Cg0ABQJqAQgADAYABwASCxMBAQwGAAQADwsTAQEMBgAHABILEwEBDAYABAAPCxMBARARBQIJBwQKCBIPABMTEQ4QAwEazALDkTWRkc096v//ger//xAnAgAAAAAAAQAQEAIFAAoIBwQSDxMTEQ4QAwEYcL9lqxyQf7s96v//ger//wIAAAAAAAEAEAUFAAAOEAg7fNR2W5hunRMDBwAAAQkLAgAGDAIAAABUSgAAAAAAAA==',
+	innerInstructions: [
+		{
+			index: 1,
+			instructions: [
+				{
+					program: 'spl-token',
+					programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+					parsed: {
+						info: {
+							extensionTypes: ['immutableOwner'],
+							mint: 'So11111111111111111111111111111111111111112'
+						},
+						type: 'getAccountDataSize'
+					}
+				},
+				{
+					program: 'system',
+					programId: '11111111111111111111111111111111',
+					parsed: {
+						info: {
+							lamports: 1488440,
+							newAccount: 'BYXrPmaA2ydGNxtVL58ahU54qRe97iqxxGRSgFqidY3g',
+							owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+							source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
+							space: 165
+						},
+						type: 'createAccount'
+					}
+				},
+				{
+					program: 'spl-token',
+					programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+					parsed: {
+						info: {
+							account: 'BYXrPmaA2ydGNxtVL58ahU54qRe97iqxxGRSgFqidY3g'
+						},
+						type: 'initializeImmutableOwner'
+					}
+				},
+				{
+					program: 'spl-token',
+					programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+					parsed: {
+						info: {
+							account: 'BYXrPmaA2ydGNxtVL58ahU54qRe97iqxxGRSgFqidY3g',
+							mint: 'So11111111111111111111111111111111111111112',
+							owner: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
+						},
+						type: 'initializeAccount3'
+					}
+				}
+			]
+		},
+		{
+			index: 5,
+			instructions: [
+				{
+					program: 'spl-token',
+					programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+					parsed: {
+						info: {
+							authority: '5rCf1DM8LjKTw4YqhnoLcngyZYeNnQqztScTogYHAS6',
+							destination: 'BYXrPmaA2ydGNxtVL58ahU54qRe97iqxxGRSgFqidY3g',
+							mint: 'So11111111111111111111111111111111111111112',
+							source: 'EYj9xKw6ZszwpyNibHY7JD5o3QgTVrSdcBp1fMJhrR9o',
+							tokenAmount: {
+								amount: '7055665',
+								decimals: 9,
+								uiAmount: 0.007055665,
+								uiAmountString: '0.007055665'
+							}
+						},
+						type: 'transferChecked'
+					}
+				},
+				{
+					program: 'spl-token',
+					programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+					parsed: {
+						info: {
+							authority: '5rCf1DM8LjKTw4YqhnoLcngyZYeNnQqztScTogYHAS6',
+							destination: '6wqnX8qdyuvshkqMyproFnbnp3XCqF6P3eqWqdT7BTGU',
+							mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+							source: 'CoaxzEh8p5YyGLcj36Eo3cUThVJxeKCs7qvLAGDYwBcz',
+							tokenAmount: {
+								amount: '1194217',
+								decimals: 6,
+								uiAmount: 1.194217,
+								uiAmountString: '1.194217'
+							}
+						},
+						type: 'transferChecked'
+					}
+				},
+				{
+					programId: 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo'
+				}
+			]
+		},
+		{
+			index: 6,
+			instructions: [
+				{
+					program: 'spl-token',
+					programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+					parsed: {
+						info: {
+							authority: '5rCf1DM8LjKTw4YqhnoLcngyZYeNnQqztScTogYHAS6',
+							destination: 'BYXrPmaA2ydGNxtVL58ahU54qRe97iqxxGRSgFqidY3g',
+							mint: 'So11111111111111111111111111111111111111112',
+							source: 'EYj9xKw6ZszwpyNibHY7JD5o3QgTVrSdcBp1fMJhrR9o',
+							tokenAmount: {
+								amount: '984',
+								decimals: 9,
+								uiAmount: 9.84e-7,
+								uiAmountString: '0.000000984'
+							}
+						},
+						type: 'transferChecked'
+					}
+				},
+				{
+					program: 'spl-token',
+					programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+					parsed: {
+						info: {
+							authority: '5rCf1DM8LjKTw4YqhnoLcngyZYeNnQqztScTogYHAS6',
+							destination: '6wqnX8qdyuvshkqMyproFnbnp3XCqF6P3eqWqdT7BTGU',
+							mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+							source: 'CoaxzEh8p5YyGLcj36Eo3cUThVJxeKCs7qvLAGDYwBcz',
+							tokenAmount: {
+								amount: '174',
+								decimals: 6,
+								uiAmount: 0.000174,
+								uiAmountString: '0.000174'
+							}
+						},
+						type: 'transferChecked'
+					}
+				},
+				{
+					programId: 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo'
+				},
+				{
+					programId: 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo'
+				}
+			]
+		},
+		{
+			index: 7,
+			instructions: [
+				{
+					programId: 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo'
+				}
+			]
+		}
+	],
+	userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
+	// The wallet's USDC account, which the request opens again only if it is missing.
+	usdcAccount: '6wqnX8qdyuvshkqMyproFnbnp3XCqF6P3eqWqdT7BTGU',
+	usdc: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+	position: {
+		account: '8wmR8dCeYSemR1uzPA5MBNF8Tmnu44wdDkUtrP9MZREr',
+		program: 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo',
+		lamports: 41_899_840n
+	},
+	// The wallet's lamports after the run less those before it, and the fee the run charged.
+	walletChange: 48_932_461n,
+	fee: 5_000n,
+	rentExemptMinimum: 1_488_440n
+};

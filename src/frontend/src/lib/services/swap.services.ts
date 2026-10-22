@@ -10,6 +10,7 @@ import { createPermit } from '$eth/services/eip2612-permit.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
 import { send as sendEvm } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
+import type { EthAddress } from '$eth/types/address';
 import type { ErcFungibleToken } from '$eth/types/erc-fungible';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
@@ -43,7 +44,13 @@ import {
 import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
 import { ICP_SWAP_POOL_FEE, SWAP_SIDE } from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
-import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
+import {
+	PLAUSIBLE_EVENTS,
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_RESULT_STATUSES,
+	PLAUSIBLE_EVENT_SEVERITIES,
+	PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES
+} from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { btcSwapProviders } from '$lib/providers/btc-swap.providers';
 import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
@@ -72,6 +79,7 @@ import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsQuoteResponse
 } from '$lib/types/near-intents';
+import type { NetworkId } from '$lib/types/network';
 import type { OisyTradeQuote } from '$lib/types/oisy-trade-swap';
 import type { Amount } from '$lib/types/send';
 import {
@@ -102,6 +110,7 @@ import { VELORA_EXTERNAL_REF_KEYS, type VeloraExternalRefKey } from '$lib/types/
 import { consoleError } from '$lib/utils/console.utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { formatToken } from '$lib/utils/format.utils';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import {
 	toNearIntentsData,
 	toNearIntentsDisplayRefs,
@@ -688,12 +697,15 @@ export const fetchIcpSwap = async ({
 		fee: destinationTokenFee
 	} = destinationToken;
 
+	// Certified, because this pool canister becomes the spender of the approval and the target of
+	// the deposit below.
 	const pool = await getPoolCanister({
 		identity,
 		token0: { address: sourceLedgerCanisterId, standard: sourceStandard.code },
 		token1: { address: destinationLedgerCanisterId, standard: destinationStandard.code },
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity,
-		fee: ICP_SWAP_POOL_FEE
+		fee: ICP_SWAP_POOL_FEE,
+		certified: true
 	});
 
 	if (isNullish(pool)) {
@@ -1179,6 +1191,16 @@ export const fetchNearIntentsXrpSwap = async ({
 	network,
 	fee
 }: SwapNearIntentsXrpParams): Promise<void> => {
+	// `fetchSwapAmountsXRP` already leaves out an offer with a deposit memo. Checked again right
+	// before the deposit, like the signature and the expiry, for a quote that reaches the send by
+	// another route: nothing documents how such a memo has to travel with an XRP payment.
+	if (nonNullish(swapDetails.quote.depositMemo)) {
+		throwSwapError({
+			code: SwapErrorCodes.NEAR_INTENTS_QUOTE_DEPOSIT_MEMO,
+			message: replaceOisyPlaceholders(get(i18n).swap.error.near_intents_quote_deposit_memo)
+		});
+	}
+
 	await executeNearIntentsSwap({
 		identity,
 		progress,
@@ -1281,6 +1303,10 @@ export const swapService = {
 	// which `SwapParams` cannot carry, so `SwapIcpWizard` dispatches it explicitly
 	// and never reaches this entry, exactly as it does for 1Sec and Chain Fusion.
 	[SwapProvider.OISY_TRADE]: () => {
+		throw new Error(get(i18n).swap.error.unexpected);
+	},
+	// LI.FI has no ICP side, so no swap from an ICP token can reach this entry.
+	[SwapProvider.LIFI]: () => {
 		throw new Error(get(i18n).swap.error.unexpected);
 	}
 } satisfies Record<SwapProvider, (params: SwapParams) => Promise<void>>;
@@ -1525,7 +1551,34 @@ export const fetchSwapAmountsXRP = async ({
 		)
 	);
 
-	return reduceSettledSwapResults(settledResults);
+	// An offer whose XRP deposit comes with a deposit memo is left out: nothing documents how such a
+	// memo has to travel with an XRP payment, and a deposit that does not carry it in the expected
+	// form may never be credited. Each one is reported, so a change on the provider's side shows up
+	// in the analytics and not only as a pair that is no longer offered.
+	return reduceSettledSwapResults(settledResults).filter((offer) => {
+		const hasDepositMemo =
+			offer.provider === SwapProvider.NEAR_INTENTS &&
+			nonNullish(offer.swapDetails.quote.depositMemo);
+
+		if (hasDepositMemo) {
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: {
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+					event_subcontext: offer.provider,
+					event_severity: PLAUSIBLE_EVENT_SEVERITIES.ERROR,
+					result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+					result_error_type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.DEPOSIT_MEMO,
+					token_symbol: sourceToken.symbol,
+					token_network: sourceToken.network.name,
+					token2_symbol: destinationToken.symbol,
+					token2_network: destinationToken.network.name
+				}
+			});
+		}
+
+		return !hasDepositMemo;
+	});
 };
 
 export const withdrawUserUnusedBalance = async ({
@@ -1792,6 +1845,36 @@ export const fetchVeloraDeltaSwap = async ({
 	await enableSwapDestinationToken({ destinationToken, identity });
 };
 
+/**
+ * Waits until `spender` may spend at least `amount` of `token` for `owner`: an approval just mined
+ * can take a few reads to show. Throws when it still cannot after the retries, so that the swap is
+ * not sent against an allowance it would fail on.
+ */
+export const waitForSwapAllowance = async ({
+	token,
+	owner,
+	spender,
+	networkId,
+	amount
+}: {
+	token: ErcFungibleToken;
+	owner: EthAddress;
+	spender: EthAddress;
+	networkId: NetworkId;
+	amount: bigint;
+}): Promise<void> => {
+	await retryWithDelay({
+		maxRetries: 10,
+		request: async () => {
+			const currentAllowance = await erc20ContractAllowance({ token, owner, spender, networkId });
+
+			if (currentAllowance < amount) {
+				throw new Error(get(i18n).swap.error.unexpected);
+			}
+		}
+	});
+};
+
 export const fetchVeloraMarketSwap = async ({
 	identity,
 	progress,
@@ -1834,19 +1917,12 @@ export const fetchVeloraMarketSwap = async ({
 			progressSteps: ProgressStepsSwap
 		});
 
-		await retryWithDelay({
-			maxRetries: 10,
-			request: async () => {
-				const currentAllowance = await erc20ContractAllowance({
-					token: sourceToken,
-					owner: userAddress,
-					spender: TokenTransferProxy,
-					networkId: sourceNetwork.id
-				});
-				if (currentAllowance < parsedSwapAmount) {
-					throw new Error(get(i18n).swap.error.unexpected);
-				}
-			}
+		await waitForSwapAllowance({
+			token: sourceToken,
+			owner: userAddress,
+			spender: TokenTransferProxy,
+			networkId: sourceNetwork.id,
+			amount: parsedSwapAmount
 		});
 	}
 
@@ -1870,6 +1946,7 @@ export const fetchVeloraMarketSwap = async ({
 		from: userAddress,
 		to: txParams.to,
 		transaction: txParams,
+		amount: parsedSwapAmount,
 		identity,
 		token: sourceToken,
 		sourceNetwork,

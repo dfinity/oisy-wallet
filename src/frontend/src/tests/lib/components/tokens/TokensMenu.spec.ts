@@ -52,6 +52,21 @@ describe('TokensMenu', () => {
 		});
 	});
 
+	it('exposes the settings as independent checked controls', async () => {
+		const { getByRole } = render(TokensMenu);
+		await fireEvent.click(getByRole('button', { name: en.tokens.manage.text.list_settings }));
+		const control = await waitFor(() =>
+			getByRole('switch', { name: en.tokens.text.hide_zero_balances })
+		);
+
+		expect(control.closest('button')).toBeNull();
+
+		await fireEvent.click(control);
+		await waitFor(() => expect(control).toBeChecked());
+		await fireEvent.click(control);
+		await waitFor(() => expect(control).not.toBeChecked());
+	});
+
 	describe('notification blob', () => {
 		const getNotificationBlob = (container: HTMLElement) =>
 			container.querySelector('.rounded-full.bg-brand-primary');
@@ -107,5 +122,11 @@ describe('TokensMenu', () => {
 
 			expect(blob?.classList.contains('opacity-100')).toBeTruthy();
 		});
+	});
+
+	it('gives its trigger a touch-sized tap area', () => {
+		const { container } = render(TokensMenu);
+
+		expect(container.querySelector('button')).toHaveClass('hit-area', 'hit-area-touch');
 	});
 });

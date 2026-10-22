@@ -48,6 +48,7 @@ import {
 	mapNearIntentsQuoteResult,
 	mapVeloraMarketSwapResult,
 	mapVeloraSwapResult,
+	nearIntentsQuoteRejectedMessage,
 	resolveNearIntentsBlockchain,
 	resolveNearIntentsSwapAssets,
 	slippagePercentToBasisPoints
@@ -554,6 +555,30 @@ describe('swap utils', () => {
 			expect(isSwapError(undefined)).toBeFalsy();
 			expect(isSwapError('string')).toBeFalsy();
 			expect(isSwapError({ code: 'deposit_error' })).toBeFalsy();
+		});
+	});
+
+	describe('nearIntentsQuoteRejectedMessage', () => {
+		it.each([
+			SwapErrorCodes.NEAR_INTENTS_QUOTE_UNVERIFIED,
+			SwapErrorCodes.NEAR_INTENTS_QUOTE_EXPIRED,
+			SwapErrorCodes.NEAR_INTENTS_QUOTE_DEPOSIT_MEMO
+		])('should return the message of a %s error', (code) => {
+			const error = new SwapError(code, 'No funds were sent.');
+
+			expect(nearIntentsQuoteRejectedMessage(error)).toBe('No funds were sent.');
+		});
+
+		it('should return undefined for another swap error', () => {
+			const error = new SwapError(SwapErrorCodes.DEPOSIT_FAILED, 'Deposit failed');
+
+			expect(nearIntentsQuoteRejectedMessage(error)).toBeUndefined();
+		});
+
+		it('should return undefined if error is not instance of SwapError', () => {
+			const error = new Error('No funds were sent.');
+
+			expect(nearIntentsQuoteRejectedMessage(error)).toBeUndefined();
 		});
 	});
 

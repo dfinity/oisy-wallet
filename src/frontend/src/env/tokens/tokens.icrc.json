@@ -286,5 +286,16 @@
 		},
 		"icon": "/icons/icrc/ij33n-oiaaa-aaaar-qbooa-cai.svg",
 		"metadataOnly": true
+	},
+	"PUFFIN": {
+		"ledgerCanisterId": "p7szh-maaaa-aaaab-qhgsa-cai",
+		"indexCanisterId": "pyt7t-byaaa-aaaab-qhgsq-cai",
+		"decimals": 8,
+		"name": "Puffin",
+		"symbol": "PUFFIN",
+		"fee": {
+			"__bigint__": "1000000"
+		},
+		"icon": "/icons/icrc/p7szh-maaaa-aaaab-qhgsa-cai.jpg"
 	}
 }

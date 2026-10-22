@@ -2,8 +2,11 @@ import { USDC_DECIMALS, USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.en
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
+import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
+import { SolanaNetworks } from '$sol/types/network';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
@@ -97,6 +100,48 @@ describe('SolTransaction', () => {
 
 		expect(labelOf('send')).toBe(en.swap.text.swap);
 		expect(labelOf('receive')).toBe(en.swap.text.swap);
+	});
+
+	describe('a swap into a token the wallet does not list', () => {
+		beforeEach(() => {
+			splTokenMetadataStore.set({
+				network: SolanaNetworks.mainnet,
+				metadata: { 'unlisted-mint': { name: 'Ping', symbol: 'PING' } }
+			});
+		});
+
+		afterEach(() => {
+			splTokenMetadataStore.reset();
+		});
+
+		// The symbol a mint carries is its creator's choice, so the row keeps it inside the
+		// placeholder, where it cannot read as a token the wallet lists.
+		it('should name the mint by the placeholder carrying its own symbol', () => {
+			const { getByText } = render(SolTransaction, {
+				props: {
+					transaction: {
+						...mockTrx,
+						summary: {
+							kind: 'swap' as const,
+							spent: { delta: -100n },
+							received: { delta: 7n, tokenAddress: 'unlisted-mint', decimals: 6 }
+						}
+					},
+					token: SOLANA_TOKEN
+				}
+			});
+
+			expect(
+				getByText(
+					replacePlaceholders(en.transaction.text.summary_swap, {
+						$spent_symbol: SOLANA_TOKEN.symbol,
+						$received_symbol: replacePlaceholders(en.transaction.text.unknown_token_named, {
+							$symbol: 'PING'
+						})
+					})
+				)
+			).toBeInTheDocument();
+		});
 	});
 
 	// Stefan: an unreduced transaction should read like a swap does, with the programs it ran

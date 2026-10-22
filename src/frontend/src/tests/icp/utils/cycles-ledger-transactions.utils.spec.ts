@@ -1,0 +1,137 @@
+import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { CYCLES_LEDGER_DEPOSIT_FEE } from '$icp/constants/cmc.constants';
+import type { IcrcTransaction } from '$icp/types/ic-transaction';
+import {
+	getTopUpCanister,
+	isCyclesLedger,
+	mapCyclesLedgerTransaction
+} from '$icp/utils/cycles-ledger-transactions.utils';
+import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
+import {
+	createMockIcrcBurnTransaction,
+	createMockIcrcMintTransaction,
+	createMockIcrcTransferTransaction
+} from '$tests/mocks/ic-transactions.mock';
+import { mockIdentity, mockPrincipalText2 } from '$tests/mocks/identity.mock';
+import { assertNonNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
+
+describe('cycles-ledger-transactions.utils', () => {
+	const canister = Principal.fromText('ywcsb-maaaa-aaaai-q6k7a-cai');
+
+	// As mainnet block 16,786,001 carries it.
+	const topUpMemo = Uint8Array.from([0x81, 0x4a, ...canister.toUint8Array()]);
+
+	const refundMemo = new Uint8Array(32).fill(0xff);
+
+	describe('isCyclesLedger', () => {
+		it('should recognise the cycles ledger', () => {
+			expect(isCyclesLedger({ ledgerCanisterId: IC_CYCLES_LEDGER_CANISTER_ID })).toBeTruthy();
+		});
+
+		it('should not recognise another ledger', () => {
+			expect(isCyclesLedger({ ledgerCanisterId: mockPrincipalText2 })).toBeFalsy();
+		});
+	});
+
+	describe('getTopUpCanister', () => {
+		it('should read the canister from a top-up memo', () => {
+			expect(getTopUpCanister(topUpMemo)?.toText()).toBe(canister.toText());
+		});
+
+		// A one-entry CBOR map instead of an array, and a 9-byte string instead of a 10-byte one:
+		// 12 bytes each, so only the prefix check can turn them away.
+		it.each([
+			{ first: 0xa1, second: 0x4a },
+			{ first: 0x81, second: 0x49 }
+		])('should reject the incorrect prefix [$first, $second]', ({ first, second }) => {
+			expect(
+				getTopUpCanister(Uint8Array.from([first, second, ...canister.toUint8Array()]))
+			).toBeUndefined();
+		});
+
+		it('should not read a memo of another length', () => {
+			expect(getTopUpCanister(topUpMemo.slice(0, 11))).toBeUndefined();
+			expect(getTopUpCanister(Uint8Array.from([...topUpMemo, 0x00]))).toBeUndefined();
+		});
+
+		it('should not read a missing or empty memo', () => {
+			expect(getTopUpCanister(undefined)).toBeUndefined();
+			expect(getTopUpCanister(new Uint8Array())).toBeUndefined();
+		});
+	});
+
+	describe('mapCyclesLedgerTransaction', () => {
+		it('should label a top-up and name its canister as the destination', () => {
+			const transaction = createMockIcrcBurnTransaction({ memo: topUpMemo });
+
+			const result = mapCyclesLedgerTransaction({ transaction, identity: mockIdentity });
+
+			expect(result).toEqual({
+				...mapIcrcTransaction({ transaction, identity: mockIdentity }),
+				to: canister.toText(),
+				typeLabel: 'transaction.label.top_up',
+				fee: CYCLES_LEDGER_DEPOSIT_FEE
+			});
+			expect(result.type).toBe('burn');
+		});
+
+		it('should keep a burn with another memo, or none, a plain burn with the ledger fee', () => {
+			const otherMemo = createMockIcrcBurnTransaction({ memo: new Uint8Array(32).fill(0xfe) });
+			const noMemo = createMockIcrcBurnTransaction();
+
+			expect(
+				mapCyclesLedgerTransaction({ transaction: otherMemo, identity: mockIdentity })
+			).toEqual({
+				...mapIcrcTransaction({ transaction: otherMemo, identity: mockIdentity }),
+				fee: CYCLES_LEDGER_DEPOSIT_FEE
+			});
+			expect(mapCyclesLedgerTransaction({ transaction: noMemo, identity: mockIdentity })).toEqual({
+				...mapIcrcTransaction({ transaction: noMemo, identity: mockIdentity }),
+				fee: CYCLES_LEDGER_DEPOSIT_FEE
+			});
+		});
+
+		it('should keep the fee the index gives a burn', () => {
+			const indexed = createMockIcrcBurnTransaction({ memo: topUpMemo });
+			const [burn] = indexed.transaction.burn;
+
+			assertNonNullish(burn);
+
+			const transaction = {
+				...indexed,
+				transaction: { ...indexed.transaction, burn: [{ ...burn, fee: [123n] }] }
+			} as IcrcTransaction;
+
+			expect(mapCyclesLedgerTransaction({ transaction, identity: mockIdentity }).fee).toBe(123n);
+		});
+
+		it('should label the refund of a failed top-up', () => {
+			const transaction = createMockIcrcMintTransaction({ memo: refundMemo });
+
+			const result = mapCyclesLedgerTransaction({ transaction, identity: mockIdentity });
+
+			expect(result).toEqual({
+				...mapIcrcTransaction({ transaction, identity: mockIdentity }),
+				typeLabel: 'transaction.label.top_up_refund'
+			});
+			expect(result.type).toBe('mint');
+		});
+
+		it('should keep another mint a plain mint', () => {
+			const transaction = createMockIcrcMintTransaction();
+
+			expect(mapCyclesLedgerTransaction({ transaction, identity: mockIdentity })).toEqual(
+				mapIcrcTransaction({ transaction, identity: mockIdentity })
+			);
+		});
+
+		it('should keep a transfer as it is, whatever its memo', () => {
+			const transaction = createMockIcrcTransferTransaction({ memo: topUpMemo });
+
+			expect(mapCyclesLedgerTransaction({ transaction, identity: mockIdentity })).toEqual(
+				mapIcrcTransaction({ transaction, identity: mockIdentity })
+			);
+		});
+	});
+});

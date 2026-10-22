@@ -1,15 +1,40 @@
+import { consoleError } from '$lib/utils/console.utils';
 import { SOLANA_TRANSACTION_DETAIL_CONCURRENCY } from '$sol/constants/sol.constants';
 import { findSolTokenAccounts, mergeSignatureSources } from '$sol/services/sol-signatures.services';
 import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions.services';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type {
-	SolResolvedTransaction,
-	SolSignatureWithSources,
-	SolTransactionUi
+import {
+	SolTransactionReadError,
+	type SolResolvedSignatures,
+	type SolSignatureWithSources,
+	type SolTransactionUi,
+	type SolUnreadableTransaction
 } from '$sol/types/sol-transaction';
 import type { SplToken, SplTokenAddress } from '$sol/types/spl';
 import { nonNullish } from '@dfinity/utils';
+import {
+	isSolanaError,
+	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION
+} from '@solana/kit';
+
+type SolUnreadableOutcome = Pick<SolUnreadableTransaction, 'reason' | 'errorCode'>;
+
+// The failures that retrying cannot change: only an OISY that reads the transaction can. The RPC
+// refusing it, or OISY failing to read what the RPC returned. A network error or a rate limit is
+// neither.
+const unreadableOutcome = (err: unknown): SolUnreadableOutcome | undefined => {
+	if (isSolanaError(err, SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION)) {
+		return { reason: 'refused', errorCode: err.context.__code };
+	}
+
+	if (err instanceof SolTransactionReadError) {
+		// What went wrong is ours to fix, and the event that reports it does not carry it.
+		consoleError('Reading a Solana transaction failed:', err.cause);
+
+		return { reason: 'unparsable' };
+	}
+};
 
 /**
  * Which token each source address belongs to: the wallet maps to `null` (native SOL), the
@@ -73,11 +98,15 @@ const mapWithConcurrency = async <T, R>({
  * once however many sources returned it. Every associated token account of the network is seeded as
  * the user's, so one derivation serves every token the signature belongs to.
  *
- * The result keeps the page's order, one entry per signature that derives to a record, with the
- * sources the pager tagged it with. A signature that derives to nothing (an associated token
+ * The transactions keep the page's order, one entry per signature that derives to a record, with
+ * the sources the pager tagged it with. A signature that derives to nothing (an associated token
  * account lookup returns transactions that never touched anything of the user's) is left out, and
- * so is every signature in `known`. A failed fetch rejects the call, so that the caller retries
- * rather than taking a partial page for a complete one.
+ * so is every signature in `known`.
+ *
+ * A transaction the RPC refuses to return, or that OISY fails to read, is left out too, and listed
+ * in `unreadable`: retrying cannot change either, and failing the page on it would stop the history
+ * of every token it belongs to for as long as it stays on that page. Any other failure rejects the
+ * call, so that the caller retries rather than taking a partial page for a complete one.
  */
 export const resolveSolSignatures = async ({
 	address,
@@ -91,37 +120,63 @@ export const resolveSolSignatures = async ({
 	tokens: Pick<SplToken, 'address' | 'owner'>[];
 	signatures: SolSignatureWithSources[];
 	known?: ReadonlySet<string>;
-}): Promise<SolResolvedTransaction[]> => {
+}): Promise<SolResolvedSignatures> => {
 	const toResolve = [...mergeSignatureSources(signatures).values()].filter(
 		({ signature }) => !(known?.has(signature) ?? false)
 	);
 
 	if (toResolve.length === 0) {
-		return [];
+		return { transactions: [], unreadable: [] };
 	}
 
 	const sourcesToTokens = await mapSolSourcesToTokens({ address, tokens });
 
 	const ownedTokenAccounts = [...sourcesToTokens.keys()].filter((source) => source !== address);
 
-	const records = await mapWithConcurrency<SolSignatureWithSources, SolTransactionUi | undefined>({
+	const outcomes = await mapWithConcurrency<
+		SolSignatureWithSources,
+		{ transaction: SolTransactionUi | undefined } | { unreadable: SolUnreadableOutcome }
+	>({
 		items: toResolve,
 		concurrency: SOLANA_TRANSACTION_DETAIL_CONCURRENCY,
 		task: async (signature) => {
-			const [transaction] = await fetchSolTransactionsForSignature({
-				signature,
-				network,
-				address,
-				ownedTokenAccounts
-			});
+			try {
+				const [transaction] = await fetchSolTransactionsForSignature({
+					signature,
+					network,
+					address,
+					ownedTokenAccounts
+				});
 
-			return transaction;
+				return { transaction };
+			} catch (err: unknown) {
+				const unreadable = unreadableOutcome(err);
+
+				if (nonNullish(unreadable)) {
+					return { unreadable };
+				}
+
+				throw err;
+			}
 		}
 	});
 
-	return toResolve.reduce<SolResolvedTransaction[]>((acc, { sources }, index) => {
-		const transaction = records[index];
+	return toResolve.reduce<SolResolvedSignatures>(
+		(acc, { signature, sources }, index) => {
+			const outcome = outcomes[index];
 
-		return nonNullish(transaction) ? [...acc, { transaction, sources }] : acc;
-	}, []);
+			if ('unreadable' in outcome) {
+				const { unreadable } = outcome;
+
+				return { ...acc, unreadable: [...acc.unreadable, { signature, sources, ...unreadable }] };
+			}
+
+			const { transaction } = outcome;
+
+			return nonNullish(transaction)
+				? { ...acc, transactions: [...acc.transactions, { transaction, sources }] }
+				: acc;
+		},
+		{ transactions: [], unreadable: [] }
+	);
 };
