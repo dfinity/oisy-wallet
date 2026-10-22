@@ -30,11 +30,11 @@ import {
 	getSetComputeUnitLimitInstruction,
 	getSetComputeUnitPriceInstruction
 } from '@solana-program/compute-budget';
-import { getWithdrawInstruction } from '@solana-program/stake';
 import {
 	getInitializeCheckedInstruction,
 	getInitializeInstruction,
-	getSetLockupInstruction
+	getSetLockupInstruction,
+	getWithdrawInstruction
 } from '@solana-program/stake';
 import {
 	getCreateAccountInstruction,
