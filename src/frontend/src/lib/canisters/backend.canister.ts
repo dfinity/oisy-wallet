@@ -8,6 +8,7 @@ import type {
 	CustomToken,
 	DeletePersonalNoteRequest,
 	ExchangeRate,
+	GetActiveUserTransactionsResponse,
 	GetAllowedCyclesResponse,
 	MyTip,
 	PersonalNoteEntry,
@@ -681,15 +682,27 @@ export class BackendCanister extends Canister<BackendService> {
 		throw response.Err;
 	};
 
-	getActiveUserTransactions = async ({ certified = false }: QueryParams = {}): Promise<
-		ActiveUserTransaction[]
-	> => {
+	getActiveUserTransactions = async ({
+		certified = false
+	}: QueryParams = {}): Promise<GetActiveUserTransactionsResponse> => {
 		const { get_active_user_transactions } = this.caller({ certified });
 
 		const response = await get_active_user_transactions();
 
 		if ('Ok' in response) {
-			return response.Ok.transactions;
+			return response.Ok;
+		}
+
+		throw response.Err;
+	};
+
+	markActiveUserTransactionsSeen = async (upToNs: bigint): Promise<bigint> => {
+		const { mark_active_user_transactions_seen } = this.caller({ certified: true });
+
+		const response = await mark_active_user_transactions_seen(upToNs);
+
+		if ('Ok' in response) {
+			return response.Ok;
 		}
 
 		throw response.Err;
