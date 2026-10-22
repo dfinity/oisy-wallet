@@ -485,6 +485,22 @@ describe('wallet-connect.services', () => {
 				expect(result).toEqual(expect.objectContaining({ opensAccountBeyondRent: true }));
 			});
 
+			it('should pass on that the run keeps a token batch whole', async () => {
+				vi.mocked(simulateSolTransaction).mockResolvedValue({
+					parties: mockParties,
+					unreadPrograms: [],
+					keepsBatchWhole: true
+				});
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(result).toEqual(expect.objectContaining({ keepsBatchWhole: true }));
+			});
+
 			it('should decode without a preview when the simulation yields none', async () => {
 				vi.mocked(simulateSolTransaction).mockResolvedValue({
 					parties: mockParties,
@@ -838,7 +854,8 @@ describe('wallet-connect.services', () => {
 			closesPayOthers: false,
 			unreadProgramsAcknowledged: true,
 			rentExemptMinimum: mockRentExemptMinimum,
-			opensAccountBeyondRent: false
+			opensAccountBeyondRent: false,
+			keepsBatchWhole: false
 		};
 
 		describe(`with method ${SESSION_REQUEST_SOL_SIGN_TRANSACTION}`, () => {
@@ -863,7 +880,8 @@ describe('wallet-connect.services', () => {
 				closesPayOthers: false,
 				unreadProgramsAcknowledged: true,
 				rentExemptMinimum: mockRentExemptMinimum,
-				opensAccountBeyondRent: false
+				opensAccountBeyondRent: false,
+				keepsBatchWhole: false
 			};
 
 			const expected = {
@@ -1011,7 +1029,8 @@ describe('wallet-connect.services', () => {
 				closesPayOthers: false,
 				unreadProgramsAcknowledged: true,
 				rentExemptMinimum: mockRentExemptMinimum,
-				opensAccountBeyondRent: false
+				opensAccountBeyondRent: false,
+				keepsBatchWhole: false
 			};
 
 			it('should show an error if the address is nullish', async () => {
@@ -1469,6 +1488,31 @@ describe('wallet-connect.services', () => {
 		describe('with an account opened above its rent inside an instruction', () => {
 			it('should refuse to sign and reject the request', async () => {
 				const result = await sign({ ...mockParams, opensAccountBeyondRent: true });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.ambiguous_transaction }
+				});
+
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(sendSignedTransaction).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: mockRequest.topic,
+					id: mockRequest.id,
+					error: UNEXPECTED_ERROR
+				});
+			});
+		});
+
+		// The run keeps a token batch whole when it returns calls made inside one of several steps,
+		// such as two transfers between the same accounts running their mint's hook. The message's
+		// mapping reads such a batch in full, so the decode's verdict on it is handed in.
+		describe('with a token batch the run keeps whole', () => {
+			it('should refuse to sign and reject the request', async () => {
+				const result = await sign({ ...mockParams, keepsBatchWhole: true });
 
 				expect(result).toEqual({ success: false });
 

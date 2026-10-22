@@ -117,6 +117,9 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	// costs. Only the run shows such an opening, and the decode already has it, so it is handed on
 	// for the same reason the simulated flag is.
 	opensAccountBeyondRent: boolean;
+	// Whether the run keeps a token batch whole, stating none of its steps. Only the run can say so,
+	// and the decode already has it, for the same reason.
+	keepsBatchWhole: boolean;
 };
 
 export const decode = async ({
@@ -177,7 +180,8 @@ export const decode = async ({
 		messageSummary,
 		parties: simulatedParties,
 		unreadPrograms,
-		opensAccountBeyondRent
+		opensAccountBeyondRent,
+		keepsBatchWhole
 	} = simulation ?? {};
 
 	// Name the mints and the programs the review is about to show. Best effort and awaited, since
@@ -285,6 +289,7 @@ export const decode = async ({
 		// Handed on to signing, which holds the message to the line this review was computed with.
 		...(nonNullish(rentExemptMinimum) && { rentExemptMinimum }),
 		...(opensAccountBeyondRent === true && { opensAccountBeyondRent }),
+		...(keepsBatchWhole === true && { keepsBatchWhole }),
 		parties
 	};
 };
@@ -532,6 +537,7 @@ export const sign = ({
 	unreadProgramsAcknowledged,
 	rentExemptMinimum,
 	opensAccountBeyondRent,
+	keepsBatchWhole,
 	...params
 }: WalletConnectSignTransactionParams): Promise<ResultSuccess> =>
 	execute({
@@ -607,7 +613,10 @@ export const sign = ({
 			// An account a program opens inside its own instruction with more than its size costs is
 			// refused on the same terms as an over-funded opening the message states itself: what
 			// sits above the rent is a payment with no destination, which no line can show.
-			if (ambiguous || opensAccountBeyondRent) {
+			//
+			// So is a token batch the run keeps whole. The review states none of its steps, so what
+			// they pay the wallet goes unstated, however fully the mapper read each of them.
+			if (ambiguous || opensAccountBeyondRent || keepsBatchWhole) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.ambiguous_transaction }
 				});

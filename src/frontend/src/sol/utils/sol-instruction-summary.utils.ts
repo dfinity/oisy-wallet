@@ -1896,6 +1896,24 @@ export const solOpensAccountBeyondRent = ({
 	);
 
 /**
+ * Whether a simulated run keeps a token batch whole: one whose contents cannot be read, or one of
+ * several steps the run returns calls made inside, which nothing puts in order with its steps.
+ *
+ * The list states such a batch as an instruction nobody read and none of its steps, so whatever a
+ * step pays the wallet goes unstated too, which the check on an application's close relies on. That
+ * holds whatever the message's own mapping read of the steps, which cannot say where the calls ran
+ * either.
+ */
+export const solKeepsBatchWhole = ({
+	instructions,
+	innerInstructions
+}: {
+	instructions: readonly unknown[];
+	innerInstructions: readonly SolInstructionGroup[];
+}): boolean =>
+	flatten({ instructions, innerInstructions }).some(({ wholeBatch }) => wholeBatch ?? false);
+
+/**
  * The instruction list the review shows, from a transaction's own instructions and the ones a
  * simulation says it would make inside them.
  *

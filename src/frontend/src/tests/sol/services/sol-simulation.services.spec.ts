@@ -29,6 +29,10 @@ import {
 } from '$tests/mocks/sol.mock';
 import { getCreateAssociatedTokenIdempotentInstruction } from '@solana-program/token';
 import {
+	getBatchInstruction as getToken2022BatchInstruction,
+	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction
+} from '@solana-program/token-2022';
+import {
 	AccountRole,
 	address,
 	appendTransactionMessageInstruction,
@@ -304,6 +308,56 @@ describe('sol-simulation.services', () => {
 			const result = await simulateSolTransaction(params(message([])));
 
 			expect(result).not.toHaveProperty('opensAccountBeyondRent');
+		});
+	});
+
+	// The run returns the calls a step of a token batch makes, such as a transfer running its mint's
+	// hook, after all of the batch's steps, so nothing puts them in order and the list keeps the batch
+	// whole. That holds however fully the message's own mapping reads the steps.
+	describe('a token batch', () => {
+		const transfer = (amount: bigint) =>
+			getToken2022TransferCheckedInstruction({
+				source: address(mockAtaAddress),
+				mint: address(mockSplAddress),
+				destination: address(mockAtaAddress2),
+				authority: address(mockSolAddress),
+				amount,
+				decimals: 6
+			});
+
+		const batchMessage = {
+			feePayer: { address: mockSolAddress },
+			instructions: [getToken2022BatchInstruction([transfer(1n), transfer(2n)])]
+		} as unknown as CompilableTransactionMessage;
+
+		const hookCall = [
+			{
+				index: 0,
+				instructions: [
+					{
+						programId: 'Hook111111111111111111111111111111111111111',
+						accounts: [],
+						data: '',
+						stackHeight: 2
+					}
+				]
+			}
+		] as unknown as SolanaSimulatedInnerInstructions;
+
+		it('should say so when the run keeps a batch of transfers between the same accounts whole', async () => {
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({ accounts: [], innerInstructions: hookCall })
+			);
+
+			const result = await simulateSolTransaction(params(batchMessage));
+
+			expect(result?.keepsBatchWhole).toBeTruthy();
+		});
+
+		it('should say nothing when the run makes no calls inside the batch', async () => {
+			const result = await simulateSolTransaction(params(batchMessage));
+
+			expect(result).not.toHaveProperty('keepsBatchWhole');
 		});
 	});
 

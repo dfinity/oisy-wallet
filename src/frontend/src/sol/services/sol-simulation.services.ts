@@ -14,6 +14,7 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import {
 	mapSolInstructionSummaries,
 	solClosingInstructionCandidates,
+	solKeepsBatchWhole,
 	solOpensAccountBeyondRent,
 	type SolInstructionGroup
 } from '$sol/utils/sol-instruction-summary.utils';
@@ -390,6 +391,10 @@ const simulate = async ({
 			innerInstructions: innerInstructionGroups,
 			rentExemptMinimum
 		}) && { opensAccountBeyondRent: true }),
+		...(solKeepsBatchWhole({
+			instructions: [...transactionMessage.instructions].map(asSolParsedRpcInstructionOrSelf),
+			innerInstructions: innerInstructionGroups
+		}) && { keepsBatchWhole: true }),
 		parties: {
 			...deriveSolTransferParties({
 				legs,
