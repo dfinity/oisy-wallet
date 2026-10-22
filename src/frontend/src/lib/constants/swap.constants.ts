@@ -55,6 +55,43 @@ export const LIFI_QUOTE_REFRESH_INTERVAL_MS = 30_000;
 // hold back every other offer, and a request that never settles would never be retried.
 export const LIFI_QUOTE_TIMEOUT_MS = 10_000;
 
+// Added to the gas the node estimates a LI.FI transaction at, which execution signs with: the
+// route's swaps can cost more when mined than when estimated, and a transaction that runs out of
+// gas still pays for it.
+export const LIFI_GAS_LIMIT_BUFFER_PERCENT = 20n;
+
+// Added to LI.FI's own gas estimate for the fee the user reviews, where execution adds the buffer
+// above to the node's: the node estimates the very same transaction a few percent higher (3–5 %
+// for USDC → ETH on Base, on every exchange, 2026-10-21), and a review priced below execution
+// refused every first attempt from an ERC-20.
+export const LIFI_REVIEW_GAS_BUFFER_PERCENT = 30n;
+
+// Added to the gas and the L1 data fee a refused execution carries back to the review, which
+// re-prices them at the fee per gas of the moment: the retry re-quotes and re-estimates, and an
+// estimate a little above the last must not refuse it again.
+export const LIFI_CARRIED_FEE_HEADROOM_PERCENT = 10n;
+
+// Added to the LI.FI fee "Max" leaves room for from a native source. The review prices the fee again,
+// at a fee per gas read anew, and on Ethereum that read came out higher than the form's 4–10 s
+// earlier in 39–64 % of samples, by up to 5.5 % (2026-10-22): an amount with no room above the
+// form's fee could not be confirmed.
+export const LIFI_MAX_FEE_HEADROOM_PERCENT = 10n;
+
+// A LI.FI row whose transaction the node refused outright is deleted, retried as a cycles mint's
+// is: a few attempts, a second apart.
+export const LIFI_ROW_DELETE_ATTEMPTS = 3;
+export const LIFI_ROW_DELETE_RETRY_DELAY_MILLIS = 1_000;
+
+// A LI.FI approval is waited for until mined, for up to three minutes: the allowance poll after it
+// gives up within two Ethereum blocks.
+export const LIFI_APPROVAL_RECEIPT_ATTEMPTS = 60;
+export const LIFI_APPROVAL_RECEIPT_POLL_MILLIS = 3_000;
+
+// An EVM swap's signed transaction is broadcast again, the same bytes, while its outcome is unknown:
+// a few attempts, a second apart.
+export const SWAP_BROADCAST_ATTEMPTS = 3;
+export const SWAP_BROADCAST_RETRY_DELAY_MILLIS = 1_000;
+
 // The active-transaction tick awaits each provider's poller in turn, so a stalled `/status` request
 // would stall every other provider's rows.
 export const LIFI_STATUS_TIMEOUT_MS = 10_000;

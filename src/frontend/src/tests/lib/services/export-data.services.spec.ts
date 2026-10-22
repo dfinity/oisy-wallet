@@ -1,3 +1,4 @@
+import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.services';
@@ -16,8 +17,10 @@ import {
 	type TransactionCsvRow
 } from '$lib/utils/export-data.utils';
 import { loadOlderSolTransactions } from '$sol/services/sol-history-pagers.services';
+import { solUnreadableTransactionsStore } from '$sol/stores/sol-unreadable-transactions.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
 
 vi.mock('$icp/services/ic-transactions.services', () => ({
 	loadNextIcTransactionsByOldest: vi.fn()
@@ -139,6 +142,10 @@ describe('export-data.services', () => {
 		mockSortTokenRows.mockImplementation((rows) => rows);
 		mockBuildTransactionRows.mockReturnValue([transactionRow]);
 		mockSortTransactionRows.mockImplementation((rows) => rows);
+
+		[SOLANA_TOKEN.id, USDC_TOKEN.id].forEach((tokenId) =>
+			solUnreadableTransactionsStore.reset(tokenId)
+		);
 	});
 
 	afterEach(() => {
@@ -352,6 +359,73 @@ describe('export-data.services', () => {
 			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
 				type: 'transactions_extended',
 				resultStatus: 'success'
+			});
+		});
+
+		describe('with a Solana transaction the history left out', () => {
+			const { signature } = mockSolSignatureResponse();
+
+			const endSolanaHistory = () =>
+				mockLoadOlderSolTransactions.mockImplementationOnce(({ signalEnd }) => {
+					signalEnd();
+
+					return Promise.resolve({ success: false });
+				});
+
+			// The pager resolves a page that leaves a transaction out, so only the store tells the export
+			// that its history stops short.
+			it('fails the export when the walk leaves a transaction of an exported token out', async () => {
+				mockLoadOlderSolTransactions.mockImplementationOnce(({ signalEnd }) => {
+					solUnreadableTransactionsStore.add({ tokenId: SOLANA_TOKEN.id, signatures: [signature] });
+					signalEnd();
+
+					return Promise.resolve({ success: true });
+				});
+
+				const result = await exportTransactionsCsv({
+					...defaultTransactionParams(),
+					tokens: [SOLANA_TOKEN]
+				});
+
+				expect(result).toBeFalsy();
+				expect(mockDownloadCsv).not.toHaveBeenCalled();
+				expect(mockToastsShow).toHaveBeenCalledExactlyOnceWith({
+					text: en.settings.error.export_failed,
+					level: 'error',
+					duration: 4000
+				});
+				expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
+					type: 'transactions_extended',
+					resultStatus: 'error',
+					errorCode: 'build_failed',
+					error: 'Transactions left out of the history of 1 token(s)'
+				});
+			});
+
+			it('fails the export for a transaction an earlier pass left out', async () => {
+				solUnreadableTransactionsStore.add({ tokenId: SOLANA_TOKEN.id, signatures: [signature] });
+				endSolanaHistory();
+
+				const result = await exportTransactionsCsv({
+					...defaultTransactionParams(),
+					tokens: [SOLANA_TOKEN]
+				});
+
+				expect(result).toBeFalsy();
+				expect(mockDownloadCsv).not.toHaveBeenCalled();
+			});
+
+			it('exports when only a token it does not export left a transaction out', async () => {
+				solUnreadableTransactionsStore.add({ tokenId: USDC_TOKEN.id, signatures: [signature] });
+				endSolanaHistory();
+
+				const result = await exportTransactionsCsv({
+					...defaultTransactionParams(),
+					tokens: [SOLANA_TOKEN]
+				});
+
+				expect(result).toBeTruthy();
+				expect(mockDownloadCsv).toHaveBeenCalledOnce();
 			});
 		});
 

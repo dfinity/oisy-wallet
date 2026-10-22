@@ -275,12 +275,18 @@ scale takes far more pixels off a full-width element; full-width rows don't
 shrink at all.
 
 The shared buttons (`button.scss`) and `row-feedback` rows change colour in
-150 ms ease-out; use the same for new feedback. The `tertiary-alt` and
+150 ms ease-out; use the same for new feedback. A row's pressed fill is the
+exception: it shows at once and fades back over 150 ms on release, because a
+quick click is held for about 80 ms and a fade would only peak as it is let
+go. `row-feedback`, `.nav-item` and `ListItemCheckbox` have it built in; a
+wrapper or `display: contents` row adds `child-pressed:duration-0` or
+`parent-pressed:duration-0` beside its fill. The `tertiary-alt` and
 `secondary-light` buttons and `row-feedback` rows press one step past their
 hover (`brand-subtle-10` → `-20`, or `-20` → `-30`), and a state that stays on,
 such as an open popover's button, may go a step further. `.dropdown-button`
-has no pressed fill of its own, and success, error and other palettes keep
-their own steps.
+presses to `brand-subtle-20` (the border too when bordered), a step past its
+hover and open fill, shown at once rather than faded in. Success, error and
+other palettes keep their own steps.
 
 ### Small controls: `hit-area`
 
@@ -300,9 +306,10 @@ screen (`pointer: coarse`), as the icon triggers of menus and dropdowns do.
   `row-feedback`, `pressed:` and `child-pressed:` exclude that, plain
   `active:` does not.
 - **`display: contents` buttons paint nothing.** Put `row-feedback` on the
-  element inside, plus `parent-pressed:bg-brand-subtle-20`: holding Space on
-  the focused button makes only the button `:active`, not the element inside
-  (as `Transaction` and `TipHistory` do).
+  element inside, plus `parent-pressed:bg-brand-subtle-20` and
+  `parent-pressed:duration-0`: holding Space on the focused button makes
+  only the button `:active`, not the element inside (as `Transaction` and
+  `TipHistory` do).
 - **`scale` makes the element the containing block** of its absolutely
   positioned children. If a child is positioned against something further
   out (the mobile bar's Finance circle), scale the child, not the element:

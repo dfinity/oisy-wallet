@@ -2,7 +2,11 @@ import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
-import { SYSTEM_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import {
+	STAKE_PROGRAM_ADDRESS,
+	SYSTEM_PROGRAM_ADDRESS,
+	TOKEN_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
 import {
@@ -27,12 +31,19 @@ import {
 	getSetComputeUnitPriceInstruction
 } from '@solana-program/compute-budget';
 import {
+	getInitializeCheckedInstruction,
+	getInitializeInstruction,
+	getSetLockupInstruction,
+	getWithdrawInstruction
+} from '@solana-program/stake';
+import {
 	getCreateAccountInstruction,
 	getCreateAccountWithSeedInstruction,
 	getTransferSolInstruction
 } from '@solana-program/system';
 import {
 	AuthorityType,
+	getBatchInstruction,
 	getBurnInstruction,
 	getCloseAccountInstruction,
 	getInitializeAccount3Instruction,
@@ -41,6 +52,7 @@ import {
 	getTransferCheckedInstruction
 } from '@solana-program/token';
 import {
+	getBatchInstruction as getToken2022BatchInstruction,
 	getBurnInstruction as getToken2022BurnInstruction,
 	getSetAuthorityInstruction as getToken2022SetAuthorityInstruction,
 	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction,
@@ -525,6 +537,54 @@ describe('sol-transactions.utils', () => {
 			).toStrictEqual({ amount: undefined, ambiguous: true });
 		});
 
+		it('should refuse a stake withdrawal that pays anywhere but the wallet', () => {
+			// the surrounding suite stubs the instruction mapper; this case exercises the real one
+			spyMapSolInstruction.mockRestore();
+
+			// The stake account is not the wallet, so neither what leaves it nor where it goes appears
+			// on the review: the refusal has to come from the instruction itself.
+			const instructions = [
+				getWithdrawInstruction({
+					stake: address(mockSolAddress3),
+					recipient: address(mockSolAddress2),
+					withdrawAuthority: createNoopSigner(address(mockSolAddress)),
+					args: 10_000_000_000n
+				})
+			];
+
+			expect(
+				mapSolTransactionMessage({
+					transactionMessage: { ...mockSolParsedTransactionMessage, instructions },
+					userAddress: mockSolAddress
+				})
+			).toStrictEqual({ amount: undefined, ambiguous: true });
+		});
+
+		it('should state a stake withdrawal that pays the wallet', () => {
+			// the surrounding suite stubs the instruction mapper; this case exercises the real one
+			spyMapSolInstruction.mockRestore();
+
+			const instructions = [
+				getWithdrawInstruction({
+					stake: address(mockSolAddress3),
+					recipient: address(mockSolAddress),
+					withdrawAuthority: createNoopSigner(address(mockSolAddress)),
+					args: 10_000_000_000n
+				})
+			];
+
+			expect(
+				mapSolTransactionMessage({
+					transactionMessage: { ...mockSolParsedTransactionMessage, instructions },
+					userAddress: mockSolAddress
+				})
+			).toStrictEqual({
+				amount: 10_000_000_000n,
+				source: mockSolAddress3,
+				destination: mockSolAddress
+			});
+		});
+
 		// A dApp wraps the SOL a trade spends by funding the wrapped SOL account it opens with it, and
 		// closes the account back to the wallet at the end. Raydium opens it at a seed-derived address.
 		describe('a wrapped SOL account the message closes back to the wallet', () => {
@@ -923,6 +983,44 @@ describe('sol-transactions.utils', () => {
 				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
 			});
 
+			it('should reject a `SetAuthority` carried in a token batch', () => {
+				const setAuthority = getSetAuthorityInstruction({
+					owned: address(mockAtaAddress),
+					owner: address(mockSolAddress),
+					authorityType: AuthorityType.AccountOwner,
+					newAuthority: address(mockSolAddress3)
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [dustTransfer, getBatchInstruction([setAuthority])]
+						},
+						userAddress: mockSolAddress
+					})
+				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
+			});
+
+			it('should reject a Token-2022 `Burn` carried in a token batch', () => {
+				const burn = getToken2022BurnInstruction({
+					account: address(mockAtaAddress),
+					mint: address(JUP_TOKEN.address),
+					authority: address(mockSolAddress),
+					amount: 1_000_000n
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [token2022DustTransfer, getToken2022BatchInstruction([burn])]
+						},
+						userAddress: mockSolAddress
+					})
+				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
+			});
+
 			it('should keep a lone dust transfer signable', () => {
 				expect(
 					mapSolTransactionMessage({
@@ -936,6 +1034,121 @@ describe('sol-transactions.utils', () => {
 					source: mockAtaAddress,
 					destination: mockSolAddress2,
 					tokenAddress: JUP_TOKEN.address
+				});
+			});
+		});
+
+		describe('with a stake account opened and initialised', () => {
+			// These exercise the real instruction mapper end to end.
+			beforeEach(() => {
+				spyMapSolInstruction.mockRestore();
+			});
+
+			// A stake account is 200 bytes. With a token account's 165 costing 2_039_280 lamports, its
+			// rent is 2_039_280 * (128 + 200) / (128 + 165) = 2_282_880 lamports.
+			const rentExemptMinimum = 2_039_280n;
+
+			const createStakeAccount = getCreateAccountInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: createNoopSigner(address(mockSolAddress3)),
+				lamports: 2_282_880n,
+				space: 200n,
+				programAddress: address(STAKE_PROGRAM_ADDRESS)
+			});
+
+			const initialize = ({ withdrawer }: { withdrawer: string }) =>
+				getInitializeInstruction({
+					stake: address(mockSolAddress3),
+					arg0: { staker: address(mockSolAddress), withdrawer: address(withdrawer) },
+					arg1: { unixTimestamp: ZERO, epoch: ZERO, custodian: address(SYSTEM_PROGRAM_ADDRESS) }
+				});
+
+			it('should refuse one initialised with somebody else as the withdraw authority', () => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [createStakeAccount, initialize({ withdrawer: mockSolAddress2 })]
+						},
+						userAddress: mockSolAddress,
+						rentExemptMinimum
+					})
+				).toStrictEqual({
+					amount: 2_282_880n,
+					payer: mockSolAddress,
+					ambiguous: true
+				});
+			});
+
+			it('should keep one initialised for the user signable, with the review marked incomplete', () => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [createStakeAccount, initialize({ withdrawer: mockSolAddress })]
+						},
+						userAddress: mockSolAddress,
+						rentExemptMinimum
+					})
+				).toStrictEqual({
+					amount: 2_282_880n,
+					payer: mockSolAddress,
+					unreviewed: true
+				});
+			});
+
+			it('should refuse one initialised with somebody else as both authorities by the checked form', () => {
+				const initializeChecked = getInitializeCheckedInstruction({
+					stake: address(mockSolAddress3),
+					stakeAuthority: address(mockSolAddress2),
+					withdrawAuthority: createNoopSigner(address(mockSolAddress2))
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [createStakeAccount, initializeChecked]
+						},
+						userAddress: mockSolAddress,
+						rentExemptMinimum
+					})
+				).toStrictEqual({
+					amount: 2_282_880n,
+					payer: mockSolAddress,
+					ambiguous: true
+				});
+			});
+
+			// While no lockup is in force the withdraw authority sets one alone, so an initialisation
+			// without a lockup does not keep the account free of one.
+			it('should refuse one initialised for the user and locked by the next instruction', () => {
+				const setLockup = getSetLockupInstruction({
+					stake: address(mockSolAddress3),
+					authority: createNoopSigner(address(mockSolAddress)),
+					unixTimestamp: null,
+					epoch: 1_000n,
+					custodian: address(mockSolAddress2)
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [
+								createStakeAccount,
+								initialize({ withdrawer: mockSolAddress }),
+								setLockup
+							]
+						},
+						userAddress: mockSolAddress,
+						rentExemptMinimum
+					})
+				).toStrictEqual({
+					amount: 2_282_880n,
+					payer: mockSolAddress,
+					unreviewed: true,
+					ambiguous: true
 				});
 			});
 		});

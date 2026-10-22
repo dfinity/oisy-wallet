@@ -72,6 +72,19 @@ describe('lifi.rest', () => {
 		timeout.mockRestore();
 	});
 
+	// Several requests in turn can share one, and it is not sent as part of the request.
+	it('should take the deadline it is given instead', async () => {
+		const { signal } = new AbortController();
+		const timeout = vi.spyOn(AbortSignal, 'timeout');
+
+		await fetchLifiQuote({ ...request, signal });
+
+		expect(timeout).not.toHaveBeenCalled();
+		expect(getQuote).toHaveBeenLastCalledWith(client, request, { signal });
+
+		timeout.mockRestore();
+	});
+
 	it('should ask for a status through the same client, with its own deadline', async () => {
 		const { signal } = new AbortController();
 		const timeout = vi.spyOn(AbortSignal, 'timeout').mockReturnValue(signal);
