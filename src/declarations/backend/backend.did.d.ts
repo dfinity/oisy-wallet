@@ -62,6 +62,16 @@ export type ActiveUserTransactionData =
 	| { OneSecIcpToEvm: OneSecIcpToEvmData }
 	| {
 			/**
+			 * LI.FI swap or bridge. A single variant covers every source chain (EVM,
+			 * Solana) and every route; the source tx hash, the route tool, LI.FI's
+			 * transaction id and the learned destination tx hash ride in
+			 * `external_refs`. The two chains are those of `source_token` /
+			 * `dest_token`.
+			 */
+			Lifi: LifiData;
+	  }
+	| {
+			/**
 			 * OISY Trade order-book swap. Both legs are Internet Computer ledgers, and
 			 * the row is opened *before* the deposit — it is the record that tells a
 			 * later session which token to pull back out of the DEX's custody: the
@@ -1277,6 +1287,21 @@ export interface InitArg {
 	 * deployments that pre-date this field.
 	 */
 	new_user_signups_allowed: [] | [boolean];
+}
+/**
+ * LI.FI swap payload. Settlement is tracked off-chain — first on the source
+ * chain, by transaction hash, then by LI.FI's status endpoint — so those
+ * pointers, and the learned destination tx hash, live in `external_refs`; only
+ * the values fixed at creation are captured here. No chain id is stored: the
+ * token ids already carry both chains.
+ */
+export interface LifiData {
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units.
+	 */
+	amount: bigint;
+	dest_token: TokenId;
 }
 /**
  * Which Liquidium lend/borrow action an active transaction tracks.

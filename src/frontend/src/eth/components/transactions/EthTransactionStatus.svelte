@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount, untrack } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { WebSocketListener } from '$lib/types/listener';
 	import type { Token } from '$lib/types/token';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		blockNumber: number;

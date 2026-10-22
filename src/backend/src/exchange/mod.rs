@@ -594,7 +594,7 @@ mod tests {
 
     #[test]
     fn custom_tokens_to_mark_empty_for_natives_only() {
-        assert!(custom_tokens_to_mark(&native_token_ids()).is_empty());
+        assert_eq!(custom_tokens_to_mark(&native_token_ids()), vec![]);
     }
 
     #[test]

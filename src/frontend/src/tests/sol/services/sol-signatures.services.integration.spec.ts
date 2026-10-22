@@ -168,7 +168,7 @@ describe('sol-signatures.services integration', () => {
 				cursor
 			});
 
-			const records = await resolveSolSignatures({
+			const { transactions: records } = await resolveSolSignatures({
 				address: wallet,
 				network: SolanaNetworks.mainnet,
 				tokens,

@@ -1,3 +1,6 @@
+import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { CKETH_ABI, CKETH_DEPOSIT_HASH } from '$eth/constants/cketh.constants';
 import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
 import {
 	ERC20_APPROVE_HASH,
@@ -15,19 +18,30 @@ import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect'
 import {
 	assertValidEthTypedData,
 	classifyWalletConnectEthCall,
+	classifyWalletConnectEthSendTransaction,
 	getEthTypedDataApproval,
 	getEthTypedDataMethods,
 	getSendParamsGas,
 	getSignedEthTypedData,
 	getSignParamsMessageTypedDataV4Hash,
+	getWalletConnectEthCkEthDeposit,
 	hasInvalidTypedData,
 	hasUnreviewableTypedData,
 	isEthSignTypedDataMethod,
 	isWalletConnectEthApproval,
 	toTypedDataDomainChainId,
+	toWalletConnectCkEthHelperContractAddress,
+	WalletConnectEthCkEthDepositError,
+	WalletConnectEthCkEthHelperUnconfirmedError,
 	WalletConnectEthTypedDataError
 } from '$eth/utils/wallet-connect.utils';
 import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
+import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
+import { mockPrincipal } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
+import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
+import { Principal } from '@icp-sdk/core/principal';
+import { Interface } from 'ethers/abi';
 import { TypedDataEncoder, type TypedDataField } from 'ethers/hash';
 
 // The fixtures below state chain 1 in their domain, so the session allowed to sign them is chain 1
@@ -446,6 +460,314 @@ describe('wallet-connect.utils', () => {
 		});
 	});
 
+	describe('ckETH helper contract deposits', () => {
+		// The ckETH helper contract on Ethereum mainnet, as the minter returns it.
+		const CKETH_HELPER = '0x7574eB42cA208A4f6960ECCAfDF186D627dCC175';
+
+		const OTHER_PRINCIPAL = Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai');
+
+		const encodeDeposit = (principal: Principal): string =>
+			new Interface(CKETH_ABI).encodeFunctionData('deposit', [
+				encodePrincipalToEthAddress(principal)
+			]);
+
+		const ownDeposit = encodeDeposit(mockPrincipal);
+
+		const minterInfoWithHelper = (helper: string) => ({
+			data: { ...mockCkMinterInfo, eth_helper_contract_address: toNullable(helper) },
+			certified: true
+		});
+
+		const minterInfo = minterInfoWithHelper(CKETH_HELPER);
+
+		const params = {
+			to: CKETH_HELPER,
+			data: ownDeposit,
+			networkId: ETHEREUM_NETWORK_ID,
+			minterInfo,
+			principal: mockPrincipal
+		};
+
+		describe('toWalletConnectCkEthHelperContractAddress', () => {
+			it.each([
+				{ network: 'Ethereum', networkId: ETHEREUM_NETWORK_ID },
+				{ network: 'Sepolia', networkId: SEPOLIA_NETWORK_ID }
+			])(
+				'should read the helper contract off the minter information on $network',
+				({ networkId }) => {
+					expect(toWalletConnectCkEthHelperContractAddress({ networkId, minterInfo })).toBe(
+						CKETH_HELPER
+					);
+				}
+			);
+
+			it('should name no helper contract on an EVM network without ckETH', () => {
+				expect(
+					toWalletConnectCkEthHelperContractAddress({ networkId: BASE_NETWORK_ID, minterInfo })
+				).toBeUndefined();
+			});
+
+			it.each([undefined, null])(
+				'should name no helper contract without minter information (%s)',
+				(missing) => {
+					expect(
+						toWalletConnectCkEthHelperContractAddress({
+							networkId: ETHEREUM_NETWORK_ID,
+							minterInfo: missing
+						})
+					).toBeUndefined();
+				}
+			);
+		});
+
+		describe('getWalletConnectEthCkEthDeposit', () => {
+			it('should return the principal of the user for a deposit to it', () => {
+				expect(getWalletConnectEthCkEthDeposit(params)?.toText()).toBe(mockPrincipal.toText());
+			});
+
+			it.each([
+				{ to: CKETH_HELPER.toLowerCase(), helper: CKETH_HELPER },
+				{ to: CKETH_HELPER, helper: CKETH_HELPER.toLowerCase() },
+				{ to: `0x${CKETH_HELPER.slice(2).toUpperCase()}`, helper: CKETH_HELPER }
+			])(
+				'should hold $to to the helper contract however its address is cased',
+				({ to, helper }) => {
+					const casedParams = { ...params, to, minterInfo: minterInfoWithHelper(helper) };
+
+					expect(() =>
+						getWalletConnectEthCkEthDeposit({
+							...casedParams,
+							data: encodeDeposit(OTHER_PRINCIPAL)
+						})
+					).toThrow(WalletConnectEthCkEthDepositError);
+
+					expect(getWalletConnectEthCkEthDeposit(casedParams)?.toText()).toBe(
+						mockPrincipal.toText()
+					);
+				}
+			);
+
+			it('should hold a deposit on Sepolia to its helper contract as well', () => {
+				expect(() =>
+					getWalletConnectEthCkEthDeposit({
+						...params,
+						networkId: SEPOLIA_NETWORK_ID,
+						data: encodeDeposit(OTHER_PRINCIPAL)
+					})
+				).toThrow(WalletConnectEthCkEthDepositError);
+			});
+
+			// The minter information in the store for another chain's token is still Ethereum's, so the
+			// address it names is not the ckETH helper there.
+			it('should not check a deposit on an EVM network without ckETH', () => {
+				expect(
+					getWalletConnectEthCkEthDeposit({
+						...params,
+						networkId: BASE_NETWORK_ID,
+						data: encodeDeposit(OTHER_PRINCIPAL)
+					})
+				).toBeUndefined();
+			});
+
+			it('should throw for a deposit to another principal', () => {
+				expect(() =>
+					getWalletConnectEthCkEthDeposit({ ...params, data: encodeDeposit(OTHER_PRINCIPAL) })
+				).toThrow(WalletConnectEthCkEthDepositError);
+			});
+
+			it('should throw for a deposit when no user is signed in', () => {
+				expect(() => getWalletConnectEthCkEthDeposit({ ...params, principal: undefined })).toThrow(
+					WalletConnectEthCkEthDepositError
+				);
+			});
+
+			it.each([
+				{ kind: 'a deposit followed by more bytes', data: `${ownDeposit}00` },
+				{ kind: 'a truncated deposit', data: ownDeposit.slice(0, -2) },
+				{ kind: 'a deposit naming no principal', data: `${CKETH_DEPOSIT_HASH}${'00'.repeat(32)}` },
+				// `getMinterAddress()`
+				{ kind: 'another function of the helper', data: '0x93e5d42a' },
+				{ kind: 'calldata too short to carry a selector', data: '0xab' }
+			])('should throw for $kind', ({ data }) => {
+				expect(() => getWalletConnectEthCkEthDeposit({ ...params, data })).toThrow(
+					WalletConnectEthCkEthDepositError
+				);
+			});
+
+			it.each([undefined, '', '0x'])(
+				'should return undefined for a request to the helper carrying no calldata (%s)',
+				(data) => {
+					expect(getWalletConnectEthCkEthDeposit({ ...params, data })).toBeUndefined();
+				}
+			);
+
+			it('should return undefined for a deposit to another contract', () => {
+				expect(
+					getWalletConnectEthCkEthDeposit({
+						...params,
+						to: SPENDER,
+						data: encodeDeposit(OTHER_PRINCIPAL)
+					})
+				).toBeUndefined();
+			});
+
+			describe('while the helper contract is not confirmed', () => {
+				const unconfirmed = [
+					{ state: 'not loaded', minterInfo: undefined },
+					{ state: 'not loadable', minterInfo: null },
+					{ state: 'not certified', minterInfo: { ...minterInfo, certified: false } }
+				];
+
+				it.each(unconfirmed)(
+					'should hold a deposit to another principal while the minter information is $state',
+					({ minterInfo }) => {
+						expect(() =>
+							getWalletConnectEthCkEthDeposit({
+								...params,
+								minterInfo,
+								data: encodeDeposit(OTHER_PRINCIPAL)
+							})
+						).toThrow(WalletConnectEthCkEthHelperUnconfirmedError);
+					}
+				);
+
+				it.each(unconfirmed)(
+					'should hold a deposit to the principal of the user while the minter information is $state',
+					({ minterInfo }) => {
+						expect(() => getWalletConnectEthCkEthDeposit({ ...params, minterInfo })).toThrow(
+							WalletConnectEthCkEthHelperUnconfirmedError
+						);
+					}
+				);
+
+				// Without the helper's address, a contract that is not the helper cannot be told apart from
+				// one that is.
+				it('should hold a deposit addressed to any contract', () => {
+					expect(() =>
+						getWalletConnectEthCkEthDeposit({
+							...params,
+							to: SPENDER,
+							minterInfo: undefined,
+							data: encodeDeposit(OTHER_PRINCIPAL)
+						})
+					).toThrow(WalletConnectEthCkEthHelperUnconfirmedError);
+				});
+
+				it('should hold a deposit on Sepolia as well', () => {
+					expect(() =>
+						getWalletConnectEthCkEthDeposit({
+							...params,
+							networkId: SEPOLIA_NETWORK_ID,
+							minterInfo: undefined
+						})
+					).toThrow(WalletConnectEthCkEthHelperUnconfirmedError);
+				});
+
+				it('should hold a deposit whatever the case of its selector', () => {
+					expect(() =>
+						getWalletConnectEthCkEthDeposit({
+							...params,
+							minterInfo: undefined,
+							data: `0x${ownDeposit.slice(2).toUpperCase()}`
+						})
+					).toThrow(WalletConnectEthCkEthHelperUnconfirmedError);
+				});
+
+				it('should not hold calldata that is not a deposit', () => {
+					expect(
+						getWalletConnectEthCkEthDeposit({
+							...params,
+							minterInfo: undefined,
+							data: `${ERC20_TRANSFER_HASH}${'de'.repeat(64)}`
+						})
+					).toBeUndefined();
+				});
+
+				it.each([undefined, '0x'])(
+					'should not hold a request carrying no calldata (%s)',
+					(data) => {
+						expect(
+							getWalletConnectEthCkEthDeposit({ ...params, minterInfo: undefined, data })
+						).toBeUndefined();
+					}
+				);
+
+				it('should not hold a deposit on an EVM network without ckETH', () => {
+					expect(
+						getWalletConnectEthCkEthDeposit({
+							...params,
+							networkId: BASE_NETWORK_ID,
+							minterInfo: undefined,
+							data: encodeDeposit(OTHER_PRINCIPAL)
+						})
+					).toBeUndefined();
+				});
+			});
+		});
+
+		describe('classifyWalletConnectEthSendTransaction', () => {
+			it('should classify a deposit to the principal of the user as a ckETH deposit', () => {
+				const call = classifyWalletConnectEthSendTransaction(params);
+
+				expect(call.type).toBe('ckEthDeposit');
+				expect(call.type === 'ckEthDeposit' && call.principal.toText()).toBe(
+					mockPrincipal.toText()
+				);
+			});
+
+			it('should refuse a deposit to another principal', () => {
+				expect(
+					classifyWalletConnectEthSendTransaction({
+						...params,
+						data: encodeDeposit(OTHER_PRINCIPAL)
+					})
+				).toEqual({ type: 'ckEthDepositRefused' });
+			});
+
+			it('should refuse calldata to the helper that is not a deposit', () => {
+				expect(
+					classifyWalletConnectEthSendTransaction({ ...params, data: `${ERC20_TRANSFER_HASH}00` })
+				).toEqual({ type: 'ckEthDepositRefused' });
+			});
+
+			it('should classify a request to the helper carrying no calldata as native', () => {
+				expect(classifyWalletConnectEthSendTransaction({ ...params, data: '0x' })).toEqual({
+					type: 'native'
+				});
+			});
+
+			it('should classify a request to another contract by its calldata alone', () => {
+				expect(
+					classifyWalletConnectEthSendTransaction({
+						...params,
+						to: SPENDER,
+						data: encodeDeposit(OTHER_PRINCIPAL)
+					})
+				).toEqual({ type: 'unknown', selector: CKETH_DEPOSIT_HASH });
+
+				expect(
+					classifyWalletConnectEthSendTransaction({
+						...params,
+						to: SPENDER,
+						data: `${ERC20_TRANSFER_HASH}${'de'.repeat(64)}`
+					})
+				).toEqual({ type: 'erc20Transfer' });
+			});
+
+			it('should hold a deposit while the helper contract is not confirmed', () => {
+				expect(
+					classifyWalletConnectEthSendTransaction({ ...params, minterInfo: undefined })
+				).toEqual({ type: 'ckEthHelperUnconfirmed' });
+			});
+
+			it('should classify a deposit on an EVM network without ckETH by its calldata alone', () => {
+				expect(
+					classifyWalletConnectEthSendTransaction({ ...params, networkId: BASE_NETWORK_ID })
+				).toEqual({ type: 'unknown', selector: CKETH_DEPOSIT_HASH });
+			});
+		});
+	});
+
 	describe('isWalletConnectEthApproval', () => {
 		it.each([
 			{ type: 'erc20Approve' as const },
@@ -460,7 +782,10 @@ describe('wallet-connect.utils', () => {
 		it.each([
 			{ type: 'native' as const },
 			{ type: 'erc20Transfer' as const },
-			{ type: 'unknown' as const, selector: '0xdeadbeef' }
+			{ type: 'unknown' as const, selector: '0xdeadbeef' },
+			{ type: 'ckEthDeposit' as const, principal: mockPrincipal },
+			{ type: 'ckEthDepositRefused' as const },
+			{ type: 'ckEthHelperUnconfirmed' as const }
 		])('should not treat $type as an approval', (call) => {
 			expect(isWalletConnectEthApproval(call)).toBeFalsy();
 		});

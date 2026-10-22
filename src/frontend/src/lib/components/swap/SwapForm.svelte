@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
@@ -35,6 +34,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -60,6 +60,8 @@
 		 * Left unset, "Max" is the balance minus the fee as before.
 		 */
 		maxAmount?: bigint;
+		// Called when the user presses "Max", before it is applied.
+		onMax?: () => void;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
 		onClose: () => void;
 		onNext: () => void;
@@ -77,6 +79,7 @@
 		onCustomValidate,
 		fee,
 		maxAmount,
+		onMax,
 		onShowTokensList,
 		onClose,
 		onNext
@@ -89,12 +92,12 @@
 		sourceTokenExchangeRate,
 		sourceTokenBalance,
 		destinationTokenExchangeRate,
+		amountSetToMax,
 		switchTokens
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	let amountSetToMax = $state(false);
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
@@ -173,7 +176,6 @@
 		const newSourceDecimals = $destinationToken?.decimals;
 
 		swapAmountsStore.reset();
-		amountSetToMax = false;
 
 		swapAmount =
 			nonNullish(tempAmount) && nonNullish(newSourceDecimals)
@@ -208,7 +210,7 @@
 							token={$sourceToken}
 							bind:amount={swapAmount}
 							bind:errorType
-							bind:amountSetToMax
+							bind:amountSetToMax={$amountSetToMax}
 						>
 							{#snippet title()}{$i18n.tokens.text.source_token_title}{/snippet}
 
@@ -233,8 +235,9 @@
 											error={nonNullish(errorType)}
 											{fee}
 											{maxAmount}
+											{onMax}
 											token={$sourceToken}
-											bind:amountSetToMax
+											bind:amountSetToMax={$amountSetToMax}
 											bind:amount={swapAmount}
 										/>
 									{:else}

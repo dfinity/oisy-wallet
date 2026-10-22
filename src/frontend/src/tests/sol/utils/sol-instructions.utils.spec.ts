@@ -49,11 +49,19 @@ import {
 } from '@solana-program/compute-budget';
 import { getAddMemoInstruction } from '@solana-program/memo';
 import {
+	getAuthorizeCheckedInstruction,
+	getAuthorizeCheckedWithSeedInstruction,
 	getAuthorizeInstruction,
+	getAuthorizeWithSeedInstruction,
 	getDelegateStakeInstruction,
 	getGetMinimumDelegationInstruction,
+	getInitializeCheckedInstruction,
+	getInitializeInstruction,
+	getSetLockupCheckedInstruction,
+	getSetLockupInstruction,
 	getWithdrawInstruction,
-	StakeAuthorize
+	StakeAuthorize,
+	type LockupArgs
 } from '@solana-program/stake';
 import {
 	getAdvanceNonceAccountInstruction,
@@ -93,6 +101,7 @@ import {
 	AuthorityType as Token2022AuthorityType
 } from '@solana-program/token-2022';
 import {
+	AccountRole,
 	address,
 	createNoopSigner,
 	type Base58EncodedBytes,
@@ -1922,12 +1931,14 @@ describe('sol-instructions.utils', () => {
 
 		describe('with a Stake instruction', () => {
 			const mockStakeAuthority = createNoopSigner(address(mockSolAddress));
+			// Distinct from the recipient, so a parser reading the wrong position cannot pass unnoticed.
+			const mockWithdrawAuthority = createNoopSigner(address(mockSolAddress3));
 
 			it('should state a Withdraw instruction in full', () => {
 				const instruction = getWithdrawInstruction({
 					stake: address(mockSolAddress2),
 					recipient: address(mockSolAddress),
-					withdrawAuthority: mockStakeAuthority,
+					withdrawAuthority: mockWithdrawAuthority,
 					args: 5_000_000n
 				});
 
@@ -1939,6 +1950,66 @@ describe('sol-instructions.utils', () => {
 
 				expect(parseSolStakeInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
 				expect(console.warn).not.toHaveBeenCalled();
+			});
+
+			// Since stake program v5 the sysvar accounts are optional and the builders no longer emit
+			// them, but dApps on older clients still send the legacy layout. The parser reads accounts
+			// by position, so the review must keep stating the same parties for both layouts.
+			describe('in the legacy account layout', () => {
+				const clockSysvar = {
+					address: address('SysvarC1ock11111111111111111111111111111111'),
+					role: AccountRole.READONLY
+				};
+				const stakeHistorySysvar = {
+					address: address('SysvarStakeHistory1111111111111111111111111'),
+					role: AccountRole.READONLY
+				};
+				const stakeConfig = {
+					address: address('StakeConfig11111111111111111111111111111111'),
+					role: AccountRole.READONLY
+				};
+
+				it('should state a Withdraw instruction in full', () => {
+					const withdraw = getWithdrawInstruction({
+						stake: address(mockSolAddress2),
+						recipient: address(mockSolAddress),
+						withdrawAuthority: mockWithdrawAuthority,
+						args: 5_000_000n
+					});
+					const [stake, recipient, withdrawAuthority] = withdraw.accounts;
+					const instruction = {
+						...withdraw,
+						accounts: [stake, recipient, clockSysvar, stakeHistorySysvar, withdrawAuthority]
+					};
+
+					expect(mapSolInstruction({ instruction })).toStrictEqual({
+						amount: 5_000_000n,
+						source: mockSolAddress2,
+						destination: mockSolAddress
+					});
+
+					expect(console.warn).not.toHaveBeenCalled();
+				});
+
+				it('should mark a DelegateStake instruction unreviewed', () => {
+					const delegateStake = getDelegateStakeInstruction({
+						stake: address(mockSolAddress2),
+						vote: address(mockSolAddress),
+						stakeAuthority: mockStakeAuthority
+					});
+					const [stake, vote, stakeAuthority] = delegateStake.accounts;
+					const instruction = {
+						...delegateStake,
+						accounts: [stake, vote, clockSysvar, stakeHistorySysvar, stakeConfig, stakeAuthority]
+					};
+
+					expect(mapSolInstruction({ instruction })).toStrictEqual({
+						amount: undefined,
+						unreviewed: true
+					});
+
+					expect(console.warn).not.toHaveBeenCalled();
+				});
 			});
 
 			// Handing over the withdraw authority hands over everything the account holds, and the
@@ -1962,6 +2033,47 @@ describe('sol-instructions.utils', () => {
 				}
 			);
 
+			it.each([
+				{
+					name: 'AuthorizeChecked',
+					instruction: getAuthorizeCheckedInstruction({
+						stake: address(mockSolAddress2),
+						authority: mockStakeAuthority,
+						newAuthority: createNoopSigner(address(mockSolAddress3)),
+						stakeAuthorize: StakeAuthorize.Withdrawer
+					})
+				},
+				{
+					name: 'AuthorizeWithSeed',
+					instruction: getAuthorizeWithSeedInstruction({
+						stake: address(mockSolAddress2),
+						base: mockStakeAuthority,
+						newAuthorizedPubkey: address(mockSolAddress3),
+						stakeAuthorize: StakeAuthorize.Withdrawer,
+						authoritySeed: 'seed',
+						authorityOwner: address(SYSTEM_PROGRAM_ADDRESS)
+					})
+				},
+				{
+					name: 'AuthorizeCheckedWithSeed',
+					instruction: getAuthorizeCheckedWithSeedInstruction({
+						stake: address(mockSolAddress2),
+						base: mockStakeAuthority,
+						newAuthority: createNoopSigner(address(mockSolAddress3)),
+						stakeAuthorize: StakeAuthorize.Withdrawer,
+						authoritySeed: 'seed',
+						authorityOwner: address(SYSTEM_PROGRAM_ADDRESS)
+					})
+				}
+			])('should fail closed on an $name instruction', ({ instruction }) => {
+				expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+
+				expect(console.warn).not.toHaveBeenCalled();
+			});
+
 			it('should ignore a GetMinimumDelegation instruction', () => {
 				const instruction = getGetMinimumDelegationInstruction();
 
@@ -1978,13 +2090,216 @@ describe('sol-instructions.utils', () => {
 				const instruction = getDelegateStakeInstruction({
 					stake: address(mockSolAddress2),
 					vote: address(mockSolAddress),
-					unused: address(mockSolAddress),
 					stakeAuthority: mockStakeAuthority
 				});
 
 				expect(mapSolInstruction({ instruction })).toStrictEqual({
 					amount: undefined,
 					unreviewed: true
+				});
+
+				expect(console.warn).not.toHaveBeenCalled();
+			});
+
+			describe('initialising a stake account', () => {
+				// What every staking flow passes: no date, no epoch, and the all-zero address as custodian.
+				const noLockup: LockupArgs = {
+					unixTimestamp: ZERO,
+					epoch: ZERO,
+					custodian: address(SYSTEM_PROGRAM_ADDRESS)
+				};
+
+				const initialize = ({
+					staker = mockSolAddress,
+					withdrawer = mockSolAddress,
+					lockup = noLockup
+				}: {
+					staker?: string;
+					withdrawer?: string;
+					lockup?: LockupArgs;
+				} = {}) =>
+					getInitializeInstruction({
+						stake: address(mockSolAddress2),
+						arg0: { staker: address(staker), withdrawer: address(withdrawer) },
+						arg1: lockup
+					});
+
+				// Nothing is handed to anybody, and the account then holds stake the summary has no
+				// vocabulary for, which is what every other stake operation says too.
+				it('should mark an Initialize instruction naming the user for both authorities unreviewed', () => {
+					const instruction = initialize();
+
+					expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+						amount: undefined,
+						unreviewed: true
+					});
+
+					expect(parseSolStakeInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
+					expect(console.warn).not.toHaveBeenCalled();
+				});
+
+				// The same handover an Authorize instruction makes, made when the account is set up.
+				it.each([
+					{ role: 'stake authority', authorities: { staker: mockSolAddress3 } },
+					{ role: 'withdraw authority', authorities: { withdrawer: mockSolAddress3 } },
+					{
+						role: 'stake and withdraw authority',
+						authorities: { staker: mockSolAddress3, withdrawer: mockSolAddress3 }
+					}
+				])(
+					'should fail closed on an Initialize instruction naming somebody else as the $role',
+					({ authorities }) => {
+						expect(
+							mapSolInstruction({
+								instruction: initialize(authorities),
+								userAddress: mockSolAddress
+							})
+						).toStrictEqual({
+							amount: undefined,
+							ambiguous: true
+						});
+
+						expect(console.warn).not.toHaveBeenCalled();
+					}
+				);
+
+				it('should fail closed on an Initialize instruction when the user is not known', () => {
+					expect(mapSolInstruction({ instruction: initialize() })).toStrictEqual({
+						amount: undefined,
+						ambiguous: true
+					});
+				});
+
+				// A lockup holds the balance until its date or epoch, and only the custodian can lift or
+				// extend it meanwhile. The summary cannot state when the balance becomes withdrawable.
+				it.each([
+					{
+						until: 'a date',
+						lockup: { unixTimestamp: 1_900_000_000n, custodian: address(mockSolAddress3) }
+					},
+					{ until: 'an epoch', lockup: { epoch: 1_000n, custodian: address(mockSolAddress3) } },
+					{
+						until: 'a date, with the user as custodian',
+						lockup: { unixTimestamp: 1_900_000_000n, custodian: address(mockSolAddress) }
+					}
+				])(
+					'should fail closed on an Initialize instruction setting a lockup until $until',
+					({ lockup }) => {
+						expect(
+							mapSolInstruction({
+								instruction: initialize({ lockup: { ...noLockup, ...lockup } }),
+								userAddress: mockSolAddress
+							})
+						).toStrictEqual({
+							amount: undefined,
+							ambiguous: true
+						});
+					}
+				);
+
+				// A custodian decides only while a lockup is in force, and one with no date and no epoch
+				// never is.
+				it('should read a custodian with no lockup set as no lockup', () => {
+					expect(
+						mapSolInstruction({
+							instruction: initialize({
+								lockup: { ...noLockup, custodian: address(mockSolAddress3) }
+							}),
+							userAddress: mockSolAddress
+						})
+					).toStrictEqual({
+						amount: undefined,
+						unreviewed: true
+					});
+				});
+
+				const initializeChecked = ({
+					stakeAuthority = mockSolAddress,
+					withdrawAuthority = mockSolAddress
+				}: {
+					stakeAuthority?: string;
+					withdrawAuthority?: string;
+				} = {}) =>
+					getInitializeCheckedInstruction({
+						stake: address(mockSolAddress2),
+						stakeAuthority: address(stakeAuthority),
+						withdrawAuthority: createNoopSigner(address(withdrawAuthority))
+					});
+
+				it('should mark an InitializeChecked instruction naming the user for both authorities unreviewed', () => {
+					expect(
+						mapSolInstruction({ instruction: initializeChecked(), userAddress: mockSolAddress })
+					).toStrictEqual({
+						amount: undefined,
+						unreviewed: true
+					});
+
+					expect(console.warn).not.toHaveBeenCalled();
+				});
+
+				it.each([
+					{ role: 'stake authority', authorities: { stakeAuthority: mockSolAddress3 } },
+					{ role: 'withdraw authority', authorities: { withdrawAuthority: mockSolAddress3 } },
+					{
+						role: 'stake and withdraw authority',
+						authorities: { stakeAuthority: mockSolAddress3, withdrawAuthority: mockSolAddress3 }
+					}
+				])(
+					'should fail closed on an InitializeChecked instruction naming somebody else as the $role',
+					({ authorities }) => {
+						expect(
+							mapSolInstruction({
+								instruction: initializeChecked(authorities),
+								userAddress: mockSolAddress
+							})
+						).toStrictEqual({
+							amount: undefined,
+							ambiguous: true
+						});
+
+						expect(console.warn).not.toHaveBeenCalled();
+					}
+				);
+			});
+
+			// A lockup set once the account exists holds the balance as one set at initialisation
+			// does, and while none is in force the withdraw authority sets it alone. Refused whatever
+			// it sets, the wallet as custodian included.
+			it.each([
+				{
+					name: 'SetLockup instruction',
+					instruction: getSetLockupInstruction({
+						stake: address(mockSolAddress2),
+						authority: mockStakeAuthority,
+						unixTimestamp: null,
+						epoch: 1_000n,
+						custodian: address(mockSolAddress3)
+					})
+				},
+				{
+					name: 'SetLockupChecked instruction',
+					instruction: getSetLockupCheckedInstruction({
+						stake: address(mockSolAddress2),
+						authority: mockStakeAuthority,
+						newAuthority: createNoopSigner(address(mockSolAddress3)),
+						unixTimestamp: null,
+						epoch: 1_000n
+					})
+				},
+				{
+					name: 'SetLockup instruction naming the wallet as custodian',
+					instruction: getSetLockupInstruction({
+						stake: address(mockSolAddress2),
+						authority: mockStakeAuthority,
+						unixTimestamp: 1_900_000_000n,
+						epoch: null,
+						custodian: address(mockSolAddress)
+					})
+				}
+			])('should fail closed on a $name', ({ instruction }) => {
+				expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
 				});
 
 				expect(console.warn).not.toHaveBeenCalled();

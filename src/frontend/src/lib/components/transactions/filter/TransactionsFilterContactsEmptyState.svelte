@@ -32,7 +32,6 @@
 		>{$i18n.transaction.filter.contacts_empty_description}<br />
 		<ExternalLink
 			ariaLabel={$i18n.core.text.learn_more}
-			color="blue"
 			href={learnMoreUrl}
 			iconVisible={false}
 			trackEvent={buildLearnMoreEvent({

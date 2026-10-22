@@ -20,6 +20,9 @@ export type SolInstructionSummaryKind =
 	// An account opened for an application's own program, its rent paid by the user. The account is
 	// the program's, and the rent is what the user hands over to open it.
 	| 'createAccount'
+	// An application's account its program emptied, every lamport of it paid back into the user's
+	// wallet. The program moves them itself, so only the run's account states say it happened.
+	| 'closeAccount'
 	| 'closeTokenAccount'
 	| 'approve'
 	| 'revoke'
@@ -57,8 +60,11 @@ export interface SolInstructionSummary {
 	own?: boolean;
 	// The account created, closed, approved or handed over.
 	account?: SolAddress;
-	// Lamports the user pays to open an account.
+	// Lamports it costs to open an account.
 	rent?: bigint;
+	// Who funded the opening, which is not always the user: a sender opening the recipient's account
+	// pays its rent.
+	payer?: SolAddress;
 	// Lamports an account returns when it is closed. Closing hands the destination the account's
 	// whole balance, so for a wrapped SOL account this is the rent-exempt reserve plus the SOL that
 	// was wrapped, not the rent alone.
@@ -86,6 +92,12 @@ export interface SolInstructionSummary {
 	// The name that program publishes for itself, when it publishes one. Its own claim about
 	// itself, attested by nobody: a label for the address, never a statement about what it does.
 	programName?: string;
+	// The program that made a transfer inside the instruction it hangs under, when that is another
+	// program than the one the heading names and not one of the known programs: a pool OISY cannot
+	// read, which the review's notice about such programs names.
+	via?: SolAddress;
+	// The name that program publishes for itself, when it publishes one. A label, as above.
+	viaName?: string;
 	// The lines of a single instruction the wallet could not read, the legs of a routed swap among
 	// them. They hang under it rather than sitting flat among the top-level effects, which is what
 	// keeps a four-leg route from reading as four unrelated transfers, and a line made inside an

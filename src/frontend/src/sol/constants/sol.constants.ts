@@ -30,6 +30,10 @@ export const SOLANA_TRANSACTION_FEE_IN_LAMPORTS = 5_000n;
 
 export const MICROLAMPORTS_PER_LAMPORT = 1_000_000n;
 
+// The largest amount an SPL token account holds or approves (a `u64`). An approval of exactly this
+// much is how applications ask for an unlimited allowance.
+export const SPL_TOKEN_MAX_AMOUNT = (1n << 64n) - 1n;
+
 // When a transaction does not request a compute unit limit, the runtime budgets a fixed
 // amount per instruction, capped transaction-wide. The prioritisation fee is charged on the
 // requested (or defaulted) limit, not on the units actually consumed.
@@ -57,6 +61,13 @@ export const SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES = 128n;
 // past this many the preview is dropped rather than truncated, because a truncated preview
 // would report "no changes" for accounts it never looked at.
 export const SOLANA_SIMULATION_MAX_ACCOUNTS = 60;
+
+// A close an application's program makes inside one of several calls naming the account goes to
+// the last of them only after a second run of the message up to it, one run per distinct call.
+// Nothing short of the account limit bounds how many a crafted message asks for, and the timeout
+// below does not cancel runs in flight, so past this many none is started and those closes stay
+// unlisted.
+export const SOLANA_SIMULATION_MAX_CLOSE_RUNS = 5;
 
 // The preview is fetched before the review renders, so a slow or unresponsive RPC would hold
 // the request behind it. Past this it is abandoned and the review renders without it.
