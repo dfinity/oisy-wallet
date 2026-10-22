@@ -1139,6 +1139,7 @@ interface I18nSwap {
 		swap_replaced_or_dropped: string;
 		near_intents_quote_unverified: string;
 		near_intents_quote_expired: string;
+		near_intents_deposit_expired: string;
 		near_intents_quote_deposit_memo: string;
 		oisy_trade_not_trackable: string;
 		oisy_trade_order_killed: string;
@@ -1890,6 +1891,7 @@ interface I18nTransaction {
 		instruction_unwrap: string;
 		instruction_unwrap_all_to: string;
 		instruction_unwrap_all_from: string;
+		instruction_receive_excess_from: string;
 		instruction_create_account: string;
 		instruction_create_program_account: string;
 		instruction_close_program_account: string;

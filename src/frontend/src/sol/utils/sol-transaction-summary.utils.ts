@@ -392,7 +392,10 @@ export const solWalletLamportsStated = ({
 	userAddress: OptionSolAddress;
 }): bigint | undefined =>
 	flattenInstructions(instructions).reduce<bigint | undefined>(
-		(acc, { kind, amount, tokenAddress, rent, payer, returned, counterparty, unwrapsToWallet }) => {
+		(
+			acc,
+			{ kind, amount, tokenAddress, rent, payer, returned, counterparty, unwrapsToWallet, account }
+		) => {
 			if (isNullish(acc)) {
 				return acc;
 			}
@@ -405,6 +408,12 @@ export const solWalletLamportsStated = ({
 
 			// SOL itself, not a token: wrapped SOL moves between token accounts, not the wallet.
 			if ((kind === 'send' || kind === 'receive') && isNullish(tokenAddress)) {
+				// Paid into another account of the user's, it stays there, and reaches the wallet only
+				// with the close that pays it on, which states it.
+				if (kind === 'receive' && nonNullish(account) && account !== userAddress) {
+					return acc;
+				}
+
 				return isNullish(amount) ? undefined : kind === 'send' ? acc - amount : acc + amount;
 			}
 
@@ -711,7 +720,8 @@ export const formatSolInstructionSummary = ({
 		via,
 		viaName,
 		children,
-		unwrapsAll
+		unwrapsAll,
+		withdrawsExcess
 	},
 	i18n,
 	symbolOf,
@@ -782,6 +792,22 @@ export const formatSolInstructionSummary = ({
 					: i18n.transaction.text.instruction_unwrap_all_from,
 				{ $symbol: symbolOf(tokenAddress) }
 			),
+			...(nonNullish(ownDetail) && { detail: ownDetail }),
+			...(nonNullish(viaTrailing) && { trailing: viaTrailing })
+		};
+	}
+
+	// The excess lamports a token account pays the wallet, which no instruction states the amount of:
+	// the line still says that SOL arrives, and from which account, rather than that a program was
+	// called.
+	if (
+		kind === 'receive' &&
+		isNullish(value) &&
+		(withdrawsExcess ?? false) &&
+		nonNullish(counterparty)
+	) {
+		return {
+			text: i18n.transaction.text.instruction_receive_excess_from,
 			...(nonNullish(ownDetail) && { detail: ownDetail }),
 			...(nonNullish(viaTrailing) && { trailing: viaTrailing })
 		};

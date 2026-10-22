@@ -841,6 +841,150 @@ describe('sol-simulation.services', () => {
 			});
 		});
 
+		// The program also has the wallet paid as much as the closed account held, out of an account
+		// no application holds: a seed-derived account, a nonce account, or a token account handing
+		// over its excess lamports. That inflow is the payout's, and only what the wallet gains
+		// beyond it can be the close's.
+		describe('next to SOL paid into the wallet out of a System or token account', () => {
+			const payer = mockAtaAddress3;
+
+			const withPayer = {
+				feePayer: { address: mockSolAddress },
+				instructions: [
+					{
+						programAddress: application,
+						accounts: [
+							{ address: mockSolAddress2, role: AccountRole.WRITABLE },
+							{ address: mockSolAddress, role: AccountRole.WRITABLE_SIGNER },
+							{ address: payer, role: AccountRole.WRITABLE }
+						]
+					}
+				]
+			} as unknown as CompilableTransactionMessage;
+
+			const SYSTEM = '11111111111111111111111111111111';
+
+			const withSeed = {
+				program: 'system',
+				programId: SYSTEM,
+				parsed: {
+					type: 'transferWithSeed',
+					info: {
+						source: payer,
+						sourceBase: mockSolAddress3,
+						destination: mockSolAddress,
+						lamports: Number(rent),
+						sourceSeed: 'vault',
+						sourceOwner: SYSTEM
+					}
+				}
+			};
+
+			const fromNonce = {
+				program: 'system',
+				programId: SYSTEM,
+				parsed: {
+					type: 'withdrawFromNonce',
+					info: {
+						nonceAccount: payer,
+						destination: mockSolAddress,
+						nonceAuthority: mockSolAddress3,
+						lamports: Number(rent)
+					}
+				}
+			};
+
+			const excess = {
+				program: 'spl-token',
+				programId: TOKEN_PROGRAM_ADDRESS,
+				parsed: {
+					type: 'withdrawExcessLamports',
+					info: { source: payer, destination: mockSolAddress, authority: mockSolAddress3 }
+				}
+			};
+
+			// A token account holds its excess on top of its rent, and hands over that alone.
+			const run = async ({ payout, walletAfter }: { payout: object; walletAfter: bigint }) => {
+				const fromToken = payout === excess;
+				const tokenHolding = tokenAccount({ owner: mockSolAddress3, amount: ZERO });
+
+				vi.mocked(getMultipleAccountsInfo).mockResolvedValue([
+					systemAccount(1_000_000n),
+					appAccount,
+					fromToken
+						? ({
+								...tokenHolding,
+								lamports: 2_039_280n + rent
+							} as unknown as SolanaParsedAccountsInfo[number])
+						: systemAccount(100_000_000n)
+				]);
+				vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+					simulated({
+						accounts: [
+							systemAccount(walletAfter),
+							null,
+							fromToken ? tokenHolding : systemAccount(100_000_000n - rent)
+						],
+						innerInstructions: [
+							{ index: 0, instructions: [payout] }
+						] as unknown as SolanaSimulatedInnerInstructions,
+						fee
+					})
+				);
+
+				return await simulateSolTransaction(params(withPayer));
+			};
+
+			it.each([
+				{ name: 'a seed-derived account', payout: withSeed, stated: { amount: rent } },
+				{ name: 'a nonce account', payout: fromNonce, stated: { amount: rent } },
+				{
+					name: 'a token account handing over its excess lamports',
+					payout: excess,
+					stated: { withdrawsExcess: true }
+				}
+			])(
+				'should list no close paid somebody else next to SOL paid by $name',
+				async ({ payout, stated }) => {
+					const result = await run({ payout, walletAfter: 1_000_000n + rent - fee });
+
+					expect(result?.instructions).toStrictEqual([
+						{
+							kind: 'route',
+							program: application,
+							children: [{ kind: 'receive', ...stated, counterparty: payer, own: false }]
+						}
+					]);
+				}
+			);
+
+			it.each([
+				{ name: 'a seed-derived account', payout: withSeed },
+				{ name: 'a nonce account', payout: fromNonce }
+			])(
+				'should list the close when it paid the wallet next to SOL paid by $name',
+				async ({ payout }) => {
+					const result = await run({ payout, walletAfter: 1_000_000n + rent + rent - fee });
+
+					expect(result?.instructions).toStrictEqual([
+						{
+							kind: 'route',
+							program: application,
+							children: [
+								{ kind: 'receive', amount: rent, counterparty: payer, own: false },
+								{
+									kind: 'closeAccount',
+									account: mockSolAddress2,
+									program: application,
+									returned: rent
+								}
+							]
+						}
+					]);
+				}
+			);
+		});
+
 		// Nothing then says where the rent went, and the instruction stays one nothing describes.
 		it('should leave the instruction undescribed when the rent went elsewhere', async () => {
 			const result = await run({ walletAfter: 1_000_000n - fee });

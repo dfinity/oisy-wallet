@@ -3,7 +3,7 @@ import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolInstructionsList from '$sol/components/transactions/SolInstructionsList.svelte';
-import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import { SYSTEM_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 import { SolanaNetworks } from '$sol/types/network';
@@ -177,6 +177,34 @@ describe('SolInstructionsList', () => {
 		expect(getByTestId('sol-instructions-list')).toHaveTextContent('0.005');
 	});
 
+	// SOL somebody else pays into a wrapped SOL account of the user's is lamports as well, so it reads
+	// in the same precision wherever wrapped SOL is not listed.
+	it('should state SOL paid into a wrapped SOL account in the precision of SOL where wrapped SOL is not listed', () => {
+		const [receive] = mapSolInstructionSummaries({
+			instructions: [
+				{
+					program: 'system',
+					programId: SYSTEM_PROGRAM_ADDRESS,
+					parsed: {
+						type: 'transfer',
+						info: { source: mockSolAddress2, destination: mockAtaAddress3, lamports: 5_000_000 }
+					}
+				}
+			],
+			ownedAddresses: [mockSolAddress, mockAtaAddress3],
+			userAddress: mockSolAddress,
+			addressToToken: { [mockAtaAddress3]: WSOL_TOKEN.address }
+		});
+
+		expect(receive).toHaveProperty('tokenAddress', WSOL_TOKEN.address);
+
+		const { getByTestId } = render(SolInstructionsList, {
+			props: { instructions: [receive], token: SOLANA_DEVNET_TOKEN, userAddress: mockSolAddress }
+		});
+
+		expect(getByTestId('sol-instructions-list')).toHaveTextContent('0.005');
+	});
+
 	// Read from the message alone, nothing says how much an unwrap of everything moves, but the line
 	// still says what leaves the account and for whom, rather than that a program was called.
 	it('should state an unwrap of everything nobody read the amount of as one', () => {
@@ -209,6 +237,41 @@ describe('SolInstructionsList', () => {
 			replacePlaceholders(en.transaction.text.instruction_unwrap_all_to, {
 				$symbol: en.transaction.text.unknown_token
 			})
+		);
+		expect(getByTestId('sol-instructions-list')).not.toHaveTextContent(
+			en.transaction.text.summary_other
+		);
+	});
+
+	// Excess lamports paid to the wallet come by an amount no instruction states, and the row says that
+	// SOL arrives from the account rather than that the account is a program being called.
+	it('should state excess lamports paid to the wallet as SOL received from their account', () => {
+		const instructions = mapSolInstructionSummaries({
+			instructions: [
+				{
+					program: 'spl-token',
+					programId: TOKEN_PROGRAM_ADDRESS,
+					parsed: {
+						type: 'withdrawExcessLamports',
+						info: {
+							source: mockAtaAddress3,
+							destination: mockSolAddress,
+							authority: mockSolAddress2
+						}
+					}
+				}
+			],
+			ownedAddresses: [mockSolAddress],
+			userAddress: mockSolAddress,
+			includeUnrecognised: true
+		});
+
+		const { getByTestId } = render(SolInstructionsList, {
+			props: { instructions, token: SOLANA_TOKEN, userAddress: mockSolAddress }
+		});
+
+		expect(getByTestId('sol-instructions-list')).toHaveTextContent(
+			en.transaction.text.instruction_receive_excess_from
 		);
 		expect(getByTestId('sol-instructions-list')).not.toHaveTextContent(
 			en.transaction.text.summary_other
