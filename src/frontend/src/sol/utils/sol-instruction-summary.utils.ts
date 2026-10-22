@@ -2070,7 +2070,7 @@ export const mapSolInstructionSummaries = ({
 		}, [])
 	]);
 
-	const effects = flattened.reduce<Effect[]>(
+	const { effects, unstated } = flattened.reduce<{ effects: Effect[]; unstated: number[] }>(
 		(acc, { parentIndex, topLevel, instruction, madeBy, batch }, position) => {
 			const effect = toEffect({
 				instruction,
@@ -2089,8 +2089,13 @@ export const mapSolInstructionSummaries = ({
 				flattened
 			});
 
+			// A step of a batch the message states gets the reading it would get stated on its own,
+			// where one that produces no line and is not plumbing is an instruction nobody read. The
+			// lines of the batch's other steps cover its index, so it is recorded by that index here.
 			if (isNullish(effect)) {
-				return acc;
+				return nonNullish(batch) && topLevel && !PLUMBING_TYPES.includes(instruction.parsed.type)
+					? { ...acc, unstated: [...acc.unstated, parentIndex] }
+					: acc;
 			}
 
 			const wrapped = asWrap({
@@ -2127,19 +2132,22 @@ export const mapSolInstructionSummaries = ({
 					? madeBy
 					: undefined;
 
-			return [
+			return {
 				...acc,
-				{
-					...wrapped,
-					...(nonNullish(rent) && { rent }),
-					...(nonNullish(payer) && { payer }),
-					...(nonNullish(via) && { via }),
-					parentIndex,
-					...(nonNullish(batch) && { batch })
-				}
-			];
+				effects: [
+					...acc.effects,
+					{
+						...wrapped,
+						...(nonNullish(rent) && { rent }),
+						...(nonNullish(payer) && { payer }),
+						...(nonNullish(via) && { via }),
+						parentIndex,
+						...(nonNullish(batch) && { batch })
+					}
+				]
+			};
 		},
-		[]
+		{ effects: [], unstated: [] }
 	);
 
 	// Each close hangs under the instruction that made it, after that instruction's other lines: the
@@ -2164,16 +2172,20 @@ export const mapSolInstructionSummaries = ({
 	const covered = new Set(described.map(({ parentIndex }) => parentIndex));
 
 	// A batch left whole is an instruction nobody read, whatever else the instruction made: the
-	// lines beside it cannot say what its steps did.
-	const wholeBatches = new Set(
-		flattened.filter(({ wholeBatch }) => wholeBatch ?? false).map(({ parentIndex }) => parentIndex)
-	);
+	// lines beside it cannot say what its steps did. So is a batch the message states with a step
+	// nobody read, which its other steps' lines say nothing about either.
+	const unreadBatches = new Set([
+		...flattened
+			.filter(({ wholeBatch }) => wholeBatch ?? false)
+			.map(({ parentIndex }) => parentIndex),
+		...unstated
+	]);
 
 	const listed = includeUnrecognised
 		? [
 				...described,
 				...instructions.reduce<Effect[]>((acc, _, index) => {
-					if (covered.has(index) && !wholeBatches.has(index)) {
+					if (covered.has(index) && !unreadBatches.has(index)) {
 						return acc;
 					}
 

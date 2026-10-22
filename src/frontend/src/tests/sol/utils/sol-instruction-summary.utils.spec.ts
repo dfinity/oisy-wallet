@@ -27,6 +27,7 @@ import {
 import {
 	mockAtaAddress,
 	mockAtaAddress2,
+	mockAtaAddress3,
 	mockSolAddress,
 	mockSolAddress2,
 	mockSolAddress3
@@ -47,8 +48,14 @@ import {
 	getMintToInstruction,
 	getRevokeInstruction,
 	getSetAuthorityInstruction,
+	getSyncNativeInstruction,
 	getTransferCheckedInstruction
 } from '@solana-program/token';
+import {
+	getSetTransferFeeInstruction,
+	getBatchInstruction as getToken2022BatchInstruction,
+	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction
+} from '@solana-program/token-2022';
 import {
 	AccountRole,
 	decompileTransactionMessage,
@@ -3510,6 +3517,66 @@ describe('sol-instruction-summary.utils', () => {
 							send({ counterparty: mockSolAddress2, amount: 1n }),
 							send({ counterparty: mockAtaAddress2, amount: 2n })
 						]
+					}
+				]);
+			});
+
+			// Stated on its own, the fee change would be an instruction nobody read, and the transfer
+			// beside it in the batch says nothing about it.
+			it('should list a batch the message states as unread when one of its steps has no line', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						getToken2022BatchInstruction([
+							getToken2022TransferCheckedInstruction({
+								source: toAddress(mockAtaAddress),
+								mint: toAddress(mint),
+								destination: toAddress(mockSolAddress2),
+								authority: toAddress(mockSolAddress),
+								amount: 1n,
+								decimals: 6
+							}),
+							getSetTransferFeeInstruction({
+								mint: toAddress(mint),
+								transferFeeConfigAuthority: toAddress(mockSolAddress),
+								transferFeeBasisPoints: 10_000,
+								maximumFee: 1_000_000n
+							})
+						])
+					].map(asSolParsedRpcInstructionOrSelf),
+					ownedAddresses: [mockSolAddress, mockAtaAddress],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(views).toStrictEqual([
+					{
+						kind: 'batch',
+						program: TOKEN_2022_PROGRAM_ADDRESS,
+						children: [send({ counterparty: mockSolAddress2, amount: 1n })]
+					},
+					{ kind: 'unknown', program: TOKEN_2022_PROGRAM_ADDRESS }
+				]);
+			});
+
+			// Syncing is plumbing the list reads and leaves out, here as when the message states it.
+			it('should keep a batch the message states read when the step with no line is plumbing', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						getBatchInstruction([
+							getSyncNativeInstruction({ account: toAddress(mockAtaAddress3) }),
+							transferTo({ destination: mockSolAddress2, amount: 1n })
+						])
+					].map(asSolParsedRpcInstructionOrSelf),
+					ownedAddresses: [mockSolAddress, mockAtaAddress, mockAtaAddress3],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(views).toStrictEqual([
+					{
+						kind: 'batch',
+						program: TOKEN,
+						children: [send({ counterparty: mockSolAddress2, amount: 1n })]
 					}
 				]);
 			});
