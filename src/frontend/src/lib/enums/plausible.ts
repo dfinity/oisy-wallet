@@ -34,6 +34,9 @@ export enum PLAUSIBLE_EVENTS {
 	XDR_BASKET_EXPIRY = 'xdr_basket_expiry',
 	CYCLES_MINT = 'cycles_mint',
 	CYCLES_TOP_UP = 'cycles_top_up',
+	// The Settings switch that lets the user sign WalletConnect transactions OISY refuses because its
+	// review cannot show what they do: turned on, and a request signed through it.
+	WALLET_CONNECT_UNCHECKED_SIGNING = 'wallet_connect_unchecked_signing',
 	// Sending a transaction, sent when something notable happens to it. The outcome is in
 	// `result_status`, never in the name.
 	TRANSACTION_SEND = 'transaction_send',
@@ -184,6 +187,7 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	HELP = 'help',
 	TIPS = 'tips',
 	COMPUTE = 'compute',
+	WALLET_CONNECT = 'wallet_connect',
 	SEND = 'send',
 	CONVERT = 'convert',
 	AI_ASSISTANT = 'ai_assistant'
@@ -311,6 +315,7 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	CONTACT = 'contact',
 	TYPE = 'type',
 	LINK = 'link',
+	REASON = 'reason',
 	// The gas limit a transaction was signed with.
 	GAS_SENT = 'gas_sent',
 	// The gas the network estimates the same transaction needs, asked again after it failed.

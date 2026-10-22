@@ -567,6 +567,16 @@ const mapSolSystemInstruction = ({
 	// length and nothing else, so there is no amount, source or destination for the summary to
 	// carry, and the account it sizes is its only meta and a required signer, so a message can name
 	// the connected wallet here as well.
+	//
+	// A plain `Assign` naming the connected wallet hands over the wallet itself, which no
+	// acknowledgement signs past, so it says so on top of being refused.
+	if (
+		instructionType === SystemInstruction.Assign &&
+		instruction.accounts.account.address === userAddress
+	) {
+		return { ...unfaithfulInstruction(), reassignsWallet: true };
+	}
+
 	if (
 		instructionType === SystemInstruction.Assign ||
 		instructionType === SystemInstruction.AssignWithSeed ||

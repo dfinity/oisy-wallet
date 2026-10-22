@@ -195,22 +195,23 @@ The event payload is built via the `buildLearnMoreEvent()` factory helper in `sr
 
 **Tracked links:**
 
-| Component                            | `source_location` | `source_sublocation`      |
-| ------------------------------------ | ----------------- | ------------------------- |
-| LockPage                             | `lock`            | —                         |
-| NftImageConsentModal                 | `nft`             | —                         |
-| ReferralCodeModal                    | `referral`        | —                         |
-| ScannerInfo (scan)                   | `scanner`         | `scan`                    |
-| ScannerInfo (pay)                    | `scanner`         | `pay`                     |
-| Settings                             | `settings_page`   | `hide_micro_transactions` |
-| SettingsExportData                   | `settings_page`   | `export_data`             |
-| SettingsExperimentalFeatures         | `settings_page`   | `experimental_features`   |
-| WelcomeModal                         | `welcome`         | —                         |
-| EarningHeader                        | `earn`            | —                         |
-| SignerSignIn                         | `signer`          | —                         |
-| RewardsRequirements                  | `rewards`         | `requirements`            |
-| TransactionsFilterContactsEmptyState | `transactions`    | —                         |
-| LiquidiumInfoBox                     | `liquidium`       | —                         |
+| Component                             | `source_location` | `source_sublocation`               |
+| ------------------------------------- | ----------------- | ---------------------------------- |
+| LockPage                              | `lock`            | —                                  |
+| NftImageConsentModal                  | `nft`             | —                                  |
+| ReferralCodeModal                     | `referral`        | —                                  |
+| ScannerInfo (scan)                    | `scanner`         | `scan`                             |
+| ScannerInfo (pay)                     | `scanner`         | `pay`                              |
+| SettingsSecurity                      | `settings_page`   | `hide_micro_transactions`          |
+| SettingsWalletConnectUncheckedSigning | `settings_page`   | `wallet_connect_unchecked_signing` |
+| SettingsExportData                    | `settings_page`   | `export_data`                      |
+| SettingsExperimentalFeatures          | `settings_page`   | `experimental_features`            |
+| WelcomeModal                          | `welcome`         | —                                  |
+| EarningHeader                         | `earn`            | —                                  |
+| SignerSignIn                          | `signer`          | —                                  |
+| RewardsRequirements                   | `rewards`         | `requirements`                     |
+| TransactionsFilterContactsEmptyState  | `transactions`    | —                                  |
+| LiquidiumInfoBox                      | `liquidium`       | —                                  |
 
 **Excluded:** `HarvestAutopilotOverview` / `LiquidiumProviderHero` (scroll anchor, not an external link), `DappsCarouselSlide` / `DappCard` (buttons with no href), `RewardModal` / `RewardStateModal` / `Rewards.svelte` (tracked separately with custom reward event names).
 
@@ -323,6 +324,17 @@ The two gas figures show how far estimates fall short, per token and network. Th
 | `top_up`         | a top-up starts and finishes | `executing` → `success`/`error` | `token_symbol`; `result_error_code` on failure |
 
 `result_error_code` says why a top-up ended in `error`: `refused` (the ledger refused before burning anything, so nothing moved), `refunded` (the canister could not receive the cycles, which came back minus the ledger's fees) or `unknown` (no answer, so the top-up may or may not have gone through). A failed top-up also carries `event_severity` for the monitoring dashboards: `warn` for `refused` and `unknown`, `error` for `refunded`, which cost twice the fee.
+
+### WalletConnect unchecked signing tracking
+
+The [switch that allows signing WalletConnect transactions OISY can't check](#signing-a-walletconnect-request-oisy-cant-check) emits one structured event, **`wallet_connect_unchecked_signing`**, under `event_context: wallet_connect`, with `result_status: success`. It carries nothing about the transaction: no address, amount, data or app.
+
+| `event_modifier` | Fires when                                                      | Properties                                                                                |
+| ---------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `enable`         | the switch is turned on, after its confirmation                 | `source_location: settings_page`                                                          |
+| `sign`           | a request is signed past one or more refusals the switch allows | `token_network`; `event_key: reason` with the refusals, comma-separated, in `event_value` |
+
+The reasons say which reviews users sign past most, so that those can be taught to state what they do.
 
 ---
 
@@ -476,7 +488,7 @@ The **currency** selector does **not** appear in the user menu — it is always 
 
 ### Security card
 
-The Settings page has a **Security** card directly below General. It holds the settings that protect the user from scams: today, the filter that hides transactions with very small values, which are typically spam meant to get the user to copy the sender's address.
+The Settings page has a **Security** card directly below General. It holds the settings that protect the user from scams: the filter that hides transactions with very small values, which are typically spam meant to get the user to copy the sender's address, and, under an **Expert features** heading, the switch that allows signing WalletConnect transactions OISY can't check (see [WalletConnect](#signing-a-walletconnect-request-oisy-cant-check)).
 
 ---
 
@@ -694,6 +706,18 @@ Only Ethereum and Sepolia have a ckETH helper contract. On other EVM networks no
 ### Token calls that also send native value
 
 An `eth_sendTransaction` request whose data is an ERC-20 `transfer`, `approve`, `increaseAllowance` or `decreaseAllowance` is reviewed as the token operation it encodes: the amount shown is the token amount, with the recipient or spender the data names. The native value of the transaction (ETH, or the native token of the request's network) is sent to the token contract in the same transaction, and that review has no line for a second amount, so a token call that carries one is **refused** rather than shown in part. The review states the native amount and keeps Approve disabled, and the signing step applies the same check, so such a request is never signed. Standard token contracts accept no native value on these calls, so an ordinary token operation never carries one. An operator grant (`setApprovalForAll`) and a call OISY cannot read are not affected: their review states the native value as the amount.
+
+### Signing a WalletConnect request OISY can't check
+
+Some requests OISY refuses although it could sign them, because its review cannot state faithfully what they do. On Solana these are: a close that pays an account's balance to an address that is not the user's wallet; instructions that disagree about source, destination, payer, token or action, or that are decoded in full and still cannot be stated (burns, authority changes, stake accounts set up for somebody else, lockups, withdrawals and unwraps that pay anyone but the user's wallet, token batches that carry a refused instruction or do not hold together, the System, lookup-table and Compute Budget instructions described above, and an account a program opens inside its own instruction with more than its rent); and an instruction OISY cannot read that no simulated run accounts for. Each is stated on the review as a refusal, with Approve held. The last one used to be a warning on the review and a refusal in a toast after Approve; it is now refused on the review like the others.
+
+A user who needs to sign one anyway turns on **Allow signing WalletConnect transactions OISY can't check** in the Settings **Security** card. Turning it on asks first, in a dialog on desktop and a bottom sheet on mobile, with the same content on both: in the worst case a single transaction can take all the funds the wallet holds on that network, including funds kept in other apps, nobody can reverse it, and a website, chat or support agent asking for it is a scam. **Turn on** works only once the user ticks that they understand they could lose all their funds on that network, and the box starts unticked every time. Cancelling leaves the switch off. It stays on for **5 minutes** from the confirmation, with the time left shown beside it, then turns itself off; turning it off takes effect at once. It is kept in the session storage of the tab only: a reload keeps it, another tab or another device never sees it, and every sign-out ends it.
+
+While it is on, the review of a refused request states each reason without saying that OISY won't sign it, and asks the user to tick that they understand OISY can't show what the transaction does and want to sign it anyway; Approve works once the box is ticked (and, when the run also calls programs OISY can't read, once that confirmation is given too, since it is shown here as well), and the box is never remembered from one review to the next. Whether a review offers this is decided when it opens, so one that opened while the switch was on keeps the offer until it closes, and one that opened after it turned off never gains it. Every notice the review shows on a request it signs is shown there too. While the switch is off, the review points to it instead, with a link that rejects the request and opens Settings, so the user can turn it on and have the app send the request again.
+
+No way out is offered, and the switch is not pointed at, when WalletConnect's domain verification flags the site as a known scam or as running on an origin other than the domain the app declares. Nor for a Solana request that hands the connected wallet itself to another program, whether the message states the assignment or a program makes it inside its own call, as the simulated run shows: no app needs the wallet handed over, and the wallet cannot pay a fee afterwards. Signing checks again: OISY signs only when every refusal it finds was acknowledged on the review, and never for a flagged site or a wallet handed to another program.
+
+Refusals that protect a signing rule stay refused whatever the switch says: a Solana `signMessage` over the bytes of a transaction, every Bitcoin `signPsbt` refusal, and the Ethereum refusals of typed data that cannot be signed or names another chain, and of a request from another account. Ethereum requests are not covered by the switch yet.
 
 ### Starting a pairing from the scanner
 
