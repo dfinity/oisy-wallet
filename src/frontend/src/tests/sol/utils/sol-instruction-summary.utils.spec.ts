@@ -27,6 +27,7 @@ import {
 import {
 	mockAtaAddress,
 	mockAtaAddress2,
+	mockAtaAddress3,
 	mockSolAddress,
 	mockSolAddress2,
 	mockSolAddress3
@@ -47,8 +48,14 @@ import {
 	getMintToInstruction,
 	getRevokeInstruction,
 	getSetAuthorityInstruction,
+	getSyncNativeInstruction,
 	getTransferCheckedInstruction
 } from '@solana-program/token';
+import {
+	getSetTransferFeeInstruction,
+	getBatchInstruction as getToken2022BatchInstruction,
+	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction
+} from '@solana-program/token-2022';
 import {
 	AccountRole,
 	decompileTransactionMessage,
@@ -3514,6 +3521,81 @@ describe('sol-instruction-summary.utils', () => {
 				]);
 			});
 
+			// Stated on its own, the fee change would be an instruction nobody read, and the transfer
+			// beside it in the batch says nothing about it.
+			it('should list a batch the message states as unread when one of its steps has no line', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						getToken2022BatchInstruction([
+							getToken2022TransferCheckedInstruction({
+								source: toAddress(mockAtaAddress),
+								mint: toAddress(mint),
+								destination: toAddress(mockSolAddress2),
+								authority: toAddress(mockSolAddress),
+								amount: 1n,
+								decimals: 6
+							}),
+							getSetTransferFeeInstruction({
+								mint: toAddress(mint),
+								transferFeeConfigAuthority: toAddress(mockSolAddress),
+								transferFeeBasisPoints: 10_000,
+								maximumFee: 1_000_000n
+							})
+						])
+					].map(asSolParsedRpcInstructionOrSelf),
+					ownedAddresses: [mockSolAddress, mockAtaAddress],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(views).toStrictEqual([
+					{
+						kind: 'batch',
+						program: TOKEN_2022_PROGRAM_ADDRESS,
+						children: [send({ counterparty: mockSolAddress2, amount: 1n })]
+					},
+					{ kind: 'unknown', program: TOKEN_2022_PROGRAM_ADDRESS }
+				]);
+			});
+
+			// Syncing is plumbing the list reads and leaves out, here as when the message states it.
+			it('should keep a batch the message states read when the step with no line is plumbing', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						getBatchInstruction([
+							getSyncNativeInstruction({ account: toAddress(mockAtaAddress3) }),
+							transferTo({ destination: mockSolAddress2, amount: 1n })
+						])
+					].map(asSolParsedRpcInstructionOrSelf),
+					ownedAddresses: [mockSolAddress, mockAtaAddress, mockAtaAddress3],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(views).toStrictEqual([
+					{
+						kind: 'batch',
+						program: TOKEN,
+						children: [send({ counterparty: mockSolAddress2, amount: 1n })]
+					}
+				]);
+			});
+
+			// Nothing but plumbing gets no line at all, as the same steps stated one by one would not.
+			it('should leave out a batch the message states that carries only plumbing', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						transferTo({ destination: mockSolAddress2, amount: 1n }),
+						getBatchInstruction([getSyncNativeInstruction({ account: toAddress(mockAtaAddress3) })])
+					].map(asSolParsedRpcInstructionOrSelf),
+					ownedAddresses: [mockSolAddress, mockAtaAddress, mockAtaAddress3],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(views).toStrictEqual([send({ counterparty: mockSolAddress2, amount: 1n })]);
+			});
+
 			it('should list a batch a program runs under that program and under one line naming it', () => {
 				const views = mapSolInstructionSummaries({
 					instructions: [unreadCall],
@@ -3883,6 +3965,47 @@ describe('sol-instruction-summary.utils', () => {
 					});
 
 					expect(views.at(-1)).not.toHaveProperty('returned');
+				});
+
+				// An account holding Token-2022's native mint keeps what it wraps as lamports too, so a
+				// transfer into it raises what the close hands back as much as what the unwrap moves.
+				it('should count a transfer into a Token-2022 native account toward what the close hands back', () => {
+					const token2022 = { program: 'spl-token-2022', programId: TOKEN_2022_PROGRAM_ADDRESS };
+
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							{
+								...token2022,
+								parsed: {
+									type: 'transferChecked',
+									info: {
+										source: mockSolAddress3,
+										mint: TOKEN_2022_NATIVE_MINT_ADDRESS,
+										destination: wrapped,
+										authority: mockSolAddress2,
+										tokenAmount: { amount: '5000', decimals: 9 }
+									}
+								}
+							},
+							{ ...unwrap({ destination: mockSolAddress }), ...token2022 },
+							{ ...close, ...token2022 }
+						],
+						ownedAddresses: [mockSolAddress, wrapped],
+						userAddress: mockSolAddress,
+						addressToToken: {
+							[wrapped]: TOKEN_2022_NATIVE_MINT_ADDRESS,
+							[mockSolAddress3]: TOKEN_2022_NATIVE_MINT_ADDRESS
+						},
+						accountLamports: { [wrapped]: 2_046_280n },
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					const closing = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+					expect(closing?.returned).toBe(2_039_280n);
+					expect(
+						solWalletLamportsStated({ instructions: views, userAddress: mockSolAddress })
+					).toBe(2_051_280n);
 				});
 			});
 

@@ -87,6 +87,11 @@ const tokenAmount = (info: object): { amount?: bigint; decimals?: number } => {
 
 const TOKEN_PROGRAMS = ['spl-token', 'spl-token-2022'];
 
+// Both token programs wrap SOL, each under a native mint of its own, and an account holding either
+// keeps what it wraps as lamports.
+const isNativeMint = (mint: SplTokenAddress | undefined): boolean =>
+	nonNullish(mint) && [WSOL_TOKEN.address, TOKEN_2022_NATIVE_MINT_ADDRESS].includes(mint);
+
 /**
  * Whether a System instruction opens an account, at an address of its own or at one derived from a
  * seed. Both fund and size the account the same way: Raydium, for one, opens the wrapped SOL account
@@ -1640,14 +1645,11 @@ const closePayouts = ({
 					return;
 				}
 
-				if (
-					nonNullish(destination) &&
-					mintAt({ account: destination, position }) === WSOL_TOKEN.address
-				) {
+				if (nonNullish(destination) && isNativeMint(mintAt({ account: destination, position }))) {
 					add({ account: destination, value: moved });
 				}
 
-				if (nonNullish(source) && mintAt({ account: source, position }) === WSOL_TOKEN.address) {
+				if (nonNullish(source) && isNativeMint(mintAt({ account: source, position }))) {
 					take({ account: source, value: moved });
 				}
 
@@ -1973,6 +1975,24 @@ export const solOpensAccountBeyondRent = ({
 	);
 
 /**
+ * Whether a simulated run keeps a token batch whole: one whose contents cannot be read, or one of
+ * several steps the run returns calls made inside, which nothing puts in order with its steps.
+ *
+ * The list states such a batch as an instruction nobody read and none of its steps, so whatever a
+ * step pays the wallet goes unstated too, which the check on an application's close relies on. That
+ * holds whatever the message's own mapping read of the steps, which cannot say where the calls ran
+ * either.
+ */
+export const solKeepsBatchWhole = ({
+	instructions,
+	innerInstructions
+}: {
+	instructions: readonly unknown[];
+	innerInstructions: readonly SolInstructionGroup[];
+}): boolean =>
+	flatten({ instructions, innerInstructions }).some(({ wholeBatch }) => wholeBatch ?? false);
+
+/**
  * The instruction list the review shows, from a transaction's own instructions and the ones a
  * simulation says it would make inside them.
  *
@@ -2149,7 +2169,7 @@ export const mapSolInstructionSummaries = ({
 		}, [])
 	]);
 
-	const effects = flattened.reduce<Effect[]>(
+	const { effects, unstated } = flattened.reduce<{ effects: Effect[]; unstated: number[] }>(
 		(acc, { parentIndex, topLevel, instruction, madeBy, batch }, position) => {
 			const effect = toEffect({
 				instruction,
@@ -2168,8 +2188,13 @@ export const mapSolInstructionSummaries = ({
 				flattened
 			});
 
+			// A step of a batch the message states gets the reading it would get stated on its own,
+			// where one that produces no line and is not plumbing is an instruction nobody read. The
+			// lines of the batch's other steps cover its index, so it is recorded by that index here.
 			if (isNullish(effect)) {
-				return acc;
+				return nonNullish(batch) && topLevel && !PLUMBING_TYPES.includes(instruction.parsed.type)
+					? { ...acc, unstated: [...acc.unstated, parentIndex] }
+					: acc;
 			}
 
 			const wrapped = asWrap({
@@ -2206,19 +2231,22 @@ export const mapSolInstructionSummaries = ({
 					? madeBy
 					: undefined;
 
-			return [
+			return {
 				...acc,
-				{
-					...wrapped,
-					...(nonNullish(rent) && { rent }),
-					...(nonNullish(payer) && { payer }),
-					...(nonNullish(via) && { via }),
-					parentIndex,
-					...(nonNullish(batch) && { batch })
-				}
-			];
+				effects: [
+					...acc.effects,
+					{
+						...wrapped,
+						...(nonNullish(rent) && { rent }),
+						...(nonNullish(payer) && { payer }),
+						...(nonNullish(via) && { via }),
+						parentIndex,
+						...(nonNullish(batch) && { batch })
+					}
+				]
+			};
 		},
-		[]
+		{ effects: [], unstated: [] }
 	);
 
 	// Each close hangs under the instruction that made it, after that instruction's other lines: the
@@ -2243,16 +2271,30 @@ export const mapSolInstructionSummaries = ({
 	const covered = new Set(described.map(({ parentIndex }) => parentIndex));
 
 	// A batch left whole is an instruction nobody read, whatever else the instruction made: the
-	// lines beside it cannot say what its steps did.
-	const wholeBatches = new Set(
-		flattened.filter(({ wholeBatch }) => wholeBatch ?? false).map(({ parentIndex }) => parentIndex)
+	// lines beside it cannot say what its steps did. So is a batch the message states with a step
+	// nobody read, which its other steps' lines say nothing about either.
+	const unreadBatches = new Set([
+		...flattened
+			.filter(({ wholeBatch }) => wholeBatch ?? false)
+			.map(({ parentIndex }) => parentIndex),
+		...unstated
+	]);
+
+	// A batch the message states with no step nobody read is read in full, as its steps would be if
+	// the message stated them one by one, even when no line comes from it: one that carries nothing
+	// but plumbing.
+	const readBatches = new Set(
+		flattened
+			.filter(({ batch, topLevel }) => nonNullish(batch) && topLevel)
+			.map(({ parentIndex }) => parentIndex)
+			.filter((index) => !unreadBatches.has(index))
 	);
 
 	const listed = includeUnrecognised
 		? [
 				...described,
 				...instructions.reduce<Effect[]>((acc, _, index) => {
-					if (covered.has(index) && !wholeBatches.has(index)) {
+					if (covered.has(index) && !unreadBatches.has(index)) {
 						return acc;
 					}
 
@@ -2261,7 +2303,11 @@ export const mapSolInstructionSummaries = ({
 					// The review already states what these do, as the priority fee it charges for.
 					// Listing them here as instructions nothing could read would be noise on every
 					// transaction that sets a compute budget, and untrue besides.
-					if (program === COMPUTE_BUDGET_PROGRAM_ADDRESS || plumbing.has(index)) {
+					if (
+						program === COMPUTE_BUDGET_PROGRAM_ADDRESS ||
+						plumbing.has(index) ||
+						readBatches.has(index)
+					) {
 						return acc;
 					}
 
