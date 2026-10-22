@@ -3951,6 +3951,47 @@ describe('sol-instruction-summary.utils', () => {
 
 					expect(views.at(-1)).not.toHaveProperty('returned');
 				});
+
+				// An account holding Token-2022's native mint keeps what it wraps as lamports too, so a
+				// transfer into it raises what the close hands back as much as what the unwrap moves.
+				it('should count a transfer into a Token-2022 native account toward what the close hands back', () => {
+					const token2022 = { program: 'spl-token-2022', programId: TOKEN_2022_PROGRAM_ADDRESS };
+
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							{
+								...token2022,
+								parsed: {
+									type: 'transferChecked',
+									info: {
+										source: mockSolAddress3,
+										mint: TOKEN_2022_NATIVE_MINT_ADDRESS,
+										destination: wrapped,
+										authority: mockSolAddress2,
+										tokenAmount: { amount: '5000', decimals: 9 }
+									}
+								}
+							},
+							{ ...unwrap({ destination: mockSolAddress }), ...token2022 },
+							{ ...close, ...token2022 }
+						],
+						ownedAddresses: [mockSolAddress, wrapped],
+						userAddress: mockSolAddress,
+						addressToToken: {
+							[wrapped]: TOKEN_2022_NATIVE_MINT_ADDRESS,
+							[mockSolAddress3]: TOKEN_2022_NATIVE_MINT_ADDRESS
+						},
+						accountLamports: { [wrapped]: 2_046_280n },
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					const closing = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+					expect(closing?.returned).toBe(2_039_280n);
+					expect(
+						solWalletLamportsStated({ instructions: views, userAddress: mockSolAddress })
+					).toBe(2_051_280n);
+				});
 			});
 
 			describe('into the account', () => {

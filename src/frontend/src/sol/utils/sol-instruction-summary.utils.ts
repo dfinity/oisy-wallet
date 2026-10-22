@@ -87,6 +87,11 @@ const tokenAmount = (info: object): { amount?: bigint; decimals?: number } => {
 
 const TOKEN_PROGRAMS = ['spl-token', 'spl-token-2022'];
 
+// Both token programs wrap SOL, each under a native mint of its own, and an account holding either
+// keeps what it wraps as lamports.
+const isNativeMint = (mint: SplTokenAddress | undefined): boolean =>
+	nonNullish(mint) && [WSOL_TOKEN.address, TOKEN_2022_NATIVE_MINT_ADDRESS].includes(mint);
+
 /**
  * Whether a System instruction opens an account, at an address of its own or at one derived from a
  * seed. Both fund and size the account the same way: Raydium, for one, opens the wrapped SOL account
@@ -1583,14 +1588,11 @@ const closePayouts = ({
 					return;
 				}
 
-				if (
-					nonNullish(destination) &&
-					mintAt({ account: destination, position }) === WSOL_TOKEN.address
-				) {
+				if (nonNullish(destination) && isNativeMint(mintAt({ account: destination, position }))) {
 					add({ account: destination, value: moved });
 				}
 
-				if (nonNullish(source) && mintAt({ account: source, position }) === WSOL_TOKEN.address) {
+				if (nonNullish(source) && isNativeMint(mintAt({ account: source, position }))) {
 					take({ account: source, value: moved });
 				}
 
