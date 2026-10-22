@@ -840,11 +840,7 @@ const toEffect = ({
 					openedNext({ account: destination, flattened, from: position }).mint)
 				: undefined;
 
-		const wrappedMint =
-			nonNullish(destinationMint) &&
-			[WSOL_TOKEN.address, TOKEN_2022_NATIVE_MINT_ADDRESS].includes(destinationMint)
-				? destinationMint
-				: undefined;
+		const wrappedMint = isNativeMint(destinationMint) ? destinationMint : undefined;
 
 		return {
 			kind: outgoing ? 'send' : 'receive',
