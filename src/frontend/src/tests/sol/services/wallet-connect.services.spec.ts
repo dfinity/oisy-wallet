@@ -11,7 +11,12 @@ import { trackEvent } from '$lib/services/analytics.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { estimatePriorityFee, getAccountInfo, getSolCreateAccountFee } from '$sol/api/solana.api';
+import {
+	estimatePriorityFee,
+	getAccountInfo,
+	getSolCreateAccountFee,
+	getSplTokenMetadata
+} from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
 	STAKE_PROGRAM_ADDRESS
@@ -29,6 +34,7 @@ import { signTransaction as executeSign } from '$sol/services/sol-sign.services'
 import { simulateSolTransaction } from '$sol/services/sol-simulation.services';
 import { decode, decodeMessage, sign, signMessage } from '$sol/services/wallet-connect.services';
 import { solProgramNameStore } from '$sol/stores/sol-program-name.store';
+import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSimulationPreview } from '$sol/types/sol-simulation';
@@ -96,6 +102,7 @@ vi.mock('$sol/api/solana.api', () => ({
 	estimatePriorityFee: vi.fn(),
 	getMultipleAccountsInfo: vi.fn(),
 	getSolCreateAccountFee: vi.fn(),
+	getSplTokenMetadata: vi.fn(),
 	simulateTransactionAccounts: vi.fn()
 }));
 
@@ -498,6 +505,38 @@ describe('wallet-connect.services', () => {
 				});
 				expect(result).not.toHaveProperty('preview');
 			});
+
+			// An allowance moves no balance, so no token delta names its mint.
+			it('should read the metadata of the token an allowance names', async () => {
+				splTokenMetadataStore.reset();
+				vi.mocked(getSplTokenMetadata).mockResolvedValue({});
+				vi.mocked(simulateSolTransaction).mockResolvedValue({
+					preview: {
+						tokenDeltas: [],
+						controlChanges: [
+							{
+								account: mockAtaAddress,
+								field: 'allowance',
+								to: mockSolAddress2,
+								allowance: { tokenAddress: mockSplAddress, decimals: 6, amount: 1n }
+							}
+						]
+					},
+					parties: mockParties,
+					unreadPrograms: []
+				});
+
+				await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(getSplTokenMetadata).toHaveBeenCalledExactlyOnceWith({
+					addresses: [mockSplAddress],
+					network: 'mainnet'
+				});
+			});
 		});
 
 		// The Operations tab lists what the message contains. A run reveals the calls made inside
@@ -799,7 +838,8 @@ describe('wallet-connect.services', () => {
 			closesPayOthers: false,
 			unreadProgramsAcknowledged: true,
 			rentExemptMinimum: mockRentExemptMinimum,
-			opensAccountBeyondRent: false
+			opensAccountBeyondRent: false,
+			reassignsWallet: false
 		};
 
 		describe(`with method ${SESSION_REQUEST_SOL_SIGN_TRANSACTION}`, () => {
@@ -824,7 +864,8 @@ describe('wallet-connect.services', () => {
 				closesPayOthers: false,
 				unreadProgramsAcknowledged: true,
 				rentExemptMinimum: mockRentExemptMinimum,
-				opensAccountBeyondRent: false
+				opensAccountBeyondRent: false,
+				reassignsWallet: false
 			};
 
 			const expected = {
@@ -972,7 +1013,8 @@ describe('wallet-connect.services', () => {
 				closesPayOthers: false,
 				unreadProgramsAcknowledged: true,
 				rentExemptMinimum: mockRentExemptMinimum,
-				opensAccountBeyondRent: false
+				opensAccountBeyondRent: false,
+				reassignsWallet: false
 			};
 
 			it('should show an error if the address is nullish', async () => {
@@ -1437,6 +1479,31 @@ describe('wallet-connect.services', () => {
 					msg: { text: en.wallet_connect.error.ambiguous_transaction }
 				});
 
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(sendSignedTransaction).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: mockRequest.topic,
+					id: mockRequest.id,
+					error: UNEXPECTED_ERROR
+				});
+			});
+		});
+
+		// A program can hand the wallet to another program inside its own call, which only the run
+		// shows, so the review's verdict on it is handed in rather than read from the message.
+		describe('with the wallet handed to another program inside an instruction', () => {
+			it('should refuse to sign and reject the request', async () => {
+				const result = await sign({ ...mockParams, reassignsWallet: true });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.ambiguous_transaction }
+				});
+
+				expect(mockParams.modalNext).not.toHaveBeenCalled();
 				expect(executeSign).not.toHaveBeenCalled();
 				expect(sendSignedTransaction).not.toHaveBeenCalled();
 				expect(mockListener.approveRequest).not.toHaveBeenCalled();

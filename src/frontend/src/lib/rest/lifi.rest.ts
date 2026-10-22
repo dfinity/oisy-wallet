@@ -31,11 +31,16 @@ const lifiClient = (): SDKClient => {
 // https://docs.li.fi/api-reference/get-a-quote-for-a-token-transfer
 //
 // The SDK fills its defaults into the request object it is given, so the caller passes one it does
-// not keep. The SDK sets no timeout of its own: without one, a stalled connection never settles.
+// not keep. The SDK sets no timeout of its own: without one, a stalled connection never settles. A
+// caller making several requests in turn can pass one deadline for them all (`signal`), which is
+// not part of the request sent.
 //
 // `async` so that a client that cannot be created (no integrator id) rejects rather than throws.
-export const fetchLifiQuote = async (request: QuoteRequestFromAmount): Promise<LiFiStep> =>
-	await getQuote(lifiClient(), request, { signal: AbortSignal.timeout(LIFI_QUOTE_TIMEOUT_MS) });
+export const fetchLifiQuote = async ({
+	signal = AbortSignal.timeout(LIFI_QUOTE_TIMEOUT_MS),
+	...request
+}: QuoteRequestFromAmount & { signal?: AbortSignal }): Promise<LiFiStep> =>
+	await getQuote(lifiClient(), request, { signal });
 
 // https://docs.li.fi/api-reference/check-the-status-of-a-cross-chain-transfer
 //

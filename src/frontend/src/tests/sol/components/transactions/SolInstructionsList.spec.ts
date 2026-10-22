@@ -1,7 +1,10 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolInstructionsList from '$sol/components/transactions/SolInstructionsList.svelte';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
+import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
+import { SolanaNetworks } from '$sol/types/network';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import en from '$tests/mocks/i18n.mock';
 import {
@@ -24,6 +27,39 @@ describe('SolInstructionsList', () => {
 
 	beforeEach(() => {
 		splCustomTokensStore.resetAll();
+		splTokenMetadataStore.reset();
+	});
+
+	// Any mint can carry the symbol of a token the wallet lists. Kept inside the placeholder, the
+	// line moving it cannot read as one that moves the listed token.
+	it('should keep a listed symbol carried by an unlisted mint inside the placeholder', () => {
+		splCustomTokensStore.setAll([
+			{ data: { ...mockValidSplToken, version: undefined, enabled: true }, certified: false }
+		]);
+		splTokenMetadataStore.set({
+			network: SolanaNetworks.mainnet,
+			metadata: {
+				'other-mint': { name: mockValidSplToken.name, symbol: mockValidSplToken.symbol }
+			}
+		});
+
+		const { getAllByTestId } = render(SolInstructionsList, {
+			props: {
+				instructions: [send(mockSplAddress), send('other-mint')],
+				token: SOLANA_TOKEN,
+				userAddress: mockSolAddress
+			}
+		});
+
+		const [listed, unlisted] = getAllByTestId('sol-instruction');
+
+		expect(listed).toHaveTextContent(mockValidSplToken.symbol);
+		expect(listed).not.toHaveTextContent(en.transaction.text.unknown_token);
+		expect(unlisted).toHaveTextContent(
+			replacePlaceholders(en.transaction.text.unknown_token_named, {
+				$symbol: mockValidSplToken.symbol
+			})
+		);
 	});
 
 	// Two lines both reading "Unknown token" say less than the addresses would, since nothing
@@ -104,6 +140,50 @@ describe('SolInstructionsList', () => {
 		expect(getByTestId('sol-instructions-list')).toHaveTextContent(
 			`0.01 ${mockValidSplToken.symbol}`
 		);
+	});
+
+	describe('an unchecked approval, which states no decimals', () => {
+		const approval = (tokenAddress: string): SolInstructionSummary => ({
+			kind: 'approve',
+			amount: 1_000_000n,
+			tokenAddress,
+			counterparty: mockSolAddress2
+		});
+
+		// A transaction that only approves moves no balance, so no net change gives the decimals of
+		// a mint the wallet does not list, and the base units are not an amount.
+		it('should name the spender alone for a mint the wallet does not list', () => {
+			const { getByTestId } = render(SolInstructionsList, {
+				props: {
+					instructions: [approval('unlisted-mint')],
+					token: SOLANA_TOKEN,
+					userAddress: mockSolAddress
+				}
+			});
+
+			expect(getByTestId('sol-instructions-list')).toHaveTextContent(
+				en.transaction.text.instruction_approve
+			);
+			expect(getByTestId('sol-instructions-list')).not.toHaveTextContent('Approve spender for');
+		});
+
+		it('should scale the amount with the decimals of a token the wallet lists', () => {
+			splCustomTokensStore.setAll([
+				{ data: { ...mockValidSplToken, version: undefined, enabled: false }, certified: false }
+			]);
+
+			const { getByTestId } = render(SolInstructionsList, {
+				props: {
+					instructions: [approval(mockSplAddress)],
+					token: SOLANA_TOKEN,
+					userAddress: mockSolAddress
+				}
+			});
+
+			expect(getByTestId('sol-instructions-list')).toHaveTextContent(
+				`Approve spender for 0.01 ${mockValidSplToken.symbol}`
+			);
+		});
 	});
 
 	// The program names the account, so it follows the line the way the program of a route does.

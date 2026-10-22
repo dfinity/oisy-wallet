@@ -643,6 +643,17 @@ a.as-button {
 		}
 	}
 
+	// One step past the hover and open fill while held, shown at once and fading back on release:
+	// a quick click lasts about 80 ms, and a fill that faded in would only peak as the panel opens.
+	&:active:not(.disabled):not([disabled]) {
+		@apply bg-brand-subtle-20;
+		transition-duration: 0s;
+
+		&.border {
+			@apply border-brand-subtle-20;
+		}
+	}
+
 	// IconExpandMore at 14px with a 2.5 stroke (1.75px on screen), so the glyph stays light
 	// beside 16px text.
 	.dropdown-chevron {

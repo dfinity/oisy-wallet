@@ -3,10 +3,14 @@ import type { FeeStoreData } from '$eth/stores/eth-fee.store';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { SendParams } from '$eth/types/send';
 import {
+	classifyWalletConnectEthCall,
 	getSendParamsGas,
 	getSignParamsMessageHex,
 	getSignParamsMessageTypedDataV4Hash,
-	isEthSignTypedDataMethod
+	getWalletConnectEthCkEthDeposit,
+	isEthSignTypedDataMethod,
+	isWalletConnectEthTokenCallWithValue,
+	WalletConnectEthCkEthHelperUnconfirmedError
 } from '$eth/utils/wallet-connect.utils';
 import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
@@ -27,6 +31,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -75,7 +80,9 @@ export const send = ({
 						unknown_parameter,
 						wallet_not_initialized,
 						from_address_not_wallet,
-						unknown_destination
+						unknown_destination,
+						cketh_deposit_refused,
+						cketh_helper_unconfirmed
 					}
 				}
 			} = get(i18n);
@@ -106,6 +113,29 @@ export const send = ({
 			if (isNullish(firstParam.to)) {
 				toastsError({
 					msg: { text: unknown_destination }
+				});
+				return { success: false };
+			}
+
+			// The review refuses these requests through the same check. Running it here as well, against
+			// the minter information the transaction is then prepared with, keeps a refused request from
+			// being signed however this is reached.
+			try {
+				getWalletConnectEthCkEthDeposit({
+					to: firstParam.to,
+					data: firstParam.data,
+					networkId: sourceNetwork.id,
+					minterInfo,
+					principal: identity?.getPrincipal()
+				});
+			} catch (err: unknown) {
+				toastsError({
+					msg: {
+						text:
+							err instanceof WalletConnectEthCkEthHelperUnconfirmedError
+								? cketh_helper_unconfirmed
+								: cketh_deposit_refused
+					}
 				});
 				return { success: false };
 			}
@@ -142,6 +172,24 @@ export const send = ({
 			}
 
 			const { to, gas: gasWC, data } = firstParam as { to: string; gas?: string; data?: string };
+
+			// The review refuses a token call that sends native value along with it, and the signing
+			// step holds to the same check.
+			if (
+				isWalletConnectEthTokenCallWithValue({
+					call: classifyWalletConnectEthCall(data),
+					value: amount
+				})
+			) {
+				toastsError({
+					msg: {
+						text: replacePlaceholders(get(i18n).wallet_connect.error.token_call_with_value, {
+							$amount: `${formatToken({ value: amount, unitName: token.decimals })} ${token.symbol}`
+						})
+					}
+				});
+				return { success: false };
+			}
 
 			modalNext();
 
