@@ -2201,6 +2201,16 @@ export const mapSolInstructionSummaries = ({
 		...unstated
 	]);
 
+	// A batch the message states with no step nobody read is read in full, as its steps would be if
+	// the message stated them one by one, even when no line comes from it: one that carries nothing
+	// but plumbing.
+	const readBatches = new Set(
+		flattened
+			.filter(({ batch, topLevel }) => nonNullish(batch) && topLevel)
+			.map(({ parentIndex }) => parentIndex)
+			.filter((index) => !unreadBatches.has(index))
+	);
+
 	const listed = includeUnrecognised
 		? [
 				...described,
@@ -2214,7 +2224,11 @@ export const mapSolInstructionSummaries = ({
 					// The review already states what these do, as the priority fee it charges for.
 					// Listing them here as instructions nothing could read would be noise on every
 					// transaction that sets a compute budget, and untrue besides.
-					if (program === COMPUTE_BUDGET_PROGRAM_ADDRESS || plumbing.has(index)) {
+					if (
+						program === COMPUTE_BUDGET_PROGRAM_ADDRESS ||
+						plumbing.has(index) ||
+						readBatches.has(index)
+					) {
 						return acc;
 					}
 

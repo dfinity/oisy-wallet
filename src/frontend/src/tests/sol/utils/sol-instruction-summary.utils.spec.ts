@@ -3581,6 +3581,21 @@ describe('sol-instruction-summary.utils', () => {
 				]);
 			});
 
+			// Nothing but plumbing gets no line at all, as the same steps stated one by one would not.
+			it('should leave out a batch the message states that carries only plumbing', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						transferTo({ destination: mockSolAddress2, amount: 1n }),
+						getBatchInstruction([getSyncNativeInstruction({ account: toAddress(mockAtaAddress3) })])
+					].map(asSolParsedRpcInstructionOrSelf),
+					ownedAddresses: [mockSolAddress, mockAtaAddress, mockAtaAddress3],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(views).toStrictEqual([send({ counterparty: mockSolAddress2, amount: 1n })]);
+			});
+
 			it('should list a batch a program runs under that program and under one line naming it', () => {
 				const views = mapSolInstructionSummaries({
 					instructions: [unreadCall],
