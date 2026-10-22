@@ -101,6 +101,16 @@ const isAccountCreation = (type: string): boolean =>
 	['createAccount', 'createAccountWithSeed'].includes(type);
 
 /**
+ * The System instructions that pay lamports from one account into another: the plain transfer, the
+ * one out of a seed-derived account and a withdrawal from a nonce account. All three state the
+ * amount and the destination the same way, and the source of a withdrawal is its nonce account.
+ */
+const SYSTEM_TRANSFERS = ['transfer', 'transferWithSeed', 'withdrawFromNonce'];
+
+const systemTransferSource = (info: object): SolAddress | undefined =>
+	address({ info, key: 'source' }) ?? address({ info, key: 'nonceAccount' });
+
+/**
  * Whether an idempotent account creation found the account already there and did nothing.
  *
  * The run reads every account an instruction writes, and the account a creation names is written,
@@ -803,8 +813,11 @@ const toEffect = ({
 			: undefined;
 	}
 
-	if (program === 'system' && type === 'transfer') {
-		const source = address({ info, key: 'source' });
+	// Out of a seed-derived account or a nonce account as well: SOL paid into the wallet from either
+	// arrives as surely as from a plain transfer, and a line stating it is what the wallet's own
+	// change is held to.
+	if (program === 'system' && SYSTEM_TRANSFERS.includes(type)) {
+		const source = systemTransferSource(info);
 		const destination = address({ info, key: 'destination' });
 
 		const outgoing = nonNullish(source) && isOwned({ account: source });
@@ -816,11 +829,28 @@ const toEffect = ({
 
 		const counterparty = outgoing ? destination : source;
 
+		// Paid by somebody else into an account of the user's other than the wallet, the lamports stay
+		// in that account, which only the unwrap or the close that pays them on reaches, and the line
+		// names it. In a wrapped SOL account they become wrapped SOL there: the account as of the
+		// transfer, or the one opened there next, under the native mint of either token program. The
+		// amount is lamports, which a native mint counts with the same precision on every network.
+		const intoAccount =
+			!outgoing && nonNullish(destination) && destination !== userAddress ? destination : undefined;
+
+		const destinationMint = nonNullish(intoAccount)
+			? (mintAt({ account: intoAccount, position }) ??
+				openedNext({ account: intoAccount, flattened, from: position }).mint)
+			: undefined;
+
+		const wrappedMint = isNativeMint(destinationMint) ? destinationMint : undefined;
+
 		return {
 			kind: outgoing ? 'send' : 'receive',
 			...(nonNullish(amount({ info, key: 'lamports' })) && {
 				amount: amount({ info, key: 'lamports' })
 			}),
+			...(nonNullish(wrappedMint) && { tokenAddress: wrappedMint, decimals: WSOL_DECIMALS }),
+			...(nonNullish(intoAccount) && { account: intoAccount }),
 			...(nonNullish(counterparty) && {
 				counterparty,
 				own: isOwned({ account: counterparty, arriving: outgoing })
@@ -888,6 +918,23 @@ const toEffect = ({
 			return nonNullish(destination) && destination === userAddress
 				? { ...unwrapping, unwrapsToWallet: true }
 				: unwrapping;
+		}
+
+		// Withdrawing excess lamports pays the destination whatever its source holds above what it
+		// costs to exist and what it wraps, and names no amount. Paid to the wallet, that is SOL
+		// arriving there by an amount nobody read, which leaves the wallet's change as unknown as
+		// the line says. The line says it is the account's excess, which is what it can still state.
+		if (type === 'withdrawExcessLamports') {
+			const source = address({ info, key: 'source' });
+			const destination = address({ info, key: 'destination' });
+
+			return nonNullish(destination) && destination === userAddress
+				? {
+						kind: 'receive',
+						withdrawsExcess: true,
+						...(nonNullish(source) && { counterparty: source, own: isOwned({ account: source }) })
+					}
+				: undefined;
 		}
 
 		if (type === 'closeAccount') {
@@ -1215,9 +1262,9 @@ const balanceAtInstruction = ({
 				return { ...held, unsynced: plus([held.unsynced, payoutAt(position)]) };
 			}
 
-			// Wrapping: a System transfer into a wrapped SOL account pays lamports in, which its token
+			// Wrapping: a System payment into a wrapped SOL account pays lamports in, which its token
 			// amount counts once the account is synced.
-			if (native && program === 'system' && type === 'transfer') {
+			if (native && program === 'system' && SYSTEM_TRANSFERS.includes(type)) {
 				return address({ info, key: 'destination' }) === account
 					? { ...held, unsynced: plus([held.unsynced, amount({ info, key: 'lamports' })]) }
 					: held;
@@ -1255,6 +1302,16 @@ const balanceAtInstruction = ({
 					amount: remaining,
 					unsynced: into ? plus([held.unsynced, unwrapped ?? held.amount]) : held.unsynced
 				};
+			}
+
+			// Withdrawing excess lamports takes exactly what no sync counted out of its source, which
+			// leaves the amount as it was, and pays its destination an amount nobody stated, which no
+			// sync has counted there either.
+			if (native && token && type === 'withdrawExcessLamports') {
+				const outOf = address({ info, key: 'source' }) === account;
+				const into = address({ info, key: 'destination' }) === account;
+
+				return outOf === into ? held : { ...held, unsynced: outOf ? ZERO : undefined };
 			}
 
 			if (!token || !['transfer', 'transferChecked'].includes(type)) {
@@ -1638,13 +1695,35 @@ const closePayouts = ({
 				return;
 			}
 
+			// Withdrawing excess lamports names no amount, so both ends hold one nobody can state.
+			if (
+				nonNullish(program) &&
+				TOKEN_PROGRAMS.includes(program) &&
+				type === 'withdrawExcessLamports'
+			) {
+				const source = address({ info, key: 'source' });
+				const destination = address({ info, key: 'destination' });
+
+				if (isNullish(source) || source === destination) {
+					return;
+				}
+
+				lamports.set(source, undefined);
+
+				if (nonNullish(destination)) {
+					lamports.set(destination, undefined);
+				}
+
+				return;
+			}
+
 			if (program !== 'system') {
 				return;
 			}
 
 			const funded = isAccountCreation(type)
 				? address({ info, key: 'newAccount' })
-				: type === 'transfer'
+				: SYSTEM_TRANSFERS.includes(type)
 					? address({ info, key: 'destination' })
 					: undefined;
 

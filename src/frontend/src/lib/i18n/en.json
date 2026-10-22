@@ -2220,6 +2220,7 @@
 			"instruction_unwrap": "Unwrap and close token account for $symbol",
 			"instruction_unwrap_all_to": "Unwrap all $symbol to",
 			"instruction_unwrap_all_from": "Unwrap all $symbol from",
+			"instruction_receive_excess_from": "Receive excess SOL from",
 			"instruction_create_account": "Create token account for $symbol",
 			"instruction_create_program_account": "Create app account for",
 			"instruction_close_program_account": "Close app account for",
