@@ -3,7 +3,7 @@ import { infuraLifiProviders, type InfuraLifiProvider } from '$eth/providers/inf
 import type { EthAddress } from '$eth/types/address';
 import { ZERO } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
-import { assertLifiCalldata } from '$lib/utils/lifi-calldata.utils';
+import { assertLifiCalldata, lifiCalldataSwapTargets } from '$lib/utils/lifi-calldata.utils';
 import { lifiRejectedError } from '$lib/utils/lifi-swap.utils';
 import { isNullish } from '@dfinity/utils';
 import type { LiFiStep, QuoteRequestFromAmount } from '@lifi/sdk';
@@ -42,11 +42,12 @@ const approvedTokenAddresses = async ({
  * governance rather than on the unsigned quote.
  *
  * `userTokenAddresses` are the ERC-20s OISY knows on the source network, enabled or not: hiding a
- * token does not revoke its allowance. Those with an allowance to the Diamond, read here, are what a
- * swap call could spend, and may not be called.
+ * token does not revoke its allowance. Those with an allowance to the Diamond are what a swap call
+ * could spend, and may not be called. Their allowance is read only for the ones a swap step calls or
+ * approves, the only ones it could refuse.
  *
- * Run on the execution-time quote, the one whose bytes are signed. A failed read of the whitelist
- * refuses the swap too: the check fails closed.
+ * Run on the quote whose bytes are signed, and before an ERC-20's approval on the one its price is
+ * checked against. A failed read of the whitelist refuses the swap too: the check fails closed.
  */
 export const assertLifiEvmCalldata = async ({
 	quote,
@@ -72,13 +73,17 @@ export const assertLifiEvmCalldata = async ({
 
 	const provider = infuraLifiProviders(sourceNetworkId);
 
+	const targets = new Set(
+		lifiCalldataSwapTargets({ quote, request }).map((address) => address.toLowerCase())
+	);
+
 	const calls = assertLifiCalldata({
 		quote,
 		request,
 		diamond,
 		displayedToAmountMin,
 		approvedTokenAddresses: await approvedTokenAddresses({
-			tokenAddresses: userTokenAddresses,
+			tokenAddresses: userTokenAddresses.filter((address) => targets.has(address.toLowerCase())),
 			owner: request.fromAddress,
 			diamond,
 			provider

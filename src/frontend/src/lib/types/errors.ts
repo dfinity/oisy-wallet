@@ -59,8 +59,8 @@ export class LifiQuoteRejectedError extends Error {}
 
 /**
  * A LI.FI quote passed the trust checks, but its route is one the calldata binding would refuse
- * (see `isLifiRouteExecutable`), even after re-quoting without Across. There is no route OISY can
- * execute.
+ * (see `isLifiRouteExecutable`), even after re-quoting without the bridge it took. There is no route
+ * OISY can execute.
  */
 export class LifiRouteUnsupportedError extends Error {}
 

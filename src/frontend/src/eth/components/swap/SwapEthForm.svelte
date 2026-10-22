@@ -24,7 +24,11 @@
 	import type { Token } from '$lib/types/token';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { isLifiFeeAffordable } from '$lib/utils/lifi-fee.utils';
+	import {
+		isLifiFeeAffordable,
+		raiseLifiMaxFee,
+		withLifiMaxFeeHeadroom
+	} from '$lib/utils/lifi-fee.utils';
 	import { parseToken, tryParseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
@@ -90,22 +94,26 @@
 
 	// LI.FI's fee comes with each quote, and each quote with the amount: a "Max" that followed it
 	// would set an amount, get another fee for it, and set another amount, never settling. While
-	// "Max" holds a LI.FI amount it follows the highest fee seen since, so the amount only steps down.
-	// Kept in the swap context with the held "Max": this form is rebuilt at every step change, and a
-	// fee that fell meanwhile would otherwise raise the amount. Only another provider's offer ends it:
-	// none is selected while the offers reload, as after a token picker cleared them.
+	// "Max" holds a LI.FI amount it follows the highest fee seen since for the same destination, so
+	// the amount only steps down; a new destination's fee starts it over. Kept in the swap context
+	// with the held "Max": this form is rebuilt at every step change, and a fee that fell meanwhile
+	// would otherwise raise the amount. Only another provider's offer ends it: none is selected while
+	// the offers reload, as after a token picker cleared them.
 	$effect(() => {
 		const fee = lifiFee;
+		const destinationTokenId = $destinationToken?.id;
 
 		if (!$amountSetToMax || (nonNullish($swapAmountsStore?.selectedProvider) && !isLifi)) {
 			lifiMaxFee.set(undefined);
 			return;
 		}
 
-		if (isLifi && nonNullish(fee)) {
+		if (isLifi && nonNullish(fee) && nonNullish(destinationTokenId)) {
 			untrack(() => {
-				if (isNullish($lifiMaxFee) || fee > $lifiMaxFee) {
-					lifiMaxFee.set(fee);
+				const reserved = raiseLifiMaxFee({ reserved: $lifiMaxFee, fee, destinationTokenId });
+
+				if (reserved !== $lifiMaxFee) {
+					lifiMaxFee.set(reserved);
 				}
 			});
 		}
@@ -115,18 +123,30 @@
 	// would otherwise keep the amount below the max for good.
 	const onMax = () => {
 		if (isLifi) {
-			lifiMaxFee.set(lifiFee);
+			lifiMaxFee.set(
+				nonNullish(lifiFee) && nonNullish($destinationToken)
+					? { fee: lifiFee, destinationTokenId: $destinationToken.id }
+					: undefined
+			);
 		}
 	};
 
 	// The fee "Max" leaves room for; `undefined` while the fee is, which holds the form. While the
 	// offers reload, the plain estimate the form falls back to stays below a LI.FI reservation kept
-	// through them, so "Max" holds.
-	const maxFee = $derived(
-		nonNullish(totalFee) && nonNullish($lifiMaxFee) && $lifiMaxFee > totalFee
-			? $lifiMaxFee
-			: totalFee
-	);
+	// through them, so "Max" holds. A LI.FI fee gets headroom, the review pricing it again.
+	const maxFee = $derived.by(() => {
+		if (isNullish(totalFee)) {
+			return;
+		}
+
+		if (!isLifi && isNullish($lifiMaxFee)) {
+			return totalFee;
+		}
+
+		return withLifiMaxFeeHeadroom(
+			nonNullish($lifiMaxFee) && $lifiMaxFee.fee > totalFee ? $lifiMaxFee.fee : totalFee
+		);
+	});
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType | undefined => {
 		if (isNullish($storeFeeData) || isNullish($sourceToken?.id)) {

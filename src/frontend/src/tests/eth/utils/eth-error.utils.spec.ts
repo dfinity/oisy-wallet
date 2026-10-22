@@ -1,5 +1,6 @@
 import * as sendAnalytics from '$eth/services/eth-transaction-send-analytics.services';
 import {
+	isBroadcastRetriable,
 	isDefinitiveTransactionRefusal,
 	mapEthereumErrorMsg,
 	toastEthereumTransactionError
@@ -106,6 +107,51 @@ describe('eth-error.utils', () => {
 					Object.assign(new Error('intrinsic gas too low'), {
 						error: { code: -32000, message: 'intrinsic gas too low' },
 						payload: { id: 1, jsonrpc: '2.0', method: 'eth_estimateGas' }
+					})
+				)
+			).toBeFalsy();
+		});
+	});
+
+	describe('isBroadcastRetriable', () => {
+		const broadcastAnswered = (message: string) =>
+			Object.assign(new Error(`could not coalesce error (${message})`), {
+				code: 'UNKNOWN_ERROR',
+				error: { code: -32000, message },
+				payload: { id: 1, jsonrpc: '2.0', method: 'eth_sendRawTransaction' }
+			});
+
+		it.each([
+			{
+				failure: 'a transport failure',
+				err: Object.assign(new Error('timeout'), { code: 'TIMEOUT' })
+			},
+			{
+				failure: 'a server error',
+				err: Object.assign(new Error('server response 502'), { code: 'SERVER_ERROR' })
+			},
+			{ failure: 'an underpriced answer', err: broadcastAnswered('transaction underpriced') }
+		])('should send again after $failure', ({ err }) => {
+			expect(isBroadcastRetriable(err)).toBeTruthy();
+		});
+
+		it.each([
+			'max fee per gas less than block base fee: address 0x0, maxFeePerGas: 1, baseFee: 2',
+			'insufficient funds for gas * price + value',
+			'already known',
+			'known transaction: 0xabc',
+			'nonce too low: next nonce 8, tx nonce 7'
+		])('should not send again when the node answers "%s"', (message) => {
+			expect(isBroadcastRetriable(broadcastAnswered(message))).toBeFalsy();
+		});
+
+		// How ethers delivers `nonce too low`: its own code, the node's answer under `info`.
+		it('should not send again a nonce ethers reports as used', () => {
+			expect(
+				isBroadcastRetriable(
+					Object.assign(new Error('nonce has already been used'), {
+						code: 'NONCE_EXPIRED',
+						info: { error: { code: -32000, message: 'nonce too low' } }
 					})
 				)
 			).toBeFalsy();

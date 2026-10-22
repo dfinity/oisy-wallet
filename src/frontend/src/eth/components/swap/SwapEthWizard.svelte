@@ -83,7 +83,11 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isLifiFeeAffordable, lifiCarriedFeeCeiling } from '$lib/utils/lifi-fee.utils';
+	import {
+		isLifiFeeAffordable,
+		lifiCarriedFeeCeiling,
+		raiseLifiMaxFee
+	} from '$lib/utils/lifi-fee.utils';
 	import { toLifiSwapErrorType } from '$lib/utils/lifi-swap-error.utils';
 	import { lifiUserTokenAddresses } from '$lib/utils/lifi-swap.utils';
 	import { isNetworkEthereum } from '$lib/utils/network.utils';
@@ -126,6 +130,8 @@
 		destinationToken,
 		failedSwapError,
 		lifiCarriedFee,
+		amountSetToMax,
+		lifiMaxFee,
 		sourceTokenExchangeRate,
 		setIsTokenPermitSupported,
 		isSourceTokenPermitSupported
@@ -385,6 +391,34 @@
 						: undefined) ?? ZERO
 			})
 	);
+
+	// "Max" from a native source left room for the form's fee, with headroom. A review that prices it
+	// higher still, at a fee per gas that rose further or with a ceiling carried back from a refused
+	// execution, raises what "Max" leaves room for: back on the form, it then steps down to an amount
+	// that fits, instead of landing on the same one again.
+	$effect(() => {
+		const fee = lifiFee;
+		const destinationTokenId = $destinationToken?.id;
+
+		if (
+			currentStep?.name !== WizardStepsSwap.REVIEW ||
+			!isLifiFeeUnaffordable ||
+			!$amountSetToMax ||
+			lifiOffer?.request.fromToken !== ZERO_ETH_ADDRESS ||
+			isNullish(fee) ||
+			isNullish(destinationTokenId)
+		) {
+			return;
+		}
+
+		untrack(() => {
+			const reserved = raiseLifiMaxFee({ reserved: $lifiMaxFee, fee, destinationTokenId });
+
+			if (reserved !== $lifiMaxFee) {
+				lifiMaxFee.set(reserved);
+			}
+		});
+	});
 
 	// Velora, OneSec, NEAR Intents, Chain Fusion and LI.FI all close the modal at initiation
 	// and settle in the background via the Active User Transactions store. Only the
@@ -697,10 +731,9 @@
 					...swapTrackingMetadata,
 					// LI.FI's error text can carry the user's addresses or signed transaction: only an
 					// allow-listed category is reported.
-					error:
-						selectedProvider?.provider === SwapProvider.LIFI
-							? toLifiSwapErrorType(err)
-							: (errorDetail ?? '')
+					...(selectedProvider?.provider === SwapProvider.LIFI
+						? { result_error_type: toLifiSwapErrorType(err) }
+						: { error: errorDetail ?? '' })
 				}
 			});
 

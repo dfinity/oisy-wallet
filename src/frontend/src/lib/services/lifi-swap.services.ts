@@ -1,6 +1,8 @@
 import { LIFI_INTEGRATOR } from '$env/rest/lifi.env';
-import { LIFI_ACROSS_TOOL } from '$eth/constants/lifi.constants';
-import { LIFI_QUOTE_REFRESH_INTERVAL_MS } from '$lib/constants/swap.constants';
+import {
+	LIFI_QUOTE_REFRESH_INTERVAL_MS,
+	LIFI_QUOTE_TIMEOUT_MS
+} from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
 import {
 	PLAUSIBLE_EVENT_CONTEXTS,
@@ -21,10 +23,10 @@ import {
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
+import { isLifiRouteExecutable } from '$lib/utils/lifi-calldata.utils';
 import {
 	assertLifiQuote,
 	buildLifiQuoteRequest,
-	isLifiRouteExecutable,
 	mapLifiSwapResult
 } from '$lib/utils/lifi-swap.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
@@ -139,13 +141,15 @@ const toSwapOfferError = (
 
 const fetchTrustedLifiQuote = async ({
 	request,
-	sourceNetworkId
+	sourceNetworkId,
+	signal
 }: {
 	request: QuoteRequestFromAmount;
 	sourceNetworkId: NetworkId;
+	signal: AbortSignal;
 }): Promise<LiFiStep> => {
 	// A copy, because the SDK fills its defaults into the object it is given.
-	const quote = await fetchLifiQuote({ ...request });
+	const quote = await fetchLifiQuote({ ...request, signal });
 
 	assertLifiQuote({ quote, request, sourceNetworkId });
 
@@ -154,9 +158,10 @@ const fetchTrustedLifiQuote = async ({
 
 /**
  * A trusted quote whose route the calldata binding could accept, with the request it answers. When
- * LI.FI's best route goes through Across in a shape the binding refuses (behind a DEX swap, or
- * followed by another step), LI.FI is asked once more without Across, so that another allowed
- * bridge can serve the pair; that request is the one execution re-quotes with.
+ * LI.FI's best route goes through a bridge in a shape the binding refuses (Across behind a DEX swap,
+ * or any bridge followed by another step), LI.FI is asked once more without that bridge, so that
+ * another allowed one can serve the pair; that request is the one execution re-quotes with. Both
+ * requests share one deadline: the form waits for every provider's answer.
  */
 const fetchExecutableLifiQuote = async ({
 	request,
@@ -165,27 +170,33 @@ const fetchExecutableLifiQuote = async ({
 	request: QuoteRequestFromAmount;
 	sourceNetworkId: NetworkId;
 }): Promise<{ quote: LiFiStep; request: QuoteRequestFromAmount }> => {
-	const quote = await fetchTrustedLifiQuote({ request, sourceNetworkId });
+	const signal = AbortSignal.timeout(LIFI_QUOTE_TIMEOUT_MS);
+	const quote = await fetchTrustedLifiQuote({ request, sourceNetworkId, signal });
 
 	if (isLifiRouteExecutable(quote)) {
 		return { quote, request };
 	}
 
 	const bridge = quote.includedSteps.find(({ type }) => type === 'cross')?.tool;
-	const otherBridges = (request.allowBridges ?? []).filter((key) => key !== LIFI_ACROSS_TOOL);
+	const allowBridges = request.allowBridges ?? [];
+	const otherBridges = allowBridges.filter((key) => key !== bridge);
 
-	if (bridge !== LIFI_ACROSS_TOOL || otherBridges.length === 0) {
+	if (
+		isNullish(bridge) ||
+		otherBridges.length === allowBridges.length ||
+		otherBridges.length === 0
+	) {
 		throw new LifiRouteUnsupportedError(`LI.FI route via ${bridge} cannot be executed`);
 	}
 
-	const withoutAcross = { ...request, allowBridges: otherBridges };
-	const fallback = await fetchTrustedLifiQuote({ request: withoutAcross, sourceNetworkId });
+	const withoutBridge = { ...request, allowBridges: otherBridges };
+	const fallback = await fetchTrustedLifiQuote({ request: withoutBridge, sourceNetworkId, signal });
 
 	if (!isLifiRouteExecutable(fallback)) {
-		throw new LifiRouteUnsupportedError('LI.FI route without Across cannot be executed');
+		throw new LifiRouteUnsupportedError(`LI.FI route without ${bridge} cannot be executed`);
 	}
 
-	return { quote: fallback, request: withoutAcross };
+	return { quote: fallback, request: withoutBridge };
 };
 
 const loadLifiSwapQuote = async ({

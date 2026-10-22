@@ -16,6 +16,7 @@ import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
+import { TransactionNotFoundError } from 'viem';
 
 export const processTransactionSent = async ({
 	identity,
@@ -87,7 +88,15 @@ const processPendingTransaction = async ({
 	} = token;
 
 	const { getTransaction, wait } = alchemyProviders(networkId);
-	const transaction = await getTransaction(hash);
+
+	// Viem throws for a transaction it cannot find rather than returning `null`.
+	const transaction = await getTransaction(hash).catch((err: unknown) => {
+		if (err instanceof TransactionNotFoundError) {
+			return null;
+		}
+
+		throw err;
+	});
 
 	if (isNullish(transaction)) {
 		// The provider searches in the transaction pool for pending transactions. But that does not guarantee that it found it.

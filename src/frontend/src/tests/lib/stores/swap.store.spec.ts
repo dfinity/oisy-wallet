@@ -126,7 +126,7 @@ describe('swapStore', () => {
 		failedSwapError.set({ message: 'stale error from previous swap', variant: 'error' });
 		lifiCarriedFee.set({ key: 'stale inputs', gas: 1n, l1Fee: 1n });
 		amountSetToMax.set(true);
-		lifiMaxFee.set(1n);
+		lifiMaxFee.set({ fee: 1n, destinationTokenId: mockToken2.id });
 
 		reset();
 
@@ -154,7 +154,7 @@ describe('swapStore', () => {
 			});
 
 			amountSetToMax.set(true);
-			lifiMaxFee.set(1n);
+			lifiMaxFee.set({ fee: 1n, destinationTokenId: mockToken2.id });
 			setSourceToken(mockToken2);
 
 			expect(get(amountSetToMax)).toBeFalsy();
@@ -168,7 +168,7 @@ describe('swapStore', () => {
 			});
 
 			amountSetToMax.set(true);
-			lifiMaxFee.set(1n);
+			lifiMaxFee.set({ fee: 1n, destinationTokenId: mockToken2.id });
 			switchTokens();
 
 			expect(get(amountSetToMax)).toBeFalsy();
@@ -182,11 +182,11 @@ describe('swapStore', () => {
 			});
 
 			amountSetToMax.set(true);
-			lifiMaxFee.set(1n);
+			lifiMaxFee.set({ fee: 1n, destinationTokenId: mockToken2.id });
 			setDestinationToken(mockToken1);
 
 			expect(get(amountSetToMax)).toBeTruthy();
-			expect(get(lifiMaxFee)).toBe(1n);
+			expect(get(lifiMaxFee)).toEqual({ fee: 1n, destinationTokenId: mockToken2.id });
 		});
 	});
 

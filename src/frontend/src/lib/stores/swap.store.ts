@@ -8,7 +8,7 @@ import {
 	type SwapSupportedTokensData
 } from '$lib/stores/swap-supported-tokens.store';
 import type { Balance } from '$lib/types/balance';
-import type { Token } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
 import { computeReceiveSupportedTokens } from '$lib/utils/swap-tokens-filter.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
@@ -39,8 +39,9 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	// destination would otherwise release "Max", and the amount would keep the max of a fee that
 	// no longer applies.
 	const amountSetToMax = writable(false);
-	// The highest LI.FI fee seen while "Max" holds a LI.FI amount, kept with it for the same reason.
-	const lifiMaxFee = writable<bigint | undefined>(undefined);
+	// The LI.FI fee "Max" leaves room for while it holds a LI.FI amount, kept with it for the same
+	// reason.
+	const lifiMaxFee = writable<LifiMaxFee | undefined>(undefined);
 
 	const sourceToken = derived(
 		[data, swappableTokens],
@@ -200,6 +201,13 @@ export interface LifiCarriedFee {
 	l1Fee: bigint;
 }
 
+// The highest LI.FI fee seen for the route to a destination while "Max" holds a LI.FI amount, and
+// that destination: the fee of a route to another says nothing about the new one's.
+export interface LifiMaxFee {
+	fee: bigint;
+	destinationTokenId: TokenId;
+}
+
 export interface SwapContext {
 	sourceToken: Readable<Token | undefined>;
 	destinationToken: Readable<Token | undefined>;
@@ -215,8 +223,8 @@ export interface SwapContext {
 	// Whether "Max" holds the source amount, re-applied whenever the fee changes until the user
 	// types or the source changes.
 	amountSetToMax: Writable<boolean>;
-	// The highest LI.FI fee seen while "Max" holds a LI.FI amount, which "Max" leaves room for.
-	lifiMaxFee: Writable<bigint | undefined>;
+	// The LI.FI fee "Max" leaves room for while it holds a LI.FI amount.
+	lifiMaxFee: Writable<LifiMaxFee | undefined>;
 	setIsTokensIcrc2: (args: { ledgerCanisterId: string; isIcrc2Supported: boolean }) => void;
 	setIsTokenPermitSupported: ({
 		address,

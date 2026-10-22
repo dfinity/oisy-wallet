@@ -6,6 +6,7 @@ import { approve, erc20ContractAllowance } from '$eth/services/approve.services'
 import { getL1DataFee } from '$eth/services/fee.services';
 import { swap } from '$eth/services/swap.services';
 import { mapEthereumErrorMsg } from '$eth/utils/eth-error.utils';
+import { LIFI_APPROVAL_RECEIPT_ATTEMPTS } from '$lib/constants/swap.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import en from '$lib/i18n/en.json';
 import { fetchLifiQuote } from '$lib/rest/lifi.rest';
@@ -30,6 +31,7 @@ import { SwapProvider, type SwapLifiEvmParams } from '$lib/types/swap';
 import { toLifiExternalRefsMap } from '$lib/utils/lifi-active-tx.utils';
 import { lifiUnsignedTxSize } from '$lib/utils/lifi-fee.utils';
 import { buildLifiQuoteRequest } from '$lib/utils/lifi-swap.utils';
+import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
@@ -106,6 +108,7 @@ describe('lifi-evm-swap.services', () => {
 	const swapGas = 360_000n;
 	const hash = `0x${'ab'.repeat(32)}`;
 	const nonce = 7;
+	const approvalHash = `0x${'cd'.repeat(32)}`;
 
 	const toRequest = (params: Parameters<typeof buildLifiQuoteRequest>[0]) => {
 		const request = buildLifiQuoteRequest(params);
@@ -211,6 +214,7 @@ describe('lifi-evm-swap.services', () => {
 
 	const estimateGas = vi.fn();
 	const balance = vi.fn();
+	const getTransactionReceipt = vi.fn();
 
 	// `swap` signs, then runs `beforeBroadcast`, then broadcasts: `broadcast` stands for the last.
 	let broadcast: () => Promise<void>;
@@ -228,10 +232,18 @@ describe('lifi-evm-swap.services', () => {
 
 		estimateGas.mockResolvedValue(estimatedGas);
 		balance.mockResolvedValue(10n ** 18n);
+		getTransactionReceipt.mockResolvedValue({ status: 1 });
 		vi.mocked(infuraProviders).mockReturnValue({
 			estimateGas,
-			balance
+			balance,
+			getTransactionReceipt
 		} as unknown as ReturnType<typeof infuraProviders>);
+
+		vi.mocked(approve).mockResolvedValue({
+			transactionNeededApproval: true,
+			hash: approvalHash,
+			nonce: nonce - 1
+		});
 
 		vi.mocked(swap).mockImplementation(async ({ beforeBroadcast }) => {
 			await beforeBroadcast?.({ hash, nonce });
@@ -384,11 +396,101 @@ describe('lifi-evm-swap.services', () => {
 					expect.objectContaining({ token: mockLifiBaseUsdcToken, amount: 50_000_000n })
 				);
 
-				const [priceCheck, simulated] = vi.mocked(fetchLifiQuote).mock.invocationCallOrder;
-				const [approval] = vi.mocked(approve).mock.invocationCallOrder;
+				expect(assertLifiEvmCalldata).toHaveBeenNthCalledWith(
+					1,
+					expect.objectContaining({
+						quote: erc20Quote,
+						request: { ...erc20Request, skipSimulation: true }
+					})
+				);
+				expect(assertLifiEvmCalldata).toHaveBeenNthCalledWith(
+					2,
+					expect.objectContaining({
+						quote: erc20Quote,
+						request: { ...erc20Request, skipSimulation: false }
+					})
+				);
+				expect(getTransactionReceipt).toHaveBeenCalledExactlyOnceWith(approvalHash);
 
-				expect(priceCheck).toBeLessThan(approval ?? 0);
-				expect(approval).toBeLessThan(simulated ?? 0);
+				const [priceCheck, simulated] = vi.mocked(fetchLifiQuote).mock.invocationCallOrder;
+				const [priceBinding] = vi.mocked(assertLifiEvmCalldata).mock.invocationCallOrder;
+				const [approval] = vi.mocked(approve).mock.invocationCallOrder;
+				const [mined] = getTransactionReceipt.mock.invocationCallOrder;
+				const [allowance] = vi.mocked(waitForSwapAllowance).mock.invocationCallOrder;
+
+				expect(priceCheck).toBeLessThan(priceBinding ?? 0);
+				expect(priceBinding).toBeLessThan(approval ?? 0);
+				expect(approval).toBeLessThan(mined ?? 0);
+				expect(mined).toBeLessThan(allowance ?? 0);
+				expect(allowance).toBeLessThan(simulated ?? 0);
+			});
+
+			// Nothing the binding reads waits on the allowance, so a route it refuses costs no approval.
+			it("should refuse the price check's calldata before approving when the binding refuses it", async () => {
+				const err = new LifiQuoteRejectedError(
+					'LI.FI calldata rejected: a swap targets the Diamond'
+				);
+
+				vi.mocked(assertLifiEvmCalldata).mockRejectedValueOnce(err);
+
+				await expect(fetchLifiEvmSwap(erc20Params())).rejects.toBe(err);
+
+				expect(approve).not.toHaveBeenCalled();
+				expect(swap).not.toHaveBeenCalled();
+			});
+
+			describe('the approval', () => {
+				it('should be waited for until mined', async () => {
+					getTransactionReceipt
+						.mockResolvedValueOnce(null)
+						.mockResolvedValueOnce(null)
+						.mockResolvedValueOnce({ status: 1 });
+
+					await fetchLifiEvmSwap(erc20Params());
+
+					expect(getTransactionReceipt).toHaveBeenCalledTimes(3);
+					expect(waitForMilliseconds).toHaveBeenCalledTimes(2);
+					expect(swap).toHaveBeenCalledOnce();
+				});
+
+				it('should keep being waited for through a failed read', async () => {
+					getTransactionReceipt
+						.mockRejectedValueOnce(new Error('rpc down'))
+						.mockResolvedValueOnce({ status: 1 });
+
+					await fetchLifiEvmSwap(erc20Params());
+
+					expect(getTransactionReceipt).toHaveBeenCalledTimes(2);
+					expect(swap).toHaveBeenCalledOnce();
+				});
+
+				it('should fail the swap at once when it reverted', async () => {
+					getTransactionReceipt.mockResolvedValue({ status: 0 });
+
+					await expect(fetchLifiEvmSwap(erc20Params())).rejects.toThrow(en.swap.error.unexpected);
+
+					expect(getTransactionReceipt).toHaveBeenCalledOnce();
+					expect(waitForSwapAllowance).not.toHaveBeenCalled();
+					expect(swap).not.toHaveBeenCalled();
+				});
+
+				it('should be left to the allowance poll when still unmined after the last attempt', async () => {
+					getTransactionReceipt.mockResolvedValue(null);
+
+					await fetchLifiEvmSwap(erc20Params());
+
+					expect(getTransactionReceipt).toHaveBeenCalledTimes(LIFI_APPROVAL_RECEIPT_ATTEMPTS);
+					expect(waitForSwapAllowance).toHaveBeenCalledOnce();
+				});
+
+				it('should not be waited for when none was sent', async () => {
+					vi.mocked(approve).mockResolvedValue({ transactionNeededApproval: false, nonce });
+
+					await fetchLifiEvmSwap(erc20Params());
+
+					expect(getTransactionReceipt).not.toHaveBeenCalled();
+					expect(swap).toHaveBeenCalledOnce();
+				});
 			});
 
 			it.each([
@@ -837,7 +939,8 @@ describe('lifi-evm-swap.services', () => {
 					await expect(fetchLifiEvmSwap(acrossParams())).rejects.toThrow(LifiRouteUnsupportedError);
 
 					expect(approve).toHaveBeenCalledOnce();
-					expect(assertLifiEvmCalldata).not.toHaveBeenCalled();
+					// The price check's only.
+					expect(assertLifiEvmCalldata).toHaveBeenCalledOnce();
 					expect(swap).not.toHaveBeenCalled();
 				});
 

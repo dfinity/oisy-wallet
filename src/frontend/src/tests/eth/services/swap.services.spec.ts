@@ -12,7 +12,9 @@ import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import * as signerApiLib from '$lib/api/signer.api';
 import { signTransaction } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
+import { SWAP_BROADCAST_ATTEMPTS } from '$lib/constants/swap.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import { consoleError } from '$lib/utils/console.utils';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -49,6 +51,14 @@ vi.mock('$eth/services/eth-transaction.services', () => ({
 
 vi.mock('$lib/api/signer.api', () => ({
 	signTransaction: vi.fn()
+}));
+
+vi.mock('$lib/utils/timeout.utils', () => ({
+	waitForMilliseconds: vi.fn()
+}));
+
+vi.mock('$lib/utils/console.utils', () => ({
+	consoleError: vi.fn()
 }));
 
 describe('swap.services', () => {
@@ -121,6 +131,7 @@ describe('swap.services', () => {
 			mockSendTransaction.mockResolvedValue(mockTransactionResponse);
 
 			vi.mocked(signTransaction).mockResolvedValue(mockRawTransaction);
+			vi.mocked(processTransactionSent).mockResolvedValue();
 		});
 
 		it('should perform swap successfully', async () => {
@@ -177,6 +188,91 @@ describe('swap.services', () => {
 				token: ETHEREUM_TOKEN,
 				transaction: mockTransactionResponse,
 				value: 50_000_000n
+			});
+		});
+
+		it('should resolve although the pending activity fails, which is not the swap', async () => {
+			const err = new Error('transaction not found');
+
+			vi.mocked(processTransactionSent).mockRejectedValue(err);
+
+			await expect(swap(mockSwapParams)).resolves.toEqual({
+				hash: mockTransactionHash,
+				nonce: mockNonce
+			});
+
+			await vi.waitFor(() => expect(consoleError).toHaveBeenCalledWith(err));
+		});
+
+		describe('a broadcast whose outcome is unknown', () => {
+			// The node's answer to the broadcast, as ethers nests it.
+			const nodeAnswer = (message: string) =>
+				Object.assign(new Error(message), {
+					code: 'UNKNOWN_ERROR',
+					error: { code: -32000, message },
+					payload: { id: 1, jsonrpc: '2.0', method: 'eth_sendRawTransaction' }
+				});
+
+			it.each([
+				{ failure: 'a transport failure', err: new Error('fetch failed') },
+				{
+					failure: 'a server error',
+					err: Object.assign(new Error('bad response'), { code: 'SERVER_ERROR' })
+				},
+				{ failure: 'an underpriced answer', err: nodeAnswer('transaction underpriced') }
+			])('should send the same signed bytes again after $failure', async ({ err }) => {
+				mockSendTransaction.mockRejectedValueOnce(err);
+
+				await expect(swap(mockSwapParams)).resolves.toEqual({
+					hash: mockTransactionHash,
+					nonce: mockNonce
+				});
+
+				expect(signTransaction).toHaveBeenCalledOnce();
+				expect(mockSendTransaction).toHaveBeenCalledTimes(2);
+				expect(mockSendTransaction).toHaveBeenNthCalledWith(2, mockRawTransaction);
+				expect(processTransactionSent).toHaveBeenCalledOnce();
+			});
+
+			it('should give up after the last attempt, with its failure', async () => {
+				const last = new Error('fetch failed, last attempt');
+
+				mockSendTransaction.mockRejectedValue(last);
+
+				for (let attempt = 1; attempt < SWAP_BROADCAST_ATTEMPTS; attempt++) {
+					mockSendTransaction.mockRejectedValueOnce(new Error('fetch failed'));
+				}
+
+				await expect(swap(mockSwapParams)).rejects.toThrow(last);
+
+				expect(mockSendTransaction).toHaveBeenCalledTimes(SWAP_BROADCAST_ATTEMPTS);
+				expect(processTransactionSent).not.toHaveBeenCalled();
+			});
+
+			it.each([
+				{ answer: 'a definitive refusal', message: 'max fee per gas less than block base fee' },
+				{ answer: 'already known', message: 'already known' },
+				{ answer: 'nonce too low', message: 'nonce too low: next nonce 43, tx nonce 42' }
+			])('should not send again after $answer', async ({ message }) => {
+				const err = nodeAnswer(message);
+
+				mockSendTransaction.mockRejectedValue(err);
+
+				await expect(swap(mockSwapParams)).rejects.toThrow(err);
+
+				expect(mockSendTransaction).toHaveBeenCalledOnce();
+			});
+
+			// A first attempt relayed despite its failure: the next one finds it in.
+			it('should stop at an answer that the transaction is in', async () => {
+				const known = nodeAnswer('already known');
+
+				mockSendTransaction.mockRejectedValueOnce(new Error('fetch failed'));
+				mockSendTransaction.mockRejectedValueOnce(known);
+
+				await expect(swap(mockSwapParams)).rejects.toThrow(known);
+
+				expect(mockSendTransaction).toHaveBeenCalledTimes(2);
 			});
 		});
 

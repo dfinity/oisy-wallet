@@ -5,9 +5,12 @@ import {
 	lifiCarriedFeeCeiling,
 	lifiQuoteGas,
 	lifiUnsignedTxSize,
+	raiseLifiMaxFee,
 	withLifiGasBuffer,
+	withLifiMaxFeeHeadroom,
 	withLifiReviewGasBuffer
 } from '$lib/utils/lifi-fee.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
 import { mockLifiDiamond, mockLifiQuote } from '$tests/mocks/lifi.mock';
 import type { GasCost, LiFiStep } from '@lifi/sdk';
 import { Transaction } from 'ethers/transaction';
@@ -74,6 +77,53 @@ describe('lifi-fee.utils', () => {
 			expect(withLifiReviewGasBuffer(258_163n)).toBeGreaterThanOrEqual(
 				withLifiGasBuffer((258_163n * 105n) / 100n)
 			);
+		});
+	});
+
+	// Above the rise of the fee per gas measured between the form and the review on Ethereum.
+	describe('withLifiMaxFeeHeadroom', () => {
+		it('should add 10 %', () => {
+			expect(withLifiMaxFeeHeadroom(1_000_000n)).toBe(1_100_000n);
+		});
+	});
+
+	describe('raiseLifiMaxFee', () => {
+		const usdc = parseTokenId('LifiMaxUsdc');
+		const sol = parseTokenId('LifiMaxSol');
+
+		it('should start from the fee when nothing is reserved', () => {
+			expect(raiseLifiMaxFee({ reserved: undefined, fee: 5n, destinationTokenId: usdc })).toEqual({
+				fee: 5n,
+				destinationTokenId: usdc
+			});
+		});
+
+		it('should raise the reservation for the same destination to a higher fee', () => {
+			expect(
+				raiseLifiMaxFee({
+					reserved: { fee: 5n, destinationTokenId: usdc },
+					fee: 6n,
+					destinationTokenId: usdc
+				})
+			).toEqual({ fee: 6n, destinationTokenId: usdc });
+		});
+
+		// So that the amount only steps down.
+		it('should keep the reservation itself for the same destination when the fee is not higher', () => {
+			const reserved = { fee: 5n, destinationTokenId: usdc };
+
+			expect(raiseLifiMaxFee({ reserved, fee: 5n, destinationTokenId: usdc })).toBe(reserved);
+			expect(raiseLifiMaxFee({ reserved, fee: 4n, destinationTokenId: usdc })).toBe(reserved);
+		});
+
+		it("should start over from another destination's fee, even a lower one", () => {
+			expect(
+				raiseLifiMaxFee({
+					reserved: { fee: 5n, destinationTokenId: usdc },
+					fee: 4n,
+					destinationTokenId: sol
+				})
+			).toEqual({ fee: 4n, destinationTokenId: sol });
 		});
 	});
 

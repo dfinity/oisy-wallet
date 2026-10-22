@@ -286,6 +286,22 @@ export const isDefinitiveTransactionRefusal = (err: unknown): boolean =>
 				!EXECUTION_REVERTED_PATTERN.test(message)
 		));
 
+// The node's answers that the transaction, or another with its nonce, is already in.
+const ALREADY_SENT_PATTERN = /already known|known transaction|nonce too low/i;
+
+/**
+ * Whether broadcasting the same signed transaction again could still send it: the node neither
+ * refused it outright nor answered that it, or its nonce, is already in. A transport failure, a
+ * server error or `transaction underpriced` leave it unsent as far as anyone can tell, and the same
+ * bytes have one hash and one nonce, so sending them again cannot send them twice.
+ */
+export const isBroadcastRetriable = (err: unknown): boolean =>
+	!isDefinitiveTransactionRefusal(err) &&
+	!collectErrorRecords({ err }).some(
+		({ code, message }) =>
+			typeof code === 'number' && typeof message === 'string' && ALREADY_SENT_PATTERN.test(message)
+	);
+
 /**
  * Maps an error raised while broadcasting an Ethereum or EVM transaction to a user-friendly message.
  *

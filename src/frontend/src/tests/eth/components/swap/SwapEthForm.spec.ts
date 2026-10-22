@@ -10,9 +10,11 @@ import {
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
-import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
+import { SWAP_CONTEXT_KEY, initSwapContext, type SwapContext } from '$lib/stores/swap.store';
 import type { OptionAmount } from '$lib/types/send';
 import { formatToken } from '$lib/utils/format.utils';
+import { withLifiMaxFeeHeadroom } from '$lib/utils/lifi-fee.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
 import SwapEthFormLifiTest from '$tests/eth/components/swap/SwapEthFormLifiTest.svelte';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -267,6 +269,9 @@ describe('SwapFormEth', () => {
 					displayDecimals: ETHEREUM_TOKEN.decimals
 				});
 
+			// LI.FI's fee with headroom: the review prices it again, at a fee per gas read anew.
+			const maxForLifi = (fee: bigint) => maxFor(withLifiMaxFeeHeadroom(fee));
+
 			const amountOf = (container: HTMLElement) =>
 				(container.querySelector(amountSelector) as HTMLInputElement).value;
 
@@ -330,21 +335,21 @@ describe('SwapFormEth', () => {
 				renderForm();
 				await vi.advanceTimersByTimeAsync(500);
 
-				expect(get(amount)).toBe(maxFor(lifiFee + 1_000n));
+				expect(get(amount)).toBe(maxForLifi(lifiFee + 1_000n));
 			});
 
 			it('should step down to a higher fee and hold there when the fee falls back', async () => {
 				const { container } = await renderWithMax();
 
-				expect(amountOf(container)).toBe(maxFor(lifiFee));
+				expect(amountOf(container)).toBe(maxForLifi(lifiFee));
 
 				await setFee(lifiFee + 1_000n);
 
-				expect(amountOf(container)).toBe(maxFor(lifiFee + 1_000n));
+				expect(amountOf(container)).toBe(maxForLifi(lifiFee + 1_000n));
 
 				await setFee(lifiFee - 1_000n);
 
-				expect(amountOf(container)).toBe(maxFor(lifiFee + 1_000n));
+				expect(amountOf(container)).toBe(maxForLifi(lifiFee + 1_000n));
 			});
 
 			// The form is rebuilt at every step change, and a fee that fell meanwhile must not raise the
@@ -361,7 +366,7 @@ describe('SwapFormEth', () => {
 				renderForm();
 				await vi.advanceTimersByTimeAsync(500);
 
-				expect(get(amount)).toBe(maxFor(lifiFee + 1_000n));
+				expect(get(amount)).toBe(maxForLifi(lifiFee + 1_000n));
 			});
 
 			// A destroyed form's pending re-application must not write the amount while the rebuilt one
@@ -379,11 +384,11 @@ describe('SwapFormEth', () => {
 				renderForm();
 				await vi.advanceTimersByTimeAsync(1_000);
 
-				expect(get(amount)).toBe(maxFor(lifiFee));
+				expect(get(amount)).toBe(maxForLifi(lifiFee));
 
 				await setFee(lifiFee - 1_000n);
 
-				expect(get(amount)).toBe(maxFor(lifiFee + 1_000n));
+				expect(get(amount)).toBe(maxForLifi(lifiFee + 1_000n));
 			});
 
 			// A token picker clears the offers, and cancelling it rebuilds this form while they reload,
@@ -423,7 +428,7 @@ describe('SwapFormEth', () => {
 				it('should hold "Max" rather than follow the plain estimate', async () => {
 					await renderReloading();
 
-					expect(get(amount)).toBe(maxFor(lifiFee + 1_000n));
+					expect(get(amount)).toBe(maxForLifi(lifiFee + 1_000n));
 				});
 
 				it('should keep the highest fee for LI.FI back with a lower one', async () => {
@@ -437,7 +442,7 @@ describe('SwapFormEth', () => {
 					renderForm();
 					await vi.advanceTimersByTimeAsync(1_000);
 
-					expect(get(amount)).toBe(maxFor(lifiFee + 1_000n));
+					expect(get(amount)).toBe(maxForLifi(lifiFee + 1_000n));
 				});
 
 				it("should follow another provider's fee once one is chosen", async () => {
@@ -454,18 +459,72 @@ describe('SwapFormEth', () => {
 				});
 			});
 
+			it("should leave room for LI.FI's fee and 10 % more", async () => {
+				await renderWithMax();
+
+				expect(get(amount)).toBe('0.9978');
+			});
+
+			// Another destination is another route, whose fee the old one says nothing about.
+			describe('a new destination', () => {
+				const otherDestination = {
+					...mockValidErc20Token,
+					id: parseTokenId('LifiOtherDestination')
+				};
+
+				const offers = writable<unknown>({
+					selectedProvider: { provider: 'lifi', receiveAmount: 1n },
+					swaps: []
+				});
+
+				const renderForNewDestination = async () => {
+					mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: offers });
+
+					const { unmount } = await renderWithMax();
+
+					await setFee(lifiFee + 1_000n);
+
+					unmount();
+
+					(mockContext.get(SWAP_CONTEXT_KEY) as SwapContext).setDestinationToken(otherDestination);
+				};
+
+				it('should hold the old reservation while its offers reload', async () => {
+					await renderForNewDestination();
+
+					offers.set(null);
+					fee.set(undefined);
+
+					renderForm({ isLifi: false });
+					await vi.advanceTimersByTimeAsync(1_000);
+
+					expect(get(amount)).toBe(maxForLifi(lifiFee + 1_000n));
+				});
+
+				it("should start over from LI.FI's fee for it, even a lower one", async () => {
+					await renderForNewDestination();
+
+					fee.set(lifiFee - 1_000n);
+
+					renderForm();
+					await vi.advanceTimersByTimeAsync(1_000);
+
+					expect(get(amount)).toBe(maxForLifi(lifiFee - 1_000n));
+				});
+			});
+
 			it('should start from the fee of the moment when "Max" is pressed again', async () => {
 				const { container, getByTestId } = await renderWithMax();
 
 				await setFee(lifiFee + 1_000n);
 				await setFee(lifiFee - 1_000n);
 
-				expect(amountOf(container)).toBe(maxFor(lifiFee + 1_000n));
+				expect(amountOf(container)).toBe(maxForLifi(lifiFee + 1_000n));
 
 				// At once, not after the debounce a fee change waits out.
 				await fireEvent.click(getByTestId(MAX_BUTTON));
 
-				expect(amountOf(container)).toBe(maxFor(lifiFee - 1_000n));
+				expect(amountOf(container)).toBe(maxForLifi(lifiFee - 1_000n));
 			});
 
 			it('should follow the fee anew once the amount is typed and "Max" pressed again', async () => {
@@ -484,7 +543,7 @@ describe('SwapFormEth', () => {
 				await fireEvent.click(getByTestId(MAX_BUTTON));
 				await vi.advanceTimersByTimeAsync(500);
 
-				expect(amountOf(container)).toBe(maxFor(lifiFee - 1_000n));
+				expect(amountOf(container)).toBe(maxForLifi(lifiFee - 1_000n));
 			});
 		});
 	});

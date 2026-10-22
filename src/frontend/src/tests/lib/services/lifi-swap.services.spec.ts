@@ -2,7 +2,10 @@ import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.ev
 import type * as lifiEnv from '$env/rest/lifi.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import { LIFI_QUOTE_REFRESH_INTERVAL_MS } from '$lib/constants/swap.constants';
+import {
+	LIFI_QUOTE_REFRESH_INTERVAL_MS,
+	LIFI_QUOTE_TIMEOUT_MS
+} from '$lib/constants/swap.constants';
 import {
 	PLAUSIBLE_EVENT_CONTEXTS,
 	PLAUSIBLE_EVENT_RESULT_STATUSES,
@@ -94,7 +97,8 @@ describe('lifi-swap.services', () => {
 					fromAddress: mockLifiUserAddress,
 					fromAmount: `${mockLifiFromAmount}`,
 					skipSimulation: true,
-					allowDestinationCall: false
+					allowDestinationCall: false,
+					signal: expect.any(AbortSignal)
 				})
 			);
 		});
@@ -213,12 +217,47 @@ describe('lifi-swap.services', () => {
 				);
 			});
 
-			it('should not re-quote a route that another bridge cannot execute', async () => {
-				vi.mocked(fetchLifiQuote).mockResolvedValue(routeVia([feeCollection, near, dexSwap]));
+			it('should re-quote without NEAR Intents when its route is followed by another step', async () => {
+				const fallback = routeVia([feeCollection, across]);
+
+				vi.mocked(fetchLifiQuote)
+					.mockResolvedValueOnce(routeVia([feeCollection, near, dexSwap]))
+					.mockResolvedValueOnce(fallback);
+
+				const offer = await fetchLifiSwapQuote(crossChainParams);
+
+				expect(offer?.swapDetails).toStrictEqual(fallback);
+				expect(offer?.provider === SwapProvider.LIFI && offer.request.allowBridges).toEqual([
+					'across'
+				]);
+				expect(bridgesOfCall(1)).toEqual(['across']);
+			});
+
+			// Asking without it would ask the same again.
+			it('should not re-quote a route through a bridge the request did not allow', async () => {
+				vi.mocked(fetchLifiQuote).mockResolvedValue(
+					routeVia([feeCollection, step({ type: 'cross', tool: 'relay' })])
+				);
 
 				await expect(fetchLifiSwapQuote(crossChainParams)).resolves.toBeUndefined();
 
 				expect(fetchLifiQuote).toHaveBeenCalledOnce();
+			});
+
+			// The form waits for every provider: the re-quote gets what is left of the first deadline.
+			it('should give both requests one deadline', async () => {
+				const timeout = vi.spyOn(AbortSignal, 'timeout');
+
+				vi.mocked(fetchLifiQuote)
+					.mockResolvedValueOnce(routeVia([feeCollection, dexSwap, across]))
+					.mockResolvedValueOnce(routeVia([feeCollection, dexSwap, near]));
+
+				await fetchLifiSwapQuote(crossChainParams);
+
+				const [[first], [second]] = vi.mocked(fetchLifiQuote).mock.calls;
+
+				expect(second?.signal).toBe(first?.signal);
+				expect(timeout).toHaveBeenCalledExactlyOnceWith(LIFI_QUOTE_TIMEOUT_MS);
 			});
 		});
 

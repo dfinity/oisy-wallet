@@ -3,11 +3,19 @@ import { infuraProviders } from '$eth/providers/infura.providers';
 import { processTransactionSent } from '$eth/services/eth-transaction.services';
 import { getNonce } from '$eth/services/nonce.services';
 import type { SwapParams } from '$eth/types/swap';
+import { isBroadcastRetriable } from '$eth/utils/eth-error.utils';
 import { signTransaction } from '$lib/api/signer.api';
+import {
+	SWAP_BROADCAST_ATTEMPTS,
+	SWAP_BROADCAST_RETRY_DELAY_MILLIS
+} from '$lib/constants/swap.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
+import type { NetworkId } from '$lib/types/network';
 import type { TransferParams } from '$lib/types/send';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
+import { consoleError } from '$lib/utils/console.utils';
+import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { isNullish, toNullable } from '@dfinity/utils';
 import type { TransactionParams } from '@velora-dex/sdk';
 import { keccak256 } from 'ethers/crypto';
@@ -71,6 +79,35 @@ const signSwapTransaction = ({
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
+// The same signed bytes are sent again while the node has neither refused them nor answered that
+// they are in: a transport failure or a server error would otherwise leave a signed swap unsent, and
+// with one hash and one nonce they cannot swap twice.
+const broadcast = async ({
+	networkId,
+	rawTransaction
+}: {
+	networkId: NetworkId;
+	rawTransaction: string;
+}): Promise<TransactionResponse> => {
+	const { sendTransaction } = infuraProviders(networkId);
+
+	for (let attempt = 1; attempt < SWAP_BROADCAST_ATTEMPTS; attempt++) {
+		try {
+			return await sendTransaction(rawTransaction);
+		} catch (err: unknown) {
+			if (!isBroadcastRetriable(err)) {
+				throw err;
+			}
+
+			consoleError(err);
+		}
+
+		await waitForMilliseconds(SWAP_BROADCAST_RETRY_DELAY_MILLIS);
+	}
+
+	return await sendTransaction(rawTransaction);
+};
+
 export const swap = async ({
 	progress,
 	token,
@@ -111,10 +148,12 @@ export const swap = async ({
 	// The hash of a typed transaction is the hash of its signed bytes.
 	await beforeBroadcast?.({ hash: keccak256(rawTransaction), nonce });
 
-	const transactionSent: TransactionResponse =
-		await infuraProviders(networkId).sendTransaction(rawTransaction);
+	const transactionSent = await broadcast({ networkId, rawTransaction });
 
-	processTransactionSent({ identity, token, transaction: transactionSent, value: amount });
+	// Not awaited: the pending activity settles in the background, and its failure is not the swap's.
+	processTransactionSent({ identity, token, transaction: transactionSent, value: amount }).catch(
+		consoleError
+	);
 
 	// The nonce is returned so callers can persist it: it is what later tells a
 	// transaction that is merely unmined from one that was replaced or dropped.

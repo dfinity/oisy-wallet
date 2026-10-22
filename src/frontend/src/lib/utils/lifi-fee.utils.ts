@@ -2,8 +2,12 @@ import { ZERO } from '$lib/constants/app.constants';
 import {
 	LIFI_CARRIED_FEE_HEADROOM_PERCENT,
 	LIFI_GAS_LIMIT_BUFFER_PERCENT,
+	LIFI_MAX_FEE_HEADROOM_PERCENT,
 	LIFI_REVIEW_GAS_BUFFER_PERCENT
 } from '$lib/constants/swap.constants';
+import type { LifiMaxFee } from '$lib/stores/swap.store';
+import type { TokenId } from '$lib/types/token';
+import { nonNullish } from '@dfinity/utils';
 import type { LiFiStep } from '@lifi/sdk';
 import { dataLength, encodeRlp, toBeArray } from 'ethers/utils';
 
@@ -37,6 +41,29 @@ export const withLifiGasBuffer = (gas: bigint): bigint =>
 // node estimates the same transaction a little above LI.FI.
 export const withLifiReviewGasBuffer = (gas: bigint): bigint =>
 	withPercent({ value: gas, percent: LIFI_REVIEW_GAS_BUFFER_PERCENT });
+
+// What "Max" from a native source leaves room for, on top of LI.FI's fee: the review prices the fee
+// again, at a fee per gas read anew.
+export const withLifiMaxFeeHeadroom = (fee: bigint): bigint =>
+	withPercent({ value: fee, percent: LIFI_MAX_FEE_HEADROOM_PERCENT });
+
+/**
+ * The LI.FI fee "Max" leaves room for once `fee` is known for the route to `destinationTokenId`: the
+ * higher of it and the one `reserved` for the same destination, so that the amount only steps down,
+ * and `fee` alone for another destination. `reserved` itself when it stands.
+ */
+export const raiseLifiMaxFee = ({
+	reserved,
+	fee,
+	destinationTokenId
+}: {
+	reserved: LifiMaxFee | undefined;
+	fee: bigint;
+	destinationTokenId: TokenId;
+}): LifiMaxFee =>
+	nonNullish(reserved) && reserved.destinationTokenId === destinationTokenId && reserved.fee >= fee
+		? reserved
+		: { fee, destinationTokenId };
 
 /**
  * The fee ceiling a refused execution carried back, re-priced at the fee per gas the review now

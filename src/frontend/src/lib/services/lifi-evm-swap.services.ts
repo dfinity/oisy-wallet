@@ -8,6 +8,8 @@ import { isDefinitiveTransactionRefusal } from '$eth/utils/eth-error.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import {
+	LIFI_APPROVAL_RECEIPT_ATTEMPTS,
+	LIFI_APPROVAL_RECEIPT_POLL_MILLIS,
 	LIFI_ROW_DELETE_ATTEMPTS,
 	LIFI_ROW_DELETE_RETRY_DELAY_MILLIS
 } from '$lib/constants/swap.constants';
@@ -30,6 +32,7 @@ import {
 	toLifiData,
 	toLifiExternalRefs
 } from '$lib/utils/lifi-active-tx.utils';
+import { isLifiRouteExecutable } from '$lib/utils/lifi-calldata.utils';
 import {
 	lifiApprovalCount,
 	lifiQuoteGas,
@@ -37,7 +40,7 @@ import {
 	withLifiGasBuffer,
 	withLifiReviewGasBuffer
 } from '$lib/utils/lifi-fee.utils';
-import { assertLifiQuote, isLifiRouteExecutable } from '$lib/utils/lifi-swap.utils';
+import { assertLifiQuote } from '$lib/utils/lifi-swap.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -271,6 +274,32 @@ export const lifiApprovalTransactions = async ({
 	}
 };
 
+// `approve()` returns once the approval is broadcast, and the allowance poll after it gives up within
+// two Ethereum blocks: a slow approval would send the swap back to the review still pending, where a
+// retry signs a second one. An approval that reverted fails the swap at once. One still unmined
+// after the last attempt is left to the poll.
+const waitForApproval = async ({ networkId, hash }: { networkId: NetworkId; hash: string }) => {
+	const { getTransactionReceipt } = infuraProviders(networkId);
+
+	for (let attempt = 1; attempt <= LIFI_APPROVAL_RECEIPT_ATTEMPTS; attempt++) {
+		const receipt = await getTransactionReceipt(hash).catch((err: unknown) => {
+			consoleError(err);
+
+			return null;
+		});
+
+		if (nonNullish(receipt)) {
+			if (receipt.status === 0) {
+				throw new Error(get(i18n).swap.error.unexpected);
+			}
+
+			return;
+		}
+
+		await waitForMilliseconds(LIFI_APPROVAL_RECEIPT_POLL_MILLIS);
+	}
+};
+
 // A delete that keeps failing leaves the row to the poller, which settles it as replaced or
 // dropped once its nonce is used.
 const deleteLifiRow = async ({ identity, id }: { identity: Identity; id: string }) => {
@@ -334,14 +363,24 @@ export const fetchLifiEvmSwap = async ({
 		}
 
 		// The price is checked before the approval costs anything, against a quote that is not
-		// simulated: the allowance it would need does not exist yet.
-		await requoteReviewedRoute({
+		// simulated: the allowance it would need does not exist yet. Its calldata is bound too, so
+		// that a route the binding refuses costs no approval; the binding runs again on the quote
+		// that is signed.
+		const { quote: priceQuote, request: priceRequest } = await requoteReviewedRoute({
 			request: { ...request, skipSimulation: true },
 			sourceNetworkId,
 			displayedToAmountMin
 		});
 
-		await approveToken({
+		await assertLifiEvmCalldata({
+			quote: priceQuote,
+			request: priceRequest,
+			sourceNetworkId,
+			displayedToAmountMin,
+			userTokenAddresses
+		});
+
+		const { hash: approvalHash } = await approveToken({
 			token: sourceToken,
 			from: userAddress,
 			to: diamond,
@@ -355,6 +394,10 @@ export const fetchLifiEvmSwap = async ({
 			progress,
 			progressSteps: ProgressStepsSwap
 		});
+
+		if (nonNullish(approvalHash)) {
+			await waitForApproval({ networkId: sourceNetworkId, hash: approvalHash });
+		}
 
 		await waitForSwapAllowance({
 			token: sourceToken,
