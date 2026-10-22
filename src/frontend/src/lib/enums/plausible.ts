@@ -13,6 +13,9 @@ export enum PLAUSIBLE_EVENTS {
 	STAKE = 'stake',
 	UNSTAKE = 'unstake',
 	LOAD_TRANSACTIONS = 'load_transactions',
+	// Loading transactions, sent when something notable happens to it. The outcome is in
+	// `result_status`, never in the name.
+	TRANSACTION_LOAD = 'transaction_load',
 	SIGNER_PAGE_VISIT = 'signer_page_visit',
 	SIGNER_INTERACTION = 'signer_interaction',
 	NETWORK_FILTER = 'network_filter',
@@ -30,6 +33,10 @@ export enum PLAUSIBLE_EVENTS {
 	// The countdown to the end of the XDR basket that prices TCYCLES.
 	XDR_BASKET_EXPIRY = 'xdr_basket_expiry',
 	CYCLES_MINT = 'cycles_mint',
+	CYCLES_TOP_UP = 'cycles_top_up',
+	// Sending a transaction, sent when something notable happens to it. The outcome is in
+	// `result_status`, never in the name.
+	TRANSACTION_SEND = 'transaction_send',
 	// An invariant we believed unreachable was reached. Not for flows that can legitimately
 	// fail — those keep their own event and report the outcome via `result_status`.
 	ERROR = 'error'
@@ -89,6 +96,89 @@ export enum PLAUSIBLE_EVENT_HELP_ERROR_TYPES {
 	UNKNOWN = 'unknown'
 }
 
+// The category is what a dashboard filters on. The node's own text sits next to it in
+// `result_error_text` only in the one wording known to carry a gas figure alone.
+export enum PLAUSIBLE_EVENT_TRANSACTION_SEND_ERROR_TYPES {
+	// The node simulated the transaction and it ran out of the gas it was signed with.
+	OUT_OF_GAS = 'out_of_gas'
+}
+
+// Why a provider's offer is missing from the swap form: the request failed, or the offer that
+// arrived was left out.
+export enum PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES {
+	// A 1Click quote for an XRP deposit came with a deposit memo.
+	DEPOSIT_MEMO = 'deposit_memo',
+	// The provider has no route for the pair and amount.
+	NO_ROUTE = 'no_route',
+	// The provider refused the request for exceeding its rate limit.
+	RATE_LIMITED = 'rate_limited',
+	// The quote failed OISY's own checks — a target, spender or echoed request that differs from
+	// what was asked — so it was never shown.
+	QUOTE_REJECTED = 'quote_rejected',
+	// The quote request was aborted after the provider's timeout.
+	TIMEOUT = 'timeout',
+	// Any other failure of the quote request.
+	REQUEST_FAILED = 'request_failed'
+}
+
+// Why a swap failed after the user confirmed it, for a provider whose error text cannot be sent:
+// LI.FI's carries the user's addresses or the signed transaction.
+export enum PLAUSIBLE_EVENT_SWAP_ERROR_TYPES {
+	// The network fee at signing exceeded the one reviewed, so nothing was signed.
+	FEE_CHANGED = 'fee_changed',
+	// The re-quote no longer reaches the minimum the user reviewed, or has no route.
+	SLIPPAGE_EXCEEDED = 'slippage_exceeded',
+	// The re-quote failed OISY's own checks, or its route is one OISY cannot execute.
+	QUOTE_REJECTED = PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.QUOTE_REJECTED,
+	// The balance does not cover the swap and its network fee.
+	INSUFFICIENT_FUNDS = 'insufficient_funds',
+	// Any other failure.
+	UNKNOWN = 'unknown'
+}
+
+// Why a tip step failed. `TipError` is OISY's own candid type, so its variant names are a closed
+// set we control and safe to send under invariant 4 in docs/ai/frontend/analytics.md; only the
+// name goes out, never the `msg` some variants carry. The ledger's refusals of the approve are
+// prefixed because `InsufficientFunds` exists on both sides and means different things there.
+export enum PLAUSIBLE_EVENT_TIP_ERROR_TYPES {
+	INVALID_EXPIRY = 'invalid_expiry',
+	CLAIM_IN_PROGRESS = 'claim_in_progress',
+	SECRET_CIPHERTEXT_TOO_LARGE = 'secret_ciphertext_too_large',
+	// The sender's allowance no longer covers the tip.
+	UNCOVERED = 'uncovered',
+	// Unknown id, expired, cancelled, already claimed or a wrong code: the canister answers all of
+	// them alike on purpose, so nobody can probe which.
+	NOT_FOUND = 'not_found',
+	NOT_YOUR_TIP = 'not_your_tip',
+	INVALID_CLAIM_CODE_HASH = 'invalid_claim_code_hash',
+	INVALID_TIP_ID = 'invalid_tip_id',
+	RATE_LIMITED = 'rate_limited',
+	DUPLICATE_TIP_ID = 'duplicate_tip_id',
+	NOT_CANCELLABLE = 'not_cancellable',
+	TRANSFER_FAILED = 'transfer_failed',
+	INTERNAL_ERROR = 'internal_error',
+	MESSAGE_TOO_LONG = 'message_too_long',
+	TOO_MANY_TIPS = 'too_many_tips',
+	// The claim was valid but the sender's balance was short.
+	INSUFFICIENT_FUNDS = 'insufficient_funds',
+	AMOUNT_TOO_SMALL = 'amount_too_small',
+	LEDGER_GENERIC_ERROR = 'ledger_generic_error',
+	LEDGER_TEMPORARILY_UNAVAILABLE = 'ledger_temporarily_unavailable',
+	LEDGER_DUPLICATE = 'ledger_duplicate',
+	LEDGER_BAD_FEE = 'ledger_bad_fee',
+	LEDGER_ALLOWANCE_CHANGED = 'ledger_allowance_changed',
+	LEDGER_CREATED_IN_FUTURE = 'ledger_created_in_future',
+	LEDGER_TOO_OLD = 'ledger_too_old',
+	LEDGER_EXPIRED = 'ledger_expired',
+	// The sender's balance does not cover the amount plus the fee.
+	LEDGER_INSUFFICIENT_FUNDS = 'ledger_insufficient_funds',
+	// Not a canister error: a reopen found no recoverable copy of the claim code, because the tip
+	// predates the store, was cancelled, or its copy could not be saved when it was created.
+	LINK_UNAVAILABLE = 'link_unavailable',
+	// Anything else: transport, agent, the vetKey decryption, or an unexpected throw.
+	UNKNOWN = 'unknown'
+}
+
 export enum PLAUSIBLE_EVENT_CONTEXTS {
 	BACKEND = 'backend',
 	NFT = 'nft',
@@ -106,7 +196,10 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	PERSONAL_NOTES = 'personal_notes',
 	HELP = 'help',
 	TIPS = 'tips',
-	COMPUTE = 'compute'
+	COMPUTE = 'compute',
+	SEND = 'send',
+	CONVERT = 'convert',
+	AI_ASSISTANT = 'ai_assistant'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -133,6 +226,19 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_NETWORKS {
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS {
 	UNCERTIFIED_REMOVED = 'uncertified_removed'
+}
+
+// What a `transaction_load` event is about: one transaction, or a whole load of them.
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTION_LOAD {
+	SINGLE = 'single'
+}
+
+// Why a `transaction_load` failed, in `result_error_type`.
+export enum PLAUSIBLE_EVENT_TRANSACTION_LOAD_ERROR_TYPES {
+	// The RPC refused to return the transaction.
+	LOAD_REFUSED = 'load_refused',
+	// The RPC returned it, but OISY failed to read it.
+	PARSE_FAILED = 'parse_failed'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER {
@@ -217,7 +323,13 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	TOKEN = 'token',
 	CONTACT = 'contact',
 	TYPE = 'type',
-	LINK = 'link'
+	LINK = 'link',
+	// The gas limit a transaction was signed with.
+	GAS_SENT = 'gas_sent',
+	// The gas the network estimates the same transaction needs, asked again after it failed.
+	GAS_NEEDED = 'gas_needed',
+	// How long a tip stays claimable, as the label the sender picked.
+	EXPIRY = 'expiry'
 }
 
 export enum PLAUSIBLE_EVENT_FILTER_MODIFIERS {

@@ -11,26 +11,26 @@ use shared::types::{
 use crate::{
     personal_notes::PERSONAL_NOTES_DOMAIN_SEPARATOR,
     state::memory::{
-        ACTIVE_USER_TRANSACTIONS_MEMORY_ID, AGREEMENT_HISTORY_MEMORY_ID, API_KEYS_MEMORY_ID,
-        BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID, CONTACT_IMAGE_MEMORY_ID,
-        CONTACT_MEMORY_ID, EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER,
-        PERSONAL_NOTES_ENCRYPTED_MAPS_MEMORY_ID, PERSONAL_NOTES_KEY_MANAGER_ACCESS_MEMORY_ID,
-        PERSONAL_NOTES_KEY_MANAGER_CONFIG_MEMORY_ID, PERSONAL_NOTES_KEY_MANAGER_SHARED_MEMORY_ID,
-        PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID, PERSONAL_NOTE_SHARES_MEMORY_ID,
-        TIPS_BY_SENDER_MEMORY_ID, TIPS_MEMORY_ID, TIP_SECRETS_ENCRYPTED_MAPS_MEMORY_ID,
-        TIP_SECRETS_KEY_MANAGER_ACCESS_MEMORY_ID, TIP_SECRETS_KEY_MANAGER_CONFIG_MEMORY_ID,
-        TIP_SECRETS_KEY_MANAGER_SHARED_MEMORY_ID, TOKEN_ACTIVITY_MEMORY_ID,
-        USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID, USER_PROFILE_UPDATED_MEMORY_ID,
-        USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
+        ACTIVE_USER_TRANSACTIONS_MEMORY_ID, ACTIVE_USER_TRANSACTIONS_SEEN_MEMORY_ID,
+        AGREEMENT_HISTORY_MEMORY_ID, API_KEYS_MEMORY_ID, BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID,
+        CONFIG_MEMORY_ID, CONTACT_IMAGE_MEMORY_ID, CONTACT_MEMORY_ID, EXCHANGE_RATE_MEMORY_ID,
+        MEMORY_MANAGER, PERSONAL_NOTES_ENCRYPTED_MAPS_MEMORY_ID,
+        PERSONAL_NOTES_KEY_MANAGER_ACCESS_MEMORY_ID, PERSONAL_NOTES_KEY_MANAGER_CONFIG_MEMORY_ID,
+        PERSONAL_NOTES_KEY_MANAGER_SHARED_MEMORY_ID, PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID,
+        PERSONAL_NOTE_SHARES_MEMORY_ID, TIPS_BY_SENDER_MEMORY_ID, TIPS_MEMORY_ID,
+        TIP_SECRETS_ENCRYPTED_MAPS_MEMORY_ID, TIP_SECRETS_KEY_MANAGER_ACCESS_MEMORY_ID,
+        TIP_SECRETS_KEY_MANAGER_CONFIG_MEMORY_ID, TIP_SECRETS_KEY_MANAGER_SHARED_MEMORY_ID,
+        TOKEN_ACTIVITY_MEMORY_ID, USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID,
+        USER_PROFILE_UPDATED_MEMORY_ID, USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
     },
     tips::secrets::TIP_SECRETS_DOMAIN_SEPARATOR,
     types::{
         maps::{
-            ActiveUserTransactionsMap, AgreementHistoryMap, ApiKeysCell,
-            BtcUserPendingTransactionsMap, ConfigCell, ContactImageMap, ContactMap, CustomTokenMap,
-            ExchangeRateMap, PersonalNoteShareMap, PersonalNoteSharesByCreatorMap, TipMap,
-            TipsBySenderMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
-            UserTransactionsMap,
+            ActiveUserTransactionsMap, ActiveUserTransactionsSeenMap, AgreementHistoryMap,
+            ApiKeysCell, BtcUserPendingTransactionsMap, ConfigCell, ContactImageMap, ContactMap,
+            CustomTokenMap, ExchangeRateMap, PersonalNoteShareMap, PersonalNoteSharesByCreatorMap,
+            TipMap, TipsBySenderMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap,
+            UserTokenMap, UserTransactionsMap,
         },
         storable::Candid,
     },
@@ -65,6 +65,9 @@ pub(crate) struct State {
     /// Per-user in-flight high-level operations (swaps, converts, …). Survives
     /// canister upgrades; the FE polls and updates these records.
     pub(crate) active_user_transactions: ActiveUserTransactionsMap,
+    /// Per-user time up to which the user has seen their active user transactions, so a record
+    /// reads as unread on every device only once it changes after that.
+    pub(crate) active_user_transactions_seen: ActiveUserTransactionsSeenMap,
     /// Per-user end-to-end-encrypted personal notes (vetKeys `EncryptedMaps`).
     ///
     /// `None` until the store is first accessed (see [`with_personal_notes`] /
@@ -139,6 +142,7 @@ thread_local! {
             user_transactions: UserTransactionsMap::init(mm.borrow().get(USER_TRANSACTIONS_MEMORY_ID)),
             agreement_history: AgreementHistoryMap::init(mm.borrow().get(AGREEMENT_HISTORY_MEMORY_ID)),
             active_user_transactions: ActiveUserTransactionsMap::init(mm.borrow().get(ACTIVE_USER_TRANSACTIONS_MEMORY_ID)),
+            active_user_transactions_seen: ActiveUserTransactionsSeenMap::init(mm.borrow().get(ACTIVE_USER_TRANSACTIONS_SEEN_MEMORY_ID)),
             // Initialised lazily on first access (see `ensure_personal_notes`).
             personal_notes: None,
             // Initialised lazily on first access (see `ensure_tip_secrets`).

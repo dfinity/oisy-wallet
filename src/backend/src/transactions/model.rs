@@ -443,7 +443,7 @@ mod tests {
 
         let result = get_transactions(&map, principal, &eth_native_token(), None, 10);
 
-        assert!(result.transactions.is_empty());
+        assert_eq!(result.transactions, vec![]);
         assert!(result.newest_block_index.is_none());
         assert!(result.oldest_block_index.is_none());
         assert_eq!(result.total_stored, 0);
@@ -1284,7 +1284,7 @@ mod tests {
 
         let result = get_transactions(&map, principal, &eth_native_token(), None, 0);
 
-        assert!(result.transactions.is_empty());
+        assert_eq!(result.transactions, vec![]);
         assert_eq!(result.newest_block_index, Some(100));
         assert_eq!(result.oldest_block_index, Some(100));
         assert_eq!(result.total_stored, 1);

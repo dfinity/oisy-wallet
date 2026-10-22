@@ -1,6 +1,9 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
+import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { SPL_TOKEN_MAX_AMOUNT } from '$sol/constants/sol.constants';
 import type { SolAddress } from '$sol/types/address';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
@@ -12,7 +15,8 @@ import {
 	formatSolTransactionSummary,
 	solAppAccountCost,
 	solAtaFee,
-	solClosesPayOthers
+	solClosesPayOthers,
+	solWalletLamportsStated
 } from '$sol/utils/sol-transaction-summary.utils';
 import en from '$tests/mocks/i18n.mock';
 import { MOCK_SOL_BALANCES } from '$tests/mocks/sol-balances.mock';
@@ -431,6 +435,89 @@ describe('sol-transaction-summary.utils', () => {
 		});
 	});
 
+	describe('solWalletLamportsStated', () => {
+		const WALLET = mockSolAddress;
+
+		const stated = (instructions: SolInstructionSummary[]) =>
+			solWalletLamportsStated({ instructions, userAddress: WALLET });
+
+		it('should add up what the lines move in and out of the wallet', () => {
+			expect(
+				stated([
+					{ kind: 'send', amount: 19_028n, counterparty: mockSolAddress2 },
+					{ kind: 'receive', amount: 1_000n, counterparty: mockSolAddress2 },
+					{ kind: 'createTokenAccount', account: mockAtaAddress, rent: 1_488_440n, payer: WALLET },
+					{ kind: 'wrap', amount: 500_000n, account: mockAtaAddress },
+					{ kind: 'unwrap', returned: 2_000_000n, counterparty: WALLET },
+					{
+						kind: 'route',
+						children: [
+							{ kind: 'createAccount', program: mockSolAddress3, rent: 41_899_840n, payer: WALLET }
+						]
+					}
+				])
+			).toBe(-19_028n + 1_000n - 1_488_440n - 500_000n + 2_000_000n - 41_899_840n);
+		});
+
+		// A sender opening the recipient's account pays its rent, and so can any other signer.
+		it('should leave out the rent of an opening another signer paid', () => {
+			expect(
+				stated([
+					{
+						kind: 'createTokenAccount',
+						account: mockAtaAddress,
+						rent: 1_488_440n,
+						payer: mockSolAddress2
+					},
+					{
+						kind: 'createAccount',
+						program: mockSolAddress3,
+						rent: 41_899_840n,
+						payer: mockSolAddress2
+					},
+					{ kind: 'createTokenAccount', account: mockAtaAddress2, payer: mockSolAddress2 }
+				])
+			).toBe(ZERO);
+		});
+
+		it('should know nothing of an opening whose funder nobody read', () => {
+			expect(
+				stated([{ kind: 'createTokenAccount', account: mockAtaAddress, rent: 1_488_440n }])
+			).toBeUndefined();
+		});
+
+		// Wrapped SOL and every other token move between token accounts, not the wallet.
+		it('should leave token transfers out', () => {
+			expect(
+				stated([
+					{
+						kind: 'send',
+						amount: 9_000n,
+						tokenAddress: mockSplAddress,
+						counterparty: mockSolAddress2
+					}
+				])
+			).toBe(ZERO);
+		});
+
+		it('should leave out a close that pays somebody else', () => {
+			expect(
+				stated([{ kind: 'closeTokenAccount', returned: 2_039_280n, counterparty: mockSolAddress2 }])
+			).toBe(ZERO);
+		});
+
+		it('should know nothing when a line moves the wallet by an amount nobody read', () => {
+			expect(stated([{ kind: 'send', counterparty: mockSolAddress2 }])).toBeUndefined();
+			expect(
+				stated([{ kind: 'createTokenAccount', account: mockAtaAddress, payer: WALLET }])
+			).toBeUndefined();
+		});
+
+		it('should know nothing of a close whose destination nobody read', () => {
+			expect(stated([{ kind: 'closeTokenAccount', returned: 2_039_280n }])).toBeUndefined();
+		});
+	});
+
 	describe('solAtaFee', () => {
 		const RENT = 2_039_280n;
 		const WALLET = mockSolAddress;
@@ -457,6 +544,55 @@ describe('sol-transaction-summary.utils', () => {
 
 		it('should charge the rent of each of several accounts', () => {
 			expect(fee([create(), create()])).toBe(RENT * 2n);
+		});
+
+		// A sender opening the recipient's account pays its rent, and so can any other signer.
+		it('should not charge the rent of an opening another signer paid', () => {
+			expect(fee([{ ...create(), payer: STRANGER }])).toBe(ZERO);
+		});
+
+		it('should charge the rent of an opening the wallet paid', () => {
+			expect(fee([{ ...create(), payer: WALLET }])).toBe(RENT);
+		});
+
+		// Without the wallet's address nothing says who another signer is, and the fee keeps the
+		// conservative reading it had before payers were read: every opening is charged.
+		it('should charge the rent of an opening another signer paid while the address is unknown', () => {
+			expect(
+				solAtaFee({ instructions: [{ ...create(), payer: STRANGER }], userAddress: undefined })
+			).toBe(RENT);
+		});
+
+		// Closed into the wallet, an account another signer opened hands the user money they did
+		// not have. Credited as rent, it would cancel the rent they did pay for another account.
+		it('should not credit the rent of an account another signer opened', () => {
+			expect(
+				fee([
+					{ ...create(), payer: WALLET },
+					{ kind: 'createTokenAccount', account: mockAtaAddress2, rent: RENT, payer: STRANGER },
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress2,
+						returned: RENT,
+						counterparty: WALLET
+					}
+				])
+			).toBe(RENT);
+		});
+
+		it('should not credit the rent of a wrapped SOL account another signer opened', () => {
+			expect(
+				fee([
+					{ ...create(), payer: WALLET },
+					{ kind: 'createTokenAccount', account: mockAtaAddress2, rent: RENT, payer: STRANGER },
+					{
+						kind: 'unwrap',
+						account: mockAtaAddress2,
+						returned: RENT + 5_000_000n,
+						counterparty: WALLET
+					}
+				])
+			).toBe(RENT);
 		});
 
 		// Only a close that pays the wallet reduces what the transaction cost. Crediting a
@@ -937,7 +1073,9 @@ describe('sol-transaction-summary.utils', () => {
 	});
 
 	describe('formatSolInstructionSummary', () => {
-		const format = (instruction: SolInstructionSummary): { text: string; detail?: string } =>
+		const format = (
+			instruction: SolInstructionSummary
+		): { text: string; detail?: string; trailing?: string } =>
 			formatSolInstructionSummary({
 				instruction,
 				i18n: en,
@@ -950,6 +1088,125 @@ describe('sol-transaction-summary.utils', () => {
 			format(instruction).detail;
 
 		const textOf = (instruction: SolInstructionSummary): string => format(instruction).text;
+
+		describe('approve', () => {
+			const approval: SolInstructionSummary = {
+				kind: 'approve',
+				amount: 5_000_000n,
+				decimals: 6,
+				tokenAddress: mockSplAddress,
+				counterparty: mockSolAddress2,
+				account: mockAtaAddress
+			};
+
+			it('should state how much the spender may spend', () => {
+				expect(textOf(approval)).toBe(
+					replacePlaceholders(en.transaction.text.instruction_approve_amount, {
+						$amount: '5',
+						$symbol: 'BONK'
+					})
+				);
+			});
+
+			it('should state the largest token amount as any amount', () => {
+				expect(textOf({ ...approval, amount: SPL_TOKEN_MAX_AMOUNT })).toBe(
+					replacePlaceholders(en.transaction.text.instruction_approve_unlimited, {
+						$symbol: 'BONK'
+					})
+				);
+			});
+
+			// Without the mint the symbol would fall back to SOL, which names the wrong token.
+			it('should name the spender alone when the mint was not read', () => {
+				const { tokenAddress: _, ...withoutMint } = approval;
+
+				expect(textOf(withoutMint)).toBe(en.transaction.text.instruction_approve);
+			});
+
+			it('should name the spender alone when the amount was not read', () => {
+				const { amount: _, ...withoutAmount } = approval;
+
+				expect(textOf(withoutAmount)).toBe(en.transaction.text.instruction_approve);
+			});
+
+			describe('an unchecked approval, which states no decimals', () => {
+				const { decimals: _, ...unchecked } = approval;
+
+				const textWith = (decimalsOf: () => number | undefined): string =>
+					formatSolInstructionSummary({
+						instruction: unchecked,
+						i18n: en,
+						symbolOf: () => 'BONK',
+						decimalsOf,
+						userAddress: mockSolAddress
+					}).text;
+
+				// Read as a token with no decimals, 5 BONK would be stated as 5,000,000.
+				it('should name the spender alone when nothing gives the decimals', () => {
+					expect(textWith(() => undefined)).toBe(en.transaction.text.instruction_approve);
+				});
+
+				it('should state the amount of a token with no decimals', () => {
+					expect(textWith(() => 0)).toBe(
+						replacePlaceholders(en.transaction.text.instruction_approve_amount, {
+							$amount: '5000000',
+							$symbol: 'BONK'
+						})
+					);
+				});
+
+				it('should state the amount in the decimals the wallet knows', () => {
+					expect(textWith(() => 6)).toBe(
+						replacePlaceholders(en.transaction.text.instruction_approve_amount, {
+							$amount: '5',
+							$symbol: 'BONK'
+						})
+					);
+				});
+
+				it('should state the largest token amount as any amount without the decimals', () => {
+					expect(
+						formatSolInstructionSummary({
+							instruction: { ...unchecked, amount: SPL_TOKEN_MAX_AMOUNT },
+							i18n: en,
+							symbolOf: () => 'BONK',
+							decimalsOf: () => undefined,
+							userAddress: mockSolAddress
+						}).text
+					).toBe(
+						replacePlaceholders(en.transaction.text.instruction_approve_unlimited, {
+							$symbol: 'BONK'
+						})
+					);
+				});
+			});
+		});
+
+		// The notice about programs OISY cannot read names a pool by itself; the leg the pool made has
+		// to name it the same way, or nothing on the screen matches it.
+		it('should say which pool a leg of a route goes through', () => {
+			const leg: SolInstructionSummary = {
+				kind: 'send',
+				amount: 1_000_000_000n,
+				counterparty: mockSolAddress2,
+				via: mockSolAddress3,
+				viaName: 'fusionamm'
+			};
+
+			expect(format(leg).trailing).toBe('via fusionamm');
+			expect(format({ ...leg, kind: 'receive' }).trailing).toBe('via fusionamm');
+		});
+
+		it('should name that pool by its address when it publishes no name', () => {
+			expect(
+				format({
+					kind: 'receive',
+					amount: 1_000_000_000n,
+					counterparty: mockSolAddress2,
+					via: mockSolAddress3
+				}).trailing
+			).toBe(`via ${shortenWithMiddleEllipsis({ text: mockSolAddress3 })}`);
+		});
 
 		// The opening line names the token, and the closing one did not: "Close token account" left
 		// the user to work out which of their accounts a transaction was closing.
@@ -1092,6 +1349,20 @@ describe('sol-transaction-summary.utils', () => {
 					rent: 41_899_840n
 				})
 			).toStrictEqual({ text: 'Create app account for', trailing: 'rent 0.04189984 SOL' });
+		});
+
+		it('should say what closing an application’s account sends to the wallet', () => {
+			expect(
+				format({
+					kind: 'closeAccount',
+					account: mockSolAddress2,
+					program: mockSolAddress3,
+					returned: 41_899_840n
+				})
+			).toStrictEqual({
+				text: 'Close app account for',
+				trailing: '0.04189984 SOL sent to your wallet'
+			});
 		});
 
 		describe('the heading over the lines of an instruction it cannot read', () => {

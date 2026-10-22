@@ -138,7 +138,7 @@ describe('EditAvatar', () => {
 	});
 
 	it('should apply correct accessibility attributes', async () => {
-		const { getByTestId } = render(EditAvatar, {
+		const { getByTestId, getByRole } = render(EditAvatar, {
 			props: {
 				onReplaceImage: mockReplaceImage,
 				onRemoveImage: mockRemoveImage
@@ -149,10 +149,19 @@ describe('EditAvatar', () => {
 
 		expect(button).toHaveAttribute('aria-label', en.address_book.edit_avatar.replace_image);
 
+		expect(button).toHaveClass('hit-area', 'hit-area-touch');
+		expect(button).toHaveAttribute('aria-expanded', 'false');
+
 		await fireEvent.click(button);
 		const menu = getByTestId(CONTACT_POPOVER_MENU);
 
-		expect(menu).toHaveAttribute('role', 'menu');
+		// Dialog semantics from the popover, named after the menu, not `role="menu"`, which
+		// promises arrow-key navigation the panel does not have (docs/ai/frontend/reusability.md).
+		expect(getByRole('dialog', { name: en.address_book.edit_avatar.menu_title })).toContainElement(
+			menu
+		);
+		expect(menu).not.toHaveAttribute('role', 'menu');
+		expect(button).toHaveAttribute('aria-expanded', 'true');
 	});
 
 	it('should apply correct styling classes to popover', async () => {
@@ -166,7 +175,7 @@ describe('EditAvatar', () => {
 		await fireEvent.click(getByTestId(CONTACT_POPOVER_TRIGGER));
 		const popover = getByTestId(CONTACT_POPOVER_MENU);
 
-		expect(popover).toHaveClass('min-w-60');
-		expect(popover).toHaveClass('max-w-[60%]');
+		expect(popover).toHaveClass('menu-surface', 'min-w-60');
+		expect(popover.closest('.wrapper.dropdown')).not.toBeNull();
 	});
 });

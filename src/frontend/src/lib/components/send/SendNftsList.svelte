@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import IconExpandMore from '$lib/components/icons/IconExpandMore.svelte';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftList from '$lib/components/nfts/NftList.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import ModalFilterButton from '$lib/components/ui/ModalFilterButton.svelte';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -58,14 +58,12 @@
 	</div>
 
 	<div class="flex items-center">
-		<button
-			class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary"
-			aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
+		<ModalFilterButton
+			ariaLabel={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
 			onclick={onSelectNetwork}
 		>
-			<span class="font-medium">{$filterNetwork?.name ?? $i18n.networks.chain_fusion}</span>
-			<IconExpandMore size="24" />
-		</button>
+			{$filterNetwork?.name ?? $i18n.networks.chain_fusion}
+		</ModalFilterButton>
 	</div>
 </div>
 

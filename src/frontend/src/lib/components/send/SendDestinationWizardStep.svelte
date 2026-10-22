@@ -8,6 +8,7 @@
 	import { ethNetworkContacts } from '$eth/derived/eth-contacts.derived';
 	import { ethKnownDestinations } from '$eth/derived/eth-transactions.derived';
 	import { nativeEthereumTokenId } from '$eth/derived/token.derived';
+	import CyclesSentToCanisterWarning from '$icp/components/cycles-top-up/CyclesSentToCanisterWarning.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import { icNetworkContacts } from '$icp/derived/ic-contacts.derived';
 	import { icKnownDestinations } from '$icp/derived/ic-transactions.derived';
@@ -134,6 +135,7 @@
 				bind:destination
 				bind:invalidDestination
 			/>
+			<CyclesSentToCanisterWarning {destination} styleClass="mt-4" token={$sendToken} />
 			<SendDestinationTabs
 				knownDestinations={$icKnownDestinations}
 				networkContacts={$icNetworkContacts}

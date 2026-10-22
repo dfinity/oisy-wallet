@@ -2,6 +2,7 @@ import type { EthAddress } from '$eth/types/address';
 import * as liquidiumApi from '$lib/api/liquidium.api';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
+import { LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS } from '$lib/constants/liquidium.constants';
 import { ProgressStepsLiquidiumRepay } from '$lib/enums/progress-steps';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import * as analyticsServices from '$lib/services/analytics.services';
@@ -9,18 +10,23 @@ import {
 	computeLiquidiumRepayPreview,
 	executeLiquidiumRepay,
 	getLiquidiumMaxRepayAmount,
-	liquidiumDebtInterestUsd
+	liquidiumDebtInterestUsd,
+	liquidiumPendingCoversDebt,
+	liquidiumRepayCapError
 } from '$lib/services/liquidium-repay.services';
 import * as liquidiumServices from '$lib/services/liquidium.services';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { SupplyFlow, SupplyTarget } from '@liquidium/client';
 
 vi.mock('$lib/api/liquidium.api', () => ({ liquidiumClient: vi.fn() }));
 vi.mock('$lib/services/liquidium.services', () => ({ getOrCreateLiquidiumProfile: vi.fn() }));
 vi.mock('$lib/services/active-user-transactions.services', () => ({
-	createActiveUserTransaction: vi.fn()
+	createActiveUserTransaction: vi.fn(),
+	deleteActiveUserTransaction: vi.fn(),
+	updateActiveUserTransaction: vi.fn()
 }));
 vi.mock('$lib/services/analytics.services', () => ({ trackEvent: vi.fn() }));
 
@@ -82,6 +88,78 @@ describe('liquidium-repay.services', () => {
 		});
 	});
 
+	describe('liquidiumPendingCoversDebt', () => {
+		it('is false without pending repays', () => {
+			expect(
+				liquidiumPendingCoversDebt({ pendingRepay: ZERO, maxRepay: ZERO, reserve })
+			).toBeFalsy();
+		});
+
+		it('is true when the net cap is zero', () => {
+			expect(
+				liquidiumPendingCoversDebt({ pendingRepay: 1n, maxRepay: ZERO, reserve })
+			).toBeTruthy();
+		});
+
+		it('is true when pending repays reach principal plus interest, even with a dust cap', () => {
+			expect(
+				liquidiumPendingCoversDebt({
+					pendingRepay: 100_500_000n,
+					maxRepay: 150n,
+					reserve: { ...reserve, debtInterest: 500_000n }
+				})
+			).toBeTruthy();
+		});
+
+		it('is false while pending repays fall short of the debt', () => {
+			expect(
+				liquidiumPendingCoversDebt({ pendingRepay: 99_999_999n, maxRepay: 1n, reserve })
+			).toBeFalsy();
+		});
+
+		it('is false while the cap is still loading and the debt is not covered', () => {
+			expect(
+				liquidiumPendingCoversDebt({ pendingRepay: 1n, maxRepay: undefined, reserve })
+			).toBeFalsy();
+		});
+	});
+
+	describe('liquidiumRepayCapError', () => {
+		const cap = { maxRepay: 100n, pendingRepay: ZERO, reserve, i18n: en };
+
+		it('is undefined within the cap', () => {
+			expect(liquidiumRepayCapError({ ...cap, amount: 50n })).toBeUndefined();
+		});
+
+		it('accepts exactly the cap', () => {
+			expect(liquidiumRepayCapError({ ...cap, amount: 100n })).toBeUndefined();
+		});
+
+		it('flags an amount over the cap', () => {
+			expect(liquidiumRepayCapError({ ...cap, amount: 101n })?.message).toBe(
+				en.liquidium.text.repay_exceeds_debt
+			);
+		});
+
+		it('flags a missing cap as unavailable', () => {
+			expect(liquidiumRepayCapError({ ...cap, amount: 1n, maxRepay: undefined })?.message).toBe(
+				en.liquidium.text.repay_debt_unavailable
+			);
+		});
+
+		it('flags a dust amount once pending repays cover the debt', () => {
+			// 1 BTC pending covers the 1 BTC debt; the buffer leaves a 150-sat cap the amount fits.
+			expect(
+				liquidiumRepayCapError({
+					...cap,
+					amount: 100n,
+					maxRepay: 150n,
+					pendingRepay: 100_000_000n
+				})?.message
+			).toBe(en.liquidium.text.repay_pending_covers_debt);
+		});
+	});
+
 	describe('getLiquidiumMaxRepayAmount', () => {
 		const getProfileId = vi.fn();
 		const getMaxRepayAmount = vi.fn();
@@ -134,6 +212,12 @@ describe('liquidium-repay.services', () => {
 		const createActiveUserTransaction = vi.mocked(
 			activeUserTransactionsServices.createActiveUserTransaction
 		);
+		const updateActiveUserTransaction = vi.mocked(
+			activeUserTransactionsServices.updateActiveUserTransaction
+		);
+		const deleteActiveUserTransaction = vi.mocked(
+			activeUserTransactionsServices.deleteActiveUserTransaction
+		);
 
 		const nativeTarget: SupplyTarget = {
 			poolId,
@@ -171,6 +255,10 @@ describe('liquidium-repay.services', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
+			// Also drops `*Once` answers a case queued but did not use, so they cannot leak into the next.
+			createActiveUserTransaction.mockReset();
+			updateActiveUserTransaction.mockReset();
+			deleteActiveUserTransaction.mockReset();
 			vi.mocked(liquidiumServices.getOrCreateLiquidiumProfile).mockResolvedValue(profileId);
 			vi.mocked(liquidiumApi.liquidiumClient).mockReturnValue({
 				lending: { supply }
@@ -202,7 +290,7 @@ describe('liquidium-repay.services', () => {
 				metadata: { dApp: 'liquidium', action: 'repay', token: 'BTC', tokenAmount: '1' }
 			});
 
-			const [[{ data, externalRefs }]] = createActiveUserTransaction.mock.calls;
+			const [[{ data }]] = createActiveUserTransaction.mock.calls;
 
 			expect(data).toEqual(
 				expect.objectContaining({
@@ -213,33 +301,245 @@ describe('liquidium-repay.services', () => {
 					})
 				})
 			);
-			expect(externalRefs).toEqual(
-				expect.arrayContaining([
-					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId },
+			expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
+		it('records the AUT before broadcasting and adds the txid to it once sent', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			broadcast.mockResolvedValue('0xhash');
+
+			await run();
+
+			const [[{ id, externalRefs }]] = createActiveUserTransaction.mock.calls;
+
+			expect(createActiveUserTransaction.mock.invocationCallOrder[0]).toBeLessThan(
+				broadcast.mock.invocationCallOrder[0]
+			);
+			expect(externalRefs).toEqual([
+				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
+				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' },
+				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId }
+			]);
+
+			// The whole ref set, since the backend replaces it wholesale.
+			expect(updateActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				id,
+				externalRefs: [
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }
-				])
+				]
+			});
+			// Before the SDK submit, so a tab closed during that call leaves the row its txid.
+			expect(updateActiveUserTransaction.mock.invocationCallOrder[0]).toBeLessThan(
+				submit.mock.invocationCallOrder[0]
 			);
 		});
 
-		it('resolves even if post-broadcast bookkeeping fails (funds already sent)', async () => {
+		it('does not broadcast when the AUT cannot be recorded', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			createActiveUserTransaction.mockRejectedValueOnce(new Error('TooManyActiveTransactions'));
+
+			await expect(run()).rejects.toThrow('TooManyActiveTransactions');
+
+			expect(broadcast).not.toHaveBeenCalled();
+			expect(submit).not.toHaveBeenCalled();
+			expect(analyticsServices.trackEvent).not.toHaveBeenCalled();
+		});
+
+		it('deletes the AUT when its create fails, in case only the answer was lost', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			createActiveUserTransaction.mockRejectedValueOnce(new Error('agent timeout'));
+
+			await expect(run()).rejects.toThrow('agent timeout');
+
+			const [[{ id }]] = createActiveUserTransaction.mock.calls;
+
+			expect(deleteActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				id
+			});
+		});
+
+		it('deletes the AUT and rethrows when the broadcast fails', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			broadcast.mockRejectedValueOnce(new Error('insufficient funds'));
+
+			await expect(run()).rejects.toThrow('insufficient funds');
+
+			const [[{ id }]] = createActiveUserTransaction.mock.calls;
+
+			expect(deleteActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				id
+			});
+			expect(updateActiveUserTransaction).not.toHaveBeenCalled();
+			expect(submit).not.toHaveBeenCalled();
+			expect(analyticsServices.trackEvent).not.toHaveBeenCalled();
+		});
+
+		it('still rethrows the broadcast error when the AUT delete fails', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			broadcast.mockRejectedValueOnce(new Error('insufficient funds'));
+			deleteActiveUserTransaction.mockRejectedValueOnce(new Error('backend unavailable'));
+
+			await expect(run()).rejects.toThrow('insufficient funds');
+		});
+
+		describe('while the broadcast is pending', () => {
+			beforeEach(() => {
+				vi.useFakeTimers();
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			const pendingBroadcast = () => {
+				let settle: { resolve: (txid: string) => void; reject: (err: Error) => void } = {
+					resolve: () => {},
+					reject: () => {}
+				};
+
+				broadcast.mockReturnValueOnce(
+					new Promise<string>((resolve, reject) => {
+						settle = { resolve, reject };
+					})
+				);
+
+				return () => settle;
+			};
+
+			it('renews the AUT, and stops once the transfer is sent', async () => {
+				supply.mockResolvedValue(buildFlow(nativeTarget));
+				const settle = pendingBroadcast();
+
+				const repaid = run();
+
+				await vi.advanceTimersByTimeAsync(LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS * 2);
+
+				const [[{ id }]] = createActiveUserTransaction.mock.calls;
+
+				// A write with nothing in it, so it cannot clobber the row's refs or status.
+				expect(updateActiveUserTransaction).toHaveBeenCalledTimes(2);
+				expect(updateActiveUserTransaction).toHaveBeenNthCalledWith(1, {
+					identity: mockIdentity,
+					id
+				});
+
+				settle().resolve('0xhash');
+				await repaid;
+
+				// + the txid write.
+				expect(updateActiveUserTransaction).toHaveBeenCalledTimes(3);
+
+				await vi.advanceTimersByTimeAsync(LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS * 2);
+
+				expect(updateActiveUserTransaction).toHaveBeenCalledTimes(3);
+			});
+
+			it('stops renewing the AUT once the broadcast fails', async () => {
+				supply.mockResolvedValue(buildFlow(nativeTarget));
+				const settle = pendingBroadcast();
+
+				const repaid = run();
+
+				await vi.advanceTimersByTimeAsync(LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS);
+
+				settle().reject(new Error('insufficient funds'));
+
+				await expect(repaid).rejects.toThrow('insufficient funds');
+
+				await vi.advanceTimersByTimeAsync(LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS * 2);
+
+				expect(updateActiveUserTransaction).toHaveBeenCalledOnce();
+				expect(deleteActiveUserTransaction).toHaveBeenCalledOnce();
+			});
+
+			it('keeps the repay going when a renewal fails', async () => {
+				supply.mockResolvedValue(buildFlow(nativeTarget));
+				updateActiveUserTransaction.mockRejectedValueOnce(new Error('backend unavailable'));
+				const settle = pendingBroadcast();
+
+				const repaid = run();
+
+				await vi.advanceTimersByTimeAsync(LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS);
+
+				settle().resolve('0xhash');
+
+				await expect(repaid).resolves.toBeUndefined();
+			});
+		});
+
+		// A poller took the row for abandoned while the broadcast outlasted the grace period.
+		it('records the AUT again, with its txid, when it was deleted during the broadcast', async () => {
 			supply.mockResolvedValue(buildFlow(nativeTarget));
 			broadcast.mockResolvedValue('0xhash');
-			createActiveUserTransaction.mockRejectedValueOnce(new Error('backend unavailable'));
+			updateActiveUserTransaction.mockRejectedValueOnce({ NotFound: null });
+
+			await expect(run()).resolves.toBeUndefined();
+
+			expect(createActiveUserTransaction).toHaveBeenCalledTimes(2);
+
+			const [[first], [second]] = createActiveUserTransaction.mock.calls;
+
+			expect(second).toEqual({
+				...first,
+				externalRefs: [
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }
+				]
+			});
+			expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
+		it('does not record the AUT again when the txid write fails for another reason', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			broadcast.mockResolvedValue('0xhash');
+			updateActiveUserTransaction.mockRejectedValueOnce(new Error('backend unavailable'));
+
+			await expect(run()).resolves.toBeUndefined();
+
+			expect(createActiveUserTransaction).toHaveBeenCalledOnce();
+		});
+
+		it('resolves when recording the AUT again fails (funds already sent)', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			broadcast.mockResolvedValue('0xhash');
+			updateActiveUserTransaction.mockRejectedValueOnce({ NotFound: null });
+			createActiveUserTransaction
+				.mockResolvedValueOnce(undefined)
+				.mockRejectedValueOnce({ TooManyActiveTransactions: null });
+
+			await expect(run()).resolves.toBeUndefined();
+
+			expect(createActiveUserTransaction).toHaveBeenCalledTimes(2);
+			expect(submit).toHaveBeenCalledOnce();
+		});
+
+		it('resolves even if the txid write fails (funds already sent)', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			broadcast.mockResolvedValue('0xhash');
+			updateActiveUserTransaction.mockRejectedValueOnce(new Error('backend unavailable'));
 
 			await expect(run()).resolves.toBeUndefined();
 
 			expect(broadcast).toHaveBeenCalledOnce();
+			expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
 		});
 
-		it('resolves and still registers the AUT when the SDK submit fails (txid is only an indexing hint)', async () => {
+		it('resolves and still adds the txid when the SDK submit fails (txid is only an indexing hint)', async () => {
 			supply.mockResolvedValue(buildFlow(nativeTarget));
 			broadcast.mockResolvedValue('0xhash');
 			submit.mockRejectedValueOnce(new Error('indexing hint rejected'));
 
 			await expect(run()).resolves.toBeUndefined();
 
-			expect(createActiveUserTransaction).toHaveBeenCalledOnce();
+			expect(updateActiveUserTransaction).toHaveBeenCalledOnce();
 		});
 
 		it('reports progress and omits progressStep from the AUT when none is provided', async () => {

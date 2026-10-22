@@ -1,18 +1,24 @@
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	SPL_TOKEN_MAX_AMOUNT,
 	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaParsedAccountInfo, SolanaSimulatedInnerInstructions } from '$sol/types/sol-rpc';
+import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import {
+	findSolClosedAppAccounts,
 	findSolUnreadPrograms,
 	isEmptySolSimulationPreview,
 	mapSolSimulationAccountOwners,
 	mapSolSimulationPreview,
-	selectSolSimulationAddresses
+	selectSolSimulationAddresses,
+	solClosedAccountsReachWallet,
+	solOpenAppAccountsLostLamports,
+	solSimulationReassignsWallet
 } from '$sol/utils/sol-simulation.utils';
 import {
 	mockAtaAddress,
@@ -42,12 +48,14 @@ describe('sol-simulation.utils', () => {
 		amount,
 		owner,
 		delegate,
+		delegatedAmount,
 		closeAuthority,
 		program = TOKEN_PROGRAM_ADDRESS
 	}: {
 		amount: bigint;
 		owner: SolAddress;
 		delegate?: SolAddress;
+		delegatedAmount?: bigint;
 		closeAuthority?: SolAddress;
 		program?: SolAddress;
 	}): NonNullable<SolanaParsedAccountInfo> =>
@@ -65,6 +73,9 @@ describe('sol-simulation.utils', () => {
 						mint: mockSplAddress,
 						owner,
 						...(delegate !== undefined && { delegate }),
+						...(delegatedAmount !== undefined && {
+							delegatedAmount: { amount: `${delegatedAmount}`, decimals: 6 }
+						}),
 						...(closeAuthority !== undefined && { closeAuthority }),
 						tokenAmount: { amount: `${amount}`, decimals: 6 }
 					}
@@ -202,6 +213,118 @@ describe('sol-simulation.utils', () => {
 			]);
 		});
 
+		it('should state what a new delegate may spend', () => {
+			const preview = mapSolSimulationPreview({
+				addresses: [mockAtaAddress],
+				preAccounts: [tokenAccount({ amount: 5_000_000n, owner: mockSolAddress })],
+				postAccounts: [
+					tokenAccount({
+						amount: 5_000_000n,
+						owner: mockSolAddress,
+						delegate: mockSolAddress2,
+						delegatedAmount: 1_000_000n
+					})
+				],
+				userAddress: mockSolAddress
+			});
+
+			expect(preview.controlChanges).toEqual([
+				{
+					account: mockAtaAddress,
+					field: 'delegate',
+					to: mockSolAddress2,
+					allowance: { tokenAddress: mockSplAddress, decimals: 6, amount: 1_000_000n }
+				}
+			]);
+		});
+
+		// The delegate stays the same, so a diff of the delegate alone reads this as no change at all.
+		it('should report a raised allowance of the same delegate', () => {
+			const preview = mapSolSimulationPreview({
+				addresses: [mockAtaAddress],
+				preAccounts: [
+					tokenAccount({
+						amount: 5_000_000n,
+						owner: mockSolAddress,
+						delegate: mockSolAddress2,
+						delegatedAmount: 1n
+					})
+				],
+				postAccounts: [
+					tokenAccount({
+						amount: 5_000_000n,
+						owner: mockSolAddress,
+						delegate: mockSolAddress2,
+						delegatedAmount: SPL_TOKEN_MAX_AMOUNT
+					})
+				],
+				userAddress: mockSolAddress
+			});
+
+			expect(preview).toEqual({
+				tokenDeltas: [],
+				controlChanges: [
+					{
+						account: mockAtaAddress,
+						field: 'allowance',
+						to: mockSolAddress2,
+						allowance: { tokenAddress: mockSplAddress, decimals: 6, amount: SPL_TOKEN_MAX_AMOUNT }
+					}
+				]
+			});
+			expect(isEmptySolSimulationPreview(preview)).toBeFalsy();
+		});
+
+		it('should report nothing when the delegate and its allowance stay the same', () => {
+			const account = tokenAccount({
+				amount: 5_000_000n,
+				owner: mockSolAddress,
+				delegate: mockSolAddress2,
+				delegatedAmount: 1_000_000n
+			});
+
+			const preview = mapSolSimulationPreview({
+				addresses: [mockAtaAddress],
+				preAccounts: [account],
+				postAccounts: [account],
+				userAddress: mockSolAddress
+			});
+
+			expect(isEmptySolSimulationPreview(preview)).toBeTruthy();
+		});
+
+		it('should report a replaced delegate once, with what the new one may spend', () => {
+			const preview = mapSolSimulationPreview({
+				addresses: [mockAtaAddress],
+				preAccounts: [
+					tokenAccount({
+						amount: 5_000_000n,
+						owner: mockSolAddress,
+						delegate: mockSolAddress2,
+						delegatedAmount: 1n
+					})
+				],
+				postAccounts: [
+					tokenAccount({
+						amount: 5_000_000n,
+						owner: mockSolAddress,
+						delegate: mockSolAddress3,
+						delegatedAmount: 2n
+					})
+				],
+				userAddress: mockSolAddress
+			});
+
+			expect(preview.controlChanges).toEqual([
+				{
+					account: mockAtaAddress,
+					field: 'delegate',
+					to: mockSolAddress3,
+					allowance: { tokenAddress: mockSplAddress, decimals: 6, amount: 2n }
+				}
+			]);
+		});
+
 		it('should report a removed delegate without a new value', () => {
 			const preview = mapSolSimulationPreview({
 				addresses: [mockAtaAddress],
@@ -276,6 +399,77 @@ describe('sol-simulation.utils', () => {
 
 			expect(preview).not.toHaveProperty('solDelta');
 			expect(isEmptySolSimulationPreview(preview)).toBeTruthy();
+		});
+	});
+
+	describe('solSimulationReassignsWallet', () => {
+		const preview = (
+			controlChanges: SolSimulationPreview['controlChanges']
+		): SolSimulationPreview => ({ tokenDeltas: [], controlChanges });
+
+		it('should be true when the run hands the wallet to another program', () => {
+			expect(
+				solSimulationReassignsWallet({
+					preview: preview([
+						{ account: mockSolAddress, field: 'program', to: STAKE_PROGRAM_ADDRESS }
+					]),
+					userAddress: mockSolAddress
+				})
+			).toBeTruthy();
+		});
+
+		// Only the wallet: a change to another of the user's accounts is shown by the preview, but is
+		// not this question.
+		it('should be false when another account of the user changes program', () => {
+			expect(
+				solSimulationReassignsWallet({
+					preview: preview([{ account: mockAtaAddress, field: 'program', to: mockSolAddress2 }]),
+					userAddress: mockSolAddress
+				})
+			).toBeFalsy();
+		});
+
+		it('should be false for a control change other than the owning program', () => {
+			expect(
+				solSimulationReassignsWallet({
+					preview: preview([{ account: mockSolAddress, field: 'owner', to: mockSolAddress2 }]),
+					userAddress: mockSolAddress
+				})
+			).toBeFalsy();
+		});
+
+		it('should be false without a preview', () => {
+			expect(
+				solSimulationReassignsWallet({ preview: undefined, userAddress: mockSolAddress })
+			).toBeFalsy();
+		});
+
+		it('should be false without a wallet', () => {
+			expect(
+				solSimulationReassignsWallet({
+					preview: preview([{ account: mockSolAddress, field: 'program', to: mockSolAddress2 }]),
+					userAddress: undefined
+				})
+			).toBeFalsy();
+		});
+
+		// End to end through the diff: a System-owned wallet the run leaves owned by another program.
+		it('should be true for the diff of a wallet assigned during the run', () => {
+			const diffed = mapSolSimulationPreview({
+				addresses: [mockSolAddress],
+				preAccounts: [systemAccount({ lamports: 1_000_000n })],
+				postAccounts: [
+					{
+						...systemAccount({ lamports: 995_000n }),
+						owner: mockSolAddress3
+					} as NonNullable<SolanaParsedAccountInfo>
+				],
+				userAddress: mockSolAddress
+			});
+
+			expect(
+				solSimulationReassignsWallet({ preview: diffed, userAddress: mockSolAddress })
+			).toBeTruthy();
 		});
 	});
 
@@ -400,6 +594,171 @@ describe('sol-simulation.utils', () => {
 					])
 				)
 			).toBeUndefined();
+		});
+	});
+
+	describe('findSolClosedAppAccounts', () => {
+		const application = 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo';
+
+		const appAccount = (lamports: bigint): NonNullable<SolanaParsedAccountInfo> =>
+			({
+				executable: false,
+				lamports,
+				owner: application,
+				space: 8120n,
+				data: ['', 'base64']
+			}) as unknown as NonNullable<SolanaParsedAccountInfo>;
+
+		it('should find an application account the run empties', () => {
+			expect(
+				findSolClosedAppAccounts({
+					addresses: [mockSolAddress2],
+					preAccounts: [appAccount(41_899_840n)],
+					postAccounts: [systemAccount({ lamports: ZERO })]
+				})
+			).toStrictEqual([{ account: mockSolAddress2, program: application, lamports: 41_899_840n }]);
+		});
+
+		it('should find one the run leaves no account of at all', () => {
+			expect(
+				findSolClosedAppAccounts({
+					addresses: [mockSolAddress2],
+					preAccounts: [appAccount(41_899_840n)],
+					postAccounts: [null]
+				})
+			).toHaveLength(1);
+		});
+
+		it('should leave out an account that keeps lamports', () => {
+			expect(
+				findSolClosedAppAccounts({
+					addresses: [mockSolAddress2],
+					preAccounts: [appAccount(41_899_840n)],
+					postAccounts: [appAccount(1n)]
+				})
+			).toStrictEqual([]);
+		});
+
+		// What leaves a wallet does so by a transfer the run states, and a token account is closed by
+		// an instruction that names where its balance goes.
+		it('should leave out wallets and token accounts', () => {
+			expect(
+				findSolClosedAppAccounts({
+					addresses: [mockSolAddress, mockAtaAddress],
+					preAccounts: [
+						systemAccount({ lamports: 1_000_000n }),
+						tokenAccount({ amount: ZERO, owner: mockSolAddress })
+					],
+					postAccounts: [null, null]
+				})
+			).toStrictEqual([]);
+		});
+
+		it('should say nothing of an account the run did not report on', () => {
+			expect(
+				findSolClosedAppAccounts({
+					addresses: [mockSolAddress2],
+					preAccounts: [appAccount(41_899_840n)],
+					postAccounts: []
+				})
+			).toStrictEqual([]);
+		});
+	});
+
+	describe('solOpenAppAccountsLostLamports', () => {
+		const appAccount = (lamports: bigint): NonNullable<SolanaParsedAccountInfo> =>
+			({
+				executable: false,
+				lamports,
+				owner: 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo',
+				space: 8120n,
+				data: ['', 'base64']
+			}) as unknown as NonNullable<SolanaParsedAccountInfo>;
+
+		const lost = ({
+			pre,
+			post
+		}: {
+			pre: NonNullable<SolanaParsedAccountInfo>;
+			post: SolanaParsedAccountInfo;
+		}) =>
+			solOpenAppAccountsLostLamports({
+				addresses: [mockSolAddress2],
+				preAccounts: [pre],
+				postAccounts: [post]
+			});
+
+		// Its program could pay the wallet from it, which no line states.
+		it('should say so of an app account that stays open with fewer lamports', () => {
+			expect(lost({ pre: appAccount(100_000_000n), post: appAccount(58_100_160n) })).toBeTruthy();
+		});
+
+		it('should not of one that keeps its lamports', () => {
+			expect(lost({ pre: appAccount(41_899_840n), post: appAccount(41_899_840n) })).toBeFalsy();
+		});
+
+		// An emptied account is a close, which is checked on its own.
+		it('should not of one the run empties', () => {
+			expect(lost({ pre: appAccount(41_899_840n), post: null })).toBeFalsy();
+		});
+
+		it('should not of wallets and token accounts', () => {
+			expect(
+				lost({
+					pre: systemAccount({ lamports: 2_000_000n }),
+					post: systemAccount({ lamports: 1n })
+				})
+			).toBeFalsy();
+		});
+	});
+
+	describe('solClosedAccountsReachWallet', () => {
+		const closedAccounts = [
+			{ account: mockSolAddress2, program: mockSolAddress3, lamports: 41_899_840n }
+		];
+
+		it('should hold when the rest of the wallet’s change is exactly what the accounts held', () => {
+			expect(
+				solClosedAccountsReachWallet({
+					closedAccounts,
+					walletChange: 41_894_840n - 19_028n,
+					statedChange: -19_028n,
+					fee: 5_000n
+				})
+			).toBeTruthy();
+		});
+
+		it('should not hold when part of it went elsewhere', () => {
+			expect(
+				solClosedAccountsReachWallet({
+					closedAccounts,
+					walletChange: 41_000_000n,
+					statedChange: ZERO,
+					fee: 5_000n
+				})
+			).toBeFalsy();
+		});
+
+		it('should not hold when a line moves the wallet by an amount nobody read', () => {
+			expect(
+				solClosedAccountsReachWallet({
+					closedAccounts,
+					walletChange: 41_894_840n,
+					statedChange: undefined,
+					fee: 5_000n
+				})
+			).toBeFalsy();
+		});
+
+		it('should not hold when nothing was closed', () => {
+			expect(
+				solClosedAccountsReachWallet({
+					closedAccounts: [],
+					walletChange: -5_000n,
+					statedChange: ZERO,
+					fee: 5_000n
+				})
+			).toBeFalsy();
 		});
 	});
 });
