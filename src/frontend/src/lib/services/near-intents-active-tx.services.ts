@@ -94,9 +94,10 @@ const pollNearIntentsActiveUserTransaction = async ({
 
 		const { status, swapDetails } = await fetchNearIntentsStatus({ depositAddress, depositMemo });
 
-		// Only while 1Click has seen no deposit: from then on, 1Click decides.
+		// Until 1Click processes the deposit: a submitted hash (`KNOWN_DEPOSIT_TX`) does not
+		// establish that funds have arrived.
 		const depositUpdate =
-			status === 'PENDING_DEPOSIT'
+			status === 'PENDING_DEPOSIT' || status === 'KNOWN_DEPOSIT_TX'
 				? await readEvmDepositUpdate({ tx, refs, userAddress, confirmedNonceByChainId })
 				: undefined;
 
@@ -138,7 +139,7 @@ const pollNearIntentsActiveUserTransaction = async ({
 };
 
 /**
- * Advances the pending NEAR Intents rows from 1Click's `/status`, and, while 1Click has seen no
+ * Advances the pending NEAR Intents rows from 1Click's `/status`, and, until 1Click processes the
  * deposit, a row with an EVM deposit transaction from the source chain too.
  *
  * `userAddress` is the caller's EVM address, which signed every EVM deposit: rows are

@@ -239,54 +239,68 @@ describe('near-intents-active-tx.services', () => {
 				);
 			});
 
-			it('fails the swap when its deposit was replaced or dropped', async () => {
-				vi.mocked(readEvmSourceTxOutcome).mockResolvedValue('replaced');
+			// `KNOWN_DEPOSIT_TX` follows the hash OISY submits to `/deposit/submit`, so it does not
+			// establish that funds arrived either.
+			it.each<NearIntentsSwapStatus>(['PENDING_DEPOSIT', 'KNOWN_DEPOSIT_TX'])(
+				'fails the swap at %s when its deposit was replaced or dropped',
+				async (status) => {
+					vi.mocked(nearIntentsRest.fetchNearIntentsStatus).mockResolvedValue(
+						statusResponse({ status })
+					);
+					vi.mocked(readEvmSourceTxOutcome).mockResolvedValue('replaced');
 
-				const confirmedNonceByChainId = new Map<string, Promise<number>>();
+					const confirmedNonceByChainId = new Map<string, Promise<number>>();
 
-				await pollNearIntentsActiveUserTransactions({
-					identity: mockIdentity,
-					userAddress: mockEthAddress,
-					transactions: [evmTx],
-					confirmedNonceByChainId
-				});
+					await pollNearIntentsActiveUserTransactions({
+						identity: mockIdentity,
+						userAddress: mockEthAddress,
+						transactions: [evmTx],
+						confirmedNonceByChainId
+					});
 
-				expect(readEvmSourceTxOutcome).toHaveBeenCalledExactlyOnceWith({
-					rowId: evmTx.id,
-					hash: depositTxHash,
-					txNonce: 5,
-					network: ETHEREUM_NETWORK,
-					userAddress: mockEthAddress,
-					confirmedNonceByChainId
-				});
-				expect(applySpy).toHaveBeenCalledExactlyOnceWith(
-					expect.objectContaining({
-						update: {
-							status: { Failed: null },
-							error: en.swap.error.swap_replaced_or_dropped
-						}
-					})
-				);
-			});
+					expect(readEvmSourceTxOutcome).toHaveBeenCalledExactlyOnceWith({
+						rowId: evmTx.id,
+						hash: depositTxHash,
+						txNonce: 5,
+						network: ETHEREUM_NETWORK,
+						userAddress: mockEthAddress,
+						confirmedNonceByChainId
+					});
+					expect(applySpy).toHaveBeenCalledExactlyOnceWith(
+						expect.objectContaining({
+							update: {
+								status: { Failed: null },
+								error: en.swap.error.swap_replaced_or_dropped
+							}
+						})
+					);
+				}
+			);
 
-			it('fails the swap when its deposit reverted', async () => {
-				vi.mocked(readEvmSourceTxOutcome).mockResolvedValue('reverted');
+			it.each<NearIntentsSwapStatus>(['PENDING_DEPOSIT', 'KNOWN_DEPOSIT_TX'])(
+				'fails the swap at %s when its deposit reverted',
+				async (status) => {
+					vi.mocked(nearIntentsRest.fetchNearIntentsStatus).mockResolvedValue(
+						statusResponse({ status })
+					);
+					vi.mocked(readEvmSourceTxOutcome).mockResolvedValue('reverted');
 
-				await pollNearIntentsActiveUserTransactions({
-					identity: mockIdentity,
-					userAddress: mockEthAddress,
-					transactions: [evmTx]
-				});
+					await pollNearIntentsActiveUserTransactions({
+						identity: mockIdentity,
+						userAddress: mockEthAddress,
+						transactions: [evmTx]
+					});
 
-				expect(applySpy).toHaveBeenCalledExactlyOnceWith(
-					expect.objectContaining({
-						update: {
-							status: { Failed: null },
-							error: en.swap.error.failed_unexpectedly
-						}
-					})
-				);
-			});
+					expect(applySpy).toHaveBeenCalledExactlyOnceWith(
+						expect.objectContaining({
+							update: {
+								status: { Failed: null },
+								error: en.swap.error.failed_unexpectedly
+							}
+						})
+					);
+				}
+			);
 
 			it.each(['pending', 'succeeded'] as const)(
 				'leaves the swap to 1Click when its deposit is %s',
@@ -303,9 +317,9 @@ describe('near-intents-active-tx.services', () => {
 				}
 			);
 
-			it('does not read the deposit once 1Click has seen it', async () => {
+			it('does not read the deposit once 1Click processes it', async () => {
 				vi.mocked(nearIntentsRest.fetchNearIntentsStatus).mockResolvedValue(
-					statusResponse({ status: 'KNOWN_DEPOSIT_TX' })
+					statusResponse({ status: 'PROCESSING' })
 				);
 
 				await pollNearIntentsActiveUserTransactions({

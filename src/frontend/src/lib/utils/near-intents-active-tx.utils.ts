@@ -158,7 +158,7 @@ export const nearIntentsStatusError = (status: NearIntentsSwapStatus): string | 
 };
 
 /**
- * The swap's outcome from its EVM deposit transaction, read while 1Click has seen no deposit yet.
+ * The swap's outcome from its EVM deposit transaction, read until 1Click processes the deposit.
  * A deposit that reverted, or whose nonce another transaction took, can never reach the deposit
  * address, and 1Click keeps waiting for it. Any other verdict leaves the swap to 1Click.
  */
