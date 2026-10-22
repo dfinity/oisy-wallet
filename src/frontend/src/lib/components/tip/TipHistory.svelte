@@ -206,7 +206,7 @@
 						type="button"
 					>
 						<span
-							class="block w-full rounded-xl row-feedback px-2 py-2 text-left parent-pressed:bg-brand-subtle-20"
+							class="block w-full rounded-xl row-feedback px-2 py-2 text-left parent-pressed:bg-brand-subtle-20 parent-pressed:duration-0"
 						>
 							<Card noMargin>
 								{#snippet icon()}

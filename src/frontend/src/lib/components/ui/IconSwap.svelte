@@ -39,6 +39,11 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
+		.layer {
+			transition-property: opacity;
+			transition-duration: 100ms;
+		}
+
 		.out {
 			scale: 1;
 			filter: none;

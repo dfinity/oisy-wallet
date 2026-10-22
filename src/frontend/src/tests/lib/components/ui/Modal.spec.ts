@@ -1,6 +1,8 @@
 import Modal from '$lib/components/ui/Modal.svelte';
+import { busy } from '$lib/stores/busy.store';
 import { createMockSnippet, mockSnippet } from '$tests/mocks/snippet.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
+import { createRawSnippet, tick } from 'svelte';
 
 describe('Modal', () => {
 	const baseProps = { title: createMockSnippet('modal-title-content'), children: mockSnippet };
@@ -22,5 +24,45 @@ describe('Modal', () => {
 		});
 
 		expect(getByTestId('close-modal').matches(':first-child')).toBeFalsy();
+	});
+
+	it('preserves the autofocus of a child input when the modal mounts', async () => {
+		const { getByTestId } = render(Modal, {
+			props: {
+				...baseProps,
+				children: createRawSnippet(() => ({
+					render: () => '<input data-tid="autofocus-field" />'
+				}))
+			}
+		});
+		// Simulate the child's mount autofocus before the overlay's deferred fallback.
+		getByTestId('autofocus-field').focus();
+		await tick();
+
+		expect(document.activeElement).toBe(getByTestId('autofocus-field'));
+	});
+
+	it('ignores Escape while busy and restores the opener after dismissal', async () => {
+		const trigger = document.createElement('button');
+		document.body.append(trigger);
+		trigger.focus();
+		const onClose = vi.fn();
+		const { unmount } = render(Modal, { props: { ...baseProps, onClose } });
+		await tick();
+		busy.start();
+		await fireEvent.keyDown(window, { key: 'Escape' });
+
+		expect(onClose).not.toHaveBeenCalled();
+
+		busy.stop();
+		await fireEvent.keyDown(window, { key: 'Escape' });
+
+		expect(onClose).toHaveBeenCalledOnce();
+
+		unmount();
+
+		expect(document.activeElement).toBe(trigger);
+
+		trigger.remove();
 	});
 });

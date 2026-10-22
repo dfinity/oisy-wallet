@@ -75,7 +75,7 @@ describe('ListItemButton', () => {
 		});
 
 		const host = container.querySelector(`[data-tid="${testId}"]`);
-		const selectableSpan = host?.querySelector('span.w-\\[20px\\]');
+		const selectableSpan = host?.querySelector('span.w-5');
 
 		expect(selectableSpan).toBeInTheDocument();
 
@@ -95,5 +95,15 @@ describe('ListItemButton', () => {
 		const host = container.querySelector(`[data-tid="${testId}"]`);
 
 		expect(host?.querySelector('svg')).toBeInTheDocument();
+	});
+
+	it('lets the label fill the row when contentFullWidth is set', () => {
+		const { getByText } = render(ListItemButtonTest, {
+			onclick: vi.fn(),
+			children: LABEL,
+			contentFullWidth: true
+		});
+
+		expect(getByText(LABEL)).toHaveClass('flex-1');
 	});
 });

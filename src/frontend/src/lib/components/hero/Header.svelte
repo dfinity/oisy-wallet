@@ -65,8 +65,8 @@
 	// `backdrop-filter` inside it to itself: the user menu's backdrop could dim the page and not
 	// blur it. So the name is dropped while the user menu is open, the only popover here with a
 	// visible backdrop. Its entries close it before the navigation they start, so page changes
-	// still find the header named; the network switcher closes only after its navigation, so it
-	// must not touch the name.
+	// still find the header named. The network switcher also closes before its navigation, and its
+	// backdrop is invisible, so it leaves the name alone.
 	let viewTransitionName = $derived(menuOpen ? 'none' : 'header');
 </script>
 
@@ -77,6 +77,7 @@
 	class="pointer-events-none relative flex w-full max-w-screen-2.5xl items-center justify-between gap-y-5 px-4 pt-6 md:px-8"
 	class:1.5xl:fixed={$authSignedIn}
 	class:1.5xl:inset-x-0={$authSignedIn}
+	class:flex-wrap={$authNotSignedIn}
 	class:md:sticky={$authSignedIn}
 	class:md:top-0={$authSignedIn}
 	class:md:z-10={$authSignedIn && !popoverOpen}
@@ -93,7 +94,7 @@
 	</div>
 
 	<div
-		class="pointer-events-auto flex justify-end"
+		class="pointer-events-auto flex items-center justify-end"
 		class:gap-1={isCompact}
 		class:gap-2={!isCompact}
 		class:max-w-full={isCompact}
@@ -120,7 +121,7 @@
 		{#if $authSignedIn}
 			<Menu bind:visible={menuOpen} />
 		{:else}
-			<div class="mr-2 flex justify-end gap-3 sm:gap-5 md:mr-0">
+			<div class="flex flex-wrap items-center justify-end gap-2 sm:gap-5">
 				<AboutWhyOisy trackEventSource={LANDING_PAGE_ROUTE} />
 				<DocumentationLink shortTextOnMobile trackEventSource={LANDING_PAGE_ROUTE} />
 				<ThemeSwitchButton />

@@ -53,15 +53,17 @@ button.nav-item:not([disabled]):not(.disabled):not(.loading) {
 		@apply bg-brand-subtle-10;
 	}
 
-	// One step darker than hover and selected, so a press always shows.
+	// One step darker than hover and selected, so a press always shows; at once, as `row-feedback`
+	// rows press (global.scss).
 	&:active {
 		@apply text-brand-primary-alt;
 		@apply bg-brand-subtle-20;
+		@apply duration-0;
 	}
 
 	&[focus],
 	&:focus {
-		outline-offset: 2px;
+		outline-offset: var(--focus-outline-offset, 2px);
 		outline: var(--color-background-brand-primary) solid 2px;
 	}
 
@@ -89,6 +91,7 @@ button.nav-item[disabled]:not(.loading) {
 }
 
 .nav-item {
+	--focus-outline-offset: -3px;
 	@apply py-3;
 }
 

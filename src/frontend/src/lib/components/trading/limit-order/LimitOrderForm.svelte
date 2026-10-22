@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import LimitOrderPriceSection from '$lib/components/trading/limit-order/LimitOrderPriceSection.svelte';
 	import LimitOrderRouting from '$lib/components/trading/limit-order/LimitOrderRouting.svelte';
@@ -27,6 +26,7 @@
 		maxSpendBaseAmount,
 		type PricePreset
 	} from '$lib/utils/oisy-trade.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		side: LimitOrderSide;

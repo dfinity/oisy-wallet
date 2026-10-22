@@ -165,11 +165,12 @@
 	//
 	// Only the programs that moved something. An instruction the wallet could not read names its
 	// program too, and most transactions carry a couple that change nothing the user holds, so
-	// counting those here would bury the program that did the work among its housekeeping.
+	// counting those here would bury the program that did the work among its housekeeping. A token
+	// batch's heading names the token program, which runs the batch rather than doing the trade.
 	let venues = $derived([
 		...new Set(
 			flattenInstructions(instructions ?? [])
-				.filter(({ kind }) => kind !== 'unknown')
+				.filter(({ kind }) => kind !== 'unknown' && kind !== 'batch')
 				.map(({ program }) => program)
 				.filter(nonNullish)
 		)
@@ -205,6 +206,7 @@
 							metadata: $splTokenMetadataStore,
 							unknownTokenAddresses: summaryTokenAddresses,
 							unknownTokenLabel: $i18n.transaction.text.unknown_token,
+							unknownTokenNamedLabel: $i18n.transaction.text.unknown_token_named,
 							nativeSymbol: feeToken.symbol
 						}),
 					amountOf: ({ delta, decimals }) =>

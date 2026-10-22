@@ -176,3 +176,10 @@ export enum WizardStepsCyclesMint {
 	REVIEW = 'Review',
 	MINTING = 'Minting'
 }
+
+export enum WizardStepsCyclesTopUp {
+	CANISTER = 'Canister',
+	AMOUNT = 'Amount',
+	REVIEW = 'Review',
+	TOPPING_UP = 'ToppingUp'
+}

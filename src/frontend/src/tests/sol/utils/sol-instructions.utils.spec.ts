@@ -31,7 +31,12 @@ import * as solInstructionsToken2022Utils from '$sol/utils/sol-instructions-toke
 import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
 import * as solInstructionsTokenUtils from '$sol/utils/sol-instructions-token.utils';
 import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
-import { mapSolInstruction, mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
+import {
+	asSolParsedRpcInstruction,
+	mapSolInstruction,
+	mapSolParsedInstruction,
+	solUnbatchedInstructions
+} from '$sol/utils/sol-instructions.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolParsedTransactionMessage } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSolAddress2, mockSolAddress3 } from '$tests/mocks/sol.mock';
@@ -49,11 +54,19 @@ import {
 } from '@solana-program/compute-budget';
 import { getAddMemoInstruction } from '@solana-program/memo';
 import {
+	getAuthorizeCheckedInstruction,
+	getAuthorizeCheckedWithSeedInstruction,
 	getAuthorizeInstruction,
+	getAuthorizeWithSeedInstruction,
 	getDelegateStakeInstruction,
 	getGetMinimumDelegationInstruction,
+	getInitializeCheckedInstruction,
+	getInitializeInstruction,
+	getSetLockupCheckedInstruction,
+	getSetLockupInstruction,
 	getWithdrawInstruction,
-	StakeAuthorize
+	StakeAuthorize,
+	type LockupArgs
 } from '@solana-program/stake';
 import {
 	getAdvanceNonceAccountInstruction,
@@ -74,22 +87,29 @@ import {
 	AuthorityType,
 	getApproveCheckedInstruction,
 	getApproveInstruction,
+	getBatchInstruction,
+	getBatchInstructionDataEncoder,
 	getBurnCheckedInstruction,
 	getBurnInstruction,
+	getCloseAccountInstruction,
 	getCreateAssociatedTokenIdempotentInstruction,
 	getCreateAssociatedTokenInstruction,
 	getSetAuthorityInstruction,
 	getTransferCheckedInstruction,
+	getUnwrapLamportsInstruction,
 	TokenInstruction
 } from '@solana-program/token';
 import {
 	getApproveCheckedInstruction as getToken2022ApproveCheckedInstruction,
 	getApproveInstruction as getToken2022ApproveInstruction,
+	getBatchInstruction as getToken2022BatchInstruction,
 	getBurnCheckedInstruction as getToken2022BurnCheckedInstruction,
 	getBurnInstruction as getToken2022BurnInstruction,
 	getCloseAccountInstruction as getToken2022CloseAccountInstruction,
+	getPermissionedBurnInstruction as getToken2022PermissionedBurnInstruction,
 	getSetAuthorityInstruction as getToken2022SetAuthorityInstruction,
 	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction,
+	getUnwrapLamportsInstruction as getToken2022UnwrapLamportsInstruction,
 	AuthorityType as Token2022AuthorityType
 } from '@solana-program/token-2022';
 import {
@@ -1330,7 +1350,26 @@ describe('sol-instructions.utils', () => {
 			});
 		});
 
-		it('should state a `WithdrawNonceAccount` instruction as the transfer it is', () => {
+		it('should state a `WithdrawNonceAccount` instruction that pays the wallet as the transfer it is', () => {
+			const instruction = getWithdrawNonceAccountInstruction({
+				nonceAccount: address(mockSolAddress2),
+				recipientAccount: address(mockSolAddress),
+				nonceAuthority: createNoopSigner(address(mockSolAddress)),
+				withdrawAmount: 5_000n
+			});
+
+			expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+				amount: 5_000n,
+				source: mockSolAddress2,
+				destination: mockSolAddress
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		// The nonce account is not one the balance changes read, so lamports it pays anywhere but the
+		// wallet would leave without a line on the review saying so.
+		it('should fail closed on a `WithdrawNonceAccount` instruction that pays anywhere but the wallet', () => {
 			const instruction = getWithdrawNonceAccountInstruction({
 				nonceAccount: address(mockSolAddress2),
 				recipientAccount: address(mockSolAddress3),
@@ -1338,16 +1377,35 @@ describe('sol-instructions.utils', () => {
 				withdrawAmount: 5_000n
 			});
 
-			expect(mapSolInstruction({ instruction })).toStrictEqual({
-				amount: 5_000n,
-				source: mockSolAddress2,
-				destination: mockSolAddress3
+			expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
 			});
 
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
-		it('should state a `TransferSolWithSeed` instruction as the transfer it is', () => {
+		it('should state a `TransferSolWithSeed` instruction that pays the wallet as the transfer it is', () => {
+			const instruction = getTransferSolWithSeedInstruction({
+				source: address(mockSolAddress2),
+				baseAccount: createNoopSigner(address(mockSolAddress)),
+				destination: address(mockSolAddress),
+				amount: 7_000n,
+				fromSeed: 'vault',
+				fromOwner: address(SYSTEM_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+				amount: 7_000n,
+				source: mockSolAddress2,
+				destination: mockSolAddress
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		// The seed-derived source is never the wallet itself, so the same holds as for a nonce account.
+		it('should fail closed on a `TransferSolWithSeed` instruction that pays anywhere but the wallet', () => {
 			const instruction = getTransferSolWithSeedInstruction({
 				source: address(mockSolAddress2),
 				baseAccount: createNoopSigner(address(mockSolAddress)),
@@ -1357,10 +1415,9 @@ describe('sol-instructions.utils', () => {
 				fromOwner: address(SYSTEM_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction({ instruction })).toStrictEqual({
-				amount: 7_000n,
-				source: mockSolAddress2,
-				destination: mockSolAddress3
+			expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
 			});
 
 			expect(console.warn).not.toHaveBeenCalled();
@@ -1778,6 +1835,236 @@ describe('sol-instructions.utils', () => {
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
+		describe('an `UnwrapLamports` instruction', () => {
+			const unwrapTo = (destination: string) =>
+				getUnwrapLamportsInstruction({
+					source: address(mockSolAddress3),
+					destination: address(destination),
+					authority: address(mockSolAddress),
+					amount: 100n
+				});
+
+			it('should fail closed on an unwrap that pays somebody else', () => {
+				expect(
+					mapSolInstruction({ instruction: unwrapTo(mockSolAddress2), userAddress: mockSolAddress })
+				).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on an unwrap when the user is not known', () => {
+				expect(mapSolInstruction({ instruction: unwrapTo(mockSolAddress) })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should state nothing for an unwrap that pays the user', () => {
+				expect(
+					mapSolInstruction({ instruction: unwrapTo(mockSolAddress), userAddress: mockSolAddress })
+				).toStrictEqual({ amount: undefined });
+			});
+
+			it('should fail closed on a Token-2022 unwrap that pays somebody else', () => {
+				const instruction = getToken2022UnwrapLamportsInstruction({
+					source: address(mockSolAddress3),
+					destination: address(mockSolAddress2),
+					authority: address(mockSolAddress),
+					amount: 100n
+				});
+
+				expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should state nothing for a Token-2022 unwrap that pays the user', () => {
+				const instruction = getToken2022UnwrapLamportsInstruction({
+					source: address(mockSolAddress3),
+					destination: address(mockSolAddress),
+					authority: address(mockSolAddress),
+					amount: 100n
+				});
+
+				expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+					amount: undefined
+				});
+			});
+		});
+
+		describe('a token batch', () => {
+			const setAuthority = getSetAuthorityInstruction({
+				owned: address(mockSolAddress3),
+				owner: address(mockSolAddress),
+				authorityType: AuthorityType.AccountOwner,
+				newAuthority: address(mockSolAddress2)
+			});
+
+			const transfer = getTransferCheckedInstruction({
+				source: address(mockSolAddress3),
+				mint: address(JUP_TOKEN.address),
+				destination: address(mockSolAddress2),
+				authority: address(mockSolAddress),
+				amount: 1n,
+				decimals: 6
+			});
+
+			const closeTo = (destination: string) =>
+				getCloseAccountInstruction({
+					account: address(mockSolAddress3),
+					destination: address(destination),
+					owner: address(mockSolAddress)
+				});
+
+			const map = (instruction: SolInstruction) =>
+				mapSolInstruction({ instruction, userAddress: mockSolAddress });
+
+			it('should fail closed on a batch carrying an authority change', () => {
+				expect(map(getBatchInstruction([setAuthority]))).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should fail closed on a batch carrying a burn', () => {
+				const burn = getBurnInstruction({
+					account: address(mockSolAddress3),
+					mint: address(JUP_TOKEN.address),
+					authority: address(mockSolAddress),
+					amount: 100n
+				});
+
+				expect(map(getBatchInstruction([burn]))).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should fail closed on a batch carrying a checked burn', () => {
+				const burn = getBurnCheckedInstruction({
+					account: address(mockSolAddress3),
+					mint: address(JUP_TOKEN.address),
+					authority: address(mockSolAddress),
+					amount: 100n,
+					decimals: 6
+				});
+
+				expect(map(getBatchInstruction([burn]))).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should fail closed on a batch carrying a close that pays somebody else', () => {
+				expect(map(getBatchInstruction([closeTo(mockSolAddress2)]))).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should fail closed on a batch carrying an unwrap that pays somebody else', () => {
+				const unwrap = getUnwrapLamportsInstruction({
+					source: address(mockSolAddress3),
+					destination: address(mockSolAddress2),
+					authority: address(mockSolAddress),
+					amount: 100n
+				});
+
+				expect(map(getBatchInstruction([unwrap]))).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should fail closed when any one of the instructions it carries is refused', () => {
+				expect(map(getBatchInstruction([transfer, setAuthority]))).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should leave a batch carrying only instructions that pass unread', () => {
+				expect(map(getBatchInstruction([transfer, closeTo(mockSolAddress)]))).toStrictEqual({
+					amount: undefined,
+					unreviewed: true
+				});
+			});
+
+			it('should fail closed on a batch nested in a batch', () => {
+				const inner = getBatchInstruction([transfer]);
+
+				const nested: SolInstruction = {
+					programAddress: inner.programAddress,
+					accounts: inner.accounts,
+					data: getBatchInstructionDataEncoder().encode({
+						data: [{ numberOfAccounts: inner.accounts.length, instructionData: inner.data }]
+					})
+				};
+
+				expect(map(nested)).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on a batch naming more accounts than it carries', () => {
+				const batch = getBatchInstruction([transfer]);
+
+				expect(map({ ...batch, accounts: batch.accounts.slice(0, -1) })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should fail closed on a batch carrying no instruction', () => {
+				const empty: SolInstruction = {
+					programAddress: address(TOKEN_PROGRAM_ADDRESS),
+					accounts: [],
+					data: getBatchInstructionDataEncoder().encode({ data: [] })
+				};
+
+				expect(map(empty)).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on a Token-2022 batch carrying an authority change', () => {
+				const instruction = getToken2022BatchInstruction([
+					getToken2022SetAuthorityInstruction({
+						owned: address(mockSolAddress3),
+						owner: address(mockSolAddress),
+						authorityType: Token2022AuthorityType.AccountOwner,
+						newAuthority: address(mockSolAddress2)
+					})
+				]);
+
+				expect(map(instruction)).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on a Token-2022 batch carrying a permissioned burn', () => {
+				const instruction = getToken2022BatchInstruction([
+					getToken2022PermissionedBurnInstruction({
+						account: address(mockSolAddress3),
+						mint: address(JUP_TOKEN.address),
+						permissionedBurnAuthority: createNoopSigner(address(mockSolAddress2)),
+						authority: address(mockSolAddress),
+						amount: 100n
+					})
+				]);
+
+				expect(map(instruction)).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should leave a Token-2022 batch carrying only transfers unread', () => {
+				const instruction = getToken2022BatchInstruction([
+					getToken2022TransferCheckedInstruction({
+						source: address(mockSolAddress3),
+						mint: address(JUP_TOKEN.address),
+						destination: address(mockSolAddress2),
+						authority: address(mockSolAddress),
+						amount: 1n,
+						decimals: 6
+					})
+				]);
+
+				expect(map(instruction)).toStrictEqual({ amount: undefined, unreviewed: true });
+			});
+		});
+
 		it('should ignore a Create Associated Token instruction', () => {
 			const instruction = getCreateAssociatedTokenInstruction({
 				payer: createNoopSigner(address(mockSolAddress)),
@@ -1926,7 +2213,43 @@ describe('sol-instructions.utils', () => {
 			// Distinct from the recipient, so a parser reading the wrong position cannot pass unnoticed.
 			const mockWithdrawAuthority = createNoopSigner(address(mockSolAddress3));
 
-			it('should state a Withdraw instruction in full', () => {
+			it('should state a Withdraw instruction that pays the wallet in full', () => {
+				const instruction = getWithdrawInstruction({
+					stake: address(mockSolAddress2),
+					recipient: address(mockSolAddress),
+					withdrawAuthority: mockStakeAuthority,
+					args: 5_000_000n
+				});
+
+				expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+					amount: 5_000_000n,
+					source: mockSolAddress2,
+					destination: mockSolAddress
+				});
+
+				expect(parseSolStakeInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
+				expect(console.warn).not.toHaveBeenCalled();
+			});
+
+			// The stake account is not one the balance changes read, so lamports it pays anywhere but
+			// the wallet would leave without a line on the review saying so.
+			it('should fail closed on a Withdraw instruction that pays anywhere but the wallet', () => {
+				const instruction = getWithdrawInstruction({
+					stake: address(mockSolAddress2),
+					recipient: address(mockSolAddress3),
+					withdrawAuthority: mockStakeAuthority,
+					args: 5_000_000n
+				});
+
+				expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+
+				expect(console.warn).not.toHaveBeenCalled();
+			});
+
+			it('should fail closed on a Withdraw instruction when the wallet is not known', () => {
 				const instruction = getWithdrawInstruction({
 					stake: address(mockSolAddress2),
 					recipient: address(mockSolAddress),
@@ -1935,13 +2258,9 @@ describe('sol-instructions.utils', () => {
 				});
 
 				expect(mapSolInstruction({ instruction })).toStrictEqual({
-					amount: 5_000_000n,
-					source: mockSolAddress2,
-					destination: mockSolAddress
+					amount: undefined,
+					ambiguous: true
 				});
-
-				expect(parseSolStakeInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
-				expect(console.warn).not.toHaveBeenCalled();
 			});
 
 			// Since stake program v5 the sysvar accounts are optional and the builders no longer emit
@@ -1961,7 +2280,7 @@ describe('sol-instructions.utils', () => {
 					role: AccountRole.READONLY
 				};
 
-				it('should state a Withdraw instruction in full', () => {
+				it('should state a Withdraw instruction that pays the wallet in full', () => {
 					const withdraw = getWithdrawInstruction({
 						stake: address(mockSolAddress2),
 						recipient: address(mockSolAddress),
@@ -1974,7 +2293,7 @@ describe('sol-instructions.utils', () => {
 						accounts: [stake, recipient, clockSysvar, stakeHistorySysvar, withdrawAuthority]
 					};
 
-					expect(mapSolInstruction({ instruction })).toStrictEqual({
+					expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
 						amount: 5_000_000n,
 						source: mockSolAddress2,
 						destination: mockSolAddress
@@ -2025,6 +2344,47 @@ describe('sol-instructions.utils', () => {
 				}
 			);
 
+			it.each([
+				{
+					name: 'AuthorizeChecked',
+					instruction: getAuthorizeCheckedInstruction({
+						stake: address(mockSolAddress2),
+						authority: mockStakeAuthority,
+						newAuthority: createNoopSigner(address(mockSolAddress3)),
+						stakeAuthorize: StakeAuthorize.Withdrawer
+					})
+				},
+				{
+					name: 'AuthorizeWithSeed',
+					instruction: getAuthorizeWithSeedInstruction({
+						stake: address(mockSolAddress2),
+						base: mockStakeAuthority,
+						newAuthorizedPubkey: address(mockSolAddress3),
+						stakeAuthorize: StakeAuthorize.Withdrawer,
+						authoritySeed: 'seed',
+						authorityOwner: address(SYSTEM_PROGRAM_ADDRESS)
+					})
+				},
+				{
+					name: 'AuthorizeCheckedWithSeed',
+					instruction: getAuthorizeCheckedWithSeedInstruction({
+						stake: address(mockSolAddress2),
+						base: mockStakeAuthority,
+						newAuthority: createNoopSigner(address(mockSolAddress3)),
+						stakeAuthorize: StakeAuthorize.Withdrawer,
+						authoritySeed: 'seed',
+						authorityOwner: address(SYSTEM_PROGRAM_ADDRESS)
+					})
+				}
+			])('should fail closed on an $name instruction', ({ instruction }) => {
+				expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+
+				expect(console.warn).not.toHaveBeenCalled();
+			});
+
 			it('should ignore a GetMinimumDelegation instruction', () => {
 				const instruction = getGetMinimumDelegationInstruction();
 
@@ -2047,6 +2407,210 @@ describe('sol-instructions.utils', () => {
 				expect(mapSolInstruction({ instruction })).toStrictEqual({
 					amount: undefined,
 					unreviewed: true
+				});
+
+				expect(console.warn).not.toHaveBeenCalled();
+			});
+
+			describe('initialising a stake account', () => {
+				// What every staking flow passes: no date, no epoch, and the all-zero address as custodian.
+				const noLockup: LockupArgs = {
+					unixTimestamp: ZERO,
+					epoch: ZERO,
+					custodian: address(SYSTEM_PROGRAM_ADDRESS)
+				};
+
+				const initialize = ({
+					staker = mockSolAddress,
+					withdrawer = mockSolAddress,
+					lockup = noLockup
+				}: {
+					staker?: string;
+					withdrawer?: string;
+					lockup?: LockupArgs;
+				} = {}) =>
+					getInitializeInstruction({
+						stake: address(mockSolAddress2),
+						arg0: { staker: address(staker), withdrawer: address(withdrawer) },
+						arg1: lockup
+					});
+
+				// Nothing is handed to anybody, and the account then holds stake the summary has no
+				// vocabulary for, which is what every other stake operation says too.
+				it('should mark an Initialize instruction naming the user for both authorities unreviewed', () => {
+					const instruction = initialize();
+
+					expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+						amount: undefined,
+						unreviewed: true
+					});
+
+					expect(parseSolStakeInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
+					expect(console.warn).not.toHaveBeenCalled();
+				});
+
+				// The same handover an Authorize instruction makes, made when the account is set up.
+				it.each([
+					{ role: 'stake authority', authorities: { staker: mockSolAddress3 } },
+					{ role: 'withdraw authority', authorities: { withdrawer: mockSolAddress3 } },
+					{
+						role: 'stake and withdraw authority',
+						authorities: { staker: mockSolAddress3, withdrawer: mockSolAddress3 }
+					}
+				])(
+					'should fail closed on an Initialize instruction naming somebody else as the $role',
+					({ authorities }) => {
+						expect(
+							mapSolInstruction({
+								instruction: initialize(authorities),
+								userAddress: mockSolAddress
+							})
+						).toStrictEqual({
+							amount: undefined,
+							ambiguous: true
+						});
+
+						expect(console.warn).not.toHaveBeenCalled();
+					}
+				);
+
+				it('should fail closed on an Initialize instruction when the user is not known', () => {
+					expect(mapSolInstruction({ instruction: initialize() })).toStrictEqual({
+						amount: undefined,
+						ambiguous: true
+					});
+				});
+
+				// A lockup holds the balance until its date or epoch, and only the custodian can lift or
+				// extend it meanwhile. The summary cannot state when the balance becomes withdrawable.
+				it.each([
+					{
+						until: 'a date',
+						lockup: { unixTimestamp: 1_900_000_000n, custodian: address(mockSolAddress3) }
+					},
+					{ until: 'an epoch', lockup: { epoch: 1_000n, custodian: address(mockSolAddress3) } },
+					{
+						until: 'a date, with the user as custodian',
+						lockup: { unixTimestamp: 1_900_000_000n, custodian: address(mockSolAddress) }
+					}
+				])(
+					'should fail closed on an Initialize instruction setting a lockup until $until',
+					({ lockup }) => {
+						expect(
+							mapSolInstruction({
+								instruction: initialize({ lockup: { ...noLockup, ...lockup } }),
+								userAddress: mockSolAddress
+							})
+						).toStrictEqual({
+							amount: undefined,
+							ambiguous: true
+						});
+					}
+				);
+
+				// A custodian decides only while a lockup is in force, and one with no date and no epoch
+				// never is.
+				it('should read a custodian with no lockup set as no lockup', () => {
+					expect(
+						mapSolInstruction({
+							instruction: initialize({
+								lockup: { ...noLockup, custodian: address(mockSolAddress3) }
+							}),
+							userAddress: mockSolAddress
+						})
+					).toStrictEqual({
+						amount: undefined,
+						unreviewed: true
+					});
+				});
+
+				const initializeChecked = ({
+					stakeAuthority = mockSolAddress,
+					withdrawAuthority = mockSolAddress
+				}: {
+					stakeAuthority?: string;
+					withdrawAuthority?: string;
+				} = {}) =>
+					getInitializeCheckedInstruction({
+						stake: address(mockSolAddress2),
+						stakeAuthority: address(stakeAuthority),
+						withdrawAuthority: createNoopSigner(address(withdrawAuthority))
+					});
+
+				it('should mark an InitializeChecked instruction naming the user for both authorities unreviewed', () => {
+					expect(
+						mapSolInstruction({ instruction: initializeChecked(), userAddress: mockSolAddress })
+					).toStrictEqual({
+						amount: undefined,
+						unreviewed: true
+					});
+
+					expect(console.warn).not.toHaveBeenCalled();
+				});
+
+				it.each([
+					{ role: 'stake authority', authorities: { stakeAuthority: mockSolAddress3 } },
+					{ role: 'withdraw authority', authorities: { withdrawAuthority: mockSolAddress3 } },
+					{
+						role: 'stake and withdraw authority',
+						authorities: { stakeAuthority: mockSolAddress3, withdrawAuthority: mockSolAddress3 }
+					}
+				])(
+					'should fail closed on an InitializeChecked instruction naming somebody else as the $role',
+					({ authorities }) => {
+						expect(
+							mapSolInstruction({
+								instruction: initializeChecked(authorities),
+								userAddress: mockSolAddress
+							})
+						).toStrictEqual({
+							amount: undefined,
+							ambiguous: true
+						});
+
+						expect(console.warn).not.toHaveBeenCalled();
+					}
+				);
+			});
+
+			// A lockup set once the account exists holds the balance as one set at initialisation
+			// does, and while none is in force the withdraw authority sets it alone. Refused whatever
+			// it sets, the wallet as custodian included.
+			it.each([
+				{
+					name: 'SetLockup instruction',
+					instruction: getSetLockupInstruction({
+						stake: address(mockSolAddress2),
+						authority: mockStakeAuthority,
+						unixTimestamp: null,
+						epoch: 1_000n,
+						custodian: address(mockSolAddress3)
+					})
+				},
+				{
+					name: 'SetLockupChecked instruction',
+					instruction: getSetLockupCheckedInstruction({
+						stake: address(mockSolAddress2),
+						authority: mockStakeAuthority,
+						newAuthority: createNoopSigner(address(mockSolAddress3)),
+						unixTimestamp: null,
+						epoch: 1_000n
+					})
+				},
+				{
+					name: 'SetLockup instruction naming the wallet as custodian',
+					instruction: getSetLockupInstruction({
+						stake: address(mockSolAddress2),
+						authority: mockStakeAuthority,
+						unixTimestamp: 1_900_000_000n,
+						epoch: null,
+						custodian: address(mockSolAddress)
+					})
+				}
+			])('should fail closed on a $name', ({ instruction }) => {
+				expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
 				});
 
 				expect(console.warn).not.toHaveBeenCalled();
@@ -2089,6 +2653,152 @@ describe('sol-instructions.utils', () => {
 			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
 				`Could not parse Solana instruction for program ${mockInstruction1.programAddress}`
 			);
+		});
+	});
+
+	describe('a token batch read through its instructions', () => {
+		const transferTo = (destination: string) =>
+			getTransferCheckedInstruction({
+				source: address(mockSolAddress3),
+				mint: address(JUP_TOKEN.address),
+				destination: address(destination),
+				authority: address(mockSolAddress),
+				amount: 1n,
+				decimals: 6
+			});
+
+		const nest = (inner: SolInstruction): SolInstruction => ({
+			programAddress: inner.programAddress,
+			accounts: inner.accounts,
+			data: getBatchInstructionDataEncoder().encode({
+				data: [
+					{
+						numberOfAccounts: inner.accounts?.length ?? 0,
+						instructionData: inner.data ?? new Uint8Array()
+					}
+				]
+			})
+		});
+
+		describe('solUnbatchedInstructions', () => {
+			it('should give the instructions a batch carries, each with its own accounts', () => {
+				const first = transferTo(mockSolAddress2);
+				const second = transferTo(mockSolAddress);
+
+				const unbatched = solUnbatchedInstructions(getBatchInstruction([first, second]));
+
+				expect(unbatched).toHaveLength(2);
+				expect(unbatched.map(({ accounts }) => accounts)).toStrictEqual([
+					first.accounts,
+					second.accounts
+				]);
+				expect(unbatched.map(({ data }) => data)).toStrictEqual([first.data, second.data]);
+			});
+
+			it('should leave any other instruction as it is', () => {
+				const transfer = transferTo(mockSolAddress2);
+
+				expect(solUnbatchedInstructions(transfer)).toStrictEqual([transfer]);
+			});
+
+			it('should leave a batch nested in a batch whole', () => {
+				const nested = nest(getBatchInstruction([transferTo(mockSolAddress2)]));
+
+				expect(solUnbatchedInstructions(nested)).toStrictEqual([nested]);
+			});
+
+			it('should leave a batch naming more accounts than it carries whole', () => {
+				const batch = getBatchInstruction([transferTo(mockSolAddress2)]);
+				const short = { ...batch, accounts: batch.accounts.slice(0, -1) };
+
+				expect(solUnbatchedInstructions(short)).toStrictEqual([short]);
+			});
+		});
+
+		describe('asSolParsedRpcInstruction', () => {
+			it('should state a batch the way the RPC returns one', () => {
+				expect(
+					asSolParsedRpcInstruction(
+						getBatchInstruction([transferTo(mockSolAddress2), transferTo(mockSolAddress)])
+					)
+				).toStrictEqual({
+					program: 'spl-token',
+					programId: TOKEN_PROGRAM_ADDRESS,
+					parsed: {
+						type: 'batch',
+						info: {
+							instructions: [mockSolAddress2, mockSolAddress].map((destination) => ({
+								type: 'transferChecked',
+								info: expect.objectContaining({
+									source: mockSolAddress3,
+									mint: JUP_TOKEN.address,
+									destination,
+									authority: mockSolAddress
+								})
+							}))
+						}
+					}
+				});
+			});
+
+			it('should leave a batch nested in a batch unread', () => {
+				expect(
+					asSolParsedRpcInstruction(nest(getBatchInstruction([transferTo(mockSolAddress2)])))
+				).toBeUndefined();
+			});
+		});
+	});
+
+	// The RPC names both after what they do, and the effects are read against its names.
+	describe('asSolParsedRpcInstruction', () => {
+		it('should state a seed-derived transfer the way the RPC returns one', () => {
+			expect(
+				asSolParsedRpcInstruction(
+					getTransferSolWithSeedInstruction({
+						source: address(mockSolAddress2),
+						baseAccount: createNoopSigner(address(mockSolAddress)),
+						destination: address(mockSolAddress3),
+						amount: 7_000n,
+						fromSeed: 'vault',
+						fromOwner: address(SYSTEM_PROGRAM_ADDRESS)
+					})
+				)
+			).toStrictEqual({
+				program: 'system',
+				programId: SYSTEM_PROGRAM_ADDRESS,
+				parsed: {
+					type: 'transferWithSeed',
+					info: expect.objectContaining({
+						source: mockSolAddress2,
+						destination: mockSolAddress3,
+						lamports: 7_000n
+					})
+				}
+			});
+		});
+
+		it('should state a withdrawal from a nonce account the way the RPC returns one', () => {
+			expect(
+				asSolParsedRpcInstruction(
+					getWithdrawNonceAccountInstruction({
+						nonceAccount: address(mockSolAddress2),
+						recipientAccount: address(mockSolAddress3),
+						nonceAuthority: createNoopSigner(address(mockSolAddress)),
+						withdrawAmount: 5_000n
+					})
+				)
+			).toStrictEqual({
+				program: 'system',
+				programId: SYSTEM_PROGRAM_ADDRESS,
+				parsed: {
+					type: 'withdrawFromNonce',
+					info: expect.objectContaining({
+						nonceAccount: mockSolAddress2,
+						destination: mockSolAddress3,
+						lamports: 5_000n
+					})
+				}
+			});
 		});
 	});
 });

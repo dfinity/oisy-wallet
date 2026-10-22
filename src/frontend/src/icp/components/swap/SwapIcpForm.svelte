@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, untrack } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import { oisyTradeSwapEnabled } from '$env/oisy-trade-swap';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 	import { isIcToken } from '$icp/validation/ic-token.validation';
@@ -30,6 +29,7 @@
 	import { findOisyTradePair, oisyTradeAmountObjection } from '$lib/utils/oisy-trade-swap.utils';
 	import { formatTradeAmount, toPairView } from '$lib/utils/oisy-trade.utils';
 	import { tryParseToken } from '$lib/utils/parse.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
 
 	interface Props {

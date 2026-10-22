@@ -136,6 +136,11 @@ Baseline rules; ESLint a11y rules and `svelte-check` catch some violations.
   - `aria-label` / `aria-labelledby`.
 - Icon-only buttons need `aria-label` (or visible text via an `sr-only`
   span). Pull the label from `$i18n.<bucket>.alt.*`.
+- A control that shows text is named by that text: no `aria-label` that
+  replaces it, or voice-control users can't reach it by what it says
+  (WCAG 2.5.3). Put extra context in a description instead:
+  `Dropdown` / `DropdownButton` / `MultiSelectDropdown` take
+  `ariaDescription`, which they wire through `aria-describedby`.
 - Decorative icons → `aria-hidden="true"`.
 
 ### Focus & keyboard

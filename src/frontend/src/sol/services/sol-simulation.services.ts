@@ -14,6 +14,7 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import {
 	mapSolInstructionSummaries,
 	solClosingInstructionCandidates,
+	solKeepsBatchWhole,
 	solOpensAccountBeyondRent,
 	type SolInstructionGroup
 } from '$sol/utils/sol-instruction-summary.utils';
@@ -280,6 +281,21 @@ const simulate = async ({
 		{}
 	);
 
+	// What each wrapped SOL account held going in beyond the reserve it states and its amount:
+	// lamports paid in that no sync has counted yet, which a sync in the message folds in.
+	const accountUnsynced = addresses.reduce<Record<SolAddress, bigint>>((acc, account, index) => {
+		const preAccount = preAccounts[index];
+		const token = nonNullish(preAccount) ? parseTokenAccountState(preAccount) : undefined;
+
+		if (nonNullish(preAccount) && nonNullish(token?.nativeReserve)) {
+			const unsynced = BigInt(preAccount.lamports) - token.nativeReserve - token.amount;
+
+			acc[account] = unsynced > ZERO ? unsynced : ZERO;
+		}
+
+		return acc;
+	}, {});
+
 	const innerInstructionGroups = [...innerInstructions].map(({ index, instructions: inner }) => ({
 		index: Number(index),
 		instructions: [...inner]
@@ -298,6 +314,7 @@ const simulate = async ({
 			accountMintsBefore,
 			accountLamports,
 			accountTokenAmounts,
+			accountUnsynced,
 			rentExemptMinimum,
 			closedAccounts,
 			// A run whose calls all happen inside a program the wallet cannot read produces no effects
@@ -374,6 +391,10 @@ const simulate = async ({
 			innerInstructions: innerInstructionGroups,
 			rentExemptMinimum
 		}) && { opensAccountBeyondRent: true }),
+		...(solKeepsBatchWhole({
+			instructions: [...transactionMessage.instructions].map(asSolParsedRpcInstructionOrSelf),
+			innerInstructions: innerInstructionGroups
+		}) && { keepsBatchWhole: true }),
 		parties: {
 			...deriveSolTransferParties({
 				legs,

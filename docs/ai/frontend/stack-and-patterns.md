@@ -221,6 +221,10 @@ layer and let the service own caching.
   (`lib/styles/mixins/_interaction.scss`), not a bare `&:hover`, so a tap
   on a touch screen doesn't leave the hover colour on. Tailwind's `hover:`
   variant already does this.
+- **Touch sizes in SCSS:** write `@include interaction.coarse { … }` for sizes
+  a touch screen needs (44 px targets). It follows the main pointer, not the
+  width: a breakpoint cannot tell a tablet from a narrow laptop window.
+  Tailwind's `pointer-coarse:` variant does the same in markup.
 - The route-level prerendered backgrounds described in
   [HACKING.md "Routes Styles"](../../../HACKING.md#routes-styles) are the
   preferred way to set route-specific colours.
@@ -271,12 +275,18 @@ scale takes far more pixels off a full-width element; full-width rows don't
 shrink at all.
 
 The shared buttons (`button.scss`) and `row-feedback` rows change colour in
-150 ms ease-out; use the same for new feedback. The `tertiary-alt` and
+150 ms ease-out; use the same for new feedback. A row's pressed fill is the
+exception: it shows at once and fades back over 150 ms on release, because a
+quick click is held for about 80 ms and a fade would only peak as it is let
+go. `row-feedback`, `.nav-item` and `ListItemCheckbox` have it built in; a
+wrapper or `display: contents` row adds `child-pressed:duration-0` or
+`parent-pressed:duration-0` beside its fill. The `tertiary-alt` and
 `secondary-light` buttons and `row-feedback` rows press one step past their
 hover (`brand-subtle-10` → `-20`, or `-20` → `-30`), and a state that stays on,
 such as an open popover's button, may go a step further. `.dropdown-button`
-has no pressed fill of its own, and success, error and other palettes keep
-their own steps.
+presses to `brand-subtle-20` (the border too when bordered), a step past its
+hover and open fill, shown at once rather than faded in. Success, error and
+other palettes keep their own steps.
 
 ### Small controls: `hit-area`
 
@@ -286,7 +296,8 @@ bigger. Two tap areas must never overlap; where a neighbour sits closer,
 cap it: `[--hit-area:2rem]`, or one axis with `[--hit-area-x:...]` /
 `[--hit-area-y:...]` (`[--hit-area-x:0px]` grows it only up and down). It
 does not set `position`: add `relative` unless the control is already
-`absolute` or `fixed`.
+`absolute` or `fixed`. Add `hit-area-touch` for 44 × 44 px on a touch
+screen (`pointer: coarse`), as the icon triggers of menus and dropdowns do.
 
 ### Pitfalls
 
@@ -295,9 +306,10 @@ does not set `position`: add `relative` unless the control is already
   `row-feedback`, `pressed:` and `child-pressed:` exclude that, plain
   `active:` does not.
 - **`display: contents` buttons paint nothing.** Put `row-feedback` on the
-  element inside, plus `parent-pressed:bg-brand-subtle-20`: holding Space on
-  the focused button makes only the button `:active`, not the element inside
-  (as `Transaction` and `TipHistory` do).
+  element inside, plus `parent-pressed:bg-brand-subtle-20` and
+  `parent-pressed:duration-0`: holding Space on the focused button makes
+  only the button `:active`, not the element inside (as `Transaction` and
+  `TipHistory` do).
 - **`scale` makes the element the containing block** of its absolutely
   positioned children. If a child is positioned against something further
   out (the mobile bar's Finance circle), scale the child, not the element:
@@ -322,7 +334,12 @@ does not set `position`: add `relative` unless the control is already
 Import `fade`, `fly`, `slide`, `scale` and `blur` from
 `$lib/utils/transitions.utils`, not from `svelte/transition`. They take the
 same parameters and add OISY's timings and the system's reduced-motion
-setting. Svelte's own default is 400 ms, slower than anything OISY uses.
+setting. Svelte's own default is 400 ms, slower than anything OISY uses. The
+module also re-exports the parameter types (`FadeParams`, `SlideParams`,
+`TransitionConfig`, …), and a lint rule refuses `svelte/transition` everywhere
+else (`transition.constants.ts` excepted, since the module is built on it).
+The restriction uses `@typescript-eslint/no-restricted-imports` separately from
+the shared core rule, preserving its deprecated-package and `/dist/` import bans.
 
 | Kind of motion                        | Timing                              | Constant (`transition.constants.ts`) |
 | ------------------------------------- | ----------------------------------- | ------------------------------------ |
@@ -349,8 +366,18 @@ setting. Svelte's own default is 400 ms, slower than anything OISY uses.
 - **CSS animations:** under reduced motion `animate-pulse` and `animate-ping`
   hold still. A decorative illustration with its own keyframes adds
   `decorative-motion` to its root, which stops every animation inside it.
-  Progress indicators (`Spinner`, `AnimatedIconLoader`) keep turning: they
-  are often the only sign that work is happening.
+  Progress indicators (`Spinner`, plus the `LoaderSpinner` and `AnimatedIconLoader`
+  wrappers) keep their trace moving under reduced motion: they are essential
+  progress cues, not decorative motion. The pre-hydration loader in `app.html`
+  follows the same rule, retaining its 30-second animation cap. Keep the owning
+  controls' loading states, translated labels and accessibility semantics intact.
+- **Progress steps (`ProgressSteps`):** a step's old marker leaves at once and
+  the new one comes in. A finished or failed badge springs in over 440 ms on a
+  spring sampled into CSS `linear()`, with an overshooting `cubic-bezier`
+  fallback. The active label grows from 16 to 18 px by `scale`, never by
+  `font-size`, and keeps one font weight, so nothing reflows. Its glint is a
+  copy of the text laid on top. Under reduced motion only the colours change
+  and the arc keeps turning.
 
 For a page backdrop use `backdrop` from the same module: it animates the dim and blur
 radius without an opacity animation that hides the blur in Chrome. Under reduced motion

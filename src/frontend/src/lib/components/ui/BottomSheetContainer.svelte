@@ -2,24 +2,44 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { cubicIn, cubicOut } from 'svelte/easing';
+	import { overlayFocus } from '$lib/utils/overlay.utils';
 	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		transition?: boolean;
+		onClose?: () => void;
+		ariaLabel?: string;
+		ariaLabelledby?: string;
 		header?: Snippet;
 		footer?: Snippet;
 		children: Snippet;
 	}
 
-	let { transition = false, header, footer, children }: Props = $props();
+	let {
+		transition = false,
+		onClose,
+		ariaLabel,
+		ariaLabelledby,
+		header,
+		footer,
+		children
+	}: Props = $props();
 
 	let transitionFn = $derived(transition ? slide : () => ({}));
+
+	const manageFocus = (node: HTMLElement) =>
+		onClose ? overlayFocus(node, { onClose }) : undefined;
 </script>
 
 <div
 	class="bottom-sheet"
+	aria-label={ariaLabel}
+	aria-labelledby={ariaLabelledby}
+	aria-modal={onClose ? true : undefined}
 	data-tid="bottom-sheet"
 	role="dialog"
+	tabindex="-1"
+	use:manageFocus
 	in:transitionFn|global={{ axis: 'y', duration: 250, easing: cubicOut }}
 	out:transitionFn|global={{ axis: 'y', duration: 200, easing: cubicIn }}
 >
@@ -49,6 +69,7 @@
 
 			&:nth-child(2) {
 				overflow-y: auto;
+				overscroll-behavior: contain;
 				flex-direction: inherit;
 				padding-top: 0;
 			}
@@ -69,6 +90,7 @@
 		max-height: 90vh;
 		max-height: 90dvh;
 		overflow-y: auto;
+		overscroll-behavior: contain;
 
 		background: var(--card-background);
 		box-shadow: var(--bottom-sheet-box-shadow);

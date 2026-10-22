@@ -36,7 +36,7 @@ import { consoleError, consoleWarn } from '$lib/utils/console.utils';
 import { emit } from '$lib/utils/events.utils';
 import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 import { replaceHistory } from '$lib/utils/route.utils';
-import { get as getStorage } from '$lib/utils/storage.utils';
+import { delByPrefix, get as getStorage } from '$lib/utils/storage.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import { clearIdbSolTransactionDetails } from '$sol/api/idb-sol-transaction-details.api';
 import { nonNullish } from '@dfinity/utils';
@@ -230,6 +230,10 @@ const clearIdbStoreList = [
 	clearIdbBalances
 ];
 
+// The permissions the user grants to relying parties in the signer (ICRC-25) are persisted by @dfinity/oisy-wallet-signer in the local storage as "oisy_signer_<origin>_<principal>".
+// The library does not expose a function to clear them, so we rely on its internal key prefix.
+const SIGNER_PERMISSIONS_KEY_PREFIX = 'oisy_signer_';
+
 // eslint-disable-next-line require-await
 const clearSessionStorage = async () => {
 	if (browser) {
@@ -277,6 +281,9 @@ const logout = async ({
 		consoleWarn('Error clearing session storage on logout', err);
 	}
 
+	// Signing out ends the relationships with the relying parties, so they have to request the permissions again on the next sign-in.
+	delByPrefix({ prefix: SIGNER_PERMISSIONS_KEY_PREFIX });
+
 	await authStore.signOut();
 
 	// No need to append the message if we are resetting the url.
@@ -292,7 +299,7 @@ const logout = async ({
 
 	// Auth: Delegation and identity are cleared from indexedDB by agent-js so, we do not need to clear these
 
-	// Preferences: We do not clear local storage as well. It contains anonymous information such as the selected theme.
+	// Preferences: Apart from the signer permissions, we do not clear local storage as well. It contains anonymous information such as the selected theme.
 	// Information the user wants to preserve across sign-in. e.g. if I select the light theme, logout and sign-in again, I am happy if the dapp still uses the light theme.
 
 	// We reload the page to make sure all the states are cleared
