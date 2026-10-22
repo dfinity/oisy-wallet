@@ -4276,6 +4276,7 @@ describe('sol-instruction-summary.utils', () => {
 						kind: 'receive',
 						amount: 5_000n,
 						tokenAddress: WSOL_TOKEN.address,
+						decimals: WSOL_TOKEN.decimals,
 						counterparty: mockSolAddress3,
 						own: false
 					});

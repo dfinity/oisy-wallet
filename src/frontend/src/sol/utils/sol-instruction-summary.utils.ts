@@ -826,7 +826,8 @@ const toEffect = ({
 
 		// Paid by somebody else into a wrapped SOL account of the user's, the lamports become wrapped
 		// SOL there rather than SOL in the wallet, which only the unwrap or the close that pays them
-		// on reaches. The account as of the transfer, or the one opened there next.
+		// on reaches. The account as of the transfer, or the one opened there next. The amount is
+		// lamports, which a native mint counts with the same precision on every network.
 		const wrappedForUser =
 			!outgoing &&
 			nonNullish(destination) &&
@@ -840,7 +841,7 @@ const toEffect = ({
 			...(nonNullish(amount({ info, key: 'lamports' })) && {
 				amount: amount({ info, key: 'lamports' })
 			}),
-			...(wrappedForUser && { tokenAddress: WSOL_TOKEN.address }),
+			...(wrappedForUser && { tokenAddress: WSOL_TOKEN.address, decimals: WSOL_DECIMALS }),
 			...(nonNullish(counterparty) && {
 				counterparty,
 				own: isOwned({ account: counterparty, arriving: outgoing })

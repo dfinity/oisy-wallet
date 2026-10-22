@@ -3,7 +3,7 @@ import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolInstructionsList from '$sol/components/transactions/SolInstructionsList.svelte';
-import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import { SYSTEM_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 import { SolanaNetworks } from '$sol/types/network';
@@ -172,6 +172,34 @@ describe('SolInstructionsList', () => {
 
 		const { getByTestId } = render(SolInstructionsList, {
 			props: { instructions: [unwrap], token: SOLANA_DEVNET_TOKEN, userAddress: mockSolAddress }
+		});
+
+		expect(getByTestId('sol-instructions-list')).toHaveTextContent('0.005');
+	});
+
+	// SOL somebody else pays into a wrapped SOL account of the user's is lamports as well, so it reads
+	// in the same precision wherever wrapped SOL is not listed.
+	it('should state SOL paid into a wrapped SOL account in the precision of SOL where wrapped SOL is not listed', () => {
+		const [receive] = mapSolInstructionSummaries({
+			instructions: [
+				{
+					program: 'system',
+					programId: SYSTEM_PROGRAM_ADDRESS,
+					parsed: {
+						type: 'transfer',
+						info: { source: mockSolAddress2, destination: mockAtaAddress3, lamports: 5_000_000 }
+					}
+				}
+			],
+			ownedAddresses: [mockSolAddress, mockAtaAddress3],
+			userAddress: mockSolAddress,
+			addressToToken: { [mockAtaAddress3]: WSOL_TOKEN.address }
+		});
+
+		expect(receive).toHaveProperty('tokenAddress', WSOL_TOKEN.address);
+
+		const { getByTestId } = render(SolInstructionsList, {
+			props: { instructions: [receive], token: SOLANA_DEVNET_TOKEN, userAddress: mockSolAddress }
 		});
 
 		expect(getByTestId('sol-instructions-list')).toHaveTextContent('0.005');
