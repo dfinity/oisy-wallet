@@ -34,6 +34,8 @@ import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { Interface } from 'ethers/abi';
+import { SigningKey } from 'ethers/crypto';
+import { Transaction } from 'ethers/transaction';
 import { get } from 'svelte/store';
 
 vi.mock('$lib/api/signer.api', () => ({
@@ -294,6 +296,83 @@ describe('eth wallet-connect.services', () => {
 
 			expect(success).toBeTruthy();
 			expect(vi.mocked(executeSend).mock.calls[0][0]).toMatchObject({ gas: estimatedGas });
+		});
+
+		describe('a broadcast the node refuses', () => {
+			const transaction = Transaction.from({
+				type: 2,
+				chainId: 42161n,
+				nonce: 10,
+				maxPriorityFeePerGas: ZERO,
+				maxFeePerGas: 20_000_000n,
+				gasLimit: 21_000n,
+				to: SPENDER,
+				value: ZERO,
+				data: '0xa9059cbb'
+			});
+
+			transaction.signature = new SigningKey(
+				'0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+			).sign(transaction.unsignedHash);
+
+			const signedTransaction = transaction.serialized;
+
+			// As ethers hands it over: the node's answer under `error`, and the request, the signed
+			// transaction inside, under `payload` and in the message.
+			const err = Object.assign(
+				new Error(`could not coalesce error (… "params": [ "${signedTransaction}" ] …)`),
+				{
+					code: 'UNKNOWN_ERROR',
+					error: {
+						code: -32000,
+						message: 'intrinsic gas too low: gas 21000, minimum needed 29604'
+					},
+					payload: {
+						id: 9,
+						jsonrpc: '2.0',
+						method: 'eth_sendRawTransaction',
+						params: [signedTransaction]
+					}
+				}
+			);
+
+			beforeEach(() => {
+				vi.mocked(executeSend).mockRejectedValue(err);
+			});
+
+			it('shows the node message, the hash and the unsigned transaction, never the signed one', async () => {
+				const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+				const spyToastsErrorNoTrace = vi.spyOn(toastsStore, 'toastsErrorNoTrace');
+
+				const result = await send(buildParams({ data: '0xa9059cbb' }));
+
+				expect(result).toStrictEqual({ success: false, err });
+
+				expect(spyToastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
+					msg: {
+						text: [
+							`${get(i18n).wallet_connect.error.unexpected_processing_request} / intrinsic gas too low: gas 21000, minimum needed 29604`,
+							`Transaction hash: ${transaction.hash}`,
+							`Unsigned transaction: ${transaction.unsignedSerialized}`
+						].join('<br>'),
+						renderAsHtml: true
+					},
+					err
+				});
+
+				expect(spyToastsError).not.toHaveBeenCalled();
+			});
+
+			it('rejects the request of the dApp', async () => {
+				await send(buildParams({ data: '0xa9059cbb' }));
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: 'mock-topic',
+					id: 1,
+					error: UNEXPECTED_ERROR
+				});
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			});
 		});
 
 		describe('a token call that sends native value along with it', () => {
