@@ -64,12 +64,16 @@ vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 
 describe('backend.canister', () => {
 	const createBackendCanister = ({
-		serviceOverride
-	}: Pick<CreateCanisterOptions<BackendService>, 'serviceOverride'>): Promise<BackendCanister> =>
+		serviceOverride,
+		certifiedServiceOverride = serviceOverride
+	}: Pick<
+		CreateCanisterOptions<BackendService>,
+		'serviceOverride' | 'certifiedServiceOverride'
+	>): Promise<BackendCanister> =>
 		BackendCanister.create({
 			canisterId: Principal.fromText('d3nvo-aaaaa-aaaar-qagzq-cai'),
 			identity: mockIdentity,
-			certifiedServiceOverride: serviceOverride,
+			certifiedServiceOverride,
 			serviceOverride
 		});
 	const service = mock<ActorSubclass<BackendService>>();
@@ -1317,6 +1321,24 @@ describe('backend.canister', () => {
 			expect(res).toEqual(mockContact);
 		});
 
+		it('should read the contact through the certified service', async () => {
+			const [mockContact] = getMockContacts({ n: 1 });
+			const queryService = mock<ActorSubclass<BackendService>>();
+			const certifiedService = mock<ActorSubclass<BackendService>>();
+
+			certifiedService.get_contact.mockResolvedValue({ Ok: mockContact });
+
+			const { getContact } = await createBackendCanister({
+				serviceOverride: queryService,
+				certifiedServiceOverride: certifiedService
+			});
+
+			await expect(getContact(1n)).resolves.toEqual(mockContact);
+
+			expect(certifiedService.get_contact).toHaveBeenCalledExactlyOnceWith(1n);
+			expect(queryService.get_contact).not.toHaveBeenCalled();
+		});
+
 		it('should throw an error if get_contact throws', async () => {
 			service.get_contact.mockImplementation(async () => {
 				await Promise.resolve();
@@ -1348,6 +1370,24 @@ describe('backend.canister', () => {
 
 			expect(service.get_contacts).toHaveBeenCalledOnce();
 			expect(res).toEqual(mockContacts);
+		});
+
+		it('should read the contacts through the certified service', async () => {
+			const mockContacts = getMockContacts({ n: 4 });
+			const queryService = mock<ActorSubclass<BackendService>>();
+			const certifiedService = mock<ActorSubclass<BackendService>>();
+
+			certifiedService.get_contacts.mockResolvedValue({ Ok: mockContacts });
+
+			const { getContacts } = await createBackendCanister({
+				serviceOverride: queryService,
+				certifiedServiceOverride: certifiedService
+			});
+
+			await expect(getContacts()).resolves.toEqual(mockContacts);
+
+			expect(certifiedService.get_contacts).toHaveBeenCalledOnce();
+			expect(queryService.get_contacts).not.toHaveBeenCalled();
 		});
 
 		it('should throw an error if get_contact throws', async () => {

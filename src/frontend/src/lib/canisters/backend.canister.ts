@@ -466,8 +466,9 @@ export class BackendCanister extends Canister<BackendService> {
 		});
 	};
 
+	// Contact addresses can become send destinations, so contacts are always read certified.
 	getContact = async (id: bigint): Promise<Contact> => {
-		const { get_contact } = this.caller({ certified: false });
+		const { get_contact } = this.caller({ certified: true });
 		const response = await get_contact(id);
 
 		if ('Ok' in response) {
@@ -477,7 +478,7 @@ export class BackendCanister extends Canister<BackendService> {
 	};
 
 	getContacts = async (): Promise<Contact[]> => {
-		const { get_contacts } = this.caller({ certified: false });
+		const { get_contacts } = this.caller({ certified: true });
 		const response = await get_contacts();
 
 		if ('Ok' in response) {
