@@ -13,7 +13,10 @@ import type {
 	SolTransferParty
 } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { solRpcBatchedInstructions } from '$sol/utils/sol-instruction-summary.utils';
+import {
+	solRpcBatchMadeCalls,
+	solRpcOrderedBatchedInstructions
+} from '$sol/utils/sol-instruction-summary.utils';
 import {
 	asSolParsedRpcInstruction,
 	mapSolInstruction,
@@ -227,10 +230,16 @@ const mapSolInnerTransferLegs = async ({
 	from: number;
 }): Promise<{ legs: PlacedLeg[]; events: LifecycleEvent[] }> =>
 	// A token batch a program runs is returned as the instructions it carries, each of which is
-	// read like any other call the program makes.
+	// read like any other call the program makes, unless calls made inside it leave its steps in no
+	// order that can be trusted.
 	await instructions
-		.flatMap<SolanaSimulatedInnerInstruction>((instruction) =>
-			'parsed' in instruction ? solRpcBatchedInstructions(instruction) : [instruction]
+		.flatMap<SolanaSimulatedInnerInstruction>((instruction, position) =>
+			'parsed' in instruction
+				? solRpcOrderedBatchedInstructions({
+						instruction,
+						madeCalls: solRpcBatchMadeCalls({ inner: instructions, position })
+					})
+				: [instruction]
 		)
 		.reduce<Promise<{ legs: PlacedLeg[]; events: LifecycleEvent[] }>>(
 			async (acc, instruction) => {
@@ -293,9 +302,20 @@ export const mapSolSimulatedTransferLegs = async ({
 		async (acc, instruction, index) => {
 			const { legs, events } = await acc;
 
+			const { instructions: inner } =
+				innerInstructions.find(({ index: parentIndex }) => parentIndex === index) ?? {};
+
 			// A token batch states the instructions it carries, which run in that order, so each
 			// gives its leg and its event in turn. Any other instruction is the only one it carries.
-			const stated = solUnbatchedInstructions(instruction).reduce<{
+			// A batch of several steps that made calls of its own stays whole, as in the operation
+			// list: nothing says between which of its steps those calls ran.
+			const unbatched = solUnbatchedInstructions(instruction);
+			const carried =
+				unbatched.length > 1 && solRpcBatchMadeCalls({ inner: inner ?? [] })
+					? [instruction]
+					: unbatched;
+
+			const stated = carried.reduce<{
 				legs: PlacedLeg[];
 				events: LifecycleEvent[];
 			}>(
@@ -312,9 +332,6 @@ export const mapSolSimulatedTransferLegs = async ({
 				},
 				{ legs: [], events: [] }
 			);
-
-			const { instructions: inner } =
-				innerInstructions.find(({ index: parentIndex }) => parentIndex === index) ?? {};
 
 			const within = await mapSolInnerTransferLegs({
 				instructions: inner ?? [],

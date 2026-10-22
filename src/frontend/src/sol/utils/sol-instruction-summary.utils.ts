@@ -6,6 +6,7 @@ import { SOLANA_KNOWN_PROGRAM_ADDRESSES } from '$sol/constants/sol-known-program
 import {
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
+	TOKEN_2022_NATIVE_MINT_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
@@ -253,6 +254,59 @@ export const solRpcBatchedInstructions = <
 		: [instruction];
 };
 
+/**
+ * Whether the run returns calls made inside a token batch: every call of a top-level batch's
+ * instruction, or, for a batch a program runs, the calls right after it one level deeper. A depth
+ * the RPC leaves out counts as inside, the reading that trusts no order.
+ */
+export const solRpcBatchMadeCalls = ({
+	inner,
+	position
+}: {
+	inner: readonly unknown[];
+	// Where the batch sits among the calls, absent for a batch the message states.
+	position?: number;
+}): boolean => {
+	if (isNullish(position)) {
+		return inner.length > 0;
+	}
+
+	const next = inner[position + 1];
+
+	if (isNullish(next)) {
+		return false;
+	}
+
+	const height = stackHeightOf(inner[position]);
+	const nextHeight = stackHeightOf(next);
+
+	return isNullish(height) || isNullish(nextHeight) || nextHeight > height;
+};
+
+/**
+ * A token batch as the instructions it carries, in the order they ran with the calls the run
+ * returns for it. The RPC returns every call made inside a batch after all its steps, with nothing
+ * saying which step made it, and a step can make calls in the middle of the batch, such as a
+ * Token-2022 transfer running its mint's hook. A batch of one step made them after that step; one
+ * of more stays whole, since no order between its steps and those calls can be trusted.
+ */
+export const solRpcOrderedBatchedInstructions = <
+	T extends { program?: string; parsed: { type: string; info?: object } }
+>({
+	instruction,
+	madeCalls
+}: {
+	instruction: T;
+	madeCalls: boolean;
+}): T[] => {
+	const carried = solRpcBatchedInstructions(instruction);
+
+	return madeCalls && carried.length > 1 ? [instruction] : carried;
+};
+
+const isTokenBatch = ({ program, parsed: { type } }: SolParsedRpcInstruction): boolean =>
+	nonNullish(program) && TOKEN_PROGRAMS.includes(program) && type === 'batch';
+
 // A token batch's instructions are marked as its own, so its lines can be gathered under it. The
 // mark names one batch among all the instructions of the transaction, and the program it runs in.
 interface SolBatchMark {
@@ -382,19 +436,23 @@ const callersOf = ({
 	});
 };
 
+interface FlattenedInstruction {
+	parentIndex: number;
+	topLevel: boolean;
+	instruction: SolParsedRpcInstruction;
+	madeBy?: SolAddress;
+	batch?: SolBatchMark;
+	// A token batch left whole, whose steps nobody read in order.
+	wholeBatch?: boolean;
+}
+
 const flatten = ({
 	instructions,
 	innerInstructions
 }: {
 	instructions: readonly unknown[];
 	innerInstructions: readonly SolInstructionGroup[];
-}): {
-	parentIndex: number;
-	topLevel: boolean;
-	instruction: SolParsedRpcInstruction;
-	madeBy?: SolAddress;
-	batch?: SolBatchMark;
-}[] =>
+}): FlattenedInstruction[] =>
 	instructions.flatMap((instruction, parentIndex) => {
 		const inner = innerInstructions.find(({ index }) => index === parentIndex)?.instructions ?? [];
 
@@ -407,38 +465,48 @@ const flatten = ({
 		// inner one.
 		return (
 			[
-				{ instruction, topLevel: true, madeBy: undefined },
+				{
+					instruction,
+					topLevel: true,
+					madeBy: undefined,
+					madeCalls: solRpcBatchMadeCalls({ inner })
+				},
 				...inner.map((nested, index) => ({
 					instruction: nested,
 					topLevel: false,
-					madeBy: callers[index]
+					madeBy: callers[index],
+					madeCalls: solRpcBatchMadeCalls({ inner, position: index })
 				}))
 			]
 				.filter(({ instruction: candidate }) => isParsed(candidate))
 				// A token batch runs the instructions it carries one after the other, so each takes the
 				// batch's place in turn, marked as the batch's, and made by whatever made the batch. One
-				// whose contents cannot be read stays whole, and describes nothing.
-				.flatMap(({ instruction: candidate, topLevel, madeBy }, position) => {
-					const parsed = candidate as SolParsedRpcInstruction;
-					const carried = solRpcBatchedInstructions(parsed);
+				// whose contents cannot be read, or whose steps cannot be put in order with the calls
+				// made inside it, stays whole, and describes nothing.
+				.flatMap<FlattenedInstruction>(
+					({ instruction: candidate, topLevel, madeBy, madeCalls }, position) => {
+						const parsed = candidate as SolParsedRpcInstruction;
+						const carried = solRpcOrderedBatchedInstructions({ instruction: parsed, madeCalls });
 
-					return carried.length === 1 && carried[0] === parsed
-						? [
-								{
+						return carried.length === 1 && carried[0] === parsed
+							? [
+									{
+										parentIndex,
+										topLevel,
+										instruction: parsed,
+										...(nonNullish(madeBy) && { madeBy }),
+										...(isTokenBatch(parsed) && { wholeBatch: true })
+									}
+								]
+							: carried.map((entry) => ({
 									parentIndex,
 									topLevel,
-									instruction: parsed,
-									...(nonNullish(madeBy) && { madeBy })
-								}
-							]
-						: carried.map((entry) => ({
-								parentIndex,
-								topLevel,
-								instruction: entry,
-								...(nonNullish(madeBy) && { madeBy }),
-								batch: { id: `${parentIndex}:${position}`, program: parsed.programId }
-							}));
-				})
+									instruction: entry,
+									...(nonNullish(madeBy) && { madeBy }),
+									batch: { id: `${parentIndex}:${position}`, program: parsed.programId }
+								}));
+					}
+				)
 		);
 	});
 
@@ -821,9 +889,17 @@ const toEffect = ({
 				return undefined;
 			}
 
-			// The amount is lamports, which the native mint counts with the same precision on every
-			// network, whether or not the wallet lists wrapped SOL there.
-			const unwrapping = { ...effect, decimals: WSOL_DECIMALS };
+			// The source holds the native mint of the program that runs the unwrap, or the program
+			// refuses it, so that is the mint whether or not a run read the account. The amount is
+			// lamports, which a native mint counts with the same precision on every network.
+			const unwrapping = {
+				...effect,
+				tokenAddress:
+					programId === TOKEN_2022_PROGRAM_ADDRESS
+						? TOKEN_2022_NATIVE_MINT_ADDRESS
+						: WSOL_TOKEN.address,
+				decimals: WSOL_DECIMALS
+			};
 
 			// Paid to the wallet, what leaves the account arrives there as SOL itself, whoever held
 			// it, and what the wallet holds has to count it.
@@ -1806,10 +1882,13 @@ const groupUnread = ({
 		.reduce<Effect[][]>((runs, effect) => {
 			const run = runs[runs.length - 1];
 
+			// The line saying nobody read an instruction stands on its own, beside whatever the
+			// instruction's calls made, so it reads as the instruction's rather than as one of them.
 			const continues =
 				nonNullish(run) &&
 				unread.has(effect.parentIndex) &&
-				run[0].parentIndex === effect.parentIndex;
+				run[0].parentIndex === effect.parentIndex &&
+				effect.kind !== 'unknown';
 
 			return continues ? [...runs.slice(0, -1), [...run, effect]] : [...runs, [effect]];
 		}, [])
@@ -2157,11 +2236,17 @@ export const mapSolInstructionSummaries = ({
 	// order the run would take rather than as the recognised instructions with the gaps closed up.
 	const covered = new Set(described.map(({ parentIndex }) => parentIndex));
 
+	// A batch left whole is an instruction nobody read, whatever else the instruction made: the
+	// lines beside it cannot say what its steps did.
+	const wholeBatches = new Set(
+		flattened.filter(({ wholeBatch }) => wholeBatch ?? false).map(({ parentIndex }) => parentIndex)
+	);
+
 	const listed = includeUnrecognised
 		? [
 				...described,
 				...instructions.reduce<Effect[]>((acc, _, index) => {
-					if (covered.has(index)) {
+					if (covered.has(index) && !wholeBatches.has(index)) {
 						return acc;
 					}
 

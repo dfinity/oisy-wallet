@@ -1,5 +1,9 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
+import {
+	TOKEN_2022_NATIVE_MINT_ADDRESS,
+	TOKEN_2022_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolClosedAccount } from '$sol/types/sol-simulation';
 import {
@@ -3592,6 +3596,101 @@ describe('sol-instruction-summary.utils', () => {
 
 				expect(kinds(views)).toStrictEqual(['unknown']);
 			});
+
+			// The RPC returns the calls made inside a batch after all its steps, and a step can make
+			// them in the middle of it, such as a transfer running its mint's hook.
+			describe('with calls made inside it', () => {
+				const paidIn = {
+					program: 'system',
+					programId: '11111111111111111111111111111111',
+					parsed: {
+						type: 'transfer',
+						info: { source: mockSolAddress3, destination: mockSolAddress, lamports: 5_000 }
+					},
+					stackHeight: 3
+				};
+
+				const received = {
+					kind: 'receive',
+					amount: 5_000n,
+					counterparty: mockSolAddress3,
+					own: false
+				};
+
+				it('should keep a batch of several steps whole and list it as nobody read it', () => {
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							getBatchInstruction([
+								transferTo({ destination: mockSolAddress2, amount: 1n }),
+								transferTo({ destination: mockAtaAddress2, amount: 2n })
+							])
+						].map(asSolParsedRpcInstructionOrSelf),
+						innerInstructions: [{ index: 0, instructions: [paidIn] }],
+						ownedAddresses: [mockSolAddress, mockAtaAddress],
+						userAddress: mockSolAddress,
+						includeUnrecognised: true
+					});
+
+					expect(views).toStrictEqual([received, { kind: 'unknown', program: TOKEN }]);
+				});
+
+				it('should read a batch of one step with the calls made after it', () => {
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							getBatchInstruction([transferTo({ destination: mockSolAddress2, amount: 1n })])
+						].map(asSolParsedRpcInstructionOrSelf),
+						innerInstructions: [{ index: 0, instructions: [paidIn] }],
+						ownedAddresses: [mockSolAddress, mockAtaAddress],
+						userAddress: mockSolAddress,
+						includeUnrecognised: true
+					});
+
+					expect(views).toStrictEqual([
+						{
+							kind: 'batch',
+							program: TOKEN,
+							children: [send({ counterparty: mockSolAddress2, amount: 1n })]
+						},
+						received
+					]);
+				});
+
+				it('should keep a batch a program runs whole when a call one level deeper follows it', () => {
+					const steps = [
+						{
+							type: 'transferChecked',
+							info: {
+								source: mockAtaAddress,
+								destination: mockSolAddress2,
+								authority: mockSolAddress,
+								mint,
+								tokenAmount: { amount: '5', decimals: 6 }
+							}
+						},
+						{
+							type: 'transferChecked',
+							info: {
+								source: mockAtaAddress,
+								destination: mockAtaAddress2,
+								authority: mockSolAddress,
+								mint,
+								tokenAmount: { amount: '6', decimals: 6 }
+							}
+						}
+					];
+
+					const views = mapSolInstructionSummaries({
+						instructions: [unreadCall],
+						innerInstructions: [{ index: 0, instructions: [returnedBatch(steps), paidIn] }],
+						ownedAddresses: [mockSolAddress, mockAtaAddress],
+						userAddress: mockSolAddress,
+						includeUnrecognised: true
+					});
+
+					expect(kinds(views)).not.toContain('batch');
+					expect(views).toContainEqual({ kind: 'unknown', program: APP });
+				});
+			});
 		});
 
 		describe('an unwrap', () => {
@@ -3699,6 +3798,26 @@ describe('sol-instruction-summary.utils', () => {
 						unwrapsToWallet: true
 					}
 				]);
+			});
+
+			// Read from the message alone, nothing names the source's mint, and the program settles it:
+			// it refuses an unwrap out of any account but one of its native mint.
+			it('should name the native mint of the program that runs an unwrap nobody read the source of', () => {
+				const [token, token2022] = mapSolInstructionSummaries({
+					instructions: [
+						unwrap({ amount: '5000' }),
+						{
+							...unwrap({ amount: '5000' }),
+							program: 'spl-token-2022',
+							programId: TOKEN_2022_PROGRAM_ADDRESS
+						}
+					],
+					ownedAddresses: [mockSolAddress, wrapped],
+					userAddress: mockSolAddress
+				});
+
+				expect(token?.tokenAddress).toBe(WSOL_TOKEN.address);
+				expect(token2022?.tokenAddress).toBe(TOKEN_2022_NATIVE_MINT_ADDRESS);
 			});
 
 			it('should state everything the account wraps when it names no amount', () => {
