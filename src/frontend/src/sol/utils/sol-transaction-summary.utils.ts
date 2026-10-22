@@ -3,6 +3,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { absBigInt, maxBigInt } from '$lib/utils/bigint.utils';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { SPL_TOKEN_MAX_AMOUNT } from '$sol/constants/sol.constants';
 import type { OptionSolAddress } from '$sol/types/address';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type {
@@ -22,14 +23,30 @@ export const flattenInstructions = (
 	]);
 
 /**
+ * The lines an instruction made inside itself, a token batch it ran included: the batch's lines
+ * hang one level down under a heading of their own, and are still that instruction's doing.
+ */
+const routeLegs = (children: SolInstructionSummary[]): SolInstructionSummary[] =>
+	children.flatMap((child) => (child.kind === 'batch' ? (child.children ?? []) : [child]));
+
+/**
  * Whether the lines an instruction made inside itself make a swap: something leaves and something
  * else arrives. Lines that all leave, or all arrive, are what a deposit or a withdrawal looks like
- * too, and one opening an account trades nothing.
+ * too, and one opening an account trades nothing. A batch the message states is a batch heading of
+ * its own and never a route, whatever its lines do.
  */
-export const isSolSwapRoute = ({ kind, children = [] }: SolInstructionSummary): boolean =>
-	kind === 'route' &&
-	children.some(({ kind: line }) => line === 'send') &&
-	children.some(({ kind: line }) => line === 'receive');
+export const isSolSwapRoute = ({ kind, children = [] }: SolInstructionSummary): boolean => {
+	if (kind !== 'route') {
+		return false;
+	}
+
+	const legs = routeLegs(children);
+
+	return (
+		legs.some(({ kind: line }) => line === 'send') &&
+		legs.some(({ kind: line }) => line === 'receive')
+	);
+};
 
 /**
  * Whether the message closes an account of the user's and pays its balance to an address that is
@@ -360,8 +377,8 @@ export const solAppAccountCost = ({
 
 /**
  * What the lines say the transaction does to the SOL in the wallet itself: the SOL it sends and
- * receives, the SOL it wraps, the rent it pays to open accounts, and what closes pay back into it.
- * The fee is not a line and is left to the caller.
+ * receives, the SOL it wraps and unwraps into it, the rent it pays to open accounts, and what
+ * closes pay back into it. The fee is not a line and is left to the caller.
  *
  * Undefined when a line moves the wallet's SOL by an amount nobody read, opens an account nobody
  * read the funder of, or pays a close to a destination nobody read: the total is then unknown
@@ -375,13 +392,28 @@ export const solWalletLamportsStated = ({
 	userAddress: OptionSolAddress;
 }): bigint | undefined =>
 	flattenInstructions(instructions).reduce<bigint | undefined>(
-		(acc, { kind, amount, tokenAddress, rent, payer, returned, counterparty }) => {
+		(
+			acc,
+			{ kind, amount, tokenAddress, rent, payer, returned, counterparty, unwrapsToWallet, account }
+		) => {
 			if (isNullish(acc)) {
 				return acc;
 			}
 
+			// Wrapped SOL an unwrap pays into the wallet, out of the user's own account or somebody
+			// else's, arrives there as SOL itself.
+			if (unwrapsToWallet) {
+				return isNullish(amount) ? undefined : acc + amount;
+			}
+
 			// SOL itself, not a token: wrapped SOL moves between token accounts, not the wallet.
 			if ((kind === 'send' || kind === 'receive') && isNullish(tokenAddress)) {
+				// Paid into another account of the user's, it stays there, and reaches the wallet only
+				// with the close that pays it on, which states it.
+				if (kind === 'receive' && nonNullish(account) && account !== userAddress) {
+					return acc;
+				}
+
 				return isNullish(amount) ? undefined : kind === 'send' ? acc - amount : acc + amount;
 			}
 
@@ -421,15 +453,20 @@ export const solWalletLamportsStated = ({
 /**
  * The tokens the transaction actually trades, read from its legs.
  *
- * `undefined` in the set stands for native SOL. SOL makes the set only through a transfer or a
- * wrap: an SPL send that opens the recipient an account also moves SOL, but that SOL is rent, and
- * counting it would turn every such send into a swap.
+ * `undefined` in the set stands for native SOL. SOL makes the set only through a transfer, a wrap
+ * or an unwrap: an SPL send that opens the recipient an account also moves SOL, but that SOL is
+ * rent, and counting it would turn every such send into a swap.
  */
 const tradedTokens = (instructions: SolInstructionSummary[]): Set<SplTokenAddress | undefined> =>
 	flattenInstructions(instructions).reduce<Set<SplTokenAddress | undefined>>(
-		(acc, { kind, tokenAddress }) => {
+		(acc, { kind, tokenAddress, unwrapsToWallet }) => {
 			if (['send', 'receive'].includes(kind)) {
 				acc.add(tokenAddress);
+			}
+
+			// Wrapped SOL an unwrap pays into the wallet arrives there as SOL itself.
+			if (unwrapsToWallet) {
+				acc.add(undefined);
 			}
 
 			if (['wrap', 'unwrap'].includes(kind)) {
@@ -465,9 +502,16 @@ const routeTradedTokens = (
 			return acc;
 		}
 
-		children
+		routeLegs(children)
 			.filter((child) => ['send', 'receive'].includes(child.kind))
-			.forEach((child) => acc.add(child.tokenAddress));
+			.forEach(({ tokenAddress, unwrapsToWallet }) => {
+				acc.add(tokenAddress);
+
+				// A leg unwrapped into the wallet trades the SOL it arrives as.
+				if (unwrapsToWallet) {
+					acc.add(undefined);
+				}
+			});
 
 		return acc;
 	}, new Set());
@@ -491,7 +535,10 @@ const counterpartyOf = ({
 	flattenInstructions(instructions).find(
 		(view) =>
 			view.kind === kind &&
-			view.tokenAddress === tokenAddress &&
+			// Wrapped SOL unwrapped into the wallet arrives there as SOL itself, so its line is the one
+			// a receive of SOL names the sender from.
+			(view.tokenAddress === tokenAddress ||
+				(kind === 'receive' && isNullish(tokenAddress) && (view.unwrapsToWallet ?? false))) &&
 			nonNullish(view.counterparty) &&
 			view.own !== true
 	)?.counterparty;
@@ -672,7 +719,9 @@ export const formatSolInstructionSummary = ({
 		program,
 		via,
 		viaName,
-		children
+		children,
+		unwrapsAll,
+		withdrawsExcess
 	},
 	i18n,
 	symbolOf,
@@ -682,14 +731,17 @@ export const formatSolInstructionSummary = ({
 	instruction: SolInstructionSummary;
 	i18n: I18n;
 	symbolOf: (tokenAddress: SplTokenAddress | undefined) => string;
-	decimalsOf: (tokenAddress: SplTokenAddress | undefined) => number;
+	// Absent when nothing gives the mint's decimals, which a token with none must not be read as.
+	decimalsOf: (tokenAddress: SplTokenAddress | undefined) => number | undefined;
 	userAddress: OptionSolAddress;
 }): { text: string; detail?: string; trailing?: string } => {
+	const scale = decimals ?? decimalsOf(tokenAddress);
+
 	const amount = (raw: bigint): string =>
 		formatToken({
 			value: raw < ZERO ? -raw : raw,
-			unitName: decimals ?? decimalsOf(tokenAddress),
-			displayDecimals: decimals ?? decimalsOf(tokenAddress)
+			unitName: scale ?? 0,
+			displayDecimals: scale ?? 0
 		});
 
 	const ownDetail = own === true ? i18n.transaction.text.instruction_own_account : undefined;
@@ -719,6 +771,43 @@ export const formatSolInstructionSummary = ({
 				$amount: amount(value),
 				$symbol: symbolOf(tokenAddress)
 			}),
+			...(nonNullish(ownDetail) && { detail: ownDetail }),
+			...(nonNullish(viaTrailing) && { trailing: viaTrailing })
+		};
+	}
+
+	// An unwrap of everything its account wraps, where nobody read how much that is: the line still
+	// says what leaves the account and for whom. It leaves the account open, unlike the close that
+	// unwraps.
+	if (
+		(kind === 'send' || kind === 'receive') &&
+		isNullish(value) &&
+		(unwrapsAll ?? false) &&
+		nonNullish(counterparty)
+	) {
+		return {
+			text: replacePlaceholders(
+				kind === 'send'
+					? i18n.transaction.text.instruction_unwrap_all_to
+					: i18n.transaction.text.instruction_unwrap_all_from,
+				{ $symbol: symbolOf(tokenAddress) }
+			),
+			...(nonNullish(ownDetail) && { detail: ownDetail }),
+			...(nonNullish(viaTrailing) && { trailing: viaTrailing })
+		};
+	}
+
+	// The excess lamports a token account pays the wallet, which no instruction states the amount of:
+	// the line still says that SOL arrives, and from which account, rather than that a program was
+	// called.
+	if (
+		kind === 'receive' &&
+		isNullish(value) &&
+		(withdrawsExcess ?? false) &&
+		nonNullish(counterparty)
+	) {
+		return {
+			text: i18n.transaction.text.instruction_receive_excess_from,
 			...(nonNullish(ownDetail) && { detail: ownDetail }),
 			...(nonNullish(viaTrailing) && { trailing: viaTrailing })
 		};
@@ -842,9 +931,30 @@ export const formatSolInstructionSummary = ({
 		};
 	}
 
+	// What the spender may spend, which is the whole of what an approval grants: a one-unit approval
+	// and an unlimited one name the same spender. The largest amount a token account can hold is how
+	// applications ask for an unlimited one, whatever the token's decimals. Without a mint the line
+	// cannot say which token, and without the decimals it cannot say how much, so it names the
+	// spender alone: an unchecked approval states no decimals, and a transaction that only approves
+	// moves no balance that would give them.
 	if (kind === 'approve' && nonNullish(counterparty)) {
+		if (nonNullish(tokenAddress) && value === SPL_TOKEN_MAX_AMOUNT) {
+			return {
+				text: replacePlaceholders(i18n.transaction.text.instruction_approve_unlimited, {
+					$symbol: symbolOf(tokenAddress)
+				})
+			};
+		}
+
+		if (isNullish(value) || isNullish(tokenAddress) || isNullish(scale)) {
+			return { text: i18n.transaction.text.instruction_approve };
+		}
+
 		return {
-			text: i18n.transaction.text.instruction_approve
+			text: replacePlaceholders(i18n.transaction.text.instruction_approve_amount, {
+				$amount: amount(value),
+				$symbol: symbolOf(tokenAddress)
+			})
 		};
 	}
 
@@ -889,6 +999,11 @@ export const formatSolInstructionSummary = ({
 					? i18n.transaction.text.instruction_unknown_via
 					: i18n.transaction.text.instruction_unknown
 		};
+	}
+
+	// The heading over the lines of a token batch, with the program it runs in beside it.
+	if (kind === 'batch') {
+		return { text: i18n.transaction.text.instruction_batch_via };
 	}
 
 	// Says only that the wallet could not read it. The program beside it is the whole of what is

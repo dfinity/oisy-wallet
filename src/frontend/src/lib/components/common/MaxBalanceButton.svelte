@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { onDestroy } from 'svelte';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { MAX_BUTTON } from '$lib/constants/test-ids.constants';
@@ -22,6 +23,9 @@
 		// Optional hard cap (base units). When set, "Max" never exceeds it even if the
 		// affordable balance is higher (e.g. full debt for repay).
 		maxAmount?: bigint;
+		// Called when the user presses "Max", before it is applied: re-applying it for a new fee
+		// does not call it.
+		onMax?: () => void;
 	}
 
 	let {
@@ -31,7 +35,8 @@
 		balance,
 		token,
 		fee,
-		maxAmount
+		maxAmount,
+		onMax
 	}: Props = $props();
 
 	let isZeroBalance = $derived(!$isIcMintingAccount && (isNullish(balance) || balance === ZERO));
@@ -78,6 +83,11 @@
 		}
 	};
 
+	// One pending re-application at a time, restarted by each change and cancelled with the button:
+	// a destroyed button's would otherwise still write the amount once the form holding it was
+	// rebuilt, before the new one even knows its fee.
+	let reapplyTimer: ReturnType<typeof setTimeout> | undefined;
+
 	/**
 	 * Reevaluate max amount if the user has used the "Max" button and the fee is changing.
 	 */
@@ -85,7 +95,10 @@
 		if (!amountSetToMax) {
 			return;
 		}
-		debounce(() => {
+
+		clearTimeout(reapplyTimer);
+
+		reapplyTimer = setTimeout(() => {
 			// Rechecked because the flag can be cleared during the delay: typing into the input
 			// clears it, and this callback would otherwise overwrite what the user just typed —
 			// and re-arm the flag, so the next fee change would do it again.
@@ -94,8 +107,10 @@
 			}
 
 			setMax();
-		}, 500)();
+		}, 500);
 	};
+
+	onDestroy(() => clearTimeout(reapplyTimer));
 
 	$effect(() => {
 		// `maxAmount` is tracked alongside the fee because it arrives asynchronously and can
@@ -115,7 +130,10 @@
 	class:text-brand-primary-alt={!isZeroBalance && !error}
 	class:text-error-primary={isZeroBalance || error}
 	data-tid={MAX_BUTTON}
-	onclick={preventDefault(setMax)}
+	onclick={preventDefault(() => {
+		onMax?.();
+		setMax();
+	})}
 >
 	{$i18n.core.text.max}:
 	{nonNullish(cappedMaxAmount) && nonNullish(token)

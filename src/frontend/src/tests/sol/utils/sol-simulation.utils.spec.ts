@@ -1,11 +1,13 @@
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	SPL_TOKEN_MAX_AMOUNT,
 	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaParsedAccountInfo, SolanaSimulatedInnerInstructions } from '$sol/types/sol-rpc';
+import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import {
 	findSolClosedAppAccounts,
@@ -15,7 +17,8 @@ import {
 	mapSolSimulationPreview,
 	selectSolSimulationAddresses,
 	solClosedAccountsReachWallet,
-	solOpenAppAccountsLostLamports
+	solOpenAppAccountsLostLamports,
+	solSimulationReassignsWallet
 } from '$sol/utils/sol-simulation.utils';
 import {
 	mockAtaAddress,
@@ -45,12 +48,14 @@ describe('sol-simulation.utils', () => {
 		amount,
 		owner,
 		delegate,
+		delegatedAmount,
 		closeAuthority,
 		program = TOKEN_PROGRAM_ADDRESS
 	}: {
 		amount: bigint;
 		owner: SolAddress;
 		delegate?: SolAddress;
+		delegatedAmount?: bigint;
 		closeAuthority?: SolAddress;
 		program?: SolAddress;
 	}): NonNullable<SolanaParsedAccountInfo> =>
@@ -68,6 +73,9 @@ describe('sol-simulation.utils', () => {
 						mint: mockSplAddress,
 						owner,
 						...(delegate !== undefined && { delegate }),
+						...(delegatedAmount !== undefined && {
+							delegatedAmount: { amount: `${delegatedAmount}`, decimals: 6 }
+						}),
 						...(closeAuthority !== undefined && { closeAuthority }),
 						tokenAmount: { amount: `${amount}`, decimals: 6 }
 					}
@@ -205,6 +213,118 @@ describe('sol-simulation.utils', () => {
 			]);
 		});
 
+		it('should state what a new delegate may spend', () => {
+			const preview = mapSolSimulationPreview({
+				addresses: [mockAtaAddress],
+				preAccounts: [tokenAccount({ amount: 5_000_000n, owner: mockSolAddress })],
+				postAccounts: [
+					tokenAccount({
+						amount: 5_000_000n,
+						owner: mockSolAddress,
+						delegate: mockSolAddress2,
+						delegatedAmount: 1_000_000n
+					})
+				],
+				userAddress: mockSolAddress
+			});
+
+			expect(preview.controlChanges).toEqual([
+				{
+					account: mockAtaAddress,
+					field: 'delegate',
+					to: mockSolAddress2,
+					allowance: { tokenAddress: mockSplAddress, decimals: 6, amount: 1_000_000n }
+				}
+			]);
+		});
+
+		// The delegate stays the same, so a diff of the delegate alone reads this as no change at all.
+		it('should report a raised allowance of the same delegate', () => {
+			const preview = mapSolSimulationPreview({
+				addresses: [mockAtaAddress],
+				preAccounts: [
+					tokenAccount({
+						amount: 5_000_000n,
+						owner: mockSolAddress,
+						delegate: mockSolAddress2,
+						delegatedAmount: 1n
+					})
+				],
+				postAccounts: [
+					tokenAccount({
+						amount: 5_000_000n,
+						owner: mockSolAddress,
+						delegate: mockSolAddress2,
+						delegatedAmount: SPL_TOKEN_MAX_AMOUNT
+					})
+				],
+				userAddress: mockSolAddress
+			});
+
+			expect(preview).toEqual({
+				tokenDeltas: [],
+				controlChanges: [
+					{
+						account: mockAtaAddress,
+						field: 'allowance',
+						to: mockSolAddress2,
+						allowance: { tokenAddress: mockSplAddress, decimals: 6, amount: SPL_TOKEN_MAX_AMOUNT }
+					}
+				]
+			});
+			expect(isEmptySolSimulationPreview(preview)).toBeFalsy();
+		});
+
+		it('should report nothing when the delegate and its allowance stay the same', () => {
+			const account = tokenAccount({
+				amount: 5_000_000n,
+				owner: mockSolAddress,
+				delegate: mockSolAddress2,
+				delegatedAmount: 1_000_000n
+			});
+
+			const preview = mapSolSimulationPreview({
+				addresses: [mockAtaAddress],
+				preAccounts: [account],
+				postAccounts: [account],
+				userAddress: mockSolAddress
+			});
+
+			expect(isEmptySolSimulationPreview(preview)).toBeTruthy();
+		});
+
+		it('should report a replaced delegate once, with what the new one may spend', () => {
+			const preview = mapSolSimulationPreview({
+				addresses: [mockAtaAddress],
+				preAccounts: [
+					tokenAccount({
+						amount: 5_000_000n,
+						owner: mockSolAddress,
+						delegate: mockSolAddress2,
+						delegatedAmount: 1n
+					})
+				],
+				postAccounts: [
+					tokenAccount({
+						amount: 5_000_000n,
+						owner: mockSolAddress,
+						delegate: mockSolAddress3,
+						delegatedAmount: 2n
+					})
+				],
+				userAddress: mockSolAddress
+			});
+
+			expect(preview.controlChanges).toEqual([
+				{
+					account: mockAtaAddress,
+					field: 'delegate',
+					to: mockSolAddress3,
+					allowance: { tokenAddress: mockSplAddress, decimals: 6, amount: 2n }
+				}
+			]);
+		});
+
 		it('should report a removed delegate without a new value', () => {
 			const preview = mapSolSimulationPreview({
 				addresses: [mockAtaAddress],
@@ -279,6 +399,77 @@ describe('sol-simulation.utils', () => {
 
 			expect(preview).not.toHaveProperty('solDelta');
 			expect(isEmptySolSimulationPreview(preview)).toBeTruthy();
+		});
+	});
+
+	describe('solSimulationReassignsWallet', () => {
+		const preview = (
+			controlChanges: SolSimulationPreview['controlChanges']
+		): SolSimulationPreview => ({ tokenDeltas: [], controlChanges });
+
+		it('should be true when the run hands the wallet to another program', () => {
+			expect(
+				solSimulationReassignsWallet({
+					preview: preview([
+						{ account: mockSolAddress, field: 'program', to: STAKE_PROGRAM_ADDRESS }
+					]),
+					userAddress: mockSolAddress
+				})
+			).toBeTruthy();
+		});
+
+		// Only the wallet: a change to another of the user's accounts is shown by the preview, but is
+		// not this question.
+		it('should be false when another account of the user changes program', () => {
+			expect(
+				solSimulationReassignsWallet({
+					preview: preview([{ account: mockAtaAddress, field: 'program', to: mockSolAddress2 }]),
+					userAddress: mockSolAddress
+				})
+			).toBeFalsy();
+		});
+
+		it('should be false for a control change other than the owning program', () => {
+			expect(
+				solSimulationReassignsWallet({
+					preview: preview([{ account: mockSolAddress, field: 'owner', to: mockSolAddress2 }]),
+					userAddress: mockSolAddress
+				})
+			).toBeFalsy();
+		});
+
+		it('should be false without a preview', () => {
+			expect(
+				solSimulationReassignsWallet({ preview: undefined, userAddress: mockSolAddress })
+			).toBeFalsy();
+		});
+
+		it('should be false without a wallet', () => {
+			expect(
+				solSimulationReassignsWallet({
+					preview: preview([{ account: mockSolAddress, field: 'program', to: mockSolAddress2 }]),
+					userAddress: undefined
+				})
+			).toBeFalsy();
+		});
+
+		// End to end through the diff: a System-owned wallet the run leaves owned by another program.
+		it('should be true for the diff of a wallet assigned during the run', () => {
+			const diffed = mapSolSimulationPreview({
+				addresses: [mockSolAddress],
+				preAccounts: [systemAccount({ lamports: 1_000_000n })],
+				postAccounts: [
+					{
+						...systemAccount({ lamports: 995_000n }),
+						owner: mockSolAddress3
+					} as NonNullable<SolanaParsedAccountInfo>
+				],
+				userAddress: mockSolAddress
+			});
+
+			expect(
+				solSimulationReassignsWallet({ preview: diffed, userAddress: mockSolAddress })
+			).toBeTruthy();
 		});
 	});
 

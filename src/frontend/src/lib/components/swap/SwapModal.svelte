@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
+	import { getContext, onDestroy } from 'svelte';
 	import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';
@@ -78,6 +78,10 @@
 			selectTokenType = undefined;
 			showSelectProviderModal = false;
 		});
+
+	// The swap context outlives the modal, and a navigation closes it without `close`: what the swap
+	// held, "Max" among it, would otherwise carry over to the next one.
+	onDestroy(resetSwapStore);
 
 	let disablePointerEvents = $derived(
 		currentStep?.name === WizardStepsSwap.SWAPPING ||

@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatToken, formatCurrency } from '$lib/utils/format.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		amount: bigint;

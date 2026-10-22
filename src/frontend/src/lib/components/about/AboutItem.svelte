@@ -32,7 +32,7 @@
 	data-tid={testId}
 	onclick={onClick}
 >
-	<div class="flex items-center gap-2">
+	<div class="flex items-center gap-3">
 		{#if asMenuItem}
 			{@render icon?.()}
 		{/if}

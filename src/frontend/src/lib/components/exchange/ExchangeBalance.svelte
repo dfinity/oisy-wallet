@@ -17,7 +17,7 @@
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isIOS } from '$lib/utils/device.utils';
+	import { isDesktop, isIOS } from '$lib/utils/device.utils';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
@@ -64,17 +64,18 @@
 		})
 	);
 
+	// The toast points to the [P] shortcut, which only helps with a keyboard.
 	const togglePrivacyMode = (source: string) =>
 		setPrivacyMode({
 			enabled: !$isPrivacyMode,
-			withToast: false,
+			withToast: isDesktop(),
 			source
 		});
 </script>
 
 <span class="flex flex-col items-center gap-1">
 	<output
-		class="mt-7 inline-block touch-manipulation text-4xl font-bold break-all md:text-5xl"
+		class="mt-7 inline-block cursor-pointer touch-manipulation text-4xl font-bold break-all md:text-5xl"
 		ondblclick={() => togglePrivacyMode('Hero - Double click on the ExchangeBalance amount')}
 	>
 		{#if $loaded && nonNullish(balance)}

@@ -88,6 +88,20 @@ describe('TokenGroupCard', () => {
 	const getTokenCountBadge = (container: HTMLElement): HTMLElement | null =>
 		container.querySelector('[data-tid^="token-count"]');
 
+	it('announces expanded state on the keyboard-focusable group header', async () => {
+		const { container } = render(TokenGroupCard, { tokenGroup });
+		const header = container.querySelector('button');
+
+		assertNonNullish(header);
+
+		expect(header.tabIndex).toBe(0);
+		expect(header).toHaveAttribute('aria-expanded', 'false');
+
+		await fireEvent.click(header);
+
+		expect(header).toHaveAttribute('aria-expanded', 'true');
+	});
+
 	describe('header hover', () => {
 		const card = (container: HTMLElement): Element | null =>
 			container.querySelector(':scope > div');

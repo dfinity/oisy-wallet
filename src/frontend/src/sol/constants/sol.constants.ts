@@ -4,6 +4,8 @@ export const SYSTEM_PROGRAM_ADDRESS = '11111111111111111111111111111111';
 export const COMPUTE_BUDGET_PROGRAM_ADDRESS = 'ComputeBudget111111111111111111111111111111';
 export const TOKEN_PROGRAM_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 export const TOKEN_2022_PROGRAM_ADDRESS = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
+// The native mint of Token-2022, its counterpart of wrapped SOL: an account of it wraps lamports.
+export const TOKEN_2022_NATIVE_MINT_ADDRESS = '9pan9bMn5HatX4EJdBwg9VgCa7Uz5HL8N1m5D3NdXejP';
 export const ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS =
 	'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
 export const ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS = 'AddressLookupTab1e1111111111111111111111111';
@@ -29,6 +31,10 @@ export const ANCHOR_IDL_ACCOUNT_HEADER_LENGTH = 44;
 export const SOLANA_TRANSACTION_FEE_IN_LAMPORTS = 5_000n;
 
 export const MICROLAMPORTS_PER_LAMPORT = 1_000_000n;
+
+// The largest amount an SPL token account holds or approves (a `u64`). An approval of exactly this
+// much is how applications ask for an unlimited allowance.
+export const SPL_TOKEN_MAX_AMOUNT = (1n << 64n) - 1n;
 
 // When a transaction does not request a compute unit limit, the runtime budgets a fixed
 // amount per instruction, capped transaction-wide. The prioritisation fee is charged on the

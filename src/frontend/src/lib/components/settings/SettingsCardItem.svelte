@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import HelpToggle from '$lib/components/ui/HelpToggle.svelte';
 	import { nextElementId } from '$lib/utils/html.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		permanentInfo?: boolean;

@@ -911,7 +911,7 @@ describe('onesec-swap.services', () => {
 			vi.spyOn(
 				activeUserTransactionsServices,
 				'applyActiveUserTransactionPollUpdate'
-			).mockResolvedValue();
+			).mockResolvedValue(true);
 
 			await pollOneSecActiveUserTransactions({
 				identity: mockIdentity,
@@ -931,7 +931,7 @@ describe('onesec-swap.services', () => {
 			]);
 			const applySpy = vi
 				.spyOn(activeUserTransactionsServices, 'applyActiveUserTransactionPollUpdate')
-				.mockResolvedValue();
+				.mockResolvedValue(true);
 
 			await pollOneSecActiveUserTransactions({
 				identity: mockIdentity,
@@ -977,7 +977,7 @@ describe('onesec-swap.services', () => {
 			});
 			const applySpy = vi
 				.spyOn(activeUserTransactionsServices, 'applyActiveUserTransactionPollUpdate')
-				.mockResolvedValue();
+				.mockResolvedValue(true);
 
 			await pollOneSecActiveUserTransactions({
 				identity: mockIdentity,
@@ -1001,7 +1001,7 @@ describe('onesec-swap.services', () => {
 			});
 			const applySpy = vi
 				.spyOn(activeUserTransactionsServices, 'applyActiveUserTransactionPollUpdate')
-				.mockResolvedValue();
+				.mockResolvedValue(true);
 
 			await pollOneSecActiveUserTransactions({
 				identity: mockIdentity,
@@ -1088,7 +1088,7 @@ describe('onesec-swap.services', () => {
 					.mockResolvedValue();
 				const applySpy = vi
 					.spyOn(activeUserTransactionsServices, 'applyActiveUserTransactionPollUpdate')
-					.mockResolvedValue();
+					.mockResolvedValue(true);
 
 				await pollOneSecActiveUserTransactions({
 					identity: mockIdentity,
@@ -1199,7 +1199,7 @@ describe('onesec-swap.services', () => {
 				vi.spyOn(
 					activeUserTransactionsServices,
 					'applyActiveUserTransactionPollUpdate'
-				).mockResolvedValue();
+				).mockResolvedValue(true);
 
 				await pollOneSecActiveUserTransactions({
 					identity: mockIdentity,
@@ -1282,7 +1282,7 @@ describe('onesec-swap.services', () => {
 				vi.spyOn(
 					activeUserTransactionsServices,
 					'applyActiveUserTransactionPollUpdate'
-				).mockResolvedValue();
+				).mockResolvedValue(true);
 
 				await pollOneSecActiveUserTransactions({
 					identity: mockIdentity,
