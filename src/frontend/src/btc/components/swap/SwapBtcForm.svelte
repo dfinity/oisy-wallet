@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
 	import SwapBtcFees from '$btc/components/swap/SwapBtcFees.svelte';
 	import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
@@ -26,6 +25,7 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { parseToken, tryParseToken } from '$lib/utils/parse.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;

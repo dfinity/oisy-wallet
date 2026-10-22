@@ -25,6 +25,7 @@
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { consoleError } from '$lib/utils/console.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
+	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
 	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$sol/constants/steps.constants';
 	import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
@@ -39,6 +40,7 @@
 	import type { SolSimulationPreview, SolUnreadProgram } from '$sol/types/sol-simulation';
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
 	import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
+	import { solSimulationReassignsWallet } from '$sol/utils/sol-simulation.utils';
 	import { solClosesPayOthers } from '$sol/utils/sol-transaction-summary.utils';
 	import { findSplToken } from '$sol/utils/spl.utils';
 
@@ -117,6 +119,9 @@
 	let closesPayOthers = $derived(
 		solClosesPayOthers({ instructions: instructions ?? [], userAddress: address })
 	);
+	// The run hands the wallet itself to another program. `sign()` refuses it as it does an
+	// assignment the message states, so the review says so the same way.
+	let reassignsWallet = $derived(solSimulationReassignsWallet({ preview, userAddress: address }));
 
 	const updateData = async () => {
 		try {
@@ -253,10 +258,12 @@
 				nonNullish(instructions) &&
 				instructions.length > 0 &&
 				!instructions.some(({ kind }) => kind === 'unknown'),
+			simulationRan: simulatedInstructions ?? false,
 			closesPayOthers,
 			unreadProgramsAcknowledged: !callsUnreadPrograms || unreadProgramsAcknowledged,
 			rentExemptMinimum,
-			opensAccountBeyondRent: opensAccountBeyondRent ?? false
+			opensAccountBeyondRent: opensAccountBeyondRent ?? false,
+			reassignsWallet
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
@@ -282,17 +289,19 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<SolWalletConnectSignReview
-				ambiguous={(ambiguous ?? false) || (opensAccountBeyondRent ?? false)}
+				ambiguous={(ambiguous ?? false) || (opensAccountBeyondRent ?? false) || reassignsWallet}
 				{application}
 				approveDisabled={!decoded ||
 					(ambiguous ?? false) ||
 					(opensAccountBeyondRent ?? false) ||
+					reassignsWallet ||
 					closesPayOthers}
 				{closesPayOthers}
 				{data}
 				{decoded}
 				destination={destination ?? ''}
 				feeToken={token}
+				flaggedAsScam={!acceptedContext(request.verifyContext)}
 				{instructions}
 				isApproval={isApproval ?? false}
 				{messageSummary}

@@ -1,7 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
-import { solAccountExplorerUrl } from '$sol/utils/sol-explorer.utils';
-import { mockSolAddress } from '$tests/mocks/sol.mock';
+import { solAccountExplorerUrl, solTokenExplorerUrl } from '$sol/utils/sol-explorer.utils';
+import { mockSolAddress, mockSplAddress } from '$tests/mocks/sol.mock';
 
 describe('sol-explorer.utils', () => {
 	describe('solAccountExplorerUrl', () => {
@@ -35,6 +35,39 @@ describe('sol-explorer.utils', () => {
 			).toBeUndefined();
 			expect(
 				solAccountExplorerUrl({ network: SOLANA_MAINNET_NETWORK, address: undefined })
+			).toBeUndefined();
+		});
+	});
+
+	describe('solTokenExplorerUrl', () => {
+		it('should substitute the token into the explorer template', () => {
+			expect(
+				solTokenExplorerUrl({ network: SOLANA_MAINNET_NETWORK, tokenAddress: mockSplAddress })
+			).toBe(`https://solscan.io/token/${mockSplAddress}/`);
+		});
+
+		it('should keep the cluster query of a non-mainnet explorer', () => {
+			const url = solTokenExplorerUrl({
+				network: SOLANA_DEVNET_NETWORK,
+				tokenAddress: mockSplAddress
+			});
+
+			expect(url).toContain(`token/${mockSplAddress}/`);
+			expect(url).toContain('cluster=devnet');
+		});
+
+		it('should give no link for a network that is not Solana', () => {
+			expect(
+				solTokenExplorerUrl({ network: ETHEREUM_NETWORK, tokenAddress: mockSplAddress })
+			).toBeUndefined();
+		});
+
+		it('should give no link without a network or a token', () => {
+			expect(
+				solTokenExplorerUrl({ network: undefined, tokenAddress: mockSplAddress })
+			).toBeUndefined();
+			expect(
+				solTokenExplorerUrl({ network: SOLANA_MAINNET_NETWORK, tokenAddress: undefined })
 			).toBeUndefined();
 		});
 	});

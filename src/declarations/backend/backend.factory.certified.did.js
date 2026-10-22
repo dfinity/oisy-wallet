@@ -285,6 +285,11 @@ export const idlFactory = ({ IDL }) => {
 		amount: IDL.Nat,
 		dest_token: TokenId
 	});
+	const LifiData = IDL.Record({
+		source_token: TokenId,
+		amount: IDL.Nat,
+		dest_token: TokenId
+	});
 	const OisyTradeSide = IDL.Variant({ Buy: IDL.Null, Sell: IDL.Null });
 	const OisyTradeData = IDL.Record({
 		side: OisyTradeSide,
@@ -344,6 +349,7 @@ export const idlFactory = ({ IDL }) => {
 		Xrp: XrpData,
 		OneSecEvmToIcp: OneSecEvmToIcpData,
 		OneSecIcpToEvm: OneSecIcpToEvmData,
+		Lifi: LifiData,
 		OisyTrade: OisyTradeData,
 		NearIntents: NearIntentsData,
 		CyclesMint: CyclesMintData,
@@ -584,6 +590,7 @@ export const idlFactory = ({ IDL }) => {
 		Err: PersonalNoteError
 	});
 	const GetActiveUserTransactionsResponse = IDL.Record({
+		seen_up_to_ns: IDL.Nat64,
 		transactions: IDL.Vec(ActiveUserTransaction)
 	});
 	const GetActiveUserTransactionsResult = IDL.Variant({
@@ -870,6 +877,10 @@ export const idlFactory = ({ IDL }) => {
 		enabled: IDL.Bool,
 		allowed_external_content_source_urls: IDL.Opt(IDL.Vec(IDL.Text))
 	});
+	const MarkActiveUserTransactionsSeenResult = IDL.Variant({
+		Ok: IDL.Nat64,
+		Err: ActiveUserTransactionError
+	});
 	const SaveUserTransactionsRequest = IDL.Record({
 		token_id: TokenId,
 		transactions: IDL.Vec(UserTransaction)
@@ -1062,6 +1073,11 @@ export const idlFactory = ({ IDL }) => {
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
 		http_request_transform: IDL.Func([TransformArgs], [HttpRequestResult]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
+		mark_active_user_transactions_seen: IDL.Func(
+			[IDL.Nat64],
+			[MarkActiveUserTransactionsSeenResult],
+			[]
+		),
 		new_user_signups_allowed: IDL.Func([], [IDL.Bool]),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
 		save_user_transactions: IDL.Func(

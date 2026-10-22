@@ -11,6 +11,7 @@ import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import * as currencyExchangeStore from '$lib/stores/currency-exchange.store';
 import { HERO_CONTEXT_KEY, initHeroContext, type HeroContext } from '$lib/stores/hero.store';
 import type { TokenUi } from '$lib/types/token-ui';
+import * as deviceUtils from '$lib/utils/device.utils';
 import * as formatUtils from '$lib/utils/format.utils';
 import * as privacyUtils from '$lib/utils/privacy.utils';
 import en from '$tests/mocks/i18n.mock';
@@ -291,10 +292,23 @@ describe('ExchangeBalance', () => {
 	describe('privacy mode toggle', () => {
 		beforeEach(() => {
 			mockHeroContext.loading.set(false);
+
+			vi.spyOn(deviceUtils, 'isDesktop').mockReturnValue(true);
+		});
+
+		it('should show a pointer on the amount and keep it selectable', () => {
+			const { container } = renderComponent();
+
+			const amount = container.querySelector('output');
+
+			expect(amount).toHaveClass('cursor-pointer');
+			expect(amount).not.toHaveClass('select-none');
 		});
 
 		it('should call setPrivacyMode on double-click', async () => {
-			const setPrivacyModeSpy = vi.spyOn(privacyUtils, 'setPrivacyMode');
+			const setPrivacyModeSpy = vi
+				.spyOn(privacyUtils, 'setPrivacyMode')
+				.mockImplementation(() => undefined);
 
 			const { container } = renderComponent();
 
@@ -308,7 +322,7 @@ describe('ExchangeBalance', () => {
 
 			expect(setPrivacyModeSpy).toHaveBeenCalledExactlyOnceWith({
 				enabled: true,
-				withToast: false,
+				withToast: true,
 				source: 'Hero - Double click on the ExchangeBalance'
 			});
 		});
@@ -316,7 +330,9 @@ describe('ExchangeBalance', () => {
 		it('should toggle privacy mode off when already enabled', async () => {
 			vi.spyOn(settingsDerived, 'isPrivacyMode', 'get').mockReturnValue(staticStore(true));
 
-			const setPrivacyModeSpy = vi.spyOn(privacyUtils, 'setPrivacyMode');
+			const setPrivacyModeSpy = vi
+				.spyOn(privacyUtils, 'setPrivacyMode')
+				.mockImplementation(() => undefined);
 
 			const { container } = renderComponent();
 
@@ -330,8 +346,118 @@ describe('ExchangeBalance', () => {
 
 			expect(setPrivacyModeSpy).toHaveBeenCalledExactlyOnceWith({
 				enabled: false,
-				withToast: false,
+				withToast: true,
 				source: 'Hero - Double click on the ExchangeBalance'
+			});
+		});
+
+		it('should toggle privacy mode on when double-clicking the amount', async () => {
+			const setPrivacyModeSpy = vi
+				.spyOn(privacyUtils, 'setPrivacyMode')
+				.mockImplementation(() => undefined);
+
+			const { container } = renderComponent();
+
+			const amount = container.querySelector('output');
+
+			assertNonNullish(amount);
+
+			await fireEvent.dblClick(amount);
+
+			expect(setPrivacyModeSpy).toHaveBeenCalledExactlyOnceWith({
+				enabled: true,
+				withToast: true,
+				source: 'Hero - Double click on the ExchangeBalance amount'
+			});
+		});
+
+		it('should toggle privacy mode off when double-clicking the hidden amount', async () => {
+			vi.spyOn(settingsDerived, 'isPrivacyMode', 'get').mockReturnValue(staticStore(true));
+
+			const setPrivacyModeSpy = vi
+				.spyOn(privacyUtils, 'setPrivacyMode')
+				.mockImplementation(() => undefined);
+
+			const { container } = renderComponent({ hideBalance: true });
+
+			const amount = container.querySelector('output');
+
+			assertNonNullish(amount);
+
+			await fireEvent.dblClick(amount);
+
+			expect(setPrivacyModeSpy).toHaveBeenCalledExactlyOnceWith({
+				enabled: false,
+				withToast: true,
+				source: 'Hero - Double click on the ExchangeBalance amount'
+			});
+		});
+
+		it('should toggle privacy mode when double-clicking the amount while loading', async () => {
+			mockHeroContext.loading.set(true);
+
+			const setPrivacyModeSpy = vi
+				.spyOn(privacyUtils, 'setPrivacyMode')
+				.mockImplementation(() => undefined);
+
+			const { container } = renderComponent();
+
+			const amount = container.querySelector('output');
+
+			assertNonNullish(amount);
+
+			await fireEvent.dblClick(amount);
+
+			expect(setPrivacyModeSpy).toHaveBeenCalledExactlyOnceWith({
+				enabled: true,
+				withToast: true,
+				source: 'Hero - Double click on the ExchangeBalance amount'
+			});
+		});
+
+		describe('on mobile', () => {
+			beforeEach(() => {
+				vi.spyOn(deviceUtils, 'isDesktop').mockReturnValue(false);
+			});
+
+			it('should toggle privacy mode without a toast when double-clicking the amount', async () => {
+				const setPrivacyModeSpy = vi
+					.spyOn(privacyUtils, 'setPrivacyMode')
+					.mockImplementation(() => undefined);
+
+				const { container } = renderComponent();
+
+				const amount = container.querySelector('output');
+
+				assertNonNullish(amount);
+
+				await fireEvent.dblClick(amount);
+
+				expect(setPrivacyModeSpy).toHaveBeenCalledExactlyOnceWith({
+					enabled: true,
+					withToast: false,
+					source: 'Hero - Double click on the ExchangeBalance amount'
+				});
+			});
+
+			it('should toggle privacy mode without a toast when double-clicking the subtitle', async () => {
+				const setPrivacyModeSpy = vi
+					.spyOn(privacyUtils, 'setPrivacyMode')
+					.mockImplementation(() => undefined);
+
+				const { container } = renderComponent();
+
+				const toggleButton = container.querySelector('span[role="button"]');
+
+				assertNonNullish(toggleButton);
+
+				await fireEvent.dblClick(toggleButton);
+
+				expect(setPrivacyModeSpy).toHaveBeenCalledExactlyOnceWith({
+					enabled: true,
+					withToast: false,
+					source: 'Hero - Double click on the ExchangeBalance'
+				});
 			});
 		});
 	});

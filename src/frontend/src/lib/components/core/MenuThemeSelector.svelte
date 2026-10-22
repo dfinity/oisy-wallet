@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
+	import MenuControlRow from '$lib/components/core/MenuControlRow.svelte';
 	import ThemeSelectorButton from '$lib/components/core/ThemeSelectorButton.svelte';
 	import IconDuoTone from '$lib/components/icons/IconDuoTone.svelte';
 	import IconMoon from '$lib/components/icons/IconMoon.svelte';
@@ -39,11 +40,8 @@
 	});
 </script>
 
-<div class="flex justify-between pl-3">
-	<span class="mr-3 flex min-w-32 items-center text-tertiary">
-		<span class="mr-2 flex"><IconSunMoon /></span>
-		<span class="flex">{$i18n.settings.text.appearance}</span>
-	</span>
+<MenuControlRow label={$i18n.settings.text.appearance}>
+	{#snippet icon()}<IconSunMoon />{/snippet}
 
 	<div class="flex">
 		<ThemeSelectorButton
@@ -71,4 +69,4 @@
 			</ThemeSelectorButton>
 		{/each}
 	</div>
-</div>
+</MenuControlRow>

@@ -96,6 +96,10 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	// describe a review they never read. A run that completed and reported nothing is not a
 	// description - an effect outside what the preview measures produces exactly that.
 	simulated: boolean;
+	// Whether a simulated run came back at all, described anything or not. The review told the user
+	// it ran one, so a refusal for a run that left part of the message undescribed says that, rather
+	// than that there was no run.
+	simulationRan: boolean;
 	// Whether a close in the reviewed instruction list pays an account's balance to an address
 	// that is not the user's wallet. Decided from that list rather than from the message, which
 	// cannot see a close a program makes inside its own call, and handed on for the same reason
@@ -113,6 +117,10 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	// costs. Only the run shows such an opening, and the decode already has it, so it is handed on
 	// for the same reason the simulated flag is.
 	opensAccountBeyondRent: boolean;
+	// Whether the run hands the user's wallet to another program. A program can make that assignment
+	// inside its own call, where only the run shows it, and the review already has the run, so it is
+	// handed on for the same reason the simulated flag is.
+	reassignsWallet: boolean;
 };
 
 export const decode = async ({
@@ -189,8 +197,14 @@ export const decode = async ({
 			})),
 			network: solNetwork
 		}),
+		// An allowance names its token too, and moves no balance that would name it otherwise.
 		loadSplTokenMetadata({
-			tokenAddresses: (preview?.tokenDeltas ?? []).map(({ tokenAddress }) => tokenAddress),
+			tokenAddresses: [
+				...(preview?.tokenDeltas ?? []).map(({ tokenAddress }) => tokenAddress),
+				...(preview?.controlChanges ?? [])
+					.map(({ allowance }) => allowance?.tokenAddress)
+					.filter(nonNullish)
+			],
 			network: solNetwork
 		})
 	]);
@@ -517,10 +531,12 @@ export const sign = ({
 	progress,
 	identity,
 	simulated,
+	simulationRan,
 	closesPayOthers,
 	unreadProgramsAcknowledged,
 	rentExemptMinimum,
 	opensAccountBeyondRent,
+	reassignsWallet,
 	...params
 }: WalletConnectSignTransactionParams): Promise<ResultSuccess> =>
 	execute({
@@ -596,7 +612,11 @@ export const sign = ({
 			// An account a program opens inside its own instruction with more than its size costs is
 			// refused on the same terms as an over-funded opening the message states itself: what
 			// sits above the rent is a payment with no destination, which no line can show.
-			if (ambiguous || opensAccountBeyondRent) {
+			//
+			// The wallet handed to another program inside a program's call is refused on the same terms
+			// as an assignment the message states: from then on that program, not the wallet's key,
+			// decides what leaves the wallet, and no amount, source or destination says so.
+			if (ambiguous || opensAccountBeyondRent || reassignsWallet) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.ambiguous_transaction }
 				});
@@ -616,7 +636,11 @@ export const sign = ({
 			// the wallet understands still signs.
 			if ((unreviewed ?? false) && !simulated) {
 				toastsError({
-					msg: { text: get(i18n).wallet_connect.error.unreviewed_without_simulation }
+					msg: {
+						text: simulationRan
+							? get(i18n).wallet_connect.error.unreviewed_not_described_by_simulation
+							: get(i18n).wallet_connect.error.unreviewed_without_simulation
+					}
 				});
 
 				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });

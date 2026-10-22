@@ -1,6 +1,11 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
 import { liquidiumClient } from '$lib/api/liquidium.api';
-import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
+import { LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS } from '$lib/constants/liquidium.constants';
+import {
+	applyActiveUserTransactionPollUpdate,
+	deleteActiveUserTransaction,
+	reloadActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
@@ -13,6 +18,68 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { ActivityFilter, type Activity, type LiquidiumClient } from '@liquidium/client';
 import { get } from 'svelte/store';
+
+/**
+ * How many consecutive ticks each repay row has been seen without its txid and unwritten. The repay
+ * renews its row while the broadcast is pending, so the count only runs once nobody is working on
+ * it. In memory, like `cycles-mint-active-tx.services`: a refresh restarts the count, which only
+ * ever delays the cleanup.
+ */
+const repayTxidObservations = new Map<string, { updatedAtNs: bigint; count: number }>();
+
+// Test seam — module-level state would otherwise leak between cases.
+export const resetLiquidiumRepayTxidObservations = (): void => {
+	repayTxidObservations.clear();
+};
+
+const recordRepayTxidObservation = ({ id, updated_at_ns }: ActiveUserTransaction): number => {
+	const previous = repayTxidObservations.get(id);
+
+	const count =
+		nonNullish(previous) && previous.updatedAtNs === updated_at_ns ? previous.count + 1 : 1;
+
+	repayTxidObservations.set(id, { updatedAtNs: updated_at_ns, count });
+
+	return count;
+};
+
+// A repay records its row before the broadcast and adds the txid after it (see
+// `executeLiquidiumRepay`). Nothing can poll a row without one, and it would lower the repay max
+// for good, so once it has gone unwritten for the grace period it is deleted, as the repay deletes
+// the row of a broadcast that failed.
+const dropRepayWithoutTxid = async ({
+	tx,
+	identity
+}: {
+	tx: ActiveUserTransaction;
+	identity: Identity;
+}): Promise<void> => {
+	if (recordRepayTxidObservation(tx) < LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS) {
+		return;
+	}
+
+	// This tab's copy can be stale: a txid write whose response was lost, or a write made from
+	// another tab (the txid, or a lease renewal of a broadcast still pending there), never reached
+	// it. The backend's row decides, read right before the delete. Either write keeps the row, and
+	// the store now holds the backend's copy for the next tick to count from. A failed read or
+	// delete is retried on the next tick.
+	const current = await reloadActiveUserTransaction({ identity, id: tx.id });
+
+	if (
+		nonNullish(current) &&
+		(current.updated_at_ns > tx.updated_at_ns ||
+			nonNullish(
+				toLiquidiumExternalRefsMap(current.external_refs)[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]
+			))
+	) {
+		repayTxidObservations.delete(tx.id);
+		return;
+	}
+
+	await deleteActiveUserTransaction({ identity, id: tx.id });
+
+	repayTxidObservations.delete(tx.id);
+};
 
 // Bridges `0x`/case differences between oisy's broadcast hash and the SDK's txid.
 const normalizeTxid = (value: string): string => value.toLowerCase().replace(/^0x/, '');
@@ -58,6 +125,13 @@ const pollLiquidiumActiveUserTransaction = async ({
 		const profileId = refs[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID];
 		const txid = refs[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID];
 		const outflowId = refs[LIQUIDIUM_EXTERNAL_REF_KEYS.OUTFLOW_ID];
+
+		if (isNullish(txid) && 'Liquidium' in tx.data && 'Repay' in tx.data.Liquidium.action) {
+			await dropRepayWithoutTxid({ tx, identity });
+			return;
+		}
+
+		repayTxidObservations.delete(tx.id);
 
 		// Not pollable without a profile and either a txid or an outflow id.
 		if (isNullish(profileId) || (isNullish(txid) && isNullish(outflowId))) {

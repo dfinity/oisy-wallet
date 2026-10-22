@@ -32,6 +32,12 @@ type ActiveUserTransactionData = variant {
 	Xrp : XrpData;
 	OneSecEvmToIcp : OneSecEvmToIcpData;
 	OneSecIcpToEvm : OneSecIcpToEvmData;
+	// LI.FI swap or bridge. A single variant covers every source chain (EVM,
+	// Solana) and every route; the source tx hash, the route tool, LI.FI's
+	// transaction id and the learned destination tx hash ride in
+	// `external_refs`. The two chains are those of `source_token` /
+	// `dest_token`.
+	Lifi : LifiData;
 	// OISY Trade order-book swap. Both legs are Internet Computer ledgers, and
 	// the row is opened *before* the deposit — it is the record that tells a
 	// later session which token to pull back out of the DEX's custody: the
@@ -656,6 +662,10 @@ type ExperimentalFeaturesSettings = record {
 // An EXT v2 compliant token on the Internet Computer.
 type ExtV2Token = record { canister_id : principal };
 type GetActiveUserTransactionsResponse = record {
+	// The user has seen every record updated at or before this time, on whichever device they
+	// saw it, so a record reads as unread only once it changes after this. Zero until the user
+	// first marks their records seen.
+	seen_up_to_ns : nat64;
 	transactions : vec ActiveUserTransaction
 };
 type GetActiveUserTransactionsResult = variant {
@@ -865,6 +875,17 @@ type InitArg = record {
 	// deployments that pre-date this field.
 	new_user_signups_allowed : opt bool
 };
+// LI.FI swap payload. Settlement is tracked off-chain — first on the source
+// chain, by transaction hash, then by LI.FI's status endpoint — so those
+// pointers, and the learned destination tx hash, live in `external_refs`; only
+// the values fixed at creation are captured here. No chain id is stored: the
+// token ids already carry both chains.
+type LifiData = record {
+	source_token : TokenId;
+	// Source-token amount in base units.
+	amount : nat;
+	dest_token : TokenId
+};
 // Which Liquidium lend/borrow action an active transaction tracks.
 type LiquidiumAction = variant { Withdraw; Repay; Borrow; Supply };
 type LiquidiumData = record {
@@ -875,6 +896,12 @@ type LiquidiumData = record {
 	pool_id : text;
 	// Amount in the token's base units.
 	amount : nat
+};
+type MarkActiveUserTransactionsSeenResult = variant {
+	// The mark now stored, which is later than the one requested when another device has
+	// already marked further.
+	Ok : nat64;
+	Err : ActiveUserTransactionError
 };
 // One of the caller's own tips, as returned by `get_my_tips`.
 type MyTip = record {
@@ -2035,6 +2062,12 @@ service : (Arg) -> {
 	// - Integrations that previously relied on query semantics must be updated to invoke this as an
 	// update method.
 	list_custom_tokens : () -> (vec CustomToken);
+	// Marks every one of the caller's active user transactions updated at or before
+	// `up_to_ns` as seen, on every device the caller signs in on. Returns the mark
+	// now stored.
+	mark_active_user_transactions_seen : (nat64) -> (
+		MarkActiveUserTransactionsSeenResult
+	);
 	// Returns whether sign-ups of new users are currently allowed.
 	//
 	// Exposed as an unauthenticated query so the landing page can display an info banner before the

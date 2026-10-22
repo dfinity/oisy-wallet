@@ -57,15 +57,15 @@
 			metadata: $splTokenMetadataStore,
 			unknownTokenAddresses,
 			unknownTokenLabel: $i18n.transaction.text.unknown_token,
+			unknownTokenNamedLabel: $i18n.transaction.text.unknown_token_named,
 			nativeSymbol: SOLANA_TOKEN.symbol
 		});
 
-	const decimalsOf = (tokenAddress: string | undefined): number =>
+	const decimalsOf = (tokenAddress: string | undefined): number | undefined =>
 		isNullish(tokenAddress)
 			? SOLANA_TOKEN.decimals
 			: (splToken(tokenAddress)?.decimals ??
-				netChanges?.find((change) => change.tokenAddress === tokenAddress)?.decimals ??
-				0);
+				netChanges?.find((change) => change.tokenAddress === tokenAddress)?.decimals);
 </script>
 
 {#snippet line(instruction: SolInstructionSummary, headingProgram?: SolAddress)}

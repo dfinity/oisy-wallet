@@ -13,10 +13,12 @@ import type {
 import type { NullishIdentity } from '$lib/types/identity';
 import {
 	hasActiveUserTransactionPollUpdateChanges,
+	isActiveUserTransactionError,
+	isTerminalActiveUserTransactionStatus,
 	type ActiveUserTransactionPollUpdate
 } from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 
 /**
@@ -50,22 +52,68 @@ export const loadActiveUserTransactions = async ({
 	}
 };
 
+// An account switch during the call leaves the store holding another principal's rows, whose loader
+// would report this one as its own. The row is left to its account's next load instead.
+const upsertForIdentity = ({
+	identity,
+	transaction
+}: {
+	identity: Identity;
+	transaction: ActiveUserTransaction;
+}) => {
+	if (!activeUserTransactionsStore.holds(identity.getPrincipal())) {
+		return;
+	}
+
+	activeUserTransactionsStore.upsert({ transaction });
+};
+
 export const createActiveUserTransaction = async ({
 	identity,
 	...params
 }: { identity: Identity } & CreateActiveUserTransactionParams): Promise<void> => {
 	const transaction = await createActiveUserTransactionApi({ identity, ...params });
 
-	activeUserTransactionsStore.upsert({ transaction });
+	upsertForIdentity({ identity, transaction });
 };
 
 export const updateActiveUserTransaction = async ({
 	identity,
+	outcomeReportedByCaller = false,
 	...params
-}: { identity: Identity } & UpdateActiveUserTransactionParams): Promise<void> => {
-	const transaction = await updateActiveUserTransactionApi({ identity, ...params });
+}: {
+	identity: Identity;
+	// The caller reports this write's outcome itself, so no later load has to.
+	outcomeReportedByCaller?: boolean;
+} & UpdateActiveUserTransactionParams): Promise<void> => {
+	const principal = identity.getPrincipal();
+	const terminal =
+		!outcomeReportedByCaller &&
+		nonNullish(params.status) &&
+		isTerminalActiveUserTransactionStatus(params.status);
 
-	activeUserTransactionsStore.upsert({ transaction });
+	// Before the write, which can commit after this tab is gone: the next load in this browser then
+	// reports the outcome instead of taking the row as settled elsewhere. Recorded for the identity
+	// that sends it, which the store may no longer hold after a sign-out or an account switch.
+	if (terminal) {
+		activeUserTransactionsStore.markTerminalWriteSent({ principal, id: params.id });
+	}
+
+	let transaction: ActiveUserTransaction;
+
+	try {
+		transaction = await updateActiveUserTransactionApi({ identity, ...params });
+	} catch (err: unknown) {
+		// The canister refused the write, so it never committed: a marker left behind would make a
+		// later load report the row once someone else settles it. A transport failure keeps it.
+		if (terminal && isActiveUserTransactionError(err)) {
+			activeUserTransactionsStore.clearTerminalWriteSent({ principal, id: params.id });
+		}
+
+		throw err;
+	}
+
+	upsertForIdentity({ identity, transaction });
 };
 
 export const deleteActiveUserTransaction = async ({
@@ -80,6 +128,34 @@ export const deleteActiveUserTransaction = async ({
 	activeUserTransactionsStore.remove({ id });
 };
 
+// Reads one of the caller's rows from the backend into the store, for a caller whose copy may be
+// stale: a write whose response was lost, or one made from another tab, never reached it. Returns
+// the row, or `undefined` once it is gone. Certified, since the caller acts on the answer (the
+// Liquidium poller deletes on it): a lagging or misbehaving replica must not be able to hand back
+// an older copy.
+export const reloadActiveUserTransaction = async ({
+	identity,
+	id
+}: {
+	identity: Identity;
+	id: UpdateActiveUserTransactionParams['id'];
+}): Promise<ActiveUserTransaction | undefined> => {
+	const transaction = (await getActiveUserTransactions({ identity, certified: true })).find(
+		(tx) => tx.id === id
+	);
+
+	if (nonNullish(transaction)) {
+		upsertForIdentity({ identity, transaction });
+	}
+
+	return transaction;
+};
+
+/**
+ * Writes a poller's update, if it changes anything. A failed write is reported and swallowed, so
+ * that the row stays as it was for the next poll; the result says whether the update was written,
+ * for a poller whose own state must outlive a failed write.
+ */
 export const applyActiveUserTransactionPollUpdate = async ({
 	identity,
 	tx,
@@ -88,9 +164,9 @@ export const applyActiveUserTransactionPollUpdate = async ({
 	identity: Identity;
 	tx: ActiveUserTransaction;
 	update?: ActiveUserTransactionPollUpdate;
-}): Promise<void> => {
+}): Promise<boolean> => {
 	if (isNullish(update) || !hasActiveUserTransactionPollUpdateChanges(update)) {
-		return;
+		return false;
 	}
 
 	try {
@@ -99,7 +175,11 @@ export const applyActiveUserTransactionPollUpdate = async ({
 			id: tx.id,
 			...update
 		});
+
+		return true;
 	} catch (err: unknown) {
 		consoleError(err);
+
+		return false;
 	}
 };

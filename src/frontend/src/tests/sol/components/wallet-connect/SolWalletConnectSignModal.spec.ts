@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { solAddressMainnetStore } from '$lib/stores/address.store';
 import SolWalletConnectSignMessageModal from '$sol/components/wallet-connect/SolWalletConnectSignMessageModal.svelte';
 import SolWalletConnectSignModal from '$sol/components/wallet-connect/SolWalletConnectSignModal.svelte';
 import {
@@ -8,6 +9,7 @@ import {
 } from '$sol/constants/wallet-connect.constants';
 import { decode, sign } from '$sol/services/wallet-connect.services';
 import en from '$tests/mocks/i18n.mock';
+import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { lamports } from '@solana/kit';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -211,6 +213,30 @@ describe('SolWalletConnectSignModal', () => {
 		});
 	});
 
+	// Which refusal the signing service gives for a message it cannot describe depends on whether a
+	// run came back at all, described anything or not.
+	describe('the run flag it hands the signing service', () => {
+		it('should be true when a run came back and left an instruction unaccounted for', async () => {
+			const args = await approve({
+				amount: 1n,
+				simulatedInstructions: true,
+				instructions: [{ kind: 'unknown' }],
+				parties: { sources: [], destinations: [], partial: false }
+			});
+
+			expect(args).toEqual(expect.objectContaining({ simulated: false, simulationRan: true }));
+		});
+
+		it('should be false when there was no run at all', async () => {
+			const args = await approve({
+				amount: 1n,
+				parties: { sources: [], destinations: [], partial: true }
+			});
+
+			expect(args).toEqual(expect.objectContaining({ simulated: false, simulationRan: false }));
+		});
+	});
+
 	// An account the run opens inside another program's instruction with more than its size costs is
 	// refused by signing like an ambiguous message, so the review holds the button the same way.
 	it('should hold approval when the run opens an account above its rent', async () => {
@@ -238,6 +264,54 @@ describe('SolWalletConnectSignModal', () => {
 		});
 
 		expect(args).toEqual(expect.objectContaining({ opensAccountBeyondRent: false }));
+	});
+
+	describe('the wallet handed to another program', () => {
+		beforeEach(() => {
+			solAddressMainnetStore.set({ data: mockSolAddress, certified: true });
+		});
+
+		afterEach(() => {
+			solAddressMainnetStore.reset();
+		});
+
+		// Signing refuses the run reassigning the wallet as it does an assignment the message states,
+		// so the review holds the button the same way.
+		it('should hold approval when the run reassigns the wallet', async () => {
+			vi.mocked(decode).mockResolvedValueOnce({
+				amount: 1n,
+				preview: {
+					solDelta: -5_000n,
+					tokenDeltas: [],
+					controlChanges: [{ account: mockSolAddress, field: 'program', to: mockSolAddress2 }]
+				},
+				parties: { sources: [], destinations: [], partial: false }
+			});
+
+			const { getByRole, getByText } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			await waitFor(() => {
+				expect(getByText(en.wallet_connect.text.cannot_be_shown)).toBeInTheDocument();
+			});
+
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should hand signing no reassignment when the run changes another account', async () => {
+			const args = await approve({
+				amount: 1n,
+				preview: {
+					solDelta: -5_000n,
+					tokenDeltas: [],
+					controlChanges: [{ account: mockAtaAddress, field: 'delegate', to: mockSolAddress2 }]
+				},
+				parties: { sources: [], destinations: [], partial: false }
+			});
+
+			expect(args).toEqual(expect.objectContaining({ reassignsWallet: false }));
+		});
 	});
 
 	// Signing holds the message's account creations to the reserve the review was computed with, so
@@ -338,6 +412,46 @@ describe('SolWalletConnectSignModal', () => {
 
 		await waitFor(() => {
 			expect(getByText(en.wallet_connect.text.sign_message)).toBeInTheDocument();
+		});
+	});
+
+	describe('a request Verify flags as a scam', () => {
+		const flaggedProps = (method: string) => {
+			const { request, ...rest } = props(method);
+
+			return {
+				...rest,
+				request: {
+					...request,
+					verifyContext: { verified: { ...request.verifyContext.verified, isScam: true } }
+				}
+			};
+		};
+
+		it('should only offer to reject a transaction, and say why', async () => {
+			const { getByRole, getByTestId, queryByRole } = render(SolWalletConnectSignModal, {
+				props: flaggedProps(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			await waitFor(() => {
+				expect(getByTestId('wallet-connect-scam-warning')).toBeInTheDocument();
+			});
+
+			expect(queryByRole('button', { name: en.core.text.approve })).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.reject })).toBeInTheDocument();
+		});
+
+		it('should only offer to reject a message, and say why', async () => {
+			const { getByRole, getByTestId, queryByRole } = render(SolWalletConnectSignMessageModal, {
+				props: flaggedProps(SESSION_REQUEST_SOL_SIGN_MESSAGE)
+			});
+
+			await waitFor(() => {
+				expect(getByTestId('wallet-connect-scam-warning')).toBeInTheDocument();
+			});
+
+			expect(queryByRole('button', { name: en.core.text.approve })).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.reject })).toBeInTheDocument();
 		});
 	});
 });

@@ -681,8 +681,10 @@ export class BackendCanister extends Canister<BackendService> {
 		throw response.Err;
 	};
 
-	getActiveUserTransactions = async (): Promise<ActiveUserTransaction[]> => {
-		const { get_active_user_transactions } = this.caller({ certified: false });
+	getActiveUserTransactions = async ({ certified = false }: QueryParams = {}): Promise<
+		ActiveUserTransaction[]
+	> => {
+		const { get_active_user_transactions } = this.caller({ certified });
 
 		const response = await get_active_user_transactions();
 

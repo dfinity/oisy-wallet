@@ -7,9 +7,12 @@ use std::{cell::Cell, time::Duration};
 
 use ic_cdk::api::time;
 use ic_cdk_timers::{set_timer, set_timer_interval};
-use shared::types::{
-    exchange::{ExchangeData, ExchangeError, ExchangeRate},
-    token_id::TokenId,
+use shared::{
+    types::{
+        exchange::{ExchangeData, ExchangeError, ExchangeRate},
+        token_id::TokenId,
+    },
+    validate::Validate,
 };
 
 use crate::{
@@ -39,8 +42,8 @@ pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 10 * 60;
 const NANOS_PER_SEC: u64 = 1_000_000_000;
 
 /// A token's cached price is considered "fresh enough" if its
-/// [`ExchangeData::timestamp_ns`] (the provider-reported `last_updated_at`,
-/// or `time()` when the provider doesn't supply one) is within
+/// [`ExchangeData::timestamp_ns`] (the provider's `last_updated_at` capped at
+/// `time()`, or `time()` when the provider doesn't supply one) is within
 /// `PRICE_REFRESH_INTERVAL_SEC / 2` of now. Such tokens are skipped on the
 /// next refresh tick to avoid duplicate upstream calls when, e.g., a lazy
 /// bootstrap or a manual refresh has just populated the cache with a price
@@ -291,14 +294,23 @@ pub(crate) fn start_exchange_rate_timer() {
     });
 }
 
+/// Caches `exchange_data` as the USD rate of `token_id`.
+///
+/// Reading a cached rate decodes it, and decoding runs [`Validate`] and traps when it fails (see
+/// `validate_on_deserialize!`). A rate that fails validation is therefore logged and skipped,
+/// which keeps any rate already cached for the token.
 fn update_price(token_id: &StoredTokenId, exchange_data: &ExchangeData) {
+    let rate = ExchangeRate {
+        usd: exchange_data.clone(),
+    };
+
+    if let Err(err) = rate.validate() {
+        ic_cdk::println!("Skipping the exchange rate for {token_id:?}: {err}");
+        return;
+    }
+
     mutate_state(|s| {
-        s.exchange_rates.insert(
-            token_id.clone(),
-            Candid(ExchangeRate {
-                usd: exchange_data.clone(),
-            }),
-        );
+        s.exchange_rates.insert(token_id.clone(), Candid(rate));
     });
 }
 
@@ -582,7 +594,7 @@ mod tests {
 
     #[test]
     fn custom_tokens_to_mark_empty_for_natives_only() {
-        assert!(custom_tokens_to_mark(&native_token_ids()).is_empty());
+        assert_eq!(custom_tokens_to_mark(&native_token_ids()), vec![]);
     }
 
     #[test]
@@ -727,6 +739,41 @@ mod tests {
                 market_cap: None,
             },
         }
+    }
+
+    fn stored_rate(token_id: &StoredTokenId) -> Option<ExchangeRate> {
+        read_state(|s| s.exchange_rates.get(token_id).map(|rate| rate.0))
+    }
+
+    #[test]
+    fn update_price_does_not_store_a_zero_timestamp() {
+        let token = custom_token(1);
+
+        update_price(
+            &token,
+            &ExchangeData {
+                timestamp_ns: 0,
+                ..exchange_rate(1_000).usd
+            },
+        );
+
+        assert_eq!(stored_rate(&token), None);
+    }
+
+    #[test]
+    fn update_price_keeps_the_stored_rate_when_the_new_one_fails_validation() {
+        let token = custom_token(1);
+        update_price(&token, &exchange_rate(1_000).usd);
+
+        update_price(
+            &token,
+            &ExchangeData {
+                timestamp_ns: 0,
+                ..exchange_rate(2_000).usd
+            },
+        );
+
+        assert_eq!(stored_rate(&token), Some(exchange_rate(1_000)));
     }
 
     #[test]
