@@ -283,13 +283,18 @@ describe('near-intents-active-tx.utils', () => {
 			vi.useRealTimers();
 		});
 
-		it('is true for a pending deposit past the deadline of its verified quote', async () => {
-			await expect(
-				isNearIntentsDepositExpired({ status: 'PENDING_DEPOSIT', quoteResponse, depositAddress })
-			).resolves.toBeTruthy();
+		// `KNOWN_DEPOSIT_TX` follows the hash OISY submits to `/deposit/submit`, so it does not
+		// establish that funds arrived either.
+		it.each<NearIntentsSwapStatus>(['PENDING_DEPOSIT', 'KNOWN_DEPOSIT_TX'])(
+			'is true at %s past the deadline of its verified quote',
+			async (status) => {
+				await expect(
+					isNearIntentsDepositExpired({ status, quoteResponse, depositAddress })
+				).resolves.toBeTruthy();
 
-			expect(verifyNearIntentsQuoteSignature).toHaveBeenCalledExactlyOnceWith(quoteResponse);
-		});
+				expect(verifyNearIntentsQuoteSignature).toHaveBeenCalledExactlyOnceWith(quoteResponse);
+			}
+		);
 
 		it('is false up to the deadline itself', async () => {
 			vi.setSystemTime(new Date(deadline));
@@ -300,7 +305,6 @@ describe('near-intents-active-tx.utils', () => {
 		});
 
 		it.each<NearIntentsSwapStatus>([
-			'KNOWN_DEPOSIT_TX',
 			'INCOMPLETE_DEPOSIT',
 			'PROCESSING',
 			'SUCCESS',

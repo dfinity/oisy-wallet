@@ -222,23 +222,29 @@ describe('near-intents-active-tx.services', () => {
 				vi.useRealTimers();
 			});
 
-			it('fails the swap once the signed quote deadline has passed', async () => {
-				vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(true);
+			it.each<NearIntentsSwapStatus>(['PENDING_DEPOSIT', 'KNOWN_DEPOSIT_TX'])(
+				'fails the swap at %s once the signed quote deadline has passed',
+				async (status) => {
+					vi.mocked(nearIntentsRest.fetchNearIntentsStatus).mockResolvedValue(
+						statusResponse({ status, quoteResponse })
+					);
+					vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(true);
 
-				await pollNearIntentsActiveUserTransactions({
-					identity: mockIdentity,
-					transactions: [{ ...pendingTx, status: { Executing: null } }]
-				});
+					await pollNearIntentsActiveUserTransactions({
+						identity: mockIdentity,
+						transactions: [{ ...pendingTx, status: { Executing: null } }]
+					});
 
-				expect(applySpy).toHaveBeenCalledExactlyOnceWith(
-					expect.objectContaining({
-						update: {
-							status: { Failed: null },
-							error: en.swap.error.near_intents_deposit_expired
-						}
-					})
-				);
-			});
+					expect(applySpy).toHaveBeenCalledExactlyOnceWith(
+						expect.objectContaining({
+							update: {
+								status: { Failed: null },
+								error: en.swap.error.near_intents_deposit_expired
+							}
+						})
+					);
+				}
+			);
 
 			it('keeps the swap in progress when the quote signature does not verify', async () => {
 				vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(false);

@@ -159,8 +159,10 @@ export const nearIntentsStatusError = (status: NearIntentsSwapStatus): string | 
 };
 
 /**
- * Whether a swap's deposit can no longer arrive: 1Click still reports none (`PENDING_DEPOSIT`)
- * after the signed quote deadline, the moment its deposit address becomes inactive.
+ * Whether a swap's deposit can no longer arrive: 1Click still reports none (`PENDING_DEPOSIT`), or
+ * only knows its hash (`KNOWN_DEPOSIT_TX`, which follows the hash OISY submits to
+ * `/deposit/submit`), after the signed quote deadline, the moment its deposit address becomes
+ * inactive.
  *
  * 1Click itself never moves such an address on, so without this a deposit that never reached it
  * (an EVM transaction the network accepted and then dropped, for example) would leave the row
@@ -177,7 +179,7 @@ export const isNearIntentsDepositExpired = async ({
 	depositAddress: string;
 }): Promise<boolean> => {
 	if (
-		status !== 'PENDING_DEPOSIT' ||
+		(status !== 'PENDING_DEPOSIT' && status !== 'KNOWN_DEPOSIT_TX') ||
 		quoteResponse?.quoteRequest?.dry !== false ||
 		quoteResponse?.quote?.depositAddress !== depositAddress
 	) {
