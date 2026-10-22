@@ -192,6 +192,114 @@ describe('sol-transaction-summary.utils', () => {
 			expect(result.received?.tokenAddress).toBe(orca);
 		});
 
+		// A program can run its legs in a token batch, whose lines hang under a heading of their own
+		// beneath its instruction. They are still that instruction's trade, and the tip is not.
+		it('should not take a tip for the trade when the swap runs its legs in a token batch', () => {
+			const usdc = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+			const orca = 'orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE';
+
+			const result = deriveSolTransactionSummary({
+				netChanges: [
+					{ tokenAddress: usdc, decimals: 6, delta: -1_000_000n },
+					{ delta: -5_000_000n },
+					{ tokenAddress: orca, decimals: 6, delta: 2_000_000n }
+				],
+				instructions: [
+					{
+						kind: 'route',
+						program: mockSolAddress3,
+						children: [{ kind: 'send', amount: 5_000_000n, counterparty: mockSolAddress2 }]
+					},
+					{
+						kind: 'route',
+						program: mockSolAddress2,
+						children: [
+							{
+								kind: 'batch',
+								program: mockSolAddress3,
+								children: [
+									{
+										kind: 'send',
+										amount: 1_000_000n,
+										tokenAddress: usdc,
+										counterparty: mockAtaAddress
+									},
+									{
+										kind: 'receive',
+										amount: 2_000_000n,
+										tokenAddress: orca,
+										counterparty: mockAtaAddress2
+									}
+								]
+							}
+						]
+					}
+				],
+				userAddress: mockSolAddress
+			});
+
+			expect(result.kind).toBe('swap');
+			expect(result.spent?.tokenAddress).toBe(usdc);
+			expect(result.received?.tokenAddress).toBe(orca);
+		});
+
+		// The line names the wrapped SOL that leaves a program's account; what the wallet gains is
+		// SOL itself.
+		describe('with SOL a program unwraps into the wallet', () => {
+			const usdc = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
+			const payout: SolInstructionSummary = {
+				kind: 'receive',
+				amount: 5_000_000n,
+				tokenAddress: WSOL_TOKEN.address,
+				counterparty: mockAtaAddress3,
+				own: false,
+				unwrapsToWallet: true
+			};
+
+			it('should call the payout alone a receive', () => {
+				const result = deriveSolTransactionSummary({
+					netChanges: [{ delta: 5_000_000n }],
+					instructions: [{ kind: 'route', program: mockSolAddress3, children: [payout] }],
+					userAddress: mockSolAddress
+				});
+
+				expect(result.kind).toBe('receive');
+				expect(result.received?.delta).toBe(5_000_000n);
+				// The account the SOL left is the sender, not the wallet it arrived in.
+				expect(result.counterparty).toBe(mockAtaAddress3);
+			});
+
+			it('should call a swap that pays out that way a swap for SOL', () => {
+				const result = deriveSolTransactionSummary({
+					netChanges: [
+						{ tokenAddress: usdc, decimals: 6, delta: -1_000_000n },
+						{ delta: 5_000_000n }
+					],
+					instructions: [
+						{
+							kind: 'route',
+							program: mockSolAddress3,
+							children: [
+								{
+									kind: 'send',
+									amount: 1_000_000n,
+									tokenAddress: usdc,
+									counterparty: mockAtaAddress
+								},
+								payout
+							]
+						}
+					],
+					userAddress: mockSolAddress
+				});
+
+				expect(result.kind).toBe('swap');
+				expect(result.spent?.tokenAddress).toBe(usdc);
+				expect(result.received?.tokenAddress).toBeUndefined();
+			});
+		});
+
 		it('should call a transaction that touches nothing of the user’s other', () => {
 			expect(summary('THIRD_PARTY').kind).toBe('other');
 		});
@@ -500,6 +608,31 @@ describe('sol-transaction-summary.utils', () => {
 			).toBe(ZERO);
 		});
 
+		// Except for an unwrap paying the wallet: what leaves the wrapped SOL account, the user's or
+		// somebody else's, arrives there as SOL itself.
+		it('should add what an unwrap pays into the wallet', () => {
+			expect(
+				stated([
+					{
+						kind: 'send',
+						amount: 5_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						counterparty: WALLET,
+						own: true,
+						unwrapsToWallet: true
+					},
+					{
+						kind: 'receive',
+						amount: 3_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						counterparty: mockAtaAddress3,
+						own: false,
+						unwrapsToWallet: true
+					}
+				])
+			).toBe(5_000n + 3_000n);
+		});
+
 		it('should leave out a close that pays somebody else', () => {
 			expect(
 				stated([{ kind: 'closeTokenAccount', returned: 2_039_280n, counterparty: mockSolAddress2 }])
@@ -510,6 +643,17 @@ describe('sol-transaction-summary.utils', () => {
 			expect(stated([{ kind: 'send', counterparty: mockSolAddress2 }])).toBeUndefined();
 			expect(
 				stated([{ kind: 'createTokenAccount', account: mockAtaAddress, payer: WALLET }])
+			).toBeUndefined();
+			expect(
+				stated([
+					{
+						kind: 'send',
+						tokenAddress: WSOL_TOKEN.address,
+						counterparty: WALLET,
+						own: true,
+						unwrapsToWallet: true
+					}
+				])
 			).toBeUndefined();
 		});
 
@@ -1208,6 +1352,33 @@ describe('sol-transaction-summary.utils', () => {
 			).toBe(`via ${shortenWithMiddleEllipsis({ text: mockSolAddress3 })}`);
 		});
 
+		// An unwrap of everything an account wraps still says what leaves it, and for whom, when
+		// nobody read how much that is. It leaves the account open, which the close's label does not.
+		it('should state an unwrap of everything nobody read the amount of on either side', () => {
+			const unwrap: SolInstructionSummary = {
+				kind: 'send',
+				tokenAddress: WSOL_TOKEN.address,
+				decimals: WSOL_TOKEN.decimals,
+				counterparty: mockSolAddress2,
+				own: false,
+				unwrapsAll: true
+			};
+
+			expect(textOf(unwrap)).toBe(
+				replacePlaceholders(en.transaction.text.instruction_unwrap_all_to, { $symbol: 'WSOL' })
+			);
+			expect(
+				textOf({
+					...unwrap,
+					kind: 'receive',
+					counterparty: mockSolAddress3,
+					unwrapsToWallet: true
+				})
+			).toBe(
+				replacePlaceholders(en.transaction.text.instruction_unwrap_all_from, { $symbol: 'WSOL' })
+			);
+		});
+
 		// The opening line names the token, and the closing one did not: "Close token account" left
 		// the user to work out which of their accounts a transaction was closing.
 		it('should name the token a close is closing', () => {
@@ -1380,6 +1551,18 @@ describe('sol-transaction-summary.utils', () => {
 				);
 			});
 
+			// A program can run its legs in a token batch, whose lines hang under a heading of their
+			// own beneath its instruction.
+			it('should call legs going both ways inside a token batch a swap route', () => {
+				expect(
+					textOf({
+						kind: 'route',
+						program: mockSolAddress3,
+						children: [{ kind: 'batch', program: mockSolAddress2, children: [send, receive] }]
+					})
+				).toBe(en.transaction.text.instruction_route);
+			});
+
 			// Something leaving and nothing arriving is what a deposit looks like too.
 			it('should not call legs that all leave a swap', () => {
 				expect(textOf({ kind: 'route', program: mockSolAddress3, children: [send, send] })).toBe(
@@ -1406,6 +1589,14 @@ describe('sol-transaction-summary.utils', () => {
 			it('should say so without a program when none is known', () => {
 				expect(textOf({ kind: 'route', children: [send, send] })).toBe(
 					en.transaction.text.instruction_unknown
+				);
+			});
+
+			// A batch is named for what it is, whatever its lines do: it is the token program
+			// running several of its own instructions, not a trade routed through a venue.
+			it('should call the heading over the lines of a token batch a batch', () => {
+				expect(textOf({ kind: 'batch', program: mockSolAddress3, children: [send, receive] })).toBe(
+					en.transaction.text.instruction_batch_via
 				);
 			});
 		});

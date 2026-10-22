@@ -745,6 +745,23 @@ describe('SolWalletConnectSignReview', () => {
 			});
 		});
 
+		it('should not take the program a token batch runs in for one the run goes through', () => {
+			const { queryByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					instructions: [
+						{
+							kind: 'batch' as const,
+							program: ORCA,
+							children: [{ kind: 'send' as const, amount: 1n, counterparty: JUPITER }]
+						}
+					]
+				}
+			});
+
+			expect(queryByTestId('venue')).not.toBeInTheDocument();
+		});
+
 		it('should show no group when the run named no program', () => {
 			const { queryByTestId } = render(SolWalletConnectSignReview, { props });
 
