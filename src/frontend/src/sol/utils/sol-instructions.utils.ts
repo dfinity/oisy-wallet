@@ -771,8 +771,8 @@ const mapSolTokenInstruction = ({
 	}
 
 	// Unwrapping pays lamports out of a wrapped SOL account to the destination the instruction names,
-	// which is the question a close answers too, and it is refused on the same terms when the answer
-	// is not the user's wallet. Paid to the wallet it stays an instruction the review does not read.
+	// which is the question a close answers too, and it is read on the same terms: paid to the
+	// user's wallet it states nothing the summary needs to carry, paid anywhere else it is refused.
 	if (instructionType === TokenInstruction.UnwrapLamports) {
 		const {
 			accounts: {
@@ -780,9 +780,7 @@ const mapSolTokenInstruction = ({
 			}
 		} = instruction;
 
-		if (destination !== userAddress) {
-			return unfaithfulInstruction();
-		}
+		return destination === userAddress ? ignoredInstruction() : unfaithfulInstruction();
 	}
 
 	if (
@@ -897,9 +895,7 @@ const mapSolToken2022Instruction = ({
 			}
 		} = instruction;
 
-		if (destination !== userAddress) {
-			return unfaithfulInstruction();
-		}
+		return destination === userAddress ? ignoredInstruction() : unfaithfulInstruction();
 	}
 
 	if (
@@ -1278,6 +1274,25 @@ export const asSolParsedRpcInstruction = (
 		return;
 	}
 
+	// Read the way the RPC returns a batch, as the instructions it carries, each read on its own: a
+	// batch the message states is then read exactly like one a program runs inside its own call. One
+	// that does not hold together, or nests another, stays unread.
+	if (isSolTokenBatch(instruction)) {
+		const batched = solBatchedInstructions(instruction);
+
+		const carried = (batched ?? []).map((inner) =>
+			isSolTokenBatch(inner) ? undefined : asSolParsedRpcInstruction(inner)
+		);
+
+		return nonNullish(batched) && carried.every(nonNullish)
+			? {
+					program: vocabulary.program,
+					programId,
+					parsed: { type: 'batch', info: { instructions: carried.map(({ parsed }) => parsed) } }
+				}
+			: undefined;
+	}
+
 	try {
 		const decoded = parseSolInstruction(instruction);
 
@@ -1381,6 +1396,22 @@ const solBatchedInstructions = ({
 	} catch (_err: unknown) {
 		// A batch the decoder cannot read is one nothing can say anything about.
 	}
+};
+
+/**
+ * The instructions a message runs, with a token batch read as the instructions it carries.
+ *
+ * A batch that does not hold together, or that nests another, stays whole: neither program runs one,
+ * and mapped as it is, it is refused.
+ */
+export const solUnbatchedInstructions = (instruction: SolInstruction): SolInstruction[] => {
+	if (!isSolTokenBatch(instruction)) {
+		return [instruction];
+	}
+
+	const batched = solBatchedInstructions(instruction);
+
+	return nonNullish(batched) && !batched.some(isSolTokenBatch) ? batched : [instruction];
 };
 
 const INITIALIZE_ACCOUNT_TYPES = ['initializeAccount', 'initializeAccount2', 'initializeAccount3'];
@@ -1509,7 +1540,8 @@ export const mapSolInstruction = ({
 	// names, so it does what they would do stated one by one. Each is held to the reading it would
 	// get on its own, and one refused there is refused here too, with the whole message. A batch
 	// nested in a batch, which neither token program runs, and one that does not hold together are
-	// refused as well. A batch that passes stays an instruction the review does not read.
+	// refused as well. Mapped on its own, a batch that passes stays an instruction the review does
+	// not read; a message's mapping reads it as the instructions it carries instead.
 	if (isSolTokenBatch(instruction)) {
 		const batched = solBatchedInstructions(instruction);
 

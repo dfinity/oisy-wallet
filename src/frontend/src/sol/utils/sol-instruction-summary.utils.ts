@@ -1,4 +1,4 @@
-import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
+import { WSOL_DECIMALS, WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { maxBigInt } from '$lib/utils/bigint.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
@@ -6,6 +6,7 @@ import { SOLANA_KNOWN_PROGRAM_ADDRESSES } from '$sol/constants/sol-known-program
 import {
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
+	TOKEN_2022_NATIVE_MINT_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
@@ -85,6 +86,11 @@ const tokenAmount = (info: object): { amount?: bigint; decimals?: number } => {
 };
 
 const TOKEN_PROGRAMS = ['spl-token', 'spl-token-2022'];
+
+// Both token programs wrap SOL, each under a native mint of its own, and an account holding either
+// keeps what it wraps as lamports.
+const isNativeMint = (mint: SplTokenAddress | undefined): boolean =>
+	nonNullish(mint) && [WSOL_TOKEN.address, TOKEN_2022_NATIVE_MINT_ADDRESS].includes(mint);
 
 /**
  * Whether a System instruction opens an account, at an address of its own or at one derived from a
@@ -197,8 +203,115 @@ const PLUMBING_TYPES = [
 	'syncNative'
 ];
 
+const isParsedStep = (entry: unknown): entry is { type: string; info: object } =>
+	nonNullish(entry) &&
+	typeof entry === 'object' &&
+	'type' in entry &&
+	typeof entry.type === 'string' &&
+	'info' in entry &&
+	nonNullish(entry.info) &&
+	typeof entry.info === 'object';
+
+/**
+ * A token batch as the RPC returns one: the parsed instructions it carries, which come without a
+ * program of their own, since they run in the batch's. Each is given the batch's in turn. A batch
+ * whose contents are not in that shape stays whole, and describes nothing.
+ */
+export const solRpcBatchedInstructions = <
+	T extends { program?: string; parsed: { type: string; info?: object } }
+>(
+	instruction: T
+): T[] => {
+	const {
+		program,
+		parsed: { type, info }
+	} = instruction;
+
+	if (
+		type !== 'batch' ||
+		isNullish(program) ||
+		!TOKEN_PROGRAMS.includes(program) ||
+		isNullish(info)
+	) {
+		return [instruction];
+	}
+
+	const carried = field({ info, key: 'instructions' });
+
+	if (!Array.isArray(carried) || carried.length === 0) {
+		return [instruction];
+	}
+
+	const entries = carried.filter(isParsedStep);
+
+	return entries.length === carried.length
+		? entries.map((parsed) => ({ ...instruction, parsed }))
+		: [instruction];
+};
+
+/**
+ * Whether the run returns calls made inside a token batch: every call of a top-level batch's
+ * instruction, or, for a batch a program runs, the calls right after it one level deeper. A depth
+ * the RPC leaves out counts as inside, the reading that trusts no order.
+ */
+export const solRpcBatchMadeCalls = ({
+	inner,
+	position
+}: {
+	inner: readonly unknown[];
+	// Where the batch sits among the calls, absent for a batch the message states.
+	position?: number;
+}): boolean => {
+	if (isNullish(position)) {
+		return inner.length > 0;
+	}
+
+	const next = inner[position + 1];
+
+	if (isNullish(next)) {
+		return false;
+	}
+
+	const height = stackHeightOf(inner[position]);
+	const nextHeight = stackHeightOf(next);
+
+	return isNullish(height) || isNullish(nextHeight) || nextHeight > height;
+};
+
+/**
+ * A token batch as the instructions it carries, in the order they ran with the calls the run
+ * returns for it. The RPC returns every call made inside a batch after all its steps, with nothing
+ * saying which step made it, and a step can make calls in the middle of the batch, such as a
+ * Token-2022 transfer running its mint's hook. A batch of one step made them after that step; one
+ * of more stays whole, since no order between its steps and those calls can be trusted.
+ */
+export const solRpcOrderedBatchedInstructions = <
+	T extends { program?: string; parsed: { type: string; info?: object } }
+>({
+	instruction,
+	madeCalls
+}: {
+	instruction: T;
+	madeCalls: boolean;
+}): T[] => {
+	const carried = solRpcBatchedInstructions(instruction);
+
+	return madeCalls && carried.length > 1 ? [instruction] : carried;
+};
+
+const isTokenBatch = ({ program, parsed: { type } }: SolParsedRpcInstruction): boolean =>
+	nonNullish(program) && TOKEN_PROGRAMS.includes(program) && type === 'batch';
+
+// A token batch's instructions are marked as its own, so its lines can be gathered under it. The
+// mark names one batch among all the instructions of the transaction, and the program it runs in.
+interface SolBatchMark {
+	id: string;
+	program: SolAddress;
+}
+
 interface Effect extends SolInstructionSummary {
 	parentIndex: number;
+	batch?: SolBatchMark;
 }
 
 /**
@@ -318,18 +431,23 @@ const callersOf = ({
 	});
 };
 
+interface FlattenedInstruction {
+	parentIndex: number;
+	topLevel: boolean;
+	instruction: SolParsedRpcInstruction;
+	madeBy?: SolAddress;
+	batch?: SolBatchMark;
+	// A token batch left whole, whose steps nobody read in order.
+	wholeBatch?: boolean;
+}
+
 const flatten = ({
 	instructions,
 	innerInstructions
 }: {
 	instructions: readonly unknown[];
 	innerInstructions: readonly SolInstructionGroup[];
-}): {
-	parentIndex: number;
-	topLevel: boolean;
-	instruction: SolParsedRpcInstruction;
-	madeBy?: SolAddress;
-}[] =>
+}): FlattenedInstruction[] =>
 	instructions.flatMap((instruction, parentIndex) => {
 		const inner = innerInstructions.find(({ index }) => index === parentIndex)?.instructions ?? [];
 
@@ -340,21 +458,51 @@ const flatten = ({
 		// that program's own plumbing and is already described by the instruction that caused it.
 		// Marked before the parse filter, so an unreadable top-level call does not promote its first
 		// inner one.
-		return [
-			{ instruction, topLevel: true, madeBy: undefined },
-			...inner.map((nested, index) => ({
-				instruction: nested,
-				topLevel: false,
-				madeBy: callers[index]
-			}))
-		]
-			.filter(({ instruction: candidate }) => isParsed(candidate))
-			.map(({ instruction: parsed, topLevel, madeBy }) => ({
-				parentIndex,
-				topLevel,
-				instruction: parsed as SolParsedRpcInstruction,
-				...(nonNullish(madeBy) && { madeBy })
-			}));
+		return (
+			[
+				{
+					instruction,
+					topLevel: true,
+					madeBy: undefined,
+					madeCalls: solRpcBatchMadeCalls({ inner })
+				},
+				...inner.map((nested, index) => ({
+					instruction: nested,
+					topLevel: false,
+					madeBy: callers[index],
+					madeCalls: solRpcBatchMadeCalls({ inner, position: index })
+				}))
+			]
+				.filter(({ instruction: candidate }) => isParsed(candidate))
+				// A token batch runs the instructions it carries one after the other, so each takes the
+				// batch's place in turn, marked as the batch's, and made by whatever made the batch. One
+				// whose contents cannot be read, or whose steps cannot be put in order with the calls
+				// made inside it, stays whole, and describes nothing.
+				.flatMap<FlattenedInstruction>(
+					({ instruction: candidate, topLevel, madeBy, madeCalls }, position) => {
+						const parsed = candidate as SolParsedRpcInstruction;
+						const carried = solRpcOrderedBatchedInstructions({ instruction: parsed, madeCalls });
+
+						return carried.length === 1 && carried[0] === parsed
+							? [
+									{
+										parentIndex,
+										topLevel,
+										instruction: parsed,
+										...(nonNullish(madeBy) && { madeBy }),
+										...(isTokenBatch(parsed) && { wholeBatch: true })
+									}
+								]
+							: carried.map((entry) => ({
+									parentIndex,
+									topLevel,
+									instruction: entry,
+									...(nonNullish(madeBy) && { madeBy }),
+									batch: { id: `${parentIndex}:${position}`, program: parsed.programId }
+								}));
+					}
+				)
+		);
 	});
 
 /**
@@ -498,6 +646,7 @@ const toEffect = ({
 	mintAt,
 	returnedAt,
 	accountTokenAmounts,
+	accountUnsynced,
 	rentExemptMinimum,
 	flattened
 }: {
@@ -530,6 +679,8 @@ const toEffect = ({
 	// What each token account held going in, so a close of an empty wrapped SOL account is not
 	// described as unwrapping something.
 	accountTokenAmounts: Partial<Record<SolAddress, bigint>>;
+	// What each wrapped SOL account held going in that no sync has counted yet.
+	accountUnsynced: Partial<Record<SolAddress, bigint>>;
 	// What a token account of the usual size costs to exist, read from the chain.
 	rentExemptMinimum: bigint | undefined;
 	flattened: { instruction: SolParsedRpcInstruction }[];
@@ -686,6 +837,59 @@ const toEffect = ({
 			});
 		}
 
+		// Unwrapping pays lamports out of a wrapped SOL account to the destination it names, which
+		// leaves the account open and moves its wrapped SOL like a transfer does. An amount left
+		// unstated is everything the account wraps, as it stands at this instruction.
+		if (type === 'unwrapLamports') {
+			const source = address({ info, key: 'source' });
+			const destination = address({ info, key: 'destination' });
+			const stated = amount({ info, key: 'amount' });
+
+			const wrapped =
+				isNullish(stated) && nonNullish(source)
+					? heldAtInstruction({
+							account: source,
+							native: true,
+							flattened,
+							accountTokenAmounts,
+							accountUnsynced,
+							rentExemptMinimum,
+							payoutAt: returnedAt,
+							until: position
+						})
+					: undefined;
+
+			const effect = transferEffect({
+				info: nonNullish(wrapped) ? { ...info, amount: wrapped } : info,
+				isOwned,
+				mintOf: (account) => mintAt({ account, position })
+			});
+
+			if (isNullish(effect)) {
+				return undefined;
+			}
+
+			// The source holds the native mint of the program that runs the unwrap, or the program
+			// refuses it, so that is the mint whether or not a run read the account. The amount is
+			// lamports, which a native mint counts with the same precision on every network. One that
+			// names none says so, which is what the line can still state when nobody read the amount.
+			const unwrapping = {
+				...effect,
+				tokenAddress:
+					programId === TOKEN_2022_PROGRAM_ADDRESS
+						? TOKEN_2022_NATIVE_MINT_ADDRESS
+						: WSOL_TOKEN.address,
+				...(isNullish(stated) && { unwrapsAll: true }),
+				decimals: WSOL_DECIMALS
+			};
+
+			// Paid to the wallet, what leaves the account arrives there as SOL itself, whoever held
+			// it, and what the wallet holds has to count it.
+			return nonNullish(destination) && destination === userAddress
+				? { ...unwrapping, unwrapsToWallet: true }
+				: unwrapping;
+		}
+
 		if (type === 'closeAccount') {
 			const account = address({ info, key: 'account' });
 			const owner = address({ info, key: 'owner' });
@@ -759,12 +963,14 @@ const toEffect = ({
 			// What it held when it closed, not before the transaction ran: the swaps that open one
 			// wrap into it and unwrap out of it within the same message, and one that pre-dates the
 			// message can be emptied before its close just the same.
-			const wrapped = heldAtInstruction({
+			const wrapped = heldAboveReserveAtInstruction({
 				account,
 				native: mint === WSOL_TOKEN.address,
 				flattened,
 				accountTokenAmounts,
+				accountUnsynced,
 				rentExemptMinimum,
+				payoutAt: returnedAt,
 				until: position
 			});
 
@@ -879,54 +1085,91 @@ const toEffect = ({
 };
 
 /**
- * What a token account holds by the time an instruction reaches it.
- *
- * The same walk the lamports take, over the token balance: from what it held before the
+ * What a token account holds as a walk stands, in the two parts the token programs keep apart for
+ * wrapped SOL: the token amount, which transfers and unwraps move, and lamports paid in on top of
+ * the amount and the reserve that no sync has counted yet. A close hands back both. An unwrap of
+ * everything moves the amount alone, until `syncNative` folds the rest into it. An account of any
+ * other mint holds its amount alone.
+ */
+interface HeldBalance {
+	amount: bigint | undefined;
+	unsynced: bigint | undefined;
+}
+
+// A sum is known only when every part of it is.
+const plus = (parts: (bigint | undefined)[]): bigint | undefined =>
+	parts.reduce<bigint | undefined>(
+		(acc, part) => (nonNullish(acc) && nonNullish(part) ? acc + part : undefined),
+		ZERO
+	);
+
+// The instructions that set a wrapped SOL account's amount to every lamport above its reserve:
+// syncing it, and initialising it, which is where an opening's funding becomes its balance.
+const SYNCING_TYPES = [
+	'syncNative',
+	'initializeAccount',
+	'initializeAccount2',
+	'initializeAccount3'
+];
+
+/**
+ * The same walk the lamports take, over the token balance: from what the account held before the
  * transaction, or from nothing when this message opened it, plus every transfer in and out since.
  * Reading the state from before the transaction instead says a wrapped SOL account emptied on the
  * way still holds what it started with, and calls its close an unwrap of something already gone.
  *
+ * Going in, an account holds what the run read: its amount, and the lamports above the reserve it
+ * states and that amount, which a sync in the message folds in. Where no run read the reserve the
+ * account is taken as synced, and only lamports the message pays in wait for a sync.
+ *
  * Undefined when there is nothing to start from: an account that pre-dates the message and whose
  * state no run read is one whose balance nobody knows.
  */
-const heldAtInstruction = ({
+const balanceAtInstruction = ({
 	account,
 	native,
 	flattened,
 	accountTokenAmounts,
+	accountUnsynced,
 	rentExemptMinimum,
+	payoutAt,
 	until
 }: {
 	account: SolAddress;
-	// Whether the account holds wrapped SOL, whose balance is its lamports: a System transfer into
-	// one is the wrapping, and raises the token balance with them. Of any other mint it does not.
+	// Whether the account holds wrapped SOL, whose token amount is lamports: a System transfer into
+	// one is the wrapping, counted in the amount once the account is synced. Of any other mint,
+	// lamports paid in stay lamports.
 	native: boolean;
 	flattened: { instruction: SolParsedRpcInstruction }[];
 	accountTokenAmounts: Partial<Record<SolAddress, bigint>>;
+	// What each wrapped SOL account held going in that no sync has counted yet, where a run read it.
+	accountUnsynced: Partial<Record<SolAddress, bigint>>;
 	// What the chain charges a token account of the usual size to exist. A creation may fund one
 	// with more than that and let its initialisation read the difference as the balance, so the
 	// two cannot be told apart without knowing where the line falls.
 	rentExemptMinimum: bigint | undefined;
+	// What the close at a position pays out, as the close walk has it.
+	payoutAt: (position: number) => bigint | undefined;
 	until: number;
-}): bigint | undefined =>
-	flattened.slice(0, until).reduce<bigint | undefined>(
+}): HeldBalance | undefined => {
+	const amountBefore = accountTokenAmounts[account];
+
+	return flattened.slice(0, until).reduce<HeldBalance | undefined>(
 		(
-			acc,
+			held,
 			{
 				instruction: {
 					program,
 					parsed: { type, info }
 				}
-			}
+			},
+			position
 		) => {
+			const token = nonNullish(program) && TOKEN_PROGRAMS.includes(program);
+
 			// A close of this account ends it, and an address closed and opened again within the one
 			// message is two accounts. Until something opens it again there is no balance to state.
-			if (
-				nonNullish(program) &&
-				TOKEN_PROGRAMS.includes(program) &&
-				type === 'closeAccount' &&
-				address({ info, key: 'account' }) === account
-			) {
+			if (token && type === 'closeAccount' && address({ info, key: 'account' }) === account) {
 				return undefined;
 			}
 
@@ -940,46 +1183,90 @@ const heldAtInstruction = ({
 				address({ info, key: 'newAccount' }) === account
 			) {
 				if (!native) {
-					return ZERO;
+					return { amount: ZERO, unsynced: ZERO };
 				}
 
 				const lamports = amount({ info, key: 'lamports' });
 
-				return nonNullish(lamports) &&
-					nonNullish(rentExemptMinimum) &&
-					amount({ info, key: 'space' }) === ATA_SIZE
-					? maxBigInt(lamports - rentExemptMinimum, ZERO)
-					: undefined;
+				return {
+					amount:
+						nonNullish(lamports) &&
+						nonNullish(rentExemptMinimum) &&
+						amount({ info, key: 'space' }) === ATA_SIZE
+							? maxBigInt(lamports - rentExemptMinimum, ZERO)
+							: undefined,
+					unsynced: ZERO
+				};
 			}
 
-			// An amount nobody knows stays unknown whatever moves after it.
-			if (isNullish(acc)) {
-				return acc;
+			// Nothing to start from stays nothing whatever moves after it.
+			if (isNullish(held)) {
+				return held;
 			}
 
-			// Wrapping: a System transfer into a wrapped SOL account raises its token balance with
-			// its lamports, because there the two are the same thing.
+			// A close of another account pays everything it held into the one it names, and in a
+			// wrapped SOL account those are lamports no sync counted yet.
+			if (
+				native &&
+				token &&
+				type === 'closeAccount' &&
+				address({ info, key: 'destination' }) === account
+			) {
+				return { ...held, unsynced: plus([held.unsynced, payoutAt(position)]) };
+			}
+
+			// Wrapping: a System transfer into a wrapped SOL account pays lamports in, which its token
+			// amount counts once the account is synced.
 			if (native && program === 'system' && type === 'transfer') {
-				const wrapping = amount({ info, key: 'lamports' });
-
-				return nonNullish(wrapping) && address({ info, key: 'destination' }) === account
-					? acc + wrapping
-					: acc;
+				return address({ info, key: 'destination' }) === account
+					? { ...held, unsynced: plus([held.unsynced, amount({ info, key: 'lamports' })]) }
+					: held;
 			}
 
 			if (
-				isNullish(program) ||
-				!TOKEN_PROGRAMS.includes(program) ||
-				!['transfer', 'transferChecked'].includes(type)
+				native &&
+				token &&
+				SYNCING_TYPES.includes(type) &&
+				address({ info, key: 'account' }) === account
 			) {
-				return acc;
+				return { amount: plus([held.amount, held.unsynced]), unsynced: ZERO };
+			}
+
+			// Unwrapping takes the amount it states, or the whole amount, out of the token amount. Paid
+			// elsewhere, the lamports leave with it; into the account itself they stay, on top of an
+			// amount that dropped all the same. Paid into another wrapped SOL account, they arrive
+			// there the way a wrapping does, by an amount nobody knows when the unwrap states none.
+			if (native && token && type === 'unwrapLamports') {
+				const unwrapped = amount({ info, key: 'amount' });
+				const outOf = address({ info, key: 'source' }) === account;
+				const into = address({ info, key: 'destination' }) === account;
+
+				if (!outOf) {
+					return into ? { ...held, unsynced: plus([held.unsynced, unwrapped]) } : held;
+				}
+
+				const remaining = isNullish(unwrapped)
+					? ZERO
+					: nonNullish(held.amount)
+						? maxBigInt(held.amount - unwrapped, ZERO)
+						: undefined;
+
+				return {
+					amount: remaining,
+					unsynced: into ? plus([held.unsynced, unwrapped ?? held.amount]) : held.unsynced
+				};
+			}
+
+			if (!token || !['transfer', 'transferChecked'].includes(type)) {
+				return held;
 			}
 
 			const moved =
 				type === 'transferChecked' ? tokenAmount(info).amount : amount({ info, key: 'amount' });
 
-			if (isNullish(moved)) {
-				return acc;
+			// An amount nobody knows stays unknown whatever moves after it.
+			if (isNullish(moved) || isNullish(held.amount)) {
+				return held;
 			}
 
 			const into = address({ info, key: 'destination' }) === account;
@@ -988,13 +1275,38 @@ const heldAtInstruction = ({
 			// Moving nothing for the account unless exactly one end is it: a transfer from it to itself
 			// leaves the balance where it was, and reading the destination alone counts it in.
 			if (into === outOf) {
-				return acc;
+				return held;
 			}
 
-			return into ? acc + moved : maxBigInt(acc - moved, ZERO);
+			return {
+				...held,
+				amount: into ? held.amount + moved : maxBigInt(held.amount - moved, ZERO)
+			};
 		},
-		accountTokenAmounts[account]
+		nonNullish(amountBefore)
+			? { amount: amountBefore, unsynced: native ? (accountUnsynced[account] ?? ZERO) : ZERO }
+			: undefined
 	);
+};
+
+type BalanceParams = Parameters<typeof balanceAtInstruction>[0];
+
+/**
+ * What a token account holds in tokens by the time an instruction reaches it, which is what an
+ * unwrap naming no amount moves.
+ */
+const heldAtInstruction = (params: BalanceParams): bigint | undefined =>
+	balanceAtInstruction(params)?.amount;
+
+/**
+ * Everything a token account holds above its reserve by the time an instruction reaches it: what
+ * it wraps, and lamports paid in that no sync counted yet. A close hands both back.
+ */
+const heldAboveReserveAtInstruction = (params: BalanceParams): bigint | undefined => {
+	const held = balanceAtInstruction(params);
+
+	return plus([held?.amount, held?.unsynced]);
+};
 
 /**
  * Whose a token account is and which mint it holds, as of an instruction: what it was opened as,
@@ -1181,7 +1493,8 @@ const initialisedInMessage = ({
 const closePayouts = ({
 	flattened,
 	accountLamports,
-	mintAt
+	mintAt,
+	wrappedAt
 }: {
 	flattened: { instruction: SolParsedRpcInstruction }[];
 	// What each account held going in, so a chain can start from an account that already existed.
@@ -1189,6 +1502,13 @@ const closePayouts = ({
 	// Which mint an account holds as of an instruction. A wrapped SOL account's token balance is
 	// its lamports, so a token transfer in or out of one moves lamports; of any other mint, none.
 	mintAt: (params: { account: SolAddress; position: number }) => SplTokenAddress | undefined;
+	// What a wrapped SOL account wraps as of an instruction, which is what an unwrap naming no
+	// amount moves.
+	wrappedAt: (params: {
+		account: SolAddress;
+		position: number;
+		payoutAt: (position: number) => bigint | undefined;
+	}) => bigint | undefined;
 }): Map<number, bigint | undefined> => {
 	// What each account holds as the walk stands. Absent means untouched so far, and an untouched
 	// account holds what it held going in, which may be unknown.
@@ -1197,8 +1517,24 @@ const closePayouts = ({
 	const held = (account: SolAddress): bigint | undefined =>
 		lamports.has(account) ? lamports.get(account) : accountLamports[account];
 
-	const add = ({ account, value }: { account: SolAddress; value: bigint }) =>
-		lamports.set(account, (held(account) ?? ZERO) + value);
+	// Paying in adds to what an account holds. One nobody read and nothing has touched yet starts
+	// from nothing, as an account the message opens does; one this walk has lost track of stays
+	// unknown, rather than holding only what arrived since.
+	const add = ({ account, value }: { account: SolAddress; value: bigint }) => {
+		const balance = held(account);
+
+		lamports.set(
+			account,
+			isNullish(balance) && lamports.has(account) ? undefined : (balance ?? ZERO) + value
+		);
+	};
+
+	// Paying out of an amount nobody knows leaves one nobody knows.
+	const take = ({ account, value }: { account: SolAddress; value: bigint }) => {
+		const balance = held(account);
+
+		lamports.set(account, isNullish(balance) ? undefined : maxBigInt(balance - value, ZERO));
+	};
 
 	const payouts = new Map<number, bigint | undefined>();
 
@@ -1227,8 +1563,14 @@ const closePayouts = ({
 				payouts.set(position, payout);
 				lamports.set(account, ZERO);
 
-				if (nonNullish(destination) && destination !== account && nonNullish(payout)) {
-					add({ account: destination, value: payout });
+				// What arrives at the destination is all of it, so an amount nobody knows leaves the
+				// destination holding one nobody knows either.
+				if (nonNullish(destination) && destination !== account) {
+					if (nonNullish(payout)) {
+						add({ account: destination, value: payout });
+					} else {
+						lamports.set(destination, undefined);
+					}
 				}
 
 				return;
@@ -1249,15 +1591,48 @@ const closePayouts = ({
 					return;
 				}
 
-				if (
-					nonNullish(destination) &&
-					mintAt({ account: destination, position }) === WSOL_TOKEN.address
-				) {
+				if (nonNullish(destination) && isNativeMint(mintAt({ account: destination, position }))) {
 					add({ account: destination, value: moved });
 				}
 
-				if (nonNullish(source) && mintAt({ account: source, position }) === WSOL_TOKEN.address) {
-					lamports.set(source, maxBigInt((held(source) ?? ZERO) - moved, ZERO));
+				if (nonNullish(source) && isNativeMint(mintAt({ account: source, position }))) {
+					take({ account: source, value: moved });
+				}
+
+				return;
+			}
+
+			// Unwrapping moves lamports out of a wrapped SOL account and leaves it open. An amount left
+			// unstated is everything it wraps as of this instruction, which this walk does not know
+			// apart from its rent but the token balance walk does, as for the unwrap's own line. Only
+			// when that is unknown too do both ends hold an amount nobody can state, rather than one
+			// this walk made up.
+			if (nonNullish(program) && TOKEN_PROGRAMS.includes(program) && type === 'unwrapLamports') {
+				const source = address({ info, key: 'source' });
+				const destination = address({ info, key: 'destination' });
+
+				if (isNullish(source) || source === destination) {
+					return;
+				}
+
+				const moved =
+					amount({ info, key: 'amount' }) ??
+					wrappedAt({ account: source, position, payoutAt: (at) => payouts.get(at) });
+
+				if (isNullish(moved)) {
+					lamports.set(source, undefined);
+
+					if (nonNullish(destination)) {
+						lamports.set(destination, undefined);
+					}
+
+					return;
+				}
+
+				take({ account: source, value: moved });
+
+				if (nonNullish(destination)) {
+					add({ account: destination, value: moved });
 				}
 
 				return;
@@ -1380,7 +1755,43 @@ const asWrap = ({
 			}
 		: effect;
 
-const strip = ({ parentIndex: _parentIndex, ...view }: Effect): SolInstructionSummary => view;
+const strip = ({
+	parentIndex: _parentIndex,
+	batch: _batch,
+	...view
+}: Effect): SolInstructionSummary => view;
+
+/**
+ * The lines of each token batch, gathered under one that names the batch and the program it runs in.
+ *
+ * A batch is one instruction to the network, and every line under it is that instruction's doing:
+ * listed flat, its lines would read as ones the message states one by one. They are consecutive,
+ * since the program runs a batch's instructions one after the other and nothing in between.
+ */
+const groupBatches = (effects: Effect[]): Effect[] =>
+	effects
+		.reduce<Effect[][]>((runs, effect) => {
+			const run = runs[runs.length - 1];
+
+			const continues =
+				nonNullish(run) && nonNullish(effect.batch) && run[0].batch?.id === effect.batch.id;
+
+			return continues ? [...runs.slice(0, -1), [...run, effect]] : [...runs, [effect]];
+		}, [])
+		.flatMap((run) => {
+			const [{ parentIndex, batch }] = run;
+
+			return isNullish(batch)
+				? run
+				: [
+						{
+							kind: 'batch' as const,
+							program: batch.program,
+							children: run.map(strip),
+							parentIndex
+						}
+					];
+		});
 
 /**
  * Every line of a top-level instruction the wallet could not read, gathered under it.
@@ -1403,10 +1814,13 @@ const groupUnread = ({
 		.reduce<Effect[][]>((runs, effect) => {
 			const run = runs[runs.length - 1];
 
+			// The line saying nobody read an instruction stands on its own, beside whatever the
+			// instruction's calls made, so it reads as the instruction's rather than as one of them.
 			const continues =
 				nonNullish(run) &&
 				unread.has(effect.parentIndex) &&
-				run[0].parentIndex === effect.parentIndex;
+				run[0].parentIndex === effect.parentIndex &&
+				effect.kind !== 'unknown';
 
 			return continues ? [...runs.slice(0, -1), [...run, effect]] : [...runs, [effect]];
 		}, [])
@@ -1485,6 +1899,24 @@ export const solOpensAccountBeyondRent = ({
 	);
 
 /**
+ * Whether a simulated run keeps a token batch whole: one whose contents cannot be read, or one of
+ * several steps the run returns calls made inside, which nothing puts in order with its steps.
+ *
+ * The list states such a batch as an instruction nobody read and none of its steps, so whatever a
+ * step pays the wallet goes unstated too, which the check on an application's close relies on. That
+ * holds whatever the message's own mapping read of the steps, which cannot say where the calls ran
+ * either.
+ */
+export const solKeepsBatchWhole = ({
+	instructions,
+	innerInstructions
+}: {
+	instructions: readonly unknown[];
+	innerInstructions: readonly SolInstructionGroup[];
+}): boolean =>
+	flatten({ instructions, innerInstructions }).some(({ wholeBatch }) => wholeBatch ?? false);
+
+/**
  * The instruction list the review shows, from a transaction's own instructions and the ones a
  * simulation says it would make inside them.
  *
@@ -1506,6 +1938,7 @@ export const mapSolInstructionSummaries = ({
 	accountMintsBefore = {},
 	accountLamports = {},
 	accountTokenAmounts = {},
+	accountUnsynced = {},
 	rentExemptMinimum,
 	closedAccounts = [],
 	includeUnrecognised = false
@@ -1529,6 +1962,11 @@ export const mapSolInstructionSummaries = ({
 	// What each token account held before the transaction ran. A wrapped SOL account holding
 	// nothing is closed rather than unwrapped, and the line says so.
 	accountTokenAmounts?: Partial<Record<SolAddress, bigint>>;
+	// What each wrapped SOL account held before the transaction ran beyond the reserve it states and
+	// its amount, where a run read that reserve: lamports no sync has counted yet. An account absent
+	// here is taken as synced, as a transaction already on chain has to be, its records stating no
+	// reserve.
+	accountUnsynced?: Partial<Record<SolAddress, bigint>>;
 	// What a token account of the usual size costs to exist. Without it, an account this message
 	// opens holds an amount nobody can state rather than nothing.
 	rentExemptMinimum?: bigint;
@@ -1571,7 +2009,23 @@ export const mapSolInstructionSummaries = ({
 		);
 	};
 
-	const payouts = closePayouts({ flattened, accountLamports, mintAt });
+	const payouts = closePayouts({
+		flattened,
+		accountLamports,
+		mintAt,
+		// The source of an unwrap holds wrapped SOL, or the program refuses it.
+		wrappedAt: ({ account, position, payoutAt }) =>
+			heldAtInstruction({
+				account,
+				native: true,
+				flattened,
+				accountTokenAmounts,
+				accountUnsynced,
+				rentExemptMinimum,
+				payoutAt,
+				until: position
+			})
+	});
 
 	const owned = expandOwnedAccounts({ flattened, ownedAddresses });
 
@@ -1639,8 +2093,8 @@ export const mapSolInstructionSummaries = ({
 		}, [])
 	]);
 
-	const effects = flattened.reduce<Effect[]>(
-		(acc, { parentIndex, topLevel, instruction, madeBy }, position) => {
+	const { effects, unstated } = flattened.reduce<{ effects: Effect[]; unstated: number[] }>(
+		(acc, { parentIndex, topLevel, instruction, madeBy, batch }, position) => {
 			const effect = toEffect({
 				instruction,
 				topLevel,
@@ -1653,12 +2107,18 @@ export const mapSolInstructionSummaries = ({
 				mintAt,
 				returnedAt: (at) => payouts.get(at),
 				accountTokenAmounts,
+				accountUnsynced,
 				rentExemptMinimum,
 				flattened
 			});
 
+			// A step of a batch the message states gets the reading it would get stated on its own,
+			// where one that produces no line and is not plumbing is an instruction nobody read. The
+			// lines of the batch's other steps cover its index, so it is recorded by that index here.
 			if (isNullish(effect)) {
-				return acc;
+				return nonNullish(batch) && topLevel && !PLUMBING_TYPES.includes(instruction.parsed.type)
+					? { ...acc, unstated: [...acc.unstated, parentIndex] }
+					: acc;
 			}
 
 			const wrapped = asWrap({
@@ -1695,18 +2155,22 @@ export const mapSolInstructionSummaries = ({
 					? madeBy
 					: undefined;
 
-			return [
+			return {
 				...acc,
-				{
-					...wrapped,
-					...(nonNullish(rent) && { rent }),
-					...(nonNullish(payer) && { payer }),
-					...(nonNullish(via) && { via }),
-					parentIndex
-				}
-			];
+				effects: [
+					...acc.effects,
+					{
+						...wrapped,
+						...(nonNullish(rent) && { rent }),
+						...(nonNullish(payer) && { payer }),
+						...(nonNullish(via) && { via }),
+						parentIndex,
+						...(nonNullish(batch) && { batch })
+					}
+				]
+			};
 		},
-		[]
+		{ effects: [], unstated: [] }
 	);
 
 	// Each close hangs under the instruction that made it, after that instruction's other lines: the
@@ -1720,7 +2184,7 @@ export const mapSolInstructionSummaries = ({
 		[]
 	);
 
-	const described = [...effects, ...closes].sort(
+	const described = [...groupBatches(effects), ...closes].sort(
 		({ parentIndex: first }, { parentIndex: second }) => first - second
 	);
 
@@ -1730,11 +2194,31 @@ export const mapSolInstructionSummaries = ({
 	// order the run would take rather than as the recognised instructions with the gaps closed up.
 	const covered = new Set(described.map(({ parentIndex }) => parentIndex));
 
+	// A batch left whole is an instruction nobody read, whatever else the instruction made: the
+	// lines beside it cannot say what its steps did. So is a batch the message states with a step
+	// nobody read, which its other steps' lines say nothing about either.
+	const unreadBatches = new Set([
+		...flattened
+			.filter(({ wholeBatch }) => wholeBatch ?? false)
+			.map(({ parentIndex }) => parentIndex),
+		...unstated
+	]);
+
+	// A batch the message states with no step nobody read is read in full, as its steps would be if
+	// the message stated them one by one, even when no line comes from it: one that carries nothing
+	// but plumbing.
+	const readBatches = new Set(
+		flattened
+			.filter(({ batch, topLevel }) => nonNullish(batch) && topLevel)
+			.map(({ parentIndex }) => parentIndex)
+			.filter((index) => !unreadBatches.has(index))
+	);
+
 	const listed = includeUnrecognised
 		? [
 				...described,
 				...instructions.reduce<Effect[]>((acc, _, index) => {
-					if (covered.has(index)) {
+					if (covered.has(index) && !unreadBatches.has(index)) {
 						return acc;
 					}
 
@@ -1743,7 +2227,11 @@ export const mapSolInstructionSummaries = ({
 					// The review already states what these do, as the priority fee it charges for.
 					// Listing them here as instructions nothing could read would be noise on every
 					// transaction that sets a compute budget, and untrue besides.
-					if (program === COMPUTE_BUDGET_PROGRAM_ADDRESS || plumbing.has(index)) {
+					if (
+						program === COMPUTE_BUDGET_PROGRAM_ADDRESS ||
+						plumbing.has(index) ||
+						readBatches.has(index)
+					) {
 						return acc;
 					}
 
