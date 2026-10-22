@@ -29,6 +29,7 @@ import type { TokenStandardCode } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
+	buildIcTokenLabels,
 	calculateTokenUsdAmount,
 	calculateTokenUsdBalance,
 	filterEnabledToken,
@@ -698,6 +699,107 @@ describe('token.utils', () => {
 			expect(isUSD1Token(USDC_TOKEN)).toBeFalsy();
 			expect(isUSD1Token(USDT_TOKEN)).toBeFalsy();
 			expect(isUSD1Token(ICP_TOKEN)).toBeFalsy();
+		});
+	});
+
+	describe('buildIcTokenLabels', () => {
+		const real = {
+			...mockValidIcToken,
+			symbol: 'XYZ',
+			name: 'XYZ Token',
+			ledgerCanisterId: 'qaa6y-5yaaa-aaaaa-aaafa-cai'
+		};
+		const impostor = { ...real, ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai' };
+
+		it('labels a token by its symbol when no other ledger claims it', () => {
+			expect(buildIcTokenLabels([ICP_TOKEN, real]).get(real.ledgerCanisterId)).toBe('XYZ');
+		});
+
+		it('suffixes both ledgers with their ids when they share a symbol', () => {
+			const labels = buildIcTokenLabels([ICP_TOKEN, real, impostor]);
+
+			expect(labels.get(real.ledgerCanisterId)).toBe('XYZ (qaa6y-5...afa-cai)');
+			expect(labels.get(impostor.ledgerCanisterId)).toBe('XYZ (mxzaz-h...ada-cai)');
+			expect(labels.get(ICP_TOKEN.ledgerCanisterId)).toBe(ICP_TOKEN.symbol);
+		});
+
+		it('treats a shared symbol as a collision even when the names differ', () => {
+			// Results show no name, so a differing name cannot tell the two apart there.
+			const labels = buildIcTokenLabels([real, { ...impostor, name: 'Something Else' }]);
+
+			expect(labels.get(impostor.ledgerCanisterId)).toBe('XYZ (mxzaz-h...ada-cai)');
+		});
+
+		it('does not flag a ledger listed twice as a collision with itself', () => {
+			// A default token that is also an enabled custom one arrives twice in enabledIcrcTokens.
+			const labels = buildIcTokenLabels([real, { ...real, name: 'custom entry' }]);
+
+			expect(labels.get(real.ledgerCanisterId)).toBe('XYZ');
+		});
+
+		describe('a ledger listed twice', () => {
+			// mapTokenOisySymbol runs only on the default-token load path, so the default entry can
+			// carry an oisySymbol that a custom duplicate of the same ledger lacks.
+			const defaultEntry = { ...real, symbol: 'RAW', oisySymbol: { oisySymbol: 'GHOSTNODE' } };
+			const customDuplicate = { ...real, symbol: 'RAW' };
+
+			it("keeps the first entry's label rather than the later duplicate's", () => {
+				expect(buildIcTokenLabels([defaultEntry, customDuplicate]).get(real.ledgerCanisterId)).toBe(
+					'GHOSTNODE'
+				);
+			});
+
+			it("does not let the duplicate's symbol invent a collision for another ledger", () => {
+				const unrelated = { ...impostor, symbol: 'RAW' };
+
+				expect(
+					buildIcTokenLabels([defaultEntry, customDuplicate, unrelated]).get(
+						unrelated.ledgerCanisterId
+					)
+				).toBe('RAW');
+			});
+		});
+
+		describe("a symbol that spells out another token's suffixed label", () => {
+			// A custom ledger can set its symbol to the literal text of the real token's suffixed
+			// label. As a raw string it is unique, so it used to be left as is.
+			const forger = {
+				...mockValidIcToken,
+				symbol: 'XYZ (qaa6y-5...afa-cai)',
+				ledgerCanisterId: 'ss2fx-dyaaa-aaaar-qacoq-cai'
+			};
+
+			it("cannot end up with the real token's label", () => {
+				const labels = buildIcTokenLabels([real, impostor, forger]);
+
+				expect(labels.get(real.ledgerCanisterId)).toBe('XYZ (qaa6y-5...afa-cai)');
+				expect(labels.get(forger.ledgerCanisterId)).toBe(
+					'XYZ (qaa6y-5...afa-cai) (ss2fx-d...coq-cai)'
+				);
+			});
+
+			it('is flagged even when nothing collides with the real token', () => {
+				// Unsuffixed, the forger would read as the real token disambiguated.
+				const labels = buildIcTokenLabels([real, forger]);
+
+				expect(labels.get(real.ledgerCanisterId)).toBe('XYZ');
+				expect(labels.get(forger.ledgerCanisterId)).toBe(
+					'XYZ (qaa6y-5...afa-cai) (ss2fx-d...coq-cai)'
+				);
+			});
+
+			it('keeps every label distinct', () => {
+				const tokens = [real, impostor, forger];
+				const labels = [...buildIcTokenLabels(tokens).values()];
+
+				expect(new Set(labels).size).toBe(tokens.length);
+			});
+		});
+
+		it('labels by the display symbol, which is what the user actually sees', () => {
+			const renamed = { ...real, oisySymbol: { oisySymbol: 'OSYM' } };
+
+			expect(buildIcTokenLabels([renamed, impostor]).get(real.ledgerCanisterId)).toBe('OSYM');
 		});
 	});
 });

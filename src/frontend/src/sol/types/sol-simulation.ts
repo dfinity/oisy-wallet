@@ -10,8 +10,12 @@ import type { SplTokenAddress } from '$sol/types/spl';
  * `program` is the account-level owner (the program the account is assigned to); the other
  * three live inside a parsed SPL token account. They are kept apart because they hand over
  * different things: the account itself, the right to spend from it, or the right to close it.
+ *
+ * `allowance` is how much a delegate that stays the same may spend. Raising it hands over more of
+ * the account without changing who holds the right, so it is a change of its own.
  */
-export type SolSimulationControlField = 'owner' | 'delegate' | 'closeAuthority' | 'program';
+export type SolSimulationControlField =
+	'owner' | 'delegate' | 'allowance' | 'closeAuthority' | 'program';
 
 export interface SolSimulationTokenDelta {
 	account: SolAddress;
@@ -20,11 +24,23 @@ export interface SolSimulationTokenDelta {
 	delta: bigint;
 }
 
+/**
+ * What a delegate may spend from a token account once the run is through, in the account's token.
+ */
+export interface SolSimulationAllowance {
+	tokenAddress: SplTokenAddress;
+	decimals: number;
+	amount: bigint;
+}
+
 export interface SolSimulationControlChange {
 	account: SolAddress;
 	field: SolSimulationControlField;
-	// Absent when the field was cleared (e.g. a revoked delegate).
+	// Absent when the field was cleared (e.g. a revoked delegate). For `allowance`, the delegate the
+	// limit belongs to.
 	to?: SolAddress;
+	// On a `delegate` or `allowance` change that leaves a delegate in place: how much it may spend.
+	allowance?: SolSimulationAllowance;
 }
 
 /**
@@ -41,6 +57,28 @@ export interface SolSimulationPreview {
 }
 
 /**
+ * An account an application's program held before a simulated run and emptied in it, with every
+ * lamport it held then.
+ */
+export interface SolClosedAccount {
+	account: SolAddress;
+	program: SolAddress;
+	lamports: bigint;
+	// The top-level instruction that emptied it, once that is established.
+	instruction?: number;
+}
+
+/**
+ * A program the simulated run calls from inside another program's instruction and that OISY does
+ * not know, with the name it publishes for itself when it publishes one. The name is the program's
+ * own claim, attested by nobody: a label for the address, never a statement about what it does.
+ */
+export interface SolUnreadProgram {
+	address: SolAddress;
+	name?: string;
+}
+
+/**
  * Everything one simulated run yields for the review.
  *
  * The preview is absent when the run changes nothing the user owns; the parties are always
@@ -50,11 +88,19 @@ export interface SolSimulationPreview {
 export interface SolSimulationResult {
 	preview?: SolSimulationPreview;
 	// What the simulated run does to the user's accounts, instruction by instruction. The message
-	// states almost none of it: a routed swap performs every transfer as a nested call.
+	// states almost none of it: a routed swap performs every transfer as a nested call. Empty when
+	// the run did nothing there is a line for, which is an answer rather than a gap.
 	instructions?: SolInstructionSummary[];
 	// What the message itself says it moves, read from its own top-level instructions rather than
 	// from the run. Whether the run agrees is the caller's to decide, since only the caller knows
 	// what the transaction costs, which the simulated balance carries and the message never states.
 	messageSummary?: SolTransactionSummary;
+	// Whether the run opens an account inside another program's instruction with more than its size
+	// costs: a payment the review refuses rather than states, as it does for the message's own.
+	opensAccountBeyondRent?: boolean;
 	parties: SolTransferParties;
+	// The programs the run calls from inside another program's instruction that are not among the
+	// known ones. Such a call can act on what the user holds in an application, which neither the
+	// preview nor the instructions describe. Empty when every nested call reaches a known program.
+	unreadPrograms: SolAddress[];
 }

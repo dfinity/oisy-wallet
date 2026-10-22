@@ -112,7 +112,7 @@
 								ariaLabel={$i18n.core.text.edit}
 								height="h-6"
 								onclick={onEditClick}
-								styleClass="inline-block align-sub"
+								styleClass="relative inline-block align-sub hit-area [--hit-area-x:0px]"
 								testId={TOKEN_MODAL_INDEX_CANISTER_ID_EDIT_BUTTON}
 								width="w-6"
 							>

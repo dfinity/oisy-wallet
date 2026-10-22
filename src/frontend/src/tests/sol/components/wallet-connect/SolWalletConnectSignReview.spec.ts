@@ -4,6 +4,9 @@ import { exchangeStore } from '$lib/stores/exchange.store';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
+import { STAKE_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
+import { SolanaNetworks } from '$sol/types/network';
 import en from '$tests/mocks/i18n.mock';
 import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -108,6 +111,69 @@ describe('SolWalletConnectSignReview', () => {
 		});
 	});
 
+	describe('programs the run calls that OISY cannot read', () => {
+		const unreadPrograms = [{ address: STAKE_PROGRAM_ADDRESS }];
+
+		const approve = (queries: { getByRole: (role: string, options: object) => HTMLElement }) =>
+			queries.getByRole('button', { name: en.core.text.approve });
+
+		it('should name them', () => {
+			const { getByTestId } = render(SolWalletConnectSignReview, {
+				props: { ...props, decoded: true, unreadPrograms }
+			});
+
+			expect(getByTestId('unread-programs')).toHaveTextContent(
+				en.wallet_connect.text.unread_programs_one
+			);
+		});
+
+		it('should hold Approve until the user confirms it', async () => {
+			const queries = render(SolWalletConnectSignReview, {
+				props: { ...props, decoded: true, unreadPrograms }
+			});
+
+			expect(approve(queries)).toBeDisabled();
+
+			await fireEvent.click(queries.getByText(en.wallet_connect.text.unread_programs_acknowledge));
+
+			expect(approve(queries)).toBeEnabled();
+		});
+
+		it('should ask nothing when the run calls only programs it knows', () => {
+			const queries = render(SolWalletConnectSignReview, {
+				props: { ...props, decoded: true, unreadPrograms: [] }
+			});
+
+			expect(queries.queryByTestId('unread-programs')).not.toBeInTheDocument();
+			expect(approve(queries)).toBeEnabled();
+		});
+
+		// There is nothing to confirm on a request OISY will not sign, and its refusal is the one
+		// thing the review has to say.
+		it('should ask nothing about a request it will not sign', () => {
+			const { queryByTestId } = render(SolWalletConnectSignReview, {
+				props: { ...props, decoded: true, ambiguous: true, unreadPrograms }
+			});
+
+			expect(queryByTestId('unread-programs')).not.toBeInTheDocument();
+		});
+
+		// The notices read `approveDisabled` as whether the request can be acted on at all. The
+		// confirmation holds the button without changing that, or waiting for it would hide them.
+		it('should leave the other notices as they are while it waits', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					decoded: true,
+					unreadPrograms,
+					preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(getByText(en.wallet_connect.text.multiple_operations)).toBeInTheDocument();
+		});
+	});
+
 	it('should say a message it will not sign cannot be shown', () => {
 		const { getByText } = render(SolWalletConnectSignReview, {
 			props: { ...props, ambiguous: true }
@@ -124,6 +190,54 @@ describe('SolWalletConnectSignReview', () => {
 		});
 
 		expect(getByRole('alert')).toHaveTextContent(en.wallet_connect.text.cannot_be_shown);
+	});
+
+	it('should say a close that pays somebody else will not be signed', () => {
+		const { getByText } = render(SolWalletConnectSignReview, {
+			props: { ...props, closesPayOthers: true }
+		});
+
+		expect(getByText(en.wallet_connect.text.close_pays_others)).toBeInTheDocument();
+	});
+
+	it('should announce that refusal to a screen reader too', () => {
+		const { getByRole } = render(SolWalletConnectSignReview, {
+			props: { ...props, closesPayOthers: true }
+		});
+
+		expect(getByRole('alert')).toHaveTextContent(en.wallet_connect.text.close_pays_others);
+	});
+
+	// The instruction mapper refuses a close the message states, so both are true of the commonest
+	// case and the general sentence would be shown for the specific thing that is wrong with it.
+	it('should say which refusal it is when a close is both', () => {
+		const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+			props: { ...props, ambiguous: true, closesPayOthers: true }
+		});
+
+		expect(getByText(en.wallet_connect.text.close_pays_others)).toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.cannot_be_shown)).not.toBeInTheDocument();
+	});
+
+	it('should say nothing else about a close it will not sign', () => {
+		// Same reasoning as the ambiguous case: none of the caveats qualify a review nobody acts on.
+		const { queryByText } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				closesPayOthers: true,
+				parties: { sources: [], destinations: [], partial: true },
+				preview: {
+					solDelta: -5_000n,
+					tokenDeltas: [],
+					controlChanges: [
+						{ account: mockSolAddress2, field: 'owner' as const, to: mockAtaAddress }
+					]
+				}
+			}
+		});
+
+		expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
 	});
 
 	it('should say nothing else about a message it will not sign', () => {
@@ -284,6 +398,48 @@ describe('SolWalletConnectSignReview', () => {
 		});
 
 		expect(queryByTestId('ata-fee')).not.toBeInTheDocument();
+	});
+
+	// The rent sits in an account the application controls, so it is stated apart from the rent of
+	// the user's own token accounts.
+	it('should state what opening an application’s account costs as its own line', () => {
+		const { getByTestId } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{
+						kind: 'route' as const,
+						program: 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo',
+						children: [
+							{
+								kind: 'createAccount' as const,
+								account: 'BNzxjYNsUyyUyJgds2qYqtpThcd6FPnucFKXfWGzweDK',
+								program: 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo',
+								rent: 41_899_840n
+							}
+						]
+					},
+					{ kind: 'createTokenAccount' as const, account: 'ata-one', rent: 2_039_280n }
+				]
+			}
+		});
+
+		expect(getByTestId('app-account-fee')).toHaveTextContent(en.fee.text.app_account_kind);
+		expect(getByTestId('app-account-fee')).toHaveTextContent('0.04189984');
+		expect(getByTestId('ata-fee')).toHaveTextContent('0.00203928');
+	});
+
+	it('should state no application account cost when the message opens none', () => {
+		const { queryByTestId } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{ kind: 'createTokenAccount' as const, account: 'ata-one', rent: 2_039_280n }
+				]
+			}
+		});
+
+		expect(queryByTestId('app-account-fee')).not.toBeInTheDocument();
 	});
 
 	it('should charge no rent when the message opens no account', () => {
@@ -448,6 +604,35 @@ describe('SolWalletConnectSignReview', () => {
 			expect(getByTestId('message-summary')).toHaveTextContent(en.send.text.send);
 		});
 
+		// The rent of an application's account is a cost the fee section states, like the base fee,
+		// so the run taking it is no disagreement with the message. Grouped the way the Meteora
+		// position request lists it: under the instruction that opens the account.
+		it('should allow for the rent of an application’s account the run pays', () => {
+			const { getByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					messageSummary,
+					instructions: [
+						{
+							kind: 'route' as const,
+							program: 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo',
+							children: [
+								{
+									kind: 'createAccount' as const,
+									account: 'BNzxjYNsUyyUyJgds2qYqtpThcd6FPnucFKXfWGzweDK',
+									program: 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo',
+									rent: 41_899_840n
+								}
+							]
+						}
+					],
+					preview: { solDelta: -42_904_840n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(getByTestId('message-summary')).toHaveTextContent(en.send.text.send);
+		});
+
 		// Every signature pays the base fee out of the SOL balance the run reports, so a send the
 		// dApp co-signs takes two of them beyond what it moves.
 		it('should allow for every signature the message requires', () => {
@@ -507,6 +692,60 @@ describe('SolWalletConnectSignReview', () => {
 			});
 
 			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
+		});
+
+		describe('a swap into a token the wallet does not list', () => {
+			const swap = {
+				kind: 'swap' as const,
+				spent: { delta: -1_000_000n },
+				received: { tokenAddress: 'unlisted-mint', delta: 2_500_000n, decimals: 6 }
+			};
+
+			const preview = {
+				solDelta: -1_005_000n,
+				tokenDeltas: [
+					{ account: mockAtaAddress, tokenAddress: 'unlisted-mint', decimals: 6, delta: 2_500_000n }
+				],
+				controlChanges: []
+			};
+
+			beforeEach(() => {
+				splTokenMetadataStore.set({
+					network: SolanaNetworks.mainnet,
+					metadata: { 'unlisted-mint': { name: 'Ping', symbol: 'PING' } }
+				});
+			});
+
+			afterEach(() => {
+				splTokenMetadataStore.reset();
+			});
+
+			// The sentence names what the user receives, and the symbol the mint carries is its
+			// creator's choice: it is stated inside the placeholder, never as the token's name.
+			it('should state the symbol the mint carries inside the placeholder', () => {
+				const { getByTestId } = render(SolWalletConnectSignReview, {
+					props: { ...props, messageSummary: swap, preview }
+				});
+
+				expect(getByTestId('message-summary')).toHaveTextContent(
+					replacePlaceholders(en.transaction.text.summary_swap, {
+						$spent_symbol: SOLANA_TOKEN.symbol,
+						$received_symbol: replacePlaceholders(en.transaction.text.unknown_token_named, {
+							$symbol: 'PING'
+						})
+					})
+				);
+			});
+
+			// The swap is a plain one the run agrees with, which the warning about several operations
+			// would misdescribe. The placeholder in the sentence already says the token is unlisted.
+			it('should not warn about multiple operations', () => {
+				const { queryByText } = render(SolWalletConnectSignReview, {
+					props: { ...props, messageSummary: swap, preview }
+				});
+
+				expect(queryByText(en.wallet_connect.text.multiple_operations)).not.toBeInTheDocument();
+			});
 		});
 	});
 
@@ -1089,5 +1328,24 @@ describe('SolWalletConnectSignReview', () => {
 		);
 
 		expect(logo).toBeInTheDocument();
+	});
+
+	describe('scam flag', () => {
+		it('does not warn about a request Verify does not flag', () => {
+			const { getByRole, queryByTestId } = render(SolWalletConnectSignReview, { props });
+
+			expect(queryByTestId('wallet-connect-scam-warning')).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeInTheDocument();
+		});
+
+		it('only offers to reject a request Verify flags as a scam, and says why', () => {
+			const { getByRole, getByTestId, queryByRole } = render(SolWalletConnectSignReview, {
+				props: { ...props, flaggedAsScam: true }
+			});
+
+			expect(getByTestId('wallet-connect-scam-warning')).toBeInTheDocument();
+			expect(queryByRole('button', { name: en.core.text.approve })).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.reject })).toBeInTheDocument();
+		});
 	});
 });

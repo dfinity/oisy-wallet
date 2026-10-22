@@ -1,4 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
+import type { OptionSolAddress } from '$sol/types/address';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 import type {
@@ -50,11 +51,17 @@ const netChangesOf = (instructions: SolInstructionSummary[]): SolNetBalanceChang
  * makes a disagreement between the two visible at all.
  */
 export const deriveSolMessageSummary = ({
-	instructions
+	instructions,
+	userAddress
 }: {
 	instructions: SolInstructionSummary[];
+	userAddress: OptionSolAddress;
 }): SolTransactionSummary =>
-	deriveSolTransactionSummary({ netChanges: netChangesOf(instructions), instructions });
+	deriveSolTransactionSummary({
+		netChanges: netChangesOf(instructions),
+		instructions,
+		userAddress
+	});
 
 /**
  * What one side of a summary claims, as a signed amount per asset.

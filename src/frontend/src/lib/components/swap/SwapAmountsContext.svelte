@@ -6,7 +6,12 @@
 		SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS,
 		SWAP_DEFAULT_SLIPPAGE_VALUE
 	} from '$lib/constants/swap.constants';
-	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
+	import {
+		btcAddressMainnet,
+		ethAddress,
+		solAddressMainnet,
+		xrpAddressMainnet
+	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { fetchSwapAmounts } from '$lib/services/swap.services';
@@ -107,7 +112,8 @@
 				isSourceTokenIcrc2,
 				userEthAddress: $ethAddress,
 				userSolAddress: $solAddressMainnet,
-				userBtcAddress: $btcAddressMainnet
+				userBtcAddress: $btcAddressMainnet,
+				userXrpAddress: $xrpAddressMainnet
 			});
 
 			if (currentGeneration !== fetchGeneration) {

@@ -74,7 +74,7 @@ const fetchCoingecko = async <T extends CoingeckoSimplePrice | CoingeckoSimpleTo
 
 const joinSimpleParams = (params: CoingeckoSimpleParams): string =>
 	`${Object.entries(params)
-		.map(([key, value]) => `${key}=${value}`)
+		.map(([key, value]) => `${key}=${Array.isArray(value) ? value.join(',') : value}`)
 		.join('&')}`;
 
 const joinParams = (params: string[]): string => params.filter((param) => param !== '').join('&');

@@ -14,7 +14,7 @@ import {
 import { SwapProvider } from '$lib/types/swap';
 import type { Token as AppToken } from '$lib/types/token';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
-import { nonNullish } from '@dfinity/utils';
+import { nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const isNearIntentsActiveUserTransaction = (tx: ActiveUserTransaction): boolean =>
@@ -22,24 +22,31 @@ export const isNearIntentsActiveUserTransaction = (tx: ActiveUserTransaction): b
 
 /**
  * Builds the `NearIntents` AUT data variant carrying the canonical immutable
- * trio (source token, dest token, source amount in base units). The deposit
+ * trio (source token, dest token, source amount in base units), plus the
+ * address the deposit is sent from when it is an XRP payment. The deposit
  * address/memo, tx hashes and display symbols ride in `external_refs`. Returns
  * `undefined` when either token can't be mapped to a backend `TokenId`.
  */
 export const toNearIntentsData = ({
 	sourceToken,
 	destinationToken,
-	amount
+	amount,
+	sourceAddress
 }: {
 	sourceToken: AppToken;
 	destinationToken: AppToken;
 	amount: bigint;
+	// Set only for a swap from native XRP: that deposit is an XRP payment, and the backend
+	// counts it against this address in the one-payment-in-flight check.
+	sourceAddress?: string;
 }): ActiveUserTransactionData | undefined => {
 	const source_token = toBackendTokenId(sourceToken);
 	const dest_token = toBackendTokenId(destinationToken);
 
 	if (nonNullish(source_token) && nonNullish(dest_token)) {
-		return { NearIntents: { source_token, dest_token, amount } };
+		return {
+			NearIntents: { source_token, dest_token, amount, source_address: toNullable(sourceAddress) }
+		};
 	}
 };
 

@@ -6,7 +6,8 @@ export type HideInfoKey =
 	| 'oisy_ic_hide_bitcoin_info'
 	| 'oisy_ic_hide_ethereum_info'
 	| 'oisy_ic_hide_erc20_info'
-	| 'oisy_ic_hide_transaction_unavailable_canister';
+	| 'oisy_ic_hide_transaction_unavailable_canister'
+	| 'oisy_sol_hide_unsupported_transactions';
 
 export const saveHideInfo = (key: HideInfoKey) => {
 	try {

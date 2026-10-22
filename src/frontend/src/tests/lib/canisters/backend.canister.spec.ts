@@ -226,6 +226,43 @@ describe('backend.canister', () => {
 		expect(res).toEqual(response);
 	});
 
+	// `create_user_profile` is idempotent: an existing user gets their stored profile back, and it
+	// goes into the store exactly as a read would. So it needs the same key normalisation — a
+	// hashed key reaching the store unresolved is the settings loss this decode exists to prevent.
+	it('resolves hashed network settings keys returned by create user profile', async () => {
+		service.create_user_profile.mockResolvedValue({
+			Ok: {
+				...mockedUserProfile,
+				settings: [
+					{
+						networks: {
+							// @ts-expect-error A key the generated bindings cannot name — exactly what the
+							// tolerant decode yields before it is resolved
+							networks: [[{ _2986158464_: null }, { enabled: true, is_testnet: false }]],
+							testnets: { show_testnets: false }
+						},
+						notifications: [],
+						dapp: { dapp_carousel: { hidden_dapp_ids: [] } },
+						experimental_features: { experimental_features: [] },
+						transactions: []
+					}
+				]
+			}
+		});
+
+		const { createUserProfile } = await createBackendCanister({
+			serviceOverride: service
+		});
+
+		const res = await createUserProfile();
+
+		const [settings] = 'Ok' in res ? res.Ok.settings : [];
+
+		expect(settings?.networks.networks).toEqual([
+			[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
+		]);
+	});
+
 	it('should throw SignupsClosedError when backend returns SignupsClosed', async () => {
 		service.create_user_profile.mockResolvedValue({ Err: { SignupsClosed: null } });
 
@@ -1981,10 +2018,12 @@ describe('backend.canister', () => {
 	describe('getActiveUserTransactions', () => {
 		const errorResponse = { Err: mockActiveUserTransactionErrorNotFound };
 
-		it('should return the unwrapped list of transactions', async () => {
-			service.get_active_user_transactions.mockResolvedValue({
-				Ok: { transactions: [mockActiveUserTransaction] }
-			});
+		it('should return the unwrapped transactions and seen mark', async () => {
+			const response = {
+				transactions: [mockActiveUserTransaction],
+				seen_up_to_ns: mockActiveUserTransaction.updated_at_ns
+			};
+			service.get_active_user_transactions.mockResolvedValue({ Ok: response });
 
 			const { getActiveUserTransactions } = await createBackendCanister({
 				serviceOverride: service
@@ -1993,12 +2032,26 @@ describe('backend.canister', () => {
 			const res = await getActiveUserTransactions();
 
 			expect(service.get_active_user_transactions).toHaveBeenCalledExactlyOnceWith();
-			expect(res).toEqual([mockActiveUserTransaction]);
+			expect(res).toEqual(response);
 		});
 
-		it('should return an empty array when the user has no records', async () => {
+		it('should return the unwrapped transactions and seen mark from a certified call', async () => {
+			const response = { transactions: [mockActiveUserTransaction], seen_up_to_ns: ZERO };
+			service.get_active_user_transactions.mockResolvedValue({ Ok: response });
+
+			const { getActiveUserTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await getActiveUserTransactions({ certified: true });
+
+			expect(service.get_active_user_transactions).toHaveBeenCalledExactlyOnceWith();
+			expect(res).toEqual(response);
+		});
+
+		it('should return no transactions when the user has no records', async () => {
 			service.get_active_user_transactions.mockResolvedValue({
-				Ok: { transactions: [] }
+				Ok: { transactions: [], seen_up_to_ns: ZERO }
 			});
 
 			const { getActiveUserTransactions } = await createBackendCanister({
@@ -2007,7 +2060,7 @@ describe('backend.canister', () => {
 
 			const res = await getActiveUserTransactions();
 
-			expect(res).toEqual([]);
+			expect(res).toEqual({ transactions: [], seen_up_to_ns: ZERO });
 		});
 
 		it('should throw if the canister returns Err', async () => {
@@ -2018,6 +2071,34 @@ describe('backend.canister', () => {
 			});
 
 			await expect(getActiveUserTransactions()).rejects.toEqual(errorResponse.Err);
+		});
+	});
+
+	describe('markActiveUserTransactionsSeen', () => {
+		const upToNs = mockActiveUserTransaction.updated_at_ns;
+
+		it('should return the mark the backend stored', async () => {
+			service.mark_active_user_transactions_seen.mockResolvedValue({ Ok: upToNs });
+
+			const { markActiveUserTransactionsSeen } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await markActiveUserTransactionsSeen(upToNs);
+
+			expect(service.mark_active_user_transactions_seen).toHaveBeenCalledExactlyOnceWith(upToNs);
+			expect(res).toBe(upToNs);
+		});
+
+		it('should throw if the canister returns Err', async () => {
+			const errorResponse = { Err: mockActiveUserTransactionErrorNotFound };
+			service.mark_active_user_transactions_seen.mockResolvedValue(errorResponse);
+
+			const { markActiveUserTransactionsSeen } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(markActiveUserTransactionsSeen(upToNs)).rejects.toEqual(errorResponse.Err);
 		});
 	});
 });

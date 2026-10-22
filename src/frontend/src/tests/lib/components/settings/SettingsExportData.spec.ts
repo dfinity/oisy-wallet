@@ -13,6 +13,15 @@ describe('SettingsExportData', () => {
 		vi.resetAllMocks();
 	});
 
+	it('labels the help toggle and starts it closed', () => {
+		const { getByRole } = render(SettingsExportData);
+
+		const help = getByRole('button', { name: en.core.text.info });
+
+		expect(help).toHaveAttribute('aria-expanded', 'false');
+		expect(help).toHaveClass('hit-area', 'press-icon');
+	});
+
 	it('renders both subsection labels and all four download buttons', () => {
 		const { getByText, getByRole } = render(SettingsExportData);
 

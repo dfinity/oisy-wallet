@@ -8,6 +8,7 @@
 	import { ethNetworkContacts } from '$eth/derived/eth-contacts.derived';
 	import { ethKnownDestinations } from '$eth/derived/eth-transactions.derived';
 	import { nativeEthereumTokenId } from '$eth/derived/token.derived';
+	import CyclesSentToCanisterWarning from '$icp/components/cycles-top-up/CyclesSentToCanisterWarning.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import { icNetworkContacts } from '$icp/derived/ic-contacts.derived';
 	import { icKnownDestinations } from '$icp/derived/ic-transactions.derived';
@@ -41,6 +42,8 @@
 	import { solNetworkContacts } from '$sol/derived/sol-contacts.derived';
 	import { solKnownDestinations } from '$sol/derived/sol-transactions.derived';
 	import XrpSendDestination from '$xrp/components/send/XrpSendDestination.svelte';
+	import { xrpNetworkContacts } from '$xrp/derived/xrp-contacts.derived';
+	import { xrpKnownDestinations } from '$xrp/derived/xrp-transactions.derived';
 
 	interface Props {
 		destination: string;
@@ -132,6 +135,7 @@
 				bind:destination
 				bind:invalidDestination
 			/>
+			<CyclesSentToCanisterWarning {destination} styleClass="mt-4" token={$sendToken} />
 			<SendDestinationTabs
 				knownDestinations={$icKnownDestinations}
 				networkContacts={$icNetworkContacts}
@@ -177,11 +181,21 @@
 			/>
 		</div>
 	{:else if isNetworkIdXrp($sendTokenNetworkId)}
-		<!-- XRP address-book contacts require a backend TokenAccountId address type (out of scope for
-		     the frontend-only integration), and transaction history (known destinations) lands in a
-		     later phase — so the destination step is address entry only for now. -->
 		<div data-tid={testId}>
-			<XrpSendDestination {onQRCodeScan} bind:destination bind:invalidDestination />
+			<XrpSendDestination
+				knownDestinations={$xrpKnownDestinations}
+				{onQRCodeScan}
+				bind:destination
+				bind:invalidDestination
+			/>
+			<SendDestinationTabs
+				knownDestinations={$xrpKnownDestinations}
+				networkContacts={$xrpNetworkContacts}
+				onNext={next}
+				bind:destination
+				bind:activeSendDestinationTab
+				bind:selectedContact
+			/>
 		</div>
 	{/if}
 

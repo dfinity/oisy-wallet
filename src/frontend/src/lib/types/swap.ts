@@ -17,17 +17,23 @@ import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
+import type { OptionXrpAddress, XrpAddress } from '$xrp/types/address';
+import type { XrpNetworkType } from '$xrp/types/network';
+import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import type { Identity } from '@icp-sdk/core/agent';
+import type { LiFiStep, QuoteRequestFromAmount } from '@lifi/sdk';
 import type { DeltaPrice, OptimalRate, QuoteParams } from '@velora-dex/sdk';
 
 export type SwapSelectTokenType = 'source' | 'destination';
 
 export type DisplayUnit = 'token' | 'usd';
 
-export type SwapTokenCategory = 'icp' | 'evm' | 'sol' | 'btc';
+export type SwapTokenCategory = 'icp' | 'evm' | 'sol' | 'btc' | 'xrp';
 
-export type SwapCategorizedTokenIds = Partial<Record<SwapTokenCategory, Set<string>>>;
+// Per category, either the destination ids a provider can reach or `'any'`: a provider that
+// reaches every token of that category it has a route for, with no list of its own.
+export type SwapCategorizedTokenIds = Partial<Record<SwapTokenCategory, Set<string> | 'any'>>;
 
 export type FindProviderSourceTokens = (params: {
 	key: SwapProvider;
@@ -51,7 +57,8 @@ export enum SwapProvider {
 	NEAR_INTENTS = 'nearIntents',
 	ONE_SEC = 'oneSec',
 	CHAIN_FUSION = 'chainFusion',
-	OISY_TRADE = 'oisyTrade'
+	OISY_TRADE = 'oisyTrade',
+	LIFI = 'lifi'
 }
 
 export enum VeloraSwapTypes {
@@ -69,7 +76,8 @@ export enum SwapErrorCodes {
 	ICP_SWAP_WITHDRAW_SUCCESS = 'ICPSwap_withdraw_success',
 	ICP_SWAP_WITHDRAW_FAILED = 'ICPSwap_withdraw_failed',
 	NEAR_INTENTS_QUOTE_UNVERIFIED = 'near_intents_quote_unverified',
-	NEAR_INTENTS_QUOTE_EXPIRED = 'near_intents_quote_expired'
+	NEAR_INTENTS_QUOTE_EXPIRED = 'near_intents_quote_expired',
+	NEAR_INTENTS_QUOTE_DEPOSIT_MEMO = 'near_intents_quote_deposit_memo'
 }
 export interface ProviderFee {
 	fee: bigint;
@@ -93,6 +101,9 @@ export interface FetchSwapAmountsParams {
 	// The user's own Bitcoin address. Unlike the other two it is needed to *quote*, not
 	// only to execute: a BTC → ckBTC offer's fee comes from selecting the user's UTXOs.
 	userBtcAddress: OptionBtcAddress;
+	// The user's own XRP mainnet address: the refund address of a swap from XRP, and the
+	// payout address of a swap toward it.
+	userXrpAddress: OptionXrpAddress;
 }
 
 export type Slippage = string | number;
@@ -168,6 +179,18 @@ export type SwapMappedResult =
 			// must not affect this offer.
 			swapDetails: OisyTradeSwapDetails;
 			type?: string;
+	  }
+	| {
+			provider: SwapProvider.LIFI;
+			receiveAmount: bigint;
+			receiveOutMinimum: bigint;
+			// The whole quote: its estimate carries the duration, fees and route tool the
+			// provider sheet shows.
+			swapDetails: LiFiStep;
+			// The request the quote answers, which execution re-quotes with: it may differ from the
+			// one built for the form's inputs (see `fetchLifiSwapQuote`).
+			request: QuoteRequestFromAmount;
+			type?: string;
 	  };
 
 interface KongQuoteParams {
@@ -220,6 +243,14 @@ export interface EvmSwapProviderConfig {
 }
 
 export interface SolSwapProviderConfig {
+	key: SwapProvider;
+	getQuote: (params: NearIntentsQuoteParams) => Promise<SwapMappedResult | undefined>;
+	isEnabled: boolean;
+	getSupportedTokens?: () => Promise<Set<string>>;
+	getSupportedDestinations: GetSupportedDestinationsFn;
+}
+
+export interface XrpSwapProviderConfig {
 	key: SwapProvider;
 	getQuote: (params: NearIntentsQuoteParams) => Promise<SwapMappedResult | undefined>;
 	isEnabled: boolean;
@@ -470,6 +501,27 @@ export interface SwapVeloraMarketParams extends SwapVeloraParams {
 	swapDetails: OptimalRate;
 }
 
+export interface SwapLifiEvmParams extends RequiredTransactionFeeData {
+	identity: Identity;
+	progress: (step: ProgressStep) => void;
+	sourceToken: ErcFungibleToken;
+	destinationToken: Token;
+	swapAmount: Amount;
+	sourceNetwork: EthereumNetwork;
+	userAddress: EthAddress;
+	offer: Extract<SwapMappedResult, { provider: SwapProvider.LIFI }>;
+	// The swap transaction's network fee ceiling the user reviewed: the review cannot confirm until it
+	// is known, since an ERC-20's approval is paid before execution compares against it. Execution
+	// never signs one above it.
+	reviewedFeeCeiling: bigint;
+	// The total network fee the review showed, the approvals included: an ERC-20 source's balance
+	// must cover it before the approval is paid.
+	reviewedFee: bigint;
+	// The ERC-20s OISY knows on the source network, enabled or not: those with an allowance to the
+	// Diamond are what no call of the route may target (`lifiUserTokenAddresses`).
+	userTokenAddresses: string[];
+}
+
 interface SwapNearIntentsParams {
 	identity: Identity;
 	progress: (step: ProgressStep) => void;
@@ -491,6 +543,15 @@ export interface SwapNearIntentsEvmParams
 export interface SwapNearIntentsSolParams extends SwapNearIntentsParams {
 	destinationToken: Token;
 	userAddress: SolAddress;
+}
+
+export interface SwapNearIntentsXrpParams extends SwapNearIntentsParams {
+	destinationToken: Token;
+	// The user's own XRP address: the deposit is paid from it, and 1Click refunds to it.
+	userAddress: XrpAddress;
+	network: XrpNetworkType;
+	// The transaction cost the user reviewed, in drops; `sendXrp` signs exactly this.
+	fee: XrpBalance;
 }
 
 export interface SwapNearIntentsBtcParams extends SwapNearIntentsParams {

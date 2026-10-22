@@ -5,15 +5,24 @@
 		TRACK_COUNT_LIQUIDIUM_ERROR,
 		TRACK_COUNT_LIQUIDIUM_SUCCESS,
 		TRACK_COUNT_SWAP_ERROR,
-		TRACK_COUNT_SWAP_SUCCESS
+		TRACK_COUNT_SWAP_SUCCESS,
+		TRACK_COUNT_XRP_SEND_ERROR,
+		TRACK_COUNT_XRP_SEND_SUCCESS
 	} from '$lib/constants/analytics.constants';
 	import { ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { enabledFungibleTokens } from '$lib/derived/tokens.derived';
 	import { loadActiveUserTransactions } from '$lib/services/active-user-transactions.services';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { pollChainFusionActiveUserTransactions } from '$lib/services/chain-fusion-swap-active-tx.services';
+	import { pollCyclesMintActiveUserTransactions } from '$lib/services/cycles-mint-active-tx.services';
+	import { trackCyclesMint } from '$lib/services/cycles-mint-analytics.services';
+	import {
+		pollLifiActiveUserTransactions,
+		reloadLifiEvmBalances
+	} from '$lib/services/lifi-active-tx.services';
 	import { pollLiquidiumActiveUserTransactions } from '$lib/services/liquidium-active-tx.services';
 	import { loadLiquidium } from '$lib/services/liquidium.services';
 	import { pollNearIntentsActiveUserTransactions } from '$lib/services/near-intents-active-tx.services';
@@ -21,12 +30,22 @@
 	import { pollOneSecActiveUserTransactions } from '$lib/services/onesec-swap.services';
 	import { pollVeloraActiveUserTransactions } from '$lib/services/velora-active-tx.services';
 	import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
 	import {
 		buildChainFusionSwapTrackingMetadata,
 		isChainFusionActiveUserTransaction
 	} from '$lib/utils/chain-fusion-swap-active-tx.utils';
 	import { consoleError } from '$lib/utils/console.utils';
+	import {
+		isCyclesMintActiveUserTransaction,
+		toCyclesMintTrackingParams
+	} from '$lib/utils/cycles-mint-active-tx.utils';
+	import {
+		buildLifiSwapTrackingMetadata,
+		isLifiActiveUserTransaction
+	} from '$lib/utils/lifi-active-tx.utils';
 	import {
 		buildLiquidiumTrackingMetadata,
 		isLiquidiumActiveUserTransaction
@@ -48,6 +67,12 @@
 		isVeloraActiveUserTransaction
 	} from '$lib/utils/velora-active-tx.utils';
 	import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
+	import { pollXrpActiveUserTransactions } from '$xrp/services/xrp-active-tx.services';
+	import {
+		buildXrpSendTrackingMetadata,
+		isXrpActiveUserTransaction
+	} from '$xrp/utils/xrp-active-tx.utils';
+	import { isXrpPaymentInFlight, makesXrpPayment } from '$xrp/utils/xrp-in-flight.utils';
 
 	// `loadActiveUserTransactions` resets the store on nullish identity.
 	$effect(() => {
@@ -86,11 +111,21 @@
 				await pollLiquidiumActiveUserTransactions({ identity, transactions: liquidium });
 			}
 
-			const nearIntents = $activeUserTransactionsPending.filter(isNearIntentsActiveUserTransaction);
+			// A swap from XRP whose deposit has not resolved on the ledger belongs to the XRP ledger
+			// resolution below, not to 1Click: 1Click reports `PENDING_DEPOSIT` at once, which would move
+			// the row to `Executing` and end the in-flight check while the deposit can still apply.
+			const nearIntents = $activeUserTransactionsPending.filter(
+				(tx) => isNearIntentsActiveUserTransaction(tx) && !isXrpPaymentInFlight(tx)
+			);
 
 			if (nearIntents.length > 0) {
 				await pollNearIntentsActiveUserTransactions({ identity, transactions: nearIntents });
 			}
+
+			// Shared by the EVM pollers of this tick, so rows on one chain cost one nonce read whatever
+			// their provider. They run one after another: a nonce read earlier in the tick can only be
+			// lower, which reads as still pending, never as replaced.
+			const confirmedNonceByChainId = new Map<string, Promise<number>>();
 
 			const velora = $activeUserTransactionsPending.filter(isVeloraActiveUserTransaction);
 
@@ -98,7 +133,19 @@
 				await pollVeloraActiveUserTransactions({
 					identity,
 					transactions: velora,
-					userAddress: $ethAddress
+					userAddress: $ethAddress,
+					confirmedNonceByChainId
+				});
+			}
+
+			const lifi = $activeUserTransactionsPending.filter(isLifiActiveUserTransaction);
+
+			if (lifi.length > 0) {
+				await pollLifiActiveUserTransactions({
+					identity,
+					transactions: lifi,
+					userAddress: $ethAddress,
+					confirmedNonceByChainId
 				});
 			}
 
@@ -112,6 +159,18 @@
 
 			if (oisyTrade.length > 0) {
 				await pollOisyTradeActiveUserTransactions({ identity, transactions: oisyTrade });
+			}
+
+			const cyclesMint = $activeUserTransactionsPending.filter(isCyclesMintActiveUserTransaction);
+
+			if (cyclesMint.length > 0) {
+				await pollCyclesMintActiveUserTransactions({ identity, transactions: cyclesMint });
+			}
+
+			const xrp = $activeUserTransactionsPending.filter(isXrpPaymentInFlight);
+
+			if (xrp.length > 0) {
+				await pollXrpActiveUserTransactions({ identity, transactions: xrp });
 			}
 		} catch (err: unknown) {
 			consoleError(err);
@@ -148,9 +207,9 @@
 
 	onDestroy(stop);
 
-	// Fires wallet refresh + analytics exactly once per terminal row.
-	// Idempotency lives in `terminalSideEffectsApplied` on the store, so a
-	// row that finalizes across a refresh still fires once on next load.
+	// Fires wallet refresh + analytics exactly once per row this tab sees
+	// settle. Idempotency lives in `terminalSideEffectsApplied` on the store,
+	// which claims a row that loads already settled without firing it.
 	$effect(() => {
 		if (isNullish($activeUserTransactionsStore)) {
 			return;
@@ -193,7 +252,9 @@
 					metadata: buildNearIntentsSwapTrackingMetadata({ tx })
 				});
 
-				if (isSucceeded) {
+				// A swap from XRP whose deposit failed on the ledger was still charged the network fee, so
+				// its balance changed either way, as for an XRP send below.
+				if (isSucceeded || makesXrpPayment(tx)) {
 					shouldRefresh = true;
 				}
 			} else if (
@@ -211,6 +272,23 @@
 				if (isSucceeded) {
 					shouldRefresh = true;
 				}
+			} else if (
+				isTerminalActiveUserTransaction(tx) &&
+				!alreadyApplied &&
+				isLifiActiveUserTransaction(tx)
+			) {
+				newlyAppliedIds.push(tx.id);
+
+				trackEvent({
+					name: isSucceeded ? TRACK_COUNT_SWAP_SUCCESS : TRACK_COUNT_SWAP_ERROR,
+					metadata: buildLifiSwapTrackingMetadata({ tx })
+				});
+
+				// Whatever the outcome: the modal closed at broadcast, and a failed, reverted or refunded
+				// route still spent gas or returned funds. The wallet refresh covers the Solana side; EVM
+				// balances have no wallet worker, so they are reloaded explicitly.
+				shouldRefresh = true;
+				reloadLifiEvmBalances({ tx, tokens: $enabledFungibleTokens });
 			} else if (
 				isTerminalActiveUserTransaction(tx) &&
 				!alreadyApplied &&
@@ -240,10 +318,23 @@
 					metadata: buildOisyTradeSwapTrackingMetadata({ tx })
 				});
 
-				// Unconditional, unlike every other provider's: a failed OISY Trade swap is a
-				// killed fill-or-kill order whose *source* token has just been withdrawn back
-				// to the wallet. Elsewhere a failure means nothing moved and there is nothing
+				// Unconditional, as for XRP below: a failed OISY Trade swap is a killed
+				// fill-or-kill order whose *source* token has just been withdrawn back to the
+				// wallet. For most providers a failure means nothing moved and there is nothing
 				// to refresh; here the balance changed either way.
+				shouldRefresh = true;
+			} else if (
+				isTerminalActiveUserTransaction(tx) &&
+				!alreadyApplied &&
+				isCyclesMintActiveUserTransaction(tx)
+			) {
+				newlyAppliedIds.push(tx.id);
+
+				trackCyclesMint(toCyclesMintTrackingParams({ tx }));
+
+				// Unconditional, as for OISY Trade: a mint that failed after its ICP left the
+				// wallet changed the balance (a refund brings most of it back). One closed as never
+				// sent moved nothing, and refreshing for it is only redundant.
 				shouldRefresh = true;
 			} else if (
 				isTerminalActiveUserTransaction(tx) &&
@@ -261,6 +352,36 @@
 					shouldRefresh = true;
 					shouldRefreshLiquidium = true;
 				}
+			} else if (
+				isTerminalActiveUserTransaction(tx) &&
+				!alreadyApplied &&
+				isXrpActiveUserTransaction(tx)
+			) {
+				newlyAppliedIds.push(tx.id);
+
+				trackEvent({
+					name: isSucceeded ? TRACK_COUNT_XRP_SEND_SUCCESS : TRACK_COUNT_XRP_SEND_ERROR,
+					metadata: buildXrpSendTrackingMetadata({ tx })
+				});
+
+				// The only place an XRP send's outcome is reported. The modal stops at the submit, so
+				// by the time the ledger decides there may be no modal — and this hook fires exactly
+				// once per row even when the ledger decided while the tab was shut: a row no poller settled
+				// is still open when the next session loads, and a row whose terminal write committed after
+				// its tab closed is left to the next session in that browser by its persisted marker.
+				//
+				// The failure text comes off the record rather than being derived here: the two
+				// failures need different advice — nothing was sent, or the fee was charged — and
+				// only the resolver knows which one it wrote.
+				if (isSucceeded) {
+					toastsShow({ text: $i18n.send.text.xrp_sent, level: 'success', duration: 4000 });
+				} else {
+					toastsError({ msg: { text: tx.error[0] ?? $i18n.send.error.unexpected } });
+				}
+
+				// Unconditional: a validated failure claimed the fee, so the balance moved, and an
+				// expiry costs only a refresh that finds nothing new.
+				shouldRefresh = true;
 			}
 		}
 

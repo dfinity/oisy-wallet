@@ -4,6 +4,7 @@
 	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
 	import ScannedPlainAddressNotice from '$lib/components/send/ScannedPlainAddressNotice.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
@@ -55,6 +56,16 @@
 				<span class="text-tertiary">{$i18n.send.text.xrp_destination_tag}</span>
 				<span>{$sendXrpDestinationTag}</span>
 			</div>
+		{:else}
+			<!-- "may be required": addresses flagged as requiring a tag are already refused on send,
+			so this covers exchange deposit addresses that need a tag but do not set the flag. -->
+			<MessageBox
+				level="warning"
+				styleClass="mt-4 mb-0!"
+				testId="xrp-review-destination-tag-missing"
+			>
+				{$i18n.send.info.xrp_destination_tag_missing}
+			</MessageBox>
 		{/if}
 	{/snippet}
 </SendReview>

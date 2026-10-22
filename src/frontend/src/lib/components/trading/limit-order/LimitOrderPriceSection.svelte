@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import IconArrowDown from '$lib/components/icons/lucide/IconArrowDown.svelte';
 	import TokenInputContainer from '$lib/components/tokens/TokenInputContainer.svelte';
 	import PillButton from '$lib/components/ui/PillButton.svelte';
@@ -25,6 +24,7 @@
 		validatePrice,
 		valueDifferencePercent
 	} from '$lib/utils/oisy-trade.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		price: string;

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import Input from '$lib/components/ui/Input.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import { slide } from '$lib/utils/transitions.utils';
 	// The same bound `sendXrp` enforces before signing, not a second copy of it: a tag is a
 	// protocol-level UInt32, so a local literal could not legitimately diverge — but nothing
 	// would have shown a reader that the form's limit and the signer's were meant to be one
@@ -19,6 +19,9 @@
 	let { invalidDestinationTag = $bindable(false) }: Props = $props();
 
 	const { sendXrpDestinationTag } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	const INPUT_NAME = 'xrp-destination-tag';
+	const HINT_ID = 'xrp-destination-tag-hint';
 
 	let value = $state<string>(nonNullish($sendXrpDestinationTag) ? `${$sendXrpDestinationTag}` : '');
 
@@ -45,19 +48,29 @@
 </script>
 
 <div class="mb-4">
+	<!-- Title and hint are rendered here rather than in `Input`'s label snippet so the hint sits
+	between them without becoming part of the input's accessible name. -->
+	<label class="font-bold" for={INPUT_NAME}>{$i18n.send.text.xrp_destination_tag}</label>
+
+	<p
+		id={HINT_ID}
+		class="mt-1 mb-3 text-sm font-medium text-primary"
+		data-tid="xrp-destination-tag-hint"
+	>
+		{$i18n.send.info.xrp_destination_tag_hint}
+	</p>
+
 	<Input
-		name="xrp-destination-tag"
+		name={INPUT_NAME}
+		ariaDescribedBy={HINT_ID}
 		inputType="text"
 		{onInput}
 		placeholder={$i18n.send.placeholder.xrp_destination_tag}
 		required={false}
+		showInfo={false}
 		testId="xrp-destination-tag-input"
 		bind:value
 	>
-		{#snippet label()}
-			<span>{$i18n.send.text.xrp_destination_tag}</span>
-		{/snippet}
-
 		{#snippet bottom()}
 			{#if invalidDestinationTag}
 				<!-- `role="alert"` because this appears on input and blocks the form: without a live

@@ -8,6 +8,7 @@ use pretty_assertions::assert_eq;
 use super::ParseError;
 use crate::types::account::{
     BtcAddress, EthAddress, IcrcSubaccountId, Icrcv2AccountId, SolPrincipal, TokenAccountId,
+    XrpAddress,
 };
 
 struct TestVector<T: Eq + Debug> {
@@ -174,6 +175,45 @@ fn btc_test_vectors() -> Vec<TestVector<BtcAddress>> {
     ]
 }
 
+fn xrp_test_vectors() -> Vec<TestVector<XrpAddress>> {
+    vec![
+        TestVector {
+            // The ledger's genesis account
+            name: "XRP: Classic address",
+            input: "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh",
+            expected: Ok(XrpAddress("rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh".to_string())),
+        },
+        TestVector {
+            name: "XRP: Shortest classic address",
+            input: "rrrrrrrrrrrrrrrrrrrrrhoLvTp", // Account ID of all zeros
+            expected: Ok(XrpAddress("rrrrrrrrrrrrrrrrrrrrrhoLvTp".to_string())),
+        },
+        TestVector {
+            // The genesis account with its last character changed
+            name: "XRP: Invalid checksum",
+            input: "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTi",
+            expected: Err(ParseError::InvalidChecksum),
+        },
+        TestVector {
+            // The genesis account ID, encoded with type byte 0x01
+            name: "XRP: Invalid type prefix",
+            input: "gvkeRNogMFtYbr2SvQ7BMp64mdXoLfa8t",
+            expected: Err(ParseError::InvalidPrefix),
+        },
+        TestVector {
+            // The genesis account as an X-address, which also encodes a destination tag
+            name: "XRP: X-address",
+            input: "XVPcpSm47b1CZkf5AkKM9a84dQHe3m4sBhsrA4XtnBECTAc",
+            expected: Err(ParseError::InvalidLength),
+        },
+        TestVector {
+            name: "XRP: Invalid characters",
+            input: "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyT0",
+            expected: Err(ParseError::InvalidEncoding),
+        },
+    ]
+}
+
 impl From<TestVector<Icrcv2AccountId>> for TestVector<TokenAccountId> {
     fn from(value: TestVector<Icrcv2AccountId>) -> Self {
         let TestVector {
@@ -242,6 +282,23 @@ impl From<TestVector<BtcAddress>> for TestVector<TokenAccountId> {
     }
 }
 
+impl From<TestVector<XrpAddress>> for TestVector<TokenAccountId> {
+    fn from(value: TestVector<XrpAddress>) -> Self {
+        let TestVector {
+            name,
+            input,
+            expected,
+        } = value;
+        TestVector {
+            name,
+            input,
+            expected: expected
+                .map(TokenAccountId::Xrp)
+                .map_err(|_| ParseError::UnsupportedFormat),
+        }
+    }
+}
+
 fn all_test_vectors() -> Vec<TestVector<TokenAccountId>> {
     icrc2_test_vectors()
         .into_iter()
@@ -258,6 +315,11 @@ fn all_test_vectors() -> Vec<TestVector<TokenAccountId>> {
         )
         .chain(
             btc_test_vectors()
+                .into_iter()
+                .map(TestVector::<TokenAccountId>::from),
+        )
+        .chain(
+            xrp_test_vectors()
                 .into_iter()
                 .map(TestVector::<TokenAccountId>::from),
         )
@@ -295,6 +357,13 @@ fn eth_account_ids_can_be_parsed() {
 #[test]
 fn btc_account_ids_can_be_parsed() {
     for vector in btc_test_vectors() {
+        assert_eq!(vector.expected, vector.input.parse(), "{}", vector.name);
+    }
+}
+
+#[test]
+fn xrp_account_ids_can_be_parsed() {
+    for vector in xrp_test_vectors() {
         assert_eq!(vector.expected, vector.input.parse(), "{}", vector.name);
     }
 }
