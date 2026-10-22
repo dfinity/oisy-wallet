@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use shared::types::exchange::ExchangeData;
+use shared::{types::exchange::ExchangeData, validate::Validate};
 
 use crate::{
     exchange::{provider::ExchangePriceProvider, supplemental::SupplementalPriceProvider},
@@ -8,8 +8,11 @@ use crate::{
 };
 
 /// Whether the backend should treat this snapshot as a usable USD price.
+///
+/// The snapshot must also pass [`Validate`], as every cached rate has to (see `update_price`).
+/// One that fails counts as missing, so a later provider can still price the token.
 pub(crate) fn has_valid_price(data: &ExchangeData) -> bool {
-    data.price.is_some_and(|p| p.is_finite() && p > 0.0)
+    data.price.is_some_and(|p| p.is_finite() && p > 0.0) && data.validate().is_ok()
 }
 
 fn merge_valid_primary(
@@ -162,7 +165,7 @@ mod tests {
 
     fn data(price: Option<f64>) -> ExchangeData {
         ExchangeData {
-            timestamp_ns: 0,
+            timestamp_ns: 1,
             price,
             price_24h_change_pct: None,
             market_cap: None,
@@ -180,7 +183,7 @@ mod tests {
     #[test]
     fn has_valid_price_accepts_positive_finite() {
         let d = ExchangeData {
-            timestamp_ns: 0,
+            timestamp_ns: 1,
             price: Some(1.5),
             price_24h_change_pct: None,
             market_cap: None,
@@ -191,7 +194,7 @@ mod tests {
     #[test]
     fn has_valid_price_rejects_none_zero_nan() {
         let none = ExchangeData {
-            timestamp_ns: 0,
+            timestamp_ns: 1,
             price: None,
             price_24h_change_pct: None,
             market_cap: None,
@@ -199,7 +202,7 @@ mod tests {
         assert!(!has_valid_price(&none));
 
         let zero = ExchangeData {
-            timestamp_ns: 0,
+            timestamp_ns: 1,
             price: Some(0.0),
             price_24h_change_pct: None,
             market_cap: None,
@@ -207,12 +210,27 @@ mod tests {
         assert!(!has_valid_price(&zero));
 
         let nan = ExchangeData {
-            timestamp_ns: 0,
+            timestamp_ns: 1,
             price: Some(f64::NAN),
             price_24h_change_pct: None,
             market_cap: None,
         };
         assert!(!has_valid_price(&nan));
+    }
+
+    #[test]
+    fn has_valid_price_rejects_data_that_fails_validation() {
+        let zero_timestamp = ExchangeData {
+            timestamp_ns: 0,
+            ..data(Some(1.5))
+        };
+        assert!(!has_valid_price(&zero_timestamp));
+
+        let change_below_minus_100_pct = ExchangeData {
+            price_24h_change_pct: Some(-150.0),
+            ..data(Some(1.5))
+        };
+        assert!(!has_valid_price(&change_below_minus_100_pct));
     }
 
     #[test]
@@ -281,6 +299,33 @@ mod tests {
             prices,
             vec![(valid, data(Some(1.0))), (invalid, data(Some(2.0)))]
         );
+    }
+
+    #[test]
+    fn fetch_all_prices_treats_data_that_fails_validation_as_missing() {
+        let first = native_token();
+        let second = icrc_token("ryjl3-tyaaa-aaaaa-aaaba-cai");
+        let requested = vec![first.clone(), second.clone()];
+        let zero_timestamp = ExchangeData {
+            timestamp_ns: 0,
+            ..data(Some(1.0))
+        };
+        let primary = MockPrimaryProvider {
+            result: Ok(vec![
+                (first.clone(), zero_timestamp.clone()),
+                (second.clone(), zero_timestamp.clone()),
+            ]),
+        };
+        let (supplemental, requested_by_supplemental) = MockSupplementalProvider::boxed(Ok(vec![
+            (first.clone(), data(Some(2.0))),
+            (second, zero_timestamp),
+        ]));
+        let supplementals: Vec<Box<dyn SupplementalPriceProvider>> = vec![supplemental];
+
+        let prices = block_on(fetch_all_prices(&primary, true, &supplementals, &requested));
+
+        assert_eq!(*requested_by_supplemental.borrow(), vec![requested]);
+        assert_eq!(prices, vec![(first, data(Some(2.0)))]);
     }
 
     #[test]

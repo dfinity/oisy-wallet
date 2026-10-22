@@ -33,7 +33,8 @@ import {
 import {
 	getInitializeCheckedInstruction,
 	getInitializeInstruction,
-	getSetLockupInstruction
+	getSetLockupInstruction,
+	getWithdrawInstruction
 } from '@solana-program/stake';
 import {
 	getCreateAccountInstruction,
@@ -532,6 +533,54 @@ describe('sol-transactions.utils', () => {
 					transactionMessage: { ...mockSolParsedTransactionMessage, instructions }
 				})
 			).toStrictEqual({ amount: undefined, ambiguous: true });
+		});
+
+		it('should refuse a stake withdrawal that pays anywhere but the wallet', () => {
+			// the surrounding suite stubs the instruction mapper; this case exercises the real one
+			spyMapSolInstruction.mockRestore();
+
+			// The stake account is not the wallet, so neither what leaves it nor where it goes appears
+			// on the review: the refusal has to come from the instruction itself.
+			const instructions = [
+				getWithdrawInstruction({
+					stake: address(mockSolAddress3),
+					recipient: address(mockSolAddress2),
+					withdrawAuthority: createNoopSigner(address(mockSolAddress)),
+					args: 10_000_000_000n
+				})
+			];
+
+			expect(
+				mapSolTransactionMessage({
+					transactionMessage: { ...mockSolParsedTransactionMessage, instructions },
+					userAddress: mockSolAddress
+				})
+			).toStrictEqual({ amount: undefined, ambiguous: true });
+		});
+
+		it('should state a stake withdrawal that pays the wallet', () => {
+			// the surrounding suite stubs the instruction mapper; this case exercises the real one
+			spyMapSolInstruction.mockRestore();
+
+			const instructions = [
+				getWithdrawInstruction({
+					stake: address(mockSolAddress3),
+					recipient: address(mockSolAddress),
+					withdrawAuthority: createNoopSigner(address(mockSolAddress)),
+					args: 10_000_000_000n
+				})
+			];
+
+			expect(
+				mapSolTransactionMessage({
+					transactionMessage: { ...mockSolParsedTransactionMessage, instructions },
+					userAddress: mockSolAddress
+				})
+			).toStrictEqual({
+				amount: 10_000_000_000n,
+				source: mockSolAddress3,
+				destination: mockSolAddress
+			});
 		});
 
 		// A dApp wraps the SOL a trade spends by funding the wrapped SOL account it opens with it, and
