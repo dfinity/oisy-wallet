@@ -923,7 +923,7 @@ const toEffect = ({
 		// Withdrawing excess lamports pays the destination whatever its source holds above what it
 		// costs to exist and what it wraps, and names no amount. Paid to the wallet, that is SOL
 		// arriving there by an amount nobody read, which leaves the wallet's change as unknown as
-		// the line says.
+		// the line says. The line says it is the account's excess, which is what it can still state.
 		if (type === 'withdrawExcessLamports') {
 			const source = address({ info, key: 'source' });
 			const destination = address({ info, key: 'destination' });
@@ -931,6 +931,7 @@ const toEffect = ({
 			return nonNullish(destination) && destination === userAddress
 				? {
 						kind: 'receive',
+						withdrawsExcess: true,
 						...(nonNullish(source) && { counterparty: source, own: isOwned({ account: source }) })
 					}
 				: undefined;

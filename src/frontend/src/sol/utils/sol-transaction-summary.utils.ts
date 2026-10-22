@@ -719,7 +719,8 @@ export const formatSolInstructionSummary = ({
 		via,
 		viaName,
 		children,
-		unwrapsAll
+		unwrapsAll,
+		withdrawsExcess
 	},
 	i18n,
 	symbolOf,
@@ -787,6 +788,22 @@ export const formatSolInstructionSummary = ({
 					: i18n.transaction.text.instruction_unwrap_all_from,
 				{ $symbol: symbolOf(tokenAddress) }
 			),
+			...(nonNullish(ownDetail) && { detail: ownDetail }),
+			...(nonNullish(viaTrailing) && { trailing: viaTrailing })
+		};
+	}
+
+	// The excess lamports a token account pays the wallet, which no instruction states the amount of:
+	// the line still says that SOL arrives, and from which account, rather than that a program was
+	// called.
+	if (
+		kind === 'receive' &&
+		isNullish(value) &&
+		(withdrawsExcess ?? false) &&
+		nonNullish(counterparty)
+	) {
+		return {
+			text: i18n.transaction.text.instruction_receive_excess_from,
 			...(nonNullish(ownDetail) && { detail: ownDetail }),
 			...(nonNullish(viaTrailing) && { trailing: viaTrailing })
 		};

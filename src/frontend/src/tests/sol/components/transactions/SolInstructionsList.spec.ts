@@ -243,6 +243,41 @@ describe('SolInstructionsList', () => {
 		);
 	});
 
+	// Excess lamports paid to the wallet come by an amount no instruction states, and the row says that
+	// SOL arrives from the account rather than that the account is a program being called.
+	it('should state excess lamports paid to the wallet as SOL received from their account', () => {
+		const instructions = mapSolInstructionSummaries({
+			instructions: [
+				{
+					program: 'spl-token',
+					programId: TOKEN_PROGRAM_ADDRESS,
+					parsed: {
+						type: 'withdrawExcessLamports',
+						info: {
+							source: mockAtaAddress3,
+							destination: mockSolAddress,
+							authority: mockSolAddress2
+						}
+					}
+				}
+			],
+			ownedAddresses: [mockSolAddress],
+			userAddress: mockSolAddress,
+			includeUnrecognised: true
+		});
+
+		const { getByTestId } = render(SolInstructionsList, {
+			props: { instructions, token: SOLANA_TOKEN, userAddress: mockSolAddress }
+		});
+
+		expect(getByTestId('sol-instructions-list')).toHaveTextContent(
+			en.transaction.text.instruction_receive_excess_from
+		);
+		expect(getByTestId('sol-instructions-list')).not.toHaveTextContent(
+			en.transaction.text.summary_other
+		);
+	});
+
 	// The program names the account, so it follows the line the way the program of a route does.
 	it('should name the program an account is opened for', () => {
 		const { getByTestId } = render(SolInstructionsList, {

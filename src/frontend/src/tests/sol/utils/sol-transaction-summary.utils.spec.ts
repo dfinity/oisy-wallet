@@ -1285,6 +1285,19 @@ describe('sol-transaction-summary.utils', () => {
 			);
 		});
 
+		// No instruction states how much excess a token account pays the wallet, but the line still says
+		// that SOL arrives, and from which account.
+		it('should state excess lamports paid to the wallet by an amount nobody read', () => {
+			expect(
+				textOf({
+					kind: 'receive',
+					withdrawsExcess: true,
+					counterparty: mockSolAddress3,
+					own: false
+				})
+			).toBe(en.transaction.text.instruction_receive_excess_from);
+		});
+
 		// The opening line names the token, and the closing one did not: "Close token account" left
 		// the user to work out which of their accounts a transaction was closing.
 		it('should name the token a close is closing', () => {

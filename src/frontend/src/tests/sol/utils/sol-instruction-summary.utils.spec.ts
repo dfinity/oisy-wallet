@@ -4493,7 +4493,7 @@ describe('sol-instruction-summary.utils', () => {
 
 			it('should state excess lamports paid to the wallet as SOL received by an amount nobody read', () => {
 				expect(read({ instructions: [excess({ destination: mockSolAddress })] })).toStrictEqual([
-					{ kind: 'receive', counterparty: mockSolAddress3, own: false }
+					{ kind: 'receive', withdrawsExcess: true, counterparty: mockSolAddress3, own: false }
 				]);
 			});
 

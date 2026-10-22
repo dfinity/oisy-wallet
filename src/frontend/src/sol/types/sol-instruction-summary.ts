@@ -68,6 +68,9 @@ export interface SolInstructionSummary {
 	// Set on an unwrap that names no amount, which moves everything its account wraps: what the line
 	// can still state when nobody read how much that is.
 	unwrapsAll?: boolean;
+	// Set on the excess lamports a token account pays the wallet, which no instruction states the
+	// amount of: what the line can still state.
+	withdrawsExcess?: boolean;
 	// The account created, closed, approved or handed over. On SOL somebody else pays the user, the
 	// account of theirs it arrives in when that is not the wallet.
 	account?: SolAddress;

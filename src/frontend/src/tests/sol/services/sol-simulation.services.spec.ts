@@ -938,7 +938,11 @@ describe('sol-simulation.services', () => {
 			it.each([
 				{ name: 'a seed-derived account', payout: withSeed, stated: { amount: rent } },
 				{ name: 'a nonce account', payout: fromNonce, stated: { amount: rent } },
-				{ name: 'a token account handing over its excess lamports', payout: excess, stated: {} }
+				{
+					name: 'a token account handing over its excess lamports',
+					payout: excess,
+					stated: { withdrawsExcess: true }
+				}
 			])(
 				'should list no close paid somebody else next to SOL paid by $name',
 				async ({ payout, stated }) => {

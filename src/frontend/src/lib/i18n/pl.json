@@ -2185,6 +2185,7 @@
 			"instruction_unwrap": "Rozpakuj i zamknij konto tokenów $symbol",
 			"instruction_unwrap_all_to": "",
 			"instruction_unwrap_all_from": "",
+			"instruction_receive_excess_from": "",
 			"instruction_create_account": "",
 			"instruction_create_program_account": "",
 			"instruction_close_program_account": "",
