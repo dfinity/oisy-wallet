@@ -30,7 +30,8 @@ import {
 	mockAtaAddress3,
 	mockSolAddress,
 	mockSolAddress2,
-	mockSolAddress3
+	mockSolAddress3,
+	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { nonNullish } from '@dfinity/utils';
 import {
@@ -4276,6 +4277,296 @@ describe('sol-instruction-summary.utils', () => {
 				]);
 
 				expect(views.at(-1)).not.toHaveProperty('returned');
+			});
+		});
+
+		// SOL paid out of an account no application holds: a seed-derived account, a nonce account, or
+		// a token account handing over its excess lamports. Each pays the wallet as surely as a plain
+		// transfer, and only a line says so.
+		describe('SOL paid out of a System or token account', () => {
+			const TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+			const SYSTEM = '11111111111111111111111111111111';
+			const wrapped = mockAtaAddress2;
+
+			const withSeed = (destination: string) => ({
+				program: 'system',
+				programId: SYSTEM,
+				parsed: {
+					type: 'transferWithSeed',
+					info: {
+						source: mockSolAddress3,
+						sourceBase: mockSolAddress2,
+						destination,
+						lamports: 5_000,
+						sourceSeed: 'vault',
+						sourceOwner: SYSTEM
+					}
+				}
+			});
+
+			const fromNonce = (destination: string) => ({
+				program: 'system',
+				programId: SYSTEM,
+				parsed: {
+					type: 'withdrawFromNonce',
+					info: {
+						nonceAccount: mockSolAddress3,
+						destination,
+						nonceAuthority: mockSolAddress2,
+						lamports: 5_000
+					}
+				}
+			});
+
+			const excess = ({
+				source = mockSolAddress3,
+				destination
+			}: {
+				source?: string;
+				destination: string;
+			}) => ({
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'withdrawExcessLamports',
+					info: { source, destination, authority: mockSolAddress2 }
+				}
+			});
+
+			const unwrapAll = {
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'unwrapLamports',
+					info: { source: wrapped, destination: mockSolAddress, authority: mockSolAddress }
+				}
+			};
+
+			const sync = {
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: { type: 'syncNative', info: { account: wrapped } }
+			};
+
+			const read = ({
+				instructions,
+				mint = WSOL_TOKEN.address,
+				accountLamports,
+				accountTokenAmounts
+			}: {
+				instructions: unknown[];
+				mint?: string;
+				accountLamports?: Record<string, bigint>;
+				accountTokenAmounts?: Record<string, bigint>;
+			}) =>
+				mapSolInstructionSummaries({
+					instructions,
+					ownedAddresses: [mockSolAddress, wrapped],
+					userAddress: mockSolAddress,
+					addressToToken: { [wrapped]: mint },
+					accountLamports,
+					accountTokenAmounts
+				});
+
+			const plain = (destination: string) => ({
+				program: 'system',
+				programId: SYSTEM,
+				parsed: {
+					type: 'transfer',
+					info: { source: mockSolAddress3, destination, lamports: 5_000 }
+				}
+			});
+
+			const payouts = [
+				{ name: 'a plain transfer', payout: plain },
+				{ name: 'a seed-derived account', payout: withSeed },
+				{ name: 'a nonce account', payout: fromNonce }
+			];
+
+			it.each(payouts)('should state what $name pays the wallet as SOL received', ({ payout }) => {
+				expect(read({ instructions: [payout(mockSolAddress)] })).toStrictEqual([
+					{ kind: 'receive', amount: 5_000n, counterparty: mockSolAddress3, own: false }
+				]);
+			});
+
+			// Paid into a wrapped SOL account, the lamports raise its balance the way a plain transfer
+			// into it does, once the account is synced. They reach the wallet only with the unwrap,
+			// which is what the wallet's change counts them at.
+			it.each(payouts)(
+				'should count what $name pays into a wrapped SOL account toward a later unwrap of everything',
+				({ payout }) => {
+					const views = read({
+						instructions: [payout(wrapped), sync, unwrapAll],
+						accountTokenAmounts: { [wrapped]: ZERO }
+					});
+
+					expect(views[0]).toStrictEqual({
+						kind: 'receive',
+						amount: 5_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						decimals: WSOL_TOKEN.decimals,
+						account: wrapped,
+						counterparty: mockSolAddress3,
+						own: false
+					});
+					expect(views.at(-1)?.amount).toBe(5_000n);
+					expect(
+						solWalletLamportsStated({ instructions: views, userAddress: mockSolAddress })
+					).toBe(5_000n);
+				}
+			);
+
+			// Token-2022 wraps SOL under a native mint of its own, and what is paid into an account
+			// holding it becomes wrapped SOL there just the same.
+			it.each(payouts)(
+				'should count what $name pays into a Token-2022 wrapped SOL account toward a later unwrap of everything',
+				({ payout }) => {
+					const token2022 = { program: 'spl-token-2022', programId: TOKEN_2022_PROGRAM_ADDRESS };
+
+					const views = read({
+						instructions: [
+							payout(wrapped),
+							{ ...sync, ...token2022 },
+							{ ...unwrapAll, ...token2022 }
+						],
+						mint: TOKEN_2022_NATIVE_MINT_ADDRESS,
+						accountTokenAmounts: { [wrapped]: ZERO }
+					});
+
+					expect(views[0]).toStrictEqual({
+						kind: 'receive',
+						amount: 5_000n,
+						tokenAddress: TOKEN_2022_NATIVE_MINT_ADDRESS,
+						decimals: WSOL_TOKEN.decimals,
+						account: wrapped,
+						counterparty: mockSolAddress3,
+						own: false
+					});
+					expect(
+						solWalletLamportsStated({ instructions: views, userAddress: mockSolAddress })
+					).toBe(5_000n);
+				}
+			);
+
+			// In an account of any other token the lamports stay in that account rather than reaching the
+			// wallet, which they do only with its close: the line names the account, and the wallet's
+			// change counts them once, at the close.
+			it.each(payouts)(
+				'should count what $name pays into a token account of another mint once, at its close',
+				({ payout }) => {
+					const tokenAccount = mockAtaAddress3;
+
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							payout(tokenAccount),
+							{
+								program: 'spl-token',
+								programId: TOKEN,
+								parsed: {
+									type: 'closeAccount',
+									info: {
+										account: tokenAccount,
+										destination: mockSolAddress,
+										owner: mockSolAddress
+									}
+								}
+							}
+						],
+						ownedAddresses: [mockSolAddress, tokenAccount],
+						userAddress: mockSolAddress,
+						addressToToken: { [tokenAccount]: mockSplAddress },
+						accountLamports: { [tokenAccount]: 2_039_280n },
+						accountTokenAmounts: { [tokenAccount]: ZERO }
+					});
+
+					expect(views[0]).toStrictEqual({
+						kind: 'receive',
+						amount: 5_000n,
+						account: tokenAccount,
+						counterparty: mockSolAddress3,
+						own: false
+					});
+					expect(views.at(-1)?.returned).toBe(2_044_280n);
+					expect(
+						solWalletLamportsStated({ instructions: views, userAddress: mockSolAddress })
+					).toBe(2_044_280n);
+				}
+			);
+
+			it('should state excess lamports paid to the wallet as SOL received by an amount nobody read', () => {
+				expect(read({ instructions: [excess({ destination: mockSolAddress })] })).toStrictEqual([
+					{ kind: 'receive', withdrawsExcess: true, counterparty: mockSolAddress3, own: false }
+				]);
+			});
+
+			it('should state nothing of excess lamports paid anywhere else', () => {
+				expect(read({ instructions: [excess({ destination: mockSolAddress2 })] })).toStrictEqual(
+					[]
+				);
+			});
+
+			it('should know nothing of what a wrapped SOL account wraps once excess lamports reach it', () => {
+				const views = read({
+					instructions: [excess({ destination: wrapped }), sync, unwrapAll],
+					accountTokenAmounts: { [wrapped]: ZERO }
+				});
+
+				expect(views.at(-1)).not.toHaveProperty('amount');
+			});
+
+			it('should know nothing of what a close hands back once excess lamports left the account', () => {
+				const views = read({
+					instructions: [
+						excess({ source: wrapped, destination: mockSolAddress }),
+						{
+							program: 'spl-token',
+							programId: TOKEN,
+							parsed: {
+								type: 'closeAccount',
+								info: { account: wrapped, destination: mockSolAddress, owner: mockSolAddress }
+							}
+						}
+					],
+					accountLamports: { [wrapped]: 2_046_280n },
+					accountTokenAmounts: { [wrapped]: 7_000n }
+				});
+
+				expect(views.at(-1)).not.toHaveProperty('returned');
+			});
+
+			// Counted from nothing after the withdrawal, a payment in would have the close of either
+			// account state what arrived since as all it hands back.
+			describe('and a payment in after it', () => {
+				const other = mockAtaAddress;
+
+				const close = (account: string) => ({
+					program: 'spl-token',
+					programId: TOKEN,
+					parsed: {
+						type: 'closeAccount',
+						info: { account, destination: mockSolAddress, owner: mockSolAddress }
+					}
+				});
+
+				it.each([
+					{ end: 'source', account: wrapped },
+					{ end: 'destination', account: other }
+				])('should know nothing of what a close of its $end hands back', ({ account }) => {
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							excess({ source: wrapped, destination: other }),
+							plain(account),
+							close(account)
+						],
+						ownedAddresses: [mockSolAddress, wrapped, other],
+						userAddress: mockSolAddress,
+						addressToToken: { [wrapped]: WSOL_TOKEN.address, [other]: WSOL_TOKEN.address },
+						accountLamports: { [wrapped]: 2_046_280n, [other]: 2_039_280n },
+						accountTokenAmounts: { [wrapped]: 7_000n, [other]: ZERO }
+					});
+
+					expect(views.at(-1)).not.toHaveProperty('returned');
+				});
 			});
 		});
 

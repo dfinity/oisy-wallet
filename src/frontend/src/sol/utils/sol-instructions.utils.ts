@@ -1151,9 +1151,15 @@ const vocabularyOf = (programId: SolAddress): ProgramVocabulary | undefined => {
 			program: 'system',
 			names: SystemInstruction,
 			// The RPC calls a SOL transfer `transfer` and its amount `lamports`, and the effects
-			// below are written against those.
-			types: { transferSol: 'transfer' },
-			fields: { amount: 'lamports' }
+			// below are written against those. It calls the seed-derived one `transferWithSeed`, and
+			// a withdrawal from a nonce account `withdrawFromNonce`, paying `lamports` to `destination`.
+			types: {
+				transferSol: 'transfer',
+				transferSolWithSeed: 'transferWithSeed',
+				withdrawNonceAccount: 'withdrawFromNonce'
+			},
+			accounts: { recipientAccount: 'destination' },
+			fields: { amount: 'lamports', withdrawAmount: 'lamports' }
 		};
 	}
 
