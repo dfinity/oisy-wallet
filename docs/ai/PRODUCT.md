@@ -719,7 +719,7 @@ No way out is offered, and the switch is not pointed at, when WalletConnect's do
 
 On Ethereum and the EVM networks, an `eth_sendTransaction` is refused the same way when an ERC-20 approve, transfer or allowance change, or an NFT operator grant (`setApprovalForAll`), carries arguments that do not decode, and the switch covers those too. A request on an ERC-20 token OISY does not list, among the default tokens and the user's custom ones, is refused for good instead: the review tells the user to add the token to OISY and send the request again, after which it is reviewed in full. The signing path checks again here too, rather than relying on the review: it refuses a call on a token OISY does not list, a refusal that was not acknowledged, and every refusal for a flagged site.
 
-Refusals that protect a signing rule stay refused whatever the switch says: a Solana `signMessage` over the bytes of a transaction, every Bitcoin `signPsbt` refusal, and the Ethereum refusals of typed data that cannot be signed or names another chain, and of a request from another account.
+Refusals that protect a signing rule stay refused whatever the switch says: a Solana `signMessage` over the bytes of a transaction, every Bitcoin `signPsbt` refusal, and the Ethereum refusals of typed data that cannot be signed or names another chain, and of a request from another account. So do the Ethereum refusals of a token call that also sends native value, and of a ckETH conversion to another principal or one OISY cannot check yet: no app needs the first, the second is what that check stops, and the third clears by waiting.
 
 ### Starting a pairing from the scanner
 
