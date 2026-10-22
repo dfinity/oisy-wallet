@@ -4,9 +4,11 @@ import * as activeUserTransactionsServices from '$lib/services/active-user-trans
 import { pollNearIntentsActiveUserTransactions } from '$lib/services/near-intents-active-tx.services';
 import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
+	type NearIntentsQuoteResponse,
 	type NearIntentsSwapDetails,
 	type NearIntentsSwapStatus
 } from '$lib/types/near-intents';
+import { verifyNearIntentsQuoteSignature } from '$lib/utils/near-intents-quote.utils';
 import {
 	mockNearIntentsActiveUserTransaction,
 	mockXrpLastLedgerSequence,
@@ -14,10 +16,15 @@ import {
 	mockXrpTxHash
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockNearIntentsStatusPending } from '$tests/mocks/near-intents.mock';
 import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 
 vi.mock('$lib/rest/near-intents.rest', () => ({
 	fetchNearIntentsStatus: vi.fn()
+}));
+
+vi.mock('$lib/utils/near-intents-quote.utils', () => ({
+	verifyNearIntentsQuoteSignature: vi.fn()
 }));
 
 vi.mock('$lib/utils/console.utils', () => ({
@@ -30,15 +37,17 @@ const pendingTx = mockNearIntentsActiveUserTransaction;
 
 const statusResponse = ({
 	status,
-	swapDetails = {}
+	swapDetails = {},
+	quoteResponse = {} as never
 }: {
 	status: NearIntentsSwapStatus;
 	swapDetails?: NearIntentsSwapDetails;
+	quoteResponse?: NearIntentsQuoteResponse;
 }) => ({
 	correlationId: 'id',
 	status,
 	updatedAt: '2026-03-16T00:00:00.000Z',
-	quoteResponse: {} as never,
+	quoteResponse,
 	swapDetails
 });
 
@@ -196,6 +205,51 @@ describe('near-intents-active-tx.services', () => {
 					})
 				})
 			);
+		});
+
+		describe('a deposit that never arrived', () => {
+			const { quoteResponse } = mockNearIntentsStatusPending;
+
+			beforeEach(() => {
+				vi.useFakeTimers().setSystemTime(new Date(Date.parse(quoteResponse.quote.deadline) + 1));
+
+				vi.mocked(nearIntentsRest.fetchNearIntentsStatus).mockResolvedValue(
+					statusResponse({ status: 'PENDING_DEPOSIT', quoteResponse })
+				);
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			it('fails the swap once the signed quote deadline has passed', async () => {
+				vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(true);
+
+				await pollNearIntentsActiveUserTransactions({
+					identity: mockIdentity,
+					transactions: [{ ...pendingTx, status: { Executing: null } }]
+				});
+
+				expect(applySpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						update: {
+							status: { Failed: null },
+							error: en.swap.error.near_intents_deposit_expired
+						}
+					})
+				);
+			});
+
+			it('keeps the swap in progress when the quote signature does not verify', async () => {
+				vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(false);
+
+				await pollNearIntentsActiveUserTransactions({
+					identity: mockIdentity,
+					transactions: [{ ...pendingTx, status: { Executing: null } }]
+				});
+
+				expect(applySpy).not.toHaveBeenCalled();
+			});
 		});
 
 		it('does not write when the status would not advance and no new refs were learned', async () => {
