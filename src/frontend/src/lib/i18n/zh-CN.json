@@ -519,6 +519,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"blitzgrid": {
+				"name": "Blitz Grid Fantasy Football",
+				"one_liner": "完全运行在 Internet Computer 上的梦幻橄榄球联赛。",
+				"description": "Blitz Grid 是一款为移动端打造的梦幻橄榄球游戏。联赛、选秀、阵容、交易和每周计分都在 Internet Computer 的容器中运行。连接 OISY 后，你可以向联赛中的其他经理发送 ICP。每笔转账都在 OISY 中签名。"
 			}
 		}
 	},
