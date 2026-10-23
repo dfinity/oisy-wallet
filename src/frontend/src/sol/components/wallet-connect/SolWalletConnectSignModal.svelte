@@ -110,6 +110,11 @@
 	// A token batch the run keeps whole, which the list states none of the steps of. `sign()` refuses
 	// it as it does an ambiguous message, so the review says so the same way.
 	let keepsBatchWhole = $state<boolean | undefined>();
+	// Whether the message names an account other than the wallet to pay its fee. A send goes out with
+	// the wallet as the fee payer instead, which the review never ran, so `sign()` refuses to send such
+	// a message and the review says so. Signing it without sending keeps the payer it names.
+	let feePaidByOthers = $state<boolean | undefined>();
+	let sendPaidByOthers = $derived(signWithSending && (feePaidByOthers ?? false));
 	// The decode is asynchronous, so until it settles the review shows an empty summary and no
 	// warning. Approval waits for it: signing on the strength of a review that has not been
 	// computed yet is exactly what the warnings exist to prevent. A failed decode never flips it,
@@ -144,7 +149,8 @@
 				unreadPrograms,
 				rentExemptMinimum,
 				opensAccountBeyondRent,
-				keepsBatchWhole
+				keepsBatchWhole,
+				feePaidByOthers
 			} = await decodeService({
 				base64EncodedTransactionMessage: data,
 				networkId,
@@ -300,6 +306,7 @@
 					reassignsWallet}
 				{application}
 				approveDisabled={!decoded ||
+					sendPaidByOthers ||
 					(ambiguous ?? false) ||
 					(opensAccountBeyondRent ?? false) ||
 					(keepsBatchWhole ?? false) ||
@@ -309,6 +316,7 @@
 				{data}
 				{decoded}
 				destination={destination ?? ''}
+				feePaidByOthers={sendPaidByOthers}
 				feeToken={token}
 				flaggedAsScam={!acceptedContext(request.verifyContext)}
 				{instructions}

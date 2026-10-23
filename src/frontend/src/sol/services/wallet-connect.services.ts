@@ -148,6 +148,14 @@ export const decode = async ({
 		rpc: solanaHttpRpc(solNetwork)
 	});
 
+	// A send goes out with the wallet as its fee payer, which makes the wallet a signer. A message
+	// that names another account to pay is reviewed with the wallet as an account that does not
+	// sign, and a program can tell the two apart, so the run below would describe a different
+	// transaction from the one sent. Signing without sending keeps the fee payer the message names,
+	// so whether this refuses the request is decided where the method is known.
+	const feePaidByOthers =
+		nonNullish(address) && parsedTransactionMessage.feePayer.address !== address;
+
 	// The review is synchronous, so both the estimate the requested fee is judged against and the
 	// simulation are fetched here, where the request is already being decoded before the modal
 	// opens. A simulation that lands after the user has approved would be worthless.
@@ -294,6 +302,7 @@ export const decode = async ({
 		...(nonNullish(rentExemptMinimum) && { rentExemptMinimum }),
 		...(opensAccountBeyondRent === true && { opensAccountBeyondRent }),
 		...(keepsBatchWhole === true && { keepsBatchWhole }),
+		...(feePaidByOthers && { feePaidByOthers }),
 		parties
 	};
 };
@@ -584,6 +593,25 @@ export const sign = ({
 				transactionMessage: base64EncodedTransactionMessage,
 				rpc: solanaHttpRpc(solNetwork)
 			});
+
+			// A send goes out with the wallet as its fee payer, and the fee payer signs. A message that
+			// names another account to pay was reviewed with the wallet as an account that does not
+			// sign, so sending it would sign a transaction the review never ran. Only a message the
+			// wallet already pays for is sent: setting the fee payer then changes no account's role.
+			// Asked first, as the review asks it, since every check below read the message as the dApp
+			// sent it.
+			if (
+				method === SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION &&
+				parsedTransactionMessage.feePayer.address !== address
+			) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.fee_paid_by_others }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
 
 			const { amount, destination, ambiguous, unreviewed } = mapSolTransactionMessage({
 				transactionMessage: parsedTransactionMessage,
