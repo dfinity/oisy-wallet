@@ -1135,6 +1135,66 @@ describe('btc wallet-connect.services', () => {
 				msg: { text: en.wallet_connect.error.btc_psbt_input_ambiguous }
 			});
 		});
+
+		it('signs a request whose previous transactions prove every input when the UTXO lookup fails', async () => {
+			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockRejectedValue(new Error('unavailable'));
+
+			const { address: mainnetAddress } = payments.p2wpkh({
+				pubkey: signerPubkey,
+				network: networks.bitcoin
+			});
+
+			const result = await signPsbt({
+				listener: mockListener,
+				request: buildSignRequest({
+					chainId: mainnetChainId,
+					params: {
+						psbt: buildOwnedPsbtWithBothUtxos({ witnessValue: 100_000 }),
+						broadcast: false
+					}
+				}),
+				address: mainnetAddress,
+				modalNext,
+				progress,
+				identity: mockIdentity
+			});
+
+			expect(result).toEqual({ success: true });
+
+			expect(mockListener.approveRequest).toHaveBeenCalledOnce();
+			expect(mockListener.rejectRequest).not.toHaveBeenCalled();
+			expect(signerApi.signBtcPrehash).toHaveBeenCalledOnce();
+		});
+
+		it('declines an input its previous transaction does not prove as unverified when the UTXO lookup fails', async () => {
+			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockRejectedValue(new Error('unavailable'));
+
+			const { address: mainnetAddress } = payments.p2wpkh({
+				pubkey: signerPubkey,
+				network: networks.bitcoin
+			});
+
+			const result = await signPsbt({
+				listener: mockListener,
+				request: buildSignRequest({
+					chainId: mainnetChainId,
+					params: { psbt: buildOwnedPsbt(networks.bitcoin), broadcast: false }
+				}),
+				address: mainnetAddress,
+				modalNext,
+				progress,
+				identity: mockIdentity
+			});
+
+			expect(result).toEqual({ success: false });
+
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			expect(signerApi.signBtcPrehash).not.toHaveBeenCalled();
+
+			expect(spyToastsError).toHaveBeenCalledWith({
+				msg: { text: en.wallet_connect.error.btc_psbt_input_unverified }
+			});
+		});
 	});
 
 	describe('decodeMessage', () => {

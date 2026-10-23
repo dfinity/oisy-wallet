@@ -565,7 +565,10 @@ export const signPsbt = ({
 				// The review prices the request from `decodePsbt`; refuse whatever it could not display
 				// faithfully, so no signature is ever produced for figures the user did not see. The UTXO
 				// set is read again rather than taken from the review, so the check holds at signing time.
-				const walletUtxos = await loadPsbtWalletUtxos({ request, address, identity });
+				// Without it, as in the review, only inputs their previous transaction proves can pass.
+				const walletUtxos = await loadPsbtWalletUtxos({ request, address, identity }).catch(
+					(_: unknown) => []
+				);
 
 				const { ambiguous, unverified } = decodePsbt({ request, address, walletUtxos });
 
