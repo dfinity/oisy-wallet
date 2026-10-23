@@ -5,13 +5,11 @@ import { POLYGON_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.
 import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import type { EthAddress } from '$eth/types/address';
-import { LOCAL, STAGING, TEST } from '$lib/constants/app.constants';
+import { TEST } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
 
-// On for local and staging, where the EVM swap wizard executes a LI.FI offer (Solana sources come
-// later); not on beta nor production yet. Off under test, whose specs switch it on themselves.
-// `STAGING` already covers the test_fe / audit / e2e environments.
-export const LIFI_SWAP_ENABLED = (LOCAL || STAGING) && !TEST;
+// On in every environment. Off under test, whose specs switch it on themselves.
+export const LIFI_SWAP_ENABLED = !TEST;
 
 // Scoped to an origin allow-list on LI.FI's partner portal, with a separate key per environment, so
 // shipping it in the bundle does not expose another environment's quota.
