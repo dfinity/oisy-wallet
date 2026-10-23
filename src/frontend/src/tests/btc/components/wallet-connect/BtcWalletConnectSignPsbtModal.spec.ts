@@ -116,4 +116,35 @@ describe('BtcWalletConnectSignPsbtModal', () => {
 		).resolves.toBeInTheDocument();
 		expect(queryByRole('button', { name: en.core.text.approve })).not.toBeInTheDocument();
 	});
+
+	it('loads the wallet UTXOs again when the address arrives after the modal opened', async () => {
+		let resolveWithoutAddress: (utxos: BitcoinDid.utxo[]) => void = () => {};
+
+		const spy = vi
+			.spyOn(btcWalletConnectServices, 'loadPsbtWalletUtxos')
+			.mockImplementation(({ address: loadAddress }) =>
+				loadAddress === address
+					? Promise.resolve([walletUtxo])
+					: new Promise((resolve) => {
+							resolveWithoutAddress = resolve;
+						})
+			);
+
+		const { findByRole, getByRole, rerender } = render(BtcWalletConnectSignPsbtModal, {
+			props: { ...props(), address: undefined }
+		});
+
+		await rerender(props());
+
+		await expect(findByRole('button', { name: en.core.text.approve })).resolves.toBeInTheDocument();
+
+		expect(spy).toHaveBeenCalledTimes(2);
+		expect(spy).toHaveBeenLastCalledWith(expect.objectContaining({ address }));
+
+		// The load started without an address settles last and must not replace the address's set.
+		resolveWithoutAddress([]);
+		await new Promise((resolve) => setTimeout(resolve, 0));
+
+		expect(getByRole('button', { name: en.core.text.approve })).toBeInTheDocument();
+	});
 });

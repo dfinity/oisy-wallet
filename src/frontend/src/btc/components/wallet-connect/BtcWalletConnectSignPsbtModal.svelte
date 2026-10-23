@@ -2,7 +2,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import type { BitcoinDid } from '@icp-sdk/canisters/ckbtc';
 	import type { WalletKitTypes } from '@reown/walletkit';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy } from 'svelte';
 	import BtcWalletConnectSignPsbtReview from '$btc/components/wallet-connect/BtcWalletConnectSignPsbtReview.svelte';
 	import {
 		decodePsbt,
@@ -38,14 +38,33 @@
 
 	let walletUtxos = $state<BitcoinDid.utxo[] | undefined>();
 
-	onMount(async () => {
-		try {
-			walletUtxos = await loadPsbtWalletUtxos({ request, address, identity: $authIdentity });
-		} catch (_: unknown) {
-			// Without the UTXO set no input of the wallet can be checked against it, so the review
-			// refuses such inputs unless their previous transaction is part of the request.
-			walletUtxos = [];
-		}
+	$effect(() => {
+		// Reloaded whenever the request, the address or the identity changes: an address that
+		// arrives after the modal opened has a UTXO set of its own.
+		const params = { request, address, identity: $authIdentity };
+
+		walletUtxos = undefined;
+
+		// A slower previous load must not overwrite the set of the current address.
+		let cancelled = false;
+
+		loadPsbtWalletUtxos(params)
+			.then((utxos) => {
+				if (!cancelled) {
+					walletUtxos = utxos;
+				}
+			})
+			.catch((_: unknown) => {
+				// Without the UTXO set no input can be checked against it, so the review refuses every
+				// input whose previous transaction is not part of the request.
+				if (!cancelled) {
+					walletUtxos = [];
+				}
+			});
+
+		return () => {
+			cancelled = true;
+		};
 	});
 
 	let decoded = $state<WalletConnectBtcDecodedPsbt | undefined>();
