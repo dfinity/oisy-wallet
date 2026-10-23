@@ -11,6 +11,7 @@ import type {
 	SolClosedAccount,
 	SolSimulationAllowance,
 	SolSimulationControlChange,
+	SolSimulationCreatedAccount,
 	SolSimulationPreview,
 	SolSimulationTokenDelta
 } from '$sol/types/sol-simulation';
@@ -282,10 +283,12 @@ export const mapSolSimulationPreview = ({
 	postAccounts: readonly SolanaParsedAccountInfo[];
 	userAddress: SolAddress;
 }): SolSimulationPreview => {
-	const { solDelta, tokenDeltas, changes } = addresses.reduce<{
+	const { solDelta, tokenDeltas, changes, created, closed } = addresses.reduce<{
 		solDelta: bigint | undefined;
 		tokenDeltas: SolSimulationTokenDelta[];
 		changes: SolSimulationControlChange[];
+		created: SolSimulationCreatedAccount[];
+		closed: SolAddress[];
 	}>(
 		(acc, address, index) => {
 			const pre = parseAccountState(preAccounts[index]);
@@ -299,6 +302,21 @@ export const mapSolSimulationPreview = ({
 			const token = post?.token ?? pre?.token;
 
 			return {
+				created:
+					isNullish(pre) && nonNullish(post?.token)
+						? [
+								...acc.created,
+								{
+									account: address,
+									owner: post.token.owner,
+									...(nonNullish(post.token.delegate) && { delegate: post.token.delegate }),
+									...(nonNullish(post.token.closeAuthority) && {
+										closeAuthority: post.token.closeAuthority
+									})
+								}
+							]
+						: acc.created,
+				closed: nonNullish(pre) && isNullish(post) ? [...acc.closed, address] : acc.closed,
 				solDelta:
 					address === userAddress
 						? (post?.lamports ?? ZERO) - (pre?.lamports ?? ZERO)
@@ -319,13 +337,15 @@ export const mapSolSimulationPreview = ({
 				changes: [...acc.changes, ...controlChanges({ account: address, pre, post })]
 			};
 		},
-		{ solDelta: undefined, tokenDeltas: [], changes: [] }
+		{ solDelta: undefined, tokenDeltas: [], changes: [], created: [], closed: [] }
 	);
 
 	return {
 		...(nonNullish(solDelta) && solDelta !== ZERO && { solDelta }),
 		tokenDeltas,
-		controlChanges: changes
+		controlChanges: changes,
+		...(created.length > 0 && { createdAccounts: created }),
+		...(closed.length > 0 && { closedAccounts: closed })
 	};
 };
 

@@ -385,7 +385,115 @@ describe('sol-simulation.utils', () => {
 						delta: 3_000_000n
 					}
 				],
-				controlChanges: []
+				controlChanges: [],
+				createdAccounts: [{ account: mockAtaAddress, owner: mockSolAddress }]
+			});
+		});
+
+		// Control changes need a state before; a created account has none, so who controls it is
+		// listed apart.
+		describe('accounts the run creates', () => {
+			it('should list one created for the user with who controls it', () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockAtaAddress],
+					preAccounts: [null],
+					postAccounts: [
+						tokenAccount({
+							amount: ZERO,
+							owner: mockSolAddress,
+							delegate: mockSolAddress2,
+							delegatedAmount: 1n,
+							closeAuthority: mockSolAddress3
+						})
+					],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview.createdAccounts).toEqual([
+					{
+						account: mockAtaAddress,
+						owner: mockSolAddress,
+						delegate: mockSolAddress2,
+						closeAuthority: mockSolAddress3
+					}
+				]);
+			});
+
+			it('should not list one created for somebody else', () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockAtaAddress],
+					preAccounts: [null],
+					postAccounts: [tokenAccount({ amount: 3_000_000n, owner: mockSolAddress2 })],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview.createdAccounts).toBeUndefined();
+			});
+
+			it('should not list one that existed before the run', () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockAtaAddress],
+					preAccounts: [tokenAccount({ amount: ZERO, owner: mockSolAddress })],
+					postAccounts: [
+						tokenAccount({ amount: ZERO, owner: mockSolAddress, delegate: mockSolAddress2 })
+					],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview.createdAccounts).toBeUndefined();
+			});
+		});
+
+		// An empty account closed shows no token delta and no control change.
+		describe('accounts the run closes', () => {
+			it("should list one of the user's that existed before the run", () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockAtaAddress],
+					preAccounts: [tokenAccount({ amount: ZERO, owner: mockSolAddress })],
+					postAccounts: [null],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview).toEqual({
+					tokenDeltas: [],
+					controlChanges: [],
+					closedAccounts: [mockAtaAddress]
+				});
+				expect(isEmptySolSimulationPreview(preview)).toBeTruthy();
+			});
+
+			it('should not list one of somebody else', () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockAtaAddress],
+					preAccounts: [tokenAccount({ amount: ZERO, owner: mockSolAddress2 })],
+					postAccounts: [null],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview.closedAccounts).toBeUndefined();
+			});
+
+			it('should not list one the run creates and closes, which has no pre-state', () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockAtaAddress],
+					preAccounts: [null],
+					postAccounts: [null],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview.closedAccounts).toBeUndefined();
+			});
+
+			// The wallet is the user's whatever its state, so only the missing state before rules it out.
+			it('should not list an account that did not exist before the run either', () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockSolAddress],
+					preAccounts: [null],
+					postAccounts: [null],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview.closedAccounts).toBeUndefined();
 			});
 		});
 

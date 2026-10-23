@@ -75,6 +75,10 @@ export const SOLANA_SIMULATION_MAX_CLOSE_RUNS = 5;
 // the request behind it. Past this it is abandoned and the review renders without it.
 export const SOLANA_SIMULATION_TIMEOUT_MILLISECONDS = 5_000;
 
+// How many times a run whose pre-state must be read at its very slot reads the pair again, when
+// the simulation lands on a later slot or on a node not there yet, within the timeout above.
+export const SOLANA_SIMULATION_SNAPSHOT_ATTEMPTS = 3;
+
 // Multiples of that baseline at which the review speaks up: twice it is worth naming as the dApp's
 // own choice, five times it is worth questioning. Both stay short of blocking, since paying well
 // over the odds is a legitimate thing to want during congestion.
