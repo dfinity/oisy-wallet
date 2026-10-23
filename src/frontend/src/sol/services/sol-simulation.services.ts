@@ -1,9 +1,14 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
-import { getMultipleAccountsInfo, simulateTransactionAccounts } from '$sol/api/solana.api';
+import {
+	getMultipleAccountsInfo,
+	getMultipleAccountsInfoWithContext,
+	simulateTransactionAccounts
+} from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
 	SOLANA_SIMULATION_MAX_CLOSE_RUNS,
+	SOLANA_SIMULATION_SNAPSHOT_ATTEMPTS,
 	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS
 } from '$sol/constants/sol.constants';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
@@ -37,7 +42,12 @@ import {
 	mapSolSimulatedTransferLegs
 } from '$sol/utils/sol-transfer-parties.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { compileTransaction, getBase64EncodedWireTransaction } from '@solana/kit';
+import {
+	compileTransaction,
+	getBase64EncodedWireTransaction,
+	isSolanaError,
+	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_MIN_CONTEXT_SLOT_NOT_REACHED
+} from '@solana/kit';
 
 /**
  * Which of the given closed accounts still hold every lamport they held before the message, after
@@ -154,12 +164,62 @@ const attributeClosedAccounts = async ({
 	});
 };
 
+type SolSimulationSnapshot = {
+	preAccounts: Awaited<ReturnType<typeof getMultipleAccountsInfo>>;
+} & Awaited<ReturnType<typeof simulateTransactionAccounts>>;
+
+/**
+ * The pre-state and the run read at one slot, so that the diff between them is only what the
+ * transaction does: read side by side, the two can see different slots, and whatever else reached
+ * the user's accounts in between (an incoming transfer, another transaction of theirs) is folded
+ * into the deltas. The pre-state is read first, then the run is asked for no earlier slot and
+ * must come back at that very one. A later slot, or a node that has not reached it, reads the
+ * pair again; `undefined` when no attempt lands on one slot.
+ */
+const readSnapshotAtOneSlot = async ({
+	addresses,
+	network,
+	...simulation
+}: Pick<Parameters<typeof simulateTransactionAccounts>[0], 'base64EncodedTransactionMessage'> & {
+	addresses: SolAddress[];
+	network: SolanaNetworkType;
+	replaceRecentBlockhash?: boolean;
+}): Promise<SolSimulationSnapshot | undefined> => {
+	for (let attempt = 1; attempt <= SOLANA_SIMULATION_SNAPSHOT_ATTEMPTS; attempt++) {
+		const { slot, value: preAccounts } = await getMultipleAccountsInfoWithContext({
+			addresses,
+			network
+		});
+
+		try {
+			const run = await simulateTransactionAccounts({
+				...simulation,
+				addresses,
+				network,
+				minContextSlot: slot
+			});
+
+			if (run.slot === slot) {
+				return { preAccounts, ...run };
+			}
+		} catch (err: unknown) {
+			if (!isSolanaError(err, SOLANA_ERROR__JSON_RPC__SERVER_ERROR_MIN_CONTEXT_SLOT_NOT_REACHED)) {
+				throw err;
+			}
+		}
+	}
+
+	return undefined;
+};
+
 const simulate = async ({
 	base64EncodedTransactionMessage,
 	transactionMessage,
 	address,
 	network,
-	rentExemptMinimumRequest
+	rentExemptMinimumRequest,
+	replaceRecentBlockhash,
+	consistentSnapshot = false
 }: {
 	base64EncodedTransactionMessage: string;
 	transactionMessage: CompilableTransactionMessage;
@@ -168,6 +228,8 @@ const simulate = async ({
 	// The decode's request for the reserve a token account costs to exist, still pending when the
 	// run starts, so that waiting for it falls inside the run's own timeout.
 	rentExemptMinimumRequest: Promise<bigint | undefined>;
+	replaceRecentBlockhash?: boolean;
+	consistentSnapshot?: boolean;
 }): Promise<SolSimulationResult | undefined> => {
 	const addresses = selectSolSimulationAddresses(transactionMessage);
 
@@ -177,18 +239,34 @@ const simulate = async ({
 		return undefined;
 	}
 
-	// The "before" read does not depend on the simulation's outcome, so the two go out together
-	// and the preview costs one round trip rather than two. The reserve a token account costs to
-	// exist joins them: a creation may fund one with more than that and let its initialisation
-	// read the difference as the balance, and nothing in the message says where the line falls.
-	// Best effort - without it the balance of an account this message opens is stated as unknown
-	// rather than guessed at.
-	const [preAccounts, { err, accounts: postAccounts, innerInstructions, fee }, rentExemptMinimum] =
-		await Promise.all([
-			getMultipleAccountsInfo({ addresses, network }),
-			simulateTransactionAccounts({ base64EncodedTransactionMessage, addresses, network }),
-			rentExemptMinimumRequest
-		]);
+	const simulation = {
+		base64EncodedTransactionMessage,
+		addresses,
+		network,
+		...(nonNullish(replaceRecentBlockhash) && { replaceRecentBlockhash })
+	};
+
+	// Unless the two must be read at one slot, the "before" read does not depend on the
+	// simulation's outcome, so the two go out together and the preview costs one round trip rather
+	// than two. The reserve a token account costs to exist joins them: a creation may fund one with
+	// more than that and let its initialisation read the difference as the balance, and nothing in
+	// the message says where the line falls. Best effort - without it the balance of an account
+	// this message opens is stated as unknown rather than guessed at.
+	const [snapshot, rentExemptMinimum] = await Promise.all([
+		consistentSnapshot
+			? readSnapshotAtOneSlot(simulation)
+			: Promise.all([
+					getMultipleAccountsInfo({ addresses, network }),
+					simulateTransactionAccounts(simulation)
+				]).then(([preAccounts, run]) => ({ preAccounts, ...run })),
+		rentExemptMinimumRequest
+	]);
+
+	if (isNullish(snapshot)) {
+		return undefined;
+	}
+
+	const { preAccounts, err, accounts: postAccounts, innerInstructions, fee } = snapshot;
 
 	// A run that failed rolled its changes back, so its post-state describes nothing the user
 	// would actually get. Showing those deltas would be worse than showing none.
@@ -420,6 +498,12 @@ const simulate = async ({
  * what the message states on its own while saying that the lists are then partial. The simulation
  * is extra context on top of the review, not the material the review is made of, so its absence
  * must never keep the user from seeing or rejecting a request.
+ *
+ * A caller that signs exactly the bytes it simulates passes `replaceRecentBlockhash: false`, so
+ * that a blockhash that has expired fails the run instead of being replaced, and
+ * `consistentSnapshot: true`, so that the deltas are only what the transaction does (see
+ * `readSnapshotAtOneSlot`), at the cost of one more round trip. Both default to what the
+ * WalletConnect review needs.
  */
 export const simulateSolTransaction = async (params: {
 	base64EncodedTransactionMessage: string;
@@ -427,6 +511,8 @@ export const simulateSolTransaction = async (params: {
 	address: OptionSolAddress;
 	network: SolanaNetworkType;
 	rentExemptMinimumRequest: Promise<bigint | undefined>;
+	replaceRecentBlockhash?: boolean;
+	consistentSnapshot?: boolean;
 }): Promise<SolSimulationResult | undefined> => {
 	const { address } = params;
 
