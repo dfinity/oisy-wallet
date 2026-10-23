@@ -386,7 +386,9 @@ const decodePsbtInput = ({
 			signedByWallet
 		},
 		ambiguous: false,
-		unverified: signedByWallet && !proven
+		// Outside the UTXO set, the script an input states does not establish whose output it spends,
+		// so its value must be proven whichever address it names.
+		unverified: !proven
 	};
 };
 
@@ -399,10 +401,9 @@ const decodePsbtInput = ({
  * (`resolvePsbtInputPrevout`), and the whole decode is flagged `ambiguous` as soon as one input
  * contradicts itself, since one wrong input value distorts the total and the fee too.
  *
- * Only values OISY can check are shown: an input of the wallet is priced from the wallet's UTXO set
- * (`walletUtxos`) or from the previous transaction its outpoint names, and the decode is flagged
- * `unverified` when neither states it. Any other input shows a value only when its previous
- * transaction proves it, and the fee only when every input has one.
+ * Only values OISY can check are shown: an input spending one of the wallet's UTXOs (`walletUtxos`)
+ * is priced from that set, any other input from the previous transaction its outpoint names, and
+ * the decode is flagged `unverified` as soon as one input is established neither way.
  * Throws if the PSBT is missing or cannot be parsed.
  */
 export const decodePsbt = ({

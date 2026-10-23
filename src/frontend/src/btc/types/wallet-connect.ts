@@ -70,10 +70,10 @@ export interface WalletConnectBtcDecodedPsbt {
 	// unreadable. Every figure above would then rest on a guess about what the signer will consume,
 	// so the request must be neither displayed nor signed.
 	ambiguous: boolean;
-	// `true` when an input of the wallet has a value OISY could check neither against the wallet's
-	// UTXO set nor against the previous transaction its outpoint names. A signature commits to the
-	// value of the input it signs only, so signatures over different stated values of the same
-	// transaction can be combined: the request must be neither displayed nor signed.
+	// `true` when an input has a value OISY could check neither against the wallet's UTXO set nor
+	// against the previous transaction its outpoint names. A signature commits to the value of the
+	// input it signs only, so signatures over different stated values of the same transaction can be
+	// combined: the request must be neither displayed nor signed.
 	unverified: boolean;
 }
 

@@ -445,7 +445,7 @@ describe('btc wallet-connect.services', () => {
 		expect(decoded.unverified).toBeFalsy();
 	});
 
-	it('represents an input stating no previous output as an unknown value (not zero)', () => {
+	it('flags an input stating no previous output as unverified, with an unknown value (not zero)', () => {
 		const psbt = new Psbt({ network });
 		psbt.addInput({
 			hash: '0000000000000000000000000000000000000000000000000000000000000002',
@@ -462,7 +462,7 @@ describe('btc wallet-connect.services', () => {
 		expect(decoded.totalSignedInputs).toBe(ZERO);
 		expect(decoded.fee).toBeUndefined();
 		expect(decoded.ambiguous).toBeFalsy();
-		expect(decoded.unverified).toBeFalsy();
+		expect(decoded.unverified).toBeTruthy();
 	});
 
 	it('shows no figure for an input whose nonWitnessUtxo is not the transaction its outpoint names', () => {
@@ -571,7 +571,7 @@ describe('btc wallet-connect.services', () => {
 		expect(decoded.unverified).toBeFalsy();
 	});
 
-	it('shows no value or fee for an input of another address that only its witnessUtxo prices', () => {
+	it('flags an input of another address that only its witnessUtxo prices as unverified', () => {
 		const psbt = new Psbt({ network });
 		psbt.addInput({
 			hash: FIRST_TXID,
@@ -598,7 +598,48 @@ describe('btc wallet-connect.services', () => {
 		expect(decoded.totalSignedInputs).toBe(100_000n);
 		expect(decoded.fee).toBeUndefined();
 		expect(decoded.ambiguous).toBeFalsy();
-		expect(decoded.unverified).toBeFalsy();
+		expect(decoded.unverified).toBeTruthy();
+	});
+
+	it('flags each of two requests that state one wallet output outside the UTXO set with another script as unverified', () => {
+		// Outputs not yet in a block are absent from the UTXO set: whichever of the two the request
+		// proves, the other must be proven too, whatever script it states.
+		const first = buildPrevTx({ script: walletScript as Buffer, value: 100_000_000 });
+		const second = new Transaction();
+		second.addInput(Buffer.alloc(32, 2), 0);
+		second.addOutput(walletScript as Buffer, 100_000_000);
+
+		const buildProving = (proven: Transaction): string => {
+			const psbt = new Psbt({ network });
+
+			for (const prevTx of [first, second]) {
+				psbt.addInput({
+					hash: prevTx.getId(),
+					index: 0,
+					...(prevTx === proven
+						? {
+								nonWitnessUtxo: prevTx.toBuffer(),
+								witnessUtxo: { script: walletScript as Buffer, value: 100_000_000 }
+							}
+						: { witnessUtxo: { script: externalScript as Buffer, value: 1 } })
+				});
+			}
+
+			psbt.addOutput({ script: walletScript as Buffer, value: 99_990_000 });
+
+			return psbt.toBase64();
+		};
+
+		for (const proven of [first, second]) {
+			const decoded = decodePsbt({
+				request: buildRequest({ psbt: buildProving(proven), broadcast: false }),
+				address: walletAddress,
+				walletUtxos: []
+			});
+
+			expect(decoded.unverified).toBeTruthy();
+			expect(decoded.fee).toBeUndefined();
+		}
 	});
 
 	it('shows no figure for either of two requests that each state one input of the wallet below its value', () => {

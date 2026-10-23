@@ -1929,7 +1929,7 @@
 			"btc_psbt_input_not_segwit": "This transaction includes an input that is not a SegWit (P2WPKH) input, which OISY cannot sign. For your security, it was not signed.",
 			"btc_psbt_input_not_owned": "This transaction includes an input that does not belong to this wallet's address, which OISY cannot sign. For your security, it was not signed.",
 			"btc_psbt_input_ambiguous": "OISY cannot tell which previous output one of this transaction's inputs refers to, so the amounts shown for review could differ from the amounts being signed. For your security, it was not signed.",
-			"btc_psbt_input_unverified": "OISY couldn't check the amount of one of your inputs in this transaction, so the amounts shown for review could differ from the amounts being signed. Nothing was signed. Try again once your latest Bitcoin transactions have confirmed.",
+			"btc_psbt_input_unverified": "OISY couldn't check the amount of one of the inputs in this transaction, so the amounts shown for review could differ from the amounts being signed. Nothing was signed. Try again once your latest Bitcoin transactions have confirmed.",
 			"from_address_not_wallet": "From address requested for the transaction is not the address of this wallet.",
 			"unknown_destination": "Unknown destination address.",
 			"cketh_deposit_refused": "This request calls the ckETH conversion contract for an Internet Computer principal that isn't yours, or with data OISY can't read. For your security, it was not signed.",
