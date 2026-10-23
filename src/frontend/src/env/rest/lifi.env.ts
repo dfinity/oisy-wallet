@@ -5,11 +5,9 @@ import { POLYGON_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.
 import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import type { EthAddress } from '$eth/types/address';
-import { TEST } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
 
-// On in every environment. Off under test, whose specs switch it on themselves.
-export const LIFI_SWAP_ENABLED = !TEST;
+export const LIFI_SWAP_ENABLED = true;
 
 // Scoped to an origin allow-list on LI.FI's partner portal, with a separate key per environment, so
 // shipping it in the bundle does not expose another environment's quota.
