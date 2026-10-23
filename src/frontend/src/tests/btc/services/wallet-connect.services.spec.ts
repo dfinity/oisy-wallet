@@ -3,6 +3,7 @@ import {
 	decodeMessage,
 	decodePsbt,
 	getAccountAddresses,
+	loadPsbtWalletUtxos,
 	sign,
 	signPsbt
 } from '$btc/services/wallet-connect.services';
@@ -11,6 +12,8 @@ import * as btcWalletConnectUtils from '$btc/utils/wallet-connect.utils';
 import { BIP122_CHAINS } from '$env/bip122-chains.env';
 import { BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import * as signerEnv from '$env/signer.env';
+import * as bitcoinApi from '$icp/api/bitcoin.api';
+import { txidStringToUint8Array } from '$icp/utils/btc.utils';
 import * as signerApi from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
 import * as signerConstants from '$lib/constants/signer.constants';
@@ -24,7 +27,8 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, toNullable } from '@dfinity/utils';
+import type { BitcoinDid } from '@icp-sdk/canisters/ckbtc';
 import { signAsync as signSecp256k1Async } from '@noble/secp256k1';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { networks, payments, Psbt, Transaction } from 'bitcoinjs-lib';
@@ -281,10 +285,31 @@ describe('btc wallet-connect.services', () => {
 			}
 		}) as unknown as WalletKitTypes.SessionRequest;
 
+	const FIRST_TXID = '0000000000000000000000000000000000000000000000000000000000000001';
+
+	// A UTXO of the wallet as the Bitcoin canister lists it: the txid in binary byte order.
+	const walletUtxo = ({
+		txid,
+		vout = 0,
+		value
+	}: {
+		txid: string;
+		vout?: number;
+		value: bigint;
+	}): BitcoinDid.utxo => ({
+		outpoint: { txid: txidStringToUint8Array(txid), vout },
+		value,
+		height: 1
+	});
+
 	it('decodes inputs, outputs, total spend and fee', () => {
 		const request = buildRequest({ psbt: buildPsbt(), broadcast: false });
 
-		const decoded = decodePsbt({ request, address: walletAddress });
+		const decoded = decodePsbt({
+			request,
+			address: walletAddress,
+			walletUtxos: [walletUtxo({ txid: FIRST_TXID, value: 100_000n })]
+		});
 
 		expect(decoded.inputs).toHaveLength(1);
 		expect(decoded.inputs[0].address).toBe(walletAddress);
@@ -300,6 +325,7 @@ describe('btc wallet-connect.services', () => {
 		expect(decoded.fee).toBe(2_000n);
 		expect(decoded.broadcast).toBeFalsy();
 		expect(decoded.ambiguous).toBeFalsy();
+		expect(decoded.unverified).toBeFalsy();
 	});
 
 	it('decodes an input stating the same previous output in witnessUtxo and nonWitnessUtxo', () => {
@@ -311,7 +337,7 @@ describe('btc wallet-connect.services', () => {
 			broadcast: false
 		});
 
-		const decoded = decodePsbt({ request, address: walletAddress });
+		const decoded = decodePsbt({ request, address: walletAddress, walletUtxos: [] });
 
 		expect(decoded.ambiguous).toBeFalsy();
 		expect(decoded.inputs[0].address).toBe(walletAddress);
@@ -332,7 +358,7 @@ describe('btc wallet-connect.services', () => {
 			broadcast: false
 		});
 
-		const decoded = decodePsbt({ request, address: walletAddress });
+		const decoded = decodePsbt({ request, address: walletAddress, walletUtxos: [] });
 
 		expect(decoded.ambiguous).toBeTruthy();
 		expect(decoded.inputs[0].value).toBeUndefined();
@@ -351,7 +377,7 @@ describe('btc wallet-connect.services', () => {
 			broadcast: false
 		});
 
-		const decoded = decodePsbt({ request, address: walletAddress });
+		const decoded = decodePsbt({ request, address: walletAddress, walletUtxos: [] });
 
 		expect(decoded.ambiguous).toBeTruthy();
 		expect(decoded.inputs[0].value).toBeUndefined();
@@ -380,7 +406,7 @@ describe('btc wallet-connect.services', () => {
 
 		const request = buildRequest({ psbt: psbt.toBase64(), broadcast: false });
 
-		const decoded = decodePsbt({ request, address: walletAddress });
+		const decoded = decodePsbt({ request, address: walletAddress, walletUtxos: [] });
 
 		expect(decoded.ambiguous).toBeTruthy();
 		expect(decoded.inputs[1].value).toBeUndefined();
@@ -390,63 +416,341 @@ describe('btc wallet-connect.services', () => {
 	it('flags an input as not owned when it does not match the wallet address', () => {
 		const request = buildRequest({ psbt: buildPsbt(), broadcast: false });
 
-		const decoded = decodePsbt({ request, address: 'tb1qsomeoneelseaddressxxxxxxxxxxxxxxxxxxxx' });
+		const decoded = decodePsbt({
+			request,
+			address: 'tb1qsomeoneelseaddressxxxxxxxxxxxxxxxxxxxx',
+			walletUtxos: []
+		});
 
 		expect(decoded.inputs[0].signedByWallet).toBeFalsy();
 		expect(decoded.totalSignedInputs).toBe(ZERO);
 	});
 
-	it('represents an input without witnessUtxo as an unknown value (not zero)', () => {
-		// A legacy (non-SegWit) input carries a full previous transaction instead of a `witnessUtxo`,
-		// so the decoder cannot read its value and must surface it as unknown.
-		const prevTx = new Psbt({ network });
-		prevTx.addInput({
-			hash: '0000000000000000000000000000000000000000000000000000000000000002',
-			index: 0,
-			witnessUtxo: { script: walletScript as Buffer, value: 50_000 }
-		});
-		prevTx.addOutput({ script: walletScript as Buffer, value: 50_000 });
+	it('prices an input carrying only a nonWitnessUtxo from that previous transaction', () => {
+		const prevTx = buildPrevTx({ script: walletScript as Buffer, value: 50_000 });
 
+		const psbt = new Psbt({ network });
+		psbt.addInput({ hash: prevTx.getId(), index: 0, nonWitnessUtxo: prevTx.toBuffer() });
+		psbt.addOutput({ script: externalScript as Buffer, value: 40_000 });
+
+		const request = buildRequest({ psbt: psbt.toBase64(), broadcast: false });
+
+		const decoded = decodePsbt({ request, address: walletAddress, walletUtxos: [] });
+
+		expect(decoded.inputs[0].value).toBe(50_000n);
+		expect(decoded.inputs[0].signedByWallet).toBeTruthy();
+		expect(decoded.totalSignedInputs).toBe(50_000n);
+		expect(decoded.fee).toBe(10_000n);
+		expect(decoded.ambiguous).toBeFalsy();
+		expect(decoded.unverified).toBeFalsy();
+	});
+
+	it('represents an input stating no previous output as an unknown value (not zero)', () => {
 		const psbt = new Psbt({ network });
 		psbt.addInput({
 			hash: '0000000000000000000000000000000000000000000000000000000000000002',
-			index: 0,
-			nonWitnessUtxo: Buffer.from(prevTx.data.globalMap.unsignedTx.toBuffer())
+			index: 0
 		});
 		psbt.addOutput({ script: externalScript as Buffer, value: 40_000 });
 
 		const request = buildRequest({ psbt: psbt.toBase64(), broadcast: false });
 
-		const decoded = decodePsbt({ request, address: walletAddress });
+		const decoded = decodePsbt({ request, address: walletAddress, walletUtxos: [] });
 
 		expect(decoded.inputs[0].value).toBeUndefined();
+		expect(decoded.inputs[0].address).toBeUndefined();
 		expect(decoded.totalSignedInputs).toBe(ZERO);
 		expect(decoded.fee).toBeUndefined();
 		expect(decoded.ambiguous).toBeFalsy();
+		expect(decoded.unverified).toBeFalsy();
+	});
+
+	it('shows no figure for an input whose nonWitnessUtxo is not the transaction its outpoint names', () => {
+		const prevTx = buildPrevTx({ script: walletScript as Buffer, value: 50_000 });
+
+		const psbt = new Psbt({ network });
+		psbt.addInput({
+			hash: '0000000000000000000000000000000000000000000000000000000000000002',
+			index: 0,
+			nonWitnessUtxo: prevTx.toBuffer(),
+			witnessUtxo: { script: walletScript as Buffer, value: 50_000 }
+		});
+		psbt.addOutput({ script: externalScript as Buffer, value: 40_000 });
+
+		const request = buildRequest({ psbt: psbt.toBase64(), broadcast: false });
+
+		const decoded = decodePsbt({ request, address: walletAddress, walletUtxos: [] });
+
+		expect(decoded.ambiguous).toBeTruthy();
+		expect(decoded.inputs[0].value).toBeUndefined();
+		expect(decoded.fee).toBeUndefined();
+	});
+
+	it('flags an input of the wallet that only its witnessUtxo prices as unverified', () => {
+		const request = buildRequest({ psbt: buildPsbt(), broadcast: false });
+
+		const decoded = decodePsbt({ request, address: walletAddress, walletUtxos: [] });
+
+		expect(decoded.unverified).toBeTruthy();
+		expect(decoded.ambiguous).toBeFalsy();
+		expect(decoded.inputs[0].signedByWallet).toBeTruthy();
+		expect(decoded.inputs[0].value).toBeUndefined();
+		expect(decoded.totalSignedInputs).toBe(ZERO);
+		expect(decoded.fee).toBeUndefined();
+	});
+
+	it('flags an input as unverified when the wallet UTXO it names has another index', () => {
+		const request = buildRequest({ psbt: buildPsbt(), broadcast: false });
+
+		const decoded = decodePsbt({
+			request,
+			address: walletAddress,
+			walletUtxos: [walletUtxo({ txid: FIRST_TXID, vout: 1, value: 100_000n })]
+		});
+
+		expect(decoded.unverified).toBeTruthy();
+	});
+
+	it('shows no figure for an input stating another value for one of the wallet UTXOs', () => {
+		const request = buildRequest({ psbt: buildPsbt(), broadcast: false });
+
+		const decoded = decodePsbt({
+			request,
+			address: walletAddress,
+			walletUtxos: [walletUtxo({ txid: FIRST_TXID, value: 900_000n })]
+		});
+
+		expect(decoded.ambiguous).toBeTruthy();
+		expect(decoded.inputs[0].value).toBeUndefined();
+		expect(decoded.totalSignedInputs).toBe(ZERO);
+		expect(decoded.fee).toBeUndefined();
+	});
+
+	it('shows no figure for an input stating another address for one of the wallet UTXOs', () => {
+		const psbt = new Psbt({ network });
+		psbt.addInput({
+			hash: FIRST_TXID,
+			index: 0,
+			witnessUtxo: { script: externalScript as Buffer, value: 100_000 }
+		});
+		psbt.addOutput({ script: externalScript as Buffer, value: 90_000 });
+
+		const request = buildRequest({ psbt: psbt.toBase64(), broadcast: false });
+
+		const decoded = decodePsbt({
+			request,
+			address: walletAddress,
+			walletUtxos: [walletUtxo({ txid: FIRST_TXID, value: 100_000n })]
+		});
+
+		expect(decoded.ambiguous).toBeTruthy();
+		expect(decoded.fee).toBeUndefined();
+	});
+
+	it('recognises an input spending a wallet UTXO by its outpoint when it states no previous output', () => {
+		const psbt = new Psbt({ network });
+		psbt.addInput({ hash: FIRST_TXID, index: 0 });
+		psbt.addOutput({ script: externalScript as Buffer, value: 90_000 });
+
+		const request = buildRequest({ psbt: psbt.toBase64(), broadcast: false });
+
+		const decoded = decodePsbt({
+			request,
+			address: walletAddress,
+			walletUtxos: [walletUtxo({ txid: FIRST_TXID, value: 100_000n })]
+		});
+
+		expect(decoded.inputs[0]).toStrictEqual({
+			address: walletAddress,
+			value: 100_000n,
+			signedByWallet: true
+		});
+		expect(decoded.totalSignedInputs).toBe(100_000n);
+		expect(decoded.fee).toBe(10_000n);
+		expect(decoded.ambiguous).toBeFalsy();
+		expect(decoded.unverified).toBeFalsy();
+	});
+
+	it('shows no value or fee for an input of another address that only its witnessUtxo prices', () => {
+		const psbt = new Psbt({ network });
+		psbt.addInput({
+			hash: FIRST_TXID,
+			index: 0,
+			witnessUtxo: { script: walletScript as Buffer, value: 100_000 }
+		});
+		psbt.addInput({
+			hash: '0000000000000000000000000000000000000000000000000000000000000002',
+			index: 0,
+			witnessUtxo: { script: externalScript as Buffer, value: 500_000 }
+		});
+		psbt.addOutput({ script: externalScript as Buffer, value: 590_000 });
+
+		const request = buildRequest({ psbt: psbt.toBase64(), broadcast: false });
+
+		const decoded = decodePsbt({
+			request,
+			address: walletAddress,
+			walletUtxos: [walletUtxo({ txid: FIRST_TXID, value: 100_000n })]
+		});
+
+		expect(decoded.inputs[1].value).toBeUndefined();
+		expect(decoded.inputs[1].signedByWallet).toBeFalsy();
+		expect(decoded.totalSignedInputs).toBe(100_000n);
+		expect(decoded.fee).toBeUndefined();
+		expect(decoded.ambiguous).toBeFalsy();
+		expect(decoded.unverified).toBeFalsy();
+	});
+
+	it('shows no figure for either of two requests that each state one input of the wallet below its value', () => {
+		// The same transaction, sent twice, each time truthful about a different input: each signature
+		// would commit only to the input it signs, so both requests must be refused.
+		const SECOND_TXID = '0000000000000000000000000000000000000000000000000000000000000002';
+
+		const walletUtxos = [
+			walletUtxo({ txid: FIRST_TXID, value: 100_000_000n }),
+			walletUtxo({ txid: SECOND_TXID, value: 100_000_000n })
+		];
+
+		const buildStatingValues = ([first, second]: [number, number]): string => {
+			const psbt = new Psbt({ network });
+			psbt.addInput({
+				hash: FIRST_TXID,
+				index: 0,
+				witnessUtxo: { script: walletScript as Buffer, value: first }
+			});
+			psbt.addInput({
+				hash: SECOND_TXID,
+				index: 0,
+				witnessUtxo: { script: walletScript as Buffer, value: second }
+			});
+			psbt.addOutput({ script: walletScript as Buffer, value: 99_990_000 });
+
+			return psbt.toBase64();
+		};
+
+		for (const values of [
+			[100_000_000, 1],
+			[1, 100_000_000]
+		] as [number, number][]) {
+			const decoded = decodePsbt({
+				request: buildRequest({ psbt: buildStatingValues(values), broadcast: false }),
+				address: walletAddress,
+				walletUtxos
+			});
+
+			expect(decoded.ambiguous).toBeTruthy();
+			expect(decoded.fee).toBeUndefined();
+		}
+	});
+
+	describe('loadPsbtWalletUtxos', () => {
+		const mainnetChainId = Object.keys(BIP122_CHAINS).find(
+			(key) => BIP122_CHAINS[key].networkId === BTC_MAINNET_NETWORK_ID
+		);
+		assertNonNullish(mainnetChainId);
+
+		const buildChainRequest = (chainId: string): WalletKitTypes.SessionRequest =>
+			({
+				params: { chainId, request: { method: 'signPsbt', params: {} } }
+			}) as unknown as WalletKitTypes.SessionRequest;
+
+		const page = ({
+			utxos,
+			nextPage
+		}: {
+			utxos: BitcoinDid.utxo[];
+			nextPage?: Uint8Array;
+		}): BitcoinDid.get_utxos_response => ({
+			utxos,
+			next_page: toNullable(nextPage),
+			tip_height: 100,
+			tip_block_hash: new Uint8Array()
+		});
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('reads every page of the wallet UTXO set on mainnet', async () => {
+			const first = walletUtxo({ txid: FIRST_TXID, value: 1_000n });
+			const second = walletUtxo({ txid: FIRST_TXID, vout: 1, value: 2_000n });
+			const nextPage = Uint8Array.from([7]);
+
+			const spy = vi
+				.spyOn(bitcoinApi, 'getUtxosQuery')
+				.mockResolvedValueOnce(page({ utxos: [first], nextPage }))
+				.mockResolvedValueOnce(page({ utxos: [second] }));
+
+			await expect(
+				loadPsbtWalletUtxos({
+					request: buildChainRequest(mainnetChainId),
+					address: mockBtcAddress,
+					identity: mockIdentity
+				})
+			).resolves.toStrictEqual([first, second]);
+
+			expect(spy).toHaveBeenCalledTimes(2);
+			expect(spy).toHaveBeenNthCalledWith(
+				1,
+				expect.objectContaining({ address: mockBtcAddress, network: 'mainnet', page: undefined })
+			);
+			expect(spy).toHaveBeenNthCalledWith(
+				2,
+				expect.objectContaining({ address: mockBtcAddress, network: 'mainnet', page: nextPage })
+			);
+		});
+
+		it('reads nothing for a request on another network', async () => {
+			const spy = vi.spyOn(bitcoinApi, 'getUtxosQuery');
+
+			await expect(
+				loadPsbtWalletUtxos({
+					request: buildChainRequest(testnetChainId),
+					address: mockBtcAddress,
+					identity: mockIdentity
+				})
+			).resolves.toStrictEqual([]);
+
+			expect(spy).not.toHaveBeenCalled();
+		});
+
+		it('reads nothing without a wallet address', async () => {
+			const spy = vi.spyOn(bitcoinApi, 'getUtxosQuery');
+
+			await expect(
+				loadPsbtWalletUtxos({
+					request: buildChainRequest(mainnetChainId),
+					address: undefined,
+					identity: mockIdentity
+				})
+			).resolves.toStrictEqual([]);
+
+			expect(spy).not.toHaveBeenCalled();
+		});
 	});
 
 	it('reports the broadcast flag and defaults it to false', () => {
 		const request = buildRequest({ psbt: buildPsbt() });
 
-		expect(decodePsbt({ request, address: walletAddress }).broadcast).toBeFalsy();
+		expect(decodePsbt({ request, address: walletAddress, walletUtxos: [] }).broadcast).toBeFalsy();
 
 		const broadcastRequest = buildRequest({ psbt: buildPsbt(), broadcast: true });
 
 		expect(
-			decodePsbt({ request: broadcastRequest, address: walletAddress }).broadcast
+			decodePsbt({ request: broadcastRequest, address: walletAddress, walletUtxos: [] }).broadcast
 		).toBeTruthy();
 	});
 
 	it('throws when the PSBT is missing', () => {
 		const request = buildRequest({ broadcast: false });
 
-		expect(() => decodePsbt({ request, address: walletAddress })).toThrow();
+		expect(() => decodePsbt({ request, address: walletAddress, walletUtxos: [] })).toThrow();
 	});
 
 	it('throws when the PSBT cannot be parsed', () => {
 		const request = buildRequest({ psbt: 'not-a-valid-psbt', broadcast: false });
 
-		expect(() => decodePsbt({ request, address: walletAddress })).toThrow();
+		expect(() => decodePsbt({ request, address: walletAddress, walletUtxos: [] })).toThrow();
 	});
 
 	describe('signPsbt', () => {
@@ -536,6 +840,14 @@ describe('btc wallet-connect.services', () => {
 		const modalNext = vi.fn();
 		const progress = vi.fn();
 
+		const mockWalletUtxos = (utxos: BitcoinDid.utxo[]): MockInstance =>
+			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
+				utxos,
+				next_page: [],
+				tip_height: 100,
+				tip_block_hash: new Uint8Array()
+			});
+
 		let spyToastsError: MockInstance;
 
 		beforeEach(() => {
@@ -550,6 +862,8 @@ describe('btc wallet-connect.services', () => {
 			vi.spyOn(signerApi, 'signBtcPrehash').mockImplementation(async ({ hash }) =>
 				(await signSecp256k1Async(Uint8Array.from(hash), privateKey)).toCompactRawBytes()
 			);
+
+			mockWalletUtxos([walletUtxo({ txid: FIRST_TXID, value: 100_000n })]);
 		});
 
 		it('rejects a signPsbt request on a non-mainnet (testnet) chain without signing', async () => {
@@ -681,6 +995,97 @@ describe('btc wallet-connect.services', () => {
 				topic: 'sign-topic',
 				error: UNEXPECTED_ERROR
 			});
+
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			expect(signerApi.signBtcPrehash).not.toHaveBeenCalled();
+
+			expect(spyToastsError).toHaveBeenCalledWith({
+				msg: { text: en.wallet_connect.error.btc_psbt_input_ambiguous }
+			});
+		});
+
+		it('reads the wallet UTXO set again when signing', async () => {
+			const spy = mockWalletUtxos([walletUtxo({ txid: FIRST_TXID, value: 100_000n })]);
+
+			const { address: mainnetAddress } = payments.p2wpkh({
+				pubkey: signerPubkey,
+				network: networks.bitcoin
+			});
+
+			await signPsbt({
+				listener: mockListener,
+				request: buildSignRequest({
+					chainId: mainnetChainId,
+					params: { psbt: buildOwnedPsbt(networks.bitcoin), broadcast: false }
+				}),
+				address: mainnetAddress,
+				modalNext,
+				progress,
+				identity: mockIdentity
+			});
+
+			expect(spy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ address: mainnetAddress, network: 'mainnet' })
+			);
+		});
+
+		it('rejects a request whose wallet input is in neither the UTXO set nor a previous transaction', async () => {
+			mockWalletUtxos([]);
+
+			const { address: mainnetAddress } = payments.p2wpkh({
+				pubkey: signerPubkey,
+				network: networks.bitcoin
+			});
+
+			const result = await signPsbt({
+				listener: mockListener,
+				request: buildSignRequest({
+					chainId: mainnetChainId,
+					params: { psbt: buildOwnedPsbt(networks.bitcoin), broadcast: false }
+				}),
+				address: mainnetAddress,
+				modalNext,
+				progress,
+				identity: mockIdentity
+			});
+
+			expect(result).toEqual({ success: false });
+
+			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+				id: 456,
+				topic: 'sign-topic',
+				error: UNEXPECTED_ERROR
+			});
+
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			expect(signerApi.signBtcPrehash).not.toHaveBeenCalled();
+
+			expect(spyToastsError).toHaveBeenCalledWith({
+				msg: { text: en.wallet_connect.error.btc_psbt_input_unverified }
+			});
+		});
+
+		it('rejects a request stating another value for a wallet UTXO without signing', async () => {
+			mockWalletUtxos([walletUtxo({ txid: FIRST_TXID, value: 900_000n })]);
+
+			const { address: mainnetAddress } = payments.p2wpkh({
+				pubkey: signerPubkey,
+				network: networks.bitcoin
+			});
+
+			const result = await signPsbt({
+				listener: mockListener,
+				request: buildSignRequest({
+					chainId: mainnetChainId,
+					params: { psbt: buildOwnedPsbt(networks.bitcoin), broadcast: false }
+				}),
+				address: mainnetAddress,
+				modalNext,
+				progress,
+				identity: mockIdentity
+			});
+
+			expect(result).toEqual({ success: false });
 
 			expect(mockListener.approveRequest).not.toHaveBeenCalled();
 			expect(signerApi.signBtcPrehash).not.toHaveBeenCalled();

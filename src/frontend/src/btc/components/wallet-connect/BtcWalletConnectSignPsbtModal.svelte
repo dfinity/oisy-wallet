@@ -1,9 +1,14 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
+	import type { BitcoinDid } from '@icp-sdk/canisters/ckbtc';
 	import type { WalletKitTypes } from '@reown/walletkit';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import BtcWalletConnectSignPsbtReview from '$btc/components/wallet-connect/BtcWalletConnectSignPsbtReview.svelte';
-	import { decodePsbt, signPsbt as signPsbtService } from '$btc/services/wallet-connect.services';
+	import {
+		decodePsbt,
+		loadPsbtWalletUtxos,
+		signPsbt as signPsbtService
+	} from '$btc/services/wallet-connect.services';
 	import type { OptionBtcAddress } from '$btc/types/address';
 	import type { WalletConnectBtcDecodedPsbt } from '$btc/types/wallet-connect';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
@@ -31,12 +36,28 @@
 
 	let application = $derived(request.verifyContext.verified.origin);
 
+	let walletUtxos = $state<BitcoinDid.utxo[] | undefined>();
+
+	onMount(async () => {
+		try {
+			walletUtxos = await loadPsbtWalletUtxos({ request, address, identity: $authIdentity });
+		} catch (_: unknown) {
+			// Without the UTXO set no input of the wallet can be checked against it, so the review
+			// refuses such inputs unless their previous transaction is part of the request.
+			walletUtxos = [];
+		}
+	});
+
 	let decoded = $state<WalletConnectBtcDecodedPsbt | undefined>();
 	let decodeError = $state(false);
 
 	$effect(() => {
+		if (isNullish(walletUtxos)) {
+			return;
+		}
+
 		try {
-			decoded = decodePsbt({ request, address });
+			decoded = decodePsbt({ request, address, walletUtxos });
 			decodeError = false;
 		} catch (_: unknown) {
 			decoded = undefined;
@@ -112,6 +133,7 @@
 				{decodeError}
 				{decoded}
 				flaggedAsScam={!acceptedContext(request.verifyContext)}
+				loading={isNullish(walletUtxos)}
 				onApprove={approve}
 				onReject={reject}
 				source={address ?? ''}
