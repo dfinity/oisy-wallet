@@ -1929,6 +1929,7 @@
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
 			"btc_psbt_input_ambiguous": "",
+			"btc_psbt_input_unverified": "",
 			"from_address_not_wallet": "عنوان المرسل المطلوب للمعاملة ليس عنوان هذه المحفظة.",
 			"unknown_destination": "عنوان الوجهة غير معروف.",
 			"cketh_deposit_refused": "",
