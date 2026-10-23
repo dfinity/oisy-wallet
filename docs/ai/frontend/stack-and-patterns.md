@@ -444,6 +444,19 @@ the slot grow to the name. During foreground comparison,
 stale details. Custom sheet triggers receive `{ open, disabled }` and must forward disabled
 to their native control. Other disclosure callers retain the default enabled behavior.
 
+No hard cuts in the section. The Smart Swap row, and ETH's "Total fee" row, open and close
+with `slide` (height, 250 ms) while their content fades up 4 px with `fly`; the fee row follows
+`SWAP_DETAILS_ROW_STAGGER_MS` (60 ms) later. The 12 px gap is `pb-3` inside the sliding row, not
+the forms' flex gap, so it animates with the height. The header never swaps labels in one frame:
+`comparingLayout` follows `comparing` one `MOTION_SWAP_DURATION` late, so Select and Best Rate
+(inert while fading) or the status fade out in place before the row re-lays out and the incoming
+ones fade in. The provider slot never shows a placeholder. A re-quote keeps the shown provider
+until a participant reports and turns from it; a first round leaves the slot empty and fades the
+first participant up (opacity, 4 px, the soft-layer blur bridge, 200 ms ease-out). That fade runs
+once: re-runs for a reveal or a confirmation leave it going, and only a turn, which samples the
+pose first, cuts it short. ETH's fee skeleton and value share one grid cell and cross-fade.
+Reduced motion keeps the fades (100 ms at most) and drops the slide, rise and blur.
+
 Keep visible layers keyed by provider through interruption. Sample their current poses before
 cancelling/retargeting WAAPI; an outgoing provider can immediately become the winner without
 being remounted hidden. Only transient exits remain, never persistent wheel neighbours.

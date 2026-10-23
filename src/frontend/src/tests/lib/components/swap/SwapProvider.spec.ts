@@ -1,5 +1,6 @@
 import SwapProviderHeader from '$lib/components/swap/SwapProvider.svelte';
 import { SWAP_PROVIDER_ANIMATION } from '$lib/constants/test-ids.constants';
+import { MOTION_SWAP_DURATION } from '$lib/constants/transition.constants';
 import { screensStore } from '$lib/stores/screens.store';
 import { initSwapAmountsStore, SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
 import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
@@ -101,8 +102,10 @@ describe('SwapProvider form header', () => {
 		});
 		const { getByRole, getByText } = render(SwapProviderHeader, { props, context });
 		const select = getByRole('button', { name: en.swap.text.select });
+		const slot = getByText(en.swap.text.smart_swap).nextElementSibling;
 
-		expect(getByText(en.swap.text.smart_swap).nextElementSibling).toBe(select);
+		expect(slot).toContainElement(select);
+		expect(slot).toHaveClass('flex-none');
 		expect(select).toHaveClass('flex-none');
 	});
 
@@ -291,7 +294,7 @@ describe('SwapProvider form header', () => {
 		store.setManualProvider(mockOneSecProvider);
 		activity.start({ requestId: 5, background: false });
 		activity.addProvider({ requestId: 5, provider: SwapProvider.ICP_SWAP });
-		const { getByTestId, queryByText, getByText } = render(SwapProviderHeader, { props, context });
+		const { getByTestId, queryByText, findByText } = render(SwapProviderHeader, { props, context });
 		const animate = vi.spyOn(Element.prototype, 'animate');
 		await tick();
 		await tick();
@@ -304,20 +307,22 @@ describe('SwapProvider form header', () => {
 			'data-provider',
 			SwapProvider.ONE_SEC
 		);
-		expect(queryByText(en.swap.text.best_rate)).not.toBeInTheDocument();
-		expect(getByText(en.swap.text.select)).toBeInTheDocument();
 		expect(providerAnimationCalls(animate)).toHaveLength(0);
+		// Select fades in once the status has faded out of the row.
+		await expect(findByText(en.swap.text.select)).resolves.toBeInTheDocument();
+		expect(queryByText(en.swap.text.best_rate)).not.toBeInTheDocument();
 	});
 
 	it('removes an empty completed comparison instead of leaving a blank clickable disclosure', async () => {
 		activity.start({ requestId: 6, background: false });
 		const { queryByTestId } = render(SwapProviderHeader, { props, context });
 		activity.complete({ requestId: 6 });
-		await tick();
-		await tick();
 
-		expect(queryByTestId('collapsible-header')).not.toBeInTheDocument();
-		expect(queryByTestId(SWAP_PROVIDER_ANIMATION)).not.toBeInTheDocument();
+		// The row closes with its height before it leaves the DOM.
+		await waitFor(() => {
+			expect(queryByTestId('collapsible-header')).not.toBeInTheDocument();
+			expect(queryByTestId(SWAP_PROVIDER_ANIMATION)).not.toBeInTheDocument();
+		});
 	});
 
 	it('does not confirm a result published after an empty completion', async () => {
@@ -449,6 +454,9 @@ describe('SwapProvider form header', () => {
 
 			expect(getByTestId(SWAP_PROVIDER_ANIMATION)).toBe(loop);
 			expect(loop).toHaveAttribute('data-provider', SwapProvider.ICP_SWAP);
+
+			await vi.advanceTimersByTimeAsync(MOTION_SWAP_DURATION);
+
 			expect(queryByText(en.swap.text.comparing_providers)).not.toBeInTheDocument();
 
 			const pops = animate.mock.calls.filter(
@@ -537,7 +545,17 @@ describe('SwapProvider form header', () => {
 			await tick();
 
 			expect(queryByText(en.swap.text.swap_provider_website)).not.toBeInTheDocument();
-			expect(queryByRole('button', { name: en.swap.text.select })).not.toBeInTheDocument();
+
+			// Select fades out in place first, and cannot be used meanwhile.
+			const fadingSelect = queryByRole('button', { name: en.swap.text.select })?.closest(
+				'span.flex-none'
+			) as HTMLElement | null | undefined;
+
+			expect(fadingSelect?.inert).toBeTruthy();
+
+			await waitFor(() =>
+				expect(queryByRole('button', { name: en.swap.text.select })).not.toBeInTheDocument()
+			);
 
 			if (screen === 'md') {
 				const header = getByTestId('collapsible-header');
@@ -591,5 +609,86 @@ describe('SwapProvider form header', () => {
 		expect(scrollGroup).not.toHaveClass('min-w-0');
 		// Below 390 px (24.375rem) the slot is fixed, so a long name cannot shorten the status.
 		expect(scrollGroup).toHaveClass('max-[24.375rem]:max-w-24');
+	});
+
+	it('fades the labels through instead of swapping them in one frame', async () => {
+		vi.useFakeTimers();
+		const offers = [offer, { ...offer, receiveAmount: 2n }];
+		store.setSwaps({ swaps: offers, selectedProvider: offer, amountForSwap: '1' });
+		const { getByText, queryByText } = render(SwapProviderHeader, { props, context });
+		const selectSlot = getByText(en.swap.text.select).closest('span.flex-none');
+
+		activity.start({ requestId: 12, background: false });
+		await tick();
+
+		// Fading out in place: still laid out, transparent, and no status beside it yet.
+		expect(selectSlot).toHaveClass('opacity-0');
+		expect(queryByText(en.swap.text.best_rate)).toBeInTheDocument();
+		expect(queryByText(en.swap.text.comparing_providers)).not.toBeInTheDocument();
+
+		await vi.advanceTimersByTimeAsync(MOTION_SWAP_DURATION);
+
+		expect(selectSlot).not.toBeInTheDocument();
+		expect(queryByText(en.swap.text.best_rate)).not.toBeInTheDocument();
+		expect(getByText(en.swap.text.comparing_providers)).not.toHaveClass('opacity-0');
+
+		store.setSwaps({ swaps: offers, selectedProvider: offer, amountForSwap: '1' });
+		activity.complete({ requestId: 12 });
+		await tick();
+
+		expect(getByText(en.swap.text.comparing_providers)).toHaveClass('opacity-0');
+
+		await vi.advanceTimersByTimeAsync(MOTION_SWAP_DURATION);
+
+		expect(queryByText(en.swap.text.comparing_providers)).not.toBeInTheDocument();
+		expect(getByText(en.swap.text.select)).toBeInTheDocument();
+		expect(getByText(en.swap.text.best_rate)).toBeInTheDocument();
+	});
+
+	it('retargets an interrupted label fade without re-laying out the row', async () => {
+		vi.useFakeTimers();
+		const offers = [offer, { ...offer, receiveAmount: 2n }];
+		store.setSwaps({ swaps: offers, selectedProvider: offer, amountForSwap: '1' });
+		const { getByText, queryByText } = render(SwapProviderHeader, { props, context });
+		const selectSlot = getByText(en.swap.text.select).closest('span.flex-none');
+
+		activity.start({ requestId: 13, background: false });
+		await tick();
+		await vi.advanceTimersByTimeAsync(MOTION_SWAP_DURATION / 3);
+		activity.complete({ requestId: 13 });
+		await tick();
+		await vi.advanceTimersByTimeAsync(MOTION_SWAP_DURATION * 2);
+
+		expect(selectSlot).toBeInTheDocument();
+		expect(selectSlot).not.toHaveClass('opacity-0');
+		expect(queryByText(en.swap.text.comparing_providers)).not.toBeInTheDocument();
+	});
+
+	it('opens the row with its height and keeps the gap to the next row inside it', async () => {
+		const animate = vi.spyOn(Element.prototype, 'animate');
+		const { getByTestId } = render(SwapProviderHeader, { props, context });
+		activity.start({ requestId: 14, background: false });
+		await tick();
+		await tick();
+		const row = getByTestId('collapsible-header').closest('.pb-3');
+		const heights = animate.mock.calls.filter(
+			([frames], index) =>
+				animate.mock.contexts[index] === row &&
+				Array.isArray(frames) &&
+				frames.some((frame) => 'height' in frame)
+		);
+
+		expect(row).not.toBeNull();
+		expect(heights.length).toBeGreaterThan(0);
+	});
+
+	it('shows the status with the row when there is no label to fade out first', async () => {
+		vi.useFakeTimers();
+		const { getByText } = render(SwapProviderHeader, { props, context });
+
+		activity.start({ requestId: 15, background: false });
+		await tick();
+
+		expect(getByText(en.swap.text.comparing_providers)).not.toHaveClass('opacity-0');
 	});
 });

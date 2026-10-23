@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { tick, untrack } from 'svelte';
+	import { onDestroy, tick, untrack } from 'svelte';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import {
 		SWAP_PROVIDER_CONFIRMATION_MOTION,
 		SWAP_PROVIDER_CYCLE_INTERVAL_MS,
@@ -37,6 +36,8 @@
 		sharpOpacity: string;
 		softOpacity: string;
 		stackPose: string;
+		// The first provider of a comparison fades up into the empty slot instead of turning in.
+		fadingIn: boolean;
 		node?: HTMLElement;
 		stack?: HTMLElement;
 		sharp?: HTMLElement;
@@ -50,11 +51,21 @@
 	let current = $derived(layers.find((layer) => layer.provider === displayedProvider));
 	let lastConfirmationId: Props['confirmationId'];
 	let animations: Animation[] = [];
+	// A fade-up runs once. Re-runs for a reveal or a confirmation leave it going; only a turn,
+	// which samples the layer's pose first, cuts it short.
+	let fades: Animation[] = [];
 
 	const cancelAnimations = () => {
 		animations.forEach((animation) => animation.cancel());
 		animations = [];
 	};
+
+	const cancelFades = () => {
+		fades.forEach((animation) => animation.cancel());
+		fades = [];
+	};
+
+	onDestroy(cancelFades);
 
 	const snapshotLayer = (layer: ProviderLayer) => {
 		if (!layer.node) {
@@ -87,17 +98,25 @@
 				return;
 			}
 			const entering = animate && layers.length > 0;
-			const moving = entering && !prefersReducedMotion.current;
+			const fadingIn = animate && loading && layers.length === 0;
+			const reduced = prefersReducedMotion.current;
+			const moving = entering && !reduced;
+			const softening = (entering || fadingIn) && !reduced;
 			const layer: ProviderLayer = {
 				provider: next,
 				details,
 				pose: {
-					transform: moving ? 'translateY(75%) rotateX(90deg)' : 'none',
-					opacity: entering ? '0' : '1'
+					transform: moving
+						? 'translateY(75%) rotateX(90deg)'
+						: fadingIn && !reduced
+							? 'translateY(4px)'
+							: 'none',
+					opacity: entering || fadingIn ? '0' : '1'
 				},
-				sharpOpacity: moving ? '0' : '1',
-				softOpacity: moving ? '1' : '0',
-				stackPose: 'none'
+				sharpOpacity: softening ? '0' : '1',
+				softOpacity: softening ? '1' : '0',
+				stackPose: 'none',
+				fadingIn
 			};
 			layers = [...layers, layer];
 		}
@@ -116,12 +135,14 @@
 		keyframes,
 		duration,
 		easing = MOTION_EASE_OUT_CSS,
+		fade = false,
 		onfinish
 	}: {
 		node?: HTMLElement;
 		keyframes: Keyframe[];
 		duration?: number;
 		easing?: string;
+		fade?: boolean;
 		onfinish?: () => void;
 	}) => {
 		if (!node) {
@@ -134,10 +155,14 @@
 		});
 		animation.onfinish = () => {
 			animation.cancel();
-			animations = animations.filter((item) => item !== animation);
+			if (fade) {
+				fades = fades.filter((item) => item !== animation);
+			} else {
+				animations = animations.filter((item) => item !== animation);
+			}
 			onfinish?.();
 		};
-		animations.push(animation);
+		(fade ? fades : animations).push(animation);
 	};
 
 	$effect(() => {
@@ -153,11 +178,15 @@
 				return;
 			}
 
-			showProvider(
-				displayedProvider && candidates.includes(displayedProvider)
+			// No placeholder: a new round keeps what is on screen until a participant reports,
+			// and a first round leaves the slot empty until its first participant fades in.
+			const next =
+				displayedProvider && (candidates.length === 0 || candidates.includes(displayedProvider))
 					? displayedProvider
-					: candidates[0]
-			);
+					: candidates[0];
+			if (next) {
+				showProvider(next);
+			}
 			if (reduced || !enabled || candidates.length < 2) {
 				return;
 			}
@@ -193,7 +222,12 @@
 					return;
 				}
 
-				if (layers.length > 1) {
+				const turning = layers.length > 1;
+				if (turning) {
+					cancelFades();
+				}
+				const moving = turning ? layers : layers.filter(({ fadingIn }) => fadingIn);
+				if (moving.length > 0) {
 					const turnEasing =
 						!reduced &&
 						typeof CSS !== 'undefined' &&
@@ -201,7 +235,11 @@
 						CSS.supports('animation-timing-function', SWAP_PROVIDER_TURN_EASING)
 							? SWAP_PROVIDER_TURN_EASING
 							: MOTION_EASE_OUT_CSS;
-					for (const layer of layers) {
+					// A fade-up into an empty slot settles with ease-out; the spring is for turns.
+					const fade = !turning;
+					const easing = fade ? MOTION_EASE_OUT_CSS : turnEasing;
+					for (const layer of moving) {
+						layer.fadingIn = false;
 						const incoming = layer.provider === displayedProvider;
 						const duration = reduced
 							? MOTION_REDUCED_FADE_DURATION
@@ -222,7 +260,8 @@
 										}
 									],
 							duration,
-							easing: turnEasing,
+							easing,
+							fade,
 							onfinish: () => {
 								if (
 									!cancelled &&
@@ -240,13 +279,15 @@
 								node: layer.sharp,
 								keyframes: [{ opacity: layer.sharpOpacity }, { opacity: incoming ? 1 : 0 }],
 								duration,
-								easing: turnEasing
+								easing,
+								fade
 							});
 							play({
 								node: layer.soft,
 								keyframes: [{ opacity: layer.softOpacity }, { opacity: incoming ? 0 : 1 }],
 								duration,
-								easing: turnEasing
+								easing,
+								fade
 							});
 						}
 					}
@@ -319,8 +360,6 @@
 				</div>
 			</div>
 		{/each}
-		<!-- Narrower below 390 px, where SwapProvider caps the comparing slot at 96 px. -->
-		{#if !current}<div class="w-28 self-center max-[24.375rem]:w-24"><SkeletonText /></div>{/if}
 	</div>
 {/if}
 

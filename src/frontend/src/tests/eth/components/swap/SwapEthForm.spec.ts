@@ -21,7 +21,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import SwapEthFormLifiTest from '$tests/eth/components/swap/SwapEthFormLifiTest.svelte';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockVeloraMarketProvider } from '$tests/mocks/swap.mocks';
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get, readable, writable } from 'svelte/store';
 
@@ -141,11 +141,18 @@ describe('SwapFormEth', () => {
 			expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_VALUE)).not.toBeInTheDocument();
 
 			if (previousOffer) {
+				const skeletonCell = getByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON).closest('.grid');
 				activity.complete({ requestId: 2 });
 				await tick();
 
+				// The value fades in over the outgoing skeleton in the same cell, so the row keeps its height.
+				expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_VALUE)?.closest('.grid')).toBe(skeletonCell);
+
+				await waitFor(() =>
+					expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON)).not.toBeInTheDocument()
+				);
+
 				expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_VALUE)).toBeInTheDocument();
-				expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON)).not.toBeInTheDocument();
 
 				activity.start({ requestId: 3, background: true });
 				await tick();

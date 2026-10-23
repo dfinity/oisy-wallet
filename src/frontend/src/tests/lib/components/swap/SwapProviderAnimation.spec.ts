@@ -4,6 +4,7 @@ import { MOTION_EASE_OUT_CSS } from '$lib/constants/transition.constants';
 import { SwapProvider } from '$lib/types/swap';
 import { findSwapProvider } from '$lib/utils/swap.utils';
 import { fireEvent, render } from '@testing-library/svelte';
+import { tick } from 'svelte';
 
 const motion = vi.hoisted(() => ({ reduced: false }));
 vi.mock('svelte/motion', () => ({
@@ -37,13 +38,63 @@ describe('SwapProviderAnimation', () => {
 		);
 	});
 
-	it('narrows the pending skeleton to the capped phone slot below 390 px', () => {
-		const { getByTestId } = render(SwapProviderAnimation, {
-			props: { providers: [], loading: true }
-		});
-		const skeleton = getByTestId(SWAP_PROVIDER_ANIMATION).lastElementChild;
+	it.each([false, true])(
+		'leaves the slot empty until the first participant, then fades it up (reduced: %s)',
+		async (reduced) => {
+			motion.reduced = reduced;
+			const animate = vi.spyOn(Element.prototype, 'animate');
+			const { getByTestId, rerender, unmount } = render(SwapProviderAnimation, {
+				props: { providers: [], loading: true }
+			});
+			const viewport = getByTestId(SWAP_PROVIDER_ANIMATION);
 
-		expect(skeleton).toHaveClass('w-28', 'max-[24.375rem]:w-24');
+			// No placeholder: only the screen-reader status is mounted.
+			expect([...viewport.children].map((child) => child.className)).toEqual(['sr-only']);
+
+			await rerender({ providers: [SwapProvider.VELORA] });
+			await tick();
+			await tick();
+			const layer = viewport.querySelector('[data-provider-layer="current"]');
+			const [fadeUp] = animate.mock.calls.filter(
+				(_, index) => animate.mock.contexts[index] === layer
+			);
+
+			expect(layer).toHaveAttribute('data-provider', SwapProvider.VELORA);
+			expect(fadeUp).toEqual(
+				reduced
+					? [[{ opacity: '0' }, { opacity: 1 }], expect.objectContaining({ duration: 100 })]
+					: [
+							[
+								{ transform: 'translateY(4px)', opacity: '0' },
+								{ transform: 'translateY(0) rotateX(0deg)', opacity: 1 }
+							],
+							expect.objectContaining({ duration: 200, easing: MOTION_EASE_OUT_CSS })
+						]
+			);
+
+			unmount();
+		}
+	);
+
+	it('lets a fade-up finish instead of restarting it when the round is revealed mid-fade', async () => {
+		const animate = vi.spyOn(Element.prototype, 'animate');
+		const { getByTestId, rerender, unmount } = render(SwapProviderAnimation, {
+			props: { providers: [SwapProvider.VELORA], loading: true }
+		});
+		await tick();
+		await tick();
+		const layer = getByTestId(SWAP_PROVIDER_ANIMATION).querySelector('[data-provider-layer]');
+
+		expect(animate.mock.contexts).toContain(layer);
+
+		animate.mockClear();
+		await rerender({ selectedProvider: SwapProvider.VELORA, loading: false, confirmationId: 1 });
+		await tick();
+		await tick();
+
+		expect(animate.mock.contexts).not.toContain(layer);
+
+		unmount();
 	});
 
 	it('cycles only the participating providers while comparison is pending', async () => {
@@ -129,6 +180,8 @@ describe('SwapProviderAnimation', () => {
 		const { unmount } = render(SwapProviderAnimation, {
 			props: { providers: [SwapProvider.NEAR_INTENTS, SwapProvider.VELORA], loading: true }
 		});
+		// Past the first provider's fade-up; only the turn is inspected.
+		await tick();
 		animate.mockClear();
 		await vi.advanceTimersByTimeAsync(650);
 
@@ -183,6 +236,7 @@ describe('SwapProviderAnimation', () => {
 		const { unmount } = render(SwapProviderAnimation, {
 			props: { providers: [SwapProvider.NEAR_INTENTS, SwapProvider.VELORA], loading: true }
 		});
+		await tick();
 		animate.mockClear();
 		await vi.advanceTimersByTimeAsync(650);
 
@@ -359,6 +413,8 @@ describe('SwapProviderAnimation', () => {
 		const { rerender, unmount } = render(SwapProviderAnimation, {
 			props: { providers: [SwapProvider.NEAR_INTENTS], loading: true }
 		});
+		await tick();
+		await tick();
 		animate.mockClear();
 		await rerender({
 			selectedProvider: SwapProvider.NEAR_INTENTS,
@@ -450,7 +506,7 @@ describe('SwapProviderAnimation', () => {
 		}
 	});
 
-	it('clears stale candidates on invalidation and removes the result after an empty round', async () => {
+	it('keeps the shown provider through invalidation instead of a placeholder, and removes the result after an empty round', async () => {
 		vi.useFakeTimers();
 		const { getByTestId, queryByTestId, rerender, unmount } = render(SwapProviderAnimation, {
 			props: { providers: [SwapProvider.NEAR_INTENTS, SwapProvider.VELORA], loading: true }
@@ -460,8 +516,9 @@ describe('SwapProviderAnimation', () => {
 		await vi.advanceTimersByTimeAsync(2000);
 		const viewport = getByTestId(SWAP_PROVIDER_ANIMATION);
 
-		expect(viewport).not.toHaveAttribute('data-provider');
-		expect(viewport.querySelectorAll('[data-provider-layer]')).toHaveLength(0);
+		// Stale candidates stop cycling, but the shown name stays until a participant reports.
+		expect(viewport).toHaveAttribute('data-provider', SwapProvider.VELORA);
+		expect(viewport.querySelectorAll('[data-provider-layer]')).toHaveLength(1);
 
 		await rerender({ loading: false, selectedProvider: undefined });
 

@@ -14,6 +14,7 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { SWAP_DETAILS_ROW_STAGGER_MS } from '$lib/constants/swap.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -31,6 +32,7 @@
 		withLifiMaxFeeHeadroom
 	} from '$lib/utils/lifi-fee.utils';
 	import { parseToken, tryParseToken } from '$lib/utils/parse.utils';
+	import { fade, fly, slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -269,32 +271,45 @@
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<Hr spacing="md" />
 
-			<div class="flex flex-col gap-3">
+			<div class="flex flex-col">
 				<SwapProvider isForm {onShowProviderList} showSelectButton {slippageValue} />
 
-				{#if comparing}
-					<FeeDisplay
-						decimals={$feeDecimalsStore ?? nativeEthereumToken.decimals}
-						symbol={$feeSymbolStore ?? nativeEthereumToken.symbol}
-					>
-						{#snippet label()}<Html text={$i18n.fee.text.total_fee} />{/snippet}
-					</FeeDisplay>
-				{:else if nonNullish($swapAmountsStore?.selectedProvider) && nonNullish($feeTokenIdStore)}
-					{#if isGasless}
-						<SwapGaslessFee />
-					{:else if isLifi}
-						<SwapLifiFeeDisplay fee={lifiFee}>
-							{#snippet label()}
-								<Html text={$i18n.fee.text.total_fee} />
-							{/snippet}
-						</SwapLifiFeeDisplay>
-					{:else}
-						<EthFeeDisplay {isApproveNeeded}>
-							{#snippet label()}
-								<Html text={$i18n.fee.text.total_fee} />
-							{/snippet}
-						</EthFeeDisplay>
-					{/if}
+				{#if comparing || (nonNullish($swapAmountsStore?.selectedProvider) && nonNullish($feeTokenIdStore))}
+					<div transition:slide>
+						<!-- One cell for every branch, so the skeleton and the value cross-fade in place. -->
+						<div class="grid" transition:fly={{ y: 4, delay: SWAP_DETAILS_ROW_STAGGER_MS }}>
+							{#if comparing}
+								<div class="[grid-area:1/1]" transition:fade>
+									<FeeDisplay
+										decimals={$feeDecimalsStore ?? nativeEthereumToken.decimals}
+										symbol={$feeSymbolStore ?? nativeEthereumToken.symbol}
+									>
+										{#snippet label()}<Html text={$i18n.fee.text.total_fee} />{/snippet}
+									</FeeDisplay>
+								</div>
+							{:else if isGasless}
+								<div class="[grid-area:1/1]" transition:fade>
+									<SwapGaslessFee />
+								</div>
+							{:else if isLifi}
+								<div class="[grid-area:1/1]" transition:fade>
+									<SwapLifiFeeDisplay fee={lifiFee}>
+										{#snippet label()}
+											<Html text={$i18n.fee.text.total_fee} />
+										{/snippet}
+									</SwapLifiFeeDisplay>
+								</div>
+							{:else}
+								<div class="[grid-area:1/1]" transition:fade>
+									<EthFeeDisplay {isApproveNeeded}>
+										{#snippet label()}
+											<Html text={$i18n.fee.text.total_fee} />
+										{/snippet}
+									</EthFeeDisplay>
+								</div>
+							{/if}
+						</div>
+					</div>
 				{/if}
 			</div>
 		{/if}

@@ -56,6 +56,10 @@ export const SWAP_PROVIDER_CYCLE_INTERVAL_MS = 650;
 // are not held further.
 export const SWAP_PROVIDER_MIN_COMPARISON_MS = SWAP_PROVIDER_CYCLE_INTERVAL_MS * 2;
 
+// A detail row that opens with the Smart Swap row fades up this much later, so the two read as
+// a sequence rather than one block.
+export const SWAP_DETAILS_ROW_STAGGER_MS = 60;
+
 // Selected Text Loop spring (k=900, c=80, m=10), sampled at 33 equally spaced times.
 // p(t)=1-exp(-4t)*(cos(sqrt(74)t)+4/sqrt(74)*sin(sqrt(74)t)); first p=1 at
 // T=(PI-atan(sqrt(74)/4))/sqrt(74). Map [0,T] to the shared turn budget: no overshoot/tail.

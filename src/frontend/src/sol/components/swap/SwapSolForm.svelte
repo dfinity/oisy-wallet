@@ -139,7 +139,7 @@
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<Hr spacing="md" />
 
-			<div class="flex flex-col gap-3">
+			<div class="flex flex-col">
 				<SwapProvider isForm {onShowProviderList} showSelectButton {slippageValue} />
 
 				<SwapSolFees />
