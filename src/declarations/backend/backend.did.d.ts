@@ -100,11 +100,11 @@ export type ActiveUserTransactionData =
 	  }
 	| {
 			/**
-			 * Chain Fusion ck conversion (BTC↔ckBTC, ETH↔ckETH, ERC20↔ckERC20). A
-			 * single variant covers all six directions, discriminated by the
-			 * `direction` field; the minter block indices, the BTC txid and deposit
-			 * address, and the Ethereum deposit tx hash and block number ride in
-			 * `external_refs`.
+			 * Chain Fusion ck conversion (BTC↔ckBTC, ETH↔ckETH, ERC20↔ckERC20,
+			 * SOL↔ckSOL). A single variant covers all eight directions, discriminated
+			 * by the `direction` field; the minter block indices, the BTC txid and
+			 * deposit address, and the Ethereum deposit tx hash and block number ride
+			 * in `external_refs`.
 			 */
 			ChainFusion: ChainFusionData;
 	  }
@@ -615,7 +615,7 @@ export type CanisterStatusType =
  * Chain Fusion ck conversion payload. Every settlement pointer is learned
  * mid-flow — a minter block index, a BTC txid, an Ethereum deposit tx hash — so
  * those live in `external_refs`; only the canonical immutable fields are
- * captured here, which is why all six directions share one variant.
+ * captured here, which is why all eight directions share one variant.
  *
  * `direction` is explicit rather than inferred from the token pair: the poller
  * selects its settlement oracle from it, and re-deriving "is this a mint or a
@@ -633,16 +633,18 @@ export interface ChainFusionData {
 }
 /**
  * Which ck conversion an active transaction tracks. Determines which minter the
- * frontend asks about settlement, and how: the three withdrawal directions have
- * an exact status keyed by the minter's burn block index, while the mint
- * directions are observed from the deposit side.
+ * frontend asks about settlement, and how: the four withdrawal directions have
+ * an exact status keyed by the minter's burn block index, while each mint
+ * direction is followed the way its minter reports deposits.
  */
 export type ChainFusionDirection =
 	| { BtcToCkBtc: null }
 	| { CkBtcToBtc: null }
 	| { EthToCkEth: null }
 	| { CkErc20ToErc20: null }
+	| { SolToCkSol: null }
 	| { Erc20ToCkErc20: null }
+	| { CkSolToSol: null }
 	| { CkEthToEth: null };
 export type ClaimTipResult = { Ok: TipClaim } | { Err: TipError };
 export interface Config {
