@@ -98,6 +98,9 @@ export interface SolSimulationResult {
 	// Whether the run opens an account inside another program's instruction with more than its size
 	// costs: a payment the review refuses rather than states, as it does for the message's own.
 	opensAccountBeyondRent?: boolean;
+	// Whether the run keeps a token batch whole, which the list states as an instruction nobody read
+	// and none of its steps: a request the review refuses, whatever the message's mapping read of it.
+	keepsBatchWhole?: boolean;
 	parties: SolTransferParties;
 	// The programs the run calls from inside another program's instruction that are not among the
 	// known ones. Such a call can act on what the user holds in an application, which neither the

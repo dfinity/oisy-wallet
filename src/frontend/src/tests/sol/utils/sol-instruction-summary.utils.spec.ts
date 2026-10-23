@@ -1,5 +1,9 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
+import {
+	TOKEN_2022_NATIVE_MINT_ADDRESS,
+	TOKEN_2022_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolClosedAccount } from '$sol/types/sol-simulation';
 import {
@@ -23,9 +27,11 @@ import {
 import {
 	mockAtaAddress,
 	mockAtaAddress2,
+	mockAtaAddress3,
 	mockSolAddress,
 	mockSolAddress2,
-	mockSolAddress3
+	mockSolAddress3,
+	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { nonNullish } from '@dfinity/utils';
 import {
@@ -37,13 +43,20 @@ import {
 	AuthorityType,
 	getApproveCheckedInstruction,
 	getApproveInstruction,
+	getBatchInstruction,
 	getBurnInstruction,
 	getFreezeAccountInstruction,
 	getMintToInstruction,
 	getRevokeInstruction,
 	getSetAuthorityInstruction,
+	getSyncNativeInstruction,
 	getTransferCheckedInstruction
 } from '@solana-program/token';
+import {
+	getSetTransferFeeInstruction,
+	getBatchInstruction as getToken2022BatchInstruction,
+	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction
+} from '@solana-program/token-2022';
 import {
 	AccountRole,
 	decompileTransactionMessage,
@@ -3449,6 +3462,1111 @@ describe('sol-instruction-summary.utils', () => {
 						userAddress: me
 					})
 				).not.toThrow();
+			});
+		});
+
+		describe('a token batch', () => {
+			const TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+			const APP = 'App1111111111111111111111111111111111111111';
+			const mint = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
+			const transferTo = ({ destination, amount }: { destination: string; amount: bigint }) =>
+				getTransferCheckedInstruction({
+					source: toAddress(mockAtaAddress),
+					mint: toAddress(mint),
+					destination: toAddress(destination),
+					authority: toAddress(mockSolAddress),
+					amount,
+					decimals: 6
+				});
+
+			const send = ({ counterparty, amount }: { counterparty: string; amount: bigint }) => ({
+				kind: 'send',
+				amount,
+				tokenAddress: mint,
+				decimals: 6,
+				counterparty,
+				own: false
+			});
+
+			// What the RPC returns for a batch a program runs inside its own instruction.
+			const returnedBatch = (instructions: unknown) => ({
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: { type: 'batch', info: { instructions } },
+				stackHeight: 2
+			});
+
+			const unreadCall = { programId: APP, accounts: [], data: '' };
+
+			it('should list the instructions of a batch the message states under one line naming it', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						getBatchInstruction([
+							transferTo({ destination: mockSolAddress2, amount: 1n }),
+							transferTo({ destination: mockAtaAddress2, amount: 2n })
+						])
+					].map(asSolParsedRpcInstructionOrSelf),
+					ownedAddresses: [mockSolAddress, mockAtaAddress],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(views).toStrictEqual([
+					{
+						kind: 'batch',
+						program: TOKEN,
+						children: [
+							send({ counterparty: mockSolAddress2, amount: 1n }),
+							send({ counterparty: mockAtaAddress2, amount: 2n })
+						]
+					}
+				]);
+			});
+
+			// Stated on its own, the fee change would be an instruction nobody read, and the transfer
+			// beside it in the batch says nothing about it.
+			it('should list a batch the message states as unread when one of its steps has no line', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						getToken2022BatchInstruction([
+							getToken2022TransferCheckedInstruction({
+								source: toAddress(mockAtaAddress),
+								mint: toAddress(mint),
+								destination: toAddress(mockSolAddress2),
+								authority: toAddress(mockSolAddress),
+								amount: 1n,
+								decimals: 6
+							}),
+							getSetTransferFeeInstruction({
+								mint: toAddress(mint),
+								transferFeeConfigAuthority: toAddress(mockSolAddress),
+								transferFeeBasisPoints: 10_000,
+								maximumFee: 1_000_000n
+							})
+						])
+					].map(asSolParsedRpcInstructionOrSelf),
+					ownedAddresses: [mockSolAddress, mockAtaAddress],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(views).toStrictEqual([
+					{
+						kind: 'batch',
+						program: TOKEN_2022_PROGRAM_ADDRESS,
+						children: [send({ counterparty: mockSolAddress2, amount: 1n })]
+					},
+					{ kind: 'unknown', program: TOKEN_2022_PROGRAM_ADDRESS }
+				]);
+			});
+
+			// Syncing is plumbing the list reads and leaves out, here as when the message states it.
+			it('should keep a batch the message states read when the step with no line is plumbing', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						getBatchInstruction([
+							getSyncNativeInstruction({ account: toAddress(mockAtaAddress3) }),
+							transferTo({ destination: mockSolAddress2, amount: 1n })
+						])
+					].map(asSolParsedRpcInstructionOrSelf),
+					ownedAddresses: [mockSolAddress, mockAtaAddress, mockAtaAddress3],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(views).toStrictEqual([
+					{
+						kind: 'batch',
+						program: TOKEN,
+						children: [send({ counterparty: mockSolAddress2, amount: 1n })]
+					}
+				]);
+			});
+
+			// Nothing but plumbing gets no line at all, as the same steps stated one by one would not.
+			it('should leave out a batch the message states that carries only plumbing', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						transferTo({ destination: mockSolAddress2, amount: 1n }),
+						getBatchInstruction([getSyncNativeInstruction({ account: toAddress(mockAtaAddress3) })])
+					].map(asSolParsedRpcInstructionOrSelf),
+					ownedAddresses: [mockSolAddress, mockAtaAddress, mockAtaAddress3],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(views).toStrictEqual([send({ counterparty: mockSolAddress2, amount: 1n })]);
+			});
+
+			it('should list a batch a program runs under that program and under one line naming it', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [unreadCall],
+					innerInstructions: [
+						{
+							index: 0,
+							instructions: [
+								returnedBatch([
+									{
+										type: 'transferChecked',
+										info: {
+											source: mockAtaAddress,
+											destination: mockSolAddress2,
+											authority: mockSolAddress,
+											mint,
+											tokenAmount: { amount: '5', decimals: 6 }
+										}
+									}
+								])
+							]
+						}
+					],
+					ownedAddresses: [mockSolAddress, mockAtaAddress],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(views).toStrictEqual([
+					{
+						kind: 'route',
+						program: APP,
+						children: [
+							{
+								kind: 'batch',
+								program: TOKEN,
+								children: [send({ counterparty: mockSolAddress2, amount: 5n })]
+							}
+						]
+					}
+				]);
+			});
+
+			it('should hold a close inside such a batch that pays somebody else to the close refusal', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [unreadCall],
+					innerInstructions: [
+						{
+							index: 0,
+							instructions: [
+								returnedBatch([
+									{
+										type: 'closeAccount',
+										info: {
+											account: mockAtaAddress,
+											destination: mockSolAddress2,
+											owner: mockSolAddress
+										}
+									}
+								])
+							]
+						}
+					],
+					ownedAddresses: [mockSolAddress, mockAtaAddress],
+					userAddress: mockSolAddress,
+					accountLamports: { [mockAtaAddress]: 2_039_280n }
+				});
+
+				expect(
+					solClosesPayOthers({ instructions: views, userAddress: mockSolAddress })
+				).toBeTruthy();
+			});
+
+			it('should leave a batch whose contents it cannot read unrecognised', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [returnedBatch('not a list')],
+					ownedAddresses: [mockSolAddress, mockAtaAddress],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(kinds(views)).toStrictEqual(['unknown']);
+			});
+
+			// The RPC returns the calls made inside a batch after all its steps, and a step can make
+			// them in the middle of it, such as a transfer running its mint's hook.
+			describe('with calls made inside it', () => {
+				const paidIn = {
+					program: 'system',
+					programId: '11111111111111111111111111111111',
+					parsed: {
+						type: 'transfer',
+						info: { source: mockSolAddress3, destination: mockSolAddress, lamports: 5_000 }
+					},
+					stackHeight: 3
+				};
+
+				const received = {
+					kind: 'receive',
+					amount: 5_000n,
+					counterparty: mockSolAddress3,
+					own: false
+				};
+
+				it('should keep a batch of several steps whole and list it as nobody read it', () => {
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							getBatchInstruction([
+								transferTo({ destination: mockSolAddress2, amount: 1n }),
+								transferTo({ destination: mockAtaAddress2, amount: 2n })
+							])
+						].map(asSolParsedRpcInstructionOrSelf),
+						innerInstructions: [{ index: 0, instructions: [paidIn] }],
+						ownedAddresses: [mockSolAddress, mockAtaAddress],
+						userAddress: mockSolAddress,
+						includeUnrecognised: true
+					});
+
+					expect(views).toStrictEqual([received, { kind: 'unknown', program: TOKEN }]);
+				});
+
+				it('should read a batch of one step with the calls made after it', () => {
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							getBatchInstruction([transferTo({ destination: mockSolAddress2, amount: 1n })])
+						].map(asSolParsedRpcInstructionOrSelf),
+						innerInstructions: [{ index: 0, instructions: [paidIn] }],
+						ownedAddresses: [mockSolAddress, mockAtaAddress],
+						userAddress: mockSolAddress,
+						includeUnrecognised: true
+					});
+
+					expect(views).toStrictEqual([
+						{
+							kind: 'batch',
+							program: TOKEN,
+							children: [send({ counterparty: mockSolAddress2, amount: 1n })]
+						},
+						received
+					]);
+				});
+
+				it('should keep a batch a program runs whole when a call one level deeper follows it', () => {
+					const steps = [
+						{
+							type: 'transferChecked',
+							info: {
+								source: mockAtaAddress,
+								destination: mockSolAddress2,
+								authority: mockSolAddress,
+								mint,
+								tokenAmount: { amount: '5', decimals: 6 }
+							}
+						},
+						{
+							type: 'transferChecked',
+							info: {
+								source: mockAtaAddress,
+								destination: mockAtaAddress2,
+								authority: mockSolAddress,
+								mint,
+								tokenAmount: { amount: '6', decimals: 6 }
+							}
+						}
+					];
+
+					const views = mapSolInstructionSummaries({
+						instructions: [unreadCall],
+						innerInstructions: [{ index: 0, instructions: [returnedBatch(steps), paidIn] }],
+						ownedAddresses: [mockSolAddress, mockAtaAddress],
+						userAddress: mockSolAddress,
+						includeUnrecognised: true
+					});
+
+					expect(kinds(views)).not.toContain('batch');
+					expect(views).toContainEqual({ kind: 'unknown', program: APP });
+				});
+			});
+		});
+
+		describe('an unwrap', () => {
+			const TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+			const wrapped = mockAtaAddress2;
+
+			const unwrap = ({
+				amount,
+				destination = mockSolAddress2
+			}: { amount?: string; destination?: string } = {}) => ({
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'unwrapLamports',
+					info: {
+						source: wrapped,
+						destination,
+						authority: mockSolAddress,
+						...(amount !== undefined && { amount })
+					}
+				}
+			});
+
+			const read = ({
+				instructions,
+				accountLamports,
+				accountTokenAmounts,
+				accountUnsynced
+			}: {
+				instructions: unknown[];
+				accountLamports?: Record<string, bigint>;
+				accountTokenAmounts?: Record<string, bigint>;
+				accountUnsynced?: Record<string, bigint>;
+			}) =>
+				mapSolInstructionSummaries({
+					instructions,
+					ownedAddresses: [mockSolAddress, wrapped],
+					userAddress: mockSolAddress,
+					addressToToken: { [wrapped]: WSOL_TOKEN.address },
+					accountLamports,
+					accountTokenAmounts,
+					accountUnsynced
+				});
+
+			it('should state the wrapped SOL leaving the account for its destination', () => {
+				expect(read({ instructions: [unwrap({ amount: '5000' })] })).toStrictEqual([
+					{
+						kind: 'send',
+						amount: 5_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						decimals: WSOL_TOKEN.decimals,
+						counterparty: mockSolAddress2,
+						own: false
+					}
+				]);
+			});
+
+			// What it pays the wallet arrives there as SOL itself, which the wallet's own change counts.
+			it('should mark an unwrap paying the wallet', () => {
+				expect(
+					read({ instructions: [unwrap({ amount: '5000', destination: mockSolAddress })] })
+				).toStrictEqual([
+					{
+						kind: 'send',
+						amount: 5_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						decimals: WSOL_TOKEN.decimals,
+						counterparty: mockSolAddress,
+						own: true,
+						unwrapsToWallet: true
+					}
+				]);
+			});
+
+			it('should mark an unwrap paying the wallet out of somebody else’s account', () => {
+				expect(
+					mapSolInstructionSummaries({
+						instructions: [
+							{
+								program: 'spl-token',
+								programId: TOKEN,
+								parsed: {
+									type: 'unwrapLamports',
+									info: {
+										source: mockSolAddress3,
+										destination: mockSolAddress,
+										authority: mockSolAddress2,
+										amount: '5000'
+									}
+								}
+							}
+						],
+						ownedAddresses: [mockSolAddress],
+						userAddress: mockSolAddress,
+						addressToToken: { [mockSolAddress3]: WSOL_TOKEN.address }
+					})
+				).toStrictEqual([
+					{
+						kind: 'receive',
+						amount: 5_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						decimals: WSOL_TOKEN.decimals,
+						counterparty: mockSolAddress3,
+						own: false,
+						unwrapsToWallet: true
+					}
+				]);
+			});
+
+			// Read from the message alone, nothing names the source's mint, and the program settles it:
+			// it refuses an unwrap out of any account but one of its native mint.
+			it('should name the native mint of the program that runs an unwrap nobody read the source of', () => {
+				const [token, token2022] = mapSolInstructionSummaries({
+					instructions: [
+						unwrap({ amount: '5000' }),
+						{
+							...unwrap({ amount: '5000' }),
+							program: 'spl-token-2022',
+							programId: TOKEN_2022_PROGRAM_ADDRESS
+						}
+					],
+					ownedAddresses: [mockSolAddress, wrapped],
+					userAddress: mockSolAddress
+				});
+
+				expect(token?.tokenAddress).toBe(WSOL_TOKEN.address);
+				expect(token2022?.tokenAddress).toBe(TOKEN_2022_NATIVE_MINT_ADDRESS);
+			});
+
+			it('should state everything the account wraps when it names no amount', () => {
+				const [line] = read({
+					instructions: [unwrap()],
+					accountTokenAmounts: { [wrapped]: 7_000n }
+				});
+
+				expect(line.amount).toBe(7_000n);
+			});
+
+			it('should have a later close of the account hand back what the unwrap left', () => {
+				const views = read({
+					instructions: [
+						unwrap({ amount: '5000' }),
+						{
+							program: 'spl-token',
+							programId: TOKEN,
+							parsed: {
+								type: 'closeAccount',
+								info: { account: wrapped, destination: mockSolAddress, owner: mockSolAddress }
+							}
+						}
+					],
+					accountLamports: { [wrapped]: 2_046_280n },
+					accountTokenAmounts: { [wrapped]: 7_000n }
+				});
+
+				const close = views.find(({ kind }) => kind === 'unwrap');
+
+				expect(close?.returned).toBe(2_041_280n);
+				expect(close?.wrapped).toBe(2_000n);
+			});
+
+			describe('of everything, then a close', () => {
+				const close = {
+					program: 'spl-token',
+					programId: TOKEN,
+					parsed: {
+						type: 'closeAccount',
+						info: { account: wrapped, destination: mockSolAddress, owner: mockSolAddress }
+					}
+				};
+
+				// What it moves is what the account wraps there, as its own line says, so the close
+				// hands back what is left rather than an amount nobody knows.
+				it('should have the close hand back what the unwrap left', () => {
+					const views = read({
+						instructions: [unwrap(), close],
+						accountLamports: { [wrapped]: 2_046_280n },
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					const closing = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+					expect(closing?.returned).toBe(2_039_280n);
+				});
+
+				it('should know nothing of what the close hands back when nobody read what it wraps', () => {
+					const views = read({
+						instructions: [unwrap(), close],
+						accountLamports: { [wrapped]: 2_046_280n }
+					});
+
+					expect(views.at(-1)).not.toHaveProperty('returned');
+				});
+
+				// An account holding Token-2022's native mint keeps what it wraps as lamports too, so a
+				// transfer into it raises what the close hands back as much as what the unwrap moves.
+				it('should count a transfer into a Token-2022 native account toward what the close hands back', () => {
+					const token2022 = { program: 'spl-token-2022', programId: TOKEN_2022_PROGRAM_ADDRESS };
+
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							{
+								...token2022,
+								parsed: {
+									type: 'transferChecked',
+									info: {
+										source: mockSolAddress3,
+										mint: TOKEN_2022_NATIVE_MINT_ADDRESS,
+										destination: wrapped,
+										authority: mockSolAddress2,
+										tokenAmount: { amount: '5000', decimals: 9 }
+									}
+								}
+							},
+							{ ...unwrap({ destination: mockSolAddress }), ...token2022 },
+							{ ...close, ...token2022 }
+						],
+						ownedAddresses: [mockSolAddress, wrapped],
+						userAddress: mockSolAddress,
+						addressToToken: {
+							[wrapped]: TOKEN_2022_NATIVE_MINT_ADDRESS,
+							[mockSolAddress3]: TOKEN_2022_NATIVE_MINT_ADDRESS
+						},
+						accountLamports: { [wrapped]: 2_046_280n },
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					const closing = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+					expect(closing?.returned).toBe(2_039_280n);
+					expect(
+						solWalletLamportsStated({ instructions: views, userAddress: mockSolAddress })
+					).toBe(2_051_280n);
+				});
+			});
+
+			describe('into the account', () => {
+				const into = (amount?: string) => ({
+					program: 'spl-token',
+					programId: TOKEN,
+					parsed: {
+						type: 'unwrapLamports',
+						info: {
+							source: mockSolAddress3,
+							destination: wrapped,
+							authority: mockSolAddress2,
+							...(amount !== undefined && { amount })
+						}
+					}
+				});
+
+				const sync = {
+					program: 'spl-token',
+					programId: TOKEN,
+					parsed: { type: 'syncNative', info: { account: wrapped } }
+				};
+
+				// The lamports raise its balance the way a wrapping does, so an unwrap of everything it
+				// wraps afterwards hands on what arrived.
+				it('should count what arrived toward a later unwrap of everything', () => {
+					const views = read({
+						instructions: [into('5000'), sync, unwrap({ destination: mockSolAddress })],
+						accountTokenAmounts: { [wrapped]: ZERO }
+					});
+
+					expect(views.at(-1)?.amount).toBe(5_000n);
+				});
+
+				// Until a sync counts them, they sit beside the amount, which is all an unwrap of
+				// everything moves.
+				it('should leave what arrived out of a later unwrap of everything without a sync', () => {
+					const views = read({
+						instructions: [into('5000'), unwrap({ destination: mockSolAddress })],
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					expect(views.at(-1)?.amount).toBe(7_000n);
+				});
+
+				it('should leave SOL a System transfer paid in out of a later unwrap of everything without a sync', () => {
+					const views = read({
+						instructions: [
+							{
+								program: 'system',
+								programId: '11111111111111111111111111111111',
+								parsed: {
+									type: 'transfer',
+									info: { source: mockSolAddress, destination: wrapped, lamports: 5_000 }
+								}
+							},
+							unwrap({ destination: mockSolAddress })
+						],
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					expect(views.at(-1)?.amount).toBe(7_000n);
+				});
+
+				// A close hands back every lamport, synced or not, so for it the account wraps both.
+				it('should have a close state what arrived as wrapped without a sync', () => {
+					const views = read({
+						instructions: [
+							into('5000'),
+							{
+								program: 'spl-token',
+								programId: TOKEN,
+								parsed: {
+									type: 'closeAccount',
+									info: { account: wrapped, destination: mockSolAddress, owner: mockSolAddress }
+								}
+							}
+						],
+						accountLamports: { [wrapped]: 2_046_280n },
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					const closing = views.find(({ kind }) => kind === 'unwrap');
+
+					expect(closing?.wrapped).toBe(12_000n);
+					expect(closing?.returned).toBe(2_051_280n);
+				});
+
+				it('should know nothing of a later unwrap of everything when the first names no amount', () => {
+					const views = read({
+						instructions: [into(), sync, unwrap({ destination: mockSolAddress })],
+						accountTokenAmounts: { [wrapped]: ZERO }
+					});
+
+					expect(views.at(-1)).not.toHaveProperty('amount');
+				});
+
+				// Both token programs lower the balance and leave the lamports where they are.
+				it('should lower the balance for an unwrap into the account itself', () => {
+					const views = read({
+						instructions: [
+							unwrap({ amount: '5000', destination: wrapped }),
+							unwrap({ destination: mockSolAddress })
+						],
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					expect(views.at(-1)?.amount).toBe(2_000n);
+				});
+
+				// A close paying into the account hands it every lamport the closed account held, which a
+				// sync counts like any other paid in.
+				describe('after a close paid into it', () => {
+					const closeInto = {
+						program: 'spl-token',
+						programId: TOKEN,
+						parsed: {
+							type: 'closeAccount',
+							info: { account: mockSolAddress3, destination: wrapped, owner: mockSolAddress2 }
+						}
+					};
+
+					it('should count what the close paid in toward a later unwrap of everything once synced', () => {
+						const views = read({
+							instructions: [closeInto, sync, unwrap({ destination: mockSolAddress })],
+							accountLamports: { [wrapped]: 2_046_280n, [mockSolAddress3]: 2_039_280n },
+							accountTokenAmounts: { [wrapped]: 7_000n }
+						});
+
+						expect(views.at(-1)?.amount).toBe(2_046_280n);
+					});
+
+					it('should know nothing of a later unwrap of everything when nobody read what the close paid in', () => {
+						const views = read({
+							instructions: [closeInto, sync, unwrap({ destination: mockSolAddress })],
+							accountLamports: { [wrapped]: 2_046_280n },
+							accountTokenAmounts: { [wrapped]: 7_000n }
+						});
+
+						expect(views.at(-1)).not.toHaveProperty('amount');
+					});
+				});
+
+				// Lamports already in the account beyond its reserve and its amount wait for a sync, like
+				// those the message pays in.
+				it('should count what the account held unsynced going in once a sync does', () => {
+					const views = read({
+						instructions: [sync, unwrap({ destination: mockSolAddress })],
+						accountTokenAmounts: { [wrapped]: 7_000n },
+						accountUnsynced: { [wrapped]: 5_000n }
+					});
+
+					expect(views.at(-1)?.amount).toBe(12_000n);
+				});
+
+				it('should leave what the account held unsynced going in out of an unwrap of everything without a sync', () => {
+					const views = read({
+						instructions: [unwrap({ destination: mockSolAddress })],
+						accountTokenAmounts: { [wrapped]: 7_000n },
+						accountUnsynced: { [wrapped]: 5_000n }
+					});
+
+					expect(views.at(-1)?.amount).toBe(7_000n);
+				});
+
+				// The lamports it left in place are counted again once the account is synced.
+				it('should count what an unwrap into the account itself left once a sync does', () => {
+					const views = read({
+						instructions: [
+							unwrap({ amount: '5000', destination: wrapped }),
+							sync,
+							unwrap({ destination: mockSolAddress })
+						],
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					expect(views.at(-1)?.amount).toBe(7_000n);
+				});
+			});
+		});
+
+		// Counted from nothing, an account the walk lost track of would have its close state what
+		// arrived since as all it hands back, or nothing at all.
+		describe('a balance nobody knows', () => {
+			const TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+			const wrapped = mockAtaAddress2;
+			const other = mockAtaAddress;
+
+			const unwrap = ({
+				source,
+				destination,
+				authority = mockSolAddress,
+				amount
+			}: {
+				source: string;
+				destination: string;
+				authority?: string;
+				amount?: string;
+			}) => ({
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'unwrapLamports',
+					info: { source, destination, authority, ...(amount !== undefined && { amount }) }
+				}
+			});
+
+			const close = ({
+				account,
+				destination = mockSolAddress
+			}: {
+				account: string;
+				destination?: string;
+			}) => ({
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'closeAccount',
+					info: { account, destination, owner: mockSolAddress }
+				}
+			});
+
+			const read = (instructions: unknown[]) =>
+				mapSolInstructionSummaries({
+					instructions,
+					ownedAddresses: [mockSolAddress, wrapped, other],
+					userAddress: mockSolAddress,
+					addressToToken: {
+						[wrapped]: WSOL_TOKEN.address,
+						[other]: WSOL_TOKEN.address,
+						[mockSolAddress3]: WSOL_TOKEN.address
+					},
+					accountLamports: { [wrapped]: 2_046_280n, [other]: 2_039_280n }
+				});
+
+			it('should know nothing of what a close hands back after a stated unwrap follows one nobody read', () => {
+				const views = read([
+					unwrap({ source: wrapped, destination: mockSolAddress }),
+					unwrap({ source: wrapped, destination: mockSolAddress2, amount: '5000' }),
+					close({ account: wrapped })
+				]);
+
+				expect(views.at(-1)).not.toHaveProperty('returned');
+			});
+
+			it('should know nothing of what a close hands back once an unwrap nobody read paid into the account', () => {
+				const views = read([
+					unwrap({ source: mockSolAddress3, destination: other, authority: mockSolAddress2 }),
+					unwrap({
+						source: mockSolAddress3,
+						destination: other,
+						authority: mockSolAddress2,
+						amount: '5000'
+					}),
+					close({ account: other })
+				]);
+
+				expect(views.at(-1)).not.toHaveProperty('returned');
+			});
+
+			it('should know nothing of what a close hands back once a close nobody read paid into the account', () => {
+				const views = read([
+					close({ account: mockSolAddress3, destination: other }),
+					close({ account: other })
+				]);
+
+				expect(views.at(-1)).not.toHaveProperty('returned');
+			});
+		});
+
+		// SOL paid out of an account no application holds: a seed-derived account, a nonce account, or
+		// a token account handing over its excess lamports. Each pays the wallet as surely as a plain
+		// transfer, and only a line says so.
+		describe('SOL paid out of a System or token account', () => {
+			const TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+			const SYSTEM = '11111111111111111111111111111111';
+			const wrapped = mockAtaAddress2;
+
+			const withSeed = (destination: string) => ({
+				program: 'system',
+				programId: SYSTEM,
+				parsed: {
+					type: 'transferWithSeed',
+					info: {
+						source: mockSolAddress3,
+						sourceBase: mockSolAddress2,
+						destination,
+						lamports: 5_000,
+						sourceSeed: 'vault',
+						sourceOwner: SYSTEM
+					}
+				}
+			});
+
+			const fromNonce = (destination: string) => ({
+				program: 'system',
+				programId: SYSTEM,
+				parsed: {
+					type: 'withdrawFromNonce',
+					info: {
+						nonceAccount: mockSolAddress3,
+						destination,
+						nonceAuthority: mockSolAddress2,
+						lamports: 5_000
+					}
+				}
+			});
+
+			const excess = ({
+				source = mockSolAddress3,
+				destination
+			}: {
+				source?: string;
+				destination: string;
+			}) => ({
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'withdrawExcessLamports',
+					info: { source, destination, authority: mockSolAddress2 }
+				}
+			});
+
+			const unwrapAll = {
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'unwrapLamports',
+					info: { source: wrapped, destination: mockSolAddress, authority: mockSolAddress }
+				}
+			};
+
+			const sync = {
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: { type: 'syncNative', info: { account: wrapped } }
+			};
+
+			const read = ({
+				instructions,
+				mint = WSOL_TOKEN.address,
+				accountLamports,
+				accountTokenAmounts
+			}: {
+				instructions: unknown[];
+				mint?: string;
+				accountLamports?: Record<string, bigint>;
+				accountTokenAmounts?: Record<string, bigint>;
+			}) =>
+				mapSolInstructionSummaries({
+					instructions,
+					ownedAddresses: [mockSolAddress, wrapped],
+					userAddress: mockSolAddress,
+					addressToToken: { [wrapped]: mint },
+					accountLamports,
+					accountTokenAmounts
+				});
+
+			const plain = (destination: string) => ({
+				program: 'system',
+				programId: SYSTEM,
+				parsed: {
+					type: 'transfer',
+					info: { source: mockSolAddress3, destination, lamports: 5_000 }
+				}
+			});
+
+			const payouts = [
+				{ name: 'a plain transfer', payout: plain },
+				{ name: 'a seed-derived account', payout: withSeed },
+				{ name: 'a nonce account', payout: fromNonce }
+			];
+
+			it.each(payouts)('should state what $name pays the wallet as SOL received', ({ payout }) => {
+				expect(read({ instructions: [payout(mockSolAddress)] })).toStrictEqual([
+					{ kind: 'receive', amount: 5_000n, counterparty: mockSolAddress3, own: false }
+				]);
+			});
+
+			// Paid into a wrapped SOL account, the lamports raise its balance the way a plain transfer
+			// into it does, once the account is synced. They reach the wallet only with the unwrap,
+			// which is what the wallet's change counts them at.
+			it.each(payouts)(
+				'should count what $name pays into a wrapped SOL account toward a later unwrap of everything',
+				({ payout }) => {
+					const views = read({
+						instructions: [payout(wrapped), sync, unwrapAll],
+						accountTokenAmounts: { [wrapped]: ZERO }
+					});
+
+					expect(views[0]).toStrictEqual({
+						kind: 'receive',
+						amount: 5_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						decimals: WSOL_TOKEN.decimals,
+						account: wrapped,
+						counterparty: mockSolAddress3,
+						own: false
+					});
+					expect(views.at(-1)?.amount).toBe(5_000n);
+					expect(
+						solWalletLamportsStated({ instructions: views, userAddress: mockSolAddress })
+					).toBe(5_000n);
+				}
+			);
+
+			// Token-2022 wraps SOL under a native mint of its own, and what is paid into an account
+			// holding it becomes wrapped SOL there just the same.
+			it.each(payouts)(
+				'should count what $name pays into a Token-2022 wrapped SOL account toward a later unwrap of everything',
+				({ payout }) => {
+					const token2022 = { program: 'spl-token-2022', programId: TOKEN_2022_PROGRAM_ADDRESS };
+
+					const views = read({
+						instructions: [
+							payout(wrapped),
+							{ ...sync, ...token2022 },
+							{ ...unwrapAll, ...token2022 }
+						],
+						mint: TOKEN_2022_NATIVE_MINT_ADDRESS,
+						accountTokenAmounts: { [wrapped]: ZERO }
+					});
+
+					expect(views[0]).toStrictEqual({
+						kind: 'receive',
+						amount: 5_000n,
+						tokenAddress: TOKEN_2022_NATIVE_MINT_ADDRESS,
+						decimals: WSOL_TOKEN.decimals,
+						account: wrapped,
+						counterparty: mockSolAddress3,
+						own: false
+					});
+					expect(
+						solWalletLamportsStated({ instructions: views, userAddress: mockSolAddress })
+					).toBe(5_000n);
+				}
+			);
+
+			// In an account of any other token the lamports stay in that account rather than reaching the
+			// wallet, which they do only with its close: the line names the account, and the wallet's
+			// change counts them once, at the close.
+			it.each(payouts)(
+				'should count what $name pays into a token account of another mint once, at its close',
+				({ payout }) => {
+					const tokenAccount = mockAtaAddress3;
+
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							payout(tokenAccount),
+							{
+								program: 'spl-token',
+								programId: TOKEN,
+								parsed: {
+									type: 'closeAccount',
+									info: {
+										account: tokenAccount,
+										destination: mockSolAddress,
+										owner: mockSolAddress
+									}
+								}
+							}
+						],
+						ownedAddresses: [mockSolAddress, tokenAccount],
+						userAddress: mockSolAddress,
+						addressToToken: { [tokenAccount]: mockSplAddress },
+						accountLamports: { [tokenAccount]: 2_039_280n },
+						accountTokenAmounts: { [tokenAccount]: ZERO }
+					});
+
+					expect(views[0]).toStrictEqual({
+						kind: 'receive',
+						amount: 5_000n,
+						account: tokenAccount,
+						counterparty: mockSolAddress3,
+						own: false
+					});
+					expect(views.at(-1)?.returned).toBe(2_044_280n);
+					expect(
+						solWalletLamportsStated({ instructions: views, userAddress: mockSolAddress })
+					).toBe(2_044_280n);
+				}
+			);
+
+			it('should state excess lamports paid to the wallet as SOL received by an amount nobody read', () => {
+				expect(read({ instructions: [excess({ destination: mockSolAddress })] })).toStrictEqual([
+					{ kind: 'receive', withdrawsExcess: true, counterparty: mockSolAddress3, own: false }
+				]);
+			});
+
+			it('should state nothing of excess lamports paid anywhere else', () => {
+				expect(read({ instructions: [excess({ destination: mockSolAddress2 })] })).toStrictEqual(
+					[]
+				);
+			});
+
+			it('should know nothing of what a wrapped SOL account wraps once excess lamports reach it', () => {
+				const views = read({
+					instructions: [excess({ destination: wrapped }), sync, unwrapAll],
+					accountTokenAmounts: { [wrapped]: ZERO }
+				});
+
+				expect(views.at(-1)).not.toHaveProperty('amount');
+			});
+
+			it('should know nothing of what a close hands back once excess lamports left the account', () => {
+				const views = read({
+					instructions: [
+						excess({ source: wrapped, destination: mockSolAddress }),
+						{
+							program: 'spl-token',
+							programId: TOKEN,
+							parsed: {
+								type: 'closeAccount',
+								info: { account: wrapped, destination: mockSolAddress, owner: mockSolAddress }
+							}
+						}
+					],
+					accountLamports: { [wrapped]: 2_046_280n },
+					accountTokenAmounts: { [wrapped]: 7_000n }
+				});
+
+				expect(views.at(-1)).not.toHaveProperty('returned');
+			});
+
+			// Counted from nothing after the withdrawal, a payment in would have the close of either
+			// account state what arrived since as all it hands back.
+			describe('and a payment in after it', () => {
+				const other = mockAtaAddress;
+
+				const close = (account: string) => ({
+					program: 'spl-token',
+					programId: TOKEN,
+					parsed: {
+						type: 'closeAccount',
+						info: { account, destination: mockSolAddress, owner: mockSolAddress }
+					}
+				});
+
+				it.each([
+					{ end: 'source', account: wrapped },
+					{ end: 'destination', account: other }
+				])('should know nothing of what a close of its $end hands back', ({ account }) => {
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							excess({ source: wrapped, destination: other }),
+							plain(account),
+							close(account)
+						],
+						ownedAddresses: [mockSolAddress, wrapped, other],
+						userAddress: mockSolAddress,
+						addressToToken: { [wrapped]: WSOL_TOKEN.address, [other]: WSOL_TOKEN.address },
+						accountLamports: { [wrapped]: 2_046_280n, [other]: 2_039_280n },
+						accountTokenAmounts: { [wrapped]: 7_000n, [other]: ZERO }
+					});
+
+					expect(views.at(-1)).not.toHaveProperty('returned');
+				});
 			});
 		});
 

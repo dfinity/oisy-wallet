@@ -6,6 +6,7 @@ import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-me
 import { calculateSolPrioritizationFee, resolveSolComputeUnitLimit } from '$sol/utils/fee.utils';
 import {
 	mapSolInstruction,
+	solUnbatchedInstructions,
 	solWrappedSolOpeningsReturnedToWallet
 } from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -139,14 +140,21 @@ export const mapSolTransactionMessage = ({
 			transactionMessage.version !== 1 || programAddress !== COMPUTE_BUDGET_PROGRAM_ADDRESS
 	);
 
+	// A token batch runs the instructions it carries one after the other, so they are read as if the
+	// message stated each itself, held to the same rules as their neighbours. The count that sizes
+	// the default compute limit stays the message's own: the batch is one instruction to the network.
+	const unbatched = instructionsList.flatMap(solUnbatchedInstructions);
+
 	// A creation can only be told apart from a payment by what the rest of the message does with the
-	// account it opens, so that is read once, over the whole message, before any instruction is.
+	// account it opens, so that is read once, over the whole message, before any instruction is. The
+	// instructions a batch carries are the message's own too, so a close among them answers for the
+	// opening as one stated on its own does.
 	const returnedToWallet = solWrappedSolOpeningsReturnedToWallet({
-		instructions: instructionsList,
+		instructions: unbatched,
 		userAddress
 	});
 
-	const mapped = instructionsList.reduce<MappedSolTransaction>(
+	const mapped = unbatched.reduce<MappedSolTransaction>(
 		(acc, instruction, index) => {
 			const {
 				amount,

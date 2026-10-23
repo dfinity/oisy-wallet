@@ -109,6 +109,9 @@
 	// An account the run opens inside another program's instruction with more than its size costs.
 	// `sign()` refuses it as it does an ambiguous message, so the review says so the same way.
 	let opensAccountBeyondRent = $state<boolean | undefined>();
+	// A token batch the run keeps whole, which the list states none of the steps of. `sign()` refuses
+	// it as it does an ambiguous message, so the review says so the same way.
+	let keepsBatchWhole = $state<boolean | undefined>();
 	// The decode is asynchronous, so until it settles the review shows an empty summary and no
 	// warning. Approval waits for it: signing on the strength of a review that has not been
 	// computed yet is exactly what the warnings exist to prevent. A failed decode never flips it,
@@ -144,7 +147,8 @@
 				parties,
 				unreadPrograms,
 				rentExemptMinimum,
-				opensAccountBeyondRent
+				opensAccountBeyondRent,
+				keepsBatchWhole
 			} = await decodeService({
 				base64EncodedTransactionMessage: data,
 				networkId,
@@ -267,6 +271,7 @@
 			unreadProgramsAcknowledged: !callsUnreadPrograms || unreadProgramsAcknowledged,
 			rentExemptMinimum,
 			opensAccountBeyondRent: opensAccountBeyondRent ?? false,
+			keepsBatchWhole: keepsBatchWhole ?? false,
 			reassignsWallet
 		});
 
@@ -293,11 +298,15 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<SolWalletConnectSignReview
-				ambiguous={(ambiguous ?? false) || (opensAccountBeyondRent ?? false) || reassignsWallet}
+				ambiguous={(ambiguous ?? false) ||
+					(opensAccountBeyondRent ?? false) ||
+					(keepsBatchWhole ?? false) ||
+					reassignsWallet}
 				{application}
 				approveDisabled={!decoded ||
 					(ambiguous ?? false) ||
 					(opensAccountBeyondRent ?? false) ||
+					(keepsBatchWhole ?? false) ||
 					reassignsWallet ||
 					closesPayOthers}
 				{closesPayOthers}

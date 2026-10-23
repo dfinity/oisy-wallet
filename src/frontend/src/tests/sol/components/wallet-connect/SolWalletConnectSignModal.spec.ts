@@ -358,6 +358,35 @@ describe('SolWalletConnectSignModal', () => {
 		expect(args).toEqual(expect.objectContaining({ opensAccountBeyondRent: false }));
 	});
 
+	// A token batch the run keeps whole has none of its steps listed, and signing refuses it like an
+	// ambiguous message, so the review holds the button the same way.
+	it('should hold approval when the run keeps a token batch whole', async () => {
+		vi.mocked(decode).mockResolvedValueOnce({
+			amount: 1n,
+			keepsBatchWhole: true,
+			parties: { sources: [], destinations: [], partial: false }
+		});
+
+		const { getByRole, getByText } = render(SolWalletConnectSignModal, {
+			props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+		});
+
+		await waitFor(() => {
+			expect(getByText(en.wallet_connect.text.cannot_be_shown)).toBeInTheDocument();
+		});
+
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+	});
+
+	it('should hand signing no whole batch when the run kept none', async () => {
+		const args = await approve({
+			amount: 1n,
+			parties: { sources: [], destinations: [], partial: true }
+		});
+
+		expect(args).toEqual(expect.objectContaining({ keepsBatchWhole: false }));
+	});
+
 	describe('the wallet handed to another program', () => {
 		beforeEach(() => {
 			solAddressMainnetStore.set({ data: mockSolAddress, certified: true });

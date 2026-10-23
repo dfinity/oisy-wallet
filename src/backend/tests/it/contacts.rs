@@ -14,7 +14,7 @@ use shared::types::{
 
 use crate::utils::{
     mock::CALLER,
-    pocketic::{setup, BackendBuilder, PicBackend, PicCanisterTrait},
+    pocketic::{controller, setup, BackendBuilder, PicBackend, PicCanisterTrait},
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -1291,4 +1291,50 @@ fn test_images_survive_canister_upgrade() {
     let listed = call_get_contacts(&pic_setup, caller);
     assert_eq!(listed.len(), 1);
     assert_eq!(listed[0].image, Some(png_image));
+}
+
+#[test]
+fn test_inline_image_migration_finishes_after_canister_upgrade() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let png_image = create_test_png_image();
+    let with_image = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "Migrated".to_string(),
+        Some(png_image.clone()),
+    )
+    .unwrap();
+
+    // Same rate-limit idiom as `test_images_survive_canister_upgrade`.
+    pic_setup.pic.advance_time(Duration::from_mins(1));
+    for _ in 0..20 {
+        pic_setup.pic.tick();
+    }
+
+    pic_setup
+        .upgrade_with_wasm(&BackendBuilder::default_wasm_path(), None)
+        .expect("canister upgrade should succeed");
+
+    // `post_upgrade` starts the migration on a timer; let its first batch run.
+    for _ in 0..5 {
+        pic_setup.pic.tick();
+    }
+
+    // The only image is already in `contact_image`, so the migration finishes with nothing to move.
+    let logs = pic_setup
+        .pic
+        .fetch_canister_logs(pic_setup.canister_id, controller())
+        .expect("a controller can read the canister logs");
+    assert!(
+        logs.iter()
+            .any(|record| String::from_utf8_lossy(&record.content)
+                .contains("Moved 0 inline contact images to contact_image")),
+        "the migration should finish after the upgrade"
+    );
+
+    let after = call_get_contact(&pic_setup, caller, with_image.id)
+        .expect("that the contact survives the migration");
+    assert_eq!(after.image, Some(png_image));
 }
