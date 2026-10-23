@@ -127,6 +127,10 @@ pub fn post_upgrade(arg: Option<Arg>) {
     utils::housekeeping::start_periodic_housekeeping_timers();
 
     exchange::start_exchange_rate_timer();
+
+    // TODO: remove once every canister has been upgraded past the release that ships it; see
+    // `contacts::migration`.
+    contacts::start_inline_image_migration();
 }
 
 export_candid!();

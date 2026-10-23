@@ -4,6 +4,8 @@ export const SYSTEM_PROGRAM_ADDRESS = '11111111111111111111111111111111';
 export const COMPUTE_BUDGET_PROGRAM_ADDRESS = 'ComputeBudget111111111111111111111111111111';
 export const TOKEN_PROGRAM_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 export const TOKEN_2022_PROGRAM_ADDRESS = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
+// The native mint of Token-2022, its counterpart of wrapped SOL: an account of it wraps lamports.
+export const TOKEN_2022_NATIVE_MINT_ADDRESS = '9pan9bMn5HatX4EJdBwg9VgCa7Uz5HL8N1m5D3NdXejP';
 export const ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS =
 	'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
 export const ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS = 'AddressLookupTab1e1111111111111111111111111';
@@ -72,6 +74,13 @@ export const SOLANA_SIMULATION_MAX_CLOSE_RUNS = 5;
 // The preview is fetched before the review renders, so a slow or unresponsive RPC would hold
 // the request behind it. Past this it is abandoned and the review renders without it.
 export const SOLANA_SIMULATION_TIMEOUT_MILLISECONDS = 5_000;
+
+// How many times a run whose pre-state must be read at its very slot reads the pair again, when
+// the simulation lands on a later slot or on a node not there yet, within the timeout above. On
+// mainnet, 75 of 100 pairs landed on one slot at the first attempt, 23 at the second, 1 at the
+// third and 1 at none of three, at about 100 ms a pair (2026-10-23, public endpoints): ten leave a
+// miss about one in a million, and still most of the timeout.
+export const SOLANA_SIMULATION_SNAPSHOT_ATTEMPTS = 10;
 
 // Multiples of that baseline at which the review speaks up: twice it is worth naming as the dApp's
 // own choice, five times it is worth questioning. Both stay short of blocking, since paying well

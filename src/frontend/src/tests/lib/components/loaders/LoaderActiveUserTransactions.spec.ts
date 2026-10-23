@@ -304,17 +304,22 @@ describe('LoaderActiveUserTransactions', () => {
 			});
 		});
 
-		it('polls NEAR Intents rows on each tick when present', async () => {
+		it('polls NEAR Intents rows on each tick when present, sharing the nonce reads with Velora', async () => {
 			const oneSecSpy = vi
 				.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions')
 				.mockResolvedValue();
 			const nearSpy = vi
 				.spyOn(nearIntentsPoller, 'pollNearIntentsActiveUserTransactions')
 				.mockResolvedValue();
+			const veloraSpy = vi
+				.spyOn(veloraPoller, 'pollVeloraActiveUserTransactions')
+				.mockResolvedValue();
+			vi.spyOn(addressDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
 			const tx = pendingNearIntents('near-a');
 
 			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
 			activeUserTransactionsStore.upsert({ transaction: tx });
+			activeUserTransactionsStore.upsert({ transaction: pendingVelora('velora-a') });
 
 			render(LoaderActiveUserTransactions);
 
@@ -323,8 +328,13 @@ describe('LoaderActiveUserTransactions', () => {
 			expect(oneSecSpy).not.toHaveBeenCalled();
 			expect(nearSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
-				transactions: [tx]
+				transactions: [tx],
+				userAddress: mockEthAddress,
+				confirmedNonceByChainId: expect.any(Map)
 			});
+			expect(nearSpy.mock.calls[0][0].confirmedNonceByChainId).toBe(
+				veloraSpy.mock.calls[0][0].confirmedNonceByChainId
+			);
 		});
 
 		it('polls Velora rows on each tick when present, with the EVM address', async () => {
@@ -529,10 +539,12 @@ describe('LoaderActiveUserTransactions', () => {
 				await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
 
 				expect(xrpSpy).not.toHaveBeenCalled();
-				expect(nearSpy).toHaveBeenCalledExactlyOnceWith({
-					identity: mockIdentity,
-					transactions: [tx]
-				});
+				expect(nearSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						identity: mockIdentity,
+						transactions: [tx]
+					})
+				);
 			});
 		});
 

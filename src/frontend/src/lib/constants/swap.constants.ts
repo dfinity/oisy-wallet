@@ -223,7 +223,6 @@ export const swapProvidersDetails: Partial<Record<SwapProvider, SwapProvidersCon
 	[SwapProvider.LIFI]: {
 		website: 'https://li.fi',
 		name: 'LI.FI',
-		// TODO: replace the placeholder with the official logo
 		logo: '/images/dapps/lifi-logo.svg'
 	}
 };
