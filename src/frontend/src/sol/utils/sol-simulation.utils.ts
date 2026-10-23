@@ -11,6 +11,7 @@ import type {
 	SolClosedAccount,
 	SolSimulationAllowance,
 	SolSimulationControlChange,
+	SolSimulationCreatedAccount,
 	SolSimulationPreview,
 	SolSimulationTokenDelta
 } from '$sol/types/sol-simulation';
@@ -114,6 +115,11 @@ const parseAccountState = (account: SolanaParsedAccountInfo): SolAccountState | 
 		...(nonNullish(token) && { token })
 	};
 };
+
+// Emptied by a run: no account after it, or one holding no lamports, which the run may report in
+// place of a missing one. An account the run did not report on says nothing.
+const isEmptiedAccount = (post: SolanaParsedAccountInfo | undefined): boolean =>
+	post === null || (nonNullish(post) && BigInt(post.lamports) === ZERO);
 
 /**
  * Whether an account is the user's own.
@@ -282,10 +288,12 @@ export const mapSolSimulationPreview = ({
 	postAccounts: readonly SolanaParsedAccountInfo[];
 	userAddress: SolAddress;
 }): SolSimulationPreview => {
-	const { solDelta, tokenDeltas, changes } = addresses.reduce<{
+	const { solDelta, tokenDeltas, changes, created, closed } = addresses.reduce<{
 		solDelta: bigint | undefined;
 		tokenDeltas: SolSimulationTokenDelta[];
 		changes: SolSimulationControlChange[];
+		created: SolSimulationCreatedAccount[];
+		closed: SolAddress[];
 	}>(
 		(acc, address, index) => {
 			const pre = parseAccountState(preAccounts[index]);
@@ -299,6 +307,24 @@ export const mapSolSimulationPreview = ({
 			const token = post?.token ?? pre?.token;
 
 			return {
+				created:
+					isNullish(pre) && nonNullish(post?.token)
+						? [
+								...acc.created,
+								{
+									account: address,
+									owner: post.token.owner,
+									...(nonNullish(post.token.delegate) && { delegate: post.token.delegate }),
+									...(nonNullish(post.token.closeAuthority) && {
+										closeAuthority: post.token.closeAuthority
+									})
+								}
+							]
+						: acc.created,
+				closed:
+					nonNullish(pre) && isEmptiedAccount(postAccounts[index])
+						? [...acc.closed, address]
+						: acc.closed,
 				solDelta:
 					address === userAddress
 						? (post?.lamports ?? ZERO) - (pre?.lamports ?? ZERO)
@@ -319,13 +345,15 @@ export const mapSolSimulationPreview = ({
 				changes: [...acc.changes, ...controlChanges({ account: address, pre, post })]
 			};
 		},
-		{ solDelta: undefined, tokenDeltas: [], changes: [] }
+		{ solDelta: undefined, tokenDeltas: [], changes: [], created: [], closed: [] }
 	);
 
 	return {
 		...(nonNullish(solDelta) && solDelta !== ZERO && { solDelta }),
 		tokenDeltas,
-		controlChanges: changes
+		controlChanges: changes,
+		...(created.length > 0 && { createdAccounts: created }),
+		...(closed.length > 0 && { closedAccounts: closed })
 	};
 };
 
@@ -421,9 +449,9 @@ export const findSolClosedAppAccounts = ({
 			return acc;
 		}
 
-		const emptied = post === null || (nonNullish(post) && BigInt(post.lamports) === ZERO);
-
-		return emptied ? [...acc, { account, program: pre.program, lamports: pre.lamports }] : acc;
+		return isEmptiedAccount(post)
+			? [...acc, { account, program: pre.program, lamports: pre.lamports }]
+			: acc;
 	}, []);
 
 /**

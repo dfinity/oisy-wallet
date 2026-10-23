@@ -44,16 +44,34 @@ export interface SolSimulationControlChange {
 }
 
 /**
+ * A token account of the user's that the run creates, with who controls it once the run is
+ * through. Control changes cannot say this: there is no state before to diff against.
+ */
+export interface SolSimulationCreatedAccount {
+	account: SolAddress;
+	owner: SolAddress;
+	delegate?: SolAddress;
+	closeAuthority?: SolAddress;
+}
+
+/**
  * What a simulation says this message would do to the accounts the user owns.
  *
  * A control change carries no amount, which is the whole reason it is reported separately: an
  * account handed to someone else keeps the exact balance it had, so a diff of amounts alone
  * would describe the theft as nothing happening.
+ *
+ * The accounts the run creates and closes are listed apart, for a caller that must hold them to
+ * rules of its own: neither has two states to diff, so neither shows among the control changes,
+ * and an empty account closed shows no token delta either. Absent when there are none. They do
+ * not make a preview non-empty.
  */
 export interface SolSimulationPreview {
 	solDelta?: bigint;
 	tokenDeltas: SolSimulationTokenDelta[];
 	controlChanges: SolSimulationControlChange[];
+	createdAccounts?: SolSimulationCreatedAccount[];
+	closedAccounts?: SolAddress[];
 }
 
 /**
