@@ -857,6 +857,7 @@
 		"text": {
 			"title": "Settings",
 			"general": "General",
+			"security": "Security",
 			"preferences": "Preferences",
 			"principal": "Your Principal",
 			"principal_copied": "Principal copied to clipboard",
