@@ -519,6 +519,26 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"minglechat": {
+				"name": "Mingle Chat",
+				"one_liner": "Nhắn tin mã hóa, tích hợp sẵn token.",
+				"description": "Mingle Chat là ứng dụng nhắn tin mã hóa đầu cuối chạy hoàn toàn trên Internet Computer. Trò chuyện riêng hoặc theo nhóm, chia sẻ tin nhắn thoại, hình ảnh và tệp, và gửi token ngay trong cuộc trò chuyện. Mọi giao dịch chuyển đều được ký trong OISY."
+			},
+			"icforums": {
+				"name": "IC Forums",
+				"one_liner": "Diễn đàn cộng đồng trên Internet Computer.",
+				"description": "IC Forums là nền tảng cộng đồng chạy hoàn toàn trên Internet Computer. Tham gia thảo luận trong hơn 100 cộng đồng, hoặc tạo cộng đồng của riêng bạn với cấu trúc, vai trò và cách kiểm duyệt riêng. Một danh tính dùng được cho mọi cộng đồng."
+			},
+			"storica": {
+				"name": "Storica",
+				"one_liner": "Kho lưu trữ đám mây của riêng bạn trên Internet Computer.",
+				"description": "Storica triển khai một canister lưu trữ riêng tư trên Internet Computer trong khoảng một phút, thanh toán bằng ICP. Bạn kiểm soát canister, các tệp, quyền truy cập và các bản nâng cấp của nó. Quản lý tệp qua bảng điều khiển web, công cụ dòng lệnh hoặc TypeScript SDK, và đăng nhập bằng OISY hoặc Internet Identity."
+			},
+			"blitzgrid": {
+				"name": "Blitz Grid Fantasy Football",
+				"one_liner": "Giải đấu fantasy football chạy hoàn toàn trên Internet Computer.",
+				"description": "Blitz Grid là trò chơi fantasy football được thiết kế cho thiết bị di động. Giải đấu, draft, đội hình, trao đổi cầu thủ và tính điểm hằng tuần đều chạy trong các canister trên Internet Computer. Kết nối OISY để gửi ICP cho các quản lý khác trong giải đấu của bạn. Mọi giao dịch chuyển đều được ký trong OISY."
 			}
 		}
 	},
