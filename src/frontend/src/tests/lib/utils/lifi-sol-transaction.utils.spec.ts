@@ -24,7 +24,9 @@ import {
 import { calculateAssociatedTokenAddress } from '$sol/services/spl-accounts.services';
 import type { SolAddress } from '$sol/types/address';
 import type { SolInstruction } from '$sol/types/sol-instructions';
+import type { SolanaParsedAccountInfo } from '$sol/types/sol-rpc';
 import type { SolSimulationPreview, SolSimulationResult } from '$sol/types/sol-simulation';
+import { mapSolSimulationPreview } from '$sol/utils/sol-simulation.utils';
 import {
 	mockLifiSolSolToPyusd,
 	mockLifiSolSolToUsdc,
@@ -41,7 +43,7 @@ import {
 	mockAtaAddress3,
 	mockSolAddress2
 } from '$tests/mocks/sol.mock';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { AccountRole, address, getBase16Encoder } from '@solana/kit';
 
 const USDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
@@ -73,22 +75,38 @@ const ataOf = ({
 		tokenOwnerAddress: tokenProgram
 	});
 
+const atasOf = async ({
+	owner,
+	mint
+}: {
+	owner: SolAddress;
+	mint: SolAddress;
+}): Promise<Partial<Record<SolAddress, SolAddress>>> => ({
+	[TOKEN_PROGRAM_ADDRESS]: await ataOf({ owner, mint }),
+	[TOKEN_2022_PROGRAM_ADDRESS]: await ataOf({
+		owner,
+		mint,
+		tokenProgram: TOKEN_2022_PROGRAM_ADDRESS
+	})
+});
+
 const accountsOf = async ({
 	request: { fromAddress, fromToken }
-}: LifiSolTransactionFixture): Promise<LifiSolDerivedAccounts> => ({
-	wrappedSolAccount: await ataOf({ owner: fromAddress, mint: WSOL_TOKEN.address }),
-	feeTokenAccounts:
-		fromToken === SYSTEM_PROGRAM_ADDRESS
-			? {}
-			: {
-					[TOKEN_PROGRAM_ADDRESS]: await ataOf({ owner: LIFI_SOLANA_FEE_WALLET, mint: fromToken }),
-					[TOKEN_2022_PROGRAM_ADDRESS]: await ataOf({
-						owner: LIFI_SOLANA_FEE_WALLET,
-						mint: fromToken,
-						tokenProgram: TOKEN_2022_PROGRAM_ADDRESS
-					})
-				}
-});
+}: LifiSolTransactionFixture): Promise<LifiSolDerivedAccounts> => {
+	const wrappedSolAccount = await ataOf({ owner: fromAddress, mint: WSOL_TOKEN.address });
+
+	return fromToken === SYSTEM_PROGRAM_ADDRESS
+		? {
+				wrappedSolAccount,
+				sourceTokenAccounts: { [TOKEN_PROGRAM_ADDRESS]: wrappedSolAccount },
+				feeTokenAccounts: {}
+			}
+		: {
+				wrappedSolAccount,
+				sourceTokenAccounts: await atasOf({ owner: fromAddress, mint: fromToken }),
+				feeTokenAccounts: await atasOf({ owner: LIFI_SOLANA_FEE_WALLET, mint: fromToken })
+			};
+};
 
 const instructionsOf = (fixture: LifiSolTransactionFixture): SolInstruction[] => [
 	...mockLifiSolTransactionMessage(fixture).instructions
@@ -1261,6 +1279,207 @@ describe('lifi-sol-transaction.utils', () => {
 				});
 			});
 
+			describe('accounts', () => {
+				const withRouteAccounts = ({
+					fixture = mockLifiSolSolToUsdc,
+					edit
+				}: {
+					fixture?: LifiSolTransactionFixture;
+					edit: (accounts: SolInstruction['accounts']) => SolInstruction['accounts'];
+				}) => {
+					const instructions = instructionsOf(fixture);
+					const index = indexOf({ instructions, programAddress: JUPITER });
+					const route = instructions[index];
+
+					assertNonNullish(route);
+
+					return replaceAt({
+						instructions,
+						index,
+						instruction: { ...route, accounts: edit(route.accounts) }
+					});
+				};
+
+				const withRouteAccount = ({
+					fixture,
+					index,
+					account
+				}: {
+					fixture?: LifiSolTransactionFixture;
+					index: number;
+					account: SolAddress;
+				}) =>
+					withRouteAccounts({
+						fixture,
+						edit: (accounts) =>
+							(accounts ?? []).map((meta, metaIndex) =>
+								metaIndex === index ? { ...meta, address: address(account) } : meta
+							)
+					});
+
+				it.each([
+					{ account: 'user_transfer_authority', index: 0 },
+					{ account: 'user_source_token_account', index: 1 },
+					{ account: 'source_mint', index: 3 },
+					{ account: 'destination_mint', index: 4 },
+					{ account: 'source_token_program', index: 5 }
+				])('should refuse another $account', async ({ index }) => {
+					await expectRejected({
+						fixture: mockLifiSolSolToUsdc,
+						instructions: withRouteAccount({ index, account: mockSolAddress2 })
+					});
+				});
+
+				it('should refuse a route missing the accounts the binding reads', async () => {
+					await expectRejected({
+						fixture: mockLifiSolSolToUsdc,
+						instructions: withRouteAccounts({ edit: (accounts) => (accounts ?? []).slice(0, 5) })
+					});
+				});
+
+				// Lamports sent to the wrapped SOL account and never synced are not part of its token
+				// amount, so a run spending them shows no decrease of it.
+				it("should refuse an SPL source's route spending the user's wrapped SOL", async () => {
+					const wrappedSolAccount = await ataOf({
+						owner: mockLifiSolUser,
+						mint: WSOL_TOKEN.address
+					});
+
+					const sync = instructionAt({
+						instructions: instructionsOf(mockLifiSolSolToUsdc),
+						programAddress: TOKEN_PROGRAM_ADDRESS
+					});
+
+					const route = withRouteAccounts({
+						fixture: mockLifiSolUsdcToUsdt,
+						edit: (accounts) =>
+							(accounts ?? []).map((meta, index) =>
+								index === 1
+									? { ...meta, address: address(wrappedSolAccount) }
+									: index === 3
+										? { ...meta, address: address(WSOL_TOKEN.address) }
+										: meta
+							)
+					});
+
+					await expectRejected({ fixture: mockLifiSolUsdcToUsdt, instructions: [sync, ...route] });
+				});
+
+				it('should refuse a native source spent under Token-2022', async () => {
+					await expectRejected({
+						fixture: mockLifiSolSolToUsdc,
+						instructions: withRouteAccount({ index: 5, account: TOKEN_2022_PROGRAM_ADDRESS })
+					});
+				});
+
+				// The account is derived under the program the route names.
+				it("should accept the source spent under Token-2022 from the user's account there", async () => {
+					const sourceAccount = await ataOf({
+						owner: mockLifiSolUser,
+						mint: USDC,
+						tokenProgram: TOKEN_2022_PROGRAM_ADDRESS
+					});
+
+					const instructions = withRouteAccounts({
+						fixture: mockLifiSolUsdcToUsdt,
+						edit: (accounts) =>
+							(accounts ?? []).map((meta, index) =>
+								index === 1
+									? { ...meta, address: address(sourceAccount) }
+									: index === 5
+										? { ...meta, address: address(TOKEN_2022_PROGRAM_ADDRESS) }
+										: meta
+							)
+					});
+
+					await expect(
+						assertWith({ fixture: mockLifiSolUsdcToUsdt, instructions })
+					).resolves.toBeDefined();
+				});
+
+				describe('shared_accounts_route_v2', () => {
+					// The fixture's `route_v2` as its shared-accounts form: the same arguments behind an
+					// `id`, and the program's authority and token accounts among the user's.
+					const sharedRoute = (edit: (accounts: SolAddress[]) => SolAddress[] = (a) => a) => {
+						const instructions = instructionsOf(mockLifiSolSolToUsdc);
+						const index = indexOf({ instructions, programAddress: JUPITER });
+						const route = instructions[index];
+
+						assertNonNullish(route?.data);
+
+						const [
+							user,
+							source,
+							destination,
+							sourceMint,
+							destinationMint,
+							sourceProgram,
+							destinationProgram,
+							,
+							eventAuthority,
+							program
+						] = (route.accounts ?? []).map(({ address }) => address);
+
+						const accounts = edit(
+							[
+								mockSolAddress2,
+								user,
+								source,
+								mockAtaAddress,
+								mockAtaAddress2,
+								destination,
+								sourceMint,
+								destinationMint,
+								sourceProgram,
+								destinationProgram,
+								eventAuthority,
+								program
+							].filter(nonNullish)
+						);
+
+						return replaceAt({
+							instructions,
+							index,
+							instruction: {
+								...route,
+								accounts: accounts.map((account) => ({
+									address: address(account),
+									role: AccountRole.WRITABLE
+								})),
+								data: new Uint8Array([
+									...getBase16Encoder().encode(JUPITER_SHARED_ACCOUNTS_ROUTE_V2_DISCRIMINATOR),
+									0,
+									...route.data.slice(8)
+								])
+							}
+						});
+					};
+
+					it('should accept it with its own accounts', async () => {
+						await expect(
+							assertWith({ fixture: mockLifiSolSolToUsdc, instructions: sharedRoute() })
+						).resolves.toBeDefined();
+					});
+
+					it.each([
+						{ account: 'user_transfer_authority', index: 1 },
+						{ account: 'source_token_account', index: 2 },
+						{ account: 'source_mint', index: 6 },
+						{ account: 'destination_mint', index: 7 },
+						{ account: 'source_token_program', index: 8 }
+					])('should refuse another $account', async ({ index }) => {
+						await expectRejected({
+							fixture: mockLifiSolSolToUsdc,
+							instructions: sharedRoute((accounts) =>
+								accounts.map((account, accountIndex) =>
+									accountIndex === index ? mockSolAddress2 : account
+								)
+							)
+						});
+					});
+				});
+			});
+
 			it('should refuse a route spending more than the amount without a fee', async () => {
 				const instructions = withRoute({
 					fixture: mockLifiSolUsdcToUsdt,
@@ -1419,6 +1638,95 @@ describe('lifi-sol-transaction.utils', () => {
 		});
 
 		describe('closed accounts', () => {
+			const parsedSystemAccount = (lamports: bigint): NonNullable<SolanaParsedAccountInfo> =>
+				({
+					executable: false,
+					lamports,
+					owner: SYSTEM_PROGRAM_ADDRESS,
+					space: ZERO,
+					data: ['', 'base64']
+				}) as unknown as NonNullable<SolanaParsedAccountInfo>;
+
+			const parsedTokenAccount = ({
+				mint,
+				amount,
+				decimals
+			}: {
+				mint: SolAddress;
+				amount: bigint;
+				decimals: number;
+			}): NonNullable<SolanaParsedAccountInfo> =>
+				({
+					executable: false,
+					lamports: 2_039_280n,
+					owner: TOKEN_PROGRAM_ADDRESS,
+					space: 165n,
+					data: {
+						program: 'spl-token',
+						space: 165n,
+						parsed: {
+							type: 'account',
+							info: { mint, owner: user, tokenAmount: { amount: `${amount}`, decimals } }
+						}
+					}
+				}) as unknown as NonNullable<SolanaParsedAccountInfo>;
+
+			// Mainnet reported a wrapped SOL account a LI.FI route closed as the latter (2026-10-23).
+			const closedRepresentations = [
+				{ representation: 'no account', closed: null },
+				{
+					representation: 'a System account holding no lamports',
+					closed: parsedSystemAccount(ZERO)
+				}
+			];
+
+			// SOL → USDC at its bounds, closing the user's empty wrapped SOL account.
+			const previewClosing = (closed: SolanaParsedAccountInfo) =>
+				mapSolSimulationPreview({
+					addresses: [user, wrappedSolAccount, usdcAccount],
+					preAccounts: [
+						parsedSystemAccount(1_000_000_000n),
+						parsedTokenAccount({ mint: WSOL_TOKEN.address, amount: ZERO, decimals: 9 }),
+						null
+					],
+					postAccounts: [
+						parsedSystemAccount(1_000_000_000n - amount - ceiling + 2_039_280n),
+						closed,
+						parsedTokenAccount({ mint: USDC, amount: toAmountMin, decimals: 6 })
+					],
+					userAddress: user
+				});
+
+			it.each(closedRepresentations)(
+				"should accept the user's empty wrapped SOL account closed, reported as $representation",
+				({ closed }) => {
+					expect(() =>
+						assertWith({ result: resultWith({ preview: previewClosing(closed) }) })
+					).not.toThrow();
+				}
+			);
+
+			it.each(closedRepresentations)(
+				'should still refuse a control change on another account, a close reported as $representation',
+				({ closed }) => {
+					const preview = previewClosing(closed);
+
+					expect(() =>
+						assertWith({
+							result: resultWith({
+								preview: {
+									...preview,
+									controlChanges: [
+										...preview.controlChanges,
+										{ account: usdcAccount, field: 'delegate', to: mockSolAddress2 }
+									]
+								}
+							})
+						})
+					).toThrow(LifiQuoteRejectedError);
+				}
+			);
+
 			const rent = 2_039_280n;
 
 			it("should accept the user's wrapped SOL account holding none, its lamports not received", () => {

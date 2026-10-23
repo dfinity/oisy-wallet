@@ -867,7 +867,11 @@ The result must show all of the following:
 
 - `preview.controlChanges` is empty. No owner, delegate or close-authority change on any
   user account. An absent `preview` (the run changed nothing the user owns) passes this
-  check but fails the receipt check below.
+  check but fails the receipt check below. An account the run closes is the exception:
+  the run reports it as a System account holding no lamports (mainnet, for the user's
+  wSOL account a LI.FI route closed, 2026-10-23), which the mapper diffs as a change of
+  its program and owner although nothing is left to control. Its control changes are
+  ignored; the close rules below hold it instead.
 - **Accounts the transaction creates have safe authorities.** `controlChanges` only
   diffs accounts that existed before the run: `controlChanges` in
   `sol/utils/sol-simulation.utils.ts` returns nothing when `pre` is absent, by design
@@ -984,6 +988,15 @@ The result must show all of the following:
   `platform_fee_bps` and `positive_slippage_bps` must be `0` — no platform takes a share
   of the user's output, LI.FI's fee being the separate transfer above — and `in_amount`
   plus that fee must not exceed `fromAmount` (99,750,000 + 250,000 on the same route).
+  The route's accounts are bound from the same IDL: its `user_transfer_authority` is the
+  user, its source and destination mints are the requested ones (wSOL for native SOL),
+  and its source token account is the user's associated token account for the source mint
+  under the route's source token program (the user's wSOL account for native SOL). The
+  simulation alone does not bind the source: lamports sent to the user's wSOL account and
+  never synced are not part of its token amount, so an SPL-source route that syncs and
+  spends them leaves that amount as it was, and the run shows no decrease (in review,
+  2026-10-23). Bound to the source account, `in_amount` is also in the source token's
+  units, which the `fromAmount` bound assumes.
   The v1 variants (`route`, `shared_accounts_route`, their token-ledger variants) and every
   exact-out variant are not allowed: none came from LI.FI, and each would need its own
   decoder. A test from a real LI.FI transaction fixture covers `route_v2`; LI.FI sent no

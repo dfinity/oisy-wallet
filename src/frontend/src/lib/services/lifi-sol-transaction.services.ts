@@ -105,23 +105,20 @@ const toBinding = ({
 });
 
 /**
- * The fee wallet's associated token account for an SPL source, under each program that may hold the
- * mint: the transfer names the program, and the account is derived from it.
+ * An owner's associated token account for a mint, under each program that may hold the mint: the
+ * instruction spending from or paying into it names the program, and the account is derived from
+ * it.
  */
-const feeTokenAccounts = async (
-	fromToken: SolAddress
-): Promise<Partial<Record<SolAddress, SolAddress>>> => {
-	if (fromToken === SYSTEM_PROGRAM_ADDRESS) {
-		return {};
-	}
-
+const associatedTokenAccounts = async ({
+	owner,
+	mint
+}: {
+	owner: SolAddress;
+	mint: SolAddress;
+}): Promise<Partial<Record<SolAddress, SolAddress>>> => {
 	const [token, token2022] = await Promise.all(
 		[TOKEN_PROGRAM_ADDRESS, TOKEN_2022_PROGRAM_ADDRESS].map((tokenOwnerAddress) =>
-			calculateAssociatedTokenAddress({
-				owner: LIFI_SOLANA_FEE_WALLET,
-				tokenAddress: fromToken,
-				tokenOwnerAddress
-			})
+			calculateAssociatedTokenAddress({ owner, tokenAddress: mint, tokenOwnerAddress })
 		)
 	);
 
@@ -179,23 +176,32 @@ export const assertLifiSolTransaction = async ({
 		throw rejected('the transaction needs a signer other than the user');
 	}
 
-	const [transactionMessage, wrappedSolAccount, feeAccounts, rentExemptMinimum] = await Promise.all(
-		[
+	// A native source is spent from the user's wrapped SOL account, and its fee paid in SOL.
+	const nativeSource = fromToken === SYSTEM_PROGRAM_ADDRESS;
+
+	const [transactionMessage, wrappedSolAccount, sourceAccounts, feeAccounts, rentExemptMinimum] =
+		await Promise.all([
 			parseSolBase64TransactionMessage({ transactionMessage: data, rpc: solanaHttpRpc(network) }),
 			calculateAssociatedTokenAddress({
 				owner: userAddress,
 				tokenAddress: WSOL_TOKEN.address,
 				tokenOwnerAddress: TOKEN_PROGRAM_ADDRESS
 			}),
-			feeTokenAccounts(fromToken),
+			nativeSource ? undefined : associatedTokenAccounts({ owner: userAddress, mint: fromToken }),
+			nativeSource
+				? {}
+				: associatedTokenAccounts({ owner: LIFI_SOLANA_FEE_WALLET, mint: fromToken }),
 			getSolCreateAccountFee(network)
-		]
-	);
+		]);
 
 	const { computeUnitLimit, computeUnitPrice, createdAccounts } = assertLifiSolInstructions({
 		instructions: transactionMessage.instructions,
 		binding,
-		accounts: { wrappedSolAccount, feeTokenAccounts: feeAccounts }
+		accounts: {
+			wrappedSolAccount,
+			sourceTokenAccounts: sourceAccounts ?? { [TOKEN_PROGRAM_ADDRESS]: wrappedSolAccount },
+			feeTokenAccounts: feeAccounts
+		}
 	});
 
 	const ceiling = await lifiSolTransactionCeiling({

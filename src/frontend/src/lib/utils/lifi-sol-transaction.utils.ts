@@ -1,3 +1,4 @@
+import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { LIFI_FEE_BPS } from '$eth/constants/lifi.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import type { LifiQuoteRejectedError } from '$lib/types/errors';
@@ -67,11 +68,13 @@ export interface LifiSolBinding {
 
 /**
  * The accounts the binding compares against, derived rather than read from the transaction: the
- * user's associated token account for wrapped SOL, and the fee wallet's for an SPL source's mint,
- * under each token program that may hold the mint.
+ * user's associated token account for wrapped SOL; the user's for the source mint, which is that
+ * wrapped SOL account for native SOL; and the fee wallet's for an SPL source's mint. Those for a
+ * mint are keyed by each token program that may hold it.
  */
 export interface LifiSolDerivedAccounts {
 	wrappedSolAccount: SolAddress;
+	sourceTokenAccounts: Partial<Record<SolAddress, SolAddress>>;
 	feeTokenAccounts: Partial<Record<SolAddress, SolAddress>>;
 }
 
@@ -110,6 +113,40 @@ const jupiterRouteArgumentsDecoder = getStructDecoder([
 // The arguments above, then the route plan's length prefix.
 const JUPITER_ROUTE_ARGUMENTS_MIN_LENGTH = 26;
 
+// Where a route entrypoint's arguments start, and the position of each account the binding reads,
+// from the program's on-chain IDL (2026-10-23).
+interface JupiterEntrypoint {
+	argumentsOffset: number;
+	userTransferAuthority: number;
+	sourceTokenAccount: number;
+	sourceMint: number;
+	destinationMint: number;
+	sourceTokenProgram: number;
+}
+
+const JUPITER_ENTRYPOINTS: Record<string, JupiterEntrypoint> = {
+	[JUPITER_ROUTE_V2_DISCRIMINATOR]: {
+		argumentsOffset: 8,
+		userTransferAuthority: 0,
+		sourceTokenAccount: 1,
+		sourceMint: 3,
+		destinationMint: 4,
+		sourceTokenProgram: 5
+	},
+	// An `id: u8` before the same arguments, and the program's own authority before the user's.
+	[JUPITER_SHARED_ACCOUNTS_ROUTE_V2_DISCRIMINATOR]: {
+		argumentsOffset: 9,
+		userTransferAuthority: 1,
+		sourceTokenAccount: 2,
+		sourceMint: 6,
+		destinationMint: 7,
+		sourceTokenProgram: 8
+	}
+};
+
+const jupiterEntrypointOf = (data: ReadonlyUint8Array): JupiterEntrypoint | undefined =>
+	JUPITER_ENTRYPOINTS[getBase16Decoder().decode(data.slice(0, 8))];
+
 /**
  * The leading arguments of a Jupiter v6 `route_v2` or `shared_accounts_route_v2` instruction, as
  * the program's on-chain IDL lays them out; `undefined` for any other instruction of the program, or
@@ -117,21 +154,16 @@ const JUPITER_ROUTE_ARGUMENTS_MIN_LENGTH = 26;
  * the minimum the program enforces on its output.
  */
 export const decodeJupiterRoute = (data: ReadonlyUint8Array): JupiterRouteArguments | undefined => {
-	const discriminator = getBase16Decoder().decode(data.slice(0, 8));
+	const entrypoint = jupiterEntrypointOf(data);
 
-	// `shared_accounts_route_v2` takes an `id: u8` before the same arguments.
-	const offset =
-		discriminator === JUPITER_ROUTE_V2_DISCRIMINATOR
-			? 8
-			: discriminator === JUPITER_SHARED_ACCOUNTS_ROUTE_V2_DISCRIMINATOR
-				? 9
-				: undefined;
-
-	if (isNullish(offset) || data.length < offset + JUPITER_ROUTE_ARGUMENTS_MIN_LENGTH) {
+	if (
+		isNullish(entrypoint) ||
+		data.length < entrypoint.argumentsOffset + JUPITER_ROUTE_ARGUMENTS_MIN_LENGTH
+	) {
 		return;
 	}
 
-	return jupiterRouteArgumentsDecoder.decode(data, offset);
+	return jupiterRouteArgumentsDecoder.decode(data, entrypoint.argumentsOffset);
 };
 
 /**
@@ -362,12 +394,53 @@ const token2022Step = (params: {
 	}
 };
 
-const routeStep = (instruction: SolInstruction): LifiSolStep | undefined => {
-	const route = nonNullish(instruction.data) ? decodeJupiterRoute(instruction.data) : undefined;
+// LI.FI's address for native SOL stands for wrapped SOL inside a route.
+const routeMint = (token: SolAddress): SolAddress =>
+	token === SYSTEM_PROGRAM_ADDRESS ? WSOL_TOKEN.address : token;
 
-	if (nonNullish(route)) {
-		return { kind: 'route', route };
+/**
+ * A Jupiter route spending from the user's own account for the source mint and paying out the
+ * destination mint, signed for by the user.
+ *
+ * The simulation alone does not bind its source: lamports sent to the user's wrapped SOL account
+ * and never synced are not part of its token amount, so a route that syncs and spends them leaves
+ * that amount as it was, and the run shows no decrease. Bound to the source account, the route's
+ * input is also in the source token's units, which the bound on the amount assumes.
+ */
+const routeStep = ({
+	instruction,
+	binding: { userAddress, fromToken, toToken },
+	accounts: { sourceTokenAccounts }
+}: {
+	instruction: SolInstruction;
+	binding: LifiSolBinding;
+	accounts: LifiSolDerivedAccounts;
+}): LifiSolStep | undefined => {
+	const { data } = instruction;
+	const entrypoint = nonNullish(data) ? jupiterEntrypointOf(data) : undefined;
+	const route = nonNullish(data) ? decodeJupiterRoute(data) : undefined;
+
+	if (isNullish(entrypoint) || isNullish(route)) {
+		return;
 	}
+
+	const addresses = accountAddresses(instruction);
+	const sourceTokenProgram = addresses[entrypoint.sourceTokenProgram];
+	const sourceTokenAccount = nonNullish(sourceTokenProgram)
+		? sourceTokenAccounts[sourceTokenProgram]
+		: undefined;
+
+	if (
+		addresses[entrypoint.userTransferAuthority] !== userAddress ||
+		addresses[entrypoint.sourceMint] !== routeMint(fromToken) ||
+		addresses[entrypoint.destinationMint] !== routeMint(toToken) ||
+		isNullish(sourceTokenAccount) ||
+		addresses[entrypoint.sourceTokenAccount] !== sourceTokenAccount
+	) {
+		return;
+	}
+
+	return { kind: 'route', route };
 };
 
 /**
@@ -397,7 +470,7 @@ const classify = (params: {
 		case TOKEN_2022_PROGRAM_ADDRESS:
 			return token2022Step(params);
 		case JUPITER_V6_PROGRAM:
-			return routeStep(instruction);
+			return routeStep(params);
 	}
 };
 
@@ -412,8 +485,9 @@ const classify = (params: {
  *   account funded by the user and synced;
  * - closes paying the user, of accounts the transaction creates or of the user's wrapped SOL
  *   account (whether that one held wrapped SOL only the simulation says);
- * - exactly one Jupiter route, whose on-chain minimum output is at least the minimum the user
- *   reviewed, with no platform taking a share, spending no more than the amount less the fee.
+ * - exactly one Jupiter route, from the user's own account for the source mint to the destination
+ *   mint, whose on-chain minimum output is at least the minimum the user reviewed, with no
+ *   platform taking a share, spending no more than the amount less the fee.
  *
  * Returns what the transaction's network fee and the rent of the accounts it creates are priced
  * from.
@@ -628,7 +702,13 @@ export const assertLifiSolSimulation = ({
 		closedAccounts = []
 	} = preview;
 
-	if (controlChanges.length > 0) {
+	// A closed account is reported holding no lamports as a System account, which reads as a change of
+	// its program and owner. Nothing is left to control there; the close rules below hold it instead.
+	if (
+		controlChanges.some(
+			({ account }) => !closedAccounts.some(({ account: closed }) => closed === account)
+		)
+	) {
 		throw rejected("the transaction changes who controls an account of the user's");
 	}
 
