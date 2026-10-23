@@ -81,6 +81,10 @@
 		// user's wallet. Read from the list rather than the message, which cannot see a close made
 		// inside another program.
 		closesPayOthers?: boolean;
+		// Whether the request grants an allowance through an unchecked approval, which names neither
+		// the token nor its decimals, and no simulated run came back to state how much the spender
+		// may spend. The signing flow refuses it.
+		approvalWithoutSimulation?: boolean;
 		// The programs the simulated run calls from inside another program's instruction that OISY
 		// does not know. What such a call does to funds the user holds in an application is in
 		// neither the balance changes nor the operations, so the review names them and asks the user
@@ -114,6 +118,7 @@
 		messageSummary,
 		parties,
 		closesPayOthers = false,
+		approvalWithoutSimulation = false,
 		unreadPrograms = [],
 		unreadProgramsAcknowledged = $bindable(false),
 		flaggedAsScam = false,
@@ -320,6 +325,11 @@
 		<div role="alert">
 			<MessageBox level="error">{$i18n.wallet_connect.text.cannot_be_shown}</MessageBox>
 		</div>
+	{:else if approvalWithoutSimulation}
+		<!-- Same live region, same reason. -->
+		<div role="alert">
+			<MessageBox level="error">{$i18n.wallet_connect.text.approval_without_simulation}</MessageBox>
+		</div>
 	{:else if unreviewed}
 		<MessageBox level="warning">
 			{nonNullish(preview)
@@ -335,7 +345,7 @@
 	<!-- Everything below qualifies a review that is going to be acted on. None of it applies to a
 	     message the wallet has already decided it will not sign, and the partial-parties notice is
 	     actively wrong there: it tells the user which lists to read on a request that is refused. -->
-	{#if !ambiguous && !closesPayOthers}
+	{#if !ambiguous && !closesPayOthers && !approvalWithoutSimulation}
 		<!-- An authority change moves no funds at all, so a diff of amounts alone would describe the
 		     theft as nothing happening. It is named first among the fund warnings for that reason. -->
 		{#if nonNullish(preview) && preview.controlChanges.length > 0}

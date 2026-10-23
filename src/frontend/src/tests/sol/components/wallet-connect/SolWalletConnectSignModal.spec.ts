@@ -237,6 +237,43 @@ describe('SolWalletConnectSignModal', () => {
 		});
 	});
 
+	// Signing refuses an unchecked approval no run came back for, so the review holds the button.
+	it('should hold approval on an unchecked approval with no simulation', async () => {
+		vi.mocked(decode).mockResolvedValueOnce({
+			amount: 1n,
+			destination: mockSolAddress2,
+			isApproval: true,
+			uncheckedApproval: true,
+			parties: { sources: [], destinations: [], partial: true }
+		});
+
+		const { getByRole, getByText } = render(SolWalletConnectSignModal, {
+			props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+		});
+
+		await waitFor(() => {
+			expect(getByText(en.wallet_connect.text.approval_without_simulation)).toBeInTheDocument();
+		});
+
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+	});
+
+	it('should let an unchecked approval through when a simulation came back', async () => {
+		const args = await approve({
+			amount: 1n,
+			destination: mockSolAddress2,
+			isApproval: true,
+			uncheckedApproval: true,
+			instructions: [
+				{ kind: 'approve', account: mockAtaAddress, amount: 1n, counterparty: mockSolAddress2 }
+			],
+			simulatedInstructions: true,
+			parties: { sources: [], destinations: [], partial: false }
+		});
+
+		expect(args).toEqual(expect.objectContaining({ simulationRan: true }));
+	});
+
 	// An account the run opens inside another program's instruction with more than its size costs is
 	// refused by signing like an ambiguous message, so the review holds the button the same way.
 	it('should hold approval when the run opens an account above its rent', async () => {

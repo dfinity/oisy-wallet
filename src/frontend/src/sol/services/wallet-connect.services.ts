@@ -585,11 +585,12 @@ export const sign = ({
 				rpc: solanaHttpRpc(solNetwork)
 			});
 
-			const { amount, destination, ambiguous, unreviewed } = mapSolTransactionMessage({
-				transactionMessage: parsedTransactionMessage,
-				userAddress: address,
-				rentExemptMinimum
-			});
+			const { amount, destination, ambiguous, unreviewed, uncheckedApproval } =
+				mapSolTransactionMessage({
+					transactionMessage: parsedTransactionMessage,
+					userAddress: address,
+					rentExemptMinimum
+				});
 
 			// The balance is gone the moment this is signed, and the message mapper cannot see a close
 			// made inside another program's call. Refused rather than warned about, on the same test
@@ -635,6 +636,21 @@ export const sign = ({
 				return { success: false };
 			}
 
+			// What an approval grants is how much the spender may spend, and an unchecked one names
+			// neither the token nor its decimals, so only a simulated run's account changes state that
+			// amount. Without a run the review names the spender alone, which a one-unit approval and
+			// an unlimited one share. The exception to a simulation being best effort: a checked
+			// approval states its amount itself and still signs without one.
+			if ((uncheckedApproval ?? false) && !simulationRan) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.approval_without_simulation }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
 			// An instruction OISY cannot read does not corrupt the summary, so it is a warning rather
 			// than a refusal - but the thing that makes it a warning and not a blindfold is the
 			// simulated run, which reports what the message would do to the user's own accounts
@@ -642,7 +658,7 @@ export const sign = ({
 			// something in here could not be read, and approving it is approving an effect nobody
 			// described. The simulation is best effort by design and stays that way: it is not
 			// required of a message OISY did read, and a provider that times out on a transaction
-			// the wallet understands still signs.
+			// the wallet understands still signs, an unchecked approval aside (above).
 			if ((unreviewed ?? false) && !simulated) {
 				toastsError({
 					msg: {
