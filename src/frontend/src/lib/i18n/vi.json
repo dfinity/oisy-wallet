@@ -1929,6 +1929,7 @@
 			"btc_psbt_input_not_segwit": "Giao dịch này bao gồm một đầu vào không phải là đầu vào SegWit (P2WPKH), mà OISY không thể ký. Vì lý do bảo mật, giao dịch chưa được ký.",
 			"btc_psbt_input_not_owned": "Giao dịch này bao gồm một đầu vào không thuộc về địa chỉ của ví này, mà OISY không thể ký. Vì lý do bảo mật, giao dịch chưa được ký.",
 			"btc_psbt_input_ambiguous": "OISY không thể xác định một trong các đầu vào của giao dịch này tham chiếu đến đầu ra trước đó nào, vì vậy số tiền hiển thị để xem xét có thể khác với số tiền thực sự được ký. Vì lý do bảo mật, giao dịch chưa được ký.",
+			"btc_psbt_input_unverified": "",
 			"from_address_not_wallet": "Địa chỉ gửi được yêu cầu cho giao dịch không phải là địa chỉ của ví này.",
 			"unknown_destination": "Địa chỉ đích không xác định.",
 			"cketh_deposit_refused": "Yêu cầu này gọi hợp đồng chuyển đổi ckETH cho một principal Internet Computer không phải của bạn, hoặc với dữ liệu mà OISY không đọc được. Vì sự an toàn của bạn, yêu cầu đã không được ký.",
