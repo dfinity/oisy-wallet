@@ -96,7 +96,9 @@ describe('BtcWalletConnectSignPsbtModal', () => {
 			props: props()
 		});
 
-		await expect(findByText(en.wallet_connect.error.btc_psbt_input_unverified)).resolves.toBeInTheDocument();
+		await expect(
+			findByText(en.wallet_connect.error.btc_psbt_input_unverified)
+		).resolves.toBeInTheDocument();
 		expect(queryByRole('button', { name: en.core.text.approve })).not.toBeInTheDocument();
 	});
 
@@ -109,7 +111,9 @@ describe('BtcWalletConnectSignPsbtModal', () => {
 			props: props()
 		});
 
-		await expect(findByText(en.wallet_connect.error.btc_psbt_input_unverified)).resolves.toBeInTheDocument();
+		await expect(
+			findByText(en.wallet_connect.error.btc_psbt_input_unverified)
+		).resolves.toBeInTheDocument();
 		expect(queryByRole('button', { name: en.core.text.approve })).not.toBeInTheDocument();
 	});
 });
