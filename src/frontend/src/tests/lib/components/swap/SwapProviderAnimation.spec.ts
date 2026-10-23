@@ -506,23 +506,101 @@ describe('SwapProviderAnimation', () => {
 		}
 	});
 
-	it('keeps the shown provider through invalidation instead of a placeholder, and removes the result after an empty round', async () => {
+	it('keeps turning through the last round while a new round waits, and removes the result after an empty round', async () => {
 		vi.useFakeTimers();
 		const { getByTestId, queryByTestId, rerender, unmount } = render(SwapProviderAnimation, {
 			props: { providers: [SwapProvider.NEAR_INTENTS, SwapProvider.VELORA], loading: true }
 		});
 		await vi.advanceTimersByTimeAsync(650);
-		await rerender({ providers: [] });
-		await vi.advanceTimersByTimeAsync(2000);
 		const viewport = getByTestId(SWAP_PROVIDER_ANIMATION);
 
-		// Stale candidates stop cycling, but the shown name stays until a participant reports.
 		expect(viewport).toHaveAttribute('data-provider', SwapProvider.VELORA);
-		expect(viewport.querySelectorAll('[data-provider-layer]')).toHaveLength(1);
+
+		// A new round has no participants yet: no placeholder, and no hold on one name either.
+		await rerender({ providers: [] });
+		await vi.advanceTimersByTimeAsync(650);
+
+		expect(viewport).toHaveAttribute('data-provider', SwapProvider.NEAR_INTENTS);
+
+		await vi.advanceTimersByTimeAsync(650);
+
+		expect(viewport).toHaveAttribute('data-provider', SwapProvider.VELORA);
 
 		await rerender({ loading: false, selectedProvider: undefined });
 
 		expect(queryByTestId(SWAP_PROVIDER_ANIMATION)).not.toBeInTheDocument();
+
+		unmount();
+	});
+
+	it('keeps one turn rhythm across rounds instead of restarting it on a keystroke', async () => {
+		vi.useFakeTimers();
+		const { getByTestId, rerender, unmount } = render(SwapProviderAnimation, {
+			props: {
+				providers: [SwapProvider.NEAR_INTENTS, SwapProvider.VELORA, SwapProvider.LIFI],
+				loading: true
+			}
+		});
+		const viewport = getByTestId(SWAP_PROVIDER_ANIMATION);
+		await vi.advanceTimersByTimeAsync(650);
+		await vi.advanceTimersByTimeAsync(300);
+		await rerender({ providers: [] });
+		await vi.advanceTimersByTimeAsync(349);
+
+		expect(viewport).toHaveAttribute('data-provider', SwapProvider.VELORA);
+
+		// The next turn comes 650 ms after the previous one, not 650 ms after the keystroke.
+		await vi.advanceTimersByTimeAsync(1);
+
+		expect(viewport).toHaveAttribute('data-provider', SwapProvider.LIFI);
+
+		// The new round includes the shown provider: it stays, and the rhythm carries on.
+		await vi.advanceTimersByTimeAsync(200);
+		await rerender({ providers: [SwapProvider.LIFI, SwapProvider.NEAR_INTENTS] });
+
+		expect(viewport).toHaveAttribute('data-provider', SwapProvider.LIFI);
+
+		await vi.advanceTimersByTimeAsync(450);
+
+		expect(viewport).toHaveAttribute('data-provider', SwapProvider.NEAR_INTENTS);
+
+		unmount();
+	});
+
+	it('moves on to the new round at the next turn when it leaves out the shown provider', async () => {
+		vi.useFakeTimers();
+		const { getByTestId, rerender, unmount } = render(SwapProviderAnimation, {
+			props: { providers: [SwapProvider.NEAR_INTENTS, SwapProvider.VELORA], loading: true }
+		});
+		const viewport = getByTestId(SWAP_PROVIDER_ANIMATION);
+		await vi.advanceTimersByTimeAsync(650);
+		await vi.advanceTimersByTimeAsync(200);
+		await rerender({ providers: [SwapProvider.LIFI, SwapProvider.ONE_SEC] });
+
+		expect(viewport).toHaveAttribute('data-provider', SwapProvider.VELORA);
+
+		await vi.advanceTimersByTimeAsync(450);
+
+		expect(viewport).toHaveAttribute('data-provider', SwapProvider.LIFI);
+
+		unmount();
+	});
+
+	it('gives the first provider of a first round a full turn', async () => {
+		vi.useFakeTimers();
+		const { getByTestId, rerender, unmount } = render(SwapProviderAnimation, {
+			props: { providers: [], loading: true }
+		});
+		const viewport = getByTestId(SWAP_PROVIDER_ANIMATION);
+		await vi.advanceTimersByTimeAsync(300);
+		await rerender({ providers: [SwapProvider.NEAR_INTENTS, SwapProvider.VELORA] });
+		await vi.advanceTimersByTimeAsync(649);
+
+		expect(viewport).toHaveAttribute('data-provider', SwapProvider.NEAR_INTENTS);
+
+		await vi.advanceTimersByTimeAsync(1);
+
+		expect(viewport).toHaveAttribute('data-provider', SwapProvider.VELORA);
 
 		unmount();
 	});

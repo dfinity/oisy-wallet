@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, tick, untrack } from 'svelte';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -165,38 +166,65 @@
 		(fade ? fades : animations).push(animation);
 	};
 
+	// The last round's participants. A new round starts with none of its own, so until they
+	// report (the debounce, slow eligibility checks) the scroll keeps turning through these
+	// instead of holding one name.
+	let previousCandidates: SwapProvider[] = [];
+	// One boolean, so prop updates that leave it unchanged never restart the clock mid-turn.
+	let clockRunning = $derived(
+		loading && animate && !prefersReducedMotion.current && nonNullish(displayedProvider)
+	);
+
 	$effect(() => {
 		const candidates = providers;
 		const pending = loading;
 		const selected = pending ? undefined : selectedProvider;
-		const reduced = prefersReducedMotion.current;
-		const enabled = animate;
+		const turning = animate && !prefersReducedMotion.current;
 
-		return untrack(() => {
+		untrack(() => {
 			if (!pending) {
 				showProvider(selected);
 				return;
 			}
-
-			// No placeholder: a new round keeps what is on screen until a participant reports,
-			// and a first round leaves the slot empty until its first participant fades in.
-			const next =
-				displayedProvider && (candidates.length === 0 || candidates.includes(displayedProvider))
-					? displayedProvider
-					: candidates[0];
-			if (next) {
-				showProvider(next);
+			if (candidates.length > 0) {
+				previousCandidates = candidates;
 			}
-			if (reduced || !enabled || candidates.length < 2) {
+
+			// No placeholder: a first round leaves the slot empty until its first participant
+			// fades in; later rounds keep what is on screen.
+			if (isNullish(displayedProvider)) {
+				if (nonNullish(candidates[0])) {
+					showProvider(candidates[0]);
+				}
 				return;
 			}
 
-			const timer = setInterval(() => {
-				const index = candidates.findIndex((candidate) => candidate === displayedProvider);
-				showProvider(candidates[(index + 1) % candidates.length]);
-			}, SWAP_PROVIDER_CYCLE_INTERVAL_MS);
-			return () => clearInterval(timer);
+			// A shown provider the new round leaves out gives way at the next turn, so the rhythm
+			// holds. Without a running scroll it gives way at once.
+			if (!turning && candidates.length > 0 && !candidates.includes(displayedProvider)) {
+				showProvider(candidates[0]);
+			}
 		});
+	});
+
+	// One turn clock for the whole comparison, started once a name is on screen so the first one
+	// gets a full turn. New rounds and late participants change what the next turn shows, never
+	// when it comes.
+	$effect(() => {
+		if (!clockRunning) {
+			return;
+		}
+
+		const timer = setInterval(() => {
+			untrack(() => {
+				const list = providers.length > 0 ? providers : previousCandidates;
+				const index = list.findIndex((candidate) => candidate === displayedProvider);
+				if (list.length > 1 || (list.length === 1 && index === -1)) {
+					showProvider(list[(index + 1) % list.length]);
+				}
+			});
+		}, SWAP_PROVIDER_CYCLE_INTERVAL_MS);
+		return () => clearInterval(timer);
 	});
 
 	$effect(() => {
