@@ -81,3 +81,18 @@ export class LifiFeeChangedError extends Error {
 		this.l1Fee = l1Fee;
 	}
 }
+
+/**
+ * The LI.FI Solana swap's ceiling — its network fee plus the rent of the accounts it creates, read
+ * from the transaction about to be signed — exceeds the one the user reviewed, so it was not signed.
+ * It carries that ceiling, in lamports, back to the review for the user to confirm.
+ */
+export class LifiSolFeeChangedError extends Error {
+	readonly ceiling: bigint;
+
+	constructor({ ceiling }: { ceiling: bigint }) {
+		super('The network fee of the LI.FI swap rose above the one reviewed.');
+
+		this.ceiling = ceiling;
+	}
+}

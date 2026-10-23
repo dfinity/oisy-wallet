@@ -365,9 +365,9 @@ instructions and a minimum-output decoder (see
 `['jupiter']` (the key LI.FI's `/tools` lists). Without it, LI.FI displays a route that
 would always abort at execution: its best Solana → Solana route is DFlow's (SOL → USDC and
 USDC → SOL, 2026-10-22), and `/tools` lists Fly, OKX, Titan and others besides. Pinned to
-`jupiter`, the same requests come back as Jupiter routes. The list and
-`LIFI_SOLANA_ALLOWED_INSTRUCTIONS` change together, as `allowBridges` and the curated
-bridge facets do on EVM; DFlow joins only with its own pinned instructions and
+`jupiter`, the same requests come back as Jupiter routes. The list and the route
+entrypoints `assertLifiSolInstructions` pins change together, as `allowBridges` and the
+curated bridge facets do on EVM; DFlow joins only with its own pinned instructions and
 minimum-output decoder (see [Decisions](#decisions)).
 
 A Solana route from or to SOL is offered only if it would not unwrap wSOL the user holds.
@@ -867,7 +867,11 @@ The result must show all of the following:
 
 - `preview.controlChanges` is empty. No owner, delegate or close-authority change on any
   user account. An absent `preview` (the run changed nothing the user owns) passes this
-  check but fails the receipt check below.
+  check but fails the receipt check below. An account the run closes is the exception:
+  the run reports it as a System account holding no lamports (mainnet, for the user's
+  wSOL account a LI.FI route closed, 2026-10-23), which the mapper diffs as a change of
+  its program and owner although nothing is left to control. Its control changes are
+  ignored; the close rules below hold it instead.
 - **Accounts the transaction creates have safe authorities.** `controlChanges` only
   diffs accounts that existed before the run: `controlChanges` in
   `sol/utils/sol-simulation.utils.ts` returns nothing when `pre` is absent, by design
@@ -887,9 +891,10 @@ The result must show all of the following:
   `CloseAccount` names; only the fee payer's own lamports count toward `solDelta`. A
   forged transaction could therefore close the user's empty token accounts and send their
   rent elsewhere while passing every bound above. So the preview gains a
-  `closedAccounts: SolAddress[]` field (user-owned accounts with a pre-state and no
-  post-state), and it must be empty. Accounts the transaction both creates and closes (a
-  temporary wSOL account) have no pre-state and are not listed. The one exception is the
+  `closedAccounts: { account, lamports }[]` field (user-owned accounts with a pre-state
+  and no post-state, with the lamports each held before the run), and it must be empty.
+  Accounts the transaction both creates and closes (a temporary wSOL account) have no
+  pre-state and are not listed. The one exception is the
   user's own wSOL account, their associated token account for the native mint (derived,
   not read from the transaction): a wallet that has one gets no temporary account, and
   every LI.FI route from or to SOL wraps into that account and closes it to the user at
@@ -898,9 +903,11 @@ The result must show all of the following:
   before the run; its rent then comes back to the user. That rent was the user's before
   the run, so its lamports before the run are taken out of `solDelta` for the spend and
   receipt bounds below: counted, they would let a forged route underpay a native-SOL
-  destination by the cap plus that rent (1,488,440 lamports at today's rent for 165 bytes,
+  destination by the ceiling plus that rent (1,488,440 lamports at today's rent for 165 bytes,
   2,039,280 for an older account, in review), where a temporary account nets out, its rent
-  funded in the same transaction. A wSOL account that held wSOL is
+  funded in the same transaction. That it held no wSOL shows as the account having no
+  token delta: its balance going to zero is the only one a closed account has. A wSOL
+  account that held wSOL is
   closed by LI.FI's routes all the same (a wallet holding 1,328 wSOL, 2026-10-23), which
   would unwrap the user's whole wSOL balance into SOL: that stays refused, and is caught
   at quote time (see [Quoting](#quoting)) so that the user never confirms it. Closing any
@@ -911,7 +918,9 @@ The result must show all of the following:
   with the user as position authority that pays attacker accounts. The drained position
   is program-owned, so the wallet's token and control deltas would not show it. So each
   top-level instruction is decoded and must match a pinned `(program, discriminator)`
-  pair in `LIFI_SOLANA_ALLOWED_INSTRUCTIONS`: Compute Budget (`SetComputeUnitLimit`,
+  pair, with its exact data length and number of accounts, so that no trailing data and
+  no extra (multisig signer) account rides along (`assertLifiSolInstructions`,
+  `lib/utils/lifi-sol-transaction.utils.ts`): Compute Budget (`SetComputeUnitLimit`,
   `SetComputeUnitPrice`), Associated Token Account `CreateIdempotent` for the user,
   System `Transfer` from the user to the user's own wSOL account, SPL Token `SyncNative`, and
   `CloseAccount` of accounts the transaction created, or of the user's own wSOL account
@@ -919,7 +928,7 @@ The result must show all of the following:
   user** (as the WalletConnect review already requires, `sol-instructions.utils.ts`;
   otherwise a forged transaction could create an empty account for the user and close it
   to an attacker, a rent loss that neither `createdAccounts` nor `closedAccounts` sees and
-  that fits inside the SOL fee cap), LI.FI's fee instructions (next bullet), and the
+  that fits inside the ceiling), LI.FI's fee instructions (next bullet), and the
   route entrypoints of the allowed Solana aggregators: for Jupiter v6, `route_v2`
   (discriminator `bb64facc31c4af14`, the one LI.FI's transactions call, 2026-10-22) and
   `shared_accounts_route_v2` (`d19853937cfed8e9`, the same arguments behind an `id: u8`);
@@ -941,8 +950,9 @@ The result must show all of the following:
     accounts.
   - the fee itself, paid to LI.FI's fee wallet `34FKjAdVcTax2DHqV2XnbXa9J3zmyKcFuFKWbcmgxjgm`
     (a system account): a System `Transfer` from the user to that wallet for a native-SOL
-    source (250,000 lamports of 0.1 SOL), an SPL `TransferChecked` from the user's
-    source-token account to that wallet's associated token account for the source mint
+    source (250,000 lamports of 0.1 SOL), an SPL `TransferChecked` of the source mint,
+    signed by the user, to that wallet's associated token account for the source mint
+    under the token program the transfer calls (SPL Token or Token-2022)
     otherwise (`8jjWmLhYdqrtFMcEkiMDdqkEN85cvEFnNS4LFgNf5NRv` for USDC, 50,000 of 20
     USDC; both verified on chain).
 
@@ -978,11 +988,21 @@ The result must show all of the following:
   `platform_fee_bps` and `positive_slippage_bps` must be `0` — no platform takes a share
   of the user's output, LI.FI's fee being the separate transfer above — and `in_amount`
   plus that fee must not exceed `fromAmount` (99,750,000 + 250,000 on the same route).
+  The route's accounts are bound from the same IDL: its `user_transfer_authority` is the
+  user, its source and destination mints are the requested ones (wSOL for native SOL),
+  and its source token account is the user's associated token account for the source mint
+  under the route's source token program (the user's wSOL account for native SOL). The
+  simulation alone does not bind the source: lamports sent to the user's wSOL account and
+  never synced are not part of its token amount, so an SPL-source route that syncs and
+  spends them leaves that amount as it was, and the run shows no decrease (in review,
+  2026-10-23). Bound to the source account, `in_amount` is also in the source token's
+  units, which the `fromAmount` bound assumes.
   The v1 variants (`route`, `shared_accounts_route`, their token-ledger variants) and every
   exact-out variant are not allowed: none came from LI.FI, and each would need its own
-  decoder. A test from a real LI.FI transaction fixture covers each allowed variant. An
-  aggregator is added to `LIFI_SOLANA_ALLOWED_INSTRUCTIONS` only together with its
-  minimum-output decoder. Simulation stays as an additional check.
+  decoder. A test from a real LI.FI transaction fixture covers `route_v2`; LI.FI sent no
+  `shared_accounts_route_v2` (5 of 5 fixtures, 2026-10-23), which a test covers by moving
+  a fixture's arguments behind an `id`. An aggregator's entrypoints are pinned only
+  together with its minimum-output decoder. Simulation stays as an additional check.
 - **Every program is known.** Every top-level instruction's program, and every entry of
   `unreadPrograms`, is in `SOLANA_KNOWN_PROGRAM_ADDRESSES` or in a new pinned
   `LIFI_SOLANA_PROGRAM_ADDRESSES`. `unreadPrograms` only lists programs called from
@@ -996,28 +1016,38 @@ The result must show all of the following:
   line per program, like `sol-known-programs.constants.ts`. A tool removed via
   `LIFI_DENY_*` has its programs removed from the list in the same change. Jupiter reaches
   the DEXes of its route plan by CPI, so `unreadPrograms` lists every one outside
-  `SOLANA_KNOWN_PROGRAM_ADDRESSES`, and a hand-pinned list would refuse each route through
-  a DEX it misses; which programs live LI.FI routes reach, and so how this bullet holds
-  for Jupiter, is still open (see [Open questions](#open-questions)).
+  `SOLANA_KNOWN_PROGRAM_ADDRESSES`. Of 33 live LI.FI routes simulated (2026-10-23), 21
+  reached known programs only; the other 12 reached 7 programs outside the list: Obsidian
+  (6 routes), JupLend AMM and one of its internal programs (5 each), Deriverse (3), JupLend
+  AMM's other internal program (2), Saber and Archer (1 each). So the list pins every venue
+  Jupiter publishes (`/swap/v1/program-id-to-label`, 107 programs on 2026-10-23) that
+  `SOLANA_KNOWN_PROGRAM_ADDRESSES` leaves out, 79 of them, and the two internal programs of
+  JupLend AMM's, which Jupiter does not publish: 81 programs, each an executable account
+  on chain, which cover all 33 routes. Only the pinned route entrypoint reaches them, and
+  what it does with them is bound by its minimum output and by the spend and receipt
+  bounds below. A venue Jupiter adds later is refused until the list follows; so that such
+  a route is refused before the user confirms it rather than after, 3d also simulates the
+  display quote's transaction at the review step (see [Decisions](#decisions)).
 - **Spend is bounded.** The source token's delta on the user's accounts is no lower than
   `-fromAmount`. No other user token account decreases. `solDelta`, less the lamports
   before the run of the user's own wSOL account if the run closes it (see above), is no
-  lower than `-(fromAmount if the source is native SOL) - LIFI_SOL_MAX_FEE_LAMPORTS`. The cap is a
-  new constant sized for priority fees plus the rent of the accounts a route creates,
-  Token-2022 ones at their larger size (see [Solana execution](#solana-execution)), with a
-  measured value recorded next to it.
+  lower than `-(fromAmount if the source is native SOL) - ceiling`, where `ceiling` is the
+  [LI.FI ceiling](#solana-execution) of the transaction itself: its network fee plus the
+  rent of every account it creates, Token-2022 ones at their larger size, which the next
+  bullet holds to the one the user reviewed. A fixed cap would have to be sized for the
+  highest priority fee and the most accounts any route might create, and would let every
+  route spend that much; the transaction's own ceiling is what it can cost.
 - **The network fee is bounded by the review.** The fee a version 0 Solana transaction
   pays — the only version the trust checks let through — is set by its own Compute
   Budget instructions: the unit limit times the unit price, in
   micro-lamports, as priority fee, plus 5,000 lamports per signature (LI.FI's `SEND` gas
   cost is exactly that sum: 435,534 units at 299,999 micro-lamports, 135,660 lamports, on
-  the DFlow route of 2026-10-22). LI.FI chooses the price, and the spend bound's
-  `LIFI_SOL_MAX_FEE_LAMPORTS` would let a high one through, so the
+  the DFlow route of 2026-10-22). LI.FI chooses the price, so the
   [LI.FI ceiling](#solana-execution) of the transaction about to be signed — that fee plus
   the rent of the accounts it creates, each sized from its mint — may not exceed the one the
   user reviewed. Above it,
   nothing is signed and the review returns with the higher ceiling and the
-  `lifi_fee_changed` note, as on EVM.
+  `lifi_fee_changed` note, as on EVM (`LifiSolFeeChangedError`, carrying the ceiling).
 - **Receipt is bound (Solana → Solana).** The user's destination-token delta is at least
   the displayed quote's `toAmountMin`. A missing `preview`, or no delta for the
   destination token, fails this check.
@@ -1025,11 +1055,10 @@ The result must show all of the following:
     (`mapSolSimulationPreview` diffs the user's own account), so a valid SPL → SOL swap
     shows `received − transaction fee − rent` and would sit below LI.FI's gross
     `toAmountMin`. For a native-SOL destination the check is therefore
-    `solDelta >= toAmountMin - LIFI_SOL_MAX_FEE_LAMPORTS`, using the same fee cap as the
-    spend bound, with `solDelta` less the lamports of the user's own wSOL account the run
-    closes, as for the spend bound. A forged route can underpay by at most that cap, which
-    is the same tolerance the spend bound already grants, and it can still only pay the
-    user.
+    `solDelta >= toAmountMin - ceiling`, using the same ceiling as the spend bound, with
+    `solDelta` less the lamports of the user's own wSOL account the run closes, as for the
+    spend bound. A forged route can underpay by at most that ceiling, which is the same
+    tolerance the spend bound already grants, and it can still only pay the user.
 
 `simulateSolTransaction` takes, besides the base64 bytes, a **decompiled**
 `transactionMessage` (it selects the accounts to snapshot from it) and a
@@ -1432,10 +1461,14 @@ other mint extension it defines (`MetadataPointer`, `TokenMetadata`, `PermanentD
 `DefaultAccountState`, `ScaledUiAmount`, `ConfidentialTransferMint`…) adds nothing to the
 account. Every Token-2022 mint in OISY's list carries some of those (all 50, in review),
 and an AAPLx account is 179 bytes on chain, what `getTokenSize` gives for
-`ImmutableOwner`, `TransferHookAccount` and `PausableAccount`. A mint that cannot be read,
-or that carries an extension type the decoder does not recognise, gets no LI.FI offer:
-its rent cannot be bounded. The review, execution's network-fee bound and
-`LIFI_SOL_MAX_FEE_LAMPORTS` size the accounts the same way.
+`ImmutableOwner`, `TransferHookAccount` and `PausableAccount`; a PYUSD one is 187, with
+`TransferFeeAmount` and `TransferHookAccount` (2026-10-23). A mint that cannot be read, or
+that carries an extension type the decoder does not recognise, gets no LI.FI offer: its
+rent cannot be bounded. So does one carrying a type the decoder knows but neither list
+places (`PermissionedBurn`, newer than the mapping above, whose account extension, if any,
+is not established). The review and execution's ceiling, which the spend and receipt
+bounds also use, size the accounts the same way (`lifiSolTransactionCeiling`,
+`lib/services/lifi-sol-transaction.services.ts`).
 
 As on EVM, the form, its validation, "Max" and the review use that total
 (`SwapLifiFeeDisplay`) instead of the fee context's estimate; the review confirms only
@@ -1861,9 +1894,9 @@ rows.
 | 2a-2 | **Registration** — LI.FI destination resolver + per-category wildcard, Solana in `crossChainSwapNetworks` / `allCrossChainSwapTokens` when either flag is on, EVM registry entry, Solana registry entry **restricted to EVM sources** (EVM → Solana, allow-listed bridges, empty source list so the Solana source picker is unchanged), provider sheet                                                                                                                                                                                                                                                                                                               | 2a-1                                            |
 | 2b   | **EVM execution + tracking** — calldata binding (pinned facet ABIs decoded locally, incl. each bridge's payout and LI.FI's fee forwarding, + the Diamond's whitelist), route-tools refusal of Across behind a DEX swap, `fetchLifiEvmSwap` (pre-approval price check, unchanged `approve()`, form budget of 0/1/2 approval fees from one allowance read) + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound and the `/status` 404 → `NOT_FOUND` mapping)/loader (incl. wallet + EVM balance refresh)/item; flag to `(LOCAL \|\| STAGING) && !TEST`, `PRODUCT.md` for EVM-source swaps | 2a-2                                            |
 | 3a   | **Solana simulation plumbing** (a refactor on `main`) — `replaceRecentBlockhash` and `consistentSnapshot` options on `simulateSolTransaction` / `simulateTransactionAccounts` (`minContextSlot`, the response's slot), `getMultipleAccountsInfoWithContext` behind an unchanged `getMultipleAccountsInfo`, `createdAccounts` / `closedAccounts` in the simulation preview; every default as today, so the WalletConnect review and Solana balances are unchanged                                                                                                                                                                                                     | 2b                                              |
-| 3b   | **Solana transaction binding** (not wired in) — `assertLifiSolTransaction`: pinned top-level instructions incl. LI.FI's fee instructions, Jupiter `route_v2` / `shared_accounts_route_v2` minimum-output decoder, the program, spend, receipt and network-fee bounds, on real LI.FI fixtures; the [CPI question](#open-questions) answered first                                                                                                                                                                                                                                                                                                                     | 3a                                              |
+| 3b   | **Solana transaction binding** (not wired in) — `assertLifiSolTransaction`: pinned top-level instructions incl. LI.FI's fee instructions, Jupiter `route_v2` / `shared_accounts_route_v2` minimum-output decoder, the program, spend, receipt and network-fee bounds, on real LI.FI fixtures; Jupiter's published venues pinned for the programs its routes reach by CPI                                                                                                                                                                                                                                                                                             | 3a                                              |
 | 3c   | **Solana tracking** — the poller's Solana source-chain check (in-memory expiry observations), the loader's `$solAddressMainnet`; nothing opens a Solana row until 3d                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 2b                                              |
-| 3d   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (quote with the Jupiter pin, destinations, and a mainnet-only source list in place of the empty one; Solana destinations only), the Solana trust checks, `fetchLifiSolSwap` (re-sent broadcast, a later refusal keeping the row, on EVM's `swap()` too), LI.FI's ceiling in the form, "Max" and the review, `SwapSolWizard` dispatch, `PRODUCT.md` update for Solana-source swaps                                                                                                                                                                                              | 3b, 3c                                          |
+| 3d   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (quote with the Jupiter pin, destinations, and a mainnet-only source list in place of the empty one; Solana destinations only), the Solana trust checks, `fetchLifiSolSwap` (re-sent broadcast, a later refusal keeping the row, on EVM's `swap()` too), LI.FI's ceiling in the form, "Max" and the review, the review's simulation of the display quote's transaction (an unpinned venue refused before confirming), `SwapSolWizard` dispatch, `PRODUCT.md` update for Solana-source swaps                                                                                    | 3b, 3c                                          |
 | 4    | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | 3d, production key + rate-limit scope confirmed |
 
 PR 2 is split up front so each PR stays reviewable, and 2a again into the quote client
@@ -1923,6 +1956,10 @@ everywhere.
 - **Solana routes through Jupiter only** — LI.FI's best Solana → Solana route was
   DFlow's in both directions probed (2026-10-22), which v1 does not offer; a Jupiter route
   may pay a little less. Accepted until DFlow's instructions are pinned and decoded.
+- **Jupiter's venues are pinned by hand** — a route through a venue Jupiter adds later is
+  refused (at the review, from 3d) until `LIFI_SOLANA_PROGRAM_ADDRESSES` follows, and the
+  pair then has no LI.FI offer through it. Jupiter's published list is the one to compare
+  against.
 - **No LI.FI offer for SOL to a user who holds wSOL** — LI.FI's routes from or to SOL close
   the wallet's wSOL account, which would unwrap the wSOL in it; such routes are not offered.
   Accepted for v1; NEAR Intents still serves those swaps.
@@ -2006,15 +2043,16 @@ everywhere.
    change, leaves every token account it creates for the user with the user
    as owner and no foreign delegate or close authority, closes none of the user's
    pre-existing accounts but their own wSOL account when it held no wSOL, and that one
-   only to the user, sets exactly one compute unit limit, contains only top-level instructions from
-   `LIFI_SOLANA_ALLOWED_INSTRUCTIONS` (any `CloseAccount` paying the user, LI.FI's fee paid
-   only to its pinned wallet and at most 25 bps, and the route's decoded on-chain minimum
+   only to the user, sets exactly one compute unit limit, contains only the pinned
+   top-level instructions, each with its exact data and accounts (any `CloseAccount`
+   paying the user, LI.FI's fee paid only to its pinned wallet and at most 25 bps, and the route's decoded on-chain minimum
    output at least `toAmountMin`, with no platform fee), sets a network fee within the
    reviewed ceiling, calls (top-level or nested)
    only programs in `SOLANA_KNOWN_PROGRAM_ADDRESSES` or the pinned
-   `LIFI_SOLANA_PROGRAM_ADDRESSES`, spends no more than `fromAmount` (plus the SOL fee
-   cap) from the user's accounts and, Solana → Solana, credits at least `toAmountMin`
-   (for a native-SOL destination, net of at most the SOL fee cap). A failed or
+   `LIFI_SOLANA_PROGRAM_ADDRESSES`, spends no more than `fromAmount` (plus the
+   transaction's own LI.FI ceiling) from the user's accounts and, Solana → Solana,
+   credits at least `toAmountMin` (for a native-SOL destination, net of at most that
+   ceiling). A failed or
    timed-out simulation aborts the swap.
 10. The destination picker offers EVM and Solana tokens for an EVM source, and (from
     PR 3) Solana tokens for a Solana source, even when no other provider covers that
@@ -2074,7 +2112,7 @@ everywhere.
 ## Open questions
 
 Facts still to confirm. The first two gate PR 4 (the flag flip), not PRs 1–3; the
-third is answered for NEAR Intents; the fourth gates 3b.
+third is answered for NEAR Intents.
 
 - **Production API key.** A separate key, scoped to OISY's production origins, must be
   registered on LI.FI's partner portal and set as a deployment secret. Owner: whoever
@@ -2093,14 +2131,6 @@ third is answered for NEAR Intents; the fourth gates 3b.
   therefore ships through NEAR Intents. Still to re-run with the registered integrator
   id and key: whether Across serves EVM → Solana then. Owner: implementer, with the
   staging key.
-
-- **Programs a Jupiter route reaches by CPI** (gates 3b). The binding requires every
-  program in `unreadPrograms` to be known, and Jupiter calls the DEXes of its route plan by
-  CPI. Pinning them by hand refuses every route through a DEX the list misses, and the set
-  changes as Jupiter adds venues. To measure on live LI.FI routes which programs they
-  reach, then decide whether to pin them, or to leave the calls inside a pinned
-  `route_v2` to Jupiter, whose minimum output is bound and whose effects the simulation's
-  spend and receipt bounds already cover. Owner: implementer, before 3b.
 
 ## Decisions
 
@@ -2141,6 +2171,18 @@ Recorded so a future reader can tell "excluded on purpose" from "forgotten".
 - **The user's own wSOL account may be closed when it held no wSOL** (2026-10-23): LI.FI's
   routes from or to SOL use it whenever the wallet has one. One that holds wSOL would be
   unwrapped, so such a route is not offered.
+- **Jupiter's venues are pinned** (2026-10-23): `LIFI_SOLANA_PROGRAM_ADDRESSES` lists
+  every venue Jupiter publishes that `SOLANA_KNOWN_PROGRAM_ADDRESSES` leaves out, and JupLend
+  AMM's two internal programs, rather than leaving the calls inside a pinned `route_v2` to
+  Jupiter: the rule that every program a swap reaches is known holds for LI.FI as for the
+  WalletConnect review. The cost is a route through a venue Jupiter adds later, refused
+  until the list follows; 3d simulates the display quote's transaction at the review step
+  so that the refusal comes before the user confirms, not after.
+- **The Solana spend and receipt bounds use the transaction's own LI.FI ceiling**
+  (2026-10-23), not a fixed `LIFI_SOL_MAX_FEE_LAMPORTS`: the ceiling is computed for the
+  network-fee bound anyway, is held to the one the user reviewed, and is what the
+  transaction can cost, where a fixed cap sized for any route would let every route spend
+  as much.
 - **The route's minimum is checked as LI.FI rounds it**, to the nearest unit: the minimum
   Jupiter enforces may then be one base unit below the displayed one (2026-10-23).
 - **LI.FI's Solana transactions must be version 0 messages** (2026-10-22): the fee is
@@ -2157,7 +2199,8 @@ Recorded so a future reader can tell "excluded on purpose" from "forgotten".
 - **The unresolved-status bound starts after source confirmation and accumulates
   observed time in capped per-poll steps, persisted in `localStorage`**, so reloads do
   not restart it and clock jumps cannot hasten it; another device starts its own window.
-- **Native-SOL receipts are checked net of the SOL fee cap**, not by reconstructing gross
+- **Native-SOL receipts are checked net of the transaction's LI.FI ceiling**, not by
+  reconstructing gross
   incoming lamports.
 - **`approve()` is reused unchanged; there is no exact-allowance mode.** The allowance
   the Diamond is left with is **at least** `fromAmount`, not exactly that: a larger
