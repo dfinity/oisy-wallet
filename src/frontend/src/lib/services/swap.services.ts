@@ -5,6 +5,11 @@ import type {
 	VeloraSwapMode
 } from '$declarations/backend/backend.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import { VELORA_AUGUSTUS_ADDRESSES, VELORA_DELTA_ADDRESSES } from '$env/rest/velora.env';
+import {
+	VELORA_DELTA_EIP712_DOMAIN,
+	VELORA_DELTA_ORDER_TYPES
+} from '$eth/constants/velora.constants';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/approve.services';
 import { createPermit } from '$eth/services/eip2612-permit.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
@@ -145,6 +150,13 @@ import {
 	toVeloraDisplayRefs,
 	toVeloraExternalRefs
 } from '$lib/utils/velora-active-tx.utils';
+import {
+	assertVeloraDeltaOrder,
+	assertVeloraDeltaRoute,
+	assertVeloraMarketTransaction,
+	veloraMinimumAmount,
+	veloraRejectedError
+} from '$lib/utils/velora-swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
@@ -1753,13 +1765,26 @@ export const fetchVeloraDeltaSwap = async ({
 		fetch: window.fetch
 	});
 
-	const deltaContract = await sdk.delta.getDeltaContract();
+	// The spender and the contract the order is signed for are pinned, never taken from the API.
+	const deltaContract = VELORA_DELTA_ADDRESSES[sourceNetwork.id];
 
 	if (isNullish(deltaContract)) {
-		return;
+		throw veloraRejectedError('no Delta contract is pinned for the network');
 	}
 
+	const destinationChainId = destinationToken.network.chainId;
+
+	assertVeloraDeltaRoute({
+		route: swapDetails.route,
+		sourceTokenAddress: sourceToken.address,
+		sourceChainId: sourceNetwork.chainId,
+		destinationTokenAddress: geSwapEthTokenAddress(destinationToken),
+		destinationChainId,
+		amount: parsedSwapAmount
+	});
+
 	let builtOrder;
+	let permit = '0x';
 
 	const slippageBasisPoints = slippagePercentToBasisPoints(slippageValue);
 
@@ -1783,6 +1808,8 @@ export const fetchVeloraDeltaSwap = async ({
 			value: parsedSwapAmount.toString(),
 			identity
 		});
+
+		permit = encodedPermit;
 
 		progress(ProgressStepsSwap.SWAP);
 
@@ -1830,7 +1857,26 @@ export const fetchVeloraDeltaSwap = async ({
 		);
 	}
 
-	const hash = getSignParamsEIP712(builtOrder.toSign);
+	assertVeloraDeltaOrder({
+		order: builtOrder.toSign.value,
+		route: swapDetails.route,
+		wallet: userAddress,
+		amount: parsedSwapAmount,
+		permit,
+		feePercent: swapDetails.partner.feePercent,
+		destinationChainId
+	});
+
+	// Hashed with OISY's own domain and types: the API's would let it choose what is signed.
+	const hash = getSignParamsEIP712({
+		domain: {
+			...VELORA_DELTA_EIP712_DOMAIN,
+			chainId: Number(sourceNetwork.chainId),
+			verifyingContract: deltaContract
+		},
+		types: VELORA_DELTA_ORDER_TYPES,
+		value: builtOrder.toSign.value
+	});
 
 	const signature = await signPrehash({
 		hash,
@@ -1920,13 +1966,18 @@ export const fetchVeloraMarketSwap = async ({
 		fetch: window.fetch
 	});
 
-	const TokenTransferProxy = await sdk.swap.getSpender();
+	// The call target and spender are pinned, never taken from the API.
+	const augustusAddress = VELORA_AUGUSTUS_ADDRESSES[sourceNetwork.id];
+
+	if (isNullish(augustusAddress)) {
+		throw veloraRejectedError('no Augustus is pinned for the network');
+	}
 
 	if (isNotDefaultEthereumToken(sourceToken)) {
 		await approveToken({
 			token: sourceToken,
 			from: userAddress,
-			to: TokenTransferProxy,
+			to: augustusAddress,
 			amount: parsedSwapAmount,
 			sourceNetwork,
 			identity,
@@ -1941,7 +1992,7 @@ export const fetchVeloraMarketSwap = async ({
 		await waitForSwapAllowance({
 			token: sourceToken,
 			owner: userAddress,
-			spender: TokenTransferProxy,
+			spender: augustusAddress,
 			networkId: sourceNetwork.id,
 			amount: parsedSwapAmount
 		});
@@ -1949,14 +2000,34 @@ export const fetchVeloraMarketSwap = async ({
 
 	progress(ProgressStepsSwap.SWAP);
 
+	const srcToken = geSwapEthTokenAddress(sourceToken);
+	const destToken = geSwapEthTokenAddress(destinationToken);
+	const slippageBasisPoints = slippagePercentToBasisPoints(slippageValue);
+
 	const txParams = await sdk.swap.buildTx({
-		srcToken: geSwapEthTokenAddress(sourceToken),
-		destToken: geSwapEthTokenAddress(destinationToken),
+		srcToken,
+		destToken,
 		srcAmount: swapDetails.srcAmount,
-		slippage: slippagePercentToBasisPoints(slippageValue),
+		slippage: slippageBasisPoints,
 		priceRoute: swapDetails,
 		userAddress,
 		partner: OISY_URL_HOSTNAME
+	});
+
+	assertVeloraMarketTransaction({
+		transaction: txParams,
+		augustusAddress,
+		sourceChainId: sourceNetwork.chainId,
+		srcToken,
+		destToken,
+		amount: parsedSwapAmount,
+		isNativeSource: isDefaultEthereumToken(sourceToken),
+		minimum: veloraMinimumAmount({
+			amount: BigInt(swapDetails.destAmount),
+			slippageBasisPoints
+		}),
+		feePercent: swapDetails.partnerFee,
+		wallet: userAddress
 	});
 
 	// The transaction is broadcast from here on — the point of no return. `swap`
@@ -1965,7 +2036,7 @@ export const fetchVeloraMarketSwap = async ({
 	// settlement record on top of it.
 	const { hash, nonce } = await swap({
 		from: userAddress,
-		to: txParams.to,
+		to: augustusAddress,
 		transaction: txParams,
 		amount: parsedSwapAmount,
 		identity,
