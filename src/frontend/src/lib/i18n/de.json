@@ -1363,6 +1363,8 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "UI aktualisieren",
 			"swap_provider": "Tausch-Anbieter",
+			"smart_swap": "",
+			"comparing_providers": "",
 			"swap_provider_website": "Website",
 			"swap_route": "Tauschroute",
 			"included_network_fees": "Enthaltene Netzwerkgebühren",

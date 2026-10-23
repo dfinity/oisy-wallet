@@ -36,7 +36,8 @@ import {
 	SwapProvider,
 	type BtcQuoteParams,
 	type EvmQuoteParams,
-	type IcpBridgeQuoteParams
+	type IcpBridgeQuoteParams,
+	type SwapQuoteObserver
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -147,7 +148,10 @@ const ckUsdcToken = makeCkToken({
 	symbol: 'ckUSDC'
 });
 
-const quote = (params: Partial<{ sourceToken: Token; destinationToken: Token; amount: bigint }>) =>
+const quote = (
+	params: SwapQuoteObserver &
+		Partial<{ sourceToken: Token; destinationToken: Token; amount: bigint }>
+) =>
 	fetchChainFusionEvmQuote({
 		sourceToken: ETHEREUM_TOKEN,
 		destinationToken: ckEthToken,
@@ -173,6 +177,19 @@ describe('chain-fusion-swap.services', () => {
 			mockEnabled = true;
 			ckEthMinterInfoStore.reset(ETHEREUM_TOKEN_ID);
 			setMinterInfo();
+		});
+
+		it('reports local mint pricing only after the helper prerequisites are available', async () => {
+			const onProviderParticipating = vi.fn();
+			await quote({ onProviderParticipating });
+
+			expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.CHAIN_FUSION);
+
+			onProviderParticipating.mockClear();
+			ckEthMinterInfoStore.reset(ETHEREUM_TOKEN_ID);
+			await quote({ onProviderParticipating });
+
+			expect(onProviderParticipating).not.toHaveBeenCalled();
 		});
 
 		it('should quote ETH to ckETH one to one, with no fee deducted', async () => {
@@ -274,7 +291,9 @@ describe('chain-fusion-swap.services', () => {
 			feeLedgerCanisterId: IC_CKETH_LEDGER
 		};
 
-		const icpQuote = (params: Partial<{ sourceToken: Token; destinationToken: Token }>) =>
+		const icpQuote = (
+			params: SwapQuoteObserver & Partial<{ sourceToken: Token; destinationToken: Token }>
+		) =>
 			fetchChainFusionIcpQuote({
 				sourceToken: ckEthSource,
 				destinationToken: ETHEREUM_TOKEN,
@@ -299,6 +318,34 @@ describe('chain-fusion-swap.services', () => {
 				gas_limit: 1n,
 				timestamp: toNullable(1n)
 			});
+		});
+
+		it('reports each eligible ETH-family withdrawal pricing entry, not missing minters', async () => {
+			const onProviderParticipating = vi.fn();
+			await icpQuote({ onProviderParticipating });
+			await icpQuote({
+				sourceToken: ckUsdcSource,
+				destinationToken: USDC_TOKEN,
+				onProviderParticipating
+			});
+
+			expect(onProviderParticipating.mock.calls).toEqual([
+				[SwapProvider.CHAIN_FUSION],
+				[SwapProvider.CHAIN_FUSION]
+			]);
+
+			onProviderParticipating.mockClear();
+			await icpQuote({
+				sourceToken: { ...ckEthSource, minterCanisterId: undefined } as IcCkToken,
+				onProviderParticipating
+			});
+			await icpQuote({
+				sourceToken: { ...ckUsdcSource, feeLedgerCanisterId: undefined } as IcCkToken,
+				destinationToken: USDC_TOKEN,
+				onProviderParticipating
+			});
+
+			expect(onProviderParticipating).not.toHaveBeenCalled();
 		});
 
 		it('should quote a ckETH withdrawal 1:1 with both fees itemized, like the Convert flow', async () => {
@@ -831,7 +878,9 @@ describe('chain-fusion-swap.services', () => {
 			symbol: 'ckBTC-destination'
 		});
 
-		const btcQuote = (params: Partial<{ sourceToken: Token; destinationToken: Token }> = {}) =>
+		const btcQuote = (
+			params: SwapQuoteObserver & Partial<{ sourceToken: Token; destinationToken: Token }> = {}
+		) =>
 			fetchChainFusionBtcQuote({
 				sourceToken: BTC_MAINNET_TOKEN,
 				destinationToken: ckBtcDestination,
@@ -868,6 +917,19 @@ describe('chain-fusion-swap.services', () => {
 		// 100-satoshi `kyt_fee`. The network fee comes out of the transaction's change, so it
 		// is charged on top. `BtcConvertFees`'s zero-valued conversion-fee row is not carried
 		// over — "Free" is not a fee worth a line in an offer list.
+		it('reports BTC local pricing but not a mint without a deposit address', async () => {
+			const onProviderParticipating = vi.fn();
+			await btcQuote({ onProviderParticipating });
+
+			expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.CHAIN_FUSION);
+
+			onProviderParticipating.mockClear();
+			btcAddressStore.reset(ckBtcDestination.id);
+			await btcQuote({ onProviderParticipating });
+
+			expect(onProviderParticipating).not.toHaveBeenCalled();
+		});
+
 		it('should deduct only the KYT fee from what the minter credits', async () => {
 			await expect(btcQuote()).resolves.toStrictEqual({
 				provider: SwapProvider.CHAIN_FUSION,
@@ -978,7 +1040,9 @@ describe('chain-fusion-swap.services', () => {
 			symbol: 'ckBTC-source'
 		});
 
-		const icpQuote = (params: Partial<{ sourceToken: Token; destinationToken: Token }> = {}) =>
+		const icpQuote = (
+			params: SwapQuoteObserver & Partial<{ sourceToken: Token; destinationToken: Token }> = {}
+		) =>
 			fetchChainFusionIcpQuote({
 				sourceToken: ckBtcSource,
 				destinationToken: BTC_MAINNET_TOKEN,
@@ -1008,6 +1072,19 @@ describe('chain-fusion-swap.services', () => {
 		// finalized withdrawals: they pay out exactly `amount - bitcoin_fee - minter_fee`. The
 		// KYT fee `IcTokenFees` also lists is not charged to the user on a withdrawal, so it
 		// is not quoted at all — neither deducted nor on top.
+		it('reports ckBTC withdrawal pricing only with minter prerequisites', async () => {
+			const onProviderParticipating = vi.fn();
+			await icpQuote({ onProviderParticipating });
+
+			expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.CHAIN_FUSION);
+
+			onProviderParticipating.mockClear();
+			ckBtcMinterInfoStore.reset(ckBtcSource.id);
+			await icpQuote({ onProviderParticipating });
+
+			expect(onProviderParticipating).not.toHaveBeenCalled();
+		});
+
 		it('should deduct only the Bitcoin network and minter fees, and not quote the KYT fee', async () => {
 			await expect(icpQuote()).resolves.toStrictEqual({
 				provider: SwapProvider.CHAIN_FUSION,

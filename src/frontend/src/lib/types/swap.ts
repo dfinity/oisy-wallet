@@ -88,7 +88,14 @@ export interface ICPSwapResult {
 	receiveAmount: bigint;
 }
 
-export interface FetchSwapAmountsParams {
+/** Reports participation in pricing, including cached quotes and local calculations.
+ * Not a promise of a fresh network request or of an available offer.
+ */
+export interface SwapQuoteObserver {
+	onProviderParticipating?: (provider: SwapProvider) => void;
+}
+
+export interface FetchSwapAmountsParams extends SwapQuoteObserver {
 	identity: Identity;
 	sourceToken: Token;
 	destinationToken: Token;
@@ -204,7 +211,7 @@ interface IcpQuoteParams {
 	destToken: IcToken;
 }
 
-interface SwapQuoteParams {
+interface SwapQuoteParams extends SwapQuoteObserver {
 	identity: Identity;
 	sourceToken: IcToken;
 	destinationToken: IcToken;
@@ -317,7 +324,7 @@ export interface GetQuoteParams extends QuoteParams<'all' | 'market'> {
 	destChainId?: number;
 }
 
-export interface EvmQuoteParams {
+export interface EvmQuoteParams extends SwapQuoteObserver {
 	sourceToken: Erc20Token;
 	destinationToken: Erc20Token | IcToken;
 	amount: bigint;
@@ -328,7 +335,7 @@ export interface EvmQuoteParams {
 	slippage: Slippage;
 }
 
-export interface NearIntentsQuoteParams {
+export interface NearIntentsQuoteParams extends SwapQuoteObserver {
 	sourceToken: Token;
 	destinationToken: Token;
 	amount: bigint;
@@ -438,7 +445,7 @@ export interface OneSecEvmToIcpParams extends RequiredTransactionFeeData {
 	swapId: string;
 }
 
-export interface IcpBridgeQuoteParams {
+export interface IcpBridgeQuoteParams extends SwapQuoteObserver {
 	sourceToken: Token;
 	destinationToken: Token;
 	amount: bigint;
@@ -454,7 +461,7 @@ export interface IcpBridgeSwapProviderConfig {
 	getSupportedDestinations: GetSupportedDestinationsFn;
 }
 
-export interface BtcQuoteParams {
+export interface BtcQuoteParams extends SwapQuoteObserver {
 	sourceToken: Token;
 	destinationToken: Token;
 	amount: bigint;

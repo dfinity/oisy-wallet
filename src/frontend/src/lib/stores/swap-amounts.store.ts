@@ -1,3 +1,4 @@
+import type { SwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
 import type { OptionAmount } from '$lib/types/send';
 import type { SwapMappedResult, SwapProvider, SwapQuoteError } from '$lib/types/swap';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -96,6 +97,7 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 
 export interface SwapAmountsContext {
 	store: SwapAmountsStore;
+	activity?: SwapQuoteActivityStore;
 }
 
 export const SWAP_AMOUNTS_CONTEXT_KEY = Symbol('swap-amounts');

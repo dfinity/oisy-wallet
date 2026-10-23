@@ -1,18 +1,20 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, untrack } from 'svelte';
+	import { readable } from 'svelte/store';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
-	import SwapEthFeeInfo from '$eth/components/swap/SwapEthFeeInfo.svelte';
 	import SwapLifiFeeDisplay from '$eth/components/swap/SwapLifiFeeDisplay.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
+	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { SWAP_DETAILS_ROW_STAGGER_MS } from '$lib/constants/swap.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -30,6 +32,7 @@
 		withLifiMaxFeeHeadroom
 	} from '$lib/utils/lifi-fee.utils';
 	import { parseToken, tryParseToken } from '$lib/utils/parse.utils';
+	import { fade, fly, slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -68,7 +71,10 @@
 	const { sourceToken, destinationToken, sourceTokenBalance, amountSetToMax, lifiMaxFee } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+	const { store: swapAmountsStore, activity } =
+		getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+	const quoteActivity = activity ?? readable(undefined);
+	const comparing = $derived($quoteActivity?.pending === true && !$quoteActivity.background);
 
 	let errorType = $state<TokenActionErrorType | undefined>();
 
@@ -262,40 +268,48 @@
 	bind:slippageValue
 >
 	{#snippet swapDetails()}
-		{#if nonNullish($destinationToken) && nonNullish($sourceToken) && nonNullish($feeTokenIdStore)}
+		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<Hr spacing="md" />
 
-			<div class="flex flex-col gap-3">
-				<SwapProvider {onShowProviderList} showSelectButton {slippageValue} />
+			<div class="flex flex-col">
+				<SwapProvider isForm {onShowProviderList} showSelectButton {slippageValue} />
 
-				{#if nonNullish($swapAmountsStore?.selectedProvider)}
-					{#if isGasless}
-						<SwapGaslessFee />
-					{:else if isLifi}
-						<SwapLifiFeeDisplay fee={lifiFee}>
-							{#snippet label()}
-								<Html text={$i18n.fee.text.total_fee} />
-							{/snippet}
-						</SwapLifiFeeDisplay>
-
-						<SwapEthFeeInfo
-							decimals={$feeDecimalsStore}
-							feeSymbol={$feeSymbolStore}
-							feeTokenId={$feeTokenIdStore}
-						/>
-					{:else}
-						<EthFeeDisplay {isApproveNeeded}>
-							{#snippet label()}
-								<Html text={$i18n.fee.text.total_fee} />
-							{/snippet}
-						</EthFeeDisplay>
-
-						<SwapEthFeeInfo
-							decimals={$feeDecimalsStore}
-							feeSymbol={$feeSymbolStore}
-							feeTokenId={$feeTokenIdStore}
-						/>
-					{/if}
+				{#if comparing || (nonNullish($swapAmountsStore?.selectedProvider) && nonNullish($feeTokenIdStore))}
+					<div transition:slide>
+						<!-- One cell for every branch, so the skeleton and the value cross-fade in place. -->
+						<div class="grid" transition:fly={{ y: 4, delay: SWAP_DETAILS_ROW_STAGGER_MS }}>
+							{#if comparing}
+								<div class="[grid-area:1/1]" transition:fade>
+									<FeeDisplay
+										decimals={$feeDecimalsStore ?? nativeEthereumToken.decimals}
+										symbol={$feeSymbolStore ?? nativeEthereumToken.symbol}
+									>
+										{#snippet label()}<Html text={$i18n.fee.text.total_fee} />{/snippet}
+									</FeeDisplay>
+								</div>
+							{:else if isGasless}
+								<div class="[grid-area:1/1]" transition:fade>
+									<SwapGaslessFee />
+								</div>
+							{:else if isLifi}
+								<div class="[grid-area:1/1]" transition:fade>
+									<SwapLifiFeeDisplay fee={lifiFee}>
+										{#snippet label()}
+											<Html text={$i18n.fee.text.total_fee} />
+										{/snippet}
+									</SwapLifiFeeDisplay>
+								</div>
+							{:else}
+								<div class="[grid-area:1/1]" transition:fade>
+									<EthFeeDisplay {isApproveNeeded}>
+										{#snippet label()}
+											<Html text={$i18n.fee.text.total_fee} />
+										{/snippet}
+									</EthFeeDisplay>
+								</div>
+							{/if}
+						</div>
+					</div>
 				{/if}
 			</div>
 		{/if}

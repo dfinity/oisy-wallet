@@ -150,7 +150,7 @@ describe('SwapIcpWizard', () => {
 	it('renders swap provider information', () => {
 		const { getByText } = renderWithStep(WizardStepsSwap.SWAP);
 
-		expect(getByText(en.swap.text.swap_provider)).toBeInTheDocument();
+		expect(getByText(en.swap.text.smart_swap)).toBeInTheDocument();
 	});
 
 	it('renders fee information', () => {

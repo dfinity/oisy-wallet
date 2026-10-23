@@ -2,6 +2,7 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { MAX_BUTTON } from '$lib/constants/test-ids.constants';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
+import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import en from '$tests/mocks/i18n.mock';
@@ -36,10 +37,12 @@ describe('SwapXrpForm', () => {
 
 	const renderForm = ({
 		swapAmount,
-		reserveKnown = true
+		reserveKnown = true,
+		comparing = false
 	}: {
 		swapAmount: string;
 		reserveKnown?: boolean;
+		comparing?: boolean;
 	}) => {
 		feeStore = initFeeStore();
 		feeStore.setFee(fee);
@@ -49,11 +52,15 @@ describe('SwapXrpForm', () => {
 
 		const swapAmountsStore = initSwapAmountsStore();
 		swapAmountsStore.setSwaps({
-			swaps: [offer],
+			swaps: comparing ? [] : [offer],
 			amountForSwap: Number(swapAmount),
-			selectedProvider: offer
+			selectedProvider: comparing ? undefined : offer
 		});
 
+		const activity = initSwapQuoteActivityStore();
+		if (comparing) {
+			activity.start({ requestId: 1, background: false });
+		}
 		const context = new Map<symbol, unknown>([
 			[
 				SWAP_CONTEXT_KEY,
@@ -67,7 +74,7 @@ describe('SwapXrpForm', () => {
 					destinationTokenExchangeRate: readable(2000)
 				}
 			],
-			[SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore }],
+			[SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore, activity }],
 			[
 				XRP_FEE_CONTEXT_KEY,
 				initXrpFeeContext({
@@ -85,7 +92,7 @@ describe('SwapXrpForm', () => {
 			props: {
 				swapAmount,
 				slippageValue: '0.5',
-				isSwapAmountsLoading: false,
+				isSwapAmountsLoading: comparing,
 				onShowTokensList: vi.fn(),
 				onShowProviderList: vi.fn(),
 				onClose: vi.fn(),
@@ -97,6 +104,14 @@ describe('SwapXrpForm', () => {
 
 	const reviewButton = (getByText: (text: string) => HTMLElement) =>
 		getByText(en.swap.text.review_button).closest('button');
+
+	it('compares providers before an offer exists without enabling Review', () => {
+		const { getByText } = renderForm({ swapAmount: '10', comparing: true });
+
+		expect(getByText(en.swap.text.smart_swap)).toBeInTheDocument();
+		expect(getByText(en.swap.text.comparing_providers)).toBeInTheDocument();
+		expect(reviewButton(getByText)).toBeDisabled();
+	});
 
 	describe('Max', () => {
 		it('leaves the fee and the reserve', () => {
@@ -165,7 +180,7 @@ describe('SwapXrpForm', () => {
 	it('shows the provider and the network fee', () => {
 		const { getByText } = renderForm({ swapAmount: '10' });
 
-		expect(getByText(en.swap.text.swap_provider)).toBeInTheDocument();
+		expect(getByText(en.swap.text.smart_swap)).toBeInTheDocument();
 		expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
 	});
 });

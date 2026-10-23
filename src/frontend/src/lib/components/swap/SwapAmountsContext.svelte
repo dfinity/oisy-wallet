@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, untrack, type Snippet } from 'svelte';
+	import { prefersReducedMotion } from 'svelte/motion';
 	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import {
 		SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS,
-		SWAP_DEFAULT_SLIPPAGE_VALUE
+		SWAP_DEFAULT_SLIPPAGE_VALUE,
+		SWAP_PROVIDER_MIN_COMPARISON_MS
 	} from '$lib/constants/swap.constants';
 	import {
 		btcAddressMainnet,
@@ -21,6 +23,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SwapAmountTooLowError } from '$lib/types/errors';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { SwapProvider } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 
 	interface Props {
@@ -47,11 +50,14 @@
 		pauseAmountUpdates = false
 	}: Props = $props();
 
-	const { store } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+	const { store, activity } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
 	let timer: NodeJS.Timeout | undefined;
 	let debounceTimer = $state<NodeJS.Timeout | undefined>();
 	let fetchGeneration = 0;
+	let requestSequence = 0;
+	let currentRequest: { requestId: number; background: boolean } | undefined;
+	let destroyed = false;
 
 	const clearTimer = () => {
 		if (nonNullish(timer)) {
@@ -77,8 +83,26 @@
 		}
 	};
 
+	const invalidateRequest = (discardForegroundQuote = false) => {
+		// A cancelled foreground round leaves the retained offers priced for old inputs.
+		// Background work, unlike foreground work, may still have a usable accepted quote.
+		if (discardForegroundQuote && currentRequest?.background === false) {
+			store.reset();
+		}
+		fetchGeneration++;
+		currentRequest = undefined;
+		activity?.reset();
+		isSwapAmountsLoading = false;
+		clearDebounceTimer();
+	};
+
 	const loadSwapAmounts = async (isPeriodicUpdate = false) => {
-		if (isNullish($authIdentity)) {
+		if (destroyed || pauseAmountUpdates || isNullish($authIdentity)) {
+			return;
+		}
+
+		// Do not overlap refreshes for the same inputs or race the foreground debounce.
+		if (isPeriodicUpdate && (nonNullish(currentRequest) || nonNullish(debounceTimer))) {
 			return;
 		}
 
@@ -93,11 +117,39 @@
 			return;
 		}
 
-		if (!isPeriodicUpdate && nonNullish($store) && $store.amountForSwap === parsedAmount) {
-			return;
+		const currentGeneration = fetchGeneration;
+		// A foreground round already owns its identity while queued in the debounce.
+		const requestId = isPeriodicUpdate
+			? ++requestSequence
+			: (currentRequest?.requestId ?? ++requestSequence);
+		currentRequest = { requestId, background: isPeriodicUpdate };
+		const isCurrentRequest = () =>
+			!destroyed &&
+			!pauseAmountUpdates &&
+			nonNullish($authIdentity) &&
+			currentGeneration === fetchGeneration &&
+			currentRequest?.requestId === requestId;
+		if (isPeriodicUpdate) {
+			activity?.start({ requestId, background: true });
 		}
 
-		const currentGeneration = fetchGeneration;
+		// Fast or cached quotes would reveal the winner before the provider scroll reaches a
+		// second name, so a foreground comparison between providers stays up for a minimum time,
+		// failures included. Reduced motion draws no scroll, so there is nothing to hold for.
+		let firstParticipantAt: number | undefined;
+		const participants: SwapProvider[] = [];
+		const holdComparison = async () => {
+			const holdMs =
+				isPeriodicUpdate ||
+				participants.length < 2 ||
+				isNullish(firstParticipantAt) ||
+				prefersReducedMotion.current
+					? 0
+					: firstParticipantAt + SWAP_PROVIDER_MIN_COMPARISON_MS - Date.now();
+			if (holdMs > 0 && isCurrentRequest()) {
+				await new Promise((resolve) => setTimeout(resolve, holdMs));
+			}
+		};
 
 		isSwapAmountsLoading = true;
 
@@ -113,10 +165,19 @@
 				userEthAddress: $ethAddress,
 				userSolAddress: $solAddressMainnet,
 				userBtcAddress: $btcAddressMainnet,
-				userXrpAddress: $xrpAddressMainnet
-			});
+				userXrpAddress: $xrpAddressMainnet,
+				onProviderParticipating: (provider) => {
+					if (isCurrentRequest()) {
+						firstParticipantAt ??= Date.now();
+						if (!participants.includes(provider)) {
+							participants.push(provider);
+						}
+						activity?.addProvider({ requestId, provider });
+					}
+				}
+			}).finally(holdComparison);
 
-			if (currentGeneration !== fetchGeneration) {
+			if (!isCurrentRequest()) {
 				return;
 			}
 
@@ -135,7 +196,7 @@
 				selectedProvider: swapAmounts[0]
 			});
 		} catch (err: unknown) {
-			if (currentGeneration !== fetchGeneration) {
+			if (!isCurrentRequest()) {
 				return;
 			}
 
@@ -151,7 +212,9 @@
 				})
 			});
 		} finally {
-			if (currentGeneration === fetchGeneration) {
+			if (isCurrentRequest()) {
+				activity?.complete({ requestId });
+				currentRequest = undefined;
 				isSwapAmountsLoading = false;
 			}
 		}
@@ -159,9 +222,6 @@
 
 	$effect(() => {
 		if (pauseAmountUpdates || !enableAmountUpdates) {
-			fetchGeneration++;
-			isSwapAmountsLoading = false;
-			untrack(clearDebounceTimer);
 			clearTimer();
 		} else {
 			startTimer();
@@ -169,21 +229,52 @@
 	});
 
 	$effect(() => {
-		[amount, sourceToken, destinationToken, isSourceTokenIcrc2];
+		[
+			amount,
+			sourceToken,
+			destinationToken,
+			isSourceTokenIcrc2,
+			slippageValue,
+			pauseAmountUpdates,
+			$authIdentity
+		];
 
 		untrack(() => {
-			fetchGeneration++;
-			clearDebounceTimer();
+			invalidateRequest(pauseAmountUpdates);
+			if (isNullish($authIdentity)) {
+				store.reset();
+				return;
+			}
+			if (pauseAmountUpdates) {
+				return;
+			}
+			if (isNullish(amount) || isNullish(sourceToken) || isNullish(destinationToken)) {
+				store.reset();
+				return;
+			}
+			if (isNullish(isSourceTokenIcrc2) && isIcToken(sourceToken)) {
+				store.reset();
+				return;
+			}
+			// A remounted wizard may reuse its accepted quote without replaying comparison.
+			if (fetchGeneration === 1 && nonNullish($store) && $store.amountForSwap === Number(amount)) {
+				return;
+			}
+			const requestId = ++requestSequence;
+			currentRequest = { requestId, background: false };
+			activity?.start({ requestId, background: false });
+			isSwapAmountsLoading = true;
 			debounceTimer = setTimeout(() => {
+				debounceTimer = undefined;
 				loadSwapAmounts(false);
 			}, 300);
 		});
 	});
 
 	onDestroy(() => {
-		fetchGeneration++;
+		destroyed = true;
+		invalidateRequest(true);
 		clearTimer();
-		clearDebounceTimer();
 	});
 </script>
 

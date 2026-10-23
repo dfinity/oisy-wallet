@@ -4,6 +4,7 @@ import {
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
+import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
@@ -87,6 +88,21 @@ describe('SwapSolForm', () => {
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
 	const switchButtonSelector = `button[data-tid="${SWAP_SWITCH_TOKENS_BUTTON}"]`;
+
+	it('compares providers before an offer exists without enabling Review', () => {
+		const activity = initSwapQuoteActivityStore();
+		activity.start({ requestId: 1, background: false });
+		const context = new Map(mockContext);
+		context.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: initSwapAmountsStore(), activity });
+		const { getByText } = render(SwapSolForm, {
+			props: { ...props, isSwapAmountsLoading: true },
+			context
+		});
+
+		expect(getByText(en.swap.text.smart_swap)).toBeInTheDocument();
+		expect(getByText(en.swap.text.comparing_providers)).toBeInTheDocument();
+		expect(getByText(en.swap.text.review_button).closest('button')).toBeDisabled();
+	});
 
 	it('should render the component', () => {
 		const { container } = render(SwapSolForm, {
@@ -209,7 +225,7 @@ describe('SwapSolForm', () => {
 			context: mockContext
 		});
 
-		expect(getByText(en.swap.text.swap_provider)).toBeInTheDocument();
+		expect(getByText(en.swap.text.smart_swap)).toBeInTheDocument();
 	});
 
 	it('should render exchange value displays', () => {

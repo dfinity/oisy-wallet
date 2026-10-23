@@ -386,6 +386,89 @@ it becomes the same capped fade.
 Modal and popover containers use an intro-only 25 ms fade. Their children own the exits;
 a container outro would hide the panel and backdrop before their longer outros finish.
 
+### Programmatic swap comparison
+
+`SwapProviderAnimation` is a quote-state indicator, not a timer that controls quote acceptance.
+Its WAAPI entry/exit reuse the shared 200/150 ms durations with the selected Text Loop's
+reference spring phase (`SWAP_PROVIDER_TURN_EASING`): 33 equally spaced samples up to the
+first target crossing, normalized to each turn budget without overshoot or a long tail.
+The layer transform/opacity and sharp/soft opacity bridge share that curve. Feature-detect
+CSS `linear()` inside the client effect; unsupported or absent `CSS.supports` retains
+`MOTION_EASE_OUT_CSS`. Reduced motion retains its existing 100 ms opacity-only ease-out;
+confirmation timing and segment easing are separate. This feature-specific loop does not
+change the generic transitions' exit policy. Candidate dwell, the minimum comparison and the
+short borderless confirmation are configured in `swap.constants.ts`. The animation itself never
+delays a quote; the coordinator owns the minimum comparison (below).
+The multi-keyframe confirmation eases each segment on a linear effect clock; easing the
+entire clock again would hide the squeeze before the recalled text is readable.
+
+Read participants from `SwapAmountsContext.activity`, not the provider registry. The optional
+`SwapQuoteObserver.onProviderParticipating` runs after eligibility guards at pricing entry;
+cached quotes and local pricing count as participation, not fresh network requests. The
+coordinator owns input invalidation, per-round identity and the foreground/background flag.
+Always reveal the amounts store's accepted selection, preserving manual-provider policy.
+Only a foreground pending round actually observed by the mounted header may confirm: no
+replay from a completed snapshot, review remount, manual selection or periodic refresh.
+
+Foreground activity starts when the coordinator queues the round, before its 300 ms debounce,
+and keeps one request identity through pricing. The shared form blocks Review throughout that
+queued/pending foreground work; background refresh may retain a usable quote and enabled Review.
+Cancelling queued/pending foreground work discards offers priced for the previous inputs before
+clearing activity, so a same-amount remount cannot accidentally reuse them. Completed quotes and
+background refresh retain the existing Review-remount and manual-provider behavior.
+
+A foreground round with 2+ participants stays pending for at least
+`SWAP_PROVIDER_MIN_COMPARISON_MS` (two scroll turns) from its first participant, so fast or
+cached quotes still show a second provider before the winner. The coordinator holds the whole
+round, not just the header: the receive amount stays a skeleton and Review stays disabled until
+the winner appears, failures included. Background refresh, a single participant and reduced
+motion are never held, and slower pricing is not held further. A round replaced during the
+hold commits nothing.
+
+All six quote fan-outs use the same collector and `SWAP_QUOTE_TIMEOUT_MS` budget (10 seconds,
+aligned with LI.FI's existing display-quote timeout). Finish early when every provider settles;
+at the deadline, pass completed results to the existing mapping, ordering and minimum-error
+policy, ignoring unfinished providers and late participation/results. This is logical abandonment,
+not universal transport cancellation: nonabortable SDK/canister work may continue underneath.
+Do not apply this quote budget to swap execution, signing, deposit validity or animation timing.
+
+The five swap forms opt into this presentation with `SwapProvider isForm`; review/default
+callers retain the static provider label. Keep the brand nonshrinking in the single-line
+header. While comparing, the status has a zero basis (`w-0 flex-1`) so it truncates first, and
+the scroll group keeps `min-w-24`, room for a logo and a short name down to 320 px; without it
+the label group's `min-w-min` counted the full status text and squeezed the scroll to nothing
+on phones. Below 390 px (`max-[24.375rem]:max-w-24`) the slot is also capped at 96 px, so a long
+name such as NEAR Intents truncates instead of shortening the status on its turn; wider rows let
+the slot grow to the name. During foreground comparison,
+`Collapsible` / `CollapsibleBottomSheet` use their optional `disabled` prop to close and block
+stale details. Custom sheet triggers receive `{ open, disabled }` and must forward disabled
+to their native control. Other disclosure callers retain the default enabled behavior.
+
+No hard cuts in the section. The Smart Swap row, and ETH's "Total fee" row, open and close
+with `slide` (height, 250 ms) while their content fades up 4 px with `fly`; the fee row follows
+`SWAP_DETAILS_ROW_STAGGER_MS` (60 ms) later. The 12 px gap is `pb-3` inside the sliding row, not
+the forms' flex gap, so it animates with the height. The header never swaps labels in one frame:
+`comparingLayout` follows `comparing` one `MOTION_SWAP_DURATION` late, so Select and Best Rate
+(inert while fading) or the status fade out in place before the row re-lays out and the incoming
+ones fade in. The provider slot never shows a placeholder. A first round leaves the slot empty
+and fades the first participant up (opacity, 4 px, the soft-layer blur bridge, 200 ms ease-out);
+that fade runs once, and only a turn, which samples the pose first, cuts it short. One turn clock
+runs for the whole comparison: it starts once a name is on screen and never restarts on a
+keystroke. While a new round waits for its participants (the debounce, slow eligibility checks)
+the scroll keeps turning through the previous round's; a shown provider the new round leaves out
+gives way at the next turn. The clock is a single `$derived` boolean, so prop updates that leave
+it unchanged never restart it mid-turn. ETH's fee skeleton and value share one grid cell and cross-fade.
+Reduced motion keeps the fades (100 ms at most) and drops the slide, rise and blur.
+
+Keep visible layers keyed by provider through interruption. Sample their current poses before
+cancelling/retargeting WAAPI; an outgoing provider can immediately become the winner without
+being remounted hidden. Only transient exits remain, never persistent wheel neighbours.
+A static 2px soft layer crossfades through opacity, so no filter is animated. Reduced motion
+stops rotation and confirmation scale, retains the shared short opacity bridge on an actual
+provider change, and never dims an already-readable winner. Cancel timers/animations on
+invalidation and destruction. Verify real logo sources, clipping and current-pose continuity
+in a compiled-component browser probe: mocked WAAPI unit tests cannot prove those properties.
+
 ## Icons
 
 The codebase uses several icon sources (Lucide, Tabler, Iconly, custom

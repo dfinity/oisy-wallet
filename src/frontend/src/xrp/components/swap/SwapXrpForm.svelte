@@ -140,8 +140,8 @@
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<Hr spacing="md" />
 
-			<div class="flex flex-col gap-3">
-				<SwapProvider {onShowProviderList} showSelectButton {slippageValue} />
+			<div class="flex flex-col">
+				<SwapProvider isForm {onShowProviderList} showSelectButton {slippageValue} />
 
 				<SwapXrpFees />
 			</div>

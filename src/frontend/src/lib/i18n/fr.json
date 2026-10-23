@@ -1363,6 +1363,8 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "Actualisation de l'interface",
 			"swap_provider": "Fournisseur d'échange",
+			"smart_swap": "",
+			"comparing_providers": "",
 			"swap_provider_website": "Site web",
 			"swap_route": "Route d'échange",
 			"included_network_fees": "Frais de réseau inclus",

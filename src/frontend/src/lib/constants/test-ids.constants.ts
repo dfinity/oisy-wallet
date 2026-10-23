@@ -234,6 +234,7 @@ export const SWAP_SWITCH_TOKENS_BUTTON = 'swap-switch-tokens-button';
 export const SWAP_TOKENS_MODAL_OPEN_BUTTON = 'swap-tokens-modal-open-button';
 export const SWAP_TOKENS_MODAL = 'swap-tokens-modal';
 export const SWAP_MODAL_SELECT_PROVIDER_STEP = 'swap-modal-select-provider-step';
+export const SWAP_PROVIDER_ANIMATION = 'swap-provider-animation';
 export const SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE = 'swap-lifi-insufficient-funds-for-fee';
 
 export const MODAL_FILTER_NETWORKS = 'MODAL_FILTER_NETWORKS';
@@ -418,7 +419,6 @@ export const ETH_FEE_PRIORITY = 'eth-fee-priority';
 export const ETH_FEE_PRIORITY_OPTION = 'eth-fee-priority-option';
 export const ETH_FEE_PRIORITY_OPTION_AMOUNT = 'eth-fee-priority-option-amount';
 export const ETH_FEE_PRIORITY_TRIGGER = 'eth-fee-priority-trigger';
-export const SWAP_FEE_INFO = 'swap-fee-info';
 
 // Avatar
 export const AVATAR_IMAGE = 'avatar-image';

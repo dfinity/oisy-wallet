@@ -1363,6 +1363,8 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "刷新界面中",
 			"swap_provider": "兑换服务商",
+			"smart_swap": "",
+			"comparing_providers": "",
 			"swap_provider_website": "官网",
 			"swap_route": "兑换路径",
 			"included_network_fees": "包含的网络费用",

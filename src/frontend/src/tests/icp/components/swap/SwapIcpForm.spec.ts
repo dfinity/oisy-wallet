@@ -12,6 +12,7 @@ import {
 import { balancesStore } from '$lib/stores/balances.store';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
+import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import type { ChainFusionSwapDetails, SwapMappedResult } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
@@ -82,6 +83,21 @@ describe('SwapIcpForm', () => {
 
 		await fireEvent.input(input, { target: { value } });
 	};
+
+	it('compares providers before an offer exists without enabling Review', () => {
+		const activity = initSwapQuoteActivityStore();
+		activity.start({ requestId: 1, background: false });
+		const context = new Map(mockContext);
+		context.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: initSwapAmountsStore(), activity });
+		const { getByText } = render(SwapIcpForm, {
+			props: { ...props, isSwapAmountsLoading: true },
+			context
+		});
+
+		expect(getByText(en.swap.text.smart_swap)).toBeInTheDocument();
+		expect(getByText(en.swap.text.comparing_providers)).toBeInTheDocument();
+		expect(getByText(en.swap.text.review_button).closest('button')).toBeDisabled();
+	});
 
 	it('should render all fields', () => {
 		const { container, getByTestId } = render(SwapIcpForm, {
