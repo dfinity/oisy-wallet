@@ -319,7 +319,8 @@
 				</div>
 			</div>
 		{/each}
-		{#if !current}<div class="w-28 self-center"><SkeletonText /></div>{/if}
+		<!-- Narrower below 390 px, where SwapProvider caps the comparing slot at 96 px. -->
+		{#if !current}<div class="w-28 self-center max-[24.375rem]:w-24"><SkeletonText /></div>{/if}
 	</div>
 {/if}
 

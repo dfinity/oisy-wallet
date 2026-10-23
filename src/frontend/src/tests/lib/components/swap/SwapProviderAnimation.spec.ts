@@ -37,6 +37,15 @@ describe('SwapProviderAnimation', () => {
 		);
 	});
 
+	it('narrows the pending skeleton to the capped phone slot below 390 px', () => {
+		const { getByTestId } = render(SwapProviderAnimation, {
+			props: { providers: [], loading: true }
+		});
+		const skeleton = getByTestId(SWAP_PROVIDER_ANIMATION).lastElementChild;
+
+		expect(skeleton).toHaveClass('w-28', 'max-[24.375rem]:w-24');
+	});
+
 	it('cycles only the participating providers while comparison is pending', async () => {
 		vi.useFakeTimers();
 		const { getByTestId, unmount } = render(SwapProviderAnimation, {

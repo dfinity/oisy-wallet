@@ -117,6 +117,9 @@ describe('SwapProvider form header', () => {
 
 		expect(providerGroup).not.toHaveClass('max-w-[45%]');
 		expect(providerGroup).not.toHaveClass('shrink-0');
+		expect(providerGroup).toHaveClass('min-w-0');
+		expect(providerGroup).not.toHaveClass('min-w-24');
+		expect(providerGroup).not.toHaveClass('max-[24.375rem]:max-w-24');
 		expect(getByText(en.swap.text.smart_swap).parentElement).toHaveClass(
 			'min-w-min',
 			'flex-auto',
@@ -568,15 +571,25 @@ describe('SwapProvider form header', () => {
 
 		expect(status.parentElement).toBe(label.parentElement);
 		expect(label.parentElement).toHaveClass('flex-nowrap', 'min-w-min', 'text-sm', 'text-tertiary');
-		expect(status).toHaveClass('truncate');
 		expect(label).toHaveClass('shrink-0');
-		expect(getByTestId(SWAP_PROVIDER_ANIMATION).parentElement).toHaveClass(
-			'min-w-0',
-			'justify-end'
-		);
+		expect(getByTestId(SWAP_PROVIDER_ANIMATION).parentElement).toHaveClass('justify-end');
 		expect(getByTestId(SWAP_PROVIDER_ANIMATION)).toHaveAttribute(
 			'data-provider',
 			SwapProvider.ICP_SWAP
 		);
+	});
+
+	it('truncates the comparing status before the provider scroll gives up its room', () => {
+		activity.start({ requestId: 1, background: false });
+		activity.addProvider({ requestId: 1, provider: SwapProvider.ICP_SWAP });
+		const { getByText, getByTestId } = render(SwapProviderHeader, { props, context });
+		const scrollGroup = getByTestId(SWAP_PROVIDER_ANIMATION).parentElement;
+
+		// Zero basis: the status no longer counts toward the label group's min-content.
+		expect(getByText(en.swap.text.comparing_providers)).toHaveClass('w-0', 'flex-1', 'truncate');
+		expect(scrollGroup).toHaveClass('min-w-24');
+		expect(scrollGroup).not.toHaveClass('min-w-0');
+		// Below 390 px (24.375rem) the slot is fixed, so a long name cannot shorten the status.
+		expect(scrollGroup).toHaveClass('max-[24.375rem]:max-w-24');
 	});
 });

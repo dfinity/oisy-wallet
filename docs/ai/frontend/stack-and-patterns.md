@@ -434,7 +434,12 @@ Do not apply this quote budget to swap execution, signing, deposit validity or a
 
 The five swap forms opt into this presentation with `SwapProvider isForm`; review/default
 callers retain the static provider label. Keep the brand nonshrinking in the single-line
-header; the adjacent status may truncate on narrow screens. During foreground comparison,
+header. While comparing, the status has a zero basis (`w-0 flex-1`) so it truncates first, and
+the scroll group keeps `min-w-24`, room for a logo and a short name down to 320 px; without it
+the label group's `min-w-min` counted the full status text and squeezed the scroll to nothing
+on phones. Below 390 px (`max-[24.375rem]:max-w-24`) the slot is also capped at 96 px, so a long
+name such as NEAR Intents truncates instead of shortening the status on its turn; wider rows let
+the slot grow to the name. During foreground comparison,
 `Collapsible` / `CollapsibleBottomSheet` use their optional `disabled` prop to close and block
 stale details. Custom sheet triggers receive `{ open, disabled }` and must forward disabled
 to their native control. Other disclosure callers retain the default enabled behavior.

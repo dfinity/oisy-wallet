@@ -124,7 +124,11 @@
 					>
 						<span class="shrink-0">{$i18n.swap.text.smart_swap}</span>
 						{#if comparing}
-							<span class="truncate" role="status">{$i18n.swap.text.comparing_providers}</span>
+							<!-- Zero basis keeps the status out of the group's min-content: it truncates
+							into whatever the provider scroll leaves, instead of squeezing the scroll. -->
+							<span class="w-0 flex-1 truncate" role="status"
+								>{$i18n.swap.text.comparing_providers}</span
+							>
 						{:else if ($swapAmountsStore?.swaps.length ?? 0) > 1 && !isInBottomSheet && showSelectButton}
 							<Button
 								link
@@ -137,7 +141,15 @@
 							>
 						{/if}
 					</div>
-					<div class="ml-auto flex min-w-0 items-center justify-end gap-2 text-sm text-primary">
+					<!-- While comparing, the scroll keeps room for a logo and a short name down to 320 px.
+					Below 390 px it is also capped there, so a long name truncates instead of
+					shortening the status on its turn. -->
+					<div
+						class="ml-auto flex items-center justify-end gap-2 text-sm text-primary"
+						class:max-[24.375rem]:max-w-24={comparing}
+						class:min-w-0={!comparing}
+						class:min-w-24={comparing}
+					>
 						{#if !comparing && isBestRate && ($swapAmountsStore?.swaps.length ?? 0) > 1}
 							<BestRateBadge styleClass="mt-0" />
 						{/if}
