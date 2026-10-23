@@ -17,6 +17,7 @@ import {
 	IC_CKETH_LEDGER_CANISTER_ID,
 	ICRC_CK_ETH_TOKENS
 } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
+import { ICRC_CK_SOL_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface } from '$icp/types/ic-token';
 import { nonNullish } from '@dfinity/utils';
@@ -31,7 +32,8 @@ export const PUBLIC_ICRC_TOKENS: IcCkInterface[] = [
 export const ICRC_CK_TOKENS: IcCkInterface[] = [
 	...ICRC_CK_BTC_TOKENS,
 	...ICRC_CK_ETH_TOKENS,
-	...ICRC_CK_ERC20_TOKENS
+	...ICRC_CK_ERC20_TOKENS,
+	...ICRC_CK_SOL_TOKENS
 ];
 
 export const ICRC_CK_TOKENS_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = [
