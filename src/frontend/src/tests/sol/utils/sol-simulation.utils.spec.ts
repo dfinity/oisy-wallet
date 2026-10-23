@@ -462,6 +462,29 @@ describe('sol-simulation.utils', () => {
 				expect(isEmptySolSimulationPreview(preview)).toBeTruthy();
 			});
 
+			// The run may report a closed account as an empty one rather than as none.
+			it('should list one the run reports as holding no lamports', () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockAtaAddress],
+					preAccounts: [tokenAccount({ amount: ZERO, owner: mockSolAddress })],
+					postAccounts: [systemAccount({ lamports: ZERO })],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview.closedAccounts).toEqual([mockAtaAddress]);
+			});
+
+			it('should not list one the run did not report on', () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockAtaAddress],
+					preAccounts: [tokenAccount({ amount: ZERO, owner: mockSolAddress })],
+					postAccounts: [],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview.closedAccounts).toBeUndefined();
+			});
+
 			it('should not list one of somebody else', () => {
 				const preview = mapSolSimulationPreview({
 					addresses: [mockAtaAddress],

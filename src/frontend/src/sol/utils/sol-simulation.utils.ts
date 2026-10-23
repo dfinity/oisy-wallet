@@ -116,6 +116,11 @@ const parseAccountState = (account: SolanaParsedAccountInfo): SolAccountState | 
 	};
 };
 
+// Emptied by a run: no account after it, or one holding no lamports, which the run may report in
+// place of a missing one. An account the run did not report on says nothing.
+const isEmptiedAccount = (post: SolanaParsedAccountInfo | undefined): boolean =>
+	post === null || (nonNullish(post) && BigInt(post.lamports) === ZERO);
+
 /**
  * Whether an account is the user's own.
  *
@@ -316,7 +321,10 @@ export const mapSolSimulationPreview = ({
 								}
 							]
 						: acc.created,
-				closed: nonNullish(pre) && isNullish(post) ? [...acc.closed, address] : acc.closed,
+				closed:
+					nonNullish(pre) && isEmptiedAccount(postAccounts[index])
+						? [...acc.closed, address]
+						: acc.closed,
 				solDelta:
 					address === userAddress
 						? (post?.lamports ?? ZERO) - (pre?.lamports ?? ZERO)
@@ -441,9 +449,9 @@ export const findSolClosedAppAccounts = ({
 			return acc;
 		}
 
-		const emptied = post === null || (nonNullish(post) && BigInt(post.lamports) === ZERO);
-
-		return emptied ? [...acc, { account, program: pre.program, lamports: pre.lamports }] : acc;
+		return isEmptiedAccount(post)
+			? [...acc, { account, program: pre.program, lamports: pre.lamports }]
+			: acc;
 	}, []);
 
 /**
