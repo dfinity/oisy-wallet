@@ -116,6 +116,12 @@ upgraded past this release.` comment so the cleanup is obvious, and
      drop the module + `post_upgrade` wiring in a follow-up PR once the
      rollout is complete.
 
+   A migration that may not fit in one message can run in timer batches
+   instead: start it from `post_upgrade`, end each batch at an instruction
+   budget, and resume after the last key it migrated. Every upgrade starts
+   it again until it is removed, so it must be idempotent. See
+   [`contacts/migration.rs`](../../../../src/backend/src/contacts/migration.rs).
+
 3. **Bumped `MemoryId` + parallel migration.** Define a new `MemoryId`
    for the new shape, populate it from the old one in `post_upgrade`,
    read from the new one going forward.
