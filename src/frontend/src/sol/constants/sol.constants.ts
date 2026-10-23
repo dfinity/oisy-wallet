@@ -76,8 +76,11 @@ export const SOLANA_SIMULATION_MAX_CLOSE_RUNS = 5;
 export const SOLANA_SIMULATION_TIMEOUT_MILLISECONDS = 5_000;
 
 // How many times a run whose pre-state must be read at its very slot reads the pair again, when
-// the simulation lands on a later slot or on a node not there yet, within the timeout above.
-export const SOLANA_SIMULATION_SNAPSHOT_ATTEMPTS = 3;
+// the simulation lands on a later slot or on a node not there yet, within the timeout above. On
+// mainnet, 75 of 100 pairs landed on one slot at the first attempt, 23 at the second, 1 at the
+// third and 1 at none of three, at about 100 ms a pair (2026-10-23, public endpoints): ten leave a
+// miss about one in a million, and still most of the timeout.
+export const SOLANA_SIMULATION_SNAPSHOT_ATTEMPTS = 10;
 
 // Multiples of that baseline at which the review speaks up: twice it is worth naming as the dApp's
 // own choice, five times it is worth questioning. Both stay short of blocking, since paying well
