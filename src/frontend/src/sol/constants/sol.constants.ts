@@ -4,6 +4,8 @@ export const SYSTEM_PROGRAM_ADDRESS = '11111111111111111111111111111111';
 export const COMPUTE_BUDGET_PROGRAM_ADDRESS = 'ComputeBudget111111111111111111111111111111';
 export const TOKEN_PROGRAM_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 export const TOKEN_2022_PROGRAM_ADDRESS = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
+// The native mint of Token-2022, its counterpart of wrapped SOL: an account of it wraps lamports.
+export const TOKEN_2022_NATIVE_MINT_ADDRESS = '9pan9bMn5HatX4EJdBwg9VgCa7Uz5HL8N1m5D3NdXejP';
 export const ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS =
 	'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
 export const ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS = 'AddressLookupTab1e1111111111111111111111111';
@@ -30,6 +32,10 @@ export const SOLANA_TRANSACTION_FEE_IN_LAMPORTS = 5_000n;
 
 export const MICROLAMPORTS_PER_LAMPORT = 1_000_000n;
 
+// The largest amount an SPL token account holds or approves (a `u64`). An approval of exactly this
+// much is how applications ask for an unlimited allowance.
+export const SPL_TOKEN_MAX_AMOUNT = (1n << 64n) - 1n;
+
 // When a transaction does not request a compute unit limit, the runtime budgets a fixed
 // amount per instruction, capped transaction-wide. The prioritisation fee is charged on the
 // requested (or defaulted) limit, not on the units actually consumed.
@@ -43,23 +49,27 @@ export const SOLANA_MAX_COMPUTE_UNIT_LIMIT = 1_400_000n;
 // collapses towards nothing, which would otherwise make an ordinary tip look enormous.
 export const SOLANA_PRIORITIZATION_FEE_BASELINE_FLOOR_USD = 0.1;
 
+/**
+ * The fixed header every account pays rent for on top of its own data, as the protocol states it.
+ *
+ * The price per byte is not reproduced here: it is chain state rather than a protocol constant, and
+ * the network lowers it in steps by feature gate, so the review reads what the chain charges instead.
+ * The header is what turns the chain's figure for one account size into the figure for another.
+ */
+export const SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES = 128n;
+
 // The simulated preview asks the RPC for the post-state of an explicit list of accounts. Only
 // writable accounts can change, which already discards most of a DeFi message's account set;
 // past this many the preview is dropped rather than truncated, because a truncated preview
 // would report "no changes" for accounts it never looked at.
-/**
- * What the runtime charges to keep an account alive, as the protocol states it: every account pays
- * for a fixed 128-byte header plus its own data, at a per-byte-year price, for a fixed number of
- * years up front. An account funded with this much is exempt and never pays again.
- *
- * Reproduced here rather than asked of a provider because the review needs it before it renders,
- * and because the three values are protocol constants rather than chain state.
- */
-export const SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES = 128n;
-export const SOLANA_RENT_LAMPORTS_PER_BYTE_YEAR = 3_480n;
-export const SOLANA_RENT_EXEMPTION_YEARS = 2n;
-
 export const SOLANA_SIMULATION_MAX_ACCOUNTS = 60;
+
+// A close an application's program makes inside one of several calls naming the account goes to
+// the last of them only after a second run of the message up to it, one run per distinct call.
+// Nothing short of the account limit bounds how many a crafted message asks for, and the timeout
+// below does not cancel runs in flight, so past this many none is started and those closes stay
+// unlisted.
+export const SOLANA_SIMULATION_MAX_CLOSE_RUNS = 5;
 
 // The preview is fetched before the review renders, so a slow or unresponsive RPC would hold
 // the request behind it. Past this it is abandoned and the review renders without it.
@@ -85,6 +95,11 @@ export const SOLANA_MAX_SKIPPED_SIGNATURE_PAGES = 3;
 // The RPC rejects a `getMultipleAccounts` call that asks for more accounts than this.
 // https://solana.com/docs/rpc/http/getmultipleaccounts
 export const SOLANA_MAX_MULTIPLE_ACCOUNTS = 100;
+
+// The RPC refuses to return a transaction of a newer version than the caller declares support for,
+// and one such transaction in a wallet's history fails every load of it. Version 1 (SIMD-0385) is
+// accepted on mainnet since epoch 1035.
+export const SOLANA_MAX_SUPPORTED_TRANSACTION_VERSION = 1;
 
 // A page of signatures is resolved concurrently, but public RPC endpoints throttle bursts of
 // `getTransaction` calls, so only this many are in flight at once.

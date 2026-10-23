@@ -23,6 +23,9 @@
 		amount: OptionAmount;
 		amountSetToMax?: boolean;
 		destination?: string;
+		// The fee in hand was estimated for a previous amount or recipient, and the one for the current
+		// values has not landed yet.
+		feeOutdated?: boolean;
 		nativeEthereumToken: Token;
 		selectedContact?: ContactUi;
 		onBack: () => void;
@@ -35,6 +38,7 @@
 		amount = $bindable(),
 		amountSetToMax = $bindable(false),
 		destination = $bindable(''),
+		feeOutdated = false,
 		nativeEthereumToken,
 		selectedContact,
 		onBack,
@@ -51,7 +55,9 @@
 
 	let invalidDestination = $derived(isNullishOrEmpty(destination) || !isEthAddress(destination));
 
-	let invalid = $derived(invalidDestination || insufficientFunds || isNullish(amount));
+	let invalid = $derived(
+		invalidDestination || insufficientFunds || isNullish(amount) || feeOutdated
+	);
 </script>
 
 <SendForm

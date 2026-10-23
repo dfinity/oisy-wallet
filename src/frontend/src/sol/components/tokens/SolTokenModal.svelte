@@ -47,7 +47,6 @@
 
 				<ExternalLink
 					ariaLabel={$i18n.tokens.alt.open_token_address_block_explorer}
-					color="blue"
 					href={nonNullish(explorerUrl)
 						? replacePlaceholders(explorerUrl, { $args: `token/${tokenAddress}/` })
 						: ''}

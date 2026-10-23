@@ -22,7 +22,11 @@
 	</PillButton>
 
 	{#each categories as category (category)}
-		<PillButton onClick={() => select(category)} selected={$tokenCategoryFilter === category}>
+		<PillButton
+			accent={category === TokenCategoryTagValue.COMPUTE}
+			onClick={() => select(category)}
+			selected={$tokenCategoryFilter === category}
+		>
 			{getCategoryLabel(category)}
 		</PillButton>
 	{/each}

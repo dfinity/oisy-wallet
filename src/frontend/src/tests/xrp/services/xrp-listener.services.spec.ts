@@ -3,6 +3,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenId } from '$lib/types/token';
 import { areTransactionsStoresLoaded } from '$lib/utils/transactions.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
+import * as xrpHistoryPager from '$xrp/services/xrp-history-pager.services';
 import { resetWallet, syncWallet, syncWalletError } from '$xrp/services/xrp-listener.services';
 import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
@@ -99,6 +100,16 @@ describe('xrp-listener.services', () => {
 
 			expect(get(xrpTransactionsStore)?.[tokenId]).toBeUndefined();
 			expect(get(balancesStore)?.[tokenId]).toBeNull();
+		});
+
+		// The pager's marker points below the rows just cleared: resuming from it would leave out
+		// everything between the first page synced next and where the pager had got to.
+		it('drops the history pager, so that paging starts from the newest transaction again', () => {
+			const spyResetPager = vi.spyOn(xrpHistoryPager, 'resetXrpHistoryPager');
+
+			resetWallet({ tokenId });
+
+			expect(spyResetPager).toHaveBeenCalledExactlyOnceWith(tokenId);
 		});
 
 		// A failure is not a handover. A failure leaves loaded rows in place — `syncWalletError`

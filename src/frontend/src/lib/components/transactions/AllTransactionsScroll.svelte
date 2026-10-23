@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 	import InfiniteScroll from '$lib/components/ui/InfiniteScroll.svelte';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
@@ -17,6 +18,11 @@
 		onLoadMore?: () => Promise<ResultSuccess>;
 		/** True once no chain has any history left to give. */
 		exhausted?: boolean;
+		/**
+		 * How far back the list reaches, in seconds. Rows older than it are held back until the list
+		 * goes that far for every token.
+		 */
+		floor?: number;
 		children: Snippet;
 	}
 
@@ -25,6 +31,7 @@
 		transactionsToDisplay = $bindable([]),
 		onLoadMore,
 		exhausted = false,
+		floor,
 		children
 	}: Props = $props();
 
@@ -45,11 +52,35 @@
 		dryAtLength = undefined;
 	});
 
-	let everythingLoadedIsOnScreen = $derived(
-		transactionsToDisplay.length >= sortedTransactions.length
-	);
+	// A moved floor changes what the list can show without anything loading, so an empty round measured
+	// against the old one says nothing about the new one. Kept, it disabled the scroll for good once a
+	// rising floor shrank the list below the length it recorded.
+	$effect.pre(() => {
+		[floor];
 
-	let dry = $derived(nonNullish(dryAtLength) && sortedTransactions.length <= dryAtLength);
+		dryAtLength = undefined;
+	});
+
+	// Only rows down to the floor. Tokens load whole pages, so some bring rows from beyond it while the
+	// token whose own oldest row set it has none there. Shown straight away, those rows left that
+	// token's older transactions out between them until the end of the list asked every chain again.
+	// Undated rows stay: there is nothing to hold them against.
+	let revealable = $derived.by(() => {
+		if (exhausted || isNullish(floor)) {
+			return sortedTransactions;
+		}
+
+		const cutOff = floor;
+
+		return sortedTransactions.filter(
+			({ transaction: { timestamp } }) =>
+				isNullish(timestamp) || normalizeTimestampToSeconds(timestamp) >= cutOff
+		);
+	});
+
+	let everythingLoadedIsOnScreen = $derived(transactionsToDisplay.length >= revealable.length);
+
+	let dry = $derived(nonNullish(dryAtLength) && revealable.length <= dryAtLength);
 
 	let canFetchMore = $derived(nonNullish(onLoadMore) && !exhausted && !dry);
 
@@ -71,7 +102,8 @@
 			return false;
 		}
 
-		const lengthBeforeFetch = sortedTransactions.length;
+		const lengthBeforeFetch = revealable.length;
+		const floorBeforeFetch = floor;
 
 		loading = true;
 
@@ -105,14 +137,17 @@
 		}
 
 		// Nothing loaded. Stop asking until the list grows again, otherwise the observer would keep
-		// firing against chains that have nothing left.
-		dryAtLength = lengthBeforeFetch;
+		// firing against chains that have nothing left. Not when the floor moved during the round: the
+		// length recorded above belongs to the old one, and a rising floor would read as dry for good.
+		if (floor === floorBeforeFetch) {
+			dryAtLength = lengthBeforeFetch;
+		}
 
 		return false;
 	};
 
 	$effect(() => {
-		transactionsToDisplay = sortedTransactions.slice(0, Number(WALLET_PAGINATION) * pages);
+		transactionsToDisplay = revealable.slice(0, Number(WALLET_PAGINATION) * pages);
 	});
 </script>
 

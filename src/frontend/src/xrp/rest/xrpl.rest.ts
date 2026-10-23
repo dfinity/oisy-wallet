@@ -131,8 +131,8 @@ const xrpJsonRpc = async ({
 	// `error_code` and `error_message` — and was previously ignored, so a FAILED response could
 	// still deliver a plausible-looking result: the method schemas strip `status` as an unknown key,
 	// and `{ status: 'error', ledger_current_index: <bogus> }` came back as an index. That is the
-	// one payload the confirmation loop cannot defend against by arithmetic, because the first
-	// validated index a run reads has nothing to corroborate it.
+	// one payload no check downstream can defend against by arithmetic, because a single index read
+	// has nothing to corroborate it.
 	//
 	// Only these two values exist. Gated on presence, so a node that omits the field is still fine.
 	if ('status' in result && status !== 'success' && status !== 'error') {
@@ -578,8 +578,8 @@ export const loadXrpTransactionOutcome = async ({
 	//
 	// A `txnNotFound` WITHOUT `searched_all` matches no variant and so lands here too, which is
 	// right: it may mean the node simply lacks the ledger our payment is in — a resynced or
-	// history-gapped member of a load-balanced endpoint — and reading that as non-inclusion declares
-	// a settled payment expired, inviting the duplicate send that `XrpSendExpiredError` calls safe.
+	// history-gapped member of a load-balanced endpoint — and reading that as non-inclusion closes a
+	// settled payment's record as expired, inviting the duplicate send the expiry message calls safe.
 	const parsed = XrplTxResultSchema.safeParse(result);
 
 	if (!parsed.success) {
@@ -600,8 +600,8 @@ export const loadXrpTransactionOutcome = async ({
 	// And therefore the one that must be bound to the question. The validated and pending branches
 	// carry a `hash` to compare; absence carries none, so the echoed request is the only identity
 	// available — and without it a stale or misrouted `txnNotFound`, for another hash or another
-	// range, is read as THIS payment's non-inclusion. Past `LastLedgerSequence` that is
-	// `XrpSendExpiredError`, which tells the caller a fresh payment is safe to build.
+	// range, is read as THIS payment's non-inclusion. Past `LastLedgerSequence` that closes the
+	// record as expired, which tells the user a fresh payment is safe to build.
 	//
 	// The range is compared too, not just the hash: absence only means anything over the ledgers
 	// that were actually searched, so an answer about a different window says nothing about this
@@ -659,11 +659,12 @@ export const loadXrpTransactionOutcome = async ({
 /**
  * Broadcasts a signed transaction blob via the XRPL `submit` method.
  *
- * `accepted` reports whether THIS node took the transaction and `engine_result` is its
- * provisional result (e.g. `tesSUCCESS`, `terQUEUED`, `tecUNFUNDED_PAYMENT`). Neither is proof of
- * anything final: an applied `tec*` is accepted yet failed, and a refusal may still be reapplied
- * later. Only a malformed `tem*` result is conclusive (see `isXrpSubmitFinalFailure`); every other
- * outcome is settled by polling the tx hash (see {@link loadXrpTransactionOutcome}).
+ * `engine_result` is this node's provisional result (e.g. `tesSUCCESS`, `terQUEUED`,
+ * `tecUNFUNDED_PAYMENT`), and not proof of anything final: an applied `tec*` failed yet consumed
+ * the sequence, and a refusal may still be reapplied later. So no submit result decides the outcome — every one is settled by the record's poll of the
+ * tx hash (see {@link loadXrpTransactionOutcome}). Even a malformed `tem*`, which no ledger will
+ * ever apply, is left to it: the transaction never lands, and the record resolves as expired once
+ * its window has passed.
  */
 export const submitXrpTransaction = async ({
 	txBlob,
@@ -685,16 +686,7 @@ export const submitXrpTransaction = async ({
 	return {
 		engineResult: data.engine_result,
 		engineResultMessage: data.engine_result_message,
-		txHash: data.tx_json?.hash,
-		// It says this node took the transaction (applied/queued/broadcast/kept), which is neither
-		// necessary nor sufficient for the send to have happened — so `accepted: false` never
-		// creates a failure. It does decide one thing: a `tem*` is only a definitive rejection when
-		// the node did NOT also claim to have taken the blob, because nothing can be both malformed
-		// and accepted. See `isXrpSubmitFinalFailure`.
-		//
-		// Passed through rather than compared to `true`: the schema requires a boolean, so the
-		// comparison would only be re-deriving what the parse already guarantees.
-		accepted: data.accepted
+		txHash: data.tx_json?.hash
 	};
 };
 

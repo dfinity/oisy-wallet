@@ -203,6 +203,21 @@ describe('MaxBalanceButton', () => {
 Prefer `getByRole`, `getByLabelText`, `getByText` — they exercise the same
 semantics as a screen reader.
 
+Interaction-feedback gotchas:
+
+- **jsdom applies no `:hover` / `:active` and no stylesheet.** Assert the
+  utility that produces the feedback (`press`, `press-icon`,
+  `row-feedback`, `hit-area`) and check the look itself in the running app.
+- **Svelte 5 delegates `onclick`** to one listener at the mount root and
+  replays propagation itself. To prove a nested control stops its click
+  from reaching the row, render the real parent row and assert the row's
+  callback was not called; a plain `addEventListener` on the test
+  container sees the click either way.
+- **`transition:slide` on an inline element** (a `<span>`) logs a Svelte
+  warning in jsdom, which fails the test (logging is not allowed) and can
+  leave its DOM behind for the next test. Exercise the toggle on a
+  component whose collapsible part is a block element, or don't open it.
+
 ## Type-check tests
 
 `npm run check:tests` runs `svelte-check` against `tsconfig.spec.json`.

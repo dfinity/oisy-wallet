@@ -22,7 +22,6 @@ export const CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS = 4;
 export const BTC_CONVERT_FEE = ZERO;
 
 export const DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE = 0.00001;
-export const BTC_AMOUNT_FOR_UTXOS_FEE_UPDATE_PROPORTION = 10;
 export const BTC_MINIMUM_AMOUNT = 700n;
 
 // Fee tolerance percentage for Bitcoin transactions (±10%)

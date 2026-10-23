@@ -2,6 +2,7 @@ import { Currency } from '$lib/enums/currency';
 import { AppWorker } from '$lib/services/_worker.services';
 import { syncExchange } from '$lib/services/exchange.services';
 import { ExchangeWorker } from '$lib/services/worker.exchange.services';
+import { trackXdrBasketExpiry } from '$lib/services/xdr-basket-analytics.services';
 import { toastsError } from '$lib/stores/toasts.store';
 import type {
 	PostMessageDataRequestExchangeTimer,
@@ -13,6 +14,10 @@ import { mockSplAddress } from '$tests/mocks/sol.mock';
 
 vi.mock('$lib/services/exchange.services', () => ({
 	syncExchange: vi.fn()
+}));
+
+vi.mock('$lib/services/xdr-basket-analytics.services', () => ({
+	trackXdrBasketExpiry: vi.fn()
 }));
 
 vi.mock('$lib/stores/toasts.store', () => ({
@@ -128,6 +133,23 @@ describe('worker.exchange.services', () => {
 				workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
 				expect(syncExchange).toHaveBeenCalledExactlyOnceWith(mockData);
+				expect(trackXdrBasketExpiry).not.toHaveBeenCalled();
+			});
+
+			it('should track the XDR basket countdown when the refresh reports it', () => {
+				const mockData: PostMessageDataResponseExchange = {
+					currentErc20Prices: {},
+					currentIcrcPrices: {},
+					currentXdrBasketStatus: { phase: 'grace', daysLeft: 12 }
+				};
+				const payload = { msg: 'syncExchange', data: mockData };
+				workerInstance.onmessage?.({ data: payload } as MessageEvent);
+
+				expect(syncExchange).toHaveBeenCalledExactlyOnceWith(mockData);
+				expect(trackXdrBasketExpiry).toHaveBeenCalledExactlyOnceWith({
+					phase: 'grace',
+					daysLeft: 12
+				});
 			});
 
 			it('should handle syncExchangeError message', () => {

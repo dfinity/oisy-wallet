@@ -48,9 +48,28 @@ export interface ActiveUserTransaction {
  */
 export type ActiveUserTransactionData =
 	| {
-			OneSecEvmToIcp: OneSecEvmToIcpData;
+			/**
+			 * Native XRP payment. Unlike every other variant this one does not track a
+			 * provider — it exists to hold an invariant: an XRPL `Sequence` is a nonce,
+			 * so a second payment from the same address while the first is unresolved
+			 * is unsafe whichever sequence it picks. The row is what refuses it, and it
+			 * has to outlive the tab to do that. The locally derived transaction id and
+			 * the signed `LastLedgerSequence` ride in `external_refs`.
+			 */
+			Xrp: XrpData;
 	  }
+	| { OneSecEvmToIcp: OneSecEvmToIcpData }
 	| { OneSecIcpToEvm: OneSecIcpToEvmData }
+	| {
+			/**
+			 * LI.FI swap or bridge. A single variant covers every source chain (EVM,
+			 * Solana) and every route; the source tx hash, the route tool, LI.FI's
+			 * transaction id and the learned destination tx hash ride in
+			 * `external_refs`. The two chains are those of `source_token` /
+			 * `dest_token`.
+			 */
+			Lifi: LifiData;
+	  }
 	| {
 			/**
 			 * OISY Trade order-book swap. Both legs are Internet Computer ledgers, and
@@ -67,6 +86,17 @@ export type ActiveUserTransactionData =
 			 * optional memo, and origin/destination tx hashes ride in `external_refs`.
 			 */
 			NearIntents: NearIntentsData;
+	  }
+	| {
+			/**
+			 * Minting TCYCLES from ICP through the NNS Cycles Minting Canister: an ICP
+			 * transfer to the CMC's deposit account for the caller, then
+			 * `notify_mint_cycles`. Only the caller's own principal can notify its
+			 * deposit, so the row, opened before the transfer, is what lets a later
+			 * session finish a mint whose tab closed between the two calls. The ICP
+			 * block index, learned once the transfer returns, rides in `external_refs`.
+			 */
+			CyclesMint: CyclesMintData;
 	  }
 	| {
 			/**
@@ -95,6 +125,14 @@ export type ActiveUserTransactionData =
 	  };
 export type ActiveUserTransactionError =
 	| { InvalidId: null }
+	| {
+			/**
+			 * A non-terminal record already tracks the same subject, and the flow only
+			 * allows one at a time. Distinct from `AlreadyExists`, which is about the
+			 * record's own id: this one is about what the record is *for*.
+			 */
+			AlreadyInFlight: null;
+	  }
 	| { NotFound: null }
 	| { TooManyActiveTransactions: null }
 	| { InvalidData: string }
@@ -777,6 +815,26 @@ export interface CustomToken {
 	enabled: boolean;
 	allowed_external_content_source_urls: [] | [Array<string>];
 }
+/**
+ * Cycles mint payload: the values fixed when the mint starts. The row opens
+ * before the ICP transfer, so the transfer's creation timestamp is one of them;
+ * only the block index is learned later, in `external_refs`.
+ */
+export interface CyclesMintData {
+	/**
+	 * `created_at_time` of the ICP transfer. Reusing it on a retry lets the
+	 * ledger deduplicate the transfer, and it is what finds the block again
+	 * when the tab died before the transfer returned.
+	 */
+	transfer_created_at_ns: bigint;
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units: the ICP sent to the CMC, without the
+	 * ledger fee.
+	 */
+	amount: bigint;
+	dest_token: TokenId;
+}
 export interface DappCarouselSettings {
 	hidden_dapp_ids: Array<string>;
 }
@@ -905,6 +963,12 @@ export interface ExtV2Token {
 	canister_id: Principal;
 }
 export interface GetActiveUserTransactionsResponse {
+	/**
+	 * The user has seen every record updated at or before this time, on whichever device they
+	 * saw it, so a record reads as unread only once it changes after this. Zero until the user
+	 * first marks their records seen.
+	 */
+	seen_up_to_ns: bigint;
 	transactions: Array<ActiveUserTransaction>;
 }
 export type GetActiveUserTransactionsResult =
@@ -1231,6 +1295,21 @@ export interface InitArg {
 	new_user_signups_allowed: [] | [boolean];
 }
 /**
+ * LI.FI swap payload. Settlement is tracked off-chain — first on the source
+ * chain, by transaction hash, then by LI.FI's status endpoint — so those
+ * pointers, and the learned destination tx hash, live in `external_refs`; only
+ * the values fixed at creation are captured here. No chain id is stored: the
+ * token ids already carry both chains.
+ */
+export interface LifiData {
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units.
+	 */
+	amount: bigint;
+	dest_token: TokenId;
+}
+/**
  * Which Liquidium lend/borrow action an active transaction tracks.
  */
 export type LiquidiumAction =
@@ -1250,6 +1329,15 @@ export interface LiquidiumData {
 	 */
 	amount: bigint;
 }
+export type MarkActiveUserTransactionsSeenResult =
+	| {
+			/**
+			 * The mark now stored, which is later than the one requested when another device has
+			 * already marked further.
+			 */
+			Ok: bigint;
+	  }
+	| { Err: ActiveUserTransactionError };
 /**
  * One of the caller's own tips, as returned by `get_my_tips`.
  */
@@ -1277,10 +1365,17 @@ export interface MyTip {
  * NEAR Intents (1Click) cross-chain swap payload. Settlement is tracked
  * off-chain by polling the 1Click status endpoint keyed by the deposit
  * address, so that address (and its optional memo, plus learned-mid-flow tx
- * hashes) lives in `external_refs`; only the canonical immutable trio is
+ * hashes) lives in `external_refs`; only the values fixed at creation are
  * captured here.
  */
 export interface NearIntentsData {
+	/**
+	 * The XRP address the deposit is sent from, set exactly when `source_token`
+	 * is native XRP. That deposit is an XRP payment, so this is the field the
+	 * one-payment-in-flight check reads, as it reads `XrpData::source_address`
+	 * for a send. Optional and last, so rows stored before it decode as `None`.
+	 */
+	source_address: [] | [string];
 	source_token: TokenId;
 	/**
 	 * Source-token amount in base units.
@@ -2045,7 +2140,11 @@ export type Token =
 	| { Erc4626: ErcToken }
 	| { Dip721: ExtV2Token };
 export type TokenAccountId =
-	{ Btc: BtcAddress } | { Eth: EthAddress } | { Sol: string } | { Icrcv2: Icrcv2AccountId };
+	| { Btc: BtcAddress }
+	| { Eth: EthAddress }
+	| { Sol: string }
+	| { Xrp: string }
+	| { Icrcv2: Icrcv2AccountId };
 /**
  * A unified token identifier covering both native and custom tokens for the main supported chains.
  * Unlike `CustomTokenId` (which only covers user-added tokens), this enum also includes
@@ -2412,6 +2511,37 @@ export interface VeloraData {
  * API, `Market` by transaction receipt on the source chain.
  */
 export type VeloraSwapMode = { Delta: null } | { Market: null };
+/**
+ * Native XRP payment payload — the values fixed when the transaction was
+ * signed. The transaction id and its `LastLedgerSequence` are learned from the
+ * signed blob and ride in `external_refs`, so they are not here.
+ *
+ * `source_address` is the field the guard reads: the invariant is one
+ * unresolved payment per *address*, not per user, because a row for a
+ * different address says nothing about this one's sequence.
+ */
+export interface XrpData {
+	destination_address: string;
+	/**
+	 * Transaction cost in drops.
+	 */
+	fee: bigint;
+	/**
+	 * Native XRP, which also fixes the network the payment was signed for.
+	 */
+	token: TokenId;
+	/**
+	 * The XRPL `DestinationTag`, when the payment carries one. `0` is a real
+	 * tag rather than an absent one, which is why this is an `Option` and not
+	 * a sentinel.
+	 */
+	destination_tag: [] | [number];
+	source_address: string;
+	/**
+	 * Amount in drops.
+	 */
+	amount: bigint;
+}
 export interface _SERVICE {
 	/**
 	 * Adds one or more dismissed notifications to the user's profile.
@@ -2927,6 +3057,12 @@ export interface _SERVICE {
 	 * update method.
 	 */
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
+	/**
+	 * Marks every one of the caller's active user transactions updated at or before
+	 * `up_to_ns` as seen, on every device the caller signs in on. Returns the mark
+	 * now stored.
+	 */
+	mark_active_user_transactions_seen: ActorMethod<[bigint], MarkActiveUserTransactionsSeenResult>;
 	/**
 	 * Returns whether sign-ups of new users are currently allowed.
 	 *

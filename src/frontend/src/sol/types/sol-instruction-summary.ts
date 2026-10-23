@@ -9,13 +9,23 @@ import type { SplTokenAddress } from '$sol/types/spl';
  * (`syncNative`, `initializeImmutableOwner`) names nothing a user holds or controls.
  */
 export type SolInstructionSummaryKind =
-	// Not an instruction at all: the container the legs of one routed swap hang under.
+	// Not an effect at all: the heading the lines of one instruction the wallet could not read hang
+	// under, a routed swap's legs among them.
 	| 'route'
+	// Not an effect either: the heading the lines of one token batch hang under, naming the program
+	// the batch runs in.
+	| 'batch'
 	| 'send'
 	| 'receive'
 	| 'wrap'
 	| 'unwrap'
 	| 'createTokenAccount'
+	// An account opened for an application's own program, its rent paid by the user. The account is
+	// the program's, and the rent is what the user hands over to open it.
+	| 'createAccount'
+	// An application's account its program emptied, every lamport of it paid back into the user's
+	// wallet. The program moves them itself, so only the run's account states say it happened.
+	| 'closeAccount'
 	| 'closeTokenAccount'
 	| 'approve'
 	| 'revoke'
@@ -51,23 +61,60 @@ export interface SolInstructionSummary {
 	// Whether the counterparty is an account the user owns. A swap pays the user's own account, so
 	// without this every route reads as if it were sending value to a stranger.
 	own?: boolean;
-	// The account created, closed, approved or handed over.
+	// Set on an unwrap paying the user's wallet, whichever account it leaves. The line states the
+	// wrapped SOL leaving its account, and it arrives in the wallet as SOL itself, which no transfer
+	// of wrapped SOL does.
+	unwrapsToWallet?: boolean;
+	// Set on an unwrap that names no amount, which moves everything its account wraps: what the line
+	// can still state when nobody read how much that is.
+	unwrapsAll?: boolean;
+	// Set on the excess lamports a token account pays the wallet, which no instruction states the
+	// amount of: what the line can still state.
+	withdrawsExcess?: boolean;
+	// The account created, closed, approved or handed over. On SOL somebody else pays the user, the
+	// account of theirs it arrives in when that is not the wallet.
 	account?: SolAddress;
-	// Lamports the user pays to open an account.
+	// Lamports it costs to open an account.
 	rent?: bigint;
+	// Who funded the opening, which is not always the user: a sender opening the recipient's account
+	// pays its rent.
+	payer?: SolAddress;
 	// Lamports an account returns when it is closed. Closing hands the destination the account's
 	// whole balance, so for a wrapped SOL account this is the rent-exempt reserve plus the SOL that
 	// was wrapped, not the rent alone.
 	returned?: bigint;
+	// What a closed token account held in tokens when it closed, when it was read: what it held
+	// before the message, or nothing when the message opened it, plus every transfer in and out
+	// since. For a wrapped SOL account that is the SOL wrapped inside it, which separates a close
+	// that unwraps something from one that closes an empty account.
+	wrapped?: bigint;
+	// The rent-exempt reserve of a closed account, where it is known: the part of what it hands
+	// over that is rent. A Token program account is always the same size, so its reserve is the
+	// chain's minimum for that size; a Token-2022 account's size varies with its extensions and
+	// leaves it unknown. Everything above it and the wrapped SOL is lamports paid in on top.
+	reserve?: bigint;
+	// `false` on a close of an account a run read and found somebody else holding, which reaches
+	// the list only because it pays the user's wallet. What arrives is money they did not have
+	// rather than money of theirs coming back, and its rent was never theirs to be charged or
+	// credited. Absent where no run read the account, which says nothing either way.
+	ownAccount?: boolean;
 	// The new authority of a `setAuthority`, absent when the field was cleared.
 	newAuthority?: SolAddress;
-	// The program that produced the legs of a route, when one is known by address.
+	// The program that produced the legs of a route, or that an account is opened for, when one is
+	// known by address.
 	program?: SolAddress;
 	// The name that program publishes for itself, when it publishes one. Its own claim about
 	// itself, attested by nobody: a label for the address, never a statement about what it does.
 	programName?: string;
-	// The legs of a single routed swap. They hang under the route rather than sitting flat among
-	// the top-level effects, which is what keeps a four-leg route from reading as four unrelated
-	// transfers.
+	// The program that made a transfer inside the instruction it hangs under, when that is another
+	// program than the one the heading names and not one of the known programs: a pool OISY cannot
+	// read, which the review's notice about such programs names.
+	via?: SolAddress;
+	// The name that program publishes for itself, when it publishes one. A label, as above.
+	viaName?: string;
+	// The lines of a single instruction the wallet could not read, the legs of a routed swap among
+	// them, or of a token batch. They hang under it rather than sitting flat among the top-level
+	// effects, which is what keeps a four-leg route from reading as four unrelated transfers, and a
+	// line made inside an application from reading as one the message states itself.
 	children?: SolInstructionSummary[];
 }

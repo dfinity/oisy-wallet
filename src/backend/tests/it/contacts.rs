@@ -4,7 +4,7 @@ use candid::Principal;
 use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use shared::types::{
-    account::{EthAddress, TokenAccountId},
+    account::{EthAddress, TokenAccountId, XrpAddress},
     contact::{
         Contact, ContactAddressData, ContactError, ContactImage, CreateContactRequest,
         ImageMimeType, UpdateContactRequest, MAX_IMAGES_PER_PRINCIPAL,
@@ -14,7 +14,7 @@ use shared::types::{
 
 use crate::utils::{
     mock::CALLER,
-    pocketic::{setup, BackendBuilder, PicBackend, PicCanisterTrait},
+    pocketic::{controller, setup, BackendBuilder, PicBackend, PicCanisterTrait},
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -166,7 +166,7 @@ fn test_create_contact_should_succeed_with_valid_name() {
 
     assert_eq!(contact.name, "John Doe");
     assert!(contact.id > 0); // Should have a valid ID
-    assert!(contact.addresses.is_empty()); // Should start with empty addresses
+    assert_eq!(contact.addresses, vec![]); // Should start with empty addresses
 }
 
 #[test]
@@ -318,7 +318,7 @@ fn test_create_contact_should_be_retrievable_by_get_contacts() {
 
     // Initially there should be no contacts
     let contacts = call_get_contacts(&pic_setup, caller);
-    assert!(contacts.is_empty());
+    assert_eq!(contacts, vec![]);
 
     // Create a contact
     let contact_name = "Alice Smith";
@@ -549,7 +549,7 @@ fn test_update_contact_should_succeed_with_valid_name_only() {
 
     assert_eq!(updated_contact.name, "Updated Name");
     assert!(updated_contact.id > 0);
-    assert!(updated_contact.addresses.is_empty());
+    assert_eq!(updated_contact.addresses, vec![]);
 }
 
 #[test]
@@ -1058,6 +1058,72 @@ fn test_update_contact_rejects_an_over_long_address() {
 }
 
 #[test]
+fn test_update_contact_stores_an_xrp_address() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let contact = call_create_contact(&pic_setup, caller, "XRP Contact".to_string()).unwrap();
+
+    let xrp_address = ContactAddressData {
+        token_account_id: TokenAccountId::Xrp(XrpAddress(
+            "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh".to_string(),
+        )),
+        label: Some("main".to_string()),
+    };
+    let updated = call_update_contact(
+        &pic_setup,
+        caller,
+        Contact {
+            addresses: vec![xrp_address.clone()],
+            ..contact.clone()
+        },
+    )
+    .expect("that an XRP address is accepted");
+    assert_eq!(updated.addresses, vec![xrp_address.clone()]);
+
+    let stored =
+        call_get_contact(&pic_setup, caller, contact.id).expect("that the contact is retrievable");
+    assert_eq!(stored.addresses, vec![xrp_address]);
+}
+
+#[test]
+fn test_update_contact_rejects_an_xrp_x_address() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let contact = call_create_contact(&pic_setup, caller, "XRP Contact".to_string()).unwrap();
+
+    // An X-address bundles a destination tag, which a contact does not store. Validation runs
+    // during candid deserialization, so the call is rejected outright rather than returning a typed
+    // ContactError.
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "update_contact",
+        UpdateContactRequest {
+            id: contact.id,
+            name: contact.name.clone(),
+            addresses: vec![ContactAddressData {
+                token_account_id: TokenAccountId::Xrp(XrpAddress(
+                    "XVPcpSm47b1CZkf5AkKM9a84dQHe3m4sBhsrA4XtnBECTAc".to_string(),
+                )),
+                label: None,
+            }],
+            update_timestamp_ns: contact.update_timestamp_ns,
+            image: None,
+        },
+    );
+    assert!(
+        wrapped_result.is_err(),
+        "an XRP X-address should be rejected"
+    );
+
+    // The rejected write left the stored contact untouched.
+    let after =
+        call_get_contact(&pic_setup, caller, contact.id).expect("that the contact survives");
+    assert_eq!(after.addresses, vec![]);
+}
+
+#[test]
 fn test_images_survive_in_get_contacts() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
@@ -1225,4 +1291,50 @@ fn test_images_survive_canister_upgrade() {
     let listed = call_get_contacts(&pic_setup, caller);
     assert_eq!(listed.len(), 1);
     assert_eq!(listed[0].image, Some(png_image));
+}
+
+#[test]
+fn test_inline_image_migration_finishes_after_canister_upgrade() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let png_image = create_test_png_image();
+    let with_image = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "Migrated".to_string(),
+        Some(png_image.clone()),
+    )
+    .unwrap();
+
+    // Same rate-limit idiom as `test_images_survive_canister_upgrade`.
+    pic_setup.pic.advance_time(Duration::from_mins(1));
+    for _ in 0..20 {
+        pic_setup.pic.tick();
+    }
+
+    pic_setup
+        .upgrade_with_wasm(&BackendBuilder::default_wasm_path(), None)
+        .expect("canister upgrade should succeed");
+
+    // `post_upgrade` starts the migration on a timer; let its first batch run.
+    for _ in 0..5 {
+        pic_setup.pic.tick();
+    }
+
+    // The only image is already in `contact_image`, so the migration finishes with nothing to move.
+    let logs = pic_setup
+        .pic
+        .fetch_canister_logs(pic_setup.canister_id, controller())
+        .expect("a controller can read the canister logs");
+    assert!(
+        logs.iter()
+            .any(|record| String::from_utf8_lossy(&record.content)
+                .contains("Moved 0 inline contact images to contact_image")),
+        "the migration should finish after the upgrade"
+    );
+
+    let after = call_get_contact(&pic_setup, caller, with_image.id)
+        .expect("that the contact survives the migration");
+    assert_eq!(after.image, Some(png_image));
 }

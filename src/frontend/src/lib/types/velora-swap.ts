@@ -12,7 +12,7 @@ export const VELORA_EXTERNAL_REF_KEYS = {
 	REFUND_TX_HASH: 'velora_refund_tx',
 	// Market poll keys: the broadcast tx hash plus the nonce it was signed with.
 	// The nonce is what lets the poller tell "not mined yet" from "replaced or
-	// dropped" — see `toVeloraMarketOutcome`.
+	// dropped" — see `toEvmSourceTxOutcome`.
 	TX_HASH: 'velora_tx_hash',
 	TX_NONCE: 'velora_tx_nonce',
 	// Display + analytics metadata snapshotted at creation time. Reuses the same

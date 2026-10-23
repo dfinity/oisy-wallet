@@ -150,7 +150,9 @@
 </script>
 
 <button class={`contents ${styleClass ?? ''}`} data-tid={testId} onclick={onClick}>
-	<span class="block w-full rounded-xl px-2 py-2 hover:bg-brand-subtle-10">
+	<span
+		class="block w-full rounded-xl row-feedback px-2 py-2 parent-pressed:bg-brand-subtle-20 parent-pressed:duration-0"
+	>
 		<Card noMargin withGap>
 			<span class="flex min-w-0 flex-1 basis-0 items-center gap-1">
 				<span class="truncate" data-tid={TRANSACTION_CHILDREN_CONTAINER}>

@@ -17,6 +17,7 @@ import {
 } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { act, render } from '@testing-library/svelte';
 import { tick, type Snippet } from 'svelte';
 import { get, readable, writable } from 'svelte/store';
@@ -178,6 +179,31 @@ describe('SwapAmountsContext.svelte', () => {
 		expect(value?.swaps).toEqual(mockSwapProviders);
 		expect(value?.selectedProvider).toEqual(mockSwapProviders[0]);
 		expect(value?.amountForSwap).toBe(10);
+	});
+
+	// The XRP address is the refund address of a swap from XRP and the payout address of a
+	// swap toward it; without it the fan-out quotes neither.
+	it('passes the user XRP mainnet address to fetchSwapAmounts', async () => {
+		vi.spyOn(addressDerived, 'xrpAddressMainnet', 'get').mockImplementation(() =>
+			readable(mockXrpAddress)
+		);
+
+		const fetchMock = vi
+			.spyOn(swapService, 'fetchSwapAmounts')
+			.mockResolvedValue(mockSwapProviders);
+
+		await renderWithContext({
+			amount: '10',
+			sourceToken,
+			destinationToken,
+			slippageValue: '0.3'
+		});
+
+		await waitForDebounce();
+
+		expect(fetchMock).toHaveBeenCalledWith(
+			expect.objectContaining({ userXrpAddress: mockXrpAddress })
+		);
 	});
 
 	it('sets empty swaps if fetchSwapAmounts throws', async () => {

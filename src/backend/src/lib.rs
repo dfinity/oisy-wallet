@@ -39,12 +39,12 @@ use shared::{
             GetContactResult, GetContactsResult, GetMyTipsResult, GetPersonalNoteShareResult,
             GetPersonalNoteSharesCountResult, GetPersonalNotesCountResult, GetPersonalNotesResult,
             GetTipDetailsResult, GetTipResult, GetTipSecretResult, GetUserProfileResult,
-            GetUserTransactionsResult, PersonalNotesVetkeyResult, SaveUserTransactionsResult,
-            SetPersonalNoteResult, SetTipSecretResult, SetUserShowTestnetsResult,
-            SignOnramperWidgetUrlResult, TipVetkeyResult, UpdateContactResult,
-            UpdateExperimentalFeaturesSettingsResult, UpdateProviderAgreementsResult,
-            UpdateTransactionFilterSettingsResult, UpdateUserAgreementsResult,
-            UpdateUserNetworkSettingsResult,
+            GetUserTransactionsResult, MarkActiveUserTransactionsSeenResult,
+            PersonalNotesVetkeyResult, SaveUserTransactionsResult, SetPersonalNoteResult,
+            SetTipSecretResult, SetUserShowTestnetsResult, SignOnramperWidgetUrlResult,
+            TipVetkeyResult, UpdateContactResult, UpdateExperimentalFeaturesSettingsResult,
+            UpdateProviderAgreementsResult, UpdateTransactionFilterSettingsResult,
+            UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -127,6 +127,10 @@ pub fn post_upgrade(arg: Option<Arg>) {
     utils::housekeeping::start_periodic_housekeeping_timers();
 
     exchange::start_exchange_rate_timer();
+
+    // TODO: remove once every canister has been upgraded past the release that ships it; see
+    // `contacts::migration`.
+    contacts::start_inline_image_migration();
 }
 
 export_candid!();
