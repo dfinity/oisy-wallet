@@ -1,3 +1,4 @@
+import { goto } from '$app/navigation';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
@@ -7,6 +8,7 @@ import { tokenGroupStore } from '$lib/stores/token-group.store';
 import { tokenListStore } from '$lib/stores/token-list.store';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiGroup } from '$lib/types/token-ui-group';
+import { transactionsUrl } from '$lib/utils/nav.utils';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
@@ -263,5 +265,39 @@ describe('TokenGroupCard', () => {
 		expect(cryptoCardA).toBeInTheDocument();
 		expect(cryptoCardB).toBeInTheDocument();
 		expect(stableCard).toBeInTheDocument();
+	});
+
+	describe('opening a token of the group', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		const openFirstToken = async (container: HTMLElement) => {
+			const header = container.querySelector('[data-tid^="token-group"]');
+			assertNonNullish(header);
+			await fireEvent.click(header);
+
+			const card = container.querySelector('[data-tid="token-card-CRYA-ICP"]');
+			assertNonNullish(card);
+			await fireEvent.click(card);
+		};
+
+		it("opens the token's page by default", async () => {
+			const { container } = render(TokenGroupCard, { props: { tokenGroup } });
+
+			await openFirstToken(container);
+
+			expect(goto).toHaveBeenCalledExactlyOnceWith(transactionsUrl({ token: cryptoTokenA }));
+		});
+
+		it('hands the token to onTokenClick instead when given', async () => {
+			const onTokenClick = vi.fn();
+			const { container } = render(TokenGroupCard, { props: { tokenGroup, onTokenClick } });
+
+			await openFirstToken(container);
+
+			expect(onTokenClick).toHaveBeenCalledExactlyOnceWith(cryptoTokenA);
+			expect(goto).not.toHaveBeenCalled();
+		});
 	});
 });

@@ -29,7 +29,7 @@
 		},
 		"types": ["vitest/globals", "@testing-library/jest-dom"]
 	},
-	"exclude": [],
+	"exclude": ["./src/extension/**/*"],
 	"include": [
 		"ambient.d.ts",
 		"./types/**/$types.d.ts",

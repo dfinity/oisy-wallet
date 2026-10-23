@@ -757,7 +757,6 @@ interface I18nSend {
 		approving: string;
 		approving_fees: string;
 		approving_transfer: string;
-		approving_wallet_connect: string;
 		refreshing_ui: string;
 		initializing: string;
 		signing_transaction: string;
@@ -1620,6 +1619,51 @@ interface I18nWallet_connect {
 		sol_transaction_as_message: string;
 		request_not_defined: string;
 		unexpected_processing_request: string;
+	};
+}
+
+interface I18nExtension {
+	text: {
+		loading: string;
+		loading_addresses: string;
+		no_extension: string;
+		not_found: string;
+		outdated: string;
+		done: string;
+		failed: string;
+		unsupported: string;
+		networks_off: string;
+		wrong_account: string;
+	};
+	connect: {
+		title_site: string;
+		title_extension: string;
+		site_sees: string;
+		extension_keeps: string;
+		eth_network: string;
+		sol_network: string;
+		connect: string;
+	};
+	panel: {
+		menu: string;
+		this_site_connected: string;
+		this_site_not_connected: string;
+		connected_sites_count: string;
+		no_sites: string;
+		disconnect: string;
+		disconnect_site: string;
+		disconnect_all: string;
+		chain_eth: string;
+		chain_sol: string;
+		all_tokens: string;
+		open_oisy: string;
+		all_activity: string;
+		view_all: string;
+		addresses_sites_see: string;
+		snapshot_as_of: string;
+		snapshot_prices_live: string;
+		sign_in_for_activity: string;
+		sign_in: string;
 	};
 }
 
@@ -2749,6 +2793,7 @@ interface I18n {
 	fee: I18nFee;
 	info: I18nInfo;
 	wallet_connect: I18nWallet_connect;
+	extension: I18nExtension;
 	trading: I18nTrading;
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;

@@ -1026,7 +1026,6 @@
 			"approving": "承認中...",
 			"approving_fees": "手数料を承認中...",
 			"approving_transfer": "送信を承認中...",
-			"approving_wallet_connect": "WalletConnectリクエスト承認中...",
 			"refreshing_ui": "UI更新中",
 			"initializing": "トランザクション初期化中...",
 			"signing_transaction": "トランザクション署名中...",
@@ -1942,6 +1941,50 @@
 			"sol_transaction_as_message": "このメッセージはSolanaのトランザクションであり、トランザクションレビューを通じてのみ承認できます。安全のため、署名されませんでした。",
 			"request_not_defined": "予期しないエラー: リクエストが定義されていないため、処理できません。",
 			"unexpected_processing_request": "WalletConnectでリクエストを処理中に予期しないエラーが発生しました。"
+		}
+	},
+	"extension": {
+		"text": {
+			"loading": "",
+			"loading_addresses": "",
+			"no_extension": "",
+			"not_found": "",
+			"outdated": "",
+			"done": "",
+			"failed": "",
+			"unsupported": "",
+			"networks_off": "",
+			"wrong_account": ""
+		},
+		"connect": {
+			"title_site": "",
+			"title_extension": "",
+			"site_sees": "",
+			"extension_keeps": "",
+			"eth_network": "",
+			"sol_network": "",
+			"connect": ""
+		},
+		"panel": {
+			"menu": "",
+			"this_site_connected": "",
+			"this_site_not_connected": "",
+			"connected_sites_count": "",
+			"no_sites": "",
+			"disconnect": "",
+			"disconnect_site": "",
+			"disconnect_all": "",
+			"chain_eth": "",
+			"chain_sol": "",
+			"all_tokens": "",
+			"open_oisy": "",
+			"all_activity": "",
+			"view_all": "",
+			"addresses_sites_see": "",
+			"snapshot_as_of": "",
+			"snapshot_prices_live": "",
+			"sign_in_for_activity": "",
+			"sign_in": ""
 		}
 	},
 	"trading": {

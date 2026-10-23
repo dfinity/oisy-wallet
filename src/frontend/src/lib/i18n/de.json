@@ -1026,7 +1026,6 @@
 			"approving": "Genehmige...",
 			"approving_fees": "Genehmige Gebühren...",
 			"approving_transfer": "Genehmige Übertragung...",
-			"approving_wallet_connect": "Genehmige WalletConnect-Anfrage...",
 			"refreshing_ui": "UI aktualisieren",
 			"initializing": "Initialisiere Transaktion...",
 			"signing_transaction": "Transaktion wird signiert...",
@@ -1942,6 +1941,50 @@
 			"sol_transaction_as_message": "Diese Nachricht ist eine Solana-Transaktion, die nur durch eine Transaktionsüberprüfung genehmigt werden kann. Aus Sicherheitsgründen wurde sie nicht signiert.",
 			"request_not_defined": "Unerwarteter Fehler: Anfrage ist nicht definiert und kann daher nicht verarbeitet werden.",
 			"unexpected_processing_request": "Unerwarteter Fehler bei der Verarbeitung der WalletConnect-Anfrage."
+		}
+	},
+	"extension": {
+		"text": {
+			"loading": "",
+			"loading_addresses": "",
+			"no_extension": "",
+			"not_found": "",
+			"outdated": "",
+			"done": "",
+			"failed": "",
+			"unsupported": "",
+			"networks_off": "",
+			"wrong_account": ""
+		},
+		"connect": {
+			"title_site": "",
+			"title_extension": "",
+			"site_sees": "",
+			"extension_keeps": "",
+			"eth_network": "",
+			"sol_network": "",
+			"connect": ""
+		},
+		"panel": {
+			"menu": "",
+			"this_site_connected": "",
+			"this_site_not_connected": "",
+			"connected_sites_count": "",
+			"no_sites": "",
+			"disconnect": "",
+			"disconnect_site": "",
+			"disconnect_all": "",
+			"chain_eth": "",
+			"chain_sol": "",
+			"all_tokens": "",
+			"open_oisy": "",
+			"all_activity": "",
+			"view_all": "",
+			"addresses_sites_see": "",
+			"snapshot_as_of": "",
+			"snapshot_prices_live": "",
+			"sign_in_for_activity": "",
+			"sign_in": ""
 		}
 	},
 	"trading": {
