@@ -54,6 +54,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
 import {
 	createMockSolCompiledTransactionMessageBytes,
+	mockSolParsedTransactionMessage,
 	mockSolSignedTransaction
 } from '$tests/mocks/sol-transactions.mock';
 import {
@@ -66,6 +67,7 @@ import {
 import type { WalletKitTypes } from '@reown/walletkit';
 import type { SignatureBytes } from '@solana/keys';
 import {
+	address,
 	getBase58Decoder,
 	getBase58Encoder,
 	isTransactionMessageWithBlockhashLifetime,
@@ -333,11 +335,11 @@ describe('wallet-connect.services', () => {
 			const base64EncodedTransactionMessage = 'mockBase64Transaction';
 			const networkId = SOLANA_MAINNET_NETWORK_ID;
 
-			const paidBy = (address: string) =>
+			const paidBy = (payer: string) =>
 				vi.spyOn(solTransactionsUtils, 'parseSolBase64TransactionMessage').mockResolvedValue({
-					...mockParsedTransaction,
-					feePayer: { address }
-				} as unknown as CompilableTransactionMessage);
+					...mockSolParsedTransactionMessage,
+					feePayer: { address: address(payer) }
+				});
 
 			it('should say when the message names another account to pay its fee', async () => {
 				paidBy(mockSolAddress2);
@@ -1444,9 +1446,9 @@ describe('wallet-connect.services', () => {
 		describe('with a message that names another account to pay its fee', () => {
 			beforeEach(() => {
 				vi.spyOn(solTransactionsUtils, 'parseSolBase64TransactionMessage').mockResolvedValue({
-					...mockParsedTransaction,
-					feePayer: { address: mockSolAddress2 }
-				} as unknown as CompilableTransactionMessage);
+					...mockSolParsedTransactionMessage,
+					feePayer: { address: address(mockSolAddress2) }
+				});
 			});
 
 			it('should refuse to send it', async () => {
