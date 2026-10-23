@@ -396,8 +396,9 @@ The layer transform/opacity and sharp/soft opacity bridge share that curve. Feat
 CSS `linear()` inside the client effect; unsupported or absent `CSS.supports` retains
 `MOTION_EASE_OUT_CSS`. Reduced motion retains its existing 100 ms opacity-only ease-out;
 confirmation timing and segment easing are separate. This feature-specific loop does not
-change the generic transitions' exit policy. Candidate dwell and the short borderless
-confirmation are configured in `swap.constants.ts`; neither adds a minimum quote wait.
+change the generic transitions' exit policy. Candidate dwell, the minimum comparison and the
+short borderless confirmation are configured in `swap.constants.ts`. The animation itself never
+delays a quote; the coordinator owns the minimum comparison (below).
 The multi-keyframe confirmation eases each segment on a linear effect clock; easing the
 entire clock again would hide the squeeze before the recalled text is readable.
 
@@ -415,6 +416,14 @@ queued/pending foreground work; background refresh may retain a usable quote and
 Cancelling queued/pending foreground work discards offers priced for the previous inputs before
 clearing activity, so a same-amount remount cannot accidentally reuse them. Completed quotes and
 background refresh retain the existing Review-remount and manual-provider behavior.
+
+A foreground round with 2+ participants stays pending for at least
+`SWAP_PROVIDER_MIN_COMPARISON_MS` (two scroll turns) from its first participant, so fast or
+cached quotes still show a second provider before the winner. The coordinator holds the whole
+round, not just the header: the receive amount stays a skeleton and Review stays disabled until
+the winner appears, failures included. Background refresh, a single participant and reduced
+motion are never held, and slower pricing is not held further. A round replaced during the
+hold commits nothing.
 
 All six quote fan-outs use the same collector and `SWAP_QUOTE_TIMEOUT_MS` budget (10 seconds,
 aligned with LI.FI's existing display-quote timeout). Finish early when every provider settles;

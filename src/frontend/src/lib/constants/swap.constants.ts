@@ -48,8 +48,13 @@ export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeee
 
 export const SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS = 5_000;
 
-// Candidate dwell time, not a minimum quote duration: a ready offer always wins immediately.
+// Candidate dwell time: how long each provider stays in the comparison scroll.
 export const SWAP_PROVIDER_CYCLE_INTERVAL_MS = 650;
+
+// Shortest foreground comparison between 2+ providers, from the first provider shown: two scroll
+// turns, so fast or cached quotes still show a second provider before the winner. Slower quotes
+// are not held further.
+export const SWAP_PROVIDER_MIN_COMPARISON_MS = SWAP_PROVIDER_CYCLE_INTERVAL_MS * 2;
 
 // Selected Text Loop spring (k=900, c=80, m=10), sampled at 33 equally spaced times.
 // p(t)=1-exp(-4t)*(cos(sqrt(74)t)+4/sqrt(74)*sin(sqrt(74)t)); first p=1 at

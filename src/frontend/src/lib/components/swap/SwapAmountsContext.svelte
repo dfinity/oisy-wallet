@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, untrack, type Snippet } from 'svelte';
+	import { prefersReducedMotion } from 'svelte/motion';
 	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import {
 		SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS,
-		SWAP_DEFAULT_SLIPPAGE_VALUE
+		SWAP_DEFAULT_SLIPPAGE_VALUE,
+		SWAP_PROVIDER_MIN_COMPARISON_MS
 	} from '$lib/constants/swap.constants';
 	import {
 		btcAddressMainnet,
@@ -21,6 +23,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SwapAmountTooLowError } from '$lib/types/errors';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { SwapProvider } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 
 	interface Props {
@@ -130,6 +133,24 @@
 			activity?.start({ requestId, background: true });
 		}
 
+		// Fast or cached quotes would reveal the winner before the provider scroll reaches a
+		// second name, so a foreground comparison between providers stays up for a minimum time,
+		// failures included. Reduced motion draws no scroll, so there is nothing to hold for.
+		let firstParticipantAt: number | undefined;
+		const participants: SwapProvider[] = [];
+		const holdComparison = async () => {
+			const holdMs =
+				isPeriodicUpdate ||
+				participants.length < 2 ||
+				isNullish(firstParticipantAt) ||
+				prefersReducedMotion.current
+					? 0
+					: firstParticipantAt + SWAP_PROVIDER_MIN_COMPARISON_MS - Date.now();
+			if (holdMs > 0 && isCurrentRequest()) {
+				await new Promise((resolve) => setTimeout(resolve, holdMs));
+			}
+		};
+
 		isSwapAmountsLoading = true;
 
 		try {
@@ -147,10 +168,14 @@
 				userXrpAddress: $xrpAddressMainnet,
 				onProviderParticipating: (provider) => {
 					if (isCurrentRequest()) {
+						firstParticipantAt ??= Date.now();
+						if (!participants.includes(provider)) {
+							participants.push(provider);
+						}
 						activity?.addProvider({ requestId, provider });
 					}
 				}
-			});
+			}).finally(holdComparison);
 
 			if (!isCurrentRequest()) {
 				return;
