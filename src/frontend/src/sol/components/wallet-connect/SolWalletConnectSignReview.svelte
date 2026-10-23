@@ -23,10 +23,10 @@
 	import SolWalletConnectTransferParties from '$sol/components/wallet-connect/SolWalletConnectTransferParties.svelte';
 	import SolWalletConnectUnreadPrograms from '$sol/components/wallet-connect/SolWalletConnectUnreadPrograms.svelte';
 	import {
+		SOLANA_LAMPORTS_PER_SIGNATURE,
 		SOLANA_PRIORITIZATION_FEE_BASELINE_FLOOR_USD,
 		SOLANA_PRIORITIZATION_FEE_NOTICE_MULTIPLIER,
-		SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER,
-		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
+		SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER
 	} from '$sol/constants/sol.constants';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
@@ -54,6 +54,13 @@
 		feeToken: Token;
 		prioritizationFee?: bigint;
 		prioritizationFeeEstimate?: bigint;
+		// How many signatures the message requires, which the base fee is charged on once each. Every
+		// message carries at least its fee payer's, so that is what the review assumes until the
+		// decode settles.
+		requiredSignatures?: number;
+		// Who pays the base and priority fees: the message's first signer, which is the dApp rather
+		// than the user when the dApp sponsors the request.
+		feePayer?: string;
 		isApproval?: boolean;
 		// Whether the message cannot be stated faithfully, which is what the signing flow refuses on.
 		ambiguous?: boolean;
@@ -104,6 +111,8 @@
 		feeToken,
 		prioritizationFee,
 		prioritizationFeeEstimate,
+		requiredSignatures = 1,
+		feePayer,
 		isApproval = false,
 		ambiguous = false,
 		decoded = false,
@@ -142,11 +151,20 @@
 
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
-	// What the transaction costs beyond what it moves: every line of the fee section. The simulated
-	// SOL balance carries all of it and the message states none of it, so it is the room the
-	// comparison of the two allows.
+	// Charged for every signature the message requires rather than once per message, so a message a
+	// dApp co-signs pays it twice.
+	let baseFee = $derived(SOLANA_LAMPORTS_PER_SIGNATURE * BigInt(requiredSignatures));
+
+	// A fee payer nobody has read yet is taken to be the user, as the review has always assumed.
+	let walletPaysFees = $derived(isNullish(feePayer) || feePayer === source);
+
+	// What the transaction costs the user beyond what it moves: every line of the fee section the
+	// wallet pays. The simulated SOL balance carries all of it and the message states none of it, so
+	// it is the room the comparison of the two allows. A request the dApp sponsors leaves the base and
+	// priority fees out: the user's balance pays neither, so allowing for them would make room for an
+	// outflow nothing explains.
 	let costs = $derived(
-		SOLANA_TRANSACTION_FEE_IN_LAMPORTS + (prioritizationFee ?? ZERO) + ataFee + appAccountCost
+		(walletPaysFees ? baseFee + (prioritizationFee ?? ZERO) : ZERO) + ataFee + appAccountCost
 	);
 
 	// The message read on its own says a plain send, receive or swap, and the run agrees that this
@@ -450,15 +468,15 @@
 					</WalletConnectModalValue>
 				{/if}
 
-				<!-- One heading, and under it what the transaction actually charges: the base fee every
-		     message pays, what it bids on top, and the rent of any account it opens. Three headings
+				<!-- One heading, and under it what the transaction actually charges: the base fee its
+		     signatures cost, what it bids on top, and the rent of any account it opens. Three headings
 		     read as three unrelated costs. -->
 				<WalletConnectModalValue label={$i18n.fee.text.fee} ref="fee">
 					<div class="flex flex-col gap-1">
 						<div data-tid="network-fee">
 							{@render feeValue({
 								kind: $i18n.fee.text.base_kind,
-								feeAmount: SOLANA_TRANSACTION_FEE_IN_LAMPORTS
+								feeAmount: baseFee
 							})}
 						</div>
 
