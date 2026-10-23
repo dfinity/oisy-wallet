@@ -50,8 +50,9 @@
 	<p class="mb-4 font-normal"><output class="break-all">{source}</output></p>
 
 	{#if loading}
-		<div class="mb-4" data-tid="btc-wallet-connect-sign-psbt-loading">
+		<div class="mb-4" data-tid="btc-wallet-connect-sign-psbt-loading" role="status">
 			<LoaderSpinner inline size="small" />
+			<span class="sr-only">{$i18n.init.info.hold_loading}</span>
 		</div>
 	{:else if decodeError || isNullish(decoded)}
 		<p class="mb-4 font-normal text-error-primary">

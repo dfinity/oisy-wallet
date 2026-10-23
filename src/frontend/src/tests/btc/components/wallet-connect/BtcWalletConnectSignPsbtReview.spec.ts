@@ -36,7 +36,10 @@ describe('BtcWalletConnectSignPsbtReview', () => {
 			props: { ...props, decoded: undefined, loading: true }
 		});
 
-		expect(getByTestId('btc-wallet-connect-sign-psbt-loading')).toBeInTheDocument();
+		const loading = getByTestId('btc-wallet-connect-sign-psbt-loading');
+
+		expect(loading).toHaveAttribute('role', 'status');
+		expect(loading).toHaveTextContent(en.init.info.hold_loading);
 		expect(queryByText(en.wallet_connect.error.btc_psbt_decode)).not.toBeInTheDocument();
 		expect(queryByRole('button', { name: en.core.text.approve })).not.toBeInTheDocument();
 	});
