@@ -849,10 +849,13 @@ LI.FI passes `true`, which changes the run in three ways:
   nodes at the same confirmed slot hold the same state for it, so equality is the
   consistency guarantee, whichever node answered.
 - A simulation at a later slot, or a `minContextSlot`-not-reached error from a lagging
-  node, repeats the pair, up to `LIFI_SOL_SIMULATION_SNAPSHOT_ATTEMPTS` (3) times inside
-  the existing `SOLANA_SIMULATION_TIMEOUT_MILLISECONDS`. If no attempt lands on one
-  slot, the result is `undefined` and the swap aborts (fail closed), like any other
-  simulation failure.
+  node, repeats the pair, up to `SOLANA_SIMULATION_SNAPSHOT_ATTEMPTS` (10) times inside
+  the existing `SOLANA_SIMULATION_TIMEOUT_MILLISECONDS`, a shared Solana constant since
+  3a. Of 100 mainnet runs, 75 landed on one slot at the first attempt, 23 at the second,
+  1 at the third and 1 at none of three, at about 100 ms a pair (2026-10-23, in
+  review): ten make a miss about one in a million. If no attempt lands on one slot, the
+  result is `undefined` and the swap aborts (fail closed), like any other simulation
+  failure.
 
 The sequential read costs one extra round trip on the LI.FI path only. Binding the
 route's source and destination account metas statically instead would need a per-route
