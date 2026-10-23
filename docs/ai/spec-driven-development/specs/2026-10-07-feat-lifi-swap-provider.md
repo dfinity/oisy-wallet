@@ -892,7 +892,12 @@ The result must show all of the following:
   every LI.FI route from or to SOL wraps into that account and closes it to the user at
   the end (all 5 such routes for a wallet with one, in review, and SOL → USDC and
   USDC → SOL again, 2026-10-23). It may be closed, to the user only, when it held no wSOL
-  before the run; its rent then comes back to the user. A wSOL account that held wSOL is
+  before the run; its rent then comes back to the user. That rent was the user's before
+  the run, so its lamports before the run are taken out of `solDelta` for the spend and
+  receipt bounds below: counted, they would let a forged route underpay a native-SOL
+  destination by the cap plus that rent (1,488,440 lamports at today's rent for 165 bytes,
+  2,039,280 for an older account, in review), where a temporary account nets out, its rent
+  funded in the same transaction. A wSOL account that held wSOL is
   closed by LI.FI's routes all the same (a wallet holding 1,328 wSOL, 2026-10-23), which
   would unwrap the user's whole wSOL balance into SOL: that stays refused, and is caught
   at quote time (see [Quoting](#quoting)) so that the user never confirms it. Closing any
@@ -992,8 +997,9 @@ The result must show all of the following:
   a DEX it misses; which programs live LI.FI routes reach, and so how this bullet holds
   for Jupiter, is still open (see [Open questions](#open-questions)).
 - **Spend is bounded.** The source token's delta on the user's accounts is no lower than
-  `-fromAmount`. No other user token account decreases. `solDelta` is no lower than
-  `-(fromAmount if the source is native SOL) - LIFI_SOL_MAX_FEE_LAMPORTS`. The cap is a
+  `-fromAmount`. No other user token account decreases. `solDelta`, less the lamports
+  before the run of the user's own wSOL account if the run closes it (see above), is no
+  lower than `-(fromAmount if the source is native SOL) - LIFI_SOL_MAX_FEE_LAMPORTS`. The cap is a
   new constant sized for priority fees plus the rent of the accounts a route creates,
   Token-2022 ones at their larger size (see [Solana execution](#solana-execution)), with a
   measured value recorded next to it.
@@ -1017,8 +1023,10 @@ The result must show all of the following:
     shows `received − transaction fee − rent` and would sit below LI.FI's gross
     `toAmountMin`. For a native-SOL destination the check is therefore
     `solDelta >= toAmountMin - LIFI_SOL_MAX_FEE_LAMPORTS`, using the same fee cap as the
-    spend bound. A forged route can underpay by at most that cap, which is the same
-    tolerance the spend bound already grants, and it can still only pay the user.
+    spend bound, with `solDelta` less the lamports of the user's own wSOL account the run
+    closes, as for the spend bound. A forged route can underpay by at most that cap, which
+    is the same tolerance the spend bound already grants, and it can still only pay the
+    user.
 
 `simulateSolTransaction` takes, besides the base64 bytes, a **decompiled**
 `transactionMessage` (it selects the accounts to snapshot from it) and a
@@ -1963,8 +1971,9 @@ everywhere.
 5. No LI.FI request carries a `fee` parameter.
 6. A LI.FI quote whose `to` / `approvalAddress` is not the pinned Diamond for the source
    chain, whose echoed request differs from what was asked, whose Solana `data` is an
-   array, whose Solana transaction is not a version 0 message, or whose Solana
-   transaction needs another signer, is never shown and never executed.
+   array, whose Solana transaction is not a version 0 message, whose Solana transaction
+   needs another signer, or whose Solana transaction closes the user's existing wSOL
+   account while it holds wSOL, is never shown and never executed.
 7. An ERC-20 swap first re-checks the price without touching the chain and aborts with
    the slippage copy if `toAmountMin` dropped, then goes through the unchanged
    `approve()` with the pinned Diamond (which equals the quote's `approvalAddress`) as
