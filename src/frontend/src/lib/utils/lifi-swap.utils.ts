@@ -184,13 +184,13 @@ const isSameAddress = ({
 
 /**
  * The error a LI.FI check refuses with, its message naming what was refused: the quote (the trust
- * checks) or its calldata (the binding).
+ * checks), its calldata (the EVM binding) or its transaction (the Solana binding).
  */
 export const lifiRejectedError = ({
 	subject,
 	reason
 }: {
-	subject: 'quote' | 'calldata';
+	subject: 'quote' | 'calldata' | 'transaction';
 	reason: string;
 }): LifiQuoteRejectedError => new LifiQuoteRejectedError(`LI.FI ${subject} rejected: ${reason}`);
 
