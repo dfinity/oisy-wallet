@@ -1,9 +1,14 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
-import { getMultipleAccountsInfo, simulateTransactionAccounts } from '$sol/api/solana.api';
+import {
+	getMultipleAccountsInfo,
+	getMultipleAccountsInfoWithContext,
+	simulateTransactionAccounts
+} from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
 	SOLANA_SIMULATION_MAX_CLOSE_RUNS,
+	SOLANA_SIMULATION_SNAPSHOT_ATTEMPTS,
 	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
 	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
@@ -42,11 +47,14 @@ import {
 	createTransactionMessage,
 	pipe,
 	setTransactionMessageFeePayer,
-	setTransactionMessageLifetimeUsingBlockhash
+	setTransactionMessageLifetimeUsingBlockhash,
+	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_MIN_CONTEXT_SLOT_NOT_REACHED,
+	SolanaError
 } from '@solana/kit';
 
 vi.mock('$sol/api/solana.api', () => ({
 	getMultipleAccountsInfo: vi.fn(),
+	getMultipleAccountsInfoWithContext: vi.fn(),
 	simulateTransactionAccounts: vi.fn()
 }));
 
@@ -126,14 +134,16 @@ describe('sol-simulation.services', () => {
 		err = null,
 		accounts,
 		innerInstructions = [],
-		fee
+		fee,
+		slot = ZERO
 	}: {
 		err?: string | null;
 		accounts: SolanaParsedAccountsInfo;
 		innerInstructions?: SolanaSimulatedInnerInstructions;
 		fee?: bigint;
+		slot?: bigint;
 	}) =>
-		({ err, accounts, innerInstructions, fee }) as unknown as Awaited<
+		({ err, accounts, innerInstructions, fee, slot }) as unknown as Awaited<
 			ReturnType<typeof simulateTransactionAccounts>
 		>;
 
@@ -203,6 +213,111 @@ describe('sol-simulation.services', () => {
 		vi.mocked(simulateTransactionAccounts).mockRejectedValue(new Error('rpc down'));
 
 		await expect(simulateSolTransaction(params(message([])))).resolves.toBeUndefined();
+	});
+
+	// A caller signing exactly the bytes it simulates: an expired blockhash must fail the run.
+	it('should keep the blockhash when asked to', async () => {
+		await simulateSolTransaction({ ...params(message([])), replaceRecentBlockhash: false });
+
+		expect(simulateTransactionAccounts).toHaveBeenCalledExactlyOnceWith({
+			base64EncodedTransactionMessage,
+			addresses: [mockSolAddress],
+			network,
+			replaceRecentBlockhash: false
+		});
+	});
+
+	// Read side by side, the pre-state and the run can see different slots, and whatever reached the
+	// user's accounts in between would be folded into the deltas.
+	describe('a snapshot read at one slot', () => {
+		const snapshotParams = () => ({ ...params(message([])), consistentSnapshot: true });
+
+		const preState = ({ slot, lamports }: { slot: bigint; lamports: bigint }) => ({
+			slot,
+			value: [systemAccount(lamports)]
+		});
+
+		const slotNotReached = () =>
+			new SolanaError(SOLANA_ERROR__JSON_RPC__SERVER_ERROR_MIN_CONTEXT_SLOT_NOT_REACHED, {
+				contextSlot: 99n
+			});
+
+		it('should read the pre-state first and run at that very slot', async () => {
+			vi.mocked(getMultipleAccountsInfoWithContext).mockResolvedValue(
+				preState({ slot: 100n, lamports: 1_000_000n })
+			);
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({ accounts: [systemAccount(994_000n)], slot: 100n })
+			);
+
+			const result = await simulateSolTransaction(snapshotParams());
+
+			expect(result?.preview?.solDelta).toBe(-6_000n);
+			expect(simulateTransactionAccounts).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ minContextSlot: 100n })
+			);
+			expect(
+				vi.mocked(getMultipleAccountsInfoWithContext).mock.invocationCallOrder[0]
+			).toBeLessThan(vi.mocked(simulateTransactionAccounts).mock.invocationCallOrder[0] ?? 0);
+			expect(getMultipleAccountsInfo).not.toHaveBeenCalled();
+		});
+
+		it('should read the pair again when the run lands on a later slot', async () => {
+			vi.mocked(getMultipleAccountsInfoWithContext)
+				.mockResolvedValueOnce(preState({ slot: 100n, lamports: 1_000_000n }))
+				.mockResolvedValueOnce(preState({ slot: 102n, lamports: 999_000n }));
+			vi.mocked(simulateTransactionAccounts)
+				.mockResolvedValueOnce(simulated({ accounts: [systemAccount(994_000n)], slot: 101n }))
+				.mockResolvedValueOnce(simulated({ accounts: [systemAccount(994_000n)], slot: 102n }));
+
+			const result = await simulateSolTransaction(snapshotParams());
+
+			// From the second pair alone.
+			expect(result?.preview?.solDelta).toBe(-5_000n);
+			expect(simulateTransactionAccounts).toHaveBeenLastCalledWith(
+				expect.objectContaining({ minContextSlot: 102n })
+			);
+		});
+
+		it('should read the pair again when the node has not reached the slot', async () => {
+			vi.mocked(getMultipleAccountsInfoWithContext).mockResolvedValue(
+				preState({ slot: 100n, lamports: 1_000_000n })
+			);
+			vi.mocked(simulateTransactionAccounts)
+				.mockRejectedValueOnce(slotNotReached())
+				.mockResolvedValueOnce(simulated({ accounts: [systemAccount(994_000n)], slot: 100n }));
+
+			const result = await simulateSolTransaction(snapshotParams());
+
+			expect(result?.preview?.solDelta).toBe(-6_000n);
+			expect(simulateTransactionAccounts).toHaveBeenCalledTimes(2);
+		});
+
+		it('should yield nothing when no attempt lands on one slot', async () => {
+			vi.mocked(getMultipleAccountsInfoWithContext).mockResolvedValue(
+				preState({ slot: 100n, lamports: 1_000_000n })
+			);
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({ accounts: [systemAccount(994_000n)], slot: 101n })
+			);
+
+			await expect(simulateSolTransaction(snapshotParams())).resolves.toBeUndefined();
+
+			expect(simulateTransactionAccounts).toHaveBeenCalledTimes(
+				SOLANA_SIMULATION_SNAPSHOT_ATTEMPTS
+			);
+		});
+
+		it('should yield nothing on any other failure of the run, without reading again', async () => {
+			vi.mocked(getMultipleAccountsInfoWithContext).mockResolvedValue(
+				preState({ slot: 100n, lamports: 1_000_000n })
+			);
+			vi.mocked(simulateTransactionAccounts).mockRejectedValue(new Error('rpc down'));
+
+			await expect(simulateSolTransaction(snapshotParams())).resolves.toBeUndefined();
+
+			expect(simulateTransactionAccounts).toHaveBeenCalledOnce();
+		});
 	});
 
 	// A creation may fund a token account with more than its reserve and let the initialisation read
