@@ -363,6 +363,8 @@ describe('SolWalletConnectSignModal', () => {
 	it('should hold approval when the run keeps a token batch whole', async () => {
 		vi.mocked(decode).mockResolvedValueOnce({
 			amount: 1n,
+			requiredSignatures: 1,
+			feePayer: address(mockSolAddress),
 			keepsBatchWhole: true,
 			parties: { sources: [], destinations: [], partial: false }
 		});
@@ -381,6 +383,8 @@ describe('SolWalletConnectSignModal', () => {
 	it('should hand signing no whole batch when the run kept none', async () => {
 		const args = await approve({
 			amount: 1n,
+			requiredSignatures: 1,
+			feePayer: address(mockSolAddress),
 			parties: { sources: [], destinations: [], partial: true }
 		});
 
