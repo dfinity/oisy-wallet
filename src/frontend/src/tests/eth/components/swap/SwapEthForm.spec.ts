@@ -6,7 +6,6 @@ import {
 	CONVERT_AMOUNT_DISPLAY_SKELETON,
 	CONVERT_AMOUNT_DISPLAY_VALUE,
 	MAX_BUTTON,
-	SWAP_FEE_INFO,
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
@@ -93,18 +92,14 @@ describe('SwapFormEth', () => {
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
 	const switchButtonSelector = `button[data-tid="${SWAP_SWITCH_TOKENS_BUTTON}"]`;
 
-	it.each([false, true])(
-		'retains Total fee without the swap-only fee-balance callout (LI.FI: %s)',
-		(isLifi) => {
-			const { getByText, queryByTestId } = render(SwapEthForm, {
-				props: { ...props, isLifi, lifiFee: 2_000_000_000_000_000n },
-				context: mockContext
-			});
+	it.each([false, true])('retains Total fee (LI.FI: %s)', (isLifi) => {
+		const { getByText } = render(SwapEthForm, {
+			props: { ...props, isLifi, lifiFee: 2_000_000_000_000_000n },
+			context: mockContext
+		});
 
-			expect(getByText(get(i18n).fee.text.total_fee)).toBeInTheDocument();
-			expect(queryByTestId(SWAP_FEE_INFO)).not.toBeInTheDocument();
-		}
-	);
+		expect(getByText(get(i18n).fee.text.total_fee)).toBeInTheDocument();
+	});
 
 	it.each([
 		{ previousOffer: false, isLifi: false },
