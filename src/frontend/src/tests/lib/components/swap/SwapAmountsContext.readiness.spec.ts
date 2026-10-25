@@ -1,7 +1,11 @@
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
 import SwapForm from '$lib/components/swap/SwapForm.svelte';
-import { SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS } from '$lib/constants/swap.constants';
+import {
+	SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS,
+	SWAP_PROVIDER_MIN_COMPARISON_MS
+} from '$lib/constants/swap.constants';
+import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import * as addressDerived from '$lib/derived/address.derived';
 import * as authDerived from '$lib/derived/auth.derived';
 import * as tokensDerived from '$lib/derived/tokens.derived';
@@ -103,14 +107,18 @@ describe('SwapAmountsContext current-parameter Review readiness', () => {
 		vi.restoreAllMocks();
 	});
 
-	it('blocks same-amount Review immediately on a valid slippage edit through debounce and pricing', async () => {
+	it('loads the receive field on a same-amount slippage edit through debounce, pricing and the comparison hold', async () => {
 		const coordinator = await mountCoordinator();
 		const form = await mountForm();
 		const review = form.getByRole('button', { name: en.swap.text.review_button });
+		const [, receiveInput] = form.getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
+		const receiveField = receiveInput.closest('.token-input-currency');
 		await advance();
 		await accept({ index: 0 });
 
 		expect(review).toBeEnabled();
+		expect(receiveInput).toHaveValue('10');
+		expect(receiveField).not.toHaveClass('animate-pulse');
 
 		await form.rerender({ slippageValue: '1' });
 
@@ -121,11 +129,14 @@ describe('SwapAmountsContext current-parameter Review readiness', () => {
 		expect(get(store)?.amountForSwap).toBe(0.25);
 		expect(rounds).toHaveLength(1);
 		expect(review).toBeDisabled();
+		expect(receiveInput).toHaveValue('0');
+		expect(receiveField).toHaveClass('animate-pulse');
 
 		await advance(299);
 
 		expect(rounds).toHaveLength(1);
 		expect(review).toBeDisabled();
+		expect(receiveField).toHaveClass('animate-pulse');
 
 		await advance(1);
 
@@ -133,11 +144,26 @@ describe('SwapAmountsContext current-parameter Review readiness', () => {
 		expect(rounds[1].params.slippage).toBe('1');
 		expect(get(activity)).toMatchObject({ pending: true, background: false });
 		expect(review).toBeDisabled();
+		expect(receiveField).toHaveClass('animate-pulse');
 
+		await act(() => rounds[1].params.onProviderParticipating?.(SwapProvider.LIFI));
 		await accept({ index: 1 });
+
+		expect(get(activity)?.pending).toBeTruthy();
+		expect(review).toBeDisabled();
+		expect(receiveInput).toHaveValue('0');
+		expect(receiveField).toHaveClass('animate-pulse');
+
+		await advance(SWAP_PROVIDER_MIN_COMPARISON_MS - 1);
+
+		expect(receiveField).toHaveClass('animate-pulse');
+
+		await advance(1);
 
 		expect(get(activity)?.pending).toBeFalsy();
 		expect(review).toBeEnabled();
+		expect(receiveInput).toHaveValue('10');
+		expect(receiveField).not.toHaveClass('animate-pulse');
 
 		form.unmount();
 		coordinator.unmount();

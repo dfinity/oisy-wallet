@@ -575,6 +575,113 @@ describe('SwapForm', () => {
 	});
 
 	describe('loading states', () => {
+		it('shows receive-field loading throughout a same-amount foreground round', async () => {
+			const store = setupSwapAmountsStore(mockSwapAmounts);
+			const activity = initSwapQuoteActivityStore();
+			mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store, activity });
+			setupIcTokenFeeStore();
+
+			const { getAllByTestId, getByText, getByRole, queryByText } = render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					slippageValue: '1',
+					isSwapAmountsLoading: false,
+					fee: 1000n,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+			const [, receiveInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
+			const receiveField = receiveInput.closest('.token-input-currency');
+			const difference = getByText(/^\+\d+\.\d+%$/);
+			const review = getByRole('button', { name: en.swap.text.review_button });
+
+			expect(receiveInput).toHaveValue('10');
+			expect(receiveField).not.toHaveClass('animate-pulse');
+			expect(review).toBeEnabled();
+
+			await act(() => activity.start({ requestId: 1, background: false }));
+
+			expect(receiveField).toHaveClass('animate-pulse');
+			expect(receiveInput).toHaveValue('0');
+			expect(difference).not.toBeInTheDocument();
+			expect(review).toBeDisabled();
+
+			await act(() => activity.complete({ requestId: 1 }));
+
+			expect(receiveField).not.toHaveClass('animate-pulse');
+			expect(receiveInput).toHaveValue('10');
+			expect(queryByText(/^\+\d+\.\d+%$/)).toBeInTheDocument();
+			expect(review).toBeEnabled();
+		});
+
+		it('keeps a usable receive amount visible during background refresh', async () => {
+			const store = setupSwapAmountsStore(mockSwapAmounts);
+			const activity = initSwapQuoteActivityStore();
+			mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store, activity });
+			setupIcTokenFeeStore();
+
+			const { getAllByTestId, getByText, getByRole } = render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					slippageValue: '1',
+					isSwapAmountsLoading: true,
+					fee: 1000n,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+			const [, receiveInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
+			const difference = getByText(/^\+\d+\.\d+%$/);
+			const review = getByRole('button', { name: en.swap.text.review_button });
+
+			expect(receiveInput).toHaveValue('10');
+			expect(review).toBeEnabled();
+
+			await act(() => activity.start({ requestId: 1, background: true }));
+
+			expect(receiveInput.closest('.token-input-currency')).not.toHaveClass('animate-pulse');
+			expect(receiveInput).toHaveValue('10');
+			expect(difference).toBeInTheDocument();
+			expect(review).toBeEnabled();
+		});
+
+		it('shows receive-field loading before the first quote exists', async () => {
+			const store = setupSwapAmountsStore();
+			const activity = initSwapQuoteActivityStore();
+			activity.start({ requestId: 1, background: false });
+			mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store, activity });
+			setupIcTokenFeeStore();
+
+			const { getAllByTestId } = render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					slippageValue: '1',
+					isSwapAmountsLoading: false,
+					fee: 1000n,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+			const [, receiveInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
+
+			expect(receiveInput.closest('.token-input-currency')).toHaveClass('animate-pulse');
+			expect(receiveInput).toHaveValue('0');
+
+			await act(() => activity.complete({ requestId: 1 }));
+
+			expect(receiveInput.closest('.token-input-currency')).not.toHaveClass('animate-pulse');
+		});
+
 		it('should show skeleton when fee is not loaded', () => {
 			setupSwapAmountsStore(mockSwapAmounts);
 			setupIcTokenFeeStore();

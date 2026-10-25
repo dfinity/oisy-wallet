@@ -108,9 +108,10 @@
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	let swapAmountsLoading = $derived(
-		nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
-			? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
-			: false
+		foregroundQuotePending ||
+			(nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
+				? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
+				: false)
 	);
 
 	let showSwapNotOfferedError = $derived(
