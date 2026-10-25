@@ -1085,7 +1085,7 @@ interface I18nSwap {
 		refreshing_ui: string;
 		swap_provider: string;
 		smart_swap: string;
-		comparing_providers: string;
+		finding_best_rate: string;
 		swap_provider_website: string;
 		swap_route: string;
 		included_network_fees: string;

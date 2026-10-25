@@ -134,14 +134,15 @@
 		}
 
 		// Fast or cached quotes would reveal the winner before the provider scroll reaches a
-		// second name, so a foreground comparison between providers stays up for a minimum time,
-		// failures included. Reduced motion draws no scroll, so there is nothing to hold for.
+		// second name, so a foreground comparison stays up for a minimum time, failures included.
+		// One participant is enough: the scroll fills the wait with OISY's provider pool. Reduced
+		// motion draws no scroll, so there is nothing to hold for.
 		let firstParticipantAt: number | undefined;
 		const participants: SwapProvider[] = [];
 		const holdComparison = async () => {
 			const holdMs =
 				isPeriodicUpdate ||
-				participants.length < 2 ||
+				participants.length === 0 ||
 				isNullish(firstParticipantAt) ||
 				prefersReducedMotion.current
 					? 0

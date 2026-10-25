@@ -18,10 +18,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { SwapProvider } from '$lib/types/swap';
 	import { resolveText } from '$lib/utils/i18n.utils';
+	import type { SwapProviderPool } from '$lib/utils/swap-provider-pool.utils';
 	import { findSwapProvider } from '$lib/utils/swap.utils';
 
 	interface Props {
 		providers: SwapProvider[];
+		// Shown after the asked providers while a quote loads, so the scroll shows OISY's range.
+		pool?: SwapProviderPool;
 		loading: boolean;
 		selectedProvider?: SwapProvider;
 		confirmationId?: number;
@@ -45,7 +48,14 @@
 		soft?: HTMLElement;
 	}
 
-	let { providers, loading, selectedProvider, confirmationId, animate = true }: Props = $props();
+	let {
+		providers,
+		pool,
+		loading,
+		selectedProvider,
+		confirmationId,
+		animate = true
+	}: Props = $props();
 	let displayedProvider = $state<SwapProvider>();
 	let layers = $state<ProviderLayer[]>([]);
 	let revision = $state(0);
@@ -207,6 +217,16 @@
 		});
 	});
 
+	// The asked providers first, then the related and the wider pool, each once per pass. Only
+	// asked providers can be on screen first (the clock starts with one), and the reveal always
+	// lands on the real winner, so the pool only ever fills the wait.
+	const scrollList = (asked: SwapProvider[]): SwapProvider[] => [
+		...asked,
+		...[...(pool?.related ?? []), ...(pool?.wider ?? [])].filter(
+			(provider) => !asked.includes(provider)
+		)
+	];
+
 	// One turn clock for the whole comparison, started once a name is on screen so the first one
 	// gets a full turn. New rounds and late participants change what the next turn shows, never
 	// when it comes.
@@ -217,7 +237,7 @@
 
 		const timer = setInterval(() => {
 			untrack(() => {
-				const list = providers.length > 0 ? providers : previousCandidates;
+				const list = scrollList(providers.length > 0 ? providers : previousCandidates);
 				const index = list.findIndex((candidate) => candidate === displayedProvider);
 				if (list.length > 1 || (list.length === 1 && index === -1)) {
 					showProvider(list[(index + 1) % list.length]);

@@ -204,6 +204,7 @@ describe('SwapAmountsContext minimum comparison', () => {
 
 		await participate({ index: 1, providers: [SwapProvider.LIFI] });
 		await accept(1);
+		await advance(SWAP_PROVIDER_MIN_COMPARISON_MS);
 
 		expect(get(activity)?.pending).toBeFalsy();
 		expect(get(store)?.amountForSwap).toBe(0.5);
@@ -211,14 +212,27 @@ describe('SwapAmountsContext minimum comparison', () => {
 		unmount();
 	});
 
-	it.each([
-		{ case: 'a single participant', providers: [SwapProvider.LIFI], reduced: false },
-		{ case: 'reduced motion', providers: comparedProviders, reduced: true }
-	])('does not hold a foreground comparison with $case', async ({ providers, reduced }) => {
-		motion.reduced = reduced;
+	it('holds a one-provider comparison too, so the scroll can show the provider pool', async () => {
 		const { unmount } = await mountCoordinator();
 		await advance();
-		await participate({ index: 0, providers });
+		await participate({ index: 0, providers: [SwapProvider.LIFI] });
+		await accept(0);
+
+		expect(get(activity)?.pending).toBeTruthy();
+
+		await advance(SWAP_PROVIDER_MIN_COMPARISON_MS);
+
+		expect(get(activity)?.pending).toBeFalsy();
+		expect(get(store)?.selectedProvider).toEqual(mockSwapProviders[0]);
+
+		unmount();
+	});
+
+	it('does not hold a foreground comparison under reduced motion', async () => {
+		motion.reduced = true;
+		const { unmount } = await mountCoordinator();
+		await advance();
+		await participate({ index: 0, providers: comparedProviders });
 		await accept(0);
 
 		expect(get(activity)?.pending).toBeFalsy();

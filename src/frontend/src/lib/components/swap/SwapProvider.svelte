@@ -33,11 +33,13 @@
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
+	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { OptionString } from '$lib/types/string';
 	import { SwapProvider } from '$lib/types/swap';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
+	import { swapProviderPool } from '$lib/utils/swap-provider-pool.utils';
 	import { findSwapProvider } from '$lib/utils/swap.utils';
 	import { fade, fly, slide } from '$lib/utils/transitions.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
@@ -52,6 +54,9 @@
 	const { store: swapAmountsStore, activity } =
 		getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 	const quoteActivity = activity ?? readable(undefined);
+	const swapContext = getContext<SwapContext | undefined>(SWAP_CONTEXT_KEY);
+	const sourceToken = swapContext?.sourceToken ?? readable(undefined);
+	const destinationToken = swapContext?.destinationToken ?? readable(undefined);
 
 	let {
 		showSelectButton = false,
@@ -61,6 +66,15 @@
 	}: Props = $props();
 	let comparing = $derived(
 		isForm && $quoteActivity?.pending === true && !$quoteActivity.background
+	);
+
+	let providerPool = $derived(
+		isForm && nonNullish($sourceToken) && nonNullish($destinationToken)
+			? swapProviderPool({
+					sourceNetworkId: $sourceToken.network.id,
+					destinationNetworkId: $destinationToken.network.id
+				})
+			: undefined
 	);
 
 	// The header re-lays out one swap duration after `comparing` changes: the outgoing labels
@@ -164,7 +178,7 @@
 										class="w-0 flex-1 truncate transition-opacity duration-150 ease-in motion-reduce:duration-100"
 										class:opacity-0={!comparing}
 										role="status"
-										in:fade={labelIn}>{$i18n.swap.text.comparing_providers}</span
+										in:fade={labelIn}>{$i18n.swap.text.finding_best_rate}</span
 									>
 								{:else if ($swapAmountsStore?.swaps.length ?? 0) > 1 && !isInBottomSheet && showSelectButton}
 									<span
@@ -207,6 +221,7 @@
 									animate={!isInBottomSheet && animate}
 									confirmationId={isInBottomSheet ? undefined : confirmationId}
 									loading={comparing}
+									pool={providerPool}
 									providers={$quoteActivity?.providers ?? []}
 									selectedProvider={selectedProvider?.provider}
 								/>

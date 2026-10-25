@@ -148,7 +148,7 @@ describe('SwapBtcForm', () => {
 		});
 
 		expect(getByText(en.swap.text.smart_swap)).toBeInTheDocument();
-		expect(getByText(en.swap.text.comparing_providers)).toBeInTheDocument();
+		expect(getByText(en.swap.text.finding_best_rate)).toBeInTheDocument();
 		expect(getByText(en.swap.text.review_button).closest('button')).toBeDisabled();
 	});
 

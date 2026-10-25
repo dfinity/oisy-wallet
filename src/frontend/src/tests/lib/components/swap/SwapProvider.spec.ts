@@ -265,7 +265,7 @@ describe('SwapProvider form header', () => {
 				activity.addProvider({ requestId, provider: SwapProvider.ICP_SWAP });
 				await vi.advanceTimersByTimeAsync(5000);
 
-				expect(queryByText(en.swap.text.comparing_providers)).not.toBeInTheDocument();
+				expect(queryByText(en.swap.text.finding_best_rate)).not.toBeInTheDocument();
 
 				store.setSwaps({
 					swaps: [mockOneSecProvider, offer],
@@ -349,7 +349,7 @@ describe('SwapProvider form header', () => {
 
 		expect(getByText(en.swap.text.swap_provider)).toBeInTheDocument();
 		expect(queryByText(en.swap.text.smart_swap)).not.toBeInTheDocument();
-		expect(queryByText(en.swap.text.comparing_providers)).not.toBeInTheDocument();
+		expect(queryByText(en.swap.text.finding_best_rate)).not.toBeInTheDocument();
 		expect(queryByTestId(SWAP_PROVIDER_ANIMATION)).not.toBeInTheDocument();
 
 		await fireEvent.click(getByTestId('collapsible-header'));
@@ -457,7 +457,7 @@ describe('SwapProvider form header', () => {
 
 			await vi.advanceTimersByTimeAsync(MOTION_SWAP_DURATION);
 
-			expect(queryByText(en.swap.text.comparing_providers)).not.toBeInTheDocument();
+			expect(queryByText(en.swap.text.finding_best_rate)).not.toBeInTheDocument();
 
 			const pops = animate.mock.calls.filter(
 				([frames]) =>
@@ -585,7 +585,7 @@ describe('SwapProvider form header', () => {
 		const { getByText, getByTestId } = render(SwapProviderHeader, { props, context });
 
 		const label = getByText(en.swap.text.smart_swap);
-		const status = getByText(en.swap.text.comparing_providers);
+		const status = getByText(en.swap.text.finding_best_rate);
 
 		expect(status.parentElement).toBe(label.parentElement);
 		expect(label.parentElement).toHaveClass('flex-nowrap', 'min-w-min', 'text-sm', 'text-tertiary');
@@ -604,7 +604,7 @@ describe('SwapProvider form header', () => {
 		const scrollGroup = getByTestId(SWAP_PROVIDER_ANIMATION).parentElement;
 
 		// Zero basis: the status no longer counts toward the label group's min-content.
-		expect(getByText(en.swap.text.comparing_providers)).toHaveClass('w-0', 'flex-1', 'truncate');
+		expect(getByText(en.swap.text.finding_best_rate)).toHaveClass('w-0', 'flex-1', 'truncate');
 		expect(scrollGroup).toHaveClass('min-w-24');
 		expect(scrollGroup).not.toHaveClass('min-w-0');
 		// Below 390 px (24.375rem) the slot is fixed, so a long name cannot shorten the status.
@@ -624,23 +624,23 @@ describe('SwapProvider form header', () => {
 		// Fading out in place: still laid out, transparent, and no status beside it yet.
 		expect(selectSlot).toHaveClass('opacity-0');
 		expect(queryByText(en.swap.text.best_rate)).toBeInTheDocument();
-		expect(queryByText(en.swap.text.comparing_providers)).not.toBeInTheDocument();
+		expect(queryByText(en.swap.text.finding_best_rate)).not.toBeInTheDocument();
 
 		await vi.advanceTimersByTimeAsync(MOTION_SWAP_DURATION);
 
 		expect(selectSlot).not.toBeInTheDocument();
 		expect(queryByText(en.swap.text.best_rate)).not.toBeInTheDocument();
-		expect(getByText(en.swap.text.comparing_providers)).not.toHaveClass('opacity-0');
+		expect(getByText(en.swap.text.finding_best_rate)).not.toHaveClass('opacity-0');
 
 		store.setSwaps({ swaps: offers, selectedProvider: offer, amountForSwap: '1' });
 		activity.complete({ requestId: 12 });
 		await tick();
 
-		expect(getByText(en.swap.text.comparing_providers)).toHaveClass('opacity-0');
+		expect(getByText(en.swap.text.finding_best_rate)).toHaveClass('opacity-0');
 
 		await vi.advanceTimersByTimeAsync(MOTION_SWAP_DURATION);
 
-		expect(queryByText(en.swap.text.comparing_providers)).not.toBeInTheDocument();
+		expect(queryByText(en.swap.text.finding_best_rate)).not.toBeInTheDocument();
 		expect(getByText(en.swap.text.select)).toBeInTheDocument();
 		expect(getByText(en.swap.text.best_rate)).toBeInTheDocument();
 	});
@@ -661,7 +661,7 @@ describe('SwapProvider form header', () => {
 
 		expect(selectSlot).toBeInTheDocument();
 		expect(selectSlot).not.toHaveClass('opacity-0');
-		expect(queryByText(en.swap.text.comparing_providers)).not.toBeInTheDocument();
+		expect(queryByText(en.swap.text.finding_best_rate)).not.toBeInTheDocument();
 	});
 
 	it('opens the row with its height and keeps the gap to the next row inside it', async () => {
@@ -689,6 +689,6 @@ describe('SwapProvider form header', () => {
 		activity.start({ requestId: 15, background: false });
 		await tick();
 
-		expect(getByText(en.swap.text.comparing_providers)).not.toHaveClass('opacity-0');
+		expect(getByText(en.swap.text.finding_best_rate)).not.toHaveClass('opacity-0');
 	});
 });

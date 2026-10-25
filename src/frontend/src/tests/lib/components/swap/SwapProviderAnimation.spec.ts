@@ -663,4 +663,102 @@ describe('SwapProviderAnimation', () => {
 
 		unmount();
 	});
+
+	describe('provider pool', () => {
+		const pool = {
+			related: [SwapProvider.NEAR_INTENTS, SwapProvider.ONE_SEC],
+			wider: [SwapProvider.ICP_SWAP]
+		};
+
+		it('turns through the asked providers, then the related pool, then the wider pool, then back', async () => {
+			vi.useFakeTimers();
+			const { getByTestId, unmount } = render(SwapProviderAnimation, {
+				props: { providers: [SwapProvider.VELORA], pool, loading: true }
+			});
+			const viewport = getByTestId(SWAP_PROVIDER_ANIMATION);
+			const seen = [viewport.getAttribute('data-provider')];
+			for (let turn = 0; turn < 4; turn++) {
+				await vi.advanceTimersByTimeAsync(650);
+				seen.push(viewport.getAttribute('data-provider'));
+			}
+
+			expect(seen).toEqual([
+				SwapProvider.VELORA,
+				SwapProvider.NEAR_INTENTS,
+				SwapProvider.ONE_SEC,
+				SwapProvider.ICP_SWAP,
+				SwapProvider.VELORA
+			]);
+
+			unmount();
+		});
+
+		it('never shows a pool provider first and still lands on the real winner', async () => {
+			vi.useFakeTimers();
+			const { getByTestId, rerender, unmount } = render(SwapProviderAnimation, {
+				props: { providers: [], pool, loading: true }
+			});
+			const viewport = getByTestId(SWAP_PROVIDER_ANIMATION);
+			await vi.advanceTimersByTimeAsync(1300);
+
+			expect(viewport).not.toHaveAttribute('data-provider');
+
+			await rerender({ providers: [SwapProvider.VELORA], pool, loading: true });
+
+			expect(viewport).toHaveAttribute('data-provider', SwapProvider.VELORA);
+
+			await vi.advanceTimersByTimeAsync(650);
+
+			expect(viewport).toHaveAttribute('data-provider', SwapProvider.NEAR_INTENTS);
+
+			await rerender({
+				providers: [SwapProvider.VELORA],
+				pool,
+				loading: false,
+				selectedProvider: SwapProvider.VELORA
+			});
+
+			expect(viewport).toHaveAttribute('data-provider', SwapProvider.VELORA);
+
+			unmount();
+		});
+
+		it('shows an asked provider once, not again from the pool', async () => {
+			vi.useFakeTimers();
+			const { getByTestId, unmount } = render(SwapProviderAnimation, {
+				props: { providers: [SwapProvider.VELORA, SwapProvider.NEAR_INTENTS], pool, loading: true }
+			});
+			const viewport = getByTestId(SWAP_PROVIDER_ANIMATION);
+			const seen = [viewport.getAttribute('data-provider')];
+			for (let turn = 0; turn < 3; turn++) {
+				await vi.advanceTimersByTimeAsync(650);
+				seen.push(viewport.getAttribute('data-provider'));
+			}
+
+			expect(seen).toEqual([
+				SwapProvider.VELORA,
+				SwapProvider.NEAR_INTENTS,
+				SwapProvider.ONE_SEC,
+				SwapProvider.ICP_SWAP
+			]);
+
+			unmount();
+		});
+
+		it('shows no pool under reduced motion', async () => {
+			motion.reduced = true;
+			vi.useFakeTimers();
+			const { getByTestId, unmount } = render(SwapProviderAnimation, {
+				props: { providers: [SwapProvider.VELORA], pool, loading: true }
+			});
+			await vi.advanceTimersByTimeAsync(2000);
+
+			expect(getByTestId(SWAP_PROVIDER_ANIMATION)).toHaveAttribute(
+				'data-provider',
+				SwapProvider.VELORA
+			);
+
+			unmount();
+		});
+	});
 });

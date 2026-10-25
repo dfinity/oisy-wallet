@@ -182,7 +182,7 @@ describe('SwapFormEth', () => {
 		});
 
 		expect(getByText(get(i18n).swap.text.smart_swap)).toBeInTheDocument();
-		expect(getByText(get(i18n).swap.text.comparing_providers)).toBeInTheDocument();
+		expect(getByText(get(i18n).swap.text.finding_best_rate)).toBeInTheDocument();
 		expect(getByText(get(i18n).swap.text.review_button).closest('button')).toBeDisabled();
 	});
 

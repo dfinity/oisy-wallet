@@ -109,7 +109,7 @@ describe('SwapXrpForm', () => {
 		const { getByText } = renderForm({ swapAmount: '10', comparing: true });
 
 		expect(getByText(en.swap.text.smart_swap)).toBeInTheDocument();
-		expect(getByText(en.swap.text.comparing_providers)).toBeInTheDocument();
+		expect(getByText(en.swap.text.finding_best_rate)).toBeInTheDocument();
 		expect(reviewButton(getByText)).toBeDisabled();
 	});
 

@@ -1,5 +1,8 @@
 import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
-import { SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS } from '$lib/constants/swap.constants';
+import {
+	SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS,
+	SWAP_PROVIDER_MIN_COMPARISON_MS
+} from '$lib/constants/swap.constants';
 import * as addressDerived from '$lib/derived/address.derived';
 import * as authDerived from '$lib/derived/auth.derived';
 import * as tokensDerived from '$lib/derived/tokens.derived';
@@ -125,6 +128,8 @@ describe('SwapAmountsContext quote activity', () => {
 
 		rounds[1].resolve([mockSwapProviders[1]]);
 		await runResolvedPromises();
+		// A one-provider round is held for the minimum comparison too.
+		await advance(SWAP_PROVIDER_MIN_COMPARISON_MS);
 
 		expect(get(activity)?.pending).toBeFalsy();
 		expect(get(store)?.amountForSwap).toBe(20);

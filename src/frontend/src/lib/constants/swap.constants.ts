@@ -51,9 +51,9 @@ export const SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS = 5_000;
 // Candidate dwell time: how long each provider stays in the comparison scroll.
 export const SWAP_PROVIDER_CYCLE_INTERVAL_MS = 650;
 
-// Shortest foreground comparison between 2+ providers, from the first provider shown: two scroll
-// turns, so fast or cached quotes still show a second provider before the winner. Slower quotes
-// are not held further.
+// Shortest foreground comparison, from the first provider shown: two scroll turns, so fast or
+// cached quotes, and one-provider pairs through the provider pool, still show more than one name
+// before the winner. Slower quotes are not held further.
 export const SWAP_PROVIDER_MIN_COMPARISON_MS = SWAP_PROVIDER_CYCLE_INTERVAL_MS * 2;
 
 // A detail row that opens with the Smart Swap row fades up this much later, so the two read as

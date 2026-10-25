@@ -93,7 +93,7 @@ does not finish while the children are invisible (see `NftHideButton`).
 | `Collapsible`, `CollapsibleBottomSheet` | `$lib/components/ui/`             | Shared disclosure; `disabled` closes and blocks it. Forward `{ open, disabled }` into custom sheet triggers.                                              |
 | `SwapProvider`                          | `$lib/components/swap/`           | `isForm` opts into Smart Swap activity/branding; review/default callers keep the static provider presentation.                                            |
 | `BestRateBadge`                         | `$lib/components/ui/`             | Filled best-rate indicator. `styleClass` defaults to `mt-1`; centered form rows can opt into `mt-0` without changing other callers.                       |
-| `SwapProviderAnimation`                 | `$lib/components/swap/`           | Right-aligned pricing-participant loop, accepted-selection reveal and one foreground confirmation; reduced motion built in.                               |
+| `SwapProviderAnimation`                 | `$lib/components/swap/`           | Right-aligned loop of the asked providers, then the `swapProviderPool`; reveals the real winner once; reduced motion built in.                            |
 
 `Logo` defaults to lazy loading and its existing readiness opacity/fade, with transitions
 suppressed on iOS. Set `animateReadiness={false}` when a parent owns the whole reveal;

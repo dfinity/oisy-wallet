@@ -417,13 +417,25 @@ Cancelling queued/pending foreground work discards offers priced for the previou
 clearing activity, so a same-amount remount cannot accidentally reuse them. Completed quotes and
 background refresh retain the existing Review-remount and manual-provider behavior.
 
-A foreground round with 2+ participants stays pending for at least
+Every foreground round with a participant stays pending for at least
 `SWAP_PROVIDER_MIN_COMPARISON_MS` (two scroll turns) from its first participant, so fast or
-cached quotes still show a second provider before the winner. The coordinator holds the whole
-round, not just the header: the receive amount stays a skeleton and Review stays disabled until
-the winner appears, failures included. Background refresh, a single participant and reduced
-motion are never held, and slower pricing is not held further. A round replaced during the
-hold commits nothing.
+cached quotes, and one-provider pairs through the provider pool, still show more than one name
+before the winner. The coordinator holds the whole round, not just the header: the receive
+amount stays a skeleton and Review stays disabled until the winner appears, failures included.
+Background refresh and reduced motion are never held, and slower pricing is not held further. A
+round replaced during the hold commits nothing.
+
+The scroll also shows OISY's provider pool, so a pair with one or two participants still shows
+the range of providers. `swapProviderPool` (`swap-provider-pool.utils.ts`) builds it from the
+provider registries and their flags only, never a hand-written list, so a disabled provider
+never appears: `related` are the enabled providers of the registries that price the pair's
+source or destination network (as `fetchSwapAmounts` routes it), `wider` every other enabled
+one. The turn list is the asked providers first, then `related`, then `wider`, each once per
+pass. The clock starts with an asked provider on screen and the reveal is always the real
+winner, so the pool only ever fills the wait, and on fast quotes (two turns) it rarely gets past
+`related`. This is the one exception to reading participants from the activity store; the status
+copy says "Finding the best rate..." because pool names were not asked. Component specs that
+factory-mock a service the registries import (chain-fusion, OISY Trade) must stub those exports.
 
 All six quote fan-outs use the same collector and `SWAP_QUOTE_TIMEOUT_MS` budget (10 seconds,
 aligned with LI.FI's existing display-quote timeout). Finish early when every provider settles;
