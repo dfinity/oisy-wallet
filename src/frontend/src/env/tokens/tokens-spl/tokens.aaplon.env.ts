@@ -26,6 +26,5 @@ export const AAPLON_TOKEN: RequiredSpl2022Token = {
 	address: '123mYEnRLM2LLYsJW3K6oyYh8uP1fngj732iG638ondo',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
 	mintAuthority: '9foMHsSDq7nMg4WPusSz9eY7tyxyukqborA8GyU5cUxD',
-	freezeAuthority: '51QVCuHfL1FeNjd8BDeffCKhCcAYoULnVB3yjNhShiuK',
 	groupData: AAPLON_TOKEN_GROUP
 };
