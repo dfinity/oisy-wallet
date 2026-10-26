@@ -492,6 +492,8 @@ type ContactError = variant {
 	TooManyContactsWithImages
 };
 type ContactImage = record { data : blob; mime_type : ImageMimeType };
+// A contact's image, as returned by `get_contact_images`.
+type ContactImageEntry = record { contact_id : nat64; image : ContactImage };
 type CreateActiveUserTransactionRequest = record {
 	id : text;
 	external_refs : vec ActiveUserTransactionRef;
@@ -691,11 +693,25 @@ type GetAllowedCyclesResult = variant {
 	// The allowed cycles were not retrieved due to an error.
 	Err : GetAllowedCyclesError
 };
+// The caller's contacts whose images `get_contact_images` returns.
+type GetContactImagesRequest = record { contact_ids : vec nat64 };
+type GetContactImagesResult = variant {
+	// The images were retrieved successfully.
+	Ok : vec ContactImageEntry;
+	// The images were not retrieved due to an error.
+	Err : ContactError
+};
 type GetContactResult = variant {
 	// The contacts were retrieved successfully.
 	Ok : Contact;
 	// The contacts were not retrieved due to an error.
 	Err : ContactError
+};
+// Options for `get_contacts`. A caller that leaves them out gets every contact with its image.
+type GetContactsRequest = record {
+	// Whether each contact carries its image. Without them, `get_contact_images` returns the
+	// images in batches.
+	include_images : bool
 };
 type GetContactsResult = variant {
 	// The contacts were retrieved successfully.
@@ -1862,12 +1878,28 @@ service : (Arg) -> {
 	// # Errors
 	// * `ContactNotFound` - If no contact for the provided `contact_id` could be found
 	get_contact : (nat64) -> (GetContactResult) query;
+	// Returns the images of the given contacts of the caller.
+	//
+	// A call takes at most `MAX_CONTACT_IMAGES_PER_CALL` contact IDs, so that the reply stays below
+	// the 2 MiB a certified call can return.
+	// # Arguments
+	// * `request` - The IDs of the caller's contacts whose images to return.
+	// # Returns
+	// * `Ok(Vec<ContactImageEntry>)` - The images found; contacts the caller does not have, and
+	// contacts without an image, are left out.
+	get_contact_images : (GetContactImagesRequest) -> (
+		GetContactImagesResult
+	) query;
 	// Returns all contacts for the caller
 	//
 	// This query function returns a list of the user's contacts.
+	// # Arguments
+	// * `request` - Optional. Without it, or with `include_images: true`, each contact carries its
+	// image. With `include_images: false` the contacts come without images, which
+	// `get_contact_images` returns in batches.
 	// # Returns
 	// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
-	get_contacts : () -> (GetContactsResult) query;
+	get_contacts : (opt GetContactsRequest) -> (GetContactsResult) query;
 	get_exchange_rate : (TokenId) -> (opt ExchangeRate) query;
 	// Returns the latest USD prices for the caller's priceable tokens.
 	//

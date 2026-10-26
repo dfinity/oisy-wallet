@@ -709,6 +709,13 @@ export interface ContactImage {
 	data: Uint8Array;
 	mime_type: ImageMimeType;
 }
+/**
+ * A contact's image, as returned by `get_contact_images`.
+ */
+export interface ContactImageEntry {
+	contact_id: bigint;
+	image: ContactImage;
+}
 export interface CreateActiveUserTransactionRequest {
 	id: string;
 	external_refs: Array<ActiveUserTransactionRef>;
@@ -1010,6 +1017,25 @@ export type GetAllowedCyclesResult =
 			 */
 			Err: GetAllowedCyclesError;
 	  };
+/**
+ * The caller's contacts whose images `get_contact_images` returns.
+ */
+export interface GetContactImagesRequest {
+	contact_ids: BigUint64Array;
+}
+export type GetContactImagesResult =
+	| {
+			/**
+			 * The images were retrieved successfully.
+			 */
+			Ok: Array<ContactImageEntry>;
+	  }
+	| {
+			/**
+			 * The images were not retrieved due to an error.
+			 */
+			Err: ContactError;
+	  };
 export type GetContactResult =
 	| {
 			/**
@@ -1023,6 +1049,16 @@ export type GetContactResult =
 			 */
 			Err: ContactError;
 	  };
+/**
+ * Options for `get_contacts`. A caller that leaves them out gets every contact with its image.
+ */
+export interface GetContactsRequest {
+	/**
+	 * Whether each contact carries its image. Without them, `get_contact_images` returns the
+	 * images in batches.
+	 */
+	include_images: boolean;
+}
 export type GetContactsResult =
 	| {
 			/**
@@ -2820,13 +2856,29 @@ export interface _SERVICE {
 	 */
 	get_contact: ActorMethod<[bigint], GetContactResult>;
 	/**
+	 * Returns the images of the given contacts of the caller.
+	 *
+	 * A call takes at most `MAX_CONTACT_IMAGES_PER_CALL` contact IDs, so that the reply stays below
+	 * the 2 MiB a certified call can return.
+	 * # Arguments
+	 * * `request` - The IDs of the caller's contacts whose images to return.
+	 * # Returns
+	 * * `Ok(Vec<ContactImageEntry>)` - The images found; contacts the caller does not have, and
+	 * contacts without an image, are left out.
+	 */
+	get_contact_images: ActorMethod<[GetContactImagesRequest], GetContactImagesResult>;
+	/**
 	 * Returns all contacts for the caller
 	 *
 	 * This query function returns a list of the user's contacts.
+	 * # Arguments
+	 * * `request` - Optional. Without it, or with `include_images: true`, each contact carries its
+	 * image. With `include_images: false` the contacts come without images, which
+	 * `get_contact_images` returns in batches.
 	 * # Returns
 	 * * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	 */
-	get_contacts: ActorMethod<[], GetContactsResult>;
+	get_contacts: ActorMethod<[[] | [GetContactsRequest]], GetContactsResult>;
 	get_exchange_rate: ActorMethod<[TokenId], [] | [ExchangeRate]>;
 	/**
 	 * Returns the latest USD prices for the caller's priceable tokens.

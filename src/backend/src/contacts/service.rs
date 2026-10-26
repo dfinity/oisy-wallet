@@ -3,7 +3,8 @@ use std::collections::BTreeMap;
 use ic_cdk::api::{msg_caller, time};
 use shared::types::contact::{
     count_contacts_with_inline_images, validate_principal_memory_limit, Contact, ContactError,
-    CreateContactRequest, StoredContacts, UpdateContactRequest, MAX_CONTACTS_PER_USER,
+    ContactImageEntry, CreateContactRequest, StoredContacts, UpdateContactRequest,
+    MAX_CONTACTS_PER_USER,
 };
 
 use crate::{
@@ -82,7 +83,11 @@ pub(crate) async fn create_contact(request: CreateContactRequest) -> Result<Cont
     })
 }
 
-pub(crate) fn get_contacts() -> Vec<Contact> {
+/// Returns the caller's contacts, each with its image when `include_images` is set.
+///
+/// Without images the reply stays small however many images the caller holds; `get_contact_images`
+/// returns them in batches.
+pub(crate) fn get_contacts(include_images: bool) -> Vec<Contact> {
     let stored_principal = StoredPrincipal(msg_caller());
 
     let stored_contacts = get_stored_contacts(&stored_principal);
@@ -91,7 +96,37 @@ pub(crate) fn get_contacts() -> Vec<Contact> {
     stored_contacts
         .contacts
         .into_values()
-        .map(|contact| attach_image(&stored_principal, contact))
+        .map(|contact| {
+            if include_images {
+                attach_image(&stored_principal, contact)
+            } else {
+                // A contact written before the image split may still hold its image inline.
+                Contact {
+                    image: None,
+                    ..contact
+                }
+            }
+        })
+        .collect()
+}
+
+/// Returns the images of the given contacts of the caller.
+///
+/// Contacts the caller does not have, and contacts without an image, are left out.
+pub(crate) fn get_contact_images(contact_ids: Vec<u64>) -> Vec<ContactImageEntry> {
+    let stored_principal = StoredPrincipal(msg_caller());
+
+    let mut stored_contacts = get_stored_contacts(&stored_principal);
+
+    contact_ids
+        .into_iter()
+        .filter_map(|contact_id| stored_contacts.contacts.remove(&contact_id))
+        .filter_map(|contact| {
+            let contact_id = contact.id;
+            attach_image(&stored_principal, contact)
+                .image
+                .map(|image| ContactImageEntry { contact_id, image })
+        })
         .collect()
 }
 

@@ -15,6 +15,12 @@ pub const MAX_CONTACTS_PER_USER: usize = 500;
 /// Maximum number of images per principal (100)
 pub const MAX_IMAGES_PER_PRINCIPAL: usize = 100;
 
+/// Maximum number of contacts per `get_contact_images` call.
+///
+/// A reply in replicated execution, which a certified call gets, is capped at 2 MiB. 16 images of
+/// at most `MAX_IMAGE_SIZE_BYTES` stay well below that.
+pub const MAX_CONTACT_IMAGES_PER_CALL: usize = 16;
+
 /// Represents the MIME type of image.
 #[derive(CandidType, Deserialize, serde::Serialize, Clone, Debug, Eq, PartialEq)]
 pub enum ImageMimeType {
@@ -115,6 +121,28 @@ pub struct UpdateContactRequest {
     pub addresses: Vec<ContactAddressData>,
     pub update_timestamp_ns: u64,
     pub image: Option<ContactImage>,
+}
+
+/// Options for `get_contacts`. A caller that leaves them out gets every contact with its image.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct GetContactsRequest {
+    /// Whether each contact carries its image. Without them, `get_contact_images` returns the
+    /// images in batches.
+    pub include_images: bool,
+}
+
+/// The caller's contacts whose images `get_contact_images` returns.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+#[serde(remote = "Self")]
+pub struct GetContactImagesRequest {
+    pub contact_ids: Vec<u64>,
+}
+
+/// A contact's image, as returned by `get_contact_images`.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct ContactImageEntry {
+    pub contact_id: u64,
+    pub image: ContactImage,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

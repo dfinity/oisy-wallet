@@ -19,7 +19,7 @@ use crate::types::{
     },
     agreement::{AgreementHistoryEntry, GetAgreementHistoryError, UpdateAgreementsError},
     bitcoin::{BtcGetFeePercentilesError, BtcGetFeePercentilesResponse},
-    contact::{Contact, ContactError},
+    contact::{Contact, ContactError, ContactImageEntry},
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
     onramper::{SignOnramperWidgetUrlError, SignOnramperWidgetUrlResponse},
@@ -108,6 +108,22 @@ impl From<Result<Vec<Contact>, ContactError>> for GetContactsResult {
         match result {
             Ok(contacts) => GetContactsResult::Ok(contacts),
             Err(err) => GetContactsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetContactImagesResult {
+    /// The images were retrieved successfully.
+    Ok(Vec<ContactImageEntry>),
+    /// The images were not retrieved due to an error.
+    Err(ContactError),
+}
+impl From<Result<Vec<ContactImageEntry>, ContactError>> for GetContactImagesResult {
+    fn from(result: Result<Vec<ContactImageEntry>, ContactError>) -> Self {
+        match result {
+            Ok(images) => GetContactImagesResult::Ok(images),
+            Err(err) => GetContactImagesResult::Err(err),
         }
     }
 }
