@@ -59,6 +59,7 @@ import { SPYON_TOKEN } from '$env/tokens/tokens-spl/tokens.spyon.env';
 import { SPYX_TOKEN } from '$env/tokens/tokens-spl/tokens.spyx.env';
 import { TQQQX_TOKEN } from '$env/tokens/tokens-spl/tokens.tqqqx.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
+import { TSLAON_TOKEN } from '$env/tokens/tokens-spl/tokens.tslaon.env';
 import { TSLAX_TOKEN } from '$env/tokens/tokens-spl/tokens.tslax.env';
 import { UNHX_TOKEN } from '$env/tokens/tokens-spl/tokens.unhx.env';
 import { USD1_TOKEN } from '$env/tokens/tokens-spl/tokens.usd1.env';
@@ -131,6 +132,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	SPYX_TOKEN,
 	TQQQX_TOKEN,
 	TRUMP_TOKEN,
+	TSLAON_TOKEN,
 	TSLAX_TOKEN,
 	UNHX_TOKEN,
 	USD1_TOKEN,

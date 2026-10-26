@@ -14,6 +14,7 @@ import { PBRON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/toke
 import { SLVON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.slvon.env';
 import { SPCXON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.spcxon.env';
 import { SPYON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.spyon.env';
+import { TSLAON_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.tslaon.env';
 import { USD1_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usd1.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdt.env';
@@ -36,6 +37,7 @@ const BSC_BEP20_TOKENS_MAINNET: RequiredEvmBep20Token[] = [
 	SLVON_TOKEN,
 	SPCXON_TOKEN,
 	SPYON_TOKEN,
+	TSLAON_TOKEN,
 	USD1_TOKEN,
 	USDC_TOKEN,
 	USDT_TOKEN
