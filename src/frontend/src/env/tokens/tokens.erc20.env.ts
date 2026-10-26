@@ -22,6 +22,7 @@ import { EFAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.efaon.env';
 import { EURC_TOKEN, SEPOLIA_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { FLOKI_TOKEN } from '$env/tokens/tokens-erc20/tokens.floki.env';
 import { GLDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.gldt.env';
+import { GOOGLON_TOKEN } from '$env/tokens/tokens-erc20/tokens.googlon.env';
 import { IAUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.iauon.env';
 import { ICP_TOKEN } from '$env/tokens/tokens-erc20/tokens.icp.env';
 import { IVVON_TOKEN } from '$env/tokens/tokens-erc20/tokens.ivvon.env';
@@ -104,6 +105,7 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	EFAON_TOKEN,
 	FLOKI_TOKEN,
 	GLDT_TOKEN,
+	GOOGLON_TOKEN,
 	ICP_TOKEN,
 	IAUON_TOKEN,
 	IVVON_TOKEN,
