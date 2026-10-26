@@ -1,5 +1,7 @@
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	CONVERT_AMOUNT_DISPLAY_SKELETON,
+	SWAP_PROVIDER_STATUS,
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
@@ -13,7 +15,8 @@ import { SOL_FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$sol/stores/s
 import en from '$tests/mocks/i18n.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { readable, writable } from 'svelte/store';
 
 vi.mock('$lib/utils/parse.utils', () => ({
@@ -36,9 +39,12 @@ describe('SwapSolForm', () => {
 
 	const mockContext = new Map();
 
-	const createFeeContext = () =>
-		initFeeContext({
-			feeStore: initFeeStore(),
+	const createFeeContext = (fee?: bigint) => {
+		const feeStore = initFeeStore();
+		feeStore.setFee(fee);
+
+		return initFeeContext({
+			feeStore,
 			prioritizationFeeStore: initFeeStore(),
 			ataFeeStore: initFeeStore(),
 			feeSymbolStore: writable('SOL'),
@@ -46,6 +52,7 @@ describe('SwapSolForm', () => {
 			feeTokenIdStore: writable(undefined),
 			feeExchangeRateStore: writable(undefined)
 		});
+	};
 
 	beforeEach(() => {
 		const originalSwapContext = initSwapContext({
@@ -94,14 +101,46 @@ describe('SwapSolForm', () => {
 		activity.start({ requestId: 1, background: false });
 		const context = new Map(mockContext);
 		context.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: initSwapAmountsStore(), activity });
-		const { getByText } = render(SwapSolForm, {
+		const { getByTestId, getByText } = render(SwapSolForm, {
 			props: { ...props, isSwapAmountsLoading: true },
 			context
 		});
 
 		expect(getByText(en.swap.text.smart_swap)).toBeInTheDocument();
-		expect(getByText(en.swap.text.finding_best_rate)).toBeInTheDocument();
+		expect(getByTestId(SWAP_PROVIDER_STATUS)).toHaveTextContent(en.swap.text.finding_best_rate);
 		expect(getByText(en.swap.text.review_button).closest('button')).toBeDisabled();
+	});
+
+	it('hides the network fee behind a Total fee skeleton while comparing, and brings it back after', async () => {
+		const activity = initSwapQuoteActivityStore();
+		activity.start({ requestId: 2, background: false });
+		const context = new Map(mockContext);
+		const { store } = context.get(SWAP_AMOUNTS_CONTEXT_KEY);
+		context.set(SWAP_AMOUNTS_CONTEXT_KEY, { store, activity });
+		context.set(SOL_FEE_CONTEXT_KEY, createFeeContext(5_000n));
+		const { getByTestId, getByText, queryByTestId, queryByText } = render(SwapSolForm, {
+			props: { ...props, isSwapAmountsLoading: true },
+			context
+		});
+
+		expect(getByText(en.fee.text.total_fee)).toBeInTheDocument();
+		expect(getByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON)).toBeInTheDocument();
+		expect(queryByText(en.fee.text.network_fee)).not.toBeInTheDocument();
+
+		activity.complete({ requestId: 2 });
+
+		await waitFor(() =>
+			expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON)).not.toBeInTheDocument()
+		);
+
+		expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
+
+		// A background refresh keeps the fee in place.
+		activity.start({ requestId: 3, background: true });
+		await tick();
+
+		expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON)).not.toBeInTheDocument();
+		expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
 	});
 
 	it('should render the component', () => {

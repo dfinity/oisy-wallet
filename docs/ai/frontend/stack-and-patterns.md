@@ -456,7 +456,7 @@ the slot grow to the name. During foreground comparison,
 stale details. Custom sheet triggers receive `{ open, disabled }` and must forward disabled
 to their native control. Other disclosure callers retain the default enabled behavior.
 
-No hard cuts in the section. The Smart Swap row, and ETH's "Total fee" row, open and close
+No hard cuts in the section. The Smart Swap row and the fee row (`SwapFeeRow`) open and close
 with `slide` (height, 250 ms) while their content fades up 4 px with `fly`; the fee row follows
 `SWAP_DETAILS_ROW_STAGGER_MS` (60 ms) later. The 12 px gap is `pb-3` inside the sliding row, not
 the forms' flex gap, so it animates with the height. The header never swaps labels in one frame:
@@ -471,8 +471,22 @@ runs for the whole comparison: it starts once a name is on screen and never rest
 keystroke. While a new round waits for its participants (the debounce, slow eligibility checks)
 the scroll keeps turning through the previous round's; a shown provider the new round leaves out
 gives way at the next turn. The clock is a single `$derived` boolean, so prop updates that leave
-it unchanged never restart it mid-turn. ETH's fee skeleton and value share one grid cell and cross-fade.
+it unchanged never restart it mid-turn.
 Reduced motion keeps the fades (100 ms at most) and drops the slide, rise and blur.
+
+While a foreground round compares, every form's fee row shows a "Total fee" skeleton instead of
+the last quote's fees, which would describe a provider that may not win; background refreshes
+keep the fees. `SwapFeeRow` owns this for all five forms: the skeleton and the form's fees share
+one grid cell and cross-fade. Its `show` decides the row outside a comparison: ICP, SOL and XRP
+fees do not need an offer, ETH and BTC pass "an offer is selected". The fee components stay
+quote-only, because Review renders them too.
+
+Screen readers hear the section through one `sr-only` `role="status"` region that
+`SwapProvider isForm` mounts before any round, outside the header. Two reasons: the Collapsible
+header is a `role="button"`, whose children are presentational, and a region inserted with its
+text already in place is not announced. Its text is the status while comparing, then the
+selected provider's name. The visible status is `aria-hidden`, the scroll's name is plain text
+for the header's accessible name, and cycling names are never announced.
 
 Keep visible layers keyed by provider through interruption. Sample their current poses before
 cancelling/retargeting WAAPI; an outgoing provider can immediately become the winner without

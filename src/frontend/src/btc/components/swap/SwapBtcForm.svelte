@@ -13,12 +13,17 @@
 	import { convertSatoshisToBtc, isInvalidUtxosFee } from '$btc/utils/btc-send.utils';
 	import { invalidSendAmount } from '$btc/utils/input.utils';
 	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
+	import SwapFeeRow from '$lib/components/swap/SwapFeeRow.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		SWAP_AMOUNTS_CONTEXT_KEY,
+		type SwapAmountsContext
+	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
@@ -55,6 +60,8 @@
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: utxosFeeStore } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
+
+	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
 	let errorType = $state<TokenActionErrorType | undefined>();
 
@@ -192,7 +199,9 @@
 			<div class="flex flex-col">
 				<SwapProvider isForm {onShowProviderList} showSelectButton {slippageValue} />
 
-				<SwapBtcFees />
+				<SwapFeeRow show={nonNullish($swapAmountsStore?.selectedProvider)}>
+					<SwapBtcFees />
+				</SwapFeeRow>
 			</div>
 		{/if}
 	{/snippet}

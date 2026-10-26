@@ -94,6 +94,7 @@ does not finish while the children are invisible (see `NftHideButton`).
 | `SwapProvider`                          | `$lib/components/swap/`           | `isForm` opts into Smart Swap activity/branding; review/default callers keep the static provider presentation.                                            |
 | `BestRateBadge`                         | `$lib/components/ui/`             | Filled best-rate indicator. `styleClass` defaults to `mt-1`; centered form rows can opt into `mt-0` without changing other callers.                       |
 | `SwapProviderAnimation`                 | `$lib/components/swap/`           | Right-aligned loop of the asked providers, then the `swapProviderPool`; reveals the real winner once; reduced motion built in.                            |
+| `SwapFeeRow`                            | `$lib/components/swap/`           | A swap form's fee row: slides in, shows a "Total fee" skeleton during a foreground comparison, cross-fades to the form's fees.                            |
 
 `Logo` defaults to lazy loading and its existing readiness opacity/fade, with transitions
 suppressed on iOS. Set `animateReadiness={false}` when a parent owns the whole reveal;

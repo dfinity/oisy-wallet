@@ -23,6 +23,7 @@
 	import CollapsibleBottomSheet from '$lib/components/ui/CollapsibleBottomSheet.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import { SWAP_PROVIDER_STATUS } from '$lib/constants/test-ids.constants';
 	import {
 		MOTION_ENTER,
 		MOTION_REDUCED_FADE_DURATION,
@@ -145,6 +146,17 @@
 		nonNullish(selectedProvider?.provider) ? findSwapProvider(selectedProvider.provider) : null
 	);
 
+	// One region for screen readers, mounted before any round and outside the header, whose
+	// role="button" makes its children presentational. Only its text changes, so each change is
+	// heard: the status while comparing, then the provider the comparison picked.
+	let announcement = $derived(
+		comparing
+			? $i18n.swap.text.finding_best_rate
+			: nonNullish(swapDApp)
+				? resolveText({ i18n: $i18n, path: swapDApp.name })
+				: ''
+	);
+
 	$effect(() => {
 		if (nonNullish(swapDApp)) {
 			const parsed = UrlSchema.safeParse(swapDApp.website);
@@ -157,6 +169,12 @@
 		}
 	});
 </script>
+
+{#if isForm}
+	<span class="sr-only" aria-live="polite" data-tid={SWAP_PROVIDER_STATUS} role="status"
+		>{announcement}</span
+	>
+{/if}
 
 {#if comparing || (nonNullish(swapDApp) && nonNullish(selectedProvider) && nonNullish($swapAmountsStore))}
 	<!-- The row opens and closes with its height, so what is below moves instead of jumping. The
@@ -177,7 +195,7 @@
 									<span
 										class="w-0 flex-1 truncate transition-opacity duration-150 ease-in motion-reduce:duration-100"
 										class:opacity-0={!comparing}
-										role="status"
+										aria-hidden="true"
 										in:fade={labelIn}>{$i18n.swap.text.finding_best_rate}</span
 									>
 								{:else if ($swapAmountsStore?.swaps.length ?? 0) > 1 && !isInBottomSheet && showSelectButton}

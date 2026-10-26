@@ -1,5 +1,5 @@
 import SwapProviderHeader from '$lib/components/swap/SwapProvider.svelte';
-import { SWAP_PROVIDER_ANIMATION } from '$lib/constants/test-ids.constants';
+import { SWAP_PROVIDER_ANIMATION, SWAP_PROVIDER_STATUS } from '$lib/constants/test-ids.constants';
 import { MOTION_SWAP_DURATION } from '$lib/constants/transition.constants';
 import { screensStore } from '$lib/stores/screens.store';
 import { initSwapAmountsStore, SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
@@ -32,6 +32,9 @@ const providerAnimationCalls = (animate: MockInstance<Element['animate']>) =>
 		);
 	});
 
+// The status region repeats the visible label for screen readers; label assertions skip it.
+const visibleOnly = { ignore: 'script, style, .sr-only' };
+
 const offer: SwapMappedResult = {
 	provider: SwapProvider.ICP_SWAP,
 	receiveAmount: 100_000_000n,
@@ -63,20 +66,38 @@ describe('SwapProvider form header', () => {
 
 	afterEach(() => vi.useRealTimers());
 
-	it('announces only the canonical ready selection, not cycling candidates', async () => {
+	it('announces the comparison and the provider it picks from one region outside the header', async () => {
 		vi.useFakeTimers();
+		const { container, getByTestId, getByText } = render(SwapProviderHeader, { props, context });
+		const status = getByTestId(SWAP_PROVIDER_STATUS);
+
+		// Mounted empty before any round, so the first change is heard.
+		expect(status).toHaveAttribute('role', 'status');
+		expect(status.textContent).toBe('');
+
 		activity.start({ requestId: 10, background: false });
 		activity.addProvider({ requestId: 10, provider: SwapProvider.ICP_SWAP });
 		activity.addProvider({ requestId: 10, provider: SwapProvider.ONE_SEC });
-		const { getByTestId } = render(SwapProviderHeader, { props, context });
-		const loop = getByTestId(SWAP_PROVIDER_ANIMATION);
+		await tick();
 
-		expect(loop).toHaveAttribute('role', 'status');
-		expect(loop.querySelector('.sr-only')?.textContent).toBe('');
+		expect(status).toHaveTextContent(en.swap.text.finding_best_rate);
+		expect(getByText(en.swap.text.finding_best_rate, visibleOnly)).toHaveAttribute(
+			'aria-hidden',
+			'true'
+		);
+		// The Collapsible header is a role="button", whose children are presentational.
+		expect(status.closest('[role="button"]')).toBeNull();
+		expect(
+			container.querySelectorAll('[role="button"] [role="status"], [role="button"] [aria-live]')
+		).toHaveLength(0);
 
 		await vi.advanceTimersByTimeAsync(650);
 
+		const loop = getByTestId(SWAP_PROVIDER_ANIMATION);
+
+		// Cycling candidates are never spoken, by the region or by the scroll.
 		expect(loop).toHaveAttribute('data-provider', SwapProvider.ONE_SEC);
+		expect(status).toHaveTextContent(en.swap.text.finding_best_rate);
 		expect(loop.querySelector('.sr-only')?.textContent).toBe('');
 
 		for (const layer of loop.querySelectorAll('[data-provider-layer]')) {
@@ -88,10 +109,14 @@ describe('SwapProvider form header', () => {
 		await tick();
 		await tick();
 
-		const canonical = loop.querySelector('.sr-only');
+		expect(status).toHaveTextContent('ICPSwap');
+		// The scroll keeps the name as plain text, for the header's accessible name.
+		expect(loop.querySelector('.sr-only')).toHaveTextContent('ICPSwap');
 
-		expect(canonical).toHaveTextContent('ICPSwap');
-		expect(canonical?.closest('[aria-hidden="true"]')).toBeNull();
+		activity.start({ requestId: 11, background: false });
+		await tick();
+
+		expect(status).toHaveTextContent(en.swap.text.finding_best_rate);
 	});
 
 	it('keeps the manual selection link content-sized beside the Smart Swap label', () => {
@@ -265,7 +290,7 @@ describe('SwapProvider form header', () => {
 				activity.addProvider({ requestId, provider: SwapProvider.ICP_SWAP });
 				await vi.advanceTimersByTimeAsync(5000);
 
-				expect(queryByText(en.swap.text.finding_best_rate)).not.toBeInTheDocument();
+				expect(queryByText(en.swap.text.finding_best_rate, visibleOnly)).not.toBeInTheDocument();
 
 				store.setSwaps({
 					swaps: [mockOneSecProvider, offer],
@@ -349,7 +374,7 @@ describe('SwapProvider form header', () => {
 
 		expect(getByText(en.swap.text.swap_provider)).toBeInTheDocument();
 		expect(queryByText(en.swap.text.smart_swap)).not.toBeInTheDocument();
-		expect(queryByText(en.swap.text.finding_best_rate)).not.toBeInTheDocument();
+		expect(queryByText(en.swap.text.finding_best_rate, visibleOnly)).not.toBeInTheDocument();
 		expect(queryByTestId(SWAP_PROVIDER_ANIMATION)).not.toBeInTheDocument();
 
 		await fireEvent.click(getByTestId('collapsible-header'));
@@ -457,7 +482,7 @@ describe('SwapProvider form header', () => {
 
 			await vi.advanceTimersByTimeAsync(MOTION_SWAP_DURATION);
 
-			expect(queryByText(en.swap.text.finding_best_rate)).not.toBeInTheDocument();
+			expect(queryByText(en.swap.text.finding_best_rate, visibleOnly)).not.toBeInTheDocument();
 
 			const pops = animate.mock.calls.filter(
 				([frames]) =>
@@ -585,7 +610,7 @@ describe('SwapProvider form header', () => {
 		const { getByText, getByTestId } = render(SwapProviderHeader, { props, context });
 
 		const label = getByText(en.swap.text.smart_swap);
-		const status = getByText(en.swap.text.finding_best_rate);
+		const status = getByText(en.swap.text.finding_best_rate, visibleOnly);
 
 		expect(status.parentElement).toBe(label.parentElement);
 		expect(label.parentElement).toHaveClass('flex-nowrap', 'min-w-min', 'text-sm', 'text-tertiary');
@@ -604,7 +629,11 @@ describe('SwapProvider form header', () => {
 		const scrollGroup = getByTestId(SWAP_PROVIDER_ANIMATION).parentElement;
 
 		// Zero basis: the status no longer counts toward the label group's min-content.
-		expect(getByText(en.swap.text.finding_best_rate)).toHaveClass('w-0', 'flex-1', 'truncate');
+		expect(getByText(en.swap.text.finding_best_rate, visibleOnly)).toHaveClass(
+			'w-0',
+			'flex-1',
+			'truncate'
+		);
 		expect(scrollGroup).toHaveClass('min-w-24');
 		expect(scrollGroup).not.toHaveClass('min-w-0');
 		// Below 390 px (24.375rem) the slot is fixed, so a long name cannot shorten the status.
@@ -624,23 +653,23 @@ describe('SwapProvider form header', () => {
 		// Fading out in place: still laid out, transparent, and no status beside it yet.
 		expect(selectSlot).toHaveClass('opacity-0');
 		expect(queryByText(en.swap.text.best_rate)).toBeInTheDocument();
-		expect(queryByText(en.swap.text.finding_best_rate)).not.toBeInTheDocument();
+		expect(queryByText(en.swap.text.finding_best_rate, visibleOnly)).not.toBeInTheDocument();
 
 		await vi.advanceTimersByTimeAsync(MOTION_SWAP_DURATION);
 
 		expect(selectSlot).not.toBeInTheDocument();
 		expect(queryByText(en.swap.text.best_rate)).not.toBeInTheDocument();
-		expect(getByText(en.swap.text.finding_best_rate)).not.toHaveClass('opacity-0');
+		expect(getByText(en.swap.text.finding_best_rate, visibleOnly)).not.toHaveClass('opacity-0');
 
 		store.setSwaps({ swaps: offers, selectedProvider: offer, amountForSwap: '1' });
 		activity.complete({ requestId: 12 });
 		await tick();
 
-		expect(getByText(en.swap.text.finding_best_rate)).toHaveClass('opacity-0');
+		expect(getByText(en.swap.text.finding_best_rate, visibleOnly)).toHaveClass('opacity-0');
 
 		await vi.advanceTimersByTimeAsync(MOTION_SWAP_DURATION);
 
-		expect(queryByText(en.swap.text.finding_best_rate)).not.toBeInTheDocument();
+		expect(queryByText(en.swap.text.finding_best_rate, visibleOnly)).not.toBeInTheDocument();
 		expect(getByText(en.swap.text.select)).toBeInTheDocument();
 		expect(getByText(en.swap.text.best_rate)).toBeInTheDocument();
 	});
@@ -661,7 +690,7 @@ describe('SwapProvider form header', () => {
 
 		expect(selectSlot).toBeInTheDocument();
 		expect(selectSlot).not.toHaveClass('opacity-0');
-		expect(queryByText(en.swap.text.finding_best_rate)).not.toBeInTheDocument();
+		expect(queryByText(en.swap.text.finding_best_rate, visibleOnly)).not.toBeInTheDocument();
 	});
 
 	it('opens the row with its height and keeps the gap to the next row inside it', async () => {
@@ -689,7 +718,7 @@ describe('SwapProvider form header', () => {
 		activity.start({ requestId: 15, background: false });
 		await tick();
 
-		expect(getByText(en.swap.text.finding_best_rate)).not.toHaveClass('opacity-0');
+		expect(getByText(en.swap.text.finding_best_rate, visibleOnly)).not.toHaveClass('opacity-0');
 	});
 
 	it('shows Best Rate for a single offer, without Select', () => {
@@ -719,11 +748,11 @@ describe('SwapProvider form header', () => {
 		await tick();
 
 		expect(getByText(en.swap.text.best_rate)).toBeInTheDocument();
-		expect(queryByText(en.swap.text.finding_best_rate)).not.toBeInTheDocument();
+		expect(queryByText(en.swap.text.finding_best_rate, visibleOnly)).not.toBeInTheDocument();
 
 		await vi.advanceTimersByTimeAsync(MOTION_SWAP_DURATION);
 
 		expect(queryByText(en.swap.text.best_rate)).not.toBeInTheDocument();
-		expect(getByText(en.swap.text.finding_best_rate)).toBeInTheDocument();
+		expect(getByText(en.swap.text.finding_best_rate, visibleOnly)).toBeInTheDocument();
 	});
 });

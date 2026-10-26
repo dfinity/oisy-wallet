@@ -6,6 +6,8 @@ import {
 	CONVERT_AMOUNT_DISPLAY_SKELETON,
 	CONVERT_AMOUNT_DISPLAY_VALUE,
 	MAX_BUTTON,
+	SWAP_FEE_ROW,
+	SWAP_PROVIDER_STATUS,
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
@@ -141,12 +143,14 @@ describe('SwapFormEth', () => {
 			expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_VALUE)).not.toBeInTheDocument();
 
 			if (previousOffer) {
-				const skeletonCell = getByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON).closest('.grid');
+				const row = `[data-tid="${SWAP_FEE_ROW}"]`;
+				const skeletonCell = getByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON).closest(row);
 				activity.complete({ requestId: 2 });
 				await tick();
 
 				// The value fades in over the outgoing skeleton in the same cell, so the row keeps its height.
-				expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_VALUE)?.closest('.grid')).toBe(skeletonCell);
+				expect(skeletonCell).not.toBeNull();
+				expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_VALUE)?.closest(row)).toBe(skeletonCell);
 
 				await waitFor(() =>
 					expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON)).not.toBeInTheDocument()
@@ -176,13 +180,15 @@ describe('SwapFormEth', () => {
 				feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
 			})
 		);
-		const { getByText } = render(SwapEthForm, {
+		const { getByTestId, getByText } = render(SwapEthForm, {
 			props: { ...props, isSwapAmountsLoading: true },
 			context: mockContext
 		});
 
 		expect(getByText(get(i18n).swap.text.smart_swap)).toBeInTheDocument();
-		expect(getByText(get(i18n).swap.text.finding_best_rate)).toBeInTheDocument();
+		expect(getByTestId(SWAP_PROVIDER_STATUS)).toHaveTextContent(
+			get(i18n).swap.text.finding_best_rate
+		);
 		expect(getByText(get(i18n).swap.text.review_button).closest('button')).toBeDisabled();
 	});
 

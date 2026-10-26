@@ -5,7 +5,10 @@ import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	CONVERT_AMOUNT_DISPLAY_SKELETON,
+	CONVERT_AMOUNT_EXCHANGE_SKELETON,
 	MAX_BUTTON,
+	SWAP_PROVIDER_STATUS,
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
@@ -24,6 +27,7 @@ import { mockChainFusionProvider, mockOneSecProvider } from '$tests/mocks/swap.m
 import { assertNonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { readable } from 'svelte/store';
 
 // The form reads the flag at module scope, so it has to be true before the component is
@@ -89,14 +93,47 @@ describe('SwapIcpForm', () => {
 		activity.start({ requestId: 1, background: false });
 		const context = new Map(mockContext);
 		context.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: initSwapAmountsStore(), activity });
-		const { getByText } = render(SwapIcpForm, {
+		const { getByTestId, getByText } = render(SwapIcpForm, {
 			props: { ...props, isSwapAmountsLoading: true },
 			context
 		});
 
 		expect(getByText(en.swap.text.smart_swap)).toBeInTheDocument();
-		expect(getByText(en.swap.text.finding_best_rate)).toBeInTheDocument();
+		expect(getByTestId(SWAP_PROVIDER_STATUS)).toHaveTextContent(en.swap.text.finding_best_rate);
 		expect(getByText(en.swap.text.review_button).closest('button')).toBeDisabled();
+	});
+
+	it('hides the fees behind a Total fee skeleton while comparing, and brings them back after', async () => {
+		const activity = initSwapQuoteActivityStore();
+		activity.start({ requestId: 2, background: false });
+		const context = new Map(mockContext);
+		context.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: initSwapAmountsStore(), activity });
+		const { getByTestId, getByText, queryByTestId, queryByText } = render(SwapIcpForm, {
+			props: { ...props, isSwapAmountsLoading: true },
+			context
+		});
+
+		expect(getByText(en.fee.text.total_fee)).toBeInTheDocument();
+		expect(getByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON)).toBeInTheDocument();
+		// The ICP total is one line, so the skeleton is too: a second bar would stack on phones
+		// and the row would shrink when the fees arrive.
+		expect(queryByTestId(CONVERT_AMOUNT_EXCHANGE_SKELETON)).not.toBeInTheDocument();
+		expect(queryByText(en.swap.text.total_fee)).not.toBeInTheDocument();
+
+		activity.complete({ requestId: 2 });
+
+		await waitFor(() =>
+			expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON)).not.toBeInTheDocument()
+		);
+
+		expect(getByText(en.swap.text.total_fee)).toBeInTheDocument();
+
+		// A background refresh keeps the fees in place.
+		activity.start({ requestId: 3, background: true });
+		await tick();
+
+		expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON)).not.toBeInTheDocument();
+		expect(getByText(en.swap.text.total_fee)).toBeInTheDocument();
 	});
 
 	it('should render all fields', () => {

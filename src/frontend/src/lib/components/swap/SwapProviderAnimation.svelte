@@ -379,13 +379,8 @@
 {/snippet}
 
 {#if current ?? loading}
-	<div
-		class="provider-loop"
-		aria-live="polite"
-		data-provider={displayedProvider}
-		data-tid={SWAP_PROVIDER_ANIMATION}
-		role="status"
-	>
+	<!-- Plain text for the header's accessible name; `SwapProvider` announces the change. -->
+	<div class="provider-loop" data-provider={displayedProvider} data-tid={SWAP_PROVIDER_ANIMATION}>
 		<span class="sr-only"
 			>{!loading && current ? resolveText({ i18n: $i18n, path: current.details.name }) : ''}</span
 		>
