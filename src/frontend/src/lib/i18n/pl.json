@@ -2479,7 +2479,7 @@
 			"create": "Nie udało się utworzyć kontaktu",
 			"update": "Nie udało się zaktualizować kontaktu",
 			"delete": "Nie udało się usunąć kontaktu",
-			"load": "",
+			"load": "Nie udało się załadować kontaktów",
 			"name_too_long": "Proszę, aby nazwa miała $maxCharacters znaków lub mniej."
 		}
 	},

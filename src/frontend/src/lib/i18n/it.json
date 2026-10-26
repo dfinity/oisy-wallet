@@ -2479,7 +2479,7 @@
 			"create": "Impossibile creare il contatto",
 			"update": "Impossibile aggiornare il contatto",
 			"delete": "Impossibile eliminare il contatto",
-			"load": "",
+			"load": "Impossibile caricare i contatti",
 			"name_too_long": "Si prega di mantenere il nome entro massimo $maxCharacters caratteri."
 		}
 	},

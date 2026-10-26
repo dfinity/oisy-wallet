@@ -2479,7 +2479,7 @@
 			"create": "Không thể tạo liên hệ",
 			"update": "Không thể cập nhật liên hệ",
 			"delete": "Không thể xóa liên hệ",
-			"load": "",
+			"load": "Không thể tải danh sách liên hệ",
 			"name_too_long": "Vui lòng giữ tên không quá $maxCharacters ký tự."
 		}
 	},
