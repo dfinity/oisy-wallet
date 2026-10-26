@@ -4,7 +4,7 @@ import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { swapProviderPool } from '$lib/providers/swap-provider-pool.providers';
 import { SwapProvider } from '$lib/types/swap';
 
-// LI.FI runs on local and staging only, never in tests; KongSwap is disabled.
+// KongSwap is disabled; every other provider, LI.FI included, is enabled everywhere.
 describe('swapProviderPool', () => {
 	it('starts an ICP pair with the ICP providers and its bridges, then the rest', () => {
 		expect(
@@ -16,7 +16,7 @@ describe('swapProviderPool', () => {
 				SwapProvider.ONE_SEC,
 				SwapProvider.CHAIN_FUSION
 			],
-			wider: [SwapProvider.VELORA, SwapProvider.NEAR_INTENTS]
+			wider: [SwapProvider.VELORA, SwapProvider.NEAR_INTENTS, SwapProvider.LIFI]
 		});
 	});
 
@@ -31,7 +31,8 @@ describe('swapProviderPool', () => {
 				SwapProvider.VELORA,
 				SwapProvider.NEAR_INTENTS,
 				SwapProvider.ONE_SEC,
-				SwapProvider.CHAIN_FUSION
+				SwapProvider.CHAIN_FUSION,
+				SwapProvider.LIFI
 			],
 			wider: [SwapProvider.ICP_SWAP, SwapProvider.OISY_TRADE]
 		});
@@ -65,6 +66,5 @@ describe('swapProviderPool', () => {
 		});
 
 		expect([...related, ...wider]).not.toContain(SwapProvider.KONG_SWAP);
-		expect([...related, ...wider]).not.toContain(SwapProvider.LIFI);
 	});
 });
