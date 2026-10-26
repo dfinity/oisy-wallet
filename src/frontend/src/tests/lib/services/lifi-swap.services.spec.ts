@@ -280,7 +280,7 @@ describe('lifi-swap.services', () => {
 		});
 
 		describe('a route through an in-between token', () => {
-			const listedTokens = tokens as unknown as Writable<Token[]>;
+			const listedTokens = tokens as Writable<Token[]>;
 
 			const baseUsdc = { chainId: ChainId.BAS, address: mockLifiBaseUsdcAddress };
 			const robinhoodUsdg = { chainId: ChainId.OUT, address: USDG_TOKEN.address };
