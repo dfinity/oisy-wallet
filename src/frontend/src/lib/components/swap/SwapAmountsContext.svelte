@@ -52,6 +52,9 @@
 
 	const { store, activity } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
+	const sourceTokenId = $derived(sourceToken?.id);
+	const destinationTokenId = $derived(destinationToken?.id);
+
 	let timer: NodeJS.Timeout | undefined;
 	let debounceTimer = $state<NodeJS.Timeout | undefined>();
 	let fetchGeneration = 0;
@@ -238,8 +241,8 @@
 	$effect(() => {
 		[
 			amount,
-			sourceToken,
-			destinationToken,
+			sourceTokenId,
+			destinationTokenId,
 			isSourceTokenIcrc2,
 			slippageValue,
 			pauseAmountUpdates,

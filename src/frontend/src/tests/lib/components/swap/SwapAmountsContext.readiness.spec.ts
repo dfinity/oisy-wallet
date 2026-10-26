@@ -13,6 +13,7 @@ import * as swapService from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
 import { SwapProvider, type FetchSwapAmountsParams, type SwapMappedResult } from '$lib/types/swap';
+import SwapAmountsContextTokensTest from '$tests/lib/components/swap/SwapAmountsContextTokensTest.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -105,6 +106,43 @@ describe('SwapAmountsContext current-parameter Review readiness', () => {
 	afterEach(() => {
 		vi.useRealTimers();
 		vi.restoreAllMocks();
+	});
+
+	it('keeps Review and the accepted receive value ready when the token objects refresh without changing identity', async () => {
+		const sourceToken = writable(props.sourceToken);
+		const destinationToken = writable(props.destinationToken);
+		const coordinator = await act(() =>
+			render(SwapAmountsContextTokensTest, {
+				props: { ...props, sourceToken, destinationToken },
+				context
+			})
+		);
+		const form = await mountForm();
+		const review = form.getByRole('button', { name: en.swap.text.review_button });
+		const [, receiveInput] = form.getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
+		const receiveField = receiveInput.closest('.token-input-currency');
+		await advance();
+		await accept({ index: 0 });
+		await act(() => store.setManualProvider(mockSwapProviders[1]));
+		const acceptedQuote = get(store);
+
+		expect(review).toBeEnabled();
+		expect(receiveInput).toHaveValue('20');
+		expect(receiveField).not.toHaveClass('animate-pulse');
+
+		await act(() => sourceToken.set({ ...props.sourceToken }));
+		await act(() => destinationToken.set({ ...props.destinationToken }));
+		await advance();
+
+		expect(rounds).toHaveLength(1);
+		expect(get(activity)).toMatchObject({ requestId: 1, pending: false, background: false });
+		expect(get(store)).toBe(acceptedQuote);
+		expect(review).toBeEnabled();
+		expect(receiveInput).toHaveValue('20');
+		expect(receiveField).not.toHaveClass('animate-pulse');
+
+		form.unmount();
+		coordinator.unmount();
 	});
 
 	it('loads the receive field on a same-amount slippage edit through debounce, pricing and the comparison hold', async () => {

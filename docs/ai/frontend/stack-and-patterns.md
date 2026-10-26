@@ -411,7 +411,12 @@ Only a foreground pending round actually observed by the mounted header may conf
 replay from a completed snapshot, review remount, manual selection or periodic refresh.
 
 Foreground activity starts when the coordinator queues the round, before its 300 ms debounce,
-and keeps one request identity through pricing. The shared form blocks Review throughout that
+and keeps one request identity through pricing. Track the source/destination `TokenId` values,
+not token-object emissions: `initSwapContext` re-emits its selected token objects on unrelated
+balance updates, which must not invalidate a quote or restart foreground comparison. Genuine
+pair, amount, slippage and ICRC-2 readiness changes still invalidate the current round; pricing
+reads the latest complete token objects inside the untracked request path.
+The shared form blocks Review throughout that
 queued/pending foreground work; background refresh may retain a usable quote and enabled Review.
 Cancelling queued/pending foreground work discards offers priced for the previous inputs before
 clearing activity, so a same-amount remount cannot accidentally reuse them. Completed quotes and

@@ -1,3 +1,4 @@
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
 import {
 	SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS,
@@ -7,13 +8,16 @@ import * as addressDerived from '$lib/derived/address.derived';
 import * as authDerived from '$lib/derived/auth.derived';
 import * as tokensDerived from '$lib/derived/tokens.derived';
 import * as swapService from '$lib/services/swap.services';
+import { balancesStore } from '$lib/stores/balances.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import {
 	initSwapQuoteActivityStore,
 	type SwapQuoteActivity
 } from '$lib/stores/swap-quote-activity.store';
+import { initSwapContext } from '$lib/stores/swap.store';
 import { SwapProvider, type FetchSwapAmountsParams, type SwapMappedResult } from '$lib/types/swap';
 import { parseTokenId } from '$lib/validation/token.validation';
+import SwapAmountsContextTokensTest from '$tests/lib/components/swap/SwapAmountsContextTokensTest.svelte';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
@@ -60,6 +64,186 @@ describe('SwapAmountsContext quote activity', () => {
 		vi.useRealTimers();
 		vi.restoreAllMocks();
 	});
+
+	it('keeps accepted quotes quiet when unrelated balance updates re-emit the selected tokens', async () => {
+		const fetchMock = vi
+			.spyOn(swapService, 'fetchSwapAmounts')
+			.mockResolvedValue(mockSwapProviders);
+		const { sourceToken, destinationToken } = initSwapContext(props);
+		const sourceEmissions = vi.fn();
+		const destinationEmissions = vi.fn();
+		const stopSource = sourceToken.subscribe(sourceEmissions);
+		const stopDestination = destinationToken.subscribe(destinationEmissions);
+		const { unmount } = await act(() =>
+			render(SwapAmountsContextTokensTest, {
+				props: { ...props, sourceToken, destinationToken },
+				context: mockContextMap([[SWAP_AMOUNTS_CONTEXT_KEY, { store, activity }]])
+			})
+		);
+		await advance();
+		store.setManualProvider(mockSwapProviders[1]);
+		const acceptedActivity = get(activity);
+		const acceptedQuote = get(store);
+		const activityEmissions = vi.fn();
+		const stopActivity = activity.subscribe(activityEmissions);
+		activityEmissions.mockClear();
+		sourceEmissions.mockClear();
+		destinationEmissions.mockClear();
+
+		expect(fetchMock).toHaveBeenCalledOnce();
+		expect(acceptedActivity?.pending).toBeFalsy();
+
+		await act(() => {
+			balancesStore.set({ id: ETHEREUM_TOKEN.id, data: { data: 1n, certified: false } });
+		});
+		await act(() => {
+			balancesStore.set({ id: ETHEREUM_TOKEN.id, data: { data: 1n, certified: false } });
+		});
+
+		expect(sourceEmissions).toHaveBeenCalledTimes(2);
+		expect(destinationEmissions).toHaveBeenCalledTimes(2);
+		expect(sourceEmissions).toHaveBeenLastCalledWith(props.sourceToken);
+		expect(destinationEmissions).toHaveBeenLastCalledWith(props.destinationToken);
+		expect(get(activity)).toBe(acceptedActivity);
+		expect(activityEmissions).not.toHaveBeenCalled();
+
+		await advance();
+
+		expect(fetchMock).toHaveBeenCalledOnce();
+		expect(get(store)).toBe(acceptedQuote);
+
+		await advance(SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS);
+
+		expect(fetchMock).toHaveBeenCalledTimes(2);
+		expect(get(activity)).toMatchObject({ requestId: 2, pending: false, background: true });
+		expect(get(store)?.selectedProvider).toEqual(mockSwapProviders[1]);
+
+		stopActivity();
+		stopSource();
+		stopDestination();
+		unmount();
+	});
+
+	it.each(['debounce', 'pricing', 'hold', 'accepted', 'background'] as const)(
+		'preserves the current %s round when token stores emit unchanged identities',
+		async (phase) => {
+			const sourceToken = writable(props.sourceToken);
+			const destinationToken = writable(props.destinationToken);
+			const rounds: {
+				params: FetchSwapAmountsParams;
+				resolve: (offers: SwapMappedResult[]) => void;
+			}[] = [];
+			const fetchMock = vi
+				.spyOn(swapService, 'fetchSwapAmounts')
+				.mockImplementation((params) => new Promise((resolve) => rounds.push({ params, resolve })));
+			const { unmount } = await act(() =>
+				render(SwapAmountsContextTokensTest, {
+					props: { ...props, sourceToken, destinationToken },
+					context: mockContextMap([[SWAP_AMOUNTS_CONTEXT_KEY, { store, activity }]])
+				})
+			);
+			if (phase !== 'debounce') {
+				await advance();
+			}
+			if (phase === 'hold') {
+				await act(() => rounds[0].params.onProviderParticipating?.(SwapProvider.LIFI));
+			}
+			if (phase === 'hold' || phase === 'accepted' || phase === 'background') {
+				await act(() => rounds[0].resolve(mockSwapProviders));
+				await runResolvedPromises();
+			}
+			if (phase === 'background') {
+				store.setManualProvider(mockSwapProviders[1]);
+				await advance(SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS);
+			}
+			const currentActivity = get(activity);
+			const currentQuote = get(store);
+			const activityEmissions = vi.fn();
+			const stopActivity = activity.subscribe(activityEmissions);
+			activityEmissions.mockClear();
+			const callsBefore = fetchMock.mock.calls.length;
+
+			for (const tokenStore of [sourceToken, destinationToken]) {
+				await act(() => tokenStore.set(get(tokenStore)));
+				await act(() => tokenStore.set({ ...get(tokenStore) }));
+
+				expect(get(activity)).toBe(currentActivity);
+				expect(activityEmissions).not.toHaveBeenCalled();
+				expect(get(store)).toBe(currentQuote);
+				expect(fetchMock).toHaveBeenCalledTimes(callsBefore);
+			}
+
+			await advance();
+
+			expect(fetchMock).toHaveBeenCalledTimes(phase === 'background' ? 2 : 1);
+			expect(get(activity)).toBe(currentActivity);
+
+			if (phase === 'debounce') {
+				expect(get(activity)).toMatchObject({ requestId: 1, pending: true, background: false });
+			}
+			if (phase === 'hold') {
+				await advance(SWAP_PROVIDER_MIN_COMPARISON_MS);
+			}
+			if (phase === 'debounce' || phase === 'pricing' || phase === 'background') {
+				await act(() => rounds.at(-1)?.resolve(mockSwapProviders));
+				await runResolvedPromises();
+			}
+
+			expect(get(activity)?.pending).toBeFalsy();
+
+			stopActivity();
+			unmount();
+		}
+	);
+
+	it.each(['sourceToken', 'destinationToken'] as const)(
+		'invalidates pending pricing when the %s store selects a different TokenId with the same symbol',
+		async (side) => {
+			const sourceToken = writable(props.sourceToken);
+			const destinationToken = writable(props.destinationToken);
+			const rounds: {
+				params: FetchSwapAmountsParams;
+				resolve: (offers: SwapMappedResult[]) => void;
+			}[] = [];
+			vi.spyOn(swapService, 'fetchSwapAmounts').mockImplementation(
+				(params) => new Promise((resolve) => rounds.push({ params, resolve }))
+			);
+			const { unmount } = await act(() =>
+				render(SwapAmountsContextTokensTest, {
+					props: { ...props, sourceToken, destinationToken },
+					context: mockContextMap([[SWAP_AMOUNTS_CONTEXT_KEY, { store, activity }]])
+				})
+			);
+			await advance();
+			const tokenStore = side === 'sourceToken' ? sourceToken : destinationToken;
+			const nextToken = { ...props[side], id: parseTokenId(props[side].symbol) };
+			await act(() => tokenStore.set(nextToken));
+
+			expect(get(activity)).toMatchObject({ requestId: 2, pending: true, background: false });
+
+			await act(() => {
+				rounds[0].params.onProviderParticipating?.(SwapProvider.LIFI);
+				rounds[0].resolve(mockSwapProviders);
+			});
+			await runResolvedPromises();
+
+			expect(get(activity)?.providers).toEqual([]);
+			expect(get(store)).toBeUndefined();
+
+			await advance();
+
+			expect(rounds).toHaveLength(2);
+			expect(rounds[1].params[side]).toBe(nextToken);
+
+			await act(() => rounds[1].resolve(mockSwapProviders));
+			await runResolvedPromises();
+
+			expect(get(activity)).toMatchObject({ requestId: 2, pending: false, background: false });
+			expect(get(store)?.selectedProvider).toEqual(mockSwapProviders[0]);
+
+			unmount();
+		}
+	);
 
 	it('starts and completes a foreground round even when pricing settles immediately', async () => {
 		vi.spyOn(swapService, 'fetchSwapAmounts').mockResolvedValue(mockSwapProviders);
@@ -242,7 +426,9 @@ describe('SwapAmountsContext quote activity', () => {
 
 	it.each([
 		{ slippageValue: '0.5' },
-		{ destinationToken: { ...mockValidIcCkToken, id: parseTokenId('another destination') } }
+		{ sourceToken: { ...mockValidIcToken, id: parseTokenId(mockValidIcToken.symbol) } },
+		{ destinationToken: { ...mockValidIcCkToken, id: parseTokenId('another destination') } },
+		{ isSourceTokenIcrc2: false }
 	])('starts a fresh foreground round when another quote input changes: %o', async (change) => {
 		const fetchMock = vi
 			.spyOn(swapService, 'fetchSwapAmounts')
