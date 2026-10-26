@@ -1933,6 +1933,7 @@
 			"btc_psbt_input_not_segwit": "Tato transakce obsahuje vstup, který není typu SegWit (P2WPKH), a OISY jej nemůže podepsat. Z bezpečnostních důvodů nebyla podepsána.",
 			"btc_psbt_input_not_owned": "Tato transakce obsahuje vstup, který nepatří adrese této peněženky, a OISY jej nemůže podepsat. Z bezpečnostních důvodů nebyla podepsána.",
 			"btc_psbt_input_ambiguous": "OISY nedokáže určit, na který předchozí výstup odkazuje jeden ze vstupů této transakce, takže zobrazené částky ke kontrole se mohou lišit od skutečně podepisovaných částek. Z bezpečnostních důvodů nebyla podepsána.",
+			"btc_psbt_input_unverified": "Částku jednoho ze vstupů této transakce nebylo možné ověřit, takže zobrazené částky ke kontrole se mohou lišit od skutečně podepisovaných částek. Nic nebylo podepsáno. Pokud je vstup váš, zkuste to znovu, až budou vaše poslední bitcoinové transakce potvrzeny. V opačném případě musí aplikace u každého vstupu uvést jeho předchozí transakci.",
 			"from_address_not_wallet": "Adresa „Od“ požadovaná pro transakci není adresou této peněženky.",
 			"unknown_destination": "Neznámá cílová adresa.",
 			"cketh_deposit_refused": "Tento požadavek volá kontrakt pro převod ckETH pro principal na Internet Computeru, který není váš, nebo s daty, která OISY nedokáže přečíst. Pro vaši bezpečnost nebyl podepsán.",

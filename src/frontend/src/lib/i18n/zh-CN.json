@@ -1933,6 +1933,7 @@
 			"btc_psbt_input_not_segwit": "此交易包含一个非 SegWit（P2WPKH）类型的输入，OISY 无法对其签名。出于安全考虑，该交易未被签名。",
 			"btc_psbt_input_not_owned": "此交易包含一个不属于此钱包地址的输入，OISY 无法对其签名。出于安全考虑，该交易未被签名。",
 			"btc_psbt_input_ambiguous": "OISY 无法确定此交易的某个输入引用的是哪个先前输出，因此审查时显示的金额可能与实际签名的金额不同。出于安全考虑，该交易未被签名。",
+			"btc_psbt_input_unverified": "OISY 无法核实此交易中某个输入的金额，因此审查时显示的金额可能与实际签名的金额不同。未签名任何内容。如果该输入属于您，请在您最近的比特币交易确认后重试。否则，应用需要为每个输入附上其先前交易。",
 			"from_address_not_wallet": "请求交易的发起地址不是本钱包的地址。",
 			"unknown_destination": "未知的接收地址。",
 			"cketh_deposit_refused": "此请求会为不属于您的 Internet Computer 主标识，或使用 OISY 无法读取的数据，调用 ckETH 转换合约。为了您的安全，该请求未被签署。",

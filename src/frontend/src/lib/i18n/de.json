@@ -1933,6 +1933,7 @@
 			"btc_psbt_input_not_segwit": "Diese Transaktion enthält eine Eingabe, die keine SegWit-Eingabe (P2WPKH) ist, die OISY nicht signieren kann. Aus Sicherheitsgründen wurde sie nicht signiert.",
 			"btc_psbt_input_not_owned": "Diese Transaktion enthält eine Eingabe, die nicht zur Adresse dieser Wallet gehört, die OISY nicht signieren kann. Aus Sicherheitsgründen wurde sie nicht signiert.",
 			"btc_psbt_input_ambiguous": "OISY kann nicht feststellen, auf welche vorherige Ausgabe sich eine der Eingaben dieser Transaktion bezieht, sodass die zur Überprüfung angezeigten Beträge von den tatsächlich signierten Beträgen abweichen könnten. Aus Sicherheitsgründen wurde sie nicht signiert.",
+			"btc_psbt_input_unverified": "OISY konnte den Betrag einer der Eingaben dieser Transaktion nicht prüfen, sodass die zur Überprüfung angezeigten Beträge von den tatsächlich signierten Beträgen abweichen könnten. Es wurde nichts signiert. Wenn die Eingabe dir gehört, versuche es erneut, sobald deine letzten Bitcoin-Transaktionen bestätigt sind. Andernfalls muss die App für jede Eingabe die vorherige Transaktion mitsenden.",
 			"from_address_not_wallet": "Die für die Transaktion angeforderte Absenderadresse ist nicht die Adresse dieser Wallet.",
 			"unknown_destination": "Unbekannte Zieladresse.",
 			"cketh_deposit_refused": "Diese Anfrage ruft den ckETH-Umwandlungsvertrag für einen Internet Computer Principal auf, der nicht deiner ist, oder mit Daten, die OISY nicht lesen kann. Zu deiner Sicherheit wurde sie nicht signiert.",
