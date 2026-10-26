@@ -29,3 +29,10 @@ export const LIFI_EXTERNAL_REF_KEYS = {
 
 export type LifiExternalRefKey =
 	(typeof LIFI_EXTERNAL_REF_KEYS)[keyof typeof LIFI_EXTERNAL_REF_KEYS];
+
+// A token as LI.FI names it: its chain id, and its address — the zero address for an EVM chain's
+// native coin.
+export interface LifiTokenRef {
+	chainId: number;
+	address: string;
+}
