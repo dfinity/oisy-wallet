@@ -352,6 +352,7 @@ describe('SolWalletConnectSignModal', () => {
 	it('should hold approval on an unchecked approval with no simulation', async () => {
 		vi.mocked(decode).mockResolvedValueOnce({
 			amount: 1n,
+			requiredSignatures: 1,
 			destination: mockSolAddress2,
 			isApproval: true,
 			uncheckedApproval: true,
@@ -372,6 +373,7 @@ describe('SolWalletConnectSignModal', () => {
 	it('should let an unchecked approval through when a simulation came back', async () => {
 		const args = await approve({
 			amount: 1n,
+			requiredSignatures: 1,
 			destination: mockSolAddress2,
 			isApproval: true,
 			uncheckedApproval: true,
