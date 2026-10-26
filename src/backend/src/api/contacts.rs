@@ -1,11 +1,9 @@
 use ic_cdk::{query, update};
 use shared::types::{
-    contact::{
-        CreateContactRequest, GetContactImagesRequest, GetContactsRequest, UpdateContactRequest,
-    },
+    contact::{CreateContactRequest, GetContactImagesRequest, UpdateContactRequest},
     result_types::{
         CreateContactResult, DeleteContactResult, GetContactImagesResult, GetContactResult,
-        GetContactsResult, UpdateContactResult,
+        GetContactsPageResult, GetContactsResult, UpdateContactResult,
     },
 };
 
@@ -71,17 +69,28 @@ pub fn get_contact(contact_id: u64) -> GetContactResult {
 /// Returns all contacts for the caller
 ///
 /// This query function returns a list of the user's contacts.
-/// # Arguments
-/// * `request` - Optional. Without it, or with `include_images: true`, each contact carries its
-///   image. With `include_images: false` the contacts come without images, which
-///   `get_contact_images` returns in batches.
 /// # Returns
 /// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
-pub fn get_contacts(request: Option<GetContactsRequest>) -> GetContactsResult {
-    let include_images = request.is_none_or(|request| request.include_images);
-    let result = Ok(contacts::get_contacts(include_images));
+pub fn get_contacts() -> GetContactsResult {
+    let result = Ok(contacts::get_contacts());
+    result.into()
+}
+
+/// Returns a page of the caller's contacts, without their images.
+///
+/// A page holds contacts in ID order until their encoded size reaches `CONTACTS_PAGE_MAX_BYTES`, so
+/// that the reply stays below the 2 MiB a certified call can return. `get_contact_images` returns
+/// the images.
+/// # Arguments
+/// * `after` - The `next` of the previous page; none for the first page.
+/// # Returns
+/// * `Ok(ContactsPage)` - The page, with `next` set while contacts remain after it.
+#[query(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn get_contacts_page(after: Option<u64>) -> GetContactsPageResult {
+    let result = Ok(contacts::get_contacts_page(after));
     result.into()
 }
 

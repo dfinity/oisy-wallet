@@ -654,9 +654,16 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Vec(ContactImageEntry),
 		Err: ContactError
 	});
-	const GetContactsRequest = IDL.Record({ include_images: IDL.Bool });
 	const GetContactsResult = IDL.Variant({
 		Ok: IDL.Vec(Contact),
+		Err: ContactError
+	});
+	const ContactsPage = IDL.Record({
+		contacts: IDL.Vec(Contact),
+		next: IDL.Opt(IDL.Nat64)
+	});
+	const GetContactsPageResult = IDL.Variant({
+		Ok: ContactsPage,
 		Err: ContactError
 	});
 	const ExchangeData = IDL.Record({
@@ -1060,7 +1067,8 @@ export const idlFactory = ({ IDL }) => {
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_contact: IDL.Func([IDL.Nat64], [GetContactResult]),
 		get_contact_images: IDL.Func([GetContactImagesRequest], [GetContactImagesResult]),
-		get_contacts: IDL.Func([IDL.Opt(GetContactsRequest)], [GetContactsResult]),
+		get_contacts: IDL.Func([], [GetContactsResult]),
+		get_contacts_page: IDL.Func([IDL.Opt(IDL.Nat64)], [GetContactsPageResult]),
 		get_exchange_rate: IDL.Func([TokenId], [IDL.Opt(ExchangeRate)]),
 		get_exchange_rates: IDL.Func([], [IDL.Vec(IDL.Tuple(TokenId, IDL.Opt(ExchangeRate)))], []),
 		get_my_tips: IDL.Func([], [GetMyTipsResult]),

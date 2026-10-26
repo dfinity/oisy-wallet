@@ -1346,8 +1346,7 @@ describe('backend.canister', () => {
 
 			const res = await getContacts();
 
-			// No request: the contacts keep coming with their images.
-			expect(service.get_contacts).toHaveBeenCalledExactlyOnceWith([]);
+			expect(service.get_contacts).toHaveBeenCalledOnce();
 			expect(res).toEqual(mockContacts);
 		});
 

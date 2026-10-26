@@ -716,6 +716,19 @@ export interface ContactImageEntry {
 	contact_id: bigint;
 	image: ContactImage;
 }
+/**
+ * A page of the caller's contacts, as returned by `get_contacts_page`.
+ */
+export interface ContactsPage {
+	/**
+	 * Contacts in ID order, without their images; `get_contact_images` returns those.
+	 */
+	contacts: Array<Contact>;
+	/**
+	 * What to pass as `after` for the next page; none once this page holds the last contact.
+	 */
+	next: [] | [bigint];
+}
 export interface CreateActiveUserTransactionRequest {
 	id: string;
 	external_refs: Array<ActiveUserTransactionRef>;
@@ -1049,16 +1062,19 @@ export type GetContactResult =
 			 */
 			Err: ContactError;
 	  };
-/**
- * Options for `get_contacts`. A caller that leaves them out gets every contact with its image.
- */
-export interface GetContactsRequest {
-	/**
-	 * Whether each contact carries its image. Without them, `get_contact_images` returns the
-	 * images in batches.
-	 */
-	include_images: boolean;
-}
+export type GetContactsPageResult =
+	| {
+			/**
+			 * The page was retrieved successfully.
+			 */
+			Ok: ContactsPage;
+	  }
+	| {
+			/**
+			 * The page was not retrieved due to an error.
+			 */
+			Err: ContactError;
+	  };
 export type GetContactsResult =
 	| {
 			/**
@@ -2871,14 +2887,22 @@ export interface _SERVICE {
 	 * Returns all contacts for the caller
 	 *
 	 * This query function returns a list of the user's contacts.
-	 * # Arguments
-	 * * `request` - Optional. Without it, or with `include_images: true`, each contact carries its
-	 * image. With `include_images: false` the contacts come without images, which
-	 * `get_contact_images` returns in batches.
 	 * # Returns
 	 * * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	 */
-	get_contacts: ActorMethod<[[] | [GetContactsRequest]], GetContactsResult>;
+	get_contacts: ActorMethod<[], GetContactsResult>;
+	/**
+	 * Returns a page of the caller's contacts, without their images.
+	 *
+	 * A page holds contacts in ID order until their encoded size reaches `CONTACTS_PAGE_MAX_BYTES`, so
+	 * that the reply stays below the 2 MiB a certified call can return. `get_contact_images` returns
+	 * the images.
+	 * # Arguments
+	 * * `after` - The `next` of the previous page; none for the first page.
+	 * # Returns
+	 * * `Ok(ContactsPage)` - The page, with `next` set while contacts remain after it.
+	 */
+	get_contacts_page: ActorMethod<[[] | [bigint]], GetContactsPageResult>;
 	get_exchange_rate: ActorMethod<[TokenId], [] | [ExchangeRate]>;
 	/**
 	 * Returns the latest USD prices for the caller's priceable tokens.

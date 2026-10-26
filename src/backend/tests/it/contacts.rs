@@ -4,11 +4,11 @@ use candid::Principal;
 use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use shared::types::{
-    account::{EthAddress, TokenAccountId, XrpAddress},
+    account::{EthAddress, SolPrincipal, TokenAccountId, XrpAddress},
     contact::{
-        Contact, ContactAddressData, ContactError, ContactImage, ContactImageEntry,
-        CreateContactRequest, GetContactImagesRequest, GetContactsRequest, ImageMimeType,
-        UpdateContactRequest, MAX_CONTACT_IMAGES_PER_CALL, MAX_IMAGES_PER_PRINCIPAL,
+        Contact, ContactAddressData, ContactError, ContactImage, ContactImageEntry, ContactsPage,
+        CreateContactRequest, GetContactImagesRequest, ImageMimeType, UpdateContactRequest,
+        MAX_CONTACTS_PER_USER, MAX_CONTACT_IMAGES_PER_CALL, MAX_IMAGES_PER_PRINCIPAL,
     },
     user_profile::OisyUser,
 };
@@ -54,15 +54,16 @@ pub fn call_get_contacts(pic_setup: &PicBackend, caller: Principal) -> Vec<Conta
         .expect("that get_contacts succeeds")
         .expect("that the result is not empty")
 }
-pub fn call_get_contacts_without_images(pic_setup: &PicBackend, caller: Principal) -> Vec<Contact> {
-    let request = Some(GetContactsRequest {
-        include_images: false,
-    });
+pub fn call_get_contacts_page(
+    pic_setup: &PicBackend,
+    caller: Principal,
+    after: Option<u64>,
+) -> ContactsPage {
     let wrapped_result =
-        pic_setup.query::<Result<Vec<Contact>, ContactError>>(caller, "get_contacts", request);
+        pic_setup.query::<Result<ContactsPage, ContactError>>(caller, "get_contacts_page", after);
     wrapped_result
-        .expect("that get_contacts succeeds")
-        .expect("that the result is not empty")
+        .expect("that get_contacts_page succeeds")
+        .expect("that the page is returned")
 }
 
 pub fn call_get_contact_images(
@@ -1368,7 +1369,7 @@ fn test_inline_image_migration_finishes_after_canister_upgrade() {
 // -------------------------------------------------------------------------------------------------
 
 #[test]
-fn test_get_contacts_without_images_leaves_the_images_out() {
+fn test_get_contacts_page_leaves_the_images_out() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
@@ -1382,12 +1383,13 @@ fn test_get_contacts_without_images_leaves_the_images_out() {
     .unwrap();
     call_create_contact_with_image(&pic_setup, caller, "None".to_string(), None).unwrap();
 
-    let contacts = call_get_contacts_without_images(&pic_setup, caller);
+    let page = call_get_contacts_page(&pic_setup, caller, None);
 
-    assert_eq!(contacts.len(), 2);
-    assert!(contacts.iter().all(|contact| contact.image.is_none()));
+    assert_eq!(page.contacts.len(), 2);
+    assert_eq!(page.next, None);
+    assert!(page.contacts.iter().all(|contact| contact.image.is_none()));
 
-    // A call without the argument, as the frontends before it send, still gets the images.
+    // `get_contacts` keeps returning the images.
     let with_images = call_get_contacts(&pic_setup, caller);
     let image = with_images
         .into_iter()
@@ -1506,18 +1508,13 @@ fn test_contacts_and_their_images_load_as_certified_calls() {
     .unwrap();
 
     // A certified call runs the query methods in replicated execution.
-    let contacts = pic_setup
-        .update::<Result<Vec<Contact>, ContactError>>(
-            caller,
-            "get_contacts",
-            Some(GetContactsRequest {
-                include_images: false,
-            }),
-        )
-        .expect("that get_contacts succeeds")
-        .expect("that the contacts are returned");
-    assert_eq!(contacts.len(), 1);
-    assert_eq!(contacts[0].image, None);
+    let page = pic_setup
+        .update::<Result<ContactsPage, ContactError>>(caller, "get_contacts_page", None::<u64>)
+        .expect("that get_contacts_page succeeds")
+        .expect("that the page is returned");
+    assert_eq!(page.contacts.len(), 1);
+    assert_eq!(page.contacts[0].image, None);
+    assert_eq!(page.next, None);
 
     let images = pic_setup
         .update::<Result<Vec<ContactImageEntry>, ContactError>>(
@@ -1536,4 +1533,63 @@ fn test_contacts_and_their_images_load_as_certified_calls() {
             image: png_image,
         }]
     );
+}
+
+#[test]
+fn test_get_contacts_page_loads_an_address_book_at_the_caps() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Every contact at the caps: a 100-character name and 40 addresses, each a 128-character
+    // address string with a 50-character label. Solana addresses only get the length check.
+    let addresses: Vec<ContactAddressData> = (0..40)
+        .map(|index| ContactAddressData {
+            token_account_id: TokenAccountId::Sol(SolPrincipal(format!("{index:0>128}"))),
+            label: Some(format!("{index:0>50}")),
+        })
+        .collect();
+
+    for index in 0..MAX_CONTACTS_PER_USER {
+        let contact = call_create_contact(&pic_setup, caller, format!("{index:0>100}")).unwrap();
+        call_update_contact(
+            &pic_setup,
+            caller,
+            Contact {
+                addresses: addresses.clone(),
+                ..contact
+            },
+        )
+        .unwrap();
+    }
+
+    // In one reply, the address book passes the 2 MiB of a certified call.
+    let whole = pic_setup.update::<Result<Vec<Contact>, ContactError>>(caller, "get_contacts", ());
+    assert!(whole.is_err());
+
+    // Page by page, as certified calls, every contact comes back once, in ID order.
+    let mut ids: Vec<u64> = Vec::new();
+    let mut pages = 0;
+    let mut after = None;
+    loop {
+        let page = pic_setup
+            .update::<Result<ContactsPage, ContactError>>(caller, "get_contacts_page", after)
+            .expect("that get_contacts_page succeeds")
+            .expect("that the page is returned");
+
+        pages += 1;
+        assert!(page
+            .contacts
+            .iter()
+            .all(|contact| contact.addresses == addresses));
+        ids.extend(page.contacts.iter().map(|contact| contact.id));
+
+        match page.next {
+            Some(next) => after = Some(next),
+            None => break,
+        }
+    }
+
+    assert!(pages > 1);
+    assert_eq!(ids.len(), MAX_CONTACTS_PER_USER);
+    assert!(ids.windows(2).all(|pair| pair[0] < pair[1]));
 }

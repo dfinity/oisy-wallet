@@ -21,6 +21,12 @@ pub const MAX_IMAGES_PER_PRINCIPAL: usize = 100;
 /// at most `MAX_IMAGE_SIZE_BYTES` stay well below that.
 pub const MAX_CONTACT_IMAGES_PER_CALL: usize = 16;
 
+/// Encoded size up to which `get_contacts_page` fills a page (1.5 MiB).
+///
+/// The caps allow an address book far larger than the 2 MiB reply of a certified call; the margin
+/// covers the reply's own encoding around the contacts.
+pub const CONTACTS_PAGE_MAX_BYTES: usize = 1_536 * 1024;
+
 /// Represents the MIME type of image.
 #[derive(CandidType, Deserialize, serde::Serialize, Clone, Debug, Eq, PartialEq)]
 pub enum ImageMimeType {
@@ -123,12 +129,13 @@ pub struct UpdateContactRequest {
     pub image: Option<ContactImage>,
 }
 
-/// Options for `get_contacts`. A caller that leaves them out gets every contact with its image.
+/// A page of the caller's contacts, as returned by `get_contacts_page`.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct GetContactsRequest {
-    /// Whether each contact carries its image. Without them, `get_contact_images` returns the
-    /// images in batches.
-    pub include_images: bool,
+pub struct ContactsPage {
+    /// Contacts in ID order, without their images; `get_contact_images` returns those.
+    pub contacts: Vec<Contact>,
+    /// What to pass as `after` for the next page; none once this page holds the last contact.
+    pub next: Option<u64>,
 }
 
 /// The caller's contacts whose images `get_contact_images` returns.
