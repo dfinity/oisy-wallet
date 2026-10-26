@@ -37,6 +37,7 @@ import { PEPECOIN_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepecoin.env';
 import { RNDR_TOKEN } from '$env/tokens/tokens-erc20/tokens.rndr.env';
 import { SHIB_TOKEN } from '$env/tokens/tokens-erc20/tokens.shib.env';
 import { SLVON_TOKEN } from '$env/tokens/tokens-erc20/tokens.slvon.env';
+import { SPCXON_TOKEN } from '$env/tokens/tokens-erc20/tokens.spcxon.env';
 import { SPX_TOKEN } from '$env/tokens/tokens-erc20/tokens.spx.env';
 import { SPYON_TOKEN } from '$env/tokens/tokens-erc20/tokens.spyon.env';
 import { UNI_TOKEN } from '$env/tokens/tokens-erc20/tokens.uni.env';
@@ -112,6 +113,7 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	PEPECOIN_TOKEN,
 	RNDR_TOKEN,
 	SLVON_TOKEN,
+	SPCXON_TOKEN,
 	SPX_TOKEN,
 	SPYON_TOKEN,
 	USD1_TOKEN,
