@@ -109,8 +109,9 @@ All of the following hold:
   pattern B).
 - It names LI.FI as the provider, the source token, the destination token and the in-between
   token. It carries no amounts.
-- "Appears" is counted once per pair and amount while the form is open, not on every quote
-  refresh.
+- "Appears" is counted once per pair, in-between token and amount while the swap modal is open: not
+  on every quote refresh, not when a refresh hides the box and the next brings it back, and not
+  when the form is rebuilt on the way back from the token picker.
 - LI.FI's existing `swap_offer` event stays as it is. It fires for every LI.FI answer, also when
   another provider's offer keeps the box hidden, so it cannot tell how often the box shows.
 
@@ -180,7 +181,8 @@ All of the following hold:
    the refresh interval lead to none.
 10. The box never shows an amount of the destination token.
 11. The box appearing for a pair and amount, and each press of its button, sends the tracking
-    event once; a quote refresh does not send it again.
+    event once; a quote refresh, the box hiding and coming back, or the form being rebuilt does
+    not send it again.
 
 ## Decisions
 

@@ -10,6 +10,7 @@ import {
 	TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
+import { trackSwapTwoSwapsHint } from '$lib/services/swap-two-swaps-hint-analytics.services';
 import {
 	SWAP_AMOUNTS_CONTEXT_KEY,
 	initSwapAmountsStore,
@@ -25,7 +26,12 @@ import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { get, readable } from 'svelte/store';
+
+vi.mock('$lib/services/swap-two-swaps-hint-analytics.services', () => ({
+	trackSwapTwoSwapsHint: vi.fn()
+}));
 
 describe('SwapForm', () => {
 	const mockContext = new Map();
@@ -546,6 +552,8 @@ describe('SwapForm', () => {
 				});
 
 			beforeEach(() => {
+				vi.clearAllMocks();
+
 				setupSwapAmountsStore(twoSwaps);
 				setupIcTokenFeeStore();
 			});
@@ -611,6 +619,40 @@ describe('SwapForm', () => {
 				expect(get(destinationToken)).toBe(mockValidIcCkToken);
 				expect(get(swapAmountsStore)).toBeNull();
 				expect(queryByTestId(SWAP_TWO_SWAPS_HINT)).not.toBeInTheDocument();
+			});
+
+			const showCount = () =>
+				vi.mocked(trackSwapTwoSwapsHint).mock.calls.filter(([{ action }]) => action === 'show')
+					.length;
+
+			it('should count the hint once when a refresh hides it and the next one brings it back', async () => {
+				const swapAmountsStore = setupSwapAmountsStore(twoSwaps);
+
+				const { queryByTestId } = renderForm();
+
+				// A refresh whose answers name no in-between token.
+				swapAmountsStore.setSwaps({ amountForSwap: 1, swaps: [], selectedProvider: undefined });
+				await tick();
+
+				expect(queryByTestId(SWAP_TWO_SWAPS_HINT)).not.toBeInTheDocument();
+
+				swapAmountsStore.setSwaps(twoSwaps);
+				await tick();
+
+				expect(queryByTestId(SWAP_TWO_SWAPS_HINT)).toBeInTheDocument();
+				expect(showCount()).toBe(1);
+			});
+
+			// The token picker rebuilds the form on its way back, with the same swap context.
+			it('should count the hint once when the form is rebuilt', () => {
+				const { unmount } = renderForm();
+
+				unmount();
+
+				const { getByTestId } = renderForm();
+
+				expect(getByTestId(SWAP_TWO_SWAPS_HINT)).toBeInTheDocument();
+				expect(showCount()).toBe(1);
 			});
 		});
 	});

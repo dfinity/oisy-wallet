@@ -83,10 +83,14 @@ describe('SwapTwoSwapsHint', () => {
 		expect(get(swapAmountsStore)).toBeNull();
 	});
 
-	it('should track that it showed, once', async () => {
-		const { rerender } = render(SwapTwoSwapsHint, { props, context });
+	it('should track that it showed once, however often it shows again', async () => {
+		const { rerender, unmount } = render(SwapTwoSwapsHint, { props, context });
 
 		await rerender({ ...props });
+
+		unmount();
+
+		render(SwapTwoSwapsHint, { props, context });
 
 		expect(trackSwapTwoSwapsHint).toHaveBeenCalledExactlyOnceWith({
 			action: 'show',
@@ -95,10 +99,12 @@ describe('SwapTwoSwapsHint', () => {
 		});
 	});
 
-	it('should track a new in-between token', async () => {
-		const { rerender } = render(SwapTwoSwapsHint, { props, context });
+	it('should track it again for another in-between token', () => {
+		const { unmount } = render(SwapTwoSwapsHint, { props, context });
 
-		await rerender({ ...props, intermediateToken: NVDA_TOKEN });
+		unmount();
+
+		render(SwapTwoSwapsHint, { props: { ...props, intermediateToken: NVDA_TOKEN }, context });
 
 		expect(trackSwapTwoSwapsHint).toHaveBeenCalledTimes(2);
 		expect(trackSwapTwoSwapsHint).toHaveBeenLastCalledWith({
@@ -108,6 +114,22 @@ describe('SwapTwoSwapsHint', () => {
 			destinationToken,
 			intermediateToken: NVDA_TOKEN
 		});
+	});
+
+	it('should track it again for another amount', () => {
+		const { unmount } = render(SwapTwoSwapsHint, { props, context });
+
+		unmount();
+
+		swapAmountsStore.setSwaps({
+			swaps: [],
+			amountForSwap: 2,
+			quoteError: { type: 'two-swaps', intermediateToken, provider: SwapProvider.LIFI }
+		});
+
+		render(SwapTwoSwapsHint, { props, context });
+
+		expect(trackSwapTwoSwapsHint).toHaveBeenCalledTimes(2);
 	});
 
 	it('should track a press of its button', async () => {

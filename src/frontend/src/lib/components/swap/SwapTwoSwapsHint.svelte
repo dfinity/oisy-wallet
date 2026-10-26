@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import {
@@ -25,25 +25,28 @@
 
 	let { intermediateToken, provider }: Props = $props();
 
-	const { sourceToken, destinationToken, setDestinationToken } =
+	const { sourceToken, destinationToken, setDestinationToken, markTwoSwapsHintShown } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	// Tracked once per in-between token while the hint is up: it stays up through the periodic
-	// refresh of the offers, and comes back for a new pair or amount.
-	let shownFor: Token['id'] | undefined;
-
-	$effect(() => {
-		if (
-			isNullish($sourceToken) ||
-			isNullish($destinationToken) ||
-			shownFor === intermediateToken.id
-		) {
+	// Counted once per pair, in-between token and quoted amount while the swap modal is open: the
+	// hint comes and goes with the quotes, and the form is rebuilt with every step change.
+	onMount(() => {
+		if (isNullish($sourceToken) || isNullish($destinationToken)) {
 			return;
 		}
 
-		shownFor = intermediateToken.id;
+		const firstShown = markTwoSwapsHintShown({
+			sourceTokenId: $sourceToken.id,
+			destinationTokenId: $destinationToken.id,
+			intermediateTokenId: intermediateToken.id,
+			amount: $swapAmountsStore?.amountForSwap
+		});
+
+		if (!firstShown) {
+			return;
+		}
 
 		trackSwapTwoSwapsHint({
 			action: 'show',
