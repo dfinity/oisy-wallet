@@ -26,6 +26,6 @@ export const COPXON_TOKEN: RequiredSpl2022Token = {
 	address: 'X7j77hTmjZJbepkXXBcsEapM8qNgdfihkFj6CZ5ondo',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
 	mintAuthority: '9foMHsSDq7nMg4WPusSz9eY7tyxyukqborA8GyU5cUxD',
-	freezeAuthority: 'Chm9dcASBc9C54FGxcSRGv9qC998TueQqr5XzGZkEVCc',
+	freezeAuthority: '51QVCuHfL1FeNjd8BDeffCKhCcAYoULnVB3yjNhShiuK',
 	groupData: COPXON_TOKEN_GROUP
 };

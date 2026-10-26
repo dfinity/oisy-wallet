@@ -26,6 +26,6 @@ export const EEMON_TOKEN: RequiredSpl2022Token = {
 	address: '916SDKz7y5ZcEZC9CtnQ5Djs1Y8Yv3UAPb6bak8ondo',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
 	mintAuthority: '9foMHsSDq7nMg4WPusSz9eY7tyxyukqborA8GyU5cUxD',
-	freezeAuthority: 'Chm9dcASBc9C54FGxcSRGv9qC998TueQqr5XzGZkEVCc',
+	freezeAuthority: '51QVCuHfL1FeNjd8BDeffCKhCcAYoULnVB3yjNhShiuK',
 	groupData: EEMON_TOKEN_GROUP
 };

@@ -26,6 +26,6 @@ export const NVDAON_TOKEN: RequiredSpl2022Token = {
 	address: 'gEGtLTPNQ7jcg25zTetkbmF7teoDLcrfTnQfmn2ondo',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
 	mintAuthority: '9foMHsSDq7nMg4WPusSz9eY7tyxyukqborA8GyU5cUxD',
-	freezeAuthority: 'Chm9dcASBc9C54FGxcSRGv9qC998TueQqr5XzGZkEVCc',
+	freezeAuthority: '51QVCuHfL1FeNjd8BDeffCKhCcAYoULnVB3yjNhShiuK',
 	groupData: NVDAON_TOKEN_GROUP
 };

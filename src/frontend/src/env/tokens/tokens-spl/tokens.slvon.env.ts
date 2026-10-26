@@ -26,6 +26,6 @@ export const SLVON_TOKEN: RequiredSpl2022Token = {
 	address: 'iy11ytbSGcUnrjE6Lfv78TFqxKyUESfku1FugS9ondo',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
 	mintAuthority: '9foMHsSDq7nMg4WPusSz9eY7tyxyukqborA8GyU5cUxD',
-	freezeAuthority: 'Chm9dcASBc9C54FGxcSRGv9qC998TueQqr5XzGZkEVCc',
+	freezeAuthority: '51QVCuHfL1FeNjd8BDeffCKhCcAYoULnVB3yjNhShiuK',
 	groupData: SLVON_TOKEN_GROUP
 };
