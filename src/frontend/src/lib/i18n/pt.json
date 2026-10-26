@@ -1931,7 +1931,7 @@
 			"btc_psbt_input_not_segwit": "Esta transação inclui uma entrada que não é do tipo SegWit (P2WPKH), que a OISY não pode assinar. Por sua segurança, ela não foi assinada.",
 			"btc_psbt_input_not_owned": "Esta transação inclui uma entrada que não pertence ao endereço desta carteira, que a OISY não pode assinar. Por sua segurança, ela não foi assinada.",
 			"btc_psbt_input_ambiguous": "A OISY não consegue determinar a qual saída anterior uma das entradas desta transação se refere, portanto os valores mostrados para revisão podem diferir dos valores realmente assinados. Por sua segurança, ela não foi assinada.",
-			"btc_psbt_input_unverified": "",
+			"btc_psbt_input_unverified": "A OISY não conseguiu verificar o valor de uma das entradas desta transação, portanto os valores mostrados para revisão podem diferir dos valores realmente assinados. Nada foi assinado. Se a entrada for sua, tente novamente quando suas transações de Bitcoin mais recentes forem confirmadas. Caso contrário, o aplicativo precisa incluir a transação anterior de cada entrada.",
 			"from_address_not_wallet": "O endereço 'De' solicitado para a transação não é o endereço desta carteira.",
 			"unknown_destination": "Endereço de destino desconhecido.",
 			"cketh_deposit_refused": "Esta solicitação chama o contrato de conversão de ckETH para um principal do Internet Computer que não é seu, ou com dados que a OISY não consegue ler. Para a sua segurança, não foi assinada.",
