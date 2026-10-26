@@ -335,10 +335,12 @@
 		{@render message?.()}
 
 		{#if nonNullish(twoSwapsQuoteError)}
-			<SwapTwoSwapsHint
-				intermediateToken={twoSwapsQuoteError.intermediateToken}
-				provider={twoSwapsQuoteError.provider}
-			/>
+			{#key twoSwapsQuoteError.intermediateToken.id}
+				<SwapTwoSwapsHint
+					intermediateToken={twoSwapsQuoteError.intermediateToken}
+					provider={twoSwapsQuoteError.provider}
+				/>
+			{/key}
 		{:else}
 			<SwapCrossChainInfo />
 		{/if}

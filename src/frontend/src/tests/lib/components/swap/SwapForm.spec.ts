@@ -654,6 +654,34 @@ describe('SwapForm', () => {
 				expect(getByTestId(SWAP_TWO_SWAPS_HINT)).toBeInTheDocument();
 				expect(showCount()).toBe(1);
 			});
+
+			it('should count the hint once per in-between token when a refresh replaces the token in place', async () => {
+				const swapAmountsStore = setupSwapAmountsStore(twoSwaps);
+
+				renderForm();
+
+				// A refresh whose answer routes the pair through another token.
+				swapAmountsStore.setSwaps({
+					...twoSwaps,
+					quoteError: {
+						type: 'two-swaps',
+						intermediateToken: mockValidErc20Token,
+						provider: SwapProvider.LIFI
+					}
+				});
+				await tick();
+
+				// And back to the first: already counted.
+				swapAmountsStore.setSwaps(twoSwaps);
+				await tick();
+
+				expect(
+					vi
+						.mocked(trackSwapTwoSwapsHint)
+						.mock.calls.filter(([{ action }]) => action === 'show')
+						.map(([{ intermediateToken }]) => intermediateToken)
+				).toEqual([mockValidIcCkToken, mockValidErc20Token]);
+			});
 		});
 	});
 
