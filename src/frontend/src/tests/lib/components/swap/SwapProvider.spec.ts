@@ -119,6 +119,24 @@ describe('SwapProvider form header', () => {
 		expect(status).toHaveTextContent(en.swap.text.finding_best_rate);
 	});
 
+	it('does not re-announce the status when a keystroke replaces the round', async () => {
+		activity.start({ requestId: 20, background: false });
+		const { getByTestId } = render(SwapProviderHeader, { props, context });
+		const status = getByTestId(SWAP_PROVIDER_STATUS);
+		const changes: MutationRecord[] = [];
+		const observer = new MutationObserver((records) => changes.push(...records));
+		observer.observe(status, { childList: true, characterData: true, subtree: true });
+
+		// The coordinator invalidates and restarts a round in one synchronous step.
+		activity.reset();
+		activity.start({ requestId: 21, background: false });
+		await tick();
+		observer.disconnect();
+
+		expect(status).toHaveTextContent(en.swap.text.finding_best_rate);
+		expect(changes).toHaveLength(0);
+	});
+
 	it('keeps the manual selection link content-sized beside the Smart Swap label', () => {
 		store.setSwaps({
 			swaps: [offer, mockOneSecProvider],
