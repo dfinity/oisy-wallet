@@ -15,10 +15,10 @@
 		MOTION_EXIT,
 		MOTION_REDUCED_FADE_DURATION
 	} from '$lib/constants/transition.constants';
+	import type { SwapProviderPool } from '$lib/providers/swap-provider-pool.providers';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { SwapProvider } from '$lib/types/swap';
 	import { resolveText } from '$lib/utils/i18n.utils';
-	import type { SwapProviderPool } from '$lib/utils/swap-provider-pool.utils';
 	import { findSwapProvider } from '$lib/utils/swap.utils';
 
 	interface Props {

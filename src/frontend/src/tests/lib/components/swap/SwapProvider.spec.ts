@@ -691,4 +691,39 @@ describe('SwapProvider form header', () => {
 
 		expect(getByText(en.swap.text.finding_best_rate)).not.toHaveClass('opacity-0');
 	});
+
+	it('shows Best Rate for a single offer, without Select', () => {
+		store.setSwaps({ swaps: [offer], selectedProvider: offer, amountForSwap: '1' });
+		const { getByText, queryByRole } = render(SwapProviderHeader, { props, context });
+
+		expect(getByText(en.swap.text.best_rate)).toBeInTheDocument();
+		expect(queryByRole('button', { name: en.swap.text.select })).not.toBeInTheDocument();
+	});
+
+	it('shows Best Rate on Review for a single offer', () => {
+		store.setSwaps({ swaps: [offer], selectedProvider: offer, amountForSwap: '1' });
+		const { getByText } = render(SwapProviderHeader, {
+			props: { slippageValue: '0.5' },
+			context
+		});
+
+		expect(getByText(en.swap.text.best_rate)).toBeInTheDocument();
+	});
+
+	it('fades the Best Rate of a single offer out before the status arrives', async () => {
+		vi.useFakeTimers();
+		store.setSwaps({ swaps: [offer], selectedProvider: offer, amountForSwap: '1' });
+		const { getByText, queryByText } = render(SwapProviderHeader, { props, context });
+
+		activity.start({ requestId: 16, background: false });
+		await tick();
+
+		expect(getByText(en.swap.text.best_rate)).toBeInTheDocument();
+		expect(queryByText(en.swap.text.finding_best_rate)).not.toBeInTheDocument();
+
+		await vi.advanceTimersByTimeAsync(MOTION_SWAP_DURATION);
+
+		expect(queryByText(en.swap.text.best_rate)).not.toBeInTheDocument();
+		expect(getByText(en.swap.text.finding_best_rate)).toBeInTheDocument();
+	});
 });

@@ -28,6 +28,7 @@
 		MOTION_REDUCED_FADE_DURATION,
 		MOTION_SWAP_DURATION
 	} from '$lib/constants/transition.constants';
+	import { swapProviderPool } from '$lib/providers/swap-provider-pool.providers';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -39,7 +40,6 @@
 	import { SwapProvider } from '$lib/types/swap';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
-	import { swapProviderPool } from '$lib/utils/swap-provider-pool.utils';
 	import { findSwapProvider } from '$lib/utils/swap.utils';
 	import { fade, fly, slide } from '$lib/utils/transitions.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
@@ -86,9 +86,9 @@
 		if (next === untrack(() => comparingLayout)) {
 			return;
 		}
-		// Select and Best Rate need 2+ offers; without them nothing has to fade out first, so the
-		// status arrives with the row instead of one swap duration after it.
-		if (next && untrack(() => ($swapAmountsStore?.swaps.length ?? 0) <= 1)) {
+		// Best Rate shows with any offer (Select with 2+); with no offer nothing has to fade out
+		// first, so the status arrives with the row instead of one swap duration after it.
+		if (next && untrack(() => ($swapAmountsStore?.swaps.length ?? 0) === 0)) {
 			comparingLayout = next;
 			return;
 		}
@@ -208,7 +208,9 @@
 								class:min-w-0={!comparingLayout}
 								class:min-w-24={comparingLayout}
 							>
-								{#if !comparingLayout && isBestRate && ($swapAmountsStore?.swaps.length ?? 0) > 1}
+								<!-- Any offer, even a single one, is the best rate found; only a manual
+								non-best choice hides it. -->
+								{#if !comparingLayout && isBestRate && ($swapAmountsStore?.swaps.length ?? 0) > 0}
 									<span
 										class="flex transition-opacity duration-150 ease-in motion-reduce:duration-100"
 										class:opacity-0={comparing}
@@ -240,7 +242,7 @@
 
 							{#snippet mainValue()}
 								<div class="flex items-start gap-3">
-									{#if isBestRate && $swapAmountsStore.swaps.length > 1}
+									{#if isBestRate && $swapAmountsStore.swaps.length > 0}
 										<BestRateBadge />
 									{/if}
 									<div class="flex gap-2">

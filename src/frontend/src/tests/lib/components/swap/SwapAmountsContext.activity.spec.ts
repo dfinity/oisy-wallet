@@ -297,4 +297,27 @@ describe('SwapAmountsContext quote activity', () => {
 
 		unmount();
 	});
+
+	it('restarts the refresh clock with a fresh foreground quote, so a refresh never lands mid-reveal', async () => {
+		const fetchMock = vi
+			.spyOn(swapService, 'fetchSwapAmounts')
+			.mockResolvedValue(mockSwapProviders);
+		const { unmount } = await mount();
+		// The foreground round queues at mount and prices after its 300 ms debounce.
+		await advance();
+
+		expect(fetchMock).toHaveBeenCalledOnce();
+
+		// A clock started at mount would refresh at 5,000 ms; this one counts from the quote.
+		await advance(SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS - 200);
+
+		expect(fetchMock).toHaveBeenCalledOnce();
+
+		await advance(200);
+
+		expect(fetchMock).toHaveBeenCalledTimes(2);
+		expect(get(activity)?.background).toBeTruthy();
+
+		unmount();
+	});
 });

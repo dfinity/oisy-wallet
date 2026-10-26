@@ -1,8 +1,8 @@
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { swapProviderPool } from '$lib/providers/swap-provider-pool.providers';
 import { SwapProvider } from '$lib/types/swap';
-import { swapProviderPool } from '$lib/utils/swap-provider-pool.utils';
 
 // LI.FI runs on local and staging only, never in tests; KongSwap is disabled.
 describe('swapProviderPool', () => {

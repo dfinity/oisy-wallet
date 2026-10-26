@@ -426,7 +426,7 @@ Background refresh and reduced motion are never held, and slower pricing is not 
 round replaced during the hold commits nothing.
 
 The scroll also shows OISY's provider pool, so a pair with one or two participants still shows
-the range of providers. `swapProviderPool` (`swap-provider-pool.utils.ts`) builds it from the
+the range of providers. `swapProviderPool` (`swap-provider-pool.providers.ts`) builds it from the
 provider registries and their flags only, never a hand-written list, so a disabled provider
 never appears: `related` are the enabled providers of the registries that price the pair's
 source or destination network (as `fetchSwapAmounts` routes it), `wider` every other enabled
@@ -460,9 +460,11 @@ No hard cuts in the section. The Smart Swap row, and ETH's "Total fee" row, open
 with `slide` (height, 250 ms) while their content fades up 4 px with `fly`; the fee row follows
 `SWAP_DETAILS_ROW_STAGGER_MS` (60 ms) later. The 12 px gap is `pb-3` inside the sliding row, not
 the forms' flex gap, so it animates with the height. The header never swaps labels in one frame:
-`comparingLayout` follows `comparing` one `MOTION_SWAP_DURATION` late, so Select and Best Rate
-(inert while fading) or the status fade out in place before the row re-lays out and the incoming
-ones fade in. The provider slot never shows a placeholder. A first round leaves the slot empty
+`comparingLayout` follows `comparing` one `MOTION_SWAP_DURATION` late, so Select (inert while
+fading) and Best Rate or the status fade out in place before the row re-lays out and the incoming
+ones fade in. Best Rate shows whenever the selected provider is the top offer, a single offer
+included; only a manual non-best choice hides it. Select needs two or more offers. The provider
+slot never shows a placeholder. A first round leaves the slot empty
 and fades the first participant up (opacity, 4 px, the soft-layer blur bridge, 200 ms ease-out);
 that fade runs once, and only a turn, which samples the pose first, cuts it short. One turn clock
 runs for the whole comparison: it starts once a name is on screen and never restarts on a

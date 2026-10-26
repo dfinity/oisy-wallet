@@ -217,6 +217,12 @@
 				activity?.complete({ requestId });
 				currentRequest = undefined;
 				isSwapAmountsLoading = false;
+				// The refresh clock restarts with a fresh foreground quote, so the next background
+				// round comes a full interval later and never cuts the winner's reveal motion.
+				if (!isPeriodicUpdate) {
+					clearTimer();
+					startTimer();
+				}
 			}
 		}
 	};
