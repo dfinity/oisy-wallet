@@ -91,6 +91,7 @@
 	let unreviewed = $state<boolean | undefined>();
 	let prioritizationFee = $state<bigint | undefined>();
 	let prioritizationFeeEstimate = $state<bigint | undefined>();
+	let requiredSignatures = $state<number | undefined>();
 	let preview = $state<SolSimulationPreview | undefined>();
 	let instructions = $state<SolInstructionSummary[] | undefined>();
 
@@ -149,6 +150,7 @@
 				unreviewed,
 				prioritizationFee,
 				prioritizationFeeEstimate,
+				requiredSignatures,
 				preview,
 				instructions,
 				simulatedInstructions,
@@ -338,11 +340,13 @@
 				{preview}
 				{prioritizationFee}
 				{prioritizationFeeEstimate}
+				{requiredSignatures}
 				simulatedInstructions={simulatedInstructions ?? false}
 				source={address ?? ''}
 				token={reviewToken}
 				unreadPrograms={unreadPrograms ?? []}
 				unreviewed={unreviewed ?? false}
+				walletPaysFees={!(feePaidByOthers ?? false)}
 				bind:unreadProgramsAcknowledged
 			/>
 		{/if}
