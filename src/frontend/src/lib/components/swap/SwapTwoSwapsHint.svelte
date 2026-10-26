@@ -56,19 +56,23 @@
 
 	// The first of the two swaps: from the same source, for the same amount, to the in-between token.
 	const onSwapFirst = () => {
+		// Read before the reset: the props come from the quote error the reset clears, so reading
+		// them afterwards finds it gone.
+		const token = intermediateToken;
+
 		if (nonNullish($sourceToken) && nonNullish($destinationToken)) {
 			trackSwapTwoSwapsHint({
 				action: 'click',
 				provider,
 				sourceToken: $sourceToken,
 				destinationToken: $destinationToken,
-				intermediateToken
+				intermediateToken: token
 			});
 		}
 
 		swapAmountsStore.reset();
 
-		setDestinationToken(intermediateToken);
+		setDestinationToken(token);
 	};
 </script>
 

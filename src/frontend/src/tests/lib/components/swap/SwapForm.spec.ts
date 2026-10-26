@@ -5,6 +5,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import {
 	SWAP_SWITCH_TOKENS_BUTTON,
 	SWAP_TWO_SWAPS_HINT,
+	SWAP_TWO_SWAPS_HINT_BUTTON,
 	TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON,
 	TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE,
 	TOKEN_INPUT_CURRENCY_TOKEN
@@ -24,7 +25,7 @@ import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
+import { get, readable } from 'svelte/store';
 
 describe('SwapForm', () => {
 	const mockContext = new Map();
@@ -596,6 +597,20 @@ describe('SwapForm', () => {
 				const { container: withoutHint } = renderForm();
 
 				expect(withoutHint).toHaveTextContent(crossNetworkNote);
+			});
+
+			// The hint's props come from the quote error its button clears.
+			it('should set the in-between token as the destination from its button', async () => {
+				const swapAmountsStore = setupSwapAmountsStore(twoSwaps);
+				const { destinationToken } = mockContext.get(SWAP_CONTEXT_KEY);
+
+				const { getByTestId, queryByTestId } = renderForm();
+
+				await fireEvent.click(getByTestId(SWAP_TWO_SWAPS_HINT_BUTTON));
+
+				expect(get(destinationToken)).toBe(mockValidIcCkToken);
+				expect(get(swapAmountsStore)).toBeNull();
+				expect(queryByTestId(SWAP_TWO_SWAPS_HINT)).not.toBeInTheDocument();
 			});
 		});
 	});
