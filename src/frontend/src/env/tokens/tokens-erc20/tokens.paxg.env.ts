@@ -1,5 +1,4 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { PAXG_TOKEN_GROUP } from '$env/tokens/groups/groups.paxg.env';
 import paxg from '$eth/assets/paxg.png';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
@@ -22,6 +21,5 @@ export const PAXG_TOKEN: RequiredAdditionalErc20Token = {
 	symbol: PAXG_SYMBOL,
 	decimals: PAXG_DECIMALS,
 	icon: paxg,
-	address: '0x45804880De22913dAFE09f4980848ECE6EcbAf78',
-	groupData: PAXG_TOKEN_GROUP
+	address: '0x45804880De22913dAFE09f4980848ECE6EcbAf78'
 };
