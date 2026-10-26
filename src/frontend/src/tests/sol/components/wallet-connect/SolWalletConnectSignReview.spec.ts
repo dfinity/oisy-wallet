@@ -690,7 +690,6 @@ describe('SolWalletConnectSignReview', () => {
 					...props,
 					messageSummary,
 					requiredSignatures: 2,
-					feePayer: mockSolAddress,
 					preview: { solDelta: -1_010_000n, tokenDeltas: [], controlChanges: [] }
 				}
 			});
@@ -718,7 +717,7 @@ describe('SolWalletConnectSignReview', () => {
 					...props,
 					messageSummary,
 					requiredSignatures: 2,
-					feePayer: mockSolAddress2,
+					walletPaysFees: false,
 					preview: { solDelta: -1_010_000n, tokenDeltas: [], controlChanges: [] }
 				}
 			});
@@ -732,7 +731,7 @@ describe('SolWalletConnectSignReview', () => {
 					...props,
 					messageSummary,
 					prioritizationFee: 7_000n,
-					feePayer: mockSolAddress2,
+					walletPaysFees: false,
 					preview: { solDelta: -1_007_000n, tokenDeltas: [], controlChanges: [] }
 				}
 			});
@@ -746,7 +745,7 @@ describe('SolWalletConnectSignReview', () => {
 					...props,
 					messageSummary,
 					requiredSignatures: 2,
-					feePayer: mockSolAddress2,
+					walletPaysFees: false,
 					preview: { solDelta: -1_000_000n, tokenDeltas: [], controlChanges: [] }
 				}
 			});

@@ -34,7 +34,7 @@
 		sign as signService,
 		decode as decodeService
 	} from '$sol/services/wallet-connect.services';
-	import type { OptionSolAddress, SolAddress } from '$sol/types/address';
+	import type { OptionSolAddress } from '$sol/types/address';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 	import type { SolSimulationPreview, SolUnreadProgram } from '$sol/types/sol-simulation';
@@ -91,7 +91,6 @@
 	let prioritizationFee = $state<bigint | undefined>();
 	let prioritizationFeeEstimate = $state<bigint | undefined>();
 	let requiredSignatures = $state<number | undefined>();
-	let feePayer = $state<SolAddress | undefined>();
 	let preview = $state<SolSimulationPreview | undefined>();
 	let instructions = $state<SolInstructionSummary[] | undefined>();
 
@@ -144,7 +143,6 @@
 				prioritizationFee,
 				prioritizationFeeEstimate,
 				requiredSignatures,
-				feePayer,
 				preview,
 				instructions,
 				simulatedInstructions,
@@ -321,7 +319,6 @@
 				{decoded}
 				destination={destination ?? ''}
 				feePaidByOthers={sendPaidByOthers}
-				{feePayer}
 				feeToken={token}
 				flaggedAsScam={!acceptedContext(request.verifyContext)}
 				{instructions}
@@ -339,6 +336,7 @@
 				token={reviewToken}
 				unreadPrograms={unreadPrograms ?? []}
 				unreviewed={unreviewed ?? false}
+				walletPaysFees={!(feePaidByOthers ?? false)}
 				bind:unreadProgramsAcknowledged
 			/>
 		{/if}

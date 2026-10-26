@@ -58,9 +58,10 @@
 		// message carries at least its fee payer's, so that is what the review assumes until the
 		// decode settles.
 		requiredSignatures?: number;
-		// Who pays the base and priority fees: the message's first signer, which is the dApp rather
-		// than the user when the dApp sponsors the request.
-		feePayer?: string;
+		// Whether the user's wallet pays the base and priority fees, which it does not when the message
+		// names another account to pay them, as a dApp sponsoring the request does. Until the decode
+		// says otherwise it is taken to, as the review has always assumed.
+		walletPaysFees?: boolean;
 		isApproval?: boolean;
 		// Whether the message cannot be stated faithfully, which is what the signing flow refuses on.
 		ambiguous?: boolean;
@@ -116,7 +117,7 @@
 		prioritizationFee,
 		prioritizationFeeEstimate,
 		requiredSignatures = 1,
-		feePayer,
+		walletPaysFees = true,
 		isApproval = false,
 		ambiguous = false,
 		decoded = false,
@@ -159,9 +160,6 @@
 	// Charged for every signature the message requires rather than once per message, so a message a
 	// dApp co-signs pays it twice.
 	let baseFee = $derived(SOLANA_LAMPORTS_PER_SIGNATURE * BigInt(requiredSignatures));
-
-	// A fee payer nobody has read yet is taken to be the user, as the review has always assumed.
-	let walletPaysFees = $derived(isNullish(feePayer) || feePayer === source);
 
 	// What the transaction costs the user beyond what it moves: every line of the fee section the
 	// wallet pays. The simulated SOL balance carries all of it and the message states none of it, so
