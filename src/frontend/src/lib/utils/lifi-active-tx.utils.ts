@@ -22,6 +22,7 @@ import type { EvmSourceTxOutcome } from '$lib/utils/evm-source-tx.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { truncateUtf8Bytes } from '$lib/utils/string.utils';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
+import type { SolSourceTxOutcome } from '$sol/utils/sol-source-tx.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import {
 	ChainId,
@@ -98,12 +99,12 @@ export interface LifiStatusUpdate {
 }
 
 /**
- * The row's status while its EVM source transaction is not confirmed yet, from the source chain's
- * verdict. A confirmed source settles a same-chain swap, which the poller writes, and nothing
- * else: from there, `/status` decides.
+ * The row's status while its source transaction is not confirmed yet, from the source chain's
+ * verdict (EVM or Solana). A confirmed source settles a same-chain swap, which the poller writes,
+ * and nothing else: from there, `/status` decides.
  */
 export const lifiSourceOutcomeToUpdate = (
-	outcome: EvmSourceTxOutcome
+	outcome: EvmSourceTxOutcome | SolSourceTxOutcome
 ): LifiStatusUpdate | undefined => {
 	switch (outcome) {
 		case 'pending':
@@ -112,6 +113,8 @@ export const lifiSourceOutcomeToUpdate = (
 			return { status: { Failed: null }, error: get(i18n).swap.error.failed_unexpectedly };
 		case 'replaced':
 			return { status: { Failed: null }, error: get(i18n).swap.error.swap_replaced_or_dropped };
+		case 'expired':
+			return { status: { Failed: null }, error: get(i18n).swap.error.swap_expired };
 		default:
 			return undefined;
 	}

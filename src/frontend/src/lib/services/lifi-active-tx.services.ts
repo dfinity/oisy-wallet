@@ -40,6 +40,8 @@ import {
 import { findEvmNetworkByChainId } from '$lib/utils/network.utils';
 import { del, get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
 import { findTokenByBackendTokenId } from '$lib/utils/token-id.utils';
+import { readSolSourceTxOutcome } from '$sol/services/sol-source-tx.services';
+import { SolanaNetworks } from '$sol/types/network';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { ChainId, HTTPError, SDKError, type GetStatusRequestExtended } from '@lifi/sdk';
@@ -48,8 +50,8 @@ import { get } from 'svelte/store';
 // When each row was last polled: LI.FI's per-row cadence runs on top of the loader's 5 s tick.
 const lastPolledAt = new Map<string, number>();
 
-// Rows whose source transaction this page has seen confirmed. From then on the receipt is not read
-// again (after a reload, once more), and only a cross-chain row asks `/status`.
+// Rows whose source transaction this page has seen confirmed. From then on the source chain is not
+// read again (after a reload, once more), and only a cross-chain row asks `/status`.
 const sourceConfirmed = new Set<string>();
 
 // Rows whose stored tool LI.FI refused (`INVALID`): from then on, `/status` is asked without it.
@@ -331,6 +333,52 @@ const checkEvmSource = async ({
 	return false;
 };
 
+/**
+ * Whether the row's Solana source transaction is confirmed. Until it is, the network's verdict is
+ * written: in flight, reverted, or expired without landing (seen on two consecutive polls).
+ */
+const checkSolSource = async ({
+	tx,
+	identity,
+	refs,
+	txHash
+}: {
+	tx: ActiveUserTransaction;
+	identity: Identity;
+	refs: Partial<Record<LifiExternalRefKey, string>>;
+	txHash: string;
+}): Promise<boolean> => {
+	const blockhash = refs[LIFI_EXTERNAL_REF_KEYS.BLOCKHASH];
+
+	if (isNullish(blockhash)) {
+		consoleError(`LI.FI row ${tx.id} has no blockhash`);
+		return false;
+	}
+
+	// LI.FI's Solana rows are mainnet only: the backend refuses a devnet token.
+	const outcome = await readSolSourceTxOutcome({
+		rowId: tx.id,
+		signature: txHash,
+		blockhash,
+		network: SolanaNetworks.mainnet
+	});
+
+	if (outcome === 'succeeded') {
+		sourceConfirmed.add(tx.id);
+		return true;
+	}
+
+	await applyUpdate({
+		identity,
+		tx,
+		refs,
+		update: lifiSourceOutcomeToUpdate(outcome),
+		learned: {}
+	});
+
+	return false;
+};
+
 const pollLifiActiveUserTransaction = async ({
 	tx,
 	identity,
@@ -339,7 +387,7 @@ const pollLifiActiveUserTransaction = async ({
 }: {
 	tx: ActiveUserTransaction;
 	identity: Identity;
-	userAddress: EthAddress;
+	userAddress: OptionEthAddress;
 	confirmedNonceByChainId: Map<string, Promise<number>>;
 }): Promise<void> => {
 	if (!('Lifi' in tx.data)) {
@@ -355,15 +403,31 @@ const pollLifiActiveUserTransaction = async ({
 		return;
 	}
 
-	// The Solana source check comes with Solana-source swaps; until then OISY opens no such row.
-	if (fromChain === ChainId.SOL) {
-		return;
-	}
-
 	const refs = toLifiExternalRefsMap(tx.external_refs);
 	const txHash = refs[LIFI_EXTERNAL_REF_KEYS.TX_HASH];
 
 	if (isNullish(txHash)) {
+		return;
+	}
+
+	// A Solana source is read by its signature and blockhash alone. An EVM source is read with the
+	// address that signed it, so its row waits while that address is unavailable.
+	let checkSource: () => Promise<boolean>;
+
+	if (fromChain === ChainId.SOL) {
+		checkSource = () => checkSolSource({ tx, identity, refs, txHash });
+	} else if (nonNullish(userAddress)) {
+		checkSource = () =>
+			checkEvmSource({
+				tx,
+				identity,
+				refs,
+				fromChain,
+				txHash,
+				userAddress,
+				confirmedNonceByChainId
+			});
+	} else {
 		return;
 	}
 
@@ -375,18 +439,7 @@ const pollLifiActiveUserTransaction = async ({
 
 	lastPolledAt.set(tx.id, now);
 
-	if (
-		!sourceConfirmed.has(tx.id) &&
-		!(await checkEvmSource({
-			tx,
-			identity,
-			refs,
-			fromChain,
-			txHash,
-			userAddress,
-			confirmedNonceByChainId
-		}))
-	) {
+	if (!sourceConfirmed.has(tx.id) && !(await checkSource())) {
 		return;
 	}
 
@@ -429,9 +482,10 @@ const pollLifiActiveUserTransaction = async ({
  * LI.FI's recommended cadence. Errors are caught per row and leave it untouched until its next poll.
  *
  * `userAddress` is the caller's EVM address, which signed every EVM-source row: rows are
- * principal-scoped and OISY derives one EVM address per principal. They are skipped while it is
- * unavailable. `confirmedNonceByChainId` is shared with the other EVM pollers of the same tick, so
- * rows on one chain cost one nonce read whatever their provider.
+ * principal-scoped and OISY derives one EVM address per principal. EVM-source rows are skipped while
+ * it is unavailable; a Solana-source row needs no address. `confirmedNonceByChainId` is shared with
+ * the other EVM pollers of the same tick, so rows on one chain cost one nonce read whatever their
+ * provider.
  */
 export const pollLifiActiveUserTransactions = async ({
 	identity,
@@ -446,7 +500,7 @@ export const pollLifiActiveUserTransactions = async ({
 }): Promise<void> => {
 	forgetSettledRows(new Set(transactions.map(({ id }) => id)));
 
-	if (transactions.length === 0 || isNullish(userAddress)) {
+	if (transactions.length === 0) {
 		return;
 	}
 

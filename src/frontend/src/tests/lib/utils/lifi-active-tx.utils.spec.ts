@@ -123,6 +123,13 @@ describe('lifi-active-tx.utils', () => {
 			});
 		});
 
+		it('should fail a Solana source whose blockhash expired before it landed', () => {
+			expect(lifiSourceOutcomeToUpdate('expired')).toEqual({
+				status: { Failed: null },
+				error: en.swap.error.swap_expired
+			});
+		});
+
 		it.each(['succeeded', 'unknown'] as const)('should settle nothing on %s', (outcome) => {
 			expect(lifiSourceOutcomeToUpdate(outcome)).toBeUndefined();
 		});

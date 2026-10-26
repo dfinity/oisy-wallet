@@ -1593,23 +1593,31 @@ Each tick, per pending LI.FI row:
      two-observation counter keyed per row) that both pollers call. Velora's behaviour
      and existing tests stay unchanged; the refactor landed on its own, ahead of the
      LI.FI EVM poller (2b-1, see [Delivery plan](#delivery-plan)).
-   - Solana — new, since nothing in the repo reads signature statuses or blockhash
-     validity yet:
+   - Solana — new, since nothing in the repo read signature statuses or blockhash
+     validity before. `readSolSourceTxOutcome` (`sol/services/sol-source-tx.services.ts`,
+     with the mapping in `toSolSourceTxOutcome`, `sol/utils/sol-source-tx.utils.ts`) is the
+     Solana counterpart of the EVM helper, on Solana mainnet, reading through
+     `getSignatureStatus` and `isBlockhashValid` in `sol/api/solana.api.ts`. It needs no
+     address: the signature and the blockhash identify the transaction.
      1. `getSignatureStatuses([signature], { searchTransactionHistory: true })`. The
         history search matters: without it the RPC only answers from its recent-status
         cache, and an old landed transaction would read as missing.
-     2. A status with `err` → `Failed` ("reverted on Solana"). A status at `confirmed` or
-        `finalized` without `err` → the source leg is done; go on to `/status`.
+     2. A status at `confirmed` or `finalized` with `err` → `Failed` ("reverted on
+        Solana", `swap.error.failed_unexpectedly` as for an EVM revert); without `err` →
+        the source leg is done; go on to `/status`. A status only `processed`, with or
+        without `err`, is no verdict: its block may still be dropped with its fork, so the
+        row stays in flight (`Executing`) until the cluster confirms it.
      3. No status → `isBlockhashValid(lifi_blockhash, { commitment: 'confirmed' })`. While
-        valid, the transaction can still land: no update. Once invalid, it can never
-        land — but it may have landed just before the hash expired, between the two
-        calls. So the first poll that sees "no status + invalid blockhash" only records
+        valid, the transaction can still land: the row stays in flight. Once invalid, it
+        can never land — but it may have landed just before the hash expired, between the
+        two calls. So the first poll that sees "no status + invalid blockhash" only records
         an observation in an in-memory `expiryObservations` map keyed by row id. The next
         poll re-runs step 1, and only if it again finds no status is the row set to
-        `Failed` ("expired, never landed"). This is the same two-observation guard Velora
-        Market uses for "replaced or dropped" (`replacementObservations`,
-        `REPLACEMENT_OBSERVATIONS_REQUIRED`), applied here because a `Failed` verdict is
-        immutable; the extracted source-tx helper can own the map for both.
+        `Failed` with `swap.error.swap_expired` ("expired before the network processed
+        it"). This is the same two-observation guard the EVM helper uses for "replaced or
+        dropped" (`replacementObservations`, `REPLACEMENT_OBSERVATIONS_REQUIRED`), applied
+        here because a `Failed` verdict is immutable; the Solana helper owns its map, as the
+        EVM helper owns its own.
      4. The two observations must be **consecutive**: any poll that finds a signature
         status, or a still-valid blockhash, **deletes** the row's entry. A page reload
         empties the map, so the count restarts; that can only delay the verdict by one
@@ -1779,8 +1787,8 @@ rows.
 #### Loader and UI
 
 - `LoaderActiveUserTransactions.svelte`: a `tick` branch calling the LI.FI poller with
-  `$ethAddress` (PR 3 adds `$solAddressMainnet` from `lib/derived/address.derived.ts` with
-  the Solana source check; until then a Solana-source row is skipped, and OISY opens none),
+  `$ethAddress`, which only EVM-source rows need and wait for (a Solana-source row is read
+  by its signature and blockhash, so the poller polls it without any address, from 3c),
   and a terminal-status branch firing `TRACK_COUNT_SWAP_SUCCESS` / `_ERROR` with
   `buildLifiSwapTrackingMetadata`. That metadata carries no `error`, unlike the other
   providers': for a `FAILED` transfer the row's error is LI.FI's own text, which never goes
@@ -1862,7 +1870,7 @@ rows.
 | 2b   | **EVM execution + tracking** — calldata binding (pinned facet ABIs decoded locally, incl. each bridge's payout and LI.FI's fee forwarding, + the Diamond's whitelist), route-tools refusal of Across behind a DEX swap, `fetchLifiEvmSwap` (pre-approval price check, unchanged `approve()`, form budget of 0/1/2 approval fees from one allowance read) + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound and the `/status` 404 → `NOT_FOUND` mapping)/loader (incl. wallet + EVM balance refresh)/item; flag to `(LOCAL \|\| STAGING) && !TEST`, `PRODUCT.md` for EVM-source swaps | 2a-2                                            |
 | 3a   | **Solana simulation plumbing** (a refactor on `main`) — `replaceRecentBlockhash` and `consistentSnapshot` options on `simulateSolTransaction` / `simulateTransactionAccounts` (`minContextSlot`, the response's slot), `getMultipleAccountsInfoWithContext` behind an unchanged `getMultipleAccountsInfo`, `createdAccounts` / `closedAccounts` in the simulation preview; every default as today, so the WalletConnect review and Solana balances are unchanged                                                                                                                                                                                                     | 2b                                              |
 | 3b   | **Solana transaction binding** (not wired in) — `assertLifiSolTransaction`: pinned top-level instructions incl. LI.FI's fee instructions, Jupiter `route_v2` / `shared_accounts_route_v2` minimum-output decoder, the program, spend, receipt and network-fee bounds, on real LI.FI fixtures; the [CPI question](#open-questions) answered first                                                                                                                                                                                                                                                                                                                     | 3a                                              |
-| 3c   | **Solana tracking** — the poller's Solana source-chain check (in-memory expiry observations), the loader's `$solAddressMainnet`; nothing opens a Solana row until 3d                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 2b                                              |
+| 3c   | **Solana tracking** — the poller's Solana source-chain check (in-memory expiry observations), Solana rows polled without an EVM address; nothing opens a Solana row until 3d                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | 2b                                              |
 | 3d   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (quote with the Jupiter pin, destinations, and a mainnet-only source list in place of the empty one; Solana destinations only), the Solana trust checks, `fetchLifiSolSwap` (re-sent broadcast, a later refusal keeping the row, on EVM's `swap()` too), LI.FI's ceiling in the form, "Max" and the review, `SwapSolWizard` dispatch, `PRODUCT.md` update for Solana-source swaps                                                                                                                                                                                              | 3b, 3c                                          |
 | 4    | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | 3d, production key + rate-limit scope confirmed |
 

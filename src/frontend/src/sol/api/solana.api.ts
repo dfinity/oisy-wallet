@@ -12,6 +12,7 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type {
 	SolanaGetAccountInfoReturn,
 	SolanaParsedAccountsInfo,
+	SolanaSignatureStatus,
 	SolanaSimulatedInnerInstructions
 } from '$sol/types/sol-rpc';
 import type {
@@ -24,6 +25,8 @@ import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import {
 	getBase64Encoder,
 	address as solAddress,
+	blockhash as solBlockhash,
+	signature as solSignature,
 	type Address,
 	type Base64EncodedWireTransaction,
 	type Lamports,
@@ -90,6 +93,51 @@ export const getRpcTransaction = async ({
 		maxSupportedTransactionVersion: SOLANA_MAX_SUPPORTED_TRANSACTION_VERSION,
 		encoding: 'jsonParsed'
 	}).send();
+};
+
+/**
+ * The status of one transaction, `null` while the node knows no transaction with that signature.
+ *
+ * The history search is what finds a transaction that landed a while ago: without it, the node
+ * answers from its recent-status cache alone, and a landed transaction reads as missing once it
+ * has aged out of it.
+ */
+export const getSignatureStatus = async ({
+	signature,
+	network
+}: {
+	signature: string;
+	network: SolanaNetworkType;
+}): Promise<SolanaSignatureStatus> => {
+	const { getSignatureStatuses } = solanaHttpRpc(network);
+
+	const {
+		value: [status]
+	} = await getSignatureStatuses([solSignature(signature)], {
+		searchTransactionHistory: true
+	}).send();
+
+	return status ?? null;
+};
+
+/**
+ * Whether a transaction with this recent blockhash can still land, as of the highest confirmed
+ * slot: the network refuses a blockhash once it has aged out, so an invalid one never turns valid.
+ */
+export const isBlockhashValid = async ({
+	blockhash,
+	network
+}: {
+	blockhash: string;
+	network: SolanaNetworkType;
+}): Promise<boolean> => {
+	const { isBlockhashValid } = solanaHttpRpc(network);
+
+	const { value } = await isBlockhashValid(solBlockhash(blockhash), {
+		commitment: 'confirmed'
+	}).send();
+
+	return value;
 };
 
 const cachedTransactions = new SvelteMap<

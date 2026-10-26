@@ -18,8 +18,10 @@ import {
 	getAccountOwner,
 	getMultipleAccountsInfo,
 	getMultipleAccountsInfoWithContext,
+	getSignatureStatus,
 	getSolCreateAccountFee,
 	getTokenInfo,
+	isBlockhashValid,
 	loadTokenAccount,
 	simulateTransactionAccounts
 } from '$sol/api/solana.api';
@@ -706,6 +708,113 @@ describe('solana.api', () => {
 				innerInstructions: [],
 				fee: undefined,
 				slot: 101n
+			});
+		});
+	});
+
+	describe('the source-transaction reads', () => {
+		const signature = mockSolSignature();
+		const blockhash = 'HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN';
+
+		const confirmedStatus = {
+			confirmationStatus: 'confirmed',
+			confirmations: 3n,
+			err: null,
+			slot: 100n,
+			status: { Ok: null }
+		};
+
+		let mockGetSignatureStatuses: MockInstance;
+		let mockIsBlockhashValid: MockInstance;
+
+		beforeEach(() => {
+			mockGetSignatureStatuses = vi.fn().mockReturnValue({
+				send: () => Promise.resolve({ context: { slot: 100n }, value: [confirmedStatus] })
+			});
+
+			mockIsBlockhashValid = vi.fn().mockReturnValue({
+				send: () => Promise.resolve({ context: { slot: 100n }, value: false })
+			});
+
+			vi.mocked(solRpcProviders.solanaHttpRpc).mockReturnValue({
+				getSignatureStatuses: mockGetSignatureStatuses,
+				isBlockhashValid: mockIsBlockhashValid
+			} as unknown as ReturnType<typeof solRpcProviders.solanaHttpRpc>);
+		});
+
+		describe('getSignatureStatus', () => {
+			it('should return the status of the signature, searching the history', async () => {
+				await expect(
+					getSignatureStatus({ signature, network: SolanaNetworks.mainnet })
+				).resolves.toEqual(confirmedStatus);
+
+				expect(solRpcProviders.solanaHttpRpc).toHaveBeenCalledExactlyOnceWith(
+					SolanaNetworks.mainnet
+				);
+				expect(mockGetSignatureStatuses).toHaveBeenCalledExactlyOnceWith([signature], {
+					searchTransactionHistory: true
+				});
+			});
+
+			it('should return null for a signature the node does not know', async () => {
+				mockGetSignatureStatuses.mockReturnValue({
+					send: () => Promise.resolve({ context: { slot: 100n }, value: [null] })
+				});
+
+				await expect(
+					getSignatureStatus({ signature, network: SolanaNetworks.mainnet })
+				).resolves.toBeNull();
+			});
+
+			it('should return null when the node answers with no entry at all', async () => {
+				mockGetSignatureStatuses.mockReturnValue({
+					send: () => Promise.resolve({ context: { slot: 100n }, value: [] })
+				});
+
+				await expect(
+					getSignatureStatus({ signature, network: SolanaNetworks.mainnet })
+				).resolves.toBeNull();
+			});
+
+			it('should refuse a string that is not a signature, without asking the node', async () => {
+				await expect(
+					getSignatureStatus({ signature: 'not-a-signature', network: SolanaNetworks.mainnet })
+				).rejects.toThrow();
+
+				expect(mockGetSignatureStatuses).not.toHaveBeenCalled();
+			});
+		});
+
+		describe('isBlockhashValid', () => {
+			it('should return whether the blockhash is valid as of the confirmed slot', async () => {
+				await expect(
+					isBlockhashValid({ blockhash, network: SolanaNetworks.mainnet })
+				).resolves.toBeFalsy();
+
+				expect(solRpcProviders.solanaHttpRpc).toHaveBeenCalledExactlyOnceWith(
+					SolanaNetworks.mainnet
+				);
+				expect(mockIsBlockhashValid).toHaveBeenCalledExactlyOnceWith(blockhash, {
+					commitment: 'confirmed'
+				});
+			});
+
+			it('should return true for a blockhash still valid', async () => {
+				mockIsBlockhashValid.mockReturnValue({
+					send: () => Promise.resolve({ context: { slot: 100n }, value: true })
+				});
+
+				await expect(
+					isBlockhashValid({ blockhash, network: SolanaNetworks.mainnet })
+				).resolves.toBeTruthy();
+			});
+
+			it('should refuse a string that is not a blockhash, without asking the node', async () => {
+				await expect(
+					isBlockhashValid({ blockhash: 'not-a-blockhash', network: SolanaNetworks.mainnet })
+				).rejects.toThrow();
+
+				expect(mockIsBlockhashValid).not.toHaveBeenCalled();
 			});
 		});
 	});
