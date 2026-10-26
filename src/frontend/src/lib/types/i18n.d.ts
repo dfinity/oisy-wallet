@@ -1497,6 +1497,7 @@ interface I18nWallet_connect {
 		cannot_be_shown: string;
 		close_pays_others: string;
 		fee_paid_by_others: string;
+		approval_without_simulation: string;
 		simulated_instructions: string;
 		multiple_operations: string;
 		simulated_review: string;
@@ -1616,6 +1617,7 @@ interface I18nWallet_connect {
 		ambiguous_transaction: string;
 		close_pays_others: string;
 		fee_paid_by_others: string;
+		approval_without_simulation: string;
 		unreviewed_without_simulation: string;
 		unreviewed_not_described_by_simulation: string;
 		unread_programs_unconfirmed: string;

@@ -137,6 +137,10 @@ export interface MappedSolTransaction {
 	// rather than transferring funds. The `destination` then holds the delegate (spender),
 	// so the review must label it as an approval, not a send.
 	isApproval?: boolean;
+	// `true` when that allowance is granted by an unchecked `Approve`, which names neither the
+	// token nor its decimals. How much the spender may spend is then stated only from a simulated
+	// run's account changes, so without a run the review cannot state it.
+	uncheckedApproval?: boolean;
 	// `true` when the message contains at least one instruction whose effects the
 	// review screen cannot display. Unlike `ambiguous`, this does not block signing:
 	// it surfaces a warning so the user knows the review is incomplete and can decide.

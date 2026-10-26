@@ -45,6 +45,8 @@ import {
 } from '@solana-program/system';
 import {
 	AuthorityType,
+	getApproveCheckedInstruction,
+	getApproveInstruction,
 	getBatchInstruction,
 	getBurnInstruction,
 	getCloseAccountInstruction,
@@ -54,6 +56,7 @@ import {
 	getTransferCheckedInstruction
 } from '@solana-program/token';
 import {
+	getApproveInstruction as getToken2022ApproveInstruction,
 	getBatchInstruction as getToken2022BatchInstruction,
 	getBurnInstruction as getToken2022BurnInstruction,
 	getSetAuthorityInstruction as getToken2022SetAuthorityInstruction,
@@ -889,6 +892,89 @@ describe('sol-transactions.utils', () => {
 
 			expect(mapSolTransactionMessage({ transactionMessage: mockParams })).toStrictEqual({
 				amount: undefined
+			});
+		});
+
+		describe('with an approval', () => {
+			// The real instruction mapper, since whether an approval names its token and decimals is
+			// decided by the instruction it decodes.
+			beforeEach(() => {
+				spyMapSolInstruction.mockRestore();
+			});
+
+			const approve = getApproveInstruction({
+				source: address(mockAtaAddress),
+				delegate: address(mockSolAddress2),
+				owner: createNoopSigner(address(mockSolAddress)),
+				amount: 1_000_000n
+			});
+
+			const mappedApproval = {
+				amount: 1_000_000n,
+				source: mockAtaAddress,
+				destination: mockSolAddress2,
+				isApproval: true
+			};
+
+			it('should flag an `Approve` as an unchecked approval', () => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: { ...mockSolParsedTransactionMessage, instructions: [approve] },
+						userAddress: mockSolAddress
+					})
+				).toStrictEqual({ ...mappedApproval, uncheckedApproval: true });
+			});
+
+			it('should flag a Token-2022 `Approve` as an unchecked approval', () => {
+				const token2022Approve = getToken2022ApproveInstruction({
+					source: address(mockAtaAddress),
+					delegate: address(mockSolAddress2),
+					owner: createNoopSigner(address(mockSolAddress)),
+					amount: 1_000_000n
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [token2022Approve]
+						},
+						userAddress: mockSolAddress
+					})
+				).toStrictEqual({ ...mappedApproval, uncheckedApproval: true });
+			});
+
+			it('should flag an `Approve` carried in a token batch as an unchecked approval', () => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [getBatchInstruction([approve])]
+						},
+						userAddress: mockSolAddress
+					})
+				).toStrictEqual({ ...mappedApproval, uncheckedApproval: true });
+			});
+
+			it('should not flag an `ApproveChecked` as an unchecked approval', () => {
+				const approveChecked = getApproveCheckedInstruction({
+					source: address(mockAtaAddress),
+					mint: address(JUP_TOKEN.address),
+					delegate: address(mockSolAddress2),
+					owner: createNoopSigner(address(mockSolAddress)),
+					amount: 1_000_000n,
+					decimals: 6
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [approveChecked]
+						},
+						userAddress: mockSolAddress
+					})
+				).toStrictEqual({ ...mappedApproval, tokenAddress: JUP_TOKEN.address });
 			});
 		});
 

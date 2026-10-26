@@ -240,6 +240,40 @@ describe('SolWalletConnectSignReview', () => {
 		expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
 	});
 
+	it('should say an approval with no simulation behind it will not be signed', () => {
+		const { getByRole } = render(SolWalletConnectSignReview, {
+			props: { ...props, isApproval: true, approvalWithoutSimulation: true }
+		});
+
+		expect(getByRole('alert')).toHaveTextContent(
+			en.wallet_connect.text.approval_without_simulation
+		);
+	});
+
+	// Signing names this refusal before the one for an instruction nobody read, so the screen says
+	// what the toast would.
+	it('should say it is the approval when an unread instruction comes with it', () => {
+		const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+			props: { ...props, isApproval: true, approvalWithoutSimulation: true, unreviewed: true }
+		});
+
+		expect(getByText(en.wallet_connect.text.approval_without_simulation)).toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.unreviewed_instructions)).not.toBeInTheDocument();
+	});
+
+	it('should say nothing else about an approval it will not sign', () => {
+		const { queryByText } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				isApproval: true,
+				approvalWithoutSimulation: true,
+				parties: { sources: [], destinations: [], partial: true }
+			}
+		});
+
+		expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+	});
+
 	it('should say nothing else about a message it will not sign', () => {
 		// Every caveat qualifies a review nobody is going to act on, including the ones that sit
 		// outside the notice chain: the partial-parties line would tell the user which lists to read

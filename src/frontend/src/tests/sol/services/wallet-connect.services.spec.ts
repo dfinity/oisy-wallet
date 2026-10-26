@@ -1538,6 +1538,82 @@ describe('wallet-connect.services', () => {
 			});
 		});
 
+		describe('with an unchecked approval', () => {
+			beforeEach(() => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					...mockMappedTransaction,
+					isApproval: true,
+					uncheckedApproval: true
+				});
+			});
+
+			it('should refuse to sign when no simulation came back', async () => {
+				const result = await sign({ ...mockParams, simulated: false, simulationRan: false });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.wallet_connect.error.approval_without_simulation }
+				});
+
+				expect(mockParams.modalNext).not.toHaveBeenCalled();
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(sendSignedTransaction).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: mockRequest.topic,
+					id: mockRequest.id,
+					error: UNEXPECTED_ERROR
+				});
+			});
+
+			// The review names this refusal before the one for an instruction nobody read, so the
+			// toast says the same thing the screen did.
+			it('should say it is the approval when an unread instruction comes with it', async () => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					...mockMappedTransaction,
+					isApproval: true,
+					uncheckedApproval: true,
+					unreviewed: true
+				});
+
+				const result = await sign({ ...mockParams, simulated: false, simulationRan: false });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.wallet_connect.error.approval_without_simulation }
+				});
+
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(mockListener.rejectRequest).toHaveBeenCalledOnce();
+			});
+
+			it('should sign when a simulation came back', async () => {
+				const result = await sign({ ...mockParams, simulated: true, simulationRan: true });
+
+				expect(result).toEqual(expect.objectContaining({ success: true }));
+
+				expect(spyToastsError).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).toHaveBeenCalledOnce();
+			});
+
+			it('should sign a checked approval when no simulation came back', async () => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					...mockMappedTransaction,
+					isApproval: true
+				});
+
+				const result = await sign({ ...mockParams, simulated: false, simulationRan: false });
+
+				expect(result).toEqual(expect.objectContaining({ success: true }));
+
+				expect(spyToastsError).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).toHaveBeenCalledOnce();
+			});
+		});
+
 		describe('with a close that pays somebody else', () => {
 			it('should refuse to sign', async () => {
 				const result = await sign({ ...mockParams, closesPayOthers: true });
