@@ -1381,6 +1381,8 @@
 			"gasless": "गैस रहित",
 			"swap_fees": "स्वैप शुल्क",
 			"cross_chain_networks_info": "आप टोकन <b>$sourceNetwork</b> से <b>$destinationNetwork</b> नेटवर्क पर ले जाते हैं",
+			"two_swaps_info": "",
+			"two_swaps_first_button": "",
 			"near_intents_estimated_time": "",
 			"lifi_route_via": "",
 			"lifi_route_via_estimated_time": "",

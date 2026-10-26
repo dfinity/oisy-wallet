@@ -1381,6 +1381,8 @@
 			"gasless": "Gasless",
 			"swap_fees": "Poplatky za swap",
 			"cross_chain_networks_info": "Přesouváte tokeny ze sítě <b>$sourceNetwork</b> do sítě <b>$destinationNetwork</b>",
+			"two_swaps_info": "",
+			"two_swaps_first_button": "",
 			"near_intents_estimated_time": "",
 			"lifi_route_via": "",
 			"lifi_route_via_estimated_time": "",

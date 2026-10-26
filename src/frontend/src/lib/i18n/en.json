@@ -1381,6 +1381,8 @@
 			"gasless": "Gasless",
 			"swap_fees": "Swap Fees",
 			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network",
+			"two_swaps_info": "$oisy_short only offers swaps it can fully verify before you sign. There's no such direct route from $sourceSymbol to $destinationSymbol, but you can do it yourself in two separate swaps: first $sourceSymbol → $intermediateSymbol, then $intermediateSymbol → $destinationSymbol.",
+			"two_swaps_first_button": "Swap to $intermediateSymbol first",
 			"near_intents_estimated_time": "NEAR Intents (~$minutes min)",
 			"lifi_route_via": "LI.FI via $tool",
 			"lifi_route_via_estimated_time": "LI.FI via $tool (~$minutes min)",

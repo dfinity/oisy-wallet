@@ -1102,6 +1102,8 @@ interface I18nSwap {
 		gasless: string;
 		swap_fees: string;
 		cross_chain_networks_info: string;
+		two_swaps_info: string;
+		two_swaps_first_button: string;
 		near_intents_estimated_time: string;
 		lifi_route_via: string;
 		lifi_route_via_estimated_time: string;
