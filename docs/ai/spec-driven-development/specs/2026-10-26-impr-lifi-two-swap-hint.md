@@ -132,8 +132,8 @@ All of the following hold:
    the existing single cache entry with the offer.
 2. **Reading the route** — `src/frontend/src/lib/utils/lifi-swap.utils.ts`: a pure function that
    returns the in-between token (network and address) from a quote's `includedSteps` when there
-   is exactly one; the second request is `buildLifiQuoteRequest`'s request without
-   `allowDestinationCall: false`.
+   is exactly one; the second request is `buildLifiQuoteRequest`'s request with
+   `allowDestinationCall: true`.
 3. **Reaching the form** — the same path as the NEAR Intents minimum: a typed reason rejected by
    the provider (like `SwapAmountTooLowError` in `src/frontend/src/lib/rest/near-intents.rest.ts`),
    surfaced by `reduceSettledSwapResults` in `src/frontend/src/lib/services/swap.services.ts` only
