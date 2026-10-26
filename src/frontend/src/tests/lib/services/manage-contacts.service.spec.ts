@@ -5,15 +5,21 @@ import { createContact, loadContacts, updateContact } from '$lib/services/manage
 import { contactsStore } from '$lib/stores/contacts.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { ContactUi } from '$lib/types/contact';
-import { replaceIcErrorFields } from '$lib/utils/error.utils';
 import {
 	mockBackendContactAddressBtc,
 	mockBackendContactAddressEth,
 	mockBackendContactAddressSol
 } from '$tests/mocks/contacts.mock';
 import en from '$tests/mocks/i18n.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
+import {
+	RejectError,
+	ReplicaRejectCode,
+	UncertifiedRejectErrorCode,
+	requestIdOf
+} from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -116,7 +122,29 @@ describe('manage-contacts.service', () => {
 				}
 			];
 
-			const mockError = new Error('Request ID: 0x1234\nReject text: Canister is stopped');
+			// Shaped like the agent's rejected query: its HTTP details carry the request, with the sender.
+			const mockError = (() => {
+				const code = new UncertifiedRejectErrorCode(
+					requestIdOf({ method_name: 'get_contacts' }),
+					ReplicaRejectCode.CanisterError,
+					'Canister is stopped',
+					'IC0508',
+					undefined
+				);
+				const httpDetails = {
+					ok: true,
+					status: 200,
+					statusText: 'OK',
+					headers: [],
+					requestDetails: { request_type: 'query', sender: mockPrincipal }
+				};
+				code.callContext = {
+					canisterId: Principal.fromText('doked-biaaa-aaaar-qag2a-cai'),
+					methodName: 'get_contacts',
+					httpDetails
+				};
+				return RejectError.fromCode(code);
+			})();
 
 			let spyTrackEvent: MockInstance<typeof analytics.trackEvent>;
 			let spyToastsError: MockInstance<typeof toastsStore.toastsError>;
@@ -213,12 +241,14 @@ describe('manage-contacts.service', () => {
 						event_modifier: 'load_all',
 						result_status: 'error',
 						event_severity: 'error',
-						result_error: replaceIcErrorFields(mockError)
+						result_error_type: 'call_rejected'
 					}
 				});
 			});
 
-			it('should strip the request ID from the tracked error', async () => {
+			it('should track the error category, never the error text with its sender', async () => {
+				expect(mockError.message).toContain(mockPrincipal.toText());
+
 				mockGetContacts.mockRejectedValue(mockError);
 
 				const promise = loadContacts(mockIdentity);
@@ -228,9 +258,8 @@ describe('manage-contacts.service', () => {
 
 				const [[{ metadata }]] = spyTrackEvent.mock.calls;
 
-				expect(metadata?.result_error).toContain('Canister is stopped');
-				expect(metadata?.result_error).not.toContain('Request ID');
-				expect(metadata?.result_error).not.toContain('0x1234');
+				expect(metadata).not.toHaveProperty('result_error');
+				expect(Object.values(metadata ?? {}).join(' ')).not.toContain(mockPrincipal.toText());
 			});
 		});
 	});

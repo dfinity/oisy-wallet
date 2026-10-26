@@ -338,12 +338,12 @@ Loading the user's contacts emits one structured **`contact`** event under `even
 
 The contacts load when the user signs in or opens OISY already signed in. A load that fails is tried again after 2 seconds and, if that fails too, after another 4 seconds. Once the third attempt fails, the user sees a "Failed to load contacts" error toast.
 
-| `event_modifier` | Fires when                 | `result_status` | `event_severity` | Extra                                     |
-| ---------------- | -------------------------- | --------------- | ---------------- | ----------------------------------------- |
-| `load_all`       | the third attempt fails    | `error`         | `error`          | `result_error`, without the IC request ID |
-| `load_all`       | a retry loads the contacts | `success`       | `warn`           | —                                         |
+| `event_modifier` | Fires when                 | `result_status` | `event_severity` | Extra                                             |
+| ---------------- | -------------------------- | --------------- | ---------------- | ------------------------------------------------- |
+| `load_all`       | the third attempt fails    | `error`         | `error`          | `result_error_type`: `call_rejected` or `unknown` |
+| `load_all`       | a retry loads the contacts | `success`       | `warn`           | —                                                 |
 
-A load that succeeds on the first attempt sends nothing.
+A load that succeeds on the first attempt sends nothing. A failure is tracked by its category only: `call_rejected` when the backend rejected the call, `unknown` for anything else. The error text stays out, since an agent error carries the call context.
 
 ---
 

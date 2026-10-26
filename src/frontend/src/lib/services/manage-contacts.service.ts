@@ -10,14 +10,13 @@ import {
 	CONTACTS_LOAD_RETRY_BASE_DELAY
 } from '$lib/constants/contact.constants';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES, PLAUSIBLE_EVENT_SEVERITIES } from '$lib/enums/plausible';
-import { trackContact } from '$lib/services/contacts-analytics.services';
+import { toContactErrorType, trackContact } from '$lib/services/contacts-analytics.services';
 import { contactsStore } from '$lib/stores/contacts.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { ContactUi } from '$lib/types/contact';
 import { compareContactAddresses } from '$lib/utils/contact-address.utils';
 import { mapToBackendContact, mapToFrontendContact } from '$lib/utils/contact.utils';
-import { replaceIcErrorFields } from '$lib/utils/error.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
@@ -54,7 +53,7 @@ export const loadContacts = async (identity: Identity): Promise<void> => {
 					step: 'load_all',
 					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 					severity: PLAUSIBLE_EVENT_SEVERITIES.ERROR,
-					error: replaceIcErrorFields(err)
+					errorType: toContactErrorType(err)
 				});
 
 				toastsError({ msg: { text: get(i18n).contact.error.load }, err });
