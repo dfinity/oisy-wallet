@@ -376,7 +376,8 @@ describe('lifi-active-tx.services', () => {
 
 		it.each([
 			{ name: 'without a simulation slot', slot: undefined },
-			{ name: 'with a simulation slot that is not one', slot: '-1' }
+			{ name: 'with a simulation slot that is not one', slot: '-1' },
+			{ name: 'with a simulation slot wider than a u64', slot: '18446744073709551616' }
 		])('reads the blockhash unanchored $name', async ({ slot }) => {
 			vi.mocked(getSignatureStatus).mockResolvedValue(noStatus);
 

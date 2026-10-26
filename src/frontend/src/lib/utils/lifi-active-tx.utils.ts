@@ -7,7 +7,8 @@ import type {
 } from '$declarations/backend/backend.did';
 import {
 	ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES,
-	ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES
+	ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES,
+	MAX_UINT_64
 } from '$lib/constants/app.constants';
 import {
 	LIFI_STATUS_POLL_CADENCE,
@@ -122,10 +123,20 @@ export const lifiSourceOutcomeToUpdate = (
 
 /**
  * The slot a Solana row stores (`lifi_simulation_slot`), where OISY's own simulation of the signed
- * bytes ran and their blockhash was valid. `undefined` when the row has none or it is not a slot.
+ * bytes ran and their blockhash was valid. `undefined` when the row has none or it is not a slot:
+ * a `u64`, as the node parses `minContextSlot`, which would refuse a wider one on every poll rather
+ * than let the row be read unanchored.
  */
-export const toLifiSimulationSlot = (value: string | undefined): bigint | undefined =>
-	nonNullish(value) && /^\d{1,20}$/.test(value) ? BigInt(value) : undefined;
+export const toLifiSimulationSlot = (value: string | undefined): bigint | undefined => {
+	// The length is checked first, so that an unbounded string never reaches `BigInt`.
+	if (isNullish(value) || !/^\d{1,20}$/.test(value)) {
+		return undefined;
+	}
+
+	const slot = BigInt(value);
+
+	return slot <= MAX_UINT_64 ? slot : undefined;
+};
 
 // A `/status` answer, or the `NOT_FOUND` an HTTP 404 stands for.
 export type LifiStatusAnswer = BaseStatusData & {

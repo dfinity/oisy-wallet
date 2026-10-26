@@ -142,12 +142,20 @@ describe('lifi-active-tx.utils', () => {
 			expect(toLifiSimulationSlot('18446744073709551615')).toBe(18446744073709551615n);
 		});
 
-		it.each([undefined, '', '-1', '+1', '1.5', '0x10', ' 1', '123456789012345678901'])(
-			'should read no slot from %s',
-			(value) => {
-				expect(toLifiSimulationSlot(value)).toBeUndefined();
-			}
-		);
+		it.each([
+			undefined,
+			'',
+			'-1',
+			'+1',
+			'1.5',
+			'0x10',
+			' 1',
+			'18446744073709551616',
+			'99999999999999999999',
+			'123456789012345678901'
+		])('should read no slot from %s', (value) => {
+			expect(toLifiSimulationSlot(value)).toBeUndefined();
+		});
 	});
 
 	describe('isLifiStatusUnresolved', () => {
