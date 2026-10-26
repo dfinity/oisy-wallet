@@ -6,8 +6,9 @@ use serde_bytes::ByteBuf;
 use shared::types::{
     account::{EthAddress, TokenAccountId, XrpAddress},
     contact::{
-        Contact, ContactAddressData, ContactError, ContactImage, CreateContactRequest,
-        ImageMimeType, UpdateContactRequest, MAX_IMAGES_PER_PRINCIPAL,
+        Contact, ContactAddressData, ContactError, ContactImage, ContactImageEntry,
+        CreateContactRequest, GetContactImagesRequest, GetContactsRequest, ImageMimeType,
+        UpdateContactRequest, MAX_CONTACT_IMAGES_PER_CALL, MAX_IMAGES_PER_PRINCIPAL,
     },
     user_profile::OisyUser,
 };
@@ -53,6 +54,29 @@ pub fn call_get_contacts(pic_setup: &PicBackend, caller: Principal) -> Vec<Conta
         .expect("that get_contacts succeeds")
         .expect("that the result is not empty")
 }
+pub fn call_get_contacts_without_images(pic_setup: &PicBackend, caller: Principal) -> Vec<Contact> {
+    let request = Some(GetContactsRequest {
+        include_images: false,
+    });
+    let wrapped_result =
+        pic_setup.query::<Result<Vec<Contact>, ContactError>>(caller, "get_contacts", request);
+    wrapped_result
+        .expect("that get_contacts succeeds")
+        .expect("that the result is not empty")
+}
+
+pub fn call_get_contact_images(
+    pic_setup: &PicBackend,
+    caller: Principal,
+    contact_ids: Vec<u64>,
+) -> Result<Result<Vec<ContactImageEntry>, ContactError>, String> {
+    pic_setup.query::<Result<Vec<ContactImageEntry>, ContactError>>(
+        caller,
+        "get_contact_images",
+        GetContactImagesRequest { contact_ids },
+    )
+}
+
 pub fn call_get_contact(
     pic_setup: &PicBackend,
     caller: Principal,
@@ -1337,4 +1361,179 @@ fn test_inline_image_migration_finishes_after_canister_upgrade() {
     let after = call_get_contact(&pic_setup, caller, with_image.id)
         .expect("that the contact survives the migration");
     assert_eq!(after.image, Some(png_image));
+}
+
+// -------------------------------------------------------------------------------------------------
+// - Integration tests for loading contacts and their images apart
+// -------------------------------------------------------------------------------------------------
+
+#[test]
+fn test_get_contacts_without_images_leaves_the_images_out() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let png_image = create_test_png_image();
+    let with_image = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "PNG".to_string(),
+        Some(png_image.clone()),
+    )
+    .unwrap();
+    call_create_contact_with_image(&pic_setup, caller, "None".to_string(), None).unwrap();
+
+    let contacts = call_get_contacts_without_images(&pic_setup, caller);
+
+    assert_eq!(contacts.len(), 2);
+    assert!(contacts.iter().all(|contact| contact.image.is_none()));
+
+    // A call without the argument, as the frontends before it send, still gets the images.
+    let with_images = call_get_contacts(&pic_setup, caller);
+    let image = with_images
+        .into_iter()
+        .find(|contact| contact.id == with_image.id)
+        .and_then(|contact| contact.image);
+    assert_eq!(image, Some(png_image));
+}
+
+#[test]
+fn test_get_contact_images_returns_the_requested_images() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let png_image = create_test_png_image();
+    let jpeg_image = create_test_jpeg_image();
+
+    let with_png = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "PNG".to_string(),
+        Some(png_image.clone()),
+    )
+    .unwrap();
+    let with_jpeg = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "JPEG".to_string(),
+        Some(jpeg_image.clone()),
+    )
+    .unwrap();
+    let without =
+        call_create_contact_with_image(&pic_setup, caller, "None".to_string(), None).unwrap();
+
+    // A contact without an image and an ID the caller does not have are left out.
+    let images = call_get_contact_images(
+        &pic_setup,
+        caller,
+        vec![with_png.id, without.id, with_jpeg.id, u64::MAX],
+    )
+    .expect("that get_contact_images succeeds")
+    .expect("that the images are returned");
+
+    assert_eq!(
+        images,
+        vec![
+            ContactImageEntry {
+                contact_id: with_png.id,
+                image: png_image,
+            },
+            ContactImageEntry {
+                contact_id: with_jpeg.id,
+                image: jpeg_image,
+            },
+        ]
+    );
+}
+
+#[test]
+fn test_get_contact_images_returns_only_the_callers_images() {
+    let pic_setup = setup();
+    let test_users: Vec<OisyUser> = pic_setup.create_users(1..=2);
+    let owner = test_users[0].principal;
+    let other = test_users[1].principal;
+
+    let contact = call_create_contact_with_image(
+        &pic_setup,
+        owner,
+        "PNG".to_string(),
+        Some(create_test_png_image()),
+    )
+    .unwrap();
+
+    let images = call_get_contact_images(&pic_setup, other, vec![contact.id])
+        .expect("that get_contact_images succeeds")
+        .expect("that the result is returned");
+
+    assert_eq!(images, vec![]);
+}
+
+#[test]
+fn test_get_contact_images_rejects_more_contacts_than_a_call_takes() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let contact_ids = (0..=MAX_CONTACT_IMAGES_PER_CALL as u64).collect();
+    let result = call_get_contact_images(&pic_setup, caller, contact_ids);
+
+    assert!(result
+        .unwrap_err()
+        .contains("Too many GetContactImagesRequest.contact_ids"));
+}
+
+#[test]
+fn test_get_contact_images_requires_authenticated_user() {
+    let pic_setup = setup();
+
+    let result = call_get_contact_images(&pic_setup, Principal::anonymous(), vec![1]);
+
+    assert!(result
+        .unwrap_err()
+        .contains("Anonymous caller not authorized"));
+}
+
+#[test]
+fn test_contacts_and_their_images_load_as_certified_calls() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let png_image = create_test_png_image();
+    let contact = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "PNG".to_string(),
+        Some(png_image.clone()),
+    )
+    .unwrap();
+
+    // A certified call runs the query methods in replicated execution.
+    let contacts = pic_setup
+        .update::<Result<Vec<Contact>, ContactError>>(
+            caller,
+            "get_contacts",
+            Some(GetContactsRequest {
+                include_images: false,
+            }),
+        )
+        .expect("that get_contacts succeeds")
+        .expect("that the contacts are returned");
+    assert_eq!(contacts.len(), 1);
+    assert_eq!(contacts[0].image, None);
+
+    let images = pic_setup
+        .update::<Result<Vec<ContactImageEntry>, ContactError>>(
+            caller,
+            "get_contact_images",
+            GetContactImagesRequest {
+                contact_ids: vec![contact.id],
+            },
+        )
+        .expect("that get_contact_images succeeds")
+        .expect("that the images are returned");
+    assert_eq!(
+        images,
+        vec![ContactImageEntry {
+            contact_id: contact.id,
+            image: png_image,
+        }]
+    );
 }

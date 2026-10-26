@@ -862,3 +862,61 @@ mod stored_contacts {
         assert_eq!(decoded.contacts[&1], contact(1, None));
     }
 }
+
+mod get_contact_images_request {
+    //! Tests for `GetContactImagesRequest` validation
+    use candid::{Decode, Encode};
+
+    use crate::{
+        types::contact::{GetContactImagesRequest, MAX_CONTACT_IMAGES_PER_CALL},
+        validate::{test_validate_on_deserialize, TestVector, Validate},
+    };
+
+    test_validate_on_deserialize!(
+        GetContactImagesRequest,
+        [
+            TestVector {
+                description: "GetContactImagesRequest at the per-call limit",
+                input: GetContactImagesRequest {
+                    contact_ids: (0..MAX_CONTACT_IMAGES_PER_CALL as u64).collect(),
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "GetContactImagesRequest over the per-call limit",
+                input: GetContactImagesRequest {
+                    contact_ids: (0..=MAX_CONTACT_IMAGES_PER_CALL as u64).collect(),
+                },
+                valid: false,
+            }
+        ]
+    );
+}
+
+mod get_contacts_request {
+    //! Tests for decoding the optional argument of `get_contacts`.
+    use candid::{decode_args, encode_args, encode_one};
+    use pretty_assertions::assert_eq;
+
+    use crate::types::contact::GetContactsRequest;
+
+    // Callers that predate the argument send none; they must keep getting the old behaviour.
+    #[test]
+    fn a_call_without_an_argument_decodes_as_no_request() {
+        let (request,): (Option<GetContactsRequest>,) =
+            decode_args(&encode_args(()).unwrap()).unwrap();
+
+        assert_eq!(request, None);
+    }
+
+    #[test]
+    fn a_call_with_a_request_decodes_it() {
+        let request = GetContactsRequest {
+            include_images: false,
+        };
+        let (decoded,): (Option<GetContactsRequest>,) =
+            decode_args(&encode_one(Some(request.clone())).unwrap()).unwrap();
+
+        assert_eq!(decoded, Some(request));
+    }
+}
