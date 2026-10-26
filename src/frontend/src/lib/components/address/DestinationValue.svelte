@@ -12,10 +12,19 @@
 		token: Token;
 		destination?: string;
 		isDestinationCustom?: boolean;
+		// The last screen before the assets leave shows the whole address: a shortened one cannot tell
+		// it apart from a lookalike that shares its first and last characters.
+		fullAddress?: boolean;
 		children?: Snippet;
 	}
 
-	let { token, destination = '', isDestinationCustom = false, children }: Props = $props();
+	let {
+		token,
+		destination = '',
+		isDestinationCustom = false,
+		fullAddress = false,
+		children
+	}: Props = $props();
 </script>
 
 <ModalValue>
@@ -35,7 +44,11 @@
 				<span>{$i18n.convert.text.default_destination}</span>
 			{:else}
 				<NetworkLogo color="off-white" network={token.network} />
-				<span>{shortenWithMiddleEllipsis({ text: destination ?? '' })}</span>
+				{#if fullAddress}
+					<span class="break-all">{destination}</span>
+				{:else}
+					<span>{shortenWithMiddleEllipsis({ text: destination ?? '' })}</span>
+				{/if}
 			{/if}
 
 			{@render children?.()}
