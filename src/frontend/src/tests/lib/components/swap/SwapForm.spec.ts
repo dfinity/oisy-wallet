@@ -4,6 +4,7 @@ import SwapForm from '$lib/components/swap/SwapForm.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	SWAP_SWITCH_TOKENS_BUTTON,
+	SWAP_TWO_SWAPS_HINT,
 	TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON,
 	TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE,
 	TOKEN_INPUT_CURRENCY_TOKEN
@@ -15,8 +16,10 @@ import {
 } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import type { OptionAmount } from '$lib/types/send';
+import { SwapProvider } from '$lib/types/swap';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
@@ -503,6 +506,97 @@ describe('SwapForm', () => {
 
 			expect(getByText(en.swap.text.swap_amount_too_low)).toBeInTheDocument();
 			expect(queryByText(en.swap.text.swap_is_not_offered)).not.toBeInTheDocument();
+		});
+
+		describe('with two separate swaps through an in-between token', () => {
+			const twoSwaps: SwapAmountsStoreData = {
+				amountForSwap: 1,
+				swaps: [],
+				selectedProvider: undefined,
+				quoteError: {
+					type: 'two-swaps',
+					intermediateToken: mockValidIcCkToken,
+					provider: SwapProvider.LIFI
+				}
+			};
+
+			const renderForm = ({
+				swapAmount = '1',
+				isSwapAmountsLoading = false,
+				notOfferedExplained = false
+			}: {
+				swapAmount?: string;
+				isSwapAmountsLoading?: boolean;
+				notOfferedExplained?: boolean;
+			} = {}) =>
+				render(SwapForm, {
+					props: {
+						swapAmount,
+						receiveAmount: undefined,
+						slippageValue: undefined,
+						isSwapAmountsLoading,
+						notOfferedExplained,
+						onCustomValidate: vi.fn(),
+						onShowTokensList: vi.fn(),
+						onClose: vi.fn(),
+						onNext: vi.fn()
+					},
+					context: mockContext
+				});
+
+			beforeEach(() => {
+				setupSwapAmountsStore(twoSwaps);
+				setupIcTokenFeeStore();
+			});
+
+			it('should show the hint beside the "not offered" line', () => {
+				const { getByTestId, getByText } = renderForm();
+
+				expect(getByTestId(SWAP_TWO_SWAPS_HINT)).toBeInTheDocument();
+				expect(getByText(en.swap.text.swap_is_not_offered)).toBeInTheDocument();
+			});
+
+			it('should keep the hint up while the offers refresh', () => {
+				const { getByTestId } = renderForm({ isSwapAmountsLoading: true });
+
+				expect(getByTestId(SWAP_TWO_SWAPS_HINT)).toBeInTheDocument();
+			});
+
+			it('should not show the hint for an amount it was not quoted for', () => {
+				const { queryByTestId } = renderForm({ swapAmount: '2' });
+
+				expect(queryByTestId(SWAP_TWO_SWAPS_HINT)).not.toBeInTheDocument();
+			});
+
+			it('should not show the hint when the form explains the missing offer itself', () => {
+				const { queryByTestId } = renderForm({ notOfferedExplained: true });
+
+				expect(queryByTestId(SWAP_TWO_SWAPS_HINT)).not.toBeInTheDocument();
+			});
+
+			it('should show the hint in place of the cross-network note', () => {
+				mockContext.set(SWAP_CONTEXT_KEY, {
+					...initSwapContext({
+						sourceToken: mockValidIcToken,
+						destinationToken: mockValidErc20Token
+					}),
+					sourceTokenExchangeRate: readable(10),
+					destinationTokenExchangeRate: readable(2)
+				});
+
+				const crossNetworkNote = 'You move tokens from';
+
+				const { container, getByTestId } = renderForm();
+
+				expect(getByTestId(SWAP_TWO_SWAPS_HINT)).toBeInTheDocument();
+				expect(container).not.toHaveTextContent(crossNetworkNote);
+
+				setupSwapAmountsStore();
+
+				const { container: withoutHint } = renderForm();
+
+				expect(withoutHint).toHaveTextContent(crossNetworkNote);
+			});
 		});
 	});
 

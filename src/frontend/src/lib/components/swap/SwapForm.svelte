@@ -5,6 +5,7 @@
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
+	import SwapTwoSwapsHint from '$lib/components/swap/SwapTwoSwapsHint.svelte';
 	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
@@ -121,6 +122,18 @@
 	let quoteError = $derived(
 		nonNullish($swapAmountsStore) && $swapAmountsStore.swaps.length === 0
 			? $swapAmountsStore.quoteError
+			: undefined
+	);
+
+	// No offer, but two separate swaps through a token OISY lists reach the destination. Unlike the
+	// "not offered" line, the hint stays up while the offers refresh, and goes with a new amount.
+	let twoSwapsQuoteError = $derived(
+		quoteError?.type === 'two-swaps' &&
+			!swapAmountsLoading &&
+			!notOfferedExplained &&
+			nonNullish(swapAmount) &&
+			Number(swapAmount) > 0
+			? quoteError
 			: undefined
 	);
 
@@ -321,7 +334,14 @@
 
 		{@render message?.()}
 
-		<SwapCrossChainInfo />
+		{#if nonNullish(twoSwapsQuoteError)}
+			<SwapTwoSwapsHint
+				intermediateToken={twoSwapsQuoteError.intermediateToken}
+				provider={twoSwapsQuoteError.provider}
+			/>
+		{:else}
+			<SwapCrossChainInfo />
+		{/if}
 
 		<SwapSlippage
 			maxSlippageInvalidValue={isNetworkIdICP($sourceToken?.network.id)
