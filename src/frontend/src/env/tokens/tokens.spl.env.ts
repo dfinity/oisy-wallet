@@ -54,6 +54,7 @@ import { QQQX_TOKEN } from '$env/tokens/tokens-spl/tokens.qqqx.env';
 import { RAY_TOKEN } from '$env/tokens/tokens-spl/tokens.ray.env';
 import { SLVON_TOKEN } from '$env/tokens/tokens-spl/tokens.slvon.env';
 import { SPX_TOKEN } from '$env/tokens/tokens-spl/tokens.spx.env';
+import { SPYON_TOKEN } from '$env/tokens/tokens-spl/tokens.spyon.env';
 import { SPYX_TOKEN } from '$env/tokens/tokens-spl/tokens.spyx.env';
 import { TQQQX_TOKEN } from '$env/tokens/tokens-spl/tokens.tqqqx.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
@@ -124,6 +125,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	RAY_TOKEN,
 	SLVON_TOKEN,
 	SPX_TOKEN,
+	SPYON_TOKEN,
 	SPYX_TOKEN,
 	TQQQX_TOKEN,
 	TRUMP_TOKEN,
