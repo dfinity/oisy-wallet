@@ -402,9 +402,9 @@ Sending TCYCLES to an account a canister owns, with or without a subaccount, doe
 
 ## Swap
 
-### LI.FI (local and staging)
+### LI.FI
 
-On local and staging builds, the swap form also asks **LI.FI** for an offer whenever the source is a token on one of the six EVM networks OISY supports (Ethereum, Arbitrum, BSC, Polygon, Base, Robinhood Chain). It covers swaps on the same network, to another of those networks, and to Solana, and is ranked by receive amount with the other providers. Solana as a _source_, beta and production come later. Cross-network routes go through two bridges only, Across and NEAR Intents, and only in shapes OISY can verify before signing; LI.FI is asked once more without the bridge its best route took when that route is not one of them, so the other bridge can serve the pair instead. A pair LI.FI has no verifiable route for simply gets no LI.FI offer.
+The swap form also asks **LI.FI** for an offer whenever the source is a token on one of the six EVM networks OISY supports (Ethereum, Arbitrum, BSC, Polygon, Base, Robinhood Chain). It covers swaps on the same network, to another of those networks, and to Solana, and is ranked by receive amount with the other providers. Solana as a _source_ comes later. A build without LI.FI's integrator id gets no LI.FI offer. Cross-network routes go through two bridges only, Across and NEAR Intents, and only in shapes OISY can verify before signing; LI.FI is asked once more without the bridge its best route took when that route is not one of them, so the other bridge can serve the pair instead. A pair LI.FI has no verifiable route for simply gets no LI.FI offer.
 
 LI.FI's quotes are not signed, so nothing about the transaction is taken on trust. Before the user's key signs, OISY re-quotes, checks that the transaction calls LI.FI's own contract on that network, decodes it, and refuses it unless it pays the user, in the token asked for, at least the minimum the user reviewed, takes no more than LI.FI's 0.25 % fee, and makes only calls LI.FI's contract has whitelisted. A swap whose price got worse since the review stops with the usual slippage message before any approval is paid for.
 
@@ -709,6 +709,8 @@ Listing several sources does not make a self-contradicting transaction showable.
 The list currently appears on the WalletConnect sign review. Showing it on an executed transaction in the activity list is a follow-up.
 
 `signPsbt` is **sign-only**: OISY signs the PSBT the dApp provides and returns it, but does not broadcast the resulting transaction itself. Broadcasting is deferred to the dApp (and the `sendTransfer` method is intentionally not offered) so OISY never broadcasts a transaction it cannot fully account for — see the spec's broadcast-atomicity rationale.
+
+The `signPsbt` review shows only values OISY can check. An input that spends one of the wallet's own unspent outputs, as the Bitcoin canister lists them (on mainnet, the only network OISY signs for), is the user's and is priced from that list; any other input is priced from the previous transaction the request includes for it, whose ID must match the output it spends, whichever address the input names. A request that states another value or address for one of the wallet's outputs, or that has an input OISY can price neither way, is **refused**: the review says why and keeps Approve disabled, and the signing step reads the wallet's outputs again and runs the same check. Every request offered for approval therefore states a checked value for each input and a known fee. The review shows a spinner while the wallet's outputs load.
 
 ### ckETH conversions requested by an Ethereum dApp
 
