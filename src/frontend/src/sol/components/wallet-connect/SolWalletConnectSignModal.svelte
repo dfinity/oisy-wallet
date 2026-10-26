@@ -83,6 +83,7 @@
 	let destination = $state<OptionSolAddress>();
 	let tokenAddress = $state<OptionSolAddress>();
 	let isApproval = $state<boolean | undefined>();
+	let uncheckedApproval = $state<boolean | undefined>();
 	// Set when the message bundles instructions that disagree on what it does, or carries one that
 	// is decoded and still cannot be stated. `sign()` refuses such a message, so the review says so
 	// and holds the button rather than letting the user press it and bounce.
@@ -130,6 +131,12 @@
 	// The run hands the wallet itself to another program. `sign()` refuses it as it does an
 	// assignment the message states, so the review says so the same way.
 	let reassignsWallet = $derived(solSimulationReassignsWallet({ preview, userAddress: address }));
+	// An unchecked approval names neither its token nor its decimals, so with no simulated run
+	// nothing states how much it lets the spender spend. `sign()` refuses it, so the review says so
+	// the same way and holds the button.
+	let approvalWithoutSimulation = $derived(
+		(uncheckedApproval ?? false) && !(simulatedInstructions ?? false)
+	);
 
 	const updateData = async () => {
 		try {
@@ -138,6 +145,7 @@
 				destination,
 				tokenAddress,
 				isApproval,
+				uncheckedApproval,
 				unreviewed,
 				prioritizationFee,
 				prioritizationFeeEstimate,
@@ -305,13 +313,15 @@
 					(keepsBatchWhole ?? false) ||
 					reassignsWallet}
 				{application}
+				{approvalWithoutSimulation}
 				approveDisabled={!decoded ||
 					sendPaidByOthers ||
 					(ambiguous ?? false) ||
 					(opensAccountBeyondRent ?? false) ||
 					(keepsBatchWhole ?? false) ||
 					reassignsWallet ||
-					closesPayOthers}
+					closesPayOthers ||
+					approvalWithoutSimulation}
 				{closesPayOthers}
 				{data}
 				{decoded}
