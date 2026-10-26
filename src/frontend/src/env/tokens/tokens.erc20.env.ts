@@ -40,6 +40,7 @@ import { SLVON_TOKEN } from '$env/tokens/tokens-erc20/tokens.slvon.env';
 import { SPCXON_TOKEN } from '$env/tokens/tokens-erc20/tokens.spcxon.env';
 import { SPX_TOKEN } from '$env/tokens/tokens-erc20/tokens.spx.env';
 import { SPYON_TOKEN } from '$env/tokens/tokens-erc20/tokens.spyon.env';
+import { TSLAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.tslaon.env';
 import { UNI_TOKEN } from '$env/tokens/tokens-erc20/tokens.uni.env';
 import { USD1_TOKEN } from '$env/tokens/tokens-erc20/tokens.usd1.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
@@ -116,6 +117,7 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	SPCXON_TOKEN,
 	SPX_TOKEN,
 	SPYON_TOKEN,
+	TSLAON_TOKEN,
 	USD1_TOKEN,
 	WEETH_TOKEN,
 	WETH_TOKEN,
