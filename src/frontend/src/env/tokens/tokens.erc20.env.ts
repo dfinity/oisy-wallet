@@ -30,6 +30,7 @@ import { MATIC_TOKEN } from '$env/tokens/tokens-erc20/tokens.matic.env';
 import { MUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.muon.env';
 import { NVDAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.nvdaon.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
+import { PAXG_TOKEN } from '$env/tokens/tokens-erc20/tokens.paxg.env';
 import { PBRON_TOKEN } from '$env/tokens/tokens-erc20/tokens.pbron.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { PEPECOIN_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepecoin.env';
@@ -105,6 +106,7 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	MATIC_TOKEN,
 	MUON_TOKEN,
 	NVDAON_TOKEN,
+	PAXG_TOKEN,
 	PBRON_TOKEN,
 	PEPECOIN_TOKEN,
 	RNDR_TOKEN,
