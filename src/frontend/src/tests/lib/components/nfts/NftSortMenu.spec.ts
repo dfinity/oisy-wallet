@@ -211,4 +211,10 @@ describe('NftSorting', () => {
 			expect(button).toHaveAttribute('aria-expanded', 'true');
 		});
 	});
+
+	it('gives its trigger a touch-sized tap area', () => {
+		const { container } = render(NftSorting);
+
+		expect(container.querySelector('button')).toHaveClass('hit-area', 'hit-area-touch');
+	});
 });

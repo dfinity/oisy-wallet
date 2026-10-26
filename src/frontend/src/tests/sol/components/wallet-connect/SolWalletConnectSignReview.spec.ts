@@ -5,6 +5,8 @@ import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 import { STAKE_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
+import { SolanaNetworks } from '$sol/types/network';
 import en from '$tests/mocks/i18n.mock';
 import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -238,6 +240,40 @@ describe('SolWalletConnectSignReview', () => {
 		expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
 	});
 
+	it('should say an approval with no simulation behind it will not be signed', () => {
+		const { getByRole } = render(SolWalletConnectSignReview, {
+			props: { ...props, isApproval: true, approvalWithoutSimulation: true }
+		});
+
+		expect(getByRole('alert')).toHaveTextContent(
+			en.wallet_connect.text.approval_without_simulation
+		);
+	});
+
+	// Signing names this refusal before the one for an instruction nobody read, so the screen says
+	// what the toast would.
+	it('should say it is the approval when an unread instruction comes with it', () => {
+		const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+			props: { ...props, isApproval: true, approvalWithoutSimulation: true, unreviewed: true }
+		});
+
+		expect(getByText(en.wallet_connect.text.approval_without_simulation)).toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.unreviewed_instructions)).not.toBeInTheDocument();
+	});
+
+	it('should say nothing else about an approval it will not sign', () => {
+		const { queryByText } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				isApproval: true,
+				approvalWithoutSimulation: true,
+				parties: { sources: [], destinations: [], partial: true }
+			}
+		});
+
+		expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+	});
+
 	it('should say nothing else about a message it will not sign', () => {
 		// Every caveat qualifies a review nobody is going to act on, including the ones that sit
 		// outside the notice chain: the partial-parties line would tell the user which lists to read
@@ -261,6 +297,55 @@ describe('SolWalletConnectSignReview', () => {
 		expect(queryByText(en.wallet_connect.text.unreviewed_instructions)).not.toBeInTheDocument();
 		expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
 		expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
+	});
+
+	describe('a send that names another account to pay its fee', () => {
+		it('should announce that it will not be signed', () => {
+			const { getByRole } = render(SolWalletConnectSignReview, {
+				props: { ...props, feePaidByOthers: true }
+			});
+
+			expect(getByRole('alert')).toHaveTextContent(en.wallet_connect.text.fee_paid_by_others);
+		});
+
+		// It goes out with the wallet as the fee payer, so every other reading here was made of a
+		// different transaction, and this refusal is the one thing the review has to say.
+		it('should say which refusal it is when the message is refused on other grounds too', () => {
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, feePaidByOthers: true, ambiguous: true, closesPayOthers: true }
+			});
+
+			expect(getByText(en.wallet_connect.text.fee_paid_by_others)).toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.close_pays_others)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.cannot_be_shown)).not.toBeInTheDocument();
+		});
+
+		it('should say nothing else about it', () => {
+			const { queryByText, queryByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					decoded: true,
+					feePaidByOthers: true,
+					unreviewed: true,
+					unreadPrograms: [{ address: STAKE_PROGRAM_ADDRESS }],
+					parties: { sources: [], destinations: [], partial: true },
+					preview: {
+						solDelta: 1n,
+						tokenDeltas: [],
+						controlChanges: [
+							{ account: mockSolAddress2, field: 'owner' as const, to: mockAtaAddress }
+						]
+					}
+				}
+			});
+
+			expect(
+				queryByText(en.wallet_connect.text.unreviewed_instructions_simulated)
+			).not.toBeInTheDocument();
+			expect(queryByTestId('unread-programs')).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
+		});
 	});
 
 	it('should render the unreviewed instructions warning', () => {
@@ -655,6 +740,60 @@ describe('SolWalletConnectSignReview', () => {
 
 			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
 		});
+
+		describe('a swap into a token the wallet does not list', () => {
+			const swap = {
+				kind: 'swap' as const,
+				spent: { delta: -1_000_000n },
+				received: { tokenAddress: 'unlisted-mint', delta: 2_500_000n, decimals: 6 }
+			};
+
+			const preview = {
+				solDelta: -1_005_000n,
+				tokenDeltas: [
+					{ account: mockAtaAddress, tokenAddress: 'unlisted-mint', decimals: 6, delta: 2_500_000n }
+				],
+				controlChanges: []
+			};
+
+			beforeEach(() => {
+				splTokenMetadataStore.set({
+					network: SolanaNetworks.mainnet,
+					metadata: { 'unlisted-mint': { name: 'Ping', symbol: 'PING' } }
+				});
+			});
+
+			afterEach(() => {
+				splTokenMetadataStore.reset();
+			});
+
+			// The sentence names what the user receives, and the symbol the mint carries is its
+			// creator's choice: it is stated inside the placeholder, never as the token's name.
+			it('should state the symbol the mint carries inside the placeholder', () => {
+				const { getByTestId } = render(SolWalletConnectSignReview, {
+					props: { ...props, messageSummary: swap, preview }
+				});
+
+				expect(getByTestId('message-summary')).toHaveTextContent(
+					replacePlaceholders(en.transaction.text.summary_swap, {
+						$spent_symbol: SOLANA_TOKEN.symbol,
+						$received_symbol: replacePlaceholders(en.transaction.text.unknown_token_named, {
+							$symbol: 'PING'
+						})
+					})
+				);
+			});
+
+			// The swap is a plain one the run agrees with, which the warning about several operations
+			// would misdescribe. The placeholder in the sentence already says the token is unlisted.
+			it('should not warn about multiple operations', () => {
+				const { queryByText } = render(SolWalletConnectSignReview, {
+					props: { ...props, messageSummary: swap, preview }
+				});
+
+				expect(queryByText(en.wallet_connect.text.multiple_operations)).not.toBeInTheDocument();
+			});
+		});
 	});
 
 	// A program is the closest thing a Solana message has to a recipient, and the one party the
@@ -687,6 +826,23 @@ describe('SolWalletConnectSignReview', () => {
 				expect(venues[index].querySelector('button')).toBeInTheDocument();
 				expect(venues[index].querySelector(`a[href*="${program}"]`)).toBeInTheDocument();
 			});
+		});
+
+		it('should not take the program a token batch runs in for one the run goes through', () => {
+			const { queryByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					instructions: [
+						{
+							kind: 'batch' as const,
+							program: ORCA,
+							children: [{ kind: 'send' as const, amount: 1n, counterparty: JUPITER }]
+						}
+					]
+				}
+			});
+
+			expect(queryByTestId('venue')).not.toBeInTheDocument();
 		});
 
 		it('should show no group when the run named no program', () => {

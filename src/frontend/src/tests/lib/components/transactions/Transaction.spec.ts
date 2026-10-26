@@ -41,7 +41,8 @@ describe('Transaction', () => {
 
 		expect(container.querySelector('button > span')).toHaveClass(
 			'row-feedback',
-			'parent-pressed:bg-brand-subtle-20'
+			'parent-pressed:bg-brand-subtle-20',
+			'parent-pressed:duration-0'
 		);
 	});
 

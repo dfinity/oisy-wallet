@@ -5,11 +5,13 @@ import {
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
-import type { SolAddress } from '$sol/types/address';
+import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaParsedAccountInfo, SolanaSimulatedInnerInstructions } from '$sol/types/sol-rpc';
 import type {
 	SolClosedAccount,
+	SolSimulationAllowance,
 	SolSimulationControlChange,
+	SolSimulationCreatedAccount,
 	SolSimulationPreview,
 	SolSimulationTokenDelta
 } from '$sol/types/sol-simulation';
@@ -22,9 +24,14 @@ interface SolTokenAccountState {
 	tokenAddress: SplTokenAddress;
 	owner: SolAddress;
 	delegate?: SolAddress;
+	// What the delegate may still spend. Present whenever a delegate is.
+	delegatedAmount?: bigint;
 	closeAuthority?: SolAddress;
 	amount: bigint;
 	decimals: number;
+	// The rent-exempt reserve a wrapped SOL account states for itself. Every lamport above it and the
+	// amount is one no sync has counted yet.
+	nativeReserve?: bigint;
 }
 
 interface SolAccountState {
@@ -68,14 +75,16 @@ export const parseTokenAccountState = (
 		return undefined;
 	}
 
-	const { mint, owner, delegate, closeAuthority, tokenAmount } = (data.parsed.info ??
-		{}) as Partial<{
-		mint: SplTokenAddress;
-		owner: SolAddress;
-		delegate: SolAddress;
-		closeAuthority: SolAddress;
-		tokenAmount: { amount: string; decimals: number };
-	}>;
+	const { mint, owner, delegate, delegatedAmount, closeAuthority, tokenAmount, rentExemptReserve } =
+		(data.parsed.info ?? {}) as Partial<{
+			mint: SplTokenAddress;
+			owner: SolAddress;
+			delegate: SolAddress;
+			delegatedAmount: { amount: string };
+			closeAuthority: SolAddress;
+			tokenAmount: { amount: string; decimals: number };
+			rentExemptReserve: { amount: string };
+		}>;
 
 	if (isNullish(mint) || isNullish(owner) || isNullish(tokenAmount)) {
 		return undefined;
@@ -85,9 +94,11 @@ export const parseTokenAccountState = (
 		tokenAddress: mint,
 		owner,
 		...(nonNullish(delegate) && { delegate }),
+		...(nonNullish(delegatedAmount) && { delegatedAmount: BigInt(delegatedAmount.amount) }),
 		...(nonNullish(closeAuthority) && { closeAuthority }),
 		amount: BigInt(tokenAmount.amount),
-		decimals: tokenAmount.decimals
+		decimals: tokenAmount.decimals,
+		...(nonNullish(rentExemptReserve) && { nativeReserve: BigInt(rentExemptReserve.amount) })
 	};
 };
 
@@ -104,6 +115,11 @@ const parseAccountState = (account: SolanaParsedAccountInfo): SolAccountState | 
 		...(nonNullish(token) && { token })
 	};
 };
+
+// Emptied by a run: no account after it, or one holding no lamports, which the run may report in
+// place of a missing one. An account the run did not report on says nothing.
+const isEmptiedAccount = (post: SolanaParsedAccountInfo | undefined): boolean =>
+	post === null || (nonNullish(post) && BigInt(post.lamports) === ZERO);
 
 /**
  * Whether an account is the user's own.
@@ -194,6 +210,17 @@ const controlChanges = ({
 		return [];
 	}
 
+	// What a delegate left in place may spend, stated with every change that leaves one: a
+	// one-unit approval and an unlimited one name the same delegate.
+	const allowance: SolSimulationAllowance | undefined =
+		nonNullish(post.token?.delegate) && nonNullish(post.token.delegatedAmount)
+			? {
+					tokenAddress: post.token.tokenAddress,
+					decimals: post.token.decimals,
+					amount: post.token.delegatedAmount
+				}
+			: undefined;
+
 	const changed: [
 		SolSimulationControlChange['field'],
 		SolAddress | undefined,
@@ -205,13 +232,42 @@ const controlChanges = ({
 		['closeAuthority', pre.token?.closeAuthority, post.token?.closeAuthority]
 	];
 
-	return changed.reduce<SolSimulationControlChange[]>(
-		(acc, [field, from, to]) => [
-			...acc,
-			...(from !== to ? [{ account, field, ...(nonNullish(to) && { to }) }] : [])
-		],
-		[]
-	);
+	// The same delegate with a different limit. Comparing the delegate alone reads an approval that
+	// raises an existing allowance as no change at all.
+	const delegate = post.token?.delegate;
+	const allowanceChanged =
+		nonNullish(delegate) &&
+		pre.token?.delegate === delegate &&
+		pre.token.delegatedAmount !== post.token?.delegatedAmount;
+
+	return [
+		...changed.reduce<SolSimulationControlChange[]>(
+			(acc, [field, from, to]) => [
+				...acc,
+				...(from !== to
+					? [
+							{
+								account,
+								field,
+								...(nonNullish(to) && { to }),
+								...(field === 'delegate' && nonNullish(allowance) && { allowance })
+							}
+						]
+					: [])
+			],
+			[]
+		),
+		...(allowanceChanged
+			? [
+					{
+						account,
+						field: 'allowance' as const,
+						to: delegate,
+						...(nonNullish(allowance) && { allowance })
+					}
+				]
+			: [])
+	];
 };
 
 /**
@@ -232,10 +288,12 @@ export const mapSolSimulationPreview = ({
 	postAccounts: readonly SolanaParsedAccountInfo[];
 	userAddress: SolAddress;
 }): SolSimulationPreview => {
-	const { solDelta, tokenDeltas, changes } = addresses.reduce<{
+	const { solDelta, tokenDeltas, changes, created, closed } = addresses.reduce<{
 		solDelta: bigint | undefined;
 		tokenDeltas: SolSimulationTokenDelta[];
 		changes: SolSimulationControlChange[];
+		created: SolSimulationCreatedAccount[];
+		closed: SolAddress[];
 	}>(
 		(acc, address, index) => {
 			const pre = parseAccountState(preAccounts[index]);
@@ -249,6 +307,24 @@ export const mapSolSimulationPreview = ({
 			const token = post?.token ?? pre?.token;
 
 			return {
+				created:
+					isNullish(pre) && nonNullish(post?.token)
+						? [
+								...acc.created,
+								{
+									account: address,
+									owner: post.token.owner,
+									...(nonNullish(post.token.delegate) && { delegate: post.token.delegate }),
+									...(nonNullish(post.token.closeAuthority) && {
+										closeAuthority: post.token.closeAuthority
+									})
+								}
+							]
+						: acc.created,
+				closed:
+					nonNullish(pre) && isEmptiedAccount(postAccounts[index])
+						? [...acc.closed, address]
+						: acc.closed,
 				solDelta:
 					address === userAddress
 						? (post?.lamports ?? ZERO) - (pre?.lamports ?? ZERO)
@@ -269,13 +345,15 @@ export const mapSolSimulationPreview = ({
 				changes: [...acc.changes, ...controlChanges({ account: address, pre, post })]
 			};
 		},
-		{ solDelta: undefined, tokenDeltas: [], changes: [] }
+		{ solDelta: undefined, tokenDeltas: [], changes: [], created: [], closed: [] }
 	);
 
 	return {
 		...(nonNullish(solDelta) && solDelta !== ZERO && { solDelta }),
 		tokenDeltas,
-		controlChanges: changes
+		controlChanges: changes,
+		...(created.length > 0 && { createdAccounts: created }),
+		...(closed.length > 0 && { closedAccounts: closed })
 	};
 };
 
@@ -285,6 +363,25 @@ export const isEmptySolSimulationPreview = ({
 	controlChanges
 }: SolSimulationPreview): boolean =>
 	isNullish(solDelta) && tokenDeltas.length === 0 && controlChanges.length === 0;
+
+/**
+ * Whether the run hands the user's wallet to a program other than the one that owned it.
+ *
+ * Once assigned, that program and no longer the wallet's key decides what leaves the wallet, and
+ * the wallet can no longer pay a fee. The message need not state the assignment: a program can
+ * make it inside its own call, where only the run sees it, as a change of the wallet's owning
+ * program.
+ */
+export const solSimulationReassignsWallet = ({
+	preview,
+	userAddress
+}: {
+	preview: SolSimulationPreview | undefined;
+	userAddress: OptionSolAddress;
+}): boolean =>
+	(preview?.controlChanges ?? []).some(
+		({ account, field }) => field === 'program' && account === userAddress
+	);
 
 /**
  * The programs a simulated run calls from inside another program's instruction that are not among
@@ -352,9 +449,9 @@ export const findSolClosedAppAccounts = ({
 			return acc;
 		}
 
-		const emptied = post === null || (nonNullish(post) && BigInt(post.lamports) === ZERO);
-
-		return emptied ? [...acc, { account, program: pre.program, lamports: pre.lamports }] : acc;
+		return isEmptiedAccount(post)
+			? [...acc, { account, program: pre.program, lamports: pre.lamports }]
+			: acc;
 	}, []);
 
 /**

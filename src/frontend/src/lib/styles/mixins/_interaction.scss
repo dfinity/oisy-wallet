@@ -9,6 +9,15 @@
 	}
 }
 
+// Sizes for a touch screen as the main input. Not a width breakpoint: a tablet and a narrow
+// laptop window can be the same width, and only the tablet needs 44px targets. A laptop with a
+// touchscreen still reports its trackpad here and keeps the compact sizes.
+@mixin coarse {
+	@media (pointer: coarse) {
+		@content;
+	}
+}
+
 @mixin tappable {
 	touch-action: manipulation;
 	cursor: pointer;

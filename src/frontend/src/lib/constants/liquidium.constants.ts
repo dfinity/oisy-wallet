@@ -10,6 +10,7 @@ import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import type { OptionCanisterIdText } from '$lib/types/canister';
 import type { Token } from '$lib/types/token';
 
@@ -63,3 +64,21 @@ export const LIQUIDIUM_WITHDRAW_CAP_TOLERANCE = 1e-6;
 
 // Refresh cadence for markets + positions while the provider page is visible.
 export const LIQUIDIUM_POLL_INTERVAL_MILLIS = 30_000;
+
+// How long a repay's AUT may go without its txid and without a write before the poller deletes it,
+// counted in the poller's own ticks (see `OISY_TRADE_SWAP_SETTLE_GRACE_OBSERVATIONS` for why not in
+// wall time). The repay records its row before the broadcast, renews it while the broadcast is
+// pending (`LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS`) and adds the txid right after it, so a row left
+// alone this long has nobody left to add one: its tab closed, or the write failed.
+//
+// Ten minutes: many renewals long, so a few lost ones do not end a broadcast's claim. Not much
+// longer, since until then a repay that was never sent keeps lowering the repay max.
+export const LIQUIDIUM_REPAY_TXID_GRACE_PERIOD_MILLIS = 10 * 60 * 1000;
+
+export const LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS = Math.ceil(
+	LIQUIDIUM_REPAY_TXID_GRACE_PERIOD_MILLIS / ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS
+);
+
+// How often a repay renews its row while its broadcast is pending, so the poller does not take it
+// for abandoned: nothing bounds how long a broadcast can take. Well inside the grace period above.
+export const LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS = 60_000;

@@ -123,4 +123,10 @@ describe('TokensMenu', () => {
 			expect(blob?.classList.contains('opacity-100')).toBeTruthy();
 		});
 	});
+
+	it('gives its trigger a touch-sized tap area', () => {
+		const { container } = render(TokensMenu);
+
+		expect(container.querySelector('button')).toHaveClass('hit-area', 'hit-area-touch');
+	});
 });

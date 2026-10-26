@@ -74,6 +74,7 @@ import {
 	isNearIntentsQuoteExpired,
 	verifyNearIntentsQuoteSignature
 } from '$lib/utils/near-intents-quote.utils';
+import { parseToken } from '$lib/utils/parse.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
@@ -2199,6 +2200,32 @@ describe('swap.services', () => {
 			expect(mockSwapBuildTx).toHaveBeenCalled();
 		});
 
+		it('passes the amount swapped for the pending activity, which the calldata does not carry as a transfer', async () => {
+			await fetchVeloraMarketSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				slippageValue: mockSlippageValue,
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: mockSwapDetails,
+				receiveAmount: BigInt(1000),
+				isGasless: false
+			});
+
+			expect(sendEvmSwap).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					token: mockSourceToken,
+					amount: parseToken({ value: mockSwapAmount, unitName: mockSourceToken.decimals })
+				})
+			);
+		});
+
 		it('rounds the slippage to integer basis points when building the transaction', async () => {
 			await fetchVeloraMarketSwap({
 				identity: mockIdentity,
@@ -3182,7 +3209,7 @@ describe('swap.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123' });
+			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123', nonce: 5 });
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
 			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
 		});
@@ -3369,7 +3396,7 @@ describe('swap.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123' });
+			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123', nonce: 5 });
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
 			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
 		});
@@ -3452,6 +3479,43 @@ describe('swap.services', () => {
 					])
 				})
 			);
+		});
+
+		it('should record the deposit transaction hash, nonce and chain on the AUT row', async () => {
+			await fetchNearIntentsEvmSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				destinationToken,
+				swapAmount: '1',
+				receiveAmount: 900000n,
+				slippageValue: '1',
+				sourceNetwork: ETHEREUM_NETWORK,
+				userAddress: mockEthAddress,
+				gas: 21000n,
+				maxFeePerGas: 20000000000n,
+				maxPriorityFeePerGas: 2000000000n,
+				swapDetails: mockNearIntentsQuoteResponse
+			});
+
+			const [[{ externalRefs }]] = vi.mocked(
+				activeUserTransactionsServices.createActiveUserTransaction
+			).mock.calls;
+
+			expect(externalRefs).toEqual(
+				expect.arrayContaining([
+					{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_TX_HASH, value: '0xTxHash123' },
+					{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_TX_NONCE, value: '5' },
+					{
+						key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_CHAIN_ID,
+						value: `${ETHEREUM_NETWORK.chainId}`
+					}
+				])
+			);
+
+			const keys = externalRefs.map(({ key }) => key);
+
+			expect(keys).toEqual([...keys].sort());
 		});
 
 		it('should execute the full NEAR Intents swap flow using swapDetails directly', async () => {

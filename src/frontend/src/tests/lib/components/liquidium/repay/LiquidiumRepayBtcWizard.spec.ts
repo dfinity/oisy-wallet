@@ -11,13 +11,17 @@ import {
 } from '$btc/types/btc-send';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
+import * as liquidiumApi from '$lib/api/liquidium.api';
 import LiquidiumRepayBtcWizard from '$lib/components/liquidium/repay/LiquidiumRepayBtcWizard.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import { STAKE_REVIEW_FORM_BUTTON } from '$lib/constants/test-ids.constants';
 import * as addressesStore from '$lib/derived/address.derived';
 import { ProgressStepsLiquidiumRepay } from '$lib/enums/progress-steps';
 import { WizardStepsLiquidiumRepay } from '$lib/enums/wizard-steps';
+import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import * as liquidiumRepayServices from '$lib/services/liquidium-repay.services';
+import * as liquidiumServices from '$lib/services/liquidium.services';
+import * as toastsStore from '$lib/stores/toasts.store';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import type { WizardStep } from '$lib/types/wizard';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -213,6 +217,50 @@ describe('LiquidiumRepayBtcWizard', () => {
 			});
 
 			expect(liquidiumRepayServices.executeLiquidiumRepay).not.toHaveBeenCalled();
+		});
+
+		describe('when the repay cannot be recorded', () => {
+			afterEach(() => {
+				vi.restoreAllMocks();
+			});
+
+			it('toasts the failure and goes back without sending BTC', async () => {
+				// The real service, so the test covers what reaches the network.
+				vi.spyOn(liquidiumRepayServices, 'executeLiquidiumRepay').mockRestore();
+
+				vi.spyOn(liquidiumServices, 'getOrCreateLiquidiumProfile').mockResolvedValue('profile-1');
+				vi.spyOn(liquidiumApi, 'liquidiumClient').mockReturnValue({
+					lending: {
+						supply: vi
+							.fn()
+							.mockResolvedValue({ target: { address: 'repay-target' }, submit: vi.fn() })
+					}
+				} as unknown as ReturnType<typeof liquidiumApi.liquidiumClient>);
+				vi.spyOn(activeUserTransactionsServices, 'createActiveUserTransaction').mockRejectedValue(
+					new Error('TooManyActiveTransactions')
+				);
+				vi.spyOn(activeUserTransactionsServices, 'deleteActiveUserTransaction').mockResolvedValue(
+					undefined
+				);
+
+				const sendBtcSpy = vi.spyOn(btcSendServices, 'sendBtc').mockResolvedValue('txid');
+				const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError');
+
+				const onBack = vi.fn();
+
+				const { getByTestId } = renderReview({ onBack });
+
+				await clickConfirm(getByTestId);
+
+				await waitFor(() => {
+					expect(onBack).toHaveBeenCalledOnce();
+				});
+
+				expect(sendBtcSpy).not.toHaveBeenCalled();
+				expect(toastsErrorSpy).toHaveBeenCalledWith(
+					expect.objectContaining({ msg: { text: en.liquidium.text.transaction_failed } })
+				);
+			});
 		});
 	});
 });

@@ -116,7 +116,9 @@
 	"progress": {
 		"completed": "Concluído",
 		"in_progress": "Em andamento",
-		"failed": "Falhou"
+		"failed": "Falhou",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {
@@ -1192,6 +1194,37 @@
 			"unconfirmed": "Não foi possível confirmar a transferência de $token. Se ela foi concluída, a cunhagem terminará em segundo plano: acompanhe-a nas transações ativas."
 		}
 	},
+	"cycles_top_up": {
+		"text": {
+			"top_up": "Recarregar",
+			"title": "Recarregar um canister",
+			"description": "Os ciclos saem do seu saldo de $token para o canister, que os gasta em computação e armazenamento.",
+			"canister_id_placeholder": "Insira um ID de canister",
+			"checking_canister": "Verificando o canister...",
+			"recently_topped_up": "Recarregados recentemente",
+			"canister": "Canister",
+			"you_top_up": "Você recarrega",
+			"total": "Total",
+			"one_way": "Uma recarga não pode ser desfeita: os ciclos ficam no canister.",
+			"topping_up": "Recarregando $canister...",
+			"topped_up": "$canister recarregado com $amount $token.",
+			"unknown": "OISY ainda não sabe se a recarga foi concluída. Se foi, sua atividade de $token vai mostrá-la. Recarregue de novo para reenviar a mesma recarga: ela só pode ser concluída uma vez. Uma recarga nova ou alterada adicionaria ciclos de novo se esta foi concluída.",
+			"unknown_fresh": "OISY ainda não sabe se sua última recarga foi concluída. Se foi, esta recarga adiciona ciclos de novo. Verifique primeiro sua atividade de $token.",
+			"sent_to_canister": "Enviar $token para um canister não o recarrega. Os $token chegam à conta do canister, e o canister só recebe ciclos se o próprio código dele os sacar.",
+			"sent_to_canister_top_up": "Para adicionar ciclos a um canister, use “Recarregar” na página de $token."
+		},
+		"error": {
+			"invalid_canister_id": "Insira um ID de canister. Principals de usuário, IDs de conta e endereços de outras redes não podem ser recarregados.",
+			"canister_not_found": "Não existe nenhum canister com este ID no Internet Computer. Verifique o ID.",
+			"canister_check_failed": "OISY não conseguiu verificar este canister. Tente novamente em instantes.",
+			"amount_too_small": "Insira mais do que a taxa de $fee $token.",
+			"refused": "A recarga não foi concluída. Nada saiu da sua carteira. Tente novamente em instantes.",
+			"insufficient_funds": "Não há $token suficientes para esta recarga e a taxa. Nada saiu da sua carteira. Reduza o valor.",
+			"clock": "A recarga não foi concluída porque o relógio do seu dispositivo está errado. Nada saiu da sua carteira. Ajuste a hora correta e tente novamente.",
+			"refunded": "O canister não conseguiu receber os ciclos. $refund $token voltaram para sua carteira, e a tentativa custou $fees $token em taxas. Verifique o ID do canister.",
+			"refunded_nothing": "O canister não conseguiu receber os ciclos, e as taxas consumiram todo o valor. Verifique o ID do canister."
+		}
+	},
 	"active_user_transactions": {
 		"text": {
 			"button_label": "",
@@ -1385,12 +1418,15 @@
 			"swap_replaced_or_dropped": "",
 			"near_intents_quote_unverified": "",
 			"near_intents_quote_expired": "",
+			"near_intents_deposit_expired": "",
 			"near_intents_quote_deposit_memo": "",
 			"oisy_trade_not_trackable": "",
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
-			"oisy_trade_recovery_failed": ""
+			"oisy_trade_recovery_failed": "",
+			"lifi_status_unknown": "",
+			"lifi_fee_changed": ""
 		}
 	},
 	"buy": {
@@ -1779,6 +1815,8 @@
 			"unread_programs_acknowledge": "Compreendo que a OISY não consegue mostrar o que esta aplicação faz",
 			"cannot_be_shown": "Esta transação inclui ações que não podem ser todas mostradas com precisão para revisão, por isso a OISY não a irá assinar. Rejeite-a e peça à aplicação um pedido mais simples.",
 			"close_pays_others": "Esta transação encerra uma das suas contas de tokens e envia o saldo dela para um endereço que não é a sua carteira. Para a sua segurança, a OISY não a assina.",
+			"fee_paid_by_others": "",
+			"approval_without_simulation": "",
 			"simulated_instructions": "Instruções simuladas",
 			"multiple_operations": "Esta transação contém várias operações que afetam sua carteira. Verifique as alterações de saldo simuladas e as instruções contidas, e aprove esta transação somente se também confiar na aplicação.",
 			"simulated_review": "A revisão abaixo é o que a simulação desta transação prevê em relação ao estado atual da rede. O que acontece na execução real pode ser diferente.",
@@ -1789,6 +1827,9 @@
 			"simulation_control_change": "Esta transação mudaria quem controla uma ou mais de suas contas. Aprová-la pode entregar a própria conta, não apenas o que ela contém.",
 			"simulation_new_owner": "Novo proprietário da conta",
 			"simulation_new_spender": "Novo autorizado aprovado",
+			"simulation_new_allowance": "",
+			"simulation_allowance": "",
+			"simulation_allowance_unlimited": "",
 			"simulation_new_close_authority": "Nova autoridade de encerramento",
 			"simulation_new_program": "Novo programa proprietário",
 			"simulation_control_removed": "Removido",
@@ -1811,9 +1852,14 @@
 			"allowance_increase": "Esta solicitação aumenta o limite do autorizado abaixo pelo valor mostrado, além do que ele já pode gastar. O autorizado pode transferir esse valor deste token da sua carteira, a qualquer momento, até que você o revogue.",
 			"allowance_decrease": "Esta solicitação reduz o limite do autorizado abaixo pelo valor mostrado. Ela não movimenta fundos por si só.",
 			"unverifiable_erc20_request": "Esta solicitação envolve um token que a OISY não consegue identificar ou decodificar. O que é exibido pode diferir do que seria realmente assinado, portanto a aprovação está desativada.",
+			"token_call_with_value": "Além do valor em tokens mostrado abaixo, esta solicitação envia $amount para o contrato do token. Uma transferência ou aprovação de tokens não envia $symbol, por isso, para a sua segurança, a OISY não a assina.",
 			"unverifiable_approval_for_all_request": "Esta solicitação entregaria a um operador o controle de uma coleção de NFT, e a OISY não consegue decodificar qual operador. O que é exibido pode diferir do que seria realmente assinado, portanto a aprovação está desativada.",
 			"approval_for_all_grant": "Esta solicitação permite que o operador abaixo transfira qualquer NFT desta coleção que você possua agora ou adquira depois, a qualquer momento, até que você o revogue. Ela não movimenta fundos por si só.",
 			"approval_for_all_revoke": "Esta solicitação revoga o operador abaixo, para que ele não possa mais transferir os NFTs que você possui nesta coleção.",
+			"cketh_deposit": "Esta solicitação converte ETH em ckETH para o seu principal do Internet Computer, mostrado abaixo.",
+			"cketh_deposit_principal": "Destinatário dos ckETH",
+			"cketh_deposit_refused": "Esta solicitação chama o contrato de conversão de ckETH para um principal do Internet Computer que não é seu, ou com dados que a OISY não consegue ler. Para a sua segurança, a OISY não a assina.",
+			"cketh_helper_unconfirmed": "A OISY ainda não consegue confirmar o contrato de conversão de ckETH, por isso não consegue verificar este depósito. A aprovação continua desativada até que isso seja possível.",
 			"raw_copied": "Dados da transação brutos copiados para a área de transferência.",
 			"sign_message": "Assinar Mensagem",
 			"sign_psbt": "Assinar transação",
@@ -1887,9 +1933,15 @@
 			"btc_psbt_input_ambiguous": "A OISY não consegue determinar a qual saída anterior uma das entradas desta transação se refere, portanto os valores mostrados para revisão podem diferir dos valores realmente assinados. Por sua segurança, ela não foi assinada.",
 			"from_address_not_wallet": "O endereço 'De' solicitado para a transação não é o endereço desta carteira.",
 			"unknown_destination": "Endereço de destino desconhecido.",
+			"cketh_deposit_refused": "Esta solicitação chama o contrato de conversão de ckETH para um principal do Internet Computer que não é seu, ou com dados que a OISY não consegue ler. Para a sua segurança, não foi assinada.",
+			"cketh_helper_unconfirmed": "A OISY não conseguiu confirmar o contrato de conversão de ckETH, por isso não conseguiu verificar este depósito. Para a sua segurança, não foi assinado.",
+			"token_call_with_value": "Esta solicitação envia $amount para o contrato do token, além do valor em tokens. Para a sua segurança, não foi assinada.",
 			"ambiguous_transaction": "Esta transação movimenta fundos entre vários endereços e não pode ser exibida com precisão para revisão. Para sua segurança, ela não foi assinada.",
 			"close_pays_others": "Esta transação encerra uma das suas contas de tokens e envia o saldo dela para um endereço que não é a sua carteira. Para a sua segurança, não foi assinada.",
+			"fee_paid_by_others": "",
+			"approval_without_simulation": "",
 			"unreviewed_without_simulation": "A OISY não conseguiu ler parte desta transação e a rede também não devolveu uma simulação, por isso nada descreve o que essa parte faria. Para a sua segurança, não foi assinada.",
+			"unreviewed_not_described_by_simulation": "A OISY não conseguiu ler parte desta transação e a simulação também não mostrou o que essa parte faria. Para a sua segurança, não foi assinada.",
 			"unread_programs_unconfirmed": "Esta transação chama um programa que a OISY não consegue ler e não foi confirmada na revisão. Para a sua segurança, não foi assinada.",
 			"sol_transaction_as_message": "Esta mensagem é uma transação Solana, que só pode ser aprovada por meio de uma revisão de transação. Por sua segurança, ela não foi assinada.",
 			"request_not_defined": "Erro inesperado: A solicitação não está definida, portanto, não pode ser processada.",
@@ -2158,7 +2210,8 @@
 			"summary_self": "",
 			"swap_on": "",
 			"interacted_with": "Interagido com",
-			"unknown_token": "",
+			"unknown_token": "Token desconhecido",
+			"unknown_token_named": "Token desconhecido ($symbol)",
 			"summary_other": "",
 			"tab_summary": "",
 			"tab_balance_changes": "",
@@ -2169,12 +2222,17 @@
 			"instruction_receive": "",
 			"instruction_wrap": "",
 			"instruction_unwrap": "Desempacotar e encerrar a conta de tokens de $symbol",
+			"instruction_unwrap_all_to": "",
+			"instruction_unwrap_all_from": "",
+			"instruction_receive_excess_from": "",
 			"instruction_create_account": "",
 			"instruction_create_program_account": "",
 			"instruction_close_program_account": "",
 			"instruction_close_account": "",
 			"instruction_close_account_for": "Encerrar a conta de tokens de $symbol",
 			"instruction_approve": "",
+			"instruction_approve_amount": "",
+			"instruction_approve_unlimited": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
 			"instruction_route": "",
@@ -2184,6 +2242,7 @@
 			"instruction_thaw": "",
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
+			"instruction_batch_via": "",
 			"instruction_via": "via $program",
 			"instruction_rent": "",
 			"instruction_balance_returned": "Saldo de SOL devolvido à sua carteira",
@@ -2247,7 +2306,9 @@
 			"converting_ck_token": "Convertendo $ckToken para $twinToken",
 			"twin_network": "Rede $twinNetwork",
 			"no_date_available": "Data não disponível",
-			"pending": "Pendente"
+			"pending": "Pendente",
+			"top_up": "Recarga",
+			"top_up_refund": "Reembolso da recarga"
 		},
 		"alt": {
 			"open_block_explorer": "Abrir esta transação no explorador de blocos",
@@ -2589,7 +2650,8 @@
 		},
 		"warning": {
 			"no_index_canister": "$oisy_short não consegue carregar as transações de $token_list — o emissor do token não oferece rastreamento de transações.",
-			"unavailable_index_canister": "No momento, as transações mais recentes de $token_list não podem ser carregadas, porque o serviço de rastreamento delas não está respondendo. Elas serão carregadas automaticamente assim que ele voltar."
+			"unavailable_index_canister": "No momento, as transações mais recentes de $token_list não podem ser carregadas, porque o serviço de rastreamento delas não está respondendo. Elas serão carregadas automaticamente assim que ele voltar.",
+			"unsupported_sol_transactions": "Algumas transações de $token_list não puderam ser carregadas, porque têm um formato não suportado. Elas aparecerão automaticamente assim que este problema for resolvido."
 		}
 	},
 	"earning": {

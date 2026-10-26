@@ -10,6 +10,7 @@ import { createPermit } from '$eth/services/eip2612-permit.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
 import { send as sendEvm } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
+import type { EthAddress } from '$eth/types/address';
 import type { ErcFungibleToken } from '$eth/types/erc-fungible';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
@@ -78,6 +79,7 @@ import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsQuoteResponse
 } from '$lib/types/near-intents';
+import type { NetworkId } from '$lib/types/network';
 import type { OisyTradeQuote } from '$lib/types/oisy-trade-swap';
 import type { Amount } from '$lib/types/send';
 import {
@@ -695,12 +697,15 @@ export const fetchIcpSwap = async ({
 		fee: destinationTokenFee
 	} = destinationToken;
 
+	// Certified, because this pool canister becomes the spender of the approval and the target of
+	// the deposit below.
 	const pool = await getPoolCanister({
 		identity,
 		token0: { address: sourceLedgerCanisterId, standard: sourceStandard.code },
 		token1: { address: destinationLedgerCanisterId, standard: destinationStandard.code },
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity,
-		fee: ICP_SWAP_POOL_FEE
+		fee: ICP_SWAP_POOL_FEE,
+		certified: true
 	});
 
 	if (isNullish(pool)) {
@@ -903,6 +908,9 @@ const executeNearIntentsSwap = async ({
 	// guarantee). A transport that ignores it keeps the default ordering below, where the
 	// row is created only after the send has resolved and the deposit been submitted.
 	//
+	// `recordPollRefs` is for a transport on that default ordering that learns its payment's poll
+	// keys when it broadcasts (EVM: the hash and nonce): the row is created with them.
+	//
 	// `swapRecord` is for a transport whose payment has to be recorded before it is broadcast
 	// (XRP): it describes the swap's AUT row, with the payment's source address and poll keys
 	// added, for the transport to create at that point. Taking it marks the swap as registered,
@@ -911,6 +919,7 @@ const executeNearIntentsSwap = async ({
 		amount: bigint;
 		depositAddress: string;
 		registerSwap: () => Promise<void>;
+		recordPollRefs: (pollRefs: ActiveUserTransactionRef[]) => void;
 		swapRecord: (params: {
 			sourceAddress: string;
 			pollRefs: ActiveUserTransactionRef[];
@@ -962,13 +971,18 @@ const executeNearIntentsSwap = async ({
 				: {})
 		});
 
+	const swapRefsWith = (pollRefs: ActiveUserTransactionRef[]): ActiveUserTransactionRef[] =>
+		[...swapRefs(), ...pollRefs].sort(({ key: a }, { key: b }) => (a < b ? -1 : a > b ? 1 : 0));
+
 	// Registers the swap as an Active User Transaction so settlement is tracked by
 	// the global poller (survives modal close, tab close, refresh, logout).
 	// Best-effort, single attempt: it only ever runs once funds have left the wallet
 	// (point of no return), so a failed create must NOT surface as a swap failure;
 	// mirrors OneSec's `createAutAndDetachCloser`.
 	let swapRegistered = false;
-	const registerSwap = async (): Promise<void> => {
+	const registerSwap = async (
+		{ pollRefs }: { pollRefs: ActiveUserTransactionRef[] } = { pollRefs: [] }
+	): Promise<void> => {
 		swapRegistered = true;
 
 		try {
@@ -983,7 +997,7 @@ const executeNearIntentsSwap = async ({
 					identity,
 					id: crypto.randomUUID(),
 					data,
-					externalRefs: swapRefs()
+					externalRefs: swapRefsWith(pollRefs)
 				});
 			}
 		} catch (err: unknown) {
@@ -1010,19 +1024,22 @@ const executeNearIntentsSwap = async ({
 		return nonNullish(data)
 			? {
 					data,
-					externalRefs: [...swapRefs(), ...pollRefs].sort(({ key: a }, { key: b }) =>
-						a < b ? -1 : a > b ? 1 : 0
-					)
+					externalRefs: swapRefsWith(pollRefs)
 				}
 			: undefined;
 	};
 
 	progress(ProgressStepsSwap.SIGN_TRANSFER);
 
+	let broadcastPollRefs: ActiveUserTransactionRef[] = [];
+
 	const txHash = await sendTransaction({
 		amount: parsedSwapAmount,
 		depositAddress,
 		registerSwap,
+		recordPollRefs: (refs) => {
+			broadcastPollRefs = refs;
+		},
 		swapRecord
 	});
 
@@ -1042,7 +1059,7 @@ const executeNearIntentsSwap = async ({
 	}
 
 	if (!swapRegistered) {
-		await registerSwap();
+		await registerSwap({ pollRefs: broadcastPollRefs });
 	}
 
 	progress(ProgressStepsSwap.UPDATE_UI);
@@ -1071,8 +1088,8 @@ export const fetchNearIntentsEvmSwap = async ({
 		destinationToken,
 		swapAmount,
 		swapDetails,
-		sendTransaction: async ({ amount, depositAddress }) => {
-			const { hash } = await sendEvm({
+		sendTransaction: async ({ amount, depositAddress, recordPollRefs }) => {
+			const { hash, nonce } = await sendEvm({
 				from: userAddress,
 				to: depositAddress,
 				amount,
@@ -1083,6 +1100,15 @@ export const fetchNearIntentsEvmSwap = async ({
 				maxFeePerGas,
 				maxPriorityFeePerGas
 			});
+
+			recordPollRefs(
+				toNearIntentsExternalRefs({
+					[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_TX_HASH]: hash,
+					[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_TX_NONCE]: `${nonce}`,
+					[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_CHAIN_ID]: `${sourceNetwork.chainId}`
+				})
+			);
+
 			return hash;
 		},
 		enableDestinationToken: () => enableSwapDestinationToken({ destinationToken, identity })
@@ -1840,6 +1866,36 @@ export const fetchVeloraDeltaSwap = async ({
 	await enableSwapDestinationToken({ destinationToken, identity });
 };
 
+/**
+ * Waits until `spender` may spend at least `amount` of `token` for `owner`: an approval just mined
+ * can take a few reads to show. Throws when it still cannot after the retries, so that the swap is
+ * not sent against an allowance it would fail on.
+ */
+export const waitForSwapAllowance = async ({
+	token,
+	owner,
+	spender,
+	networkId,
+	amount
+}: {
+	token: ErcFungibleToken;
+	owner: EthAddress;
+	spender: EthAddress;
+	networkId: NetworkId;
+	amount: bigint;
+}): Promise<void> => {
+	await retryWithDelay({
+		maxRetries: 10,
+		request: async () => {
+			const currentAllowance = await erc20ContractAllowance({ token, owner, spender, networkId });
+
+			if (currentAllowance < amount) {
+				throw new Error(get(i18n).swap.error.unexpected);
+			}
+		}
+	});
+};
+
 export const fetchVeloraMarketSwap = async ({
 	identity,
 	progress,
@@ -1882,19 +1938,12 @@ export const fetchVeloraMarketSwap = async ({
 			progressSteps: ProgressStepsSwap
 		});
 
-		await retryWithDelay({
-			maxRetries: 10,
-			request: async () => {
-				const currentAllowance = await erc20ContractAllowance({
-					token: sourceToken,
-					owner: userAddress,
-					spender: TokenTransferProxy,
-					networkId: sourceNetwork.id
-				});
-				if (currentAllowance < parsedSwapAmount) {
-					throw new Error(get(i18n).swap.error.unexpected);
-				}
-			}
+		await waitForSwapAllowance({
+			token: sourceToken,
+			owner: userAddress,
+			spender: TokenTransferProxy,
+			networkId: sourceNetwork.id,
+			amount: parsedSwapAmount
 		});
 	}
 
@@ -1918,6 +1967,7 @@ export const fetchVeloraMarketSwap = async ({
 		from: userAddress,
 		to: txParams.to,
 		transaction: txParams,
+		amount: parsedSwapAmount,
 		identity,
 		token: sourceToken,
 		sourceNetwork,

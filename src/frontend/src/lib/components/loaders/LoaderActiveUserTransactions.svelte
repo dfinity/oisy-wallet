@@ -13,11 +13,16 @@
 	import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { enabledFungibleTokens } from '$lib/derived/tokens.derived';
 	import { loadActiveUserTransactions } from '$lib/services/active-user-transactions.services';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { pollChainFusionActiveUserTransactions } from '$lib/services/chain-fusion-swap-active-tx.services';
 	import { pollCyclesMintActiveUserTransactions } from '$lib/services/cycles-mint-active-tx.services';
 	import { trackCyclesMint } from '$lib/services/cycles-mint-analytics.services';
+	import {
+		pollLifiActiveUserTransactions,
+		reloadLifiEvmBalances
+	} from '$lib/services/lifi-active-tx.services';
 	import { pollLiquidiumActiveUserTransactions } from '$lib/services/liquidium-active-tx.services';
 	import { loadLiquidium } from '$lib/services/liquidium.services';
 	import { pollNearIntentsActiveUserTransactions } from '$lib/services/near-intents-active-tx.services';
@@ -37,6 +42,10 @@
 		isCyclesMintActiveUserTransaction,
 		toCyclesMintTrackingParams
 	} from '$lib/utils/cycles-mint-active-tx.utils';
+	import {
+		buildLifiSwapTrackingMetadata,
+		isLifiActiveUserTransaction
+	} from '$lib/utils/lifi-active-tx.utils';
 	import {
 		buildLiquidiumTrackingMetadata,
 		isLiquidiumActiveUserTransaction
@@ -109,8 +118,18 @@
 				(tx) => isNearIntentsActiveUserTransaction(tx) && !isXrpPaymentInFlight(tx)
 			);
 
+			// Shared by the EVM pollers of this tick, so rows on one chain cost one nonce read whatever
+			// their provider. They run one after another: a nonce read earlier in the tick can only be
+			// lower, which reads as still pending, never as replaced.
+			const confirmedNonceByChainId = new Map<string, Promise<number>>();
+
 			if (nearIntents.length > 0) {
-				await pollNearIntentsActiveUserTransactions({ identity, transactions: nearIntents });
+				await pollNearIntentsActiveUserTransactions({
+					identity,
+					transactions: nearIntents,
+					userAddress: $ethAddress,
+					confirmedNonceByChainId
+				});
 			}
 
 			const velora = $activeUserTransactionsPending.filter(isVeloraActiveUserTransaction);
@@ -119,7 +138,19 @@
 				await pollVeloraActiveUserTransactions({
 					identity,
 					transactions: velora,
-					userAddress: $ethAddress
+					userAddress: $ethAddress,
+					confirmedNonceByChainId
+				});
+			}
+
+			const lifi = $activeUserTransactionsPending.filter(isLifiActiveUserTransaction);
+
+			if (lifi.length > 0) {
+				await pollLifiActiveUserTransactions({
+					identity,
+					transactions: lifi,
+					userAddress: $ethAddress,
+					confirmedNonceByChainId
 				});
 			}
 
@@ -246,6 +277,23 @@
 				if (isSucceeded) {
 					shouldRefresh = true;
 				}
+			} else if (
+				isTerminalActiveUserTransaction(tx) &&
+				!alreadyApplied &&
+				isLifiActiveUserTransaction(tx)
+			) {
+				newlyAppliedIds.push(tx.id);
+
+				trackEvent({
+					name: isSucceeded ? TRACK_COUNT_SWAP_SUCCESS : TRACK_COUNT_SWAP_ERROR,
+					metadata: buildLifiSwapTrackingMetadata({ tx })
+				});
+
+				// Whatever the outcome: the modal closed at broadcast, and a failed, reverted or refunded
+				// route still spent gas or returned funds. The wallet refresh covers the Solana side; EVM
+				// balances have no wallet worker, so they are reloaded explicitly.
+				shouldRefresh = true;
+				reloadLifiEvmBalances({ tx, tokens: $enabledFungibleTokens });
 			} else if (
 				isTerminalActiveUserTransaction(tx) &&
 				!alreadyApplied &&

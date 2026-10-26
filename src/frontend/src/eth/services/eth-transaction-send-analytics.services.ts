@@ -15,7 +15,8 @@ import { nonNullish } from '@dfinity/utils';
 export type EthTransactionSendContext =
 	| PLAUSIBLE_EVENT_CONTEXTS.SEND
 	| PLAUSIBLE_EVENT_CONTEXTS.CONVERT
-	| PLAUSIBLE_EVENT_CONTEXTS.AI_ASSISTANT;
+	| PLAUSIBLE_EVENT_CONTEXTS.AI_ASSISTANT
+	| PLAUSIBLE_EVENT_CONTEXTS.WALLET_CONNECT;
 
 // The one out-of-gas answer whose wording is known, Base's: a gas figure and nothing else. Any other
 // wording is a node's free text, which no scrub can bound, so it is not tracked.

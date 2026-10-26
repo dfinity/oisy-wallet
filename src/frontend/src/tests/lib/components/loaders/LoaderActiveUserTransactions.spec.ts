@@ -1,3 +1,7 @@
+import type {
+	ActiveUserTransaction,
+	ActiveUserTransactionStatus
+} from '$declarations/backend/backend.did';
 import LoaderActiveUserTransactions from '$lib/components/loaders/LoaderActiveUserTransactions.svelte';
 import {
 	TRACK_COUNT_LIQUIDIUM_ERROR,
@@ -17,6 +21,7 @@ import * as activeUserTransactionsServices from '$lib/services/active-user-trans
 import * as analyticsServices from '$lib/services/analytics.services';
 import * as chainFusionPoller from '$lib/services/chain-fusion-swap-active-tx.services';
 import * as cyclesMintPoller from '$lib/services/cycles-mint-active-tx.services';
+import * as lifiPoller from '$lib/services/lifi-active-tx.services';
 import * as liquidiumPoller from '$lib/services/liquidium-active-tx.services';
 import * as liquidiumServices from '$lib/services/liquidium.services';
 import * as nearIntentsPoller from '$lib/services/near-intents-active-tx.services';
@@ -32,6 +37,7 @@ import {
 	mockActiveUserTransaction,
 	mockChainFusionActiveUserTransaction,
 	mockCyclesMintActiveUserTransaction,
+	mockLifiActiveUserTransaction,
 	mockLiquidiumActiveUserTransaction,
 	mockNearIntentsActiveUserTransaction,
 	mockOisyTradeActiveUserTransaction,
@@ -94,6 +100,14 @@ const succeededVelora = (id: string) =>
 		id,
 		status: { Succeeded: null } as const
 	}) satisfies typeof mockVeloraActiveUserTransaction;
+
+const lifiWithStatus =
+	(status: ActiveUserTransactionStatus) =>
+	(id: string): ActiveUserTransaction => ({ ...mockLifiActiveUserTransaction, id, status });
+
+const pendingLifi = lifiWithStatus({ Pending: null });
+const succeededLifi = lifiWithStatus({ Succeeded: null });
+const failedLifi = lifiWithStatus({ Failed: null });
 
 const pendingChainFusion = (id: string) =>
 	({
@@ -290,17 +304,22 @@ describe('LoaderActiveUserTransactions', () => {
 			});
 		});
 
-		it('polls NEAR Intents rows on each tick when present', async () => {
+		it('polls NEAR Intents rows on each tick when present, sharing the nonce reads with Velora', async () => {
 			const oneSecSpy = vi
 				.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions')
 				.mockResolvedValue();
 			const nearSpy = vi
 				.spyOn(nearIntentsPoller, 'pollNearIntentsActiveUserTransactions')
 				.mockResolvedValue();
+			const veloraSpy = vi
+				.spyOn(veloraPoller, 'pollVeloraActiveUserTransactions')
+				.mockResolvedValue();
+			vi.spyOn(addressDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
 			const tx = pendingNearIntents('near-a');
 
 			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
 			activeUserTransactionsStore.upsert({ transaction: tx });
+			activeUserTransactionsStore.upsert({ transaction: pendingVelora('velora-a') });
 
 			render(LoaderActiveUserTransactions);
 
@@ -309,8 +328,13 @@ describe('LoaderActiveUserTransactions', () => {
 			expect(oneSecSpy).not.toHaveBeenCalled();
 			expect(nearSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
-				transactions: [tx]
+				transactions: [tx],
+				userAddress: mockEthAddress,
+				confirmedNonceByChainId: expect.any(Map)
 			});
+			expect(nearSpy.mock.calls[0][0].confirmedNonceByChainId).toBe(
+				veloraSpy.mock.calls[0][0].confirmedNonceByChainId
+			);
 		});
 
 		it('polls Velora rows on each tick when present, with the EVM address', async () => {
@@ -334,8 +358,44 @@ describe('LoaderActiveUserTransactions', () => {
 			expect(veloraSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				transactions: [tx],
-				userAddress: mockEthAddress
+				userAddress: mockEthAddress,
+				confirmedNonceByChainId: expect.any(Map)
 			});
+		});
+
+		it('polls LI.FI rows on each tick when present, sharing the nonce reads with Velora', async () => {
+			const veloraSpy = vi
+				.spyOn(veloraPoller, 'pollVeloraActiveUserTransactions')
+				.mockResolvedValue();
+			const lifiSpy = vi.spyOn(lifiPoller, 'pollLifiActiveUserTransactions').mockResolvedValue();
+			vi.spyOn(addressDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
+			const velora = pendingVelora('velora-a');
+			const lifi = pendingLifi('lifi-a');
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: velora });
+			activeUserTransactionsStore.upsert({ transaction: lifi });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(lifiSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [lifi],
+				userAddress: mockEthAddress,
+				confirmedNonceByChainId: expect.any(Map)
+			});
+			expect(lifiSpy.mock.calls[0][0].confirmedNonceByChainId).toBe(
+				veloraSpy.mock.calls[0][0].confirmedNonceByChainId
+			);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(lifiSpy).toHaveBeenCalledTimes(2);
+			expect(lifiSpy.mock.calls[1][0].confirmedNonceByChainId).not.toBe(
+				lifiSpy.mock.calls[0][0].confirmedNonceByChainId
+			);
 		});
 
 		it('polls Chain Fusion rows on each tick when present', async () => {
@@ -479,10 +539,12 @@ describe('LoaderActiveUserTransactions', () => {
 				await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
 
 				expect(xrpSpy).not.toHaveBeenCalled();
-				expect(nearSpy).toHaveBeenCalledExactlyOnceWith({
-					identity: mockIdentity,
-					transactions: [tx]
-				});
+				expect(nearSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						identity: mockIdentity,
+						transactions: [tx]
+					})
+				);
 			});
 		});
 
@@ -788,6 +850,44 @@ describe('LoaderActiveUserTransactions', () => {
 				metadata: expect.objectContaining({ dApp: SwapProvider.VELORA })
 			});
 			expect(appliedFlags()).toEqual({ 'velora-a': true });
+		});
+
+		describe('a LI.FI row', () => {
+			let reloadSpy: ReturnType<typeof vi.spyOn>;
+
+			beforeEach(() => {
+				reloadSpy = vi.spyOn(lifiPoller, 'reloadLifiEvmBalances').mockReturnValue(undefined);
+			});
+
+			it.each([
+				{ outcome: 'succeeds', settled: succeededLifi, event: TRACK_COUNT_SWAP_SUCCESS },
+				{ outcome: 'fails', settled: failedLifi, event: TRACK_COUNT_SWAP_ERROR }
+			])(
+				'reports once and refreshes the wallet and its EVM balances when it $outcome',
+				async ({ settled, event }) => {
+					activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+					activeUserTransactionsStore.upsert({ transaction: pendingLifi('lifi-a') });
+
+					render(LoaderActiveUserTransactions);
+					await tick();
+
+					expect(reloadSpy).not.toHaveBeenCalled();
+
+					activeUserTransactionsStore.upsert({ transaction: settled('lifi-a') });
+					await tick();
+
+					expect(refreshSpy).toHaveBeenCalledOnce();
+					expect(reloadSpy).toHaveBeenCalledExactlyOnceWith({
+						tx: settled('lifi-a'),
+						tokens: expect.any(Array)
+					});
+					expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+						name: event,
+						metadata: expect.objectContaining({ dApp: SwapProvider.LIFI })
+					});
+					expect(appliedFlags()).toEqual({ 'lifi-a': true });
+				}
+			);
 		});
 
 		it('fires waitAndTriggerWallet and a swap_success event with the Chain Fusion dApp when a ck row succeeds', async () => {

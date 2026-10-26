@@ -13,6 +13,9 @@ export enum PLAUSIBLE_EVENTS {
 	STAKE = 'stake',
 	UNSTAKE = 'unstake',
 	LOAD_TRANSACTIONS = 'load_transactions',
+	// Loading transactions, sent when something notable happens to it. The outcome is in
+	// `result_status`, never in the name.
+	TRANSACTION_LOAD = 'transaction_load',
 	SIGNER_PAGE_VISIT = 'signer_page_visit',
 	SIGNER_INTERACTION = 'signer_interaction',
 	NETWORK_FILTER = 'network_filter',
@@ -30,6 +33,7 @@ export enum PLAUSIBLE_EVENTS {
 	// The countdown to the end of the XDR basket that prices TCYCLES.
 	XDR_BASKET_EXPIRY = 'xdr_basket_expiry',
 	CYCLES_MINT = 'cycles_mint',
+	CYCLES_TOP_UP = 'cycles_top_up',
 	// Sending a transaction, sent when something notable happens to it. The outcome is in
 	// `result_status`, never in the name.
 	TRANSACTION_SEND = 'transaction_send',
@@ -59,6 +63,19 @@ export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
 	MAJOR = 'major',
 	// Invisible to the user; they keep working as normal.
 	MINOR = 'minor'
+}
+
+// An ICP NFT collection writes its own text into some of its error variants, and a rejected call
+// carries the IC request id and the canister's reject text, so a raw message cannot satisfy
+// invariant 4 in docs/ai/frontend/analytics.md. ICP NFT send failures are categorised by error
+// class instead.
+export enum PLAUSIBLE_EVENT_NFT_SEND_ERROR_TYPES {
+	// The collection returned an error variant.
+	CANISTER_ERROR = 'canister_error',
+	// The collection rejected the call or trapped.
+	CALL_REJECTED = 'call_rejected',
+	// Anything else: transport, agent, or an unexpected throw.
+	UNKNOWN = 'unknown'
 }
 
 export enum PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES {
@@ -104,6 +121,21 @@ export enum PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES {
 	TIMEOUT = 'timeout',
 	// Any other failure of the quote request.
 	REQUEST_FAILED = 'request_failed'
+}
+
+// Why a swap failed after the user confirmed it, for a provider whose error text cannot be sent:
+// LI.FI's carries the user's addresses or the signed transaction.
+export enum PLAUSIBLE_EVENT_SWAP_ERROR_TYPES {
+	// The network fee at signing exceeded the one reviewed, so nothing was signed.
+	FEE_CHANGED = 'fee_changed',
+	// The re-quote no longer reaches the minimum the user reviewed, or has no route.
+	SLIPPAGE_EXCEEDED = 'slippage_exceeded',
+	// The re-quote failed OISY's own checks, or its route is one OISY cannot execute.
+	QUOTE_REJECTED = PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.QUOTE_REJECTED,
+	// The balance does not cover the swap and its network fee.
+	INSUFFICIENT_FUNDS = 'insufficient_funds',
+	// Any other failure.
+	UNKNOWN = 'unknown'
 }
 
 // Why a tip step failed. `TipError` is OISY's own candid type, so its variant names are a closed
@@ -170,6 +202,7 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	SEND = 'send',
 	CONVERT = 'convert',
 	AI_ASSISTANT = 'ai_assistant',
+	WALLET_CONNECT = 'wallet_connect',
 	CONTACTS = 'contacts'
 }
 
@@ -197,6 +230,19 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_NETWORKS {
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS {
 	UNCERTIFIED_REMOVED = 'uncertified_removed'
+}
+
+// What a `transaction_load` event is about: one transaction, or a whole load of them.
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTION_LOAD {
+	SINGLE = 'single'
+}
+
+// Why a `transaction_load` failed, in `result_error_type`.
+export enum PLAUSIBLE_EVENT_TRANSACTION_LOAD_ERROR_TYPES {
+	// The RPC refused to return the transaction.
+	LOAD_REFUSED = 'load_refused',
+	// The RPC returned it, but OISY failed to read it.
+	PARSE_FAILED = 'parse_failed'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER {

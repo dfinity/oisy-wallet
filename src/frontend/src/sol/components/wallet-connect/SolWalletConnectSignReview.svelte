@@ -81,6 +81,14 @@
 		// user's wallet. Read from the list rather than the message, which cannot see a close made
 		// inside another program.
 		closesPayOthers?: boolean;
+		// Whether the request asks OISY to send a message that names another account to pay its fee.
+		// A send goes out with the wallet as the fee payer, which is not the transaction reviewed here,
+		// so the signing flow refuses it.
+		feePaidByOthers?: boolean;
+		// Whether the request grants an allowance through an unchecked approval, which names neither
+		// the token nor its decimals, and no simulated run came back to state how much the spender
+		// may spend. The signing flow refuses it.
+		approvalWithoutSimulation?: boolean;
 		// The programs the simulated run calls from inside another program's instruction that OISY
 		// does not know. What such a call does to funds the user holds in an application is in
 		// neither the balance changes nor the operations, so the review names them and asks the user
@@ -114,6 +122,8 @@
 		messageSummary,
 		parties,
 		closesPayOthers = false,
+		feePaidByOthers = false,
+		approvalWithoutSimulation = false,
 		unreadPrograms = [],
 		unreadProgramsAcknowledged = $bindable(false),
 		flaggedAsScam = false,
@@ -165,11 +175,12 @@
 	//
 	// Only the programs that moved something. An instruction the wallet could not read names its
 	// program too, and most transactions carry a couple that change nothing the user holds, so
-	// counting those here would bury the program that did the work among its housekeeping.
+	// counting those here would bury the program that did the work among its housekeeping. A token
+	// batch's heading names the token program, which runs the batch rather than doing the trade.
 	let venues = $derived([
 		...new Set(
 			flattenInstructions(instructions ?? [])
-				.filter(({ kind }) => kind !== 'unknown')
+				.filter(({ kind }) => kind !== 'unknown' && kind !== 'batch')
 				.map(({ program }) => program)
 				.filter(nonNullish)
 		)
@@ -205,6 +216,7 @@
 							metadata: $splTokenMetadataStore,
 							unknownTokenAddresses: summaryTokenAddresses,
 							unknownTokenLabel: $i18n.transaction.text.unknown_token,
+							unknownTokenNamedLabel: $i18n.transaction.text.unknown_token_named,
 							nativeSymbol: feeToken.symbol
 						}),
 					amountOf: ({ delta, decimals }) =>
@@ -293,10 +305,13 @@
 	     refuses one the message states and so marks the request ambiguous as well: the two would
 	     both be true of the commonest case, and the general sentence would be shown for the
 	     specific thing that is wrong with it. -->
+	<!-- A send another account is named to pay for is asked about before either: it goes out with
+	     the wallet as the fee payer, so everything else here was read from a transaction other than
+	     the one OISY would sign. -->
 	<!-- Above the caveats, because it is the one notice that asks something of the user: approving
 	     waits for the confirmation it carries. A refusal hides it, since there is nothing left to
 	     confirm on a request OISY will not sign. -->
-	{#if !ambiguous && !closesPayOthers && unreadPrograms.length > 0}
+	{#if !feePaidByOthers && !ambiguous && !closesPayOthers && unreadPrograms.length > 0}
 		<SolWalletConnectUnreadPrograms
 			network={token.network}
 			programs={unreadPrograms}
@@ -304,7 +319,13 @@
 		/>
 	{/if}
 
-	{#if closesPayOthers}
+	{#if feePaidByOthers}
+		<!-- A live region for the same reason as the refusals below: it is why Approve stays
+		     unusable. -->
+		<div role="alert">
+			<MessageBox level="error">{$i18n.wallet_connect.text.fee_paid_by_others}</MessageBox>
+		</div>
+	{:else if closesPayOthers}
 		<!-- `role="alert"` because this arrives only once the decode settles, and it is the reason
 		     the Approve button never becomes usable: without a live region a screen-reader user is
 		     left on a button that will not proceed and never hears why. The same reasoning as the
@@ -317,6 +338,11 @@
 		<!-- Same live region, same reason: it is why Approve stays unusable. -->
 		<div role="alert">
 			<MessageBox level="error">{$i18n.wallet_connect.text.cannot_be_shown}</MessageBox>
+		</div>
+	{:else if approvalWithoutSimulation}
+		<!-- Same live region, same reason. -->
+		<div role="alert">
+			<MessageBox level="error">{$i18n.wallet_connect.text.approval_without_simulation}</MessageBox>
 		</div>
 	{:else if unreviewed}
 		<MessageBox level="warning">
@@ -333,7 +359,7 @@
 	<!-- Everything below qualifies a review that is going to be acted on. None of it applies to a
 	     message the wallet has already decided it will not sign, and the partial-parties notice is
 	     actively wrong there: it tells the user which lists to read on a request that is refused. -->
-	{#if !ambiguous && !closesPayOthers}
+	{#if !feePaidByOthers && !ambiguous && !closesPayOthers && !approvalWithoutSimulation}
 		<!-- An authority change moves no funds at all, so a diff of amounts alone would describe the
 		     theft as nothing happening. It is named first among the fund warnings for that reason. -->
 		{#if nonNullish(preview) && preview.controlChanges.length > 0}

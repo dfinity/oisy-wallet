@@ -2,6 +2,8 @@ import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { SPL_TOKEN_MAX_AMOUNT } from '$sol/constants/sol.constants';
 import type { SolAddress } from '$sol/types/address';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
@@ -188,6 +190,114 @@ describe('sol-transaction-summary.utils', () => {
 			expect(result.kind).toBe('swap');
 			expect(result.spent?.tokenAddress).toBe(usdc);
 			expect(result.received?.tokenAddress).toBe(orca);
+		});
+
+		// A program can run its legs in a token batch, whose lines hang under a heading of their own
+		// beneath its instruction. They are still that instruction's trade, and the tip is not.
+		it('should not take a tip for the trade when the swap runs its legs in a token batch', () => {
+			const usdc = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+			const orca = 'orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE';
+
+			const result = deriveSolTransactionSummary({
+				netChanges: [
+					{ tokenAddress: usdc, decimals: 6, delta: -1_000_000n },
+					{ delta: -5_000_000n },
+					{ tokenAddress: orca, decimals: 6, delta: 2_000_000n }
+				],
+				instructions: [
+					{
+						kind: 'route',
+						program: mockSolAddress3,
+						children: [{ kind: 'send', amount: 5_000_000n, counterparty: mockSolAddress2 }]
+					},
+					{
+						kind: 'route',
+						program: mockSolAddress2,
+						children: [
+							{
+								kind: 'batch',
+								program: mockSolAddress3,
+								children: [
+									{
+										kind: 'send',
+										amount: 1_000_000n,
+										tokenAddress: usdc,
+										counterparty: mockAtaAddress
+									},
+									{
+										kind: 'receive',
+										amount: 2_000_000n,
+										tokenAddress: orca,
+										counterparty: mockAtaAddress2
+									}
+								]
+							}
+						]
+					}
+				],
+				userAddress: mockSolAddress
+			});
+
+			expect(result.kind).toBe('swap');
+			expect(result.spent?.tokenAddress).toBe(usdc);
+			expect(result.received?.tokenAddress).toBe(orca);
+		});
+
+		// The line names the wrapped SOL that leaves a program's account; what the wallet gains is
+		// SOL itself.
+		describe('with SOL a program unwraps into the wallet', () => {
+			const usdc = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
+			const payout: SolInstructionSummary = {
+				kind: 'receive',
+				amount: 5_000_000n,
+				tokenAddress: WSOL_TOKEN.address,
+				counterparty: mockAtaAddress3,
+				own: false,
+				unwrapsToWallet: true
+			};
+
+			it('should call the payout alone a receive', () => {
+				const result = deriveSolTransactionSummary({
+					netChanges: [{ delta: 5_000_000n }],
+					instructions: [{ kind: 'route', program: mockSolAddress3, children: [payout] }],
+					userAddress: mockSolAddress
+				});
+
+				expect(result.kind).toBe('receive');
+				expect(result.received?.delta).toBe(5_000_000n);
+				// The account the SOL left is the sender, not the wallet it arrived in.
+				expect(result.counterparty).toBe(mockAtaAddress3);
+			});
+
+			it('should call a swap that pays out that way a swap for SOL', () => {
+				const result = deriveSolTransactionSummary({
+					netChanges: [
+						{ tokenAddress: usdc, decimals: 6, delta: -1_000_000n },
+						{ delta: 5_000_000n }
+					],
+					instructions: [
+						{
+							kind: 'route',
+							program: mockSolAddress3,
+							children: [
+								{
+									kind: 'send',
+									amount: 1_000_000n,
+									tokenAddress: usdc,
+									counterparty: mockAtaAddress
+								},
+								payout
+							]
+						}
+					],
+					userAddress: mockSolAddress
+				});
+
+				expect(result.kind).toBe('swap');
+				expect(result.spent?.tokenAddress).toBe(usdc);
+				expect(result.received?.tokenAddress).toBeUndefined();
+			});
 		});
 
 		it('should call a transaction that touches nothing of the user’s other', () => {
@@ -498,6 +608,31 @@ describe('sol-transaction-summary.utils', () => {
 			).toBe(ZERO);
 		});
 
+		// Except for an unwrap paying the wallet: what leaves the wrapped SOL account, the user's or
+		// somebody else's, arrives there as SOL itself.
+		it('should add what an unwrap pays into the wallet', () => {
+			expect(
+				stated([
+					{
+						kind: 'send',
+						amount: 5_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						counterparty: WALLET,
+						own: true,
+						unwrapsToWallet: true
+					},
+					{
+						kind: 'receive',
+						amount: 3_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						counterparty: mockAtaAddress3,
+						own: false,
+						unwrapsToWallet: true
+					}
+				])
+			).toBe(5_000n + 3_000n);
+		});
+
 		it('should leave out a close that pays somebody else', () => {
 			expect(
 				stated([{ kind: 'closeTokenAccount', returned: 2_039_280n, counterparty: mockSolAddress2 }])
@@ -508,6 +643,17 @@ describe('sol-transaction-summary.utils', () => {
 			expect(stated([{ kind: 'send', counterparty: mockSolAddress2 }])).toBeUndefined();
 			expect(
 				stated([{ kind: 'createTokenAccount', account: mockAtaAddress, payer: WALLET }])
+			).toBeUndefined();
+			expect(
+				stated([
+					{
+						kind: 'send',
+						tokenAddress: WSOL_TOKEN.address,
+						counterparty: WALLET,
+						own: true,
+						unwrapsToWallet: true
+					}
+				])
 			).toBeUndefined();
 		});
 
@@ -1087,6 +1233,99 @@ describe('sol-transaction-summary.utils', () => {
 
 		const textOf = (instruction: SolInstructionSummary): string => format(instruction).text;
 
+		describe('approve', () => {
+			const approval: SolInstructionSummary = {
+				kind: 'approve',
+				amount: 5_000_000n,
+				decimals: 6,
+				tokenAddress: mockSplAddress,
+				counterparty: mockSolAddress2,
+				account: mockAtaAddress
+			};
+
+			it('should state how much the spender may spend', () => {
+				expect(textOf(approval)).toBe(
+					replacePlaceholders(en.transaction.text.instruction_approve_amount, {
+						$amount: '5',
+						$symbol: 'BONK'
+					})
+				);
+			});
+
+			it('should state the largest token amount as any amount', () => {
+				expect(textOf({ ...approval, amount: SPL_TOKEN_MAX_AMOUNT })).toBe(
+					replacePlaceholders(en.transaction.text.instruction_approve_unlimited, {
+						$symbol: 'BONK'
+					})
+				);
+			});
+
+			// Without the mint the symbol would fall back to SOL, which names the wrong token.
+			it('should name the spender alone when the mint was not read', () => {
+				const { tokenAddress: _, ...withoutMint } = approval;
+
+				expect(textOf(withoutMint)).toBe(en.transaction.text.instruction_approve);
+			});
+
+			it('should name the spender alone when the amount was not read', () => {
+				const { amount: _, ...withoutAmount } = approval;
+
+				expect(textOf(withoutAmount)).toBe(en.transaction.text.instruction_approve);
+			});
+
+			describe('an unchecked approval, which states no decimals', () => {
+				const { decimals: _, ...unchecked } = approval;
+
+				const textWith = (decimalsOf: () => number | undefined): string =>
+					formatSolInstructionSummary({
+						instruction: unchecked,
+						i18n: en,
+						symbolOf: () => 'BONK',
+						decimalsOf,
+						userAddress: mockSolAddress
+					}).text;
+
+				// Read as a token with no decimals, 5 BONK would be stated as 5,000,000.
+				it('should name the spender alone when nothing gives the decimals', () => {
+					expect(textWith(() => undefined)).toBe(en.transaction.text.instruction_approve);
+				});
+
+				it('should state the amount of a token with no decimals', () => {
+					expect(textWith(() => 0)).toBe(
+						replacePlaceholders(en.transaction.text.instruction_approve_amount, {
+							$amount: '5000000',
+							$symbol: 'BONK'
+						})
+					);
+				});
+
+				it('should state the amount in the decimals the wallet knows', () => {
+					expect(textWith(() => 6)).toBe(
+						replacePlaceholders(en.transaction.text.instruction_approve_amount, {
+							$amount: '5',
+							$symbol: 'BONK'
+						})
+					);
+				});
+
+				it('should state the largest token amount as any amount without the decimals', () => {
+					expect(
+						formatSolInstructionSummary({
+							instruction: { ...unchecked, amount: SPL_TOKEN_MAX_AMOUNT },
+							i18n: en,
+							symbolOf: () => 'BONK',
+							decimalsOf: () => undefined,
+							userAddress: mockSolAddress
+						}).text
+					).toBe(
+						replacePlaceholders(en.transaction.text.instruction_approve_unlimited, {
+							$symbol: 'BONK'
+						})
+					);
+				});
+			});
+		});
+
 		// The notice about programs OISY cannot read names a pool by itself; the leg the pool made has
 		// to name it the same way, or nothing on the screen matches it.
 		it('should say which pool a leg of a route goes through', () => {
@@ -1111,6 +1350,46 @@ describe('sol-transaction-summary.utils', () => {
 					via: mockSolAddress3
 				}).trailing
 			).toBe(`via ${shortenWithMiddleEllipsis({ text: mockSolAddress3 })}`);
+		});
+
+		// An unwrap of everything an account wraps still says what leaves it, and for whom, when
+		// nobody read how much that is. It leaves the account open, which the close's label does not.
+		it('should state an unwrap of everything nobody read the amount of on either side', () => {
+			const unwrap: SolInstructionSummary = {
+				kind: 'send',
+				tokenAddress: WSOL_TOKEN.address,
+				decimals: WSOL_TOKEN.decimals,
+				counterparty: mockSolAddress2,
+				own: false,
+				unwrapsAll: true
+			};
+
+			expect(textOf(unwrap)).toBe(
+				replacePlaceholders(en.transaction.text.instruction_unwrap_all_to, { $symbol: 'WSOL' })
+			);
+			expect(
+				textOf({
+					...unwrap,
+					kind: 'receive',
+					counterparty: mockSolAddress3,
+					unwrapsToWallet: true
+				})
+			).toBe(
+				replacePlaceholders(en.transaction.text.instruction_unwrap_all_from, { $symbol: 'WSOL' })
+			);
+		});
+
+		// No instruction states how much excess a token account pays the wallet, but the line still says
+		// that SOL arrives, and from which account.
+		it('should state excess lamports paid to the wallet by an amount nobody read', () => {
+			expect(
+				textOf({
+					kind: 'receive',
+					withdrawsExcess: true,
+					counterparty: mockSolAddress3,
+					own: false
+				})
+			).toBe(en.transaction.text.instruction_receive_excess_from);
 		});
 
 		// The opening line names the token, and the closing one did not: "Close token account" left
@@ -1285,6 +1564,18 @@ describe('sol-transaction-summary.utils', () => {
 				);
 			});
 
+			// A program can run its legs in a token batch, whose lines hang under a heading of their
+			// own beneath its instruction.
+			it('should call legs going both ways inside a token batch a swap route', () => {
+				expect(
+					textOf({
+						kind: 'route',
+						program: mockSolAddress3,
+						children: [{ kind: 'batch', program: mockSolAddress2, children: [send, receive] }]
+					})
+				).toBe(en.transaction.text.instruction_route);
+			});
+
 			// Something leaving and nothing arriving is what a deposit looks like too.
 			it('should not call legs that all leave a swap', () => {
 				expect(textOf({ kind: 'route', program: mockSolAddress3, children: [send, send] })).toBe(
@@ -1311,6 +1602,14 @@ describe('sol-transaction-summary.utils', () => {
 			it('should say so without a program when none is known', () => {
 				expect(textOf({ kind: 'route', children: [send, send] })).toBe(
 					en.transaction.text.instruction_unknown
+				);
+			});
+
+			// A batch is named for what it is, whatever its lines do: it is the token program
+			// running several of its own instructions, not a trade routed through a venue.
+			it('should call the heading over the lines of a token batch a batch', () => {
+				expect(textOf({ kind: 'batch', program: mockSolAddress3, children: [send, receive] })).toBe(
+					en.transaction.text.instruction_batch_via
 				);
 			});
 		});

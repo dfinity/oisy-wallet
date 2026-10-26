@@ -1,4 +1,5 @@
 import type { solTransactionTypes } from '$lib/schema/transaction.schema';
+import type { Token } from '$lib/types/token';
 import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 import { SOLANA_MAX_SUPPORTED_TRANSACTION_VERSION } from '$sol/constants/sol.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
@@ -86,6 +87,38 @@ export interface SolResolvedTransaction {
 	sources: SolAddress[];
 }
 
+// Thrown when OISY fails to read a transaction the RPC returned: unlike a failed lookup, it fails
+// again however often the transaction is fetched again.
+export class SolTransactionReadError extends Error {}
+
+export type SolUnreadableTransactionReason =
+	// The RPC refused to return it, as it does for a version newer than the request declares.
+	| 'refused'
+	// The RPC returned it, but OISY failed to read it.
+	| 'unparsable';
+
+// A signature whose transaction OISY cannot show, left out of the history it was on rather than
+// failing it.
+export interface SolUnreadableTransaction {
+	signature: Signature;
+	// As for a resolved transaction: the history of the token of each of them is missing it.
+	sources: SolAddress[];
+	reason: SolUnreadableTransactionReason;
+	// The code the RPC refused it with.
+	errorCode?: number;
+}
+
+export interface SolResolvedSignatures {
+	transactions: SolResolvedTransaction[];
+	unreadable: SolUnreadableTransaction[];
+}
+
+export interface SolUnreadableTransactionsWarning {
+	token: Token;
+	// The transactions missing from its history whose warning the user has not dismissed.
+	signatures: SolUnreadableTransaction['signature'][];
+}
+
 export type SolSignedTransaction = Transaction &
 	FullySignedTransaction &
 	TransactionWithinSizeLimit &
@@ -104,6 +137,10 @@ export interface MappedSolTransaction {
 	// rather than transferring funds. The `destination` then holds the delegate (spender),
 	// so the review must label it as an approval, not a send.
 	isApproval?: boolean;
+	// `true` when that allowance is granted by an unchecked `Approve`, which names neither the
+	// token nor its decimals. How much the spender may spend is then stated only from a simulated
+	// run's account changes, so without a run the review cannot state it.
+	uncheckedApproval?: boolean;
 	// `true` when the message contains at least one instruction whose effects the
 	// review screen cannot display. Unlike `ambiguous`, this does not block signing:
 	// it surfaces a warning so the user knows the review is incomplete and can decide.
