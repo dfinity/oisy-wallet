@@ -91,9 +91,8 @@ All of the following hold:
 - Below the token inputs, in place of the cross-network note ("You move tokens from Base to
   Robinhood Chain network"), an info box:
 
-  > OISY only offers swaps it can fully verify before you sign. There's no such direct route from
-  > USDC to NVDA, but you can do it yourself in two separate swaps: first USDC → USDG, then USDG →
-  > NVDA.
+  > OISY only offers swaps it can fully verify before you approve, and there is no such direct
+  > swap from USDC to NVDA. But you can swap from USDC to USDG first, and then from USDG to NVDA.
 
 - A button in the box: **Swap to USDG first**. It sets the in-between token as the destination
   and keeps the source and the amount; the form then quotes that swap as usual.
@@ -156,7 +155,8 @@ All of the following hold:
    (plus any metadata enum members it needs) and one tracking function in a domain analytics
    service, called by the box when it appears and when its button is pressed, following
    `docs/ai/frontend/analytics.md` (§5 pattern B, §6 privacy, §8 checklist).
-7. **i18n** — new keys under `swap.text` in `en.json`; the other locales follow in their own PR.
+7. **i18n** — new keys under `swap.text` in `en.json`, translated into the other shipped
+   languages in the same plain terms.
 8. **Tests** — the route reading (one, none and two in-between tokens; fee and wrapping steps; a
    wrapped native coin), the quoting (a refused route gives the hint without another request; no
    route triggers exactly one more; both are cached; a quote failing the trust checks gives none),
@@ -200,6 +200,9 @@ Made with Stefan on 2026-10-26:
 - **The in-between token comes from LI.FI's route**, not from a fixed list.
 - **The copy leads with what OISY does** ("fully verify") and says the user can do it as two
   separate swaps. It does not talk about servers or providers being hacked.
+- **The copy stays plain for users who do not know why they sign**: "before you approve" rather
+  than "before you sign", and the two swaps in words rather than arrows. The translations follow
+  the same terms.
 - **No expected amount of the destination token.**
 - **The box is tracked**, when it appears and when its button is pressed (see
   [Tracking](#tracking)).
