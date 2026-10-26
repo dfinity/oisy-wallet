@@ -1,4 +1,5 @@
 import { SOL_MAINNET_ENABLED } from '$env/networks/networks.sol.env';
+import { AAPLON_TOKEN } from '$env/tokens/tokens-spl/tokens.aaplon.env';
 import { AAPLX_TOKEN } from '$env/tokens/tokens-spl/tokens.aaplx.env';
 import { ABBVX_TOKEN } from '$env/tokens/tokens-spl/tokens.abbvx.env';
 import { ABTX_TOKEN } from '$env/tokens/tokens-spl/tokens.abtx.env';
@@ -72,6 +73,7 @@ import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import type { RequiredSplToken } from '$sol/types/spl';
 
 const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
+	AAPLON_TOKEN,
 	AAPLX_TOKEN,
 	ABBVX_TOKEN,
 	ABTX_TOKEN,
