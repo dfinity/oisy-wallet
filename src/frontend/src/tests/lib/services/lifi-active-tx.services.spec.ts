@@ -275,6 +275,7 @@ describe('lifi-active-tx.services', () => {
 
 	describe('a Solana source', () => {
 		const blockhash = 'HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN';
+		const simulationSlot = 150n;
 
 		// SOL → USDC on Solana.
 		const solanaData: LifiData = {
@@ -286,24 +287,30 @@ describe('lifi-active-tx.services', () => {
 		const solanaRefs: Partial<Record<LifiExternalRefKey, string>> = {
 			[LIFI_EXTERNAL_REF_KEYS.TX_HASH]: solanaSignature,
 			[LIFI_EXTERNAL_REF_KEYS.BLOCKHASH]: blockhash,
+			[LIFI_EXTERNAL_REF_KEYS.SIMULATION_SLOT]: `${simulationSlot}`,
 			[LIFI_EXTERNAL_REF_KEYS.TOOL]: 'jupiter'
 		};
 
 		const solanaTx = (refs = solanaRefs) => buildTx({ data: solanaData, refs });
 
-		const status = (overrides: Partial<NonNullable<SolanaSignatureStatus>> = {}) =>
-			({
+		const status = (overrides: Partial<NonNullable<SolanaSignatureStatus>> = {}) => ({
+			slot: 210n,
+			status: {
 				confirmationStatus: 'confirmed',
 				confirmations: 3n,
 				err: null,
 				slot: 100n,
 				status: { Ok: null },
 				...overrides
-			}) as SolanaSignatureStatus;
+			} as SolanaSignatureStatus
+		});
+
+		// Read at or past the slot the blockhash read below answers at.
+		const noStatus = { slot: 210n, status: null };
 
 		beforeEach(() => {
 			vi.mocked(getSignatureStatus).mockResolvedValue(status());
-			vi.mocked(isBlockhashValid).mockResolvedValue(true);
+			vi.mocked(isBlockhashValid).mockResolvedValue({ slot: 200n, valid: true });
 		});
 
 		it('reads the status of its signature on Solana mainnet, not an EVM receipt', async () => {
@@ -354,16 +361,32 @@ describe('lifi-active-tx.services', () => {
 			expect(lastUpdate()).toEqual({ status: { Executing: null } });
 		});
 
-		it('marks a row executing while its transaction has no status and its blockhash is valid', async () => {
-			vi.mocked(getSignatureStatus).mockResolvedValue(null);
+		it('marks a row executing while its transaction has no status and its blockhash is valid at or past its simulation slot', async () => {
+			vi.mocked(getSignatureStatus).mockResolvedValue(noStatus);
 
 			await poll([solanaTx()]);
 
 			expect(isBlockhashValid).toHaveBeenCalledExactlyOnceWith({
 				blockhash,
-				network: SolanaNetworks.mainnet
+				network: SolanaNetworks.mainnet,
+				minContextSlot: simulationSlot
 			});
 			expect(lastUpdate()).toEqual({ status: { Executing: null } });
+		});
+
+		it.each([
+			{ name: 'without a simulation slot', slot: undefined },
+			{ name: 'with a simulation slot that is not one', slot: '-1' }
+		])('reads the blockhash unanchored $name', async ({ slot }) => {
+			vi.mocked(getSignatureStatus).mockResolvedValue(noStatus);
+
+			await poll([solanaTx({ ...solanaRefs, [LIFI_EXTERNAL_REF_KEYS.SIMULATION_SLOT]: slot })]);
+
+			expect(isBlockhashValid).toHaveBeenCalledExactlyOnceWith({
+				blockhash,
+				network: SolanaNetworks.mainnet,
+				minContextSlot: undefined
+			});
 		});
 
 		it('fails a row whose transaction was confirmed with an error', async () => {
@@ -380,8 +403,8 @@ describe('lifi-active-tx.services', () => {
 		});
 
 		it('fails a row whose blockhash expired without it landing, only on the second consecutive poll', async () => {
-			vi.mocked(getSignatureStatus).mockResolvedValue(null);
-			vi.mocked(isBlockhashValid).mockResolvedValue(false);
+			vi.mocked(getSignatureStatus).mockResolvedValue(noStatus);
+			vi.mocked(isBlockhashValid).mockResolvedValue({ slot: 200n, valid: false });
 
 			await poll([solanaTx()]);
 
@@ -397,10 +420,28 @@ describe('lifi-active-tx.services', () => {
 		});
 
 		it('succeeds a row whose transaction landed just before its blockhash aged out', async () => {
-			vi.mocked(getSignatureStatus).mockResolvedValueOnce(null);
-			vi.mocked(isBlockhashValid).mockResolvedValue(false);
+			vi.mocked(getSignatureStatus).mockResolvedValueOnce(noStatus);
+			vi.mocked(isBlockhashValid).mockResolvedValue({ slot: 200n, valid: false });
 
 			await poll([solanaTx()]);
+
+			expect(lastUpdate()).toEqual({ status: { Succeeded: null } });
+		});
+
+		it('leaves a row untouched while the node is behind its simulation slot, and settles it once caught up', async () => {
+			vi.mocked(getSignatureStatus).mockResolvedValue(noStatus);
+			vi.mocked(isBlockhashValid).mockRejectedValue(
+				new Error('Minimum context slot has not been reached')
+			);
+
+			await poll([solanaTx()]);
+			await vi.advanceTimersByTimeAsync(10_000);
+			await poll([solanaTx()]);
+
+			expect(applySpy).not.toHaveBeenCalled();
+
+			vi.mocked(getSignatureStatus).mockResolvedValue(status());
+
 			await vi.advanceTimersByTimeAsync(10_000);
 			await poll([solanaTx()]);
 

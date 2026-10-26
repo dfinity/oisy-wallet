@@ -120,6 +120,13 @@ export const lifiSourceOutcomeToUpdate = (
 	}
 };
 
+/**
+ * The slot a Solana row stores (`lifi_simulation_slot`), where OISY's own simulation of the signed
+ * bytes ran and their blockhash was valid. `undefined` when the row has none or it is not a slot.
+ */
+export const toLifiSimulationSlot = (value: string | undefined): bigint | undefined =>
+	nonNullish(value) && /^\d{1,20}$/.test(value) ? BigInt(value) : undefined;
+
 // A `/status` answer, or the `NOT_FOUND` an HTTP 404 stands for.
 export type LifiStatusAnswer = BaseStatusData & {
 	receiving?: PendingReceivingInfo | ExtendedTransactionInfo;

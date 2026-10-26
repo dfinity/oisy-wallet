@@ -23,6 +23,7 @@ import {
 	toLifiExternalRefs,
 	toLifiExternalRefsMap,
 	toLifiLearnedRefs,
+	toLifiSimulationSlot,
 	toLifiStatusUpdate,
 	type LifiStatusAnswer
 } from '$lib/utils/lifi-active-tx.utils';
@@ -133,6 +134,20 @@ describe('lifi-active-tx.utils', () => {
 		it.each(['succeeded', 'unknown'] as const)('should settle nothing on %s', (outcome) => {
 			expect(lifiSourceOutcomeToUpdate(outcome)).toBeUndefined();
 		});
+	});
+
+	describe('toLifiSimulationSlot', () => {
+		it('should read a slot', () => {
+			expect(toLifiSimulationSlot('461778178')).toBe(461778178n);
+			expect(toLifiSimulationSlot('18446744073709551615')).toBe(18446744073709551615n);
+		});
+
+		it.each([undefined, '', '-1', '+1', '1.5', '0x10', ' 1', '123456789012345678901'])(
+			'should read no slot from %s',
+			(value) => {
+				expect(toLifiSimulationSlot(value)).toBeUndefined();
+			}
+		);
 	});
 
 	describe('isLifiStatusUnresolved', () => {

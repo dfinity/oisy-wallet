@@ -96,7 +96,8 @@ export const getRpcTransaction = async ({
 };
 
 /**
- * The status of one transaction, `null` while the node knows no transaction with that signature.
+ * The status of one transaction, `null` while the node knows no transaction with that signature,
+ * with the slot the node answered at (its processed slot).
  *
  * The history search is what finds a transaction that landed a while ago: without it, the node
  * answers from its recent-status cache alone, and a landed transaction reads as missing once it
@@ -108,36 +109,48 @@ export const getSignatureStatus = async ({
 }: {
 	signature: string;
 	network: SolanaNetworkType;
-}): Promise<SolanaSignatureStatus> => {
+}): Promise<{ slot: bigint; status: SolanaSignatureStatus }> => {
 	const { getSignatureStatuses } = solanaHttpRpc(network);
 
 	const {
+		context: { slot },
 		value: [status]
 	} = await getSignatureStatuses([solSignature(signature)], {
 		searchTransactionHistory: true
 	}).send();
 
-	return status ?? null;
+	return { slot, status: status ?? null };
 };
 
 /**
  * Whether a transaction with this recent blockhash can still land, as of the highest confirmed
- * slot: the network refuses a blockhash once it has aged out, so an invalid one never turns valid.
+ * slot, with that slot.
+ *
+ * A node answers `false` alike for a blockhash that has aged out and for one it has not seen yet,
+ * which is what a node running behind answers about a recent one. `minContextSlot` is a slot where
+ * the blockhash is known to be valid: a node not that far yet refuses to answer, so `false` then
+ * means aged out, and an aged-out blockhash never turns valid again.
  */
 export const isBlockhashValid = async ({
 	blockhash,
-	network
+	network,
+	minContextSlot
 }: {
 	blockhash: string;
 	network: SolanaNetworkType;
-}): Promise<boolean> => {
+	minContextSlot?: bigint;
+}): Promise<{ slot: bigint; valid: boolean }> => {
 	const { isBlockhashValid } = solanaHttpRpc(network);
 
-	const { value } = await isBlockhashValid(solBlockhash(blockhash), {
-		commitment: 'confirmed'
+	const {
+		context: { slot },
+		value
+	} = await isBlockhashValid(solBlockhash(blockhash), {
+		commitment: 'confirmed',
+		...(nonNullish(minContextSlot) && { minContextSlot })
 	}).send();
 
-	return value;
+	return { slot, valid: value };
 };
 
 const cachedTransactions = new SvelteMap<

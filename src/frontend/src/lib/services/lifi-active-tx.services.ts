@@ -31,6 +31,7 @@ import {
 	toLifiExternalRefs,
 	toLifiExternalRefsMap,
 	toLifiLearnedRefs,
+	toLifiSimulationSlot,
 	toLifiStatusUpdate,
 	type LifiStatusAnswer,
 	type LifiStatusUpdate,
@@ -355,11 +356,14 @@ const checkSolSource = async ({
 		return false;
 	}
 
-	// LI.FI's Solana rows are mainnet only: the backend refuses a devnet token.
+	// LI.FI's Solana rows are mainnet only: the backend refuses a devnet token. Their blockhash is read
+	// at or past the slot OISY simulated them at, where it was valid; a row without that slot, which
+	// OISY does not open, is read unanchored.
 	const outcome = await readSolSourceTxOutcome({
 		rowId: tx.id,
 		signature: txHash,
 		blockhash,
+		minContextSlot: toLifiSimulationSlot(refs[LIFI_EXTERNAL_REF_KEYS.SIMULATION_SLOT]),
 		network: SolanaNetworks.mainnet
 	});
 

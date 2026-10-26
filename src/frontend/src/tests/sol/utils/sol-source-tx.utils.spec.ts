@@ -23,9 +23,9 @@ describe('sol-source-tx.utils', () => {
 		it.each(['confirmed', 'finalized'] as const)(
 			'should succeed a transaction %s without an error',
 			(confirmationStatus) => {
-				expect(toSolSourceTxOutcome({ status: statusAt({ confirmationStatus }) })).toBe(
-					'succeeded'
-				);
+				expect(
+					toSolSourceTxOutcome({ status: statusAt({ confirmationStatus }), statusSlot: 200n })
+				).toBe('succeeded');
 			}
 		);
 
@@ -34,7 +34,8 @@ describe('sol-source-tx.utils', () => {
 			(confirmationStatus) => {
 				expect(
 					toSolSourceTxOutcome({
-						status: statusAt({ confirmationStatus, err: instructionError })
+						status: statusAt({ confirmationStatus, err: instructionError }),
+						statusSlot: 200n
 					})
 				).toBe('reverted');
 			}
@@ -43,30 +44,61 @@ describe('sol-source-tx.utils', () => {
 		it.each(['processed', null] as const)(
 			'should keep a transaction %s pending, whatever its error, since its block may still be dropped',
 			(confirmationStatus) => {
-				expect(toSolSourceTxOutcome({ status: statusAt({ confirmationStatus }) })).toBe('pending');
 				expect(
-					toSolSourceTxOutcome({ status: statusAt({ confirmationStatus, err: instructionError }) })
+					toSolSourceTxOutcome({ status: statusAt({ confirmationStatus }), statusSlot: 200n })
+				).toBe('pending');
+				expect(
+					toSolSourceTxOutcome({
+						status: statusAt({ confirmationStatus, err: instructionError }),
+						statusSlot: 200n
+					})
 				).toBe('pending');
 			}
 		);
 
-		it('should keep a transaction without a status pending while its blockhash is valid', () => {
-			expect(toSolSourceTxOutcome({ status: null, blockhashValid: true })).toBe('pending');
-		});
-
-		it('should expire a transaction without a status once its blockhash is invalid', () => {
-			expect(toSolSourceTxOutcome({ status: null, blockhashValid: false })).toBe('expired');
-		});
-
 		it('should keep a transaction without a status pending while its blockhash was not read', () => {
-			expect(toSolSourceTxOutcome({ status: null })).toBe('pending');
+			expect(toSolSourceTxOutcome({ status: null, statusSlot: 200n })).toBe('pending');
+		});
+
+		it('should keep a transaction without a status pending while its blockhash is valid', () => {
+			expect(
+				toSolSourceTxOutcome({
+					status: null,
+					statusSlot: 200n,
+					blockhash: { valid: true, slot: 200n }
+				})
+			).toBe('pending');
+		});
+
+		it.each([200n, 201n])(
+			'should expire a transaction whose status was read at slot %s, at or past the expired blockhash',
+			(statusSlot) => {
+				expect(
+					toSolSourceTxOutcome({
+						status: null,
+						statusSlot,
+						blockhash: { valid: false, slot: 200n }
+					})
+				).toBe('expired');
+			}
+		);
+
+		it('should keep a transaction pending when its status was read behind the expired blockhash', () => {
+			expect(
+				toSolSourceTxOutcome({
+					status: null,
+					statusSlot: 199n,
+					blockhash: { valid: false, slot: 200n }
+				})
+			).toBe('pending');
 		});
 
 		it('should go by the status, not the blockhash, when there is one', () => {
 			expect(
 				toSolSourceTxOutcome({
 					status: statusAt({ confirmationStatus: 'confirmed' }),
-					blockhashValid: false
+					statusSlot: 200n,
+					blockhash: { valid: false, slot: 200n }
 				})
 			).toBe('succeeded');
 		});

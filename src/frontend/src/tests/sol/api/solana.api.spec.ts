@@ -743,10 +743,10 @@ describe('solana.api', () => {
 		});
 
 		describe('getSignatureStatus', () => {
-			it('should return the status of the signature, searching the history', async () => {
+			it('should return the status of the signature with the slot it was read at, searching the history', async () => {
 				await expect(
 					getSignatureStatus({ signature, network: SolanaNetworks.mainnet })
-				).resolves.toEqual(confirmedStatus);
+				).resolves.toEqual({ slot: 100n, status: confirmedStatus });
 
 				expect(solRpcProviders.solanaHttpRpc).toHaveBeenCalledExactlyOnceWith(
 					SolanaNetworks.mainnet
@@ -763,7 +763,7 @@ describe('solana.api', () => {
 
 				await expect(
 					getSignatureStatus({ signature, network: SolanaNetworks.mainnet })
-				).resolves.toBeNull();
+				).resolves.toEqual({ slot: 100n, status: null });
 			});
 
 			it('should return null when the node answers with no entry at all', async () => {
@@ -773,7 +773,7 @@ describe('solana.api', () => {
 
 				await expect(
 					getSignatureStatus({ signature, network: SolanaNetworks.mainnet })
-				).resolves.toBeNull();
+				).resolves.toEqual({ slot: 100n, status: null });
 			});
 
 			it('should refuse a string that is not a signature, without asking the node', async () => {
@@ -786,10 +786,10 @@ describe('solana.api', () => {
 		});
 
 		describe('isBlockhashValid', () => {
-			it('should return whether the blockhash is valid as of the confirmed slot', async () => {
+			it('should return whether the blockhash is valid as of the confirmed slot, with that slot', async () => {
 				await expect(
 					isBlockhashValid({ blockhash, network: SolanaNetworks.mainnet })
-				).resolves.toBeFalsy();
+				).resolves.toEqual({ slot: 100n, valid: false });
 
 				expect(solRpcProviders.solanaHttpRpc).toHaveBeenCalledExactlyOnceWith(
 					SolanaNetworks.mainnet
@@ -801,12 +801,21 @@ describe('solana.api', () => {
 
 			it('should return true for a blockhash still valid', async () => {
 				mockIsBlockhashValid.mockReturnValue({
-					send: () => Promise.resolve({ context: { slot: 100n }, value: true })
+					send: () => Promise.resolve({ context: { slot: 101n }, value: true })
 				});
 
 				await expect(
 					isBlockhashValid({ blockhash, network: SolanaNetworks.mainnet })
-				).resolves.toBeTruthy();
+				).resolves.toEqual({ slot: 101n, valid: true });
+			});
+
+			it('should ask for no earlier slot than the one given', async () => {
+				await isBlockhashValid({ blockhash, network: SolanaNetworks.mainnet, minContextSlot: 90n });
+
+				expect(mockIsBlockhashValid).toHaveBeenCalledExactlyOnceWith(blockhash, {
+					commitment: 'confirmed',
+					minContextSlot: 90n
+				});
 			});
 
 			it('should refuse a string that is not a blockhash, without asking the node', async () => {

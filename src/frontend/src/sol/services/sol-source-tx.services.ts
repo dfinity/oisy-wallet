@@ -5,10 +5,10 @@ import { isNullish } from '@dfinity/utils';
 
 /**
  * Counts how many consecutive polls have observed a row's source transaction as expired. A single
- * observation is not trusted: the status read and the blockhash read are not atomic, so a
- * transaction that landed just before its blockhash aged out can be read as missing, and its
- * blockhash then as invalid. Writing `Failed` there would be a permanent wrong verdict on a
- * transaction that went through.
+ * observation is not trusted: the reads are not atomic, and the nodes behind one endpoint can each
+ * be at a different slot or fork, so a transaction that landed can momentarily read as missing with
+ * an expired blockhash. Writing `Failed` there would be a permanent wrong verdict on a transaction
+ * that went through.
  *
  * Keyed by active-transaction row id, so one map serves every provider. Deliberately in-memory: a
  * refresh resets the count, which at worst delays the verdict by one poll and never hastens it.
@@ -37,6 +37,10 @@ const recordExpiryObservation = (rowId: string): number => {
  * says whether it landed and how, and its recent blockhash, read only while there is no status, is
  * what distinguishes a transaction that can still land from one that never will.
  *
+ * `minContextSlot` is a slot where the blockhash is known to be valid. A node not that far yet then
+ * refuses to answer, and the read throws, rather than calling a blockhash it has not seen yet
+ * invalid. Without it, the blockhash read is taken as it comes.
+ *
  * `expired` is returned only once two consecutive polls of the same row have seen it; the first
  * reads as `pending`.
  */
@@ -44,19 +48,37 @@ export const readSolSourceTxOutcome = async ({
 	rowId,
 	signature,
 	blockhash,
+	minContextSlot,
 	network
 }: {
 	rowId: string;
 	signature: string;
 	blockhash: string;
+	minContextSlot?: bigint;
 	network: SolanaNetworkType;
 }): Promise<SolSourceTxOutcome> => {
-	const status = await getSignatureStatus({ signature, network });
+	const { status, slot } = await getSignatureStatus({ signature, network });
 
-	const outcome = toSolSourceTxOutcome({
-		status,
-		blockhashValid: isNullish(status) ? await isBlockhashValid({ blockhash, network }) : undefined
-	});
+	let outcome = toSolSourceTxOutcome({ status, statusSlot: slot });
+
+	// Only a missing status is ambiguous: the transaction may still land, or never will. The
+	// blockhash tells the two apart.
+	if (isNullish(status)) {
+		const blockhashRead = await isBlockhashValid({ blockhash, network, minContextSlot });
+
+		if (!blockhashRead.valid) {
+			// The transaction may have landed just before its blockhash aged out, after the status was
+			// read, or that read may have come from a node further behind: read it again before counting
+			// this as evidence that the transaction can never land.
+			const recheck = await getSignatureStatus({ signature, network });
+
+			outcome = toSolSourceTxOutcome({
+				status: recheck.status,
+				statusSlot: recheck.slot,
+				blockhash: blockhashRead
+			});
+		}
+	}
 
 	if (outcome === 'expired' && recordExpiryObservation(rowId) < EXPIRY_OBSERVATIONS_REQUIRED) {
 		return 'pending';
