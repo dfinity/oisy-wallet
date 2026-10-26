@@ -299,6 +299,55 @@ describe('SolWalletConnectSignReview', () => {
 		expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
 	});
 
+	describe('a send that names another account to pay its fee', () => {
+		it('should announce that it will not be signed', () => {
+			const { getByRole } = render(SolWalletConnectSignReview, {
+				props: { ...props, feePaidByOthers: true }
+			});
+
+			expect(getByRole('alert')).toHaveTextContent(en.wallet_connect.text.fee_paid_by_others);
+		});
+
+		// It goes out with the wallet as the fee payer, so every other reading here was made of a
+		// different transaction, and this refusal is the one thing the review has to say.
+		it('should say which refusal it is when the message is refused on other grounds too', () => {
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, feePaidByOthers: true, ambiguous: true, closesPayOthers: true }
+			});
+
+			expect(getByText(en.wallet_connect.text.fee_paid_by_others)).toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.close_pays_others)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.cannot_be_shown)).not.toBeInTheDocument();
+		});
+
+		it('should say nothing else about it', () => {
+			const { queryByText, queryByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					decoded: true,
+					feePaidByOthers: true,
+					unreviewed: true,
+					unreadPrograms: [{ address: STAKE_PROGRAM_ADDRESS }],
+					parties: { sources: [], destinations: [], partial: true },
+					preview: {
+						solDelta: 1n,
+						tokenDeltas: [],
+						controlChanges: [
+							{ account: mockSolAddress2, field: 'owner' as const, to: mockAtaAddress }
+						]
+					}
+				}
+			});
+
+			expect(
+				queryByText(en.wallet_connect.text.unreviewed_instructions_simulated)
+			).not.toBeInTheDocument();
+			expect(queryByTestId('unread-programs')).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
+		});
+	});
+
 	it('should render the unreviewed instructions warning', () => {
 		const { getByText } = render(SolWalletConnectSignReview, {
 			props: {

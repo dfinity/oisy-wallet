@@ -81,6 +81,10 @@
 		// user's wallet. Read from the list rather than the message, which cannot see a close made
 		// inside another program.
 		closesPayOthers?: boolean;
+		// Whether the request asks OISY to send a message that names another account to pay its fee.
+		// A send goes out with the wallet as the fee payer, which is not the transaction reviewed here,
+		// so the signing flow refuses it.
+		feePaidByOthers?: boolean;
 		// Whether the request grants an allowance through an unchecked approval, which names neither
 		// the token nor its decimals, and no simulated run came back to state how much the spender
 		// may spend. The signing flow refuses it.
@@ -118,6 +122,7 @@
 		messageSummary,
 		parties,
 		closesPayOthers = false,
+		feePaidByOthers = false,
 		approvalWithoutSimulation = false,
 		unreadPrograms = [],
 		unreadProgramsAcknowledged = $bindable(false),
@@ -300,10 +305,13 @@
 	     refuses one the message states and so marks the request ambiguous as well: the two would
 	     both be true of the commonest case, and the general sentence would be shown for the
 	     specific thing that is wrong with it. -->
+	<!-- A send another account is named to pay for is asked about before either: it goes out with
+	     the wallet as the fee payer, so everything else here was read from a transaction other than
+	     the one OISY would sign. -->
 	<!-- Above the caveats, because it is the one notice that asks something of the user: approving
 	     waits for the confirmation it carries. A refusal hides it, since there is nothing left to
 	     confirm on a request OISY will not sign. -->
-	{#if !ambiguous && !closesPayOthers && unreadPrograms.length > 0}
+	{#if !feePaidByOthers && !ambiguous && !closesPayOthers && unreadPrograms.length > 0}
 		<SolWalletConnectUnreadPrograms
 			network={token.network}
 			programs={unreadPrograms}
@@ -311,7 +319,13 @@
 		/>
 	{/if}
 
-	{#if closesPayOthers}
+	{#if feePaidByOthers}
+		<!-- A live region for the same reason as the refusals below: it is why Approve stays
+		     unusable. -->
+		<div role="alert">
+			<MessageBox level="error">{$i18n.wallet_connect.text.fee_paid_by_others}</MessageBox>
+		</div>
+	{:else if closesPayOthers}
 		<!-- `role="alert"` because this arrives only once the decode settles, and it is the reason
 		     the Approve button never becomes usable: without a live region a screen-reader user is
 		     left on a button that will not proceed and never hears why. The same reasoning as the
@@ -345,7 +359,7 @@
 	<!-- Everything below qualifies a review that is going to be acted on. None of it applies to a
 	     message the wallet has already decided it will not sign, and the partial-parties notice is
 	     actively wrong there: it tells the user which lists to read on a request that is refused. -->
-	{#if !ambiguous && !closesPayOthers && !approvalWithoutSimulation}
+	{#if !feePaidByOthers && !ambiguous && !closesPayOthers && !approvalWithoutSimulation}
 		<!-- An authority change moves no funds at all, so a diff of amounts alone would describe the
 		     theft as nothing happening. It is named first among the fund warnings for that reason. -->
 		{#if nonNullish(preview) && preview.controlChanges.length > 0}
