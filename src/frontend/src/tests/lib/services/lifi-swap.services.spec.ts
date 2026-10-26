@@ -403,6 +403,51 @@ describe('lifi-swap.services', () => {
 				await expect(fetchLifiSwapQuote(pairParams)).resolves.toBeUndefined();
 			});
 
+			// LI.FI's answers vary: the second request can come back with a route OISY can take, here
+			// NEAR behind a DEX swap, for DAI (Base) → USDC (Arbitrum).
+			it('should name no token from a route OISY could take after all', async () => {
+				const baseDai = {
+					chainId: ChainId.BAS,
+					address: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb'
+				};
+				const arbitrumUsdc = {
+					chainId: ChainId.ARB,
+					address: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'
+				};
+
+				vi.mocked(fetchLifiQuote)
+					.mockRejectedValueOnce(httpFailure(422))
+					.mockResolvedValueOnce({
+						...swapAfterBridge,
+						action: action({ from: baseDai, to: arbitrumUsdc }),
+						includedSteps: [
+							step({ type: 'protocol', tool: 'feeCollection', from: baseDai, to: baseDai }),
+							step({ type: 'swap', tool: 'nordstern', from: baseDai, to: baseUsdc }),
+							step({ type: 'cross', tool: 'near', from: baseUsdc, to: arbitrumUsdc })
+						]
+					});
+
+				await expect(
+					fetchLifiSwapQuote({
+						...params,
+						sourceToken: {
+							...mockLifiBaseUsdcToken,
+							id: parseTokenId('LifiBaseDai'),
+							symbol: 'DAI',
+							address: baseDai.address
+						},
+						destinationToken: {
+							...mockLifiBaseUsdcToken,
+							id: parseTokenId('LifiArbitrumUsdc'),
+							network: ARBITRUM_MAINNET_NETWORK,
+							address: arbitrumUsdc.address
+						}
+					})
+				).resolves.toBeUndefined();
+
+				expect(fetchLifiQuote).toHaveBeenCalledTimes(2);
+			});
+
 			it('should name no in-between token that OISY does not list', async () => {
 				listedTokens.set([mockLifiBaseUsdcToken, NVDA_TOKEN]);
 

@@ -273,13 +273,13 @@ const loadLifiIntermediateToken = async ({
 	}
 
 	try {
-		return findLifiIntermediateToken(
-			await fetchTrustedLifiQuote({
-				request: { ...request, allowDestinationCall: true },
-				sourceNetworkId,
-				signal
-			})
-		);
+		const quote = await fetchTrustedLifiQuote({
+			request: { ...request, allowDestinationCall: true },
+			sourceNetworkId,
+			signal
+		});
+
+		return isLifiRouteExecutable(quote) ? undefined : findLifiIntermediateToken(quote);
 	} catch (_: unknown) {
 		// Without an answer, there is only no hint.
 	}

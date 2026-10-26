@@ -75,6 +75,9 @@ All of the following hold:
   successfully generate a tx") and minutes later with the Across + Smart Deposit route.
 - A quote that fails OISY's trust checks (a contract, chain, token or amount other than the one
   asked for) never feeds the hint.
+- A route from that request that OISY could take itself (e.g. NEAR behind a DEX swap) names no
+  token: the box would claim there is no verifiable direct route when there is one. LI.FI is
+  asked again at the next refresh.
 - The route is read only for its in-between token. It is never shown, never signed, and never
   used for an amount.
 - The answer is cached together with LI.FI's offer for the same inputs and the same refresh
@@ -183,6 +186,8 @@ All of the following hold:
 11. The box appearing for a pair and amount, and each press of its button, sends the tracking
     event once; a quote refresh, the box hiding and coming back, or the form being rebuilt does
     not send it again.
+12. A first answer with no route, followed by a route OISY could take (e.g. DAI (Base) → USDC
+    (Base) → NEAR → USDC (Arbitrum)): no box.
 
 ## Decisions
 
