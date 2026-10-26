@@ -1381,6 +1381,8 @@
 			"gasless": "",
 			"swap_fees": "",
 			"cross_chain_networks_info": "",
+			"two_swaps_info": "$oisy_short offre solo scambi che può verificare completamente prima della tua approvazione, e non esiste uno scambio diretto di questo tipo da $sourceSymbol a $destinationSymbol. Però puoi scambiare prima $sourceSymbol con $intermediateSymbol e poi $intermediateSymbol con $destinationSymbol.",
+			"two_swaps_first_button": "Scambia prima con $intermediateSymbol",
 			"near_intents_estimated_time": "",
 			"lifi_route_via": "",
 			"lifi_route_via_estimated_time": "",
