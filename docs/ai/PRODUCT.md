@@ -649,6 +649,14 @@ On the Operations tab, each transfer of a routed swap that a pool outside the li
 
 It is orange and not red because red on this screen means OISY will not sign, and this request it signs once confirmed; a request OISY refuses anyway shows only its refusal. Applications where users keep balances of their own (lending, derivatives, staking) are left off the list on purpose, since those balances are what the confirmation is about, so a call into the Stake program always asks for it. The list dates: routers keep adding venues, and a venue missing from it asks for the confirmation on every swap routed through it. A run with a nested call that does not name its program is not used at all, since it cannot be said to call only programs on the list.
 
+### What a Solana transaction's fee is made of
+
+The review states the fee under one heading, in up to four lines: **Base**, what the network charges for the message's signatures; **Priority**, what the dApp bids on top; **Account rent**, the rent of the token accounts the message opens, less what the ones it closes hand back; and **App account cost**, the rent of the accounts it opens for applications, described above.
+
+The base fee is charged **per signature**, at 5,000 lamports each, not once per transaction. A message the dApp co-signs alongside the user requires two signatures and pays twice, so the review reads the count from the message itself and states the base fee for every signature it requires — all of them charged to the fee payer. The same total is the room the review allows when it compares the simulated SOL change against what the message says it moves, so a co-signed send or swap is still stated in one line instead of being warned about as a transaction with multiple operations. That room covers the base and priority fees only when the user's wallet is the fee payer: a dApp that sponsors the request pays both itself, so the user's balance carries neither and the comparison allows for neither, while the fee lines still state what the transaction costs. The network also charges for each signature a message has one of its signature-verification programs (Ed25519, Secp256k1, Secp256r1) check; those are not counted yet, which is a follow-up.
+
+OISY's own sends, and the deposit a swap makes, are signed by the user's key alone, so they pay the base fee for a single signature.
+
 ### Account creations and handovers in a Solana transaction
 
 The review reduces a message to a single source, destination and amount, so an instruction whose effect that single figure cannot carry is **refused outright** rather than shown in part. Two families of System-program instruction fall there, and so does setting up a stake account for somebody else.

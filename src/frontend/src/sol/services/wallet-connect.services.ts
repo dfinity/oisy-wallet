@@ -55,6 +55,7 @@ import {
 	type CreateSignerParams
 } from '$sol/utils/sol-sign.utils';
 import {
+	countSolRequiredSignatures,
 	decodeTransactionMessage,
 	isSolCompiledTransactionMessage,
 	mapSolTransactionMessage,
@@ -223,6 +224,7 @@ export const decode = async ({
 
 	const mapped = {
 		...mappedTransaction,
+		requiredSignatures: countSolRequiredSignatures(base64EncodedTransactionMessage),
 		...(nonNullish(prioritizationFeeEstimate) && { prioritizationFeeEstimate }),
 		...(nonNullish(preview) && { preview }),
 		...(nonNullish(messageSummary) && { messageSummary })
