@@ -199,6 +199,48 @@ describe('SolWalletConnectSignModal', () => {
 		});
 	});
 
+	// A send goes out with the wallet as the fee payer, so a message that names another payer is
+	// refused when it is to be sent, and only then: signing it alone keeps the payer it names.
+	describe('a message that names another account to pay its fee', () => {
+		const decoded: Awaited<ReturnType<typeof decode>> = {
+			amount: 1n,
+			requiredSignatures: 1,
+			feePayer: address(mockSolAddress2),
+			feePaidByOthers: true,
+			parties: { sources: [], destinations: [], partial: true }
+		};
+
+		it('should hold approval when it is to be sent', async () => {
+			vi.mocked(decode).mockResolvedValueOnce(decoded);
+
+			const { getByRole, getByText } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION)
+			});
+
+			await waitFor(() => {
+				expect(getByText(en.wallet_connect.text.fee_paid_by_others)).toBeInTheDocument();
+			});
+
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should let it be signed when it is only to be signed', async () => {
+			vi.mocked(decode).mockResolvedValueOnce(decoded);
+
+			const { getByRole, queryByText } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			const approve = getByRole('button', { name: en.core.text.approve });
+
+			await waitFor(() => {
+				expect(approve).toBeEnabled();
+			});
+
+			expect(queryByText(en.wallet_connect.text.fee_paid_by_others)).not.toBeInTheDocument();
+		});
+	});
+
 	// The service tests are handed what the modal passes to signing, so only these cover how the modal
 	// derives it: a regression hard-coding a value would leave those green and disable the refusal.
 	const approve = async (decoded: Awaited<ReturnType<typeof decode>>) => {
