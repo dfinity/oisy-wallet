@@ -715,6 +715,24 @@ Only Ethereum and Sepolia have a ckETH helper contract. On other EVM networks no
 
 An `eth_sendTransaction` request whose data is an ERC-20 `transfer`, `approve`, `increaseAllowance` or `decreaseAllowance` is reviewed as the token operation it encodes: the amount shown is the token amount, with the recipient or spender the data names. The native value of the transaction (ETH, or the native token of the request's network) is sent to the token contract in the same transaction, and that review has no line for a second amount, so a token call that carries one is **refused** rather than shown in part. The review states the native amount and keeps Approve disabled, and the signing step applies the same check, so such a request is never signed. Standard token contracts accept no native value on these calls, so an ordinary token operation never carries one. An operator grant (`setApprovalForAll`) and a call OISY cannot read are not affected: their review states the native value as the amount.
 
+### Uniswap swaps requested by an Ethereum dApp
+
+An `eth_sendTransaction` request that calls `execute` on Uniswap's Universal Router is reviewed as a **swap** when OISY can read all of it. OISY knows the router by its address on each network: versions 2.0.0, 2.1.1 and 2.1.2 on Ethereum, Sepolia, Base, BNB Smart Chain, Polygon and Arbitrum, and 2.1.1 and 2.1.2 on Base Sepolia and Robinhood Chain. The same call to any other address, or to that address on another network, is reviewed like any call OISY cannot read.
+
+The review is titled "Swap" and states:
+
+- **You pay:** the token and amount the transaction takes from the wallet, "You pay at most" when the swap is for an exact output.
+- **You receive at least:** the token and the least the router lets arrive. Tokens the router keeps at the end count as not received.
+- **Recipient:** only when the tokens go to an address that is not this wallet.
+- **App fee:** each share or amount the swap pays to another address, with that address.
+- **New spending allowance:** when the transaction also grants the router a Permit2 allowance, what it can spend and until when. The allowance lasts beyond the transaction.
+- **Valid until:** the swap's deadline, or "No deadline".
+- **Interacting with:** "Uniswap Universal Router" with its version and address.
+
+Three red notes can show above the summary, each leaving Approve enabled: when the tokens go to another address, when the swap guarantees no minimum amount, and when the deadline has passed by the device's clock.
+
+Every amount is one the router enforces, read from the router's own commands and checked to be exactly their encoding. OISY describes a swap only when it reads every command, the wallet pays exactly one token, exactly one other token arrives at one address, and every other payment is a fee. A swap through a command OISY does not read (a sub-plan, a batch permit, a bridge deposit, liquidity management), into or out of a token OISY doesn't list, or with an allowance for anyone but the router, is reviewed like any call OISY cannot read. Uniswap's newer router 2.2.0, its swap proxy and signed executions are not described yet. What is signed is the transaction exactly as the dApp sent it.
+
 ### Starting a pairing from the scanner
 
 A WalletConnect pairing is started from the universal scanner by scanning (or pasting) a pairing code. The scanner accepts two forms: a bare `wc:` URI, and an OISY WalletConnect deep-link URL that wraps it — `<OISY host>/wc/?uri=<url-encoded wc: uri>`. When a deep-link URL is scanned, OISY unwraps the inner `uri` and pairs with it. The URL form is only unwrapped when its host is **OISY's own domain** for the running environment (`oisy.com` in production); a `uri` param carried by any other host is never treated as a pairing. A well-formed WalletConnect deep-link URL whose host is a different domain shows a dedicated "this link is for a different domain" error rather than the generic invalid-code message, so the user understands the link was valid but pointed elsewhere.
