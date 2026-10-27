@@ -4,6 +4,8 @@ export const SYSTEM_PROGRAM_ADDRESS = '11111111111111111111111111111111';
 export const COMPUTE_BUDGET_PROGRAM_ADDRESS = 'ComputeBudget111111111111111111111111111111';
 export const TOKEN_PROGRAM_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 export const TOKEN_2022_PROGRAM_ADDRESS = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
+// The native mint of Token-2022, its counterpart of wrapped SOL: an account of it wraps lamports.
+export const TOKEN_2022_NATIVE_MINT_ADDRESS = '9pan9bMn5HatX4EJdBwg9VgCa7Uz5HL8N1m5D3NdXejP';
 export const ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS =
 	'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
 export const ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS = 'AddressLookupTab1e1111111111111111111111111';
@@ -23,10 +25,15 @@ export const ANCHOR_IDL_ACCOUNT_DISCRIMINATOR = [24, 70, 98, 191, 58, 144, 123, 
 export const ANCHOR_IDL_ACCOUNT_LENGTH_OFFSET = 40;
 export const ANCHOR_IDL_ACCOUNT_HEADER_LENGTH = 44;
 
-// Solana transaction fee
-// It can be hard-coded since it is not changed unsless under community proposal, with time in advance.
+// Solana base fee, which a message pays once for every signature it requires.
+// It can be hard-coded since it is not changed unless under community proposal, with time in advance.
 // https://solana.com/docs/core/fees#transaction-fees
-export const SOLANA_TRANSACTION_FEE_IN_LAMPORTS = 5_000n;
+export const SOLANA_LAMPORTS_PER_SIGNATURE = 5_000n;
+
+// How many signatures the messages the wallet builds itself require, for a send or a swap's
+// deposit: the user's key alone pays the fee, authorises the transfer and funds any token account
+// the transfer opens. Their fee is quoted before the message exists, so it is quoted for this many.
+export const SOLANA_SEND_REQUIRED_SIGNATURES = 1;
 
 export const MICROLAMPORTS_PER_LAMPORT = 1_000_000n;
 
@@ -72,6 +79,13 @@ export const SOLANA_SIMULATION_MAX_CLOSE_RUNS = 5;
 // The preview is fetched before the review renders, so a slow or unresponsive RPC would hold
 // the request behind it. Past this it is abandoned and the review renders without it.
 export const SOLANA_SIMULATION_TIMEOUT_MILLISECONDS = 5_000;
+
+// How many times a run whose pre-state must be read at its very slot reads the pair again, when
+// the simulation lands on a later slot or on a node not there yet, within the timeout above. On
+// mainnet, 75 of 100 pairs landed on one slot at the first attempt, 23 at the second, 1 at the
+// third and 1 at none of three, at about 100 ms a pair (2026-10-23, public endpoints): ten leave a
+// miss about one in a million, and still most of the timeout.
+export const SOLANA_SIMULATION_SNAPSHOT_ATTEMPTS = 10;
 
 // Multiples of that baseline at which the review speaks up: twice it is worth naming as the dApp's
 // own choice, five times it is worth questioning. Both stay short of blocking, since paying well

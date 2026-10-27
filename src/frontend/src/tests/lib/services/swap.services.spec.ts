@@ -62,7 +62,7 @@ import { fetchVeloraSwapAmount } from '$lib/services/velora-swap.services';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
-import { SwapAmountTooLowError } from '$lib/types/errors';
+import { SwapAmountTooLowError, SwapViaIntermediateTokenError } from '$lib/types/errors';
 import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsQuoteResponse
@@ -1511,6 +1511,54 @@ describe('swap.services', () => {
 
 			expect(result).toHaveLength(1);
 			expect(result[0].provider).toBe(SwapProvider.VELORA);
+		});
+
+		describe('a route through an in-between token', () => {
+			const viaIntermediateToken = new SwapViaIntermediateTokenError({
+				intermediateToken: mockValidErc20Token,
+				provider: SwapProvider.LIFI
+			});
+
+			it('rethrows it when no provider quoted', async () => {
+				mockVeloraGetQuote.mockResolvedValueOnce(undefined);
+				mockEvmNearIntentsGetQuote.mockRejectedValueOnce(viaIntermediateToken);
+
+				await expect(
+					fetchSwapAmountsEVM({ sourceToken, destinationToken, amount, userAddress, slippage })
+				).rejects.toBe(viaIntermediateToken);
+			});
+
+			it('rethrows an amount-too-low refusal in its place', async () => {
+				mockVeloraGetQuote.mockRejectedValueOnce(viaIntermediateToken);
+				mockEvmNearIntentsGetQuote.mockRejectedValueOnce(
+					new SwapAmountTooLowError('Amount is too low for bridge, try at least 8300', 8300n)
+				);
+
+				await expect(
+					fetchSwapAmountsEVM({ sourceToken, destinationToken, amount, userAddress, slippage })
+				).rejects.toThrow(SwapAmountTooLowError);
+			});
+
+			it('drops it when another provider quoted', async () => {
+				mockVeloraGetQuote.mockResolvedValueOnce({
+					provider: SwapProvider.VELORA,
+					receiveAmount: 123n,
+					swapDetails: {},
+					type: 'delta'
+				});
+				mockEvmNearIntentsGetQuote.mockRejectedValueOnce(viaIntermediateToken);
+
+				const result = await fetchSwapAmountsEVM({
+					sourceToken,
+					destinationToken,
+					amount,
+					userAddress,
+					slippage
+				});
+
+				expect(result).toHaveLength(1);
+				expect(result[0].provider).toBe(SwapProvider.VELORA);
+			});
 		});
 	});
 
@@ -3209,7 +3257,7 @@ describe('swap.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123' });
+			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123', nonce: 5 });
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
 			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
 		});
@@ -3396,7 +3444,7 @@ describe('swap.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123' });
+			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123', nonce: 5 });
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
 			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
 		});
@@ -3479,6 +3527,43 @@ describe('swap.services', () => {
 					])
 				})
 			);
+		});
+
+		it('should record the deposit transaction hash, nonce and chain on the AUT row', async () => {
+			await fetchNearIntentsEvmSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				destinationToken,
+				swapAmount: '1',
+				receiveAmount: 900000n,
+				slippageValue: '1',
+				sourceNetwork: ETHEREUM_NETWORK,
+				userAddress: mockEthAddress,
+				gas: 21000n,
+				maxFeePerGas: 20000000000n,
+				maxPriorityFeePerGas: 2000000000n,
+				swapDetails: mockNearIntentsQuoteResponse
+			});
+
+			const [[{ externalRefs }]] = vi.mocked(
+				activeUserTransactionsServices.createActiveUserTransaction
+			).mock.calls;
+
+			expect(externalRefs).toEqual(
+				expect.arrayContaining([
+					{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_TX_HASH, value: '0xTxHash123' },
+					{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_TX_NONCE, value: '5' },
+					{
+						key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_CHAIN_ID,
+						value: `${ETHEREUM_NETWORK.chainId}`
+					}
+				])
+			);
+
+			const keys = externalRefs.map(({ key }) => key);
+
+			expect(keys).toEqual([...keys].sort());
 		});
 
 		it('should execute the full NEAR Intents swap flow using swapDetails directly', async () => {

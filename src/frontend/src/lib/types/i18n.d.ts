@@ -1102,6 +1102,8 @@ interface I18nSwap {
 		gasless: string;
 		swap_fees: string;
 		cross_chain_networks_info: string;
+		two_swaps_info: string;
+		two_swaps_first_button: string;
 		near_intents_estimated_time: string;
 		lifi_route_via: string;
 		lifi_route_via_estimated_time: string;
@@ -1139,6 +1141,7 @@ interface I18nSwap {
 		swap_replaced_or_dropped: string;
 		near_intents_quote_unverified: string;
 		near_intents_quote_expired: string;
+		near_intents_deposit_expired: string;
 		near_intents_quote_deposit_memo: string;
 		oisy_trade_not_trackable: string;
 		oisy_trade_order_killed: string;
@@ -1495,6 +1498,8 @@ interface I18nWallet_connect {
 		unread_programs_acknowledge: string;
 		cannot_be_shown: string;
 		close_pays_others: string;
+		fee_paid_by_others: string;
+		approval_without_simulation: string;
 		simulated_instructions: string;
 		multiple_operations: string;
 		simulated_review: string;
@@ -1606,6 +1611,7 @@ interface I18nWallet_connect {
 		btc_psbt_input_not_segwit: string;
 		btc_psbt_input_not_owned: string;
 		btc_psbt_input_ambiguous: string;
+		btc_psbt_input_unverified: string;
 		from_address_not_wallet: string;
 		unknown_destination: string;
 		cketh_deposit_refused: string;
@@ -1613,6 +1619,8 @@ interface I18nWallet_connect {
 		token_call_with_value: string;
 		ambiguous_transaction: string;
 		close_pays_others: string;
+		fee_paid_by_others: string;
+		approval_without_simulation: string;
 		unreviewed_without_simulation: string;
 		unreviewed_not_described_by_simulation: string;
 		unread_programs_unconfirmed: string;
@@ -1888,6 +1896,9 @@ interface I18nTransaction {
 		instruction_receive: string;
 		instruction_wrap: string;
 		instruction_unwrap: string;
+		instruction_unwrap_all_to: string;
+		instruction_unwrap_all_from: string;
+		instruction_receive_excess_from: string;
 		instruction_create_account: string;
 		instruction_create_program_account: string;
 		instruction_close_program_account: string;
@@ -1905,6 +1916,7 @@ interface I18nTransaction {
 		instruction_thaw: string;
 		instruction_unknown: string;
 		instruction_unknown_via: string;
+		instruction_batch_via: string;
 		instruction_via: string;
 		instruction_rent: string;
 		instruction_balance_returned: string;

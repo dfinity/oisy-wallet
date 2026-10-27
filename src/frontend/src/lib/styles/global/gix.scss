@@ -37,6 +37,7 @@
 	--overlay-box-shadow:
 		0 0 0 1px rgb(0 0 0 / 6%), 0 2px 4px -1px rgb(0 0 0 / 4%), 0 8px 24px -4px rgb(0 0 0 / 10%);
 
+	--bottom-sheet-box-shadow: var(--overlay-box-shadow);
 	--bottom-sheet-border-color: var(--color-border-primary);
 	--bottom-sheet-z-index: var(--modal-z-index);
 	--card-background: var(--color-background-primary);

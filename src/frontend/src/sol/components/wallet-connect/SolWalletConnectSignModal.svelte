@@ -83,6 +83,7 @@
 	let destination = $state<OptionSolAddress>();
 	let tokenAddress = $state<OptionSolAddress>();
 	let isApproval = $state<boolean | undefined>();
+	let uncheckedApproval = $state<boolean | undefined>();
 	// Set when the message bundles instructions that disagree on what it does, or carries one that
 	// is decoded and still cannot be stated. `sign()` refuses such a message, so the review says so
 	// and holds the button rather than letting the user press it and bounce.
@@ -90,6 +91,7 @@
 	let unreviewed = $state<boolean | undefined>();
 	let prioritizationFee = $state<bigint | undefined>();
 	let prioritizationFeeEstimate = $state<bigint | undefined>();
+	let requiredSignatures = $state<number | undefined>();
 	let preview = $state<SolSimulationPreview | undefined>();
 	let instructions = $state<SolInstructionSummary[] | undefined>();
 
@@ -107,6 +109,14 @@
 	// An account the run opens inside another program's instruction with more than its size costs.
 	// `sign()` refuses it as it does an ambiguous message, so the review says so the same way.
 	let opensAccountBeyondRent = $state<boolean | undefined>();
+	// A token batch the run keeps whole, which the list states none of the steps of. `sign()` refuses
+	// it as it does an ambiguous message, so the review says so the same way.
+	let keepsBatchWhole = $state<boolean | undefined>();
+	// Whether the message names an account other than the wallet to pay its fee. A send goes out with
+	// the wallet as the fee payer instead, which the review never ran, so `sign()` refuses to send such
+	// a message and the review says so. Signing it without sending keeps the payer it names.
+	let feePaidByOthers = $state<boolean | undefined>();
+	let sendPaidByOthers = $derived(signWithSending && (feePaidByOthers ?? false));
 	// The decode is asynchronous, so until it settles the review shows an empty summary and no
 	// warning. Approval waits for it: signing on the strength of a review that has not been
 	// computed yet is exactly what the warnings exist to prevent. A failed decode never flips it,
@@ -122,6 +132,12 @@
 	// The run hands the wallet itself to another program. `sign()` refuses it as it does an
 	// assignment the message states, so the review says so the same way.
 	let reassignsWallet = $derived(solSimulationReassignsWallet({ preview, userAddress: address }));
+	// An unchecked approval names neither its token nor its decimals, so with no simulated run
+	// nothing states how much it lets the spender spend. `sign()` refuses it, so the review says so
+	// the same way and holds the button.
+	let approvalWithoutSimulation = $derived(
+		(uncheckedApproval ?? false) && !(simulatedInstructions ?? false)
+	);
 
 	const updateData = async () => {
 		try {
@@ -130,9 +146,11 @@
 				destination,
 				tokenAddress,
 				isApproval,
+				uncheckedApproval,
 				unreviewed,
 				prioritizationFee,
 				prioritizationFeeEstimate,
+				requiredSignatures,
 				preview,
 				instructions,
 				simulatedInstructions,
@@ -140,7 +158,9 @@
 				parties,
 				unreadPrograms,
 				rentExemptMinimum,
-				opensAccountBeyondRent
+				opensAccountBeyondRent,
+				keepsBatchWhole,
+				feePaidByOthers
 			} = await decodeService({
 				base64EncodedTransactionMessage: data,
 				networkId,
@@ -263,6 +283,7 @@
 			unreadProgramsAcknowledged: !callsUnreadPrograms || unreadProgramsAcknowledged,
 			rentExemptMinimum,
 			opensAccountBeyondRent: opensAccountBeyondRent ?? false,
+			keepsBatchWhole: keepsBatchWhole ?? false,
 			reassignsWallet
 		});
 
@@ -289,17 +310,25 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<SolWalletConnectSignReview
-				ambiguous={(ambiguous ?? false) || (opensAccountBeyondRent ?? false) || reassignsWallet}
+				ambiguous={(ambiguous ?? false) ||
+					(opensAccountBeyondRent ?? false) ||
+					(keepsBatchWhole ?? false) ||
+					reassignsWallet}
 				{application}
+				{approvalWithoutSimulation}
 				approveDisabled={!decoded ||
+					sendPaidByOthers ||
 					(ambiguous ?? false) ||
 					(opensAccountBeyondRent ?? false) ||
+					(keepsBatchWhole ?? false) ||
 					reassignsWallet ||
-					closesPayOthers}
+					closesPayOthers ||
+					approvalWithoutSimulation}
 				{closesPayOthers}
 				{data}
 				{decoded}
 				destination={destination ?? ''}
+				feePaidByOthers={sendPaidByOthers}
 				feeToken={token}
 				flaggedAsScam={!acceptedContext(request.verifyContext)}
 				{instructions}
@@ -311,11 +340,13 @@
 				{preview}
 				{prioritizationFee}
 				{prioritizationFeeEstimate}
+				{requiredSignatures}
 				simulatedInstructions={simulatedInstructions ?? false}
 				source={address ?? ''}
 				token={reviewToken}
 				unreadPrograms={unreadPrograms ?? []}
 				unreviewed={unreviewed ?? false}
+				walletPaysFees={!(feePaidByOthers ?? false)}
 				bind:unreadProgramsAcknowledged
 			/>
 		{/if}

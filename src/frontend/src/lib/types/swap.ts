@@ -113,11 +113,20 @@ export type Slippage = string | number;
  *
  * `minAmount` is the provider's minimum, in the source token's smallest unit,
  * when the provider communicated it.
+ *
+ * `intermediateToken` is the token OISY lists that a provider routes the pair through in a shape
+ * OISY cannot verify: the user can make the swap as two separate swaps through it.
  */
-export interface SwapQuoteError {
-	type: 'amount-too-low';
-	minAmount?: bigint;
-}
+export type SwapQuoteError =
+	| {
+			type: 'amount-too-low';
+			minAmount?: bigint;
+	  }
+	| {
+			type: 'two-swaps';
+			intermediateToken: Token;
+			provider: SwapProvider;
+	  };
 
 export type SwapMappedResult =
 	| {

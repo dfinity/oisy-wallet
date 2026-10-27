@@ -6,6 +6,7 @@ import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-me
 import { calculateSolPrioritizationFee, resolveSolComputeUnitLimit } from '$sol/utils/fee.utils';
 import {
 	mapSolInstruction,
+	solUnbatchedInstructions,
 	solWrappedSolOpeningsReturnedToWallet
 } from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -69,6 +70,24 @@ export const parseSolBase64TransactionMessage = async ({
 };
 
 /**
+ * How many signatures a base64-encoded transaction requires, which is what its base fee is charged
+ * on.
+ *
+ * It is read from the header of the compiled message rather than counted in the decompiled one.
+ * Decompiling keeps only the fee payer and the accounts the instructions name, so a signer that no
+ * instruction names drops out of it, though its signature is still required and still charged.
+ */
+export const countSolRequiredSignatures = (transactionMessage: string): number => {
+	const { messageBytes } = decodeTransactionMessage(transactionMessage);
+
+	const {
+		header: { numSignerAccounts }
+	} = getCompiledTransactionMessageDecoder().decode(messageBytes);
+
+	return numSignerAccounts;
+};
+
+/**
  * Whether these bytes decode as a compiled Solana transaction message.
  *
  * Decoder acceptance is the definition, deliberately, and it is wider than "the network would
@@ -121,14 +140,21 @@ export const mapSolTransactionMessage = ({
 			transactionMessage.version !== 1 || programAddress !== COMPUTE_BUDGET_PROGRAM_ADDRESS
 	);
 
+	// A token batch runs the instructions it carries one after the other, so they are read as if the
+	// message stated each itself, held to the same rules as their neighbours. The count that sizes
+	// the default compute limit stays the message's own: the batch is one instruction to the network.
+	const unbatched = instructionsList.flatMap(solUnbatchedInstructions);
+
 	// A creation can only be told apart from a payment by what the rest of the message does with the
-	// account it opens, so that is read once, over the whole message, before any instruction is.
+	// account it opens, so that is read once, over the whole message, before any instruction is. The
+	// instructions a batch carries are the message's own too, so a close among them answers for the
+	// opening as one stated on its own does.
 	const returnedToWallet = solWrappedSolOpeningsReturnedToWallet({
-		instructions: instructionsList,
+		instructions: unbatched,
 		userAddress
 	});
 
-	const mapped = instructionsList.reduce<MappedSolTransaction>(
+	const mapped = unbatched.reduce<MappedSolTransaction>(
 		(acc, instruction, index) => {
 			const {
 				amount,
@@ -137,6 +163,7 @@ export const mapSolTransactionMessage = ({
 				payer,
 				tokenAddress,
 				isApproval,
+				uncheckedApproval,
 				unreviewed,
 				computeUnitPrice,
 				computeUnitLimit,
@@ -194,6 +221,7 @@ export const mapSolTransactionMessage = ({
 				...(nonNullish(payer) && { payer }),
 				...(nonNullish(tokenAddress) && { tokenAddress }),
 				...((isApproval ?? acc.isApproval) && { isApproval: true }),
+				...((uncheckedApproval ?? acc.uncheckedApproval) && { uncheckedApproval: true }),
 				...((unreviewed ?? acc.unreviewed) && { unreviewed: true }),
 				...(ambiguous && { ambiguous }),
 				...(nonNullish(computeUnitPrice) && { computeUnitPrice }),

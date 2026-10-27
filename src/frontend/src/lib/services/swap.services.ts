@@ -74,7 +74,7 @@ import {
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
-import { SwapAmountTooLowError } from '$lib/types/errors';
+import { SwapAmountTooLowError, SwapViaIntermediateTokenError } from '$lib/types/errors';
 import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsQuoteResponse
@@ -908,6 +908,9 @@ const executeNearIntentsSwap = async ({
 	// guarantee). A transport that ignores it keeps the default ordering below, where the
 	// row is created only after the send has resolved and the deposit been submitted.
 	//
+	// `recordPollRefs` is for a transport on that default ordering that learns its payment's poll
+	// keys when it broadcasts (EVM: the hash and nonce): the row is created with them.
+	//
 	// `swapRecord` is for a transport whose payment has to be recorded before it is broadcast
 	// (XRP): it describes the swap's AUT row, with the payment's source address and poll keys
 	// added, for the transport to create at that point. Taking it marks the swap as registered,
@@ -916,6 +919,7 @@ const executeNearIntentsSwap = async ({
 		amount: bigint;
 		depositAddress: string;
 		registerSwap: () => Promise<void>;
+		recordPollRefs: (pollRefs: ActiveUserTransactionRef[]) => void;
 		swapRecord: (params: {
 			sourceAddress: string;
 			pollRefs: ActiveUserTransactionRef[];
@@ -967,13 +971,18 @@ const executeNearIntentsSwap = async ({
 				: {})
 		});
 
+	const swapRefsWith = (pollRefs: ActiveUserTransactionRef[]): ActiveUserTransactionRef[] =>
+		[...swapRefs(), ...pollRefs].sort(({ key: a }, { key: b }) => (a < b ? -1 : a > b ? 1 : 0));
+
 	// Registers the swap as an Active User Transaction so settlement is tracked by
 	// the global poller (survives modal close, tab close, refresh, logout).
 	// Best-effort, single attempt: it only ever runs once funds have left the wallet
 	// (point of no return), so a failed create must NOT surface as a swap failure;
 	// mirrors OneSec's `createAutAndDetachCloser`.
 	let swapRegistered = false;
-	const registerSwap = async (): Promise<void> => {
+	const registerSwap = async (
+		{ pollRefs }: { pollRefs: ActiveUserTransactionRef[] } = { pollRefs: [] }
+	): Promise<void> => {
 		swapRegistered = true;
 
 		try {
@@ -988,7 +997,7 @@ const executeNearIntentsSwap = async ({
 					identity,
 					id: crypto.randomUUID(),
 					data,
-					externalRefs: swapRefs()
+					externalRefs: swapRefsWith(pollRefs)
 				});
 			}
 		} catch (err: unknown) {
@@ -1015,19 +1024,22 @@ const executeNearIntentsSwap = async ({
 		return nonNullish(data)
 			? {
 					data,
-					externalRefs: [...swapRefs(), ...pollRefs].sort(({ key: a }, { key: b }) =>
-						a < b ? -1 : a > b ? 1 : 0
-					)
+					externalRefs: swapRefsWith(pollRefs)
 				}
 			: undefined;
 	};
 
 	progress(ProgressStepsSwap.SIGN_TRANSFER);
 
+	let broadcastPollRefs: ActiveUserTransactionRef[] = [];
+
 	const txHash = await sendTransaction({
 		amount: parsedSwapAmount,
 		depositAddress,
 		registerSwap,
+		recordPollRefs: (refs) => {
+			broadcastPollRefs = refs;
+		},
 		swapRecord
 	});
 
@@ -1047,7 +1059,7 @@ const executeNearIntentsSwap = async ({
 	}
 
 	if (!swapRegistered) {
-		await registerSwap();
+		await registerSwap({ pollRefs: broadcastPollRefs });
 	}
 
 	progress(ProgressStepsSwap.UPDATE_UI);
@@ -1076,8 +1088,8 @@ export const fetchNearIntentsEvmSwap = async ({
 		destinationToken,
 		swapAmount,
 		swapDetails,
-		sendTransaction: async ({ amount, depositAddress }) => {
-			const { hash } = await sendEvm({
+		sendTransaction: async ({ amount, depositAddress, recordPollRefs }) => {
+			const { hash, nonce } = await sendEvm({
 				from: userAddress,
 				to: depositAddress,
 				amount,
@@ -1088,6 +1100,15 @@ export const fetchNearIntentsEvmSwap = async ({
 				maxFeePerGas,
 				maxPriorityFeePerGas
 			});
+
+			recordPollRefs(
+				toNearIntentsExternalRefs({
+					[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_TX_HASH]: hash,
+					[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_TX_NONCE]: `${nonce}`,
+					[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_CHAIN_ID]: `${sourceNetwork.chainId}`
+				})
+			);
+
 			return hash;
 		},
 		enableDestinationToken: () => enableSwapDestinationToken({ destinationToken, identity })
@@ -1425,6 +1446,16 @@ const reduceSettledSwapResults = (
 
 		if (nonNullish(amountTooLow)) {
 			throw amountTooLow.reason;
+		}
+
+		// After the minimum, which a larger amount turns into a direct offer.
+		const viaIntermediateToken = settledResults.find(
+			(result): result is PromiseRejectedResult =>
+				result.status === 'rejected' && result.reason instanceof SwapViaIntermediateTokenError
+		);
+
+		if (nonNullish(viaIntermediateToken)) {
+			throw viaIntermediateToken.reason;
 		}
 	}
 

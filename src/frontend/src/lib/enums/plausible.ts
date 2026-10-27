@@ -4,6 +4,9 @@ export enum PLAUSIBLE_EVENTS {
 	PAGE_OPEN = 'page_open',
 	LIST_SETTINGS_CHANGE = 'list_settings_change',
 	SWAP_OFFER = 'swap_offer',
+	// The swap form's hint to make a swap without an offer as two separate swaps, when it shows and
+	// when its button is used.
+	SWAP_TWO_SWAPS_HINT = 'swap_two_swaps_hint',
 	MEDIA_CONSENT = 'media_consent',
 	OPEN_MODAL = 'open_modal',
 	LOAD_CUSTOM_TOKENS = 'load_custom_tokens',
@@ -61,6 +64,19 @@ export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
 	MAJOR = 'major',
 	// Invisible to the user; they keep working as normal.
 	MINOR = 'minor'
+}
+
+// An ICP NFT collection writes its own text into some of its error variants, and a rejected call
+// carries the IC request id and the canister's reject text, so a raw message cannot satisfy
+// invariant 4 in docs/ai/frontend/analytics.md. ICP NFT send failures are categorised by error
+// class instead.
+export enum PLAUSIBLE_EVENT_NFT_SEND_ERROR_TYPES {
+	// The collection returned an error variant.
+	CANISTER_ERROR = 'canister_error',
+	// The collection rejected the call or trapped.
+	CALL_REJECTED = 'call_rejected',
+	// Anything else: transport, agent, or an unexpected throw.
+	UNKNOWN = 'unknown'
 }
 
 export enum PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES {
@@ -186,7 +202,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	COMPUTE = 'compute',
 	SEND = 'send',
 	CONVERT = 'convert',
-	AI_ASSISTANT = 'ai_assistant'
+	AI_ASSISTANT = 'ai_assistant',
+	WALLET_CONNECT = 'wallet_connect'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {

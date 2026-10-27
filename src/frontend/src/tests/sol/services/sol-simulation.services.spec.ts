@@ -1,8 +1,14 @@
+import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
-import { getMultipleAccountsInfo, simulateTransactionAccounts } from '$sol/api/solana.api';
+import {
+	getMultipleAccountsInfo,
+	getMultipleAccountsInfoWithContext,
+	simulateTransactionAccounts
+} from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
 	SOLANA_SIMULATION_MAX_CLOSE_RUNS,
+	SOLANA_SIMULATION_SNAPSHOT_ATTEMPTS,
 	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
 	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
@@ -28,6 +34,10 @@ import {
 } from '$tests/mocks/sol.mock';
 import { getCreateAssociatedTokenIdempotentInstruction } from '@solana-program/token';
 import {
+	getBatchInstruction as getToken2022BatchInstruction,
+	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction
+} from '@solana-program/token-2022';
+import {
 	AccountRole,
 	address,
 	appendTransactionMessageInstruction,
@@ -37,11 +47,14 @@ import {
 	createTransactionMessage,
 	pipe,
 	setTransactionMessageFeePayer,
-	setTransactionMessageLifetimeUsingBlockhash
+	setTransactionMessageLifetimeUsingBlockhash,
+	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_MIN_CONTEXT_SLOT_NOT_REACHED,
+	SolanaError
 } from '@solana/kit';
 
 vi.mock('$sol/api/solana.api', () => ({
 	getMultipleAccountsInfo: vi.fn(),
+	getMultipleAccountsInfoWithContext: vi.fn(),
 	simulateTransactionAccounts: vi.fn()
 }));
 
@@ -121,14 +134,16 @@ describe('sol-simulation.services', () => {
 		err = null,
 		accounts,
 		innerInstructions = [],
-		fee
+		fee,
+		slot = ZERO
 	}: {
 		err?: string | null;
 		accounts: SolanaParsedAccountsInfo;
 		innerInstructions?: SolanaSimulatedInnerInstructions;
 		fee?: bigint;
+		slot?: bigint;
 	}) =>
-		({ err, accounts, innerInstructions, fee }) as unknown as Awaited<
+		({ err, accounts, innerInstructions, fee, slot }) as unknown as Awaited<
 			ReturnType<typeof simulateTransactionAccounts>
 		>;
 
@@ -198,6 +213,111 @@ describe('sol-simulation.services', () => {
 		vi.mocked(simulateTransactionAccounts).mockRejectedValue(new Error('rpc down'));
 
 		await expect(simulateSolTransaction(params(message([])))).resolves.toBeUndefined();
+	});
+
+	// A caller signing exactly the bytes it simulates: an expired blockhash must fail the run.
+	it('should keep the blockhash when asked to', async () => {
+		await simulateSolTransaction({ ...params(message([])), replaceRecentBlockhash: false });
+
+		expect(simulateTransactionAccounts).toHaveBeenCalledExactlyOnceWith({
+			base64EncodedTransactionMessage,
+			addresses: [mockSolAddress],
+			network,
+			replaceRecentBlockhash: false
+		});
+	});
+
+	// Read side by side, the pre-state and the run can see different slots, and whatever reached the
+	// user's accounts in between would be folded into the deltas.
+	describe('a snapshot read at one slot', () => {
+		const snapshotParams = () => ({ ...params(message([])), consistentSnapshot: true });
+
+		const preState = ({ slot, lamports }: { slot: bigint; lamports: bigint }) => ({
+			slot,
+			value: [systemAccount(lamports)]
+		});
+
+		const slotNotReached = () =>
+			new SolanaError(SOLANA_ERROR__JSON_RPC__SERVER_ERROR_MIN_CONTEXT_SLOT_NOT_REACHED, {
+				contextSlot: 99n
+			});
+
+		it('should read the pre-state first and run at that very slot', async () => {
+			vi.mocked(getMultipleAccountsInfoWithContext).mockResolvedValue(
+				preState({ slot: 100n, lamports: 1_000_000n })
+			);
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({ accounts: [systemAccount(994_000n)], slot: 100n })
+			);
+
+			const result = await simulateSolTransaction(snapshotParams());
+
+			expect(result?.preview?.solDelta).toBe(-6_000n);
+			expect(simulateTransactionAccounts).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ minContextSlot: 100n })
+			);
+			expect(
+				vi.mocked(getMultipleAccountsInfoWithContext).mock.invocationCallOrder[0]
+			).toBeLessThan(vi.mocked(simulateTransactionAccounts).mock.invocationCallOrder[0] ?? 0);
+			expect(getMultipleAccountsInfo).not.toHaveBeenCalled();
+		});
+
+		it('should read the pair again when the run lands on a later slot', async () => {
+			vi.mocked(getMultipleAccountsInfoWithContext)
+				.mockResolvedValueOnce(preState({ slot: 100n, lamports: 1_000_000n }))
+				.mockResolvedValueOnce(preState({ slot: 102n, lamports: 999_000n }));
+			vi.mocked(simulateTransactionAccounts)
+				.mockResolvedValueOnce(simulated({ accounts: [systemAccount(994_000n)], slot: 101n }))
+				.mockResolvedValueOnce(simulated({ accounts: [systemAccount(994_000n)], slot: 102n }));
+
+			const result = await simulateSolTransaction(snapshotParams());
+
+			// From the second pair alone.
+			expect(result?.preview?.solDelta).toBe(-5_000n);
+			expect(simulateTransactionAccounts).toHaveBeenLastCalledWith(
+				expect.objectContaining({ minContextSlot: 102n })
+			);
+		});
+
+		it('should read the pair again when the node has not reached the slot', async () => {
+			vi.mocked(getMultipleAccountsInfoWithContext).mockResolvedValue(
+				preState({ slot: 100n, lamports: 1_000_000n })
+			);
+			vi.mocked(simulateTransactionAccounts)
+				.mockRejectedValueOnce(slotNotReached())
+				.mockResolvedValueOnce(simulated({ accounts: [systemAccount(994_000n)], slot: 100n }));
+
+			const result = await simulateSolTransaction(snapshotParams());
+
+			expect(result?.preview?.solDelta).toBe(-6_000n);
+			expect(simulateTransactionAccounts).toHaveBeenCalledTimes(2);
+		});
+
+		it('should yield nothing when no attempt lands on one slot', async () => {
+			vi.mocked(getMultipleAccountsInfoWithContext).mockResolvedValue(
+				preState({ slot: 100n, lamports: 1_000_000n })
+			);
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({ accounts: [systemAccount(994_000n)], slot: 101n })
+			);
+
+			await expect(simulateSolTransaction(snapshotParams())).resolves.toBeUndefined();
+
+			expect(simulateTransactionAccounts).toHaveBeenCalledTimes(
+				SOLANA_SIMULATION_SNAPSHOT_ATTEMPTS
+			);
+		});
+
+		it('should yield nothing on any other failure of the run, without reading again', async () => {
+			vi.mocked(getMultipleAccountsInfoWithContext).mockResolvedValue(
+				preState({ slot: 100n, lamports: 1_000_000n })
+			);
+			vi.mocked(simulateTransactionAccounts).mockRejectedValue(new Error('rpc down'));
+
+			await expect(simulateSolTransaction(snapshotParams())).resolves.toBeUndefined();
+
+			expect(simulateTransactionAccounts).toHaveBeenCalledOnce();
+		});
 	});
 
 	// A creation may fund a token account with more than its reserve and let the initialisation read
@@ -303,6 +423,56 @@ describe('sol-simulation.services', () => {
 			const result = await simulateSolTransaction(params(message([])));
 
 			expect(result).not.toHaveProperty('opensAccountBeyondRent');
+		});
+	});
+
+	// The run returns the calls a step of a token batch makes, such as a transfer running its mint's
+	// hook, after all of the batch's steps, so nothing puts them in order and the list keeps the batch
+	// whole. That holds however fully the message's own mapping reads the steps.
+	describe('a token batch', () => {
+		const transfer = (amount: bigint) =>
+			getToken2022TransferCheckedInstruction({
+				source: address(mockAtaAddress),
+				mint: address(mockSplAddress),
+				destination: address(mockAtaAddress2),
+				authority: address(mockSolAddress),
+				amount,
+				decimals: 6
+			});
+
+		const batchMessage = {
+			feePayer: { address: mockSolAddress },
+			instructions: [getToken2022BatchInstruction([transfer(1n), transfer(2n)])]
+		} as unknown as CompilableTransactionMessage;
+
+		const hookCall = [
+			{
+				index: 0,
+				instructions: [
+					{
+						programId: 'Hook111111111111111111111111111111111111111',
+						accounts: [],
+						data: '',
+						stackHeight: 2
+					}
+				]
+			}
+		] as unknown as SolanaSimulatedInnerInstructions;
+
+		it('should say so when the run keeps a batch of transfers between the same accounts whole', async () => {
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({ accounts: [], innerInstructions: hookCall })
+			);
+
+			const result = await simulateSolTransaction(params(batchMessage));
+
+			expect(result?.keepsBatchWhole).toBeTruthy();
+		});
+
+		it('should say nothing when the run makes no calls inside the batch', async () => {
+			const result = await simulateSolTransaction(params(batchMessage));
+
+			expect(result).not.toHaveProperty('keepsBatchWhole');
 		});
 	});
 
@@ -670,12 +840,355 @@ describe('sol-simulation.services', () => {
 			expect(result?.instructions).toStrictEqual([{ kind: 'unknown', program: application }]);
 		});
 
+		// The program also pays the wallet out of a wrapped SOL account of its own, as much as the
+		// closed account held. That inflow is the unwrap's, and only what the wallet gains beyond it
+		// can be the close's.
+		describe('next to an unwrap paying the wallet', () => {
+			const vault = mockAtaAddress3;
+
+			const withUnwrap = {
+				feePayer: { address: mockSolAddress },
+				instructions: [
+					{
+						programAddress: application,
+						accounts: [
+							{ address: mockSolAddress2, role: AccountRole.WRITABLE },
+							{ address: mockSolAddress, role: AccountRole.WRITABLE_SIGNER },
+							{ address: vault, role: AccountRole.WRITABLE }
+						]
+					}
+				]
+			} as unknown as CompilableTransactionMessage;
+
+			const wrapped = (lamports: bigint) =>
+				({
+					executable: false,
+					lamports,
+					owner: TOKEN_PROGRAM_ADDRESS,
+					space: 165n,
+					data: {
+						parsed: {
+							type: 'account',
+							info: {
+								mint: WSOL_TOKEN.address,
+								owner: mockSolAddress3,
+								isNative: true,
+								tokenAmount: { amount: `${lamports - 2_039_280n}`, decimals: 9 }
+							}
+						}
+					}
+				}) as unknown as SolanaParsedAccountsInfo[number];
+
+			const unwrapping = [
+				{
+					index: 0,
+					instructions: [
+						{
+							program: 'spl-token',
+							programId: TOKEN_PROGRAM_ADDRESS,
+							parsed: {
+								type: 'unwrapLamports',
+								info: {
+									source: vault,
+									destination: mockSolAddress,
+									authority: mockSolAddress3,
+									amount: `${rent}`
+								}
+							}
+						}
+					]
+				}
+			] as unknown as SolanaSimulatedInnerInstructions;
+
+			const unwrapped = {
+				kind: 'receive',
+				amount: rent,
+				tokenAddress: WSOL_TOKEN.address,
+				decimals: WSOL_TOKEN.decimals,
+				counterparty: vault,
+				own: false,
+				unwrapsToWallet: true
+			};
+
+			const run = async (walletAfter: bigint) => {
+				vi.mocked(getMultipleAccountsInfo).mockResolvedValue([
+					systemAccount(1_000_000n),
+					appAccount,
+					wrapped(100_000_000n)
+				]);
+				vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+					simulated({
+						accounts: [systemAccount(walletAfter), null, wrapped(100_000_000n - rent)],
+						innerInstructions: unwrapping,
+						fee
+					})
+				);
+
+				return await simulateSolTransaction(params(withUnwrap));
+			};
+
+			it('should list no close when the account paid somebody else', async () => {
+				const result = await run(1_000_000n + rent - fee);
+
+				expect(result?.instructions).toStrictEqual([
+					{ kind: 'route', program: application, children: [unwrapped] }
+				]);
+			});
+
+			it('should list the close when the account paid the wallet too', async () => {
+				const result = await run(1_000_000n + rent + rent - fee);
+
+				expect(result?.instructions).toStrictEqual([
+					{
+						kind: 'route',
+						program: application,
+						children: [
+							unwrapped,
+							{
+								kind: 'closeAccount',
+								account: mockSolAddress2,
+								program: application,
+								returned: rent
+							}
+						]
+					}
+				]);
+			});
+		});
+
+		// The program also has the wallet paid as much as the closed account held, out of an account
+		// no application holds: a seed-derived account, a nonce account, or a token account handing
+		// over its excess lamports. That inflow is the payout's, and only what the wallet gains
+		// beyond it can be the close's.
+		describe('next to SOL paid into the wallet out of a System or token account', () => {
+			const payer = mockAtaAddress3;
+
+			const withPayer = {
+				feePayer: { address: mockSolAddress },
+				instructions: [
+					{
+						programAddress: application,
+						accounts: [
+							{ address: mockSolAddress2, role: AccountRole.WRITABLE },
+							{ address: mockSolAddress, role: AccountRole.WRITABLE_SIGNER },
+							{ address: payer, role: AccountRole.WRITABLE }
+						]
+					}
+				]
+			} as unknown as CompilableTransactionMessage;
+
+			const SYSTEM = '11111111111111111111111111111111';
+
+			const withSeed = {
+				program: 'system',
+				programId: SYSTEM,
+				parsed: {
+					type: 'transferWithSeed',
+					info: {
+						source: payer,
+						sourceBase: mockSolAddress3,
+						destination: mockSolAddress,
+						lamports: Number(rent),
+						sourceSeed: 'vault',
+						sourceOwner: SYSTEM
+					}
+				}
+			};
+
+			const fromNonce = {
+				program: 'system',
+				programId: SYSTEM,
+				parsed: {
+					type: 'withdrawFromNonce',
+					info: {
+						nonceAccount: payer,
+						destination: mockSolAddress,
+						nonceAuthority: mockSolAddress3,
+						lamports: Number(rent)
+					}
+				}
+			};
+
+			const excess = {
+				program: 'spl-token',
+				programId: TOKEN_PROGRAM_ADDRESS,
+				parsed: {
+					type: 'withdrawExcessLamports',
+					info: { source: payer, destination: mockSolAddress, authority: mockSolAddress3 }
+				}
+			};
+
+			// A token account holds its excess on top of its rent, and hands over that alone.
+			const run = async ({ payout, walletAfter }: { payout: object; walletAfter: bigint }) => {
+				const fromToken = payout === excess;
+				const tokenHolding = tokenAccount({ owner: mockSolAddress3, amount: ZERO });
+
+				vi.mocked(getMultipleAccountsInfo).mockResolvedValue([
+					systemAccount(1_000_000n),
+					appAccount,
+					fromToken
+						? ({
+								...tokenHolding,
+								lamports: 2_039_280n + rent
+							} as unknown as SolanaParsedAccountsInfo[number])
+						: systemAccount(100_000_000n)
+				]);
+				vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+					simulated({
+						accounts: [
+							systemAccount(walletAfter),
+							null,
+							fromToken ? tokenHolding : systemAccount(100_000_000n - rent)
+						],
+						innerInstructions: [
+							{ index: 0, instructions: [payout] }
+						] as unknown as SolanaSimulatedInnerInstructions,
+						fee
+					})
+				);
+
+				return await simulateSolTransaction(params(withPayer));
+			};
+
+			it.each([
+				{ name: 'a seed-derived account', payout: withSeed, stated: { amount: rent } },
+				{ name: 'a nonce account', payout: fromNonce, stated: { amount: rent } },
+				{
+					name: 'a token account handing over its excess lamports',
+					payout: excess,
+					stated: { withdrawsExcess: true }
+				}
+			])(
+				'should list no close paid somebody else next to SOL paid by $name',
+				async ({ payout, stated }) => {
+					const result = await run({ payout, walletAfter: 1_000_000n + rent - fee });
+
+					expect(result?.instructions).toStrictEqual([
+						{
+							kind: 'route',
+							program: application,
+							children: [{ kind: 'receive', ...stated, counterparty: payer, own: false }]
+						}
+					]);
+				}
+			);
+
+			it.each([
+				{ name: 'a seed-derived account', payout: withSeed },
+				{ name: 'a nonce account', payout: fromNonce }
+			])(
+				'should list the close when it paid the wallet next to SOL paid by $name',
+				async ({ payout }) => {
+					const result = await run({ payout, walletAfter: 1_000_000n + rent + rent - fee });
+
+					expect(result?.instructions).toStrictEqual([
+						{
+							kind: 'route',
+							program: application,
+							children: [
+								{ kind: 'receive', amount: rent, counterparty: payer, own: false },
+								{
+									kind: 'closeAccount',
+									account: mockSolAddress2,
+									program: application,
+									returned: rent
+								}
+							]
+						}
+					]);
+				}
+			);
+		});
+
 		// Nothing then says where the rent went, and the instruction stays one nothing describes.
 		it('should leave the instruction undescribed when the rent went elsewhere', async () => {
 			const result = await run({ walletAfter: 1_000_000n - fee });
 
 			expect(result?.instructions).toStrictEqual([{ kind: 'unknown', program: application }]);
 		});
+	});
+
+	// The reserve a wrapped SOL account states for itself tells its amount apart from lamports paid in
+	// that no sync counted yet, which a sync in the message folds in.
+	it('should read what a wrapped SOL account held unsynced going in from the reserve it states', async () => {
+		const application = 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo';
+		const fee = 5_000n;
+		const wrapped = mockAtaAddress3;
+
+		const wrappedAccount = ({ lamports, amount }: { lamports: bigint; amount: bigint }) =>
+			({
+				executable: false,
+				lamports,
+				owner: TOKEN_PROGRAM_ADDRESS,
+				space: 165n,
+				data: {
+					parsed: {
+						type: 'account',
+						info: {
+							mint: WSOL_TOKEN.address,
+							owner: mockSolAddress,
+							isNative: true,
+							tokenAmount: { amount: `${amount}`, decimals: 9 },
+							rentExemptReserve: { amount: '2039280', decimals: 9 }
+						}
+					}
+				}
+			}) as unknown as SolanaParsedAccountsInfo[number];
+
+		vi.mocked(getMultipleAccountsInfo).mockResolvedValue([
+			systemAccount(1_000_000n),
+			wrappedAccount({ lamports: 2_051_280n, amount: 7_000n })
+		]);
+		vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+			simulated({
+				accounts: [
+					systemAccount(1_000_000n + 12_000n - fee),
+					wrappedAccount({ lamports: 2_039_280n, amount: ZERO })
+				],
+				innerInstructions: [
+					{
+						index: 0,
+						instructions: [
+							{
+								program: 'spl-token',
+								programId: TOKEN_PROGRAM_ADDRESS,
+								parsed: { type: 'syncNative', info: { account: wrapped } }
+							},
+							{
+								program: 'spl-token',
+								programId: TOKEN_PROGRAM_ADDRESS,
+								parsed: {
+									type: 'unwrapLamports',
+									info: { source: wrapped, destination: mockSolAddress, authority: mockSolAddress }
+								}
+							}
+						]
+					}
+				] as unknown as SolanaSimulatedInnerInstructions,
+				fee
+			})
+		);
+
+		const result = await simulateSolTransaction(
+			params({
+				feePayer: { address: mockSolAddress },
+				instructions: [
+					{
+						programAddress: application,
+						accounts: [
+							{ address: wrapped, role: AccountRole.WRITABLE },
+							{ address: mockSolAddress, role: AccountRole.WRITABLE_SIGNER }
+						]
+					}
+				]
+			} as unknown as CompilableTransactionMessage)
+		);
+
+		const unwrapped = (result?.instructions ?? [])
+			.flatMap(({ children = [] }) => children)
+			.find(({ unwrapsToWallet }) => unwrapsToWallet === true);
+
+		expect(unwrapped?.amount).toBe(12_000n);
 	});
 
 	it('should keep an empty list for a run with nothing to list', async () => {
