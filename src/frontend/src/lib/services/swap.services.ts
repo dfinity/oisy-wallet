@@ -74,7 +74,7 @@ import {
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
-import { SwapAmountTooLowError } from '$lib/types/errors';
+import { SwapAmountTooLowError, SwapViaIntermediateTokenError } from '$lib/types/errors';
 import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsQuoteResponse
@@ -1446,6 +1446,16 @@ const reduceSettledSwapResults = (
 
 		if (nonNullish(amountTooLow)) {
 			throw amountTooLow.reason;
+		}
+
+		// After the minimum, which a larger amount turns into a direct offer.
+		const viaIntermediateToken = settledResults.find(
+			(result): result is PromiseRejectedResult =>
+				result.status === 'rejected' && result.reason instanceof SwapViaIntermediateTokenError
+		);
+
+		if (nonNullish(viaIntermediateToken)) {
+			throw viaIntermediateToken.reason;
 		}
 	}
 
