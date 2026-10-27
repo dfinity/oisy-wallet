@@ -4,11 +4,13 @@ import {
 	LIFI_DENY_EXCHANGES,
 	LIFI_DIAMOND_ADDRESSES
 } from '$env/rest/lifi.env';
+import { LIFI_ACROSS_WRAPPED_NATIVE } from '$eth/constants/lifi.constants';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { LifiQuoteRejectedError } from '$lib/types/errors';
+import type { LifiTokenRef } from '$lib/types/lifi';
 import type { Network, NetworkId } from '$lib/types/network';
 import {
 	SwapProvider,
@@ -349,6 +351,94 @@ export const mapLifiSwapResult = ({
 	swapDetails: quote,
 	request
 });
+
+const isSameLifiToken = ({
+	actual,
+	expected
+}: {
+	actual: LifiTokenRef;
+	expected: LifiTokenRef;
+}): boolean =>
+	actual.chainId === expected.chainId &&
+	isSameHex({ actual: actual.address, expected: expected.address });
+
+/**
+ * The one token a route between two EVM networks moves the funds through besides its source and
+ * its destination — USDG, for a route that bridges USDC to Robinhood Chain and swaps it to NVDA
+ * there: the token of the two separate swaps the user can make instead. `undefined` when there is
+ * none or more than one. LI.FI's fee step keeps the token and does not count; every other step's
+ * output does, wrapped coins included.
+ *
+ * Also `undefined` for a wrapped native coin on the destination side of the bridge: Across pays
+ * those out unwrapped, so no swap could deliver one as the first of the two.
+ */
+export const findLifiIntermediateToken = ({
+	action: { fromChainId, toChainId, fromToken, toToken },
+	includedSteps
+}: LiFiStep): LifiTokenRef | undefined => {
+	if (fromChainId === toChainId || fromChainId === ChainId.SOL || toChainId === ChainId.SOL) {
+		return;
+	}
+
+	const outputs = includedSteps
+		.filter(
+			({ action }) => !isSameLifiToken({ actual: action.toToken, expected: action.fromToken })
+		)
+		.map(({ action }) => action.toToken);
+
+	const last = outputs.at(-1);
+
+	if (isNullish(last) || !isSameLifiToken({ actual: last, expected: toToken })) {
+		return;
+	}
+
+	const [intermediate, ...others] = outputs.filter(
+		(token) =>
+			!isSameLifiToken({ actual: token, expected: fromToken }) &&
+			!isSameLifiToken({ actual: token, expected: toToken })
+	);
+
+	if (
+		isNullish(intermediate) ||
+		others.some((token) => !isSameLifiToken({ actual: token, expected: intermediate }))
+	) {
+		return;
+	}
+
+	const wrappedNative = LIFI_ACROSS_WRAPPED_NATIVE[toChainId];
+
+	if (
+		intermediate.chainId === toChainId &&
+		nonNullish(wrappedNative) &&
+		isSameHex({ actual: intermediate.address, expected: wrappedNative })
+	) {
+		return;
+	}
+
+	return { chainId: intermediate.chainId, address: intermediate.address };
+};
+
+/**
+ * The token OISY lists, enabled or not, that LI.FI names: matched by its address within its
+ * network, never by its symbol — two tokens on one network can share a symbol.
+ */
+export const findLifiListedToken = ({
+	tokens,
+	token
+}: {
+	tokens: Token[];
+	token: LifiTokenRef;
+}): Token | undefined =>
+	tokens.find((candidate) => {
+		const chainId = toLifiChainId(candidate.network);
+		const address = toLifiTokenAddress(candidate);
+
+		return (
+			nonNullish(chainId) &&
+			nonNullish(address) &&
+			isSameLifiToken({ actual: { chainId, address }, expected: token })
+		);
+	});
 
 /**
  * The addresses of every ERC-20 and ERC-4626 OISY knows on a network, enabled or not, whose
