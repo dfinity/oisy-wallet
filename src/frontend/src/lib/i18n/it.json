@@ -1809,6 +1809,7 @@
 			"network": "Rete",
 			"amount": "Importo",
 			"hex_data": "Dati HEX",
+			"base64_data": "",
 			"tab_operations": "Operazioni",
 			"unreviewed_instructions": "OISY non riesce a decodificare alcune di queste istruzioni, quindi la revisione qui sotto potrebbe essere incompleta.",
 			"unreviewed_instructions_simulated": "Questa transazione contiene operazioni provenienti da una fonte esterna che OISY non riesce a decodificare, quindi OISY ne ha eseguito una simulazione. Assicurati di fidarti dell'applicazione e controlla le variazioni di saldo simulate e le operazioni prima di firmare. Tieni presente che il risultato effettivo potrebbe differire dalla simulazione.",

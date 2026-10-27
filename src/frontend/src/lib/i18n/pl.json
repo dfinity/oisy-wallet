@@ -1809,6 +1809,7 @@
 			"network": "Sieć",
 			"amount": "Ilość",
 			"hex_data": "Dane HEX",
+			"base64_data": "",
 			"tab_operations": "Operacje",
 			"unreviewed_instructions": "OISY nie może zdekodować niektórych z tych instrukcji, więc poniższy przegląd może być niepełny.",
 			"unreviewed_instructions_simulated": "Ta transakcja zawiera operacje z zewnętrznego źródła, których OISY nie może zdekodować, dlatego OISY przeprowadził ich symulację. Upewnij się, że ufasz aplikacji, i przed podpisaniem sprawdź symulowane zmiany salda oraz operacje. Pamiętaj, że rzeczywisty wynik może różnić się od symulacji.",

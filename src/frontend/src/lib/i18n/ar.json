@@ -1809,6 +1809,7 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "بيانات HEX",
+			"base64_data": "",
 			"tab_operations": "",
 			"unreviewed_instructions": "",
 			"unreviewed_instructions_simulated": "",
