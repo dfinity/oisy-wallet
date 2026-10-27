@@ -258,3 +258,13 @@ fixture out. It exercises the same Notes surface/store as component tests withou
 bypassing signed canister responses. Always rebuild with the flag false before
 phone installation and check that the fixture event is absent from bundled JS.
 See [mobile verification](../../../mobile/capacitor/README.md#verification).
+
+## Mobile authentication deployment checks
+
+`mobile/capacitor/check-auth-deployment.mjs` checks supplied audit callback/AASA JSON,
+signed-app entitlements and selected provisioning metadata. Its offline regression
+tests live in `src/frontend/src/tests/mobile-auth-deployment.spec.ts`, alongside
+other mobile build-tool tests. Passing these checks does not prove live sign-in,
+code-signature validity or device domain association. See the
+[SDK migration preparation](../../../mobile/capacitor/docs/sdk-auth-migration.md#repeatable-deployment-check)
+for inputs, limitations and device acceptance steps.

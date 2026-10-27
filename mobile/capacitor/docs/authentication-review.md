@@ -30,6 +30,8 @@ the authentication design.
 This review compares the app with [dfinity/icp-native-sdk](https://github.com/dfinity/icp-native-sdk)
 at commit `cc22ba56b6cbab384fcef02c8e3c8624341cc30a`, the remote HEAD on the review
 date. Its Swift modules are `IcpSdkAuth`, `IcpSdkSigner` and `IcpSdkCore`.
+This is the development API, not the API shipped in the latest published v0.11.1.
+The migration preparation below checks the release and deployment prerequisites.
 
 The active Capacitor app does not link the Swift SDK. The earlier native balance
 experiment used v0.11.1, but that dependency was removed. Shared web calls use
@@ -58,6 +60,12 @@ data pipeline can stay. Adoption requires a protocol and session-lifecycle chang
 the SDK returns an II-scoped session that cannot replace the current unrestricted
 app delegation directly. Check that the audit principal and balances remain the
 same before changing the installed sign-in flow.
+
+## SDK migration preparation
+
+The published release differs from the development checkout. This follow-up records
+the package build result, live II/domain checks and the steps required to migrate.
+Source: [SDK authentication migration preparation](./sdk-auth-migration.md)
 
 ## Questions for Internet Identity reviewers
 

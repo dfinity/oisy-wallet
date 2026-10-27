@@ -18,8 +18,33 @@ Wallet, Activity and Explore now float over the WebView. More opens Notes, Earn,
 Borrow and Search. The floating navigation was installed at 13:27 local time;
 the shared modal shell and Notes page followed at 15:48. Phone acceptance of those
 screens remains pending. Later welcome updates and their installation times are
-recorded below. The final authentication review fixes were tested in the simulator
-and have not been installed on the phone.
+recorded below. The final authentication review fixes and documentation commit
+`1387b85ac` were installed and launched on the phone at 18:14 local time. The
+normal bundle excludes test fixtures; no app uninstall or sign-in reset was used.
+
+## SDK migration preparation — 2026-10-27
+
+Local branch `codex/ios-sdk-auth-preparation` starts from reviewed `1387b85ac`.
+The working phone app and draft PR remain on `codex/ios-native-m1`; this preparation
+has not switched authentication or added a runtime dependency.
+
+Read [SDK authentication migration preparation](../../../../../mobile/capacitor/docs/sdk-auth-migration.md)
+for the pinned release comparison, callback/provisioning changes, deployment checker
+and implementation sequence. v0.11.1 lacks the newer public identity API needed by
+our web adapter; its isolated SwiftPM probe also fails with HTTP 404 for the binary
+assets. Live II exposes the session methods, but audit's Apple association and the
+signed preview/profile do not yet authorize the SDK's HTTPS callback.
+
+The preparation keeps Explore's read-only provider unchanged. Native enforcement
+of transaction approval remains a separate change: SDK storage alone cannot
+restrict a broad child credential already held by JavaScript.
+
+Preparation validation: 12 deployment-check tests and four existing mobile build
+configuration tests pass. Test type checking reports zero errors/warnings;
+focused ESLint, formatting and the Capacitor/handoff documentation trees pass.
+The live deployment check correctly fails the missing Apple association and
+profile capabilities. The SDK package probe did not compile because binary
+resolution failed. No SDK sign-in or signed principal proof was attempted.
 
 ## Authentication and code review — 2026-10-27
 
@@ -36,8 +61,8 @@ test logs stay outside review commits.
 
 Sign-in still depends on the callback relay deployed on audit; its source is
 missing from this branch. The prototype is ready for design and security review.
-Production approval is still needed, and these review fixes have not been
-installed on the phone.
+Production approval is still needed. These fixes were installed at 18:14; real
+passkey acceptance was not repeated during that installation.
 
 ### Review validation
 
