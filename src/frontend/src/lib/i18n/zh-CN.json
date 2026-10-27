@@ -811,6 +811,7 @@
 			"explorers_description": "$oisy_name 通过第三方服务商处理兑换和跨链桥转账。如果某笔转账耗时超出预期，请打开该服务商自己的浏览器：它会显示您的转账进度，并已按您的钱包筛选。",
 			"explorers_velora_description": "以太坊及其他 EVM 网络上的兑换。",
 			"explorers_near_intents_description": "EVM 网络、Solana 和比特币之间的跨链兑换。",
+			"explorers_lifi_description": "从 EVM 网络发起的兑换和跨链桥转账，包括转至 Solana。",
 			"explorers_onesec_description": "Internet Computer 与 EVM 网络之间的跨链桥转账。",
 			"explorers_chain_eth": "以太坊和 EVM 网络",
 			"explorers_chain_sol": "Solana",

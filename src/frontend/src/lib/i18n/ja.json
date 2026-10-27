@@ -811,6 +811,7 @@
 			"explorers_description": "$oisy_name はスワップやブリッジ送金を第三者のプロバイダー経由で行います。想定より時間がかかっている場合は、プロバイダーのエクスプローラーを開いてください。お客様のウォレットで絞り込まれた状態で、送金の進行状況を確認できます。",
 			"explorers_velora_description": "Ethereum およびその他の EVM ネットワークでのスワップ。",
 			"explorers_near_intents_description": "EVM ネットワーク、Solana、Bitcoin 間のクロスチェーンスワップ。",
+			"explorers_lifi_description": "EVM ネットワークからのスワップとブリッジ送金（Solana 宛てを含む）。",
 			"explorers_onesec_description": "Internet Computer と EVM ネットワーク間のブリッジ送金。",
 			"explorers_chain_eth": "Ethereum と EVM ネットワーク",
 			"explorers_chain_sol": "Solana",

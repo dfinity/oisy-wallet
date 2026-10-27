@@ -811,6 +811,7 @@
 			"explorers_description": "$oisy_name проводит свопы и переводы через мосты с помощью сторонних провайдеров. Если какой-то из них занимает больше времени, чем ожидалось, откройте обозреватель самого провайдера: он покажет, на каком этапе ваш перевод, и уже отфильтрован по вашему кошельку.",
 			"explorers_velora_description": "Свопы в Ethereum и других сетях EVM.",
 			"explorers_near_intents_description": "Кросс-чейн свопы между сетями EVM, Solana и Bitcoin.",
+			"explorers_lifi_description": "Свопы и переводы через мосты из сетей EVM, в том числе в Solana.",
 			"explorers_onesec_description": "Переводы через мост между Internet Computer и сетями EVM.",
 			"explorers_chain_eth": "Ethereum и сети EVM",
 			"explorers_chain_sol": "Solana",

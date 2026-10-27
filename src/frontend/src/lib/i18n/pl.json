@@ -811,6 +811,7 @@
 			"explorers_description": "$oisy_name realizuje swapy i transfery przez most za pośrednictwem zewnętrznych dostawców. Jeśli któryś trwa dłużej niż oczekiwano, otwórz eksplorator dostawcy: pokazuje, na jakim etapie jest Twój transfer, już przefiltrowany do Twojego portfela.",
 			"explorers_velora_description": "Swapy na Ethereum i innych sieciach EVM.",
 			"explorers_near_intents_description": "Swapy międzyłańcuchowe między sieciami EVM, Solaną i Bitcoinem.",
+			"explorers_lifi_description": "Swapy i transfery przez most z sieci EVM, także do Solany.",
 			"explorers_onesec_description": "Transfery przez most między Internet Computer a sieciami EVM.",
 			"explorers_chain_eth": "Ethereum i sieci EVM",
 			"explorers_chain_sol": "Solana",

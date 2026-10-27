@@ -811,6 +811,7 @@
 			"explorers_description": "O $oisy_name faz swaps e transferências via bridge por meio de provedores terceiros. Se alguma demorar mais do que o esperado, abra o explorador do próprio provedor: ele mostra em que ponto está sua transferência, já filtrado para a sua carteira.",
 			"explorers_velora_description": "Swaps no Ethereum e em outras redes EVM.",
 			"explorers_near_intents_description": "Swaps entre cadeias entre redes EVM, Solana e Bitcoin.",
+			"explorers_lifi_description": "Swaps e transferências via bridge a partir de redes EVM, inclusive para Solana.",
 			"explorers_onesec_description": "Transferências via bridge entre o Internet Computer e redes EVM.",
 			"explorers_chain_eth": "Ethereum e redes EVM",
 			"explorers_chain_sol": "Solana",

@@ -811,6 +811,7 @@
 			"explorers_description": "$oisy_name fait passer les swaps et les transferts via un pont par des fournisseurs tiers. Si l'un d'eux prend plus de temps que prévu, ouvrez l'explorateur du fournisseur : il indique où en est votre transfert, déjà filtré sur votre portefeuille.",
 			"explorers_velora_description": "Swaps sur Ethereum et d'autres réseaux EVM.",
 			"explorers_near_intents_description": "Swaps inter-chaînes entre les réseaux EVM, Solana et Bitcoin.",
+			"explorers_lifi_description": "Swaps et transferts via un pont depuis les réseaux EVM, y compris vers Solana.",
 			"explorers_onesec_description": "Transferts via un pont entre l'Internet Computer et les réseaux EVM.",
 			"explorers_chain_eth": "Ethereum et réseaux EVM",
 			"explorers_chain_sol": "Solana",

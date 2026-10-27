@@ -811,6 +811,7 @@
 			"explorers_description": "$oisy_name provádí swapy a převody přes most prostřednictvím poskytovatelů třetích stran. Pokud některý trvá déle, než se čekalo, otevřete průzkumník daného poskytovatele: ukáže, v jakém stavu je váš převod, už vyfiltrovaný na vaši peněženku.",
 			"explorers_velora_description": "Swapy na Ethereu a dalších sítích EVM.",
 			"explorers_near_intents_description": "Mezichainové swapy mezi sítěmi EVM, Solanou a Bitcoinem.",
+			"explorers_lifi_description": "Swapy a převody přes most ze sítí EVM, včetně převodů na Solanu.",
 			"explorers_onesec_description": "Převody přes most mezi Internet Computerem a sítěmi EVM.",
 			"explorers_chain_eth": "Ethereum a sítě EVM",
 			"explorers_chain_sol": "Solana",

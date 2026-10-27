@@ -811,6 +811,7 @@
 			"explorers_description": "$oisy_name thực hiện swap và chuyển qua cầu nối thông qua các nhà cung cấp bên thứ ba. Nếu một giao dịch mất nhiều thời gian hơn dự kiến, hãy mở trình khám phá của chính nhà cung cấp đó: nó cho biết giao dịch của bạn đang ở bước nào, đã được lọc theo ví của bạn.",
 			"explorers_velora_description": "Swap trên Ethereum và các mạng EVM khác.",
 			"explorers_near_intents_description": "Swap xuyên chuỗi giữa các mạng EVM, Solana và Bitcoin.",
+			"explorers_lifi_description": "Swap và chuyển qua cầu nối từ các mạng EVM, kể cả sang Solana.",
 			"explorers_onesec_description": "Chuyển qua cầu nối giữa Internet Computer và các mạng EVM.",
 			"explorers_chain_eth": "Ethereum & các mạng EVM",
 			"explorers_chain_sol": "Solana",

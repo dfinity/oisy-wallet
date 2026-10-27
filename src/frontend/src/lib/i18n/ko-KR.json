@@ -811,6 +811,7 @@
 			"explorers_description": "$oisy_name의 스왑과 브릿지 전송은 서드파티 제공업체를 통해 처리됩니다. 예상보다 오래 걸린다면 해당 제공업체의 탐색기를 열어 보세요. 사용자 지갑으로 이미 필터링된 상태에서 전송이 어디까지 진행되었는지 보여 줍니다.",
 			"explorers_velora_description": "이더리움 및 기타 EVM 네트워크의 스왑.",
 			"explorers_near_intents_description": "EVM 네트워크, 솔라나, 비트코인 간 크로스체인 스왑.",
+			"explorers_lifi_description": "EVM 네트워크에서 시작하는 스왑과 브릿지 전송(솔라나로의 전송 포함).",
 			"explorers_onesec_description": "인터넷 컴퓨터와 EVM 네트워크 간 브릿지 전송.",
 			"explorers_chain_eth": "이더리움 및 EVM 네트워크",
 			"explorers_chain_sol": "솔라나",
