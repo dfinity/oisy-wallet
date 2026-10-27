@@ -238,6 +238,8 @@ and preserves child autofocus. It restores a connected opener through the overla
 Regions drawn above overlays that must stay reachable carry `data-overlay-reachable`
 (the toasts): focus may enter them, and Tab crosses from the overlay's last control into
 them and back. Escape is ignored while an input method is composing.
+The panel that carries the action has `tabindex="-1"` and `outline-none`, so a
+click on its empty space keeps focus in the overlay without a ring around the panel.
 Use dialog semantics for mixed controls; do not assign `role="menu"` without
 implementing menu-item navigation.
 
