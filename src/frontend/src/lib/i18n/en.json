@@ -111,6 +111,9 @@
 		},
 		"error": {
 			"copy_failed": "Couldn't copy. Your browser blocked access to the clipboard. Try again."
+		},
+		"mobile_shell": {
+			"account": "Account"
 		}
 	},
 	"progress": {

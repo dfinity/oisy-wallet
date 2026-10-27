@@ -18,6 +18,23 @@
    the same PR (still atomic — one logical change: "consolidate X").
 4. **Add a row here.** Don't make the next agent re-discover it.
 
+## Mobile wallet reuse
+
+Capacitor builds the same `(app)` routes: Wallet (`Assets`/`Hero`), Token
+(`Transactions`) and Activity (`AllTransactions`). They use the normal auth store,
+Loaders, balances, prices and history workers. Do not add mobile-specific data
+snapshots or duplicate feature pages. `WalletViewSnapshot`, `NativePreview*`,
+`EmbeddedWalletLayout`, `routes/mobile/` and the mobile portfolio/history services
+were removed when the real route/data lifecycle was integrated.
+
+`MOBILE_SHELL` changes outer chrome and unsupported preview actions, not data
+ownership. `SplitPane.embedded` omits the web sidebar; `Header.onAccount` invokes
+the native account sheet; `OisyWalletLogo.markOnly` preserves mobile branding.
+`SlidingInput.forceOpen` lets Search in the native More menu open the existing token filter.
+Saved contacts reuse the real address book with editing hidden in the preview.
+Token/group rows use canonical Symbol IDs so equal tickers remain distinct.
+See the [Capacitor guide](../../../mobile/capacitor/README.md).
+
 ## Where reusable things live
 
 | Layer                                | Path                                                                 | What goes there                                                                                                                    |
@@ -264,3 +281,44 @@ Every dropdown trigger except the native `Select` uses `.dropdown-button` (`Drop
 ### Dropdown panels
 
 Pickers, filters and short option menus open a `Popover` (or `ResponsivePopover`) with `dropdown`, which `Dropdown` and `MultiSelectDropdown` set themselves: an 8 px inset, 36 px rows with a 12 px inset in line with the search text, a 40 px `InputSearch` (through the `--input-padding-*` and `--input-block-gap` hooks in `InputBase`), an inset focus ring and no row dividers. Under `pointer: coarse` rows and search grow to 44 px. Rows keep their own hover, pressed and focus fill (`row-feedback`: the hover fades in over 150 ms, the pressed fill shows at once), and menu rows keep their text colour on hover. Build the content from `menu-surface` rows, `ListItemButton` or `ListItemCheckbox`; do not override row sizes per component. Icon triggers of these menus keep their look and add `relative hit-area hit-area-touch` for a 44 px tap area on touch screens. The user menu is a dropdown too: its labelled controls use `MenuControlRow`, and its buttons and dividers sit on the 8 px panel inset. A picker opened from a row renders inline but keeps its own rows: a modal (the phone form) gets full-size rows back. On phones, `ResponsivePopover` and `Dropdown` with `asModalOnMobile` switch to a sheet or modal at their `Responsive` breakpoints; a bare `Popover` stays a popover, with 44 px rows on touch.
+
+## Capacitor host
+
+`mobile-host.services.ts` is the sole Capacitor transport; feature components do
+not import native plugins. Contract v2 validates fixed navigation, account,
+delegation and sign-out commands. `mobile-runtime.services.ts` installs the native
+child through `AuthClientProvider`; `mobile-worker-session.services.ts` provisions
+workers with independent ephemeral keys. Both reuse the normal auth/data lifecycle.
+
+`OISY_MOBILE_SHELL` writes `build-mobile/` and `.svelte-kit-mobile/`, using the same
+route tree as the website. Its build preflight requires the existing
+`VITE_ETHERSCAN_API_KEY` from the current worktree/build environment for EVM history;
+see the [Capacitor build guide](../../../mobile/capacitor/README.md#build-and-run).
+`MobileHost` maps native roots into Svelte navigation;
+Swift acknowledges routes without echoing navigation. The floating native More
+menu opens the shared `/notes/`, `/earn/` and `/borrow/` routes; Search remains
+the existing wallet filter. `MobileHost` reserves bottom scroll/modal space for
+the native overlay, while feature screens remain shared. Build flags are presentation
+configuration, never authorization. Read the [session boundary](../../../mobile/capacitor/docs/session-boundary.md)
+for origin checks, worker isolation, five-minute logout and remaining renewal gates.
+
+## Shared mobile modal presentation and Notes
+
+`MobileHost.svelte` adapts the existing `Modal` and bottom-sheet surfaces only in
+the embedded mobile build. Keep feature bodies in shared web components. Dialogs
+use a full-viewport backdrop with a content-sized sheet; forms can request
+`mobilePresentation="fullScreen"`. `showCloseButton={false}` supports editors
+with explicit Cancel/Save without CSS that hides unrelated close buttons.
+`ContentWithToolbar.showToolbar` omits page-only or redundant footers; a mobile
+modal suppresses its sole `ButtonCloseModal` footer when the header already closes it.
+
+`overlayFocus` also maintains `blockingOverlayOpenStore` from its mounted stack.
+The mobile host forwards this flag to the native presentation command, hiding
+tabs/More through nested overlays and their exit transitions. Do not add per-feature
+native visibility callbacks or keyboard notification flags.
+
+`Notes.svelte` owns the existing note list/view/editor state and services.
+`NotesModal.svelte` retains the website modal entry; `(app)/notes/+page.svelte`
+uses `presentation="page"`. Both share encryption, cache, validation, search,
+retry, save/delete/share and analytics. The page owns its heading/Back control;
+`NoteView.showBackButton` omits the old modal footer in this context.

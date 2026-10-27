@@ -1,3 +1,4 @@
+import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 import { WorkerQueue } from '$lib/services/worker-queue.services';
 import type { WithoutWorkerId, WorkerData, WorkerId } from '$lib/types/worker';
 import { workerPoolSize } from '$lib/utils/device.utils';
@@ -40,7 +41,18 @@ export abstract class AppWorker {
 		const Workers = await import('$lib/workers/workers?worker');
 		const worker = new Workers.default();
 		AppWorker.#liveWorkers.add(worker);
-		return worker;
+		try {
+			if (MOBILE_SHELL) {
+				const { connectMobileWorkerSession } =
+					await import('$lib/services/mobile-worker-session.services');
+				await connectMobileWorkerSession(worker);
+			}
+			return worker;
+		} catch (error) {
+			worker.terminate();
+			AppWorker.#liveWorkers.delete(worker);
+			throw error;
+		}
 	};
 
 	static #resolvedPoolSize = (): number => {

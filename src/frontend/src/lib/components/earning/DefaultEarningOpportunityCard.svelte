@@ -8,6 +8,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import OverlappedLogos from '$lib/components/ui/OverlappedLogos.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
@@ -129,8 +130,10 @@
 		</List>
 	{/snippet}
 	{#snippet button()}
-		<Button colorStyle="success" fullWidth onclick={cardFields.action} paddingSmall
-			>{resolveText({ i18n: $i18n, path: cardData.actionText })}</Button
-		>
+		{#if !MOBILE_SHELL}
+			<Button colorStyle="success" fullWidth onclick={cardFields.action} paddingSmall
+				>{resolveText({ i18n: $i18n, path: cardData.actionText })}</Button
+			>
+		{/if}
 	{/snippet}
 </EarningOpportunityCard>

@@ -3,6 +3,9 @@ import type { Snippet } from 'svelte';
 
 export interface ModalProps {
 	visible?: boolean;
+	/** Used only by the embedded mobile shell; desktop presentation is unchanged. */
+	mobilePresentation?: 'sheet' | 'fullScreen';
+	showCloseButton?: boolean;
 	role?: 'dialog' | 'alert';
 	testId?: string;
 	disablePointerEvents?: boolean;

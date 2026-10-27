@@ -25,6 +25,7 @@ import {
 } from '$tests/mocks/user-profile.mock';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { toNullable } from '@dfinity/utils';
+import { DelegationChain, DelegationIdentity, Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/services/load-user-profile.services', () => ({
@@ -60,6 +61,7 @@ describe('loader.services', () => {
 			apiMock = vi.spyOn(api, 'allowSigning');
 
 			mockAuthStore();
+			authStore.setForTesting(mockIdentity);
 
 			Object.defineProperty(window, 'location', {
 				writable: true,
@@ -78,6 +80,51 @@ describe('loader.services', () => {
 			const result = await initSignerAllowance();
 
 			expect(result.success).toBeTruthy();
+		});
+
+		it('initializes allowance with the original II proof for a mobile child identity', async () => {
+			const root = Ed25519KeyIdentity.generate();
+			const nativeKey = Ed25519KeyIdentity.generate();
+			const webKey = Ed25519KeyIdentity.generate();
+			const iiChain = await DelegationChain.create(
+				root,
+				nativeKey.getPublicKey(),
+				new Date(Date.now() + 600_000)
+			);
+			const nativeIdentity = DelegationIdentity.fromDelegation(nativeKey, iiChain);
+			const webChain = await DelegationChain.create(
+				nativeIdentity,
+				webKey.getPublicKey(),
+				new Date(Date.now() + 300_000),
+				{ previous: iiChain }
+			);
+			const webIdentity = DelegationIdentity.fromDelegation(webKey, webChain);
+			authStore.setForTesting(webIdentity);
+			vi.mocked(allowSigning).mockImplementation(({ iiDelegationChain }) => {
+				// Mirrors the backend's one-link II proof contract; this is not signature validation.
+				if (iiDelegationChain[0]?.delegations.length !== 1) {
+					throw new Error('Expected exactly one II delegation');
+				}
+				return Promise.resolve(mockExecutedOutcome);
+			});
+			const signedOut = vi.spyOn(authServices, 'errorSignOut');
+
+			await expect(initSignerAllowance()).resolves.toEqual({ success: true });
+			expect(signedOut).not.toHaveBeenCalled();
+			expect(apiMock).toHaveBeenCalledWith({
+				identity: webIdentity,
+				iiDelegationChain: [
+					expect.objectContaining({
+						public_key: new Uint8Array(iiChain.publicKey),
+						delegations: [
+							expect.objectContaining({
+								signature: new Uint8Array(iiChain.delegations[0].signature)
+							})
+						]
+					})
+				]
+			});
+			expect(webIdentity.getDelegation().delegations).toHaveLength(2);
 		});
 
 		it('should not track event when not rate limited', async () => {

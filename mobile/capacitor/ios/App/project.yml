@@ -1,0 +1,59 @@
+name: App
+options:
+  minimumXcodeGenVersion: 2.45.0
+  deploymentTarget:
+    iOS: '26.0'
+  developmentLanguage: en
+settings:
+  base:
+    SWIFT_VERSION: '6.0'
+    SWIFT_STRICT_CONCURRENCY: complete
+    CODE_SIGN_STYLE: Automatic
+    'CODE_SIGN_IDENTITY[sdk=iphonesimulator*]': '-'
+    TARGETED_DEVICE_FAMILY: '1'
+    MARKETING_VERSION: '0.1.0'
+    CURRENT_PROJECT_VERSION: '2'
+packages:
+  CapApp-SPM:
+    path: CapApp-SPM
+targets:
+  App:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+        excludes: [public, Base.lproj/Main.storyboard]
+      - path: App/public
+        type: folder
+        buildPhase: resources
+    dependencies:
+      - package: CapApp-SPM
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.dfinity.oisy.capacitor.preview
+        INFOPLIST_FILE: App/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: ''
+  AppTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [../AppTests]
+    dependencies: [{ target: App }]
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: org.dfinity.oisy.capacitor.preview.tests
+  AppUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [../AppUITests]
+    dependencies: [{ target: App }]
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: org.dfinity.oisy.capacitor.preview.uitests
+schemes:
+  App:
+    build:
+      targets: { App: all }
+    test:
+      targets: [AppTests, AppUITests]

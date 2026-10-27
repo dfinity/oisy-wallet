@@ -111,6 +111,9 @@
 		},
 		"error": {
 			"copy_failed": ""
+		},
+		"mobile_shell": {
+			"account": ""
 		}
 	},
 	"progress": {

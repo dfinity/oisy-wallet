@@ -6,6 +6,11 @@ import { onCkEthMinterInfoMessage } from '$icp/workers/cketh-minter-info.worker'
 import { onDip20WalletMessage } from '$icp/workers/dip20-wallet.worker';
 import { onIcpWalletMessage } from '$icp/workers/icp-wallet.worker';
 import { onIcrcWalletMessage } from '$icp/workers/icrc-wallet.worker';
+import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
+import {
+	installMobileWorkerSession,
+	mobileWorkerInitSchema
+} from '$lib/services/mobile-worker-session.services';
 import type {
 	PostMessage,
 	PostMessageDataRequest,
@@ -65,7 +70,30 @@ export const messageToHandler: PostMessageRequestMap = {
 	triggerCkBtcMinterInfoTimer: onCkBtcMinterInfoMessage
 };
 
+let mobileSessionInstalled = false;
+let mobileSessionInstalling = false;
 onmessage = async (ev: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
+	if (MOBILE_SHELL) {
+		const session = mobileWorkerInitSchema.safeParse(ev.data);
+		if (
+			session.success &&
+			!mobileSessionInstalled &&
+			!mobileSessionInstalling &&
+			ev.ports.length === 1
+		) {
+			mobileSessionInstalling = true;
+			try {
+				await installMobileWorkerSession({ port: ev.ports[0], session: session.data });
+				mobileSessionInstalled = true;
+			} catch {
+				self.close();
+			}
+			return;
+		}
+		if (!mobileSessionInstalled) {
+			return;
+		}
+	}
 	const msg = ev.data?.msg;
 	if (isNullish(msg)) {
 		return;

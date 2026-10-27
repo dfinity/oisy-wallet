@@ -52,6 +52,16 @@ describe('TransactionContactCard', () => {
 		vi.clearAllMocks();
 	});
 
+	it('keeps addresses readable without offering to save in the read-only preview', () => {
+		mockContacts([]);
+		const { queryByRole, getByText } = render(TransactionContactCard, {
+			props: { type: 'send', to: toAddress, readOnly: true }
+		});
+
+		expect(getByText(toAddress)).toBeInTheDocument();
+		expect(queryByRole('button', { name: get(i18n).address.save.title })).not.toBeInTheDocument();
+	});
+
 	it('renders SkeletonAddressCard if no relevant address', () => {
 		const { getByTestId } = render(TransactionContactCard, {
 			props: { type: 'send' }

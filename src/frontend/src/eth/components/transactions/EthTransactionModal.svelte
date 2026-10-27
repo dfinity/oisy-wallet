@@ -51,11 +51,12 @@
 	import { parseNftId } from '$lib/validation/nft.validation';
 
 	interface Props {
+		readOnly?: boolean;
 		transaction: EthTransactionUi;
 		token: OptionToken;
 	}
 
-	const { transaction, token }: Props = $props();
+	const { transaction, token, readOnly = false }: Props = $props();
 
 	let {
 		from,
@@ -352,6 +353,7 @@
 				{from}
 				{fromExplorerUrl}
 				{onSaveAddressComplete}
+				{readOnly}
 				type="approve"
 			/>
 		{:else if nonNullish(recipient) && nonNullish(from)}
@@ -359,6 +361,7 @@
 				{from}
 				{fromExplorerUrl}
 				{onSaveAddressComplete}
+				{readOnly}
 				to={recipient}
 				toExplorerUrl={recipientExplorerUrl}
 				type={type === 'receive' ? 'receive' : 'send'}

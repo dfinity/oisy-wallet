@@ -14,6 +14,8 @@
 
 	let {
 		visible = true,
+		mobilePresentation = 'sheet',
+		showCloseButton = true,
 		role = 'dialog',
 		testId,
 		disablePointerEvents = false,
@@ -61,6 +63,8 @@
 		aria-label={showHeader ? undefined : ariaLabel}
 		aria-labelledby={showHeader ? modalTitleId : undefined}
 		aria-modal="true"
+		data-dismissible={nonNullish(onClose) && showCloseButton && !disablePointerEvents}
+		data-mobile-presentation={mobilePresentation}
 		data-tid={testId}
 		onclick={stopPropagation(onClick)}
 		onintroend={onIntroEnd}
@@ -90,7 +94,7 @@
 					<div class="header-right">
 						{@render headerRight?.()}
 
-						{#if !disablePointerEvents}
+						{#if !disablePointerEvents && showCloseButton}
 							<!-- Flush against the header actions, so its tap area only grows up and down
 							     when one is actually rendered before it. Not keyed on the headerRight
 							     snippet: a snippet can render nothing (Notes shows Save only in its

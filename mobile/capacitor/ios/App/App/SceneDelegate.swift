@@ -1,0 +1,31 @@
+import Capacitor
+import UIKit
+
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+  var window: UIWindow?
+
+  func scene(
+    _ scene: UIScene, willConnectTo session: UISceneSession,
+    options connectionOptions: UIScene.ConnectionOptions
+  ) {
+    guard let windowScene = scene as? UIWindowScene else { return }
+
+    window = UIWindow(windowScene: windowScene)
+    window?.rootViewController = ShellViewController()
+    window?.makeKeyAndVisible()
+
+    SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)
+  }
+
+  func sceneDidBecomeActive(_ scene: UIScene) {
+    (window?.rootViewController as? ShellViewController)?.resume()
+  }
+
+  func scene(_ scene: UIScene, openURLContexts urlContexts: Set<UIOpenURLContext>) {
+    SceneDelegateProxy.shared.scene(scene, openURLContexts: urlContexts)
+  }
+
+  func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+    SceneDelegateProxy.shared.scene(scene, continue: userActivity)
+  }
+}

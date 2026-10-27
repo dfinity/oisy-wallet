@@ -1,8 +1,10 @@
 import { PersonalNotesRateLimitedError } from '$lib/canisters/errors';
+import Notes from '$lib/components/notes/Notes.svelte';
 import NotesModal from '$lib/components/notes/NotesModal.svelte';
 import { MAX_PERSONAL_NOTES_PER_USER } from '$lib/constants/app.constants';
 import {
 	NOTES_ADD_BUTTON,
+	NOTES_CANCEL_BUTTON,
 	NOTES_DELETE_CONFIRM_BUTTON,
 	NOTES_INPUT,
 	NOTES_LIST_ITEM,
@@ -20,12 +22,14 @@ import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import { trackPersonalNote } from '$lib/services/personal-notes-analytics.services';
 import * as notesServices from '$lib/services/personal-notes.services';
 import { personalNotesStore } from '$lib/stores/personal-notes.store';
+import { blockingOverlayOpenStore } from '$lib/stores/ui.store';
 import type { PersonalNoteUi } from '$lib/types/personal-note';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
+import { get } from 'svelte/store';
 
 const note = (id: string): PersonalNoteUi => ({
 	id,
@@ -50,6 +54,50 @@ describe('NotesModal', () => {
 		vi.clearAllMocks();
 		mockAuthStore();
 		personalNotesStore.reset();
+	});
+
+	it('renders Notes as a page, presents only the editor modally and restores the page on cancel', async () => {
+		setLoadedNotes({ entries: [], count: 0 });
+		const save = vi.spyOn(notesServices, 'savePersonalNote');
+		const { getByTestId, queryByRole, queryByTestId, getByRole } = render(Notes, {
+			presentation: 'page'
+		});
+
+		expect(getByTestId('notes-page')).toBeInTheDocument();
+		expect(queryByRole('dialog')).not.toBeInTheDocument();
+		expect(queryByTestId('modal-dismiss')).not.toBeInTheDocument();
+		expect(get(blockingOverlayOpenStore)).toBeFalsy();
+
+		await fireEvent.click(getByTestId(NOTES_ADD_BUTTON));
+
+		expect(getByRole('dialog')).toHaveAttribute('data-mobile-presentation', 'fullScreen');
+		expect(queryByTestId('close-modal')).not.toBeInTheDocument();
+		expect(get(blockingOverlayOpenStore)).toBeTruthy();
+
+		await fireEvent.input(getByTestId(NOTES_INPUT), { target: { value: 'unsaved fixture' } });
+		await fireEvent.keyDown(window, { key: 'Escape' });
+
+		expect(getByTestId(NOTES_INPUT)).toHaveValue('unsaved fixture');
+
+		await fireEvent.click(getByTestId(NOTES_CANCEL_BUTTON));
+		await waitFor(() => expect(queryByRole('dialog')).not.toBeInTheDocument());
+
+		expect(getByTestId('notes-page')).toBeInTheDocument();
+		expect(get(blockingOverlayOpenStore)).toBeFalsy();
+		expect(save).not.toHaveBeenCalled();
+	});
+
+	it('keeps the shared note view and returns to its list without a modal Close footer', async () => {
+		setLoadedNotes({ entries: [note('a')], count: 1 });
+		const { getByTestId, getByRole, queryByRole } = render(Notes, { presentation: 'page' });
+		await fireEvent.click(getByTestId(NOTES_LIST_ITEM));
+
+		expect(getByTestId(NOTES_VIEW)).toBeInTheDocument();
+		expect(queryByRole('dialog')).not.toBeInTheDocument();
+
+		await fireEvent.click(getByRole('button', { name: en.notes.text.back }));
+
+		expect(getByTestId(NOTES_LIST_ITEM)).toBeInTheDocument();
 	});
 
 	it('tracks the notes surface opening on mount', () => {

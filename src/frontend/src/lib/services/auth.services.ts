@@ -18,6 +18,7 @@ import {
 	TRACK_SIGN_OUT_SUCCESS,
 	TRACK_SIGN_OUT_WITH_WARNING
 } from '$lib/constants/analytics.constants';
+import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 import { PARAM_DELETE_IDB_CACHE, PARAM_LEVEL, PARAM_MSG } from '$lib/constants/routes.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
@@ -195,14 +196,16 @@ export const idleSignOut = (): Promise<void> => {
 			text,
 			level
 		},
-		clearIdbStorages: false
+		clearIdbStorages: false,
+		mobileReason: 'sessionExpired'
 	});
 };
 
 export const lockSession = ({ resetUrl = false }: { resetUrl?: boolean }): Promise<void> =>
 	logout({
 		resetUrl,
-		clearIdbStorages: false
+		clearIdbStorages: false,
+		mobileReason: 'sessionExpired'
 	});
 
 const clearIdbStore = async (clearIdbStore: () => Promise<void>) => {
@@ -254,13 +257,28 @@ const disconnectWalletConnect = async () => {
 
 const logout = async ({
 	clearIdbStorages = true,
+	mobileReason = 'signOut',
 	...params
-}: { clearIdbStorages?: boolean } & ({ msg?: ToastMsg } | { resetUrl?: boolean })) => {
+}: { clearIdbStorages?: boolean; mobileReason?: 'signOut' | 'sessionExpired' } & (
+	{ msg?: ToastMsg } | { resetUrl?: boolean }
+)) => {
 	const { msg, resetUrl } = {
 		msg: undefined,
 		resetUrl: false,
 		...params
 	};
+
+	if (MOBILE_SHELL) {
+		busy.start();
+		const { endMobileRuntime } = await import('$lib/services/mobile-runtime.services');
+		await authStore.signOut();
+		try {
+			await endMobileRuntime(mobileReason);
+		} finally {
+			busy.stop();
+		}
+		return;
+	}
 
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
 	busy.start();

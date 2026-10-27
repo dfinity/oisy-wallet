@@ -1,3 +1,4 @@
+import { blockingOverlayOpenStore } from '$lib/stores/ui.store';
 import { tick } from 'svelte';
 
 interface OverlayOptions {
@@ -75,6 +76,7 @@ export const overlayFocus = (node: HTMLElement, options: OverlayOptions = {}) =>
 			: []
 	};
 	overlays.push(entry);
+	blockingOverlayOpenStore.set(true);
 	let mounted = true;
 
 	const isTopmost = () => topmostOverlay() === entry;
@@ -151,6 +153,7 @@ export const overlayFocus = (node: HTMLElement, options: OverlayOptions = {}) =>
 			mounted = false;
 			const wasTopmost = isTopmost();
 			overlays.splice(overlays.indexOf(entry), 1);
+			blockingOverlayOpenStore.set(overlays.length > 0);
 			window.removeEventListener('keydown', onKeyDown);
 			document.removeEventListener('focusin', onFocusIn);
 			const remaining = topmostOverlay()?.node;

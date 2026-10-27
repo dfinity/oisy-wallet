@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { browser } from '$app/environment';
 	import Banner from '$lib/components/core/Banner.svelte';
+	import MobileHost from '$lib/components/core/MobileHost.svelte';
 	import Busy from '$lib/components/ui/Busy.svelte';
 	import ModalExitHandler from '$lib/components/ui/ModalExitHandler.svelte';
 	import ResponsiveListener from '$lib/components/ui/ResponsiveListener.svelte';
@@ -14,6 +15,7 @@
 		TRACK_SYNC_AUTH_ERROR_COUNT,
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 	} from '$lib/constants/analytics.constants';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { isLocked } from '$lib/derived/locked.derived';
 	import { routeToken } from '$lib/derived/nav.derived';
@@ -69,6 +71,10 @@
 		}
 
 		try {
+			if (MOBILE_SHELL) {
+				const { initializeMobileRuntime } = await import('$lib/services/mobile-runtime.services');
+				await initializeMobileRuntime();
+			}
 			await authStore.sync();
 
 			// We are using $authStore.identity here and not the derived $authIdentity because we track the event imperatively right after authStore.sync
@@ -78,6 +84,11 @@
 					: TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 			});
 		} catch (err: unknown) {
+			if (MOBILE_SHELL) {
+				const { endMobileRuntime } = await import('$lib/services/mobile-runtime.services');
+				await endMobileRuntime();
+				return;
+			}
 			trackEvent({
 				name: TRACK_SYNC_AUTH_ERROR_COUNT
 			});
@@ -97,7 +108,33 @@
 
 	let worker = $state<AuthWorker | undefined>();
 
-	onMount(async () => (worker = await AuthWorker.init()));
+	const initialized = init();
+	let disposed = false;
+	onMount(() => {
+		void initialized.then(async () => {
+			if (disposed || (MOBILE_SHELL && isNullish($authStore.identity))) {
+				return;
+			}
+			try {
+				const created = await AuthWorker.init();
+				if (disposed) {
+					created.destroy();
+				} else {
+					worker = created;
+				}
+			} catch (err) {
+				if (MOBILE_SHELL) {
+					const { endMobileRuntime } = await import('$lib/services/mobile-runtime.services');
+					await endMobileRuntime();
+				} else {
+					consoleWarn('Auth worker unavailable', err);
+				}
+			}
+		});
+		return () => {
+			disposed = true;
+		};
+	});
 
 	onMount(initWorkerCleanupOnPageUnload);
 	onDestroy(() => worker?.destroy());
@@ -181,7 +218,7 @@
 		}
 	};
 
-	onMount(openBc);
+	onMount(() => (MOBILE_SHELL ? undefined : openBc()));
 
 	let scrollY = 0;
 
@@ -226,7 +263,7 @@
 	});
 </script>
 
-{#await init()}
+{#await initialized}
 	<div
 		class="app-initializing pointer-events-none fixed inset-0 flex items-center justify-center text-brand-primary dark:text-primary"
 		in:fade
@@ -234,6 +271,7 @@
 		<Spinner inline size="48px" />
 	</div>
 {:then _}
+	{#if MOBILE_SHELL}<MobileHost />{/if}
 	{@render children()}
 {/await}
 

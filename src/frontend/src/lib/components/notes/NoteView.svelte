@@ -24,6 +24,7 @@
 	interface Props {
 		note: PersonalNoteUi;
 		onBack: () => void;
+		showBackButton?: boolean;
 		// Optional so the read-only view can render without the edit/delete actions
 		// (they are wired once the editor and delete flows exist).
 		onEdit?: () => void;
@@ -32,7 +33,7 @@
 		onShare?: () => void;
 	}
 
-	let { note, onBack, onEdit, onDelete, onShare }: Props = $props();
+	let { note, onBack, onEdit, onDelete, onShare, showBackButton = true }: Props = $props();
 
 	const metaLine = $derived.by(() => {
 		const created = formatPersonalNoteTimestamp({
@@ -75,6 +76,7 @@
 </script>
 
 <ContentWithToolbar
+	showToolbar={showBackButton}
 	styleClass="flex min-h-0 flex-col items-stretch gap-4 overflow-y-auto"
 	testId={NOTES_VIEW}
 >

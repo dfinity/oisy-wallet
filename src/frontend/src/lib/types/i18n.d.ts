@@ -94,6 +94,7 @@ interface I18nCore {
 	};
 	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
 	error: { copy_failed: string };
+	mobile_shell: { account: string };
 }
 
 interface I18nProgress {

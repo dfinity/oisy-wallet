@@ -3,6 +3,7 @@
 // reaches into `localStorage` from several code paths — doesn't crash with
 // `ReferenceError: localStorage is not defined` when this provider is used
 // from a worker. No-op in the main thread.
+import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 import '$lib/utils/worker-local-storage.polyfill';
 // Side-effect import: installs `Promise.withResolvers` when missing (e.g.
 // Safari < 17.4), because `@icp-sdk/signer` calls it on every sign-in request.
@@ -17,7 +18,11 @@ import {
 	KEY_STORAGE_KEY
 } from '@icp-sdk/auth/client';
 import type { Identity } from '@icp-sdk/core/agent';
-import { DelegationChain, isDelegationValid } from '@icp-sdk/core/identity';
+import {
+	DelegationChain,
+	type DelegationIdentity,
+	isDelegationValid
+} from '@icp-sdk/core/identity';
 
 type SignInAuthClientOptions = Pick<
 	AuthClientCreateOptions,
@@ -31,6 +36,7 @@ export class AuthClientProvider {
 	readonly #storage: IdbStorage;
 
 	#authClient: AuthClient | undefined;
+	#mobileIdentity: DelegationIdentity | undefined;
 
 	private constructor() {
 		this.#storage = new IdbStorage();
@@ -134,6 +140,11 @@ export class AuthClientProvider {
 	 * identically in the main thread and in workers.
 	 */
 	loadIdentity = async (): Promise<Identity | undefined> => {
+		if (MOBILE_SHELL) {
+			return this.#mobileIdentity && isDelegationValid(this.#mobileIdentity.getDelegation())
+				? this.#mobileIdentity
+				: undefined;
+		}
 		if (!(await this.#hasValidDelegation())) {
 			return;
 		}
@@ -141,6 +152,29 @@ export class AuthClientProvider {
 		const authClient = await this.createAuthClient();
 
 		return await authClient.getIdentity();
+	};
+
+	// Native/worker child keys live only in their owning JS realm, never in AuthClient IDB.
+	setMobileIdentity = (identity: DelegationIdentity | undefined): void => {
+		if (!MOBILE_SHELL) {
+			throw new Error('Mobile session is unavailable in the browser build');
+		}
+		this.#mobileIdentity = identity;
+	};
+
+	loadDelegation = async (): Promise<DelegationChain | undefined> => {
+		if (MOBILE_SHELL) {
+			return this.#mobileIdentity?.getDelegation();
+		}
+		const raw = await this.#storage.get(KEY_STORAGE_DELEGATION);
+		if (typeof raw !== 'string') {
+			return;
+		}
+		try {
+			return DelegationChain.fromJSON(raw);
+		} catch {
+			// Malformed browser storage has no valid delegation.
+		}
 	};
 
 	#hasValidDelegation = async (): Promise<boolean> => {
@@ -168,5 +202,6 @@ export class AuthClientProvider {
 	 */
 	reset() {
 		this.#authClient = undefined;
+		this.#mobileIdentity = undefined;
 	}
 }

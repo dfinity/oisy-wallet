@@ -13,6 +13,7 @@ const signerVersionsFile = fileURLToPath(new URL('signer-versions.json', import.
 const signerVersions = JSON.parse(readFileSync(signerVersionsFile, 'utf8'));
 
 const signerTarget = process.env.OISY_SIGNER_TARGET;
+const mobileShell = process.env.OISY_MOBILE_SHELL === '1';
 
 // The legacy signer is still built from main, so its pin is held equal to the wallet version by
 // the release workflow. The pin only starts to differ once it is frozen at a v4 snapshot.
@@ -27,8 +28,10 @@ const config = {
 	preprocess: vitePreprocess(),
 
 	kit: {
+		...(mobileShell && { outDir: '.svelte-kit-mobile' }),
 		adapter: adapter({
 			fallback: 'index.html',
+			...(mobileShell && { pages: 'build-mobile', assets: 'build-mobile' }),
 			precompress: false
 		}),
 		prerender: {
@@ -53,7 +56,8 @@ const config = {
 			$xrp: './src/frontend/src/xrp',
 			'$icp-eth': './src/frontend/src/icp-eth',
 			$env: './src/frontend/src/env',
-			$routes: './src/frontend/src/routes'
+			$routes: './src/frontend/src/routes',
+			$tests: './src/frontend/src/tests'
 		},
 
 		serviceWorker: {

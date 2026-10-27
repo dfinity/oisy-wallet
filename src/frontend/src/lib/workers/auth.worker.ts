@@ -1,9 +1,8 @@
 import { AUTH_TIMER_INTERVAL, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
-import { isNullish, nonNullish } from '@dfinity/utils';
-import { KEY_STORAGE_DELEGATION } from '@icp-sdk/auth/client';
-import { DelegationChain, isDelegationValid } from '@icp-sdk/core/identity';
+import { nonNullish } from '@dfinity/utils';
+import { type DelegationChain, isDelegationValid } from '@icp-sdk/core/identity';
 
 export const onAuthMessage = async ({
 	data
@@ -64,27 +63,12 @@ const onIdleSignOut = async () => {
 	logout();
 };
 
-/**
- * Reads the delegation chain from IndexedDB and checks its validity.
- *
- * Prior to `@icp-sdk/auth` v6 the worker also called
- * `AuthClient.isAuthenticated()` as an extra signal. In v6 that call is
- * synchronous and reads from `localStorage`, which isn't available inside
- * Web Workers (`ReferenceError: localStorage is not defined`). Since the
- * delegation chain stored in IndexedDB is already the source of truth for
- * an active session, a single IDB-based check is sufficient and is
- * worker-safe.
- *
- * @returns the parsed delegation (if any) and whether it is still valid.
- */
+/** Read the shared session provider: browser IDB or the worker's in-memory mobile delegation. */
 const checkDelegationChain = async (): Promise<{
 	valid: boolean;
 	delegation: DelegationChain | null;
 }> => {
-	const delegationChain =
-		await AuthClientProvider.getInstance().storage.get(KEY_STORAGE_DELEGATION);
-
-	const delegation = isNullish(delegationChain) ? null : DelegationChain.fromJSON(delegationChain);
+	const delegation = (await AuthClientProvider.getInstance().loadDelegation()) ?? null;
 
 	return {
 		valid: nonNullish(delegation) && isDelegationValid(delegation),
@@ -101,7 +85,11 @@ const logout = () => {
 };
 
 const emitExpirationTime = (delegation: DelegationChain) => {
-	const expirationTime: bigint | undefined = delegation.delegations[0]?.delegation.expiration;
+	const expirationTime = delegation.delegations.reduce<bigint | undefined>(
+		(expiration, { delegation: item }) =>
+			expiration === undefined || item.expiration < expiration ? item.expiration : expiration,
+		undefined
+	);
 
 	// That would be unexpected here because the delegation has just been tested and is valid
 	if (expirationTime === undefined) {
