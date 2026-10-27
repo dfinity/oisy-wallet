@@ -1381,6 +1381,8 @@
 			"gasless": "Sin gas",
 			"swap_fees": "Comisiones de Intercambio",
 			"cross_chain_networks_info": "Mover tokens de la red <b>$sourceNetwork</b> a la red <b>$destinationNetwork</b>",
+			"two_swaps_info": "$oisy_short solo ofrece intercambios que puede verificar por completo antes de tu aprobación, y no hay un intercambio directo así de $sourceSymbol a $destinationSymbol. Pero puedes intercambiar primero $sourceSymbol por $intermediateSymbol y después $intermediateSymbol por $destinationSymbol.",
+			"two_swaps_first_button": "Intercambiar primero por $intermediateSymbol",
 			"near_intents_estimated_time": "",
 			"lifi_route_via": "",
 			"lifi_route_via_estimated_time": "",
