@@ -1,4 +1,5 @@
 import {
+	LIFI_EXPLORER_URL,
 	NEAR_INTENTS_EXPLORER_URL,
 	ONESEC_EXPLORER_URL,
 	VELORA_EXPLORER_URL
@@ -28,6 +29,7 @@ describe('help-explorers.utils', () => {
 			expect(groups.map(({ provider }) => provider)).toEqual([
 				SwapProvider.VELORA,
 				SwapProvider.NEAR_INTENTS,
+				SwapProvider.LIFI,
 				SwapProvider.ONE_SEC
 			]);
 		});
@@ -53,8 +55,16 @@ describe('help-explorers.utils', () => {
 			]);
 		});
 
+		it('links LI.FI Scan to the Ethereum address every LI.FI transfer leaves from', () => {
+			const [, , lifi] = buildHelpExplorerGroups(allAddresses);
+
+			expect(lifi.links).toEqual([
+				{ chain: 'eth', url: `${LIFI_EXPLORER_URL}/wallet/${mockEthAddress}` }
+			]);
+		});
+
 		it('gives 1Sec both ends of the bridge, ICP first', () => {
-			const [, , oneSec] = buildHelpExplorerGroups(allAddresses);
+			const [, , , oneSec] = buildHelpExplorerGroups(allAddresses);
 
 			expect(oneSec.links).toEqual([
 				{ chain: 'icp', url: `${ONESEC_EXPLORER_URL}/explorer/?address=${mockPrincipalText}` },
@@ -81,7 +91,7 @@ describe('help-explorers.utils', () => {
 		it('treats an empty address the same as a missing one', () => {
 			const groups = buildHelpExplorerGroups({ ...allAddresses, principal: '' });
 
-			const [, , oneSec] = groups;
+			const [, , , oneSec] = groups;
 
 			expect(oneSec.links.map(({ chain }) => chain)).toEqual(['eth']);
 		});
@@ -92,7 +102,7 @@ describe('help-explorers.utils', () => {
 				principal: mockPrincipalText
 			});
 
-			// Velora is EVM-only, so without an Ethereum address it has nothing to offer.
+			// Velora and LI.FI are EVM-only, so without an Ethereum address they have nothing to offer.
 			expect(groups.map(({ provider }) => provider)).toEqual([
 				SwapProvider.NEAR_INTENTS,
 				SwapProvider.ONE_SEC
@@ -111,6 +121,7 @@ describe('help-explorers.utils', () => {
 			expect(providers.map((provider) => HELP_EXPLORER_PROVIDER_NAMES[provider])).toEqual([
 				'Velora',
 				'NEAR Intents',
+				'LI.FI',
 				'1Sec'
 			]);
 		});
