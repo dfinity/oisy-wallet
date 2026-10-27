@@ -66,6 +66,12 @@ describe('Popover', () => {
 		expect(container.querySelector('.wrapper.above')).not.toBeNull();
 	});
 
+	it('keeps the browser focus ring off the panel', () => {
+		const { container } = render(Popover, { props: { visible: true } });
+
+		expect(container.querySelector('.wrapper')).toHaveClass('outline-none');
+	});
+
 	it('exposes the anchor distance an upward panel is positioned by', () => {
 		const { container } = render(Popover, { props: { visible: true, placement: 'above' } });
 
