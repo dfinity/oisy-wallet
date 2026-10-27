@@ -7,6 +7,20 @@ import { createRawSnippet, tick } from 'svelte';
 describe('Modal', () => {
 	const baseProps = { title: createMockSnippet('modal-title-content'), children: mockSnippet };
 
+	it('keeps a footer dismissal available unless the header can actually close the dialog', async () => {
+		const { getByRole, rerender } = render(Modal, { props: baseProps });
+
+		expect(getByRole('dialog')).toHaveAttribute('data-dismissible', 'false');
+
+		await rerender({ ...baseProps, onClose: vi.fn() });
+
+		expect(getByRole('dialog')).toHaveAttribute('data-dismissible', 'true');
+
+		await rerender({ ...baseProps, onClose: vi.fn(), showCloseButton: false });
+
+		expect(getByRole('dialog')).toHaveAttribute('data-dismissible', 'false');
+	});
+
 	// The close button's tap area is capped sideways only when a header action actually renders
 	// right before it, not merely because a headerRight snippet was passed (it may render nothing).
 	it('keeps the close button its full tap area when no header action sits before it', () => {

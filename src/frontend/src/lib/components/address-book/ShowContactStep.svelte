@@ -7,6 +7,7 @@
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import {
 		CONTACT_SHOW_ADD_ADDRESS_BUTTON,
 		CONTACT_SHOW_CLOSE_BUTTON
@@ -50,16 +51,16 @@
 			{/each}
 		</div>
 		<div class="flex justify-start">
-			<Button
-				alignLeft
-				ariaLabel={$i18n.address_book.edit_contact.add_address}
-				colorStyle="secondary-light"
-				onclick={onAddAddress}
-				transparent
-			>
-				<IconPlus />
-				{$i18n.address_book.edit_contact.add_address}
-			</Button>
+			{#if !MOBILE_SHELL}<Button
+					alignLeft
+					ariaLabel={$i18n.address_book.edit_contact.add_address}
+					colorStyle="secondary-light"
+					onclick={onAddAddress}
+					transparent
+				>
+					<IconPlus />
+					{$i18n.address_book.edit_contact.add_address}
+				</Button>{/if}
 		</div>
 	{:else}
 		<div class="mb-5 flex flex-col items-center gap-5">
@@ -78,16 +79,16 @@
 				>
 			</div>
 
-			<Button
-				ariaLabel={$i18n.address_book.show_contact.add_address}
-				colorStyle="secondary-light"
-				onclick={onAddAddress}
-				testId={CONTACT_SHOW_ADD_ADDRESS_BUTTON}
-				transparent
-			>
-				<IconPlus />
-				{$i18n.address_book.show_contact.add_address}
-			</Button>
+			{#if !MOBILE_SHELL}<Button
+					ariaLabel={$i18n.address_book.show_contact.add_address}
+					colorStyle="secondary-light"
+					onclick={onAddAddress}
+					testId={CONTACT_SHOW_ADD_ADDRESS_BUTTON}
+					transparent
+				>
+					<IconPlus />
+					{$i18n.address_book.show_contact.add_address}
+				</Button>{/if}
 		</div>
 	{/if}
 

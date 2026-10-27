@@ -5,9 +5,17 @@ import * as formatUtils from '$lib/utils/format.utils';
 import { render, screen } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
+const mobile = vi.hoisted(() => ({ enabled: false }));
+vi.mock('$lib/constants/mobile.constants', () => ({
+	get MOBILE_SHELL() {
+		return mobile.enabled;
+	}
+}));
+
 describe('DefaultEarningOpportunityCard', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
+		mobile.enabled = false;
 		vi.spyOn(formatUtils, 'formatCurrency').mockImplementation(({ value }) => `$${value}`);
 	});
 
@@ -98,6 +106,14 @@ describe('DefaultEarningOpportunityCard', () => {
 		});
 
 		expect(screen.getByRole('button')).toHaveTextContent('mock.card.action');
+	});
+
+	it('keeps opportunity data visible without transaction actions in the mobile preview', () => {
+		mobile.enabled = true;
+		render(DefaultEarningOpportunityCard, { cardData: mockCardData, cardFields: mockCardFields });
+
+		expect(screen.getByText('mock.card.title')).toBeInTheDocument();
+		expect(screen.queryByRole('button')).not.toBeInTheDocument();
 	});
 
 	it('calls action() when button is clicked', async () => {

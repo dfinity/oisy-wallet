@@ -1,6 +1,9 @@
 # Run a native SwiftUI OISY on the iPhone simulator that shows real balances and signs for Uniswap on Sepolia
 
-Date: 2026-10-22 Surface: new iOS app (folder is pending decision D1 in the spec) Repo: oisy-wallet
+**Historical plan, superseded 2026-10-27.** The separate Swift wallet has been retired.
+See the [current Capacitor handoff](../2026-10-27-feat-mobile-shared-web-native-navigation/handoff.md).
+
+Date: 2026-10-22 Surface: new iOS app in `mobile/ios-native/` (accepted D1) Repo: oisy-wallet
 Spec: [`../2026-10-22-feat-ios-native-mvp.md`](../2026-10-22-feat-ios-native-mvp.md)
 Decisions: [`decisions.md`](./decisions.md) · Handoff notes: [`handoff.md`](./handoff.md)
 
@@ -14,7 +17,8 @@ in-app browser and get messages and transactions signed on Sepolia.
 ## Reference
 
 - Tab bar: the iOS 26 system `TabView`, with Liquid Glass as Apple Music and Photos use it: a glass
-  bar, a separate search button, minimized on scroll down, and a bottom accessory. found: Xcode 26.2
+  bar, minimized on scroll down, and a bottom accessory. The 2026-10-26 refinement restores a functional
+  search-role tab on the right for tokens and actions, removing the inline Wallet search field. Xcode 26.2
   with the iOS 26.2 SDK is installed on this Mac.
 - Wallet tab content: OISY's total and asset list, as the extension side panel compacts them
   (`ExtensionWalletTotal.svelte`, `ExtensionWalletAssets.svelte` on branch
@@ -38,14 +42,15 @@ in-app browser and get messages and transactions signed on Sepolia.
   user and the Internet Identity proof of sign-in (the delegation chain): one delegation, no
   targets. (source: `src/backend/backend.did:173,816,1684`, `src/backend/src/delegation.rs`)
 - Signer methods the MVP needs:
-  - `eth_address_of_caller`
+  - `eth_address`
   - `btc_caller_address`
   - `eth_personal_sign {message: hex}`
   - `eth_sign_prehash {hash}`
   - `eth_sign_transaction {to, gas, value, max_priority_fee_per_gas, data, max_fee_per_gas, chain_id, nonce}`
 
-  The canister is `grghe-syaaa-aaaar-qabyq-cai`, which audit also uses. (source:
-  `src/declarations/signer/signer.did:467-511`, `dfx.json:14`,
+  Audit uses `tdxud-2yaaa-aaaad-aadiq-cai`; production uses `grghe-syaaa-aaaar-qabyq-cai`.
+  Corrected against the deployed audit frontend on 2026-10-26. (source:
+  `src/declarations/signer/signer.did`, `dfx.json` audit signer mapping,
   `src/frontend/src/eth/services/wallet-connect.services.ts:291`)
 
 - Audit's backend `vhcnk-oqaaa-aaaah-araya-cai` serves prices: `exchange_rate_enabled` returned
@@ -64,23 +69,31 @@ in-app browser and get messages and transactions signed on Sepolia.
 ## Non-goals
 
 - Signing on any chain other than Sepolia, or on mainnet. Mainnet balances are read only.
-- App Store, TestFlight, signing for a real device, Face ID, Android.
-- Solana, Bitcoin and XRP dApps; SOL and XRP balances; your custom tokens from the backend; activity
-  and history; Send, Receive and swap screens inside OISY; OISY as a signer for IC dApps (ICRC-25).
-- Verifying the IC's cryptographic signatures on responses (BLS certificate verification). This is
-  required before any real use.
+- App Store, TestFlight, Face ID integration, Android. Local device signing for II testing is now in scope by user request.
+- Solana, Bitcoin and XRP dApps; SOL and XRP balances; Send, Receive and swap screens inside OISY; OISY as a signer for IC dApps (ICRC-25).
+- A custom BLS implementation. The approved native SDK now verifies IC responses; the custom
+  authentication parser still lacks initial II root-canister-signature verification.
 - Matching OISY's WalletConnect review logic (approve and permit detection, simulation).
 - Any change to `oisy.com`, the audit deployment, the backend, the signer or the web frontend.
 - Pushing anything.
 - Nothing not listed under Acceptance.
+
+## Wallet UI extension
+
+The 2026-10-24 request adds grouped tokens, token management including custom imports, token detail and recent
+activity. Follow the [wallet UI plan](./wallet-ui-plan.md) for this extension. Its first slice uses
+sample data. The 2026-10-26 integration uses pinned native SDK 0.11.1 for live balances in signed-in
+views, while the explicit preview remains sample-only. All seven balances and six mainnet valuations are verified loading on the physical phone. The user confirmed the funded ICP balance and other zero balances match audit web. Nonzero
+BTC/ETH and ck-token holdings are not yet available in this account for parity testing. The audit signer is `tdxud-2yaaa-aaaad-aadiq-cai`; the original
+spec's production signer ID was corrected.
 
 ## Acceptance
 
 - [ ] Builds with Xcode 26.2 and runs on the iPhone 17 simulator (iOS 26.2). Unit tests pass, including
       test vectors for the IC message encoding, request IDs, Candid, Keccak-256 and EIP-712.
 - [ ] Tab bar:
-  - Wallet (`wallet.bifold`), Browser (`globe`) and Settings (`gearshape`), plus a search tab
-    (`Tab(role: .search)`, `magnifyingglass`) that takes a URL or search terms and opens it in Browser.
+  - Wallet (`wallet.bifold`), Browser (`globe`), Settings (`gearshape`) and Search (`magnifyingglass`,
+    search role). Per the 2026-10-26 refinement, Search finds tokens and actions; URL entry belongs to Browser.
   - System Liquid Glass, tint `#016DFC`.
   - `.tabBarMinimizeBehavior(.onScrollDown)` on Wallet and Browser.
   - While a site is connected, the bottom accessory shows its host and "Sepolia".

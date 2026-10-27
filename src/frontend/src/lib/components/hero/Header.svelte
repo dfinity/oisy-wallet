@@ -6,12 +6,15 @@
 	import ActiveUserTransactionsButton from '$lib/components/active-user-transactions/ActiveUserTransactionsButton.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
+	import IconUser from '$lib/components/icons/IconUser.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 	import Scanner from '$lib/components/scanner/Scanner.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ThemeSwitchButton from '$lib/components/ui/ThemeSwitchButton.svelte';
 	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
 	import { LANDING_PAGE_ROUTE } from '$lib/constants/analytics.constants';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import {
 		modalAboutWhyOisy,
@@ -20,8 +23,14 @@
 		modalWalletConnect
 	} from '$lib/derived/modal.derived';
 	import { routeCollection } from '$lib/derived/nav.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { walletConnectListenerStore } from '$lib/stores/wallet-connect.store';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
+
+	interface Props {
+		onAccount?: () => void;
+	}
+	let { onAccount }: Props = $props();
 
 	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340).
 	let networkSwitcherOpen = $state(false);
@@ -90,7 +99,7 @@
 	class:z-4={modalsOpen && !popoverOpen}
 >
 	<div class="pointer-events-auto">
-		<OisyWalletLogoLink />
+		<OisyWalletLogoLink markOnly={MOBILE_SHELL} />
 	</div>
 
 	<div
@@ -108,7 +117,7 @@
 			<NetworksSwitcher bind:visible={networkSwitcherOpen} />
 		{/if}
 
-		{#if $authSignedIn}
+		{#if !MOBILE_SHELL && $authSignedIn}
 			{#if nonNullish($walletConnectListenerStore)}
 				<WalletConnect />
 			{/if}
@@ -118,8 +127,16 @@
 			<Scanner />
 		{/if}
 
-		{#if $authSignedIn}
+		{#if !MOBILE_SHELL && $authSignedIn}
 			<Menu bind:visible={menuOpen} />
+		{:else if MOBILE_SHELL}
+			{#if onAccount}<ButtonIcon
+					ariaLabel={$i18n.core.mobile_shell.account}
+					colorStyle="tertiary-alt"
+					link={false}
+					onclick={onAccount}
+					testId="mobile-account">{#snippet icon()}<IconUser />{/snippet}</ButtonIcon
+				>{:else}<ThemeSwitchButton />{/if}
 		{:else}
 			<div class="flex flex-wrap items-center justify-end gap-2 sm:gap-5">
 				<AboutWhyOisy trackEventSource={LANDING_PAGE_ROUTE} />

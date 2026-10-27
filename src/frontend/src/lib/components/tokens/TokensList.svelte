@@ -22,8 +22,7 @@
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { Network } from '$lib/types/network';
 	import type { Token, TokenId } from '$lib/types/token';
-	import type { TokenUi } from '$lib/types/token-ui';
-	import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-ui-group';
+	import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
@@ -121,13 +120,8 @@
 		modifiedTokens.set(id, { id, ...rest });
 	};
 
-	const tokenKey = ({ id: tokenId, network: { id: networkId } }: TokenUi): string =>
-		`token:${tokenId.description}:${networkId.description}`;
-
-	const groupKey = ({ id }: TokenUiGroup): string => `group:${id.description}`;
-
-	const getUiKey = (tokenOrGroup: TokenUiOrGroupUi): string =>
-		isTokenUiGroup(tokenOrGroup) ? groupKey(tokenOrGroup.group) : tokenKey(tokenOrGroup.token);
+	const getUiKey = (item: TokenUiOrGroupUi): symbol =>
+		isTokenUiGroup(item) ? item.group.id : item.token.id;
 
 	let tokensWithKey = $derived(
 		filteredTokens.map((tokenOrGroup) => ({ tokenOrGroup, key: getUiKey(tokenOrGroup) }))

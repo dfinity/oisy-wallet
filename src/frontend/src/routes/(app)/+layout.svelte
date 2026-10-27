@@ -20,11 +20,13 @@
 	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
 	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { aiAssistantConsoleOpen } from '$lib/derived/ai-assistant.derived';
 	import { authNotSignedIn, authSignedIn, authIdentity } from '$lib/derived/auth.derived';
 	import { isAuthLocked } from '$lib/derived/locked.derived';
 	import { routeCollection } from '$lib/derived/nav.derived';
 	import { pageNonFungibleToken, pageToken } from '$lib/derived/page-token.derived';
+	import { openMobileAccount } from '$lib/services/mobile-host.services';
 	import { token } from '$lib/stores/token.store';
 	import {
 		isRouteBorrowings,
@@ -42,6 +44,8 @@
 	let { children }: Props = $props();
 
 	let tokensRoute = $derived(isRouteTokens(page));
+
+	let notesRoute = $derived(page.url.pathname === '/notes/');
 
 	let nftsRoute = $derived(isRouteNfts(page));
 	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish($routeCollection));
@@ -116,13 +120,15 @@
 			class:min-h-[100dvh]={$authNotSignedIn}
 			class:overflow-x-hidden={$authNotSignedIn}
 		>
-			<Header />
+			{#if !MOBILE_SHELL || !notesRoute}
+				<Header onAccount={MOBILE_SHELL ? openMobileAccount : undefined} />
+			{/if}
 
 			<AuthGuard>
-				<SplitPane>
+				<SplitPane embedded={MOBILE_SHELL}>
 					{#snippet menu()}
 						<NavigationMenu>
-							{#if assetsRoute}
+							{#if assetsRoute && !MOBILE_SHELL}
 								<DappsCarousel wrapperStyleClass="hidden xl:flex" />
 							{/if}
 						</NavigationMenu>
@@ -133,28 +139,32 @@
 					{/if}
 
 					<Loaders>
-						{#if assetsRoute}
+						{#if assetsRoute && !MOBILE_SHELL}
 							<DappsCarousel wrapperStyleClass="mb-6 flex justify-center xl:hidden" />
 						{/if}
 
-						{@render children()}
+						{#if !notesRoute}{@render children()}{/if}
 					</Loaders>
+
+					<!-- Notes has its own loader, like the existing Notes modal. It must
+					     remain reachable while the wallet profile/balances are unavailable. -->
+					{#if notesRoute}{@render children()}{/if}
 				</SplitPane>
 
-				{#if !$aiAssistantConsoleOpen}
+				{#if !MOBILE_SHELL && !$aiAssistantConsoleOpen}
 					<div class="fixed right-4 bottom-16 z-2 block">
 						<AiAssistantConsoleButton styleClass="mb-2" />
 					</div>
 				{/if}
 
-				<MobileNavigationMenu>
-					<NavigationMenuMainItems layout="mobile" testIdPrefix="mobile" />
-				</MobileNavigationMenu>
+				{#if !MOBILE_SHELL}<MobileNavigationMenu>
+						<NavigationMenuMainItems layout="mobile" testIdPrefix="mobile" />
+					</MobileNavigationMenu>{/if}
 
 				<Modals />
 			</AuthGuard>
 
-			<Footer />
+			{#if !MOBILE_SHELL}<Footer />{/if}
 		</div>
 	</div>
 {/if}

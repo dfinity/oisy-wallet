@@ -15,6 +15,7 @@
 	fullWidth
 	onclick={modalStore.close}
 	paddingSmall
+	testId="modal-dismiss"
 	type="button"
 >
 	{$i18n.core.text.close}

@@ -23,6 +23,7 @@
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
 	import TransactionsIdbSetter from '$lib/components/transactions/TransactionsIdbSetter.svelte';
 	import WalletConnectListener from '$lib/components/wallet-connect/WalletConnectListener.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 
 	interface Props {
@@ -75,7 +76,9 @@
 	<Guards />
 </LoaderUserProfile>
 
-<WalletConnectListener />
+{#if !MOBILE_SHELL}
+	<WalletConnectListener />
 
-<!-- This listener is kept outside of the Loaders tree to prevent slow page loading on localhost/e2e -->
-<CkBtcUpdateBalanceListener />
+	<!-- This listener is kept outside of the Loaders tree to prevent slow page loading on localhost/e2e -->
+	<CkBtcUpdateBalanceListener />
+{/if}

@@ -2,7 +2,17 @@ This spec follows the workflow defined in `docs/ai/spec-driven-development/workf
 
 # feat: Native SwiftUI OISY MVP on iOS (balances + in-app dApp browser)
 
-Status: draft. An MVP that judges feasibility; it is not a product release.
+**Historical spec, superseded 2026-10-27.** The separate Swift wallet and native SDK
+client were retired. Use the [Capacitor migration spec](./2026-10-27-feat-mobile-shared-web-native-navigation.md)
+and [current app guide](../../../../mobile/capacitor/README.md) for implementation.
+The status below records the earlier experiment, not the current app.
+
+Historical status: native wallet UI extension implemented locally with mock data (grouping, management, custom
+import review, token detail and activity); see the [plan and implementation status](./2026-10-22-feat-ios-native-mvp/wallet-ui-plan.md).
+M1 frame implemented locally; scroll-minimization verification remains open.
+M3 authentication is verified on the physical iPhone. The approved native SDK now supplies the
+M2 client and M3 read-only balance calls; ICP and three ck-token balances are verified on-device.
+All seven balances and six mainnet valuations now load on-device; the user confirmed parity for their funded ICP and other zero balances. M4 connection/read support is implemented with native consent and Uniswap/1inch shortcuts; app-specific verification is tracked in the native testing guide. M5 signing remains unimplemented. An MVP that judges feasibility; it is not a product release.
 Brief with the state matrix and evidence list: [brief](./2026-10-22-feat-ios-native-mvp/brief.md).
 Decisions so far: [decisions](./2026-10-22-feat-ios-native-mvp/decisions.md). Implementer setup notes:
 [handoff](./2026-10-22-feat-ios-native-mvp/handoff.md).
@@ -34,11 +44,16 @@ What the web app does today, and so what a native client has to do itself, was m
 
 - An Xcode project for iOS 26.
 - Sign-in through ICRC-167 / ICRC-34 against `audit.oisy.com`.
-- A minimal IC client in Swift.
+- A pinned native IC SDK, approved on 2026-10-26 (supersedes the original dependency-free client).
 - A Wallet tab with 7 tokens and USD values.
 - An in-app browser with an injected EIP-1193 provider (EIP-6963 + `window.ethereum`).
 - Native review sheets for connect, `personal_sign`, `eth_signTypedData_v4` and `eth_sendTransaction`,
   on Sepolia only.
+
+**UI extension requested 2026-10-24:** grouped tokens, token management including custom imports, token detail and recent
+transactions. See the [implementation plan](./2026-10-22-feat-ios-native-mvp/wallet-ui-plan.md).
+Sample UI comes first; live data has separate integration gates. This supersedes the activity
+exclusion below and adds custom-token imports. Financial action screens remain outside this slice.
 
 **Out:** see [Explicit non-goals](#explicit-non-goals).
 
@@ -47,14 +62,15 @@ What the web app does today, and so what a native client has to do itself, was m
 ### App frame and tab bar
 
 A SwiftUI `App` with one `TabView`, built with the iOS 26 SDK so the bar is system Liquid Glass. It has
-no custom blur and no custom bar.
+no custom blur and no custom tab bar. User refinement on 2026-10-26 restores Search as a functional native search-role tab on the
+right, covering tokens and actions. Wallet has no inline search field; URL entry remains a Browser responsibility.
 
 | Tab      | API                             | Symbol            | Content                                                     |
 | -------- | ------------------------------- | ----------------- | ----------------------------------------------------------- |
 | Wallet   | `Tab("Wallet", systemImage:)`   | `wallet.bifold`   | total + token list                                          |
 | Browser  | `Tab("Browser", systemImage:)`  | `globe`           | `WKWebView` with the injected provider                      |
 | Settings | `Tab("Settings", systemImage:)` | `gearshape`       | principal, ETH and BTC addresses, connected sites, sign out |
-| Search   | `Tab(role: .search)`            | `magnifyingglass` | takes a URL or search terms, opens it in Browser            |
+| Search   | `Tab(value:role: .search)`      | `magnifyingglass` | enabled tokens and actions; native search presentation      |
 
 - `.tint(Color(hex: 0x016DFC))`, the OISY blue (`src/frontend/src/app.html:110`).
 - `.tabBarMinimizeBehavior(.onScrollDown)`.
@@ -64,8 +80,8 @@ no custom blur and no custom bar.
 
 ### Project layout
 
-The location is pending decision D1; the proposal is `mobile/ios-native/`. The Xcode project is
-generated from `project.yml` (pending decision D2).
+The project lives in `mobile/ios-native/` (accepted D1). The Xcode project is
+generated from `project.yml` (accepted D2).
 
 ```
 mobile/ios-native/
@@ -83,7 +99,7 @@ mobile/ios-native/
   OisyMVPTests/                  vectors: CBOR, request id, Candid, Keccak, EIP-712, ICRC-34 parsing
 ```
 
-There are no Swift package dependencies (pending decision D3).
+There are no Swift package dependencies (accepted D3).
 
 ### Sign-in (ICRC-167 / ICRC-34)
 
@@ -106,7 +122,10 @@ This ports the proof of concept's flow (`src/frontend/src/lib/utils/auth-mobile.
    - `message` → `result.publicKey` (base64 DER) and
      `result.signerDelegation[{delegation:{pubkey, expiration, targets?}, signature}]`.
    - Check that `state` matches, that the last delegation's `pubkey` equals our session public key,
-     and that `expiration` lies in the future.
+     and that every `expiration` lies in the future. Accept up to 20 untargeted, unrestricted
+     delegations; cryptographically verify additional Ed25519/P-256 links against the preceding
+     public key. The root canister signature remains outside this local preview's verification.
+     The effective expiry is the earliest link's expiry.
 5. Keep the session key and the chain in the Keychain (`kSecClassGenericPassword`,
    `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`).
    - The principal is the self-authenticating principal of `publicKey`: SHA-224 of the DER, plus `0x02`.
@@ -114,47 +133,31 @@ This ports the proof of concept's flow (`src/frontend/src/lib/utils/auth-mobile.
 6. Calls after sign-in:
    - `get_user_profile`; if it returns not found, `create_user_profile`.
    - `allow_signing({ii_delegation_chain: opt {public_key; delegations}})`.
-   - The signer's `eth_address_of_caller` and `btc_caller_address({network: mainnet, address_type: P2WPKH})`,
+   - The audit signer's `eth_address` and `btc_caller_address({network: mainnet, address_type: P2WPKH})`,
      cached in `UserDefaults` per principal.
 
-### Minimal IC client
+### Native IC client
 
-The client follows the IC HTTPS interface against `https://icp-api.io` (`REPLICA_HOST`,
-`app.constants.ts:22`).
+On 2026-10-26 the user approved DFINITY's `icp-native-sdk`, pinned exactly to **0.11.1**
+(commit `0fa5065af17b0e3dfe79ab1312f6353186ae3dbf`). Its released Swift product is
+`InternetComputer`; the newer main-branch documentation calls the core product `IcpSdkCore`.
+This supersedes the proposed handwritten CBOR, Candid, request-ID and certificate client.
 
-**Endpoints:**
+`SessionIdentity` adapts the existing Ed25519 Keychain session to the SDK's `Identity` protocol.
+`HttpAgent.withDelegatedIdentity` receives the complete chain and its root key; a sender-principal
+check prevents a different account from being used. The current working ICRC-167 relay sign-in is
+preserved. No Auth SDK migration or associated-domain change is included.
 
-- Query: `POST /api/v2/canister/<id>/query`.
-- Update: `POST /api/v3/canister/<id>/call`. A 200 response carries a certificate. On a 202, poll
-  `POST /api/v2/canister/<id>/read_state` for `["request_status", <request_id>]` every 500 ms, for up
-  to 60 s.
+The SDK owns Candid, envelopes, request signatures, update polling and IC response verification,
+using its compiled-in mainnet root key against `https://icp-api.io`. The app never calls
+`fetchRootKey` on mainnet. Initial II root-canister-signature verification in the app remains a
+separate unfinished authentication concern; additional delegation links are locally verified.
 
-**Envelope:**
-
-- `content` holds `{request_type, sender, canister_id, method_name, arg, ingress_expiry, nonce}`.
-  `ingress_expiry` is now + 4 min in nanoseconds; `nonce` is 16 random bytes.
-- `sender_pubkey` is the chain's `publicKey`. `sender_delegation` is the chain.
-- `sender_sig` is `Ed25519(session, "\x0Aic-request" ‖ request_id)`.
-- Anonymous queries use sender `0x04` with no signature fields.
-
-**Encoding:**
-
-- The request ID is the representation-independent hash: SHA-256 over the sorted
-  `sha256(key) ‖ sha256(value)` pairs. Test it against the interface spec's example vector.
-- CBOR encodes with self-describe tag 55799. Decoding needs maps, byte and text strings, arrays,
-  unsigned integers and tags.
-
-**Certificate:** decode it and look up `request_status/<id>/status` and `/reply` in the hash tree.
-**The BLS signature is not verified** in this MVP (see the threat model); the root key and the lookup
-code are kept apart so verification can be added later.
-
-**Candid:**
-
-- Encodes `DIDL`, the type table and LEB128/SLEB128 values. Covers `null`, `bool`, `nat`, `nat8`,
-  `nat64`, `int`, `text`, `blob`, `principal`, `opt`, `vec`, `record` and `variant`.
-- Field IDs use the Candid name hash.
-- Decoding is generic, into a `CandidValue` tree, then mapped. Unknown record fields are skipped, so
-  large results (the user profile) decode safely.
+Minimal `.did` interfaces in `mobile/ios-native/OisyMVP/Core/IC/Candid/` are based on the
+repository declarations. `Core/IC/Generated/` contains reproducible output from the matching
+0.11.1 `candid-bindgen`, including generator version and input hash. Do not hand-edit those Swift
+files or `src/declarations/`. The generated project stays ignored; the exact package version is
+specified in `project.yml`. Private release downloads require GitHub access; see the handoff.
 
 ### Calls the app makes
 
@@ -163,7 +166,7 @@ code are kept apart so verification can be added later.
 | backend `vhcnk-oqaaa-aaaah-araya-cai`                                                                          | `get_user_profile` / `create_user_profile`                                                                | query / update | after sign-in                                                                                                 |
 | backend                                                                                                        | `allow_signing`                                                                                           | update         | after sign-in                                                                                                 |
 | backend                                                                                                        | `get_exchange_rates`                                                                                      | update         | each Wallet refresh, no more than every 60 s; audit's `exchange_rate_enabled` returned `(true)` on 2026-10-22 |
-| signer `grghe-syaaa-aaaar-qabyq-cai`                                                                           | `eth_address_of_caller`, `btc_caller_address`                                                             | update, paid   | once per principal                                                                                            |
+| audit signer `tdxud-2yaaa-aaaad-aadiq-cai`                                                                     | `eth_address`, `btc_caller_address`                                                                       | update, paid   | once per principal                                                                                            |
 | signer                                                                                                         | `eth_personal_sign {message: hex}`                                                                        | update, paid   | `personal_sign` (same hex form as `wallet-connect.services.ts:291`)                                           |
 | signer                                                                                                         | `eth_sign_prehash {hash}`                                                                                 | update, paid   | `eth_signTypedData_v4`, hash computed in Swift                                                                |
 | signer                                                                                                         | `eth_sign_transaction {to, gas, value, max_priority_fee_per_gas, data, max_fee_per_gas, chain_id, nonce}` | update, paid   | `eth_sendTransaction`                                                                                         |
@@ -175,6 +178,17 @@ Every paid signer call passes `opt PatronPaysIcrc2Cycles {owner: <audit backend>
 `src/frontend/src/lib/canisters/signer.constants.ts` does.
 
 ### Wallet data
+
+Runtime correction verified against `dfx.json` and audit's deployed frontend on 2026-10-26:
+audit uses signer **`tdxud-2yaaa-aaaad-aadiq-cai`**, not production's
+`grghe-syaaa-aaaar-qabyq-cai` from the original draft. The backend is still
+`vhcnk-oqaaa-aaaah-araya-cai`. Keep the mainnet ck-token ledger IDs below; audit also exposes
+separate testnet ck ledgers, which must not replace the mainnet holdings.
+
+Current read-only integration uses an existing web-initialized signing allowance and caches the
+returned addresses per audit signer and principal. It does not create profiles or renew allowances.
+The backend's one-link delegation restriction still needs a proper resolution for native-only
+onboarding; never truncate the authenticated chain to bypass it.
 
 | Row                    | Balance from                                                      | Price key from `get_exchange_rates`                           |
 | ---------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------- |
@@ -263,10 +277,11 @@ Every paid signer call passes `opt PatronPaysIcrc2Cycles {owner: <audit backend>
 
 Each milestone ends with a check on the iPhone 17 simulator.
 
-1. **M1 Frame.** XcodeGen project, the 4 tabs with Liquid Glass, Wallet with static sample rows.
+1. **M1 Frame.** XcodeGen project, the 4 tabs with Liquid Glass (revised 2026-10-26), Wallet with static sample rows.
    Check: screenshots in light and dark mode; the bar minimizes on scroll.
-2. **M2 IC client, read only.** CBOR, Candid, request ID and anonymous queries. Wallet reads ICP and
-   ck balances for a principal pasted in Settings (debug builds only).
+2. **M2 IC client, read only.** The approved native SDK supplies Candid, request envelopes and
+   verified canister calls. The signed-in wallet reads ICP and ck balances; independent codec and
+   model tests cover exact amounts, missing data and cancellation.
    Check: values equal audit web's for that principal; unit tests pass.
 3. **M3 Sign-in and balances.** ICRC-167 sign-in, Keychain, delegated calls, profile, `allow_signing`,
    addresses, BTC and ETH rows, prices.
@@ -277,6 +292,13 @@ Each milestone ends with a check on the iPhone 17 simulator.
 5. **M5 Signing.** `personal_sign`, typed data, send.
    Check: the test dApp's recovery checks pass, and a Sepolia transaction from the test dApp and one
    from Uniswap (wrap or swap 0.001 SepoliaETH) show on sepolia.etherscan.io.
+
+### M1 verification (2026-10-22)
+
+Xcode 26.2 simulator build, sample-data unit test, and four-tab UI test pass. Light and dark
+screenshots are saved for iPhone 17 and iPhone 16e (XXL). The native minimize modifier is set,
+but the tab bar stayed expanded during the simulator checks; **M1 is not fully accepted yet**.
+See the [historical verification archive](./2026-10-22-feat-ios-native-mvp/handoff.md#local-archive).
 
 ## Acceptance criteria
 
@@ -295,16 +317,17 @@ The full list, with the state matrix and evidence, is in the brief. In short:
 
 ## Threat model (why the MVP must not hold real funds)
 
-- **No certificate verification.** Responses from `icp-api.io` are trusted without checking the IC's
-  BLS signature, so a man in the middle or a bad boundary node could show false balances or a false
-  "signed" result. A production client must verify certificates (open question O3 covers how).
+- **Authentication verification remains incomplete.** The approved SDK verifies IC responses
+  against its mainnet root key. The initial II root canister signature is not independently
+  verified by the custom sign-in parser; additional delegation links are verified. This is still
+  a local read-only preview, not production authentication.
 - **Thin review.** The sheets show raw fields. They do not detect ERC-20 `approve`, `permit`,
   `setApprovalForAll` or Permit2 allowances as OISY's WalletConnect review does
   (`src/frontend/src/eth/utils/wallet-connect.utils.ts`), and they do not simulate. That is why signing
   is limited to Sepolia in code: the chain ID is pinned, `wallet_switchEthereumChain` refuses others,
   and typed data with a foreign `domain.chainId` is refused.
 - **Delegation in the Keychain** without biometric protection. It is valid for the requested TTL
-  (pending decision D4) on an audit-environment identity.
+  (24 hours, accepted D4) on an audit-environment identity.
 - **The page shares the provider's world.** `inpage.js` runs in the page, so a site can call the
   `oisy` message handler directly. Safety rests on the native side: the origin comes from WebKit, the
   connection check happens before every account or signing method, and every signature needs an
@@ -314,39 +337,39 @@ The full list, with the state matrix and evidence, is in the brief. In short:
 
 ## Explicit non-goals
 
-- Mainnet or any signing chain but Sepolia. App Store, TestFlight, device signing, Face ID, Android.
-- Solana, Bitcoin and XRP dApps; SOL and XRP balances; custom tokens from the backend; activity;
+- Mainnet or any signing chain but Sepolia. App Store, TestFlight, Face ID integration, Android. Local device signing for II testing is now in scope by user request.
+- Solana, Bitcoin and XRP dApps; SOL and XRP balances;
   Send, Receive and swap screens; ICRC-25 signer flows.
-- BLS certificate verification. Parity with the web review logic.
+- A custom BLS implementation (the approved SDK handles IC responses). Parity with web review logic.
 - Any change to the backend, the signer, the web frontend or any deployment. Nothing is pushed.
 - Agreements screens. `create_user_profile` from the app creates a profile without the web's
   agreements step, which is acceptable on audit only.
 
 ## Open questions (facts to confirm)
 
-- **O1.** Is the user on Apple team `7FY8G6QYKD`, whose app ID audit's AASA lists? This decides
-  between the one-tap relay and a direct universal-link callback. Unknown as of 2026-10-22; the user
-  will check. Build the one-tap relay (`.customScheme("oisy")`) first; it works without the team.
+- **O1 resolved 2026-10-26.** The user approved DFINITY Stiftung (`7FY8G6QYKD`) and signed in
+  successfully on the physical phone. The verified one-tap relay remains in use.
 - **O2.** The exact keys `get_exchange_rates` returns for ICP, BTC, ETH and USDC (`TokenId` variants)
   on audit. Check with one call in M3.
-- **O3.** For production: verify certificates with Rust `ic-agent` through UniFFI, with IcpKit's
-  `bls12381`, or with a Swift BLS12-381 port? IcpKit's README documents neither delegation chains nor
-  certificate verification, and lists no releases.
+- **O3 updated 2026-10-26.** The approved SDK uses Rust `ic-agent` through UniFFI for IC
+  response verification. Initial II root-canister-signature verification remains open in custom auth.
 - **O4.** Does Uniswap's mobile web layout list EIP-6963 wallets in the connect modal, and does its
   testnet mode request `0xaa36a7`? Check in M4. The fallback test site is the extension's test dApp.
 - **O5.** Does `id.ai` work inside `ASWebAuthenticationSession`, including passkey prompts? This was
   an open question in PR #13512's spec too. Check in M3.
 
-## Pending decisions (facts are clear, someone must decide)
+## Accepted decisions
 
-- **D1. Where the Swift project lives.** Recommendation: `mobile/ios-native/`. It is a new top-level
+The user accepted all four recommendations before M1. See the timestamped
+[decision log](./2026-10-22-feat-ios-native-mvp/decisions.md).
+
+- **D1. Where the Swift project lives.** Accepted: `mobile/ios-native/`. It is a new top-level
   `mobile/` folder (CLAUDE.md asks for approval) shared with the Capacitor proof of concept's
   `mobile/`, without colliding with its `mobile/ios`. The alternative is a separate repository.
-- **D2. Xcode project tooling.** Recommendation: XcodeGen (already installed on the user's Mac at
+- **D2. Xcode project tooling.** Accepted: XcodeGen (already installed on the user's Mac at
   `/opt/homebrew/bin/xcodegen`), because `project.yml` stays readable and diffable. The alternative is a hand-written `.xcodeproj` using
   Xcode's synchronized folders.
-- **D3. IC client.** Recommendation: the minimal Swift client above, with no packages, so the MVP shows
-  exactly what a native client needs. The alternative is IcpKit's `Candid` module plus our own
-  envelope.
-- **D4. Session TTL.** Recommendation: 24 h, the proof of concept's `MOBILE_AUTH_MAX_TIME_TO_LIVE`; the
+- **D3. IC client.** Superseded on 2026-10-26: the user explicitly approved DFINITY's native
+  SDK. Pin version 0.11.1 and use its core product for canister calls; retain the working relay auth.
+- **D4. Session TTL.** Accepted: 24 h, the proof of concept's `MOBILE_AUTH_MAX_TIME_TO_LIVE`; the
   web uses 1 h.

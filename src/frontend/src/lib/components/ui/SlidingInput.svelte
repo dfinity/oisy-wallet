@@ -16,6 +16,7 @@
 		ariaLabel: string;
 		testIdPrefix?: string;
 		disabled?: boolean;
+		forceOpen?: boolean;
 		icon: Snippet;
 		overflowableContent?: Snippet;
 	}
@@ -26,11 +27,17 @@
 		ariaLabel,
 		testIdPrefix = 'sliding-input',
 		disabled = false,
+		forceOpen = false,
 		icon: slidingIcon,
 		overflowableContent
 	}: Props = $props();
 
 	let visible = $state(false);
+	$effect(() => {
+		if (forceOpen) {
+			visible = true;
+		}
+	});
 
 	let button: HTMLButtonElement | undefined = $state();
 	let inputElement: HTMLInputElement | undefined = $state();
@@ -68,7 +75,7 @@
 		// Can be useful to trigger the condition "handleClose if empty inputValue" by setting the bound input value to empty string
 		// instead of dispatching an event from the parent component using this component
 		setTimeout(() => {
-			if (inputValue === '') {
+			if (inputValue === '' && !forceOpen) {
 				visible = false;
 			}
 		}, 1);

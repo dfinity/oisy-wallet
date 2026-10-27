@@ -2,6 +2,7 @@
 	import IconAddressBook from '$lib/components/icons/IconAddressBook.svelte';
 	import IconCircleArrowRight from '$lib/components/icons/lucide/IconCircleArrowRight.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { ADDRESS_BOOK_ADD_CONTACT_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -22,8 +23,11 @@
 		<span>{$i18n.address_book.text.empty_text}</span>
 	</div>
 
-	<Button onclick={() => onAddContact()} testId={ADDRESS_BOOK_ADD_CONTACT_BUTTON}>
-		{$i18n.address_book.text.add_new_contact}
-		<IconCircleArrowRight />
-	</Button>
+	{#if !MOBILE_SHELL}<Button
+			onclick={() => onAddContact()}
+			testId={ADDRESS_BOOK_ADD_CONTACT_BUTTON}
+		>
+			{$i18n.address_book.text.add_new_contact}
+			<IconCircleArrowRight />
+		</Button>{/if}
 </div>

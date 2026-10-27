@@ -26,11 +26,12 @@
 	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
 
 	interface Props {
+		readOnly?: boolean;
 		transaction: BtcTransactionUi;
 		token: OptionToken;
 	}
 
-	const { transaction, token }: Props = $props();
+	const { transaction, token, readOnly = false }: Props = $props();
 
 	let { from, value, fee, timestamp, id, blockNumber, to, type, status, confirmations } =
 		$derived(transaction);
@@ -95,6 +96,7 @@
 					{from}
 					{fromExplorerUrl}
 					{onSaveAddressComplete}
+					{readOnly}
 					to={address}
 					toExplorerUrl={nonNullish(explorerUrl) ? `${explorerUrl}/address/${address}` : undefined}
 					type={type === 'receive' ? 'receive' : 'send'}

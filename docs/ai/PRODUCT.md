@@ -14,6 +14,20 @@ Users authenticate via Internet Identity (WebAuthn), making OISY cross-device by
 
 ## Navigation
 
+### Capacitor iOS preview (local prototype)
+
+`mobile/capacitor/` is the only active mobile app. Signed-in launch opens shared OISY
+web screens; Swift owns system-browser authentication, Keychain, navigation and
+isolated Explore connections. The duplicate native wallet and its mode switch were
+retired on 2026-10-27. `mobile/ios-native/` contains historical documentation only.
+The [Capacitor guide](../../mobile/capacitor/README.md) owns current mobile behavior,
+build instructions and preview permission limits. The [migration spec](./spec-driven-development/specs/2026-10-27-feat-mobile-shared-web-native-navigation.md)
+owns the remaining renewal, authentication review and Android gates. The current iOS
+build uses the normal web auth provider, stores, loaders and workers. This document continues to
+own web product behavior.
+
+### Web navigation
+
 The primary navigation is a desktop **sidebar** and a mobile **bottom bar** that share one set of destinations arranged by a grouped information architecture: **Portfolio**, **Finance**, and **More**. The grouping is intentionally different per form factor — the mobile bar has limited slots, so Notes earns a top-level slot there while NFTs lives in the More group; on desktop NFTs sits in Portfolio and Notes lives in More.
 
 - **Portfolio** — Assets, NFTs, Activity.

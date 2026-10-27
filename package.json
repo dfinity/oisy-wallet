@@ -67,9 +67,12 @@
 		"update:oisy-eslint": "npm rm @dfinity/eslint-config-oisy-wallet && npm i @dfinity/eslint-config-oisy-wallet -D",
 		"update:oisy-eslint:next": "npm rm @dfinity/eslint-config-oisy-wallet && npm i @dfinity/eslint-config-oisy-wallet@next -D",
 		"benchmark": "canbench --persist --show-summary",
-		"perf:memory": "node scripts/perf.memory.mjs"
+		"perf:memory": "node scripts/perf.memory.mjs",
+		"build:mobile": "node mobile/capacitor/check-build-env.mjs && DFX_NETWORK=audit OISY_MOBILE_SHELL=1 VITE_MOBILE_SHELL=true vite build && node mobile/capacitor/write-build-info.mjs",
+		"mobile:sync:ios": "npm run build:mobile && npm --prefix mobile/capacitor run sync:ios"
 	},
 	"dependencies": {
+		"@capacitor/core": "8.5.3",
 		"@dfinity/ic-pub-key": "^1.0.2",
 		"@dfinity/oisy-wallet-signer": "^6.0.0",
 		"@dfinity/utils": "~4.0.3",
@@ -112,6 +115,8 @@
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {
+		"@capacitor/cli": "8.5.3",
+		"@capacitor/ios": "8.5.3",
 		"@dfinity/eslint-config-oisy-wallet": "^0.5.0",
 		"@dfinity/internet-identity-playwright": "^3.0.0",
 		"@icp-sdk/bindgen": "^0.2.0",

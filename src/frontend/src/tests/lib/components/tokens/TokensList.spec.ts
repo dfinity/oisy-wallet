@@ -1,3 +1,5 @@
+import { goto } from '$app/navigation';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import TokensList from '$lib/components/tokens/TokensList.svelte';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { hideTokenCategoryFilterStore, tokenCategoryFilterStore } from '$lib/stores/settings.store';
@@ -5,9 +7,10 @@ import { tokenListStore } from '$lib/stores/token-list.store';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { filterTokenGroups } from '$lib/utils/token-group.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
-import { render, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 const mockStores = vi.hoisted(() => ({
 	setAllFungibleNetworkTokens: (_v: Token[]) => {},
@@ -188,5 +191,33 @@ describe('TokensList', () => {
 
 			expect(paragraphs).toHaveLength(1);
 		});
+	});
+
+	it('keeps different ledgers with the same symbol as distinct rows', async () => {
+		const tokens = [
+			{
+				...ICP_TOKEN,
+				id: parseTokenId('SAME'),
+				symbol: 'SAME',
+				ledgerCanisterId: 'ledger-one',
+				name: 'First ledger',
+				groupData: undefined
+			},
+			{
+				...ICP_TOKEN,
+				id: parseTokenId('SAME'),
+				symbol: 'SAME',
+				ledgerCanisterId: 'ledger-two',
+				name: 'Second ledger',
+				groupData: undefined
+			}
+		];
+		tokenListStore.set({ filter: '' });
+		mockStores.setSortedTokens(tokens.map((token) => ({ token })));
+		const { getByText } = render(TokensList);
+		await waitFor(() => expect(getByText('First ledger')).toBeInTheDocument());
+		await fireEvent.click(getByText('Second ledger'));
+
+		expect(goto).toHaveBeenCalled();
 	});
 });

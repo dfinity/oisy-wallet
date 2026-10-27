@@ -1,0 +1,15 @@
+{
+	"name": "@dfinity/oisy-capacitor",
+	"version": "0.0.1",
+	"private": true,
+	"description": "Native host. Dependencies and lockfile are owned by the repository root.",
+	"dependencies": {
+		"@capacitor/core": "8.5.3",
+		"@capacitor/ios": "8.5.3"
+	},
+	"scripts": {
+		"sync:ios": "cap sync ios && npm run project:ios",
+		"open:ios": "cap open ios",
+		"project:ios": "xcodegen generate --spec ios/App/project.yml --project ios/App"
+	}
+}

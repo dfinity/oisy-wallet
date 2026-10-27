@@ -4,8 +4,11 @@ import type { Identity } from '@icp-sdk/core/agent';
 import { DelegationIdentity } from '@icp-sdk/core/identity';
 
 /**
- * Extracts the public II delegation chain from an Identity, if it is a DelegationIdentity.
+ * Extracts the original public II proof from a DelegationIdentity.
  *
+ * The backend verifies exactly the first, II-signed link against the caller principal.
+ * Child links (native → web → worker) stay in the identity for request authentication;
+ * they are not part of this separate II proof. The backend still verifies the II signature.
  * Only the public data is extracted (public keys, expiration, targets, signatures).
  * The private session key is never included.
  *
@@ -21,7 +24,7 @@ export const extractIIDelegationChain = (identity: Identity): Nullable<IIDelegat
 
 	return toNullable({
 		public_key: new Uint8Array(chain.publicKey),
-		delegations: chain.delegations.map(({ delegation, signature }) => ({
+		delegations: chain.delegations.slice(0, 1).map(({ delegation, signature }) => ({
 			delegation: {
 				pubkey: new Uint8Array(delegation.pubkey),
 				expiration: delegation.expiration,

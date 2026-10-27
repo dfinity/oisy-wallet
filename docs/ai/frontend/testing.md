@@ -248,3 +248,13 @@ plumbing, etc.). Given the [e2e restriction](#e2e-status-temporarily-restricted)
 - A **new** Playwright spec is allowed only if (a) the user explicitly
   asked, or (b) it is a trivially stable spec mirroring an existing
   one in `e2e/`. Otherwise, capture the manual repro and move on.
+
+## Embedded mobile presentation fixtures
+
+The Capacitor WebKit integration test uses a fake native identity and rejects
+network calls. `VITE_MOBILE_UI_TEST=true` enables an isolated empty Notes cache
+through `$tests/mocks/mobile-notes.fixture.ts`; the normal bundle compiles this
+fixture out. It exercises the same Notes surface/store as component tests without
+bypassing signed canister responses. Always rebuild with the flag false before
+phone installation and check that the fixture event is absent from bundled JS.
+See [mobile verification](../../../mobile/capacitor/README.md#verification).

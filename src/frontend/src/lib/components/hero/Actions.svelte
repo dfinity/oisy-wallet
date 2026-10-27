@@ -23,6 +23,7 @@
 	import Send from '$lib/components/send/Send.svelte';
 	import Swap from '$lib/components/swap/Swap.svelte';
 	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { allBalancesZero } from '$lib/derived/balances.derived';
 	import {
 		networkEthereum,
@@ -102,54 +103,56 @@
 			<Receive />
 		{/if}
 
-		{#if sendAction}
-			<Send {isNftsPage} {isTransactionsPage} />
-		{/if}
+		{#if !MOBILE_SHELL}
+			{#if sendAction}
+				<Send {isNftsPage} {isTransactionsPage} />
+			{/if}
 
-		{#if swapAction}
-			<Swap />
-		{/if}
+			{#if swapAction}
+				<Swap />
+			{/if}
 
-		{#if cyclesMintAction && isTokenCyclesLedger($pageToken)}
-			<CyclesMintButton token={$pageToken} />
-		{/if}
+			{#if cyclesMintAction && isTokenCyclesLedger($pageToken)}
+				<CyclesMintButton token={$pageToken} />
+			{/if}
 
-		{#if cyclesTopUpAction && isTokenCyclesLedger($pageToken)}
-			<CyclesTopUpButton token={$pageToken} />
-		{/if}
+			{#if cyclesTopUpAction && isTokenCyclesLedger($pageToken)}
+				<CyclesTopUpButton token={$pageToken} />
+			{/if}
 
-		{#if checkNewCollectionsAction}
-			<CheckNewCollectionsButton />
-		{/if}
+			{#if checkNewCollectionsAction}
+				<CheckNewCollectionsButton />
+			{/if}
 
-		{#if isTransactionsPage}
-			{#if convertEth}
-				{#if $networkICP}
-					<ConvertToEthereum />
-				{:else}
-					<ConvertToCkEth />
+			{#if isTransactionsPage}
+				{#if convertEth}
+					{#if $networkICP}
+						<ConvertToEthereum />
+					{:else}
+						<ConvertToCkEth />
+					{/if}
+				{/if}
+
+				{#if convertErc20}
+					{#if $networkICP}
+						<ConvertToEthereum />
+					{:else}
+						<ConvertToCkErc20 />
+					{/if}
+				{/if}
+
+				{#if convertCkBtc}
+					<ConvertToBtc />
+				{/if}
+
+				{#if convertBtc}
+					<ConvertToCkBtc />
 				{/if}
 			{/if}
 
-			{#if convertErc20}
-				{#if $networkICP}
-					<ConvertToEthereum />
-				{:else}
-					<ConvertToCkErc20 />
-				{/if}
+			{#if buyAction && !tooManyButtons}
+				<Buy />
 			{/if}
-
-			{#if convertCkBtc}
-				<ConvertToBtc />
-			{/if}
-
-			{#if convertBtc}
-				<ConvertToCkBtc />
-			{/if}
-		{/if}
-
-		{#if buyAction && !tooManyButtons}
-			<Buy />
 		{/if}
 	</HeroButtonGroup>
 </div>

@@ -1,0 +1,14 @@
+*.xcodeproj/
+.build/
+*.xcresult/
+.DS_Store
+DerivedData/
+build/
+.swiftpm/
+xcuserdata/
+*.xcuserstate
+*.p12
+*.mobileprovision
+
+# Generated shared Svelte preview assets
+WebPreview/

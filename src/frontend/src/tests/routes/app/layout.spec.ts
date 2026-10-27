@@ -3,6 +3,7 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { isUserMintingAccount } from '$icp/services/icrc-minting.services';
 import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import { OISY_URL } from '$lib/constants/oisy.constants';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import { pageToken } from '$lib/derived/page-token.derived';
 import { authStore } from '$lib/stores/auth.store';
@@ -32,6 +33,7 @@ describe('App Layout', () => {
 		authStore.setForTesting(mockIdentity);
 
 		mockPage.reset();
+		mockPage.mockUrl(new URL(OISY_URL));
 
 		vi.mocked(isUserMintingAccount).mockResolvedValue(false);
 	});
