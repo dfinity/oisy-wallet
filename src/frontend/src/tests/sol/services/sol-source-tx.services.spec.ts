@@ -16,13 +16,13 @@ describe('sol-source-tx.services', () => {
 	const blockhash = 'HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN';
 	const simulationSlot = 150n;
 
-	const confirmedStatus = {
+	const confirmedStatus: NonNullable<SolanaSignatureStatus> = {
 		confirmationStatus: 'confirmed',
 		confirmations: 3n,
 		err: null,
 		slot: 100n,
 		status: { Ok: null }
-	} as SolanaSignatureStatus;
+	};
 
 	// A status read at or past the slot the blockhash read below answers at.
 	const noStatus = { slot: 210n, status: null };
@@ -99,7 +99,7 @@ describe('sol-source-tx.services', () => {
 				status: {
 					...confirmedStatus,
 					err: { InstructionError: [3, { Custom: 6001 }] }
-				} as SolanaSignatureStatus
+				}
 			});
 
 			await expect(read()).resolves.toBe('reverted');
@@ -148,7 +148,7 @@ describe('sol-source-tx.services', () => {
 
 				vi.mocked(getSignatureStatus).mockResolvedValueOnce({
 					slot: 210n,
-					status: { ...confirmedStatus, confirmationStatus: 'processed' } as SolanaSignatureStatus
+					status: { ...confirmedStatus, confirmationStatus: 'processed' }
 				});
 
 				await expect(read()).resolves.toBe('pending');

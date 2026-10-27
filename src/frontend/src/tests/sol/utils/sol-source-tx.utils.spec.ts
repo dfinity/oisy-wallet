@@ -1,5 +1,6 @@
 import type { SolanaSignatureStatus } from '$sol/types/sol-rpc';
 import { toSolSourceTxOutcome } from '$sol/utils/sol-source-tx.utils';
+import type { TransactionError } from '@solana/kit';
 
 describe('sol-source-tx.utils', () => {
 	const statusAt = ({
@@ -7,17 +8,16 @@ describe('sol-source-tx.utils', () => {
 		err = null
 	}: {
 		confirmationStatus: 'processed' | 'confirmed' | 'finalized' | null;
-		err?: unknown;
-	}): SolanaSignatureStatus =>
-		({
-			confirmationStatus,
-			confirmations: null,
-			err,
-			slot: 100n,
-			status: { Ok: null }
-		}) as SolanaSignatureStatus;
+		err?: TransactionError | null;
+	}): SolanaSignatureStatus => ({
+		confirmationStatus,
+		confirmations: null,
+		err,
+		slot: 100n,
+		status: { Ok: null }
+	});
 
-	const instructionError = { InstructionError: [3, { Custom: 6001 }] };
+	const instructionError: TransactionError = { InstructionError: [3, { Custom: 6001 }] };
 
 	describe('toSolSourceTxOutcome', () => {
 		it.each(['confirmed', 'finalized'] as const)(

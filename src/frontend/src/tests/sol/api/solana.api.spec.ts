@@ -29,6 +29,7 @@ import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import * as solRpcProviders from '$sol/providers/sol-rpc.providers';
 import { SolanaNetworks } from '$sol/types/network';
+import type { SolanaSignatureStatus } from '$sol/types/sol-rpc';
 import {
 	mockSolSignature,
 	mockSolSignatureResponse,
@@ -44,8 +45,8 @@ import {
 	mockSolAddress4,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
-import { address, lamports } from '@solana/kit';
-import type { MockInstance } from 'vitest';
+import { address, lamports, type SolanaRpcResponse } from '@solana/kit';
+import type { Mock, MockInstance } from 'vitest';
 
 vi.mock('$sol/providers/sol-rpc.providers');
 
@@ -716,7 +717,7 @@ describe('solana.api', () => {
 		const signature = mockSolSignature();
 		const blockhash = 'HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN';
 
-		const confirmedStatus = {
+		const confirmedStatus: NonNullable<SolanaSignatureStatus> = {
 			confirmationStatus: 'confirmed',
 			confirmations: 3n,
 			err: null,
@@ -724,22 +725,36 @@ describe('solana.api', () => {
 			status: { Ok: null }
 		};
 
-		let mockGetSignatureStatuses: MockInstance;
-		let mockIsBlockhashValid: MockInstance;
+		// The node's answers, typed as the kit types them, so that a change of shape fails here.
+		const statusesAnswer = ({
+			slot = 100n,
+			value
+		}: {
+			slot?: bigint;
+			value: readonly SolanaSignatureStatus[];
+		}) => ({
+			send: (): Promise<SolanaRpcResponse<readonly SolanaSignatureStatus[]>> =>
+				Promise.resolve({ context: { slot }, value })
+		});
+
+		const validityAnswer = ({ slot = 100n, value }: { slot?: bigint; value: boolean }) => ({
+			send: (): Promise<SolanaRpcResponse<boolean>> => Promise.resolve({ context: { slot }, value })
+		});
+
+		let mockGetSignatureStatuses: Mock;
+		let mockIsBlockhashValid: Mock;
 
 		beforeEach(() => {
-			mockGetSignatureStatuses = vi.fn().mockReturnValue({
-				send: () => Promise.resolve({ context: { slot: 100n }, value: [confirmedStatus] })
-			});
+			mockGetSignatureStatuses = vi
+				.fn()
+				.mockReturnValue(statusesAnswer({ value: [confirmedStatus] }));
+			mockIsBlockhashValid = vi.fn().mockReturnValue(validityAnswer({ value: false }));
 
-			mockIsBlockhashValid = vi.fn().mockReturnValue({
-				send: () => Promise.resolve({ context: { slot: 100n }, value: false })
-			});
-
-			vi.mocked(solRpcProviders.solanaHttpRpc).mockReturnValue({
+			// A partial mock: only the two reads under test are stubbed.
+			vi.mocked(solRpcProviders.solanaHttpRpc, { partial: true }).mockReturnValue({
 				getSignatureStatuses: mockGetSignatureStatuses,
 				isBlockhashValid: mockIsBlockhashValid
-			} as unknown as ReturnType<typeof solRpcProviders.solanaHttpRpc>);
+			});
 		});
 
 		describe('getSignatureStatus', () => {
@@ -757,9 +772,7 @@ describe('solana.api', () => {
 			});
 
 			it('should return null for a signature the node does not know', async () => {
-				mockGetSignatureStatuses.mockReturnValue({
-					send: () => Promise.resolve({ context: { slot: 100n }, value: [null] })
-				});
+				mockGetSignatureStatuses.mockReturnValue(statusesAnswer({ value: [null] }));
 
 				await expect(
 					getSignatureStatus({ signature, network: SolanaNetworks.mainnet })
@@ -767,9 +780,7 @@ describe('solana.api', () => {
 			});
 
 			it('should return null when the node answers with no entry at all', async () => {
-				mockGetSignatureStatuses.mockReturnValue({
-					send: () => Promise.resolve({ context: { slot: 100n }, value: [] })
-				});
+				mockGetSignatureStatuses.mockReturnValue(statusesAnswer({ value: [] }));
 
 				await expect(
 					getSignatureStatus({ signature, network: SolanaNetworks.mainnet })
@@ -800,9 +811,7 @@ describe('solana.api', () => {
 			});
 
 			it('should return true for a blockhash still valid', async () => {
-				mockIsBlockhashValid.mockReturnValue({
-					send: () => Promise.resolve({ context: { slot: 101n }, value: true })
-				});
+				mockIsBlockhashValid.mockReturnValue(validityAnswer({ slot: 101n, value: true }));
 
 				await expect(
 					isBlockhashValid({ blockhash, network: SolanaNetworks.mainnet })

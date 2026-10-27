@@ -293,7 +293,9 @@ describe('lifi-active-tx.services', () => {
 
 		const solanaTx = (refs = solanaRefs) => buildTx({ data: solanaData, refs });
 
-		const status = (overrides: Partial<NonNullable<SolanaSignatureStatus>> = {}) => ({
+		const status = (
+			overrides: Partial<NonNullable<SolanaSignatureStatus>> = {}
+		): { slot: bigint; status: SolanaSignatureStatus } => ({
 			slot: 210n,
 			status: {
 				confirmationStatus: 'confirmed',
@@ -302,7 +304,7 @@ describe('lifi-active-tx.services', () => {
 				slot: 100n,
 				status: { Ok: null },
 				...overrides
-			} as SolanaSignatureStatus
+			}
 		});
 
 		// Read at or past the slot the blockhash read below answers at.
