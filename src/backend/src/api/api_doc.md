@@ -20,6 +20,24 @@ can help determine whether a caller needs to create a profile. Profile creation
 and user preference methods may update OISY-managed state; they do not create an
 Internet Identity identity or control the caller's signing keys.
 
+## Terms of Use
+
+Using OISY, including through an agent, is subject to the OISY Terms of Use:
+https://oisy.com/terms-of-use/
+
+Before creating a profile for a user, show them the Terms of Use and ask whether
+they accept. If they decline, do not call `create_user_profile`. If they accept,
+call `create_user_profile`, then `update_user_agreements` with
+`current_user_version` set to the profile's `version`, and `accepted = opt true`
+with the values below for each agreement, as the OISY web app records on sign-in.
+Leave `last_accepted_at_ns` empty; the backend sets it.
+
+| Agreement           | `last_updated_at_ms` | `text_sha256`                                                      |
+| ------------------- | -------------------- | ------------------------------------------------------------------ |
+| `terms_of_use`      | `1756245600000`      | `52bab7b1b296314cec46c12fce499d77823acb27f85ff9ac2f8e4ec541878930` |
+| `license_agreement` | `1756245600000`      | `248fd163ca7c0138714d824ba9f2b4378f1b122ad708f7e4d2225b3005d72979` |
+| `privacy_policy`    | `1756245600000`      | `3c1f186b9348d5cdf17d438f98eb29909bb6bcb74f6f3b554b4abd4942064424` |
+
 ## What this API provides
 
 The backend exposes OISY application services, including user preferences and
