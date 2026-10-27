@@ -811,7 +811,7 @@
 			"explorers_description": "",
 			"explorers_velora_description": "",
 			"explorers_near_intents_description": "",
-			"explorers_lifi_description": "",
+			"explorers_lifi_description": "EVM नेटवर्क से स्वैप और ब्रिज ट्रांसफ़र, जिनमें सोलाना पर भेजे गए ट्रांसफ़र भी शामिल हैं।",
 			"explorers_onesec_description": "",
 			"explorers_chain_eth": "",
 			"explorers_chain_sol": "",
