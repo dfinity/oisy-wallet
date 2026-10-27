@@ -7,12 +7,14 @@ This spec follows the workflow defined in `docs/ai/spec-driven-development/workf
 
 # Shared web wallet with native navigation for iOS and Android
 
-**Status:** Shared Wallet/Token/Activity routes and data/auth workers integrated into iOS Capacitor; renewal, release gates and Android incomplete.
-**Updated:** 2026-10-27. The user authorized merging main, adopting/updating
-Capacitor and preparing the shared web/native apps. Capacitor 8.5.3 core/CLI/iOS
-are now pinned. The follow-up code review request authorizes cleanup, commit and push;
-audit deployment and transaction execution remain outside this review.
-Android and shared authenticated-runtime acceptance gates remain open.
+**Status:** The iOS Capacitor app uses shared Wallet, Token and Activity routes,
+including their data and auth workers. Automatic renewal, Android and release
+acceptance remain incomplete.
+
+**Updated:** 2026-10-27. The user authorized the main merge, Capacitor adoption
+and preparation of the shared web and mobile apps, followed by cleanup, commit
+and push for review. Capacitor core, CLI and iOS are pinned to 8.5.3. Audit
+deployment and transaction execution are outside this review.
 
 ## Current implementation
 
@@ -20,30 +22,33 @@ Main was merged through release 2.6.3 (`cb4863433`), merge HEAD `9946d6b9b`.
 The only active app is `mobile/capacitor/`; preserve the installed phone's signing,
 bundle and Keychain identity. Installing the app does not deploy the audit site.
 
-The iOS package now builds the normal Svelte route tree, auth store, Loaders,
-chain schedulers and workers. Wallet, Token and Activity use their real web pages.
-Native owns tabs, Account, II/Keychain and isolated Explore. Search opens the normal
-token filter. The separate `routes/mobile/`, snapshot props, `NativePreview*` screens
-and preview portfolio/history services were removed. Browser authentication still
-uses AuthClient/IDB; mobile adds an in-memory identity source behind the same
-provider, including bounded independent worker keys.
+The iOS package builds the normal Svelte routes, auth store, Loaders, chain
+schedulers and workers. Wallet, Token and Activity use their existing web pages.
+Native code handles tabs, Account, II sign-in, Keychain and the isolated Explore
+browser. Search opens the existing token filter.
 
-This is still an audit preview. Five-minute child expiry logs out; automatic
+The separate `routes/mobile/`, snapshot props, `NativePreview*` screens and preview
+data services were removed. Browser authentication keeps AuthClient/IDB. Mobile
+uses an in-memory identity through the same provider, with separate worker keys
+and time-limited delegations.
+
+The preview signs out when its five-minute child session expires. Automatic
 renewal, Android, II review of the delegation trust model and financial execution
-are not complete. See the [authentication review](../../../../mobile/capacitor/docs/authentication-review.md)
-for the exact SDK comparison and callback deployment dependency.
-See [session boundary](../../../../mobile/capacitor/docs/session-boundary.md) for
-ownership and [handoff](./2026-10-27-feat-mobile-shared-web-native-navigation/handoff.md)
-for verification. Earlier comparison-app retention instructions are superseded;
-do not restore the old Swift wallet or merge the historical Capacitor POC wholesale.
+remain unfinished. The [authentication review](../../../../mobile/capacitor/docs/authentication-review.md)
+compares the app with `dfinity/icp-native-sdk` and explains its dependency on the
+deployed audit callback. The [session guide](../../../../mobile/capacitor/docs/session-boundary.md)
+describes ownership; the [handoff](./2026-10-27-feat-mobile-shared-web-native-navigation/handoff.md)
+records verification.
+
+Earlier instructions to retain the comparison app are superseded. Keep the old
+Swift wallet retired and use the historical Capacitor POC only as a reference.
 
 ## Evidence: what already exists
 
-Before the implementation/main merge, the inspected iOS worktree was
-`codex/ios-native-m1`, at HEAD
-`bdd3b822ed167df0b8c29989c3d4c7f94e36eb45`, **with substantial uncommitted work**.
-HEAD alone does not contain the current hybrid implementation. Preserve those
-files and inspect the working tree before starting a migration.
+The comparison below records the starting point before implementation and the
+main merge. At that time, `codex/ios-native-m1` was at
+`bdd3b822ed167df0b8c29989c3d4c7f94e36eb45` with substantial uncommitted work.
+That commit alone does not contain the hybrid implementation inspected here.
 
 The other source is draft [PR #13512: native Android and iOS POC](https://github.com/dfinity/oisy-wallet/pull/13512),
 branch `claude/mobile-app-architecture-1d1cde`, inspected at
@@ -101,8 +106,7 @@ Do not copy these POC assumptions unchanged:
 
 ### Current implementation anchors
 
-These local files are the migration starting points, not parallel features to
-reimplement:
+Use these files when continuing the migration:
 
 - [ShellViewController.swift](../../../../mobile/capacitor/ios/App/App/ShellViewController.swift)
   and [OisyHostPlugin.swift](../../../../mobile/capacitor/ios/App/App/OisyHostPlugin.swift):
@@ -145,9 +149,9 @@ flowchart TB
   BROKER --> CONSENT[Native permission and approval presentation]
 ```
 
-Capacitor replaces generic container, asset delivery and plugin plumbing where it
-fits. It does not replace the product shell or automatically isolate an untrusted
-website. Never load a dApp in the bridge-enabled wallet runtime.
+Capacitor provides the container, asset delivery and plugin infrastructure. The
+native shell still owns navigation and must isolate untrusted websites. Load dApps
+in a separate WebView without the wallet bridge.
 
 On iOS, evaluate a retained `CAPBridgeViewController` inside the existing native
 hierarchy; customization is an officially supported mechanism.
@@ -184,10 +188,10 @@ Swift and Kotlin transaction forms.
 
 ### Navigation contract
 
-- Keep Wallet, Activity and Browser root destinations, with a trailing Search
-  entry on iOS and an equivalent accessible native entry on Android. Account opens
-  from the profile control. A prominent native Actions button may open the common
-  sheet; it must not turn into a fifth competing navigation hierarchy.
+- Keep Wallet, Activity and Explore as root destinations. The iOS More menu opens
+  Notes, Earn, Borrow and Search; Android needs equivalent accessible entries.
+  Account opens from the profile control. A prominent native Actions button may
+  open the shared sheet without adding another navigation hierarchy.
 - Native owns the selected root and presentation of native screens. Web owns
   token/detail routes, filters, scroll positions and web sheets. Exchange typed
   destinations and route state, not arbitrary URLs or executable JavaScript.
@@ -226,9 +230,8 @@ Swift and Kotlin transaction forms.
    parity checks. Delete replaced Swift portfolio/history/import UI and bindings
    in a separate cleanup change, leaving authentication and Browser ownership intact.
 
-Do not reuse the entire desktop layout in a constrained WebView and then patch
-around it indefinitely. Likewise, do not create another independently maintained
-mobile wallet page that only shares icons and token rows.
+Share feature views and business logic. Give the mobile host its own layout
+without copying the wallet page or depending on desktop navigation hidden by CSS.
 
 ## Session, trust and lifecycle requirements
 
@@ -308,11 +311,10 @@ code between Swift and Kotlin.
 | M3 — Management and execution readiness | Shared token management/import persistence; review of Send/Swap/Buy integration                                                 | Import/save/cancel/network validation checks first; any transaction execution requires separately approved testnet scope and its own acceptance evidence; mainnet stays gated                      |
 | M4 — Browser parity and cleanup         | Android isolated Browser matches current iOS connection/read scope; remove superseded preview code after parity                 | Wrong-origin/frame requests denied; no trusted bridge/storage in dApps; account/network changes invalidate permissions; ordinary web regression checks; release checklist remains explicit         |
 
-M0 is intentionally small. A successful container launch alone is insufficient to
-choose the architecture: native view lifetime and common auth/worker integration
-are the two highest-risk maintenance assumptions. If either needs extensive
-framework patching, keep the working iOS host and reassess the Android container
-against the same shared frontend contract before proceeding.
+M0 must test native view lifetime and shared auth/worker integration, as well as
+launching the container. If either requires extensive framework patches, keep the
+working iOS host and reassess the Android container against the same frontend
+contract.
 
 ## Acceptance and verification
 
@@ -344,13 +346,13 @@ specs by default; the repository's E2E restriction still applies. Run one heavy
 build at a time on this Mac. Capture cold launch, tab-switch and memory baselines
 before optimizing; do not claim performance parity without measurements.
 
-No app build or device test was executed for this documentation-only spec. Existing
-iOS phone evidence cannot be reused as Android or Capacitor migration evidence.
+No builds or device tests were run when the original spec was written. Later iOS
+implementation results are in the handoff; they do not establish Android parity.
 
 ## Continue implementation
 
-The handoff contains the first bounded task and the human/tooling checklist, while
-this document remains the source of architecture and acceptance requirements.
+The handoff records implementation progress, test results, phone checks and
+remaining work. This spec defines the architecture and acceptance requirements.
 Source: [Mobile migration handoff](./2026-10-27-feat-mobile-shared-web-native-navigation/handoff.md)
 
 ## Dependencies

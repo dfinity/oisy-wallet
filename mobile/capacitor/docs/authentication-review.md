@@ -5,11 +5,13 @@ tags: [ios, security, internet-identity, review]
 
 # Authentication and Explore review
 
-Review date: 2026-10-27. This branch is an **audit prototype for architecture and
-security review**, not a production wallet approval. Wallet, Token, Activity and
-Notes use the shared Svelte frontend. Native code owns system sign-in, the parent
-key, navigation and an isolated EVM app browser. No Internet Identity approval is
-implied by working balances or passing tests.
+Reviewed on 2026-10-27. This prototype uses the shared Svelte frontend for Wallet,
+Token, Activity and Notes. Native code handles system sign-in, the parent key,
+navigation and the isolated Explore browser.
+
+The implementation needs architecture and security review before release. Passing
+tests and working balances do not establish that Internet Identity has approved
+the authentication design.
 
 ## Read these first
 
@@ -25,12 +27,13 @@ implied by working balances or passing tests.
 
 ## Comparison with the requested SDK
 
-The reference is exactly [dfinity/icp-native-sdk](https://github.com/dfinity/icp-native-sdk),
-reviewed at commit `cc22ba56b6cbab384fcef02c8e3c8624341cc30a` (remote HEAD on the
-review date). The earlier native balance experiment used v0.11.1; that dependency
-is absent from the active Capacitor app. The current Swift modules are
-`IcpSdkAuth`, `IcpSdkSigner` and `IcpSdkCore`. Shared web calls use the existing
-`@icp-sdk/core` identity/agent implementation.
+This review compares the app with [dfinity/icp-native-sdk](https://github.com/dfinity/icp-native-sdk)
+at commit `cc22ba56b6cbab384fcef02c8e3c8624341cc30a`, the remote HEAD on the review
+date. Its Swift modules are `IcpSdkAuth`, `IcpSdkSigner` and `IcpSdkCore`.
+
+The active Capacitor app does not link the Swift SDK. The earlier native balance
+experiment used v0.11.1, but that dependency was removed. Shared web calls use
+`@icp-sdk/core` for identities and agents.
 
 | Concern                | SDK reference                                                                                         | This branch / consequence                                                                                                                                                                                 |
 | ---------------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -39,7 +42,7 @@ is absent from the active Capacitor app. The current Swift modules are
 | Correlation            | Fresh 16-byte state, form-encoded fragment and JSON-RPC correlation                                   | Same randomness size and fragment encoding; exact callback route, duplicate fields, request ID, state and final key checked                                                                               |
 | Key storage            | `AppleCredentialStorage` / `KeychainIdentity` use platform key handles, with configurable protection  | A software Ed25519 session key is stored as a Keychain data item, `WhenUnlockedThisDeviceOnly`; it is not a Secure Enclave key                                                                            |
 | Delegation checks      | Core validates shape, repeated keys, requested scope and maximum lifetime                             | Final key, bounds, restrictions and expiry checked; repeated-key and returned-lifetime checks added during this review. All targeted/permission-bearing chains are rejected rather than silently stripped |
-| Signature verification | Core explicitly leaves delegation signature verification to the receiving replica                     | Root canister signature is not locally verified; additional Ed25519/P-256 links are checked with CryptoKit. This is custom code to assess, not evidence of full II verification                           |
+| Signature verification | Core explicitly leaves delegation signature verification to the receiving replica                     | Root canister signature is not locally verified; additional Ed25519/P-256 links are checked with CryptoKit. The local checks do not verify the full II chain                                              |
 | Session lifetime       | SDK renews app delegations using the II session and handles foreground/presence                       | Parent requested for 24 hours; local web/worker children last at most five minutes. Expiry signs out; automatic renewal is not implemented                                                                |
 | External apps          | SDK signer is a client for IC wallet protocols                                                        | Explore currently implements an EIP-1193/6963 provider for Sepolia connection and public reads. It is not an ICRC signer implementation or WalletConnect                                                  |
 
@@ -49,12 +52,12 @@ Pinned source references:
 [delegation checks](https://github.com/dfinity/icp-native-sdk/blob/cc22ba56b6cbab384fcef02c8e3c8624341cc30a/crates/icp-core/src/delegation.rs),
 [renewal lifecycle](https://github.com/dfinity/icp-native-sdk/blob/cc22ba56b6cbab384fcef02c8e3c8624341cc30a/languages/swift/Sources/IcpSdkAuth/Session.swift).
 
-Recommendation: evaluate replacing the custom auth adapter with `IcpSdkAuth`
-after II reviews origin continuity, callback registration and child delegation
-integration. Keep the shared web data pipeline. This is a protocol/lifecycle
-migration, not a drop-in import: the SDK's session result is II-scoped and cannot
-be substituted for the current unrestricted app delegation. Verify the same audit
-principal and balances before changing the installed flow.
+Consider replacing the custom adapter with `IcpSdkAuth` after II reviews the
+derivation origin, callback registration and child delegations. The shared web
+data pipeline can stay. Adoption requires a protocol and session-lifecycle change:
+the SDK returns an II-scoped session that cannot replace the current unrestricted
+app delegation directly. Check that the audit principal and balances remain the
+same before changing the installed sign-in flow.
 
 ## Questions for Internet Identity reviewers
 
@@ -78,24 +81,24 @@ principal and balances before changing the installed flow.
 
 ## Callback deployment dependency
 
-The public audit callback allowlist was checked on the review date and names
-`https://audit.oisy.com/signer-callback`. The deployed relay page responds, but
-its route and well-known assets are **not present in this branch**. Their source
-history is in the earlier mobile POC, including commit
-[`efd8103648`](https://github.com/dfinity/oisy-wallet/commit/efd810364803608a579d4a4eba7dc533a6f2eba6).
-This review does not establish which revision is currently deployed on audit.
-Do not deploy this branch over audit without retaining/reviewing that callback
-and its domain configuration, or migrating to the SDK's verified HTTPS callback.
-Installing the packaged iOS app does not deploy the audit site.
+On the review date, the public audit allowlist included
+`https://audit.oisy.com/signer-callback`, and the relay page responded. Its route
+and well-known assets are missing from this branch. They appear in the earlier
+mobile POC, including commit
+[`efd8103648`](https://github.com/dfinity/oisy-wallet/commit/efd810364803608a579d4a4eba7dc533a6f2eba6);
+the revision currently deployed on audit is unknown.
+
+Before deploying this branch to audit, preserve and review that callback and its
+domain configuration, or migrate to the SDK's verified HTTPS callback. Installing
+the packaged iOS app does not deploy the audit site.
 
 ## Important limits
 
-The `audit-read-only` mode name describes exposed financial UI, **not a
-cryptographic read-only credential**. The trusted wallet has an unrestricted,
-time-bounded signing identity so ordinary authenticated loaders, allowances,
-token settings and encrypted Notes can work. A compromised trusted wallet script
-could use that authority until expiry. Hiding Send/Swap/Buy is not a security
-boundary. Do not share this preview as a funded-wallet release.
+The trusted web wallet can authorize authenticated updates, including allowances,
+token settings and encrypted Notes. Its signing identity is unrestricted until
+expiry. The name `audit-read-only` refers only to the financial actions exposed in
+the UI. Hiding Send/Swap/Buy does not restrict a compromised wallet script's
+signing authority. This preview is not ready for release to funded wallets.
 
 Explore has a distinct nonpersistent WebView, no Capacitor bridge, top-frame and
 origin checks, native permission prompts and a fixed read-method allowlist.
@@ -104,21 +107,21 @@ wallet address requires consent. Its WebView storage is discarded on logout even
 when ETH address loading has not completed. Connection consent is not transaction
 approval. Real Uniswap/1inch signing and swaps have not been implemented or tested.
 
-The packaged CSP permits HTTPS/WSS data endpoints and inline bootstrap code; it is
-not a narrowly enumerated production endpoint policy. Callback-domain deployment,
-CSP hardening, dependency review, trusted-page threat model, production provisioning,
-Android and transaction approval flows remain release work. Simulator fixtures do
-not establish real II/passkey security or funded transaction correctness.
+The packaged CSP allows HTTPS/WSS data endpoints and inline bootstrap code.
+Release work still includes a narrower endpoint policy, callback-domain deployment,
+dependency review, a threat model for the trusted page, production provisioning,
+Android and transaction approval flows. Simulator fixtures cannot verify real
+II/passkey security or transactions involving funds.
 
 ## Fixes and cleanup from this review
 
 - Reject callback chains whose effective expiry exceeds the requested 24 hours plus
   the SDK's five-minute clock-skew allowance; reject overlong numeric expirations.
 - Reject repeated root/intermediate/child keys before using a delegation.
-- Preserve returning welcome when the auth worker ends an expired session;
-  explicit logout still selects the introduction. Native enforces expiry independently.
-- Discard Explore storage on wallet teardown even before an account is published,
-  and clear persisted consent on a signed-out/cold-expired startup.
+- Show “Welcome back!” when the auth worker ends an expired session, and the
+  introduction after explicit logout. Native code also enforces expiry.
+- Discard Explore storage when the wallet closes, even before account loading
+  finishes. Clear saved consent when the app starts signed out or with an expired session.
 - Ignore stale sign-in error callbacks after logout and remove the diagnostic print.
 - Remove unused token-menu read-only mode, unused native debug configuration and
   30 localization keys from retired screens.

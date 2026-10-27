@@ -5,14 +5,14 @@ tags: [mobile, capacitor, ios, development]
 
 # OISY Capacitor app
 
-The only active mobile project, consolidated on 2026-10-27. Signed-in launch opens
-the real shared OISY web wallet. There is no native-wallet mode or sample balance
-screen. Native iOS code owns navigation, system-browser sign-in, Keychain and an
-isolated **Explore** section for connecting apps. Wallet, Activity and Explore float
-over the web content; the separate More button opens Notes, Earn, Borrow and Search.
-Notes is a shared web page. Blocking web sheets hide the native controls until
-closed; editing a note uses the same web editor in a full-screen mobile frame.
-Read AGENTS.md before changes.
+This is the only active mobile app as of 2026-10-27. After sign-in, it opens the
+shared OISY web wallet. Native iOS code handles navigation, system-browser sign-in,
+Keychain and Explore, the isolated browser for connecting apps.
+
+Wallet, Activity and Explore tabs float over the web content. A separate More
+button opens Notes, Earn, Borrow and Search. Web dialogs hide the native controls
+until closed. Notes uses a shared web page and a full-screen mobile editor.
+Read AGENTS.md before making changes.
 
 ## Ownership
 
@@ -26,57 +26,58 @@ Read AGENTS.md before changes.
 | Uniswap / 1inch, EIP-1193/6963 discovery and consent                    | `ios/App/App/Explore/`, isolated WebKit/provider                                              |
 | Static frontend delivery                                                | Capacitor 8.5.3, packaged local assets, no loopback server                                    |
 
-The native SDK, generated balance bindings, custom Swift token/transaction/import
-screens, sample portfolio and old app target were deleted. `mobile/ios-native/`
-contains historical documentation only. Native resources now belong to this folder.
+The separate Swift wallet, its native SDK and balance bindings, custom screens,
+sample portfolio and old app target were removed. `mobile/ios-native/` contains
+historical documentation; all active native resources live here.
 
 ## Welcome screens
 
-Signed-out entry is a full-screen native welcome with the OISY mark and an Explore
+Signed-out users see a full-screen native welcome with the OISY mark and an Explore
 shortcut. First-time installations and explicit logout show “Your Digital Assets
 Private and Secure” and “Open or create”. Session expiry shows a softly blurred
-wallet illustration, “Welcome back!” and “Open Wallet”. Both buttons open the existing system-browser
-Internet Identity flow. Native tabs/More stay hidden only while welcome is visible;
-Explore and the authenticated wallet retain the normal navigation.
+wallet illustration, “Welcome back!” and “Open Wallet”. Both buttons open Internet
+Identity in the system browser.
+The welcome screen hides tabs and More; Explore and the signed-in wallet show them.
 
-A cosmetic UserDefaults boolean selects returning presentation after successful
-sign-in or restoration of a saved session, including expiry migration. Expiry
-retains it; explicit logout clears it. Both outcomes survive app relaunch and use
-the same Keychain/session cleanup. It contains no account data and never
-authenticates the user. The historical `.hasSignedIn` preference key is retained
-for installed previews; the observable property is `showsWelcomeBack`.
+A UserDefaults boolean selects the returning welcome after sign-in or restoration
+of a saved session, including migration of an expired session. Expiry keeps it;
+explicit logout clears it. The choice survives relaunch, and both paths use the
+same Keychain and session cleanup. This preference contains no account data and
+does not authenticate the user. Installed previews keep the `.hasSignedIn` storage
+key; the observable property is `showsWelcomeBack`.
 
-The backgrounds are bundled images generated with the built-in image generation
-tool from the user's OISY brand reference. Native text/buttons remain sharp,
-localized and accessible. Artwork makes one subtle settling movement and responds
-to device tilt with UIKit motion effects (up to 12 pt horizontally and 16 pt
-vertically). Extra artwork covers the edges; text, buttons and contrast overlays
-stay fixed. Reduce Motion disables both animations. Tilt effects are removed while
-the scene is inactive, system sign-in is open, after authentication, and when the
-artwork leaves the window. Native UIWindowScene activation owns this lifecycle
-inside the UIKit shell. No raw motion data is collected. Large text can scroll
-without losing the CTA. Light and
-dark appearances share the art with an appropriate contrast layer. Exact prompts
-and asset locations are recorded in [Artwork provenance](./docs/welcome-artwork.json).
+The bundled backgrounds were generated from the user's OISY brand reference.
+Native text and buttons stay sharp, localized and accessible. Artwork moves once
+on entry, then responds to device tilt through UIKit motion effects: up to 12 pt
+horizontally and 16 pt vertically. Extra artwork covers the edges; text, buttons
+and contrast overlays stay fixed.
+
+Reduce Motion disables both effects. Tilt also stops while the scene is inactive,
+during system sign-in, after authentication, and when the artwork leaves the
+window. UIWindowScene activation controls this lifecycle; no raw motion data is
+collected. Large text can scroll with the sign-in button still reachable. Light
+and dark appearances use the same artwork with different contrast layers. Exact
+prompts and asset locations are in [Artwork provenance](./docs/welcome-artwork.json).
 
 ## Authentication review
 
-The review entry point compares the retained adapter with the exact Swift SDK,
-records fixes, and identifies decisions for Internet Identity reviewers.
+This guide compares the auth adapter with `dfinity/icp-native-sdk`, lists the
+review fixes and sets out questions for the Internet Identity team.
 Source: [Authentication and Explore review](./docs/authentication-review.md)
 
 ## Session and isolation
 
-The existing Internet Identity relay, URL scheme and Keychain service are retained.
-The parent key stays native; the trusted wallet generates an in-memory child key
-and receives a bounded delegation. The existing AuthClientProvider, auth store,
-normal loaders and workers now use that session. Each worker generates its own
-key and obtains a bounded delegation through a private MessagePort. Browser builds
-retain their existing AuthClient/IDB flow. See [Session boundary](./docs/session-boundary.md).
+The app keeps the existing Internet Identity relay, URL scheme and Keychain service.
+The parent key stays native. The trusted web wallet generates an in-memory child
+key and receives a time-limited delegation. AuthClientProvider, the auth store,
+loaders and workers use this session. Each worker has its own key and receives a
+bounded delegation through a private MessagePort. Browser builds keep their
+AuthClient/IDB flow. See [Session boundary](./docs/session-boundary.md).
 
-A five-minute child or parent expiry logs out, clears Keychain and closes the wallet
-and Explore grants. Foreground and bridge-entry checks use the native deadline.
-Automatic renewal remains pending. Unavailable API data stays unavailable, not zero.
+The child expires after at most five minutes, or sooner if the parent expires.
+Expiry signs out, clears Keychain, closes the wallet and revokes Explore grants.
+Foreground and bridge-entry checks enforce the native deadline. Automatic renewal
+is not implemented. Missing API data must be shown as unavailable rather than zero.
 
 Only the exact local `capacitor://localhost` main wallet document may use the fixed
 v2 bridge. General-purpose Capacitor HTTP/cookie plugins remain blocked. Wallet and
@@ -109,14 +110,14 @@ xcrun simctl install booted /tmp/oisy-capacitor-build/Build/Products/Debug-iphon
 xcrun simctl launch booted org.dfinity.oisy.capacitor.preview
 ```
 
-An unsigned-in simulator shows Internet Identity entry and Explore. Automated tests
+A signed-out simulator shows the welcome screen and Explore. Automated tests
 use isolated signed fixtures and block network calls; there is no user-facing sample
 mode. Physical sign-in still requires the user's passkey interaction.
 
 `build-mobile/` and `.svelte-kit-mobile/` remain isolated from the website build.
 `mobile-build.json` records source revision, dirty state, contract and audit mode.
-The packaged CSP permits the normal HTTPS/WSS data endpoints while keeping scripts local. Publishing
-`audit.oisy.com` does not update installed interface assets.
+The packaged CSP allows HTTPS/WSS data endpoints and local scripts, including
+inline bootstrap code. Publishing `audit.oisy.com` does not update the installed UI.
 
 For the existing physical preview, use the previously configured development team
 and bundle identifier override; do not uninstall it or switch Keychain entitlements.
@@ -132,7 +133,8 @@ generated projects or dependencies. Android SDK/JDK and an Android host remain p
 
 ## Remaining shared-runtime work
 
-Automatic child renewal, Android, II review of the delegation trust model and remaining release gates.
+The session guide tracks automatic child renewal, Android support and the
+authentication and release checks still needed.
 Source: [Session boundary](./docs/session-boundary.md)
 
 ## Verification

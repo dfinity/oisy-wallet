@@ -5,39 +5,39 @@ tags: [mobile, ios, android, capacitor, handoff]
 
 # Mobile migration handoff
 
-Updated 2026-10-27: the iOS Capacitor app now uses the normal Wallet, Token and
-Activity routes with the shared auth provider, stores, loaders and workers.
-The earlier component-snapshot preview and its separate data pipeline are removed.
-Installed over OISY Preview and launched on the iPhone 14 Pro Max on 2026-10-27.
-The first phone check reached token loading, then returned to login. After the
-II-proof correction below, the user confirmed that ICP is correct and the wallet
-stays open. The user then reported missing native tabs; that navigation correction
-passed simulator tests and was installed at 13:07 local time. The user confirmed
-that tabs are visible and both ICP detail and Activity open. Funded transaction
-correctness and additional chains have not been accepted on this build.
+Updated 2026-10-27. The iOS Capacitor app uses the existing Wallet, Token and
+Activity routes with their shared auth provider, stores, loaders and workers.
+The separate snapshot preview and data pipeline have been removed.
 
-The next navigation update floats Wallet, Activity and Explore over the full-height
-WebView, with a separate OISY-mark More button. Its native popover opens the shared
-Notes page, Earn and Borrow pages, plus Search. The floating-navigation update was installed at 13:27 local time. The subsequent
-modal/Notes update passed simulator verification and was installed and launched
-on the reconnected iPhone at 15:48; user acceptance of these latest screens is
-still pending. Details are recorded in the follow-up below.
+On the iPhone 14 Pro Max, the user confirmed correct ICP, no immediate sign-out,
+visible native tabs, and working ICP detail and Activity screens after the fixes
+below. A later check confirmed that Base ETH history loads. These checks do not
+validate every transaction field or other chains.
+
+Wallet, Activity and Explore now float over the WebView. More opens Notes, Earn,
+Borrow and Search. The floating navigation was installed at 13:27 local time;
+the shared modal shell and Notes page followed at 15:48. Phone acceptance of those
+screens remains pending. Later welcome updates and their installation times are
+recorded below. The final authentication review fixes were tested in the simulator
+and have not been installed on the phone.
 
 ## Authentication and code review — 2026-10-27
 
-The current review entry point is [Authentication and Explore review](../../../../../mobile/capacitor/docs/authentication-review.md).
-It compares this implementation with `dfinity/icp-native-sdk` at
-`cc22ba56b6cbab384fcef02c8e3c8624341cc30a`, maps the relevant sources and lists
-questions for the II team. The active app does not link that Swift SDK.
+Start with [Authentication and Explore review](../../../../../mobile/capacitor/docs/authentication-review.md).
+It links the relevant code, lists questions for II and compares the implementation
+with `dfinity/icp-native-sdk` at `cc22ba56b6cbab384fcef02c8e3c8624341cc30a`.
+The active app does not link that Swift SDK.
 
-Review fixes add maximum callback lifetime and repeated-key checks, preserve the
-expiry-versus-explicit-logout welcome state, and close Explore and revoke stored
-consent even if expiry occurs before account loading. Unused native translations,
-debug configuration and an unused token-menu variant were removed. Historical
-native media and machine-specific logs remain local and are excluded from commits.
-The callback relay is a separate existing audit deployment dependency; its source
-is absent from this branch. This is ready for design/security review only, not a
-production approval. These review changes have not been installed on the phone.
+The review added checks for callback lifetime and repeated keys, kept the correct
+welcome state after expiry or explicit logout, and fixed Explore cleanup when
+expiry happens before account loading. It also removed unused native translations,
+debug configuration and a token-menu variant. Historical native media and local
+test logs stay outside review commits.
+
+Sign-in still depends on the callback relay deployed on audit; its source is
+missing from this branch. The prototype is ready for design and security review.
+Production approval is still needed, and these review fixes have not been
+installed on the phone.
 
 ### Review validation
 
@@ -55,13 +55,15 @@ production approval. These review changes have not been installed on the phone.
 - Normal website build, mobile build/Capacitor sync and final simulator app build
   pass. The normal mobile bundle was rebuilt with `VITE_MOBILE_UI_TEST=false`;
   `oisyTestEmptyNotes` is absent from its JavaScript.
-- Current documentation trees validate. Staged sources contain no matching local
-  API-key values, private provisioning files or generated mobile bundle output.
+- The Capacitor guide and handoff pass documentation validation. The wider spec
+  scan reports existing issues outside the edited docs. Staged sources contain
+  no matching local API-key values, private provisioning files or generated mobile
+  bundle output.
 
-The suite reports existing nested-mock/dependency/simulator warnings; the commands
-above complete successfully after the fixture correction. This review did not run
-Android, repeat real passkey approval, or test funded signing/swaps. Prior physical
-checks are recorded below; they are not evidence for new transaction capabilities.
+The runs emitted existing nested-mock, dependency and simulator warnings. The six
+failed frontend tests passed after the fixture correction; the other checks above
+passed. This review did not test Android, repeat real passkey approval or sign
+transactions involving funds. Earlier phone checks are recorded below.
 
 ## Branch and preservation
 
@@ -113,20 +115,20 @@ remain unavailable. Token management and settings use the ordinary web flows.
 | Latest package/reload regression         | Passed: 4 targeted WebKit/origin tests; `/private/tmp/oisy-shared-final-smoke.xcresult`                                                                             |
 | Physical device                          | User confirmed correct ICP/no immediate sign-out, visible native tabs, and ICP detail/Activity opening after both fixes                                             |
 
-The WebKit fixture blocks network reads deliberately. It proves packaged code,
-worker authentication, routing and expiry; it does **not** prove real balances or
-funded transaction history. Offline captures show the normal web loading/error UI,
-including its initial zero placeholder. Treat them as failure-state evidence, not
-as a portfolio design or real-account acceptance. A window capture can miss a
-WebKit composited layer after theme change; the WebKit snapshots were inspected.
+The WebKit fixture blocks network reads. It checks packaged code, worker
+authentication, routing and expiry, but cannot validate real balances or history.
+Its screenshots show loading and error states, including the web UI's initial
+zero placeholder. A window capture can miss a WebKit composited layer after a
+theme change, so the WebKit snapshots were also inspected.
 
 Documentation: the Capacitor entry tree and handoff validator pass. The migration
 spec directory-wide validator also reports legacy issues in other spec files;
 current integration links were checked and repaired without a repository-wide cleanup.
 
-At the initial integration checkpoint below, the full repository suite, separate
-website build and Android had not been run. The later review validation above
-supersedes the first two limitations; Android remains untested.
+The following sections record earlier implementation checkpoints. Their test
+counts and installation status apply to those builds. The full frontend suite and
+separate website build were run during the later review above; Android remains
+untested.
 No new Playwright specs, dependencies, restricted scripts, CI, backend or dfx edits
 were introduced for this integration. Shared build reports existing optional
 provider/Robinhood-network warnings; final build still succeeds.
@@ -159,8 +161,9 @@ Backend validation is unchanged.
 
 Two new child-chain regressions failed before the fix. The utility, loader and
 mobile-session suites then passed 28 tests, including an allowance regression
-mirroring the backend one-link contract. Fixtures use local signing keys, not real
-II canister signatures; phone acceptance is still needed. Logs are at
+mirroring the backend one-link contract. Fixtures use local signing keys rather
+than real II canister signatures. The phone check is recorded in the next
+paragraph. Logs are at
 `/private/tmp/oisy-ii-proof-before.log` and `/private/tmp/oisy-ii-proof-tests.log`.
 
 The correction passed Svelte application/test type checking (0 errors/warnings)
@@ -203,17 +206,17 @@ dismissal restores visibility without a retained hidden flag.
 
 ## Navigation follow-up: floating tabs and More
 
-The user's requested layout now keeps three native tabs (Wallet, Activity, Explore)
-and a separate glass More button using the existing OISY mark. Both sit above the
-full-height wallet WebView. The shared mobile host adds bottom scroll padding so
-end-of-page content stays reachable; web dialogs are bounded above the controls.
-Explore/sign-in use native safe-area insets. The keyboard layout guide still avoids
-stale hidden-navigation state after system authentication.
+This update added three floating native tabs (Wallet, Activity, Explore) and a
+separate glass More button with the OISY mark. The shared mobile host adds bottom
+scroll padding to keep the end of the page reachable. At this checkpoint, web
+dialogs ended above the controls; the later modal update changed that behavior.
+Explore and sign-in used native safe-area insets. The keyboard layout guide kept
+the navigation visible after returning from system authentication.
 
-More uses a native menu with Notes, Earn and Borrow, followed by Search. Notes
-opens the existing shared modal without changing the underlying page. Earn/Borrow
-use their ordinary web routes and shared loaders. Search retains the ordinary
-wallet token filter. Fixed route/message allowlists were extended; one wallet
+More opened a native menu with Notes, Earn, Borrow and Search. Notes initially
+opened the shared modal; it moved to its own page in the update below. Earn and
+Borrow used their existing web routes and loaders, and Search used the wallet's
+token filter. Fixed route/message allowlists were extended; one wallet
 WebView and its auth session remain in use. Menu destinations are disabled while
 signed out. UIKit provides menu behavior, accessible labels and large-content
 viewing; More's caption uses scaled type.
@@ -249,8 +252,8 @@ The user reported working Base ETH balances but no transaction history. Inspecti
 confirmed that the installed bundle's Etherscan API-key constant is `undefined`.
 The worktree initially had no local development env file; the main checkout had
 an Etherscan configuration, which the worktree build did not inherit. History uses
-Etherscan independently of balance loading. No transaction-provider rewrite is needed
-to fix this missing configuration.
+Etherscan independently of balance loading. Adding the missing configuration
+restored history without changing the provider.
 
 `build:mobile` now checks the key before building. Four offline Vitest checks cover a
 missing/blank key, the audit development env file and a build-environment override,
@@ -301,7 +304,8 @@ performed during verification.
 ## Remaining work
 
 - Automatic child renewal with worker/client replacement and cancellation tests.
-- Native II root-signature verification and cold-start callback recovery review.
+- II review of root-signature trust and cold-start callback recovery; see the SDK
+  comparison before choosing a local verifier.
 - Fresh-account onboarding/allowance and multi-chain funded-history acceptance.
 - Android host/toolchain, storage/signing compatibility and device checks.
 - Send/swap/buy and dApp signing/broadcast are separate tasks.
@@ -329,10 +333,9 @@ behind the fixed host interface. M1 cross-platform/release acceptance is not com
 
 ## Shared mobile modal shell and Notes page — 2026-10-27
 
-The user approved a common mobile presentation shell and a dedicated Notes page
-from More. Shared feature logic stays in Svelte; native code only controls its
-navigation visibility. No dependency, backend, authentication or cryptography
-change was needed. Nothing has been pushed.
+This update added a common mobile modal shell and a Notes page opened from More.
+Feature logic stays in Svelte; native code controls navigation visibility. It
+required no dependency, backend, authentication or cryptography changes.
 
 | Before                                        | After                                                                                                                                                                           |
 | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -382,10 +385,10 @@ a shared modal is still pending; passkey approval may be necessary after expiry.
 
 ## Illustrated welcome — 2026-10-27
 
-The next change replaces the generic native signed-out placeholder with two
-illustrated welcome states. No shared wallet screen, signing request, delegation
-validation or frontend data pipeline is replaced. The native entry point keeps the
-OISY mark without a wordmark, a direct Internet Identity CTA, and an Explore shortcut.
+This update replaced the signed-out placeholder with two illustrated welcome
+screens. It kept the shared wallet screens, sign-in request, delegation validation
+and frontend data pipeline. Both welcome screens use the OISY mark, an Internet
+Identity sign-in button and an Explore shortcut.
 First-time/returning presentation uses a cosmetic installation preference; see the
 [mobile app README](../../../../../mobile/capacitor/README.md#welcome-screens) for
 state migration, motion and artwork provenance.
@@ -420,7 +423,7 @@ bundle and Keychain. Logs: `/private/tmp/oisy-welcome-phone-install.log` and
 `/private/tmp/oisy-welcome-phone-launch.log`. The update includes the previously
 verified modal/Notes changes. User acceptance of the new welcome remains pending;
 physical passkey approval is performed by the user. The simulator's Reduce Motion
-preference was restored to its original off value after testing. Nothing pushed.
+preference was restored to its original off value after testing.
 
 ## Welcome state follows logout reason — 2026-10-27
 
@@ -442,7 +445,7 @@ Signed phone build succeeded and CoreDevice confirmed installation and launch at
 Logs: `/private/tmp/oisy-welcome-logout-phone.log`,
 `/private/tmp/oisy-welcome-logout-install.log`, and
 `/private/tmp/oisy-welcome-logout-launch.log`. Physical user acceptance of the two
-welcome paths remains pending. Nothing pushed.
+welcome paths remains pending.
 
 ## Welcome artwork follows device tilt — 2026-10-27
 
@@ -473,4 +476,3 @@ Signed phone build succeeded; CoreDevice confirmed installation and launch at
 `/private/tmp/oisy-welcome-parallax-install.log`, and
 `/private/tmp/oisy-welcome-parallax-launch.log`. Actual tilt feel still needs the
 user to tilt their physical iPhone; simulator checks do not validate sensor input.
-Nothing pushed.
