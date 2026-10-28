@@ -239,6 +239,9 @@ const readLifiSolTransaction = async ({
  *
  * Only the decompiled message is used to read the instructions and pick the accounts to simulate;
  * what is simulated, and later signed, are LI.FI's own bytes.
+ *
+ * Returns the slot the simulation ran at, where the transaction's blockhash was valid: the poller
+ * reads the blockhash's validity no earlier than that (`lifi_simulation_slot`).
  */
 export const assertLifiSolTransaction = async ({
 	quote,
@@ -250,7 +253,7 @@ export const assertLifiSolTransaction = async ({
 	request: QuoteRequestFromAmount;
 	displayedToAmountMin: bigint;
 	reviewedCeiling: bigint;
-}): Promise<void> => {
+}): Promise<{ simulationSlot: bigint | undefined }> => {
 	const { data, binding, transactionMessage, wrappedSolAccount, rentExemptMinimum, ceiling } =
 		await readLifiSolTransaction({ quote, request, displayedToAmountMin });
 	const { userAddress } = binding;
@@ -271,6 +274,8 @@ export const assertLifiSolTransaction = async ({
 	});
 
 	assertLifiSolSimulation({ result, binding, wrappedSolAccount, ceiling });
+
+	return { simulationSlot: result?.slot };
 };
 
 // Whether the user's wrapped SOL account holds wrapped SOL, which closing it would unwrap. One that

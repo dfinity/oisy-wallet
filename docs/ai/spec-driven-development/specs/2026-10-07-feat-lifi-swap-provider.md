@@ -1373,7 +1373,9 @@ swap, after its approval was paid.
 
 ### Solana execution
 
-New `fetchLifiSolSwap`:
+New `fetchLifiSolSwap` (`lib/services/lifi-sol-swap.services.ts`, from 3d-2). The re-quote,
+its slippage wording, and the row's creation and deletion are shared with
+`fetchLifiEvmSwap` in `lib/services/lifi-swap-execution.services.ts`:
 
 1. **Re-quote immediately before signing, with simulation on** (the displayed quote's
    blockhash is likely stale), with the offer's own request (its exchanges pinned), run
@@ -1434,7 +1436,11 @@ New `fetchLifiSolSwap`:
    blockhash expires, never landed. EVM's `swap()` takes the same rule in 3d. There it is
    hardening rather than a fix: each definitive refusal on EVM answers either the bytes
    alone, which the first attempt shared, or a state change (a balance spent, a base fee
-   more than doubled) that cannot happen within the retry window. Then
+   more than doubled) that cannot happen within the retry window. On both chains, a
+   broadcast that ends after an attempt with an unknown outcome rejects with
+   `SwapBroadcastOutcomeUnknownError`, its last answer as the cause, which neither
+   `isDefinitiveTransactionRefusal` nor `isSolPreflightRefusal` counts as a refusal, so
+   the row stays. Then
    `enableSwapDestinationToken`. The blockhash is read from the compiled
    message (`getCompiledTransactionMessageDecoder` → `lifetimeToken`). LI.FI's
    transaction carries only the blockhash, not its `lastValidBlockHeight`; the expiry

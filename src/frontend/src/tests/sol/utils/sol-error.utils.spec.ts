@@ -1,4 +1,9 @@
-import { mapSolanaErrorMsg } from '$sol/utils/sol-error.utils';
+import { SwapBroadcastOutcomeUnknownError } from '$lib/types/errors';
+import {
+	isSolPreflightRefusal,
+	isSolTransactionAlreadyProcessed,
+	mapSolanaErrorMsg
+} from '$sol/utils/sol-error.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockPreflightContext } from '$tests/mocks/sol-error.mock';
 import {
@@ -6,6 +11,7 @@ import {
 	SOLANA_ERROR__INSTRUCTION_ERROR__CUSTOM,
 	SOLANA_ERROR__INSTRUCTION_ERROR__INSUFFICIENT_FUNDS,
 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE,
+	SOLANA_ERROR__TRANSACTION_ERROR__ALREADY_PROCESSED,
 	SOLANA_ERROR__TRANSACTION_ERROR__INSUFFICIENT_FUNDS_FOR_FEE,
 	SOLANA_ERROR__TRANSACTION_ERROR__INSUFFICIENT_FUNDS_FOR_RENT,
 	SolanaError
@@ -120,6 +126,52 @@ describe('sol-error.utils', () => {
 			);
 
 			expect(mapSolanaErrorMsg(err)).toBeUndefined();
+		});
+	});
+
+	describe('sending a transaction', () => {
+		const preflightFailure = (cause: Error) =>
+			new SolanaError(
+				SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE,
+				mockPreflightContext({ cause })
+			);
+
+		const insufficientFunds = () =>
+			preflightFailure(
+				new SolanaError(SOLANA_ERROR__INSTRUCTION_ERROR__INSUFFICIENT_FUNDS, { index: 0 })
+			);
+
+		const alreadyProcessed = () =>
+			preflightFailure(new SolanaError(SOLANA_ERROR__TRANSACTION_ERROR__ALREADY_PROCESSED));
+
+		describe('isSolTransactionAlreadyProcessed', () => {
+			it('should tell the transaction already landed', () => {
+				expect(isSolTransactionAlreadyProcessed(alreadyProcessed())).toBeTruthy();
+			});
+
+			it.each([
+				{ case: 'another preflight failure', err: insufficientFunds() },
+				{ case: 'a transport failure', err: new Error('fetch failed') }
+			])('should not for $case', ({ err }) => {
+				expect(isSolTransactionAlreadyProcessed(err)).toBeFalsy();
+			});
+		});
+
+		describe('isSolPreflightRefusal', () => {
+			it('should be a refusal when the preflight simulation failed', () => {
+				expect(isSolPreflightRefusal(insufficientFunds())).toBeTruthy();
+			});
+
+			it.each([
+				{ case: 'the transaction already processed', err: alreadyProcessed() },
+				{ case: 'a transport failure', err: new Error('fetch failed') },
+				{
+					case: 'a refusal after an attempt that may have been relayed',
+					err: new SwapBroadcastOutcomeUnknownError({ cause: insufficientFunds() })
+				}
+			])('should not be a refusal for $case', ({ err }) => {
+				expect(isSolPreflightRefusal(err)).toBeFalsy();
+			});
 		});
 	});
 });

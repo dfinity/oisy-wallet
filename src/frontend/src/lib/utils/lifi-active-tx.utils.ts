@@ -371,13 +371,17 @@ const LIFI_TOOL_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 const LIFI_TRANSACTION_ID_PATTERN = /^0x[0-9a-fA-F]{1,128}$/;
 
 /**
- * The refs a LI.FI row is created with: the poll keys of its signed EVM source transaction, the
- * route's tool (sent as `bridge` to `/status`) and LI.FI's transaction id when they are valid, and
- * the display metadata every swap provider shares.
+ * The refs a LI.FI row is created with: the poll keys of its signed source transaction, the route's
+ * tool (sent as `bridge` to `/status`) and LI.FI's transaction id when they are valid, and the
+ * display metadata every swap provider shares.
+ *
+ * Besides its hash or signature, an EVM source transaction is polled by the nonce it was signed with,
+ * a Solana one by its recent blockhash and the slot OISY simulated it at, where that blockhash was
+ * valid. A Solana row without that slot is polled all the same, its blockhash read unanchored.
  */
 export const toLifiCreationRefs = ({
 	hash,
-	nonce,
+	source,
 	quote: { tool, transactionId },
 	sourceToken,
 	destinationToken,
@@ -385,7 +389,7 @@ export const toLifiCreationRefs = ({
 	usdSourceValue
 }: {
 	hash: string;
-	nonce: number;
+	source: { nonce: number } | { blockhash: string; simulationSlot?: bigint };
 	quote: Pick<LiFiStep, 'tool' | 'transactionId'>;
 	sourceToken: Token;
 	destinationToken: Token;
@@ -393,7 +397,14 @@ export const toLifiCreationRefs = ({
 	usdSourceValue?: string;
 }): Partial<Record<LifiExternalRefKey, string>> => ({
 	[LIFI_EXTERNAL_REF_KEYS.TX_HASH]: hash,
-	[LIFI_EXTERNAL_REF_KEYS.TX_NONCE]: `${nonce}`,
+	...('nonce' in source
+		? { [LIFI_EXTERNAL_REF_KEYS.TX_NONCE]: `${source.nonce}` }
+		: {
+				[LIFI_EXTERNAL_REF_KEYS.BLOCKHASH]: source.blockhash,
+				...(nonNullish(source.simulationSlot) && {
+					[LIFI_EXTERNAL_REF_KEYS.SIMULATION_SLOT]: `${source.simulationSlot}`
+				})
+			}),
 	...(LIFI_TOOL_PATTERN.test(tool) && { [LIFI_EXTERNAL_REF_KEYS.TOOL]: tool }),
 	...(nonNullish(transactionId) &&
 		LIFI_TRANSACTION_ID_PATTERN.test(transactionId) && {

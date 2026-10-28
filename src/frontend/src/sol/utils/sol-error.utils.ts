@@ -1,10 +1,13 @@
 import { i18n } from '$lib/stores/i18n.store';
+import { SwapBroadcastOutcomeUnknownError } from '$lib/types/errors';
 import { nonNullish } from '@dfinity/utils';
 import {
 	isSolanaError,
 	SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED,
 	SOLANA_ERROR__INSTRUCTION_ERROR__CUSTOM,
 	SOLANA_ERROR__INSTRUCTION_ERROR__INSUFFICIENT_FUNDS,
+	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE,
+	SOLANA_ERROR__TRANSACTION_ERROR__ALREADY_PROCESSED,
 	SOLANA_ERROR__TRANSACTION_ERROR__INSUFFICIENT_FUNDS_FOR_FEE,
 	SOLANA_ERROR__TRANSACTION_ERROR__INSUFFICIENT_FUNDS_FOR_RENT,
 	type SolanaErrorCode
@@ -97,3 +100,24 @@ export const mapSolanaErrorMsg = (err: unknown): string | undefined => {
 		return error.solana_insufficient_funds_for_rent;
 	}
 };
+
+/**
+ * Whether sending a transaction was answered that it has already been processed: that the very
+ * transaction landed, from an earlier attempt that went through.
+ */
+export const isSolTransactionAlreadyProcessed = (err: unknown): boolean =>
+	findSolanaErrorInChain({ err, code: SOLANA_ERROR__TRANSACTION_ERROR__ALREADY_PROCESSED });
+
+/**
+ * Whether sending a transaction failed its preflight simulation, after which the node forwards
+ * nothing: the transaction was neither taken nor relayed. Not when the simulation found it already
+ * processed, which is its landing, nor when the refusal came after an attempt that may have been
+ * relayed (`SwapBroadcastOutcomeUnknownError`, whose cause it is).
+ */
+export const isSolPreflightRefusal = (err: unknown): boolean =>
+	!(err instanceof SwapBroadcastOutcomeUnknownError) &&
+	findSolanaErrorInChain({
+		err,
+		code: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE
+	}) &&
+	!isSolTransactionAlreadyProcessed(err);
