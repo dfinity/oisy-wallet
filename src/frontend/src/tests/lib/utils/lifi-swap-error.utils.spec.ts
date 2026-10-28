@@ -1,3 +1,4 @@
+import { EthNonceReadError, EthSubmissionUnconfirmedError } from '$eth/types/send';
 import {
 	LifiFeeChangedError,
 	LifiQuoteRejectedError,
@@ -24,6 +25,20 @@ describe('lifi-swap-error.utils', () => {
 			}
 		])('should report $type', ({ type, err }) => {
 			expect(toLifiSwapErrorType(err)).toBe(type);
+		});
+
+		// The EVM send explains these too, but neither is about the balance.
+		it.each([
+			{
+				outcome: 'a nonce that could not be read',
+				err: new EthNonceReadError(new Error('Internal error'))
+			},
+			{
+				outcome: 'a submission whose outcome is unknown',
+				err: new EthSubmissionUnconfirmedError(new Error('Internal error'))
+			}
+		])('should report $outcome as unknown', ({ err }) => {
+			expect(toLifiSwapErrorType(err)).toBe('unknown');
 		});
 
 		// What the SDK throws for a failed request: its message names the URL, addresses included.

@@ -91,7 +91,10 @@ const isNodeInsufficientBalanceAnswer = ({ code, message }: Record<string, unkno
 	INSUFFICIENT_BALANCE_PATTERN.test(message) &&
 	!EXECUTION_REVERTED_PATTERN.test(message);
 
-const isInsufficientBalanceError = (err: unknown): boolean =>
+/**
+ * Whether the account cannot pay for the transaction, by ethers' own verdict or by the node's answer.
+ */
+export const isInsufficientBalanceError = (err: unknown): boolean =>
 	collectErrorRecords({ err }).some(
 		(record) =>
 			record.code === ETHERS_INSUFFICIENT_FUNDS_CODE || isNodeInsufficientBalanceAnswer(record)

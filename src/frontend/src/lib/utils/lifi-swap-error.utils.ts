@@ -1,4 +1,4 @@
-import { mapEthereumErrorMsg } from '$eth/utils/eth-error.utils';
+import { isInsufficientBalanceError } from '$eth/utils/eth-error.utils';
 import { PLAUSIBLE_EVENT_SWAP_ERROR_TYPES } from '$lib/enums/plausible';
 import {
 	LifiFeeChangedError,
@@ -6,7 +6,6 @@ import {
 	LifiRouteUnsupportedError
 } from '$lib/types/errors';
 import { errorDetailToString } from '$lib/utils/error.utils';
-import { nonNullish } from '@dfinity/utils';
 
 /**
  * The allow-listed category of a failed LI.FI swap, for analytics. Its error text comes from LI.FI's
@@ -29,7 +28,9 @@ export const toLifiSwapErrorType = (err: unknown): PLAUSIBLE_EVENT_SWAP_ERROR_TY
 		return PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.QUOTE_REJECTED;
 	}
 
-	if (nonNullish(mapEthereumErrorMsg(err))) {
+	// Asked directly: the EVM send's messages also explain failures that are not about the balance,
+	// such as a nonce that could not be read.
+	if (isInsufficientBalanceError(err)) {
 		return PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.INSUFFICIENT_FUNDS;
 	}
 
