@@ -299,6 +299,7 @@
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsCyclesTopUp.CANISTER}
 			<CyclesTopUpCanister
+				cyclesToken={token}
 				{onBack}
 				onCancel={close}
 				onNext={() => modal?.next()}
