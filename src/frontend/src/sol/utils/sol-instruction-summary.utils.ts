@@ -2,7 +2,10 @@ import { WSOL_DECIMALS, WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.en
 import { ZERO } from '$lib/constants/app.constants';
 import { maxBigInt } from '$lib/utils/bigint.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
-import { SOLANA_KNOWN_PROGRAM_ADDRESSES } from '$sol/constants/sol-known-programs.constants';
+import {
+	SOLANA_KNOWN_PROGRAM_ADDRESSES,
+	SOLANA_ROUTER_PROGRAM_ADDRESSES
+} from '$sol/constants/sol-known-programs.constants';
 import {
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
@@ -412,7 +415,7 @@ const stackHeightOf = (instruction: unknown): number | undefined =>
 		: undefined;
 
 /**
- * The program that made each call inside one top-level instruction: the closest call before it one
+ * The call that made each call inside one top-level instruction: the closest call before it one
  * level up, from the depth the RPC reports for every nested call. A call reported without its depth
  * is left without a caller rather than guessed at.
  */
@@ -422,8 +425,8 @@ const callersOf = ({
 }: {
 	instruction: unknown;
 	inner: readonly unknown[];
-}): (SolAddress | undefined)[] => {
-	const stack: (SolAddress | undefined)[] = [programAddressOf(instruction)];
+}): unknown[] => {
+	const stack: unknown[] = [instruction];
 
 	return inner.map((nested) => {
 		const height = stackHeightOf(nested);
@@ -435,7 +438,7 @@ const callersOf = ({
 		const caller = stack[height - 2];
 
 		stack.length = height;
-		stack[height - 1] = programAddressOf(nested);
+		stack[height - 1] = nested;
 
 		return caller;
 	});
@@ -446,6 +449,8 @@ interface FlattenedInstruction {
 	topLevel: boolean;
 	instruction: SolParsedRpcInstruction;
 	madeBy?: SolAddress;
+	// The accounts the call that made this instruction names, which carry the signatures it acts with.
+	madeWith?: SolAddress[];
 	batch?: SolBatchMark;
 	// A token batch left whole, whose steps nobody read in order.
 	wholeBatch?: boolean;
@@ -474,12 +479,14 @@ const flatten = ({
 					instruction,
 					topLevel: true,
 					madeBy: undefined,
+					madeWith: [],
 					madeCalls: solRpcBatchMadeCalls({ inner })
 				},
 				...inner.map((nested, index) => ({
 					instruction: nested,
 					topLevel: false,
-					madeBy: callers[index],
+					madeBy: programAddressOf(callers[index]),
+					madeWith: accountsOf(callers[index]),
 					madeCalls: solRpcBatchMadeCalls({ inner, position: index })
 				}))
 			]
@@ -489,7 +496,7 @@ const flatten = ({
 				// whose contents cannot be read, or whose steps cannot be put in order with the calls
 				// made inside it, stays whole, and describes nothing.
 				.flatMap<FlattenedInstruction>(
-					({ instruction: candidate, topLevel, madeBy, madeCalls }, position) => {
+					({ instruction: candidate, topLevel, madeBy, madeWith, madeCalls }, position) => {
 						const parsed = candidate as SolParsedRpcInstruction;
 						const carried = solRpcOrderedBatchedInstructions({ instruction: parsed, madeCalls });
 
@@ -499,7 +506,7 @@ const flatten = ({
 										parentIndex,
 										topLevel,
 										instruction: parsed,
-										...(nonNullish(madeBy) && { madeBy }),
+										...(nonNullish(madeBy) && { madeBy, madeWith }),
 										...(isTokenBatch(parsed) && { wholeBatch: true })
 									}
 								]
@@ -507,7 +514,7 @@ const flatten = ({
 									parentIndex,
 									topLevel,
 									instruction: entry,
-									...(nonNullish(madeBy) && { madeBy }),
+									...(nonNullish(madeBy) && { madeBy, madeWith }),
 									batch: { id: `${parentIndex}:${position}`, program: parsed.programId }
 								}));
 					}
@@ -1996,6 +2003,58 @@ export const solKeepsBatchWhole = ({
 	flatten({ instructions, innerInstructions }).some(({ wholeBatch }) => wholeBatch ?? false);
 
 /**
+ * Whose an account is as of an instruction: the holder its current lifecycle began with, where that
+ * is known, and the accounts named as the user's otherwise. Those are every account the user held
+ * at any point of the message, so read alone they lend an address that was somebody else's before
+ * it was opened for the user, or after the user's was closed, to the user.
+ *
+ * An address with no account open is neither: the message closed what was there, or opens the first
+ * account there only later. Nothing of the user's can leave it, and what arrives lands in the
+ * account opened there next, so it is whoever that one is opened for.
+ */
+const ownershipAt =
+	({
+		flattened,
+		owned,
+		accountHolders,
+		accountMintsBefore
+	}: {
+		flattened: { instruction: SolParsedRpcInstruction }[];
+		owned: Set<SolAddress>;
+		accountHolders: Partial<Record<SolAddress, SolAddress>>;
+		accountMintsBefore: Partial<Record<SolAddress, SplTokenAddress>>;
+	}) =>
+	({
+		account,
+		position,
+		arriving = false
+	}: {
+		account: SolAddress;
+		position: number;
+		arriving?: boolean;
+	}): boolean => {
+		const { holder, closed } = openedAs({
+			account,
+			flattened,
+			accountHolders,
+			accountMintsBefore,
+			until: position
+		});
+
+		if (nonNullish(holder)) {
+			return owned.has(holder);
+		}
+
+		const { holder: next } = openedNext({ account, flattened, from: position });
+
+		if ((closed ?? false) || nonNullish(next)) {
+			return arriving && nonNullish(next) && owned.has(next);
+		}
+
+		return owned.has(account);
+	};
+
+/**
  * The instruction list the review shows, from a transaction's own instructions and the ones a
  * simulation says it would make inside them.
  *
@@ -2106,39 +2165,12 @@ export const mapSolInstructionSummaries = ({
 			})
 	});
 
-	const owned = expandOwnedAccounts({ flattened, ownedAddresses });
-
-	// Whose an account is as of an instruction: the holder its current lifecycle began with, where
-	// that is known, and the accounts named as the user's otherwise. Those are every account the
-	// user held at any point of the message, so read alone they lend an address that was somebody
-	// else's before it was opened for the user, or after the user's was closed, to the user.
-	//
-	// An address with no account open is neither: the message closed what was there, or opens the
-	// first account there only later. Nothing of the user's can leave it, and what arrives lands in
-	// the account opened there next, so it is whoever that one is opened for.
-	const ownedAt = ({
-		account,
-		position,
-		arriving = false
-	}: {
-		account: SolAddress;
-		position: number;
-		arriving?: boolean;
-	}): boolean => {
-		const { holder, closed } = openedAt({ account, position });
-
-		if (nonNullish(holder)) {
-			return owned.has(holder);
-		}
-
-		const { holder: next } = openedNext({ account, flattened, from: position });
-
-		if ((closed ?? false) || nonNullish(next)) {
-			return arriving && nonNullish(next) && owned.has(next);
-		}
-
-		return owned.has(account);
-	};
+	const ownedAt = ownershipAt({
+		flattened,
+		owned: expandOwnedAccounts({ flattened, ownedAddresses }),
+		accountHolders,
+		accountMintsBefore
+	});
 
 	// Read from the top-level instructions themselves: a router's own instruction is precisely the
 	// one the RPC cannot parse, so taking it from the flattened list would name the first inner
@@ -2334,4 +2366,130 @@ export const mapSolInstructionSummaries = ({
 	);
 
 	return groupUnread({ effects: listed, programs, unread });
+};
+
+// What a transfer moves where: from a System account, a seed-derived one or a nonce account, or from
+// a token account on the signature of its authority.
+const paymentOf = ({
+	program,
+	parsed: { type, info }
+}: SolParsedRpcInstruction):
+	| { source?: SolAddress; destination?: SolAddress; authority?: SolAddress; value?: bigint }
+	| undefined => {
+	if (program === 'system' && SYSTEM_TRANSFERS.includes(type)) {
+		return {
+			source: systemTransferSource(info),
+			destination: address({ info, key: 'destination' }),
+			value: amount({ info, key: 'lamports' })
+		};
+	}
+
+	if (
+		nonNullish(program) &&
+		TOKEN_PROGRAMS.includes(program) &&
+		['transfer', 'transferChecked'].includes(type)
+	) {
+		return {
+			source: address({ info, key: 'source' }),
+			destination: address({ info, key: 'destination' }),
+			authority: address({ info, key: 'authority' }) ?? address({ info, key: 'multisigAuthority' }),
+			value: tokenAmount(info).amount ?? amount({ info, key: 'amount' })
+		};
+	}
+};
+
+/**
+ * The programs that, called with the wallet among their accounts, pay out of an account that is not
+ * the user's into another one that is not theirs either, each named once, in the order they do it.
+ * Routers are left out: what passes through their own accounts is a swap on its way, or a fee.
+ *
+ * Such a payout has no line and no balance change, while any other line of the same instruction
+ * accounts for all of it: a pool holding the user's liquidity in a position, called with the wallet
+ * the position answers to, can pay it out to somebody else beside a line of nothing paid to the
+ * user. A payout into an account that pays at least as much on later in the same instruction is a
+ * hop of a swap, a router's account carrying the trade to its next pool, and is not counted: only a
+ * program running in that instruction moves anything out of that account, and a program the dApp
+ * brings itself is named on its own.
+ */
+export const findSolProgramsPayingOthers = ({
+	instructions,
+	innerInstructions = [],
+	ownedAddresses,
+	userAddress,
+	accountHolders = {},
+	accountMintsBefore = {}
+}: {
+	instructions: readonly unknown[];
+	innerInstructions?: readonly SolInstructionGroup[];
+	ownedAddresses: SolAddress[];
+	userAddress: OptionSolAddress;
+	accountHolders?: Partial<Record<SolAddress, SolAddress>>;
+	accountMintsBefore?: Partial<Record<SolAddress, SplTokenAddress>>;
+}): SolAddress[] => {
+	if (isNullish(userAddress)) {
+		return [];
+	}
+
+	const flattened = flatten({ instructions, innerInstructions });
+
+	const ownedAt = ownershipAt({
+		flattened,
+		owned: expandOwnedAccounts({ flattened, ownedAddresses }),
+		accountHolders,
+		accountMintsBefore
+	});
+
+	const passedOn = ({
+		account,
+		parentIndex,
+		after
+	}: {
+		account: SolAddress;
+		parentIndex: number;
+		after: number;
+	}): bigint =>
+		flattened
+			.slice(after + 1)
+			.filter(({ parentIndex: parent }) => parent === parentIndex)
+			.map(({ instruction }) => paymentOf(instruction))
+			.filter((payment) => payment?.source === account)
+			.reduce((sum, payment) => sum + (payment?.value ?? ZERO), ZERO);
+
+	const paying = flattened.reduce<SolAddress[]>(
+		(acc, { parentIndex, topLevel, instruction, madeBy, madeWith = [] }, position) => {
+			const payment = paymentOf(instruction);
+
+			if (
+				topLevel ||
+				isNullish(payment) ||
+				isNullish(madeBy) ||
+				SOLANA_ROUTER_PROGRAM_ADDRESSES.includes(madeBy) ||
+				!madeWith.includes(userAddress)
+			) {
+				return acc;
+			}
+
+			const { source, destination, authority, value } = payment;
+
+			const fromUser = [authority, source].some(
+				(account) => nonNullish(account) && ownedAt({ account, position })
+			);
+			const toUser =
+				nonNullish(destination) && ownedAt({ account: destination, position, arriving: true });
+
+			if (fromUser || toUser || value === ZERO) {
+				return acc;
+			}
+
+			const hop =
+				nonNullish(destination) &&
+				nonNullish(value) &&
+				passedOn({ account: destination, parentIndex, after: position }) >= value;
+
+			return hop ? acc : [...acc, madeBy];
+		},
+		[]
+	);
+
+	return [...new Set(paying)];
 };

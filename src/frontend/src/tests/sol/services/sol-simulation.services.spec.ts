@@ -1525,6 +1525,70 @@ describe('sol-simulation.services', () => {
 			expect(result?.unreadPrograms).toEqual([mockSolAddress4]);
 		});
 
+		// A withdrawal from a position the wallet owns: nothing paid to the user's account, which is
+		// the line that accounts for the instruction, and the rest paid into somebody else's.
+		it('should name a known pool that, called with the wallet, pays out of its vault elsewhere', async () => {
+			const WHIRLPOOL = 'whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc';
+
+			vi.mocked(getMultipleAccountsInfo).mockResolvedValue([
+				systemAccount(1_000_000n),
+				tokenAccount({ owner: mockSolAddress, amount: ZERO }),
+				tokenAccount({ owner: mockSolAddress2, amount: 1_000_000_000n }),
+				tokenAccount({ owner: mockSolAddress3, amount: ZERO })
+			]);
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({
+					accounts: [
+						systemAccount(995_000n),
+						tokenAccount({ owner: mockSolAddress, amount: ZERO }),
+						tokenAccount({ owner: mockSolAddress2, amount: 750_000_000n }),
+						tokenAccount({ owner: mockSolAddress3, amount: 250_000_000n })
+					],
+					innerInstructions: [
+						{
+							index: 0,
+							instructions: [mockAtaAddress, mockAtaAddress3].map((destination, leg) => ({
+								program: 'spl-token',
+								programId: TOKEN_PROGRAM_ADDRESS,
+								parsed: {
+									type: 'transfer',
+									info: {
+										source: mockAtaAddress2,
+										destination,
+										authority: mockSolAddress2,
+										amount: leg === 0 ? '0' : '250000000'
+									}
+								},
+								stackHeight: 2
+							}))
+						}
+					] as unknown as SolanaSimulatedInnerInstructions
+				})
+			);
+
+			const result = await simulateSolTransaction(
+				params({
+					feePayer: { address: mockSolAddress },
+					instructions: [
+						{
+							programAddress: WHIRLPOOL,
+							accounts: [
+								{ address: mockSolAddress, role: AccountRole.WRITABLE_SIGNER },
+								{ address: mockAtaAddress, role: AccountRole.WRITABLE },
+								{ address: mockAtaAddress2, role: AccountRole.WRITABLE },
+								{ address: mockAtaAddress3, role: AccountRole.WRITABLE }
+							],
+							data: new Uint8Array([1])
+						}
+					]
+				} as unknown as CompilableTransactionMessage)
+			);
+
+			expect(result?.instructions?.some(({ kind }) => kind === 'unknown')).toBeFalsy();
+			expect(result?.preview?.tokenDeltas ?? []).toEqual([]);
+			expect(result?.unreadPrograms).toEqual([WHIRLPOOL]);
+		});
+
 		it('should yield nothing when a nested call does not name its program', async () => {
 			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
 				simulated({

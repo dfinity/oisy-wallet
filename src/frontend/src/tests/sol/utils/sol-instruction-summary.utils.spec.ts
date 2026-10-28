@@ -7,6 +7,7 @@ import {
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolClosedAccount } from '$sol/types/sol-simulation';
 import {
+	findSolProgramsPayingOthers,
 	mapSolInstructionSummaries,
 	solClosingInstructionCandidates,
 	solOpensAccountBeyondRent
@@ -31,6 +32,7 @@ import {
 	mockSolAddress,
 	mockSolAddress2,
 	mockSolAddress3,
+	mockSolAddress4,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { nonNullish } from '@dfinity/utils';
@@ -4814,6 +4816,218 @@ describe('sol-instruction-summary.utils', () => {
 					rentExemptMinimum: MOCK_SOL_METEORA_DLMM_OPEN_POSITION.rentExemptMinimum
 				})
 			).toBeFalsy();
+		});
+	});
+
+	describe('findSolProgramsPayingOthers', () => {
+		const WHIRLPOOL = 'whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc';
+		const DLMM = 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo';
+		const JUPITER = 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4';
+		const OKX = 'proVF4pMXVaYqmy4NjniPh4pqKNfMmsihgd4wdkCX3u';
+
+		// The user's token account, a pool's vault, and an account of somebody else's.
+		const userAccount = mockAtaAddress;
+		const vault = mockAtaAddress2;
+		const elsewhere = mockAtaAddress3;
+
+		const calling = ({
+			program,
+			withWallet = true
+		}: {
+			program: string;
+			withWallet?: boolean;
+		}) => ({
+			programAddress: program,
+			accounts: [
+				...(withWallet ? [{ address: mockSolAddress, role: AccountRole.WRITABLE_SIGNER }] : []),
+				{ address: vault, role: AccountRole.WRITABLE }
+			],
+			data: new Uint8Array([1])
+		});
+
+		const call = ({
+			program,
+			withWallet = true,
+			stackHeight
+		}: {
+			program: string;
+			withWallet?: boolean;
+			stackHeight: number;
+		}) => ({
+			programId: program,
+			accounts: [...(withWallet ? [mockSolAddress] : []), vault],
+			data: '',
+			stackHeight
+		});
+
+		const transfer = ({
+			source,
+			destination,
+			amount,
+			authority = mockSolAddress2,
+			stackHeight
+		}: {
+			source: string;
+			destination: string;
+			amount: string;
+			authority?: string;
+			stackHeight: number;
+		}) => ({
+			program: 'spl-token',
+			programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+			parsed: { type: 'transfer', info: { source, destination, amount, authority } },
+			stackHeight
+		});
+
+		const paying = ({
+			instructions,
+			inner
+		}: {
+			instructions: unknown[];
+			inner: unknown[];
+		}): string[] =>
+			findSolProgramsPayingOthers({
+				instructions,
+				innerInstructions: [{ index: 0, instructions: inner }],
+				ownedAddresses: [mockSolAddress, userAccount],
+				userAddress: mockSolAddress,
+				accountHolders: {
+					[userAccount]: mockSolAddress,
+					[vault]: mockSolAddress2,
+					[elsewhere]: mockSolAddress3
+				}
+			});
+
+		// A withdrawal from a position the wallet owns, its second payout sent elsewhere: the first,
+		// of nothing, is the line that accounts for the instruction.
+		it("should name a listed pool that pays out of its vault into an account that is not the user's", () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						transfer({ source: vault, destination: userAccount, amount: '0', stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 2 })
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should name a listed pool another program calls with the wallet to pay elsewhere', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: mockSolAddress3 })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 })
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should not name a pool that pays the user', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						transfer({ source: vault, destination: userAccount, amount: '1000', stackHeight: 2 })
+					]
+				})
+			).toEqual([]);
+		});
+
+		// A route through shared accounts: the router's own accounts trade with the pools, which
+		// it calls without the wallet.
+		it('should not name a pool called without the wallet', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: JUPITER })],
+					inner: [
+						call({ program: WHIRLPOOL, withWallet: false, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 })
+					]
+				})
+			).toEqual([]);
+		});
+
+		it("should not name a router paying between accounts that are not the user's", () => {
+			expect(
+				paying({
+					instructions: [calling({ program: JUPITER })],
+					inner: [
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 2 })
+					]
+				})
+			).toEqual([]);
+		});
+
+		// A router's account takes the pool's output and pays it on to the next pool.
+		it('should not name a pool whose payout the receiving account passes on in the same instruction', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([]);
+		});
+
+		it('should name a pool whose payout is passed on only in part', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '999',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should not name a pool paying nothing elsewhere', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [transfer({ source: vault, destination: elsewhere, amount: '0', stackHeight: 2 })]
+				})
+			).toEqual([]);
+		});
+
+		// Without its depth, a call has no caller to name.
+		it('should not name anything for calls the RPC returns without their depth', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						{
+							...transfer({
+								source: vault,
+								destination: elsewhere,
+								amount: '1000',
+								stackHeight: 2
+							}),
+							stackHeight: undefined
+						}
+					]
+				})
+			).toEqual([]);
 		});
 	});
 });
