@@ -103,7 +103,11 @@ describe('cycles-top-up.services', () => {
 				status: 'topped_up',
 				cycles: 2_500_000_000_000n
 			});
-			expect(notifyTopUp).toHaveBeenCalledExactlyOnceWith(params);
+			expect(notifyTopUp).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				blockIndex: 42n,
+				to: params.canisterId
+			});
 		});
 
 		it('should report a refund with its block', async () => {
