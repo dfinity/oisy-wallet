@@ -378,6 +378,13 @@ export const isBroadcastRetriable = (err: unknown): boolean =>
 			typeof code === 'number' && typeof message === 'string' && ALREADY_SENT_PATTERN.test(message)
 	);
 
+/**
+ * Whether the node turned the broadcast down because the transaction runs out of the gas it was
+ * signed with. No outright refusal, since another node can still mine it to revert, but one with an
+ * explanation of its own: the gas sent, the gas needed, and the fee it may have cost.
+ */
+export const isOutOfGasRefusal = (err: unknown): boolean => nonNullish(findNodeOutOfGasAnswer(err));
+
 // Whether the error, or one it wraps, is of the given kind: a caller may wrap a send's error again.
 const isErrorOfKind = ({
 	err,

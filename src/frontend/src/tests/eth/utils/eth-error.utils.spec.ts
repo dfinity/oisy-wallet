@@ -3,6 +3,7 @@ import { EthNonceReadError, EthSubmissionUnconfirmedError } from '$eth/types/sen
 import {
 	isBroadcastRetriable,
 	isDefinitiveTransactionRefusal,
+	isOutOfGasRefusal,
 	mapEthereumErrorMsg,
 	toastEthereumTransactionError
 } from '$eth/utils/eth-error.utils';
@@ -157,6 +158,49 @@ describe('eth-error.utils', () => {
 						code: 'NONCE_EXPIRED',
 						info: { error: { code: -32000, message: 'nonce too low' } }
 					})
+				)
+			).toBeFalsy();
+		});
+	});
+
+	describe('isOutOfGasRefusal', () => {
+		const answered = ({ method, message }: { method: string; message: string }) =>
+			Object.assign(new Error(`could not coalesce error (${message})`), {
+				code: 'UNKNOWN_ERROR',
+				error: { code: -32000, message },
+				payload: { id: 1, jsonrpc: '2.0', method }
+			});
+
+		it('should be true when the node answers the broadcast that the gas ran out', () => {
+			expect(
+				isOutOfGasRefusal(
+					answered({
+						method: 'eth_sendRawTransaction',
+						message: 'out of gas: gas required exceeds: 21000'
+					})
+				)
+			).toBeTruthy();
+		});
+
+		// An estimate or a call runs before signing: no transaction was turned down.
+		it('should be false for an answer to another request than the broadcast', () => {
+			expect(
+				isOutOfGasRefusal(answered({ method: 'eth_estimateGas', message: 'out of gas' }))
+			).toBeFalsy();
+		});
+
+		it('should be false for a revert that mentions gas', () => {
+			expect(
+				isOutOfGasRefusal(
+					answered({ method: 'eth_sendRawTransaction', message: 'execution reverted: out of gas' })
+				)
+			).toBeFalsy();
+		});
+
+		it('should be false for an outright refusal', () => {
+			expect(
+				isOutOfGasRefusal(
+					answered({ method: 'eth_sendRawTransaction', message: 'intrinsic gas too low' })
 				)
 			).toBeFalsy();
 		});

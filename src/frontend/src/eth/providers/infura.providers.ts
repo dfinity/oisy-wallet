@@ -10,7 +10,7 @@ import type { EthAddress } from '$eth/types/address';
 import type { GetFeeData } from '$eth/types/infura';
 import type { EthersProviderNetwork } from '$eth/types/network';
 import { EthSubmissionUnconfirmedError } from '$eth/types/send';
-import { isDefinitiveTransactionRefusal } from '$eth/utils/eth-error.utils';
+import { isDefinitiveTransactionRefusal, isOutOfGasRefusal } from '$eth/utils/eth-error.utils';
 import { isEthersError } from '$eth/utils/eth.utils';
 import {
 	OP_STACK_GAS_PRICE_ORACLE_ABI,
@@ -211,10 +211,13 @@ export class InfuraProvider {
 				}
 			});
 		} catch (err: unknown) {
-			// An outright refusal is the network's answer: the transaction was not taken. Anything else
-			// leaves open whether it reached the network, which the send must say rather than claim
-			// either way, since a retry is signed with the next nonce and both could execute.
-			throw isDefinitiveTransactionRefusal(err) ? err : new EthSubmissionUnconfirmedError(err);
+			// An outright refusal is the network's answer: the transaction was not taken. Running out
+			// of gas is explained on its own, fee included. Anything else leaves open whether the
+			// transaction reached the network, which the send must say rather than claim either way,
+			// since a retry is signed with the next nonce and both could execute.
+			throw isDefinitiveTransactionRefusal(err) || isOutOfGasRefusal(err)
+				? err
+				: new EthSubmissionUnconfirmedError(err);
 		}
 	};
 

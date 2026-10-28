@@ -455,6 +455,22 @@ describe('infura.providers', () => {
 			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(infuraRefusal);
 		});
 
+		it('should leave running out of gas to its own explanation', async () => {
+			const { provider } = buildProvider();
+
+			// The node's answer to a transaction that runs out of the gas it was signed with, as Base
+			// words it. Another node can still mine it, so it is no outright refusal.
+			const outOfGas = Object.assign(new Error('could not coalesce error'), {
+				code: 'UNKNOWN_ERROR',
+				error: { code: -32000, message: 'out of gas: gas required exceeds: 21000' }
+			});
+
+			mockBroadcastTransaction.mockRejectedValue(outOfGas);
+			mockGetTransaction.mockResolvedValueOnce(null);
+
+			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(outOfGas);
+		});
+
 		it('should fail when the lookup cannot be answered either', async () => {
 			const { provider } = buildProvider();
 
