@@ -6,11 +6,12 @@ import {
 	CmcNotifyRefundedError,
 	CmcNotifyTransactionTooOldError
 } from '$icp/canisters/cmc.errors';
-import { CMC_MINT_CYCLES_MEMO } from '$icp/constants/cmc.constants';
+import { CMC_MINT_CYCLES_MEMO, CMC_TOP_UP_MEMO } from '$icp/constants/cmc.constants';
 import {
 	getCmcDepositAccount,
 	getCmcDepositAccountIdentifier,
 	isCmcDeposit,
+	isCmcTopUpMemo,
 	toCmcNotifyFailure
 } from '$icp/utils/cmc.utils';
 import { ZERO } from '$lib/constants/app.constants';
@@ -138,6 +139,39 @@ describe('cmc.utils', () => {
 			}
 		])('does not match $label', ({ transaction }) => {
 			expect(isCmcDeposit({ ...params, transaction })).toBeFalsy();
+		});
+	});
+
+	describe('isCmcTopUpMemo', () => {
+		it.each([
+			{ label: 'as the 8-byte ICRC-1 memo', memo: ZERO, icrc1Memo: CMC_TOP_UP_MEMO },
+			// What the ICP ledger's legacy `transfer` writes, e.g. for `dfx ledger top-up`.
+			{ label: 'as the legacy memo', memo: 0x50555054n, icrc1Memo: undefined }
+		])('is true for TPUP $label', ({ memo, icrc1Memo }) => {
+			expect(
+				isCmcTopUpMemo({ memo, icrc1_memo: icrc1Memo === undefined ? [] : [icrc1Memo] })
+			).toBeTruthy();
+		});
+
+		it.each([
+			{ label: 'no memo', memo: ZERO, icrc1Memo: undefined },
+			{ label: 'the MINT memo', memo: ZERO, icrc1Memo: CMC_MINT_CYCLES_MEMO },
+			{ label: 'MINT as the legacy memo', memo: 0x544e494dn, icrc1Memo: undefined },
+			{
+				label: 'an ICRC-1 memo that only starts like TPUP',
+				memo: ZERO,
+				icrc1Memo: new Uint8Array([0x54, 0x50, 0x55, 0x50])
+			},
+			// The CMC reads the legacy memo first, so it decides when it is set.
+			{
+				label: 'TPUP as the ICRC-1 memo under another legacy memo',
+				memo: 1n,
+				icrc1Memo: CMC_TOP_UP_MEMO
+			}
+		])('is false for $label', ({ memo, icrc1Memo }) => {
+			expect(
+				isCmcTopUpMemo({ memo, icrc1_memo: icrc1Memo === undefined ? [] : [icrc1Memo] })
+			).toBeFalsy();
 		});
 	});
 
