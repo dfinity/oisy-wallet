@@ -2,10 +2,19 @@ import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	assertLifiSolTransaction,
-	lifiSolTransactionCeiling
+	lifiSolTransactionCeiling,
+	loadLifiSolQuoteCeiling
 } from '$lib/services/lifi-sol-transaction.services';
-import { LifiQuoteRejectedError, LifiSolFeeChangedError } from '$lib/types/errors';
-import { getAccountData, getSolCreateAccountFee } from '$sol/api/solana.api';
+import {
+	LifiQuoteRejectedError,
+	LifiRouteUnsupportedError,
+	LifiSolFeeChangedError
+} from '$lib/types/errors';
+import {
+	getAccountData,
+	getMultipleAccountsInfo,
+	getSolCreateAccountFee
+} from '$sol/api/solana.api';
 import { LIFI_SOLANA_FEE_WALLET } from '$sol/constants/lifi.constants';
 import {
 	SYSTEM_PROGRAM_ADDRESS,
@@ -15,15 +24,19 @@ import {
 import { simulateSolTransaction } from '$sol/services/sol-simulation.services';
 import { calculateAssociatedTokenAddress } from '$sol/services/spl-accounts.services';
 import type { SolInstruction } from '$sol/types/sol-instructions';
+import type { SolanaParsedAccountInfo } from '$sol/types/sol-rpc';
 import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import { parseSolBase64TransactionMessage } from '$sol/utils/sol-transactions.utils';
 import {
 	mockLifiSolSolToPyusd,
 	mockLifiSolSolToUsdc,
+	mockLifiSolSolToUsdcWithWsolAccount,
 	mockLifiSolTransactionMessage,
 	mockLifiSolUsdcToSol,
+	mockLifiSolUsdcToUsdt,
 	mockLifiSolUser,
+	mockLifiSolWrappedSolUser,
 	type LifiSolTransactionFixture
 } from '$tests/mocks/lifi-sol-transaction.mock';
 import { mockSolAddress2 } from '$tests/mocks/sol.mock';
@@ -47,6 +60,7 @@ import {
 
 vi.mock('$sol/api/solana.api', () => ({
 	getAccountData: vi.fn(),
+	getMultipleAccountsInfo: vi.fn(),
 	getSolCreateAccountFee: vi.fn()
 }));
 
@@ -558,6 +572,131 @@ describe('lifi-sol-transaction.services', () => {
 
 				await expect(assertFixture({ fixture: mockLifiSolSolToUsdc })).resolves.toBeUndefined();
 			});
+		});
+	});
+
+	describe('loadLifiSolQuoteCeiling', () => {
+		const loadFixture = ({ quote, request }: LifiSolTransactionFixture) =>
+			loadLifiSolQuoteCeiling({ quote, request });
+
+		// The user's wrapped SOL account as the RPC parses it, holding `amount` of wrapped SOL.
+		const wrappedSolAccountHolding = (amount: bigint): NonNullable<SolanaParsedAccountInfo> => ({
+			executable: false,
+			lamports: lamports(rentExemptMinimum + amount),
+			owner: address(TOKEN_PROGRAM_ADDRESS),
+			space: 165n,
+			data: {
+				program: 'spl-token',
+				space: 165n,
+				parsed: {
+					type: 'account',
+					info: {
+						mint: WSOL_TOKEN.address,
+						owner: mockLifiSolWrappedSolUser,
+						tokenAmount: { amount: `${amount}`, decimals: 9 }
+					}
+				}
+			}
+		});
+
+		it("should give the ceiling of the quote's own transaction, without simulating it", async () => {
+			await expect(loadFixture(mockLifiSolSolToUsdc)).resolves.toBe(solToUsdcCeiling);
+
+			expect(simulateSolTransaction).not.toHaveBeenCalled();
+		});
+
+		it('should not read a wrapped SOL account the transaction creates before closing it', async () => {
+			await loadFixture(mockLifiSolSolToUsdc);
+
+			expect(getMultipleAccountsInfo).not.toHaveBeenCalled();
+		});
+
+		it('should not read a wrapped SOL account a route does not touch', async () => {
+			mockFixture(mockLifiSolUsdcToUsdt);
+
+			await expect(loadFixture(mockLifiSolUsdcToUsdt)).resolves.toBeGreaterThan(ZERO);
+
+			expect(getMultipleAccountsInfo).not.toHaveBeenCalled();
+		});
+
+		describe("a route closing the user's existing wrapped SOL account", () => {
+			const fixture = mockLifiSolSolToUsdcWithWsolAccount;
+
+			beforeEach(() => {
+				mockFixture(fixture);
+			});
+
+			it('should read that account, on Solana mainnet', async () => {
+				vi.mocked(getMultipleAccountsInfo).mockResolvedValue([wrappedSolAccountHolding(ZERO)]);
+
+				await loadFixture(fixture);
+
+				expect(getMultipleAccountsInfo).toHaveBeenCalledExactlyOnceWith({
+					addresses: [
+						await calculateAssociatedTokenAddress({
+							owner: mockLifiSolWrappedSolUser,
+							tokenAddress: WSOL_TOKEN.address,
+							tokenOwnerAddress: TOKEN_PROGRAM_ADDRESS
+						})
+					],
+					network: 'mainnet'
+				});
+			});
+
+			it('should be offered while the account holds no wrapped SOL', async () => {
+				vi.mocked(getMultipleAccountsInfo).mockResolvedValue([wrappedSolAccountHolding(ZERO)]);
+
+				await expect(loadFixture(fixture)).resolves.toBeGreaterThan(ZERO);
+			});
+
+			it('should be offered when the account is gone', async () => {
+				vi.mocked(getMultipleAccountsInfo).mockResolvedValue([null]);
+
+				await expect(loadFixture(fixture)).resolves.toBeGreaterThan(ZERO);
+			});
+
+			it('should not be offered while the account holds wrapped SOL, which closing it would unwrap', async () => {
+				vi.mocked(getMultipleAccountsInfo).mockResolvedValue([wrappedSolAccountHolding(1n)]);
+
+				await expect(loadFixture(fixture)).rejects.toThrow(LifiRouteUnsupportedError);
+			});
+
+			it('should not be offered when the account does not read as a token account', async () => {
+				vi.mocked(getMultipleAccountsInfo).mockResolvedValue([
+					{
+						...wrappedSolAccountHolding(ZERO),
+						data: { program: 'spl-token', space: 82n, parsed: { type: 'mint', info: {} } }
+					}
+				]);
+
+				await expect(loadFixture(fixture)).rejects.toThrow(LifiRouteUnsupportedError);
+			});
+		});
+
+		it('should not offer a route the binding would refuse, as one OISY cannot take', async () => {
+			const { quote, request } = mockLifiSolSolToUsdc;
+
+			const err = await loadLifiSolQuoteCeiling({
+				quote,
+				request: { ...request, toToken: PYUSD }
+			}).catch((error: unknown) => error);
+
+			expect(err).toBeInstanceOf(LifiRouteUnsupportedError);
+			expect(err).toHaveProperty('route', quote);
+		});
+
+		it('should not offer a route whose rent cannot be bounded', async () => {
+			mockFixture(mockLifiSolSolToPyusd);
+			vi.mocked(getAccountData).mockResolvedValue(undefined);
+
+			await expect(loadFixture(mockLifiSolSolToPyusd)).rejects.toThrow(LifiRouteUnsupportedError);
+		});
+
+		it('should reject as it is when the chain cannot be read', async () => {
+			const failure = new Error('lookup tables unavailable');
+			vi.mocked(parseSolBase64TransactionMessage).mockRejectedValue(failure);
+
+			await expect(loadFixture(mockLifiSolSolToUsdc)).rejects.toBe(failure);
 		});
 	});
 });

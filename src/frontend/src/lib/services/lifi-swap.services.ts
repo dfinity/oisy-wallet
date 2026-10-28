@@ -14,6 +14,7 @@ import {
 } from '$lib/enums/plausible';
 import { fetchLifiQuote } from '$lib/rest/lifi.rest';
 import { trackEvent } from '$lib/services/analytics.services';
+import { loadLifiSolQuoteCeiling } from '$lib/services/lifi-sol-transaction.services';
 import {
 	LifiQuoteRejectedError,
 	LifiRouteUnsupportedError,
@@ -181,11 +182,16 @@ const fetchTrustedLifiQuote = async ({
 };
 
 /**
- * A trusted quote whose route the calldata binding could accept, with the request it answers. When
- * LI.FI's best route goes through a bridge in a shape the binding refuses (Across behind a DEX swap,
- * or any bridge followed by another step), LI.FI is asked once more without that bridge, so that
- * another allowed one can serve the pair; that request is the one execution re-quotes with. Both
- * requests share the caller's deadline: the form waits for every provider's answer.
+ * A trusted quote whose route the binding could accept, with the request it answers.
+ *
+ * A Solana source's transaction is read as its binding reads it, which also gives the LI.FI ceiling
+ * the form budgets (`loadLifiSolQuoteCeiling`).
+ *
+ * When an EVM source's best route goes through a bridge in a shape the calldata binding refuses
+ * (Across behind a DEX swap, or any bridge followed by another step), LI.FI is asked once more
+ * without that bridge, so that another allowed one can serve the pair; that request is the one
+ * execution re-quotes with. Both requests share the caller's deadline: the form waits for every
+ * provider's answer.
  *
  * When there is no such route, the refused one travels with the `LifiRouteUnsupportedError`, for the
  * two-swap hint.
@@ -198,8 +204,12 @@ const fetchExecutableLifiQuote = async ({
 	request: QuoteRequestFromAmount;
 	sourceNetworkId: NetworkId;
 	signal: AbortSignal;
-}): Promise<{ quote: LiFiStep; request: QuoteRequestFromAmount }> => {
+}): Promise<{ quote: LiFiStep; request: QuoteRequestFromAmount; solFeeCeiling?: bigint }> => {
 	const quote = await fetchTrustedLifiQuote({ request, sourceNetworkId, signal });
+
+	if (request.fromChain === ChainId.SOL) {
+		return { quote, request, solFeeCeiling: await loadLifiSolQuoteCeiling({ quote, request }) };
+	}
 
 	if (isLifiRouteExecutable(quote)) {
 		return { quote, request };
