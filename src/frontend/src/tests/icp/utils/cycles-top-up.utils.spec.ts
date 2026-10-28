@@ -1,10 +1,14 @@
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import {
+	getCanisterNetworkContacts,
 	getRecentlyToppedUpCanisters,
 	isCanisterAccount,
 	isCanisterId,
 	parseCanisterId
 } from '$icp/utils/cycles-top-up.utils';
+import type { ContactUi } from '$lib/types/contact';
+import { getNetworkContactKey } from '$lib/utils/contact.utils';
+import { mockContactEthAddressUi } from '$tests/mocks/contacts.mock';
 import {
 	mockAccountIdentifierText,
 	mockPrincipal,
@@ -16,6 +20,55 @@ import { Principal } from '@icp-sdk/core/principal';
 describe('cycles-top-up.utils', () => {
 	const canister = 'ywcsb-maaaa-aaaai-q6k7a-cai';
 	const otherCanister = 'um5iw-rqaaa-aaaaq-qaaba-cai';
+
+	describe('getCanisterNetworkContacts', () => {
+		const contact = ({ id, addresses }: Pick<ContactUi, 'id' | 'addresses'>): ContactUi => ({
+			id,
+			name: `Contact ${id}`,
+			updateTimestampNs: 12n,
+			addresses,
+			image: undefined
+		});
+
+		const backend = contact({
+			id: 1n,
+			addresses: [
+				{ addressType: 'Icrcv2', address: canister },
+				{ addressType: 'Icrcv2', address: mockPrincipalText },
+				{ addressType: 'Icrcv2', address: mockAccountIdentifierText },
+				{
+					addressType: 'Icrcv2',
+					address: encodeIcrcAccount({
+						owner: Principal.fromText(canister),
+						subaccount: new Uint8Array(32).fill(1)
+					})
+				},
+				mockContactEthAddressUi
+			]
+		});
+
+		const ledger = contact({
+			id: 2n,
+			addresses: [{ addressType: 'Icrcv2', address: otherCanister }]
+		});
+
+		it('keeps one entry per contact address that is a canister ID, and nothing else', () => {
+			expect(getCanisterNetworkContacts([backend, ledger])).toEqual({
+				[getNetworkContactKey({ contact: backend, address: canister })]: {
+					address: canister,
+					contact: backend
+				},
+				[getNetworkContactKey({ contact: ledger, address: otherCanister })]: {
+					address: otherCanister,
+					contact: ledger
+				}
+			});
+		});
+
+		it('is empty without contacts', () => {
+			expect(getCanisterNetworkContacts([])).toEqual({});
+		});
+	});
 
 	describe('parseCanisterId', () => {
 		it('should accept a canister ID', () => {
