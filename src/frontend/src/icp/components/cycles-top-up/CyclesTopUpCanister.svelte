@@ -162,7 +162,11 @@
 	{#snippet toolbar()}
 		<ButtonGroup>
 			{#if nonNullish(onBack)}
-				<ButtonBack onclick={onBack} testId={CYCLES_TOP_UP_CANISTER_BACK_BUTTON} />
+				<ButtonBack
+					disabled={checking}
+					onclick={onBack}
+					testId={CYCLES_TOP_UP_CANISTER_BACK_BUTTON}
+				/>
 			{:else}
 				<ButtonCancel onclick={onCancel} />
 			{/if}

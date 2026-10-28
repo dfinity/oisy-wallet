@@ -1,6 +1,8 @@
 import * as cyclesTopUpEnv from '$env/cycles-top-up.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import * as canisterStateApi from '$icp/api/canister-state.api';
 import { lastCyclesTopUps } from '$icp/stores/cycles-top-up.store';
+import type { CanisterExistence } from '$icp/types/cycles-top-up';
 import SendModal from '$lib/components/send/SendModal.svelte';
 import {
 	CYCLES_SEND_OR_TOP_UP,
@@ -9,6 +11,7 @@ import {
 	CYCLES_TOP_UP_CANISTER,
 	CYCLES_TOP_UP_CANISTER_BACK_BUTTON,
 	CYCLES_TOP_UP_CANISTER_INPUT,
+	CYCLES_TOP_UP_CANISTER_NEXT_BUTTON,
 	CYCLES_TOP_UP_REVIEW
 } from '$lib/constants/test-ids.constants';
 import * as authDerived from '$lib/derived/auth.derived';
@@ -599,6 +602,50 @@ describe('SendModal', () => {
 
 				expect(result.getByTestId('stub-destination-cancel-action')).toHaveTextContent('close');
 				expect(result.queryByTestId(CYCLES_SEND_OR_TOP_UP)).not.toBeInTheDocument();
+			});
+
+			// The check's answer moves Send on, from wherever Back would have taken the user meanwhile.
+			it('keeps Back disabled while the canister check runs', async () => {
+				const canister = 'ywcsb-maaaa-aaaai-q6k7a-cai';
+
+				vi.spyOn(authDerived, 'authIdentity', 'get').mockReturnValue(readable(mockIdentity));
+
+				let answer: (existence: CanisterExistence) => void = () => undefined;
+
+				vi.spyOn(canisterStateApi, 'getCanisterExistence').mockImplementation(
+					() =>
+						new Promise<CanisterExistence>((resolve) => {
+							answer = resolve;
+						})
+				);
+
+				const result = renderTokenPage();
+
+				await expectChoice(result);
+
+				await fireEvent.click(result.getByTestId(CYCLES_SEND_OR_TOP_UP_TOP_UP_BUTTON));
+
+				await expectTopUpCanister(result);
+
+				await fireEvent.input(result.getByTestId(CYCLES_TOP_UP_CANISTER_INPUT), {
+					target: { value: canister }
+				});
+
+				expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_BACK_BUTTON)).toBeEnabled();
+
+				await fireEvent.click(result.getByTestId(CYCLES_TOP_UP_CANISTER_NEXT_BUTTON));
+
+				await waitFor(() =>
+					expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_BACK_BUTTON)).toBeDisabled()
+				);
+
+				answer('not_found');
+
+				await waitFor(() =>
+					expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_BACK_BUTTON)).toBeEnabled()
+				);
+
+				expect(result.container).toHaveTextContent(en.cycles_top_up.error.canister_not_found);
 			});
 
 			it("resumes the principal's unanswered top-up on its Review", async () => {
