@@ -30,6 +30,12 @@ pub const MAX_TIP_ID_BYTES: u32 = 64;
 /// bytes) — it is user-facing text, and the design specifies 250 characters.
 pub const MAX_TIP_MESSAGE_CHARS: usize = 250;
 
+/// Maximum width, in bits, of a tip's `amount`. ICRC ledgers keep balances and
+/// allowances in at most 256 bits, so a wider amount is one no allowance can
+/// cover. `Nat` is variable-length on the wire, so without this bound a single
+/// tip could carry megabytes of digits.
+pub const MAX_TIP_AMOUNT_BITS: u64 = 256;
+
 /// Byte length of the stored claim-code hash: SHA-256 of the claim code that
 /// lives only in the link fragment. The code itself never reaches the canister
 /// and no endpoint returns the hash.
@@ -256,6 +262,10 @@ pub enum TipError {
     /// no longer covers it — they spent, reduced or revoked it. The one
     /// deliberately distinguishable failure, reachable only with a valid link,
     /// because telling the claimer "come back later" is useless.
+    ///
+    /// At creation: the allowance does not cover the amount plus its fee, or
+    /// the amount is wider than [`MAX_TIP_AMOUNT_BITS`], which no allowance
+    /// can cover.
     Uncovered,
     /// The sender's account no longer holds the amount. The reservation is still
     /// granted and the claim code is still valid, so the same link works again

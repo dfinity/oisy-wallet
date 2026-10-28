@@ -462,6 +462,34 @@ fn a_tip_without_a_covering_allowance_is_refused_at_creation() {
 }
 
 #[test]
+fn an_amount_no_allowance_can_cover_is_refused_before_any_ledger_call() {
+    let env = setup_tips();
+    // Not a canister: asking it anything ends in `TransferFailed`, so `Uncovered`
+    // shows the width check answered before a ledger was called.
+    let no_ledger = Principal::from_slice(&[0xab; 10]);
+    let wider_than_256_bits = Nat::from(u128::MAX) * Nat::from(u128::MAX) * Nat::from(2u8);
+
+    let result = env
+        .pic_setup
+        .update::<Result<(), TipError>>(
+            env.sender,
+            "create_tip",
+            CreateTipRequest {
+                tip_id: "tip-too-wide".to_string(),
+                ledger_canister_id: no_ledger,
+                amount: wider_than_256_bits,
+                expires_at_ns: now_ns(&env.pic_setup) + ONE_HOUR_NS,
+                message: None,
+                claim_code_hash: claim_code_hash("code-too-wide"),
+            },
+        )
+        .expect("create_tip should reach the handler");
+
+    assert_eq!(result, Err(TipError::Uncovered));
+    assert!(env.my_tips(env.sender).is_empty());
+}
+
+#[test]
 fn a_stored_claim_code_is_readable_only_by_the_sender_who_stored_it() {
     // The recovery store exists so a sender can get back to their own link. It
     // must not become a way to read anybody else's: `EncryptedMaps` keys every

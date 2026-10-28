@@ -19,8 +19,8 @@ use super::{
     icrc2::{self, Account, AllowanceArgs, TransferFromArgs, TransferFromCallError},
     model::{
         claim_code_matches, new_tip_exceeds_cap, spender_subaccount, validate_amount,
-        validate_claim_code_hash, validate_expiry, validate_message, validate_tip_id, TipRecord,
-        TipState,
+        validate_amount_width, validate_claim_code_hash, validate_expiry, validate_message,
+        validate_tip_id, TipRecord, TipState,
     },
     secrets,
 };
@@ -135,6 +135,7 @@ pub async fn create_tip(request: CreateTipRequest) -> Result<(), TipError> {
     validate_tip_id(&request.tip_id)?;
     validate_claim_code_hash(&request.claim_code_hash)?;
     validate_message(request.message.as_deref())?;
+    validate_amount_width(&request.amount)?;
     let now = time();
     validate_expiry(request.expires_at_ns, now)?;
 

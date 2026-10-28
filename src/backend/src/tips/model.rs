@@ -6,8 +6,8 @@ use serde_bytes::ByteBuf;
 use sha2::{Digest, Sha256};
 use shared::types::tip::{
     MyTip, PublicTip, TipClaimFailure, TipDetails, TipError, TipStatus, MAX_TIPS_PER_USER,
-    MAX_TIP_EXPIRY_NS, MAX_TIP_ID_BYTES, MAX_TIP_MESSAGE_CHARS, TIP_CLAIM_CODE_HASH_BYTES,
-    TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS,
+    MAX_TIP_AMOUNT_BITS, MAX_TIP_EXPIRY_NS, MAX_TIP_ID_BYTES, MAX_TIP_MESSAGE_CHARS,
+    TIP_CLAIM_CODE_HASH_BYTES, TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS,
 };
 
 /// Where a tip is in its lifecycle, as stored.
@@ -243,6 +243,16 @@ pub fn validate_amount(amount: &Nat, ledger_fee: &Nat) -> Result<(), TipError> {
     Ok(())
 }
 
+/// Refuses an amount wider than [`MAX_TIP_AMOUNT_BITS`]. No allowance can
+/// cover it, so the answer is the one a ledger would give, `Uncovered` — but
+/// without asking one, so the width check runs before any ledger call.
+pub fn validate_amount_width(amount: &Nat) -> Result<(), TipError> {
+    if amount.0.bits() > MAX_TIP_AMOUNT_BITS {
+        return Err(TipError::Uncovered);
+    }
+    Ok(())
+}
+
 /// Whether creating another tip would exceed the per-sender active-tip cap.
 pub fn new_tip_exceeds_cap(active_count: usize) -> bool {
     active_count >= MAX_TIPS_PER_USER
@@ -348,6 +358,18 @@ mod tests {
         );
         assert!(validate_amount(&fee, &fee).is_ok());
         assert!(validate_amount(&Nat::from(10_001u64), &fee).is_ok());
+    }
+
+    #[test]
+    fn amount_width_boundary() {
+        let widest = Nat::from(u128::MAX) * Nat::from(u128::MAX);
+        assert_eq!(widest.0.bits(), MAX_TIP_AMOUNT_BITS);
+        assert!(validate_amount_width(&widest).is_ok());
+        assert!(validate_amount_width(&Nat::from(1u8)).is_ok());
+        assert_eq!(
+            validate_amount_width(&(widest * Nat::from(2u8))),
+            Err(TipError::Uncovered)
+        );
     }
 
     #[test]
