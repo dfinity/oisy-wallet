@@ -34,6 +34,11 @@ export const CYCLES_MINT_MIN_ESTIMATE = 2n * CYCLES_LEDGER_DEPOSIT_FEE;
 // through amounts above it, whatever the rate.
 export const CYCLES_MINT_REFUND_FEES = 30_000n;
 
+// The same for a top-up deposit, which the CMC refunds under its own constant
+// (`TOP_UP_CANISTER_REFUND_FEE` in `rs/nns/cmc`), of the same size today. The ICP amount
+// step only lets through amounts above it.
+export const CYCLES_TOP_UP_REFUND_FEES = 30_000n;
+
 // How often a form that converts ICP into cycles re-reads the ICP/XDR rate. The CMC
 // refreshes it every 5 minutes.
 export const CMC_RATE_REFRESH_INTERVAL_MILLIS = 60_000;
