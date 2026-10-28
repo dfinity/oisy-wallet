@@ -1,5 +1,8 @@
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { ZERO } from '$lib/constants/app.constants';
+import type { ContactUi } from '$lib/types/contact';
+import type { NetworkContacts } from '$lib/types/contacts';
+import { getNetworkContacts } from '$lib/utils/contacts.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { decodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
@@ -42,6 +45,18 @@ export const isCanisterAccount = (text: string): boolean => {
 		return false;
 	}
 };
+
+/**
+ * The contact addresses that are canister IDs, by the same rule as the canister input, one
+ * entry per address. An ICP account identifier is never one, even a canister's: it is a
+ * hash, which no canister ID can be read back from.
+ */
+export const getCanisterNetworkContacts = (contacts: ContactUi[]): NetworkContacts =>
+	Object.entries(getNetworkContacts({ addressType: 'Icrcv2', contacts })).reduce<NetworkContacts>(
+		(acc, [key, networkContact]) =>
+			nonNullish(parseCanisterId(networkContact.address)) ? { ...acc, [key]: networkContact } : acc,
+		{}
+	);
 
 export interface RecentlyToppedUpCanister {
 	canisterId: string;
