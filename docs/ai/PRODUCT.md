@@ -407,6 +407,12 @@ The fee shown is the most the swap can cost: the swap transaction's own limit, p
 
 Like the other cross-chain swaps, the modal closes once the transaction is sent, and the swap appears in the Active-transactions panel labelled "LI.FI" until it settles. The row is recorded before the transaction is broadcast, so a swap is never sent untracked; if the network refuses the transaction outright, the row is removed again. If the network's answer is lost instead, OISY sends the same signed transaction again a few times, which cannot run it twice; if the outcome is still unknown, the swap counts as sent and stays tracked until it settles: it is never offered for signing a second time, which could make it run twice.
 
+### When an Ethereum send fails
+
+When an Ethereum or EVM send fails, what OISY says depends on how far the transaction got. If the network could not be reached to read the transaction's nonce, the transaction was never signed, so the message says it was not sent and that trying again is safe. If a node refused the transaction outright, such as for a balance that cannot cover it, the message states that reason, and a transaction that [runs out of gas](#a-send-that-runs-out-of-gas) keeps its own message. If every provider failed the submission, or answered in a way that leaves it open, such as that the transaction's nonce is already used, OISY cannot know whether the network received the transaction, and the message says exactly that: it may still go through, so the user should check their activity before sending it again. It never says such a transaction was not sent, because a new attempt is signed with the next nonce, and if the first one did get through, both would execute and the user would pay twice.
+
+The send, convert, swap and AI assistant flows show these messages, and so do WalletConnect transaction requests; the dApp still receives a rejection. A failure OISY cannot explain keeps its flow's generic message.
+
 ---
 
 ## Activity

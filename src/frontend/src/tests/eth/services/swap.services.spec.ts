@@ -9,6 +9,7 @@ import * as ethTransactionServicesLib from '$eth/services/eth-transaction.servic
 import { processTransactionSent } from '$eth/services/eth-transaction.services';
 import { swap } from '$eth/services/swap.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { EthSubmissionUnconfirmedError } from '$eth/types/send';
 import * as signerApiLib from '$lib/api/signer.api';
 import { signTransaction } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
@@ -256,8 +257,18 @@ describe('swap.services', () => {
 				expect(processTransactionSent).not.toHaveBeenCalled();
 			});
 
+			it('should not send again after a definitive refusal', async () => {
+				const err = nodeAnswer('max fee per gas less than block base fee');
+
+				mockSendTransaction.mockRejectedValue(err);
+
+				await expect(swap(mockSwapParams)).rejects.toThrow(err);
+
+				expect(mockSendTransaction).toHaveBeenCalledOnce();
+			});
+
+			// The provider reports these as an outcome it cannot confirm, the node's answer as the cause.
 			it.each([
-				{ answer: 'a definitive refusal', message: 'max fee per gas less than block base fee' },
 				{ answer: 'already known', message: 'already known' },
 				{ answer: 'nonce too low', message: 'nonce too low: next nonce 43, tx nonce 42' }
 			])('should not send again after $answer', async ({ message }) => {
@@ -265,8 +276,10 @@ describe('swap.services', () => {
 
 				mockSendTransaction.mockRejectedValue(err);
 
-				await expect(swap(mockSwapParams)).rejects.toThrow(err);
+				const outcome = await swap(mockSwapParams).catch((error: unknown) => error);
 
+				expect(outcome).toBeInstanceOf(EthSubmissionUnconfirmedError);
+				expect(outcome).toHaveProperty('cause', err);
 				expect(mockSendTransaction).toHaveBeenCalledOnce();
 			});
 
@@ -277,8 +290,10 @@ describe('swap.services', () => {
 				mockSendTransaction.mockRejectedValueOnce(new Error('fetch failed'));
 				mockSendTransaction.mockRejectedValueOnce(known);
 
-				await expect(swap(mockSwapParams)).rejects.toThrow(known);
+				const outcome = await swap(mockSwapParams).catch((error: unknown) => error);
 
+				expect(outcome).toBeInstanceOf(EthSubmissionUnconfirmedError);
+				expect(outcome).toHaveProperty('cause', known);
 				expect(mockSendTransaction).toHaveBeenCalledTimes(2);
 			});
 		});
