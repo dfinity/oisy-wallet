@@ -9,6 +9,10 @@ export const CMC_NAME = 'Cycles Minting Canister';
 // the CMC reads whenever the legacy memo is zero.
 export const CMC_MINT_CYCLES_MEMO = new Uint8Array([0x4d, 0x49, 0x4e, 0x54, 0, 0, 0, 0]);
 
+// The CMC treats a deposit as a top-up only when its memo is `TPUP` (0x50555054), read
+// the same way.
+export const CMC_TOP_UP_MEMO = new Uint8Array([0x54, 0x50, 0x55, 0x50, 0, 0, 0, 0]);
+
 // The cycles ledger counts in cycles, 10^12 to the TCYCLES, and keeps 0.0001 TCYCLES of
 // every deposit as its fee (`dfinity/cycles-ledger`, `config.rs`). The CMC's `minted` is
 // the amount before that fee.
