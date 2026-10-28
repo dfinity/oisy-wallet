@@ -275,13 +275,15 @@
 
 		const skip = shouldSkipDestinationStep({ destination, token });
 
+		// TCYCLES starts over at the choice even with an address that would skip its step, such as
+		// one entered for another token: Send then asks for it again, filled in.
 		// eslint-disable-next-line require-await
 		const callback = async () => {
 			goToStep(
-				skip
-					? WizardStepsSend.SEND
-					: isSendOrTopUp(token)
-						? WizardStepsSend.SEND_OR_TOP_UP
+				isSendOrTopUp(token)
+					? WizardStepsSend.SEND_OR_TOP_UP
+					: skip
+						? WizardStepsSend.SEND
 						: WizardStepsSend.DESTINATION
 			);
 		};

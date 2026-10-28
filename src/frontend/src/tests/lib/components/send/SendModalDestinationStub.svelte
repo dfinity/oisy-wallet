@@ -2,6 +2,7 @@
 <script lang="ts">
 	import type { ContactUi } from '$lib/types/contact';
 	import type { SendDestinationTab } from '$lib/types/send';
+	import { mockPrincipalText2 } from '$tests/mocks/identity.mock';
 
 	interface Props {
 		destination: string;
@@ -40,4 +41,13 @@
 		destination = 'stub-destination-2';
 		onNext();
 	}}>change</button
+>
+<!-- A principal, valid for any Internet Computer token, so switching tokens can skip this step. Not
+     `mockPrincipalText`, the mock tokens' minting account, which would turn the send into a burn. -->
+<button
+	data-tid="stub-destination-principal-next"
+	onclick={() => {
+		destination = mockPrincipalText2;
+		onNext();
+	}}>principal</button
 >

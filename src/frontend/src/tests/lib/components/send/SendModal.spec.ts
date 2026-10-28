@@ -20,7 +20,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { mockTcyclesToken } from '$tests/mocks/cycles-mint.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipalText2 } from '$tests/mocks/identity.mock';
 import {
 	createSelectedNftHarness,
 	createStepsHarness
@@ -439,6 +439,56 @@ describe('SendModal', () => {
 				await fireEvent.click(result.getByTestId('stub-destination-back'));
 
 				await waitFor(() => expect(result.getByTestId('stub-select-tcycles')).toBeInTheDocument());
+			});
+
+			describe('switching tokens from the amount form', () => {
+				// The principal entered for the first token is valid for any token on the Internet
+				// Computer, which lets a switch skip the destination step.
+				const toAmountAndBack = async (result: Result) => {
+					await fireEvent.click(result.getByTestId('stub-select-token-a'));
+
+					await expectDestination(result);
+
+					await fireEvent.click(result.getByTestId('stub-destination-principal-next'));
+
+					await waitFor(() => expect(result.getByTestId('stub-amount')).toBeInTheDocument());
+
+					await fireEvent.click(result.getByTestId('stub-to-tokens-list'));
+
+					await waitFor(() =>
+						expect(result.getByTestId('stub-select-tcycles')).toBeInTheDocument()
+					);
+				};
+
+				it('asks again for TCYCLES, and Send asks for the kept address again', async () => {
+					const result = await renderTokensList();
+
+					await toAmountAndBack(result);
+
+					await pickTcycles(result);
+
+					await expectChoice(result);
+
+					expect(result.queryByTestId('stub-amount')).not.toBeInTheDocument();
+
+					await fireEvent.click(result.getByTestId(CYCLES_SEND_OR_TOP_UP_SEND_BUTTON));
+
+					await expectDestination(result);
+
+					expect(result.getByTestId('stub-destination')).toHaveTextContent(mockPrincipalText2);
+				});
+
+				it('still skips the destination for another token', async () => {
+					const result = await renderTokensList();
+
+					await toAmountAndBack(result);
+
+					await fireEvent.click(result.getByTestId('stub-select-token-b'));
+
+					await waitFor(() => expect(result.getByTestId('stub-amount')).toBeInTheDocument());
+
+					expect(result.queryByTestId(CYCLES_SEND_OR_TOP_UP)).not.toBeInTheDocument();
+				});
 			});
 
 			it('goes straight to the destination while the choice is off', async () => {
