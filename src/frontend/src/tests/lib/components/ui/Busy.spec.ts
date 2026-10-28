@@ -76,6 +76,14 @@ describe('Busy', () => {
 		expect(busyElement).not.toHaveClass('close');
 	});
 
+	it('keeps the browser focus ring off the overlay', () => {
+		busy.start();
+
+		const { container } = render(Busy);
+
+		expect(container.querySelector('.busy')).toHaveClass('outline-none');
+	});
+
 	it('should not close when overlay is clicked and close is false', async () => {
 		busy.start();
 

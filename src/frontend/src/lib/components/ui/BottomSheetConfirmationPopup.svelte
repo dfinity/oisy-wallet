@@ -76,7 +76,7 @@
 		<Backdrop onClose={cancel} />
 
 		<div
-			class="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl bg-primary shadow-[var(--overlay-box-shadow)]"
+			class="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl bg-primary shadow-[var(--overlay-box-shadow)] outline-none"
 			aria-labelledby={titleId}
 			aria-modal="true"
 			data-tid={CONFIRMATION_POPUP_MODAL}

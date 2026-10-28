@@ -517,6 +517,7 @@ This card links straight into those explorers, each pre-filtered to the user's o
 
 - **Velora** — the user's order list, on their Ethereum address.
 - **NEAR Intents** — three links, for their Ethereum, Solana and Bitcoin addresses.
+- **LI.FI** — one link to LI.FI Scan, on their Ethereum address: every LI.FI transfer OISY starts leaves from an EVM network, Solana-bound ones included.
 - **1Sec** — two links, for their principal and their Ethereum address.
 
 One Ethereum address serves every EVM network OISY supports, so the EVM link is offered once per provider rather than per chain. The links point at the providers' production explorers only, and a link whose address has not loaded yet is left out entirely rather than opening an explorer with an empty query; a provider with no available link, and a card with no available provider, disappear the same way.
