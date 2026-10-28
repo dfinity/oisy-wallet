@@ -1,13 +1,17 @@
 <script lang="ts">
-	import { nonNullish, notEmptyString } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 	import { setContext } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { CYCLES_SEND_OR_TOP_UP_ENABLED } from '$env/cycles-top-up.env';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledErc4626Tokens } from '$eth/derived/erc4626.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { decodeQrCode as decodeQrCodeETH } from '$eth/utils/qr-code.utils';
+	import CyclesSendOrTopUp from '$icp/components/cycles-top-up/CyclesSendOrTopUp.svelte';
+	import CyclesTopUpWizard from '$icp/components/cycles-top-up/CyclesTopUpWizard.svelte';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
+	import { isTokenCyclesLedger } from '$icp/utils/cycles-mint.utils';
 	import { isTokenIc } from '$icp/utils/icrc.utils';
 	import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
 	import SendNftsList from '$lib/components/send/SendNftsList.svelte';
@@ -41,7 +45,7 @@
 	import { pageCollectionNfts, pageNft } from '$lib/derived/page-nft.derived';
 	import { enabledTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
-	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { WizardStepsCyclesTopUp, WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { loadTokenAndRun } from '$lib/services/token.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -131,18 +135,44 @@
 	// Pinned by the "steps derivation reactivity" describe block in `SendModal.spec.ts`.
 	let hasPageNft = $derived(nonNullish($pageNft));
 
+	// Sending TCYCLES starts with a choice between sending them and topping up a canister, unless
+	// the send started from a scanned address, which is where the user wants to send to.
+	const isSendOrTopUp = (token: OptionToken): boolean =>
+		CYCLES_SEND_OR_TOP_UP_ENABLED && isNullish(initialModalData) && isTokenCyclesLedger(token);
+
+	let sendOrTopUp = $derived(isSendOrTopUp($token));
+
 	let steps = $derived(
 		isTransactionsPage
-			? sendWizardStepsWithQrCodeScan({ i18n: $i18n, minting: $isIcMintingAccount, burning })
+			? sendWizardStepsWithQrCodeScan({
+					i18n: $i18n,
+					minting: $isIcMintingAccount,
+					burning,
+					sendOrTopUp
+				})
 			: isNftsPage
 				? hasPageNft
 					? sendNftsWizardStepsWithQrCodeScan({ i18n: $i18n })
 					: allSendNftsWizardSteps({ i18n: $i18n })
-				: allSendWizardSteps({ i18n: $i18n, minting: $isIcMintingAccount, burning })
+				: allSendWizardSteps({
+						i18n: $i18n,
+						minting: $isIcMintingAccount,
+						burning,
+						// Whatever token is picked: picking one must not change the steps, which would
+						// send the wizard back to the list.
+						sendOrTopUp: CYCLES_SEND_OR_TOP_UP_ENABLED && isNullish(initialModalData)
+					})
 	);
 
-	let currentStep = $state<WizardStep<WizardStepsSend> | undefined>();
-	let modal = $state<WizardModal<WizardStepsSend>>();
+	let currentStep = $state<WizardStep<WizardStepsSend | WizardStepsCyclesTopUp> | undefined>();
+	let modal = $state<WizardModal<WizardStepsSend | WizardStepsCyclesTopUp>>();
+
+	let showCyclesTopUpWizard = $derived(
+		currentStep?.name === WizardStepsCyclesTopUp.CANISTER ||
+			currentStep?.name === WizardStepsCyclesTopUp.AMOUNT ||
+			currentStep?.name === WizardStepsCyclesTopUp.REVIEW ||
+			currentStep?.name === WizardStepsCyclesTopUp.TOPPING_UP
+	);
 	let selectedNft = $state.raw<Nft | undefined>($pageNft);
 
 	// `$pageNft` can be undefined during NFT store refreshes; do not clear a manual list selection.
@@ -247,13 +277,19 @@
 
 		// eslint-disable-next-line require-await
 		const callback = async () => {
-			goToStep(skip ? WizardStepsSend.SEND : WizardStepsSend.DESTINATION);
+			goToStep(
+				skip
+					? WizardStepsSend.SEND
+					: isSendOrTopUp(token)
+						? WizardStepsSend.SEND_OR_TOP_UP
+						: WizardStepsSend.DESTINATION
+			);
 		};
 
 		await loadTokenAndRun({ token, callback });
 	};
 
-	const goToStep = (stepName: WizardStepsSend) => {
+	const goToStep = (stepName: WizardStepsSend | WizardStepsCyclesTopUp) => {
 		if (nonNullish(modal)) {
 			goToWizardStep({
 				modal,
@@ -306,7 +342,8 @@
 	<WizardModal
 		bind:this={modal}
 		disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING ||
-			currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
+			currentStep?.name === WizardStepsSend.FILTER_NETWORKS ||
+			currentStep?.name === WizardStepsCyclesTopUp.TOPPING_UP}
 		onClose={close}
 		{steps}
 		testId={SEND_TOKENS_MODAL}
@@ -333,6 +370,16 @@
 				bind:amount
 				bind:sendProgressStep
 			/>
+		{:else if showCyclesTopUpWizard && isTokenCyclesLedger($token)}
+			<!-- Its steps share one wizard too, which holds the top-up while it is on its way. -->
+			<CyclesTopUpWizard
+				{currentStep}
+				{modal}
+				onBack={() => goToStep(WizardStepsSend.SEND_OR_TOP_UP)}
+				onClose={close}
+				{steps}
+				token={$token}
+			/>
 		{:else}
 			{#key currentStep?.name}
 				{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
@@ -340,6 +387,15 @@
 						{lockedNetwork}
 						onSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 						{onSendToken}
+					/>
+				{:else if currentStep?.name === WizardStepsSend.SEND_OR_TOP_UP && isTokenCyclesLedger($token)}
+					<CyclesSendOrTopUp
+						formCancelAction={isTransactionsPage ? 'close' : 'back'}
+						onBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+						onClose={close}
+						onSend={() => goToStep(WizardStepsSend.DESTINATION)}
+						onTopUp={() => goToStep(WizardStepsCyclesTopUp.CANISTER)}
+						token={$token}
 					/>
 				{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
 					<SendNftsList
@@ -353,10 +409,12 @@
 					/>
 				{:else if currentStep?.name === WizardStepsSend.DESTINATION}
 					<SendDestinationWizardStep
-						formCancelAction={isTransactionsPage || (isNftsPage && nonNullish($pageNft))
+						formCancelAction={!sendOrTopUp &&
+						(isTransactionsPage || (isNftsPage && nonNullish($pageNft)))
 							? 'close'
 							: 'back'}
-						onBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+						onBack={() =>
+							goToStep(sendOrTopUp ? WizardStepsSend.SEND_OR_TOP_UP : WizardStepsSend.TOKENS_LIST)}
 						onClose={close}
 						onNext={modal.next}
 						onQRCodeScan={() => goToStep(WizardStepsSend.QR_CODE_SCAN)}

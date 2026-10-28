@@ -6,12 +6,14 @@
 	  produces: a fresh object that keeps the `TokenId` symbol the store already held for that
 	  identifier,
 	- two distinct assets that share a symbol, hence share a `TokenId` description, because
-	  `mapIcrcToken` / `mapErc20Token` mint the `TokenId` from the symbol.
+	  `mapIcrcToken` / `mapErc20Token` mint the `TokenId` from the symbol,
+	- TCYCLES, which can also top up a canister.
 -->
 <script lang="ts">
 	import type { IcToken } from '$icp/types/ic-token';
 	import type { Token } from '$lib/types/token';
 	import { parseTokenId } from '$lib/validation/token.validation';
+	import { mockTcyclesToken } from '$tests/mocks/cycles-mint.mock';
 	import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 
 	interface Props {
@@ -66,4 +68,6 @@
 >
 <button data-tid="stub-select-token-same-symbol-b" onclick={() => onSendToken(sameSymbolTokenB)}
 	>S2</button
+>
+<button data-tid="stub-select-tcycles" onclick={() => onSendToken(mockTcyclesToken)}>TCYCLES</button
 >

@@ -1,14 +1,34 @@
+import * as cyclesTopUpEnv from '$env/cycles-top-up.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { lastCyclesTopUps } from '$icp/stores/cycles-top-up.store';
 import SendModal from '$lib/components/send/SendModal.svelte';
+import {
+	CYCLES_SEND_OR_TOP_UP,
+	CYCLES_SEND_OR_TOP_UP_SEND_BUTTON,
+	CYCLES_SEND_OR_TOP_UP_TOP_UP_BUTTON,
+	CYCLES_TOP_UP_CANISTER,
+	CYCLES_TOP_UP_CANISTER_BACK_BUTTON,
+	CYCLES_TOP_UP_REVIEW
+} from '$lib/constants/test-ids.constants';
+import * as authDerived from '$lib/derived/auth.derived';
+import * as cyclesTopUpAnalytics from '$lib/services/cycles-top-up-analytics.services';
+import { balancesStore } from '$lib/stores/balances.store';
+import { modalStore } from '$lib/stores/modal.store';
 import { token } from '$lib/stores/token.store';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockTcyclesToken } from '$tests/mocks/cycles-mint.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	createSelectedNftHarness,
 	createStepsHarness
 } from '$tests/utils/steps-reactivity.test-utils.svelte';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { flushSync } from 'svelte';
+import { readable } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 vi.mock(
 	'$lib/components/send/SendTokensList.svelte',
@@ -292,6 +312,240 @@ describe('SendModal', () => {
 			await waitFor(() => expect(getByTestId('stub-amount')).toBeInTheDocument());
 
 			expect(getByTestId('stub-amount')).toHaveTextContent('5');
+		});
+	});
+
+	describe('sending TCYCLES', () => {
+		type Result = ReturnType<typeof render<typeof SendModal>>;
+
+		let trackSpy: MockInstance;
+
+		const renderTokensList = async (): Promise<Result> => {
+			const result = render(SendModal, {
+				props: { isTransactionsPage: false, isNftsPage: false }
+			});
+
+			await waitFor(() => expect(result.getByTestId('stub-select-tcycles')).toBeInTheDocument());
+
+			return result;
+		};
+
+		// The TCYCLES page, where the token is the page's and there is no token list.
+		const renderTokenPage = (): Result => {
+			token.set(mockTcyclesToken);
+
+			return render(SendModal, {
+				props: { isTransactionsPage: true, isNftsPage: false }
+			});
+		};
+
+		const expectChoice = async ({ getByTestId }: Result) => {
+			await waitFor(() => expect(getByTestId(CYCLES_SEND_OR_TOP_UP)).toBeInTheDocument());
+		};
+
+		const expectDestination = async ({ getByTestId }: Result) => {
+			await waitFor(() => expect(getByTestId('stub-destination')).toBeInTheDocument());
+		};
+
+		const expectTopUpCanister = async ({ getByTestId }: Result) => {
+			await waitFor(() => expect(getByTestId(CYCLES_TOP_UP_CANISTER)).toBeInTheDocument());
+		};
+
+		const pickTcycles = async (result: Result) => {
+			await fireEvent.click(result.getByTestId('stub-select-tcycles'));
+		};
+
+		beforeEach(() => {
+			vi.spyOn(cyclesTopUpEnv, 'CYCLES_SEND_OR_TOP_UP_ENABLED', 'get').mockReturnValue(true);
+
+			trackSpy = vi
+				.spyOn(cyclesTopUpAnalytics, 'trackCyclesTopUp')
+				.mockImplementation(() => undefined);
+
+			token.reset();
+			lastCyclesTopUps.set({});
+		});
+
+		afterEach(() => {
+			modalStore.close();
+			vi.restoreAllMocks();
+		});
+
+		describe('from the token list', () => {
+			it('asks whether to send or top up once TCYCLES is picked', async () => {
+				const result = await renderTokensList();
+
+				await pickTcycles(result);
+
+				await expectChoice(result);
+
+				expect(result.queryByTestId('stub-destination')).not.toBeInTheDocument();
+			});
+
+			it('goes back from the choice to the token list', async () => {
+				const result = await renderTokensList();
+
+				await pickTcycles(result);
+				await expectChoice(result);
+
+				await fireEvent.click(result.getByText(en.core.text.back));
+
+				await waitFor(() => expect(result.getByTestId('stub-select-tcycles')).toBeInTheDocument());
+			});
+
+			it('goes on to the destination to send, and back to the choice', async () => {
+				const result = await renderTokensList();
+
+				await pickTcycles(result);
+				await expectChoice(result);
+
+				await fireEvent.click(result.getByTestId(CYCLES_SEND_OR_TOP_UP_SEND_BUTTON));
+
+				await expectDestination(result);
+
+				expect(result.getByTestId('stub-destination-cancel-action')).toHaveTextContent('back');
+
+				await fireEvent.click(result.getByTestId('stub-destination-back'));
+
+				await expectChoice(result);
+			});
+
+			it('goes on to the top-up, and back to the choice', async () => {
+				const result = await renderTokensList();
+
+				await pickTcycles(result);
+				await expectChoice(result);
+
+				await fireEvent.click(result.getByTestId(CYCLES_SEND_OR_TOP_UP_TOP_UP_BUTTON));
+
+				await expectTopUpCanister(result);
+
+				expect(trackSpy).toHaveBeenCalledExactlyOnceWith({ step: 'open' });
+
+				await fireEvent.click(result.getByTestId(CYCLES_TOP_UP_CANISTER_BACK_BUTTON));
+
+				await expectChoice(result);
+			});
+
+			it('goes straight to the destination for another token', async () => {
+				const result = await renderTokensList();
+
+				await fireEvent.click(result.getByTestId('stub-select-token-a'));
+
+				await expectDestination(result);
+
+				expect(result.queryByTestId(CYCLES_SEND_OR_TOP_UP)).not.toBeInTheDocument();
+
+				await fireEvent.click(result.getByTestId('stub-destination-back'));
+
+				await waitFor(() => expect(result.getByTestId('stub-select-tcycles')).toBeInTheDocument());
+			});
+
+			it('goes straight to the destination while the choice is off', async () => {
+				vi.spyOn(cyclesTopUpEnv, 'CYCLES_SEND_OR_TOP_UP_ENABLED', 'get').mockReturnValue(false);
+
+				const result = await renderTokensList();
+
+				await pickTcycles(result);
+
+				await expectDestination(result);
+
+				expect(result.queryByTestId(CYCLES_SEND_OR_TOP_UP)).not.toBeInTheDocument();
+			});
+
+			// A scanned address that is not a principal does not skip the destination step, which then
+			// comes first and leads back to the list.
+			it('skips the choice for a send that started from a scanned address', async () => {
+				modalStore.openSend({
+					id: Symbol(),
+					data: { destination: 'scanned-address', lockedNetworkId: ICP_NETWORK_ID }
+				});
+
+				const result = await renderTokensList();
+
+				await pickTcycles(result);
+
+				await expectDestination(result);
+
+				expect(result.queryByTestId(CYCLES_SEND_OR_TOP_UP)).not.toBeInTheDocument();
+
+				await fireEvent.click(result.getByTestId('stub-destination-back'));
+
+				await waitFor(() => expect(result.getByTestId('stub-select-tcycles')).toBeInTheDocument());
+			});
+		});
+
+		describe('from the TCYCLES page', () => {
+			it('starts on the choice, which closes the modal on Cancel', async () => {
+				const closeSpy = vi.spyOn(modalStore, 'close');
+
+				const result = renderTokenPage();
+
+				await expectChoice(result);
+
+				await fireEvent.click(result.getByText(en.core.text.cancel));
+
+				expect(closeSpy).toHaveBeenCalledOnce();
+			});
+
+			it('goes back from the destination to the choice', async () => {
+				const result = renderTokenPage();
+
+				await expectChoice(result);
+
+				await fireEvent.click(result.getByTestId(CYCLES_SEND_OR_TOP_UP_SEND_BUTTON));
+
+				await expectDestination(result);
+
+				expect(result.getByTestId('stub-destination-cancel-action')).toHaveTextContent('back');
+
+				await fireEvent.click(result.getByTestId('stub-destination-back'));
+
+				await expectChoice(result);
+			});
+
+			it('starts on the destination while the choice is off', async () => {
+				vi.spyOn(cyclesTopUpEnv, 'CYCLES_SEND_OR_TOP_UP_ENABLED', 'get').mockReturnValue(false);
+
+				const result = renderTokenPage();
+
+				await expectDestination(result);
+
+				expect(result.getByTestId('stub-destination-cancel-action')).toHaveTextContent('close');
+				expect(result.queryByTestId(CYCLES_SEND_OR_TOP_UP)).not.toBeInTheDocument();
+			});
+
+			it("resumes the principal's unanswered top-up on its Review", async () => {
+				const canister = 'ywcsb-maaaa-aaaai-q6k7a-cai';
+
+				vi.spyOn(authDerived, 'authIdentity', 'get').mockReturnValue(readable(mockIdentity));
+
+				balancesStore.set({
+					id: mockTcyclesToken.id,
+					data: { data: 5_000_000_000_000n, certified: true }
+				});
+
+				lastCyclesTopUps.set({
+					[mockIdentity.getPrincipal().toText()]: {
+						request: {
+							canisterId: canister,
+							amount: 1_500_000_000_000n,
+							createdAt: 1_000_000_000n
+						},
+						send: Symbol()
+					}
+				});
+
+				const result = renderTokenPage();
+
+				await expectChoice(result);
+
+				await fireEvent.click(result.getByTestId(CYCLES_SEND_OR_TOP_UP_TOP_UP_BUTTON));
+
+				await waitFor(() => expect(result.getByTestId(CYCLES_TOP_UP_REVIEW)).toBeInTheDocument());
+
+				expect(result.container).toHaveTextContent(canister);
+			});
 		});
 	});
 });

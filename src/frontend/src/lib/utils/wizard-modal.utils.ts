@@ -3,6 +3,7 @@ import type {
 	TokenModalSteps,
 	WizardStepsAuthHelp,
 	WizardStepsConvert,
+	WizardStepsCyclesTopUp,
 	WizardStepsHowToConvert,
 	WizardStepsLimitOrder,
 	WizardStepsLiquidiumBorrow,
@@ -22,6 +23,7 @@ import type { WizardModal, WizardSteps } from '$lib/types/wizard';
 
 type StepName =
 	| WizardStepsSend
+	| WizardStepsCyclesTopUp
 	| WizardStepsSwap
 	| WizardStepsConvert
 	| WizardStepsAuthHelp
