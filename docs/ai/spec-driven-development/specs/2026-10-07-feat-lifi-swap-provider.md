@@ -1355,8 +1355,10 @@ New `fetchLifiSolSwap`:
    Nothing is fetched or recompiled to satisfy the type.
 
 3. Create the AUT row once the transaction is signed and before `sendSignedTransaction`
-   in step 2, with the signature as the tx hash and the transaction's **recent
-   blockhash** as a ref. As on EVM, a row that cannot be created aborts the swap before
+   in step 2, with the signature as the tx hash, the transaction's **recent
+   blockhash** as a ref, and the slot of the binding's simulation of those bytes
+   (`lifi_simulation_slot`, returned by `assertLifiSolTransaction`), where the blockhash
+   was valid. As on EVM, a row that cannot be created aborts the swap before
    it is sent, and only a definitive refusal deletes it: a failed preflight simulation,
    after which the RPC forwards nothing — except one reporting the transaction as already
    processed, which is its landing. Any other failure first **sends the same signed
@@ -1380,8 +1382,9 @@ New `fetchLifiSolSwap`:
    more than doubled) that cannot happen within the retry window. Then
    `enableSwapDestinationToken`. The blockhash is read from the compiled
    message (`getCompiledTransactionMessageDecoder` → `lifetimeToken`). LI.FI's
-   transaction carries only the blockhash, not its `lastValidBlockHeight`, and the expiry
-   check in the [poller](#poller-libserviceslifi-active-txservicests) needs nothing more.
+   transaction carries only the blockhash, not its `lastValidBlockHeight`; the expiry
+   check in the [poller](#poller-libserviceslifi-active-txservicests) needs only the
+   blockhash and the simulation's slot.
 
 **WalletConnect's `getSignatureWithSending` path is not reused.** It decompiles the
 message with `decompileTransactionMessageFetchingLookupTables`, replaces the blockhash
@@ -1527,6 +1530,7 @@ otherwise no-ops silently). Precedent: commit `78d5addbd` (Velora's variant).
 | `lifi_transaction_id`  | creation                | LI.FI's id, for support / explorer links               |
 | `lifi_nonce`           | creation, EVM, required | replaced/dropped detection (Velora Market)             |
 | `lifi_blockhash`       | creation, SOL, required | the transaction's recent blockhash; expiry detection   |
+| `lifi_simulation_slot` | creation, SOL           | slot of OISY's own simulation; anchors the expiry read |
 | `lifi_dest_tx_hash`    | learned                 | `receiving.txHash`                                     |
 | `lifi_substatus`       | learned                 | how a `DONE` ended: `COMPLETED`, `PARTIAL`, `REFUNDED` |
 | `lifi_received_symbol` | learned                 | `receiving.token.symbol` on every `DONE` / `PARTIAL`   |
@@ -1535,8 +1539,15 @@ otherwise no-ops silently). Precedent: commit `78d5addbd` (Velora's variant).
 Plus the shared display keys (`amount`, `source_token_symbol`, `source_network_symbol`,
 `destination_token_symbol`, `destination_network_symbol`, `usd_source_value`), so
 `ActiveUserTransactionItem` renders the row without new layout. An EVM row uses at most
-14 of the 16 keys (`lifi_nonce`, no `lifi_blockhash`), a Solana row likewise 14
-(`lifi_blockhash`, no `lifi_nonce`), leaving two spare.
+14 of the 16 keys (`lifi_nonce`, no `lifi_blockhash`), leaving two spare; a Solana row 15
+(`lifi_blockhash` and `lifi_simulation_slot`, no `lifi_nonce`), leaving one.
+
+`lifi_simulation_slot` is the slot at which OISY's own simulation of the signed bytes ran
+before signing ([Solana execution](#solana-execution)). That simulation keeps the
+transaction's blockhash (`replaceRecentBlockhash: false`) and fails on one the node does
+not know, so the blockhash was valid there. 3d writes it as a decimal `u64`; the backend
+neither requires nor checks it, and the poller reads it only if it is one (see the
+[poller](#poller-libserviceslifi-active-txservicests)).
 
 `lifi_substatus` is written on every `DONE`, only when it is in the SDK's closed set
 (`isSubstatusDone`). It is what tells a partial payout apart for the balance reload (see
@@ -1593,24 +1604,47 @@ Each tick, per pending LI.FI row:
      two-observation counter keyed per row) that both pollers call. Velora's behaviour
      and existing tests stay unchanged; the refactor landed on its own, ahead of the
      LI.FI EVM poller (2b-1, see [Delivery plan](#delivery-plan)).
-   - Solana — new, since nothing in the repo reads signature statuses or blockhash
-     validity yet:
+   - Solana — new, since nothing in the repo read signature statuses or blockhash
+     validity before. `readSolSourceTxOutcome` (`sol/services/sol-source-tx.services.ts`,
+     with the mapping in `toSolSourceTxOutcome`, `sol/utils/sol-source-tx.utils.ts`) is the
+     Solana counterpart of the EVM helper, on Solana mainnet, reading through
+     `getSignatureStatus` and `isBlockhashValid` in `sol/api/solana.api.ts`. It needs no
+     address: the signature and the blockhash identify the transaction.
      1. `getSignatureStatuses([signature], { searchTransactionHistory: true })`. The
         history search matters: without it the RPC only answers from its recent-status
         cache, and an old landed transaction would read as missing.
-     2. A status with `err` → `Failed` ("reverted on Solana"). A status at `confirmed` or
-        `finalized` without `err` → the source leg is done; go on to `/status`.
-     3. No status → `isBlockhashValid(lifi_blockhash, { commitment: 'confirmed' })`. While
-        valid, the transaction can still land: no update. Once invalid, it can never
-        land — but it may have landed just before the hash expired, between the two
-        calls. So the first poll that sees "no status + invalid blockhash" only records
+     2. A status at `confirmed` or `finalized` with `err` → `Failed` ("reverted on
+        Solana", `swap.error.failed_unexpectedly` as for an EVM revert); without `err` →
+        the source leg is done; go on to `/status`. A status only `processed`, with or
+        without `err`, is no verdict: its block may still be dropped with its fork, so the
+        row stays in flight (`Executing`) until the cluster confirms it.
+     3. No status → `isBlockhashValid(lifi_blockhash, { commitment: 'confirmed',
+minContextSlot: lifi_simulation_slot })`. While valid, the transaction can still
+        land: the row stays in flight. A node answers `false` alike for a blockhash that
+        has aged out and for one it has not seen yet (checked on mainnet, 2026-10-26), so
+        a node running behind would call a live blockhash invalid. `minContextSlot` makes
+        such a node refuse to answer instead (`-32016`, "Minimum context slot has not been
+        reached"), which the poller's per-row catch leaves for the next poll; a node at or
+        past the slot only answers `false` once the hash has aged out, which is final. A
+        row without a usable `lifi_simulation_slot`, which OISY does not open, is read
+        unanchored.
+     4. Invalid → the status is read again. The transaction may have landed just before
+        the hash expired, after step 1, or step 1's answer may have come from a node
+        further behind. A missing status counts only if this read's slot (the node's
+        processed slot) is at or past the slot the blockhash read answered at (its
+        confirmed slot): a transaction that landed did so before then, so a node that far
+        knows it. Otherwise the transaction stays in flight. The EVM helper re-reads the
+        receipt before counting a replacement for the same reason.
+     5. Even then, the first poll that sees "no status + invalid blockhash" only records
         an observation in an in-memory `expiryObservations` map keyed by row id. The next
         poll re-runs step 1, and only if it again finds no status is the row set to
-        `Failed` ("expired, never landed"). This is the same two-observation guard Velora
-        Market uses for "replaced or dropped" (`replacementObservations`,
-        `REPLACEMENT_OBSERVATIONS_REQUIRED`), applied here because a `Failed` verdict is
-        immutable; the extracted source-tx helper can own the map for both.
-     4. The two observations must be **consecutive**: any poll that finds a signature
+        `Failed` with `swap.error.swap_expired` ("expired before the network processed
+        it"). This is the same two-observation guard the EVM helper uses for "replaced or
+        dropped" (`replacementObservations`, `REPLACEMENT_OBSERVATIONS_REQUIRED`), kept
+        here because a `Failed` verdict is immutable and nodes behind one endpoint can
+        each be at a different slot or fork; the Solana helper owns its map, as the EVM
+        helper owns its own.
+     6. The two observations must be **consecutive**: any poll that finds a signature
         status, or a still-valid blockhash, **deletes** the row's entry. A page reload
         empties the map, so the count restarts; that can only delay the verdict by one
         poll, never hasten it, which is why the observation is not persisted in a ref.
@@ -1779,8 +1813,8 @@ rows.
 #### Loader and UI
 
 - `LoaderActiveUserTransactions.svelte`: a `tick` branch calling the LI.FI poller with
-  `$ethAddress` (PR 3 adds `$solAddressMainnet` from `lib/derived/address.derived.ts` with
-  the Solana source check; until then a Solana-source row is skipped, and OISY opens none),
+  `$ethAddress`, which only EVM-source rows need and wait for (a Solana-source row is read
+  by its signature and blockhash, so the poller polls it without any address, from 3c),
   and a terminal-status branch firing `TRACK_COUNT_SWAP_SUCCESS` / `_ERROR` with
   `buildLifiSwapTrackingMetadata`. That metadata carries no `error`, unlike the other
   providers': for a `FAILED` transfer the row's error is LI.FI's own text, which never goes
@@ -1862,8 +1896,8 @@ rows.
 | 2b   | **EVM execution + tracking** — calldata binding (pinned facet ABIs decoded locally, incl. each bridge's payout and LI.FI's fee forwarding, + the Diamond's whitelist), route-tools refusal of Across behind a DEX swap, `fetchLifiEvmSwap` (pre-approval price check, unchanged `approve()`, form budget of 0/1/2 approval fees from one allowance read) + wizard dispatch, Velora source-tx helper extraction, byte-safe truncation util, AUT utils/poller (incl. unresolved-status bound and the `/status` 404 → `NOT_FOUND` mapping)/loader (incl. wallet + EVM balance refresh)/item; flag to `(LOCAL \|\| STAGING) && !TEST`, `PRODUCT.md` for EVM-source swaps | 2a-2                                            |
 | 3a   | **Solana simulation plumbing** (a refactor on `main`) — `replaceRecentBlockhash` and `consistentSnapshot` options on `simulateSolTransaction` / `simulateTransactionAccounts` (`minContextSlot`, the response's slot), `getMultipleAccountsInfoWithContext` behind an unchanged `getMultipleAccountsInfo`, `createdAccounts` / `closedAccounts` in the simulation preview; every default as today, so the WalletConnect review and Solana balances are unchanged                                                                                                                                                                                                     | 2b                                              |
 | 3b   | **Solana transaction binding** (not wired in) — `assertLifiSolTransaction`: pinned top-level instructions incl. LI.FI's fee instructions, Jupiter `route_v2` / `shared_accounts_route_v2` minimum-output decoder, the program, spend, receipt and network-fee bounds, on real LI.FI fixtures; the [CPI question](#open-questions) answered first                                                                                                                                                                                                                                                                                                                     | 3a                                              |
-| 3c   | **Solana tracking** — the poller's Solana source-chain check (in-memory expiry observations), the loader's `$solAddressMainnet`; nothing opens a Solana row until 3d                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 2b                                              |
-| 3d   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (quote with the Jupiter pin, destinations, and a mainnet-only source list in place of the empty one; Solana destinations only), the Solana trust checks, `fetchLifiSolSwap` (re-sent broadcast, a later refusal keeping the row, on EVM's `swap()` too), LI.FI's ceiling in the form, "Max" and the review, `SwapSolWizard` dispatch, `PRODUCT.md` update for Solana-source swaps                                                                                                                                                                                              | 3b, 3c                                          |
+| 3c   | **Solana tracking** — the poller's Solana source-chain check (in-memory expiry observations, the blockhash read at or past the row's `lifi_simulation_slot`), Solana rows polled without an EVM address; nothing opens a Solana row until 3d                                                                                                                                                                                                                                                                                                                                                                                                                         | 2b                                              |
+| 3d   | **Solana → Solana** — lift the Solana-source restriction on the Solana registry entry (quote with the Jupiter pin, destinations, and a mainnet-only source list in place of the empty one; Solana destinations only), the Solana trust checks, `assertLifiSolTransaction` returning its simulation's slot, `fetchLifiSolSwap` (the row's `lifi_simulation_slot`, re-sent broadcast, a later refusal keeping the row, on EVM's `swap()` too), LI.FI's ceiling in the form, "Max" and the review, `SwapSolWizard` dispatch, `PRODUCT.md` update for Solana-source swaps                                                                                                | 3b, 3c                                          |
 | 4    | **Flip the flag** — `LIFI_SWAP_ENABLED = true` (one line) + `PRODUCT.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | 3d, production key + rate-limit scope confirmed |
 
 PR 2 is split up front so each PR stays reviewable, and 2a again into the quote client
@@ -1932,7 +1966,10 @@ everywhere.
 - **Solana blockhash expiry** — between the execution re-quote and broadcast only one
   threshold Schnorr signature happens (seconds), well inside 60–90 s. A transaction
   that still expires is detected by the poller (no signature status + an invalid
-  blockhash, on two consecutive polls) and ends `Failed`, never `Succeeded`.
+  blockhash, on two consecutive polls) and ends `Failed`, never `Succeeded`. A node
+  running behind cannot fake the expiry: the blockhash is read at or past the slot OISY
+  simulated the transaction at, and a missing status counts only from a node at or past
+  the blockhash read.
 - **Wrong terminal verdict is permanent** — `NOT_FOUND` / `INVALID` never terminate a
   row on their own; a source-chain failure, a LI.FI `DONE` / `FAILED`, or the 6 h
   [unresolved-status](#unresolved-status) bound does. The bound's verdict is worded as
