@@ -172,6 +172,8 @@ export const MAX_UINT_256 = (1n << 256n) - 1n;
 // Permit2 declares its allowance as a `uint160`, so an unlimited one saturates there rather than
 // at the 256-bit maximum.
 export const MAX_UINT_160 = (1n << 160n) - 1n;
+// An EVM account nonce and a Solana slot are both `u64`.
+export const MAX_UINT_64 = (1n << 64n) - 1n;
 
 // NFTs
 export const COLLECTION_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1_000; // 20 seconds in milliseconds
