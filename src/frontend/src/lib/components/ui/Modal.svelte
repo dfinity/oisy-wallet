@@ -69,7 +69,7 @@
 	>
 		<Backdrop {disablePointerEvents} onClose={() => onClose?.()} />
 		<div
-			class={`wrapper ${role}`}
+			class={`wrapper ${role} outline-none`}
 			tabindex="-1"
 			use:overlayFocus={{ onClose: closeWithKeyboard }}
 			in:fade|global={{ duration: FADE_IN_DURATION, easing: cubicOut }}

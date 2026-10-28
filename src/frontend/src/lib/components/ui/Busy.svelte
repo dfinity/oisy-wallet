@@ -26,7 +26,7 @@
 
 {#if nonNullish($busy)}
 	<div
-		class="busy"
+		class="busy outline-none"
 		class:close={$busy.close}
 		aria-label={$busy.msg ?? $i18n.init.info.hold_loading}
 		aria-modal="true"

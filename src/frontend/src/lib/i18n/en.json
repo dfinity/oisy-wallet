@@ -811,6 +811,7 @@
 			"explorers_description": "$oisy_name routes swaps and bridge transfers through third-party providers. If one takes longer than expected, open the provider's own explorer: it shows where your transfer stands, already filtered to your wallet.",
 			"explorers_velora_description": "Swaps on Ethereum and other EVM networks.",
 			"explorers_near_intents_description": "Cross-chain swaps between EVM networks, Solana and Bitcoin.",
+			"explorers_lifi_description": "Swaps and bridge transfers from EVM networks, including to Solana.",
 			"explorers_onesec_description": "Bridge transfers between the Internet Computer and EVM networks.",
 			"explorers_chain_eth": "Ethereum & EVM networks",
 			"explorers_chain_sol": "Solana",
