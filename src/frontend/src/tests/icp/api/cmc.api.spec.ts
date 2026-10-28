@@ -73,21 +73,25 @@ describe('cmc.api', () => {
 	describe('notifyTopUp', () => {
 		const canisterId = Principal.fromText('ywcsb-maaaa-aaaai-q6k7a-cai');
 
-		it('should notify the CMC of the block for the canister', async () => {
+		it('should notify the CMC, as the CMC, of the block for the canister', async () => {
 			cmcCanisterMock.notifyTopUp.mockResolvedValue(2_500_000_000_000n);
 
 			await expect(
-				notifyTopUp({ identity: mockIdentity, blockIndex: 123n, canisterId })
+				notifyTopUp({ identity: mockIdentity, blockIndex: 123n, to: canisterId })
 			).resolves.toBe(2_500_000_000_000n);
 			expect(cmcCanisterMock.notifyTopUp).toHaveBeenCalledExactlyOnceWith({
 				blockIndex: 123n,
 				canisterId
 			});
+			expect(CmcCanister.create).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				canisterId: Principal.fromText(CMC_CANISTER_ID)
+			});
 		});
 
 		it('should throw if identity is undefined', async () => {
 			await expect(
-				notifyTopUp({ identity: undefined, blockIndex: 123n, canisterId })
+				notifyTopUp({ identity: undefined, blockIndex: 123n, to: canisterId })
 			).rejects.toThrow();
 		});
 	});
