@@ -1213,9 +1213,9 @@
 			"unknown_fresh": "前回のチャージが完了したかどうか、OISYはまだ判断できません。完了していた場合、このチャージでサイクルがもう一度追加されます。先に$tokenのアクティビティを確認してください。",
 			"sent_to_canister": "キャニスターに$tokenを送ってもチャージにはなりません。$tokenはキャニスターのアカウントに届き、キャニスター自身のコードが引き出した場合にのみサイクルになります。",
 			"sent_to_canister_top_up": "キャニスターにサイクルを追加するには、$tokenのページで「チャージ」を使ってください。",
-			"choice_send": "",
-			"choice_send_description": "",
-			"choice_top_up_description": ""
+			"choice_send": "$tokenを送信",
+			"choice_send_description": "$tokenを別のアカウントに送信します。",
+			"choice_top_up_description": "$tokenの残高からキャニスターにサイクルを追加します。"
 		},
 		"error": {
 			"invalid_canister_id": "キャニスターIDを入力してください。ユーザーのプリンシパル、アカウントID、他のネットワークのアドレスにはチャージできません。",

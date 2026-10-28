@@ -1213,9 +1213,9 @@
 			"unknown_fresh": "OISY zatím nedokáže určit, zda vaše poslední dobití proběhlo. Pokud ano, toto dobití přidá cykly znovu. Nejprve zkontrolujte aktivitu $token.",
 			"sent_to_canister": "Odesláním $token do kanistru se kanistr nedobije. $token skončí na účtu kanistru a kanistr získá cykly, jen pokud si je vybere jeho vlastní kód.",
 			"sent_to_canister_top_up": "Chcete-li kanistru přidat cykly, použijte „Dobít“ na stránce $token.",
-			"choice_send": "",
-			"choice_send_description": "",
-			"choice_top_up_description": ""
+			"choice_send": "Odeslat $token",
+			"choice_send_description": "Odešlete $token na jiný účet.",
+			"choice_top_up_description": "Přidejte kanistru cykly ze svého zůstatku $token."
 		},
 		"error": {
 			"invalid_canister_id": "Zadejte ID kanistru. Uživatelské principaly, ID účtů a adresy v jiných sítích nelze dobít.",

@@ -1213,9 +1213,9 @@
 			"unknown_fresh": "OISY ne peut pas encore dire si votre dernière recharge a abouti. Si c'est le cas, cette recharge ajoute à nouveau des cycles. Vérifiez d'abord votre activité $token.",
 			"sent_to_canister": "Envoyer des $token à un canister ne le recharge pas. Les $token arrivent sur le compte du canister, et le canister ne reçoit des cycles que si son propre code les retire.",
 			"sent_to_canister_top_up": "Pour ajouter des cycles à un canister, utilisez « Recharger » sur la page $token.",
-			"choice_send": "",
-			"choice_send_description": "",
-			"choice_top_up_description": ""
+			"choice_send": "Envoyer des $token",
+			"choice_send_description": "Envoyez des $token vers un autre compte.",
+			"choice_top_up_description": "Ajoutez des cycles à un canister depuis votre solde $token."
 		},
 		"error": {
 			"invalid_canister_id": "Saisissez un ID de canister. Les principals d'utilisateur, les ID de compte et les adresses d'autres réseaux ne peuvent pas être rechargés.",
