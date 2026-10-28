@@ -228,9 +228,26 @@ describe('uniswap.utils', () => {
 			);
 		});
 
+		it('should describe an allowance expiring on the last date JavaScript can hold', () => {
+			const data = execute({
+				commands: [
+					permit({ expiration: 8_640_000_000_000n }),
+					v3Swap({ amount: 1_000_000n, amountLimit: 1n })
+				]
+			});
+
+			expect(getUniswapSwap(params({ data }))?.approval).toEqual(
+				expect.objectContaining({ expiration: 8_640_000_000_000 })
+			);
+		});
+
 		it.each([
 			{ case: 'names another spender', command: permit({ spender: OTHER }) },
-			{ case: 'expires with the current block', command: permit({ expiration: ZERO }) }
+			{ case: 'expires with the current block', command: permit({ expiration: ZERO }) },
+			{
+				case: 'expires past the last date JavaScript can hold',
+				command: permit({ expiration: 2n ** 48n - 1n })
+			}
 		])('should not describe a swap whose allowance $case', ({ command }) => {
 			const data = execute({
 				commands: [command, v3Swap({ amount: 1_000_000n, amountLimit: 1n })]
