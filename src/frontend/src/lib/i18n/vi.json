@@ -1822,6 +1822,8 @@
 			"close_pays_others": "Giao dịch này đóng một trong các tài khoản token của bạn và trả số dư của nó cho một địa chỉ không phải ví của bạn. Vì sự an toàn của bạn, OISY sẽ không ký giao dịch này.",
 			"fee_paid_by_others": "",
 			"approval_without_simulation": "",
+			"unreviewed_without_simulation": "",
+			"unreviewed_not_described_by_simulation": "",
 			"simulated_instructions": "Chỉ dẫn được mô phỏng",
 			"multiple_operations": "Giao dịch này chứa nhiều thao tác ảnh hưởng đến ví của bạn. Hãy kiểm tra các thay đổi số dư được mô phỏng và các chỉ dẫn chứa trong đó, và chỉ phê duyệt giao dịch này nếu bạn cũng tin tưởng ứng dụng.",
 			"simulated_review": "Phần xem xét bên dưới là những gì mô phỏng giao dịch này đối với trạng thái hiện tại của mạng dự đoán. Kết quả khi thực sự chạy có thể khác.",

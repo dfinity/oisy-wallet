@@ -1822,6 +1822,8 @@
 			"close_pays_others": "Questa transazione chiude uno dei tuoi conti token e versa il suo saldo a un indirizzo che non è il tuo wallet. Per la tua sicurezza, OISY non la firma.",
 			"fee_paid_by_others": "",
 			"approval_without_simulation": "",
+			"unreviewed_without_simulation": "",
+			"unreviewed_not_described_by_simulation": "",
 			"simulated_instructions": "Istruzioni simulate",
 			"multiple_operations": "Questa transazione contiene più operazioni che interessano il tuo wallet. Verifica le variazioni di saldo simulate e le istruzioni contenute, e approva questa transazione solo se ti fidi anche dell'applicazione.",
 			"simulated_review": "La revisione qui sotto è ciò che prevede la simulazione di questa transazione rispetto allo stato attuale della rete. Ciò che accade durante l'esecuzione effettiva può differire.",

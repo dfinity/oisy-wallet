@@ -1822,6 +1822,8 @@
 			"close_pays_others": "",
 			"fee_paid_by_others": "",
 			"approval_without_simulation": "",
+			"unreviewed_without_simulation": "",
+			"unreviewed_not_described_by_simulation": "",
 			"simulated_instructions": "",
 			"multiple_operations": "",
 			"simulated_review": "",

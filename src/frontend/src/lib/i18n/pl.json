@@ -1822,6 +1822,8 @@
 			"close_pays_others": "Ta transakcja zamyka jedno z Twoich kont tokenów i wypłaca jego saldo na adres, który nie jest Twoim portfelem. Dla Twojego bezpieczeństwa OISY jej nie podpisze.",
 			"fee_paid_by_others": "",
 			"approval_without_simulation": "",
+			"unreviewed_without_simulation": "",
+			"unreviewed_not_described_by_simulation": "",
 			"simulated_instructions": "Symulowane instrukcje",
 			"multiple_operations": "Ta transakcja zawiera wiele operacji wpływających na Twój portfel. Zweryfikuj symulowane zmiany salda oraz zawarte instrukcje i zatwierdź tę transakcję tylko wtedy, gdy ufasz również aplikacji.",
 			"simulated_review": "Poniższy przegląd to przewidywanie symulacji tej transakcji względem aktualnego stanu sieci. To, co faktycznie nastąpi podczas wykonania, może się różnić.",
