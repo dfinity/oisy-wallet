@@ -1139,6 +1139,8 @@
 			"ethereum_out_of_gas_gas_sent": "Wysłany gaz: $gasSent",
 			"ethereum_transaction_hash": "Hash transakcji: $hash",
 			"ethereum_unsigned_transaction": "Niepodpisana transakcja: $transaction",
+			"ethereum_transaction_not_sent": "Transakcja nie została wysłana: nie udało nam się połączyć z siecią, aby ją przygotować. Możesz bezpiecznie spróbować ponownie.",
+			"ethereum_transaction_unconfirmed": "Nie mogliśmy potwierdzić, czy transakcja dotarła do sieci. Może jeszcze przejść, więc przed ponownym wysłaniem sprawdź swoją aktywność.",
 			"solana_transaction_expired": "Twoja transakcja nie została przetworzona przez sieć Solana i wygasła, najprawdopodobniej dlatego, że podana opłata priorytetowa była niewystarczająca. Zaktualizowaliśmy ją do najnowszej zalecanej kwoty, więc spróbuj ponownie.",
 			"solana_confirmation_failed": "Nie otrzymaliśmy potwierdzenia dla właśnie utworzonej transakcji. Poczekaj kilka sekund, a następnie sprawdź listę transakcji swojego tokena, czy Twoja transakcja została utworzona poprawnie.",
 			"solana_insufficient_funds": "Saldo Twojego tokena jest niewystarczające do zrealizowania tej transakcji. Twoje saldo mogło się zmienić od ostatniego wyświetlenia.",
