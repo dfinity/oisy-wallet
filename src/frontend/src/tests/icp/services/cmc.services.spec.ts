@@ -1,15 +1,21 @@
-import { ICP_INDEX_CANISTER_ID } from '$env/networks/networks.icp.env';
+import { ICP_INDEX_CANISTER_ID, ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
 import * as icpIndexApi from '$icp/api/icp-index.api';
+import * as icpLedgerApi from '$icp/api/icp-ledger.api';
 import {
 	CMC_DEPOSIT_LOOKUP_PAGE_SIZE,
 	CMC_MINT_CYCLES_MEMO,
 	ICP_LEDGER_PERMITTED_DRIFT_NS
 } from '$icp/constants/cmc.constants';
-import { findCmcDeposit } from '$icp/services/cmc.services';
+import { findCmcDeposit, transferIcpToCmc } from '$icp/services/cmc.services';
+import { getCmcDepositAccount } from '$icp/utils/cmc.utils';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
-import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
+import {
+	InsufficientFundsError,
+	TxDuplicateError,
+	type IcpIndexDid
+} from '@icp-sdk/canisters/ledger/icp';
 
 const DEPOSIT_ACCOUNT_IDENTIFIER = 'a1b2c3';
 const OWN_ACCOUNT_IDENTIFIER = getAccountIdentifier(mockPrincipal).toHex();
@@ -48,6 +54,51 @@ const entry = ({
 });
 
 describe('cmc.services', () => {
+	describe('transferIcpToCmc', () => {
+		let transferSpy: ReturnType<typeof vi.spyOn>;
+
+		const params = {
+			identity: mockIdentity,
+			to: getCmcDepositAccount(mockPrincipal),
+			memo: CMC_MINT_CYCLES_MEMO,
+			amount: AMOUNT,
+			createdAt: CREATED_AT_NS
+		};
+
+		beforeEach(() => {
+			vi.restoreAllMocks();
+
+			transferSpy = vi.spyOn(icpLedgerApi, 'icrc1Transfer');
+		});
+
+		it('sends the ICP to the deposit account with the memo, and returns its block', async () => {
+			transferSpy.mockResolvedValue(42n);
+
+			await expect(transferIcpToCmc(params)).resolves.toBe(42n);
+			expect(transferSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				to: params.to,
+				amount: AMOUNT,
+				createdAt: CREATED_AT_NS,
+				memo: CMC_MINT_CYCLES_MEMO,
+				ledgerCanisterId: ICP_LEDGER_CANISTER_ID
+			});
+		});
+
+		it('returns the original block when the ledger sees the same transfer again', async () => {
+			transferSpy.mockRejectedValue(new TxDuplicateError(41n));
+
+			await expect(transferIcpToCmc(params)).resolves.toBe(41n);
+		});
+
+		it('rethrows any other transfer failure', async () => {
+			const err = new InsufficientFundsError(ZERO);
+			transferSpy.mockRejectedValue(err);
+
+			await expect(transferIcpToCmc(params)).rejects.toBe(err);
+		});
+	});
+
 	describe('findCmcDeposit', () => {
 		let lookupSpy: ReturnType<typeof vi.spyOn>;
 
