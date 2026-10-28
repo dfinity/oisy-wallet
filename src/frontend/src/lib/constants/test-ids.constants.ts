@@ -168,6 +168,7 @@ export const NAVIGATION_MORE_MENU_SOURCE_CODE = 'navigation-more-menu-source-cod
 export const NAVIGATION_MORE_MENU_X = 'navigation-more-menu-x';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
+export const NAVIGATION_ITEM_CANISTER_TOP_UP = 'navigation-item-canister-top-up';
 
 export const NAVIGATION_GROUP_PORTFOLIO = 'navigation-group-portfolio';
 export const NAVIGATION_GROUP_FINANCE = 'navigation-group-finance';

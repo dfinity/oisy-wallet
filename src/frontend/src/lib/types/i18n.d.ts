@@ -117,6 +117,7 @@ interface I18nNavigation {
 		section_finance: string;
 		section_more: string;
 		airdrops: string;
+		canister_top_up: string;
 		earning: string;
 		pay: string;
 		wallet_connect: string;
@@ -150,6 +151,7 @@ interface I18nNavigation {
 		borrow: string;
 		earning: string;
 		airdrops: string;
+		canister_top_up: string;
 		pay: string;
 		wallet_connect: string;
 		menu: string;

@@ -4,10 +4,12 @@
 	import type { Component } from 'svelte';
 	import { afterNavigate, beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
+	import { CANISTER_TOP_UP_ENABLED } from '$env/canister-top-up.env';
 	import { EARNING_ENABLED } from '$env/earning';
 	import { HELP_ENABLED } from '$env/help.env';
 	import { PERSONAL_NOTES_ENABLED } from '$env/personal-notes.env';
 	import { anyTradingProviderEnabled } from '$env/trading';
+	import IconFuelPump from '$lib/components/icons/IconFuelPump.svelte';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconPlant from '$lib/components/icons/IconPlant.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
@@ -37,6 +39,7 @@
 		NAVIGATION_GROUP_PORTFOLIO,
 		NAVIGATION_ITEM_ACTIVITY,
 		NAVIGATION_ITEM_BORROW,
+		NAVIGATION_ITEM_CANISTER_TOP_UP,
 		NAVIGATION_ITEM_EARN,
 		NAVIGATION_ITEM_EXPLORER,
 		NAVIGATION_ITEM_NFTS,
@@ -98,6 +101,7 @@
 	};
 
 	const notesModalId = Symbol();
+	const canisterTopUpModalId = Symbol();
 
 	// Which group's bottom sheet is open on mobile (null = none).
 	let openSheet = $state<NavigationGroupId | null>(null);
@@ -298,7 +302,21 @@
 				icon: IconGift,
 				href: url(AppPath.Rewards),
 				selected: isRouteRewards(page)
-			}
+			},
+			// Opens the Canister top-up modal, as Notes opens its own, so it never takes the
+			// "current page" treatment. Gated on the same flag as the modal host (Modals.svelte).
+			...(CANISTER_TOP_UP_ENABLED
+				? {
+						canisterTopUp: {
+							label: $i18n.navigation.text.canister_top_up,
+							ariaLabel: $i18n.navigation.alt.canister_top_up,
+							testId: prefixedTestId(NAVIGATION_ITEM_CANISTER_TOP_UP),
+							icon: IconFuelPump,
+							onclick: () => modalStore.openCanisterTopUp(canisterTopUpModalId),
+							selected: false
+						}
+					}
+				: {})
 		})
 	);
 
@@ -355,11 +373,17 @@
 				{@render cardInner()}
 			</a>
 		{:else}
+			<!-- A card that opens a modal starts no navigation, so it closes its sheet itself, as
+			     instantly as a navigation would. -->
 			<button
 				class={cardClass}
 				aria-label={descriptor.ariaLabel}
 				data-tid={descriptor.testId}
-				onclick={descriptor.onclick}
+				onclick={() => {
+					closeSheetInstantly = true;
+					openSheet = null;
+					descriptor.onclick?.();
+				}}
 				type="button"
 			>
 				{@render cardInner()}
