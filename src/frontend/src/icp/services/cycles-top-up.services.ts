@@ -207,7 +207,7 @@ export const notifyCyclesTopUp = async ({
 	assertNonNullish(identity);
 
 	try {
-		const cycles = await notifyTopUp({ identity, blockIndex, canisterId });
+		const cycles = await notifyTopUp({ identity, blockIndex, to: canisterId });
 
 		return { status: 'topped_up', cycles };
 	} catch (err: unknown) {
