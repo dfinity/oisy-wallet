@@ -38,6 +38,32 @@ export const sortedContacts: Readable<ContactUi[]> = derived([contacts], ([$cont
 	$contacts.sort((a, b) => a.name.localeCompare(b.name))
 );
 
+// The AI assistant refers to an address by this ID between its request and its reply, so an
+// address keeps its ID for as long as its contact, its position and the address itself stay the
+// same; an update that only adds images, for one, keeps every ID.
+const addressIds = new Map<string, string>();
+
+const addressIdOf = ({
+	contactId,
+	index,
+	address: { addressType, address }
+}: {
+	contactId: ContactUi['id'];
+	index: number;
+	address: ContactUi['addresses'][number];
+}): string => {
+	const key = `${contactId}:${index}:${addressType}:${address}`;
+
+	const existing = addressIds.get(key);
+	if (nonNullish(existing)) {
+		return existing;
+	}
+
+	const id = crypto.randomUUID().toString();
+	addressIds.set(key, id);
+	return id;
+};
+
 export const extendedAddressContacts: Readable<ExtendedAddressContactUiMap> = derived(
 	[contacts],
 	([$contacts]) =>
@@ -47,9 +73,9 @@ export const extendedAddressContacts: Readable<ExtendedAddressContactUiMap> = de
 				[`${id}`]: {
 					...rest,
 					id,
-					addresses: addresses.map((address) => ({
+					addresses: addresses.map((address, index) => ({
 						...address,
-						id: crypto.randomUUID().toString()
+						id: addressIdOf({ contactId: id, index, address })
 					}))
 				}
 			}),
