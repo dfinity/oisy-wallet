@@ -254,10 +254,12 @@ describe('lifi-sol-transaction.services', () => {
 				await expect(ceilingFor()).resolves.toBeUndefined();
 			});
 
-			it('should give none for a mint that cannot be read', async () => {
-				vi.mocked(getAccountData).mockRejectedValue(new Error('rpc'));
+			// A failure of the chain, not of the route.
+			it('should reject as it is when the mint cannot be read', async () => {
+				const failure = new Error('rpc');
+				vi.mocked(getAccountData).mockRejectedValue(failure);
 
-				await expect(ceilingFor()).resolves.toBeUndefined();
+				await expect(ceilingFor()).rejects.toBe(failure);
 			});
 
 			it('should give none for a mint that does not decode', async () => {
@@ -670,10 +672,14 @@ describe('lifi-sol-transaction.services', () => {
 				await expect(loadFixture(fixture)).resolves.toBeGreaterThan(ZERO);
 			});
 
+			// A route OISY cannot take, not a forged one: no cause, tracked as no route.
 			it('should not be offered while the account holds wrapped SOL, which closing it would unwrap', async () => {
 				vi.mocked(getMultipleAccountsInfo).mockResolvedValue([wrappedSolAccountHolding(1n)]);
 
-				await expect(loadFixture(fixture)).rejects.toThrow(LifiRouteUnsupportedError);
+				const err = await loadFixture(fixture).catch((error: unknown) => error);
+
+				expect(err).toBeInstanceOf(LifiRouteUnsupportedError);
+				expect(err).toHaveProperty('cause', undefined);
 			});
 
 			it('should not be offered when the account does not read as a token account', async () => {
@@ -688,7 +694,9 @@ describe('lifi-sol-transaction.services', () => {
 			});
 		});
 
-		it('should not offer a route the binding would refuse, as one OISY cannot take', async () => {
+		// The pinned instructions are the only check of what the transaction does when the quote is
+		// fetched, so their refusal travels as the cause, for the quote to be tracked as rejected.
+		it('should not offer a route the binding would refuse, its refusal the cause', async () => {
 			const { quote, request } = mockLifiSolSolToUsdc;
 
 			const err = await loadLifiSolQuoteCeiling({
@@ -698,20 +706,30 @@ describe('lifi-sol-transaction.services', () => {
 
 			expect(err).toBeInstanceOf(LifiRouteUnsupportedError);
 			expect(err).toHaveProperty('route', quote);
+			expect(err).toHaveProperty('cause', expect.any(LifiQuoteRejectedError));
 		});
 
-		it('should not offer a route whose rent cannot be bounded', async () => {
+		it('should not offer a route whose rent cannot be bounded, the mint gone', async () => {
 			mockFixture(mockLifiSolSolToPyusd);
 			vi.mocked(getAccountData).mockResolvedValue(undefined);
 
 			await expect(loadFixture(mockLifiSolSolToPyusd)).rejects.toThrow(LifiRouteUnsupportedError);
 		});
 
-		it('should reject as it is when the chain cannot be read', async () => {
+		it('should reject as it is when the lookup tables cannot be read', async () => {
 			const failure = new Error('lookup tables unavailable');
 			vi.mocked(parseSolBase64TransactionMessage).mockRejectedValue(failure);
 
 			await expect(loadFixture(mockLifiSolSolToUsdc)).rejects.toBe(failure);
+		});
+
+		// A failure of the chain, not of the route: tracked as a failed request.
+		it('should reject as it is when a Token-2022 mint cannot be read', async () => {
+			const failure = new Error('mint unavailable');
+			mockFixture(mockLifiSolSolToPyusd);
+			vi.mocked(getAccountData).mockRejectedValue(failure);
+
+			await expect(loadFixture(mockLifiSolSolToPyusd)).rejects.toBe(failure);
 		});
 	});
 });

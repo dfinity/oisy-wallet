@@ -21,7 +21,11 @@ import { fetchLifiQuote } from '$lib/rest/lifi.rest';
 import { trackEvent } from '$lib/services/analytics.services';
 import { loadLifiSolQuoteCeiling } from '$lib/services/lifi-sol-transaction.services';
 import { fetchLifiSwapQuote, resetLifiQuoteCache } from '$lib/services/lifi-swap.services';
-import { LifiRouteUnsupportedError, SwapViaIntermediateTokenError } from '$lib/types/errors';
+import {
+	LifiQuoteRejectedError,
+	LifiRouteUnsupportedError,
+	SwapViaIntermediateTokenError
+} from '$lib/types/errors';
 import type { LifiTokenRef } from '$lib/types/lifi';
 import { SwapProvider } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
@@ -209,25 +213,34 @@ describe('lifi-swap.services', () => {
 
 			it.each([
 				{
-					reason: 'a route its binding would refuse',
-					err: new LifiRouteUnsupportedError('unsupported'),
-					type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE
+					reason: 'a transaction its binding refuses, as a rejected quote',
+					err: new LifiRouteUnsupportedError('refused', {
+						cause: new LifiQuoteRejectedError('LI.FI transaction rejected: x')
+					}),
+					type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.QUOTE_REJECTED,
+					severity: PLAUSIBLE_EVENT_SEVERITIES.ERROR
 				},
 				{
-					reason: 'a route whose chain reads fail',
+					reason: 'a route OISY cannot take, as no route',
+					err: new LifiRouteUnsupportedError('unsupported'),
+					type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE,
+					severity: undefined
+				},
+				{
+					reason: 'a route whose chain reads fail, as a failed request',
 					err: new Error('rpc down'),
-					type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.REQUEST_FAILED
+					type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.REQUEST_FAILED,
+					severity: PLAUSIBLE_EVENT_SEVERITIES.WARN
 				}
-			])('should not offer $reason', async ({ err, type }) => {
+			])('should not offer $reason', async ({ err, type, severity }) => {
 				vi.mocked(loadLifiSolQuoteCeiling).mockRejectedValue(err);
 
 				await expect(fetchLifiSwapQuote(solParams)).resolves.toBeUndefined();
 
-				expect(trackEvent).toHaveBeenCalledWith(
-					expect.objectContaining({
-						metadata: expect.objectContaining({ result_error_type: type })
-					})
-				);
+				const [[{ metadata }]] = vi.mocked(trackEvent).mock.calls;
+
+				expect(metadata).toEqual(expect.objectContaining({ result_error_type: type }));
+				expect(metadata?.event_severity).toBe(severity);
 			});
 
 			describe('a ceiling read that outlasts the deadline', () => {
