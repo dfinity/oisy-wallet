@@ -1212,7 +1212,10 @@
 			"unknown": "OISY ainda não sabe se a recarga foi concluída. Se foi, sua atividade de $token vai mostrá-la. Recarregue de novo para reenviar a mesma recarga: ela só pode ser concluída uma vez. Uma recarga nova ou alterada adicionaria ciclos de novo se esta foi concluída.",
 			"unknown_fresh": "OISY ainda não sabe se sua última recarga foi concluída. Se foi, esta recarga adiciona ciclos de novo. Verifique primeiro sua atividade de $token.",
 			"sent_to_canister": "Enviar $token para um canister não o recarrega. Os $token chegam à conta do canister, e o canister só recebe ciclos se o próprio código dele os sacar.",
-			"sent_to_canister_top_up": "Para adicionar ciclos a um canister, use “Recarregar” na página de $token."
+			"sent_to_canister_top_up": "Para adicionar ciclos a um canister, use “Recarregar” na página de $token.",
+			"choice_send": "",
+			"choice_send_description": "",
+			"choice_top_up_description": ""
 		},
 		"error": {
 			"invalid_canister_id": "Insira um ID de canister. Principals de usuário, IDs de conta e endereços de outras redes não podem ser recarregados.",

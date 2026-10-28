@@ -940,6 +940,9 @@ interface I18nCycles_top_up {
 		unknown_fresh: string;
 		sent_to_canister: string;
 		sent_to_canister_top_up: string;
+		choice_send: string;
+		choice_send_description: string;
+		choice_top_up_description: string;
 	};
 	error: {
 		invalid_canister_id: string;

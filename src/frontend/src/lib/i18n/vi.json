@@ -1212,7 +1212,10 @@
 			"unknown": "OISY chưa thể biết việc nạp đã thành công hay chưa. Nếu đã thành công, hoạt động $token của bạn sẽ hiển thị. Hãy nạp lại để gửi lại cùng một lần nạp: lần nạp đó chỉ có thể thành công một lần. Một lần nạp mới hoặc đã thay đổi sẽ thêm cycles một lần nữa nếu lần nạp này đã thành công.",
 			"unknown_fresh": "OISY chưa thể biết lần nạp gần nhất của bạn đã thành công hay chưa. Nếu đã thành công, lần nạp này sẽ thêm cycles một lần nữa. Hãy kiểm tra hoạt động $token trước.",
 			"sent_to_canister": "Gửi $token đến một canister không nạp cho canister đó. Số $token sẽ vào tài khoản của canister, và canister chỉ nhận được cycles nếu mã của chính nó rút chúng ra.",
-			"sent_to_canister_top_up": "Để thêm cycles cho một canister, hãy dùng “Nạp” trên trang $token."
+			"sent_to_canister_top_up": "Để thêm cycles cho một canister, hãy dùng “Nạp” trên trang $token.",
+			"choice_send": "",
+			"choice_send_description": "",
+			"choice_top_up_description": ""
 		},
 		"error": {
 			"invalid_canister_id": "Nhập ID canister. Không thể nạp cho principal người dùng, ID tài khoản và địa chỉ trên các mạng khác.",
