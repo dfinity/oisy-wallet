@@ -60,6 +60,20 @@ export const onExchangeMessage = async ({
 			return;
 		case 'startExchangeTimer':
 			await startExchangeTimer(payload);
+			return;
+		case 'triggerExchangeTimer': {
+			if (!latestTimerData) {
+				throw new Error('Prices are not ready');
+			}
+			const generation = timerGeneration;
+			if (exchangeInFlight && activeSyncGeneration !== generation) {
+				throw new Error('Prices are restarting');
+			}
+			const success = await (exchangeInFlight ?? syncLatestExchange(generation));
+			if (!success || generation !== timerGeneration) {
+				throw new Error('Price refresh failed');
+			}
+		}
 	}
 };
 
@@ -115,10 +129,12 @@ const stopTimer = () => {
 };
 
 let syncInProgress = false;
+let exchangeInFlight: Promise<boolean> | undefined;
 let queuedSyncGeneration: number | undefined = undefined;
 let activeSyncGeneration: number | undefined = undefined;
 
 interface SyncExchangeParams {
+	onError?: () => void;
 	currentCurrency: Currency;
 	erc20ContractAddresses: Erc20ContractAddressWithNetwork[];
 	icrcLedgerCanisterIds: LedgerCanisterIdText[];
@@ -128,11 +144,13 @@ interface SyncExchangeParams {
 
 const syncExchangeFromBackend = async ({
 	currentCurrency,
-	erc4626TokensExchangeData
+	erc4626TokensExchangeData,
+	onError
 }: SyncExchangeParams): Promise<PostMessageDataResponseExchange> => {
 	const identity = await AuthClientProvider.getInstance().loadIdentity();
 
 	if (isNullish(identity)) {
+		onError?.();
 		consoleError(
 			'Error while fetching exchange rate:',
 			'Cannot fetch backend exchange rates without an authenticated identity.'
@@ -164,10 +182,12 @@ const syncExchangeFromBackend = async ({
 	]);
 
 	if (currentExchangeRateResult.status === 'rejected') {
+		onError?.();
 		consoleError('Error while fetching exchange rate:', currentExchangeRateResult.reason);
 	}
 
 	if (backendPricesResult.status === 'rejected') {
+		onError?.();
 		consoleError(
 			'Error while fetching exchange rate:',
 			'Failed to fetch backend exchange rates:',
@@ -241,13 +261,18 @@ const syncExchangeFromProviders = async ({
 	erc20ContractAddresses,
 	icrcLedgerCanisterIds,
 	splTokenAddresses,
-	erc4626TokensExchangeData
+	erc4626TokensExchangeData,
+	onError
 }: SyncExchangeParams): Promise<PostMessageDataResponseExchange> => {
 	const erc20PriceParams = buildErc20PriceParams(erc20ContractAddresses);
 
 	const erc20PricesSettled = await Promise.allSettled(
 		erc20PriceParams.map((params) => exchangeRateERC20ToUsd(params))
 	);
+
+	if (erc20PricesSettled.some((result) => result.status === 'rejected')) {
+		onError?.();
+	}
 
 	const currentErc20Prices = erc20PricesSettled.reduce<CoingeckoSimpleTokenPriceResponse>(
 		(acc, result) => {
@@ -273,6 +298,7 @@ const syncExchangeFromProviders = async ({
 
 	results.forEach((result) => {
 		if (result.status === 'rejected') {
+			onError?.();
 			consoleError('Error while fetching exchange rate:', result.reason);
 		}
 	});
@@ -429,6 +455,7 @@ const fetchProviderFallbackPrices = async ({
 	// backend's gaps), but they must stay observable — mirror the logging of the
 	// full provider path.
 	const logFallbackError = (err: unknown): undefined => {
+		params.onError?.();
 		consoleError('Error while fetching fallback exchange rate:', err);
 		return undefined;
 	};
@@ -537,20 +564,25 @@ const backendExchangeEnabledFromTimerData = (
 	data: PostMessageDataRequestExchangeTimer | undefined
 ): boolean => data?.backendExchangeEnabled ?? BACKEND_EXCHANGE_ENABLED;
 
-const syncLatestExchange = async (generation: number) => {
+const syncLatestExchange = async (generation: number): Promise<boolean> => {
 	if (generation !== timerGeneration) {
-		return;
+		return false;
 	}
 
 	if (syncInProgress) {
 		queuedSyncGeneration = generation;
-		return;
+		return false;
 	}
 
 	syncInProgress = true;
 	activeSyncGeneration = generation;
 
-	await syncExchange(paramsFromTimerData(latestTimerData)).finally(() => {
+	const running = syncExchange(paramsFromTimerData(latestTimerData));
+	exchangeInFlight = running;
+	const success = await running.finally(() => {
+		if (exchangeInFlight === running) {
+			exchangeInFlight = undefined;
+		}
 		syncInProgress = false;
 		if (activeSyncGeneration === generation) {
 			activeSyncGeneration = undefined;
@@ -567,18 +599,29 @@ const syncLatestExchange = async (generation: number) => {
 	) {
 		void syncLatestExchange(nextGeneration);
 	}
+	return success;
 };
 
 const syncExchange = async (params: SyncExchangeParams) => {
+	// Keep publishing partial prices for background consumers; manual refresh also
+	// needs to know whether any provider failed during this same run.
+	let success = true;
+	const observedParams = {
+		...params,
+		onError: () => {
+			success = false;
+		}
+	};
 	try {
 		const data = backendExchangeEnabledFromTimerData(latestTimerData)
-			? await syncExchangeWithFallback(params)
-			: await syncExchangeFromProviders(params);
+			? await syncExchangeWithFallback(observedParams)
+			: await syncExchangeFromProviders(observedParams);
 
 		postMessage({
 			msg: 'syncExchange',
 			data
 		});
+		return success;
 	} catch (err: unknown) {
 		consoleError('Unexpected error while fetching symbol average price:', err);
 
@@ -588,5 +631,6 @@ const syncExchange = async (params: SyncExchangeParams) => {
 				err: errorDetailToString(err)
 			}
 		});
+		return false;
 	}
 };

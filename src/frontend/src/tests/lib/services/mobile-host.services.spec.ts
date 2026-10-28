@@ -1,8 +1,13 @@
 import {
+	clearMobileBack,
 	connectMobileHost,
+	connectMobileInteractions,
+	finishMobileRefresh,
 	mobileHostAvailable,
 	navigateMobileHost,
 	openMobileAccount,
+	prepareMobileBack,
+	publishMobileNavigation,
 	requestMobileWallet,
 	setMobilePresentation
 } from '$lib/services/mobile-host.services';
@@ -13,6 +18,10 @@ const { host } = vi.hoisted(() => ({
 		ready: vi.fn(),
 		wallet: vi.fn(),
 		navigate: vi.fn(),
+		navigationState: vi.fn(),
+		prepareBack: vi.fn(),
+		clearBack: vi.fn(),
+		finishRefresh: vi.fn(),
 		presentation: vi.fn(),
 		openAccount: vi.fn(),
 		addListener:
@@ -79,8 +88,80 @@ describe('mobile host boundary', () => {
 		await expect(navigateMobileHost('wallet')).rejects.toThrow('unavailable');
 		await expect(openMobileAccount()).rejects.toThrow('unavailable');
 		await expect(setMobilePresentation(true)).rejects.toThrow('unavailable');
+		await expect(prepareMobileBack({ root: 'wallet', backPath: '/' })).rejects.toThrow(
+			'unavailable'
+		);
+		await expect(finishMobileRefresh(1)).rejects.toThrow('unavailable');
+		await expect(clearMobileBack()).rejects.toThrow('unavailable');
+		await expect(
+			connectMobileInteractions({ onBack: vi.fn(), onRefresh: vi.fn() })
+		).rejects.toThrow('unavailable');
 		expect(host.presentation).not.toHaveBeenCalled();
 		expect(host.addListener).not.toHaveBeenCalled();
+	});
+
+	it('handles only current validated native interactions and removes both listeners', async () => {
+		const onBack = vi.fn();
+		const onRefresh = vi.fn().mockResolvedValue(undefined);
+		const disconnect = await connectMobileInteractions({ onBack, onRefresh });
+		const back = host.addListener.mock.calls.find(([name]) => name === 'back')?.[1];
+		const refresh = host.addListener.mock.calls.find(([name]) => name === 'refresh')?.[1];
+		back?.({ version: 2, url: 'https://evil.example' });
+		back?.({ version: 1 });
+		refresh?.({ version: 2, requestId: -1 });
+		refresh?.({ version: 2, requestId: 1, extra: true });
+
+		expect(onBack).not.toHaveBeenCalled();
+		expect(onRefresh).not.toHaveBeenCalled();
+
+		back?.({ version: 2 });
+		refresh?.({ version: 2, requestId: 2 });
+		refresh?.({ version: 2, requestId: 1 });
+		refresh?.({ version: 2, requestId: 2 });
+
+		expect(onBack).toHaveBeenCalledOnce();
+		expect(onRefresh).toHaveBeenCalledExactlyOnceWith(2);
+
+		await disconnect();
+		back?.({ version: 2 });
+		refresh?.({ version: 2, requestId: 3 });
+
+		expect(remove).toHaveBeenCalledTimes(2);
+		expect(onBack).toHaveBeenCalledOnce();
+		expect(onRefresh).toHaveBeenCalledOnce();
+	});
+
+	it('cleans up the Back listener if refresh registration fails', async () => {
+		host.addListener.mockResolvedValueOnce({ remove }).mockRejectedValueOnce(new Error('closed'));
+
+		await expect(
+			connectMobileInteractions({ onBack: vi.fn(), onRefresh: vi.fn() })
+		).rejects.toThrow('closed');
+		expect(remove).toHaveBeenCalledOnce();
+	});
+
+	it('captures only a bounded matching list parent and acknowledges the exact refresh', async () => {
+		await prepareMobileBack({ root: 'search', backPath: '/?search=true&network=ICP' });
+		await finishMobileRefresh(7);
+		await clearMobileBack();
+
+		expect(host.prepareBack).toHaveBeenCalledExactlyOnceWith({
+			version: 2,
+			root: 'search',
+			backPath: '/?search=true&network=ICP'
+		});
+		expect(host.finishRefresh).toHaveBeenCalledExactlyOnceWith({ version: 2, requestId: 7 });
+		expect(host.clearBack).toHaveBeenCalledExactlyOnceWith({ version: 2 });
+		await expect(
+			prepareMobileBack({ root: 'wallet', backPath: '/?search=true' })
+		).rejects.toThrow();
+		await expect(
+			prepareMobileBack({ root: 'wallet', backPath: 'https://example.com/' })
+		).rejects.toThrow();
+		await expect(prepareMobileBack({ root: 'wallet', backPath: 'http://[' })).rejects.toThrow();
+		await expect(finishMobileRefresh(Number.NaN)).rejects.toThrow();
+		expect(host.prepareBack).toHaveBeenCalledOnce();
+		expect(host.finishRefresh).toHaveBeenCalledOnce();
 	});
 
 	it('reserves the Android https local origin without accepting iOS https', () => {
@@ -97,7 +178,7 @@ describe('mobile host boundary', () => {
 		expect(host.addListener.mock.invocationCallOrder[0]).toBeLessThan(
 			host.ready.mock.invocationCallOrder[0]
 		);
-		expect(navigate).toHaveBeenCalledWith('wallet');
+		expect(navigate).toHaveBeenCalledWith({ screen: 'wallet', requestId: 0 });
 		expect(connection.runtimeId).toBe(state.runtimeId);
 
 		await connection.disconnect();
@@ -115,6 +196,18 @@ describe('mobile host boundary', () => {
 
 		await expect(connectMobileHost(vi.fn())).rejects.toThrow();
 		expect(remove).toHaveBeenCalledOnce();
+	});
+
+	it('does not replace a newer selection with an older handshake response', async () => {
+		const navigate = vi.fn();
+		host.ready.mockImplementationOnce(() => {
+			const [[, listener]] = host.addListener.mock.calls;
+			listener({ version: 2, root: 'search', requestId: 2 });
+			return Promise.resolve({ ...state, requestId: 1 });
+		});
+		await connectMobileHost(navigate);
+
+		expect(navigate).toHaveBeenCalledExactlyOnceWith({ screen: 'search', requestId: 2 });
 	});
 
 	it('removes the listener if the native handshake fails', async () => {
@@ -142,7 +235,7 @@ describe('mobile host boundary', () => {
 
 		listener({ version: 2, root: 'activity' });
 
-		expect(navigate).toHaveBeenCalledExactlyOnceWith('activity');
+		expect(navigate).toHaveBeenCalledExactlyOnceWith({ screen: 'activity', requestId: 0 });
 	});
 
 	it.each(['notes', 'earn', 'borrow', 'search'])(
@@ -154,7 +247,7 @@ describe('mobile host boundary', () => {
 			navigate.mockClear();
 			listener({ version: 2, root });
 
-			expect(navigate).toHaveBeenCalledExactlyOnceWith(root);
+			expect(navigate).toHaveBeenCalledExactlyOnceWith({ screen: root, requestId: 0 });
 		}
 	);
 
@@ -164,6 +257,61 @@ describe('mobile host boundary', () => {
 
 		expect(host.navigate).toHaveBeenCalledExactlyOnceWith({ version: 2, root: 'search' });
 		expect(host.openAccount).toHaveBeenCalledExactlyOnceWith({ version: 2 });
+	});
+
+	it('reports committed navigation with bounded parent and request identity', async () => {
+		await publishMobileNavigation({
+			root: 'search',
+			requestId: 7,
+			revision: 12,
+			backPath: '/?search=true&network=InternetComputer'
+		});
+
+		expect(host.navigationState).toHaveBeenCalledExactlyOnceWith({
+			version: 2,
+			root: 'search',
+			requestId: 7,
+			revision: 12,
+			backPath: '/?search=true&network=InternetComputer'
+		});
+	});
+
+	it.each([
+		'https://evil.test/',
+		'//evil.test/',
+		'/transactions/?token=ICP',
+		'/?url=https://evil.test',
+		'/?network=ICP&network=ETH',
+		'/?search=false',
+		'/?network=',
+		'/?search=true',
+		'/#secret'
+	])('rejects an unsupported parent %s before crossing the host', async (backPath) => {
+		await expect(
+			publishMobileNavigation({ root: 'wallet', requestId: 1, revision: 1, backPath })
+		).rejects.toThrow();
+		expect(host.navigationState).not.toHaveBeenCalled();
+	});
+
+	it.each([-1, 0.5, Number.MAX_SAFE_INTEGER + 1])(
+		'rejects invalid request identities %s',
+		async (requestId) => {
+			await expect(
+				publishMobileNavigation({ root: 'wallet', requestId, revision: 1 })
+			).rejects.toThrow();
+			expect(host.navigationState).not.toHaveBeenCalled();
+		}
+	);
+
+	it('preserves host request IDs and ignores invalid IDs', async () => {
+		const navigate = vi.fn();
+		await connectMobileHost(navigate);
+		const [[, listener]] = host.addListener.mock.calls;
+		navigate.mockClear();
+		listener({ version: 2, root: 'search', requestId: 8 });
+		listener({ version: 2, root: 'wallet', requestId: -1 });
+
+		expect(navigate).toHaveBeenCalledExactlyOnceWith({ screen: 'search', requestId: 8 });
 	});
 
 	it('only sends a presentation flag to the native shell', async () => {

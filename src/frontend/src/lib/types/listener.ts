@@ -6,6 +6,7 @@ export interface WalletWorker {
 	start: () => void;
 	stop: () => void;
 	trigger: () => void;
+	refresh?: (signal: AbortSignal) => Promise<void>;
 	destroy: () => void;
 }
 

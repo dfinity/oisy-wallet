@@ -33,7 +33,15 @@ the native account sheet; `OisyWalletLogo.markOnly` preserves mobile branding.
 `SlidingInput.forceOpen` lets Search in the native More menu open the existing token filter.
 Saved contacts reuse the real address book with editing hidden in the preview.
 Token/group rows use canonical Symbol IDs so equal tickers remain distinct.
-See the [Capacitor guide](../../../mobile/capacitor/README.md).
+Mobile Send reuses `SendModal`, `IcSendTokenWizard` / `EthSendTokenWizard` and
+existing per-chain services. `mobile-send.utils.isMobileTransferToken` combines
+canonical ICP/ck-ledger and supported ETH/ERC-20 policy. Do not fork the form,
+fees or signing clients. `WizardModal.mobilePresentation` owns presentation.
+Mobile Swap uses the shared ICPSwap pipeline and `mobile-swap.utils` for pair and
+provider selection. `mobile-operation-journal.services` records EVM hash/nonce
+and ICPSwap stages through a principal-bound native Keychain adapter. Recovery
+uses shared RPC/canister clients. Keep expected-state/CAS, session and no-replay
+guards; see the [mobile transaction contract](../../../mobile/capacitor/docs/shared-web-contract.md#durable-mobile-operation-records).
 
 ## Where reusable things live
 
@@ -298,7 +306,8 @@ menu opens the shared `/notes/`, `/earn/` and `/borrow/` routes; Search remains
 the existing wallet filter. `MobileHost` reserves bottom scroll/modal space for
 the native overlay, while feature screens remain shared. Build flags are presentation
 configuration, never authorization. Read the [session boundary](../../../mobile/capacitor/docs/session-boundary.md)
-for origin checks, worker isolation, five-minute logout and remaining renewal gates.
+for origin checks, worker isolation and the fixed one-hour deadline without renewal.
+The [compatibility guide](../../../mobile/capacitor/docs/shared-web-contract.md) owns paired host/web changes and their checks.
 
 ## Shared mobile modal presentation and Notes
 
@@ -320,3 +329,24 @@ native visibility callbacks or keyboard notification flags.
 uses `presentation="page"`. Both share encryption, cache, validation, search,
 retry, save/delete/share and analytics. The page owns its heading/Back control;
 `NoteView.showBackButton` omits the old modal footer in this context.
+
+### Embedded navigation
+
+`MobileHost.svelte` and `mobile-history.utils.ts` coordinate native root requests
+with the shared Svelte router. Keep token links as ordinary shared route links and
+use the shared `Back` component; do not add feature-specific native routing.
+Wallet/Search → Token records a bounded list parent, while root changes replace
+history. Shared modal exit handling blocks underlying mobile navigation until
+Close/Cancel/Save. See the [mobile contract](../../../mobile/capacitor/docs/shared-web-contract.md#token-navigation-contract)
+for request ordering, state ownership and the current single-parent limit.
+
+### Awaitable wallet refresh
+
+`wallet-refresh.services.ts` coordinates a manual refresh through the existing
+wallet, EVM and price owners. Components register their current loaders; worker
+services use `AppWorker.postMessageAndWait` for a correlated completion, including
+unchanged balances. `SchedulerTimer.refresh` joins in-flight polling and reports
+its outcome. Keep `trigger` for existing background callers. Native pull-to-refresh
+uses this shared path; it must not reload the page or create new fetch/identity
+logic. See the [refresh contract](../../../mobile/capacitor/docs/shared-web-contract.md#wallet-refresh-contract)
+for cancellation and deadlines.

@@ -11,6 +11,17 @@ import XCTest
       source, arguments: [:], in: nil, contentWorld: .page)
     return try XCTUnwrap(value as? String, "Expected string from: " + source)
   }
+  private func waitFor(_ view: WKWebView, _ condition: String) async throws {
+    var ready = "false"
+    for _ in 0..<100 {
+      ready = (try? await evaluate(view, "return String(\(condition));")) ?? "false"
+      if ready == "true" { break }
+      try await Task.sleep(for: .milliseconds(100))
+    }
+    XCTAssertEqual(ready, "true", "Timed out waiting for: " + condition)
+    // Let native acknowledgement and the shared list's coalesced render finish.
+    try await Task.sleep(for: .milliseconds(200))
+  }
   private func capture(_ window: UIWindow, name: String) {
     let attachment = XCTAttachment(
       image: UIGraphicsImageRenderer(bounds: window.bounds).image { _ in
@@ -19,6 +30,184 @@ import XCTest
     attachment.name = name
     attachment.lifetime = .keepAlways
     add(attachment)
+  }
+  private func verifySharedSwapForm(
+    _ web: WKWebView, shell: ShellViewController, window: UIWindow
+  ) async throws {
+    let tabs = try XCTUnwrap(shell.view.subviews.compactMap { $0 as? UITabBar }.first)
+    let interactions = try XCTUnwrap(shell.wallet?.interactions)
+    let tokenURL = web.url
+    try await waitFor(web, "!!document.querySelector('[data-tid=swap-tokens-modal-open-button]')")
+    _ = try await evaluate(
+      web,
+      "document.querySelector('[data-tid=swap-tokens-modal-open-button]').click(); return 'opened';"
+    )
+    try await waitFor(web, "!!document.querySelector('[data-tid=swap-tokens-modal]')")
+    let preview = try await evaluate(
+      web,
+      """
+      const modal = document.querySelector('[data-tid=swap-tokens-modal]');
+      return String(modal.textContent.includes('Swap')
+        && !modal.textContent.includes('Swapping in the app is not available yet.'));
+      """)
+    XCTAssertEqual(preview, "true")
+    XCTAssertTrue(tabs.isHidden)
+    XCTAssertFalse(interactions.canBeginBack)
+    XCTAssertFalse(interactions.refreshControl.isEnabled)
+    for (style, name) in [(UIUserInterfaceStyle.light, "light"), (.dark, "dark")] {
+      window.overrideUserInterfaceStyle = style
+      try await Task.sleep(for: .milliseconds(400))
+      capture(window, name: "capacitor-icp-swap-" + name)
+    }
+    _ = try await evaluate(
+      web,
+      "document.querySelector('[data-tid=swap-tokens-modal] [data-tid=close-modal]').click(); return 'closed';"
+    )
+    try await waitFor(web, "!document.querySelector('[data-tid=swap-tokens-modal]')")
+    XCTAssertFalse(tabs.isHidden)
+    XCTAssertEqual(web.url, tokenURL)
+  }
+
+  private func verifySharedICPSendReviewAndCancellation(
+    _ web: WKWebView, shell: ShellViewController, window: UIWindow
+  ) async throws {
+    let tabs = try XCTUnwrap(shell.view.subviews.compactMap { $0 as? UITabBar }.first)
+    let more = try XCTUnwrap(shell.view.subviews.compactMap { $0 as? UIButton }.first)
+    let interactions = try XCTUnwrap(shell.wallet?.interactions)
+    let tokenURL = web.url
+    let recipient = "xlmdg-vkosz-ceopx-7wtgu-g3xmd-koiyc-awqaq-7modz-zf6r6-364rh-oqe"
+    try await waitFor(web, "!!document.querySelector('[data-tid=send-tokens-modal-open-button]')")
+    _ = try await evaluate(
+      web,
+      "document.querySelector('[data-tid=send-tokens-modal-open-button]').click(); return 'opened';"
+    )
+    try await waitFor(
+      web,
+      "!!document.querySelector('[data-tid=send-tokens-modal] input[data-tid=destination-input]')"
+    )
+    XCTAssertTrue(tabs.isHidden, "The shared Send sheet must hide native tabs")
+    XCTAssertTrue(more.isHidden)
+    XCTAssertFalse(interactions.canBeginBack, "An edge swipe must not leave an open Send flow")
+    XCTAssertFalse(interactions.refreshControl.isEnabled)
+
+    // Exercise the real destination validation: an Ethereum address cannot
+    // accidentally select a ck withdrawal in this ICP-only Send slice.
+    _ = try await evaluate(
+      web,
+      """
+      const input = document.querySelector('[data-tid=send-tokens-modal] input[data-tid=destination-input]');
+      input.value = '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9';
+      input.dispatchEvent(new Event('input', {bubbles: true}));
+      return 'entered';
+      """)
+    try await waitFor(
+      web,
+      "document.querySelector('[data-tid=send-form-destination-next-button]')?.disabled === true"
+    )
+    _ = try await evaluate(
+      web,
+      """
+      const input = document.querySelector('[data-tid=send-tokens-modal] input[data-tid=destination-input]');
+      input.value = '\(recipient)'; input.dispatchEvent(new Event('input', {bubbles: true})); input.blur();
+      return 'entered';
+      """)
+    try await waitFor(
+      web,
+      "document.querySelector('[data-tid=send-form-destination-next-button]')?.disabled === false"
+    )
+    _ = try await evaluate(
+      web,
+      "document.querySelector('[data-tid=send-form-destination-next-button]').click(); return 'next';"
+    )
+    try await waitFor(
+      web,
+      "!!document.querySelector('[data-tid=send-tokens-modal] input[data-tid=token-input-currency-token]')"
+    )
+    _ = try await evaluate(
+      web,
+      """
+      const input = document.querySelector('[data-tid=send-tokens-modal] input[data-tid=token-input-currency-token]');
+      input.value = '0.125'; input.dispatchEvent(new Event('input', {bubbles: true})); input.blur();
+      return 'entered';
+      """)
+    window.endEditing(true)
+    try await waitFor(
+      web, "document.querySelector('[data-tid=send-form-next-button]')?.disabled === false")
+    _ = try await evaluate(
+      web, "document.querySelector('[data-tid=send-form-next-button]').click(); return 'review';")
+    try await waitFor(web, "!!document.querySelector('[data-tid=review-form-send-button]')")
+    let review = try await evaluate(
+      web,
+      """
+      const modal = document.querySelector('[data-tid=send-tokens-modal]');
+      const text = modal.textContent.replace(/\\s+/g, ' ');
+      const button = modal.querySelector('[data-tid=review-form-send-button]');
+      return String(text.includes('0.125 ICP') && text.includes('\(recipient)')
+        && text.includes('0.0001') && !!button?.disabled
+        && !!modal.querySelector('[data-tid=send-first-time-destination-confirm]'));
+      """)
+    XCTAssertEqual(review, "true", "Review must show ICP, its fee, recipient and confirmation")
+    // Acknowledge the recipient, but never invoke the final Send action. Both
+    // the wallet and worker fetch functions remain blocked by this test harness.
+    _ = try await evaluate(
+      web,
+      "document.querySelector('[data-tid=send-first-time-destination-confirm]').click(); return 'acknowledged';"
+    )
+    try await waitFor(
+      web, "document.querySelector('[data-tid=review-form-send-button]')?.disabled === false")
+    for (style, name) in [(UIUserInterfaceStyle.light, "light"), (.dark, "dark")] {
+      window.overrideUserInterfaceStyle = style
+      try await Task.sleep(for: .milliseconds(400))
+      capture(window, name: "capacitor-icp-send-review-" + name)
+    }
+    XCTAssertTrue(tabs.isHidden)
+    XCTAssertTrue(more.isHidden)
+    XCTAssertFalse(interactions.canBeginBack)
+    XCTAssertEqual(web.url, tokenURL, "Review must stay inside the token's shared modal")
+
+    // Back preserves the draft; Cancel discards it and restores native controls.
+    _ = try await evaluate(
+      web,
+      "document.querySelector('[data-tid=send-tokens-modal] [data-tid=toolbar] button').click(); return 'back';"
+    )
+    try await waitFor(
+      web,
+      "document.querySelector('[data-tid=send-tokens-modal] input[data-tid=token-input-currency-token]')?.value === '0.125'"
+    )
+    _ = try await evaluate(
+      web,
+      "document.querySelector('[data-tid=send-tokens-modal] [data-tid=toolbar] button').click(); return 'back';"
+    )
+    try await waitFor(
+      web,
+      "document.querySelector('[data-tid=send-tokens-modal] input[data-tid=destination-input]')?.value === '\(recipient)'"
+    )
+    _ = try await evaluate(
+      web,
+      "document.querySelector('[data-tid=send-form-destination-next-button]').previousElementSibling.click(); return 'cancelled';"
+    )
+    try await waitFor(web, "!document.querySelector('[data-tid=send-tokens-modal]')")
+    XCTAssertFalse(tabs.isHidden)
+    XCTAssertFalse(more.isHidden)
+    XCTAssertTrue(shell.walletInteractionsAllowed)
+    XCTAssertEqual(web.url, tokenURL)
+
+    _ = try await evaluate(
+      web,
+      "document.querySelector('[data-tid=send-tokens-modal-open-button]').click(); return 'reopened';"
+    )
+    try await waitFor(
+      web,
+      "document.querySelector('[data-tid=send-tokens-modal] input[data-tid=destination-input]')?.value === ''"
+    )
+    _ = try await evaluate(
+      web,
+      "document.querySelector('[data-tid=send-tokens-modal] [data-tid=close-modal]').click(); return 'closed';"
+    )
+    try await waitFor(web, "!document.querySelector('[data-tid=send-tokens-modal]')")
+    XCTAssertFalse(tabs.isHidden)
+    XCTAssertFalse(more.isHidden)
+    XCTAssertTrue(shell.walletInteractionsAllowed)
   }
   func testRealWebWalletExploreAndExpiry() async throws {
     let store = KeychainStore(service: "oisy.capacitor.webkit.\(UUID())")
@@ -29,12 +218,29 @@ import XCTest
     let shell = ShellViewController(auth: AuthModel(store: store))
     shell.walletBootstrapScript = """
       window.testNetworkReads = 0;
-      window.fetch = () => { window.testNetworkReads++; return Promise.reject(new Error('Offline fixture')); };
+      window.testDocumentNonce = crypto.randomUUID();
+      // Keep real API paths pending: no network response is fabricated or certified.
+      window.fetch = () => { window.testNetworkReads++; return new Promise(() => {}); };
       window.testAuthWorkerReady = false;
       const OriginalWorker = window.Worker;
       window.Worker = class extends OriginalWorker {
-        constructor(...args) {
-          super(...args);
+        constructor(script, options) {
+          // Workers have separate globals. Block their network too, then load the
+          // real bundled worker and replay the native-session handshake it received.
+          const workerURL = new URL(script, location.href).href;
+          const source = `
+            globalThis.fetch = () => new Promise(() => {});
+            const queued = [];
+            const hold = event => { event.stopImmediatePropagation(); queued.push(event); };
+            globalThis.addEventListener('message', hold);
+            import(${JSON.stringify(workerURL)}).then(() => {
+              globalThis.removeEventListener('message', hold);
+              for (const event of queued) globalThis.dispatchEvent(new MessageEvent('message', {
+                data: event.data, ports: event.ports
+              }));
+            });`;
+          const wrapper = URL.createObjectURL(new Blob([source], {type: 'text/javascript'}));
+          super(wrapper, options);
           this.addEventListener('message', ({data}) => {
             if (data?.msg === 'delegationRemainingTime') window.testAuthWorkerReady = true;
           });
@@ -75,7 +281,6 @@ import XCTest
     XCTAssertNotNil(wallet.session.grant)
     XCTAssertEqual(web.url?.scheme, "capacitor")
     XCTAssertFalse(web.configuration.websiteDataStore.isPersistent)
-    XCTAssertFalse(web.scrollView.bounces)
     for (style, name) in [(UIUserInterfaceStyle.light, "light"), (.dark, "dark")] {
       window.overrideUserInterfaceStyle = style
       try await Task.sleep(for: .seconds(2))
@@ -106,18 +311,193 @@ import XCTest
       add(capture)
     }
     let grantID = wallet.session.grant?.id
+    let documentNonce = try await evaluate(web, "return window.testDocumentNonce;")
+    try await waitFor(web, "document.documentElement.dataset.mobileNavigationFixture === 'ready'")
+    _ = try await evaluate(
+      web, "window.dispatchEvent(new Event('oisyTestNavigation')); return 'seeded';")
+    try await waitFor(web, "!!document.querySelector('[data-tid=token-card-ICP-ICP]')")
+    let interactions = try XCTUnwrap(wallet.interactions)
+    let refreshCSS = try await evaluate(
+      web,
+      "return JSON.stringify({path: location.pathname, marker: !!document.querySelector('[data-mobile-refresh]'), html: getComputedStyle(document.documentElement).overscrollBehaviorY, body: getComputedStyle(document.body).overscrollBehaviorY});"
+    )
+    XCTAssertTrue(
+      web.scrollView.bouncesVertically,
+      "Refresh: enabled=\(interactions.refreshControl.isEnabled) allowed=\(shell.walletInteractionsAllowed) root=\(shell.walletRoot) legacy=\(shell.acceptsLegacyNavigation) css=\(refreshCSS)"
+    )
+    XCTAssertFalse(web.scrollView.bouncesHorizontally)
+    interactions.refreshControl.beginRefreshing()
+    XCTAssertTrue(interactions.refreshControl.isRefreshing)
+    interactions.refreshControl.sendActions(for: .valueChanged)
+    let refreshID = try XCTUnwrap(interactions.refreshRequestID)
+    interactions.refreshControl.sendActions(for: .valueChanged)
+    XCTAssertEqual(interactions.refreshRequestID, refreshID)
+    XCTAssertEqual(wallet.session.grant?.id, grantID, "Refresh must keep its session")
+    // Exercise the actual shared list and its actual token-row handler, not a
+    // synthetic token page. The network ID is ICP; InternetComputer is a pay URI label.
+    _ = try await evaluate(
+      web,
+      """
+      window.testWalletScroll = Math.min(160, document.documentElement.scrollHeight - innerHeight);
+      scrollTo(0, window.testWalletScroll);
+      return 'scrolled';
+      """)
+    try await waitFor(
+      web, "window.testWalletScroll > 0 && Math.abs(scrollY - window.testWalletScroll) < 2")
+    let walletParent = web.url
+    _ = try await evaluate(
+      web, "document.querySelector('[data-tid=token-card-ICP-ICP]').click(); return 'opened';")
+    try await waitFor(
+      web,
+      "location.pathname === '/transactions/' && new URLSearchParams(location.search).get('network') === 'ICP' && new URLSearchParams(location.search).get('token') === 'ryjl3-tyaaa-aaaaa-aaaba-cai'"
+    )
+    XCTAssertEqual(shell.walletRoot, .wallet)
+    XCTAssertEqual(web.backForwardList.backItem?.url, walletParent)
+    XCTAssertFalse(web.allowsBackForwardNavigationGestures)
+    XCTAssertTrue(interactions.canBeginBack)
+    XCTAssertNil(interactions.refreshRequestID, "Leaving Wallet cancels refresh")
+    XCTAssertFalse(interactions.refreshControl.isRefreshing)
+    XCTAssertFalse(web.scrollView.bouncesVertically)
+    XCTAssertEqual(interactions.parentURL, walletParent)
+    XCTAssertTrue(interactions.beginBack())
+    interactions.updateBack(progress: 0.45)
+    capture(window, name: "wallet-back-mid-gesture-correct-parent")
+    interactions.endBack(commit: false, animated: false)
+    XCTAssertEqual(
+      web.url.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: false)?.path },
+      "/transactions/", "Cancelling must not change route")
+    XCTAssertEqual(web.transform, .identity)
+    XCTAssertTrue(interactions.beginBack())
+    interactions.updateBack(progress: 0.6)
+    interactions.endBack(commit: true, animated: false)
+    try await waitFor(web, "location.pathname === '/' && !location.search")
+    try await waitFor(web, "Math.abs(scrollY - window.testWalletScroll) < 2")
+    XCTAssertFalse(web.allowsBackForwardNavigationGestures)
+    XCTAssertEqual(wallet.session.grant?.id, grantID)
+
+    // Match the reported ETH-on-Base path: return into an expanded group at the
+    // same scroll position, without a second height animation.
+    _ = try await evaluate(
+      web, "document.querySelector('[data-tid=token-group-ETH]').click(); return 'expanded';")
+    try await waitFor(web, "!!document.querySelector('[data-tid=token-card-ETH-BASE]')")
+    try await waitFor(
+      web,
+      "document.querySelector('[data-tid=token-group-ETH]').closest('.group-card').getAnimations({subtree: true}).filter(animation => animation.effect?.getTiming().iterations !== Infinity).every(animation => animation.playState === 'finished')"
+    )
+    _ = try await evaluate(
+      web,
+      """
+      document.querySelector('[data-tid=token-card-ETH-BASE]').scrollIntoView({block: 'center'});
+      window.testGroupScroll = scrollY;
+      window.testGroupHeight = document.querySelector('[data-tid=token-group-ETH]').closest('.group-card').getBoundingClientRect().height;
+      return 'positioned';
+      """)
+    _ = try await evaluate(
+      web, "document.querySelector('[data-tid=token-card-ETH-BASE]').click(); return 'opened';")
+    try await waitFor(
+      web,
+      "location.pathname === '/transactions/' && new URLSearchParams(location.search).get('network') === 'BASE'"
+    )
+    XCTAssertEqual(interactions.parentURL, walletParent)
+    // The web route can commit before its presentation report enables native Back.
+    for _ in 0..<50 {
+      if interactions.canBeginBack { break }
+      try await Task.sleep(for: .milliseconds(100))
+    }
+    XCTAssertTrue(interactions.beginBack())
+    interactions.updateBack(progress: 0.55)
+    capture(window, name: "eth-base-back-mid-gesture-expanded-wallet")
+    interactions.endBack(commit: true, animated: false)
+    try await waitFor(web, "location.pathname === '/' && !location.search")
+    try await waitFor(
+      web,
+      "document.querySelector('[data-tid=token-group-ETH]').closest('.group-card').classList.contains('expanded') && Math.abs(scrollY - window.testGroupScroll) < 2 && Math.abs(document.querySelector('[data-tid=token-group-ETH]').closest('.group-card').getBoundingClientRect().height - window.testGroupHeight) < 2"
+    )
+    capture(window, name: "eth-base-back-restored-expanded-wallet")
+    XCTAssertEqual(wallet.session.grant?.id, grantID)
+
+    let rootsHistoryLength = try await evaluate(web, "return String(history.length);")
     shell.select(.search)
-    try await Task.sleep(for: .milliseconds(400))
-    let searchDestination = try await evaluate(
-      web, "return location.search.includes('search=true') ? 'search' : '';")
-    XCTAssertEqual(searchDestination, "search")
+    try await waitFor(
+      web,
+      "location.pathname === '/' && location.search === '?search=true' && !!document.querySelector('[data-tid=token-list-filter-input]')"
+    )
+    XCTAssertFalse(web.scrollView.bouncesVertically, "Search never enables pull to refresh")
+    let searchHistoryLength = try await evaluate(web, "return String(history.length);")
+    XCTAssertEqual(
+      searchHistoryLength, rootsHistoryLength, "Selecting Search must replace the root")
+    _ = try await evaluate(
+      web,
+      """
+      const input = document.querySelector('[data-tid=token-list-filter-input]');
+      input.value = 'ICP'; input.dispatchEvent(new Event('input', {bubbles: true})); input.blur();
+      return 'filtered';
+      """)
+    window.endEditing(true)
+    try await waitFor(
+      web,
+      "document.querySelector('[data-tid=token-list-filter-input]')?.value === 'ICP' && !!document.querySelector('[data-tid=token-card-ICP-ICP]')"
+    )
+    let searchParent = web.url
+    _ = try await evaluate(
+      web, "document.querySelector('[data-tid=token-card-ICP-ICP]').click(); return 'opened';")
+    try await waitFor(web, "location.pathname === '/transactions/'")
+    XCTAssertEqual(shell.walletRoot, .search)
+    XCTAssertEqual(web.backForwardList.backItem?.url, searchParent)
+    XCTAssertFalse(web.allowsBackForwardNavigationGestures)
+    XCTAssertTrue(interactions.canBeginBack)
+    XCTAssertFalse(interactions.refreshControl.isEnabled, "Search is not a refresh surface")
+    XCTAssertEqual(wallet.session.grant?.id, grantID)
+
+    // A blocking shared presentation must suspend both gesture eligibility and
+    // the underlying Back action. The Contacts request acknowledges the same route.
+    wallet.hostPlugin.select("contacts")
+    try await waitFor(web, "!!document.querySelector('[data-tid=address-book-modal]')")
+    XCTAssertFalse(web.allowsBackForwardNavigationGestures)
+    XCTAssertFalse(interactions.canBeginBack)
+    _ = try await evaluate(
+      web,
+      "document.querySelector('button[aria-label=\"Go back to the previous page\"]').click(); return 'blocked';"
+    )
+    web.goBack()
+    try await Task.sleep(for: .milliseconds(600))
+    let overlayLocation = try await evaluate(web, "return location.pathname;")
+    XCTAssertEqual(
+      overlayLocation, "/transactions/", "A blocking modal must prevent underlying Back")
+    let overlayPresent = try await evaluate(
+      web, "return String(!!document.querySelector('[data-tid=address-book-modal]'));")
+    XCTAssertEqual(overlayPresent, "true")
+    _ = try await evaluate(
+      web,
+      "document.querySelector('[data-tid=address-book-modal] [data-tid=close-modal]').click(); return 'closed';"
+    )
+    try await waitFor(web, "!document.querySelector('[data-tid=address-book-modal]')")
+    XCTAssertFalse(web.allowsBackForwardNavigationGestures)
+    XCTAssertTrue(interactions.canBeginBack)
+    XCTAssertTrue(interactions.beginBack())
+    interactions.updateBack(progress: 0.55)
+    capture(window, name: "search-back-mid-gesture-correct-parent")
+    interactions.endBack(commit: true, animated: false)
+    try await waitFor(
+      web,
+      "location.pathname === '/' && location.search === '?search=true' && document.querySelector('[data-tid=token-list-filter-input]')?.value === 'ICP'"
+    )
+    XCTAssertEqual(shell.walletRoot, .search)
+    XCTAssertFalse(web.allowsBackForwardNavigationGestures)
+    let nonceAfterBack = try await evaluate(web, "return window.testDocumentNonce;")
+    XCTAssertEqual(nonceAfterBack, documentNonce, "Back must retain the wallet document")
+    XCTAssertEqual(wallet.session.grant?.id, grantID, "Back must retain its native grant")
+
+    let beforeTabHistoryLength = try await evaluate(web, "return String(history.length);")
     shell.select(.activity)
-    try await Task.sleep(for: .milliseconds(400))
+    try await waitFor(web, "location.pathname === '/activity/'")
+    let afterTabHistoryLength = try await evaluate(web, "return String(history.length);")
+    XCTAssertEqual(
+      beforeTabHistoryLength, afterTabHistoryLength, "Tabs must not append browser history")
+    XCTAssertEqual(shell.walletRoot, .activity)
+    XCTAssertFalse(web.allowsBackForwardNavigationGestures)
     XCTAssertTrue(web === shell.wallet?.webView)
-    let activityDestination = try await evaluate(
-      web, "return location.pathname;")
-    XCTAssertEqual(activityDestination, "/activity/")
-    XCTAssertTrue(wallet.session.grant?.id == grantID, "Client routing must preserve the session")
+    XCTAssertEqual(wallet.session.grant?.id, grantID, "Client routing must preserve the session")
     let readCount = try await evaluate(web, "return String(window.testNetworkReads);")
     XCTAssertGreaterThan(
       Int(readCount) ?? 0, 0, "Normal shared loader must attempt its canister read")
@@ -234,7 +614,17 @@ import XCTest
     try await Task.sleep(for: .milliseconds(500))
     XCTAssertFalse(tabs.isHidden)
     shell.select(.wallet)
-    try await Task.sleep(for: .milliseconds(300))
+    try await waitFor(
+      web,
+      "location.pathname === '/' && !location.search && !!document.querySelector('[data-tid=token-card-ICP-ICP]')"
+    )
+    _ = try await evaluate(
+      web, "document.querySelector('[data-tid=token-card-ICP-ICP]').click(); return 'opened';")
+    try await waitFor(web, "location.pathname === '/transactions/'")
+    try await verifySharedICPSendReviewAndCancellation(web, shell: shell, window: window)
+    try await verifySharedSwapForm(web, shell: shell, window: window)
+    shell.select(.wallet)
+    try await waitFor(web, "location.pathname === '/' && !location.search")
     let more = try XCTUnwrap(shell.view.subviews.compactMap { $0 as? UIButton }.first)
     more.performPrimaryAction()
     try await Task.sleep(for: .milliseconds(500))

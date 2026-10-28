@@ -316,6 +316,72 @@ describe('scheduler', () => {
 			});
 		});
 
+		describe('refresh', () => {
+			it('joins a running background job without resetting its timer', async () => {
+				let finish: () => void = () => {};
+				mockJob.mockImplementationOnce(
+					() =>
+						new Promise<void>((resolve) => {
+							finish = resolve;
+						})
+				);
+				await scheduler.start(mockParams);
+				const { timer } = { timer: scheduler['timer'] };
+				const result = scheduler.refresh(mockParams);
+				const settled = vi.fn();
+				void result.then(settled);
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(mockJob).toHaveBeenCalledOnce();
+				expect(settled).not.toHaveBeenCalled();
+
+				finish();
+				await result;
+
+				expect(scheduler['timer']).toBe(timer);
+			});
+
+			it('performs a one-shot refresh without starting a new timer', async () => {
+				await expect(scheduler.refresh(mockParams)).resolves.toBeUndefined();
+				expect(mockJob).toHaveBeenCalledOnce();
+				expect(scheduler['timer']).toBeUndefined();
+			});
+
+			it('rejects a handled provider error but leaves scheduled polling intact', async () => {
+				await scheduler.start(mockParams);
+				await vi.advanceTimersByTimeAsync(0);
+				const { timer } = { timer: scheduler['timer'] };
+				mockJob.mockResolvedValueOnce(false);
+
+				await expect(scheduler.refresh(mockParams)).rejects.toThrow('refresh failed');
+				expect(scheduler['timer']).toBe(timer);
+			});
+
+			it('rejects when authentication is unavailable', async () => {
+				vi.mocked(provider.loadIdentity).mockResolvedValueOnce(undefined);
+
+				await expect(scheduler.refresh(mockParams)).rejects.toThrow('unavailable');
+				expect(mockJob).not.toHaveBeenCalled();
+			});
+
+			it('rejects a refresh stopped while its job is running', async () => {
+				let finish: () => void = () => {};
+				mockJob.mockImplementationOnce(
+					() =>
+						new Promise<void>((resolve) => {
+							finish = resolve;
+						})
+				);
+				const result = scheduler.refresh(mockParams);
+				const outcome = result.catch((error: unknown) => error);
+				await vi.advanceTimersByTimeAsync(0);
+				scheduler.stop();
+				finish();
+
+				await expect(outcome).resolves.toMatchObject({ message: 'Wallet refresh failed' });
+			});
+		});
+
 		describe('trigger', () => {
 			const { interval: _, ...mockTriggerParams } = mockParams;
 

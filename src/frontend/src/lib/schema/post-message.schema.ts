@@ -31,6 +31,7 @@ export const POST_MESSAGE_REQUESTS = [
 	'stopIdleTimer',
 	'startExchangeTimer',
 	'stopExchangeTimer',
+	'triggerExchangeTimer',
 	'stopIcpWalletTimer',
 	'startIcpWalletTimer',
 	'triggerIcpWalletTimer',
@@ -276,6 +277,7 @@ export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 		z
 			.object({
 				msg: PostMessageRequestSchema,
+				requestId: z.string().uuid().optional(),
 				data: dataSchema.optional()
 			})
 			.strict(),
@@ -284,3 +286,12 @@ export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 
 export const inferPostMessageSchedulerSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 	buildPostMessageResponseSchema({ dataSchema });
+
+export const WorkerRefreshResultSchema = z
+	.object({
+		msg: z.literal('workerRefreshFinished'),
+		workerId: z.string(),
+		requestId: z.string().uuid(),
+		success: z.boolean()
+	})
+	.strict();

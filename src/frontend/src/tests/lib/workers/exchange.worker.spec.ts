@@ -92,7 +92,11 @@ describe('exchange.worker', () => {
 	describe('onExchangeMessage', () => {
 		let originalPostMessage: unknown;
 
-		const invalidMessages = excludeValidMessageEvents(['stopExchangeTimer', 'startExchangeTimer']);
+		const invalidMessages = excludeValidMessageEvents([
+			'stopExchangeTimer',
+			'startExchangeTimer',
+			'triggerExchangeTimer'
+		]);
 
 		const createEvent = (msg: string) =>
 			createMockEvent(msg) as unknown as MessageEvent<
@@ -148,6 +152,61 @@ describe('exchange.worker', () => {
 		afterAll(() => {
 			// @ts-expect-error redo original
 			window.postMessage = originalPostMessage;
+		});
+
+		describe('manual refresh', () => {
+			const startEvent = (): MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> =>
+				new MessageEvent('message', {
+					data: {
+						msg: 'startExchangeTimer',
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [],
+							icrcCanisterIds: [],
+							splAddresses: [],
+							erc4626TokensExchangeData: [],
+							backendExchangeEnabled: false
+						}
+					}
+				});
+			const refreshEvent = (): MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> =>
+				new MessageEvent('message', { data: { msg: 'triggerExchangeTimer' } });
+
+			it('joins the current sync without starting another provider request', async () => {
+				let finish: (prices: CoingeckoSimpleErc4626TokenPriceResponse) => void = () => {};
+				vi.mocked(calculateErc4626Prices).mockImplementationOnce(
+					() =>
+						new Promise((resolve) => {
+							finish = resolve;
+						})
+				);
+				const initial = onExchangeMessage(startEvent());
+				await vi.advanceTimersByTimeAsync(0);
+				const calls = vi.mocked(simplePrice).mock.calls.length;
+				const result = onExchangeMessage(refreshEvent());
+				const settled = vi.fn();
+				void result.then(settled);
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(simplePrice).toHaveBeenCalledTimes(calls);
+				expect(settled).not.toHaveBeenCalled();
+
+				finish({});
+				await Promise.all([initial, result]);
+
+				expect(postMessageMock).toHaveBeenCalledOnce();
+			});
+
+			it('reports partial provider errors while still publishing available prices', async () => {
+				await onExchangeMessage(startEvent());
+				postMessageMock.mockClear();
+				vi.mocked(simplePrice).mockRejectedValueOnce(new Error('Price provider unavailable'));
+
+				await expect(onExchangeMessage(refreshEvent())).rejects.toThrow('Price refresh failed');
+				expect(postMessageMock).toHaveBeenCalledWith(
+					expect.objectContaining({ msg: 'syncExchange' })
+				);
+			});
 		});
 
 		describe('with message startExchangeTimer', () => {

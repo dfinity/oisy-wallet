@@ -16,6 +16,10 @@ export const onXrpWalletMessage = async ({
 			await scheduler.start(data);
 			return;
 		case 'triggerXrpWalletTimer':
-			await scheduler.trigger(data);
+			if ('requestId' in dataMsg && dataMsg.requestId !== undefined) {
+				await scheduler.refresh(data);
+			} else {
+				await scheduler.trigger(data);
+			}
 	}
 };

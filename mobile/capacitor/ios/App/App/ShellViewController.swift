@@ -14,6 +14,20 @@ final class ShellViewController: UIViewController, UITabBarDelegate {
   private let content = UIView()
   private let moreButton = UIButton(type: .system)
   private var blockingPresentation = false
+  private var accountPresentation = false
+  private(set) var navigationRequestID = 0
+  private var navigationRevision = -1
+  private var navigationPending = false
+  private var usesNavigationState = false
+  private var requestedRoot: WalletRoot?
+  var navigationRoot: WalletRoot { requestedRoot ?? walletRoot }
+  var acceptsLegacyNavigation: Bool { !usesNavigationState }
+  var walletInteractionsAllowed: Bool {
+    !navigationPending && !blockingPresentation && !accountPresentation
+      && wallet?.view.isHidden == false && !interactionsSuspended
+  }
+  private var interactionsSuspended = false
+  private var approvedBackURL: URL?
   private var tabsHeight: NSLayoutConstraint?
   private(set) var walletRoot: WalletRoot = .wallet
   #if DEBUG
@@ -132,9 +146,17 @@ final class ShellViewController: UIViewController, UITabBarDelegate {
       #endif
       mount(wallet)
     }
-    select(.wallet)
+    walletRoot = .wallet
+    showWallet()
   }
   private func closeWallet() {
+    navigationRequestID = 0
+    navigationRevision = -1
+    navigationPending = false
+    usesNavigationState = false
+    requestedRoot = nil
+    approvedBackURL = nil
+    accountPresentation = false
     setBlockingPresentation(false)
     dismiss(animated: false)
     // Also discard anonymous Explore storage if logout beats ETH address loading.
@@ -146,10 +168,17 @@ final class ShellViewController: UIViewController, UITabBarDelegate {
     wallet?.removeFromParent()
     wallet = nil
   }
+  func suspendInteractions() {
+    interactionsSuspended = true
+    wallet?.interactions?.invalidate()
+    updateBackNavigation()
+  }
   func resume() {
+    interactionsSuspended = false
     wallet?.session.checkExpiration()
     auth.restore()
     syncSession()
+    updateBackNavigation()
   }
   override func viewSafeAreaInsetsDidChange() {
     super.viewSafeAreaInsetsDidChange()
@@ -164,6 +193,7 @@ final class ShellViewController: UIViewController, UITabBarDelegate {
     if let root = roots[item.tag] { select(root) }
   }
   func showExplore() {
+    wallet?.interactions?.invalidate()
     view.endEditing(true)
     tabs.selectedItem = tabs.items?.first { $0.tag == 2 }
     wallet?.view.isHidden = true
@@ -173,12 +203,64 @@ final class ShellViewController: UIViewController, UITabBarDelegate {
     updateMoreMenu()
   }
   func select(_ root: WalletRoot, notifyWeb: Bool = true) {
-    if walletRoot != root { view.endEditing(true) }
+    if notifyWeb, wallet != nil {
+      requestWebScreen(root.rawValue)
+      return
+    }
+    wallet?.interactions?.invalidate()
+    // A legacy bundle can update the highlight, but cannot enable native gestures.
+    approvedBackURL = nil
+    navigationPending = false
+    requestedRoot = nil
     walletRoot = wallet == nil ? .wallet : root
-    // A late web route acknowledgement must not pull the user out of Explore.
-    if !notifyWeb && tabs.selectedItem?.tag == 2 { return }
+    if notifyWeb || tabs.selectedItem?.tag != 2 { showWallet() }
+    updateBackNavigation()
+  }
+  func requestWebScreen(_ screen: String) {
+    guard let wallet,
+      WalletRoot(rawValue: screen) != nil || ["contacts", "preferences"].contains(screen)
+    else { return }
+    if WalletRoot(rawValue: screen) != nil { wallet.interactions?.invalidate() }
+    view.endEditing(true)
+    navigationRequestID += 1
+    navigationPending = true
+    requestedRoot = WalletRoot(rawValue: screen)
+    approvedBackURL = nil
+    // The selected root remains committed until the web router accepts the request.
     showWallet()
-    if notifyWeb { wallet?.hostPlugin.select(walletRoot.rawValue) }
+    wallet.hostPlugin.select(screen, requestID: navigationRequestID)
+  }
+  @discardableResult func commitNavigation(_ state: WalletNavigationState) -> Bool {
+    guard let wallet, state.requestID == navigationRequestID,
+      state.revision > navigationRevision,
+      state.backURL == nil || WalletBackNavigationPolicy.isToken(wallet.webView?.url)
+    else { return false }
+    navigationRevision = state.revision
+    usesNavigationState = true
+    navigationPending = false
+    requestedRoot = nil
+    approvedBackURL = state.backURL
+    walletRoot = state.root
+    wallet.interactions?.navigationCommitted(url: wallet.webView?.url)
+    // A late acknowledgement may update retained state, never leave Explore.
+    if tabs.selectedItem?.tag != 2 { showWallet() }
+    updateBackNavigation()
+    return true
+  }
+  func resetNavigationForDocument() {
+    wallet?.interactions?.invalidate()
+    navigationRevision = -1
+    navigationPending = false
+    usesNavigationState = false
+    requestedRoot = nil
+    approvedBackURL = nil
+    updateBackNavigation()
+  }
+  private func updateBackNavigation() {
+    wallet?.setBackNavigation(
+      parent: approvedBackURL,
+      enabled: walletInteractionsAllowed,
+      refreshEnabled: usesNavigationState && walletRoot == .wallet)
   }
   private func showWallet() {
     tabs.selectedItem = tabs.items?.first {
@@ -192,6 +274,11 @@ final class ShellViewController: UIViewController, UITabBarDelegate {
   }
   func setBlockingPresentation(_ blocking: Bool) {
     blockingPresentation = blocking
+    if blocking,
+      wallet?.interactions?.isDragging == true || wallet?.interactions?.awaitingBack == true
+    {
+      wallet?.interactions?.clearBack()
+    }
     updateNavigationVisibility()
   }
   private func updateNavigationVisibility() {
@@ -203,6 +290,7 @@ final class ShellViewController: UIViewController, UITabBarDelegate {
     moreButton.isHidden = hidden
     tabs.accessibilityElementsHidden = hidden
     moreButton.accessibilityElementsHidden = hidden
+    updateBackNavigation()
   }
   private func configureMoreButton() {
     var configuration = UIButton.Configuration.glass()
@@ -262,19 +350,26 @@ final class ShellViewController: UIViewController, UITabBarDelegate {
   }
   func openAccount() {
     guard presentedViewController == nil, wallet != nil else { return }
+    accountPresentation = true
+    wallet?.interactions?.clearBack()
+    updateBackNavigation()
     let controller = UIHostingController(
       rootView: AccountView(browser: browser) { [weak self] screen in
         self?.dismiss(animated: true) {
           guard let self else { return }
+          self.accountPresentation = false
           if screen == "reload" {
             self.select(self.walletRoot, notifyWeb: false)
             self.wallet?.webView?.reload()
           } else {
-            self.select(.wallet)
-            self.wallet?.hostPlugin.select(screen)
+            self.requestWebScreen(screen)
           }
         }
-      }.environment(auth).tint(Color("OisyBrandPrimary")))
+      }.environment(auth).tint(Color("OisyBrandPrimary"))
+        .onDisappear { [weak self] in
+          self?.accountPresentation = false
+          self?.updateBackNavigation()
+        })
     present(controller, animated: true)
   }
 }

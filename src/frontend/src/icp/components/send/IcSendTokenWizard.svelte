@@ -1,24 +1,27 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, onDestroy } from 'svelte';
 	import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
 	import IcSendReview from '$icp/components/send/IcSendReview.svelte';
 	import { sendIc } from '$icp/services/ic-send.services';
 	import { sendNft } from '$icp/services/nft-send.services';
-	import type { IcTransferParams } from '$icp/types/ic-send';
+	import { MobileSendSessionExpiredError, type IcTransferParams } from '$icp/types/ic-send';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { toIcNftSendErrorType } from '$icp/utils/ic-nft.utils';
+	import { isMobileSendDestination } from '$icp/utils/ic-send.utils';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
 		TRACK_COUNT_IC_SEND_ERROR,
 		TRACK_COUNT_IC_SEND_SUCCESS,
 		TRACK_NFT_SEND
 	} from '$lib/constants/analytics.constants';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { idleSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -140,7 +143,21 @@
 		}
 	};
 
+	let submitting = false;
+	let disposed = false;
+	let closeTimer: ReturnType<typeof setTimeout> | undefined;
+	onDestroy(() => {
+		disposed = true;
+		clearTimeout(closeTimer);
+	});
+
 	const send = async () => {
+		if (submitting || disposed || currentStep?.name !== WizardStepsSend.REVIEW) {
+			return;
+		}
+		if (MOBILE_SHELL && !isMobileSendDestination({ token: $sendToken, destination })) {
+			return;
+		}
 		if (isNullishOrEmpty(destination)) {
 			toastsError({
 				msg: { text: $i18n.send.assertion.destination_address_invalid }
@@ -162,6 +179,8 @@
 			return;
 		}
 
+		// Latch synchronously: two taps before Svelte paints SENDING are still one transfer.
+		submitting = true;
 		onNext();
 
 		try {
@@ -172,7 +191,11 @@
 					unitName: $sendTokenDecimals
 				}),
 				identity: $authIdentity,
-				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step)
+				progress: (step: ProgressStepsSendIc) => {
+					if (!disposed) {
+						sendProgressStep = step;
+					}
+				}
 			};
 
 			const trackAnalyticsOnSendComplete = () => {
@@ -190,10 +213,26 @@
 				sendCompleted: trackAnalyticsOnSendComplete
 			});
 
-			sendProgressStep = ProgressStepsSendIc.DONE;
-
-			setTimeout(() => close(), 750);
+			if (!disposed) {
+				sendProgressStep = ProgressStepsSendIc.DONE;
+				closeTimer = setTimeout(() => close(), 750);
+			}
 		} catch (err: unknown) {
+			if (disposed) {
+				return;
+			}
+			if (MOBILE_SHELL && err instanceof MobileSendSessionExpiredError) {
+				await idleSignOut();
+				return;
+			}
+			if (MOBILE_SHELL) {
+				// A transport failure can arrive after the ledger accepted the send.
+				// Close the intent instead of offering an immediate second payment.
+				toastsError({ msg: { text: $i18n.send.error.mobile_unconfirmed } });
+				close();
+				return;
+			}
+			submitting = false;
 			trackEvent({
 				name: TRACK_COUNT_IC_SEND_ERROR,
 				metadata: {

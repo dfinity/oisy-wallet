@@ -144,6 +144,23 @@
         }
       }
     },
+    "wallet.refreshing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refreshing wallet"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновление кошелька"
+          }
+        }
+      }
+    },
     "wallet.account": {
       "extractionState": "manual",
       "localizations": {

@@ -9,14 +9,17 @@ final class WalletSession {
   private var timer: Task<Void, Never>?
   private let onExpired: (AuthSession) -> Void
   private let onAccount: (BrowserAccount?) -> Void
+  private let operationStore: OperationJournalStore
 
   init(
     native: AuthSession, onExpired: @escaping (AuthSession) -> Void,
-    onAccount: @escaping (BrowserAccount?) -> Void
+    onAccount: @escaping (BrowserAccount?) -> Void,
+    operationStore: OperationJournalStore = .init()
   ) {
     self.native = native
     self.onExpired = onExpired
     self.onAccount = onAccount
+    self.operationStore = operationStore
     schedule()
   }
   @discardableResult func checkExpiration(now: Date = .now) -> Bool {
@@ -52,6 +55,21 @@ final class WalletSession {
       onAccount(nil)
     }
   }
+  // The web caller cannot supply an owner. A new document must authorize its
+  // own child key before it can read metadata left by a previous session.
+  private func operationPrincipal() throws -> String {
+    guard !checkExpiration(), let grant, grant.principal == native.principal else {
+      throw AuthError.expired
+    }
+    return grant.principal
+  }
+  func readOperations() throws -> OperationJournalSnapshot {
+    try operationStore.read(principal: operationPrincipal())
+  }
+  func writeOperations(revision: String, value: String) throws -> OperationJournalSnapshot {
+    try operationStore.write(principal: operationPrincipal(), revision: revision, value: value)
+  }
+
   func resetDocument() {
     guard !checkExpiration() else { return }
     grant = nil

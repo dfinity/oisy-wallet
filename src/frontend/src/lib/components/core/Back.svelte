@@ -3,7 +3,9 @@
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import IconBack from '$lib/components/icons/IconBack.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { mobileBackStore } from '$lib/stores/mobile-host.store';
 	import { back } from '$lib/utils/nav.utils';
 
 	interface Props {
@@ -26,7 +28,7 @@
 	class:text-brand-primary={color === 'primary'}
 	class:text-current={color === 'current'}
 	aria-label={$i18n.core.alt.back}
-	onclick={() => back({ pop: nonNullish(fromRoute) })}
+	onclick={() => (MOBILE_SHELL ? $mobileBackStore?.() : back({ pop: nonNullish(fromRoute) }))}
 >
 	<IconBack />
 	<span class:visually-hidden={onlyArrow}>{$i18n.core.text.back}</span>

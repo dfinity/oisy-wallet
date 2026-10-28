@@ -4,6 +4,7 @@
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { showTokenCategoryFilter, tokenCategoryFilter } from '$lib/derived/settings.derived';
@@ -33,11 +34,19 @@
 
 	const hideZeros: boolean = $derived(($tokenGroupStore ?? {})[tokenGroup.id]?.hideZeros ?? true);
 
-	const toggleIsExpanded = (toggle: boolean) =>
+	// A restored group must already have its full height when native Back reveals
+	// the list. Keep the usual animation for explicit expand/filter gestures.
+	let interacted = $state(false);
+	const transitionParams = $derived(MOBILE_SHELL && !interacted ? { duration: 0 } : SLIDE_PARAMS);
+	const toggleIsExpanded = (toggle: boolean) => {
+		interacted = true;
 		tokenGroupStore.set({ id: tokenGroup.id, data: { isExpanded: toggle, hideZeros } });
+	};
 
-	const toggleHideZeros = (toggle: boolean) =>
+	const toggleHideZeros = (toggle: boolean) => {
+		interacted = true;
 		tokenGroupStore.set({ id: tokenGroup.id, data: { isExpanded, hideZeros: toggle } });
+	};
 
 	const headerData: CardData = $derived(mapHeaderData(tokenGroup));
 
@@ -120,11 +129,11 @@
 	</div>
 
 	{#if isExpanded}
-		<div class="ml-0 flex flex-col gap-1.5 p-2 md:ml-16" transition:slide={SLIDE_PARAMS}>
+		<div class="ml-0 flex flex-col gap-1.5 p-2 md:ml-16" transition:slide={transitionParams}>
 			{#each tokensToShow as token (`token:${token.id.description}:${token.network.id.description}`)}
 				<div
 					class="flex overflow-hidden rounded-lg bg-secondary transition-colors duration-150 ease-out hover:bg-brand-subtle-10"
-					transition:slide={SLIDE_PARAMS}
+					transition:slide={transitionParams}
 				>
 					<TokenCard asNetwork data={token} onClick={() => goto(transactionsUrl({ token }))} />
 				</div>

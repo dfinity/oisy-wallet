@@ -26,3 +26,5 @@ export type IcCkWithdrawalResult =
 	| { type: 'ckErc20ToErc20'; ckEthBlockIndex: bigint; ckErc20BlockIndex: bigint };
 
 export class IcAmountAssertionError extends Error {}
+
+export class MobileSendSessionExpiredError extends Error {}

@@ -19,6 +19,7 @@
 	import MobileNavigationMenu from '$lib/components/navigation/MobileNavigationMenu.svelte';
 	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
 	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
+	import MobilePendingOperations from '$lib/components/transactions/MobilePendingOperations.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { aiAssistantConsoleOpen } from '$lib/derived/ai-assistant.derived';
@@ -95,7 +96,7 @@
 	onNavigate((navigation) => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore -- The ViewTransition api is still a "Candidate recommendation", so it's not embedded in TSs' definition yet
-		if (isNullish(document.startViewTransition)) {
+		if (MOBILE_SHELL || isNullish(document.startViewTransition)) {
 			return;
 		}
 
@@ -138,6 +139,7 @@
 						<Hero />
 					{/if}
 
+					{#if MOBILE_SHELL}<MobilePendingOperations />{/if}
 					<Loaders>
 						{#if assetsRoute && !MOBILE_SHELL}
 							<DappsCarousel wrapperStyleClass="mb-6 flex justify-center xl:hidden" />

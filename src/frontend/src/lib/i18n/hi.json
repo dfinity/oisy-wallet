@@ -113,7 +113,8 @@
 			"copy_failed": ""
 		},
 		"mobile_shell": {
-			"account": ""
+			"account": "",
+			"refresh_failed": ""
 		}
 	},
 	"progress": {
@@ -1057,7 +1058,12 @@
 			"send_review_subtitle": "आप भेजते हैं",
 			"no_nfts_found": "",
 			"no_nfts_found_desc": "",
-			"select_nft": ""
+			"select_nft": "",
+			"mobile_pending": "",
+			"mobile_pending_title": "",
+			"mobile_not_confirmed": "",
+			"mobile_recovery_unavailable": "",
+			"mobile_check_status": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "सार्वजनिक पता (0x), नाम या उपनाम दर्ज करें",
@@ -1079,7 +1085,9 @@
 			"fee_expired": "",
 			"fee_info": "शुल्क का भुगतान $feeSymbol में किया जाएगा। उपलब्ध: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "स्कैन किए गए कोड में केवल एक गंतव्य पता था। कृपया सुनिश्चित करें कि आप सही टोकन चुनें, सही राशि दर्ज करें, और गंतव्य पते की सावधानीपूर्वक समीक्षा करें!",
-			"scanned_address_only_destination_single_token": "स्कैन किए गए कोड में केवल एक गंतव्य पता था। कृपया सुनिश्चित करें कि आप सही राशि दर्ज करें, और गंतव्य पते की सावधानीपूर्वक समीक्षा करें!"
+			"scanned_address_only_destination_single_token": "स्कैन किए गए कोड में केवल एक गंतव्य पता था। कृपया सुनिश्चित करें कि आप सही राशि दर्ज करें, और गंतव्य पते की सावधानीपूर्वक समीक्षा करें!",
+			"mobile_ic_only": "",
+			"mobile_supported_only": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "अमान्य गंतव्य पता",
@@ -1155,7 +1163,8 @@
 			"xrp_destination_unfunded": "इस पते पर अभी कोई XRP खाता नहीं है। इसे बनाने के लिए कम से कम $reserve XRP का पहला भुगतान चाहिए। कुछ भी नहीं भेजा गया — राशि बढ़ाएँ, या पहले से फंडेड पते पर भेजें।",
 			"xrp_destination_tag_required": "इस पते के लिए XRP डेस्टिनेशन टैग आवश्यक है। कुछ भी नहीं भेजा गया — जिस सेवा को आप भुगतान कर रहे हैं उसका दिया गया टैग जोड़ें और फिर भेजें।",
 			"xrp_destination_is_source": "यह आपका अपना XRP पता है। कुछ भी नहीं भेजा गया — कोई दूसरा प्राप्तकर्ता चुनें।",
-			"xrp_account_state_unavailable": "वॉलेट आपके खाते का विवरण नहीं पढ़ सका, इसलिए राशि जाँची नहीं जा सकी। कुछ भी नहीं भेजा गया — कृपया थोड़ी देर में फिर कोशिश करें।"
+			"xrp_account_state_unavailable": "वॉलेट आपके खाते का विवरण नहीं पढ़ सका, इसलिए राशि जाँची नहीं जा सकी। कुछ भी नहीं भेजा गया — कृपया थोड़ी देर में फिर कोशिश करें।",
+			"mobile_unconfirmed": ""
 		}
 	},
 	"mint": {
@@ -1398,7 +1407,12 @@
 			"oisy_trade_taker_fee": "",
 			"oisy_trade_withdrawal_fee": "",
 			"value_difference_error_confirmation": "",
-			"value_difference_missing_price_confirmation": "कम से कम एक टोकन की कीमत प्राप्त नहीं की जा सकी। कृपया <strong>स्वतंत्र रूप से सत्यापित करें</strong> कि यह स्वैप ऑफर उचित सौदा है।<br>ध्यान दें कि स्लिपेज सेटिंग आपको बहुत कम प्राप्त मूल्य वाले ऑफर से सुरक्षित <strong>नहीं</strong> करती है!"
+			"value_difference_missing_price_confirmation": "कम से कम एक टोकन की कीमत प्राप्त नहीं की जा सकी। कृपया <strong>स्वतंत्र रूप से सत्यापित करें</strong> कि यह स्वैप ऑफर उचित सौदा है।<br>ध्यान दें कि स्लिपेज सेटिंग आपको बहुत कम प्राप्त मूल्य वाले ऑफर से सुरक्षित <strong>नहीं</strong> करती है!",
+			"mobile_pending": "",
+			"mobile_pool_not_empty": "",
+			"mobile_no_recovery_balance": "",
+			"mobile_recovered": "",
+			"mobile_recover": ""
 		},
 		"error": {
 			"kong_not_available": "टोकन स्वैप करने के लिए वर्तमान में कोई एक्सचेंज उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।",

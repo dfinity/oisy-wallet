@@ -5,7 +5,7 @@ tags: [ios, security, internet-identity, review]
 
 # Authentication and Explore review
 
-Reviewed on 2026-10-27. This prototype uses the shared Svelte frontend for Wallet,
+Reviewed on 2026-10-27; session lifetime updated on 2026-10-28. This prototype uses the shared Svelte frontend for Wallet,
 Token, Activity and Notes. Native code handles system sign-in, the parent key,
 navigation and the isolated Explore browser.
 
@@ -45,7 +45,7 @@ experiment used v0.11.1, but that dependency was removed. Shared web calls use
 | Key storage            | `AppleCredentialStorage` / `KeychainIdentity` use platform key handles, with configurable protection  | A software Ed25519 session key is stored as a Keychain data item, `WhenUnlockedThisDeviceOnly`; it is not a Secure Enclave key                                                                            |
 | Delegation checks      | Core validates shape, repeated keys, requested scope and maximum lifetime                             | Final key, bounds, restrictions and expiry checked; repeated-key and returned-lifetime checks added during this review. All targeted/permission-bearing chains are rejected rather than silently stripped |
 | Signature verification | Core explicitly leaves delegation signature verification to the receiving replica                     | Root canister signature is not locally verified; additional Ed25519/P-256 links are checked with CryptoKit. The local checks do not verify the full II chain                                              |
-| Session lifetime       | SDK renews app delegations using the II session and handles foreground/presence                       | Parent requested for 24 hours; local web/worker children last at most five minutes. Expiry signs out; automatic renewal is not implemented                                                                |
+| Session lifetime       | SDK renews app delegations using the II session and handles foreground/presence                       | Parent requested for one hour; native/web/worker access ends at the persisted deadline or earlier II expiry. No automatic renewal                                                                         |
 | External apps          | SDK signer is a client for IC wallet protocols                                                        | Explore currently implements an EIP-1193/6963 provider for Sepolia connection and public reads. It is not an ICRC signer implementation or WalletConnect                                                  |
 
 Pinned source references:
@@ -76,9 +76,10 @@ Source: [SDK authentication migration preparation](./sdk-auth-migration.md)
 2. Review the HTTPS relay → custom-scheme return, state/key binding, cancellation
    and cold-start behavior. Recommend the associated-domain/HTTPS callback setup
    for production; this branch does not configure one.
-3. Review parent → web → worker delegation, five-minute child lifetime, unrestricted
-   targets, logout/expiry and Keychain handling. Is this an acceptable model for a
-   trusted packaged wallet, and what renewal/idle policy should replace forced expiry?
+3. Review parent → web → worker delegation, unrestricted targets, logout/expiry
+   and Keychain handling. The current branch has a fixed one-hour deadline without
+   renewal; the previous preview capped web access at five minutes. Confirm the
+   longer child lifetime and authority. Relaunch must retain the original deadline.
 4. Confirm that the separate backend II-proof argument should contain the original
    II-signed first link while the request identity retains the complete chain.
    The backend verifies the proof signature and caller principal independently.
@@ -104,9 +105,9 @@ the packaged iOS app does not deploy the audit site.
 
 The trusted web wallet can authorize authenticated updates, including allowances,
 token settings and encrypted Notes. Its signing identity is unrestricted until
-expiry. The name `audit-read-only` refers only to the financial actions exposed in
-the UI. Hiding Send/Swap/Buy does not restrict a compromised wallet script's
-signing authority. This preview is not ready for release to funded wallets.
+expiry. `audit-read-only` remains a legacy v2 protocol label; the current preview
+exposes shared ICP/ck-token Send. Hiding other actions does not restrict a
+compromised wallet script's signing authority. This preview is not ready for release to funded wallets.
 
 Explore has a distinct nonpersistent WebView, no Capacitor bridge, top-frame and
 origin checks, native permission prompts and a fixed read-method allowlist.
@@ -123,7 +124,7 @@ II/passkey security or transactions involving funds.
 
 ## Fixes and cleanup from this review
 
-- Reject callback chains whose effective expiry exceeds the requested 24 hours plus
+- Reject callback chains whose effective expiry exceeds the requested lifetime plus
   the SDK's five-minute clock-skew allowance; reject overlong numeric expirations.
 - Reject repeated root/intermediate/child keys before using a delegation.
 - Show “Welcome back!” when the auth worker ends an expired session, and the

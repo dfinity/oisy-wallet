@@ -54,7 +54,11 @@ export const onBtcWalletMessage = async ({
 				schedulers.set(schedulerKey, scheduler);
 			}
 
-			await scheduler.trigger(data);
+			if ('requestId' in dataMsg && dataMsg.requestId !== undefined) {
+				await scheduler.refresh(data);
+			} else {
+				await scheduler.trigger(data);
+			}
 		}
 	}
 };

@@ -4,7 +4,9 @@ import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
+import { isMobileSendToken } from '$icp/utils/ic-send.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import * as mobile from '$lib/constants/mobile.constants';
 import {
 	allCrossChainSwapTokens,
 	allSwapCompatibleIcrcTokens
@@ -30,6 +32,27 @@ describe('swap.derived', () => {
 	afterEach(() => {
 		vi.restoreAllMocks();
 		swapSupportedTokensStore.reset();
+	});
+
+	describe('mobile quote preview', () => {
+		beforeEach(() => {
+			vi.spyOn(mobile, 'MOBILE_SHELL', 'get').mockReturnValue(true);
+			mockPage.reset();
+		});
+
+		it('limits both token pickers to canonical ICP/ck ledgers', () => {
+			const tokens = get(allSwapUniverseTokens);
+
+			expect(tokens.some(({ id }) => id === ICP_TOKEN.id)).toBeTruthy();
+			expect(tokens.every(isMobileSendToken)).toBeTruthy();
+		});
+
+		it('does not preselect a token from another chain', () => {
+			mockPage.mockToken(ETHEREUM_TOKEN);
+
+			expect(get(isPageTokenSwappable)).toBeFalsy();
+			expect(get(swappableTokens)).toEqual({ sourceToken: undefined, destinationToken: undefined });
+		});
 	});
 
 	describe('isPageTokenSwappable', () => {

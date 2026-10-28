@@ -10,7 +10,7 @@ import { isNullish, nonNullish, type QueryParams } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 
 export interface SchedulerParams<T> {
-	job: (params: SchedulerJobData<T>) => Promise<void>;
+	job: (params: SchedulerJobData<T>) => Promise<void | boolean>;
 	data?: T;
 }
 
@@ -35,6 +35,7 @@ export class SchedulerTimer {
 	private timerStatus: SyncState = 'idle';
 	// Counts the stops, so that a start can tell whether it was stopped while it awaited the identity.
 	private stops = 0;
+	private activeJob: Promise<boolean> | undefined;
 
 	constructor(private statusMsg: PostMessageResponseStatus) {}
 
@@ -136,49 +137,63 @@ export class SchedulerTimer {
 		await this.executeJob<T>({ identity, ...params });
 	}
 
+	// Manual refresh joins scheduled work and propagates failure without changing
+	// how background trigger callers handle errors.
+	async refresh<T>(params: SchedulerParams<T>): Promise<void> {
+		const generation = this.stops;
+		let running = this.activeJob;
+		if (!running) {
+			const identity = await AuthClientProvider.getInstance().loadIdentity();
+			if (isNullish(identity) || generation !== this.stops) {
+				throw new Error('Wallet unavailable');
+			}
+			running = this.activeJob ?? this.executeJob({ identity, ...params });
+		}
+		const success = await running;
+		if (!success || generation !== this.stops) {
+			throw new Error('Wallet refresh failed');
+		}
+	}
+
 	private async executeJob<T>({
 		job,
 		...rest
-	}: SchedulerParams<T> & SchedulerSyncParams): Promise<void> {
-		// Avoid to sync if already in progress - do not duplicate calls - or if there was a previous error
+	}: SchedulerParams<T> & SchedulerSyncParams): Promise<boolean> {
 		if (this.timerStatus !== 'idle') {
-			return;
+			return false;
 		}
-
 		this.setStatus('in_progress');
-
-		// `stop` does not cancel a job that is already awaiting, so a stop/start pair can leave the
-		// previous job running alongside the new one. The stop counter identifies the generation this
-		// job belongs to: once it has moved on, this job no longer owns the shared status and must
-		// not report on it — otherwise its completion flips the status to `idle` under the running
-		// job, whose `postMsg` is then discarded, or its failure stops a timer it no longer owns.
 		const generation = this.stops;
-
-		try {
-			await job({ ...rest });
-
-			if (generation !== this.stops) {
-				return;
+		const running = (async () => {
+			try {
+				const success = await job({ ...rest });
+				if (generation !== this.stops) {
+					return false;
+				}
+				this.setStatus('idle');
+				return success !== false;
+			} catch (err: unknown) {
+				consoleError(err);
+				if (generation !== this.stops) {
+					return false;
+				}
+				this.setStatus('error');
+				this.stop();
+				return false;
 			}
-
-			this.setStatus('idle');
-		} catch (err: unknown) {
-			consoleError(err);
-
-			if (generation !== this.stops) {
-				return;
-			}
-
-			// Once the status becomes "error", the job will no longer be called and the status will remain "error"
-			this.setStatus('error');
-
-			// Because it will no longer be called, we can stop it too
-			this.stop();
+		})();
+		this.activeJob = running;
+		const success = await running;
+		if (this.activeJob === running) {
+			this.activeJob = undefined;
 		}
+		return success;
 	}
 
 	stop() {
 		this.stops++;
+		// A refresh after restart must not join a job from the previous generation.
+		this.activeJob = undefined;
 		this.stopTimer();
 		this.setStatus('idle');
 	}

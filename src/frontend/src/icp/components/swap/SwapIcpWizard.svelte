@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, onDestroy } from 'svelte';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import SwapIcpForm from '$icp/components/swap/SwapIcpForm.svelte';
@@ -20,12 +20,18 @@
 		TRACK_COUNT_SWAP_SUBMITTED,
 		TRACK_COUNT_SWAP_SUCCESS
 	} from '$lib/constants/analytics.constants';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { idleSignOut } from '$lib/services/auth.services';
 	import { fetchChainFusionIcpSwap } from '$lib/services/chain-fusion-swap.services';
+	import {
+		MobileOperationPendingError,
+		MobileOperationSessionExpiredError
+	} from '$lib/services/mobile-operation-journal.services';
 	import { fetchOisyTradeSwap } from '$lib/services/oisy-trade-swap.services';
 	import { OisyTradeSwapError } from '$lib/services/swap-errors.services';
 	import {
@@ -90,7 +96,11 @@
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContextType>(IC_TOKEN_FEE_CONTEXT_KEY);
 
-	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
+	const progress = (step: ProgressStepsSwap) => {
+		if (!disposed) {
+			swapProgressStep = step;
+		}
+	};
 
 	const setFailedProgressStep = (step: ProgressStepsSwap) => {
 		if (!swapFailedProgressSteps.includes(step)) {
@@ -169,7 +179,15 @@
 			: undefined
 	);
 
+	let submitting = false;
+	let disposed = false;
+	onDestroy(() => {
+		disposed = true;
+	});
 	const swap = async () => {
+		if (submitting || disposed) {
+			return;
+		}
 		if (isNullish($authIdentity)) {
 			return;
 		}
@@ -205,6 +223,7 @@
 			? $destinationToken.ledgerCanisterId
 			: '';
 
+		submitting = true;
 		onNext();
 
 		try {
@@ -282,6 +301,7 @@
 				});
 			} else {
 				await swapService[$swapAmountsStore.selectedProvider.provider]({
+					canProceed: () => !disposed,
 					identity: $authIdentity,
 					progress,
 					sourceToken: $sourceToken as IcTokenToggleable,
@@ -304,6 +324,9 @@
 				});
 			}
 
+			if (disposed) {
+				return;
+			}
 			progress(ProgressStepsSwap.DONE);
 
 			// For OneSec and Chain Fusion, the foreground completes once the user's funds
@@ -316,6 +339,9 @@
 			});
 
 			setTimeout(() => {
+				if (disposed) {
+					return;
+				}
 				try {
 					onClose();
 				} catch (_: unknown) {
@@ -325,6 +351,19 @@
 				}
 			}, 2500);
 		} catch (err: unknown) {
+			if (disposed) {
+				return;
+			}
+			if (MOBILE_SHELL && err instanceof MobileOperationSessionExpiredError) {
+				await idleSignOut();
+				return;
+			}
+			if (MOBILE_SHELL && err instanceof MobileOperationPendingError) {
+				toastsError({ msg: { text: $i18n.swap.text.mobile_pending } });
+				onClose();
+				return;
+			}
+			submitting = false;
 			const errorDetail = errorDetailToString(err);
 
 			if (isSwapError(err)) {
@@ -399,7 +438,11 @@
 				});
 			}
 
-			setTimeout(() => onBack(), 2000);
+			setTimeout(() => {
+				if (!disposed) {
+					onBack();
+				}
+			}, 2000);
 		}
 	};
 </script>

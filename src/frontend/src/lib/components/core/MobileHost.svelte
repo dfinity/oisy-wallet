@@ -1,13 +1,25 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
+	import { onMount, tick } from 'svelte';
+	import { afterNavigate, beforeNavigate, onNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import { navigateMobileHost, setMobilePresentation } from '$lib/services/mobile-host.services';
+	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import {
+		publishMobileNavigation,
+		connectMobileInteractions,
+		clearMobileBack,
+		prepareMobileBack,
+		finishMobileRefresh,
+		setMobilePresentation
+	} from '$lib/services/mobile-host.services';
 	import { publishMobileAccount } from '$lib/services/mobile-runtime.services';
-	import { mobileScreenStore } from '$lib/stores/mobile-host.store';
+	import { cancelWalletRefresh, refreshWallet } from '$lib/services/wallet-refresh.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { mobileScreenStore, mobileBackStore } from '$lib/stores/mobile-host.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 	import { blockingOverlayOpenStore } from '$lib/stores/ui.store';
+	import { createMobileHistory } from '$lib/utils/mobile-history.utils';
 	import { mobileRouteAllowed } from '$lib/utils/mobile-navigation.utils';
 
 	// Compiled out of normal bundles. Native UI tests seed the same in-memory
@@ -18,9 +30,17 @@
 		}
 		let disposed = false;
 		let cleanup: (() => void) | undefined;
-		void import('$tests/mocks/mobile-notes.fixture').then(({ installNotesFixture }) => {
+		void Promise.all([
+			import('$tests/mocks/mobile-notes.fixture'),
+			import('$tests/mocks/mobile-navigation.fixture')
+		]).then(([{ installNotesFixture }, { installNavigationFixture }]) => {
 			if (!disposed) {
-				cleanup = installNotesFixture();
+				const removeNotes = installNotesFixture();
+				const removeNavigation = installNavigationFixture();
+				cleanup = () => {
+					removeNotes();
+					removeNavigation();
+				};
 			}
 		});
 		return () => {
@@ -29,26 +49,73 @@
 		};
 	});
 
+	// The router owns feature state; native only mirrors committed navigation.
+	const navigation = createMobileHistory(page.url);
+	let revision = 0;
+	let renderRevision = 0;
+	let listScroll: { path: string; x: number; y: number } | undefined;
+	const publishNavigation = () => {
+		const { root, requestId, backPath } = navigation.state;
+		void publishMobileNavigation({
+			root,
+			requestId,
+			revision: ++revision,
+			...(backPath ? { backPath } : {})
+		}).catch(() => {
+			/* A superseded request or expired runtime is rejected by native. */
+		});
+	};
+
 	onMount(() =>
-		mobileScreenStore.subscribe(async ({ screen }) => {
-			modalStore.close();
-			if (screen === 'contacts') {
-				modalStore.openAddressBook({ id: Symbol() });
+		mobileScreenStore.subscribe(async (request) => {
+			const transition = navigation.prepareRoot(request);
+			if (!transition) {
 				return;
 			}
-			const path =
-				screen === 'activity' || screen === 'earn' || screen === 'borrow' || screen === 'notes'
-					? `/${screen}/`
-					: screen === 'preferences'
-						? '/settings/'
-						: screen === 'search'
-							? '/?search=true'
-							: '/';
-			if (`${page.url.pathname}${page.url.search}` !== path) {
-				await goto(path);
+			if ($blockingOverlayOpenStore) {
+				navigation.cancel(transition);
+				publishNavigation();
+				return;
+			}
+			if (request.screen === 'contacts') {
+				navigation.cancel(transition);
+				modalStore.openAddressBook({ id: Symbol() });
+				publishNavigation();
+				return;
+			}
+			try {
+				if (`${page.url.pathname}${page.url.search}` !== transition.path) {
+					await goto(transition.path, { replaceState: true });
+				}
+				// Same-path requests do not trigger afterNavigate. A cancelled navigation
+				// acknowledges its request with the previous committed location.
+				if (navigation.pending === transition) {
+					if (!navigation.commit({ transition, url: page.url })) {
+						navigation.cancel(transition);
+					}
+					publishNavigation();
+				}
+			} catch {
+				if (navigation.cancel(transition)) {
+					publishNavigation();
+				}
 			}
 		})
 	);
+
+	onMount(() => {
+		mobileBackStore.set(() => {
+			if ($blockingOverlayOpenStore || navigation.pending) {
+				return;
+			}
+			if (navigation.state.backPath) {
+				history.back();
+			} else {
+				void goto('/', { replaceState: true });
+			}
+		});
+		return () => mobileBackStore.set(undefined);
+	});
 
 	onMount(() =>
 		blockingOverlayOpenStore.subscribe((blocking) => {
@@ -58,26 +125,133 @@
 		})
 	);
 
-	beforeNavigate(({ to, cancel }) => {
-		if (to && to.url.protocol !== 'https:' && !mobileRouteAllowed(to.url)) {
-			cancel();
+	onMount(() => {
+		let disposed = false;
+		let disconnect: (() => Promise<void>) | undefined;
+		void connectMobileInteractions({
+			onBack: () => $mobileBackStore?.(),
+			onRefresh: async (requestId) => {
+				try {
+					if (
+						disposed ||
+						$blockingOverlayOpenStore ||
+						navigation.pending ||
+						page.url.pathname !== '/' ||
+						page.url.searchParams.has('search')
+					) {
+						return;
+					}
+					await refreshWallet();
+				} catch (error) {
+					if (
+						!disposed &&
+						page.url.pathname === '/' &&
+						!(error instanceof DOMException && error.name === 'AbortError')
+					) {
+						toastsError({ msg: { text: $i18n.core.mobile_shell.refresh_failed } });
+					}
+				} finally {
+					await finishMobileRefresh(requestId).catch(() => {
+						// Native may already have ended this pull after navigation or expiry.
+					});
+				}
+			}
+		})
+			.then(async (remove) => {
+				if (disposed) {
+					await remove();
+				} else {
+					disconnect = remove;
+				}
+			})
+			.catch(() => {
+				// Native times out incomplete interactions; ordinary web Back remains usable.
+			});
+		return () => {
+			disposed = true;
+			cancelWalletRefresh();
+			void disconnect?.();
+		};
+	});
+
+	onMount(() => {
+		let previous: boolean | undefined;
+		return isPrivacyMode.subscribe((hidden) => {
+			if (previous !== undefined && previous !== hidden) {
+				// Never reveal balances from a cached list after privacy mode changes.
+				void clearMobileBack().catch(() => {});
+			}
+			previous = hidden;
+		});
+	});
+
+	onNavigate(async ({ from, to }) => {
+		const { root } = navigation.state;
+		if (
+			from?.url.pathname !== '/' ||
+			to?.url.pathname !== '/transactions/' ||
+			$blockingOverlayOpenStore ||
+			(root !== 'wallet' && root !== 'search')
+		) {
+			return;
+		}
+		try {
+			// Await native's bounded capture while the source list is still rendered.
+			await prepareMobileBack({ root, backPath: `${from.url.pathname}${from.url.search}` });
+		} catch {
+			// Capture failure disables the edge gesture, not access to the token.
 		}
 	});
-	afterNavigate(() => {
-		const root =
-			page.url.pathname === '/activity/'
-				? 'activity'
-				: page.url.pathname === '/earn/'
-					? 'earn'
-					: page.url.pathname === '/notes/'
-						? 'notes'
-						: page.url.pathname === '/borrow/'
-							? 'borrow'
-							: page.url.searchParams.has('search')
-								? 'search'
-								: 'wallet';
-		void navigateMobileHost(root);
+
+	beforeNavigate(({ from, to, type, cancel }) => {
+		if (!to) {
+			return;
+		}
+		// Capture before SvelteKit updates browser history and WebKit changes scroll.
+		if (from?.url.pathname === '/' && to.url.pathname === '/transactions/') {
+			listScroll = { path: `${from.url.pathname}${from.url.search}`, x: scrollX, y: scrollY };
+		}
+		if (
+			(to.url.protocol !== 'https:' && !mobileRouteAllowed(to.url)) ||
+			(type === 'popstate' && !navigation.canGoBack(to.url))
+		) {
+			cancel();
+			return;
+		}
+		cancelWalletRefresh();
 	});
+	afterNavigate(async () => {
+		const rendering = ++renderRevision;
+		const returning = navigation.canGoBack(page.url);
+		const transition = navigation.pending;
+		const committed = transition
+			? navigation.commit({ transition, url: page.url })
+			: navigation.commitRoute(page.url);
+		if (!committed) {
+			return;
+		}
+		// Report a committed screen only after the shared list's coalesced render
+		// and scroll restoration. Native can then remove its transition cover safely.
+		await tick();
+		await new Promise<void>((resolve) =>
+			requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+		);
+		if (
+			rendering !== renderRevision ||
+			navigation.pending ||
+			navigation.state.path !== `${page.url.pathname}${page.url.search}`
+		) {
+			return;
+		}
+		if (returning && listScroll?.path === navigation.state.path) {
+			scrollTo(listScroll.x, listScroll.y);
+			await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+		}
+		if (rendering === renderRevision && !navigation.pending) {
+			publishNavigation();
+		}
+	});
+
 	$effect(() => {
 		void publishMobileAccount($ethAddress ?? undefined).catch(() => {
 			// Expiry/navigation teardown may finish before an address load. Native fails closed.
@@ -85,7 +259,15 @@
 	});
 </script>
 
-<div aria-hidden="true" data-mobile-host></div>
+<div
+	aria-hidden="true"
+	data-mobile-host
+	data-mobile-refresh={page.url.pathname === '/' &&
+	!page.url.searchParams.has('search') &&
+	!$blockingOverlayOpenStore
+		? ''
+		: undefined}
+></div>
 
 <style lang="scss">
 	:global(html:has([data-mobile-host])) {
@@ -101,6 +283,12 @@
 		min-height: 100dvh;
 		height: auto;
 		overscroll-behavior: none;
+	}
+	/* UIKit owns pull-to-refresh only on Wallet. Other routes and modal surfaces
+	   retain their existing overscroll containment. */
+	:global(html:has([data-mobile-refresh])),
+	:global(body:has([data-mobile-refresh])) {
+		overscroll-behavior-y: auto;
 	}
 	/* A sheet owns the whole viewport, including the area under native navigation.
 	   The host hides its controls for the overlay's entire mounted lifetime. */

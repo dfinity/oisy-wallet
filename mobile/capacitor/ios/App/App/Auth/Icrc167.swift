@@ -3,7 +3,7 @@ import Foundation
 import Security
 
 struct Icrc167 {
-  static let timeToLiveNanoseconds: UInt64 = 86_400_000_000_000
+  static let timeToLiveNanoseconds = UInt64(AuthSession.duration) * 1_000_000_000
   // Match icp-native-sdk’s allowance for issuer/device clock skew.
   static let clockSkewSeconds: TimeInterval = 300
   let key: Curve25519.Signing.PrivateKey
@@ -99,12 +99,12 @@ struct Icrc167 {
     else { throw AuthError.invalidResponse }
     guard response.error == nil else { throw AuthError.signIn }
     guard let chain = response.result else { throw AuthError.invalidResponse }
-    let session = AuthSession(privateKey: key.rawRepresentation, chain: chain)
+    let session = AuthSession(privateKey: key.rawRepresentation, chain: chain, now: now)
     try session.validate(now: now)
     // The replica enforces the returned chain, not the lifetime we requested.
     let maximumExpiry = now.addingTimeInterval(
       Double(Self.timeToLiveNanoseconds) / 1_000_000_000 + Self.clockSkewSeconds)
-    guard session.expiresAt <= maximumExpiry else { throw AuthError.invalidResponse }
+    guard session.delegationExpiresAt <= maximumExpiry else { throw AuthError.invalidResponse }
     return session
   }
 }

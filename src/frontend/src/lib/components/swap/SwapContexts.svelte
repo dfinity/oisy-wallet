@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { setContext, type Snippet } from 'svelte';
+	import { setContext, untrack, type Snippet } from 'svelte';
 	import { get } from 'svelte/store';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import {
 		IC_TOKEN_FEE_CONTEXT_KEY,
 		type IcTokenFeeContext,
 		icTokenFeeStore
 	} from '$icp/stores/ic-token-fee.store';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import {
 		crossChainSwapNetworksMainnets,
 		crossChainSwapNetworksMainnetsIds
@@ -73,30 +75,34 @@
 		}
 	});
 
+	let availableNetworks = $derived(MOBILE_SHELL ? [ICP_NETWORK] : $crossChainSwapNetworksMainnets);
+	let availableNetworkIds = $derived(availableNetworks.map(({ id }) => id));
+
 	const tokensListContext = initModalTokensListContext({
 		tokens: [],
-		filterNetwork:
-			nonNullish($selectedNetwork) &&
-			$crossChainSwapNetworksMainnetsIds.includes($selectedNetwork.id)
+		filterNetwork: MOBILE_SHELL
+			? ICP_NETWORK
+			: nonNullish($selectedNetwork) &&
+				  $crossChainSwapNetworksMainnetsIds.includes($selectedNetwork.id)
 				? $selectedNetwork
 				: undefined,
-		filterNetworksIds: $crossChainSwapNetworksMainnetsIds
+		filterNetworksIds: untrack(() => availableNetworkIds)
 	});
 
 	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
 
 	const networksListContext = initModalNetworksListContext({
-		networks: $crossChainSwapNetworksMainnets
+		networks: untrack(() => availableNetworks)
 	});
 
 	setContext<ModalNetworksListContext>(MODAL_NETWORKS_LIST_CONTEXT_KEY, networksListContext);
 
 	$effect(() => {
-		networksListContext.setNetworks($crossChainSwapNetworksMainnets);
+		networksListContext.setNetworks(availableNetworks);
 	});
 
 	$effect(() => {
-		tokensListContext.setFilterNetworksIds($crossChainSwapNetworksMainnetsIds);
+		tokensListContext.setFilterNetworksIds(availableNetworkIds);
 	});
 
 	setContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY, {

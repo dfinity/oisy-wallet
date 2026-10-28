@@ -1,8 +1,10 @@
-import type { MobileScreen } from '$lib/schema/mobile-host.schema';
+import type { MobileNavigationRequest } from '$lib/schema/mobile-host.schema';
 import { writable } from 'svelte/store';
 
 // Native selections are requests; the shared Svelte router owns page history.
-export const mobileScreenStore = writable<{ screen: MobileScreen; request: number }>({
+export const mobileScreenStore = writable<MobileNavigationRequest>({
 	screen: 'wallet',
-	request: 0
+	requestId: 0
 });
+// Installed only for the lifetime of the authenticated shared web host.
+export const mobileBackStore = writable<(() => void) | undefined>();

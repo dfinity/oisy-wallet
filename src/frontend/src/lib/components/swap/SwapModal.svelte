@@ -93,6 +93,7 @@
 <WizardModal
 	bind:this={modal}
 	{disablePointerEvents}
+	mobilePresentation="fullScreen"
 	onClose={close}
 	{steps}
 	testId={SWAP_TOKENS_MODAL}

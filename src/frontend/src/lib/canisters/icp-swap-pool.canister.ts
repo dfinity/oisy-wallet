@@ -124,10 +124,14 @@ export class ICPSwapPoolCanister extends Canister<SwapPoolService> {
 	 * @returns Object containing balance0 and balance1 (both bigint).
 	 * @throws CanisterInternalError if fetching balances fails.
 	 */
-	getUserUnusedBalance = async (
-		principal: Principal
-	): Promise<{ balance0: bigint; balance1: bigint }> => {
-		const { getUserUnusedBalance } = this.caller({ certified: false });
+	getUserUnusedBalance = async ({
+		principal,
+		certified = false
+	}: {
+		principal: Principal;
+		certified?: boolean;
+	}): Promise<{ balance0: bigint; balance1: bigint }> => {
+		const { getUserUnusedBalance } = this.caller({ certified });
 		const response = await getUserUnusedBalance(principal);
 
 		if ('ok' in response) {

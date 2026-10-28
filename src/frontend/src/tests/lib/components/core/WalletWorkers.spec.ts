@@ -2,6 +2,7 @@ import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/t
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { SOLANA_DEVNET_TOKEN } from '$env/tokens/tokens.sol.env';
 import WalletWorkers from '$lib/components/core/WalletWorkers.svelte';
+import { registerWalletRefresh } from '$lib/services/wallet-refresh.services';
 import type { WalletWorker } from '$lib/types/listener';
 import type { TokenId } from '$lib/types/token';
 import { emit } from '$lib/utils/events.utils';
@@ -9,6 +10,11 @@ import * as walletUtils from '$lib/utils/wallet.utils';
 import { cleanWorkers, loadWorker } from '$lib/utils/wallet.utils';
 import { render } from '@testing-library/svelte';
 import { SvelteMap } from 'svelte/reactivity';
+
+vi.mock('$lib/constants/mobile.constants', () => ({ MOBILE_SHELL: true }));
+vi.mock('$lib/services/wallet-refresh.services', () => ({
+	registerWalletRefresh: vi.fn(() => vi.fn())
+}));
 
 describe('WalletWorkers', () => {
 	const tokenA = ETHEREUM_TOKEN;
@@ -19,12 +25,14 @@ describe('WalletWorkers', () => {
 	const stop = vi.fn();
 	const start = vi.fn();
 	const trigger = vi.fn();
+	const refresh = vi.fn(async (_signal: AbortSignal) => {});
 	const destroy = vi.fn();
 
 	const mockWorker: WalletWorker = {
 		stop,
 		start,
 		trigger,
+		refresh,
 		destroy
 	};
 
@@ -130,5 +138,31 @@ describe('WalletWorkers', () => {
 
 		expect(loadWorker).toHaveBeenCalledTimes(mockTokens.length * 2 + 1);
 		expect(initWalletWorker).toHaveBeenCalledTimes(mockTokens.length + 1);
+	});
+
+	describe('manual refresh', () => {
+		const refreshOwner = () =>
+			vi.mocked(registerWalletRefresh).mock.calls[0][0].refresh(new AbortController().signal);
+
+		it('succeeds explicitly for an empty enabled token list', async () => {
+			render(WalletWorkers, { tokens: [], initWalletWorker });
+
+			await expect(refreshOwner()).resolves.toBeUndefined();
+			expect(refresh).not.toHaveBeenCalled();
+		});
+
+		it('initializes workers before refresh without waiting for the debounce', async () => {
+			render(WalletWorkers, { tokens, initWalletWorker });
+			await refreshOwner();
+
+			expect(initWalletWorker).toHaveBeenCalledTimes(tokens.length);
+			expect(refresh).toHaveBeenCalledTimes(tokens.length);
+		});
+
+		it('rejects a missing address instead of treating it as an empty wallet', async () => {
+			render(WalletWorkers, { tokens: [], initWalletWorker, refreshReady: false });
+
+			await expect(refreshOwner()).rejects.toThrow('address unavailable');
+		});
 	});
 });

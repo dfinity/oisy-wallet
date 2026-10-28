@@ -8,13 +8,19 @@ describe('mobile session', () => {
 	const root = Ed25519KeyIdentity.generate();
 	const native = Ed25519KeyIdentity.generate();
 	const postMessage = vi.mocked(requestMobileWallet);
-	const nativeGrant = async (message: Record<string, string>) => {
+	const nativeGrant = async ({
+		message,
+		lifetime = 3_600_000
+	}: {
+		message: Record<string, string>;
+		lifetime?: number;
+	}) => {
 		const { publicKey } = z.object({ publicKey: z.string() }).parse(message);
-		const expiresAt = Date.now() + 300_000;
+		const expiresAt = Date.now() + lifetime;
 		const previous = await DelegationChain.create(
 			root,
 			native.getPublicKey(),
-			new Date(Date.now() + 600_000)
+			new Date(Date.now() + lifetime + 60_000)
 		);
 		const chain = await DelegationChain.create(
 			native,
@@ -41,10 +47,13 @@ describe('mobile session', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		postMessage.mockImplementation(nativeGrant);
+		vi.useFakeTimers({ toFake: ['Date'] });
+		vi.setSystemTime(new Date('2026-10-28T10:00:00Z'));
+		postMessage.mockImplementation((request) => nativeGrant({ message: request }));
 	});
 
 	afterEach(() => {
+		vi.useRealTimers();
 		vi.unstubAllGlobals();
 		vi.unstubAllEnvs();
 	});
@@ -54,14 +63,42 @@ describe('mobile session', () => {
 
 		expect(identity.getPrincipal().toText()).toBe(root.getPrincipal().toText());
 		expect(identity.getDelegation().delegations).toHaveLength(2);
-		expect(expiresAt - Date.now()).toBeLessThanOrEqual(300_000);
-		expect(expiresAt - Date.now()).toBeGreaterThan(290_000);
+		expect(expiresAt - Date.now()).toBe(3_600_000);
 		await expect(identity.sign(new Uint8Array([1, 2, 3]))).resolves.toHaveLength(64);
+	});
+
+	it('accepts only the time remaining after reopening the wallet', async () => {
+		postMessage.mockImplementation((request) =>
+			nativeGrant({ message: request, lifetime: 60_000 })
+		);
+		const { expiresAt } = await createMobileIdentity();
+
+		expect(expiresAt).toBe(Date.now() + 60_000);
+	});
+
+	it('rejects an overlong signed grant even when its declared expiry matches', async () => {
+		postMessage.mockImplementation((request) =>
+			nativeGrant({ message: request, lifetime: 3_900_000 })
+		);
+
+		await expect(createMobileIdentity()).rejects.toThrow('Invalid mobile delegation');
+	});
+
+	it('rejects a response that arrives after its original deadline', async () => {
+		postMessage.mockImplementation(async (request) => {
+			const result = await nativeGrant({ message: request, lifetime: 60_000 });
+			vi.setSystemTime(Date.now() + 60_000);
+			return result;
+		});
+
+		await expect(createMobileIdentity()).rejects.toThrow('Invalid mobile delegation');
 	});
 
 	it('rejects a response issued for a different public key', async () => {
 		postMessage.mockImplementation(() =>
-			nativeGrant({ publicKey: Buffer.from(root.getPublicKey().toDer()).toString('base64') })
+			nativeGrant({
+				message: { publicKey: Buffer.from(root.getPublicKey().toDer()).toString('base64') }
+			})
 		);
 
 		await expect(createMobileIdentity()).rejects.toThrow('Invalid mobile delegation');
@@ -74,7 +111,7 @@ describe('mobile session', () => {
 			{ expiresAt: Date.now() + 600_000 }
 		]) {
 			postMessage.mockImplementation(async (request: Record<string, string>) =>
-				JSON.stringify({ ...JSON.parse(await nativeGrant(request)), ...overrides })
+				JSON.stringify({ ...JSON.parse(await nativeGrant({ message: request })), ...overrides })
 			);
 
 			await expect(createMobileIdentity()).rejects.toThrow();

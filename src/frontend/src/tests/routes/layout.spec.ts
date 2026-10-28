@@ -4,14 +4,17 @@ import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 import * as analytics from '$lib/services/analytics.services';
 import { authLoggedInAnotherTabStore, authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
+import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsShow } from '$lib/stores/toasts.store';
 import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
+import * as deviceUtils from '$lib/utils/device.utils';
 import App from '$routes/+layout.svelte';
 import { mockAuthSignedIn } from '$tests/mocks/auth.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { get } from 'svelte/store';
 
 vi.mock('$lib/services/worker.auth.services', () => ({
@@ -111,6 +114,52 @@ describe('App Layout', () => {
 		render(App, { children: mockSnippet });
 
 		expect(spy).toHaveBeenCalledOnce();
+	});
+
+	describe('iOS modal scroll restoration', () => {
+		beforeEach(() => {
+			vi.spyOn(deviceUtils, 'isIOS').mockReturnValue(true);
+			vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+			modalStore.close();
+		});
+
+		afterEach(() => {
+			vi.restoreAllMocks();
+			vi.unstubAllGlobals();
+			modalStore.close();
+			document.body.removeAttribute('style');
+		});
+
+		it('does not reset scroll when no modal has locked the page', async () => {
+			render(App, { children: mockSnippet });
+			await tick();
+			modalStore.close();
+			await tick();
+
+			expect(window.scrollTo).not.toHaveBeenCalled();
+		});
+
+		it('preserves the original offset when switching between modal steps', async () => {
+			render(App, { children: mockSnippet });
+			await tick();
+			vi.stubGlobal('scrollY', 160);
+			modalStore.openIcpReceive(Symbol());
+			await tick();
+
+			expect(document.body.style.top).toBe('-160px');
+
+			vi.stubGlobal('scrollY', 0);
+			modalStore.openIcpReceive(Symbol());
+			await tick();
+
+			expect(document.body.style.top).toBe('-160px');
+
+			modalStore.close();
+			await tick();
+
+			expect(window.scrollTo).toHaveBeenCalledExactlyOnceWith(0, 160);
+			expect(document.body.style.position).toBe('');
+		});
 	});
 
 	describe('user selected network initialization on mount', () => {

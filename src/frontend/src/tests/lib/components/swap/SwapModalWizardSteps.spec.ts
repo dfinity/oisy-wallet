@@ -14,6 +14,7 @@ import {
 import * as addressDerived from '$lib/derived/address.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
+import { swapService } from '$lib/services/swap.services';
 import {
 	MODAL_NETWORKS_LIST_CONTEXT_KEY,
 	initModalNetworksListContext
@@ -28,12 +29,14 @@ import {
 	type SwapAmountsStoreData
 } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
+import { SwapProvider } from '$lib/types/swap';
 import type { WizardModal, WizardStep } from '$lib/types/wizard';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxo } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get, readable } from 'svelte/store';
 
@@ -68,10 +71,13 @@ describe('SwapModalWizardSteps', () => {
 	};
 
 	const mockModal = {
+		next: vi.fn(),
+		back: vi.fn(),
 		set: vi.fn()
 	};
 
 	beforeEach(() => {
+		mockModal.next.mockReset();
 		const mockToken = { ...mockValidIcToken, enabled: true };
 
 		const originalContext = initSwapContext({
@@ -219,6 +225,56 @@ describe('SwapModalWizardSteps', () => {
 
 			expect(getByText(en.swap.text.initializing)).toBeInTheDocument();
 		});
+	});
+
+	it('keeps the executing ICP wizard alive through progress and cancels it only on modal teardown', async () => {
+		mockAuthStore();
+		setupSwapAmountsStore(mockSwapAmounts);
+		setupIcTokenFeeStore();
+		setupModalTokensListContext();
+		setupModalNetworksListContext();
+		const token = { ...mockValidIcToken, enabled: true };
+		mockContext.set(SWAP_CONTEXT_KEY, {
+			...initSwapContext({ sourceToken: token, destinationToken: token }),
+			isSourceTokenIcrc2: readable(true),
+			sourceTokenExchangeRate: readable(1),
+			destinationTokenExchangeRate: readable(1)
+		});
+		let finishSwap: (() => void) | undefined;
+		const executeSwap = vi.spyOn(swapService, SwapProvider.ICP_SWAP).mockImplementation(
+			() =>
+				new Promise<void>((resolve) => {
+					finishSwap = resolve;
+				})
+		);
+		const { getByRole, getByText, rerender, unmount } = renderSwapModalWizardSteps({
+			name: WizardStepsSwap.SWAP,
+			title: 'Swap'
+		});
+		await rerender({
+			currentStep: { name: WizardStepsSwap.REVIEW, title: 'Review' },
+			slippageValue: '0.5'
+		});
+		mockModal.next.mockImplementation(() => {
+			void rerender({ currentStep: { name: WizardStepsSwap.SWAPPING, title: 'Swapping' } });
+		});
+		await fireEvent.click(getByRole('button', { name: en.swap.text.swap_button }));
+		await tick();
+
+		expect(executeSwap).toHaveBeenCalledOnce();
+
+		const [[{ canProceed }]] = executeSwap.mock.calls;
+
+		expect(canProceed?.()).toBeTruthy();
+		expect(getByText(en.swap.text.initializing)).toBeInTheDocument();
+
+		unmount();
+
+		expect(canProceed?.()).toBeFalsy();
+
+		finishSwap?.();
+		await tick();
+		executeSwap.mockRestore();
 	});
 
 	// `SwapBtcContexts` wraps the per-step `{#key}` rather than sitting inside it. Below the

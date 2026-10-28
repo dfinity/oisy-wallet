@@ -18,7 +18,8 @@ struct WebDelegation: Encodable {
     else {
       throw AuthError.invalidResponse
     }
-    let expiry = min(session.expiresAt, now.addingTimeInterval(300))
+    // A new document gets the remaining session time, never a fresh lifetime.
+    let expiry = session.expiresAt
     let delegation = DelegationChain.SignedDelegation.Delegation(
       pubkey: publicKey,
       expiration: String(UInt64(expiry.timeIntervalSince1970 * 1_000_000_000)), targets: nil)

@@ -14,17 +14,24 @@ describe('mobile worker delegation', () => {
 
 	beforeEach(async () => {
 		vi.restoreAllMocks();
+		vi.useFakeTimers({ toFake: ['Date'] });
+		vi.setSystemTime(new Date('2026-10-28T10:00:00Z'));
 		const root = Ed25519KeyIdentity.generate();
 		const sessionKey = Ed25519KeyIdentity.generate();
 		identity = DelegationIdentity.fromDelegation(
 			sessionKey,
-			await DelegationChain.create(root, sessionKey.getPublicKey(), new Date(Date.now() + 60_000))
+			await DelegationChain.create(
+				root,
+				sessionKey.getPublicKey(),
+				new Date(Date.now() + 3_600_000)
+			)
 		);
 		provider.setMobileIdentity(identity);
 	});
 
 	afterEach(() => {
 		provider.reset();
+		vi.useRealTimers();
 		vi.restoreAllMocks();
 	});
 
@@ -54,6 +61,7 @@ describe('mobile worker delegation', () => {
 			)
 		};
 		await connectMobileWorkerSession(worker);
+		vi.setSystemTime(Date.now() + 45 * 60_000);
 		await connectMobileWorkerSession(worker);
 		await Promise.all(jobs);
 
@@ -65,7 +73,7 @@ describe('mobile worker delegation', () => {
 			const chain = workerIdentity.getDelegation();
 
 			expect(chain.delegations).toHaveLength(2);
-			expect(chain.delegations.at(-1)?.delegation.expiration).toBeLessThanOrEqual(
+			expect(chain.delegations.at(-1)?.delegation.expiration).toBe(
 				identity.getDelegation().delegations[0].delegation.expiration
 			);
 			await expect(workerIdentity.sign(new Uint8Array([1, 2, 3]))).resolves.toHaveLength(64);
@@ -87,6 +95,14 @@ describe('mobile worker delegation', () => {
 		await expect(connectMobileWorkerSession(worker)).rejects.toThrow('unavailable');
 		expect(worker.postMessage).not.toHaveBeenCalled();
 		expect(create).not.toHaveBeenCalled();
+	});
+
+	it('does not give a new worker access after the fixed deadline', async () => {
+		vi.setSystemTime(Date.now() + 60 * 60_000);
+		const worker = { postMessage: vi.fn() };
+
+		await expect(connectMobileWorkerSession(worker)).rejects.toThrow('unavailable');
+		expect(worker.postMessage).not.toHaveBeenCalled();
 	});
 
 	it('rejects a late worker key after sign-out', async () => {

@@ -71,13 +71,16 @@ export const withdraw = async ({
 export const getUserUnusedBalance = async ({
 	identity,
 	canisterId,
-	principal
-}: CanisterApiFunctionParamsWithCanisterId<ICPSwapGetUserUnusedBalanceParams>): Promise<{
+	principal,
+	certified = false
+}: CanisterApiFunctionParamsWithCanisterId<ICPSwapGetUserUnusedBalanceParams> & {
+	certified?: boolean;
+}): Promise<{
 	balance0: bigint;
 	balance1: bigint;
 }> => {
 	const { getUserUnusedBalance } = await getPoolCanister({ identity, canisterId });
-	return getUserUnusedBalance(principal);
+	return getUserUnusedBalance({ principal, certified });
 };
 
 export const getPoolMetadata = async ({

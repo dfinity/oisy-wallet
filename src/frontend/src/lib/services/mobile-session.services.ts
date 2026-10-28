@@ -1,3 +1,4 @@
+import { MOBILE_SESSION_DURATION_MS } from '$lib/constants/mobile.constants';
 import { requestMobileWallet } from '$lib/services/mobile-host.services';
 import {
 	DelegationChain,
@@ -69,12 +70,13 @@ export const createMobileIdentity = async () => {
 		!isDelegationValid(chain) ||
 		delegations.at(-1)?.delegation.pubkey !== Buffer.from(publicKey).toString('hex') ||
 		grant.expiresAt <= Date.now() ||
-		grant.expiresAt > Date.now() + 301_000 ||
-		grant.expiresAt >
-			Math.min(
-				...chain.delegations.map(({ delegation }) => Number(delegation.expiration) / 1_000_000)
-			) +
-				1
+		grant.expiresAt > Date.now() + MOBILE_SESSION_DURATION_MS + 1_000 ||
+		Math.abs(
+			grant.expiresAt -
+				Math.min(
+					...chain.delegations.map(({ delegation }) => Number(delegation.expiration) / 1_000_000)
+				)
+		) > 1
 	) {
 		throw new Error('Invalid mobile delegation');
 	}

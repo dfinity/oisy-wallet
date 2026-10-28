@@ -17,8 +17,8 @@ final class WalletSessionTests: XCTestCase {
     let grant = try XCTUnwrap(session.grant)
     XCTAssertEqual(grant.principal, native.principal)
     try AuthSession(privateKey: child.rawRepresentation, chain: grant.chain).validate()
-    XCTAssertLessThanOrEqual(
-      grant.expiresAt, Date.now.addingTimeInterval(300).timeIntervalSince1970 * 1000)
+    XCTAssertEqual(grant.expiresAt, native.expiresAt.timeIntervalSince1970 * 1000)
+    XCTAssertFalse(session.checkExpiration(now: native.expiresAt.addingTimeInterval(-1)))
     try session.setAccount(
       grantID: grant.id, principal: grant.principal,
       address: "0x2222222222222222222222222222222222222222")
@@ -46,6 +46,8 @@ final class WalletSessionTests: XCTestCase {
     _ = try session.authorize(publicKey: Icrc167.derPublicKey(Curve25519.Signing.PrivateKey()))
     let grant = try XCTUnwrap(session.grant)
     session.resetDocument()
+    _ = try session.authorize(publicKey: Icrc167.derPublicKey(Curve25519.Signing.PrivateKey()))
+    XCTAssertEqual(session.grant?.expiresAt, grant.expiresAt)
     XCTAssertThrowsError(
       try session.setAccount(grantID: grant.id, principal: grant.principal, address: nil))
   }

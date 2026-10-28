@@ -113,7 +113,8 @@
 			"copy_failed": "Couldn't copy. Your browser blocked access to the clipboard. Try again."
 		},
 		"mobile_shell": {
-			"account": "Account"
+			"account": "Account",
+			"refresh_failed": "Some balances or prices couldn’t be refreshed. Try again."
 		}
 	},
 	"progress": {
@@ -1057,7 +1058,12 @@
 			"send_review_subtitle": "You send",
 			"no_nfts_found": "No collectibles found",
 			"no_nfts_found_desc": "Adjust your search or network to find your collectibles",
-			"select_nft": "Select collectible"
+			"select_nft": "Select collectible",
+			"mobile_pending": "A transfer is awaiting confirmation. Check Activity before trying again. Sending on this network is paused until its outcome is known.",
+			"mobile_pending_title": "Pending operation",
+			"mobile_not_confirmed": "The transfer reverted or its nonce was used by another transaction. Check Activity before sending again.",
+			"mobile_recovery_unavailable": "Pending operations could not be checked. New transactions need a working recovery record before they can be submitted.",
+			"mobile_check_status": "Check status"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x), name or alias",
@@ -1079,7 +1085,9 @@
 			"fee_expired": "The fee amount calculated for this transaction has expired. Use “Back” to get an updated fee amount.",
 			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "The scanned code only contained a destination address. Make sure you select the correct token, enter the right amount, and review the destination address carefully!",
-			"scanned_address_only_destination_single_token": "The scanned code only contained a destination address. Make sure you enter the right amount and review the destination address carefully!"
+			"scanned_address_only_destination_single_token": "The scanned code only contained a destination address. Make sure you enter the right amount and review the destination address carefully!",
+			"mobile_ic_only": "Send ICP and ck-tokens to an Internet Computer account. Minting, burning and transfers to other networks are not available in this preview.",
+			"mobile_supported_only": "Send ICP, ck-tokens, ETH and ERC-20 tokens on their current network. Conversions and NFT transfers are not available in this preview."
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
@@ -1155,7 +1163,8 @@
 			"xrp_destination_unfunded": "This address has no XRP account yet. Creating one needs a first payment of at least $reserve XRP. Nothing was sent — raise the amount, or send to an address that is already funded.",
 			"xrp_destination_tag_required": "This address requires an XRP destination tag. Nothing was sent — add the tag given to you by the service you are paying, then send again.",
 			"xrp_destination_is_source": "This is your own XRP address. Nothing was sent — choose a different recipient.",
-			"xrp_account_state_unavailable": "The wallet could not read your account details, so the amount could not be checked. Nothing was sent — try again in a moment."
+			"xrp_account_state_unavailable": "The wallet could not read your account details, so the amount could not be checked. Nothing was sent — try again in a moment.",
+			"mobile_unconfirmed": "We couldn’t confirm the transfer. Check Activity and your balance before sending again."
 		}
 	},
 	"mint": {
@@ -1398,7 +1407,12 @@
 			"oisy_trade_taker_fee": "Taker fee",
 			"oisy_trade_withdrawal_fee": "Withdrawal ledger fee",
 			"value_difference_error_confirmation": "The value difference is very high, and you would lose a significant value in this swap. Please confirm that you want to proceed.",
-			"value_difference_missing_price_confirmation": "The price for at least one of the tokens could not be retrieved. Please <strong>verify independently</strong> that this swap offer provides a fair deal.<br>Note that the slippage setting does <strong>not</strong> protect you from an offer with a much lower receive value!"
+			"value_difference_missing_price_confirmation": "The price for at least one of the tokens could not be retrieved. Please <strong>verify independently</strong> that this swap offer provides a fair deal.<br>Note that the slippage setting does <strong>not</strong> protect you from an offer with a much lower receive value!",
+			"mobile_pending": "The swap was interrupted. Do not repeat it. After 10 minutes, you can withdraw any available pool balance to this wallet. An uncertain operation keeps this pool locked.",
+			"mobile_pool_not_empty": "This pool already holds tokens for your wallet. Recover them before starting a new swap.",
+			"mobile_no_recovery_balance": "No recoverable balance was confirmed, or the withdrawal could not be completed. The operation remains pending; check Activity and try checking its status later.",
+			"mobile_recovered": "Available pool tokens were returned to this wallet. Check Activity. The record stays pending because the earlier operation still has an uncertain outcome.",
+			"mobile_recover": "Withdraw available tokens"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",

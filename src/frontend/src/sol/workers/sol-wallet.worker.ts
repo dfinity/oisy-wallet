@@ -31,7 +31,11 @@ export const onSolWalletMessage = async ({
 				scheduler = new SolWalletScheduler();
 			}
 
-			await scheduler.trigger(data);
+			if ('requestId' in dataMsg && dataMsg.requestId !== undefined) {
+				await scheduler.refresh(data);
+			} else {
+				await scheduler.trigger(data);
+			}
 		}
 	}
 };

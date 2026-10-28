@@ -24,6 +24,11 @@ final class TrustedWalletViewController: CAPBridgeViewController {
   let hostPlugin = OisyHostPlugin()
   let session: WalletSession
   private var messageGate: WalletMessageGate?
+  private var navigationObservations: [NSKeyValueObservation] = []
+  private var approvedBackURL: URL?
+  private var permitsBackNavigation = false
+  private var permitsRefresh = false
+  private(set) var interactions: WalletInteractions?
   #if DEBUG
     var bootstrapScript: String?
   #endif
@@ -61,9 +66,68 @@ final class TrustedWalletViewController: CAPBridgeViewController {
     webView.scrollView.bounces = false
     webView.scrollView.contentInsetAdjustmentBehavior = .never
     webView.allowsBackForwardNavigationGestures = false
+    interactions = WalletInteractions(
+      webView: webView,
+      onBack: { [weak self] in self?.hostPlugin.returnToParent() },
+      onRefresh: { [weak self] requestID in self?.hostPlugin.refresh(requestID: requestID) })
+    registerForTraitChanges([UITraitUserInterfaceStyle.self]) {
+      (controller: TrustedWalletViewController, _: UITraitCollection) in
+      controller.interactions?.clearBack()
+    }
+    navigationObservations = [
+      webView.observe(\.url, options: [.new]) { [weak self] _, _ in
+        MainActor.assumeIsolated { self?.refreshBackNavigation() }
+      },
+      webView.observe(\.canGoBack, options: [.new]) { [weak self] _, _ in
+        MainActor.assumeIsolated { self?.refreshBackNavigation() }
+      },
+      webView.observe(\.canGoForward, options: [.new]) { [weak self] _, _ in
+        MainActor.assumeIsolated { self?.refreshBackNavigation() }
+      },
+    ]
     webView.isInspectable = _isDebugAssertConfiguration()
   }
+  func setBackNavigation(parent: URL?, enabled: Bool, refreshEnabled: Bool = false) {
+    approvedBackURL = parent
+    permitsBackNavigation = enabled
+    permitsRefresh = refreshEnabled
+    refreshBackNavigation()
+  }
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    refreshBackNavigation()
+  }
+  func prepareBack(parent: URL, completion: @escaping (Bool) -> Void) {
+    guard let webView, let interactions, session.isActive,
+      webView.url == parent || webView.backForwardList.backItem?.url == parent
+    else {
+      completion(false)
+      return
+    }
+    interactions.capture(parent: parent, completion: completion)
+  }
+  private func refreshBackNavigation() {
+    guard let webView else { return }
+    let allowed = permitsBackNavigation && session.isActive
+    let isRoot =
+      WalletOriginPolicy.accepts(webView.url, mainFrame: true)
+      && webView.url.flatMap {
+        WalletBackNavigationPolicy.parentURL(
+          path: $0.path + ($0.query.map { "?" + $0 } ?? ""), root: .wallet)
+      } != nil
+    interactions?.update(
+      backAllowed: allowed && WalletBackNavigationPolicy.isToken(webView.url)
+        && approvedBackURL != nil && approvedBackURL == interactions?.parentURL
+        && webView.backForwardList.backItem?.url == approvedBackURL
+        && webView.backForwardList.forwardItem == nil,
+      refreshAllowed: allowed && permitsRefresh && isRoot)
+    webView.allowsBackForwardNavigationGestures = false
+  }
   func close() {
+    interactions?.close()
+    interactions = nil
+    setBackNavigation(parent: nil, enabled: false)
+    navigationObservations.removeAll()
     session.close()
     hostPlugin.host = nil
     webView?.stopLoading()
@@ -93,7 +157,9 @@ private final class WalletMessageGate: NSObject, WKScriptMessageHandler {
       body["pluginId"] as? String == "OisyHost",
       let method = body["methodName"] as? String,
       [
-        "ready", "navigate", "presentation", "openAccount", "wallet", "addListener",
+        "ready", "navigate", "navigationState", "presentation", "openAccount", "wallet",
+        "prepareBack", "clearBack", "finishRefresh",
+        "addListener",
         "removeListener",
       ].contains(
         method)

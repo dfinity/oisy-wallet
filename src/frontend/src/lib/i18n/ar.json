@@ -113,7 +113,8 @@
 			"copy_failed": ""
 		},
 		"mobile_shell": {
-			"account": ""
+			"account": "",
+			"refresh_failed": ""
 		}
 	},
 	"progress": {
@@ -1057,7 +1058,12 @@
 			"send_review_subtitle": "أنت ترسل",
 			"no_nfts_found": "",
 			"no_nfts_found_desc": "",
-			"select_nft": ""
+			"select_nft": "",
+			"mobile_pending": "",
+			"mobile_pending_title": "",
+			"mobile_not_confirmed": "",
+			"mobile_recovery_unavailable": "",
+			"mobile_check_status": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "أدخل العنوان العام (0x)، الاسم أو الاسم المستعار",
@@ -1079,7 +1085,9 @@
 			"fee_expired": "",
 			"fee_info": "سيتم دفع الرسوم بعملة $feeSymbol. متوفر: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "يحتوي الرمز الممسوح ضوئيًا على عنوان الوجهة فقط. تأكد من اختيار التوكن الصحيح، وإدخال المبلغ المناسب، ومراجعة عنوان الوجهة بعناية!",
-			"scanned_address_only_destination_single_token": "يحتوي الرمز الممسوح ضوئيًا على عنوان الوجهة فقط. تأكد من إدخال المبلغ المناسب، ومراجعة عنوان الوجهة بعناية!"
+			"scanned_address_only_destination_single_token": "يحتوي الرمز الممسوح ضوئيًا على عنوان الوجهة فقط. تأكد من إدخال المبلغ المناسب، ومراجعة عنوان الوجهة بعناية!",
+			"mobile_ic_only": "",
+			"mobile_supported_only": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "عنوان الوجهة غير صالح",
@@ -1155,7 +1163,8 @@
 			"xrp_destination_unfunded": "",
 			"xrp_destination_tag_required": "",
 			"xrp_destination_is_source": "",
-			"xrp_account_state_unavailable": ""
+			"xrp_account_state_unavailable": "",
+			"mobile_unconfirmed": ""
 		}
 	},
 	"mint": {
@@ -1398,7 +1407,12 @@
 			"oisy_trade_taker_fee": "",
 			"oisy_trade_withdrawal_fee": "",
 			"value_difference_error_confirmation": "",
-			"value_difference_missing_price_confirmation": "تعذر استرجاع سعر واحد على الأقل من الرموز. يرجى <strong>التحقق بشكل مستقل</strong> من أن عرض المبادلة هذا يقدم صفقة عادلة.<br>لاحظ أن إعداد الانزلاق السعري <strong>لا</strong> يحميك من عرض بقيمة استلام أقل بكثير!"
+			"value_difference_missing_price_confirmation": "تعذر استرجاع سعر واحد على الأقل من الرموز. يرجى <strong>التحقق بشكل مستقل</strong> من أن عرض المبادلة هذا يقدم صفقة عادلة.<br>لاحظ أن إعداد الانزلاق السعري <strong>لا</strong> يحميك من عرض بقيمة استلام أقل بكثير!",
+			"mobile_pending": "",
+			"mobile_pool_not_empty": "",
+			"mobile_no_recovery_balance": "",
+			"mobile_recovered": "",
+			"mobile_recover": ""
 		},
 		"error": {
 			"kong_not_available": "لا يوجد حاليًا أي تبادل متاح لتبديل التوكنات. يرجى المحاولة مرة أخرى لاحقًا.",

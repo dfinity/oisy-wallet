@@ -12,8 +12,10 @@ import {
 	type EthFeeStore,
 	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
+import { MobileEthSendPendingError } from '$eth/types/send';
 import * as tokenUtils from '$eth/utils/token.utils';
 import * as ckethServices from '$icp-eth/services/cketh.services';
+import type * as MobileConstantsModule from '$lib/constants/mobile.constants';
 import {
 	MAX_BUTTON,
 	REVIEW_FORM_SEND_BUTTON,
@@ -25,6 +27,7 @@ import * as exchDerived from '$lib/derived/exchange.derived';
 import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
+import type * as OperationJournalModule from '$lib/services/mobile-operation-journal.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { initSendContext, SEND_CONTEXT_KEY } from '$lib/stores/send.store';
 import * as toasts from '$lib/stores/toasts.store';
@@ -42,6 +45,18 @@ import { fireEvent, render } from '@testing-library/svelte';
 import type { TransactionResponse } from 'ethers/providers';
 import { makeError } from 'ethers/utils';
 import { readable, writable, type Writable } from 'svelte/store';
+
+const mobile = vi.hoisted(() => ({ enabled: false, persist: vi.fn() }));
+vi.mock('$lib/constants/mobile.constants', async (importOriginal) => ({
+	...(await importOriginal<typeof MobileConstantsModule>()),
+	get MOBILE_SHELL() {
+		return mobile.enabled;
+	}
+}));
+vi.mock('$lib/services/mobile-operation-journal.services', async (importOriginal) => ({
+	...(await importOriginal<typeof OperationJournalModule>()),
+	persistMobileEthSend: mobile.persist
+}));
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
 	initMinedTransactionsListener: () => ({
@@ -81,6 +96,8 @@ describe('EthSendTokenWizard.spec', () => {
 	beforeEach(() => {
 		vi.useFakeTimers();
 		vi.clearAllMocks();
+		mobile.enabled = false;
+		mobile.persist.mockResolvedValue(undefined);
 
 		vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(fromAddr));
 		vi.spyOn(idDerived, 'authIdentity', 'get').mockImplementation(() => readable(mockIdentity));
@@ -182,6 +199,61 @@ describe('EthSendTokenWizard.spec', () => {
 		);
 
 		expect(nftSendServices.sendNft).not.toHaveBeenCalled();
+	});
+
+	it('saves mobile recovery before broadcast without requiring ck minter metadata', async () => {
+		mobile.enabled = true;
+		vi.mocked(ckethServices.assertCkEthMinterInfoLoaded).mockReturnValue({ valid: false });
+		vi.mocked(sendServices.send).mockImplementation(async ({ beforeBroadcast }) => {
+			await beforeBroadcast?.({ hash: '0xsignedhash', nonce: 2 });
+			return { hash: '0xsignedhash', nonce: 2 };
+		});
+		const { getByTestId } = renderHost({
+			currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+			sendProgressStep: ProgressStepsSend.INITIALIZATION,
+			destination,
+			sourceNetwork: ETHEREUM_NETWORK,
+			nativeEthereumToken: ETHEREUM_TOKEN,
+			sendToken: ETHEREUM_TOKEN,
+			sendTokenDecimals: ETHEREUM_TOKEN.decimals
+		});
+		await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+		await vi.runOnlyPendingTimersAsync();
+
+		expect(ckethServices.assertCkEthMinterInfoLoaded).not.toHaveBeenCalled();
+		expect(mobile.persist).toHaveBeenCalledWith({
+			identity: mockIdentity,
+			token: ETHEREUM_TOKEN,
+			from: fromAddr,
+			to: destination,
+			hash: '0xsignedhash',
+			nonce: 2
+		});
+	});
+
+	it('closes an uncertain mobile transfer instead of offering an immediate retry', async () => {
+		mobile.enabled = true;
+		vi.mocked(sendServices.send).mockRejectedValueOnce(
+			new MobileEthSendPendingError({ hash: '0xhash', nonce: 2 })
+		);
+		const onCloseStep = vi.fn();
+		const { getByTestId } = render(EthSendTokenWizardTestHost, {
+			props: {
+				currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+				destination,
+				sendContext: mockSendContext({
+					sendToken: ETHEREUM_TOKEN,
+					sendTokenDecimals: ETHEREUM_TOKEN.decimals
+				}),
+				sourceNetwork: ETHEREUM_NETWORK,
+				nativeEthereumToken: ETHEREUM_TOKEN,
+				onCloseStep
+			}
+		});
+		await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+
+		expect(onCloseStep).toHaveBeenCalledOnce();
+		expect(sendServices.send).toHaveBeenCalledOnce();
 	});
 
 	it('sends NFT via sendNft on icSend', async () => {
@@ -617,6 +689,49 @@ describe('EthSendTokenWizard.spec', () => {
 			expect(sendServices.send).toHaveBeenCalledWith(
 				expect.objectContaining({ amount: freshBalance - gasFee })
 			);
+		});
+
+		it('ignores a second tap while the Max balance is still being read', async () => {
+			let finishRead: ((balance: bigint) => void) | undefined;
+			vi.mocked(ethBalanceServices.readEthBalance).mockImplementation(
+				() =>
+					new Promise((resolve) => {
+						finishRead = resolve;
+					})
+			);
+			const { getByTestId, rerender } = renderMaxSend();
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+			await rerender({ currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' } });
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+
+			expect(ethBalanceServices.readEthBalance).toHaveBeenCalledOnce();
+
+			finishRead?.(freshBalance);
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(sendServices.send).toHaveBeenCalledOnce();
+		});
+
+		it('does not submit after the view is dismissed during the Max balance read', async () => {
+			let finishRead: ((balance: bigint) => void) | undefined;
+			vi.mocked(ethBalanceServices.readEthBalance).mockImplementation(
+				() =>
+					new Promise((resolve) => {
+						finishRead = resolve;
+					})
+			);
+			const { getByTestId, rerender, unmount } = renderMaxSend();
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+			await rerender({ currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' } });
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+			unmount();
+			finishRead?.(freshBalance);
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(sendServices.send).not.toHaveBeenCalled();
 		});
 
 		it('caps against the last sample when the re-read fails', async () => {

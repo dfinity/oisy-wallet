@@ -113,7 +113,8 @@
 			"copy_failed": ""
 		},
 		"mobile_shell": {
-			"account": ""
+			"account": "",
+			"refresh_failed": ""
 		}
 	},
 	"progress": {
@@ -1057,7 +1058,12 @@
 			"send_review_subtitle": "전송 금액",
 			"no_nfts_found": "컬렉터블을 찾을 수 없습니다",
 			"no_nfts_found_desc": "검색어나 네트워크를 조정하여 컬렉터블을 찾아보세요",
-			"select_nft": "컬렉터블 선택"
+			"select_nft": "컬렉터블 선택",
+			"mobile_pending": "",
+			"mobile_pending_title": "",
+			"mobile_not_confirmed": "",
+			"mobile_recovery_unavailable": "",
+			"mobile_check_status": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "공개 주소 (0x), 이름 또는 별칭 입력",
@@ -1079,7 +1085,9 @@
 			"fee_expired": "",
 			"fee_info": "수수료는 $feeSymbol로 지불됩니다. 사용 가능: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "스캔된 코드에는 수신 주소만 포함되어 있습니다. 올바른 토큰을 선택하고, 정확한 금액을 입력한 후, 수신 주소를 주의 깊게 확인해 주세요!",
-			"scanned_address_only_destination_single_token": "스캔된 코드에는 수신 주소만 포함되어 있습니다. 정확한 금액을 입력하고, 수신 주소를 주의 깊게 확인해 주세요!"
+			"scanned_address_only_destination_single_token": "스캔된 코드에는 수신 주소만 포함되어 있습니다. 정확한 금액을 입력하고, 수신 주소를 주의 깊게 확인해 주세요!",
+			"mobile_ic_only": "",
+			"mobile_supported_only": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "유효하지 않은 수신 주소",
@@ -1155,7 +1163,8 @@
 			"xrp_destination_unfunded": "이 주소에는 아직 XRP 계정이 없습니다. 계정을 만들려면 최소 $reserve XRP의 첫 결제가 필요합니다. 아무것도 전송되지 않았습니다. 금액을 늘리거나 이미 활성화된 주소로 보내세요.",
 			"xrp_destination_tag_required": "이 주소에는 XRP 목적지 태그가 필요합니다. 아무것도 전송되지 않았습니다. 결제하려는 서비스에서 받은 태그를 입력한 뒤 다시 보내세요.",
 			"xrp_destination_is_source": "이 주소는 본인의 XRP 주소입니다. 아무것도 전송되지 않았습니다. 다른 수취인을 선택하세요.",
-			"xrp_account_state_unavailable": "지갑이 계정 정보를 읽지 못해 금액을 확인할 수 없었습니다. 아무것도 전송되지 않았습니다. 잠시 후 다시 시도해 주세요."
+			"xrp_account_state_unavailable": "지갑이 계정 정보를 읽지 못해 금액을 확인할 수 없었습니다. 아무것도 전송되지 않았습니다. 잠시 후 다시 시도해 주세요.",
+			"mobile_unconfirmed": ""
 		}
 	},
 	"mint": {
@@ -1398,7 +1407,12 @@
 			"oisy_trade_taker_fee": "",
 			"oisy_trade_withdrawal_fee": "",
 			"value_difference_error_confirmation": "",
-			"value_difference_missing_price_confirmation": "토큰 중 하나 이상의 가격을 가져올 수 없습니다. 이 스왑 제안이 공정한 거래인지 <strong>독립적으로 확인</strong>해 주세요.<br>슬리피지 설정은 받는 가치가 훨씬 낮은 제안으로부터 사용자를 보호하지 <strong>않습니다</strong>!"
+			"value_difference_missing_price_confirmation": "토큰 중 하나 이상의 가격을 가져올 수 없습니다. 이 스왑 제안이 공정한 거래인지 <strong>독립적으로 확인</strong>해 주세요.<br>슬리피지 설정은 받는 가치가 훨씬 낮은 제안으로부터 사용자를 보호하지 <strong>않습니다</strong>!",
+			"mobile_pending": "",
+			"mobile_pool_not_empty": "",
+			"mobile_no_recovery_balance": "",
+			"mobile_recovered": "",
+			"mobile_recover": ""
 		},
 		"error": {
 			"kong_not_available": "현재 토큰을 스왑할 수 있는 거래소가 없습니다. 나중에 다시 시도해 주세요.",

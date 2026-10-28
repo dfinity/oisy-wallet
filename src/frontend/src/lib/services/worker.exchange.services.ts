@@ -63,6 +63,9 @@ export class ExchangeWorker extends AppWorker {
 		});
 	};
 
+	refresh = (signal: AbortSignal): Promise<void> =>
+		this.postMessageAndWait({ message: { msg: 'triggerExchangeTimer' }, signal });
+
 	stopExchangeTimer = () => {
 		this.stopTimer();
 	};

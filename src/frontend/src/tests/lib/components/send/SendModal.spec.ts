@@ -1,4 +1,9 @@
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import SendModal from '$lib/components/send/SendModal.svelte';
+import * as mobile from '$lib/constants/mobile.constants';
+import * as tokensDerived from '$lib/derived/tokens.derived';
+import * as modalTokens from '$lib/stores/modal-tokens-list.store';
 import { token } from '$lib/stores/token.store';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -9,6 +14,7 @@ import {
 } from '$tests/utils/steps-reactivity.test-utils.svelte';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { flushSync } from 'svelte';
+import { readable } from 'svelte/store';
 
 vi.mock(
 	'$lib/components/send/SendTokensList.svelte',
@@ -293,5 +299,36 @@ describe('SendModal', () => {
 
 			expect(getByTestId('stub-amount')).toHaveTextContent('5');
 		});
+	});
+});
+
+describe('mobile Send modal', () => {
+	afterEach(() => vi.restoreAllMocks());
+
+	it('includes supported ICP and ETH assets in the shared token list', () => {
+		vi.spyOn(mobile, 'MOBILE_SHELL', 'get').mockReturnValue(true);
+		vi.spyOn(tokensDerived, 'enabledTokens', 'get').mockReturnValue(
+			readable([ICP_TOKEN, ETHEREUM_TOKEN, { ...mockValidIcrcToken, ledgerCanisterId: 'aaaaa-aa' }])
+		);
+		const context = vi.spyOn(modalTokens, 'initModalTokensListContext');
+		render(SendModal, { props: { isTransactionsPage: false, isNftsPage: false } });
+
+		expect(context).toHaveBeenCalledWith(
+			expect.objectContaining({
+				tokens: [ICP_TOKEN, ETHEREUM_TOKEN],
+				filterZeroBalance: true
+			})
+		);
+	});
+
+	it('does not render an unsupported token flow even when invoked directly', () => {
+		vi.spyOn(mobile, 'MOBILE_SHELL', 'get').mockReturnValue(true);
+		const unsupportedToken = { ...mockValidIcrcToken, ledgerCanisterId: 'aaaaa-aa' };
+		token.set(unsupportedToken);
+		const { queryByRole } = render(SendModal, {
+			props: { isTransactionsPage: true, isNftsPage: false }
+		});
+
+		expect(queryByRole('dialog')).not.toBeInTheDocument();
 	});
 });

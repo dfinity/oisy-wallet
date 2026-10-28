@@ -12,12 +12,18 @@ Read [README.md](./README.md) and repository-root AGENTS.md first.
 - Keep one trusted wallet WebView. Explore dApps use separate nonpersistent storage
   and no Capacitor bridge. Keep exact frame/origin/version and method validation.
 - Swift 6 strict concurrency, native controls, Dynamic Type and localized copy.
+- Shared web or host changes must follow [the compatibility guide](./docs/shared-web-contract.md).
+  Update [feature coverage](./docs/feature-parity.md) when adding routes/actions.
 - Wallet balances, history and contacts belong to the shared Svelte frontend.
   Native code owns system sign-in, Keychain, bounded delegations and Explore consent.
   Never persist child keys in IndexedDB or log keys/delegations/private wallet data.
-- This is an audit preview with financial actions hidden, not cryptographically read-only.
-  The trusted web session can perform authenticated updates. Explore supports Sepolia connection/reads,
-  not signing or transaction execution. Shared web auth/provider/workers now run on iOS; renewal and Android remain open.
+- This audit preview supports shared ICP/ck/ETH/ERC-20 Send and same-chain ICP/ck Swap.
+  The trusted web session can perform authenticated updates. Keep durable operation
+  records before EVM broadcast and each ICPSwap step; never replay unknown outcomes.
+  Preserve expected-record/CAS checks, wallet binding and the documented recovery limits.
+  Other financial actions remain hidden. Explore supports Sepolia connection/reads,
+  not signing or transaction execution. Shared web auth/provider/workers now run on iOS with a persisted one-hour deadline
+  and no renewal (see the session guide). Android remains open.
   Do not claim complete M1 or production readiness.
 - Run appropriate frontend/native tests, one heavy job at a time. Keep documentation
   and migration handoff accurate using agentic-markdown. Do not push without asking.

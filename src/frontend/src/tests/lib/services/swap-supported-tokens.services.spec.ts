@@ -1,4 +1,6 @@
+import * as mobile from '$lib/constants/mobile.constants';
 import { swapSupportedTokensStore } from '$lib/stores/swap-supported-tokens.store';
+import { SwapProvider } from '$lib/types/swap';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
 
@@ -113,6 +115,34 @@ describe('swap-supported-tokens.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		swapSupportedTokensStore.reset();
+	});
+
+	it('loads only ICPSwap support in the mobile quote preview', async () => {
+		const mobileSpy = vi.spyOn(mobile, 'MOBILE_SHELL', 'get').mockReturnValue(true);
+		try {
+			mockIcpSwapSupportedTokens.mockResolvedValue(new Set(['canister-a']));
+			const { loadSwapSupportedTokens } =
+				await import('$lib/services/swap-supported-tokens.services');
+			await loadSwapSupportedTokens({ identity: mockIdentity });
+
+			expect(get(swapSupportedTokensStore)?.providers.map(({ key }) => key)).toEqual([
+				SwapProvider.ICP_SWAP
+			]);
+			expect(mockIcpSwapSupportedTokens).toHaveBeenCalledOnce();
+
+			for (const loader of [
+				mockKongSupportedTokens,
+				mockIcpBridgeSupportedTokens,
+				mockEvmGetSupportedTokens,
+				mockSolGetSupportedTokens,
+				mockBtcGetSupportedTokens,
+				mockXrpGetSupportedTokens
+			]) {
+				expect(loader).not.toHaveBeenCalled();
+			}
+		} finally {
+			mobileSpy.mockRestore();
+		}
 	});
 
 	it('should load and store supported tokens from all provider groups', async () => {

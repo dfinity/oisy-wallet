@@ -2,6 +2,7 @@ import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { AppWorker } from '$lib/services/_worker.services';
 import { connectMobileHost, requestMobileWallet } from '$lib/services/mobile-host.services';
 import { createMobileIdentity } from '$lib/services/mobile-session.services';
+import { cancelWalletRefresh } from '$lib/services/wallet-refresh.services';
 import { mobileScreenStore } from '$lib/stores/mobile-host.store';
 
 let current: Awaited<ReturnType<typeof createMobileIdentity>> | undefined;
@@ -12,9 +13,9 @@ let disconnect: (() => Promise<void>) | undefined;
 export const initializeMobileRuntime = (): Promise<void> => {
 	initializing ??= (async () => {
 		const started = generation;
-		const connection = await connectMobileHost((screen) => {
+		const connection = await connectMobileHost((request) => {
 			if (started === generation) {
-				mobileScreenStore.update(({ request }) => ({ screen, request: request + 1 }));
+				mobileScreenStore.set(request);
 			}
 		});
 		if (started !== generation) {
@@ -50,6 +51,7 @@ export const endMobileRuntime = async (
 ): Promise<void> => {
 	generation++;
 	current = undefined;
+	cancelWalletRefresh();
 	AppWorker.terminateAllWorkers();
 	AuthClientProvider.getInstance().setMobileIdentity(undefined);
 	// Native removes the entire nonpersistent runtime, including private stores and cached clients.

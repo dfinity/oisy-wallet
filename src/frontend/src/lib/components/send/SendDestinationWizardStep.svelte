@@ -8,10 +8,12 @@
 	import { ethNetworkContacts } from '$eth/derived/eth-contacts.derived';
 	import { ethKnownDestinations } from '$eth/derived/eth-transactions.derived';
 	import { nativeEthereumTokenId } from '$eth/derived/token.derived';
+	import { isMobileEthSendDestination } from '$eth/utils/mobile-send.utils';
 	import CyclesSentToCanisterWarning from '$icp/components/cycles-top-up/CyclesSentToCanisterWarning.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import { icNetworkContacts } from '$icp/derived/ic-contacts.derived';
 	import { icKnownDestinations } from '$icp/derived/ic-transactions.derived';
+	import { isMobileSendDestination } from '$icp/utils/ic-send.utils';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import SendDestinationTabs from '$lib/components/send/SendDestinationTabs.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -20,6 +22,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { MIN_DESTINATION_LENGTH_FOR_ERROR_STATE } from '$lib/constants/app.constants';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import {
 		SEND_DESTINATION_WIZARD_STEP,
 		SEND_FORM_DESTINATION_NEXT_BUTTON
@@ -95,7 +98,11 @@
 	let invalidDestination = $state(false);
 
 	let disabled = $derived(
-		invalidDestination || destination.length <= MIN_DESTINATION_LENGTH_FOR_ERROR_STATE
+		invalidDestination ||
+			destination.length <= MIN_DESTINATION_LENGTH_FOR_ERROR_STATE ||
+			(MOBILE_SHELL &&
+				!isMobileSendDestination({ token: $sendToken, destination }) &&
+				!isMobileEthSendDestination({ token: $sendToken, destination }))
 	);
 
 	let testId = $derived(`${SEND_DESTINATION_WIZARD_STEP}-${$sendToken.network.name}`);
@@ -135,6 +142,9 @@
 				bind:destination
 				bind:invalidDestination
 			/>
+			{#if MOBILE_SHELL}
+				<p class="mt-4 text-secondary">{$i18n.send.info.mobile_supported_only}</p>
+			{/if}
 			<CyclesSentToCanisterWarning {destination} styleClass="mt-4" token={$sendToken} />
 			<SendDestinationTabs
 				knownDestinations={$icKnownDestinations}

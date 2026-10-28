@@ -8,10 +8,10 @@ This spec follows the workflow defined in `docs/ai/spec-driven-development/workf
 # Shared web wallet with native navigation for iOS and Android
 
 **Status:** The iOS Capacitor app uses shared Wallet, Token and Activity routes,
-including their data and auth workers. Automatic renewal, Android and release
-acceptance remain incomplete.
+including their data and auth workers, with a fixed one-hour session and no
+automatic renewal. Android and release acceptance remain incomplete.
 
-**Updated:** 2026-10-27. The user authorized the main merge, Capacitor adoption
+**Updated:** 2026-10-28. The user authorized the main merge, Capacitor adoption
 and preparation of the shared web and mobile apps, followed by cleanup, commit
 and push for review. Capacitor core, CLI and iOS are pinned to 8.5.3. Audit
 deployment and transaction execution are outside this review.
@@ -32,8 +32,9 @@ data services were removed. Browser authentication keeps AuthClient/IDB. Mobile
 uses an in-memory identity through the same provider, with separate worker keys
 and time-limited delegations.
 
-The preview signs out when its five-minute child session expires. Automatic
-renewal, Android, II review of the delegation trust model and financial execution
+The preview signs out at its persisted one-hour deadline or earlier II expiry.
+Relaunch and activity do not extend it; automatic renewal is outside the chosen
+scope. Android, II review of the delegation trust model and financial execution
 remain unfinished. The [authentication review](../../../../mobile/capacitor/docs/authentication-review.md)
 compares the app with `dfinity/icp-native-sdk` and explains its dependency on the
 deployed audit callback. The [session guide](../../../../mobile/capacitor/docs/session-boundary.md)
@@ -130,8 +131,16 @@ The current iOS build uses the normal enabled-token universe, chain balances,
 prices and history sources. It no longer has a separate seven-asset catalog or
 20-transaction adapter. Token management and preferences use the shared frontend;
 physical funded-account validation is still required for this new integration.
-Saved contacts remain read-only. Financial execution, automatic child renewal,
+Saved contacts remain read-only. Financial execution,
 Android and release gates remain incomplete; the handoff owns verification evidence.
+
+## Feature expansion and compatibility
+
+The [coverage and navigation plan](../../../../mobile/capacitor/docs/feature-parity.md)
+records the 2026-10-28 source inventory and proposes the next screen-level batches.
+The [compatibility guide](../../../../mobile/capacitor/docs/shared-web-contract.md)
+owns agent routing, paired web/native changes and their validation. These refine
+this spec; proposed Back gestures and broader feature support are not yet implemented.
 
 ## Target ownership
 
@@ -216,7 +225,7 @@ Swift and Kotlin transaction forms.
    Use a small typed host configuration for navigation ownership, available
    capabilities and presentation variants. Avoid scattered platform/user-agent
    conditionals and CSS that merely conceals functional duplicate navigation.
-2. Give session installation, renewal, logout and worker restart one lifecycle.
+2. Give session installation, expiry, logout and worker restart one lifecycle.
    Extend the existing AuthClient provider boundary rather than creating a third
    auth store. Both web and mobile should feed the same balance/history services.
 3. Move popup-, browser- and device-specific operations behind narrow adapters:
@@ -255,8 +264,8 @@ drop-in replacement for Keychain ownership.
 - A child delegation can authorize updates; it is **not cryptographically read-only**
   merely because the preview hides Send. Keep untrusted content outside that trust
   boundary and review delegation scope and app capabilities before execution.
-- One session generation owns clients, workers and pending requests. On renewal,
-  rebuild or refresh dependent clients once; ignore stale-generation responses.
+- One session generation owns clients, workers and pending requests. On a new
+  sign-in or runtime replacement, rebuild dependent clients once; ignore stale-generation responses.
   On expiry/logout, cancel work, clear private rendered state and permitted caches,
   disconnect Browser permissions as appropriate, and restore a consistent sign-in UI.
 - Persist ordinary preferences with one owner. Decide sensitive web storage and
@@ -303,13 +312,13 @@ code between Swift and Kotlin.
 
 ## Milestones and exit criteria
 
-| Milestone                               | Deliverable                                                                                                                     | Required evidence before moving on                                                                                                                                                                 |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| M0 — Compatibility and session spike    | Pinned runtime proposal; native host on both platforms; one shared mock Wallet → token → back slice; session integration design | iOS simulator and Android emulator launch; one runtime across root changes; Back/keyboard/insets work; actual toolchain versions recorded; dependency and custody decisions recorded               |
-| M1 — Authenticated shared runtime       | System sign-in and existing session restoration; common stores/workers for real read-only balances                              | Physical iPhone and Android device checks: same audit principal/addresses/known balances; warm/cold callback, cancel, expiry, renewal, logout and relaunch; no private-key export or stale results |
-| M2 — Shared wallet coverage             | Wallet, token, Activity, Search, Actions, Receive, Contacts and persistent preferences on both platforms                        | Feature/source inventory, light/dark and large-text checks; unavailable/offline states; same frontend behavior on the normal website; no duplicate data pipelines for migrated reads               |
-| M3 — Management and execution readiness | Shared token management/import persistence; review of Send/Swap/Buy integration                                                 | Import/save/cancel/network validation checks first; any transaction execution requires separately approved testnet scope and its own acceptance evidence; mainnet stays gated                      |
-| M4 — Browser parity and cleanup         | Android isolated Browser matches current iOS connection/read scope; remove superseded preview code after parity                 | Wrong-origin/frame requests denied; no trusted bridge/storage in dApps; account/network changes invalidate permissions; ordinary web regression checks; release checklist remains explicit         |
+| Milestone                               | Deliverable                                                                                                                     | Required evidence before moving on                                                                                                                                                                              |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| M0 — Compatibility and session spike    | Pinned runtime proposal; native host on both platforms; one shared mock Wallet → token → back slice; session integration design | iOS simulator and Android emulator launch; one runtime across root changes; Back/keyboard/insets work; actual toolchain versions recorded; dependency and custody decisions recorded                            |
+| M1 — Authenticated shared runtime       | System sign-in and existing session restoration; common stores/workers for real read-only balances                              | Physical iPhone and Android device checks: same audit principal/addresses/known balances; warm/cold callback, cancel, expiry at the fixed deadline, logout and relaunch; no private-key export or stale results |
+| M2 — Shared wallet coverage             | Wallet, token, Activity, Search, Actions, Receive, Contacts and persistent preferences on both platforms                        | Feature/source inventory, light/dark and large-text checks; unavailable/offline states; same frontend behavior on the normal website; no duplicate data pipelines for migrated reads                            |
+| M3 — Management and execution readiness | Shared token management/import persistence; review of Send/Swap/Buy integration                                                 | Import/save/cancel/network validation checks first; any transaction execution requires separately approved testnet scope and its own acceptance evidence; mainnet stays gated                                   |
+| M4 — Browser parity and cleanup         | Android isolated Browser matches current iOS connection/read scope; remove superseded preview code after parity                 | Wrong-origin/frame requests denied; no trusted bridge/storage in dApps; account/network changes invalidate permissions; ordinary web regression checks; release checklist remains explicit                      |
 
 M0 must test native view lifetime and shared auth/worker integration, as well as
 launching the container. If either requires extensive framework patches, keep the
@@ -330,7 +339,7 @@ contract.
       invented zero values or mock live balances. Token IDs include chain/ledger
       identity, including BTC versus ckBTC and ETH versus ckETH.
 - [ ] Authentication tests cover cold starts, process recreation, replay, wrong
-      state/key, expiry, logout, renewal and switching identities. Fresh-account
+      state/key, fixed-deadline expiry, logout and switching identities. Fresh-account
       onboarding and root-signature verification are explicit release gates.
 - [ ] iOS and Android isolate dApps from wallet storage and native plugins; existing
       iOS Browser limitations remain visible rather than silently enabling writes.
@@ -372,14 +381,14 @@ Source: [Mobile migration handoff](./2026-10-27-feat-mobile-shared-web-native-na
 
 ## Open questions (facts to confirm)
 
-| ID  | Question                                                                                                                          | Owner / evidence needed                                                                      |
-| --- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Q1  | Which current Capacitor version fits the existing Swift 6/XcodeGen/SDK setup and Android host without framework patches?          | Engineering; M0 compile and lifecycle evidence, exact dependency pins                        |
-| Q2  | Can normal AuthClient consumers and web workers use renewed native-issued child sessions without a separate mobile data pipeline? | Frontend/auth engineering; read and renewal spike, including IDB/process recreation behavior |
-| Q3  | Which native Android storage/signing implementation supports the required session-key algorithm?                                  | Android/auth engineering; Keystore/device verification and documented fallback               |
-| Q4  | Are callback domains and association files actually deployed for the intended bundle IDs and release certificates?                | Release owner; on-device Universal/App Link verification, not repository files alone         |
-| Q5  | What Android SDK/JDK/emulator/device setup is available locally, and which minimum OS versions should testing cover?              | Engineering; local inventory and product device support requirements                         |
-| Q6  | Which web workers, external providers and redirect flows need origin/CSP/CORS changes under packaged local origins?               | Frontend engineering; exercised read paths and provider inventory; no wildcard bypass        |
+| ID  | Question                                                                                                                       | Owner / evidence needed                                                                  |
+| --- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| Q1  | Which current Capacitor version fits the existing Swift 6/XcodeGen/SDK setup and Android host without framework patches?       | Engineering; M0 compile and lifecycle evidence, exact dependency pins                    |
+| Q2  | Can Android share the native-issued session/provider/worker lifecycle already integrated on iOS, including process recreation? | Android/auth engineering; shared provider and worker tests, including process recreation |
+| Q3  | Which native Android storage/signing implementation supports the required session-key algorithm?                               | Android/auth engineering; Keystore/device verification and documented fallback           |
+| Q4  | Are callback domains and association files actually deployed for the intended bundle IDs and release certificates?             | Release owner; on-device Universal/App Link verification, not repository files alone     |
+| Q5  | What Android SDK/JDK/emulator/device setup is available locally, and which minimum OS versions should testing cover?           | Engineering; local inventory and product device support requirements                     |
+| Q6  | Which web workers, external providers and redirect flows need origin/CSP/CORS changes under packaged local origins?            | Frontend engineering; exercised read paths and provider inventory; no wildcard bypass    |
 
 ## Pending decisions (facts are clear — we just need to decide)
 
@@ -387,7 +396,7 @@ Source: [Mobile migration handoff](./2026-10-27-feat-mobile-shared-web-native-na
 | --- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | D1  | Product ownership   | **User requirement:** iOS and Android, native navigation, most wallet content shared from the primary web frontend                                                     |
 | D2  | Container adoption  | **Authorized for M0:** Capacitor 8.5.3 core/CLI/iOS; selective POC reference, no wholesale branch merge. Final adoption still depends on M0 gates                      |
-| D3  | Session custody     | **Implemented preview:** native parent/child custody and shared provider/store/workers integrated on iOS; renewal and Android pending                                  |
+| D3  | Session custody     | **Implemented preview:** native parent/child custody and shared provider/store/workers integrated on iOS with a fixed one-hour deadline, no renewal; Android pending   |
 | D4  | Actions and Account | **Proposed:** native entry controls and compact Account landing; shared web Actions sheet, Contacts and general preference screens                                     |
 | D5  | Native UI tooling   | **Proposed:** retain SwiftUI/UIKit; choose Android native controls compatible with the host. Compose/Material additions, if needed, require normal dependency approval |
 | D6  | Delivery            | **Implemented for M0:** bundled versioned frontend in the same repository; no remote live reload or copied frontend tree                                               |

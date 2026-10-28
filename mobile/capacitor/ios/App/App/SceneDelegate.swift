@@ -17,6 +17,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)
   }
 
+  func sceneWillResignActive(_ scene: UIScene) {
+    (window?.rootViewController as? ShellViewController)?.suspendInteractions()
+  }
+
   func sceneDidBecomeActive(_ scene: UIScene) {
     (window?.rootViewController as? ShellViewController)?.resume()
   }

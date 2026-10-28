@@ -10,6 +10,39 @@ loaders, stores and workers. The separate mobile wallet page and snapshot data
 pipeline have been removed. Native code handles navigation and keeps Explore
 separate from the trusted wallet.
 
+## Fixed session policy
+
+As of 2026-10-28, mobile sign-in requests a one-hour II delegation, matching the web
+wallet’s `AUTH_MAX_TIME_TO_LIVE`. Native code
+also records a deadline of one hour from accepting the sign-in response. The
+earlier of that deadline and every link's expiry ends the session. The existing
+five-minute issuer clock-skew tolerance only bounds callback validation; it does
+not extend local access beyond one hour.
+
+The deadline is saved with the native session in Keychain. Relaunch, activity,
+foreground return and WebView replacement do not restart the clock. A replacement
+web document receives only the remaining time. Workers receive the same effective
+chain deadline. There is no automatic renewal.
+
+Sessions saved by the 20-minute preview keep their original deadline; this update
+does not extend them. The next successful sign-in gets the one-hour policy.
+
+Older Keychain records have no saved deadline. They are treated as expired and
+removed, so updating from the earlier preview requires one new sign-in. Expiry
+shows “Welcome back!”. Explicit logout shows the introduction. Both paths discard
+wallet/worker identities and Explore grants.
+
+The native child limit and web validation changed together. The web adapter checks
+that the declared expiry matches the earliest signed expiry, rather than accepting
+a short declared lifetime for a longer-lived chain. The child can now last up to
+one hour: if copied with its key, it can be used until that
+deadline. The trusted web identity still permits authenticated updates; this
+lifetime change does not add a native transaction-approval boundary.
+
+The SDK can reissue app delegations inside a valid II session. It cannot extend
+that session's hard deadline by doing so. Renewal is outside this phase; see the
+[SDK comparison and implementation plan](./sdk-auth-migration.md).
+
 ## Ownership
 
 | Owner                                       | Responsibility                                                                                             |
@@ -29,7 +62,7 @@ separate from the trusted wallet.
    Keychain and native memory. Neither the native key nor a web child key is
    written to AuthClient IndexedDB.
 2. The trusted local web document generates an Ed25519 key. The fixed v2 bridge
-   returns a child delegation capped at five minutes and parent expiry. The web
+   returns a child delegation capped at the saved one-hour deadline and parent expiry. The web
    adapter checks its bounded schema, principal, expected DER public key and expiry.
 3. The web adapter installs the identity in the shared provider and synchronizes
    `authStore`. The authenticated route layout and its loaders then mount.
@@ -44,7 +77,7 @@ separate from the trusted wallet.
    wallet runtime, clears its Keychain session and revokes Explore permissions.
    Late bootstrap or worker responses cannot restore the old session. A new login
    creates a new runtime.
-6. Native code also closes the wallet when the parent or five-minute child expires.
+6. Native code also closes the wallet at the effective native/web deadline.
    Foreground and bridge-entry checks enforce the same deadline. There is no
    automatic renewal in this preview.
 
@@ -76,9 +109,10 @@ the exact scheme, host, credentials, path/query allowlist, frame and current
 plugin/session on every bridge entry. Client routing retains
 one WebView; native route acknowledgements do not echo another navigation command.
 The trusted web child has an unrestricted signing identity. `audit-read-only`
-describes the financial UI exposed by the preview; it cannot prevent authenticated
-updates. The mobile build changes navigation and presentation, hides financial
-execution and contact editing, and keeps the normal web token-management flow.
+is a legacy v2 protocol label, not an authorization boundary. The mobile build now
+exposes shared ICP/ck-token Send, token management and Notes writes. Other financial
+execution and contact editing remain hidden. UI restrictions cannot prevent
+authenticated updates by a compromised trusted wallet script.
 Explore uses separate nonpersistent storage and supports Sepolia connections and
 public reads.
 
@@ -119,7 +153,8 @@ website keeps its existing actions. Notes data remains owned by the web feature.
 ## Remaining release gates
 
 - Android host, native storage/signing compatibility and emulator/device tests.
-- Automatic child renewal with worker/client replacement and cancellation tests.
+- Repeat real-device acceptance of the one-hour deadline, foreground return and
+  legacy-session cleanup. Automatic renewal is deferred.
 - Review callback ownership, root-signature trust and cold-start callback recovery with II.
   The referenced native SDK also leaves delegation signatures to replica verification;
   see the [SDK comparison](./authentication-review.md) before choosing a local verifier.

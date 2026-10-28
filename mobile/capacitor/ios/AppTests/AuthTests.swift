@@ -1,4 +1,5 @@
 import CryptoKit
+import Security
 import XCTest
 
 @testable import App
@@ -42,7 +43,7 @@ final class AuthTests: XCTestCase {
     return try XCTUnwrap(url.url)
   }
 
-  func testRequestUsesAuditOriginFreshKeysStateAnd24HourTTL() throws {
+  func testRequestUsesAuditOriginFreshKeysStateAndOneHourTTL() throws {
     let request = try Icrc167()
     let second = try Icrc167()
     XCTAssertNotEqual(request.state, second.state)
@@ -73,7 +74,7 @@ final class AuthTests: XCTestCase {
     let decoded = try JSONDecoder().decode(Request.self, from: message)
     XCTAssertEqual(decoded.method, "icrc34_delegation")
     XCTAssertEqual(decoded.params.publicKey, Icrc167.derPublicKey(request.key))
-    XCTAssertEqual(decoded.params.maxTimeToLive, "86400000000000")
+    XCTAssertEqual(decoded.params.maxTimeToLive, "3600000000000")
     XCTAssertNil(decoded.params.targets)
     XCTAssertFalse(
       try XCTUnwrap(URLComponents(url: url, resolvingAgainstBaseURL: false)?.percentEncodedFragment)
@@ -122,6 +123,87 @@ final class AuthTests: XCTestCase {
     let otherRequest = try Icrc167()
     XCTAssertThrowsError(
       try otherRequest.session(from: callback(otherRequest, chain: delegated), now: now))
+  }
+
+  func testFixedDeadlineSurvivesPersistenceAndLateWebDelegation() throws {
+    let request = try Icrc167()
+    let session = try request.session(from: callback(request, chain: chain(request)), now: now)
+    let restored = try JSONDecoder().decode(AuthSession.self, from: JSONEncoder().encode(session))
+    XCTAssertEqual(restored, session)
+    XCTAssertEqual(restored.expiresAt, now.addingTimeInterval(3600))
+    try restored.validate(now: now.addingTimeInterval(3599))
+    XCTAssertThrowsError(try restored.validate(now: now.addingTimeInterval(3600)))
+    for elapsed: TimeInterval in [0, 2700, 3599] {
+      let child = try WebDelegation(
+        session: restored, publicKey: Icrc167.derPublicKey(Curve25519.Signing.PrivateKey()),
+        now: now.addingTimeInterval(elapsed))
+      XCTAssertEqual(child.expiresAt, session.expiresAt.timeIntervalSince1970 * 1000)
+    }
+    XCTAssertThrowsError(
+      try WebDelegation(
+        session: restored, publicKey: Icrc167.derPublicKey(Curve25519.Signing.PrivateKey()),
+        now: now.addingTimeInterval(3600)))
+  }
+
+  func testSavedTwentyMinuteDeadlineIsNotExtendedByLongerSessionPolicy() throws {
+    struct SavedSession: Encodable {
+      let privateKey: Data
+      let chain: DelegationChain
+      let deadline: Date
+    }
+    let request = try Icrc167()
+    let saved = SavedSession(
+      privateKey: request.key.rawRepresentation, chain: chain(request),
+      deadline: now.addingTimeInterval(1200))
+    let restored = try JSONDecoder().decode(AuthSession.self, from: JSONEncoder().encode(saved))
+    XCTAssertEqual(restored.expiresAt, saved.deadline)
+    try restored.validate(now: saved.deadline.addingTimeInterval(-1))
+    let child = try WebDelegation(
+      session: restored, publicKey: Icrc167.derPublicKey(Curve25519.Signing.PrivateKey()), now: now)
+    XCTAssertEqual(child.expiresAt, saved.deadline.timeIntervalSince1970 * 1000)
+    XCTAssertThrowsError(try restored.validate(now: saved.deadline))
+  }
+
+  func testShorterIILifetimeAlwaysWins() throws {
+    let request = try Icrc167()
+    let shorter = chain(request, expiration: "1800000600000000000")
+    let session = try request.session(from: callback(request, chain: shorter), now: now)
+    let child = try WebDelegation(
+      session: session, publicKey: Icrc167.derPublicKey(Curve25519.Signing.PrivateKey()), now: now)
+    XCTAssertEqual(session.expiresAt, now.addingTimeInterval(600))
+    XCTAssertEqual(child.expiresAt, session.expiresAt.timeIntervalSince1970 * 1000)
+  }
+
+  @MainActor
+  func testLegacyKeychainSessionRequiresSignInWithoutStartingANewClock() throws {
+    struct LegacySession: Encodable {
+      let privateKey: Data
+      let chain: DelegationChain
+    }
+    let fixture = try fixtureSession(
+      key: Curve25519.Signing.PrivateKey(), expiry: .now.addingTimeInterval(86400))
+    let store = KeychainStore(service: "oisy.legacy.deadline.tests.\(UUID())")
+    let preferences = try XCTUnwrap(UserDefaults(suiteName: store.service))
+    defer {
+      try? store.clear()
+      preferences.removePersistentDomain(forName: store.service)
+    }
+    let data = try JSONEncoder().encode(
+      LegacySession(privateKey: fixture.privateKey, chain: fixture.chain))
+    let item: [String: CFTypeRef] = [
+      kSecClass as String: kSecClassGenericPassword,
+      kSecAttrService as String: store.service as CFString,
+      kSecAttrAccount as String: "internet-identity" as CFString,
+      kSecValueData as String: data as CFData,
+      kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+    ]
+    XCTAssertEqual(SecItemAdd(item as CFDictionary, nil), errSecSuccess)
+    let auth = AuthModel(store: store, preferences: preferences)
+    XCTAssertNil(auth.session)
+    XCTAssertTrue(auth.showsWelcomeBack)
+    XCTAssertNil(try store.load())
+    auth.restore()
+    XCTAssertNil(auth.session)
   }
 
   func testChainedDelegationRejectsTamperingAndRestrictions() throws {
@@ -203,7 +285,7 @@ final class AuthTests: XCTestCase {
   func testChainedSessionPersistsAndRestoresInKeychain() throws {
     let request = try Icrc167()
     let session = AuthSession(
-      privateKey: request.key.rawRepresentation, chain: try extendedChain(request))
+      privateKey: request.key.rawRepresentation, chain: try extendedChain(request), now: now)
     let store = KeychainStore(service: "com.oisy.native.mvp.tests.\(UUID().uuidString)")
     defer { try? store.clear() }
     try store.save(session)
@@ -232,7 +314,9 @@ final class AuthTests: XCTestCase {
       UInt64(now.timeIntervalSince1970) * 1_000_000_000
       + Icrc167.timeToLiveNanoseconds + 300_000_000_000
     let accepted = chain(request, expiration: String(limit))
-    XCTAssertNoThrow(try request.session(from: callback(request, chain: accepted), now: now))
+    let session = try request.session(from: callback(request, chain: accepted), now: now)
+    XCTAssertEqual(session.expiresAt, now.addingTimeInterval(3600))
+    XCTAssertEqual(session.delegationExpiresAt, now.addingTimeInterval(3900))
     let excessive = chain(request, expiration: String(limit + 1_000_000_000))
     XCTAssertThrowsError(try request.session(from: callback(request, chain: excessive), now: now))
     let padded = chain(request, expiration: "000000000000000000001800003600000000000")

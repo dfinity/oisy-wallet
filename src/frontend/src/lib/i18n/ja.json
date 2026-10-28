@@ -113,7 +113,8 @@
 			"copy_failed": ""
 		},
 		"mobile_shell": {
-			"account": ""
+			"account": "",
+			"refresh_failed": ""
 		}
 	},
 	"progress": {
@@ -1057,7 +1058,12 @@
 			"send_review_subtitle": "以下の内容を送信します。",
 			"no_nfts_found": "コレクティブルが見つかりません。",
 			"no_nfts_found_desc": "コレクティブルを見つけるには、検索条件またはネットワークを調整してください。",
-			"select_nft": "送信するコレクティブルを選択"
+			"select_nft": "送信するコレクティブルを選択",
+			"mobile_pending": "",
+			"mobile_pending_title": "",
+			"mobile_not_confirmed": "",
+			"mobile_recovery_unavailable": "",
+			"mobile_check_status": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "パブリックアドレス (0x)、名前、またはエイリアスを入力",
@@ -1079,7 +1085,9 @@
 			"fee_expired": "",
 			"fee_info": "手数料は$feeSymbolで支払われます。利用可能残高: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "スキャンしたコードには宛先アドレスのみが含まれていました。正しいトークンを選択し、正しい数量を入力し、宛先アドレスを慎重に確認してください！",
-			"scanned_address_only_destination_single_token": "スキャンしたコードには宛先アドレスのみが含まれていました。正しい数量を入力し、宛先アドレスを慎重に確認してください！"
+			"scanned_address_only_destination_single_token": "スキャンしたコードには宛先アドレスのみが含まれていました。正しい数量を入力し、宛先アドレスを慎重に確認してください！",
+			"mobile_ic_only": "",
+			"mobile_supported_only": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "送信先アドレスが無効です",
@@ -1155,7 +1163,8 @@
 			"xrp_destination_unfunded": "このアドレスにはまだ XRP アカウントがありません。作成には少なくとも $reserve XRP の最初の送金が必要です。何も送信されていません。金額を増やすか、すでに有効化されたアドレスへ送信してください。",
 			"xrp_destination_tag_required": "このアドレスには XRP 宛先タグが必要です。何も送信されていません。支払先のサービスから受け取ったタグを入力して、もう一度送信してください。",
 			"xrp_destination_is_source": "これはご自身の XRP アドレスです。何も送信されていません。別の送金先を選んでください。",
-			"xrp_account_state_unavailable": "ウォレットがアカウント情報を読み取れなかったため、金額を確認できませんでした。何も送信されていません。しばらくしてからもう一度お試しください。"
+			"xrp_account_state_unavailable": "ウォレットがアカウント情報を読み取れなかったため、金額を確認できませんでした。何も送信されていません。しばらくしてからもう一度お試しください。",
+			"mobile_unconfirmed": ""
 		}
 	},
 	"mint": {
@@ -1398,7 +1407,12 @@
 			"oisy_trade_taker_fee": "",
 			"oisy_trade_withdrawal_fee": "",
 			"value_difference_error_confirmation": "",
-			"value_difference_missing_price_confirmation": "少なくとも1つのトークンの価格を取得できませんでした。このスワップオファーが公正な取引であることを<strong>独自に確認</strong>してください。<br>スリッページ設定は、受取額が大幅に低いオファーからは保護<strong>されません</strong>のでご注意ください！"
+			"value_difference_missing_price_confirmation": "少なくとも1つのトークンの価格を取得できませんでした。このスワップオファーが公正な取引であることを<strong>独自に確認</strong>してください。<br>スリッページ設定は、受取額が大幅に低いオファーからは保護<strong>されません</strong>のでご注意ください！",
+			"mobile_pending": "",
+			"mobile_pool_not_empty": "",
+			"mobile_no_recovery_balance": "",
+			"mobile_recovered": "",
+			"mobile_recover": ""
 		},
 		"error": {
 			"kong_not_available": "現在、トークンスワップ用の取引所が利用できません。後ほど再試行してください。",

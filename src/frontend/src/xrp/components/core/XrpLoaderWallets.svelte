@@ -6,6 +6,10 @@
 	import { enabledXrpTokens } from '$xrp/derived/tokens.derived';
 	import { XrpWalletWorker } from '$xrp/services/worker.xrp-wallet.services';
 
+	let supportedTokens = $derived(
+		$enabledXrpTokens.filter(({ network: { id } }) => isNetworkIdXRPMainnet(id))
+	);
+
 	let walletWorkerTokens = $derived(
 		$enabledXrpTokens.filter(
 			({ network: { id: networkId } }) =>
@@ -14,4 +18,8 @@
 	);
 </script>
 
-<WalletWorkers initWalletWorker={XrpWalletWorker.init} tokens={walletWorkerTokens} />
+<WalletWorkers
+	initWalletWorker={XrpWalletWorker.init}
+	refreshReady={supportedTokens.length === walletWorkerTokens.length}
+	tokens={walletWorkerTokens}
+/>

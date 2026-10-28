@@ -171,6 +171,22 @@ export class XrpWalletWorker extends AppWorker implements WalletWorker {
 		});
 	};
 
+	refresh = (signal: AbortSignal) => {
+		const data = this.#data();
+
+		if (isNullish(data)) {
+			return Promise.reject(new Error('XRP address unavailable'));
+		}
+
+		return this.postMessageAndWait<PostMessage<PostMessageDataRequestXrp>>({
+			message: {
+				msg: 'triggerXrpWalletTimer',
+				data
+			},
+			signal
+		});
+	};
+
 	// `AppWorker.destroy` is a class field rather than a prototype method, so it cannot be reached
 	// through `super`. Its two steps are replicated here instead; `terminate` is idempotent.
 	destroy = () => {

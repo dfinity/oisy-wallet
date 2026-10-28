@@ -6,6 +6,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import Actions from '$lib/components/hero/Actions.svelte';
+import * as mobile from '$lib/constants/mobile.constants';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import {
 	BUY_TOKENS_MODAL_OPEN_BUTTON,
@@ -155,6 +156,50 @@ describe('Actions', () => {
 			const { container } = renderActions();
 
 			expect(container.querySelector(sendButtonSelector)).toBeInTheDocument();
+		});
+	});
+
+	describe('mobile Send availability', () => {
+		beforeEach(() => vi.spyOn(mobile, 'MOBILE_SHELL', 'get').mockReturnValue(true));
+
+		it('shows shared ICP Send and Swap but keeps Buy hidden', () => {
+			setTransactionsPage();
+			mockPage.mockToken(ICP_TOKEN);
+			vi.spyOn(swapDerived, 'isPageTokenSwappable', 'get').mockReturnValue(readable(true));
+			const { container } = renderActions();
+
+			expect(container.querySelector(sendButtonSelector)).toBeInTheDocument();
+			expect(container.querySelector(swapButtonSelector)).toBeInTheDocument();
+			expect(container.querySelector(buyButtonSelector)).not.toBeInTheDocument();
+		});
+
+		it.each([BTC_MAINNET_TOKEN, SOLANA_TOKEN, mockTcyclesToken])(
+			'hides Send for unsupported $symbol',
+			(token) => {
+				setTransactionsPage();
+				mockPage.mockToken(token);
+				const { container } = renderActions();
+
+				expect(container.querySelector(sendButtonSelector)).not.toBeInTheDocument();
+				expect(container.querySelector(swapButtonSelector)).not.toBeInTheDocument();
+			}
+		);
+
+		it('shows direct ETH Send without mobile EVM Swap', () => {
+			setTransactionsPage();
+			mockPage.mockToken(ETHEREUM_TOKEN);
+			const { container } = renderActions();
+
+			expect(container.querySelector(sendButtonSelector)).toBeInTheDocument();
+			expect(container.querySelector(swapButtonSelector)).not.toBeInTheDocument();
+		});
+
+		it('does not enable NFT sends', () => {
+			setNftsPage();
+			mockPage.mockToken(ICP_TOKEN);
+			const { container } = renderActions();
+
+			expect(container.querySelector(sendButtonSelector)).not.toBeInTheDocument();
 		});
 	});
 

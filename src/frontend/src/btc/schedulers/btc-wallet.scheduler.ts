@@ -119,6 +119,11 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		});
 	}
 
+	async refresh(data: PostMessageDataRequestBtc | undefined) {
+		this.setRef(data);
+		await this.timer.refresh<PostMessageDataRequestBtc>({ job: this.syncWallet, data });
+	}
+
 	async trigger(data: PostMessageDataRequestBtc | undefined) {
 		this.setRef(data);
 
@@ -339,6 +344,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		const btcAddress = data?.btcAddress.data;
 		assertNonNullish(btcAddress, 'No BTC address provided to get BTC transactions.');
 
+		let success = true;
 		await this.queryAndUpdateWithWarmup<BtcWalletData>({
 			request: ({ identity: _, certified }) =>
 				this.loadWalletData({
@@ -355,6 +361,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			},
 			identity,
 			onUpdateError: ({ error }) => {
+				success = false;
 				this.failedSyncCounter++;
 				if (FAILURE_THRESHOLD <= this.failedSyncCounter) {
 					// Mirror the listener-side UI reset; otherwise the next sync only emits deltas and the UI stays empty.
@@ -363,6 +370,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				}
 			}
 		});
+		return success;
 	};
 
 	private syncWalletData = ({

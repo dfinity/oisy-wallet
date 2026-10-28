@@ -5,7 +5,7 @@ tags: [mobile, ios, android, capacitor, handoff]
 
 # Mobile migration handoff
 
-Updated 2026-10-27. The iOS Capacitor app uses the existing Wallet, Token and
+Updated 2026-10-28. The iOS Capacitor app uses the existing Wallet, Token and
 Activity routes with their shared auth provider, stores, loaders and workers.
 The separate snapshot preview and data pipeline have been removed.
 
@@ -21,6 +21,389 @@ screens remains pending. Later welcome updates and their installation times are
 recorded below. The final authentication review fixes and documentation commit
 `1387b85ac` were installed and launched on the phone at 18:14 local time. The
 normal bundle excludes test fixtures; no app uninstall or sign-in reset was used.
+
+## Shared Swap and EVM Send — 2026-10-28
+
+User requested both ICPSwap execution and ETH/ERC-20 Send. Both reuse the existing
+web forms and services. Native adds only bounded, principal-bound Keychain metadata
+storage. No backend deployment, new SDK or dependency was needed.
+
+Validation: 413 frontend tests passed across 13 suites, followed by a focused
+30-test certified-caller/lifecycle rerun. App/test typechecks report zero errors
+and warnings; scoped ESLint and both documentation trees pass. The packaged
+simulator run passed eight WebKit/journal/session tests, including shared ICP Send
+review/cancel, Swap sheet opening/closing, native overlay suppression and expiry.
+Light/dark captures were visually checked. Network-blocked simulator fixtures and
+mocked service tests do not prove a live quote or funded transaction. No funds moved.
+
+The normal `VITE_MOBILE_UI_TEST=false` bundle was rebuilt and signed for the
+existing DFINITY team/app identifier. Signature, matching build metadata and test
+fixture absence passed. After the user reconnected the iPhone, this build was
+installed at 17:02 and launched at 17:03 local time on 2026-10-28. It replaces the
+quote-only preview without uninstalling the app or changing its team, bundle ID
+or Keychain service. No sign-out or data reset was requested. Live quote and funded
+transaction acceptance on the phone remain pending.
+
+Evidence: `/private/tmp/oisy-mobile-send-swap-tests-complete.log`,
+`/private/tmp/oisy-mobile-send-swap-caller-tests.log`,
+`/private/tmp/oisy-mobile-send-swap-types-final.log`,
+`/private/tmp/oisy-mobile-send-swap-lint-final.log`,
+`/private/tmp/oisy-mobile-send-swap-webkit.xcresult`,
+`/private/tmp/oisy-mobile-send-swap-captures/`,
+`/private/tmp/oisy-mobile-send-swap-phone-build.log`,
+`/private/tmp/oisy-mobile-send-swap-phone-install-connected.json` and
+`/private/tmp/oisy-mobile-send-swap-phone-launch-connected.json`.
+The approved four API/RPC values were absent from 6,680 tracked/nonignored files,
+staged changes and branch commit diffs. They remain in ignored configuration and
+bundles. No commit or push was made.
+
+Recovery is intentionally conservative. Unknown EVM results block another send on
+the chain/sender. A recorded hash may never have been broadcast if cancellation or
+expiry happened in between; a missing receipt alone cannot clear it. Unknown
+ICPSwap results keep the pool locked, even after available pool tokens are explicitly
+withdrawn. Old approval-only records can be released without risking a deposit.
+Funded device acceptance and explicit resolution of unknown operations remain open.
+See the [transaction contract](../../../../../mobile/capacitor/docs/shared-web-contract.md#durable-mobile-operation-records).
+
+The earlier quote-only preview was installed and launched on the existing iPhone
+at 15:51 local time. Its build kept the existing app, team and Keychain settings.
+This section supersedes the quote-only limitation recorded below.
+
+## Shared Swap quote preview — 2026-10-28
+
+The next mobile slice opens the shared Swap form and review for canonical ICP and
+ck-tokens on Internet Computer. It uses ICPSwap only. KongSwap's existing disabled
+flag remains intact. The token picker is locked to ICP, provider discovery avoids
+other chains, and unsupported pairs are rejected before quoting. Quotes refresh
+while editing and pause on Review. Native tabs, edge Back and refresh follow the
+existing full-screen modal contract.
+
+This is a quote/review preview, with explanatory copy in both steps. There is no
+mobile submission button. The wizard and `fetchIcpSwap` also reject execution
+before approval or deposit. Existing browser Swap behavior remains available.
+
+Why submission is separate: the existing ICPSwap wizard keeps recovery state in
+memory. A killed app or expired session can lose it after funds reach a pool.
+Implement a wallet-bound operation record and reconciliation before enabling
+mobile deposit/swap/withdrawal, then test quote freshness, per-write session checks,
+repeated taps and unknown outcomes. Never retry an unknown swap automatically.
+
+Validation: 357 frontend tests pass across 11 suites, including browser regressions,
+mobile token/provider restrictions, review-only controls and the execution guard.
+App/test type checks report zero errors and warnings; scoped ESLint and both mobile
+document-tree checks pass. Packaged WebKit verification passed, including opening
+and closing the full-screen Swap form and light/dark captures. It does not validate
+a live quote or funded swap. The first WebKit run reached the new Swap checks but
+failed an earlier ETH/Base Back assertion; that test now waits for native readiness
+rather than treating the web route commit as proof that Back is enabled.
+
+Evidence: `/private/tmp/oisy-swap-preview-tests-final.log`,
+`/private/tmp/oisy-swap-preview-webkit-final.xcresult` and
+`/private/tmp/oisy-swap-preview-captures/`. The normal signed phone build at
+`/private/tmp/oisy-capacitor-phone-build/Build/Products/Debug-iphoneos/App.app`
+passed signature, existing team/bundle, matching web-metadata and fixture-absence
+checks. This quote-only build was installed and launched at 15:51 local time.
+Physical refresh acceptance remains open.
+
+No funds moved; no commit or push. The approved API/RPC values remain in ignored
+configuration/bundles. A scan found none in tracked/nonignored source, staged
+changes or this branch's commit diffs.
+
+## Refresh provider configuration — 2026-10-28
+
+The user reported a refresh error after about 15 seconds while displayed amounts
+still looked correct. Safari inspection of the phone showed failing Solana and
+Robinhood Alchemy requests plus repeated `XrpRpcNotConfiguredError` failures.
+The mobile worktree had only the Etherscan key. Missing providers exhausted the
+shared refresh deadline; the visible spinner was not the cause.
+
+The user authorized reuse of the main checkout's Infura/Alchemy client keys and
+asked to reuse the XRP endpoint shipped by the website. The production `oisy.com`
+bundle contains an XRP endpoint; the older audit bundle does not include XRPL RPC.
+All values were placed only in ignored `.env.development.local`. Anonymous
+RPC health/chain checks with the app origin succeeded for XRP and Infura.
+Alchemy rejected `localhost` with a domain-allowlist error; the same key also
+rejected the audit origin. The user then explicitly requested temporary Solana
+and Robinhood disablement. Existing `VITE_SOLANA_MAINNET_DISABLED=true` and
+`VITE_ROBINHOOD_MAINNET_DISABLED=true` are set only in the ignored local env.
+XRP stays enabled. Re-enable these mainnets after an approved RPC key accepts
+the app origin; do not bypass the provider restriction. The existing Solana
+mainnet flag does not remove devnet when the user enables testnets.
+
+The mobile preflight now rejects missing Infura/Alchemy configuration and missing
+or malformed XRP URLs when XRP is enabled. Twelve regression cases pass. The
+credential scan found no values in tracked/non-ignored files, the index diff or
+branch commit diffs against `origin/main`; local env and built assets are untracked.
+The normal web bundle and signed phone build succeeded with these flags. Scoped
+ESLint, documentation lint, signature, matching packaged metadata, fixture absence
+and a final Git-visible credential scan pass. Logs:
+`/private/tmp/oisy-refresh-config-final-sync.log`,
+`/private/tmp/oisy-refresh-config-final-phone-build.log` and
+`/private/tmp/oisy-refresh-config-tests.log`. The ready app is
+`/private/tmp/oisy-capacitor-phone-build/Build/Products/Debug-iphoneos/App.app`.
+Installed and launched on the iPhone 14 Pro Max at 14:56 Zurich on 2026-10-28
+after the user reconnected it. The existing team and bundle were retained; no
+uninstall or Keychain reset was used. CoreDevice records:
+`/private/tmp/oisy-refresh-config-phone-install.json` and
+`/private/tmp/oisy-refresh-config-phone-launch.json`. The user has been asked to
+pull down on Wallet and confirm completion without the refresh error; that
+physical acceptance remains pending. No credentials were committed; no commit
+or push was made.
+
+## Visible Wallet refresh feedback — 2026-10-28
+
+The user reported no visible spinner during pull-to-refresh. The full-screen
+WebView has no native top inset; web safe-area padding does not move its native
+refresh control below the status bar. `WalletInteractions` now draws a single
+UIKit spinner on a material surface below the safe area while retaining the
+existing pull threshold and shared refresh coordinator. The indicator remains
+visible after release until the matching request finishes or is cancelled. Light
+and dark appearances and a localized VoiceOver label are included. No web assets,
+data loading, authentication or bridge messages changed.
+
+Verification: eight focused simulator tests pass, covering safe-area placement,
+pending/completed/cancelled requests, stale replies, haptic deduplication, Back
+and shell layout. Light/dark screenshots were inspected; they use an isolated
+native layout fixture, not the user's wallet. The first captures exposed a second
+stock spinner despite transparent tint; setting the refresh control's alpha to
+zero leaves one visible indicator. Swift formatting and both documentation trees
+pass. The build still reports existing Sendable-capture warnings in
+`TrustedWalletViewController`; this change did not edit those observers.
+
+Evidence: `/private/tmp/oisy-refresh-feedback-final.xcresult` and
+`/private/tmp/oisy-refresh-feedback-final-captures/`. The native-only phone build
+reuses the verified normal audit web bundle from Send. Signature, original
+team/bundle, matching web metadata and fixture absence were checked. Installed
+and launched on the iPhone 14 Pro Max at 14:06 Zurich on 2026-10-28 without an
+uninstall or Keychain reset. CoreDevice records are
+`/private/tmp/oisy-refresh-feedback-phone-install.json` and
+`/private/tmp/oisy-refresh-feedback-phone-launch.json`. Physical pull/feedback
+acceptance remains for the user; simulator checks dispatch the public refresh
+control event and hold completion, rather than synthesize a touch gesture.
+No commit or push was made.
+
+## Shared ICP and ck-token Send — 2026-10-28
+
+The mobile hero exposes the existing web Send for ICP and canonical ckBTC,
+ckETH and ckERC20 ledgers on Internet Computer. Wallet selection is restricted
+to those tokens; Token opens the same destination/amount/review/progress wizard
+in the shared full-screen modal. Fees, saved contacts, first-recipient confirmation,
+ledger calls and post-send wallet refresh remain owned by the web implementation.
+
+The submission service checks the supported ledger, destination network/account
+and current unexpired identity. The confirmation handler latches synchronously
+against duplicate taps. An unconfirmed response closes the intent and directs the
+user to Activity/balance before another send. No automatic retry or session renewal
+was added. Camera scanning, other chains, arbitrary ICRC/SNS, NFTs and ck withdrawals
+remain outside this slice. Durable pending-result recovery is still open.
+
+The v2 `audit-read-only` string remains a legacy protocol label. Shared Send is
+now exposed; the delegated web identity was already capable of updates. See the
+[Send contract](../../../../../mobile/capacitor/docs/shared-web-contract.md#shared-send)
+for the current scope and future-agent rules. Real-funds acceptance must be
+separately authorized with a recipient and amount.
+
+Verification: 209 focused frontend cases pass, including the real modal/transition
+hierarchy resolving a mocked transfer after token/balance refresh. The packaged
+WebKit simulator test passes destination validation, amount/review/fee, first-recipient
+acknowledgement, Back, cancel, draft reset and native-controls restoration, with
+light/dark review captures. Wallet/worker network calls are blocked in that harness;
+the final Send button is never invoked there. No real funds were sent.
+
+Logs: `/private/tmp/oisy-send-tests-final.log` and
+`/private/tmp/oisy-send-webkit-20261028.xcresult`. App/test type checks report zero
+errors and warnings; scoped lint and both documentation trees pass. The phone
+bundle was rebuilt with `VITE_MOBILE_UI_TEST=false`; signature, existing team/bundle,
+matching web metadata and fixture absence were verified.
+
+Installed and launched on the iPhone 14 Pro Max at 13:46 Zurich on 2026-10-28,
+after the user reconnected and unlocked it. The update used the existing team
+`7FY8G6QYKD` and bundle `org.dfinity.oisy.native.preview.artem`, without uninstalling
+or resetting Keychain. CoreDevice installation and launch succeeded; phone form
+acceptance and a funded transfer have not been confirmed. Evidence:
+`/private/tmp/oisy-send-phone-install.json` and
+`/private/tmp/oisy-send-phone-launch.json`. No commit or push was made.
+
+## Captured-parent Back and Wallet refresh — 2026-10-28
+
+The user's phone recording exposed a flaw in the first slice: WebKit's SPA history
+snapshot could show the outgoing token page behind itself during Back. The trusted
+wallet now disables that gesture and uses a native edge pan over a captured
+Wallet/Search parent. It retains one live wallet WebView. Cancel leaves the token
+in place; commit asks the shared router to return and waits for restored scroll and
+paint before removing the cover. Parent images stay in memory and are discarded
+on privacy/lifecycle changes. Capture failure retains ordinary visible Back.
+
+Mobile header/list and restored token-group intros no longer expand again after
+Back. Explicit group expansion still animates. The WebKit fixture includes the
+reported expanded ETH group → ETH Base → Back path as well as ICP and Search.
+
+Wallet has native pull-to-refresh with one light haptic. It joins the existing
+shared balance and price loaders, including EVM. Correlated completion works even
+when values do not change; web/native deadlines stop a hung indicator. Existing
+reader failure behavior still applies, including unavailable balances where a
+provider failed. Refresh does not reload the document or extend authentication.
+The [interaction and refresh contract](../../../../../mobile/capacitor/docs/shared-web-contract.md#token-navigation-contract)
+owns the protocol and lifecycle details.
+
+Verification: 462 focused frontend cases pass across the combined run and the
+corrected scheduler assertion rerun; app/test type checks report zero errors and
+warnings. Native verification covers 56 cases across the signed suite and final
+7-case interaction/WebKit rerun. The final run confirms correct parent rendering,
+expanded ETH/Base restoration, Search query, cancellation, unchanged runtime/grant,
+visible spinner completion and vertical-only refresh. The original unsigned
+simulator attempt could not access Keychain; it was rerun with ordinary ad-hoc
+signing without changing authentication code. Swift/changed-frontend lint,
+document-tree validation and whitespace checks passed.
+
+Evidence: `/private/tmp/oisy-interactions-web-final.log`,
+`/private/tmp/oisy-refresh-scheduler-final.log`,
+`/private/tmp/oisy-interactions-check-final.log`,
+`/private/tmp/oisy-interactions-check-tests-final.log`,
+`/private/tmp/oisy-interactions-native-signed-20261028.xcresult` and
+`/private/tmp/oisy-interactions-verified-20261028.xcresult`. Final gesture captures
+are in `/private/tmp/oisy-interactions-verified-captures/`. They use isolated mock
+balances and blocked network calls. Physical finger tracking, haptic feel and live
+provider refresh remain device acceptance items.
+
+Installed and launched on the iPhone 14 Pro Max at 12:26 Zurich time on 2026-10-28.
+The normal bundle was rebuilt without UI fixtures, its metadata matched the signed
+app, and the signature/team/bundle were verified. Installation retained the
+existing application and Keychain; no uninstall or session reset was performed.
+Build/install evidence: `/private/tmp/oisy-interactions-phone-sync.log`,
+`/private/tmp/oisy-interactions-phone-build.log`,
+`/private/tmp/oisy-interactions-phone-install.json` and
+`/private/tmp/oisy-interactions-phone-launch.json`. Physical acceptance is pending.
+No commit or push was made for this change.
+
+## Wallet/Search token navigation — 2026-10-28
+
+The first navigation slice reuses the shared Wallet and Token routes. Token Back
+returns to its exact Wallet/Search parent, with in-memory scroll and search state.
+Native root requests use IDs; web acknowledges its committed location and revision.
+Root selection replaces history, and stale reports cannot switch the active tab.
+One trusted WebView and its delegation survive same-document Back.
+
+Native history gestures are gated by the actual preceding WebKit URL, active
+session and absence of a pending root request, Account or blocking overlay. Shared
+mobile modals reject underlying route changes and retain their contents. The iOS
+scroll lock now does nothing when no modal was locked, and keeps the original
+position when one modal step replaces another.
+
+This is not independent retained tab history. Interactive edge swipe completion
+and cancellation remain a physical-device acceptance item: simulator clicks worked,
+but its control tool did not deliver any drag, including ordinary scroll. Automated
+Back, history, grant and modal assertions are separate evidence. Financial actions
+remain hidden. No commit or push was made for this slice.
+
+The [navigation contract](../../../../../mobile/capacitor/docs/shared-web-contract.md#token-navigation-contract)
+and [coverage plan](../../../../../mobile/capacitor/docs/feature-parity.md#first-implementation-slice)
+record ownership and next work. Rebuild matching native/web assets together; the
+strict v2 handshake adds the `navigationState` capability. Test-only fixtures must
+be removed by a normal rebuild before any phone installation.
+
+Verification: 78 focused frontend tests passed, including shared iOS modal scroll,
+host ordering and the navigation model. The complete simulator run passed 48
+AppTests and 2 AppUITests, including the real bundled WebKit flow. Application/test
+type checks reported zero errors and warnings. Changed-file ESLint, Prettier,
+Swift formatting, the mobile README/handoff context trees and `git diff --check`
+passed. The final normal mobile build/sync also passed with both fixture event
+names absent from `build-mobile` and the packaged iOS public assets. This does not
+replace physical gesture acceptance.
+
+Evidence: `/private/tmp/oisy-nav-web-final.log`,
+`/private/tmp/oisy-navigation-complete-20261028.xcresult`,
+`/private/tmp/oisy-nav-native-complete.log`,
+`/private/tmp/oisy-nav-check-final.log`,
+`/private/tmp/oisy-nav-test-types-final.log` and
+`/private/tmp/oisy-nav-normal-build.log`.
+
+Installed and launched on the iPhone 14 Pro Max at 11:37 Zurich time on 2026-10-28.
+The signed app retained the existing bundle identifier, development team and
+Keychain service; no uninstall or session reset was performed. Its packaged web
+build metadata matches the normal bundle, and both test-fixture events are absent.
+The user still needs to verify completed/cancelled edge gestures on the device.
+Installation evidence: `/private/tmp/oisy-navigation-phone-build.log`,
+`/private/tmp/oisy-navigation-phone-install.json` and
+`/private/tmp/oisy-navigation-phone-launch.json`.
+
+## Feature and compatibility audit — 2026-10-28
+
+A read-only code audit covered web feature availability, iOS routes/entry points,
+Back/swipe feasibility and shared-code regression gaps. The
+[coverage plan](../../../../../mobile/capacitor/docs/feature-parity.md) owns the
+inventory and proposed stages; the [compatibility guide](../../../../../mobile/capacitor/docs/shared-web-contract.md)
+owns agent checks and change/test routing. Root/frontend/mobile agent entry points
+now link to that guide. Stale current-state five-minute/renewal descriptions were
+corrected; historical build records remain.
+
+At the time of the audit, the recommended first slice was Wallet/Search → Token
+→ Back; its subsequent implementation is recorded above. The audit itself changed
+no runtime behavior, financial capability, CI workflow or phone installation. The mobile README
+context tree (including both new guides), handoff tree, new relative links,
+formatting and `git diff --check` pass. A broader migration-spec traversal reports
+73 pre-existing link/Source-format errors in the older repository documentation;
+these are outside the new guides and were not cleaned up here. The previous app
+test results below are not evidence for unimplemented navigation.
+
+## One-hour session — 2026-10-28
+
+The user increased the fixed session limit to one hour, matching the web wallet's
+`AUTH_MAX_TIME_TO_LIVE`. Native sign-in requests one hour and persists its deadline;
+the web validation limit is derived from the existing web constant. Earlier II
+expiry still wins. No automatic renewal or activity-based extension was added.
+Existing 20-minute sessions keep their saved deadline; the next sign-in gets the
+new lifetime. See the [session policy](../../../../../mobile/capacitor/docs/session-boundary.md#fixed-session-policy).
+
+Verification: all 27 focused frontend tests and 47 simulator tests passed,
+including saved-deadline migration, late web/worker grants, expiry cleanup and
+welcome UI. Application and test type checks report zero errors and warnings;
+focused ESLint, Swift formatting and documentation validation pass. The normal
+mobile bundle and signed phone build succeeded, with test fixtures excluded.
+
+Installed and launched on the iPhone 14 Pro Max at 10:18 Zurich time on 2026-10-28,
+preserving the existing team, bundle identifier and Keychain service. The user
+must sign in again to get a one-hour delegation; an existing shorter session is
+not extended. A real passkey sign-in and full elapsed-hour check remain pending;
+expiry tests use controlled time.
+
+Evidence: `/private/tmp/oisy-hour-web-tests.log`,
+`/private/tmp/oisy-hour-simulator-20261028.xcresult`,
+`/private/tmp/oisy-hour-check.log`, `/private/tmp/oisy-hour-check-tests.log`,
+`/private/tmp/oisy-hour-phone-build.log`, `/private/tmp/oisy-hour-install.json`
+and `/private/tmp/oisy-hour-launch.json`. The interactive explanation also now
+uses a one-hour example. No commit or push was made.
+
+## Fixed 20-minute session — 2026-10-28
+
+The preceding build requested 20 minutes from II, persisted a local deadline when sign-in
+succeeded, and issued web/worker grants no later than that deadline or actual II
+expiry. Relaunch, activity and document replacement cannot restart the clock.
+Old Keychain records without a deadline expire into “Welcome back!” and require a
+new sign-in. Explicit logout still shows the introduction.
+
+The [session policy](../../../../../mobile/capacitor/docs/session-boundary.md#fixed-session-policy)
+owns this behavior. It supersedes the earlier five-minute child limit and renewal
+items below. There is no new SDK dependency or domain deployment. The normal build
+was installed and launched on the iPhone 14 Pro Max at 10:08 Zurich time on
+2026-10-28, after the laptop reboot. The existing team, bundle identifier and
+Keychain service were preserved; the app was not uninstalled. A fresh II sign-in
+is required to replace the legacy session. Physical sign-in and a full 20-minute
+elapsed-time check remain pending.
+
+Verification: 27 focused frontend tests and all 46 simulator tests passed. The
+simulator suite includes actual WebKit/session teardown and welcome UI checks.
+New expiry tests use controlled timestamps; they do not constitute a 20-minute
+physical-phone/passkey test. Application and test type checks report zero errors
+and warnings. The reboot removed the earlier temporary simulator/type-check
+artifacts and interrupted full-repository lint. After reboot, the 27 frontend tests
+passed again, as did focused ESLint, strict Swift formatting, normal mobile web
+build/sync and the signed device build. A test-helper parameter warning was fixed.
+The installed bundle has no UI-test fixture references; its code signature and
+existing development team were verified. Current temporary evidence:
+`/private/tmp/oisy-20min-web-tests.log`, `/private/tmp/oisy-20min-focused-lint.log`,
+`/private/tmp/oisy-20min-swift-lint.log`, `/private/tmp/oisy-20min-phone-build.log`,
+`/private/tmp/oisy-20min-install.json` and `/private/tmp/oisy-20min-launch.json`.
 
 ## SDK migration preparation — 2026-10-27
 
@@ -123,8 +506,9 @@ do not echo web navigation or interrupt an active Explore tab.
 
 Parent/child expiry logs out, clears Keychain, removes the wallet runtime and
 revokes Explore permissions. Web logout also terminates all workers; late bootstrap
-and worker responses cannot reinstall the old session. Child TTL remains five
-minutes with **no automatic renewal**. Financial execution and contact editing
+and worker responses cannot reinstall the old session. The original five-minute
+child limit was replaced by a persisted 20-minute session deadline on 2026-10-28,
+with **no automatic renewal**. Financial execution and contact editing
 remain unavailable. Token management and settings use the ordinary web flows.
 
 ## Verification for this integration
@@ -328,7 +712,7 @@ performed during verification.
 
 ## Remaining work
 
-- Automatic child renewal with worker/client replacement and cancellation tests.
+- Real-device acceptance of fixed one-hour sessions; automatic renewal is deferred.
 - II review of root-signature trust and cold-start callback recovery; see the SDK
   comparison before choosing a local verifier.
 - Fresh-account onboarding/allowance and multi-chain funded-history acceptance.

@@ -3,10 +3,12 @@
 	import { getContext } from 'svelte';
 	import { get } from 'svelte/store';
 	import SwapBtcContexts from '$btc/components/swap/SwapBtcContexts.svelte';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
 	import { crossChainSwapNetworksMainnets } from '$lib/derived/cross-chain-networks.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
@@ -167,6 +169,11 @@
 	};
 
 	const applyListConstraints = (side: TokenSide) => {
+		if (MOBILE_SHELL) {
+			setNetworksMode({ enabled: false, allowedIds: [ICP_NETWORK.id] });
+			setFilterNetwork(ICP_NETWORK);
+			return;
+		}
 		// SOURCE list: user can browse all networks (but keep current network preselected if any)
 		if (side === 'source') {
 			setNetworksMode({ enabled: true });
@@ -274,40 +281,44 @@
   minute the backend allows for the reserved-outpoint list.
 -->
 <SwapBtcContexts amount={swapAmount} load={isBitcoinSource} networkId={$sourceToken?.network?.id}>
-	{#key currentStep?.name}
-		{#if currentStep?.name === WizardStepsSwap.TOKENS_LIST}
-			<SwapTokensList
-				onCloseTokensList={closeTokenList}
-				onSelectNetworkFilter={() => goToStep(WizardStepsSwap.FILTER_NETWORKS)}
-				onSelectToken={selectToken}
-				side={selectTokenType}
-			/>
-		{:else if currentStep?.name === WizardStepsSwap.FILTER_NETWORKS}
-			<ModalNetworksFilter
-				{allNetworksEnabled}
-				filteredNetworks={$filteredNetworks}
-				onNetworkFilter={() => goToStep(WizardStepsSwap.TOKENS_LIST)}
-				showStakeBalance={false}
-			/>
-		{:else if currentStep?.name === WizardStepsSwap.SELECT_PROVIDER}
-			<SwapProviderListModal
-				onCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
-				onSelectProvider={selectProvider}
-			/>
-		{:else if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
-			<SwapTokenWizard
-				{currentStep}
-				onBack={() => modal?.back()}
-				{onClose}
-				onNext={() => modal?.next()}
-				onShowProviderList={() => goToStep(WizardStepsSwap.SELECT_PROVIDER)}
-				onShowTokensList={showTokensList}
-				bind:swapAmount
-				bind:receiveAmount
-				bind:slippageValue
-				bind:swapProgressStep
-				bind:swapFailedProgressSteps
-			/>
-		{/if}
-	{/key}
+	<!-- Keep the execution owner alive when Review advances to progress. Its teardown cancels
+	     pending requests; remount only when the user leaves the form/review/execution flow. -->
+	{#if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
+		<SwapTokenWizard
+			{currentStep}
+			onBack={() => modal?.back()}
+			{onClose}
+			onNext={() => modal?.next()}
+			onShowProviderList={() => goToStep(WizardStepsSwap.SELECT_PROVIDER)}
+			onShowTokensList={showTokensList}
+			bind:swapAmount
+			bind:receiveAmount
+			bind:slippageValue
+			bind:swapProgressStep
+			bind:swapFailedProgressSteps
+		/>
+	{:else}
+		{#key currentStep?.name}
+			{#if currentStep?.name === WizardStepsSwap.TOKENS_LIST}
+				<SwapTokensList
+					onCloseTokensList={closeTokenList}
+					onSelectNetworkFilter={() => goToStep(WizardStepsSwap.FILTER_NETWORKS)}
+					onSelectToken={selectToken}
+					side={selectTokenType}
+				/>
+			{:else if currentStep?.name === WizardStepsSwap.FILTER_NETWORKS}
+				<ModalNetworksFilter
+					{allNetworksEnabled}
+					filteredNetworks={$filteredNetworks}
+					onNetworkFilter={() => goToStep(WizardStepsSwap.TOKENS_LIST)}
+					showStakeBalance={false}
+				/>
+			{:else if currentStep?.name === WizardStepsSwap.SELECT_PROVIDER}
+				<SwapProviderListModal
+					onCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
+					onSelectProvider={selectProvider}
+				/>
+			{/if}
+		{/key}
+	{/if}
 </SwapBtcContexts>

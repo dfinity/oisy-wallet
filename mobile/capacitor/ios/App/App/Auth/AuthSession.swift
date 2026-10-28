@@ -17,11 +17,22 @@ struct DelegationChain: Codable, Equatable {
 }
 
 struct AuthSession: Codable, Equatable {
+  static let duration: TimeInterval = 60 * 60
   let privateKey: Data
   let chain: DelegationChain
+  // Optional only to decode old Keychain records. Missing deadlines require a fresh sign-in.
+  private let deadline: Date?
+
+  init(privateKey: Data, chain: DelegationChain, now: Date = .now) {
+    self.privateKey = privateKey
+    self.chain = chain
+    deadline = now.addingTimeInterval(Self.duration)
+  }
 
   var principal: String { Principal.selfAuthenticating(publicKey: chain.publicKey) }
-  var expiresAt: Date {
+  var expiresAt: Date { min(delegationExpiresAt, deadline ?? .distantPast) }
+
+  var delegationExpiresAt: Date {
     let expiration =
       chain.signerDelegation.compactMap { UInt64($0.delegation.expiration) }.min() ?? 0
     return Date(timeIntervalSince1970: Double(expiration) / 1_000_000_000)

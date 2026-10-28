@@ -40,3 +40,18 @@ export type SignAndApproveParams = Omit<
 	nonce: number;
 	spender: EthAddress;
 } & Omit<WithProgress, 'progressSteps'>;
+
+export interface EthSendTransactionReference {
+	hash: string;
+	nonce: number;
+}
+
+export class MobileEthSendSessionExpiredError extends Error {}
+
+// A node can accept the signed transaction even when its response never reaches the app.
+// This error carries no raw transaction or provider dump: callers must check the saved hash.
+export class MobileEthSendPendingError extends Error {
+	constructor(readonly transaction: EthSendTransactionReference) {
+		super('Mobile transfer broadcast needs confirmation');
+	}
+}

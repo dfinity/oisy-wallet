@@ -252,12 +252,22 @@ plumbing, etc.). Given the [e2e restriction](#e2e-status-temporarily-restricted)
 ## Embedded mobile presentation fixtures
 
 The Capacitor WebKit integration test uses a fake native identity and rejects
-network calls. `VITE_MOBILE_UI_TEST=true` enables an isolated empty Notes cache
-through `$tests/mocks/mobile-notes.fixture.ts`; the normal bundle compiles this
-fixture out. It exercises the same Notes surface/store as component tests without
-bypassing signed canister responses. Always rebuild with the flag false before
-phone installation and check that the fixture event is absent from bundled JS.
-See [mobile verification](../../../mobile/capacitor/README.md#verification).
+network calls in both the page and workers. `VITE_MOBILE_UI_TEST=true` enables
+`$tests/mocks/mobile-notes.fixture.ts` and `mobile-navigation.fixture.ts`. They seed
+shared in-memory Notes, profile and balance stores for real route/Back tests, without
+bypassing signed canister responses. The normal bundle compiles them out. Always
+rebuild with the flag false before phone installation and check that fixture events
+are absent from bundled JS.
+The native WebKit test also exercises captured-parent drag cancellation/completion,
+restored scroll, unchanged session grants and root-only refresh availability. Its
+programmatic gesture callbacks and screenshots are useful integration evidence;
+physical finger tracking and haptic feel still require device acceptance.
+
+Manual refresh touches shared background workers. Run coordinator, AppWorker
+correlation, scheduler and exchange tests, plus the affected chain/loader tests.
+Cover unchanged results, joining an in-flight job, partial provider failure,
+timeout, disposal and a late reply for another request. Keep normal background
+worker calls compatible. See [mobile verification](../../../mobile/capacitor/README.md#verification).
 
 ## Mobile authentication deployment checks
 

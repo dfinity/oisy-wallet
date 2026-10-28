@@ -22,7 +22,9 @@ isolated Explore connections. The duplicate native wallet and its mode switch we
 retired on 2026-10-27. `mobile/ios-native/` contains historical documentation only.
 The [Capacitor guide](../../mobile/capacitor/README.md) owns current mobile behavior,
 build instructions and preview permission limits. The [migration spec](./spec-driven-development/specs/2026-10-27-feat-mobile-shared-web-native-navigation.md)
-owns the remaining renewal, authentication review and Android gates. The current iOS
+owns the remaining authentication review and Android gates. The mobile session
+has a fixed one-hour deadline without renewal. The [coverage plan](../../mobile/capacitor/docs/feature-parity.md)
+distinguishes current mobile support from proposed features. The current iOS
 build uses the normal web auth provider, stores, loaders and workers. This document continues to
 own web product behavior.
 

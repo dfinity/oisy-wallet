@@ -15,6 +15,21 @@ Keep Capacitor, the shared Svelte routes/data pipeline, native navigation and th
 isolated Explore browser. Migrate authentication first. Enforcing native approval
 for wallet operations requires a separate change to signing authority.
 
+## Session policy and scope
+
+The user chose fixed one-hour sessions with sign-in again after expiry, without
+automatic renewal. The [session guide](./session-boundary.md#fixed-session-policy)
+owns the implemented deadline and legacy-session migration policy.
+Borrowing the SDK's validation, storage and callback principles does not require
+adopting the package or its session protocol. The package steps below apply only
+if we choose SDK adoption.
+
+The SDK's app-delegation renewal is distinct from extending an II session. Its
+[session documentation](https://github.com/dfinity/icp-native-sdk/blob/cc22ba56b6cbab384fcef02c8e3c8624341cc30a/docs/auth-sdk.md#5-the-session)
+describes separate II and app credentials. A replacement app delegation cannot
+outlive the II session; once that session expires, another sign-in is required.
+This feature is documented, but is not required for our planned fixed sessions.
+
 ## Published API and build result
 
 The latest published release found through authenticated GitHub access was
@@ -175,8 +190,10 @@ npm exec -- vitest run src/frontend/src/tests/mobile-auth-deployment.spec.ts
    alone does not prove that the identity can authenticate. Test same-account
    restore after relaunch and cancel migration on a mismatch.
 3. **Adapt the trusted-web grant.** Obtain an app delegation from SDK authentication,
-   then issue a child bound to the fresh web public key, existing five-minute
-   maximum and app-delegation expiry. The II session is scoped to II and cannot
+   then issue a child bound to the fresh web public key and no later than the
+   earliest app-chain expiry or persisted one-hour session deadline. If the
+   SDK's app grant is shorter than our requested session, end access at that earlier
+   deadline; do not silently add renewal. The II session is scoped to II and cannot
    replace the current app chain directly. Keep exact bridge origin, frame,
    document and session-generation checks. Retain worker-specific keys and private
    MessagePorts; never export the II session or native private key to JavaScript.
@@ -185,21 +202,22 @@ npm exec -- vitest run src/frontend/src/tests/mobile-auth-deployment.spec.ts
    profile/token settings and encrypted Notes with the actual minted app chain.
    Do not assume that extracting the first link of an II session yields the proof
    the backend expects. Get the SDK/II team to confirm the app-proof contract.
-5. **Add renewal as a lifecycle change.** SDK app-delegation renewal does not renew
-   already issued web or worker credentials. Refresh before the earliest deadline,
-   replace the shared provider and worker grants together, and reject late results
-   from the old generation. Account changes, logout and document replacement must
-   invalidate pending requests. Keep fail-closed expiry until this path is tested.
+5. **Apply one fixed session deadline.** Follow the session guide's one-hour
+   policy, bounded by the actual returned chains. Align native, web and worker
+   expiry checks and reject late results from an ended session. Activity, app
+   resume and document replacement must not move the deadline. SDK app-delegation
+   rotation and extending web/worker access are outside this phase. Verify that
+   the chosen adapter can enforce this policy without an implicit renewal loop.
 6. **Preserve sign-out behavior.** Explicit logout ends/revokes the SDK session,
    destroys wallet/worker identities, clears Explore consent/storage and shows the
    introduction. Expiry or terminal credential loss shows “Welcome back!”. Retry
    temporarily locked Apple storage; distinguish user cancellation from expiry.
-   Handle foreground/background transitions, offline renewal and restoration.
+   Handle foreground/background transitions, offline expiry and restoration.
    Remove the custom relay adapter and legacy key only after acceptance and an
    explicit successful migration.
 
 Acceptance requires real passkey interaction and signed canister calls, plus
-regressions for expiry, cancellation, late renewal, stale worker messages, app
+regressions for expiry, cancellation, late grants, stale worker messages, app
 relaunch and logout during every asynchronous stage. Simulator fixtures cannot
 establish domain ownership or real account continuity.
 
@@ -234,9 +252,9 @@ signing, transaction execution or unrestricted chain changes as part of SDK auth
 - Apple developer team: enable Associated Domains for the explicit preview App ID
   and regenerate the profile. Choose production app identity separately.
 - II/SDK reviewers: confirm audit principal continuity, the backend app-proof
-  contract, and supported renewal/revocation semantics for derived web sessions.
+  contract, and the fixed deadline, child authority and revocation semantics.
 - Device acceptance: repeat real sign-in, signed principal proof, matching accounts,
-  restore, cancellation, renewal, explicit logout and expiry after those changes.
+  restore, cancellation, explicit logout and fixed expiry after those changes.
 
 ## Dependencies
 

@@ -13,16 +13,25 @@ import {
 	convertCkETHToEth,
 	convertCkErc20ToErc20
 } from '$icp/services/ck.services';
-import type { IcCkWithdrawalResult, IcSendParams, IcTransferParams } from '$icp/types/ic-send';
+import {
+	MobileSendSessionExpiredError,
+	type IcCkWithdrawalResult,
+	type IcSendParams,
+	type IcTransferParams
+} from '$icp/types/ic-send';
 import type { IcToken } from '$icp/types/ic-token';
 import { invalidIcpAddress } from '$icp/utils/account.utils';
+import { isMobileSendDestination, isMobileSendToken } from '$icp/utils/ic-send.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
+import { ZERO } from '$lib/constants/app.constants';
+import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
 import { consoleError } from '$lib/utils/console.utils';
-import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
+import { isNetworkIdBitcoin, isNetworkIdICP } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { BlockHeight } from '@icp-sdk/canisters/ledger/icp';
 import { decodeIcrcAccount, type IcrcLedgerDid } from '@icp-sdk/canisters/ledger/icrc';
@@ -74,6 +83,24 @@ const send = async ({
 	token: IcToken;
 	targetNetworkId?: NetworkId;
 }): Promise<IcCkWithdrawalResult | undefined> => {
+	if (MOBILE_SHELL) {
+		if (
+			!isMobileSendToken(token) ||
+			(targetNetworkId !== undefined && !isNetworkIdICP(targetNetworkId)) ||
+			!isMobileSendDestination({ token, destination: rest.to }) ||
+			rest.amount <= ZERO
+		) {
+			throw new Error(get(i18n).send.info.mobile_ic_only);
+		}
+		const identity = await AuthClientProvider.getInstance().loadIdentity();
+		if (!identity || identity !== rest.identity) {
+			throw new MobileSendSessionExpiredError();
+		}
+		if (token.mintingAccount?.owner.toText() === identity.getPrincipal().toText()) {
+			throw new Error(get(i18n).send.info.mobile_ic_only);
+		}
+	}
+
 	if (isNetworkIdBitcoin(targetNetworkId)) {
 		return await convertCkBTCToBtc({
 			...rest,

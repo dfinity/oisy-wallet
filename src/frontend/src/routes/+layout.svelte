@@ -221,8 +221,13 @@
 	onMount(() => (MOBILE_SHELL ? undefined : openBc()));
 
 	let scrollY = 0;
+	let bodyScrollLocked = false;
 
 	const lockBodyScroll = () => {
+		if (bodyScrollLocked) {
+			return;
+		}
+		bodyScrollLocked = true;
 		({ scrollY } = window);
 		document.body.style.position = 'fixed';
 		document.body.style.top = `-${scrollY}px`;
@@ -230,6 +235,10 @@
 	};
 
 	const unlockBodyScroll = () => {
+		if (!bodyScrollLocked) {
+			return;
+		}
+		bodyScrollLocked = false;
 		document.body.style.position = '';
 		document.body.style.top = '';
 		document.body.style.width = '';

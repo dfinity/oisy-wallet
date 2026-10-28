@@ -7,6 +7,7 @@ import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { approve } from '$eth/services/approve.services';
 import { processTransactionSent } from '$eth/services/eth-transaction.services';
+import { getNonce } from '$eth/services/nonce.services';
 import { prepare } from '$eth/services/prepare.services';
 import type {
 	CkEthPopulateTransaction,
@@ -14,8 +15,14 @@ import type {
 } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork, NetworkChainId } from '$eth/types/network';
-import type { SendParams } from '$eth/types/send';
+import {
+	MobileEthSendPendingError,
+	MobileEthSendSessionExpiredError,
+	type EthSendTransactionReference,
+	type SendParams
+} from '$eth/types/send';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+import { isMobileEthSendDestination, mobileEthSendNetwork } from '$eth/utils/mobile-send.utils';
 import { isDestinationContractAddress } from '$eth/utils/send.utils';
 import { isErc20Icp } from '$eth/utils/token.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -23,9 +30,11 @@ import {
 	toCkErc20HelperContractAddress,
 	toCkEthHelperContractAddress
 } from '$icp-eth/utils/cketh.utils';
-import { signTransaction } from '$lib/api/signer.api';
+import { getEthAddress, signTransaction } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
+import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 import { ProgressStepsSend } from '$lib/enums/progress-steps';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
 import type { TransferParams } from '$lib/types/send';
@@ -33,6 +42,7 @@ import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
+import { keccak256 } from 'ethers/crypto';
 import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 
@@ -174,46 +184,117 @@ const ckErc20HelperContractPrepareTransaction = async ({
 	});
 };
 
-export const send = async ({
+type EthSendParams = Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> & {
+	customNonce?: number;
+	beforeBroadcast?: (transaction: EthSendTransactionReference) => Promise<void>;
+	canProceed?: () => boolean;
+} & SendParams &
+	RequiredTransactionFeeData;
+
+const mobileSendsInFlight = new Set<string>();
+
+const assertMobileSendSession = async ({
+	identity,
+	canProceed
+}: Pick<EthSendParams, 'identity' | 'canProceed'>): Promise<void> => {
+	if (!MOBILE_SHELL) {
+		return;
+	}
+	if (canProceed?.() === false) {
+		throw new DOMException('Transfer cancelled', 'AbortError');
+	}
+	const currentIdentity = await AuthClientProvider.getInstance().loadIdentity();
+	if (isNullish(currentIdentity) || currentIdentity !== identity) {
+		throw new MobileEthSendSessionExpiredError();
+	}
+	if (canProceed?.() === false) {
+		throw new DOMException('Transfer cancelled', 'AbortError');
+	}
+};
+
+export const send = async (params: EthSendParams): Promise<EthSendTransactionReference> => {
+	const key = `${params.identity?.getPrincipal().toText()}:${params.sourceNetwork.chainId}`;
+	if (MOBILE_SHELL && mobileSendsInFlight.has(key)) {
+		throw new Error(get(i18n).send.error.unexpected);
+	}
+	if (MOBILE_SHELL) {
+		mobileSendsInFlight.add(key);
+	}
+	try {
+		return await executeSend(params);
+	} finally {
+		mobileSendsInFlight.delete(key);
+	}
+};
+
+const executeSend = async ({
 	lastProgressStep = ProgressStepsSend.DONE,
 	progress,
 	token,
 	identity,
 	customNonce,
+	beforeBroadcast,
+	canProceed,
 	...rest
-}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> & {
-	customNonce?: number;
-} & SendParams &
-	RequiredTransactionFeeData): Promise<{ hash: string; nonce: number }> => {
+}: EthSendParams): Promise<EthSendTransactionReference> => {
+	if (MOBILE_SHELL) {
+		const network = mobileEthSendNetwork(token);
+		if (
+			isNullish(network) ||
+			network.id !== rest.sourceNetwork.id ||
+			network.chainId !== rest.sourceNetwork.chainId ||
+			(nonNullish(rest.targetNetwork) && rest.targetNetwork.id !== network.id) ||
+			!isMobileEthSendDestination({ token, destination: rest.to, minterInfo: rest.minterInfo }) ||
+			rest.amount <= ZERO ||
+			(nonNullish(rest.data) && rest.data !== '0x') ||
+			nonNullish(customNonce) ||
+			isNullish(beforeBroadcast)
+		) {
+			throw new Error(get(i18n).send.error.unexpected);
+		}
+		await assertMobileSendSession({ identity, canProceed });
+		// The source address is owned by the active signer, not merely an address left in a store.
+		const signerAddress = await getEthAddress({ identity });
+		await assertMobileSendSession({ identity, canProceed });
+		if (signerAddress.toLowerCase() !== rest.from.toLowerCase()) {
+			throw new Error(get(i18n).send.assertion.address_unknown);
+		}
+	}
+
 	progress?.(ProgressStepsSend.INITIALIZATION);
 
-	const { transactionNeededApproval, nonce } = await approve({
-		progress,
-		progressSteps: ProgressStepsSend,
-		token,
-		identity,
-		customNonce,
-		...rest
-	});
+	// Direct mobile transfers cannot request allowances or a ck-token conversion.
+	const { transactionNeededApproval, nonce } = MOBILE_SHELL
+		? {
+				transactionNeededApproval: false,
+				nonce: await getNonce({ from: rest.from, networkId: rest.sourceNetwork.id })
+			}
+		: await approve({
+				progress,
+				progressSteps: ProgressStepsSend,
+				token,
+				identity,
+				customNonce,
+				...rest
+			});
 
-	// If we approved a transaction - as, for example, in Erc20 -> ckErc20 flow - then we increment the nonce for the next transaction. Otherwise, we can use the nonce we got.
 	const nonceTransaction = transactionNeededApproval ? nonce + 1 : nonce;
-
 	const transactionSent = await sendTransaction({
 		progress,
 		nonce: nonceTransaction,
 		token,
 		identity,
+		beforeBroadcast,
+		canProceed,
 		...rest
 	});
 
-	// Explicitly do not await to proceed in the background and allow the UI to continue
-	processTransactionSent({ identity, token, transaction: transactionSent });
-
+	// The broadcast already succeeded. Failure to refresh the shared activity must not invite a
+	// second payment or produce an unhandled rejection containing wallet data.
+	Promise.resolve(processTransactionSent({ identity, token, transaction: transactionSent })).catch(
+		() => undefined
+	);
 	progress?.(lastProgressStep);
-
-	// The nonce is returned so callers can persist it: it is what later tells a
-	// transaction that is merely unmined from one that was replaced or dropped.
 	return { hash: transactionSent.hash, nonce: nonceTransaction };
 };
 
@@ -230,10 +311,15 @@ const sendTransaction = async ({
 	identity,
 	minterInfo,
 	nonce,
+	beforeBroadcast,
+	canProceed,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	Omit<SendParams, 'lastProgressStep'> &
-	RequiredTransactionFeeData & { nonce: number }): Promise<TransactionResponse> => {
+	RequiredTransactionFeeData & { nonce: number } & Pick<
+		EthSendParams,
+		'beforeBroadcast' | 'canProceed'
+	>): Promise<TransactionResponse> => {
 	const { id: networkId, chainId } = sourceNetwork;
 
 	const { sendTransaction } = infuraProviders(networkId);
@@ -324,6 +410,7 @@ const sendTransaction = async ({
 							: infuraErc20Providers(networkId).populateTransaction
 				}));
 
+	await assertMobileSendSession({ identity, canProceed });
 	progress?.(ProgressStepsSend.SIGN_TRANSFER);
 
 	const rawTransaction = await signTransaction({
@@ -332,7 +419,19 @@ const sendTransaction = async ({
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
+	await assertMobileSendSession({ identity, canProceed });
+	// Save only the hash and nonce before any broadcast. A transport error must not produce a
+	// fresh signature and nonce on retry: this hash remains the source of truth for recovery.
+	const reference = { hash: nonNullish(beforeBroadcast) ? keccak256(rawTransaction) : '', nonce };
+	await beforeBroadcast?.(reference);
+	await assertMobileSendSession({ identity, canProceed });
 	progress?.(ProgressStepsSend.TRANSFER);
-
-	return await sendTransaction(rawTransaction);
+	try {
+		return await sendTransaction(rawTransaction);
+	} catch (err: unknown) {
+		if (MOBILE_SHELL) {
+			throw new MobileEthSendPendingError(reference);
+		}
+		throw err;
+	}
 };
