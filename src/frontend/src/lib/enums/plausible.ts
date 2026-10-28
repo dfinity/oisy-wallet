@@ -311,7 +311,8 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	NOTE_SHARE_RECIPIENT_PAGE = 'recipient_page',
 	HELP_PAGE = 'help_page',
 	TIP_SENDER = 'tip_sender',
-	TIP_CLAIMER = 'tip_claimer'
+	TIP_CLAIMER = 'tip_claimer',
+	NAVIGATION = 'navigation'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
