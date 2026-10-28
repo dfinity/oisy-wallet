@@ -47,12 +47,12 @@ OISY already reads these for the contracts it lists by address
 
 ### What approving an unknown token can cost
 
-The call goes to the token contract, and the allowance or the transfer it makes is in that token
-only. A token call that also sends native value is already refused
+The call goes to the token contract, and a conventional ERC-20 implementation applies the allowance
+or transfer to that token only. A token call that also sends native value is already refused
 ([Token calls that also send native value](../../PRODUCT.md#token-calls-that-also-send-native-value)).
-So the most such a request can do is grant or move that token, the token whose amount the review
-then states. A contract that is a fake can make its own token worthless, but it cannot reach the
-user's other assets through this call.
+However, an unlisted contract's metadata does not establish its implementation: it may execute
+arbitrary code, including spending other assets for which it already has authorization. Reading
+its symbol and decimals does not prove that the call is limited to that token.
 
 ## Behaviour
 
