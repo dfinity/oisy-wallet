@@ -4,6 +4,7 @@
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import EthFeePriority from '$eth/components/fee/EthFeePriority.svelte';
 	import EthWalletConnectCallMethods from '$eth/components/wallet-connect/EthWalletConnectCallMethods.svelte';
+	import EthWalletConnectUniswapSwap from '$eth/components/wallet-connect/EthWalletConnectUniswapSwap.svelte';
 	import {
 		ETH_WALLET_CONNECT_GAS_BASELINE_FLOOR,
 		ETH_WALLET_CONNECT_GAS_NOTICE_MULTIPLIER,
@@ -119,6 +120,17 @@
 
 	let ckEthHelperUnconfirmed = $derived(call.type === 'ckEthHelperUnconfirmed');
 
+	let swap = $derived(call.type === 'uniswapSwap' ? call.swap : undefined);
+
+	// Each states something the summary rows cannot carry on their own, so several can show at once.
+	let swapToOtherAddress = $derived(nonNullish(swap?.recipient));
+
+	let swapWithoutMinimum = $derived(swap?.received.amount === ZERO);
+
+	// Judged when the review opens, against this device's clock. The deadline itself is a row of the
+	// summary, so the box is the only part that depends on the clock being right.
+	let swapExpired = $derived(nonNullish(swap?.deadline) && swap.deadline < Date.now() / 1000);
+
 	let erc20 = $derived(erc20Approve || erc20Transfer || allowanceDelta);
 
 	let decodedErc20Data = $derived.by(() => {
@@ -207,6 +219,30 @@
 	let activeTab = $state('summary');
 </script>
 
+<!-- Shared by the swap summary and the send summary. -->
+{#snippet sourceNetwork()}
+	<WalletConnectModalValue label={$i18n.send.text.source_network} ref="source-network">
+		<NetworkWithLogo network={sourceNetworkProp} />
+	</WalletConnectModalValue>
+{/snippet}
+
+<!-- The fee is two rows that belong together, so it takes a heading like every other block in the
+     summary rather than trailing loose off the end of it. -->
+{#snippet fee()}
+	<span id={FEE_SECTION_LABEL} class="font-bold">{$i18n.fee.text.fee}</span>
+
+	<div class="mb-4" aria-labelledby={FEE_SECTION_LABEL} role="group">
+		<EthFeePriority gas={signedGas} styleClass="mb-2" />
+
+		<EthFeeDisplay estimated gas={signedGas}>
+			{#snippet label()}
+				<!-- "Fee" is the heading above; repeating it in the row would say it twice. -->
+				{$i18n.fee.text.estimated}
+			{/snippet}
+		</EthFeeDisplay>
+	</div>
+{/snippet}
+
 <ContentWithToolbar>
 	{#if flaggedAsScam}
 		<WalletConnectScamWarning />
@@ -260,6 +296,24 @@
 		</MessageBox>
 	{/if}
 
+	{#if swapToOtherAddress}
+		<MessageBox level="error" testId="wallet-connect-swap-recipient">
+			{$i18n.wallet_connect.text.swap_recipient_not_wallet}
+		</MessageBox>
+	{/if}
+
+	{#if swapWithoutMinimum}
+		<MessageBox level="error" testId="wallet-connect-swap-no-minimum">
+			{$i18n.wallet_connect.text.swap_no_minimum}
+		</MessageBox>
+	{/if}
+
+	{#if swapExpired}
+		<MessageBox level="error" testId="wallet-connect-swap-expired">
+			{$i18n.wallet_connect.text.swap_expired}
+		</MessageBox>
+	{/if}
+
 	<!-- Padding an estimate is ordinary dApp behaviour and unused gas is refunded, so both tiers
 	     inform instead of blocking the way undecodable ERC20 calldata does. They sit with the other
 	     warnings rather than in a tab, since a warning behind a tab is one the user need not see. -->
@@ -281,7 +335,11 @@
 		]}
 		bind:activeTab
 	>
-		{#if activeTab === 'summary'}
+		{#if activeTab === 'summary' && nonNullish(swap)}
+			<EthWalletConnectUniswapSwap {application} network={sourceNetworkProp} {sourceNetwork} {swap}>
+				{@render fee()}
+			</EthWalletConnectUniswapSwap>
+		{:else if activeTab === 'summary'}
 			<SendData
 				amount={amountDisplay}
 				{application}
@@ -293,14 +351,9 @@
 				showSigner={false}
 				showUnlimitedAmountLabel={erc20Approve || allowanceIncrease}
 				source={$ethAddress ?? ''}
+				{sourceNetwork}
 				{token}
 			>
-				{#snippet sourceNetwork()}
-					<WalletConnectModalValue label={$i18n.send.text.source_network} ref="source-network">
-						<NetworkWithLogo network={sourceNetworkProp} />
-					</WalletConnectModalValue>
-				{/snippet}
-
 				{#snippet destinationNetwork()}
 					{#if nonNullish(targetNetwork)}
 						<WalletConnectModalValue
@@ -329,20 +382,7 @@
 					</WalletConnectModalValue>
 				{/if}
 
-				<!-- The fee is two rows that belong together, so it takes a heading like every other
-				     block in this summary rather than trailing loose off the end of it. -->
-				<span id={FEE_SECTION_LABEL} class="font-bold">{$i18n.fee.text.fee}</span>
-
-				<div class="mb-4" aria-labelledby={FEE_SECTION_LABEL} role="group">
-					<EthFeePriority gas={signedGas} styleClass="mb-2" />
-
-					<EthFeeDisplay estimated gas={signedGas}>
-						{#snippet label()}
-							<!-- "Fee" is the heading above; repeating it in the row would say it twice. -->
-							{$i18n.fee.text.estimated}
-						{/snippet}
-					</EthFeeDisplay>
-				</div>
+				{@render fee()}
 			</SendData>
 		{:else}
 			<!-- What the transaction calls is the one thing the review can still state about calldata

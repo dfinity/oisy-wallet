@@ -1,17 +1,21 @@
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { EURC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.eurc.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { IC_CKETH_MINTER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthWalletConnectSendTokenModal from '$eth/components/wallet-connect/EthWalletConnectSendTokenModal.svelte';
 import { CKETH_ABI } from '$eth/constants/cketh.constants';
 import { send as sendServices } from '$eth/services/wallet-connect.services';
+import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 import { loadCkEthMinterInfo } from '$icp-eth/services/cketh.services';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import { EthFeePriority } from '$lib/enums/eth-fee-priority';
+import { ethAddressStore } from '$lib/stores/address.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import type { Token } from '$lib/types/token';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
@@ -20,6 +24,11 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
+import {
+	encodeUniswapEurcToUsdc,
+	mockUniswapRouter,
+	mockUniswapWallet
+} from '$tests/mocks/uniswap.mock';
 import { toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
@@ -257,6 +266,49 @@ describe('EthWalletConnectSendTokenModal', () => {
 			expect(getByText(en.wallet_connect.text.unknown_call_title)).toBeInTheDocument();
 
 			ckEthMinterInfoStore.reset(BASE_ETH_TOKEN.id);
+		});
+	});
+
+	describe('Uniswap swaps', () => {
+		beforeEach(() => {
+			ethAddressStore.set({ certified: true, data: mockUniswapWallet });
+
+			erc20DefaultTokensStore.reset();
+			erc20DefaultTokensStore.add(EURC_TOKEN);
+			erc20DefaultTokensStore.add(USDC_TOKEN);
+		});
+
+		afterEach(() => {
+			ethAddressStore.reset();
+			erc20DefaultTokensStore.reset();
+		});
+
+		it('should title an execute on a pinned router as a swap', () => {
+			const { getByText } = setup({
+				firstTransaction: {
+					from: mockUniswapWallet,
+					to: mockUniswapRouter,
+					data: encodeUniswapEurcToUsdc()
+				},
+				token: BASE_ETH_TOKEN,
+				sourceNetwork: BASE_NETWORK
+			});
+
+			expect(getByText(en.wallet_connect.text.swap_title)).toBeInTheDocument();
+		});
+
+		it('should title the same execute to another contract as a contract call', () => {
+			const { getByText } = setup({
+				firstTransaction: {
+					from: mockUniswapWallet,
+					to: '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a',
+					data: encodeUniswapEurcToUsdc()
+				},
+				token: BASE_ETH_TOKEN,
+				sourceNetwork: BASE_NETWORK
+			});
+
+			expect(getByText(en.wallet_connect.text.unknown_call_title)).toBeInTheDocument();
 		});
 	});
 });
