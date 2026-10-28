@@ -511,6 +511,16 @@ fn require_chain_fusion_pair(data: &ChainFusionData) -> Result<(), ActiveUserTra
     }
 }
 
+/// ICP in either of its spellings: the wallet sends it as `Icrc` of its ledger,
+/// while `IcpNative` exists for the exchange-rate path.
+fn is_icp_token(token: &TokenId) -> bool {
+    match token {
+        TokenId::IcpNative => true,
+        TokenId::Icrc(ledger) => *ledger == *ICP_LEDGER,
+        _ => false,
+    }
+}
+
 /// A mint spends ICP, in either of its spellings, and deposits into the cycles
 /// ledger. Unlike the other variants, which check kinds only so that testnets
 /// and new pairs need no change here, a mint has exactly one pair, and both
@@ -518,15 +528,10 @@ fn require_chain_fusion_pair(data: &ChainFusionData) -> Result<(), ActiveUserTra
 /// in `dfx.json`), so both legs are pinned. `data` is immutable after creation,
 /// so a row naming any other token would describe a mint that cannot exist.
 fn require_cycles_mint_pair(data: &CyclesMintData) -> Result<(), ActiveUserTransactionError> {
-    let is_icp = |t: &TokenId| match t {
-        TokenId::IcpNative => true,
-        TokenId::Icrc(ledger) => *ledger == *ICP_LEDGER,
-        _ => false,
-    };
     let is_cycles_ledger =
         |t: &TokenId| matches!(t, TokenId::Icrc(ledger) if *ledger == *CYCLES_LEDGER);
 
-    if is_icp(&data.source_token) && is_cycles_ledger(&data.dest_token) {
+    if is_icp_token(&data.source_token) && is_cycles_ledger(&data.dest_token) {
         Ok(())
     } else {
         Err(ActiveUserTransactionError::InvalidData(
