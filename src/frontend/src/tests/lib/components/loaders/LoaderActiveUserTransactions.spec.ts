@@ -21,6 +21,7 @@ import * as activeUserTransactionsServices from '$lib/services/active-user-trans
 import * as analyticsServices from '$lib/services/analytics.services';
 import * as chainFusionPoller from '$lib/services/chain-fusion-swap-active-tx.services';
 import * as cyclesMintPoller from '$lib/services/cycles-mint-active-tx.services';
+import * as cyclesTopUpPoller from '$lib/services/cycles-top-up-active-tx.services';
 import * as lifiPoller from '$lib/services/lifi-active-tx.services';
 import * as liquidiumPoller from '$lib/services/liquidium-active-tx.services';
 import * as liquidiumServices from '$lib/services/liquidium.services';
@@ -31,12 +32,14 @@ import * as veloraPoller from '$lib/services/velora-active-tx.services';
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import * as toasts from '$lib/stores/toasts.store';
 import { CYCLES_MINT_EXTERNAL_REF_KEYS } from '$lib/types/cycles-mint-active-tx';
+import { CYCLES_TOP_UP_EXTERNAL_REF_KEYS } from '$lib/types/cycles-top-up-active-tx';
 import { SwapProvider } from '$lib/types/swap';
 import * as walletUtils from '$lib/utils/wallet.utils';
 import {
 	mockActiveUserTransaction,
 	mockChainFusionActiveUserTransaction,
 	mockCyclesMintActiveUserTransaction,
+	mockCyclesTopUpActiveUserTransaction,
 	mockLifiActiveUserTransaction,
 	mockLiquidiumActiveUserTransaction,
 	mockNearIntentsActiveUserTransaction,
@@ -168,6 +171,26 @@ const cyclesMint = ({
 		...(outcome === undefined
 			? []
 			: [{ key: CYCLES_MINT_EXTERNAL_REF_KEYS.OUTCOME, value: outcome }])
+	]
+});
+
+const cyclesTopUp = ({
+	id,
+	status,
+	outcome
+}: {
+	id: string;
+	status: typeof mockCyclesTopUpActiveUserTransaction.status;
+	outcome?: string;
+}) => ({
+	...mockCyclesTopUpActiveUserTransaction,
+	id,
+	status,
+	external_refs: [
+		...mockCyclesTopUpActiveUserTransaction.external_refs,
+		...(outcome === undefined
+			? []
+			: [{ key: CYCLES_TOP_UP_EXTERNAL_REF_KEYS.OUTCOME, value: outcome }])
 	]
 });
 
@@ -465,6 +488,29 @@ describe('LoaderActiveUserTransactions', () => {
 
 			expect(oneSecSpy).not.toHaveBeenCalled();
 			expect(cyclesMintSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [tx]
+			});
+		});
+
+		it('polls cycles-top-up rows on each tick when present', async () => {
+			const cyclesMintSpy = vi
+				.spyOn(cyclesMintPoller, 'pollCyclesMintActiveUserTransactions')
+				.mockResolvedValue();
+			const cyclesTopUpSpy = vi
+				.spyOn(cyclesTopUpPoller, 'pollCyclesTopUpActiveUserTransactions')
+				.mockResolvedValue();
+			const tx = cyclesTopUp({ id: 'cycles-top-up-a', status: { Executing: null } });
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: tx });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(cyclesMintSpy).not.toHaveBeenCalled();
+			expect(cyclesTopUpSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				transactions: [tx]
 			});
@@ -968,6 +1014,68 @@ describe('LoaderActiveUserTransactions', () => {
 			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
 				name: TRACK_COUNT_SWAP_ERROR,
 				metadata: expect.objectContaining({ dApp: SwapProvider.OISY_TRADE })
+			});
+		});
+
+		// Only the navigation pays with ICP, so that is the source of every top-up row.
+		it('fires one cycles_top_up success from the navigation and refreshes the wallet when a top-up settles', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({
+				transaction: cyclesTopUp({ id: 'cycles-top-up-a', status: { Executing: null } })
+			});
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			expect(trackEventSpy).not.toHaveBeenCalled();
+
+			activeUserTransactionsStore.upsert({
+				transaction: cyclesTopUp({
+					id: 'cycles-top-up-a',
+					status: { Succeeded: null },
+					outcome: 'topped_up'
+				})
+			});
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: PLAUSIBLE_EVENTS.CYCLES_TOP_UP,
+				metadata: expect.objectContaining({
+					event_modifier: 'top_up',
+					result_status: 'success',
+					source_location: 'navigation',
+					token_symbol: 'ICP'
+				})
+			});
+			expect(appliedFlags()).toEqual({ 'cycles-top-up-a': true });
+		});
+
+		it('reports a refunded top-up as an error and still refreshes the wallet', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({
+				transaction: cyclesTopUp({ id: 'cycles-top-up-a', status: { Executing: null } })
+			});
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			activeUserTransactionsStore.upsert({
+				transaction: cyclesTopUp({
+					id: 'cycles-top-up-a',
+					status: { Failed: null },
+					outcome: 'refunded'
+				})
+			});
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: PLAUSIBLE_EVENTS.CYCLES_TOP_UP,
+				metadata: expect.objectContaining({
+					result_status: 'error',
+					result_error_code: 'refunded'
+				})
 			});
 		});
 
