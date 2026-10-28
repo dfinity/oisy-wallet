@@ -1419,6 +1419,7 @@
 			"cannot_save_provider_agreement": "",
 			"swap_refunded": "",
 			"swap_replaced_or_dropped": "",
+			"swap_expired": "",
 			"near_intents_quote_unverified": "",
 			"near_intents_quote_expired": "",
 			"near_intents_deposit_expired": "",

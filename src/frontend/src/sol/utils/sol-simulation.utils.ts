@@ -10,6 +10,7 @@ import type { SolanaParsedAccountInfo, SolanaSimulatedInnerInstructions } from '
 import type {
 	SolClosedAccount,
 	SolSimulationAllowance,
+	SolSimulationClosedAccount,
 	SolSimulationControlChange,
 	SolSimulationCreatedAccount,
 	SolSimulationPreview,
@@ -293,7 +294,7 @@ export const mapSolSimulationPreview = ({
 		tokenDeltas: SolSimulationTokenDelta[];
 		changes: SolSimulationControlChange[];
 		created: SolSimulationCreatedAccount[];
-		closed: SolAddress[];
+		closed: SolSimulationClosedAccount[];
 	}>(
 		(acc, address, index) => {
 			const pre = parseAccountState(preAccounts[index]);
@@ -323,7 +324,7 @@ export const mapSolSimulationPreview = ({
 						: acc.created,
 				closed:
 					nonNullish(pre) && isEmptiedAccount(postAccounts[index])
-						? [...acc.closed, address]
+						? [...acc.closed, { account: address, lamports: pre.lamports }]
 						: acc.closed,
 				solDelta:
 					address === userAddress
