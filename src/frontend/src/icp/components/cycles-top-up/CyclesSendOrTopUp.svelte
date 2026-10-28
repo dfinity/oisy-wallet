@@ -27,6 +27,11 @@
 	}
 
 	let { token, formCancelAction = 'back', onSend, onTopUp, onBack, onClose }: Props = $props();
+
+	// Both buttons wider than the longest label in any shipped language (Russian Top up, about
+	// 112px), so they line up whatever the language, and on one line, which a phone's narrow row
+	// would break.
+	const buttonStyleClass = 'min-w-30 text-nowrap';
 </script>
 
 <ContentWithToolbar testId={CYCLES_SEND_OR_TOP_UP}>
@@ -50,7 +55,7 @@
 				<Button
 					onclick={onSend}
 					paddingSmall
-					styleClass="text-nowrap"
+					styleClass={buttonStyleClass}
 					testId={CYCLES_SEND_OR_TOP_UP_SEND_BUTTON}
 				>
 					{$i18n.send.text.send}
@@ -77,7 +82,7 @@
 				<Button
 					onclick={onTopUp}
 					paddingSmall
-					styleClass="text-nowrap"
+					styleClass={buttonStyleClass}
 					testId={CYCLES_SEND_OR_TOP_UP_TOP_UP_BUTTON}
 				>
 					{$i18n.cycles_top_up.text.top_up}
