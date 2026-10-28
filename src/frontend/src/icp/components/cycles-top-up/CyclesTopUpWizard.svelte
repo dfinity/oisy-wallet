@@ -34,9 +34,11 @@
 		currentStep?: WizardStep<WizardStepsCyclesTopUp>;
 		modal?: WizardModal<WizardStepsCyclesTopUp>;
 		onClose: () => void;
+		// Leads from the first step back to whatever led to the top-up, when something did.
+		onBack?: () => void;
 	}
 
-	let { token, steps, currentStep, modal, onClose }: Props = $props();
+	let { token, steps, currentStep, modal, onClose, onBack }: Props = $props();
 
 	let canisterIdText = $state('');
 	let sendAmount = $state<OptionAmount>();
@@ -296,6 +298,7 @@
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsCyclesTopUp.CANISTER}
 			<CyclesTopUpCanister
+				{onBack}
 				onCancel={close}
 				onNext={() => modal?.next()}
 				{token}

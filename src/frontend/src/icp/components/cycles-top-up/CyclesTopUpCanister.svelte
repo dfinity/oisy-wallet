@@ -6,6 +6,7 @@
 	import { parseCanisterId } from '$icp/utils/cycles-top-up.utils';
 	import { isIcrcAddress } from '$icp/utils/icrc-account.utils';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonReset from '$lib/components/ui/ButtonReset.svelte';
@@ -15,6 +16,7 @@
 	import { MIN_DESTINATION_LENGTH_FOR_ERROR_STATE } from '$lib/constants/app.constants';
 	import {
 		CYCLES_TOP_UP_CANISTER,
+		CYCLES_TOP_UP_CANISTER_BACK_BUTTON,
 		CYCLES_TOP_UP_CANISTER_INPUT,
 		CYCLES_TOP_UP_CANISTER_NEXT_BUTTON
 	} from '$lib/constants/test-ids.constants';
@@ -29,10 +31,13 @@
 		// The page's TCYCLES token.
 		token: IcToken;
 		onCancel: () => void;
+		// Set when an earlier step leads here, which the step then offers to go back to instead
+		// of cancelling.
+		onBack?: () => void;
 		onNext: () => void;
 	}
 
-	let { canisterIdText = $bindable(''), token, onCancel, onNext }: Props = $props();
+	let { canisterIdText = $bindable(''), token, onCancel, onBack, onNext }: Props = $props();
 
 	let canisterId = $derived(parseCanisterId(canisterIdText));
 
@@ -156,7 +161,11 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<ButtonCancel onclick={onCancel} />
+			{#if nonNullish(onBack)}
+				<ButtonBack onclick={onBack} testId={CYCLES_TOP_UP_CANISTER_BACK_BUTTON} />
+			{:else}
+				<ButtonCancel onclick={onCancel} />
+			{/if}
 
 			<Button
 				disabled={isNullish(canisterId) || checking || checkFailure === 'not_found'}
