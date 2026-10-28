@@ -7,7 +7,8 @@ import type {
 } from '$declarations/backend/backend.did';
 import {
 	ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES,
-	ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES
+	ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES,
+	MAX_UINT_64
 } from '$lib/constants/app.constants';
 import {
 	LIFI_STATUS_POLL_CADENCE,
@@ -22,6 +23,7 @@ import type { EvmSourceTxOutcome } from '$lib/utils/evm-source-tx.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { truncateUtf8Bytes } from '$lib/utils/string.utils';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
+import type { SolSourceTxOutcome } from '$sol/utils/sol-source-tx.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import {
 	ChainId,
@@ -98,12 +100,12 @@ export interface LifiStatusUpdate {
 }
 
 /**
- * The row's status while its EVM source transaction is not confirmed yet, from the source chain's
- * verdict. A confirmed source settles a same-chain swap, which the poller writes, and nothing
- * else: from there, `/status` decides.
+ * The row's status while its source transaction is not confirmed yet, from the source chain's
+ * verdict (EVM or Solana). A confirmed source settles a same-chain swap, which the poller writes,
+ * and nothing else: from there, `/status` decides.
  */
 export const lifiSourceOutcomeToUpdate = (
-	outcome: EvmSourceTxOutcome
+	outcome: EvmSourceTxOutcome | SolSourceTxOutcome
 ): LifiStatusUpdate | undefined => {
 	switch (outcome) {
 		case 'pending':
@@ -112,9 +114,28 @@ export const lifiSourceOutcomeToUpdate = (
 			return { status: { Failed: null }, error: get(i18n).swap.error.failed_unexpectedly };
 		case 'replaced':
 			return { status: { Failed: null }, error: get(i18n).swap.error.swap_replaced_or_dropped };
+		case 'expired':
+			return { status: { Failed: null }, error: get(i18n).swap.error.swap_expired };
 		default:
 			return undefined;
 	}
+};
+
+/**
+ * The slot a Solana row stores (`lifi_simulation_slot`), where OISY's own simulation of the signed
+ * bytes ran and their blockhash was valid. `undefined` when the row has none or it is not a slot:
+ * a `u64`, as the node parses `minContextSlot`, which would refuse a wider one on every poll rather
+ * than let the row be read unanchored.
+ */
+export const toLifiSimulationSlot = (value: string | undefined): bigint | undefined => {
+	// The length is checked first, so that an unbounded string never reaches `BigInt`.
+	if (isNullish(value) || !/^\d{1,20}$/.test(value)) {
+		return undefined;
+	}
+
+	const slot = BigInt(value);
+
+	return slot <= MAX_UINT_64 ? slot : undefined;
 };
 
 // A `/status` answer, or the `NOT_FOUND` an HTTP 404 stands for.
