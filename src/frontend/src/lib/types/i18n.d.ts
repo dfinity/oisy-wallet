@@ -1140,6 +1140,7 @@ interface I18nSwap {
 		cannot_save_provider_agreement: string;
 		swap_refunded: string;
 		swap_replaced_or_dropped: string;
+		swap_expired: string;
 		near_intents_quote_unverified: string;
 		near_intents_quote_expired: string;
 		near_intents_deposit_expired: string;
@@ -1491,6 +1492,7 @@ interface I18nWallet_connect {
 		network: string;
 		amount: string;
 		hex_data: string;
+		base64_data: string;
 		tab_operations: string;
 		unreviewed_instructions: string;
 		unreviewed_instructions_simulated: string;

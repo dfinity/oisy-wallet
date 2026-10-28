@@ -650,7 +650,7 @@ describe('SolWalletConnectSignReview', () => {
 			});
 
 			expect(getByText(en.fee.text.base_kind)).toBeInTheDocument();
-			expect(queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.base64_data)).not.toBeInTheDocument();
 		});
 
 		// The warnings are about the request as a whole, so they belong to neither tab: hiding one
@@ -1053,17 +1053,19 @@ describe('SolWalletConnectSignReview', () => {
 		});
 
 		// What it costs belongs with what it does; the raw message is material to check it against.
-		it('should render the fees with the summary and the hex data with the operations', async () => {
+		it('should render the fees with the summary and the base64 data with the operations', async () => {
 			const queries = render(SolWalletConnectSignReview, {
 				props: { ...props, data: 'AQID', prioritizationFee: 238_217n }
 			});
 
 			expect(queries.getByText(en.fee.text.prioritization_kind)).toBeInTheDocument();
-			expect(queries.queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
+			expect(queries.queryByText(en.wallet_connect.text.base64_data)).not.toBeInTheDocument();
 
 			await showOperations(queries);
 
-			expect(queries.getByText(en.wallet_connect.text.hex_data)).toBeInTheDocument();
+			expect(queries.getByText(en.wallet_connect.text.base64_data)).toBeInTheDocument();
+			// The request carries the transaction as base64, so the row must not call it hex.
+			expect(queries.queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
 			expect(queries.queryByText(en.fee.text.prioritization_kind)).not.toBeInTheDocument();
 		});
 	});
@@ -1351,7 +1353,7 @@ describe('SolWalletConnectSignReview', () => {
 
 			await showOperations(queries);
 
-			expect(queries.getByText(en.wallet_connect.text.hex_data)).toBeInTheDocument();
+			expect(queries.getByText(en.wallet_connect.text.base64_data)).toBeInTheDocument();
 		});
 
 		it('should still render the simulated changes', () => {

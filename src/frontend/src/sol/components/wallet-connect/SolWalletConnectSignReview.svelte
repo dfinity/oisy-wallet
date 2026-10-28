@@ -537,7 +537,7 @@
 				{/snippet}
 			</SendData>
 		{:else}
-			<!-- What the transaction is made of, shown here rather than left to the hex, which nobody
+			<!-- What the transaction is made of, shown here rather than left to the base64, which nobody
 			     can read. A simulated run reveals the calls made inside other programs, which the
 			     message states none of, so the heading says which of the two this is. -->
 			{#if nonNullish(instructions) && instructions.length > 0}
@@ -559,7 +559,7 @@
 				</WalletConnectModalValue>
 			{/if}
 
-			<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
+			<WalletConnectData {data} label={$i18n.wallet_connect.text.base64_data} />
 		{/if}
 	</Tabs>
 
