@@ -406,7 +406,20 @@ const readV4Swap = ({
 			? (produced.get(key) ?? ZERO)
 			: ZERO;
 
+	const settled = new Set<string>();
+
 	for (const { action, args } of steps) {
+		if (action === UNISWAP_V4_ACTIONS.SETTLE || action === UNISWAP_V4_ACTIONS.SETTLE_ALL) {
+			const key = args[0].toLowerCase();
+
+			// Repeated settlements require tracking the remaining debt in execution order.
+			if (settled.has(key)) {
+				return false;
+			}
+
+			settled.add(key);
+		}
+
 		if (action === UNISWAP_V4_ACTIONS.SETTLE) {
 			const [currency, amount, payerIsUser] = args;
 			const key = currency.toLowerCase();

@@ -687,6 +687,20 @@ describe('uniswap.utils', () => {
 
 				expect(getUniswapSwap(params({ data }))).toBeUndefined();
 			});
+
+			// The router pays only what is still owed, so the swaps' inputs no longer bound a second
+			// settlement of the same currency.
+			it.each([
+				{ case: 'a partial settlement', first: settle({ amount: 500_000n }) },
+				{
+					case: 'a settlement the router funds',
+					first: settle({ amount: 400_000n, payerIsUser: false })
+				}
+			])('should not describe $case followed by an open one', ({ first }) => {
+				const data = execute({ commands: [v4Swap([swapExactIn, first, settle(), take()])] });
+
+				expect(getUniswapSwap(params({ data }))).toBeUndefined();
+			});
 		});
 
 		describe('commands OISY does not read', () => {

@@ -104,9 +104,10 @@ router) and `BALANCE_CHECK_ERC20`, which only checks a balance.
 `EXECUTE_SUB_PLAN`, `ACROSS_V4_DEPOSIT_V3`, any other byte; `WRAP_ETH` to anyone but the router;
 `PERMIT2_TRANSFER_FROM` to anyone but the router; a V2 swap whose input was paid beforehand; a
 `PERMIT2_PERMIT` whose expiration is 0, which lasts for the current block only and is no date to
-show; a V4 exact-output swap of the open amount; and a V4 settlement the wallet pays that nothing
+show; a V4 exact-output swap of the open amount; a V4 settlement the wallet pays that nothing
 bounds: the router's whole balance, or the open amount of a currency that a take adds to what is
-owed.
+owed; and a `V4_SWAP` that settles one currency more than once, whose open settlements would have
+to be followed action by action.
 
 **Allow-revert bit:** ignored, except on `PERMIT2_PERMIT`. Every other command OISY reads reverts
 the whole transaction when it fails, whatever the bit says. A `PERMIT2_PERMIT` with the bit keeps
