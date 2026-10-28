@@ -108,10 +108,11 @@ show; a V4 exact-output swap of the open amount; and a V4 settlement the wallet 
 bounds: the router's whole balance, or the open amount of a currency that a take adds to what is
 owed.
 
-**Allow-revert bit:** read and ignored. Every command OISY reads except `PERMIT2_PERMIT` reverts
-the whole transaction when it fails, whatever the bit says. On `PERMIT2_PERMIT` it lets the swap go
-ahead when the permit fails (for example because it was applied before), so the allowance row
-states at most what the transaction grants. Uniswap's SDK sets the bit on sub-plans only.
+**Allow-revert bit:** ignored, except on `PERMIT2_PERMIT`. Every other command OISY reads reverts
+the whole transaction when it fails, whatever the bit says. A `PERMIT2_PERMIT` with the bit keeps
+the transaction unknown: when it fails (an expired signature, a used nonce), the swap goes ahead
+under the allowance the router already had, which the allowance row cannot state. Uniswap's SDK
+sets the bit on sub-plans only.
 
 ### The amounts
 
@@ -221,7 +222,7 @@ Recommended in the design note of 2026-10-27, which Stefan asked to turn into th
 - **A token OISY doesn't list keeps the transaction unknown**, as there are no decimals or symbol
   to state its amount with.
 - **No partial summaries.**
-- **The allow-revert bit is ignored**, for the reasons above.
+- **The allow-revert bit is ignored, except on `PERMIT2_PERMIT`**, for the reasons above.
 
 ## Not in this version
 

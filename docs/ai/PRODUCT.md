@@ -732,7 +732,7 @@ The review is titled "Swap" and states:
 
 Three red notes can show above the summary, each leaving Approve enabled: when the tokens go to another address, when the swap guarantees no minimum amount, and when the deadline has passed by the device's clock.
 
-Every amount is one the router enforces, read from the router's own commands and checked to be exactly their encoding. OISY describes a swap only when it reads every command, the wallet pays exactly one token, exactly one other token arrives at one address, and every other payment is a fee. A swap through a command OISY does not read (a sub-plan, a batch permit, a bridge deposit, liquidity management), into or out of a token OISY doesn't list, or with an allowance for anyone but the router, is reviewed like any call OISY cannot read. Uniswap's newer router 2.2.0, its swap proxy and signed executions are not described yet. What is signed is the transaction exactly as the dApp sent it.
+Every amount is one the router enforces, read from the router's own commands and checked to be exactly their encoding. OISY describes a swap only when it reads every command, the wallet pays exactly one token, exactly one other token arrives at one address, and every other payment is a fee. A swap through a command OISY does not read (a sub-plan, a batch permit, a bridge deposit, liquidity management), into or out of a token OISY doesn't list, or with an allowance for anyone but the router or one the transaction lets fail, is reviewed like any call OISY cannot read. Uniswap's newer router 2.2.0, its swap proxy and signed executions are not described yet. What is signed is the transaction exactly as the dApp sent it.
 
 ### Starting a pairing from the scanner
 

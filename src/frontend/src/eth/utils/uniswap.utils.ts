@@ -793,9 +793,15 @@ export const getUniswapSwap = ({
 	};
 
 	for (const [index, byte] of execute.commands.entries()) {
-		// The allow-revert bit is ignored. Every command read here reverts the transaction when it
-		// fails, except `PERMIT2_PERMIT`, whose failure grants nothing.
+		// The allow-revert bit changes nothing for the other commands read here: they revert the
+		// transaction when they fail.
 		const command = byte & UNISWAP_COMMAND_TYPE_MASK;
+
+		// A fallible permit cannot establish the allowance shown in the review.
+		if (byte !== command && command === UNISWAP_COMMANDS.PERMIT2_PERMIT) {
+			return;
+		}
+
 		const types = reader.layouts.commands[command];
 		const args = nonNullish(types)
 			? decodeExactly({ types, data: execute.inputs[index] })

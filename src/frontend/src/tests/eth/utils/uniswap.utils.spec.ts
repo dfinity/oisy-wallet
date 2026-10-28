@@ -716,6 +716,19 @@ describe('uniswap.utils', () => {
 				).toBeDefined();
 			});
 
+			// A permit allowed to fail leaves whatever allowance the router already had in place.
+			it('should not describe a plan whose permit is allowed to fail', () => {
+				const command = permit();
+
+				const plan = (type: number) =>
+					execute({
+						commands: [{ ...command, type }, v3Swap({ amount: 1_000_000n, amountLimit: 1n })]
+					});
+
+				expect(getUniswapSwap(params({ data: plan(command.type) }))).toBeDefined();
+				expect(getUniswapSwap(params({ data: plan(command.type | 0x80) }))).toBeUndefined();
+			});
+
 			it.each([
 				{
 					case: 'wraps to the wallet',
