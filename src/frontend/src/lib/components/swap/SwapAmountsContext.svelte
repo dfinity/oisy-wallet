@@ -6,7 +6,12 @@
 		SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS,
 		SWAP_DEFAULT_SLIPPAGE_VALUE
 	} from '$lib/constants/swap.constants';
-	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
+	import {
+		btcAddressMainnet,
+		ethAddress,
+		solAddressMainnet,
+		xrpAddressMainnet
+	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { fetchSwapAmounts } from '$lib/services/swap.services';
@@ -14,7 +19,7 @@
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
-	import { SwapAmountTooLowError } from '$lib/types/errors';
+	import { SwapAmountTooLowError, SwapViaIntermediateTokenError } from '$lib/types/errors';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 
@@ -107,7 +112,8 @@
 				isSourceTokenIcrc2,
 				userEthAddress: $ethAddress,
 				userSolAddress: $solAddressMainnet,
-				userBtcAddress: $btcAddressMainnet
+				userBtcAddress: $btcAddressMainnet,
+				userXrpAddress: $xrpAddressMainnet
 			});
 
 			if (currentGeneration !== fetchGeneration) {
@@ -135,13 +141,22 @@
 
 			// Any fetch failure (no pool for the pair, provider or network error) surfaces as
 			// "no offers". A provider that refused the amount as below its minimum names the
-			// reason, which the form surfaces instead of the generic "swap is not offered".
+			// reason, which the form surfaces instead of the generic "swap is not offered"; one
+			// whose route goes through a token OISY lists names that token, for the form to point
+			// to the two separate swaps through it.
 			store.setSwaps({
 				swaps: [],
 				amountForSwap: parsedAmount,
 				selectedProvider: undefined,
 				...(err instanceof SwapAmountTooLowError && {
 					quoteError: { type: 'amount-too-low', minAmount: err.minAmount }
+				}),
+				...(err instanceof SwapViaIntermediateTokenError && {
+					quoteError: {
+						type: 'two-swaps',
+						intermediateToken: err.intermediateToken,
+						provider: err.provider
+					}
 				})
 			});
 		} finally {

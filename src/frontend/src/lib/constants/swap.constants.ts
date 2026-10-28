@@ -9,9 +9,11 @@ import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import {
 	NEAR_INTENTS_BTC_SWAP_ENABLED,
-	NEAR_INTENTS_SWAP_ENABLED
+	NEAR_INTENTS_SWAP_ENABLED,
+	NEAR_INTENTS_XRP_SWAP_ENABLED
 } from '$env/rest/near-intents.env';
 import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
 import { ICRC_CK_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
@@ -45,6 +47,72 @@ export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeee
 
 export const SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS = 5_000;
 
+// LI.FI is re-quoted at most this often for unchanged inputs, rather than on every periodic tick:
+// its rate limit is tight, and a displayed quote is never signed — execution always re-quotes.
+export const LIFI_QUOTE_REFRESH_INTERVAL_MS = 30_000;
+
+// The swap form shows its offers once every provider has answered, so a stalled LI.FI request would
+// hold back every other offer, and a request that never settles would never be retried.
+export const LIFI_QUOTE_TIMEOUT_MS = 10_000;
+
+// Added to the gas the node estimates a LI.FI transaction at, which execution signs with: the
+// route's swaps can cost more when mined than when estimated, and a transaction that runs out of
+// gas still pays for it.
+export const LIFI_GAS_LIMIT_BUFFER_PERCENT = 20n;
+
+// Added to LI.FI's own gas estimate for the fee the user reviews, where execution adds the buffer
+// above to the node's: the node estimates the very same transaction a few percent higher (3–5 %
+// for USDC → ETH on Base, on every exchange, 2026-10-21), and a review priced below execution
+// refused every first attempt from an ERC-20.
+export const LIFI_REVIEW_GAS_BUFFER_PERCENT = 30n;
+
+// Added to the gas and the L1 data fee a refused execution carries back to the review, which
+// re-prices them at the fee per gas of the moment: the retry re-quotes and re-estimates, and an
+// estimate a little above the last must not refuse it again.
+export const LIFI_CARRIED_FEE_HEADROOM_PERCENT = 10n;
+
+// Added to the LI.FI fee "Max" leaves room for from a native source. The review prices the fee again,
+// at a fee per gas read anew, and on Ethereum that read came out higher than the form's 4–10 s
+// earlier in 39–64 % of samples, by up to 5.5 % (2026-10-22): an amount with no room above the
+// form's fee could not be confirmed.
+export const LIFI_MAX_FEE_HEADROOM_PERCENT = 10n;
+
+// A LI.FI row whose transaction the node refused outright is deleted, retried as a cycles mint's
+// is: a few attempts, a second apart.
+export const LIFI_ROW_DELETE_ATTEMPTS = 3;
+export const LIFI_ROW_DELETE_RETRY_DELAY_MILLIS = 1_000;
+
+// A LI.FI approval is waited for until mined, for up to three minutes: the allowance poll after it
+// gives up within two Ethereum blocks.
+export const LIFI_APPROVAL_RECEIPT_ATTEMPTS = 60;
+export const LIFI_APPROVAL_RECEIPT_POLL_MILLIS = 3_000;
+
+// An EVM swap's signed transaction is broadcast again, the same bytes, while its outcome is unknown:
+// a few attempts, a second apart.
+export const SWAP_BROADCAST_ATTEMPTS = 3;
+export const SWAP_BROADCAST_RETRY_DELAY_MILLIS = 1_000;
+
+// The active-transaction tick awaits each provider's poller in turn, so a stalled `/status` request
+// would stall every other provider's rows.
+export const LIFI_STATUS_TIMEOUT_MS = 10_000;
+
+// LI.FI's recommended `/status` cadence: every 10 s for the first minute after the row is created,
+// every 30 s until 10 minutes, then every minute.
+export const LIFI_STATUS_POLL_CADENCE: { maxAgeMillis: number; intervalMillis: number }[] = [
+	{ maxAgeMillis: 60_000, intervalMillis: 10_000 },
+	{ maxAgeMillis: 600_000, intervalMillis: 30_000 }
+];
+
+export const LIFI_STATUS_POLL_SLOWEST_INTERVAL_MILLIS = 60_000;
+
+// How long `/status` may stay unresolved (`NOT_FOUND` / `INVALID`) once the source transaction is
+// confirmed before the row is failed as "outcome unknown"; far past LI.FI's slowest bridge ETAs.
+export const LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS = 6 * 60 * 60 * 1_000;
+
+// The most observed time one poll can add to that window: twice the slowest poll interval, so a
+// clock jump or a tab left closed can only delay the verdict, never hasten it.
+export const LIFI_STATUS_UNRESOLVED_MAX_STEP_MILLIS = 2 * LIFI_STATUS_POLL_SLOWEST_INTERVAL_MILLIS;
+
 export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
 	[ETHEREUM_NETWORK_ID]: 'eth',
 	[ARBITRUM_MAINNET_NETWORK_ID]: 'arb',
@@ -53,7 +121,8 @@ export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
 	[POLYGON_MAINNET_NETWORK_ID]: 'pol',
 	[ROBINHOOD_MAINNET_NETWORK_ID]: 'hood',
 	[SOLANA_MAINNET_NETWORK_ID]: 'sol',
-	[BTC_MAINNET_NETWORK_ID]: 'btc'
+	[BTC_MAINNET_NETWORK_ID]: 'btc',
+	[XRP_MAINNET_NETWORK_ID]: 'xrp'
 };
 
 export const NEAR_INTENTS_QUOTE_DEADLINE_MS = 3 * 60 * 1000;
@@ -113,6 +182,13 @@ export const swapProvidersDetails: Partial<Record<SwapProvider, SwapProvidersCon
 		website: OISY_TRADE_LEARN_MORE_URL,
 		name: OISY_TRADE_PROVIDER_NAME,
 		logo: '/images/dapps/oisy-trade-logo.svg'
+	},
+	// Unconditional for the same reason as OISY Trade: a LI.FI active-transaction row outlives a
+	// flag rollback, and `ActiveUserTransactionItem` names it through this map.
+	[SwapProvider.LIFI]: {
+		website: 'https://li.fi',
+		name: 'LI.FI',
+		logo: '/images/dapps/lifi-logo.svg'
 	}
 };
 
@@ -153,6 +229,12 @@ const NEAR_INTENTS_BTC_NETWORK_IDS: NetworkId[] = NEAR_INTENTS_BTC_SWAP_ENABLED
 	? [BTC_MAINNET_NETWORK_ID]
 	: [];
 
+// NEAR Intents bridges XRP mainnet to and from every EVM, Solana and Bitcoin chain in its map, and
+// is XRP's only provider.
+const NEAR_INTENTS_XRP_NETWORK_IDS: NetworkId[] = NEAR_INTENTS_XRP_SWAP_ENABLED
+	? [XRP_MAINNET_NETWORK_ID]
+	: [];
+
 const ICP_PAIRED_EVM_NETWORK_IDS: NetworkId[] = [
 	...new Set<NetworkId>([
 		...(ONESEC_SWAP_ENABLED ? ONESEC_EVM_NETWORK_IDS : []),
@@ -163,7 +245,8 @@ const ICP_PAIRED_EVM_NETWORK_IDS: NetworkId[] = [
 const withIcpIfPaired = (networkId: NetworkId): NetworkId[] => [
 	...(ICP_PAIRED_EVM_NETWORK_IDS.includes(networkId) ? [ICP_NETWORK_ID] : []),
 	...SUPPORTED_CROSS_SWAP_NETWORK_IDS,
-	...NEAR_INTENTS_BTC_NETWORK_IDS
+	...NEAR_INTENTS_BTC_NETWORK_IDS,
+	...NEAR_INTENTS_XRP_NETWORK_IDS
 ];
 
 export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
@@ -174,7 +257,9 @@ export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
 	],
 	[BTC_MAINNET_NETWORK_ID]: [
 		...(CHAIN_FUSION_BTC_NETWORK_IDS.length > 0 ? [ICP_NETWORK_ID] : []),
-		...(NEAR_INTENTS_BTC_SWAP_ENABLED ? SUPPORTED_CROSS_SWAP_NETWORK_IDS : [])
+		...(NEAR_INTENTS_BTC_SWAP_ENABLED
+			? [...SUPPORTED_CROSS_SWAP_NETWORK_IDS, ...NEAR_INTENTS_XRP_NETWORK_IDS]
+			: [])
 	],
 	[ETHEREUM_NETWORK_ID]: withIcpIfPaired(ETHEREUM_NETWORK_ID),
 	[ARBITRUM_MAINNET_NETWORK_ID]: withIcpIfPaired(ARBITRUM_MAINNET_NETWORK_ID),
@@ -184,6 +269,16 @@ export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
 	[ROBINHOOD_MAINNET_NETWORK_ID]: withIcpIfPaired(ROBINHOOD_MAINNET_NETWORK_ID),
 	[SOLANA_MAINNET_NETWORK_ID]: [
 		...SUPPORTED_CROSS_SWAP_NETWORK_IDS,
-		...NEAR_INTENTS_BTC_NETWORK_IDS
-	]
+		...NEAR_INTENTS_BTC_NETWORK_IDS,
+		...NEAR_INTENTS_XRP_NETWORK_IDS
+	],
+	// Absent rather than empty while the flag is off, so a lookup reads as it does without XRP.
+	...(NEAR_INTENTS_XRP_SWAP_ENABLED
+		? {
+				[XRP_MAINNET_NETWORK_ID]: [
+					...SUPPORTED_CROSS_SWAP_NETWORK_IDS,
+					...NEAR_INTENTS_BTC_NETWORK_IDS
+				]
+			}
+		: {})
 };

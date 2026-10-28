@@ -179,9 +179,18 @@ Repeatable keys use a numeric suffix (`event_key`, `event_key2`, …;
 | `event_modifier`                  | "Direction" for two-way events                         | `enable` / `disable`, `deposit` / `withdraw`, `create` / `cancel` | `PLAUSIBLE_EVENT_FILTER_MODIFIERS` or feature-local union |
 | `event_key` (`event_key2`, …)     | Event-specific key                                     | `episode`, `type`                                                 | `PLAUSIBLE_EVENT_EVENTS_KEYS` / free string               |
 | `event_value` (`event_value2`, …) | Event-specific value                                   | `s1e4`, `address`                                                 | free string                                               |
+| `event_severity`                  | How serious the event is, from low to high             | `info` / `warn` / `error` / `blocker`                             | `PLAUSIBLE_EVENT_SEVERITIES`                              |
 | `side`                            | Order side (trade events)                              | `buy` / `sell`                                                    | feature-local union                                       |
 | `order_type`                      | Order time-in-force (trade events)                     | `FOK` / `GTC`                                                     | feature-local union                                       |
 | `price`                           | Limit price, quote per base (trade events)             | `8.42`                                                            | string (full-precision decimal string)                    |
+
+> **Two severities.** `event_severity` can rate any event, so that dashboards can
+> filter every event by it. Its scale is OpenTelemetry's level names with
+> `blocker` in place of `fatal`: `info` < `warn` < `error` < `blocker`.
+> `result_error_severity` (the Result group below) stays the impact band of an
+> `error` result, with its own values. The first event to set `event_severity` is
+> `xdr_basket_expiry`, the countdown to the end of the XDR basket that prices
+> TCYCLES.
 
 ### Source — where it came from
 
@@ -319,7 +328,19 @@ These are not guidelines. A PR that violates them does not merge.
    (`notEmptyString`). Where the text comes from a third party — another
    project's canister, an external API — a scrubber cannot be written against
    payloads we do not control: emit an allow-listed `result_error_type` category
-   instead and leave the message to the toast and the console.
+   instead and leave the message to the toast and the console. One exception,
+   narrow by design: `transaction_send` adds the EVM node's own out-of-gas
+   answer to its `result_error_type`, as `result_error_text`, but only when it
+   reads exactly `out of gas: gas required exceeds: <digits>`, a gas figure and
+   nothing else. Any other wording is free text and stays out. It is the
+   JSON-RPC message itself, never the error ethers wraps around it, which
+   embeds the signed request and so the wallet, the recipient and the amount.
+   When the error is a variant of a candid type with a fixed set of variants,
+   OISY's own (`TipError`) or a standard one (ICRC `ApproveError`), the variant
+   name is already a category. Send it through a map typed against the
+   declaration (`Record<KeysOfUnion<…>, …>`) so that a new variant fails the
+   build until it has a value, read only the name and never its payload, and fall
+   back to `unknown` for anything else (see `toTipErrorType`).
 5. **English, locale-independent labels.** Human-readable labels resolve against
    the bundled `en.json` (see `resolveEnglishLabel` / `replaceOisyPlaceholders`),
    never the user's locale, so dashboards stay consistent and no locale leaks.

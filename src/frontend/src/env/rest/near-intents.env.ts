@@ -5,6 +5,8 @@ export const NEAR_INTENTS_SWAP_ENABLED = true;
 
 export const NEAR_INTENTS_BTC_SWAP_ENABLED = true;
 
+export const NEAR_INTENTS_XRP_SWAP_ENABLED = true;
+
 // Apparently we do not need any API keys for Near Intents; we can make unauthorised calls
 export const NEAR_INTENTS_API_KEY = import.meta.env.VITE_NEAR_INTENTS_API_KEY;
 

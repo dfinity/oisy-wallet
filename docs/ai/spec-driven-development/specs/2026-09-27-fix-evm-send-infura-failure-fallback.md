@@ -68,8 +68,10 @@ learn how often Infura fails.
   a successful submission, recognised by the lookup below rather than by the wording of the answer.
 - Before reporting a submission as failed, OISY looks its hash up on Alchemy. If the network knows
   it, the submission succeeded.
-- When a provider refuses the transaction with a reason, that reason is what the user is told, not
-  the other provider's bare internal error.
+- When a provider refuses the transaction outright (the account cannot pay for it, or it is
+  invalid), that refusal is what the user is told, not the other provider's bare internal error. An
+  answer that the transaction is already known, or that its nonce is too low, is no such refusal:
+  the transaction may be in.
 - A submission Infura does not answer within 30 seconds counts as failed, which is safe for the same
   reason.
 - This covers every submission OISY makes itself, since they all go through the same provider: send,

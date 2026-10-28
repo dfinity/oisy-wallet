@@ -12,7 +12,8 @@ import { readable, writable, type Writable } from 'svelte/store';
 
 vi.mock('$env/rest/near-intents.env', () => ({
 	NEAR_INTENTS_SWAP_ENABLED: true,
-	NEAR_INTENTS_BTC_SWAP_ENABLED: true
+	NEAR_INTENTS_BTC_SWAP_ENABLED: true,
+	NEAR_INTENTS_XRP_SWAP_ENABLED: false
 }));
 
 describe('SwapReview', () => {
@@ -215,6 +216,19 @@ describe('SwapReview', () => {
 
 			const { getByText } = render(SwapReview, {
 				props: { ...baseProps, isSwapAmountsLoading: true },
+				context
+			});
+
+			const swapButton = getByText(en.swap.text.swap_button).closest('button');
+
+			expect(swapButton).toBeDisabled();
+		});
+
+		it('should disable swap button when the wizard holds the swap back', () => {
+			const { context } = createSwapContext();
+
+			const { getByText } = render(SwapReview, {
+				props: { ...baseProps, swapDisabled: true },
 				context
 			});
 

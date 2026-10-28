@@ -12,6 +12,7 @@ import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { NullishIdentity } from '$lib/types/identity';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { consoleWarn } from '$lib/utils/console.utils';
+import { isDesktop, isPWAStandalone } from '$lib/utils/device.utils';
 import { popupCenter } from '$lib/utils/window.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
@@ -211,7 +212,12 @@ const initAuthStore = (): AuthStore => {
 						: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943/authorize`
 					: `https://${effectiveDomain ?? InternetIdentityDomain.VERSION_1_0}/authorize${effectiveDomain === InternetIdentityDomain.VERSION_2_0 ? '?feature_flag_min_guided_upgrade=true' : ''}`;
 
-			const windowOpenerFeatures = asPopup
+			// In a desktop PWA, a new tab opens in the regular browser window, away
+			// from the app. A popup window stays on top of the PWA instead, and
+			// focus returns to the app once the SDK closes it.
+			const openAsPopup = asPopup === true || (isDesktop() && isPWAStandalone());
+
+			const windowOpenerFeatures = openAsPopup
 				? popupCenter({
 						width: AUTH_POPUP_WIDTH,
 						height: AUTH_POPUP_HEIGHT

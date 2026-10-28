@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import AiAssistantActionButton from '$lib/components/ai-assistant/AiAssistantActionButton.svelte';
 	import AiAssistantForm from '$lib/components/ai-assistant/AiAssistantForm.svelte';
 	import AiAssistantMessages from '$lib/components/ai-assistant/AiAssistantMessages.svelte';
@@ -24,6 +23,7 @@
 	import { generateAiAssistantResponseEventMetadata } from '$lib/utils/ai-assistant.utils';
 	import { consoleError } from '$lib/utils/console.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		loading?: boolean;

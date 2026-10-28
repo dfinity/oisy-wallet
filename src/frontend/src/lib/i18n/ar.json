@@ -108,12 +108,17 @@
 			"do_not_close": "لا تغلق هذه النافذة حتى تكتمل المعاملة",
 			"standalone_mode": "",
 			"video_not_supported": ""
+		},
+		"error": {
+			"copy_failed": ""
 		}
 	},
 	"progress": {
 		"completed": "مكتمل",
 		"in_progress": "قيد التقدم",
-		"failed": "فشل"
+		"failed": "فشل",
+		"step_of": "",
+		"failed_at": ""
 	},
 	"navigation": {
 		"text": {
@@ -806,6 +811,7 @@
 			"explorers_description": "",
 			"explorers_velora_description": "",
 			"explorers_near_intents_description": "",
+			"explorers_lifi_description": "",
 			"explorers_onesec_description": "",
 			"explorers_chain_eth": "",
 			"explorers_chain_sol": "",
@@ -1010,6 +1016,8 @@
 	"send": {
 		"text": {
 			"send": "إرسال",
+			"xrp_sent": "",
+			"xrp_submitted": "",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "الوجهة",
@@ -1053,7 +1061,6 @@
 			"enter_eth_address": "أدخل العنوان العام (0x)، الاسم أو الاسم المستعار",
 			"enter_recipient_address": "أدخل عنوان المستلم، الاسم أو الاسم المستعار",
 			"enter_wallet_address": "أدخل عنوان المحفظة، الاسم أو الاسم المستعار",
-			"enter_xrp_address": "",
 			"xrp_destination_tag": "",
 			"select_network": "حدد الشبكة",
 			"search_nfts": ""
@@ -1065,6 +1072,8 @@
 			"no_available_utxos": "لن يكون لديك UTXOs متاحة لإجراء هذه المعاملة.",
 			"first_time_destination": "",
 			"first_time_destination_confirm": "",
+			"xrp_destination_tag_hint": "",
+			"xrp_destination_tag_missing": "",
 			"fee_expired": "",
 			"fee_info": "سيتم دفع الرسوم بعملة $feeSymbol. متوفر: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "يحتوي الرمز الممسوح ضوئيًا على عنوان الوجهة فقط. تأكد من اختيار التوكن الصحيح، وإدخال المبلغ المناسب، ومراجعة عنوان الوجهة بعناية!",
@@ -1121,12 +1130,15 @@
 			"no_btc_network_id": "الشبكة الحالية ($networkId) ليست شبكة بيتكوين.",
 			"no_solana_network_id": "الشبكة الحالية ($networkId) ليست شبكة سولانا.",
 			"no_xrp_network_id": "",
-			"xrp_confirmation_failed": "",
-			"xrp_transaction_failed": "",
 			"no_pending_bitcoin_transaction": "حدث خطأ أثناء تحميل معاملات البيتكوين المعلقة. يرجى المحاولة مرة أخرى لاحقًا.",
 			"unexpected_utxos_fee": "حدث خطأ ما أثناء حساب رسوم المعاملة.",
 			"unable_to_retrieve_amount": "غير متاح (لا يمكن استرداده)",
 			"ethereum_insufficient_funds": "",
+			"ethereum_out_of_gas": "",
+			"ethereum_out_of_gas_gas": "",
+			"ethereum_out_of_gas_gas_sent": "",
+			"ethereum_transaction_hash": "",
+			"ethereum_unsigned_transaction": "",
 			"ethereum_transaction_not_sent": "",
 			"ethereum_transaction_unconfirmed": "",
 			"solana_transaction_expired": "لم تتم معالجة معاملتك بواسطة شبكة Solana وانتهت صلاحيتها، على الأرجح لأن رسوم الأولوية المقدمة لم تكن كافية. لقد قمنا بتحديثها إلى أحدث مبلغ موصى به، لذا يرجى المحاولة مرة أخرى.",
@@ -1136,6 +1148,9 @@
 			"solana_insufficient_funds_for_rent": "",
 			"fee_calc_unsupported_standard": "",
 			"xrp_send_expired": "",
+			"xrp_send_already_in_flight": "",
+			"xrp_send_not_guarded": "",
+			"xrp_active_transaction_failed": "",
 			"xrp_amount_exceeds_sendable": "",
 			"xrp_destination_unfunded": "",
 			"xrp_destination_tag_required": "",
@@ -1155,6 +1170,62 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "",
+			"description": "",
+			"you_mint_estimate": "",
+			"rate": "",
+			"cycles_ledger_fee": "",
+			"minter": "",
+			"one_way": "",
+			"sending": "",
+			"minting": "",
+			"minted": "",
+			"pending": ""
+		},
+		"error": {
+			"rate_unavailable": "",
+			"amount_too_small": "",
+			"refunded": "",
+			"refunded_nothing": "",
+			"failed": "",
+			"not_started": "",
+			"transfer_failed": "",
+			"unconfirmed": ""
+		}
+	},
+	"cycles_top_up": {
+		"text": {
+			"top_up": "",
+			"title": "",
+			"description": "",
+			"canister_id_placeholder": "",
+			"checking_canister": "",
+			"recently_topped_up": "",
+			"canister": "",
+			"you_top_up": "",
+			"total": "",
+			"one_way": "",
+			"topping_up": "",
+			"topped_up": "",
+			"unknown": "",
+			"unknown_fresh": "",
+			"sent_to_canister": "",
+			"sent_to_canister_top_up": ""
+		},
+		"error": {
+			"invalid_canister_id": "",
+			"canister_not_found": "",
+			"canister_check_failed": "",
+			"amount_too_small": "",
+			"refused": "",
+			"insufficient_funds": "",
+			"clock": "",
+			"refunded": "",
+			"refunded_nothing": ""
 		}
 	},
 	"active_user_transactions": {
@@ -1313,7 +1384,11 @@
 			"gasless": "",
 			"swap_fees": "",
 			"cross_chain_networks_info": "",
+			"two_swaps_info": "",
+			"two_swaps_first_button": "",
 			"near_intents_estimated_time": "",
+			"lifi_route_via": "",
+			"lifi_route_via_estimated_time": "",
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
@@ -1346,13 +1421,18 @@
 			"cannot_save_provider_agreement": "",
 			"swap_refunded": "",
 			"swap_replaced_or_dropped": "",
+			"swap_expired": "",
 			"near_intents_quote_unverified": "",
 			"near_intents_quote_expired": "",
+			"near_intents_deposit_expired": "",
+			"near_intents_quote_deposit_memo": "",
 			"oisy_trade_not_trackable": "",
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",
-			"oisy_trade_recovery_failed": ""
+			"oisy_trade_recovery_failed": "",
+			"lifi_status_unknown": "",
+			"lifi_fee_changed": ""
 		}
 	},
 	"buy": {
@@ -1471,7 +1551,8 @@
 				"info": "تتوفر معرفات حاوية السجل والفهرس عادةً على موقع المشروع.",
 				"info_ext": "",
 				"info_index": "معرف حاوية الفهرس اختياري، ولكن بدونه، لا يمكن لـ $oisy_short عرض سجل المعاملات.",
-				"custom_tokens_not_supported": "الشبكة المحددة لا تدعم التوكنات المخصصة."
+				"custom_tokens_not_supported": "الشبكة المحددة لا تدعم التوكنات المخصصة.",
+				"custom_tokens_not_supported_yet": ""
 			},
 			"error": {
 				"loading_metadata": "العنوان المحدد ليس توكنًا صالحًا في الشبكة المحددة.",
@@ -1530,7 +1611,8 @@
 			"open_contract_address_block_explorer": "افتح عنوان العقد على مستكشف الكتل",
 			"open_token_address_block_explorer": "افتح عنوان التوكن على مستكشف الكتل",
 			"token_group_number": "العدد الإجمالي للتوكنات في المجموعة للتوكن الأصلي $token",
-			"filter_button": "فتح/إغلاق الفلتر"
+			"filter_button": "فتح/إغلاق الفلتر",
+			"switch_amount_unit": ""
 		},
 		"placeholder": {
 			"enter_contract_address": "أدخل عنوان عقد ERC20",
@@ -1567,7 +1649,11 @@
 			"crypto": "",
 			"stablecoin": "",
 			"stock": "",
-			"commodity": ""
+			"commodity": "",
+			"compute": ""
+		},
+		"category_in_sentence": {
+			"compute": ""
 		},
 		"risk": {
 			"low": "",
@@ -1677,7 +1763,8 @@
 			"prioritization_fee": "",
 			"base_kind": "",
 			"prioritization_kind": "",
-			"ata_kind": ""
+			"ata_kind": "",
+			"app_account_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "رصيد غير كافٍ لتغطية الرسوم."
@@ -1726,10 +1813,17 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "بيانات HEX",
+			"base64_data": "",
 			"tab_operations": "",
 			"unreviewed_instructions": "",
 			"unreviewed_instructions_simulated": "",
+			"unread_programs_one": "",
+			"unread_programs_other": "",
+			"unread_programs_acknowledge": "",
 			"cannot_be_shown": "",
+			"close_pays_others": "",
+			"fee_paid_by_others": "",
+			"approval_without_simulation": "",
 			"simulated_instructions": "",
 			"multiple_operations": "",
 			"simulated_review": "",
@@ -1740,6 +1834,9 @@
 			"simulation_control_change": "",
 			"simulation_new_owner": "",
 			"simulation_new_spender": "",
+			"simulation_new_allowance": "",
+			"simulation_allowance": "",
+			"simulation_allowance_unlimited": "",
 			"simulation_new_close_authority": "",
 			"simulation_new_program": "",
 			"simulation_control_removed": "",
@@ -1762,9 +1859,14 @@
 			"allowance_increase": "",
 			"allowance_decrease": "",
 			"unverifiable_erc20_request": "",
+			"token_call_with_value": "",
 			"unverifiable_approval_for_all_request": "",
 			"approval_for_all_grant": "",
 			"approval_for_all_revoke": "",
+			"cketh_deposit": "",
+			"cketh_deposit_principal": "",
+			"cketh_deposit_refused": "",
+			"cketh_helper_unconfirmed": "",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
 			"sign_message": "توقيع الرسالة",
 			"sign_psbt": "",
@@ -1836,10 +1938,19 @@
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
 			"btc_psbt_input_ambiguous": "",
+			"btc_psbt_input_unverified": "",
 			"from_address_not_wallet": "عنوان المرسل المطلوب للمعاملة ليس عنوان هذه المحفظة.",
 			"unknown_destination": "عنوان الوجهة غير معروف.",
+			"cketh_deposit_refused": "",
+			"cketh_helper_unconfirmed": "",
+			"token_call_with_value": "",
 			"ambiguous_transaction": "تنقل هذه المعاملة الأموال بين عدة عناوين ولا يمكن عرضها بدقة للمراجعة. حفاظًا على أمانك، لم يتم توقيعها.",
+			"close_pays_others": "",
+			"fee_paid_by_others": "",
+			"approval_without_simulation": "",
 			"unreviewed_without_simulation": "",
+			"unreviewed_not_described_by_simulation": "",
+			"unread_programs_unconfirmed": "",
 			"sol_transaction_as_message": "",
 			"request_not_defined": "خطأ غير متوقع: الطلب غير معرف وبالتالي لا يمكن معالجته.",
 			"unexpected_processing_request": "خطأ غير متوقع أثناء معالجة الطلب باستخدام WalletConnect."
@@ -2108,6 +2219,7 @@
 			"swap_on": "",
 			"interacted_with": "تم التفاعل مع (إلى)",
 			"unknown_token": "",
+			"unknown_token_named": "",
 			"summary_other": "",
 			"tab_summary": "",
 			"tab_balance_changes": "",
@@ -2118,9 +2230,17 @@
 			"instruction_receive": "",
 			"instruction_wrap": "",
 			"instruction_unwrap": "",
+			"instruction_unwrap_all_to": "",
+			"instruction_unwrap_all_from": "",
+			"instruction_receive_excess_from": "",
 			"instruction_create_account": "",
+			"instruction_create_program_account": "",
+			"instruction_close_program_account": "",
 			"instruction_close_account": "",
+			"instruction_close_account_for": "",
 			"instruction_approve": "",
+			"instruction_approve_amount": "",
+			"instruction_approve_unlimited": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
 			"instruction_route": "",
@@ -2130,9 +2250,15 @@
 			"instruction_thaw": "",
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
+			"instruction_batch_via": "",
+			"instruction_via": "",
 			"instruction_rent": "",
-			"instruction_rent_returned": "",
+			"instruction_balance_returned": "",
+			"instruction_balance_sent": "",
 			"instruction_returned": "",
+			"instruction_sent": "",
+			"instruction_returned_to": "",
+			"instruction_balance_returned_to": "",
 			"instruction_own_account": "",
 			"raw_value": "",
 			"status": "الحالة",
@@ -2188,7 +2314,9 @@
 			"converting_ck_token": "جاري تحويل $ckToken إلى $twinToken",
 			"twin_network": "شبكة $twinNetwork",
 			"no_date_available": "لا يوجد تاريخ متاح",
-			"pending": "معلق"
+			"pending": "معلق",
+			"top_up": "",
+			"top_up_refund": ""
 		},
 		"alt": {
 			"open_block_explorer": "افتح هذه المعاملة في مستكشف الكتل",
@@ -2367,7 +2495,8 @@
 			"Icrcv2": "كمبيوتر الإنترنت",
 			"Btc": "بيتكوين",
 			"Eth": "إيثريوم",
-			"Sol": "سولانا"
+			"Sol": "سولانا",
+			"Xrp": ""
 		},
 		"form": {
 			"new_address": "عنوان جديد",
@@ -2528,7 +2657,8 @@
 		},
 		"warning": {
 			"no_index_canister": "لا يمكن عرض معاملات $token_list. لا يتوفر حاوية فهرس.",
-			"unavailable_index_canister": "لا يمكن عرض معاملات $token_list. حاوية الفهرس غير متاحة حاليًا."
+			"unavailable_index_canister": "لا يمكن عرض معاملات $token_list. حاوية الفهرس غير متاحة حاليًا.",
+			"unsupported_sol_transactions": ""
 		}
 	},
 	"earning": {
@@ -2614,6 +2744,8 @@
 			"transaction_fee": "",
 			"insufficient_funds_for_fee": "",
 			"supply_prices_unavailable": "",
+			"minimum_supply": "",
+			"supply_below_minimum": "",
 			"borrow_review": "",
 			"borrow_review_subtitle": "",
 			"borrowing": "",
@@ -2627,6 +2759,7 @@
 			"funds_delivered_to": "",
 			"your_oisy_address": "",
 			"borrow_risk_info": "",
+			"borrow_activation_fee_info": "",
 			"borrow_at_risk_warning": "",
 			"borrow_exceeds_power": "",
 			"borrow_below_minimum": "",
@@ -2656,10 +2789,13 @@
 			"starting_to_repay": "",
 			"repay_started": "",
 			"current_debt": "",
+			"pending_repays": "",
 			"interest_accrued": "",
 			"debt_after_repay": "",
 			"repay_exceeds_debt": "",
-			"repay_prices_unavailable": ""
+			"repay_prices_unavailable": "",
+			"repay_debt_unavailable": "",
+			"repay_pending_covers_debt": ""
 		},
 		"info": {
 			"title": "",
@@ -2961,6 +3097,7 @@
 			"generate": "",
 			"share_heading": "",
 			"copy_link": "",
+			"link_copied": "",
 			"share_link": "",
 			"they_will_receive": "",
 			"no_wallet_needed_title": "",

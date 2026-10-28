@@ -39,8 +39,12 @@ const patchVariant = ({
 	// Inherit from the module namespace so every other constructor stays untouched.
 	const patched: FactoryIdl = Object.create(idl);
 
-	patched.Variant = (fields: Record<string, IDL.Type>) =>
-		(transform(fields) ?? idl.Variant(fields)) as ReturnType<typeof idl.Variant>;
+	// Define, not assign: the production bundle materialises the namespace as a frozen object, and
+	// assigning over a read-only inherited property throws in strict mode.
+	Object.defineProperty(patched, 'Variant', {
+		value: (fields: Record<string, IDL.Type>) =>
+			(transform(fields) ?? idl.Variant(fields)) as ReturnType<typeof idl.Variant>
+	});
 
 	return patched;
 };

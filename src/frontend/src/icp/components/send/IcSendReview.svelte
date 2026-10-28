@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import CyclesSentToCanisterWarning from '$icp/components/cycles-top-up/CyclesSentToCanisterWarning.svelte';
 	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
@@ -24,7 +25,7 @@
 
 	let { destination = '', amount, selectedContact, nft, onBack, onSend }: Props = $props();
 
-	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenStandard, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = $derived(
@@ -40,6 +41,7 @@
 <SendReview {amount} {destination} disabled={invalid} {nft} {onBack} {onSend} {selectedContact}>
 	{#snippet topBanner()}
 		<ScannedPlainAddressNotice styleClass="mb-6!" />
+		<CyclesSentToCanisterWarning {destination} styleClass="mb-6" token={$sendToken} />
 	{/snippet}
 
 	{#snippet fee()}

@@ -1,4 +1,5 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { XRP_TOKEN, XRP_TOKEN_ID } from '$env/tokens/tokens.xrp.env';
 import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 import SendReview from '$lib/components/send/SendReview.svelte';
 import {
@@ -12,6 +13,8 @@ import { getMockContactsUi, mockContactEthAddressUi } from '$tests/mocks/contact
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcAccount } from '$tests/mocks/identity.mock';
+import { mockXrpAddress, mockXrpAddress2 } from '$tests/mocks/xrp.mock';
+import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -125,5 +128,51 @@ describe('SendReview', () => {
 
 		expect(queryByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).not.toBeInTheDocument();
 		expect(getByTestId(REVIEW_FORM_SEND_BUTTON)).toBeEnabled();
+	});
+
+	describe('XRP', () => {
+		const xrpProps = { ...props, destination: mockXrpAddress2 };
+
+		beforeEach(() => {
+			xrpTransactionsStore.reset(XRP_TOKEN_ID);
+		});
+
+		it('warns and gates a send to an address never sent to', () => {
+			const { getByTestId } = render(SendReview, {
+				props: xrpProps,
+				context: mockContext(XRP_TOKEN)
+			});
+
+			expect(getByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).toBeInTheDocument();
+			expect(getByTestId(REVIEW_FORM_SEND_BUTTON)).toBeDisabled();
+		});
+
+		it('does not warn nor gate a send to a recently used address', () => {
+			xrpTransactionsStore.append({
+				tokenId: XRP_TOKEN_ID,
+				transactions: [
+					{
+						data: {
+							id: 'tx1',
+							type: 'send',
+							status: 'confirmed',
+							value: 1_000_000n,
+							from: mockXrpAddress,
+							to: mockXrpAddress2,
+							timestamp: 1_700_000_000n
+						},
+						certified: false
+					}
+				]
+			});
+
+			const { queryByTestId, getByTestId } = render(SendReview, {
+				props: xrpProps,
+				context: mockContext(XRP_TOKEN)
+			});
+
+			expect(queryByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).not.toBeInTheDocument();
+			expect(getByTestId(REVIEW_FORM_SEND_BUTTON)).toBeEnabled();
+		});
 	});
 });

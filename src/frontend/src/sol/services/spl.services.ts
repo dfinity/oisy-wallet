@@ -103,8 +103,9 @@ const loadCustomTokensWithMetadata = async ({
 
 				const newToken: SplCustomToken = {
 					id: parseCustomTokenId({
-						identifier: fromNullable(symbol) ?? tokenAddress,
-						chainId: tokenNetwork.chainId
+						identifier: tokenAddress,
+						chainId: tokenNetwork.chainId,
+						standard: 'spl'
 					}),
 					name: tokenAddress,
 					address: tokenAddress,

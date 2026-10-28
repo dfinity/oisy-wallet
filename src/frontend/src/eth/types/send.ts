@@ -54,6 +54,6 @@ class EthSendOutcomeError extends Error {
 // The nonce could not be read, so the transaction that needed it was never signed, let alone sent.
 export class EthNonceReadError extends EthSendOutcomeError {}
 
-// Every provider failed the submission without saying anything about the transaction, so whether
-// the network received it is unknown.
+// Every provider failed the submission without an answer that settles what became of the
+// transaction, so whether the network received it is unknown.
 export class EthSubmissionUnconfirmedError extends EthSendOutcomeError {}

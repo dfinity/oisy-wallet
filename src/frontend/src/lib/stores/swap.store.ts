@@ -8,7 +8,8 @@ import {
 	type SwapSupportedTokensData
 } from '$lib/stores/swap-supported-tokens.store';
 import type { Balance } from '$lib/types/balance';
-import type { Token } from '$lib/types/token';
+import type { OptionAmount } from '$lib/types/send';
+import type { Token, TokenId } from '$lib/types/token';
 import { computeReceiveSupportedTokens } from '$lib/utils/swap-tokens-filter.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
@@ -34,6 +35,17 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const isTokensIcrc2 = writable<IsTokensIcrc2Map | undefined>();
 	const isErc20PermitSupported = writable<IsTokensIcrc2Map | undefined>();
 	const failedSwapError = writable<SwapError | undefined>(undefined);
+	const lifiCarriedFee = writable<LifiCarriedFee | undefined>(undefined);
+	// Kept here rather than in the form, which every step change rebuilds: picking a provider or a
+	// destination would otherwise release "Max", and the amount would keep the max of a fee that
+	// no longer applies.
+	const amountSetToMax = writable(false);
+	// The LI.FI fee "Max" leaves room for while it holds a LI.FI amount, kept with it for the same
+	// reason.
+	const lifiMaxFee = writable<LifiMaxFee | undefined>(undefined);
+	// The two-swap hints shown since the swap modal opened. Kept here rather than in the hint, which
+	// comes and goes with the quotes and is rebuilt with the form, so that each one counts once.
+	const twoSwapsHintsShown: TwoSwapsHintShown[] = [];
 
 	const sourceToken = derived(
 		[data, swappableTokens],
@@ -114,18 +126,29 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		isSourceTokenPermitSupported,
 		receiveSupportedData,
 		failedSwapError,
-		setSourceToken: (token: Token) =>
+		lifiCarriedFee,
+		amountSetToMax,
+		lifiMaxFee,
+		// The amount is kept as it is for another source, not refilled with that token's max.
+		setSourceToken: (token: Token) => {
+			amountSetToMax.set(false);
+			lifiMaxFee.set(undefined);
+
 			update((state) => ({
 				...state,
 				sourceToken: token
-			})),
+			}));
+		},
 		setDestinationToken: (token: Token | undefined) =>
 			update((state) => ({
 				...state,
 				destinationToken: token
 			})),
 		// TODO: Ideally, this function should be used with reactive statements, exported outside the store.
-		switchTokens: () =>
+		switchTokens: () => {
+			amountSetToMax.set(false);
+			lifiMaxFee.set(undefined);
+
 			update((state) => {
 				const $swappableTokens = get(swappableTokens);
 
@@ -134,7 +157,8 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 					sourceToken: state.destinationToken ?? $swappableTokens.destinationToken,
 					destinationToken: state.sourceToken ?? $swappableTokens.sourceToken
 				};
-			}),
+			});
+		},
 		setIsTokensIcrc2: ({
 			ledgerCanisterId,
 			isIcrc2Supported
@@ -158,15 +182,60 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 				[address]: isPermitSupported
 			})),
 
+		markTwoSwapsHintShown: (hint: TwoSwapsHintShown): boolean => {
+			const shown = twoSwapsHintsShown.some(
+				({ sourceTokenId, destinationTokenId, intermediateTokenId, amount }) =>
+					sourceTokenId === hint.sourceTokenId &&
+					destinationTokenId === hint.destinationTokenId &&
+					intermediateTokenId === hint.intermediateTokenId &&
+					amount === hint.amount
+			);
+
+			if (!shown) {
+				twoSwapsHintsShown.push(hint);
+			}
+
+			return !shown;
+		},
+
 		reset: () => {
 			set({
 				sourceToken: undefined,
 				destinationToken: undefined
 			});
 			failedSwapError.set(undefined);
+			lifiCarriedFee.set(undefined);
+			amountSetToMax.set(false);
+			lifiMaxFee.set(undefined);
+			twoSwapsHintsShown.splice(0);
 		}
 	};
 };
+
+// The gas and L1 data fee of a LI.FI fee ceiling that an execution found above the reviewed one,
+// for the quote inputs it was found for; the review prices them at its own fee per gas. Kept here
+// rather than in the wizard, which every step change rebuilds: the review the failed execution
+// returns to is another instance.
+export interface LifiCarriedFee {
+	key: string;
+	gas: bigint;
+	l1Fee: bigint;
+}
+
+// The highest LI.FI fee seen for the route to a destination while "Max" holds a LI.FI amount, and
+// that destination: the fee of a route to another says nothing about the new one's.
+export interface LifiMaxFee {
+	fee: bigint;
+	destinationTokenId: TokenId;
+}
+
+// A two-swap hint the swap form showed: for a pair, the token in between and the quoted amount.
+export interface TwoSwapsHintShown {
+	sourceTokenId: TokenId;
+	destinationTokenId: TokenId;
+	intermediateTokenId: TokenId;
+	amount: OptionAmount;
+}
 
 export interface SwapContext {
 	sourceToken: Readable<Token | undefined>;
@@ -179,6 +248,12 @@ export interface SwapContext {
 	isSourceTokenPermitSupported: Readable<boolean | undefined>;
 	receiveSupportedData: Readable<SwapSupportedTokensData | undefined>;
 	failedSwapError: Writable<SwapError | undefined>;
+	lifiCarriedFee: Writable<LifiCarriedFee | undefined>;
+	// Whether "Max" holds the source amount, re-applied whenever the fee changes until the user
+	// types or the source changes.
+	amountSetToMax: Writable<boolean>;
+	// The LI.FI fee "Max" leaves room for while it holds a LI.FI amount.
+	lifiMaxFee: Writable<LifiMaxFee | undefined>;
 	setIsTokensIcrc2: (args: { ledgerCanisterId: string; isIcrc2Supported: boolean }) => void;
 	setIsTokenPermitSupported: ({
 		address,
@@ -190,6 +265,8 @@ export interface SwapContext {
 	setSourceToken: (token: Token) => void;
 	setDestinationToken: (token: Token | undefined) => void;
 	switchTokens: () => void;
+	// Records a two-swap hint as shown: `true` the first time since the swap modal opened.
+	markTwoSwapsHintShown: (hint: TwoSwapsHintShown) => boolean;
 	reset: () => void;
 }
 
