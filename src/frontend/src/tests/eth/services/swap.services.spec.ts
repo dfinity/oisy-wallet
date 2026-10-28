@@ -9,11 +9,13 @@ import * as ethTransactionServicesLib from '$eth/services/eth-transaction.servic
 import { processTransactionSent } from '$eth/services/eth-transaction.services';
 import { swap } from '$eth/services/swap.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { isDefinitiveTransactionRefusal } from '$eth/utils/eth-error.utils';
 import * as signerApiLib from '$lib/api/signer.api';
 import { signTransaction } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { SWAP_BROADCAST_ATTEMPTS } from '$lib/constants/swap.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import { SwapBroadcastOutcomeUnknownError } from '$lib/types/errors';
 import { consoleError } from '$lib/utils/console.utils';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -234,7 +236,14 @@ describe('swap.services', () => {
 				expect(processTransactionSent).toHaveBeenCalledOnce();
 			});
 
-			it('should give up after the last attempt, with its failure', async () => {
+			// The rejection the caller gets, for a closer look at it.
+			const rejectionOf = (promise: Promise<unknown>) =>
+				promise.then(
+					() => undefined,
+					(err: unknown) => err
+				);
+
+			it('should give up after the last attempt, its failure the cause of an unknown outcome', async () => {
 				const last = new Error('fetch failed, last attempt');
 
 				mockSendTransaction.mockRejectedValue(last);
@@ -243,25 +252,45 @@ describe('swap.services', () => {
 					mockSendTransaction.mockRejectedValueOnce(new Error('fetch failed'));
 				}
 
-				await expect(swap(mockSwapParams)).rejects.toThrow(last);
+				const err = await rejectionOf(swap(mockSwapParams));
 
+				expect(err).toBeInstanceOf(SwapBroadcastOutcomeUnknownError);
+				expect(err).toHaveProperty('cause', last);
 				expect(mockSendTransaction).toHaveBeenCalledTimes(SWAP_BROADCAST_ATTEMPTS);
 				expect(processTransactionSent).not.toHaveBeenCalled();
+			});
+
+			// The first attempt may have been relayed, and spent what the refusal says is missing.
+			it('should end with an unknown outcome, not a refusal, when a later attempt is refused', async () => {
+				const refusal = nodeAnswer('insufficient funds for gas * price + value');
+
+				mockSendTransaction.mockRejectedValueOnce(new Error('fetch failed'));
+				mockSendTransaction.mockRejectedValueOnce(refusal);
+
+				const err = await rejectionOf(swap(mockSwapParams));
+
+				expect(err).toBeInstanceOf(SwapBroadcastOutcomeUnknownError);
+				expect(err).toHaveProperty('cause', refusal);
+				expect(isDefinitiveTransactionRefusal(err)).toBeFalsy();
+				expect(mockSendTransaction).toHaveBeenCalledTimes(2);
 			});
 
 			it.each([
 				{ answer: 'a definitive refusal', message: 'max fee per gas less than block base fee' },
 				{ answer: 'already known', message: 'already known' },
 				{ answer: 'nonce too low', message: 'nonce too low: next nonce 43, tx nonce 42' }
-			])('should not send again after $answer', async ({ message }) => {
-				const err = nodeAnswer(message);
+			])(
+				'should not send again after $answer, which it rejects with as it is',
+				async ({ message }) => {
+					const err = nodeAnswer(message);
 
-				mockSendTransaction.mockRejectedValue(err);
+					mockSendTransaction.mockRejectedValue(err);
 
-				await expect(swap(mockSwapParams)).rejects.toThrow(err);
+					await expect(rejectionOf(swap(mockSwapParams))).resolves.toBe(err);
 
-				expect(mockSendTransaction).toHaveBeenCalledOnce();
-			});
+					expect(mockSendTransaction).toHaveBeenCalledOnce();
+				}
+			);
 
 			// A first attempt relayed despite its failure: the next one finds it in.
 			it('should stop at an answer that the transaction is in', async () => {
@@ -270,8 +299,10 @@ describe('swap.services', () => {
 				mockSendTransaction.mockRejectedValueOnce(new Error('fetch failed'));
 				mockSendTransaction.mockRejectedValueOnce(known);
 
-				await expect(swap(mockSwapParams)).rejects.toThrow(known);
+				const err = await rejectionOf(swap(mockSwapParams));
 
+				expect(err).toBeInstanceOf(SwapBroadcastOutcomeUnknownError);
+				expect(err).toHaveProperty('cause', known);
 				expect(mockSendTransaction).toHaveBeenCalledTimes(2);
 			});
 		});
@@ -404,10 +435,11 @@ describe('swap.services', () => {
 			expect(mockSendTransaction).not.toHaveBeenCalled();
 		});
 
+		// A plain failure may have relayed the bytes, so after the last attempt the outcome is unknown.
 		it('should handle error when sending transaction', async () => {
 			mockSendTransaction.mockRejectedValue(mockError);
 
-			await expect(swap(mockSwapParams)).rejects.toThrow(mockError);
+			await expect(swap(mockSwapParams)).rejects.toThrow(SwapBroadcastOutcomeUnknownError);
 
 			expect(mockSwapParams.progress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
 			expect(infuraProviders).toHaveBeenCalledWith(ETHEREUM_NETWORK_ID);
