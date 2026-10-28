@@ -26,6 +26,5 @@ export const GOOGLON_TOKEN: RequiredSpl2022Token = {
 	address: 'bbahNA5vT9WJeYft8tALrH1LXWffjwqVoUbqYa1ondo',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
 	mintAuthority: '9foMHsSDq7nMg4WPusSz9eY7tyxyukqborA8GyU5cUxD',
-	freezeAuthority: '51QVCuHfL1FeNjd8BDeffCKhCcAYoULnVB3yjNhShiuK',
 	groupData: GOOGLON_TOKEN_GROUP
 };

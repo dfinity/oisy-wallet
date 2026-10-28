@@ -36,6 +36,7 @@ import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
+import { Signature } from 'ethers/crypto';
 import { get } from 'svelte/store';
 
 type WalletConnectSendParams = WalletConnectExecuteParams & {
@@ -307,7 +308,11 @@ export const signMessage = ({
 					});
 				};
 
-				const signedMessage = await sign(params);
+				// The signer ends a signature with the bare y-parity (0 or 1) as `v`, the form an
+				// EIP-1559 transaction takes. A signed message goes back to the dApp with `v` as 27 or
+				// 28, the only values a contract verifying it on-chain (e.g. an ERC-2612 `permit`)
+				// accepts.
+				const signedMessage = Signature.from(await sign(params)).serialized;
 
 				progress(ProgressStepsSign.APPROVE_WALLET_CONNECT);
 

@@ -26,6 +26,5 @@ export const TSLAON_TOKEN: RequiredSpl2022Token = {
 	address: 'KeGv7bsfR4MheC1CkmnAVceoApjrkvBhHYjWb67ondo',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
 	mintAuthority: '9foMHsSDq7nMg4WPusSz9eY7tyxyukqborA8GyU5cUxD',
-	freezeAuthority: '51QVCuHfL1FeNjd8BDeffCKhCcAYoULnVB3yjNhShiuK',
 	groupData: TSLAON_TOKEN_GROUP
 };
