@@ -81,6 +81,18 @@ export type ActiveUserTransactionData =
 	  }
 	| {
 			/**
+			 * Topping up a canister with ICP through the NNS Cycles Minting Canister:
+			 * an ICP transfer to the CMC's deposit account for the canister, then
+			 * `notify_top_up`. The ledger records that account only as a hash, so the
+			 * row, opened before the transfer, is the one place that keeps the canister,
+			 * and what lets a later session finish a top-up whose tab closed between the
+			 * two calls. The ICP block index, learned once the transfer returns, rides
+			 * in `external_refs`.
+			 */
+			CyclesTopUp: CyclesTopUpData;
+	  }
+	| {
+			/**
 			 * NEAR Intents (1Click) cross-chain swap. A single variant covers every
 			 * source/destination leg (EVM and Solana); the deposit address, its
 			 * optional memo, and origin/destination tx hashes ride in `external_refs`.
@@ -854,6 +866,31 @@ export interface CyclesMintData {
 	 */
 	amount: bigint;
 	dest_token: TokenId;
+}
+/**
+ * Cycles top-up payload: the values fixed when the top-up starts. The row opens
+ * before the ICP transfer, so the transfer's creation timestamp is one of them;
+ * only the block index is learned later, in `external_refs`.
+ */
+export interface CyclesTopUpData {
+	/**
+	 * `created_at_time` of the ICP transfer. Reusing it on a retry lets the
+	 * ledger deduplicate the transfer, and it is what finds the block again
+	 * when the tab died before the transfer returned.
+	 */
+	transfer_created_at_ns: bigint;
+	/**
+	 * The canister the cycles go to. The CMC's deposit account is derived from
+	 * it, and the ICP ledger keeps only that account's hash, so neither the
+	 * ledger nor its index can give the canister back.
+	 */
+	canister_id: Principal;
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units: the ICP sent to the CMC, without the
+	 * ledger fee.
+	 */
+	amount: bigint;
 }
 export interface DappCarouselSettings {
 	hidden_dapp_ids: Array<string>;
