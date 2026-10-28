@@ -180,6 +180,8 @@ export enum WizardStepsCyclesMint {
 export enum WizardStepsCyclesTopUp {
 	CANISTER = 'Canister',
 	AMOUNT = 'Amount',
-	REVIEW = 'Review',
+	// Not 'Review': the send wizard hosts these steps next to its own Review step, and steps are
+	// found by name.
+	REVIEW = 'Top Up Review',
 	TOPPING_UP = 'ToppingUp'
 }
