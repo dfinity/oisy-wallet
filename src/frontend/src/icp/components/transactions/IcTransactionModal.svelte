@@ -3,6 +3,7 @@
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { isTokenCyclesLedger } from '$icp/utils/cycles-mint.utils';
+	import { isTokenIcp } from '$icp/utils/icrc.utils';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
@@ -46,8 +47,11 @@
 
 	let isIncoming = $derived(type === 'receive' || type === 'mint');
 
-	// A TCYCLES top-up and its refund read as such here too, as they do in the list.
-	let showTypeLabel = $derived(nonNullish(typeLabel) && isTokenCyclesLedger(token));
+	// A top-up, and a TCYCLES top-up's refund, read as such here too, as they do in the list.
+	// On ICP only a canister top-up has a label.
+	let showTypeLabel = $derived(
+		nonNullish(typeLabel) && nonNullish(token) && (isTokenCyclesLedger(token) || isTokenIcp(token))
+	);
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openIcTransaction({
