@@ -312,6 +312,7 @@ export const CYCLES_TOP_UP_CANISTER_INPUT = 'cycles-top-up-canister-input';
 export const CYCLES_TOP_UP_CANISTER_NEXT_BUTTON = 'cycles-top-up-canister-next-button';
 export const CYCLES_TOP_UP_RECENT_CANISTER = 'cycles-top-up-recent-canister';
 export const CYCLES_TOP_UP_CONTACT = 'cycles-top-up-contact';
+export const CYCLES_TOP_UP_ICP_HINT = 'cycles-top-up-icp-hint';
 export const CYCLES_TOP_UP_AMOUNT = 'cycles-top-up-amount';
 export const CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON = 'cycles-top-up-amount-next-button';
 export const CYCLES_TOP_UP_ESTIMATE = 'cycles-top-up-estimate';
