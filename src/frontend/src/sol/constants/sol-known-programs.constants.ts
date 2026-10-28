@@ -9,14 +9,15 @@ import {
 import type { SolAddress } from '$sol/types/address';
 
 /**
- * The programs a simulated run may call from inside another program's instruction without the
- * WalletConnect review asking the user to confirm the transaction separately.
+ * The programs a simulated run may reach, whether the message calls them itself or another program
+ * calls them inside its own instruction, without the WalletConnect review asking the user to confirm
+ * the transaction separately.
  *
  * The balance changes and the operations describe what a transaction does to the user's wallet and
- * token accounts. A call made inside another program's instruction can also act on what the user
- * holds in an application - a stake account, a lending deposit - and neither of the two shows that.
- * The review names every program outside this list that the run calls that way, and approving
- * waits for the user to confirm they understand OISY cannot say what it does.
+ * token accounts. A program can also act on what the user holds in an application - a stake
+ * account, a lending deposit - and neither of the two shows that. The review names every program
+ * outside this list that the run reaches, and approving waits for the user to confirm they
+ * understand OISY cannot say what it does.
  *
  * Sized from the calls ordinary swaps make: the runs of swaps built through Jupiter (Ultra and the
  * Swap API) and Raydium, and swaps made on chain through DFlow, OKX, Titan, Orca, Meteora and

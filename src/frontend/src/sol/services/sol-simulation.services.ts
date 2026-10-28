@@ -276,7 +276,10 @@ const simulate = async ({
 
 	// A run with a nested call that names no program cannot be said to call only known ones, and
 	// the review would read the empty list as exactly that.
-	const unreadPrograms = findSolUnreadPrograms(innerInstructions);
+	const unreadPrograms = findSolUnreadPrograms({
+		instructions: transactionMessage.instructions,
+		innerInstructions
+	});
 
 	if (isNullish(unreadPrograms)) {
 		return undefined;

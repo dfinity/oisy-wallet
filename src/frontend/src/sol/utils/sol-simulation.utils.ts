@@ -1,6 +1,9 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { SOLANA_KNOWN_PROGRAM_ADDRESSES } from '$sol/constants/sol-known-programs.constants';
 import {
+	ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
+	MEMO_LEGACY_PROGRAM_ADDRESS,
+	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
@@ -384,33 +387,59 @@ export const solSimulationReassignsWallet = ({
 		({ account, field }) => field === 'program' && account === userAddress
 	);
 
+// Programs the review decodes when the message calls them itself, besides the known ones: it states
+// what their instructions do from the message alone.
+const SOLANA_DECODED_PROGRAM_ADDRESSES: SolAddress[] = [
+	STAKE_PROGRAM_ADDRESS,
+	ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
+	MEMO_LEGACY_PROGRAM_ADDRESS
+];
+
 /**
- * The programs a simulated run calls from inside another program's instruction that are not among
- * the known ones, each named once, in the order the run first reaches them.
+ * The programs a simulated run reaches that OISY can't read, each named once, in the order the run
+ * first reaches them: one the message calls itself that is neither among the known ones nor one
+ * the review decodes, and one called from inside another program's instruction that is not among
+ * the known ones.
  *
- * Only the nested calls. The message's own instructions are the review's to list, and one it
- * cannot read is already listed as such; a nested call exists only in the run.
+ * The message's own instructions as well. One the review cannot read is listed as such only while
+ * no line came from it: a single transfer it makes inside itself, one lamport out of the wallet
+ * say, accounts for the whole instruction, and the program then runs with the wallet's signature
+ * unnamed, while the same program called from inside a router would be named.
  *
  * Nothing at all when a nested call does not name its program. The RPC names it for every call a
  * simulation reports, parsed or not, but the type also admits one that only points into the
  * account list, and an empty list for a run containing it would say it calls only known programs.
  */
-export const findSolUnreadPrograms = (
-	innerInstructions: SolanaSimulatedInnerInstructions
-): SolAddress[] | undefined => {
-	const calls = [...innerInstructions].flatMap(({ instructions }) => [...instructions]);
+export const findSolUnreadPrograms = ({
+	instructions,
+	innerInstructions
+}: {
+	instructions: CompilableTransactionMessage['instructions'];
+	innerInstructions: SolanaSimulatedInnerInstructions;
+}): SolAddress[] | undefined => {
+	const groups = [...innerInstructions].map(({ index, instructions: nested }) => ({
+		parent: Number(index),
+		programs: [...nested].map((instruction) =>
+			'programId' in instruction ? instruction.programId : undefined
+		)
+	}));
 
-	const programs = calls
-		.map((instruction) => ('programId' in instruction ? instruction.programId : undefined))
-		.filter(nonNullish);
-
-	if (programs.length < calls.length) {
+	if (groups.some(({ programs }) => programs.some(isNullish))) {
 		return undefined;
 	}
 
 	const known = new Set<SolAddress>(SOLANA_KNOWN_PROGRAM_ADDRESSES);
+	const decoded = new Set<SolAddress>([...known, ...SOLANA_DECODED_PROGRAM_ADDRESSES]);
 
-	return [...new Set(programs)].filter((program) => !known.has(program));
+	const reached = [...instructions].flatMap(({ programAddress }, index) => [
+		...(decoded.has(programAddress) ? [] : [programAddress]),
+		...groups
+			.filter(({ parent }) => parent === index)
+			.flatMap(({ programs }) => programs.filter(nonNullish))
+			.filter((program) => !known.has(program))
+	]);
+
+	return [...new Set(reached)];
 };
 
 // The programs whose accounts a run's lines already account for: what leaves a wallet does so by a
