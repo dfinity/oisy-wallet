@@ -24,6 +24,5 @@ export const UNHX_TOKEN: RequiredSpl2022Token = {
 	icon: unhx,
 	address: 'XszvaiXGPwvk2nwb3o9C1CX4K6zH8sez11E6uyup6fe',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
-	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
-	freezeAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
+	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
 };

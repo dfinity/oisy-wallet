@@ -1810,6 +1810,7 @@
 			"network": "Network",
 			"amount": "Amount",
 			"hex_data": "HEX Data",
+			"base64_data": "Base64 Data",
 			"tab_operations": "Operations",
 			"unreviewed_instructions": "OISY can't decode some of these instructions, so the review below may be incomplete.",
 			"unreviewed_instructions_simulated": "This transaction contains operations from an external source that OISY can't decode, so OISY ran a simulation of it. Be sure you trust the application, and review the simulated balance changes and operations before signing. Note that the actual outcome can differ from the simulation.",
