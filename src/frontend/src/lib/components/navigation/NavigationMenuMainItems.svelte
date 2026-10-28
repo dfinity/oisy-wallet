@@ -335,7 +335,7 @@
 	{@const descriptor = descriptors[id]}
 	{#if nonNullish(descriptor)}
 		{@const Icon = descriptor.icon}
-		{@const cardClass = `relative flex flex-col items-center gap-2 rounded-2xl px-2 py-4 text-center no-underline ${descriptor.selected ? 'bg-brand-subtle-20 text-brand-primary-alt' : 'bg-secondary text-primary'}`}
+		{@const cardClass = `relative flex flex-col items-center gap-2 rounded-2xl px-2 py-4 text-center no-underline transition-[background-color,color,scale] duration-150 ease-out press ${descriptor.selected ? 'bg-brand-subtle-20 text-brand-primary-alt' : 'bg-secondary text-primary'}`}
 		{#snippet cardInner()}
 			<Icon />
 			<span class="text-sm font-semibold">{descriptor.label}</span>
@@ -417,7 +417,7 @@
 					     conditionally (text-primary is NOT a base class) so the active one wins
 					     regardless of Tailwind's utility source order. -->
 				<button
-					class="flex min-w-0 flex-1 flex-col items-center justify-end p-1.5 text-center text-sm"
+					class="group flex min-w-0 flex-1 flex-col items-center justify-end p-1.5 text-center text-sm"
 					class:text-brand-primary-alt={ownsCurrent}
 					class:text-primary={!ownsCurrent && !pressed}
 					class:text-tertiary={pressed}
@@ -434,7 +434,7 @@
 					     row (which the global `.mobile-nav` container padding lifts) so it clears the indicator.
 					     The label stays on the row (items-end). -->
 					<span
-						class="absolute bottom-[calc(1.75rem+env(safe-area-inset-bottom))] left-1/2 flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full border-[1.5px] border-current bg-primary transition-colors"
+						class="absolute bottom-[calc(1.75rem+env(safe-area-inset-bottom))] left-1/2 flex h-11 w-11 -translate-x-1/2 press-icon-in-group items-center justify-center rounded-full border-[1.5px] border-current bg-primary transition-[color,background-color,border-color,scale] duration-150 ease-out"
 					>
 						{#if nonNullish(GroupIcon)}
 							<GroupIcon />

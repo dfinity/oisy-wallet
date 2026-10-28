@@ -100,7 +100,7 @@ describe('AiAssistantReviewSendEthToken', () => {
 
 		mockPage.reset();
 
-		sendSpy = vi.spyOn(sendServices, 'send').mockResolvedValue({ hash: 'test' });
+		sendSpy = vi.spyOn(sendServices, 'send').mockResolvedValue({ hash: 'test', nonce: 1 });
 	});
 
 	it('should render the success message instead of button if sendCompleted is true', () => {

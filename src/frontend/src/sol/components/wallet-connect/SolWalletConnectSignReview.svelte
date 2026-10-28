@@ -10,6 +10,7 @@
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
+	import WalletConnectScamWarning from '$lib/components/wallet-connect/WalletConnectScamWarning.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -20,16 +21,17 @@
 	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
 	import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
 	import SolWalletConnectTransferParties from '$sol/components/wallet-connect/SolWalletConnectTransferParties.svelte';
+	import SolWalletConnectUnreadPrograms from '$sol/components/wallet-connect/SolWalletConnectUnreadPrograms.svelte';
 	import {
+		SOLANA_LAMPORTS_PER_SIGNATURE,
 		SOLANA_PRIORITIZATION_FEE_BASELINE_FLOOR_USD,
 		SOLANA_PRIORITIZATION_FEE_NOTICE_MULTIPLIER,
-		SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER,
-		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
+		SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER
 	} from '$sol/constants/sol.constants';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
-	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
+	import type { SolSimulationPreview, SolUnreadProgram } from '$sol/types/sol-simulation';
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
 	import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
 	import { solMessageMatchesSimulation } from '$sol/utils/sol-message-summary.utils';
@@ -37,6 +39,7 @@
 	import {
 		flattenInstructions,
 		formatSolTransactionSummary,
+		solAppAccountCost,
 		solAtaFee
 	} from '$sol/utils/sol-transaction-summary.utils';
 
@@ -51,6 +54,14 @@
 		feeToken: Token;
 		prioritizationFee?: bigint;
 		prioritizationFeeEstimate?: bigint;
+		// How many signatures the message requires, which the base fee is charged on once each. Every
+		// message carries at least its fee payer's, so that is what the review assumes until the
+		// decode settles.
+		requiredSignatures?: number;
+		// Whether the user's wallet pays the base and priority fees, which it does not when the message
+		// names another account to pay them, as a dApp sponsoring the request does. Until the decode
+		// says otherwise it is taken to, as the review has always assumed.
+		walletPaysFees?: boolean;
 		isApproval?: boolean;
 		// Whether the message cannot be stated faithfully, which is what the signing flow refuses on.
 		ambiguous?: boolean;
@@ -74,6 +85,27 @@
 		// Who the transaction spends from, derived from the transfer instructions it contains. Where
 		// the value ends up is left to the simulated balance changes. Absent until the decode settles.
 		parties?: SolTransferParties;
+		// Whether a close in that list pays an account's balance to an address that is not the
+		// user's wallet. Read from the list rather than the message, which cannot see a close made
+		// inside another program.
+		closesPayOthers?: boolean;
+		// Whether the request asks OISY to send a message that names another account to pay its fee.
+		// A send goes out with the wallet as the fee payer, which is not the transaction reviewed here,
+		// so the signing flow refuses it.
+		feePaidByOthers?: boolean;
+		// Whether the request grants an allowance through an unchecked approval, which names neither
+		// the token nor its decimals, and no simulated run came back to state how much the spender
+		// may spend. The signing flow refuses it.
+		approvalWithoutSimulation?: boolean;
+		// The programs the simulated run calls from inside another program's instruction that OISY
+		// does not know. What such a call does to funds the user holds in an application is in
+		// neither the balance changes nor the operations, so the review names them and asks the user
+		// to confirm; the confirmation is bound back to the caller, which holds the button on it.
+		unreadPrograms?: SolUnreadProgram[];
+		unreadProgramsAcknowledged?: boolean;
+		// WalletConnect's Verify API flags the requesting site as a scam: the review says so and
+		// offers Reject only.
+		flaggedAsScam?: boolean;
 		approveDisabled?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
@@ -88,6 +120,8 @@
 		feeToken,
 		prioritizationFee,
 		prioritizationFeeEstimate,
+		requiredSignatures = 1,
+		walletPaysFees = true,
 		isApproval = false,
 		ambiguous = false,
 		decoded = false,
@@ -97,6 +131,12 @@
 		simulatedInstructions = false,
 		messageSummary,
 		parties,
+		closesPayOthers = false,
+		feePaidByOthers = false,
+		approvalWithoutSimulation = false,
+		unreadPrograms = [],
+		unreadProgramsAcknowledged = $bindable(false),
+		flaggedAsScam = false,
 		approveDisabled = false,
 		onApprove,
 		onReject
@@ -104,16 +144,36 @@
 
 	let activeTab = $state('summary');
 
+	// The confirmation the unread programs ask for holds the button, and only the button: the notices
+	// read `approveDisabled` as whether the request can be acted on at all, which it can.
+	let approveHeld = $derived(
+		approveDisabled || (unreadPrograms.length > 0 && !unreadProgramsAcknowledged)
+	);
+
 	// What the token accounts cost this message: the rent of the ones it opens, less what the ones
 	// it closes hand back. Charged like a fee and part of neither the base nor the bid, so it is
 	// stated as its own line rather than folded into either.
-	let ataFee = $derived(solAtaFee(instructions ?? []));
+	let ataFee = $derived(solAtaFee({ instructions: instructions ?? [], userAddress: source }));
+
+	// What the message pays to open accounts for applications. A line of its own rather than part of
+	// the rent above: the user can always close a token account and get its rent back, while an
+	// application's account returns its rent only if the application chooses to.
+	let appAccountCost = $derived(solAppAccountCost({ instructions: instructions ?? [] }));
 
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
-	// What the transaction costs beyond what it moves. The simulated SOL balance carries all of it
-	// and the message states none of it, so it is the room the comparison of the two allows.
-	let costs = $derived(SOLANA_TRANSACTION_FEE_IN_LAMPORTS + (prioritizationFee ?? ZERO) + ataFee);
+	// Charged for every signature the message requires rather than once per message, so a message a
+	// dApp co-signs pays it twice.
+	let baseFee = $derived(SOLANA_LAMPORTS_PER_SIGNATURE * BigInt(requiredSignatures));
+
+	// What the transaction costs the user beyond what it moves: every line of the fee section the
+	// wallet pays. The simulated SOL balance carries all of it and the message states none of it, so
+	// it is the room the comparison of the two allows. A request the dApp sponsors leaves the base and
+	// priority fees out: the user's balance pays neither, so allowing for them would make room for an
+	// outflow nothing explains.
+	let costs = $derived(
+		(walletPaysFees ? baseFee + (prioritizationFee ?? ZERO) : ZERO) + ataFee + appAccountCost
+	);
 
 	// The message read on its own says a plain send, receive or swap, and the run agrees that this
 	// is all it does. Anything less than agreement is left unsaid: a confident sentence over a
@@ -131,11 +191,12 @@
 	//
 	// Only the programs that moved something. An instruction the wallet could not read names its
 	// program too, and most transactions carry a couple that change nothing the user holds, so
-	// counting those here would bury the program that did the work among its housekeeping.
+	// counting those here would bury the program that did the work among its housekeeping. A token
+	// batch's heading names the token program, which runs the batch rather than doing the trade.
 	let venues = $derived([
 		...new Set(
 			flattenInstructions(instructions ?? [])
-				.filter(({ kind }) => kind !== 'unknown')
+				.filter(({ kind }) => kind !== 'unknown' && kind !== 'batch')
 				.map(({ program }) => program)
 				.filter(nonNullish)
 		)
@@ -171,6 +232,7 @@
 							metadata: $splTokenMetadataStore,
 							unknownTokenAddresses: summaryTokenAddresses,
 							unknownTokenLabel: $i18n.transaction.text.unknown_token,
+							unknownTokenNamedLabel: $i18n.transaction.text.unknown_token_named,
 							nativeSymbol: feeToken.symbol
 						}),
 					amountOf: ({ delta, decimals }) =>
@@ -240,6 +302,10 @@
 {/snippet}
 
 <ContentWithToolbar>
+	{#if flaggedAsScam}
+		<WalletConnectScamWarning />
+	{/if}
+
 	<!-- One notice, whichever fits, and the refusal comes first: a message the signing flow will not
 	     sign makes every caveat below it moot, since they qualify a review nobody is going to act
 	     on. It is the only notice here that is an error rather than a warning, because it describes
@@ -251,14 +317,48 @@
 	     simulated changes, so it waits for a run to exist and for the decode to settle, and the
 	     absence of a run has a warning of its own. A message that does reduce still shows
 	     simulated figures, which is a caveat and no more. -->
-	{#if ambiguous}
+	<!-- A close that pays somebody else is asked about first, because the instruction mapper
+	     refuses one the message states and so marks the request ambiguous as well: the two would
+	     both be true of the commonest case, and the general sentence would be shown for the
+	     specific thing that is wrong with it. -->
+	<!-- A send another account is named to pay for is asked about before either: it goes out with
+	     the wallet as the fee payer, so everything else here was read from a transaction other than
+	     the one OISY would sign. -->
+	<!-- Above the caveats, because it is the one notice that asks something of the user: approving
+	     waits for the confirmation it carries. A refusal hides it, since there is nothing left to
+	     confirm on a request OISY will not sign. -->
+	{#if !feePaidByOthers && !ambiguous && !closesPayOthers && unreadPrograms.length > 0}
+		<SolWalletConnectUnreadPrograms
+			network={token.network}
+			programs={unreadPrograms}
+			bind:acknowledged={unreadProgramsAcknowledged}
+		/>
+	{/if}
+
+	{#if feePaidByOthers}
+		<!-- A live region for the same reason as the refusals below: it is why Approve stays
+		     unusable. -->
+		<div role="alert">
+			<MessageBox level="error">{$i18n.wallet_connect.text.fee_paid_by_others}</MessageBox>
+		</div>
+	{:else if closesPayOthers}
 		<!-- `role="alert"` because this arrives only once the decode settles, and it is the reason
 		     the Approve button never becomes usable: without a live region a screen-reader user is
 		     left on a button that will not proceed and never hears why. The same reasoning as the
 		     destination-tag error, and applied here rather than inside `MessageBox`, which every
 		     other notice on this screen also uses. -->
 		<div role="alert">
+			<MessageBox level="error">{$i18n.wallet_connect.text.close_pays_others}</MessageBox>
+		</div>
+	{:else if ambiguous}
+		<!-- Same live region, same reason: it is why Approve stays unusable. -->
+		<div role="alert">
 			<MessageBox level="error">{$i18n.wallet_connect.text.cannot_be_shown}</MessageBox>
+		</div>
+	{:else if approvalWithoutSimulation}
+		<!-- Same live region, same reason. -->
+		<div role="alert">
+			<MessageBox level="error">{$i18n.wallet_connect.text.approval_without_simulation}</MessageBox>
 		</div>
 	{:else if unreviewed}
 		<MessageBox level="warning">
@@ -275,7 +375,7 @@
 	<!-- Everything below qualifies a review that is going to be acted on. None of it applies to a
 	     message the wallet has already decided it will not sign, and the partial-parties notice is
 	     actively wrong there: it tells the user which lists to read on a request that is refused. -->
-	{#if !ambiguous}
+	{#if !feePaidByOthers && !ambiguous && !closesPayOthers && !approvalWithoutSimulation}
 		<!-- An authority change moves no funds at all, so a diff of amounts alone would describe the
 		     theft as nothing happening. It is named first among the fund warnings for that reason. -->
 		{#if nonNullish(preview) && preview.controlChanges.length > 0}
@@ -390,15 +490,15 @@
 					</WalletConnectModalValue>
 				{/if}
 
-				<!-- One heading, and under it what the transaction actually charges: the base fee every
-		     message pays, what it bids on top, and the rent of any account it opens. Three headings
+				<!-- One heading, and under it what the transaction actually charges: the base fee its
+		     signatures cost, what it bids on top, and the rent of any account it opens. Three headings
 		     read as three unrelated costs. -->
 				<WalletConnectModalValue label={$i18n.fee.text.fee} ref="fee">
 					<div class="flex flex-col gap-1">
 						<div data-tid="network-fee">
 							{@render feeValue({
 								kind: $i18n.fee.text.base_kind,
-								feeAmount: SOLANA_TRANSACTION_FEE_IN_LAMPORTS
+								feeAmount: baseFee
 							})}
 						</div>
 
@@ -414,6 +514,15 @@
 						{#if ataFee > ZERO}
 							<div data-tid="ata-fee">
 								{@render feeValue({ kind: $i18n.fee.text.ata_kind, feeAmount: ataFee })}
+							</div>
+						{/if}
+
+						{#if appAccountCost > ZERO}
+							<div data-tid="app-account-fee">
+								{@render feeValue({
+									kind: $i18n.fee.text.app_account_kind,
+									feeAmount: appAccountCost
+								})}
 							</div>
 						{/if}
 					</div>
@@ -441,7 +550,12 @@
 					<!-- The simulated deltas carry the decimals of a mint the wallet does not list,
 					     which an unchecked transfer does not state and the list would otherwise read
 					     raw. -->
-					<SolInstructionsList {instructions} netChanges={preview?.tokenDeltas} {token} />
+					<SolInstructionsList
+						{instructions}
+						netChanges={preview?.tokenDeltas}
+						{token}
+						userAddress={source}
+					/>
 				</WalletConnectModalValue>
 			{/if}
 
@@ -450,6 +564,11 @@
 	</Tabs>
 
 	{#snippet toolbar()}
-		<WalletConnectActions {approveDisabled} {onApprove} {onReject} />
+		<WalletConnectActions
+			approve={!flaggedAsScam}
+			approveDisabled={approveHeld}
+			{onApprove}
+			{onReject}
+		/>
 	{/snippet}
 </ContentWithToolbar>

@@ -1,6 +1,7 @@
 import { SOL_WALLET_TIMER_INTERVAL_MILLIS, WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type { PostMessageDataRequestSol } from '$lib/types/post-message';
+import * as consoleUtils from '$lib/utils/console.utils';
 import { fetchSignatures } from '$sol/api/solana.api';
 import {
 	SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK,
@@ -19,7 +20,11 @@ import type { SolAddress } from '$sol/types/address';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolSignaturesCursor } from '$sol/types/sol-api';
 import type { SolNetworkBalances } from '$sol/types/sol-balance';
-import type { SolResolvedTransaction, SolSignatureWithSources } from '$sol/types/sol-transaction';
+import type {
+	SolResolvedSignatures,
+	SolResolvedTransaction,
+	SolSignatureWithSources
+} from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -33,6 +38,8 @@ import {
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { isNullish, jsonReviver, nonNullish } from '@dfinity/utils';
+import { SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION } from '@solana/kit';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/utils/time.utils', () => ({
 	randomWait: vi.fn()
@@ -114,6 +121,11 @@ describe('sol-wallet.scheduler', () => {
 			transaction: { ...createMockSolTransactionUi(signature), signature },
 			sources
 		}));
+
+	const resolvedPage = (signatures: SolSignatureWithSources[]): SolResolvedSignatures => ({
+		transactions: toResolved(signatures),
+		unreadable: []
+	});
 
 	const newestSignature = signatureAt({ slot: 101n });
 	const olderSignature = signatureAt({ slot: 100n, sources: [mockAtaAddress] });
@@ -215,7 +227,7 @@ describe('sol-wallet.scheduler', () => {
 		vi.mocked(loadSolNetworkBalances).mockResolvedValue(mockBalances);
 		mockPage(page);
 		vi.mocked(resolveSolSignatures).mockImplementation(({ signatures }) =>
-			Promise.resolve(toResolved(signatures))
+			Promise.resolve(resolvedPage(signatures))
 		);
 		vi.mocked(mapSolSourcesToTokens).mockResolvedValue(sourceTokens);
 		vi.mocked(saveSolFinalizedTransactions).mockResolvedValue({ success: true });
@@ -959,6 +971,197 @@ describe('sol-wallet.scheduler', () => {
 			expect(posts).toHaveLength(1);
 			expect(posts[0].data.wallet.balances).toEqual(mockBalances);
 			expect(postedTransactions(posts[0])).toEqual(toResolved(page));
+		});
+	});
+
+	describe('history failures', () => {
+		const error = new Error('Transaction version (1) is not supported');
+
+		let consoleErrorSpy: MockInstance<typeof consoleUtils.consoleError>;
+
+		beforeEach(() => {
+			consoleErrorSpy = vi.spyOn(consoleUtils, 'consoleError').mockImplementation(() => {});
+
+			vi.mocked(resolveSolSignatures).mockRejectedValue(error);
+		});
+
+		it('should post the balances on their own when the history fails', async () => {
+			await scheduler.trigger(data);
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(posts[0].data.wallet).toEqual({
+				balances: mockBalances,
+				newTransactions: '[]',
+				transactionsUnavailable: true
+			});
+			expect(postMessageMock).not.toHaveBeenCalledWith(
+				expect.objectContaining({ msg: 'syncSolWalletError' })
+			);
+			expect(consoleErrorSpy).toHaveBeenCalledExactlyOnceWith(
+				'Loading the newest Solana history failed:',
+				error
+			);
+		});
+
+		// A failing history is asked for again on the next tick, not retried within this one.
+		it('should not retry the tick when only the history fails', async () => {
+			await triggerAndSettle();
+
+			expect(loadSolNetworkBalances).toHaveBeenCalledOnce();
+			expect(resolveSolSignatures).toHaveBeenCalledOnce();
+		});
+
+		it('should not post again while the history keeps failing and the balances stay the same', async () => {
+			await scheduler.trigger(data);
+
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+
+			expect(walletPosts()).toHaveLength(0);
+		});
+
+		it('should post the balances again when they change while the history keeps failing', async () => {
+			await scheduler.trigger(data);
+
+			const balances = { ...mockBalances, sol: 200n };
+			vi.mocked(loadSolNetworkBalances).mockResolvedValue(balances);
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(posts[0].data.wallet.balances).toEqual(balances);
+			expect(posts[0].data.wallet.transactionsUnavailable).toBeTruthy();
+		});
+
+		// Nothing of a failed head is committed, so the tick after it loads the same page as new.
+		it('should load the history that failed on the next tick', async () => {
+			await scheduler.trigger(data);
+
+			vi.mocked(resolveSolSignatures).mockImplementation(({ signatures }) =>
+				Promise.resolve(resolvedPage(signatures))
+			);
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(postedTransactions(posts[0])).toEqual(toResolved(page));
+			expect(posts[0].data.wallet.transactionsUnavailable).toBeUndefined();
+		});
+
+		// The balances posted on their own leave every transaction list unset, and only a message with
+		// the history sets them.
+		it('should post the history once it loads, even with no transaction and the same balances', async () => {
+			vi.mocked(getSolSignatures).mockRejectedValue(new Error('Too many requests'));
+
+			await scheduler.trigger(data);
+
+			mockPage([]);
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(posts[0].data.wallet).toEqual({ balances: mockBalances, newTransactions: '[]' });
+		});
+
+		it('should still fail the tick when the balances fail too', async () => {
+			vi.mocked(loadSolNetworkBalances).mockRejectedValue(new Error('Failed to fetch'));
+
+			await triggerAndSettle();
+
+			// first time + 10 retries
+			expect(loadSolNetworkBalances).toHaveBeenCalledTimes(11);
+			expect(walletPosts()).toHaveLength(0);
+			expect(postMessageMock).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: 'syncSolWalletError' })
+			);
+		});
+	});
+
+	describe('unreadable transactions', () => {
+		const refused = signatureAt({ slot: 102n, sources: [mockSolAddress, mockAtaAddress] });
+
+		const unreadable = {
+			signature: refused.signature,
+			sources: refused.sources,
+			reason: 'refused' as const,
+			errorCode: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION
+		};
+
+		beforeEach(() => {
+			mockPage([refused, ...page]);
+
+			vi.mocked(resolveSolSignatures).mockImplementation(({ signatures }) =>
+				Promise.resolve({
+					transactions: toResolved(
+						signatures.filter(({ signature }) => signature !== refused.signature)
+					),
+					unreadable: signatures.some(({ signature }) => signature === refused.signature)
+						? [unreadable]
+						: []
+				})
+			);
+		});
+
+		it('should post them alongside the records of the others', async () => {
+			await scheduler.trigger(data);
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(postedTransactions(posts[0])).toEqual(toResolved(page));
+			expect(posts[0].data.wallet.unreadableTransactions).toEqual([unreadable]);
+		});
+
+		it('should post a tick whose only new signature is one of them', async () => {
+			mockPage(page);
+
+			await scheduler.trigger(data);
+
+			mockPage([refused, ...page]);
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(postedTransactions(posts[0])).toEqual([]);
+			expect(posts[0].data.wallet.unreadableTransactions).toEqual([unreadable]);
+		});
+
+		// The RPC answers the same on every tick: once committed, the signature is held like any other.
+		it('should neither fetch nor post one again on the next tick', async () => {
+			await scheduler.trigger(data);
+
+			vi.mocked(resolveSolSignatures).mockClear();
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+
+			expect(resolveSolSignatures).not.toHaveBeenCalled();
+			expect(walletPosts()).toHaveLength(0);
+		});
+
+		it('should leave them out of a message that has none', async () => {
+			mockPage(page);
+
+			await scheduler.trigger(data);
+
+			const [post] = walletPosts();
+
+			expect(post.data.wallet).not.toHaveProperty('unreadableTransactions');
 		});
 	});
 

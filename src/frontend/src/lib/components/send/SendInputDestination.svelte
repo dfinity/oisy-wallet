@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { debounce, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import QrButton from '$lib/components/common/QrButton.svelte';
 	import FirstTimeDestinationWarning from '$lib/components/send/FirstTimeDestinationWarning.svelte';
 	import ButtonReset from '$lib/components/ui/ButtonReset.svelte';
@@ -16,6 +15,7 @@
 	import type { KnownDestinations } from '$lib/types/transactions';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { isFirstTimeDestination } from '$lib/utils/known-destinations.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		destination: string;

@@ -4,6 +4,7 @@ import { mockBtcAddress, mockBtcP2SHAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockAccountIdentifierText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { nonNullish } from '@dfinity/utils';
 
 export const mockBackendContactAddressSol: ContactAddressData = {
@@ -19,6 +20,11 @@ export const mockBackendContactAddressBtc: ContactAddressData = {
 export const mockBackendContactAddressEth: ContactAddressData = {
 	token_account_id: { Eth: { Public: mockEthAddress3 } },
 	label: ['Testwallet Eth']
+};
+
+export const mockBackendContactAddressXrp: ContactAddressData = {
+	token_account_id: { Xrp: mockXrpAddress },
+	label: ['Testwallet XRP']
 };
 
 export const getMockContacts = ({
@@ -62,6 +68,11 @@ export const mockContactEthAddressUi: ContactAddressUi = {
 export const mockContactUiSolAddressUi: ContactAddressUi = {
 	addressType: 'Sol',
 	address: mockSolAddress
+};
+
+export const mockContactXrpAddressUi: ContactAddressUi = {
+	addressType: 'Xrp',
+	address: mockXrpAddress
 };
 
 export const getMockContactsUi = ({

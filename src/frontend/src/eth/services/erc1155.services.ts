@@ -132,7 +132,11 @@ const mapErc1155CustomToken = async ({
 
 	return {
 		...{
-			id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
+			id: parseCustomTokenId({
+				identifier: tokenAddress,
+				chainId: network.chainId,
+				standard: 'erc1155'
+			}),
 			name: tokenAddress,
 			address: tokenAddress,
 			network,

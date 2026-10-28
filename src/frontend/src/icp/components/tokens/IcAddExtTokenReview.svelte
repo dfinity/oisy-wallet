@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
-	import { blur, fade } from 'svelte/transition';
 	import { extTokens } from '$icp/derived/ext.derived';
 	import {
 		loadAndAssertAddCustomToken,
@@ -20,6 +19,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { blur, fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		extCanisterId?: string;

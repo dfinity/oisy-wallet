@@ -9,7 +9,7 @@ import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-tra
 import { mapIcpTransaction, mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
 import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
 import type { PostMessage, PostMessageDataRequestIcp } from '$lib/types/post-message';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 
 const getBalance = ({
@@ -108,29 +108,64 @@ export const initIcpWalletScheduler = (
 	_data: PostMessageDataRequestIcp | undefined
 ): IcWalletScheduler<PostMessageDataRequestIcp> => initIcpWalletBalanceAndTransactionsScheduler();
 
-let scheduler: IcWalletScheduler<PostMessageDataRequestIcp> | undefined;
+// ICP and Test ICP are both ICP-standard tokens, and pooled wallet workers can run them in the same
+// worker realm, so each Ledger canister gets its own scheduler.
+const schedulers = new Map<string, IcWalletScheduler<PostMessageDataRequestIcp>>();
+
+const stopAllSchedulers = () => {
+	schedulers.forEach((scheduler) => scheduler.stop());
+	schedulers.clear();
+};
 
 export const onIcpWalletMessage = async ({
 	data: dataMsg
 }: MessageEvent<PostMessage<PostMessageDataRequestIcp>>) => {
 	const { msg, data } = dataMsg;
 
-	switch (msg) {
-		case 'startIcpWalletTimer':
-		case 'stopIcpWalletTimer':
-			scheduler?.stop();
-	}
+	const schedulerKey =
+		nonNullish(data) && 'ledgerCanisterId' in data ? data.ledgerCanisterId : undefined;
 
 	switch (msg) {
 		case 'startIcpWalletTimer': {
-			scheduler = initIcpWalletScheduler(data);
+			if (isNullish(schedulerKey)) {
+				return;
+			}
+
+			schedulers.get(schedulerKey)?.stop();
+
+			const scheduler = initIcpWalletScheduler(data);
+
+			schedulers.set(schedulerKey, scheduler);
+
 			await scheduler.start(data);
+
+			break;
+		}
+		case 'stopIcpWalletTimer': {
+			if (isNullish(schedulerKey)) {
+				stopAllSchedulers();
+				break;
+			}
+
+			schedulers.get(schedulerKey)?.stop();
+
+			schedulers.delete(schedulerKey);
+
 			break;
 		}
 		case 'triggerIcpWalletTimer': {
+			if (isNullish(schedulerKey)) {
+				return;
+			}
+
+			let scheduler = schedulers.get(schedulerKey);
+
 			if (isNullish(scheduler)) {
 				scheduler = initIcpWalletScheduler(data);
+
+				schedulers.set(schedulerKey, scheduler);
 			}
+
 			await scheduler.trigger(data);
 		}
 	}

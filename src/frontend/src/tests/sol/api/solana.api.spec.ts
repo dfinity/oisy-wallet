@@ -16,9 +16,12 @@ import {
 	fetchTransactionDetailForSignature,
 	getAccountInfo,
 	getAccountOwner,
+	getMultipleAccountsInfo,
+	getMultipleAccountsInfoWithContext,
 	getSolCreateAccountFee,
 	getTokenInfo,
-	loadTokenAccount
+	loadTokenAccount,
+	simulateTransactionAccounts
 } from '$sol/api/solana.api';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -54,6 +57,8 @@ describe('solana.api', () => {
 	let mockGetMinimumBalanceForRentExemption: MockInstance;
 	let mockGetRecentPrioritizationFees: MockInstance;
 	let mockGetAccountInfo: MockInstance;
+	let mockGetMultipleAccounts: MockInstance;
+	let mockSimulateTransaction: MockInstance;
 
 	let originalMapGet = Map.prototype.get;
 
@@ -209,11 +214,25 @@ describe('solana.api', () => {
 			send: () => Promise.resolve(mockAccountInfo)
 		});
 
+		mockGetMultipleAccounts = vi.fn().mockReturnValue({
+			send: () => Promise.resolve({ context: { slot: 100n }, value: [mockOwnerInfo.value, null] })
+		});
+
+		mockSimulateTransaction = vi.fn().mockReturnValue({
+			send: () =>
+				Promise.resolve({
+					context: { slot: 101n },
+					value: { err: null, accounts: [null], innerInstructions: [], fee: null }
+				})
+		});
+
 		const mockSolanaHttpRpc = vi.fn().mockReturnValue({
 			getSignaturesForAddress: mockGetSignaturesForAddress,
 			getMinimumBalanceForRentExemption: mockGetMinimumBalanceForRentExemption,
 			getRecentPrioritizationFees: mockGetRecentPrioritizationFees,
-			getAccountInfo: mockGetAccountInfo
+			getAccountInfo: mockGetAccountInfo,
+			getMultipleAccounts: mockGetMultipleAccounts,
+			simulateTransaction: mockSimulateTransaction
 		});
 		vi.mocked(solRpcProviders.solanaHttpRpc).mockImplementation(mockSolanaHttpRpc);
 
@@ -411,7 +430,7 @@ describe('solana.api', () => {
 				signature: signature.signature
 			});
 			expect(mockGetTransaction).toHaveBeenCalledExactlyOnceWith(signature.signature, {
-				maxSupportedTransactionVersion: 0,
+				maxSupportedTransactionVersion: 1,
 				encoding: 'jsonParsed'
 			});
 
@@ -623,6 +642,71 @@ describe('solana.api', () => {
 					tokenAddress: ''
 				})
 			).rejects.toThrow();
+		});
+	});
+
+	describe('getMultipleAccountsInfoWithContext', () => {
+		it('should return the accounts with the slot the node read them at', async () => {
+			await expect(
+				getMultipleAccountsInfoWithContext({
+					addresses: mockAddresses,
+					network: SolanaNetworks.mainnet
+				})
+			).resolves.toEqual({ slot: 100n, value: [mockOwnerInfo.value, null] });
+
+			expect(mockGetMultipleAccounts).toHaveBeenCalledExactlyOnceWith(mockAddresses, {
+				encoding: 'jsonParsed'
+			});
+		});
+	});
+
+	describe('getMultipleAccountsInfo', () => {
+		it('should return the accounts alone', async () => {
+			await expect(
+				getMultipleAccountsInfo({ addresses: mockAddresses, network: SolanaNetworks.mainnet })
+			).resolves.toEqual([mockOwnerInfo.value, null]);
+		});
+	});
+
+	describe('simulateTransactionAccounts', () => {
+		const simulate = (
+			options: { replaceRecentBlockhash?: boolean; minContextSlot?: bigint } = {}
+		) =>
+			simulateTransactionAccounts({
+				base64EncodedTransactionMessage: 'mockBase64Transaction',
+				addresses: [mockSolAddress],
+				network: SolanaNetworks.mainnet,
+				...options
+			});
+
+		it('should replace the blockhash and set no slot by default, as the WalletConnect review needs', async () => {
+			await simulate();
+
+			expect(mockSimulateTransaction).toHaveBeenCalledExactlyOnceWith('mockBase64Transaction', {
+				encoding: 'base64',
+				innerInstructions: true,
+				replaceRecentBlockhash: true,
+				accounts: { encoding: 'jsonParsed', addresses: [mockSolAddress] }
+			});
+		});
+
+		it('should keep the blockhash and ask for no earlier slot when told to', async () => {
+			await simulate({ replaceRecentBlockhash: false, minContextSlot: 100n });
+
+			expect(mockSimulateTransaction).toHaveBeenCalledExactlyOnceWith(
+				'mockBase64Transaction',
+				expect.objectContaining({ replaceRecentBlockhash: false, minContextSlot: 100n })
+			);
+		});
+
+		it('should return the slot the run used', async () => {
+			await expect(simulate()).resolves.toEqual({
+				err: null,
+				accounts: [null],
+				innerInstructions: [],
+				fee: undefined,
+				slot: 101n
+			});
 		});
 	});
 

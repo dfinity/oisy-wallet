@@ -1,10 +1,15 @@
+import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import * as solanaApi from '$sol/api/solana.api';
 import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction';
+import {
+	SolTransactionReadError,
+	type SolRpcTransaction,
+	type SolSignature
+} from '$sol/types/sol-transaction';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
@@ -131,6 +136,42 @@ describe('sol-transactions.services', () => {
 			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual([]);
 		});
 
+		describe('failures', () => {
+			// Only a failure to read what the RPC returned fails again however often it is retried, so
+			// only that one is told apart.
+			it('should throw a read error, with the cause, when it cannot read what the RPC returned', async () => {
+				spyFetchTransactionDetailForSignature.mockResolvedValueOnce(
+					detailWith({ accountKeys: [null] })
+				);
+
+				const result = fetchSolTransactionsForSignature(mockParams);
+
+				await expect(result).rejects.toBeInstanceOf(SolTransactionReadError);
+				await expect(result).rejects.toHaveProperty('cause', expect.any(TypeError));
+			});
+
+			it('should let a failed fetch through unchanged', async () => {
+				const err = new Error('Failed to fetch');
+
+				spyFetchTransactionDetailForSignature.mockRejectedValueOnce(err);
+
+				await expect(fetchSolTransactionsForSignature(mockParams)).rejects.toBe(err);
+			});
+
+			it('should let a failed lookup of the counterparty owner through unchanged', async () => {
+				const err = new Error('Failed to fetch');
+
+				spyGetAccountOwner.mockRejectedValueOnce(err);
+
+				await expect(fetchSolTransactionsForSignature(mockParams)).rejects.toBe(err);
+
+				expect(spyGetAccountOwner).toHaveBeenCalledExactlyOnceWith({
+					address: mockSolAddress2,
+					network
+				});
+			});
+		});
+
 		it('should return a single record per signature', async () => {
 			const result = await fetchSolTransactionsForSignature(mockParams);
 
@@ -190,6 +231,49 @@ describe('sol-transactions.services', () => {
 			expect(record.netChanges).toStrictEqual([{ delta: -1_000_000n }]);
 			expect(record.instructions).toHaveLength(1);
 			expect(record.instructions?.[0].kind).toBe('send');
+		});
+
+		// The lamports were threaded through this path and the token balances were not, so every
+		// close in the activity list held an unknown amount and read as an unwrap of it.
+		it('should read what a closed account held from the pre-token balances', async () => {
+			spyFetchTransactionDetailForSignature.mockResolvedValueOnce(
+				detailWith({
+					instructions: [
+						{
+							program: 'spl-token',
+							programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+							parsed: {
+								type: 'closeAccount',
+								info: {
+									account: mockAtaAddress,
+									destination: mockSolAddress,
+									owner: mockSolAddress
+								}
+							}
+						}
+					],
+					accountKeys: [
+						{ pubkey: mockSolAddress, signer: true, writable: true, source: 'transaction' },
+						{ pubkey: mockAtaAddress, signer: false, writable: true, source: 'transaction' }
+					],
+					preBalances: [10_000_000n, 2_039_280n],
+					postBalances: [12_034_280n, ZERO],
+					preTokenBalances: [
+						{
+							accountIndex: 1,
+							mint: WSOL_TOKEN.address,
+							owner: mockSolAddress,
+							uiTokenAmount: { amount: '0', decimals: 9 }
+						}
+					]
+				})
+			);
+
+			const [record] = await fetchSolTransactionsForSignature(mockParams);
+
+			const close = record.instructions?.find(({ kind }) => kind === 'closeTokenAccount');
+
+			expect(close?.wrapped).toBe(ZERO);
 		});
 
 		it('should return nothing for a transaction the user has no part in', async () => {

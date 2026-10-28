@@ -25,6 +25,7 @@
 				<Html text={replaceOisyPlaceholders($i18n.core.warning.standalone_mode)} />
 			</span>
 			<button
+				class="hit-area relative press-icon"
 				aria-label={$i18n.core.text.close}
 				data-tid={PWA_INFO_BANNER_CLOSE_BUTTON_TEST_ID}
 				onclick={closePwaBanner}

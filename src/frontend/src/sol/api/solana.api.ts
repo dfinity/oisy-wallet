@@ -5,6 +5,7 @@ import {
 	setIdbSolTransactionDetail
 } from '$sol/api/idb-sol-transaction-details.api';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
+import { SOLANA_MAX_SUPPORTED_TRANSACTION_VERSION } from '$sol/constants/sol.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
@@ -86,7 +87,7 @@ export const getRpcTransaction = async ({
 	const { getTransaction } = solanaHttpRpc(network);
 
 	return await getTransaction(signature, {
-		maxSupportedTransactionVersion: 0,
+		maxSupportedTransactionVersion: SOLANA_MAX_SUPPORTED_TRANSACTION_VERSION,
 		encoding: 'jsonParsed'
 	}).send();
 };
@@ -228,24 +229,40 @@ export const estimatePriorityFee = async ({
 };
 
 /**
- * Reads the current state of several accounts in one call.
+ * Reads the current state of several accounts in one call, with the slot the node read them at.
  *
  * Deliberately uncached, unlike `getAccountInfo` below: this is the "before" side of the
  * simulated preview's diff, and a memoised entry from earlier in the session would fabricate
- * a delta that never existed.
+ * a delta that never existed. The slot is what lets a caller simulate against that very state.
  */
-export const getMultipleAccountsInfo = async ({
+export const getMultipleAccountsInfoWithContext = async ({
 	addresses,
 	network
 }: {
 	addresses: SolAddress[];
 	network: SolanaNetworkType;
-}): Promise<SolanaParsedAccountsInfo> => {
+}): Promise<{ slot: bigint; value: SolanaParsedAccountsInfo }> => {
 	const { getMultipleAccounts } = solanaHttpRpc(network);
 
-	const { value } = await getMultipleAccounts(addresses.map(solAddress), {
+	const {
+		context: { slot },
+		value
+	} = await getMultipleAccounts(addresses.map(solAddress), {
 		encoding: 'jsonParsed'
 	}).send();
+
+	return { slot, value };
+};
+
+/**
+ * Reads the current state of several accounts in one call: `getMultipleAccountsInfoWithContext`
+ * without the slot.
+ */
+export const getMultipleAccountsInfo = async (params: {
+	addresses: SolAddress[];
+	network: SolanaNetworkType;
+}): Promise<SolanaParsedAccountsInfo> => {
+	const { value } = await getMultipleAccountsInfoWithContext(params);
 
 	return value;
 };
@@ -262,35 +279,48 @@ export const getMultipleAccountsInfo = async ({
  * `innerInstructions` returns the cross-program invocations the run would make, parsed by the same
  * server-side parser. A routed swap performs its transfers there and nowhere else, so without them
  * a decode of the message alone sees one opaque call and no value moving at all.
+ *
+ * A caller that simulates the exact bytes it will send passes `replaceRecentBlockhash: false`, so
+ * that an expired blockhash fails the run rather than being replaced. `minContextSlot` keeps a node
+ * behind that slot from answering, and the slot the run used comes back with it.
  */
 export const simulateTransactionAccounts = async ({
 	base64EncodedTransactionMessage,
 	addresses,
-	network
+	network,
+	replaceRecentBlockhash = true,
+	minContextSlot
 }: {
 	base64EncodedTransactionMessage: string;
 	addresses: SolAddress[];
 	network: SolanaNetworkType;
+	replaceRecentBlockhash?: boolean;
+	minContextSlot?: bigint;
 }): Promise<{
 	err: TransactionError | null;
 	accounts: SolanaParsedAccountsInfo;
 	innerInstructions: SolanaSimulatedInnerInstructions;
+	// What the run charged the fee payer, which a node that predates the field leaves out.
+	fee: bigint | undefined;
+	slot: bigint;
 }> => {
 	const { simulateTransaction } = solanaHttpRpc(network);
 
 	const {
-		value: { err, accounts, innerInstructions }
+		context: { slot },
+		value: { err, accounts, innerInstructions, fee }
 	} = await simulateTransaction(base64EncodedTransactionMessage as Base64EncodedWireTransaction, {
 		encoding: 'base64',
 		innerInstructions: true,
-		replaceRecentBlockhash: true,
+		replaceRecentBlockhash,
+		...(nonNullish(minContextSlot) && { minContextSlot }),
 		accounts: {
 			encoding: 'jsonParsed',
 			addresses: addresses.map(solAddress)
 		}
 	}).send();
 
-	return { err, accounts, innerInstructions };
+	return { err, accounts, innerInstructions, fee: fee ?? undefined, slot };
 };
 
 const addressToAccountInfo = new Map<
