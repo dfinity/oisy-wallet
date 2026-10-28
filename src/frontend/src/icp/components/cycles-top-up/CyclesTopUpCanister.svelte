@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+	import { CANISTER_TOP_UP_ENABLED } from '$env/canister-top-up.env';
 	import { getCanisterExistence } from '$icp/api/canister-state.api';
+	import CyclesTopUpCanisterTabs from '$icp/components/cycles-top-up/CyclesTopUpCanisterTabs.svelte';
 	import CyclesTopUpRecentCanisters from '$icp/components/cycles-top-up/CyclesTopUpRecentCanisters.svelte';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { parseCanisterId } from '$icp/utils/cycles-top-up.utils';
@@ -107,6 +109,12 @@
 
 		check = { canisterIdText: checkedText, existence };
 	};
+
+	const select = async (selected: string) => {
+		canisterIdText = selected;
+
+		await next();
+	};
 </script>
 
 <ContentWithToolbar testId={CYCLES_TOP_UP_CANISTER}>
@@ -145,14 +153,11 @@
 	{/if}
 
 	<!-- As in the send flow, picking a canister goes on, after the same check as Next. -->
-	<CyclesTopUpRecentCanisters
-		onSelect={async (selected) => {
-			canisterIdText = selected;
-
-			await next();
-		}}
-		{token}
-	/>
+	{#if CANISTER_TOP_UP_ENABLED}
+		<CyclesTopUpCanisterTabs onSelect={select} {token} />
+	{:else}
+		<CyclesTopUpRecentCanisters onSelect={select} {token} />
+	{/if}
 
 	{#snippet toolbar()}
 		<ButtonGroup>

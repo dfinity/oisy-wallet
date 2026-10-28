@@ -930,6 +930,10 @@ interface I18nCycles_top_up {
 		canister_id_placeholder: string;
 		checking_canister: string;
 		recently_topped_up: string;
+		recently_topped_up_empty_state_title: string;
+		recently_topped_up_empty_state_description: string;
+		contacts_empty_state_title: string;
+		contacts_empty_state_description: string;
 		canister: string;
 		you_top_up: string;
 		total: string;
