@@ -57,6 +57,13 @@ vi.mock('$lib/utils/timeout.utils', () => ({
 	waitForMilliseconds: vi.fn()
 }));
 
+// What this suite tests is the swap's own retry of a broadcast. The provider asking Alchemy when
+// Infura fails is tested with the provider, and left on it would answer some of the attempts here.
+vi.mock('$env/rest/alchemy.env', () => ({
+	ALCHEMY_API_KEY: 'test-alchemy-key',
+	ALCHEMY_EVM_FALLBACK_ENABLED: false
+}));
+
 vi.mock('$lib/utils/console.utils', () => ({
 	consoleError: vi.fn()
 }));

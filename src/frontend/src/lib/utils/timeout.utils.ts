@@ -1,3 +1,4 @@
+import { TimeoutError } from '$lib/types/errors';
 import { nonNullish } from '@dfinity/utils';
 
 /**
@@ -38,6 +39,36 @@ export const waitForMilliseconds = (milliseconds: number): Promise<void> =>
 	new Promise((resolve) => {
 		setTimeout(resolve, milliseconds);
 	});
+
+// Stands in for an answer that never came: no value a caller's promise can resolve with equals it.
+const NO_ANSWER = Symbol('no answer');
+
+/**
+ * Settles as `promise` does, unless it takes longer than `milliseconds`, in which case it rejects
+ * with a `TimeoutError`: `withDeadline` for a caller that must tell a late answer from any value.
+ *
+ * Nothing is cancelled: the work behind `promise` carries on, only its answer is no longer waited
+ * for. So a caller may give up only on work that is safe to repeat or to abandon.
+ */
+export const withTimeout = async <T>({
+	promise,
+	milliseconds
+}: {
+	promise: Promise<T>;
+	milliseconds: number;
+}): Promise<T> => {
+	const answer = await withDeadline<T | typeof NO_ANSWER>({
+		operation: promise,
+		fallback: NO_ANSWER,
+		milliseconds
+	});
+
+	if (answer === NO_ANSWER) {
+		throw new TimeoutError(`No answer within ${milliseconds} ms`);
+	}
+
+	return answer;
+};
 
 export const waitReady = async ({
 	retries,

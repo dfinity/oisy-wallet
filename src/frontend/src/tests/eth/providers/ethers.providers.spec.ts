@@ -1,6 +1,6 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
-import { ethersProvider } from '$eth/providers/ethers.providers';
+import { ethersFallbackProvider, ethersProvider } from '$eth/providers/ethers.providers';
 import type { EthereumNetwork, EthersProviderNetwork } from '$eth/types/network';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { InfuraProvider, JsonRpcProvider, Network } from 'ethers/providers';
@@ -101,5 +101,30 @@ describe('ethers.providers', () => {
 				expect(mockNetwork).toHaveBeenCalledExactlyOnceWith('Mock Network', 4_663n);
 			});
 		});
+	});
+
+	describe('ethersFallbackProvider', () => {
+		it.each(infuraNetworks)('should ask $name over its Alchemy URL', (network) => {
+			const provider = ethersFallbackProvider(network);
+
+			expect(mockInfuraProvider).not.toHaveBeenCalled();
+			expect(mockJsonRpcProvider).toHaveBeenCalledExactlyOnceWith(
+				`${network.providers.alchemyJsonRpcUrl}/test-alchemy-key`,
+				expect.anything(),
+				{ staticNetwork: true }
+			);
+			expect(mockNetwork).toHaveBeenCalledExactlyOnceWith(network.name, network.chainId);
+			expect(provider).toBe(mockJsonRpcProvider.mock.instances[0]);
+		});
+
+		it.each(fallbackNetworks)(
+			'should have no second provider for $name, which is read over Alchemy already',
+			(network) => {
+				expect(ethersFallbackProvider(network)).toBeUndefined();
+
+				expect(mockInfuraProvider).not.toHaveBeenCalled();
+				expect(mockJsonRpcProvider).not.toHaveBeenCalled();
+			}
+		);
 	});
 });
