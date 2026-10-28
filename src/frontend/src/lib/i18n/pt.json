@@ -2314,7 +2314,8 @@
 			"no_date_available": "Data não disponível",
 			"pending": "Pendente",
 			"top_up": "Recarga",
-			"top_up_refund": "Reembolso da recarga"
+			"top_up_refund": "Reembolso da recarga",
+			"canister_top_up": ""
 		},
 		"alt": {
 			"open_block_explorer": "Abrir esta transação no explorador de blocos",

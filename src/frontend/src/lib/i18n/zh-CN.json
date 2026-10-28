@@ -2314,7 +2314,8 @@
 			"no_date_available": "无可用日期",
 			"pending": "处理中",
 			"top_up": "充值",
-			"top_up_refund": "充值退款"
+			"top_up_refund": "充值退款",
+			"canister_top_up": ""
 		},
 		"alt": {
 			"open_block_explorer": "在区块浏览器中打开此交易",

@@ -2314,7 +2314,8 @@
 			"no_date_available": "Aucune date disponible",
 			"pending": "En attente",
 			"top_up": "Recharge",
-			"top_up_refund": "Remboursement de recharge"
+			"top_up_refund": "Remboursement de recharge",
+			"canister_top_up": ""
 		},
 		"alt": {
 			"open_block_explorer": "Ouvrir cette transaction sur un explorateur de blocs",

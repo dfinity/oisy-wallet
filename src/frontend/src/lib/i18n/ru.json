@@ -2314,7 +2314,8 @@
 			"no_date_available": "Дата недоступна",
 			"pending": "Ожидание",
 			"top_up": "Пополнение",
-			"top_up_refund": "Возврат пополнения"
+			"top_up_refund": "Возврат пополнения",
+			"canister_top_up": ""
 		},
 		"alt": {
 			"open_block_explorer": "Открыть эту транзакцию в обозревателе блоков",

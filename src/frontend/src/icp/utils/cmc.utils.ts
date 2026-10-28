@@ -1,6 +1,8 @@
 import { CMC_CANISTER_ID } from '$env/networks/networks.icp.env';
 import { CmcNotifyError, CmcNotifyRefundedError } from '$icp/canisters/cmc.errors';
+import { CMC_TOP_UP_LEGACY_MEMO, CMC_TOP_UP_MEMO } from '$icp/constants/cmc.constants';
 import type { CmcNotifyFailure } from '$icp/types/cmc';
+import { ZERO } from '$lib/constants/app.constants';
 import { fromNullable, nonNullish, principalToSubAccount } from '@dfinity/utils';
 import { AccountIdentifier, SubAccount, type IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
@@ -25,6 +27,20 @@ const isMemo = ({ memo, expected }: { memo: Uint8Array | undefined; expected: Ui
 	nonNullish(memo) &&
 	memo.length === expected.length &&
 	memo.every((byte, index) => byte === expected[index]);
+
+/**
+ * Whether an ICP transaction carries the CMC's top-up memo, read the way the CMC reads it:
+ * the legacy memo when it is not zero, the `icrc1_memo` otherwise. Only the sender sets
+ * it. Its destination, a hash of the CMC's account and the canister, does not name the
+ * canister.
+ */
+export const isCmcTopUpMemo = ({
+	memo,
+	icrc1_memo
+}: Pick<IcpIndexDid.Transaction, 'memo' | 'icrc1_memo'>): boolean =>
+	memo !== ZERO
+		? memo === CMC_TOP_UP_LEGACY_MEMO
+		: isMemo({ memo: fromNullable(icrc1_memo), expected: CMC_TOP_UP_MEMO });
 
 /**
  * Whether an ICP history entry is a given deposit to the CMC: a transfer of `amount` from

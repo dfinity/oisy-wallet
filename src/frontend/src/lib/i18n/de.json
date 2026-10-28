@@ -2314,7 +2314,8 @@
 			"no_date_available": "Kein Datum verfügbar",
 			"pending": "Ausstehend",
 			"top_up": "Aufladung",
-			"top_up_refund": "Erstattung der Aufladung"
+			"top_up_refund": "Erstattung der Aufladung",
+			"canister_top_up": ""
 		},
 		"alt": {
 			"open_block_explorer": "Diese Transaktion in einem Block-Explorer öffnen",

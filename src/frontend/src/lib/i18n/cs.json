@@ -2314,7 +2314,8 @@
 			"no_date_available": "Datum není k dispozici",
 			"pending": "Čeká na vyřízení",
 			"top_up": "Dobití",
-			"top_up_refund": "Vrácení dobití"
+			"top_up_refund": "Vrácení dobití",
+			"canister_top_up": ""
 		},
 		"alt": {
 			"open_block_explorer": "Otevřít tuto transakci v blockchainovém průzkumníku",

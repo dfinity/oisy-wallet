@@ -2314,7 +2314,8 @@
 			"no_date_available": "Nessuna data disponibile",
 			"pending": "In sospeso",
 			"top_up": "Ricarica",
-			"top_up_refund": "Rimborso della ricarica"
+			"top_up_refund": "Rimborso della ricarica",
+			"canister_top_up": ""
 		},
 		"alt": {
 			"open_block_explorer": "Apri questa transazione su un block explorer",

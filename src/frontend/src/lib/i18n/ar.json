@@ -2314,7 +2314,8 @@
 			"no_date_available": "لا يوجد تاريخ متاح",
 			"pending": "معلق",
 			"top_up": "",
-			"top_up_refund": ""
+			"top_up_refund": "",
+			"canister_top_up": ""
 		},
 		"alt": {
 			"open_block_explorer": "افتح هذه المعاملة في مستكشف الكتل",

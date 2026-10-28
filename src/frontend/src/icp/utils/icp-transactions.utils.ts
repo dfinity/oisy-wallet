@@ -4,6 +4,7 @@ import type {
 	IcTransactionUi,
 	IcpTransaction
 } from '$icp/types/ic-transaction';
+import { isCmcTopUpMemo } from '$icp/utils/cmc.utils';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import type { NullishIdentity } from '$lib/types/identity';
 import { fromNullable, jsonReplacer, nonNullish } from '@dfinity/utils';
@@ -132,6 +133,10 @@ export const mapIcpTransaction = ({
 		// account owner did not pick the destination in that case, the spender did.
 		const transferSpender = fromNullable(operation.Transfer.spender);
 
+		// A top-up through the CMC. The ledger records only a hash of the deposit account, so
+		// the canister cannot be named.
+		const isCanisterTopUp = source.incoming === false && isCmcTopUpMemo(transaction);
+
 		return {
 			...tx,
 			type: source.incoming === false ? 'send' : 'receive',
@@ -139,7 +144,8 @@ export const mapIcpTransaction = ({
 			...mapTo(operation.Transfer.to),
 			value: operation.Transfer.amount.e8s,
 			...(nonNullish(transferFee) && { fee: transferFee }),
-			...(nonNullish(transferSpender) && { transferSpender })
+			...(nonNullish(transferSpender) && { transferSpender }),
+			...(isCanisterTopUp && { typeLabel: 'transaction.label.canister_top_up' })
 		};
 	}
 

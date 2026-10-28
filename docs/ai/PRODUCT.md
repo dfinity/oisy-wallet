@@ -863,6 +863,8 @@ It is on in every environment; `CYCLES_TOP_UP_ENABLED` (`src/frontend/src/env/cy
 
 **Activity.** TCYCLES Activity shows a top-up as **Top up**, with the canister as its destination, in the list and in the details. The ledger records the canister in the burn's memo, so this covers top-ups made outside OISY too. The refund of a failed top-up shows as **Top-up refund**, and every other burn on the cycles ledger stays **Burn**.
 
+ICP Activity shows an outgoing ICP transfer that carries the CMC's top-up memo, `TPUP`, as the legacy memo or as the 8-byte ICRC-1 memo, as **Canister top-up**, in the list and in the details. Such a transfer pays ICP to the CMC, which turns it into cycles for a canister. The ICP ledger records only a hash of the CMC's deposit account for that canister, so the row cannot name the canister. The label rests on the memo alone, so it also covers top-ups made outside OISY. The refund of a failed one is an ordinary incoming transfer without a memo, and stays one.
+
 What this deliberately does not do: show a canister's cycle balance (only its controllers can read it), save or name canisters, pick a canister from Contacts, top up straight from ICP through the CMC, create canisters, top up from a subaccount or for another account through an ICRC-2 approval, ask to confirm a first top-up to a canister the way the send flow confirms a first-time destination, or carry an amount in analytics.
 
 ## Swap
