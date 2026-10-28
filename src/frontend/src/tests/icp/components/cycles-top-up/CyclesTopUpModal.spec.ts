@@ -1,3 +1,4 @@
+import * as canisterTopUpEnv from '$env/canister-top-up.env';
 import * as canisterStateApi from '$icp/api/canister-state.api';
 import CyclesTopUpModal from '$icp/components/cycles-top-up/CyclesTopUpModal.svelte';
 import * as cyclesTopUpServices from '$icp/services/cycles-top-up.services';
@@ -10,6 +11,7 @@ import {
 	CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON,
 	CYCLES_TOP_UP_CANISTER_INPUT,
 	CYCLES_TOP_UP_CANISTER_NEXT_BUTTON,
+	CYCLES_TOP_UP_CONTACT,
 	CYCLES_TOP_UP_RECENT_CANISTER,
 	CYCLES_TOP_UP_REVIEW,
 	CYCLES_TOP_UP_REVIEW_BACK_BUTTON,
@@ -20,6 +22,7 @@ import * as authDerived from '$lib/derived/auth.derived';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import * as cyclesTopUpAnalytics from '$lib/services/cycles-top-up-analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
+import { contactsStore } from '$lib/stores/contacts.store';
 import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -153,6 +156,7 @@ describe('CyclesTopUpModal', () => {
 
 		lastCyclesTopUps.set({});
 		icTransactionsStore.reset(mockTcyclesToken.id);
+		contactsStore.reset();
 	});
 
 	afterEach(() => {
@@ -368,6 +372,53 @@ describe('CyclesTopUpModal', () => {
 			});
 
 			expect(existenceSpy).toHaveBeenCalledTimes(2);
+		});
+
+		describe('contacts', () => {
+			const enableCanisterTopUp = (enabled: boolean) =>
+				vi.spyOn(canisterTopUpEnv, 'CANISTER_TOP_UP_ENABLED', 'get').mockReturnValue(enabled);
+
+			beforeEach(() => {
+				contactsStore.set([
+					{
+						id: 1n,
+						name: 'Backend',
+						updateTimestampNs: 12n,
+						addresses: [{ addressType: 'Icrcv2', address: canister }],
+						image: undefined
+					}
+				]);
+			});
+
+			it('goes on to the amount when a contact’s canister is picked, after checking it', async () => {
+				enableCanisterTopUp(true);
+
+				const result = renderModal();
+
+				const button = result.getByTestId(CYCLES_TOP_UP_CONTACT).querySelector('button');
+
+				assertNonNullish(button);
+
+				await fireEvent.click(button);
+
+				await waitFor(() => {
+					expect(result.getByTestId(CYCLES_TOP_UP_AMOUNT)).toBeInTheDocument();
+				});
+
+				expect(existenceSpy).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					canisterId: Principal.fromText(canister)
+				});
+			});
+
+			it('offers no contacts while the Canister top-up flag is off', () => {
+				enableCanisterTopUp(false);
+
+				const result = renderModal();
+
+				expect(result.queryByTestId(CYCLES_TOP_UP_CONTACT)).toBeNull();
+				expect(result.container).not.toHaveTextContent(en.send.text.contacts_tab);
+			});
 		});
 	});
 
