@@ -3,6 +3,7 @@
 	import IconAddressTypeEth from '$lib/components/icons/IconAddressTypeEth.svelte';
 	import IconAddressTypeIcrc2 from '$lib/components/icons/IconAddressTypeIcrcv2.svelte';
 	import IconAddressTypeSol from '$lib/components/icons/IconAddressTypeSol.svelte';
+	import IconAddressTypeXrp from '$lib/components/icons/IconAddressTypeXrp.svelte';
 	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 
 	interface Props {
@@ -23,6 +24,8 @@
 		<IconAddressTypeEth {size} />
 	{:else if addressType === 'Sol'}
 		<IconAddressTypeSol {size} />
+	{:else if addressType === 'Xrp'}
+		<IconAddressTypeXrp {size} />
 	{/if}
 {/snippet}
 

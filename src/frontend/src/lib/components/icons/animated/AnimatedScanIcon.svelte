@@ -9,7 +9,7 @@
 </script>
 
 <svg
-	class={`${styleClass} whitespace-pre`}
+	class={`${styleClass} decorative-motion whitespace-pre`}
 	height={size}
 	viewBox="0 0 38 38"
 	width={size}

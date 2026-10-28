@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
 	import OisyTradePositionRow from '$lib/components/trading/OisyTradePositionRow.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { oisyTradeAssets } from '$lib/derived/oisy-trade.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import { oisyTradeAssetMatchesFilter } from '$lib/utils/oisy-trade.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	let filteredAssets = $derived(
 		$oisyTradeAssets.filter((asset) =>

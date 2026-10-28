@@ -22,6 +22,7 @@
 		inputElement = $bindable(),
 		autofocus = false,
 		autocomplete = $bindable(),
+		ariaDescribedBy,
 		showInfo = true,
 		onInput,
 		onBlur,
@@ -235,6 +236,7 @@
 				id={name}
 				{name}
 				class:inner-end={displayInnerEnd}
+				aria-describedby={ariaDescribedBy}
 				{autocomplete}
 				{autofocus}
 				data-1p-ignore={ignore1Password}
@@ -277,7 +279,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
-		gap: var(--padding);
+		gap: var(--input-block-gap, var(--padding));
 
 		width: var(--input-width);
 
@@ -310,7 +312,9 @@
 
 		font-size: inherit;
 
-		padding: var(--padding-2x);
+		// A denser surface (the dropdown Popover) sizes the box through these hooks.
+		padding: var(--input-padding-block, var(--padding-2x))
+			var(--input-padding-inline, var(--padding-2x));
 		box-sizing: border-box;
 
 		border-radius: var(--border-radius);
@@ -338,7 +342,7 @@
 		top: 50%;
 		right: 0;
 		transform: translate(0, -50%);
-		padding: var(--padding) var(--padding-2x);
+		padding: var(--padding) var(--input-padding-inline, var(--padding-2x));
 	}
 
 	.with-bottom {

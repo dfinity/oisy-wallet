@@ -134,8 +134,8 @@ describe('NavigationMoreMenu', () => {
 		});
 
 		it('keeps the documentation support page where the Help page is not enabled', async () => {
-			// Production, until the page ships there. Same row, same label, same
-			// place; only where it goes differs.
+			// Only reachable by turning `HELP_ENABLED` off again, e.g. to revert the
+			// rollout. Same row, same label, same place; only where it goes differs.
 			featureFlags.helpEnabled = false;
 
 			const { getByTestId } = await open();
@@ -206,5 +206,12 @@ describe('NavigationMoreMenu', () => {
 		await fireEvent.click(getByTestId(NAVIGATION_MORE_MENU_HELP));
 
 		await waitFor(() => expect(queryByTestId(NAVIGATION_MORE_MENU)).toBeNull());
+	});
+
+	it('opens as a compact dropdown with menu rows', async () => {
+		const { getByTestId } = await open();
+
+		expect(getByTestId(NAVIGATION_MORE_MENU)).toHaveClass('menu-surface');
+		expect(getByTestId(NAVIGATION_MORE_MENU).closest('.wrapper.dropdown')).not.toBeNull();
 	});
 });

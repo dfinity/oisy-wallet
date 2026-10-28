@@ -31,8 +31,11 @@
 	import { TIP_CLAIM_RETRY_BUTTON, TIP_RECEIVED_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userProfileLoaded } from '$lib/derived/user-profile.derived';
-	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
-	import { trackTip, type TipClaimOutcome } from '$lib/services/tip-analytics.services';
+	import {
+		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		type PLAUSIBLE_EVENT_TIP_ERROR_TYPES
+	} from '$lib/enums/plausible';
+	import { toTipErrorType, trackTip } from '$lib/services/tip-analytics.services';
 	import { claimTip, loadTipDetails, tipRateLimit } from '$lib/services/tip.services';
 	import { autoLoadSingleToken } from '$lib/services/token.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -40,7 +43,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { userProfileCreated } from '$lib/stores/user-profile.store';
 	import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
-	import type { PendingTipClaim } from '$lib/types/tip';
+	import type { PendingTipClaim, TipClaimOutcome } from '$lib/types/tip';
 	import { consoleWarn } from '$lib/utils/console.utils';
 	import { toCustomToken } from '$lib/utils/custom-token.utils';
 	import { formatToken } from '$lib/utils/format.utils';
@@ -278,7 +281,11 @@
 			// already underneath with the tip in it either way.
 			if (introduce && nonNullish(principal)) {
 				rememberTipWelcomeSeen(principal);
-				trackTip({ step: 'welcome', side: 'claimer' });
+				trackTip({
+					step: 'welcome',
+					side: 'claimer',
+					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+				});
 				modalStore.openTipWelcome(Symbol());
 			}
 		} finally {
@@ -329,7 +336,12 @@
 		tipId: string;
 		claimCode: string;
 	}): Promise<
-		{ details: TipDetails } | { failure: TipClaimOutcome; limit: ReturnType<typeof tipRateLimit> }
+		| { details: TipDetails }
+		| {
+				failure: TipClaimOutcome;
+				limit: ReturnType<typeof tipRateLimit>;
+				errorType: PLAUSIBLE_EVENT_TIP_ERROR_TYPES;
+		  }
 	> => {
 		try {
 			return { details: await loadTipDetails(params) };
@@ -341,7 +353,8 @@
 
 			return {
 				failure: isTipUnavailable(err) ? 'unavailable' : 'failed',
-				limit: tipRateLimit(err)
+				limit: tipRateLimit(err),
+				errorType: toTipErrorType(err)
 			};
 		}
 	};
@@ -385,8 +398,7 @@
 				step: 'claim',
 				side: 'claimer',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
-				outcome: outcome.failure,
-				...(nonNullish(outcome.limit) && { rateLimited: true })
+				errorType: outcome.errorType
 			});
 
 			return;
@@ -423,29 +435,21 @@
 
 			// A tip claimed by someone else in the meantime is gone, and a retry
 			// would never work; a failed call is the opposite.
-			//
-			// Named rather than assigned straight to `claimState`, so the same value
-			// types-checks as an analytics outcome without a cast — `ClaimState` also
-			// covers `claiming` and `received`, which are not outcomes, and a cast here
-			// would silently survive either union gaining a member.
-			const outcome: TipClaimOutcome = isUncovered(err)
+			claimState = isUncovered(err)
 				? 'uncovered'
 				: isShortBalance(err)
 					? 'shortBalance'
 					: isTipUnavailable(err)
 						? 'unavailable'
 						: 'failed';
-
-			claimState = outcome;
 			rateLimit = tipRateLimit(err);
 
 			trackTip({
 				step: 'claim',
 				side: 'claimer',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
-				outcome,
-				symbol,
-				...(nonNullish(rateLimit) && { rateLimited: true })
+				errorType: toTipErrorType(err),
+				symbol
 			});
 		}
 	};

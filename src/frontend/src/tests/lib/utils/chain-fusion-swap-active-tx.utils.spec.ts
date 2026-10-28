@@ -111,7 +111,8 @@ describe('chain-fusion-swap-active-tx.utils', () => {
 							NearIntents: {
 								source_token: { EvmNative: 1n },
 								dest_token: { EvmNative: 1n },
-								amount: 1n
+								amount: 1n,
+								source_address: []
 							}
 						}
 					})

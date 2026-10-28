@@ -6,6 +6,7 @@ import type {
 	CreateTipRequest,
 	CustomToken,
 	DeletePersonalNoteRequest,
+	GetActiveUserTransactionsResponse,
 	GetAllowedCyclesResponse,
 	MyTip,
 	PersonalNoteEntry,
@@ -360,11 +361,21 @@ export const deleteActiveUserTransaction = async ({
 };
 
 export const getActiveUserTransactions = async ({
-	identity
-}: CanisterApiFunctionParams): Promise<ActiveUserTransaction[]> => {
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<GetActiveUserTransactionsResponse> => {
 	const { getActiveUserTransactions } = await backendCanister({ identity });
 
-	return getActiveUserTransactions();
+	return getActiveUserTransactions({ certified });
+};
+
+export const markActiveUserTransactionsSeen = async ({
+	identity,
+	upToNs
+}: CanisterApiFunctionParams<{ upToNs: bigint }>): Promise<bigint> => {
+	const { markActiveUserTransactionsSeen } = await backendCanister({ identity });
+
+	return markActiveUserTransactionsSeen(upToNs);
 };
 
 export const setPersonalNote = async ({

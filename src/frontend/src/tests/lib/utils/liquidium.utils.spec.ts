@@ -1,6 +1,7 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
@@ -13,10 +14,12 @@ import {
 	liquidiumHealthFactorPercent,
 	liquidiumHealthLevel,
 	liquidiumMarketToken,
+	liquidiumMaxBorrowBaseUnits,
 	liquidiumMaxLtv,
 	liquidiumMaxSupplyApy,
 	liquidiumMinBorrowApy,
 	liquidiumNetInterestUsd,
+	liquidiumOpeningDebtFactor,
 	liquidiumProjectedHealthAfterRepayPercent,
 	liquidiumProjectedHealthAfterWithdrawPercent,
 	liquidiumProjectedHealthPercent,
@@ -33,7 +36,8 @@ import {
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import {
-	RATE_SCALE,
+	HEALTH_FACTOR_DECIMALS,
+	HEALTH_FACTOR_SCALE,
 	type Pool,
 	type Position,
 	type UserPositionSummary,
@@ -44,6 +48,7 @@ import {
 const buildPool = (overrides: Partial<Pool> = {}): Pool => ({
 	id: 'pool-btc',
 	asset: 'BTC',
+	displayName: 'Bitcoin',
 	chain: 'BTC',
 	decimals: 8n,
 	frozen: false,
@@ -55,9 +60,12 @@ const buildPool = (overrides: Partial<Pool> = {}): Pool => ({
 	liquidationBonus: ZERO,
 	protocolLiquidationFee: ZERO,
 	reserveFactor: ZERO,
+	activationFee: ZERO,
 	rateDecimals: 2n,
 	lendingRate: 5n,
+	estimatedLendingApy: 5n,
 	borrowingRate: 9n,
+	estimatedBorrowingApy: 9n,
 	utilizationRate: ZERO,
 	baseRate: ZERO,
 	optimalUtilizationRate: ZERO,
@@ -83,8 +91,8 @@ const buildPosition = (overrides: Partial<Position> = {}): Position => ({
 	...overrides
 });
 
-// healthFactor is scaled by RATE_SCALE: 60% → 0.6 * RATE_SCALE.
-const scaledHealth = (percent: bigint): bigint => (percent * RATE_SCALE) / 100n;
+// healthFactor is scaled by HEALTH_FACTOR_SCALE: 60% → 0.6 * HEALTH_FACTOR_SCALE.
+const scaledHealth = (percent: bigint): bigint => (percent * HEALTH_FACTOR_SCALE) / 100n;
 
 describe('liquidium.utils', () => {
 	describe('mapLiquidiumMarket', () => {
@@ -96,6 +104,7 @@ describe('liquidium.utils', () => {
 				supplyApy: expect.closeTo(5),
 				borrowApy: expect.closeTo(9),
 				maxLtv: expect.closeTo(0),
+				activationFeePercent: 0,
 				frozen: false,
 				available: true
 			});
@@ -104,6 +113,13 @@ describe('liquidium.utils', () => {
 		it('maps maxLtv from basis points to a 0–1 ratio', () => {
 			// maxLtv is basis points: 7000 / 10_000 = 0.7.
 			expect(mapLiquidiumMarket(buildPool({ maxLtv: 7000n })).maxLtv).toBeCloseTo(0.7);
+		});
+
+		it('maps activationFee from basis points to a percentage', () => {
+			// activationFee is basis points: 50 / 100 = 0.5%.
+			expect(
+				mapLiquidiumMarket(buildPool({ activationFee: 50n })).activationFeePercent
+			).toBeCloseTo(0.5);
 		});
 
 		it('is unavailable when frozen', () => {
@@ -128,6 +144,10 @@ describe('liquidium.utils', () => {
 		it('offers the ERC-20 + ICP (ck) rails for the stablecoins', () => {
 			expect(liquidiumSupportedRails('USDC')).toEqual(['ETH', 'ICP']);
 			expect(liquidiumSupportedRails('USDT')).toEqual(['ETH', 'ICP']);
+		});
+
+		it('offers the native + ICP (ck) rails for ETH', () => {
+			expect(liquidiumSupportedRails('ETH')).toEqual(['ETH', 'ICP']);
 		});
 
 		it('offers only the ICP rail for ICP', () => {
@@ -448,6 +468,39 @@ describe('liquidium.utils', () => {
 			{ percent: 0, level: 'critical' }
 		])('classifies $percent% as $level', ({ percent, level }) => {
 			expect(liquidiumHealthLevel(percent)).toBe(level);
+		});
+	});
+
+	describe('liquidiumOpeningDebtFactor', () => {
+		it('is 1 when the pool charges no activation fee', () => {
+			expect(liquidiumOpeningDebtFactor({})).toBe(1);
+			expect(liquidiumOpeningDebtFactor({ activationFeePercent: 0 })).toBe(1);
+		});
+
+		it('adds the activation fee to each unit of principal', () => {
+			expect(liquidiumOpeningDebtFactor({ activationFeePercent: 0.45 })).toBeCloseTo(1.0045);
+		});
+	});
+
+	describe('liquidiumMaxBorrowBaseUnits', () => {
+		const params = { availableBorrowsUsd: 100_000, price: 50_000, decimals: 8 };
+
+		it('divides the borrowing power by the price without a fee', () => {
+			expect(liquidiumMaxBorrowBaseUnits({ ...params, openingDebtFactor: 1 })).toBe(200_000_000n);
+		});
+
+		it('shrinks the principal so principal plus fee fits the borrowing power', () => {
+			// 2 / 1.0045 = 1.991040318566… → rounded to 8 decimals.
+			expect(liquidiumMaxBorrowBaseUnits({ ...params, openingDebtFactor: 1.0045 })).toBe(
+				199_104_032n
+			);
+		});
+
+		it('is zero without borrowing power or price', () => {
+			expect(
+				liquidiumMaxBorrowBaseUnits({ ...params, availableBorrowsUsd: 0, openingDebtFactor: 1 })
+			).toBe(ZERO);
+			expect(liquidiumMaxBorrowBaseUnits({ ...params, price: 0, openingDebtFactor: 1 })).toBe(ZERO);
 		});
 	});
 
@@ -872,7 +925,8 @@ describe('liquidium.utils', () => {
 				currentLtvBps: 4_000n,
 				weightedMaxLtvBps: 6_000n,
 				weightedLiquidationThresholdBps: 8_000n,
-				healthFactor: scaledHealth(60n)
+				healthFactor: scaledHealth(60n),
+				healthFactorDecimals: HEALTH_FACTOR_DECIMALS
 			};
 
 			const portfolio = mapLiquidiumPortfolio({
@@ -920,6 +974,11 @@ describe('liquidium.utils', () => {
 			// no twin in the list it resolves to nothing rather than the wrong (native/ERC) token.
 			expect(liquidiumMarketToken({ chain: 'ICP', asset: 'BTC', tokens: [] })).toBeUndefined();
 			expect(liquidiumMarketToken({ chain: 'ICP', asset: 'USDC', tokens: [] })).toBeUndefined();
+			expect(liquidiumMarketToken({ chain: 'ICP', asset: 'ETH', tokens: [] })).toBeUndefined();
+		});
+
+		it('resolves native ETH on the ETH chain', () => {
+			expect(liquidiumMarketToken({ chain: 'ETH', asset: 'ETH', tokens: [] })).toBe(ETHEREUM_TOKEN);
 		});
 
 		it('returns undefined for an unsupported (chain, asset) pair', () => {
@@ -944,6 +1003,19 @@ describe('liquidium.utils', () => {
 					enabledTokens: [BTC_MAINNET_TOKEN]
 				})
 			).toBe(BTC_MAINNET_TOKEN);
+		});
+
+		it('resolves the ckETH rail from the enabled twin', () => {
+			const ckEthToken = {
+				...mockValidIcCkToken,
+				id: parseTokenId('ckETH'),
+				symbol: 'ckETH',
+				network: ICP_TOKEN.network
+			} as Token;
+
+			expect(
+				liquidiumEnabledRailToken({ chain: 'ICP', asset: 'ETH', enabledTokens: [ckEthToken] })
+			).toBe(ckEthToken);
 		});
 
 		it('resolves a ck rail from the enabled twin', () => {

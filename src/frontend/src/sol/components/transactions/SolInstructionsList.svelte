@@ -5,8 +5,10 @@
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
+	import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 	import { solAccountExplorerUrl } from '$sol/utils/sol-explorer.utils';
@@ -23,9 +25,11 @@
 		// The net changes of the same transaction, whose decimals stand in for the ones an
 		// unchecked transfer does not carry.
 		netChanges?: SolNetBalanceChange[];
+		// The user's address on this network, which decides whether a close paid them back.
+		userAddress: OptionSolAddress;
 	}
 
-	let { instructions, token, netChanges }: Props = $props();
+	let { instructions, token, netChanges, userAddress }: Props = $props();
 
 	const splToken = (tokenAddress: string) =>
 		findSplToken({
@@ -53,36 +57,59 @@
 			metadata: $splTokenMetadataStore,
 			unknownTokenAddresses,
 			unknownTokenLabel: $i18n.transaction.text.unknown_token,
+			unknownTokenNamedLabel: $i18n.transaction.text.unknown_token_named,
 			nativeSymbol: SOLANA_TOKEN.symbol
 		});
 
-	const decimalsOf = (tokenAddress: string | undefined): number =>
+	const decimalsOf = (tokenAddress: string | undefined): number | undefined =>
 		isNullish(tokenAddress)
 			? SOLANA_TOKEN.decimals
 			: (splToken(tokenAddress)?.decimals ??
-				netChanges?.find((change) => change.tokenAddress === tokenAddress)?.decimals ??
-				0);
+				netChanges?.find((change) => change.tokenAddress === tokenAddress)?.decimals);
 </script>
 
-{#snippet line(instruction: SolInstructionSummary)}
-	{@const { text, detail } = formatSolInstructionSummary({
+{#snippet line(instruction: SolInstructionSummary, headingProgram?: SolAddress)}
+	{@const { text, detail, trailing } = formatSolInstructionSummary({
 		instruction,
 		i18n: $i18n,
 		symbolOf,
-		decimalsOf
+		decimalsOf,
+		userAddress
 	})}
 
 	<!-- The counterparty of a transfer, the delegate of an approval, the new authority of a
 	     handover, the program a route ran through: an address the user has something to check. The
 	     account a creation or a close names is a derived token account nobody recognises, and the
-	     token already identifies it. -->
+	     token already identifies it.
+
+	     A close that pays the user their own wallet back is the exception: the line already says
+	     the balance came home, and naming the wallet underneath repeats it. The address is what
+	     the line needs when it went somewhere else. -->
+	{@const closedHome =
+		(instruction.kind === 'closeTokenAccount' || instruction.kind === 'unwrap') &&
+		instruction.counterparty === userAddress}
+
+	<!-- A line under the heading of the very program it names need not repeat that program's
+	     address: the heading shows it, with its controls, right above. The line keeps the name, and
+	     reads like the opening of a token account. -->
+	{@const programLabel =
+		nonNullish(headingProgram) && instruction.program === headingProgram
+			? (instruction.programName ?? shortenWithMiddleEllipsis({ text: headingProgram }))
+			: undefined}
+
 	{@const actionAddress =
-		instruction.counterparty ?? instruction.newAuthority ?? instruction.program}
+		closedHome || nonNullish(programLabel)
+			? undefined
+			: (instruction.counterparty ?? instruction.newAuthority ?? instruction.program)}
 
 	<span class="flex flex-col gap-1" data-tid="sol-instruction">
 		<span class="flex flex-wrap items-center gap-x-1">
 			<span>
-				{text}{#if nonNullish(detail)}<span class="text-tertiary">{` · ${detail}`}</span>{/if}
+				{text}{#if nonNullish(programLabel)}<span class="text-tertiary">{` ${programLabel}`}</span
+					>{/if}{#if nonNullish(detail)}<span class="text-tertiary">{` · ${detail}`}</span
+					>{/if}{#if nonNullish(programLabel) && nonNullish(trailing)}<span class="text-tertiary"
+						>{` · ${trailing}`}</span
+					>{/if}
 			</span>
 
 			<!-- A contact or a token OISY knows names the account; the address is what is left when
@@ -105,14 +132,19 @@
 					inline
 				/>
 			{/if}
+
+			{#if isNullish(programLabel) && nonNullish(trailing)}
+				<span class="text-tertiary">{`· ${trailing}`}</span>
+			{/if}
 		</span>
 
-		<!-- The legs sit under the route that produced them: flat, a four-leg swap reads as four
-		     unrelated transfers, which is the one thing the grouping exists to prevent. -->
+		<!-- The lines sit under the instruction that produced them: flat, a four-leg swap reads as
+		     four unrelated transfers, and a line made inside an application as one the message
+		     states itself. -->
 		{#if nonNullish(instruction.children)}
 			<span class="flex flex-col gap-1 ps-4">
 				{#each instruction.children as child, i (i)}
-					{@render line(child)}
+					{@render line(child, instruction.program)}
 				{/each}
 			</span>
 		{/if}

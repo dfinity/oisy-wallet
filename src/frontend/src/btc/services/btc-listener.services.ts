@@ -10,7 +10,7 @@ import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import { consoleWarn } from '$lib/utils/console.utils';
-import { jsonReviver, nonNullish } from '@dfinity/utils';
+import { isNullish, jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const syncWallet = ({
@@ -34,7 +34,10 @@ export const syncWallet = ({
 		jsonReviver
 	);
 
-	if (providerTransactions.length > 0) {
+	// An empty page is still written while the token has no history yet: that entry is what tells
+	// the UI its history has loaded, so a wallet without Bitcoin transactions would otherwise keep
+	// Activity on its skeleton for good.
+	if (providerTransactions.length > 0 || isNullish(get(btcTransactionsStore)?.[tokenId])) {
 		btcTransactionsStore.prepend({
 			tokenId,
 			transactions: providerTransactions

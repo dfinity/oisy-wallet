@@ -7,7 +7,8 @@ export enum TokenCategoryTagValue {
 	CRYPTO = 'crypto',
 	STABLECOIN = 'stablecoin',
 	STOCK = 'stock',
-	COMMODITY = 'commodity'
+	COMMODITY = 'commodity',
+	COMPUTE = 'compute'
 }
 
 export enum TokenRiskTagValue {

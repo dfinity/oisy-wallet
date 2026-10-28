@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, untrack } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import SignerConsentMessageWarning from '$lib/components/signer/SignerConsentMessageWarning.svelte';
 	import SignerLoading from '$lib/components/signer/SignerLoading.svelte';
 	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
@@ -20,6 +19,7 @@
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { mapSignerOriginHost } from '$lib/utils/signer.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	const {
 		consentMessagePrompt: { payload, reset: resetPrompt },

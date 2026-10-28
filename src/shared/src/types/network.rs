@@ -194,4 +194,9 @@ pub mod marker_trait {
     #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
     pub struct EthereumSepolia {}
     impl Network for EthereumSepolia {}
+
+    /// A marker trait, used to indicate that a type is to be used with the XRP Ledger mainnet.
+    #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
+    pub struct XrpMainnet {}
+    impl Network for XrpMainnet {}
 }

@@ -93,12 +93,15 @@ interface I18nCore {
 		up_one_level: string;
 	};
 	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
+	error: { copy_failed: string };
 }
 
 interface I18nProgress {
 	completed: string;
 	in_progress: string;
 	failed: string;
+	step_of: string;
+	failed_at: string;
 }
 
 interface I18nNavigation {
@@ -548,6 +551,7 @@ interface I18nHelp {
 		explorers_description: string;
 		explorers_velora_description: string;
 		explorers_near_intents_description: string;
+		explorers_lifi_description: string;
 		explorers_onesec_description: string;
 		explorers_chain_eth: string;
 		explorers_chain_sol: string;
@@ -743,6 +747,8 @@ interface I18nReceive {
 interface I18nSend {
 	text: {
 		send: string;
+		xrp_sent: string;
+		xrp_submitted: string;
 		send_token: string;
 		send_unknown_token: string;
 		destination: string;
@@ -786,7 +792,6 @@ interface I18nSend {
 		enter_eth_address: string;
 		enter_recipient_address: string;
 		enter_wallet_address: string;
-		enter_xrp_address: string;
 		xrp_destination_tag: string;
 		select_network: string;
 		search_nfts: string;
@@ -798,6 +803,8 @@ interface I18nSend {
 		no_available_utxos: string;
 		first_time_destination: string;
 		first_time_destination_confirm: string;
+		xrp_destination_tag_hint: string;
+		xrp_destination_tag_missing: string;
 		fee_expired: string;
 		fee_info: string;
 		scanned_address_only_destination: string;
@@ -854,12 +861,15 @@ interface I18nSend {
 		no_btc_network_id: string;
 		no_solana_network_id: string;
 		no_xrp_network_id: string;
-		xrp_confirmation_failed: string;
-		xrp_transaction_failed: string;
 		no_pending_bitcoin_transaction: string;
 		unexpected_utxos_fee: string;
 		unable_to_retrieve_amount: string;
 		ethereum_insufficient_funds: string;
+		ethereum_out_of_gas: string;
+		ethereum_out_of_gas_gas: string;
+		ethereum_out_of_gas_gas_sent: string;
+		ethereum_transaction_hash: string;
+		ethereum_unsigned_transaction: string;
 		solana_transaction_expired: string;
 		solana_confirmation_failed: string;
 		solana_insufficient_funds: string;
@@ -867,6 +877,9 @@ interface I18nSend {
 		solana_insufficient_funds_for_rent: string;
 		fee_calc_unsupported_standard: string;
 		xrp_send_expired: string;
+		xrp_send_already_in_flight: string;
+		xrp_send_not_guarded: string;
+		xrp_active_transaction_failed: string;
 		xrp_amount_exceeds_sendable: string;
 		xrp_destination_unfunded: string;
 		xrp_destination_tag_required: string;
@@ -881,6 +894,64 @@ interface I18nMint {
 
 interface I18nBurn {
 	text: { burn: string; burning: string; burn_review_subtitle: string };
+}
+
+interface I18nCycles_mint {
+	text: {
+		title: string;
+		description: string;
+		you_mint_estimate: string;
+		rate: string;
+		cycles_ledger_fee: string;
+		minter: string;
+		one_way: string;
+		sending: string;
+		minting: string;
+		minted: string;
+		pending: string;
+	};
+	error: {
+		rate_unavailable: string;
+		amount_too_small: string;
+		refunded: string;
+		refunded_nothing: string;
+		failed: string;
+		not_started: string;
+		transfer_failed: string;
+		unconfirmed: string;
+	};
+}
+
+interface I18nCycles_top_up {
+	text: {
+		top_up: string;
+		title: string;
+		description: string;
+		canister_id_placeholder: string;
+		checking_canister: string;
+		recently_topped_up: string;
+		canister: string;
+		you_top_up: string;
+		total: string;
+		one_way: string;
+		topping_up: string;
+		topped_up: string;
+		unknown: string;
+		unknown_fresh: string;
+		sent_to_canister: string;
+		sent_to_canister_top_up: string;
+	};
+	error: {
+		invalid_canister_id: string;
+		canister_not_found: string;
+		canister_check_failed: string;
+		amount_too_small: string;
+		refused: string;
+		insufficient_funds: string;
+		clock: string;
+		refunded: string;
+		refunded_nothing: string;
+	};
 }
 
 interface I18nActive_user_transactions {
@@ -1032,7 +1103,11 @@ interface I18nSwap {
 		gasless: string;
 		swap_fees: string;
 		cross_chain_networks_info: string;
+		two_swaps_info: string;
+		two_swaps_first_button: string;
 		near_intents_estimated_time: string;
+		lifi_route_via: string;
+		lifi_route_via_estimated_time: string;
 		near_intents_tos: string;
 		onesec_transfer_fee: string;
 		onesec_protocol_fee: string;
@@ -1065,13 +1140,18 @@ interface I18nSwap {
 		cannot_save_provider_agreement: string;
 		swap_refunded: string;
 		swap_replaced_or_dropped: string;
+		swap_expired: string;
 		near_intents_quote_unverified: string;
 		near_intents_quote_expired: string;
+		near_intents_deposit_expired: string;
+		near_intents_quote_deposit_memo: string;
 		oisy_trade_not_trackable: string;
 		oisy_trade_order_killed: string;
 		oisy_trade_settlement_unresolved: string;
 		oisy_trade_order_not_placed: string;
 		oisy_trade_recovery_failed: string;
+		lifi_status_unknown: string;
+		lifi_fee_changed: string;
 	};
 }
 
@@ -1183,6 +1263,7 @@ interface I18nTokens {
 			info_ext: string;
 			info_index: string;
 			custom_tokens_not_supported: string;
+			custom_tokens_not_supported_yet: string;
 		};
 		error: {
 			loading_metadata: string;
@@ -1227,6 +1308,7 @@ interface I18nTokens {
 		open_token_address_block_explorer: string;
 		token_group_number: string;
 		filter_button: string;
+		switch_amount_unit: string;
 	};
 	placeholder: {
 		enter_contract_address: string;
@@ -1255,7 +1337,14 @@ interface I18nTokens {
 
 interface I18nToken_tag {
 	type: { category: string; risk: string };
-	category: { crypto: string; stablecoin: string; stock: string; commodity: string };
+	category: {
+		crypto: string;
+		stablecoin: string;
+		stock: string;
+		commodity: string;
+		compute: string;
+	};
+	category_in_sentence: { compute: string };
 	risk: { low: string; medium: string; high: string };
 }
 
@@ -1361,6 +1450,7 @@ interface I18nFee {
 		base_kind: string;
 		prioritization_kind: string;
 		ata_kind: string;
+		app_account_kind: string;
 	};
 	assertion: { insufficient_funds_for_fee: string };
 	error: { cannot_fetch_gas_fee: string };
@@ -1402,10 +1492,17 @@ interface I18nWallet_connect {
 		network: string;
 		amount: string;
 		hex_data: string;
+		base64_data: string;
 		tab_operations: string;
 		unreviewed_instructions: string;
 		unreviewed_instructions_simulated: string;
+		unread_programs_one: string;
+		unread_programs_other: string;
+		unread_programs_acknowledge: string;
 		cannot_be_shown: string;
+		close_pays_others: string;
+		fee_paid_by_others: string;
+		approval_without_simulation: string;
 		simulated_instructions: string;
 		multiple_operations: string;
 		simulated_review: string;
@@ -1416,6 +1513,9 @@ interface I18nWallet_connect {
 		simulation_control_change: string;
 		simulation_new_owner: string;
 		simulation_new_spender: string;
+		simulation_new_allowance: string;
+		simulation_allowance: string;
+		simulation_allowance_unlimited: string;
 		simulation_new_close_authority: string;
 		simulation_new_program: string;
 		simulation_control_removed: string;
@@ -1438,9 +1538,14 @@ interface I18nWallet_connect {
 		allowance_increase: string;
 		allowance_decrease: string;
 		unverifiable_erc20_request: string;
+		token_call_with_value: string;
 		unverifiable_approval_for_all_request: string;
 		approval_for_all_grant: string;
 		approval_for_all_revoke: string;
+		cketh_deposit: string;
+		cketh_deposit_principal: string;
+		cketh_deposit_refused: string;
+		cketh_helper_unconfirmed: string;
 		raw_copied: string;
 		sign_message: string;
 		sign_psbt: string;
@@ -1509,10 +1614,19 @@ interface I18nWallet_connect {
 		btc_psbt_input_not_segwit: string;
 		btc_psbt_input_not_owned: string;
 		btc_psbt_input_ambiguous: string;
+		btc_psbt_input_unverified: string;
 		from_address_not_wallet: string;
 		unknown_destination: string;
+		cketh_deposit_refused: string;
+		cketh_helper_unconfirmed: string;
+		token_call_with_value: string;
 		ambiguous_transaction: string;
+		close_pays_others: string;
+		fee_paid_by_others: string;
+		approval_without_simulation: string;
 		unreviewed_without_simulation: string;
+		unreviewed_not_described_by_simulation: string;
+		unread_programs_unconfirmed: string;
 		sol_transaction_as_message: string;
 		request_not_defined: string;
 		unexpected_processing_request: string;
@@ -1774,6 +1888,7 @@ interface I18nTransaction {
 		swap_on: string;
 		interacted_with: string;
 		unknown_token: string;
+		unknown_token_named: string;
 		summary_other: string;
 		tab_summary: string;
 		tab_balance_changes: string;
@@ -1784,9 +1899,17 @@ interface I18nTransaction {
 		instruction_receive: string;
 		instruction_wrap: string;
 		instruction_unwrap: string;
+		instruction_unwrap_all_to: string;
+		instruction_unwrap_all_from: string;
+		instruction_receive_excess_from: string;
 		instruction_create_account: string;
+		instruction_create_program_account: string;
+		instruction_close_program_account: string;
 		instruction_close_account: string;
+		instruction_close_account_for: string;
 		instruction_approve: string;
+		instruction_approve_amount: string;
+		instruction_approve_unlimited: string;
 		instruction_revoke: string;
 		instruction_set_authority: string;
 		instruction_route: string;
@@ -1796,9 +1919,15 @@ interface I18nTransaction {
 		instruction_thaw: string;
 		instruction_unknown: string;
 		instruction_unknown_via: string;
+		instruction_batch_via: string;
+		instruction_via: string;
 		instruction_rent: string;
-		instruction_rent_returned: string;
+		instruction_balance_returned: string;
+		instruction_balance_sent: string;
 		instruction_returned: string;
+		instruction_sent: string;
+		instruction_returned_to: string;
+		instruction_balance_returned_to: string;
 		instruction_own_account: string;
 		raw_value: string;
 		status: string;
@@ -1855,6 +1984,8 @@ interface I18nTransaction {
 		twin_network: string;
 		no_date_available: string;
 		pending: string;
+		top_up: string;
+		top_up_refund: string;
 	};
 	alt: {
 		open_block_explorer: string;
@@ -1981,7 +2112,7 @@ interface I18nContact {
 }
 
 interface I18nAddress {
-	types: { Icrcv2: string; Btc: string; Eth: string; Sol: string };
+	types: { Icrcv2: string; Btc: string; Eth: string; Sol: string; Xrp: string };
 	form: {
 		new_address: string;
 		address_placeholder: string;
@@ -2076,7 +2207,11 @@ interface I18nPrivacy_policy {
 interface I18nActivity {
 	text: { title: string };
 	info: { btc_transactions: string; hidden_micro_transactions: string };
-	warning: { no_index_canister: string; unavailable_index_canister: string };
+	warning: {
+		no_index_canister: string;
+		unavailable_index_canister: string;
+		unsupported_sol_transactions: string;
+	};
 }
 
 interface I18nEarning {
@@ -2149,6 +2284,8 @@ interface I18nLiquidium {
 		transaction_fee: string;
 		insufficient_funds_for_fee: string;
 		supply_prices_unavailable: string;
+		minimum_supply: string;
+		supply_below_minimum: string;
 		borrow_review: string;
 		borrow_review_subtitle: string;
 		borrowing: string;
@@ -2162,6 +2299,7 @@ interface I18nLiquidium {
 		funds_delivered_to: string;
 		your_oisy_address: string;
 		borrow_risk_info: string;
+		borrow_activation_fee_info: string;
 		borrow_at_risk_warning: string;
 		borrow_exceeds_power: string;
 		borrow_below_minimum: string;
@@ -2191,10 +2329,13 @@ interface I18nLiquidium {
 		starting_to_repay: string;
 		repay_started: string;
 		current_debt: string;
+		pending_repays: string;
 		interest_accrued: string;
 		debt_after_repay: string;
 		repay_exceeds_debt: string;
 		repay_prices_unavailable: string;
+		repay_debt_unavailable: string;
+		repay_pending_covers_debt: string;
 	};
 	info: {
 		title: string;
@@ -2483,6 +2624,7 @@ interface I18nTip {
 		generate: string;
 		share_heading: string;
 		copy_link: string;
+		link_copied: string;
 		share_link: string;
 		they_will_receive: string;
 		no_wallet_needed_title: string;
@@ -2603,6 +2745,8 @@ interface I18n {
 	send: I18nSend;
 	mint: I18nMint;
 	burn: I18nBurn;
+	cycles_mint: I18nCycles_mint;
+	cycles_top_up: I18nCycles_top_up;
 	active_user_transactions: I18nActive_user_transactions;
 	scanner: I18nScanner;
 	convert: I18nConvert;

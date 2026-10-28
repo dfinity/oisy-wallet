@@ -8,6 +8,10 @@ import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { mapCkBTCTransaction } from '$icp/utils/ckbtc-transactions.utils';
 import { mapCkEthereumTransaction } from '$icp/utils/cketh-transactions.utils';
 import {
+	isCyclesLedger,
+	mapCyclesLedgerTransaction
+} from '$icp/utils/cycles-ledger-transactions.utils';
+import {
 	isTokenCkBtcLedger,
 	isTokenCkErc20Ledger,
 	isTokenCkEthLedger
@@ -67,6 +71,10 @@ const mapTransaction = ({
 
 	if (nonNullish(ledgerId) && (isTokenCkEthLedger(ledgerId) || isTokenCkErc20Ledger(ledgerId))) {
 		return mapCkEthereumTransaction({ transaction, identity, ...env, ...ledgerId });
+	}
+
+	if (nonNullish(ledgerId) && isCyclesLedger(ledgerId)) {
+		return mapCyclesLedgerTransaction({ transaction, identity });
 	}
 
 	return mapIcrcTransaction({ transaction, identity });

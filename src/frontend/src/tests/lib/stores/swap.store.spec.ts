@@ -103,6 +103,9 @@ describe('swapStore', () => {
 			destinationTokenBalance,
 			destinationToken,
 			failedSwapError,
+			lifiCarriedFee,
+			amountSetToMax,
+			lifiMaxFee,
 			reset
 		} = initSwapContext({
 			destinationToken: mockToken1,
@@ -121,6 +124,9 @@ describe('swapStore', () => {
 		});
 
 		failedSwapError.set({ message: 'stale error from previous swap', variant: 'error' });
+		lifiCarriedFee.set({ key: 'stale inputs', gas: 1n, l1Fee: 1n });
+		amountSetToMax.set(true);
+		lifiMaxFee.set({ fee: 1n, destinationTokenId: mockToken2.id });
 
 		reset();
 
@@ -134,6 +140,92 @@ describe('swapStore', () => {
 		expect(get(destinationTokenExchangeRate)).toBe(undefined);
 
 		expect(get(failedSwapError)).toBe(undefined);
+		expect(get(lifiCarriedFee)).toBe(undefined);
+		expect(get(amountSetToMax)).toBeFalsy();
+		expect(get(lifiMaxFee)).toBeUndefined();
+	});
+
+	describe('markTwoSwapsHintShown', () => {
+		const hint = {
+			sourceTokenId: mockToken1.id,
+			destinationTokenId: mockToken2.id,
+			intermediateTokenId: mockValidErc20Token.id,
+			amount: 1
+		};
+
+		it('should count a hint once', () => {
+			const { markTwoSwapsHintShown } = initSwapContext();
+
+			expect(markTwoSwapsHintShown(hint)).toBeTruthy();
+			expect(markTwoSwapsHintShown({ ...hint })).toBeFalsy();
+		});
+
+		it.each([
+			{ field: 'source', change: { sourceTokenId: ETHEREUM_TOKEN.id } },
+			{ field: 'destination', change: { destinationTokenId: ETHEREUM_TOKEN.id } },
+			{ field: 'in-between token', change: { intermediateTokenId: ETHEREUM_TOKEN.id } },
+			{ field: 'amount', change: { amount: 2 } }
+		])('should count a hint with another $field', ({ change }) => {
+			const { markTwoSwapsHintShown } = initSwapContext();
+
+			markTwoSwapsHintShown(hint);
+
+			expect(markTwoSwapsHintShown({ ...hint, ...change })).toBeTruthy();
+		});
+
+		it('should count a hint again once the swap is reset', () => {
+			const { markTwoSwapsHintShown, reset } = initSwapContext();
+
+			markTwoSwapsHintShown(hint);
+			reset();
+
+			expect(markTwoSwapsHintShown(hint)).toBeTruthy();
+		});
+	});
+
+	// A held "Max" survives the steps that rebuild the form, but not a new source: the amount is
+	// kept as it is rather than refilled with the new token's max.
+	describe('amountSetToMax', () => {
+		it('should be released when the source token changes', () => {
+			const { amountSetToMax, lifiMaxFee, setSourceToken } = initSwapContext({
+				sourceToken: mockToken1
+			});
+
+			amountSetToMax.set(true);
+			lifiMaxFee.set({ fee: 1n, destinationTokenId: mockToken2.id });
+			setSourceToken(mockToken2);
+
+			expect(get(amountSetToMax)).toBeFalsy();
+			expect(get(lifiMaxFee)).toBeUndefined();
+		});
+
+		it('should be released when the tokens switch', () => {
+			const { amountSetToMax, lifiMaxFee, switchTokens } = initSwapContext({
+				sourceToken: mockToken1,
+				destinationToken: mockToken2
+			});
+
+			amountSetToMax.set(true);
+			lifiMaxFee.set({ fee: 1n, destinationTokenId: mockToken2.id });
+			switchTokens();
+
+			expect(get(amountSetToMax)).toBeFalsy();
+			expect(get(lifiMaxFee)).toBeUndefined();
+		});
+
+		it('should hold when only the destination token changes', () => {
+			const { amountSetToMax, lifiMaxFee, setDestinationToken } = initSwapContext({
+				sourceToken: mockToken1,
+				destinationToken: mockToken2
+			});
+
+			amountSetToMax.set(true);
+			lifiMaxFee.set({ fee: 1n, destinationTokenId: mockToken2.id });
+			setDestinationToken(mockToken1);
+
+			expect(get(amountSetToMax)).toBeTruthy();
+			expect(get(lifiMaxFee)).toEqual({ fee: 1n, destinationTokenId: mockToken2.id });
+		});
 	});
 
 	it('should set tokens correctly', () => {
@@ -448,7 +540,8 @@ describe('swapStore', () => {
 					icp: { coverage: 'all', supportedTokenIds: supportedSet },
 					evm: { coverage: 'none', supportedTokenIds: new Set() },
 					sol: { coverage: 'none', supportedTokenIds: new Set() },
-					btc: { coverage: 'none', supportedTokenIds: new Set() }
+					btc: { coverage: 'none', supportedTokenIds: new Set() },
+					xrp: { coverage: 'none', supportedTokenIds: new Set() }
 				},
 				providers: [
 					{
