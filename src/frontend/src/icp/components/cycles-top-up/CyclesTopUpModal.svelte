@@ -13,6 +13,7 @@
 	import { parseCanisterId } from '$icp/utils/cycles-top-up.utils';
 	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
+	import { cyclesTopUpWizardSteps } from '$lib/config/cycles-top-up.config';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { ProgressStepsCyclesTopUp } from '$lib/enums/progress-steps';
@@ -21,7 +22,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
@@ -84,24 +85,7 @@
 		nonNullish(resendable) && resendable.canisterId === canisterId && resendable.amount === amount
 	);
 
-	let steps = $derived<WizardSteps<WizardStepsCyclesTopUp>>([
-		{
-			name: WizardStepsCyclesTopUp.CANISTER,
-			title: $i18n.cycles_top_up.text.title
-		},
-		{
-			name: WizardStepsCyclesTopUp.AMOUNT,
-			title: $i18n.cycles_top_up.text.title
-		},
-		{
-			name: WizardStepsCyclesTopUp.REVIEW,
-			title: $i18n.convert.text.review
-		},
-		{
-			name: WizardStepsCyclesTopUp.TOPPING_UP,
-			title: $i18n.cycles_top_up.text.title
-		}
-	]);
+	let steps = $derived(cyclesTopUpWizardSteps({ i18n: $i18n }));
 
 	onMount(() => trackCyclesTopUp({ step: 'open' }));
 
