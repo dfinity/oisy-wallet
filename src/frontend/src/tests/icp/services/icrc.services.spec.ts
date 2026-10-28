@@ -1,7 +1,9 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SNS_BUILTIN_TOKENS } from '$env/tokens/tokens.sns.env';
 import {
 	hasSufficientIcrcAllowance,
@@ -11,6 +13,7 @@ import {
 	loadDisabledIcrcTokensExchanges
 } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import * as icrcMetadataUtils from '$icp/utils/icrc-metadata.utils';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
@@ -26,8 +29,10 @@ import * as exchangeServices from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
+import { initSwapContext } from '$lib/stores/swap.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { CanisterIdText } from '$lib/types/canister';
+import * as consoleUtils from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -571,6 +576,7 @@ describe('icrc.services', () => {
 			exchangeStore.reset();
 			vi.spyOn(exchangeServices, 'exchangeRateERC20ToUsd').mockResolvedValue(erc20Exchange);
 			vi.spyOn(exchangeServices, 'exchangeRateICRCToUsd').mockResolvedValue(icrcExchange);
+			vi.spyOn(exchangeServices, 'fillIcrcPricesFromFallbackProviders').mockResolvedValue({});
 		});
 
 		it('should load tokens exchanges for the provided tokens', async () => {
@@ -603,6 +609,113 @@ describe('icrc.services', () => {
 				withoutTcycles
 			);
 			expect(withoutTcycles).not.toContain(TCYCLES_LEDGER_CANISTER_ID);
+		});
+	});
+
+	describe('swap prices for a ck-token missing from the backend response', () => {
+		const ckUsdc = {
+			...mockValidIcCkToken,
+			ledgerCanisterId: 'xevnm-gaaaa-aaaar-qafnq-cai',
+			twinToken: USDC_TOKEN,
+			id: parseTokenId('ckUSDC'),
+			exchangeCoinId: 'ethereum' as const,
+			network: ICP_NETWORK
+		};
+		const ckUsdcPrice = { usd: 0.9998, usd_market_cap: 0 };
+		const fallbackPrices = { [ckUsdc.ledgerCanisterId]: ckUsdcPrice };
+
+		beforeEach(() => {
+			vi.restoreAllMocks();
+			exchangeStore.reset();
+			icrcDefaultTokensStore.resetAll();
+			icrcDefaultTokensStore.set({ data: ckUsdc, certified: true });
+			exchangeStore.set([{ 'internet-computer': { usd: 4.2, usd_market_cap: 0 } }]);
+			vi.spyOn(exchangeServices, 'exchangeRateERC20ToUsd').mockRejectedValue(
+				new Error('Unavailable')
+			);
+			vi.spyOn(exchangeServices, 'exchangeRateICRCToUsd').mockResolvedValue({});
+			vi.spyOn(exchangeServices, 'fillIcrcPricesFromFallbackProviders').mockResolvedValue(
+				fallbackPrices
+			);
+		});
+
+		afterEach(() => {
+			vi.restoreAllMocks();
+			exchangeStore.reset();
+			icrcDefaultTokensStore.resetAll();
+		});
+
+		it('updates ICP → ckUSDC swap rates through the shared store when CoinGecko fails', async () => {
+			const swap = initSwapContext({ sourceToken: ICP_TOKEN, destinationToken: ckUsdc });
+
+			expect(get(swap.destinationTokenExchangeRate)).toBeUndefined();
+
+			await loadDisabledIcrcTokensExchanges({ disabledIcrcTokens: [ckUsdc] });
+
+			expect(exchangeServices.fillIcrcPricesFromFallbackProviders).toHaveBeenCalledExactlyOnceWith({
+				ledgerCanisterIds: [ckUsdc.ledgerCanisterId]
+			});
+			expect(get(swap.sourceTokenExchangeRate)).toBe(4.2);
+			expect(get(swap.destinationTokenExchangeRate)).toBe(ckUsdcPrice.usd);
+		});
+
+		it('also fills a missing price after an empty CoinGecko response', async () => {
+			vi.mocked(exchangeServices.exchangeRateERC20ToUsd).mockResolvedValue({});
+
+			await loadDisabledIcrcTokensExchanges({ disabledIcrcTokens: [ckUsdc] });
+
+			expect(get(exchangeStore)?.[ckUsdc.ledgerCanisterId]).toEqual(ckUsdcPrice);
+		});
+
+		it.each(['ledger', 'twin'])(
+			'keeps an available %s price without calling the fallback',
+			async (source) => {
+				exchangeStore.set([
+					{
+						[source === 'ledger' ? ckUsdc.ledgerCanisterId : USDC_TOKEN.address.toLowerCase()]:
+							ckUsdcPrice
+					}
+				]);
+
+				await loadDisabledIcrcTokensExchanges({ disabledIcrcTokens: [ckUsdc] });
+
+				expect(exchangeServices.fillIcrcPricesFromFallbackProviders).not.toHaveBeenCalled();
+			}
+		);
+
+		it('does not overwrite a backend price arriving while the fallback loads', async () => {
+			const backendPrice = { usd: 1.0001, usd_market_cap: 0 };
+			vi.mocked(exchangeServices.fillIcrcPricesFromFallbackProviders).mockImplementation(() => {
+				exchangeStore.set([{ [ckUsdc.ledgerCanisterId]: backendPrice }]);
+				return Promise.resolve(fallbackPrices);
+			});
+
+			await loadDisabledIcrcTokensExchanges({ disabledIcrcTokens: [ckUsdc] });
+
+			expect(get(exchangeStore)?.[ckUsdc.ledgerCanisterId]).toEqual(backendPrice);
+		});
+
+		it('leaves the price unavailable if every provider fails', async () => {
+			const warn = vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => undefined);
+			vi.mocked(exchangeServices.fillIcrcPricesFromFallbackProviders).mockRejectedValue(
+				new Error('Unavailable')
+			);
+
+			await expect(
+				loadDisabledIcrcTokensExchanges({ disabledIcrcTokens: [ckUsdc] })
+			).resolves.toBeUndefined();
+
+			expect(get(exchangeStore)?.[ckUsdc.ledgerCanisterId]).toBeUndefined();
+			expect(get(exchangeStore)?.['internet-computer']?.usd).toBe(4.2);
+			expect(warn).toHaveBeenCalledExactlyOnceWith('Failed to load missing swap token prices.');
+		});
+
+		it('never asks the fallback for a TCYCLES market price', async () => {
+			await loadDisabledIcrcTokensExchanges({
+				disabledIcrcTokens: [{ ...ckUsdc, ledgerCanisterId: TCYCLES_LEDGER_CANISTER_ID }]
+			});
+
+			expect(exchangeServices.fillIcrcPricesFromFallbackProviders).not.toHaveBeenCalled();
 		});
 	});
 

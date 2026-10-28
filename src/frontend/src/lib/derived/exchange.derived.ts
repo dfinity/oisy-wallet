@@ -31,14 +31,12 @@ import {
 import { XRP_TOKEN_ID } from '$env/tokens/tokens.xrp.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { erc4626Tokens } from '$eth/derived/erc4626.derived';
-import type { Erc20Token } from '$eth/types/erc20';
 import { isErc20Icp } from '$eth/utils/token.utils';
-import type { IcCkToken } from '$icp/types/ic-token';
 import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import { derivedMemo } from '$lib/utils/derived-memo.utils';
-import { exchangesDataEqual } from '$lib/utils/exchange.utils';
+import { exchangesDataEqual, icrcTokenPrice } from '$lib/utils/exchange.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -106,38 +104,13 @@ export const exchanges: Readable<ExchangesData> = derivedMemo(
 				}),
 				{}
 			),
-			...$icrcTokens.reduce((acc, token) => {
-				const { id, ledgerCanisterId, exchangeCoinId } = token;
-
-				const icrcPrice = $exchangeStore?.[ledgerCanisterId];
-
-				if (nonNullish(icrcPrice)) {
-					return {
-						...acc,
-						[id]: icrcPrice
-					};
-				}
-
-				const { twinToken } = token as Partial<IcCkToken>;
-				const { address } = (twinToken as Partial<Erc20Token>) ?? { address: undefined };
-				const ckEthereumPrice = nonNullish(address)
-					? $exchangeStore?.[address.toLowerCase()]
-					: ethPrice;
-
-				return {
+			...$icrcTokens.reduce(
+				(acc, token) => ({
 					...acc,
-					[id]:
-						exchangeCoinId === 'ethereum'
-							? ckEthereumPrice
-							: exchangeCoinId === 'bitcoin'
-								? btcPrice
-								: exchangeCoinId === 'solana'
-									? solPrice
-									: exchangeCoinId === 'internet-computer'
-										? icpPrice
-										: undefined
-				};
-			}, {})
+					[token.id]: icrcTokenPrice({ token, prices: $exchangeStore })
+				}),
+				{}
+			)
 		};
 	},
 	exchangesDataEqual

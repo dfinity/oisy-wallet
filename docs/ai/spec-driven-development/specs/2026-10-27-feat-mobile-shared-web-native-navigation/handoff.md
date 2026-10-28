@@ -22,6 +22,42 @@ recorded below. The final authentication review fixes and documentation commit
 `1387b85ac` were installed and launched on the phone at 18:14 local time. The
 normal bundle excludes test fixtures; no app uninstall or sign-in reset was used.
 
+## Swap USD price fix — 2026-10-28
+
+The phone showed an unavailable USD price for ICP → ckUSDC. Swap's extra token
+price loader requested the Ethereum twin through CoinGecko and excluded ck-tokens
+from its ledger fallback. The preview has no CoinGecko key, so tokens omitted by
+the backend response stayed unpriced. The public ICPSwap ckUSDC endpoint responded
+with HTTP 200 and allowed the Capacitor origin.
+
+`loadDisabledIcrcTokensExchanges` now uses the existing flag-gated ICPSwap/Kong
+fallback for missing ledger prices, including ck-tokens. Existing prices are kept,
+including those arriving during the request. TCYCLES remains excluded. If all
+sources fail, the price stays unavailable. No API key or dependency was added.
+
+Seven regression cases cover ICP/ckUSDC store updates, empty responses, existing
+ledger/twin prices, concurrent backend updates, provider failure and TCYCLES.
+All 180 tests across the ICRC service, exchange service, exchange-derived and
+exchange utility suites pass. The three regression cases that exercise the missing
+path failed before the fix. A production build exposed a circular dependency when
+the loader imported the derived exchange store; both now use the same pure
+`icrcTokenPrice` utility. Scoped ESLint and the app/test typecheck passed with no
+errors or warnings; the production web bundle and signed iOS build succeeded.
+The ICPSwap GET and CORS preflight both returned HTTP 200 for the Capacitor origin.
+Signature, unchanged team/app ID, matching bundle metadata and fixture absence
+passed. Installed on the existing iPhone at 17:20 and launched at 17:21 local time.
+No uninstall, data reset, key addition, commit or push. Live price acceptance in
+ICP → ckUSDC remains for the user; no transaction was submitted.
+
+Evidence: `/private/tmp/oisy-swap-prices-before.log`,
+`/private/tmp/oisy-swap-prices-tests.log`, `/private/tmp/oisy-swap-prices-lint.log`,
+`/private/tmp/oisy-swap-prices-types.log`, `/private/tmp/oisy-swap-prices-sync.log`,
+`/private/tmp/oisy-swap-prices-phone-build.log`,
+`/private/tmp/oisy-swap-prices-phone-install.json` and
+`/private/tmp/oisy-swap-prices-phone-launch.json`. The handoff tree lints cleanly;
+the broader frontend documentation tree still reports its existing broken links
+and missing frontmatter, outside this pricing change.
+
 ## Shared Swap and EVM Send — 2026-10-28
 
 User requested both ICPSwap execution and ETH/ERC-20 Send. Both reuse the existing

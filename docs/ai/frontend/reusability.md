@@ -37,6 +37,15 @@ Mobile Send reuses `SendModal`, `IcSendTokenWizard` / `EthSendTokenWizard` and
 existing per-chain services. `mobile-send.utils.isMobileTransferToken` combines
 canonical ICP/ck-ledger and supported ETH/ERC-20 policy. Do not fork the form,
 fees or signing clients. `WizardModal.mobilePresentation` owns presentation.
+Swap price preloading lives in `icrc.services.loadDisabledIcrcTokensExchanges`.
+It fills missing ledger prices through `fillIcrcPricesFromFallbackProviders`,
+including ck-tokens when their twin's price is unavailable. Keep existing ledger
+or twin prices, recheck after the request, and exclude TCYCLES from market-price
+fallbacks. Wallet and Swap read the same `exchanges` store. Both the store and preload
+service use the pure `exchange.utils.icrcTokenPrice` lookup; do not import the
+derived store graph into that service, add a mobile price store, or assume a
+stablecoin is worth exactly one dollar.
+
 Mobile Swap uses the shared ICPSwap pipeline and `mobile-swap.utils` for pair and
 provider selection. `mobile-operation-journal.services` records EVM hash/nonce
 and ICPSwap stages through a principal-bound native Keychain adapter. Recovery

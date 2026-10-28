@@ -1,6 +1,8 @@
 import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
+import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
+import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 import { MILLISECONDS_IN_DAY, ZERO } from '$lib/constants/app.constants';
 import {
 	XDR_BASKET,
@@ -13,6 +15,7 @@ import { Currency } from '$lib/enums/currency';
 import type { OptionBalance } from '$lib/types/balance';
 import type {
 	CoingeckoPlatformId,
+	CoingeckoPriceResponse,
 	CoingeckoSimplePrice,
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPrice,
@@ -27,6 +30,7 @@ import type { TokenId } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 
 export const usdValue = ({
 	decimals,
@@ -46,6 +50,36 @@ export const usdValue = ({
 				})
 			) * exchangeRate
 		: Number(ZERO);
+
+// Resolve a ledger price first, then the ck-token's underlying asset. Kept pure so
+// preload services can share the store's mapping without importing its store graph.
+export const icrcTokenPrice = ({
+	token,
+	prices
+}: {
+	token: IcToken;
+	prices: Nullish<CoingeckoPriceResponse>;
+}): CoingeckoSimplePrice | undefined => {
+	const { ledgerCanisterId, exchangeCoinId } = token;
+	const ledgerPrice = prices?.[ledgerCanisterId];
+	if (nonNullish(ledgerPrice)) {
+		return ledgerPrice;
+	}
+
+	const { twinToken } = token as Partial<IcCkToken>;
+	const { address } = (twinToken as Partial<Erc20Token>) ?? { address: undefined };
+	return exchangeCoinId === 'ethereum'
+		? nonNullish(address)
+			? prices?.[address.toLowerCase()]
+			: prices?.ethereum
+		: exchangeCoinId === 'bitcoin'
+			? prices?.bitcoin
+			: exchangeCoinId === 'solana'
+				? prices?.solana
+				: exchangeCoinId === 'internet-computer'
+					? prices?.['internet-computer']
+					: undefined;
+};
 
 const ICPSWAP_MIN_TVL_USD = 500;
 
