@@ -128,6 +128,9 @@ Only from checks the router enforces:
   minimum; a V4 `TAKE` of a stated amount; and a V4 `TAKE` of the whole open amount of a token,
   which inherits the minimum outputs of the V4 swaps that produce it when it is the only take of
   that token and no V4 swap spends it.
+- A V4 exact-output swap counts its output towards that only on 2.1.2, the first version that
+  reverts unless the swap fills. Versions 2.0.0 and 2.1.1 cap its input only, and a pool short of
+  liquidity delivers part of the output.
 - Tokens left in the router at the end count as not received.
 
 ### What the user sees

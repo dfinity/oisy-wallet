@@ -13,7 +13,8 @@ import {
 	UNISWAP_UNIVERSAL_ROUTERS,
 	UNISWAP_V3_PATH_ADDRESS_LENGTH,
 	UNISWAP_V3_PATH_HOP_LENGTH,
-	UNISWAP_V4_ACTIONS
+	UNISWAP_V4_ACTIONS,
+	UNISWAP_V4_EXACT_OUTPUT_FILLS
 } from '$eth/constants/uniswap.constants';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { ErcFungibleToken } from '$eth/types/erc-fungible';
@@ -322,7 +323,11 @@ const readV4Swap = ({
 			spent.set(keyIn, (spent.get(keyIn) ?? ZERO) + amountIn);
 		}
 
-		produced.set(keyOut, (produced.get(keyOut) ?? ZERO) + amountOut);
+		// Older routers cap the input but do not require an exact-output swap to fill.
+		const minimumOut =
+			exactInput || UNISWAP_V4_EXACT_OUTPUT_FILLS[reader.router.version] ? amountOut : ZERO;
+
+		produced.set(keyOut, (produced.get(keyOut) ?? ZERO) + minimumOut);
 
 		if (!exactInput) {
 			plan.exactOutput = true;

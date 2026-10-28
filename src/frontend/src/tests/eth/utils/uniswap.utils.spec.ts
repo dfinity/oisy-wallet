@@ -549,6 +549,68 @@ describe('uniswap.utils', () => {
 				);
 			});
 
+			// Before 2.1.2, a V4 exact-output swap reverted on its input only, so a pool short of
+			// liquidity could deliver part of the output to whoever takes it.
+			describe('an exact-output swap taken in full', () => {
+				// Router 2.1.1 on Base.
+				const ROUTER_2_1_1 = '0xFdf682F51FE81Aa4898F0AE2163d8A55c127fbC7';
+
+				const POOL = [EURC, USDC, 500, 10, ZERO_ETH_ADDRESS];
+
+				const exactOutput2_1 = {
+					action: UNISWAP_V4_ACTIONS.SWAP_EXACT_OUT_SINGLE,
+					types: [V4_SWAP_SINGLE],
+					values: [[POOL, true, 1_087_807n, 1_010_000n, ZERO, '0x']]
+				};
+
+				const exactOutput2_0 = {
+					action: UNISWAP_V4_ACTIONS.SWAP_EXACT_OUT_SINGLE,
+					types: [`tuple(${POOL_KEY},bool,uint128,uint128,bytes)`],
+					values: [[POOL, true, 1_087_807n, 1_010_000n, '0x']]
+				};
+
+				const takeAll = (minAmount: bigint) => ({
+					action: UNISWAP_V4_ACTIONS.TAKE_ALL,
+					types: ['address', 'uint256'],
+					values: [USDC, minAmount]
+				});
+
+				it.each([
+					{ version: '2.0.0', to: ROUTER_2_0, swap: exactOutput2_0 },
+					{ version: '2.1.1', to: ROUTER_2_1_1, swap: exactOutput2_1 }
+				])('should count none of its output on $version', ({ version, to, swap }) => {
+					const data = execute({ commands: [v4Swap([swap, settle(), take()])] });
+
+					expect(getUniswapSwap(params({ data, to }))).toEqual(
+						expect.objectContaining({
+							router: expect.objectContaining({ version }),
+							paid: { token: EURC_TOKEN, amount: 1_010_000n, atMost: true },
+							received: { token: USDC_TOKEN, amount: ZERO }
+						})
+					);
+				});
+
+				it('should keep the minimum a take of everything states on 2.1.1', () => {
+					const data = execute({
+						commands: [v4Swap([exactOutput2_1, settle(), takeAll(1_000_000n)])]
+					});
+
+					expect(getUniswapSwap(params({ data, to: ROUTER_2_1_1 }))?.received).toEqual({
+						token: USDC_TOKEN,
+						amount: 1_000_000n
+					});
+				});
+
+				it('should count its whole output on 2.1.2', () => {
+					const data = execute({ commands: [v4Swap([exactOutput2_1, settle(), take()])] });
+
+					expect(getUniswapSwap(params({ data }))?.received).toEqual({
+						token: USDC_TOKEN,
+						amount: 1_087_807n
+					});
+				});
+			});
+
 			it('should describe the native coin paid in and settled by the router', () => {
 				const value = 307_938_748_743_669n;
 

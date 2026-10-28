@@ -199,3 +199,12 @@ export const UNISWAP_LAYOUTS: Record<UniswapUniversalRouterVersion, UniswapLayou
 	'2.1.1': layouts2_1,
 	'2.1.2': layouts2_1
 };
+
+// Whether a V4 exact-output swap reverts unless it delivers its whole output
+// (`V4ExactOutputUnfilled`, from 2.1.2). Before that, the router capped the input only, and a pool
+// short of liquidity delivered part of the output.
+export const UNISWAP_V4_EXACT_OUTPUT_FILLS: Record<UniswapUniversalRouterVersion, boolean> = {
+	'2.0.0': false,
+	'2.1.1': false,
+	'2.1.2': true
+};
