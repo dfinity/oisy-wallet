@@ -54,6 +54,7 @@ import {
 	signTransaction,
 	type CreateSignerParams
 } from '$sol/utils/sol-sign.utils';
+import { solUnreviewedNotDescribed } from '$sol/utils/sol-simulation.utils';
 import {
 	countSolRequiredSignatures,
 	decodeTransactionMessage,
@@ -689,7 +690,7 @@ export const sign = ({
 			// described. The simulation is best effort by design and stays that way: it is not
 			// required of a message OISY did read, and a provider that times out on a transaction
 			// the wallet understands still signs, an unchecked approval aside (above).
-			if ((unreviewed ?? false) && !simulated) {
+			if (solUnreviewedNotDescribed({ unreviewed, simulated })) {
 				toastsError({
 					msg: {
 						text: simulationRan
