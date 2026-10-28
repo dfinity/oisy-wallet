@@ -97,12 +97,15 @@ What OISY may claim depends on how far the send got:
   a swap may already have sent its approval before it reads the nonce for the swap itself. Reads of
   the fee and gas fail before a review can be approved and keep their own message, and a signing
   failure keeps its current one, since in a flow with an approval the approval may already be out.
-- **The network refused it with a reason.** The message states the reason, as the send flow already
-  does for a transaction the balance cannot pay for.
+- **A node refused it outright**: the account cannot pay for it, or it is invalid. The message
+  states the reason, as the send flow already does for a transaction the balance cannot pay for. A
+  transaction that runs out of gas keeps its own message, which already allows that another node
+  may still mine it.
 - **OISY could not find out whether the network received it**, because every provider failed without
-  an answer. The message says so and asks the user to check their activity before trying again. It
-  never says the transaction was not sent: a retry is signed with the next nonce, so if the first
-  one did get through, both execute and the user pays twice.
+  an answer that settles it; one that the transaction is already known, or that its nonce is too
+  low, leaves it open. The message says so and asks the user to check their activity before trying
+  again. It never says the transaction was not sent: a retry is signed with the next nonce, so if
+  the first one did get through, both execute and the user pays twice.
 
 WalletConnect Ethereum sends are explained the same way as the send flow, instead of through the
 generic WalletConnect message. The dApp still receives a rejection, as today.
@@ -192,6 +195,8 @@ PR 3:
   provider.
 - A WalletConnect transaction the balance cannot pay for shows the existing insufficient-funds
   message.
+- A send that runs out of gas keeps its out-of-gas message.
+- A LI.FI swap whose nonce could not be read is not tracked as insufficient funds.
 - An error with no mapping keeps its current generic message.
 
 PR 4:
