@@ -59,7 +59,7 @@ export const CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS = 15n * 60n * 1_000_000_000n;
 // history back past that point cannot find it any more.
 export const ICP_LEDGER_PERMITTED_DRIFT_NS = 60_000_000_000n;
 
-export const CYCLES_MINT_DEPOSIT_LOOKUP_PAGE_SIZE = 100n;
+export const CMC_DEPOSIT_LOOKUP_PAGE_SIZE = 100n;
 
 // How long a row has to go unwritten before the poller acts on it, counted in the
 // poller's own ticks (see `OISY_TRADE_SWAP_SETTLE_GRACE_OBSERVATIONS` for why not in

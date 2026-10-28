@@ -12,7 +12,7 @@ import {
 } from '$icp/stores/ic-transactions.store';
 import type { IcCkToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import { getCyclesMintDepositAccountIdentifier } from '$icp/utils/cycles-mint.utils';
+import { getCmcDepositAccountIdentifier } from '$icp/utils/cmc.utils';
 import { authStore } from '$lib/stores/auth.store';
 import { token } from '$lib/stores/token.store';
 import type { TokenId } from '$lib/types/token';
@@ -224,7 +224,7 @@ describe('ic-transactions.derived', () => {
 			authStore.setForTesting(mockIdentity);
 
 			const [userInitiated] = transactions;
-			const depositAccount = getCyclesMintDepositAccountIdentifier(mockIdentity.getPrincipal());
+			const depositAccount = getCmcDepositAccountIdentifier(mockIdentity.getPrincipal());
 			const mintDeposits: IcCertifiedTransaction[] = [
 				depositAccount,
 				depositAccount.toUpperCase()

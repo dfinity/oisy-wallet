@@ -12,7 +12,8 @@ import {
 	CYCLES_MINT_TRANSFER_START_WINDOW_NS
 } from '$icp/constants/cmc.constants';
 import { CyclesMintError, type CyclesMintNotifyResult } from '$icp/types/cycles-mint';
-import { getCyclesMintDepositAccount, randomSubMillisecondNs } from '$icp/utils/cycles-mint.utils';
+import { getCmcDepositAccount } from '$icp/utils/cmc.utils';
+import { randomSubMillisecondNs } from '$icp/utils/cycles-mint.utils';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import { ProgressStepsCyclesMint } from '$lib/enums/progress-steps';
 import {
@@ -66,7 +67,7 @@ export const transferIcpForCyclesMint = async ({
 	try {
 		return await icrc1Transfer({
 			identity,
-			to: getCyclesMintDepositAccount(identity.getPrincipal()),
+			to: getCmcDepositAccount(identity.getPrincipal()),
 			amount,
 			createdAt,
 			memo: CMC_MINT_CYCLES_MEMO,

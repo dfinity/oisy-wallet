@@ -10,7 +10,7 @@ import {
 } from '$icp/constants/cmc.constants';
 import * as cyclesMintServices from '$icp/services/cycles-mint.services';
 import type { CyclesMintNotifyResult } from '$icp/types/cycles-mint';
-import { getCyclesMintDepositAccountIdentifier } from '$icp/utils/cycles-mint.utils';
+import { getCmcDepositAccountIdentifier } from '$icp/utils/cmc.utils';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
@@ -37,7 +37,7 @@ import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 
 const CREATED_AT_NS = mockCyclesMintData.transfer_created_at_ns;
 
-const DEPOSIT_ACCOUNT_IDENTIFIER = getCyclesMintDepositAccountIdentifier(mockPrincipal);
+const DEPOSIT_ACCOUNT_IDENTIFIER = getCmcDepositAccountIdentifier(mockPrincipal);
 const OWN_ACCOUNT_IDENTIFIER = getAccountIdentifier(mockPrincipal).toHex();
 
 const displayRefs = toCyclesMintExternalRefsMap(mockCyclesMintActiveUserTransaction.external_refs);
