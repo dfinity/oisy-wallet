@@ -37,10 +37,10 @@ itself is not.
 
 ### What the token contract can tell
 
-An ERC-20 contract answers `decimals()`, `symbol()` and `name()`. `decimals()` is what the contract
-itself uses to read the amount, so an amount scaled by it is exactly the amount the call moves or
-allows, whoever made the token. The symbol and name are whatever the token's creator chose: anybody
-can deploy a token that calls itself "USDC".
+An ERC-20 contract answers `decimals()`, `symbol()` and `name()`. `decimals()` is the scale the
+contract itself declares for its amounts, so for a conventional ERC-20 implementation an amount
+scaled by it is exactly the amount the call moves or allows. The symbol and name are whatever the
+token's creator chose: anybody can deploy a token that calls itself "USDC".
 
 OISY already reads these for the contracts it lists by address
 (`infuraErc20Providers(network).metadata`, `src/frontend/src/eth/providers/infura-erc20.providers.ts`).
