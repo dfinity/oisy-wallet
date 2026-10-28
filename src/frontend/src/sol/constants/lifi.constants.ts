@@ -4,12 +4,12 @@ import type { SolAddress } from '$sol/types/address';
 // with no account of the user's: it cannot move the user's funds, whatever it does.
 export const LIFI_SOLANA_FEE_PROGRAM: SolAddress = '3i5JeuZuUxeKtVysUnwQNGerJP2bSMX9fTFfS4Nxe3Br';
 
-// The only accounts that instruction may name, in this order: the Clock sysvar, and an address that
-// holds no account.
-export const LIFI_SOLANA_FEE_PROGRAM_ACCOUNTS: SolAddress[] = [
-	'SysvarC1ock11111111111111111111111111111111',
-	'BHwZCcfDTgSAz8eBFrKqPfNFVFsdBnUtH8zkXs7LM3dG'
-];
+// The first of the two accounts that instruction names. The second is one it only reads and that
+// does not sign, bound by that role rather than its address: LI.FI rotates it (`BHwZ…` until
+// 2026-10-23, `CnmFYA…` from 2026-10-27, neither holding an account), and with nothing writable and
+// no signer, the instruction cannot change any account, whatever it is passed.
+export const LIFI_SOLANA_FEE_PROGRAM_CLOCK: SolAddress =
+	'SysvarC1ock11111111111111111111111111111111';
 
 // What that instruction's data starts with, and its whole length.
 export const LIFI_SOLANA_FEE_PROGRAM_DISCRIMINATOR = 0;

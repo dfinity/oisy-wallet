@@ -225,6 +225,40 @@ export const mockLifiSolUsdcToUsdt: LifiSolTransactionFixture = {
 	}
 };
 
+// 20 USDC → SOL, captured on 2026-10-28, after LI.FI rotated the second account of its fee
+// program's instruction from `BHwZ…` to `CnmFYA…`.
+export const mockLifiSolUsdcToSolAfterFeeRotation: LifiSolTransactionFixture = {
+	request: {
+		fromChain: ChainId.SOL,
+		toChain: ChainId.SOL,
+		fromToken: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+		toToken: '11111111111111111111111111111111',
+		fromAmount: '20000000',
+		fromAddress: mockLifiSolUser,
+		toAddress: mockLifiSolUser,
+		slippage: 0.005,
+		allowExchanges: ['jupiter']
+	},
+	toAmountMin: 192_599_461n,
+	quote: quoteWith({
+		toAmount: '193567297',
+		toAmountMin: '192599461',
+		data: 'AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAQAKDg3DCB8iG/qh2fapNS7+A6KwO1p4JbWqXBb+DHdxyv/jcvRFs6GawEjSqSj+B3TPe4te+nxkV8vMvILs8OrJPHmB19GaWCSjjeRRw0rvOJBUO31dT3PPAxwTXjgLsSMPKfp5hOh3/qcoma73bNFfkJQ495Yf4ERt8eabAS/EcRUXAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoPQ3SgjVP7wrjsOIn03zYnKJm+xfd+PfLfM775OvcVTWbY4i4JFGCbLuDu5Qhevllhghin4FjTwokSd5rUJx2jJclj04kifG7PRApFI4NgwtaE5na/xCEBI572Nvp+FmvKboZ+gGUkrke6NmfdeU6RNQZ6S0Tx6fe2s6wsy98CwMGRm/lIRcy/+ytunLDm+e8jOW7xfcSayxDmzpAAAAAtD/6J/XX9kp0wJsfKVh53ksJqzbfyd1RSzIap7OM5egEedVb8jHAbu50xW7OaBUH/bGy3qP0jlECsc2iVrwTjwan1RcYx3TJKFZjmGkdXraLXrijm0ttXHNVWyEAAAAABt324ddloZPZy+FGzut5rBy0he1fWzeROoz1hX7/AKkpqfDuQIGF5pb7TpBfBz0285peKl30QBK4ohO/+3i/owcJAAUCwFwVAAkACQM1ggAAAAAAAAUCDAgJAC/gMjIamz4ADQQCEgEACgxQwwAAAAAAAAYHBgADABQEDQEBCxgAAgMSFA0NCwoLEQAPEA4DAg0NFBIVEwYou2T6zDHErxSwaTABAAAAAEGaiQsAAAAAMgAAAAAAAQAAALEAECcAAQ0DAwAAAQkBaqnD6zW9JDo+H+KAaN7anlH5OQXEZKvnbsMiY28t+NkDgIWEBYJxhxB/'
+	}),
+	lookups: {
+		'8BNMiq1CM4g3zZbhbWQHn27631FPAJLGMF2c52y3Vs5i': {
+			16: 'So11111111111111111111111111111111111111112',
+			113: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+			127: 'Sysvar1nstructions1111111111111111111111111',
+			128: '2Y7HATmn9aJBcxCskE5V2U2epmjvkZmB51zTJBbhj4cU',
+			130: 'BiSoNHVpsVZW2F7rx2eQ59yQwKxzU5NvBcmKshCSUypi',
+			132: 'ATRsNGv2nDw7hSMfkUTBoVUDsFDwN7po7KbecyiGWNB4',
+			133: '8FnX3xo2yYw3EUE6w3nQA4GfXGS9wpK6oj3veJpbFzLo',
+			135: 'J1to1yufRnoWn81KYg1XkTWzmKjnYSnmE2VY8DGUJ9Qv'
+		}
+	}
+};
+
 // Any address, standing in for the entries a message does not read.
 const UNREAD_ENTRY = address('11111111111111111111111111111111');
 

@@ -33,6 +33,7 @@ import {
 	mockLifiSolSolToUsdcWithWsolAccount,
 	mockLifiSolTransactionMessage,
 	mockLifiSolUsdcToSol,
+	mockLifiSolUsdcToSolAfterFeeRotation,
 	mockLifiSolUsdcToUsdt,
 	mockLifiSolUser,
 	type LifiSolTransactionFixture
@@ -91,19 +92,26 @@ const atasOf = async ({
 });
 
 const accountsOf = async ({
-	request: { fromAddress, fromToken }
+	request: { fromAddress, fromToken, toToken }
 }: LifiSolTransactionFixture): Promise<LifiSolDerivedAccounts> => {
 	const wrappedSolAccount = await ataOf({ owner: fromAddress, mint: WSOL_TOKEN.address });
+
+	const destinationTokenAccounts =
+		toToken === SYSTEM_PROGRAM_ADDRESS
+			? { [TOKEN_PROGRAM_ADDRESS]: wrappedSolAccount }
+			: await atasOf({ owner: fromAddress, mint: toToken });
 
 	return fromToken === SYSTEM_PROGRAM_ADDRESS
 		? {
 				wrappedSolAccount,
 				sourceTokenAccounts: { [TOKEN_PROGRAM_ADDRESS]: wrappedSolAccount },
+				destinationTokenAccounts,
 				feeTokenAccounts: {}
 			}
 		: {
 				wrappedSolAccount,
 				sourceTokenAccounts: await atasOf({ owner: fromAddress, mint: fromToken }),
+				destinationTokenAccounts,
 				feeTokenAccounts: await atasOf({ owner: LIFI_SOLANA_FEE_WALLET, mint: fromToken })
 			};
 };
@@ -453,6 +461,16 @@ describe('lifi-sol-transaction.utils', () => {
 				);
 			});
 
+			it("should accept USDC → SOL as LI.FI builds it since rotating its fee program's account", async () => {
+				await expect(
+					assertWith({ fixture: mockLifiSolUsdcToSolAfterFeeRotation })
+				).resolves.toEqual(
+					expect.objectContaining({
+						createdAccounts: [expect.objectContaining({ mint: WSOL_TOKEN.address })]
+					})
+				);
+			});
+
 			// Whether that account held wrapped SOL only the simulation says.
 			it("should accept a route closing the user's own wrapped SOL account", async () => {
 				await expect(assertWith({ fixture: mockLifiSolSolToUsdcWithWsolAccount })).resolves.toEqual(
@@ -668,25 +686,76 @@ describe('lifi-sol-transaction.utils', () => {
 				});
 			});
 
-			it.each([0, 1])(
-				"should refuse the fee program naming another account, the user's, at %s",
-				async (index) => {
-					const instructions = instructionsOf(mockLifiSolSolToUsdc);
+			it('should refuse the fee program naming another account than the Clock sysvar first', async () => {
+				const instructions = instructionsOf(mockLifiSolSolToUsdc);
 
-					await expectRejected({
-						fixture: mockLifiSolSolToUsdc,
-						instructions: replaceAt({
-							instructions,
-							index: indexOf({ instructions, programAddress: LIFI_SOLANA_FEE_PROGRAM }),
-							instruction: withAccount({
-								instruction: feeProgramOf(instructions),
-								index,
-								account: mockLifiSolUser
-							})
+				await expectRejected({
+					fixture: mockLifiSolSolToUsdc,
+					instructions: replaceAt({
+						instructions,
+						index: indexOf({ instructions, programAddress: LIFI_SOLANA_FEE_PROGRAM }),
+						instruction: withAccount({
+							instruction: feeProgramOf(instructions),
+							index: 0,
+							account: mockSolAddress2
 						})
-					});
-				}
-			);
+					})
+				});
+			});
+
+			// The fee program's instructions with their second account replaced.
+			const withFeeReference = (reference: { address: SolAddress; role: AccountRole }) => {
+				const instructions = instructionsOf(mockLifiSolSolToUsdc);
+				const feeProgram = feeProgramOf(instructions);
+				const [clock] = feeProgram.accounts ?? [];
+
+				assertNonNullish(clock);
+
+				return replaceAt({
+					instructions,
+					index: indexOf({ instructions, programAddress: LIFI_SOLANA_FEE_PROGRAM }),
+					instruction: {
+						...feeProgram,
+						accounts: [clock, { address: address(reference.address), role: reference.role }]
+					}
+				});
+			};
+
+			// LI.FI rotates that account: `BHwZ…` until 2026-10-23, `CnmFYA…` from 2026-10-27.
+			it.each([
+				'BHwZCcfDTgSAz8eBFrKqPfNFVFsdBnUtH8zkXs7LM3dG',
+				'CnmFYAJAEzj7gUnigN55qTZQ5zHT7EUwTj3SD63HPHuL',
+				mockSolAddress2
+			])('should accept %s as its second account, read-only and not signing', async (reference) => {
+				await expect(
+					assertWith({
+						fixture: mockLifiSolSolToUsdc,
+						instructions: withFeeReference({ address: reference, role: AccountRole.READONLY })
+					})
+				).resolves.toBeDefined();
+			});
+
+			it.each([
+				{ case: 'writable', role: AccountRole.WRITABLE },
+				{ case: 'signing', role: AccountRole.READONLY_SIGNER },
+				{ case: 'writable and signing', role: AccountRole.WRITABLE_SIGNER }
+			])('should refuse its second account $case', async ({ role }) => {
+				await expectRejected({
+					fixture: mockLifiSolSolToUsdc,
+					instructions: withFeeReference({ address: mockSolAddress2, role })
+				});
+			});
+
+			// The user pays the fee, so every account meta naming the user is a writable signer.
+			it("should refuse the user's account as its second account", async () => {
+				await expectRejected({
+					fixture: mockLifiSolSolToUsdc,
+					instructions: withFeeReference({
+						address: mockLifiSolUser,
+						role: AccountRole.WRITABLE_SIGNER
+					})
+				});
+			});
 
 			it('should refuse the fee program with its first account only', async () => {
 				const instructions = instructionsOf(mockLifiSolSolToUsdc);
@@ -1320,13 +1389,66 @@ describe('lifi-sol-transaction.utils', () => {
 				it.each([
 					{ account: 'user_transfer_authority', index: 0 },
 					{ account: 'user_source_token_account', index: 1 },
+					// A token account the user owns but not the associated one, which OISY never reads.
+					{ account: 'user_destination_token_account', index: 2 },
 					{ account: 'source_mint', index: 3 },
 					{ account: 'destination_mint', index: 4 },
-					{ account: 'source_token_program', index: 5 }
+					{ account: 'source_token_program', index: 5 },
+					{ account: 'destination_token_program', index: 6 },
+					// Set, it takes the output in the user's account's place.
+					{ account: 'destination_token_account', index: 7 }
 				])('should refuse another $account', async ({ index }) => {
 					await expectRejected({
 						fixture: mockLifiSolSolToUsdc,
 						instructions: withRouteAccount({ index, account: mockSolAddress2 })
+					});
+				});
+
+				it("should refuse the user's account for the destination under another token program", async () => {
+					await expectRejected({
+						fixture: mockLifiSolSolToUsdc,
+						instructions: withRouteAccount({
+							index: 2,
+							account: await ataOf({
+								owner: mockLifiSolUser,
+								mint: USDC,
+								tokenProgram: TOKEN_2022_PROGRAM_ADDRESS
+							})
+						})
+					});
+				});
+
+				it('should accept a destination under Token-2022 when the route names Token-2022 for it', async () => {
+					const destinationAccount = await ataOf({
+						owner: mockLifiSolUser,
+						mint: USDC,
+						tokenProgram: TOKEN_2022_PROGRAM_ADDRESS
+					});
+
+					const instructions = withRouteAccounts({
+						edit: (accounts) =>
+							(accounts ?? []).map((meta, index) =>
+								index === 2
+									? { ...meta, address: address(destinationAccount) }
+									: index === 6
+										? { ...meta, address: address(TOKEN_2022_PROGRAM_ADDRESS) }
+										: meta
+							)
+					});
+
+					await expect(
+						assertWith({ fixture: mockLifiSolSolToUsdc, instructions })
+					).resolves.toBeDefined();
+				});
+
+				it("should refuse a native SOL destination paid anywhere but the user's wrapped SOL account", async () => {
+					await expectRejected({
+						fixture: mockLifiSolUsdcToSol,
+						instructions: withRouteAccount({
+							fixture: mockLifiSolUsdcToSol,
+							index: 2,
+							account: await ataOf({ owner: mockLifiSolUser, mint: USDC })
+						})
 					});
 				});
 
@@ -1464,9 +1586,11 @@ describe('lifi-sol-transaction.utils', () => {
 					it.each([
 						{ account: 'user_transfer_authority', index: 1 },
 						{ account: 'source_token_account', index: 2 },
+						{ account: 'destination_token_account', index: 5 },
 						{ account: 'source_mint', index: 6 },
 						{ account: 'destination_mint', index: 7 },
-						{ account: 'source_token_program', index: 8 }
+						{ account: 'source_token_program', index: 8 },
+						{ account: 'destination_token_program', index: 9 }
 					])('should refuse another $account', async ({ index }) => {
 						await expectRejected({
 							fixture: mockLifiSolSolToUsdc,

@@ -8,7 +8,7 @@ import {
 	JUPITER_SHARED_ACCOUNTS_ROUTE_V2_DISCRIMINATOR,
 	JUPITER_V6_PROGRAM,
 	LIFI_SOLANA_FEE_PROGRAM,
-	LIFI_SOLANA_FEE_PROGRAM_ACCOUNTS,
+	LIFI_SOLANA_FEE_PROGRAM_CLOCK,
 	LIFI_SOLANA_FEE_PROGRAM_DATA_LENGTH,
 	LIFI_SOLANA_FEE_PROGRAM_DISCRIMINATOR,
 	LIFI_SOLANA_FEE_WALLET,
@@ -46,6 +46,8 @@ import {
 	getStructDecoder,
 	getU16Decoder,
 	getU64Decoder,
+	isSignerRole,
+	isWritableRole,
 	type ReadonlyUint8Array
 } from '@solana/kit';
 
@@ -68,13 +70,14 @@ export interface LifiSolBinding {
 
 /**
  * The accounts the binding compares against, derived rather than read from the transaction: the
- * user's associated token account for wrapped SOL; the user's for the source mint, which is that
- * wrapped SOL account for native SOL; and the fee wallet's for an SPL source's mint. Those for a
- * mint are keyed by each token program that may hold it.
+ * user's associated token account for wrapped SOL; the user's for the source and the destination
+ * mints, which is that wrapped SOL account for native SOL; and the fee wallet's for an SPL source's
+ * mint. Those for a mint are keyed by each token program that may hold it.
  */
 export interface LifiSolDerivedAccounts {
 	wrappedSolAccount: SolAddress;
 	sourceTokenAccounts: Partial<Record<SolAddress, SolAddress>>;
+	destinationTokenAccounts: Partial<Record<SolAddress, SolAddress>>;
 	feeTokenAccounts: Partial<Record<SolAddress, SolAddress>>;
 }
 
@@ -114,14 +117,19 @@ const jupiterRouteArgumentsDecoder = getStructDecoder([
 const JUPITER_ROUTE_ARGUMENTS_MIN_LENGTH = 26;
 
 // Where a route entrypoint's arguments start, and the position of each account the binding reads,
-// from the program's on-chain IDL (2026-10-23).
+// from the program's on-chain IDL (2026-10-23, the destination's 2026-10-28).
 interface JupiterEntrypoint {
 	argumentsOffset: number;
 	userTransferAuthority: number;
 	sourceTokenAccount: number;
+	destinationTokenAccount: number;
 	sourceMint: number;
 	destinationMint: number;
 	sourceTokenProgram: number;
+	destinationTokenProgram: number;
+	// An optional account that, when set, takes the output in the destination's place. Unset, it
+	// holds the program's own id.
+	outputRedirect?: number;
 }
 
 const JUPITER_ENTRYPOINTS: Record<string, JupiterEntrypoint> = {
@@ -129,18 +137,24 @@ const JUPITER_ENTRYPOINTS: Record<string, JupiterEntrypoint> = {
 		argumentsOffset: 8,
 		userTransferAuthority: 0,
 		sourceTokenAccount: 1,
+		destinationTokenAccount: 2,
 		sourceMint: 3,
 		destinationMint: 4,
-		sourceTokenProgram: 5
+		sourceTokenProgram: 5,
+		destinationTokenProgram: 6,
+		outputRedirect: 7
 	},
-	// An `id: u8` before the same arguments, and the program's own authority before the user's.
+	// An `id: u8` before the same arguments, and the program's own authority and token accounts among
+	// the user's.
 	[JUPITER_SHARED_ACCOUNTS_ROUTE_V2_DISCRIMINATOR]: {
 		argumentsOffset: 9,
 		userTransferAuthority: 1,
 		sourceTokenAccount: 2,
+		destinationTokenAccount: 5,
 		sourceMint: 6,
 		destinationMint: 7,
-		sourceTokenProgram: 8
+		sourceTokenProgram: 8,
+		destinationTokenProgram: 9
 	}
 };
 
@@ -233,15 +247,18 @@ const computeBudgetStep = (instruction: SolInstruction): LifiSolStep | undefined
 	}
 };
 
-const feeProgramStep = (instruction: SolInstruction): LifiSolStep | undefined => {
-	const { data } = instruction;
-	const accounts = accountAddresses(instruction);
+// The Clock sysvar, then one account the instruction only reads, which does not sign.
+const feeProgramStep = ({ data, accounts = [] }: SolInstruction): LifiSolStep | undefined => {
+	const [clock, reference, ...others] = accounts;
 
 	if (
 		data?.[0] === LIFI_SOLANA_FEE_PROGRAM_DISCRIMINATOR &&
 		data.length === LIFI_SOLANA_FEE_PROGRAM_DATA_LENGTH &&
-		accounts.length === LIFI_SOLANA_FEE_PROGRAM_ACCOUNTS.length &&
-		accounts.every((account, index) => account === LIFI_SOLANA_FEE_PROGRAM_ACCOUNTS[index])
+		clock?.address === LIFI_SOLANA_FEE_PROGRAM_CLOCK &&
+		nonNullish(reference) &&
+		!isSignerRole(reference.role) &&
+		!isWritableRole(reference.role) &&
+		others.length === 0
 	) {
 		return { kind: 'feeProgram' };
 	}
@@ -399,18 +416,23 @@ const routeMint = (token: SolAddress): SolAddress =>
 	token === SYSTEM_PROGRAM_ADDRESS ? WSOL_TOKEN.address : token;
 
 /**
- * A Jupiter route spending from the user's own account for the source mint and paying out the
- * destination mint, signed for by the user.
+ * A Jupiter route spending from the user's own account for the source mint and paying the
+ * destination mint into the user's own account for it, signed for by the user.
  *
  * The simulation alone does not bind its source: lamports sent to the user's wrapped SOL account
  * and never synced are not part of its token amount, so a route that syncs and spends them leaves
  * that amount as it was, and the run shows no decrease. Bound to the source account, the route's
  * input is also in the source token's units, which the bound on the amount assumes.
+ *
+ * Nor does it bind the destination: it counts every token account the user owns, and anyone can
+ * open one for the user without their signature. Paid into such an account, the output would still
+ * be the user's, but OISY reads and spends only the associated one, so it would be lost to the
+ * wallet.
  */
 const routeStep = ({
 	instruction,
 	binding: { userAddress, fromToken, toToken },
-	accounts: { sourceTokenAccounts }
+	accounts: { sourceTokenAccounts, destinationTokenAccounts }
 }: {
 	instruction: SolInstruction;
 	binding: LifiSolBinding;
@@ -425,17 +447,40 @@ const routeStep = ({
 	}
 
 	const addresses = accountAddresses(instruction);
-	const sourceTokenProgram = addresses[entrypoint.sourceTokenProgram];
-	const sourceTokenAccount = nonNullish(sourceTokenProgram)
-		? sourceTokenAccounts[sourceTokenProgram]
-		: undefined;
+
+	// The user's account under the token program the route names for it, if it names one.
+	const userTokenAccount = ({
+		program,
+		accounts
+	}: {
+		program: number;
+		accounts: Partial<Record<SolAddress, SolAddress>>;
+	}): SolAddress | undefined => {
+		const tokenProgram = addresses[program];
+
+		return nonNullish(tokenProgram) ? accounts[tokenProgram] : undefined;
+	};
+
+	const sourceTokenAccount = userTokenAccount({
+		program: entrypoint.sourceTokenProgram,
+		accounts: sourceTokenAccounts
+	});
+
+	const destinationTokenAccount = userTokenAccount({
+		program: entrypoint.destinationTokenProgram,
+		accounts: destinationTokenAccounts
+	});
 
 	if (
 		addresses[entrypoint.userTransferAuthority] !== userAddress ||
 		addresses[entrypoint.sourceMint] !== routeMint(fromToken) ||
 		addresses[entrypoint.destinationMint] !== routeMint(toToken) ||
 		isNullish(sourceTokenAccount) ||
-		addresses[entrypoint.sourceTokenAccount] !== sourceTokenAccount
+		addresses[entrypoint.sourceTokenAccount] !== sourceTokenAccount ||
+		isNullish(destinationTokenAccount) ||
+		addresses[entrypoint.destinationTokenAccount] !== destinationTokenAccount ||
+		(nonNullish(entrypoint.outputRedirect) &&
+			addresses[entrypoint.outputRedirect] !== JUPITER_V6_PROGRAM)
 	) {
 		return;
 	}

@@ -944,10 +944,14 @@ The result must show all of the following:
   sources, 2026-10-22), not with a swap step:
   - an instruction of LI.FI's program `3i5JeuZuUxeKtVysUnwQNGerJP2bSMX9fTFfS4Nxe3Br`
     (an upgradeable program): discriminator `0x00`, 9 bytes of data, and as its only
-    accounts the Clock sysvar and `BHwZCcfDTgSAz8eBFrKqPfNFVFsdBnUtH8zkXs7LM3dG`, an
-    address that holds no account. No account of the user's is passed to it, so it cannot
-    move the user's funds whatever the program does; it is pinned with exactly those
-    accounts.
+    accounts the Clock sysvar and one more, read-only and not a signer, which holds no
+    account. LI.FI rotates that second address — `BHwZCcfDTgSAz8eBFrKqPfNFVFsdBnUtH8zkXs7LM3dG`
+    until 2026-10-23, `CnmFYAJAEzj7gUnigN55qTZQ5zHT7EUwTj3SD63HPHuL` from 2026-10-27, in
+    review — so it is bound by its role, not its address: exactly two accounts, the Clock
+    sysvar first, then one that is neither writable nor a signer. With nothing writable
+    and no signer, the instruction cannot change any account whatever the program does,
+    and the user's own account cannot be the second: the user pays the fee, so every
+    reference to it is a writable signer.
   - the fee itself, paid to LI.FI's fee wallet `34FKjAdVcTax2DHqV2XnbXa9J3zmyKcFuFKWbcmgxjgm`
     (a system account): a System `Transfer` from the user to that wallet for a native-SOL
     source (250,000 lamports of 0.1 SOL), an SPL `TransferChecked` of the source mint,
@@ -990,13 +994,25 @@ The result must show all of the following:
   plus that fee must not exceed `fromAmount` (99,750,000 + 250,000 on the same route).
   The route's accounts are bound from the same IDL: its `user_transfer_authority` is the
   user, its source and destination mints are the requested ones (wSOL for native SOL),
-  and its source token account is the user's associated token account for the source mint
-  under the route's source token program (the user's wSOL account for native SOL). The
-  simulation alone does not bind the source: lamports sent to the user's wSOL account and
-  never synced are not part of its token amount, so an SPL-source route that syncs and
-  spends them leaves that amount as it was, and the run shows no decrease (in review,
-  2026-10-23). Bound to the source account, `in_amount` is also in the source token's
-  units, which the `fromAmount` bound assumes.
+  its source token account is the user's associated token account for the source mint
+  under the route's source token program, and its destination token account the user's
+  associated token account for the destination mint under the route's destination token
+  program (the user's wSOL account for native SOL, on either side). `route_v2`'s optional
+  `destination_token_account`, which takes the output in the user's account's place when
+  set, must be unset, that is, the program's own id (every captured route). The
+  positions: `route_v2` 0, 1, 2 (destination), 3, 4, 5, 6 (destination program), 7
+  (optional destination); `shared_accounts_route_v2` 1, 2, 5 (destination), 6, 7, 8, 9
+  (destination program), read from the IDL on 2026-10-23 and, for the destination, on
+  2026-10-28. The simulation alone does not bind the source: lamports sent to the user's
+  wSOL account and never synced are not part of its token amount, so an SPL-source route
+  that syncs and spends them leaves that amount as it was, and the run shows no decrease
+  (in review, 2026-10-23). Bound to the source account, `in_amount` is also in the source
+  token's units, which the `fromAmount` bound assumes. Nor does it bind the destination:
+  the receipt bound counts every token account the user owns, and anyone can open one
+  for the user without their signature (`InitializeAccount3` takes the owner as an
+  argument). Paid into such an account, the output would still be the user's, but OISY
+  reads and spends only the associated one, so it would be lost to the wallet (in review,
+  2026-10-28).
   The v1 variants (`route`, `shared_accounts_route`, their token-ledger variants) and every
   exact-out variant are not allowed: none came from LI.FI, and each would need its own
   decoder. A test from a real LI.FI transaction fixture covers `route_v2`; LI.FI sent no
