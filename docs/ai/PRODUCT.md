@@ -336,12 +336,13 @@ The two gas figures show how far estimates fall short, per token and network. Th
 
 Loading the user's contacts emits one structured **`contact`** event under `event_context: contacts`, following the domain-service pattern (the step in `event_modifier`, the outcome in `result_status`). It never carries a contact name, an address, a contact id, or PII.
 
-The contacts load when the user signs in or opens OISY already signed in. A load that fails is tried again after 2 seconds and, if that fails too, after another 4 seconds. Once the third attempt fails, the user sees a "Failed to load contacts" error toast.
+The contacts load when the user signs in or opens OISY already signed in: first the contacts without their images, in pages, then the images in batches of 16, so that every certified reply stays below 2 MiB. A load that fails is tried again after 2 seconds and, if that fails too, after another 4 seconds. Once the third attempt fails, the user sees a "Failed to load contacts" error toast. A contact whose image did not load shows without it, and editing that contact reads the image first, so the edit keeps it.
 
 | `event_modifier` | Fires when                 | `result_status` | `event_severity` | Extra                                             |
 | ---------------- | -------------------------- | --------------- | ---------------- | ------------------------------------------------- |
 | `load_all`       | the third attempt fails    | `error`         | `error`          | `result_error_type`: `call_rejected` or `unknown` |
 | `load_all`       | a retry loads the contacts | `success`       | `warn`           | —                                                 |
+| `load_images`    | an image batch fails       | `error`         | `warn`           | `result_error_type`: `call_rejected` or `unknown` |
 
 A load that succeeds on the first attempt sends nothing. A failure is tracked by its category only: `call_rejected` when the backend rejected the call, `unknown` for anything else. The error text stays out, since an agent error carries the call context.
 
