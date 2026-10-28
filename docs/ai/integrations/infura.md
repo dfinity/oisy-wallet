@@ -52,7 +52,9 @@ the end.
 ## Transaction lifecycle
 
 - **Nonce** — `getTransactionCount` with `latest` / `pending` tags, exposed as
-  `getTransactionCountLatest` / `getTransactionCountPending`.
+  `getTransactionCountLatest` / `getTransactionCountPending`. When Infura does not
+  answer the `pending` read within 10 s, it goes to Alchemy — see
+  [Alchemy → EVM — fallback for Infura](./alchemy.md#evm--fallback-for-infura).
 - **Block number** — `getBlockNumber`, used for transaction finality tracking
   (`src/frontend/src/eth/services/eth-transactions.services.ts`).
 - **Broadcast signed transactions** — `sendTransaction` wraps ethers'
