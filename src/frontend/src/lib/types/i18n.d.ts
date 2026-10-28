@@ -940,7 +940,12 @@ interface I18nCycles_top_up {
 		canister: string;
 		you_top_up: string;
 		total: string;
+		canister_receives: string;
+		cycles_estimate: string;
+		rate: string;
+		converted_by: string;
 		one_way: string;
+		one_way_icp: string;
 		topping_up: string;
 		topped_up: string;
 		unknown: string;
@@ -953,6 +958,8 @@ interface I18nCycles_top_up {
 		canister_not_found: string;
 		canister_check_failed: string;
 		amount_too_small: string;
+		amount_too_small_icp: string;
+		rate_unavailable: string;
 		refused: string;
 		insufficient_funds: string;
 		clock: string;
