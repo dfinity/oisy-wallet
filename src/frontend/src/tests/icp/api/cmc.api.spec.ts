@@ -1,6 +1,6 @@
 import type { NotifyMintCyclesSuccess } from '$declarations/cmc/cmc.did';
 import { CMC_CANISTER_ID } from '$env/networks/networks.icp.env';
-import { getIcpXdrConversionRate, notifyMintCycles } from '$icp/api/cmc.api';
+import { getIcpXdrConversionRate, notifyMintCycles, notifyTopUp } from '$icp/api/cmc.api';
 import { CmcCanister } from '$icp/canisters/cmc.canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Principal } from '@icp-sdk/core/principal';
@@ -67,6 +67,28 @@ describe('cmc.api', () => {
 
 		it('should throw if identity is undefined', async () => {
 			await expect(notifyMintCycles({ identity: undefined, blockIndex: 123n })).rejects.toThrow();
+		});
+	});
+
+	describe('notifyTopUp', () => {
+		const canisterId = Principal.fromText('ywcsb-maaaa-aaaai-q6k7a-cai');
+
+		it('should notify the CMC of the block for the canister', async () => {
+			cmcCanisterMock.notifyTopUp.mockResolvedValue(2_500_000_000_000n);
+
+			await expect(
+				notifyTopUp({ identity: mockIdentity, blockIndex: 123n, canisterId })
+			).resolves.toBe(2_500_000_000_000n);
+			expect(cmcCanisterMock.notifyTopUp).toHaveBeenCalledExactlyOnceWith({
+				blockIndex: 123n,
+				canisterId
+			});
+		});
+
+		it('should throw if identity is undefined', async () => {
+			await expect(
+				notifyTopUp({ identity: undefined, blockIndex: 123n, canisterId })
+			).rejects.toThrow();
 		});
 	});
 });
