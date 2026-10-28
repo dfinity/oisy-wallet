@@ -1,10 +1,17 @@
 import * as canisterTopUpEnv from '$env/canister-top-up.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as canisterStateApi from '$icp/api/canister-state.api';
+import * as cmcApi from '$icp/api/cmc.api';
 import CyclesTopUpModal from '$icp/components/cycles-top-up/CyclesTopUpModal.svelte';
 import * as cyclesTopUpServices from '$icp/services/cycles-top-up.services';
 import { lastCyclesTopUps } from '$icp/stores/cycles-top-up.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-import type { CanisterExistence, CyclesTopUpResult } from '$icp/types/cycles-top-up';
+import {
+	CyclesTopUpIcpError,
+	type CanisterExistence,
+	type CyclesTopUpNotifyResult,
+	type CyclesTopUpResult
+} from '$icp/types/cycles-top-up';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import {
 	CYCLES_TOP_UP_AMOUNT,
@@ -16,19 +23,22 @@ import {
 	CYCLES_TOP_UP_REVIEW,
 	CYCLES_TOP_UP_REVIEW_BACK_BUTTON,
 	CYCLES_TOP_UP_REVIEW_TOP_UP_BUTTON,
+	CYCLES_TOP_UP_TOKEN_OPTION,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import * as authDerived from '$lib/derived/auth.derived';
+import * as tokensDerived from '$lib/derived/tokens.derived';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import * as cyclesTopUpAnalytics from '$lib/services/cycles-top-up-analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { contactsStore } from '$lib/stores/contacts.store';
 import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
+import * as consoleUtils from '$lib/utils/console.utils';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import * as walletUtils from '$lib/utils/wallet.utils';
-import { mockTcyclesToken } from '$tests/mocks/cycles-mint.mock';
+import { mockTcyclesToken, mockXdrPermyriadPerIcp } from '$tests/mocks/cycles-mint.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity, mockPrincipal2, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -167,7 +177,10 @@ describe('CyclesTopUpModal', () => {
 		const { container } = renderModal();
 
 		expect(container).toHaveTextContent(en.cycles_top_up.text.title);
-		expect(trackSpy).toHaveBeenCalledExactlyOnceWith({ step: 'open' });
+		expect(trackSpy).toHaveBeenCalledExactlyOnceWith({
+			step: 'open',
+			sourceLocation: 'token_details'
+		});
 	});
 
 	describe('canister step', () => {
@@ -541,11 +554,13 @@ describe('CyclesTopUpModal', () => {
 			expect(trackSpy).toHaveBeenNthCalledWith(2, {
 				step: 'top_up',
 				tokenSymbol: 'TCYCLES',
+				sourceLocation: 'token_details',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING
 			});
 			expect(trackSpy).toHaveBeenNthCalledWith(3, {
 				step: 'top_up',
 				tokenSymbol: 'TCYCLES',
+				sourceLocation: 'token_details',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
 			});
 			expect(walletUtils.waitAndTriggerWallet).toHaveBeenCalledOnce();
@@ -566,6 +581,7 @@ describe('CyclesTopUpModal', () => {
 			expect(trackSpy).toHaveBeenLastCalledWith({
 				step: 'top_up',
 				tokenSymbol: 'TCYCLES',
+				sourceLocation: 'token_details',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 				errorCode: 'refused'
 			});
@@ -643,6 +659,7 @@ describe('CyclesTopUpModal', () => {
 			expect(trackSpy).toHaveBeenLastCalledWith({
 				step: 'top_up',
 				tokenSymbol: 'TCYCLES',
+				sourceLocation: 'token_details',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 				errorCode: 'unknown'
 			});
@@ -1245,6 +1262,410 @@ describe('CyclesTopUpModal', () => {
 				await topUp(result);
 
 				expect(topUpSpy).not.toHaveBeenCalled();
+			});
+		});
+	});
+
+	describe('from the navigation', () => {
+		let rateSpy: MockInstance;
+		let topUpWithIcpSpy: MockInstance;
+
+		const renderFromNavigation = () => render(CyclesTopUpModal, { props: {} });
+
+		// ICP first, as the picker lists them.
+		const pickToken = async ({
+			result,
+			index
+		}: {
+			result: ReturnType<typeof renderModal>;
+			index: 0 | 1;
+		}) => {
+			const button = result
+				.getAllByTestId(CYCLES_TOP_UP_TOKEN_OPTION)
+				[index].querySelector('button');
+
+			assertNonNullish(button);
+
+			await fireEvent.click(button);
+		};
+
+		const onCanisterStep = async (result: ReturnType<typeof renderModal>) => {
+			await waitFor(() => {
+				expect(result.getByTestId(CYCLES_TOP_UP_CANISTER_INPUT)).toBeInTheDocument();
+			});
+		};
+
+		// From the canister step, with the amount entered once the step takes it.
+		const canisterToReview = async ({
+			result,
+			value
+		}: {
+			result: ReturnType<typeof renderModal>;
+			value: string;
+		}) => {
+			await enterCanister({ result, text: canister });
+
+			await fireEvent.click(result.getByTestId(CYCLES_TOP_UP_CANISTER_NEXT_BUTTON));
+
+			await waitFor(() => {
+				expect(result.getByTestId(CYCLES_TOP_UP_AMOUNT)).toBeInTheDocument();
+			});
+
+			const input = result.container.querySelector<HTMLInputElement>(
+				`input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`
+			);
+
+			assertNonNullish(input);
+
+			// Paid with ICP, the amount waits for the rate.
+			await waitFor(() => {
+				expect(input).toBeEnabled();
+			});
+
+			await fireEvent.input(input, { target: { value } });
+
+			await waitFor(() => {
+				expect(result.getByTestId(CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON)).toBeEnabled();
+			});
+
+			await fireEvent.click(result.getByTestId(CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON));
+
+			await backOnReview(result);
+		};
+
+		const toIcpReview = async () => {
+			const result = renderFromNavigation();
+
+			await pickToken({ result, index: 0 });
+
+			await onCanisterStep(result);
+
+			await canisterToReview({ result, value: '1.5' });
+
+			// Top up waits for the quote Review opened with.
+			await waitFor(() => {
+				expect(result.getByTestId(CYCLES_TOP_UP_REVIEW_TOP_UP_BUTTON)).toBeEnabled();
+			});
+
+			return result;
+		};
+
+		beforeEach(() => {
+			vi.spyOn(canisterTopUpEnv, 'CANISTER_TOP_UP_ENABLED', 'get').mockReturnValue(true);
+			vi.spyOn(tokensDerived, 'enabledIcTokens', 'get').mockReturnValue(readable([token]));
+
+			rateSpy = vi
+				.spyOn(cmcApi, 'getIcpXdrConversionRate')
+				.mockResolvedValue(mockXdrPermyriadPerIcp);
+			topUpWithIcpSpy = vi
+				.spyOn(cyclesTopUpServices, 'topUpCanisterWithIcp')
+				.mockResolvedValue({ status: 'topped_up', cycles: 6_750_000_000_000n });
+
+			balancesStore.set({ id: ICP_TOKEN.id, data: { data: 250_000_000n, certified: true } });
+		});
+
+		it('opens on the token picker when ICP and TCYCLES can both pay, and reports the open from there', () => {
+			const { container, getAllByTestId } = renderFromNavigation();
+
+			expect(container).toHaveTextContent(en.cycles_top_up.text.canister_top_up);
+			expect(getAllByTestId(CYCLES_TOP_UP_TOKEN_OPTION)).toHaveLength(2);
+			expect(trackSpy).toHaveBeenCalledExactlyOnceWith({
+				step: 'open',
+				sourceLocation: 'navigation'
+			});
+		});
+
+		it('starts on the canister step with ICP when only ICP can pay, with Cancel', async () => {
+			// Twice the TCYCLES fee: no amount above the fee is left to pay with.
+			balancesStore.set({
+				id: mockTcyclesToken.id,
+				data: { data: 200_000_000n, certified: true }
+			});
+
+			const result = renderFromNavigation();
+
+			await onCanisterStep(result);
+
+			expect(result.container).toHaveTextContent(
+				replacePlaceholders(en.cycles_top_up.text.description_icp, { $token: 'ICP' })
+			);
+			expect(result.queryByTestId(CYCLES_TOP_UP_TOKEN_OPTION)).toBeNull();
+			expect(result.getByText(en.core.text.cancel)).toBeInTheDocument();
+		});
+
+		it('starts on the canister step with TCYCLES when only TCYCLES can pay', async () => {
+			// The 0.0003 ICP a refund keeps and the fee: no amount above them is left.
+			balancesStore.set({ id: ICP_TOKEN.id, data: { data: 40_000n, certified: true } });
+
+			const result = renderFromNavigation();
+
+			await onCanisterStep(result);
+
+			expect(result.container).toHaveTextContent(
+				replacePlaceholders(en.cycles_top_up.text.description, { $token: 'TCYCLES' })
+			);
+		});
+
+		it('counts a balance that has not loaded as zero', async () => {
+			balancesStore.reset(ICP_TOKEN.id);
+
+			const result = renderFromNavigation();
+
+			await onCanisterStep(result);
+
+			expect(result.container).toHaveTextContent(
+				replacePlaceholders(en.cycles_top_up.text.description, { $token: 'TCYCLES' })
+			);
+		});
+
+		it('counts TCYCLES out while it is not enabled', async () => {
+			vi.spyOn(tokensDerived, 'enabledIcTokens', 'get').mockReturnValue(readable([]));
+
+			const result = renderFromNavigation();
+
+			await onCanisterStep(result);
+
+			expect(result.container).toHaveTextContent(
+				replacePlaceholders(en.cycles_top_up.text.description_icp, { $token: 'ICP' })
+			);
+		});
+
+		it('explains what a top-up is and goes no further when no token can pay', () => {
+			balancesStore.reset(ICP_TOKEN.id);
+			balancesStore.reset(mockTcyclesToken.id);
+
+			const { container, queryByTestId } = renderFromNavigation();
+
+			expect(container).toHaveTextContent(en.cycles_top_up.text.no_token_title);
+			expect(queryByTestId(CYCLES_TOP_UP_TOKEN_OPTION)).toBeNull();
+			expect(queryByTestId(CYCLES_TOP_UP_CANISTER_INPUT)).toBeNull();
+		});
+
+		it('returns from the canister step to the picker', async () => {
+			const result = renderFromNavigation();
+
+			await pickToken({ result, index: 0 });
+
+			await onCanisterStep(result);
+
+			await fireEvent.click(result.getByText(en.core.text.back));
+
+			await waitFor(() => {
+				expect(result.getAllByTestId(CYCLES_TOP_UP_TOKEN_OPTION)).toHaveLength(2);
+			});
+		});
+
+		it('starts on the Review of an unanswered TCYCLES top-up', async () => {
+			lastCyclesTopUps.set({
+				[mockPrincipalText]: {
+					request: { canisterId: canister, amount: 1_500_000_000_000n, createdAt: 1_000_000_000n },
+					send: Symbol()
+				}
+			});
+
+			const result = renderFromNavigation();
+
+			await backOnReview(result);
+
+			expect(result.container).toHaveTextContent(
+				replacePlaceholders(en.cycles_top_up.text.unknown, { $token: 'TCYCLES' })
+			);
+
+			await topUp(result);
+
+			await waitFor(() => {
+				expect(topUpSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ amount: 1_500_000_000_000n, createdAt: 1_000_000_000n })
+				);
+			});
+		});
+
+		it('tops up with TCYCLES, reported from the navigation, without loading the ICP rate', async () => {
+			const result = renderFromNavigation();
+
+			await pickToken({ result, index: 1 });
+
+			await onCanisterStep(result);
+
+			await canisterToReview({ result, value: '1.5' });
+
+			await topUp(result);
+
+			await waitFor(() => {
+				expect(trackSpy).toHaveBeenNthCalledWith(3, {
+					step: 'top_up',
+					tokenSymbol: 'TCYCLES',
+					sourceLocation: 'navigation',
+					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+				});
+			});
+
+			expect(topUpWithIcpSpy).not.toHaveBeenCalled();
+			expect(rateSpy).not.toHaveBeenCalled();
+		});
+
+		describe('paid with ICP', () => {
+			it('re-quotes the rate when Review opens', async () => {
+				await toIcpReview();
+
+				// Once when ICP was picked, once for Review.
+				expect(rateSpy).toHaveBeenCalledTimes(2);
+			});
+
+			it('tops up through the CMC and confirms the cycles it deposited, in trillions', async () => {
+				const result = await toIcpReview();
+
+				await topUp(result);
+
+				await waitFor(() => {
+					expect(toastsShowSpy).toHaveBeenCalledWith({
+						text: `Topped up ${shortenWithMiddleEllipsis({ text: canister })} with 6.75T cycles.`,
+						level: 'success',
+						duration: 4000
+					});
+				});
+
+				expect(topUpWithIcpSpy).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					topUpId: expect.any(String),
+					sourceToken: ICP_TOKEN,
+					canisterId: Principal.fromText(canister),
+					amount: 150_000_000n,
+					usdSourceValue: undefined,
+					progress: expect.any(Function)
+				});
+				expect(topUpSpy).not.toHaveBeenCalled();
+				expect(walletUtils.waitAndTriggerWallet).toHaveBeenCalledOnce();
+				// The top-up's row reports how it ended.
+				expect(trackSpy).toHaveBeenCalledExactlyOnceWith({
+					step: 'open',
+					sourceLocation: 'navigation'
+				});
+			});
+
+			it('says it finishes in the background while the CMC keeps it pending', async () => {
+				topUpWithIcpSpy.mockResolvedValue({ status: 'pending' });
+
+				const result = await toIcpReview();
+
+				await topUp(result);
+
+				await waitFor(() => {
+					expect(toastsShowSpy).toHaveBeenCalledWith({
+						text: en.cycles_top_up.text.pending,
+						level: 'info'
+					});
+				});
+			});
+
+			it.each<{ label: string; answer: CyclesTopUpNotifyResult; text: string }>([
+				{
+					label: 'a refund, minus what the CMC keeps',
+					answer: { status: 'refunded', reason: 'Canister not found', refundBlockIndex: 13n },
+					text: "The canister couldn't receive the cycles. Your ICP came back to your wallet, minus 0.0003 ICP in fees. Check the canister ID."
+				},
+				{
+					label: 'a refund the fees took whole',
+					answer: { status: 'refunded', reason: 'Canister not found' },
+					text: en.cycles_top_up.error.refunded_nothing
+				},
+				{
+					label: 'another final answer',
+					answer: { status: 'failed', reason: 'Canister not found' },
+					text: replacePlaceholders(en.cycles_top_up.error.failed, { $token: 'ICP' })
+				}
+			])('reports $label without the CMC’s reason', async ({ answer, text }) => {
+				topUpWithIcpSpy.mockResolvedValue(answer);
+
+				const result = await toIcpReview();
+
+				await topUp(result);
+
+				await waitFor(() => {
+					expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({ msg: { text } });
+				});
+			});
+
+			it('goes back to Review when nothing moved', async () => {
+				topUpWithIcpSpy.mockRejectedValue(new CyclesTopUpIcpError('transfer_failed'));
+
+				const result = await toIcpReview();
+
+				await topUp(result);
+
+				await waitFor(() => {
+					expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({
+						msg: {
+							text: "The ICP transfer didn't go through. Nothing left your wallet. Try again in a moment."
+						}
+					});
+				});
+
+				await backOnReview(result);
+			});
+
+			it.each(['not_trackable', 'timed_out'] as const)(
+				'says the top-up could not start when it is %s',
+				async (kind) => {
+					topUpWithIcpSpy.mockRejectedValue(new CyclesTopUpIcpError(kind));
+
+					const result = await toIcpReview();
+
+					await topUp(result);
+
+					await waitFor(() => {
+						expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({
+							msg: { text: en.cycles_top_up.error.not_started }
+						});
+					});
+				}
+			);
+
+			it('logs an unexpected error and goes back to Review', async () => {
+				const consoleErrorSpy = vi
+					.spyOn(consoleUtils, 'consoleError')
+					.mockImplementation(() => undefined);
+
+				const err = new Error('Unexpected');
+
+				topUpWithIcpSpy.mockRejectedValue(err);
+
+				const result = await toIcpReview();
+
+				await topUp(result);
+
+				await waitFor(() => {
+					expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({
+						msg: { text: en.send.error.unexpected }
+					});
+				});
+
+				expect(consoleErrorSpy).toHaveBeenCalledExactlyOnceWith(err);
+
+				await backOnReview(result);
+			});
+
+			it('closes and points to Active transactions when the transfer went unanswered', async () => {
+				topUpWithIcpSpy.mockRejectedValue(new CyclesTopUpIcpError('unconfirmed'));
+
+				const result = await toIcpReview();
+
+				await topUp(result);
+
+				await waitFor(() => {
+					expect(toastsShowSpy).toHaveBeenCalledWith({
+						text: "OISY couldn't confirm the ICP transfer. If it went through, the top-up finishes in the background: follow it under Active transactions.",
+						level: 'warn'
+					});
+				});
+
+				// Neither back on Review nor left on the progress.
+				await waitFor(() => {
+					expect(result.queryByTestId(CYCLES_TOP_UP_REVIEW)).toBeNull();
+					expect(result.container).not.toHaveTextContent(
+						'Sending ICP to the Cycles Minting Canister...'
+					);
+				});
 			});
 		});
 	});

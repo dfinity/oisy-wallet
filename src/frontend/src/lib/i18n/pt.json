@@ -1199,6 +1199,7 @@
 		"text": {
 			"top_up": "Recarregar",
 			"title": "Recarregar um canister",
+			"canister_top_up": "",
 			"description": "Os ciclos saem do seu saldo de $token para o canister, que os gasta em computação e armazenamento.",
 			"description_icp": "",
 			"pay_with": "",
@@ -1224,6 +1225,8 @@
 			"one_way_icp": "",
 			"topping_up": "Recarregando $canister...",
 			"topped_up": "$canister recarregado com $amount $token.",
+			"topped_up_cycles": "",
+			"pending": "",
 			"unknown": "OISY ainda não sabe se a recarga foi concluída. Se foi, sua atividade de $token vai mostrá-la. Recarregue de novo para reenviar a mesma recarga: ela só pode ser concluída uma vez. Uma recarga nova ou alterada adicionaria ciclos de novo se esta foi concluída.",
 			"unknown_fresh": "OISY ainda não sabe se sua última recarga foi concluída. Se foi, esta recarga adiciona ciclos de novo. Verifique primeiro sua atividade de $token.",
 			"sent_to_canister": "Enviar $token para um canister não o recarrega. Os $token chegam à conta do canister, e o canister só recebe ciclos se o próprio código dele os sacar.",
@@ -1240,7 +1243,12 @@
 			"insufficient_funds": "Não há $token suficientes para esta recarga e a taxa. Nada saiu da sua carteira. Reduza o valor.",
 			"clock": "A recarga não foi concluída porque o relógio do seu dispositivo está errado. Nada saiu da sua carteira. Ajuste a hora correta e tente novamente.",
 			"refunded": "O canister não conseguiu receber os ciclos. $refund $token voltaram para sua carteira, e a tentativa custou $fees $token em taxas. Verifique o ID do canister.",
-			"refunded_nothing": "O canister não conseguiu receber os ciclos, e as taxas consumiram todo o valor. Verifique o ID do canister."
+			"refunded_nothing": "O canister não conseguiu receber os ciclos, e as taxas consumiram todo o valor. Verifique o ID do canister.",
+			"refunded_icp": "",
+			"failed": "",
+			"not_started": "",
+			"transfer_failed": "",
+			"unconfirmed": ""
 		}
 	},
 	"active_user_transactions": {
