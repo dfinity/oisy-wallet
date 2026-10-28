@@ -78,6 +78,16 @@ pub const TIP_RETENTION_AFTER_TERMINAL_NS: u64 = 30 * 24 * 60 * 60 * 1_000_000_0
 /// call fail at the message-size limit.
 pub const MAX_TIPS_RETURNED: usize = 200;
 
+/// Maximum number of tips one sender keeps stored, History included.
+///
+/// [`MAX_TIPS_PER_USER`] counts only live tips, and a finished one is kept for
+/// [`TIP_RETENTION_AFTER_TERMINAL_NS`], so without this a sender's stored rows
+/// would be bounded by how many tips they create in that window rather than by
+/// a count. History never shows more than [`MAX_TIPS_RETURNED`] rows, so that
+/// is the bound. It must stay above the live cap, so a new tip always finds
+/// finished rows to make room with.
+pub const MAX_STORED_TIPS_PER_USER: usize = MAX_TIPS_RETURNED;
+
 /// Create-tip request. The canister stores the tip and verifies the sender's
 /// allowance covers it; it never takes custody.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]

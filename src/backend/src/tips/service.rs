@@ -12,7 +12,8 @@ use candid::Principal;
 use ic_cdk::api::{canister_self, msg_caller, time};
 use shared::types::tip::{
     CreateTipRequest, MyTip, PublicTip, TipClaim, TipClaimFailure, TipClaimFailureReason,
-    TipClaimRequest, TipDetails, TipError, MAX_TIPS_RETURNED, TIP_RETENTION_AFTER_TERMINAL_NS,
+    TipClaimRequest, TipDetails, TipError, MAX_STORED_TIPS_PER_USER, MAX_TIPS_RETURNED,
+    TIP_RETENTION_AFTER_TERMINAL_NS,
 };
 
 use super::{
@@ -89,6 +90,42 @@ fn partition_sender_tips(
         }
     }
     (active, collectable)
+}
+
+/// The finished tips one sender has to give up so that one more tip keeps them
+/// within [`MAX_STORED_TIPS_PER_USER`].
+///
+/// Live tips are never chosen. Finished ones go in the order the retention
+/// sweep would take them anyway, earliest `active_until` first, so this only
+/// brings that sweep forward for a sender who creates tips faster than
+/// retention lets them go.
+fn finished_tips_over_storage_cap(
+    by_sender: &TipsBySenderMap,
+    sender: Principal,
+    now_ns: u64,
+) -> Vec<TipId> {
+    let prefix = StoredPrincipal(sender);
+    let start = TipSenderKey(prefix, TipId(String::new()));
+    let mut stored = 0usize;
+    let mut finished = Vec::new();
+    for entry in by_sender
+        .range(start..)
+        .take_while(|entry| entry.key().0 == prefix)
+    {
+        stored += 1;
+        let active_until_ns = entry.value();
+        if active_until_ns <= now_ns {
+            finished.push((active_until_ns, entry.key().1.clone()));
+        }
+    }
+
+    let excess = (stored + 1).saturating_sub(MAX_STORED_TIPS_PER_USER);
+    finished.sort_unstable();
+    finished
+        .into_iter()
+        .take(excess)
+        .map(|(_, tip_id)| tip_id)
+        .collect()
 }
 
 fn remove_tip(state: &mut State, tip_id: &TipId, sender: Principal) {
@@ -184,7 +221,8 @@ pub async fn create_tip(request: CreateTipRequest) -> Result<(), TipError> {
         return Err(TipError::InvalidExpiry);
     }
 
-    mutate_state(|s| {
+    let mut removed = Vec::new();
+    let created = mutate_state(|s| {
         // Re-read the clock. `now` above was taken before two awaited ledger
         // calls, and an expiry that was in the future when the request arrived
         // can be in the past by the time it is written — which would store a tip
@@ -200,12 +238,20 @@ pub async fn create_tip(request: CreateTipRequest) -> Result<(), TipError> {
         let (active_count, collectable) = partition_sender_tips(&s.tips_by_sender, sender, now);
         for stale in collectable {
             remove_tip(s, &stale, sender);
+            removed.push(stale);
         }
         if s.tips.contains_key(&tip_id) {
             return Err(TipError::DuplicateTipId);
         }
         if new_tip_exceeds_cap(active_count) {
             return Err(TipError::TooManyTips);
+        }
+
+        // A tip that lapses frees its live slot at once but stays for retention,
+        // so the live cap alone does not bound what a sender keeps stored.
+        for finished in finished_tips_over_storage_cap(&s.tips_by_sender, sender, now) {
+            remove_tip(s, &finished, sender);
+            removed.push(finished);
         }
 
         store_tip(
@@ -225,7 +271,15 @@ pub async fn create_tip(request: CreateTipRequest) -> Result<(), TipError> {
             },
         );
         Ok(())
-    })
+    });
+
+    // Outside the borrow above, as in `prune_expired_tips`: dropping a secret
+    // goes through `mutate_state` itself.
+    for tip_id in removed {
+        let _ = secrets::remove_tip_secret_for(sender, tip_id.0);
+    }
+
+    created
 }
 
 /// What an anonymous reader of a tip link sees: amount, token, deadline.
@@ -800,6 +854,94 @@ mod tests {
                 .collect::<Vec<_>>(),
             vec!["a-old".to_string()],
             "retention boundary is exclusive, and another sender's rows never leak in"
+        );
+    }
+
+    fn insert_tips(map: &mut TipsBySenderMap, sender: Principal, rows: &[(&str, u64)]) {
+        for (tip_id, active_until_ns) in rows {
+            map.insert(
+                TipSenderKey(StoredPrincipal(sender), TipId((*tip_id).to_string())),
+                *active_until_ns,
+            );
+        }
+    }
+
+    fn ids(tip_ids: &[TipId]) -> Vec<String> {
+        tip_ids.iter().map(|id| id.0.clone()).collect()
+    }
+
+    #[test]
+    fn the_live_cap_leaves_room_under_the_storage_cap() {
+        assert!(shared::types::tip::MAX_TIPS_PER_USER < MAX_STORED_TIPS_PER_USER);
+    }
+
+    #[test]
+    fn a_sender_below_the_storage_cap_keeps_every_row() {
+        let mut map = in_memory_by_sender_map();
+        let alice = test_principal(1);
+        let now = 10 * TIP_RETENTION_AFTER_TERMINAL_NS;
+
+        let names: Vec<String> = (0..MAX_STORED_TIPS_PER_USER - 1)
+            .map(|i| format!("done-{i}"))
+            .collect();
+        let rows: Vec<(&str, u64)> = names.iter().map(|name| (name.as_str(), now - 1)).collect();
+        insert_tips(&mut map, alice, &rows);
+
+        assert!(finished_tips_over_storage_cap(&map, alice, now).is_empty());
+    }
+
+    #[test]
+    fn the_storage_cap_gives_up_the_earliest_finished_rows_and_never_a_live_one() {
+        let mut map = in_memory_by_sender_map();
+        let alice = test_principal(1);
+        let bob = test_principal(2);
+        let now = 10 * TIP_RETENTION_AFTER_TERMINAL_NS;
+
+        // A full store: one live tip, the rest finished at different instants.
+        let names: Vec<String> = (0..MAX_STORED_TIPS_PER_USER - 1)
+            .map(|i| format!("done-{i:03}"))
+            .collect();
+        let mut rows: Vec<(&str, u64)> = names
+            .iter()
+            .zip(1u64..)
+            .map(|(name, age)| (name.as_str(), now - age))
+            .collect();
+        rows.push(("live", now + 1));
+        insert_tips(&mut map, alice, &rows);
+        // Another sender's rows never count towards alice's store.
+        insert_tips(&mut map, bob, &[("b-done", now - 1), ("b-live", now + 1)]);
+
+        let last = format!("done-{:03}", MAX_STORED_TIPS_PER_USER - 2);
+        assert_eq!(
+            ids(&finished_tips_over_storage_cap(&map, alice, now)),
+            vec![last],
+            "one more tip takes the row that finished first, the one retention would take next"
+        );
+        assert!(finished_tips_over_storage_cap(&map, bob, now).is_empty());
+    }
+
+    #[test]
+    fn a_store_far_over_the_cap_is_brought_back_under_it_in_one_create() {
+        let mut map = in_memory_by_sender_map();
+        let alice = test_principal(1);
+        let now = 10 * TIP_RETENTION_AFTER_TERMINAL_NS;
+
+        let names: Vec<String> = (0..MAX_STORED_TIPS_PER_USER + 10)
+            .map(|i| format!("done-{i:03}"))
+            .collect();
+        let rows: Vec<(&str, u64)> = names
+            .iter()
+            .zip(1u64..)
+            .map(|(name, age)| (name.as_str(), now - age))
+            .collect();
+        insert_tips(&mut map, alice, &rows);
+
+        let given_up = finished_tips_over_storage_cap(&map, alice, now);
+        assert_eq!(given_up.len(), 11);
+        assert_eq!(
+            ids(&given_up)[0],
+            format!("done-{:03}", MAX_STORED_TIPS_PER_USER + 9),
+            "earliest-finished first"
         );
     }
 }
