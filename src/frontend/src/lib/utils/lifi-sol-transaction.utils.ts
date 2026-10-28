@@ -17,7 +17,7 @@ import {
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
-	SOLANA_TRANSACTION_FEE_IN_LAMPORTS,
+	SOLANA_LAMPORTS_PER_SIGNATURE,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
@@ -586,7 +586,7 @@ export const lifiSolNetworkFee = ({
 	signatures: number;
 	instructionsCount: number;
 }): bigint =>
-	SOLANA_TRANSACTION_FEE_IN_LAMPORTS * BigInt(signatures) +
+	SOLANA_LAMPORTS_PER_SIGNATURE * BigInt(signatures) +
 	(calculateSolPrioritizationFee({ computeUnitPrice, computeUnitLimit, instructionsCount }) ??
 		ZERO);
 
