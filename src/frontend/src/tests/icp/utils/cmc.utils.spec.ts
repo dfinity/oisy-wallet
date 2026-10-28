@@ -1,9 +1,17 @@
 import { CMC_CANISTER_ID } from '$env/networks/networks.icp.env';
+import {
+	CmcNotifyInvalidTransactionError,
+	CmcNotifyOtherError,
+	CmcNotifyProcessingError,
+	CmcNotifyRefundedError,
+	CmcNotifyTransactionTooOldError
+} from '$icp/canisters/cmc.errors';
 import { CMC_MINT_CYCLES_MEMO } from '$icp/constants/cmc.constants';
 import {
 	getCmcDepositAccount,
 	getCmcDepositAccountIdentifier,
-	isCmcDeposit
+	isCmcDeposit,
+	toCmcNotifyFailure
 } from '$icp/utils/cmc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
@@ -130,6 +138,42 @@ describe('cmc.utils', () => {
 			}
 		])('does not match $label', ({ transaction }) => {
 			expect(isCmcDeposit({ ...params, transaction })).toBeFalsy();
+		});
+	});
+
+	describe('toCmcNotifyFailure', () => {
+		it('reads a refund with its block', () => {
+			expect(toCmcNotifyFailure(new CmcNotifyRefundedError(43n, 'Minting limit reached'))).toEqual({
+				status: 'refunded',
+				reason: 'Minting limit reached',
+				refundBlockIndex: 43n
+			});
+		});
+
+		it('reads a refund without a block', () => {
+			expect(toCmcNotifyFailure(new CmcNotifyRefundedError(undefined, 'Too small'))).toEqual({
+				status: 'refunded',
+				reason: 'Too small'
+			});
+		});
+
+		it.each([
+			{
+				label: 'a block the CMC can no longer process',
+				err: new CmcNotifyTransactionTooOldError(1_000n)
+			},
+			{ label: 'an invalid transaction', err: new CmcNotifyInvalidTransactionError('Wrong memo') },
+			{ label: 'a final CMC error', err: new CmcNotifyOtherError(6n, 'Memo too long') }
+		])('reads $label as failed', ({ err }) => {
+			expect(toCmcNotifyFailure(err)).toEqual({ status: 'failed', reason: err.message });
+		});
+
+		it.each([
+			{ label: 'another notify of the same block', err: new CmcNotifyProcessingError() },
+			{ label: 'a transient CMC error', err: new CmcNotifyOtherError(2n, 'Failed to fetch block') },
+			{ label: 'a call that got no answer', err: new Error('Network error') }
+		])('reads $label as pending', ({ err }) => {
+			expect(toCmcNotifyFailure(err)).toEqual({ status: 'pending' });
 		});
 	});
 });

@@ -1,4 +1,6 @@
 import { CMC_CANISTER_ID } from '$env/networks/networks.icp.env';
+import { CmcNotifyError, CmcNotifyRefundedError } from '$icp/canisters/cmc.errors';
+import type { CmcNotifyFailure } from '$icp/types/cmc';
 import { fromNullable, nonNullish, principalToSubAccount } from '@dfinity/utils';
 import { AccountIdentifier, SubAccount, type IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
@@ -61,4 +63,26 @@ export const isCmcDeposit = ({
 		fromNullable(created_at_time)?.timestamp_nanos === transferCreatedAtNs &&
 		isMemo({ memo: fromNullable(icrc1_memo), expected: memo })
 	);
+};
+
+/**
+ * What a notify that did not succeed means for its deposit. Only a refund and the CMC's
+ * other final answers end it. `Processing`, a transient CMC error and a call that got no
+ * answer all leave it `pending`: the ICP has left the wallet, so the deposit must not be
+ * reported as failed while notifying again can still complete it.
+ */
+export const toCmcNotifyFailure = (err: unknown): CmcNotifyFailure => {
+	if (err instanceof CmcNotifyRefundedError) {
+		return {
+			status: 'refunded',
+			reason: err.message,
+			...(nonNullish(err.refundBlockIndex) && { refundBlockIndex: err.refundBlockIndex })
+		};
+	}
+
+	if (err instanceof CmcNotifyError && !err.retryable) {
+		return { status: 'failed', reason: err.message };
+	}
+
+	return { status: 'pending' };
 };
