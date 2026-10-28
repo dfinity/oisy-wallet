@@ -316,6 +316,9 @@ export const CYCLES_TOP_UP_REVIEW = 'cycles-top-up-review';
 export const CYCLES_TOP_UP_REVIEW_BACK_BUTTON = 'cycles-top-up-review-back-button';
 export const CYCLES_TOP_UP_REVIEW_TOP_UP_BUTTON = 'cycles-top-up-review-top-up-button';
 export const CYCLES_SENT_TO_CANISTER_WARNING = 'cycles-sent-to-canister-warning';
+export const CYCLES_SEND_OR_TOP_UP = 'cycles-send-or-top-up';
+export const CYCLES_SEND_OR_TOP_UP_SEND_BUTTON = 'cycles-send-or-top-up-send-button';
+export const CYCLES_SEND_OR_TOP_UP_TOP_UP_BUTTON = 'cycles-send-or-top-up-top-up-button';
 
 export const HELP_AUTH_IMAGE_BANNER = 'help-auth-image-banner';
 export const HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON = 'help-auth-new-identity-version-button';
