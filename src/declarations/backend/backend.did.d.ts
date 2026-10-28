@@ -2799,6 +2799,13 @@ export interface _SERVICE {
 	 */
 	get_allowed_cycles: ActorMethod<[], GetAllowedCyclesResult>;
 	/**
+	 * Returns usage guidance for AI agents and other API clients.
+	 *
+	 * The Candid interface remains the source of truth for method signatures and
+	 * exact error variants.
+	 */
+	get_api_doc: ActorMethod<[], string>;
+	/**
 	 * Returns the currently stored API keys.
 	 *
 	 * Restricted to canister controllers only.

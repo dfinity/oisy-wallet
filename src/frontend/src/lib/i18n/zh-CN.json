@@ -811,6 +811,7 @@
 			"explorers_description": "",
 			"explorers_velora_description": "",
 			"explorers_near_intents_description": "",
+			"explorers_lifi_description": "从 EVM 网络发起的兑换和跨链桥转账，包括转至 Solana。",
 			"explorers_onesec_description": "",
 			"explorers_chain_eth": "",
 			"explorers_chain_sol": "",

@@ -17,8 +17,9 @@
 		"build:seo": "node scripts/build.seo.mjs",
 		"build:style": "node scripts/build.style.mjs",
 		"build:ic-domains": "node scripts/build.ic-domains.mjs",
+		"build:ic-architecture": "node scripts/build.ic-architecture.mjs",
 		"build:ii-alternative-origins": "node scripts/build.ii-alternative-origins.mjs",
-		"build:post-process": "npm run build:style && npm run build:metadata && npm run build:seo && npm run build:ic-domains && npm run build:ii-alternative-origins && npm run build:csp && npm run build:compress",
+		"build:post-process": "npm run build:style && npm run build:metadata && npm run build:seo && npm run build:ic-domains && npm run build:ic-architecture && npm run build:ii-alternative-origins && npm run build:csp && npm run build:compress",
 		"build:tokens-sns": "vite-node scripts/build.tokens.sns.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.sns.json",
 		"build:tokens-ckerc20": "vite-node scripts/build.tokens.ckerc20.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.ckerc20.json",
 		"build:tokens-icrc": "vite-node scripts/build.tokens.icrc.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.icrc.json",
@@ -109,7 +110,7 @@
 		"ripple-binary-codec": "^2.8.0",
 		"svelte-confetti": "^2.3.2",
 		"viem": "^2.55.11",
-		"zod": "^4.4.3"
+		"zod": "^4.6.7"
 	},
 	"devDependencies": {
 		"@dfinity/eslint-config-oisy-wallet": "^0.5.0",
@@ -138,13 +139,13 @@
 		"prettier-plugin-organize-imports": "^4.3.0",
 		"prettier-plugin-svelte": "^4.1.0",
 		"prettier-plugin-tailwindcss": "^0.8.1",
-		"sass": "^1.98.0",
+		"sass": "^1.105.0",
 		"svelte": "^5.56.6",
 		"svelte-check": "^4.6.0",
 		"tailwindcss": "4.3.3",
 		"tslib": "^2.8.1",
 		"typescript": "^5.4.5",
-		"vite": "^7.3.2",
+		"vite": "^7.3.7",
 		"vite-node": "^6.0.0",
 		"vitest": "^4.1.11",
 		"vitest-mock-extended": "^5.1.1"

@@ -1,4 +1,5 @@
 import {
+	LIFI_EXPLORER_URL,
 	NEAR_INTENTS_EXPLORER_URL,
 	ONESEC_EXPLORER_URL,
 	VELORA_EXPLORER_URL
@@ -62,14 +63,16 @@ describe('HelpProviderExplorers', () => {
 
 		const { getAllByTestId, getByText } = render(HelpProviderExplorers);
 
-		expect(getAllByTestId(HELP_EXPLORERS_GROUP)).toHaveLength(3);
+		expect(getAllByTestId(HELP_EXPLORERS_GROUP)).toHaveLength(4);
 
 		expect(getByText('Velora')).toBeInTheDocument();
 		expect(getByText('NEAR Intents')).toBeInTheDocument();
+		expect(getByText('LI.FI')).toBeInTheDocument();
 		expect(getByText('1Sec')).toBeInTheDocument();
 
 		expect(getByText(en.help.text.explorers_velora_description)).toBeInTheDocument();
 		expect(getByText(en.help.text.explorers_near_intents_description)).toBeInTheDocument();
+		expect(getByText(en.help.text.explorers_lifi_description)).toBeInTheDocument();
 		expect(getByText(en.help.text.explorers_onesec_description)).toBeInTheDocument();
 	});
 
@@ -89,6 +92,9 @@ describe('HelpProviderExplorers', () => {
 		);
 		expect(getByTestId(`${HELP_EXPLORERS_LINK}-nearIntents-btc`).getAttribute('href')).toBe(
 			`${NEAR_INTENTS_EXPLORER_URL}/?search=${mockBtcAddress}`
+		);
+		expect(getByTestId(`${HELP_EXPLORERS_LINK}-lifi-eth`).getAttribute('href')).toBe(
+			`${LIFI_EXPLORER_URL}/wallet/${mockEthAddress}`
 		);
 		expect(getByTestId(`${HELP_EXPLORERS_LINK}-oneSec-icp`).getAttribute('href')).toBe(
 			`${ONESEC_EXPLORER_URL}/explorer/?address=${mockPrincipalText}`

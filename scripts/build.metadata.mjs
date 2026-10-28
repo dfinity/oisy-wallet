@@ -1,12 +1,9 @@
 #!/usr/bin/env node
 
-import { notEmptyString } from '@dfinity/utils';
 import { config } from 'dotenv';
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { ENV, OISY_IC_DOMAIN, findHtmlFiles, replaceEnv } from './build.utils.mjs';
-
-const IS_SIGNER_BUILD = notEmptyString(process.env.OISY_SIGNER_TARGET);
+import { ENV, IS_SIGNER_BUILD, OISY_IC_DOMAIN, findHtmlFiles, replaceEnv } from './build.utils.mjs';
 
 config({ path: `.env.${ENV}` });
 

@@ -811,6 +811,7 @@
 			"explorers_description": "",
 			"explorers_velora_description": "",
 			"explorers_near_intents_description": "",
+			"explorers_lifi_description": "EVM ネットワークからのスワップとブリッジ送金（Solana 宛てを含む）。",
 			"explorers_onesec_description": "",
 			"explorers_chain_eth": "",
 			"explorers_chain_sol": "",
