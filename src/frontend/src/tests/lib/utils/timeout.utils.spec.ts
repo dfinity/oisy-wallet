@@ -116,14 +116,21 @@ describe('timeout.utils', () => {
 			await expect(pending).rejects.toBe(deadline);
 		});
 
-		it('should reject at once when the signal has already aborted', async () => {
-			const controller = new AbortController();
-			controller.abort(deadline);
+		it.each([
+			{ name: 'still pending', operation: () => new Promise(() => undefined) },
+			{ name: 'already fulfilled', operation: () => Promise.resolve('answer') },
+			{ name: 'already rejected', operation: () => Promise.reject(new Error('rpc down')) }
+		])(
+			'should reject at once when the signal has already aborted, the operation $name',
+			async ({ operation }) => {
+				const controller = new AbortController();
+				controller.abort(deadline);
 
-			await expect(
-				untilAborted({ operation: new Promise(() => undefined), signal: controller.signal })
-			).rejects.toBe(deadline);
-		});
+				await expect(
+					untilAborted({ operation: operation(), signal: controller.signal })
+				).rejects.toBe(deadline);
+			}
+		);
 
 		it('should leave no listener on the signal once settled', async () => {
 			const controller = new AbortController();

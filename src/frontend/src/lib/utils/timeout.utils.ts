@@ -49,10 +49,11 @@ export const untilAborted = async <T>({
 	let onAbort: (() => void) | undefined;
 
 	// As above, `operation` is subscribed to straight away, so a rejection arriving after the signal
-	// aborted is still handled and cannot surface as an unhandled rejection.
+	// aborted is still handled and cannot surface as an unhandled rejection. The abort comes first:
+	// `Promise.race` settles with the first entry already settled, so a signal that had aborted before
+	// the call wins over an operation that had already settled too.
 	try {
 		return await Promise.race([
-			operation,
 			new Promise<never>((_, reject) => {
 				onAbort = () => reject(signal.reason);
 
@@ -62,7 +63,8 @@ export const untilAborted = async <T>({
 				}
 
 				signal.addEventListener('abort', onAbort, { once: true });
-			})
+			}),
+			operation
 		]);
 	} finally {
 		if (nonNullish(onAbort)) {
