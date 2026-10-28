@@ -23,14 +23,16 @@ export const notifyMintCycles = async ({
 	return await notifyMintCycles({ blockIndex });
 };
 
+// The canister to top up is `to`, as in `withdrawCycles`: `canisterId` names the CMC itself
+// here.
 export const notifyTopUp = async ({
 	blockIndex,
-	canisterId,
+	to,
 	...rest
-}: CanisterApiFunctionParams<{ blockIndex: bigint; canisterId: Principal }>): Promise<bigint> => {
+}: CanisterApiFunctionParams<{ blockIndex: bigint; to: Principal }>): Promise<bigint> => {
 	const { notifyTopUp } = await cmcCanister(rest);
 
-	return await notifyTopUp({ blockIndex, canisterId });
+	return await notifyTopUp({ blockIndex, canisterId: to });
 };
 
 // Created per call rather than cached: the CMC checks a deposit against the
