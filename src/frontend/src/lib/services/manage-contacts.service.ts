@@ -99,6 +99,7 @@ const loadContactImages = async ({
 		batches.push(contactIds.slice(start, start + CONTACT_IMAGES_BATCH_SIZE));
 	}
 
+	const contactsAtRequest = new Set(get(contactsStore) ?? []);
 	const results = await Promise.allSettled(
 		batches.map((batch) => getContactImages({ identity, contactIds: batch }))
 	);
@@ -117,10 +118,10 @@ const loadContactImages = async ({
 		result.value.forEach(({ contact_id, image }) => images.set(contact_id, image));
 	});
 
-	// A contact edited in the meantime already holds its image and is left as it is.
+	// Contacts replaced by an edit or a newer load must not receive stale images.
 	contactsStore.update((contacts) =>
 		contacts?.map((contact) =>
-			contact.image === undefined && loadedIds.has(contact.id)
+			contactsAtRequest.has(contact) && contact.image === undefined && loadedIds.has(contact.id)
 				? { ...contact, image: images.get(contact.id) ?? null }
 				: contact
 		)

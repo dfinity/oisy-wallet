@@ -210,6 +210,46 @@ describe('manage-contacts.service', () => {
 
 				expect(imageOf(1n)).toEqual(editedImage);
 			});
+
+			it('should not add the images of an older load to the contacts of a newer one', async () => {
+				const newerImage: ContactImage = {
+					data: new Uint8Array([7]),
+					mime_type: { 'image/png': null }
+				};
+
+				mockGetContactsPage.mockResolvedValue(page({ contacts: [contactWith({ id: 1n })] }));
+
+				let resolveOlderImages: (entries: ReturnType<typeof imageEntry>[]) => void = () => {};
+				let resolveNewerImages: (entries: ReturnType<typeof imageEntry>[]) => void = () => {};
+				mockGetContactImages
+					.mockReturnValueOnce(
+						new Promise((resolve) => {
+							resolveOlderImages = resolve;
+						})
+					)
+					.mockReturnValueOnce(
+						new Promise((resolve) => {
+							resolveNewerImages = resolve;
+						})
+					);
+
+				const olderLoad = loadContacts(mockIdentity);
+				await vi.waitFor(() => expect(mockGetContactImages).toHaveBeenCalledOnce());
+
+				const newerLoad = loadContacts(mockIdentity);
+				await vi.waitFor(() => expect(mockGetContactImages).toHaveBeenCalledTimes(2));
+
+				resolveOlderImages([imageEntry(1n)]);
+				await olderLoad;
+
+				// Left for the newer load, whose images are still on the way.
+				expect(imageOf(1n)).toBeUndefined();
+
+				resolveNewerImages([{ contact_id: 1n, image: newerImage }]);
+				await newerLoad;
+
+				expect(imageOf(1n)).toEqual(newerImage);
+			});
 		});
 
 		describe('retries', () => {
