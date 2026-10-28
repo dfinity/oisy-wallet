@@ -2,6 +2,7 @@
 <script lang="ts">
 	import type { ContactUi } from '$lib/types/contact';
 	import type { SendDestinationTab } from '$lib/types/send';
+	import { getMockContactsUi } from '$tests/mocks/contacts.mock';
 	import { mockPrincipalText2 } from '$tests/mocks/identity.mock';
 
 	interface Props {
@@ -50,4 +51,12 @@
 		destination = mockPrincipalText2;
 		onNext();
 	}}>principal</button
+>
+<button
+	data-tid="stub-destination-contact-next"
+	onclick={() => {
+		[selectedContact] = getMockContactsUi({ n: 1, name: 'Alice', addresses: [] });
+		destination = mockPrincipalText2;
+		onNext();
+	}}>contact</button
 >

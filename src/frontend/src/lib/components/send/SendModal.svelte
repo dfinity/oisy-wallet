@@ -301,6 +301,15 @@
 		}
 	};
 
+	// A top-up starts without the address Send had, as it starts without its own canister ID, so
+	// that Send after it asks for a new one: the address entered before is easily sent to unnoticed.
+	const startTopUp = () => {
+		destination = '';
+		selectedContact = undefined;
+
+		goToStep(WizardStepsCyclesTopUp.CANISTER);
+	};
+
 	const onDecodeQrCode = ({
 		status,
 		code,
@@ -396,7 +405,7 @@
 						onBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
 						onClose={close}
 						onSend={() => goToStep(WizardStepsSend.DESTINATION)}
-						onTopUp={() => goToStep(WizardStepsCyclesTopUp.CANISTER)}
+						onTopUp={startTopUp}
 						token={$token}
 					/>
 				{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}

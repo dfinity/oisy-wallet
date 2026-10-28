@@ -8,6 +8,7 @@ import {
 	CYCLES_SEND_OR_TOP_UP_TOP_UP_BUTTON,
 	CYCLES_TOP_UP_CANISTER,
 	CYCLES_TOP_UP_CANISTER_BACK_BUTTON,
+	CYCLES_TOP_UP_CANISTER_INPUT,
 	CYCLES_TOP_UP_REVIEW
 } from '$lib/constants/test-ids.constants';
 import * as authDerived from '$lib/derived/auth.derived';
@@ -489,6 +490,41 @@ describe('SendModal', () => {
 
 					expect(result.queryByTestId(CYCLES_SEND_OR_TOP_UP)).not.toBeInTheDocument();
 				});
+			});
+
+			it("clears Send's address and contact once Top up is picked", async () => {
+				const result = await renderTokensList();
+
+				await pickTcycles(result);
+				await expectChoice(result);
+
+				await fireEvent.click(result.getByTestId(CYCLES_SEND_OR_TOP_UP_SEND_BUTTON));
+				await expectDestination(result);
+
+				await fireEvent.click(result.getByTestId('stub-destination-contact-next'));
+				await waitFor(() => expect(result.getByTestId('stub-amount')).toBeInTheDocument());
+
+				await fireEvent.click(result.getByTestId('stub-to-tokens-list'));
+				await waitFor(() => expect(result.getByTestId('stub-select-tcycles')).toBeInTheDocument());
+
+				await pickTcycles(result);
+				await expectChoice(result);
+
+				await fireEvent.click(result.getByTestId(CYCLES_SEND_OR_TOP_UP_TOP_UP_BUTTON));
+				await expectTopUpCanister(result);
+
+				await fireEvent.input(result.getByTestId(CYCLES_TOP_UP_CANISTER_INPUT), {
+					target: { value: 'ywcsb-maaaa-aaaai-q6k7a-cai' }
+				});
+
+				await fireEvent.click(result.getByTestId(CYCLES_TOP_UP_CANISTER_BACK_BUTTON));
+				await expectChoice(result);
+
+				await fireEvent.click(result.getByTestId(CYCLES_SEND_OR_TOP_UP_SEND_BUTTON));
+				await expectDestination(result);
+
+				expect(result.getByTestId('stub-destination').textContent).toBe('');
+				expect(result.getByTestId('stub-destination-contact').textContent).toBe('');
 			});
 
 			it('goes straight to the destination while the choice is off', async () => {
