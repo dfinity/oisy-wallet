@@ -457,7 +457,7 @@ describe('sol-simulation.utils', () => {
 				expect(preview).toEqual({
 					tokenDeltas: [],
 					controlChanges: [],
-					closedAccounts: [mockAtaAddress]
+					closedAccounts: [{ account: mockAtaAddress, lamports: 2_039_280n }]
 				});
 				expect(isEmptySolSimulationPreview(preview)).toBeTruthy();
 			});
@@ -471,7 +471,7 @@ describe('sol-simulation.utils', () => {
 					userAddress: mockSolAddress
 				});
 
-				expect(preview.closedAccounts).toEqual([mockAtaAddress]);
+				expect(preview.closedAccounts).toEqual([{ account: mockAtaAddress, lamports: 2_039_280n }]);
 			});
 
 			it('should not list one the run did not report on', () => {
