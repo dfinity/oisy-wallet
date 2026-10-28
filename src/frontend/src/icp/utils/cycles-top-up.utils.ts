@@ -1,8 +1,13 @@
+import { CYCLES_LEDGER_DECIMALS, CYCLES_TOP_UP_REFUND_FEES } from '$icp/constants/cmc.constants';
+import type { IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import { isTokenIcp } from '$icp/utils/icrc.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import type { OptionBalance } from '$lib/types/balance';
 import type { ContactUi } from '$lib/types/contact';
 import type { NetworkContacts } from '$lib/types/contacts';
 import { getNetworkContacts } from '$lib/utils/contacts.utils';
+import { formatToken } from '$lib/utils/format.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { decodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
@@ -93,3 +98,46 @@ export const getRecentlyToppedUpCanisters = (
 		b > a ? 1 : b < a ? -1 : 0
 	);
 };
+
+/**
+ * Whether a token can pay for a top-up: its balance covers the fee and the smallest amount
+ * the flow takes. A refund returns the amount minus its fees, so the flow only takes amounts
+ * above them: the CMC's refund fees with ICP, the cycles ledger's fee with TCYCLES. A
+ * balance that has not loaded counts as zero.
+ */
+export const isCyclesTopUpTokenUsable = ({
+	token,
+	balance
+}: {
+	token: IcToken;
+	balance: OptionBalance;
+}): boolean => {
+	const { fee } = token;
+
+	const refundFees = isTokenIcp(token) ? CYCLES_TOP_UP_REFUND_FEES : fee;
+
+	return nonNullish(balance) && balance > refundFees + fee;
+};
+
+/**
+ * The cycles a top-up of `amount` ICP e8s deposits at a CMC rate: the rate converts 1 e8
+ * into exactly `xdrPermyriadPerIcp` cycles (`toCyclesPerIcp`), and unlike a mint, no
+ * cycles ledger takes a fee. An estimate, because the CMC converts at its rate when the
+ * notify runs.
+ */
+export const estimateCyclesTopUpCycles = ({
+	amount,
+	xdrPermyriadPerIcp
+}: {
+	amount: bigint;
+	xdrPermyriadPerIcp: bigint;
+}): bigint => amount * xdrPermyriadPerIcp;
+
+// Cycles as trillions, the unit a top-up paid with ICP shows them in: "2.49" for the "2.49T
+// cycles" a canister receives. Never TCYCLES, which is a token, and none is involved.
+export const formatTrillionCycles = (cycles: bigint): string =>
+	formatToken({
+		value: cycles,
+		unitName: CYCLES_LEDGER_DECIMALS,
+		displayDecimals: CYCLES_LEDGER_DECIMALS
+	});
