@@ -6,6 +6,7 @@ import { formatNanosecondsToShortRelativeTime } from '$lib/utils/format.utils';
 import {
 	mockChainFusionActiveUserTransaction,
 	mockCyclesMintActiveUserTransaction,
+	mockCyclesTopUpActiveUserTransaction,
 	mockLifiActiveUserTransaction,
 	mockLiquidiumActiveUserTransaction,
 	mockNearIntentsActiveUserTransaction,
@@ -131,6 +132,23 @@ describe('ActiveUserTransactionItem', () => {
 		expect(container).toHaveTextContent('Cycles Minting Canister');
 		expect(container).not.toHaveTextContent('Internet Computer → Internet Computer');
 		expect(container).not.toHaveTextContent(en.swap.text.swap);
+	});
+
+	// One token on one network, paid into a canister the row does not name.
+	it('renders a top-up paid with ICP with its amount, its one network and the CMC', () => {
+		const { container } = render(ActiveUserTransactionItem, {
+			props: {
+				tx: mockCyclesTopUpActiveUserTransaction,
+				isUnseen: false,
+				dismissing: false,
+				onDismiss: vi.fn()
+			}
+		});
+
+		expect(screen.getByText(`${en.transaction.label.canister_top_up} 1.5 ICP`)).toBeInTheDocument();
+		expect(container).toHaveTextContent('Internet Computer');
+		expect(container).toHaveTextContent('Cycles Minting Canister');
+		expect(container).not.toHaveTextContent('→');
 	});
 
 	it('renders Liquidium rows with the action, amount, asset and provider', () => {
