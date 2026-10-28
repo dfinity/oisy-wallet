@@ -55,6 +55,16 @@ export interface SolSimulationCreatedAccount {
 }
 
 /**
+ * An account of the user's that existed before the run and that the run closes, with the lamports
+ * it held before the run: wherever the close sends them, they are not part of what the run moved
+ * out of the wallet itself.
+ */
+export interface SolSimulationClosedAccount {
+	account: SolAddress;
+	lamports: bigint;
+}
+
+/**
  * What a simulation says this message would do to the accounts the user owns.
  *
  * A control change carries no amount, which is the whole reason it is reported separately: an
@@ -71,7 +81,7 @@ export interface SolSimulationPreview {
 	tokenDeltas: SolSimulationTokenDelta[];
 	controlChanges: SolSimulationControlChange[];
 	createdAccounts?: SolSimulationCreatedAccount[];
-	closedAccounts?: SolAddress[];
+	closedAccounts?: SolSimulationClosedAccount[];
 }
 
 /**
