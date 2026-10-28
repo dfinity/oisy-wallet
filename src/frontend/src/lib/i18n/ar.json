@@ -1199,6 +1199,7 @@
 		"text": {
 			"top_up": "",
 			"title": "",
+			"canister_top_up": "",
 			"description": "",
 			"description_icp": "",
 			"pay_with": "",
@@ -1224,6 +1225,8 @@
 			"one_way_icp": "",
 			"topping_up": "",
 			"topped_up": "",
+			"topped_up_cycles": "",
+			"pending": "",
 			"unknown": "",
 			"unknown_fresh": "",
 			"sent_to_canister": "",
@@ -1240,7 +1243,12 @@
 			"insufficient_funds": "",
 			"clock": "",
 			"refunded": "",
-			"refunded_nothing": ""
+			"refunded_nothing": "",
+			"refunded_icp": "",
+			"failed": "",
+			"not_started": "",
+			"transfer_failed": "",
+			"unconfirmed": ""
 		}
 	},
 	"active_user_transactions": {

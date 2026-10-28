@@ -1199,6 +1199,7 @@
 		"text": {
 			"top_up": "Doładuj",
 			"title": "Doładuj kanister",
+			"canister_top_up": "",
 			"description": "Cykle trafiają z Twojego salda $token do kanistra, który zużywa je na obliczenia i przechowywanie danych.",
 			"description_icp": "",
 			"pay_with": "",
@@ -1224,6 +1225,8 @@
 			"one_way_icp": "",
 			"topping_up": "Doładowywanie $canister...",
 			"topped_up": "Doładowano $canister kwotą $amount $token.",
+			"topped_up_cycles": "",
+			"pending": "",
 			"unknown": "OISY nie wie jeszcze, czy doładowanie się powiodło. Jeśli tak, zobaczysz je w aktywności $token. Doładuj ponownie, aby wysłać to samo doładowanie jeszcze raz: może się powieść tylko raz. Nowe lub zmienione doładowanie dodałoby cykle ponownie, jeśli to się powiodło.",
 			"unknown_fresh": "OISY nie wie jeszcze, czy Twoje ostatnie doładowanie się powiodło. Jeśli tak, to doładowanie doda cykle ponownie. Najpierw sprawdź aktywność $token.",
 			"sent_to_canister": "Wysłanie $token do kanistra go nie doładowuje. $token trafiają na konto kanistra, a kanister dostaje cykle tylko wtedy, gdy wypłaci je jego własny kod.",
@@ -1240,7 +1243,12 @@
 			"insufficient_funds": "Za mało $token na to doładowanie i opłatę. Nic nie opuściło Twojego portfela. Zmniejsz kwotę.",
 			"clock": "Doładowanie się nie powiodło, ponieważ zegar Twojego urządzenia jest źle ustawiony. Nic nie opuściło Twojego portfela. Ustaw prawidłowy czas i spróbuj ponownie.",
 			"refunded": "Kanister nie mógł przyjąć cykli. Do Twojego portfela wróciło $refund $token, a próba kosztowała $fees $token opłat. Sprawdź ID kanistra.",
-			"refunded_nothing": "Kanister nie mógł przyjąć cykli, a opłaty pochłonęły całą kwotę. Sprawdź ID kanistra."
+			"refunded_nothing": "Kanister nie mógł przyjąć cykli, a opłaty pochłonęły całą kwotę. Sprawdź ID kanistra.",
+			"refunded_icp": "",
+			"failed": "",
+			"not_started": "",
+			"transfer_failed": "",
+			"unconfirmed": ""
 		}
 	},
 	"active_user_transactions": {
