@@ -13,6 +13,10 @@ export const CMC_MINT_CYCLES_MEMO = new Uint8Array([0x4d, 0x49, 0x4e, 0x54, 0, 0
 // the same way.
 export const CMC_TOP_UP_MEMO = new Uint8Array([0x54, 0x50, 0x55, 0x50, 0, 0, 0, 0]);
 
+// The same memo as the ICP ledger's legacy `transfer` carries it, as a number. The CMC
+// reads that one first, and the `icrc1_memo` only when it is zero.
+export const CMC_TOP_UP_LEGACY_MEMO = 0x50555054n;
+
 // The cycles ledger counts in cycles, 10^12 to the TCYCLES, and keeps 0.0001 TCYCLES of
 // every deposit as its fee (`dfinity/cycles-ledger`, `config.rs`). The CMC's `minted` is
 // the amount before that fee.
