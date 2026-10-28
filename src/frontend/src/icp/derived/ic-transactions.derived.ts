@@ -6,7 +6,7 @@ import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 import { icTransactionsStore, type IcTransactionsData } from '$icp/stores/ic-transactions.store';
-import { getCyclesMintDepositAccountIdentifier } from '$icp/utils/cycles-mint.utils';
+import { getCmcDepositAccountIdentifier } from '$icp/utils/cmc.utils';
 import { getAllIcTransactions, getIcExtendedTransactions } from '$icp/utils/ic-transactions.utils';
 import { isTokenIcp } from '$icp/utils/icrc.utils';
 import { authIdentity } from '$lib/derived/auth.derived';
@@ -80,7 +80,7 @@ export const icKnownDestinations: Readable<KnownDestinations> = derived(
 		// recovered through OISY, so the account is never offered as, or counted as,
 		// a familiar destination.
 		const cyclesMintDepositAccountIdentifier = nonNullish($authIdentity)
-			? getCyclesMintDepositAccountIdentifier($authIdentity.getPrincipal()).toLowerCase()
+			? getCmcDepositAccountIdentifier($authIdentity.getPrincipal()).toLowerCase()
 			: undefined;
 
 		const mappedTransactions: AnyTransactionUiWithToken[] = [];
