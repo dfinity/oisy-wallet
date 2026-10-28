@@ -54,7 +54,6 @@
 
 				<ExternalLink
 					ariaLabel={$i18n.tokens.alt.open_contract_address_block_explorer}
-					color="blue"
 					href={`${getExplorerUrl({ token: $pageToken })}/address/${contractAddress}`}
 					iconSize="18"
 					inline

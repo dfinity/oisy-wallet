@@ -92,7 +92,6 @@
 						{$i18n.footer.text.by}
 						<ExternalLink
 							ariaLabel={$i18n.footer.alt.dfinity}
-							color="blue"
 							href="https://dfinity.org"
 							iconVisible={false}
 						>

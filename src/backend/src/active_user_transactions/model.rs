@@ -5,23 +5,37 @@ use shared::types::{
     active_user_transaction::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
-        ChainFusionDirection, CreateActiveUserTransactionRequest,
-        GetActiveUserTransactionsResponse, OisyTradeData, UpdateActiveUserTransactionRequest,
+        ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, LifiData,
+        NearIntentsData, OisyTradeData, UpdateActiveUserTransactionRequest, XrpData,
+        LIFI_REF_BLOCKHASH, LIFI_REF_NONCE, LIFI_REF_TX_HASH,
         MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS,
         MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN, MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_KEY_LEN,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN, MAX_ACTIVE_USER_TRANSACTION_ID_LEN,
         MAX_ACTIVE_USER_TRANSACTION_PROGRESS_STEP_LEN, MAX_EVM_ADDRESS_LEN,
-        MAX_LIQUIDIUM_POOL_ID_LEN,
+        MAX_LIQUIDIUM_POOL_ID_LEN, MAX_XRP_ADDRESS_LEN, MIN_XRP_ADDRESS_LEN,
+        XRP_LEDGER_RESULT_EXPIRED, XRP_LEDGER_RESULT_SUCCESS, XRP_REF_LAST_LEDGER_SEQUENCE,
+        XRP_REF_LEDGER_RESULT, XRP_REF_TX_HASH, XRP_TX_HASH_LEN,
     },
     token_id::TokenId,
 };
 
-use crate::types::{ActiveUserTransactionKey, ActiveUserTransactionsMap, Candid, StoredPrincipal};
+use crate::{
+    signer::{CYCLES_LEDGER, ICP_LEDGER},
+    types::{
+        ActiveUserTransactionKey, ActiveUserTransactionsMap, ActiveUserTransactionsSeenMap, Candid,
+        StoredPrincipal,
+    },
+};
 
 /// Create a new active transaction. Checks are ordered so callers always see
 /// the most informative error: `InvalidId` → `AlreadyExists` (idempotent
-/// retries land here even at the cap) → `InvalidData` → `TooManyActiveTransactions`.
+/// retries land here even at the cap) → `InvalidData` → `AlreadyInFlight` →
+/// `TooManyActiveTransactions`. `AlreadyInFlight` precedes the cap because it
+/// names the specific reason this create is refused and tells the caller what to
+/// wait for, where the cap only says the store is full. The cap comes last for a
+/// second reason: at the cap, `make_room` deletes finished rows, and a create
+/// refused for any other reason must delete nothing.
 pub fn create(
     map: &mut ActiveUserTransactionsMap,
     principal: Principal,
@@ -39,9 +53,33 @@ pub fn create(
     validate_progress_step(request.progress_step.as_deref())?;
     validate_external_refs(&request.external_refs)?;
 
-    if count_records(map, principal) >= MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
-        return Err(ActiveUserTransactionError::TooManyActiveTransactions);
+    if let Some(source_address) = xrp_payment_source(&request.data) {
+        // Required here and not only in `validate_data`, which cannot see the
+        // refs: both values are derived from the signed blob before this call, so
+        // a row arriving without them describes a payment nothing could ever poll.
+        require_xrp_refs(&request.external_refs)?;
+
+        // An XRPL `Sequence` is a nonce, so at most one unresolved payment may
+        // exist per source address — whether a send or a swap's deposit makes it.
+        // The frontend refuses early too, but that check cannot be atomic with this
+        // create — between the two it reads the account, derives a signing key and
+        // takes a threshold signature, and a second tab can pass its own check
+        // inside that window. This call is the only place that sees the check and
+        // the write at once, so this is what actually holds the invariant.
+        if has_xrp_payment_in_flight(map, principal, source_address) {
+            return Err(ActiveUserTransactionError::AlreadyInFlight);
+        }
     }
+
+    if let ActiveUserTransactionData::Lifi(data) = &request.data {
+        // Required here and not only in `validate_data`, which cannot see the
+        // refs: the row is opened after the source transaction is broadcast, so
+        // a row arriving without its poll keys describes a swap nothing could
+        // ever drive to a terminal status.
+        require_lifi_refs(data, &request.external_refs)?;
+    }
+
+    make_room(map, principal)?;
 
     let tx = ActiveUserTransaction {
         id: request.id,
@@ -79,6 +117,19 @@ pub fn update(
     }
     if let Some(refs) = request.external_refs.as_ref() {
         validate_external_refs(refs)?;
+
+        // `external_refs` is replaced wholesale, so without this an update could
+        // strip the poll keys off a row that is already refusing payments — the
+        // same unresolvable state `create` now rejects, reached one call later.
+        // Held for terminal rows too: the invariant is the record's, not a phase's.
+        if xrp_payment_source(&current.data).is_some() {
+            require_xrp_refs(refs)?;
+        }
+        // Same reasoning for a LI.FI row, whose poll keys an update could strip
+        // just as well.
+        if let ActiveUserTransactionData::Lifi(data) = &current.data {
+            require_lifi_refs(data, refs)?;
+        }
     }
     if let Some(err) = request.error.as_deref() {
         validate_error(err)?;
@@ -86,6 +137,17 @@ pub fn update(
 
     if let Some(new_status) = request.status.as_ref() {
         validate_transition(&current.status, new_status)?;
+
+        if leaves_pending_xrp_deposit(&current, new_status) {
+            require_ledger_resolution(
+                new_status,
+                request
+                    .external_refs
+                    .as_deref()
+                    .unwrap_or(&current.external_refs),
+            )?;
+        }
+
         current.status = new_status.clone();
     }
     if let Some(step) = request.progress_step {
@@ -115,16 +177,129 @@ pub fn delete(
     Ok(())
 }
 
-/// Build the response of active transactions visible to the caller. Records
-/// are never auto-pruned — the FE deletes them on user acknowledgement.
-pub fn list(
+/// The active transactions visible to the caller. Records stay until the FE
+/// deletes them on user acknowledgement, or until `create` needs the room and
+/// they are the oldest finished ones.
+pub fn list(map: &ActiveUserTransactionsMap, principal: Principal) -> Vec<ActiveUserTransaction> {
+    scan_principal(map, principal).map(|(_, c)| c.0).collect()
+}
+
+/// The time up to which the caller has seen their records. Zero until they
+/// first mark them seen.
+pub fn seen_up_to(seen: &ActiveUserTransactionsSeenMap, principal: Principal) -> u64 {
+    seen.get(&StoredPrincipal(principal)).unwrap_or(0)
+}
+
+/// Moves the caller's seen mark up to `up_to_ns` and returns the mark stored
+/// afterwards.
+///
+/// Never backwards: two devices can mark out of order, and the later call must
+/// not turn records the earlier one marked unread again. Never past `now_ns`: a
+/// mark in the future would hide records that are yet to change.
+pub fn mark_seen(
+    seen: &mut ActiveUserTransactionsSeenMap,
+    principal: Principal,
+    up_to_ns: u64,
+    now_ns: u64,
+) -> u64 {
+    let current = seen_up_to(seen, principal);
+    let next = current.max(up_to_ns.min(now_ns));
+
+    if next > current {
+        seen.insert(StoredPrincipal(principal), next);
+    }
+
+    next
+}
+
+/// Whether an XRP payment from this source address can still apply.
+///
+/// Per **address**, not per user: a record for a different address says nothing
+/// about this one's sequence, and refusing on it would block an unrelated payment.
+/// Compared raw, like everywhere else this address travels — a classic address is
+/// base58 over a checksummed payload, so case is significant.
+fn has_xrp_payment_in_flight(
     map: &ActiveUserTransactionsMap,
     principal: Principal,
-) -> GetActiveUserTransactionsResponse {
-    let transactions: Vec<ActiveUserTransaction> =
-        scan_principal(map, principal).map(|(_, c)| c.0).collect();
+    source_address: &str,
+) -> bool {
+    scan_principal(map, principal).any(|(_, Candid(tx))| {
+        xrp_payment_source(&tx.data) == Some(source_address) && holds_xrp_address(&tx)
+    })
+}
 
-    GetActiveUserTransactionsResponse { transactions }
+/// The XRP address a row's payment is sent from, for the rows that make one: an
+/// XRP send, and a swap whose deposit is an XRP payment. With
+/// `holds_xrp_address`, the one place that knows which rows those are — a new
+/// kind of row that makes an XRP payment is added here and nowhere else.
+fn xrp_payment_source(data: &ActiveUserTransactionData) -> Option<&str> {
+    match data {
+        ActiveUserTransactionData::Xrp(d) => Some(&d.source_address),
+        ActiveUserTransactionData::NearIntents(d) => d.source_address.as_deref(),
+        _ => None,
+    }
+}
+
+/// Whether a row's XRP payment can still apply. A send's can until the row is
+/// terminal. A swap's deposit can only while the row is `Pending`: once the
+/// deposit validates, the frontend moves the row to `Executing`, and the swap
+/// goes on at 1Click without holding the address.
+fn holds_xrp_address(tx: &ActiveUserTransaction) -> bool {
+    match tx.data {
+        ActiveUserTransactionData::Xrp(_) => matches!(
+            tx.status,
+            ActiveUserTransactionStatus::Pending | ActiveUserTransactionStatus::Executing
+        ),
+        ActiveUserTransactionData::NearIntents(_) => {
+            matches!(tx.status, ActiveUserTransactionStatus::Pending)
+        }
+        _ => false,
+    }
+}
+
+/// Make room for one more of the caller's records. Below the cap this does
+/// nothing. At the cap it deletes as many of the caller's finished rows —
+/// `Succeeded` or `Failed` — as the new record needs, least recently updated
+/// first, and refuses with `TooManyActiveTransactions`, deleting nothing, when
+/// there are not enough of them.
+///
+/// Finished rows otherwise stay until the user dismisses them, so without this a
+/// user who never does is locked out of every flow that needs a record.
+/// `Pending` and `Executing` rows are never deleted: they are still settling, and
+/// an open XRP row is what refuses a second payment from its address. Among
+/// finished rows, the one updated longest ago is the outcome the user is least
+/// likely still to look at.
+fn make_room(
+    map: &mut ActiveUserTransactionsMap,
+    principal: Principal,
+) -> Result<(), ActiveUserTransactionError> {
+    let count = count_records(map, principal);
+    if count < MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
+        return Ok(());
+    }
+
+    // One past the cap's excess, so the new record fits. More than one only if
+    // the cap was ever lowered below what users already hold.
+    let needed = count + 1 - MAX_ACTIVE_USER_TRANSACTIONS_PER_USER;
+
+    let mut finished: Vec<(u64, ActiveUserTransactionKey)> = scan_principal(map, principal)
+        .filter(|(_, Candid(tx))| tx.status.is_terminal())
+        .map(|(key, Candid(tx))| (tx.updated_at_ns, key))
+        .collect();
+
+    if finished.len() < needed {
+        return Err(ActiveUserTransactionError::TooManyActiveTransactions);
+    }
+
+    // Stable, so rows updated at the same instant keep key order and the choice
+    // is deterministic.
+    finished.sort_by_key(|(updated_at_ns, _)| *updated_at_ns);
+
+    for (_, key) in finished.into_iter().take(needed) {
+        map.remove(&key);
+    }
+
+    Ok(())
 }
 
 fn count_records(map: &ActiveUserTransactionsMap, principal: Principal) -> usize {
@@ -217,11 +392,11 @@ fn validate_external_refs(
 fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTransactionError> {
     match data {
         ActiveUserTransactionData::OneSecIcpToEvm(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             require_evm_address(&d.recipient_evm_address)?;
         }
         ActiveUserTransactionData::OneSecEvmToIcp(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             if d.recipient_principal == Principal::anonymous() {
                 return Err(ActiveUserTransactionError::InvalidData(
                     "recipient_principal must not be anonymous".to_string(),
@@ -229,22 +404,39 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
             }
         }
         ActiveUserTransactionData::Liquidium(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             require_pool_id(&d.pool_id)?;
         }
         ActiveUserTransactionData::NearIntents(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
+            require_near_intents_source_address(d)?;
         }
         ActiveUserTransactionData::Velora(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
         }
         ActiveUserTransactionData::ChainFusion(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             require_chain_fusion_pair(d)?;
         }
+        ActiveUserTransactionData::CyclesMint(d) => {
+            require_valid_amount(&d.amount, "amount")?;
+            require_cycles_mint_pair(d)?;
+        }
         ActiveUserTransactionData::OisyTrade(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             require_oisy_trade_pair(d)?;
+        }
+        ActiveUserTransactionData::Xrp(d) => {
+            require_valid_amount(&d.amount, "amount")?;
+            require_valid_amount(&d.fee, "fee")?;
+            require_xrp_token(&d.token)?;
+            require_xrp_address(&d.source_address, "source_address")?;
+            require_xrp_address(&d.destination_address, "destination_address")?;
+            require_distinct_xrp_accounts(d)?;
+        }
+        ActiveUserTransactionData::Lifi(d) => {
+            require_valid_amount(&d.amount, "amount")?;
+            require_lifi_pair(d)?;
         }
     }
     Ok(())
@@ -254,16 +446,20 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
 /// integer any supported chain uses. The upper bound is what makes the encoded
 /// size of a record provable: `Nat` is variable-length, so an unbounded amount
 /// would let a single record carry megabytes into permanent stable memory.
-fn require_valid_amount(amount: &Nat) -> Result<(), ActiveUserTransactionError> {
+///
+/// `field` is named rather than assumed because a payload can carry more than
+/// one such value — an XRP row validates its transaction cost here too, and
+/// reporting that as an `amount` problem sends the reader to the wrong field.
+fn require_valid_amount(amount: &Nat, field: &str) -> Result<(), ActiveUserTransactionError> {
     if amount.0 == 0u32.into() {
-        return Err(ActiveUserTransactionError::InvalidData(
-            "amount must be greater than zero".to_string(),
-        ));
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{field} must be greater than zero"
+        )));
     }
     if amount.0.bits() > MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS {
-        return Err(ActiveUserTransactionError::InvalidData(
-            "amount is too large".to_string(),
-        ));
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{field} is too large"
+        )));
     }
     Ok(())
 }
@@ -312,6 +508,31 @@ fn require_chain_fusion_pair(data: &ChainFusionData) -> Result<(), ActiveUserTra
     }
 }
 
+/// A mint spends ICP, in either of its spellings, and deposits into the cycles
+/// ledger. Unlike the other variants, which check kinds only so that testnets
+/// and new pairs need no change here, a mint has exactly one pair, and both
+/// ledgers have the same id on every network (`icp_ledger` and `cycles_ledger`
+/// in `dfx.json`), so both legs are pinned. `data` is immutable after creation,
+/// so a row naming any other token would describe a mint that cannot exist.
+fn require_cycles_mint_pair(data: &CyclesMintData) -> Result<(), ActiveUserTransactionError> {
+    let is_icp = |t: &TokenId| match t {
+        TokenId::IcpNative => true,
+        TokenId::Icrc(ledger) => *ledger == *ICP_LEDGER,
+        _ => false,
+    };
+    let is_cycles_ledger =
+        |t: &TokenId| matches!(t, TokenId::Icrc(ledger) if *ledger == *CYCLES_LEDGER);
+
+    if is_icp(&data.source_token) && is_cycles_ledger(&data.dest_token) {
+        Ok(())
+    } else {
+        Err(ActiveUserTransactionError::InvalidData(
+            "cycles-mint tokens must be ICP as the source and the cycles ledger as the destination"
+                .to_string(),
+        ))
+    }
+}
+
 /// An OISY Trade pair is two ledger principals on the Internet Computer, so a
 /// row naming an EVM or Solana token is unsatisfiable by construction. `data` is
 /// immutable after creation, so such a row could never settle and would occupy
@@ -328,6 +549,150 @@ fn require_oisy_trade_pair(data: &OisyTradeData) -> Result<(), ActiveUserTransac
             "oisy-trade tokens must both be Internet Computer ledgers".to_string(),
         ))
     }
+}
+
+/// The EVM chains a LI.FI row may name: the mainnets whose LI.FI Diamond the
+/// frontend pins (`LIFI_DIAMOND_ADDRESSES`). A chain without a pinned Diamond
+/// cannot be swapped through, so adding one here goes together with pinning its
+/// Diamond in the frontend.
+const LIFI_EVM_CHAIN_IDS: [u64; 6] = [
+    1,     // Ethereum
+    42161, // Arbitrum One
+    56,    // BNB Smart Chain
+    137,   // Polygon
+    8453,  // Base
+    4663,  // Robinhood Chain
+];
+
+/// The LI.FI poller derives both chains from the token ids, then asks the source
+/// chain and LI.FI's status endpoint about them. A pair LI.FI cannot swap for the
+/// wallet — an EVM chain without a pinned Diamond, a devnet, an NFT, a chain
+/// LI.FI does not serve, or Solana → EVM, which is not executed yet — could never
+/// reach a terminal status, and `data` is immutable after creation, so the row
+/// would occupy one of the user's slots forever. Reject it up front. Unlike the
+/// kind-only checks above, the EVM chains are pinned: they are exactly the
+/// chains LI.FI can be called on.
+fn require_lifi_pair(data: &LifiData) -> Result<(), ActiveUserTransactionError> {
+    let supported = if is_lifi_evm_token(&data.source_token) {
+        is_lifi_evm_token(&data.dest_token) || is_lifi_solana_token(&data.dest_token)
+    } else {
+        is_lifi_solana_token(&data.source_token) && is_lifi_solana_token(&data.dest_token)
+    };
+
+    if !supported {
+        return Err(ActiveUserTransactionError::InvalidData(
+            "token pair is outside the LI.FI v1 matrix".to_string(),
+        ));
+    }
+
+    if is_same_lifi_token(&data.source_token, &data.dest_token) {
+        return Err(ActiveUserTransactionError::InvalidData(
+            "dest_token must differ from source_token".to_string(),
+        ));
+    }
+
+    Ok(())
+}
+
+/// `TokenId` compares its ERC address as a raw string, so a checksummed and a
+/// lower-case spelling of one contract would count as two tokens. Hex is
+/// case-insensitive, so ERC addresses are compared without case; SPL mints are
+/// base58, where case is significant, so everything else compares as is.
+fn is_same_lifi_token(a: &TokenId, b: &TokenId) -> bool {
+    match (a, b) {
+        (
+            TokenId::Erc20(a_address, a_chain_id) | TokenId::Erc4626(a_address, a_chain_id),
+            TokenId::Erc20(b_address, b_chain_id) | TokenId::Erc4626(b_address, b_chain_id),
+        ) => a_chain_id == b_chain_id && a_address.0.eq_ignore_ascii_case(&b_address.0),
+        _ => a == b,
+    }
+}
+
+fn is_lifi_evm_token(token: &TokenId) -> bool {
+    match token {
+        // An ERC-4626 vault share is an ERC-20 to LI.FI.
+        TokenId::EvmNative(chain_id)
+        | TokenId::Erc20(_, chain_id)
+        | TokenId::Erc4626(_, chain_id) => LIFI_EVM_CHAIN_IDS.contains(chain_id),
+        _ => false,
+    }
+}
+
+fn is_lifi_solana_token(token: &TokenId) -> bool {
+    matches!(token, TokenId::SplMainnet(_) | TokenId::SolNativeMainnet)
+}
+
+/// The poll keys a LI.FI row needs (see `LIFI_REF_TX_HASH`), required because a
+/// row without them could never reach a terminal status and would occupy one of
+/// the user's slots forever. Which keys apply follows from the source chain,
+/// which `require_lifi_pair` has already confined to a pinned EVM chain or
+/// Solana mainnet. Shape checks only: the frontend reads every value from the
+/// transaction it just broadcast.
+fn require_lifi_refs(
+    data: &LifiData,
+    refs: &[ActiveUserTransactionRef],
+) -> Result<(), ActiveUserTransactionError> {
+    let value = |key: &str| {
+        refs.iter()
+            .find(|ActiveUserTransactionRef { key: k, .. }| k == key)
+            .map(|ActiveUserTransactionRef { value, .. }| value.as_str())
+    };
+    let invalid = |message: String| Err(ActiveUserTransactionError::InvalidData(message));
+
+    let Some(tx_hash) = value(LIFI_REF_TX_HASH) else {
+        return invalid(format!("{LIFI_REF_TX_HASH} is required"));
+    };
+
+    if is_lifi_solana_token(&data.source_token) {
+        if !is_base58_of_len(tx_hash, SOLANA_SIGNATURE_LEN) {
+            return invalid(format!("{LIFI_REF_TX_HASH} must be a Solana signature"));
+        }
+
+        let Some(blockhash) = value(LIFI_REF_BLOCKHASH) else {
+            return invalid(format!(
+                "{LIFI_REF_BLOCKHASH} is required for a Solana source"
+            ));
+        };
+        if !is_base58_of_len(blockhash, SOLANA_BLOCKHASH_LEN) {
+            return invalid(format!("{LIFI_REF_BLOCKHASH} must be a Solana blockhash"));
+        }
+    } else {
+        let is_evm_tx_hash = tx_hash.len() == EVM_TX_HASH_LEN
+            && tx_hash
+                .strip_prefix("0x")
+                .is_some_and(|hex| hex.chars().all(|c| c.is_ascii_hexdigit()));
+        if !is_evm_tx_hash {
+            return invalid(format!(
+                "{LIFI_REF_TX_HASH} must be 0x followed by 64 hex characters"
+            ));
+        }
+
+        let Some(nonce) = value(LIFI_REF_NONCE) else {
+            return invalid(format!("{LIFI_REF_NONCE} is required for an EVM source"));
+        };
+        // Digits only, then a `u64` parse: an EVM account nonce is a `u64`
+        // (EIP-2681), and `parse` alone would accept a leading `+`.
+        if !nonce.chars().all(|c| c.is_ascii_digit()) || nonce.parse::<u64>().is_err() {
+            return invalid(format!("{LIFI_REF_NONCE} must be a u64"));
+        }
+    }
+
+    Ok(())
+}
+
+/// `0x` plus the 32-byte hash in hex.
+const EVM_TX_HASH_LEN: usize = 66;
+/// An Ed25519 signature.
+const SOLANA_SIGNATURE_LEN: usize = 64;
+/// A SHA-256 hash.
+const SOLANA_BLOCKHASH_LEN: usize = 32;
+
+/// Whether `value` is the base58 encoding of exactly `len` bytes, which is how
+/// Solana writes signatures and blockhashes.
+fn is_base58_of_len(value: &str, len: usize) -> bool {
+    bs58::decode(value)
+        .into_vec()
+        .is_ok_and(|bytes| bytes.len() == len)
 }
 
 fn require_evm_address(addr: &str) -> Result<(), ActiveUserTransactionError> {
@@ -347,6 +712,205 @@ fn require_evm_address(addr: &str) -> Result<(), ActiveUserTransactionError> {
         ));
     }
     Ok(())
+}
+
+/// The row tracks a *native XRP* payment, so a token from any other chain is
+/// unsatisfiable by construction — the FE poller would have no ledger to ask.
+/// `data` is immutable after creation, so such a row could never resolve and
+/// would occupy one of the user's slots forever. Kinds only, deliberately: an
+/// XRPL testnet token would be a new `TokenId` variant and belongs in this list
+/// when it arrives, not a reason to loosen the check now.
+fn require_xrp_token(token: &TokenId) -> Result<(), ActiveUserTransactionError> {
+    if matches!(token, TokenId::XrpNativeMainnet) {
+        Ok(())
+    } else {
+        Err(ActiveUserTransactionError::InvalidData(
+            "token must be a native XRP token".to_string(),
+        ))
+    }
+}
+
+/// A bound and a shape check, not a re-validation: the FE derives
+/// `source_address` from the caller's own key and checks `destination_address`
+/// against a full base58check validator before signing. What matters here is
+/// that a row cannot carry an arbitrary string into permanent stable memory, and
+/// that a value which could never name an XRPL account is refused rather than
+/// stored. Mirrors `require_evm_address` — length, prefix, charset, no checksum.
+fn require_xrp_address(addr: &str, field: &str) -> Result<(), ActiveUserTransactionError> {
+    // Both ends, and the lower one matters as much: a string like `"r"` clears
+    // the prefix and charset checks below while being far too short for
+    // base58check to have produced it.
+    if addr.len() < MIN_XRP_ADDRESS_LEN || addr.len() > MAX_XRP_ADDRESS_LEN {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{field} invalid length"
+        )));
+    }
+    // Classic addresses carry the 0x00 version byte, which base58check always
+    // renders as a leading `r`.
+    if !addr.starts_with('r') {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{field} must start with r"
+        )));
+    }
+    // XRPL orders the base58 alphabet differently from Bitcoin but uses the same
+    // 58 characters: alphanumerics without `0`, `O`, `I` and `l`.
+    if !addr
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() && !matches!(c, '0' | 'O' | 'I' | 'l'))
+    {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{field} must be base58"
+        )));
+    }
+    Ok(())
+}
+
+/// A swap from native XRP pays its deposit from the user's XRP address, and the
+/// one-payment-in-flight check can only count that payment if the row names the
+/// address — without it, a second payment from the same address would pass.
+/// Any other source makes no XRP payment, so an address there has no meaning and
+/// is refused rather than stored.
+fn require_near_intents_source_address(
+    data: &NearIntentsData,
+) -> Result<(), ActiveUserTransactionError> {
+    match (&data.source_token, data.source_address.as_deref()) {
+        (TokenId::XrpNativeMainnet, Some(address)) => {
+            require_xrp_address(address, "source_address")
+        }
+        (TokenId::XrpNativeMainnet, None) => Err(ActiveUserTransactionError::InvalidData(
+            "source_address is required for a native XRP source".to_string(),
+        )),
+        (_, Some(_)) => Err(ActiveUserTransactionError::InvalidData(
+            "source_address is only allowed for a native XRP source".to_string(),
+        )),
+        (_, None) => Ok(()),
+    }
+}
+
+/// XRPL answers a payment whose destination is its sender `temREDUNDANT`, which
+/// is never applied — so such a row describes a payment that cannot exist, and
+/// the FE refuses it from the arguments alone before signing. Same reasoning as
+/// the pair checks above: immutable data that could never resolve.
+fn require_distinct_xrp_accounts(data: &XrpData) -> Result<(), ActiveUserTransactionError> {
+    // Compared raw, like everywhere else this address travels: a classic address
+    // is base58 over a checksummed payload, so case is significant and two forms
+    // differing in it are not one address.
+    if data.source_address == data.destination_address {
+        return Err(ActiveUserTransactionError::InvalidData(
+            "destination_address must differ from source_address".to_string(),
+        ));
+    }
+    Ok(())
+}
+
+/// The two refs an XRP row is polled with, required because a row without them
+/// can never resolve.
+///
+/// The resolver refuses to guess: given no usable poll keys it returns without
+/// touching the node, which is correct — a row that cannot name what to poll must
+/// not be closed on an assumption. But an open row also refuses every later send
+/// from its address, and the frontend offers no way to dismiss one that is not
+/// terminal, so such a row would deny that address permanently.
+///
+/// Bounded tighter than the resolver parses: a ledger index is a `UInt32`, so a
+/// value accepted here is always one the resolver can use.
+fn require_xrp_refs(refs: &[ActiveUserTransactionRef]) -> Result<(), ActiveUserTransactionError> {
+    let value = |key: &str| {
+        refs.iter()
+            .find(|ActiveUserTransactionRef { key: k, .. }| k == key)
+            .map(|ActiveUserTransactionRef { value, .. }| value.as_str())
+    };
+
+    let Some(tx_hash) = value(XRP_REF_TX_HASH) else {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{XRP_REF_TX_HASH} is required"
+        )));
+    };
+
+    if tx_hash.len() != XRP_TX_HASH_LEN || !tx_hash.chars().all(|c| c.is_ascii_hexdigit()) {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{XRP_REF_TX_HASH} must be {XRP_TX_HASH_LEN} hex characters"
+        )));
+    }
+
+    let Some(last_ledger_sequence) = value(XRP_REF_LAST_LEDGER_SEQUENCE) else {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{XRP_REF_LAST_LEDGER_SEQUENCE} is required"
+        )));
+    };
+
+    // Digits only, then a `u32` parse: the resolver rejects anything `Number()`
+    // would coerce, and a ledger index the transaction was signed against is
+    // always a positive `UInt32`.
+    if !last_ledger_sequence.chars().all(|c| c.is_ascii_digit())
+        || last_ledger_sequence.parse::<u32>().is_ok_and(|n| n == 0)
+        || last_ledger_sequence.parse::<u32>().is_err()
+    {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{XRP_REF_LAST_LEDGER_SEQUENCE} must be a positive UInt32"
+        )));
+    }
+
+    Ok(())
+}
+
+/// Whether an update moves a swap from XRP out of `Pending` — the one status in
+/// which `holds_xrp_address` holds its address.
+fn leaves_pending_xrp_deposit(
+    current: &ActiveUserTransaction,
+    to: &ActiveUserTransactionStatus,
+) -> bool {
+    matches!(current.data, ActiveUserTransactionData::NearIntents(_))
+        && xrp_payment_source(&current.data).is_some()
+        && current.status == ActiveUserTransactionStatus::Pending
+        && *to != ActiveUserTransactionStatus::Pending
+}
+
+/// A swap from XRP leaves `Pending` only on its deposit's resolution on the
+/// ledger, recorded in `ledger_result`: `tesSUCCESS` moves it to `Executing`, a
+/// `tec` code or `expired` to `Failed`. Leaving `Pending` releases the address,
+/// and a client that follows 1Click instead — a frontend from before the swap
+/// UI maps 1Click's `PENDING_DEPOSIT` to `Executing` — would release it while
+/// the deposit can still apply.
+fn require_ledger_resolution(
+    to: &ActiveUserTransactionStatus,
+    refs: &[ActiveUserTransactionRef],
+) -> Result<(), ActiveUserTransactionError> {
+    let Some(result) = refs
+        .iter()
+        .find(|ActiveUserTransactionRef { key, .. }| key == XRP_REF_LEDGER_RESULT)
+        .map(|ActiveUserTransactionRef { value, .. }| value.as_str())
+    else {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{XRP_REF_LEDGER_RESULT} is required to leave Pending"
+        )));
+    };
+
+    let resolves_to = if result == XRP_LEDGER_RESULT_SUCCESS {
+        ActiveUserTransactionStatus::Executing
+    } else if result == XRP_LEDGER_RESULT_EXPIRED || is_tec_code(result) {
+        ActiveUserTransactionStatus::Failed
+    } else {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{XRP_REF_LEDGER_RESULT} must be {XRP_LEDGER_RESULT_SUCCESS}, a tec code or {XRP_LEDGER_RESULT_EXPIRED}"
+        )));
+    };
+
+    if *to == resolves_to {
+        Ok(())
+    } else {
+        Err(ActiveUserTransactionError::IllegalStatusTransition)
+    }
+}
+
+/// An XRPL `tec` result: applied, failed, fee claimed.
+fn is_tec_code(value: &str) -> bool {
+    value.strip_prefix("tec").is_some_and(|rest| {
+        !rest.is_empty()
+            && rest
+                .chars()
+                .all(|c| c.is_ascii_uppercase() || c.is_ascii_digit() || c == '_')
+    })
 }
 
 fn validate_transition(
@@ -372,7 +936,7 @@ fn validate_transition(
 
 #[cfg(test)]
 mod tests {
-    use std::cell::RefCell;
+    use std::{cell::RefCell, collections::BTreeSet};
 
     use candid::{Nat, Principal};
     use ic_stable_structures::{
@@ -382,19 +946,21 @@ mod tests {
     use pretty_assertions::assert_eq;
     use shared::types::{
         active_user_transaction::{
-            ActiveUserTransactionData, ActiveUserTransactionError, ActiveUserTransactionRef,
-            ActiveUserTransactionStatus, ChainFusionData, ChainFusionDirection,
-            CreateActiveUserTransactionRequest, LiquidiumAction, LiquidiumData, NearIntentsData,
-            OisyTradeData, OisyTradeSide, OneSecEvmToIcpData, OneSecIcpToEvmData,
-            UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode,
+            ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
+            ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
+            ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, LifiData,
+            LiquidiumAction, LiquidiumData, NearIntentsData, OisyTradeData, OisyTradeSide,
+            OneSecEvmToIcpData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData,
+            VeloraSwapMode, XrpData, LIFI_REF_BLOCKHASH, LIFI_REF_NONCE, LIFI_REF_TX_HASH,
             MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_LIQUIDIUM_POOL_ID_LEN,
+            XRP_REF_LAST_LEDGER_SEQUENCE, XRP_REF_LEDGER_RESULT, XRP_REF_TX_HASH, XRP_TX_HASH_LEN,
         },
-        custom_token::ErcTokenId,
+        custom_token::{ErcTokenId, SplTokenId},
         token_id::TokenId,
     };
 
-    use super::{create, delete, list, update};
-    use crate::types::maps::ActiveUserTransactionsMap;
+    use super::{create, delete, list, mark_seen, seen_up_to, update};
+    use crate::types::maps::{ActiveUserTransactionsMap, ActiveUserTransactionsSeenMap};
 
     const PRINCIPAL_TEXT: &str = "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
     const OTHER_PRINCIPAL_TEXT: &str =
@@ -407,6 +973,15 @@ mod tests {
         let mm = RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
         let map = ActiveUserTransactionsMap::init(mm.borrow().get(MemoryId::new(0)));
         (map, mm)
+    }
+
+    fn seen_setup() -> (
+        ActiveUserTransactionsSeenMap,
+        RefCell<MemoryManager<DefaultMemoryImpl>>,
+    ) {
+        let mm = RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
+        let seen = ActiveUserTransactionsSeenMap::init(mm.borrow().get(MemoryId::new(0)));
+        (seen, mm)
     }
 
     fn principal() -> Principal {
@@ -443,7 +1018,7 @@ mod tests {
         assert_eq!(tx.created_at_ns, 1);
         assert_eq!(tx.updated_at_ns, 1);
 
-        let res = list(&map, principal()).transactions;
+        let res = list(&map, principal());
         assert_eq!(res.len(), 1);
         assert_eq!(res[0].id, "id-1");
     }
@@ -496,6 +1071,7 @@ mod tests {
             source_token: TokenId::IcpNative,
             dest_token: TokenId::EvmNative(1),
             amount,
+            source_address: None,
         })
     }
 
@@ -514,7 +1090,7 @@ mod tests {
         req.data = data_with_amount(Nat::parse(OVER_WIDTH_AMOUNT).unwrap());
         let err = create(&mut map, principal(), req, 1).unwrap_err();
         assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
-        assert_eq!(list(&map, principal()).transactions.len(), 0);
+        assert_eq!(list(&map, principal()).len(), 0);
     }
 
     /// A `Nat` is variable-length on the wire, so the payload an attacker can
@@ -526,7 +1102,7 @@ mod tests {
         req.data = data_with_amount(Nat::parse(&b"9".repeat(10_000)).unwrap());
         let err = create(&mut map, principal(), req, 1).unwrap_err();
         assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
-        assert_eq!(list(&map, principal()).transactions.len(), 0);
+        assert_eq!(list(&map, principal()).len(), 0);
     }
 
     #[test]
@@ -599,6 +1175,7 @@ mod tests {
             source_token: TokenId::EvmNative(8453),
             dest_token: TokenId::SolNativeMainnet,
             amount: Nat::from(amount),
+            source_address: None,
         })
     }
 
@@ -626,6 +1203,7 @@ mod tests {
             source_token: TokenId::BtcNativeMainnet,
             dest_token: TokenId::EvmNative(8453),
             amount: Nat::from(amount),
+            source_address: None,
         })
     }
 
@@ -634,6 +1212,7 @@ mod tests {
             source_token: TokenId::SolNativeMainnet,
             dest_token: TokenId::BtcNativeMainnet,
             amount: Nat::from(amount),
+            source_address: None,
         })
     }
 
@@ -653,7 +1232,7 @@ mod tests {
             assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
             assert_eq!(tx.data, data);
 
-            let listed = list(&map, principal()).transactions;
+            let listed = list(&map, principal());
             assert_eq!(listed.len(), 1);
             assert_eq!(listed[0].data, data);
         }
@@ -763,7 +1342,7 @@ mod tests {
             let tx = create(&mut map, principal(), req, 1).expect("create");
             assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
 
-            let listed = list(&map, principal()).transactions;
+            let listed = list(&map, principal());
             assert_eq!(listed.len(), 1);
             assert_eq!(listed[0].data, chain_fusion_data(1_000, direction));
         }
@@ -800,6 +1379,126 @@ mod tests {
             let err = create(&mut map, principal(), req, 1).unwrap_err();
             assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
         }
+    }
+
+    const ICP_LEDGER: &str = "ryjl3-tyaaa-aaaaa-aaaba-cai";
+    const CYCLES_LEDGER: &str = "um5iw-rqaaa-aaaaq-qaaba-cai";
+
+    fn cycles_mint_data(
+        amount: u64,
+        source_token: TokenId,
+        dest_token: TokenId,
+    ) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::CyclesMint(CyclesMintData {
+            source_token,
+            dest_token,
+            amount: Nat::from(amount),
+            transfer_created_at_ns: 1_790_000_000_000_000_000,
+        })
+    }
+
+    #[test]
+    fn cycles_mint_create_roundtrip() {
+        // The wallet sends ICP as `Icrc` of its ledger, while `IcpNative` exists
+        // for the exchange-rate path, so both spellings of the source must
+        // survive create and the stable-memory read path.
+        for source_token in [icrc(ICP_LEDGER), TokenId::IcpNative] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("mint-1");
+            req.data = cycles_mint_data(100_000_000, source_token.clone(), icrc(CYCLES_LEDGER));
+            let tx = create(&mut map, principal(), req, 1).expect("create");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+
+            let listed = list(&map, principal());
+            assert_eq!(listed.len(), 1);
+            assert_eq!(
+                listed[0].data,
+                cycles_mint_data(100_000_000, source_token, icrc(CYCLES_LEDGER))
+            );
+        }
+    }
+
+    #[test]
+    fn cycles_mint_zero_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("mint-1");
+        req.data = cycles_mint_data(0, icrc(ICP_LEDGER), icrc(CYCLES_LEDGER));
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+    }
+
+    /// The width bound the other variants share, checked on this arm too.
+    #[test]
+    fn cycles_mint_oversized_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("mint-1");
+        req.data = ActiveUserTransactionData::CyclesMint(CyclesMintData {
+            source_token: icrc(ICP_LEDGER),
+            dest_token: icrc(CYCLES_LEDGER),
+            amount: Nat::parse(OVER_WIDTH_AMOUNT).unwrap(),
+            transfer_created_at_ns: 1_790_000_000_000_000_000,
+        });
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        assert_eq!(list(&map, principal()).len(), 0);
+    }
+
+    #[test]
+    fn cycles_mint_wrong_token_kinds_rejected() {
+        // A mint spends ICP and deposits into the cycles ledger, so any other
+        // kind on either side could never settle — and `data` is immutable after
+        // creation. `IcpNative` is a valid source but never a destination: the
+        // CMC deposits into the cycles ledger.
+        let non_ic = [
+            TokenId::EvmNative(1),
+            TokenId::Erc20(ErcTokenId(USDC_ETHEREUM.to_string()), 1),
+            TokenId::BtcNativeMainnet,
+            TokenId::SolNativeMainnet,
+        ];
+        let mut pairs: Vec<(TokenId, TokenId)> = non_ic
+            .iter()
+            .flat_map(|token| {
+                [
+                    (token.clone(), icrc(CYCLES_LEDGER)),
+                    (icrc(ICP_LEDGER), token.clone()),
+                ]
+            })
+            .collect();
+        pairs.push((icrc(ICP_LEDGER), TokenId::IcpNative));
+
+        for (source_token, dest_token) in pairs {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("mint-1");
+            req.data = cycles_mint_data(100_000_000, source_token, dest_token);
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert_eq!(err, cycles_mint_pair_error());
+        }
+    }
+
+    #[test]
+    fn cycles_mint_other_ledgers_rejected() {
+        // Right kinds, wrong ledgers: only ICP into the cycles ledger is a mint.
+        let pairs = [
+            (icrc(CKBTC_LEDGER), icrc(CYCLES_LEDGER)),
+            (icrc(ICP_LEDGER), icrc(CKUSDC_LEDGER)),
+            (icrc(CKBTC_LEDGER), icrc(CKUSDC_LEDGER)),
+            (TokenId::IcpNative, icrc(ICP_LEDGER)),
+        ];
+
+        for (source_token, dest_token) in pairs {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("mint-1");
+            req.data = cycles_mint_data(100_000_000, source_token, dest_token);
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert_eq!(err, cycles_mint_pair_error());
+        }
+    }
+
+    fn cycles_mint_pair_error() -> ActiveUserTransactionError {
+        ActiveUserTransactionError::InvalidData(
+            "cycles-mint tokens must be ICP as the source and the cycles ledger as the destination"
+                .to_string(),
+        )
     }
 
     fn oisy_trade_data(
@@ -840,7 +1539,7 @@ mod tests {
             let tx = create(&mut map, principal(), req, 1).expect("create");
             assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
 
-            let listed = list(&map, principal()).transactions;
+            let listed = list(&map, principal());
             assert_eq!(listed.len(), 1);
             assert_eq!(
                 listed[0].data,
@@ -893,6 +1592,1342 @@ mod tests {
                 );
             }
         }
+    }
+
+    const USDC_ETHEREUM_CHECKSUMMED: &str = "0xA0b86991c6218b36c1D19D4a2e9Eb0cE3606eB48";
+    const USDC_SOLANA: &str = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+
+    fn erc20(address: &str, chain_id: u64) -> TokenId {
+        TokenId::Erc20(ErcTokenId(address.to_string()), chain_id)
+    }
+
+    fn spl(mint: &str) -> TokenId {
+        TokenId::SplMainnet(SplTokenId(mint.to_string()))
+    }
+
+    fn lifi_data(
+        amount: u64,
+        source_token: TokenId,
+        dest_token: TokenId,
+    ) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::Lifi(LifiData {
+            source_token,
+            dest_token,
+            amount: Nat::from(amount),
+        })
+    }
+
+    const LIFI_EVM_TX_HASH: &str =
+        "0x1111111111111111111111111111111111111111111111111111111111111111";
+    // Base58 of the 64 bytes 1..=64 and of the 32 bytes 101..=132.
+    const LIFI_SOLANA_SIGNATURE: &str =
+        "2Ana1pUpv2ZbMVkwF5FXapYeBEjdxDatLn7nvJkhgTSXbs59SyZSx866bXirPgj8QQVB57uxHJBG1YFvkRbFj4T";
+    const LIFI_SOLANA_BLOCKHASH: &str = "7ppk9w8NHnH6ehajvJyU31VcMafwZ3ybRtJWumSyD2wd";
+
+    fn lifi_ref(key: &str, value: &str) -> ActiveUserTransactionRef {
+        ActiveUserTransactionRef {
+            key: key.to_string(),
+            value: value.to_string(),
+        }
+    }
+
+    /// The poll keys the frontend writes when it opens a row for a swap from
+    /// `source_token`.
+    fn lifi_refs(source_token: &TokenId) -> Vec<ActiveUserTransactionRef> {
+        if matches!(
+            source_token,
+            TokenId::SolNativeMainnet | TokenId::SplMainnet(_)
+        ) {
+            vec![
+                lifi_ref(LIFI_REF_BLOCKHASH, LIFI_SOLANA_BLOCKHASH),
+                lifi_ref(LIFI_REF_TX_HASH, LIFI_SOLANA_SIGNATURE),
+            ]
+        } else {
+            vec![
+                lifi_ref(LIFI_REF_NONCE, "7"),
+                lifi_ref(LIFI_REF_TX_HASH, LIFI_EVM_TX_HASH),
+            ]
+        }
+    }
+
+    fn lifi_req(source_token: TokenId, dest_token: TokenId) -> CreateActiveUserTransactionRequest {
+        CreateActiveUserTransactionRequest {
+            external_refs: lifi_refs(&source_token),
+            data: lifi_data(1_000_000, source_token, dest_token),
+            ..create_req("lifi-1")
+        }
+    }
+
+    fn assert_lifi_pair_rejected(source_token: TokenId, dest_token: TokenId, expected: &str) {
+        let (mut map, _mm) = setup();
+        let err = create(&mut map, principal(), lifi_req(source_token, dest_token), 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData(expected.to_string())
+        );
+    }
+
+    const LIFI_PAIR_ERROR: &str = "token pair is outside the LI.FI v1 matrix";
+
+    #[test]
+    fn lifi_create_roundtrip() {
+        // One pair per route the variant covers, spread so that every pinned EVM
+        // chain appears at least once.
+        for (source_token, dest_token) in [
+            // EVM → EVM, same chain.
+            (erc20(USDC_ETHEREUM, 1), TokenId::EvmNative(1)),
+            // EVM → EVM, cross-chain; a vault share is an ERC-20 to LI.FI.
+            (
+                TokenId::EvmNative(42161),
+                TokenId::Erc4626(
+                    ErcTokenId("0x0000000000000000000000000000000000000abc".to_string()),
+                    8453,
+                ),
+            ),
+            (TokenId::EvmNative(56), TokenId::EvmNative(137)),
+            // EVM → Solana.
+            (TokenId::EvmNative(4663), spl(USDC_SOLANA)),
+            // Solana → Solana.
+            (TokenId::SolNativeMainnet, spl(USDC_SOLANA)),
+        ] {
+            let (mut map, _mm) = setup();
+            let req = lifi_req(source_token.clone(), dest_token.clone());
+            let tx = create(&mut map, principal(), req, 1).expect("create");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+            assert_eq!(tx.external_refs, lifi_refs(&source_token));
+            assert_eq!(tx.data, lifi_data(1_000_000, source_token, dest_token));
+        }
+    }
+
+    #[test]
+    fn lifi_zero_amount_rejected() {
+        // Every poll key is present, so the amount is the only thing wrong and
+        // the message names the check that refused it: without the poll keys,
+        // the create would fail on them even if the amount check were gone.
+        let (mut map, _mm) = setup();
+        let req = CreateActiveUserTransactionRequest {
+            data: lifi_data(0, erc20(USDC_ETHEREUM, 1), TokenId::EvmNative(1)),
+            ..lifi_req(erc20(USDC_ETHEREUM, 1), TokenId::EvmNative(1))
+        };
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("amount must be greater than zero".to_string())
+        );
+    }
+
+    #[test]
+    fn lifi_evm_chain_without_pinned_diamond_rejected() {
+        // Optimism is a chain LI.FI serves but the frontend pins no Diamond for;
+        // Sepolia is a testnet. Either leg on such a chain is refused.
+        for chain_id in [10, 11_155_111] {
+            assert_lifi_pair_rejected(
+                TokenId::EvmNative(chain_id),
+                TokenId::EvmNative(1),
+                LIFI_PAIR_ERROR,
+            );
+            assert_lifi_pair_rejected(
+                TokenId::EvmNative(1),
+                erc20(USDC_ETHEREUM, chain_id),
+                LIFI_PAIR_ERROR,
+            );
+        }
+    }
+
+    #[test]
+    fn lifi_devnet_solana_rejected() {
+        for devnet in [
+            TokenId::SolNativeDevnet,
+            TokenId::SplDevnet(SplTokenId(USDC_SOLANA.to_string())),
+        ] {
+            assert_lifi_pair_rejected(devnet.clone(), TokenId::SolNativeMainnet, LIFI_PAIR_ERROR);
+            assert_lifi_pair_rejected(TokenId::SolNativeMainnet, devnet, LIFI_PAIR_ERROR);
+        }
+    }
+
+    #[test]
+    fn lifi_solana_to_evm_rejected() {
+        // Its EVM recipient cannot be verified before signing yet, so the
+        // frontend never executes it and no row may claim it.
+        assert_lifi_pair_rejected(
+            TokenId::SolNativeMainnet,
+            TokenId::EvmNative(1),
+            LIFI_PAIR_ERROR,
+        );
+        assert_lifi_pair_rejected(spl(USDC_SOLANA), erc20(USDC_ETHEREUM, 1), LIFI_PAIR_ERROR);
+    }
+
+    #[test]
+    fn lifi_unsupported_token_kinds_rejected() {
+        let address = || ErcTokenId(USDC_ETHEREUM.to_string());
+        for token in [
+            TokenId::Erc721(address(), 1),
+            TokenId::Erc1155(address(), 1),
+            TokenId::IcpNative,
+            icrc(CKUSDC_LEDGER),
+            TokenId::BtcNativeMainnet,
+            TokenId::XrpNativeMainnet,
+        ] {
+            assert_lifi_pair_rejected(token.clone(), TokenId::EvmNative(1), LIFI_PAIR_ERROR);
+            assert_lifi_pair_rejected(TokenId::EvmNative(1), token, LIFI_PAIR_ERROR);
+        }
+    }
+
+    #[test]
+    fn lifi_same_token_rejected() {
+        let same_token_error = "dest_token must differ from source_token";
+        for (source_token, dest_token) in [
+            (TokenId::EvmNative(1), TokenId::EvmNative(1)),
+            (TokenId::SolNativeMainnet, TokenId::SolNativeMainnet),
+            (spl(USDC_SOLANA), spl(USDC_SOLANA)),
+            // One contract in two spellings is still one token.
+            (erc20(USDC_ETHEREUM, 1), erc20(USDC_ETHEREUM_CHECKSUMMED, 1)),
+        ] {
+            assert_lifi_pair_rejected(source_token, dest_token, same_token_error);
+        }
+
+        // The same address on another chain is another token: a bridge.
+        let (mut map, _mm) = setup();
+        let req = lifi_req(erc20(USDC_ETHEREUM, 1), erc20(USDC_ETHEREUM, 8453));
+        create(&mut map, principal(), req, 1).expect("create");
+    }
+
+    fn assert_lifi_refs_rejected(
+        source_token: TokenId,
+        dest_token: TokenId,
+        external_refs: Vec<ActiveUserTransactionRef>,
+        expected: &str,
+    ) {
+        let (mut map, _mm) = setup();
+        let req = CreateActiveUserTransactionRequest {
+            external_refs,
+            ..lifi_req(source_token, dest_token)
+        };
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData(expected.to_string())
+        );
+        assert!(
+            list(&map, principal()).is_empty(),
+            "a rejected create must not leave a row behind"
+        );
+    }
+
+    #[test]
+    fn lifi_evm_source_without_poll_keys_rejected() {
+        let tx_hash = lifi_ref(LIFI_REF_TX_HASH, LIFI_EVM_TX_HASH);
+        let nonce = lifi_ref(LIFI_REF_NONCE, "7");
+        for (refs, expected) in [
+            (vec![], "lifi_tx_hash is required"),
+            (vec![nonce], "lifi_tx_hash is required"),
+            (vec![tx_hash], "lifi_nonce is required for an EVM source"),
+        ] {
+            assert_lifi_refs_rejected(
+                erc20(USDC_ETHEREUM, 1),
+                TokenId::EvmNative(1),
+                refs,
+                expected,
+            );
+        }
+    }
+
+    #[test]
+    fn lifi_solana_source_without_poll_keys_rejected() {
+        let tx_hash = lifi_ref(LIFI_REF_TX_HASH, LIFI_SOLANA_SIGNATURE);
+        let blockhash = lifi_ref(LIFI_REF_BLOCKHASH, LIFI_SOLANA_BLOCKHASH);
+        for (refs, expected) in [
+            (vec![], "lifi_tx_hash is required"),
+            (vec![blockhash], "lifi_tx_hash is required"),
+            (
+                // An EVM source's key does not stand in for a Solana one.
+                vec![tx_hash, lifi_ref(LIFI_REF_NONCE, "7")],
+                "lifi_blockhash is required for a Solana source",
+            ),
+        ] {
+            assert_lifi_refs_rejected(TokenId::SolNativeMainnet, spl(USDC_SOLANA), refs, expected);
+        }
+    }
+
+    #[test]
+    fn lifi_evm_source_malformed_poll_keys_rejected() {
+        let hash_error = "lifi_tx_hash must be 0x followed by 64 hex characters";
+        for tx_hash in [
+            // No prefix, one digit short, a non-hex digit, and a Solana
+            // signature on an EVM row.
+            &LIFI_EVM_TX_HASH[2..],
+            &LIFI_EVM_TX_HASH[..65],
+            "0x111111111111111111111111111111111111111111111111111111111111111g",
+            LIFI_SOLANA_SIGNATURE,
+        ] {
+            assert_lifi_refs_rejected(
+                TokenId::EvmNative(1),
+                erc20(USDC_ETHEREUM, 1),
+                vec![
+                    lifi_ref(LIFI_REF_NONCE, "7"),
+                    lifi_ref(LIFI_REF_TX_HASH, tx_hash),
+                ],
+                hash_error,
+            );
+        }
+
+        // Empty, signed, fractional, and one past `u64::MAX`.
+        for nonce in ["", "+7", "7.0", "18446744073709551616"] {
+            assert_lifi_refs_rejected(
+                TokenId::EvmNative(1),
+                erc20(USDC_ETHEREUM, 1),
+                vec![
+                    lifi_ref(LIFI_REF_NONCE, nonce),
+                    lifi_ref(LIFI_REF_TX_HASH, LIFI_EVM_TX_HASH),
+                ],
+                "lifi_nonce must be a u64",
+            );
+        }
+    }
+
+    #[test]
+    fn lifi_solana_source_malformed_poll_keys_rejected() {
+        // An EVM hash on a Solana row, base58 of the wrong length, and a
+        // character outside the base58 alphabet.
+        for tx_hash in [
+            LIFI_EVM_TX_HASH,
+            LIFI_SOLANA_BLOCKHASH,
+            &LIFI_SOLANA_SIGNATURE.replacen('2', "0", 1),
+        ] {
+            assert_lifi_refs_rejected(
+                TokenId::SolNativeMainnet,
+                spl(USDC_SOLANA),
+                vec![
+                    lifi_ref(LIFI_REF_BLOCKHASH, LIFI_SOLANA_BLOCKHASH),
+                    lifi_ref(LIFI_REF_TX_HASH, tx_hash),
+                ],
+                "lifi_tx_hash must be a Solana signature",
+            );
+        }
+
+        for blockhash in [LIFI_SOLANA_SIGNATURE, "", "0OIl"] {
+            assert_lifi_refs_rejected(
+                TokenId::SolNativeMainnet,
+                spl(USDC_SOLANA),
+                vec![
+                    lifi_ref(LIFI_REF_BLOCKHASH, blockhash),
+                    lifi_ref(LIFI_REF_TX_HASH, LIFI_SOLANA_SIGNATURE),
+                ],
+                "lifi_blockhash must be a Solana blockhash",
+            );
+        }
+    }
+
+    #[test]
+    fn lifi_update_cannot_strip_poll_keys() {
+        // `external_refs` is replaced wholesale, so an update that drops a poll
+        // key would leave the same row `create` refuses.
+        for source_token in [TokenId::EvmNative(1), TokenId::SolNativeMainnet] {
+            let (mut map, _mm) = setup();
+            let req = lifi_req(source_token.clone(), spl(USDC_SOLANA));
+            create(&mut map, principal(), req, 1).expect("create");
+
+            let refs = lifi_refs(&source_token);
+            let update_refs =
+                |external_refs: Vec<ActiveUserTransactionRef>| UpdateActiveUserTransactionRequest {
+                    id: "lifi-1".to_string(),
+                    status: Some(ActiveUserTransactionStatus::Executing),
+                    progress_step: None,
+                    external_refs: Some(external_refs),
+                    error: None,
+                };
+
+            for (key, expected) in [
+                (LIFI_REF_TX_HASH, "lifi_tx_hash is required"),
+                (LIFI_REF_NONCE, "lifi_nonce is required for an EVM source"),
+                (
+                    LIFI_REF_BLOCKHASH,
+                    "lifi_blockhash is required for a Solana source",
+                ),
+            ] {
+                if !refs.iter().any(|r| r.key == key) {
+                    continue;
+                }
+                let stripped = refs.iter().filter(|r| r.key != key).cloned().collect();
+                let err = update(&mut map, principal(), update_refs(stripped), 2).unwrap_err();
+                assert_eq!(
+                    err,
+                    ActiveUserTransactionError::InvalidData(expected.to_string())
+                );
+            }
+
+            // Learned refs merged onto the creation ones are accepted.
+            let mut learned = refs.clone();
+            learned.push(lifi_ref("lifi_dest_tx_hash", LIFI_EVM_TX_HASH));
+            let tx = update(&mut map, principal(), update_refs(learned.clone()), 3)
+                .expect("update with every poll key");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Executing);
+            assert_eq!(tx.external_refs, learned);
+        }
+    }
+
+    const XRP_SOURCE: &str = "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi";
+    const XRP_DESTINATION: &str = "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv";
+    const XRP_OTHER_SOURCE: &str = "rETD6N4kWuW9tDE6ewyzZsXw2uqzDAPQwg";
+    const XRP_OTHER_DESTINATION: &str = "rJkHLRqmFWoMGPsBdP8ZPMK8PR7GtbxTWi";
+
+    fn xrp_data(
+        amount: u64,
+        fee: u64,
+        destination_tag: Option<u32>,
+        source_address: &str,
+        destination_address: &str,
+    ) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::Xrp(XrpData {
+            token: TokenId::XrpNativeMainnet,
+            source_address: source_address.to_string(),
+            destination_address: destination_address.to_string(),
+            destination_tag,
+            amount: Nat::from(amount),
+            fee: Nat::from(fee),
+        })
+    }
+
+    const XRP_TX_HASH: &str = "8F2C4D1A9B3E5760A1C8D4F2B6E093751A4C8D2F6B0E93751A4C8D2F6B0E9375";
+    const XRP_LAST_LEDGER_SEQUENCE: &str = "96312004";
+
+    /// The refs every XRP row must carry. Tests not about the refs use this, so
+    /// they still exercise the check they are named for.
+    fn xrp_refs() -> Vec<ActiveUserTransactionRef> {
+        vec![
+            ActiveUserTransactionRef {
+                key: XRP_REF_TX_HASH.to_string(),
+                value: XRP_TX_HASH.to_string(),
+            },
+            ActiveUserTransactionRef {
+                key: XRP_REF_LAST_LEDGER_SEQUENCE.to_string(),
+                value: XRP_LAST_LEDGER_SEQUENCE.to_string(),
+            },
+        ]
+    }
+
+    fn xrp_refs_without(key: &str) -> Vec<ActiveUserTransactionRef> {
+        xrp_refs().into_iter().filter(|r| r.key != key).collect()
+    }
+
+    fn xrp_refs_with(key: &str, value: &str) -> Vec<ActiveUserTransactionRef> {
+        let mut refs = xrp_refs_without(key);
+        refs.push(ActiveUserTransactionRef {
+            key: key.to_string(),
+            value: value.to_string(),
+        });
+        refs
+    }
+
+    #[test]
+    fn xrp_create_roundtrip() {
+        // `destination_tag` has to survive create — and the stable-memory read
+        // path — in all three shapes: `0` is a real XRPL tag, `None` is its
+        // absence, and `u32::MAX` is the value a narrower encoding would
+        // truncate. Collapsing any of them changes the payment.
+        for destination_tag in [None, Some(0), Some(u32::MAX)] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("xrp-1");
+            req.data = xrp_data(25_000_000, 12, destination_tag, XRP_SOURCE, XRP_DESTINATION);
+            req.external_refs = xrp_refs();
+            let tx = create(&mut map, principal(), req, 1).expect("create");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+
+            let listed = list(&map, principal());
+            assert_eq!(listed.len(), 1);
+            assert_eq!(
+                listed[0].data,
+                xrp_data(25_000_000, 12, destination_tag, XRP_SOURCE, XRP_DESTINATION)
+            );
+        }
+    }
+
+    #[test]
+    fn xrp_zero_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = xrp_data(0, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        req.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+    }
+
+    #[test]
+    fn xrp_zero_fee_rejected() {
+        // Every XRPL transaction destroys a non-zero transaction cost, so a row
+        // claiming a zero fee describes a payment that could not have been
+        // signed.
+        //
+        // The exact message is asserted, not just the variant: the fee is the
+        // second `Nat` this payload validates, and a shared validator that named
+        // the wrong field would send the reader to the amount instead.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = xrp_data(25_000_000, 0, None, XRP_SOURCE, XRP_DESTINATION);
+        req.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("fee must be greater than zero".to_string())
+        );
+    }
+
+    #[test]
+    fn xrp_oversized_fee_rejected() {
+        // The other end of the same bound, and the other message that has to name
+        // the fee rather than the amount.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = ActiveUserTransactionData::Xrp(XrpData {
+            token: TokenId::XrpNativeMainnet,
+            source_address: XRP_SOURCE.to_string(),
+            destination_address: XRP_DESTINATION.to_string(),
+            destination_tag: None,
+            amount: Nat::from(25_000_000u64),
+            fee: Nat::parse(MAX_WIDTH_AMOUNT).unwrap() + Nat::from(1u32),
+        });
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("fee is too large".to_string())
+        );
+    }
+
+    #[test]
+    fn xrp_zero_amount_names_the_amount() {
+        // The counterpart to the two above: making the validator field-aware must
+        // not make an amount problem report as a fee one.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = xrp_data(0, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        req.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("amount must be greater than zero".to_string())
+        );
+    }
+
+    #[test]
+    fn xrp_non_xrp_token_rejected() {
+        // The resolver polls the XRP Ledger for this row, so a token from any
+        // other chain leaves it with nothing to ask — and `data` is immutable
+        // after creation, so the row could never resolve.
+        for token in [
+            TokenId::EvmNative(1),
+            TokenId::IcpNative,
+            TokenId::BtcNativeMainnet,
+            TokenId::SolNativeMainnet,
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("xrp-1");
+            req.data = ActiveUserTransactionData::Xrp(XrpData {
+                token,
+                source_address: XRP_SOURCE.to_string(),
+                destination_address: XRP_DESTINATION.to_string(),
+                destination_tag: None,
+                amount: Nat::from(25_000_000u64),
+                fee: Nat::from(12u64),
+            });
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "token must be a native XRP token".to_string()
+                )
+            );
+        }
+    }
+
+    #[test]
+    fn xrp_malformed_address_rejected() {
+        // Both fields are checked, and the error names which one — the guard
+        // reads `source_address`, so a row that stored a wrong one would gate
+        // the wrong account.
+        for (source, destination, expected) in [
+            ("", XRP_DESTINATION, "source_address invalid length"),
+            (XRP_SOURCE, "", "destination_address invalid length"),
+            // Clears the prefix and charset checks but is far too short for
+            // base58check to have produced it — the lower bound is the only
+            // thing that refuses it.
+            ("r", XRP_DESTINATION, "source_address invalid length"),
+            // One character below the bound, still valid base58 with the right
+            // prefix, so the length is the only thing that can refuse it.
+            (
+                "rBNLHADLTBV5WqQ8rDyLaTrG",
+                XRP_DESTINATION,
+                "source_address invalid length",
+            ),
+            (XRP_SOURCE, "r", "destination_address invalid length"),
+            (
+                "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMiXXXXX",
+                XRP_DESTINATION,
+                "source_address invalid length",
+            ),
+            (
+                "xBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi",
+                XRP_DESTINATION,
+                "source_address must start with r",
+            ),
+            // `0`, `O`, `I` and `l` are the four characters base58 omits, so an
+            // address carrying one cannot have come from a base58 encoder.
+            (
+                "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoM0",
+                XRP_DESTINATION,
+                "source_address must be base58",
+            ),
+            (
+                XRP_SOURCE,
+                "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBl",
+                "destination_address must be base58",
+            ),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("xrp-1");
+            req.data = xrp_data(25_000_000, 12, None, source, destination);
+            req.external_refs = xrp_refs();
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(expected.to_string())
+            );
+        }
+    }
+
+    // The invariant the whole XRP guard exists for, enforced here because the
+    // frontend's own check cannot be atomic with this create.
+    #[test]
+    fn xrp_second_open_send_from_the_same_address_rejected() {
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        first.external_refs = xrp_refs();
+        create(&mut map, principal(), first, 1).expect("first send");
+
+        // A different id and a different destination: neither is what refuses it.
+        let mut second = create_req("xrp-2");
+        second.data = xrp_data(1, 12, Some(7), XRP_SOURCE, XRP_OTHER_DESTINATION);
+        second.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), second, 2).unwrap_err();
+
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+    }
+
+    #[test]
+    fn xrp_second_send_rejected_while_the_first_is_executing() {
+        // `Executing` is non-terminal too, and a row that has advanced past
+        // `Pending` is exactly one whose sequence is still in play.
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        first.external_refs = xrp_refs();
+        create(&mut map, principal(), first, 1).expect("first send");
+        update(
+            &mut map,
+            principal(),
+            UpdateActiveUserTransactionRequest {
+                id: "xrp-1".to_string(),
+                status: Some(ActiveUserTransactionStatus::Executing),
+                progress_step: None,
+                external_refs: None,
+                error: None,
+            },
+            2,
+        )
+        .expect("advance");
+
+        let mut second = create_req("xrp-2");
+        second.data = xrp_data(1, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        second.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), second, 3).unwrap_err();
+
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+    }
+
+    #[test]
+    fn xrp_second_send_allowed_once_the_first_is_terminal() {
+        // Bounded by design: the record self-clears within the signed validity
+        // window, and the address is free again the moment it does.
+        for status in [
+            ActiveUserTransactionStatus::Succeeded,
+            ActiveUserTransactionStatus::Failed,
+        ] {
+            let (mut map, _mm) = setup();
+
+            let mut first = create_req("xrp-1");
+            first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+            first.external_refs = xrp_refs();
+            create(&mut map, principal(), first, 1).expect("first send");
+            update(
+                &mut map,
+                principal(),
+                UpdateActiveUserTransactionRequest {
+                    id: "xrp-1".to_string(),
+                    status: Some(status),
+                    progress_step: None,
+                    external_refs: None,
+                    error: None,
+                },
+                2,
+            )
+            .expect("resolve");
+
+            let mut second = create_req("xrp-2");
+            second.data = xrp_data(1, 12, None, XRP_SOURCE, XRP_DESTINATION);
+            second.external_refs = xrp_refs();
+
+            create(&mut map, principal(), second, 3).expect("second send");
+        }
+    }
+
+    #[test]
+    fn xrp_open_send_does_not_block_another_address() {
+        // Per address, not per user: a record for a different address says
+        // nothing about this one's sequence.
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        first.external_refs = xrp_refs();
+        create(&mut map, principal(), first, 1).expect("first send");
+
+        let mut second = create_req("xrp-2");
+        second.data = xrp_data(1, 12, None, XRP_OTHER_SOURCE, XRP_DESTINATION);
+        second.external_refs = xrp_refs();
+
+        create(&mut map, principal(), second, 2).expect("other address");
+    }
+
+    #[test]
+    fn xrp_open_send_does_not_block_another_user() {
+        // The scan is principal-scoped, so one user's open payment cannot refuse
+        // another's — even from the same address, which two users cannot share
+        // anyway.
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        first.external_refs = xrp_refs();
+        create(&mut map, principal(), first, 1).expect("first send");
+
+        let mut second = create_req("xrp-1");
+        second.data = xrp_data(1, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        second.external_refs = xrp_refs();
+
+        create(&mut map, other_principal(), second, 2).expect("other user");
+    }
+
+    #[test]
+    fn xrp_open_send_does_not_block_another_flow() {
+        // Only XRP carries this constraint; the six swap flows are unaffected.
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        first.external_refs = xrp_refs();
+        create(&mut map, principal(), first, 1).expect("first send");
+
+        create(&mut map, principal(), create_req("swap-1"), 2).expect("another flow");
+    }
+
+    #[test]
+    fn xrp_self_payment_rejected() {
+        // XRPL answers `temREDUNDANT` and never applies it, so this row could
+        // never resolve.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_SOURCE);
+        req.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData(
+                "destination_address must differ from source_address".to_string()
+            )
+        );
+    }
+
+    /// Helper for the ref tests: an otherwise-valid XRP create carrying `refs`.
+    fn xrp_create_with_refs(
+        map: &mut ActiveUserTransactionsMap,
+        refs: Vec<ActiveUserTransactionRef>,
+    ) -> Result<ActiveUserTransaction, ActiveUserTransactionError> {
+        let mut req = create_req("xrp-1");
+        req.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        req.external_refs = refs;
+        create(map, principal(), req, 1)
+    }
+
+    #[test]
+    fn xrp_create_without_poll_keys_rejected() {
+        // Both are derived from the signed blob before this call, so a row
+        // without them describes a payment nothing can poll — and an unpollable
+        // row is worse than a rejected create, because it is `Pending`, it
+        // refuses every later send from its address, and nothing clears it.
+        for (missing, expected) in [
+            (XRP_REF_TX_HASH, "tx_hash is required"),
+            (
+                XRP_REF_LAST_LEDGER_SEQUENCE,
+                "last_ledger_sequence is required",
+            ),
+        ] {
+            let (mut map, _mm) = setup();
+            let err = xrp_create_with_refs(&mut map, xrp_refs_without(missing)).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(expected.to_string())
+            );
+            assert!(
+                list(&map, principal()).is_empty(),
+                "a rejected create must not leave a row behind"
+            );
+        }
+    }
+
+    #[test]
+    fn xrp_create_with_malformed_tx_hash_rejected() {
+        // Length and alphabet, because a hash that is not one cannot be looked
+        // up: the poll would 404 forever rather than resolve.
+        let too_short = &XRP_TX_HASH[..63];
+        let too_long = format!("{XRP_TX_HASH}0");
+        let non_hex = format!("{}Z", &XRP_TX_HASH[..63]);
+        assert_eq!(too_short.len(), XRP_TX_HASH_LEN - 1);
+        assert_eq!(too_long.len(), XRP_TX_HASH_LEN + 1);
+        assert_eq!(non_hex.len(), XRP_TX_HASH_LEN);
+
+        for value in ["", too_short, too_long.as_str(), non_hex.as_str()] {
+            let (mut map, _mm) = setup();
+            let err =
+                xrp_create_with_refs(&mut map, xrp_refs_with(XRP_REF_TX_HASH, value)).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "tx_hash must be 64 hex characters".to_string()
+                ),
+                "accepted {value:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn xrp_create_with_unusable_last_ledger_sequence_rejected() {
+        // Mirrors what the resolver refuses to parse. `Number(" 12")`,
+        // `Number("0x1f")` and `Number("1e5")` all produce a number, and each
+        // would decide expiry against a ledger range the payment was never
+        // signed against — so digits only, then a `UInt32` that is not zero.
+        let over_u32 = (u64::from(u32::MAX) + 1).to_string();
+
+        for value in [
+            "",
+            " 12",
+            "12 ",
+            "0x1f",
+            "1e5",
+            "+7",
+            "-7",
+            "7.0",
+            "0",
+            over_u32.as_str(),
+        ] {
+            let (mut map, _mm) = setup();
+            let err =
+                xrp_create_with_refs(&mut map, xrp_refs_with(XRP_REF_LAST_LEDGER_SEQUENCE, value))
+                    .unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "last_ledger_sequence must be a positive UInt32".to_string()
+                ),
+                "accepted {value:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn xrp_create_accepts_display_refs_alongside_the_poll_keys() {
+        // The requirement is "these two are present", not "only these two" —
+        // the row also snapshots what it needs to render itself later.
+        let (mut map, _mm) = setup();
+        let mut refs = xrp_refs();
+        for (key, value) in [
+            ("amount", "25"),
+            ("token_symbol", "XRP"),
+            ("network_symbol", "XRP"),
+        ] {
+            refs.push(ActiveUserTransactionRef {
+                key: key.to_string(),
+                value: value.to_string(),
+            });
+        }
+
+        let tx = xrp_create_with_refs(&mut map, refs.clone()).expect("create");
+        assert_eq!(tx.external_refs, refs);
+    }
+
+    #[test]
+    fn xrp_update_cannot_strip_the_poll_keys() {
+        // `external_refs` is replaced wholesale, so without this check an update
+        // reaches the same unresolvable state `create` rejects — on a row that
+        // is already refusing sends from its address.
+        let (mut map, _mm) = setup();
+        xrp_create_with_refs(&mut map, xrp_refs()).expect("create");
+
+        let err = update(
+            &mut map,
+            principal(),
+            UpdateActiveUserTransactionRequest {
+                id: "xrp-1".to_string(),
+                status: None,
+                progress_step: None,
+                external_refs: Some(xrp_refs_without(XRP_REF_TX_HASH)),
+                error: None,
+            },
+            2,
+        )
+        .unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("tx_hash is required".to_string())
+        );
+
+        // The stored row is untouched, and the update the resolver actually
+        // sends — status only — still goes through.
+        let tx = update(
+            &mut map,
+            principal(),
+            UpdateActiveUserTransactionRequest {
+                id: "xrp-1".to_string(),
+                status: Some(ActiveUserTransactionStatus::Succeeded),
+                progress_step: None,
+                external_refs: None,
+                error: None,
+            },
+            3,
+        )
+        .expect("status-only update");
+        assert_eq!(tx.status, ActiveUserTransactionStatus::Succeeded);
+        assert_eq!(tx.external_refs, xrp_refs());
+    }
+
+    #[test]
+    fn poll_keys_are_required_of_xrp_rows_only() {
+        // Guards against the check leaking into flows that have no such refs;
+        // every other variant still creates with none.
+        let (mut map, _mm) = setup();
+        create(&mut map, principal(), create_req("other-1"), 1).expect("non-xrp create");
+    }
+
+    /// A NEAR Intents swap whose source is native XRP: its deposit is an XRP
+    /// payment from `source_address`.
+    fn xrp_swap_data(amount: u64, source_address: Option<&str>) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::XrpNativeMainnet,
+            dest_token: TokenId::EvmNative(1),
+            amount: Nat::from(amount),
+            source_address: source_address.map(str::to_string),
+        })
+    }
+
+    fn create_xrp_send(map: &mut ActiveUserTransactionsMap, id: &str, source_address: &str) {
+        let mut req = create_req(id);
+        req.data = xrp_data(25_000_000, 12, None, source_address, XRP_DESTINATION);
+        req.external_refs = xrp_refs();
+        create(map, principal(), req, 1).expect("send");
+    }
+
+    fn create_xrp_swap(
+        map: &mut ActiveUserTransactionsMap,
+        id: &str,
+        source_address: &str,
+    ) -> Result<ActiveUserTransaction, ActiveUserTransactionError> {
+        let mut req = create_req(id);
+        req.data = xrp_swap_data(25_000_000, Some(source_address));
+        req.external_refs = xrp_refs();
+        create(map, principal(), req, 1)
+    }
+
+    fn set_status(
+        map: &mut ActiveUserTransactionsMap,
+        id: &str,
+        status: ActiveUserTransactionStatus,
+    ) {
+        update(
+            map,
+            principal(),
+            UpdateActiveUserTransactionRequest {
+                id: id.to_string(),
+                status: Some(status),
+                progress_step: None,
+                external_refs: None,
+                error: None,
+            },
+            2,
+        )
+        .expect("status update");
+    }
+
+    /// The update the XRP ledger resolution makes: the new status with the row's
+    /// refs plus the deposit's `ledger_result`.
+    fn resolve_xrp_swap(
+        map: &mut ActiveUserTransactionsMap,
+        id: &str,
+        status: ActiveUserTransactionStatus,
+        ledger_result: &str,
+    ) -> Result<ActiveUserTransaction, ActiveUserTransactionError> {
+        update(
+            map,
+            principal(),
+            UpdateActiveUserTransactionRequest {
+                id: id.to_string(),
+                status: Some(status),
+                progress_step: None,
+                external_refs: Some(xrp_refs_with(XRP_REF_LEDGER_RESULT, ledger_result)),
+                error: None,
+            },
+            2,
+        )
+    }
+
+    #[test]
+    fn xrp_swap_create_roundtrip() {
+        let (mut map, _mm) = setup();
+        let tx = create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("create");
+        assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+
+        let listed = list(&map, principal());
+        assert_eq!(listed.len(), 1);
+        assert_eq!(listed[0].data, xrp_swap_data(25_000_000, Some(XRP_SOURCE)));
+    }
+
+    #[test]
+    fn xrp_swap_without_source_address_rejected() {
+        // Without the address the in-flight check cannot count the deposit, and
+        // a second payment from the same address would pass it.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("swap-1");
+        req.data = xrp_swap_data(25_000_000, None);
+        req.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData(
+                "source_address is required for a native XRP source".to_string()
+            )
+        );
+    }
+
+    #[test]
+    fn xrp_swap_malformed_source_address_rejected() {
+        // The same shape check as a send's `source_address`, since the in-flight
+        // check compares the two.
+        for (source, expected) in [
+            ("r", "source_address invalid length"),
+            (
+                "xBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi",
+                "source_address must start with r",
+            ),
+            (
+                "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoM0",
+                "source_address must be base58",
+            ),
+        ] {
+            let (mut map, _mm) = setup();
+            let err = create_xrp_swap(&mut map, "swap-1", source).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(expected.to_string())
+            );
+        }
+    }
+
+    #[test]
+    fn source_address_rejected_for_a_non_xrp_swap_source() {
+        // Only a native XRP source pays its deposit from an XRP address. A swap
+        // toward XRP makes no XRP payment either, so it carries no address.
+        for (source_token, dest_token) in [
+            (TokenId::EvmNative(1), TokenId::XrpNativeMainnet),
+            (TokenId::BtcNativeMainnet, TokenId::EvmNative(1)),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("swap-1");
+            req.data = ActiveUserTransactionData::NearIntents(NearIntentsData {
+                source_token,
+                dest_token,
+                amount: Nat::from(250_000u64),
+                source_address: Some(XRP_SOURCE.to_string()),
+            });
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "source_address is only allowed for a native XRP source".to_string()
+                )
+            );
+        }
+    }
+
+    #[test]
+    fn swap_toward_xrp_needs_no_address_or_poll_keys() {
+        // The payout arrives at the user's address; nothing is paid from it.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("swap-1");
+        req.data = ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::EvmNative(1),
+            dest_token: TokenId::XrpNativeMainnet,
+            amount: Nat::from(250_000u64),
+            source_address: None,
+        });
+        create(&mut map, principal(), req, 1).expect("create");
+    }
+
+    #[test]
+    fn xrp_swap_without_poll_keys_rejected() {
+        // A `Pending` swap row refuses every later payment from its address until
+        // its deposit resolves, so, like a send row, it must be pollable.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("swap-1");
+        req.data = xrp_swap_data(25_000_000, Some(XRP_SOURCE));
+        req.external_refs = xrp_refs_without(XRP_REF_TX_HASH);
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("tx_hash is required".to_string())
+        );
+    }
+
+    #[test]
+    fn xrp_swap_update_cannot_strip_the_poll_keys() {
+        let (mut map, _mm) = setup();
+        create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("create");
+
+        let err = update(
+            &mut map,
+            principal(),
+            UpdateActiveUserTransactionRequest {
+                id: "swap-1".to_string(),
+                status: None,
+                progress_step: None,
+                external_refs: Some(xrp_refs_without(XRP_REF_LAST_LEDGER_SEQUENCE)),
+                error: None,
+            },
+            2,
+        )
+        .unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("last_ledger_sequence is required".to_string())
+        );
+    }
+
+    #[test]
+    fn xrp_swap_rejected_while_a_send_is_in_flight() {
+        for status in [
+            ActiveUserTransactionStatus::Pending,
+            ActiveUserTransactionStatus::Executing,
+        ] {
+            let (mut map, _mm) = setup();
+            create_xrp_send(&mut map, "xrp-1", XRP_SOURCE);
+            if status != ActiveUserTransactionStatus::Pending {
+                set_status(&mut map, "xrp-1", status);
+            }
+
+            let err = create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).unwrap_err();
+            assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+        }
+    }
+
+    #[test]
+    fn xrp_payment_rejected_while_a_swap_deposit_is_in_flight() {
+        // A `Pending` swap row is a deposit that has not resolved on the ledger,
+        // so it refuses a send and a second swap from the same address alike.
+        let (mut map, _mm) = setup();
+        create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("first swap");
+
+        let mut send = create_req("xrp-1");
+        send.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        send.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), send, 2).unwrap_err();
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+
+        let err = create_xrp_swap(&mut map, "swap-2", XRP_SOURCE).unwrap_err();
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+    }
+
+    #[test]
+    fn xrp_payment_allowed_once_the_swap_deposit_has_resolved() {
+        // `Executing` means the deposit validated and the swap goes on at 1Click;
+        // the address is free even though the swap row is still open.
+        for (status, ledger_result) in [
+            (ActiveUserTransactionStatus::Executing, "tesSUCCESS"),
+            (ActiveUserTransactionStatus::Failed, "tecNO_DST_INSUF_XRP"),
+            (ActiveUserTransactionStatus::Failed, "expired"),
+        ] {
+            let (mut map, _mm) = setup();
+            create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("first swap");
+            resolve_xrp_swap(&mut map, "swap-1", status, ledger_result).expect("resolve");
+
+            create_xrp_send(&mut map, "xrp-1", XRP_SOURCE);
+        }
+    }
+
+    #[test]
+    fn xrp_payment_allowed_once_the_swap_succeeds() {
+        let (mut map, _mm) = setup();
+        create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("first swap");
+        resolve_xrp_swap(
+            &mut map,
+            "swap-1",
+            ActiveUserTransactionStatus::Executing,
+            "tesSUCCESS",
+        )
+        .expect("deposit validated");
+        // From `Executing` on, 1Click decides, without a ledger result.
+        set_status(&mut map, "swap-1", ActiveUserTransactionStatus::Succeeded);
+
+        create_xrp_send(&mut map, "xrp-1", XRP_SOURCE);
+    }
+
+    #[test]
+    fn xrp_swap_cannot_leave_pending_without_its_ledger_result() {
+        // What a frontend from before the swap UI sends: 1Click's
+        // `PENDING_DEPOSIT` mapped to `Executing`, and no ledger result. Accepted,
+        // it would release the address while the deposit can still apply.
+        for status in [
+            ActiveUserTransactionStatus::Executing,
+            ActiveUserTransactionStatus::Succeeded,
+            ActiveUserTransactionStatus::Failed,
+        ] {
+            let (mut map, _mm) = setup();
+            create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("first swap");
+
+            let err = update(
+                &mut map,
+                principal(),
+                UpdateActiveUserTransactionRequest {
+                    id: "swap-1".to_string(),
+                    status: Some(status),
+                    progress_step: None,
+                    external_refs: None,
+                    error: None,
+                },
+                2,
+            )
+            .unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "ledger_result is required to leave Pending".to_string()
+                )
+            );
+
+            assert_eq!(
+                list(&map, principal())[0].status,
+                ActiveUserTransactionStatus::Pending
+            );
+
+            let mut send = create_req("xrp-1");
+            send.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+            send.external_refs = xrp_refs();
+            let err = create(&mut map, principal(), send, 3).unwrap_err();
+            assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+        }
+    }
+
+    #[test]
+    fn xrp_swap_ledger_result_must_match_the_status() {
+        for (status, ledger_result) in [
+            (ActiveUserTransactionStatus::Failed, "tesSUCCESS"),
+            (
+                ActiveUserTransactionStatus::Executing,
+                "tecUNFUNDED_PAYMENT",
+            ),
+            (ActiveUserTransactionStatus::Executing, "expired"),
+            // The ledger only ever says the deposit validated; the swap's outcome
+            // is 1Click's, from `Executing`.
+            (ActiveUserTransactionStatus::Succeeded, "tesSUCCESS"),
+        ] {
+            let (mut map, _mm) = setup();
+            create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("first swap");
+
+            let err = resolve_xrp_swap(&mut map, "swap-1", status, ledger_result).unwrap_err();
+            assert_eq!(err, ActiveUserTransactionError::IllegalStatusTransition);
+        }
+    }
+
+    #[test]
+    fn xrp_swap_malformed_ledger_result_rejected() {
+        for ledger_result in [
+            "",
+            "tes",
+            "tec",
+            "tecfoo",
+            "SUCCESS",
+            "EXPIRED",
+            "tefPAST_SEQ",
+        ] {
+            let (mut map, _mm) = setup();
+            create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("first swap");
+
+            let err = resolve_xrp_swap(
+                &mut map,
+                "swap-1",
+                ActiveUserTransactionStatus::Failed,
+                ledger_result,
+            )
+            .unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "ledger_result must be tesSUCCESS, a tec code or expired".to_string()
+                ),
+                "{ledger_result:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn ledger_result_is_required_of_xrp_source_swaps_only() {
+        let (mut map, _mm) = setup();
+
+        // A send resolves with no ledger result, as it did before swaps.
+        create_xrp_send(&mut map, "xrp-1", XRP_SOURCE);
+        set_status(&mut map, "xrp-1", ActiveUserTransactionStatus::Succeeded);
+
+        // A swap from any other chain follows 1Click from `Pending`.
+        let mut req = create_req("swap-evm");
+        req.data = ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::EvmNative(1),
+            dest_token: TokenId::XrpNativeMainnet,
+            amount: Nat::from(250_000u64),
+            source_address: None,
+        });
+        create(&mut map, principal(), req, 1).expect("evm swap");
+        set_status(&mut map, "swap-evm", ActiveUserTransactionStatus::Executing);
+    }
+
+    #[test]
+    fn xrp_swap_deposit_does_not_block_another_address() {
+        let (mut map, _mm) = setup();
+        create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("first swap");
+
+        create_xrp_send(&mut map, "xrp-1", XRP_OTHER_SOURCE);
+    }
+
+    #[test]
+    fn swap_toward_xrp_does_not_block_a_payment() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("swap-1");
+        req.data = ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::EvmNative(1),
+            dest_token: TokenId::XrpNativeMainnet,
+            amount: Nat::from(250_000u64),
+            source_address: None,
+        });
+        create(&mut map, principal(), req, 1).expect("swap toward XRP");
+
+        create_xrp_send(&mut map, "xrp-1", XRP_SOURCE);
     }
 
     #[test]
@@ -959,32 +2994,251 @@ mod tests {
             .expect("other principal not throttled");
     }
 
-    #[test]
-    fn cap_counts_terminal_rows() {
-        let (mut map, _mm) = setup();
+    /// Fills the caller's store to the cap with `Pending` rows `id-0`…`id-99`,
+    /// all created at time 1.
+    fn fill_to_cap(map: &mut ActiveUserTransactionsMap) {
         for i in 0..MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
-            let id = format!("id-{i}");
-            create(&mut map, principal(), create_req(&id), 1).expect("within cap");
-            update(
+            create(map, principal(), create_req(&format!("id-{i}")), 1).expect("within cap");
+        }
+    }
+
+    /// Moves a row to `status` at `now_ns`, which becomes its `updated_at_ns`.
+    fn set_status_at(
+        map: &mut ActiveUserTransactionsMap,
+        principal: Principal,
+        id: &str,
+        status: ActiveUserTransactionStatus,
+        now_ns: u64,
+    ) {
+        update(
+            map,
+            principal,
+            UpdateActiveUserTransactionRequest {
+                id: id.to_string(),
+                status: Some(status),
+                progress_step: None,
+                external_refs: None,
+                error: None,
+            },
+            now_ns,
+        )
+        .expect("status update");
+    }
+
+    fn ids(map: &ActiveUserTransactionsMap, principal: Principal) -> BTreeSet<String> {
+        list(map, principal).into_iter().map(|tx| tx.id).collect()
+    }
+
+    #[test]
+    fn at_cap_the_finished_row_updated_longest_ago_makes_room() {
+        let (mut map, _mm) = setup();
+        fill_to_cap(&mut map);
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-10",
+            ActiveUserTransactionStatus::Succeeded,
+            5,
+        );
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-20",
+            ActiveUserTransactionStatus::Failed,
+            3,
+        );
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-30",
+            ActiveUserTransactionStatus::Succeeded,
+            4,
+        );
+
+        let mut expected = ids(&map, principal());
+        create(&mut map, principal(), create_req("new-1"), 10).expect("room made");
+        expected.remove("id-20");
+        expected.insert("new-1".to_string());
+        assert_eq!(ids(&map, principal()), expected);
+
+        create(&mut map, principal(), create_req("new-2"), 11).expect("room made");
+        expected.remove("id-30");
+        expected.insert("new-2".to_string());
+        assert_eq!(ids(&map, principal()), expected);
+        assert_eq!(expected.len(), MAX_ACTIVE_USER_TRANSACTIONS_PER_USER);
+    }
+
+    #[test]
+    fn finished_rows_updated_at_the_same_time_lose_exactly_one() {
+        let (mut map, _mm) = setup();
+        fill_to_cap(&mut map);
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-5",
+            ActiveUserTransactionStatus::Succeeded,
+            3,
+        );
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-7",
+            ActiveUserTransactionStatus::Failed,
+            3,
+        );
+
+        create(&mut map, principal(), create_req("new"), 4).expect("room made");
+
+        let after = ids(&map, principal());
+        assert_eq!(after.len(), MAX_ACTIVE_USER_TRANSACTIONS_PER_USER);
+        assert_eq!(
+            usize::from(after.contains("id-5")) + usize::from(after.contains("id-7")),
+            1
+        );
+    }
+
+    #[test]
+    fn at_cap_pending_and_executing_rows_are_never_removed() {
+        let (mut map, _mm) = setup();
+        fill_to_cap(&mut map);
+        for i in 0..50 {
+            set_status_at(
                 &mut map,
                 principal(),
-                UpdateActiveUserTransactionRequest {
-                    id,
-                    status: Some(ActiveUserTransactionStatus::Succeeded),
-                    progress_step: None,
-                    external_refs: None,
-                    error: None,
-                },
+                &format!("id-{i}"),
+                ActiveUserTransactionStatus::Executing,
                 2,
-            )
-            .expect("succeed");
+            );
         }
-        let err = create(&mut map, principal(), create_req("overflow"), 3).unwrap_err();
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-99",
+            ActiveUserTransactionStatus::Failed,
+            3,
+        );
+
+        create(&mut map, principal(), create_req("new-1"), 4).expect("room made");
+        let before = ids(&map, principal());
+        assert!(!before.contains("id-99"));
+
+        // Nothing finished is left: refused, and nothing is removed.
+        let err = create(&mut map, principal(), create_req("new-2"), 5).unwrap_err();
+        assert_eq!(err, ActiveUserTransactionError::TooManyActiveTransactions);
+        assert_eq!(ids(&map, principal()), before);
+    }
+
+    // Pruning must come after every other check, or a create that is refused
+    // anyway would still cost the user a row.
+    #[test]
+    fn a_create_refused_at_cap_for_another_reason_removes_nothing() {
+        let (mut map, _mm) = setup();
+
+        let mut open = create_req("xrp-open");
+        open.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        open.external_refs = xrp_refs();
+        create(&mut map, principal(), open, 1).expect("open send");
+        for i in 1..MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
+            let id = format!("id-{i}");
+            create(&mut map, principal(), create_req(&id), 1).expect("within cap");
+            set_status_at(
+                &mut map,
+                principal(),
+                &id,
+                ActiveUserTransactionStatus::Succeeded,
+                2,
+            );
+        }
+        let before = ids(&map, principal());
+        assert_eq!(before.len(), MAX_ACTIVE_USER_TRANSACTIONS_PER_USER);
+
+        let err = create(&mut map, principal(), create_req(""), 3).unwrap_err();
+        assert_eq!(err, ActiveUserTransactionError::InvalidId);
+        assert_eq!(ids(&map, principal()), before);
+
+        let err = create(&mut map, principal(), create_req("id-1"), 3).unwrap_err();
+        assert_eq!(err, ActiveUserTransactionError::AlreadyExists);
+        assert_eq!(ids(&map, principal()), before);
+
+        let mut invalid = create_req("invalid");
+        invalid.data = xrp_data(0, 12, None, XRP_OTHER_SOURCE, XRP_DESTINATION);
+        invalid.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), invalid, 3).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        assert_eq!(ids(&map, principal()), before);
+
+        let mut second = create_req("xrp-second");
+        second.data = xrp_data(1, 12, None, XRP_SOURCE, XRP_OTHER_DESTINATION);
+        second.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), second, 3).unwrap_err();
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+        assert_eq!(ids(&map, principal()), before);
+    }
+
+    #[test]
+    fn below_cap_a_create_removes_nothing() {
+        let (mut map, _mm) = setup();
+        for i in 1..MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
+            let id = format!("id-{i}");
+            create(&mut map, principal(), create_req(&id), 1).expect("within cap");
+            set_status_at(
+                &mut map,
+                principal(),
+                &id,
+                ActiveUserTransactionStatus::Succeeded,
+                2,
+            );
+        }
+        let mut expected = ids(&map, principal());
+
+        create(&mut map, principal(), create_req("last"), 3).expect("within cap");
+
+        expected.insert("last".to_string());
+        assert_eq!(ids(&map, principal()), expected);
+        assert_eq!(expected.len(), MAX_ACTIVE_USER_TRANSACTIONS_PER_USER);
+    }
+
+    #[test]
+    fn making_room_never_touches_another_users_rows() {
+        let (mut map, _mm) = setup();
+        // Finished before anything of the caller's, so they would go first if
+        // the scan crossed principals.
+        for id in ["other-1", "other-2"] {
+            create(&mut map, other_principal(), create_req(id), 1).expect("other user");
+            set_status_at(
+                &mut map,
+                other_principal(),
+                id,
+                ActiveUserTransactionStatus::Succeeded,
+                1,
+            );
+        }
+        let others = ids(&map, other_principal());
+
+        fill_to_cap(&mut map);
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-0",
+            ActiveUserTransactionStatus::Succeeded,
+            5,
+        );
+
+        create(&mut map, principal(), create_req("new"), 6).expect("room made");
+
+        assert!(!ids(&map, principal()).contains("id-0"));
+        assert_eq!(ids(&map, other_principal()), others);
+    }
+
+    #[test]
+    fn dismissing_a_row_frees_its_slot() {
+        let (mut map, _mm) = setup();
+        fill_to_cap(&mut map);
+        let err = create(&mut map, principal(), create_req("overflow"), 2).unwrap_err();
         assert_eq!(err, ActiveUserTransactionError::TooManyActiveTransactions);
 
-        // FE acknowledges one row, freeing a slot.
         delete(&mut map, principal(), "id-0".to_string()).expect("delete");
-        create(&mut map, principal(), create_req("after-delete"), 4)
+        create(&mut map, principal(), create_req("after-delete"), 3)
             .expect("slot freed after delete");
     }
 
@@ -1110,7 +3364,7 @@ mod tests {
         )
         .expect("update b");
 
-        let all = list(&map, principal()).transactions;
+        let all = list(&map, principal());
         let mut ids: Vec<String> = all.iter().map(|tx| tx.id.clone()).collect();
         ids.sort();
         assert_eq!(ids, vec!["a".to_string(), "b".to_string()]);
@@ -1122,11 +3376,49 @@ mod tests {
         create(&mut map, principal(), create_req("a"), 1).expect("a");
         create(&mut map, other_principal(), create_req("a"), 1).expect("other");
 
-        let mine = list(&map, principal()).transactions;
+        let mine = list(&map, principal());
         assert_eq!(mine.len(), 1);
 
-        let theirs = list(&map, other_principal()).transactions;
+        let theirs = list(&map, other_principal());
         assert_eq!(theirs.len(), 1);
+    }
+
+    #[test]
+    fn seen_mark_starts_at_zero() {
+        let (seen, _mm) = seen_setup();
+        assert_eq!(seen_up_to(&seen, principal()), 0);
+    }
+
+    #[test]
+    fn seen_mark_moves_forward() {
+        let (mut seen, _mm) = seen_setup();
+        assert_eq!(mark_seen(&mut seen, principal(), 5, 10), 5);
+        assert_eq!(mark_seen(&mut seen, principal(), 7, 10), 7);
+        assert_eq!(seen_up_to(&seen, principal()), 7);
+    }
+
+    // Two devices can mark out of order. The later, lower mark must not turn
+    // records the earlier one marked unread again.
+    #[test]
+    fn seen_mark_never_moves_back() {
+        let (mut seen, _mm) = seen_setup();
+        mark_seen(&mut seen, principal(), 7, 10);
+        assert_eq!(mark_seen(&mut seen, principal(), 5, 10), 7);
+        assert_eq!(seen_up_to(&seen, principal()), 7);
+    }
+
+    #[test]
+    fn seen_mark_is_capped_at_now() {
+        let (mut seen, _mm) = seen_setup();
+        assert_eq!(mark_seen(&mut seen, principal(), u64::MAX, 10), 10);
+        assert_eq!(seen_up_to(&seen, principal()), 10);
+    }
+
+    #[test]
+    fn seen_mark_is_principal_scoped() {
+        let (mut seen, _mm) = seen_setup();
+        mark_seen(&mut seen, principal(), 5, 10);
+        assert_eq!(seen_up_to(&seen, other_principal()), 0);
     }
 
     #[test]
@@ -1135,7 +3427,7 @@ mod tests {
         create(&mut map, principal(), create_req("a"), 1).expect("create");
         delete(&mut map, principal(), "a".to_string()).expect("first delete");
         delete(&mut map, principal(), "a".to_string()).expect("second delete idempotent");
-        assert!(list(&map, principal()).transactions.is_empty());
+        assert_eq!(list(&map, principal()), vec![]);
     }
 
     #[test]
@@ -1159,13 +3451,12 @@ mod tests {
         // No matter how far in the future we read, the terminal record stays
         // until the FE explicitly deletes it.
         let far_future = 10u64 + 30 * 24 * 60 * 60 * 1_000_000_000;
-        let res = list(&map, principal()).transactions;
+        let res = list(&map, principal());
         assert_eq!(res.len(), 1, "terminal entry must be retained");
 
         create(&mut map, principal(), create_req("b"), far_future).expect("create b");
         let after_write: Vec<String> = {
             let mut ids: Vec<String> = list(&map, principal())
-                .transactions
                 .into_iter()
                 .map(|tx| tx.id)
                 .collect();

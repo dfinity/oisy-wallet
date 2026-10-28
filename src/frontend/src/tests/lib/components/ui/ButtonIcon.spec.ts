@@ -57,6 +57,20 @@ describe('ButtonIcon', () => {
 		});
 	});
 
+	describe('static prop', () => {
+		it('should press by default', () => {
+			const { getByRole } = render(ButtonIcon, { props });
+
+			expect(getByRole('button')).not.toHaveClass('no-press');
+		});
+
+		it('should opt out of the press shrink', () => {
+			const { getByRole } = render(ButtonIcon, { props: { ...props, static: true } });
+
+			expect(getByRole('button')).toHaveClass('no-press');
+		});
+	});
+
 	describe('when the button is loading', () => {
 		it('should render the loading spinner', () => {
 			const { getByTestId } = render(ButtonIcon, { props: { ...props, loading: true } });

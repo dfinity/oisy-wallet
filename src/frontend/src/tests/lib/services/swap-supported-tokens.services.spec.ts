@@ -11,6 +11,7 @@ const mockSolGetQuote = vi.fn();
 const mockSolGetSupportedTokens = vi.fn();
 const mockBtcGetQuote = vi.fn();
 const mockBtcGetSupportedTokens = vi.fn();
+const mockXrpGetSupportedTokens = vi.fn();
 
 const kongDestinations = vi.fn(() => ({}));
 const icpSwapDestinations = vi.fn(() => ({}));
@@ -19,6 +20,7 @@ const veloraDestinations = vi.fn(() => ({}));
 const nearEvmDestinations = vi.fn(() => ({}));
 const nearSolDestinations = vi.fn(() => ({}));
 const chainFusionBtcDestinations = vi.fn(() => ({}));
+const nearXrpDestinations = vi.fn(() => ({}));
 
 vi.mock('$lib/providers/swap.providers', () => ({
 	swapProviders: [
@@ -95,6 +97,18 @@ vi.mock('$lib/providers/btc-swap.providers', () => ({
 	]
 }));
 
+vi.mock('$lib/providers/xrp-swap.providers', () => ({
+	xrpSwapProviders: [
+		{
+			key: 'nearIntents',
+			getQuote: vi.fn(),
+			isEnabled: true,
+			getSupportedTokens: mockXrpGetSupportedTokens,
+			getSupportedDestinations: nearXrpDestinations
+		}
+	]
+}));
+
 describe('swap-supported-tokens.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -108,6 +122,7 @@ describe('swap-supported-tokens.services', () => {
 		mockEvmGetSupportedTokens.mockResolvedValue(new Set(['0xabc', '0xdef']));
 		mockSolGetSupportedTokens.mockResolvedValue(new Set(['SplAddr1']));
 		mockBtcGetSupportedTokens.mockResolvedValue(new Set(['btc']));
+		mockXrpGetSupportedTokens.mockResolvedValue(new Set(['xrp']));
 
 		const { loadSwapSupportedTokens } =
 			await import('$lib/services/swap-supported-tokens.services');
@@ -134,6 +149,10 @@ describe('swap-supported-tokens.services', () => {
 		// BTC: Chain Fusion has a list, only provider → 'all'
 		expect(stored?.aggregated.btc.coverage).toBe('all');
 		expect(stored?.aggregated.btc.supportedTokenIds).toEqual(new Set(['btc']));
+
+		// XRP: NEAR Intents has a list, only provider → 'all'
+		expect(stored?.aggregated.xrp.coverage).toBe('all');
+		expect(stored?.aggregated.xrp.supportedTokenIds).toEqual(new Set(['xrp']));
 	});
 
 	it('should record per-provider source sets and destination resolvers', async () => {
@@ -143,6 +162,7 @@ describe('swap-supported-tokens.services', () => {
 		mockEvmGetSupportedTokens.mockResolvedValue(new Set(['0xabc']));
 		mockSolGetSupportedTokens.mockResolvedValue(new Set(['SplAddr1']));
 		mockBtcGetSupportedTokens.mockResolvedValue(new Set(['btc']));
+		mockXrpGetSupportedTokens.mockResolvedValue(new Set(['xrp']));
 
 		const { loadSwapSupportedTokens } =
 			await import('$lib/services/swap-supported-tokens.services');
@@ -150,7 +170,7 @@ describe('swap-supported-tokens.services', () => {
 
 		const stored = get(swapSupportedTokensStore);
 
-		expect(stored?.providers).toHaveLength(7);
+		expect(stored?.providers).toHaveLength(8);
 
 		const veloraEntry = stored?.providers.find(
 			(p) => p.key === 'velora' && p.sourceCategory === 'evm'
@@ -173,6 +193,13 @@ describe('swap-supported-tokens.services', () => {
 
 		expect(chainFusionBtcEntry?.supportedSourceTokens).toEqual(new Set(['btc']));
 		expect(chainFusionBtcEntry?.getSupportedDestinations).toBe(chainFusionBtcDestinations);
+
+		const nearIntentsXrpEntry = stored?.providers.find(
+			(p) => p.key === 'nearIntents' && p.sourceCategory === 'xrp'
+		);
+
+		expect(nearIntentsXrpEntry?.supportedSourceTokens).toEqual(new Set(['xrp']));
+		expect(nearIntentsXrpEntry?.getSupportedDestinations).toBe(nearXrpDestinations);
 	});
 
 	it('should handle provider getSupportedTokens failures gracefully', async () => {
@@ -182,6 +209,7 @@ describe('swap-supported-tokens.services', () => {
 		mockEvmGetSupportedTokens.mockRejectedValue(new Error('NEAR Intents API error'));
 		mockSolGetSupportedTokens.mockResolvedValue(new Set(['SplAddr1']));
 		mockBtcGetSupportedTokens.mockRejectedValue(new Error('ckBTC minter unavailable'));
+		mockXrpGetSupportedTokens.mockRejectedValue(new Error('NEAR Intents API error'));
 
 		const { loadSwapSupportedTokens } =
 			await import('$lib/services/swap-supported-tokens.services');
@@ -206,6 +234,10 @@ describe('swap-supported-tokens.services', () => {
 		// BTC: Chain Fusion failed → empty set, coverage stays 'all' as its only provider
 		expect(stored?.aggregated.btc.coverage).toBe('all');
 		expect(stored?.aggregated.btc.supportedTokenIds.size).toBe(0);
+
+		// XRP: NEAR Intents failed → empty set, coverage stays 'all' as its only provider
+		expect(stored?.aggregated.xrp.coverage).toBe('all');
+		expect(stored?.aggregated.xrp.supportedTokenIds.size).toBe(0);
 	});
 
 	it('should union token IDs across multiple providers in the same group', async () => {
@@ -215,6 +247,7 @@ describe('swap-supported-tokens.services', () => {
 		mockEvmGetSupportedTokens.mockResolvedValue(new Set());
 		mockSolGetSupportedTokens.mockResolvedValue(new Set());
 		mockBtcGetSupportedTokens.mockResolvedValue(new Set());
+		mockXrpGetSupportedTokens.mockResolvedValue(new Set());
 
 		const { loadSwapSupportedTokens } =
 			await import('$lib/services/swap-supported-tokens.services');

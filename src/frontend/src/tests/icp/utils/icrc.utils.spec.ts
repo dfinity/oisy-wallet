@@ -1,9 +1,13 @@
-import { GHOSTNODE_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
+import {
+	GHOSTNODE_LEDGER_CANISTER_ID,
+	TCYCLES_LEDGER_CANISTER_ID
+} from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { IC_CKBTC_MINTER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import {
+	CUSTOM_NAMES_BY_LEDGER_CANISTER_ID,
 	CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID,
 	isTokenDip20,
 	isTokenIc,
@@ -747,6 +751,36 @@ describe('icrc.utils', () => {
 				minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID,
 				twinToken: ETHEREUM_TOKEN
 			};
+
+			expect(mapTokenOisyName(token)).toStrictEqual({
+				...token,
+				oisyName: {
+					prefix: 'ck',
+					oisyName: ETHEREUM_TOKEN.name
+				}
+			});
+		});
+
+		it('should return the token with the OISY name if there is a custom name', () => {
+			const token = { ...mockToken, ledgerCanisterId: TCYCLES_LEDGER_CANISTER_ID };
+
+			expect(mapTokenOisyName(token)).toStrictEqual({
+				...token,
+				oisyName: {
+					oisyName: 'ICP Cycles (Trillion)'
+				}
+			});
+		});
+
+		it('should prefer the twin token over a custom name', () => {
+			const token: IcCkInterface = {
+				...mockToken,
+				ledgerCanisterId: TCYCLES_LEDGER_CANISTER_ID,
+				minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID,
+				twinToken: ETHEREUM_TOKEN
+			};
+
+			expect(CUSTOM_NAMES_BY_LEDGER_CANISTER_ID[TCYCLES_LEDGER_CANISTER_ID]).toBeDefined();
 
 			expect(mapTokenOisyName(token)).toStrictEqual({
 				...token,

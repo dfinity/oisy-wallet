@@ -26,6 +26,7 @@
 		class={`wrapper ${position}`}
 		class:elevated
 		class:error={hasErrors}
+		data-overlay-reachable
 		data-tid="toasts-component"
 	>
 		{#each toasts as msg (msg.id)}

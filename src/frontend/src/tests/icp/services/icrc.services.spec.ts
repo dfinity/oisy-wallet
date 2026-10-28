@@ -1,5 +1,6 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { SNS_BUILTIN_TOKENS } from '$env/tokens/tokens.sns.env';
 import {
@@ -578,6 +579,30 @@ describe('icrc.services', () => {
 			});
 
 			expect(get(exchangeStore)).toStrictEqual({ ...icrcExchange, ...erc20Exchange });
+		});
+
+		it('should never ask for a market price of TCYCLES', async () => {
+			await loadDisabledIcrcTokensExchanges({ disabledIcrcTokens });
+
+			const [[withoutTcycles]] = vi.mocked(exchangeServices.exchangeRateICRCToUsd).mock.calls;
+
+			vi.mocked(exchangeServices.exchangeRateICRCToUsd).mockClear();
+
+			await loadDisabledIcrcTokensExchanges({
+				disabledIcrcTokens: [
+					...disabledIcrcTokens,
+					{
+						...mockIcrcCustomToken,
+						id: parseTokenId('TCYCLES'),
+						ledgerCanisterId: TCYCLES_LEDGER_CANISTER_ID
+					}
+				]
+			});
+
+			expect(exchangeServices.exchangeRateICRCToUsd).toHaveBeenCalledExactlyOnceWith(
+				withoutTcycles
+			);
+			expect(withoutTcycles).not.toContain(TCYCLES_LEDGER_CANISTER_ID);
 		});
 	});
 

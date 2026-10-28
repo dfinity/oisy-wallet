@@ -10,10 +10,11 @@ import {
 	isNetworkIdEthereum,
 	isNetworkIdEvm,
 	isNetworkIdSOLDevnet,
-	isNetworkIdSolana
+	isNetworkIdSolana,
+	isNetworkIdXRPMainnet
 } from '$lib/utils/network.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
-import { assertNever } from '@dfinity/utils';
+import { assertNever, isNullish, nonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 /**
@@ -33,6 +34,10 @@ export const tokenIdKey = (id: TokenId): string | undefined => {
 
 	if ('Erc20' in id) {
 		return `Erc20:${id.Erc20[0].toLowerCase()}:${id.Erc20[1]}`;
+	}
+
+	if ('Erc4626' in id) {
+		return `Erc4626:${id.Erc4626[0].toLowerCase()}:${id.Erc4626[1]}`;
 	}
 
 	if ('SplMainnet' in id) {
@@ -67,7 +72,6 @@ export const tokenIdKey = (id: TokenId): string | undefined => {
 		'IcPunks' in id ||
 		'BtcNativeTestnet' in id ||
 		'Erc1155' in id ||
-		'Erc4626' in id ||
 		'Dip721' in id ||
 		'Icrc7' in id
 	) {
@@ -82,11 +86,12 @@ export const tokenIdKey = (id: TokenId): string | undefined => {
  * inverse direction of {@link tokenIdKey}, used when persisting an Active User
  * Transaction's `data` payload.
  *
- * Covers every asset the AUT consumers can swap: ERC-20 and ERC-4626 vault
- * tokens, native EVM coins, ICRC ledgers, SPL / native Solana on both mainnet
- * and devnet, and native Bitcoin on mainnet and testnet. Returns `undefined` for
- * anything else — including Bitcoin regtest, which has no backend variant —
- * which callers treat as "do not track this operation" rather than as an error.
+ * Covers every asset the AUT consumers can swap or send: ERC-20 and ERC-4626
+ * vault tokens, native EVM coins, ICRC ledgers, SPL / native Solana on both
+ * mainnet and devnet, native Bitcoin on mainnet and testnet, and native XRP on
+ * mainnet. Returns `undefined` for anything else — including Bitcoin regtest and
+ * XRPL testnet, neither of which has a backend variant — which callers treat as
+ * "do not track this operation" rather than as an error.
  *
  * An Internet Computer token maps to `Icrc` by ledger canister id — including
  * ICP itself, whose dedicated `IcpNative` variant is reserved for the
@@ -130,10 +135,44 @@ export const toBackendTokenId = (token: Token): TokenId | undefined => {
 		return { BtcNativeTestnet: null };
 	}
 
+	// Mainnet-only, matched on the network rather than assumed: XRPL testnet has
+	// no backend `TokenId` variant, so it must fall through to `undefined` rather
+	// than be mapped onto mainnet's.
+	if (isNetworkIdXRPMainnet(networkId)) {
+		return { XrpNativeMainnet: null };
+	}
+
 	// Native EVM coin (ETH, BNB, POL, …), identified by chain id.
 	if (isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)) {
 		return { EvmNative: BigInt((token.network as EthereumNetwork).chainId) };
 	}
 
 	return undefined;
+};
+
+/**
+ * The token among `tokens` that {@link toBackendTokenId} maps to `tokenId`: the reverse lookup
+ * for a row that stores backend `TokenId`s. `undefined` when none does (the token was disabled
+ * since), or for a variant {@link tokenIdKey} does not key.
+ *
+ * Takes the candidate tokens rather than reading a store, so that it can be tested without one.
+ */
+export const findTokenByBackendTokenId = ({
+	tokenId,
+	tokens
+}: {
+	tokenId: TokenId;
+	tokens: Token[];
+}): Token | undefined => {
+	const key = tokenIdKey(tokenId);
+
+	if (isNullish(key)) {
+		return;
+	}
+
+	return tokens.find((token) => {
+		const backendId = toBackendTokenId(token);
+
+		return nonNullish(backendId) && tokenIdKey(backendId) === key;
+	});
 };

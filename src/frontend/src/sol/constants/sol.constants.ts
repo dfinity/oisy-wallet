@@ -4,6 +4,8 @@ export const SYSTEM_PROGRAM_ADDRESS = '11111111111111111111111111111111';
 export const COMPUTE_BUDGET_PROGRAM_ADDRESS = 'ComputeBudget111111111111111111111111111111';
 export const TOKEN_PROGRAM_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 export const TOKEN_2022_PROGRAM_ADDRESS = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
+// The native mint of Token-2022, its counterpart of wrapped SOL: an account of it wraps lamports.
+export const TOKEN_2022_NATIVE_MINT_ADDRESS = '9pan9bMn5HatX4EJdBwg9VgCa7Uz5HL8N1m5D3NdXejP';
 export const ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS =
 	'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
 export const ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS = 'AddressLookupTab1e1111111111111111111111111';
@@ -23,12 +25,21 @@ export const ANCHOR_IDL_ACCOUNT_DISCRIMINATOR = [24, 70, 98, 191, 58, 144, 123, 
 export const ANCHOR_IDL_ACCOUNT_LENGTH_OFFSET = 40;
 export const ANCHOR_IDL_ACCOUNT_HEADER_LENGTH = 44;
 
-// Solana transaction fee
-// It can be hard-coded since it is not changed unsless under community proposal, with time in advance.
+// Solana base fee, which a message pays once for every signature it requires.
+// It can be hard-coded since it is not changed unless under community proposal, with time in advance.
 // https://solana.com/docs/core/fees#transaction-fees
-export const SOLANA_TRANSACTION_FEE_IN_LAMPORTS = 5_000n;
+export const SOLANA_LAMPORTS_PER_SIGNATURE = 5_000n;
+
+// How many signatures the messages the wallet builds itself require, for a send or a swap's
+// deposit: the user's key alone pays the fee, authorises the transfer and funds any token account
+// the transfer opens. Their fee is quoted before the message exists, so it is quoted for this many.
+export const SOLANA_SEND_REQUIRED_SIGNATURES = 1;
 
 export const MICROLAMPORTS_PER_LAMPORT = 1_000_000n;
+
+// The largest amount an SPL token account holds or approves (a `u64`). An approval of exactly this
+// much is how applications ask for an unlimited allowance.
+export const SPL_TOKEN_MAX_AMOUNT = (1n << 64n) - 1n;
 
 // When a transaction does not request a compute unit limit, the runtime budgets a fixed
 // amount per instruction, capped transaction-wide. The prioritisation fee is charged on the
@@ -43,27 +54,38 @@ export const SOLANA_MAX_COMPUTE_UNIT_LIMIT = 1_400_000n;
 // collapses towards nothing, which would otherwise make an ordinary tip look enormous.
 export const SOLANA_PRIORITIZATION_FEE_BASELINE_FLOOR_USD = 0.1;
 
+/**
+ * The fixed header every account pays rent for on top of its own data, as the protocol states it.
+ *
+ * The price per byte is not reproduced here: it is chain state rather than a protocol constant, and
+ * the network lowers it in steps by feature gate, so the review reads what the chain charges instead.
+ * The header is what turns the chain's figure for one account size into the figure for another.
+ */
+export const SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES = 128n;
+
 // The simulated preview asks the RPC for the post-state of an explicit list of accounts. Only
 // writable accounts can change, which already discards most of a DeFi message's account set;
 // past this many the preview is dropped rather than truncated, because a truncated preview
 // would report "no changes" for accounts it never looked at.
-/**
- * What the runtime charges to keep an account alive, as the protocol states it: every account pays
- * for a fixed 128-byte header plus its own data, at a per-byte-year price, for a fixed number of
- * years up front. An account funded with this much is exempt and never pays again.
- *
- * Reproduced here rather than asked of a provider because the review needs it before it renders,
- * and because the three values are protocol constants rather than chain state.
- */
-export const SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES = 128n;
-export const SOLANA_RENT_LAMPORTS_PER_BYTE_YEAR = 3_480n;
-export const SOLANA_RENT_EXEMPTION_YEARS = 2n;
-
 export const SOLANA_SIMULATION_MAX_ACCOUNTS = 60;
+
+// A close an application's program makes inside one of several calls naming the account goes to
+// the last of them only after a second run of the message up to it, one run per distinct call.
+// Nothing short of the account limit bounds how many a crafted message asks for, and the timeout
+// below does not cancel runs in flight, so past this many none is started and those closes stay
+// unlisted.
+export const SOLANA_SIMULATION_MAX_CLOSE_RUNS = 5;
 
 // The preview is fetched before the review renders, so a slow or unresponsive RPC would hold
 // the request behind it. Past this it is abandoned and the review renders without it.
 export const SOLANA_SIMULATION_TIMEOUT_MILLISECONDS = 5_000;
+
+// How many times a run whose pre-state must be read at its very slot reads the pair again, when
+// the simulation lands on a later slot or on a node not there yet, within the timeout above. On
+// mainnet, 75 of 100 pairs landed on one slot at the first attempt, 23 at the second, 1 at the
+// third and 1 at none of three, at about 100 ms a pair (2026-10-23, public endpoints): ten leave a
+// miss about one in a million, and still most of the timeout.
+export const SOLANA_SIMULATION_SNAPSHOT_ATTEMPTS = 10;
 
 // Multiples of that baseline at which the review speaks up: twice it is worth naming as the dApp's
 // own choice, five times it is worth questioning. Both stay short of blocking, since paying well
@@ -85,6 +107,11 @@ export const SOLANA_MAX_SKIPPED_SIGNATURE_PAGES = 3;
 // The RPC rejects a `getMultipleAccounts` call that asks for more accounts than this.
 // https://solana.com/docs/rpc/http/getmultipleaccounts
 export const SOLANA_MAX_MULTIPLE_ACCOUNTS = 100;
+
+// The RPC refuses to return a transaction of a newer version than the caller declares support for,
+// and one such transaction in a wallet's history fails every load of it. Version 1 (SIMD-0385) is
+// accepted on mainnet since epoch 1035.
+export const SOLANA_MAX_SUPPORTED_TRANSACTION_VERSION = 1;
 
 // A page of signatures is resolved concurrently, but public RPC endpoints throttle bursts of
 // `getTransaction` calls, so only this many are in flight at once.

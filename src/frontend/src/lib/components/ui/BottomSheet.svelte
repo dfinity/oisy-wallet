@@ -15,6 +15,7 @@
 		contentClass?: string;
 		testId?: string;
 		onClose?: () => void;
+		ariaLabel?: string;
 	}
 
 	let {
@@ -22,6 +23,7 @@
 		content,
 		footer,
 		contentClass = 'min-h-[30vh]',
+		ariaLabel,
 		testId,
 		onClose
 	}: Props = $props();
@@ -44,7 +46,7 @@
 
 {#if visible}
 	<div class="fixed inset-0 z-14" data-tid={testId}>
-		<BottomSheetContainer transition>
+		<BottomSheetContainer {ariaLabel} onClose={handleClose} transition>
 			{#snippet header()}
 				<div class="w-full p-4">
 					<ButtonIcon

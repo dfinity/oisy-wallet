@@ -4,10 +4,14 @@ import type { OptionEthAddress } from '$eth/types/address';
 import type { SendParams } from '$eth/types/send';
 import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
 import {
+	classifyWalletConnectEthCall,
 	getSendParamsGas,
 	getSignParamsMessageHex,
 	getSignParamsMessageTypedDataV4Hash,
-	isEthSignTypedDataMethod
+	getWalletConnectEthCkEthDeposit,
+	isEthSignTypedDataMethod,
+	isWalletConnectEthTokenCallWithValue,
+	WalletConnectEthCkEthHelperUnconfirmedError
 } from '$eth/utils/wallet-connect.utils';
 import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
@@ -16,6 +20,7 @@ import {
 	TRACK_COUNT_WC_ETH_SEND_SUCCESS
 } from '$lib/constants/analytics.constants';
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
+import { PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSend, ProgressStepsSign } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
@@ -28,8 +33,10 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
+import { Signature } from 'ethers/crypto';
 import { get } from 'svelte/store';
 
 type WalletConnectSendParams = WalletConnectExecuteParams & {
@@ -76,7 +83,10 @@ export const send = ({
 						unknown_parameter,
 						wallet_not_initialized,
 						from_address_not_wallet,
-						unknown_destination
+						unknown_destination,
+						cketh_deposit_refused,
+						cketh_helper_unconfirmed,
+						unexpected_processing_request
 					}
 				}
 			} = get(i18n);
@@ -107,6 +117,29 @@ export const send = ({
 			if (isNullish(firstParam.to)) {
 				toastsError({
 					msg: { text: unknown_destination }
+				});
+				return { success: false };
+			}
+
+			// The review refuses these requests through the same check. Running it here as well, against
+			// the minter information the transaction is then prepared with, keeps a refused request from
+			// being signed however this is reached.
+			try {
+				getWalletConnectEthCkEthDeposit({
+					to: firstParam.to,
+					data: firstParam.data,
+					networkId: sourceNetwork.id,
+					minterInfo,
+					principal: identity?.getPrincipal()
+				});
+			} catch (err: unknown) {
+				toastsError({
+					msg: {
+						text:
+							err instanceof WalletConnectEthCkEthHelperUnconfirmedError
+								? cketh_helper_unconfirmed
+								: cketh_deposit_refused
+					}
 				});
 				return { success: false };
 			}
@@ -143,6 +176,24 @@ export const send = ({
 			}
 
 			const { to, gas: gasWC, data } = firstParam as { to: string; gas?: string; data?: string };
+
+			// The review refuses a token call that sends native value along with it, and the signing
+			// step holds to the same check.
+			if (
+				isWalletConnectEthTokenCallWithValue({
+					call: classifyWalletConnectEthCall(data),
+					value: amount
+				})
+			) {
+				toastsError({
+					msg: {
+						text: replacePlaceholders(get(i18n).wallet_connect.error.token_call_with_value, {
+							$amount: `${formatToken({ value: amount, unitName: token.decimals })} ${token.symbol}`
+						})
+					}
+				});
+				return { success: false };
+			}
 
 			modalNext();
 
@@ -184,15 +235,16 @@ export const send = ({
 					}
 				});
 
-				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
-
-				// Explained the way the send flow explains it, rather than through the generic message
-				// `execute` gives any error it has to catch: whether the transaction may have reached the
-				// network decides whether sending it again is safe.
+				// Reported here rather than left to the generic toast of `execute`: a refused broadcast
+				// carries the signed transaction, which stays valid until its nonce is used.
 				toastEthereumTransactionError({
 					err,
-					fallbackMsg: get(i18n).wallet_connect.error.unexpected_processing_request
+					fallbackMsg: unexpected_processing_request,
+					token,
+					context: PLAUSIBLE_EVENT_CONTEXTS.WALLET_CONNECT
 				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
 
 				return { success: false, err };
 			}
@@ -256,7 +308,11 @@ export const signMessage = ({
 					});
 				};
 
-				const signedMessage = await sign(params);
+				// The signer ends a signature with the bare y-parity (0 or 1) as `v`, the form an
+				// EIP-1559 transaction takes. A signed message goes back to the dApp with `v` as 27 or
+				// 28, the only values a contract verifying it on-chain (e.g. an ERC-2612 `permit`)
+				// accepts.
+				const signedMessage = Signature.from(await sign(params)).serialized;
 
 				progress(ProgressStepsSign.APPROVE_WALLET_CONNECT);
 

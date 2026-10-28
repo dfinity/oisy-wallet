@@ -66,7 +66,9 @@ Ensure that you have [`dfx-orbit`](https://github.com/dfinity/orbit/tree/main/to
 dfx-orbit station show
 ```
 
-> To perform production development, you'll need a `.env.production` file for the frontend. Then:
+### Production proposals
+
+> To perform production proposal creation, you'll need a `.env.production` file for the frontend. Then:
 
 #### Frontend
 
@@ -107,6 +109,54 @@ dfx-orbit request asset upload legacy_signer_frontend --files target/legacy_sign
 ```bash
 dfx-orbit --station oisy-prod \
   request canister install backend \
+  --mode upgrade \
+  --wasm out/backend.wasm.gz \
+  --arg-file out/backend.args.did
+```
+
+### Production proposal review
+
+> To perform production proposal review, you'll need a `.env.production` file for the frontend, as well as the variables that are usually posted by the requestors (request IDs, batch IDs, etc.). Then:
+
+#### Frontend
+
+```bash
+./scripts/docker-build.frontend
+```
+
+```bash
+dfx-orbit verify $FRONTEND_REQUEST_ID --and-approve asset upload frontend --batch-id $BATCH_ID --files target/frontend
+```
+
+#### Signer frontend
+
+```bash
+./scripts/docker-build.signer-frontend
+```
+
+```bash
+dfx-orbit verify $SIGNER_FRONTEND_REQUEST_ID --and-approve asset upload signer_frontend --batch-id $SIGNER_FRONTEND_BATCH_ID --files target/signer_frontend
+```
+
+#### Legacy signer frontend
+
+```bash
+./scripts/docker-build.legacy-signer-frontend
+```
+
+```bash
+dfx-orbit verify $LEGACY_SIGNER_FRONTEND_REQUEST_ID --and-approve asset upload legacy_signer_frontend --batch-id $LEGACY_SIGNER_FRONTEND_BATCH_ID --files target/legacy_signer_frontend
+```
+
+#### Backend
+
+```bash
+./scripts/docker-build
+```
+
+```bash
+dfx-orbit verify $BACKEND_REQUEST_ID --and-approve \
+  canister install backend \
   --mode upgrade \
   --wasm out/backend.wasm.gz \
   --arg-file out/backend.args.did

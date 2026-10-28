@@ -1,5 +1,6 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
+import { mapCyclesLedgerTransaction } from '$icp/utils/cycles-ledger-transactions.utils';
 import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -7,9 +8,14 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { bn1Bi } from '$tests/mocks/balances.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
+import {
+	createMockIcrcBurnTransaction,
+	createMockIcTransactionsUi
+} from '$tests/mocks/ic-transactions.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
+import { Principal } from '@icp-sdk/core/principal';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -134,5 +140,29 @@ describe('IcTransaction', () => {
 		});
 
 		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: mintingAddress }));
+	});
+
+	it('should show a top-up with its label and canister', () => {
+		const canister = 'ywcsb-maaaa-aaaai-q6k7a-cai';
+
+		const transaction = mapCyclesLedgerTransaction({
+			transaction: createMockIcrcBurnTransaction({
+				memo: Uint8Array.from([0x81, 0x4a, ...Principal.fromText(canister).toUint8Array()])
+			}),
+			identity: mockIdentity
+		});
+
+		// The cycles ledger has no minting account, so a burn names its own destination.
+		const { mintingAccount: _, ...cyclesLedgerToken } = mockValidIcToken;
+
+		const { container } = render(IcTransaction, {
+			props: {
+				transaction,
+				token: cyclesLedgerToken
+			}
+		});
+
+		expect(container).toHaveTextContent(get(i18n).transaction.label.top_up);
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: canister }));
 	});
 });

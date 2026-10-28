@@ -10,7 +10,8 @@ import type { EthAddress } from '$eth/types/address';
 import type { GetFeeData } from '$eth/types/infura';
 import type { EthersProviderNetwork } from '$eth/types/network';
 import { EthSubmissionUnconfirmedError } from '$eth/types/send';
-import { isEthereumNodeRefusal } from '$eth/utils/eth-error.utils';
+import { isDefinitiveTransactionRefusal, isOutOfGasRefusal } from '$eth/utils/eth-error.utils';
+import { isEthersError } from '$eth/utils/eth.utils';
 import { simulateInfuraFailureIfEnabled } from '$eth/utils/infura-failure-simulator.utils';
 import {
 	OP_STACK_GAS_PRICE_ORACLE_ABI,
@@ -81,10 +82,15 @@ export class InfuraProvider {
 		try {
 			return await this.estimateGas(params);
 		} catch (err: unknown) {
+			// Ethers appends what it knows about a failure to the error's message: for
+			// `eth_estimateGas`, the transaction with the wallet address and the calldata (recipient
+			// and amount), and at times the node's answer, which can name the address and its balance.
+			// Its `shortMessage` can still end with a revert reason written by the contract, so only
+			// `code`, one of a fixed set, is tracked.
 			trackEvent({
 				name: TRACK_ETH_ESTIMATE_GAS_ERROR,
 				metadata: {
-					error: `${err}`,
+					error: isEthersError(err) ? `${err.code}` : `${err}`,
 					network: this.networkLabel
 				},
 				warning: `Error estimating gas for network ${this.networkLabel}: ${err}`
@@ -213,18 +219,22 @@ export class InfuraProvider {
 						return submitted;
 					}
 
-					// A refusal states something about the transaction; a provider failing the request
-					// does not. So the user is told whichever reason there is, Infura's when both give one.
-					throw !isEthereumNodeRefusal(infuraErr) && isEthereumNodeRefusal(fallbackErr)
+					// An outright refusal states something about the transaction; a provider failing the
+					// request does not. So the user is told whichever there is, Infura's when both refuse.
+					throw !isDefinitiveTransactionRefusal(infuraErr) &&
+						isDefinitiveTransactionRefusal(fallbackErr)
 						? fallbackErr
 						: infuraErr;
 				}
 			});
 		} catch (err: unknown) {
-			// A refusal is the network's answer: the transaction was not accepted. Anything else leaves
-			// open whether it reached the network, which the send must say rather than claim either
-			// way, since a retry is signed with the next nonce and both could execute.
-			throw isEthereumNodeRefusal(err) ? err : new EthSubmissionUnconfirmedError(err);
+			// An outright refusal is the network's answer: the transaction was not taken. Running out
+			// of gas is explained on its own, fee included. Anything else leaves open whether the
+			// transaction reached the network, which the send must say rather than claim either way,
+			// since a retry is signed with the next nonce and both could execute.
+			throw isDefinitiveTransactionRefusal(err) || isOutOfGasRefusal(err)
+				? err
+				: new EthSubmissionUnconfirmedError(err);
 		}
 	};
 

@@ -1,5 +1,6 @@
 import InputAddress from '$lib/components/address/InputAddress.svelte';
 import en from '$tests/mocks/i18n.mock';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('InputAddress', () => {
@@ -60,6 +61,29 @@ describe('InputAddress', () => {
 
 		expect(successMessage).toHaveClass('text-success-primary');
 		expect(successMessage).toHaveTextContent('Bitcoin');
+	});
+
+	it('shows success message for valid XRP address', async () => {
+		const { getByPlaceholderText, getByText } = render(InputAddress, defaultProps);
+		const input = getByPlaceholderText('Enter BTC address');
+
+		await fireEvent.input(input, { target: { value: mockXrpAddress } });
+
+		const successMessage = getByText(en.address.form.valid_for_networks, { exact: false });
+
+		expect(successMessage).toHaveClass('text-success-primary');
+		expect(successMessage).toHaveTextContent('XRP Ledger');
+	});
+
+	it('shows error message for an XRP X-address', async () => {
+		const { getByPlaceholderText, getByText } = render(InputAddress, defaultProps);
+		const input = getByPlaceholderText('Enter BTC address');
+
+		await fireEvent.input(input, {
+			target: { value: 'XVPcpSm47b1CZkf5AkKM9a84dQHe3m4sBhsrA4XtnBECTAc' }
+		});
+
+		expect(getByText(en.address.form.invalid_address)).toHaveClass('text-error-primary');
 	});
 
 	it('does not show QR button when onQRCodeScan is not provided', () => {

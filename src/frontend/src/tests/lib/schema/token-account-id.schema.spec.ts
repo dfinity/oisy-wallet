@@ -28,5 +28,28 @@ describe('token-account-id.schema', () => {
 			expect(result.success).toBeTruthy();
 			expect(result.data).toEqual({ Sol: solAddress });
 		});
+
+		it('should validate Xrp classic addresses', () => {
+			const xrpAddress = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
+
+			const result = TokenAccountIdSchema.safeParse(xrpAddress);
+
+			expect(result.success).toBeTruthy();
+			expect(result.data).toEqual({ Xrp: xrpAddress });
+		});
+
+		it('should reject an Xrp address with an invalid checksum', () => {
+			// The address above with its last character changed
+			expect(
+				TokenAccountIdSchema.safeParse('rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTi').success
+			).toBeFalsy();
+		});
+
+		it('should reject Xrp X-addresses', () => {
+			// The address above encoded as an X-address, which the backend does not accept either
+			expect(
+				TokenAccountIdSchema.safeParse('XVPcpSm47b1CZkf5AkKM9a84dQHe3m4sBhsrA4XtnBECTAc').success
+			).toBeFalsy();
+		});
 	});
 });

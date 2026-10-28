@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
 	import { capitalizeFirstLetter } from '../../../tests/utils/string-utils';
 	import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 	import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
@@ -7,6 +6,7 @@
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import type { AllTransactionUiWithCmpNonEmptyList } from '$lib/types/transaction-ui';
+	import { slide } from '$lib/utils/transitions.utils';
 	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
 	import XrpTransaction from '$xrp/components/transactions/XrpTransaction.svelte';
 

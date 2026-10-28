@@ -8,13 +8,16 @@ import { i18n } from '$lib/stores/i18n.store';
 import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsExternalRefKey,
+	type NearIntentsStatusResponse,
 	type NearIntentsSwapDetails,
 	type NearIntentsSwapStatus
 } from '$lib/types/near-intents';
 import { SwapProvider } from '$lib/types/swap';
 import type { Token as AppToken } from '$lib/types/token';
+import type { EvmSourceTxOutcome } from '$lib/utils/evm-source-tx.utils';
+import { verifyNearIntentsQuoteSignature } from '$lib/utils/near-intents-quote.utils';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
-import { nonNullish } from '@dfinity/utils';
+import { nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const isNearIntentsActiveUserTransaction = (tx: ActiveUserTransaction): boolean =>
@@ -22,24 +25,31 @@ export const isNearIntentsActiveUserTransaction = (tx: ActiveUserTransaction): b
 
 /**
  * Builds the `NearIntents` AUT data variant carrying the canonical immutable
- * trio (source token, dest token, source amount in base units). The deposit
+ * trio (source token, dest token, source amount in base units), plus the
+ * address the deposit is sent from when it is an XRP payment. The deposit
  * address/memo, tx hashes and display symbols ride in `external_refs`. Returns
  * `undefined` when either token can't be mapped to a backend `TokenId`.
  */
 export const toNearIntentsData = ({
 	sourceToken,
 	destinationToken,
-	amount
+	amount,
+	sourceAddress
 }: {
 	sourceToken: AppToken;
 	destinationToken: AppToken;
 	amount: bigint;
+	// Set only for a swap from native XRP: that deposit is an XRP payment, and the backend
+	// counts it against this address in the one-payment-in-flight check.
+	sourceAddress?: string;
 }): ActiveUserTransactionData | undefined => {
 	const source_token = toBackendTokenId(sourceToken);
 	const dest_token = toBackendTokenId(destinationToken);
 
 	if (nonNullish(source_token) && nonNullish(dest_token)) {
-		return { NearIntents: { source_token, dest_token, amount } };
+		return {
+			NearIntents: { source_token, dest_token, amount, source_address: toNullable(sourceAddress) }
+		};
 	}
 };
 
@@ -147,6 +157,64 @@ export const nearIntentsStatusError = (status: NearIntentsSwapStatus): string | 
 	}
 
 	return undefined;
+};
+
+/**
+ * Whether a swap's deposit can no longer arrive: 1Click still reports none (`PENDING_DEPOSIT`), or
+ * only knows its hash (`KNOWN_DEPOSIT_TX`, which follows the hash OISY submits to
+ * `/deposit/submit`), after the signed quote deadline, the moment its deposit address becomes
+ * inactive.
+ *
+ * 1Click itself never moves such an address on, so without this a deposit that never reached it
+ * (an EVM transaction the network accepted and then dropped, for example) would leave the row
+ * in progress forever. The deadline is read from the quote embedded in `/status` and counts only
+ * when that quote is the one for the row's deposit address and its signature verifies, which
+ * also covers rows created before the signature was stored. The quote must not be a dry one: a
+ * dry quote's signature covers its amounts only, not the deposit address or the deadline.
+ */
+export const isNearIntentsDepositExpired = async ({
+	status,
+	quoteResponse,
+	depositAddress
+}: Pick<NearIntentsStatusResponse, 'status' | 'quoteResponse'> & {
+	depositAddress: string;
+}): Promise<boolean> => {
+	if (
+		(status !== 'PENDING_DEPOSIT' && status !== 'KNOWN_DEPOSIT_TX') ||
+		quoteResponse?.quoteRequest?.dry !== false ||
+		quoteResponse?.quote?.depositAddress !== depositAddress
+	) {
+		return false;
+	}
+
+	const deadline = Date.parse(quoteResponse.quote.deadline);
+
+	if (Number.isNaN(deadline) || Date.now() <= deadline) {
+		return false;
+	}
+
+	return await verifyNearIntentsQuoteSignature(quoteResponse);
+};
+
+export const nearIntentsDepositExpiredError = (): string =>
+	get(i18n).swap.error.near_intents_deposit_expired;
+
+/**
+ * The swap's outcome from its EVM deposit transaction, read until 1Click processes the deposit.
+ * A deposit that reverted, or whose nonce another transaction took, can never reach the deposit
+ * address, and 1Click keeps waiting for it. Any other verdict leaves the swap to 1Click.
+ */
+export const nearIntentsDepositOutcomeToUpdate = (
+	outcome: EvmSourceTxOutcome
+): { status: ActiveUserTransactionStatus; error: string } | undefined => {
+	switch (outcome) {
+		case 'reverted':
+			return { status: { Failed: null }, error: get(i18n).swap.error.failed_unexpectedly };
+		case 'replaced':
+			return { status: { Failed: null }, error: get(i18n).swap.error.swap_replaced_or_dropped };
+		default:
+			return undefined;
+	}
 };
 
 /**
