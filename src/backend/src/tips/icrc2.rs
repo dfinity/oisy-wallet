@@ -11,7 +11,9 @@
 //! - `CyclesLedgerService` uses `Call::bounded_wait` throughout. A payout is the one call in this
 //!   feature that must not come back "maybe": a bounded wait that times out leaves the canister
 //!   unable to say whether money moved, and the claim state machine has nothing safe to do with
-//!   that answer. These use `unbounded_wait`.
+//!   that answer. The payout uses `unbounded_wait`. The two reads at creation use `bounded_wait`:
+//!   the ledger is whichever canister the sender named, and a read that times out only fails that
+//!   one create.
 //! - That client is a struct bound to one canister and bundles cycles-only methods — `deposit`,
 //!   `withdraw`, `create_canister`. Tips points at whatever ledger the sender chose, and needs
 //!   three methods.
@@ -56,7 +58,7 @@ pub enum TransferFromCallError {
 /// # Errors
 /// Returns the ledger's own message when the call fails or cannot be decoded.
 pub async fn fee(ledger: Principal) -> Result<Nat, String> {
-    Call::unbounded_wait(ledger, "icrc1_fee")
+    Call::bounded_wait(ledger, "icrc1_fee")
         .with_args(&())
         .await
         .map_err(|err| format!("icrc1_fee call failed: {err:?}"))?
@@ -69,7 +71,7 @@ pub async fn fee(ledger: Principal) -> Result<Nat, String> {
 /// # Errors
 /// Returns the ledger's own message when the call fails or cannot be decoded.
 pub async fn allowance(ledger: Principal, args: AllowanceArgs) -> Result<Allowance, String> {
-    Call::unbounded_wait(ledger, "icrc2_allowance")
+    Call::bounded_wait(ledger, "icrc2_allowance")
         .with_args(&(args,))
         .await
         .map_err(|err| format!("icrc2_allowance call failed: {err:?}"))?
