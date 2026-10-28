@@ -486,7 +486,10 @@ fn an_amount_no_allowance_can_cover_is_refused_before_any_ledger_call() {
         .expect("create_tip should reach the handler");
 
     assert_eq!(result, Err(TipError::Uncovered));
-    assert!(env.my_tips(env.sender).is_empty());
+    assert!(
+        env.my_tips(env.sender).is_empty(),
+        "a refused tip leaves nothing stored"
+    );
 }
 
 #[test]

@@ -872,7 +872,7 @@ mod tests {
 
     #[test]
     fn the_live_cap_leaves_room_under_the_storage_cap() {
-        assert!(shared::types::tip::MAX_TIPS_PER_USER < MAX_STORED_TIPS_PER_USER);
+        const { assert!(shared::types::tip::MAX_TIPS_PER_USER < MAX_STORED_TIPS_PER_USER) };
     }
 
     #[test]
@@ -887,7 +887,10 @@ mod tests {
         let rows: Vec<(&str, u64)> = names.iter().map(|name| (name.as_str(), now - 1)).collect();
         insert_tips(&mut map, alice, &rows);
 
-        assert!(finished_tips_over_storage_cap(&map, alice, now).is_empty());
+        assert!(
+            finished_tips_over_storage_cap(&map, alice, now).is_empty(),
+            "one more tip still fits, so nothing is given up"
+        );
     }
 
     #[test]
@@ -917,7 +920,10 @@ mod tests {
             vec![last],
             "one more tip takes the row that finished first, the one retention would take next"
         );
-        assert!(finished_tips_over_storage_cap(&map, bob, now).is_empty());
+        assert!(
+            finished_tips_over_storage_cap(&map, bob, now).is_empty(),
+            "and alice's rows never count towards bob's"
+        );
     }
 
     #[test]
