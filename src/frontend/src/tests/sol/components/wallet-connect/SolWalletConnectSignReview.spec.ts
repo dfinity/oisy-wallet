@@ -240,6 +240,40 @@ describe('SolWalletConnectSignReview', () => {
 		expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
 	});
 
+	it('should say an approval with no simulation behind it will not be signed', () => {
+		const { getByRole } = render(SolWalletConnectSignReview, {
+			props: { ...props, isApproval: true, approvalWithoutSimulation: true }
+		});
+
+		expect(getByRole('alert')).toHaveTextContent(
+			en.wallet_connect.text.approval_without_simulation
+		);
+	});
+
+	// Signing names this refusal before the one for an instruction nobody read, so the screen says
+	// what the toast would.
+	it('should say it is the approval when an unread instruction comes with it', () => {
+		const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+			props: { ...props, isApproval: true, approvalWithoutSimulation: true, unreviewed: true }
+		});
+
+		expect(getByText(en.wallet_connect.text.approval_without_simulation)).toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.unreviewed_instructions)).not.toBeInTheDocument();
+	});
+
+	it('should say nothing else about an approval it will not sign', () => {
+		const { queryByText } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				isApproval: true,
+				approvalWithoutSimulation: true,
+				parties: { sources: [], destinations: [], partial: true }
+			}
+		});
+
+		expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+	});
+
 	it('should say nothing else about a message it will not sign', () => {
 		// Every caveat qualifies a review nobody is going to act on, including the ones that sit
 		// outside the notice chain: the partial-parties line would tell the user which lists to read
@@ -263,6 +297,55 @@ describe('SolWalletConnectSignReview', () => {
 		expect(queryByText(en.wallet_connect.text.unreviewed_instructions)).not.toBeInTheDocument();
 		expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
 		expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
+	});
+
+	describe('a send that names another account to pay its fee', () => {
+		it('should announce that it will not be signed', () => {
+			const { getByRole } = render(SolWalletConnectSignReview, {
+				props: { ...props, feePaidByOthers: true }
+			});
+
+			expect(getByRole('alert')).toHaveTextContent(en.wallet_connect.text.fee_paid_by_others);
+		});
+
+		// It goes out with the wallet as the fee payer, so every other reading here was made of a
+		// different transaction, and this refusal is the one thing the review has to say.
+		it('should say which refusal it is when the message is refused on other grounds too', () => {
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, feePaidByOthers: true, ambiguous: true, closesPayOthers: true }
+			});
+
+			expect(getByText(en.wallet_connect.text.fee_paid_by_others)).toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.close_pays_others)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.cannot_be_shown)).not.toBeInTheDocument();
+		});
+
+		it('should say nothing else about it', () => {
+			const { queryByText, queryByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					decoded: true,
+					feePaidByOthers: true,
+					unreviewed: true,
+					unreadPrograms: [{ address: STAKE_PROGRAM_ADDRESS }],
+					parties: { sources: [], destinations: [], partial: true },
+					preview: {
+						solDelta: 1n,
+						tokenDeltas: [],
+						controlChanges: [
+							{ account: mockSolAddress2, field: 'owner' as const, to: mockAtaAddress }
+						]
+					}
+				}
+			});
+
+			expect(
+				queryByText(en.wallet_connect.text.unreviewed_instructions_simulated)
+			).not.toBeInTheDocument();
+			expect(queryByTestId('unread-programs')).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
+		});
 	});
 
 	it('should render the unreviewed instructions warning', () => {
@@ -316,6 +399,15 @@ describe('SolWalletConnectSignReview', () => {
 
 		expect(getByText(en.fee.text.base_kind)).toBeInTheDocument();
 		expect(getByText('0.000005 SOL')).toBeInTheDocument();
+	});
+
+	// A message the dApp co-signs requires two signatures, and each one is charged.
+	it('should charge the base fee for every signature the message requires', () => {
+		const { getByTestId } = render(SolWalletConnectSignReview, {
+			props: { ...props, requiredSignatures: 2 }
+		});
+
+		expect(getByTestId('network-fee')).toHaveTextContent('0.00001 SOL');
 	});
 
 	it('should render the prioritization fee at the full precision of the token', () => {
@@ -558,7 +650,7 @@ describe('SolWalletConnectSignReview', () => {
 			});
 
 			expect(getByText(en.fee.text.base_kind)).toBeInTheDocument();
-			expect(queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.base64_data)).not.toBeInTheDocument();
 		});
 
 		// The warnings are about the request as a whole, so they belong to neither tab: hiding one
@@ -618,6 +710,77 @@ describe('SolWalletConnectSignReview', () => {
 						}
 					],
 					preview: { solDelta: -42_904_840n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(getByTestId('message-summary')).toHaveTextContent(en.send.text.send);
+		});
+
+		// Every signature pays the base fee out of the SOL balance the run reports, so a send the
+		// dApp co-signs takes two of them beyond what it moves.
+		it('should allow for every signature the message requires', () => {
+			const { getByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					messageSummary,
+					requiredSignatures: 2,
+					preview: { solDelta: -1_010_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(getByTestId('message-summary')).toHaveTextContent(en.send.text.send);
+		});
+
+		it('should not allow for a signature the message does not require', () => {
+			const { queryByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					messageSummary,
+					preview: { solDelta: -1_010_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
+		});
+
+		// A dApp that sponsors the request pays its fees, so the user's balance carries none of them: a
+		// run that takes them from it anyway moved something the message did not state.
+		it('should not allow for the base fee of a request the dApp sponsors', () => {
+			const { queryByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					messageSummary,
+					requiredSignatures: 2,
+					walletPaysFees: false,
+					preview: { solDelta: -1_010_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
+		});
+
+		it('should not allow for the priority fee of a request the dApp sponsors', () => {
+			const { queryByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					messageSummary,
+					prioritizationFee: 7_000n,
+					walletPaysFees: false,
+					preview: { solDelta: -1_007_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
+		});
+
+		it('should state a sponsored request whose run takes only what it moves', () => {
+			const { getByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					messageSummary,
+					requiredSignatures: 2,
+					walletPaysFees: false,
+					preview: { solDelta: -1_000_000n, tokenDeltas: [], controlChanges: [] }
 				}
 			});
 
@@ -890,17 +1053,19 @@ describe('SolWalletConnectSignReview', () => {
 		});
 
 		// What it costs belongs with what it does; the raw message is material to check it against.
-		it('should render the fees with the summary and the hex data with the operations', async () => {
+		it('should render the fees with the summary and the base64 data with the operations', async () => {
 			const queries = render(SolWalletConnectSignReview, {
 				props: { ...props, data: 'AQID', prioritizationFee: 238_217n }
 			});
 
 			expect(queries.getByText(en.fee.text.prioritization_kind)).toBeInTheDocument();
-			expect(queries.queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
+			expect(queries.queryByText(en.wallet_connect.text.base64_data)).not.toBeInTheDocument();
 
 			await showOperations(queries);
 
-			expect(queries.getByText(en.wallet_connect.text.hex_data)).toBeInTheDocument();
+			expect(queries.getByText(en.wallet_connect.text.base64_data)).toBeInTheDocument();
+			// The request carries the transaction as base64, so the row must not call it hex.
+			expect(queries.queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
 			expect(queries.queryByText(en.fee.text.prioritization_kind)).not.toBeInTheDocument();
 		});
 	});
@@ -1188,7 +1353,7 @@ describe('SolWalletConnectSignReview', () => {
 
 			await showOperations(queries);
 
-			expect(queries.getByText(en.wallet_connect.text.hex_data)).toBeInTheDocument();
+			expect(queries.getByText(en.wallet_connect.text.base64_data)).toBeInTheDocument();
 		});
 
 		it('should still render the simulated changes', () => {

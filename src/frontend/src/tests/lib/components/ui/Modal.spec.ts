@@ -26,6 +26,14 @@ describe('Modal', () => {
 		expect(getByTestId('close-modal').matches(':first-child')).toBeFalsy();
 	});
 
+	// The panel holds focus only to keep it inside the dialog. Without the class, Chrome draws
+	// its own ring around the whole panel after a click on empty space and any key press.
+	it('keeps the browser focus ring off the panel', () => {
+		const { container } = render(Modal, { props: baseProps });
+
+		expect(container.querySelector('.wrapper')).toHaveClass('outline-none');
+	});
+
 	it('preserves the autofocus of a child input when the modal mounts', async () => {
 		const { getByTestId } = render(Modal, {
 			props: {
