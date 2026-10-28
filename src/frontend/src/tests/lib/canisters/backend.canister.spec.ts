@@ -1355,54 +1355,91 @@ describe('backend.canister', () => {
 		});
 	});
 
-	describe('getContacts', () => {
-		it('should call get_contacts service', async () => {
+	describe('getContactsPage', () => {
+		it('should read the first page through the certified service', async () => {
 			const mockContacts = getMockContacts({ n: 4 });
-			const response = { Ok: mockContacts };
-
-			service.get_contacts.mockResolvedValue(response);
-
-			const { getContacts } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = await getContacts();
-
-			expect(service.get_contacts).toHaveBeenCalledOnce();
-			expect(res).toEqual(mockContacts);
-		});
-
-		it('should read the contacts through the certified service', async () => {
-			const mockContacts = getMockContacts({ n: 4 });
+			const page = { contacts: mockContacts, next: toNullable<bigint>() };
 			const queryService = mock<ActorSubclass<BackendService>>();
 			const certifiedService = mock<ActorSubclass<BackendService>>();
 
-			certifiedService.get_contacts.mockResolvedValue({ Ok: mockContacts });
+			certifiedService.get_contacts_page.mockResolvedValue({ Ok: page });
 
-			const { getContacts } = await createBackendCanister({
+			const { getContactsPage } = await createBackendCanister({
 				serviceOverride: queryService,
 				certifiedServiceOverride: certifiedService
 			});
 
-			await expect(getContacts()).resolves.toEqual(mockContacts);
+			await expect(getContactsPage()).resolves.toEqual(page);
 
-			expect(certifiedService.get_contacts).toHaveBeenCalledOnce();
-			expect(queryService.get_contacts).not.toHaveBeenCalled();
+			expect(certifiedService.get_contacts_page).toHaveBeenCalledExactlyOnceWith([]);
+			expect(queryService.get_contacts_page).not.toHaveBeenCalled();
 		});
 
-		it('should throw an error if get_contact throws', async () => {
-			service.get_contacts.mockImplementation(async () => {
+		it('should pass the cursor of the previous page', async () => {
+			const page = { contacts: getMockContacts({ n: 1 }), next: toNullable(7n) };
+
+			service.get_contacts_page.mockResolvedValue({ Ok: page });
+
+			const { getContactsPage } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(getContactsPage(3n)).resolves.toEqual(page);
+
+			expect(service.get_contacts_page).toHaveBeenCalledWith([3n]);
+		});
+
+		it('should throw an error if get_contacts_page throws', async () => {
+			service.get_contacts_page.mockImplementation(async () => {
 				await Promise.resolve();
 				throw mockResponseError;
 			});
 
-			const { getContacts } = await createBackendCanister({
+			const { getContactsPage } = await createBackendCanister({
 				serviceOverride: service
 			});
 
-			const res = getContacts();
+			await expect(getContactsPage()).rejects.toThrow(mockResponseError);
+		});
+	});
 
-			await expect(res).rejects.toThrow(mockResponseError);
+	describe('getContactImages', () => {
+		it('should read the images through the certified service', async () => {
+			const entries = [
+				{
+					contact_id: 1n,
+					image: { data: new Uint8Array([1, 2, 3]), mime_type: { 'image/png': null } }
+				}
+			];
+			const queryService = mock<ActorSubclass<BackendService>>();
+			const certifiedService = mock<ActorSubclass<BackendService>>();
+
+			certifiedService.get_contact_images.mockResolvedValue({ Ok: entries });
+
+			const { getContactImages } = await createBackendCanister({
+				serviceOverride: queryService,
+				certifiedServiceOverride: certifiedService
+			});
+
+			await expect(getContactImages([1n, 2n])).resolves.toEqual(entries);
+
+			expect(certifiedService.get_contact_images).toHaveBeenCalledExactlyOnceWith({
+				contact_ids: BigUint64Array.from([1n, 2n])
+			});
+			expect(queryService.get_contact_images).not.toHaveBeenCalled();
+		});
+
+		it('should throw an error if get_contact_images throws', async () => {
+			service.get_contact_images.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { getContactImages } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(getContactImages([1n])).rejects.toThrow(mockResponseError);
 		});
 	});
 

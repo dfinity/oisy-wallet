@@ -10,7 +10,7 @@ import { nonNullish } from '@dfinity/utils';
 import { RejectError } from '@icp-sdk/core/agent';
 
 // The contacts step, carried in `event_modifier` so one `contact` event covers every step.
-export type ContactStep = 'load_all';
+export type ContactStep = 'load_all' | 'load_images';
 
 export interface TrackContactParams {
 	// The step → `event_modifier`.

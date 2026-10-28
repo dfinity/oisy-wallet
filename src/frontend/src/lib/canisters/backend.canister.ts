@@ -3,6 +3,8 @@ import type {
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
 	Contact,
+	ContactImageEntry,
+	ContactsPage,
 	CreatePersonalNoteShareRequest,
 	CreateTipRequest,
 	CustomToken,
@@ -478,9 +480,19 @@ export class BackendCanister extends Canister<BackendService> {
 		throw response.Err;
 	};
 
-	getContacts = async (): Promise<Contact[]> => {
-		const { get_contacts } = this.caller({ certified: true });
-		const response = await get_contacts();
+	getContactsPage = async (after?: bigint): Promise<ContactsPage> => {
+		const { get_contacts_page } = this.caller({ certified: true });
+		const response = await get_contacts_page(toNullable(after));
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getContactImages = async (contactIds: bigint[]): Promise<ContactImageEntry[]> => {
+		const { get_contact_images } = this.caller({ certified: true });
+		const response = await get_contact_images({ contact_ids: BigUint64Array.from(contactIds) });
 
 		if ('Ok' in response) {
 			return response.Ok;
