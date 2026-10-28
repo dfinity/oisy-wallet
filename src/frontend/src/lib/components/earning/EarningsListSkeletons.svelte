@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import EarningCardSkeleton from '$lib/components/earning/EarningCardSkeleton.svelte';
 	import { EARNING_CARD_SKELETON } from '$lib/constants/test-ids.constants';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		loading: boolean;

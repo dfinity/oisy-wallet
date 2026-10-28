@@ -106,14 +106,24 @@ describe('TransactionContactCard', () => {
 		expect(modalStore.openAddressBook).toHaveBeenCalled();
 	});
 
-	// `TokenAccountId` has no XRP variant, so the address book cannot prefill or validate such an
-	// address. Offering the action would walk the user into a form they can never submit.
-	it('hides the save address button for an address no contact can hold', () => {
-		const { queryByRole, getByText } = render(TransactionContactCard, {
+	it('shows save address button for an XRP address', () => {
+		const { getByRole } = render(TransactionContactCard, {
 			props: { type: 'send', to: mockXrpAddress }
 		});
 
-		expect(getByText(mockXrpAddress)).toBeTruthy();
+		expect(getByRole('button', { name: get(i18n).address.save.title })).toBeTruthy();
+	});
+
+	// No `TokenAccountId` variant holds an X-address, so the address book cannot prefill or validate
+	// it. Offering the action would walk the user into a form they can never submit.
+	it('hides the save address button for an address no contact can hold', () => {
+		const xAddress = 'XVPcpSm47b1CZkf5AkKM9a84dQHe3m4sBhsrA4XtnBECTAc';
+
+		const { queryByRole, getByText } = render(TransactionContactCard, {
+			props: { type: 'send', to: xAddress }
+		});
+
+		expect(getByText(xAddress)).toBeTruthy();
 
 		expect(queryByRole('button', { name: get(i18n).address.save.title })).toBeNull();
 	});

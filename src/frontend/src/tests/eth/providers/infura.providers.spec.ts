@@ -2,28 +2,35 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { ERC20_ABI } from '$eth/constants/erc20.constants';
 import {
 	INFURA_READ_TIMEOUT_MILLISECONDS,
 	INFURA_SUBMISSION_TIMEOUT_MILLISECONDS
 } from '$eth/constants/eth.constants';
 import { InfuraProvider, infuraProviders } from '$eth/providers/infura.providers';
+import type { GetFeeData } from '$eth/types/infura';
 import type { EthereumNetwork } from '$eth/types/network';
 import {
 	OP_STACK_GAS_PRICE_ORACLE_ABI,
 	OP_STACK_GAS_PRICE_ORACLE_ADDRESS
 } from '$evm/base/constants/base.constants';
+import { TRACK_ETH_ESTIMATE_GAS_ERROR } from '$lib/constants/analytics.constants';
 import {
 	PLAUSIBLE_EVENT_RESULT_STATUSES,
 	PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS
 } from '$lib/enums/plausible';
+import { trackEvent } from '$lib/services/analytics.services';
 import { trackProviderFallback } from '$lib/services/provider-fallback-analytics.services';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { nonNullish } from '@dfinity/utils';
+import { AbiCoder, Interface } from 'ethers/abi';
 import { Contract } from 'ethers/contract';
 import { keccak256 } from 'ethers/crypto';
 import { InfuraProvider as InfuraProviderLib, type TransactionResponse } from 'ethers/providers';
+import { makeError } from 'ethers/utils';
 
 const { mockFallbackEnabled } = vi.hoisted(() => ({ mockFallbackEnabled: { value: true } }));
 
@@ -44,6 +51,10 @@ vi.mock('$lib/services/provider-fallback-analytics.services', () => ({
 
 vi.mock('ethers/contract', () => ({
 	Contract: vi.fn()
+}));
+
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
 }));
 
 describe('infura.providers', () => {
@@ -249,6 +260,113 @@ describe('infura.providers', () => {
 				expect(trackProviderFallback).not.toHaveBeenCalled();
 			});
 		});
+
+		describe('safeEstimateGas', () => {
+			const mockEstimateGas = vi.fn();
+
+			const recipient = '0x8ba1f109551bd432803012645ac136ddd64dba72';
+
+			const data = new Interface(ERC20_ABI).encodeFunctionData('transfer', [
+				recipient,
+				100_000_000n
+			]);
+
+			const transaction: GetFeeData = { from: mockEthAddress3, to: USDC_TOKEN.address, data };
+
+			const balance = '1234567890123';
+
+			// Written by the contract, which can build it from the caller's address and balance.
+			const reason = `account ${mockEthAddress3} holds ${balance}`;
+
+			beforeEach(() => {
+				mockProvider.prototype.estimateGas = mockEstimateGas;
+			});
+
+			it('should return the estimate without tracking an event', async () => {
+				mockEstimateGas.mockResolvedValueOnce(21_000n);
+
+				const provider = new InfuraProvider(ETHEREUM_NETWORK);
+
+				await expect(provider.safeEstimateGas(transaction)).resolves.toBe(21_000n);
+
+				expect(mockEstimateGas).toHaveBeenCalledExactlyOnceWith(transaction);
+				expect(trackEvent).not.toHaveBeenCalled();
+			});
+
+			// The errors ethers makes of a node's answer to `eth_estimateGas`, built the way
+			// `JsonRpcApiProvider.getRpcError` builds them.
+			it.each([
+				{
+					answer: 'a revert without data',
+					err: AbiCoder.getBuiltinCallException('estimateGas', transaction, null),
+					tracked: 'CALL_EXCEPTION'
+				},
+				{
+					answer: 'a reason naming address and balance',
+					err: AbiCoder.getBuiltinCallException(
+						'estimateGas',
+						transaction,
+						new Interface([]).encodeErrorResult('Error', [reason])
+					),
+					tracked: 'CALL_EXCEPTION'
+				},
+				{
+					answer: 'insufficient funds',
+					err: makeError('insufficient funds', 'INSUFFICIENT_FUNDS', {
+						transaction,
+						info: {
+							payload: { method: 'eth_estimateGas', params: [transaction], id: 1, jsonrpc: '2.0' },
+							error: {
+								code: -32000,
+								message: `insufficient funds for gas * price + value: address ${mockEthAddress3} have ${balance} want 9876543210987`
+							}
+						}
+					}),
+					tracked: 'INSUFFICIENT_FUNDS'
+				}
+			])('should track only the ethers code for $answer', async ({ err, tracked }) => {
+				mockEstimateGas.mockRejectedValueOnce(err);
+
+				const provider = new InfuraProvider(ETHEREUM_NETWORK);
+
+				await expect(provider.safeEstimateGas(transaction)).resolves.toBeUndefined();
+
+				expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+					name: TRACK_ETH_ESTIMATE_GAS_ERROR,
+					metadata: { error: tracked, network: 'mainnet' },
+					warning: `Error estimating gas for network mainnet: ${err}`
+				});
+
+				const [[{ metadata }]] = vi.mocked(trackEvent).mock.calls;
+				const trackedText = JSON.stringify(metadata).toLowerCase();
+
+				// Ethers checksums the addresses it prints, and calldata carries them without the prefix.
+				[transaction.from, recipient, data].forEach((hex) => {
+					const value = hex.slice(2).toLowerCase();
+
+					expect(`${err}`.toLowerCase()).toContain(value);
+					expect(trackedText).not.toContain(value);
+				});
+
+				expect(trackedText).not.toContain(balance);
+			});
+
+			it('should keep the text of an error that does not come from ethers', async () => {
+				// What the browser's `fetch` throws without a connection; ethers passes it on unchanged.
+				const err = new TypeError('Failed to fetch');
+				mockEstimateGas.mockRejectedValueOnce(err);
+
+				const provider = new InfuraProvider(ETHEREUM_NETWORK);
+
+				await expect(provider.safeEstimateGas(transaction)).resolves.toBeUndefined();
+
+				expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+					name: TRACK_ETH_ESTIMATE_GAS_ERROR,
+					metadata: { error: 'TypeError: Failed to fetch', network: 'mainnet' },
+					warning: 'Error estimating gas for network mainnet: TypeError: Failed to fetch'
+				});
+			});
+		});
 	});
 
 	describe('sendTransaction', () => {
@@ -261,8 +379,10 @@ describe('infura.providers', () => {
 		const infuraResponse = { hash: keccak256(signedTransaction) } as TransactionResponse;
 		const alchemyResponse = { hash: keccak256(signedTransaction) } as TransactionResponse;
 
-		const refusal = Object.assign(new Error('nonce has already been used'), {
-			code: 'NONCE_EXPIRED'
+		// A node refusing the transaction outright, which no other node will mine as it is.
+		const refusal = Object.assign(new Error('could not coalesce error'), {
+			code: 'UNKNOWN_ERROR',
+			error: { code: -32000, message: 'max fee per gas less than block base fee' }
 		});
 
 		beforeEach(() => {
@@ -394,6 +514,22 @@ describe('infura.providers', () => {
 			mockGetTransaction.mockResolvedValueOnce(null);
 
 			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(refusal);
+		});
+
+		it('should not take an already-used nonce as a reason over Infura failing the request', async () => {
+			// The transaction may be in all the same: its nonce can have been spent by itself.
+			const { provider } = buildProvider();
+
+			const nonceExpired = Object.assign(new Error('nonce has already been used'), {
+				code: 'NONCE_EXPIRED'
+			});
+
+			mockBroadcastTransaction
+				.mockRejectedValueOnce(internalError)
+				.mockRejectedValueOnce(nonceExpired);
+			mockGetTransaction.mockResolvedValueOnce(null);
+
+			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(internalError);
 		});
 
 		it('should report the reason Infura gave when both refuse the transaction', async () => {

@@ -295,6 +295,54 @@ describe('xrp-wallet.scheduler', () => {
 		scheduler.stop();
 	});
 
+	// The restart puts back the very ref the previous job captured, so the ref alone let that job's
+	// late result through. Landing while the restart awaited the identity, it filled the fresh cache
+	// while the idle timer dropped its message — and the restarted job, finding nothing new, posted
+	// nothing at all.
+	it('should drop a job that completes after a stop and a same-address restart', async () => {
+		let deliverStalePage: (page: { transactions: unknown[] }) => void = () => undefined;
+
+		spyLoadTransactions
+			.mockImplementationOnce(() => new Promise((resolve) => (deliverStalePage = resolve)))
+			.mockResolvedValue({ transactions: [mockRawTransaction] });
+
+		const scheduler = new XrpWalletScheduler();
+
+		await scheduler.start(startData);
+
+		scheduler.stop();
+
+		let deliverIdentity: (identity: typeof mockIdentity) => void = () => undefined;
+
+		vi.mocked(AuthClientProvider.getInstance().loadIdentity).mockImplementationOnce(
+			() => new Promise((resolve) => (deliverIdentity = resolve))
+		);
+
+		const restart = scheduler.start(startData);
+
+		deliverStalePage({ transactions: [mockRawTransaction] });
+		await vi.advanceTimersByTimeAsync(0);
+
+		postMessageMock.mockClear();
+
+		deliverIdentity(mockIdentity);
+		await restart;
+		await awaitJobExecution();
+
+		const walletCall = postMessageMock.mock.calls.find(
+			([message]) => message?.msg === 'syncXrpWallet'
+		);
+
+		expect(walletCall?.[0].data.wallet.balance.data).toBe(mockBalance);
+
+		const transactions = JSON.parse(walletCall?.[0].data.wallet.newTransactions, jsonReviver);
+
+		expect(transactions).toHaveLength(1);
+		expect(transactions[0].data.id).toBe('HASH1');
+
+		scheduler.stop();
+	});
+
 	// A job snapshots the address it was scheduled with. If the scheduler is re-keyed to another
 	// address while that job is in flight, its result belongs to the previous account and must not
 	// be merged into or posted against the new one.

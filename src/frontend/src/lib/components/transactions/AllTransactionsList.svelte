@@ -177,9 +177,10 @@
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	<AllTransactionsLoader transactions={allTransactions}>
-		{#snippet children({ loadMore, exhausted })}
+		{#snippet children({ loadMore, exhausted, floor })}
 			<AllTransactionsScroll
 				{exhausted}
+				{floor}
 				onLoadMore={loadMore}
 				{sortedTransactions}
 				bind:transactionsToDisplay

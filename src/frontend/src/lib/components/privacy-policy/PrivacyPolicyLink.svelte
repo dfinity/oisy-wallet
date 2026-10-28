@@ -26,10 +26,10 @@
 
 <a
 	class="inline-flex items-center gap-1"
+	class:active:text-brand-hover={color === 'blue'}
 	class:active:text-brand-primary-alt={color === 'inherit'}
-	class:active:text-brand-secondary={color === 'blue'}
+	class:hover:text-brand-hover={color === 'blue'}
 	class:hover:text-brand-primary-alt={color === 'inherit'}
-	class:hover:text-brand-secondary={color === 'blue'}
 	class:no-underline={noUnderline}
 	class:text-brand-primary-alt={color === 'blue'}
 	aria-label={replaceOisyPlaceholders($i18n.privacy_policy.alt.privacy_policy)}

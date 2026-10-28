@@ -20,7 +20,6 @@ export interface XrpSubmitResult {
 	engineResult: string;
 	engineResultMessage?: string;
 	txHash?: string;
-	accepted: boolean;
 }
 
 export interface XrpAccountInfo {
@@ -96,29 +95,6 @@ export interface XrpTransactionsPage {
 	// already entries only hid that from the callers.
 	transactions: unknown[];
 	marker?: unknown;
-}
-
-/**
- * A signed transaction whose outcome is not known.
- *
- * Resubmitting exactly this, rather than rebuilding from a freshly fetched sequence, is what makes
- * a retry safe — and the guarantee is the SEQUENCE, not transaction-identity dedup. A sequence can
- * be consumed only once, so if the original landed, the resubmission fails `checkSeqProxy` with
- * `tefPAST_SEQ` and is never applied. A rebuilt transaction carries a NEW sequence and is
- * therefore a second, independent payment.
- *
- * Nothing travels beside the blob. The transaction id and the ledger range confirmation polls are
- * both pure functions of it — see `deriveXrpTransactionHash` and `deriveXrpLedgerWindow` — and
- * carrying either as a field made it a second claim that could disagree with what was signed. A
- * mismatched id polls a different transaction; a mismatched range searches the wrong ledgers. Both
- * end in a settled payment being reported as expired and safe to resend.
- *
- * `tefALREADY` is a narrower case, not this one: rippled reaches it only via
- * `checkPriorTxAndLastLedger`, which runs after `checkSeqProxy`, so it fires for a duplicate
- * submitted inside the same open ledger — before the sequence was consumed.
- */
-export interface XrpPendingTransaction {
-	txBlob: string;
 }
 
 /**

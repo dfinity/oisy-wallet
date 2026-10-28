@@ -9,9 +9,10 @@ import {
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc4626Token } from '$eth/types/erc4626';
-import { toBackendTokenId, tokenIdKey } from '$lib/utils/token-id.utils';
+import { findTokenByBackendTokenId, toBackendTokenId, tokenIdKey } from '$lib/utils/token-id.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import type { SplToken } from '$sol/types/spl';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
@@ -32,6 +33,11 @@ describe('token-id.utils', () => {
 				name: 'Erc20',
 				id: { Erc20: [USDC_ETHEREUM, 1n] },
 				expected: `Erc20:${USDC_ETHEREUM.toLowerCase()}:1`
+			},
+			{
+				name: 'Erc4626',
+				id: { Erc4626: [USDC_ETHEREUM, 1n] },
+				expected: `Erc4626:${USDC_ETHEREUM.toLowerCase()}:1`
 			},
 			{
 				name: 'SplMainnet',
@@ -57,7 +63,6 @@ describe('token-id.utils', () => {
 			{ name: 'IcPunks', id: { IcPunks: mockPrincipal } },
 			{ name: 'BtcNativeTestnet', id: { BtcNativeTestnet: null } },
 			{ name: 'Erc1155', id: { Erc1155: [USDC_ETHEREUM, 1n] } },
-			{ name: 'Erc4626', id: { Erc4626: [USDC_ETHEREUM, 1n] } },
 			{ name: 'Dip721', id: { Dip721: mockPrincipal } },
 			{ name: 'Icrc7', id: { Icrc7: mockPrincipal } }
 		])('returns undefined for the unsupported variant $name', ({ id }) => {
@@ -146,10 +151,69 @@ describe('token-id.utils', () => {
 			expect(toBackendTokenId(BTC_TESTNET_TOKEN)).toEqual({ BtcNativeTestnet: null });
 		});
 
+		// The XRP in-flight record needs this mapping: the row it opens is what
+		// refuses a second payment while the first is unresolved, and a token with
+		// no backend identity cannot be recorded at all.
+		it('maps native XRP on mainnet', () => {
+			expect(toBackendTokenId(XRP_TOKEN)).toEqual({ XrpNativeMainnet: null });
+		});
+
 		// Bitcoin regtest is a local-development network with no `TokenId` variant
 		// on the backend, so it must stay untrackable rather than borrow testnet's.
 		it('returns undefined for a token with no backend representation', () => {
 			expect(toBackendTokenId(BTC_REGTEST_TOKEN)).toBeUndefined();
+		});
+	});
+
+	describe('findTokenByBackendTokenId', () => {
+		const usdc: Erc20Token = {
+			...mockValidToken,
+			id: parseTokenId(`Erc20-${USDC_ETHEREUM}`),
+			standard: { code: 'erc20' },
+			address: USDC_ETHEREUM,
+			network: ETHEREUM_NETWORK
+		};
+
+		const tokens = [ETHEREUM_TOKEN, SOLANA_TOKEN, usdc];
+
+		it('finds the token a row stores, whatever the case of its address', () => {
+			expect(
+				findTokenByBackendTokenId({
+					tokenId: { Erc20: [USDC_ETHEREUM.toLowerCase(), 1n] },
+					tokens
+				})
+			).toBe(usdc);
+			expect(findTokenByBackendTokenId({ tokenId: { EvmNative: 1n }, tokens })).toBe(
+				ETHEREUM_TOKEN
+			);
+			expect(findTokenByBackendTokenId({ tokenId: { SolNativeMainnet: null }, tokens })).toBe(
+				SOLANA_TOKEN
+			);
+		});
+
+		it('returns undefined for a token that is not among them', () => {
+			expect(
+				findTokenByBackendTokenId({ tokenId: { Erc20: [USDC_ETHEREUM, 8453n] }, tokens })
+			).toBeUndefined();
+			expect(findTokenByBackendTokenId({ tokenId: { EvmNative: 1n }, tokens: [] })).toBeUndefined();
+		});
+
+		it('finds an ERC-4626 vault', () => {
+			expect(
+				findTokenByBackendTokenId({
+					tokenId: { Erc4626: [mockValidErc4626Token.address.toUpperCase(), 1n] },
+					tokens: [mockValidErc4626Token]
+				})
+			).toBe(mockValidErc4626Token);
+		});
+
+		it('returns undefined for a variant that has no key', () => {
+			expect(
+				findTokenByBackendTokenId({
+					tokenId: { SolNativeDevnet: null },
+					tokens: [SOLANA_DEVNET_TOKEN]
+				})
+			).toBeUndefined();
 		});
 	});
 });

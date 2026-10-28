@@ -4,7 +4,7 @@ import { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import { i18n } from '$lib/stores/i18n.store';
 import { tokenCategoryFilterStore } from '$lib/stores/settings.store';
 import { assertNonNullish } from '@dfinity/utils';
-import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('TokenCategoryFilterDropdown', () => {
@@ -78,6 +78,24 @@ describe('TokenCategoryFilterDropdown', () => {
 			expect(getByText(get(i18n).token_tag.category.stablecoin)).toBeInTheDocument();
 			expect(getByText(get(i18n).token_tag.category.stock)).toBeInTheDocument();
 			expect(getByText(get(i18n).token_tag.category.commodity)).toBeInTheDocument();
+			expect(getByText(get(i18n).token_tag.category.compute)).toBeInTheDocument();
+		});
+	});
+
+	it('should list Compute as the last category option', async () => {
+		const { container } = render(TokenCategoryFilterDropdown);
+
+		const button = container.querySelector('button');
+		assertNonNullish(button);
+
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			const options = container.querySelectorAll('[data-tid="popover-content"] button');
+
+			expect(options[options.length - 1]?.textContent?.trim()).toBe(
+				get(i18n).token_tag.category.compute
+			);
 		});
 	});
 
@@ -100,6 +118,30 @@ describe('TokenCategoryFilterDropdown', () => {
 			key: 'token-category-filter',
 			value: { value: TokenCategoryTagValue.STABLECOIN }
 		});
+	});
+
+	it('announces the selected category after selecting and reopening', async () => {
+		const { getByRole } = render(TokenCategoryFilterDropdown);
+		await fireEvent.click(getByRole('button', { name: get(i18n).tokens.text.asset_type_all }));
+		let dialog = within(getByRole('dialog'));
+
+		expect(
+			dialog.getByRole('button', { name: get(i18n).tokens.text.asset_type_all })
+		).toHaveAttribute('aria-pressed', 'true');
+
+		await fireEvent.click(
+			dialog.getByRole('button', { name: get(i18n).token_tag.category.crypto })
+		);
+		await waitFor(() => expect(document.querySelector('[role="dialog"]')).not.toBeInTheDocument());
+		await fireEvent.click(getByRole('button', { name: get(i18n).token_tag.category.crypto }));
+		dialog = within(getByRole('dialog'));
+
+		expect(
+			dialog.getByRole('button', { name: get(i18n).token_tag.category.crypto })
+		).toHaveAttribute('aria-pressed', 'true');
+		expect(
+			dialog.getByRole('button', { name: get(i18n).tokens.text.asset_type_all })
+		).toHaveAttribute('aria-pressed', 'false');
 	});
 
 	it('should reset the store when "All" is selected', async () => {
@@ -237,5 +279,24 @@ describe('TokenCategoryFilterDropdown', () => {
 			expect(onSelectSpy).toHaveBeenCalledWith(undefined);
 			expect(tokenCategoryFilterStoreSpy).not.toHaveBeenCalled();
 		});
+	});
+
+	it('shows the open state on its trigger while the options are open', async () => {
+		const { getByRole, getByText } = render(TokenCategoryFilterDropdown);
+
+		const trigger = getByRole('button', { name: get(i18n).tokens.text.asset_type_all });
+
+		expect(trigger).not.toHaveClass('opened');
+
+		await fireEvent.click(trigger);
+
+		await waitFor(() => {
+			expect(trigger).toHaveClass('opened');
+			expect(trigger).toHaveAttribute('aria-expanded', 'true');
+		});
+
+		await fireEvent.click(getByText(get(i18n).token_tag.category.stablecoin));
+
+		await waitFor(() => expect(trigger).not.toHaveClass('opened'));
 	});
 });

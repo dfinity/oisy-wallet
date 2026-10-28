@@ -7,6 +7,7 @@ import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import type { Network } from '$lib/types/network';
 import type { OptionToken, TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
+import type { EthersError } from 'ethers/utils';
 
 export const isDefaultEthereumToken = (token: OptionToken): boolean =>
 	nonNullish(token) && token.category === 'default' && isTokenEthereumNative(token);
@@ -37,3 +38,8 @@ export const getExplorerUrl = ({
 		: nonNullish(token?.network)
 			? token.network.explorerUrl
 			: DEFAULT_ETHEREUM_NETWORK.explorerUrl;
+
+// An error ethers raised: `code` is one of a fixed set, while the message carries whatever ethers
+// knows about the failure, such as the request it sent and the node's answer.
+export const isEthersError = (err: unknown): err is EthersError =>
+	err instanceof Error && 'shortMessage' in err && typeof err.shortMessage === 'string';

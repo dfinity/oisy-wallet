@@ -1,192 +1,334 @@
 <script lang="ts">
-	import IconCheckCircle from '$lib/components/icons/IconCheckCircle.svelte';
-	import IconCloseCircle from '$lib/components/icons/IconCloseCircle.svelte';
-	import LoaderSpinner from '$lib/components/ui/LoaderSpinner.svelte';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import IconCheck from '$lib/components/icons/IconCheck.svelte';
+	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ProgressStep } from '$lib/types/progress-step';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		steps: [ProgressStep, ...ProgressStep[]];
 	}
 
 	let { steps }: Props = $props();
+
+	// Steps can follow each other within milliseconds; waiting for them to settle keeps a screen
+	// reader from queueing one sentence per step.
+	const ANNOUNCE_DELAY_MS = 500;
+
+	let sentence = $derived.by(() => {
+		const failed = steps.find(({ state }) => state === 'failed');
+
+		if (nonNullish(failed)) {
+			return replacePlaceholders($i18n.progress.failed_at, { $step: failed.text });
+		}
+
+		const index = steps.findIndex(({ state }) => state === 'in_progress');
+		const current = steps[index];
+
+		if (isNullish(current)) {
+			return '';
+		}
+
+		return replacePlaceholders($i18n.progress.step_of, {
+			$step: current.text,
+			$current: `${index + 1}`,
+			$total: `${steps.length}`
+		});
+	});
+
+	let announcement = $state('');
+
+	$effect(() => {
+		const next = sentence;
+		const timer = setTimeout(() => (announcement = next), ANNOUNCE_DELAY_MS);
+
+		return () => clearTimeout(timer);
+	});
 </script>
 
-{#each steps as { step, text, state }, i (step)}
-	{@const last = i === steps.length - 1}
-	<div class={`step ${state} ${last ? 'last' : ''}`}>
-		{#if state === 'completed'}
-			<IconCheckCircle />
-		{:else if state === 'failed'}
-			<IconCloseCircle />
-		{:else if state === 'in_progress'}
-			<div class="spinner">
-				<span class="checkmark">{i + 1}</span>
-				<LoaderSpinner size="small" />
-			</div>
-		{:else}
-			<span class="checkmark round">{i + 1}</span>
-		{/if}
+<ol class="steps">
+	{#each steps as { step, text, state } (step)}
+		<li class={`step ${state}`} aria-current={state === 'in_progress' ? 'step' : undefined}>
+			<span class="marker" aria-hidden="true">
+				<!-- Keyed so a new state mounts a new marker: the old one leaves at once and only the
+				     new one animates in. -->
+				{#key state}
+					{#if state === 'completed'}
+						<span class="badge"><IconCheck size="14" /></span>
+					{:else if state === 'failed'}
+						<span class="badge"><IconClose size="12" /></span>
+					{:else if state === 'in_progress'}
+						<svg class="arc" viewBox="0 0 16 16">
+							<circle
+								cx="8"
+								cy="8"
+								fill="none"
+								r="6"
+								stroke="currentColor"
+								stroke-opacity="0.25"
+								stroke-width="2"
+							/>
+							<path
+								d="M8 2a6 6 0 0 1 6 6"
+								fill="none"
+								stroke="currentColor"
+								stroke-linecap="round"
+								stroke-width="2"
+							/>
+						</svg>
+					{:else}
+						<span class="dot"></span>
+					{/if}
+				{/key}
+			</span>
 
-		<span class="text">{text}</span>
+			<span class="text" data-label={text}>{text}</span>
 
-		<div class:line={!last}></div>
+			{#if state === 'failed'}
+				<span class="state failed-tag">{$i18n.progress.failed}</span>
+			{:else if state === 'completed'}
+				<span class="state sr-only">{$i18n.progress.completed}</span>
+			{:else if state === 'in_progress'}
+				<span class="state sr-only">{$i18n.progress.in_progress}</span>
+			{/if}
+		</li>
+	{/each}
+</ol>
 
-		{#if state === 'completed'}
-			<span class="state">{$i18n.progress.completed}</span>
-		{:else if state === 'failed'}
-			<span class="state">{$i18n.progress.failed}</span>
-		{:else if state === 'in_progress'}
-			<div class="state">
-				<span>{$i18n.progress.in_progress}</span>
-			</div>
-		{/if}
-	</div>
-{/each}
+<span class="sr-only" role="status">{announcement}</span>
 
 <style lang="scss">
+	// A finished or failed badge springs in (stiffness 640, damping 22, mass 0.7), sampled into
+	// `linear()` so no animation runtime is needed. Browsers without `linear()` get a close
+	// overshooting bezier.
+	$pop-easing: linear(
+		0,
+		0.074,
+		0.25,
+		0.468,
+		0.683,
+		0.866,
+		1.004,
+		1.093,
+		1.138,
+		1.148,
+		1.134,
+		1.106,
+		1.074,
+		1.043,
+		1.016,
+		0.997,
+		0.985,
+		0.979,
+		0.978,
+		0.981,
+		0.985,
+		0.99,
+		0.994,
+		0.998,
+		1.001,
+		1.002,
+		1.003,
+		1.003,
+		1.003,
+		1.002,
+		1.001,
+		1.001,
+		1
+	);
+	$pop-easing-fallback: cubic-bezier(0.34, 1.56, 0.64, 1);
+	$ease-out: cubic-bezier(0.2, 0, 0, 1);
+
+	.steps {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+	}
+
+	// 36 px for a one-line step; a longer explanation wraps and the row grows with the same padding.
 	.step {
-		display: grid;
-		grid-template-columns: max-content auto;
-		grid-template-rows: repeat(2, auto);
-
+		display: flex;
 		align-items: center;
-
-		column-gap: var(--padding-2x);
-		row-gap: var(--padding);
-
-		padding: 0 0 var(--padding);
-
-		--icon-check-circle-background: var(--positive-emphasis);
-		--icon-check-circle-color: white;
-
-		color: var(--value-color);
-		transition: color var(--animation-time-normal) ease-out;
+		gap: 0.75rem;
+		min-height: 2.25rem;
+		padding: 0.3125rem 0.25rem;
 	}
 
-	.line,
-	.state {
-		align-self: flex-start;
+	.marker {
+		display: grid;
+		flex-shrink: 0;
+		place-items: center;
+		width: 1.25rem;
+		height: 1.25rem;
 	}
 
-	.in_progress,
-	.next {
-		.line {
-			--line-color: var(--tertiary);
-		}
+	.dot {
+		width: 0.375rem;
+		height: 0.375rem;
+		border-radius: 2px;
+		background: var(--color-foreground-disabled-alt);
 	}
 
-	.in_progress {
-		color: var(--progress-color);
+	.badge {
+		display: grid;
+		place-items: center;
+		width: 1.25rem;
+		height: 1.25rem;
+		border-radius: 50%;
+		animation: pop 440ms $pop-easing-fallback both;
 
-		--icon-check-circle-background: var(--progress-color);
-		--icon-check-circle-color: var(--progress-color-contrast);
-
-		.checkmark {
-			--checkmark-color: var(--progress-color);
+		@supports (animation-timing-function: linear(0, 1)) {
+			animation-timing-function: $pop-easing;
 		}
 	}
 
-	.completed {
-		// Custom properties cascade into the IconCheckCircle child component.
-		--icon-check-circle-background: var(--color-background-brand-primary);
-		--icon-check-circle-color: var(--color-foreground-primary-inverted);
+	.completed .badge {
+		color: var(--color-foreground-success-secondary);
+		background: var(--color-background-success-subtle-20);
+	}
 
-		.line {
-			--line-color: var(--color-background-brand-primary);
+	.failed .badge {
+		color: var(--color-foreground-error-primary);
+		background: var(--color-background-error-subtle-20);
+	}
+
+	.arc {
+		width: 0.9375rem;
+		height: 0.9375rem;
+		color: var(--color-foreground-tertiary);
+		animation:
+			spin 0.8s linear infinite,
+			appear 180ms $ease-out;
+	}
+
+	// Set at 18 px and drawn at 16 px, so growing into the active step is a transform rather than
+	// a reflow: the lines always break where the 18 px text breaks. Labels wrap rather than
+	// truncate, since some are full explanations ("We'll keep bridging in the background").
+	// One weight in every state: a weight change would shift the glyphs. Waiting and finished
+	// labels share the tertiary grey, the lightest that keeps 4.5:1 in both themes; their markers
+	// tell them apart.
+	.text {
+		position: relative;
+		flex: 0 1 19rem;
+		min-width: 0;
+		font-size: 1.125rem;
+		line-height: 1.4;
+		color: var(--color-foreground-tertiary);
+		overflow-wrap: anywhere;
+		transform-origin: 0 50%;
+		scale: calc(16 / 18);
+		transition:
+			color var(--animation-time-normal) ease-out,
+			scale 240ms $ease-out;
+	}
+
+	.in_progress .text {
+		color: var(--color-foreground-primary);
+		scale: 1;
+	}
+
+	.failed .text {
+		color: var(--color-foreground-error-primary);
+	}
+
+	// The glint is a copy of the label laid on top, so the label keeps a solid colour and never
+	// blinks when its step ends. Its gradient spans the label's box, which caps how fast it sweeps.
+	.text::after {
+		position: absolute;
+		inset: 0;
+		color: transparent;
+		content: attr(data-label) #{'/'} '';
+		background-image: linear-gradient(
+			90deg,
+			transparent 38%,
+			var(--color-foreground-tertiary) 50%,
+			transparent 62%
+		);
+		background-size: 220% 100%;
+		-webkit-background-clip: text;
+		background-clip: text;
+		opacity: 0;
+		transition: opacity var(--animation-time-normal);
+		animation: glint 1.6s linear infinite;
+		pointer-events: none;
+	}
+
+	.in_progress .text::after {
+		opacity: 1;
+	}
+
+	// Failure is written out, not left to colour. It sits at the row's end in the flow, so a long
+	// label is cut short before it instead of running underneath; the label does not move.
+	.failed-tag {
+		flex-shrink: 0;
+		margin-left: auto;
+		padding: 0.25rem 0.5rem;
+		border-radius: 999px;
+		font-size: var(--font-size-small);
+		line-height: 1;
+		color: var(--color-foreground-error-primary);
+		background: var(--color-background-error-light);
+		animation: tag-in 220ms $ease-out 120ms both;
+	}
+
+	@keyframes pop {
+		from {
+			opacity: 0;
+			scale: 0.4;
 		}
-
-		.state {
-			color: var(--color-foreground-success-primary);
-			background: var(--color-background-success-subtle-30);
+		to {
+			opacity: 1;
+			scale: 1;
 		}
 	}
 
-	.failed {
-		color: var(--negative-emphasis);
-		--icon-close-circle-background: var(--negative-emphasis);
-		--icon-close-circle-color: white;
-
-		.line {
-			--line-color: var(--negative-emphasis);
-		}
-
-		.state {
-			color: var(--negative-emphasis);
-			background: var(--color-background-error-light);
-		}
-
-		.checkmark {
-			--checkmark-color: var(--negative-emphasis);
+	@keyframes appear {
+		from {
+			opacity: 0;
 		}
 	}
 
-	.next {
-		color: var(--tertiary);
+	@keyframes spin {
+		to {
+			rotate: 360deg;
+		}
+	}
 
-		--icon-check-circle-background: transparent;
-		--icon-check-circle-color: var(--tertiary);
-		--icon-check-circle-border-color: var(--tertiary);
+	@keyframes glint {
+		from {
+			background-position: 120% 0;
+		}
+		to {
+			background-position: -120% 0;
+		}
+	}
+
+	@keyframes tag-in {
+		from {
+			opacity: 0;
+			translate: 4px 0;
+		}
+	}
+
+	// The arc is a progress indicator and keeps turning; everything decorative stops and only the
+	// colours change.
+	@media (prefers-reduced-motion: reduce) {
+		.badge,
+		.failed-tag {
+			animation: none;
+		}
+
+		.arc {
+			animation: spin 0.8s linear infinite;
+		}
 
 		.text {
-			color: var(--color-foreground-primary);
+			transition: color var(--animation-time-normal) ease-out;
 		}
-	}
 
-	.state {
-		display: inline-flex;
-		gap: var(--padding-0_5x);
-
-		font-size: var(--font-size-small);
-		line-height: var(--line-height-small);
-
-		// Folded in from the former gix.scss override layer (OISY-owned colors).
-		color: var(--color-foreground-brand-primary-alt);
-		background: var(--color-background-brand-subtle-30);
-
-		width: fit-content;
-
-		padding: var(--padding-0_5x) var(--padding);
-		border-radius: var(--border-radius-0_5x);
-
-		div {
-			position: relative;
+		.text::after {
+			display: none;
 		}
-	}
-
-	.line {
-		height: calc(5 * var(--padding));
-		--line-color: var(--positive-emphasis);
-		background: linear-gradient(var(--line-color), var(--line-color)) no-repeat center / 1.5px 100%;
-	}
-
-	.checkmark {
-		font-size: var(--font-size-small);
-		line-height: var(--line-height-small);
-
-		--checkmark-color: var(--tertiary);
-	}
-
-	.spinner {
-		width: 24px;
-		height: 24px;
-
-		position: relative;
-
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-
-	.round {
-		width: 22px;
-		height: 22px;
-
-		border-radius: 50%;
-
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		border: 1px solid var(--checkmark-color);
 	}
 </style>

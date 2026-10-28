@@ -9,12 +9,15 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { TokenStandard } from '$lib/types/token';
+	import type { KnownDestinations } from '$lib/types/transactions';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	interface Props {
 		tokenStandard: TokenStandard;
 		customDestination?: string;
 		networkId?: NetworkId;
+		// Required rather than optional: without it the first-time destination warning stays silent.
+		knownDestinations: KnownDestinations;
 		title: Snippet;
 		onDestinationBack: () => void;
 		onQRCodeScan: () => void;
@@ -24,6 +27,7 @@
 		tokenStandard,
 		customDestination = $bindable(''),
 		networkId,
+		knownDestinations,
 		title,
 		onDestinationBack,
 		onQRCodeScan
@@ -62,6 +66,7 @@
 	>
 		{#snippet content()}
 			<IcSendDestination
+				{knownDestinations}
 				{networkId}
 				{onQRCodeScan}
 				{tokenStandard}

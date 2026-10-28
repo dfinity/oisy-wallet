@@ -134,6 +134,10 @@ export const AUTH_POPUP_WIDTH = 576;
 // TODO: revert to 625 after II provides a fix on their end
 export const AUTH_POPUP_HEIGHT = 826;
 
+// Sized for a full third-party site (block explorers, docs) rather than a sign-in dialog
+export const EXTERNAL_LINK_POPUP_WIDTH = 1024;
+export const EXTERNAL_LINK_POPUP_HEIGHT = 768;
+
 // Workers
 export const AUTH_TIMER_INTERVAL = 1_000;
 // From FI team:
@@ -168,6 +172,8 @@ export const MAX_UINT_256 = (1n << 256n) - 1n;
 // Permit2 declares its allowance as a `uint160`, so an unlimited one saturates there rather than
 // at the 256-bit maximum.
 export const MAX_UINT_160 = (1n << 160n) - 1n;
+// An EVM account nonce and a Solana slot are both `u64`.
+export const MAX_UINT_64 = (1n << 64n) - 1n;
 
 // NFTs
 export const COLLECTION_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1_000; // 20 seconds in milliseconds
@@ -184,6 +190,15 @@ export const ACTIVITY_LEVELLING_MAX_PAGES = 50;
 // How many consecutive jobs must fail to fetch the transactions of an IC token before we tell the user about it.
 // At the interval above, that is about 90 seconds of silence - long enough to skip transient hiccups.
 export const IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD = 3;
+// How long any single IndexedDB operation may take before it is treated as unanswered.
+//
+// IndexedDB can fail by saying nothing at all: an `open` that fires neither `success`, `error` nor
+// `blocked` leaves every operation behind it waiting for the life of the page, and neither a
+// `try`/`catch` nor `Promise.allSettled` can see that. A cache must never hold up the load it
+// exists to speed up, so anything that reads one gives it this long and then carries on without it.
+// Well above a healthy round trip, well below the point where the wallet looks broken.
+export const IDB_DEADLINE_MILLIS = 5_000;
+
 // Solana wallets
 // Until we find a way to reduce the number of calls (that we pay proportionally) done to the Solana RPC, we delay them more than the other wallets.
 // TODO: Use the normal one when we have a better way to handle the Solana wallets, for example when we have the internal Solana RPC canister, or when we don't load again the transactions that are already loaded.
@@ -196,6 +211,13 @@ export const CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
 
 // Active user transactions polling
 export const ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS = 5 * 1_000; // 5 seconds
+
+// The backend's `MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN`, in UTF-8 bytes — `validate_error` compares
+// `str::len()`. An update carrying a longer `error` is rejected whole, status included.
+export const ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES = 512;
+// The backend's `MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN`, in UTF-8 bytes, compared the
+// same way. An update carrying a longer ref value is rejected whole, too.
+export const ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES = 256;
 // Minimum delay between two `forward_evm_to_icp` re-notifications for the same
 // pending OneSec EVM→ICP row (notifying is an update call, polling is 5s).
 export const ONESEC_FORWARDING_NOTIFY_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute
