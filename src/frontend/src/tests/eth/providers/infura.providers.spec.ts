@@ -267,8 +267,10 @@ describe('infura.providers', () => {
 			error: { code: -32603, message: 'Internal error' }
 		});
 
-		const refusal = Object.assign(new Error('nonce has already been used'), {
-			code: 'NONCE_EXPIRED'
+		// A node refusing the transaction outright, which no other node will mine as it is.
+		const refusal = Object.assign(new Error('could not coalesce error'), {
+			code: 'UNKNOWN_ERROR',
+			error: { code: -32000, message: 'max fee per gas less than block base fee' }
 		});
 
 		// Both providers share one mock implementation, and a provider builds Infura first, then
@@ -410,6 +412,22 @@ describe('infura.providers', () => {
 			mockGetTransaction.mockResolvedValueOnce(null);
 
 			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(refusal);
+		});
+
+		it('should not take an already-used nonce as a reason over Infura failing the request', async () => {
+			// The transaction may be in all the same: its nonce can have been spent by itself.
+			const { provider } = buildProvider();
+
+			const nonceExpired = Object.assign(new Error('nonce has already been used'), {
+				code: 'NONCE_EXPIRED'
+			});
+
+			mockBroadcastTransaction
+				.mockRejectedValueOnce(internalError)
+				.mockRejectedValueOnce(nonceExpired);
+			mockGetTransaction.mockResolvedValueOnce(null);
+
+			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(internalError);
 		});
 
 		it('should report the reason Infura gave when both refuse the transaction', async () => {

@@ -9,7 +9,7 @@ import { ethersFallbackProvider, ethersProvider } from '$eth/providers/ethers.pr
 import type { EthAddress } from '$eth/types/address';
 import type { GetFeeData } from '$eth/types/infura';
 import type { EthersProviderNetwork } from '$eth/types/network';
-import { isEthereumNodeRefusal } from '$eth/utils/eth-error.utils';
+import { isDefinitiveTransactionRefusal } from '$eth/utils/eth-error.utils';
 import { isEthersError } from '$eth/utils/eth.utils';
 import {
 	OP_STACK_GAS_PRICE_ORACLE_ABI,
@@ -199,9 +199,10 @@ export class InfuraProvider {
 					return submitted;
 				}
 
-				// A refusal states something about the transaction; a provider failing the request does
-				// not. So the user is told whichever reason there is, Infura's when both give one.
-				throw !isEthereumNodeRefusal(infuraErr) && isEthereumNodeRefusal(fallbackErr)
+				// An outright refusal states something about the transaction; a provider failing the
+				// request does not. So the user is told whichever there is, Infura's when both refuse.
+				throw !isDefinitiveTransactionRefusal(infuraErr) &&
+					isDefinitiveTransactionRefusal(fallbackErr)
 					? fallbackErr
 					: infuraErr;
 			}
