@@ -118,6 +118,21 @@ export const sanitize = (text: string): string => sanitizeWithConfig({ text });
 export const sanitizeUntrusted = (text: string): string =>
 	sanitizeWithConfig({ text, config: UNTRUSTED_CONFIG });
 
+/**
+ * Escape a value so that it reads as plain text once placed into HTML.
+ *
+ * Use it for a value we do not author - e.g. a token symbol or an NFT collection name - before it is
+ * substituted into a translated text that `Html` renders. Sanitizing alone is not enough there: even
+ * `sanitizeUntrusted` keeps headings, paragraphs and links, which such a value must never add.
+ */
+export const escapeHtml = (text: string): string =>
+	text
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;');
+
 let elementsCounters: Record<string, number> = {};
 
 export const nextElementId = (prefix: string): string => {
