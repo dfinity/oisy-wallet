@@ -3,6 +3,7 @@ import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import {
 	CYCLES_TOP_UP_CONTACT,
+	CYCLES_TOP_UP_ICP_HINT,
 	CYCLES_TOP_UP_RECENT_CANISTER
 } from '$lib/constants/test-ids.constants';
 import { contactsStore } from '$lib/stores/contacts.store';
@@ -137,5 +138,54 @@ describe('CyclesTopUpCanisterTabs', () => {
 
 		expect(getAllByTestId(CYCLES_TOP_UP_CONTACT)).toHaveLength(2);
 		expect(container).not.toHaveTextContent(shortenWithMiddleEllipsis({ text: mockPrincipalText }));
+	});
+
+	it('lists nothing without the TCYCLES token, and says what it will list', () => {
+		withTopUp();
+
+		const { container, queryByTestId } = render(CyclesTopUpCanisterTabs, {
+			props: { onSelect: vi.fn() }
+		});
+
+		expect(queryByTestId(CYCLES_TOP_UP_RECENT_CANISTER)).toBeNull();
+		expect(container).toHaveTextContent(en.cycles_top_up.text.recently_topped_up_empty_state_title);
+	});
+
+	describe('paid with ICP', () => {
+		const renderPaidWithIcp = () =>
+			render(CyclesTopUpCanisterTabs, {
+				props: { token: mockTcyclesToken, paidWithIcp: true, onSelect: vi.fn() }
+			});
+
+		it('says that canisters topped up with ICP cannot be listed, in place of the empty state', () => {
+			const { container, getByTestId } = renderPaidWithIcp();
+
+			expect(getByTestId(CYCLES_TOP_UP_ICP_HINT)).toHaveTextContent(
+				en.cycles_top_up.text.icp_hint_title
+			);
+			expect(container).toHaveTextContent(en.cycles_top_up.text.icp_hint_description);
+			expect(container).not.toHaveTextContent(
+				en.cycles_top_up.text.recently_topped_up_empty_state_title
+			);
+		});
+
+		it('says so above the canisters topped up with TCYCLES too', () => {
+			withTopUp();
+
+			const { getByTestId } = renderPaidWithIcp();
+
+			expect(getByTestId(CYCLES_TOP_UP_ICP_HINT)).toHaveTextContent(
+				en.cycles_top_up.text.icp_hint_title
+			);
+			expect(getByTestId(CYCLES_TOP_UP_RECENT_CANISTER)).toBeInTheDocument();
+		});
+
+		it('says nothing of it on Contacts', async () => {
+			const { getByText, queryByTestId } = renderPaidWithIcp();
+
+			await fireEvent.click(getByText(en.send.text.contacts_tab));
+
+			expect(queryByTestId(CYCLES_TOP_UP_ICP_HINT)).toBeNull();
+		});
 	});
 });
