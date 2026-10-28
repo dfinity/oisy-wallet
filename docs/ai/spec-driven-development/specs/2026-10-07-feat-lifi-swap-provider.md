@@ -375,10 +375,11 @@ LI.FI's routes use the wallet's own wSOL account when it has one, and close it a
 (see [Solana transaction binding](#solana-transaction-binding-execution-time-quote)); if
 that account holds wSOL, the close would unwrap all of it into SOL, which the binding
 refuses. Refused only at execution, the swap would fail after the user confirmed it. So
-when the display quote's transaction closes the user's existing wSOL account rather than
-creating one, that account is read once (`loadLifiSolQuoteCeiling`, uncached): holding
-wSOL, or not reading as a token account, the route gets no LI.FI offer; an account that no
-longer exists holds none. In
+whenever the display quote's transaction closes the user's wSOL account, that account is
+read once (`loadLifiSolQuoteCeiling`, uncached), even when the transaction creates it
+first: `CreateIdempotent` leaves an existing account as it is, so a creation does not show
+the account to be new. Holding wSOL, or not reading as a token account, the route gets no
+LI.FI offer; an account that does not exist holds none. In
 v1 a user who holds wSOL has no LI.FI offer for swaps from or to SOL; NEAR Intents still
 serves them. Whether LI.FI can be asked for a temporary account instead is not known.
 
@@ -542,7 +543,10 @@ execution-time — passes `assertLifiQuote` before it is shown or acted on:
   transaction itself (from 3d-1): `loadLifiSolQuoteCeiling` reads it as the binding does
   before signing — lookup tables resolved, the pinned instructions, the LI.FI ceiling
   bounded — short of the simulation, and a quote it refuses gets no offer, tracked as no
-  route too.
+  route too. Those RPC reads share the quote's `LIFI_QUOTE_TIMEOUT_MS` deadline
+  (`untilAborted`): they cannot be handed its signal, and the form waits for every
+  provider's answer, so a read that stalls ends the offer as a timeout rather than holding
+  the whole quote, and the quote cache with it.
 
 EVM addresses (`to`, `approvalAddress`, `from`, EVM token addresses, an EVM
 `toAddress`) are compared **case-insensitively**: LI.FI may return checksummed or

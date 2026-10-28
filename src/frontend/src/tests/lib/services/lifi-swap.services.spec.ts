@@ -229,6 +229,53 @@ describe('lifi-swap.services', () => {
 					})
 				);
 			});
+
+			describe('a ceiling read that outlasts the deadline', () => {
+				let deadline: AbortController;
+
+				const timedOut = () =>
+					deadline.abort(new DOMException('The operation timed out.', 'TimeoutError'));
+
+				beforeEach(() => {
+					deadline = new AbortController();
+					vi.spyOn(AbortSignal, 'timeout').mockReturnValueOnce(deadline.signal);
+					vi.mocked(loadLifiSolQuoteCeiling).mockReturnValueOnce(new Promise(() => undefined));
+				});
+
+				afterEach(() => {
+					vi.mocked(AbortSignal.timeout).mockRestore();
+				});
+
+				it('should settle without an offer at the deadline, tracked as a timeout', async () => {
+					const quote = fetchLifiSwapQuote(solParams);
+
+					timedOut();
+
+					await expect(quote).resolves.toBeUndefined();
+
+					expect(trackEvent).toHaveBeenCalledWith(
+						expect.objectContaining({
+							metadata: expect.objectContaining({
+								result_error_type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.TIMEOUT,
+								event_severity: PLAUSIBLE_EVENT_SEVERITIES.WARN
+							})
+						})
+					);
+				});
+
+				it('should not hold a later request for the same inputs', async () => {
+					const first = fetchLifiSwapQuote(solParams);
+
+					timedOut();
+					await first;
+
+					vi.setSystemTime(now + LIFI_QUOTE_REFRESH_INTERVAL_MS);
+
+					await expect(fetchLifiSwapQuote(solParams)).resolves.toMatchObject({
+						solFeeCeiling: 380_000n
+					});
+				});
+			});
 		});
 
 		describe('a cross-chain route', () => {

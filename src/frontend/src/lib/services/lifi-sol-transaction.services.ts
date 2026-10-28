@@ -222,10 +222,7 @@ const readLifiSolTransaction = async ({
 		wrappedSolAccount,
 		rentExemptMinimum,
 		ceiling,
-		// Closed without being created first: the user's account as it is, holding whatever it holds.
-		closesExistingWrappedSolAccount:
-			closesWrappedSolAccount &&
-			!createdAccounts.some(({ account }) => account === wrappedSolAccount)
+		closesWrappedSolAccount
 	};
 };
 
@@ -298,8 +295,10 @@ const holdsWrappedSol = async (account: SolAddress): Promise<boolean> => {
  * binding reads it before signing, short of the simulation: what the form budgets beyond the amount.
  *
  * A route the binding would refuse gets no offer, since it could only fail once the user confirmed
- * it. Neither does one that closes the user's existing wrapped SOL account while it holds wrapped
- * SOL: the close would unwrap all of it, which the binding refuses too. Both refuse with
+ * it. Neither does one that closes the user's wrapped SOL account while it holds wrapped SOL: the
+ * close would unwrap all of it, which the binding refuses too. That account is read whenever the
+ * route closes it, created first or not: an idempotent creation leaves an existing account as it is,
+ * so it does not show the account to be new. Both refuse with
  * `LifiRouteUnsupportedError`, a route OISY cannot take rather than a forged one: the quote has
  * passed the trust checks. A failure to read the chain rejects as it is.
  */
@@ -328,9 +327,9 @@ export const loadLifiSolQuoteCeiling = async ({
 		throw err;
 	}
 
-	const { ceiling, wrappedSolAccount, closesExistingWrappedSolAccount } = transaction;
+	const { ceiling, wrappedSolAccount, closesWrappedSolAccount } = transaction;
 
-	if (closesExistingWrappedSolAccount && (await holdsWrappedSol(wrappedSolAccount))) {
+	if (closesWrappedSolAccount && (await holdsWrappedSol(wrappedSolAccount))) {
 		throw new LifiRouteUnsupportedError(
 			'LI.FI Solana route would unwrap the wrapped SOL the user holds',
 			{ route: quote }

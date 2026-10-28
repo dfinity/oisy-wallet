@@ -599,16 +599,31 @@ describe('lifi-sol-transaction.services', () => {
 			}
 		});
 
+		beforeEach(() => {
+			// No wrapped SOL account, unless a case says otherwise.
+			vi.mocked(getMultipleAccountsInfo).mockResolvedValue([null]);
+		});
+
 		it("should give the ceiling of the quote's own transaction, without simulating it", async () => {
 			await expect(loadFixture(mockLifiSolSolToUsdc)).resolves.toBe(solToUsdcCeiling);
 
 			expect(simulateSolTransaction).not.toHaveBeenCalled();
 		});
 
-		it('should not read a wrapped SOL account the transaction creates before closing it', async () => {
+		// An idempotent creation leaves an account that exists as it is.
+		it('should read the wrapped SOL account a route creates before closing it', async () => {
 			await loadFixture(mockLifiSolSolToUsdc);
 
-			expect(getMultipleAccountsInfo).not.toHaveBeenCalled();
+			expect(getMultipleAccountsInfo).toHaveBeenCalledExactlyOnceWith({
+				addresses: [await ataOf(WSOL_TOKEN.address)],
+				network: 'mainnet'
+			});
+		});
+
+		it('should not offer a route that creates and closes a wrapped SOL account already holding wrapped SOL', async () => {
+			vi.mocked(getMultipleAccountsInfo).mockResolvedValue([wrappedSolAccountHolding(1n)]);
+
+			await expect(loadFixture(mockLifiSolSolToUsdc)).rejects.toThrow(LifiRouteUnsupportedError);
 		});
 
 		it('should not read a wrapped SOL account a route does not touch', async () => {

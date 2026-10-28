@@ -38,6 +38,7 @@ import {
 	findLifiListedToken,
 	mapLifiSwapResult
 } from '$lib/utils/lifi-swap.utils';
+import { untilAborted } from '$lib/utils/timeout.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import {
 	ChainId,
@@ -139,12 +140,11 @@ const toSwapOfferError = (
 			: { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE };
 	}
 
-	// `LIFI_QUOTE_TIMEOUT_MS` aborts the fetch, and the SDK wraps that abort as it does any error.
-	if (
-		err instanceof SDKError &&
-		err.cause instanceof DOMException &&
-		err.cause.name === 'TimeoutError'
-	) {
+	// `LIFI_QUOTE_TIMEOUT_MS` aborts the fetch, and the SDK wraps that abort as it does any error; a
+	// Solana ceiling read that outlasts it rejects with the abort unwrapped.
+	const abort = err instanceof SDKError ? err.cause : err;
+
+	if (abort instanceof DOMException && abort.name === 'TimeoutError') {
 		return { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.TIMEOUT };
 	}
 
@@ -208,7 +208,14 @@ const fetchExecutableLifiQuote = async ({
 	const quote = await fetchTrustedLifiQuote({ request, sourceNetworkId, signal });
 
 	if (request.fromChain === ChainId.SOL) {
-		return { quote, request, solFeeCeiling: await loadLifiSolQuoteCeiling({ quote, request }) };
+		// The RPC reads behind the ceiling cannot be handed the signal, so it bounds them from here: the
+		// form waits for every provider's answer, and the cache shares one that never settles.
+		const solFeeCeiling = await untilAborted({
+			operation: loadLifiSolQuoteCeiling({ quote, request }),
+			signal
+		});
+
+		return { quote, request, solFeeCeiling };
 	}
 
 	if (isLifiRouteExecutable(quote)) {
