@@ -247,5 +247,31 @@ describe('ic-transactions.derived', () => {
 				}
 			});
 		});
+
+		it('should leave out the deposit of a canister top-up through the CMC', () => {
+			const [userInitiated] = transactions;
+			const topUp: IcCertifiedTransaction = {
+				certified: true,
+				data: {
+					...createCertifiedIcTransactionUiMock('top-up').data,
+					to: 'canister-deposit-account',
+					typeLabel: 'transaction.label.canister_top_up'
+				}
+			};
+
+			token.set(ICP_TOKEN);
+			icTransactionsStore.append({
+				tokenId: ICP_TOKEN_ID,
+				transactions: [userInitiated, topUp]
+			});
+
+			expect(get(icKnownDestinations)).toEqual({
+				[userInitiated.data.to as string]: {
+					amounts: [{ value: userInitiated.data.value, token: ICP_TOKEN }],
+					timestamp: Number(userInitiated.data.timestamp),
+					address: userInitiated.data.to
+				}
+			});
+		});
 	});
 });
