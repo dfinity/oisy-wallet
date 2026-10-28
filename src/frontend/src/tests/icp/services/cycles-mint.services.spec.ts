@@ -12,10 +12,10 @@ import {
 } from '$icp/canisters/cmc.errors';
 import {
 	CMC_MINT_CYCLES_MEMO,
-	CYCLES_MINT_DELETE_ATTEMPTS,
-	CYCLES_MINT_DELETE_RETRY_DELAY_MILLIS,
-	CYCLES_MINT_NOTIFY_ATTEMPTS,
-	CYCLES_MINT_TRANSFER_START_WINDOW_NS
+	CMC_NOTIFY_ATTEMPTS,
+	CMC_ROW_DELETE_ATTEMPTS,
+	CMC_ROW_DELETE_RETRY_DELAY_MILLIS,
+	CMC_TRANSFER_START_WINDOW_NS
 } from '$icp/constants/cmc.constants';
 import {
 	mintCycles,
@@ -365,7 +365,7 @@ describe('cycles-mint.services', () => {
 
 			await expect(mintCycles(params)).resolves.toEqual({ status: 'pending' });
 
-			expect(notifyMintCycles).toHaveBeenCalledTimes(CYCLES_MINT_NOTIFY_ATTEMPTS);
+			expect(notifyMintCycles).toHaveBeenCalledTimes(CMC_NOTIFY_ATTEMPTS);
 			expect(updateActiveUserTransaction).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({ status: { Executing: null } })
 			);
@@ -422,7 +422,7 @@ describe('cycles-mint.services', () => {
 
 		const suspendBeforeSending = () =>
 			vi.mocked(createActiveUserTransaction).mockImplementation(() => {
-				vi.setSystemTime(NOW_MS + Number(CYCLES_MINT_TRANSFER_START_WINDOW_NS / 1_000_000n) + 1);
+				vi.setSystemTime(NOW_MS + Number(CMC_TRANSFER_START_WINDOW_NS / 1_000_000n) + 1);
 
 				return Promise.resolve();
 			});
@@ -493,7 +493,7 @@ describe('cycles-mint.services', () => {
 			await expect(errorKind()).resolves.toBe('transfer_failed');
 
 			expect(deleteActiveUserTransaction).toHaveBeenCalledTimes(2);
-			expect(waitForMilliseconds).toHaveBeenCalledWith(CYCLES_MINT_DELETE_RETRY_DELAY_MILLIS);
+			expect(waitForMilliseconds).toHaveBeenCalledWith(CMC_ROW_DELETE_RETRY_DELAY_MILLIS);
 			expect(trackCyclesMint).toHaveBeenLastCalledWith(
 				expect.objectContaining({ errorCode: 'transfer_failed' })
 			);
@@ -505,8 +505,8 @@ describe('cycles-mint.services', () => {
 
 			await expect(errorKind()).resolves.toBe('transfer_failed');
 
-			expect(deleteActiveUserTransaction).toHaveBeenCalledTimes(CYCLES_MINT_DELETE_ATTEMPTS);
-			expect(waitForMilliseconds).toHaveBeenCalledTimes(CYCLES_MINT_DELETE_ATTEMPTS - 1);
+			expect(deleteActiveUserTransaction).toHaveBeenCalledTimes(CMC_ROW_DELETE_ATTEMPTS);
+			expect(waitForMilliseconds).toHaveBeenCalledTimes(CMC_ROW_DELETE_ATTEMPTS - 1);
 		});
 
 		// The transfer may have landed: the poller looks it up, then finishes the mint or closes

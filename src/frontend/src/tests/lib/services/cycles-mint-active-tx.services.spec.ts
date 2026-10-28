@@ -1,11 +1,11 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
-import { ICP_INDEX_CANISTER_ID, ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
+import { ICP_INDEX_CANISTER_ID } from '$env/networks/networks.icp.env';
 import * as icpIndexApi from '$icp/api/icp-index.api';
 import * as icpLedgerApi from '$icp/api/icp-ledger.api';
 import {
+	CMC_DEPOSIT_LANDING_WINDOW_NS,
 	CMC_MINT_CYCLES_MEMO,
-	CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS,
-	CYCLES_MINT_SETTLE_GRACE_OBSERVATIONS,
+	CMC_SETTLE_GRACE_OBSERVATIONS,
 	ICP_LEDGER_PERMITTED_DRIFT_NS
 } from '$icp/constants/cmc.constants';
 import * as cyclesMintServices from '$icp/services/cycles-mint.services';
@@ -16,7 +16,6 @@ import { ZERO } from '$lib/constants/app.constants';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import {
 	findCyclesMintDeposit,
-	hasIcpIndexSyncedPast,
 	pollCyclesMintActiveUserTransactions,
 	resetCyclesMintSettleObservations
 } from '$lib/services/cycles-mint-active-tx.services';
@@ -56,7 +55,7 @@ const unobserved: ActiveUserTransaction = {
 };
 
 // The last moment the row's transfer could land, in IC time.
-const LANDING_DEADLINE_NS = unobserved.created_at_ns + CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS;
+const LANDING_DEADLINE_NS = unobserved.created_at_ns + CMC_DEPOSIT_LANDING_WINDOW_NS;
 
 const indexEntry = ({
 	id,
@@ -116,7 +115,7 @@ describe('cycles-mint-active-tx.services', () => {
 	// The grace period is counted in the poller's own ticks, so a test that wants it spent
 	// has to spend it.
 	const pollPastGrace = async (transactions: ActiveUserTransaction[]) => {
-		for (let i = 0; i < CYCLES_MINT_SETTLE_GRACE_OBSERVATIONS; i++) {
+		for (let i = 0; i < CMC_SETTLE_GRACE_OBSERVATIONS; i++) {
 			await poll(transactions);
 		}
 	};
@@ -165,7 +164,7 @@ describe('cycles-mint-active-tx.services', () => {
 		it('waits out the grace period before touching a row', async () => {
 			notifyResolves({ status: 'pending' });
 
-			for (let i = 1; i < CYCLES_MINT_SETTLE_GRACE_OBSERVATIONS; i++) {
+			for (let i = 1; i < CMC_SETTLE_GRACE_OBSERVATIONS; i++) {
 				await poll([funded]);
 			}
 
@@ -182,7 +181,7 @@ describe('cycles-mint-active-tx.services', () => {
 		it('restarts the grace period whenever the row is written', async () => {
 			notifyResolves({ status: 'pending' });
 
-			for (let i = 1; i < CYCLES_MINT_SETTLE_GRACE_OBSERVATIONS; i++) {
+			for (let i = 1; i < CMC_SETTLE_GRACE_OBSERVATIONS; i++) {
 				await poll([funded]);
 			}
 
@@ -262,7 +261,7 @@ describe('cycles-mint-active-tx.services', () => {
 
 			expect(notifySpy).toHaveBeenCalledOnce();
 
-			for (let i = 1; i < CYCLES_MINT_SETTLE_GRACE_OBSERVATIONS; i++) {
+			for (let i = 1; i < CMC_SETTLE_GRACE_OBSERVATIONS; i++) {
 				await poll([funded]);
 			}
 
@@ -282,7 +281,7 @@ describe('cycles-mint-active-tx.services', () => {
 
 			expect(lookupSpy).toHaveBeenCalledOnce();
 
-			for (let i = 1; i < CYCLES_MINT_SETTLE_GRACE_OBSERVATIONS; i++) {
+			for (let i = 1; i < CMC_SETTLE_GRACE_OBSERVATIONS; i++) {
 				await poll([unobserved]);
 			}
 
@@ -473,55 +472,6 @@ describe('cycles-mint-active-tx.services', () => {
 				expect(deleteSpy).not.toHaveBeenCalled();
 				expect(syncedSpy).not.toHaveBeenCalled();
 			});
-		});
-	});
-
-	describe('hasIcpIndexSyncedPast', () => {
-		const hasSyncedPast = () =>
-			hasIcpIndexSyncedPast({ identity: mockIdentity, timestampNs: LANDING_DEADLINE_NS });
-
-		// A "yes" lets a row close as never sent.
-		it('reads the index’s height and its last block’s time, certified', async () => {
-			await hasSyncedPast();
-
-			expect(syncedSpy).toHaveBeenCalledExactlyOnceWith({
-				identity: mockIdentity,
-				indexCanisterId: ICP_INDEX_CANISTER_ID,
-				certified: true
-			});
-			expect(blockTimeSpy).toHaveBeenCalledExactlyOnceWith({
-				identity: mockIdentity,
-				ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
-				index: 999n,
-				certified: true
-			});
-		});
-
-		it('is true once the last synced block is later than the time', async () => {
-			blockTimeSpy.mockResolvedValue(LANDING_DEADLINE_NS + 1n);
-
-			await expect(hasSyncedPast()).resolves.toBeTruthy();
-		});
-
-		it('is false while the last synced block is not later than the time', async () => {
-			blockTimeSpy.mockResolvedValue(LANDING_DEADLINE_NS);
-
-			await expect(hasSyncedPast()).resolves.toBeFalsy();
-		});
-
-		// The index is then far behind the ledger anyway.
-		it('is false when the ledger has archived the last synced block', async () => {
-			blockTimeSpy.mockResolvedValue(undefined);
-
-			await expect(hasSyncedPast()).resolves.toBeFalsy();
-		});
-
-		it('is false for an index that has synced nothing, without asking the ledger', async () => {
-			syncedSpy.mockResolvedValue(ZERO);
-
-			await expect(hasSyncedPast()).resolves.toBeFalsy();
-
-			expect(blockTimeSpy).not.toHaveBeenCalled();
 		});
 	});
 

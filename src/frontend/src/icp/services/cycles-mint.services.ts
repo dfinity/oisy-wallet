@@ -2,11 +2,11 @@ import type { ActiveUserTransactionStatus } from '$declarations/backend/backend.
 import { notifyMintCycles } from '$icp/api/cmc.api';
 import {
 	CMC_MINT_CYCLES_MEMO,
-	CYCLES_MINT_DELETE_ATTEMPTS,
-	CYCLES_MINT_DELETE_RETRY_DELAY_MILLIS,
-	CYCLES_MINT_NOTIFY_ATTEMPTS,
-	CYCLES_MINT_NOTIFY_RETRY_DELAY_MILLIS,
-	CYCLES_MINT_TRANSFER_START_WINDOW_NS
+	CMC_NOTIFY_ATTEMPTS,
+	CMC_NOTIFY_RETRY_DELAY_MILLIS,
+	CMC_ROW_DELETE_ATTEMPTS,
+	CMC_ROW_DELETE_RETRY_DELAY_MILLIS,
+	CMC_TRANSFER_START_WINDOW_NS
 } from '$icp/constants/cmc.constants';
 import { transferIcpToCmc } from '$icp/services/cmc.services';
 import { CyclesMintError, type CyclesMintNotifyResult } from '$icp/types/cycles-mint';
@@ -175,7 +175,7 @@ export const mintCycles = async ({
 	// settles a create whose answer was lost, and a later attempt settles an earlier delete
 	// whose answer was: the first success means the row is gone, whichever call removed it.
 	const deleteRow = async (): Promise<boolean> => {
-		for (let attempt = 1; attempt <= CYCLES_MINT_DELETE_ATTEMPTS; attempt++) {
+		for (let attempt = 1; attempt <= CMC_ROW_DELETE_ATTEMPTS; attempt++) {
 			try {
 				await deleteActiveUserTransaction({ identity, id: mintId });
 
@@ -184,8 +184,8 @@ export const mintCycles = async ({
 				consoleError(err);
 			}
 
-			if (attempt < CYCLES_MINT_DELETE_ATTEMPTS) {
-				await waitForMilliseconds(CYCLES_MINT_DELETE_RETRY_DELAY_MILLIS);
+			if (attempt < CMC_ROW_DELETE_ATTEMPTS) {
+				await waitForMilliseconds(CMC_ROW_DELETE_RETRY_DELAY_MILLIS);
 			}
 		}
 
@@ -239,7 +239,7 @@ export const mintCycles = async ({
 
 	// What bounds when this transfer can still land, and so when the poller may conclude
 	// it never will: a transfer is only ever sent within this window of its timestamp.
-	if (nowInBigIntNanoSeconds() - transferCreatedAtNs > CYCLES_MINT_TRANSFER_START_WINDOW_NS) {
+	if (nowInBigIntNanoSeconds() - transferCreatedAtNs > CMC_TRANSFER_START_WINDOW_NS) {
 		throw (await deleteRow()) ? fail('timed_out') : new CyclesMintError('timed_out');
 	}
 
@@ -277,7 +277,7 @@ export const mintCycles = async ({
 
 	progress(ProgressStepsCyclesMint.MINT);
 
-	for (let attempt = 1; attempt <= CYCLES_MINT_NOTIFY_ATTEMPTS; attempt++) {
+	for (let attempt = 1; attempt <= CMC_NOTIFY_ATTEMPTS; attempt++) {
 		const result = await notifyCyclesMint({ identity, blockIndex });
 
 		const update = toCyclesMintRowUpdate(result);
@@ -290,8 +290,8 @@ export const mintCycles = async ({
 				: result;
 		}
 
-		if (attempt < CYCLES_MINT_NOTIFY_ATTEMPTS) {
-			await waitForMilliseconds(CYCLES_MINT_NOTIFY_RETRY_DELAY_MILLIS);
+		if (attempt < CMC_NOTIFY_ATTEMPTS) {
+			await waitForMilliseconds(CMC_NOTIFY_RETRY_DELAY_MILLIS);
 		}
 	}
 
