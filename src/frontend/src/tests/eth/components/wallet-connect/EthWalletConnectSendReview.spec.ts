@@ -13,6 +13,7 @@ import {
 } from '$eth/constants/erc20.constants';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { MULTICALL_HASH } from '$eth/constants/multicall.constants';
+import { loadUnlistedErc20TokenData } from '$eth/services/erc20-unlisted.services';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import {
@@ -46,6 +47,10 @@ import { Principal } from '@icp-sdk/core/principal';
 import { fireEvent, render, within } from '@testing-library/svelte';
 import { AbiCoder, Interface } from 'ethers/abi';
 import { writable } from 'svelte/store';
+
+vi.mock('$eth/services/erc20-unlisted.services', () => ({
+	loadUnlistedErc20TokenData: vi.fn()
+}));
 
 describe('EthWalletConnectSendReview', () => {
 	const RECIPIENT = '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a';
@@ -112,6 +117,7 @@ describe('EthWalletConnectSendReview', () => {
 	};
 
 	const warningTestId = 'wallet-connect-unverifiable-erc20-warning';
+	const unlistedTestId = 'wallet-connect-unlisted-erc20-warning';
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -121,6 +127,9 @@ describe('EthWalletConnectSendReview', () => {
 
 		erc20DefaultTokensStore.add(USDC_TOKEN);
 		erc20CustomTokensStore.setAll([{ data: { ...USDC_TOKEN, enabled: true }, certified: false }]);
+
+		// A contract that answers nothing, unless a case says otherwise.
+		vi.mocked(loadUnlistedErc20TokenData).mockResolvedValue(undefined);
 	});
 
 	it('should render the token, the decoded recipient and the decoded amount of an ERC20 transfer', () => {
@@ -224,10 +233,10 @@ describe('EthWalletConnectSendReview', () => {
 		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
 	});
 
-	it('should warn and disable approval for an ERC20 transfer of an unknown token', () => {
+	it('should warn and disable approval for an ERC20 transfer of an unlisted token whose contract does not answer', async () => {
 		const data = encodeCall({ selector: ERC20_TRANSFER_HASH, to: RECIPIENT, value: 1_500_000n });
 
-		const { getByTestId, getByRole } = render(EthWalletConnectSendReview, {
+		const { findByTestId, getByRole, getByText } = render(EthWalletConnectSendReview, {
 			props: {
 				...props,
 				call: classifyWalletConnectEthCall(data),
@@ -237,8 +246,199 @@ describe('EthWalletConnectSendReview', () => {
 			context: mockContext
 		});
 
-		expect(getByTestId(warningTestId)).toBeInTheDocument();
+		await expect(findByTestId(warningTestId)).resolves.toBeInTheDocument();
+		expect(getByText(en.send.error.unable_to_retrieve_amount)).toBeInTheDocument();
 		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+	});
+
+	describe('a token OISY does not list', () => {
+		const PAXG_ADDRESS = '0x45804880De22913dAFE09f4980848ECE6EcbAf78';
+
+		const renderUnlisted = ({ selector, value }: { selector: string; value: bigint }) => {
+			const data = encodeCall({ selector, to: RECIPIENT, value });
+
+			return render(EthWalletConnectSendReview, {
+				props: {
+					...props,
+					call: classifyWalletConnectEthCall(data),
+					data,
+					destination: PAXG_ADDRESS
+				},
+				context: mockContext
+			});
+		};
+
+		beforeEach(() => {
+			vi.mocked(loadUnlistedErc20TokenData).mockResolvedValue({
+				decimals: 18,
+				symbol: 'PAXG',
+				balance: 3_000_000_000_000_000_000n
+			});
+		});
+
+		it('should read the token from its own contract on the network of the request', async () => {
+			const { findByTestId } = renderUnlisted({
+				selector: ERC20_APPROVE_HASH,
+				value: 2_000_000_000_000_000_000n
+			});
+
+			await findByTestId(unlistedTestId);
+
+			expect(loadUnlistedErc20TokenData).toHaveBeenCalledExactlyOnceWith({
+				address: PAXG_ADDRESS,
+				networkId: ETHEREUM_NETWORK.id,
+				owner: undefined
+			});
+		});
+
+		it('should state an approval in the contract decimals, name the token and enable approval', async () => {
+			const { findByText, getByText, getByTestId, queryByTestId, getByRole } = renderUnlisted({
+				selector: ERC20_APPROVE_HASH,
+				value: 2_000_000_000_000_000_000n
+			});
+
+			await expect(findByText('2 Unknown token (PAXG)')).resolves.toBeInTheDocument();
+			expect(getByText('3 Unknown token (PAXG)')).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.spender)).toBeInTheDocument();
+
+			expect(getByTestId(unlistedTestId)).toHaveTextContent(
+				en.wallet_connect.text.unlisted_erc20_request
+			);
+			expect(queryByTestId(warningTestId)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		it('should show the token address with its controls in place of the destination', async () => {
+			const { findByText, container, queryByText, getByRole } = renderUnlisted({
+				selector: ERC20_APPROVE_HASH,
+				value: 2_000_000_000_000_000_000n
+			});
+
+			await expect(findByText(PAXG_ADDRESS)).resolves.toBeInTheDocument();
+			expect(container.querySelector('#token-address')).not.toBeNull();
+			expect(container.querySelector('#destination')).toBeNull();
+			expect(queryByText(en.send.text.destination)).not.toBeInTheDocument();
+
+			expect(
+				getByRole('link', { name: en.tokens.alt.open_token_address_block_explorer })
+			).toHaveAttribute('href', `${ETHEREUM_NETWORK.explorerUrl}/token/${PAXG_ADDRESS}`);
+		});
+
+		it('should call an approval of the largest amount unlimited', async () => {
+			const { findByText } = renderUnlisted({ selector: ERC20_APPROVE_HASH, value: MAX_UINT_256 });
+
+			await expect(findByText('Unlimited Unknown token (PAXG)')).resolves.toBeInTheDocument();
+		});
+
+		it('should state a transfer to its recipient, with the token address in a row of its own', async () => {
+			const { findByText, getByText, container, getByRole } = renderUnlisted({
+				selector: ERC20_TRANSFER_HASH,
+				value: 1_500_000_000_000_000_000n
+			});
+
+			await expect(findByText('1.5 Unknown token (PAXG)')).resolves.toBeInTheDocument();
+			expect(getByText(RECIPIENT)).toBeInTheDocument();
+			expect(container.querySelector('#token-address')).toHaveTextContent(PAXG_ADDRESS);
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		// Anybody can deploy a contract that calls itself after a token OISY lists.
+		it('should never let the symbol a contract reports stand on its own', async () => {
+			vi.mocked(loadUnlistedErc20TokenData).mockResolvedValue({ decimals: 6, symbol: USDC_SYMBOL });
+
+			const { findByText, queryByText } = renderUnlisted({
+				selector: ERC20_APPROVE_HASH,
+				value: 2_000_000n
+			});
+
+			await expect(findByText(`2 Unknown token (${USDC_SYMBOL})`)).resolves.toBeInTheDocument();
+			expect(queryByText(`2 ${USDC_SYMBOL}`)).not.toBeInTheDocument();
+		});
+
+		it('should name a token whose contract reports no visible symbol with the bare placeholder', async () => {
+			vi.mocked(loadUnlistedErc20TokenData).mockResolvedValue({ decimals: 18, symbol: '\u200B' });
+
+			const { findByText } = renderUnlisted({
+				selector: ERC20_APPROVE_HASH,
+				value: 2_000_000_000_000_000_000n
+			});
+
+			await expect(
+				findByText(`2 ${en.transaction.text.unknown_token}`)
+			).resolves.toBeInTheDocument();
+		});
+
+		it('should leave the balance out rather than show zero when the contract did not report it', async () => {
+			vi.mocked(loadUnlistedErc20TokenData).mockResolvedValue({ decimals: 18, symbol: 'PAXG' });
+
+			const { findByText, container } = renderUnlisted({
+				selector: ERC20_APPROVE_HASH,
+				value: 2_000_000_000_000_000_000n
+			});
+
+			await findByText('2 Unknown token (PAXG)');
+
+			expect(container.querySelector('#balance')).toBeNull();
+		});
+
+		it('should show a spinner and hold approval while the contract is read', () => {
+			vi.mocked(loadUnlistedErc20TokenData).mockReturnValue(new Promise(() => {}));
+
+			const { getByTestId, queryByTestId, getByRole } = renderUnlisted({
+				selector: ERC20_APPROVE_HASH,
+				value: 2_000_000_000_000_000_000n
+			});
+
+			expect(getByTestId('wallet-connect-unlisted-erc20-loading')).toBeInTheDocument();
+			expect(queryByTestId(warningTestId)).not.toBeInTheDocument();
+			expect(queryByTestId(unlistedTestId)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+			expect(getByRole('button', { name: en.core.text.reject })).not.toBeDisabled();
+		});
+
+		it('should fall back to the review it cannot state when the read throws', async () => {
+			vi.mocked(loadUnlistedErc20TokenData).mockRejectedValue(new Error('unexpected'));
+
+			const { findByTestId, getByRole } = renderUnlisted({
+				selector: ERC20_APPROVE_HASH,
+				value: 2_000_000_000_000_000_000n
+			});
+
+			await expect(findByTestId(warningTestId)).resolves.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should not read anything for a token OISY lists', () => {
+			const data = encodeCall({ selector: ERC20_APPROVE_HASH, to: RECIPIENT, value: 2_000_000n });
+
+			render(EthWalletConnectSendReview, {
+				props: {
+					...props,
+					call: classifyWalletConnectEthCall(data),
+					data,
+					destination: USDC_TOKEN.address
+				},
+				context: mockContext
+			});
+
+			expect(loadUnlistedErc20TokenData).not.toHaveBeenCalled();
+		});
+
+		it('should not read anything for calldata that does not decode', () => {
+			const data = `${ERC20_APPROVE_HASH}deadbeef`;
+
+			render(EthWalletConnectSendReview, {
+				props: {
+					...props,
+					call: classifyWalletConnectEthCall(data),
+					data,
+					destination: PAXG_ADDRESS
+				},
+				context: mockContext
+			});
+
+			expect(loadUnlistedErc20TokenData).not.toHaveBeenCalled();
+		});
 	});
 
 	it('should warn and disable approval for an ERC20 transfer with undecodable calldata', () => {
@@ -416,15 +616,50 @@ describe('EthWalletConnectSendReview', () => {
 			expect(getByTestId(deltaTestId)).toHaveTextContent(en.wallet_connect.text.allowance_decrease);
 		});
 
-		it('should warn and disable approval for an allowance delta on an unknown token', () => {
-			const { getByTestId, getByRole } = renderAllowanceDelta({
+		it('should warn and disable approval for an allowance delta on an unlisted token whose contract does not answer', async () => {
+			const { findByTestId, getByRole } = renderAllowanceDelta({
 				selector: ERC20_INCREASE_ALLOWANCE_HASH,
 				value: MAX_UINT_256,
 				destination: UNKNOWN_CONTRACT
 			});
 
-			expect(getByTestId(warningTestId)).toBeInTheDocument();
+			await expect(findByTestId(warningTestId)).resolves.toBeInTheDocument();
 			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should state an unlimited increase on an unlisted token in the token the contract reports', async () => {
+			vi.mocked(loadUnlistedErc20TokenData).mockResolvedValue({ decimals: 18, symbol: 'PAXG' });
+
+			const { findByText, getByTestId, getByRole, queryByTestId } = renderAllowanceDelta({
+				selector: ERC20_INCREASE_ALLOWANCE_HASH,
+				value: MAX_UINT_256,
+				destination: UNKNOWN_CONTRACT
+			});
+
+			await expect(findByText('Unlimited Unknown token (PAXG)')).resolves.toBeInTheDocument();
+
+			// What the call authorizes is still stated, beside the notice about the token.
+			expect(getByTestId(deltaTestId)).toHaveTextContent(en.wallet_connect.text.allowance_increase);
+			expect(getByTestId(unlistedTestId)).toBeInTheDocument();
+			expect(queryByTestId(warningTestId)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		it('should state a decrease on an unlisted token in the token the contract reports', async () => {
+			vi.mocked(loadUnlistedErc20TokenData).mockResolvedValue({ decimals: 18, symbol: 'PAXG' });
+
+			const { findByText, getByTestId, getByRole, queryByTestId } = renderAllowanceDelta({
+				selector: ERC20_DECREASE_ALLOWANCE_HASH,
+				value: 2_000_000_000_000_000_000n,
+				destination: UNKNOWN_CONTRACT
+			});
+
+			await expect(findByText('2 Unknown token (PAXG)')).resolves.toBeInTheDocument();
+
+			expect(getByTestId(deltaTestId)).toHaveTextContent(en.wallet_connect.text.allowance_decrease);
+			expect(getByTestId(unlistedTestId)).toBeInTheDocument();
+			expect(queryByTestId(warningTestId)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 		});
 
 		it('should warn and disable approval when the spender cannot be decoded', () => {
@@ -1060,6 +1295,22 @@ describe('EthWalletConnectSendReview', () => {
 
 			expect(getByTestId(tokenCallWithValueTestId)).toBeInTheDocument();
 			expect(queryByTestId(warningTestId)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should still refuse a token call with native value once the unlisted token is read', async () => {
+			vi.mocked(loadUnlistedErc20TokenData).mockResolvedValue({ decimals: 18, symbol: 'PAXG' });
+
+			const { getByTestId, queryByTestId, getByRole, findByText } = renderTokenCall({
+				selector: ERC20_APPROVE_HASH,
+				amount: 5_000_000_000_000_000_000n,
+				destination: UNKNOWN_CONTRACT
+			});
+
+			await findByText(UNKNOWN_CONTRACT);
+
+			expect(getByTestId(tokenCallWithValueTestId)).toBeInTheDocument();
+			expect(queryByTestId(unlistedTestId)).not.toBeInTheDocument();
 			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
 		});
 	});

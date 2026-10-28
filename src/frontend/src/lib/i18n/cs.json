@@ -1855,6 +1855,7 @@
 			"allowance_increase": "Tento požadavek zvyšuje limit útraty níže uvedeného příjemce o zobrazenou částku, nad rámec toho, co již může utratit. Příjemce může tuto částku tokenu kdykoli převést z vaší peněženky, dokud toto oprávnění neodvoláte.",
 			"allowance_decrease": "Tento požadavek snižuje limit útraty níže uvedeného příjemce o zobrazenou částku. Sám o sobě nepřevádí žádné prostředky.",
 			"unverifiable_erc20_request": "Tento požadavek se týká tokenu, který OISY nedokáže identifikovat ani dekódovat. Zobrazený obsah se může lišit od toho, co by bylo skutečně podepsáno, proto je schválení zakázáno.",
+			"unlisted_erc20_request": "OISY tento token neuvádí. Jeho symbol a zobrazená částka se čtou přímo z kontraktu tokenu a kdokoli může vytvořit token s libovolným symbolem. Před schválením zkontrolujte adresu tokenu.",
 			"token_call_with_value": "Kromě níže uvedené částky tokenu posílá tento požadavek $amount na smlouvu tokenu. Převod ani schválení tokenu $symbol neposílá, proto ho OISY pro vaši bezpečnost nepodepíše.",
 			"unverifiable_approval_for_all_request": "Tento požadavek by předal operátorovi kontrolu nad NFT kolekcí a OISY nedokáže dekódovat, o kterého operátora se jedná. Zobrazený obsah se může lišit od toho, co by bylo skutečně podepsáno, proto je schválení zakázáno.",
 			"approval_for_all_grant": "Tento požadavek umožňuje níže uvedenému operátorovi převést jakékoli NFT v této kolekci, které nyní vlastníte nebo v budoucnu získáte, kdykoli, dokud toto oprávnění neodvoláte. Sám o sobě nepřevádí žádné prostředky.",
