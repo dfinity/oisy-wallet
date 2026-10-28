@@ -173,14 +173,23 @@ describe('CyclesTopUpModal', () => {
 		vi.useRealTimers();
 	});
 
-	it('opens on the canister step and reports the open', () => {
+	it('opens on the canister step, titled Canister top-up, and reports the open', () => {
 		const { container } = renderModal();
 
-		expect(container).toHaveTextContent(en.cycles_top_up.text.title);
+		expect(container).toHaveTextContent(en.cycles_top_up.text.canister_top_up);
 		expect(trackSpy).toHaveBeenCalledExactlyOnceWith({
 			step: 'open',
 			sourceLocation: 'token_details'
 		});
+	});
+
+	it('keeps its earlier title while the Canister top-up flag is off', () => {
+		vi.spyOn(canisterTopUpEnv, 'CANISTER_TOP_UP_ENABLED', 'get').mockReturnValue(false);
+
+		const { container } = renderModal();
+
+		expect(container).toHaveTextContent(en.cycles_top_up.text.title);
+		expect(container).not.toHaveTextContent(en.cycles_top_up.text.canister_top_up);
 	});
 
 	describe('canister step', () => {
