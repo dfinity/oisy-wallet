@@ -107,9 +107,7 @@ describe('cmc.canister', () => {
 
 			const { notifyTopUp } = await createCmcCanister();
 
-			await expect(notifyTopUp({ blockIndex: 123n, canisterId })).resolves.toBe(
-				2_500_000_000_000n
-			);
+			await expect(notifyTopUp({ blockIndex: 123n, canisterId })).resolves.toBe(2_500_000_000_000n);
 			expect(certifiedService.notify_top_up).toHaveBeenCalledExactlyOnceWith({
 				block_index: 123n,
 				canister_id: canisterId
