@@ -1810,6 +1810,7 @@
 			"network": "网络",
 			"amount": "金额",
 			"hex_data": "HEX 数据",
+			"base64_data": "Base64 数据",
 			"tab_operations": "操作",
 			"unreviewed_instructions": "OISY 无法解码其中部分指令，因此以下审查可能不完整。",
 			"unreviewed_instructions_simulated": "此交易包含来自外部来源的操作，OISY 无法解码，因此 OISY 对其运行了模拟。请确保您信任该应用程序，并在签名前查看模拟的余额变化和操作。请注意，实际结果可能与模拟不同。",

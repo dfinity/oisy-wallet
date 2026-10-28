@@ -1810,6 +1810,7 @@
 			"network": "Netzwerk",
 			"amount": "Betrag",
 			"hex_data": "HEX-Daten",
+			"base64_data": "Base64-Daten",
 			"tab_operations": "Operationen",
 			"unreviewed_instructions": "OISY kann einige dieser Anweisungen nicht entschlüsseln, daher ist die Überprüfung unten möglicherweise unvollständig.",
 			"unreviewed_instructions_simulated": "Diese Transaktion enthält Operationen aus einer externen Quelle, die OISY nicht entschlüsseln kann, daher hat OISY eine Simulation davon durchgeführt. Vergewissern Sie sich, dass Sie der Anwendung vertrauen, und überprüfen Sie vor dem Signieren die simulierten Guthabenänderungen und Operationen. Beachten Sie, dass das tatsächliche Ergebnis von der Simulation abweichen kann.",

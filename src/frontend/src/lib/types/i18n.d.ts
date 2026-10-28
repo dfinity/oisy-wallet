@@ -1491,6 +1491,7 @@ interface I18nWallet_connect {
 		network: string;
 		amount: string;
 		hex_data: string;
+		base64_data: string;
 		tab_operations: string;
 		unreviewed_instructions: string;
 		unreviewed_instructions_simulated: string;

@@ -1810,6 +1810,7 @@
 			"network": "Réseau",
 			"amount": "Montant",
 			"hex_data": "Données HEX",
+			"base64_data": "Données Base64",
 			"tab_operations": "Opérations",
 			"unreviewed_instructions": "OISY ne peut pas décoder certaines de ces instructions, la vérification ci-dessous peut donc être incomplète.",
 			"unreviewed_instructions_simulated": "Cette transaction contient des opérations provenant d'une source externe qu'OISY ne peut pas décoder, c'est pourquoi OISY en a exécuté une simulation. Assurez-vous de faire confiance à l'application et vérifiez les changements de solde simulés ainsi que les opérations avant de signer. Notez que le résultat réel peut différer de la simulation.",
