@@ -927,6 +927,9 @@ interface I18nCycles_top_up {
 		top_up: string;
 		title: string;
 		description: string;
+		pay_with: string;
+		no_token_title: string;
+		no_token_description: string;
 		canister_id_placeholder: string;
 		checking_canister: string;
 		recently_topped_up: string;
