@@ -1212,7 +1212,10 @@
 			"unknown": "OISY kann noch nicht sagen, ob die Aufladung durchgegangen ist. Falls ja, zeigt deine $token-Aktivität sie an. Lade erneut auf, um dieselbe Aufladung noch einmal zu senden: Sie kann nur einmal durchgehen. Eine neue oder geänderte Aufladung würde erneut Cycles hinzufügen, falls diese durchgegangen ist.",
 			"unknown_fresh": "OISY kann noch nicht sagen, ob deine letzte Aufladung durchgegangen ist. Falls ja, fügt diese Aufladung erneut Cycles hinzu. Prüfe zuerst deine $token-Aktivität.",
 			"sent_to_canister": "$token an einen Canister zu senden, lädt ihn nicht auf. Die $token landen auf dem Konto des Canisters, und der Canister erhält nur dann Cycles, wenn sein eigener Code sie abhebt.",
-			"sent_to_canister_top_up": "Um einem Canister Cycles hinzuzufügen, nutze „Aufladen“ auf der $token-Seite."
+			"sent_to_canister_top_up": "Um einem Canister Cycles hinzuzufügen, nutze „Aufladen“ auf der $token-Seite.",
+			"choice_send": "$token senden",
+			"choice_send_description": "Sende $token an ein anderes Konto.",
+			"choice_top_up_description": "Füge einem Canister Cycles aus deinem $token-Guthaben hinzu."
 		},
 		"error": {
 			"invalid_canister_id": "Gib eine Canister-ID ein. User-Principals, Konto-IDs und Adressen in anderen Netzwerken können nicht aufgeladen werden.",

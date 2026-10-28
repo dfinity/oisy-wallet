@@ -15,7 +15,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { ProgressStepsCyclesTopUp } from '$lib/enums/progress-steps';
-	import { WizardStepsCyclesTopUp } from '$lib/enums/wizard-steps';
+	import { WizardStepsCyclesTopUp, type WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackCyclesTopUp } from '$lib/services/cycles-top-up-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
@@ -30,13 +30,16 @@
 	interface Props {
 		// The page's TCYCLES token.
 		token: IcToken;
-		steps: WizardSteps<WizardStepsCyclesTopUp>;
-		currentStep?: WizardStep<WizardStepsCyclesTopUp>;
-		modal?: WizardModal<WizardStepsCyclesTopUp>;
+		// The steps of the modal that hosts the top-up: its own, or Send's, which include them.
+		steps: WizardSteps<WizardStepsCyclesTopUp | WizardStepsSend>;
+		currentStep?: WizardStep<WizardStepsCyclesTopUp | WizardStepsSend>;
+		modal?: WizardModal<WizardStepsCyclesTopUp | WizardStepsSend>;
 		onClose: () => void;
+		// Leads from the first step back to whatever led to the top-up, when something did.
+		onBack?: () => void;
 	}
 
-	let { token, steps, currentStep, modal, onClose }: Props = $props();
+	let { token, steps, currentStep, modal, onClose, onBack }: Props = $props();
 
 	let canisterIdText = $state('');
 	let sendAmount = $state<OptionAmount>();
@@ -296,6 +299,7 @@
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsCyclesTopUp.CANISTER}
 			<CyclesTopUpCanister
+				{onBack}
 				onCancel={close}
 				onNext={() => modal?.next()}
 				{token}
