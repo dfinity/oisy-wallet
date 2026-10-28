@@ -10,6 +10,10 @@ export const LIFI_EXTERNAL_REF_KEYS = {
 	// transaction id is kept for support.
 	TOOL: 'lifi_tool',
 	TRANSACTION_ID: 'lifi_transaction_id',
+	// Set at creation for a Solana source: the slot of OISY's own simulation of the signed bytes,
+	// where their blockhash was valid. The poller reads the blockhash's validity at or past it, since
+	// a node behind it calls a blockhash it has not seen yet invalid.
+	SIMULATION_SLOT: 'lifi_simulation_slot',
 	// Learned as the poller reads `/status`. The substatus records how a `DONE` transfer ended; the
 	// received token is recorded on `DONE` / `PARTIAL`, when the user was paid in a token other than
 	// the one asked for.

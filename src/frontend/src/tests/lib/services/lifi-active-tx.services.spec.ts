@@ -16,6 +16,10 @@ import {
 import { LIFI_EXTERNAL_REF_KEYS, type LifiExternalRefKey } from '$lib/types/lifi';
 import { consoleError } from '$lib/utils/console.utils';
 import { toLifiExternalRefs, toLifiExternalRefsMap } from '$lib/utils/lifi-active-tx.utils';
+import { getSignatureStatus, isBlockhashValid } from '$sol/api/solana.api';
+import { resetSolSourceTxObservations } from '$sol/services/sol-source-tx.services';
+import { SolanaNetworks } from '$sol/types/network';
+import type { SolanaSignatureStatus } from '$sol/types/sol-rpc';
 import {
 	mockLifiActiveUserTransaction,
 	mockLifiData,
@@ -31,6 +35,11 @@ import type { MockInstance } from 'vitest';
 
 vi.mock('$eth/providers/infura.providers', () => ({
 	infuraProviders: vi.fn()
+}));
+
+vi.mock('$sol/api/solana.api', () => ({
+	getSignatureStatus: vi.fn(),
+	isBlockhashValid: vi.fn()
 }));
 
 vi.mock('$lib/rest/lifi.rest', () => ({
@@ -110,6 +119,7 @@ describe('lifi-active-tx.services', () => {
 		localStorage.clear();
 		resetLifiActiveTxState();
 		resetEvmSourceTxObservations();
+		resetSolSourceTxObservations();
 
 		applySpy.mockResolvedValue(true);
 
@@ -135,7 +145,7 @@ describe('lifi-active-tx.services', () => {
 			expect(fetchLifiStatus).not.toHaveBeenCalled();
 		});
 
-		it('skips every row without an EVM address', async () => {
+		it('skips every EVM-source row without an EVM address', async () => {
 			await pollLifiActiveUserTransactions({
 				identity: mockIdentity,
 				transactions: [buildTx()],
@@ -146,16 +156,15 @@ describe('lifi-active-tx.services', () => {
 			expect(fetchLifiStatus).not.toHaveBeenCalled();
 		});
 
-		it('skips a Solana-source row, whose check comes with Solana-source swaps', async () => {
-			await poll([
-				buildTx({
-					data: { ...mockLifiData, source_token: { SolNativeMainnet: null } }
-				})
-			]);
+		it('polls an EVM-source row skipped without an address once the address is there', async () => {
+			await pollLifiActiveUserTransactions({
+				identity: mockIdentity,
+				transactions: [buildTx()],
+				userAddress: undefined
+			});
+			await poll([buildTx()]);
 
-			expect(getTransactionReceipt).not.toHaveBeenCalled();
-			expect(fetchLifiStatus).not.toHaveBeenCalled();
-			expect(applySpy).not.toHaveBeenCalled();
+			expect(getTransactionReceipt).toHaveBeenCalledOnce();
 		});
 
 		it('reports and skips a row outside the v1 matrix', async () => {
@@ -261,6 +270,206 @@ describe('lifi-active-tx.services', () => {
 				expect(fetchLifiStatus).not.toHaveBeenCalled();
 				expect(lastUpdate()?.status).toEqual({ Failed: null });
 			});
+		});
+	});
+
+	describe('a Solana source', () => {
+		const blockhash = 'HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN';
+		const simulationSlot = 150n;
+
+		// SOL → USDC on Solana.
+		const solanaData: LifiData = {
+			source_token: { SolNativeMainnet: null },
+			dest_token: { SplMainnet: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
+			amount: 10n
+		};
+
+		const solanaRefs: Partial<Record<LifiExternalRefKey, string>> = {
+			[LIFI_EXTERNAL_REF_KEYS.TX_HASH]: solanaSignature,
+			[LIFI_EXTERNAL_REF_KEYS.BLOCKHASH]: blockhash,
+			[LIFI_EXTERNAL_REF_KEYS.SIMULATION_SLOT]: `${simulationSlot}`,
+			[LIFI_EXTERNAL_REF_KEYS.TOOL]: 'jupiter'
+		};
+
+		const solanaTx = (refs = solanaRefs) => buildTx({ data: solanaData, refs });
+
+		const status = (
+			overrides: Partial<NonNullable<SolanaSignatureStatus>> = {}
+		): { slot: bigint; status: SolanaSignatureStatus } => ({
+			slot: 210n,
+			status: {
+				confirmationStatus: 'confirmed',
+				confirmations: 3n,
+				err: null,
+				slot: 100n,
+				status: { Ok: null },
+				...overrides
+			}
+		});
+
+		// Read at or past the slot the blockhash read below answers at.
+		const noStatus = { slot: 210n, status: null };
+
+		beforeEach(() => {
+			vi.mocked(getSignatureStatus).mockResolvedValue(status());
+			vi.mocked(isBlockhashValid).mockResolvedValue({ slot: 200n, valid: true });
+		});
+
+		it('reads the status of its signature on Solana mainnet, not an EVM receipt', async () => {
+			await poll([solanaTx()]);
+
+			expect(getSignatureStatus).toHaveBeenCalledExactlyOnceWith({
+				signature: solanaSignature,
+				network: SolanaNetworks.mainnet
+			});
+			expect(infuraProviders).not.toHaveBeenCalled();
+		});
+
+		it('is polled without an EVM address', async () => {
+			await pollLifiActiveUserTransactions({
+				identity: mockIdentity,
+				transactions: [solanaTx()],
+				userAddress: undefined
+			});
+
+			expect(getSignatureStatus).toHaveBeenCalledOnce();
+			expect(lastUpdate()).toEqual({ status: { Succeeded: null } });
+		});
+
+		it('succeeds a Solana swap from its confirmed status, without asking LI.FI', async () => {
+			await poll([solanaTx()]);
+
+			expect(fetchLifiStatus).not.toHaveBeenCalled();
+			expect(lastUpdate()).toEqual({ status: { Succeeded: null } });
+		});
+
+		it('does not read the status again once the source is confirmed', async () => {
+			applySpy.mockResolvedValueOnce(false);
+
+			await poll([solanaTx()]);
+			await vi.advanceTimersByTimeAsync(10_000);
+			await poll([solanaTx()]);
+
+			expect(getSignatureStatus).toHaveBeenCalledOnce();
+			expect(lastUpdate()).toEqual({ status: { Succeeded: null } });
+		});
+
+		it('marks a row executing while its transaction is only processed', async () => {
+			vi.mocked(getSignatureStatus).mockResolvedValue(status({ confirmationStatus: 'processed' }));
+
+			await poll([solanaTx()]);
+
+			expect(isBlockhashValid).not.toHaveBeenCalled();
+			expect(lastUpdate()).toEqual({ status: { Executing: null } });
+		});
+
+		it('marks a row executing while its transaction has no status and its blockhash is valid at or past its simulation slot', async () => {
+			vi.mocked(getSignatureStatus).mockResolvedValue(noStatus);
+
+			await poll([solanaTx()]);
+
+			expect(isBlockhashValid).toHaveBeenCalledExactlyOnceWith({
+				blockhash,
+				network: SolanaNetworks.mainnet,
+				minContextSlot: simulationSlot
+			});
+			expect(lastUpdate()).toEqual({ status: { Executing: null } });
+		});
+
+		it.each([
+			{ name: 'without a simulation slot', slot: undefined },
+			{ name: 'with a simulation slot that is not one', slot: '-1' },
+			{ name: 'with a simulation slot wider than a u64', slot: '18446744073709551616' }
+		])('reads the blockhash unanchored $name', async ({ slot }) => {
+			vi.mocked(getSignatureStatus).mockResolvedValue(noStatus);
+
+			await poll([solanaTx({ ...solanaRefs, [LIFI_EXTERNAL_REF_KEYS.SIMULATION_SLOT]: slot })]);
+
+			expect(isBlockhashValid).toHaveBeenCalledExactlyOnceWith({
+				blockhash,
+				network: SolanaNetworks.mainnet,
+				minContextSlot: undefined
+			});
+		});
+
+		it('fails a row whose transaction was confirmed with an error', async () => {
+			vi.mocked(getSignatureStatus).mockResolvedValue(
+				status({ err: { InstructionError: [3, { Custom: 6001 }] } })
+			);
+
+			await poll([solanaTx()]);
+
+			expect(lastUpdate()).toEqual({
+				status: { Failed: null },
+				error: en.swap.error.failed_unexpectedly
+			});
+		});
+
+		it('fails a row whose blockhash expired without it landing, only on the second consecutive poll', async () => {
+			vi.mocked(getSignatureStatus).mockResolvedValue(noStatus);
+			vi.mocked(isBlockhashValid).mockResolvedValue({ slot: 200n, valid: false });
+
+			await poll([solanaTx()]);
+
+			expect(lastUpdate()).toEqual({ status: { Executing: null } });
+
+			await vi.advanceTimersByTimeAsync(10_000);
+			await poll([solanaTx()]);
+
+			expect(lastUpdate()).toEqual({
+				status: { Failed: null },
+				error: en.swap.error.swap_expired
+			});
+		});
+
+		it('succeeds a row whose transaction landed just before its blockhash aged out', async () => {
+			vi.mocked(getSignatureStatus).mockResolvedValueOnce(noStatus);
+			vi.mocked(isBlockhashValid).mockResolvedValue({ slot: 200n, valid: false });
+
+			await poll([solanaTx()]);
+
+			expect(lastUpdate()).toEqual({ status: { Succeeded: null } });
+		});
+
+		it('leaves a row untouched while the node is behind its simulation slot, and settles it once caught up', async () => {
+			vi.mocked(getSignatureStatus).mockResolvedValue(noStatus);
+			vi.mocked(isBlockhashValid).mockRejectedValue(
+				new Error('Minimum context slot has not been reached')
+			);
+
+			await poll([solanaTx()]);
+			await vi.advanceTimersByTimeAsync(10_000);
+			await poll([solanaTx()]);
+
+			expect(applySpy).not.toHaveBeenCalled();
+
+			vi.mocked(getSignatureStatus).mockResolvedValue(status());
+
+			await vi.advanceTimersByTimeAsync(10_000);
+			await poll([solanaTx()]);
+
+			expect(lastUpdate()).toEqual({ status: { Succeeded: null } });
+		});
+
+		it('reports and skips a row without its blockhash', async () => {
+			await poll([solanaTx({ [LIFI_EXTERNAL_REF_KEYS.TX_HASH]: solanaSignature })]);
+
+			expect(consoleError).toHaveBeenCalledOnce();
+			expect(getSignatureStatus).not.toHaveBeenCalled();
+			expect(applySpy).not.toHaveBeenCalled();
+		});
+
+		it('leaves a row untouched when the node fails, and polls it again later', async () => {
+			vi.mocked(getSignatureStatus).mockRejectedValueOnce(new Error('rpc down'));
+
+			await poll([solanaTx()]);
+
+			expect(applySpy).not.toHaveBeenCalled();
+
+			await vi.advanceTimersByTimeAsync(10_000);
+			await poll([solanaTx()]);
+
+			expect(lastUpdate()).toEqual({ status: { Succeeded: null } });
 		});
 	});
 

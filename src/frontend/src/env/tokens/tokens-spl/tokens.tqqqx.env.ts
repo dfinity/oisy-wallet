@@ -24,6 +24,5 @@ export const TQQQX_TOKEN: RequiredSpl2022Token = {
 	icon: tqqqx,
 	address: 'XsjQP3iMAaQ3kQScQKthQpx9ALRbjKAjQtHg6TFomoc',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
-	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
-	freezeAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
+	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
 };
