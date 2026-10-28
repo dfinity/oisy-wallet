@@ -325,10 +325,10 @@ The two gas figures show how far estimates fall short, per token and network. Th
 
 [Topping up a canister](#top-up-a-canister) emits one structured event, **`cycles_top_up`**, under `event_context: compute` and `source_location: token_details`, with the TCYCLES symbol as `token_symbol`. It carries no amount, no amount range and no canister ID: any of them, with the event's time, would pick out the one burn on the public cycles ledger, and with it the user's account. Almost every burn there is below $1, so even a range would single out a larger top-up.
 
-| `event_modifier` | Fires when                   | `result_status`                 | Properties                                     |
-| ---------------- | ---------------------------- | ------------------------------- | ---------------------------------------------- |
-| `open`           | the Top up modal opens       | none                            | none                                           |
-| `top_up`         | a top-up starts and finishes | `executing` → `success`/`error` | `token_symbol`; `result_error_code` on failure |
+| `event_modifier` | Fires when                                          | `result_status`                 | Properties                                     |
+| ---------------- | --------------------------------------------------- | ------------------------------- | ---------------------------------------------- |
+| `open`           | the Top up modal opens, or Top up is picked in Send | none                            | none                                           |
+| `top_up`         | a top-up starts and finishes                        | `executing` → `success`/`error` | `token_symbol`; `result_error_code` on failure |
 
 `result_error_code` says why a top-up ended in `error`: `refused` (the ledger refused before burning anything, so nothing moved), `refunded` (the canister could not receive the cycles, which came back minus the ledger's fees) or `unknown` (no answer, so the top-up may or may not have gone through). A failed top-up also carries `event_severity` for the monitoring dashboards: `warn` for `refused` and `unknown`, `error` for `refunded`, which cost twice the fee.
 
@@ -854,6 +854,10 @@ What this deliberately does not do: TCYCLES → ICP (the CMC cannot), minting in
 The TCYCLES token page has a fifth hero button, **Top up**, after Mint, with a fuel pump icon. It puts cycles from the user's TCYCLES balance into any canister on the Internet Computer through the cycles ledger's `withdraw`, which burns the TCYCLES and deposits the same number of cycles into the canister in one call. Only the mainnet cycles ledger's token has it, and it is disabled whenever Send is, since it spends TCYCLES, except while the signed-in principal has a top-up without an answer, which it then opens to resend.
 
 It is on in every environment; `CYCLES_TOP_UP_ENABLED` (`src/frontend/src/env/cycles-top-up.env.ts`) is kept as a kill switch that hides it.
+
+**From Send.** Sending TCYCLES, picked from the token list or from the TCYCLES page, first asks whether to send them or to top up a canister. Send goes on with the send steps and Top up with the steps below, in the same modal. Back from the destination step or from the canister step returns to that choice, and Back from the choice returns to the token list; on the TCYCLES page, where Send has no token list, the choice offers Cancel instead. Picking Top up resumes a top-up without an answer on its Review, as the Top up button does. A send that started from a scanned address skips the choice: the address is where the user wants to send.
+
+The choice is on for local and staging builds only, behind `CYCLES_SEND_OR_TOP_UP_ENABLED` in the same file, until it has been tried on staging.
 
 **Canister.** The first step takes a canister ID and nothing else: a user principal, the anonymous principal, an account with a subaccount, an ICP account identifier, an address on another network or text that is not a principal gets a request for a canister ID, and the principal's checksum catches typos. Before going on, OISY reads the canister's public state, which needs no controller rights. Every canister lists its controllers there, with or without code, so a canister without code is accepted. An ID with no canister behind it is refused: the subnet that hosts the ID's range proves there is none, or the boundary node answers that no subnet hosts the ID. A check that could not be made can be retried, and the step does not go on without it. **Recently topped up** lists the canisters the loaded TCYCLES history shows top-ups to, newest first, each with its last top-up, and picking one fills in the ID and goes on, after the same check as Next. It is read from history alone, so nothing is stored.
 
