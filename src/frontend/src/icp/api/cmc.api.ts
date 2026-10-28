@@ -23,6 +23,16 @@ export const notifyMintCycles = async ({
 	return await notifyMintCycles({ blockIndex });
 };
 
+export const notifyTopUp = async ({
+	blockIndex,
+	canisterId,
+	...rest
+}: CanisterApiFunctionParams<{ blockIndex: bigint; canisterId: Principal }>): Promise<bigint> => {
+	const { notifyTopUp } = await cmcCanister(rest);
+
+	return await notifyTopUp({ blockIndex, canisterId });
+};
+
 // Created per call rather than cached: the CMC checks a deposit against the
 // caller's own principal, so a client kept across a sign-out would notify as
 // the previous identity.
