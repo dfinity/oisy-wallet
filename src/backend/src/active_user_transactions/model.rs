@@ -438,6 +438,9 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
             require_valid_amount(&d.amount, "amount")?;
             require_lifi_pair(d)?;
         }
+        ActiveUserTransactionData::CyclesTopUp(d) => {
+            require_valid_amount(&d.amount, "amount")?;
+        }
     }
     Ok(())
 }
