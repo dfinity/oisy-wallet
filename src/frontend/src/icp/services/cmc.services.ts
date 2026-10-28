@@ -1,5 +1,6 @@
-import { ICP_INDEX_CANISTER_ID } from '$env/networks/networks.icp.env';
+import { ICP_INDEX_CANISTER_ID, ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
 import { getAccountIdentifierTransactions } from '$icp/api/icp-index.api';
+import { icrc1Transfer } from '$icp/api/icp-ledger.api';
 import {
 	CMC_DEPOSIT_LOOKUP_PAGE_SIZE,
 	ICP_LEDGER_PERMITTED_DRIFT_NS
@@ -7,7 +8,49 @@ import {
 import { isCmcDeposit } from '$icp/utils/cmc.utils';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import { TxDuplicateError } from '@icp-sdk/canisters/ledger/icp';
+import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import type { Identity } from '@icp-sdk/core/agent';
+
+/**
+ * Sends ICP to one of the CMC's deposit accounts, with the memo that tells the CMC what it
+ * is for.
+ *
+ * `createdAt` stays the same for the whole flow, so sending again after a call that got no
+ * answer cannot pay twice: the ledger recognises the transfer and answers with the block
+ * the first one landed in.
+ */
+export const transferIcpToCmc = async ({
+	identity,
+	to,
+	memo,
+	amount,
+	createdAt
+}: {
+	identity: Identity;
+	to: IcrcAccount;
+	memo: Uint8Array;
+	// ICP e8s, without the ledger fee.
+	amount: bigint;
+	createdAt: bigint;
+}): Promise<bigint> => {
+	try {
+		return await icrc1Transfer({
+			identity,
+			to,
+			amount,
+			createdAt,
+			memo,
+			ledgerCanisterId: ICP_LEDGER_CANISTER_ID
+		});
+	} catch (err: unknown) {
+		if (err instanceof TxDuplicateError) {
+			return err.duplicateOf;
+		}
+
+		throw err;
+	}
+};
 
 /**
  * Finds a deposit to the CMC for a row whose tab died before the transfer returned, in the
