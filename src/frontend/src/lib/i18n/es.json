@@ -1810,7 +1810,7 @@
 			"network": "Red",
 			"amount": "Cantidad",
 			"hex_data": "Datos HEX",
-			"base64_data": "",
+			"base64_data": "Datos Base64",
 			"tab_operations": "Operaciones",
 			"unreviewed_instructions": "OISY no puede decodificar algunas de estas instrucciones, por lo que la revisión a continuación puede estar incompleta.",
 			"unreviewed_instructions_simulated": "Esta transacción contiene operaciones de una fuente externa que OISY no puede decodificar, por lo que OISY ejecutó una simulación de ella. Asegúrese de confiar en la aplicación y revise los cambios de saldo simulados y las operaciones antes de firmar. Tenga en cuenta que el resultado real puede diferir de la simulación.",

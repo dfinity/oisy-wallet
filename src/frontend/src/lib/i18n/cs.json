@@ -1810,7 +1810,7 @@
 			"network": "Síť",
 			"amount": "Částka",
 			"hex_data": "HEX data",
-			"base64_data": "",
+			"base64_data": "Base64 data",
 			"tab_operations": "Operace",
 			"unreviewed_instructions": "OISY nedokáže dekódovat některé z těchto instrukcí, takže kontrola níže nemusí být úplná.",
 			"unreviewed_instructions_simulated": "Tato transakce obsahuje operace z externího zdroje, které OISY nedokáže dekódovat, proto OISY spustil jejich simulaci. Ujistěte se, že aplikaci důvěřujete, a před podpisem zkontrolujte simulované změny zůstatku a operace. Mějte na paměti, že skutečný výsledek se může od simulace lišit.",

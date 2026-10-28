@@ -1810,7 +1810,7 @@
 			"network": "Mạng",
 			"amount": "Số lượng",
 			"hex_data": "Dữ liệu HEX",
-			"base64_data": "",
+			"base64_data": "Dữ liệu Base64",
 			"tab_operations": "Thao tác",
 			"unreviewed_instructions": "OISY không thể giải mã một số chỉ dẫn này, vì vậy phần xem xét bên dưới có thể chưa đầy đủ.",
 			"unreviewed_instructions_simulated": "Giao dịch này chứa các thao tác từ một nguồn bên ngoài mà OISY không thể giải mã, vì vậy OISY đã chạy mô phỏng cho nó. Hãy đảm bảo bạn tin tưởng ứng dụng này và xem lại các thay đổi số dư được mô phỏng cùng các thao tác trước khi ký. Lưu ý rằng kết quả thực tế có thể khác với mô phỏng.",
