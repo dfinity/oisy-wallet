@@ -2040,6 +2040,10 @@ export type TipError =
 			 * no longer covers it — they spent, reduced or revoked it. The one
 			 * deliberately distinguishable failure, reachable only with a valid link,
 			 * because telling the claimer "come back later" is useless.
+			 *
+			 * At creation: the allowance does not cover the amount plus its fee, or
+			 * the amount is wider than [`MAX_TIP_AMOUNT_BITS`], which no allowance
+			 * can cover.
 			 */
 			Uncovered: null;
 	  }
@@ -2776,8 +2780,9 @@ export interface _SERVICE {
 	 *
 	 * # Errors
 	 * Errors are enumerated by `TipError` (e.g. `Uncovered` when the allowance does
-	 * not cover the amount plus its fee, `TooManyTips`, `AmountTooSmall`,
-	 * `InvalidExpiry`, `DuplicateTipId`, `RateLimited`).
+	 * not cover the amount plus its fee, or the amount is wider than any allowance
+	 * can be, `TooManyTips`, `AmountTooSmall`, `InvalidExpiry`, `DuplicateTipId`,
+	 * `RateLimited`).
 	 */
 	create_tip: ActorMethod<[CreateTipRequest], CancelTipResult>;
 	/**
