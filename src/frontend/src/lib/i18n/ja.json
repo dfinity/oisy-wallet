@@ -2318,7 +2318,8 @@
 			"no_date_available": "日付情報なし",
 			"pending": "保留中",
 			"top_up": "チャージ",
-			"top_up_refund": "チャージの返金"
+			"top_up_refund": "チャージの返金",
+			"canister_top_up": ""
 		},
 		"alt": {
 			"open_block_explorer": "ブロックエクスプローラーでこのトランザクションを開く",

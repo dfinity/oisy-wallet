@@ -2318,7 +2318,8 @@
 			"no_date_available": "कोई तिथि उपलब्ध नहीं",
 			"pending": "लंबित",
 			"top_up": "टॉप-अप",
-			"top_up_refund": "टॉप-अप रिफ़ंड"
+			"top_up_refund": "टॉप-अप रिफ़ंड",
+			"canister_top_up": ""
 		},
 		"alt": {
 			"open_block_explorer": "इस लेनदेन को ब्लॉक एक्सप्लोरर पर खोलें",
