@@ -47,7 +47,12 @@
 			{/snippet}
 
 			{#snippet button()}
-				<Button onclick={onSend} paddingSmall testId={CYCLES_SEND_OR_TOP_UP_SEND_BUTTON}>
+				<Button
+					onclick={onSend}
+					paddingSmall
+					styleClass="text-nowrap"
+					testId={CYCLES_SEND_OR_TOP_UP_SEND_BUTTON}
+				>
 					{$i18n.send.text.send}
 				</Button>
 			{/snippet}
@@ -69,7 +74,12 @@
 			{/snippet}
 
 			{#snippet button()}
-				<Button onclick={onTopUp} paddingSmall testId={CYCLES_SEND_OR_TOP_UP_TOP_UP_BUTTON}>
+				<Button
+					onclick={onTopUp}
+					paddingSmall
+					styleClass="text-nowrap"
+					testId={CYCLES_SEND_OR_TOP_UP_TOP_UP_BUTTON}
+				>
 					{$i18n.cycles_top_up.text.top_up}
 				</Button>
 			{/snippet}
