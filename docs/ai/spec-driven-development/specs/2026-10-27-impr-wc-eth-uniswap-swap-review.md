@@ -143,9 +143,10 @@ Only from checks the router enforces:
   receive at least**; **Recipient**, only when it is not the wallet; one **App fee** row per fee
   (share or amount, token, recipient address); **New spending allowance**, when the transaction
   grants the router a Permit2 allowance ("The router can spend up to 12 USDC until …", or "any
-  amount of USDC" when unlimited); **Valid until** the deadline, or "No deadline"; **Interacting
-  with**: "Uniswap Universal Router" with its version and address, with copy and explorer links;
-  then the network fee as today.
+  amount of USDC" when unlimited); **Valid until** the deadline, or "No deadline" when there is
+  none or it is past the last date JavaScript can hold; **Interacting with**: "Uniswap Universal
+  Router" with its version and address, with copy and explorer links; then the network fee as
+  today.
 - **Red boxes,** each keeping Approve enabled:
   - Recipient not the wallet: "The tokens from this swap go to an address that isn't this wallet.
     Check the recipient below before signing."

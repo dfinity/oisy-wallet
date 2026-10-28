@@ -149,13 +149,25 @@ describe('uniswap.utils', () => {
 			expect(swap?.deadline).toBeUndefined();
 		});
 
-		it('should state no deadline for one too far out to be a date', () => {
+		it.each([MAX_UINT_256, 8_640_000_000_001n])(
+			'should state no deadline for one too far out to be a date (%s)',
+			(deadline) => {
+				const data = execute({
+					commands: [v3Swap({ amount: 1_000_000n, amountLimit: 1n })],
+					deadline
+				});
+
+				expect(getUniswapSwap(params({ data }))?.deadline).toBeUndefined();
+			}
+		);
+
+		it('should state a deadline on the last date JavaScript can hold', () => {
 			const data = execute({
 				commands: [v3Swap({ amount: 1_000_000n, amountLimit: 1n })],
-				deadline: MAX_UINT_256
+				deadline: 8_640_000_000_000n
 			});
 
-			expect(getUniswapSwap(params({ data }))?.deadline).toBeUndefined();
+			expect(getUniswapSwap(params({ data }))?.deadline).toBe(8_640_000_000_000);
 		});
 
 		it('should describe the native coin paid in through a wrap, with any of it returned', () => {

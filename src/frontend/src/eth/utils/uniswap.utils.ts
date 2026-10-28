@@ -739,7 +739,9 @@ const toSwap = ({
 				}
 			}),
 		...(nonNullish(deadline) &&
-			deadline <= BigInt(Number.MAX_SAFE_INTEGER) && { deadline: Number(deadline) })
+			Number.isFinite(new Date(Number(deadline) * 1000).getTime()) && {
+				deadline: Number(deadline)
+			})
 	};
 };
 
