@@ -811,6 +811,7 @@
 			"explorers_description": "",
 			"explorers_velora_description": "",
 			"explorers_near_intents_description": "",
+			"explorers_lifi_description": "EVM 네트워크에서 시작하는 스왑과 브릿지 전송(솔라나로의 전송 포함).",
 			"explorers_onesec_description": "",
 			"explorers_chain_eth": "",
 			"explorers_chain_sol": "",

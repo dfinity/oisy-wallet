@@ -811,6 +811,7 @@
 			"explorers_description": "",
 			"explorers_velora_description": "",
 			"explorers_near_intents_description": "",
+			"explorers_lifi_description": "Swaps y transferencias por puente desde redes EVM, también hacia Solana.",
 			"explorers_onesec_description": "",
 			"explorers_chain_eth": "",
 			"explorers_chain_sol": "",
