@@ -330,6 +330,18 @@ describe('EthWalletConnectSendReview', () => {
 			await expect(findByText('Unlimited Unknown token (PAXG)')).resolves.toBeInTheDocument();
 		});
 
+		// An approval of zero is a revocation, so a nonzero one must not round to it.
+		it('should state an approval below eight decimals as less than the smallest step, not as zero', async () => {
+			const { findByText, queryByText, getByRole } = renderUnlisted({
+				selector: ERC20_APPROVE_HASH,
+				value: 1_000_000_000n
+			});
+
+			await expect(findByText('< 0.00000001 Unknown token (PAXG)')).resolves.toBeInTheDocument();
+			expect(queryByText('0 Unknown token (PAXG)')).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
 		it('should state a transfer to its recipient, with the token address in a row of its own', async () => {
 			const { findByText, getByText, container, getByRole } = renderUnlisted({
 				selector: ERC20_TRANSFER_HASH,
