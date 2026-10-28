@@ -5,8 +5,8 @@ use shared::types::{
     active_user_transaction::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
-        ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, LifiData,
-        NearIntentsData, OisyTradeData, UpdateActiveUserTransactionRequest, XrpData,
+        ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, CyclesTopUpData,
+        LifiData, NearIntentsData, OisyTradeData, UpdateActiveUserTransactionRequest, XrpData,
         LIFI_REF_BLOCKHASH, LIFI_REF_NONCE, LIFI_REF_TX_HASH,
         MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS,
         MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN, MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
@@ -440,6 +440,7 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
         }
         ActiveUserTransactionData::CyclesTopUp(d) => {
             require_valid_amount(&d.amount, "amount")?;
+            require_cycles_top_up(d)?;
         }
     }
     Ok(())
@@ -539,6 +540,30 @@ fn require_cycles_mint_pair(data: &CyclesMintData) -> Result<(), ActiveUserTrans
                 .to_string(),
         ))
     }
+}
+
+/// The class byte that ends an opaque principal, the kind the Internet Computer
+/// assigns to canisters. A user's principal is self-authenticating (`0x02`), and
+/// the anonymous principal is `0x04`.
+const OPAQUE_PRINCIPAL_CLASS: u8 = 0x01;
+
+/// A top-up spends ICP, in either of its spellings, and pays the cycles into a
+/// canister. `data` is immutable after creation, so a row naming another token,
+/// or a principal that is not a canister's, describes a top-up that cannot exist.
+/// The canister is checked by kind only: whether it exists is for the CMC to
+/// find out, and it refunds a deposit it cannot make.
+fn require_cycles_top_up(data: &CyclesTopUpData) -> Result<(), ActiveUserTransactionError> {
+    if !is_icp_token(&data.source_token) {
+        return Err(ActiveUserTransactionError::InvalidData(
+            "cycles-top-up source must be ICP".to_string(),
+        ));
+    }
+    if data.canister_id.as_slice().last() != Some(&OPAQUE_PRINCIPAL_CLASS) {
+        return Err(ActiveUserTransactionError::InvalidData(
+            "canister_id must be a canister id".to_string(),
+        ));
+    }
+    Ok(())
 }
 
 /// An OISY Trade pair is two ledger principals on the Internet Computer, so a
@@ -956,10 +981,11 @@ mod tests {
         active_user_transaction::{
             ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
             ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
-            ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, LifiData,
-            LiquidiumAction, LiquidiumData, NearIntentsData, OisyTradeData, OisyTradeSide,
-            OneSecEvmToIcpData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData,
-            VeloraSwapMode, XrpData, LIFI_REF_BLOCKHASH, LIFI_REF_NONCE, LIFI_REF_TX_HASH,
+            ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData,
+            CyclesTopUpData, LifiData, LiquidiumAction, LiquidiumData, NearIntentsData,
+            OisyTradeData, OisyTradeSide, OneSecEvmToIcpData, OneSecIcpToEvmData,
+            UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode, XrpData,
+            LIFI_REF_BLOCKHASH, LIFI_REF_NONCE, LIFI_REF_TX_HASH,
             MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_LIQUIDIUM_POOL_ID_LEN,
             XRP_REF_LAST_LEDGER_SEQUENCE, XRP_REF_LEDGER_RESULT, XRP_REF_TX_HASH, XRP_TX_HASH_LEN,
         },
@@ -1507,6 +1533,117 @@ mod tests {
             "cycles-mint tokens must be ICP as the source and the cycles ledger as the destination"
                 .to_string(),
         )
+    }
+
+    const TOP_UP_CANISTER: &str = "ywcsb-maaaa-aaaai-q6k7a-cai";
+
+    fn top_up_canister() -> Principal {
+        Principal::from_text(TOP_UP_CANISTER).unwrap()
+    }
+
+    fn cycles_top_up_data(
+        amount: u64,
+        source_token: TokenId,
+        canister_id: Principal,
+    ) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::CyclesTopUp(CyclesTopUpData {
+            source_token,
+            canister_id,
+            amount: Nat::from(amount),
+            transfer_created_at_ns: 1_790_000_000_000_000_000,
+        })
+    }
+
+    #[test]
+    fn cycles_top_up_create_roundtrip() {
+        // As for a mint, the source is ICP in either spelling, and both must
+        // survive create and the stable-memory read path.
+        for source_token in [icrc(ICP_LEDGER), TokenId::IcpNative] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("top-up-1");
+            req.data = cycles_top_up_data(100_000_000, source_token.clone(), top_up_canister());
+            let tx = create(&mut map, principal(), req, 1).expect("create");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+
+            let listed = list(&map, principal());
+            assert_eq!(listed.len(), 1);
+            assert_eq!(
+                listed[0].data,
+                cycles_top_up_data(100_000_000, source_token, top_up_canister())
+            );
+        }
+    }
+
+    #[test]
+    fn cycles_top_up_zero_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("top-up-1");
+        req.data = cycles_top_up_data(0, icrc(ICP_LEDGER), top_up_canister());
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+    }
+
+    /// The width bound the other variants share, checked on this arm too.
+    #[test]
+    fn cycles_top_up_oversized_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("top-up-1");
+        req.data = ActiveUserTransactionData::CyclesTopUp(CyclesTopUpData {
+            source_token: icrc(ICP_LEDGER),
+            canister_id: top_up_canister(),
+            amount: Nat::parse(OVER_WIDTH_AMOUNT).unwrap(),
+            transfer_created_at_ns: 1_790_000_000_000_000_000,
+        });
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        assert_eq!(list(&map, principal()).len(), 0);
+    }
+
+    #[test]
+    fn cycles_top_up_source_other_than_icp_rejected() {
+        // The CMC converts only ICP, so any other source, the cycles ledger's own
+        // token included, describes a top-up that cannot exist.
+        for source_token in [
+            TokenId::EvmNative(1),
+            TokenId::Erc20(ErcTokenId(USDC_ETHEREUM.to_string()), 1),
+            TokenId::BtcNativeMainnet,
+            TokenId::SolNativeMainnet,
+            icrc(CKBTC_LEDGER),
+            icrc(CYCLES_LEDGER),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("top-up-1");
+            req.data = cycles_top_up_data(100_000_000, source_token, top_up_canister());
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "cycles-top-up source must be ICP".to_string()
+                )
+            );
+        }
+    }
+
+    #[test]
+    fn cycles_top_up_non_canister_rejected() {
+        // Only a canister can take cycles: a user's principal, the anonymous
+        // principal and the management canister's empty id are refused.
+        for canister_id in [
+            principal(),
+            Principal::anonymous(),
+            Principal::management_canister(),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("top-up-1");
+            req.data = cycles_top_up_data(100_000_000, icrc(ICP_LEDGER), canister_id);
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "canister_id must be a canister id".to_string()
+                )
+            );
+        }
     }
 
     fn oisy_trade_data(
