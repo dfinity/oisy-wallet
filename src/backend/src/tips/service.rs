@@ -11,8 +11,8 @@ use std::cmp::Reverse;
 use candid::Principal;
 use ic_cdk::api::{canister_self, msg_caller, time};
 use shared::types::tip::{
-    CreateTipRequest, MyTip, PublicTip, TipClaim, TipClaimFailure, TipClaimFailureReason,
-    TipClaimRequest, TipDetails, TipError, MAX_TIPS_RETURNED, TIP_RETENTION_AFTER_TERMINAL_NS,
+    CreateTipRequest, MyTip, PublicTip, TipClaim, TipClaimFailureReason, TipClaimRequest,
+    TipDetails, TipError, MAX_TIPS_RETURNED, TIP_RETENTION_AFTER_TERMINAL_NS,
 };
 
 use super::{
@@ -472,42 +472,22 @@ fn claim_is_ours(record: &TipRecord, claimer: Principal, started_at_ns: u64) -> 
 /// "somebody tried and it did not pay out", which is the only one of the two the
 /// sender can act on.
 ///
-/// `renew_payout_identity` retires the tip's pinned `created_at_time`. Only a
-/// `TooOld` answer sets it: the ledger has told us it no longer recognises that
-/// stamp, so every retry carrying it would be refused the same way and the tip
-/// would be unclaimable for the rest of its life. Dropping it costs the one
-/// thing the stamp bought — from here on the ledger cannot say whether the
-/// earlier attempt landed — which is why no other failure does this.
+/// `retire_payout_stamp` is passed through to
+/// [`TipRecord::released_after_failure`], which says when it is right to set it.
 fn release_claim(
     key: &TipId,
     claimer: Principal,
     started_at_ns: u64,
     reason: TipClaimFailureReason,
-    renew_payout_identity: bool,
+    retire_payout_stamp: bool,
 ) {
     mutate_state(|s| {
         let Some(Candid(current)) = s.tips.get(key) else {
             return;
         };
         if claim_is_ours(&current, claimer, started_at_ns) {
-            let payout_created_at_ns = if renew_payout_identity {
-                None
-            } else {
-                current.payout_created_at_ns
-            };
-            store_tip(
-                s,
-                key,
-                TipRecord {
-                    state: TipState::Reserved,
-                    last_claim_failure: Some(TipClaimFailure {
-                        at_ns: time(),
-                        reason,
-                    }),
-                    payout_created_at_ns,
-                    ..current
-                },
-            );
+            let released = current.released_after_failure(reason, time(), retire_payout_stamp);
+            store_tip(s, key, released);
         }
     });
 }
