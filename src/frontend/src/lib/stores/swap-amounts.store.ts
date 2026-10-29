@@ -7,6 +7,9 @@ import { writable, type Readable } from 'svelte/store';
 export interface SwapAmountsStoreData {
 	swaps: SwapMappedResult[];
 	amountForSwap: OptionAmount;
+	// The slippage the offers were requested with. A provider can sign a minimum derived from it
+	// (NEAR Intents does), so an offer holds for this slippage only.
+	slippageForSwap?: number;
 	selectedProvider?: SwapMappedResult;
 	manuallySelectedProviderKey?: SwapProvider;
 	// The reason the quote round produced no offers, when a provider named one.
@@ -17,6 +20,7 @@ export interface SwapAmountsStore extends Readable<Nullish<SwapAmountsStoreData>
 	setSwaps: (params: {
 		swaps: SwapMappedResult[];
 		amountForSwap: OptionAmount;
+		slippageForSwap?: number;
 		selectedProvider?: SwapMappedResult;
 		quoteError?: SwapQuoteError;
 	}) => void;
@@ -39,7 +43,7 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 			set(null);
 		},
 
-		setSwaps: ({ swaps, amountForSwap, selectedProvider, quoteError }) => {
+		setSwaps: ({ swaps, amountForSwap, slippageForSwap, selectedProvider, quoteError }) => {
 			if (nonNullish(manualProviderKey)) {
 				const manualMatch = swaps.find((s) => s.provider === manualProviderKey);
 
@@ -47,6 +51,7 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 					set({
 						swaps,
 						amountForSwap,
+						slippageForSwap,
 						selectedProvider: manualMatch,
 						manuallySelectedProviderKey: manualProviderKey,
 						quoteError
@@ -61,6 +66,7 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 			set({
 				swaps,
 				amountForSwap,
+				slippageForSwap,
 				selectedProvider,
 				quoteError
 			});

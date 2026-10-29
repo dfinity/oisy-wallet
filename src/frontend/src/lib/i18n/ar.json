@@ -1422,6 +1422,7 @@
 			"swap_expired": "",
 			"near_intents_quote_unverified": "",
 			"near_intents_quote_expired": "",
+			"near_intents_quote_slippage": "",
 			"near_intents_deposit_expired": "",
 			"near_intents_quote_deposit_memo": "",
 			"oisy_trade_not_trackable": "",

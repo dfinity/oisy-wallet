@@ -285,6 +285,33 @@ describe('near-intents.services', () => {
 			);
 		});
 
+		// The send compares the quote's tolerance with the same conversion of the max slippage, and a
+		// fraction of a basis point is dropped so the quote never allows more than the user set.
+		it.each([
+			{ slippage: '0.5', slippageTolerance: 50 },
+			{ slippage: 3, slippageTolerance: 300 },
+			{ slippage: '1.009', slippageTolerance: 100 }
+		])(
+			'should request $slippage% as $slippageTolerance basis points',
+			async ({ slippage: requestedSlippage, slippageTolerance }) => {
+				vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
+					mockNearIntentsQuoteResponse
+				);
+
+				await fetchNearIntentsSwapQuote({
+					sourceToken,
+					destinationToken,
+					amount: 1_000_000n,
+					userAddress: mockEthAddress,
+					slippage: requestedSlippage
+				});
+
+				expect(nearIntentsApi.fetchNearIntentsQuote).toHaveBeenCalledWith(
+					expect.objectContaining({ slippageTolerance })
+				);
+			}
+		);
+
 		it('should return undefined when userAddress is nullish', async () => {
 			const result = await fetchNearIntentsSwapQuote({
 				sourceToken,

@@ -25,7 +25,8 @@ import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
 import {
 	buildNearIntentsQuoteRequest,
 	mapNearIntentsQuoteResult,
-	resolveNearIntentsSwapAssets
+	resolveNearIntentsSwapAssets,
+	slippagePercentToBasisPoints
 } from '$lib/utils/swap.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -158,7 +159,7 @@ export const fetchNearIntentsSwapQuote = async ({
 			: NEAR_INTENTS_QUOTE_DEADLINE_MS;
 
 	const quoteRequest = buildNearIntentsQuoteRequest({
-		slippageTolerance: Math.round(Number(slippage) * 100),
+		slippageTolerance: slippagePercentToBasisPoints(slippage),
 		...assets,
 		amount,
 		userAddress,

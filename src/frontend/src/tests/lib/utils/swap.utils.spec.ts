@@ -562,6 +562,7 @@ describe('swap utils', () => {
 		it.each([
 			SwapErrorCodes.NEAR_INTENTS_QUOTE_UNVERIFIED,
 			SwapErrorCodes.NEAR_INTENTS_QUOTE_EXPIRED,
+			SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE,
 			SwapErrorCodes.NEAR_INTENTS_QUOTE_DEPOSIT_MEMO
 		])('should return the message of a %s error', (code) => {
 			const error = new SwapError(code, 'No funds were sent.');

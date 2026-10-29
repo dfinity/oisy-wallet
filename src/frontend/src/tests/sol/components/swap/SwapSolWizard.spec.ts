@@ -319,6 +319,17 @@ describe('SwapSolWizard', () => {
 			expect(onBack).not.toHaveBeenCalled();
 		});
 
+		it('passes the reviewed max slippage to the swap', async () => {
+			const { getByText } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(swapServices.fetchNearIntentsSolSwap).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ slippageValue: '0.5' })
+			);
+		});
+
 		it('calls onBack when swap fails', async () => {
 			vi.spyOn(swapServices, 'fetchNearIntentsSolSwap').mockRejectedValue(new Error('Swap failed'));
 

@@ -89,11 +89,19 @@
 
 		const parsedAmount = Number(amount);
 
+		const slippage = slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE;
+		const parsedSlippage = Number(slippage);
+
 		if (isNullish(isSourceTokenIcrc2) && isIcToken(sourceToken)) {
 			return;
 		}
 
-		if (!isPeriodicUpdate && nonNullish($store) && $store.amountForSwap === parsedAmount) {
+		if (
+			!isPeriodicUpdate &&
+			nonNullish($store) &&
+			$store.amountForSwap === parsedAmount &&
+			$store.slippageForSwap === parsedSlippage
+		) {
 			return;
 		}
 
@@ -108,7 +116,7 @@
 				destinationToken,
 				amount,
 				tokens: $tokens,
-				slippage: slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE,
+				slippage,
 				isSourceTokenIcrc2,
 				userEthAddress: $ethAddress,
 				userSolAddress: $solAddressMainnet,
@@ -124,6 +132,7 @@
 				store.setSwaps({
 					swaps: [],
 					amountForSwap: parsedAmount,
+					slippageForSwap: parsedSlippage,
 					selectedProvider: undefined
 				});
 				return;
@@ -132,6 +141,7 @@
 			store.setSwaps({
 				swaps: swapAmounts,
 				amountForSwap: parsedAmount,
+				slippageForSwap: parsedSlippage,
 				selectedProvider: swapAmounts[0]
 			});
 		} catch (err: unknown) {
@@ -147,6 +157,7 @@
 			store.setSwaps({
 				swaps: [],
 				amountForSwap: parsedAmount,
+				slippageForSwap: parsedSlippage,
 				selectedProvider: undefined,
 				...(err instanceof SwapAmountTooLowError && {
 					quoteError: { type: 'amount-too-low', minAmount: err.minAmount }
@@ -178,7 +189,7 @@
 	});
 
 	$effect(() => {
-		[amount, sourceToken, destinationToken, isSourceTokenIcrc2];
+		[amount, sourceToken, destinationToken, isSourceTokenIcrc2, slippageValue];
 
 		untrack(() => {
 			fetchGeneration++;

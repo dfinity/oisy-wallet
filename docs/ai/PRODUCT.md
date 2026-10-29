@@ -920,6 +920,12 @@ A NEAR Intents swap from any chain fails on its own once its deposit can no long
 
 A NEAR Intents swap from an EVM network records its deposit transaction (hash, nonce and network) when the deposit is sent. Until 1Click processes the deposit, the swap is also followed on that network, the same way LI.FI and Velora swaps are: when another transaction has taken the deposit's nonce on two polls in a row, the deposit can never arrive, and the swap fails with the message that the transaction was replaced or dropped. A deposit that reverted fails the swap with the generic failure message. A deposit that is only slow to confirm stays in progress, and once 1Click processes the deposit, 1Click alone decides. A deposit hash OISY has passed to 1Click does not count as a deposit that arrived. A dropped deposit whose nonce no later transaction takes reads as still in flight on the network, so this does not settle it; the [quote deadline](#near-intents-deposits-that-never-arrive) does. Swaps sent before this was added carry no deposit transaction and are followed through 1Click only.
 
+### Offers follow the max slippage
+
+Changing the max slippage asks the providers for new offers, the same way changing the amount does: the receive amount shows as loading and Review stays disabled until the offers for the new setting arrive. A provider can bind its offer to the slippage it was asked with, so an offer counts only for that slippage.
+
+NEAR Intents does: 1Click signs a minimum receive amount derived from the slippage into its quote, and the deposit settles against it. Its expected minimum, on the form and on Review, is that signed figure; only a quote without one shows the slippage applied to the quoted amount. The slippage goes to 1Click in whole basis points, rounded down, so a quote never allows more than the setting. Right before the deposit, next to the signature and expiry checks, OISY checks that the quote was requested with the max slippage Review showed; a quote for another one stops before anything is sent, with a message that no funds were sent.
+
 ### 1Sec restricted to the unwrapping direction
 
 1Sec (OneSec) bridges tokens between ICP and Ethereum, Base and Arbitrum. OISY offers only the way back out of a bridged position, never the way in: a user who already holds a bridged balance keeps a working exit, and nobody acquires a new one through OISY.

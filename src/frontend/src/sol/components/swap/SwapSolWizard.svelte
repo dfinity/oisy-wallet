@@ -221,7 +221,8 @@
 				destinationToken: $destinationToken,
 				swapAmount,
 				userAddress: $solAddressMainnet,
-				swapDetails: selectedProvider.swapDetails as NearIntentsQuoteResponse
+				swapDetails: selectedProvider.swapDetails as NearIntentsQuoteResponse,
+				slippageValue
 			});
 
 			progress(ProgressStepsSwap.DONE);
