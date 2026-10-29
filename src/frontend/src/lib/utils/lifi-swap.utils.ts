@@ -2,13 +2,16 @@ import {
 	LIFI_ALLOWED_BRIDGES,
 	LIFI_DENY_BRIDGES,
 	LIFI_DENY_EXCHANGES,
-	LIFI_DIAMOND_ADDRESSES
+	LIFI_DIAMOND_ADDRESSES,
+	LIFI_SOLANA_ALLOWED_EXCHANGES
 } from '$env/rest/lifi.env';
+import { LIFI_ACROSS_WRAPPED_NATIVE } from '$eth/constants/lifi.constants';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { LifiQuoteRejectedError } from '$lib/types/errors';
+import type { LifiTokenRef } from '$lib/types/lifi';
 import type { Network, NetworkId } from '$lib/types/network';
 import {
 	SwapProvider,
@@ -20,10 +23,16 @@ import {
 import type { Token } from '$lib/types/token';
 import { isNetworkEthereum, isNetworkIdSOLMainnet } from '$lib/utils/network.utils';
 import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import { decodeTransactionMessage } from '$sol/utils/sol-transactions.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isTokenSolanaNative } from '$sol/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { ChainId, type LiFiStep, type QuoteRequestFromAmount } from '@lifi/sdk';
+import {
+	getCompiledTransactionMessageDecoder,
+	type Transaction,
+	type TransactionVersion
+} from '@solana/kit';
 
 /**
  * LI.FI's chain id for a network it may be asked about: an EVM network whose Diamond is pinned, or
@@ -80,10 +89,11 @@ export const buildLifiSupportedDestinations =
 
 /**
  * The quote request for a swap form's inputs, or `undefined` when LI.FI is not asked: an unsupported
- * network or token on either side, no user address, or an unusable slippage.
+ * network or token on either side, no user address, an unusable slippage, or a Solana source with an
+ * EVM destination, whose recipient cannot be verified yet.
  *
- * Only EVM sources are quoted for now: a Solana source would need the Solana swap wizard to execute a
- * LI.FI transaction, which it cannot yet.
+ * A Solana source is limited to `LIFI_SOLANA_ALLOWED_EXCHANGES`, the exchanges whose transactions
+ * its binding can check.
  */
 export const buildLifiQuoteRequest = ({
 	sourceToken,
@@ -93,7 +103,7 @@ export const buildLifiQuoteRequest = ({
 	recipientAddress,
 	slippage
 }: EvmQuoteParams | NearIntentsQuoteParams): QuoteRequestFromAmount | undefined => {
-	if (isNullish(userAddress) || !isNetworkEthereum(sourceToken.network)) {
+	if (isNullish(userAddress)) {
 		return;
 	}
 
@@ -116,6 +126,13 @@ export const buildLifiQuoteRequest = ({
 		(bridge) => !LIFI_DENY_BRIDGES.includes(bridge)
 	);
 
+	const solanaSource = fromChain === ChainId.SOL;
+
+	// A denied exchange is removed from a Solana source's allow-list for the same reason.
+	const allowExchanges = solanaSource
+		? LIFI_SOLANA_ALLOWED_EXCHANGES.filter((exchange) => !LIFI_DENY_EXCHANGES.includes(exchange))
+		: undefined;
+
 	if (
 		isNullish(fromChain) ||
 		isNullish(toChain) ||
@@ -124,7 +141,10 @@ export const buildLifiQuoteRequest = ({
 		isNullish(toAddress) ||
 		!(lifiSlippage > 0 && lifiSlippage < 1) ||
 		// A cross-chain route needs a bridge whose receiver the swap can bind.
-		(fromChain !== toChain && allowBridges.length === 0)
+		(fromChain !== toChain && allowBridges.length === 0) ||
+		// Solana → EVM is out of scope: nothing binds its EVM recipient yet.
+		(solanaSource && toChain !== ChainId.SOL) ||
+		allowExchanges?.length === 0
 	) {
 		return;
 	}
@@ -146,7 +166,9 @@ export const buildLifiQuoteRequest = ({
 		allowDestinationCall: false,
 		// An empty list would serialise as an empty `allowBridges=`; a same-chain route needs no bridge.
 		...(allowBridges.length > 0 && { allowBridges }),
-		...(LIFI_DENY_EXCHANGES.length > 0 && { denyExchanges: LIFI_DENY_EXCHANGES })
+		...(nonNullish(allowExchanges) && { allowExchanges }),
+		...(isNullish(allowExchanges) &&
+			LIFI_DENY_EXCHANGES.length > 0 && { denyExchanges: LIFI_DENY_EXCHANGES })
 	};
 };
 
@@ -184,13 +206,13 @@ const isSameAddress = ({
 
 /**
  * The error a LI.FI check refuses with, its message naming what was refused: the quote (the trust
- * checks) or its calldata (the binding).
+ * checks), its calldata (the EVM binding) or its transaction (the Solana binding).
  */
 export const lifiRejectedError = ({
 	subject,
 	reason
 }: {
-	subject: 'quote' | 'calldata';
+	subject: 'quote' | 'calldata' | 'transaction';
 	reason: string;
 }): LifiQuoteRejectedError => new LifiQuoteRejectedError(`LI.FI ${subject} rejected: ${reason}`);
 
@@ -198,12 +220,57 @@ const rejected = (reason: string): LifiQuoteRejectedError =>
 	lifiRejectedError({ subject: 'quote', reason });
 
 /**
+ * Decodes a LI.FI Solana transaction, refusing one OISY would not sign as it is: anything but one
+ * base64 string (an array is a Jito bundle), a message other than version 0, whose fee is the one its
+ * Compute Budget instructions set, or one that needs a signer other than the user, who is then also
+ * its fee payer. Shared by the quote trust checks and the binding, so that both refuse alike.
+ */
+export const decodeLifiSolTransaction = ({
+	data,
+	userAddress
+}: {
+	data: unknown;
+	userAddress: string;
+}): Transaction => {
+	if (typeof data !== 'string') {
+		throw lifiRejectedError({ subject: 'transaction', reason: 'not a single transaction' });
+	}
+
+	let transaction: Transaction;
+	let version: TransactionVersion;
+
+	try {
+		transaction = decodeTransactionMessage(data);
+		({ version } = getCompiledTransactionMessageDecoder().decode(transaction.messageBytes));
+	} catch (_: unknown) {
+		throw lifiRejectedError({ subject: 'transaction', reason: 'it does not decode' });
+	}
+
+	if (version !== 0) {
+		throw lifiRejectedError({ subject: 'transaction', reason: 'not a version 0 transaction' });
+	}
+
+	// The fee payer is the first signer.
+	const signers = Object.keys(transaction.signatures);
+
+	if (signers.length !== 1 || signers[0] !== userAddress) {
+		throw lifiRejectedError({
+			subject: 'transaction',
+			reason: 'the transaction needs a signer other than the user'
+		});
+	}
+
+	return transaction;
+};
+
+/**
  * Refuses a LI.FI quote that OISY did not ask for. Quotes are unsigned, so a compromised or
  * intercepted response could name any call target or spender; every quote, shown or executed, must
- * be addressed to the Diamond pinned for its source network, and must echo the request it answers.
+ * echo the request it answers. An EVM one must be addressed to the Diamond pinned for its source
+ * network; a Solana one must be a version 0 transaction that only the user signs.
  *
- * This binds where the transaction goes, not what its calldata does: the quote that is signed is
- * additionally checked against the Diamond's own calldata decoder before signing.
+ * This binds where the transaction goes, not what it does: the quote that is signed is additionally
+ * checked against the Diamond's own calldata decoder (EVM) or the pinned instructions (Solana).
  */
 export const assertLifiQuote = ({
 	quote,
@@ -220,10 +287,9 @@ export const assertLifiQuote = ({
 	const fromChainId = Number(fromChain);
 	const toChainId = Number(toChain);
 	const amount = parseAmount(fromAmount);
-	const diamond = LIFI_DIAMOND_ADDRESSES[sourceNetworkId];
 
-	if (isNullish(amount) || isNullish(diamond) || isNullish(toAddress)) {
-		throw rejected('the request has no pinned Diamond, amount or recipient');
+	if (isNullish(amount) || isNullish(toAddress)) {
+		throw rejected('the request has no amount or recipient');
 	}
 
 	if (action.fromChainId !== fromChainId || action.toChainId !== toChainId) {
@@ -250,14 +316,16 @@ export const assertLifiQuote = ({
 	}
 
 	// The bridge and exchange lists are only request parameters. A route through a tool outside them
-	// is refused here, so the deny lists still work if LI.FI ignores or misreads them.
-	const { allowBridges = [], denyExchanges = [] } = request;
+	// is refused here, so the lists still work if LI.FI ignores or misreads them.
+	const { allowBridges = [], allowExchanges, denyExchanges = [] } = request;
 
 	if (
 		quote.includedSteps.some(
 			({ type, tool }) =>
 				(type === 'cross' && !allowBridges.includes(tool)) ||
-				(type === 'swap' && denyExchanges.includes(tool))
+				(type === 'swap' &&
+					(denyExchanges.includes(tool) ||
+						(nonNullish(allowExchanges) && !allowExchanges.includes(tool))))
 		)
 	) {
 		throw rejected('route uses a bridge or exchange outside the requested lists');
@@ -280,6 +348,17 @@ export const assertLifiQuote = ({
 	}
 
 	const { to, from, chainId, data, value } = transactionRequest;
+
+	if (fromChainId === ChainId.SOL) {
+		decodeLifiSolTransaction({ data, userAddress: fromAddress });
+		return;
+	}
+
+	const diamond = LIFI_DIAMOND_ADDRESSES[sourceNetworkId];
+
+	if (isNullish(diamond)) {
+		throw rejected('the request has no pinned Diamond');
+	}
 
 	if (
 		!isSameAddress({ chainId: fromChainId, actual: to, expected: diamond }) ||
@@ -338,17 +417,108 @@ export const lifiFeesUsd = ({ estimate: { feeCosts } }: LiFiStep): number | unde
 
 export const mapLifiSwapResult = ({
 	quote,
-	request
+	request,
+	solFeeCeiling
 }: {
 	quote: LiFiStep;
 	request: QuoteRequestFromAmount;
+	solFeeCeiling?: bigint;
 }): SwapMappedResult => ({
 	provider: SwapProvider.LIFI,
 	receiveAmount: BigInt(quote.estimate.toAmount),
 	receiveOutMinimum: BigInt(quote.estimate.toAmountMin),
 	swapDetails: quote,
-	request
+	request,
+	...(nonNullish(solFeeCeiling) && { solFeeCeiling })
 });
+
+const isSameLifiToken = ({
+	actual,
+	expected
+}: {
+	actual: LifiTokenRef;
+	expected: LifiTokenRef;
+}): boolean =>
+	actual.chainId === expected.chainId &&
+	isSameHex({ actual: actual.address, expected: expected.address });
+
+/**
+ * The one token a route between two EVM networks moves the funds through besides its source and
+ * its destination — USDG, for a route that bridges USDC to Robinhood Chain and swaps it to NVDA
+ * there: the token of the two separate swaps the user can make instead. `undefined` when there is
+ * none or more than one. LI.FI's fee step keeps the token and does not count; every other step's
+ * output does, wrapped coins included.
+ *
+ * Also `undefined` for a wrapped native coin on the destination side of the bridge: Across pays
+ * those out unwrapped, so no swap could deliver one as the first of the two.
+ */
+export const findLifiIntermediateToken = ({
+	action: { fromChainId, toChainId, fromToken, toToken },
+	includedSteps
+}: LiFiStep): LifiTokenRef | undefined => {
+	if (fromChainId === toChainId || fromChainId === ChainId.SOL || toChainId === ChainId.SOL) {
+		return;
+	}
+
+	const outputs = includedSteps
+		.filter(
+			({ action }) => !isSameLifiToken({ actual: action.toToken, expected: action.fromToken })
+		)
+		.map(({ action }) => action.toToken);
+
+	const last = outputs.at(-1);
+
+	if (isNullish(last) || !isSameLifiToken({ actual: last, expected: toToken })) {
+		return;
+	}
+
+	const [intermediate, ...others] = outputs.filter(
+		(token) =>
+			!isSameLifiToken({ actual: token, expected: fromToken }) &&
+			!isSameLifiToken({ actual: token, expected: toToken })
+	);
+
+	if (
+		isNullish(intermediate) ||
+		others.some((token) => !isSameLifiToken({ actual: token, expected: intermediate }))
+	) {
+		return;
+	}
+
+	const wrappedNative = LIFI_ACROSS_WRAPPED_NATIVE[toChainId];
+
+	if (
+		intermediate.chainId === toChainId &&
+		nonNullish(wrappedNative) &&
+		isSameHex({ actual: intermediate.address, expected: wrappedNative })
+	) {
+		return;
+	}
+
+	return { chainId: intermediate.chainId, address: intermediate.address };
+};
+
+/**
+ * The token OISY lists, enabled or not, that LI.FI names: matched by its address within its
+ * network, never by its symbol — two tokens on one network can share a symbol.
+ */
+export const findLifiListedToken = ({
+	tokens,
+	token
+}: {
+	tokens: Token[];
+	token: LifiTokenRef;
+}): Token | undefined =>
+	tokens.find((candidate) => {
+		const chainId = toLifiChainId(candidate.network);
+		const address = toLifiTokenAddress(candidate);
+
+		return (
+			nonNullish(chainId) &&
+			nonNullish(address) &&
+			isSameLifiToken({ actual: { chainId, address }, expected: token })
+		);
+	});
 
 /**
  * The addresses of every ERC-20 and ERC-4626 OISY knows on a network, enabled or not, whose

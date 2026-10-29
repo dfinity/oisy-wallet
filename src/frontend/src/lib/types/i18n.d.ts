@@ -551,6 +551,7 @@ interface I18nHelp {
 		explorers_description: string;
 		explorers_velora_description: string;
 		explorers_near_intents_description: string;
+		explorers_lifi_description: string;
 		explorers_onesec_description: string;
 		explorers_chain_eth: string;
 		explorers_chain_sol: string;
@@ -1104,6 +1105,8 @@ interface I18nSwap {
 		gasless: string;
 		swap_fees: string;
 		cross_chain_networks_info: string;
+		two_swaps_info: string;
+		two_swaps_first_button: string;
 		near_intents_estimated_time: string;
 		lifi_route_via: string;
 		lifi_route_via_estimated_time: string;
@@ -1139,6 +1142,7 @@ interface I18nSwap {
 		cannot_save_provider_agreement: string;
 		swap_refunded: string;
 		swap_replaced_or_dropped: string;
+		swap_expired: string;
 		near_intents_quote_unverified: string;
 		near_intents_quote_expired: string;
 		near_intents_deposit_expired: string;
@@ -1490,6 +1494,7 @@ interface I18nWallet_connect {
 		network: string;
 		amount: string;
 		hex_data: string;
+		base64_data: string;
 		tab_operations: string;
 		unreviewed_instructions: string;
 		unreviewed_instructions_simulated: string;
@@ -1535,6 +1540,7 @@ interface I18nWallet_connect {
 		allowance_increase: string;
 		allowance_decrease: string;
 		unverifiable_erc20_request: string;
+		unlisted_erc20_request: string;
 		token_call_with_value: string;
 		unverifiable_approval_for_all_request: string;
 		approval_for_all_grant: string;
@@ -1611,6 +1617,7 @@ interface I18nWallet_connect {
 		btc_psbt_input_not_segwit: string;
 		btc_psbt_input_not_owned: string;
 		btc_psbt_input_ambiguous: string;
+		btc_psbt_input_unverified: string;
 		from_address_not_wallet: string;
 		unknown_destination: string;
 		cketh_deposit_refused: string;

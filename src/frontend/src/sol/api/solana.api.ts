@@ -12,6 +12,7 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type {
 	SolanaGetAccountInfoReturn,
 	SolanaParsedAccountsInfo,
+	SolanaSignatureStatus,
 	SolanaSimulatedInnerInstructions
 } from '$sol/types/sol-rpc';
 import type {
@@ -24,6 +25,8 @@ import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import {
 	getBase64Encoder,
 	address as solAddress,
+	blockhash as solBlockhash,
+	signature as solSignature,
 	type Address,
 	type Base64EncodedWireTransaction,
 	type Lamports,
@@ -90,6 +93,64 @@ export const getRpcTransaction = async ({
 		maxSupportedTransactionVersion: SOLANA_MAX_SUPPORTED_TRANSACTION_VERSION,
 		encoding: 'jsonParsed'
 	}).send();
+};
+
+/**
+ * The status of one transaction, `null` while the node knows no transaction with that signature,
+ * with the slot the node answered at (its processed slot).
+ *
+ * The history search is what finds a transaction that landed a while ago: without it, the node
+ * answers from its recent-status cache alone, and a landed transaction reads as missing once it
+ * has aged out of it.
+ */
+export const getSignatureStatus = async ({
+	signature,
+	network
+}: {
+	signature: string;
+	network: SolanaNetworkType;
+}): Promise<{ slot: bigint; status: SolanaSignatureStatus }> => {
+	const { getSignatureStatuses } = solanaHttpRpc(network);
+
+	const {
+		context: { slot },
+		value: [status]
+	} = await getSignatureStatuses([solSignature(signature)], {
+		searchTransactionHistory: true
+	}).send();
+
+	return { slot, status: status ?? null };
+};
+
+/**
+ * Whether a transaction with this recent blockhash can still land, as of the highest confirmed
+ * slot, with that slot.
+ *
+ * A node answers `false` alike for a blockhash that has aged out and for one it has not seen yet,
+ * which is what a node running behind answers about a recent one. `minContextSlot` is a slot where
+ * the blockhash is known to be valid: a node not that far yet refuses to answer, so `false` then
+ * means aged out, and an aged-out blockhash never turns valid again.
+ */
+export const isBlockhashValid = async ({
+	blockhash,
+	network,
+	minContextSlot
+}: {
+	blockhash: string;
+	network: SolanaNetworkType;
+	minContextSlot?: bigint;
+}): Promise<{ slot: bigint; valid: boolean }> => {
+	const { isBlockhashValid } = solanaHttpRpc(network);
+
+	const {
+		context: { slot },
+		value
+	} = await isBlockhashValid(solBlockhash(blockhash), {
+		commitment: 'confirmed',
+		...(nonNullish(minContextSlot) && { minContextSlot })
+	}).send();
+
+	return { slot, valid: value };
 };
 
 const cachedTransactions = new SvelteMap<

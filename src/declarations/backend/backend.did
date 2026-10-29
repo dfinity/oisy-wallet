@@ -492,6 +492,15 @@ type ContactError = variant {
 	TooManyContactsWithImages
 };
 type ContactImage = record { data : blob; mime_type : ImageMimeType };
+// A contact's image, as returned by `get_contact_images`.
+type ContactImageEntry = record { contact_id : nat64; image : ContactImage };
+// A page of the caller's contacts, as returned by `get_contacts_page`.
+type ContactsPage = record {
+	// Contacts in ID order, without their images; `get_contact_images` returns those.
+	contacts : vec Contact;
+	// What to pass as `after` for the next page; none once this page holds the last contact.
+	next : opt nat64
+};
 type CreateActiveUserTransactionRequest = record {
 	id : text;
 	external_refs : vec ActiveUserTransactionRef;
@@ -691,10 +700,24 @@ type GetAllowedCyclesResult = variant {
 	// The allowed cycles were not retrieved due to an error.
 	Err : GetAllowedCyclesError
 };
+// The caller's contacts whose images `get_contact_images` returns.
+type GetContactImagesRequest = record { contact_ids : vec nat64 };
+type GetContactImagesResult = variant {
+	// The images were retrieved successfully.
+	Ok : vec ContactImageEntry;
+	// The images were not retrieved due to an error.
+	Err : ContactError
+};
 type GetContactResult = variant {
 	// The contacts were retrieved successfully.
 	Ok : Contact;
 	// The contacts were not retrieved due to an error.
+	Err : ContactError
+};
+type GetContactsPageResult = variant {
+	// The page was retrieved successfully.
+	Ok : ContactsPage;
+	// The page was not retrieved due to an error.
 	Err : ContactError
 };
 type GetContactsResult = variant {
@@ -1847,6 +1870,11 @@ service : (Arg) -> {
 	// - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
 	// - `Other`: If another error occurred during the operation
 	get_allowed_cycles : () -> (GetAllowedCyclesResult);
+	// Returns usage guidance for AI agents and other API clients.
+	//
+	// The Candid interface remains the source of truth for method signatures and
+	// exact error variants.
+	get_api_doc : () -> (text) query;
 	// Returns the currently stored API keys.
 	//
 	// Restricted to canister controllers only.
@@ -1862,12 +1890,34 @@ service : (Arg) -> {
 	// # Errors
 	// * `ContactNotFound` - If no contact for the provided `contact_id` could be found
 	get_contact : (nat64) -> (GetContactResult) query;
+	// Returns the images of the given contacts of the caller.
+	//
+	// A call takes at most `MAX_CONTACT_IMAGES_PER_CALL` contact IDs, so that the reply stays below
+	// the 2 MiB a certified call can return.
+	// # Arguments
+	// * `request` - The IDs of the caller's contacts whose images to return.
+	// # Returns
+	// * `Ok(Vec<ContactImageEntry>)` - The images found; contacts the caller does not have, and
+	// contacts without an image, are left out.
+	get_contact_images : (GetContactImagesRequest) -> (
+		GetContactImagesResult
+	) query;
 	// Returns all contacts for the caller
 	//
 	// This query function returns a list of the user's contacts.
 	// # Returns
 	// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	get_contacts : () -> (GetContactsResult) query;
+	// Returns a page of the caller's contacts, without their images.
+	//
+	// A page holds contacts in ID order until their encoded size reaches `CONTACTS_PAGE_MAX_BYTES`, so
+	// that the reply stays below the 2 MiB a certified call can return. `get_contact_images` returns
+	// the images.
+	// # Arguments
+	// * `after` - The `next` of the previous page; none for the first page.
+	// # Returns
+	// * `Ok(ContactsPage)` - The page, with `next` set while contacts remain after it.
+	get_contacts_page : (opt nat64) -> (GetContactsPageResult) query;
 	get_exchange_rate : (TokenId) -> (opt ExchangeRate) query;
 	// Returns the latest USD prices for the caller's priceable tokens.
 	//

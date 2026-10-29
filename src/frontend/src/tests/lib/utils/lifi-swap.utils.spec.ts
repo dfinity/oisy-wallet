@@ -12,18 +12,23 @@ import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import type * as lifiEnv from '$env/rest/lifi.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import { NVDA_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens-erc20/tokens.nvda.env';
+import { USDG_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens-erc20/tokens.usdg.env';
 import { ROBINHOOD_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import { ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
+import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { LifiQuoteRejectedError } from '$lib/types/errors';
+import type { LifiTokenRef } from '$lib/types/lifi';
 import { SwapProvider } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import {
 	assertLifiQuote,
 	buildLifiQuoteRequest,
 	buildLifiSupportedDestinations,
+	findLifiIntermediateToken,
+	findLifiListedToken,
 	lifiFeesUsd,
 	lifiUserTokenAddresses,
 	mapLifiSwapResult,
@@ -32,6 +37,11 @@ import {
 } from '$lib/utils/lifi-swap.utils';
 import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
+import {
+	mockLifiSolSolToUsdc,
+	mockLifiSolUser,
+	mockLifiSolWrappedSolUser
+} from '$tests/mocks/lifi-sol-transaction.mock';
 import {
 	mockLifiBaseUsdcAddress,
 	mockLifiBaseUsdcToken,
@@ -47,9 +57,21 @@ import {
 	ChainId,
 	type CrossStep,
 	type LiFiStep,
+	type ProtocolStep,
 	type QuoteRequestFromAmount,
+	type Step,
 	type SwapStep
 } from '@lifi/sdk';
+import {
+	address,
+	blockhash,
+	compileTransaction,
+	createTransactionMessage,
+	getBase64EncodedWireTransaction,
+	pipe,
+	setTransactionMessageFeePayer,
+	setTransactionMessageLifetimeUsingBlockhash
+} from '@solana/kit';
 
 describe('lifi-swap.utils', () => {
 	const baseParams = {
@@ -171,7 +193,7 @@ describe('lifi-swap.utils', () => {
 			).toBeUndefined();
 		});
 
-		it('should not quote a Solana source', () => {
+		it('should build a Solana → Solana request limited to the exchanges its binding checks', () => {
 			expect(
 				buildLifiQuoteRequest({
 					...baseParams,
@@ -179,6 +201,41 @@ describe('lifi-swap.utils', () => {
 					destinationToken: mockValidSplToken,
 					userAddress: mockSolAddress,
 					recipientAddress: mockSolAddress
+				})
+			).toStrictEqual({
+				fromChain: ChainId.SOL,
+				toChain: ChainId.SOL,
+				fromToken: SYSTEM_PROGRAM_ADDRESS,
+				toToken: mockValidSplToken.address,
+				fromAddress: mockSolAddress,
+				toAddress: mockSolAddress,
+				fromAmount: `${mockLifiFromAmount}`,
+				slippage: 0.015,
+				order: 'CHEAPEST',
+				skipSimulation: true,
+				allowDestinationCall: false,
+				allowExchanges: ['jupiter']
+			});
+		});
+
+		it('should not quote a Solana source with an EVM destination', () => {
+			expect(
+				buildLifiQuoteRequest({
+					...baseParams,
+					sourceToken: SOLANA_TOKEN,
+					userAddress: mockSolAddress,
+					recipientAddress: mockLifiUserAddress
+				})
+			).toBeUndefined();
+		});
+
+		it('should not quote a Solana source without a Solana recipient', () => {
+			expect(
+				buildLifiQuoteRequest({
+					...baseParams,
+					sourceToken: SOLANA_TOKEN,
+					destinationToken: mockValidSplToken,
+					userAddress: mockSolAddress
 				})
 			).toBeUndefined();
 		});
@@ -219,28 +276,52 @@ describe('lifi-swap.utils', () => {
 
 			const loadWithDenyLists = async ({
 				bridges,
-				exchanges
+				exchanges,
+				solanaBridges
 			}: {
 				bridges: string[];
 				exchanges: string[];
+				// Bridges allowed from Solana, which has none.
+				solanaBridges?: string[];
 			}) => {
-				vi.doMock('$env/rest/lifi.env', async (importOriginal) => ({
-					...(await importOriginal<typeof lifiEnv>()),
-					LIFI_DENY_BRIDGES: bridges,
-					LIFI_DENY_EXCHANGES: exchanges
-				}));
+				vi.doMock('$env/rest/lifi.env', async (importOriginal) => {
+					const original = await importOriginal<typeof lifiEnv>();
+					const { SOLANA_MAINNET_NETWORK_ID } = await import('$env/networks/networks.sol.env');
+
+					return {
+						...original,
+						LIFI_DENY_BRIDGES: bridges,
+						LIFI_DENY_EXCHANGES: exchanges,
+						...(solanaBridges !== undefined && {
+							LIFI_ALLOWED_BRIDGES: {
+								...original.LIFI_ALLOWED_BRIDGES,
+								[SOLANA_MAINNET_NETWORK_ID]: solanaBridges
+							}
+						})
+					};
+				});
 
 				// Network ids are symbols, so the tokens and networks come from the same module graph
 				// as the code under test.
-				const [{ buildLifiQuoteRequest: build }, base, baseEth, arbitrum, robinhood, robinhoodEth] =
-					await Promise.all([
-						import('$lib/utils/lifi-swap.utils'),
-						import('$env/networks/networks-evm/networks.evm.base.env'),
-						import('$env/tokens/tokens-evm/tokens-base/tokens.eth.env'),
-						import('$env/networks/networks-evm/networks.evm.arbitrum.env'),
-						import('$env/networks/networks-evm/networks.evm.robinhood.env'),
-						import('$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env')
-					]);
+				const [
+					{ buildLifiQuoteRequest: build },
+					base,
+					baseEth,
+					arbitrum,
+					robinhood,
+					robinhoodEth,
+					solNetworks,
+					sol
+				] = await Promise.all([
+					import('$lib/utils/lifi-swap.utils'),
+					import('$env/networks/networks-evm/networks.evm.base.env'),
+					import('$env/tokens/tokens-evm/tokens-base/tokens.eth.env'),
+					import('$env/networks/networks-evm/networks.evm.arbitrum.env'),
+					import('$env/networks/networks-evm/networks.evm.robinhood.env'),
+					import('$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env'),
+					import('$env/networks/networks.sol.env'),
+					import('$env/tokens/tokens.sol.env')
+				]);
 
 				return {
 					build,
@@ -249,9 +330,61 @@ describe('lifi-swap.utils', () => {
 					usdcOn: (network: typeof base.BASE_NETWORK) => ({ ...mockLifiBaseUsdcToken, network }),
 					baseNetwork: base.BASE_NETWORK,
 					arbitrumNetwork: arbitrum.ARBITRUM_MAINNET_NETWORK,
-					robinhoodNetwork: robinhood.ROBINHOOD_MAINNET_NETWORK
+					robinhoodNetwork: robinhood.ROBINHOOD_MAINNET_NETWORK,
+					solToken: sol.SOLANA_TOKEN,
+					splToken: { ...mockValidSplToken, network: solNetworks.SOLANA_MAINNET_NETWORK }
 				};
 			};
+
+			const solanaParams = {
+				...baseParams,
+				userAddress: mockSolAddress,
+				recipientAddress: mockSolAddress
+			};
+
+			it("should drop a denied exchange from a Solana source's allow-list rather than send a deny list", async () => {
+				const { build, solToken, splToken } = await loadWithDenyLists({
+					bridges: [],
+					exchanges: ['someExchange']
+				});
+
+				const request = build({
+					...solanaParams,
+					sourceToken: solToken,
+					destinationToken: splToken
+				});
+
+				expect(request?.allowExchanges).toStrictEqual(['jupiter']);
+				expect(request).not.toHaveProperty('denyExchanges');
+			});
+
+			it('should not quote a Solana source with an EVM destination, even through a bridge allowed from Solana', async () => {
+				const { build, solToken, usdcOn, baseNetwork } = await loadWithDenyLists({
+					bridges: [],
+					exchanges: [],
+					solanaBridges: ['mayan']
+				});
+
+				expect(
+					build({
+						...solanaParams,
+						sourceToken: solToken,
+						destinationToken: usdcOn(baseNetwork),
+						recipientAddress: mockLifiUserAddress
+					})
+				).toBeUndefined();
+			});
+
+			it('should not quote a Solana source once every exchange its binding checks is denied', async () => {
+				const { build, solToken, splToken } = await loadWithDenyLists({
+					bridges: [],
+					exchanges: ['jupiter']
+				});
+
+				expect(
+					build({ ...solanaParams, sourceToken: solToken, destinationToken: splToken })
+				).toBeUndefined();
+			});
 
 			it('should drop a denied bridge from the allow-list rather than send a deny list', async () => {
 				const { build, baseEthToken, usdcOn, arbitrumNetwork } = await loadWithDenyLists({
@@ -524,6 +657,111 @@ describe('lifi-swap.utils', () => {
 				})
 			).toThrow(LifiQuoteRejectedError);
 		});
+
+		describe('a Solana source', () => {
+			const { request: solRequest, quote: fixtureQuote } = mockLifiSolSolToUsdc;
+			const fixtureData = fixtureQuote.transactionRequest?.data;
+
+			const solQuote = ({
+				data = fixtureData,
+				tool = 'jupiter'
+			}: {
+				data?: string;
+				tool?: string;
+			} = {}): LiFiStep => ({
+				...mockLifiQuote,
+				action: {
+					...mockLifiQuote.action,
+					fromChainId: ChainId.SOL,
+					toChainId: ChainId.SOL,
+					fromToken: { ...mockLifiQuote.action.fromToken, address: solRequest.fromToken },
+					toToken: { ...mockLifiQuote.action.toToken, address: solRequest.toToken },
+					fromAmount: solRequest.fromAmount,
+					toAddress: solRequest.toAddress
+				},
+				estimate: fixtureQuote.estimate,
+				includedSteps: [{ ...mockLifiQuote, type: 'swap', tool }],
+				transactionRequest: { data }
+			});
+
+			const assertSolQuote = ({
+				quote = solQuote(),
+				request = solRequest
+			}: {
+				quote?: LiFiStep;
+				request?: QuoteRequestFromAmount;
+			} = {}) => assertLifiQuote({ quote, request, sourceNetworkId: SOLANA_MAINNET_NETWORK.id });
+
+			// The user's own transaction, but a legacy message.
+			const legacyData = getBase64EncodedWireTransaction(
+				compileTransaction(
+					pipe(
+						createTransactionMessage({ version: 'legacy' }),
+						(message) => setTransactionMessageFeePayer(address(mockLifiSolUser), message),
+						(message) =>
+							setTransactionMessageLifetimeUsingBlockhash(
+								{
+									blockhash: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+									lastValidBlockHeight: ZERO
+								},
+								message
+							)
+					)
+				)
+			);
+
+			it('should accept a version 0 transaction that only the user signs, with no Diamond', () => {
+				expect(() => assertSolQuote()).not.toThrow();
+			});
+
+			it('should refuse a list of transactions, which a Jito bundle is', () => {
+				const bundle: unknown = [fixtureData, fixtureData];
+
+				expect(() => assertSolQuote({ quote: solQuote({ data: bundle as string }) })).toThrow(
+					'not a single transaction'
+				);
+			});
+
+			it('should refuse a transaction that does not decode', () => {
+				expect(() => assertSolQuote({ quote: solQuote({ data: 'not a transaction' }) })).toThrow(
+					LifiQuoteRejectedError
+				);
+			});
+
+			it('should refuse a message other than version 0', () => {
+				expect(() => assertSolQuote({ quote: solQuote({ data: legacyData }) })).toThrow(
+					'not a version 0 transaction'
+				);
+			});
+
+			it('should refuse a transaction that someone other than the user signs', () => {
+				expect(() =>
+					assertSolQuote({
+						request: {
+							...solRequest,
+							fromAddress: mockLifiSolWrappedSolUser,
+							toAddress: mockLifiSolWrappedSolUser
+						},
+						quote: {
+							...solQuote(),
+							action: { ...solQuote().action, toAddress: mockLifiSolWrappedSolUser }
+						}
+					})
+				).toThrow('the transaction needs a signer other than the user');
+			});
+
+			it('should refuse a swap through an exchange outside the requested ones', () => {
+				expect(() => assertSolQuote({ quote: solQuote({ tool: 'dflow' }) })).toThrow(
+					LifiQuoteRejectedError
+				);
+			});
+
+			it('should refuse a quote without a transaction', () => {
+				expect(() =>
+					assertSolQuote({ quote: { ...solQuote(), transactionRequest: undefined } })
+				).toThrow(LifiQuoteRejectedError);
+			});
+		});
 	});
 
 	describe('buildLifiSupportedDestinations', () => {
@@ -640,6 +878,245 @@ describe('lifi-swap.utils', () => {
 					networkId: BASE_NETWORK_ID
 				})
 			).toEqual([mockLifiBaseUsdcAddress, baseVault.address]);
+		});
+	});
+
+	describe('findLifiIntermediateToken', () => {
+		const baseEth = { chainId: ChainId.BAS, address: ZERO_ETH_ADDRESS };
+		const baseUsdc = { chainId: ChainId.BAS, address: mockLifiBaseUsdcAddress };
+		const baseDai = { chainId: ChainId.BAS, address: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb' };
+		const baseWeth = {
+			chainId: ChainId.BAS,
+			address: '0x4200000000000000000000000000000000000006'
+		};
+		const robinhoodUsdg = { chainId: ChainId.OUT, address: USDG_TOKEN.address };
+		const robinhoodNvda = { chainId: ChainId.OUT, address: NVDA_TOKEN.address };
+		const robinhoodWeth = {
+			chainId: ChainId.OUT,
+			address: '0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73'
+		};
+
+		const lifiToken = ({ chainId, address }: LifiTokenRef) => ({
+			...mockLifiQuote.action.toToken,
+			chainId,
+			address
+		});
+
+		const action = ({ from, to }: { from: LifiTokenRef; to: LifiTokenRef }) => ({
+			...mockLifiQuote.action,
+			fromChainId: from.chainId,
+			toChainId: to.chainId,
+			fromToken: lifiToken(from),
+			toToken: lifiToken(to)
+		});
+
+		// One branch per step type, so that each literal narrows to its own member of `Step`.
+		const step = ({
+			type,
+			tool,
+			from,
+			to
+		}: (
+			| Pick<SwapStep, 'type' | 'tool'>
+			| Pick<CrossStep, 'type' | 'tool'>
+			| Pick<ProtocolStep, 'type' | 'tool'>
+		) & {
+			from: LifiTokenRef;
+			to: LifiTokenRef;
+		}): Step =>
+			type === 'swap'
+				? { ...mockLifiQuote, type, tool, action: action({ from, to }) }
+				: type === 'cross'
+					? { ...mockLifiQuote, type, tool, action: action({ from, to }) }
+					: { ...mockLifiQuote, type, tool, action: action({ from, to }) };
+
+		const feeCollection = (token: LifiTokenRef): Step =>
+			step({ type: 'protocol', tool: 'feeCollection', from: token, to: token });
+
+		const route = ({
+			from,
+			to,
+			includedSteps
+		}: {
+			from: LifiTokenRef;
+			to: LifiTokenRef;
+			includedSteps: Step[];
+		}): LiFiStep => ({ ...mockLifiQuote, action: action({ from, to }), includedSteps });
+
+		// USDC (Base) → NVDA (Robinhood Chain), as LI.FI routed it on 2026-10-26.
+		const swapAfterBridge = route({
+			from: baseUsdc,
+			to: robinhoodNvda,
+			includedSteps: [
+				feeCollection(baseUsdc),
+				step({ type: 'cross', tool: 'across', from: baseUsdc, to: robinhoodUsdg }),
+				step({ type: 'swap', tool: 'smartDeposits', from: robinhoodUsdg, to: robinhoodNvda })
+			]
+		});
+
+		it('should name the token a route swaps from after the bridge', () => {
+			expect(findLifiIntermediateToken(swapAfterBridge)).toStrictEqual(robinhoodUsdg);
+		});
+
+		it('should name the token a route swaps to before the bridge', () => {
+			expect(
+				findLifiIntermediateToken(
+					route({
+						from: baseDai,
+						to: robinhoodUsdg,
+						includedSteps: [
+							feeCollection(baseDai),
+							step({ type: 'swap', tool: 'bitget', from: baseDai, to: baseUsdc }),
+							step({ type: 'cross', tool: 'across', from: baseUsdc, to: robinhoodUsdg })
+						]
+					})
+				)
+			).toStrictEqual(baseUsdc);
+		});
+
+		it('should name none for a route that bridges straight to the destination', () => {
+			expect(
+				findLifiIntermediateToken(
+					route({
+						from: baseUsdc,
+						to: robinhoodUsdg,
+						includedSteps: [
+							feeCollection(baseUsdc),
+							step({ type: 'cross', tool: 'across', from: baseUsdc, to: robinhoodUsdg })
+						]
+					})
+				)
+			).toBeUndefined();
+		});
+
+		// ETH (Base) → NVDA, as LI.FI routed it on 2026-10-26: wrapped on Base, bridged as WETH.
+		it('should name none for a route through two tokens, a wrapped coin counting as one', () => {
+			expect(
+				findLifiIntermediateToken(
+					route({
+						from: baseEth,
+						to: robinhoodNvda,
+						includedSteps: [
+							feeCollection(baseEth),
+							step({ type: 'protocol', tool: 'wrapper', from: baseEth, to: baseWeth }),
+							step({ type: 'cross', tool: 'across', from: baseWeth, to: robinhoodWeth }),
+							step({ type: 'swap', tool: 'kyberswap', from: robinhoodWeth, to: robinhoodNvda })
+						]
+					})
+				)
+			).toBeUndefined();
+		});
+
+		it('should name no wrapped native coin on the destination side of the bridge', () => {
+			expect(
+				findLifiIntermediateToken(
+					route({
+						from: baseUsdc,
+						to: robinhoodNvda,
+						includedSteps: [
+							step({ type: 'cross', tool: 'across', from: baseUsdc, to: robinhoodWeth }),
+							step({ type: 'swap', tool: 'kyberswap', from: robinhoodWeth, to: robinhoodNvda })
+						]
+					})
+				)
+			).toBeUndefined();
+		});
+
+		it('should name none for a route that does not end in the destination', () => {
+			expect(
+				findLifiIntermediateToken(
+					route({
+						from: baseUsdc,
+						to: robinhoodNvda,
+						includedSteps: [
+							step({ type: 'cross', tool: 'across', from: baseUsdc, to: robinhoodUsdg })
+						]
+					})
+				)
+			).toBeUndefined();
+		});
+
+		it('should name none for a route without steps', () => {
+			expect(findLifiIntermediateToken({ ...swapAfterBridge, includedSteps: [] })).toBeUndefined();
+		});
+
+		it('should name none for a route on one network', () => {
+			expect(
+				findLifiIntermediateToken(
+					route({
+						from: baseEth,
+						to: baseUsdc,
+						includedSteps: [
+							step({ type: 'protocol', tool: 'wrapper', from: baseEth, to: baseWeth }),
+							step({ type: 'swap', tool: 'nordstern', from: baseWeth, to: baseUsdc })
+						]
+					})
+				)
+			).toBeUndefined();
+		});
+
+		it('should name none for a route to Solana', () => {
+			const solanaUsdc = { chainId: ChainId.SOL, address: mockValidSplToken.address };
+			const solanaSol = { chainId: ChainId.SOL, address: SYSTEM_PROGRAM_ADDRESS };
+
+			expect(
+				findLifiIntermediateToken(
+					route({
+						from: baseUsdc,
+						to: solanaSol,
+						includedSteps: [
+							step({ type: 'cross', tool: 'near', from: baseUsdc, to: solanaUsdc }),
+							step({ type: 'swap', tool: 'jupiter', from: solanaUsdc, to: solanaSol })
+						]
+					})
+				)
+			).toBeUndefined();
+		});
+	});
+
+	describe('findLifiListedToken', () => {
+		const tokens = [
+			BASE_ETH_TOKEN,
+			ROBINHOOD_ETH_TOKEN,
+			{ ...USDG_TOKEN, enabled: false },
+			NVDA_TOKEN
+		] as Token[];
+
+		it('should find a listed token by its address within its network, enabled or not', () => {
+			expect(
+				findLifiListedToken({
+					tokens,
+					token: { chainId: ChainId.OUT, address: USDG_TOKEN.address.toLowerCase() }
+				})
+			).toBe(tokens[2]);
+		});
+
+		it("should find a network's native coin by the zero address", () => {
+			expect(
+				findLifiListedToken({
+					tokens,
+					token: { chainId: ChainId.OUT, address: ZERO_ETH_ADDRESS }
+				})
+			).toBe(ROBINHOOD_ETH_TOKEN);
+		});
+
+		it('should find no token another network lists at the same address', () => {
+			expect(
+				findLifiListedToken({
+					tokens,
+					token: { chainId: ChainId.BAS, address: USDG_TOKEN.address }
+				})
+			).toBeUndefined();
+		});
+
+		it('should find no token by its symbol alone', () => {
+			// The second USDG on Robinhood Chain, which OISY does not list.
+			expect(
+				findLifiListedToken({
+					tokens,
+					token: { chainId: ChainId.OUT, address: '0x0A3B763d66c0e8c7555c986A3701E1DC1Bf3954F' }
+				})
+			).toBeUndefined();
 		});
 	});
 });

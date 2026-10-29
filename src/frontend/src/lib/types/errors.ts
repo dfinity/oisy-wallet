@@ -1,3 +1,7 @@
+import type { SwapProvider } from '$lib/types/swap';
+import type { Token } from '$lib/types/token';
+import type { LiFiStep } from '@lifi/sdk';
+
 export class UserProfileNotFoundError extends Error {}
 
 export class SignupsClosedError extends Error {}
@@ -51,6 +55,28 @@ export class SwapAmountTooLowError extends Error {
 }
 
 /**
+ * A swap quote provider has no offer for the pair, but routes it through one token OISY lists in a
+ * shape OISY cannot verify, so the user can make it as two separate swaps through that token.
+ */
+export class SwapViaIntermediateTokenError extends Error {
+	readonly intermediateToken: Token;
+	readonly provider: SwapProvider;
+
+	constructor({
+		intermediateToken,
+		provider
+	}: {
+		intermediateToken: Token;
+		provider: SwapProvider;
+	}) {
+		super('The swap can be made as two separate swaps');
+
+		this.intermediateToken = intermediateToken;
+		this.provider = provider;
+	}
+}
+
+/**
  * A LI.FI quote failed OISY's own checks: it names a target or spender other than the pinned
  * Diamond, or echoes a request other than the one sent. LI.FI quotes are unsigned, so such a quote
  * is never shown nor acted on.
@@ -61,8 +87,19 @@ export class LifiQuoteRejectedError extends Error {}
  * A LI.FI quote passed the trust checks, but its route is one the calldata binding would refuse
  * (see `isLifiRouteExecutable`), even after re-quoting without the bridge it took. There is no route
  * OISY can execute.
+ *
+ * `route` is the refused route, which the two-swap hint reads its in-between token from; `cause`, the
+ * failure of the re-quote without its bridge.
  */
-export class LifiRouteUnsupportedError extends Error {}
+export class LifiRouteUnsupportedError extends Error {
+	readonly route?: LiFiStep;
+
+	constructor(message: string, { route, cause }: { route?: LiFiStep; cause?: unknown } = {}) {
+		super(message, { cause });
+
+		this.route = route;
+	}
+}
 
 /**
  * The LI.FI swap's network fee ceiling, from OISY's own gas estimate at execution, exceeds the one
@@ -79,5 +116,20 @@ export class LifiFeeChangedError extends Error {
 
 		this.gas = gas;
 		this.l1Fee = l1Fee;
+	}
+}
+
+/**
+ * The LI.FI Solana swap's ceiling — its network fee plus the rent of the accounts it creates, read
+ * from the transaction about to be signed — exceeds the one the user reviewed, so it was not signed.
+ * It carries that ceiling, in lamports, back to the review for the user to confirm.
+ */
+export class LifiSolFeeChangedError extends Error {
+	readonly ceiling: bigint;
+
+	constructor({ ceiling }: { ceiling: bigint }) {
+		super('The network fee of the LI.FI swap rose above the one reviewed.');
+
+		this.ceiling = ceiling;
 	}
 }

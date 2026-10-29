@@ -238,6 +238,8 @@ export const SWAP_PROVIDER_ANIMATION = 'swap-provider-animation';
 export const SWAP_PROVIDER_STATUS = 'swap-provider-status';
 export const SWAP_FEE_ROW = 'swap-fee-row';
 export const SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE = 'swap-lifi-insufficient-funds-for-fee';
+export const SWAP_TWO_SWAPS_HINT = 'swap-two-swaps-hint';
+export const SWAP_TWO_SWAPS_HINT_BUTTON = 'swap-two-swaps-hint-button';
 
 export const MODAL_FILTER_NETWORKS = 'MODAL_FILTER_NETWORKS';
 

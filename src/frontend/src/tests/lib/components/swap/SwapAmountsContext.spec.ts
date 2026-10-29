@@ -7,7 +7,7 @@ import * as tokensStore from '$lib/derived/tokens.derived';
 import * as swapService from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
-import { SwapAmountTooLowError } from '$lib/types/errors';
+import { SwapAmountTooLowError, SwapViaIntermediateTokenError } from '$lib/types/errors';
 import type { OptionAmount } from '$lib/types/send';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import {
@@ -246,6 +246,34 @@ describe('SwapAmountsContext.svelte', () => {
 		expect(value?.selectedProvider).toBeUndefined();
 		expect(value?.amountForSwap).toBe(20);
 		expect(value?.quoteError).toEqual({ type: 'amount-too-low', minAmount: 8300n });
+	});
+
+	it('sets the quote error when fetchSwapAmounts names an in-between token', async () => {
+		vi.spyOn(swapService, 'fetchSwapAmounts').mockRejectedValue(
+			new SwapViaIntermediateTokenError({
+				intermediateToken: mockValidIcrcToken,
+				provider: SwapProvider.LIFI
+			})
+		);
+
+		await renderWithContext({
+			amount: '20',
+			sourceToken,
+			destinationToken,
+			slippageValue: '0.2'
+		});
+
+		await waitForDebounce();
+
+		const value = get(store);
+
+		expect(value?.swaps).toEqual([]);
+		expect(value?.selectedProvider).toBeUndefined();
+		expect(value?.quoteError).toEqual({
+			type: 'two-swaps',
+			intermediateToken: mockValidIcrcToken,
+			provider: SwapProvider.LIFI
+		});
 	});
 
 	it('debounces fetchSwapAmounts calls', async () => {
