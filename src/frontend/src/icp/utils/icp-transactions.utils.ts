@@ -133,8 +133,9 @@ export const mapIcpTransaction = ({
 		// account owner did not pick the destination in that case, the spender did.
 		const transferSpender = fromNullable(operation.Transfer.spender);
 
-		// A top-up through the CMC. The ledger records only a hash of the deposit account, so
-		// the canister cannot be named.
+		// A top-up through the CMC, labelled as a TCYCLES top-up is. The ledger records only a
+		// hash of the deposit account, which only a contact's canister can name (see
+		// `getTopUpCanisterId`).
 		const isCanisterTopUp = source.incoming === false && isCmcTopUpMemo(transaction);
 
 		return {
@@ -145,7 +146,7 @@ export const mapIcpTransaction = ({
 			value: operation.Transfer.amount.e8s,
 			...(nonNullish(transferFee) && { fee: transferFee }),
 			...(nonNullish(transferSpender) && { transferSpender }),
-			...(isCanisterTopUp && { typeLabel: 'transaction.label.canister_top_up' })
+			...(isCanisterTopUp && { typeLabel: 'transaction.label.top_up' })
 		};
 	}
 
