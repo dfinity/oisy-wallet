@@ -6,7 +6,10 @@
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { erc721Tokens } from '$eth/derived/erc721.derived';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
-	import type { WalletConnectEthTypedDataApproval } from '$eth/types/wallet-connect';
+	import type {
+		WalletConnectEthTypedDataAllowance,
+		WalletConnectEthTypedDataApproval
+	} from '$eth/types/wallet-connect';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import {
 		getEthTypedDataApproval,
@@ -104,10 +107,10 @@
 	// message: a key the schema does not declare is absent from the digest, so
 	// displaying it would describe an approval that is not the one being signed.
 	let approval: WalletConnectEthTypedDataApproval = $derived(
-		(nonNullish(json) ? getEthTypedDataApproval(json) : undefined) ?? {}
+		(nonNullish(json) ? getEthTypedDataApproval(json) : undefined) ?? { allowances: [] }
 	);
 
-	let { spender, token: address, amount, unlimited, expiration } = $derived(approval);
+	let { spender, allowances } = $derived(approval);
 
 	// EIP-712 declares `chainId` as a `uint256`, so a number, a decimal string and a hex string are
 	// all the same chain and all hash alike. Comparing the text matched one form only.
@@ -133,7 +136,7 @@
 			: undefined
 	);
 
-	let token = $derived.by(() => {
+	const findToken = (address: string | undefined) => {
 		if (isNullish(address) || isNullish(domainChainId)) {
 			return;
 		}
@@ -148,12 +151,18 @@
 					networkId
 				}) && tokenChainId === domainChainId
 		);
-	});
+	};
 
 	// The allowance is stated whether or not the token is one OISY lists. An unlimited approval is
 	// the one that matters most and the one whose figure is least readable: 2^256-1 written out in
 	// digits is how an unlimited allowance passes for an ordinary number, so it is named instead.
-	let amountText = $derived.by(() => {
+	const toAmountText = ({
+		token,
+		amount,
+		unlimited
+	}: Pick<WalletConnectEthTypedDataAllowance, 'amount' | 'unlimited'> & {
+		token: ReturnType<typeof findToken>;
+	}): string | undefined => {
 		if (unlimited === true) {
 			return replacePlaceholders($i18n.core.text.unlimited, {
 				$items: token?.symbol ?? ''
@@ -169,18 +178,29 @@
 			: // With no token there are no decimals to scale by, so the figure stays in the units the
 				// struct states it in and says so, rather than posing as a token amount.
 				`${amount} ${$i18n.wallet_connect.text.token_units}`;
-	});
+	};
+
+	// One row group per allowance, each resolved on its own: a single signature can cover tokens
+	// OISY lists beside ones it does not, each with its own amount and expiry.
+	let allowanceRows = $derived(
+		allowances.map(({ token: address, amount, unlimited, expiration }) => {
+			const token = findToken(address);
+
+			return {
+				address,
+				token,
+				amountText: toAmountText({ token, amount, unlimited }),
+				expirationDate: nonNullish(expiration)
+					? formatSecondsToDate({ seconds: expiration, language: $currentLanguage })
+					: undefined
+			};
+		})
+	);
 
 	// Listed only where the summary rows are empty. A schema OISY describes states its spender, its
 	// amount and its expiry, which says more than the name of the struct they came out of.
 	let methods = $derived(
 		unreviewableTypedData && nonNullish(json) ? getEthTypedDataMethods(json) : []
-	);
-
-	let expirationDate = $derived(
-		nonNullish(expiration)
-			? formatSecondsToDate({ seconds: expiration, language: $currentLanguage })
-			: undefined
 	);
 
 	let activeTab = $state('summary');
@@ -285,29 +305,33 @@
 			</p>
 		{/if}
 
-		{#if nonNullish(token)}
-			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}</p>
-			<p class="mb-4 font-normal">{token.symbol}</p>
-		{:else if nonNullish(address)}
-			<!-- A token OISY does not list is still the contract the allowance is over, so the address is
-	     shown rather than the row dropped: an unnamed contract is a fact, its absence is not. -->
-			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}</p>
-			<p class="mb-4 font-normal"><output class="break-all">{address}</output></p>
-		{/if}
+		<!-- Keyed by position: a batch may list the same token twice, and each entry is signed. -->
+		{#each allowanceRows as { address, token, amountText, expirationDate }, index (index)}
+			{#if nonNullish(token)}
+				<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}</p>
+				<p class="mb-4 font-normal">{token.symbol}</p>
+			{:else if nonNullish(address)}
+				<!-- A token OISY does not list is still the contract the allowance is over, so the address
+				     is shown rather than the row dropped: an unnamed contract is a fact, its absence is not. -->
+				<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}</p>
+				<p class="mb-4 font-normal"><output class="break-all">{address}</output></p>
+			{/if}
 
-		{#if nonNullish(amountText)}
-			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.amount}</p>
-			<p class="mb-4 font-normal" data-tid="wallet-connect-typed-data-amount">{amountText}</p>
-		{/if}
+			{#if nonNullish(amountText)}
+				<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.amount}</p>
+				<p class="mb-4 font-normal" data-tid="wallet-connect-typed-data-amount">{amountText}</p>
+			{/if}
 
+			{#if nonNullish(expirationDate)}
+				<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.expiration}</p>
+				<p class="mb-4 font-normal">{expirationDate}</p>
+			{/if}
+		{/each}
+
+		<!-- Once, after every allowance: each one the signature sets is for this same spender. -->
 		{#if nonNullish(spender)}
 			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.spender}</p>
 			<p class="mb-4 font-normal">{spender}</p>
-		{/if}
-
-		{#if nonNullish(expirationDate)}
-			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.expiration}</p>
-			<p class="mb-4 font-normal">{expirationDate}</p>
 		{/if}
 	{:else}
 		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}</p>

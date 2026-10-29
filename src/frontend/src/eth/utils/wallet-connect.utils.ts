@@ -5,6 +5,7 @@ import type { OptionEthAddress } from '$eth/types/address';
 import type {
 	WalletConnectEthCall,
 	WalletConnectEthSignTypedDataV4,
+	WalletConnectEthTypedDataAllowance,
 	WalletConnectEthTypedDataApproval
 } from '$eth/types/wallet-connect';
 import { isEthAddress } from '$eth/utils/account.utils';
@@ -667,6 +668,28 @@ const toDeclaredStruct = (value: unknown): Record<string, unknown> =>
 		? (value as Record<string, unknown>)
 		: {};
 
+const PERMIT2_DETAILS: Array<TypedDataField> = [
+	{ name: 'token', type: 'address' },
+	{ name: 'amount', type: 'uint160' },
+	{ name: 'expiration', type: 'uint48' },
+	{ name: 'nonce', type: 'uint48' }
+];
+
+// Permit2 names the token it is granting an allowance over, and the contract verifying the
+// signature is Permit2 itself rather than that token, so the domain must not be read here.
+const toPermit2Allowance = (details: unknown): WalletConnectEthTypedDataAllowance => {
+	const { token, amount, expiration } = toDeclaredStruct(details);
+
+	const declaredAmount = toDeclaredUint(amount);
+
+	return {
+		token: toDeclaredAddress(token),
+		amount: declaredAmount,
+		unlimited: declaredAmount === MAX_UINT_160,
+		expiration: toExpirationSeconds(expiration)
+	};
+};
+
 /**
  * The EIP-712 schemas OISY understands well enough to summarize above the raw
  * message, each paired with the declared members that feed the summary.
@@ -685,28 +708,29 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 				{ name: 'spender', type: 'address' },
 				{ name: 'sigDeadline', type: 'uint256' }
 			],
-			PermitDetails: [
-				{ name: 'token', type: 'address' },
-				{ name: 'amount', type: 'uint160' },
-				{ name: 'expiration', type: 'uint48' },
-				{ name: 'nonce', type: 'uint48' }
-			]
+			PermitDetails: PERMIT2_DETAILS
 		},
-		// Permit2 names the token it is granting an allowance over, and the contract verifying the
-		// signature is Permit2 itself rather than that token, so the domain must not be read here.
-		toApproval: ({ message: { spender, details } }) => {
-			const { token, amount, expiration } = toDeclaredStruct(details);
-
-			const declaredAmount = toDeclaredUint(amount);
-
-			return {
-				spender: toDeclaredAddress(spender),
-				token: toDeclaredAddress(token),
-				amount: declaredAmount,
-				unlimited: declaredAmount === MAX_UINT_160,
-				expiration: toExpirationSeconds(expiration)
-			};
-		}
+		toApproval: ({ message: { spender, details } }) => ({
+			spender: toDeclaredAddress(spender),
+			allowances: [toPermit2Allowance(details)]
+		})
+	},
+	// Uniswap Permit2 `PermitBatch`: one signature setting an allowance over every token it lists,
+	// each with its own amount and expiration, all for the same spender.
+	{
+		primaryType: 'PermitBatch',
+		types: {
+			PermitBatch: [
+				{ name: 'details', type: 'PermitDetails[]' },
+				{ name: 'spender', type: 'address' },
+				{ name: 'sigDeadline', type: 'uint256' }
+			],
+			PermitDetails: PERMIT2_DETAILS
+		},
+		toApproval: ({ message: { spender, details } }) => ({
+			spender: toDeclaredAddress(spender),
+			allowances: (Array.isArray(details) ? details : []).map(toPermit2Allowance)
+		})
 	},
 	// Standard ERC-2612 `Permit`.
 	{
@@ -728,10 +752,14 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 
 			return {
 				spender: toDeclaredAddress(spender),
-				token: toDeclaredAddress(verifyingContract),
-				amount: declaredValue,
-				unlimited: declaredValue === MAX_UINT_256,
-				expiration: toExpirationSeconds(deadline)
+				allowances: [
+					{
+						token: toDeclaredAddress(verifyingContract),
+						amount: declaredValue,
+						unlimited: declaredValue === MAX_UINT_256,
+						expiration: toExpirationSeconds(deadline)
+					}
+				]
 			};
 		}
 	},
@@ -752,10 +780,14 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 		// a word in the folded message.
 		toApproval: ({ message: { spender, expiry, allowed }, domain: { verifyingContract } }) => ({
 			spender: toDeclaredAddress(spender),
-			token: toDeclaredAddress(verifyingContract),
-			amount: allowed === true ? undefined : ZERO,
-			unlimited: allowed === true,
-			expiration: toExpirationSeconds(expiry)
+			allowances: [
+				{
+					token: toDeclaredAddress(verifyingContract),
+					amount: allowed === true ? undefined : ZERO,
+					unlimited: allowed === true,
+					expiration: toExpirationSeconds(expiry)
+				}
+			]
 		})
 	}
 ];
@@ -990,7 +1022,7 @@ export const getEthTypedDataMethods = ({
  * Whether a request would be signed without OISY being able to state what it authorizes.
  *
  * A signature is not a lesser thing than a transaction. An ERC-3009 authorization lets its holder
- * pull tokens out of the wallet, a Permit2 batch grants allowances over several tokens at once, and
+ * pull tokens out of the wallet, a Permit2 signature transfer lets its spender move them in one call, and
  * a marketplace order sells an NFT; each is a struct OISY does not recognise, and each used to be
  * previewed as an application, a method name and a collapsed blob of JSON, with approval enabled
  * and nothing said about what signing it would allow.
