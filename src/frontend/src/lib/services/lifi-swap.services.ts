@@ -1,4 +1,5 @@
 import { LIFI_INTEGRATOR } from '$env/rest/lifi.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import {
 	LIFI_QUOTE_REFRESH_INTERVAL_MS,
 	LIFI_QUOTE_TIMEOUT_MS
@@ -38,7 +39,10 @@ import {
 	findLifiListedToken,
 	mapLifiSwapResult
 } from '$lib/utils/lifi-swap.utils';
+import { isNetworkIdSOLMainnet } from '$lib/utils/network.utils';
+import { resolveSwapTokenLookup } from '$lib/utils/swap-tokens-filter.utils';
 import { untilAborted } from '$lib/utils/timeout.utils';
+import { splTokens } from '$sol/derived/spl.derived';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import {
 	ChainId,
@@ -431,3 +435,19 @@ export const fetchLifiSwapQuote = async (
 
 	return toLifiSwapQuoteResult(outcome);
 };
+
+/**
+ * The Solana sources LI.FI may quote, keyed as the swap source filter keys them: native SOL and every
+ * SPL token on Solana mainnet known when the swap modal loads its lists. A list rather than a
+ * wildcard: the Solana category is a chain family, not an environment, so a wildcard would also make
+ * the devnet and local SOL tokens selectable, for which LI.FI is never asked.
+ */
+export const lifiSolSupportedTokens = (): Promise<Set<string>> =>
+	Promise.resolve(
+		new Set(
+			[SOLANA_TOKEN, ...get(splTokens)]
+				.filter(({ network: { id } }) => isNetworkIdSOLMainnet(id))
+				.map((token) => resolveSwapTokenLookup({ token })?.identifier)
+				.filter(nonNullish)
+		)
+	);

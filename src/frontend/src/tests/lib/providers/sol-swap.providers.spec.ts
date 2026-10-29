@@ -2,11 +2,12 @@ import type * as lifiEnv from '$env/rest/lifi.env';
 import type * as nearIntentsEnv from '$env/rest/near-intents.env';
 import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { SwapProvider } from '$lib/types/swap';
+import type * as splDerived from '$sol/derived/spl.derived';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { assertNonNullish } from '@dfinity/utils';
-import { get } from 'svelte/store';
+import { get, readable } from 'svelte/store';
 
 describe('sol-swap.providers', () => {
 	describe('LI.FI entry', () => {
@@ -76,7 +77,10 @@ describe('sol-swap.providers', () => {
 
 				beforeEach(() => {
 					fetchLifiSwapQuote.mockReset().mockResolvedValue(undefined);
-					vi.doMock('$lib/services/lifi-swap.services', () => ({ fetchLifiSwapQuote }));
+					vi.doMock('$lib/services/lifi-swap.services', () => ({
+						fetchLifiSwapQuote,
+						lifiSolSupportedTokens: vi.fn()
+					}));
 				});
 
 				afterEach(() => {
@@ -99,30 +103,38 @@ describe('sol-swap.providers', () => {
 					expect(fetchLifiSwapQuote).toHaveBeenCalledExactlyOnceWith(params);
 				});
 
-				it('should not ask LI.FI for a Solana source, which the Solana swap wizard cannot execute yet', async () => {
+				// The request refuses a Solana source with an EVM destination.
+				it('should ask LI.FI for a Solana source', async () => {
 					const { entry, solToken } = await load();
+					const params = {
+						sourceToken: solToken,
+						destinationToken: solToken,
+						amount: 1n,
+						userAddress: mockSolAddress,
+						recipientAddress: mockSolAddress,
+						slippage: 0.5
+					};
 
-					await expect(
-						entry.getQuote({
-							sourceToken: solToken,
-							destinationToken: solToken,
-							amount: 1n,
-							userAddress: mockSolAddress,
-							recipientAddress: mockSolAddress,
-							slippage: 0.5
-						})
-					).resolves.toBeUndefined();
+					await entry.getQuote(params);
 
-					expect(fetchLifiSwapQuote).not.toHaveBeenCalled();
+					expect(fetchLifiSwapQuote).toHaveBeenCalledExactlyOnceWith(params);
 				});
 			});
 
-			// Without a list the entry would count as a wildcard, and every enabled SPL token would be
-			// selectable as a source while LI.FI quotes none.
-			it('should declare an empty source list, so the Solana source picker is unchanged', async () => {
-				const { entry } = await load();
+			// A list rather than a wildcard, which would also admit the devnet and local SOL tokens.
+			it('should list the Solana mainnet tokens as sources', async () => {
+				const [{ entry, solToken }, { nativeSwapTokenIdentifier }] = await Promise.all([
+					load(),
+					import('$lib/utils/swap-tokens-filter.utils')
+				]);
 
-				await expect(entry.getSupportedTokens?.()).resolves.toEqual(new Set());
+				const sources = await entry.getSupportedTokens?.();
+
+				expect(
+					sources?.has(
+						nativeSwapTokenIdentifier({ networkId: solToken.network.id, symbol: solToken.symbol })
+					)
+				).toBeTruthy();
 			});
 
 			it('should offer every Solana destination for an EVM source', async () => {
@@ -137,7 +149,7 @@ describe('sol-swap.providers', () => {
 				).toStrictEqual({ sol: 'any' });
 			});
 
-			it('should offer nothing for a Solana source', async () => {
+			it('should offer every Solana destination for a Solana source', async () => {
 				const { entry, solToken } = await load();
 
 				expect(
@@ -146,7 +158,7 @@ describe('sol-swap.providers', () => {
 						supportedSourceTokens: new Set(),
 						findProviderSourceTokens: () => undefined
 					})
-				).toBeUndefined();
+				).toStrictEqual({ sol: 'any' });
 			});
 
 			// The entry's empty source list and its `'any'` wildcard, through the same steps as the swap
@@ -205,6 +217,64 @@ describe('sol-swap.providers', () => {
 					expect(
 						filterSwapTokens({ tokens: [{ ...SOLANA_TOKEN, enabled: true }], supportedData })
 					).toHaveLength(1);
+				});
+
+				describe('as sources', () => {
+					// The SPL tokens known when the lists load, a devnet one among them as with testnets on.
+					beforeEach(() => {
+						vi.doMock('$sol/derived/spl.derived', async (importOriginal) => {
+							const [original, { USDC_TOKEN, DEVNET_USDC_TOKEN }] = await Promise.all([
+								importOriginal<typeof splDerived>(),
+								import('$env/tokens/tokens-spl/tokens.usdc.env')
+							]);
+
+							return {
+								...original,
+								splTokens: readable(
+									[USDC_TOKEN, DEVNET_USDC_TOKEN].map((token) => ({ ...token, enabled: true }))
+								)
+							};
+						});
+					});
+
+					afterEach(() => {
+						vi.doUnmock('$sol/derived/spl.derived');
+					});
+
+					it('should offer the Solana mainnet tokens, and neither a devnet nor a local one', async () => {
+						const [
+							{ loadSwapSupportedTokens },
+							{ swapSupportedTokensStore },
+							{ filterSwapTokens },
+							{ SOLANA_TOKEN, SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN },
+							{ USDC_TOKEN, DEVNET_USDC_TOKEN }
+						] = await Promise.all([
+							import('$lib/services/swap-supported-tokens.services'),
+							import('$lib/stores/swap-supported-tokens.store'),
+							import('$lib/utils/swap-tokens-filter.utils'),
+							import('$env/tokens/tokens.sol.env'),
+							import('$env/tokens/tokens-spl/tokens.usdc.env')
+						]);
+
+						await loadSwapSupportedTokens({ identity: mockIdentity });
+
+						const supported = get(swapSupportedTokensStore);
+
+						assertNonNullish(supported);
+
+						const sources = filterSwapTokens({
+							tokens: [
+								SOLANA_TOKEN,
+								USDC_TOKEN,
+								SOLANA_DEVNET_TOKEN,
+								SOLANA_LOCAL_TOKEN,
+								DEVNET_USDC_TOKEN
+							].map((token) => ({ ...token, enabled: true })),
+							supportedData: supported.aggregated
+						});
+
+						expect(sources.map(({ id }) => id)).toStrictEqual([SOLANA_TOKEN.id, USDC_TOKEN.id]);
+					});
 				});
 			});
 		});

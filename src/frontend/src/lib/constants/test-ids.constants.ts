@@ -235,6 +235,7 @@ export const SWAP_TOKENS_MODAL_OPEN_BUTTON = 'swap-tokens-modal-open-button';
 export const SWAP_TOKENS_MODAL = 'swap-tokens-modal';
 export const SWAP_MODAL_SELECT_PROVIDER_STEP = 'swap-modal-select-provider-step';
 export const SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE = 'swap-lifi-insufficient-funds-for-fee';
+export const SWAP_LIFI_UNVERIFIED_ROUTE = 'swap-lifi-unverified-route';
 export const SWAP_TWO_SWAPS_HINT = 'swap-two-swaps-hint';
 export const SWAP_TWO_SWAPS_HINT_BUTTON = 'swap-two-swaps-hint-button';
 

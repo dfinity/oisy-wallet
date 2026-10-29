@@ -1,5 +1,6 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
+import { LIFI_SOL_NETWORK_FEE_HEADROOM_PERCENT } from '$lib/constants/swap.constants';
 import {
 	LifiQuoteRejectedError,
 	LifiRouteUnsupportedError,
@@ -8,6 +9,7 @@ import {
 import {
 	assertLifiSolInstructions,
 	assertLifiSolSimulation,
+	callsUnpinnedProgram,
 	lifiSolNetworkFee,
 	token2022AccountSize,
 	type LifiSolBinding,
@@ -201,13 +203,15 @@ const readLifiSolTransaction = async ({
 			}
 		});
 
+	const networkFee = lifiSolNetworkFee({
+		computeUnitLimit,
+		computeUnitPrice,
+		signatures: signers.length,
+		instructionsCount: transactionMessage.instructions.length
+	});
+
 	const ceiling = await lifiSolTransactionCeiling({
-		networkFee: lifiSolNetworkFee({
-			computeUnitLimit,
-			computeUnitPrice,
-			signatures: signers.length,
-			instructionsCount: transactionMessage.instructions.length
-		}),
+		networkFee,
 		createdAccounts,
 		rentExemptMinimum
 	});
@@ -222,6 +226,7 @@ const readLifiSolTransaction = async ({
 		transactionMessage,
 		wrappedSolAccount,
 		rentExemptMinimum,
+		networkFee,
 		ceiling,
 		closesWrappedSolAccount
 	};
@@ -298,7 +303,9 @@ const holdsWrappedSol = async (account: SolAddress): Promise<boolean> => {
 
 /**
  * The LI.FI ceiling of a Solana-source quote the form shows, read off its own transaction as the
- * binding reads it before signing, short of the simulation: what the form budgets beyond the amount.
+ * binding reads it before signing, short of the simulation, with headroom on its network fee: what
+ * the form, "Max" and the review budget beyond the amount, and execution's re-quote must fit. LI.FI
+ * prices the compute units anew with each quote (`LIFI_SOL_NETWORK_FEE_HEADROOM_PERCENT`).
  *
  * A route the binding would refuse gets no offer, since it could only fail once the user confirmed
  * it. It refuses with `LifiRouteUnsupportedError`, the binding's refusal as its cause: when a Solana
@@ -340,7 +347,7 @@ export const loadLifiSolQuoteCeiling = async ({
 		throw err;
 	}
 
-	const { ceiling, wrappedSolAccount, closesWrappedSolAccount } = transaction;
+	const { networkFee, ceiling, wrappedSolAccount, closesWrappedSolAccount } = transaction;
 
 	if (closesWrappedSolAccount && (await holdsWrappedSol(wrappedSolAccount))) {
 		throw new LifiRouteUnsupportedError(
@@ -349,5 +356,53 @@ export const loadLifiSolQuoteCeiling = async ({
 		);
 	}
 
-	return ceiling;
+	return ceiling + (networkFee * LIFI_SOL_NETWORK_FEE_HEADROOM_PERCENT) / 100n;
+};
+
+/**
+ * Whether the transaction of a Solana-source quote the review shows calls a program that is neither
+ * known nor pinned (`callsUnpinnedProgram`), from a simulation of it with its blockhash replaced: a
+ * venue Jupiter added since the pin, which the binding would refuse only once the user confirmed.
+ * Checking it at the review brings that refusal before the confirmation.
+ *
+ * `undefined` when there is no answer: a simulation that fails, a failed transaction included, or a
+ * message whose lookup tables cannot be read. The binding still checks the transaction that is
+ * signed.
+ */
+export const lifiSolQuoteCallsUnpinnedProgram = async ({
+	quote,
+	userAddress
+}: {
+	quote: LiFiStep;
+	userAddress: SolAddress;
+}): Promise<boolean | undefined> => {
+	const data = quote.transactionRequest?.data;
+
+	if (isNullish(data)) {
+		return;
+	}
+
+	const network = SolanaNetworks.mainnet;
+
+	let transactionMessage: Awaited<ReturnType<typeof parseSolBase64TransactionMessage>>;
+
+	try {
+		transactionMessage = await parseSolBase64TransactionMessage({
+			transactionMessage: data,
+			rpc: solanaHttpRpc(network)
+		});
+	} catch (_: unknown) {
+		return;
+	}
+
+	const result = await simulateSolTransaction({
+		base64EncodedTransactionMessage: data,
+		transactionMessage,
+		address: userAddress,
+		network,
+		// Only the programs it reaches are read, not what it funds.
+		rentExemptMinimumRequest: Promise.resolve(undefined)
+	});
+
+	return isNullish(result) ? undefined : callsUnpinnedProgram(result.unreadPrograms);
 };

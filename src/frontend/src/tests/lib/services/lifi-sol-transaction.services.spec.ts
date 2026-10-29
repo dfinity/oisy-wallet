@@ -2,6 +2,7 @@ import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	assertLifiSolTransaction,
+	lifiSolQuoteCallsUnpinnedProgram,
 	lifiSolTransactionCeiling,
 	loadLifiSolQuoteCeiling
 } from '$lib/services/lifi-sol-transaction.services';
@@ -619,8 +620,11 @@ describe('lifi-sol-transaction.services', () => {
 			vi.mocked(getMultipleAccountsInfo).mockResolvedValue([null]);
 		});
 
-		it("should give the ceiling of the quote's own transaction, without simulating it", async () => {
-			await expect(loadFixture(mockLifiSolSolToUsdc)).resolves.toBe(solToUsdcCeiling);
+		// The network fee doubled, the rent as it is.
+		it("should give the ceiling of the quote's own transaction with headroom on its network fee, without simulating it", async () => {
+			await expect(loadFixture(mockLifiSolSolToUsdc)).resolves.toBe(
+				solToUsdcCeiling + solToUsdcNetworkFee
+			);
 
 			expect(simulateSolTransaction).not.toHaveBeenCalled();
 		});
@@ -743,6 +747,76 @@ describe('lifi-sol-transaction.services', () => {
 			vi.mocked(getAccountData).mockRejectedValue(failure);
 
 			await expect(loadFixture(mockLifiSolSolToPyusd)).rejects.toBe(failure);
+		});
+	});
+
+	describe('lifiSolQuoteCallsUnpinnedProgram', () => {
+		// A venue Jupiter publishes, which `LIFI_SOLANA_PROGRAM_ADDRESSES` pins.
+		const PINNED_VENUE = 'HBVw6bZtcCaezhcBrmfyXBSBRWCdv72271xQ4GPvms2z';
+
+		const check = () =>
+			lifiSolQuoteCallsUnpinnedProgram({
+				quote: mockLifiSolSolToUsdc.quote,
+				userAddress: mockLifiSolUser
+			});
+
+		const mockUnreadPrograms = async (unreadPrograms: string[]) =>
+			vi.mocked(simulateSolTransaction).mockResolvedValue({
+				preview: await solToUsdcPreview(),
+				parties: { sources: [], destinations: [], partial: false },
+				unreadPrograms
+			});
+
+		it("should simulate the quote's own bytes, its blockhash replaced", async () => {
+			await check();
+
+			expect(simulateSolTransaction).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					base64EncodedTransactionMessage: mockLifiSolSolToUsdc.quote.transactionRequest?.data,
+					address: mockLifiSolUser,
+					network: 'mainnet'
+				})
+			);
+			expect(vi.mocked(simulateSolTransaction).mock.calls[0][0]).not.toHaveProperty(
+				'replaceRecentBlockhash'
+			);
+		});
+
+		it('should find no unpinned program when the route reaches known and pinned ones only', async () => {
+			await mockUnreadPrograms([PINNED_VENUE]);
+
+			await expect(check()).resolves.toBeFalsy();
+		});
+
+		it('should find a program neither known nor pinned', async () => {
+			await mockUnreadPrograms([PINNED_VENUE, mockSolAddress2]);
+
+			await expect(check()).resolves.toBeTruthy();
+		});
+
+		it('should have no answer when the simulation gives none', async () => {
+			vi.mocked(simulateSolTransaction).mockResolvedValue(undefined);
+
+			await expect(check()).resolves.toBeUndefined();
+		});
+
+		it('should have no answer when the lookup tables cannot be read', async () => {
+			vi.mocked(parseSolBase64TransactionMessage).mockRejectedValue(new Error('unavailable'));
+
+			await expect(check()).resolves.toBeUndefined();
+
+			expect(simulateSolTransaction).not.toHaveBeenCalled();
+		});
+
+		it('should have no answer for a quote without a transaction', async () => {
+			await expect(
+				lifiSolQuoteCallsUnpinnedProgram({
+					quote: { ...mockLifiSolSolToUsdc.quote, transactionRequest: undefined },
+					userAddress: mockLifiSolUser
+				})
+			).resolves.toBeUndefined();
+
+			expect(simulateSolTransaction).not.toHaveBeenCalled();
 		});
 	});
 });

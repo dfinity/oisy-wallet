@@ -212,15 +212,20 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	};
 };
 
-// The gas and L1 data fee of a LI.FI fee ceiling that an execution found above the reviewed one,
-// for the quote inputs it was found for; the review prices them at its own fee per gas. Kept here
-// rather than in the wizard, which every step change rebuilds: the review the failed execution
-// returns to is another instance.
-export interface LifiCarriedFee {
-	key: string;
-	gas: bigint;
-	l1Fee: bigint;
-}
+// A LI.FI fee ceiling that an execution found above the reviewed one, for the quote inputs it was
+// found for: on EVM its gas and L1 data fee, which the review prices at its own fee per gas, on
+// Solana the ceiling itself, in lamports. Kept here rather than in the wizard, which every step
+// change rebuilds: the review the failed execution returns to is another instance.
+export type LifiCarriedFee =
+	| {
+			key: string;
+			gas: bigint;
+			l1Fee: bigint;
+	  }
+	| {
+			key: string;
+			solCeiling: bigint;
+	  };
 
 // The highest LI.FI fee seen for the route to a destination while "Max" holds a LI.FI amount, and
 // that destination: the fee of a route to another says nothing about the new one's.

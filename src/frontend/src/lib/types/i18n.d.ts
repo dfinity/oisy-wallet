@@ -1152,6 +1152,7 @@ interface I18nSwap {
 		oisy_trade_recovery_failed: string;
 		lifi_status_unknown: string;
 		lifi_fee_changed: string;
+		lifi_route_unverified: string;
 	};
 }
 
