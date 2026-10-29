@@ -43,8 +43,9 @@ const rejected = (reason: string) => lifiRejectedError({ subject: 'transaction',
 
 /**
  * The size of the associated token account a creation makes: an SPL Token one is `ATA_SIZE`, a
- * Token-2022 one carries the extensions its mint requires, so that mint is read. `undefined` when it
- * cannot be read or sized.
+ * Token-2022 one carries the extensions its mint requires, so that mint is read. `undefined` when the
+ * mint does not exist or cannot be sized; a read that fails rejects as it is, a failure of the chain
+ * rather than of the route.
  */
 const createdAccountSize = async ({
 	mint,
@@ -54,13 +55,13 @@ const createdAccountSize = async ({
 		return ATA_SIZE;
 	}
 
+	const data = await getAccountData({ address: mint, network: SolanaNetworks.mainnet });
+
+	if (isNullish(data)) {
+		return;
+	}
+
 	try {
-		const data = await getAccountData({ address: mint, network: SolanaNetworks.mainnet });
-
-		if (isNullish(data)) {
-			return;
-		}
-
 		// The decoder throws on an extension type it does not know.
 		const extensions = unwrapOption(getMintDecoder().decode(data).extensions) ?? [];
 
@@ -75,7 +76,7 @@ const createdAccountSize = async ({
  * account it creates, each sized from its mint. An account that already exists is counted too, since
  * nothing in the message says it does, and a temporary one is, since it must be funded until it is
  * closed: an upper bound on what the transaction costs beyond the amount it swaps. `undefined` when
- * the size of one of them cannot be established.
+ * the size of one of them cannot be established; a mint read that fails rejects as it is.
  */
 export const lifiSolTransactionCeiling = async ({
 	networkFee,
@@ -300,12 +301,18 @@ const holdsWrappedSol = async (account: SolAddress): Promise<boolean> => {
  * binding reads it before signing, short of the simulation: what the form budgets beyond the amount.
  *
  * A route the binding would refuse gets no offer, since it could only fail once the user confirmed
- * it. Neither does one that closes the user's wrapped SOL account while it holds wrapped SOL: the
- * close would unwrap all of it, which the binding refuses too. That account is read whenever the
- * route closes it, created first or not: an idempotent creation leaves an existing account as it is,
- * so it does not show the account to be new. Both refuse with
- * `LifiRouteUnsupportedError`, a route OISY cannot take rather than a forged one: the quote has
- * passed the trust checks. A failure to read the chain rejects as it is.
+ * it. It refuses with `LifiRouteUnsupportedError`, the binding's refusal as its cause: when a Solana
+ * quote is fetched, the trust checks do not read its instructions, so the pinned instructions are the
+ * only check of what its transaction does. The refusal is then tracked as a rejected quote, as a
+ * forged EVM target is, and so is a change in LI.FI's transactions that the pin does not know yet.
+ *
+ * Nor does a route get an offer that closes the user's wrapped SOL account while it holds wrapped
+ * SOL: the close would unwrap all of it, which the binding refuses too. That account is read
+ * whenever the route closes it, created first or not: an idempotent creation leaves an existing
+ * account as it is, so it does not show the account to be new. It refuses with
+ * `LifiRouteUnsupportedError` and no cause, a route OISY cannot take, tracked as no route.
+ *
+ * A failure to read the chain rejects as it is.
  */
 export const loadLifiSolQuoteCeiling = async ({
 	quote,
@@ -325,7 +332,8 @@ export const loadLifiSolQuoteCeiling = async ({
 	} catch (err: unknown) {
 		if (err instanceof LifiQuoteRejectedError) {
 			throw new LifiRouteUnsupportedError(`LI.FI Solana route cannot be executed: ${err.message}`, {
-				route: quote
+				route: quote,
+				cause: err
 			});
 		}
 

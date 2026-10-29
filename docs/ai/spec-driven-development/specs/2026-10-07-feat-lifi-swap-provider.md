@@ -542,8 +542,14 @@ execution-time — passes `assertLifiQuote` before it is shown or acted on:
   a forged one, and is tracked as no route. A Solana-source quote's route shape is its
   transaction itself (from 3d-1): `loadLifiSolQuoteCeiling` reads it as the binding does
   before signing — lookup tables resolved, the pinned instructions, the LI.FI ceiling
-  bounded — short of the simulation, and a quote it refuses gets no offer, tracked as no
-  route too. Those RPC reads share the quote's `LIFI_QUOTE_TIMEOUT_MS` deadline
+  bounded — short of the simulation, and a quote it refuses gets no offer. Unlike EVM's
+  route shape, that refusal is tracked as a rejected quote (`quote_rejected`, error
+  severity, the binding's refusal as the cause): the Solana trust checks do not read the
+  instructions, so the pin is the only check of what the transaction does, and a forged
+  one or a change in LI.FI's transactions that the pin does not know yet must show. A route
+  that would unwrap the wSOL the user holds is a route OISY cannot take, tracked as no
+  route; a read that fails, the Token-2022 mint's included, as a failed request. Those RPC
+  reads share the quote's `LIFI_QUOTE_TIMEOUT_MS` deadline
   (`untilAborted`): they cannot be handed its signal, and the form waits for every
   provider's answer, so a read that stalls ends the offer as a timeout rather than holding
   the whole quote, and the quote cache with it.
@@ -1992,7 +1998,6 @@ alone makes anything reachable. "PR 3" elsewhere in this spec means them all tog
 is split three ways in turn (2026-10-28), as 2b was: the quote side (3d-1) and execution
 (3d-2), neither reachable, then the wiring (3d-3), which makes Solana-source swaps
 reachable, in every environment, since PR 4 merged first (see [Decisions](#decisions)).
-3d-1 is stacked on 3b and 3c while they are open.
 
 `docs/ai/PRODUCT.md` is updated in **every** PR that makes new behaviour reachable on a
 deployed environment, not after: PR 2b describes EVM-source swaps (including EVM →
