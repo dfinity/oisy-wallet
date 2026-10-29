@@ -150,8 +150,13 @@
 
 	let invalidDestination = $derived(isNullishOrEmpty(destination) || !isEthAddress(destination));
 
+	// The review names the token's network, so a send prepared for any other network would be signed
+	// for a chain the user never saw.
+	let networkMismatch = $derived(sourceNetwork.id !== $sendTokenNetworkId);
+
 	let invalid = $derived(
 		!sendEnabled ||
+			networkMismatch ||
 			invalidDestination ||
 			notEmptyString(insufficientFundsErrorMessage) ||
 			isNullish(amount) ||
@@ -171,6 +176,10 @@
 		});
 
 		if (isNullish($authIdentity)) {
+			return;
+		}
+
+		if (networkMismatch) {
 			return;
 		}
 
