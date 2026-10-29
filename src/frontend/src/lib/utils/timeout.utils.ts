@@ -34,6 +34,45 @@ export const withDeadline = async <T>({
 	}
 };
 
+/**
+ * Rejects with `signal`'s reason once it aborts, unless `operation` settles first: the deadline of
+ * work that cannot be handed the signal itself, such as a chain of RPC reads. The work goes on, and
+ * what it settles with afterwards is ignored.
+ */
+export const untilAborted = async <T>({
+	operation,
+	signal
+}: {
+	operation: Promise<T>;
+	signal: AbortSignal;
+}): Promise<T> => {
+	let onAbort: (() => void) | undefined;
+
+	// As above, `operation` is subscribed to straight away, so a rejection arriving after the signal
+	// aborted is still handled and cannot surface as an unhandled rejection. The abort comes first:
+	// `Promise.race` settles with the first entry already settled, so a signal that had aborted before
+	// the call wins over an operation that had already settled too.
+	try {
+		return await Promise.race([
+			new Promise<never>((_, reject) => {
+				onAbort = () => reject(signal.reason);
+
+				if (signal.aborted) {
+					onAbort();
+					return;
+				}
+
+				signal.addEventListener('abort', onAbort, { once: true });
+			}),
+			operation
+		]);
+	} finally {
+		if (nonNullish(onAbort)) {
+			signal.removeEventListener('abort', onAbort);
+		}
+	}
+};
+
 export const waitForMilliseconds = (milliseconds: number): Promise<void> =>
 	new Promise((resolve) => {
 		setTimeout(resolve, milliseconds);

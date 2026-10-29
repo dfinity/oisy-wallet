@@ -19,12 +19,18 @@ import {
 } from '$lib/enums/plausible';
 import { fetchLifiQuote } from '$lib/rest/lifi.rest';
 import { trackEvent } from '$lib/services/analytics.services';
+import { loadLifiSolQuoteCeiling } from '$lib/services/lifi-sol-transaction.services';
 import { fetchLifiSwapQuote, resetLifiQuoteCache } from '$lib/services/lifi-swap.services';
-import { SwapViaIntermediateTokenError } from '$lib/types/errors';
+import {
+	LifiQuoteRejectedError,
+	LifiRouteUnsupportedError,
+	SwapViaIntermediateTokenError
+} from '$lib/types/errors';
 import type { LifiTokenRef } from '$lib/types/lifi';
 import { SwapProvider } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockLifiSolSolToUsdc, mockLifiSolUser } from '$tests/mocks/lifi-sol-transaction.mock';
 import {
 	mockLifiBaseUsdcAddress,
 	mockLifiBaseUsdcToken,
@@ -64,6 +70,10 @@ vi.mock('$lib/derived/tokens.derived', async (importOriginal) => {
 
 vi.mock('$lib/rest/lifi.rest', () => ({
 	fetchLifiQuote: vi.fn()
+}));
+
+vi.mock('$lib/services/lifi-sol-transaction.services', () => ({
+	loadLifiSolQuoteCeiling: vi.fn()
 }));
 
 vi.mock('$lib/services/analytics.services', () => ({
@@ -126,12 +136,159 @@ describe('lifi-swap.services', () => {
 				fetchLifiSwapQuote({
 					...params,
 					sourceToken: SOLANA_TOKEN,
-					destinationToken: mockValidSplToken,
-					userAddress: mockSolAddress
+					userAddress: mockSolAddress,
+					recipientAddress: mockLifiUserAddress
 				})
 			).resolves.toBeUndefined();
 
 			expect(fetchLifiQuote).not.toHaveBeenCalled();
+		});
+
+		it('should not read a Solana ceiling for an EVM source', async () => {
+			await fetchLifiSwapQuote(params);
+
+			expect(loadLifiSolQuoteCeiling).not.toHaveBeenCalled();
+		});
+
+		describe('a Solana source', () => {
+			const { request: fixtureRequest, quote: fixtureQuote } = mockLifiSolSolToUsdc;
+
+			const solParams = {
+				sourceToken: SOLANA_TOKEN,
+				destinationToken: { ...mockValidSplToken, address: fixtureRequest.toToken },
+				amount: BigInt(fixtureRequest.fromAmount),
+				userAddress: mockLifiSolUser,
+				recipientAddress: mockLifiSolUser,
+				slippage: 0.5
+			};
+
+			// The fixture's transaction, in a quote that echoes the request.
+			const solQuote: LiFiStep = {
+				...mockLifiQuote,
+				action: {
+					...mockLifiQuote.action,
+					fromChainId: ChainId.SOL,
+					toChainId: ChainId.SOL,
+					fromToken: { ...mockLifiQuote.action.fromToken, address: fixtureRequest.fromToken },
+					toToken: { ...mockLifiQuote.action.toToken, address: fixtureRequest.toToken },
+					fromAmount: fixtureRequest.fromAmount,
+					toAddress: mockLifiSolUser
+				},
+				estimate: fixtureQuote.estimate,
+				includedSteps: [{ ...mockLifiQuote, type: 'swap', tool: 'jupiter' }],
+				transactionRequest: fixtureQuote.transactionRequest
+			};
+
+			beforeEach(() => {
+				vi.mocked(fetchLifiQuote).mockResolvedValue(solQuote);
+				vi.mocked(loadLifiSolQuoteCeiling).mockResolvedValue(380_000n);
+			});
+
+			it('should ask LI.FI with the exchanges its binding checks, and carry the ceiling of its transaction', async () => {
+				await expect(fetchLifiSwapQuote(solParams)).resolves.toStrictEqual({
+					provider: SwapProvider.LIFI,
+					receiveAmount: BigInt(fixtureQuote.estimate.toAmount),
+					receiveOutMinimum: mockLifiSolSolToUsdc.toAmountMin,
+					swapDetails: solQuote,
+					request: expect.objectContaining({ fromChain: ChainId.SOL, allowExchanges: ['jupiter'] }),
+					solFeeCeiling: 380_000n
+				});
+
+				expect(loadLifiSolQuoteCeiling).toHaveBeenCalledExactlyOnceWith({
+					quote: solQuote,
+					request: expect.objectContaining({ fromChain: ChainId.SOL, toChain: ChainId.SOL })
+				});
+			});
+
+			it('should not read the ceiling of a quote that fails the trust checks', async () => {
+				vi.mocked(fetchLifiQuote).mockResolvedValue({
+					...solQuote,
+					includedSteps: [{ ...mockLifiQuote, type: 'swap', tool: 'dflow' }]
+				});
+
+				await expect(fetchLifiSwapQuote(solParams)).resolves.toBeUndefined();
+
+				expect(loadLifiSolQuoteCeiling).not.toHaveBeenCalled();
+			});
+
+			it.each([
+				{
+					reason: 'a transaction its binding refuses, as a rejected quote',
+					err: new LifiRouteUnsupportedError('refused', {
+						cause: new LifiQuoteRejectedError('LI.FI transaction rejected: x')
+					}),
+					type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.QUOTE_REJECTED,
+					severity: PLAUSIBLE_EVENT_SEVERITIES.ERROR
+				},
+				{
+					reason: 'a route OISY cannot take, as no route',
+					err: new LifiRouteUnsupportedError('unsupported'),
+					type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE,
+					severity: undefined
+				},
+				{
+					reason: 'a route whose chain reads fail, as a failed request',
+					err: new Error('rpc down'),
+					type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.REQUEST_FAILED,
+					severity: PLAUSIBLE_EVENT_SEVERITIES.WARN
+				}
+			])('should not offer $reason', async ({ err, type, severity }) => {
+				vi.mocked(loadLifiSolQuoteCeiling).mockRejectedValue(err);
+
+				await expect(fetchLifiSwapQuote(solParams)).resolves.toBeUndefined();
+
+				const [[{ metadata }]] = vi.mocked(trackEvent).mock.calls;
+
+				expect(metadata).toEqual(expect.objectContaining({ result_error_type: type }));
+				expect(metadata?.event_severity).toBe(severity);
+			});
+
+			describe('a ceiling read that outlasts the deadline', () => {
+				let deadline: AbortController;
+
+				const timedOut = () =>
+					deadline.abort(new DOMException('The operation timed out.', 'TimeoutError'));
+
+				beforeEach(() => {
+					deadline = new AbortController();
+					vi.spyOn(AbortSignal, 'timeout').mockReturnValueOnce(deadline.signal);
+					vi.mocked(loadLifiSolQuoteCeiling).mockReturnValueOnce(new Promise(() => undefined));
+				});
+
+				afterEach(() => {
+					vi.mocked(AbortSignal.timeout).mockRestore();
+				});
+
+				it('should settle without an offer at the deadline, tracked as a timeout', async () => {
+					const quote = fetchLifiSwapQuote(solParams);
+
+					timedOut();
+
+					await expect(quote).resolves.toBeUndefined();
+
+					expect(trackEvent).toHaveBeenCalledWith(
+						expect.objectContaining({
+							metadata: expect.objectContaining({
+								result_error_type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.TIMEOUT,
+								event_severity: PLAUSIBLE_EVENT_SEVERITIES.WARN
+							})
+						})
+					);
+				});
+
+				it('should not hold a later request for the same inputs', async () => {
+					const first = fetchLifiSwapQuote(solParams);
+
+					timedOut();
+					await first;
+
+					vi.setSystemTime(now + LIFI_QUOTE_REFRESH_INTERVAL_MS);
+
+					await expect(fetchLifiSwapQuote(solParams)).resolves.toMatchObject({
+						solFeeCeiling: 380_000n
+					});
+				});
+			});
 		});
 
 		describe('a cross-chain route', () => {
