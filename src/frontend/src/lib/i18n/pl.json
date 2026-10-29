@@ -2320,7 +2320,8 @@
 			"deposit": "Wpłata",
 			"approve": "Zatwierdź",
 			"burn": "Spal",
-			"mint": "Wytwórz"
+			"mint": "Wytwórz",
+			"top_up": "Doładowanie"
 		},
 		"filter": {
 			"types_label": "",
