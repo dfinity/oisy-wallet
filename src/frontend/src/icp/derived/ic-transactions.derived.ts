@@ -101,7 +101,7 @@ export const icKnownDestinations: Readable<KnownDestinations> = derived(
 						// A canister top-up pays into the CMC's deposit account for that canister,
 						// which differs per canister, so it is told by its memo, as its label
 						// records. ICP sent there without the memo is never topped up.
-						if (data.typeLabel === 'transaction.label.canister_top_up') {
+						if (data.typeLabel === 'transaction.label.top_up') {
 							return;
 						}
 
