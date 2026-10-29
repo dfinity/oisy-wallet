@@ -12,7 +12,8 @@ use crate::{
         },
         backend_config::{Config, InitArg},
         contact::{
-            Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
+            Contact, ContactAddressData, ContactImage, CreateContactRequest,
+            GetContactImagesRequest, UpdateContactRequest, MAX_CONTACT_IMAGES_PER_CALL,
         },
         custom_token::{
             CustomToken, CustomTokenId, Dip721Token, ErcToken, ErcTokenId, ExtV2Token,
@@ -998,6 +999,16 @@ impl Validate for UpdateContactRequest {
     }
 }
 
+impl Validate for GetContactImagesRequest {
+    fn validate(&self) -> Result<(), Error> {
+        validate_collection_size(
+            &self.contact_ids,
+            MAX_CONTACT_IMAGES_PER_CALL,
+            "GetContactImagesRequest.contact_ids",
+        )
+    }
+}
+
 impl Validate for ExchangeData {
     fn validate(&self) -> Result<(), Error> {
         if self.timestamp_ns == 0 {
@@ -1633,6 +1644,7 @@ validate_on_deserialize!(Contact);
 validate_on_deserialize!(ContactAddressData);
 validate_on_deserialize!(CreateContactRequest);
 validate_on_deserialize!(UpdateContactRequest);
+validate_on_deserialize!(GetContactImagesRequest);
 validate_on_deserialize!(ContactImage);
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
