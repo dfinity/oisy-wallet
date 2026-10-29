@@ -494,6 +494,7 @@ describe('SwapBtcWizard', () => {
 			expect(fetchNearIntentsBtcSwap).toHaveBeenCalledWith(
 				expect.objectContaining({
 					swapAmount: '0.01',
+					slippageValue: '0.5',
 					userAddress: mockBtcAddress,
 					network: 'mainnet',
 					utxosFee: mockUtxosFee,

@@ -1143,6 +1143,7 @@ interface I18nSwap {
 		swap_expired: string;
 		near_intents_quote_unverified: string;
 		near_intents_quote_expired: string;
+		near_intents_quote_slippage: string;
 		near_intents_deposit_expired: string;
 		near_intents_quote_deposit_memo: string;
 		oisy_trade_not_trackable: string;

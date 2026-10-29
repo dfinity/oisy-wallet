@@ -232,6 +232,7 @@
 					destinationToken: $destinationToken,
 					swapAmount,
 					swapDetails: selectedProvider.swapDetails,
+					slippageValue,
 					userAddress: sourceAddress,
 					network,
 					utxosFee

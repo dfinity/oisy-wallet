@@ -216,6 +216,7 @@ describe('SwapXrpWizard', () => {
 					destinationToken,
 					swapAmount: '10',
 					swapDetails: mockNearIntentsQuoteResponse,
+					slippageValue: '0.5',
 					userAddress: mockXrpAddress,
 					network: XrpNetworks.mainnet,
 					fee: nodeFee

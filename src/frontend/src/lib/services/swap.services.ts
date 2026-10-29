@@ -42,7 +42,11 @@ import {
 	ZERO
 } from '$lib/constants/app.constants';
 import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
-import { ICP_SWAP_POOL_FEE, SWAP_SIDE } from '$lib/constants/swap.constants';
+import {
+	ICP_SWAP_POOL_FEE,
+	SWAP_DEFAULT_SLIPPAGE_VALUE,
+	SWAP_SIDE
+} from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
 import {
 	PLAUSIBLE_EVENTS,
@@ -81,7 +85,7 @@ import {
 } from '$lib/types/near-intents';
 import type { NetworkId } from '$lib/types/network';
 import type { OisyTradeQuote } from '$lib/types/oisy-trade-swap';
-import type { Amount } from '$lib/types/send';
+import type { Amount, OptionAmount } from '$lib/types/send';
 import {
 	SwapErrorCodes,
 	SwapProvider,
@@ -893,6 +897,7 @@ const executeNearIntentsSwap = async ({
 	destinationToken,
 	swapAmount,
 	swapDetails,
+	slippageValue,
 	sendTransaction,
 	enableDestinationToken
 }: {
@@ -902,6 +907,7 @@ const executeNearIntentsSwap = async ({
 	destinationToken: Token;
 	swapAmount: Amount;
 	swapDetails: NearIntentsQuoteResponse;
+	slippageValue: OptionAmount;
 	// `registerSwap` creates the swap's AUT row. A transport whose send is irreversible
 	// the moment it is broadcast (BTC) must invoke it from its broadcast callback, so the
 	// row exists even if any later step of the send throws (the `fetchChainFusionBtcSwap`
@@ -949,6 +955,18 @@ const executeNearIntentsSwap = async ({
 		throwSwapError({
 			code: SwapErrorCodes.NEAR_INTENTS_QUOTE_EXPIRED,
 			message: get(i18n).swap.error.near_intents_quote_expired
+		});
+	}
+
+	// 1Click derives the signed minimum from the tolerance the quote was requested with, so the quote
+	// must carry the max slippage the review showed, converted as the request converts it.
+	if (
+		swapDetails.quoteRequest.slippageTolerance !==
+		slippagePercentToBasisPoints(slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE)
+	) {
+		throwSwapError({
+			code: SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE,
+			message: get(i18n).swap.error.near_intents_quote_slippage
 		});
 	}
 
@@ -1079,7 +1097,8 @@ export const fetchNearIntentsEvmSwap = async ({
 	gas,
 	maxFeePerGas,
 	maxPriorityFeePerGas,
-	swapDetails
+	swapDetails,
+	slippageValue
 }: SwapNearIntentsEvmParams): Promise<void> => {
 	await executeNearIntentsSwap({
 		identity,
@@ -1088,6 +1107,7 @@ export const fetchNearIntentsEvmSwap = async ({
 		destinationToken,
 		swapAmount,
 		swapDetails,
+		slippageValue,
 		sendTransaction: async ({ amount, depositAddress, recordPollRefs }) => {
 			const { hash, nonce } = await sendEvm({
 				from: userAddress,
@@ -1122,7 +1142,8 @@ export const fetchNearIntentsSolSwap = async ({
 	destinationToken,
 	swapAmount,
 	userAddress,
-	swapDetails
+	swapDetails,
+	slippageValue
 }: SwapNearIntentsSolParams): Promise<void> => {
 	await executeNearIntentsSwap({
 		identity,
@@ -1131,6 +1152,7 @@ export const fetchNearIntentsSolSwap = async ({
 		destinationToken,
 		swapAmount,
 		swapDetails,
+		slippageValue,
 		sendTransaction: async ({ amount, depositAddress }) =>
 			await sendSol({
 				identity,
@@ -1151,6 +1173,7 @@ export const fetchNearIntentsBtcSwap = async ({
 	destinationToken,
 	swapAmount,
 	swapDetails,
+	slippageValue,
 	userAddress,
 	network,
 	utxosFee
@@ -1162,6 +1185,7 @@ export const fetchNearIntentsBtcSwap = async ({
 		destinationToken,
 		swapAmount,
 		swapDetails,
+		slippageValue,
 		// `sendBtc` converts the display amount to satoshis itself, so it takes the raw
 		// `swapAmount` rather than the parsed base-unit amount the core hands over.
 		sendTransaction: async ({ depositAddress, registerSwap }) => {
@@ -1208,6 +1232,7 @@ export const fetchNearIntentsXrpSwap = async ({
 	destinationToken,
 	swapAmount,
 	swapDetails,
+	slippageValue,
 	userAddress,
 	network,
 	fee
@@ -1229,6 +1254,7 @@ export const fetchNearIntentsXrpSwap = async ({
 		destinationToken,
 		swapAmount,
 		swapDetails,
+		slippageValue,
 		// The swap is the transaction and the deposit a part of it, so the payment is recorded
 		// under the swap's own row, which `sendXrp` creates after signing and before the submit —
 		// where the in-flight check needs it. `sendXrp` never throws once the payment may be on the
