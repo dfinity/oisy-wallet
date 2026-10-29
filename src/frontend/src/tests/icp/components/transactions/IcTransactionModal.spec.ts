@@ -1,6 +1,8 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
+import { getCmcDepositAccountIdentifier } from '$icp/utils/cmc.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import { contactsStore } from '$lib/stores/contacts.store';
 import { i18n } from '$lib/stores/i18n.store';
 import {
 	formatNanosecondsToDate,
@@ -10,6 +12,7 @@ import {
 import { mockTcyclesToken } from '$tests/mocks/cycles-mint.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
+import { Principal } from '@icp-sdk/core/principal';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -122,6 +125,7 @@ describe('IcTransactionModal', () => {
 
 			expect(container).toHaveTextContent(get(i18n).transaction.label.top_up);
 			expect(container).not.toHaveTextContent(/\bburn\b/);
+			expect(getByText(`${get(i18n).transaction.text.canister}:`)).toBeInTheDocument();
 			expect(getByText(canister)).toBeInTheDocument();
 		});
 
@@ -150,18 +154,64 @@ describe('IcTransactionModal', () => {
 	});
 
 	describe('ICP top-ups', () => {
+		const canister = 'ywcsb-maaaa-aaaai-q6k7a-cai';
+
+		const depositAccount = getCmcDepositAccountIdentifier(Principal.fromText(canister));
+
+		const topUp = {
+			...mockIcTransactionUi,
+			type: 'send' as const,
+			typeLabel: 'transaction.label.top_up',
+			to: depositAccount,
+			toExplorerUrl: `https://dashboard.internetcomputer.org/account/${depositAccount}`
+		};
+
+		beforeEach(() => {
+			contactsStore.set([]);
+		});
+
 		it('should title a canister top-up as one', () => {
 			const { container } = render(IcTransactionModal, {
-				transaction: {
-					...mockIcTransactionUi,
-					type: 'send' as const,
-					typeLabel: 'transaction.label.canister_top_up'
-				},
+				transaction: topUp,
 				token: ICP_TOKEN
 			});
 
-			expect(container).toHaveTextContent(get(i18n).transaction.label.canister_top_up);
+			expect(container).toHaveTextContent(get(i18n).transaction.label.top_up);
 			expect(container).not.toHaveTextContent(/\bsend\b/);
+		});
+
+		it('should call the canister unknown and never show the CMC deposit account', () => {
+			const { container, getByText, queryByText } = render(IcTransactionModal, {
+				transaction: topUp,
+				token: ICP_TOKEN
+			});
+
+			expect(getByText(`${get(i18n).transaction.text.canister}:`)).toBeInTheDocument();
+			expect(getByText(get(i18n).transaction.text.canister_unknown)).toBeInTheDocument();
+			expect(container).not.toHaveTextContent(depositAccount);
+			expect(queryByText(get(i18n).address.save.title)).not.toBeInTheDocument();
+			expect(container.querySelector(`a[href="${topUp.toExplorerUrl}"]`)).toBeNull();
+		});
+
+		it('should name the canister when a contact holds the one whose deposit account it paid', () => {
+			contactsStore.set([
+				{
+					id: 1n,
+					name: 'OISY Prod',
+					updateTimestampNs: 12n,
+					addresses: [{ addressType: 'Icrcv2', address: canister }],
+					image: undefined
+				}
+			]);
+
+			const { container, getByText } = render(IcTransactionModal, {
+				transaction: topUp,
+				token: ICP_TOKEN
+			});
+
+			expect(getByText(`${get(i18n).transaction.text.canister}: OISY Prod`)).toBeInTheDocument();
+			expect(getByText(canister)).toBeInTheDocument();
+			expect(container).not.toHaveTextContent(depositAccount);
 		});
 	});
 });
