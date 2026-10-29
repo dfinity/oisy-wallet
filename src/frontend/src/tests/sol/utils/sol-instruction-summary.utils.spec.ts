@@ -4879,6 +4879,37 @@ describe('sol-instruction-summary.utils', () => {
 			stackHeight
 		});
 
+		const transferWithFee = ({
+			source,
+			destination,
+			amount,
+			fee,
+			authority = mockSolAddress2,
+			stackHeight
+		}: {
+			source: string;
+			destination: string;
+			amount: string;
+			fee: string;
+			authority?: string;
+			stackHeight: number;
+		}) => ({
+			program: 'spl-token-2022',
+			programId: TOKEN_2022_PROGRAM_ADDRESS,
+			parsed: {
+				type: 'transferCheckedWithFee',
+				info: {
+					source,
+					destination,
+					mint: mockSplAddress,
+					tokenAmount: { amount, decimals: 6 },
+					feeAmount: { amount: fee, decimals: 6 },
+					authority
+				}
+			},
+			stackHeight
+		});
+
 		const paying = ({
 			instructions,
 			inner
@@ -4999,6 +5030,52 @@ describe('sol-instruction-summary.utils', () => {
 					]
 				})
 			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should name a listed pool that pays elsewhere with a transfer that holds back a fee', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						transfer({ source: vault, destination: userAccount, amount: '0', stackHeight: 2 }),
+						transferWithFee({
+							source: vault,
+							destination: elsewhere,
+							amount: '1000',
+							fee: '10',
+							stackHeight: 2
+						})
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		// The receiving account is credited the payout less the fee, and that is all it can pass on.
+		it('should not name a pool whose payout less the fee is passed on in the same instruction', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transferWithFee({
+							source: vault,
+							destination: elsewhere,
+							amount: '1000',
+							fee: '10',
+							stackHeight: 3
+						}),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						transferWithFee({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '990',
+							fee: '10',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([]);
 		});
 
 		it('should not name a pool paying nothing elsewhere', () => {

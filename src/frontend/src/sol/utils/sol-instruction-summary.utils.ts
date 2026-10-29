@@ -71,10 +71,17 @@ const funderOf = ({ info }: { info: object }): SolAddress | undefined =>
 	address({ info, key: 'source' }) ?? address({ info, key: 'payer' });
 
 /**
- * The amount of a `transferChecked`, which nests it with the decimals the mint uses.
+ * The amount of a `transferChecked`, which nests it with the decimals the mint uses. A
+ * `transferCheckedWithFee` nests the fee it holds back the same way, under `feeAmount`.
  */
-const tokenAmount = (info: object): { amount?: bigint; decimals?: number } => {
-	const value = field({ info, key: 'tokenAmount' });
+const tokenAmount = ({
+	info,
+	key = 'tokenAmount'
+}: {
+	info: object;
+	key?: string;
+}): { amount?: bigint; decimals?: number } => {
+	const value = field({ info, key });
 
 	if (isNullish(value) || typeof value !== 'object') {
 		return {};
@@ -607,7 +614,7 @@ const transferEffect = ({
 	const authority =
 		address({ info, key: 'authority' }) ?? address({ info, key: 'multisigAuthority' });
 
-	const { amount: checked, decimals } = tokenAmount(info);
+	const { amount: checked, decimals } = tokenAmount({ info });
 	const value = checked ?? amount({ info, key: 'amount' });
 
 	const tokenAddress =
@@ -1054,7 +1061,7 @@ const toEffect = ({
 				return undefined;
 			}
 
-			const { amount: checked, decimals } = tokenAmount(info);
+			const { amount: checked, decimals } = tokenAmount({ info });
 			const delegate = address({ info, key: 'delegate' });
 			const approved = address({ info, key: 'mint' }) ?? mintAt({ account: source, position });
 
@@ -1087,7 +1094,7 @@ const toEffect = ({
 				return undefined;
 			}
 
-			const { amount: checked, decimals } = tokenAmount(info);
+			const { amount: checked, decimals } = tokenAmount({ info });
 			const value = checked ?? amount({ info, key: 'amount' });
 			const mint = address({ info, key: 'mint' }) ?? mintAt({ account, position });
 
@@ -1326,7 +1333,7 @@ const balanceAtInstruction = ({
 			}
 
 			const moved =
-				type === 'transferChecked' ? tokenAmount(info).amount : amount({ info, key: 'amount' });
+				type === 'transferChecked' ? tokenAmount({ info }).amount : amount({ info, key: 'amount' });
 
 			// An amount nobody knows stays unknown whatever moves after it.
 			if (isNullish(moved) || isNullish(held.amount)) {
@@ -1646,7 +1653,9 @@ const closePayouts = ({
 				['transfer', 'transferChecked'].includes(type)
 			) {
 				const moved =
-					type === 'transferChecked' ? tokenAmount(info).amount : amount({ info, key: 'amount' });
+					type === 'transferChecked'
+						? tokenAmount({ info }).amount
+						: amount({ info, key: 'amount' });
 				const source = address({ info, key: 'source' });
 				const destination = address({ info, key: 'destination' });
 
@@ -2369,12 +2378,19 @@ export const mapSolInstructionSummaries = ({
 };
 
 // What a transfer moves where: from a System account, a seed-derived one or a nonce account, or from
-// a token account on the signature of its authority.
+// a token account on the signature of its authority. A Token-2022 mint that charges a fee on
+// transfers holds it back in the destination, which is credited the rest.
 const paymentOf = ({
 	program,
 	parsed: { type, info }
 }: SolParsedRpcInstruction):
-	| { source?: SolAddress; destination?: SolAddress; authority?: SolAddress; value?: bigint }
+	| {
+			source?: SolAddress;
+			destination?: SolAddress;
+			authority?: SolAddress;
+			value?: bigint;
+			credited?: bigint;
+	  }
 	| undefined => {
 	if (program === 'system' && SYSTEM_TRANSFERS.includes(type)) {
 		return {
@@ -2387,13 +2403,17 @@ const paymentOf = ({
 	if (
 		nonNullish(program) &&
 		TOKEN_PROGRAMS.includes(program) &&
-		['transfer', 'transferChecked'].includes(type)
+		['transfer', 'transferChecked', 'transferCheckedWithFee'].includes(type)
 	) {
+		const value = tokenAmount({ info }).amount ?? amount({ info, key: 'amount' });
+		const fee = tokenAmount({ info, key: 'feeAmount' }).amount;
+
 		return {
 			source: address({ info, key: 'source' }),
 			destination: address({ info, key: 'destination' }),
 			authority: address({ info, key: 'authority' }) ?? address({ info, key: 'multisigAuthority' }),
-			value: tokenAmount(info).amount ?? amount({ info, key: 'amount' })
+			value,
+			...(nonNullish(value) && nonNullish(fee) && { credited: value - fee })
 		};
 	}
 };
@@ -2406,10 +2426,10 @@ const paymentOf = ({
  * Such a payout has no line and no balance change, while any other line of the same instruction
  * accounts for all of it: a pool holding the user's liquidity in a position, called with the wallet
  * the position answers to, can pay it out to somebody else beside a line of nothing paid to the
- * user. A payout into an account that pays at least as much on later in the same instruction is a
- * hop of a swap, a router's account carrying the trade to its next pool, and is not counted: only a
- * program running in that instruction moves anything out of that account, and a program the dApp
- * brings itself is named on its own.
+ * user. A payout into an account that pays on at least what it was credited, later in the same
+ * instruction, is a hop of a swap, a router's account carrying the trade to its next pool, and is
+ * not counted: only a program running in that instruction moves anything out of that account, and
+ * a program the dApp brings itself is named on its own.
  */
 export const findSolProgramsPayingOthers = ({
 	instructions,
@@ -2469,7 +2489,7 @@ export const findSolProgramsPayingOthers = ({
 				return acc;
 			}
 
-			const { source, destination, authority, value } = payment;
+			const { source, destination, authority, value, credited = value } = payment;
 
 			const fromUser = [authority, source].some(
 				(account) => nonNullish(account) && ownedAt({ account, position })
@@ -2483,8 +2503,8 @@ export const findSolProgramsPayingOthers = ({
 
 			const hop =
 				nonNullish(destination) &&
-				nonNullish(value) &&
-				passedOn({ account: destination, parentIndex, after: position }) >= value;
+				nonNullish(credited) &&
+				passedOn({ account: destination, parentIndex, after: position }) >= credited;
 
 			return hop ? acc : [...acc, madeBy];
 		},
