@@ -376,6 +376,10 @@ fn a_revoked_allowance_tells_the_claimer_and_leaves_the_tip_recoverable() {
         .expect("the tip is still on record");
     assert_eq!(row.status, TipStatus::Failed);
 
+    // The retry carries the `created_at_time` the refused attempt pinned, which
+    // is what makes a lost answer deduplicable rather than payable twice. A real
+    // ledger accepting it is the half a unit test cannot show: a stamp that was
+    // pinned and never renewed would come back `TooOld` here instead of paying.
     env.approve(tip_id, TIP_AMOUNT + TRANSFER_FEE, Some(expires_at_ns));
     assert!(
         env.claim(claimer, tip_id, code).is_ok(),

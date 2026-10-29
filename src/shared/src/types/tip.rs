@@ -57,6 +57,21 @@ pub const MAX_TIP_EXPIRY_NS: u64 = 7 * 24 * 60 * 60 * 1_000_000_000;
 /// consumed allowance makes the retry fail rather than double-pay.
 pub const TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS: u64 = 5 * 60 * 1_000_000_000;
 
+/// How long a payout keeps one transaction identity before a claim starts a
+/// fresh one.
+///
+/// Every payout carries a `created_at_time`, pinned by the first attempt and
+/// reused by later ones, so a retry is the *same* transaction to the ledger: an
+/// attempt whose answer never came back is deduplicated against the block it
+/// already wrote rather than paying a second time. An ICRC-1 ledger only
+/// deduplicates inside its own transaction window — 24 hours on the ledgers
+/// this feature targets — and refuses anything older with `TooOld`. A tip lives
+/// up to [`MAX_TIP_EXPIRY_NS`], so it cannot hold one identity for its whole
+/// life; an hour of headroom under the ledger's window means a retry is never
+/// refused merely for being stale, at the cost of the ledger no longer being
+/// able to say what became of an attempt older than this.
+pub const TIP_PAYOUT_DEDUP_WINDOW_NS: u64 = 23 * 60 * 60 * 1_000_000_000;
+
 /// How long a terminal tip (claimed, cancelled, or lapsed) is kept before the
 /// housekeeping sweep removes it.
 ///
