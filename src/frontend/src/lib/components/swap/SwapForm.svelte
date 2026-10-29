@@ -18,6 +18,7 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import {
 		SUPPORTED_CROSS_SWAP_NETWORKS,
+		SWAP_DEFAULT_SLIPPAGE_VALUE,
 		SWAP_SLIPPAGE_INVALID_VALUE,
 		SWAP_SLIPPAGE_VELORA_INVALID_VALUE
 	} from '$lib/constants/swap.constants';
@@ -102,10 +103,14 @@
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
+	// The offers hold for the amount and the slippage they were requested with; for any other value
+	// of either, new offers are on their way.
 	let swapAmountsLoading = $derived(
-		nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
+		(nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
 			? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
-			: false
+			: false) ||
+			(nonNullish($swapAmountsStore?.slippageForSwap) &&
+				Number(slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE) !== $swapAmountsStore.slippageForSwap)
 	);
 
 	let showSwapNotOfferedError = $derived(

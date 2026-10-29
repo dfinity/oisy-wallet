@@ -2,6 +2,7 @@ import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-
 import type { IcToken } from '$icp/types/ic-token';
 import SwapForm from '$lib/components/swap/SwapForm.svelte';
 import { ZERO } from '$lib/constants/app.constants';
+import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
 import {
 	SWAP_SWITCH_TOKENS_BUTTON,
 	SWAP_TWO_SWAPS_HINT,
@@ -763,6 +764,63 @@ describe('SwapForm', () => {
 				},
 				context: mockContext
 			});
+
+			const inputs = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
+
+			expect(inputs[1]).toHaveValue('0');
+		});
+	});
+
+	describe('offers and the max slippage', () => {
+		const renderForm = ({
+			slippageForSwap,
+			slippageValue
+		}: {
+			slippageForSwap: number;
+			slippageValue: OptionAmount;
+		}) => {
+			setupSwapAmountsStore({ ...mockSwapAmounts, slippageForSwap });
+			setupIcTokenFeeStore();
+
+			return render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					receiveAmount: 2,
+					slippageValue,
+					isSwapAmountsLoading: false,
+					fee: 1000n,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+		};
+
+		it('should enable Review for offers requested with the current slippage', () => {
+			const { getByRole } = renderForm({ slippageForSwap: 0.5, slippageValue: '0.5' });
+
+			expect(getByRole('button', { name: en.swap.text.review_button })).toBeEnabled();
+		});
+
+		it('should enable Review for offers requested with the default slippage when none is set', () => {
+			const { getByRole } = renderForm({
+				slippageForSwap: SWAP_DEFAULT_SLIPPAGE_VALUE,
+				slippageValue: undefined
+			});
+
+			expect(getByRole('button', { name: en.swap.text.review_button })).toBeEnabled();
+		});
+
+		it('should disable Review for offers requested with another slippage', () => {
+			const { getByRole } = renderForm({ slippageForSwap: 3, slippageValue: '0.5' });
+
+			expect(getByRole('button', { name: en.swap.text.review_button })).toBeDisabled();
+		});
+
+		it('should show the destination amount as loading for offers requested with another slippage', () => {
+			const { getAllByTestId } = renderForm({ slippageForSwap: 3, slippageValue: '0.5' });
 
 			const inputs = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
