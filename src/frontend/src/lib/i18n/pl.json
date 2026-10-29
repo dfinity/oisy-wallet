@@ -2297,6 +2297,9 @@
 			"confirmations": "Potwierdzenia",
 			"for": "",
 			"for_copied": "",
+			"canister": "Kanister",
+			"canister_copied": "Identyfikator kanistra skopiowany do schowka.",
+			"canister_unknown": "nieznany",
 			"expiration": "",
 			"approve_label": ""
 		},
