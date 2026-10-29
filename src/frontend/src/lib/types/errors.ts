@@ -102,6 +102,19 @@ export class LifiRouteUnsupportedError extends Error {
 }
 
 /**
+ * A swap transaction's broadcast ended without showing whether it was sent. An earlier attempt failed
+ * in a way that may have relayed the signed bytes, so a refusal of a later one answers only that
+ * attempt, against a state the first may already have changed (a balance it spent). The swap counts
+ * as sent and its tracking row stays, as for any other unknown outcome. `cause` is the last attempt's
+ * error.
+ */
+export class SwapBroadcastOutcomeUnknownError extends Error {
+	constructor({ cause }: { cause: unknown }) {
+		super('The swap transaction may have been sent: its broadcast outcome is unknown.', { cause });
+	}
+}
+
+/**
  * The LI.FI swap's network fee ceiling, from OISY's own gas estimate at execution, exceeds the one
  * the user reviewed, so it was not signed. It carries what that ceiling was made of — the gas and
  * the L1 data fee of that very transaction — back to the review, which prices them at its own fee

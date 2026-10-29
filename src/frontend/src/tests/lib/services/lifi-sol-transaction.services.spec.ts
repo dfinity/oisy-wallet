@@ -284,7 +284,20 @@ describe('lifi-sol-transaction.services', () => {
 
 	describe('assertLifiSolTransaction', () => {
 		it('should accept a LI.FI transaction that binds and simulates within the bounds', async () => {
-			await expect(assertFixture({ fixture: mockLifiSolSolToUsdc })).resolves.toBeUndefined();
+			await expect(assertFixture({ fixture: mockLifiSolSolToUsdc })).resolves.toBeDefined();
+		});
+
+		it('should give the slot its simulation ran at, where the blockhash was valid', async () => {
+			vi.mocked(simulateSolTransaction).mockResolvedValue({
+				preview: await solToUsdcPreview(),
+				parties: { sources: [], destinations: [], partial: false },
+				unreadPrograms: [],
+				slot: 461_778_178n
+			});
+
+			await expect(assertFixture({ fixture: mockLifiSolSolToUsdc })).resolves.toEqual({
+				simulationSlot: 461_778_178n
+			});
 		});
 
 		it("should simulate LI.FI's own bytes, with their blockhash, at one slot", async () => {
@@ -405,7 +418,7 @@ describe('lifi-sol-transaction.services', () => {
 				assertFixture({
 					fixture: { ...mockLifiSolSolToUsdc, quote: wireTransaction({ version: 0 }) }
 				})
-			).resolves.toBeUndefined();
+			).resolves.toBeDefined();
 
 			expect(parseSolBase64TransactionMessage).toHaveBeenCalledOnce();
 		});
@@ -443,7 +456,7 @@ describe('lifi-sol-transaction.services', () => {
 				unreadPrograms: []
 			});
 
-			await expect(assertFixture({ fixture: mockLifiSolUsdcToSol })).resolves.toBeUndefined();
+			await expect(assertFixture({ fixture: mockLifiSolUsdcToSol })).resolves.toBeDefined();
 		});
 
 		// The program the transfer calls decides which of the fee wallet's accounts it must pay.
@@ -481,14 +494,14 @@ describe('lifi-sol-transaction.services', () => {
 				unreadPrograms: []
 			});
 
-			await expect(assertFixture({ fixture: mockLifiSolUsdcToSol })).resolves.toBeUndefined();
+			await expect(assertFixture({ fixture: mockLifiSolUsdcToSol })).resolves.toBeDefined();
 		});
 
 		describe('ceiling', () => {
 			it('should accept a ceiling no higher than the one reviewed', async () => {
 				await expect(
 					assertFixture({ fixture: mockLifiSolSolToUsdc, reviewedCeiling: solToUsdcCeiling })
-				).resolves.toBeUndefined();
+				).resolves.toBeDefined();
 			});
 
 			it('should carry a ceiling above the one reviewed back, without simulating', async () => {
@@ -572,7 +585,7 @@ describe('lifi-sol-transaction.services', () => {
 					unreadPrograms: []
 				});
 
-				await expect(assertFixture({ fixture: mockLifiSolSolToUsdc })).resolves.toBeUndefined();
+				await expect(assertFixture({ fixture: mockLifiSolSolToUsdc })).resolves.toBeDefined();
 			});
 		});
 	});

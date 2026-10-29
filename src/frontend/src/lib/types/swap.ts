@@ -535,6 +535,19 @@ export interface SwapLifiEvmParams extends RequiredTransactionFeeData {
 	userTokenAddresses: string[];
 }
 
+export interface SwapLifiSolParams {
+	identity: Identity;
+	progress: (step: ProgressStep) => void;
+	sourceToken: Token;
+	destinationToken: Token;
+	swapAmount: Amount;
+	userAddress: SolAddress;
+	offer: Extract<SwapMappedResult, { provider: SwapProvider.LIFI }>;
+	// The LI.FI ceiling the user reviewed, in lamports: the transaction's network fee plus the rent of
+	// the accounts it creates. Execution never signs one whose ceiling is above it.
+	reviewedCeiling: bigint;
+}
+
 interface SwapNearIntentsParams {
 	identity: Identity;
 	progress: (step: ProgressStep) => void;
