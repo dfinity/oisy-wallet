@@ -19,9 +19,9 @@ use shared::types::tip::{
 use super::{
     icrc2::{self, Account, AllowanceArgs, TransferFromArgs, TransferFromCallError},
     model::{
-        claim_code_matches, new_tip_exceeds_cap, spender_subaccount, validate_amount,
-        validate_amount_width, validate_claim_code_hash, validate_expiry, validate_message,
-        validate_tip_id, TipRecord, TipState,
+        claim_code_matches, new_tip_exceeds_cap, spender_subaccount, stored_block_index,
+        validate_amount, validate_amount_width, validate_claim_code_hash, validate_expiry,
+        validate_message, validate_tip_id, TipRecord, TipState,
     },
     secrets,
 };
@@ -438,7 +438,7 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
                         TipRecord {
                             state: TipState::Claimed {
                                 claimer,
-                                block_index: block_index.clone(),
+                                block_index: stored_block_index(&block_index),
                                 claimed_at_ns,
                             },
                             ..current

@@ -253,6 +253,15 @@ pub fn validate_amount_width(amount: &Nat) -> Result<(), TipError> {
     Ok(())
 }
 
+/// The block index a `Claimed` record keeps: the ledger's answer, capped at
+/// `u64::MAX`. The value comes from whichever ledger the sender named, decoded
+/// with no size limit, so without the cap it would be the one number in the
+/// record with no fixed width. No ledger reaches 2^64 blocks, so the cap never
+/// changes a real index.
+pub fn stored_block_index(block_index: &Nat) -> Nat {
+    Nat::from(u64::try_from(&block_index.0).unwrap_or(u64::MAX))
+}
+
 /// Whether creating another tip would exceed the per-sender active-tip cap.
 pub fn new_tip_exceeds_cap(active_count: usize) -> bool {
     active_count >= MAX_TIPS_PER_USER
@@ -369,6 +378,23 @@ mod tests {
         assert_eq!(
             validate_amount_width(&(widest * Nat::from(2u8))),
             Err(TipError::Uncovered)
+        );
+    }
+
+    #[test]
+    fn stored_block_index_keeps_64_bits_and_caps_the_rest() {
+        let widest = Nat::from(u64::MAX);
+        assert_eq!(stored_block_index(&Nat::from(7u8)), Nat::from(7u8));
+        assert_eq!(stored_block_index(&widest), widest);
+        assert_eq!(
+            stored_block_index(&(widest.clone() + Nat::from(1u8))),
+            widest,
+            "one past 64 bits is stored at the cap"
+        );
+        assert_eq!(
+            stored_block_index(&(Nat::from(u128::MAX) * Nat::from(u128::MAX))),
+            widest,
+            "and so is any wider answer"
         );
     }
 
