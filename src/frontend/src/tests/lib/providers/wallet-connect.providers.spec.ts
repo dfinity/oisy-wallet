@@ -16,6 +16,7 @@ import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { WalletKit, type WalletKitTypes } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
+import type { SessionTypes } from '@walletconnect/types';
 import type * as WalletConnectUtils from '@walletconnect/utils';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 
@@ -275,6 +276,35 @@ describe('wallet-connect.providers', () => {
 				expect(JSON.parse(sessionProperties.bip122_getAccountAddresses)).toEqual([
 					expect.objectContaining({ address: mockBtcAddress, intention: 'payment' })
 				]);
+			});
+
+			// The review states these before the user approves, so they must be what approving sends.
+			it('should approve the session with the namespaces it states before approving', async () => {
+				const granted: SessionTypes.Namespaces = {
+					eip155: {
+						chains: ['eip155:1'],
+						methods: ['eth_signTypedData_v4'],
+						events: ['chainChanged'],
+						accounts: ['eip155:1:0x0000000000000000000000000000000000000001']
+					}
+				};
+
+				buildApprovedNamespacesMock.mockReturnValue(granted);
+
+				const listener = await WalletConnectClient.init(mockParams);
+
+				expect(listener.approvedNamespaces(mockProposal)).toEqual(granted);
+
+				await listener.approveSession(mockProposal);
+
+				const [[{ namespaces }]] = mockApproveSession.mock.calls;
+
+				expect(namespaces).toEqual(granted);
+
+				expect(buildApprovedNamespacesMock).toHaveBeenCalledTimes(2);
+				expect(buildApprovedNamespacesMock.mock.calls[0]).toEqual(
+					buildApprovedNamespacesMock.mock.calls[1]
+				);
 			});
 
 			it('should not expose bip122_getAccountAddresses when only testnet/regtest addresses are present', async () => {

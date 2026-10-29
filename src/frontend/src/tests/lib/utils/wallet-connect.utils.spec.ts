@@ -1,4 +1,10 @@
-import { acceptedContext } from '$lib/utils/wallet-connect.utils';
+import { BIP122_MAINNET_CHAINS_KEYS } from '$env/bip122-chains.env';
+import { LEGACY_SOLANA_MAINNET_NAMESPACE } from '$env/caip10-chains.env';
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { acceptedContext, getWalletConnectChainName } from '$lib/utils/wallet-connect.utils';
 import type { Verify } from '@walletconnect/types';
 
 describe('wallet-connect.utils', () => {
@@ -31,5 +37,22 @@ describe('wallet-connect.utils', () => {
 				expect(acceptedContext(context({ validation, isScam: true }))).toBeFalsy();
 			}
 		);
+	});
+
+	describe('getWalletConnectChainName', () => {
+		it.each([
+			{ chain: `eip155:${ETHEREUM_NETWORK.chainId}`, name: ETHEREUM_NETWORK.name },
+			{ chain: `eip155:${BASE_NETWORK.chainId}`, name: BASE_NETWORK.name },
+			{ chain: `solana:${SOLANA_MAINNET_NETWORK.chainId}`, name: SOLANA_MAINNET_NETWORK.name },
+			{ chain: LEGACY_SOLANA_MAINNET_NAMESPACE, name: SOLANA_MAINNET_NETWORK.name },
+			{ chain: BIP122_MAINNET_CHAINS_KEYS[0], name: BTC_MAINNET_NETWORK.name }
+		])('names $chain $name', ({ chain, name }) => {
+			expect(getWalletConnectChainName(chain)).toBe(name);
+		});
+
+		// A chain is never dropped from what the user is shown, even one OISY has no network for.
+		it('falls back to the chain itself', () => {
+			expect(getWalletConnectChainName('eip155:999999')).toBe('eip155:999999');
+		});
 	});
 });
