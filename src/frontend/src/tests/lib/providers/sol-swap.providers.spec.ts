@@ -2,7 +2,9 @@ import type * as lifiEnv from '$env/rest/lifi.env';
 import type * as nearIntentsEnv from '$env/rest/near-intents.env';
 import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { SwapProvider } from '$lib/types/swap';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -49,30 +51,70 @@ describe('sol-swap.providers', () => {
 
 			// Network ids are symbols, so the tokens come from the same module graph as the registry.
 			const load = async () => {
-				const [
-					{ solSwapProviders: providers },
-					{ fetchLifiSwapQuote },
-					{ BASE_ETH_TOKEN },
-					{ SOLANA_TOKEN }
-				] = await Promise.all([
-					import('$lib/providers/sol-swap.providers'),
-					import('$lib/services/lifi-swap.services'),
-					import('$env/tokens/tokens-evm/tokens-base/tokens.eth.env'),
-					import('$env/tokens/tokens.sol.env')
-				]);
+				const [{ solSwapProviders: providers }, { BASE_ETH_TOKEN }, { SOLANA_TOKEN }] =
+					await Promise.all([
+						import('$lib/providers/sol-swap.providers'),
+						import('$env/tokens/tokens-evm/tokens-base/tokens.eth.env'),
+						import('$env/tokens/tokens.sol.env')
+					]);
 
 				const entry = providers.find(({ key }) => key === SwapProvider.LIFI);
 
 				assertNonNullish(entry);
 
-				return { entry, fetchLifiSwapQuote, baseEthToken: BASE_ETH_TOKEN, solToken: SOLANA_TOKEN };
+				return { entry, baseEthToken: BASE_ETH_TOKEN, solToken: SOLANA_TOKEN };
 			};
 
 			it('should register LI.FI as an enabled provider of the Solana registry', async () => {
-				const { entry, fetchLifiSwapQuote } = await load();
+				const { entry } = await load();
 
 				expect(entry.isEnabled).toBeTruthy();
-				expect(entry.getQuote).toBe(fetchLifiSwapQuote);
+			});
+
+			describe('its quote', () => {
+				const fetchLifiSwapQuote = vi.fn();
+
+				beforeEach(() => {
+					fetchLifiSwapQuote.mockReset().mockResolvedValue(undefined);
+					vi.doMock('$lib/services/lifi-swap.services', () => ({ fetchLifiSwapQuote }));
+				});
+
+				afterEach(() => {
+					vi.doUnmock('$lib/services/lifi-swap.services');
+				});
+
+				it('should ask LI.FI for an EVM source', async () => {
+					const { entry, baseEthToken, solToken } = await load();
+					const params = {
+						sourceToken: baseEthToken,
+						destinationToken: solToken,
+						amount: 1n,
+						userAddress: mockEthAddress,
+						recipientAddress: mockSolAddress,
+						slippage: 0.5
+					};
+
+					await entry.getQuote(params);
+
+					expect(fetchLifiSwapQuote).toHaveBeenCalledExactlyOnceWith(params);
+				});
+
+				it('should not ask LI.FI for a Solana source, which the Solana swap wizard cannot execute yet', async () => {
+					const { entry, solToken } = await load();
+
+					await expect(
+						entry.getQuote({
+							sourceToken: solToken,
+							destinationToken: solToken,
+							amount: 1n,
+							userAddress: mockSolAddress,
+							recipientAddress: mockSolAddress,
+							slippage: 0.5
+						})
+					).resolves.toBeUndefined();
+
+					expect(fetchLifiSwapQuote).not.toHaveBeenCalled();
+				});
 			});
 
 			// Without a list the entry would count as a wildcard, and every enabled SPL token would be

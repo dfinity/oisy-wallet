@@ -9,6 +9,7 @@ import {
 import { SwapProvider, type SolSwapProviderConfig } from '$lib/types/swap';
 import { buildLifiSupportedDestinations } from '$lib/utils/lifi-swap.utils';
 import { buildNearIntentsSupportedDestinations } from '$lib/utils/near-intents-swap.utils';
+import { isNetworkEthereum } from '$lib/utils/network.utils';
 
 const nearIntentsSolDestinations = buildNearIntentsSupportedDestinations('sol');
 
@@ -26,14 +27,18 @@ export const solSwapProviders: SolSwapProviderConfig[] = [
 			]
 		: []),
 	// Every pair with Solana on either side reaches this registry, so the entry is what quotes
-	// EVM → Solana. It quotes no Solana source yet: the Solana swap wizard cannot execute a LI.FI
-	// transaction. The empty source list says the same to the source picker — without a list, the
-	// entry would count as a wildcard and make every enabled SPL token selectable as a source.
+	// EVM → Solana. It quotes no Solana source yet, though LI.FI could be asked for one: the Solana
+	// swap wizard cannot execute a LI.FI transaction. The empty source list says the same to the
+	// source picker — without a list, the entry would count as a wildcard and make every enabled SPL
+	// token selectable as a source.
 	...(LIFI_SWAP_ENABLED
 		? [
 				{
 					key: SwapProvider.LIFI,
-					getQuote: fetchLifiSwapQuote,
+					getQuote: (params) =>
+						isNetworkEthereum(params.sourceToken.network)
+							? fetchLifiSwapQuote(params)
+							: Promise.resolve(undefined),
 					isEnabled: LIFI_SWAP_ENABLED,
 					getSupportedTokens: () => Promise.resolve(new Set<string>()),
 					getSupportedDestinations: buildLifiSupportedDestinations('sol')
