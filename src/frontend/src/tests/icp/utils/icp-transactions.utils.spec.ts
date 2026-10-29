@@ -48,7 +48,7 @@ describe('icp-transactions.utils', () => {
 			expect(mapped).toEqual(
 				expect.objectContaining({
 					type: 'send',
-					typeLabel: 'transaction.label.canister_top_up',
+					typeLabel: 'transaction.label.top_up',
 					to: OTHER_ACCOUNT_IDENTIFIER
 				})
 			);
