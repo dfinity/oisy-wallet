@@ -961,7 +961,7 @@ fn a_claim_whose_answer_was_lost_is_paid_not_refused_when_it_is_retried() {
     // The case this whole change exists for. A payout is in flight, the backend
     // is upgraded under it, and the ledger's reply has nowhere to land: the
     // money moved, and the backend has no record that it did. The retry must find
-    // the payout the ledger already made and report it, rather than meet a spent
+    // the payout the ledger already made and say so, rather than meet a spent
     // allowance and tell the claimer the tip is gone while the money sits in
     // their account.
     let env = setup_tips();
