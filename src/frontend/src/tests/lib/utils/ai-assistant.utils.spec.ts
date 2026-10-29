@@ -26,17 +26,14 @@ import { mapToFrontendContact } from '$lib/utils/contact.utils';
 import { getMockContacts } from '$tests/mocks/contacts.mock';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
-import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { get } from 'svelte/store';
 
 describe('ai-assistant.utils', () => {
 	const contactsData = getMockContacts({
 		n: 1,
 		names: ['Alice'],
-		addresses: [
-			[{ label: ['Test'], token_account_id: { Eth: { Public: mockEthAddress } } }],
-			[{ label: ['Test 2'], token_account_id: { Eth: { Public: mockEthAddress2 } } }]
-		]
+		addresses: [[{ label: ['Test'], token_account_id: { Eth: { Public: mockEthAddress } } }]]
 	}).map(mapToFrontendContact);
 
 	contactsData.forEach((contact) => contactsStore.addContact(contact));
