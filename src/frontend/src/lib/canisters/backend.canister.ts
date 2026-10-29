@@ -582,7 +582,9 @@ export class BackendCanister extends Canister<BackendService> {
 		start,
 		maxResults
 	}: GetUserTransactionsParams): Promise<GetUserTransactionsResponse> => {
-		const { get_user_transactions } = this.caller({ certified: false });
+		// The stored history decides which addresses count as used before on the send review, so it is
+		// always read certified.
+		const { get_user_transactions } = this.caller({ certified: true });
 
 		const response = await get_user_transactions({
 			token_id: tokenId,
