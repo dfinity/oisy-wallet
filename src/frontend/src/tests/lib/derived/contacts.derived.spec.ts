@@ -144,8 +144,10 @@ describe('contacts.derived', () => {
 				n: 1,
 				names: ['Alice'],
 				addresses: [
-					[{ label: ['Test'], token_account_id: { Eth: { Public: mockEthAddress } } }],
-					[{ label: ['Test 2'], token_account_id: { Eth: { Public: mockEthAddress2 } } }]
+					[
+						{ label: ['Test'], token_account_id: { Eth: { Public: mockEthAddress } } },
+						{ label: ['Test 2'], token_account_id: { Eth: { Public: mockEthAddress2 } } }
+					]
 				]
 			}).map(mapToFrontendContact);
 
