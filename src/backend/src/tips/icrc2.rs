@@ -32,7 +32,7 @@
 //! assume, and it is not a reason to write a second client.
 
 use candid::{Nat, Principal};
-use ic_cdk::call::Call;
+use ic_cdk::call::{Call, CallFailed, RejectCode};
 // Re-exported so callers keep importing the ledger shapes from the module that
 // speaks to the ledger.
 pub use icrc_ledger_types::{
@@ -47,8 +47,8 @@ pub use icrc_ledger_types::{
 ///
 /// The split matters. `InsufficientAllowance` is the sender having reduced or
 /// revoked the reservation; `InsufficientFunds` is the reservation still standing
-/// with the money gone, which topping up fixes. Everything else is `Failed`. All
-/// three leave the tip claimable.
+/// with the money gone, which topping up fixes. `Unresolved` is no answer at
+/// all. Everything else is `Failed`. All of them leave the tip claimable.
 #[derive(Debug)]
 pub enum TransferFromCallError {
     InsufficientAllowance,
@@ -56,7 +56,21 @@ pub enum TransferFromCallError {
     /// because it is the one failure the sender can fix, and the claimer can be
     /// told to come back rather than just "try again".
     InsufficientFunds,
+    /// The deadline passed with no answer. Kept apart from `Failed` because it
+    /// is not one: the message may have run, and may still pay. Recording it as
+    /// a failure would claim to know something the system does not, and
+    /// `service::claim_tip` leans on the difference.
+    Unresolved(String),
     Failed(String),
+}
+
+/// Whether a call error is the deadline passing rather than an answer.
+///
+/// `SysUnknown` is the system stating it cannot say whether the callee ran the
+/// message — the one outcome that must not be written down as a failure.
+fn is_unresolved(err: &CallFailed) -> bool {
+    matches!(err, CallFailed::CallRejected(rejected)
+        if matches!(rejected.reject_code(), Ok(RejectCode::SysUnknown)))
 }
 
 /// The ledger's current transfer fee, needed to size the minimum tip and to
@@ -115,7 +129,12 @@ pub async fn transfer_from(
         .with_args(&(args,))
         .await
         .map_err(|err| {
-            TransferFromCallError::Failed(format!("icrc2_transfer_from call failed: {err:?}"))
+            let msg = format!("icrc2_transfer_from call failed: {err:?}");
+            if is_unresolved(&err) {
+                TransferFromCallError::Unresolved(msg)
+            } else {
+                TransferFromCallError::Failed(msg)
+            }
         })?;
 
     // `Result` is what candid's `variant { Ok; Err }` decodes into, so the named
