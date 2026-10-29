@@ -958,7 +958,7 @@ describe('EthWalletConnectMessage', () => {
 		const SPENDER = '0x66a9893cc07d91d95644aedd05d03f95e1dba8af';
 
 		// One signature setting an allowance over a listed token and an unlisted one, for one spender.
-		const permitBatchRequest = (): WalletKitTypes.SessionRequest =>
+		const permitBatchRequest = (secondExpiration = '1893456000'): WalletKitTypes.SessionRequest =>
 			({
 				...request,
 				params: {
@@ -1003,7 +1003,7 @@ describe('EthWalletConnectMessage', () => {
 										{
 											token: UNLISTED_TOKEN,
 											amount: '5000',
-											expiration: '1893456000',
+											expiration: secondExpiration,
 											nonce: '0'
 										}
 									],
@@ -1040,6 +1040,17 @@ describe('EthWalletConnectMessage', () => {
 			expect(
 				getByText(formatSecondsToDate({ seconds: 1893456000, language: Languages.ENGLISH }))
 			).toBeInTheDocument();
+		});
+
+		// A saturated `uint48` is past the last second a date can hold, so that row is left out
+		// rather than rendered as an invalid date.
+		it('should leave out an expiration no date can hold', () => {
+			const { getAllByText, queryByText } = render(EthWalletConnectMessage, {
+				props: { request: permitBatchRequest(((1n << 48n) - 1n).toString()) }
+			});
+
+			expect(getAllByText(en.wallet_connect.text.expiration)).toHaveLength(1);
+			expect(queryByText('Invalid Date')).not.toBeInTheDocument();
 		});
 
 		// Every allowance in the batch is for the same spender, so it is stated once.

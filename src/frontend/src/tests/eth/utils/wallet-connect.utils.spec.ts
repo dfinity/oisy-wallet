@@ -1468,6 +1468,34 @@ describe('wallet-connect.utils', () => {
 			]);
 		});
 
+		// A saturated `uint48` is a safe integer, and still past the last second a `Date` holds.
+		it('states no expiration for a Permit2 expiration at the uint48 maximum', () => {
+			const maxUint48 = ((1n << 48n) - 1n).toString();
+
+			const single = structuredClone(permit2);
+			(single.message.details as Record<string, unknown>).expiration = maxUint48;
+
+			const batch = structuredClone(permit2Batch);
+			(batch.message.details as Record<string, unknown>[])[1].expiration = maxUint48;
+
+			expect(getEthTypedDataApproval(single)?.allowances[0].expiration).toBeUndefined();
+			expect(
+				getEthTypedDataApproval(batch)?.allowances.map(({ expiration }) => expiration)
+			).toEqual([1761743754, undefined]);
+		});
+
+		it('states an expiration up to the last second a date can hold', () => {
+			const typedData = structuredClone(erc2612Permit);
+
+			typedData.message.deadline = '8640000000000';
+
+			expect(getEthTypedDataApproval(typedData)?.allowances[0].expiration).toBe(8_640_000_000_000);
+
+			typedData.message.deadline = '8640000000001';
+
+			expect(getEthTypedDataApproval(typedData)?.allowances[0].expiration).toBeUndefined();
+		});
+
 		// DAI carries no amount: `allowed` is the allowance, and it is an unlimited one.
 		it('summarizes an allowed DAI permit as unlimited', () => {
 			expect(getEthTypedDataApproval(daiPermit(true))).toEqual({

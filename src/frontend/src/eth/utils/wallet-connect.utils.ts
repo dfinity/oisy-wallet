@@ -648,17 +648,22 @@ export const toTypedDataDomainChainId = (value: unknown): bigint | undefined => 
 	}
 };
 
+// The last second a JavaScript `Date` can hold, 8.64e15 milliseconds after the epoch.
+const MAX_DATE_SECONDS = 8_640_000_000_000n;
+
 /**
  * A deadline as a number of seconds, when it is one a date can be built from.
  *
- * ERC-2612 permits routinely say "never expires" with a saturated `uint256`, and that is not a
- * moment in time: turned into a `Number` it becomes a year with seventy digits. Such a deadline is
- * left out rather than rendered, since a nonsense date reads as a real one.
+ * ERC-2612 permits routinely say "never expires" with a saturated `uint256`, and Permit2 with a
+ * saturated `uint48`, and neither is a moment in time: past the last second a `Date` holds, the
+ * date renders as "Invalid Date", or as a year with seventy digits once it is past what a `Number`
+ * holds exactly. Such a deadline is left out rather than rendered, since a nonsense date reads as
+ * a real one.
  */
 const toExpirationSeconds = (value: unknown): number | undefined => {
 	const seconds = toDeclaredUint(value);
 
-	return nonNullish(seconds) && seconds >= ZERO && seconds <= BigInt(Number.MAX_SAFE_INTEGER)
+	return nonNullish(seconds) && seconds >= ZERO && seconds <= MAX_DATE_SECONDS
 		? Number(seconds)
 		: undefined;
 };
