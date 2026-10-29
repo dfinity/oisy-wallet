@@ -206,9 +206,10 @@ export type SwapMappedResult =
 			// The request the quote answers, which execution re-quotes with: it may differ from the
 			// one built for the form's inputs (see `fetchLifiSwapQuote`).
 			request: QuoteRequestFromAmount;
-			// A Solana-source quote's LI.FI ceiling, read off its own transaction: its network fee plus
-			// the rent of the accounts it creates, in lamports, what the form budgets beyond the amount.
-			// An EVM source's is priced in the form from the quote's gas.
+			// A Solana-source quote's LI.FI ceiling, read off its own transaction: its network fee, with
+			// headroom for the re-quote execution signs, plus the rent of the accounts it creates, in
+			// lamports. What the form and the review budget beyond the amount, and execution holds the
+			// re-quote's own ceiling to. An EVM source's is priced in the form from the quote's gas.
 			solFeeCeiling?: bigint;
 			type?: string;
 	  };

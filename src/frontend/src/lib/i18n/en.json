@@ -811,7 +811,7 @@
 			"explorers_description": "$oisy_name routes swaps and bridge transfers through third-party providers. If one takes longer than expected, open the provider's own explorer: it shows where your transfer stands, already filtered to your wallet.",
 			"explorers_velora_description": "Swaps on Ethereum and other EVM networks.",
 			"explorers_near_intents_description": "Cross-chain swaps between EVM networks, Solana and Bitcoin.",
-			"explorers_lifi_description": "Swaps and bridge transfers from EVM networks, including to Solana.",
+			"explorers_lifi_description": "Swaps and bridge transfers from EVM networks, including to Solana, and swaps on Solana.",
 			"explorers_onesec_description": "Bridge transfers between the Internet Computer and EVM networks.",
 			"explorers_chain_eth": "Ethereum & EVM networks",
 			"explorers_chain_sol": "Solana",
@@ -1432,7 +1432,8 @@
 			"oisy_trade_order_not_placed": "OISY Trade did not accept the order, so your funds were returned to your wallet. You were only charged network fees.",
 			"oisy_trade_recovery_failed": "OISY Trade did not accept the order, and your funds could not be returned to your wallet automatically. Please check your balances in the Trading tab to withdraw them.",
 			"lifi_status_unknown": "LI.FI could not report the outcome of this swap. Please check your destination wallet.",
-			"lifi_fee_changed": "The network fee for this swap rose since you reviewed it. Please check the new maximum fee and confirm the swap again."
+			"lifi_fee_changed": "The network fee for this swap rose since you reviewed it. Please check the new maximum fee and confirm the swap again.",
+			"lifi_route_unverified": "This LI.FI route goes through an exchange $oisy_short can't verify yet, so it can't be confirmed. Please choose another provider."
 		}
 	},
 	"buy": {

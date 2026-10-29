@@ -112,6 +112,13 @@ export const LIFI_CARRIED_FEE_HEADROOM_PERCENT = 10n;
 // form's fee could not be confirmed.
 export const LIFI_MAX_FEE_HEADROOM_PERCENT = 10n;
 
+// Added to the network fee of a Solana-source LI.FI quote's ceiling, which the form, "Max" and the
+// review budget and execution's re-quote must fit. LI.FI prices the compute units anew with each
+// quote, at 100,000 to 200,000 micro-lamports a unit for a limit fixed at 1.4M, and a re-quote came
+// out up to 34 % above the quote displayed a moment before, 57 % above one 30 s before
+// (Solana → Solana, 2026-10-29). The rent of the accounts it creates does not move.
+export const LIFI_SOL_NETWORK_FEE_HEADROOM_PERCENT = 100n;
+
 // A LI.FI row whose transaction the node refused outright is deleted, retried as a cycles mint's
 // is: a few attempts, a second apart.
 export const LIFI_ROW_DELETE_ATTEMPTS = 3;

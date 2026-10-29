@@ -7,6 +7,15 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 
+	interface Props {
+		// A LI.FI offer is priced at its transaction's own LI.FI ceiling, the network fee and the rent of
+		// the accounts it creates, rather than at the fee context's estimate of a plain transfer.
+		isLifi?: boolean;
+		lifiFee?: bigint;
+	}
+
+	let { isLifi = false, lifiFee }: Props = $props();
+
 	const {
 		feeStore: networkFee,
 		ataFeeStore: ataFee,
@@ -18,7 +27,20 @@
 	let totalFee = $derived(nonNullish($networkFee) ? $networkFee + ($ataFee ?? ZERO) : undefined);
 </script>
 
-{#if nonNullish($symbol) && nonNullish($decimals) && nonNullish($networkFee)}
+{#if isLifi}
+	{#if nonNullish($symbol) && nonNullish($decimals)}
+		<FeeDisplay
+			decimals={$decimals}
+			exchangeRate={$exchangeRate}
+			feeAmount={lifiFee}
+			symbol={$symbol}
+		>
+			{#snippet label()}
+				<span>{$i18n.fee.text.total_fee}</span>
+			{/snippet}
+		</FeeDisplay>
+	{/if}
+{:else if nonNullish($symbol) && nonNullish($decimals) && nonNullish($networkFee)}
 	{#if nonNullish($ataFee) && $ataFee > ZERO}
 		<ModalExpandableValues>
 			{#snippet listHeader()}
