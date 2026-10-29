@@ -2355,7 +2355,8 @@
 			"deposit": "Déposer",
 			"approve": "Approuver",
 			"burn": "Brûler",
-			"mint": "Minimiser"
+			"mint": "Minimiser",
+			"top_up": "Recharge"
 		},
 		"filter": {
 			"types_label": "",
