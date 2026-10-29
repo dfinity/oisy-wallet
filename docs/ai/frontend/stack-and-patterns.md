@@ -494,8 +494,10 @@ selected provider's name. The visible status is `aria-hidden`, the scroll's name
 for the header's accessible name, and cycling names are never announced.
 
 Keep visible layers keyed by provider through interruption. Sample their current poses before
-cancelling/retargeting WAAPI; an outgoing provider can immediately become the winner without
-being remounted hidden. Only transient exits remain, never persistent wheel neighbours.
+cancelling/retargeting WAAPI, including when a new round starts mid-reveal, which is no turn: the
+motion effect's cleanup samples the layers its run set moving. An outgoing provider can
+immediately become the winner without being remounted hidden. Only transient exits remain, never
+persistent wheel neighbours.
 A static 2px soft layer crossfades through opacity, so no filter is animated. Reduced motion
 stops rotation and confirmation scale, retains the shared short opacity bridge on an actual
 provider change, and never dims an already-readable winner. Cancel timers/animations on

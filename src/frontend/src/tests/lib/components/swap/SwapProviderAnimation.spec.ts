@@ -482,6 +482,45 @@ describe('SwapProviderAnimation', () => {
 		unmount();
 	});
 
+	it('continues the winner from where it is when a new round starts mid-reveal', async () => {
+		vi.useFakeTimers();
+		const animate = vi.spyOn(Element.prototype, 'animate');
+		const { getByTestId, rerender, unmount } = render(SwapProviderAnimation, {
+			props: { providers: [SwapProvider.NEAR_INTENTS, SwapProvider.VELORA], loading: true }
+		});
+		// Velora turns in at 650 ms and NEAR Intents has left by 950 ms, so the reveal remounts it.
+		await vi.advanceTimersByTimeAsync(950);
+		await rerender({
+			loading: false,
+			selectedProvider: SwapProvider.NEAR_INTENTS,
+			confirmationId: 1
+		});
+		await vi.advanceTimersByTimeAsync(80);
+
+		// Partway through its turn-in, as the browser would report it.
+		const midTurn = { transform: 'translateY(10px)', opacity: '0.6' };
+		vi.spyOn(window, 'getComputedStyle').mockReturnValue(midTurn as CSSStyleDeclaration);
+		animate.mockClear();
+		// A keystroke starts the next round before the reveal settles.
+		await rerender({
+			providers: [],
+			loading: true,
+			selectedProvider: undefined,
+			confirmationId: undefined
+		});
+		await tick();
+
+		const winner = getByTestId(SWAP_PROVIDER_ANIMATION).querySelector(
+			`.provider-layer[data-provider="${SwapProvider.NEAR_INTENTS}"]`
+		);
+		const [frames] =
+			animate.mock.calls.find((_, index) => animate.mock.contexts[index] === winner) ?? [];
+
+		expect(Array.isArray(frames) ? frames[0] : undefined).toEqual(midTurn);
+
+		unmount();
+	});
+
 	it('cancels the comparison timer and all running animations on destruction', async () => {
 		vi.useFakeTimers();
 		const interval = vi.spyOn(globalThis, 'setInterval');

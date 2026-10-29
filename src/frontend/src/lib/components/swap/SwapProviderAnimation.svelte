@@ -255,6 +255,7 @@
 		const pending = loading;
 		const selected = pending ? undefined : selectedProvider;
 		let cancelled = false;
+		let moved: ProviderLayer[] = [];
 
 		// New keyed layers must be bound before starting their animations, not one frame later.
 		void tick().then(() => {
@@ -275,6 +276,7 @@
 					cancelFades();
 				}
 				const moving = turning ? layers : layers.filter(({ fadingIn }) => fadingIn);
+				moved = moving;
 				if (moving.length > 0) {
 					const turnEasing =
 						!reduced &&
@@ -366,6 +368,10 @@
 
 		return () => {
 			cancelled = true;
+			// A re-run that is not a turn, such as a new round starting mid-reveal, samples nothing in
+			// `showProvider`, so what this run set moving continues from where it is now. Only those
+			// layers: one bound but not yet moving would read its resting pose, not its entry pose.
+			moved.forEach(snapshotLayer);
 			cancelAnimations();
 		};
 	});
