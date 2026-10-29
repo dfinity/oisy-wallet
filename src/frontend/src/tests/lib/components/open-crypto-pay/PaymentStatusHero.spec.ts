@@ -66,7 +66,7 @@ describe('PaymentStatusHero', () => {
 		selectedToken = mockToken,
 		data = mockData
 	}: {
-		status: 'success' | 'failure';
+		status: 'success' | 'failure' | 'not_confirmed';
 		selectedToken?: PayableTokenWithConvertedAmount;
 		data?: OpenCryptoPayResponse;
 	}) => {
@@ -137,6 +137,37 @@ describe('PaymentStatusHero', () => {
 			const errorDivs = container.querySelectorAll('.bg-error-subtle-20');
 
 			expect(errorDivs.length).toBeGreaterThanOrEqual(2);
+		});
+	});
+
+	describe('Not confirmed status', () => {
+		it('should render the not confirmed message with receipt name', () => {
+			const { getByText } = renderWithContext({ status: 'not_confirmed' });
+
+			expect(
+				getByText(
+					replacePlaceholders(en.scanner.text.pay_at_not_confirmed, {
+						$receipt: 'Test Shop'
+					})
+				)
+			).toBeInTheDocument();
+		});
+
+		it('should display token amount and symbol', () => {
+			const { container } = renderWithContext({ status: 'not_confirmed' });
+
+			const output = container.querySelector('output');
+
+			expect(output?.textContent).toContain('100');
+			expect(output?.textContent).toContain('USDC');
+		});
+
+		it('should apply warning background classes', () => {
+			const { container } = renderWithContext({ status: 'not_confirmed' });
+
+			expect(container.querySelectorAll('.bg-warning-subtle-20')).toHaveLength(2);
+			expect(container.querySelector('.bg-error-subtle-20')).not.toBeInTheDocument();
+			expect(container.querySelector('.bg-success-subtle-20')).not.toBeInTheDocument();
 		});
 	});
 
