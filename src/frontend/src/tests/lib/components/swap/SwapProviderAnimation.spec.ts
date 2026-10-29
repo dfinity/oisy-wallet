@@ -644,6 +644,32 @@ describe('SwapProviderAnimation', () => {
 		unmount();
 	});
 
+	it('does not play a confirmation it was mounted with', async () => {
+		const animate = vi.spyOn(Element.prototype, 'animate');
+		const { unmount } = render(SwapProviderAnimation, {
+			props: {
+				providers: [],
+				loading: false,
+				selectedProvider: SwapProvider.NEAR_INTENTS,
+				confirmationId: 1
+			}
+		});
+		await tick();
+		await tick();
+
+		expect(
+			animate.mock.calls.filter(
+				([frames]) =>
+					Array.isArray(frames) &&
+					frames.some(
+						(frame) => typeof frame.transform === 'string' && frame.transform.includes('scale')
+					)
+			)
+		).toHaveLength(0);
+
+		unmount();
+	});
+
 	it('does not replay confirmation for the same request or provider-only selection changes', async () => {
 		vi.useFakeTimers();
 		const animate = vi.spyOn(Element.prototype, 'animate');

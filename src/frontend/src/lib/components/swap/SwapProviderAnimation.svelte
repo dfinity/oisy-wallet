@@ -60,7 +60,9 @@
 	let layers = $state<ProviderLayer[]>([]);
 	let revision = $state(0);
 	let current = $derived(layers.find((layer) => layer.provider === displayedProvider));
-	let lastConfirmationId: Props['confirmationId'];
+	// A remount, such as the header crossing the sm/md breakpoint, inherits the confirmation it is
+	// mounted with: it was played by the instance it replaces, so only a later one plays.
+	let lastConfirmationId: Props['confirmationId'] = untrack(() => confirmationId);
 	let animations: Animation[] = [];
 	// A fade-up runs once. Re-runs for a reveal or a confirmation leave it going; only a turn,
 	// which samples the layer's pose first, cuts it short.

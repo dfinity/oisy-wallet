@@ -408,7 +408,9 @@ cached quotes and local pricing count as participation, not fresh network reques
 coordinator owns input invalidation, per-round identity and the foreground/background flag.
 Always reveal the amounts store's accepted selection, preserving manual-provider policy.
 Only a foreground pending round actually observed by the mounted header may confirm: no
-replay from a completed snapshot, review remount, manual selection or periodic refresh.
+replay from a completed snapshot, review remount, manual selection or periodic refresh. A scroll
+remounted across the sm/md breakpoint inherits the confirmation it mounts with, so it does not
+squeeze again.
 
 Foreground activity starts when the coordinator queues the round, before its 300 ms debounce,
 and keeps one request identity through pricing. Track the source/destination `TokenId` values,

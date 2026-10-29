@@ -224,6 +224,38 @@ describe('SwapProvider form header', () => {
 		expect(providerAnimationCalls(animate)).toHaveLength(0);
 	});
 
+	it('does not replay the confirmation when the header crosses the sm/md breakpoint', async () => {
+		activity.start({ requestId: 12, background: false });
+		activity.addProvider({ requestId: 12, provider: SwapProvider.ICP_SWAP });
+		const animate = vi.spyOn(Element.prototype, 'animate');
+		const pops = () =>
+			animate.mock.calls.filter(
+				([frames]) =>
+					Array.isArray(frames) &&
+					frames.some(
+						(frame) => typeof frame.transform === 'string' && frame.transform.includes('scale')
+					)
+			);
+		render(SwapProviderHeader, { props, context });
+		store.setSwaps({ swaps: [offer], selectedProvider: offer, amountForSwap: '1' });
+		activity.complete({ requestId: 12 });
+		await tick();
+		await tick();
+
+		expect(pops()).toHaveLength(1);
+
+		animate.mockClear();
+		// Rotating a phone or resizing the window swaps the header's subtree.
+		screensStore.set('xs');
+		await tick();
+		await tick();
+		screensStore.set('md');
+		await tick();
+		await tick();
+
+		expect(pops()).toHaveLength(0);
+	});
+
 	it('does not replay a completed request on initial mount or form remount', async () => {
 		store.setSwaps({
 			swaps: [offer, mockOneSecProvider],
