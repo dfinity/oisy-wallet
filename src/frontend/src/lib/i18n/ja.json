@@ -2290,6 +2290,9 @@
 			"confirmations": "確認数",
 			"for": "承認先",
 			"for_copied": "承認先アドレスをクリップボードにコピーしました。",
+			"canister": "キャニスター",
+			"canister_copied": "キャニスターIDがコピーされました。",
+			"canister_unknown": "不明",
 			"expiration": "有効期限",
 			"approve_label": "$approveAmount を承認"
 		},
@@ -2310,7 +2313,8 @@
 			"deposit": "入金",
 			"approve": "承認",
 			"burn": "バーン",
-			"mint": "ミント"
+			"mint": "ミント",
+			"top_up": "チャージ"
 		},
 		"filter": {
 			"types_label": "",

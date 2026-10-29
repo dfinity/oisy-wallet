@@ -2290,6 +2290,9 @@
 			"confirmations": "पुष्टियां",
 			"for": "",
 			"for_copied": "",
+			"canister": "कैनिस्टर",
+			"canister_copied": "कैनिस्टर आईडी क्लिपबोर्ड पर कॉपी की गई।",
+			"canister_unknown": "अज्ञात",
 			"expiration": "",
 			"approve_label": ""
 		},
@@ -2310,7 +2313,8 @@
 			"deposit": "जमा करें",
 			"approve": "स्वीकृत करें",
 			"burn": "बर्न",
-			"mint": "मिंट"
+			"mint": "मिंट",
+			"top_up": "टॉप-अप"
 		},
 		"filter": {
 			"types_label": "",

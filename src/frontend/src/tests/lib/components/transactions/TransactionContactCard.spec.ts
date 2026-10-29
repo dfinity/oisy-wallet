@@ -197,4 +197,26 @@ describe('TransactionContactCard', () => {
 
 		expect(btn).toBeTruthy();
 	});
+
+	it('renders top-up case with "canister" label', () => {
+		const canister = 'ywcsb-maaaa-aaaai-q6k7a-cai';
+
+		const { getByText } = render(TransactionContactCard, {
+			props: { type: 'top_up', to: canister }
+		});
+
+		expect(getByText(`${get(i18n).transaction.text.canister}:`, { exact: false })).toBeTruthy();
+		expect(getByText(canister)).toBeTruthy();
+	});
+
+	it('renders an unknown top-up canister as such, with no skeleton and no actions', () => {
+		const { getByText, queryByTestId, queryByRole } = render(TransactionContactCard, {
+			props: { type: 'top_up' }
+		});
+
+		expect(getByText(`${get(i18n).transaction.text.canister}:`)).toBeTruthy();
+		expect(getByText(get(i18n).transaction.text.canister_unknown)).toBeTruthy();
+		expect(queryByTestId(TOKEN_SKELETON_TEXT)).toBeNull();
+		expect(queryByRole('button')).toBeNull();
+	});
 });

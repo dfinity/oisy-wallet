@@ -1,7 +1,9 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
+import { getCmcDepositAccountIdentifier } from '$icp/utils/cmc.utils';
 import { mapCyclesLedgerTransaction } from '$icp/utils/cycles-ledger-transactions.utils';
 import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
+import { contactsStore } from '$lib/stores/contacts.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -163,6 +165,56 @@ describe('IcTransaction', () => {
 		});
 
 		expect(container).toHaveTextContent(get(i18n).transaction.label.top_up);
+		expect(container).toHaveTextContent(get(i18n).transaction.text.canister);
+		expect(container).not.toHaveTextContent(/\bTo\b/);
 		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: canister }));
+	});
+
+	describe('ICP top-ups', () => {
+		const canister = 'ywcsb-maaaa-aaaai-q6k7a-cai';
+
+		const depositAccount = getCmcDepositAccountIdentifier(Principal.fromText(canister));
+
+		const topUp = {
+			...mockTrx,
+			type: 'send' as const,
+			typeLabel: 'transaction.label.top_up',
+			to: depositAccount
+		};
+
+		beforeEach(() => {
+			contactsStore.set([]);
+		});
+
+		it('should call the canister unknown and never show the CMC deposit account', () => {
+			const { container } = render(IcTransaction, {
+				props: { transaction: topUp, token: ICP_TOKEN }
+			});
+
+			expect(container).toHaveTextContent(get(i18n).transaction.label.top_up);
+			expect(container).toHaveTextContent(get(i18n).transaction.text.canister);
+			expect(container).toHaveTextContent(get(i18n).transaction.text.canister_unknown);
+			expect(container).not.toHaveTextContent(shortenWithMiddleEllipsis({ text: depositAccount }));
+		});
+
+		it('should name the canister when a contact holds the one whose deposit account it paid', () => {
+			contactsStore.set([
+				{
+					id: 1n,
+					name: 'OISY Prod',
+					updateTimestampNs: 12n,
+					addresses: [{ addressType: 'Icrcv2', address: canister }],
+					image: undefined
+				}
+			]);
+
+			const { container } = render(IcTransaction, {
+				props: { transaction: topUp, token: ICP_TOKEN }
+			});
+
+			expect(container).toHaveTextContent('OISY Prod');
+			expect(container).not.toHaveTextContent(get(i18n).transaction.text.canister_unknown);
+			expect(container).not.toHaveTextContent(shortenWithMiddleEllipsis({ text: depositAccount }));
+		});
 	});
 });

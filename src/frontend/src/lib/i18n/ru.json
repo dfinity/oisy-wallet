@@ -2290,6 +2290,9 @@
 			"confirmations": "Подтверждения",
 			"for": "Для",
 			"for_copied": "Скопировать",
+			"canister": "Контейнер",
+			"canister_copied": "ID контейнера скопирован в буфер обмена.",
+			"canister_unknown": "неизвестен",
 			"expiration": "Истечение срока",
 			"approve_label": "Одобрить"
 		},
@@ -2310,7 +2313,8 @@
 			"deposit": "Депозит",
 			"approve": "Одобрение",
 			"burn": "Сжигание",
-			"mint": "Создание"
+			"mint": "Создание",
+			"top_up": "Пополнение"
 		},
 		"filter": {
 			"types_label": "",

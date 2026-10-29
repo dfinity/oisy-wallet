@@ -2290,6 +2290,9 @@
 			"confirmations": "Confirmations",
 			"for": "Pour",
 			"for_copied": "Adresse du dépensier copiée dans le presse-papiers.",
+			"canister": "Canister",
+			"canister_copied": "ID du canister copié dans le presse-papiers.",
+			"canister_unknown": "inconnu",
 			"expiration": "Expiration",
 			"approve_label": "Approuver $approveAmount"
 		},
@@ -2310,7 +2313,8 @@
 			"deposit": "Déposer",
 			"approve": "Approuver",
 			"burn": "Brûler",
-			"mint": "Minimiser"
+			"mint": "Minimiser",
+			"top_up": "Recharge"
 		},
 		"filter": {
 			"types_label": "",

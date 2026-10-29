@@ -5,6 +5,7 @@ import {
 	formatTrillionCycles,
 	getCanisterNetworkContacts,
 	getRecentlyToppedUpCanisters,
+	getTopUpCanisterId,
 	isCanisterAccount,
 	isCanisterId,
 	isCyclesTopUpTokenUsable,
@@ -127,6 +128,51 @@ describe('cycles-top-up.utils', () => {
 			expect(isCanisterAccount(mockPrincipalText)).toBeFalsy();
 			expect(isCanisterAccount(mockAccountIdentifierText)).toBeFalsy();
 			expect(isCanisterAccount('not an account')).toBeFalsy();
+		});
+	});
+
+	describe('getTopUpCanisterId', () => {
+		const depositAccount = 'ab'.repeat(32);
+
+		const cmcDepositAccountCanisterIds = { [depositAccount]: canister };
+
+		it('names the canister a TCYCLES top-up names, whatever the contacts', () => {
+			expect(
+				getTopUpCanisterId({
+					transaction: { typeLabel: 'transaction.label.top_up', to: canister },
+					cmcDepositAccountCanisterIds: {}
+				})
+			).toBe(canister);
+		});
+
+		it('names the contact canister whose CMC deposit account an ICP top-up paid, in any letter case', () => {
+			expect(
+				getTopUpCanisterId({
+					transaction: { typeLabel: 'transaction.label.top_up', to: depositAccount.toUpperCase() },
+					cmcDepositAccountCanisterIds
+				})
+			).toBe(canister);
+		});
+
+		it('names no canister for an ICP top-up to a deposit account no contact canister pays into', () => {
+			expect(
+				getTopUpCanisterId({
+					transaction: { typeLabel: 'transaction.label.top_up', to: 'cd'.repeat(32) },
+					cmcDepositAccountCanisterIds
+				})
+			).toBeUndefined();
+		});
+
+		it.each([
+			{ label: 'no label', typeLabel: undefined },
+			{ label: 'a top-up refund', typeLabel: 'transaction.label.top_up_refund' }
+		])('names nothing for a transaction with $label', ({ typeLabel }) => {
+			expect(
+				getTopUpCanisterId({
+					transaction: { typeLabel, to: canister },
+					cmcDepositAccountCanisterIds
+				})
+			).toBeUndefined();
 		});
 	});
 

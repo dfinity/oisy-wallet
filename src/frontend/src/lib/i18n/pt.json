@@ -2290,6 +2290,9 @@
 			"confirmations": "Confirmações",
 			"for": "",
 			"for_copied": "",
+			"canister": "Canister",
+			"canister_copied": "ID do canister copiado para a área de transferência.",
+			"canister_unknown": "desconhecido",
 			"expiration": "",
 			"approve_label": ""
 		},
@@ -2310,7 +2313,8 @@
 			"deposit": "Depositar",
 			"approve": "Aprovar",
 			"burn": "Burn",
-			"mint": "Mint"
+			"mint": "Mint",
+			"top_up": "Recarga"
 		},
 		"filter": {
 			"types_label": "",
