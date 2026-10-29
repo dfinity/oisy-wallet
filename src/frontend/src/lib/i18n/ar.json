@@ -1859,6 +1859,7 @@
 			"allowance_increase": "",
 			"allowance_decrease": "",
 			"unverifiable_erc20_request": "",
+			"unlisted_erc20_request": "",
 			"token_call_with_value": "",
 			"unverifiable_approval_for_all_request": "",
 			"approval_for_all_grant": "",

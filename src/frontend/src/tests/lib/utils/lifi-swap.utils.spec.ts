@@ -18,7 +18,7 @@ import { ROBINHOOD_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tok
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import { ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
+import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { LifiQuoteRejectedError } from '$lib/types/errors';
 import type { LifiTokenRef } from '$lib/types/lifi';
 import { SwapProvider } from '$lib/types/swap';
@@ -37,6 +37,11 @@ import {
 } from '$lib/utils/lifi-swap.utils';
 import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
+import {
+	mockLifiSolSolToUsdc,
+	mockLifiSolUser,
+	mockLifiSolWrappedSolUser
+} from '$tests/mocks/lifi-sol-transaction.mock';
 import {
 	mockLifiBaseUsdcAddress,
 	mockLifiBaseUsdcToken,
@@ -57,6 +62,16 @@ import {
 	type Step,
 	type SwapStep
 } from '@lifi/sdk';
+import {
+	address,
+	blockhash,
+	compileTransaction,
+	createTransactionMessage,
+	getBase64EncodedWireTransaction,
+	pipe,
+	setTransactionMessageFeePayer,
+	setTransactionMessageLifetimeUsingBlockhash
+} from '@solana/kit';
 
 describe('lifi-swap.utils', () => {
 	const baseParams = {
@@ -178,7 +193,7 @@ describe('lifi-swap.utils', () => {
 			).toBeUndefined();
 		});
 
-		it('should not quote a Solana source', () => {
+		it('should build a Solana → Solana request limited to the exchanges its binding checks', () => {
 			expect(
 				buildLifiQuoteRequest({
 					...baseParams,
@@ -186,6 +201,41 @@ describe('lifi-swap.utils', () => {
 					destinationToken: mockValidSplToken,
 					userAddress: mockSolAddress,
 					recipientAddress: mockSolAddress
+				})
+			).toStrictEqual({
+				fromChain: ChainId.SOL,
+				toChain: ChainId.SOL,
+				fromToken: SYSTEM_PROGRAM_ADDRESS,
+				toToken: mockValidSplToken.address,
+				fromAddress: mockSolAddress,
+				toAddress: mockSolAddress,
+				fromAmount: `${mockLifiFromAmount}`,
+				slippage: 0.015,
+				order: 'CHEAPEST',
+				skipSimulation: true,
+				allowDestinationCall: false,
+				allowExchanges: ['jupiter']
+			});
+		});
+
+		it('should not quote a Solana source with an EVM destination', () => {
+			expect(
+				buildLifiQuoteRequest({
+					...baseParams,
+					sourceToken: SOLANA_TOKEN,
+					userAddress: mockSolAddress,
+					recipientAddress: mockLifiUserAddress
+				})
+			).toBeUndefined();
+		});
+
+		it('should not quote a Solana source without a Solana recipient', () => {
+			expect(
+				buildLifiQuoteRequest({
+					...baseParams,
+					sourceToken: SOLANA_TOKEN,
+					destinationToken: mockValidSplToken,
+					userAddress: mockSolAddress
 				})
 			).toBeUndefined();
 		});
@@ -226,28 +276,52 @@ describe('lifi-swap.utils', () => {
 
 			const loadWithDenyLists = async ({
 				bridges,
-				exchanges
+				exchanges,
+				solanaBridges
 			}: {
 				bridges: string[];
 				exchanges: string[];
+				// Bridges allowed from Solana, which has none.
+				solanaBridges?: string[];
 			}) => {
-				vi.doMock('$env/rest/lifi.env', async (importOriginal) => ({
-					...(await importOriginal<typeof lifiEnv>()),
-					LIFI_DENY_BRIDGES: bridges,
-					LIFI_DENY_EXCHANGES: exchanges
-				}));
+				vi.doMock('$env/rest/lifi.env', async (importOriginal) => {
+					const original = await importOriginal<typeof lifiEnv>();
+					const { SOLANA_MAINNET_NETWORK_ID } = await import('$env/networks/networks.sol.env');
+
+					return {
+						...original,
+						LIFI_DENY_BRIDGES: bridges,
+						LIFI_DENY_EXCHANGES: exchanges,
+						...(solanaBridges !== undefined && {
+							LIFI_ALLOWED_BRIDGES: {
+								...original.LIFI_ALLOWED_BRIDGES,
+								[SOLANA_MAINNET_NETWORK_ID]: solanaBridges
+							}
+						})
+					};
+				});
 
 				// Network ids are symbols, so the tokens and networks come from the same module graph
 				// as the code under test.
-				const [{ buildLifiQuoteRequest: build }, base, baseEth, arbitrum, robinhood, robinhoodEth] =
-					await Promise.all([
-						import('$lib/utils/lifi-swap.utils'),
-						import('$env/networks/networks-evm/networks.evm.base.env'),
-						import('$env/tokens/tokens-evm/tokens-base/tokens.eth.env'),
-						import('$env/networks/networks-evm/networks.evm.arbitrum.env'),
-						import('$env/networks/networks-evm/networks.evm.robinhood.env'),
-						import('$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env')
-					]);
+				const [
+					{ buildLifiQuoteRequest: build },
+					base,
+					baseEth,
+					arbitrum,
+					robinhood,
+					robinhoodEth,
+					solNetworks,
+					sol
+				] = await Promise.all([
+					import('$lib/utils/lifi-swap.utils'),
+					import('$env/networks/networks-evm/networks.evm.base.env'),
+					import('$env/tokens/tokens-evm/tokens-base/tokens.eth.env'),
+					import('$env/networks/networks-evm/networks.evm.arbitrum.env'),
+					import('$env/networks/networks-evm/networks.evm.robinhood.env'),
+					import('$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env'),
+					import('$env/networks/networks.sol.env'),
+					import('$env/tokens/tokens.sol.env')
+				]);
 
 				return {
 					build,
@@ -256,9 +330,61 @@ describe('lifi-swap.utils', () => {
 					usdcOn: (network: typeof base.BASE_NETWORK) => ({ ...mockLifiBaseUsdcToken, network }),
 					baseNetwork: base.BASE_NETWORK,
 					arbitrumNetwork: arbitrum.ARBITRUM_MAINNET_NETWORK,
-					robinhoodNetwork: robinhood.ROBINHOOD_MAINNET_NETWORK
+					robinhoodNetwork: robinhood.ROBINHOOD_MAINNET_NETWORK,
+					solToken: sol.SOLANA_TOKEN,
+					splToken: { ...mockValidSplToken, network: solNetworks.SOLANA_MAINNET_NETWORK }
 				};
 			};
+
+			const solanaParams = {
+				...baseParams,
+				userAddress: mockSolAddress,
+				recipientAddress: mockSolAddress
+			};
+
+			it("should drop a denied exchange from a Solana source's allow-list rather than send a deny list", async () => {
+				const { build, solToken, splToken } = await loadWithDenyLists({
+					bridges: [],
+					exchanges: ['someExchange']
+				});
+
+				const request = build({
+					...solanaParams,
+					sourceToken: solToken,
+					destinationToken: splToken
+				});
+
+				expect(request?.allowExchanges).toStrictEqual(['jupiter']);
+				expect(request).not.toHaveProperty('denyExchanges');
+			});
+
+			it('should not quote a Solana source with an EVM destination, even through a bridge allowed from Solana', async () => {
+				const { build, solToken, usdcOn, baseNetwork } = await loadWithDenyLists({
+					bridges: [],
+					exchanges: [],
+					solanaBridges: ['mayan']
+				});
+
+				expect(
+					build({
+						...solanaParams,
+						sourceToken: solToken,
+						destinationToken: usdcOn(baseNetwork),
+						recipientAddress: mockLifiUserAddress
+					})
+				).toBeUndefined();
+			});
+
+			it('should not quote a Solana source once every exchange its binding checks is denied', async () => {
+				const { build, solToken, splToken } = await loadWithDenyLists({
+					bridges: [],
+					exchanges: ['jupiter']
+				});
+
+				expect(
+					build({ ...solanaParams, sourceToken: solToken, destinationToken: splToken })
+				).toBeUndefined();
+			});
 
 			it('should drop a denied bridge from the allow-list rather than send a deny list', async () => {
 				const { build, baseEthToken, usdcOn, arbitrumNetwork } = await loadWithDenyLists({
@@ -530,6 +656,111 @@ describe('lifi-swap.utils', () => {
 					sourceNetworkId: BASE_NETWORK_ID
 				})
 			).toThrow(LifiQuoteRejectedError);
+		});
+
+		describe('a Solana source', () => {
+			const { request: solRequest, quote: fixtureQuote } = mockLifiSolSolToUsdc;
+			const fixtureData = fixtureQuote.transactionRequest?.data;
+
+			const solQuote = ({
+				data = fixtureData,
+				tool = 'jupiter'
+			}: {
+				data?: string;
+				tool?: string;
+			} = {}): LiFiStep => ({
+				...mockLifiQuote,
+				action: {
+					...mockLifiQuote.action,
+					fromChainId: ChainId.SOL,
+					toChainId: ChainId.SOL,
+					fromToken: { ...mockLifiQuote.action.fromToken, address: solRequest.fromToken },
+					toToken: { ...mockLifiQuote.action.toToken, address: solRequest.toToken },
+					fromAmount: solRequest.fromAmount,
+					toAddress: solRequest.toAddress
+				},
+				estimate: fixtureQuote.estimate,
+				includedSteps: [{ ...mockLifiQuote, type: 'swap', tool }],
+				transactionRequest: { data }
+			});
+
+			const assertSolQuote = ({
+				quote = solQuote(),
+				request = solRequest
+			}: {
+				quote?: LiFiStep;
+				request?: QuoteRequestFromAmount;
+			} = {}) => assertLifiQuote({ quote, request, sourceNetworkId: SOLANA_MAINNET_NETWORK.id });
+
+			// The user's own transaction, but a legacy message.
+			const legacyData = getBase64EncodedWireTransaction(
+				compileTransaction(
+					pipe(
+						createTransactionMessage({ version: 'legacy' }),
+						(message) => setTransactionMessageFeePayer(address(mockLifiSolUser), message),
+						(message) =>
+							setTransactionMessageLifetimeUsingBlockhash(
+								{
+									blockhash: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+									lastValidBlockHeight: ZERO
+								},
+								message
+							)
+					)
+				)
+			);
+
+			it('should accept a version 0 transaction that only the user signs, with no Diamond', () => {
+				expect(() => assertSolQuote()).not.toThrow();
+			});
+
+			it('should refuse a list of transactions, which a Jito bundle is', () => {
+				const bundle: unknown = [fixtureData, fixtureData];
+
+				expect(() => assertSolQuote({ quote: solQuote({ data: bundle as string }) })).toThrow(
+					'not a single transaction'
+				);
+			});
+
+			it('should refuse a transaction that does not decode', () => {
+				expect(() => assertSolQuote({ quote: solQuote({ data: 'not a transaction' }) })).toThrow(
+					LifiQuoteRejectedError
+				);
+			});
+
+			it('should refuse a message other than version 0', () => {
+				expect(() => assertSolQuote({ quote: solQuote({ data: legacyData }) })).toThrow(
+					'not a version 0 transaction'
+				);
+			});
+
+			it('should refuse a transaction that someone other than the user signs', () => {
+				expect(() =>
+					assertSolQuote({
+						request: {
+							...solRequest,
+							fromAddress: mockLifiSolWrappedSolUser,
+							toAddress: mockLifiSolWrappedSolUser
+						},
+						quote: {
+							...solQuote(),
+							action: { ...solQuote().action, toAddress: mockLifiSolWrappedSolUser }
+						}
+					})
+				).toThrow('the transaction needs a signer other than the user');
+			});
+
+			it('should refuse a swap through an exchange outside the requested ones', () => {
+				expect(() => assertSolQuote({ quote: solQuote({ tool: 'dflow' }) })).toThrow(
+					LifiQuoteRejectedError
+				);
+			});
+
+			it('should refuse a quote without a transaction', () => {
+				expect(() =>
+					assertSolQuote({ quote: { ...solQuote(), transactionRequest: undefined } })
+				).toThrow(LifiQuoteRejectedError);
+			});
 		});
 	});
 
