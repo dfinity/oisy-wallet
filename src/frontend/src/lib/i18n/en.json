@@ -1857,6 +1857,7 @@
 			"allowance_increase": "This request raises the allowance of the spender below by the amount shown, on top of whatever it can already spend. The spender can transfer that much of this token out of your wallet, at any time, until you revoke it.",
 			"allowance_decrease": "This request lowers the allowance of the spender below by the amount shown. It moves no funds on its own.",
 			"unverifiable_erc20_request": "This request involves a token OISY can't identify or decode. What's shown may differ from what would actually be signed, so approval is disabled.",
+			"unlisted_erc20_request": "OISY doesn't list this token. Its symbol and the amount shown are read from the token's own contract, and anyone can create a token with any symbol. Check the token address before you approve.",
 			"token_call_with_value": "Besides the token amount below, this request sends $amount to the token contract. A token transfer or approval doesn't send $symbol, so for your security, OISY won't sign it.",
 			"unverifiable_approval_for_all_request": "This request would hand an operator control of an NFT collection, and OISY can't decode which operator. What's shown may differ from what would actually be signed, so approval is disabled.",
 			"approval_for_all_grant": "This request lets the operator below transfer any NFT in this collection that you own now or acquire later, at any time, until you revoke it. It moves no funds on its own.",
