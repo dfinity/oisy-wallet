@@ -18,9 +18,9 @@
 //!   `claim_tip` has to survive a "maybe" either way: `TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS` lets the
 //!   `Claiming` guard lapse while a first `icrc2_transfer_from` may still be in flight, so a second
 //!   attempt can overlap the first whatever shape the wait has, and what keeps that safe is the
-//!   allowance covering exactly one payout, as `service::claim_tip` says at length. The deadline
-//!   left at the `bounded_wait` default is the same 300 s as that guard, so an unknown outcome is
-//!   resolved at the moment the tip becomes claimable again.
+//!   allowance covering exactly one payout, as `service::claim_tip` says at length. The deadline is
+//!   [`PAYOUT_TIMEOUT_SECONDS`] rather than the `bounded_wait` default of 300 s, which is far
+//!   longer than a ledger's answer stays worth having.
 //! - That client is a struct bound to one canister and bundles cycles-only methods — `deposit`,
 //!   `withdraw`, `create_canister`. Tips points at whatever ledger the sender chose, and needs
 //!   three methods.
@@ -86,6 +86,16 @@ pub async fn allowance(ledger: Principal, args: AllowanceArgs) -> Result<Allowan
         .map_err(|err| format!("icrc2_allowance decode failed: {err:?}"))
 }
 
+/// How long a payout waits for the ledger before its outcome counts as unknown.
+///
+/// A cross-subnet ledger call takes seconds, so thirty is roughly ten times what
+/// a healthy answer needs and the point past which the answer has stopped being
+/// worth waiting for. It also bounds what one open payout can hold: the cycles
+/// the system sets aside for a reply come back at the deadline whether or not
+/// the ledger answers, and the `bounded_wait` default of 300 s would hold ten
+/// times as many at once for an answer that went stale long before.
+const PAYOUT_TIMEOUT_SECONDS: u32 = 30;
+
 /// Moves tokens from the sender's account to the claimer's, drawing on the
 /// per-tip allowance. The ledger charges its fee to the allowance, not to the
 /// transferred amount, so the claimer receives `args.amount` in full.
@@ -93,7 +103,7 @@ pub async fn allowance(ledger: Principal, args: AllowanceArgs) -> Result<Allowan
 /// # Errors
 /// [`TransferFromCallError::InsufficientAllowance`] when the reservation no
 /// longer covers the payout; [`TransferFromCallError::Failed`] for any other
-/// ledger rejection or transport failure, the bounded wait's deadline included.
+/// ledger rejection or transport failure, [`PAYOUT_TIMEOUT_SECONDS`] included.
 /// A payout that reaches the deadline leaves its outcome unknown — see the
 /// module comment for why the claim state machine can take that answer.
 pub async fn transfer_from(
@@ -101,6 +111,7 @@ pub async fn transfer_from(
     args: TransferFromArgs,
 ) -> Result<Nat, TransferFromCallError> {
     let response = Call::bounded_wait(ledger, "icrc2_transfer_from")
+        .change_timeout(PAYOUT_TIMEOUT_SECONDS)
         .with_args(&(args,))
         .await
         .map_err(|err| {
