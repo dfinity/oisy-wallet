@@ -140,6 +140,60 @@ describe('infura-erc20.providers', () => {
 			});
 		});
 
+		describe('decimals and symbol methods', () => {
+			const mockName = vi.fn();
+			const mockSymbol = vi.fn();
+			const mockDecimals = vi.fn();
+
+			const mockParams = {
+				address: contractAddress
+			};
+
+			beforeEach(() => {
+				vi.clearAllMocks();
+
+				mockName.mockRejectedValue(new Error('no name'));
+				mockSymbol.mockResolvedValue('mock-symbol');
+				mockDecimals.mockResolvedValue(18n);
+
+				mockContract.prototype.name = mockName as unknown as typeof mockContract.prototype.name;
+				mockContract.prototype.symbol =
+					mockSymbol as unknown as typeof mockContract.prototype.symbol;
+				mockContract.prototype.decimals =
+					mockDecimals as unknown as typeof mockContract.prototype.decimals;
+			});
+
+			it('should return the decimals as a number, without asking for the name', async () => {
+				const provider = new InfuraErc20Provider(ETHEREUM_NETWORK);
+
+				await expect(provider.decimals(mockParams)).resolves.toBe(18);
+
+				expect(mockContract).toHaveBeenCalledExactlyOnceWith(
+					...expectedContractParams,
+					new mockProvider()
+				);
+				expect(mockName).not.toHaveBeenCalled();
+			});
+
+			it('should return the symbol, without asking for the name', async () => {
+				const provider = new InfuraErc20Provider(ETHEREUM_NETWORK);
+
+				await expect(provider.symbol(mockParams)).resolves.toBe('mock-symbol');
+
+				expect(mockName).not.toHaveBeenCalled();
+			});
+
+			it('should reject when the contract does not answer', async () => {
+				mockDecimals.mockRejectedValue(new Error('no decimals'));
+				mockSymbol.mockRejectedValue(new Error('no symbol'));
+
+				const provider = new InfuraErc20Provider(ETHEREUM_NETWORK);
+
+				await expect(provider.decimals(mockParams)).rejects.toThrow('no decimals');
+				await expect(provider.symbol(mockParams)).rejects.toThrow('no symbol');
+			});
+		});
+
 		describe('balance method', () => {
 			const mockBalanceOf = vi.fn();
 
