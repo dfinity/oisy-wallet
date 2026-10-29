@@ -413,6 +413,8 @@ export const fetchLifiSwapQuote = async (
 		return;
 	}
 
+	params.onProviderParticipating?.(SwapProvider.LIFI);
+
 	const key = JSON.stringify(request);
 
 	if (nonNullish(quoteCache) && quoteCache.key === key && isFresh(quoteCache)) {

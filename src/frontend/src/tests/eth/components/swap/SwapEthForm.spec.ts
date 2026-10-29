@@ -3,13 +3,18 @@ import SwapEthForm from '$eth/components/swap/SwapEthForm.svelte';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
 import type { Erc20Token } from '$eth/types/erc20';
 import {
+	CONVERT_AMOUNT_DISPLAY_SKELETON,
+	CONVERT_AMOUNT_DISPLAY_VALUE,
 	MAX_BUTTON,
+	SWAP_FEE_ROW,
+	SWAP_PROVIDER_STATUS,
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
+import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
 import { SWAP_CONTEXT_KEY, initSwapContext, type SwapContext } from '$lib/stores/swap.store';
 import type { OptionAmount } from '$lib/types/send';
 import { formatToken } from '$lib/utils/format.utils';
@@ -17,7 +22,9 @@ import { withLifiMaxFeeHeadroom } from '$lib/utils/lifi-fee.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import SwapEthFormLifiTest from '$tests/eth/components/swap/SwapEthFormLifiTest.svelte';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
-import { fireEvent, render } from '@testing-library/svelte';
+import { mockVeloraMarketProvider } from '$tests/mocks/swap.mocks';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { get, readable, writable } from 'svelte/store';
 
 vi.mock('$lib/utils/parse.utils', async () => {
@@ -86,6 +93,104 @@ describe('SwapFormEth', () => {
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
 	const switchButtonSelector = `button[data-tid="${SWAP_SWITCH_TOKENS_BUTTON}"]`;
+
+	it.each([false, true])('retains Total fee (LI.FI: %s)', (isLifi) => {
+		const { getByText } = render(SwapEthForm, {
+			props: { ...props, isLifi, lifiFee: 2_000_000_000_000_000n },
+			context: mockContext
+		});
+
+		expect(getByText(get(i18n).fee.text.total_fee)).toBeInTheDocument();
+	});
+
+	it.each([
+		{ previousOffer: false, isLifi: false },
+		{ previousOffer: false, isLifi: true },
+		{ previousOffer: true, isLifi: false },
+		{ previousOffer: true, isLifi: true }
+	])(
+		'shows an early Total fee skeleton while comparing (previous offer: $previousOffer, LI.FI: $isLifi)',
+		async ({ previousOffer, isLifi }) => {
+			const activity = initSwapQuoteActivityStore();
+			activity.start({ requestId: 2, background: false });
+			const store = initSwapAmountsStore();
+			if (previousOffer) {
+				store.setSwaps({
+					swaps: [mockVeloraMarketProvider],
+					selectedProvider: mockVeloraMarketProvider,
+					amountForSwap: '1'
+				});
+			}
+			mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store, activity });
+			const feeStore = initEthFeeStore();
+			feeStore.setFee({ gas: 21_000n, maxFeePerGas: 1_000_000_000n, maxPriorityFeePerGas: 1n });
+			mockContext.set(
+				ETH_FEE_CONTEXT_KEY,
+				initEthFeeContext({
+					feeStore,
+					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
+				})
+			);
+			const { getByText, getByTestId, queryByTestId } = render(SwapEthForm, {
+				props: { ...props, isSwapAmountsLoading: true, isLifi, lifiFee: 2_000_000_000_000_000n },
+				context: mockContext
+			});
+
+			expect(getByText(get(i18n).fee.text.total_fee)).toBeInTheDocument();
+			expect(getByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON)).toBeInTheDocument();
+			expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_VALUE)).not.toBeInTheDocument();
+
+			if (previousOffer) {
+				const row = `[data-tid="${SWAP_FEE_ROW}"]`;
+				const skeletonCell = getByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON).closest(row);
+				activity.complete({ requestId: 2 });
+				await tick();
+
+				// The value fades in over the outgoing skeleton in the same cell, so the row keeps its height.
+				expect(skeletonCell).not.toBeNull();
+				expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_VALUE)?.closest(row)).toBe(skeletonCell);
+
+				await waitFor(() =>
+					expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON)).not.toBeInTheDocument()
+				);
+
+				expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_VALUE)).toBeInTheDocument();
+
+				activity.start({ requestId: 3, background: true });
+				await tick();
+
+				expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_VALUE)).toBeInTheDocument();
+				expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON)).not.toBeInTheDocument();
+			}
+		}
+	);
+
+	it('compares providers before an offer or fee token exists without enabling Review', () => {
+		const activity = initSwapQuoteActivityStore();
+		activity.start({ requestId: 1, background: false });
+		mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: initSwapAmountsStore(), activity });
+		mockContext.set(
+			ETH_FEE_CONTEXT_KEY,
+			initEthFeeContext({
+				feeStore: initEthFeeStore(),
+				feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+				feeTokenIdStore: writable(undefined),
+				feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
+			})
+		);
+		const { getByTestId, getByText } = render(SwapEthForm, {
+			props: { ...props, isSwapAmountsLoading: true },
+			context: mockContext
+		});
+
+		expect(getByText(get(i18n).swap.text.smart_swap)).toBeInTheDocument();
+		expect(getByTestId(SWAP_PROVIDER_STATUS)).toHaveTextContent(
+			get(i18n).swap.text.finding_best_rate
+		);
+		expect(getByText(get(i18n).swap.text.review_button).closest('button')).toBeDisabled();
+	});
 
 	it('should render all fields', () => {
 		const { container, getByTestId, getByText } = render(SwapEthForm, {
@@ -546,17 +651,5 @@ describe('SwapFormEth', () => {
 				expect(amountOf(container)).toBe(maxForLifi(lifiFee - 1_000n));
 			});
 		});
-	});
-
-	it('should show fee info message', () => {
-		const { container, getByText } = render(SwapEthForm, {
-			props,
-			context: mockContext
-		});
-
-		expect(container.querySelector('[data-tid="swap-fee-info"]')).toBeInTheDocument();
-		expect(
-			getByText(new RegExp(`${get(i18n).send.info.fee_info.split('$feeSymbol')[0]}ETH`))
-		).toBeInTheDocument();
 	});
 });

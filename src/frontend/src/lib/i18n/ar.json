@@ -1364,6 +1364,8 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "جاري تحديث واجهة المستخدم",
 			"swap_provider": "مزود التبديل",
+			"smart_swap": "",
+			"finding_best_rate": "",
 			"swap_provider_website": "الموقع الإلكتروني",
 			"swap_route": "مسار التبديل",
 			"included_network_fees": "رسوم الشبكة المضمنة",

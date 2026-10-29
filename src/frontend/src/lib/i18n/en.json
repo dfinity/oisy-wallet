@@ -1364,6 +1364,8 @@
 			"finishing_in_background": "Wrapping up. We'll keep working on it in the background.",
 			"refreshing_ui": "Refreshing UI",
 			"swap_provider": "Swap provider",
+			"smart_swap": "OISY Smart Swap",
+			"finding_best_rate": "Finding the best rate...",
 			"swap_provider_website": "Website",
 			"swap_route": "Swap route",
 			"included_network_fees": "Included network fees",

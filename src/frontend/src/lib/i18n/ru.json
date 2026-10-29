@@ -1364,6 +1364,8 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "Обновление пользовательского интерфейса",
 			"swap_provider": "Поставщик обмена",
+			"smart_swap": "",
+			"finding_best_rate": "",
 			"swap_provider_website": "Веб-сайт",
 			"swap_route": "Маршрут обмена",
 			"included_network_fees": "Включенные сетевые комиссии",
