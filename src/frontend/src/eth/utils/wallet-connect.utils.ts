@@ -692,6 +692,63 @@ const toPermit2Allowance = (details: unknown): WalletConnectEthTypedDataAllowanc
 	};
 };
 
+const PERMIT2_TOKEN_PERMISSIONS: Array<TypedDataField> = [
+	{ name: 'token', type: 'address' },
+	{ name: 'amount', type: 'uint256' }
+];
+
+const PERMIT2_TRANSFER_FROM: Array<TypedDataField> = [
+	{ name: 'permitted', type: 'TokenPermissions' },
+	{ name: 'spender', type: 'address' },
+	{ name: 'nonce', type: 'uint256' },
+	{ name: 'deadline', type: 'uint256' }
+];
+
+const PERMIT2_BATCH_TRANSFER_FROM: Array<TypedDataField> = [
+	{ name: 'permitted', type: 'TokenPermissions[]' },
+	{ name: 'spender', type: 'address' },
+	{ name: 'nonce', type: 'uint256' },
+	{ name: 'deadline', type: 'uint256' }
+];
+
+// A Permit2 signature transfer lets its spender, and no one else, move up to `amount` of `token`
+// once before the deadline. It names no recipient: the spender chooses where the tokens go when it
+// takes them, which is why the spender is the party the summary states.
+const toPermit2TransferAllowance = ({
+	permitted,
+	deadline
+}: {
+	permitted: unknown;
+	deadline: unknown;
+}): WalletConnectEthTypedDataAllowance => {
+	const { token, amount } = toDeclaredStruct(permitted);
+
+	const declaredAmount = toDeclaredUint(amount);
+
+	return {
+		token: toDeclaredAddress(token),
+		amount: declaredAmount,
+		unlimited: declaredAmount === MAX_UINT_256,
+		expiration: toExpirationSeconds(deadline)
+	};
+};
+
+const toPermit2TransferApproval = ({
+	message: { permitted, spender, deadline }
+}: Pick<EthTypedDataApprovalParams, 'message'>): WalletConnectEthTypedDataApproval => ({
+	spender: toDeclaredAddress(spender),
+	allowances: [toPermit2TransferAllowance({ permitted, deadline })]
+});
+
+const toPermit2BatchTransferApproval = ({
+	message: { permitted, spender, deadline }
+}: Pick<EthTypedDataApprovalParams, 'message'>): WalletConnectEthTypedDataApproval => ({
+	spender: toDeclaredAddress(spender),
+	allowances: (Array.isArray(permitted) ? permitted : []).map((entry) =>
+		toPermit2TransferAllowance({ permitted: entry, deadline })
+	)
+});
+
 const ERC3009_AUTHORIZATION: Array<TypedDataField> = [
 	{ name: 'from', type: 'address' },
 	{ name: 'to', type: 'address' },
@@ -760,6 +817,25 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 			spender: toDeclaredAddress(spender),
 			allowances: (Array.isArray(details) ? details : []).map(toPermit2Allowance)
 		})
+	},
+	// Uniswap Permit2 `PermitTransferFrom`: one transfer, of up to the amount it names.
+	{
+		primaryType: 'PermitTransferFrom',
+		types: {
+			PermitTransferFrom: PERMIT2_TRANSFER_FROM,
+			TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+		},
+		toApproval: toPermit2TransferApproval
+	},
+	// Uniswap Permit2 `PermitBatchTransferFrom`: the same over every token it lists, under one
+	// deadline, for the same spender.
+	{
+		primaryType: 'PermitBatchTransferFrom',
+		types: {
+			PermitBatchTransferFrom: PERMIT2_BATCH_TRANSFER_FROM,
+			TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+		},
+		toApproval: toPermit2BatchTransferApproval
 	},
 	// Standard ERC-2612 `Permit`.
 	{
@@ -1063,11 +1139,10 @@ export const getEthTypedDataMethods = ({
 /**
  * Whether a request would be signed without OISY being able to state what it authorizes.
  *
- * A signature is not a lesser thing than a transaction. A Permit2 signature transfer lets its
- * spender move tokens out of the wallet in one call, and a marketplace order sells an NFT; each is
- * a struct OISY does not recognise, and each used to be previewed as an application, a method name
- * and a collapsed blob of JSON, with approval enabled and nothing said about what signing it would
- * allow.
+ * A signature is not a lesser thing than a transaction. A marketplace order sells an NFT; it is a
+ * struct OISY does not recognise, and like every such struct it used to be previewed as an
+ * application, a method name and a collapsed blob of JSON, with approval enabled and nothing said
+ * about what signing it would allow.
  *
  * This is the `eth_sendTransaction` fallback in the other review: the summary is built from an
  * allowlist, and everything the allowlist does not cover falls through to a preview that states

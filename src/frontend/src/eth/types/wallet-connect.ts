@@ -77,8 +77,8 @@ export interface WalletConnectEthTypedDataAllowance {
 	amount?: bigint;
 	// `true` when the allowance is the largest its schema can express, which is how an unlimited
 	// approval is written. Carried as a fact rather than left to the view to work out, because
-	// each schema says it differently: a saturated `uint160` for Permit2, a saturated `uint256`
-	// for ERC-2612, and a bare `allowed` bool for DAI.
+	// each schema says it differently: a saturated `uint160` for Permit2's allowances, a saturated
+	// `uint256` for ERC-2612 and Permit2's transfers, and a bare `allowed` bool for DAI.
 	unlimited?: boolean;
 	expiration?: number;
 }

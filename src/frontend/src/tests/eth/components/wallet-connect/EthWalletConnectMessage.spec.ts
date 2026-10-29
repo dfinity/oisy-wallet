@@ -1066,7 +1066,40 @@ describe('EthWalletConnectMessage', () => {
 	});
 
 	describe('transfer signatures', () => {
+		const SPENDER = '0x66a9893cc07d91d95644aedd05d03f95e1dba8af';
 		const RECIPIENT = '0x1111111111111111111111111111111111111111';
+
+		const PERMIT2_DOMAIN = {
+			name: 'Permit2',
+			chainId: '1',
+			verifyingContract: '0x000000000022d473030f116ddee9f6b43ac78ba3'
+		};
+
+		const PERMIT2_TYPES = {
+			EIP712Domain: [
+				{ name: 'name', type: 'string' },
+				{ name: 'chainId', type: 'uint256' },
+				{ name: 'verifyingContract', type: 'address' }
+			],
+			TokenPermissions: [
+				{ name: 'token', type: 'address' },
+				{ name: 'amount', type: 'uint256' }
+			]
+		};
+
+		const PERMIT2_TRANSFER_FROM = [
+			{ name: 'permitted', type: 'TokenPermissions' },
+			{ name: 'spender', type: 'address' },
+			{ name: 'nonce', type: 'uint256' },
+			{ name: 'deadline', type: 'uint256' }
+		];
+
+		const PERMIT2_TRANSFER_MESSAGE = {
+			permitted: { token: USDC_TOKEN.address, amount: '250000000' },
+			spender: SPENDER,
+			nonce: '7',
+			deadline: '1893456000'
+		};
 
 		const toRequest = (typedData: Record<string, unknown>): WalletKitTypes.SessionRequest =>
 			({
@@ -1132,6 +1165,31 @@ describe('EthWalletConnectMessage', () => {
 			expect(getByTestId('wallet-connect-typed-data-recipient')).toHaveTextContent(RECIPIENT);
 
 			expect(queryByText(en.wallet_connect.text.spender)).not.toBeInTheDocument();
+		});
+
+		// The signature names no recipient: the spender picks one when it takes the tokens.
+		it('should state the spender of a Permit2 signature transfer and no destination', () => {
+			const { getByText, getByTestId, queryByText } = render(EthWalletConnectMessage, {
+				props: {
+					request: toRequest({
+						types: { ...PERMIT2_TYPES, PermitTransferFrom: PERMIT2_TRANSFER_FROM },
+						domain: PERMIT2_DOMAIN,
+						primaryType: 'PermitTransferFrom',
+						message: PERMIT2_TRANSFER_MESSAGE
+					})
+				}
+			});
+
+			expect(getByText(USDC_TOKEN.symbol)).toBeInTheDocument();
+			expect(getByTestId('wallet-connect-typed-data-amount')).toHaveTextContent(amountText);
+			expect(
+				getByText(formatSecondsToDate({ seconds: 1893456000, language: Languages.ENGLISH }))
+			).toBeInTheDocument();
+
+			expect(getByText(en.wallet_connect.text.spender)).toBeInTheDocument();
+			expect(getByText(SPENDER)).toBeInTheDocument();
+
+			expect(queryByText(en.send.text.destination)).not.toBeInTheDocument();
 		});
 	});
 });

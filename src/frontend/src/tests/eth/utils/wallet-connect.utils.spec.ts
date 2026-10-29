@@ -193,6 +193,58 @@ const receiveWithAuthorization: WalletConnectEthSignTypedDataV4 = {
 	message: transferWithAuthorization().message
 };
 
+const PERMIT2_TOKEN_PERMISSIONS: Array<TypedDataField> = [
+	{ name: 'token', type: 'address' },
+	{ name: 'amount', type: 'uint256' }
+];
+
+// Uniswap Permit2 signature transfer: the spender may move up to the permitted amount once, to an
+// address it picks when it does.
+const permit2Transfer: WalletConnectEthSignTypedDataV4 = {
+	domain: permit2.domain,
+	types: {
+		EIP712Domain: permit2.types.EIP712Domain,
+		PermitTransferFrom: [
+			{ name: 'permitted', type: 'TokenPermissions' },
+			{ name: 'spender', type: 'address' },
+			{ name: 'nonce', type: 'uint256' },
+			{ name: 'deadline', type: 'uint256' }
+		],
+		TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+	},
+	primaryType: 'PermitTransferFrom',
+	message: {
+		permitted: { token: USDC, amount: '250000000' },
+		spender: SPENDER,
+		nonce: '7',
+		deadline: '1893456000'
+	}
+};
+
+const permit2BatchTransfer: WalletConnectEthSignTypedDataV4 = {
+	domain: permit2.domain,
+	types: {
+		EIP712Domain: permit2.types.EIP712Domain,
+		PermitBatchTransferFrom: [
+			{ name: 'permitted', type: 'TokenPermissions[]' },
+			{ name: 'spender', type: 'address' },
+			{ name: 'nonce', type: 'uint256' },
+			{ name: 'deadline', type: 'uint256' }
+		],
+		TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+	},
+	primaryType: 'PermitBatchTransferFrom',
+	message: {
+		permitted: [
+			{ token: USDC, amount: '250000000' },
+			{ token: DAI, amount: MAX_UINT_256.toString() }
+		],
+		spender: SPENDER,
+		nonce: '7',
+		deadline: '1893456000'
+	}
+};
+
 // Hyperliquid asks every action to be signed with routing fields (`type`, `signatureChainId`) that
 // its schema does not declare, so the request is only signable if such keys are tolerated.
 const hyperliquidAcceptTerms: WalletConnectEthSignTypedDataV4 = {
@@ -1023,7 +1075,9 @@ describe('wallet-connect.utils', () => {
 			{ name: 'ERC-2612 Permit', typedData: erc2612Permit },
 			{ name: 'DAI Permit', typedData: daiPermit(true) },
 			{ name: 'ERC-3009 TransferWithAuthorization', typedData: transferWithAuthorization() },
-			{ name: 'ERC-3009 ReceiveWithAuthorization', typedData: receiveWithAuthorization }
+			{ name: 'ERC-3009 ReceiveWithAuthorization', typedData: receiveWithAuthorization },
+			{ name: 'Permit2 PermitTransferFrom', typedData: permit2Transfer },
+			{ name: 'Permit2 PermitBatchTransferFrom', typedData: permit2BatchTransfer }
 		])('should not warn about a recognised $name', ({ typedData }) => {
 			expect(call(typedData)).toBeFalsy();
 		});
@@ -1390,7 +1444,7 @@ describe('wallet-connect.utils', () => {
 	});
 
 	// The transfer schemas are matched member for member, so each fixture summarized below is held
-	// to what its contract hashes: Circle's FiatToken for ERC-3009.
+	// to what its contract hashes: Circle's FiatToken for ERC-3009, Uniswap's `PermitHash` for Permit2.
 	describe('type strings of the summarized transfer schemas', () => {
 		const encodeType = ({ types, primaryType }: WalletConnectEthSignTypedDataV4): string => {
 			const { EIP712Domain: _EIP712Domain, ...rest } = types;
@@ -1411,6 +1465,24 @@ describe('wallet-connect.utils', () => {
 		])('hashes $name under the type hash the token checks', ({ typedData, typeHash }) => {
 			expect(getEthTypedDataApproval(typedData)).toBeDefined();
 			expect(id(encodeType(typedData))).toBe(typeHash);
+		});
+
+		it.each([
+			{
+				name: 'PermitTransferFrom',
+				typedData: permit2Transfer,
+				typeString:
+					'PermitTransferFrom(TokenPermissions permitted,address spender,uint256 nonce,uint256 deadline)TokenPermissions(address token,uint256 amount)'
+			},
+			{
+				name: 'PermitBatchTransferFrom',
+				typedData: permit2BatchTransfer,
+				typeString:
+					'PermitBatchTransferFrom(TokenPermissions[] permitted,address spender,uint256 nonce,uint256 deadline)TokenPermissions(address token,uint256 amount)'
+			}
+		])('hashes $name under the type string Permit2 checks', ({ typedData, typeString }) => {
+			expect(getEthTypedDataApproval(typedData)).toBeDefined();
+			expect(encodeType(typedData)).toBe(typeString);
 		});
 	});
 
@@ -1559,6 +1631,44 @@ describe('wallet-connect.utils', () => {
 					{ name: 'memo', type: 'string' }
 				];
 				typedData.message.memo = 'gm';
+
+				expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+			});
+		});
+
+		describe('Permit2 signature transfers', () => {
+			it('summarizes a transfer from its permitted token and amount, spender and deadline', () => {
+				expect(getEthTypedDataApproval(permit2Transfer)).toEqual({
+					spender: SPENDER,
+					allowances: [
+						{ token: USDC, amount: 250000000n, unlimited: false, expiration: 1893456000 }
+					]
+				});
+			});
+
+			it('summarizes every transfer of a batch, in order, under its one deadline', () => {
+				expect(getEthTypedDataApproval(permit2BatchTransfer)).toEqual({
+					spender: SPENDER,
+					allowances: [
+						{ token: USDC, amount: 250000000n, unlimited: false, expiration: 1893456000 },
+						{ token: DAI, amount: MAX_UINT_256, unlimited: true, expiration: 1893456000 }
+					]
+				});
+			});
+
+			// The amount is a uint256, so it saturates where ERC-2612 does, not where Permit2's allowances do.
+			it('does not call a transfer of the Permit2 allowance maximum unlimited', () => {
+				const typedData = structuredClone(permit2Transfer);
+				(typedData.message.permitted as Record<string, unknown>).amount = MAX_UINT_160.toString();
+
+				expect(getEthTypedDataApproval(typedData)?.allowances).toEqual([
+					{ token: USDC, amount: MAX_UINT_160, unlimited: false, expiration: 1893456000 }
+				]);
+			});
+
+			it('summarizes nothing when one entry of a batch carries a non-conforming value', () => {
+				const typedData = structuredClone(permit2BatchTransfer);
+				(typedData.message.permitted as Record<string, unknown>[])[1].amount = '-1';
 
 				expect(getEthTypedDataApproval(typedData)).toBeUndefined();
 			});
