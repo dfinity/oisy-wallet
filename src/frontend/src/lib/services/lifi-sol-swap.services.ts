@@ -24,7 +24,8 @@ import { sendSignedTransaction } from '$sol/services/sol-send.services';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';
 import {
-	isSolPreflightRefusal,
+	isSolNodeUnhealthy,
+	isSolSendRefusal,
 	isSolTransactionAlreadyProcessed
 } from '$sol/utils/sol-error.utils';
 import { signTransaction } from '$sol/utils/sol-sign.utils';
@@ -41,9 +42,11 @@ import { get } from 'svelte/store';
 
 /**
  * Sends the signed bytes again while the node has neither refused them nor taken them: a transport
- * failure would otherwise leave a signed swap unsent, and one signature lands once only. A failed
- * preflight is the node's refusal, after which it forwards nothing; one reporting the transaction
- * already processed is its landing.
+ * failure would otherwise leave a signed swap unsent, and one signature lands once only. The node's
+ * refusal (`isSolSendRefusal`) forwards nothing; a preflight reporting the transaction already
+ * processed is its landing. A node too far behind the cluster refuses before its preflight, and is
+ * answered by sending the same bytes again, which another node may take; once the attempts run out,
+ * that refusal stands.
  *
  * Once an attempt has failed in a way that may have relayed them, no later answer shows they were
  * not taken: a refusal then answers only its own attempt, against a state the first may have moved
@@ -65,15 +68,22 @@ const broadcast = async (signedTransaction: SolSignedTransaction): Promise<void>
 				return;
 			}
 
-			if (isSolPreflightRefusal(err)) {
-				throw relayed ? new SwapBroadcastOutcomeUnknownError({ cause: err }) : err;
+			if (isSolSendRefusal(err)) {
+				if (relayed) {
+					throw new SwapBroadcastOutcomeUnknownError({ cause: err });
+				}
+
+				if (!isSolNodeUnhealthy(err) || attempt >= SWAP_BROADCAST_ATTEMPTS) {
+					throw err;
+				}
+			} else {
+				if (attempt >= SWAP_BROADCAST_ATTEMPTS) {
+					throw new SwapBroadcastOutcomeUnknownError({ cause: err });
+				}
+
+				relayed = true;
 			}
 
-			if (attempt >= SWAP_BROADCAST_ATTEMPTS) {
-				throw new SwapBroadcastOutcomeUnknownError({ cause: err });
-			}
-
-			relayed = true;
 			consoleError(err);
 		}
 
@@ -93,9 +103,9 @@ const broadcast = async (signedTransaction: SolSignedTransaction): Promise<void>
  * transaction simulated. The re-quote is what keeps its blockhash fresh.
  *
  * The row is created once the transaction is signed and before it is broadcast, so that no swap is
- * ever broadcast untracked; it is deleted only if the node refuses the first attempt. Any other end
- * counts as sent, and the poller settles the row as landed or, once its blockhash expires, never
- * landed.
+ * ever broadcast untracked; it is deleted only if the node refuses an attempt no earlier one may have
+ * relayed. Any other end counts as sent, and the poller settles the row as landed or, once its
+ * blockhash expires, never landed.
  */
 export const fetchLifiSolSwap = async ({
 	identity,
@@ -188,8 +198,8 @@ export const fetchLifiSolSwap = async ({
 	try {
 		await broadcast(signedTransaction);
 	} catch (err: unknown) {
-		// Only a refusal of the first attempt shows the transaction was never forwarded.
-		if (isSolPreflightRefusal(err)) {
+		// Only a refusal no earlier attempt may have relayed shows the transaction was never forwarded.
+		if (isSolSendRefusal(err)) {
 			await deleteLifiRow({ identity, id: rowId });
 
 			throw err;

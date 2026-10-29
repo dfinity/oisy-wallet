@@ -31,6 +31,8 @@ import {
 	getBase58Decoder,
 	getCompiledTransactionMessageDecoder,
 	SOLANA_ERROR__INSTRUCTION_ERROR__INSUFFICIENT_FUNDS,
+	SOLANA_ERROR__JSON_RPC__INVALID_PARAMS,
+	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_NODE_UNHEALTHY,
 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE,
 	SOLANA_ERROR__TRANSACTION_ERROR__ALREADY_PROCESSED,
 	SolanaError,
@@ -140,6 +142,10 @@ describe('lifi-sol-swap.services', () => {
 		preflightFailure(
 			new SolanaError(SOLANA_ERROR__INSTRUCTION_ERROR__INSUFFICIENT_FUNDS, { index: 0 })
 		);
+
+	// Agave checks the node's health before its preflight, and forwards nothing after either.
+	const nodeUnhealthy = () =>
+		new SolanaError(SOLANA_ERROR__JSON_RPC__SERVER_ERROR_NODE_UNHEALTHY, { numSlotsBehind: 42 });
 
 	const rowRefs = () => {
 		const [call] = vi.mocked(createActiveUserTransaction).mock.calls;
@@ -365,6 +371,69 @@ describe('lifi-sol-swap.services', () => {
 
 				expect(sendSignedTransaction).toHaveBeenCalledTimes(SWAP_BROADCAST_ATTEMPTS);
 				expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+			});
+
+			it('should delete the row and fail when the node cannot read the transaction', async () => {
+				const refusal = new SolanaError(SOLANA_ERROR__JSON_RPC__INVALID_PARAMS, {
+					__serverMessage:
+						'invalid transaction: Transaction loads an address table account that does not exist'
+				});
+				vi.mocked(sendSignedTransaction).mockRejectedValue(refusal);
+
+				await expect(fetchLifiSolSwap(params)).rejects.toBe(refusal);
+
+				expect(sendSignedTransaction).toHaveBeenCalledOnce();
+				expect(deleteActiveUserTransaction).toHaveBeenCalledOnce();
+			});
+
+			describe('a node too far behind', () => {
+				it('should send the same signed bytes again, which another node may take', async () => {
+					vi.mocked(sendSignedTransaction).mockRejectedValueOnce(nodeUnhealthy());
+
+					await expect(fetchLifiSolSwap(params)).resolves.toBeUndefined();
+
+					const [first, second] = vi.mocked(sendSignedTransaction).mock.calls;
+
+					expect(second?.[0].signedTransaction).toBe(first?.[0].signedTransaction);
+					expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+					expect(enableSwapDestinationToken).toHaveBeenCalledOnce();
+				});
+
+				// It forwarded nothing, so the refusal that follows still answers every attempt.
+				it('should delete the row and fail on a refusal after it', async () => {
+					const refusal = insufficientFunds();
+					vi.mocked(sendSignedTransaction)
+						.mockRejectedValueOnce(nodeUnhealthy())
+						.mockRejectedValueOnce(refusal);
+
+					await expect(fetchLifiSolSwap(params)).rejects.toBe(refusal);
+
+					expect(sendSignedTransaction).toHaveBeenCalledTimes(2);
+					expect(deleteActiveUserTransaction).toHaveBeenCalledOnce();
+					expect(enableSwapDestinationToken).not.toHaveBeenCalled();
+				});
+
+				it('should delete the row and fail once the attempts run out', async () => {
+					const refusal = nodeUnhealthy();
+					vi.mocked(sendSignedTransaction).mockRejectedValue(refusal);
+
+					await expect(fetchLifiSolSwap(params)).rejects.toBe(refusal);
+
+					expect(sendSignedTransaction).toHaveBeenCalledTimes(SWAP_BROADCAST_ATTEMPTS);
+					expect(deleteActiveUserTransaction).toHaveBeenCalledOnce();
+				});
+
+				it('should keep the row and count the swap as sent after an attempt that may have been relayed', async () => {
+					vi.mocked(sendSignedTransaction)
+						.mockRejectedValueOnce(new Error('fetch failed'))
+						.mockRejectedValueOnce(nodeUnhealthy());
+
+					await expect(fetchLifiSolSwap(params)).resolves.toBeUndefined();
+
+					expect(sendSignedTransaction).toHaveBeenCalledTimes(2);
+					expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+					expect(enableSwapDestinationToken).toHaveBeenCalledOnce();
+				});
 			});
 		});
 	});

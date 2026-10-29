@@ -6,6 +6,8 @@ import {
 	SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED,
 	SOLANA_ERROR__INSTRUCTION_ERROR__CUSTOM,
 	SOLANA_ERROR__INSTRUCTION_ERROR__INSUFFICIENT_FUNDS,
+	SOLANA_ERROR__JSON_RPC__INVALID_PARAMS,
+	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_NODE_UNHEALTHY,
 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE,
 	SOLANA_ERROR__TRANSACTION_ERROR__ALREADY_PROCESSED,
 	SOLANA_ERROR__TRANSACTION_ERROR__INSUFFICIENT_FUNDS_FOR_FEE,
@@ -109,15 +111,28 @@ export const isSolTransactionAlreadyProcessed = (err: unknown): boolean =>
 	findSolanaErrorInChain({ err, code: SOLANA_ERROR__TRANSACTION_ERROR__ALREADY_PROCESSED });
 
 /**
- * Whether sending a transaction failed its preflight simulation, after which the node forwards
- * nothing: the transaction was neither taken nor relayed. Not when the simulation found it already
- * processed, which is its landing, nor when the refusal came after an attempt that may have been
- * relayed (`SwapBroadcastOutcomeUnknownError`, whose cause it is).
+ * Whether sending a transaction was answered that the node is too far behind the cluster, which it
+ * checks before its preflight simulation and forwards nothing after. Another node, or the same one
+ * once it caught up, may take the same transaction.
  */
-export const isSolPreflightRefusal = (err: unknown): boolean =>
+export const isSolNodeUnhealthy = (err: unknown): boolean =>
+	findSolanaErrorInChain({ err, code: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_NODE_UNHEALTHY });
+
+/**
+ * Whether the node refused to send a transaction, before it forwarded anything: the transaction was
+ * neither taken nor relayed. The node refuses one it cannot read (invalid params), while it is too
+ * far behind the cluster (`isSolNodeUnhealthy`), and one whose preflight simulation fails, unless
+ * that simulation found it already processed, which is its landing.
+ *
+ * Not a refusal that came after an attempt that may have been relayed
+ * (`SwapBroadcastOutcomeUnknownError`, whose cause it is).
+ */
+export const isSolSendRefusal = (err: unknown): boolean =>
 	!(err instanceof SwapBroadcastOutcomeUnknownError) &&
-	findSolanaErrorInChain({
-		err,
-		code: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE
-	}) &&
-	!isSolTransactionAlreadyProcessed(err);
+	(findSolanaErrorInChain({ err, code: SOLANA_ERROR__JSON_RPC__INVALID_PARAMS }) ||
+		isSolNodeUnhealthy(err) ||
+		(findSolanaErrorInChain({
+			err,
+			code: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE
+		}) &&
+			!isSolTransactionAlreadyProcessed(err)));

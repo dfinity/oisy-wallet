@@ -1539,6 +1539,7 @@ interface I18nWallet_connect {
 		allowance_increase: string;
 		allowance_decrease: string;
 		unverifiable_erc20_request: string;
+		unlisted_erc20_request: string;
 		token_call_with_value: string;
 		unverifiable_approval_for_all_request: string;
 		approval_for_all_grant: string;

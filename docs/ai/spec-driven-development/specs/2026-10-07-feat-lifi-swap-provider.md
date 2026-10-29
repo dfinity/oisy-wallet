@@ -1426,30 +1426,35 @@ its slippage wording, and the row's creation and deletion are shared with
    blockhash** as a ref, and the slot of the binding's simulation of those bytes
    (`lifi_simulation_slot`, returned by `assertLifiSolTransaction`), where the blockhash
    was valid. As on EVM, a row that cannot be created aborts the swap before
-   it is sent, and only a definitive refusal deletes it: a failed preflight simulation,
-   after which the RPC forwards nothing — except one reporting the transaction as already
-   processed, which is its landing. Any other failure first **sends the same signed
-   bytes again**, up to `SWAP_BROADCAST_ATTEMPTS` (3) attempts a second apart, as EVM's
-   `swap()` does: one signature can land once only, and a transport failure would
-   otherwise leave unsent a swap that counts as sent. It stops at a definitive refusal or
-   once the transaction is processed.
+   it is sent, and only a definitive refusal deletes it (`isSolSendRefusal`): the node's
+   answers before it forwards anything (Agave's `send_transaction`) — a failed preflight
+   simulation, except one reporting the transaction as already processed, which is its
+   landing; the health check before it, a node too far behind the cluster (`-32005`); and
+   a transaction it cannot read (`-32602`, invalid params). Any other failure first
+   **sends the same signed bytes again**, up to `SWAP_BROADCAST_ATTEMPTS` (3) attempts a
+   second apart, as EVM's `swap()` does: one signature can land once only, and a
+   transport failure would otherwise leave unsent a swap that counts as sent. So does a
+   node too far behind, which forwarded nothing and whose refusal another node may not
+   share; it stands once the attempts run out. It stops at any other definitive refusal
+   or once the transaction is processed.
 
-   **A refusal deletes the row only when it answers the first attempt.** A preflight
+   **A refusal deletes the row only when no earlier attempt may have relayed the
+   bytes.** A preflight
    refusal proves only that its own attempt was not forwarded: the first can time out
    after it was, and a retry then fail its preflight against state that moved meanwhile
    (a price past the slippage, a balance the first is about to spend) while the first is
    still in flight. Deleting the row then would drop the tracking of a swap that can
    still land and let the user sign another. So once one attempt's outcome is unknown, a
-   later refusal ends the retries and the swap counts as sent. Any end but a refusal of
-   the first attempt (processed, a transport failure that may have relayed it, or such a
-   later refusal) leaves the row to the poller, which settles it as landed or, once the
+   later refusal ends the retries and the swap counts as sent. Any end but such a
+   refusal (processed, a transport failure that may have relayed it, or a refusal after
+   one) leaves the row to the poller, which settles it as landed or, once the
    blockhash expires, never landed. EVM's `swap()` takes the same rule in 3d. There it is
    hardening rather than a fix: each definitive refusal on EVM answers either the bytes
    alone, which the first attempt shared, or a state change (a balance spent, a base fee
    more than doubled) that cannot happen within the retry window. On both chains, a
    broadcast that ends after an attempt with an unknown outcome rejects with
    `SwapBroadcastOutcomeUnknownError`, its last answer as the cause, which neither
-   `isDefinitiveTransactionRefusal` nor `isSolPreflightRefusal` counts as a refusal, so
+   `isDefinitiveTransactionRefusal` nor `isSolSendRefusal` counts as a refusal, so
    the row stays. Then
    `enableSwapDestinationToken`. The blockhash is read from the compiled
    message (`getCompiledTransactionMessageDecoder` → `lifetimeToken`). LI.FI's
