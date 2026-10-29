@@ -329,6 +329,32 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText('PermitSingle')).toBeInTheDocument();
 	});
 
+	// The declared `primaryType` is never hashed, so the request cannot rename what it asks for.
+	it('should name the struct the signature hashes, not the one the request declares', () => {
+		const [address, payload] = request.params.request.params;
+
+		const { getByText, queryByText } = render(EthWalletConnectMessage, {
+			props: {
+				request: {
+					...request,
+					params: {
+						...request.params,
+						request: {
+							...request.params.request,
+							params: [
+								address,
+								payload.replace('"primaryType":"PermitSingle"', '"primaryType":"Login"')
+							]
+						}
+					}
+				} as WalletKitTypes.SessionRequest
+			}
+		});
+
+		expect(getByText('PermitSingle')).toBeInTheDocument();
+		expect(queryByText('Login')).not.toBeInTheDocument();
+	});
+
 	it('should say nothing about a type for a request that is not typed data', () => {
 		const { queryByText } = render(EthWalletConnectMessage, {
 			props: {

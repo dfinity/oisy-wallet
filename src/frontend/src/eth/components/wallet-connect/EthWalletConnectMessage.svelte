@@ -11,6 +11,7 @@
 	import {
 		getEthTypedDataApproval,
 		getEthTypedDataMethods,
+		getEthTypedDataPrimaryType,
 		getSignedEthTypedData,
 		getSignParamsMessageTypedDataV4,
 		getSignParamsMessageUtf8,
@@ -65,7 +66,8 @@
 
 	// The struct EIP-712 hashes. The RPC method above says how the request arrived; this says what
 	// it is, which is the difference between "a typed-data signature" and "an unlimited allowance".
-	let primaryType = $derived(json?.primaryType);
+	// Derived as the hash derives it: the `primaryType` the request declares is never hashed.
+	let primaryType = $derived(nonNullish(json) ? getEthTypedDataPrimaryType(json) : undefined);
 
 	// Only the members the schema declares are previewed: EIP-712 hashes those and nothing else, so
 	// a key the schema leaves out is not part of what the user would sign and is not shown as if it

@@ -21,6 +21,7 @@ import {
 	classifyWalletConnectEthSendTransaction,
 	getEthTypedDataApproval,
 	getEthTypedDataMethods,
+	getEthTypedDataPrimaryType,
 	getSendParamsGas,
 	getSignedEthTypedData,
 	getSignParamsMessageTypedDataV4Hash,
@@ -928,6 +929,48 @@ describe('wallet-connect.utils', () => {
 					message: {}
 				})
 			).toEqual([]);
+		});
+	});
+
+	describe('getEthTypedDataPrimaryType', () => {
+		it('names the struct the digest is rooted at', () => {
+			expect(getEthTypedDataPrimaryType(permit2)).toBe('PermitSingle');
+		});
+
+		// The declared field is the request's label for itself: the digest is the same whatever it says,
+		// so naming the request after it would let an allowance pass for anything.
+		it('names the hashed struct rather than the one the payload declares', () => {
+			const mislabelled = { ...permit2, primaryType: 'Login' };
+
+			expect(getEthTypedDataPrimaryType(mislabelled)).toBe('PermitSingle');
+
+			expect(
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(mislabelled),
+					sessionChainId: MAINNET_SESSION
+				})
+			).toBe(
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(permit2),
+					sessionChainId: MAINNET_SESSION
+				})
+			);
+		});
+
+		it('names nothing for a type graph with no single root', () => {
+			expect(
+				getEthTypedDataPrimaryType({
+					types: {
+						EIP712Domain: EIP712_DOMAIN,
+						Login: [{ name: 'user', type: 'address' }],
+						Order: [{ name: 'price', type: 'uint256' }]
+					}
+				})
+			).toBeUndefined();
+		});
+
+		it('names nothing for a payload that declares no types', () => {
+			expect(getEthTypedDataPrimaryType(JSON.parse('{}'))).toBeUndefined();
 		});
 	});
 
