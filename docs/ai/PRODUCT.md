@@ -387,6 +387,16 @@ Sending TCYCLES to an account a canister owns, with or without a subaccount, doe
 
 ---
 
+## Pay with a scanned code
+
+At a shop that uses Open CryptoPay, the scanner reads the checkout code and the user picks a token to pay with. OISY then approves the payment provider for the amount (ICP and ICRC tokens) or signs the payment (Ethereum, EVM networks and Bitcoin) and hands it to the provider, which collects it.
+
+### A payment the provider did not confirm
+
+Once the payment is approved or signed and on its way to the provider, an error no longer tells whether the provider collected it: the provider's answer may simply not have come back. The wallet then shows **Payment Not Confirmed**, says that the payment may have gone through, and asks the user to check their activity and the merchant before paying again. The screen offers Close rather than Try again, so a second payment is always a new scan the user chooses to make. An error before that point, while the payment details are requested or before anything is approved or signed, shows **Payment Failed** with Try again, since nothing has left the wallet.
+
+---
+
 ## Swap
 
 ### LI.FI
