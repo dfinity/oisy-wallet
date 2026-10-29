@@ -2290,6 +2290,9 @@
 			"confirmations": "确认数",
 			"for": "用于",
 			"for_copied": "支出方地址已复制到剪贴板。",
+			"canister": "Canister",
+			"canister_copied": "Canister ID 已复制到剪贴板。",
+			"canister_unknown": "未知",
 			"expiration": "过期时间",
 			"approve_label": "批准 $approveAmount"
 		},

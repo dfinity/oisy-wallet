@@ -2290,6 +2290,9 @@
 			"confirmations": "Confirmações",
 			"for": "",
 			"for_copied": "",
+			"canister": "Canister",
+			"canister_copied": "ID do canister copiado para a área de transferência.",
+			"canister_unknown": "desconhecido",
 			"expiration": "",
 			"approve_label": ""
 		},

@@ -2290,6 +2290,9 @@
 			"confirmations": "Confirmations",
 			"for": "For",
 			"for_copied": "Spender address copied to clipboard.",
+			"canister": "Canister",
+			"canister_copied": "Canister ID copied to clipboard.",
+			"canister_unknown": "unknown",
 			"expiration": "Expiration",
 			"approve_label": "Approve $approveAmount"
 		},

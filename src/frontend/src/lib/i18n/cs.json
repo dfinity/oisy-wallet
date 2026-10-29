@@ -2290,6 +2290,9 @@
 			"confirmations": "Potvrzení",
 			"for": "Pro",
 			"for_copied": "Adresa příjemce zkopírována do schránky.",
+			"canister": "Kanistr",
+			"canister_copied": "ID kanistru zkopírováno do schránky.",
+			"canister_unknown": "neznámý",
 			"expiration": "Platnost",
 			"approve_label": "Schválit $approveAmount"
 		},

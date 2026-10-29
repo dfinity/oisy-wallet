@@ -41,6 +41,9 @@
 		from?: string;
 		// Overrides the type-derived To/From prefix: a swap's address is a venue, not a recipient.
 		addressPrefixLabel?: string;
+		// Shown after the prefix when there is no address to show because it cannot be known, as
+		// for an ICP top-up to a canister no contact holds. Without it, no address shows no line.
+		unknownAddressLabel?: string;
 		// Overrides the icon the type would choose, which is the badge over a token logo and the
 		// icon itself in the transaction layout. A Solana swap is stored as a send or a receive of
 		// one of its two sides, so the type alone would mark half of it with an arrow out and half
@@ -69,6 +72,7 @@
 		to,
 		from,
 		addressPrefixLabel,
+		unknownAddressLabel,
 		icon: iconOverride,
 		iconAriaLabel,
 		addresses,
@@ -223,7 +227,7 @@
 				<span
 					class="flex min-w-0 flex-col items-center items-start text-xs text-primary sm:flex-row sm:text-sm"
 				>
-					{#if shownAddresses.length > 0}
+					{#if shownAddresses.length > 0 || nonNullish(unknownAddressLabel)}
 						<span class="inline-flex min-w-0 items-center gap-1">
 							{#if nonNullish(addressPrefixLabel)}
 								<span class="shrink-0">{addressPrefixLabel}</span>
@@ -238,6 +242,8 @@
 							{#each shownAddresses as shownAddress, index (shownAddress)}
 								{#if index > 0}<span class="shrink-0">,&nbsp;</span>{/if}
 								<ContactOrToken identifier={shownAddress} showFallback />
+							{:else}
+								<span class="truncate">{unknownAddressLabel}</span>
 							{/each}
 						</span>
 					{/if}

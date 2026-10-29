@@ -255,7 +255,7 @@ describe('ic-transactions.derived', () => {
 				data: {
 					...createCertifiedIcTransactionUiMock('top-up').data,
 					to: 'canister-deposit-account',
-					typeLabel: 'transaction.label.canister_top_up'
+					typeLabel: 'transaction.label.top_up'
 				}
 			};
 
