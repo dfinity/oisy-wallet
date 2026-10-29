@@ -196,18 +196,50 @@ export const mapSolSimulationAccountOwners = ({
 		{ ownedAddresses: [], addressToOwner: {}, addressToToken: {} }
 	);
 
+/**
+ * The state a token account the run opens starts from: held by the owner and the program it ends
+ * with, holding nothing, and with no delegate and no close authority.
+ *
+ * Its owner and program are what it was opened for, so neither reads as a change. A delegate or a
+ * close authority it ends up with was granted by this very message, and an account opened empty
+ * shows no balance that would reveal the grant.
+ */
+const openedTokenAccountState = ({
+	program,
+	token
+}: SolAccountState): SolAccountState | undefined =>
+	nonNullish(token)
+		? {
+				program,
+				lamports: ZERO,
+				token: {
+					tokenAddress: token.tokenAddress,
+					owner: token.owner,
+					amount: ZERO,
+					decimals: token.decimals
+				}
+			}
+		: undefined;
+
 const controlChanges = ({
 	account,
-	pre,
+	pre: preState,
 	post
 }: {
 	account: SolAddress;
 	pre?: SolAccountState;
 	post?: SolAccountState;
 }): SolSimulationControlChange[] => {
-	// An account that did not exist beforehand cannot have been taken over; it was created by
-	// this very message, and whatever it ends up holding is reported as a balance instead.
-	if (isNullish(pre) || isNullish(post)) {
+	if (isNullish(post)) {
+		return [];
+	}
+
+	// An account that did not exist beforehand is compared with the one it was opened as. One that
+	// is not a token account has nothing to grant, and whatever it ends up holding is stated as a
+	// balance instead.
+	const pre = preState ?? openedTokenAccountState(post);
+
+	if (isNullish(pre)) {
 		return [];
 	}
 

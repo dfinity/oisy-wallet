@@ -390,9 +390,102 @@ describe('sol-simulation.utils', () => {
 			});
 		});
 
-		// Control changes need a state before; a created account has none, so who controls it is
-		// listed apart.
+		// A created account has no state before the run, so who controls it is listed apart; what the
+		// run grants on it beyond opening it is compared with the account it was opened as.
 		describe('accounts the run creates', () => {
+			it('should state a delegate granted on one it opens empty, with its allowance', () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockSolAddress, mockAtaAddress],
+					preAccounts: [systemAccount({ lamports: 1_000_000_000n }), null],
+					postAccounts: [
+						systemAccount({ lamports: 1_000_000_000n }),
+						tokenAccount({
+							amount: ZERO,
+							owner: mockSolAddress,
+							delegate: mockSolAddress2,
+							delegatedAmount: SPL_TOKEN_MAX_AMOUNT
+						})
+					],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview.controlChanges).toEqual([
+					{
+						account: mockAtaAddress,
+						field: 'delegate',
+						to: mockSolAddress2,
+						allowance: { tokenAddress: mockSplAddress, decimals: 6, amount: SPL_TOKEN_MAX_AMOUNT }
+					}
+				]);
+				expect(isEmptySolSimulationPreview(preview)).toBeFalsy();
+			});
+
+			it('should state a delegate granted on one it opens and funds', () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockAtaAddress],
+					preAccounts: [null],
+					postAccounts: [
+						tokenAccount({
+							amount: 3_000_000n,
+							owner: mockSolAddress,
+							delegate: mockSolAddress2,
+							delegatedAmount: 3_000_000n
+						})
+					],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview.tokenDeltas).toEqual([
+					{ account: mockAtaAddress, tokenAddress: mockSplAddress, decimals: 6, delta: 3_000_000n }
+				]);
+				expect(preview.controlChanges).toEqual([
+					{
+						account: mockAtaAddress,
+						field: 'delegate',
+						to: mockSolAddress2,
+						allowance: { tokenAddress: mockSplAddress, decimals: 6, amount: 3_000_000n }
+					}
+				]);
+			});
+
+			it('should state a close authority set on one it opens', () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockAtaAddress],
+					preAccounts: [null],
+					postAccounts: [
+						tokenAccount({ amount: ZERO, owner: mockSolAddress, closeAuthority: mockSolAddress2 })
+					],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview.controlChanges).toEqual([
+					{ account: mockAtaAddress, field: 'closeAuthority', to: mockSolAddress2 }
+				]);
+			});
+
+			it('should state no control change for one opened for the user alone', () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockAtaAddress],
+					preAccounts: [null],
+					postAccounts: [tokenAccount({ amount: ZERO, owner: mockSolAddress })],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview.controlChanges).toEqual([]);
+				expect(isEmptySolSimulationPreview(preview)).toBeTruthy();
+			});
+
+			it('should state no control change for a wallet the run funds into existence', () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockSolAddress],
+					preAccounts: [null],
+					postAccounts: [systemAccount({ lamports: 1_000_000n })],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview).toEqual({ solDelta: 1_000_000n, tokenDeltas: [], controlChanges: [] });
+			});
+
 			it('should list one created for the user with who controls it', () => {
 				const preview = mapSolSimulationPreview({
 					addresses: [mockAtaAddress],
