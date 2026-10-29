@@ -2418,6 +2418,45 @@ const paymentOf = ({
 	}
 };
 
+interface WaitingPayout {
+	program: SolAddress;
+	account: SolAddress;
+	parentIndex: number;
+	position: number;
+	left: bigint;
+}
+
+// A transfer out of an account passes its amount on to the payouts into that account within the same
+// instruction that are still waiting, oldest first.
+const passOn = ({
+	waiting,
+	account,
+	parentIndex,
+	value
+}: {
+	waiting: WaitingPayout[];
+	account: SolAddress | undefined;
+	parentIndex: number;
+	value: bigint | undefined;
+}): WaitingPayout[] =>
+	isNullish(account) || isNullish(value)
+		? waiting
+		: waiting.reduce<{ rest: bigint; waiting: WaitingPayout[] }>(
+				({ rest, waiting: acc }, payout) => {
+					if (payout.account !== account || payout.parentIndex !== parentIndex) {
+						return { rest, waiting: [...acc, payout] };
+					}
+
+					const taken = payout.left < rest ? payout.left : rest;
+
+					return {
+						rest: rest - taken,
+						waiting: [...acc, { ...payout, left: payout.left - taken }]
+					};
+				},
+				{ rest: value, waiting: [] }
+			).waiting;
+
 /**
  * The programs that, called with the wallet among their accounts, pay out of an account that is not
  * the user's into another one that is not theirs either, each named once, in the order they do it.
@@ -2426,10 +2465,11 @@ const paymentOf = ({
  * Such a payout has no line and no balance change, while any other line of the same instruction
  * accounts for all of it: a pool holding the user's liquidity in a position, called with the wallet
  * the position answers to, can pay it out to somebody else beside a line of nothing paid to the
- * user. A payout into an account that pays on at least what it was credited, later in the same
- * instruction, is a hop of a swap, a router's account carrying the trade to its next pool, and is
- * not counted: only a program running in that instruction moves anything out of that account, and
- * a program the dApp brings itself is named on its own.
+ * user. A payout the receiving account passes on in full, later in the same instruction, is a hop
+ * of a swap, a router's account carrying the trade to its next pool, and is not counted: only a
+ * program running in that instruction moves anything out of that account, and a program the dApp
+ * brings itself is named on its own. A transfer out passes its amount on once, to the payouts into
+ * the account oldest first, so a split route paying one account from two pools is still a hop.
  */
 export const findSolProgramsPayingOthers = ({
 	instructions,
@@ -2459,37 +2499,29 @@ export const findSolProgramsPayingOthers = ({
 		accountMintsBefore
 	});
 
-	const passedOn = ({
-		account,
-		parentIndex,
-		after
-	}: {
-		account: SolAddress;
-		parentIndex: number;
-		after: number;
-	}): bigint =>
-		flattened
-			.slice(after + 1)
-			.filter(({ parentIndex: parent }) => parent === parentIndex)
-			.map(({ instruction }) => paymentOf(instruction))
-			.filter((payment) => payment?.source === account)
-			.reduce((sum, payment) => sum + (payment?.value ?? ZERO), ZERO);
-
-	const paying = flattened.reduce<SolAddress[]>(
+	const { named, waiting } = flattened.reduce<{
+		named: { program: SolAddress; position: number }[];
+		waiting: WaitingPayout[];
+	}>(
 		(acc, { parentIndex, topLevel, instruction, madeBy, madeWith = [] }, position) => {
 			const payment = paymentOf(instruction);
 
-			if (
-				topLevel ||
-				isNullish(payment) ||
-				isNullish(madeBy) ||
-				SOLANA_ROUTER_PROGRAM_ADDRESSES.includes(madeBy) ||
-				!madeWith.includes(userAddress)
-			) {
+			if (isNullish(payment)) {
 				return acc;
 			}
 
 			const { source, destination, authority, value, credited = value } = payment;
+
+			const waiting = passOn({ waiting: acc.waiting, account: source, parentIndex, value });
+
+			if (
+				topLevel ||
+				isNullish(madeBy) ||
+				SOLANA_ROUTER_PROGRAM_ADDRESSES.includes(madeBy) ||
+				!madeWith.includes(userAddress)
+			) {
+				return { ...acc, waiting };
+			}
 
 			const fromUser = [authority, source].some(
 				(account) => nonNullish(account) && ownedAt({ account, position })
@@ -2498,18 +2530,28 @@ export const findSolProgramsPayingOthers = ({
 				nonNullish(destination) && ownedAt({ account: destination, position, arriving: true });
 
 			if (fromUser || toUser || value === ZERO) {
-				return acc;
+				return { ...acc, waiting };
 			}
 
-			const hop =
-				nonNullish(destination) &&
-				nonNullish(credited) &&
-				passedOn({ account: destination, parentIndex, after: position }) >= credited;
+			// A payout whose account or amount is unknown cannot be followed on.
+			if (isNullish(destination) || isNullish(credited)) {
+				return { named: [...acc.named, { program: madeBy, position }], waiting };
+			}
 
-			return hop ? acc : [...acc, madeBy];
+			return {
+				...acc,
+				waiting: [
+					...waiting,
+					{ program: madeBy, account: destination, parentIndex, position, left: credited }
+				]
+			};
 		},
-		[]
+		{ named: [], waiting: [] }
 	);
+
+	const paying = [...named, ...waiting.filter(({ left }) => left > ZERO)]
+		.sort(({ position: first }, { position: second }) => first - second)
+		.map(({ program }) => program);
 
 	return [...new Set(paying)];
 };

@@ -5032,6 +5032,51 @@ describe('sol-instruction-summary.utils', () => {
 			).toEqual([WHIRLPOOL]);
 		});
 
+		it('should name a pool whose payouts into one account a single transfer out does not cover', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		// A split route: two pools pay one router account, which pays the total on.
+		it('should not name pools whose payouts into one account a single transfer out passes on together', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '500', stackHeight: 3 }),
+						call({ program: WHIRLPOOL, withWallet: false, stackHeight: 2 }),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1500',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([]);
+		});
+
 		it('should name a listed pool that pays elsewhere with a transfer that holds back a fee', () => {
 			expect(
 				paying({
