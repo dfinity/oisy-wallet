@@ -28,7 +28,7 @@ use super::{
 use crate::{
     state::{mutate_state, read_state, State},
     types::{
-        maps::TipsBySenderMap,
+        maps::{TipMap, TipsBySenderMap},
         storable::{Candid, StoredPrincipal, TipId, TipSenderKey},
     },
 };
@@ -99,11 +99,20 @@ fn partition_sender_tips(
 /// sweep would take them anyway, earliest `active_until` first, so this only
 /// brings that sweep forward for a sender who creates tips faster than
 /// retention lets them go.
+///
+/// A `Claiming` tip is never chosen either, even past its expiry: its payout
+/// may still be outstanding, and a payout that lands writes `Claimed` to the
+/// record it finds. The state decides this, not `has_claim_in_flight`, which
+/// turns false at expiry. Retention still collects such a row like any other.
+///
+/// # Errors
+/// [`TipError::TooManyTips`] when too few rows can be given up to make room.
 fn finished_tips_over_storage_cap(
+    tips: &TipMap,
     by_sender: &TipsBySenderMap,
     sender: Principal,
     now_ns: u64,
-) -> Vec<TipId> {
+) -> Result<Vec<TipId>, TipError> {
     let prefix = StoredPrincipal(sender);
     let start = TipSenderKey(prefix, TipId(String::new()));
     let mut stored = 0usize;
@@ -121,11 +130,22 @@ fn finished_tips_over_storage_cap(
 
     let excess = (stored + 1).saturating_sub(MAX_STORED_TIPS_PER_USER);
     finished.sort_unstable();
-    finished
+    // Lazy, so only as many records are decoded as it takes to find `excess`
+    // rows, usually one.
+    let given_up: Vec<TipId> = finished
         .into_iter()
-        .take(excess)
         .map(|(_, tip_id)| tip_id)
-        .collect()
+        .filter(|tip_id| {
+            !tips
+                .get(tip_id)
+                .is_some_and(|Candid(record)| matches!(record.state, TipState::Claiming { .. }))
+        })
+        .take(excess)
+        .collect();
+    if given_up.len() < excess {
+        return Err(TipError::TooManyTips);
+    }
+    Ok(given_up)
 }
 
 fn remove_tip(state: &mut State, tip_id: &TipId, sender: Principal) {
@@ -249,7 +269,7 @@ pub async fn create_tip(request: CreateTipRequest) -> Result<(), TipError> {
 
         // A tip that lapses frees its live slot at once but stays for retention,
         // so the live cap alone does not bound what a sender keeps stored.
-        for finished in finished_tips_over_storage_cap(&s.tips_by_sender, sender, now) {
+        for finished in finished_tips_over_storage_cap(&s.tips, &s.tips_by_sender, sender, now)? {
             remove_tip(s, &finished, sender);
             removed.push(finished);
         }
@@ -649,6 +669,7 @@ mod tests {
     };
     use pretty_assertions::assert_eq;
     use serde_bytes::ByteBuf;
+    use shared::types::tip::MAX_TIPS_PER_USER;
 
     use super::*;
 
@@ -870,6 +891,33 @@ mod tests {
         tip_ids.iter().map(|id| id.0.clone()).collect()
     }
 
+    fn in_memory_tip_map() -> TipMap {
+        let mm = MemoryManager::init(DefaultMemoryImpl::default());
+        TipMap::init(mm.get(MemoryId::new(0)))
+    }
+
+    /// A claim that started before the tip's expiry and has no answer yet: the
+    /// state a payout still outstanding past expiry leaves in both maps.
+    fn insert_claiming_past_expiry(
+        tips: &mut TipMap,
+        by_sender: &mut TipsBySenderMap,
+        tip_id: &str,
+        expired_at_ns: u64,
+    ) {
+        let record = record_with(
+            TipState::Claiming {
+                claimer: test_principal(2),
+                started_at_ns: expired_at_ns - 1,
+            },
+            expired_at_ns,
+        );
+        by_sender.insert(
+            TipSenderKey(StoredPrincipal(record.sender), TipId(tip_id.to_string())),
+            active_until(&record),
+        );
+        tips.insert(TipId(tip_id.to_string()), Candid(record));
+    }
+
     #[test]
     fn the_live_cap_leaves_room_under_the_storage_cap() {
         const { assert!(shared::types::tip::MAX_TIPS_PER_USER < MAX_STORED_TIPS_PER_USER) };
@@ -887,8 +935,9 @@ mod tests {
         let rows: Vec<(&str, u64)> = names.iter().map(|name| (name.as_str(), now - 1)).collect();
         insert_tips(&mut map, alice, &rows);
 
-        assert!(
-            finished_tips_over_storage_cap(&map, alice, now).is_empty(),
+        assert_eq!(
+            finished_tips_over_storage_cap(&in_memory_tip_map(), &map, alice, now),
+            Ok(vec![]),
             "one more tip still fits, so nothing is given up"
         );
     }
@@ -914,14 +963,16 @@ mod tests {
         // Another sender's rows never count towards alice's store.
         insert_tips(&mut map, bob, &[("b-done", now - 1), ("b-live", now + 1)]);
 
+        let tips = in_memory_tip_map();
         let last = format!("done-{:03}", MAX_STORED_TIPS_PER_USER - 2);
         assert_eq!(
-            ids(&finished_tips_over_storage_cap(&map, alice, now)),
-            vec![last],
+            finished_tips_over_storage_cap(&tips, &map, alice, now).map(|given_up| ids(&given_up)),
+            Ok(vec![last]),
             "one more tip takes the row that finished first, the one retention would take next"
         );
-        assert!(
-            finished_tips_over_storage_cap(&map, bob, now).is_empty(),
+        assert_eq!(
+            finished_tips_over_storage_cap(&tips, &map, bob, now),
+            Ok(vec![]),
             "and alice's rows never count towards bob's"
         );
     }
@@ -942,12 +993,66 @@ mod tests {
             .collect();
         insert_tips(&mut map, alice, &rows);
 
-        let given_up = finished_tips_over_storage_cap(&map, alice, now);
+        let given_up = ids(
+            &finished_tips_over_storage_cap(&in_memory_tip_map(), &map, alice, now)
+                .expect("finished rows can make room"),
+        );
         assert_eq!(given_up.len(), 11);
         assert_eq!(
-            ids(&given_up)[0],
+            given_up[0],
             format!("done-{:03}", MAX_STORED_TIPS_PER_USER + 9),
             "earliest-finished first"
+        );
+    }
+
+    #[test]
+    fn the_storage_cap_never_gives_up_a_claiming_row_past_its_expiry() {
+        let mut tips = in_memory_tip_map();
+        let mut map = in_memory_by_sender_map();
+        let alice = test_principal(1);
+        let now = 10 * TIP_RETENTION_AFTER_TERMINAL_NS;
+
+        // A full store whose oldest finished row is a claim still awaiting its
+        // payout.
+        let names: Vec<String> = (0..MAX_STORED_TIPS_PER_USER - 1)
+            .map(|i| format!("done-{i:03}"))
+            .collect();
+        let rows: Vec<(&str, u64)> = names
+            .iter()
+            .zip(1u64..)
+            .map(|(name, age)| (name.as_str(), now - age))
+            .collect();
+        insert_tips(&mut map, alice, &rows);
+        insert_claiming_past_expiry(&mut tips, &mut map, "paying", now - 1_000);
+
+        let next = format!("done-{:03}", MAX_STORED_TIPS_PER_USER - 2);
+        assert_eq!(
+            finished_tips_over_storage_cap(&tips, &map, alice, now).map(|given_up| ids(&given_up)),
+            Ok(vec![next]),
+            "the claim keeps its record, so a payout that lands can still write `Claimed`"
+        );
+    }
+
+    #[test]
+    fn a_full_store_whose_finished_rows_are_all_claiming_takes_no_new_tip() {
+        let mut tips = in_memory_tip_map();
+        let mut map = in_memory_by_sender_map();
+        let alice = test_principal(1);
+        let now = 10 * TIP_RETENTION_AFTER_TERMINAL_NS;
+
+        let live: Vec<String> = (0..MAX_TIPS_PER_USER)
+            .map(|i| format!("live-{i:03}"))
+            .collect();
+        let rows: Vec<(&str, u64)> = live.iter().map(|name| (name.as_str(), now + 1)).collect();
+        insert_tips(&mut map, alice, &rows);
+        for i in MAX_TIPS_PER_USER..MAX_STORED_TIPS_PER_USER {
+            insert_claiming_past_expiry(&mut tips, &mut map, &format!("paying-{i:03}"), now - 1);
+        }
+
+        assert_eq!(
+            finished_tips_over_storage_cap(&tips, &map, alice, now),
+            Err(TipError::TooManyTips),
+            "no row can make room, so the store stays at the cap"
         );
     }
 }

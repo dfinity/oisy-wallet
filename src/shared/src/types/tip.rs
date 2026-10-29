@@ -84,8 +84,8 @@ pub const MAX_TIPS_RETURNED: usize = 200;
 /// [`TIP_RETENTION_AFTER_TERMINAL_NS`], so without this a sender's stored rows
 /// would be bounded by how many tips they create in that window rather than by
 /// a count. History never shows more than [`MAX_TIPS_RETURNED`] rows, so that
-/// is the bound. It must stay above the live cap, so a new tip always finds
-/// finished rows to make room with.
+/// is the bound. It must stay above the live cap, so a new tip finds finished
+/// rows to make room with unless every one of them is still `Claiming`.
 pub const MAX_STORED_TIPS_PER_USER: usize = MAX_TIPS_RETURNED;
 
 /// Create-tip request. The canister stores the tip and verifies the sender's
@@ -262,7 +262,9 @@ pub enum TipError {
     /// The `tip_id` already exists; the client should generate a fresh random
     /// id and retry.
     DuplicateTipId,
-    /// The caller already holds [`MAX_TIPS_PER_USER`] active tips.
+    /// The caller already holds [`MAX_TIPS_PER_USER`] active tips, or
+    /// [`MAX_STORED_TIPS_PER_USER`] stored ones that cannot make room for
+    /// another because the finished ones are still `Claiming`.
     TooManyTips,
     /// No claimable tip for this id. Also returned for an expired, cancelled or
     /// already-claimed tip, and for a wrong claim code — every case collapsed

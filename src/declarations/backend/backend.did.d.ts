@@ -2103,7 +2103,9 @@ export type TipError =
 	  }
 	| {
 			/**
-			 * The caller already holds [`MAX_TIPS_PER_USER`] active tips.
+			 * The caller already holds [`MAX_TIPS_PER_USER`] active tips, or
+			 * [`MAX_STORED_TIPS_PER_USER`] stored ones that cannot make room for
+			 * another because the finished ones are still `Claiming`.
 			 */
 			TooManyTips: null;
 	  }
