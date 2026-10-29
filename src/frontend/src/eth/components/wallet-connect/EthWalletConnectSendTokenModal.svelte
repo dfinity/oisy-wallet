@@ -191,6 +191,8 @@
 
 	let sendProgressStep = $state<ProgressStep>(ProgressStepsSend.INITIALIZATION);
 
+	let unknownCallAcknowledged = $state(false);
+
 	let amount = $derived(BigInt(firstTransaction?.value ?? ZERO));
 
 	let requestedGas = $derived(getSendParamsGas(firstTransaction.gas));
@@ -212,7 +214,8 @@
 			identity: $authIdentity,
 			minterInfo,
 			sourceNetwork,
-			targetNetwork
+			targetNetwork,
+			unknownCallAcknowledged
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
@@ -268,6 +271,7 @@
 						{requestedGas}
 						{sourceNetwork}
 						{targetNetwork}
+						bind:unknownCallAcknowledged
 					/>
 				{/if}
 			{/key}

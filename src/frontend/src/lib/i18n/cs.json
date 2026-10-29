@@ -1953,6 +1953,7 @@
 			"unreviewed_without_simulation": "OISY nedokázala přečíst část této transakce a síť k ní nevrátila ani simulaci, takže nic nepopisuje, co by tato část udělala. Z důvodu vaší bezpečnosti nebyla podepsána.",
 			"unreviewed_not_described_by_simulation": "OISY nedokázala přečíst část této transakce a ani její simulace neukázala, co by tato část udělala. Z důvodu vaší bezpečnosti nebyla podepsána.",
 			"unread_programs_unconfirmed": "Tato transakce volá program, který OISY nedokáže přečíst, a při kontrole nebyla potvrzena. Z důvodu vaší bezpečnosti nebyla podepsána.",
+			"unexplained_request_unconfirmed": "",
 			"sol_transaction_as_message": "Tato zpráva je solanská transakce, kterou lze schválit pouze prostřednictvím kontroly transakce. Z bezpečnostních důvodů nebyla podepsána.",
 			"request_not_defined": "Neočekávaná chyba: Požadavek není definován, proto jej nelze zpracovat.",
 			"unexpected_processing_request": "Neočekávaná chyba při zpracování požadavku pomocí WalletConnect."

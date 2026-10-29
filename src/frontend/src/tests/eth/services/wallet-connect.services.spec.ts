@@ -107,7 +107,8 @@ describe('eth wallet-connect.services', () => {
 			request,
 			listener: mockListener,
 			modalNext: vi.fn(),
-			progress: vi.fn()
+			progress: vi.fn(),
+			unreviewableTypedDataAcknowledged: false
 		});
 
 		beforeEach(() => {
@@ -115,6 +116,60 @@ describe('eth wallet-connect.services', () => {
 			authStore.setForTesting(mockIdentity);
 			vi.mocked(signPrehash).mockResolvedValue(signerSignature(0));
 			vi.mocked(signMessageApi).mockResolvedValue(signerSignature(1));
+		});
+
+		describe('typed data OISY cannot describe', () => {
+			// A struct no summary schema matches, on the session's chain, that would sign.
+			const orderRequest = () =>
+				buildRequest({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: [
+						HOLDER,
+						JSON.stringify({
+							domain: { name: 'Marketplace', chainId: '1', verifyingContract: DAI },
+							types: {
+								EIP712Domain: [
+									{ name: 'name', type: 'string' },
+									{ name: 'chainId', type: 'uint256' },
+									{ name: 'verifyingContract', type: 'address' }
+								],
+								Order: [
+									{ name: 'offerer', type: 'address' },
+									{ name: 'price', type: 'uint256' }
+								]
+							},
+							primaryType: 'Order',
+							message: { offerer: HOLDER, price: '1' }
+						})
+					]
+				});
+
+			it('refuses it when the review did not confirm it', async () => {
+				const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+				const { success } = await signMessage(buildParams(orderRequest()));
+
+				expect(success).toBeFalsy();
+				expect(signPrehash).not.toHaveBeenCalled();
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: get(i18n).wallet_connect.error.unexplained_request_unconfirmed }
+				});
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: 'mock-topic',
+					id: 1,
+					error: UNEXPECTED_ERROR
+				});
+			});
+
+			it('signs it once the review confirmed it', async () => {
+				const result = await signMessage({
+					...buildParams(orderRequest()),
+					unreviewableTypedDataAcknowledged: true
+				});
+
+				expect(result).toStrictEqual({ success: true });
+				expect(signPrehash).toHaveBeenCalledOnce();
+			});
 		});
 
 		it('signs a valid typed-data permit via signPrehash and approves', async () => {
@@ -307,12 +362,41 @@ describe('eth wallet-connect.services', () => {
 			identity: mockIdentity,
 			minterInfo: undefined,
 			sourceNetwork: ETHEREUM_NETWORK,
-			targetNetwork: ETHEREUM_NETWORK
+			targetNetwork: ETHEREUM_NETWORK,
+			unknownCallAcknowledged: false
 		});
 
 		beforeEach(() => {
 			vi.clearAllMocks();
 			vi.mocked(executeSend).mockResolvedValue({ hash: '0xHASH', nonce: 1 });
+		});
+
+		describe('a call OISY cannot read', () => {
+			const data = '0xdeadbeef';
+
+			it('refuses it when the review did not confirm it', async () => {
+				const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+				const { success } = await send(buildParams({ data }));
+
+				expect(success).toBeFalsy();
+				expect(executeSend).not.toHaveBeenCalled();
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: get(i18n).wallet_connect.error.unexplained_request_unconfirmed }
+				});
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: 'mock-topic',
+					id: 1,
+					error: UNEXPECTED_ERROR
+				});
+			});
+
+			it('signs it once the review confirmed it', async () => {
+				const { success } = await send({ ...buildParams({ data }), unknownCallAcknowledged: true });
+
+				expect(success).toBeTruthy();
+				expect(vi.mocked(executeSend).mock.calls[0][0]).toMatchObject({ data });
+			});
 		});
 
 		it('signs the gas limit the dApp requested', async () => {
@@ -577,11 +661,13 @@ describe('eth wallet-connect.services', () => {
 			it('should not check a deposit on an EVM network without ckETH', async () => {
 				const data = encodeDeposit(Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
 
+				// Read as a call OISY cannot read there, which the review asks the user to confirm.
 				const { success } = await send({
 					...buildDepositParams({ to: CKETH_HELPER, data }),
 					token: BASE_ETH_TOKEN,
 					sourceNetwork: BASE_NETWORK,
-					targetNetwork: BASE_NETWORK
+					targetNetwork: BASE_NETWORK,
+					unknownCallAcknowledged: true
 				});
 
 				expect(success).toBeTruthy();

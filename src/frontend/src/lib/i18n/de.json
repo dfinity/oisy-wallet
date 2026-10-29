@@ -1953,6 +1953,7 @@
 			"unreviewed_without_simulation": "OISY konnte einen Teil dieser Transaktion nicht lesen, und das Netzwerk hat dazu auch keine Simulation zurückgegeben – es beschreibt also nichts, was dieser Teil tun würde. Zu Ihrer Sicherheit wurde sie nicht signiert.",
 			"unreviewed_not_described_by_simulation": "OISY konnte einen Teil dieser Transaktion nicht lesen, und auch ihre Simulation hat nicht gezeigt, was dieser Teil tun würde. Zu Ihrer Sicherheit wurde sie nicht signiert.",
 			"unread_programs_unconfirmed": "Diese Transaktion ruft ein Programm auf, das OISY nicht lesen kann, und wurde in der Überprüfung nicht bestätigt. Zu Ihrer Sicherheit wurde sie nicht signiert.",
+			"unexplained_request_unconfirmed": "",
 			"sol_transaction_as_message": "Diese Nachricht ist eine Solana-Transaktion, die nur durch eine Transaktionsüberprüfung genehmigt werden kann. Aus Sicherheitsgründen wurde sie nicht signiert.",
 			"request_not_defined": "Unerwarteter Fehler: Anfrage ist nicht definiert und kann daher nicht verarbeitet werden.",
 			"unexpected_processing_request": "Unerwarteter Fehler bei der Verarbeitung der WalletConnect-Anfrage."

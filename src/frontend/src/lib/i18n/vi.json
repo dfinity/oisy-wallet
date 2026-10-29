@@ -1953,6 +1953,7 @@
 			"unreviewed_without_simulation": "OISY không thể đọc một phần của giao dịch này và mạng cũng không trả về bản mô phỏng, nên không có gì mô tả phần đó sẽ làm gì. Vì sự an toàn của bạn, giao dịch đã không được ký.",
 			"unreviewed_not_described_by_simulation": "OISY không thể đọc một phần của giao dịch này và bản mô phỏng của nó cũng không cho thấy phần đó sẽ làm gì. Vì sự an toàn của bạn, giao dịch đã không được ký.",
 			"unread_programs_unconfirmed": "Giao dịch này gọi một chương trình mà OISY không thể đọc và chưa được xác nhận trong phần xem xét. Vì sự an toàn của bạn, giao dịch đã không được ký.",
+			"unexplained_request_unconfirmed": "",
 			"sol_transaction_as_message": "Thông báo này là một giao dịch Solana, chỉ có thể được phê duyệt thông qua việc xem xét giao dịch. Vì lý do bảo mật, giao dịch chưa được ký.",
 			"request_not_defined": "Lỗi không mong muốn: Yêu cầu không được xác định nên không thể xử lý.",
 			"unexpected_processing_request": "Lỗi không mong muốn trong khi xử lý yêu cầu với WalletConnect."

@@ -4,10 +4,16 @@ import {
 	SESSION_REQUEST_ETH_SIGN_V4,
 	SESSION_REQUEST_PERSONAL_SIGN
 } from '$eth/constants/wallet-connect.constants';
+import { signMessage } from '$eth/services/wallet-connect.services';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
+
+vi.mock(import('$eth/services/wallet-connect.services'), async (importOriginal) => ({
+	...(await importOriginal()),
+	signMessage: vi.fn()
+}));
 
 describe('EthWalletConnectSignModal', () => {
 	const typedData = {
@@ -116,5 +122,43 @@ describe('EthWalletConnectSignModal', () => {
 		expect(getByText(en.wallet_connect.text.sign_message)).toBeInTheDocument();
 
 		expect(queryByText(en.wallet_connect.text.sign_transaction)).not.toBeInTheDocument();
+	});
+
+	// The review holds Approve until the user ticks the box, and signing checks the same answer.
+	it('should hand signing the confirmation the user gave on the review of typed data OISY cannot describe', async () => {
+		vi.mocked(signMessage).mockResolvedValue({ success: true });
+
+		const { getByRole, getByLabelText } = render(EthWalletConnectSignModal, {
+			props: props(
+				mockRequest({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					payload: JSON.stringify({
+						...typedData,
+						types: {
+							EIP712Domain: typedData.types.EIP712Domain,
+							Order: [
+								{ name: 'offerer', type: 'address' },
+								{ name: 'price', type: 'uint256' }
+							]
+						},
+						primaryType: 'Order',
+						message: { offerer: '0xf2e508d5b8f44f08bd81c7d19e9f1f5277e31f95', price: '1' }
+					})
+				})
+			)
+		});
+
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+
+		await fireEvent.click(getByLabelText(en.wallet_connect.text.unread_programs_acknowledge));
+		await fireEvent.click(getByRole('button', { name: en.core.text.approve }));
+
+		await waitFor(() => {
+			expect(signMessage).toHaveBeenCalledOnce();
+		});
+
+		expect(vi.mocked(signMessage).mock.calls[0][0]).toMatchObject({
+			unreviewableTypedDataAcknowledged: true
+		});
 	});
 });
