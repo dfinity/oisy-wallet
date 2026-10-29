@@ -63,9 +63,12 @@ export interface WalletConnectEthSignTypedDataV4 {
  */
 export interface WalletConnectEthTypedDataApproval {
 	spender?: string;
-	// One entry per token the signature sets an allowance over, in the order the struct lists them.
-	// Most schemas grant one; Permit2's `PermitBatch` grants as many as it declares, all to the
-	// same spender.
+	// The address an ERC-3009 authorization sends to. That struct names who receives the tokens
+	// rather than who may take them, so it states this in place of a spender.
+	recipient?: string;
+	// One entry per token the signature lets move out of the wallet, in the order the struct lists
+	// them: as an allowance for a permit, as a transfer for an authorization. Most schemas name one;
+	// Permit2's batches name as many as they declare, all for the same spender.
 	allowances: WalletConnectEthTypedDataAllowance[];
 }
 

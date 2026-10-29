@@ -609,13 +609,15 @@ export const getSignedEthTypedData = (
 	}
 };
 
+interface EthTypedDataApprovalParams {
+	message: Record<string, unknown>;
+	domain: TypedDataDomain;
+}
+
 interface EthTypedDataApprovalSchema {
 	primaryType: string;
 	types: Record<string, Array<TypedDataField>>;
-	toApproval: (params: {
-		message: Record<string, unknown>;
-		domain: TypedDataDomain;
-	}) => WalletConnectEthTypedDataApproval;
+	toApproval: (params: EthTypedDataApprovalParams) => WalletConnectEthTypedDataApproval;
 }
 
 const toDeclaredAddress = (value: unknown): string | undefined =>
@@ -689,6 +691,33 @@ const toPermit2Allowance = (details: unknown): WalletConnectEthTypedDataAllowanc
 		expiration: toExpirationSeconds(expiration)
 	};
 };
+
+const ERC3009_AUTHORIZATION: Array<TypedDataField> = [
+	{ name: 'from', type: 'address' },
+	{ name: 'to', type: 'address' },
+	{ name: 'value', type: 'uint256' },
+	{ name: 'validAfter', type: 'uint256' },
+	{ name: 'validBefore', type: 'uint256' },
+	{ name: 'nonce', type: 'bytes32' }
+];
+
+// ERC-3009, like ERC-2612, names no token: the token contract verifies the authorization itself,
+// and the domain states that contract. The authorization moves exactly `value` to `to` or nothing,
+// so unlike an allowance it is never unlimited. `validAfter` only delays it, which adds nothing to
+// what the user gives.
+const toErc3009Approval = ({
+	message: { to, value, validBefore },
+	domain: { verifyingContract }
+}: EthTypedDataApprovalParams): WalletConnectEthTypedDataApproval => ({
+	recipient: toDeclaredAddress(to),
+	allowances: [
+		{
+			token: toDeclaredAddress(verifyingContract),
+			amount: toDeclaredUint(value),
+			expiration: toExpirationSeconds(validBefore)
+		}
+	]
+});
 
 /**
  * The EIP-712 schemas OISY understands well enough to summarize above the raw
@@ -789,6 +818,19 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 				}
 			]
 		})
+	},
+	// ERC-3009 `TransferWithAuthorization`, as USDC implements it: a transfer that anyone holding
+	// the signature can submit to the token.
+	{
+		primaryType: 'TransferWithAuthorization',
+		types: { TransferWithAuthorization: ERC3009_AUTHORIZATION },
+		toApproval: toErc3009Approval
+	},
+	// ERC-3009 `ReceiveWithAuthorization`: the same transfer, which only its recipient can submit.
+	{
+		primaryType: 'ReceiveWithAuthorization',
+		types: { ReceiveWithAuthorization: ERC3009_AUTHORIZATION },
+		toApproval: toErc3009Approval
 	}
 ];
 
@@ -1021,11 +1063,11 @@ export const getEthTypedDataMethods = ({
 /**
  * Whether a request would be signed without OISY being able to state what it authorizes.
  *
- * A signature is not a lesser thing than a transaction. An ERC-3009 authorization lets its holder
- * pull tokens out of the wallet, a Permit2 signature transfer lets its spender move them in one call, and
- * a marketplace order sells an NFT; each is a struct OISY does not recognise, and each used to be
- * previewed as an application, a method name and a collapsed blob of JSON, with approval enabled
- * and nothing said about what signing it would allow.
+ * A signature is not a lesser thing than a transaction. A Permit2 signature transfer lets its
+ * spender move tokens out of the wallet in one call, and a marketplace order sells an NFT; each is
+ * a struct OISY does not recognise, and each used to be previewed as an application, a method name
+ * and a collapsed blob of JSON, with approval enabled and nothing said about what signing it would
+ * allow.
  *
  * This is the `eth_sendTransaction` fallback in the other review: the summary is built from an
  * allowlist, and everything the allowlist does not cover falls through to a preview that states

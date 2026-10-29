@@ -44,7 +44,7 @@ import { toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
 import { Interface } from 'ethers/abi';
-import { TypedDataEncoder, type TypedDataField } from 'ethers/hash';
+import { id, TypedDataEncoder, type TypedDataField } from 'ethers/hash';
 
 // The fixtures below state chain 1 in their domain, so the session allowed to sign them is chain 1
 // — bar the Hyperliquid one, which states Arbitrum.
@@ -181,6 +181,17 @@ const transferWithAuthorization = (
 		...extra
 	}
 });
+
+// ERC-3009's other authorization: the same transfer, which only its recipient may submit.
+const receiveWithAuthorization: WalletConnectEthSignTypedDataV4 = {
+	domain: transferWithAuthorization().domain,
+	types: {
+		EIP712Domain: EIP712_DOMAIN,
+		ReceiveWithAuthorization: transferWithAuthorization().types.TransferWithAuthorization
+	},
+	primaryType: 'ReceiveWithAuthorization',
+	message: transferWithAuthorization().message
+};
 
 // Hyperliquid asks every action to be signed with routing fields (`type`, `signatureChainId`) that
 // its schema does not declare, so the request is only signable if such keys are tolerated.
@@ -854,7 +865,7 @@ describe('wallet-connect.utils', () => {
 			]);
 		});
 
-		it('should name the ERC-3009 authorization the review could not describe', () => {
+		it('should name the struct an ERC-3009 authorization hashes', () => {
 			expect(getEthTypedDataMethods(transferWithAuthorization())).toEqual([
 				{ name: 'TransferWithAuthorization', depth: 0 }
 			]);
@@ -1010,15 +1021,11 @@ describe('wallet-connect.utils', () => {
 			{ name: 'Permit2 PermitSingle', typedData: permit2 },
 			{ name: 'Permit2 PermitBatch', typedData: permit2Batch },
 			{ name: 'ERC-2612 Permit', typedData: erc2612Permit },
-			{ name: 'DAI Permit', typedData: daiPermit(true) }
+			{ name: 'DAI Permit', typedData: daiPermit(true) },
+			{ name: 'ERC-3009 TransferWithAuthorization', typedData: transferWithAuthorization() },
+			{ name: 'ERC-3009 ReceiveWithAuthorization', typedData: receiveWithAuthorization }
 		])('should not warn about a recognised $name', ({ typedData }) => {
 			expect(call(typedData)).toBeFalsy();
-		});
-
-		// The report that would have come next. An ERC-3009 authorization lets whoever holds the
-		// signature pull the stated value out of the wallet, and the review said nothing about it.
-		it('should warn about an ERC-3009 authorization', () => {
-			expect(call(transferWithAuthorization())).toBeTruthy();
 		});
 
 		it('should warn about a struct that is nothing OISY knows', () => {
@@ -1382,6 +1389,31 @@ describe('wallet-connect.utils', () => {
 		);
 	});
 
+	// The transfer schemas are matched member for member, so each fixture summarized below is held
+	// to what its contract hashes: Circle's FiatToken for ERC-3009.
+	describe('type strings of the summarized transfer schemas', () => {
+		const encodeType = ({ types, primaryType }: WalletConnectEthSignTypedDataV4): string => {
+			const { EIP712Domain: _EIP712Domain, ...rest } = types;
+			return TypedDataEncoder.from(rest).encodeType(primaryType);
+		};
+
+		it.each([
+			{
+				name: 'TransferWithAuthorization',
+				typedData: transferWithAuthorization(),
+				typeHash: '0x7c7c6cdb67a18743f49ec6fa9b35f50d52ed05cbed4cc592e13b44501c1a2267'
+			},
+			{
+				name: 'ReceiveWithAuthorization',
+				typedData: receiveWithAuthorization,
+				typeHash: '0xd099cc98ef71107a616c4f0f941f04c322d8e254fe26b3c6668db87aae413de8'
+			}
+		])('hashes $name under the type hash the token checks', ({ typedData, typeHash }) => {
+			expect(getEthTypedDataApproval(typedData)).toBeDefined();
+			expect(id(encodeType(typedData))).toBe(typeHash);
+		});
+	});
+
 	describe('getEthTypedDataApproval', () => {
 		it('summarizes a Permit2 request from its declared members', () => {
 			expect(getEthTypedDataApproval(permit2)).toEqual({
@@ -1483,14 +1515,53 @@ describe('wallet-connect.utils', () => {
 			});
 		});
 
-		it('summarizes nothing for an ERC-3009 authorization carrying undeclared summary keys', () => {
-			expect(
-				getEthTypedDataApproval(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS))
-			).toBeUndefined();
-		});
+		describe('ERC-3009 authorizations', () => {
+			const erc3009Approval = {
+				recipient: RECIPIENT,
+				allowances: [
+					{
+						// Like ERC-2612, ERC-3009 names no token: the contract that verifies it is the token.
+						token: USDC,
+						amount: 5000000000n,
+						expiration: 1893456000
+					}
+				]
+			};
 
-		it('summarizes nothing for a canonical ERC-3009 authorization', () => {
-			expect(getEthTypedDataApproval(transferWithAuthorization())).toBeUndefined();
+			it('summarizes a transfer from its value, recipient, deadline and verifying contract', () => {
+				expect(getEthTypedDataApproval(transferWithAuthorization())).toEqual(erc3009Approval);
+			});
+
+			it('summarizes a receive like the transfer it authorizes', () => {
+				expect(getEthTypedDataApproval(receiveWithAuthorization)).toEqual(erc3009Approval);
+			});
+
+			it('summarizes the declared members only, whatever undeclared keys ride along', () => {
+				expect(getEthTypedDataApproval(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS))).toEqual(
+					erc3009Approval
+				);
+			});
+
+			// A transfer moves its value or nothing, so its largest figure is still that figure.
+			it('does not call a saturated value unlimited', () => {
+				expect(
+					getEthTypedDataApproval(transferWithAuthorization({ value: MAX_UINT_256.toString() }))
+				).toEqual({
+					...erc3009Approval,
+					allowances: [{ token: USDC, amount: MAX_UINT_256, expiration: 1893456000 }]
+				});
+			});
+
+			it('summarizes nothing for a struct of that name with another member', () => {
+				const typedData = transferWithAuthorization();
+				typedData.types.TransferWithAuthorization = [
+					...typedData.types.TransferWithAuthorization,
+					{ name: 'memo', type: 'string' }
+				];
+				typedData.message.memo = 'gm';
+
+				expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+			});
 		});
 
 		it('summarizes nothing for an unrelated struct that declares spender and details', () => {

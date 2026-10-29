@@ -110,7 +110,7 @@
 		(nonNullish(json) ? getEthTypedDataApproval(json) : undefined) ?? { allowances: [] }
 	);
 
-	let { spender, allowances } = $derived(approval);
+	let { spender, recipient, allowances } = $derived(approval);
 
 	// EIP-712 declares `chainId` as a `uint256`, so a number, a decimal string and a hex string are
 	// all the same chain and all hash alike. Comparing the text matched one form only.
@@ -332,6 +332,13 @@
 		{#if nonNullish(spender)}
 			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.spender}</p>
 			<p class="mb-4 font-normal">{spender}</p>
+		{/if}
+
+		<!-- An ERC-3009 authorization names who receives the tokens rather than who may take them. It
+		     is labelled as the send review labels the recipient of a token transfer. -->
+		{#if nonNullish(recipient)}
+			<p class="mb-0.5 font-bold">{$i18n.send.text.destination}</p>
+			<p class="mb-4 font-normal" data-tid="wallet-connect-typed-data-recipient">{recipient}</p>
 		{/if}
 	{:else}
 		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}</p>
