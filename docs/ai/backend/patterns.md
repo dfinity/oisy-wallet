@@ -123,6 +123,24 @@ pub fn create_contact(req: CreateContactRequest) -> CreateContactResult {
 - Update `backend.did` via `npm run generate` after any change to the
   set / signature of `#[update]` / `#[query]` exports.
 
+## Reads a certified call returns — below 2 MiB
+
+A certified call runs a `#[query]` in replicated execution, where a reply
+is capped at 2 MiB (a query gets 3 MiB). A read whose result grows with
+user data must stay below that at the caps, not only for typical data:
+
+- Return lists in pages filled up to an encoded-size budget, measured per
+  item with `candid::encode_one`. The caller passes `after` (the `next` of
+  the previous page, none for the first page), the reply sets `next` while
+  items remain, and every page holds at least one item. Example:
+  `get_contacts_page` with `CONTACTS_PAGE_MAX_BYTES` (1.5 MiB).
+- Keep blobs out of list replies and return them in fixed batches sized
+  from their own cap: `get_contact_images` takes at most
+  `MAX_CONTACT_IMAGES_PER_CALL` (16) IDs of images up to 100 KiB, a bound
+  enforced while the request decodes.
+- Leave the existing endpoint as it is for callers that already use it
+  (`get_contacts`).
+
 ## Threshold signatures — chain-fusion signer only
 
 - Direct calls to `sign_with_ecdsa` / `sign_with_schnorr` are forbidden

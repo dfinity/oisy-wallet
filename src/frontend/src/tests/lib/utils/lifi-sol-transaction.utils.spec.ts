@@ -449,14 +449,16 @@ describe('lifi-sol-transaction.utils', () => {
 							mint: USDC,
 							tokenProgram: TOKEN_PROGRAM_ADDRESS
 						}
-					]
+					],
+					closesWrappedSolAccount: true
 				});
 			});
 
 			it('should accept USDC → SOL, its fee paid in USDC', async () => {
 				await expect(assertWith({ fixture: mockLifiSolUsdcToSol })).resolves.toEqual(
 					expect.objectContaining({
-						createdAccounts: [expect.objectContaining({ mint: WSOL_TOKEN.address })]
+						createdAccounts: [expect.objectContaining({ mint: WSOL_TOKEN.address })],
+						closesWrappedSolAccount: true
 					})
 				);
 			});
@@ -474,7 +476,7 @@ describe('lifi-sol-transaction.utils', () => {
 			// Whether that account held wrapped SOL only the simulation says.
 			it("should accept a route closing the user's own wrapped SOL account", async () => {
 				await expect(assertWith({ fixture: mockLifiSolSolToUsdcWithWsolAccount })).resolves.toEqual(
-					expect.objectContaining({ createdAccounts: [] })
+					expect.objectContaining({ createdAccounts: [], closesWrappedSolAccount: true })
 				);
 			});
 
@@ -498,7 +500,7 @@ describe('lifi-sol-transaction.utils', () => {
 
 			it('should accept USDC → USDT, with no wrapped SOL at all', async () => {
 				await expect(assertWith({ fixture: mockLifiSolUsdcToUsdt })).resolves.toEqual(
-					expect.objectContaining({ computeUnitLimit: 1_400_000n })
+					expect.objectContaining({ computeUnitLimit: 1_400_000n, closesWrappedSolAccount: false })
 				);
 			});
 

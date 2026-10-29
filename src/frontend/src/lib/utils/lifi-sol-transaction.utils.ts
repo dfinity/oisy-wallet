@@ -95,6 +95,8 @@ export interface LifiSolInstructions {
 	computeUnitLimit: bigint;
 	computeUnitPrice?: bigint;
 	createdAccounts: LifiSolCreatedAccount[];
+	// Whether the transaction closes the user's wrapped SOL account, which unwraps whatever it holds.
+	closesWrappedSolAccount: boolean;
 }
 
 export interface JupiterRouteArguments {
@@ -585,8 +587,9 @@ export const assertLifiSolInstructions = ({
 	}));
 
 	const closable = [accounts.wrappedSolAccount, ...createdAccounts.map(({ account }) => account)];
+	const closes = ofKind('close');
 
-	if (ofKind('close').some(({ account }) => !closable.includes(account))) {
+	if (closes.some(({ account }) => !closable.includes(account))) {
 		throw rejected('the transaction closes an account it did not create');
 	}
 
@@ -614,7 +617,8 @@ export const assertLifiSolInstructions = ({
 	return {
 		computeUnitLimit: limit.units,
 		...(nonNullish(price) && { computeUnitPrice: price.microLamports }),
-		createdAccounts
+		createdAccounts,
+		closesWrappedSolAccount: closes.some(({ account }) => account === accounts.wrappedSolAccount)
 	};
 };
 
