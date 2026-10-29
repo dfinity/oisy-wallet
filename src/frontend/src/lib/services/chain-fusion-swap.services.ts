@@ -58,7 +58,8 @@ import {
 	type ChainFusionSwapDetails,
 	type EvmQuoteParams,
 	type IcpBridgeQuoteParams,
-	type SwapMappedResult
+	type SwapMappedResult,
+	type SwapQuoteObserver
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import {
@@ -80,7 +81,8 @@ import { get } from 'svelte/store';
 const resolveChainFusionEvmQuote = ({
 	sourceToken,
 	destinationToken,
-	amount
+	amount,
+	onProviderParticipating
 }: EvmQuoteParams): SwapMappedResult | undefined => {
 	if (!CHAIN_FUSION_SWAP_ENABLED) {
 		return;
@@ -103,6 +105,8 @@ const resolveChainFusionEvmQuote = ({
 	if (isNullish(helperContractAddress)) {
 		return;
 	}
+
+	onProviderParticipating?.(SwapProvider.CHAIN_FUSION);
 
 	const sourceFees: ChainFusionFee[] = [];
 
@@ -132,7 +136,8 @@ const resolveChainFusionBtcQuote = ({
 	sourceToken,
 	destinationToken,
 	amount,
-	userBtcAddress
+	userBtcAddress,
+	onProviderParticipating
 }: BtcQuoteParams): SwapMappedResult | undefined => {
 	if (!CHAIN_FUSION_SWAP_ENABLED) {
 		return;
@@ -167,6 +172,8 @@ const resolveChainFusionBtcQuote = ({
 	// UTXOs another send has already reserved, and errors when that store holds nothing
 	// for this address. All three stores are filled by the loaders the swap flow mounts
 	// for a Bitcoin source.
+	onProviderParticipating?.(SwapProvider.CHAIN_FUSION);
+
 	const utxosFee = prepareBtcSend({
 		amount: formatToken({
 			value: amount,
@@ -263,9 +270,10 @@ const queryMaxTransactionFee = async ({
  * belong in `sourceFees`: the ledger fee for the `icrc2_approve` leg, and the minter's
  * gas estimate.
  */
-const resolveCkEthWithdrawalDetails = async (
-	sourceToken: IcCkToken
-): Promise<ChainFusionSwapDetails | undefined> => {
+const resolveCkEthWithdrawalDetails = async ({
+	sourceToken,
+	onProviderParticipating
+}: SwapQuoteObserver & { sourceToken: IcCkToken }): Promise<ChainFusionSwapDetails | undefined> => {
 	const { minterCanisterId, fee } = sourceToken;
 
 	if (isNullish(minterCanisterId)) {
@@ -277,6 +285,8 @@ const resolveCkEthWithdrawalDetails = async (
 	if (isNullish(minterInfo)) {
 		return;
 	}
+
+	onProviderParticipating?.(SwapProvider.CHAIN_FUSION);
 
 	const maxTransactionFee = await queryMaxTransactionFee({ minterCanisterId });
 
@@ -303,9 +313,10 @@ const resolveCkEthWithdrawalDetails = async (
  * No minimum: validation dispatches ckERC20 to `assertCkErc20Amount`, which never reads
  * minter info, so no minter floor applies.
  */
-const resolveCkErc20WithdrawalDetails = async (
-	sourceToken: IcCkToken
-): Promise<ChainFusionSwapDetails | undefined> => {
+const resolveCkErc20WithdrawalDetails = async ({
+	sourceToken,
+	onProviderParticipating
+}: SwapQuoteObserver & { sourceToken: IcCkToken }): Promise<ChainFusionSwapDetails | undefined> => {
 	const { minterCanisterId, ledgerCanisterId, feeLedgerCanisterId, fee } = sourceToken;
 
 	if (isNullish(minterCanisterId) || isNullish(feeLedgerCanisterId)) {
@@ -317,6 +328,8 @@ const resolveCkErc20WithdrawalDetails = async (
 	if (isNullish(ckEthToken)) {
 		return;
 	}
+
+	onProviderParticipating?.(SwapProvider.CHAIN_FUSION);
 
 	const maxTransactionFee = await queryMaxTransactionFee({
 		minterCanisterId,
@@ -363,8 +376,9 @@ const resolveCkErc20WithdrawalDetails = async (
 const resolveCkBtcWithdrawalDetails = async ({
 	sourceToken,
 	destinationToken,
-	amount
-}: {
+	amount,
+	onProviderParticipating
+}: SwapQuoteObserver & {
 	sourceToken: IcCkToken;
 	destinationToken: Token;
 	amount: bigint;
@@ -384,6 +398,8 @@ const resolveCkBtcWithdrawalDetails = async ({
 	// The raw api wrapper rather than `queryEstimateFee`, which toasts on failure — a
 	// toast on every quote tick would be noise. Served anonymously and uncertified, like
 	// the ckETH gas price read above: a quote wants the fast path.
+	onProviderParticipating?.(SwapProvider.CHAIN_FUSION);
+
 	const { bitcoin_fee, minter_fee } = await estimateFee({
 		identity: new AnonymousIdentity(),
 		minterCanisterId,
@@ -419,7 +435,8 @@ const resolveCkBtcWithdrawalDetails = async ({
 export const fetchChainFusionIcpQuote = async ({
 	sourceToken,
 	destinationToken,
-	amount
+	amount,
+	onProviderParticipating
 }: IcpBridgeQuoteParams): Promise<SwapMappedResult | undefined> => {
 	if (!CHAIN_FUSION_SWAP_ENABLED) {
 		return;
@@ -442,14 +459,21 @@ export const fetchChainFusionIcpQuote = async ({
 	try {
 		const swapDetails =
 			isTokenCkEthLedger(ckSourceToken) && destinationNetworkId === ETHEREUM_NETWORK_ID
-				? await resolveCkEthWithdrawalDetails(ckSourceToken)
+				? await resolveCkEthWithdrawalDetails({
+						sourceToken: ckSourceToken,
+						onProviderParticipating
+					})
 				: isTokenCkErc20Ledger(ckSourceToken) && destinationNetworkId === ETHEREUM_NETWORK_ID
-					? await resolveCkErc20WithdrawalDetails(ckSourceToken)
+					? await resolveCkErc20WithdrawalDetails({
+							sourceToken: ckSourceToken,
+							onProviderParticipating
+						})
 					: isTokenCkBtcLedger(ckSourceToken) && destinationNetworkId === BTC_MAINNET_NETWORK_ID
 						? await resolveCkBtcWithdrawalDetails({
 								sourceToken: ckSourceToken,
 								destinationToken,
-								amount
+								amount,
+								onProviderParticipating
 							})
 						: undefined;
 
@@ -632,7 +656,7 @@ export const fetchChainFusionIcpSwap = async ({
 	// shape. `undefined` on a missing prerequisite; `sendIc` then fails its own assertion
 	// before any approval is made.
 	const ckErc20ToErc20MaxCkEthFees = isTokenCkErc20Ledger(sourceToken)
-		? (await resolveCkErc20WithdrawalDetails(sourceToken))?.externalFees[0]?.fee
+		? (await resolveCkErc20WithdrawalDetails({ sourceToken }))?.externalFees[0]?.fee
 		: undefined;
 
 	const amount = parseToken({ value: `${swapAmount}`, unitName: sourceToken.decimals });

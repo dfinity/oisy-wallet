@@ -17,7 +17,7 @@ import { USDG_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens-erc20
 import { ROBINHOOD_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { LifiQuoteRejectedError } from '$lib/types/errors';
 import type { LifiTokenRef } from '$lib/types/lifi';
@@ -785,16 +785,17 @@ describe('lifi-swap.utils', () => {
 			}
 		);
 
-		it('should offer every Solana destination from the Solana registry for an EVM source', () => {
-			expect(destinations({ registry: 'sol', sourceToken: BASE_ETH_TOKEN })).toStrictEqual({
-				sol: 'any'
-			});
-		});
+		it.each([BASE_ETH_TOKEN, SOLANA_TOKEN, mockValidSplToken])(
+			'should offer every Solana destination from the Solana registry for $symbol on $network.name',
+			(sourceToken) => {
+				expect(destinations({ registry: 'sol', sourceToken })).toStrictEqual({ sol: 'any' });
+			}
+		);
 
 		it.each([
 			{ registry: 'evm' as const, sourceToken: SOLANA_TOKEN },
-			{ registry: 'sol' as const, sourceToken: SOLANA_TOKEN },
-			{ registry: 'sol' as const, sourceToken: mockValidSplToken },
+			{ registry: 'evm' as const, sourceToken: mockValidSplToken },
+			{ registry: 'sol' as const, sourceToken: SOLANA_DEVNET_TOKEN },
 			{ registry: 'evm' as const, sourceToken: SEPOLIA_TOKEN },
 			{ registry: 'sol' as const, sourceToken: SEPOLIA_TOKEN },
 			{ registry: 'evm' as const, sourceToken: ICP_TOKEN }

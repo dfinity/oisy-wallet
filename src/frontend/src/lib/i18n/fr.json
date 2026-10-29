@@ -1364,6 +1364,8 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "Actualisation de l'interface",
 			"swap_provider": "Fournisseur d'échange",
+			"smart_swap": "",
+			"finding_best_rate": "",
 			"swap_provider_website": "Site web",
 			"swap_route": "Route d'échange",
 			"included_network_fees": "Frais de réseau inclus",
@@ -1430,7 +1432,8 @@
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
-			"lifi_fee_changed": ""
+			"lifi_fee_changed": "",
+			"lifi_route_unverified": ""
 		}
 	},
 	"buy": {

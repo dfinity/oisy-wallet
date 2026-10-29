@@ -352,7 +352,10 @@
 		const carriedFee = $lifiCarriedFee;
 
 		const carried =
-			nonNullish(carriedFee) && carriedFee.key === lifiInputsKey && nonNullish(maxFeePerGas)
+			nonNullish(carriedFee) &&
+			carriedFee.key === lifiInputsKey &&
+			'gas' in carriedFee &&
+			nonNullish(maxFeePerGas)
 				? lifiCarriedFeeCeiling({ gas: carriedFee.gas, l1Fee: carriedFee.l1Fee, maxFeePerGas })
 				: undefined;
 

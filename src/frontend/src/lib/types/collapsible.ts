@@ -10,6 +10,7 @@ export interface CollapsibleProps {
 	iconSize?: 'small' | 'medium';
 	expandButton?: boolean;
 	externalToggle?: boolean;
+	disabled?: boolean;
 	wrapHeight?: boolean;
 	header: Snippet;
 	children: Snippet;

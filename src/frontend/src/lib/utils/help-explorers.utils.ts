@@ -104,10 +104,13 @@ export const buildHelpExplorerGroups = ({
 			]
 		},
 		{
-			// Every LI.FI transfer OISY starts leaves from an EVM network, so the Ethereum
-			// address finds it, Solana-bound ones included.
+			// A LI.FI transfer OISY starts leaves from an EVM network or from Solana, so the address
+			// it leaves from finds it, Solana-bound ones included.
 			provider: SwapProvider.LIFI,
-			links: toLink({ chain: 'eth', address: ethAddress, buildUrl: lifiWalletUrl })
+			links: [
+				...toLink({ chain: 'eth', address: ethAddress, buildUrl: lifiWalletUrl }),
+				...toLink({ chain: 'sol', address: solAddress, buildUrl: lifiWalletUrl })
+			]
 		},
 		{
 			provider: SwapProvider.ONE_SEC,

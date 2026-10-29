@@ -253,6 +253,7 @@ describe('sol-simulation.services', () => {
 			const result = await simulateSolTransaction(snapshotParams());
 
 			expect(result?.preview?.solDelta).toBe(-6_000n);
+			expect(result?.slot).toBe(100n);
 			expect(simulateTransactionAccounts).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({ minContextSlot: 100n })
 			);

@@ -134,4 +134,7 @@ export interface SolSimulationResult {
 	// known ones. Such a call can act on what the user holds in an application, which neither the
 	// preview nor the instructions describe. Empty when every nested call reaches a known program.
 	unreadPrograms: SolAddress[];
+	// The slot the run read the chain at: where a transaction simulated with its own blockhash found
+	// that blockhash valid.
+	slot?: bigint;
 }

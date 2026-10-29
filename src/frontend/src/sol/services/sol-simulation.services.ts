@@ -499,7 +499,8 @@ const simulate = async ({
 					accountMintsBefore
 				})
 			])
-		]
+		],
+		slot: snapshot.slot
 	};
 };
 

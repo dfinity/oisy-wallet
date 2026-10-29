@@ -1364,6 +1364,8 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "UI 새로고침 중",
 			"swap_provider": "스왑 제공자",
+			"smart_swap": "",
+			"finding_best_rate": "",
 			"swap_provider_website": "웹사이트",
 			"swap_route": "스왑 경로",
 			"included_network_fees": "포함된 네트워크 수수료",
@@ -1430,7 +1432,8 @@
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
-			"lifi_fee_changed": ""
+			"lifi_fee_changed": "",
+			"lifi_route_unverified": ""
 		}
 	},
 	"buy": {
