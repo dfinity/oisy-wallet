@@ -16,6 +16,7 @@ import {
 	type LifiSolCreatedAccount
 } from '$lib/utils/lifi-sol-transaction.utils';
 import { decodeLifiSolTransaction, lifiRejectedError } from '$lib/utils/lifi-swap.utils';
+import { withDeadline } from '$lib/utils/timeout.utils';
 import {
 	getAccountData,
 	getMultipleAccountsInfo,
@@ -24,6 +25,7 @@ import {
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { LIFI_SOLANA_FEE_WALLET } from '$sol/constants/lifi.constants';
 import {
+	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
@@ -359,29 +361,13 @@ export const loadLifiSolQuoteCeiling = async ({
 	return ceiling + (networkFee * LIFI_SOL_NETWORK_FEE_HEADROOM_PERCENT) / 100n;
 };
 
-/**
- * Whether the transaction of a Solana-source quote the review shows calls a program that is neither
- * known nor pinned (`callsUnpinnedProgram`), from a simulation of it with its blockhash replaced: a
- * venue Jupiter added since the pin, which the binding would refuse only once the user confirmed.
- * Checking it at the review brings that refusal before the confirmation.
- *
- * `undefined` when there is no answer: a simulation that fails, a failed transaction included, or a
- * message whose lookup tables cannot be read. The binding still checks the transaction that is
- * signed.
- */
-export const lifiSolQuoteCallsUnpinnedProgram = async ({
-	quote,
+const simulateCallsUnpinnedProgram = async ({
+	data,
 	userAddress
 }: {
-	quote: LiFiStep;
+	data: string;
 	userAddress: SolAddress;
 }): Promise<boolean | undefined> => {
-	const data = quote.transactionRequest?.data;
-
-	if (isNullish(data)) {
-		return;
-	}
-
 	const network = SolanaNetworks.mainnet;
 
 	let transactionMessage: Awaited<ReturnType<typeof parseSolBase64TransactionMessage>>;
@@ -405,4 +391,35 @@ export const lifiSolQuoteCallsUnpinnedProgram = async ({
 	});
 
 	return isNullish(result) ? undefined : callsUnpinnedProgram(result.unreadPrograms);
+};
+
+/**
+ * Whether the transaction of a Solana-source quote the review shows calls a program that is neither
+ * known nor pinned (`callsUnpinnedProgram`), from a simulation of it with its blockhash replaced: a
+ * venue Jupiter added since the pin, which the binding would refuse only once the user confirmed.
+ * Checking it at the review brings that refusal before the confirmation.
+ *
+ * `undefined` when there is no answer: a simulation that fails, a failed transaction included, a
+ * message whose lookup tables cannot be read, or no answer within
+ * `SOLANA_SIMULATION_TIMEOUT_MILLISECONDS`, the lookup tables' read included, since the review waits
+ * for it. The binding still checks the transaction that is signed.
+ */
+export const lifiSolQuoteCallsUnpinnedProgram = async ({
+	quote,
+	userAddress
+}: {
+	quote: LiFiStep;
+	userAddress: SolAddress;
+}): Promise<boolean | undefined> => {
+	const data = quote.transactionRequest?.data;
+
+	if (isNullish(data)) {
+		return;
+	}
+
+	return await withDeadline({
+		operation: simulateCallsUnpinnedProgram({ data, userAddress }),
+		fallback: undefined,
+		milliseconds: SOLANA_SIMULATION_TIMEOUT_MILLISECONDS
+	});
 };

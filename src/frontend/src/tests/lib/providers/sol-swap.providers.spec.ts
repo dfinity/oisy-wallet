@@ -2,12 +2,13 @@ import type * as lifiEnv from '$env/rest/lifi.env';
 import type * as nearIntentsEnv from '$env/rest/near-intents.env';
 import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { SwapProvider } from '$lib/types/swap';
+import type { Token } from '$lib/types/token';
 import type * as splDerived from '$sol/derived/spl.derived';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { assertNonNullish } from '@dfinity/utils';
-import { get, readable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
 describe('sol-swap.providers', () => {
 	describe('LI.FI entry', () => {
@@ -220,21 +221,41 @@ describe('sol-swap.providers', () => {
 				});
 
 				describe('as sources', () => {
-					// The SPL tokens known when the lists load, a devnet one among them as with testnets on.
-					beforeEach(() => {
-						vi.doMock('$sol/derived/spl.derived', async (importOriginal) => {
-							const [original, { USDC_TOKEN, DEVNET_USDC_TOKEN }] = await Promise.all([
-								importOriginal<typeof splDerived>(),
-								import('$env/tokens/tokens-spl/tokens.usdc.env')
-							]);
+					// The SPL tokens known, a devnet one among them as with testnets on.
+					const splTokens = writable<unknown[]>([]);
 
-							return {
-								...original,
-								splTokens: readable(
-									[USDC_TOKEN, DEVNET_USDC_TOKEN].map((token) => ({ ...token, enabled: true }))
-								)
-							};
-						});
+					const knowSplTokens = async () => {
+						const { USDC_TOKEN, DEVNET_USDC_TOKEN } =
+							await import('$env/tokens/tokens-spl/tokens.usdc.env');
+
+						splTokens.set(
+							[USDC_TOKEN, DEVNET_USDC_TOKEN].map((token) => ({ ...token, enabled: true }))
+						);
+					};
+
+					const sourcesAmong = async (tokens: Token[]) => {
+						const [{ swapSupportedTokensStore }, { filterSwapTokens }] = await Promise.all([
+							import('$lib/stores/swap-supported-tokens.store'),
+							import('$lib/utils/swap-tokens-filter.utils')
+						]);
+
+						const supported = get(swapSupportedTokensStore);
+
+						assertNonNullish(supported);
+
+						return filterSwapTokens({
+							tokens: tokens.map((token) => ({ ...token, enabled: true })),
+							supportedData: supported.aggregated
+						}).map(({ id }) => id);
+					};
+
+					beforeEach(() => {
+						splTokens.set([]);
+
+						vi.doMock('$sol/derived/spl.derived', async (importOriginal) => ({
+							...(await importOriginal<typeof splDerived>()),
+							splTokens
+						}));
 					});
 
 					afterEach(() => {
@@ -244,36 +265,52 @@ describe('sol-swap.providers', () => {
 					it('should offer the Solana mainnet tokens, and neither a devnet nor a local one', async () => {
 						const [
 							{ loadSwapSupportedTokens },
-							{ swapSupportedTokensStore },
-							{ filterSwapTokens },
 							{ SOLANA_TOKEN, SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN },
 							{ USDC_TOKEN, DEVNET_USDC_TOKEN }
 						] = await Promise.all([
 							import('$lib/services/swap-supported-tokens.services'),
-							import('$lib/stores/swap-supported-tokens.store'),
-							import('$lib/utils/swap-tokens-filter.utils'),
+							import('$env/tokens/tokens.sol.env'),
+							import('$env/tokens/tokens-spl/tokens.usdc.env')
+						]);
+
+						await knowSplTokens();
+						await loadSwapSupportedTokens({ identity: mockIdentity });
+
+						await expect(
+							sourcesAmong([
+								SOLANA_TOKEN,
+								USDC_TOKEN,
+								SOLANA_DEVNET_TOKEN,
+								SOLANA_LOCAL_TOKEN,
+								DEVNET_USDC_TOKEN
+							])
+						).resolves.toStrictEqual([SOLANA_TOKEN.id, USDC_TOKEN.id]);
+					});
+
+					// The default and custom SPL tokens load after the swap lists.
+					it('should offer an SPL token known only after the lists loaded, once they are read again', async () => {
+						const [
+							{ loadSwapSupportedTokens, reloadSolSwapSupportedTokens },
+							{ SOLANA_TOKEN },
+							{ USDC_TOKEN, DEVNET_USDC_TOKEN }
+						] = await Promise.all([
+							import('$lib/services/swap-supported-tokens.services'),
 							import('$env/tokens/tokens.sol.env'),
 							import('$env/tokens/tokens-spl/tokens.usdc.env')
 						]);
 
 						await loadSwapSupportedTokens({ identity: mockIdentity });
 
-						const supported = get(swapSupportedTokensStore);
+						await expect(sourcesAmong([SOLANA_TOKEN, USDC_TOKEN])).resolves.toStrictEqual([
+							SOLANA_TOKEN.id
+						]);
 
-						assertNonNullish(supported);
+						await knowSplTokens();
+						await reloadSolSwapSupportedTokens();
 
-						const sources = filterSwapTokens({
-							tokens: [
-								SOLANA_TOKEN,
-								USDC_TOKEN,
-								SOLANA_DEVNET_TOKEN,
-								SOLANA_LOCAL_TOKEN,
-								DEVNET_USDC_TOKEN
-							].map((token) => ({ ...token, enabled: true })),
-							supportedData: supported.aggregated
-						});
-
-						expect(sources.map(({ id }) => id)).toStrictEqual([SOLANA_TOKEN.id, USDC_TOKEN.id]);
+						await expect(
+							sourcesAmong([SOLANA_TOKEN, USDC_TOKEN, DEVNET_USDC_TOKEN])
+						).resolves.toStrictEqual([SOLANA_TOKEN.id, USDC_TOKEN.id]);
 					});
 				});
 			});

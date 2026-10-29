@@ -18,6 +18,7 @@ import {
 } from '$sol/api/solana.api';
 import { LIFI_SOLANA_FEE_WALLET } from '$sol/constants/lifi.constants';
 import {
+	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
@@ -806,6 +807,23 @@ describe('lifi-sol-transaction.services', () => {
 			await expect(check()).resolves.toBeUndefined();
 
 			expect(simulateSolTransaction).not.toHaveBeenCalled();
+		});
+
+		// The review waits for the answer, and the simulation's own timeout starts only after the read.
+		it('should have no answer once the lookup tables have not been read within the simulation timeout', async () => {
+			vi.useFakeTimers();
+
+			try {
+				vi.mocked(parseSolBase64TransactionMessage).mockReturnValue(new Promise(() => {}));
+
+				const answer = check();
+
+				await vi.advanceTimersByTimeAsync(SOLANA_SIMULATION_TIMEOUT_MILLISECONDS);
+
+				await expect(answer).resolves.toBeUndefined();
+			} finally {
+				vi.useRealTimers();
+			}
 		});
 
 		it('should have no answer for a quote without a transaction', async () => {

@@ -351,9 +351,13 @@ From PR 3 the Solana entry's `getSupportedTokens` returns the identifiers of eve
 Solana **mainnet** token known at load time — native SOL on `SOLANA_MAINNET_NETWORK_ID`
 and every token of `splTokens` whose network is Solana mainnet, read with `get()` and
 keyed through `resolveSwapTokenLookup` so the identifiers stay in the filter's key
-space. `loadSwapSupportedTokens` runs on every Swap modal open (`SwapLoader.svelte`), so
-a custom SPL token the user added since the last load is covered the next time the
-modal opens. The category keeps coverage `all` (NEAR Intents and LI.FI both list), and
+space. The swap lists load once per session, as soon as the user is signed in
+(`LoaderSwapTokens`; `SwapLoader` loads them only if that has not), before the default
+SPL tokens, which wait for the Solana address, and the custom ones, which come from the
+backend. So `LoaderSwapTokens` reads the Solana registry's lists again
+(`reloadSolSwapSupportedTokens`) whenever the Solana mainnet SPL tokens change, and once
+the lists have loaded, leaving the other registries' as they are: NEAR Intents answers
+from its cache. A token loaded or added later becomes a source then. The category keeps coverage `all` (NEAR Intents and LI.FI both list), and
 the union is NEAR's list plus every known mainnet SPL token. The EVM entry needs no such
 guard, because Velora is already a wildcard for the EVM category; that Velora's wildcard
 admits Sepolia tokens the same way is pre-existing and out of scope here.
@@ -1479,7 +1483,9 @@ own bytes with the blockhash replaced (the cached quote's may be stale), once pe
 the review shows, and refuses the route when the simulation reaches by CPI a program
 neither known nor pinned (`callsUnpinnedProgram`, which the binding uses too): the
 review shows `swap.error.lifi_route_unverified` and does not confirm. It holds the
-confirmation until the simulation answers, at most `SOLANA_SIMULATION_TIMEOUT_MILLISECONDS`.
+confirmation until the check answers, at most `SOLANA_SIMULATION_TIMEOUT_MILLISECONDS` with
+the read of the message's lookup tables included, which the simulation's own timeout
+does not cover.
 A simulation with no answer (a failed transaction, an RPC failure, lookup tables that
 cannot be read) lets the review confirm: the binding still checks the transaction that
 is signed, and fails closed.
