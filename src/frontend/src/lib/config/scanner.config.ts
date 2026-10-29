@@ -34,6 +34,10 @@ export const scannerWizardSteps = ({
 		title: i18n.scanner.text.payment_failed
 	},
 	{
+		name: WizardStepsScanner.PAYMENT_NOT_CONFIRMED,
+		title: i18n.scanner.text.payment_not_confirmed
+	},
+	{
 		name: WizardStepsScanner.WALLET_CONNECT_CONNECT,
 		title: i18n.wallet_connect.text.name
 	},
