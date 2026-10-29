@@ -1,6 +1,7 @@
 import { SwapBroadcastOutcomeUnknownError } from '$lib/types/errors';
 import {
-	isSolPreflightRefusal,
+	isSolNodeUnhealthy,
+	isSolSendRefusal,
 	isSolTransactionAlreadyProcessed,
 	mapSolanaErrorMsg
 } from '$sol/utils/sol-error.utils';
@@ -10,6 +11,8 @@ import {
 	SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED,
 	SOLANA_ERROR__INSTRUCTION_ERROR__CUSTOM,
 	SOLANA_ERROR__INSTRUCTION_ERROR__INSUFFICIENT_FUNDS,
+	SOLANA_ERROR__JSON_RPC__INVALID_PARAMS,
+	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_NODE_UNHEALTHY,
 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE,
 	SOLANA_ERROR__TRANSACTION_ERROR__ALREADY_PROCESSED,
 	SOLANA_ERROR__TRANSACTION_ERROR__INSUFFICIENT_FUNDS_FOR_FEE,
@@ -144,6 +147,15 @@ describe('sol-error.utils', () => {
 		const alreadyProcessed = () =>
 			preflightFailure(new SolanaError(SOLANA_ERROR__TRANSACTION_ERROR__ALREADY_PROCESSED));
 
+		const nodeUnhealthy = () =>
+			new SolanaError(SOLANA_ERROR__JSON_RPC__SERVER_ERROR_NODE_UNHEALTHY, { numSlotsBehind: 42 });
+
+		const invalidParams = () =>
+			new SolanaError(SOLANA_ERROR__JSON_RPC__INVALID_PARAMS, {
+				__serverMessage:
+					'invalid transaction: Transaction failed to sanitize accounts offsets correctly'
+			});
+
 		describe('isSolTransactionAlreadyProcessed', () => {
 			it('should tell the transaction already landed', () => {
 				expect(isSolTransactionAlreadyProcessed(alreadyProcessed())).toBeTruthy();
@@ -157,9 +169,27 @@ describe('sol-error.utils', () => {
 			});
 		});
 
-		describe('isSolPreflightRefusal', () => {
-			it('should be a refusal when the preflight simulation failed', () => {
-				expect(isSolPreflightRefusal(insufficientFunds())).toBeTruthy();
+		describe('isSolNodeUnhealthy', () => {
+			it('should tell the node is too far behind', () => {
+				expect(isSolNodeUnhealthy(nodeUnhealthy())).toBeTruthy();
+			});
+
+			it.each([
+				{ case: 'a preflight failure', err: insufficientFunds() },
+				{ case: 'a transport failure', err: new Error('fetch failed') }
+			])('should not for $case', ({ err }) => {
+				expect(isSolNodeUnhealthy(err)).toBeFalsy();
+			});
+		});
+
+		// Each comes before the node forwards anything (Agave's `send_transaction`).
+		describe('isSolSendRefusal', () => {
+			it.each([
+				{ case: 'the preflight simulation failed', err: insufficientFunds() },
+				{ case: 'the node is too far behind to run one', err: nodeUnhealthy() },
+				{ case: 'the node cannot read the transaction', err: invalidParams() }
+			])('should be a refusal when $case', ({ err }) => {
+				expect(isSolSendRefusal(err)).toBeTruthy();
 			});
 
 			it.each([
@@ -168,9 +198,13 @@ describe('sol-error.utils', () => {
 				{
 					case: 'a refusal after an attempt that may have been relayed',
 					err: new SwapBroadcastOutcomeUnknownError({ cause: insufficientFunds() })
+				},
+				{
+					case: 'a node too far behind after an attempt that may have been relayed',
+					err: new SwapBroadcastOutcomeUnknownError({ cause: nodeUnhealthy() })
 				}
 			])('should not be a refusal for $case', ({ err }) => {
-				expect(isSolPreflightRefusal(err)).toBeFalsy();
+				expect(isSolSendRefusal(err)).toBeFalsy();
 			});
 		});
 	});
