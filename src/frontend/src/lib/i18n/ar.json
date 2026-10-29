@@ -2317,7 +2317,8 @@
 			"deposit": "إيداع",
 			"approve": "موافقة",
 			"burn": "حرق",
-			"mint": "إنشاء"
+			"mint": "إنشاء",
+			"top_up": ""
 		},
 		"filter": {
 			"types_label": "",

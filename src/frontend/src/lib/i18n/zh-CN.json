@@ -2317,7 +2317,8 @@
 			"deposit": "存入",
 			"approve": "批准",
 			"burn": "销毁",
-			"mint": "铸造"
+			"mint": "铸造",
+			"top_up": "充值"
 		},
 		"filter": {
 			"types_label": "",

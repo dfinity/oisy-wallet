@@ -2317,7 +2317,8 @@
 			"deposit": "Einzahlung",
 			"approve": "Genehmigung",
 			"burn": "Burn",
-			"mint": "Mint"
+			"mint": "Mint",
+			"top_up": "Aufladung"
 		},
 		"filter": {
 			"types_label": "",
