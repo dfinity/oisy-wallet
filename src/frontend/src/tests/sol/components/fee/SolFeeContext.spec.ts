@@ -9,6 +9,7 @@ import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { mockSolFeeContextEntry } from '$tests/utils/fee.context.test-utils';
 import { runResolvedPromises } from '$tests/utils/timers.test-utils';
+import { lamports } from '@solana/kit';
 import { render, waitFor } from '@testing-library/svelte';
 import { get, writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -46,6 +47,10 @@ describe('SolFeeContext', () => {
 		spyEstimatePriorityFee = vi
 			.spyOn(solanaApi, 'estimatePriorityFee')
 			.mockResolvedValue(2_000_000n);
+
+		// An SPL token with no destination is quoted the rent of a new token account, which would
+		// otherwise be read from a live RPC.
+		vi.spyOn(solanaApi, 'getSolCreateAccountFee').mockResolvedValue(lamports(2_039_280n));
 	});
 
 	// A send is signed by the user's key alone, so its base fee is that of a single signature.
@@ -133,6 +138,38 @@ describe('SolFeeContext', () => {
 			expect(vi.getTimerCount()).toBe(0);
 			expect(spyEstimatePriorityFee).toHaveBeenCalledOnce();
 			expect(get(feeStore)).toBeUndefined();
+		});
+
+		it('should keep polling and the last estimate when an estimate fails', async () => {
+			const onUnhandledRejection = vi.fn();
+			process.on('unhandledRejection', onUnhandledRejection);
+
+			try {
+				spyEstimatePriorityFee.mockRejectedValueOnce(new Error('rpc down'));
+
+				const { unmount } = renderContext();
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(get(feeStore)).toBeUndefined();
+
+				await vi.advanceTimersByTimeAsync(pollIntervalMs);
+
+				expect(get(feeStore)).toBe(5_002n);
+
+				spyEstimatePriorityFee.mockRejectedValueOnce(new Error('rpc down'));
+
+				await vi.advanceTimersByTimeAsync(pollIntervalMs);
+				await runResolvedPromises();
+
+				expect(spyEstimatePriorityFee).toHaveBeenCalledTimes(3);
+				expect(get(feeStore)).toBe(5_002n);
+				expect(onUnhandledRejection).not.toHaveBeenCalled();
+
+				unmount();
+			} finally {
+				process.off('unhandledRejection', onUnhandledRejection);
+			}
 		});
 
 		// The swap keeps this context mounted on its source token, so picking a token on another

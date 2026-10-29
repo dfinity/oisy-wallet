@@ -50,17 +50,23 @@
 		}
 
 		const addresses = isTokenSpl(token) ? [token.address] : undefined;
-		const priorityFee = await estimatePriorityFee({ network: solNetwork, addresses });
 
-		if (id !== generation) {
-			return;
+		try {
+			const priorityFee = await estimatePriorityFee({ network: solNetwork, addresses });
+
+			if (id !== generation) {
+				return;
+			}
+
+			const fee =
+				SOLANA_LAMPORTS_PER_SIGNATURE * BigInt(SOLANA_SEND_REQUIRED_SIGNATURES) +
+				priorityFee / MICROLAMPORTS_PER_LAMPORT;
+			feeStore.setFee(fee);
+			prioritizationFeeStore.setFee(priorityFee);
+		} catch (_: unknown) {
+			// The poller is the retry, so a failed estimate publishes nothing and the last one stands
+			// until a later poll succeeds, rather than surfacing as an unhandled rejection every tick.
 		}
-
-		const fee =
-			SOLANA_LAMPORTS_PER_SIGNATURE * BigInt(SOLANA_SEND_REQUIRED_SIGNATURES) +
-			priorityFee / MICROLAMPORTS_PER_LAMPORT;
-		feeStore.setFee(fee);
-		prioritizationFeeStore.setFee(priorityFee);
 	};
 
 	let timer: NodeJS.Timeout | undefined;
