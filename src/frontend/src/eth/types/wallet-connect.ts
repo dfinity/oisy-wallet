@@ -70,6 +70,10 @@ export interface WalletConnectEthTypedDataApproval {
 	// them: as an allowance for a permit, as a transfer for an authorization. Most schemas name one;
 	// Permit2's batches name as many as they declare, all for the same spender.
 	allowances: WalletConnectEthTypedDataAllowance[];
+	// `true` when the signature also covers a Permit2 witness: a struct of the dApp's own that the
+	// spender checks when it takes the tokens. The entries above state the transfer, which a witness
+	// cannot widen; nothing here describes the witness itself.
+	hasWitness?: boolean;
 }
 
 export interface WalletConnectEthTypedDataAllowance {

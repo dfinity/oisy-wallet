@@ -241,6 +241,67 @@ describe('WalletConnectSignReview', () => {
 			}
 		}) as unknown as WalletKitTypes.SessionRequest;
 
+	// A UniswapX-style order: a Permit2 transfer of the input token, bound to the order as its witness.
+	const permit2WitnessTransferRequest = (): WalletKitTypes.SessionRequest =>
+		({
+			id: 5,
+			topic: 'mock-topic',
+			params: {
+				request: {
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: [
+						HOLDER,
+						JSON.stringify({
+							domain: {
+								name: 'Permit2',
+								chainId: '1',
+								verifyingContract: '0x000000000022d473030f116ddee9f6b43ac78ba3'
+							},
+							types: {
+								EIP712Domain: [
+									{ name: 'name', type: 'string' },
+									{ name: 'chainId', type: 'uint256' },
+									{ name: 'verifyingContract', type: 'address' }
+								],
+								PermitWitnessTransferFrom: [
+									{ name: 'permitted', type: 'TokenPermissions' },
+									{ name: 'spender', type: 'address' },
+									{ name: 'nonce', type: 'uint256' },
+									{ name: 'deadline', type: 'uint256' },
+									{ name: 'witness', type: 'Order' }
+								],
+								TokenPermissions: [
+									{ name: 'token', type: 'address' },
+									{ name: 'amount', type: 'uint256' }
+								],
+								Order: [
+									{ name: 'swapper', type: 'address' },
+									{ name: 'outputAmount', type: 'uint256' }
+								]
+							},
+							primaryType: 'PermitWitnessTransferFrom',
+							message: {
+								permitted: { token: DAI, amount: '1000' },
+								spender: SPENDER,
+								nonce: '7',
+								deadline: '1893456000',
+								witness: { swapper: HOLDER, outputAmount: '1' }
+							}
+						})
+					]
+				},
+				chainId: `eip155:${ETHEREUM_NETWORK.chainId}`
+			},
+			verifyContext: {
+				verified: {
+					verifyUrl: 'https://verify.walletconnect.org',
+					validation: 'VALID',
+					origin: 'https://dapp.example',
+					isScam: false
+				}
+			}
+		}) as unknown as WalletKitTypes.SessionRequest;
+
 	const props = { onApprove: vi.fn(), onReject: vi.fn() };
 
 	it('warns and disables approval for a type-invalid permit', () => {
@@ -284,6 +345,22 @@ describe('WalletConnectSignReview', () => {
 		expect(queryByText(en.wallet_connect.text.methods)).not.toBeInTheDocument();
 
 		expect(getByTestId('wallet-connect-typed-data-recipient')).toHaveTextContent(SPENDER);
+
+		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+	});
+
+	// The transfer is stated, and the witness bound to it is the part OISY can't describe.
+	it('states the transfer of a Permit2 witness transfer and warns about the rest', () => {
+		const { getByText, queryByText, getByRole } = render(WalletConnectSignReview, {
+			props: { ...props, request: permit2WitnessTransferRequest() }
+		});
+
+		expect(getByText(en.wallet_connect.text.unreviewable_typed_data_witness)).toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.unreviewable_typed_data)).not.toBeInTheDocument();
+
+		expect(getByText(en.wallet_connect.text.spender)).toBeInTheDocument();
+		expect(getByText(SPENDER)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.methods)).toBeInTheDocument();
 
 		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 	});

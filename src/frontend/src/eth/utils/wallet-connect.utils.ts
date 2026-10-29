@@ -617,6 +617,9 @@ interface EthTypedDataApprovalParams {
 interface EthTypedDataApprovalSchema {
 	primaryType: string;
 	types: Record<string, Array<TypedDataField>>;
+	// A Permit2 witness transfer: its primary type declares one member past those listed here,
+	// typed by structs of the dApp's own that the schema cannot list in advance.
+	witness?: boolean;
 	toApproval: (params: EthTypedDataApprovalParams) => WalletConnectEthTypedDataApproval;
 }
 
@@ -837,6 +840,27 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 		},
 		toApproval: toPermit2BatchTransferApproval
 	},
+	// The witness variants of both, the single one being what UniswapX orders are signed as: the
+	// same transfer, bound to a struct of the dApp's own that the spender checks when it takes the
+	// tokens.
+	{
+		primaryType: 'PermitWitnessTransferFrom',
+		types: {
+			PermitWitnessTransferFrom: PERMIT2_TRANSFER_FROM,
+			TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+		},
+		witness: true,
+		toApproval: toPermit2TransferApproval
+	},
+	{
+		primaryType: 'PermitBatchWitnessTransferFrom',
+		types: {
+			PermitBatchWitnessTransferFrom: PERMIT2_BATCH_TRANSFER_FROM,
+			TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+		},
+		witness: true,
+		toApproval: toPermit2BatchTransferApproval
+	},
 	// Standard ERC-2612 `Permit`.
 	{
 		primaryType: 'Permit',
@@ -922,23 +946,41 @@ const sameTypedDataFields = ({
 		({ name, type }, index) => expected[index].name === name && expected[index].type === type
 	);
 
+/**
+ * Whether a payload declares a schema's structs, member for member, and nothing else.
+ *
+ * A witness schema is the one exception: Permit2 lets the dApp append a member of its own to the
+ * primary type, typed by structs of its own, so that last member and those structs are taken as
+ * declared. Once structs the schema does not list are accepted, the struct the digest is rooted at
+ * need no longer be the schema's primary type: one wrapping it would be hashed instead, and would
+ * be no Permit2 signature at all. The root is therefore held to the schema's.
+ */
 const matchesApprovalSchema = ({
 	types,
-	schema
+	schema: { primaryType, types: expectedTypes, witness = false }
 }: {
 	types: Record<string, Array<TypedDataField>>;
 	schema: EthTypedDataApprovalSchema;
 }): boolean => {
-	const expectedNames = Object.keys(schema.types);
+	const expectedNames = Object.keys(expectedTypes);
 
-	return (
-		Object.keys(types).length === expectedNames.length &&
-		expectedNames.every((name) => {
-			const fields = types[name];
+	if (!witness && Object.keys(types).length !== expectedNames.length) {
+		return false;
+	}
 
-			return nonNullish(fields) && sameTypedDataFields({ fields, expected: schema.types[name] });
-		})
-	);
+	const declared = expectedNames.every((name) => {
+		const fields = types[name];
+
+		return (
+			nonNullish(fields) &&
+			sameTypedDataFields({
+				fields: witness && name === primaryType ? fields.slice(0, -1) : fields,
+				expected: expectedTypes[name]
+			})
+		);
+	});
+
+	return declared && getEthTypedDataPrimaryType({ types }) === primaryType;
 };
 
 /**
@@ -949,6 +991,9 @@ const matchesApprovalSchema = ({
  * exactly and every value conforms to it. That is what keeps the summary honest:
  * each fact it carries is a declared member of the struct being hashed, so it
  * cannot be steered by a key that the signature does not cover.
+ *
+ * A Permit2 witness transfer is matched up to its witness. The transfer is summarized, and the
+ * witness is flagged rather than described.
  */
 export const getEthTypedDataApproval = ({
 	domain,
@@ -968,7 +1013,9 @@ export const getEthTypedDataApproval = ({
 	try {
 		assertValidEthTypedData({ types: rest, primaryType: schema.primaryType, message });
 
-		return schema.toApproval({ message, domain });
+		const approval = schema.toApproval({ message, domain });
+
+		return schema.witness === true ? { ...approval, hasWitness: true } : approval;
 	} catch (_err: unknown) {
 		// A payload that does not conform to its own schema is not summarized: it
 		// is rejected for signing anyway, and any value read from it would be
@@ -1139,15 +1186,19 @@ export const getEthTypedDataMethods = ({
 /**
  * Whether a request would be signed without OISY being able to state what it authorizes.
  *
- * A signature is not a lesser thing than a transaction. A marketplace order sells an NFT; it is a
- * struct OISY does not recognise, and like every such struct it used to be previewed as an
- * application, a method name and a collapsed blob of JSON, with approval enabled and nothing said
- * about what signing it would allow.
+ * A signature is not a lesser thing than a transaction. A marketplace order sells an NFT, and the
+ * witness of a Permit2 transfer ties the tokens it releases to terms only the spender reads; each is
+ * something OISY does not recognise, and each used to be previewed as an application, a method
+ * name and a collapsed blob of JSON, with approval enabled and nothing said about what signing it
+ * would allow.
  *
  * This is the `eth_sendTransaction` fallback in the other review: the summary is built from an
  * allowlist, and everything the allowlist does not cover falls through to a preview that states
  * nothing rather than to one that states it cannot say. Recognising one more schema improves what
  * the user is told; it is not what stands between them and an unexplained signature.
+ *
+ * A Permit2 witness transfer is one of these although the summary states its transfer: the
+ * witness is signed too, and nothing describes it.
  *
  * `false` for a raw-message method. Those carry no schema and OISY makes no claim about them: the
  * message shown is the message signed, so there is no summary that could be silently absent.
@@ -1172,7 +1223,9 @@ export const hasUnreviewableTypedData = ({
 	}
 
 	try {
-		return isNullish(getEthTypedDataApproval(getSignParamsMessageTypedDataV4(params)));
+		const approval = getEthTypedDataApproval(getSignParamsMessageTypedDataV4(params));
+
+		return isNullish(approval) || approval.hasWitness === true;
 	} catch (_err: unknown) {
 		// Typed data that cannot even be read is the invalid case above, not this one.
 		return false;

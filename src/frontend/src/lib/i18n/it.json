@@ -1850,6 +1850,7 @@
 			"high_gas_limit": "Questa richiesta imposta un limite di gas insolitamente alto, quindi la commissione massima sopra indicata è molto superiore a quanto questa transazione dovrebbe costare. Controllala attentamente e firma solo se ti fidi di questa app.",
 			"invalid_typed_data": "Questa richiesta contiene un valore il cui tipo non corrisponde allo schema dichiarato dall'app. Quanto visualizzato potrebbe differire da ciò che verrebbe effettivamente firmato, pertanto la firma è disabilitata.",
 			"unreviewable_typed_data": "OISY non riconosce il contenuto che questa app ti chiede di firmare, quindi il riepilogo non può descriverlo. Assicurati di fidarti dell'applicazione e controlla i suoi dati grezzi prima di firmare.",
+			"unreviewable_typed_data_witness": "",
 			"unsigned_typed_data_keys": "Questa app ha inviato dati aggiuntivi che il suo schema non dichiara. Tali dati non sono coperti dalla firma, quindi vengono mostrati solo i campi sottostanti.",
 			"tab_summary": "Riepilogo",
 			"tab_raw_data": "Dati grezzi",

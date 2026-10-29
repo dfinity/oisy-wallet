@@ -1850,6 +1850,7 @@
 			"high_gas_limit": "此请求设置的 Gas 限额异常高，导致上方的最高费用远超此交易应有的成本。请仔细检查，仅在您信任此应用时才签名。",
 			"invalid_typed_data": "此请求包含一个类型与应用声明的架构不匹配的值。显示的内容可能与实际将被签名的内容不同，因此签名功能已被禁用。",
 			"unreviewable_typed_data": "OISY 无法识别此应用请求您签名的内容，因此摘要无法对其进行描述。请确保您信任该应用程序，并在签名前查看其原始数据。",
+			"unreviewable_typed_data_witness": "",
 			"unsigned_typed_data_keys": "此应用发送了其架构未声明的额外数据。该数据不受签名保护，因此仅显示以下字段。",
 			"tab_summary": "摘要",
 			"tab_raw_data": "原始数据",

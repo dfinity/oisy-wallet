@@ -245,6 +245,50 @@ const permit2BatchTransfer: WalletConnectEthSignTypedDataV4 = {
 	}
 };
 
+// The witness a dApp binds a Permit2 transfer to, shaped like an order: its own structs, nested.
+const WITNESS_TYPES: Record<string, Array<TypedDataField>> = {
+	Order: [
+		{ name: 'info', type: 'OrderInfo' },
+		{ name: 'outputAmount', type: 'uint256' }
+	],
+	OrderInfo: [
+		{ name: 'swapper', type: 'address' },
+		{ name: 'deadline', type: 'uint256' }
+	]
+};
+
+const WITNESS = { info: { swapper: HOLDER, deadline: '1893456000' }, outputAmount: '1' };
+
+const permit2WitnessTransfer: WalletConnectEthSignTypedDataV4 = {
+	domain: permit2.domain,
+	types: {
+		EIP712Domain: permit2.types.EIP712Domain,
+		PermitWitnessTransferFrom: [
+			...permit2Transfer.types.PermitTransferFrom,
+			{ name: 'witness', type: 'Order' }
+		],
+		TokenPermissions: PERMIT2_TOKEN_PERMISSIONS,
+		...WITNESS_TYPES
+	},
+	primaryType: 'PermitWitnessTransferFrom',
+	message: { ...permit2Transfer.message, witness: WITNESS }
+};
+
+const permit2BatchWitnessTransfer: WalletConnectEthSignTypedDataV4 = {
+	domain: permit2.domain,
+	types: {
+		EIP712Domain: permit2.types.EIP712Domain,
+		PermitBatchWitnessTransferFrom: [
+			...permit2BatchTransfer.types.PermitBatchTransferFrom,
+			{ name: 'witness', type: 'Order' }
+		],
+		TokenPermissions: PERMIT2_TOKEN_PERMISSIONS,
+		...WITNESS_TYPES
+	},
+	primaryType: 'PermitBatchWitnessTransferFrom',
+	message: { ...permit2BatchTransfer.message, witness: WITNESS }
+};
+
 // Hyperliquid asks every action to be signed with routing fields (`type`, `signatureChainId`) that
 // its schema does not declare, so the request is only signable if such keys are tolerated.
 const hyperliquidAcceptTerms: WalletConnectEthSignTypedDataV4 = {
@@ -1082,6 +1126,24 @@ describe('wallet-connect.utils', () => {
 			expect(call(typedData)).toBeFalsy();
 		});
 
+		// The summary states the transfer, and the witness the signature also covers is the dApp's
+		// own struct, which nothing describes.
+		it.each([
+			{ name: 'Permit2 PermitWitnessTransferFrom', typedData: permit2WitnessTransfer },
+			{ name: 'Permit2 PermitBatchWitnessTransferFrom', typedData: permit2BatchWitnessTransfer }
+		])('should warn about a $name', ({ typedData }) => {
+			expect(call(typedData)).toBeTruthy();
+		});
+
+		// Signable, but as the wrapper: the transfer it carries is not the struct being hashed.
+		it('should warn about a struct that wraps a Permit2 witness transfer', () => {
+			const typedData = structuredClone(permit2WitnessTransfer);
+			typedData.types.Wrapper = [{ name: 'transfer', type: 'PermitWitnessTransferFrom' }];
+			typedData.message.transfer = permit2WitnessTransfer.message;
+
+			expect(call(typedData)).toBeTruthy();
+		});
+
 		it('should warn about a struct that is nothing OISY knows', () => {
 			expect(
 				call({
@@ -1484,6 +1546,25 @@ describe('wallet-connect.utils', () => {
 			expect(getEthTypedDataApproval(typedData)).toBeDefined();
 			expect(encodeType(typedData)).toBe(typeString);
 		});
+
+		// Permit2 hashes its own stub followed by the witness type string the spender passes it.
+		it.each([
+			{
+				name: 'PermitWitnessTransferFrom',
+				typedData: permit2WitnessTransfer,
+				stub: 'PermitWitnessTransferFrom(TokenPermissions permitted,address spender,uint256 nonce,uint256 deadline,'
+			},
+			{
+				name: 'PermitBatchWitnessTransferFrom',
+				typedData: permit2BatchWitnessTransfer,
+				stub: 'PermitBatchWitnessTransferFrom(TokenPermissions[] permitted,address spender,uint256 nonce,uint256 deadline,'
+			}
+		])('hashes $name under the stub Permit2 appends the witness to', ({ typedData, stub }) => {
+			expect(getEthTypedDataApproval(typedData)).toBeDefined();
+			expect(encodeType(typedData)).toBe(
+				`${stub}Order witness)Order(OrderInfo info,uint256 outputAmount)OrderInfo(address swapper,uint256 deadline)TokenPermissions(address token,uint256 amount)`
+			);
+		});
 	});
 
 	describe('getEthTypedDataApproval', () => {
@@ -1669,6 +1750,82 @@ describe('wallet-connect.utils', () => {
 			it('summarizes nothing when one entry of a batch carries a non-conforming value', () => {
 				const typedData = structuredClone(permit2BatchTransfer);
 				(typedData.message.permitted as Record<string, unknown>[])[1].amount = '-1';
+
+				expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+			});
+
+			it.each([
+				{
+					name: 'PermitWitnessTransferFrom',
+					typedData: permit2WitnessTransfer,
+					transfer: permit2Transfer
+				},
+				{
+					name: 'PermitBatchWitnessTransferFrom',
+					typedData: permit2BatchWitnessTransfer,
+					transfer: permit2BatchTransfer
+				}
+			])('summarizes the transfer of a $name and flags its witness', ({ typedData, transfer }) => {
+				expect(getEthTypedDataApproval(typedData)).toEqual({
+					...getEthTypedDataApproval(transfer),
+					hasWitness: true
+				});
+			});
+
+			// The witness is the dApp's to type, and Permit2 hashes a bare value as readily as a struct.
+			it('flags a witness that is not a struct', () => {
+				const typedData = structuredClone(permit2WitnessTransfer);
+				typedData.types = {
+					EIP712Domain: typedData.types.EIP712Domain,
+					PermitWitnessTransferFrom: [
+						...permit2Transfer.types.PermitTransferFrom,
+						{ name: 'witness', type: 'bytes32' }
+					],
+					TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+				};
+				typedData.message.witness = `0x${'cd'.repeat(32)}`;
+
+				expect(getEthTypedDataApproval(typedData)?.hasWitness).toBeTruthy();
+			});
+
+			it('summarizes nothing for a witness transfer that declares no witness', () => {
+				const typedData: WalletConnectEthSignTypedDataV4 = {
+					...permit2Transfer,
+					types: {
+						EIP712Domain: permit2Transfer.types.EIP712Domain,
+						PermitWitnessTransferFrom: permit2Transfer.types.PermitTransferFrom,
+						TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+					},
+					primaryType: 'PermitWitnessTransferFrom'
+				};
+
+				expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+			});
+
+			it('summarizes nothing for a witness transfer that declares a member past its witness', () => {
+				const typedData = structuredClone(permit2WitnessTransfer);
+				typedData.types.PermitWitnessTransferFrom.push({ name: 'memo', type: 'string' });
+				typedData.message.memo = 'gm';
+
+				expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+			});
+
+			it('summarizes nothing for a witness transfer whose TokenPermissions is not the one Permit2 declares', () => {
+				const typedData = structuredClone(permit2WitnessTransfer);
+				typedData.types.TokenPermissions = [
+					{ name: 'token', type: 'address' },
+					{ name: 'amount', type: 'uint160' }
+				];
+
+				expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+			});
+
+			// Accepting structs the schema does not list must not let one of them become the root, since
+			// the root is what is hashed: here the transfer at the top is no member of the signed struct.
+			it('summarizes nothing for a struct that wraps a witness transfer', () => {
+				const typedData = structuredClone(permit2WitnessTransfer);
+				typedData.types.Wrapper = [{ name: 'transfer', type: 'PermitWitnessTransferFrom' }];
+				typedData.message.transfer = { ...permit2WitnessTransfer.message, spender: RECIPIENT };
 
 				expect(getEthTypedDataApproval(typedData)).toBeUndefined();
 			});

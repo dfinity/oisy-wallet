@@ -1850,6 +1850,7 @@
 			"high_gas_limit": "Tento požadavek nastavuje neobvykle vysoký limit gasu, takže maximální poplatek uvedený výše je mnohem vyšší, než by tato transakce měla stát. Pečlivě ji zkontrolujte a podepište pouze v případě, že této aplikaci důvěřujete.",
 			"invalid_typed_data": "Tento požadavek obsahuje hodnotu, jejíž typ neodpovídá schématu deklarovanému aplikací. Zobrazený obsah se může lišit od toho, co by bylo skutečně podepsáno, proto je podepsání zakázáno.",
 			"unreviewable_typed_data": "OISY nerozpoznává obsah, který vás tato aplikace žádá podepsat, takže souhrn ho nedokáže popsat. Ujistěte se, že aplikaci důvěřujete, a před podpisem zkontrolujte její surová data.",
+			"unreviewable_typed_data_witness": "",
 			"unsigned_typed_data_keys": "Tato aplikace odeslala další data, která její schéma nedeklaruje. Tato data nejsou pokryta podpisem, takže jsou zobrazena pouze níže uvedená pole.",
 			"tab_summary": "Souhrn",
 			"tab_raw_data": "Surová data",

@@ -1850,6 +1850,7 @@
 			"high_gas_limit": "",
 			"invalid_typed_data": "",
 			"unreviewable_typed_data": "",
+			"unreviewable_typed_data_witness": "",
 			"unsigned_typed_data_keys": "",
 			"tab_summary": "",
 			"tab_raw_data": "",

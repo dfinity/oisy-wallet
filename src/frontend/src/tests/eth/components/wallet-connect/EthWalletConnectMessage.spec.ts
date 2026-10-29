@@ -1191,5 +1191,49 @@ describe('EthWalletConnectMessage', () => {
 
 			expect(queryByText(en.send.text.destination)).not.toBeInTheDocument();
 		});
+
+		describe('Permit2 witness transfer', () => {
+			const witnessRequest = toRequest({
+				types: {
+					...PERMIT2_TYPES,
+					PermitWitnessTransferFrom: [...PERMIT2_TRANSFER_FROM, { name: 'witness', type: 'Order' }],
+					Order: [
+						{ name: 'swapper', type: 'address' },
+						{ name: 'outputAmount', type: 'uint256' }
+					]
+				},
+				domain: PERMIT2_DOMAIN,
+				primaryType: 'PermitWitnessTransferFrom',
+				message: {
+					...PERMIT2_TRANSFER_MESSAGE,
+					witness: { swapper: '0xf2e508d5b8f44f08bd81c7d19e9f1f5277e31f95', outputAmount: '1' }
+				}
+			});
+
+			// The review resolves the witness as something it cannot describe, as it does any struct.
+			it('should say the summary covers the transfer and not the rest of the request', () => {
+				const { getByText, queryByText } = render(EthWalletConnectMessage, {
+					props: { request: witnessRequest, unreviewableTypedData: true }
+				});
+
+				expect(
+					getByText(en.wallet_connect.text.unreviewable_typed_data_witness)
+				).toBeInTheDocument();
+				expect(queryByText(en.wallet_connect.text.unreviewable_typed_data)).not.toBeInTheDocument();
+			});
+
+			it('should state the transfer and list the structs the signature hashes', () => {
+				const { getByText, getByTestId } = render(EthWalletConnectMessage, {
+					props: { request: witnessRequest, unreviewableTypedData: true }
+				});
+
+				expect(getByTestId('wallet-connect-typed-data-amount')).toHaveTextContent(amountText);
+				expect(getByText(SPENDER)).toBeInTheDocument();
+
+				expect(getByText(en.wallet_connect.text.methods)).toBeInTheDocument();
+				expect(getByText('Order')).toBeInTheDocument();
+				expect(getByText('TokenPermissions')).toBeInTheDocument();
+			});
+		});
 	});
 });
