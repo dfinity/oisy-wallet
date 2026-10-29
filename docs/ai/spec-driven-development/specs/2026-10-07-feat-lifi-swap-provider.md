@@ -1083,7 +1083,8 @@ The result must show all of the following:
   the rent of the accounts it creates, each sized from its mint — may not exceed the one the
   user reviewed. Above it,
   nothing is signed and the review returns with the higher ceiling and the
-  `lifi_fee_changed` note, as on EVM (`LifiSolFeeChangedError`, carrying the ceiling).
+  `lifi_fee_changed` note, as on EVM (`LifiSolFeeChangedError`, carrying the ceiling with
+  the displayed quote's headroom on its network fee).
 - **Receipt is bound (Solana → Solana).** The user's destination-token delta is at least
   the displayed quote's `toAmountMin`. A missing `preview`, or no delta for the
   destination token, fails this check.
@@ -1551,7 +1552,10 @@ total), the ceiling coming with each quote and each quote with the amount.
 **The ceiling has headroom on its network fee** (`LIFI_SOL_NETWORK_FEE_HEADROOM_PERCENT`,
 100 %), added by `loadLifiSolQuoteCeiling` to the `solFeeCeiling` the offer carries, so
 the form, "Max", the review and the ceiling execution holds the re-quote's own to all
-include it. Measured on Solana → Solana (SOL → USDC, USDC → SOL, USDC → USDT,
+include it. The ceiling a `LifiSolFeeChangedError` carries back gets the same headroom,
+as EVM's carried fee gets `LIFI_CARRIED_FEE_HEADROOM_PERCENT`: the displayed quote stays
+cached for 30 s, so a retry in that time would otherwise pass only at a price no higher
+than the refused re-quote's. Measured on Solana → Solana (SOL → USDC, USDC → SOL, USDC → USDT,
 2026-10-29), LI.FI prices the compute units anew with every quote: the limit stays at
 1.4M units, but the price came out anywhere from 100,000 to 200,000 micro-lamports a
 unit, a re-quote moments after the display quote up to 34 % above it and one 30 s later

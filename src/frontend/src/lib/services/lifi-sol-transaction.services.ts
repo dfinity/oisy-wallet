@@ -234,6 +234,16 @@ const readLifiSolTransaction = async ({
 	};
 };
 
+// A ceiling as the user reviews it: LI.FI prices the compute units anew with each quote, and the
+// next re-quote must still fit (`LIFI_SOL_NETWORK_FEE_HEADROOM_PERCENT`). The rent does not move.
+const withNetworkFeeHeadroom = ({
+	ceiling,
+	networkFee
+}: {
+	ceiling: bigint;
+	networkFee: bigint;
+}): bigint => ceiling + (networkFee * LIFI_SOL_NETWORK_FEE_HEADROOM_PERCENT) / 100n;
+
 /**
  * Refuses a LI.FI Solana → Solana transaction unless it does what the request asked, before anything
  * is signed: its top-level instructions are the pinned ones (`assertLifiSolInstructions`), its LI.FI
@@ -241,8 +251,9 @@ const readLifiSolTransaction = async ({
  * blockhash kept and pre-state read at the slot it ran at, bounds what it spends and receives
  * (`assertLifiSolSimulation`).
  *
- * A ceiling above the reviewed one throws `LifiSolFeeChangedError` with it, for the review to show;
- * any other refusal throws `LifiQuoteRejectedError`. A simulation that fails, times out or cannot be
+ * A ceiling above the reviewed one throws `LifiSolFeeChangedError` with it, for the review to show,
+ * with the headroom on its network fee the displayed quote's has: without it, a retry would pass only
+ * at a price no higher than this one. Any other refusal throws `LifiQuoteRejectedError`. A simulation that fails, times out or cannot be
  * read at one slot refuses the transaction: unlike the WalletConnect review's, this one fails closed.
  *
  * Only the decompiled message is used to read the instructions and pick the accounts to simulate;
@@ -262,13 +273,20 @@ export const assertLifiSolTransaction = async ({
 	displayedToAmountMin: bigint;
 	reviewedCeiling: bigint;
 }): Promise<{ simulationSlot: bigint | undefined }> => {
-	const { data, binding, transactionMessage, wrappedSolAccount, rentExemptMinimum, ceiling } =
-		await readLifiSolTransaction({ quote, request, displayedToAmountMin });
+	const {
+		data,
+		binding,
+		transactionMessage,
+		wrappedSolAccount,
+		rentExemptMinimum,
+		networkFee,
+		ceiling
+	} = await readLifiSolTransaction({ quote, request, displayedToAmountMin });
 	const { userAddress } = binding;
 	const network = SolanaNetworks.mainnet;
 
 	if (ceiling > reviewedCeiling) {
-		throw new LifiSolFeeChangedError({ ceiling });
+		throw new LifiSolFeeChangedError({ ceiling: withNetworkFeeHeadroom({ ceiling, networkFee }) });
 	}
 
 	const result = await simulateSolTransaction({
@@ -358,7 +376,7 @@ export const loadLifiSolQuoteCeiling = async ({
 		);
 	}
 
-	return ceiling + (networkFee * LIFI_SOL_NETWORK_FEE_HEADROOM_PERCENT) / 100n;
+	return withNetworkFeeHeadroom({ ceiling, networkFee });
 };
 
 const simulateCallsUnpinnedProgram = async ({

@@ -506,19 +506,22 @@ describe('lifi-sol-transaction.services', () => {
 				).resolves.toBeDefined();
 			});
 
-			it('should carry a ceiling above the one reviewed back, without simulating', async () => {
+			// With the network fee doubled, as the displayed quote's is: the retry's re-quote must fit it.
+			it('should carry a ceiling above the one reviewed back with headroom, without simulating', async () => {
 				const error = await assertFixture({
 					fixture: mockLifiSolSolToUsdc,
 					reviewedCeiling: solToUsdcCeiling - 1n
 				}).catch((err: unknown) => err);
 
 				expect(error).toBeInstanceOf(LifiSolFeeChangedError);
-				expect((error as LifiSolFeeChangedError).ceiling).toBe(solToUsdcCeiling);
+				expect((error as LifiSolFeeChangedError).ceiling).toBe(
+					solToUsdcCeiling + solToUsdcNetworkFee
+				);
 				expect(simulateSolTransaction).not.toHaveBeenCalled();
 			});
 
 			// 1,400,000 units at 200,018 micro-lamports, the wrapped SOL and USDC accounts at 165 bytes
-			// and the PYUSD one at 187.
+			// and the PYUSD one at 187, the network fee doubled.
 			it("should size a Token-2022 account from its mint's extensions", async () => {
 				mockFixture(mockLifiSolSolToPyusd);
 				vi.mocked(getAccountData).mockResolvedValue(new Uint8Array([1]));
@@ -530,7 +533,7 @@ describe('lifi-sol-transaction.services', () => {
 				}).catch((err: unknown) => err);
 
 				expect((error as LifiSolFeeChangedError).ceiling).toBe(
-					5_000n + 280_026n + 2n * rentExemptMinimum + 1_600_200n
+					2n * (5_000n + 280_026n) + 2n * rentExemptMinimum + 1_600_200n
 				);
 				expect(getAccountData).toHaveBeenCalledExactlyOnceWith({
 					address: PYUSD,
