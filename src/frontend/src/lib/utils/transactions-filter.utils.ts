@@ -1,7 +1,7 @@
 import type { ContactUi } from '$lib/types/contact';
 import type { Token } from '$lib/types/token';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
-import type { TransactionsFilter } from '$lib/types/transactions-filter';
+import type { TransactionsFilter, TransactionsFilterType } from '$lib/types/transactions-filter';
 import { filterAddressFromContact } from '$lib/utils/contact.utils';
 import { assertNever, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
@@ -86,6 +86,14 @@ const matchesContact = ({
 	);
 };
 
+// A top-up is filed under a type of its own, whatever its ledger records it as: a send on ICP,
+// a burn on the cycles ledger.
+const transactionsFilterType = (transactionUi: AllTransactionUiWithCmp): TransactionsFilterType =>
+	transactionUi.component === 'ic' &&
+	transactionUi.transaction.typeLabel === 'transaction.label.top_up'
+		? 'top_up'
+		: transactionUi.transaction.type;
+
 export const applyTransactionsFilter = ({
 	transactions,
 	filter,
@@ -114,7 +122,7 @@ export const applyTransactionsFilter = ({
 		: [];
 
 	return transactions.filter((transactionUi) => {
-		if (hasTypeFilter && !typeSet.has(transactionUi.transaction.type)) {
+		if (hasTypeFilter && !typeSet.has(transactionsFilterType(transactionUi))) {
 			return false;
 		}
 

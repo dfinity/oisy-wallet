@@ -2313,7 +2313,8 @@
 			"deposit": "Vložit",
 			"approve": "Schválit",
 			"burn": "Spálit",
-			"mint": "Razit"
+			"mint": "Razit",
+			"top_up": "Dobití"
 		},
 		"filter": {
 			"types_label": "",

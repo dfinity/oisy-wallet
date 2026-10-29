@@ -2313,7 +2313,8 @@
 			"deposit": "입금",
 			"approve": "승인",
 			"burn": "소각",
-			"mint": "민트"
+			"mint": "민트",
+			"top_up": "충전"
 		},
 		"filter": {
 			"types_label": "",

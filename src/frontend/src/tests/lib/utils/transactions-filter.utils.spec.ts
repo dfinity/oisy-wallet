@@ -14,6 +14,7 @@ import {
 	transactionsFilterTokenKey
 } from '$lib/utils/transactions-filter.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockTcyclesToken } from '$tests/mocks/cycles-mint.mock';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import {
@@ -166,6 +167,60 @@ describe('applyTransactionsFilter', () => {
 			});
 
 			expect(result).toEqual([btcReceiveTx, icpApproveTx]);
+		});
+
+		describe('top-ups', () => {
+			const icpTopUpTx = {
+				component: 'ic',
+				token: ICP_TOKEN,
+				transaction: {
+					id: 'icp-3',
+					type: 'send',
+					typeLabel: 'transaction.label.top_up',
+					status: 'executed',
+					from: 'caller-account-id',
+					to: 'cmc-deposit-account-id',
+					value: 100n,
+					timestamp: ZERO
+				}
+			} as unknown as AllTransactionUiWithCmp;
+
+			const tcyclesTopUpTx = {
+				component: 'ic',
+				token: mockTcyclesToken,
+				transaction: {
+					id: 'tcycles-1',
+					type: 'burn',
+					typeLabel: 'transaction.label.top_up',
+					status: 'executed',
+					from: 'caller-account',
+					to: 'ywcsb-maaaa-aaaai-q6k7a-cai',
+					value: 100n,
+					timestamp: ZERO
+				}
+			} as unknown as AllTransactionUiWithCmp;
+
+			const transactions = [...allTxs, icpTopUpTx, tcyclesTopUpTx];
+
+			it('files ICP and TCYCLES top-ups under top-up', () => {
+				const result = applyTransactionsFilter({
+					transactions,
+					filter: { ...EMPTY_TRANSACTIONS_FILTER, types: ['top_up'] },
+					contacts: []
+				});
+
+				expect(result).toEqual([icpTopUpTx, tcyclesTopUpTx]);
+			});
+
+			it('files top-ups under neither send nor burn', () => {
+				const result = applyTransactionsFilter({
+					transactions,
+					filter: { ...EMPTY_TRANSACTIONS_FILTER, types: ['send', 'burn'] },
+					contacts: []
+				});
+
+				expect(result).toEqual([btcSendTx, ethSendTx, icpSendToHexTx, solSendTx]);
+			});
 		});
 	});
 

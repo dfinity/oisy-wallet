@@ -2313,7 +2313,8 @@
 			"deposit": "जमा करें",
 			"approve": "स्वीकृत करें",
 			"burn": "बर्न",
-			"mint": "मिंट"
+			"mint": "मिंट",
+			"top_up": "टॉप-अप"
 		},
 		"filter": {
 			"types_label": "",

@@ -2313,7 +2313,8 @@
 			"deposit": "Depositar",
 			"approve": "Aprovar",
 			"burn": "Burn",
-			"mint": "Mint"
+			"mint": "Mint",
+			"top_up": "Recarga"
 		},
 		"filter": {
 			"types_label": "",

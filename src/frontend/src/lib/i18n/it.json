@@ -2313,7 +2313,8 @@
 			"deposit": "Deposito",
 			"approve": "Approvazione",
 			"burn": "Burn",
-			"mint": "Mint"
+			"mint": "Mint",
+			"top_up": "Ricarica"
 		},
 		"filter": {
 			"types_label": "",

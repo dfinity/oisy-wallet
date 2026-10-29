@@ -2313,7 +2313,8 @@
 			"deposit": "Tiền gửi",
 			"approve": "Chấp thuận",
 			"burn": "Đốt",
-			"mint": "Tạo"
+			"mint": "Tạo",
+			"top_up": "Nạp"
 		},
 		"filter": {
 			"types_label": "",

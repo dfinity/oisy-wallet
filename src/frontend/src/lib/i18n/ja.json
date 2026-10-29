@@ -2313,7 +2313,8 @@
 			"deposit": "入金",
 			"approve": "承認",
 			"burn": "バーン",
-			"mint": "ミント"
+			"mint": "ミント",
+			"top_up": "チャージ"
 		},
 		"filter": {
 			"types_label": "",
