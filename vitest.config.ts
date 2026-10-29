@@ -103,10 +103,10 @@ export default defineConfig((): UserConfig => ({
 			// TODO: increase the thresholds slowly up to an acceptable 90% at least
 			thresholds: {
 				autoUpdate: true,
-				statements: 86.9,
-				branches: 81.7,
-				functions: 85.2,
-				lines: 87.5
+				statements: 87.0,
+				branches: 81.9,
+				functions: 85.3,
+				lines: 87.7
 			}
 		}
 	}
