@@ -2294,6 +2294,9 @@
 			"confirmations": "التأكيدات",
 			"for": "",
 			"for_copied": "",
+			"canister": "",
+			"canister_copied": "",
+			"canister_unknown": "",
 			"expiration": "",
 			"approve_label": ""
 		},
