@@ -8,10 +8,19 @@
 //!
 //! The **calls** stay local, for two reasons that survive that:
 //!
-//! - `CyclesLedgerService` uses `Call::bounded_wait` throughout. A payout is the one call in this
-//!   feature that must not come back "maybe": a bounded wait that times out leaves the canister
-//!   unable to say whether money moved, and the claim state machine has nothing safe to do with
-//!   that answer. These use `unbounded_wait`.
+//! - `CyclesLedgerService` uses `Call::bounded_wait` throughout. The payout does too. It once used
+//!   `unbounded_wait`, on the grounds that a payout must not come back "maybe": a wait that times
+//!   out leaves the canister unable to say whether money moved. The premise holds; the conclusion
+//!   did not follow. The ledger is whichever canister the sender named, and a call that waits
+//!   unboundedly keeps its response reservation held until that canister answers — so one that
+//!   never answers holds a slice of the backend's cycles indefinitely, and enough slices held at
+//!   once leave it unable to make any outgoing call at all, this feature's and every other's.
+//!   `claim_tip` has to survive a "maybe" either way: `TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS` lets the
+//!   `Claiming` guard lapse while a first `icrc2_transfer_from` may still be in flight, so a second
+//!   attempt can overlap the first whatever shape the wait has, and what keeps that safe is the
+//!   allowance covering exactly one payout, as `service::claim_tip` says at length. The deadline
+//!   left at the `bounded_wait` default is the same 300 s as that guard, so an unknown outcome is
+//!   resolved at the moment the tip becomes claimable again.
 //! - That client is a struct bound to one canister and bundles cycles-only methods — `deposit`,
 //!   `withdraw`, `create_canister`. Tips points at whatever ledger the sender chose, and needs
 //!   three methods.
@@ -84,12 +93,14 @@ pub async fn allowance(ledger: Principal, args: AllowanceArgs) -> Result<Allowan
 /// # Errors
 /// [`TransferFromCallError::InsufficientAllowance`] when the reservation no
 /// longer covers the payout; [`TransferFromCallError::Failed`] for any other
-/// ledger rejection or transport failure.
+/// ledger rejection or transport failure, the bounded wait's deadline included.
+/// A payout that reaches the deadline leaves its outcome unknown — see the
+/// module comment for why the claim state machine can take that answer.
 pub async fn transfer_from(
     ledger: Principal,
     args: TransferFromArgs,
 ) -> Result<Nat, TransferFromCallError> {
-    let response = Call::unbounded_wait(ledger, "icrc2_transfer_from")
+    let response = Call::bounded_wait(ledger, "icrc2_transfer_from")
         .with_args(&(args,))
         .await
         .map_err(|err| {
