@@ -27,6 +27,7 @@ pub use icrc_ledger_types::{
     icrc2::{
         allowance::{Allowance, AllowanceArgs},
         approve::{ApproveArgs, ApproveError},
+        transfer_from::{TransferFromArgs, TransferFromError},
     },
 };
 use pocket_ic::PocketIc;
@@ -216,6 +217,46 @@ pub fn approve(
             created_at_time: None,
         },
     )
+}
+
+/// `icrc2_transfer_from`, called as `spender` — which is what the backend is when
+/// it pays a tip out. Exists so a test can put the ledger itself through the
+/// retry the backend relies on, without needing the backend to lose a reply.
+pub fn transfer_from(
+    pic: &PocketIc,
+    ledger: Principal,
+    spender: Principal,
+    args: TransferFromArgs,
+) -> Result<Nat, TransferFromError> {
+    update(pic, ledger, spender, "icrc2_transfer_from", args)
+}
+
+#[derive(CandidType, Deserialize)]
+struct GetBlocksArgs {
+    start: Nat,
+    length: Nat,
+}
+
+/// Only the one field read; candid ignores the rest of the reply.
+#[derive(CandidType, Deserialize)]
+struct GetBlocksResponse {
+    chain_length: u64,
+}
+
+/// How many blocks the ledger has written, so a test can say which block a
+/// payout is and whether a retry wrote another.
+pub fn chain_length(pic: &PocketIc, ledger: Principal) -> u64 {
+    let response: GetBlocksResponse = query(
+        pic,
+        ledger,
+        Principal::anonymous(),
+        "get_blocks",
+        GetBlocksArgs {
+            start: Nat::from(0u8),
+            length: Nat::from(0u8),
+        },
+    );
+    response.chain_length
 }
 
 pub fn balance_of(pic: &PocketIc, ledger: Principal, owner: Principal) -> Nat {
