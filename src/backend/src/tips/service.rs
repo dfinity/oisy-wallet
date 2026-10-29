@@ -349,7 +349,7 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
             // The tip's own stamp, not this attempt's. Every other field here is
             // already fixed by the tip, so pinning this one makes a retry the
             // same transaction to the ledger — which is what turns "the answer
-            // never came back" from a payout reported as a failure into a
+            // never came back" from a payout written off as a failure into a
             // payout the ledger can still account for.
             created_at_time: Some(payout_created_at_ns),
         },

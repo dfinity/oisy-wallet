@@ -149,8 +149,8 @@ not taken fresh per attempt, or the retry is a different transaction and there
 is nothing to match it against.
 
 - Without it, a call that times out, traps on the way back, or fails to decode
-  is indistinguishable from one that never executed, and the canister reports a
-  payout that landed as a failure.
+  is indistinguishable from one that never executed, and the canister writes off
+  a payout that landed as a failure.
 - With it, the ledger deduplicates: an identical retry is not executed again and
   the reply is `TransferFromError::Duplicate { duplicate_of }`, naming the
   original block. Treat that as **success** carrying that block index.

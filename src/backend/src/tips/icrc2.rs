@@ -131,10 +131,10 @@ pub async fn allowance(ledger: Principal, args: AllowanceArgs) -> Result<Allowan
 /// `args.created_at_time` carries the weight here. Set, it makes this call
 /// idempotent at the ledger for the length of the ledger's transaction window:
 /// a call that times out, traps on the way back, or fails to decode can be sent
-/// again unchanged, and the ledger either executes it once or reports the block
+/// again unchanged, and the ledger either executes it once or names the block
 /// where it already did. Unset, every one of those answers would be
-/// indistinguishable from "nothing happened", which is a payout reported as a
-/// failure. Callers pin it per tip rather than per attempt — see
+/// indistinguishable from "nothing happened", which is a payout written off as
+/// a failure. Callers pin it per tip rather than per attempt — see
 /// [`crate::tips::model::TipRecord::start_claim`].
 ///
 /// # Errors
