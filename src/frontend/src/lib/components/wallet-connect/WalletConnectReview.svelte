@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy, onMount } from 'svelte';
-	import { EIP155_CHAINS } from '$env/eip155-chains.env';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -19,9 +18,8 @@
 		walletConnectListenerStore,
 		walletConnectProposalStore
 	} from '$lib/stores/wallet-connect.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { fade } from '$lib/utils/transitions.utils';
-	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
+	import { acceptedContext, getWalletConnectChainName } from '$lib/utils/wallet-connect.utils';
 
 	let listener = $derived($walletConnectListenerStore);
 
@@ -30,6 +28,31 @@
 	let params = $derived(proposal?.params);
 
 	let approve = $derived(acceptedContext(proposal?.verifyContext));
+
+	// What approving grants, worked out exactly as `approveSession` will, rather than read off the
+	// proposal: current WalletConnect SDKs send every namespace a dApp asks for as optional, and OISY
+	// grants only the networks and methods it supports. Working it out throws when the proposal
+	// requires something OISY does not support; approving fails then too, so nothing is listed.
+	let grantedNamespaces = $derived.by(() => {
+		if (isNullish(listener) || isNullish(proposal)) {
+			return [];
+		}
+
+		try {
+			return Object.entries(listener.approvedNamespaces(proposal)).map(
+				([key, { chains, methods, events }]) => ({
+					key,
+					// A dApp can ask for a network under two chain IDs (Solana's legacy one, say), which
+					// is one network to the user.
+					networks: [...new Set((chains ?? []).map(getWalletConnectChainName))],
+					methods,
+					events
+				})
+			);
+		} catch (_: unknown) {
+			return [];
+		}
+	});
 
 	// Display a cancel button after a while if the WalletConnect initialization never resolves
 	let timer = $state<NodeJS.Timeout | undefined>();
@@ -148,31 +171,28 @@
 
 		<WalletConnectDomainVerification {proposal} />
 
-		{#each Object.entries(params.requiredNamespaces) as [key, value] (key)}
-			{@const allMethods = value.methods}
-			{@const allEvents = value.events}
+		{#if grantedNamespaces.length > 0}
+			<p class="mt-6 font-bold">{$i18n.wallet_connect.text.granted_permissions}:</p>
 
-			{#each value.chains ?? [] as chainId (chainId)}
-				{@const chainName = EIP155_CHAINS[chainId]?.name ?? ''}
+			{#each grantedNamespaces as { key, networks, methods, events } (key)}
+				<article
+					class="mt-4 rounded-xs bg-disabled p-4"
+					data-tid="wallet-connect-granted-namespace"
+				>
+					<p class="font-bold">{$i18n.wallet_connect.text.networks}:</p>
 
-				<p class="mt-6 font-bold">
-					{replacePlaceholders($i18n.wallet_connect.text.review, {
-						$chain_name: chainName,
-						$key: key
-					})}:
-				</p>
+					<p>{networks.length ? networks.join(', ') : '-'}</p>
 
-				<article class="mt-4 rounded-xs bg-disabled p-4">
-					<p class="font-bold">{$i18n.wallet_connect.text.methods}:</p>
+					<p class="mt-4 font-bold">{$i18n.wallet_connect.text.methods}:</p>
 
-					<p>{allMethods.length ? allMethods.join(', ') : '-'}</p>
+					<p>{methods.length ? methods.join(', ') : '-'}</p>
 
 					<p class="mt-4 font-bold">{$i18n.wallet_connect.text.events}:</p>
 
-					<p>{allEvents.length ? allEvents.join(', ') : '-'}</p>
+					<p>{events.length ? events.join(', ') : '-'}</p>
 				</article>
 			{/each}
-		{/each}
+		{/if}
 
 		{#snippet toolbar()}
 			<div in:fade>
