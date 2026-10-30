@@ -1345,6 +1345,10 @@ type TipError = variant {
 	// no longer covers it — they spent, reduced or revoked it. The one
 	// deliberately distinguishable failure, reachable only with a valid link,
 	// because telling the claimer "come back later" is useless.
+	//
+	// At creation: the allowance does not cover the amount plus its fee, or
+	// the amount is wider than [`MAX_TIP_AMOUNT_BITS`], which no allowance
+	// can cover.
 	Uncovered;
 	// No claimable tip for this id. Also returned for an expired, cancelled or
 	// already-claimed tip, and for a wrong claim code — every case collapsed
@@ -1368,7 +1372,9 @@ type TipError = variant {
 	InternalError : record { msg : text };
 	// `message` exceeds [`MAX_TIP_MESSAGE_CHARS`] characters.
 	MessageTooLong;
-	// The caller already holds [`MAX_TIPS_PER_USER`] active tips.
+	// The caller already holds [`MAX_TIPS_PER_USER`] active tips, or
+	// [`MAX_STORED_TIPS_PER_USER`] stored ones that cannot make room for
+	// another because the finished ones are still `Claiming`.
 	TooManyTips;
 	// The sender's account no longer holds the amount. The reservation is still
 	// granted and the claim code is still valid, so the same link works again
@@ -1807,8 +1813,9 @@ service : (Arg) -> {
 	//
 	// # Errors
 	// Errors are enumerated by `TipError` (e.g. `Uncovered` when the allowance does
-	// not cover the amount plus its fee, `TooManyTips`, `AmountTooSmall`,
-	// `InvalidExpiry`, `DuplicateTipId`, `RateLimited`).
+	// not cover the amount plus its fee, or the amount is wider than any allowance
+	// can be, `TooManyTips`, `AmountTooSmall`, `InvalidExpiry`, `DuplicateTipId`,
+	// `RateLimited`).
 	create_tip : (CreateTipRequest) -> (CancelTipResult);
 	// It creates a new user profile for the caller.
 	// If the user has already a profile, it will return that profile.
