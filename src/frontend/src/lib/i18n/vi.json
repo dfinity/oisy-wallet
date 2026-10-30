@@ -2318,7 +2318,8 @@
 			"no_date_available": "Không có ngày khả dụng",
 			"pending": "Đang chờ xử lý",
 			"top_up": "Nạp",
-			"top_up_refund": "Hoàn tiền nạp"
+			"top_up_refund": "Hoàn tiền nạp",
+			"canister_top_up": ""
 		},
 		"alt": {
 			"open_block_explorer": "Mở giao dịch này trên trình khám phá khối",

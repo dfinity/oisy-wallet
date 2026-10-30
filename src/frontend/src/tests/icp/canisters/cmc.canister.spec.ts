@@ -98,4 +98,43 @@ describe('cmc.canister', () => {
 			);
 		});
 	});
+
+	describe('notifyTopUp', () => {
+		const canisterId = Principal.fromText('ywcsb-maaaa-aaaai-q6k7a-cai');
+
+		it('should notify the block for the canister, as an update, and return the cycles deposited', async () => {
+			certifiedService.notify_top_up.mockResolvedValue({ Ok: 2_500_000_000_000n });
+
+			const { notifyTopUp } = await createCmcCanister();
+
+			await expect(notifyTopUp({ blockIndex: 123n, canisterId })).resolves.toBe(2_500_000_000_000n);
+			expect(certifiedService.notify_top_up).toHaveBeenCalledExactlyOnceWith({
+				block_index: 123n,
+				canister_id: canisterId
+			});
+			expect(service.notify_top_up).not.toHaveBeenCalled();
+		});
+
+		it('should throw the mapped error when the CMC answers Processing', async () => {
+			certifiedService.notify_top_up.mockResolvedValue({ Err: { Processing: null } });
+
+			const { notifyTopUp } = await createCmcCanister();
+
+			await expect(notifyTopUp({ blockIndex: 123n, canisterId })).rejects.toBeInstanceOf(
+				CmcNotifyProcessingError
+			);
+		});
+
+		it('should throw the mapped error when the CMC refunds', async () => {
+			certifiedService.notify_top_up.mockResolvedValue({
+				Err: { Refunded: { block_index: [124n], reason: 'refunded' } }
+			});
+
+			const { notifyTopUp } = await createCmcCanister();
+
+			await expect(notifyTopUp({ blockIndex: 123n, canisterId })).rejects.toBeInstanceOf(
+				CmcNotifyRefundedError
+			);
+		});
+	});
 });

@@ -23,7 +23,7 @@ import {
 	transferIcpForCyclesMint
 } from '$icp/services/cycles-mint.services';
 import { CyclesMintError } from '$icp/types/cycles-mint';
-import { getCyclesMintDepositAccount } from '$icp/utils/cycles-mint.utils';
+import { getCmcDepositAccount } from '$icp/utils/cmc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import { ProgressStepsCyclesMint } from '$lib/enums/progress-steps';
@@ -79,7 +79,7 @@ describe('cycles-mint.services', () => {
 			await expect(transferIcpForCyclesMint(params)).resolves.toBe(42n);
 			expect(icrc1Transfer).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
-				to: getCyclesMintDepositAccount(mockIdentity.getPrincipal()),
+				to: getCmcDepositAccount(mockIdentity.getPrincipal()),
 				amount: params.amount,
 				createdAt: params.createdAt,
 				memo: CMC_MINT_CYCLES_MEMO,

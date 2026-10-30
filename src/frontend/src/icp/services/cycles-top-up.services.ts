@@ -1,3 +1,4 @@
+import { notifyTopUp } from '$icp/api/cmc.api';
 import { withdrawCycles } from '$icp/api/cycles-ledger.api';
 import { getTransactions } from '$icp/api/icrc-index-ng.api';
 import {
@@ -5,9 +6,11 @@ import {
 	CyclesLedgerWithdrawFailedError,
 	CyclesLedgerWithdrawRefusedError
 } from '$icp/canisters/cycles-ledger.errors';
-import { CYCLES_LEDGER_DEPOSIT_FEE } from '$icp/constants/cmc.constants';
+import { CMC_TOP_UP_MEMO, CYCLES_LEDGER_DEPOSIT_FEE } from '$icp/constants/cmc.constants';
+import { transferIcpToCmc } from '$icp/services/cmc.services';
 import type { IndexCanisterIdText } from '$icp/types/canister';
-import type { CyclesTopUpResult } from '$icp/types/cycles-top-up';
+import type { CyclesTopUpNotifyResult, CyclesTopUpResult } from '$icp/types/cycles-top-up';
+import { getCmcDepositAccount, toCmcNotifyFailure } from '$icp/utils/cmc.utils';
 import { isTopUpRefundMemo } from '$icp/utils/cycles-ledger.utils';
 import type { NullishIdentity } from '$lib/types/identity';
 import { consoleError } from '$lib/utils/console.utils';
@@ -159,4 +162,55 @@ const findRefund = ({
 	}
 
 	return undefined;
+};
+
+/**
+ * Sends the ICP of a top-up to the CMC's deposit account for the canister. `createdAt`
+ * stays the same for the whole top-up (see `transferIcpToCmc`).
+ */
+export const transferIcpForCyclesTopUp = async ({
+	identity,
+	canisterId,
+	amount,
+	createdAt
+}: {
+	identity: NullishIdentity;
+	canisterId: Principal;
+	// ICP e8s, without the ledger fee.
+	amount: bigint;
+	createdAt: bigint;
+}): Promise<bigint> => {
+	assertNonNullish(identity);
+
+	return await transferIcpToCmc({
+		identity,
+		to: getCmcDepositAccount(canisterId),
+		memo: CMC_TOP_UP_MEMO,
+		amount,
+		createdAt
+	});
+};
+
+/**
+ * Notifies the CMC of a top-up deposit once, and reports where the top-up stands. Only a
+ * refund and the CMC's other final answers end it (see `toCmcNotifyFailure`).
+ */
+export const notifyCyclesTopUp = async ({
+	identity,
+	blockIndex,
+	canisterId
+}: {
+	identity: NullishIdentity;
+	blockIndex: bigint;
+	canisterId: Principal;
+}): Promise<CyclesTopUpNotifyResult> => {
+	assertNonNullish(identity);
+
+	try {
+		const cycles = await notifyTopUp({ identity, blockIndex, to: canisterId });
+
+		return { status: 'topped_up', cycles };
+	} catch (err: unknown) {
+		return toCmcNotifyFailure(err);
+	}
 };

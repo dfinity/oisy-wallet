@@ -1,8 +1,5 @@
 import type { ActiveUserTransactionStatus } from '$declarations/backend/backend.did';
-import { ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
 import { notifyMintCycles } from '$icp/api/cmc.api';
-import { icrc1Transfer } from '$icp/api/icp-ledger.api';
-import { CmcNotifyError, CmcNotifyRefundedError } from '$icp/canisters/cmc.errors';
 import {
 	CMC_MINT_CYCLES_MEMO,
 	CYCLES_MINT_DELETE_ATTEMPTS,
@@ -11,8 +8,10 @@ import {
 	CYCLES_MINT_NOTIFY_RETRY_DELAY_MILLIS,
 	CYCLES_MINT_TRANSFER_START_WINDOW_NS
 } from '$icp/constants/cmc.constants';
+import { transferIcpToCmc } from '$icp/services/cmc.services';
 import { CyclesMintError, type CyclesMintNotifyResult } from '$icp/types/cycles-mint';
-import { getCyclesMintDepositAccount, randomSubMillisecondNs } from '$icp/utils/cycles-mint.utils';
+import { getCmcDepositAccount, toCmcNotifyFailure } from '$icp/utils/cmc.utils';
+import { randomSubMillisecondNs } from '$icp/utils/cycles-mint.utils';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import { ProgressStepsCyclesMint } from '$lib/enums/progress-steps';
 import {
@@ -42,15 +41,12 @@ import {
 import { formatToken } from '$lib/utils/format.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { assertNonNullish, isNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
-import { IcrcError, TxDuplicateError } from '@icp-sdk/canisters/ledger/icp';
+import { IcrcError } from '@icp-sdk/canisters/ledger/icp';
 import type { Identity } from '@icp-sdk/core/agent';
 
 /**
- * Sends the ICP of a mint to the CMC's deposit account for the caller.
- *
- * `createdAt` stays the same for the whole mint, so sending again after a call
- * that got no answer cannot pay twice: the ledger recognises the transfer and
- * answers with the block the first one landed in.
+ * Sends the ICP of a mint to the CMC's deposit account for the caller. `createdAt` stays
+ * the same for the whole mint (see `transferIcpToCmc`).
  */
 export const transferIcpForCyclesMint = async ({
 	identity,
@@ -63,31 +59,18 @@ export const transferIcpForCyclesMint = async ({
 }): Promise<bigint> => {
 	assertNonNullish(identity);
 
-	try {
-		return await icrc1Transfer({
-			identity,
-			to: getCyclesMintDepositAccount(identity.getPrincipal()),
-			amount,
-			createdAt,
-			memo: CMC_MINT_CYCLES_MEMO,
-			ledgerCanisterId: ICP_LEDGER_CANISTER_ID
-		});
-	} catch (err: unknown) {
-		if (err instanceof TxDuplicateError) {
-			return err.duplicateOf;
-		}
-
-		throw err;
-	}
+	return await transferIcpToCmc({
+		identity,
+		to: getCmcDepositAccount(identity.getPrincipal()),
+		memo: CMC_MINT_CYCLES_MEMO,
+		amount,
+		createdAt
+	});
 };
 
 /**
- * Notifies the CMC of a mint deposit once, and reports where the mint stands.
- *
- * Only a refund and the CMC's other final answers end a mint. `Processing`, a
- * transient CMC error and a call that got no answer all leave it `pending`:
- * the ICP has left the wallet, so the mint must not be reported as failed
- * while notifying again can still complete it.
+ * Notifies the CMC of a mint deposit once, and reports where the mint stands. Only a
+ * refund and the CMC's other final answers end it (see `toCmcNotifyFailure`).
  */
 export const notifyCyclesMint = async ({
 	identity,
@@ -103,19 +86,7 @@ export const notifyCyclesMint = async ({
 
 		return { status: 'minted', minted, balance };
 	} catch (err: unknown) {
-		if (err instanceof CmcNotifyRefundedError) {
-			return {
-				status: 'refunded',
-				reason: err.message,
-				...(nonNullish(err.refundBlockIndex) && { refundBlockIndex: err.refundBlockIndex })
-			};
-		}
-
-		if (err instanceof CmcNotifyError && !err.retryable) {
-			return { status: 'failed', reason: err.message };
-		}
-
-		return { status: 'pending' };
+		return toCmcNotifyFailure(err);
 	}
 };
 

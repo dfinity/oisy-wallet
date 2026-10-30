@@ -1,32 +1,27 @@
 import type { ActiveUserTransaction, CyclesMintData } from '$declarations/backend/backend.did';
 import { ICP_INDEX_CANISTER_ID, ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
-import {
-	getAccountIdentifierTransactions,
-	getIcpIndexNumBlocksSynced
-} from '$icp/api/icp-index.api';
+import { getIcpIndexNumBlocksSynced } from '$icp/api/icp-index.api';
 import { getIcpLedgerBlockTimestamp } from '$icp/api/icp-ledger.api';
 import {
+	CMC_MINT_CYCLES_MEMO,
 	CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS,
-	CYCLES_MINT_DEPOSIT_LOOKUP_PAGE_SIZE,
-	CYCLES_MINT_SETTLE_GRACE_OBSERVATIONS,
-	ICP_LEDGER_PERMITTED_DRIFT_NS
+	CYCLES_MINT_SETTLE_GRACE_OBSERVATIONS
 } from '$icp/constants/cmc.constants';
+import { findCmcDeposit } from '$icp/services/cmc.services';
 import { notifyCyclesMint } from '$icp/services/cycles-mint.services';
-import { getCyclesMintDepositAccountIdentifier } from '$icp/utils/cycles-mint.utils';
-import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
+import { getCmcDepositAccountIdentifier } from '$icp/utils/cmc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
 import { CYCLES_MINT_EXTERNAL_REF_KEYS } from '$lib/types/cycles-mint-active-tx';
 import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import {
-	isCyclesMintDeposit,
 	toCyclesMintExternalRefs,
 	toCyclesMintExternalRefsMap,
 	toCyclesMintRefBlockIndex,
 	toCyclesMintRowUpdate
 } from '$lib/utils/cycles-mint-active-tx.utils';
-import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 
 /**
@@ -58,73 +53,24 @@ const recordSettleObservation = ({ id, updated_at_ns }: ActiveUserTransaction): 
 };
 
 /**
- * Finds a mint's deposit for a row whose tab died before the transfer returned, in the
- * history of the CMC's deposit account for the caller rather than the caller's own: that
- * account only ever sees mint deposits, their burns and their refunds, so the deposit is
- * a page or two away however busy the caller's wallet is. Newest first, stopping at the
- * first entry older than any block the deposit could be in (the transfer timestamp minus
- * the ledger's permitted drift).
- *
- * Certified, because both answers are acted on: a deposit that is found is notified, and
- * one that is not, once the index has synced past it, closes its row as never sent. A
- * single replica answering either would otherwise be enough to report a funded mint as
- * failed, or to strand one.
+ * Finds a mint's deposit in the history of the CMC's deposit account for the caller: that
+ * account only ever sees mint deposits, their burns and their refunds, so the deposit is a
+ * page or two away however busy the caller's wallet is. See `findCmcDeposit`.
  */
-export const findCyclesMintDeposit = async ({
+export const findCyclesMintDeposit = ({
 	identity,
-	data
+	data: { amount, transfer_created_at_ns }
 }: {
 	identity: Identity;
 	data: CyclesMintData;
-}): Promise<bigint | undefined> => {
-	const depositAccountIdentifier = getCyclesMintDepositAccountIdentifier(identity.getPrincipal());
-	const ownAccountIdentifier = getAccountIdentifier(identity.getPrincipal()).toHex();
-	const oldestPossibleNs = data.transfer_created_at_ns - ICP_LEDGER_PERMITTED_DRIFT_NS;
-
-	let start: bigint | undefined;
-	let hasOlderPages = true;
-
-	while (hasOlderPages) {
-		const { transactions, oldest_tx_id } = await getAccountIdentifierTransactions({
-			identity,
-			accountIdentifier: depositAccountIdentifier,
-			start,
-			maxResults: CYCLES_MINT_DEPOSIT_LOOKUP_PAGE_SIZE,
-			indexCanisterId: ICP_INDEX_CANISTER_ID,
-			certified: true
-		});
-
-		if (transactions.length === 0) {
-			return undefined;
-		}
-
-		const deposit = transactions.find(({ transaction }) =>
-			isCyclesMintDeposit({ transaction, depositAccountIdentifier, ownAccountIdentifier, data })
-		);
-
-		if (nonNullish(deposit)) {
-			return deposit.id;
-		}
-
-		const oldestFetched = transactions.reduce((min, tx) => (tx.id < min.id ? tx : min));
-		const oldestFetchedNs = fromNullable(oldestFetched.transaction.timestamp)?.timestamp_nanos;
-
-		if (nonNullish(oldestFetchedNs) && oldestFetchedNs < oldestPossibleNs) {
-			return undefined;
-		}
-
-		// As in `hasCkBtcMintForDeposit`: stop when the history is exhausted, or when a page
-		// fails to move the cursor.
-		const oldestTxId = fromNullable(oldest_tx_id);
-		hasOlderPages =
-			(isNullish(oldestTxId) || oldestFetched.id > oldestTxId) &&
-			(isNullish(start) || oldestFetched.id < start);
-
-		start = oldestFetched.id;
-	}
-
-	return undefined;
-};
+}): Promise<bigint | undefined> =>
+	findCmcDeposit({
+		identity,
+		depositAccountIdentifier: getCmcDepositAccountIdentifier(identity.getPrincipal()),
+		memo: CMC_MINT_CYCLES_MEMO,
+		amount,
+		transferCreatedAtNs: transfer_created_at_ns
+	});
 
 /**
  * Whether the ICP index already holds every block up to `timestampNs`. The ledger appends

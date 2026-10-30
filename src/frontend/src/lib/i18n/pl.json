@@ -2318,7 +2318,8 @@
 			"no_date_available": "Brak dostępnej daty",
 			"pending": "Oczekuje",
 			"top_up": "Doładowanie",
-			"top_up_refund": "Zwrot doładowania"
+			"top_up_refund": "Zwrot doładowania",
+			"canister_top_up": ""
 		},
 		"alt": {
 			"open_block_explorer": "Otwórz tę transakcję w eksploratorze bloków",

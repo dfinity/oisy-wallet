@@ -9,6 +9,14 @@ export const CMC_NAME = 'Cycles Minting Canister';
 // the CMC reads whenever the legacy memo is zero.
 export const CMC_MINT_CYCLES_MEMO = new Uint8Array([0x4d, 0x49, 0x4e, 0x54, 0, 0, 0, 0]);
 
+// The CMC treats a deposit as a top-up only when its memo is `TPUP` (0x50555054), read
+// the same way.
+export const CMC_TOP_UP_MEMO = new Uint8Array([0x54, 0x50, 0x55, 0x50, 0, 0, 0, 0]);
+
+// The same memo as the ICP ledger's legacy `transfer` carries it, as a number. The CMC
+// reads that one first, and the `icrc1_memo` only when it is zero.
+export const CMC_TOP_UP_LEGACY_MEMO = 0x50555054n;
+
 // The cycles ledger counts in cycles, 10^12 to the TCYCLES, and keeps 0.0001 TCYCLES of
 // every deposit as its fee (`dfinity/cycles-ledger`, `config.rs`). The CMC's `minted` is
 // the amount before that fee.
@@ -59,7 +67,7 @@ export const CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS = 15n * 60n * 1_000_000_000n;
 // history back past that point cannot find it any more.
 export const ICP_LEDGER_PERMITTED_DRIFT_NS = 60_000_000_000n;
 
-export const CYCLES_MINT_DEPOSIT_LOOKUP_PAGE_SIZE = 100n;
+export const CMC_DEPOSIT_LOOKUP_PAGE_SIZE = 100n;
 
 // How long a row has to go unwritten before the poller acts on it, counted in the
 // poller's own ticks (see `OISY_TRADE_SWAP_SETTLE_GRACE_OBSERVATIONS` for why not in

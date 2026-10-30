@@ -2,14 +2,9 @@ import type {
 	ActiveUserTransaction,
 	ActiveUserTransactionData,
 	ActiveUserTransactionRef,
-	ActiveUserTransactionStatus,
-	CyclesMintData
+	ActiveUserTransactionStatus
 } from '$declarations/backend/backend.did';
-import {
-	CMC_MINT_CYCLES_MEMO,
-	CYCLES_LEDGER_DECIMALS,
-	CYCLES_LEDGER_DEPOSIT_FEE
-} from '$icp/constants/cmc.constants';
+import { CYCLES_LEDGER_DECIMALS, CYCLES_LEDGER_DEPOSIT_FEE } from '$icp/constants/cmc.constants';
 import type { CyclesMintNotifyResult } from '$icp/types/cycles-mint';
 import { ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES, ZERO } from '$lib/constants/app.constants';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
@@ -23,8 +18,7 @@ import type { Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import { truncateUtf8Bytes } from '$lib/utils/string.utils';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
-import { fromNullable, nonNullish } from '@dfinity/utils';
-import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
+import { nonNullish } from '@dfinity/utils';
 
 export const isCyclesMintActiveUserTransaction = (tx: ActiveUserTransaction): boolean =>
 	'CyclesMint' in tx.data;
@@ -122,45 +116,6 @@ export const toCyclesMintOutcome = (value: string | undefined): CyclesMintOutcom
 	value === 'minted' || value === 'refunded' || value === 'failed' || value === 'not_sent'
 		? value
 		: undefined;
-
-const isCyclesMintMemo = (memo: Uint8Array | undefined): boolean =>
-	nonNullish(memo) &&
-	memo.length === CMC_MINT_CYCLES_MEMO.length &&
-	memo.every((byte, index) => byte === CMC_MINT_CYCLES_MEMO[index]);
-
-/**
- * Whether an ICP history entry is this row's deposit: a transfer of the row's amount from
- * the caller's own account to the CMC deposit account, with the `MINT` memo and the row's
- * own `created_at_time`. Short of the fixed fee, these are the fields the ledger
- * deduplicates a transfer on. The timestamp is what makes it this row's deposit rather
- * than another mint of the same amount, and the sender what keeps a transfer someone else
- * makes to that account from passing for it.
- */
-export const isCyclesMintDeposit = ({
-	transaction: { operation, icrc1_memo, created_at_time },
-	depositAccountIdentifier,
-	ownAccountIdentifier,
-	data: { amount, transfer_created_at_ns }
-}: {
-	transaction: IcpIndexDid.Transaction;
-	depositAccountIdentifier: string;
-	ownAccountIdentifier: string;
-	data: CyclesMintData;
-}): boolean => {
-	if (!('Transfer' in operation)) {
-		return false;
-	}
-
-	const { from, to, amount: transferred } = operation.Transfer;
-
-	return (
-		from.toLowerCase() === ownAccountIdentifier.toLowerCase() &&
-		to.toLowerCase() === depositAccountIdentifier.toLowerCase() &&
-		transferred.e8s === amount &&
-		fromNullable(created_at_time)?.timestamp_nanos === transfer_created_at_ns &&
-		isCyclesMintMemo(fromNullable(icrc1_memo))
-	);
-};
 
 // What the cycles ledger credits for a mint the CMC reports as `minted`.
 export const toCyclesMintCredited = (minted: bigint): bigint =>

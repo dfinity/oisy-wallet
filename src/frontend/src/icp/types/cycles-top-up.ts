@@ -1,4 +1,9 @@
 import type { CyclesLedgerWithdrawRefusal } from '$icp/canisters/cycles-ledger.errors';
+import type { CmcNotifyFailure } from '$icp/types/cmc';
+
+// Where a top-up paid with ICP stands after one notify. `cycles` is what the CMC deposited
+// into the canister. `pending` means notifying the same block again can still top it up.
+export type CyclesTopUpNotifyResult = { status: 'topped_up'; cycles: bigint } | CmcNotifyFailure;
 
 /**
  * How a top-up ended.
