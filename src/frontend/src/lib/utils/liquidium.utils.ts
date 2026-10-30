@@ -356,11 +356,13 @@ export const orderLiquidiumRails = <T extends { asset: string; chain: string }>(
 	);
 };
 
+// `borrowedUsd` is priced from `borrowed` alone: the SDK's own `borrowedUsd` values
+// `borrowed + debtInterest`, counting the interest twice (`borrowed` already includes it).
 export const mapLiquidiumReserve = ({
 	position,
 	pool,
+	priceUsd,
 	suppliedUsd,
-	borrowedUsd,
 	usdDecimals
 }: UserReserve): LiquidiumReserve => ({
 	poolId: position.poolId,
@@ -374,7 +376,7 @@ export const mapLiquidiumReserve = ({
 	borrowedDecimals: Number(position.borrowedDecimals),
 	debtInterest: position.debtInterest,
 	suppliedUsd: scaledUsdToNumber({ value: suppliedUsd, decimals: usdDecimals }),
-	borrowedUsd: scaledUsdToNumber({ value: borrowedUsd, decimals: usdDecimals })
+	borrowedUsd: (Number(position.borrowed) / 10 ** Number(position.borrowedDecimals)) * priceUsd
 });
 
 // Expands one position into an entry per supported transfer rail, so the withdraw/repay

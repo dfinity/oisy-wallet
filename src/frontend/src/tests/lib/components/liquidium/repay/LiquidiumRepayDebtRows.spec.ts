@@ -35,10 +35,17 @@ describe('LiquidiumRepayDebtRows', () => {
 		expect(container).toHaveTextContent('1 BTC');
 	});
 
+	it('does not add the accrued interest on top of the debt, which already includes it', () => {
+		const { container } = render(LiquidiumRepayDebtRows, { props: { reserve, amount: undefined } });
+
+		expect(container).toHaveTextContent('0.005 BTC');
+		expect(container).not.toHaveTextContent('1.005 BTC');
+	});
+
 	it('clamps the remaining debt to zero when repaying the full amount', () => {
 		const { container } = render(LiquidiumRepayDebtRows, { props: { reserve, amount: 2 } });
 
-		// totalDebt (1.005 BTC) < parsedRepay (2 BTC) → remaining clamped to 0.
+		// Debt (1 BTC) < parsedRepay (2 BTC) → remaining clamped to 0.
 		expect(container).toHaveTextContent('0 BTC');
 	});
 
@@ -65,13 +72,14 @@ describe('LiquidiumRepayDebtRows', () => {
 
 		expect(container).toHaveTextContent(en.liquidium.text.pending_repays);
 		expect(container).toHaveTextContent('0.5 BTC');
-		// 1.005 BTC owed − 0.5 BTC pending − 0.2 BTC repaid = 0.305 BTC.
-		expect(container).toHaveTextContent('0.305 BTC');
+		// 1 BTC owed − 0.5 BTC pending − 0.2 BTC repaid = 0.3 BTC.
+		expect(container).toHaveTextContent('0.3 BTC');
+		expect(container).not.toHaveTextContent('0.305 BTC');
 	});
 
 	it('clamps the remaining debt to zero when pending repays cover it', () => {
 		const { container } = render(LiquidiumRepayDebtRows, {
-			props: { reserve, amount: undefined, pendingRepay: 100_500_000n }
+			props: { reserve, amount: undefined, pendingRepay: 100_000_000n }
 		});
 
 		expect(container).toHaveTextContent('0 BTC');

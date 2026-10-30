@@ -170,8 +170,8 @@ describe('LiquidiumRepayForm', () => {
 
 	it('blocks the form when pending repays cover the debt but accrued interest leaves dust in the cap', () => {
 		const { container, getByTestId } = render(LiquidiumRepayForm, {
-			// 1.005 BTC pending ≥ 1 BTC principal + 0.005 BTC interest.
-			props: { ...baseProps, maxRepay: 38n, pendingRepay: 100_500_000n },
+			// 1 BTC pending ≥ the 1 BTC debt (interest included).
+			props: { ...baseProps, maxRepay: 38n, pendingRepay: 100_000_000n },
 			context: mockContext()
 		});
 
