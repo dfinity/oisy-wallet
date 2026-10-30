@@ -63,6 +63,13 @@ export interface WalletConnectEthSignTypedDataV4 {
  */
 export interface WalletConnectEthTypedDataApproval {
 	spender?: string;
+	// One entry per token the signature sets an allowance over, in the order the struct lists them.
+	// Most schemas grant one; Permit2's `PermitBatch` grants as many as it declares, all to the
+	// same spender.
+	allowances: WalletConnectEthTypedDataAllowance[];
+}
+
+export interface WalletConnectEthTypedDataAllowance {
 	token?: string;
 	amount?: bigint;
 	// `true` when the allowance is the largest its schema can express, which is how an unlimited

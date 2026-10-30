@@ -83,6 +83,31 @@ describe('EthWalletConnectSignModal', () => {
 		).toBeInTheDocument();
 	});
 
+	// The declared `primaryType` is never hashed: a request calling a permit something else is still
+	// titled by the permit it would sign.
+	it('should title a typed-data request by the struct it hashes, not the one it declares', () => {
+		const { getByText, queryByText } = render(EthWalletConnectSignModal, {
+			props: props(
+				mockRequest({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					payload: JSON.stringify({ ...typedData, primaryType: 'Login' })
+				})
+			)
+		});
+
+		expect(
+			getByText(
+				replacePlaceholders(en.wallet_connect.text.sign_transaction_with_type, { $type: 'Permit' })
+			)
+		).toBeInTheDocument();
+
+		expect(
+			queryByText(
+				replacePlaceholders(en.wallet_connect.text.sign_transaction_with_type, { $type: 'Login' })
+			)
+		).not.toBeInTheDocument();
+	});
+
 	it('should state the name its own domain supplies in the summary, never in the title', () => {
 		// The domain name is the request's text. In the wallet's chrome it reads as a name OISY
 		// vouched for, which is why it belongs in the summary beside the contract it claims to be.

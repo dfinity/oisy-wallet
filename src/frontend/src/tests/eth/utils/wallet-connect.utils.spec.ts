@@ -21,6 +21,7 @@ import {
 	classifyWalletConnectEthSendTransaction,
 	getEthTypedDataApproval,
 	getEthTypedDataMethods,
+	getEthTypedDataPrimaryType,
 	getSendParamsGas,
 	getSignedEthTypedData,
 	getSignParamsMessageTypedDataV4Hash,
@@ -123,6 +124,29 @@ const permit2: WalletConnectEthSignTypedDataV4 = {
 	primaryType: 'PermitSingle',
 	message: {
 		details: { token: DAI, amount: '123456789', expiration: '1761743754', nonce: '0' },
+		spender: SPENDER,
+		sigDeadline: '1759153554'
+	}
+};
+
+// Uniswap Permit2, one signature setting an allowance over several tokens for one spender.
+const permit2Batch: WalletConnectEthSignTypedDataV4 = {
+	domain: permit2.domain,
+	types: {
+		EIP712Domain: permit2.types.EIP712Domain,
+		PermitBatch: [
+			{ name: 'details', type: 'PermitDetails[]' },
+			{ name: 'spender', type: 'address' },
+			{ name: 'sigDeadline', type: 'uint256' }
+		],
+		PermitDetails: permit2.types.PermitDetails
+	},
+	primaryType: 'PermitBatch',
+	message: {
+		details: [
+			{ token: DAI, amount: '123456789', expiration: '1761743754', nonce: '0' },
+			{ token: USDC, amount: MAX_UINT_160.toString(), expiration: '1761743755', nonce: '1' }
+		],
 		spender: SPENDER,
 		sigDeadline: '1759153554'
 	}
@@ -931,6 +955,48 @@ describe('wallet-connect.utils', () => {
 		});
 	});
 
+	describe('getEthTypedDataPrimaryType', () => {
+		it('names the struct the digest is rooted at', () => {
+			expect(getEthTypedDataPrimaryType(permit2)).toBe('PermitSingle');
+		});
+
+		// The declared field is the request's label for itself: the digest is the same whatever it says,
+		// so naming the request after it would let an allowance pass for anything.
+		it('names the hashed struct rather than the one the payload declares', () => {
+			const mislabelled = { ...permit2, primaryType: 'Login' };
+
+			expect(getEthTypedDataPrimaryType(mislabelled)).toBe('PermitSingle');
+
+			expect(
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(mislabelled),
+					sessionChainId: MAINNET_SESSION
+				})
+			).toBe(
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(permit2),
+					sessionChainId: MAINNET_SESSION
+				})
+			);
+		});
+
+		it('names nothing for a type graph with no single root', () => {
+			expect(
+				getEthTypedDataPrimaryType({
+					types: {
+						EIP712Domain: EIP712_DOMAIN,
+						Login: [{ name: 'user', type: 'address' }],
+						Order: [{ name: 'price', type: 'uint256' }]
+					}
+				})
+			).toBeUndefined();
+		});
+
+		it('names nothing for a payload that declares no types', () => {
+			expect(getEthTypedDataPrimaryType(JSON.parse('{}'))).toBeUndefined();
+		});
+	});
+
 	describe('hasUnreviewableTypedData', () => {
 		const call = (typedData: WalletConnectEthSignTypedDataV4) =>
 			hasUnreviewableTypedData({
@@ -942,6 +1008,7 @@ describe('wallet-connect.utils', () => {
 		// The schemas OISY can summarize. These are the only ones that must not reach the warning.
 		it.each([
 			{ name: 'Permit2 PermitSingle', typedData: permit2 },
+			{ name: 'Permit2 PermitBatch', typedData: permit2Batch },
 			{ name: 'ERC-2612 Permit', typedData: erc2612Permit },
 			{ name: 'DAI Permit', typedData: daiPermit(true) }
 		])('should not warn about a recognised $name', ({ typedData }) => {
@@ -1319,10 +1386,7 @@ describe('wallet-connect.utils', () => {
 		it('summarizes a Permit2 request from its declared members', () => {
 			expect(getEthTypedDataApproval(permit2)).toEqual({
 				spender: SPENDER,
-				token: DAI,
-				amount: 123456789n,
-				unlimited: false,
-				expiration: 1761743754
+				allowances: [{ token: DAI, amount: 123456789n, unlimited: false, expiration: 1761743754 }]
 			});
 		});
 
@@ -1331,17 +1395,55 @@ describe('wallet-connect.utils', () => {
 			const typedData = structuredClone(permit2);
 			(typedData.message.details as Record<string, unknown>).amount = MAX_UINT_160.toString();
 
-			expect(getEthTypedDataApproval(typedData)?.unlimited).toBeTruthy();
+			expect(getEthTypedDataApproval(typedData)?.allowances[0].unlimited).toBeTruthy();
+		});
+
+		it('summarizes every allowance of a Permit2 batch, in order, for its one spender', () => {
+			expect(getEthTypedDataApproval(permit2Batch)).toEqual({
+				spender: SPENDER,
+				allowances: [
+					{ token: DAI, amount: 123456789n, unlimited: false, expiration: 1761743754 },
+					{ token: USDC, amount: MAX_UINT_160, unlimited: true, expiration: 1761743755 }
+				]
+			});
+		});
+
+		it('summarizes a Permit2 batch that lists no token as no allowance', () => {
+			const typedData = structuredClone(permit2Batch);
+			typedData.message.details = [];
+
+			expect(getEthTypedDataApproval(typedData)).toEqual({ spender: SPENDER, allowances: [] });
+		});
+
+		it('summarizes nothing when one entry of a Permit2 batch carries a non-conforming value', () => {
+			const typedData = structuredClone(permit2Batch);
+			(typedData.message.details as Record<string, unknown>[])[1].token = 'not-an-address';
+
+			expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+		});
+
+		// The batch is matched on its declared list, so a struct calling itself `PermitBatch` around a
+		// single entry is no Permit2 schema at all.
+		it('summarizes nothing for a batch struct whose details are not a list', () => {
+			const typedData = structuredClone(permit2Batch);
+			typedData.types.PermitBatch[0] = { name: 'details', type: 'PermitDetails' };
+			[typedData.message.details] = typedData.message.details as Record<string, unknown>[];
+
+			expect(getEthTypedDataApproval(typedData)).toBeUndefined();
 		});
 
 		it('summarizes an ERC-2612 permit from its value, deadline and verifying contract', () => {
 			expect(getEthTypedDataApproval(erc2612Permit)).toEqual({
 				spender: SPENDER,
-				// ERC-2612 names no token: the contract that verifies the permit is the token.
-				token: DAI,
-				amount: 1000000n,
-				unlimited: false,
-				expiration: 1893456000
+				allowances: [
+					{
+						// ERC-2612 names no token: the contract that verifies the permit is the token.
+						token: DAI,
+						amount: 1000000n,
+						unlimited: false,
+						expiration: 1893456000
+					}
+				]
 			});
 		});
 
@@ -1352,10 +1454,7 @@ describe('wallet-connect.utils', () => {
 
 			expect(getEthTypedDataApproval(typedData)).toEqual({
 				spender: SPENDER,
-				token: DAI,
-				amount: MAX_UINT_256,
-				unlimited: true,
-				expiration: 1893456000
+				allowances: [{ token: DAI, amount: MAX_UINT_256, unlimited: true, expiration: 1893456000 }]
 			});
 		});
 
@@ -1364,27 +1463,51 @@ describe('wallet-connect.utils', () => {
 			const typedData = structuredClone(erc2612Permit);
 			typedData.message.deadline = MAX_UINT_256.toString();
 
-			expect(getEthTypedDataApproval(typedData)?.expiration).toBeUndefined();
+			expect(getEthTypedDataApproval(typedData)?.allowances).toEqual([
+				expect.objectContaining({ expiration: undefined })
+			]);
+		});
+
+		// A saturated `uint48` is a safe integer, and still past the last second a `Date` holds.
+		it('states no expiration for a Permit2 expiration at the uint48 maximum', () => {
+			const maxUint48 = ((1n << 48n) - 1n).toString();
+
+			const single = structuredClone(permit2);
+			(single.message.details as Record<string, unknown>).expiration = maxUint48;
+
+			const batch = structuredClone(permit2Batch);
+			(batch.message.details as Record<string, unknown>[])[1].expiration = maxUint48;
+
+			expect(getEthTypedDataApproval(single)?.allowances[0].expiration).toBeUndefined();
+			expect(
+				getEthTypedDataApproval(batch)?.allowances.map(({ expiration }) => expiration)
+			).toEqual([1761743754, undefined]);
+		});
+
+		it('states an expiration up to the last second a date can hold', () => {
+			const typedData = structuredClone(erc2612Permit);
+
+			typedData.message.deadline = '8640000000000';
+
+			expect(getEthTypedDataApproval(typedData)?.allowances[0].expiration).toBe(8_640_000_000_000);
+
+			typedData.message.deadline = '8640000000001';
+
+			expect(getEthTypedDataApproval(typedData)?.allowances[0].expiration).toBeUndefined();
 		});
 
 		// DAI carries no amount: `allowed` is the allowance, and it is an unlimited one.
 		it('summarizes an allowed DAI permit as unlimited', () => {
 			expect(getEthTypedDataApproval(daiPermit(true))).toEqual({
 				spender: SPENDER,
-				token: DAI,
-				amount: undefined,
-				unlimited: true,
-				expiration: 1893456000
+				allowances: [{ token: DAI, amount: undefined, unlimited: true, expiration: 1893456000 }]
 			});
 		});
 
 		it('summarizes a cleared DAI permit as a revocation', () => {
 			expect(getEthTypedDataApproval(daiPermit(false))).toEqual({
 				spender: SPENDER,
-				token: DAI,
-				amount: ZERO,
-				unlimited: false,
-				expiration: 1893456000
+				allowances: [{ token: DAI, amount: ZERO, unlimited: false, expiration: 1893456000 }]
 			});
 		});
 

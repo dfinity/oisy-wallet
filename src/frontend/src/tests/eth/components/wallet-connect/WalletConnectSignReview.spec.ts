@@ -178,6 +178,69 @@ describe('WalletConnectSignReview', () => {
 			}
 		}) as unknown as WalletKitTypes.SessionRequest;
 
+	// Uniswap Permit2: one signature setting an allowance over two tokens for one spender.
+	const permit2BatchRequest = (): WalletKitTypes.SessionRequest =>
+		({
+			id: 4,
+			topic: 'mock-topic',
+			params: {
+				request: {
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: [
+						HOLDER,
+						JSON.stringify({
+							domain: {
+								name: 'Permit2',
+								chainId: '1',
+								verifyingContract: '0x000000000022d473030f116ddee9f6b43ac78ba3'
+							},
+							types: {
+								EIP712Domain: [
+									{ name: 'name', type: 'string' },
+									{ name: 'chainId', type: 'uint256' },
+									{ name: 'verifyingContract', type: 'address' }
+								],
+								PermitBatch: [
+									{ name: 'details', type: 'PermitDetails[]' },
+									{ name: 'spender', type: 'address' },
+									{ name: 'sigDeadline', type: 'uint256' }
+								],
+								PermitDetails: [
+									{ name: 'token', type: 'address' },
+									{ name: 'amount', type: 'uint160' },
+									{ name: 'expiration', type: 'uint48' },
+									{ name: 'nonce', type: 'uint48' }
+								]
+							},
+							primaryType: 'PermitBatch',
+							message: {
+								details: [
+									{ token: DAI, amount: '1000', expiration: '1893456000', nonce: '0' },
+									{
+										token: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+										amount: '2000',
+										expiration: '1893456000',
+										nonce: '0'
+									}
+								],
+								spender: SPENDER,
+								sigDeadline: '1893456000'
+							}
+						})
+					]
+				},
+				chainId: `eip155:${ETHEREUM_NETWORK.chainId}`
+			},
+			verifyContext: {
+				verified: {
+					verifyUrl: 'https://verify.walletconnect.org',
+					validation: 'VALID',
+					origin: 'https://dapp.example',
+					isScam: false
+				}
+			}
+		}) as unknown as WalletKitTypes.SessionRequest;
+
 	const props = { onApprove: vi.fn(), onReject: vi.fn() };
 
 	it('warns and disables approval for a type-invalid permit', () => {
@@ -253,6 +316,21 @@ describe('WalletConnectSignReview', () => {
 		});
 
 		expect(queryByText(en.wallet_connect.text.unreviewable_typed_data)).not.toBeInTheDocument();
+	});
+
+	// A Permit2 batch is summarized token by token, so there is nothing the review failed to establish.
+	it('states each allowance of a Permit2 batch instead of warning about it', () => {
+		const { getAllByText, getByText, queryByText, getByRole } = render(WalletConnectSignReview, {
+			props: { ...props, request: permit2BatchRequest() }
+		});
+
+		expect(queryByText(en.wallet_connect.text.unreviewable_typed_data)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.methods)).not.toBeInTheDocument();
+
+		expect(getAllByText(en.wallet_connect.text.token)).toHaveLength(2);
+		expect(getByText(SPENDER)).toBeInTheDocument();
+
+		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 	});
 
 	// The chain the domain binds to, on a request whose schema says nothing else: the same struct

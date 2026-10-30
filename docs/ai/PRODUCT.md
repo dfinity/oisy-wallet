@@ -730,6 +730,12 @@ The review fails closed when it cannot state the amount: when the contract does 
 
 The token is **not** added to the user's tokens. The review reads it for that request only.
 
+### Typed-data signatures
+
+An `eth_signTypedData_v4` request is titled by the struct the signature hashes, and the review's Type row states the same struct. That is the struct EIP-712 roots the digest at, never the `primaryType` the request declares: the declared name is not part of what is signed, so a request cannot rename what it asks for.
+
+The Summary tab describes four approval schemas: Permit2 `PermitSingle` and `PermitBatch`, ERC-2612 `Permit`, and DAI's `Permit`. For each token the signature sets an allowance over, in the order the struct lists them, the review states the token (its symbol when OISY lists it, otherwise the contract address), the amount ("Unlimited" when it is the largest its schema can express) and the expiration. The spender follows once, since a Permit2 batch grants every allowance to the same spender. Any other valid struct is not summarized: the review says OISY doesn't recognise the content, lists the structs the signature hashes, and leaves the decision to the user, with Approve enabled. Typed data that would not sign (it fails to parse or validate, or its domain is on a chain the session was not granted) is refused, with Approve disabled.
+
 ### Starting a pairing from the scanner
 
 A WalletConnect pairing is started from the universal scanner by scanning (or pasting) a pairing code. The scanner accepts two forms: a bare `wc:` URI, and an OISY WalletConnect deep-link URL that wraps it — `<OISY host>/wc/?uri=<url-encoded wc: uri>`. When a deep-link URL is scanned, OISY unwraps the inner `uri` and pairs with it. The URL form is only unwrapped when its host is **OISY's own domain** for the running environment (`oisy.com` in production); a `uri` param carried by any other host is never treated as a pairing. A well-formed WalletConnect deep-link URL whose host is a different domain shows a dedicated "this link is for a different domain" error rather than the generic invalid-code message, so the user understands the link was valid but pointed elsewhere.

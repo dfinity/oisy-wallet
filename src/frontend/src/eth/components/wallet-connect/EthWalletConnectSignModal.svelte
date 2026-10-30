@@ -6,6 +6,7 @@
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
 	import { signMessage } from '$eth/services/wallet-connect.services';
 	import {
+		getEthTypedDataPrimaryType,
 		getSignParamsMessageTypedDataV4,
 		isEthSignTypedDataMethod
 	} from '$eth/utils/wallet-connect.utils';
@@ -30,16 +31,19 @@
 
 	let method = $derived(request.params.request.method);
 
-	// The struct being hashed, which is what the request actually asks for. Parsing can fail on a
-	// malformed payload, and a title is no reason to throw: such a request is titled by its method
-	// alone and left to the review, which is where an unparseable payload is reported.
+	// The struct being hashed, which is what the request actually asks for, as the hash derives it
+	// rather than as the request declares it. Parsing can fail on a malformed payload, and a title is
+	// no reason to throw: such a request is titled by its method alone and left to the review, which
+	// is where an unparseable payload is flagged.
 	let primaryType = $derived.by(() => {
 		if (!isEthSignTypedDataMethod(method)) {
 			return;
 		}
 
 		try {
-			const { primaryType } = getSignParamsMessageTypedDataV4(request.params.request.params);
+			const primaryType = getEthTypedDataPrimaryType(
+				getSignParamsMessageTypedDataV4(request.params.request.params)
+			);
 
 			return notEmptyString(primaryType) ? primaryType : undefined;
 		} catch (_: unknown) {
@@ -48,7 +52,7 @@
 	});
 
 	// Typed data is a transaction the user authorizes rather than a message they write, so it is
-	// titled as one, named by its struct where the request declares a usable one. A raw message
+	// titled as one, named by the struct it hashes where it has one. A raw message
 	// stays a message. Either way the title says what OISY makes of the request, never what the
 	// request calls itself: the domain name it supplies is stated in the summary instead.
 	let modalTitle = $derived(
