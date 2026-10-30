@@ -63,10 +63,17 @@ export interface WalletConnectEthSignTypedDataV4 {
  */
 export interface WalletConnectEthTypedDataApproval {
 	spender?: string;
-	// One entry per token the signature sets an allowance over, in the order the struct lists them.
-	// Most schemas grant one; Permit2's `PermitBatch` grants as many as it declares, all to the
-	// same spender.
+	// The address an ERC-3009 authorization sends to. That struct names who receives the tokens
+	// rather than who may take them, so it states this in place of a spender.
+	recipient?: string;
+	// One entry per token the signature lets move out of the wallet, in the order the struct lists
+	// them: as an allowance for a permit, as a transfer for an authorization. Most schemas name one;
+	// Permit2's batches name as many as they declare, all for the same spender.
 	allowances: WalletConnectEthTypedDataAllowance[];
+	// `true` when the signature also covers a Permit2 witness: a struct of the dApp's own that the
+	// spender checks when it takes the tokens. The entries above state the transfer, which a witness
+	// cannot widen; nothing here describes the witness itself.
+	hasWitness?: boolean;
 }
 
 export interface WalletConnectEthTypedDataAllowance {
@@ -74,8 +81,8 @@ export interface WalletConnectEthTypedDataAllowance {
 	amount?: bigint;
 	// `true` when the allowance is the largest its schema can express, which is how an unlimited
 	// approval is written. Carried as a fact rather than left to the view to work out, because
-	// each schema says it differently: a saturated `uint160` for Permit2, a saturated `uint256`
-	// for ERC-2612, and a bare `allowed` bool for DAI.
+	// each schema says it differently: a saturated `uint160` for Permit2's allowances, a saturated
+	// `uint256` for ERC-2612 and Permit2's transfers, and a bare `allowed` bool for DAI.
 	unlimited?: boolean;
 	expiration?: number;
 }

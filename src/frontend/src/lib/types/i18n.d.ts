@@ -1531,6 +1531,7 @@ interface I18nWallet_connect {
 		high_gas_limit: string;
 		invalid_typed_data: string;
 		unreviewable_typed_data: string;
+		unreviewable_typed_data_witness: string;
 		unsigned_typed_data_keys: string;
 		tab_summary: string;
 		tab_raw_data: string;

@@ -609,13 +609,18 @@ export const getSignedEthTypedData = (
 	}
 };
 
+interface EthTypedDataApprovalParams {
+	message: Record<string, unknown>;
+	domain: TypedDataDomain;
+}
+
 interface EthTypedDataApprovalSchema {
 	primaryType: string;
 	types: Record<string, Array<TypedDataField>>;
-	toApproval: (params: {
-		message: Record<string, unknown>;
-		domain: TypedDataDomain;
-	}) => WalletConnectEthTypedDataApproval;
+	// A Permit2 witness transfer: its primary type declares one member past those listed here,
+	// typed by structs of the dApp's own that the schema cannot list in advance.
+	witness?: boolean;
+	toApproval: (params: EthTypedDataApprovalParams) => WalletConnectEthTypedDataApproval;
 }
 
 const toDeclaredAddress = (value: unknown): string | undefined =>
@@ -695,6 +700,90 @@ const toPermit2Allowance = (details: unknown): WalletConnectEthTypedDataAllowanc
 	};
 };
 
+const PERMIT2_TOKEN_PERMISSIONS: Array<TypedDataField> = [
+	{ name: 'token', type: 'address' },
+	{ name: 'amount', type: 'uint256' }
+];
+
+const PERMIT2_TRANSFER_FROM: Array<TypedDataField> = [
+	{ name: 'permitted', type: 'TokenPermissions' },
+	{ name: 'spender', type: 'address' },
+	{ name: 'nonce', type: 'uint256' },
+	{ name: 'deadline', type: 'uint256' }
+];
+
+const PERMIT2_BATCH_TRANSFER_FROM: Array<TypedDataField> = [
+	{ name: 'permitted', type: 'TokenPermissions[]' },
+	{ name: 'spender', type: 'address' },
+	{ name: 'nonce', type: 'uint256' },
+	{ name: 'deadline', type: 'uint256' }
+];
+
+// A Permit2 signature transfer lets its spender, and no one else, move up to `amount` of `token`
+// once before the deadline. It names no recipient: the spender chooses where the tokens go when it
+// takes them, which is why the spender is the party the summary states.
+const toPermit2TransferAllowance = ({
+	permitted,
+	deadline
+}: {
+	permitted: unknown;
+	deadline: unknown;
+}): WalletConnectEthTypedDataAllowance => {
+	const { token, amount } = toDeclaredStruct(permitted);
+
+	const declaredAmount = toDeclaredUint(amount);
+
+	return {
+		token: toDeclaredAddress(token),
+		amount: declaredAmount,
+		unlimited: declaredAmount === MAX_UINT_256,
+		expiration: toExpirationSeconds(deadline)
+	};
+};
+
+const toPermit2TransferApproval = ({
+	message: { permitted, spender, deadline }
+}: Pick<EthTypedDataApprovalParams, 'message'>): WalletConnectEthTypedDataApproval => ({
+	spender: toDeclaredAddress(spender),
+	allowances: [toPermit2TransferAllowance({ permitted, deadline })]
+});
+
+const toPermit2BatchTransferApproval = ({
+	message: { permitted, spender, deadline }
+}: Pick<EthTypedDataApprovalParams, 'message'>): WalletConnectEthTypedDataApproval => ({
+	spender: toDeclaredAddress(spender),
+	allowances: (Array.isArray(permitted) ? permitted : []).map((entry) =>
+		toPermit2TransferAllowance({ permitted: entry, deadline })
+	)
+});
+
+const ERC3009_AUTHORIZATION: Array<TypedDataField> = [
+	{ name: 'from', type: 'address' },
+	{ name: 'to', type: 'address' },
+	{ name: 'value', type: 'uint256' },
+	{ name: 'validAfter', type: 'uint256' },
+	{ name: 'validBefore', type: 'uint256' },
+	{ name: 'nonce', type: 'bytes32' }
+];
+
+// ERC-3009, like ERC-2612, names no token: the token contract verifies the authorization itself,
+// and the domain states that contract. The authorization moves exactly `value` to `to` or nothing,
+// so unlike an allowance it is never unlimited. `validAfter` only delays it, which adds nothing to
+// what the user gives.
+const toErc3009Approval = ({
+	message: { to, value, validBefore },
+	domain: { verifyingContract }
+}: EthTypedDataApprovalParams): WalletConnectEthTypedDataApproval => ({
+	recipient: toDeclaredAddress(to),
+	allowances: [
+		{
+			token: toDeclaredAddress(verifyingContract),
+			amount: toDeclaredUint(value),
+			expiration: toExpirationSeconds(validBefore)
+		}
+	]
+});
+
 /**
  * The EIP-712 schemas OISY understands well enough to summarize above the raw
  * message, each paired with the declared members that feed the summary.
@@ -736,6 +825,46 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 			spender: toDeclaredAddress(spender),
 			allowances: (Array.isArray(details) ? details : []).map(toPermit2Allowance)
 		})
+	},
+	// Uniswap Permit2 `PermitTransferFrom`: one transfer, of up to the amount it names.
+	{
+		primaryType: 'PermitTransferFrom',
+		types: {
+			PermitTransferFrom: PERMIT2_TRANSFER_FROM,
+			TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+		},
+		toApproval: toPermit2TransferApproval
+	},
+	// Uniswap Permit2 `PermitBatchTransferFrom`: the same over every token it lists, under one
+	// deadline, for the same spender.
+	{
+		primaryType: 'PermitBatchTransferFrom',
+		types: {
+			PermitBatchTransferFrom: PERMIT2_BATCH_TRANSFER_FROM,
+			TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+		},
+		toApproval: toPermit2BatchTransferApproval
+	},
+	// The witness variants of both, the single one being what UniswapX orders are signed as: the
+	// same transfer, bound to a struct of the dApp's own that the spender checks when it takes the
+	// tokens.
+	{
+		primaryType: 'PermitWitnessTransferFrom',
+		types: {
+			PermitWitnessTransferFrom: PERMIT2_TRANSFER_FROM,
+			TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+		},
+		witness: true,
+		toApproval: toPermit2TransferApproval
+	},
+	{
+		primaryType: 'PermitBatchWitnessTransferFrom',
+		types: {
+			PermitBatchWitnessTransferFrom: PERMIT2_BATCH_TRANSFER_FROM,
+			TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+		},
+		witness: true,
+		toApproval: toPermit2BatchTransferApproval
 	},
 	// Standard ERC-2612 `Permit`.
 	{
@@ -794,6 +923,19 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 				}
 			]
 		})
+	},
+	// ERC-3009 `TransferWithAuthorization`, as USDC implements it: a transfer that anyone holding
+	// the signature can submit to the token.
+	{
+		primaryType: 'TransferWithAuthorization',
+		types: { TransferWithAuthorization: ERC3009_AUTHORIZATION },
+		toApproval: toErc3009Approval
+	},
+	// ERC-3009 `ReceiveWithAuthorization`: the same transfer, which only its recipient can submit.
+	{
+		primaryType: 'ReceiveWithAuthorization',
+		types: { ReceiveWithAuthorization: ERC3009_AUTHORIZATION },
+		toApproval: toErc3009Approval
 	}
 ];
 
@@ -809,23 +951,41 @@ const sameTypedDataFields = ({
 		({ name, type }, index) => expected[index].name === name && expected[index].type === type
 	);
 
+/**
+ * Whether a payload declares a schema's structs, member for member, and nothing else.
+ *
+ * A witness schema is the one exception: Permit2 lets the dApp append a member of its own to the
+ * primary type, typed by structs of its own, so that last member and those structs are taken as
+ * declared. Once structs the schema does not list are accepted, the struct the digest is rooted at
+ * need no longer be the schema's primary type: one wrapping it would be hashed instead, and would
+ * be no Permit2 signature at all. The root is therefore held to the schema's.
+ */
 const matchesApprovalSchema = ({
 	types,
-	schema
+	schema: { primaryType, types: expectedTypes, witness = false }
 }: {
 	types: Record<string, Array<TypedDataField>>;
 	schema: EthTypedDataApprovalSchema;
 }): boolean => {
-	const expectedNames = Object.keys(schema.types);
+	const expectedNames = Object.keys(expectedTypes);
 
-	return (
-		Object.keys(types).length === expectedNames.length &&
-		expectedNames.every((name) => {
-			const fields = types[name];
+	if (!witness && Object.keys(types).length !== expectedNames.length) {
+		return false;
+	}
 
-			return nonNullish(fields) && sameTypedDataFields({ fields, expected: schema.types[name] });
-		})
-	);
+	const declared = expectedNames.every((name) => {
+		const fields = types[name];
+
+		return (
+			nonNullish(fields) &&
+			sameTypedDataFields({
+				fields: witness && name === primaryType ? fields.slice(0, -1) : fields,
+				expected: expectedTypes[name]
+			})
+		);
+	});
+
+	return declared && getEthTypedDataPrimaryType({ types }) === primaryType;
 };
 
 /**
@@ -836,6 +996,9 @@ const matchesApprovalSchema = ({
  * exactly and every value conforms to it. That is what keeps the summary honest:
  * each fact it carries is a declared member of the struct being hashed, so it
  * cannot be steered by a key that the signature does not cover.
+ *
+ * A Permit2 witness transfer is matched up to its witness. The transfer is summarized, and the
+ * witness is flagged rather than described.
  */
 export const getEthTypedDataApproval = ({
 	domain,
@@ -855,7 +1018,9 @@ export const getEthTypedDataApproval = ({
 	try {
 		assertValidEthTypedData({ types: rest, primaryType: schema.primaryType, message });
 
-		return schema.toApproval({ message, domain });
+		const approval = schema.toApproval({ message, domain });
+
+		return schema.witness === true ? { ...approval, hasWitness: true } : approval;
 	} catch (_err: unknown) {
 		// A payload that does not conform to its own schema is not summarized: it
 		// is rejected for signing anyway, and any value read from it would be
@@ -1026,16 +1191,19 @@ export const getEthTypedDataMethods = ({
 /**
  * Whether a request would be signed without OISY being able to state what it authorizes.
  *
- * A signature is not a lesser thing than a transaction. An ERC-3009 authorization lets its holder
- * pull tokens out of the wallet, a Permit2 signature transfer lets its spender move them in one call, and
- * a marketplace order sells an NFT; each is a struct OISY does not recognise, and each used to be
- * previewed as an application, a method name and a collapsed blob of JSON, with approval enabled
- * and nothing said about what signing it would allow.
+ * A signature is not a lesser thing than a transaction. A marketplace order sells an NFT, and the
+ * witness of a Permit2 transfer ties the tokens it releases to terms only the spender reads; each is
+ * something OISY does not recognise, and each used to be previewed as an application, a method
+ * name and a collapsed blob of JSON, with approval enabled and nothing said about what signing it
+ * would allow.
  *
  * This is the `eth_sendTransaction` fallback in the other review: the summary is built from an
  * allowlist, and everything the allowlist does not cover falls through to a preview that states
  * nothing rather than to one that states it cannot say. Recognising one more schema improves what
  * the user is told; it is not what stands between them and an unexplained signature.
+ *
+ * A Permit2 witness transfer is one of these although the summary states its transfer: the
+ * witness is signed too, and nothing describes it.
  *
  * `false` for a raw-message method. Those carry no schema and OISY makes no claim about them: the
  * message shown is the message signed, so there is no summary that could be silently absent.
@@ -1060,7 +1228,9 @@ export const hasUnreviewableTypedData = ({
 	}
 
 	try {
-		return isNullish(getEthTypedDataApproval(getSignParamsMessageTypedDataV4(params)));
+		const approval = getEthTypedDataApproval(getSignParamsMessageTypedDataV4(params));
+
+		return isNullish(approval) || approval.hasWitness === true;
 	} catch (_err: unknown) {
 		// Typed data that cannot even be read is the invalid case above, not this one.
 		return false;

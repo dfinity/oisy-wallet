@@ -1850,6 +1850,7 @@
 			"high_gas_limit": "To żądanie ustawia niezwykle wysoki limit gazu, więc maksymalna opłata powyżej jest znacznie wyższa niż powinna kosztować ta transakcja. Sprawdź ją dokładnie i podpisz tylko wtedy, gdy ufasz tej aplikacji.",
 			"invalid_typed_data": "To żądanie zawiera wartość, której typ nie odpowiada schematowi zadeklarowanemu przez aplikację. Wyświetlana treść może różnić się od tej, która faktycznie zostałaby podpisana, dlatego podpisywanie jest wyłączone.",
 			"unreviewable_typed_data": "OISY nie rozpoznaje treści, którą ta aplikacja prosi Cię o podpisanie, dlatego podsumowanie nie może jej opisać. Upewnij się, że ufasz aplikacji, i przed podpisaniem sprawdź jej surowe dane.",
+			"unreviewable_typed_data_witness": "",
 			"unsigned_typed_data_keys": "Ta aplikacja wysłała dodatkowe dane, których nie deklaruje jej schemat. Te dane nie są objęte podpisem, dlatego wyświetlane są tylko pola poniżej.",
 			"tab_summary": "Podsumowanie",
 			"tab_raw_data": "Surowe dane",

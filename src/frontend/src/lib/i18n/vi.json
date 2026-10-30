@@ -1850,6 +1850,7 @@
 			"high_gas_limit": "Yêu cầu này đặt giới hạn gas cao bất thường, khiến phí tối đa ở trên cao hơn nhiều so với chi phí thực tế của giao dịch này. Hãy kiểm tra kỹ và chỉ ký nếu bạn tin tưởng ứng dụng này.",
 			"invalid_typed_data": "Yêu cầu này chứa một giá trị có kiểu không khớp với schema mà ứng dụng đã khai báo. Nội dung hiển thị có thể khác với nội dung thực sự sẽ được ký, vì vậy việc ký đã bị vô hiệu hóa.",
 			"unreviewable_typed_data": "OISY không nhận ra nội dung mà ứng dụng này yêu cầu bạn ký, vì vậy bản tóm tắt không thể mô tả nó. Hãy đảm bảo bạn tin tưởng ứng dụng này và xem lại dữ liệu thô của nó trước khi ký.",
+			"unreviewable_typed_data_witness": "",
 			"unsigned_typed_data_keys": "Ứng dụng này đã gửi thêm dữ liệu mà schema của nó không khai báo. Dữ liệu đó không được chữ ký bao gồm, vì vậy chỉ các trường bên dưới được hiển thị.",
 			"tab_summary": "Tóm tắt",
 			"tab_raw_data": "Dữ liệu thô",

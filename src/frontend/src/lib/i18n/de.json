@@ -1850,6 +1850,7 @@
 			"high_gas_limit": "Diese Anfrage legt ein ungewöhnlich hohes Gaslimit fest, sodass die maximale Gebühr oben weit mehr ist, als diese Transaktion kosten sollte. Prüfen Sie sie sorgfältig und signieren Sie nur, wenn Sie dieser App vertrauen.",
 			"invalid_typed_data": "Diese Anfrage enthält einen Wert, dessen Typ nicht mit dem von der App deklarierten Schema übereinstimmt. Die angezeigten Daten können von den tatsächlich zu signierenden Daten abweichen, daher ist das Signieren deaktiviert.",
 			"unreviewable_typed_data": "OISY erkennt den Inhalt nicht, den diese App Sie zu signieren bittet, daher kann die Zusammenfassung ihn nicht beschreiben. Vergewissern Sie sich, dass Sie der Anwendung vertrauen, und überprüfen Sie deren Rohdaten vor dem Signieren.",
+			"unreviewable_typed_data_witness": "",
 			"unsigned_typed_data_keys": "Diese App hat zusätzliche Daten gesendet, die ihr Schema nicht deklariert. Diese Daten sind nicht von der Signatur abgedeckt, daher werden nur die unten stehenden Felder angezeigt.",
 			"tab_summary": "Zusammenfassung",
 			"tab_raw_data": "Rohdaten",

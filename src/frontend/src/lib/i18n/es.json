@@ -1850,6 +1850,7 @@
 			"high_gas_limit": "Esta solicitud establece un límite de gas inusualmente alto, por lo que la comisión máxima indicada arriba es mucho mayor de lo que esta transacción debería costar. Revísela con cuidado y firme solo si confía en esta aplicación.",
 			"invalid_typed_data": "Esta solicitud contiene un valor cuyo tipo no coincide con el esquema declarado por la aplicación. Lo que se muestra puede diferir de lo que realmente se firmaría, por lo que la firma está deshabilitada.",
 			"unreviewable_typed_data": "OISY no reconoce el contenido que esta aplicación le pide firmar, por lo que el resumen no puede describirlo. Asegúrese de confiar en la aplicación y revise sus datos sin procesar antes de firmar.",
+			"unreviewable_typed_data_witness": "",
 			"unsigned_typed_data_keys": "Esta aplicación envió datos adicionales que su esquema no declara. Esos datos no están cubiertos por la firma, por lo que solo se muestran los campos a continuación.",
 			"tab_summary": "Resumen",
 			"tab_raw_data": "Datos sin procesar",
