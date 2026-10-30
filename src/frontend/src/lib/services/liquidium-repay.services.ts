@@ -40,11 +40,12 @@ export interface LiquidiumRepayPreview {
 }
 
 // Full outstanding debt (accrued interest included) plus a small buffer, in base units, for the
-// "Max (full debt)" shortcut. Not the SDK's `getMaxRepayAmount` alone: it adds `debtInterest` on top
-// of `borrowed`, which already includes it, so its max overshoots the debt and the repay is not
+// "Max (full debt)" shortcut. Not the SDK's `getMaxRepayAmount` alone: it adds `debtInterest` on
+// top of `borrowed`, which already includes it, so its max overshoots the debt and the repay is not
 // credited. It still caps ours, so we never send more than the SDK sanctions should it ever quote
-// less (a fixed double count, a smaller buffer). `null` when the user has no profile yet (should not happen for a position that already
-// carries debt, but guarded so callers can no-op gracefully).
+// less (a fixed double count, a smaller buffer). `null` when the user has no profile yet (should
+// not happen for a position that already carries debt, but guarded so callers can no-op
+// gracefully).
 export const getLiquidiumMaxRepayAmount = async ({
 	identity,
 	ethAddress,
