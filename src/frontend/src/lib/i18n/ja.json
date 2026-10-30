@@ -1953,6 +1953,7 @@
 			"unreviewed_without_simulation": "OISY はこのトランザクションの一部を読み取れず、ネットワークからシミュレーションも返されなかったため、その部分が何を行うのかを示すものがありません。安全のため、署名されませんでした。",
 			"unreviewed_not_described_by_simulation": "OISY はこのトランザクションの一部を読み取れず、シミュレーションでもその部分が何を行うのかは示されませんでした。安全のため、署名されませんでした。",
 			"unread_programs_unconfirmed": "このトランザクションはOISYが読み取れないプログラムを呼び出しており、レビューで確認されませんでした。安全のため、署名されませんでした。",
+			"unexplained_request_unconfirmed": "",
 			"sol_transaction_as_message": "このメッセージはSolanaのトランザクションであり、トランザクションレビューを通じてのみ承認できます。安全のため、署名されませんでした。",
 			"request_not_defined": "予期しないエラー: リクエストが定義されていないため、処理できません。",
 			"unexpected_processing_request": "WalletConnectでリクエストを処理中に予期しないエラーが発生しました。"

@@ -29,6 +29,7 @@
 	import LoaderSpinner from '$lib/components/ui/LoaderSpinner.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
+	import WalletConnectAcknowledgement from '$lib/components/wallet-connect/WalletConnectAcknowledgement.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
@@ -62,6 +63,9 @@
 		// offers Reject only.
 		flaggedAsScam?: boolean;
 		approveDisabled?: boolean;
+		// Ticked by the user to confirm they sign a call OISY can't read. The review holds Approve
+		// until then, and signing checks it again.
+		unknownCallAcknowledged?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
 	}
@@ -77,6 +81,7 @@
 		targetNetwork,
 		flaggedAsScam = false,
 		approveDisabled = false,
+		unknownCallAcknowledged = $bindable(false),
 		onApprove,
 		onReject
 	}: Props = $props();
@@ -318,9 +323,11 @@
 			{$i18n.wallet_connect.text.cketh_deposit}
 		</MessageBox>
 	{:else if unknownCall}
-		<MessageBox level="error" testId="wallet-connect-unknown-call">
-			{$i18n.wallet_connect.text.unknown_call}
-		</MessageBox>
+		<WalletConnectAcknowledgement
+			testId="wallet-connect-unknown-call"
+			text={$i18n.wallet_connect.text.unknown_call}
+			bind:acknowledged={unknownCallAcknowledged}
+		/>
 	{:else if tokenCallWithValue}
 		<MessageBox level="error" testId="wallet-connect-token-call-with-value">
 			{tokenCallValue}
@@ -481,6 +488,7 @@
 		<WalletConnectActions
 			approve={!flaggedAsScam}
 			approveDisabled={approveDisabled ||
+				(unknownCall && !unknownCallAcknowledged) ||
 				tokenCallWithValue ||
 				unverifiableErc20 ||
 				unverifiableSetApprovalForAll ||
