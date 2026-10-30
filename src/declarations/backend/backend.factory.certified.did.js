@@ -314,7 +314,9 @@ export const idlFactory = ({ IDL }) => {
 		CkBtcToBtc: IDL.Null,
 		EthToCkEth: IDL.Null,
 		CkErc20ToErc20: IDL.Null,
+		SolToCkSol: IDL.Null,
 		Erc20ToCkErc20: IDL.Null,
+		CkSolToSol: IDL.Null,
 		CkEthToEth: IDL.Null
 	});
 	const ChainFusionData = IDL.Record({
