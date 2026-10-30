@@ -55,6 +55,24 @@ describe('IcSendForm', () => {
 		expect(toolbar).not.toBeNull();
 	});
 
+	it('should not render the memo input field for non-ICRC destinations', () => {
+		const { queryByPlaceholderText } = render(IcSendForm, {
+			props,
+			context: mockContext
+		});
+
+		expect(queryByPlaceholderText(en.send.placeholder.enter_memo)).toBeNull();
+	});
+
+	it('should render the memo input field for ICRC destinations', () => {
+		const { getByPlaceholderText } = render(IcSendForm, {
+			props: { ...props, destination: 'rrkah-fqaaa-aaaaa-aaaaq-cai' },
+			context: mockContext
+		});
+
+		expect(getByPlaceholderText(en.send.placeholder.enter_memo)).toBeInTheDocument();
+	});
+
 	it('should not render the fee if the user is the minting account', () => {
 		isIcMintingAccount.set(true);
 
