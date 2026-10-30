@@ -35,6 +35,10 @@ describe('scanner.config', () => {
 				title: en.scanner.text.payment_failed
 			},
 			{
+				name: WizardStepsScanner.PAYMENT_NOT_CONFIRMED,
+				title: en.scanner.text.payment_not_confirmed
+			},
+			{
 				name: WizardStepsScanner.WALLET_CONNECT_CONNECT,
 				title: en.wallet_connect.text.name
 			},

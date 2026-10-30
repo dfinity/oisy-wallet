@@ -159,6 +159,7 @@ export enum WizardStepsScanner {
 	PAYING = 'Paying',
 	PAYMENT_CONFIRMED = 'Payment Confirmed',
 	PAYMENT_FAILED = 'Payment Failed',
+	PAYMENT_NOT_CONFIRMED = 'Payment Not Confirmed',
 	WALLET_CONNECT_CONNECT = WizardStepsWalletConnect.CONNECT,
 	WALLET_CONNECT_REVIEW = WizardStepsWalletConnect.REVIEW
 }
