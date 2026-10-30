@@ -2294,6 +2294,9 @@
 			"confirmations": "التأكيدات",
 			"for": "",
 			"for_copied": "",
+			"canister": "",
+			"canister_copied": "",
+			"canister_unknown": "",
 			"expiration": "",
 			"approve_label": ""
 		},
@@ -2314,7 +2317,8 @@
 			"deposit": "إيداع",
 			"approve": "موافقة",
 			"burn": "حرق",
-			"mint": "إنشاء"
+			"mint": "إنشاء",
+			"top_up": ""
 		},
 		"filter": {
 			"types_label": "",

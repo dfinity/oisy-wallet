@@ -2294,6 +2294,9 @@
 			"confirmations": "Xác nhận",
 			"for": "",
 			"for_copied": "",
+			"canister": "Canister",
+			"canister_copied": "ID canister đã được sao chép vào khay nhớ tạm.",
+			"canister_unknown": "không xác định",
 			"expiration": "",
 			"approve_label": ""
 		},
@@ -2314,7 +2317,8 @@
 			"deposit": "Tiền gửi",
 			"approve": "Chấp thuận",
 			"burn": "Đốt",
-			"mint": "Tạo"
+			"mint": "Tạo",
+			"top_up": "Nạp"
 		},
 		"filter": {
 			"types_label": "",

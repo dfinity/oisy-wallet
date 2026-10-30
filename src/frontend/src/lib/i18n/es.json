@@ -2294,6 +2294,9 @@
 			"confirmations": "Confirmaciones",
 			"for": "Para",
 			"for_copied": "Dirección del gastador copiada al portapapeles.",
+			"canister": "Canister",
+			"canister_copied": "ID del canister copiado al portapapeles.",
+			"canister_unknown": "desconocido",
 			"expiration": "Vencimiento",
 			"approve_label": "Aprobar $approveAmount"
 		},
@@ -2314,7 +2317,8 @@
 			"deposit": "Depositar",
 			"approve": "Aprobar",
 			"burn": "Quemar",
-			"mint": "Acuñar"
+			"mint": "Acuñar",
+			"top_up": "Recarga"
 		},
 		"filter": {
 			"types_label": "",

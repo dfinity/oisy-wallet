@@ -2294,6 +2294,9 @@
 			"confirmations": "Conferme",
 			"for": "",
 			"for_copied": "",
+			"canister": "Canister",
+			"canister_copied": "ID canister copiato negli appunti.",
+			"canister_unknown": "sconosciuto",
 			"expiration": "",
 			"approve_label": ""
 		},
@@ -2314,7 +2317,8 @@
 			"deposit": "Deposito",
 			"approve": "Approvazione",
 			"burn": "Burn",
-			"mint": "Mint"
+			"mint": "Mint",
+			"top_up": "Ricarica"
 		},
 		"filter": {
 			"types_label": "",

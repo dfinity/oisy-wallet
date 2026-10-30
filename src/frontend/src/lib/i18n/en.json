@@ -2294,6 +2294,9 @@
 			"confirmations": "Confirmations",
 			"for": "For",
 			"for_copied": "Spender address copied to clipboard.",
+			"canister": "Canister",
+			"canister_copied": "Canister ID copied to clipboard.",
+			"canister_unknown": "unknown",
 			"expiration": "Expiration",
 			"approve_label": "Approve $approveAmount"
 		},
@@ -2314,7 +2317,8 @@
 			"deposit": "Deposit",
 			"approve": "Approve",
 			"burn": "Burn",
-			"mint": "Mint"
+			"mint": "Mint",
+			"top_up": "Top up"
 		},
 		"filter": {
 			"types_label": "Type",
