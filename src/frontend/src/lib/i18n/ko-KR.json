@@ -519,6 +519,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"icforums": {
+				"name": "IC Forums",
+				"one_liner": "Internet Computer 기반 커뮤니티 포럼.",
+				"description": "IC Forums는 Internet Computer에서 완전히 실행되는 커뮤니티 플랫폼입니다. 100개가 넘는 커뮤니티의 토론에 참여하거나, 자체 구조, 역할, 운영 방식을 갖춘 나만의 커뮤니티를 만들 수 있습니다. 하나의 ID로 모든 커뮤니티를 이용할 수 있습니다."
 			}
 		}
 	},
