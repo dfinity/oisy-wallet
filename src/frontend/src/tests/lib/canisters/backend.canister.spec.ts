@@ -64,12 +64,16 @@ vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 
 describe('backend.canister', () => {
 	const createBackendCanister = ({
-		serviceOverride
-	}: Pick<CreateCanisterOptions<BackendService>, 'serviceOverride'>): Promise<BackendCanister> =>
+		serviceOverride,
+		certifiedServiceOverride = serviceOverride
+	}: Pick<
+		CreateCanisterOptions<BackendService>,
+		'serviceOverride' | 'certifiedServiceOverride'
+	>): Promise<BackendCanister> =>
 		BackendCanister.create({
 			canisterId: Principal.fromText('d3nvo-aaaaa-aaaar-qagzq-cai'),
 			identity: mockIdentity,
-			certifiedServiceOverride: serviceOverride,
+			certifiedServiceOverride,
 			serviceOverride
 		});
 	const service = mock<ActorSubclass<BackendService>>();
@@ -1610,6 +1614,31 @@ describe('backend.canister', () => {
 				max_results: 10n
 			});
 			expect(res).toEqual(mockGetUserTransactionsResponse);
+		});
+
+		it('should read the stored transactions through the certified service', async () => {
+			const queryService = mock<ActorSubclass<BackendService>>();
+			const certifiedService = mock<ActorSubclass<BackendService>>();
+
+			certifiedService.get_user_transactions.mockResolvedValue({
+				Ok: mockCandidGetUserTransactionsResponse
+			});
+
+			const { getUserTransactions } = await createBackendCanister({
+				serviceOverride: queryService,
+				certifiedServiceOverride: certifiedService
+			});
+
+			await expect(getUserTransactions(getUserTransactionsParams)).resolves.toEqual(
+				mockGetUserTransactionsResponse
+			);
+
+			expect(certifiedService.get_user_transactions).toHaveBeenCalledExactlyOnceWith({
+				token_id: mockUserTransactionTokenId,
+				start: [5n],
+				max_results: 10n
+			});
+			expect(queryService.get_user_transactions).not.toHaveBeenCalled();
 		});
 
 		it('should pass empty array for start when undefined', async () => {
