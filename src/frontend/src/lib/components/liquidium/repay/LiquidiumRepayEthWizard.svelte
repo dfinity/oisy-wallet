@@ -29,16 +29,20 @@
 	import {
 		computeLiquidiumRepayPreview,
 		executeLiquidiumRepay,
-		liquidiumRepayCapError
+		holdLiquidiumRepayUntilMined,
+		liquidiumRepayCapError,
+		liquidiumRepaySpendable
 	} from '$lib/services/liquidium-repay.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { liquidiumUnminedRepaysStore } from '$lib/stores/liquidium-unmined-repays.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { consoleError } from '$lib/utils/console.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -145,8 +149,22 @@
 
 	const { maxGasFee } = ethFeeContext;
 
+	// A repay transfer just broadcast is still in the balance until it is mined and the balance
+	// reloaded; both "Max" and the balance check spend what is left without it. The reservation is
+	// the one the form makes from the send balance: the provider fee, and the gas for a native send.
+	let { spendable: spendableBalance, maxSpendable } = $derived(
+		liquidiumRepaySpendable({
+			balance: $sendBalance,
+			tokenId: $sendTokenId,
+			unminedRepays: $liquidiumUnminedRepaysStore,
+			reserved: nonNullish(inflowFee)
+				? inflowFee + (isNativeSend ? ($maxGasFee ?? ZERO) : ZERO)
+				: undefined
+		})
+	);
+
 	let validateRepayAmount = $derived.by(() => {
-		const balance = $sendBalance;
+		const balance = spendableBalance;
 		const inflow = inflowFee;
 		const gasFee = $maxGasFee;
 		const nativeBalance = nativeFeeBalance;
@@ -242,6 +260,10 @@
 						gas
 					});
 
+					holdLiquidiumRepayUntilMined({ hash, token: $sendToken, amount: transferAmount }).catch(
+						consoleError
+					);
+
 					return hash;
 				}
 			});
@@ -296,6 +318,7 @@
 				{inflowFeeUnavailable}
 				{maxRepay}
 				{maxRepayUnavailable}
+				{maxSpendable}
 				{onClose}
 				onCustomErrorValidate={validateRepayAmount}
 				{onNext}
