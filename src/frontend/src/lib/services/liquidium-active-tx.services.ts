@@ -1,4 +1,6 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { infuraProviders } from '$eth/providers/infura.providers';
 import { liquidiumClient } from '$lib/api/liquidium.api';
 import { LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS } from '$lib/constants/liquidium.constants';
 import {
@@ -17,6 +19,7 @@ import {
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { ActivityFilter, type Activity, type LiquidiumClient } from '@liquidium/client';
+import { isHexString } from 'ethers/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -111,6 +114,30 @@ const resolveLiquidiumActivity = async ({
 	return undefined;
 };
 
+// A repay is matched by the txid of the transfer we broadcast. One that reverted on Ethereum moved
+// nothing, so Liquidium never lists it, and only the receipt can end the row. An ICRC transfer
+// either lands or throws at broadcast, and a BTC transaction cannot revert.
+const isRevertedEthRepay = async ({
+	tx,
+	txid
+}: {
+	tx: ActiveUserTransaction;
+	txid?: string;
+}): Promise<boolean> => {
+	if (
+		!('Liquidium' in tx.data) ||
+		!('Repay' in tx.data.Liquidium.action) ||
+		isNullish(txid) ||
+		!isHexString(txid, 32)
+	) {
+		return false;
+	}
+
+	const receipt = await infuraProviders(ETHEREUM_NETWORK_ID).getTransactionReceipt(txid);
+
+	return receipt?.status === 0;
+};
+
 const pollLiquidiumActiveUserTransaction = async ({
 	tx,
 	identity,
@@ -140,11 +167,11 @@ const pollLiquidiumActiveUserTransaction = async ({
 
 		const activity = await resolveLiquidiumActivity({ client, profileId, txid, outflowId });
 
-		if (isNullish(activity)) {
-			return;
-		}
-
-		const candidate = liquidiumActivityToStatus(activity.status);
+		const candidate = nonNullish(activity)
+			? liquidiumActivityToStatus(activity.status)
+			: (await isRevertedEthRepay({ tx, txid }))
+				? { Failed: null }
+				: undefined;
 
 		if (isNullish(candidate)) {
 			return;
