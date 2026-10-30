@@ -615,12 +615,11 @@ export const sign = ({
 				return { success: false };
 			}
 
-			const { amount, destination, ambiguous, unreviewed, uncheckedApproval } =
-				mapSolTransactionMessage({
-					transactionMessage: parsedTransactionMessage,
-					userAddress: address,
-					rentExemptMinimum
-				});
+			const { amount, destination, ambiguous, unreviewed, isApproval } = mapSolTransactionMessage({
+				transactionMessage: parsedTransactionMessage,
+				userAddress: address,
+				rentExemptMinimum
+			});
 
 			// The balance is gone the moment this is signed, and the message mapper cannot see a close
 			// made inside another program's call. Refused rather than warned about, on the same test
@@ -666,12 +665,15 @@ export const sign = ({
 				return { success: false };
 			}
 
-			// What an approval grants is how much the spender may spend, and an unchecked one names
-			// neither the token nor its decimals, so only a simulated run's account changes state that
-			// amount. Without a run the review names the spender alone, which a one-unit approval and
-			// an unlimited one share. The exception to a simulation being best effort: a checked
-			// approval states its amount itself and still signs without one.
-			if ((uncheckedApproval ?? false) && !simulationRan) {
+			// What an approval grants is how much the spender may spend, and a one-unit approval and an
+			// unlimited one name the same spender. The review states that amount from a simulated
+			// run's allowance: an unchecked approval names neither the token nor its decimals, and a
+			// checked one states its amount only on its line among the operations, a tab away from the
+			// spender the summary names. Without a run the summary names the spender alone, and whether
+			// a run is made depends on the message too, since one naming more writable accounts than a
+			// run reads gets none. So every approval waits for a run: the exception to a simulation
+			// being best effort.
+			if ((isApproval ?? false) && !simulationRan) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.approval_without_simulation }
 				});
@@ -688,7 +690,7 @@ export const sign = ({
 			// something in here could not be read, and approving it is approving an effect nobody
 			// described. The simulation is best effort by design and stays that way: it is not
 			// required of a message OISY did read, and a provider that times out on a transaction
-			// the wallet understands still signs, an unchecked approval aside (above).
+			// the wallet understands still signs, an approval aside (above).
 			if ((unreviewed ?? false) && !simulated) {
 				toastsError({
 					msg: {

@@ -93,9 +93,8 @@
 		// A send goes out with the wallet as the fee payer, which is not the transaction reviewed here,
 		// so the signing flow refuses it.
 		feePaidByOthers?: boolean;
-		// Whether the request grants an allowance through an unchecked approval, which names neither
-		// the token nor its decimals, and no simulated run came back to state how much the spender
-		// may spend. The signing flow refuses it.
+		// Whether the request grants an allowance and no simulated run came back to state how much
+		// the spender may spend. The signing flow refuses it.
 		approvalWithoutSimulation?: boolean;
 		// The programs the simulated run calls from inside another program's instruction that OISY
 		// does not know. What such a call does to funds the user holds in an application is in
