@@ -385,6 +385,10 @@ Burning is deliberately **not** exempt. Sending assets to a minter account by mi
 
 Sending TCYCLES to an account a canister owns, with or without a subaccount, does not top the canister up: the TCYCLES land in the canister's account on the cycles ledger, and they become cycles only if the canister's own code withdraws them. The send flow says so on the address step and again on Review, and points to [Top up](#top-up-a-canister) while that flow's flag is on. It does not block the send, since a canister can own TCYCLES on purpose. No other token shows the warning.
 
+### Sending through the AI assistant
+
+The AI assistant picks the token to send from every enabled network, whichever network the navigation has selected. Its send review names that token's network, and for a token on Ethereum or an EVM network the transaction is built and signed for that network, with the fee paid in its native token. Send stays disabled if the network a send is prepared for is not the token's own.
+
 ---
 
 ## Swap

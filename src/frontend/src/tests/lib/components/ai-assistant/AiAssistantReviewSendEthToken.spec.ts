@@ -1,5 +1,5 @@
-import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import * as sendServices from '$eth/services/send.services';
 import * as ethFeeStore from '$eth/stores/eth-fee.store';
 import type { OptionEthAddress } from '$eth/types/address';
@@ -38,7 +38,7 @@ describe('AiAssistantReviewSendEthToken', () => {
 	};
 
 	const mockContext = () =>
-		new Map<symbol, SendContext>([[SEND_CONTEXT_KEY, initSendContext({ token: SEPOLIA_TOKEN })]]);
+		new Map<symbol, SendContext>([[SEND_CONTEXT_KEY, initSendContext({ token: ETHEREUM_TOKEN })]]);
 
 	const mockEthFeeStore = () => {
 		// Build the store directly rather than through the (possibly spied) factory, so it is
@@ -79,7 +79,7 @@ describe('AiAssistantReviewSendEthToken', () => {
 
 	const mockBalance = () => {
 		balancesStore.set({
-			id: SEPOLIA_TOKEN.id,
+			id: ETHEREUM_TOKEN.id,
 			data: { data: 9900000000000000n, certified: true }
 		});
 	};
@@ -135,10 +135,10 @@ describe('AiAssistantReviewSendEthToken', () => {
 		expect(sendSpy).toHaveBeenCalledExactlyOnceWith({
 			from: mockEthAddress,
 			to: mockEthAddress3,
-			token: SEPOLIA_TOKEN,
+			token: ETHEREUM_TOKEN,
 			amount: parseToken({
 				value: `${sendAmount}`,
-				unitName: SEPOLIA_TOKEN.decimals
+				unitName: ETHEREUM_TOKEN.decimals
 			}),
 			maxFeePerGas: mockFees.maxFeePerGas,
 			maxPriorityFeePerGas: mockFees.maxPriorityFeePerGas,
@@ -240,6 +240,30 @@ describe('AiAssistantReviewSendEthToken', () => {
 
 		const { getByTestId } = render(AiAssistantReviewSendEthToken, {
 			props,
+			context: mockContext()
+		});
+
+		const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
+
+		expect(button).toBeDisabled();
+
+		await fireEvent.click(button);
+
+		expect(sendSpy).not.toHaveBeenCalled();
+	});
+
+	it('should disable the send button and not send when the source network is not the token network', async () => {
+		mockAuthStore();
+		mockCkEthMinterInfoStore();
+		mockEthAddressStore();
+		mockBalance();
+		mockEthFeeStore();
+
+		const { getByTestId } = render(AiAssistantReviewSendEthToken, {
+			props: {
+				...props,
+				sourceNetwork: SEPOLIA_NETWORK
+			},
 			context: mockContext()
 		});
 
