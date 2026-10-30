@@ -1027,7 +1027,6 @@
 			"approving": "جاري الموافقة...",
 			"approving_fees": "جاري الموافقة على الرسوم...",
 			"approving_transfer": "جاري الموافقة على التحويل...",
-			"approving_wallet_connect": "جاري الموافقة على طلب الربط...",
 			"refreshing_ui": "جاري تحديث واجهة المستخدم",
 			"initializing": "جاري تهيئة المعاملة...",
 			"signing_transaction": "جاري توقيع المعاملة...",
@@ -1956,6 +1955,50 @@
 			"sol_transaction_as_message": "",
 			"request_not_defined": "خطأ غير متوقع: الطلب غير معرف وبالتالي لا يمكن معالجته.",
 			"unexpected_processing_request": "خطأ غير متوقع أثناء معالجة الطلب باستخدام WalletConnect."
+		}
+	},
+	"extension": {
+		"text": {
+			"loading": "",
+			"loading_addresses": "",
+			"no_extension": "",
+			"not_found": "",
+			"outdated": "",
+			"done": "",
+			"failed": "",
+			"unsupported": "",
+			"networks_off": "",
+			"wrong_account": ""
+		},
+		"connect": {
+			"title_site": "",
+			"title_extension": "",
+			"site_sees": "",
+			"extension_keeps": "",
+			"eth_network": "",
+			"sol_network": "",
+			"connect": ""
+		},
+		"panel": {
+			"menu": "",
+			"this_site_connected": "",
+			"this_site_not_connected": "",
+			"connected_sites_count": "",
+			"no_sites": "",
+			"disconnect": "",
+			"disconnect_site": "",
+			"disconnect_all": "",
+			"chain_eth": "",
+			"chain_sol": "",
+			"all_tokens": "",
+			"open_oisy": "",
+			"all_activity": "",
+			"view_all": "",
+			"addresses_sites_see": "",
+			"snapshot_as_of": "",
+			"snapshot_prices_live": "",
+			"sign_in_for_activity": "",
+			"sign_in": ""
 		}
 	},
 	"trading": {

@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 import { clearIdbBalances } from '$lib/api/idb-balances.api';
+import { clearIdbExtensionPanelSnapshot } from '$lib/api/idb-extension-panel.api';
 import { clearIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
 import {
 	clearIdbBtcTransactions,
@@ -227,7 +228,9 @@ const clearIdbStoreList = [
 	// say which transactions this wallet looked at, so they go with the rest of the session.
 	clearIdbSolTransactionDetails,
 	// Balances
-	clearIdbBalances
+	clearIdbBalances,
+	// What the extension's side panel last showed
+	clearIdbExtensionPanelSnapshot
 ];
 
 // The permissions the user grants to relying parties in the signer (ICRC-25) are persisted by @dfinity/oisy-wallet-signer in the local storage as "oisy_signer_<origin>_<principal>".

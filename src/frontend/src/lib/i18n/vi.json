@@ -1027,7 +1027,6 @@
 			"approving": "Đang chấp thuận...",
 			"approving_fees": "Đang chấp thuận phí...",
 			"approving_transfer": "Đang chấp thuận chuyển...",
-			"approving_wallet_connect": "Đang chấp thuận yêu cầu WalletConnect...",
 			"refreshing_ui": "Đang làm mới giao diện người dùng",
 			"initializing": "Đang khởi tạo giao dịch...",
 			"signing_transaction": "Đang ký giao dịch...",
@@ -1956,6 +1955,50 @@
 			"sol_transaction_as_message": "Thông báo này là một giao dịch Solana, chỉ có thể được phê duyệt thông qua việc xem xét giao dịch. Vì lý do bảo mật, giao dịch chưa được ký.",
 			"request_not_defined": "Lỗi không mong muốn: Yêu cầu không được xác định nên không thể xử lý.",
 			"unexpected_processing_request": "Lỗi không mong muốn trong khi xử lý yêu cầu với WalletConnect."
+		}
+	},
+	"extension": {
+		"text": {
+			"loading": "",
+			"loading_addresses": "",
+			"no_extension": "",
+			"not_found": "",
+			"outdated": "",
+			"done": "",
+			"failed": "",
+			"unsupported": "",
+			"networks_off": "",
+			"wrong_account": ""
+		},
+		"connect": {
+			"title_site": "",
+			"title_extension": "",
+			"site_sees": "",
+			"extension_keeps": "",
+			"eth_network": "",
+			"sol_network": "",
+			"connect": ""
+		},
+		"panel": {
+			"menu": "",
+			"this_site_connected": "",
+			"this_site_not_connected": "",
+			"connected_sites_count": "",
+			"no_sites": "",
+			"disconnect": "",
+			"disconnect_site": "",
+			"disconnect_all": "",
+			"chain_eth": "",
+			"chain_sol": "",
+			"all_tokens": "",
+			"open_oisy": "",
+			"all_activity": "",
+			"view_all": "",
+			"addresses_sites_see": "",
+			"snapshot_as_of": "",
+			"snapshot_prices_live": "",
+			"sign_in_for_activity": "",
+			"sign_in": ""
 		}
 	},
 	"trading": {

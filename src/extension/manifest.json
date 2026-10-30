@@ -1,0 +1,46 @@
+{
+	"manifest_version": 3,
+	"name": "OISY Wallet (proof of concept)",
+	"version": "0.0.3",
+	"minimum_chrome_version": "116",
+	"description": "Lets dapps that only support extension wallets sign with OISY. Local proof of concept against staging.",
+	"key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAj8AvHc/Io0rxBGE+OvPEVCAjFhVIZB22X/SXk7blEUiBBsY6/ryTnD7lh3w/qhr06u3Kqje5Pp0uvrsRBUskw8iwGsyhlBDaj0jNEJHLXCGZ5RXC+1gFc9oRfNIJIUotVM2L7+xTPl1rDRF0upUIhpgBiNEDQglsp03S8hlfFTn8nMO6Aoz/KIipwSkaljcKW2mBdE6s/IuEw24R2+DPclbybFF6X8tjgcX0fGq6ZN8odwqZVNJJdYm8+MwI10vrPsOMwAEL7PQvA8hbDAOzJrUISzYI6+W2bIN8Jv7UBPRLyR4mqRl1hiQEo3olb6mu+hxhvBQXSiNBOySBELXHPQIDAQAB",
+	"icons": {
+		"16": "icons/icon-16.png",
+		"32": "icons/icon-32.png",
+		"48": "icons/icon-48.png",
+		"128": "icons/icon-128.png"
+	},
+	"action": {
+		"default_title": "OISY"
+	},
+	"side_panel": {
+		"default_path": "sidepanel.html"
+	},
+	"background": {
+		"service_worker": "background.js",
+		"type": "module"
+	},
+	"permissions": ["storage", "sidePanel"],
+	"host_permissions": ["https://ethereum-sepolia-rpc.publicnode.com/*"],
+	"content_scripts": [
+		{
+			"matches": ["http://localhost/*", "http://127.0.0.1/*", "https://*/*"],
+			"exclude_matches": ["https://oisy.com/*", "https://*.oisy.com/*"],
+			"js": ["inpage.js"],
+			"run_at": "document_start",
+			"world": "MAIN",
+			"all_frames": false
+		},
+		{
+			"matches": ["http://localhost/*", "http://127.0.0.1/*", "https://*/*"],
+			"exclude_matches": ["https://oisy.com/*", "https://*.oisy.com/*"],
+			"js": ["content.js"],
+			"run_at": "document_start",
+			"all_frames": false
+		}
+	],
+	"externally_connectable": {
+		"matches": ["http://localhost/*"]
+	}
+}

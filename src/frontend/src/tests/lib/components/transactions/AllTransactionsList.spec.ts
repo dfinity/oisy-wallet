@@ -193,6 +193,32 @@ describe('AllTransactionsList', () => {
 				btcTransactionsNumber + ethTransactionsNumber + icTransactionsNumber
 			);
 		});
+
+		describe('as a preview', () => {
+			afterEach(() => {
+				transactionsFilterStore.clear();
+			});
+
+			it('shows only the newest transactions', () => {
+				const { container, getByText, queryByText } = render(AllTransactionsList, {
+					props: { preview: { limit: 3 } }
+				});
+
+				expect(container.querySelectorAll('button.contents')).toHaveLength(3);
+				expect(getByText('Today')).toBeInTheDocument();
+				expect(queryByText('Yesterday')).not.toBeInTheDocument();
+			});
+
+			it("ignores the Activity page's filters", () => {
+				transactionsFilterStore.toggleType('send');
+
+				const { container } = render(AllTransactionsList, {
+					props: { preview: { limit: 3 } }
+				});
+
+				expect(container.querySelectorAll('button.contents')).toHaveLength(3);
+			});
+		});
 	});
 
 	describe('when a selected token is no longer selectable', () => {
@@ -217,6 +243,15 @@ describe('AllTransactionsList', () => {
 			await tick();
 
 			expect(get(transactionsFilterStore).tokenIds).toEqual([selectableKey]);
+		});
+
+		it('leaves the selections alone in a preview', async () => {
+			transactionsFilterStore.toggleTokenId('UNKNOWN-Unknown');
+
+			render(AllTransactionsList, { props: { preview: { limit: 3 } } });
+			await tick();
+
+			expect(get(transactionsFilterStore).tokenIds).toEqual(['UNKNOWN-Unknown']);
 		});
 
 		it('keeps the other facets untouched', async () => {

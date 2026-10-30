@@ -1027,7 +1027,6 @@
 			"approving": "Zatwierdzanie...",
 			"approving_fees": "Zatwierdzanie opłat...",
 			"approving_transfer": "Zatwierdzanie przelewu...",
-			"approving_wallet_connect": "Zatwierdzanie żądania WalletConnect...",
 			"refreshing_ui": "Odświeżanie interfejsu użytkownika",
 			"initializing": "Inicjowanie transakcji...",
 			"signing_transaction": "Podpisywanie transakcji...",
@@ -1956,6 +1955,50 @@
 			"sol_transaction_as_message": "Ta wiadomość jest transakcją Solana, którą można zatwierdzić wyłącznie poprzez przegląd transakcji. Ze względów bezpieczeństwa nie została podpisana.",
 			"request_not_defined": "Nieoczekiwany błąd: Żądanie nie jest zdefiniowane, dlatego nie można go przetworzyć.",
 			"unexpected_processing_request": "Nieoczekiwany błąd podczas przetwarzania żądania za pomocą WalletConnect."
+		}
+	},
+	"extension": {
+		"text": {
+			"loading": "",
+			"loading_addresses": "",
+			"no_extension": "",
+			"not_found": "",
+			"outdated": "",
+			"done": "",
+			"failed": "",
+			"unsupported": "",
+			"networks_off": "",
+			"wrong_account": ""
+		},
+		"connect": {
+			"title_site": "",
+			"title_extension": "",
+			"site_sees": "",
+			"extension_keeps": "",
+			"eth_network": "",
+			"sol_network": "",
+			"connect": ""
+		},
+		"panel": {
+			"menu": "",
+			"this_site_connected": "",
+			"this_site_not_connected": "",
+			"connected_sites_count": "",
+			"no_sites": "",
+			"disconnect": "",
+			"disconnect_site": "",
+			"disconnect_all": "",
+			"chain_eth": "",
+			"chain_sol": "",
+			"all_tokens": "",
+			"open_oisy": "",
+			"all_activity": "",
+			"view_all": "",
+			"addresses_sites_see": "",
+			"snapshot_as_of": "",
+			"snapshot_prices_live": "",
+			"sign_in_for_activity": "",
+			"sign_in": ""
 		}
 	},
 	"trading": {

@@ -1027,7 +1027,6 @@
 			"approving": "Schvalování...",
 			"approving_fees": "Schvalování poplatků...",
 			"approving_transfer": "Schvalování převodu...",
-			"approving_wallet_connect": "Schvalování požadavku WalletConnect...",
 			"refreshing_ui": "Aktualizace uživatelského rozhraní",
 			"initializing": "Inicializace transakce...",
 			"signing_transaction": "Podepisování transakce...",
@@ -1956,6 +1955,50 @@
 			"sol_transaction_as_message": "Tato zpráva je solanská transakce, kterou lze schválit pouze prostřednictvím kontroly transakce. Z bezpečnostních důvodů nebyla podepsána.",
 			"request_not_defined": "Neočekávaná chyba: Požadavek není definován, proto jej nelze zpracovat.",
 			"unexpected_processing_request": "Neočekávaná chyba při zpracování požadavku pomocí WalletConnect."
+		}
+	},
+	"extension": {
+		"text": {
+			"loading": "",
+			"loading_addresses": "",
+			"no_extension": "",
+			"not_found": "",
+			"outdated": "",
+			"done": "",
+			"failed": "",
+			"unsupported": "",
+			"networks_off": "",
+			"wrong_account": ""
+		},
+		"connect": {
+			"title_site": "",
+			"title_extension": "",
+			"site_sees": "",
+			"extension_keeps": "",
+			"eth_network": "",
+			"sol_network": "",
+			"connect": ""
+		},
+		"panel": {
+			"menu": "",
+			"this_site_connected": "",
+			"this_site_not_connected": "",
+			"connected_sites_count": "",
+			"no_sites": "",
+			"disconnect": "",
+			"disconnect_site": "",
+			"disconnect_all": "",
+			"chain_eth": "",
+			"chain_sol": "",
+			"all_tokens": "",
+			"open_oisy": "",
+			"all_activity": "",
+			"view_all": "",
+			"addresses_sites_see": "",
+			"snapshot_as_of": "",
+			"snapshot_prices_live": "",
+			"sign_in_for_activity": "",
+			"sign_in": ""
 		}
 	},
 	"trading": {

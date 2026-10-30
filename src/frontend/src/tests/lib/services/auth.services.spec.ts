@@ -137,8 +137,8 @@ describe('auth.services', () => {
 		it('should clean the IDB storage for all principals', async () => {
 			await signOut({});
 
-			// 1 tokens + 4 txs + 1 Solana transaction details + 1 balance
-			expect(idbKeyval.clear).toHaveBeenCalledTimes(7);
+			// 1 tokens + 4 txs + 1 Solana transaction details + 1 balance + 1 extension panel snapshot
+			expect(idbKeyval.clear).toHaveBeenCalledTimes(8);
 		});
 
 		it("should disconnect WalletConnect's session", async () => {
@@ -257,8 +257,8 @@ describe('auth.services', () => {
 		it('should clean the IDB storage for all principals', async () => {
 			await errorSignOut(mockText);
 
-			// 1 tokens + 4 txs + 1 Solana transaction details + 1 balance
-			expect(idbKeyval.clear).toHaveBeenCalledTimes(7);
+			// 1 tokens + 4 txs + 1 Solana transaction details + 1 balance + 1 extension panel snapshot
+			expect(idbKeyval.clear).toHaveBeenCalledTimes(8);
 		});
 
 		it("should disconnect WalletConnect's session", async () => {
@@ -379,8 +379,8 @@ describe('auth.services', () => {
 		it('should clean the IDB storage for all principals', async () => {
 			await warnSignOut(mockText);
 
-			// 1 tokens + 4 txs + 1 Solana transaction details + 1 balance
-			expect(idbKeyval.clear).toHaveBeenCalledTimes(7);
+			// 1 tokens + 4 txs + 1 Solana transaction details + 1 balance + 1 extension panel snapshot
+			expect(idbKeyval.clear).toHaveBeenCalledTimes(8);
 		});
 
 		it("should disconnect WalletConnect's session", async () => {
@@ -545,8 +545,8 @@ describe('auth.services', () => {
 		it('should clean the IDB storage for all principals', async () => {
 			await nullishSignOut();
 
-			// 1 tokens + 4 txs + 1 Solana transaction details + 1 balance
-			expect(idbKeyval.clear).toHaveBeenCalledTimes(7);
+			// 1 tokens + 4 txs + 1 Solana transaction details + 1 balance + 1 extension panel snapshot
+			expect(idbKeyval.clear).toHaveBeenCalledTimes(8);
 		});
 
 		it("should disconnect WalletConnect's session", async () => {

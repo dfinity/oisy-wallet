@@ -1,6 +1,18 @@
 import { browser } from '$app/environment';
 import { isNullish } from '@dfinity/utils';
 
+// When OISY is embedded by another origin (the extension's side panel), reading the top window's
+// size throws. The browser window's outer size is readable from any frame and centres the popup on
+// the same window.
+const topWindowSize = (): { innerWidth: number; innerHeight: number } => {
+	try {
+		const { innerWidth, innerHeight } = window.top ?? window;
+		return { innerWidth, innerHeight };
+	} catch (_: unknown) {
+		return { innerWidth: window.outerWidth, innerHeight: window.outerHeight };
+	}
+};
+
 export const popupCenter = ({
 	width,
 	height
@@ -16,9 +28,7 @@ export const popupCenter = ({
 		return undefined;
 	}
 
-	const {
-		top: { innerWidth, innerHeight }
-	} = window;
+	const { innerWidth, innerHeight } = topWindowSize();
 
 	const y = innerHeight / 2 + screenY - height / 2;
 	const x = innerWidth / 2 + screenX - width / 2;
