@@ -15,6 +15,7 @@
 		SOLANA_SEND_REQUIRED_SIGNATURES
 	} from '$sol/constants/sol.constants';
 	import { SOL_FEE_CONTEXT_KEY, type FeeContext } from '$sol/stores/sol-fee.store';
+	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 	import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 	import { isAtaAddress } from '$sol/utils/sol-address.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
@@ -31,41 +32,68 @@
 	const { feeStore, prioritizationFeeStore, ataFeeStore }: FeeContext =
 		getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
-	const estimateFee = async () => {
+	// Bumped on every token change and on destroy, so an estimate still in flight from before can
+	// tell that the stores are no longer its to write.
+	let generation = 0;
+
+	const estimateFee = async (id: number) => {
 		if (!observe || isNullish(token)) {
 			return;
 		}
 
-		const solNetwork = safeMapNetworkIdToNetwork(token.network.id);
+		// Not `safeMapNetworkIdToNetwork`: the swap passes its source token straight through, so for a
+		// moment after a token on another chain is picked this context is still mounted on it.
+		const solNetwork = mapNetworkIdToNetwork(token.network.id);
+
+		if (isNullish(solNetwork)) {
+			return;
+		}
 
 		const addresses = isTokenSpl(token) ? [token.address] : undefined;
-		const priorityFee = await estimatePriorityFee({ network: solNetwork, addresses });
-		const fee =
-			SOLANA_LAMPORTS_PER_SIGNATURE * BigInt(SOLANA_SEND_REQUIRED_SIGNATURES) +
-			priorityFee / MICROLAMPORTS_PER_LAMPORT;
-		feeStore.setFee(fee);
-		prioritizationFeeStore.setFee(priorityFee);
+
+		try {
+			const priorityFee = await estimatePriorityFee({ network: solNetwork, addresses });
+
+			if (id !== generation) {
+				return;
+			}
+
+			const fee =
+				SOLANA_LAMPORTS_PER_SIGNATURE * BigInt(SOLANA_SEND_REQUIRED_SIGNATURES) +
+				priorityFee / MICROLAMPORTS_PER_LAMPORT;
+			feeStore.setFee(fee);
+			prioritizationFeeStore.setFee(priorityFee);
+		} catch (_: unknown) {
+			// The poller is the retry, so a failed estimate publishes nothing and the last one stands
+			// until a later poll succeeds, rather than surfacing as an unhandled rejection every tick.
+		}
 	};
 
-	const updateFee = async () => {
+	let timer: NodeJS.Timeout | undefined;
+
+	const clearTimer = () => clearInterval(timer);
+
+	const updateFee = (id: number) => {
 		clearTimer();
 
-		await estimateFee();
+		// Installed before the first estimate rather than once it resolves: a token change or destroy
+		// while that request is pending then always finds this timer to clear, instead of the request
+		// installing one after the clear has already run.
+		timer = setInterval(() => void estimateFee(id), 5000);
 
-		timer = setInterval(estimateFee, 5000);
+		void estimateFee(id);
 	};
 
 	$effect(() => {
 		[token];
 
-		untrack(() => updateFee());
+		untrack(() => updateFee(++generation));
 	});
 
-	let timer = $state<NodeJS.Timeout | undefined>();
-
-	const clearTimer = () => clearInterval(timer);
-
-	onDestroy(clearTimer);
+	onDestroy(() => {
+		generation++;
+		clearTimer();
+	});
 
 	const updateAtaFee = async () => {
 		if (!isTokenSpl(token)) {
