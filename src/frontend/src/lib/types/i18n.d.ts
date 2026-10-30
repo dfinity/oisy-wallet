@@ -1506,6 +1506,8 @@ interface I18nWallet_connect {
 		close_pays_others: string;
 		fee_paid_by_others: string;
 		approval_without_simulation: string;
+		unreviewed_without_simulation: string;
+		unreviewed_not_described_by_simulation: string;
 		simulated_instructions: string;
 		multiple_operations: string;
 		simulated_review: string;

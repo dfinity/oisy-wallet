@@ -1825,6 +1825,8 @@
 			"close_pays_others": "Diese Transaktion schliesst eines deiner Token-Konten und zahlt dessen Guthaben an eine Adresse aus, die nicht deine Wallet ist. Zu deiner Sicherheit signiert OISY sie nicht.",
 			"fee_paid_by_others": "",
 			"approval_without_simulation": "",
+			"unreviewed_without_simulation": "",
+			"unreviewed_not_described_by_simulation": "",
 			"simulated_instructions": "Simulierte Anweisungen",
 			"multiple_operations": "Diese Transaktion enthält mehrere Operationen, die Ihre Wallet betreffen. Überprüfen Sie die simulierten Guthabenänderungen und die enthaltenen Anweisungen, und genehmigen Sie diese Transaktion nur, wenn Sie auch der Anwendung vertrauen.",
 			"simulated_review": "Die Überprüfung unten zeigt, was die Simulation dieser Transaktion gegen den aktuellen Netzwerkzustand vorhersagt. Was beim tatsächlichen Ausführen passiert, kann davon abweichen.",
