@@ -2489,6 +2489,7 @@
 			"create": "Kontakt konnte nicht erstellt werden",
 			"update": "Kontakt konnte nicht aktualisiert werden",
 			"delete": "Kontakt konnte nicht gelöscht werden",
+			"load": "Kontakte konnten nicht geladen werden",
 			"name_too_long": "Bitte halte den Namen auf höchstens $maxCharacters Zeichen."
 		}
 	},

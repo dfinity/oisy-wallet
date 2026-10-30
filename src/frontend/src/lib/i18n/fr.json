@@ -2489,6 +2489,7 @@
 			"create": "Échec de la création du contact",
 			"update": "Échec de la mise à jour du contact",
 			"delete": "Échec de la suppression du contact",
+			"load": "Échec du chargement des contacts",
 			"name_too_long": "Veuillez limiter le nom à $maxCharacters caractères ou moins."
 		}
 	},

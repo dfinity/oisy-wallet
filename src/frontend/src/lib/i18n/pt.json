@@ -2489,6 +2489,7 @@
 			"create": "Falha ao criar o contato",
 			"update": "Falha ao atualizar o contato",
 			"delete": "Falha ao excluir o contato",
+			"load": "Falha ao carregar os contatos",
 			"name_too_long": "Por favor, mantenha o nome com $maxCharacters caracteres ou menos."
 		}
 	},

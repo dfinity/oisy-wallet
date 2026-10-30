@@ -2489,6 +2489,7 @@
 			"create": "Failed to create the contact",
 			"update": "Failed to update the contact",
 			"delete": "Failed to delete the contact",
+			"load": "Failed to load contacts",
 			"name_too_long": "Please keep the name to $maxCharacters characters or fewer."
 		}
 	},

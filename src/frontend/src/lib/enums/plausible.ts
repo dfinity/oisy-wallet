@@ -40,6 +40,8 @@ export enum PLAUSIBLE_EVENTS {
 	// Sending a transaction, sent when something notable happens to it. The outcome is in
 	// `result_status`, never in the name.
 	TRANSACTION_SEND = 'transaction_send',
+	// The user's contacts. The step is in `event_modifier` and the outcome in `result_status`.
+	CONTACT = 'contact',
 	// An invariant we believed unreachable was reached. Not for flows that can legitimately
 	// fail — those keep their own event and report the outcome via `result_status`.
 	ERROR = 'error'
@@ -74,6 +76,16 @@ export enum PLAUSIBLE_EVENT_NFT_SEND_ERROR_TYPES {
 	// The collection returned an error variant.
 	CANISTER_ERROR = 'canister_error',
 	// The collection rejected the call or trapped.
+	CALL_REJECTED = 'call_rejected',
+	// Anything else: transport, agent, or an unexpected throw.
+	UNKNOWN = 'unknown'
+}
+
+// An agent error's message carries the call context and whatever the agent puts in its HTTP
+// details, so a raw message cannot satisfy invariant 4 in docs/ai/frontend/analytics.md. Contacts
+// failures are categorised by error class instead.
+export enum PLAUSIBLE_EVENT_CONTACT_ERROR_TYPES {
+	// The backend rejected the call or trapped.
 	CALL_REJECTED = 'call_rejected',
 	// Anything else: transport, agent, or an unexpected throw.
 	UNKNOWN = 'unknown'
@@ -203,7 +215,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	SEND = 'send',
 	CONVERT = 'convert',
 	AI_ASSISTANT = 'ai_assistant',
-	WALLET_CONNECT = 'wallet_connect'
+	WALLET_CONNECT = 'wallet_connect',
+	CONTACTS = 'contacts'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {

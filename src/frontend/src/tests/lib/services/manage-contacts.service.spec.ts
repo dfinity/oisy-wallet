@@ -1,104 +1,402 @@
-import type { ContactImage } from '$declarations/backend/backend.did';
+import type { ContactAddressData, ContactImage } from '$declarations/backend/backend.did';
 import * as backendApi from '$lib/api/backend.api';
+import * as analytics from '$lib/services/analytics.services';
 import { createContact, loadContacts, updateContact } from '$lib/services/manage-contacts.service';
 import { contactsStore } from '$lib/stores/contacts.store';
+import * as toastsStore from '$lib/stores/toasts.store';
 import type { ContactUi } from '$lib/types/contact';
 import {
 	mockBackendContactAddressBtc,
 	mockBackendContactAddressEth,
 	mockBackendContactAddressSol
 } from '$tests/mocks/contacts.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import en from '$tests/mocks/i18n.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
+import {
+	RejectError,
+	ReplicaRejectCode,
+	UncertifiedRejectErrorCode,
+	requestIdOf
+} from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
-const mockContactImage: ContactImage | null = {
+const mockContactImage: ContactImage = {
 	data: new Uint8Array([1, 2, 3]),
 	mime_type: { 'image/png': null }
 };
 
 describe('manage-contacts.service', () => {
 	describe('loadContacts', () => {
-		// Mock the getContacts function from backend.api
-		const mockGetContacts = vi.spyOn(backendApi, 'getContacts');
+		const mockGetContactsPage = vi.spyOn(backendApi, 'getContactsPage');
+		const mockGetContactImages = vi.spyOn(backendApi, 'getContactImages');
+
+		const contactWith = ({
+			id,
+			addresses = []
+		}: {
+			id: bigint;
+			addresses?: ContactAddressData[];
+		}) => ({
+			id,
+			name: `Contact ${id}`,
+			update_timestamp_ns: 1n,
+			addresses,
+			image: [] as []
+		});
+
+		const page = ({
+			contacts,
+			next
+		}: {
+			contacts: ReturnType<typeof contactWith>[];
+			next?: bigint;
+		}) => ({
+			contacts,
+			next: toNullable(next)
+		});
+
+		const imageEntry = (contactId: bigint) => ({ contact_id: contactId, image: mockContactImage });
 
 		beforeEach(() => {
 			vi.resetAllMocks();
 			contactsStore.reset();
+
+			mockGetContactImages.mockResolvedValue([]);
 		});
 
 		it('should load contacts with sorted addresses', async () => {
-			// Create mock contacts with unsorted addresses
-			const mockContacts = [
-				{
-					id: BigInt(1),
-					name: 'Test Contact',
-					update_timestamp_ns: BigInt(Date.now()),
-					addresses: [
-						mockBackendContactAddressSol, // Sol should come last
-						mockBackendContactAddressBtc, // Btc should come first
-						mockBackendContactAddressEth // Eth should come second
-					],
-					image: [] as []
-				}
-			];
+			mockGetContactsPage.mockResolvedValue(
+				page({
+					contacts: [
+						contactWith({
+							id: 1n,
+							addresses: [
+								mockBackendContactAddressSol,
+								mockBackendContactAddressBtc,
+								mockBackendContactAddressEth
+							]
+						})
+					]
+				})
+			);
 
-			// Mock the getContacts function to return our mock contacts
-			mockGetContacts.mockResolvedValue(mockContacts);
-
-			// Call loadContacts
 			await loadContacts(mockIdentity);
 
-			// Get the contacts from the store
-			const loadedContacts = get(contactsStore);
+			const [contact] = get(contactsStore) ?? [];
 
-			// Verify that contacts were loaded
-			expect(loadedContacts).toHaveLength(1);
-
-			const [contact] = loadedContacts ?? [];
-
-			expect(contact.name).toBe('Test Contact');
-
-			// Verify that addresses are sorted correctly
-			const { addresses } = contact;
-
-			// Check that addresses are in the correct order
-			expect(addresses[0].addressType).toBe('Btc');
-			expect(addresses[1].addressType).toBe('Eth');
-			expect(addresses[2].addressType).toBe('Sol');
+			expect(contact.addresses.map(({ addressType }) => addressType)).toEqual([
+				'Btc',
+				'Eth',
+				'Sol'
+			]);
 		});
 
 		it('should handle contacts with empty addresses array', async () => {
-			// Create mock contacts with empty addresses array
-			const mockContacts = [
-				{
-					id: BigInt(1),
-					name: 'Empty Contact',
-					update_timestamp_ns: BigInt(Date.now()),
-					addresses: [],
-					image: [] as []
-				}
-			];
+			mockGetContactsPage.mockResolvedValue(page({ contacts: [contactWith({ id: 1n })] }));
 
-			// Mock the getContacts function to return our mock contacts
-			mockGetContacts.mockResolvedValue(mockContacts);
-
-			// Call loadContacts
 			await loadContacts(mockIdentity);
 
-			// Get the contacts from the store
-			const loadedContacts = get(contactsStore);
+			const [contact] = get(contactsStore) ?? [];
 
-			// Verify that contacts were loaded
-			expect(loadedContacts).toHaveLength(1);
-
-			const [contact] = loadedContacts ?? [];
-
-			expect(contact.name).toBe('Empty Contact');
-
-			// Verify that addresses array is empty
 			expect(contact.addresses).toHaveLength(0);
+		});
+
+		it('should load every page, passing the cursor of the previous one', async () => {
+			mockGetContactsPage
+				.mockResolvedValueOnce(
+					page({ contacts: [contactWith({ id: 1n }), contactWith({ id: 2n })], next: 2n })
+				)
+				.mockResolvedValueOnce(page({ contacts: [contactWith({ id: 3n })] }));
+
+			await loadContacts(mockIdentity);
+
+			expect(mockGetContactsPage).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				after: undefined
+			});
+			expect(mockGetContactsPage).toHaveBeenNthCalledWith(2, { identity: mockIdentity, after: 2n });
+			expect(get(contactsStore)?.map(({ id }) => id)).toEqual([1n, 2n, 3n]);
+		});
+
+		describe('images', () => {
+			const contacts = Array.from({ length: 20 }, (_, index) =>
+				contactWith({ id: BigInt(index + 1) })
+			);
+
+			let spyTrackEvent: MockInstance<typeof analytics.trackEvent>;
+
+			beforeEach(() => {
+				spyTrackEvent = vi.spyOn(analytics, 'trackEvent').mockImplementation(() => {});
+				vi.spyOn(toastsStore, 'toastsError').mockReturnValue(Symbol('toast'));
+
+				mockGetContactsPage.mockResolvedValue(page({ contacts }));
+			});
+
+			const imageOf = (id: bigint) =>
+				get(contactsStore)?.find((contact) => contact.id === id)?.image;
+
+			it('should load the images in batches of 16 and add them to their contacts', async () => {
+				mockGetContactImages
+					.mockResolvedValueOnce([imageEntry(1n)])
+					.mockResolvedValueOnce([imageEntry(17n)]);
+
+				await loadContacts(mockIdentity);
+
+				expect(mockGetContactImages).toHaveBeenCalledTimes(2);
+				expect(mockGetContactImages).toHaveBeenNthCalledWith(1, {
+					identity: mockIdentity,
+					contactIds: contacts.slice(0, 16).map(({ id }) => id)
+				});
+				expect(mockGetContactImages).toHaveBeenNthCalledWith(2, {
+					identity: mockIdentity,
+					contactIds: contacts.slice(16).map(({ id }) => id)
+				});
+
+				expect(imageOf(1n)).toEqual(mockContactImage);
+				expect(imageOf(17n)).toEqual(mockContactImage);
+				// Known to have no image.
+				expect(imageOf(2n)).toBeNull();
+				expect(spyTrackEvent).not.toHaveBeenCalled();
+			});
+
+			it('should keep the contacts and track a warn once when an image batch fails', async () => {
+				mockGetContactImages
+					.mockResolvedValueOnce([imageEntry(1n)])
+					.mockRejectedValueOnce(new Error('Failed to fetch'));
+
+				await loadContacts(mockIdentity);
+
+				expect(get(contactsStore)).toHaveLength(20);
+				expect(imageOf(1n)).toEqual(mockContactImage);
+				// Not loaded: `updateContact` reads it before writing.
+				expect(imageOf(17n)).toBeUndefined();
+				expect(spyTrackEvent).toHaveBeenCalledExactlyOnceWith({
+					name: 'contact',
+					metadata: {
+						event_context: 'contacts',
+						event_modifier: 'load_images',
+						result_status: 'error',
+						event_severity: 'warn',
+						result_error_type: 'unknown'
+					}
+				});
+			});
+
+			it('should leave a contact edited while its image loads as it is', async () => {
+				const editedImage: ContactImage = {
+					data: new Uint8Array([9]),
+					mime_type: { 'image/png': null }
+				};
+
+				let resolveImages: (entries: ReturnType<typeof imageEntry>[]) => void = () => {};
+				mockGetContactImages.mockReturnValueOnce(
+					new Promise((resolve) => {
+						resolveImages = resolve;
+					})
+				);
+
+				const promise = loadContacts(mockIdentity);
+
+				await vi.waitFor(() => expect(get(contactsStore)).toHaveLength(20));
+
+				const contact = get(contactsStore)?.find(({ id }) => id === 1n);
+				contactsStore.updateContact({ ...(contact as ContactUi), image: editedImage });
+
+				resolveImages([imageEntry(1n)]);
+				await promise;
+
+				expect(imageOf(1n)).toEqual(editedImage);
+			});
+
+			it('should not add the images of an older load to the contacts of a newer one', async () => {
+				const newerImage: ContactImage = {
+					data: new Uint8Array([7]),
+					mime_type: { 'image/png': null }
+				};
+
+				mockGetContactsPage.mockResolvedValue(page({ contacts: [contactWith({ id: 1n })] }));
+
+				let resolveOlderImages: (entries: ReturnType<typeof imageEntry>[]) => void = () => {};
+				let resolveNewerImages: (entries: ReturnType<typeof imageEntry>[]) => void = () => {};
+				mockGetContactImages
+					.mockReturnValueOnce(
+						new Promise((resolve) => {
+							resolveOlderImages = resolve;
+						})
+					)
+					.mockReturnValueOnce(
+						new Promise((resolve) => {
+							resolveNewerImages = resolve;
+						})
+					);
+
+				const olderLoad = loadContacts(mockIdentity);
+				await vi.waitFor(() => expect(mockGetContactImages).toHaveBeenCalledOnce());
+
+				const newerLoad = loadContacts(mockIdentity);
+				await vi.waitFor(() => expect(mockGetContactImages).toHaveBeenCalledTimes(2));
+
+				resolveOlderImages([imageEntry(1n)]);
+				await olderLoad;
+
+				// Left for the newer load, whose images are still on the way.
+				expect(imageOf(1n)).toBeUndefined();
+
+				resolveNewerImages([{ contact_id: 1n, image: newerImage }]);
+				await newerLoad;
+
+				expect(imageOf(1n)).toEqual(newerImage);
+			});
+		});
+
+		describe('retries', () => {
+			const mockContacts = [contactWith({ id: 1n, addresses: [mockBackendContactAddressBtc] })];
+
+			// Shaped like the agent's rejected query: its HTTP details carry the request, with the sender.
+			const mockError = (() => {
+				const code = new UncertifiedRejectErrorCode(
+					requestIdOf({ method_name: 'get_contacts_page' }),
+					ReplicaRejectCode.CanisterError,
+					'Canister is stopped',
+					'IC0508',
+					undefined
+				);
+				const httpDetails = {
+					ok: true,
+					status: 200,
+					statusText: 'OK',
+					headers: [],
+					requestDetails: { request_type: 'query', sender: mockPrincipal }
+				};
+				code.callContext = {
+					canisterId: Principal.fromText('doked-biaaa-aaaar-qag2a-cai'),
+					methodName: 'get_contacts_page',
+					httpDetails
+				};
+				return RejectError.fromCode(code);
+			})();
+
+			let spyTrackEvent: MockInstance<typeof analytics.trackEvent>;
+			let spyToastsError: MockInstance<typeof toastsStore.toastsError>;
+
+			beforeEach(() => {
+				vi.useFakeTimers();
+
+				spyTrackEvent = vi.spyOn(analytics, 'trackEvent').mockImplementation(() => {});
+				spyToastsError = vi.spyOn(toastsStore, 'toastsError').mockReturnValue(Symbol('toast'));
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			it('should neither track nor toast when the first attempt loads the contacts', async () => {
+				mockGetContactsPage.mockResolvedValue(page({ contacts: mockContacts }));
+
+				await loadContacts(mockIdentity);
+
+				expect(mockGetContactsPage).toHaveBeenCalledOnce();
+				expect(get(contactsStore)).toHaveLength(1);
+				expect(spyTrackEvent).not.toHaveBeenCalled();
+				expect(spyToastsError).not.toHaveBeenCalled();
+			});
+
+			it('should retry after 2 s and track a warn when the retry loads the contacts', async () => {
+				mockGetContactsPage
+					.mockRejectedValueOnce(mockError)
+					.mockResolvedValueOnce(page({ contacts: mockContacts }));
+
+				const promise = loadContacts(mockIdentity);
+
+				await vi.advanceTimersByTimeAsync(1_999);
+
+				expect(mockGetContactsPage).toHaveBeenCalledOnce();
+				expect(get(contactsStore)).toBeUndefined();
+
+				await vi.advanceTimersByTimeAsync(1);
+				await promise;
+
+				expect(mockGetContactsPage).toHaveBeenCalledTimes(2);
+				expect(get(contactsStore)).toHaveLength(1);
+				expect(spyTrackEvent).toHaveBeenCalledExactlyOnceWith({
+					name: 'contact',
+					metadata: {
+						event_context: 'contacts',
+						event_modifier: 'load_all',
+						result_status: 'success',
+						event_severity: 'warn'
+					}
+				});
+				expect(spyToastsError).not.toHaveBeenCalled();
+			});
+
+			it('should give up after the third attempt, waiting 2 s and then 4 s', async () => {
+				mockGetContactsPage.mockRejectedValue(mockError);
+
+				const promise = loadContacts(mockIdentity);
+
+				await vi.advanceTimersByTimeAsync(2_000);
+
+				expect(mockGetContactsPage).toHaveBeenCalledTimes(2);
+
+				await vi.advanceTimersByTimeAsync(3_999);
+
+				expect(mockGetContactsPage).toHaveBeenCalledTimes(2);
+
+				await vi.advanceTimersByTimeAsync(1);
+				await promise;
+
+				expect(mockGetContactsPage).toHaveBeenCalledTimes(3);
+
+				await vi.advanceTimersByTimeAsync(60_000);
+
+				expect(mockGetContactsPage).toHaveBeenCalledTimes(3);
+			});
+
+			it('should leave the store unset and toast and track the failure once', async () => {
+				mockGetContactsPage.mockRejectedValue(mockError);
+
+				const promise = loadContacts(mockIdentity);
+
+				await vi.runAllTimersAsync();
+				await promise;
+
+				expect(get(contactsStore)).toBeUndefined();
+				expect(mockGetContactImages).not.toHaveBeenCalled();
+				expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.contact.error.load },
+					err: mockError
+				});
+				expect(spyTrackEvent).toHaveBeenCalledExactlyOnceWith({
+					name: 'contact',
+					metadata: {
+						event_context: 'contacts',
+						event_modifier: 'load_all',
+						result_status: 'error',
+						event_severity: 'error',
+						result_error_type: 'call_rejected'
+					}
+				});
+			});
+
+			it('should track the error category, never the error text with its sender', async () => {
+				expect(mockError.message).toContain(mockPrincipal.toText());
+
+				mockGetContactsPage.mockRejectedValue(mockError);
+
+				const promise = loadContacts(mockIdentity);
+
+				await vi.runAllTimersAsync();
+				await promise;
+
+				const [[{ metadata }]] = spyTrackEvent.mock.calls;
+
+				expect(metadata).not.toHaveProperty('result_error');
+				expect(Object.values(metadata ?? {}).join(' ')).not.toContain(mockPrincipal.toText());
+			});
 		});
 	});
 
@@ -207,7 +505,7 @@ describe('manage-contacts.service', () => {
 					})
 				})
 			);
-			expect(result.image).toBeUndefined();
+			expect(result.image).toBeNull();
 		});
 
 		it('should maintain existing image when undefined is provided', async () => {
@@ -237,6 +535,64 @@ describe('manage-contacts.service', () => {
 			});
 
 			expect(result.image).toEqual(mockContactImage);
+		});
+
+		describe('when the image has not loaded yet', () => {
+			const mockGetContactImages = vi.spyOn(backendApi, 'getContactImages');
+
+			const contact: ContactUi = {
+				id: BigInt(1),
+				name: 'Contact',
+				updateTimestampNs: BigInt(Date.now()),
+				addresses: []
+			};
+
+			const updatedContact = {
+				id: BigInt(1),
+				name: 'Contact',
+				update_timestamp_ns: BigInt(Date.now()),
+				addresses: [],
+				image: toNullable(mockContactImage)
+			};
+
+			it('should read the image first and write it back', async () => {
+				mockGetContactImages.mockResolvedValue([{ contact_id: 1n, image: mockContactImage }]);
+				mockUpdateContact.mockResolvedValue(updatedContact);
+
+				await updateContact({ contact, identity: mockIdentity });
+
+				expect(mockGetContactImages).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					contactIds: [1n]
+				});
+				expect(mockUpdateContact).toHaveBeenCalledWith(
+					expect.objectContaining({
+						contact: expect.objectContaining({ image: toNullable(mockContactImage) })
+					})
+				);
+			});
+
+			it('should write no image when the contact has none', async () => {
+				mockGetContactImages.mockResolvedValue([]);
+				mockUpdateContact.mockResolvedValue({ ...updatedContact, image: toNullable() as [] });
+
+				await updateContact({ contact, identity: mockIdentity });
+
+				expect(mockUpdateContact).toHaveBeenCalledWith(
+					expect.objectContaining({
+						contact: expect.objectContaining({ image: toNullable(null) })
+					})
+				);
+			});
+
+			it('should not write when the image cannot be read', async () => {
+				const error = new Error('Failed to fetch');
+				mockGetContactImages.mockRejectedValue(error);
+
+				await expect(updateContact({ contact, identity: mockIdentity })).rejects.toThrow(error);
+
+				expect(mockUpdateContact).not.toHaveBeenCalled();
+			});
 		});
 	});
 });
