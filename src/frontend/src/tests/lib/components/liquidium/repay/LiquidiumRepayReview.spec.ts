@@ -102,9 +102,9 @@ describe('LiquidiumRepayReview', () => {
 
 	it('disables Confirm and says a repayment is still processing when pending repays cover the debt', () => {
 		const { getByTestId, container } = render(LiquidiumRepayReview, {
-			// 1.005 BTC pending ≥ 1 BTC principal + 0.005 BTC interest; the protocol buffer leaves a
-			// dust cap that the 100-sat amount fits, so the plain cap check alone would let it through.
-			props: { ...baseProps, amount: 0.000001, maxRepay: 150n, pendingRepay: 100_500_000n },
+			// 1 BTC pending ≥ the 1 BTC debt (interest included); the buffer leaves a dust cap that the
+			// 100-sat amount fits, so the plain cap check alone would let it through.
+			props: { ...baseProps, amount: 0.000001, maxRepay: 150n, pendingRepay: 100_000_000n },
 			context: mockContext()
 		});
 

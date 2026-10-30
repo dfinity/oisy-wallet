@@ -62,6 +62,11 @@ export const LIQUIDIUM_BORROWING_POWER_TOLERANCE = 1e-6;
 // Withdraw free-collateral cap tolerance, so a "Max" amount doesn't flag itself.
 export const LIQUIDIUM_WITHDRAW_CAP_TOLERANCE = 1e-6;
 
+// Headroom on the "Max (full debt)" repay for interest accruing between quote and settlement, in
+// bps of the debt. Same value as the SDK's own `getMaxRepayAmount` default.
+export const LIQUIDIUM_REPAY_BUFFER_BPS = 10n;
+export const LIQUIDIUM_BPS_SCALE = 10_000n;
+
 // Refresh cadence for markets + positions while the provider page is visible.
 export const LIQUIDIUM_POLL_INTERVAL_MILLIS = 30_000;
 
