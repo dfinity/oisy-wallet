@@ -1,3 +1,5 @@
+import { alchemyProviders } from '$eth/providers/alchemy.providers';
+import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import { liquidiumClient } from '$lib/api/liquidium.api';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
@@ -15,12 +17,18 @@ import {
 } from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
 import { getOrCreateLiquidiumProfile } from '$lib/services/liquidium.services';
+import {
+	liquidiumUnminedRepaysStore,
+	type LiquidiumUnminedRepaysData
+} from '$lib/stores/liquidium-unmined-repays.store';
+import type { OptionBalance } from '$lib/types/balance';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import {
 	LIQUIDIUM_EXTERNAL_REF_KEYS,
 	type LiquidiumExternalRefKey
 } from '$lib/types/liquidium-active-tx';
+import type { Token, TokenId } from '$lib/types/token';
 import { isActiveUserTransactionError } from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import {
@@ -145,6 +153,63 @@ export const liquidiumRepayCapError = ({
 			: amount > maxRepay
 				? new Error(i18n.liquidium.text.repay_exceeds_debt)
 				: undefined;
+
+// The balance the repay form spends from is read at the latest block, so an Ethereum transfer just
+// broadcast is still in it until it is mined and the balance reloaded. A second repay in that
+// window can spend it again, and the chain reverts that one. The transfer's `amount` is held back
+// for that long; a wait that fails (dropped, replaced, timed out) releases it to the balance poll.
+export const holdLiquidiumRepayUntilMined = async ({
+	hash,
+	token,
+	amount
+}: {
+	hash: string;
+	token: Token;
+	amount: bigint;
+}): Promise<void> => {
+	liquidiumUnminedRepaysStore.add({ hash, tokenId: token.id, amount });
+
+	try {
+		await alchemyProviders(token.network.id).wait(hash);
+
+		await reloadEthereumBalance(token);
+	} finally {
+		liquidiumUnminedRepaysStore.remove(hash);
+	}
+};
+
+// What a repay can still spend of `balance` while `tokenId`'s repay transfers are held back: all
+// of it for the balance check (`spendable`), and what is left after the fees the form reserves
+// from it for "Max" (`maxSpendable`). With nothing held `maxSpendable` is `undefined`, since the
+// form's own reservation from the balance is then the same.
+export const liquidiumRepaySpendable = ({
+	balance,
+	tokenId,
+	unminedRepays,
+	reserved
+}: {
+	balance: OptionBalance;
+	tokenId: TokenId;
+	unminedRepays: LiquidiumUnminedRepaysData;
+	reserved?: bigint;
+}): { spendable: OptionBalance; maxSpendable?: bigint } => {
+	const held = Object.values(unminedRepays).reduce(
+		(sum, { tokenId: heldTokenId, amount }) => (heldTokenId === tokenId ? sum + amount : sum),
+		ZERO
+	);
+
+	if (isNullish(balance) || held === ZERO) {
+		return { spendable: balance };
+	}
+
+	const spendable = balance > held ? balance - held : ZERO;
+
+	if (isNullish(reserved)) {
+		return { spendable };
+	}
+
+	return { spendable, maxSpendable: spendable > reserved ? spendable - reserved : ZERO };
+};
 
 // Broadcasts `amount` base units (gross = repay + provider fee) to the native target and returns
 // the txid the AUT poller correlates on. Implemented by the wizard (per-chain fee/UTXO machinery).
