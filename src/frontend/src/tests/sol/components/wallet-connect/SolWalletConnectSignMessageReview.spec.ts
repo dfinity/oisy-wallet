@@ -23,6 +23,17 @@ describe('SolWalletConnectSignMessageReview', () => {
 		expect(getByText(props.message)).toBeInTheDocument();
 	});
 
+	it('shows the message in the order it is signed, with its line breaks', () => {
+		const { getByText } = render(SolWalletConnectSignMessageReview, {
+			props: { ...props, message: 'Sign in to Example\nPay \u202E0001\u202C USDC' }
+		});
+
+		const message = getByText('Sign in to Example Pay 0001 USDC');
+
+		expect(message.textContent).toBe('Sign in to Example\nPay 0001 USDC');
+		expect(message).toHaveClass('whitespace-pre-wrap');
+	});
+
 	it('should render the field labels', () => {
 		const { getByText } = render(SolWalletConnectSignMessageReview, { props });
 
