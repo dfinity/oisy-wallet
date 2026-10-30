@@ -5,9 +5,9 @@ use candid::{CandidType, Deserialize, Nat, Principal};
 use serde_bytes::ByteBuf;
 use sha2::{Digest, Sha256};
 use shared::types::tip::{
-    MyTip, PublicTip, TipClaimFailure, TipDetails, TipError, TipStatus, MAX_TIPS_PER_USER,
-    MAX_TIP_EXPIRY_NS, MAX_TIP_ID_BYTES, MAX_TIP_MESSAGE_CHARS, TIP_CLAIM_CODE_HASH_BYTES,
-    TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS,
+    MyTip, PublicTip, TipClaimFailure, TipClaimFailureReason, TipDetails, TipError, TipStatus,
+    MAX_TIPS_PER_USER, MAX_TIP_EXPIRY_NS, MAX_TIP_ID_BYTES, MAX_TIP_MESSAGE_CHARS,
+    TIP_CLAIM_CODE_HASH_BYTES, TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS, TIP_PAYOUT_DEDUP_WINDOW_NS,
 };
 
 /// Where a tip is in its lifecycle, as stored.
@@ -64,6 +64,21 @@ pub struct TipRecord {
     /// means for the reader, and only reports `Failed` while the tip is still
     /// live. `Option` so records already in stable memory keep decoding.
     pub last_claim_failure: Option<TipClaimFailure>,
+    /// The `created_at_time` this tip's payout is sent with, pinned by the first
+    /// claim attempt and reused by later ones.
+    ///
+    /// This is what makes a retry the *same* transaction to the ledger, so an
+    /// attempt whose answer never arrived is deduplicated rather than executed
+    /// twice. `TipState::Claiming`'s `started_at_ns` cannot serve: it is taken
+    /// fresh on every takeover, which is precisely what would defeat
+    /// deduplication.
+    ///
+    /// One stamp per tip rather than per claimer, because two claimers differ in
+    /// the `to` account and their payouts are distinct transactions regardless.
+    /// `Option` so records already in stable memory keep decoding, and so a
+    /// stamp the ledger has stopped recognising can be retired — see
+    /// [`TIP_PAYOUT_DEDUP_WINDOW_NS`].
+    pub payout_created_at_ns: Option<u64>,
 }
 
 impl TipRecord {
@@ -113,6 +128,74 @@ impl TipRecord {
                     TipStatus::Reserved
                 }
             }
+        }
+    }
+
+    /// Reserves the tip for a claim attempt: flips it to `Claiming` and settles
+    /// the `created_at_time` the payout will carry.
+    ///
+    /// The stamp the first attempt pinned is reused while the ledger can still
+    /// deduplicate against it, and renewed once it has aged past
+    /// [`TIP_PAYOUT_DEDUP_WINDOW_NS`] — a stamp the ledger would answer `TooOld`
+    /// for is worse than no stamp, since it refuses the retry instead of
+    /// resolving it. Renewing is the point at which the earlier attempt's
+    /// outcome stops being knowable: nothing below the ledger can tell whether
+    /// it landed, and the allowance covering exactly one payout is what still
+    /// keeps a tip from paying twice.
+    ///
+    /// What this does not resolve, because the ledger cannot: the stamp is shared
+    /// but a transaction's identity also covers the `to` account, so only a retry
+    /// by the *same claimer* is recognised. If claimer A's payout landed and its
+    /// answer was lost, A retrying is told it worked — but claimer B arriving
+    /// first sends a different transaction, meets the spent allowance, and is
+    /// told `Uncovered`, while the tip stays unrecorded as paid until A comes
+    /// back. Nobody is paid twice; the record is merely late. And a retry past
+    /// [`TIP_PAYOUT_DEDUP_WINDOW_NS`] by anyone is the same open question.
+    ///
+    /// Returns the stamp alongside the record so the caller never has to unwrap
+    /// the `Option` it has just filled in.
+    pub fn start_claim(self, claimer: Principal, now_ns: u64) -> (Self, u64) {
+        let payout_created_at_ns = self
+            .payout_created_at_ns
+            .filter(|pinned| now_ns.saturating_sub(*pinned) < TIP_PAYOUT_DEDUP_WINDOW_NS)
+            .unwrap_or(now_ns);
+
+        (
+            Self {
+                state: TipState::Claiming {
+                    claimer,
+                    started_at_ns: now_ns,
+                },
+                payout_created_at_ns: Some(payout_created_at_ns),
+                ..self
+            },
+            payout_created_at_ns,
+        )
+    }
+
+    /// Returns a tip whose payout did not happen to `Reserved` and records why.
+    ///
+    /// `retire_payout_stamp` drops the pinned `created_at_time`, and only a
+    /// `TooOld` answer asks for it: the ledger has said it no longer recognises
+    /// that stamp, so every retry carrying it would be refused the same way and
+    /// the tip would be unclaimable for the rest of its life. Dropping it costs
+    /// the one thing the stamp bought — from here on the ledger cannot say
+    /// whether the earlier attempt landed — which is why no other failure does.
+    pub fn released_after_failure(
+        self,
+        reason: TipClaimFailureReason,
+        at_ns: u64,
+        retire_payout_stamp: bool,
+    ) -> Self {
+        Self {
+            state: TipState::Reserved,
+            last_claim_failure: Some(TipClaimFailure { at_ns, reason }),
+            payout_created_at_ns: if retire_payout_stamp {
+                None
+            } else {
+                self.payout_created_at_ns
+            },
+            ..self
         }
     }
 
@@ -251,7 +334,6 @@ pub fn new_tip_exceeds_cap(active_count: usize) -> bool {
 #[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;
-    use shared::types::tip::TipClaimFailureReason;
 
     use super::*;
 
@@ -273,6 +355,7 @@ mod tests {
             state,
             terminal_at_ns: None,
             last_claim_failure: None,
+            payout_created_at_ns: None,
         }
     }
 
@@ -506,6 +589,192 @@ mod tests {
             TipStatus::Reserved,
             "an attempt is not a payout: History still reads Reserved"
         );
+    }
+
+    /// What a retry is allowed to change, and what it is not.
+    ///
+    /// The in-flight guard has to move with each attempt — that is how a claim
+    /// whose reply never came back stops blocking the tip. The payout's
+    /// `created_at_time` has to do the opposite: if it moved with the attempt,
+    /// the retry would be a *different* transaction, the ledger would have
+    /// nothing to match it against, and the one thing the stamp exists to buy
+    /// would be gone. Both live on the same record, which is why this is worth
+    /// nailing down.
+    #[test]
+    fn a_retry_keeps_the_payout_stamp_and_moves_only_the_in_flight_guard() {
+        let claimer = principal(2);
+        let first_attempt = 1_000 * ONE_SEC;
+        let tip = record(TipState::Reserved, first_attempt + MAX_TIP_EXPIRY_NS);
+
+        let (claiming, pinned) = tip.start_claim(claimer, first_attempt);
+        assert_eq!(pinned, first_attempt, "the first attempt sets the stamp");
+        assert_eq!(claiming.payout_created_at_ns, Some(first_attempt));
+
+        // The attempt lapses and the tip goes back into the pool, carrying the
+        // stamp with it — exactly what `release_claim` writes.
+        let released = TipRecord {
+            state: TipState::Reserved,
+            ..claiming
+        };
+
+        let retry = first_attempt + TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS;
+        let (retried, reused) = released.start_claim(claimer, retry);
+        assert_eq!(
+            reused, first_attempt,
+            "a retry sends the first attempt's transaction, or the ledger cannot \
+             tell it is the same one"
+        );
+        assert_eq!(retried.payout_created_at_ns, Some(first_attempt));
+        assert!(
+            matches!(
+                retried.state,
+                TipState::Claiming { started_at_ns, .. } if started_at_ns == retry
+            ),
+            "while the in-flight guard restarts, so the next takeover is timed \
+             from this attempt and not the first"
+        );
+
+        // A different claimer inherits it harmlessly: their `to` account already
+        // makes their payout a different transaction.
+        let (_, inherited) = TipRecord {
+            state: TipState::Reserved,
+            ..retried.clone()
+        }
+        .start_claim(principal(3), retry + ONE_SEC);
+        assert_eq!(inherited, first_attempt);
+    }
+
+    /// Past the ledger's window a pinned stamp is worse than none: it would be
+    /// answered `TooOld` on every attempt, leaving a live tip permanently
+    /// unclaimable. Renewing costs the deduplication the stamp bought, which is
+    /// the honest price of a ledger that no longer remembers.
+    #[test]
+    fn a_payout_stamp_is_renewed_once_the_ledger_can_no_longer_match_it() {
+        let claimer = principal(2);
+        let first_attempt = 1_000 * ONE_SEC;
+        let tip = record(TipState::Reserved, first_attempt + MAX_TIP_EXPIRY_NS);
+        let (claiming, _) = tip.start_claim(claimer, first_attempt);
+        let released = TipRecord {
+            state: TipState::Reserved,
+            ..claiming
+        };
+
+        let last_moment = first_attempt + TIP_PAYOUT_DEDUP_WINDOW_NS - 1;
+        assert_eq!(
+            released.clone().start_claim(claimer, last_moment).1,
+            first_attempt,
+            "inside the window the stamp still stands"
+        );
+
+        let past_it = first_attempt + TIP_PAYOUT_DEDUP_WINDOW_NS;
+        let (renewed, fresh) = released.clone().start_claim(claimer, past_it);
+        assert_eq!(fresh, past_it, "the boundary is where it is renewed");
+        assert_eq!(renewed.payout_created_at_ns, Some(past_it));
+
+        // And a stamp the ledger refused outright is retired by `release_claim`,
+        // which lands here as a record with none.
+        let retired = TipRecord {
+            state: TipState::Reserved,
+            payout_created_at_ns: None,
+            ..released
+        };
+        let within_the_window = first_attempt + ONE_SEC;
+        assert_eq!(
+            retired.start_claim(claimer, within_the_window).1,
+            within_the_window,
+            "a retired stamp is never resurrected, however recent it was"
+        );
+    }
+
+    /// A failed attempt must hand the stamp to the next one untouched. This is the
+    /// step between two attempts that the in-memory test above cannot see: the
+    /// stamp only helps a retry if the write that returns the tip to `Reserved`
+    /// leaves it alone.
+    #[test]
+    fn a_failed_attempt_keeps_the_payout_stamp_unless_the_ledger_refused_it() {
+        let stamped = TipRecord {
+            payout_created_at_ns: Some(5),
+            ..record(
+                TipState::Claiming {
+                    claimer: principal(2),
+                    started_at_ns: 5,
+                },
+                1_000,
+            )
+        };
+
+        let kept =
+            stamped
+                .clone()
+                .released_after_failure(TipClaimFailureReason::TransferFailed, 9, false);
+        assert_eq!(kept.payout_created_at_ns, Some(5));
+        assert!(matches!(kept.state, TipState::Reserved));
+        assert_eq!(
+            kept.last_claim_failure,
+            Some(TipClaimFailure {
+                at_ns: 9,
+                reason: TipClaimFailureReason::TransferFailed
+            })
+        );
+
+        let retired =
+            stamped.released_after_failure(TipClaimFailureReason::TransferFailed, 9, true);
+        assert_eq!(
+            retired.payout_created_at_ns, None,
+            "a stamp the ledger refused is dropped, so the next attempt pins a fresh one"
+        );
+        assert!(matches!(retired.state, TipState::Reserved));
+    }
+
+    /// The shape a row had before the payout stamp existed. Rows like this are in
+    /// stable memory on every canister already running tips, and must keep
+    /// decoding — candid reads the missing trailing `opt` as `None`, which this
+    /// pins rather than assumes.
+    #[derive(CandidType, Deserialize)]
+    struct RecordBeforeThePayoutStamp {
+        sender: Principal,
+        ledger_canister_id: Principal,
+        amount: Nat,
+        expires_at_ns: u64,
+        created_at_ns: u64,
+        message: Option<String>,
+        claim_code_hash: ByteBuf,
+        state: TipState,
+        terminal_at_ns: Option<u64>,
+        last_claim_failure: Option<TipClaimFailure>,
+    }
+
+    #[test]
+    fn a_row_written_before_the_payout_stamp_still_decodes_and_the_stamp_round_trips() {
+        let old = RecordBeforeThePayoutStamp {
+            sender: principal(1),
+            ledger_canister_id: principal(9),
+            amount: Nat::from(1_000u64),
+            expires_at_ns: 100,
+            created_at_ns: 7,
+            message: Some("thanks!".to_string()),
+            claim_code_hash: ByteBuf::from(sha256(b"code").to_vec()),
+            state: TipState::Reserved,
+            terminal_at_ns: None,
+            last_claim_failure: None,
+        };
+
+        let decoded: TipRecord =
+            candid::decode_one(&candid::encode_one(&old).unwrap()).expect("an old row decodes");
+        assert_eq!(decoded.payout_created_at_ns, None);
+        assert_eq!(decoded.amount, Nat::from(1_000u64));
+        assert_eq!(decoded.created_at_ns, 7);
+        assert!(matches!(decoded.state, TipState::Reserved));
+
+        // And the new field survives a write and a read, which is what a stamp
+        // pinned before the ledger call and read back by the retry depends on.
+        let stamped = TipRecord {
+            payout_created_at_ns: Some(1_234),
+            ..decoded
+        };
+        let reread: TipRecord = candid::decode_one(&candid::encode_one(&stamped).unwrap())
+            .expect("a stamped row decodes");
+        assert_eq!(reread.payout_created_at_ns, Some(1_234));
     }
 
     #[test]

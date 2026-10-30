@@ -11,8 +11,8 @@ use std::cmp::Reverse;
 use candid::Principal;
 use ic_cdk::api::{canister_self, msg_caller, time};
 use shared::types::tip::{
-    CreateTipRequest, MyTip, PublicTip, TipClaim, TipClaimFailure, TipClaimFailureReason,
-    TipClaimRequest, TipDetails, TipError, MAX_TIPS_RETURNED, TIP_RETENTION_AFTER_TERMINAL_NS,
+    CreateTipRequest, MyTip, PublicTip, TipClaim, TipClaimFailureReason, TipClaimRequest,
+    TipDetails, TipError, MAX_TIPS_RETURNED, TIP_RETENTION_AFTER_TERMINAL_NS,
 };
 
 use super::{
@@ -221,6 +221,7 @@ pub async fn create_tip(request: CreateTipRequest) -> Result<(), TipError> {
                 state: TipState::Reserved,
                 terminal_at_ns: None,
                 last_claim_failure: None,
+                payout_created_at_ns: None,
             },
         );
         Ok(())
@@ -268,17 +269,28 @@ pub fn get_tip_details(request: TipClaimRequest) -> Result<TipDetails, TipError>
 ///
 /// The record flips to `Claiming` **before** the ledger call, so a second caller
 /// arriving mid-flight sees `ClaimInProgress` rather than starting a second
-/// payout. Every failure reverts to `Reserved` — safe even for an ambiguous
-/// transport error, because the allowance is the source of truth: if the
-/// transfer did happen, the next claim finds it consumed and fails `Uncovered`.
+/// payout. Every failure reverts to `Reserved`, which is safe even for an
+/// answer that never came back: the payout carries the tip's own
+/// `created_at_time`, so the retry is the *same* transaction and the ledger
+/// either executes it once or names the block where it already did.
+///
+/// That is what an ambiguous answer is worth resolving into. Without the stamp a
+/// payout that landed and whose reply was lost came back on the next attempt as
+/// a spent allowance — the claimer told the tip was no longer available while
+/// the money sat in their account, and the sender's History saying the
+/// reservation had been revoked. Both wrong, in the one direction a payments
+/// feature cannot afford.
 ///
 /// **Once, but not by this state machine alone.** The `Claiming` guard lapses
 /// after [`TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS`], because a claim whose reply never
 /// comes back must not strand the tip forever. A first `transfer_from` that is
 /// still genuinely in flight past that point — a congested subnet, not only the
-/// upgrade case — can therefore overlap a second attempt. What stops both from
-/// paying is the allowance covering exactly one payout, which the client sizes
-/// and `create_tip` only checks a lower bound on. So "exactly once" is a
+/// upgrade case — can therefore overlap a second attempt. Deduplication covers
+/// that overlap, but only while the ledger still recognises the stamp
+/// ([`TIP_PAYOUT_DEDUP_WINDOW_NS`]); past that the tip starts a new transaction
+/// identity and the question is open again. What stops both from paying either
+/// way is the allowance covering exactly one payout, which the client sizes and
+/// `create_tip` only checks a lower bound on. So "exactly once" remains a
 /// property of the allowance, and this code's job is not to weaken it.
 ///
 /// # Errors
@@ -291,7 +303,7 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
     let key = TipId(tip_id.clone());
 
     // Reserve the claim, then release the state borrow before awaiting.
-    let record = mutate_state(|s| {
+    let (record, payout_created_at_ns) = mutate_state(|s| {
         let Some(Candid(record)) = s.tips.get(&key) else {
             return Err(TipError::NotFound);
         };
@@ -307,15 +319,11 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
             return Err(TipError::NotFound);
         }
 
-        let claiming = TipRecord {
-            state: TipState::Claiming {
-                claimer,
-                started_at_ns: now,
-            },
-            ..record
-        };
+        // Pinned here rather than at the call below, and committed with the
+        // reservation: a stamp the retry cannot read back is no stamp at all.
+        let (claiming, payout_created_at_ns) = record.start_claim(claimer, now);
         store_tip(s, &key, claiming.clone());
-        Ok(claiming)
+        Ok((claiming, payout_created_at_ns))
     })?;
 
     let transfer = icrc2::transfer_from(
@@ -338,7 +346,12 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
             amount: record.amount.clone(),
             fee: None,
             memo: None,
-            created_at_time: None,
+            // The tip's own stamp, not this attempt's. Every other field here is
+            // already fixed by the tip, so pinning this one makes a retry the
+            // same transaction to the ledger — which is what turns "the answer
+            // never came back" from a payout written off as a failure into a
+            // payout the ledger can still account for.
+            created_at_time: Some(payout_created_at_ns),
         },
     )
     .await;
@@ -386,21 +399,50 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
                 block_index,
             })
         }
-        Err(err) => {
-            let reason = match &err {
-                TransferFromCallError::InsufficientAllowance => TipClaimFailureReason::Uncovered,
-                TransferFromCallError::InsufficientFunds => {
-                    TipClaimFailureReason::InsufficientFunds
-                }
-                TransferFromCallError::Failed(_) => TipClaimFailureReason::TransferFailed,
-            };
-            release_claim(&key, claimer, now, reason);
-            match err {
-                TransferFromCallError::InsufficientAllowance => Err(TipError::Uncovered),
-                TransferFromCallError::InsufficientFunds => Err(TipError::InsufficientFunds),
-                TransferFromCallError::Failed(msg) => Err(TipError::TransferFailed { msg }),
-            }
+        Err(err) => Err(refuse_claim(&key, claimer, now, err)),
+    }
+}
+
+/// The failure half of [`claim_tip`]: returns the tip to the pool, records why,
+/// and says what the claimer is told.
+///
+/// One function because the two are the same decision read twice — History's
+/// reason and the caller's error partition the ledger's refusals exactly the
+/// same way, and letting them drift apart is how a claimer and a sender end up
+/// with different accounts of the same attempt.
+fn refuse_claim(
+    key: &TipId,
+    claimer: Principal,
+    started_at_ns: u64,
+    err: TransferFromCallError,
+) -> TipError {
+    let reason = match &err {
+        TransferFromCallError::InsufficientAllowance => TipClaimFailureReason::Uncovered,
+        TransferFromCallError::InsufficientFunds => TipClaimFailureReason::InsufficientFunds,
+        // Nothing finer to say about a stale stamp: it is one more attempt that
+        // did not pay out, and retrying is the advice.
+        TransferFromCallError::TooOld | TransferFromCallError::Failed(_) => {
+            TipClaimFailureReason::TransferFailed
         }
+    };
+
+    release_claim(
+        key,
+        claimer,
+        started_at_ns,
+        reason,
+        matches!(err, TransferFromCallError::TooOld),
+    );
+
+    match err {
+        TransferFromCallError::InsufficientAllowance => TipError::Uncovered,
+        TransferFromCallError::InsufficientFunds => TipError::InsufficientFunds,
+        TransferFromCallError::TooOld => TipError::TransferFailed {
+            msg: "the payout's created_at_time fell outside the ledger's transaction window; \
+                  the next attempt starts a new one"
+                .to_string(),
+        },
+        TransferFromCallError::Failed(msg) => TipError::TransferFailed { msg },
     }
 }
 
@@ -429,29 +471,23 @@ fn claim_is_ours(record: &TipRecord, claimer: Principal, started_at_ns: u64) -> 
 /// The record is what lets History separate "nobody has tried this yet" from
 /// "somebody tried and it did not pay out", which is the only one of the two the
 /// sender can act on.
+///
+/// `retire_payout_stamp` is passed through to
+/// [`TipRecord::released_after_failure`], which says when it is right to set it.
 fn release_claim(
     key: &TipId,
     claimer: Principal,
     started_at_ns: u64,
     reason: TipClaimFailureReason,
+    retire_payout_stamp: bool,
 ) {
     mutate_state(|s| {
         let Some(Candid(current)) = s.tips.get(key) else {
             return;
         };
         if claim_is_ours(&current, claimer, started_at_ns) {
-            store_tip(
-                s,
-                key,
-                TipRecord {
-                    state: TipState::Reserved,
-                    last_claim_failure: Some(TipClaimFailure {
-                        at_ns: time(),
-                        reason,
-                    }),
-                    ..current
-                },
-            );
+            let released = current.released_after_failure(reason, time(), retire_payout_stamp);
+            store_tip(s, key, released);
         }
     });
 }
@@ -618,6 +654,7 @@ mod tests {
             state,
             terminal_at_ns: None,
             last_claim_failure: None,
+            payout_created_at_ns: None,
         }
     }
 

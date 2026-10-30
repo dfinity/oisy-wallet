@@ -141,6 +141,41 @@ user data must stay below that at the caps, not only for typical data:
 - Leave the existing endpoint as it is for callers that already use it
   (`get_contacts`).
 
+## Ledger transfers — carry a `created_at_time`
+
+Any call that **moves** tokens (`icrc1_transfer`, `icrc2_transfer_from`) sets
+`created_at_time`, and the value is pinned on the record a retry reads back —
+not taken fresh per attempt, or the retry is a different transaction and there
+is nothing to match it against.
+
+- Without it, a call that times out, traps on the way back, or fails to decode
+  is indistinguishable from one that never executed, and the canister writes off
+  a payout that landed as a failure.
+- With it, the ledger deduplicates: an identical retry is not executed again and
+  the reply is `TransferFromError::Duplicate { duplicate_of }`, naming the
+  original block. Treat that as **success** carrying that block index.
+- `TooOld` means the stamp has aged out of the ledger's transaction window (24
+  hours on the ledgers this repo targets), so the ledger can no longer say what
+  became of the earlier attempt and will refuse every retry carrying it. Retire
+  the stamp so the next attempt pins a fresh one — and renew it before the
+  window closes rather than spending an attempt on the refusal
+  (`TIP_PAYOUT_DEDUP_WINDOW_NS`).
+- `CreatedInFuture` is a plain failure: nothing was written, and the same stamp
+  is accepted once the ledger's clock passes it.
+- Deduplication narrows the ambiguous window; it does not replace the invariant
+  that makes a second payout impossible. For tips that is the allowance covering
+  exactly one payout. Keep both.
+
+Worked example: `classify` in
+[`tips/icrc2.rs`](../../../src/backend/src/tips/icrc2.rs) and
+`TipRecord::start_claim` in
+[`tips/model.rs`](../../../src/backend/src/tips/model.rs).
+
+`icrc2_approve` is a different kind of call — it sets an allowance to an
+absolute value rather than accumulating, so a repeat does not compound;
+[`signer/service.rs`](../../../src/backend/src/signer/service.rs) passes `None`
+there.
+
 ## Threshold signatures — chain-fusion signer only
 
 - Direct calls to `sign_with_ecdsa` / `sign_with_schnorr` are forbidden

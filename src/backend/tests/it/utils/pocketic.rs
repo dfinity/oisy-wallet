@@ -7,8 +7,10 @@ use ic_cdk_bitcoin_canister::Network as BitcoinNetwork;
 use ic_cycles_ledger_client::{InitArgs, LedgerArgs};
 pub use pic_canister::PicCanisterTrait;
 use pocket_ic::{
+    common::rest::{RawEffectivePrincipal, RawMessageId},
     CanisterSettings, CreateCanisterParams, CreateCanisterPlacement, PocketIc, PocketIcBuilder,
 };
+use serde_bytes::ByteBuf;
 use shared::types::{
     backend_config::{Arg, InitArg},
     user_profile::{CreateUserProfileError, HasUserProfileResponse, OisyUser, UserProfile},
@@ -16,6 +18,27 @@ use shared::types::{
 
 use super::mock::{CONTROLLER, FRONTEND_DERIVATION_ORIGIN, II_CANISTER_ID, SIGNER_CANISTER_ID};
 use crate::utils::mock::CALLER;
+
+/// The `install_code` arguments of the management canister, restated here only
+/// because a test needs to *submit* one without waiting for it, which
+/// `PocketIc::upgrade_canister` does not offer. Only the shapes it encodes.
+#[derive(CandidType)]
+struct InstallCodeArgs {
+    mode: InstallMode,
+    canister_id: Principal,
+    wasm_module: ByteBuf,
+    arg: ByteBuf,
+}
+
+// The variant's name is its name on the wire, which is lowercase.
+#[expect(non_camel_case_types)]
+#[derive(CandidType)]
+enum InstallMode {
+    upgrade(Option<()>),
+}
+
+/// A WebAssembly module with no sections: the smallest thing the IC will install.
+const EMPTY_WASM_MODULE: [u8; 8] = [0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00];
 
 const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
 const DEFAULT_BITCOIN_WASM: &str = "../../ic-btc-canister.wasm.gz";
@@ -494,6 +517,62 @@ impl PicBackend {
             env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());
 
         self.upgrade_with_wasm(&backend_wasm_path, encoded_arg)
+    }
+
+    /// Submits an upgrade of the backend to an **empty module**, without waiting
+    /// for it. Exists to lose a reply on demand: submitted alongside a payout
+    /// already handed to a ledger, it is executed in the same round, so the
+    /// ledger's answer arrives at a canister that has just been replaced and has
+    /// nothing to receive it. Stable memory survives an upgrade, so
+    /// [`Self::restore_latest_wasm_in_place`] brings the same state back.
+    ///
+    /// An empty module because the real one is over the ingress size limit, which
+    /// `PocketIc::upgrade_canister` works around and a plain submit does not.
+    pub fn submit_upgrade_to_empty_module(&self) -> RawMessageId {
+        self.pic
+            .submit_call_with_effective_principal(
+                Principal::management_canister(),
+                RawEffectivePrincipal::CanisterId(self.canister_id.as_slice().to_vec()),
+                controller(),
+                "install_code",
+                encode_one(InstallCodeArgs {
+                    mode: InstallMode::upgrade(None),
+                    canister_id: self.canister_id,
+                    wasm_module: ByteBuf::from(EMPTY_WASM_MODULE.to_vec()),
+                    arg: ByteBuf::default(),
+                })
+                .unwrap(),
+            )
+            .expect("the upgrade should be accepted")
+    }
+
+    /// Puts the real backend back, **without the day-long wait**
+    /// [`Self::upgrade_with_wasm`] starts with. The clock staying where it was is
+    /// the point, for a test that cares how old a timestamp is. Safe once or
+    /// twice; many upgrades in a row would be throttled, which is what the wait
+    /// is for.
+    pub fn restore_latest_wasm_in_place(&self) -> Result<(), String> {
+        let backend_wasm_path =
+            env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());
+        let wasm_bytes = read(&backend_wasm_path)
+            .unwrap_or_else(|_| panic!("Could not find the backend wasm: {backend_wasm_path}"));
+
+        // Mirrors `upgrade_with_wasm`, argument encoding included.
+        let arg = encode_one(init_arg()).unwrap();
+
+        self.pic
+            .upgrade_canister(
+                self.canister_id,
+                wasm_bytes,
+                encode_one(&arg).unwrap(),
+                Some(controller()),
+            )
+            .map_err(|e| {
+                format!(
+                    "Upgrade canister error code: {:?}, message: {}",
+                    e.reject_code, e.reject_message
+                )
+            })
     }
 
     pub fn upgrade_with_wasm(
