@@ -33,6 +33,7 @@ export const {
 	OISY_SCAN_URL,
 	OISY_PAY_URL,
 	OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL,
+	OISY_ICP_MEMO_DOCS_URL,
 	OISY_EXPORT_DATA_DOCS_URL
 } = safeParse({
 	schema: OisyMetadataSchema,
@@ -68,6 +69,7 @@ export const {
 		OISY_SCAN_URL: '',
 		OISY_PAY_URL: '',
 		OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL: '',
+		OISY_ICP_MEMO_DOCS_URL: '',
 		OISY_EXPORT_DATA_DOCS_URL: ''
 	}
 });

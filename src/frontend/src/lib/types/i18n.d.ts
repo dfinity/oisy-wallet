@@ -810,6 +810,7 @@ interface I18nSend {
 		xrp_destination_tag_missing: string;
 		fee_expired: string;
 		fee_info: string;
+		icp_memo_methods: string;
 		scanned_address_only_destination: string;
 		scanned_address_only_destination_single_token: string;
 	};
