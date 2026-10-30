@@ -519,6 +519,26 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"minglechat": {
+				"name": "Mingle Chat",
+				"one_liner": "トークン送信を備えた暗号化メッセンジャー。",
+				"description": "Mingle Chat は、Internet Computer 上で完全に動作するエンドツーエンド暗号化メッセンジャーです。1対1やグループでのチャット、ボイスメッセージ・画像・ファイルの共有に加え、会話の中から直接トークンを送ることができます。すべての送金は OISY で署名されます。"
+			},
+			"icforums": {
+				"name": "IC Forums",
+				"one_liner": "Internet Computer 上のコミュニティフォーラム。",
+				"description": "IC Forums は、Internet Computer 上で完全に動作するコミュニティプラットフォームです。100 以上のコミュニティで議論に参加したり、独自の構成・役割・モデレーションを持つ自分のコミュニティを作成したりできます。1つの ID ですべてのコミュニティを利用できます。"
+			},
+			"storica": {
+				"name": "Storica",
+				"one_liner": "Internet Computer 上の、あなた専用のクラウドストレージ。",
+				"description": "Storica は、約1分で Internet Computer 上にプライベートなストレージキャニスターをデプロイします。支払いは ICP で行います。キャニスターとそのファイル、権限、アップグレードはすべてあなたが管理します。Web コンソール、コマンドラインツール、TypeScript SDK からファイルを管理でき、OISY または Internet Identity でサインインできます。"
+			},
+			"blitzgrid": {
+				"name": "Blitz Grid Fantasy Football",
+				"one_liner": "Internet Computer 上で完全に動作するファンタジーフットボールリーグ。",
+				"description": "Blitz Grid は、モバイル向けに作られたファンタジーフットボールゲームです。リーグ、ドラフト、ロスター、トレード、毎週のスコア計算はすべて Internet Computer 上のキャニスターで動作します。OISY を接続すると、リーグ内の他のマネージャーに ICP を送れます。すべての送金は OISY で署名されます。"
 			}
 		}
 	},

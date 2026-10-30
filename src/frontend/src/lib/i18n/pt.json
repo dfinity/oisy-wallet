@@ -519,6 +519,26 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"minglechat": {
+				"name": "Mingle Chat",
+				"one_liner": "Mensagens criptografadas com tokens integrados.",
+				"description": "Mingle Chat é um mensageiro com criptografia de ponta a ponta que funciona inteiramente no Internet Computer. Converse a dois ou em grupo, compartilhe mensagens de voz, imagens e arquivos e envie tokens diretamente de uma conversa. Cada transferência é assinada no OISY."
+			},
+			"icforums": {
+				"name": "IC Forums",
+				"one_liner": "Fóruns de comunidade no Internet Computer.",
+				"description": "IC Forums é uma plataforma de comunidades que funciona inteiramente no Internet Computer. Participe de discussões em mais de 100 comunidades ou crie a sua, com estrutura, funções e moderação próprias. Uma única identidade vale para todas as comunidades."
+			},
+			"storica": {
+				"name": "Storica",
+				"one_liner": "Seu próprio armazenamento em nuvem no Internet Computer.",
+				"description": "Storica implanta em cerca de um minuto um canister de armazenamento privado no Internet Computer, pago com ICP. Você controla o canister, seus arquivos, permissões e atualizações. Gerencie seus arquivos pelo console web, pela ferramenta de linha de comando ou pelo SDK TypeScript, e entre com OISY ou Internet Identity."
+			},
+			"blitzgrid": {
+				"name": "Blitz Grid Fantasy Football",
+				"one_liner": "Ligas de fantasy football que funcionam inteiramente no Internet Computer.",
+				"description": "Blitz Grid é um jogo de fantasy football pensado para celular. Ligas, draft, elencos, trocas e a pontuação semanal funcionam em canisters no Internet Computer. Conecte o OISY para enviar ICP a outros técnicos da sua liga. Cada transferência é assinada no OISY."
 			}
 		}
 	},
