@@ -1,4 +1,4 @@
-import { nextElementId, sanitize, sanitizeUntrusted } from '$lib/utils/html.utils';
+import { escapeHtml, nextElementId, sanitize, sanitizeUntrusted } from '$lib/utils/html.utils';
 
 const parseHtml = (html: string): HTMLElement => {
 	const container = document.createElement('div');
@@ -98,6 +98,28 @@ describe('html.utils', () => {
 			const result = sanitize('<button>Approve</button>');
 
 			expect(parseHtml(result).querySelector('button')).not.toBeNull();
+		});
+	});
+
+	describe('escapeHtml', () => {
+		it('should escape every character that has a meaning in HTML', () => {
+			expect(escapeHtml(`<a href="x" title='y'>A & B</a>`)).toBe(
+				'&lt;a href=&quot;x&quot; title=&#39;y&#39;&gt;A &amp; B&lt;/a&gt;'
+			);
+		});
+
+		it('should leave a text without such characters unchanged', () => {
+			expect(escapeHtml('Bored Ape Yacht Club')).toBe('Bored Ape Yacht Club');
+		});
+
+		it('should keep a value as plain text once substituted into markup and sanitized', () => {
+			const value =
+				'</b><div style="position:fixed"><h1>Title</h1><img src="https://example.com/a.png"><a href="https://example.com">link</a></div><b>';
+
+			const container = parseHtml(sanitize(`Hide <b>${escapeHtml(value)}</b>?`));
+
+			expect(container.querySelector('b')?.textContent).toBe(value);
+			expect(container.querySelectorAll('*')).toHaveLength(1);
 		});
 	});
 
