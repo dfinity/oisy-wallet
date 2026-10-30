@@ -109,9 +109,9 @@ describe('liquidium-active-tx.services', () => {
 		vi.mocked(liquidiumApi.liquidiumClient).mockReturnValue({
 			activities: { list, getStatus }
 		} as unknown as ReturnType<typeof liquidiumApi.liquidiumClient>);
-		vi.mocked(infuraProviders).mockReturnValue({
+		vi.mocked(infuraProviders, { partial: true }).mockReturnValue({
 			getTransactionReceipt
-		} as unknown as ReturnType<typeof infuraProviders>);
+		});
 	});
 
 	it('does nothing for an empty transaction list (no client created)', async () => {
