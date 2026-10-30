@@ -10,6 +10,7 @@ import {
 	SOLANA_SIMULATION_MAX_CLOSE_RUNS,
 	SOLANA_SIMULATION_SNAPSHOT_ATTEMPTS,
 	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
+	SPL_TOKEN_MAX_AMOUNT,
 	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
@@ -79,7 +80,17 @@ describe('sol-simulation.services', () => {
 			data: ['', 'base64']
 		}) as unknown as SolanaParsedAccountsInfo[number];
 
-	const tokenAccount = ({ owner, amount }: { owner: SolAddress; amount: bigint }) =>
+	const tokenAccount = ({
+		owner,
+		amount,
+		delegate,
+		delegatedAmount
+	}: {
+		owner: SolAddress;
+		amount: bigint;
+		delegate?: SolAddress;
+		delegatedAmount?: bigint;
+	}) =>
 		({
 			executable: false,
 			lamports: 2_039_280n,
@@ -91,6 +102,10 @@ describe('sol-simulation.services', () => {
 					info: {
 						mint: mockSplAddress,
 						owner,
+						...(delegate !== undefined && { delegate }),
+						...(delegatedAmount !== undefined && {
+							delegatedAmount: { amount: `${delegatedAmount}`, decimals: 6 }
+						}),
 						tokenAmount: { amount: `${amount}`, decimals: 6 }
 					}
 				}
@@ -374,6 +389,36 @@ describe('sol-simulation.services', () => {
 		const result = await simulateSolTransaction(params(message([])));
 
 		expect(result?.preview).toBeUndefined();
+	});
+
+	// An account the message opens has no state before the run, and opened empty it holds no balance
+	// either, so what the run grants on it is the one thing left to state.
+	it('should yield a preview when the run grants a delegate on an account it opens', async () => {
+		vi.mocked(getMultipleAccountsInfo).mockResolvedValue([systemAccount(1_000_000n), null]);
+		vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+			simulated({
+				accounts: [
+					systemAccount(1_000_000n),
+					tokenAccount({
+						owner: mockSolAddress,
+						amount: ZERO,
+						delegate: mockSolAddress2,
+						delegatedAmount: SPL_TOKEN_MAX_AMOUNT
+					})
+				]
+			})
+		);
+
+		const result = await simulateSolTransaction(params(message([mockAtaAddress])));
+
+		expect(result?.preview?.controlChanges).toEqual([
+			{
+				account: mockAtaAddress,
+				field: 'delegate',
+				to: mockSolAddress2,
+				allowance: { tokenAddress: mockSplAddress, decimals: 6, amount: SPL_TOKEN_MAX_AMOUNT }
+			}
+		]);
 	});
 
 	// An idempotent creation of an account that is already there does nothing, so a run of a
