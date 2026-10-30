@@ -1,3 +1,4 @@
+import * as canisterTopUpEnv from '$env/canister-top-up.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import NavigationMainMenuItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
 import { AppPath } from '$lib/constants/routes.constants';
@@ -7,6 +8,7 @@ import {
 	NAVIGATION_GROUP_PORTFOLIO,
 	NAVIGATION_ITEM_ACTIVITY,
 	NAVIGATION_ITEM_BORROW,
+	NAVIGATION_ITEM_CANISTER_TOP_UP,
 	NAVIGATION_ITEM_EXPLORER,
 	NAVIGATION_ITEM_HELP,
 	NAVIGATION_ITEM_NFTS,
@@ -19,9 +21,11 @@ import {
 } from '$lib/constants/test-ids.constants';
 import * as networkDerived from '$lib/derived/network.derived';
 import { TokenTypes } from '$lib/enums/token-types';
+import { modalStore } from '$lib/stores/modal.store';
 import { activeAssetsTabStore } from '$lib/stores/settings.store';
 import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
+import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
 
@@ -316,5 +320,70 @@ describe('NavigationMainMenuItems', () => {
 		const tokenLink = getByTestId(NAVIGATION_ITEM_TOKENS);
 
 		expect(tokenLink.getAttribute('href')).not.toContain(ETHEREUM_NETWORK_ID.description);
+	});
+
+	describe('Canister top-up', () => {
+		const enableCanisterTopUp = (enabled: boolean) =>
+			vi.spyOn(canisterTopUpEnv, 'CANISTER_TOP_UP_ENABLED', 'get').mockReturnValue(enabled);
+
+		const follows = ({ first, second }: { first: HTMLElement; second: HTMLElement }): boolean =>
+			(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+
+		beforeEach(() => {
+			modalStore.close();
+		});
+
+		it('ends the sidebar More group, after Rewards, and opens its modal rather than a page', async () => {
+			enableCanisterTopUp(true);
+
+			const { getByTestId } = render(NavigationMainMenuItems);
+
+			const item = getByTestId(NAVIGATION_ITEM_CANISTER_TOP_UP);
+
+			expect(item).toHaveTextContent(en.navigation.text.canister_top_up);
+			expect(item).toHaveAttribute('aria-label', en.navigation.alt.canister_top_up);
+			expect(item).not.toHaveAttribute('href');
+			expect(item).not.toHaveClass('selected');
+			expect(follows({ first: getByTestId(NAVIGATION_ITEM_REWARDS), second: item })).toBeTruthy();
+
+			await fireEvent.click(item);
+
+			expect(get(modalStore)?.type).toBe('canister-top-up');
+		});
+
+		it('is absent while its flag is off', async () => {
+			enableCanisterTopUp(false);
+
+			const { queryByTestId } = render(NavigationMainMenuItems);
+
+			expect(queryByTestId(NAVIGATION_ITEM_CANISTER_TOP_UP)).toBeNull();
+
+			const mobile = await openMobileMore();
+
+			expect(mobile.queryByTestId(`mobile-${NAVIGATION_ITEM_CANISTER_TOP_UP}`)).toBeNull();
+		});
+
+		it('sits between Rewards and Help in the mobile More sheet, which it closes as it opens its modal', async () => {
+			enableCanisterTopUp(true);
+
+			const { getByTestId, queryByTestId } = await openMobileMore();
+
+			const card = getByTestId(`mobile-${NAVIGATION_ITEM_CANISTER_TOP_UP}`);
+
+			expect(
+				follows({ first: getByTestId(`mobile-${NAVIGATION_ITEM_REWARDS}`), second: card })
+			).toBeTruthy();
+			expect(
+				follows({ first: card, second: getByTestId(`mobile-${NAVIGATION_ITEM_HELP}`) })
+			).toBeTruthy();
+
+			await fireEvent.click(card);
+
+			expect(get(modalStore)?.type).toBe('canister-top-up');
+
+			await waitFor(() => {
+				expect(queryByTestId(`mobile-${NAVIGATION_ITEM_CANISTER_TOP_UP}`)).toBeNull();
+			});
+		});
 	});
 });

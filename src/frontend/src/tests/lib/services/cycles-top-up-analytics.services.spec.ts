@@ -1,4 +1,8 @@
-import { PLAUSIBLE_EVENT_RESULT_STATUSES, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+import {
+	PLAUSIBLE_EVENT_RESULT_STATUSES,
+	PLAUSIBLE_EVENT_SOURCE_LOCATIONS,
+	PLAUSIBLE_EVENTS
+} from '$lib/enums/plausible';
 import * as analytics from '$lib/services/analytics.services';
 import { trackCyclesTopUp } from '$lib/services/cycles-top-up-analytics.services';
 import type { MockInstance } from 'vitest';
@@ -46,10 +50,33 @@ describe('trackCyclesTopUp', () => {
 		});
 	});
 
+	it('carries the navigation as the source of a top-up paid with ICP', () => {
+		trackCyclesTopUp({
+			step: 'top_up',
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+			tokenSymbol: 'ICP',
+			sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NAVIGATION
+		});
+
+		expect(track).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({
+				metadata: expect.objectContaining({
+					source_location: 'navigation',
+					token_symbol: 'ICP'
+				})
+			})
+		);
+	});
+
 	it.each([
 		{ errorCode: 'refused' as const, severity: 'warn' },
 		{ errorCode: 'unknown' as const, severity: 'warn' },
-		{ errorCode: 'refunded' as const, severity: 'error' }
+		{ errorCode: 'refunded' as const, severity: 'error' },
+		{ errorCode: 'failed' as const, severity: 'error' },
+		{ errorCode: 'transfer_failed' as const, severity: 'warn' },
+		{ errorCode: 'not_trackable' as const, severity: 'warn' },
+		{ errorCode: 'timed_out' as const, severity: 'warn' },
+		{ errorCode: 'not_sent' as const, severity: 'warn' }
 	])('rates a top-up that ended $errorCode as $severity', ({ errorCode, severity }) => {
 		trackCyclesTopUp({
 			step: 'top_up',

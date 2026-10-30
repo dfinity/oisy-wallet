@@ -117,6 +117,7 @@ interface I18nNavigation {
 		section_finance: string;
 		section_more: string;
 		airdrops: string;
+		canister_top_up: string;
 		earning: string;
 		pay: string;
 		wallet_connect: string;
@@ -150,6 +151,7 @@ interface I18nNavigation {
 		borrow: string;
 		earning: string;
 		airdrops: string;
+		canister_top_up: string;
 		pay: string;
 		wallet_connect: string;
 		menu: string;
@@ -926,20 +928,34 @@ interface I18nCycles_top_up {
 	text: {
 		top_up: string;
 		title: string;
+		canister_top_up: string;
 		description: string;
+		description_icp: string;
+		pay_with: string;
+		no_token_title: string;
+		no_token_description: string;
 		canister_id_placeholder: string;
 		checking_canister: string;
 		recently_topped_up: string;
 		recently_topped_up_empty_state_title: string;
 		recently_topped_up_empty_state_description: string;
+		icp_hint_title: string;
+		icp_hint_description: string;
 		contacts_empty_state_title: string;
 		contacts_empty_state_description: string;
 		canister: string;
 		you_top_up: string;
 		total: string;
+		canister_receives: string;
+		cycles_estimate: string;
+		rate: string;
+		converted_by: string;
 		one_way: string;
+		one_way_icp: string;
 		topping_up: string;
 		topped_up: string;
+		topped_up_cycles: string;
+		pending: string;
 		unknown: string;
 		unknown_fresh: string;
 		sent_to_canister: string;
@@ -950,11 +966,18 @@ interface I18nCycles_top_up {
 		canister_not_found: string;
 		canister_check_failed: string;
 		amount_too_small: string;
+		amount_too_small_icp: string;
+		rate_unavailable: string;
 		refused: string;
 		insufficient_funds: string;
 		clock: string;
 		refunded: string;
 		refunded_nothing: string;
+		refunded_icp: string;
+		failed: string;
+		not_started: string;
+		transfer_failed: string;
+		unconfirmed: string;
 	};
 }
 

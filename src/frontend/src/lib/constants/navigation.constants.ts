@@ -5,7 +5,7 @@ import type { NavigationBarSlot, NavigationItemId, NavigationSection } from '$li
 export const DESKTOP_NAVIGATION_SECTIONS: NavigationSection[] = [
 	{ id: 'portfolio', items: ['assets', 'nfts', 'activity'] },
 	{ id: 'finance', items: ['trade', 'earn', 'borrow'] },
-	{ id: 'more', items: ['notes', 'explore', 'rewards'] }
+	{ id: 'more', items: ['notes', 'explore', 'rewards', 'canisterTopUp'] }
 ];
 
 // Pinned to the bottom of the sidebar, above the More menu (`NavigationMoreMenu`):
@@ -25,5 +25,9 @@ export const MOBILE_NAVIGATION_BAR: NavigationBarSlot[] = [
 	{ type: 'item', id: 'activity' },
 	{ type: 'group', id: 'finance', items: ['trade', 'earn', 'borrow'] },
 	{ type: 'item', id: 'notes' },
-	{ type: 'group', id: 'more', items: ['nfts', 'explore', 'rewards', 'help', 'settings'] }
+	{
+		type: 'group',
+		id: 'more',
+		items: ['nfts', 'explore', 'rewards', 'canisterTopUp', 'help', 'settings']
+	}
 ];

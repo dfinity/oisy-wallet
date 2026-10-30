@@ -12,7 +12,8 @@ export type NavigationItemId =
 	| 'notes'
 	| 'help'
 	| 'settings'
-	| 'rewards';
+	| 'rewards'
+	| 'canisterTopUp';
 
 export type NavigationGroupId = 'portfolio' | 'finance' | 'more';
 

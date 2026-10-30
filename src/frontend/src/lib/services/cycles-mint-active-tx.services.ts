@@ -1,16 +1,12 @@
 import type { ActiveUserTransaction, CyclesMintData } from '$declarations/backend/backend.did';
-import { ICP_INDEX_CANISTER_ID, ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
-import { getIcpIndexNumBlocksSynced } from '$icp/api/icp-index.api';
-import { getIcpLedgerBlockTimestamp } from '$icp/api/icp-ledger.api';
 import {
+	CMC_DEPOSIT_LANDING_WINDOW_NS,
 	CMC_MINT_CYCLES_MEMO,
-	CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS,
-	CYCLES_MINT_SETTLE_GRACE_OBSERVATIONS
+	CMC_SETTLE_GRACE_OBSERVATIONS
 } from '$icp/constants/cmc.constants';
-import { findCmcDeposit } from '$icp/services/cmc.services';
+import { findCmcDeposit, hasIcpIndexSyncedPast } from '$icp/services/cmc.services';
 import { notifyCyclesMint } from '$icp/services/cycles-mint.services';
 import { getCmcDepositAccountIdentifier } from '$icp/utils/cmc.utils';
-import { ZERO } from '$lib/constants/app.constants';
 import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
 import { CYCLES_MINT_EXTERNAL_REF_KEYS } from '$lib/types/cycles-mint-active-tx';
 import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
@@ -73,42 +69,6 @@ export const findCyclesMintDeposit = ({
 	});
 
 /**
- * Whether the ICP index already holds every block up to `timestampNs`. The ledger appends
- * blocks in time order and the index takes them in the same order, so it does once the
- * last block it has taken is later. The index keeps its blocks only encoded, so that
- * block's time is read from the ledger. A block the ledger has already archived reads as
- * "not yet": the index is then far behind anyway, and the row only waits longer.
- *
- * Certified, like the lookup: a "yes" lets a row close as never sent.
- */
-export const hasIcpIndexSyncedPast = async ({
-	identity,
-	timestampNs
-}: {
-	identity: Identity;
-	timestampNs: bigint;
-}): Promise<boolean> => {
-	const numBlocksSynced = await getIcpIndexNumBlocksSynced({
-		identity,
-		indexCanisterId: ICP_INDEX_CANISTER_ID,
-		certified: true
-	});
-
-	if (numBlocksSynced === ZERO) {
-		return false;
-	}
-
-	const lastSyncedAtNs = await getIcpLedgerBlockTimestamp({
-		identity,
-		ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
-		index: numBlocksSynced - 1n,
-		certified: true
-	});
-
-	return nonNullish(lastSyncedAtNs) && lastSyncedAtNs > timestampNs;
-};
-
-/**
  * A row without a deposit: its tab died between opening the row and learning the
  * transfer's block. The transfer either landed or it did not, and the ICP history says
  * which. Recovery never sends: a deposit that is not there is never made up for.
@@ -136,7 +96,7 @@ const resolveDeposit = async ({
 		'Pending' in tx.status &&
 		(await hasIcpIndexSyncedPast({
 			identity,
-			timestampNs: tx.created_at_ns + CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS
+			timestampNs: tx.created_at_ns + CMC_DEPOSIT_LANDING_WINDOW_NS
 		}));
 
 	const blockIndex = await findCyclesMintDeposit({ identity, data });
@@ -200,7 +160,7 @@ const pollCyclesMintTransaction = async ({
 		return;
 	}
 
-	if (recordSettleObservation(tx) < CYCLES_MINT_SETTLE_GRACE_OBSERVATIONS) {
+	if (recordSettleObservation(tx) < CMC_SETTLE_GRACE_OBSERVATIONS) {
 		return;
 	}
 
