@@ -8,10 +8,19 @@
 //!
 //! The **calls** stay local, for two reasons that survive that:
 //!
-//! - `CyclesLedgerService` uses `Call::bounded_wait` throughout. A payout is the one call in this
-//!   feature that must not come back "maybe": a bounded wait that times out leaves the canister
-//!   unable to say whether money moved, and the claim state machine has nothing safe to do with
-//!   that answer. These use `unbounded_wait`.
+//! - `CyclesLedgerService` uses `Call::bounded_wait` throughout. The payout does too. It once used
+//!   `unbounded_wait`, on the grounds that a payout must not come back "maybe": a wait that times
+//!   out leaves the canister unable to say whether money moved. The premise holds; the conclusion
+//!   did not follow. The ledger is whichever canister the sender named, and a call that waits
+//!   unboundedly keeps its response reservation held until that canister answers — so one that
+//!   never answers holds a slice of the backend's cycles indefinitely, and enough slices held at
+//!   once leave it unable to make any outgoing call at all, this feature's and every other's.
+//!   `claim_tip` has to survive a "maybe" either way: `TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS` lets the
+//!   `Claiming` guard lapse while a first `icrc2_transfer_from` may still be in flight, so a second
+//!   attempt can overlap the first whatever shape the wait has, and what keeps that safe is the
+//!   allowance covering exactly one payout, as `service::claim_tip` says at length. The deadline is
+//!   [`PAYOUT_TIMEOUT_SECONDS`] rather than the `bounded_wait` default of 300 s, which is far
+//!   longer than a ledger's answer stays worth having.
 //! - That client is a struct bound to one canister and bundles cycles-only methods — `deposit`,
 //!   `withdraw`, `create_canister`. Tips points at whatever ledger the sender chose, and needs
 //!   three methods.
@@ -23,7 +32,7 @@
 //! assume, and it is not a reason to write a second client.
 
 use candid::{Nat, Principal};
-use ic_cdk::call::Call;
+use ic_cdk::call::{Call, CallFailed, RejectCode};
 // Re-exported so callers keep importing the ledger shapes from the module that
 // speaks to the ledger.
 pub use icrc_ledger_types::{
@@ -38,8 +47,8 @@ pub use icrc_ledger_types::{
 ///
 /// The split matters. `InsufficientAllowance` is the sender having reduced or
 /// revoked the reservation; `InsufficientFunds` is the reservation still standing
-/// with the money gone, which topping up fixes. Everything else is `Failed`. All
-/// three leave the tip claimable.
+/// with the money gone, which topping up fixes. `Unresolved` is no answer at
+/// all. Everything else is `Failed`. All of them leave the tip claimable.
 #[derive(Debug)]
 pub enum TransferFromCallError {
     InsufficientAllowance,
@@ -47,7 +56,21 @@ pub enum TransferFromCallError {
     /// because it is the one failure the sender can fix, and the claimer can be
     /// told to come back rather than just "try again".
     InsufficientFunds,
+    /// The deadline passed with no answer. Kept apart from `Failed` because it
+    /// is not one: the message may have run, and may still pay. Recording it as
+    /// a failure would claim to know something the system does not, and
+    /// `service::claim_tip` leans on the difference.
+    Unresolved(String),
     Failed(String),
+}
+
+/// Whether a call error is the deadline passing rather than an answer.
+///
+/// `SysUnknown` is the system stating it cannot say whether the callee ran the
+/// message — the one outcome that must not be written down as a failure.
+fn is_unresolved(err: &CallFailed) -> bool {
+    matches!(err, CallFailed::CallRejected(rejected)
+        if matches!(rejected.reject_code(), Ok(RejectCode::SysUnknown)))
 }
 
 /// The ledger's current transfer fee, needed to size the minimum tip and to
@@ -77,6 +100,16 @@ pub async fn allowance(ledger: Principal, args: AllowanceArgs) -> Result<Allowan
         .map_err(|err| format!("icrc2_allowance decode failed: {err:?}"))
 }
 
+/// How long a payout waits for the ledger before its outcome counts as unknown.
+///
+/// A cross-subnet ledger call takes seconds, so thirty is roughly ten times what
+/// a healthy answer needs and the point past which the answer has stopped being
+/// worth waiting for. It also bounds what one open payout can hold: the cycles
+/// the system sets aside for a reply come back at the deadline whether or not
+/// the ledger answers, and the `bounded_wait` default of 300 s would hold ten
+/// times as many at once for an answer that went stale long before.
+const PAYOUT_TIMEOUT_SECONDS: u32 = 30;
+
 /// Moves tokens from the sender's account to the claimer's, drawing on the
 /// per-tip allowance. The ledger charges its fee to the allowance, not to the
 /// transferred amount, so the claimer receives `args.amount` in full.
@@ -84,16 +117,24 @@ pub async fn allowance(ledger: Principal, args: AllowanceArgs) -> Result<Allowan
 /// # Errors
 /// [`TransferFromCallError::InsufficientAllowance`] when the reservation no
 /// longer covers the payout; [`TransferFromCallError::Failed`] for any other
-/// ledger rejection or transport failure.
+/// ledger rejection or transport failure, [`PAYOUT_TIMEOUT_SECONDS`] included.
+/// A payout that reaches the deadline leaves its outcome unknown — see the
+/// module comment for why the claim state machine can take that answer.
 pub async fn transfer_from(
     ledger: Principal,
     args: TransferFromArgs,
 ) -> Result<Nat, TransferFromCallError> {
-    let response = Call::unbounded_wait(ledger, "icrc2_transfer_from")
+    let response = Call::bounded_wait(ledger, "icrc2_transfer_from")
+        .change_timeout(PAYOUT_TIMEOUT_SECONDS)
         .with_args(&(args,))
         .await
         .map_err(|err| {
-            TransferFromCallError::Failed(format!("icrc2_transfer_from call failed: {err:?}"))
+            let msg = format!("icrc2_transfer_from call failed: {err:?}");
+            if is_unresolved(&err) {
+                TransferFromCallError::Unresolved(msg)
+            } else {
+                TransferFromCallError::Failed(msg)
+            }
         })?;
 
     // `Result` is what candid's `variant { Ok; Err }` decodes into, so the named
