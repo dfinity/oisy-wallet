@@ -40,9 +40,10 @@ export interface LiquidiumRepayPreview {
 }
 
 // Full outstanding debt (accrued interest included) plus a small buffer, in base units, for the
-// "Max (full debt)" shortcut. Not the SDK's `getMaxRepayAmount`: it adds `debtInterest` on top of
-// `borrowed`, which already includes it, so its max overshoots the debt and the repay is not
-// credited. `null` when the user has no profile yet (should not happen for a position that already
+// "Max (full debt)" shortcut. Not the SDK's `getMaxRepayAmount` alone: it adds `debtInterest` on top
+// of `borrowed`, which already includes it, so its max overshoots the debt and the repay is not
+// credited. It still caps ours, so we never send more than the SDK sanctions should it ever quote
+// less (a fixed double count, a smaller buffer). `null` when the user has no profile yet (should not happen for a position that already
 // carries debt, but guarded so callers can no-op gracefully).
 export const getLiquidiumMaxRepayAmount = async ({
 	identity,
@@ -65,15 +66,19 @@ export const getLiquidiumMaxRepayAmount = async ({
 		return null;
 	}
 
-	const position = await positions.getPosition(profileId, poolId);
+	const [position, { amount: sdkMaxRepay }] = await Promise.all([
+		positions.getPosition(profileId, poolId),
+		positions.getMaxRepayAmount(profileId, poolId)
+	]);
 
 	if (isNullish(position) || position.borrowed <= ZERO) {
 		return ZERO;
 	}
 
-	return (
-		(position.borrowed * (LIQUIDIUM_BPS_SCALE + LIQUIDIUM_REPAY_BUFFER_BPS)) / LIQUIDIUM_BPS_SCALE
-	);
+	const maxRepay =
+		(position.borrowed * (LIQUIDIUM_BPS_SCALE + LIQUIDIUM_REPAY_BUFFER_BPS)) / LIQUIDIUM_BPS_SCALE;
+
+	return maxRepay < sdkMaxRepay ? maxRepay : sdkMaxRepay;
 };
 
 // USD value of this position's lifetime borrow interest, derived from the reserve's own price basis
