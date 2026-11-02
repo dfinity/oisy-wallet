@@ -2,7 +2,7 @@
 
 use std::{collections::BTreeMap, sync::OnceLock};
 
-use canbench_rs::{bench, bench_fn, BenchResult};
+use canbench_rs::{bench, bench_fn, bench_scope, BenchResult};
 use candid::{Nat, Principal};
 use ic_cdk_bitcoin_canister::{OutPoint, Txid, Utxo};
 use serde_bytes::ByteBuf;
@@ -22,6 +22,7 @@ use shared::{
         experimental_feature::{ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor},
         network::{NetworkSettings, NetworkSettingsFor},
         personal_note::{DeletePersonalNoteRequest, SetPersonalNoteRequest},
+        tip::{MAX_TIP_MESSAGE_CHARS, TIP_RETENTION_AFTER_TERMINAL_NS},
         token_id::TokenId,
         user_profile::{StoredUserProfile, UserProfile},
         Stats,
@@ -34,8 +35,15 @@ use crate::{
     bitcoin::pending_tx_model::BtcUserPendingTransactionsModel,
     personal_notes::service as personal_notes_service,
     state::{mutate_state, read_config, read_state, State},
+    tips::{
+        model::{TipRecord, TipState},
+        service::prune_expired_tips,
+    },
     token,
-    types::{Candid, StoredPrincipal, StoredTokenId},
+    types::{
+        storable::{TipId, TipSenderKey},
+        Candid, StoredPrincipal, StoredTokenId,
+    },
     user_profile::{self, model::UserProfileModel},
 };
 
@@ -905,5 +913,82 @@ fn bench_get_exchange_rates_50() -> BenchResult {
                 .map(|entry| (entry.key().0.clone(), entry.value().0.clone()))
                 .collect::<Vec<_>>()
         }));
+    })
+}
+
+// ---------------------------------------------------------------------------
+// Tips
+// ---------------------------------------------------------------------------
+
+/// Stores a reserved tip from a sender of its own, as `tips::service::store_tip` does: the
+/// by-sender index holds the tip's `active_until`, which for a reserved tip is its expiry.
+fn store_reserved_tip(n: u64, amount: Nat, expires_at_ns: u64) {
+    let sender = Principal::from_slice(&n.to_be_bytes());
+    let tip_id = TipId(format!("{n:022}"));
+    let record = TipRecord {
+        sender,
+        ledger_canister_id: *bench_principal(),
+        amount,
+        expires_at_ns,
+        created_at_ns: TS0_NS,
+        message: Some("x".repeat(MAX_TIP_MESSAGE_CHARS)),
+        claim_code_hash: ByteBuf::from(vec![0u8; 32]),
+        state: TipState::Reserved,
+        terminal_at_ns: None,
+        last_claim_failure: None,
+    };
+
+    mutate_state(|s| {
+        s.tips_by_sender.insert(
+            TipSenderKey(StoredPrincipal(sender), tip_id.clone()),
+            expires_at_ns,
+        );
+        s.tips.insert(tip_id, Candid(record));
+    });
+}
+
+/// Sweeps 10,000 tips twice: first while every tip is inside its retention window, which reads
+/// only the by-sender index, then once half of them are past it, which also removes those 5,000
+/// tips. The two scopes give the cost of reading one entry and of removing one tip.
+#[bench(raw)]
+fn bench_prune_expired_tips_10000() -> BenchResult {
+    const COUNT: u64 = 10_000;
+    let now = 2 * TIP_RETENTION_AFTER_TERMINAL_NS;
+    // 256 bits, the width ICRC ledgers keep balances in.
+    let amount = Nat::from(u128::MAX) * Nat::from(u128::MAX);
+
+    for n in 0..COUNT {
+        // Even tips are past their retention window at `now` but not at `now - 2`; odd tips
+        // expire at `now`, so they stay.
+        let expires_at_ns = if n % 2 == 0 {
+            now - TIP_RETENTION_AFTER_TERMINAL_NS - 1
+        } else {
+            now
+        };
+        store_reserved_tip(n, amount.clone(), expires_at_ns);
+    }
+
+    bench_fn(|| {
+        {
+            let _scope = bench_scope("read_10000");
+            std::hint::black_box(prune_expired_tips(None, now - 2, || true));
+        }
+        {
+            let _scope = bench_scope("read_10000_remove_5000");
+            std::hint::black_box(prune_expired_tips(None, now, || true));
+        }
+    })
+}
+
+/// Removes one tip whose amount takes about 1.9 MiB, close to the 2 MiB a request can carry:
+/// the largest step a sweep batch can take after it passes its instruction budget.
+#[bench(raw)]
+fn bench_prune_expired_tips_oversized() -> BenchResult {
+    let now = 2 * TIP_RETENTION_AFTER_TERMINAL_NS;
+    let amount = Nat(Nat::from(1u8).0 << 14_000_000usize);
+    store_reserved_tip(0, amount, now - TIP_RETENTION_AFTER_TERMINAL_NS - 1);
+
+    bench_fn(|| {
+        std::hint::black_box(prune_expired_tips(None, now, || true));
     })
 }

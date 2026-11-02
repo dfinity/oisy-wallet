@@ -179,6 +179,26 @@ benches:
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
+  bench_prune_expired_tips_10000:
+    total:
+      instructions: 4148829959
+      heap_increase: 0
+      stable_memory_increase: 0
+    scopes:
+      read_10000:
+        instructions: 596030126
+        heap_increase: 0
+        stable_memory_increase: 0
+      read_10000_remove_5000:
+        instructions: 3552797641
+        heap_increase: 0
+        stable_memory_increase: 0
+  bench_prune_expired_tips_oversized:
+    total:
+      instructions: 362893618
+      heap_increase: 54
+      stable_memory_increase: 0
+    scopes: {}
   bench_remove_custom_token:
     total:
       instructions: 1171903
