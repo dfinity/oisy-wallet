@@ -39,7 +39,9 @@ export const ICRC_SUGGESTED_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = [];
 
 // ICRC tokens enabled by default: enabled if the user set no preference, and saved as enabled to
 // the user's token list at sign-in, so they stay enabled once they leave this list
-export const ICRC_DEFAULT_ENABLED_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = [];
+export const ICRC_DEFAULT_ENABLED_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = [
+	TCYCLES_LEDGER_CANISTER_ID
+];
 
 const ALL_ADDITIONAL_ICRC_TOKENS: IcTokenWithoutId[] = Object.values(
 	ADDITIONAL_ICRC_PRODUCTION_DATA ?? {}
