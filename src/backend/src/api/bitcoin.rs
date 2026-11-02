@@ -112,6 +112,7 @@ pub async fn btc_add_pending_transaction(
             .await
             .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
 
+        let snapshot_started_ns = time();
         let current_utxos = api::get_all_utxos(
             params.network,
             source_address.clone(),
@@ -135,12 +136,21 @@ pub async fn btc_add_pending_transaction(
         }
 
         mutate_state(|state| {
+            // Taken after the UTXO fetch, so the reservation post-dates any concurrent call's
+            // snapshot that could still lack its UTXOs (see `prune_pending_transactions`).
+            let now_ns = time();
             let mut model = BtcUserPendingTransactionsModel::new(
                 &mut state.btc_user_pending_transactions,
                 None,
                 None,
             );
-            model.prune_pending_transactions(principal, &source_address, &current_utxos, now_ns);
+            model.prune_pending_transactions(
+                principal,
+                &source_address,
+                &current_utxos,
+                snapshot_started_ns,
+                now_ns,
+            );
 
             if model.has_intersecting_pending_utxos(principal, &params.utxos) {
                 return Err(BtcAddPendingTransactionError::UtxosAlreadyReserved);
@@ -196,6 +206,7 @@ pub async fn btc_get_pending_transactions(
             .await
             .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
 
+        let snapshot_started_ns = time();
         let current_utxos = api::get_all_utxos(
             params.network,
             source_address.clone(),
@@ -210,7 +221,13 @@ pub async fn btc_get_pending_transactions(
                 None,
                 None,
             );
-            model.prune_pending_transactions(principal, &source_address, &current_utxos, now_ns);
+            model.prune_pending_transactions(
+                principal,
+                &source_address,
+                &current_utxos,
+                snapshot_started_ns,
+                now_ns,
+            );
             model.get_pending_transactions(&principal, &source_address)
         });
 

@@ -591,7 +591,13 @@ fn bench_btc_add_pending_transaction_with_count(existing_count: u8) -> BenchResu
     bench_fn(|| {
         mutate_state(|state| {
             with_btc_pending_model(state, |model| {
-                model.prune_pending_transactions(principal, &address, &current_utxos, now_ns);
+                model.prune_pending_transactions(
+                    principal,
+                    &address,
+                    &current_utxos,
+                    now_ns,
+                    now_ns,
+                );
 
                 assert!(
                     !model.has_intersecting_pending_utxos(principal, &new_utxos),
@@ -649,7 +655,7 @@ fn bench_btc_get_pending_transactions_with_count(count: u8) -> BenchResult {
     bench_fn(|| {
         let stored = mutate_state(|state| {
             with_btc_pending_model(state, |model| {
-                model.prune_pending_transactions(principal, &address, &utxos, now_ns);
+                model.prune_pending_transactions(principal, &address, &utxos, now_ns, now_ns);
                 model.get_pending_transactions(&principal, &address)
             })
         });

@@ -100,6 +100,13 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
     /// `current_utxos` were fetched for. The principal has one address per network, and the utxos
     /// of one network say nothing about the reservations of another.
     ///
+    /// The second rule also skips pending transactions created at or after `snapshot_started_ns`,
+    /// the time the caller started fetching `current_utxos`. Concurrent calls interleave across
+    /// that fetch, so an older snapshot can lack a utxo that a newer call has just seen and
+    /// reserved. A reservation created before the fetch started was checked against a state no
+    /// newer than the snapshot. `>=` keeps a reservation from the same round as the snapshot,
+    /// since both share one time.
+    ///
     /// An empty `current_utxos` set is treated as "no confirmation information available", not as
     /// "all utxos confirmed". Such transactions are only freed by the 1-hour age rule, so a caller
     /// that fetches utxos for an address with no available utxos cannot wipe its non-expired
@@ -109,6 +116,7 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
         principal: Principal,
         utxos_address: &str,
         current_utxos: &[Utxo],
+        snapshot_started_ns: u64,
         now_ns: u64,
     ) {
         let stored_principal = StoredPrincipal(principal);
@@ -130,6 +138,7 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
                 let is_old = pending_transaction.created_at_timestamp_ns + HOUR_IN_NS < now_ns;
 
                 let none_of_tx_utxos_are_still_present = current_utxos_apply
+                    && pending_transaction.created_at_timestamp_ns < snapshot_started_ns
                     && pending_transaction
                         .utxos
                         .iter()
@@ -451,7 +460,7 @@ mod tests {
 
         let all_utxos = &[(*UTXO_1).clone(), (*UTXO_2).clone()];
 
-        model.prune_pending_transactions(principal, ADDRESS_1, all_utxos, now_ns + 1);
+        model.prune_pending_transactions(principal, ADDRESS_1, all_utxos, now_ns + 1, now_ns + 1);
 
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 1);
@@ -488,7 +497,13 @@ mod tests {
         assert_eq!(pending_txs.len(), 2);
 
         let available_utxos = &[(*UTXO_1).clone()];
-        model.prune_pending_transactions(principal, ADDRESS_1, available_utxos, now_ns);
+        model.prune_pending_transactions(
+            principal,
+            ADDRESS_1,
+            available_utxos,
+            now_ns + 1,
+            now_ns + 1,
+        );
 
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 1);
@@ -525,7 +540,13 @@ mod tests {
         assert_eq!(pending_txs.len(), 2);
 
         let available_utxos = &[(*UTXO_1).clone(), (*UTXO_3).clone()];
-        model.prune_pending_transactions(principal, ADDRESS_1, available_utxos, now_ns);
+        model.prune_pending_transactions(
+            principal,
+            ADDRESS_1,
+            available_utxos,
+            now_ns + 1,
+            now_ns + 1,
+        );
 
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 2);
@@ -551,7 +572,7 @@ mod tests {
             .add_pending_transaction(principal, ADDRESS_1.to_string(), pending.clone())
             .unwrap();
 
-        model.prune_pending_transactions(principal, ADDRESS_1, &[], now_ns);
+        model.prune_pending_transactions(principal, ADDRESS_1, &[], now_ns + 1, now_ns + 1);
 
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 1);
@@ -576,7 +597,7 @@ mod tests {
             .add_pending_transaction(principal, ADDRESS_1.to_string(), expired)
             .unwrap();
 
-        model.prune_pending_transactions(principal, ADDRESS_1, &[], now_ns);
+        model.prune_pending_transactions(principal, ADDRESS_1, &[], now_ns, now_ns);
 
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs, vec![]);
@@ -609,7 +630,13 @@ mod tests {
             .add_pending_transaction(principal, ADDRESS_2.to_string(), utxos_address_tx)
             .unwrap();
 
-        model.prune_pending_transactions(principal, ADDRESS_2, &[(*UTXO_5).clone()], now_ns);
+        model.prune_pending_transactions(
+            principal,
+            ADDRESS_2,
+            &[(*UTXO_5).clone()],
+            now_ns + 1,
+            now_ns + 1,
+        );
 
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs, vec![other_address_tx]);
@@ -636,10 +663,60 @@ mod tests {
             .add_pending_transaction(principal, ADDRESS_1.to_string(), expired)
             .unwrap();
 
-        model.prune_pending_transactions(principal, ADDRESS_2, &[(*UTXO_1).clone()], now_ns);
+        model.prune_pending_transactions(
+            principal,
+            ADDRESS_2,
+            &[(*UTXO_1).clone()],
+            now_ns,
+            now_ns,
+        );
 
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs, vec![]);
+    }
+
+    // Regression: concurrent calls interleave across the utxo fetch. A snapshot that started
+    // before a reservation was created can lack that reservation's utxos without them being
+    // spent, so it must not prune it.
+    #[test]
+    fn test_prune_absence_rule_skips_reservations_not_older_than_snapshot() {
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        let snapshot_started_ns = 1_000_000_000_000;
+
+        let before_snapshot = StoredPendingTransaction {
+            txid: vec![1, 2, 3],
+            utxos: vec![(*UTXO_1).clone()],
+            created_at_timestamp_ns: snapshot_started_ns - 1,
+        };
+        let same_round_as_snapshot = StoredPendingTransaction {
+            txid: vec![4, 5, 6],
+            utxos: vec![(*UTXO_2).clone()],
+            created_at_timestamp_ns: snapshot_started_ns,
+        };
+        let after_snapshot = StoredPendingTransaction {
+            txid: vec![7, 8, 9],
+            utxos: vec![(*UTXO_3).clone()],
+            created_at_timestamp_ns: snapshot_started_ns + 1,
+        };
+        for tx in [&before_snapshot, &same_round_as_snapshot, &after_snapshot] {
+            model
+                .add_pending_transaction(principal, ADDRESS_1.to_string(), tx.clone())
+                .unwrap();
+        }
+
+        model.prune_pending_transactions(
+            principal,
+            ADDRESS_1,
+            &[(*UTXO_5).clone()],
+            snapshot_started_ns,
+            snapshot_started_ns + 2,
+        );
+
+        let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
+        assert_eq!(pending_txs, vec![same_round_as_snapshot, after_snapshot]);
     }
 
     #[test]
