@@ -250,8 +250,9 @@ sequence with a BIP68 relative lock), `InvalidUtxos` (an input that is not the c
    network will accept. Instructions only; the `bitcoin` crate (already
    a backend dependency at 0.32) brings `secp256k1` — confirm the verification feature is enabled
    (see [Open questions](#open-questions-facts-to-confirm)).
-8. **Fee**: `Σinputs − Σoutputs > 0` and at least 1 sat/vB of the transaction's vsize (the default
-   min relay fee). Anything below never propagates.
+8. **Fee**: `Σinputs − Σoutputs > 0` and at least 1 sat/vB of the transaction's vsize. That is the
+   long-standing minimum relay fee, and the frontend's lowest rate. Nodes that still apply it drop
+   anything below. See [open question 6](#open-questions-facts-to-confirm) for the value.
 9. **Reserve, in one synchronous block, with no `await` between check and insert** (the same
    `mutate_state` block `btc_add_pending_transaction` uses): the address-scoped prune (see
    [Address-scoped prune](#backend-address-scoped-prune)) with the UTXOs from step 6, then
@@ -393,7 +394,8 @@ them). `bitcoinjs-lib` (^6.1.7) is already a dependency; nothing new is added.
 price every output as a 31-vB P2WPKH output. The frontend's lowest rate is 1 sat/vB (`MIN_FEE_RATE`
 in `src/frontend/src/btc/services/btc-utxos.service.ts`). At that rate, a 1-input send to a P2TR
 address is quoted 141 sats for a transaction of about 153 vB. The backend's fee floor (step 8)
-refuses that as `FeeTooLow`; today CFS broadcasts it and the network drops it.
+refuses that as `FeeTooLow`. Today CFS broadcasts it, and every node that still applies a 1 sat/vB
+relay minimum drops it.
 
 The fix sizes each output from its script, as 8 bytes of value + 1 byte of length + the script:
 
@@ -662,6 +664,10 @@ Every earlier PR is safe on its own.
    `BtcToCkBtc` row whose txid never appears, as NEAR Intents does with an expired deposit.
    Otherwise PR 8 adds that expiry, since `beforeBroadcast` can create rows for sends that were
    never broadcast.
+6. **Relay fee floor.** Recent Bitcoin Core releases lowered the default `-minrelaytxfee` below
+   1 sat/vB. Confirm the current default, and whether the backend's floor (step 8) should stay at
+   1 sat/vB, matching the frontend's `MIN_FEE_RATE`, or follow it down. Keep the two in step
+   either way, or an approved send can fail `FeeTooLow`.
 
 ## Pending decisions (facts are clear — we just need to decide)
 
