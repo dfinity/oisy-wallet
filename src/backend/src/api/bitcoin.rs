@@ -140,7 +140,7 @@ pub async fn btc_add_pending_transaction(
                 None,
                 None,
             );
-            model.prune_pending_transactions(principal, &current_utxos, now_ns);
+            model.prune_pending_transactions(principal, &source_address, &current_utxos, now_ns);
 
             if model.has_intersecting_pending_utxos(principal, &params.utxos) {
                 return Err(BtcAddPendingTransactionError::UtxosAlreadyReserved);
@@ -210,7 +210,7 @@ pub async fn btc_get_pending_transactions(
                 None,
                 None,
             );
-            model.prune_pending_transactions(principal, &current_utxos, now_ns);
+            model.prune_pending_transactions(principal, &source_address, &current_utxos, now_ns);
             model.get_pending_transactions(&principal, &source_address)
         });
 

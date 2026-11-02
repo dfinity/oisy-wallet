@@ -87,13 +87,18 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
     /// Prunes pending transactions for a specific principal.
     /// A pending transaction can be pruned for two reasons:
     /// - Transaction is older than 1 hour. We consider that if a pending transaction is older than
-    ///   one hour it means it failed, and we can free to utxos to be used again.
+    ///   one hour it means it failed, and we can free to utxos to be used again. This applies to
+    ///   every address of the principal.
     /// - None of the transaction's utxos are present in the current utxos list. We use the pending
     ///   transactions to avoid double spending. Once we know that an utxos is not available, we can
     ///   remove the pending transaction. Normally, all utxos of a pending transaction should be
     ///   present or not. Partial presence could happen if the utxos of a pending transaction were
     ///   not really used in the transaction. We don't remove in partial presence because, in the
     ///   end, partial presence will be temporary for one hour.
+    ///
+    /// The second rule applies only to the pending transactions of `utxos_address`, the address
+    /// `current_utxos` were fetched for. The principal has one address per network, and the utxos
+    /// of one network say nothing about the reservations of another.
     ///
     /// An empty `current_utxos` set is treated as "no confirmation information available", not as
     /// "all utxos confirmed". Such transactions are only freed by the 1-hour age rule, so a caller
@@ -102,6 +107,7 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
     pub fn prune_pending_transactions(
         &mut self,
         principal: Principal,
+        utxos_address: &str,
         current_utxos: &[Utxo],
         now_ns: u64,
     ) {
@@ -117,11 +123,13 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
         let mut changed = false;
         let mut addresses_to_remove = Vec::new();
         for (address, transactions) in &mut address_map {
+            let current_utxos_apply = address == utxos_address && !current_utxos.is_empty();
+
             let initial_len = transactions.len();
             transactions.retain(|pending_transaction| {
                 let is_old = pending_transaction.created_at_timestamp_ns + HOUR_IN_NS < now_ns;
 
-                let none_of_tx_utxos_are_still_present = !current_utxos.is_empty()
+                let none_of_tx_utxos_are_still_present = current_utxos_apply
                     && pending_transaction
                         .utxos
                         .iter()
@@ -443,7 +451,7 @@ mod tests {
 
         let all_utxos = &[(*UTXO_1).clone(), (*UTXO_2).clone()];
 
-        model.prune_pending_transactions(principal, all_utxos, now_ns + 1);
+        model.prune_pending_transactions(principal, ADDRESS_1, all_utxos, now_ns + 1);
 
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 1);
@@ -480,7 +488,7 @@ mod tests {
         assert_eq!(pending_txs.len(), 2);
 
         let available_utxos = &[(*UTXO_1).clone()];
-        model.prune_pending_transactions(principal, available_utxos, now_ns);
+        model.prune_pending_transactions(principal, ADDRESS_1, available_utxos, now_ns);
 
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 1);
@@ -517,7 +525,7 @@ mod tests {
         assert_eq!(pending_txs.len(), 2);
 
         let available_utxos = &[(*UTXO_1).clone(), (*UTXO_3).clone()];
-        model.prune_pending_transactions(principal, available_utxos, now_ns);
+        model.prune_pending_transactions(principal, ADDRESS_1, available_utxos, now_ns);
 
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 2);
@@ -543,7 +551,7 @@ mod tests {
             .add_pending_transaction(principal, ADDRESS_1.to_string(), pending.clone())
             .unwrap();
 
-        model.prune_pending_transactions(principal, &[], now_ns);
+        model.prune_pending_transactions(principal, ADDRESS_1, &[], now_ns);
 
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 1);
@@ -568,7 +576,67 @@ mod tests {
             .add_pending_transaction(principal, ADDRESS_1.to_string(), expired)
             .unwrap();
 
-        model.prune_pending_transactions(principal, &[], now_ns);
+        model.prune_pending_transactions(principal, ADDRESS_1, &[], now_ns);
+
+        let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
+        assert_eq!(pending_txs, vec![]);
+    }
+
+    // Regression: a principal has one address per network. The utxos fetched for one of them
+    // must not prune the non-expired reservations of another.
+    #[test]
+    fn test_prune_absence_rule_only_applies_to_utxos_address() {
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        let now_ns = 1_000_000_000_000;
+
+        let other_address_tx = StoredPendingTransaction {
+            txid: vec![1, 2, 3],
+            utxos: vec![(*UTXO_1).clone()],
+            created_at_timestamp_ns: now_ns,
+        };
+        let utxos_address_tx = StoredPendingTransaction {
+            txid: vec![4, 5, 6],
+            utxos: vec![(*UTXO_2).clone()],
+            created_at_timestamp_ns: now_ns,
+        };
+        model
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), other_address_tx.clone())
+            .unwrap();
+        model
+            .add_pending_transaction(principal, ADDRESS_2.to_string(), utxos_address_tx)
+            .unwrap();
+
+        model.prune_pending_transactions(principal, ADDRESS_2, &[(*UTXO_5).clone()], now_ns);
+
+        let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
+        assert_eq!(pending_txs, vec![other_address_tx]);
+
+        let pending_txs = model.get_pending_transactions(&principal, ADDRESS_2);
+        assert_eq!(pending_txs, vec![]);
+    }
+
+    #[test]
+    fn test_prune_other_address_still_prunes_expired() {
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        let yesterday_ns = 1_000_000;
+        let now_ns = yesterday_ns + HOUR_IN_NS + 1;
+
+        let expired = StoredPendingTransaction {
+            txid: vec![1, 2, 3],
+            utxos: vec![(*UTXO_1).clone()],
+            created_at_timestamp_ns: yesterday_ns,
+        };
+        model
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), expired)
+            .unwrap();
+
+        model.prune_pending_transactions(principal, ADDRESS_2, &[(*UTXO_1).clone()], now_ns);
 
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs, vec![]);
