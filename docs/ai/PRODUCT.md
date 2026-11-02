@@ -338,7 +338,7 @@ The two gas figures show how far estimates fall short, per token and network. Th
 
 ### Curated tokens vs. metadata-only tokens
 
-OISY ships a curated set of token definitions. Most are **curated tokens**: they appear in the manage-tokens list (so a user can enable them), a subset is enabled by default for new users, and they are selectable elsewhere in the wallet (including as swap destinations).
+OISY ships a curated set of token definitions. Most are **curated tokens**: they appear in the manage-tokens list (so a user can enable them), a subset starts out enabled (see [Fixed, default and suggested tokens](#fixed-default-and-suggested-tokens)), and they are selectable elsewhere in the wallet (including as swap destinations).
 
 A definition can instead be marked **metadata-only** (`metadataOnly: true`). A metadata-only token is **not** surfaced by default — it is absent from the manage-tokens list, is never enabled by default, and is not offered as a swap destination. Its curated metadata (name, symbol, decimals, icon, tags, token-group membership) is still used to **enrich a token the user imports manually**: importing that exact ledger / contract address resolves the curated details and places the token in its group, exactly as a curated token would. In short: known to OISY, but surfaced only if the user explicitly adds it.
 
@@ -351,13 +351,21 @@ A new user does not see any of these in the wallet; a user who wants one imports
 
 ICP on the same EVM chains is intentionally **not** metadata-only: some users may already hold a balance in it, and marking it metadata-only would remove it from the default curated token set (potentially hiding that balance unless they explicitly import it). ICP stays curated and suggested there.
 
+### Fixed, default and suggested tokens
+
+Three sets of curated tokens are enabled without the user switching them on. They differ in whether the user can switch them off and in whether that state is stored in the user's token list:
+
+- **Fixed** tokens are always enabled; Manage tokens does not let the user switch them off. On ICP these are ICP, ckBTC, ckETH and ckUSDC.
+- **Default** tokens are enabled unless the user has switched them off, and OISY saves them as enabled to the user's token list when the wallet loads that list and finds no entry for them, whether or not the user holds a balance. It never replaces a choice the user already made: a user who switched one off keeps it off. Once saved, the token stays enabled for that user even after it leaves the set. Today only ICRC tokens can be default tokens, and the only one is TCYCLES.
+- **Suggested** tokens are enabled unless the user has switched them off, but nothing is saved. Taking a token out of the suggested set hides it again from every user who never switched it on or off, including users who hold a balance in it.
+
 ### Asset types
 
 Every token belongs to one asset type, and the token list can be filtered by it: **All asset types**, then **Crypto**, **Stablecoins**, **Stocks**, **Commodities** and **Compute**, in that order. The types appear as pills above the token list, and as a dropdown in the modals' token lists (Send, Swap, Manage tokens and others). A token group is shown when any of its tokens matches, and the user can hide the filter altogether.
 
 **Compute** holds the tokens that pay for computation on the Internet Computer. Today that is only **TCYCLES**, which used to sit under Stablecoins. OISY shows it as **ICP Cycles (Trillion)** rather than the ledger's own name, "Trillion Cycles", which does not say which network's cycles they are. At rest its pill looks like its neighbours. What sets it apart is a brand-blue arc that runs two laps around its border when the pill appears and again each time the pointer enters it, then goes away. Selected, it looks like every other selected pill, so which filter is on always reads the same. It runs a set number of laps and not a loop, so the pill does not keep moving above a list people open every day; with reduced motion turned on in the system, there is no arc at all.
 
-TCYCLES is not enabled by default, so for most users Compute opens on the empty state, which names the supported token they can enable. It is deliberately not switched on by default: a default-enabled token is not stored in the user's profile, so it could never be withdrawn again without hiding it from users who hold a balance. Other cycles-backed tokens, such as XTC, stay under Crypto.
+TCYCLES is a [default token](#fixed-default-and-suggested-tokens): Compute lists it for every user who has not switched it off, and OISY saves it to their token list, so it can later stop being a default token without disappearing for the users it was saved for. A user who switched it off keeps it off; Compute then opens on the empty state, which names the supported token they can enable. Other cycles-backed tokens, such as XTC, stay under Crypto.
 
 ---
 
