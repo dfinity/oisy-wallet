@@ -117,6 +117,10 @@ Prices from `src/signer/api/src/methods.rs` in CFS:
   rule, with the UTXOs of the one address it was called for, to **every** address of the principal.
   A non-empty testnet fetch (`btc_get_pending_transactions` for the testnet address) therefore
   drops the user's non-expired mainnet reservations.
+- **The prune can use a stale snapshot.** The reservation's `created_at_timestamp_ns` is the
+  inserting call's start time, taken before an `await`. And a call whose UTXO fetch started first
+  can prune after a newer call has reserved an input that only just reached four confirmations.
+  That input is missing from the older snapshot, so the newer reservation is dropped.
 
 ---
 
@@ -331,10 +335,28 @@ rule still applies to every address of the principal. The "none of the UTXOs are
 rule applies only to the reservations of that address, since another network's UTXOs say nothing
 about them.
 
-All four callers pass the address they fetched for: `btc_add_pending_transaction` and
-`btc_get_pending_transactions` today, and `btc_broadcast_transaction` and `btc_get_spendable_utxos`
-once they exist. Unit tests: a non-empty testnet prune leaves a non-expired mainnet reservation in
-place, and an expired one goes regardless of address.
+The absence rule also applies only to reservations **older than the snapshot**, which fixes the
+[stale-snapshot gap](#gaps-today):
+
+- Each caller takes `snapshot_started_ns = time()` immediately before its `get_all_utxos` call and
+  passes it to the prune.
+- The absence rule skips every reservation with `created_at_timestamp_ns >= snapshot_started_ns`.
+- `created_at_timestamp_ns` is taken inside the insertion block, after the fetch, not at the start
+  of the call.
+
+This is sound: a reservation inserted before the snapshot started existed before the fetch was sent,
+so the fetch sees the Bitcoin canister's state at least as new as the one that reservation was
+checked against. A reservation from the same round as the snapshot has an equal time, so `>=` keeps
+it. The age rule still uses `created_at_timestamp_ns` and is moved later only by the fetch duration.
+
+All four callers pass the address they fetched for and their snapshot time:
+`btc_add_pending_transaction` and `btc_get_pending_transactions` today, and
+`btc_broadcast_transaction` and `btc_get_spendable_utxos` once they exist. Unit tests:
+
+- a non-empty testnet prune leaves a non-expired mainnet reservation in place, and an expired one
+  goes regardless of address;
+- a prune whose snapshot started before a reservation was inserted keeps that reservation, even
+  though none of its UTXOs are in the snapshot.
 
 ### Backend: `btc_get_spendable_utxos`
 
@@ -375,7 +397,10 @@ them). `bitcoinjs-lib` (^6.1.7) is already a dependency; nothing new is added.
   version 2, lock time 0, inputs in selection order with `sequence 0xFFFFFFFF` and a `witnessUtxo`
   (value from the UTXO, script = the wallet's P2WPKH script), outputs in order, change last only if
   `≥ 1_000` sats. Lift the dust constant into `btc.constants.ts` with a comment pointing at CFS's
-  `DUST_THRESHOLD`.
+  `DUST_THRESHOLD`. Outputs are added as `{ script, value }`, never `{ address, value }`: for a
+  P2TR address, `bitcoinjs-lib` 6.1.7 converts through `payments.p2tr`, which needs `initEccLib`,
+  and the frontend has no ECC library. The script comes from `btcAddressToOutputScript` (see
+  [Fee estimation by output script](#frontend-fee-estimation-by-output-script)).
 - **Signer.** Lift the `{ publicKey, sign }` object from `signPsbt` in
   `src/frontend/src/btc/services/wallet-connect.services.ts` (the `signBtcPrehash` call with
   `deriveBtcPublicKey` from `src/frontend/src/btc/utils/wallet-connect.utils.ts`) into the new
@@ -407,10 +432,38 @@ The fix sizes each output from its script, as 8 bytes of value + 1 byte of lengt
 | P2WSH  | 43 vB       |
 | P2TR   | 43 vB       |
 
-The recipient's script comes from its address (`bitcoinjs-lib`'s `address.toOutputScript`), and the
-change stays P2WPKH. UTXO selection and the pre-broadcast validation must agree on the fee (see the
-doc comment on `calculateFeeSatoshis`), so both take the recipient's script. This also fixes the CFS
-path, so it lands on its own (PR 6) before the backend path is switched on.
+**Which script.** The size comes from the recipient's address type, through the existing
+`parseBtcAddress` (`src/frontend/src/btc/utils/btc-address.utils.ts`), which needs no ECC library.
+The change stays P2WPKH. Not `bitcoinjs-lib`'s `address.toOutputScript`: in 6.1.7 it builds P2TR
+scripts through `payments.p2tr`, which throws "No ECC Library provided" because the repo never calls
+`initEccLib`.
+
+The builder needs the script bytes, not just the size. A new shared `btcAddressToOutputScript`
+decodes the address with `address.fromBech32` / `address.fromBase58Check`, which need no ECC
+library, and compiles the standard script directly:
+
+- `OP_0 <20>` or `OP_0 <32>` for P2WPKH and P2WSH;
+- `OP_1 <32>` for P2TR;
+- the usual P2PKH and P2SH templates.
+
+It does not check that a P2TR key is a valid x-only point, which is what the ECC library would
+add; relay policy does not check that either. The fee estimator and `buildBtcSendPsbt` both use
+this helper, so they always see the same script.
+
+**Who uses it.** Everything that prices a send uses the same sizing:
+
+- UTXO selection;
+- the pre-broadcast validation, which must arrive at the same fee (see the doc comment on
+  `calculateFeeSatoshis`);
+- **Max**: `calculateMaxSpendableAmount`, `btc-max-send-amount.derived.ts` and the
+  `initBtcMaxSendAmount` callers.
+
+Max must use the recipient's script too. Otherwise, with one 10 000-sat UTXO at 1 sat/vB, Max offers
+9 859 sats (two P2WPKH outputs), and P2TR-aware selection, needing 153 sats, then refuses that
+amount. When no recipient is known yet, Max assumes the largest supported output (43 vB), so the
+amount it offers is always fundable.
+
+This also fixes the CFS path, so it lands on its own (PR 6) before the backend path is switched on.
 
 ### Frontend: `sendBtc`
 
@@ -481,7 +534,8 @@ may have gone out and to check the activity before retrying (no automatic retry 
 `AllUtxosLoader.svelte` and `loadBtcPendingSentTransactions` read from `btc_get_spendable_utxos`
 (certified, all pages) instead of `getUtxosQuery` + `btc_get_pending_transactions`, and fill the
 same stores (`all-utxos.store.ts`, `btc-pending-sent-transactions.store.ts`), so `prepareBtcSend`,
-`initBtcMaxSendAmount` and the balance's `locked` term keep working unchanged. This also fixes the
+`initBtcMaxSendAmount` and the balance's `locked` term keep working unchanged by this change (PR 6
+changes how Max sizes outputs). This also fixes the
 first-page-only gap for large wallets. `getUtxosQuery` stays for its other users
 (`wallet-connect.services.ts`, `chain-fusion-swap-active-tx.services.ts`,
 `ckbtc-update-balance.scheduler.ts`), which read other addresses or other confirmation floors.
@@ -530,8 +584,11 @@ Every earlier PR is safe on its own.
      - a non-empty `script_sig` with an otherwise valid witness;
      - a BIP68 sequence (65 535) in a version-2 transaction;
      - a future lock time.
-2. `fix(backend): scope the pending-transaction prune to the fetched address`. Independent; must land
-   before 3. See [Address-scoped prune](#backend-address-scoped-prune).
+2. `fix(backend): scope the pending-transaction prune to the fetched address and snapshot`.
+   Independent; must land before 3. Both rules are in
+   [Address-scoped prune](#backend-address-scoped-prune). The address rule is in draft PR
+   dfinity/oisy-wallet#14497. The snapshot rule goes there too, or in a follow-up fix if that PR has
+   already merged.
 3. `feat(backend): btc_broadcast_transaction` (needs 1, 2).
    - The endpoint and its rate limiter.
    - The reservation with its release rules and same-txid reuse, plus the same rule for
@@ -553,8 +610,13 @@ Every earlier PR is safe on its own.
    - Tests prove the PSBT path produces a transaction **byte-identical** (before witnesses) to CFS's
      layout for the same inputs, outputs and fee, and that change below 1 000 sats is dropped.
 6. `fix(frontend): size BTC fee estimates by the recipient's script type`. Independent; must land
-   before 8. See [Fee estimation by output script](#frontend-fee-estimation-by-output-script). Tests
-   cover each script type at 1 sat/vB against the vsize of the built transaction.
+   before 8. See [Fee estimation by output script](#frontend-fee-estimation-by-output-script).
+   - Scope: `btcAddressToOutputScript`, selection, the pre-broadcast validation, and Max
+     (`calculateMaxSpendableAmount`, its derived store, and its callers).
+   - Tests cover each script type at 1 sat/vB against the vsize of the built transaction.
+   - Tests check that the Max offered for each script type, and with no recipient yet, is accepted
+     by selection.
+   - Tests check that a P2TR recipient's script is built without `initEccLib`.
 7. `feat(frontend): load BTC UTXOs from the backend` (needs 4). `AllUtxosLoader` and the pending
    loader move to `btc_get_spendable_utxos`.
 8. `feat(frontend): send BTC through the backend behind a flag` (needs 3, 5, 6, 7).
@@ -598,12 +660,14 @@ Every earlier PR is safe on its own.
   - a bad or high-S signature;
   - a fee below 1 sat/vB.
 - A definitive broadcast rejection releases the reservation; an unclear outcome keeps it.
-- A prune for one address never drops a non-expired reservation of another address.
+- A prune for one address never drops a non-expired reservation of another address, nor a
+  reservation inserted after its own UTXO snapshot started.
 - A Chain Fusion or NEAR Intents BTC swap whose broadcast outcome is unclear still has its
   active-swap row, and the row is not shown as a successful swap.
 - The send form sees all of a large wallet's UTXOs (all pages), certified.
 - A send at 1 sat/vB to a P2PKH, P2SH, P2WSH or P2TR address is quoted a fee that passes the
-  backend's 1 sat/vB floor for the transaction actually built.
+  backend's 1 sat/vB floor for the transaction actually built. The Max offered for it is accepted by
+  UTXO selection, and a P2TR recipient needs no ECC library.
 - With the flag off, Chain Fusion and NEAR Intents BTC swaps still create their rows in
   `onBroadcast`; with it on, in `beforeBroadcast`; never both.
 - OpenCryptoPay still pays, and its inputs are reserved before the hand-off. A retry of the same
