@@ -26,8 +26,9 @@ const HOUSEKEEPING_TIMEOUT_NS: u64 = 2 * 60 * 60 * 1_000_000_000;
 /// the next batch.
 ///
 /// A timer message may use 40B instructions. A batch stops after the tip that
-/// crosses this budget, and removing a tip decodes its record once, so the
-/// largest record a request can carry fits in the headroom above it.
+/// crosses this budget, and removing even a tip close to the 2 MiB a request
+/// can carry takes about 0.4B (`bench_prune_expired_tips_oversized`), well
+/// inside the headroom above it.
 const TIP_SWEEP_BATCH_INSTRUCTION_BUDGET: u64 = 2_000_000_000;
 
 /// Pause between tip sweep batches, so that the sweep leaves room for other
