@@ -107,7 +107,9 @@ Prices from `src/signer/api/src/methods.rs` in CFS:
 - **Two tabs or devices race.** Both see nothing pending, both broadcast; the second only learns
   `UtxosAlreadyReserved` after its BTC went out.
 - **A successful send is reported as failed.** `addPendingBtcTransaction` is awaited without a
-  `try` after the broadcast, so `sendBtc` throws when it fails.
+  `try` after the broadcast, so `sendBtc` throws when it fails. Liquidium repay then deletes its
+  row, and supply never creates one, so the transfer goes untracked. For a repay, the full repay
+  max reopens as well.
 - **WalletConnect `signPsbt` reserves nothing.** The dApp broadcasts, so OISY's next send can reuse
   the same UTXOs.
 - **The txid is unknown until CFS returns.** A caller that must track the broadcast
@@ -519,6 +521,40 @@ fails when it never is. NEAR Intents' poller already fails a row whose deposit e
 (`isNearIntentsDepositExpired`). Whether the Chain Fusion poller settles a row whose txid never
 appears is [open question 5](#open-questions-facts-to-confirm).
 
+**Liquidium supply and repay.** These two flows also send BTC through `sendBtc`, from the
+`broadcast` callback that `executeLiquidiumSupply` and `executeLiquidiumRepay` take
+(`src/frontend/src/lib/services/liquidium-supply.services.ts`,
+`src/frontend/src/lib/services/liquidium-repay.services.ts`). Both read any error from it as "not
+sent":
+
+- **Repay** creates its row before the broadcast, but deletes it when `broadcast` throws. That row is
+  the only thing that subtracts a repay in progress from the repay max (`pendingRepay` in
+  `liquidiumRepayCapError`), and Liquidium reduces the debt only once it sees the BTC arrive. So
+  after an unclear outcome the form offers the full debt again, right after "Transaction failed".
+  The backend keeps the first transaction's UTXOs reserved, so a retry spends other coins, and a
+  second full repayment can go out with no debt left to apply it to.
+- **Supply** creates its row, and calls `flow.submit({ txid })`, only after `broadcast` returns a
+  txid. A transfer whose outcome is unclear is never tracked, and a retry deposits twice.
+
+With the flag on, both follow the rules above:
+
+- **Repay** still creates its row first. `beforeBroadcast` writes the txid to the row's `TXID` ref
+  before the broadcast, so the poller's drop of rows without a txid
+  (`LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS`) no longer applies. The `broadcast` catch deletes the
+  row only when the history rule says nothing was sent. Otherwise the row stays, and the repay keeps
+  counting against the max until it settles.
+- **Supply** creates its row, with the txid, in `beforeBroadcast`. It is deleted under the same
+  rule.
+- `flow.submit({ txid })` runs only after a successful broadcast, for both. Liquidium detects the
+  incoming BTC on-chain without it.
+- After an unclear outcome, the wizard says the transfer may have gone out instead of "Transaction
+  failed", and does not return to a form offering the full amount again.
+
+With the flag off, both flows behave as today. The CFS path has its own variant of this gap: `sendBtc`
+throws after a successful broadcast when `addPendingBtcTransaction` fails (see
+[Gaps today](#gaps-today)). It is fixed separately, outside this spec, by capturing the txid in
+`onBroadcast` as the NEAR Intents swap does.
+
 Gone from the flag-on path: the `btc_caller_send` call and the trailing `addPendingBtcTransaction`
 (the backend reserved already). The pre-send re-check of pending transactions (step 4 of
 [today's send](#the-send-step-by-step)) is also redundant there, since the backend checks
@@ -624,6 +660,9 @@ Every earlier PR is safe on its own.
    - `beforeBroadcast` and `isDefinitiveBtcBroadcastRefusal` are added. The Chain Fusion and NEAR
      Intents rows are created in `beforeBroadcast` when the flag is on, and in `onBroadcast` when it
      is off.
+   - With the flag on, Liquidium supply and repay write their txid in `beforeBroadcast`, delete the
+     row only on a definitive refusal, and show "may have gone out" after an unclear outcome. See
+     [Liquidium supply and repay](#frontend-sendbtc).
    - Verified on regtest locally and with a small mainnet send on staging.
 9. `feat(frontend): OpenCryptoPay signs BTC with btc_sign_prehash` (needs 3, 5).
 10. `feat(frontend): enable backend BTC send in production`. Flag on, `PRODUCT.md` updated.
@@ -664,6 +703,9 @@ Every earlier PR is safe on its own.
   reservation inserted after its own UTXO snapshot started.
 - A Chain Fusion or NEAR Intents BTC swap whose broadcast outcome is unclear still has its
   active-swap row, and the row is not shown as a successful swap.
+- A Liquidium BTC supply or repay whose broadcast outcome is unclear keeps its row with the txid,
+  and is not reported as failed. A repay keeps lowering the repay max until it settles, so the form
+  never offers the full debt for a second repayment while the first may be on its way.
 - The send form sees all of a large wallet's UTXOs (all pages), certified.
 - A send at 1 sat/vB to a P2PKH, P2SH, P2WSH or P2TR address is quoted a fee that passes the
   backend's 1 sat/vB floor for the transaction actually built. The Max offered for it is accepted by
@@ -723,11 +765,14 @@ Every earlier PR is safe on its own.
    release) against which are system or unknown outcomes, with `ic-cdk-bitcoin-canister` 0.2.0.
 4. **Regtest.** Confirm the local dfx Bitcoin setup accepts transactions broadcast by the backend
    (min confirmations is forced to 1 on regtest in `get_all_utxos`).
-5. **Chain Fusion row for a deposit that never lands.** Confirm that the Chain Fusion poller
-   (`src/frontend/src/lib/services/chain-fusion-swap-active-tx.services.ts`) eventually fails a
-   `BtcToCkBtc` row whose txid never appears, as NEAR Intents does with an expired deposit.
-   Otherwise PR 8 adds that expiry, since `beforeBroadcast` can create rows for sends that were
-   never broadcast.
+5. **Rows for a deposit that never lands.** Confirm that each poller eventually fails a BTC row
+   whose txid never appears, as NEAR Intents does with an expired deposit. Otherwise PR 8 adds that
+   expiry, since `beforeBroadcast` can create rows for sends that were never broadcast. Two pollers
+   to check:
+   - Chain Fusion (`src/frontend/src/lib/services/chain-fusion-swap-active-tx.services.ts`), for a
+     `BtcToCkBtc` row;
+   - Liquidium (`src/frontend/src/lib/services/liquidium-active-tx.services.ts`). It matches rows to
+     Liquidium activity by txid and today drops only repay rows that never got one.
 6. **Relay fee floor.** Recent Bitcoin Core releases lowered the default `-minrelaytxfee` below
    1 sat/vB. Confirm the current default, and whether the backend's floor (step 8) should stay at
    1 sat/vB, matching the frontend's `MIN_FEE_RATE`, or follow it down. Keep the two in step
