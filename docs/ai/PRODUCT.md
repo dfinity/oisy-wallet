@@ -353,11 +353,11 @@ ICP on the same EVM chains is intentionally **not** metadata-only: some users ma
 
 ### Fixed, default and suggested tokens
 
-Three sets of curated tokens are enabled without the user switching them on. They differ in whether the user can switch them off and in whether that state is stored in the user's token list:
+Three sets of curated tokens are enabled without the user switching them on. They differ in whether the user can switch them off and in when OISY stores them in the user's token list:
 
 - **Fixed** tokens are always enabled; Manage tokens does not let the user switch them off. On ICP these are ICP, ckBTC, ckETH and ckUSDC.
 - **Default** tokens are enabled unless the user has switched them off, and OISY saves them as enabled to the user's token list when the wallet loads that list and finds no entry for them, whether or not the user holds a balance. It never replaces a choice the user already made: a user who switched one off keeps it off. Once saved, the token stays enabled for that user even after it leaves the set. Today only ICRC tokens can be default tokens, and the only one is TCYCLES.
-- **Suggested** tokens are enabled unless the user has switched them off, but nothing is saved. Taking a token out of the suggested set hides it again from every user who never switched it on or off, including users who hold a balance in it.
+- **Suggested** tokens are enabled unless the user has switched them off, and OISY saves one as enabled to the user's token list once the wallet shows a balance in it and the list has no entry for it. As with default tokens, a choice the user already made stays, and once saved, the token stays enabled for that user even after it leaves the set. Taking a token out of the suggested set hides it again only from users it was never saved for, such as those who held no balance in it while it was suggested and never switched it on or off.
 
 ### Asset types
 
