@@ -435,8 +435,17 @@ pub fn setup_with_ii() -> (PicBackend, super::ii::IICanister) {
 
 /// Like [`setup_with_ii`] but with the cycles ledger installed, so `allow_signing` can actually
 /// issue an `icrc_2_approve` and the resulting allowance is observable.
+///
+/// `allow_signing` approves from the cycles the backend's start-up housekeeping timer deposits into
+/// the cycles ledger, so the setup lets that deposit land before returning; otherwise whether the
+/// test's first `allow_signing` finds a funded account depends on how many rounds it took to get
+/// there.
 pub fn setup_with_ii_and_cycles_ledger() -> (PicBackend, super::ii::IICanister) {
-    setup_with_ii_internal(true)
+    let (backend, ii) = setup_with_ii_internal(true);
+    for _ in 0..20 {
+        backend.pic.tick();
+    }
+    (backend, ii)
 }
 
 fn setup_with_ii_internal(cycles_ledger_enabled: bool) -> (PicBackend, super::ii::IICanister) {
