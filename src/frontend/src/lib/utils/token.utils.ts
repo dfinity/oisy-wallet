@@ -77,6 +77,23 @@ export const getMaxTransactionAmount = ({
 };
 
 /**
+ * Whether the token is suggested: enabled until the user switches it on or off, and saved to the
+ * user's token list once they hold a balance in it.
+ */
+export const isTokenSuggested = (token: Token): boolean => {
+	const ledgerCanisterId = isTokenIc(token) ? token.ledgerCanisterId : undefined;
+
+	return (
+		(nonNullish(ledgerCanisterId) &&
+			ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)) ||
+		(nonNullish(ledgerCanisterId) &&
+			ICRC_SUGGESTED_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)) ||
+		(isTokenErc20(token) && ERC20_SUGGESTED_TOKEN_IDS.has(token.id)) ||
+		(isTokenSpl(token) && SPL_SUGGESTED_TOKEN_IDS.has(token.id))
+	);
+};
+
+/**
  * /**
  *  * We always display the following tokens on the "Tokens" view:
  *  * - ICP token
@@ -101,13 +118,7 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 		nonNullish(ledgerCanisterId) &&
 		ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.includes(ledgerCanisterId);
 
-	const isSuggestedToken =
-		(nonNullish(ledgerCanisterId) &&
-			ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)) ||
-		(nonNullish(ledgerCanisterId) &&
-			ICRC_SUGGESTED_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)) ||
-		(isTokenErc20(defaultToken) && ERC20_SUGGESTED_TOKEN_IDS.has(defaultToken.id)) ||
-		(isTokenSpl(defaultToken) && SPL_SUGGESTED_TOKEN_IDS.has(defaultToken.id));
+	const isSuggestedToken = isTokenSuggested(defaultToken);
 
 	// Until it is saved to the user's token list at sign-in, a default-enabled token behaves like a suggested one.
 	const isDefaultEnabledToken =
