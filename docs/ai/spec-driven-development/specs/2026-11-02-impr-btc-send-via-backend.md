@@ -452,6 +452,23 @@ It does not check that a P2TR key is a valid x-only point, which is what the ECC
 add; relay policy does not check that either. The fee estimator and `buildBtcSendPsbt` both use
 this helper, so they always see the same script.
 
+**The network is checked here, before signing.** An output script carries no network: `tb1q…` and
+`bc1q…` with the same program compile to the same bytes. Decoding and compiling would therefore
+turn a wrong-network address into a valid output on the chain being sent on. The backend cannot
+notice, because it only sees scripts. Today CFS refuses such an address
+(`require_network` in `build_p2wpkh_transaction`), and callers such as Liquidium pass
+`target.address` straight to `sendBtc`, so the frontend must keep that protection.
+
+- `btcAddressToOutputScript({ address, network })` takes the intended network and throws on a
+  mismatch.
+- A Bech32 / Bech32m prefix must equal the network's `bech32`: `bc`, `tb` or `bcrt` (in
+  `bitcoinjs-lib`'s `networks`).
+- A Base58 version must be the network's `pubKeyHash` or `scriptHash`. These are `0x00` / `0x05` on
+  mainnet, and `0x6f` / `0xc4` on testnet and regtest, which share them.
+- The fee sizing passes the same network to `parseBtcAddress`, whose `@icp-sdk/canisters/ckbtc`
+  parser takes one; the repo's wrapper currently omits it and so defaults to mainnet.
+- A mismatch is a validation error before signing, so nothing is signed or paid for.
+
 **Who uses it.** Everything that prices a send uses the same sizing:
 
 - UTXO selection;
@@ -653,6 +670,8 @@ Every earlier PR is safe on its own.
    - Tests check that the Max offered for each script type, and with no recipient yet, is accepted
      by selection.
    - Tests check that a P2TR recipient's script is built without `initEccLib`.
+   - Tests check that each address type from the wrong network (mainnet ↔ testnet, testnet ↔
+     regtest via the Bech32 prefix) is refused before signing.
 7. `feat(frontend): load BTC UTXOs from the backend` (needs 4). `AllUtxosLoader` and the pending
    loader move to `btc_get_spendable_utxos`.
 8. `feat(frontend): send BTC through the backend behind a flag` (needs 3, 5, 6, 7).
@@ -710,6 +729,7 @@ Every earlier PR is safe on its own.
 - A send at 1 sat/vB to a P2PKH, P2SH, P2WSH or P2TR address is quoted a fee that passes the
   backend's 1 sat/vB floor for the transaction actually built. The Max offered for it is accepted by
   UTXO selection, and a P2TR recipient needs no ECC library.
+- A destination address from another network is refused before signing, as CFS refuses it today.
 - With the flag off, Chain Fusion and NEAR Intents BTC swaps still create their rows in
   `onBroadcast`; with it on, in `beforeBroadcast`; never both.
 - OpenCryptoPay still pays, and its inputs are reserved before the hand-off. A retry of the same
