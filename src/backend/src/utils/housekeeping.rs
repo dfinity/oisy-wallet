@@ -9,6 +9,7 @@ use crate::{
     personal_notes::share::service::prune_expired_shares,
     tips::service::prune_expired_tips,
     token::{evict_inactive_tokens, TOKEN_ACTIVITY_RETENTION_SEC},
+    types::storable::TipSenderKey,
 };
 
 thread_local! {
@@ -20,6 +21,18 @@ thread_local! {
 /// longer than this, we consider it stuck and force-unlock so the next timer
 /// tick can proceed.
 const HOUSEKEEPING_TIMEOUT_NS: u64 = 2 * 60 * 60 * 1_000_000_000;
+
+/// Instructions a tip sweep batch may use before the remaining tips wait for
+/// the next batch.
+///
+/// A timer message may use 40B instructions. A batch stops after the tip that
+/// crosses this budget, and removing a tip decodes its record once, so the
+/// largest record a request can carry fits in the headroom above it.
+const TIP_SWEEP_BATCH_INSTRUCTION_BUDGET: u64 = 2_000_000_000;
+
+/// Pause between tip sweep batches, so that the sweep leaves room for other
+/// messages.
+const TIP_SWEEP_BATCH_INTERVAL: Duration = Duration::from_secs(1);
 
 /// Returns `true` if a housekeeping run is currently in flight and has not
 /// timed out.  If the lock has been held longer than `HOUSEKEEPING_TIMEOUT_NS`,
@@ -77,6 +90,7 @@ pub(crate) fn start_periodic_housekeeping_timers() {
 /// - Top up the cycles ledger.
 /// - Evict `token_activity` entries older than [`TOKEN_ACTIVITY_RETENTION_SEC`].
 /// - Prune expired `personal_note_shares` entries.
+/// - Start a sweep of tips past their retention window.
 async fn hourly_housekeeping_tasks() {
     // Tops up the account on the cycles ledger
     {
@@ -100,10 +114,39 @@ async fn hourly_housekeeping_tasks() {
 
     // Only tips past their retention window; a lapsed tip stays visible in the
     // sender's History until then.
-    let pruned_tips = prune_expired_tips();
-    if pruned_tips > 0 {
-        ic_cdk::println!("Pruned {pruned_tips} tips past their retention window");
-    }
+    schedule_tip_sweep_batch(None, 0);
+}
+
+/// Runs a batch of the tip sweep on a timer, from the entry after `after`, and
+/// schedules the next batch while entries remain.
+///
+/// Each batch is a message of its own, within
+/// [`TIP_SWEEP_BATCH_INSTRUCTION_BUDGET`], so the sweep's cost does not depend
+/// on how many tips are stored, and a batch that fails rolls back nothing but
+/// itself; the next hourly run starts a new sweep. A sweep that is still running
+/// then would only overlap it: a removed tip leaves the index, so no tip is
+/// removed twice. Mirrors `contacts::migration::schedule_batch`.
+fn schedule_tip_sweep_batch(after: Option<TipSenderKey>, pruned_so_far: u64) {
+    let delay = if after.is_none() {
+        Duration::ZERO
+    } else {
+        TIP_SWEEP_BATCH_INTERVAL
+    };
+
+    set_timer(delay, async move {
+        let (next, pruned) = prune_expired_tips(after, time(), || {
+            ic_cdk::api::instruction_counter() < TIP_SWEEP_BATCH_INSTRUCTION_BUDGET
+        });
+        let pruned_so_far = pruned_so_far + pruned;
+
+        match next {
+            Some(after) => schedule_tip_sweep_batch(Some(after), pruned_so_far),
+            None if pruned_so_far > 0 => {
+                ic_cdk::println!("Pruned {pruned_so_far} tips past their retention window");
+            }
+            None => {}
+        }
+    });
 }
 
 #[cfg(test)]
