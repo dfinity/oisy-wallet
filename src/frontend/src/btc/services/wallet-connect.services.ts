@@ -1,4 +1,4 @@
-import type { OptionBtcAddress } from '$btc/types/address';
+import type { BtcAddress, OptionBtcAddress } from '$btc/types/address';
 import type {
 	WalletConnectBtcDecodedPsbt,
 	WalletConnectBtcDecodedPsbtInput,
@@ -140,9 +140,27 @@ export const getAccountAddresses = ({
 			}
 
 			try {
+				const principal = identity.getPrincipal();
+
+				if (
+					!isAddressOfKey({
+						address,
+						publicKey: deriveBtcPublicKey({ principal }),
+						network: bitcoinJsNetwork(request.params.chainId)
+					})
+				) {
+					toastsError({
+						msg: { text: get(i18n).wallet_connect.error.btc_address_not_signer }
+					});
+
+					await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+					return { success: false };
+				}
+
 				const message = buildBtcAccountAddresses({
 					address,
-					principal: identity.getPrincipal(),
+					principal,
 					networkId
 				});
 
@@ -212,14 +230,30 @@ export const sign = ({
 			try {
 				progress(ProgressStepsSign.SIGN);
 
+				const publicKey = deriveBtcPublicKey({ principal: identity.getPrincipal() });
+
+				if (
+					!isAddressOfKey({
+						address,
+						publicKey,
+						network: bitcoinJsNetwork(request.params.chainId)
+					})
+				) {
+					toastsError({
+						msg: { text: get(i18n).wallet_connect.error.btc_address_not_signer }
+					});
+
+					await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+					return { success: false };
+				}
+
 				const messageHash = bitcoinSignedMessageHash(message);
 
 				const rawSignature = await signBtcPrehash({
 					identity,
 					hash: messageHash
 				});
-
-				const publicKey = deriveBtcPublicKey({ principal: identity.getPrincipal() });
 
 				const signature = encodeRecoverableSignature({
 					signature: rawSignature,
@@ -271,6 +305,18 @@ const bitcoinJsNetwork = (chainId: string | undefined): Network => {
 	// Regtest (local-only) shares testnet address parameters; default to it for non-mainnet chains.
 	return networks.regtest;
 };
+
+// A request is reviewed and answered with the wallet's loaded address, while its signature comes
+// from the key of the signed-in identity: both have to name the same account.
+const isAddressOfKey = ({
+	address,
+	publicKey,
+	network
+}: {
+	address: BtcAddress;
+	publicKey: Uint8Array;
+	network: Network;
+}): boolean => payments.p2wpkh({ pubkey: Buffer.from(publicKey), network }).address === address;
 
 const safeOutputAddress = ({
 	script,
@@ -560,6 +606,16 @@ export const signPsbt = ({
 			try {
 				progress(ProgressStepsSign.SIGN);
 
+				const publicKey = Buffer.from(deriveBtcPublicKey({ principal: identity.getPrincipal() }));
+
+				if (!isAddressOfKey({ address, publicKey, network })) {
+					toastsError({
+						msg: { text: get(i18n).wallet_connect.error.btc_address_not_signer }
+					});
+					await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+					return { success: false };
+				}
+
 				const parsed = Psbt.fromBase64(psbt, { network });
 
 				// The review prices the request from `decodePsbt`; refuse whatever it could not display
@@ -587,8 +643,6 @@ export const signPsbt = ({
 					await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
 					return { success: false };
 				}
-
-				const publicKey = Buffer.from(deriveBtcPublicKey({ principal: identity.getPrincipal() }));
 
 				// Expected P2WPKH script for the wallet's own key — used to confirm an input is ours and
 				// of the only address type we can sign (the signer manages a single P2WPKH key).
