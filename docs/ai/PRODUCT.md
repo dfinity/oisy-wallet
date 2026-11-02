@@ -706,6 +706,8 @@ The list currently appears on the WalletConnect sign review. Showing it on an ex
 
 The `signPsbt` review shows only values OISY can check. An input that spends one of the wallet's own unspent outputs, as the Bitcoin canister lists them (on mainnet, the only network OISY signs for), is the user's and is priced from that list; any other input is priced from the previous transaction the request includes for it, whose ID must match the output it spends, whichever address the input names. A request that states another value or address for one of the wallet's outputs, or that has an input OISY can price neither way, is **refused**: the review says why and keeps Approve disabled, and the signing step reads the wallet's outputs again and runs the same check. Every request offered for approval therefore states a checked value for each input and a known fee. The review shows a spinner while the wallet's outputs load.
 
+Every Bitcoin request is answered for one account only. `getAccountAddresses`, `signMessage` and `signPsbt` check that the address the request is answered or reviewed with is the address of the key OISY signs with, and refuse the request otherwise, so the address a dApp or the review shows always belongs to the key that signs.
+
 ### ckETH conversions requested by an Ethereum dApp
 
 An `eth_sendTransaction` request addressed to the ckETH helper contract, the minter contract whose `deposit(bytes32)` turns ETH into ckETH for the principal it names, is reviewed as a **conversion** when it deposits to the signed-in user's own Internet Computer principal: the review says so, shows the principal the ckETH is credited to, and names the Internet Computer as the destination network. What is signed is the deposit exactly as the dApp sent it.
