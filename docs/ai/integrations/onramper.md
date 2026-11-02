@@ -14,10 +14,9 @@ secret never ships in the frontend bundle.
 ## Availability (feature flag)
 
 The buy widget is gated by `ONRAMPER_ENABLED` (`src/frontend/src/env/rest/onramper.env.ts`), which
-is enabled only on **local and staging** — `LOCAL || STAGING` (`STAGING` covers the `test_fe_*` /
-`audit` / `e2e` environments). On **beta** and **production (`ic`)** the flag is `false`, so the buy
-flow shows the unavailable notice regardless of backend state. Within the enabled environments, the
-widget also needs the signing secret — see below.
+is enabled on **every environment** — `LOCAL || STAGING || BETA || PROD` (`STAGING` covers the
+`test_fe_*` / `audit` / `e2e` environments). Dropping `PROD` (or `BETA`) turns the widget off there
+on the next deploy. The widget also needs the signing secret — see below.
 
 ## Runtime behavior
 
