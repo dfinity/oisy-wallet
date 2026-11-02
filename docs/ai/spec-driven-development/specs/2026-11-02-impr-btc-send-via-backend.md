@@ -211,6 +211,13 @@ sequence with a BIP68 relative lock), `InvalidUtxos` (an input that is not the c
    outputs are free to add and the broadcast is priced per byte (a 1-input, 2 000-output
    transaction would cost the backend ≈1.2T). CFS prices per output for the same reason. Proposed
    values in [Pending decisions](#pending-decisions-facts-are-clear--we-just-need-to-decide).
+
+   Then look up the caller's [broadcast state](#broadcast-state-per-txid) for the decoded txid.
+   `Sent` returns the txid and `InFlight` returns `BroadcastInProgress`, both before any paid call.
+   This way a same-bytes retry of a successful send gets its success back even after its inputs
+   have left the UTXO view, which step 6 would otherwise report as `InvalidUtxos`. The step-9
+   block still re-checks the state atomically before a new broadcast.
+
 3. **Outputs must be standard**, since a non-standard output is dropped by relay policy after we
    paid for the broadcast, however valid the signatures. Every output is one of:
    - a P2PKH, P2SH, P2WPKH, P2WSH or P2TR script (`is_p2pkh()` … `is_p2tr()` on the
@@ -259,10 +266,15 @@ Utxo records>, created_at_timestamp_ns: now }`. In the same block, read and set 
 10. `ic_cdk_bitcoin_canister::bitcoin_send_transaction(&SendTransactionRequest { network, transaction })`.
     - `Ok` → state `Sent`, return the txid.
     - **Definitive failure** (the call was never made, e.g. insufficient cycles, or the Bitcoin
-      canister rejected it: `CanisterReject`, such as a malformed transaction) → return
-      `BroadcastRejected`. If this attempt inserted the reservation (the first attempt), **remove
-      it** and clear the state. If it is a retry, an earlier attempt's outcome is still unknown, so
-      the reservation stays and the state goes back to `Unknown { attempts }`.
+      canister rejected it: `CanisterReject`, such as a malformed transaction):
+      - On the first attempt, which inserted the reservation: **remove it**, clear the state, and
+        return `BroadcastRejected`.
+      - On a retry: an earlier attempt's outcome is still unknown, so the transaction's outcome is
+        too. The reservation stays, the state goes back to `Unknown { attempts }`, and the answer is
+        `BroadcastOutcomeUnknown`, not `BroadcastRejected`.
+
+      So `BroadcastRejected` always means no attempt for that txid can have gone out.
+
     - **Anything else** (system errors, unknown outcome) → **keep the reservation** until the
       usual prune, state `Unknown { attempts }`, and return `BroadcastOutcomeUnknown`. The frontend
       may resend the same bytes.
@@ -276,8 +288,8 @@ view. And with two concurrent attempts, A could release the reservation on a rej
 reusing it, is still broadcasting or has already succeeded.
 
 So the backend keeps, per `(principal, txid)`, one of `InFlight { attempts }`, `Sent` or
-`Unknown { attempts }`, where `attempts` counts the paid broadcasts so far. It is read and written in
-the step-9 block and updated in step 10:
+`Unknown { attempts }`, where `attempts` counts the paid broadcasts so far. It is read in step 2
+(`Sent` and `InFlight` only), read and written in the step-9 block, and updated in step 10:
 
 | State                                           | A same-txid request                                                              |
 | ----------------------------------------------- | -------------------------------------------------------------------------------- |
@@ -375,6 +387,29 @@ them). `bitcoinjs-lib` (^6.1.7) is already a dependency; nothing new is added.
   library the frontend does not have (adding one is a new dependency), and the backend verifies
   every signature before it pays for the broadcast.
 
+### Frontend: fee estimation by output script
+
+`estimateTransactionVSize` and `calculateFeeSatoshis` (`src/frontend/src/btc/utils/btc-utxos.utils.ts`)
+price every output as a 31-vB P2WPKH output. The frontend's lowest rate is 1 sat/vB (`MIN_FEE_RATE`
+in `src/frontend/src/btc/services/btc-utxos.service.ts`). At that rate, a 1-input send to a P2TR
+address is quoted 141 sats for a transaction of about 153 vB. The backend's fee floor (step 8)
+refuses that as `FeeTooLow`; today CFS broadcasts it and the network drops it.
+
+The fix sizes each output from its script, as 8 bytes of value + 1 byte of length + the script:
+
+| Script | Output size |
+| ------ | ----------- |
+| P2PKH  | 34 vB       |
+| P2SH   | 32 vB       |
+| P2WPKH | 31 vB       |
+| P2WSH  | 43 vB       |
+| P2TR   | 43 vB       |
+
+The recipient's script comes from its address (`bitcoinjs-lib`'s `address.toOutputScript`), and the
+change stays P2WPKH. UTXO selection and the pre-broadcast validation must agree on the fee (see the
+doc comment on `calculateFeeSatoshis`), so both take the recipient's script. This also fixes the CFS
+path, so it lands on its own (PR 6) before the backend path is switched on.
+
 ### Frontend: `sendBtc`
 
 `sendBtc` keeps its parameters (`SendBtcParams`) and gains one optional field, `beforeBroadcast`
@@ -396,17 +431,38 @@ in `src/frontend/src/lib/services/chain-fusion-swap.services.ts`) and the NEAR I
 An unclear outcome (`BroadcastOutcomeUnknown`, `BroadcastInProgress`, or a transport failure with
 no typed answer) skips that step, so a deposit that did go out would be untracked.
 
-The txid is now known after signing, so these two callers move row creation to `beforeBroadcast`.
-This mirrors the EVM `swap`'s `beforeBroadcast` (`src/frontend/src/eth/services/swap.services.ts`),
-which LI.FI uses to create its row (`src/frontend/src/lib/services/lifi-evm-swap.services.ts`).
+On the backend path the txid is known after signing, so these two callers create their row in
+`beforeBroadcast`. This mirrors the EVM `swap`'s `beforeBroadcast`
+(`src/frontend/src/eth/services/swap.services.ts`), which LI.FI uses to create its row
+(`src/frontend/src/lib/services/lifi-evm-swap.services.ts`).
 
-- The row is deleted only on a definitive answer: any typed `btc_broadcast_transaction` error other
-  than the two unclear ones. With such an error, the backend guarantees that nothing was sent.
-- After an unclear outcome the row stays and its poller reconciles it. The swap is not reported as
-  successful: the user sees that the send may have gone out, and the row settles once the deposit is
-  seen, or fails when it never is. NEAR Intents' poller already fails a row whose deposit expires
-  (`isNearIntentsDepositExpired`). Whether the Chain Fusion poller settles a row whose txid never
-  appears is [open question 5](#open-questions-facts-to-confirm).
+**Row creation follows the flag.** The CFS path never calls `beforeBroadcast`, because there the
+txid exists only once CFS has broadcast. While the CFS path exists (until PR 11), each caller passes
+both hooks and creates its row in exactly one of them:
+
+- flag on: `beforeBroadcast` creates the row, and `onBroadcast` does not;
+- flag off: `onBroadcast` creates it, as today.
+
+PR 11 deletes the flag-off branch along with the CFS path.
+
+**Deleting the row depends on the txid's whole submission history, not on the last answer.**
+
+- The row is deleted only if **every** submission of that txid got a definitive answer.
+  `isDefinitiveBtcBroadcastRefusal(err)` (new, next to `isDefinitiveTransactionRefusal` in
+  `src/frontend/src/eth/utils/eth-error.utils.ts`) decides: a typed `btc_broadcast_transaction`
+  error other than `BroadcastOutcomeUnknown` and `BroadcastInProgress`.
+- Once any submission came back unclear (one of those two, or a transport failure with no typed
+  answer), the row is kept whatever later submissions return. A rate limit, `InvalidUtxos` after the
+  inputs were mined, or a rejected retry can all follow a broadcast that did go out.
+- The backend answers a rejected retry with `BroadcastOutcomeUnknown` (step 10), so even a single
+  late answer does not look definitive. v1 makes one submission per `sendBtc` call. Any automatic
+  retry added later must keep this history.
+
+After an unclear outcome, the row's poller reconciles it. The swap is not reported as successful:
+the user sees that the send may have gone out, and the row settles once the deposit is seen, or
+fails when it never is. NEAR Intents' poller already fails a row whose deposit expires
+(`isNearIntentsDepositExpired`). Whether the Chain Fusion poller settles a row whose txid never
+appears is [open question 5](#open-questions-facts-to-confirm).
 
 Gone from the flag-on path: the `btc_caller_send` call and the trailing `addPendingBtcTransaction`
 (the backend reserved already). The pre-send re-check of pending transactions (step 4 of
@@ -458,8 +514,8 @@ spec.** A batch prehash method (one call, N signatures) would be an optional CFS
 
 ## Delivery plan
 
-Ordered by dependency. Apart from the prune fix in PR 2, nothing changes for users until PR 7. Every
-earlier PR is safe on its own.
+Ordered by dependency. Apart from the fixes in PRs 2 and 6, nothing changes for users until PR 8.
+Every earlier PR is safe on its own.
 
 1. `feat(backend): pure validator for signed BTC transactions`. Dead code.
    - Decode, caps, outputs, inputs (`script_sig`, sequence), ownership, signature and fee checks, as
@@ -481,7 +537,10 @@ earlier PR is safe on its own.
    - The [broadcast state](#broadcast-state-per-txid) as a model with unit tests for its
      interleavings:
      - A rejected while B is in flight;
-     - a retry after `Sent`;
+     - a retry after `Sent`, including one whose inputs have left the UTXO view (returns the txid,
+       not `InvalidUtxos`);
+     - a rejected retry after `Unknown` (returns `BroadcastOutcomeUnknown` and keeps the
+       reservation);
      - the attempt cap.
    - `backend.did` regenerated. Rebuild the wasm first: `npm run generate` silently no-ops on a stale
      one.
@@ -491,17 +550,23 @@ earlier PR is safe on its own.
    - `buildBtcSendPsbt`, `signAndFinalizeBtcPsbt`, and a shared signer that WalletConnect uses.
    - Tests prove the PSBT path produces a transaction **byte-identical** (before witnesses) to CFS's
      layout for the same inputs, outputs and fee, and that change below 1 000 sats is dropped.
-6. `feat(frontend): load BTC UTXOs from the backend` (needs 4). `AllUtxosLoader` and the pending
+6. `fix(frontend): size BTC fee estimates by the recipient's script type`. Independent; must land
+   before 8. See [Fee estimation by output script](#frontend-fee-estimation-by-output-script). Tests
+   cover each script type at 1 sat/vB against the vsize of the built transaction.
+7. `feat(frontend): load BTC UTXOs from the backend` (needs 4). `AllUtxosLoader` and the pending
    loader move to `btc_get_spendable_utxos`.
-7. `feat(frontend): send BTC through the backend behind a flag` (needs 3, 5, 6).
+8. `feat(frontend): send BTC through the backend behind a flag` (needs 3, 5, 6, 7).
    - The flag is on for local and staging.
-   - `beforeBroadcast` is added, and the Chain Fusion and NEAR Intents rows move to it.
+   - `beforeBroadcast` and `isDefinitiveBtcBroadcastRefusal` are added. The Chain Fusion and NEAR
+     Intents rows are created in `beforeBroadcast` when the flag is on, and in `onBroadcast` when it
+     is off.
    - Verified on regtest locally and with a small mainnet send on staging.
-8. `feat(frontend): OpenCryptoPay signs BTC with btc_sign_prehash` (needs 3, 5).
-9. `feat(frontend): enable backend BTC send in production`. Flag on, `PRODUCT.md` updated.
-10. `chore(frontend): remove the CFS BTC send path`. Removes the flag, the `sendBtc`/`signBtc` signer
-    wrappers, and the redundant pre-send re-check.
-11. Optional: `feat(backend,frontend): certified BTC balance from the backend` (`btc_get_balance`).
+9. `feat(frontend): OpenCryptoPay signs BTC with btc_sign_prehash` (needs 3, 5).
+10. `feat(frontend): enable backend BTC send in production`. Flag on, `PRODUCT.md` updated.
+11. `chore(frontend): remove the CFS BTC send path`. Removes the flag, the `sendBtc`/`signBtc`
+    signer wrappers, the redundant pre-send re-check, and the flag-off row creation in
+    `onBroadcast`.
+12. Optional: `feat(backend,frontend): certified BTC balance from the backend` (`btc_get_balance`).
 
 ---
 
@@ -509,7 +574,7 @@ earlier PR is safe on its own.
 
 - A BTC send from every `sendBtc` caller succeeds with the flag on; the broadcast transaction has
   the same layout CFS produced (version 2, lock time 0, no RBF, change last, dust rule).
-- OISY makes no `btc_caller_send` / `btc_caller_sign` calls with the flag on (and, after PR 11, no
+- OISY makes no `btc_caller_send` / `btc_caller_sign` calls with the flag on (and, after PR 12, no
   `btc_caller_balance`).
 - The inputs of a send are reserved **before** the broadcast: closing the tab mid-send, or a second
   tab sending at the same time, can never produce a second transaction over the same UTXOs from
@@ -535,6 +600,10 @@ earlier PR is safe on its own.
 - A Chain Fusion or NEAR Intents BTC swap whose broadcast outcome is unclear still has its
   active-swap row, and the row is not shown as a successful swap.
 - The send form sees all of a large wallet's UTXOs (all pages), certified.
+- A send at 1 sat/vB to a P2PKH, P2SH, P2WSH or P2TR address is quoted a fee that passes the
+  backend's 1 sat/vB floor for the transaction actually built.
+- With the flag off, Chain Fusion and NEAR Intents BTC swaps still create their rows in
+  `onBroadcast`; with it on, in `beforeBroadcast`; never both.
 - OpenCryptoPay still pays, and its inputs are reserved before the hand-off. A retry of the same
   payment after a failed hand-off is not blocked by its own reservation.
 - WalletConnect `signPsbt` behaves exactly as before.
@@ -546,7 +615,7 @@ earlier PR is safe on its own.
 
 - LI.FI swaps from BTC (own spec, `2026-11-02-feat-lifi-btc-source-swaps.md`).
 - Removing BTC methods from CFS.
-- Changing UTXO selection, fee estimation or the 4-confirmation floor.
+- Changing UTXO selection or the 4-confirmation floor. Fee estimation changes only in how it sizes outputs (PR 6).
 - RBF / fee bumping for OISY's own sends.
 - Fixing the 1-hour reservation expiry (see [Risks](#risks)).
 
@@ -591,7 +660,7 @@ earlier PR is safe on its own.
 5. **Chain Fusion row for a deposit that never lands.** Confirm that the Chain Fusion poller
    (`src/frontend/src/lib/services/chain-fusion-swap-active-tx.services.ts`) eventually fails a
    `BtcToCkBtc` row whose txid never appears, as NEAR Intents does with an expired deposit.
-   Otherwise PR 7 adds that expiry, since `beforeBroadcast` can create rows for sends that were
+   Otherwise PR 8 adds that expiry, since `beforeBroadcast` can create rows for sends that were
    never broadcast.
 
 ## Pending decisions (facts are clear — we just need to decide)
