@@ -133,7 +133,7 @@
 			"section_finance": "금융",
 			"section_more": "더보기",
 			"airdrops": "리워드",
-			"tools": "",
+			"tools": "도구",
 			"earning": "수익",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "대출 보기 열기",
 			"earning": "수익 보기 열기",
 			"airdrops": "리워드 보기 열기",
-			"tools": "",
+			"tools": "도구 열기",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "지갑 주소, 설정, 로그아웃 및 외부 링크",
@@ -889,8 +889,8 @@
 			"disable_hide_micro_transactions": "매우 작은 가치의 거래 숨기기 비활성화",
 			"save_spam_filter_success": "스팸 필터 설정이 업데이트되었습니다.",
 			"export_data": "데이터 내보내기",
-			"export_data_moved": "",
-			"open_tools": "",
+			"export_data_moved": "내보내기가 도구로 이동했습니다.",
+			"open_tools": "도구 열기",
 			"export_data_description": "토큰과 거래를 CSV로 다운로드하세요 — 기본 항목은 Basic, 추가 속성은 Extended로 확인할 수 있습니다.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -915,8 +915,8 @@
 	},
 	"tools": {
 		"text": {
-			"title": "",
-			"top_up_canister": ""
+			"title": "도구",
+			"top_up_canister": "ICP 또는 TCYCLES로 캐니스터 충전"
 		}
 	},
 	"shortcuts": {
