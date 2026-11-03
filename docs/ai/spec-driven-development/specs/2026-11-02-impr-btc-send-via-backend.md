@@ -435,8 +435,10 @@ them). `bitcoinjs-lib` (^6.1.7) is already a dependency; nothing new is added.
   arrives through `@dfinity/ic-pub-key`, so nothing is added to `package.json`. It takes the 64-byte
   `r || s` that `bitcoinjs-lib` passes the validator, and refuses high-S by default. The backend
   verifies every signature again before it pays for a broadcast, but OpenCryptoPay's hex never
-  reaches the backend. Without this check, a signing defect (a wrong prevout value, a wrong public
-  key, a missed low-S normalization) would go straight to a real payment. In the OpenCryptoPay order
+  reaches the backend. Without this check, a signing defect (a signature made with a key other than
+  the input's, a missed low-S normalization) would go straight to a real payment. It cannot catch a
+  wrong input value: signing and checking both read it from the same `witnessUtxo`. The network
+  refuses such a transaction, because BIP143 commits to the value, so no funds move. In the OpenCryptoPay order
   signing comes before the reservation, so a bad signature fails before any coins are reserved.
 
 ### Frontend: fee estimation by output script
@@ -702,8 +704,8 @@ Every PR is safe on its own.
    - `buildBtcSendPsbt`, `signAndFinalizeBtcPsbt`, and a shared signer that WalletConnect uses.
    - Tests prove the PSBT path produces a transaction **byte-identical** (before witnesses) to CFS's
      layout for the same inputs, outputs and fee, and that change below 1 000 sats is dropped.
-   - Tests check that `signAndFinalizeBtcPsbt` throws on a signature that does not verify (a wrong
-     prevout value, a wrong public key) and on a high-S one.
+   - Tests check that `signAndFinalizeBtcPsbt` throws on a signature made with a key other than the
+     input's, and on a high-S one.
 6. `fix(frontend): size BTC fee estimates by the recipient's script type`. Independent; must land
    before 8. See [Fee estimation by output script](#frontend-fee-estimation-by-output-script).
    - Scope: `btcAddressToOutputScript`, selection, the pre-broadcast validation, and Max
