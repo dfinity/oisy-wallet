@@ -245,15 +245,22 @@ sequence with a BIP68 relative lock), `InvalidUtxos` (an input that is not the c
 5. Derive the caller's address with the existing `signer::btc_principal_to_p2wpkh_address` and its
    script / public key.
 6. `api::get_all_utxos(network, address, Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX))`. Every input must
-   be in that set (match as CFS's `is_same_outpoint` does: `txin.previous_output.txid.as_byte_array()`
-   against `utxo.outpoint.txid`), which also gives its value and script.
+   be in that set, which also gives its value and script. Match the whole outpoint, as CFS's
+   `is_same_outpoint` and `btc_add_pending_transaction`'s `(txid, vout)` keys do:
+   `txin.previous_output.vout == utxo.outpoint.vout` and `txin.previous_output.txid.as_byte_array()`
+   against `utxo.outpoint.txid`. Two UTXOs from one transaction are common (a batch payout, a send
+   to oneself with change), and a txid-only match would hash the wrong value or reserve the wrong
+   UTXO.
 7. **Verify every input**: an empty `script_sig` (`InvalidInput { index }` otherwise: a native
    P2WPKH spend with a non-empty one is consensus-invalid, and BIP143 does not commit to that field,
    so the signature check alone would let it through), and a witness of exactly two items, the
    second the caller's compressed public key, the first a strict-DER, low-S signature with
    `SIGHASH_ALL` that verifies against the BIP143 sighash computed with the value from step 6.
-   Together with steps 3 and 4, this guarantees the backend only pays to broadcast transactions the
-   network will accept. Instructions only; the `bitcoin` crate (already
+   Together with steps 3, 4 and 6, the backend only pays to broadcast a well-formed, standard,
+   correctly signed transaction over the caller's confirmed UTXOs, which step 9 then checks no
+   other OISY reservation holds. That does **not** guarantee the network accepts it: the
+   ≥4-confirmation view has no mempool, so an input an unconfirmed transaction already spends still
+   passes (see [Risks](#risks)). Instructions only; the `bitcoin` crate (already
    a backend dependency at 0.32) brings `secp256k1` — confirm the verification feature is enabled
    (see [Open questions](#open-questions-facts-to-confirm)).
 8. **Fee**: `Σinputs − Σoutputs > 0` and at least 1 sat/vB of the transaction's vsize. That is the
@@ -270,17 +277,24 @@ Utxo records>, created_at_timestamp_ns: now }`. In the same block, read and set 
      transaction with the **same txid**, skip the insert: a retry after an unclear outcome must not
      be blocked by its own reservation. Whether it broadcasts again is decided by the broadcast
      state. A different txid over any of those inputs is `UtxosAlreadyReserved`.
+   - The call remembers whether it **inserted** the reservation or **reused** one. Step 10
+     releases only a reservation the call inserted.
 10. `ic_cdk_bitcoin_canister::bitcoin_send_transaction(&SendTransactionRequest { network, transaction })`.
     - `Ok` → state `Sent`, return the txid.
     - **Definitive failure** (the call was never made, e.g. insufficient cycles, or the Bitcoin
       canister rejected it: `CanisterReject`, such as a malformed transaction):
-      - On the first attempt, which inserted the reservation: **remove it**, clear the state, and
-        return `BroadcastRejected`.
-      - On a retry: an earlier attempt's outcome is still unknown, so the transaction's outcome is
-        too. The reservation stays, the state goes back to `Unknown { attempts }`, and the answer is
+      - If this call inserted the reservation in step 9: **remove it**, clear the state, and return
+        `BroadcastRejected`.
+      - If it reused a same-txid reservation: that reservation is older than this call, and
+        something under it may have gone out. It may be a retry after an unclear outcome, a resend
+        after an upgrade cleared the heap state (the reservation is in stable memory), or a
+        transaction reserved through `btc_add_pending_transaction` and handed to OpenCryptoPay.
+        The reservation stays, the state becomes `Unknown { attempts }`, and the answer is
         `BroadcastOutcomeUnknown`, not `BroadcastRejected`.
 
-      So `BroadcastRejected` always means no attempt for that txid can have gone out.
+      So a release only ever undoes the call's own insert, and `BroadcastRejected` means nothing for
+      that txid can have gone out while it was reserved. An attempt whose reservation already
+      expired is the pre-existing [1-hour expiry](#risks) case.
 
     - **Anything else** (system errors, unknown outcome) → **keep the reservation** until the
       usual prune, state `Unknown { attempts }`, and return `BroadcastOutcomeUnknown`. The frontend
@@ -306,15 +320,17 @@ So the backend keeps, per `(principal, txid)`, one of `InFlight { attempts }`, `
 | `Unknown { attempts < MAX_BROADCAST_ATTEMPTS }` | Set `InFlight { attempts: attempts + 1 }`, broadcast again.                      |
 | `Unknown { attempts ≥ MAX_BROADCAST_ATTEMPTS }` | `BroadcastOutcomeUnknown`, no call; the reservation stays until the usual prune. |
 
-Because a second attempt can never run while the first is in flight, the release rule in step 10
-can never drop a reservation that another attempt still relies on.
+A second attempt can never run while the first is in flight, and step 10 releases only a
+reservation the call itself inserted. So the release rule can never drop a reservation that
+another attempt relies on, whether that attempt is still running or came before an upgrade.
 
 The state lives in heap memory, not stable memory, so `StoredPendingTransaction` does not change
 (stable state; see [Pending decisions](#pending-decisions-facts-are-clear--we-just-need-to-decide)).
 An entry is dropped with its reservation (prune or release), so the map never holds more entries
 than there are reservations. An upgrade clears the map, which allows at most
 `MAX_BROADCAST_ATTEMPTS` more paid broadcasts of a transaction whose inputs are still in the UTXO
-view.
+view. It does not release anything: a resend after the upgrade finds its reservation and reuses it,
+so a definitive failure keeps it.
 
 `btc_add_pending_transaction` stays, for transactions OISY signs but does not broadcast itself
 (OpenCryptoPay; optionally WalletConnect `signPsbt`, see
@@ -410,10 +426,18 @@ them). `bitcoinjs-lib` (^6.1.7) is already a dependency; nothing new is added.
   signer **normalizes to low-S** (`s > n/2 → n − s`) before returning, defensively: a high-S
   signature is non-standard and would be dropped.
 - **`signAndFinalizeBtcPsbt({ psbt, identity })`**: `signInputAsync` for every input (all are the
-  wallet's own in a send), `finalizeAllInputs`, `extractTransaction()` → `{ txid, hex, bytes }`. The
-  txid is known **before** the broadcast. No `validateSignaturesOfAllInputs`: it needs an ECC
-  library the frontend does not have (adding one is a new dependency), and the backend verifies
-  every signature before it pays for the broadcast.
+  wallet's own in a send), then the signature check below, `finalizeAllInputs`,
+  `extractTransaction()` → `{ txid, hex, bytes }`. The txid is known **before** the broadcast.
+- **Signature check before finalizing.** Call
+  `psbt.validateSignaturesOfAllInputs((pubkey, msghash, signature) => verify(signature, msghash, pubkey))`
+  and throw if it returns `false`. `verify` comes from `@noble/secp256k1` 2.3.0, which production
+  code already imports (`Signature` in `src/frontend/src/btc/utils/wallet-connect.utils.ts`). It
+  arrives through `@dfinity/ic-pub-key`, so nothing is added to `package.json`. It takes the 64-byte
+  `r || s` that `bitcoinjs-lib` passes the validator, and refuses high-S by default. The backend
+  verifies every signature again before it pays for a broadcast, but OpenCryptoPay's hex never
+  reaches the backend. Without this check, a signing defect (a wrong prevout value, a wrong public
+  key, a missed low-S normalization) would go straight to a real payment. In the OpenCryptoPay order
+  signing comes before the reservation, so a bad signature fails before any coins are reserved.
 
 ### Frontend: fee estimation by output script
 
@@ -589,14 +613,24 @@ may have gone out and to check the activity before retrying (no automatic retry 
 same stores (`all-utxos.store.ts`, `btc-pending-sent-transactions.store.ts`), so `prepareBtcSend`,
 `initBtcMaxSendAmount` and the balance's `locked` term keep working unchanged by this change (PR 6
 changes how Max sizes outputs). This also fixes the
-first-page-only gap for large wallets. `getUtxosQuery` stays for its other users
+first-page-only gap for large wallets.
+
+The switch is behind `BTC_SEND_VIA_BACKEND_ENABLED` (see [`sendBtc`](#frontend-sendbtc)). Every
+BTC flow loads its UTXOs through these loaders: send, convert, the BTC swap, the AI assistant
+send, Liquidium supply and repay, and OpenCryptoPay. Without the flag, a fault in the new endpoint
+would block all of them in production until a new release. With the flag off, the loaders keep
+`getUtxosQuery` and `btc_get_pending_transactions`.
+
+`getUtxosQuery` stays for its other users
 (`wallet-connect.services.ts`, `chain-fusion-swap-active-tx.services.ts`,
 `ckbtc-update-balance.scheduler.ts`), which read other addresses or other confirmation floors.
 
 ### Frontend: OpenCryptoPay
 
 `payBtc` builds and signs with the same utils (no broadcast: OpenCryptoPay broadcasts), passes the
-hex as today and keeps `btc_add_pending_transaction`. This retires `btc_caller_sign`. With the txid
+hex as today and keeps `btc_add_pending_transaction`. This retires `btc_caller_sign`. OpenCryptoPay
+with BTC is live in production, so this path is behind `BTC_SEND_VIA_BACKEND_ENABLED` too. With the
+flag off, `payBtc` keeps `btc_caller_sign` and reserves after the hand-off, as today. With the txid
 known before the hand-off, the reservation can be added **before** `fetchOpenCryptoPay`, closing
 the same spent-but-not-reserved gap for this flow.
 
@@ -623,8 +657,10 @@ spec.** A batch prehash method (one call, N signatures) would be an optional CFS
 
 ## Delivery plan
 
-Ordered by dependency. Apart from the fixes in PRs 2 and 6, nothing changes for users until PR 8.
-Every earlier PR is safe on its own.
+Ordered by dependency. Apart from the fixes in PRs 2 and 6, nothing changes for users in production
+until PR 10. The UTXO loading (PR 7), the send (PR 8) and OpenCryptoPay (PR 9) are all behind
+`BTC_SEND_VIA_BACKEND_ENABLED`, on only for local and staging until PR 10 turns it on in production.
+Every PR is safe on its own.
 
 1. `feat(backend): pure validator for signed BTC transactions`. Dead code.
    - Decode, caps, outputs, inputs (`script_sig`, sequence), ownership, signature and fee checks, as
@@ -636,7 +672,9 @@ Every earlier PR is safe on its own.
      - two `OP_RETURN`s, an `OP_RETURN` with a non-push opcode, a bare `OP_TRUE` output;
      - a non-empty `script_sig` with an otherwise valid witness;
      - a BIP68 sequence (65 535) in a version-2 transaction;
-     - a future lock time.
+     - a future lock time;
+     - two UTXOs from one transaction with different values, the input spending the second (matched
+       by `vout`, not to the first).
 2. `fix(backend): scope the pending-transaction prune to the fetched address and snapshot`.
    Independent; must land before 3. Both rules are in
    [Address-scoped prune](#backend-address-scoped-prune). The address rule is in draft PR
@@ -653,6 +691,8 @@ Every earlier PR is safe on its own.
        not `InvalidUtxos`);
      - a rejected retry after `Unknown` (returns `BroadcastOutcomeUnknown` and keeps the
        reservation);
+     - a rejected resend that finds its reservation but no state, as after an upgrade (returns
+       `BroadcastOutcomeUnknown` and keeps the reservation);
      - the attempt cap.
    - `backend.did` regenerated. Rebuild the wasm first: `npm run generate` silently no-ops on a stale
      one.
@@ -662,6 +702,8 @@ Every earlier PR is safe on its own.
    - `buildBtcSendPsbt`, `signAndFinalizeBtcPsbt`, and a shared signer that WalletConnect uses.
    - Tests prove the PSBT path produces a transaction **byte-identical** (before witnesses) to CFS's
      layout for the same inputs, outputs and fee, and that change below 1 000 sats is dropped.
+   - Tests check that `signAndFinalizeBtcPsbt` throws on a signature that does not verify (a wrong
+     prevout value, a wrong public key) and on a high-S one.
 6. `fix(frontend): size BTC fee estimates by the recipient's script type`. Independent; must land
    before 8. See [Fee estimation by output script](#frontend-fee-estimation-by-output-script).
    - Scope: `btcAddressToOutputScript`, selection, the pre-broadcast validation, and Max
@@ -672,10 +714,11 @@ Every earlier PR is safe on its own.
    - Tests check that a P2TR recipient's script is built without `initEccLib`.
    - Tests check that each address type from the wrong network (mainnet ↔ testnet, testnet ↔
      regtest via the Bech32 prefix) is refused before signing.
-7. `feat(frontend): load BTC UTXOs from the backend` (needs 4). `AllUtxosLoader` and the pending
-   loader move to `btc_get_spendable_utxos`.
-8. `feat(frontend): send BTC through the backend behind a flag` (needs 3, 5, 6, 7).
-   - The flag is on for local and staging.
+7. `feat(frontend): load BTC UTXOs from the backend behind a flag` (needs 4).
+   - Adds `BTC_SEND_VIA_BACKEND_ENABLED`, on for local and staging.
+   - With the flag on, `AllUtxosLoader` and the pending loader move to `btc_get_spendable_utxos`.
+     With it off, they load as today.
+8. `feat(frontend): send BTC through the backend behind the flag` (needs 3, 5, 6, 7).
    - `beforeBroadcast` and `isDefinitiveBtcBroadcastRefusal` are added. The Chain Fusion and NEAR
      Intents rows are created in `beforeBroadcast` when the flag is on, and in `onBroadcast` when it
      is off.
@@ -683,11 +726,15 @@ Every earlier PR is safe on its own.
      row only on a definitive refusal, and show "may have gone out" after an unclear outcome. See
      [Liquidium supply and repay](#frontend-sendbtc).
    - Verified on regtest locally and with a small mainnet send on staging.
-9. `feat(frontend): OpenCryptoPay signs BTC with btc_sign_prehash` (needs 3, 5).
-10. `feat(frontend): enable backend BTC send in production`. Flag on, `PRODUCT.md` updated.
-11. `chore(frontend): remove the CFS BTC send path`. Removes the flag, the `sendBtc`/`signBtc`
-    signer wrappers, the redundant pre-send re-check, and the flag-off row creation in
-    `onBroadcast`.
+9. `feat(frontend): OpenCryptoPay signs BTC with btc_sign_prehash behind the flag` (needs 3, 5, 7).
+   With the flag off, it keeps `btc_caller_sign`.
+10. `feat(frontend): enable backend BTC send in production`. The flag is turned on, so the UTXO
+    loading, the send and OpenCryptoPay switch together. `PRODUCT.md` is updated.
+11. `chore(frontend): remove the CFS BTC send path`. Removes the flag and every flag-off branch:
+    - the `sendBtc`/`signBtc` signer wrappers and the redundant pre-send re-check;
+    - OpenCryptoPay's `btc_caller_sign` path;
+    - the old UTXO loading in `AllUtxosLoader` and the pending loader;
+    - the flag-off row creation in `onBroadcast`.
 12. Optional: `feat(backend,frontend): certified BTC balance from the backend` (`btc_get_balance`).
 
 ---
@@ -717,7 +764,9 @@ Every earlier PR is safe on its own.
   - an input that is not the caller's ≥4-confirmation UTXO;
   - a bad or high-S signature;
   - a fee below 1 sat/vB.
-- A definitive broadcast rejection releases the reservation; an unclear outcome keeps it.
+- A definitive broadcast rejection releases the reservation only if that call inserted it; an
+  unclear outcome, or a rejection of a call that reused an existing reservation (after an upgrade
+  too), keeps it.
 - A prune for one address never drops a non-expired reservation of another address, nor a
   reservation inserted after its own UTXO snapshot started.
 - A Chain Fusion or NEAR Intents BTC swap whose broadcast outcome is unclear still has its
@@ -733,7 +782,10 @@ Every earlier PR is safe on its own.
 - With the flag off, Chain Fusion and NEAR Intents BTC swaps still create their rows in
   `onBroadcast`; with it on, in `beforeBroadcast`; never both.
 - OpenCryptoPay still pays, and its inputs are reserved before the hand-off. A retry of the same
-  payment after a failed hand-off is not blocked by its own reservation.
+  payment after a failed hand-off is not blocked by its own reservation. A transaction whose
+  signatures do not verify is refused before the reservation and the hand-off.
+- With the flag off, every BTC flow behaves as today: UTXOs from `getUtxosQuery`, sends through
+  CFS, OpenCryptoPay through `btc_caller_sign`.
 - WalletConnect `signPsbt` behaves exactly as before.
 - `PRODUCT.md` `## Bitcoin` describes the new reservation timing.
 
@@ -754,15 +806,25 @@ Every earlier PR is safe on its own.
 - **Layout drift from CFS.** Mitigated by the byte-identical test in PR 5 and the flag.
 - **The backend broadcasts for everyone.** Bounded by:
   - the order of checks: nothing is paid before decode and caps pass;
-  - the reservation: each paid broadcast spends real, confirmed BTC, and the same inputs cannot be
-    resent under a new txid;
+  - the reservation: each paid broadcast is over the caller's own confirmed UTXOs, and the same
+    inputs cannot be resent under a new txid;
   - the broadcast state: the same txid is not paid for again after a success, and at most
     `MAX_BROADCAST_ATTEMPTS` times after unclear outcomes;
-  - the standardness, sequence and signature checks: no paid broadcast of a transaction the network
-    drops;
+  - the standardness, sequence and signature checks: no paid broadcast of a malformed, non-standard
+    or badly signed transaction;
   - the rate limiter.
 
   A canister-wide hourly budget is a pending decision.
+
+- **Inputs already spent in the mempool.** The ≥4-confirmation view does not show that an
+  unconfirmed transaction already spends an input, so every check passes. The backend pays, and the
+  network drops the broadcast as a conflict unless it outbids the first. This is the
+  [spent-but-not-reserved](#gaps-today) outcome, reached two ways:
+  - a WalletConnect `signPsbt` transaction the dApp broadcast, which reserves nothing (pending
+    decision 4);
+  - a send still in the mempool after its 1-hour reservation expired (below).
+
+  Each case costs one broadcast, and the reservation and the rate limiter still cap it.
 
 - **1-hour expiry (pre-existing).** A low-fee transaction can stay in the mempool longer than
   `HOUR_IN_NS`; its UTXOs then look free again in the ≥4-confirmation view. The Bitcoin canister has
