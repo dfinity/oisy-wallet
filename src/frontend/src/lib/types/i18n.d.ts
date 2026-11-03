@@ -940,6 +940,9 @@ interface I18nCycles_top_up {
 		unknown_fresh: string;
 		sent_to_canister: string;
 		sent_to_canister_top_up: string;
+		choice_send: string;
+		choice_send_description: string;
+		choice_top_up_description: string;
 	};
 	error: {
 		invalid_canister_id: string;
@@ -2112,7 +2115,7 @@ interface I18nContact {
 	form: { edit_contact: string; add_new_contact: string };
 	fields: { name: string };
 	delete: { title: string; delete_contact: string; content_text: string };
-	error: { create: string; update: string; delete: string; name_too_long: string };
+	error: { create: string; update: string; delete: string; load: string; name_too_long: string };
 }
 
 interface I18nAddress {
