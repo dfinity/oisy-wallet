@@ -73,4 +73,35 @@ describe('Modal', () => {
 
 		trigger.remove();
 	});
+
+	it('closes on a backdrop click by default', async () => {
+		const onClose = vi.fn();
+		const { getByTestId } = render(Modal, { props: { ...baseProps, onClose } });
+
+		await fireEvent.click(getByTestId('backdrop'));
+
+		expect(onClose).toHaveBeenCalledOnce();
+	});
+
+	it('ignores backdrop clicks with closeOnBackdropClick off, but still closes with its button and Escape', async () => {
+		const onClose = vi.fn();
+		const { getByTestId } = render(Modal, {
+			props: { ...baseProps, onClose, closeOnBackdropClick: false }
+		});
+		await tick();
+
+		const backdrop = getByTestId('backdrop');
+		await fireEvent.click(backdrop);
+
+		expect(backdrop).toHaveClass('disablePointerEvents');
+		expect(onClose).not.toHaveBeenCalled();
+
+		await fireEvent.click(getByTestId('close-modal'));
+
+		expect(onClose).toHaveBeenCalledOnce();
+
+		await fireEvent.keyDown(window, { key: 'Escape' });
+
+		expect(onClose).toHaveBeenCalledTimes(2);
+	});
 });
