@@ -188,58 +188,7 @@
 			themeLoaded = true;
 		}
 	};
-
-	// OnRamper's widget focuses its amount input shortly after it loads. That puts the keyboard in
-	// the cross-origin iframe, where key presses never reach OISY, so Escape stops closing the
-	// modal. Hand that unrequested focus back, once per widget and only in the first seconds. A
-	// click into the widget looks the same from here, but a Tab into it can be told apart.
-	const WIDGET_AUTOFOCUS_WINDOW_MS = 5_000;
-
-	let autofocusWatch: { iframe: HTMLIFrameElement; until: number } | undefined;
-
-	const watchWidgetAutofocus = ({ currentTarget }: Event) => {
-		// Later loads of the same iframe are navigations inside the widget, which the user started.
-		if (!(currentTarget instanceof HTMLIFrameElement) || autofocusWatch?.iframe === currentTarget) {
-			return;
-		}
-
-		autofocusWatch = { iframe: currentTarget, until: Date.now() + WIDGET_AUTOFOCUS_WINDOW_MS };
-	};
-
-	// Listened to in the capture phase: the overlay's own Tab handling may move the focus into the
-	// iframe before a bubbling listener runs.
-	const keepFocusMovedByTab = ({ key }: KeyboardEvent) => {
-		if (key === 'Tab' && nonNullish(autofocusWatch)) {
-			autofocusWatch.until = 0;
-		}
-	};
-
-	const returnFocusTakenByWidget = () => {
-		const watch = autofocusWatch;
-
-		if (isNullish(watch) || document.activeElement !== watch.iframe || Date.now() > watch.until) {
-			return;
-		}
-
-		watch.until = 0;
-
-		// The browser is still moving the focus into the iframe during this event, so act once it is
-		// done. Blurring, rather than focusing the close button, keeps keys meant for the widget from
-		// pressing Close.
-		setTimeout(() => {
-			if (document.activeElement === watch.iframe) {
-				watch.iframe.blur();
-			}
-		});
-	};
-
-	const onIframeLoad = (e: Event) => {
-		watchWidgetAutofocus(e);
-		changeThemeOnIframeLoad(e);
-	};
 </script>
-
-<svelte:window onblur={returnFocusTakenByWidget} onkeydowncapture={keepFocusMovedByTab} />
 
 <!-- The `allow` prop is set as suggested in the Onramper documentation that can be found at https://docs.onramper.com/docs/customise-the-ux -->
 <!-- When Onramper engineers were inquired about the reason, they answered: -->
@@ -262,7 +211,7 @@
 			allow="accelerometer; autoplay; camera; gyroscope; payment; microphone"
 			data-tid={BUY_MODAL_ONRAMPER_IFRAME}
 			height="680px"
-			onload={onIframeLoad}
+			onload={changeThemeOnIframeLoad}
 			sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
 			{src}
 			title={$i18n.buy.onramper.title}

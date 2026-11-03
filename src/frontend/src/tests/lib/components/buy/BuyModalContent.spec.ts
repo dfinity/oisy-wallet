@@ -10,7 +10,7 @@ import {
 import * as analyticsServices from '$lib/services/analytics.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
-import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 
 describe('BuyModalContent', () => {
 	const mockSignature = 'a'.repeat(64);
@@ -110,72 +110,5 @@ describe('BuyModalContent', () => {
 				})
 			)
 		);
-	});
-
-	describe('focus taken by the widget', () => {
-		let closeButton: HTMLButtonElement;
-
-		beforeEach(() => {
-			vi.spyOn(onramperEnv, 'ONRAMPER_ENABLED', 'get').mockImplementation(() => true);
-
-			// Stands in for the modal's close button, which holds the focus when the widget loads.
-			closeButton = document.createElement('button');
-			document.body.append(closeButton);
-			closeButton.focus();
-		});
-
-		afterEach(() => {
-			closeButton.remove();
-			vi.useRealTimers();
-		});
-
-		// Focus moving into the iframe, by the widget itself or by the user, blurs OISY's window.
-		const moveFocusIntoWidget = async (iframe: HTMLElement) => {
-			iframe.focus();
-			await fireEvent.blur(window);
-		};
-
-		const nextTask = () => new Promise((resolve) => setTimeout(resolve));
-
-		it('hands the focus back once when the widget takes it right after loading', async () => {
-			const { findByTestId } = render(BuyModalContent);
-			const iframe = await findByTestId(BUY_MODAL_ONRAMPER_IFRAME);
-			await fireEvent.load(iframe);
-
-			await moveFocusIntoWidget(iframe);
-
-			// To the page, not the close button, so keys meant for the widget can't press Close.
-			await waitFor(() => expect(document.activeElement).toBe(document.body));
-
-			await moveFocusIntoWidget(iframe);
-			await nextTask();
-
-			expect(document.activeElement).toBe(iframe);
-		});
-
-		it('leaves the focus in the widget when the user tabs into it', async () => {
-			const { findByTestId } = render(BuyModalContent);
-			const iframe = await findByTestId(BUY_MODAL_ONRAMPER_IFRAME);
-			await fireEvent.load(iframe);
-
-			await fireEvent.keyDown(window, { key: 'Tab' });
-			await moveFocusIntoWidget(iframe);
-			await nextTask();
-
-			expect(document.activeElement).toBe(iframe);
-		});
-
-		it('leaves the focus in the widget when it moves there after the first seconds', async () => {
-			vi.useFakeTimers({ toFake: ['Date'] });
-			const { findByTestId } = render(BuyModalContent);
-			const iframe = await findByTestId(BUY_MODAL_ONRAMPER_IFRAME);
-			await fireEvent.load(iframe);
-
-			vi.setSystemTime(Date.now() + 5_001);
-			await moveFocusIntoWidget(iframe);
-			await nextTask();
-
-			expect(document.activeElement).toBe(iframe);
-		});
 	});
 });
