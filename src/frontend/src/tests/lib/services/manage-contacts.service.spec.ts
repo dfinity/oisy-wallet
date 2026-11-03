@@ -1,7 +1,12 @@
 import type { ContactAddressData, ContactImage } from '$declarations/backend/backend.did';
 import * as backendApi from '$lib/api/backend.api';
 import * as analytics from '$lib/services/analytics.services';
-import { createContact, loadContacts, updateContact } from '$lib/services/manage-contacts.service';
+import {
+	createContact,
+	loadContacts,
+	resetContacts,
+	updateContact
+} from '$lib/services/manage-contacts.service';
 import { contactsStore } from '$lib/stores/contacts.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { ContactUi } from '$lib/types/contact';
@@ -11,9 +16,10 @@ import {
 	mockBackendContactAddressSol
 } from '$tests/mocks/contacts.mock';
 import en from '$tests/mocks/i18n.mock';
-import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import {
+	type Identity,
 	RejectError,
 	ReplicaRejectCode,
 	UncertifiedRejectErrorCode,
@@ -396,6 +402,146 @@ describe('manage-contacts.service', () => {
 
 				expect(metadata).not.toHaveProperty('result_error');
 				expect(Object.values(metadata ?? {}).join(' ')).not.toContain(mockPrincipal.toText());
+			});
+		});
+
+		describe('replaced loads', () => {
+			const otherIdentity = {
+				...mockIdentity,
+				getPrincipal: () => mockPrincipal2
+			} as unknown as Identity;
+
+			const contactIdsInStore = () => get(contactsStore)?.map(({ id }) => id);
+
+			let spyTrackEvent: MockInstance<typeof analytics.trackEvent>;
+			let spyToastsError: MockInstance<typeof toastsStore.toastsError>;
+
+			beforeEach(() => {
+				vi.useFakeTimers();
+
+				spyTrackEvent = vi.spyOn(analytics, 'trackEvent').mockImplementation(() => {});
+				spyToastsError = vi.spyOn(toastsStore, 'toastsError').mockReturnValue(Symbol('toast'));
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			it('should stop a load whose identity changed while it waited for its retry', async () => {
+				mockGetContactsPage
+					.mockRejectedValueOnce(new Error('Failed to fetch'))
+					.mockImplementation(({ identity }) =>
+						Promise.resolve(
+							page({ contacts: [contactWith({ id: identity === mockIdentity ? 1n : 2n })] })
+						)
+					);
+
+				const previousLoad = loadContacts(mockIdentity);
+
+				await vi.advanceTimersByTimeAsync(1_000);
+				await loadContacts(otherIdentity);
+
+				expect(contactIdsInStore()).toEqual([2n]);
+
+				await vi.advanceTimersByTimeAsync(1_000);
+				await previousLoad;
+
+				// No retry for the previous identity, and its contacts never replace the current ones.
+				expect(mockGetContactsPage).toHaveBeenCalledTimes(2);
+				expect(contactIdsInStore()).toEqual([2n]);
+				expect(spyTrackEvent).not.toHaveBeenCalled();
+				expect(spyToastsError).not.toHaveBeenCalled();
+			});
+
+			it('should keep the contacts of a newer load when the page of an older one arrives last', async () => {
+				let resolvePreviousPage: (value: ReturnType<typeof page>) => void = () => {};
+				mockGetContactsPage
+					.mockReturnValueOnce(
+						new Promise((resolve) => {
+							resolvePreviousPage = resolve;
+						})
+					)
+					.mockResolvedValueOnce(page({ contacts: [contactWith({ id: 2n })] }));
+
+				const previousLoad = loadContacts(mockIdentity);
+				await loadContacts(otherIdentity);
+
+				resolvePreviousPage(page({ contacts: [contactWith({ id: 1n })] }));
+				await previousLoad;
+
+				expect(contactIdsInStore()).toEqual([2n]);
+				expect(mockGetContactImages).toHaveBeenCalledExactlyOnceWith({
+					identity: otherIdentity,
+					contactIds: [2n]
+				});
+			});
+
+			it('should neither toast nor track when a replaced load fails for good', async () => {
+				let rejectLastAttempt: (err: unknown) => void = () => {};
+				mockGetContactsPage
+					.mockRejectedValueOnce(new Error('Failed to fetch'))
+					.mockRejectedValueOnce(new Error('Failed to fetch'))
+					.mockReturnValueOnce(
+						new Promise((_, reject) => {
+							rejectLastAttempt = reject;
+						})
+					)
+					.mockResolvedValueOnce(page({ contacts: [contactWith({ id: 2n })] }));
+
+				const previousLoad = loadContacts(mockIdentity);
+
+				await vi.advanceTimersByTimeAsync(6_000);
+
+				expect(mockGetContactsPage).toHaveBeenCalledTimes(3);
+
+				await loadContacts(otherIdentity);
+
+				rejectLastAttempt(new Error('Failed to fetch'));
+				await previousLoad;
+
+				expect(contactIdsInStore()).toEqual([2n]);
+				expect(spyToastsError).not.toHaveBeenCalled();
+				expect(spyTrackEvent).not.toHaveBeenCalled();
+			});
+
+			it('should send no image event for a load that a newer one replaced', async () => {
+				mockGetContactsPage.mockResolvedValue(page({ contacts: [contactWith({ id: 1n })] }));
+
+				let rejectPreviousImages: (err: unknown) => void = () => {};
+				mockGetContactImages.mockReturnValueOnce(
+					new Promise((_, reject) => {
+						rejectPreviousImages = reject;
+					})
+				);
+
+				const previousLoad = loadContacts(mockIdentity);
+				await vi.waitFor(() => expect(mockGetContactImages).toHaveBeenCalledOnce());
+
+				await loadContacts(otherIdentity);
+
+				rejectPreviousImages(new Error('Failed to fetch'));
+				await previousLoad;
+
+				expect(spyTrackEvent).not.toHaveBeenCalled();
+			});
+
+			it('should stop a load when the contacts are reset for a sign-out', async () => {
+				let resolvePage: (value: ReturnType<typeof page>) => void = () => {};
+				mockGetContactsPage.mockReturnValueOnce(
+					new Promise((resolve) => {
+						resolvePage = resolve;
+					})
+				);
+
+				const promise = loadContacts(mockIdentity);
+
+				resetContacts();
+
+				resolvePage(page({ contacts: [contactWith({ id: 1n })] }));
+				await promise;
+
+				expect(get(contactsStore)).toBeUndefined();
+				expect(mockGetContactImages).not.toHaveBeenCalled();
 			});
 		});
 	});

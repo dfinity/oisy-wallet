@@ -27,16 +27,18 @@ describe('LoaderContacts', () => {
 		});
 	});
 
-	it('does not load anything without a signed-in user', async () => {
+	it('resets the contacts instead of loading them without a signed-in user', async () => {
 		mockAuthStore(null);
 
-		const spy = vi.spyOn(manageContactsService, 'loadContacts').mockResolvedValue();
+		const spyLoad = vi.spyOn(manageContactsService, 'loadContacts').mockResolvedValue();
+		const spyReset = vi.spyOn(manageContactsService, 'resetContacts');
 
 		render(LoaderContacts);
 
 		await tick();
 
-		expect(spy).not.toHaveBeenCalled();
+		expect(spyLoad).not.toHaveBeenCalled();
+		expect(spyReset).toHaveBeenCalledOnce();
 	});
 
 	it('logs a load that rejects instead of leaving it unhandled', async () => {

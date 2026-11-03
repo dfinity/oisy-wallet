@@ -38,13 +38,30 @@ const loadContactsPages = async (identity: Identity): Promise<Contact[]> => {
 	return contacts;
 };
 
-// Returns the IDs of the loaded contacts, or nothing once every attempt has failed.
-const loadContactsWithRetries = async (
-	identity: Identity
-): Promise<ContactUi['id'][] | undefined> => {
+// Each load takes the next number, and a sign-out moves it on too. A load whose number is no
+// longer the latest stops before it retries or writes anything, since it may belong to an
+// identity that is no longer signed in.
+let latestLoad = 0;
+
+const isLatestLoad = (load: number): boolean => load === latestLoad;
+
+// Returns the IDs of the loaded contacts, or nothing once every attempt has failed or a newer
+// load has replaced this one.
+const loadContactsWithRetries = async ({
+	identity,
+	load
+}: {
+	identity: Identity;
+	load: number;
+}): Promise<ContactUi['id'][] | undefined> => {
 	for (let attempt = 1; attempt <= CONTACTS_LOAD_MAX_ATTEMPTS; attempt++) {
 		try {
 			const result = await loadContactsPages(identity);
+
+			if (!isLatestLoad(load)) {
+				return;
+			}
+
 			const contactsWithSortedAddresses = result.map((contact) => {
 				const contactUi = mapToFrontendContact(contact);
 				return {
@@ -65,6 +82,10 @@ const loadContactsWithRetries = async (
 
 			return result.map(({ id }) => id);
 		} catch (err: unknown) {
+			if (!isLatestLoad(load)) {
+				return;
+			}
+
 			if (attempt === CONTACTS_LOAD_MAX_ATTEMPTS) {
 				// The store stays unset: an empty list would read as "no contacts".
 				trackContact({
@@ -80,6 +101,10 @@ const loadContactsWithRetries = async (
 			}
 
 			await waitForMilliseconds(CONTACTS_LOAD_RETRY_BASE_DELAY * 2 ** (attempt - 1));
+
+			if (!isLatestLoad(load)) {
+				return;
+			}
 		}
 	}
 };
@@ -89,10 +114,12 @@ const loadContactsWithRetries = async (
 // which `updateContact` reads before writing, so that an edit never removes it.
 const loadContactImages = async ({
 	identity,
-	contactIds
+	contactIds,
+	load
 }: {
 	identity: Identity;
 	contactIds: ContactUi['id'][];
+	load: number;
 }): Promise<void> => {
 	const batches: ContactUi['id'][][] = [];
 	for (let start = 0; start < contactIds.length; start += CONTACT_IMAGES_BATCH_SIZE) {
@@ -103,6 +130,10 @@ const loadContactImages = async ({
 	const results = await Promise.allSettled(
 		batches.map((batch) => getContactImages({ identity, contactIds: batch }))
 	);
+
+	if (!isLatestLoad(load)) {
+		return;
+	}
 
 	const loadedIds = new Set<ContactUi['id']>();
 	const images = new Map<ContactUi['id'], ContactImage>();
@@ -139,15 +170,24 @@ const loadContactImages = async ({
 };
 
 export const loadContacts = async (identity: Identity): Promise<void> => {
+	const load = ++latestLoad;
+
 	contactsStore.reset();
 
-	const contactIds = await loadContactsWithRetries(identity);
+	const contactIds = await loadContactsWithRetries({ identity, load });
 
 	if (isNullish(contactIds)) {
 		return;
 	}
 
-	await loadContactImages({ identity, contactIds });
+	await loadContactImages({ identity, contactIds, load });
+};
+
+// Without a signed-in identity there are no contacts, and a load still running for the previous
+// identity must not bring them back.
+export const resetContacts = (): void => {
+	latestLoad++;
+	contactsStore.reset();
 };
 
 // The write result carries the contact's image, so a missing one is known to be absent (`null`).

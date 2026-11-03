@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { loadContacts } from '$lib/services/manage-contacts.service';
-	import { contactsStore } from '$lib/stores/contacts.store';
+	import { loadContacts, resetContacts } from '$lib/services/manage-contacts.service';
 	import type { NullishIdentity } from '$lib/types/identity';
 	import { consoleError } from '$lib/utils/console.utils';
 
 	const load = (identity: NullishIdentity) => {
 		if (isNullish(identity)) {
-			contactsStore.reset();
+			resetContacts();
 			return;
 		}
 
