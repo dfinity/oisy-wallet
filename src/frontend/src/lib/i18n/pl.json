@@ -1213,6 +1213,8 @@
 			"description": "Cykle trafiają z Twojego salda $token do kanistra, który zużywa je na obliczenia i przechowywanie danych.",
 			"description_icp": "Twoje $token są wymieniane na cykle po kursie sieci, a kanister zużywa je na obliczenia i przechowywanie danych.",
 			"pay_with": "Wybierz, czym zapłacić za doładowanie.",
+			"enable_token": "Aktywuj",
+			"not_enough_to_pay": "Za mało na doładowanie",
 			"no_token_title": "Doładuj za pomocą ICP lub TCYCLES",
 			"no_token_description": "Kanistry działają na cyklach, a doładowanie dodaje je do kanistra. Gdy w Twoim portfelu będzie dość ICP lub TCYCLES, możesz doładowywać tutaj.",
 			"canister_id_placeholder": "Wpisz ID kanistra",
@@ -1262,6 +1264,9 @@
 			"not_started": "Nie udało się rozpocząć doładowania. Nic nie opuściło Twojego portfela. Spróbuj ponownie za chwilę.",
 			"transfer_failed": "Przelew $token się nie powiódł. Nic nie opuściło Twojego portfela. Spróbuj ponownie za chwilę.",
 			"unconfirmed": "OISY nie mógł potwierdzić przelewu $token. Jeśli doszedł do skutku, doładowanie zakończy się w tle: możesz je śledzić w aktywnych transakcjach."
+		},
+		"alt": {
+			"enable_token": "Aktywuj $token, aby nim płacić"
 		}
 	},
 	"active_user_transactions": {

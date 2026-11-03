@@ -1213,6 +1213,8 @@
 			"description": "I cicli passano dal tuo saldo $token al canister, che li usa per calcolo e archiviazione.",
 			"description_icp": "I tuoi $token vengono convertiti in cicli al tasso della rete, e il canister li usa per calcolo e archiviazione.",
 			"pay_with": "Scegli con cosa pagare la ricarica.",
+			"enable_token": "Abilita",
+			"not_enough_to_pay": "Non basta per ricaricare",
 			"no_token_title": "Ricarica con ICP o TCYCLES",
 			"no_token_description": "I canister funzionano con i cicli, e una ricarica li aggiunge a un canister. Quando il tuo wallet avrà abbastanza ICP o TCYCLES, potrai ricaricare qui.",
 			"canister_id_placeholder": "Inserisci un ID canister",
@@ -1262,6 +1264,9 @@
 			"not_started": "Impossibile avviare la ricarica. Nulla è uscito dal tuo wallet. Riprova tra un attimo.",
 			"transfer_failed": "Il trasferimento di $token non è andato a buon fine. Nulla è uscito dal tuo wallet. Riprova tra un attimo.",
 			"unconfirmed": "OISY non è riuscito a confermare il trasferimento di $token. Se è andato a buon fine, la ricarica verrà completata in background: puoi seguirla nelle transazioni attive."
+		},
+		"alt": {
+			"enable_token": "Abilita $token per pagare con esso"
 		}
 	},
 	"active_user_transactions": {

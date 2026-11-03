@@ -1213,6 +1213,8 @@
 			"description": "Die Cycles gehen von deinem $token-Guthaben in den Canister, der sie für Rechenleistung und Speicher verbraucht.",
 			"description_icp": "Deine $token werden zum Kurs des Netzwerks in Cycles umgewandelt, und der Canister verbraucht sie für Rechenleistung und Speicher.",
 			"pay_with": "Wähle, womit du die Aufladung bezahlst.",
+			"enable_token": "Aktivieren",
+			"not_enough_to_pay": "Reicht nicht zum Aufladen",
 			"no_token_title": "Mit ICP oder TCYCLES aufladen",
 			"no_token_description": "Canister laufen mit Cycles, und eine Aufladung fügt einem Canister welche hinzu. Sobald deine Wallet genug ICP oder TCYCLES enthält, kannst du hier aufladen.",
 			"canister_id_placeholder": "Canister-ID eingeben",
@@ -1262,6 +1264,9 @@
 			"not_started": "Die Aufladung konnte nicht gestartet werden. Nichts hat deine Wallet verlassen. Versuche es gleich noch einmal.",
 			"transfer_failed": "Die $token-Überweisung ist nicht durchgegangen. Nichts hat deine Wallet verlassen. Versuche es gleich noch einmal.",
 			"unconfirmed": "OISY konnte die $token-Überweisung nicht bestätigen. Falls sie durchgegangen ist, wird die Aufladung im Hintergrund abgeschlossen: Du kannst sie in den aktiven Transaktionen verfolgen."
+		},
+		"alt": {
+			"enable_token": "$token aktivieren, um damit zu bezahlen"
 		}
 	},
 	"active_user_transactions": {
