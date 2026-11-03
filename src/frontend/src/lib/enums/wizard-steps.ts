@@ -179,7 +179,7 @@ export enum WizardStepsCyclesMint {
 }
 
 export enum WizardStepsCyclesTopUp {
-	// From the navigation only: what the top-up is paid with.
+	// From Tools only: what the top-up is paid with.
 	TOKEN = 'Token',
 	CANISTER = 'Canister',
 	AMOUNT = 'Amount',

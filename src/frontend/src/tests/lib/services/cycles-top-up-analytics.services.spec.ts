@@ -50,18 +50,18 @@ describe('trackCyclesTopUp', () => {
 		});
 	});
 
-	it('carries the navigation as the source of a top-up paid with ICP', () => {
+	it('carries Tools as the source of a top-up paid with ICP', () => {
 		trackCyclesTopUp({
 			step: 'top_up',
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 			tokenSymbol: 'ICP',
-			sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NAVIGATION
+			sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOOLS_PAGE
 		});
 
 		expect(track).toHaveBeenCalledExactlyOnceWith(
 			expect.objectContaining({
 				metadata: expect.objectContaining({
-					source_location: 'navigation',
+					source_location: 'tools_page',
 					token_symbol: 'ICP'
 				})
 			})

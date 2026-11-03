@@ -1274,11 +1274,11 @@ describe('CyclesTopUpModal', () => {
 		});
 	});
 
-	describe('from the navigation', () => {
+	describe('from Tools', () => {
 		let rateSpy: MockInstance;
 		let topUpWithIcpSpy: MockInstance;
 
-		const renderFromNavigation = () => render(CyclesTopUpModal, { props: {} });
+		const renderFromTools = () => render(CyclesTopUpModal, { props: {} });
 
 		// ICP first, as the picker lists them.
 		const pickToken = async ({
@@ -1342,7 +1342,7 @@ describe('CyclesTopUpModal', () => {
 		};
 
 		const toIcpReview = async () => {
-			const result = renderFromNavigation();
+			const result = renderFromTools();
 
 			await pickToken({ result, index: 0 });
 
@@ -1373,13 +1373,13 @@ describe('CyclesTopUpModal', () => {
 		});
 
 		it('opens on the token picker when ICP and TCYCLES can both pay, and reports the open from there', () => {
-			const { container, getAllByTestId } = renderFromNavigation();
+			const { container, getAllByTestId } = renderFromTools();
 
 			expect(container).toHaveTextContent(en.cycles_top_up.text.canister_top_up);
 			expect(getAllByTestId(CYCLES_TOP_UP_TOKEN_OPTION)).toHaveLength(2);
 			expect(trackSpy).toHaveBeenCalledExactlyOnceWith({
 				step: 'open',
-				sourceLocation: 'navigation'
+				sourceLocation: 'tools_page'
 			});
 		});
 
@@ -1390,7 +1390,7 @@ describe('CyclesTopUpModal', () => {
 				data: { data: 200_000_000n, certified: true }
 			});
 
-			const result = renderFromNavigation();
+			const result = renderFromTools();
 
 			await onCanisterStep(result);
 
@@ -1405,7 +1405,7 @@ describe('CyclesTopUpModal', () => {
 			// The 0.0003 ICP a refund keeps and the fee: no amount above them is left.
 			balancesStore.set({ id: ICP_TOKEN.id, data: { data: 40_000n, certified: true } });
 
-			const result = renderFromNavigation();
+			const result = renderFromTools();
 
 			await onCanisterStep(result);
 
@@ -1417,7 +1417,7 @@ describe('CyclesTopUpModal', () => {
 		it('counts a balance that has not loaded as zero', async () => {
 			balancesStore.reset(ICP_TOKEN.id);
 
-			const result = renderFromNavigation();
+			const result = renderFromTools();
 
 			await onCanisterStep(result);
 
@@ -1429,7 +1429,7 @@ describe('CyclesTopUpModal', () => {
 		it('counts TCYCLES out while it is not enabled', async () => {
 			vi.spyOn(tokensDerived, 'enabledIcTokens', 'get').mockReturnValue(readable([]));
 
-			const result = renderFromNavigation();
+			const result = renderFromTools();
 
 			await onCanisterStep(result);
 
@@ -1442,7 +1442,7 @@ describe('CyclesTopUpModal', () => {
 			balancesStore.reset(ICP_TOKEN.id);
 			balancesStore.reset(mockTcyclesToken.id);
 
-			const { container, queryByTestId } = renderFromNavigation();
+			const { container, queryByTestId } = renderFromTools();
 
 			expect(container).toHaveTextContent(en.cycles_top_up.text.no_token_title);
 			expect(queryByTestId(CYCLES_TOP_UP_TOKEN_OPTION)).toBeNull();
@@ -1450,7 +1450,7 @@ describe('CyclesTopUpModal', () => {
 		});
 
 		it('returns from the canister step to the picker', async () => {
-			const result = renderFromNavigation();
+			const result = renderFromTools();
 
 			await pickToken({ result, index: 0 });
 
@@ -1471,7 +1471,7 @@ describe('CyclesTopUpModal', () => {
 				}
 			});
 
-			const result = renderFromNavigation();
+			const result = renderFromTools();
 
 			await backOnReview(result);
 
@@ -1488,8 +1488,8 @@ describe('CyclesTopUpModal', () => {
 			});
 		});
 
-		it('tops up with TCYCLES, reported from the navigation, without loading the ICP rate', async () => {
-			const result = renderFromNavigation();
+		it('tops up with TCYCLES, reported from Tools, without loading the ICP rate', async () => {
+			const result = renderFromTools();
 
 			await pickToken({ result, index: 1 });
 
@@ -1503,7 +1503,7 @@ describe('CyclesTopUpModal', () => {
 				expect(trackSpy).toHaveBeenNthCalledWith(3, {
 					step: 'top_up',
 					tokenSymbol: 'TCYCLES',
-					sourceLocation: 'navigation',
+					sourceLocation: 'tools_page',
 					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
 				});
 			});
@@ -1547,7 +1547,7 @@ describe('CyclesTopUpModal', () => {
 				// The top-up's row reports how it ended.
 				expect(trackSpy).toHaveBeenCalledExactlyOnceWith({
 					step: 'open',
-					sourceLocation: 'navigation'
+					sourceLocation: 'tools_page'
 				});
 			});
 
