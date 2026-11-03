@@ -5,7 +5,8 @@
 //!
 //! 1. [`decode_transaction`]: decoding and the size, input and output caps.
 //! 2. [`check_transaction_policy`]: what relay policy would drop after we paid for the broadcast
-//!    (non-standard outputs, lock time, BIP68 sequences, a `script_sig`). Needs no UTXOs.
+//!    (non-standard outputs, under 65 non-witness bytes, lock time, BIP68 sequences, a
+//!    `script_sig`). Needs no UTXOs.
 //! 3. [`verify_transaction_spend`]: every input is the caller's confirmed UTXO, the fee clears the
 //!    floor and every signature verifies.
 //!
@@ -40,10 +41,16 @@ const MIN_FEE_SATS_PER_VBYTE: u64 = 1;
 /// `-datacarriersize` default.
 const MAX_OP_RETURN_SCRIPT_BYTES: usize = 83;
 
+/// Bitcoin Core's `MIN_STANDARD_TX_NONWITNESS_SIZE`: smaller transactions are not relayed
+/// (`tx-size-small`), since a 64-byte one could pass for an inner node of a block's Merkle tree
+/// (CVE-2017-12842).
+const MIN_NON_WITNESS_TX_BYTES: usize = 65;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TxValidationError {
     /// The bytes are not exactly one consensus-encoded transaction, it has no inputs or no
-    /// outputs, or its version is neither 1 nor 2.
+    /// outputs, its version is neither 1 nor 2, or it has fewer than 65 bytes without the
+    /// witnesses.
     MalformedTransaction,
     /// More than `MAX_BROADCAST_TX_BYTES`.
     TransactionTooLarge,
@@ -109,7 +116,8 @@ pub fn decode_transaction(bytes: &[u8]) -> Result<Transaction, TxValidationError
 /// signatures.
 ///
 /// # Errors
-/// `InvalidOutput`, `MalformedTransaction` (version), `UnsupportedLockTime` or `InvalidInput`.
+/// `InvalidOutput`, `MalformedTransaction` (version or size), `UnsupportedLockTime` or
+/// `InvalidInput`.
 pub fn check_transaction_policy(tx: &Transaction) -> Result<(), TxValidationError> {
     let mut has_op_return = false;
     for (index, txout) in tx.output.iter().enumerate() {
@@ -126,7 +134,11 @@ pub fn check_transaction_policy(tx: &Transaction) -> Result<(), TxValidationErro
         }
     }
 
-    if tx.version != Version::ONE && tx.version != Version::TWO {
+    // Only a sole, nearly empty `OP_RETURN` output gets below the minimum, since a payment output
+    // takes 31 bytes or more.
+    if (tx.version != Version::ONE && tx.version != Version::TWO)
+        || tx.base_size() < MIN_NON_WITNESS_TX_BYTES
+    {
         return Err(TxValidationError::MalformedTransaction);
     }
     // CFS and LI.FI both use 0, and a future lock time would be dropped by the mempool.
@@ -914,6 +926,33 @@ mod tests {
             tx.version = version;
             sign_as_caller(&mut tx, &utxos);
             assert_eq!(validate(&tx, &utxos), expected, "{version}");
+        }
+    }
+
+    #[test]
+    fn refuses_fewer_than_65_non_witness_bytes() {
+        let utxos = [utxo(0x01, 0, 10_000)];
+        // A sole `OP_RETURN` is the only output small enough: a payment output is 31+ bytes.
+        for (script, base_size, expected) in [
+            (
+                ScriptBuf::from_bytes(vec![0x6a]),
+                61,
+                Err(TxValidationError::MalformedTransaction),
+            ),
+            (
+                ScriptBuf::from_bytes(vec![0x6a, 0x02, 0xab, 0xab]),
+                64,
+                Err(TxValidationError::MalformedTransaction),
+            ),
+            (
+                ScriptBuf::from_bytes(vec![0x6a, 0x03, 0xab, 0xab, 0xab]),
+                65,
+                Ok(utxos.to_vec()),
+            ),
+        ] {
+            let tx = signed_tx(&utxos, vec![payment(script, 0)]);
+            assert_eq!(tx.base_size(), base_size);
+            assert_eq!(validate(&tx, &utxos), expected, "{base_size} bytes");
         }
     }
 

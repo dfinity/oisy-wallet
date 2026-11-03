@@ -32,7 +32,7 @@ benches:
   bench_btc_validate_signed_transaction_100_inputs:
     total:
       calls: 1
-      instructions: 437612153
+      instructions: 437614577
       heap_increase: 0
       stable_memory_increase: 0
     scopes:
@@ -43,18 +43,18 @@ benches:
         stable_memory_increase: 0
       policy:
         calls: 1
-        instructions: 3250
+        instructions: 5874
         heap_increase: 0
         stable_memory_increase: 0
       verify:
         calls: 1
-        instructions: 437108686
+        instructions: 437108486
         heap_increase: 0
         stable_memory_increase: 0
   bench_btc_validate_signed_transaction_1_input:
     total:
       calls: 1
-      instructions: 4409675
+      instructions: 4409803
       heap_increase: 0
       stable_memory_increase: 0
     scopes:
@@ -65,12 +65,12 @@ benches:
         stable_memory_increase: 0
       policy:
         calls: 1
-        instructions: 676
+        instructions: 806
         heap_increase: 0
         stable_memory_increase: 0
       verify:
         calls: 1
-        instructions: 4396433
+        instructions: 4396431
         heap_increase: 0
         stable_memory_increase: 0
   bench_config:

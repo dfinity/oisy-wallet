@@ -236,8 +236,10 @@ sequence with a BIP68 relative lock), `InvalidUtxos` (an input that is not the c
    Anything else, such as a bare `OP_TRUE` or a second `OP_RETURN`, is `InvalidOutput { index }`.
 
 4. **Lock time and sequences.** Lock time must be 0 (both CFS today and LI.FI's PSBTs use 0); a
-   future lock time would be dropped by the mempool after we paid for it. Version 1 or 2
-   (`MalformedTransaction` otherwise). Every
+   future lock time would be dropped by the mempool after we paid for it. Version 1 or 2, and at
+   least 65 bytes without the witnesses (Bitcoin Core's `MIN_STANDARD_TX_NONWITNESS_SIZE`, below
+   which it refuses to relay with `tx-size-small`; only a transaction whose sole output is a nearly
+   empty `OP_RETURN` is that small): `MalformedTransaction` otherwise. Every
    input's sequence must have the BIP68 disable bit (bit 31) set, i.e.
    `!txin.sequence.is_relative_lock_time()`. In a version-2 transaction a clear bit 31 enables a
    relative lock (for example sequence 65 535 on a 4-confirmation input), which lock time 0 does
@@ -724,6 +726,7 @@ Every PR is safe on its own.
      - a non-empty `script_sig` with an otherwise valid witness;
      - a BIP68 sequence (65 535) in a version-2 transaction;
      - a future lock time;
+     - fewer than 65 non-witness bytes (a sole `OP_RETURN` output), on both sides of the boundary;
      - two UTXOs from one transaction with different values, the input spending the second (matched
        by `vout`, not to the first).
    - canbench benches for 1 and 100 inputs, which answer
@@ -815,7 +818,7 @@ Every PR is safe on its own.
 - The backend refuses, **without** calling `send_transaction`:
   - malformed bytes, too many inputs or outputs, oversize;
   - non-standard or dust outputs, two `OP_RETURN`s;
-  - a future lock time, a BIP68 sequence;
+  - a future lock time, a BIP68 sequence, fewer than 65 non-witness bytes;
   - a non-empty `script_sig`;
   - an input that is not the caller's ≥4-confirmation UTXO;
   - a bad or high-S signature;
@@ -905,7 +908,7 @@ Every PR is safe on its own.
    verification also refuses high-S signatures by itself. **Measured in PR 1** with canbench
    (`bench_btc_validate_signed_transaction_{1_input,100_inputs}`): about 4.4M instructions per
    input, one BIP143 sighash and one verification. A 1-input transaction takes 4.41M in all, and
-   a 100-input one (the cap) 437.6M, of which decoding is 0.47M and the policy checks 3K. That is
+   a 100-input one (the cap) 437.6M, of which decoding is 0.47M and the policy checks 6K. That is
    about 1% of an update call's 40B-instruction limit, and on a 13-node subnet about 175M cycles
    (0.4 per instruction), small next to `send_transaction`'s 5B base fee. No cap change is
    needed.
