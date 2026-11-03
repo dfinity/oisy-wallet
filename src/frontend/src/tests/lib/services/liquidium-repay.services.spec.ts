@@ -802,7 +802,7 @@ describe('liquidium-repay.services', () => {
 		});
 
 		it('waits on the token network for the transfer', async () => {
-			wait.mockResolvedValue(undefined);
+			wait.mockResolvedValue('success');
 
 			await holdLiquidiumRepayUntilMined(params);
 
@@ -811,7 +811,7 @@ describe('liquidium-repay.services', () => {
 		});
 
 		it('keeps both held until both balances have reloaded after the transfer is mined', async () => {
-			wait.mockResolvedValue(undefined);
+			wait.mockResolvedValue('success');
 
 			const heldDuringReload: unknown[] = [];
 
@@ -833,7 +833,7 @@ describe('liquidium-repay.services', () => {
 		});
 
 		it('keeps both held until the reloaded balances are in the store', async () => {
-			wait.mockResolvedValue(undefined);
+			wait.mockResolvedValue('success');
 			vi.mocked(reloadEthereumBalance).mockResolvedValue({ success: true });
 
 			const held = holdLiquidiumRepayUntilMined(params);
@@ -858,7 +858,7 @@ describe('liquidium-repay.services', () => {
 			storeBalance({ token: USDC_TOKEN, data: 100n });
 			storeBalance({ token: ETHEREUM_TOKEN, data: 10n });
 
-			wait.mockResolvedValue(undefined);
+			wait.mockResolvedValue('success');
 			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) => {
 				storeBalance({ token: reloadToken, data: reloadToken.id === USDC_TOKEN.id ? 100n : 10n });
 
@@ -887,7 +887,7 @@ describe('liquidium-repay.services', () => {
 				storeBalance({ token: USDC_TOKEN, data: 100n });
 				storeBalance({ token: ETHEREUM_TOKEN, data: 10n });
 
-				return Promise.resolve();
+				return Promise.resolve('success');
 			});
 			vi.mocked(reloadEthereumBalance).mockResolvedValue({ success: true });
 
@@ -915,7 +915,7 @@ describe('liquidium-repay.services', () => {
 			storeBalance({ token: USDC_TOKEN, data: 50n });
 			storeBalance({ token: ETHEREUM_TOKEN, data: 9n });
 
-			wait.mockResolvedValue(undefined);
+			wait.mockResolvedValue('success');
 			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) => {
 				storeBalance({ token: reloadToken, data: reloadToken.id === USDC_TOKEN.id ? 50n : 9n });
 
@@ -928,7 +928,7 @@ describe('liquidium-repay.services', () => {
 		});
 
 		it('does not wait on the store for a reload that reports no success', async () => {
-			wait.mockResolvedValue(undefined);
+			wait.mockResolvedValue('success');
 			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) =>
 				Promise.resolve({ success: reloadToken.id !== ETHEREUM_TOKEN.id })
 			);
@@ -947,7 +947,7 @@ describe('liquidium-repay.services', () => {
 		});
 
 		it('releases both right away when no reload reports success', async () => {
-			wait.mockResolvedValue(undefined);
+			wait.mockResolvedValue('success');
 			vi.mocked(reloadEthereumBalance).mockResolvedValue({ success: false });
 
 			await holdLiquidiumRepayUntilMined(params);
@@ -955,31 +955,34 @@ describe('liquidium-repay.services', () => {
 			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
 		});
 
-		it('holds only the gas of a reverted token repay until the native balance has changed', async () => {
-			storeBalance({ token: USDC_TOKEN, data: 100n });
-			storeBalance({ token: ETHEREUM_TOKEN, data: 10n });
+		it.each(['reverted', 'replaced'])(
+			'holds only the gas of a %s token repay until the native balance has changed',
+			async (status) => {
+				storeBalance({ token: USDC_TOKEN, data: 100n });
+				storeBalance({ token: ETHEREUM_TOKEN, data: 10n });
 
-			wait.mockResolvedValue('reverted');
+				wait.mockResolvedValue(status);
 
-			const heldDuringReload: unknown[] = [];
+				const heldDuringReload: unknown[] = [];
 
-			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) => {
-				heldDuringReload.push(get(liquidiumUnminedRepaysStore)[hash]);
+				vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) => {
+					heldDuringReload.push(get(liquidiumUnminedRepaysStore)[hash]);
 
-				storeBalance({ token: reloadToken, data: 9n });
+					storeBalance({ token: reloadToken, data: 9n });
 
-				return Promise.resolve({ success: true });
-			});
+					return Promise.resolve({ success: true });
+				});
 
-			await holdLiquidiumRepayUntilMined({ ...params, unmined: get(balancesStore) });
+				await holdLiquidiumRepayUntilMined({ ...params, unmined: get(balancesStore) });
 
-			expect(reloadEthereumBalance).toHaveBeenCalledExactlyOnceWith(ETHEREUM_TOKEN);
-			expect(heldDuringReload).toEqual([[{ tokenId: ETHEREUM_TOKEN.id, amount: gasFee }]]);
-			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
-		});
+				expect(reloadEthereumBalance).toHaveBeenCalledExactlyOnceWith(ETHEREUM_TOKEN);
+				expect(heldDuringReload).toEqual([[{ tokenId: ETHEREUM_TOKEN.id, amount: gasFee }]]);
+				expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+			}
+		);
 
-		it('holds only the gas of a reverted native repay', async () => {
-			wait.mockResolvedValue('reverted');
+		it.each(['reverted', 'replaced'])('holds only the gas of a %s native repay', async (status) => {
+			wait.mockResolvedValue(status);
 
 			let heldDuringReload: unknown;
 
@@ -999,7 +1002,7 @@ describe('liquidium-repay.services', () => {
 		});
 
 		it('reloads the native balance once for a native repay', async () => {
-			wait.mockResolvedValue(undefined);
+			wait.mockResolvedValue('success');
 
 			await holdLiquidiumRepayUntilMined({ ...params, token: ETHEREUM_TOKEN });
 
@@ -1016,7 +1019,7 @@ describe('liquidium-repay.services', () => {
 		});
 
 		it('releases both when a balance reload fails', async () => {
-			wait.mockResolvedValue(undefined);
+			wait.mockResolvedValue('success');
 			vi.mocked(reloadEthereumBalance).mockRejectedValue(new Error('rpc down'));
 
 			await expect(holdLiquidiumRepayUntilMined(params)).rejects.toThrow('rpc down');
@@ -1032,7 +1035,7 @@ describe('liquidium-repay.services', () => {
 				holds: [{ tokenId: USDC_TOKEN.id, amount: 1n }]
 			});
 
-			wait.mockResolvedValue(undefined);
+			wait.mockResolvedValue('success');
 
 			await holdLiquidiumRepayUntilMined(params);
 

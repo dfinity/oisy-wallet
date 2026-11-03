@@ -131,7 +131,8 @@ describe('alchemy.providers', () => {
 			await provider.wait(mockEthAddress);
 
 			expect(mockWaitForTransactionReceipt).toHaveBeenCalledExactlyOnceWith({
-				hash: mockEthAddress
+				hash: mockEthAddress,
+				onReplaced: expect.any(Function)
 			});
 		});
 
@@ -141,6 +142,33 @@ describe('alchemy.providers', () => {
 			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
 
 			await expect(provider.wait(mockEthAddress)).resolves.toBe(status);
+		});
+
+		it.each(['replaced', 'cancelled'])(
+			'should resolve replaced when the transaction is %s',
+			async (reason) => {
+				mockWaitForTransactionReceipt.mockImplementation(({ onReplaced }) => {
+					onReplaced({ reason });
+
+					return Promise.resolve({ status: 'success' });
+				});
+
+				const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+				await expect(provider.wait(mockEthAddress)).resolves.toBe('replaced');
+			}
+		);
+
+		it('should resolve with the receipt status when the transaction is repriced', async () => {
+			mockWaitForTransactionReceipt.mockImplementation(({ onReplaced }) => {
+				onReplaced({ reason: 'repriced' });
+
+				return Promise.resolve({ status: 'reverted' });
+			});
+
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			await expect(provider.wait(mockEthAddress)).resolves.toBe('reverted');
 		});
 
 		it('should throw an error if the input is not an hash', async () => {
