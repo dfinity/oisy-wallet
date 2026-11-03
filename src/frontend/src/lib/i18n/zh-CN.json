@@ -1214,6 +1214,8 @@
 			"description": "Cycles 会从您的 $token 余额转入 Canister，Canister 用它们支付计算和存储。",
 			"description_icp": "您的 $token 会按网络汇率转换为 Cycles，Canister 用它们支付计算和存储。",
 			"pay_with": "选择用于支付充值的代币。",
+			"enable_token": "启用",
+			"not_enough_to_pay": "余额不足以充值",
 			"no_token_title": "使用 ICP 或 TCYCLES 充值",
 			"no_token_description": "Canister 依靠 Cycles 运行，充值会为 Canister 增加 Cycles。当您的钱包中有足够的 ICP 或 TCYCLES 时，即可在此充值。",
 			"canister_id_placeholder": "输入 Canister ID",
@@ -1263,6 +1265,9 @@
 			"not_started": "无法开始充值。您的钱包中没有资金转出。请稍后再试。",
 			"transfer_failed": "$token 转账未成功。您的钱包中没有资金转出。请稍后再试。",
 			"unconfirmed": "OISY 无法确认 $token 转账。如果转账已完成，充值将在后台完成：可在活跃交易中查看进度。"
+		},
+		"alt": {
+			"enable_token": "启用 $token 以用其支付"
 		}
 	},
 	"active_user_transactions": {
