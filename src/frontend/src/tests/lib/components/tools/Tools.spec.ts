@@ -1,19 +1,80 @@
 import * as canisterTopUpEnv from '$env/canister-top-up.env';
 import Tools from '$lib/components/tools/Tools.svelte';
-import { TOOLS_CANISTER_TOP_UP_BUTTON } from '$lib/constants/test-ids.constants';
+import {
+	HELP_NETWORK_EXPLORERS_CARD,
+	HELP_NETWORK_EXPLORERS_LINK,
+	TOOLS_CANISTER_TOP_UP_BUTTON
+} from '$lib/constants/test-ids.constants';
+import { trackEvent } from '$lib/services/analytics.services';
+import { ethAddressStore } from '$lib/stores/address.store';
 import { modalStore } from '$lib/stores/modal.store';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+
+vi.mock('$lib/services/analytics.services', async (importOriginal) => ({
+	...(await importOriginal<Record<string, unknown>>()),
+	trackEvent: vi.fn()
+}));
+
+vi.mock('$lib/derived/networks.derived', async (importOriginal) => {
+	const { readable } = await import('svelte/store');
+	const { ETHEREUM_NETWORK } = await import('$env/networks/networks.eth.env');
+
+	return {
+		...(await importOriginal<Record<string, unknown>>()),
+		networksMainnets: readable([ETHEREUM_NETWORK])
+	};
+});
 
 describe('Tools', () => {
 	const enableCanisterTopUp = (enabled: boolean) =>
 		vi.spyOn(canisterTopUpEnv, 'CANISTER_TOP_UP_ENABLED', 'get').mockReturnValue(enabled);
 
+	const follows = ({ first, second }: { first: HTMLElement; second: HTMLElement }): boolean =>
+		(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 
 		modalStore.close();
+		ethAddressStore.reset();
+	});
+
+	describe('Block explorers', () => {
+		beforeEach(() => {
+			ethAddressStore.set({ data: mockEthAddress, certified: false });
+		});
+
+		it('comes first, before Canister top-up and Export data', () => {
+			enableCanisterTopUp(true);
+
+			const { getByTestId, getByText } = render(Tools);
+
+			const explorers = getByTestId(HELP_NETWORK_EXPLORERS_CARD);
+			const topUp = getByTestId(TOOLS_CANISTER_TOP_UP_BUTTON);
+			const exportData = getByText(en.settings.text.export_data);
+
+			expect(explorers).toHaveTextContent(en.help.text.network_explorers_title);
+			expect(follows({ first: explorers, second: topUp })).toBeTruthy();
+			expect(follows({ first: topUp, second: exportData })).toBeTruthy();
+		});
+
+		it('reports its link clicks from Tools', async () => {
+			const { getByTestId } = render(Tools);
+
+			await fireEvent.click(getByTestId(`${HELP_NETWORK_EXPLORERS_LINK}-eth`));
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: 'help',
+				metadata: expect.objectContaining({
+					event_modifier: 'explorer',
+					source_location: 'tools_page',
+					event_subcontext: 'network_explorers'
+				})
+			});
+		});
 	});
 
 	describe('Canister top-up', () => {
