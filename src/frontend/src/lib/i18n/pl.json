@@ -1441,8 +1441,8 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "Kup/Sprzedaj",
-			"buy_dev": "Kup/Sprzedaj (środowisko deweloperskie)",
+			"buy_sell": "Kup/Sprzedaj",
+			"buy_sell_dev": "Kup/Sprzedaj (środowisko deweloperskie)",
 			"unavailable_title": "Kupowanie tokenów jest tymczasowo niedostępne",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",

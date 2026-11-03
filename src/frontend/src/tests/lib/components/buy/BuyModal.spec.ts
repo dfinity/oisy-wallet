@@ -8,13 +8,13 @@ describe('BuyModal', () => {
 		vi.spyOn(onRamperEnv, 'isOnRamperDev', 'get').mockImplementation(() => true);
 		const { getByText } = render(BuyModal);
 
-		expect(getByText(en.buy.text.buy_dev)).toBeInTheDocument();
+		expect(getByText(en.buy.text.buy_sell_dev)).toBeInTheDocument();
 	});
 
 	it('renders correct title if isOnRamperDev is false', () => {
 		vi.spyOn(onRamperEnv, 'isOnRamperDev', 'get').mockImplementation(() => false);
 		const { getByText } = render(BuyModal);
 
-		expect(getByText(en.buy.text.buy)).toBeInTheDocument();
+		expect(getByText(en.buy.text.buy_sell)).toBeInTheDocument();
 	});
 });

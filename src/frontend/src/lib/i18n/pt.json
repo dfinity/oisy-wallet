@@ -1441,8 +1441,8 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "Comprar/Vender",
-			"buy_dev": "Comprar/Vender (Ambiente de Desenvolvimento)",
+			"buy_sell": "Comprar/Vender",
+			"buy_sell_dev": "Comprar/Vender (Ambiente de Desenvolvimento)",
 			"unavailable_title": "A compra de tokens está temporariamente indisponível",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",
