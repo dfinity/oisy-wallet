@@ -735,7 +735,9 @@ Every PR is safe on its own.
    **Merged** as dfinity/oisy-wallet#14497, with both rules from
    [Address-scoped prune](#backend-address-scoped-prune).
    - New callers make the same call:
-     `prune_pending_transactions(principal, &address, &utxos, now_ns, snapshot_started_ns)`.
+     `prune_pending_transactions(principal, &address, &utxos, snapshot_started_ns, now_ns)`,
+     the order `pending_tx_model.rs` declares. Both are `u64`, so a swapped call still compiles
+     and silently loses the stale-snapshot protection.
    - They take `snapshot_started_ns = time()` just before `get_all_utxos`, and
      `created_at_timestamp_ns` inside the insertion block, as `btc_add_pending_transaction` now
      does.
