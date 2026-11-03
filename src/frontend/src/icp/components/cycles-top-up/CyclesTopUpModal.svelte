@@ -63,15 +63,15 @@
 
 	interface Props {
 		// The TCYCLES token of the page the modal opened from, which pays. Without it, the modal
-		// opened from the navigation, which offers ICP too.
+		// opened from Tools, which offers ICP too.
 		token?: IcToken;
 	}
 
 	let { token: pageToken }: Props = $props();
 
-	let fromNavigation = $derived(isNullish(pageToken));
+	let fromTools = $derived(isNullish(pageToken));
 
-	// The TCYCLES token: the page's, or from the navigation the enabled one, while Top up with
+	// The TCYCLES token: the page's, or from Tools the enabled one, while Top up with
 	// TCYCLES is on. Its history lists the canisters topped up before, whatever pays.
 	let cyclesToken = $derived(
 		pageToken ?? (CYCLES_TOP_UP_ENABLED ? $enabledIcTokens.find(isTokenCyclesLedger) : undefined)
@@ -88,15 +88,15 @@
 
 	let pickedToken = $state<IcToken | undefined>();
 
-	// What the top-up is paid with: from the TCYCLES page its token, from the navigation the
+	// What the top-up is paid with: from the TCYCLES page its token, from Tools the
 	// token picked, or the only one that can pay.
 	let payToken = $derived(pageToken ?? pickedToken);
 
 	let paidWithIcp = $derived(nonNullish(payToken) && isTokenIcp(payToken));
 
 	let sourceLocation = $derived<CyclesTopUpSourceLocation>(
-		fromNavigation
-			? PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NAVIGATION
+		fromTools
+			? PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOOLS_PAGE
 			: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOKEN_DETAILS
 	);
 
@@ -159,7 +159,7 @@
 			: $i18n.cycles_top_up.text.title
 	);
 
-	// Fixed for the modal's life, as a WizardModal needs: from the navigation, the token step
+	// Fixed for the modal's life, as a WizardModal needs: from Tools, the token step
 	// comes first, even when the modal opens past it (below).
 	let steps = $derived.by<WizardSteps<WizardStepsCyclesTopUp>>(() => {
 		const topUpSteps: WizardSteps<WizardStepsCyclesTopUp> = [
@@ -181,9 +181,7 @@
 			}
 		];
 
-		return fromNavigation
-			? [{ name: WizardStepsCyclesTopUp.TOKEN, title }, ...topUpSteps]
-			: topUpSteps;
+		return fromTools ? [{ name: WizardStepsCyclesTopUp.TOKEN, title }, ...topUpSteps] : topUpSteps;
 	});
 
 	onMount(() => trackCyclesTopUp({ step: 'open', sourceLocation }));
@@ -229,7 +227,7 @@
 	// through, the Amount step's balance check would refuse the same amount. Back leads to the
 	// usual steps, where any change is a new request. The full-precision amount parses back to
 	// the stored one.
-	// Otherwise, a modal opened from the navigation when only one token can pay starts on the
+	// Otherwise, a modal opened from Tools when only one token can pay starts on the
 	// canister step with that token: there is nothing to pick.
 	let opened = false;
 
@@ -251,7 +249,7 @@
 				return;
 			}
 
-			if (fromNavigation && usableTokens.length === 1) {
+			if (fromTools && usableTokens.length === 1) {
 				[pickedToken] = usableTokens;
 
 				goTo(WizardStepsCyclesTopUp.CANISTER);
@@ -652,7 +650,7 @@
 		{:else if currentStep?.name === WizardStepsCyclesTopUp.CANISTER && nonNullish(payToken)}
 			<CyclesTopUpCanister
 				{cyclesToken}
-				onBack={fromNavigation && usableTokens.length > 1 ? () => modal?.back() : undefined}
+				onBack={fromTools && usableTokens.length > 1 ? () => modal?.back() : undefined}
 				onCancel={close}
 				onNext={() => modal?.next()}
 				token={payToken}
