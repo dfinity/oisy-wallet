@@ -1,76 +1,50 @@
 <script lang="ts">
-	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { untrack } from 'svelte';
 	import { get } from 'svelte/store';
-	import { PersonalNotesRateLimitedError } from '$lib/canisters/errors';
-	import List from '$lib/components/common/List.svelte';
-	import ListItem from '$lib/components/common/ListItem.svelte';
-	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
 	import DeleteNoteConfirmBottomSheet from '$lib/components/notes/DeleteNoteConfirmBottomSheet.svelte';
 	import DeleteNoteConfirmContent from '$lib/components/notes/DeleteNoteConfirmContent.svelte';
-	import EmptyNotes from '$lib/components/notes/EmptyNotes.svelte';
 	import InputPersonalNote from '$lib/components/notes/InputPersonalNote.svelte';
-	import NoteListItem from '$lib/components/notes/NoteListItem.svelte';
 	import NoteView from '$lib/components/notes/NoteView.svelte';
 	import NotesPrivacyInfoBox from '$lib/components/notes/NotesPrivacyInfoBox.svelte';
-	import NotesUnavailable from '$lib/components/notes/NotesUnavailable.svelte';
-	import NotesUnlocking from '$lib/components/notes/NotesUnlocking.svelte';
 	import ShareNoteBottomSheet from '$lib/components/notes/ShareNoteBottomSheet.svelte';
 	import ShareNoteContent from '$lib/components/notes/ShareNoteContent.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
-	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
-	import { MAX_PERSONAL_NOTES_PER_USER } from '$lib/constants/app.constants';
 	import {
-		NOTES_ADD_BUTTON,
 		NOTES_CANCEL_BUTTON,
 		NOTES_EDITOR_DELETE_BUTTON,
-		NOTES_LIST,
 		NOTES_MODAL,
-		NOTES_NO_RESULTS,
-		NOTES_SAVE_BUTTON,
-		NOTES_SEARCH_INPUT
+		NOTES_SAVE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
-	import {
-		trackPersonalNoteShare,
-		trackPersonalNote
-	} from '$lib/services/personal-notes-analytics.services';
-	import {
-		deletePersonalNote,
-		loadPersonalNotes,
-		savePersonalNote
-	} from '$lib/services/personal-notes.services';
+	import { trackPersonalNoteShare } from '$lib/services/personal-notes-analytics.services';
+	import { deletePersonalNote, savePersonalNote } from '$lib/services/personal-notes.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import {
-		atPersonalNotesCapacity,
-		personalNotesList,
-		personalNotesLoaded,
-		personalNotesStore
-	} from '$lib/stores/personal-notes.store';
+	import { personalNotesList, personalNotesStore } from '$lib/stores/personal-notes.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { isPersonalNoteDecryptionFailure, type PersonalNoteUi } from '$lib/types/personal-note';
-	import { isDesktop } from '$lib/utils/device.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { formatPersonalNoteTimestamp } from '$lib/utils/personal-note.utils';
 
-	type Step = 'list' | 'view' | 'editor';
+	interface Props {
+		// The note to open on its read-only view; omitted to open the editor for a new note.
+		noteId?: string;
+	}
 
-	let step = $state<Step>('list');
-	let viewNoteId = $state<string | undefined>();
-	// Whether the editor was opened from a note's View — drives where Save/Cancel
-	// returns (back to that View vs. the list).
-	let editorFromView = $state(false);
+	let { noteId }: Props = $props();
+
+	type Step = 'view' | 'editor';
+
+	// The page opens a fresh modal for each note, so only the initial id picks the step.
+	let step = $state<Step>(untrack(() => (isNullish(noteId) ? 'editor' : 'view')));
 
 	let editingNote = $state<PersonalNoteUi | undefined>();
 	// Bumped on every editor open so the input remounts and re-applies auto-focus.
@@ -87,57 +61,24 @@
 	// `undefined` when the share flow is closed.
 	let pendingShareNote = $state<PersonalNoteUi | undefined>();
 
-	let loading = $state(!$personalNotesLoaded);
-	// Set when loadPersonalNotes enters the expensive key-derivation + decryption
-	// phase (notes present); stays set until the load resolves. Drives the
-	// "unlocking" screen so it isn't flashed during the quick fetch or on an empty
-	// list, where no derivation happens.
-	let deriving = $state(false);
 	let busy = $state(false);
-	// Set when a load fails; drives the inline "unavailable" panel (with Retry)
-	// instead of falling through to the empty state.
-	let loadError = $state<unknown>(undefined);
 
-	let searchTerm = $state('');
-
-	const notes = $derived($personalNotesList);
-	const showSkeleton = $derived(loading);
-	const hasLoadError = $derived(!showSkeleton && nonNullish(loadError));
-	const loadRateLimited = $derived(loadError instanceof PersonalNotesRateLimitedError);
-	const isEmpty = $derived(!showSkeleton && !hasLoadError && (notes?.length ?? 0) === 0);
-
-	// Client-side search: case-insensitive substring over the full (decrypted) note
-	// text — no backend call (the canister only holds ciphertext). Failed-to-decrypt
-	// entries have no text, so a non-empty query hides them.
-	const filteredNotes = $derived.by(() => {
-		const all = notes ?? [];
-		const term = searchTerm.trim().toLowerCase();
-		if (term === '') {
-			return all;
-		}
-		return all.filter(
-			(note) => !isPersonalNoteDecryptionFailure(note) && note.note.toLowerCase().includes(term)
-		);
-	});
-
-	// The note currently shown in the read-only view (reactive, so an edit reflects
-	// immediately); `undefined` if it was deleted while open.
+	// The note shown in the read-only view (reactive, so an edit reflects
+	// immediately); `undefined` once it is deleted.
 	const viewNote = $derived.by(() => {
-		if (isNullish(viewNoteId)) {
+		if (isNullish(noteId)) {
 			return undefined;
 		}
-		const entry = (notes ?? []).find(({ id }) => id === viewNoteId);
+		const entry = ($personalNotesList ?? []).find(({ id }) => id === noteId);
 		return nonNullish(entry) && !isPersonalNoteDecryptionFailure(entry) ? entry : undefined;
 	});
 
 	const stepTitle = $derived(
 		step === 'view'
 			? $i18n.notes.text.note
-			: step === 'editor'
-				? nonNullish(editingNote)
-					? $i18n.notes.text.edit_note
-					: $i18n.notes.text.add_title
-				: $i18n.notes.text.title
+			: nonNullish(editingNote)
+				? $i18n.notes.text.edit_note
+				: $i18n.notes.text.add_title
 	);
 
 	// Edit Save stays disabled until the trimmed content actually changes, so a
@@ -166,70 +107,27 @@
 		});
 	});
 
-	const load = async () => {
-		if (isNullish($authIdentity)) {
-			return;
-		}
-		loading = true;
-		deriving = false;
-		loadError = undefined;
-		try {
-			await loadPersonalNotes({ identity: $authIdentity, onDeriveStart: () => (deriving = true) });
-		} catch (err: unknown) {
-			// Surface a persistent inline panel (with Retry) instead of a toast that
-			// vanishes over a misleading empty state.
-			loadError = err;
-		} finally {
-			loading = false;
-			deriving = false;
-		}
-	};
-
-	onMount(() => {
-		// The notes surface opened — fires on every open (the modal remounts each time).
-		trackPersonalNote({ step: 'open', resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS });
-		// Lazy load on first open only; re-opening in the same session renders from cache.
-		if (!$personalNotesLoaded) {
-			load();
-		}
-	});
-
-	const openView = (id: string) => {
-		viewNoteId = id;
-		step = 'view';
-		// A note's read-only preview was opened (from the list) — distinct from `open`,
-		// which is the notes surface itself.
-		trackPersonalNote({ step: 'view', resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS });
-	};
-
-	const openEditor = ({ id, fromView = false }: { id?: string; fromView?: boolean } = {}) => {
-		const entry = nonNullish(id) ? get(personalNotesStore).entries?.[id] : undefined;
+	const openEditor = (id: string) => {
+		const entry = get(personalNotesStore).entries?.[id];
 		editingNote = nonNullish(entry) && !isPersonalNoteDecryptionFailure(entry) ? entry : undefined;
-		editorFromView = fromView;
 		noteText = editingNote?.note ?? '';
 		isValid = false;
 		editorInstance += 1;
 		step = 'editor';
 	};
 
-	// Save/Cancel of an edit opened from a note's View returns to that View; a new
-	// note (opened from the list) returns to the list.
+	// Save/Cancel of an edit returns to the note's view; of a new note, to the page.
 	const leaveEditor = () => {
+		if (isNullish(editingNote)) {
+			modalStore.close();
+			return;
+		}
 		editingNote = undefined;
 		noteText = '';
-		if (editorFromView && nonNullish(viewNoteId)) {
-			step = 'view';
-		} else {
-			step = 'list';
-		}
+		step = 'view';
 	};
 
-	const backToList = () => {
-		viewNoteId = undefined;
-		step = 'list';
-	};
-
-	// List/empty/view states are dismissible; the editor step ignores backdrop/Escape
+	// The view is dismissible; the editor step ignores backdrop/Escape
 	// (and hides the header X via CSS) so unsaved text can't be lost to an accidental tap.
 	const onClose = () => {
 		if (step === 'editor') {
@@ -290,10 +188,7 @@
 		busy = true;
 		try {
 			await deletePersonalNote({ identity: $authIdentity, id });
-			pendingDeleteNote = undefined;
-			editingNote = undefined;
-			noteText = '';
-			backToList();
+			modalStore.close();
 		} catch (err: unknown) {
 			toastsError({ msg: { text: $i18n.notes.error.delete }, err });
 		} finally {
@@ -302,10 +197,10 @@
 	};
 
 	$effect(() => {
-		// If the selected note disappears while viewing (e.g. store refresh), keep
-		// title/body in sync by returning to the list.
+		// If the viewed note disappears (e.g. store refresh), there is nothing left to
+		// show, so return to the page.
 		if (step === 'view' && isNullish(viewNote)) {
-			backToList();
+			modalStore.close();
 		}
 	});
 </script>
@@ -367,85 +262,11 @@
 	{:else if step === 'view' && nonNullish(viewNote)}
 		<NoteView
 			note={viewNote}
-			onBack={backToList}
+			onBack={modalStore.close}
 			onDelete={requestDelete}
-			onEdit={() => nonNullish(viewNote) && openEditor({ id: viewNote.id, fromView: true })}
+			onEdit={() => nonNullish(viewNote) && openEditor(viewNote.id)}
 			onShare={() => nonNullish(viewNote) && openShare(viewNote.id)}
 		/>
-	{:else}
-		<!-- gap-6 gives a comfortable space between the pinned search and the list;
-			pb-0! drops the shared modal's large bottom padding so the list sits a
-			little above the footer divider (the ~16px content gap remains).
-			overflow-y-auto lets the empty/skeleton states scroll within the body on
-			short viewports (the list state scrolls inside its own region below, so
-			this stays a no-op there). -->
-		<ContentWithToolbar
-			styleClass="flex min-h-0 flex-col items-stretch gap-6 overflow-y-auto pb-0!"
-		>
-			{#if showSkeleton}
-				{#if deriving}
-					<NotesUnlocking />
-				{:else}
-					<SkeletonCards rows={3} />
-				{/if}
-			{:else if hasLoadError}
-				<NotesUnavailable onRetry={load} rateLimited={loadRateLimited} />
-			{:else if isEmpty}
-				<EmptyNotes onAddNote={() => openEditor()} />
-			{:else}
-				<div class="flex w-full shrink-0 items-end gap-2">
-					<InputSearch
-						autofocus={isDesktop()}
-						placeholder={$i18n.notes.text.search_placeholder}
-						showResetButton={notEmptyString(searchTerm)}
-						testId={NOTES_SEARCH_INPUT}
-						bind:filter={searchTerm}
-					/>
-					<Button
-						ariaLabel={$i18n.notes.text.add_note}
-						disabled={$atPersonalNotesCapacity}
-						onclick={() => openEditor()}
-						styleClass="rounded-xl"
-						testId={NOTES_ADD_BUTTON}
-					>
-						<IconPlus />
-						<span class="hidden whitespace-nowrap xs:block">{$i18n.notes.text.add_note}</span>
-					</Button>
-				</div>
-
-				{#if $atPersonalNotesCapacity}
-					<p class="shrink-0 pt-3 text-sm text-tertiary">
-						{replacePlaceholders($i18n.notes.text.cap_reached, {
-							$max: `${MAX_PERSONAL_NOTES_PER_USER}`
-						})}
-					</p>
-				{/if}
-
-				<!-- Only the list scrolls, so the scrollbar stays out of the search header
-					and the pinned footer. -->
-				<div class="flex min-h-0 flex-1 flex-col overflow-y-auto">
-					<List noPadding testId={NOTES_LIST}>
-						{#if filteredNotes.length === 0}
-							<ListItem>
-								<span class="text-secondary" data-tid={NOTES_NO_RESULTS}>
-									{$i18n.notes.text.no_results}
-								</span>
-							</ListItem>
-						{:else}
-							{#each filteredNotes as note (note.id)}
-								<ListItem>
-									<NoteListItem {note} onRetry={load} onSelect={openView} />
-								</ListItem>
-							{/each}
-						{/if}
-					</List>
-				</div>
-			{/if}
-
-			{#snippet toolbar()}
-				<ButtonCloseModal />
-			{/snippet}
-		</ContentWithToolbar>
 	{/if}
 {/snippet}
 

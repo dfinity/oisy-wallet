@@ -1,6 +1,6 @@
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import NavigationMainMenuItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
-import { AppPath } from '$lib/constants/routes.constants';
+import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import {
 	NAVIGATION_GROUP_FINANCE,
 	NAVIGATION_GROUP_MORE,
@@ -22,6 +22,7 @@ import { TokenTypes } from '$lib/enums/token-types';
 import { activeAssetsTabStore } from '$lib/stores/settings.store';
 import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
+import { mockPage } from '$tests/mocks/page.store.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
 
@@ -55,6 +56,7 @@ describe('NavigationMainMenuItems', () => {
 		vi.clearAllMocks();
 
 		featureFlags.helpEnabled = true;
+		mockPage.reset();
 		activeAssetsTabStore.reset({ key: 'active-assets-tab' });
 		userSelectedNetworkStore.set(undefined);
 		bottomSheetOpenStore.set(false);
@@ -201,6 +203,24 @@ describe('NavigationMainMenuItems', () => {
 		const borrowLink = getByTestId(NAVIGATION_ITEM_BORROW);
 
 		expect(borrowLink.getAttribute('href')).toContain(AppPath.Borrow);
+	});
+
+	it('links Notes to the Notes page', () => {
+		const { getByTestId } = render(NavigationMainMenuItems);
+
+		const notesLink = getByTestId(NAVIGATION_ITEM_NOTES);
+
+		expect(notesLink.getAttribute('href')).toContain(AppPath.Notes);
+		expect(notesLink).not.toHaveClass('selected');
+	});
+
+	it('marks Notes as the current page on the Notes route', () => {
+		mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Notes}` });
+
+		const { getByTestId } = render(NavigationMainMenuItems);
+
+		expect(getByTestId(NAVIGATION_ITEM_NOTES)).toHaveClass('selected');
+		expect(getByTestId(NAVIGATION_ITEM_ACTIVITY)).not.toHaveClass('selected');
 	});
 
 	// Desktop has no Help item in the sidebar: it is a row of the footer's More
