@@ -2993,7 +2993,6 @@
 			"edit_note": "Chỉnh sửa ghi chú",
 			"delete_note": "Xóa ghi chú",
 			"delete_confirm_text": "Thao tác này sẽ xóa ghi chú '$note'. Không thể hoàn tác hành động này.",
-			"back": "Quay lại",
 			"empty_title": "Bạn chưa có ghi chú nào",
 			"empty_subtitle": "Tạo ghi chú riêng tư, được mã hóa để giữ an toàn cho thông tin quan trọng bên cạnh ví của bạn.",
 			"empty_add": "Thêm ghi chú mới",

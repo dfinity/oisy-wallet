@@ -1,11 +1,11 @@
 import NotesModal from '$lib/components/notes/NotesModal.svelte';
 import {
-	NOTES_BACK_BUTTON,
 	NOTES_CANCEL_BUTTON,
 	NOTES_DELETE_CONFIRM_BUTTON,
 	NOTES_INPUT,
 	NOTES_SAVE_BUTTON,
 	NOTES_VIEW,
+	NOTES_VIEW_CLOSE_BUTTON,
 	NOTES_VIEW_DELETE_BUTTON,
 	NOTES_VIEW_EDIT_BUTTON
 } from '$lib/constants/test-ids.constants';
@@ -60,10 +60,10 @@ describe('NotesModal', () => {
 		expect(queryByTestId(NOTES_INPUT)).toBeNull();
 	});
 
-	it('returns to the page from the view', async () => {
+	it('returns to the page when the view is closed', async () => {
 		const { getByTestId } = renderModal('a');
 
-		await fireEvent.click(getByTestId(NOTES_BACK_BUTTON));
+		await fireEvent.click(getByTestId(NOTES_VIEW_CLOSE_BUTTON));
 
 		expect(get(modalStore)).toBeNull();
 	});

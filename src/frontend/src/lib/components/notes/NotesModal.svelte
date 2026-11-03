@@ -262,7 +262,7 @@
 	{:else if step === 'view' && nonNullish(viewNote)}
 		<NoteView
 			note={viewNote}
-			onBack={modalStore.close}
+			onClose={modalStore.close}
 			onDelete={requestDelete}
 			onEdit={() => nonNullish(viewNote) && openEditor(viewNote.id)}
 			onShare={() => nonNullish(viewNote) && openShare(viewNote.id)}

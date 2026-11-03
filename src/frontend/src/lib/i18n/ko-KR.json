@@ -2993,7 +2993,6 @@
 			"edit_note": "메모 수정",
 			"delete_note": "메모 삭제",
 			"delete_confirm_text": "'$note' 메모가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.",
-			"back": "뒤로",
 			"empty_title": "아직 메모가 없습니다",
 			"empty_subtitle": "지갑과 함께 중요한 정보를 안전하게 보관할 수 있는 비공개 암호화 메모를 만들어보세요.",
 			"empty_add": "새 메모 추가",

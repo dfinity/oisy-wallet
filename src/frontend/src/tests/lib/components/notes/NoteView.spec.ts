@@ -1,6 +1,6 @@
 import NoteView from '$lib/components/notes/NoteView.svelte';
 import {
-	NOTES_BACK_BUTTON,
+	NOTES_VIEW_CLOSE_BUTTON,
 	NOTES_VIEW_DELETE_BUTTON,
 	NOTES_VIEW_EDIT_BUTTON
 } from '$lib/constants/test-ids.constants';
@@ -16,7 +16,7 @@ describe('NoteView', () => {
 		updated_at_ns: '100'
 	};
 
-	const baseProps = () => ({ onBack: vi.fn(), onEdit: vi.fn(), onDelete: vi.fn() });
+	const baseProps = () => ({ onClose: vi.fn(), onEdit: vi.fn(), onDelete: vi.fn() });
 
 	it('renders the title and body and turns an http(s) URL into a safe new-tab link', () => {
 		const { container } = render(NoteView, {
@@ -56,15 +56,15 @@ describe('NoteView', () => {
 		expect(container.querySelector('a')).toBeNull();
 	});
 
-	it('always labels the footer "Back"', () => {
+	it('always labels the footer "Close"', () => {
 		const { getByTestId } = render(NoteView, {
 			props: { note, ...baseProps() }
 		});
 
-		expect(getByTestId(NOTES_BACK_BUTTON)).toHaveTextContent(en.notes.text.back);
+		expect(getByTestId(NOTES_VIEW_CLOSE_BUTTON)).toHaveTextContent(en.core.text.close);
 	});
 
-	it('calls the edit / delete / back callbacks', async () => {
+	it('calls the edit / delete / close callbacks', async () => {
 		const props = { note, ...baseProps() };
 		const { getByTestId } = render(NoteView, { props });
 
@@ -76,8 +76,8 @@ describe('NoteView', () => {
 
 		expect(props.onDelete).toHaveBeenCalledExactlyOnceWith('note-1');
 
-		await fireEvent.click(getByTestId(NOTES_BACK_BUTTON));
+		await fireEvent.click(getByTestId(NOTES_VIEW_CLOSE_BUTTON));
 
-		expect(props.onBack).toHaveBeenCalledOnce();
+		expect(props.onClose).toHaveBeenCalledOnce();
 	});
 });

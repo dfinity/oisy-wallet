@@ -2531,7 +2531,6 @@ interface I18nNotes {
 		edit_note: string;
 		delete_note: string;
 		delete_confirm_text: string;
-		back: string;
 		empty_title: string;
 		empty_subtitle: string;
 		empty_add: string;

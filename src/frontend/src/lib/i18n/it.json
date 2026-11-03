@@ -2993,7 +2993,6 @@
 			"edit_note": "Modifica nota",
 			"delete_note": "Elimina nota",
 			"delete_confirm_text": "Questo eliminerà la nota '$note'. Questa azione non può essere annullata.",
-			"back": "Indietro",
 			"empty_title": "Non hai ancora nessuna nota",
 			"empty_subtitle": "Crea note private e crittografate per tenere al sicuro i dettagli accanto al tuo wallet.",
 			"empty_add": "Aggiungi nuova nota",
