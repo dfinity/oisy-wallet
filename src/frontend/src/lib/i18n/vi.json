@@ -133,7 +133,7 @@
 			"section_finance": "Tài chính",
 			"section_more": "Thêm",
 			"airdrops": "Phần thưởng",
-			"tools": "",
+			"tools": "Công cụ",
 			"earning": "Kiếm tiền",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "Mở chế độ xem khoản vay",
 			"earning": "Mở chế độ xem kiếm tiền",
 			"airdrops": "Mở chế độ xem Phần thưởng",
-			"tools": "",
+			"tools": "Mở công cụ",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "Địa chỉ ví, cài đặt, đăng xuất và các liên kết bên ngoài của bạn",
@@ -889,8 +889,8 @@
 			"disable_hide_micro_transactions": "Tắt ẩn các giao dịch có giá trị rất nhỏ",
 			"save_spam_filter_success": "Cài đặt bộ lọc spam của bạn đã được cập nhật.",
 			"export_data": "Xuất dữ liệu",
-			"export_data_moved": "",
-			"open_tools": "",
+			"export_data_moved": "Tính năng xuất dữ liệu đã chuyển sang Công cụ.",
+			"open_tools": "Mở Công cụ",
 			"export_data_description": "Tải xuống token và giao dịch của bạn dưới dạng CSV — Basic cho thông tin cơ bản, Extended cho các thuộc tính bổ sung.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -915,8 +915,8 @@
 	},
 	"tools": {
 		"text": {
-			"title": "",
-			"top_up_canister": ""
+			"title": "Công cụ",
+			"top_up_canister": "Nạp cho canister bằng ICP hoặc TCYCLES"
 		}
 	},
 	"shortcuts": {

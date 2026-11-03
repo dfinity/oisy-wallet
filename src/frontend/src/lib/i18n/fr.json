@@ -133,7 +133,7 @@
 			"section_finance": "Finance",
 			"section_more": "Plus",
 			"airdrops": "Récompenses",
-			"tools": "",
+			"tools": "Outils",
 			"earning": "Gains",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "Ouvrir la vue des prêts",
 			"earning": "Ouvrir la vue des gains",
 			"airdrops": "Ouvrir la vue des récompenses",
-			"tools": "",
+			"tools": "Ouvrir les outils",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "Votre adresse de portefeuille, les paramètres, la déconnexion et les liens externes",
@@ -889,8 +889,8 @@
 			"disable_hide_micro_transactions": "Désactiver le masquage des transactions de très petites valeurs",
 			"save_spam_filter_success": "Les paramètres de votre filtre anti-spam ont été mis à jour.",
 			"export_data": "Exporter les données",
-			"export_data_moved": "",
-			"open_tools": "",
+			"export_data_moved": "L'export se trouve désormais dans Outils.",
+			"open_tools": "Ouvrir Outils",
 			"export_data_description": "Téléchargez vos tokens et transactions au format CSV — Basic pour l'essentiel, Extended pour des attributs supplémentaires.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -915,8 +915,8 @@
 	},
 	"tools": {
 		"text": {
-			"title": "",
-			"top_up_canister": ""
+			"title": "Outils",
+			"top_up_canister": "Recharger un canister avec des ICP ou des TCYCLES"
 		}
 	},
 	"shortcuts": {

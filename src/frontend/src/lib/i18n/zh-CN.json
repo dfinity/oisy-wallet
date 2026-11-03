@@ -133,7 +133,7 @@
 			"section_finance": "金融",
 			"section_more": "更多",
 			"airdrops": "奖励",
-			"tools": "",
+			"tools": "工具",
 			"earning": "赚取",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "打开借贷视图",
 			"earning": "打开赚取视图",
 			"airdrops": "打开奖励视图",
-			"tools": "",
+			"tools": "打开工具",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "你的钱包地址、设置、登出与外部链接",
@@ -889,8 +889,8 @@
 			"disable_hide_micro_transactions": "禁用隐藏价值非常小的交易",
 			"save_spam_filter_success": "您的垃圾信息过滤器设置已更新。",
 			"export_data": "导出数据",
-			"export_data_moved": "",
-			"open_tools": "",
+			"export_data_moved": "导出功能已移至“工具”。",
+			"open_tools": "打开工具",
 			"export_data_description": "将您的代币和交易下载为 CSV — Basic 包含基础信息，Extended 包含更多属性。",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -915,8 +915,8 @@
 	},
 	"tools": {
 		"text": {
-			"title": "",
-			"top_up_canister": ""
+			"title": "工具",
+			"top_up_canister": "使用 ICP 或 TCYCLES 为 Canister 充值"
 		}
 	},
 	"shortcuts": {

@@ -133,7 +133,7 @@
 			"section_finance": "वित्त",
 			"section_more": "अधिक",
 			"airdrops": "पुरस्कार",
-			"tools": "",
+			"tools": "टूल्स",
 			"earning": "कमाएँ और पुरस्कार",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "उधार दृश्य खोलें",
 			"earning": "कमाई दृश्य खोलें",
 			"airdrops": "पुरस्कार दृश्य खोलें",
-			"tools": "",
+			"tools": "टूल्स खोलें",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "आपका वॉलेट पता, सेटिंग्स, साइन-आउट और बाहरी लिंक",
@@ -889,8 +889,8 @@
 			"disable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना अक्षम करें",
 			"save_spam_filter_success": "आपकी स्पैम फ़िल्टर सेटिंग्स अपडेट कर दी गई हैं।",
 			"export_data": "डेटा निर्यात करें",
-			"export_data_moved": "",
-			"open_tools": "",
+			"export_data_moved": "निर्यात अब टूल्स में है।",
+			"open_tools": "टूल्स खोलें",
 			"export_data_description": "अपने टोकन और लेन-देन को CSV के रूप में डाउनलोड करें — आवश्यक जानकारी के लिए Basic, अतिरिक्त विशेषताओं के लिए Extended।",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -915,8 +915,8 @@
 	},
 	"tools": {
 		"text": {
-			"title": "",
-			"top_up_canister": ""
+			"title": "टूल्स",
+			"top_up_canister": "ICP या TCYCLES से कैनिस्टर टॉप अप करें"
 		}
 	},
 	"shortcuts": {
