@@ -50,4 +50,14 @@ describe('Tools', () => {
 			expect(container).not.toHaveTextContent(en.cycles_top_up.text.canister_top_up);
 		});
 	});
+
+	it('offers Export data while the Canister top-up flag is off', () => {
+		enableCanisterTopUp(false);
+
+		const { getAllByText, getByText } = render(Tools);
+
+		expect(getByText(en.settings.text.export_data)).toBeInTheDocument();
+		expect(getAllByText(en.settings.text.export_tokens)).toHaveLength(2);
+		expect(getAllByText(en.settings.text.export_transactions)).toHaveLength(2);
+	});
 });

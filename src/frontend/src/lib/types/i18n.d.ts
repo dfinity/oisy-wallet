@@ -627,6 +627,8 @@ interface I18nSettings {
 		disable_hide_micro_transactions: string;
 		save_spam_filter_success: string;
 		export_data: string;
+		export_data_moved: string;
+		open_tools: string;
 		export_data_description: string;
 		export_basic: string;
 		export_extended: string;
