@@ -3,13 +3,15 @@
 
 	interface Props {
 		onSubmit: () => void;
+		disabled?: boolean;
+		initiallyExpanded?: boolean;
 	}
 
-	let { onSubmit }: Props = $props();
+	let { onSubmit, disabled = false, initiallyExpanded = false }: Props = $props();
 </script>
 
 <form onsubmit={onSubmit}>
-	<Collapsible>
+	<Collapsible {disabled} {initiallyExpanded}>
 		{#snippet header()}
 			<span>header</span>
 		{/snippet}

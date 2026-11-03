@@ -54,8 +54,17 @@ export const LIFI_ALLOWED_BRIDGES: Partial<Record<NetworkId, string[]>> = {
 	[ROBINHOOD_MAINNET_NETWORK_ID]: ['across']
 };
 
+/**
+ * The exchanges a Solana-source quote may route through (LI.FI tool keys from `/v1/tools`): those
+ * whose instructions the Solana binding pins and whose minimum output it decodes. Without the pin,
+ * LI.FI's best Solana → Solana route is often DFlow's, which the binding would refuse at execution.
+ * The list and the binding's pinned instructions change together.
+ */
+export const LIFI_SOLANA_ALLOWED_EXCHANGES: string[] = ['jupiter'];
+
 // Kept so that a misbehaving bridge or exchange can be blocked with a one-line change (LI.FI tool
 // keys from `/v1/tools`). A denied bridge is dropped from `LIFI_ALLOWED_BRIDGES` before a quote is
-// requested; a denied exchange is sent as `denyExchanges`.
+// requested; a denied exchange is dropped from `LIFI_SOLANA_ALLOWED_EXCHANGES` for a Solana source
+// and sent as `denyExchanges` for an EVM one.
 export const LIFI_DENY_BRIDGES: string[] = [];
 export const LIFI_DENY_EXCHANGES: string[] = [];
