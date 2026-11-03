@@ -807,8 +807,8 @@
 			"support_title": "Support",
 			"support_description": "Retrouvez des réponses et plus d'informations sur la page de support de la documentation $oisy_name, ou contactez l'équipe si vous êtes bloqué.",
 			"support_link": "Accéder à notre page de support",
-			"network_explorers_title": "Explorateurs de blocs",
-			"network_explorers_description": "$oisy_name construit votre historique à partir d'indexeurs tiers, qui peuvent être en retard sur la blockchain. Un explorateur de blocs montre ce que le réseau lui-même enregistre pour votre adresse.",
+			"network_explorers_title": "Explorateurs de blockchain",
+			"network_explorers_description": "Ouvrez ces liens pour voir vos adresses sur les explorateurs de blockchain et suivre vos soldes en temps réel ainsi que l'historique complet de vos transactions. Les blockchains sont des registres publics, vous pouvez donc vérifier et examiner de manière indépendante toute l'activité on-chain de votre $oisy_name.",
 			"explorers_title": "Statut des transactions chez les fournisseurs",
 			"explorers_description": "$oisy_name fait passer les swaps et les transferts via un pont par des fournisseurs tiers. Si l'un d'eux prend plus de temps que prévu, ouvrez l'explorateur du fournisseur : il indique où en est votre transfert, déjà filtré sur votre portefeuille.",
 			"explorers_velora_description": "Swaps sur Ethereum et d'autres réseaux EVM.",
@@ -838,7 +838,7 @@
 			"withdraw": "Retirer"
 		},
 		"alt": {
-			"network_explorer_link": "Ouvrir l'explorateur de blocs $network pour votre adresse",
+			"network_explorer_link": "Ouvrir l'explorateur de blockchain $network pour votre adresse",
 			"explorer_link": "Ouvrir l'explorateur $provider pour votre adresse $chain",
 			"select_token_first": "Sélectionner le premier token du pool",
 			"select_token_second": "Sélectionner le deuxième token du pool",
