@@ -259,4 +259,121 @@ describe('swap-supported-tokens.services', () => {
 			new Set(['id-1', 'id-2', 'id-3', 'id-4', 'id-shared'])
 		);
 	});
+
+	describe('reloadSolSwapSupportedTokens', () => {
+		const load = async () => {
+			mockKongSupportedTokens.mockResolvedValue(new Set(['canister-a']));
+			mockIcpSwapSupportedTokens.mockResolvedValue(new Set());
+			mockIcpBridgeSupportedTokens.mockResolvedValue(new Set());
+			mockEvmGetSupportedTokens.mockResolvedValue(new Set(['0xabc']));
+			mockSolGetSupportedTokens.mockResolvedValue(new Set(['SplAddr1']));
+			mockBtcGetSupportedTokens.mockResolvedValue(new Set(['btc']));
+			mockXrpGetSupportedTokens.mockResolvedValue(new Set(['xrp']));
+
+			const { loadSwapSupportedTokens } =
+				await import('$lib/services/swap-supported-tokens.services');
+			await loadSwapSupportedTokens({ identity: mockIdentity });
+
+			vi.clearAllMocks();
+		};
+
+		const reload = async () => {
+			const { reloadSolSwapSupportedTokens } =
+				await import('$lib/services/swap-supported-tokens.services');
+
+			return reloadSolSwapSupportedTokens();
+		};
+
+		it('should do nothing before the swap lists have loaded', async () => {
+			await reload();
+
+			expect(mockSolGetSupportedTokens).not.toHaveBeenCalled();
+			expect(get(swapSupportedTokensStore)).toBeUndefined();
+		});
+
+		it("should read the Solana registry's lists again and keep the others", async () => {
+			await load();
+
+			const before = get(swapSupportedTokensStore);
+
+			mockSolGetSupportedTokens.mockResolvedValue(new Set(['SplAddr1', 'SplAddr2']));
+
+			await reload();
+
+			const stored = get(swapSupportedTokensStore);
+
+			expect(stored?.aggregated.sol.supportedTokenIds).toEqual(new Set(['SplAddr1', 'SplAddr2']));
+			expect(
+				stored?.providers.find(({ sourceCategory }) => sourceCategory === 'sol')
+					?.supportedSourceTokens
+			).toEqual(new Set(['SplAddr1', 'SplAddr2']));
+
+			expect(stored?.aggregated.icp).toBe(before?.aggregated.icp);
+			expect(stored?.aggregated.evm).toBe(before?.aggregated.evm);
+			expect(stored?.aggregated.btc).toBe(before?.aggregated.btc);
+			expect(stored?.aggregated.xrp).toBe(before?.aggregated.xrp);
+			expect(stored?.providers.filter(({ sourceCategory }) => sourceCategory !== 'sol')).toEqual(
+				before?.providers.filter(({ sourceCategory }) => sourceCategory !== 'sol')
+			);
+			expect(
+				stored?.providers.filter(({ sourceCategory }) => sourceCategory === 'sol')
+			).toHaveLength(1);
+
+			expect(mockKongSupportedTokens).not.toHaveBeenCalled();
+			expect(mockEvmGetSupportedTokens).not.toHaveBeenCalled();
+			expect(mockBtcGetSupportedTokens).not.toHaveBeenCalled();
+			expect(mockXrpGetSupportedTokens).not.toHaveBeenCalled();
+		});
+
+		it('should keep only the latest of overlapping reads', async () => {
+			await load();
+
+			let resolveFirst: (tokens: Set<string>) => void = () => {};
+
+			mockSolGetSupportedTokens
+				.mockReturnValueOnce(
+					new Promise<Set<string>>((resolve) => {
+						resolveFirst = resolve;
+					})
+				)
+				.mockResolvedValueOnce(new Set(['latest']));
+
+			const first = reload();
+			await reload();
+
+			resolveFirst(new Set(['stale']));
+			await first;
+
+			expect(get(swapSupportedTokensStore)?.aggregated.sol.supportedTokenIds).toEqual(
+				new Set(['latest'])
+			);
+		});
+
+		it('should not bring the lists back once they were reset meanwhile', async () => {
+			await load();
+
+			let resolveRead: (tokens: Set<string>) => void = () => {};
+
+			mockSolGetSupportedTokens.mockReturnValueOnce(
+				new Promise<Set<string>>((resolve) => {
+					resolveRead = resolve;
+				})
+			);
+
+			// Imported first, so that the read has started when the lists are reset.
+			const { reloadSolSwapSupportedTokens } =
+				await import('$lib/services/swap-supported-tokens.services');
+
+			const reading = reloadSolSwapSupportedTokens();
+
+			expect(mockSolGetSupportedTokens).toHaveBeenCalledOnce();
+
+			swapSupportedTokensStore.reset();
+
+			resolveRead(new Set(['SplAddr2']));
+			await reading;
+
+			expect(get(swapSupportedTokensStore)).toBeUndefined();
+		});
+	});
 });

@@ -4,6 +4,7 @@
 	import { oisyTradeSwapEnabled } from '$env/oisy-trade-swap';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 	import { isIcToken } from '$icp/validation/ic-token.validation';
+	import SwapFeeRow from '$lib/components/swap/SwapFeeRow.svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
@@ -348,9 +349,11 @@
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<Hr spacing="md" />
 
-			<div class="flex flex-col gap-3">
-				<SwapProvider {onShowProviderList} showSelectButton {slippageValue} />
-				<SwapFees />
+			<div class="flex flex-col">
+				<SwapProvider isForm {onShowProviderList} showSelectButton {slippageValue} />
+				<SwapFeeRow displayExchangeRate={false}>
+					<SwapFees />
+				</SwapFeeRow>
 			</div>
 		{/if}
 	{/snippet}

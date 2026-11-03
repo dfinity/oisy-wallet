@@ -10,6 +10,18 @@ describe('CollapsibleBottomSheet', () => {
 		screensStore.set('xs');
 	});
 
+	it('does not open a disabled custom trigger', async () => {
+		const { getByTestId, queryByTestId } = render(CollapsibleBottomSheetTest, {
+			props: { withTrigger: true, disabled: true }
+		});
+
+		expect(getByTestId('custom-trigger')).toBeDisabled();
+
+		await fireEvent.click(getByTestId('custom-trigger'));
+
+		expect(queryByTestId('bottom-sheet')).not.toBeInTheDocument();
+	});
+
 	it('falls back to the info-icon button when no trigger is given', async () => {
 		const { getByLabelText, queryByTestId } = render(CollapsibleBottomSheetTest);
 

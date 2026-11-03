@@ -2,7 +2,11 @@ import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import { liquidiumClient } from '$lib/api/liquidium.api';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
-import { LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS } from '$lib/constants/liquidium.constants';
+import {
+	LIQUIDIUM_BPS_SCALE,
+	LIQUIDIUM_REPAY_BUFFER_BPS,
+	LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS
+} from '$lib/constants/liquidium.constants';
 import { ProgressStepsLiquidiumRepay } from '$lib/enums/progress-steps';
 import {
 	createActiveUserTransaction,
@@ -35,9 +39,13 @@ export interface LiquidiumRepayPreview {
 	projectedHealthPercent: number;
 }
 
-// Full outstanding debt (principal + accrued interest + small buffer) in base units, for the
-// "Max (full debt)" shortcut. `null` when the user has no profile yet (should not happen for a
-// position that already carries debt, but guarded so callers can no-op gracefully).
+// Full outstanding debt (accrued interest included) plus a small buffer, in base units, for the
+// "Max (full debt)" shortcut. Not the SDK's `getMaxRepayAmount` alone: it adds `debtInterest` on
+// top of `borrowed`, which already includes it, so its max overshoots the debt and the repay is not
+// credited. It still caps ours, so we never send more than the SDK sanctions should it ever quote
+// less (a fixed double count, a smaller buffer). `null` when the user has no profile yet (should
+// not happen for a position that already carries debt, but guarded so callers can no-op
+// gracefully).
 export const getLiquidiumMaxRepayAmount = async ({
 	identity,
 	ethAddress,
@@ -59,13 +67,24 @@ export const getLiquidiumMaxRepayAmount = async ({
 		return null;
 	}
 
-	const { amount } = await positions.getMaxRepayAmount(profileId, poolId);
+	const [position, { amount: sdkMaxRepay }] = await Promise.all([
+		positions.getPosition(profileId, poolId),
+		positions.getMaxRepayAmount(profileId, poolId)
+	]);
 
-	return amount;
+	if (isNullish(position) || position.borrowed <= ZERO) {
+		return ZERO;
+	}
+
+	const maxRepay =
+		(position.borrowed * (LIQUIDIUM_BPS_SCALE + LIQUIDIUM_REPAY_BUFFER_BPS)) / LIQUIDIUM_BPS_SCALE;
+
+	return maxRepay < sdkMaxRepay ? maxRepay : sdkMaxRepay;
 };
 
-// USD value of this position's accrued borrow interest, derived from the reserve's own price basis
-// (interest and principal share the asset price, so this scales consistently with `borrowedUsd`).
+// USD value of this position's lifetime borrow interest, derived from the reserve's own price basis
+// (it shares the asset price with the debt, so this scales consistently with `borrowedUsd`).
+// Informational: it is already part of `borrowedUsd`.
 export const liquidiumDebtInterestUsd = (reserve: LiquidiumReserve): number =>
 	reserve.borrowed > ZERO
 		? (Number(reserve.debtInterest ?? ZERO) / Number(reserve.borrowed)) * reserve.borrowedUsd
@@ -90,8 +109,9 @@ export const computeLiquidiumRepayPreview = ({
 
 // Pending repays already cover the whole debt: nothing is left to repay until they settle. The net
 // cap rarely lands on exactly zero (interest accrued since the pending repay was quoted leaves dust
-// that its own buffer already covers), so the debt itself is checked too. Shared by the form, the
-// Review step and the broadcast guard so every gate agrees on "nothing left to repay".
+// that its own buffer already covers), so the debt itself is checked too (`borrowed` already
+// includes the accrued interest). Shared by the form, the Review step and the broadcast guard so
+// every gate agrees on "nothing left to repay".
 export const liquidiumPendingCoversDebt = ({
 	pendingRepay,
 	maxRepay,
@@ -100,9 +120,7 @@ export const liquidiumPendingCoversDebt = ({
 	pendingRepay: bigint;
 	maxRepay: bigint | undefined;
 	reserve: LiquidiumReserve;
-}): boolean =>
-	pendingRepay > ZERO &&
-	(maxRepay === ZERO || pendingRepay >= reserve.borrowed + (reserve.debtInterest ?? ZERO));
+}): boolean => pendingRepay > ZERO && (maxRepay === ZERO || pendingRepay >= reserve.borrowed);
 
 // Why `amount` can no longer be repaid under the cap, or `undefined` when it can. Review can
 // outlive the cap it was entered under (a repay that settles clears and refetches it; a new pending

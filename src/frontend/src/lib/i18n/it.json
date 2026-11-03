@@ -1399,6 +1399,8 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "Aggiornamento UI",
 			"swap_provider": "Fornitore di scambio",
+			"smart_swap": "",
+			"finding_best_rate": "",
 			"swap_provider_website": "Sito web",
 			"swap_route": "Percorso di scambio",
 			"included_network_fees": "Fee di rete incluse",
@@ -1465,7 +1467,8 @@
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
-			"lifi_fee_changed": ""
+			"lifi_fee_changed": "",
+			"lifi_route_unverified": ""
 		}
 	},
 	"buy": {
@@ -1892,6 +1895,7 @@
 			"allowance_increase": "Questa richiesta aumenta l'importo autorizzato del delegato sottostante della quantità mostrata, oltre a quanto può già spendere. Il delegato può trasferire quella quantità di questo token dal tuo wallet, in qualsiasi momento, finché non la revochi.",
 			"allowance_decrease": "Questa richiesta riduce l'importo autorizzato del delegato sottostante della quantità mostrata. Non sposta fondi da sola.",
 			"unverifiable_erc20_request": "Questa richiesta riguarda un token che OISY non riesce a identificare o decodificare. Quanto visualizzato potrebbe differire da ciò che verrebbe effettivamente firmato, pertanto l'approvazione è disabilitata.",
+			"unlisted_erc20_request": "OISY non elenca questo token. Il suo simbolo e l'importo mostrato vengono letti dal contratto del token stesso, e chiunque può creare un token con qualsiasi simbolo. Controlla l'indirizzo del token prima di approvare.",
 			"token_call_with_value": "Oltre all'importo di token indicato sotto, questa richiesta invia $amount al contratto del token. Un trasferimento o un'approvazione di token non invia $symbol, quindi per la tua sicurezza OISY non la firma.",
 			"unverifiable_approval_for_all_request": "Questa richiesta consegnerebbe a un operatore il controllo di una collezione NFT, e OISY non riesce a decodificare quale operatore. Quanto visualizzato potrebbe differire da ciò che verrebbe effettivamente firmato, pertanto l'approvazione è disabilitata.",
 			"approval_for_all_grant": "Questa richiesta consente all'operatore sottostante di trasferire qualsiasi NFT di questa collezione che possiedi ora o acquisisci in seguito, in qualsiasi momento, finché non la revochi. Non sposta fondi da sola.",
