@@ -243,7 +243,8 @@ const swap = ({
 		return false;
 	}
 
-	if (!exactInput) {
+	// What the router pays out of its own balance, the wallet paid in full beforehand.
+	if (!exactInput && payerIsUser) {
 		plan.atMost = true;
 	}
 
@@ -336,10 +337,6 @@ const readV4Swap = ({
 			uncheckedOutputs.add(keyOut);
 		}
 
-		if (!exactInput) {
-			plan.atMost = true;
-		}
-
 		return true;
 	};
 
@@ -408,8 +405,9 @@ const readV4Swap = ({
 	}
 
 	// The most an open settlement of a currency pays: the explicit inputs of the swaps that spend it,
-	// as long as nothing else adds to what is owed of it. A take of the same currency could. A pool
-	// stops short of an exact input when its liquidity runs out, and leaves less owed.
+	// as long as nothing else adds to what is owed of it. A take of the same currency could. Less is
+	// owed when an exact output takes less than its maximum input, or a pool stops short of an exact
+	// input when its liquidity runs out.
 	const owedOf = (key: string): bigint | undefined =>
 		spent.has(key) && !spentOpenly.has(key) && !takes.has(key) ? spent.get(key) : undefined;
 

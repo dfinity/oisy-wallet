@@ -130,12 +130,13 @@ Only from checks the router enforces:
 - **Paid, ERC-20:** what the plan pulls from the wallet through Permit2: the input of V2 and V3
   swaps the wallet pays for, `PERMIT2_TRANSFER_FROM` amounts, and V4 settlements the wallet pays,
   bounded by the input amounts of the V4 swaps.
-- **At most:** the paid amount is a maximum when the router pulls only what the swaps take: an
-  exact-output swap, a V3 exact-input swap the wallet pays for, and a V4 open `SETTLE` or
-  `SETTLE_ALL` the wallet pays. The router sets every V3 and V4 price limit at the end of the price
-  range, so a pool that runs out of liquidity first takes less than an exact input, and no version
-  checks that an exact input fills. A V2 pair takes the whole input, and a `PERMIT2_TRANSFER_FROM`,
-  a `SETTLE` of a stated amount and the native value are paid in full.
+- **At most:** the paid amount is a maximum when the router pulls from the wallet only what the
+  swaps take: a V2 or V3 exact-output swap or a V3 exact-input swap the wallet pays for, and a V4
+  open `SETTLE` or `SETTLE_ALL` the wallet pays. The router sets every V3 and V4 price limit at the
+  end of the price range, so a pool that runs out of liquidity first takes less than an exact
+  input, and no version checks that an exact input fills. A V2 pair takes the whole input, and a
+  `PERMIT2_TRANSFER_FROM`, a `SETTLE` of a stated amount and the native value are paid in full,
+  whatever kind of swap they fund.
 - **Received:** the sum of the minimums the router enforces on what reaches the recipient: a
   swap's minimum output when the swap pays the recipient directly (an exact-output swap: its
   output); the `amountMin` of `SWEEP` and `UNWRAP_WETH`; a stated `TRANSFER` amount; V4 `TAKE_ALL`'s
@@ -222,7 +223,9 @@ Only from checks the router enforces:
     described, with the V4 swap's minimum output as the minimum.
 11. A plan with `EXECUTE_SUB_PLAN`, a token OISY doesn't list, two paid tokens, a value with
     bits beyond its type, or a 2.0.0 layout sent to a 2.1.x router (or the reverse): unknown.
-12. An exact-output swap: "You pay at most" its maximum input.
+12. An exact-output swap the wallet pays for: "You pay at most" its maximum input. One the router
+    pays out of a `PERMIT2_TRANSFER_FROM` or the native value, or that a V4 `SETTLE` of a stated
+    amount pays: "You pay" that amount.
 13. An exact input the wallet pays for through a V3 pool, or settles in V4 with an open `SETTLE`
     or a `SETTLE_ALL`: "You pay at most" that input. Through a V2 pair, a `PERMIT2_TRANSFER_FROM`
     or a V4 `SETTLE` of a stated amount: "You pay" it.

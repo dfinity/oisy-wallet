@@ -41,8 +41,9 @@ export interface UniswapSwapApproval {
  */
 export interface UniswapSwap {
 	router: UniswapUniversalRouter;
-	// `atMost` when the router pulls only what the swaps take, so the input is a maximum: an exact
-	// output, or an exact input that a pool stops short of when its liquidity runs out.
+	// `atMost` when the router pulls from the wallet only what the swaps take, so the input is a
+	// maximum: an exact output, or an exact input that a pool stops short of when its liquidity runs
+	// out. What the wallet pays up front is exact.
 	paid: UniswapSwapAmount & { atMost: boolean };
 	// The least the router lets reach the recipient.
 	received: UniswapSwapAmount;

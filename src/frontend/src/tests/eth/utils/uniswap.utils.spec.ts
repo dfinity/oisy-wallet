@@ -455,6 +455,54 @@ describe('uniswap.utils', () => {
 			});
 		});
 
+		// What the router pays out of its own balance, the wallet paid in full beforehand.
+		it.each([
+			{
+				case: 'tokens pulled into the router',
+				pays: encode({
+					type: UNISWAP_COMMANDS.PERMIT2_TRANSFER_FROM,
+					types: ['address', 'address', 'uint160'],
+					values: [EURC, UNISWAP_RECIPIENT_ROUTER, 1_010_000n]
+				}),
+				tokenIn: EURC,
+				value: ZERO,
+				token: EURC_TOKEN
+			},
+			{
+				case: 'the native coin paid in through a wrap',
+				pays: encode({
+					type: UNISWAP_COMMANDS.WRAP_ETH,
+					types: ['address', 'uint256'],
+					values: [UNISWAP_RECIPIENT_ROUTER, 1_010_000n]
+				}),
+				tokenIn: WETH,
+				value: 1_010_000n,
+				token: BASE_ETH_TOKEN
+			}
+		])(
+			'should state $case for an exact-output swap as what the wallet pays',
+			({ pays, tokenIn, value, token }) => {
+				const data = execute({
+					commands: [
+						pays,
+						v3Swap({
+							exactInput: false,
+							amount: 1_087_807n,
+							amountLimit: 1_010_000n,
+							tokens: [tokenIn, USDC],
+							payerIsUser: false
+						})
+					]
+				});
+
+				expect(getUniswapSwap(params({ data, value }))?.paid).toEqual({
+					token,
+					amount: 1_010_000n,
+					atMost: false
+				});
+			}
+		);
+
 		describe('V4', () => {
 			const swapExactInSingle = {
 				action: UNISWAP_V4_ACTIONS.SWAP_EXACT_IN_SINGLE,
@@ -619,6 +667,61 @@ describe('uniswap.utils', () => {
 					})
 				);
 			});
+
+			// A settlement of a stated amount, and the router's out of the transaction's value, pay all of
+			// it, whatever the swap takes.
+			it.each([
+				{
+					case: 'a settlement of a stated amount',
+					currencyIn: EURC,
+					settlement: settle({ amount: 1_010_000n }),
+					value: ZERO,
+					token: EURC_TOKEN
+				},
+				{
+					case: 'the native coin settled by the router',
+					currencyIn: ZERO_ETH_ADDRESS,
+					settlement: settle({
+						currency: ZERO_ETH_ADDRESS,
+						amount: 1_010_000n,
+						payerIsUser: false
+					}),
+					value: 1_010_000n,
+					token: BASE_ETH_TOKEN
+				}
+			])(
+				'should state $case for an exact-output swap as what the wallet pays',
+				({ currencyIn, settlement, value, token }) => {
+					const data = execute({
+						commands: [
+							v4Swap([
+								{
+									action: UNISWAP_V4_ACTIONS.SWAP_EXACT_OUT_SINGLE,
+									types: [V4_SWAP_SINGLE],
+									values: [
+										[
+											[currencyIn, USDC, 500, 10, ZERO_ETH_ADDRESS],
+											true,
+											1_087_807n,
+											1_010_000n,
+											ZERO,
+											'0x'
+										]
+									]
+								},
+								settlement,
+								take({ amount: 1_087_807n })
+							])
+						]
+					});
+
+					expect(getUniswapSwap(params({ data, value }))?.paid).toEqual({
+						token,
+						amount: 1_010_000n,
+						atMost: false
+					});
+				}
+			);
 
 			// Before 2.1.2, a V4 exact-output swap reverted on its input only, so a pool short of
 			// liquidity could deliver part of the output to whoever takes it.
