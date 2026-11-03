@@ -332,6 +332,20 @@ The two gas figures show how far estimates fall short, per token and network. Th
 
 `result_error_code` says why a top-up ended in `error`: `refused` (the ledger refused before burning anything, so nothing moved), `refunded` (the canister could not receive the cycles, which came back minus the ledger's fees) or `unknown` (no answer, so the top-up may or may not have gone through). A failed top-up also carries `event_severity` for the monitoring dashboards: `warn` for `refused` and `unknown`, `error` for `refunded`, which cost twice the fee.
 
+### Contacts tracking
+
+Loading the user's contacts emits one structured **`contact`** event under `event_context: contacts`, following the domain-service pattern (the step in `event_modifier`, the outcome in `result_status`). It never carries a contact name, an address, a contact id, or PII.
+
+The contacts load when the user signs in or opens OISY already signed in: first the contacts without their images, in pages, then the images in batches of 16, so that every certified reply stays below 2 MiB. A load that fails is tried again after 2 seconds and, if that fails too, after another 4 seconds. Once the third attempt fails, the user sees a "Failed to load contacts" error toast. A contact whose image did not load shows without it, and editing that contact reads the image first, so the edit keeps it.
+
+| `event_modifier` | Fires when                 | `result_status` | `event_severity` | Extra                                             |
+| ---------------- | -------------------------- | --------------- | ---------------- | ------------------------------------------------- |
+| `load_all`       | the third attempt fails    | `error`         | `error`          | `result_error_type`: `call_rejected` or `unknown` |
+| `load_all`       | a retry loads the contacts | `success`       | `warn`           | —                                                 |
+| `load_images`    | an image batch fails       | `error`         | `warn`           | `result_error_type`: `call_rejected` or `unknown` |
+
+A load that succeeds on the first attempt sends nothing. A failure is tracked by its category only: `call_rejected` when the backend rejected the call, `unknown` for anything else. The error text stays out, since an agent error carries the call context.
+
 ---
 
 ## Tokens
@@ -353,7 +367,7 @@ ICP on the same EVM chains is intentionally **not** metadata-only: some users ma
 
 ### Asset types
 
-Every token belongs to one asset type, and the token list can be filtered by it: **All asset types**, then **Crypto**, **Stablecoins**, **Stocks**, **Commodities** and **Compute**, in that order. The types appear as pills above the token list, and as a dropdown in the modals' token lists (Send, Swap, Manage tokens and others). A token group is shown when any of its tokens matches, and the user can hide the filter altogether.
+Every token belongs to one asset type, and the token list can be filtered by it: **All asset types**, then **Crypto**, **Stablecoins**, **Stocks**, **Commodities** and **Compute**, in that order. The types appear as pills above the token list, and as a dropdown in the modals' token lists (Send, Swap, Manage tokens and others). A token group is shown when any of its tokens matches, and the user can hide the filter altogether. Send and Swap opened from the assets page start their token lists on the asset type selected there, as they do on its network; opened from any other page, where the filter is not shown, they start on All asset types.
 
 **Compute** holds the tokens that pay for computation on the Internet Computer. Today that is only **TCYCLES**, which used to sit under Stablecoins. OISY shows it as **ICP Cycles (Trillion)** rather than the ledger's own name, "Trillion Cycles", which does not say which network's cycles they are. At rest its pill looks like its neighbours. What sets it apart is a brand-blue arc that runs two laps around its border when the pill appears and again each time the pointer enters it, then goes away. Selected, it looks like every other selected pill, so which filter is on always reads the same. It runs a set number of laps and not a loop, so the pill does not keep moving above a list people open every day; with reduced motion turned on in the system, there is no arc at all.
 
