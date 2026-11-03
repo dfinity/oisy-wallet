@@ -29,6 +29,10 @@ ic-vetkeys = "0.7.0"
 ic-metrics-encoder = "1.1"
 ic-canister-sig-creation = "1.3"
 ic-signature-verification = "0.3"
+# The IC's own threshold-key derivation, so the backend derives the chain-fusion signer's per-user
+# public keys offline instead of asking the management canister for each one.
+ic-ed25519 = { version = "0.6.0", default-features = false }
+ic-secp256k1 = "0.3.0"
 candid = "0.10.26"
 candid_parser = "0.4"
 serde = "1"
