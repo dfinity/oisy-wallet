@@ -155,7 +155,8 @@ Only from checks the router enforces:
 - **Title:** "Swap".
 - **Rows,** in this order: Application; Network; **You pay** (or **You pay at most**); **You
   receive at least**; **Recipient**, only when it is not the wallet; one **App fee** row per fee
-  (share or amount, token, recipient address); **New spending allowance**, when the transaction
+  (share or amount, token, recipient address; a share is shown to four decimals of a percent, and
+  a nonzero one below that as "< 0.0001%"); **New spending allowance**, when the transaction
   grants the router a Permit2 allowance ("The router can spend up to 12 USDC until …", or "any
   amount of USDC" when unlimited); **Valid until** the deadline, or "No deadline" when there is
   none or it is past the last date JavaScript can hold; **Interacting with**: "Uniswap Universal
@@ -218,7 +219,7 @@ Only from checks the router enforces:
 7. Every minimum 0: the red minimum box.
 8. A deadline in the past: the red expiry box. `execute` without a deadline: "No deadline".
 9. `PAY_PORTION` of 25 bips of the output to an address: an App fee row "0.25% of USDC" with that
-   address.
+   address. `PAY_PORTION_FULL_PRECISION` of 4 × 10^11 in 10^18: "< 0.0001% of USDC".
 10. A V4 swap (`SWAP_EXACT_IN` with `SETTLE` and a `TAKE` of the whole amount to the wallet):
     described, with the V4 swap's minimum output as the minimum.
 11. A plan with `EXECUTE_SUB_PLAN`, a token OISY doesn't list, two paid tokens, a value with

@@ -10,6 +10,7 @@
 	import SendDataSpender from '$lib/components/send/SendDataSpender.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -37,15 +38,24 @@
 	const formatDate = (seconds: number): string =>
 		formatSecondsToDate({ seconds, language: $currentLanguage });
 
+	// A share too small for the precision shown is stated as below it: as 0%, it would read as no fee,
+	// though the router pays it.
+	const formatShare = (share: bigint): string => {
+		const percent = new Intl.NumberFormat($currentLanguage, {
+			style: 'percent',
+			maximumFractionDigits: 4
+		});
+		const shown = percent.format(Number(share) / Number(UNISWAP_FULL_PRECISION_DENOMINATOR));
+
+		return share > ZERO && shown === percent.format(0) ? `< ${percent.format(0.000_001)}` : shown;
+	};
+
 	// A share of what the router holds is stated as a percentage: the amount it comes to is only known
 	// once the swap has run.
 	const formatFee = (fee: UniswapSwapFee): string =>
 		'share' in fee
 			? replacePlaceholders($i18n.wallet_connect.text.swap_app_fee_share, {
-					$share: new Intl.NumberFormat($currentLanguage, {
-						style: 'percent',
-						maximumFractionDigits: 4
-					}).format(Number(fee.share) / Number(UNISWAP_FULL_PRECISION_DENOMINATOR)),
+					$share: formatShare(fee.share),
 					$symbol: fee.token.symbol
 				})
 			: `${formatToken({ value: fee.amount, unitName: fee.token.decimals })} ${fee.token.symbol}`;

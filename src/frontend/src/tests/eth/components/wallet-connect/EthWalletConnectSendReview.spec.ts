@@ -1052,6 +1052,41 @@ describe('EthWalletConnectSendReview', () => {
 			);
 			expect(fee).toHaveTextContent(OTHER);
 		});
+
+		// As 0%, a share too small for the precision shown would read as no fee, though the router pays
+		// it.
+		it.each([
+			{ portion: 400_000_000_000n, share: '< 0.0001%' },
+			{ portion: 500_000_000_000n, share: '0.0001%' },
+			{ portion: ZERO, share: '0%' }
+		])('should state a share of $portion in 10^18 as $share', ({ portion, share }) => {
+			const { container } = renderSwap(
+				encodeUniswapExecute({
+					commands: [
+						encodeUniswapV3Swap({
+							recipient: UNISWAP_RECIPIENT_ROUTER,
+							amount: 1_000_000n,
+							amountLimit: ZERO
+						}),
+						encodeUniswapCommand({
+							type: UNISWAP_COMMANDS.PAY_PORTION_FULL_PRECISION,
+							types: ['address', 'address', 'uint256'],
+							values: [BASE_USDC_TOKEN.address, OTHER, portion]
+						}),
+						encodeUniswapSweep({ amountMin: 1_080_000n })
+					],
+					deadline: inAnHour()
+				})
+			);
+
+			// The whole text: "0.0001%" is part of "< 0.0001%".
+			expect(container.querySelector('#swap-app-fee-0 span')?.textContent).toBe(
+				replacePlaceholders(en.wallet_connect.text.swap_app_fee_share, {
+					$share: share,
+					$symbol: 'USDC'
+				})
+			);
+		});
 	});
 
 	describe('ckETH helper contract deposits', () => {

@@ -753,7 +753,7 @@ The review is titled "Swap" and states:
 - **You pay:** the token and amount the transaction takes from the wallet, "You pay at most" when the router takes from the wallet only what the swap uses: for an exact output, and for an exact input into a V3 or V4 pool, which takes less when its liquidity runs out. An amount the wallet hands over up front is exact, whatever the swap: the native coin the transaction sends, or a stated transfer or settlement.
 - **You receive at least:** the token and the least the router lets arrive. Tokens the router keeps at the end count as not received.
 - **Recipient:** only when the tokens go to an address that is not this wallet.
-- **App fee:** each share or amount the swap pays to another address, with that address.
+- **App fee:** each share or amount the swap pays to another address, with that address. A share too small to show reads "< 0.0001%", never 0%.
 - **New spending allowance:** when the transaction also grants the router a Permit2 allowance, what it can spend and until when. The allowance lasts beyond the transaction.
 - **Valid until:** the swap's deadline, or "No deadline".
 - **Interacting with:** "Uniswap Universal Router" with its version and address.
