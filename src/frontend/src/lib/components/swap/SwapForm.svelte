@@ -342,7 +342,12 @@
 			</TokenInputNetworkWrapper>
 		</div>
 
-		{@render message?.()}
+		<!-- Every message box under the amounts sits 16 px from what is above it, as `MessageBox`'s own
+		bottom margin spaces them from each other. With no message the margin collapses into the
+		16 px above the divider, so the rows below do not move. -->
+		<div class="mt-4">
+			{@render message?.()}
+		</div>
 
 		{#if nonNullish(twoSwapsQuoteError)}
 			{#key twoSwapsQuoteError.intermediateToken.id}
