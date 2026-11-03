@@ -133,7 +133,7 @@
 			"section_finance": "金融",
 			"section_more": "更多",
 			"airdrops": "奖励",
-			"canister_top_up": "Canister 充值",
+			"tools": "",
 			"earning": "赚取",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "打开借贷视图",
 			"earning": "打开赚取视图",
 			"airdrops": "打开奖励视图",
-			"canister_top_up": "使用 ICP 或 TCYCLES 为 Canister 充值",
+			"tools": "",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "你的钱包地址、设置、登出与外部链接",
@@ -909,6 +909,12 @@
 			"loading_profile": "加载用户资料时出错。请刷新页面以获得完整体验。",
 			"export_exchange_rate_unavailable": "汇率仍在加载。请稍后重试。",
 			"export_failed": "无法生成您的导出文件。请重试。"
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "",
+			"top_up_canister": ""
 		}
 	},
 	"shortcuts": {

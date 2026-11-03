@@ -156,7 +156,7 @@ describe('cycles-top-up-active-tx.utils', () => {
 	});
 
 	describe('toCyclesTopUpTrackingParams', () => {
-		it('reports a success from the navigation with the token paid', () => {
+		it('reports a success from Tools with the token paid', () => {
 			expect(
 				toCyclesTopUpTrackingParams({
 					tx: withRefs({
@@ -168,7 +168,7 @@ describe('cycles-top-up-active-tx.utils', () => {
 				step: 'top_up',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 				tokenSymbol: 'ICP',
-				sourceLocation: 'navigation'
+				sourceLocation: 'tools_page'
 			});
 		});
 

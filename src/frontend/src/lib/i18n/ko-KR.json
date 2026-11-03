@@ -133,7 +133,7 @@
 			"section_finance": "금융",
 			"section_more": "더보기",
 			"airdrops": "리워드",
-			"canister_top_up": "캐니스터 충전",
+			"tools": "",
 			"earning": "수익",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "대출 보기 열기",
 			"earning": "수익 보기 열기",
 			"airdrops": "리워드 보기 열기",
-			"canister_top_up": "ICP 또는 TCYCLES로 캐니스터 충전",
+			"tools": "",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "지갑 주소, 설정, 로그아웃 및 외부 링크",
@@ -909,6 +909,12 @@
 			"loading_profile": "프로필을 불러오는 중 오류가 발생했습니다. 전체 경험을 위해 페이지를 새로고침해 주세요.",
 			"export_exchange_rate_unavailable": "환율을 아직 불러오는 중입니다. 잠시 후 다시 시도해 주세요.",
 			"export_failed": "내보내기를 생성하지 못했습니다. 다시 시도해 주세요."
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "",
+			"top_up_canister": ""
 		}
 	},
 	"shortcuts": {
