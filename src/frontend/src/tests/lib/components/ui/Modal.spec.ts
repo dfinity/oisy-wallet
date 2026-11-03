@@ -1,5 +1,6 @@
 import Modal from '$lib/components/ui/Modal.svelte';
 import { busy } from '$lib/stores/busy.store';
+import en from '$tests/mocks/i18n.mock';
 import { createMockSnippet, mockSnippet } from '$tests/mocks/snippet.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { createRawSnippet, tick } from 'svelte';
@@ -103,5 +104,17 @@ describe('Modal', () => {
 		await fireEvent.keyDown(window, { key: 'Escape' });
 
 		expect(onClose).toHaveBeenCalledTimes(2);
+	});
+
+	it('leaves only the working Close button to assistive technology with closeOnBackdropClick off', () => {
+		const { getAllByRole, getByTestId } = render(Modal, {
+			props: { ...baseProps, closeOnBackdropClick: false }
+		});
+
+		const closeButtons = getAllByRole('button', { name: en.core.text.close });
+
+		expect(closeButtons).toHaveLength(1);
+		expect(closeButtons[0]).toBe(getByTestId('close-modal'));
+		expect(getByTestId('backdrop')).toHaveAttribute('aria-hidden', 'true');
 	});
 });
