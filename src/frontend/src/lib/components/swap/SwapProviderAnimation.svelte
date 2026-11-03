@@ -387,7 +387,7 @@
 {/snippet}
 
 {#if current ?? loading}
-	<!-- Plain text for the header's accessible name; `SwapProvider` announces the change. -->
+	<!-- Plain text for the cell's accessible name; `SwapProvider` announces the change. -->
 	<div class="provider-loop" data-provider={displayedProvider} data-tid={SWAP_PROVIDER_ANIMATION}>
 		<span class="sr-only"
 			>{!loading && current ? resolveText({ i18n: $i18n, path: current.details.name }) : ''}</span

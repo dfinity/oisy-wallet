@@ -151,15 +151,18 @@
 		</ModalValue>
 	{/if}
 
-	<ModalValue>
-		{#snippet label()}
-			{$i18n.swap.text.max_slippage}
-		{/snippet}
+	<!-- From sm up the modal header shows the slippage; on phones it would cut the title there. -->
+	<div class="mb-2 sm:hidden">
+		<ModalValue>
+			{#snippet label()}
+				{$i18n.swap.text.max_slippage}
+			{/snippet}
 
-		{#snippet mainValue()}
-			{slippageValue}%
-		{/snippet}
-	</ModalValue>
+			{#snippet mainValue()}
+				{slippageValue}%
+			{/snippet}
+		</ModalValue>
+	</div>
 
 	<div class="flex flex-col gap-3">
 		<SwapProvider {slippageValue} />

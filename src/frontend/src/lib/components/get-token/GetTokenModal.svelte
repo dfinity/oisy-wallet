@@ -5,6 +5,7 @@
 	import GetTokenWizardStep from '$lib/components/get-token/GetTokenWizardStep.svelte';
 	import ReceiveAddressQrCode from '$lib/components/receive/ReceiveAddressQrCode.svelte';
 	import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
+	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { getTokenWizardSteps } from '$lib/config/get-token.config';
 	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
@@ -32,6 +33,7 @@
 	import type { WizardStep } from '$lib/types/wizard';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import { getSwapSlippageInvalidValue } from '$lib/utils/swap.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
@@ -44,7 +46,7 @@
 
 	let { token, currentApy, receiveAddress, availableBalance }: Props = $props();
 
-	const { reset: resetSwapStore } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const { reset: resetSwapStore, sourceToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { resetFilters: resetTokensListFilters } = getContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY
@@ -134,6 +136,16 @@
 	bind:currentStep
 >
 	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
+
+	{#snippet headerRight()}
+		{#if currentStep?.name === WizardStepsGetToken.SWAP || currentStep?.name === WizardStepsGetToken.REVIEW}
+			<SwapSlippage
+				maxSlippageInvalidValue={getSwapSlippageInvalidValue($sourceToken?.network.id)}
+				readonly={currentStep.name === WizardStepsGetToken.REVIEW}
+				bind:slippageValue
+			/>
+		{/if}
+	{/snippet}
 
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsGetToken.GET_TOKEN}

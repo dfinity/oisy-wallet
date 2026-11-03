@@ -21,6 +21,7 @@
 		usdBalance: OptionAmount;
 		dapp?: OisyDappDescription | SwapProvidersConfig;
 		isBestRate: boolean;
+		selected?: boolean;
 		onClick: () => void;
 	}
 
@@ -31,6 +32,7 @@
 		usdBalance,
 		dapp,
 		isBestRate,
+		selected,
 		onClick
 	}: Props = $props();
 
@@ -52,7 +54,7 @@
 </script>
 
 {#if nonNullish(dapp)}
-	<LogoButton dividers {onClick}>
+	<LogoButton dividers {onClick} selectable={nonNullish(selected)} selected={selected ?? false}>
 		{#snippet title()}
 			{resolveText({ i18n: $i18n, path: dapp.name })}
 		{/snippet}

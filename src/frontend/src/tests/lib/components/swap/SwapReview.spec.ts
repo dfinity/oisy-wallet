@@ -87,7 +87,8 @@ describe('SwapReview', () => {
 			expect(getByText(en.tokens.text.destination_token_title)).toBeInTheDocument();
 		});
 
-		it('should render max slippage label and value', () => {
+		// From sm up the modal header shows the slippage; phones keep it in the details.
+		it('should render the max slippage row for phones only', () => {
 			const { context } = createSwapContext();
 
 			const { getByText } = render(SwapReview, {
@@ -95,8 +96,8 @@ describe('SwapReview', () => {
 				context
 			});
 
-			expect(getByText(en.swap.text.max_slippage)).toBeInTheDocument();
 			expect(getByText('0.5%')).toBeInTheDocument();
+			expect(getByText(en.swap.text.max_slippage).closest('.sm\\:hidden')).not.toBeNull();
 		});
 
 		it('should render value difference label when exchange rates are provided', () => {

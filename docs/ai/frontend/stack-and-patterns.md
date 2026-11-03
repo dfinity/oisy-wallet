@@ -452,26 +452,45 @@ not universal transport cancellation: nonabortable SDK/canister work may continu
 Do not apply this quote budget to swap execution, signing, deposit validity or animation timing.
 
 The five swap forms opt into this presentation with `SwapProvider isForm`; review/default
-callers retain the static provider label. Keep the brand nonshrinking in the single-line
-header. While comparing, the status has a zero basis (`w-0 flex-1`) so it truncates first, and
-the scroll group keeps `min-w-24`, room for a logo and a short name down to 320 px; without it
-the label group's `min-w-min` counted the full status text and squeezed the scroll to nothing
-on phones. Below 390 px (`max-[24.375rem]:max-w-24`) the slot is also capped at 96 px, so a long
-name such as NEAR Intents truncates instead of shortening the status on its turn; wider rows let
-the slot grow to the name. During foreground comparison,
-`Collapsible` / `CollapsibleBottomSheet` use their optional `disabled` prop to close and block
-stale details. Custom sheet triggers receive `{ open, disabled }` and must forward disabled
-to their native control. Other disclosure callers retain the default enabled behavior.
+callers retain the static provider label. In a form, Smart Swap is a full-width row with no
+resting fill, so it does not compete with the amounts: `row-feedback` only while it can be
+tapped, and `-mx-2 px-2 md:-mx-3 md:px-3` so its text lines up with the fee row while the hover
+fill bleeds past it. Its type is the app's list row (`LogoButton`, as in the offers list): the
+title and the provider name `text-lg font-bold`, the line under the title `text-sm
+text-tertiary`, and Best Rate the shared `BestRateBadge`. It is one `<button>` that opens the provider step (`onShowProviderList`): the selected offer's details on top, every offer below with
+the current one checked. Tapping the checked offer only goes back: `setManualProvider` would pin
+the automatic pick, and a better offer in the next round could no longer replace it. The cell
+replaces the old Select link and the inline details disclosure, and stays disabled while a
+foreground round compares, since the details would describe a stale offer. The left column holds
+the "OISY Smart Swap" title and one line under it: the status while comparing, then, when the
+pick is the best rate, what it is worth, "Est. +$X vs. lowest quote" (`calculateSwapGainUsd`,
+receive amount × the destination rate, shown from $0.01). That sentence is one i18n key; the
+component splits it at `$amount` only to colour the amount. Otherwise the line counts the offers
+("Best of N offers", "N offers compared" for a manual non-best pick), so a worse manual pick is
+never shown as a gain. A single offer is one row (`compact`): the title and the provider, with
+neither the line nor the Best Rate slot, both of which leave with `slide`. Later rounds for the
+same token pair keep that row, so re-quoting does not grow and shrink it on every amount (the
+provider scroll shows the round, the status region still announces it); a new pair, or a result
+with more offers, brings the two lines back. The cross-chain notice under the amounts (`SwapCrossChainInfo`) is a plain grey
+`MessageBox` (`level="plain"`, `bg-secondary!`), as each amount card already names its network.
+A hidden Best Rate is also
+`aria-hidden`, so it leaves the cell's accessible name. The title sets the column's minimum width and the line has a
+zero basis (`w-0 min-w-full`), so the line truncates first. The right column is the provider
+scroll with the Best Rate badge under it; the badge stays in the layout at `opacity-0` while it is
+hidden, so the cell is as tall comparing as with a result. While comparing the scroll keeps
+`min-w-24`, room for a logo and a short name down to 320 px. Below 390 px
+(`max-[24.375rem]:max-w-24`) the slot is also capped at 96 px, so a long name such as NEAR
+Intents truncates instead of shortening the status on its turn; wider cells let the slot grow to
+the name.
 
 No hard cuts in the section. The Smart Swap row and the fee row (`SwapFeeRow`) open and close
 with `slide` (height, 250 ms) while their content fades up 4 px with `fly`; the fee row follows
 `SWAP_DETAILS_ROW_STAGGER_MS` (60 ms) later. The 12 px gap is `pb-3` inside the sliding row, not
-the forms' flex gap, so it animates with the height. The header never swaps labels in one frame:
-`comparingLayout` follows `comparing` one `MOTION_SWAP_DURATION` late, so Select (inert while
-fading) and Best Rate or the status fade out in place before the row re-lays out and the incoming
-ones fade in. Best Rate shows whenever the selected provider is the top offer, a single offer
-included; only a manual non-best choice hides it. Select needs two or more offers. The provider
-slot never shows a placeholder. A first round leaves the slot empty
+the forms' flex gap, so it animates with the height. The cell never swaps labels in one frame:
+`comparingLayout` follows `comparing` one `MOTION_SWAP_DURATION` late, so the result line and
+Best Rate, or the status, fade out in place before the cell re-lays out and the incoming ones
+fade in. Best Rate shows whenever the selected provider is the top offer, a single offer
+included; only a manual non-best choice hides it. The provider slot never shows a placeholder. A first round leaves the slot empty
 and fades the first participant up (opacity, 4 px, the soft-layer blur bridge, 200 ms ease-out);
 that fade runs once, and only a turn, which samples the pose first, cuts it short. One turn clock
 runs for the whole comparison: it starts once a name is on screen and never restarts on a
@@ -489,11 +508,11 @@ fees do not need an offer, ETH and BTC pass "an offer is selected". The fee comp
 quote-only, because Review renders them too.
 
 Screen readers hear the section through one `sr-only` `role="status"` region that
-`SwapProvider isForm` mounts before any round, outside the header. Two reasons: the Collapsible
-header is a `role="button"`, whose children are presentational, and a region inserted with its
-text already in place is not announced. Its text is the status while comparing, then the
-selected provider's name. The visible status is `aria-hidden`, the scroll's name is plain text
-for the header's accessible name, and cycling names are never announced.
+`SwapProvider isForm` mounts before any round, outside the cell. Two reasons: the cell is a
+`<button>`, whose children are presentational, and a region inserted with its text already in
+place is not announced. Its text is the status while comparing, then the selected provider's
+name. The visible status is `aria-hidden`, the scroll's name is plain text for the cell's
+accessible name, and cycling names are never announced.
 
 Keep visible layers keyed by provider through interruption. Sample their current poses before
 cancelling/retargeting WAAPI, including when a new round starts mid-reveal, which is no turn: the

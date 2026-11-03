@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getContext, onDestroy } from 'svelte';
 	import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
+	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';
 	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
@@ -25,8 +26,9 @@
 	import type { SwapSelectTokenType } from '$lib/types/swap';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import { getSwapSlippageInvalidValue } from '$lib/utils/swap.utils';
 
-	const { reset: resetSwapStore } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const { reset: resetSwapStore, sourceToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { resetFilters: resetTokensListFilters } = getContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY
@@ -99,6 +101,16 @@
 	bind:currentStep
 >
 	{#snippet title()}{titleString}{/snippet}
+
+	{#snippet headerRight()}
+		{#if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW}
+			<SwapSlippage
+				maxSlippageInvalidValue={getSwapSlippageInvalidValue($sourceToken?.network.id)}
+				readonly={currentStep.name === WizardStepsSwap.REVIEW}
+				bind:slippageValue
+			/>
+		{/if}
+	{/snippet}
 
 	<SwapModalWizardSteps
 		{currentStep}

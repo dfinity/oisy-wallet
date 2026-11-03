@@ -911,4 +911,84 @@ describe('SwapForm', () => {
 			expect(inputs[1]).toHaveValue('0');
 		});
 	});
+
+	// The slippage is edited from the modal header: the form only blocks Review and says why.
+	describe('slippage', () => {
+		const renderWithSlippage = (slippageValue: OptionAmount) => {
+			setupSwapAmountsStore(mockSwapAmounts);
+			setupIcTokenFeeStore();
+
+			return render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					slippageValue,
+					isSwapAmountsLoading: false,
+					fee: 1000n,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+		};
+
+		const slippageError = (maxSlippage: number) =>
+			replacePlaceholders(en.swap.text.max_slippage_error, {
+				$maxSlippage: maxSlippage.toString()
+			});
+
+		const useErc20Source = () => {
+			const originalContext = initSwapContext({
+				sourceToken: mockValidErc20Token,
+				destinationToken: mockValidIcToken
+			});
+
+			mockContext.set(SWAP_CONTEXT_KEY, {
+				...originalContext,
+				sourceTokenExchangeRate: readable(10),
+				destinationTokenExchangeRate: readable(2)
+			});
+		};
+
+		it('should not render the slippage control', () => {
+			const { queryByRole } = renderWithSlippage('1');
+
+			expect(queryByRole('button', { name: en.swap.text.max_slippage })).not.toBeInTheDocument();
+		});
+
+		it.each(['1', '8', '49.9999'])('should allow Review at %s%% from ICP', (slippageValue) => {
+			const { getByRole, queryByText } = renderWithSlippage(slippageValue);
+
+			expect(getByRole('button', { name: en.swap.text.review_button })).toBeEnabled();
+			expect(queryByText(slippageError(50))).not.toBeInTheDocument();
+		});
+
+		it.each([undefined, '', '0', '50'])(
+			'should block Review and say why at "%s" from ICP',
+			(slippageValue) => {
+				const { getByRole, getByText } = renderWithSlippage(slippageValue);
+
+				expect(getByRole('button', { name: en.swap.text.review_button })).toBeDisabled();
+				expect(getByText(slippageError(50))).toBeInTheDocument();
+			}
+		);
+
+		it('should block Review from 15% on other networks', () => {
+			useErc20Source();
+
+			const { getByRole, getByText } = renderWithSlippage('15');
+
+			expect(getByRole('button', { name: en.swap.text.review_button })).toBeDisabled();
+			expect(getByText(slippageError(15))).toBeInTheDocument();
+		});
+
+		it('should allow Review below 15% on other networks', () => {
+			useErc20Source();
+
+			const { queryByText } = renderWithSlippage('14');
+
+			expect(queryByText(slippageError(15))).not.toBeInTheDocument();
+		});
+	});
 });
