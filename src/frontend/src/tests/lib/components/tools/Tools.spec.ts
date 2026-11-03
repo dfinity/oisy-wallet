@@ -42,7 +42,7 @@ describe('Tools', () => {
 		ethAddressStore.reset();
 	});
 
-	describe('Block explorers', () => {
+	describe('Blockchain explorers', () => {
 		beforeEach(() => {
 			ethAddressStore.set({ data: mockEthAddress, certified: false });
 		});
