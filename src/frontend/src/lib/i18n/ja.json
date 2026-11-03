@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "非常に小さな価値のトランザクションの非表示を無効にする",
 			"save_spam_filter_success": "スパムフィルターの設定が更新されました。",
 			"export_data": "データをエクスポート",
+			"export_data_moved": "",
+			"open_tools": "",
 			"export_data_description": "トークンと取引をCSVとしてダウンロード — 基本情報には Basic、追加項目には Extended をご利用ください。",
 			"export_basic": "Basic",
 			"export_extended": "Extended",

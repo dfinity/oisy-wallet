@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "禁用隐藏价值非常小的交易",
 			"save_spam_filter_success": "您的垃圾信息过滤器设置已更新。",
 			"export_data": "导出数据",
+			"export_data_moved": "",
+			"open_tools": "",
 			"export_data_description": "将您的代币和交易下载为 CSV — Basic 包含基础信息，Extended 包含更多属性。",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
