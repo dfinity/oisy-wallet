@@ -137,8 +137,10 @@ Only from checks the router enforces:
   which inherits the minimum outputs of the V4 swaps that produce it when it is the only take of
   that token and no V4 swap spends it.
 - A V4 exact-output swap counts its output towards that only on 2.1.2, the first version that
-  reverts unless the swap fills. Versions 2.0.0 and 2.1.1 cap its input only, and a pool short of
-  liquidity delivers part of the output.
+  reverts unless the swap fills. Versions 2.0.0 and 2.1.1 cap its input only: a pool short of
+  liquidity delivers part of the output, and a hook can make it negative, taking from what other
+  swaps produce of that token. There, a take of a token such a swap outputs inherits no minimum
+  from the V4 swaps.
 - Tokens left in the router at the end count as not received.
 
 ### What the user sees

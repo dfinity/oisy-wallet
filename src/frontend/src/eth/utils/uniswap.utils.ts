@@ -289,10 +289,12 @@ const readV4Swap = ({
 	}
 
 	// The explicit inputs of the swaps, the currencies a swap spends the whole credit of, the minimum
-	// outputs and the number of takes, per lowercased currency.
+	// outputs, the outputs the router does not check and the number of takes, per lowercased
+	// currency.
 	const spent = new Map<string, bigint>();
 	const spentOpenly = new Set<string>();
 	const produced = new Map<string, bigint>();
+	const uncheckedOutputs = new Set<string>();
 	const takes = new Map<string, number>();
 
 	const v4Swap = ({
@@ -323,11 +325,15 @@ const readV4Swap = ({
 			spent.set(keyIn, (spent.get(keyIn) ?? ZERO) + amountIn);
 		}
 
-		// Older routers cap the input but do not require an exact-output swap to fill.
-		const minimumOut =
-			exactInput || UNISWAP_V4_EXACT_OUTPUT_FILLS[reader.router.version] ? amountOut : ZERO;
+		// Older routers cap the input but never check an exact-output swap's output: it can fall
+		// short or, through a hook, turn negative and take from what other swaps produce of it.
+		const outputChecked = exactInput || UNISWAP_V4_EXACT_OUTPUT_FILLS[reader.router.version];
 
-		produced.set(keyOut, (produced.get(keyOut) ?? ZERO) + minimumOut);
+		produced.set(keyOut, (produced.get(keyOut) ?? ZERO) + (outputChecked ? amountOut : ZERO));
+
+		if (!outputChecked) {
+			uncheckedOutputs.add(keyOut);
+		}
 
 		if (!exactInput) {
 			plan.exactOutput = true;
@@ -406,9 +412,10 @@ const readV4Swap = ({
 		spent.has(key) && !spentOpenly.has(key) && !takes.has(key) ? spent.get(key) : undefined;
 
 	// What the only take of a currency gets when it takes the open amount: everything the swaps
-	// produce of it, so at least their minimum outputs, provided no swap spends it again.
+	// produce of it, so at least their minimum outputs, provided no swap spends it again and the
+	// router checks every output of it.
 	const producedOf = (key: string): bigint =>
-		takes.get(key) === 1 && !spent.has(key) && !spentOpenly.has(key)
+		takes.get(key) === 1 && !spent.has(key) && !spentOpenly.has(key) && !uncheckedOutputs.has(key)
 			? (produced.get(key) ?? ZERO)
 			: ZERO;
 

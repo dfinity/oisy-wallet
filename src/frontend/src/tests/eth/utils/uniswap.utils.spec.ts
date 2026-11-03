@@ -637,6 +637,50 @@ describe('uniswap.utils', () => {
 						amount: 1_087_807n
 					});
 				});
+
+				// Nor did it check the output at all: through a hook it could turn negative and take from
+				// what another swap delivers of the same token.
+				describe('next to another swap to the same token', () => {
+					const exactInput2_0 = {
+						action: UNISWAP_V4_ACTIONS.SWAP_EXACT_IN_SINGLE,
+						types: [`tuple(${POOL_KEY},bool,uint128,uint128,bytes)`],
+						values: [[POOL, true, 1_000_000n, 1_087_807n, '0x']]
+					};
+
+					it.each([
+						{ version: '2.0.0', to: ROUTER_2_0, swaps: [exactInput2_0, exactOutput2_0] },
+						{ version: '2.1.1', to: ROUTER_2_1_1, swaps: [swapExactInSingle, exactOutput2_1] }
+					])('should count no minimum of the other swap on $version', ({ to, swaps }) => {
+						const data = execute({ commands: [v4Swap([...swaps, settle(), take()])] });
+
+						expect(getUniswapSwap(params({ data, to }))?.received).toEqual({
+							token: USDC_TOKEN,
+							amount: ZERO
+						});
+					});
+
+					it('should keep the minimum a take of everything states on 2.1.1', () => {
+						const data = execute({
+							commands: [v4Swap([swapExactInSingle, exactOutput2_1, settle(), takeAll(1_000_000n)])]
+						});
+
+						expect(getUniswapSwap(params({ data, to: ROUTER_2_1_1 }))?.received).toEqual({
+							token: USDC_TOKEN,
+							amount: 1_000_000n
+						});
+					});
+
+					it('should count both outputs on 2.1.2', () => {
+						const data = execute({
+							commands: [v4Swap([swapExactInSingle, exactOutput2_1, settle(), take()])]
+						});
+
+						expect(getUniswapSwap(params({ data }))?.received).toEqual({
+							token: USDC_TOKEN,
+							amount: 1_087_807n + 1_087_807n
+						});
+					});
+				});
 			});
 
 			// Before 2.1.2, a hop of a V4 exact-output path could also fall short of what the next hop
