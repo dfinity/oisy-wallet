@@ -1441,8 +1441,8 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "Купить",
-			"buy_dev": "Купить (среда разработки)",
+			"buy": "Купить/Продать",
+			"buy_dev": "Купить/Продать (среда разработки)",
 			"unavailable_title": "Покупка токенов временно недоступна",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",

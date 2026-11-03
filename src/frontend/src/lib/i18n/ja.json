@@ -1441,8 +1441,8 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "購入",
-			"buy_dev": "購入（開発環境）",
+			"buy": "購入/売却",
+			"buy_dev": "購入/売却（開発環境）",
 			"unavailable_title": "トークンの購入は一時的にご利用いただけません",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",
