@@ -179,6 +179,8 @@ export enum WizardStepsCyclesMint {
 }
 
 export enum WizardStepsCyclesTopUp {
+	// From the navigation only: what the top-up is paid with.
+	TOKEN = 'Token',
 	CANISTER = 'Canister',
 	AMOUNT = 'Amount',
 	// Not 'Review': the send wizard hosts these steps next to its own Review step, and steps are
