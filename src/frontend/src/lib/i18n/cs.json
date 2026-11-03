@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "Zakázat skrývání transakcí s velmi malými hodnotami",
 			"save_spam_filter_success": "Nastavení filtru spamu bylo aktualizováno.",
 			"export_data": "Exportovat data",
+			"export_data_moved": "",
+			"open_tools": "",
 			"export_data_description": "Stáhněte si své tokeny a transakce jako CSV — Basic pro to nejdůležitější, Extended pro další atributy.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",

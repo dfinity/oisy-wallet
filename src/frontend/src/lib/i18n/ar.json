@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "تعطيل إخفاء المعاملات ذات القيم الصغيرة جدًا",
 			"save_spam_filter_success": "تم تحديث إعدادات مرشح البريد العشوائي الخاصة بك.",
 			"export_data": "تصدير البيانات",
+			"export_data_moved": "",
+			"open_tools": "",
 			"export_data_description": "قم بتنزيل الرموز والمعاملات الخاصة بك كملف CSV — Basic للأساسيات، Extended للسمات الإضافية.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",

@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना अक्षम करें",
 			"save_spam_filter_success": "आपकी स्पैम फ़िल्टर सेटिंग्स अपडेट कर दी गई हैं।",
 			"export_data": "डेटा निर्यात करें",
+			"export_data_moved": "",
+			"open_tools": "",
 			"export_data_description": "अपने टोकन और लेन-देन को CSV के रूप में डाउनलोड करें — आवश्यक जानकारी के लिए Basic, अतिरिक्त विशेषताओं के लिए Extended।",
 			"export_basic": "Basic",
 			"export_extended": "Extended",

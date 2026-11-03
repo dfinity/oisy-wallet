@@ -302,6 +302,8 @@
 				href: url(AppPath.Rewards),
 				selected: isRouteRewards(page)
 			},
+			// Not flagged: Export data lives on the page whatever the flags, while the Canister
+			// top-up section on it follows its own flag.
 			tools: {
 				label: $i18n.navigation.text.tools,
 				ariaLabel: $i18n.navigation.alt.tools,
