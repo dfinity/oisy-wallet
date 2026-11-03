@@ -98,7 +98,7 @@
 	{:else if PERSONAL_NOTES_ENABLED && $modalNotes}
 		<NotesModal />
 	{:else if CANISTER_TOP_UP_ENABLED && $modalCanisterTopUp}
-		<!-- Without a token: opened from the navigation, it lets the user pick what pays. -->
+		<!-- Without a token: opened from Tools, it lets the user pick what pays. -->
 		<CyclesTopUpModal />
 	{:else if $modalNftImageConsent && nonNullish($modalNftImageConsentData)}
 		<NftImageConsentModal collection={$modalNftImageConsentData} />
