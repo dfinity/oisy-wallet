@@ -8,9 +8,15 @@
 	- two distinct assets that share a symbol, hence share a `TokenId` description, because
 	  `mapIcrcToken` / `mapErc20Token` mint the `TokenId` from the symbol,
 	- TCYCLES, which can also top up a canister.
+	It also renders the asset type the modal set on the token list.
 -->
 <script lang="ts">
+	import { getContext } from 'svelte';
 	import type { IcToken } from '$icp/types/ic-token';
+	import {
+		MODAL_TOKENS_LIST_CONTEXT_KEY,
+		type ModalTokensListContext
+	} from '$lib/stores/modal-tokens-list.store';
 	import type { Token } from '$lib/types/token';
 	import { parseTokenId } from '$lib/validation/token.validation';
 	import { mockTcyclesToken } from '$tests/mocks/cycles-mint.mock';
@@ -21,6 +27,8 @@
 	}
 
 	let { onSendToken }: Props = $props();
+
+	const { filterCategoryTag } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
 	const tokenA: IcToken = mockValidIcrcToken;
 
@@ -71,3 +79,4 @@
 >
 <button data-tid="stub-select-tcycles" onclick={() => onSendToken(mockTcyclesToken)}>TCYCLES</button
 >
+<span data-tid="stub-filter-category">{$filterCategoryTag ?? ''}</span>
