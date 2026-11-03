@@ -277,7 +277,7 @@ The [OISY Trade](#finance-destinations) DEX flows emit two structured Plausible 
 
 ### Help tracking
 
-The [Help](#help) page emits one structured `help` event under `event_context: help` and `source_location: help_page`, following the domain-service pattern (the action in `event_modifier`, the card in `event_subcontext`, the outcome in `result_status`).
+The [Help](#help) page emits one structured `help` event under `event_context: help` and `source_location: help_page`, following the domain-service pattern (the action in `event_modifier`, the card in `event_subcontext`, the outcome in `result_status`). The Block explorers card is also on [Tools](#tools), where its `explorer` event carries `source_location: tools_page`.
 
 | `event_modifier` | `event_subcontext`   | Fires when                                  | `result_status`                                       | Extra                                                                                                      |
 | ---------------- | -------------------- | ------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
@@ -561,6 +561,7 @@ The page deliberately does **not**: scan pools where only one leg is active (rou
 
 A page (`/tools/`) for what a user does now and then rather than every day, reached from the navigation's **Tools** entry. It shows that OISY does more than hold and send tokens. It is laid out like Settings, a stack of cards:
 
+- **Block explorers**, the same card as on [Help](#help): a link to the user's own address on the block explorer of each enabled network. Its clicks report `source_location: tools_page`.
 - **Canister top-up**, behind `CANISTER_TOP_UP_ENABLED` (`src/frontend/src/env/canister-top-up.env.ts`, local and staging). Its **Top up** button opens [Top up a canister](#top-up-a-canister) without a token, so the user picks what pays. The card leads with the canister: a plain "Top up" in a wallet would read as adding funds to the wallet.
 - **Export data**: the CSV exports of tokens and transactions, Basic and Extended, as they were on Settings. Settings keeps an Export data card that says export has moved and opens Tools.
 
