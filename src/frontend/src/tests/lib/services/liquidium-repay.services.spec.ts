@@ -21,10 +21,11 @@ import {
 	liquidiumRepaySpendable
 } from '$lib/services/liquidium-repay.services';
 import * as liquidiumServices from '$lib/services/liquidium.services';
+import { balancesStore } from '$lib/stores/balances.store';
 import { liquidiumUnminedRepaysStore } from '$lib/stores/liquidium-unmined-repays.store';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
-import type { TokenId } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { SupplyFlow, SupplyTarget } from '@liquidium/client';
@@ -751,12 +752,25 @@ describe('liquidium-repay.services', () => {
 
 		const wait = vi.fn();
 
+		// What the reload stores lands in `balancesStore` later, as `batchSet` does on the next frame.
+		const storeBalance = ({ id }: Token) =>
+			balancesStore.set({ id, data: { data: ZERO, certified: false } });
+
+		const macrotask = () => new Promise((resolve) => setTimeout(resolve, 0));
+
 		beforeEach(() => {
 			liquidiumUnminedRepaysStore.reset();
+			balancesStore.reinitialize();
 
 			wait.mockReset();
 			vi.mocked(alchemyProviders, { partial: true }).mockReset().mockReturnValue({ wait });
-			vi.mocked(reloadEthereumBalance).mockReset().mockResolvedValue({ success: true });
+			vi.mocked(reloadEthereumBalance)
+				.mockReset()
+				.mockImplementation((reloadToken) => {
+					storeBalance(reloadToken);
+
+					return Promise.resolve({ success: true });
+				});
 		});
 
 		it('holds the amount and the gas back as soon as it is called', () => {
@@ -794,8 +808,10 @@ describe('liquidium-repay.services', () => {
 
 			const heldDuringReload: unknown[] = [];
 
-			vi.mocked(reloadEthereumBalance).mockImplementation(() => {
+			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) => {
 				heldDuringReload.push(get(liquidiumUnminedRepaysStore)[hash]);
+
+				storeBalance(reloadToken);
 
 				return Promise.resolve({ success: true });
 			});
@@ -806,6 +822,56 @@ describe('liquidium-repay.services', () => {
 			expect(reloadEthereumBalance).toHaveBeenCalledWith(USDC_TOKEN);
 			expect(reloadEthereumBalance).toHaveBeenCalledWith(ETHEREUM_TOKEN);
 			expect(heldDuringReload).toEqual([holds, holds]);
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('keeps both held until the reloaded balances are in the store', async () => {
+			wait.mockResolvedValue(undefined);
+			vi.mocked(reloadEthereumBalance).mockResolvedValue({ success: true });
+
+			const held = holdLiquidiumRepayUntilMined(params);
+
+			await vi.waitFor(() => expect(reloadEthereumBalance).toHaveBeenCalledTimes(2));
+			await macrotask();
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({ [hash]: holds });
+
+			storeBalance(USDC_TOKEN);
+			await macrotask();
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({ [hash]: holds });
+
+			storeBalance(ETHEREUM_TOKEN);
+			await held;
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('does not wait on the store for a reload that reports no success', async () => {
+			wait.mockResolvedValue(undefined);
+			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) =>
+				Promise.resolve({ success: reloadToken.id !== ETHEREUM_TOKEN.id })
+			);
+
+			const held = holdLiquidiumRepayUntilMined(params);
+
+			await vi.waitFor(() => expect(reloadEthereumBalance).toHaveBeenCalledTimes(2));
+			await macrotask();
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({ [hash]: holds });
+
+			storeBalance(USDC_TOKEN);
+			await held;
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('releases both right away when no reload reports success', async () => {
+			wait.mockResolvedValue(undefined);
+			vi.mocked(reloadEthereumBalance).mockResolvedValue({ success: false });
+
+			await holdLiquidiumRepayUntilMined(params);
+
 			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
 		});
 

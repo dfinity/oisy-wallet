@@ -17,6 +17,8 @@ import {
 } from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
 import { getOrCreateLiquidiumProfile } from '$lib/services/liquidium.services';
+import { balancesStore, type BalancesData } from '$lib/stores/balances.store';
+import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import {
 	liquidiumUnminedRepaysStore,
 	type LiquidiumUnminedRepaysData
@@ -42,6 +44,7 @@ import {
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { SupplyAction, type Chain, type SupplyTarget } from '@liquidium/client';
+import { get } from 'svelte/store';
 
 export interface LiquidiumRepayPreview {
 	projectedHealthPercent: number;
@@ -184,13 +187,51 @@ export const holdLiquidiumRepayUntilMined = async ({
 	try {
 		await alchemyProviders(token.network.id).wait(hash);
 
-		await Promise.all([
-			reloadEthereumBalance(token),
-			...(feeToken.id === token.id ? [] : [reloadEthereumBalance(feeToken)])
-		]);
+		const tokens = feeToken.id === token.id ? [token] : [token, feeToken];
+
+		const before = get(balancesStore);
+
+		const reloads = await Promise.all(
+			tokens.map(async (reloadToken) => ({
+				tokenId: reloadToken.id,
+				...(await reloadEthereumBalance(reloadToken))
+			}))
+		);
+
+		await balancesStored({
+			tokenIds: reloads.filter(({ success }) => success).map(({ tokenId }) => tokenId),
+			before
+		});
 	} finally {
 		liquidiumUnminedRepaysStore.remove(hash);
 	}
+};
+
+// `reloadEthereumBalance` stores what it loads through `batchSet`, which only lands on the next
+// animation frame, and not at all while the tab is hidden. Resolves once every one of `tokenIds`
+// has a different entry in the store than in `before`, i.e. once the reloaded balances are in it.
+const balancesStored = async ({
+	tokenIds,
+	before
+}: {
+	tokenIds: TokenId[];
+	before: CertifiedStoreData<BalancesData>;
+}): Promise<void> => {
+	const stored = (balances: CertifiedStoreData<BalancesData>): boolean =>
+		tokenIds.every((tokenId) => balances?.[tokenId] !== before?.[tokenId]);
+
+	if (stored(get(balancesStore))) {
+		return;
+	}
+
+	await new Promise<void>((resolve) => {
+		const unsubscribe = balancesStore.subscribe((balances) => {
+			if (stored(balances)) {
+				unsubscribe();
+				resolve();
+			}
+		});
+	});
 };
 
 // What a repay can still spend of `balance` while unmined repays hold some of `tokenId` (value or
