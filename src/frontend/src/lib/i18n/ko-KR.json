@@ -1214,6 +1214,8 @@
 			"description": "사이클은 $token 잔액에서 캐니스터로 이동하며, 캐니스터는 이를 연산과 스토리지에 사용합니다.",
 			"description_icp": "$token은 네트워크 환율로 사이클로 변환되며, 캐니스터는 이를 연산과 스토리지에 사용합니다.",
 			"pay_with": "충전 비용을 지불할 토큰을 선택하세요.",
+			"enable_token": "활성화",
+			"not_enough_to_pay": "충전하기에 부족합니다",
 			"no_token_title": "ICP 또는 TCYCLES로 충전",
 			"no_token_description": "캐니스터는 사이클로 작동하며, 충전하면 캐니스터에 사이클이 추가됩니다. 지갑에 ICP 또는 TCYCLES가 충분히 있으면 여기에서 충전할 수 있습니다.",
 			"canister_id_placeholder": "캐니스터 ID 입력",
@@ -1263,6 +1265,9 @@
 			"not_started": "충전을 시작하지 못했습니다. 지갑에서 빠져나간 것은 없습니다. 잠시 후 다시 시도하세요.",
 			"transfer_failed": "$token 전송이 완료되지 않았습니다. 지갑에서 빠져나간 것은 없습니다. 잠시 후 다시 시도하세요.",
 			"unconfirmed": "OISY가 $token 전송을 확인하지 못했습니다. 전송이 완료되었다면 충전은 백그라운드에서 완료되며, 활성 트랜잭션에서 진행 상황을 확인할 수 있습니다."
+		},
+		"alt": {
+			"enable_token": "결제에 사용할 수 있도록 $token 활성화"
 		}
 	},
 	"active_user_transactions": {
