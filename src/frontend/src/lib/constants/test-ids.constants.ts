@@ -120,6 +120,7 @@ export const BUY_TOKENS_MODAL_OPEN_BUTTON = 'buy-tokens-modal-open-button';
 
 export const SETTINGS_ADDRESS_LABEL = 'settings-address-label';
 export const SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON = 'settings-active-networks-edit-button';
+export const SETTINGS_EXPORT_DATA_TOOLS_BUTTON = 'settings-export-data-tools-button';
 
 export const SETTINGS_NETWORKS_MODAL = 'settings-networks-modal';
 export const SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX = 'settings-networks-modal-testnet-checkbox';
@@ -168,7 +169,9 @@ export const NAVIGATION_MORE_MENU_SOURCE_CODE = 'navigation-more-menu-source-cod
 export const NAVIGATION_MORE_MENU_X = 'navigation-more-menu-x';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
-export const NAVIGATION_ITEM_CANISTER_TOP_UP = 'navigation-item-canister-top-up';
+export const NAVIGATION_ITEM_TOOLS = 'navigation-item-tools';
+
+export const TOOLS_CANISTER_TOP_UP_BUTTON = 'tools-canister-top-up-button';
 
 export const NAVIGATION_GROUP_PORTFOLIO = 'navigation-group-portfolio';
 export const NAVIGATION_GROUP_FINANCE = 'navigation-group-finance';

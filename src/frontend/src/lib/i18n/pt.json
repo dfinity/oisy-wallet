@@ -133,7 +133,7 @@
 			"section_finance": "Finanças",
 			"section_more": "Mais",
 			"airdrops": "Recompensas",
-			"canister_top_up": "Recarga de canister",
+			"tools": "Ferramentas",
 			"earning": "Ganhar",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "Abrir a visualização de Crédito",
 			"earning": "Abrir a visualização de Ganhos",
 			"airdrops": "Abrir a visualização de airdrops",
-			"canister_top_up": "Recarregar um canister com ICP ou TCYCLES",
+			"tools": "Abrir ferramentas",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "Seu endereço de carteira, configurações, sair e links externos",
@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "Desativar a ocultação de transações com valores muito pequenos",
 			"save_spam_filter_success": "As configurações do seu filtro de spam foram atualizadas.",
 			"export_data": "Exportar dados",
+			"export_data_moved": "A exportação foi movida para Ferramentas.",
+			"open_tools": "Abrir Ferramentas",
 			"export_data_description": "Baixe seus tokens e transações como CSV — Basic para o essencial, Extended para atributos adicionais.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -909,6 +911,12 @@
 			"loading_profile": "Erro ao carregar o perfil. Por favor, atualize a página para ter a experiência completa.",
 			"export_exchange_rate_unavailable": "As taxas de câmbio ainda estão carregando. Tente novamente em alguns instantes.",
 			"export_failed": "Não foi possível gerar sua exportação. Tente novamente."
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "Ferramentas",
+			"top_up_canister": "Recarregar um canister com ICP ou TCYCLES"
 		}
 	},
 	"shortcuts": {

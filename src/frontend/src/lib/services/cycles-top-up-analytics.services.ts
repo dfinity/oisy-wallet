@@ -36,10 +36,10 @@ export type CyclesTopUpErrorCode =
 	| 'timed_out'
 	| 'not_sent';
 
-// Where the Top up modal was opened → `source_location`: the TCYCLES page, or the
-// navigation, the only place to pay with ICP.
+// Where the Top up modal was opened → `source_location`: the TCYCLES page, or Tools,
+// the only place to pay with ICP.
 export type CyclesTopUpSourceLocation =
-	PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOKEN_DETAILS | PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NAVIGATION;
+	PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOKEN_DETAILS | PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOOLS_PAGE;
 
 // How serious a failed top-up is → `event_severity`, for the monitoring dashboards. A refusal
 // and every ending where nothing moved warn, and so does no answer, which is often a passing
