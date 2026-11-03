@@ -156,32 +156,47 @@ export const liquidiumRepayCapError = ({
 
 // The balance the repay form spends from is read at the latest block, so an Ethereum transfer just
 // broadcast is still in it until it is mined and the balance reloaded. A second repay in that
-// window can spend it again, and the chain reverts that one. The transfer's `amount` is held back
-// for that long; a wait that fails (dropped, replaced, timed out) releases it to the balance poll.
+// window can spend it again, and the chain reverts that one. Its gas is still in the balance of
+// `feeToken`, the network's native token, the same way. The transfer's `amount` and the most its
+// gas can cost (`gasFee`) are held back for that long; a wait that fails (dropped, replaced, timed
+// out) releases them to the balance poll.
 export const holdLiquidiumRepayUntilMined = async ({
 	hash,
 	token,
-	amount
+	amount,
+	feeToken,
+	gasFee
 }: {
 	hash: string;
 	token: Token;
 	amount: bigint;
+	feeToken: Token;
+	gasFee: bigint;
 }): Promise<void> => {
-	liquidiumUnminedRepaysStore.add({ hash, tokenId: token.id, amount });
+	liquidiumUnminedRepaysStore.add({
+		hash,
+		holds: [
+			{ tokenId: token.id, amount },
+			{ tokenId: feeToken.id, amount: gasFee }
+		]
+	});
 
 	try {
 		await alchemyProviders(token.network.id).wait(hash);
 
-		await reloadEthereumBalance(token);
+		await Promise.all([
+			reloadEthereumBalance(token),
+			...(feeToken.id === token.id ? [] : [reloadEthereumBalance(feeToken)])
+		]);
 	} finally {
 		liquidiumUnminedRepaysStore.remove(hash);
 	}
 };
 
-// What a repay can still spend of `balance` while `tokenId`'s repay transfers are held back: all
-// of it for the balance check (`spendable`), and what is left after the fees the form reserves
-// from it for "Max" (`maxSpendable`). With nothing held `maxSpendable` is `undefined`, since the
-// form's own reservation from the balance is then the same.
+// What a repay can still spend of `balance` while unmined repays hold some of `tokenId` (value or
+// gas) back: all of it for the balance check (`spendable`), and what is left after the fees the
+// form reserves from it for "Max" (`maxSpendable`). With nothing held `maxSpendable` is
+// `undefined`, since the form's own reservation from the balance is then the same.
 export const liquidiumRepaySpendable = ({
 	balance,
 	tokenId,
@@ -193,10 +208,12 @@ export const liquidiumRepaySpendable = ({
 	unminedRepays: LiquidiumUnminedRepaysData;
 	reserved?: bigint;
 }): { spendable: OptionBalance; maxSpendable?: bigint } => {
-	const held = Object.values(unminedRepays).reduce(
-		(sum, { tokenId: heldTokenId, amount }) => (heldTokenId === tokenId ? sum + amount : sum),
-		ZERO
-	);
+	const held = Object.values(unminedRepays)
+		.flat()
+		.reduce(
+			(sum, { tokenId: heldTokenId, amount }) => (heldTokenId === tokenId ? sum + amount : sum),
+			ZERO
+		);
 
 	if (isNullish(balance) || held === ZERO) {
 		return { spendable: balance };

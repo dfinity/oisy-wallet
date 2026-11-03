@@ -1,13 +1,19 @@
 import type { TokenId } from '$lib/types/token';
 import { writable, type Readable } from 'svelte/store';
 
-// Ethereum repay transfers broadcast but not yet reflected in their token's balance, keyed by
-// transaction hash. In memory: a page reload while one is unmined drops it, and the balance then
-// holds the amount until that transfer is mined and the balance next loads.
-export type LiquidiumUnminedRepaysData = Record<string, { tokenId: TokenId; amount: bigint }>;
+// What Ethereum repays broadcast but not yet mined still hold of OISY's balances, keyed by
+// transaction hash: the transferred value of the sent token and the gas of the native token. In
+// memory: a page reload while one is unmined drops it, and the balances then hold it until that
+// transfer is mined and they next load.
+export interface LiquidiumUnminedRepayHold {
+	tokenId: TokenId;
+	amount: bigint;
+}
+
+export type LiquidiumUnminedRepaysData = Record<string, LiquidiumUnminedRepayHold[]>;
 
 export interface LiquidiumUnminedRepaysStore extends Readable<LiquidiumUnminedRepaysData> {
-	add: (params: { hash: string; tokenId: TokenId; amount: bigint }) => void;
+	add: (params: { hash: string; holds: LiquidiumUnminedRepayHold[] }) => void;
 	remove: (hash: string) => void;
 	reset: () => void;
 }
@@ -17,8 +23,7 @@ const initLiquidiumUnminedRepaysStore = (): LiquidiumUnminedRepaysStore => {
 
 	return {
 		subscribe,
-		add: ({ hash, tokenId, amount }) =>
-			update((state) => ({ ...state, [hash]: { tokenId, amount } })),
+		add: ({ hash, holds }) => update((state) => ({ ...state, [hash]: holds })),
 		remove: (hash) =>
 			update((state) => {
 				const { [hash]: _removed, ...rest } = state;

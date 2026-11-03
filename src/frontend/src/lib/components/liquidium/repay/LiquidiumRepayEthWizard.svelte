@@ -120,8 +120,15 @@
 		isSupportedEthTokenId($sendTokenId) || isSupportedEvmNativeTokenId($sendTokenId)
 	);
 
+	// For the gas check of a token repay: the native balance without the gas of repays not yet mined.
 	let nativeFeeBalance = $derived(
-		nonNullish(nativeEthereumToken) ? $balancesStore?.[nativeEthereumToken.id]?.data : undefined
+		nonNullish(nativeEthereumToken)
+			? liquidiumRepaySpendable({
+					balance: $balancesStore?.[nativeEthereumToken.id]?.data,
+					tokenId: nativeEthereumToken.id,
+					unminedRepays: $liquidiumUnminedRepaysStore
+				}).spendable
+			: undefined
 	);
 
 	$effect(() => {
@@ -149,9 +156,10 @@
 
 	const { maxGasFee } = ethFeeContext;
 
-	// A repay transfer just broadcast is still in the balance until it is mined and the balance
-	// reloaded; both "Max" and the balance check spend what is left without it. The reservation is
-	// the one the form makes from the send balance: the provider fee, and the gas for a native send.
+	// A repay just broadcast is still in the balances until it is mined and they are reloaded: its
+	// value in the send token's, its gas in the native token's. Both "Max" and the balance check
+	// spend what is left without it. The reservation is the one the form makes from the send
+	// balance: the provider fee, and the gas for a native send.
 	let { spendable: spendableBalance, maxSpendable } = $derived(
 		liquidiumRepaySpendable({
 			balance: $sendBalance,
@@ -232,6 +240,14 @@
 			return;
 		}
 
+		const gasFee = $maxGasFee;
+		const feeToken = nativeEthereumToken;
+
+		if (isNullish(gasFee) || isNullish(feeToken)) {
+			toastsError({ msg: { text: $i18n.send.assertion.gas_fees_not_defined } });
+			return;
+		}
+
 		const amountBaseUnits = parsedAmount;
 
 		onNext();
@@ -260,9 +276,13 @@
 						gas
 					});
 
-					holdLiquidiumRepayUntilMined({ hash, token: $sendToken, amount: transferAmount }).catch(
-						consoleError
-					);
+					holdLiquidiumRepayUntilMined({
+						hash,
+						token: $sendToken,
+						amount: transferAmount,
+						feeToken,
+						gasFee
+					}).catch(consoleError);
 
 					return hash;
 				}
