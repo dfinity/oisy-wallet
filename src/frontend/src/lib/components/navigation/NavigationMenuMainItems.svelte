@@ -11,6 +11,7 @@
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconPlant from '$lib/components/icons/IconPlant.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
+	import IconWrench from '$lib/components/icons/IconWrench.svelte';
 	import AnimatedIconUfo from '$lib/components/icons/animated/AnimatedIconUfo.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
@@ -21,7 +22,6 @@
 	import IconLifeBuoy from '$lib/components/icons/lucide/IconLifeBuoy.svelte';
 	import IconLineChart from '$lib/components/icons/lucide/IconLineChart.svelte';
 	import IconNotebook from '$lib/components/icons/lucide/IconNotebook.svelte';
-	import IconWrench from '$lib/components/icons/lucide/IconWrench.svelte';
 	import NavigationGroupSheet from '$lib/components/navigation/NavigationGroupSheet.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import NavigationMoreMenu from '$lib/components/navigation/NavigationMoreMenu.svelte';
