@@ -49,9 +49,10 @@ updates:
       - dependency-name: 'typescript'
       # Majors of the vite-group and vitest-group need a dedicated migration, not a grouped
       # bump: Vite 8 was reverted (#13296: Rolldown OOMs in the emulated reproducible Docker
-      # build) and pulls in SvelteKit 3 / adapter-static 4, and Vitest 5 breaks the
+      # build), SvelteKit 3 / adapter-static 4 require Vite 8, and Vitest 5 breaks the
       # @testing-library/jest-dom matcher types (testing-library/jest-dom#738).
       # Minor and patch updates still come through.
+      # Remove a rule in the PR that migrates its major.
       - dependency-name: 'vite'
         update-types: ['version-update:semver-major']
       - dependency-name: '@sveltejs/vite-plugin-svelte'
