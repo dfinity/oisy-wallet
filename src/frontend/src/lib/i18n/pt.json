@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "Desativar a ocultação de transações com valores muito pequenos",
 			"save_spam_filter_success": "As configurações do seu filtro de spam foram atualizadas.",
 			"export_data": "Exportar dados",
+			"export_data_moved": "",
+			"open_tools": "",
 			"export_data_description": "Baixe seus tokens e transações como CSV — Basic para o essencial, Extended para atributos adicionais.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
