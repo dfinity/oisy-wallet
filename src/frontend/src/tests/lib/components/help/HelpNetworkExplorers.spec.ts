@@ -13,6 +13,7 @@ import {
 	HELP_NETWORK_EXPLORERS_CARD,
 	HELP_NETWORK_EXPLORERS_LINK
 } from '$lib/constants/test-ids.constants';
+import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
 	btcAddressMainnetStore,
@@ -178,6 +179,23 @@ describe('HelpNetworkExplorers', () => {
 				event_key: 'network',
 				event_value: 'pol'
 			}
+		});
+	});
+
+	it('reports the page it is on when shown on Tools', async () => {
+		const { getByTestId } = render(HelpNetworkExplorers, {
+			props: { sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOOLS_PAGE }
+		});
+
+		await fireEvent.click(getByTestId(`${HELP_NETWORK_EXPLORERS_LINK}-pol`));
+
+		expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+			name: 'help',
+			metadata: expect.objectContaining({
+				event_modifier: 'explorer',
+				source_location: 'tools_page',
+				event_subcontext: 'network_explorers'
+			})
 		});
 	});
 
