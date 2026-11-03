@@ -3,7 +3,9 @@ import Notes from '$lib/components/notes/Notes.svelte';
 import { MAX_PERSONAL_NOTES_PER_USER } from '$lib/constants/app.constants';
 import {
 	NOTES_ADD_BUTTON,
+	NOTES_DELETE_CONFIRM_BUTTON,
 	NOTES_LIST_ITEM,
+	NOTES_LIST_ITEM_DELETE_BUTTON,
 	NOTES_NO_RESULTS,
 	NOTES_SEARCH_INPUT,
 	NOTES_UNAVAILABLE,
@@ -15,10 +17,11 @@ import { trackPersonalNote } from '$lib/services/personal-notes-analytics.servic
 import * as notesServices from '$lib/services/personal-notes.services';
 import { modalStore } from '$lib/stores/modal.store';
 import { personalNotesStore } from '$lib/stores/personal-notes.store';
+import * as toastsStore from '$lib/stores/toasts.store';
 import type { PersonalNoteUi } from '$lib/types/personal-note';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
-import { mockPrincipalText } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get } from 'svelte/store';
@@ -167,6 +170,45 @@ describe('Notes', () => {
 
 		expect(queryByTestId(NOTES_LIST_ITEM)).toBeNull();
 		expect(getByTestId(NOTES_NO_RESULTS)).toBeInTheDocument();
+	});
+
+	it('deletes a note from its row only after the confirmation step', async () => {
+		const deleteSpy = vi.spyOn(notesServices, 'deletePersonalNote').mockResolvedValue();
+		setLoadedNotes({ entries: [note('a')], count: 1 });
+
+		const { getByTestId, queryByTestId } = render(Notes);
+
+		await fireEvent.click(getByTestId(NOTES_LIST_ITEM_DELETE_BUTTON));
+
+		// The confirmation is shown; nothing is deleted yet, and the note did not open.
+		expect(getByTestId(NOTES_DELETE_CONFIRM_BUTTON)).toBeInTheDocument();
+		expect(deleteSpy).not.toHaveBeenCalled();
+		expect(get(modalStore)).toBeNull();
+
+		await fireEvent.click(getByTestId(NOTES_DELETE_CONFIRM_BUTTON));
+
+		await waitFor(() =>
+			expect(deleteSpy).toHaveBeenCalledWith({ identity: mockIdentity, id: 'a' })
+		);
+		await waitFor(() => expect(queryByTestId(NOTES_DELETE_CONFIRM_BUTTON)).toBeNull());
+	});
+
+	it('keeps the confirmation open and shows an error when the delete fails', async () => {
+		const err = new Error('delete failed');
+		vi.spyOn(notesServices, 'deletePersonalNote').mockRejectedValue(err);
+		const toastSpy = vi.spyOn(toastsStore, 'toastsError').mockImplementation(() => Symbol());
+		setLoadedNotes({ entries: [note('a')], count: 1 });
+
+		const { getByTestId } = render(Notes);
+
+		await fireEvent.click(getByTestId(NOTES_LIST_ITEM_DELETE_BUTTON));
+		await fireEvent.click(getByTestId(NOTES_DELETE_CONFIRM_BUTTON));
+
+		await waitFor(() =>
+			expect(toastSpy).toHaveBeenCalledWith({ msg: { text: en.notes.error.delete }, err })
+		);
+
+		expect(getByTestId(NOTES_DELETE_CONFIRM_BUTTON)).toBeInTheDocument();
 	});
 
 	it('shows the unavailable panel, not the empty state, when the initial load fails', async () => {

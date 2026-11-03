@@ -1,16 +1,21 @@
 <script lang="ts">
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { onMount } from 'svelte';
+	import { get } from 'svelte/store';
 	import { PersonalNotesRateLimitedError } from '$lib/canisters/errors';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
+	import DeleteNoteConfirmBottomSheet from '$lib/components/notes/DeleteNoteConfirmBottomSheet.svelte';
+	import DeleteNoteConfirmContent from '$lib/components/notes/DeleteNoteConfirmContent.svelte';
 	import EmptyNotes from '$lib/components/notes/EmptyNotes.svelte';
 	import NoteListItem from '$lib/components/notes/NoteListItem.svelte';
 	import NotesUnavailable from '$lib/components/notes/NotesUnavailable.svelte';
 	import NotesUnlocking from '$lib/components/notes/NotesUnlocking.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import { MAX_PERSONAL_NOTES_PER_USER } from '$lib/constants/app.constants';
 	import {
@@ -22,15 +27,17 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { trackPersonalNote } from '$lib/services/personal-notes-analytics.services';
-	import { loadPersonalNotes } from '$lib/services/personal-notes.services';
+	import { deletePersonalNote, loadPersonalNotes } from '$lib/services/personal-notes.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
 		atPersonalNotesCapacity,
 		personalNotesList,
-		personalNotesLoaded
+		personalNotesLoaded,
+		personalNotesStore
 	} from '$lib/stores/personal-notes.store';
-	import { isPersonalNoteDecryptionFailure } from '$lib/types/personal-note';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import { isPersonalNoteDecryptionFailure, type PersonalNoteUi } from '$lib/types/personal-note';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	const notesModalId = Symbol();
@@ -46,6 +53,11 @@
 	let loadError = $state<unknown>(undefined);
 
 	let searchTerm = $state('');
+
+	// The note awaiting delete confirmation from its row (the confirmation
+	// dialog/bottom sheet is shown while set); `undefined` when none is open.
+	let pendingDeleteNote = $state<PersonalNoteUi | undefined>();
+	let deleting = $state(false);
 
 	const notes = $derived($personalNotesList);
 	const showSkeleton = $derived(loading);
@@ -103,6 +115,32 @@
 	};
 
 	const addNote = () => modalStore.openNotes({ id: notesModalId });
+
+	// Delete asks for confirmation first (no immediate delete / undo).
+	const requestDelete = (id: string) => {
+		const entry = get(personalNotesStore).entries?.[id];
+		pendingDeleteNote =
+			nonNullish(entry) && !isPersonalNoteDecryptionFailure(entry) ? entry : undefined;
+	};
+
+	const cancelDelete = () => {
+		pendingDeleteNote = undefined;
+	};
+
+	const confirmDelete = async (id: string) => {
+		if (isNullish($authIdentity)) {
+			return;
+		}
+		deleting = true;
+		try {
+			await deletePersonalNote({ identity: $authIdentity, id });
+			pendingDeleteNote = undefined;
+		} catch (err: unknown) {
+			toastsError({ msg: { text: $i18n.notes.error.delete }, err });
+		} finally {
+			deleting = false;
+		}
+	};
 </script>
 
 <div class="flex flex-col gap-6">
@@ -154,10 +192,37 @@
 			{:else}
 				{#each filteredNotes as note (note.id)}
 					<ListItem>
-						<NoteListItem {note} onRetry={load} onSelect={openNote} />
+						<NoteListItem {note} onDelete={requestDelete} onRetry={load} onSelect={openNote} />
 					</ListItem>
 				{/each}
 			{/if}
 		</List>
 	{/if}
 </div>
+
+{#if nonNullish(pendingDeleteNote)}
+	<!-- Desktop: a dialog sized to the prompt (gix's minimum height is for full modals).
+		Mobile: a bottom sheet, as everywhere else in Notes. -->
+	<Responsive up="md">
+		<div class="sm:[--dialog-min-height:0]">
+			<Modal disablePointerEvents={deleting} onClose={cancelDelete}>
+				{#snippet title()}{$i18n.notes.text.delete_note}{/snippet}
+
+				<DeleteNoteConfirmContent
+					disabled={deleting}
+					note={pendingDeleteNote}
+					onCancel={cancelDelete}
+					onDelete={confirmDelete}
+				/>
+			</Modal>
+		</div>
+	</Responsive>
+	<Responsive down="sm">
+		<DeleteNoteConfirmBottomSheet
+			disabled={deleting}
+			note={pendingDeleteNote}
+			onCancel={cancelDelete}
+			onDelete={confirmDelete}
+		/>
+	</Responsive>
+{/if}

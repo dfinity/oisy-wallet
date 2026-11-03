@@ -367,6 +367,7 @@ export const NOTES_SEARCH_INPUT = 'notes-search-input';
 export const NOTES_NO_RESULTS = 'notes-no-results';
 export const NOTES_LIST = 'notes-list';
 export const NOTES_LIST_ITEM = 'notes-list-item';
+export const NOTES_LIST_ITEM_DELETE_BUTTON = 'notes-list-item-delete-button';
 export const NOTES_RETRY_DECRYPT_BUTTON = 'notes-retry-decrypt-button';
 export const NOTES_UNAVAILABLE = 'notes-unavailable';
 export const NOTES_UNAVAILABLE_RETRY_BUTTON = 'notes-unavailable-retry-button';
