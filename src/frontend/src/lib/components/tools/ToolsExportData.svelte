@@ -126,7 +126,7 @@
 					href={OISY_EXPORT_DATA_DOCS_URL}
 					iconVisible={false}
 					trackEvent={buildLearnMoreEvent({
-						sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SETTINGS_PAGE,
+						sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOOLS_PAGE,
 						sourceSublocation: 'export_data',
 						labelKey: 'settings.text.learn_more',
 						url: OISY_EXPORT_DATA_DOCS_URL
