@@ -47,6 +47,23 @@ updates:
       - dependency-name: '@icp-sdk/*'
       - dependency-name: '@types/*'
       - dependency-name: 'typescript'
+      # Majors of the vite-group and vitest-group need a dedicated migration, not a grouped
+      # bump: Vite 8 was reverted (#13296: Rolldown OOMs in the emulated reproducible Docker
+      # build) and pulls in SvelteKit 3 / adapter-static 4, and Vitest 5 breaks the
+      # @testing-library/jest-dom matcher types (testing-library/jest-dom#738).
+      # Minor and patch updates still come through.
+      - dependency-name: 'vite'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@sveltejs/vite-plugin-svelte'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@sveltejs/kit'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@sveltejs/adapter-static'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'vitest'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@vitest/coverage-v8'
+        update-types: ['version-update:semver-major']
     open-pull-requests-limit: 10
     groups:
       solana-kit:
