@@ -172,8 +172,8 @@ describe('SolFeeContext', () => {
 			}
 		});
 
-		// The swap keeps this context mounted on its source token, so picking a token on another
-		// chain reaches it before the Solana wizard is torn down.
+		// A safety net: the swap removes this context before it sees a source token on another chain,
+		// but `token` can be any `Token`, so one that isn't on a Solana network must not throw.
 		it('should skip a token that is not on a Solana network without throwing', async () => {
 			const onUnhandledRejection = vi.fn();
 			process.on('unhandledRejection', onUnhandledRejection);

@@ -41,8 +41,7 @@
 			return;
 		}
 
-		// Not `safeMapNetworkIdToNetwork`: the swap passes its source token straight through, so for a
-		// moment after a token on another chain is picked this context is still mounted on it.
+		// `token` can be any `Token`, so skip one that isn't on a Solana network instead of throwing.
 		const solNetwork = mapNetworkIdToNetwork(token.network.id);
 
 		if (isNullish(solNetwork)) {
