@@ -236,7 +236,8 @@ sequence with a BIP68 relative lock), `InvalidUtxos` (an input that is not the c
    Anything else, such as a bare `OP_TRUE` or a second `OP_RETURN`, is `InvalidOutput { index }`.
 
 4. **Lock time and sequences.** Lock time must be 0 (both CFS today and LI.FI's PSBTs use 0); a
-   future lock time would be dropped by the mempool after we paid for it. Version 1 or 2. Every
+   future lock time would be dropped by the mempool after we paid for it. Version 1 or 2
+   (`MalformedTransaction` otherwise). Every
    input's sequence must have the BIP68 disable bit (bit 31) set, i.e.
    `!txin.sequence.is_relative_lock_time()`. In a version-2 transaction a clear bit 31 enables a
    relative lock (for example sequence 65 535 on a 4-confirmation input), which lock time 0 does
@@ -256,7 +257,8 @@ sequence with a BIP68 relative lock), `InvalidUtxos` (an input that is not the c
    UTXO.
 7. **Verify every input**: an empty `script_sig` (`InvalidInput { index }` otherwise: a native
    P2WPKH spend with a non-empty one is consensus-invalid, and BIP143 does not commit to that field,
-   so the signature check alone would let it through), and a witness of exactly two items, the
+   so the signature check alone would let it through; it needs no UTXO, so it runs with step 4),
+   and a witness of exactly two items, the
    second the caller's compressed public key, the first a strict-DER, low-S signature with
    `SIGHASH_ALL` that verifies against the BIP143 sighash computed with the value from step 6.
    Together with steps 3, 4 and 6, the backend only pays to broadcast a well-formed, standard,
@@ -264,11 +266,12 @@ sequence with a BIP68 relative lock), `InvalidUtxos` (an input that is not the c
    other OISY reservation holds. That does **not** guarantee the network accepts it: the
    ≥4-confirmation view has no mempool, so an input an unconfirmed transaction already spends still
    passes (see [Risks](#risks)). Instructions only; the `bitcoin` crate (already
-   a backend dependency at 0.32) brings `secp256k1` — confirm the verification feature is enabled
-   (see [Open questions](#open-questions-facts-to-confirm)).
+   a backend dependency at 0.32) brings `secp256k1` with verification (see
+   [open question 2](#open-questions-facts-to-confirm)).
 8. **Fee**: `Σinputs − Σoutputs > 0` and at least 1 sat/vB of the transaction's vsize. That is the
    long-standing minimum relay fee, and the frontend's lowest rate. Nodes that still apply it drop
-   anything below. See [open question 6](#open-questions-facts-to-confirm) for the value.
+   anything below. See [open question 6](#open-questions-facts-to-confirm) for the value. It is
+   checked before step 7's signatures, which cost far more.
 9. **Reserve, in one synchronous block, with no `await` between check and insert** (the same
    `mutate_state` block `btc_add_pending_transaction` uses): the address-scoped prune (see
    [Address-scoped prune](#backend-address-scoped-prune)) with the UTXOs from step 6, then
@@ -342,10 +345,26 @@ same-txid rule as step 9. A request whose txid is already pending over exactly t
 succeeds without a second insert; today it fails with `UtxosAlreadyReserved`, which blocks a retry
 of the same payment for an hour (see [OpenCryptoPay](#frontend-opencryptopay)).
 
-Write steps 2 to 8 as a **pure function** (transaction bytes, caller script / pubkey, network,
-UTXO list → validated transaction or error), in a new module under `src/backend/src/bitcoin/` (the
-folder for BTC domain logic in `docs/ai/backend/structure.md`). Put the broadcast state next to it
-as a model, like `pending_tx_model.rs`. The pure function can then be unit-tested with fixture transactions;
+Steps 2 to 8 are **pure functions** in `src/backend/src/bitcoin/tx_validator.rs` (PR 1; the folder
+for BTC domain logic in `docs/ai/backend/structure.md`). There are three, because the endpoint runs
+the step-2 state lookup and the paid steps 5 and 6 between them:
+
+- `decode_transaction(bytes)`: step 2's decode and caps;
+- `check_transaction_policy(&tx)`: steps 3 and 4, and step 7's `script_sig` check, none of which
+  needs a UTXO;
+- `verify_transaction_spend(&tx, &public_key, &utxos)`: steps 6 to 8. It returns the matched `Utxo`
+  records in input order, which step 9 reserves.
+
+None takes the network: an output script carries none, and the caller's key fixes the input script.
+They return a backend-internal `TxValidationError`, whose variants are those of
+`BtcBroadcastTransactionError` they can produce; PR 3 maps it into that type. The caps
+(`MAX_BROADCAST_TX_BYTES`, `MAX_BROADCAST_TX_INPUTS`, `MAX_BROADCAST_TX_OUTPUTS`) live in
+`shared::types::bitcoin`, so PR 3's request type can refuse an oversized `transaction` at decode,
+and a const assertion keeps the input cap within `MAX_UTXOS_LEN`, the most UTXOs a
+`StoredPendingTransaction` may hold.
+
+Put the broadcast state next to it as a model, like `pending_tx_model.rs`. The pure functions can
+then be unit-tested with fixture transactions;
 PocketIC's Bitcoin canister has no real UTXOs (see the comment in
 `src/backend/tests/it/bitcoin.rs`), so the integration tests can only cover the guards and the rate
 limiter.
@@ -695,9 +714,10 @@ Every PR is safe on its own.
 
 1. `feat(backend): pure validator for signed BTC transactions`. Dead code.
    - Decode, caps, outputs, inputs (`script_sig`, sequence), ownership, signature and fee checks, as
-     a pure function.
+     pure functions (see [`btc_broadcast_transaction`](#backend-btc_broadcast_transaction)).
    - Fixture-based unit tests:
-     - a real CFS-signed mainnet transaction;
+     - real CFS-signed mainnet transactions from an OISY test wallet: a 1-input send with change at
+       exactly 1 sat/vB, and a 4-input send;
      - LI.FI-shaped 4-output transactions;
      - high-S, wrong pubkey, dust;
      - two `OP_RETURN`s, an `OP_RETURN` with a non-push opcode, a bare `OP_TRUE` output;
@@ -706,6 +726,8 @@ Every PR is safe on its own.
      - a future lock time;
      - two UTXOs from one transaction with different values, the input spending the second (matched
        by `vout`, not to the first).
+   - canbench benches for 1 and 100 inputs, which answer
+     [open question 2](#open-questions-facts-to-confirm).
 2. `fix(backend): scope the pending-transaction prune to the fetched address and snapshot`.
    **Merged** as dfinity/oisy-wallet#14497, with both rules from
    [Address-scoped prune](#backend-address-scoped-prune).
@@ -880,8 +902,13 @@ Every PR is safe on its own.
 2. **Cost of input verification.** The build question is settled. With its default features,
    `bitcoin` 0.32.102 already compiles `secp256k1` 0.29.1 (`std`, `alloc`) into the backend, so
    `Secp256k1::verification_only()` and BIP143 `SighashCache` need no new crate. libsecp256k1's
-   verification also refuses high-S signatures by itself. Still to measure, with canbench in PR 1:
-   the instruction cost per input verification.
+   verification also refuses high-S signatures by itself. **Measured in PR 1** with canbench
+   (`bench_btc_validate_signed_transaction_{1_input,100_inputs}`): about 4.4M instructions per
+   input, one BIP143 sighash and one verification. A 1-input transaction takes 4.41M in all, and
+   a 100-input one (the cap) 437.6M, of which decoding is 0.47M and the policy checks 3K. That is
+   about 1% of an update call's 40B-instruction limit, and on a 13-node subnet about 175M cycles
+   (0.4 per instruction), small next to `send_transaction`'s 5B base fee. No cap change is
+   needed.
 3. **`bitcoin_send_transaction` reject codes.** In `ic-cdk-bitcoin-canister` 0.2.0 it is an
    **unbounded-wait** call, so there is no `SysUnknown` timeout. It returns `ic_cdk::call::Error`:
    - `InsufficientLiquidCycleBalance` and `CallPerformFailed` mean the call was never made

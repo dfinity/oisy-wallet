@@ -21,6 +21,25 @@ pub const MAX_TXID_BYTES: usize = 32;
 /// - Consolidation transactions typically take many more, however that doesn't apply to this API.
 pub const MAX_UTXOS_LEN: usize = 128;
 
+/// The maximum serialized size of a signed transaction the backend broadcasts.
+///
+/// The broadcast is priced per byte. 100 P2WPKH inputs and 4 outputs take about 15 kB.
+pub const MAX_BROADCAST_TX_BYTES: usize = 16_000;
+/// The maximum number of inputs of a transaction the backend broadcasts.
+///
+/// Each input is signed with one `btc_sign_prehash` call (37B cycles), so the per-user signing
+/// allowance already limits a send to about 75 inputs.
+pub const MAX_BROADCAST_TX_INPUTS: usize = 100;
+/// The maximum number of outputs of a transaction the backend broadcasts.
+///
+/// Outputs are free to add and the broadcast is priced per byte. LI.FI's BTC layout is the
+/// largest supported one: deposit, `OP_RETURN`, change and fee.
+pub const MAX_BROADCAST_TX_OUTPUTS: usize = 4;
+
+// A broadcast reserves every input in one `StoredPendingTransaction`, which fails validation, and
+// so traps on read, above `MAX_UTXOS_LEN` UTXOs.
+const _: () = assert!(MAX_BROADCAST_TX_INPUTS <= MAX_UTXOS_LEN);
+
 /// Delay before the first async fee update, giving the canister time to settle after
 /// `init` or `post_upgrade` (stable memory deserialization uses heap).
 pub const FEE_PERCENTILES_INITIAL_DELAY: Duration = Duration::from_secs(10);

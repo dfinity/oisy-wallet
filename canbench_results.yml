@@ -29,6 +29,50 @@ benches:
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
+  bench_btc_validate_signed_transaction_100_inputs:
+    total:
+      calls: 1
+      instructions: 437612153
+      heap_increase: 0
+      stable_memory_increase: 0
+    scopes:
+      decode:
+        calls: 1
+        instructions: 465168
+        heap_increase: 0
+        stable_memory_increase: 0
+      policy:
+        calls: 1
+        instructions: 3250
+        heap_increase: 0
+        stable_memory_increase: 0
+      verify:
+        calls: 1
+        instructions: 437108686
+        heap_increase: 0
+        stable_memory_increase: 0
+  bench_btc_validate_signed_transaction_1_input:
+    total:
+      calls: 1
+      instructions: 4409675
+      heap_increase: 0
+      stable_memory_increase: 0
+    scopes:
+      decode:
+        calls: 1
+        instructions: 8943
+        heap_increase: 0
+        stable_memory_increase: 0
+      policy:
+        calls: 1
+        instructions: 676
+        heap_increase: 0
+        stable_memory_increase: 0
+      verify:
+        calls: 1
+        instructions: 4396433
+        heap_increase: 0
+        stable_memory_increase: 0
   bench_config:
     total:
       instructions: 1482
