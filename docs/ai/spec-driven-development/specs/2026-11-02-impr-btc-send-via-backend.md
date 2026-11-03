@@ -242,8 +242,11 @@ sequence with a BIP68 relative lock), `InvalidUtxos` (an input that is not the c
    relative lock (for example sequence 65 535 on a 4-confirmation input), which lock time 0 does
    not cancel, and the mempool would refuse it. CFS's `0xFFFFFFFF` and LI.FI's RBF `0xFFFFFFFD`
    both have the bit set, so RBF stays allowed.
-5. Derive the caller's address with the existing `signer::btc_principal_to_p2wpkh_address` and its
-   script / public key.
+5. Derive the caller's compressed public key, P2WPKH script and address. The existing
+   `signer::btc_principal_to_p2wpkh_address` (`src/backend/src/signer/service.rs`) returns only the
+   address string, so add a sibling that returns the `CompressedPublicKey` from the same
+   `cfs_ecdsa_pubkey_of` call (still one `ecdsa_public_key` call). Derive the address and
+   `ScriptBuf::new_p2wpkh(&key.wpubkey_hash())` from that key.
 6. `api::get_all_utxos(network, address, Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX))`. Every input must
    be in that set, which also gives its value and script. Match the whole outpoint, as CFS's
    `is_same_outpoint` and `btc_add_pending_transaction`'s `(txid, vout)` keys do:
@@ -340,7 +343,9 @@ succeeds without a second insert; today it fails with `UtxosAlreadyReserved`, wh
 of the same payment for an hour (see [OpenCryptoPay](#frontend-opencryptopay)).
 
 Write steps 2 to 8 as a **pure function** (transaction bytes, caller script / pubkey, network,
-UTXO list → validated transaction or error) so it can be unit-tested with fixture transactions;
+UTXO list → validated transaction or error), in a new module under `src/backend/src/bitcoin/` (the
+folder for BTC domain logic in `docs/ai/backend/structure.md`). Put the broadcast state next to it
+as a model, like `pending_tx_model.rs`. The pure function can then be unit-tested with fixture transactions;
 PocketIC's Bitcoin canister has no real UTXOs (see the comment in
 `src/backend/tests/it/bitcoin.rs`), so the integration tests can only cover the guards and the rate
 limiter.
@@ -513,9 +518,10 @@ This also fixes the CFS path, so it lands on its own (PR 6) before the backend p
 ### Frontend: `sendBtc`
 
 `sendBtc` keeps its parameters (`SendBtcParams`) and gains one optional field, `beforeBroadcast`
-(below), so the callers that do not track the send do not change. Inside, behind a flag
-(`BTC_SEND_VIA_BACKEND_ENABLED`, in the style of `NEAR_INTENTS_BTC_SWAP_ENABLED` in
-`src/frontend/src/env/rest/near-intents.env.ts`; on for local and staging first):
+(below), so the callers that do not track the send do not change. Inside, behind a flag:
+`export const BTC_SEND_VIA_BACKEND_ENABLED = LOCAL || STAGING;`, the idiom of `ONRAMPER_ENABLED`
+in `src/frontend/src/env/rest/onramper.env.ts`. It lives next to the BTC network flags in
+`src/frontend/src/env/networks/networks.btc.env.ts`, and PR 10 makes it `true`:
 
 1. Build the PSBT from `utxosFee.utxos`, `[{ destination, amount }]`, the source address as change,
    `utxosFee.feeSatoshis`.
@@ -548,9 +554,10 @@ PR 11 deletes the flag-off branch along with the CFS path.
 **Deleting the row depends on the txid's whole submission history, not on the last answer.**
 
 - The row is deleted only if **every** submission of that txid got a definitive answer.
-  `isDefinitiveBtcBroadcastRefusal(err)` (new, next to `isDefinitiveTransactionRefusal` in
-  `src/frontend/src/eth/utils/eth-error.utils.ts`) decides: a typed `btc_broadcast_transaction`
-  error other than `BroadcastOutcomeUnknown` and `BroadcastInProgress`.
+  `isDefinitiveBtcBroadcastRefusal(err)` decides: a typed `btc_broadcast_transaction` error other
+  than `BroadcastOutcomeUnknown` and `BroadcastInProgress`. It is new, in
+  `src/frontend/src/btc/utils/btc-send.utils.ts`, modelled on `isDefinitiveTransactionRefusal` in
+  `src/frontend/src/eth/utils/eth-error.utils.ts`.
 - Once any submission came back unclear (one of those two, or a transport failure with no typed
   answer), the row is kept whatever later submissions return. A rate limit, `InvalidUtxos` after the
   inputs were mined, or a rejected retry can all follow a broadcast that did go out.
@@ -604,9 +611,27 @@ Gone from the flag-on path: the `btc_caller_send` call and the trailing `addPend
 atomically; keep it while the flag exists so both paths share the validation, and delete it with the
 CFS path.
 
-Error mapping: `UtxosAlreadyReserved` and `InvalidUtxos` → the existing `UtxoLocked` style toast
-("refresh and retry"); `BroadcastOutcomeUnknown` and `BroadcastInProgress` → tell the user the send
-may have gone out and to check the activity before retrying (no automatic retry in v1).
+**Errors.**
+
+- `broadcastBtcTransaction` throws a typed error carrying the `BtcBroadcastTransactionError`
+  variant. It comes from a new `mapBtcBroadcastTransactionError`, next to
+  `mapBtcAddPendingTransactionError` in `src/frontend/src/lib/canisters/backend.errors.ts`. Unlike
+  `btcAddPendingTransaction`, it does not swallow `RateLimited`: nothing was broadcast, so the send
+  failed.
+- Today every `sendBtc` caller shows the generic `send.error.unexpected`, and the send wizard
+  returns to the form (`onBack()` in `BtcSendTokenWizard.svelte`). A shared
+  `mapBtcBroadcastErrorToMessage`, next to `mapUtxosFeeErrorToMessage` in
+  `src/frontend/src/btc/utils/btc-send.utils.ts`, picks the message:
+  - `UtxosAlreadyReserved` and `InvalidUtxos` → the existing `send.assertion.btc_utxo_locked`
+    ("refresh and retry");
+  - an unclear outcome (`BroadcastOutcomeUnknown`, `BroadcastInProgress`, or no typed answer) → a
+    new key saying the transaction may have been sent, and to check the activity before trying
+    again. It goes in `en.json` only, following `docs/ai/frontend/workflows/add-i18n-key.md`;
+  - anything else → `send.error.unexpected`, as today.
+- After an unclear outcome, no caller returns to a filled-in form: the flow closes with that
+  message. The first send's UTXOs stay reserved, so a second send would spend other coins and could
+  pay the recipient twice. This is the plain-send version of the Liquidium repay gap below. There
+  is no automatic retry in v1.
 
 ### Frontend: UTXO loading
 
@@ -662,6 +687,10 @@ spec.** A batch prehash method (one call, N signatures) would be an optional CFS
 Ordered by dependency. Apart from the fixes in PRs 2 and 6, nothing changes for users in production
 until PR 10. The UTXO loading (PR 7), the send (PR 8) and OpenCryptoPay (PR 9) are all behind
 `BTC_SEND_VIA_BACKEND_ENABLED`, on only for local and staging until PR 10 turns it on in production.
+`PRODUCT.md` is updated in the same PR as each behaviour change, per Step 4 — Build (Claude Code).
+PRs 7, 8 and 9 each add their behaviour under `## Bitcoin`, marked "(local and staging)" as the
+NEAR Intents entries are, and PR 10 drops the qualifier. PRs 2 and 6 fix behaviour `PRODUCT.md`
+does not describe.
 Every PR is safe on its own.
 
 1. `feat(backend): pure validator for signed BTC transactions`. Dead code.
@@ -678,10 +707,13 @@ Every PR is safe on its own.
      - two UTXOs from one transaction with different values, the input spending the second (matched
        by `vout`, not to the first).
 2. `fix(backend): scope the pending-transaction prune to the fetched address and snapshot`.
-   Independent; must land before 3. Both rules are in
-   [Address-scoped prune](#backend-address-scoped-prune). The address rule is in draft PR
-   dfinity/oisy-wallet#14497. The snapshot rule goes there too, or in a follow-up fix if that PR has
-   already merged.
+   **Merged** as dfinity/oisy-wallet#14497, with both rules from
+   [Address-scoped prune](#backend-address-scoped-prune).
+   - New callers make the same call:
+     `prune_pending_transactions(principal, &address, &utxos, now_ns, snapshot_started_ns)`.
+   - They take `snapshot_started_ns = time()` just before `get_all_utxos`, and
+     `created_at_timestamp_ns` inside the insertion block, as `btc_add_pending_transaction` now
+     does.
 3. `feat(backend): btc_broadcast_transaction` (needs 1, 2).
    - The endpoint and its rate limiter.
    - The reservation with its release rules and same-txid reuse, plus the same rule for
@@ -776,6 +808,9 @@ Every PR is safe on its own.
 - A Liquidium BTC supply or repay whose broadcast outcome is unclear keeps its row with the txid,
   and is not reported as failed. A repay keeps lowering the repay max until it settles, so the form
   never offers the full debt for a second repayment while the first may be on its way.
+- After an unclear broadcast outcome, no BTC flow returns the user to a filled-in form, and the
+  message says the transaction may have been sent. A `RateLimited` broadcast is reported as a failed
+  send.
 - The send form sees all of a large wallet's UTXOs (all pages), certified.
 - A send at 1 sat/vB to a P2PKH, P2SH, P2WSH or P2TR address is quoted a fee that passes the
   backend's 1 sat/vB floor for the transaction actually built. The Max offered for it is accepted by
@@ -842,11 +877,23 @@ Every PR is safe on its own.
 1. **Low-S.** Does IC threshold ECDSA always return low-S signatures? CFS's `sec1_to_der` does not
    normalize and its transactions are accepted on mainnet, which suggests yes. The frontend
    normalizes anyway; confirm so the backend's low-S check can never reject an honest send.
-2. **`secp256k1` verification in the backend build.** Confirm the backend's `bitcoin` 0.32 features
-   give `Secp256k1::verification_only()` and BIP143 `SighashCache` without a new crate, and the
-   instruction cost per input verification.
-3. **`bitcoin_send_transaction` reject codes.** Confirm which failures are `CanisterReject` (safe to
-   release) against which are system or unknown outcomes, with `ic-cdk-bitcoin-canister` 0.2.0.
+2. **Cost of input verification.** The build question is settled. With its default features,
+   `bitcoin` 0.32.102 already compiles `secp256k1` 0.29.1 (`std`, `alloc`) into the backend, so
+   `Secp256k1::verification_only()` and BIP143 `SighashCache` need no new crate. libsecp256k1's
+   verification also refuses high-S signatures by itself. Still to measure, with canbench in PR 1:
+   the instruction cost per input verification.
+3. **`bitcoin_send_transaction` reject codes.** In `ic-cdk-bitcoin-canister` 0.2.0 it is an
+   **unbounded-wait** call, so there is no `SysUnknown` timeout. It returns `ic_cdk::call::Error`:
+   - `InsufficientLiquidCycleBalance` and `CallPerformFailed` mean the call was never made
+     (definitive);
+   - `CandidDecodeFailed` means the Bitcoin canister replied, so it accepted the transaction (count
+     it as `Sent`);
+   - `CallRejected` carries a reject code.
+
+   Still to confirm against the Bitcoin canister's source: which reject codes it returns only
+   before queueing the transaction, and so are safe to release. Per its interface specification,
+   one of them is `CanisterReject` for a malformed transaction.
+
 4. **Regtest.** Confirm the local dfx Bitcoin setup accepts transactions broadcast by the backend
    (min confirmations is forced to 1 on regtest in `get_all_utxos`).
 5. **Rows for a deposit that never lands.** Confirm that each poller eventually fails a BTC row
