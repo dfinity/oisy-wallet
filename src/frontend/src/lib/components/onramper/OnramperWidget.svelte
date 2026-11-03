@@ -191,12 +191,11 @@
 
 	// OnRamper's widget focuses its amount input shortly after it loads. That puts the keyboard in
 	// the cross-origin iframe, where key presses never reach OISY, so Escape stops closing the
-	// modal. Hand that unrequested focus back, once per widget and only in the first seconds, so
-	// the user's own clicks into the widget are left alone.
+	// modal. Hand that unrequested focus back, once per widget and only in the first seconds. A
+	// click into the widget looks the same from here, but a Tab into it can be told apart.
 	const WIDGET_AUTOFOCUS_WINDOW_MS = 5_000;
 
-	let autofocusWatch:
-		{ iframe: HTMLIFrameElement; previousFocus: Element | null; until: number } | undefined;
+	let autofocusWatch: { iframe: HTMLIFrameElement; until: number } | undefined;
 
 	const watchWidgetAutofocus = ({ currentTarget }: Event) => {
 		// Later loads of the same iframe are navigations inside the widget, which the user started.
@@ -204,11 +203,15 @@
 			return;
 		}
 
-		autofocusWatch = {
-			iframe: currentTarget,
-			previousFocus: document.activeElement,
-			until: Date.now() + WIDGET_AUTOFOCUS_WINDOW_MS
-		};
+		autofocusWatch = { iframe: currentTarget, until: Date.now() + WIDGET_AUTOFOCUS_WINDOW_MS };
+	};
+
+	// Listened to in the capture phase: the overlay's own Tab handling may move the focus into the
+	// iframe before a bubbling listener runs.
+	const keepFocusMovedByTab = ({ key }: KeyboardEvent) => {
+		if (key === 'Tab' && nonNullish(autofocusWatch)) {
+			autofocusWatch.until = 0;
+		}
 	};
 
 	const returnFocusTakenByWidget = () => {
@@ -220,25 +223,13 @@
 
 		watch.until = 0;
 
-		// Focusing during this blur would leave the keyboard in the iframe, so wait until the browser
-		// has finished moving it there.
+		// The browser is still moving the focus into the iframe during this event, so act once it is
+		// done. Blurring, rather than focusing the close button, keeps keys meant for the widget from
+		// pressing Close.
 		setTimeout(() => {
-			if (document.activeElement !== watch.iframe) {
-				return;
+			if (document.activeElement === watch.iframe) {
+				watch.iframe.blur();
 			}
-
-			const { previousFocus } = watch;
-
-			if (
-				previousFocus instanceof HTMLElement &&
-				previousFocus.isConnected &&
-				previousFocus !== watch.iframe
-			) {
-				previousFocus.focus({ preventScroll: true });
-				return;
-			}
-
-			watch.iframe.blur();
 		});
 	};
 
@@ -248,7 +239,7 @@
 	};
 </script>
 
-<svelte:window onblur={returnFocusTakenByWidget} />
+<svelte:window onblur={returnFocusTakenByWidget} onkeydowncapture={keepFocusMovedByTab} />
 
 <!-- The `allow` prop is set as suggested in the Onramper documentation that can be found at https://docs.onramper.com/docs/customise-the-ux -->
 <!-- When Onramper engineers were inquired about the reason, they answered: -->

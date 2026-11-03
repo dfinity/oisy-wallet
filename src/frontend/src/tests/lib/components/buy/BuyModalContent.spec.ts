@@ -129,7 +129,7 @@ describe('BuyModalContent', () => {
 			vi.useRealTimers();
 		});
 
-		// The widget focusing its own input moves the keyboard into the iframe, which blurs the window.
+		// Focus moving into the iframe, by the widget itself or by the user, blurs OISY's window.
 		const moveFocusIntoWidget = async (iframe: HTMLElement) => {
 			iframe.focus();
 			await fireEvent.blur(window);
@@ -144,8 +144,21 @@ describe('BuyModalContent', () => {
 
 			await moveFocusIntoWidget(iframe);
 
-			await waitFor(() => expect(document.activeElement).toBe(closeButton));
+			// To the page, not the close button, so keys meant for the widget can't press Close.
+			await waitFor(() => expect(document.activeElement).toBe(document.body));
 
+			await moveFocusIntoWidget(iframe);
+			await nextTask();
+
+			expect(document.activeElement).toBe(iframe);
+		});
+
+		it('leaves the focus in the widget when the user tabs into it', async () => {
+			const { findByTestId } = render(BuyModalContent);
+			const iframe = await findByTestId(BUY_MODAL_ONRAMPER_IFRAME);
+			await fireEvent.load(iframe);
+
+			await fireEvent.keyDown(window, { key: 'Tab' });
 			await moveFocusIntoWidget(iframe);
 			await nextTask();
 
