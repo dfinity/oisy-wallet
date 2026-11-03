@@ -83,7 +83,7 @@ describe('uniswap.utils', () => {
 		it('should describe an exact-input swap paid to the wallet', () => {
 			expect(getUniswapSwap(params({ data: eurcToUsdc }))).toEqual({
 				router: { chainId: BASE_NETWORK.chainId, address: ROUTER, version: '2.1.2' },
-				paid: { token: EURC_TOKEN, amount: 1_000_000n, atMost: false },
+				paid: { token: EURC_TOKEN, amount: 1_000_000n, atMost: true },
 				received: { token: USDC_TOKEN, amount: 1_087_807n },
 				fees: [],
 				deadline: Number(DEADLINE)
@@ -220,7 +220,7 @@ describe('uniswap.utils', () => {
 
 			expect(getUniswapSwap(params({ data }))).toEqual(
 				expect.objectContaining({
-					paid: { token: USDC_TOKEN, amount: 29_829_946n, atMost: false },
+					paid: { token: USDC_TOKEN, amount: 29_829_946n, atMost: true },
 					received: { token: BASE_ETH_TOKEN, amount: 12_661_051_734_709_737n },
 					approval: {
 						token: USDC_TOKEN,
@@ -401,6 +401,18 @@ describe('uniswap.utils', () => {
 			);
 		});
 
+		// A V3 pool stops short of an exact input when its liquidity runs out, and the router then
+		// pulls from the wallet only what the pool took.
+		it('should state the most an exact-input swap pays from the wallet', () => {
+			const data = execute({ commands: [v3Swap({ amount: 1_000_000n, amountLimit: 1_087_807n })] });
+
+			expect(getUniswapSwap(params({ data }))?.paid).toEqual({
+				token: EURC_TOKEN,
+				amount: 1_000_000n,
+				atMost: true
+			});
+		});
+
 		it('should describe a V2 swap', () => {
 			const data = execute({
 				commands: [
@@ -491,7 +503,7 @@ describe('uniswap.utils', () => {
 
 				expect(getUniswapSwap(params({ data }))).toEqual(
 					expect.objectContaining({
-						paid: { token: EURC_TOKEN, amount: 1_000_000n, atMost: false },
+						paid: { token: EURC_TOKEN, amount: 1_000_000n, atMost: true },
 						received: { token: USDC_TOKEN, amount: 1_087_807n }
 					})
 				);
@@ -518,10 +530,38 @@ describe('uniswap.utils', () => {
 
 				expect(getUniswapSwap(params({ data }))).toEqual(
 					expect.objectContaining({
-						paid: { token: EURC_TOKEN, amount: 1_000_000n, atMost: false },
+						paid: { token: EURC_TOKEN, amount: 1_000_000n, atMost: true },
 						received: { token: USDC_TOKEN, amount: 1_087_807n }
 					})
 				);
+			});
+
+			// A pool stops short of an exact input when its liquidity runs out, which leaves less owed. A
+			// settlement of a stated amount pays all of it.
+			it.each([
+				{ case: 'an open settlement', settlement: settle(), atMost: true },
+				{
+					case: 'a settlement of everything owed',
+					settlement: {
+						action: UNISWAP_V4_ACTIONS.SETTLE_ALL,
+						types: ['address', 'uint256'],
+						values: [EURC, 2_000_000n]
+					},
+					atMost: true
+				},
+				{
+					case: 'a settlement of a stated amount',
+					settlement: settle({ amount: 1_000_000n }),
+					atMost: false
+				}
+			])('should state what $case of an exact input pays', ({ settlement, atMost }) => {
+				const data = execute({ commands: [v4Swap([swapExactIn, settlement, take()])] });
+
+				expect(getUniswapSwap(params({ data }))?.paid).toEqual({
+					token: EURC_TOKEN,
+					amount: 1_000_000n,
+					atMost
+				});
 			});
 
 			it('should state a fee taken out of the credit, and no minimum for what is left', () => {
@@ -824,6 +864,50 @@ describe('uniswap.utils', () => {
 						received: { token: USDC_TOKEN, amount: 990_000n }
 					})
 				);
+			});
+
+			// The router settles the native coin out of the transaction's value, which leaves the wallet
+			// in full however little the swap takes.
+			it.each([
+				{ case: 'an open settlement', settlement: settle({ currency: ZERO_ETH_ADDRESS }) },
+				{
+					case: 'a settlement of everything owed',
+					settlement: {
+						action: UNISWAP_V4_ACTIONS.SETTLE_ALL,
+						types: ['address', 'uint256'],
+						values: [ZERO_ETH_ADDRESS, MAX_UINT_256]
+					}
+				}
+			])('should state the value as what $case of the native coin pays', ({ settlement }) => {
+				const value = 307_938_748_743_669n;
+
+				const data = execute({
+					commands: [
+						v4Swap([
+							{
+								...swapExactInSingle,
+								values: [
+									[
+										[ZERO_ETH_ADDRESS, USDC, 500, 10, ZERO_ETH_ADDRESS],
+										true,
+										value,
+										990_000n,
+										ZERO,
+										'0x'
+									]
+								]
+							},
+							settlement,
+							take()
+						])
+					]
+				});
+
+				expect(getUniswapSwap(params({ data, value }))?.paid).toEqual({
+					token: BASE_ETH_TOKEN,
+					amount: value,
+					atMost: false
+				});
 			});
 
 			// A take of the input currency adds to what is owed of it, so an open settlement could pull

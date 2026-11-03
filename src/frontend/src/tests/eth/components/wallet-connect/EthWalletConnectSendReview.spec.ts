@@ -899,7 +899,7 @@ describe('EthWalletConnectSendReview', () => {
 			);
 
 			expect(container.querySelector('#swap-pay')).toHaveTextContent('1 EURC');
-			expect(getByText(en.wallet_connect.text.swap_pay)).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.swap_pay_at_most)).toBeInTheDocument();
 			expect(container.querySelector('#swap-receive')).toHaveTextContent('1.087807 USDC');
 			expect(container.querySelector('#swap-deadline')).toHaveTextContent(
 				formatSecondsToDate({ seconds: Number(deadline) })
@@ -976,6 +976,29 @@ describe('EthWalletConnectSendReview', () => {
 
 			expect(getByText(en.wallet_connect.text.swap_pay_at_most)).toBeInTheDocument();
 			expect(container.querySelector('#swap-pay')).toHaveTextContent('1.01 EURC');
+		});
+
+		it('should state what the wallet transfers in to swap as what it pays', () => {
+			const { container, getByText } = renderSwap(
+				encodeUniswapExecute({
+					commands: [
+						encodeUniswapCommand({
+							type: UNISWAP_COMMANDS.PERMIT2_TRANSFER_FROM,
+							types: ['address', 'address', 'uint160'],
+							values: [BASE_EURC_TOKEN.address, UNISWAP_RECIPIENT_ROUTER, 1_000_000n]
+						}),
+						encodeUniswapV3Swap({
+							amount: 1_000_000n,
+							amountLimit: 1_087_807n,
+							payerIsUser: false
+						})
+					],
+					deadline: inAnHour()
+				})
+			);
+
+			expect(getByText(en.wallet_connect.text.swap_pay)).toBeInTheDocument();
+			expect(container.querySelector('#swap-pay')).toHaveTextContent('1 EURC');
 		});
 
 		it('should state the allowance the swap grants, with when it ends', () => {

@@ -62,7 +62,8 @@ interface UniswapPlan {
 	deliveries: UniswapDelivery[];
 	fees: UniswapPlanFee[];
 	approvals: { token: string; amount: bigint; expiration: bigint }[];
-	exactOutput: boolean;
+	// Whether the router pulls only what the swaps take, which `pulled` caps.
+	atMost: boolean;
 }
 
 interface UniswapReader {
@@ -243,7 +244,7 @@ const swap = ({
 	}
 
 	if (!exactInput) {
-		plan.exactOutput = true;
+		plan.atMost = true;
 	}
 
 	deliver({ plan, token: tokenOut, recipient: party(recipient), minimum: amountOut });
@@ -336,7 +337,7 @@ const readV4Swap = ({
 		}
 
 		if (!exactInput) {
-			plan.exactOutput = true;
+			plan.atMost = true;
 		}
 
 		return true;
@@ -406,8 +407,9 @@ const readV4Swap = ({
 		}
 	}
 
-	// What an open settlement of a currency pays: the explicit inputs of the swaps that spend it, as
-	// long as nothing else adds to what is owed of it. A take of the same currency could.
+	// The most an open settlement of a currency pays: the explicit inputs of the swaps that spend it,
+	// as long as nothing else adds to what is owed of it. A take of the same currency could. A pool
+	// stops short of an exact input when its liquidity runs out, and leaves less owed.
 	const owedOf = (key: string): bigint | undefined =>
 		spent.has(key) && !spentOpenly.has(key) && !takes.has(key) ? spent.get(key) : undefined;
 
@@ -456,6 +458,10 @@ const readV4Swap = ({
 			if (paidByWallet && (isNullish(owed) || !pull({ plan, token: key, amount: owed }))) {
 				return false;
 			}
+
+			if (paidByWallet && amount === UNISWAP_OPEN_AMOUNT) {
+				plan.atMost = true;
+			}
 		} else if (action === UNISWAP_V4_ACTIONS.SETTLE_ALL) {
 			const [currency, maxAmount] = args;
 			const key = currency.toLowerCase();
@@ -464,12 +470,15 @@ const readV4Swap = ({
 			// pays out of the transaction's value.
 			const owed = owedOf(key);
 
-			if (
-				key !== ZERO_ETH_ADDRESS &&
-				(isNullish(owed) ||
-					!pull({ plan, token: key, amount: owed < maxAmount ? owed : maxAmount }))
-			) {
-				return false;
+			if (key !== ZERO_ETH_ADDRESS) {
+				if (
+					isNullish(owed) ||
+					!pull({ plan, token: key, amount: owed < maxAmount ? owed : maxAmount })
+				) {
+					return false;
+				}
+
+				plan.atMost = true;
 			}
 		} else if (action === UNISWAP_V4_ACTIONS.TAKE) {
 			const [currency, recipient, amount] = args;
@@ -529,6 +538,12 @@ const readCommand = ({
 
 			// An exact-output path runs from the output back to the input.
 			const [tokenIn, tokenOut] = exactInput ? tokens : [tokens[1], tokens[0]];
+
+			// A V3 pool stops short of an exact input when its liquidity runs out, and the router pulls
+			// from the wallet only what the pool took. A V2 pair takes all of it.
+			if (exactInput && payerIsUser) {
+				plan.atMost = true;
+			}
 
 			return swap({
 				reader,
@@ -746,7 +761,7 @@ const toSwap = ({
 		paid: {
 			token: paid,
 			amount: paidToken === ZERO_ETH_ADDRESS ? value : (plan.pulled.get(paidToken) ?? ZERO),
-			atMost: plan.exactOutput
+			atMost: plan.atMost
 		},
 		received: {
 			token: received,
@@ -828,7 +843,7 @@ export const getUniswapSwap = ({
 	}
 
 	const reader: UniswapReader = {
-		plan: { pulled: new Map(), deliveries: [], fees: [], approvals: [], exactOutput: false },
+		plan: { pulled: new Map(), deliveries: [], fees: [], approvals: [], atMost: false },
 		party: (address) => toParty({ address, wallet, router: router.address }),
 		layouts: UNISWAP_LAYOUTS[router.version],
 		router

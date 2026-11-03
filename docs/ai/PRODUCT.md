@@ -750,7 +750,7 @@ An `eth_sendTransaction` request that calls `execute` on Uniswap's Universal Rou
 
 The review is titled "Swap" and states:
 
-- **You pay:** the token and amount the transaction takes from the wallet, "You pay at most" when the swap is for an exact output.
+- **You pay:** the token and amount the transaction takes from the wallet, "You pay at most" when the router takes from the wallet only what the swap uses: for an exact output, and for an exact input into a V3 or V4 pool, which takes less when its liquidity runs out. An amount the wallet hands over in a stated transfer or settlement is exact.
 - **You receive at least:** the token and the least the router lets arrive. Tokens the router keeps at the end count as not received.
 - **Recipient:** only when the tokens go to an address that is not this wallet.
 - **App fee:** each share or amount the swap pays to another address, with that address.
