@@ -19,7 +19,7 @@ use crate::types::{
     },
     agreement::{AgreementHistoryEntry, GetAgreementHistoryError, UpdateAgreementsError},
     bitcoin::{BtcGetFeePercentilesError, BtcGetFeePercentilesResponse},
-    contact::{Contact, ContactError},
+    contact::{Contact, ContactError, ContactImageEntry, ContactsPage},
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
     onramper::{SignOnramperWidgetUrlError, SignOnramperWidgetUrlResponse},
@@ -108,6 +108,38 @@ impl From<Result<Vec<Contact>, ContactError>> for GetContactsResult {
         match result {
             Ok(contacts) => GetContactsResult::Ok(contacts),
             Err(err) => GetContactsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetContactsPageResult {
+    /// The page was retrieved successfully.
+    Ok(ContactsPage),
+    /// The page was not retrieved due to an error.
+    Err(ContactError),
+}
+impl From<Result<ContactsPage, ContactError>> for GetContactsPageResult {
+    fn from(result: Result<ContactsPage, ContactError>) -> Self {
+        match result {
+            Ok(page) => GetContactsPageResult::Ok(page),
+            Err(err) => GetContactsPageResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetContactImagesResult {
+    /// The images were retrieved successfully.
+    Ok(Vec<ContactImageEntry>),
+    /// The images were not retrieved due to an error.
+    Err(ContactError),
+}
+impl From<Result<Vec<ContactImageEntry>, ContactError>> for GetContactImagesResult {
+    fn from(result: Result<Vec<ContactImageEntry>, ContactError>) -> Self {
+        match result {
+            Ok(images) => GetContactImagesResult::Ok(images),
+            Err(err) => GetContactImagesResult::Err(err),
         }
     }
 }

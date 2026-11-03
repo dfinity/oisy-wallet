@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import SwapFeeRow from '$lib/components/swap/SwapFeeRow.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
@@ -140,10 +141,12 @@
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<Hr spacing="md" />
 
-			<div class="flex flex-col gap-3">
-				<SwapProvider {onShowProviderList} showSelectButton {slippageValue} />
+			<div class="flex flex-col">
+				<SwapProvider isForm {onShowProviderList} showSelectButton {slippageValue} />
 
-				<SwapXrpFees />
+				<SwapFeeRow>
+					<SwapXrpFees />
+				</SwapFeeRow>
 			</div>
 		{/if}
 	{/snippet}

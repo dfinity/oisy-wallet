@@ -1,8 +1,14 @@
+import { alchemyProviders } from '$eth/providers/alchemy.providers';
+import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import { liquidiumClient } from '$lib/api/liquidium.api';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
-import { LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS } from '$lib/constants/liquidium.constants';
+import {
+	LIQUIDIUM_BPS_SCALE,
+	LIQUIDIUM_REPAY_BUFFER_BPS,
+	LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS
+} from '$lib/constants/liquidium.constants';
 import { ProgressStepsLiquidiumRepay } from '$lib/enums/progress-steps';
 import {
 	createActiveUserTransaction,
@@ -11,12 +17,20 @@ import {
 } from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
 import { getOrCreateLiquidiumProfile } from '$lib/services/liquidium.services';
+import { balancesStore, type BalancesData } from '$lib/stores/balances.store';
+import type { CertifiedStoreData } from '$lib/stores/certified.store';
+import {
+	liquidiumUnminedRepaysStore,
+	type LiquidiumUnminedRepaysData
+} from '$lib/stores/liquidium-unmined-repays.store';
+import type { OptionBalance } from '$lib/types/balance';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import {
 	LIQUIDIUM_EXTERNAL_REF_KEYS,
 	type LiquidiumExternalRefKey
 } from '$lib/types/liquidium-active-tx';
+import type { Token, TokenId } from '$lib/types/token';
 import { isActiveUserTransactionError } from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import {
@@ -30,14 +44,19 @@ import {
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { SupplyAction, type Chain, type SupplyTarget } from '@liquidium/client';
+import { get } from 'svelte/store';
 
 export interface LiquidiumRepayPreview {
 	projectedHealthPercent: number;
 }
 
-// Full outstanding debt (principal + accrued interest + small buffer) in base units, for the
-// "Max (full debt)" shortcut. `null` when the user has no profile yet (should not happen for a
-// position that already carries debt, but guarded so callers can no-op gracefully).
+// Full outstanding debt (accrued interest included) plus a small buffer, in base units, for the
+// "Max (full debt)" shortcut. Not the SDK's `getMaxRepayAmount` alone: it adds `debtInterest` on
+// top of `borrowed`, which already includes it, so its max overshoots the debt and the repay is not
+// credited. It still caps ours, so we never send more than the SDK sanctions should it ever quote
+// less (a fixed double count, a smaller buffer). `null` when the user has no profile yet (should
+// not happen for a position that already carries debt, but guarded so callers can no-op
+// gracefully).
 export const getLiquidiumMaxRepayAmount = async ({
 	identity,
 	ethAddress,
@@ -59,13 +78,24 @@ export const getLiquidiumMaxRepayAmount = async ({
 		return null;
 	}
 
-	const { amount } = await positions.getMaxRepayAmount(profileId, poolId);
+	const [position, { amount: sdkMaxRepay }] = await Promise.all([
+		positions.getPosition(profileId, poolId),
+		positions.getMaxRepayAmount(profileId, poolId)
+	]);
 
-	return amount;
+	if (isNullish(position) || position.borrowed <= ZERO) {
+		return ZERO;
+	}
+
+	const maxRepay =
+		(position.borrowed * (LIQUIDIUM_BPS_SCALE + LIQUIDIUM_REPAY_BUFFER_BPS)) / LIQUIDIUM_BPS_SCALE;
+
+	return maxRepay < sdkMaxRepay ? maxRepay : sdkMaxRepay;
 };
 
-// USD value of this position's accrued borrow interest, derived from the reserve's own price basis
-// (interest and principal share the asset price, so this scales consistently with `borrowedUsd`).
+// USD value of this position's lifetime borrow interest, derived from the reserve's own price basis
+// (it shares the asset price with the debt, so this scales consistently with `borrowedUsd`).
+// Informational: it is already part of `borrowedUsd`.
 export const liquidiumDebtInterestUsd = (reserve: LiquidiumReserve): number =>
 	reserve.borrowed > ZERO
 		? (Number(reserve.debtInterest ?? ZERO) / Number(reserve.borrowed)) * reserve.borrowedUsd
@@ -90,8 +120,9 @@ export const computeLiquidiumRepayPreview = ({
 
 // Pending repays already cover the whole debt: nothing is left to repay until they settle. The net
 // cap rarely lands on exactly zero (interest accrued since the pending repay was quoted leaves dust
-// that its own buffer already covers), so the debt itself is checked too. Shared by the form, the
-// Review step and the broadcast guard so every gate agrees on "nothing left to repay".
+// that its own buffer already covers), so the debt itself is checked too (`borrowed` already
+// includes the accrued interest). Shared by the form, the Review step and the broadcast guard so
+// every gate agrees on "nothing left to repay".
 export const liquidiumPendingCoversDebt = ({
 	pendingRepay,
 	maxRepay,
@@ -100,9 +131,7 @@ export const liquidiumPendingCoversDebt = ({
 	pendingRepay: bigint;
 	maxRepay: bigint | undefined;
 	reserve: LiquidiumReserve;
-}): boolean =>
-	pendingRepay > ZERO &&
-	(maxRepay === ZERO || pendingRepay >= reserve.borrowed + (reserve.debtInterest ?? ZERO));
+}): boolean => pendingRepay > ZERO && (maxRepay === ZERO || pendingRepay >= reserve.borrowed);
 
 // Why `amount` can no longer be repaid under the cap, or `undefined` when it can. Review can
 // outlive the cap it was entered under (a repay that settles clears and refetches it; a new pending
@@ -127,6 +156,132 @@ export const liquidiumRepayCapError = ({
 			: amount > maxRepay
 				? new Error(i18n.liquidium.text.repay_exceeds_debt)
 				: undefined;
+
+// The balance the repay form spends from is read at the latest block, so an Ethereum transfer just
+// broadcast is still in it until it is mined and the balance reloaded. A second repay in that
+// window can spend it again, and the chain reverts that one. Its gas is still in the balance of
+// `feeToken`, the network's native token, the same way. The transfer's `amount` and the most its
+// gas can cost (`gasFee`) are held back for that long; a wait that fails (dropped, replaced, timed
+// out) releases them to the balance poll. `unmined` are the balances from before the transfer was
+// sent, to tell a reload that has it from one that does not: by the time the send returns, the
+// transfer can already be mined and the balances reloaded.
+export const holdLiquidiumRepayUntilMined = async ({
+	hash,
+	token,
+	amount,
+	feeToken,
+	gasFee,
+	unmined
+}: {
+	hash: string;
+	token: Token;
+	amount: bigint;
+	feeToken: Token;
+	gasFee: bigint;
+	unmined: CertifiedStoreData<BalancesData>;
+}): Promise<void> => {
+	liquidiumUnminedRepaysStore.add({
+		hash,
+		holds: [
+			{ tokenId: token.id, amount },
+			{ tokenId: feeToken.id, amount: gasFee }
+		]
+	});
+
+	try {
+		const status = await alchemyProviders(token.network.id).wait(hash);
+
+		// A reverted transfer moves no value, only its gas, and a replaced one moves neither, while the
+		// transaction that took its nonce pays gas from the same native balance. The sent token's
+		// balance stays as it was, so only the gas is still held, until the native balance has changed.
+		const transferred = status === 'success';
+
+		if (!transferred) {
+			liquidiumUnminedRepaysStore.add({ hash, holds: [{ tokenId: feeToken.id, amount: gasFee }] });
+		}
+
+		const tokens = !transferred || feeToken.id === token.id ? [feeToken] : [token, feeToken];
+
+		const reloads = await Promise.all(
+			tokens.map(async (reloadToken) => ({
+				tokenId: reloadToken.id,
+				...(await reloadEthereumBalance(reloadToken))
+			}))
+		);
+
+		await balancesChanged({
+			tokenIds: reloads.filter(({ success }) => success).map(({ tokenId }) => tokenId),
+			unmined
+		});
+	} finally {
+		liquidiumUnminedRepaysStore.remove(hash);
+	}
+};
+
+// A reload does not prove the store has the mined balance: `reloadEthereumBalance` stores it through
+// `batchSet`, which only lands on the next animation frame (not at all while the tab is hidden),
+// and it reads Infura, which can still be a block behind the receipt from Alchemy. The transfer
+// always changes the balances it holds, by its value or its gas, so this resolves once every one of
+// `tokenIds` has a balance in the store other than in `unmined`. A reload that still has the old
+// balance leaves the hold to the balance poll.
+const balancesChanged = async ({
+	tokenIds,
+	unmined
+}: {
+	tokenIds: TokenId[];
+	unmined: CertifiedStoreData<BalancesData>;
+}): Promise<void> => {
+	const changed = (balances: CertifiedStoreData<BalancesData>): boolean =>
+		tokenIds.every((tokenId) => balances?.[tokenId]?.data !== unmined?.[tokenId]?.data);
+
+	if (changed(get(balancesStore))) {
+		return;
+	}
+
+	await new Promise<void>((resolve) => {
+		const unsubscribe = balancesStore.subscribe((balances) => {
+			if (changed(balances)) {
+				unsubscribe();
+				resolve();
+			}
+		});
+	});
+};
+
+// What a repay can still spend of `balance` while unmined repays hold some of `tokenId` (value or
+// gas) back: all of it for the balance check (`spendable`), and what is left after the fees the
+// form reserves from it for "Max" (`maxSpendable`). With nothing held `maxSpendable` is
+// `undefined`, since the form's own reservation from the balance is then the same.
+export const liquidiumRepaySpendable = ({
+	balance,
+	tokenId,
+	unminedRepays,
+	reserved
+}: {
+	balance: OptionBalance;
+	tokenId: TokenId;
+	unminedRepays: LiquidiumUnminedRepaysData;
+	reserved?: bigint;
+}): { spendable: OptionBalance; maxSpendable?: bigint } => {
+	const held = Object.values(unminedRepays)
+		.flat()
+		.reduce(
+			(sum, { tokenId: heldTokenId, amount }) => (heldTokenId === tokenId ? sum + amount : sum),
+			ZERO
+		);
+
+	if (isNullish(balance) || held === ZERO) {
+		return { spendable: balance };
+	}
+
+	const spendable = balance > held ? balance - held : ZERO;
+
+	if (isNullish(reserved)) {
+		return { spendable };
+	}
+
+	return { spendable, maxSpendable: spendable > reserved ? spendable - reserved : ZERO };
+};
 
 // Broadcasts `amount` base units (gross = repay + provider fee) to the native target and returns
 // the txid the AUT poller correlates on. Implemented by the wizard (per-chain fee/UTXO machinery).
