@@ -6,7 +6,7 @@
 	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 </script>
 
-<!-- The Block explorers card of the Help page, shown here as well. -->
+<!-- The Blockchain explorers card of the Help page, shown here as well. -->
 <HelpNetworkExplorers sourceLocation={PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOOLS_PAGE} />
 
 {#if CANISTER_TOP_UP_ENABLED}
