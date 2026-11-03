@@ -1,21 +1,22 @@
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
-import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { CKERC20_ABI } from '$eth/constants/ckerc20.constants';
+import { ethersProvider } from '$eth/providers/ethers.providers';
 import type { EthAddress } from '$eth/types/address';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
+import type { EthersProviderNetwork } from '$eth/types/network';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { Contract, type ContractTransaction } from 'ethers/contract';
-import { InfuraProvider, type Networkish } from 'ethers/providers';
+import type { JsonRpcProvider } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraCkErc20Provider {
-	private readonly provider: InfuraProvider;
+	private readonly provider: JsonRpcProvider;
 
-	constructor(private readonly network: Networkish) {
-		this.provider = new InfuraProvider(this.network, INFURA_API_KEY);
+	constructor(private readonly network: EthersProviderNetwork) {
+		this.provider = ethersProvider(this.network);
 	}
 
 	populateTransaction = ({
@@ -36,10 +37,7 @@ export class InfuraCkErc20Provider {
 
 const providers: Record<NetworkId, InfuraCkErc20Provider> = SUPPORTED_ETHEREUM_NETWORKS.reduce<
 	Record<NetworkId, InfuraCkErc20Provider>
->(
-	(acc, { id, providers: { infura } }) => ({ ...acc, [id]: new InfuraCkErc20Provider(infura) }),
-	{}
-);
+>((acc, network) => ({ ...acc, [network.id]: new InfuraCkErc20Provider(network) }), {});
 
 export const infuraCkErc20Providers = (networkId: NetworkId): InfuraCkErc20Provider => {
 	const provider = providers[networkId];

@@ -108,7 +108,7 @@ describe('page-nft.derived', () => {
 
 		it('should return undefined when no collection in route', () => {
 			mockPage.mock({
-				nft: mockNft1.id,
+				collectible: mockNft1.id,
 				network: `${mockNft1.collection.network.id.description}`
 			});
 
@@ -117,7 +117,7 @@ describe('page-nft.derived', () => {
 
 		it('should return undefined when no network in route', () => {
 			mockPage.mock({
-				nft: mockNft1.id,
+				collectible: mockNft1.id,
 				collection: mockNft1.collection.address
 			});
 

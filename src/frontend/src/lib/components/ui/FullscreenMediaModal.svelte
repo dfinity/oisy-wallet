@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Nullish } from '@dfinity/zod-schemas';
 	import { onMount, untrack } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import UnsupportedMediaType from '$lib/components/icons/nfts/UnsupportedMediaType.svelte';
 	import Backdrop from '$lib/components/ui/Backdrop.svelte';
@@ -11,6 +10,7 @@
 	import { MediaType } from '$lib/enums/media-type';
 	import { extractMediaTypeAndSize } from '$lib/services/url.services';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		mediaSrc: string;

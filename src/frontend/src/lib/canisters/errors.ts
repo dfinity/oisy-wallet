@@ -5,3 +5,7 @@ export class CanisterInternalError extends Error {}
 export class OnramperSecretNotConfiguredError extends CanisterInternalError {}
 
 export class OnramperRateLimitedError extends CanisterInternalError {}
+
+// The caller hit the personal-notes vetKey rate limit; the UI shows a
+// "temporarily unavailable, try again" state rather than a generic failure.
+export class PersonalNotesRateLimitedError extends CanisterInternalError {}

@@ -1,16 +1,25 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { Chain } from '@liquidium/client';
 	import { getContext, setContext } from 'svelte';
 	import UtxosFeeLoader from '$btc/components/fee/UtxosFeeLoader.svelte';
 	import BtcUtxosFeeDisplay from '$btc/components/send/BtcUtxosFeeDisplay.svelte';
-	import { sendBtc } from '$btc/services/btc-send.services';
+	import {
+		handleBtcValidationError,
+		sendBtc,
+		validateBtcSend
+	} from '$btc/services/btc-send.services';
 	import {
 		initUtxosFeeStore,
 		UTXOS_FEE_CONTEXT_KEY,
 		type UtxosFeeContext
 	} from '$btc/stores/utxos-fee.store';
-	import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
+	import { BtcValidationError } from '$btc/types/btc-send';
+	import {
+		convertSatoshisToBtc,
+		isInvalidUtxosFee,
+		mapUtxosFeeErrorToMessage
+	} from '$btc/utils/btc-send.utils';
 	import LiquidiumSupplyForm from '$lib/components/liquidium/supply/LiquidiumSupplyForm.svelte';
 	import LiquidiumSupplyProgress from '$lib/components/liquidium/supply/LiquidiumSupplyProgress.svelte';
 	import LiquidiumSupplyReview from '$lib/components/liquidium/supply/LiquidiumSupplyReview.svelte';
@@ -25,6 +34,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { LiquidiumMarket } from '$lib/types/liquidium';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -34,7 +44,9 @@
 		amount: OptionAmount;
 		supplyProgressStep: string;
 		inflowFee?: bigint;
+		inflowFeeUnavailable?: boolean;
 		currentStep?: WizardStep;
+		onSelectToken?: () => void;
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
@@ -45,7 +57,9 @@
 		amount = $bindable(),
 		supplyProgressStep = $bindable(),
 		inflowFee,
+		inflowFeeUnavailable,
 		currentStep,
+		onSelectToken,
 		onClose,
 		onNext,
 		onBack
@@ -81,14 +95,22 @@
 	let validateSupplyAmount = $derived.by(() => {
 		const balance = $sendBalance;
 		const inflow = inflowFee;
-		const networkFee = utxosFee?.feeSatoshis;
+		const fee = utxosFee;
 
-		return (userAmount: bigint): Error | undefined =>
-			nonNullish(inflow) &&
-			nonNullish(balance) &&
-			userAmount + inflow + (networkFee ?? ZERO) > balance
+		return (userAmount: bigint): Error | undefined => {
+			// The displayed balance can include UTXOs the signer cannot spend yet (e.g.
+			// unconfirmed inflows), so a failed UTXO selection must block the form even
+			// when the balance check below would pass.
+			if (nonNullish(fee) && isInvalidUtxosFee(fee)) {
+				return new Error(mapUtxosFeeErrorToMessage({ utxosFee: fee, i18n: $i18n }));
+			}
+
+			return nonNullish(inflow) &&
+				nonNullish(balance) &&
+				userAmount + inflow + (fee?.feeSatoshis ?? ZERO) > balance
 				? new Error($i18n.liquidium.text.insufficient_funds_for_fee)
 				: undefined;
+		};
 	});
 
 	const supply = async () => {
@@ -109,19 +131,51 @@
 			return;
 		}
 
+		// A failed UTXO selection (error or empty set) cannot fund the broadcast — e.g.
+		// the balance is only in unconfirmed UTXOs — and the signer would reject it.
+		if (isInvalidUtxosFee(utxosFee)) {
+			toastsError({ msg: { text: mapUtxosFeeErrorToMessage({ utxosFee, i18n: $i18n }) } });
+			return;
+		}
+
 		// BTC sent from the BTC address, but the profile is ETH-owned → look it up by ETH address.
 		const source = $btcAddressMainnet;
 		const btcNetwork = network;
 		const preparedUtxosFee = utxosFee;
 		const amountBaseUnits = parsedAmount;
+		const identity = $authIdentity;
 
 		onNext();
+
+		// Last line of defense before broadcasting (mirrors BtcSendTokenWizard): re-checks
+		// the prepared UTXOs against pending transactions and current fees, for the gross
+		// transfer that is actually sent (net supply + inflow fee).
+		try {
+			await validateBtcSend({
+				utxosFee: preparedUtxosFee,
+				source,
+				amount: convertSatoshisToBtc(amountBaseUnits + inflowFee),
+				network: btcNetwork,
+				identity
+			});
+		} catch (err: unknown) {
+			if (err instanceof BtcValidationError) {
+				handleBtcValidationError({ err });
+			} else {
+				toastsError({ msg: { text: $i18n.liquidium.text.transaction_failed }, err });
+			}
+
+			onBack();
+
+			return;
+		}
 
 		try {
 			await executeLiquidiumSupply({
 				identity: $authIdentity,
 				ethAddress: $ethAddress,
 				poolId: market.poolId,
+				chain: Chain.BTC,
 				asset: market.asset,
 				amount: amountBaseUnits,
 				inflowFee,
@@ -151,7 +205,7 @@
 
 {#snippet feeDisplay()}
 	<BtcUtxosFeeDisplay>
-		{#snippet label()}{$i18n.fee.text.network_fee}{/snippet}
+		{#snippet label()}{$i18n.liquidium.text.transaction_fee}{/snippet}
 	</BtcUtxosFeeDisplay>
 {/snippet}
 
@@ -164,10 +218,12 @@
 		<LiquidiumSupplyForm
 			{feeDisplay}
 			{inflowFee}
+			{inflowFeeUnavailable}
 			{market}
 			{onClose}
 			onCustomErrorValidate={validateSupplyAmount}
 			{onNext}
+			{onSelectToken}
 			totalFee={utxosFee?.feeSatoshis}
 			bind:amount
 		/>

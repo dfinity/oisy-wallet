@@ -13,7 +13,7 @@
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionTokenUi } from '$lib/types/token-ui';
-	import { isIOS } from '$lib/utils/device.utils';
+	import { isDesktop, isIOS } from '$lib/utils/device.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -25,12 +25,21 @@
 	let { token }: Props = $props();
 
 	const { loading } = getContext<HeroContext>(HERO_CONTEXT_KEY);
+
+	// The toast points to the [P] shortcut, which only helps with a keyboard.
+	const togglePrivacyMode = (source: string) =>
+		setPrivacyMode({
+			enabled: !$isPrivacyMode,
+			withToast: isDesktop(),
+			source
+		});
 </script>
 
 <span class="flex flex-col gap-1">
 	<output
-		class="inline-flex w-full flex-row justify-center gap-3 text-4xl font-bold break-words md:text-5xl"
+		class="inline-flex cursor-pointer touch-manipulation flex-row justify-center gap-3 self-center text-4xl font-bold break-words md:text-5xl"
 		data-tid={AMOUNT_DATA}
+		ondblclick={() => togglePrivacyMode('Hero - Double click on the Balance amount')}
 	>
 		{#if nonNullish(token?.balance) && nonNullish(token?.symbol)}
 			{#if $isPrivacyMode}
@@ -56,12 +65,8 @@
 		<Button
 			ariaLabel={$i18n.hero.alt.toggle_privacy_mode}
 			fullWidth
-			ondblclick={() =>
-				setPrivacyMode({
-					enabled: !$isPrivacyMode,
-					withToast: false,
-					source: 'Hero - Double click on the Balance'
-				})}
+			ondblclick={() => togglePrivacyMode('Hero - Double click on the Balance')}
+			static
 			styleClass="bg-transparent p-0 text-xl font-medium !text-current hover:!text-current active:!text-current focus-visible:!text-current"
 			transparent
 		>

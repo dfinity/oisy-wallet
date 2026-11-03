@@ -2,7 +2,7 @@
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 </script>
 
-<div class="ufo-wrapper">
+<div class="ufo-wrapper decorative-motion">
 	<IconlyUfo />
 </div>
 

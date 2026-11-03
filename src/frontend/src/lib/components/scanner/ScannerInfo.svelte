@@ -35,7 +35,6 @@
 		<div>
 			<ExternalLink
 				ariaLabel={replaceOisyPlaceholders($i18n.scanner.text.learn_more_about_scan)}
-				color="blue"
 				href={OISY_SCAN_URL}
 				iconAsLast
 				iconSize="18"
@@ -55,7 +54,6 @@
 		<div>
 			<ExternalLink
 				ariaLabel={replaceOisyPlaceholders($i18n.scanner.text.learn_more_about_pay)}
-				color="blue"
 				href={OISY_PAY_URL}
 				iconAsLast
 				iconSize="18"

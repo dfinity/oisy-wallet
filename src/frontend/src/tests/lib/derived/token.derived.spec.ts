@@ -2,20 +2,23 @@ import { SUPPORTED_ARBITRUM_NETWORK_IDS } from '$env/networks/networks-evm/netwo
 import { SUPPORTED_BASE_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.base.env';
 import { SUPPORTED_BSC_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { SUPPORTED_POLYGON_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { SUPPORTED_ROBINHOOD_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { SUPPORTED_BITCOIN_NETWORK_IDS } from '$env/networks/networks.btc.env';
 import { SUPPORTED_NETWORK_IDS, SUPPORTED_TESTNET_NETWORK_IDS } from '$env/networks/networks.env';
 import { SUPPORTED_ETHEREUM_NETWORK_IDS } from '$env/networks/networks.eth.env';
-import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { ICP_NETWORK_ID, ICP_PSEUDO_TESTNET_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SUPPORTED_SOLANA_NETWORK_IDS } from '$env/networks/networks.sol.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { BNB_MAINNET_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
 import { POL_MAINNET_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import { DEFAULT_ARBITRUM_TOKEN } from '$lib/constants/tokens.constants';
+import { DEFAULT_ARBITRUM_TOKEN, DEFAULT_ROBINHOOD_TOKEN } from '$lib/constants/tokens.constants';
 import { defaultFallbackToken } from '$lib/derived/token.derived';
 import { token } from '$lib/stores/token.store';
+import { isNetworkIdICP } from '$lib/utils/network.utils';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
@@ -101,10 +104,25 @@ describe('token.derived', () => {
 			}
 		);
 
-		it('should return ETH for ICP network', () => {
+		it.each(SUPPORTED_ROBINHOOD_NETWORK_IDS)(
+			`should return default token for Robinhood network %s`,
+			(networkId) => {
+				mockPage.mockNetwork(networkId.description);
+
+				expect(get(defaultFallbackToken)).toEqual(DEFAULT_ROBINHOOD_TOKEN);
+			}
+		);
+
+		it('should return ICP for ICP network', () => {
 			mockPage.mockNetwork(ICP_NETWORK_ID.description);
 
-			expect(get(defaultFallbackToken)).toEqual(ETHEREUM_TOKEN);
+			expect(get(defaultFallbackToken)).toEqual(ICP_TOKEN);
+		});
+
+		it('should return ICP for ICP testnet pseudo-network', () => {
+			mockPage.mockNetwork(ICP_PSEUDO_TESTNET_NETWORK_ID.description);
+
+			expect(get(defaultFallbackToken)).toEqual(ICP_TOKEN);
 		});
 
 		it('should return ETH for any other network', () => {
@@ -123,7 +141,10 @@ describe('token.derived', () => {
 				(networkId) => {
 					mockPage.mockNetwork(networkId.description);
 
-					expect(get(defaultFallbackToken)).toEqual(ETHEREUM_TOKEN);
+					// ICP (incl. its testnet pseudo-network) is always available, so it keeps resolving to the ICP token.
+					expect(get(defaultFallbackToken)).toEqual(
+						isNetworkIdICP(networkId) ? ICP_TOKEN : ETHEREUM_TOKEN
+					);
 				}
 			);
 		});
@@ -137,7 +158,10 @@ describe('token.derived', () => {
 			it.each(SUPPORTED_NETWORK_IDS)(`should return default token for network %s`, (networkId) => {
 				mockPage.mockNetwork(networkId.description);
 
-				expect(get(defaultFallbackToken)).toEqual(ETHEREUM_TOKEN);
+				// ICP (incl. its testnet pseudo-network) is always available, so it keeps resolving to the ICP token.
+				expect(get(defaultFallbackToken)).toEqual(
+					isNetworkIdICP(networkId) ? ICP_TOKEN : ETHEREUM_TOKEN
+				);
 			});
 		});
 	});

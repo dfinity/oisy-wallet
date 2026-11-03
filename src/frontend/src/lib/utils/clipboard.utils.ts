@@ -1,12 +1,37 @@
-import { toastsShow } from '$lib/stores/toasts.store';
+import { i18n } from '$lib/stores/i18n.store';
+import { toastsErrorNoTrace, toastsShow } from '$lib/stores/toasts.store';
 import { copyText } from '$lib/utils/share.utils';
+import { get } from 'svelte/store';
 
-export const copyToClipboard = async ({ value, text }: { value: string; text: string }) => {
-	await copyText(value);
+/**
+ * @returns whether the value reached the clipboard. The browser rejects the write
+ * without permission or focus; that case shows an error toast instead of throwing.
+ * Pass `withToast: false` when the caller confirms the copy itself.
+ */
+export const copyToClipboard = async ({
+	value,
+	text,
+	withToast = true
+}: {
+	value: string;
+	text: string;
+	withToast?: boolean;
+}): Promise<boolean> => {
+	try {
+		await copyText(value);
+	} catch (err: unknown) {
+		toastsErrorNoTrace({ msg: { text: get(i18n).core.error.copy_failed }, err });
 
-	toastsShow({
-		text,
-		level: 'success',
-		duration: 2000
-	});
+		return false;
+	}
+
+	if (withToast) {
+		toastsShow({
+			text,
+			level: 'success',
+			duration: 2000
+		});
+	}
+
+	return true;
 };

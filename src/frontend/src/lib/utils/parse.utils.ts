@@ -19,6 +19,21 @@ export const parseToken = ({
 	unitName?: BigNumberish;
 }): bigint => parseUnits(normalizeAmountString(value), unitName);
 
+// Same as `parseToken` but returns `undefined` instead of throwing when the
+// value can't be represented as base units — non-numeric input, or a magnitude
+// beyond the ledger's integer range so `parseUnits` overflows. Callers treat the
+// `undefined` result as an invalid amount rather than silently skipping it.
+export const tryParseToken = (params: {
+	value: string;
+	unitName?: BigNumberish;
+}): bigint | undefined => {
+	try {
+		return parseToken(params);
+	} catch {
+		return undefined;
+	}
+};
+
 export const normalizeTokenToDecimals = ({
 	value,
 	oldUnitName,

@@ -1,4 +1,6 @@
-import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
+import { BTC_MAINNET_TOKEN, BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import IcConvertTokenWizard from '$icp/components/convert/IcConvertTokenWizard.svelte';
 import * as sendServices from '$icp/services/ic-send.services';
 import {
@@ -12,6 +14,10 @@ import {
 	type EthereumFeeContext
 } from '$icp/stores/ethereum-fee.store';
 import type { IcCkToken } from '$icp/types/ic-token';
+import {
+	SEND_FIRST_TIME_DESTINATION_CONFIRM,
+	SEND_FIRST_TIME_DESTINATION_WARNING
+} from '$lib/constants/test-ids.constants';
 import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 import { WizardStepsConvert } from '$lib/enums/wizard-steps';
 import { btcAddressMainnetStore, ethAddressStore } from '$lib/stores/address.store';
@@ -29,7 +35,7 @@ import { stringifyJson } from '$lib/utils/json.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -102,8 +108,9 @@ describe('IcConvertTokenWizard', () => {
 		});
 	};
 
+	const convertButtonSelector = '[data-tid="convert-review-button-next"]';
+
 	const clickConvertButton = async (container: HTMLElement) => {
-		const convertButtonSelector = '[data-tid="convert-review-button-next"]';
 		const button: HTMLButtonElement | null = container.querySelector(convertButtonSelector);
 		assertNonNullish(button, 'Button not found');
 		await fireEvent.click(button);
@@ -116,6 +123,7 @@ describe('IcConvertTokenWizard', () => {
 
 		btcAddressMainnetStore.reset();
 		ethAddressStore.reset();
+		btcTransactionsStore.reset(BTC_MAINNET_TOKEN_ID);
 
 		mockAuthStore();
 		mockBtcAddressStore();
@@ -161,13 +169,15 @@ describe('IcConvertTokenWizard', () => {
 	it('should call send with custom destination if it is set', async () => {
 		const customDestination = 'customDestination';
 
-		const { container } = render(IcConvertTokenWizard, {
+		const { container, getByTestId } = render(IcConvertTokenWizard, {
 			props: {
 				...props,
 				customDestination
 			},
 			context: mockContext()
 		});
+
+		await fireEvent.click(getByTestId(SEND_FIRST_TIME_DESTINATION_CONFIRM));
 
 		await clickConvertButton(container);
 
@@ -262,5 +272,183 @@ describe('IcConvertTokenWizard', () => {
 		});
 
 		expect(container).toHaveTextContent(en.core.warning.do_not_close);
+	});
+
+	describe('custom destination', () => {
+		const customDestination = 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq';
+
+		const customProps = { ...props, customDestination };
+
+		const mockBtcTransaction = ({
+			type,
+			from,
+			to
+		}: {
+			type: 'send' | 'receive';
+			from: string;
+			to: string;
+		}) =>
+			btcTransactionsStore.append({
+				tokenId: BTC_MAINNET_TOKEN_ID,
+				transactions: [
+					{
+						data: {
+							id: 'tx1',
+							timestamp: 1_700_000_000n,
+							type,
+							value: 100n,
+							from,
+							to: [to],
+							status: 'confirmed'
+						},
+						certified: true
+					}
+				]
+			});
+
+		it('shows the whole custom destination on the review', () => {
+			const { container } = render(IcConvertTokenWizard, {
+				props: customProps,
+				context: mockContext()
+			});
+
+			expect(container).toHaveTextContent(customDestination);
+		});
+
+		it('warns about a custom destination never sent to and keeps Convert disabled', () => {
+			const { getByTestId } = render(IcConvertTokenWizard, {
+				props: customProps,
+				context: mockContext()
+			});
+
+			expect(getByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).toBeInTheDocument();
+			expect(getByTestId('convert-review-button-next')).toBeDisabled();
+		});
+
+		it('converts once the first-time destination is confirmed', async () => {
+			const { container, getByTestId } = render(IcConvertTokenWizard, {
+				props: customProps,
+				context: mockContext()
+			});
+
+			await fireEvent.click(getByTestId(SEND_FIRST_TIME_DESTINATION_CONFIRM));
+
+			expect(getByTestId('convert-review-button-next')).toBeEnabled();
+
+			await clickConvertButton(container);
+
+			expect(sendSpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ to: customDestination })
+			);
+		});
+
+		it('asks again after going back from the review', async () => {
+			const { getByTestId, rerender } = render(IcConvertTokenWizard, {
+				props: customProps,
+				context: mockContext()
+			});
+
+			await fireEvent.click(getByTestId(SEND_FIRST_TIME_DESTINATION_CONFIRM));
+
+			await rerender({
+				...customProps,
+				currentStep: { name: WizardStepsConvert.CONVERT, title: 'title' }
+			});
+			await rerender(customProps);
+
+			expect(getByTestId(SEND_FIRST_TIME_DESTINATION_CONFIRM)).not.toBeChecked();
+			expect(getByTestId('convert-review-button-next')).toBeDisabled();
+		});
+
+		it('does not warn nor gate a custom destination already sent to on the twin network', () => {
+			mockBtcTransaction({ type: 'send', from: mockBtcAddress, to: customDestination });
+
+			const { queryByTestId, getByTestId } = render(IcConvertTokenWizard, {
+				props: customProps,
+				context: mockContext()
+			});
+
+			expect(queryByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).not.toBeInTheDocument();
+			expect(getByTestId('convert-review-button-next')).toBeEnabled();
+		});
+
+		it('still warns and gates when the address only ever sent to the wallet', () => {
+			mockBtcTransaction({ type: 'receive', from: customDestination, to: mockBtcAddress });
+
+			const { getByTestId } = render(IcConvertTokenWizard, {
+				props: customProps,
+				context: mockContext()
+			});
+
+			expect(getByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).toBeInTheDocument();
+			expect(getByTestId('convert-review-button-next')).toBeDisabled();
+		});
+
+		it('does not warn nor gate the default destination', () => {
+			const { queryByTestId, getByTestId } = render(IcConvertTokenWizard, {
+				props,
+				context: mockContext()
+			});
+
+			expect(queryByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).not.toBeInTheDocument();
+			expect(getByTestId('convert-review-button-next')).toBeEnabled();
+		});
+
+		it('warns and gates a custom Ethereum destination never sent to', () => {
+			const ckEthToken = {
+				...mockValidIcCkToken,
+				symbol: ETHEREUM_TOKEN.twinTokenSymbol
+			} as IcCkToken;
+
+			const { container, getByTestId } = render(IcConvertTokenWizard, {
+				props: { ...props, customDestination: mockEthAddress3 },
+				context: new Map<
+					symbol,
+					| ConvertContext
+					| BitcoinFeeContext
+					| EthereumFeeContext
+					| TokenActionValidationErrorsContext
+				>([
+					...mockContext(),
+					[
+						CONVERT_CONTEXT_KEY,
+						initConvertContext({
+							sourceToken: ckEthToken,
+							destinationToken: ETHEREUM_TOKEN
+						})
+					]
+				])
+			});
+
+			expect(container).toHaveTextContent(mockEthAddress3);
+			expect(getByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).toBeInTheDocument();
+			expect(getByTestId('convert-review-button-next')).toBeDisabled();
+		});
+
+		it('warns on the destination step about a custom destination never sent to', () => {
+			const { getByTestId } = render(IcConvertTokenWizard, {
+				props: {
+					...customProps,
+					currentStep: { name: WizardStepsConvert.DESTINATION, title: 'title' }
+				},
+				context: mockContext()
+			});
+
+			expect(getByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).toBeInTheDocument();
+		});
+
+		it('does not warn on the destination step about a custom destination already sent to', () => {
+			mockBtcTransaction({ type: 'send', from: mockBtcAddress, to: customDestination });
+
+			const { queryByTestId } = render(IcConvertTokenWizard, {
+				props: {
+					...customProps,
+					currentStep: { name: WizardStepsConvert.DESTINATION, title: 'title' }
+				},
+				context: mockContext()
+			});
+
+			expect(queryByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).not.toBeInTheDocument();
+		});
 	});
 });

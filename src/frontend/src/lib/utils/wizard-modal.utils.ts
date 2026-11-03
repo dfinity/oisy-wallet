@@ -4,15 +4,21 @@ import type {
 	WizardStepsAuthHelp,
 	WizardStepsConvert,
 	WizardStepsHowToConvert,
+	WizardStepsLimitOrder,
+	WizardStepsLiquidiumBorrow,
+	WizardStepsLiquidiumRepay,
+	WizardStepsLiquidiumSupply,
+	WizardStepsLiquidiumWithdraw,
 	WizardStepsReceive,
 	WizardStepsScanner,
 	WizardStepsSend,
 	WizardStepsSwap,
-	WizardStepsTradingDeposit
+	WizardStepsTip,
+	WizardStepsTradingDeposit,
+	WizardStepsTradingWithdraw
 } from '$lib/enums/wizard-steps';
 import type { WizardStepsGetTokenType } from '$lib/types/get-token';
-import type { WizardSteps } from '$lib/types/wizard';
-import type { WizardModal } from '@dfinity/gix-components';
+import type { WizardModal, WizardSteps } from '$lib/types/wizard';
 
 type StepName =
 	| WizardStepsSend
@@ -25,7 +31,14 @@ type StepName =
 	| TokenModalSteps
 	| WizardStepsGetTokenType
 	| WizardStepsScanner
-	| WizardStepsTradingDeposit;
+	| WizardStepsTradingDeposit
+	| WizardStepsTradingWithdraw
+	| WizardStepsLimitOrder
+	| WizardStepsLiquidiumSupply
+	| WizardStepsLiquidiumBorrow
+	| WizardStepsLiquidiumWithdraw
+	| WizardStepsLiquidiumRepay
+	| WizardStepsTip;
 
 export const goToWizardStep = <T extends StepName>({
 	modal,

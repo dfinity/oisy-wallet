@@ -1,9 +1,10 @@
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
-import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { CKETH_ABI } from '$eth/constants/cketh.constants';
+import { ethersProvider } from '$eth/providers/ethers.providers';
 import type { ContractAddress, EthAddress } from '$eth/types/address';
 import type { Erc20Provider } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
+import type { EthersProviderNetwork } from '$eth/types/network';
 import { TRACK_INFURA_GET_LOGS_CALL } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -11,14 +12,20 @@ import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { Contract, type ContractTransaction } from 'ethers/contract';
-import { InfuraProvider, type BlockTag, type Log, type Networkish } from 'ethers/providers';
+import type { BlockTag, JsonRpcProvider, Log } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraCkETHProvider implements Erc20Provider {
-	private readonly provider: InfuraProvider;
+	private readonly provider: JsonRpcProvider;
 
-	constructor(private readonly network: Networkish) {
-		this.provider = new InfuraProvider(this.network, INFURA_API_KEY);
+	constructor(private readonly network: EthersProviderNetwork) {
+		this.provider = ethersProvider(this.network);
+	}
+
+	// See `InfuraProvider.networkLabel`: the Infura name, unchanged from when this class held only
+	// a `Networkish`, so the tracked values stay comparable.
+	private get networkLabel(): string {
+		return (this.network.providers.infura ?? this.network.name).toString();
 	}
 
 	getFeeData = ({
@@ -46,13 +53,19 @@ export class InfuraCkETHProvider implements Erc20Provider {
 		return ckEthContract.deposit.populateTransaction(to);
 	};
 
+	// `endBlock` defaults to `latest`, which is what the pending-transactions
+	// listener wants: every deposit the minter has not yet observed. A caller that
+	// already knows which block its deposit landed in passes both bounds instead,
+	// turning an open-ended scan into a single-block lookup.
 	getLogs = ({
 		contract: { address: contractAddress },
 		startBlock: fromBlock,
+		endBlock: toBlock = 'latest',
 		topics
 	}: {
 		contract: ContractAddress;
 		startBlock?: BlockTag;
+		endBlock?: BlockTag;
 		topics: (string | null)[];
 	}): Promise<Log[]> => {
 		try {
@@ -63,9 +76,10 @@ export class InfuraCkETHProvider implements Erc20Provider {
 			trackEvent({
 				name: TRACK_INFURA_GET_LOGS_CALL,
 				metadata: {
-					network: this.network.toString(),
+					network: this.networkLabel,
 					contractAddress,
 					fromBlock: fromBlock?.toString() ?? 'latest',
+					toBlock: toBlock.toString(),
 					topics: topics.join(',')
 				}
 			});
@@ -75,7 +89,7 @@ export class InfuraCkETHProvider implements Erc20Provider {
 
 		return this.provider.getLogs({
 			fromBlock,
-			toBlock: 'latest',
+			toBlock,
 			address: contractAddress,
 			topics
 		});
@@ -84,7 +98,7 @@ export class InfuraCkETHProvider implements Erc20Provider {
 
 const providers: Record<NetworkId, InfuraCkETHProvider> = SUPPORTED_ETHEREUM_NETWORKS.reduce<
 	Record<NetworkId, InfuraCkETHProvider>
->((acc, { id, providers: { infura } }) => ({ ...acc, [id]: new InfuraCkETHProvider(infura) }), {});
+>((acc, network) => ({ ...acc, [network.id]: new InfuraCkETHProvider(network) }), {});
 
 export const infuraCkETHProviders = (networkId: NetworkId): InfuraCkETHProvider => {
 	const provider = providers[networkId];

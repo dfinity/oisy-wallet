@@ -1,7 +1,9 @@
+import { btcSwapProviders } from '$lib/providers/btc-swap.providers';
 import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
 import { icpBridgeProviders } from '$lib/providers/icp-bridge-swap.providers';
 import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
+import { xrpSwapProviders } from '$lib/providers/xrp-swap.providers';
 import {
 	swapSupportedTokensStore,
 	type SwapProviderSupport,
@@ -10,8 +12,9 @@ import {
 } from '$lib/stores/swap-supported-tokens.store';
 import type { GetSupportedDestinationsFn, SwapProvider, SwapTokenCategory } from '$lib/types/swap';
 import { determineCoverage } from '$lib/utils/swap-tokens-filter.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
+import { get } from 'svelte/store';
 
 const resolveProviderGroup = <
 	P extends {
@@ -71,7 +74,14 @@ export const loadSwapSupportedTokens = async ({
 }: {
 	identity: Identity;
 }): Promise<void> => {
-	const [icpProviders, icpBridgeProvidersResolved, evmProviders, solProviders] = await Promise.all([
+	const [
+		icpProviders,
+		icpBridgeProvidersResolved,
+		evmProviders,
+		solProviders,
+		btcProviders,
+		xrpProviders
+	] = await Promise.all([
 		resolveProviderGroup({
 			providers: swapProviders,
 			sourceCategory: 'icp',
@@ -91,6 +101,16 @@ export const loadSwapSupportedTokens = async ({
 			providers: solSwapProviders,
 			sourceCategory: 'sol',
 			callFn: (fn) => fn()
+		}),
+		resolveProviderGroup({
+			providers: btcSwapProviders,
+			sourceCategory: 'btc',
+			callFn: (fn) => fn()
+		}),
+		resolveProviderGroup({
+			providers: xrpSwapProviders,
+			sourceCategory: 'xrp',
+			callFn: (fn) => fn()
 		})
 	]);
 
@@ -99,10 +119,55 @@ export const loadSwapSupportedTokens = async ({
 	const aggregated: SwapSupportedTokensData = {
 		icp: aggregateCategory(icpResolutions),
 		evm: aggregateCategory(evmProviders),
-		sol: aggregateCategory(solProviders)
+		sol: aggregateCategory(solProviders),
+		btc: aggregateCategory(btcProviders),
+		xrp: aggregateCategory(xrpProviders)
 	};
 
-	const providers: SwapProviderSupport[] = [...icpResolutions, ...evmProviders, ...solProviders];
+	const providers: SwapProviderSupport[] = [
+		...icpResolutions,
+		...evmProviders,
+		...solProviders,
+		...btcProviders,
+		...xrpProviders
+	];
 
 	swapSupportedTokensStore.set({ aggregated, providers });
+};
+
+let solReloadGeneration = 0;
+
+/**
+ * Reads the Solana registry's source lists again into loaded swap lists, and leaves the other
+ * registries' as they are. LI.FI's is the Solana mainnet tokens known when it is read, and the
+ * default and custom SPL tokens load after the swap lists, or are added later. NEAR Intents answers
+ * from its cache. Does nothing before the swap lists have loaded, and only the latest of overlapping
+ * reads is kept.
+ */
+export const reloadSolSwapSupportedTokens = async (): Promise<void> => {
+	if (isNullish(get(swapSupportedTokensStore))) {
+		return;
+	}
+
+	const generation = ++solReloadGeneration;
+
+	const solProviders = await resolveProviderGroup({
+		providers: solSwapProviders,
+		sourceCategory: 'sol',
+		callFn: (fn) => fn()
+	});
+
+	const loaded = get(swapSupportedTokensStore);
+
+	if (generation !== solReloadGeneration || isNullish(loaded)) {
+		return;
+	}
+
+	swapSupportedTokensStore.set({
+		aggregated: { ...loaded.aggregated, sol: aggregateCategory(solProviders) },
+		providers: [
+			...loaded.providers.filter(({ sourceCategory }) => sourceCategory !== 'sol'),
+			...solProviders
+		]
+	});
 };

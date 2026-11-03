@@ -17,7 +17,9 @@
 	import { modalWalletConnectSign } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { walletConnectListenerStore } from '$lib/stores/wallet-connect.store';
+	import SolWalletConnectSignMessageModal from '$sol/components/wallet-connect/SolWalletConnectSignMessageModal.svelte';
 	import SolWalletConnectSignModal from '$sol/components/wallet-connect/SolWalletConnectSignModal.svelte';
+	import { SESSION_REQUEST_SOL_SIGN_MESSAGE } from '$sol/constants/wallet-connect.constants';
 	import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
 
 	let listener = $derived($walletConnectListenerStore);
@@ -62,7 +64,11 @@
 		{#if nonNullish(ethChainId)}
 			<EthWalletConnectSignModal {listener} {request} />
 		{:else if nonNullish(solChainId) && nonNullish(sourceSolNetwork)}
-			<SolWalletConnectSignModal {listener} network={sourceSolNetwork} {request} />
+			{#if request.params.request.method === SESSION_REQUEST_SOL_SIGN_MESSAGE}
+				<SolWalletConnectSignMessageModal {listener} network={sourceSolNetwork} {request} />
+			{:else}
+				<SolWalletConnectSignModal {listener} network={sourceSolNetwork} {request} />
+			{/if}
 		{:else if nonNullish(btcChain)}
 			{#if request.params.request.method === SESSION_REQUEST_BTC_SIGN_PSBT}
 				<BtcWalletConnectSignPsbtModal address={btcAddress} {listener} {request} />

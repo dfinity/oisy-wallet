@@ -6,18 +6,19 @@
 
 	interface Props {
 		approve?: boolean;
+		approveDisabled?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
 	}
 
-	let { approve = true, onApprove, onReject }: Props = $props();
+	let { approve = true, approveDisabled = false, onApprove, onReject }: Props = $props();
 </script>
 
 <ButtonGroup>
 	<Button colorStyle="error" disabled={$isBusy} onclick={onReject}>{$i18n.core.text.reject}</Button>
 
 	{#if approve}
-		<Button colorStyle="success" disabled={$isBusy} onclick={onApprove}>
+		<Button colorStyle="success" disabled={$isBusy || approveDisabled} onclick={onApprove}>
 			{$i18n.core.text.approve}
 		</Button>
 	{/if}

@@ -76,6 +76,7 @@ export const executeLiquidiumWithdraw = async ({
 	identity,
 	ethAddress,
 	poolId,
+	chain,
 	asset,
 	amount,
 	receiverAddress,
@@ -86,6 +87,7 @@ export const executeLiquidiumWithdraw = async ({
 	identity: Identity;
 	ethAddress: EthAddress;
 	poolId: string;
+	chain: Chain;
 	asset: string;
 	amount: bigint;
 	receiverAddress: string;
@@ -104,7 +106,8 @@ export const executeLiquidiumWithdraw = async ({
 		profileId,
 		poolId,
 		amount,
-		receiverAddress,
+		chain,
+		receiver: receiverAddress,
 		signerWalletAddress: ethAddress,
 		signerChain: Chain.ETH,
 		signerWalletAdapter: liquidiumWalletAdapter({ identity })

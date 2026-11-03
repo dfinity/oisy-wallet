@@ -17,7 +17,7 @@
 </script>
 
 <button
-	class="relative flex-1 rounded-lg bg-primary p-4 pt-12 shadow-sm"
+	class="relative flex-1 rounded-lg bg-primary p-4 pt-12 shadow-sm transition-[scale] duration-150 ease-out press"
 	aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, {
 		$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 	})}

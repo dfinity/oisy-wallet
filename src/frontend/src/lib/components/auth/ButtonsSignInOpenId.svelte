@@ -44,8 +44,8 @@
 
 	const variantClasses = $derived(
 		variant === 'lock'
-			? 'bg-brand-subtle-10 hover:bg-brand-subtle-20 focus-visible:outline-brand-primary'
-			: 'bg-primary border border-brand-subtle-20 hover:border-brand-primary-alt focus-visible:outline-brand-primary-alt'
+			? 'bg-brand-subtle-10 hover:bg-brand-subtle-20 active:bg-brand-subtle-30 focus-visible:outline-brand-primary'
+			: 'bg-primary border border-brand-subtle-20 hover:border-brand-primary-alt hover:bg-brand-subtle-10 active:bg-brand-subtle-30 focus-visible:outline-brand-primary-alt'
 	);
 </script>
 
@@ -56,7 +56,7 @@
 >
 	{#each providers as { provider, icon: Icon, ariaLabel, testId } (provider)}
 		<button
-			class={`flex size-14 items-center justify-center rounded-xl transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${variantClasses}`}
+			class={`flex size-14 items-center justify-center rounded-xl transition-[color,background-color,border-color,scale] duration-150 ease-out press-icon focus-visible:outline-2 focus-visible:outline-offset-2 ${variantClasses}`}
 			aria-label={ariaLabel}
 			data-tid={testId}
 			onclick={() => onProviderSelected(provider)}

@@ -15,8 +15,7 @@ describe('liquidium-wallet-adapter.services', () => {
 
 	const baseRequest: Omit<SignMessageRequest, 'chain'> = {
 		message: 'sign me',
-		actionType: 'create-account',
-		transferMode: 'native'
+		actionType: 'create-account'
 	};
 
 	describe('signMessage', () => {

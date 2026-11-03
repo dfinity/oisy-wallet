@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
@@ -9,33 +8,40 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		value?: number;
 		styleClass?: string;
 		showPlusSign?: boolean;
+		showMinusSign?: boolean;
 		showAsNeutral?: boolean;
 		showAsError?: boolean;
 		showAsSuccess?: boolean;
 		showWithShortenedLabel?: boolean;
 		fallback?: Snippet;
+		children?: Snippet;
 	}
 
 	const {
 		value,
 		showPlusSign = false,
+		showMinusSign = false,
 		styleClass,
 		showAsNeutral = false,
 		showAsSuccess = false,
 		showAsError = false,
 		showWithShortenedLabel = false,
-		fallback
+		fallback,
+		children
 	}: Props = $props();
 
 	let formattedCurrency = $derived(
 		nonNullish(value)
 			? formatCurrency({
-					value,
+					// The sign is prefixed below; format the magnitude when showMinusSign is set so a
+					// negative value doesn't render a doubled minus (formatCurrency signs it too).
+					value: showMinusSign ? Math.abs(value) : value,
 					currency: $currentCurrency,
 					exchangeRate: $currencyExchangeStore,
 					language: $currentLanguage
@@ -57,6 +63,7 @@
 	);
 
 	let positiveAmount = $derived(nonNullish(value) && value > 0);
+	let hasAmount = $derived(nonNullish(value) && value !== 0);
 </script>
 
 {#if nonNullish(yearlyAmount)}
@@ -68,7 +75,8 @@
 		class:text-tertiary={!positiveAmount}
 		in:fade
 	>
-		{`${showPlusSign && positiveAmount ? '+ ' : ''}${yearlyAmount}`}
+		{@render children?.()}
+		{`${showPlusSign && positiveAmount ? '+' : showMinusSign && hasAmount ? '−' : ''}${yearlyAmount}`}
 	</span>
 {:else if nonNullish(fallback)}
 	{@render fallback()}

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { blur } from 'svelte/transition';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OisyIndexCanisterBalanceOutOfSyncEvent } from '$lib/types/custom-events';
+	import { blur } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		children: Snippet;

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
 	import { sendIc } from '$icp/services/ic-send.services';
 	import type { IcTransferParams } from '$icp/types/ic-send';
@@ -28,6 +27,7 @@
 	import type { Address } from '$lib/types/address';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		amount: number;

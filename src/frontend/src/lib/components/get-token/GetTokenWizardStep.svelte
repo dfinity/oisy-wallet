@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import GetTokenActionItem from '$lib/components/get-token/GetTokenActionItem.svelte';
 	import GetTokenCardContent from '$lib/components/get-token/GetTokenCardContent.svelte';
 	import IconQr from '$lib/components/icons/IconQr.svelte';
@@ -26,6 +25,7 @@
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		token: Token;

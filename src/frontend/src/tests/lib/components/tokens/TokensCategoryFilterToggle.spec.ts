@@ -3,7 +3,7 @@ import { hideTokenCategoryFilter, tokenCategoryFilter } from '$lib/derived/setti
 import { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import { hideTokenCategoryFilterStore, tokenCategoryFilterStore } from '$lib/stores/settings.store';
 import en from '$tests/mocks/i18n.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render, screen } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('TokensCategoryFilterToggle', () => {
@@ -13,7 +13,7 @@ describe('TokensCategoryFilterToggle', () => {
 	});
 
 	it('should render a toggle with the correct aria label', () => {
-		const { container } = render(TokensCategoryFilterToggle);
+		const { container } = render(TokensCategoryFilterToggle, { showLabel: true });
 
 		const toggle = container.querySelector(`[aria-label="${en.tokens.text.hide_asset_types}"]`);
 
@@ -21,34 +21,34 @@ describe('TokensCategoryFilterToggle', () => {
 	});
 
 	it('should render without errors', () => {
-		const { container } = render(TokensCategoryFilterToggle);
+		const { container } = render(TokensCategoryFilterToggle, { showLabel: true });
 
 		expect(container).toBeTruthy();
 	});
 
-	it('should toggle store on oisyToggleTokenCategoryFilter event', () => {
-		render(TokensCategoryFilterToggle);
+	it('should toggle store when the switch is clicked', async () => {
+		render(TokensCategoryFilterToggle, { showLabel: true });
 
 		expect(get(hideTokenCategoryFilter)).toBeFalsy();
 
-		window.dispatchEvent(new CustomEvent('oisyToggleTokenCategoryFilter'));
+		await fireEvent.click(screen.getByRole('switch'));
 
 		expect(get(hideTokenCategoryFilter)).toBeTruthy();
 	});
 
-	it('should toggle back to disabled on second event', () => {
-		render(TokensCategoryFilterToggle);
+	it('should toggle back to disabled on second click', async () => {
+		render(TokensCategoryFilterToggle, { showLabel: true });
 
-		window.dispatchEvent(new CustomEvent('oisyToggleTokenCategoryFilter'));
+		await fireEvent.click(screen.getByRole('switch'));
 
 		expect(get(hideTokenCategoryFilter)).toBeTruthy();
 
-		window.dispatchEvent(new CustomEvent('oisyToggleTokenCategoryFilter'));
+		await fireEvent.click(screen.getByRole('switch'));
 
 		expect(get(hideTokenCategoryFilter)).toBeFalsy();
 	});
 
-	it('should reset token category filter on toggle', () => {
+	it('should reset token category filter on toggle', async () => {
 		tokenCategoryFilterStore.set({
 			key: 'token-category-filter',
 			value: { value: TokenCategoryTagValue.STABLECOIN }
@@ -56,15 +56,15 @@ describe('TokensCategoryFilterToggle', () => {
 
 		expect(get(tokenCategoryFilter)).toBe(TokenCategoryTagValue.STABLECOIN);
 
-		render(TokensCategoryFilterToggle);
+		render(TokensCategoryFilterToggle, { showLabel: true });
 
-		window.dispatchEvent(new CustomEvent('oisyToggleTokenCategoryFilter'));
+		await fireEvent.click(screen.getByRole('switch'));
 
 		expect(get(tokenCategoryFilter)).toBeUndefined();
 	});
 
-	it('should reset token category filter on each toggle', () => {
-		render(TokensCategoryFilterToggle);
+	it('should reset token category filter on each toggle', async () => {
+		render(TokensCategoryFilterToggle, { showLabel: true });
 
 		tokenCategoryFilterStore.set({
 			key: 'token-category-filter',
@@ -73,7 +73,7 @@ describe('TokensCategoryFilterToggle', () => {
 
 		expect(get(tokenCategoryFilter)).toBe(TokenCategoryTagValue.CRYPTO);
 
-		window.dispatchEvent(new CustomEvent('oisyToggleTokenCategoryFilter'));
+		await fireEvent.click(screen.getByRole('switch'));
 
 		expect(get(tokenCategoryFilter)).toBeUndefined();
 
@@ -84,7 +84,7 @@ describe('TokensCategoryFilterToggle', () => {
 
 		expect(get(tokenCategoryFilter)).toBe(TokenCategoryTagValue.COMMODITY);
 
-		window.dispatchEvent(new CustomEvent('oisyToggleTokenCategoryFilter'));
+		await fireEvent.click(screen.getByRole('switch'));
 
 		expect(get(tokenCategoryFilter)).toBeUndefined();
 	});

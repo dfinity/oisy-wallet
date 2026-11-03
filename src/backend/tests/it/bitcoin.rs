@@ -1,5 +1,7 @@
+use std::sync::LazyLock;
+
 use candid::Principal;
-use ic_cdk::bitcoin_canister::{Network as BitcoinNetwork, Outpoint, Utxo};
+use ic_cdk_bitcoin_canister::{Network as BitcoinNetwork, OutPoint, Txid, Utxo};
 use pretty_assertions::assert_eq;
 use shared::types::{
     bitcoin::{
@@ -15,14 +17,14 @@ use crate::utils::{
     pocketic::{controller, setup, setup_with_ii, setup_with_production_config, PicCanisterTrait},
 };
 
-const UTXO_1: Utxo = Utxo {
-    outpoint: Outpoint {
-        txid: vec![],
+static UTXO_1: LazyLock<Utxo> = LazyLock::new(|| Utxo {
+    outpoint: OutPoint {
+        txid: Txid::from([0; 32]),
         vout: 0,
     },
     value: 1000,
     height: 100,
-};
+});
 
 #[test]
 fn test_add_pending_transaction_requires_delegation_chain() {
@@ -33,7 +35,7 @@ fn test_add_pending_transaction_requires_delegation_chain() {
 
     let add_request = BtcAddPendingTransactionRequest {
         txid: vec![],
-        utxos: vec![UTXO_1],
+        utxos: vec![UTXO_1.clone()],
         network: BitcoinNetwork::Regtest,
         ii_delegation_chain: None,
     };
@@ -56,7 +58,7 @@ fn test_add_pending_transaction_requires_delegation_chain() {
 }
 
 #[test]
-fn test_add_pending_transaction_without_delegation_chain_passes_when_guard_disabled() {
+fn test_add_pending_transaction_enforces_guard_under_production_config() {
     let pic_setup = setup_with_production_config();
 
     let caller = Principal::from_text(CALLER).unwrap();
@@ -64,7 +66,7 @@ fn test_add_pending_transaction_without_delegation_chain_passes_when_guard_disab
 
     let add_request = BtcAddPendingTransactionRequest {
         txid: vec![],
-        utxos: vec![UTXO_1],
+        utxos: vec![UTXO_1.clone()],
         network: BitcoinNetwork::Regtest,
         ii_delegation_chain: None,
     };
@@ -78,11 +80,11 @@ fn test_add_pending_transaction_without_delegation_chain_passes_when_guard_disab
         .expect("Canister call failed");
 
     assert!(
-        !matches!(
+        matches!(
             add_response,
             Err(BtcAddPendingTransactionError::InvalidDelegationChain { .. })
         ),
-        "Delegation guard is disabled, should not get InvalidDelegationChain: {add_response:?}"
+        "Guard is enforced in production, expected InvalidDelegationChain: {add_response:?}"
     );
 }
 
@@ -143,7 +145,7 @@ fn test_add_pending_transaction_with_valid_delegation() {
 
     let add_request = BtcAddPendingTransactionRequest {
         txid: vec![],
-        utxos: vec![UTXO_1],
+        utxos: vec![UTXO_1.clone()],
         network: BitcoinNetwork::Regtest,
         ii_delegation_chain: Some(delegation_chain),
     };
@@ -171,7 +173,7 @@ fn test_controller_bypasses_delegation_check() {
 
     let add_request = BtcAddPendingTransactionRequest {
         txid: vec![],
-        utxos: vec![UTXO_1],
+        utxos: vec![UTXO_1.clone()],
         network: BitcoinNetwork::Regtest,
         ii_delegation_chain: None,
     };
@@ -226,7 +228,7 @@ fn test_get_pending_transactions_requires_delegation_chain() {
 }
 
 #[test]
-fn test_get_pending_transactions_without_delegation_chain_passes_when_guard_disabled() {
+fn test_get_pending_transactions_enforces_guard_under_production_config() {
     let pic_setup = setup_with_production_config();
     let caller = Principal::from_text(CALLER).unwrap();
     pic_setup.ensure_user_profile(caller);
@@ -245,11 +247,11 @@ fn test_get_pending_transactions_without_delegation_chain_passes_when_guard_disa
         .expect("Canister call failed");
 
     assert!(
-        !matches!(
+        matches!(
             response,
             Err(BtcGetPendingTransactionsError::InvalidDelegationChain { .. })
         ),
-        "Delegation guard is disabled, should not get InvalidDelegationChain: {response:?}"
+        "Guard is enforced in production, expected InvalidDelegationChain: {response:?}"
     );
 }
 
@@ -328,7 +330,7 @@ fn call_btc_add_pending_transaction(
 ) -> Result<(), BtcAddPendingTransactionError> {
     let request = BtcAddPendingTransactionRequest {
         txid: vec![],
-        utxos: vec![UTXO_1],
+        utxos: vec![UTXO_1.clone()],
         network: BitcoinNetwork::Regtest,
         ii_delegation_chain: None,
     };

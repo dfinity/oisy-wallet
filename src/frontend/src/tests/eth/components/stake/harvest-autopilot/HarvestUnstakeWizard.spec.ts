@@ -167,7 +167,9 @@ describe('HarvestUnstakeWizard', () => {
 			vi.spyOn(feeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
 				...ctx,
 				maxGasFee: readable(undefined),
-				minGasFee: readable(undefined)
+				minGasFee: readable(undefined),
+				estimatedGasFee: readable(undefined),
+				feePrioritiesStore: writable(undefined)
 			}));
 		});
 
@@ -281,7 +283,9 @@ describe('HarvestUnstakeWizard', () => {
 			vi.spyOn(feeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
 				...ctx,
 				maxGasFee: readable(undefined),
-				minGasFee: readable(undefined)
+				minGasFee: readable(undefined),
+				estimatedGasFee: readable(undefined),
+				feePrioritiesStore: writable(undefined)
 			}));
 		});
 

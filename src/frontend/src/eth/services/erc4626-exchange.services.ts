@@ -1,5 +1,5 @@
-import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { ERC4626_ABI } from '$eth/constants/erc4626.constants';
+import { ethersProvider } from '$eth/providers/ethers.providers';
 import type { Erc4626TokensExchangeData } from '$eth/types/erc4626';
 import type {
 	CoingeckoSimpleErc4626TokenPriceResponse,
@@ -8,7 +8,6 @@ import type {
 import { consoleError } from '$lib/utils/console.utils';
 import { isNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
-import { InfuraProvider } from 'ethers/providers';
 
 export const calculateErc4626Prices = async ({
 	erc20Prices,
@@ -21,7 +20,7 @@ export const calculateErc4626Prices = async ({
 
 	await Promise.all(
 		erc4626TokensExchangeData.map(
-			async ({ vaultAddress, vaultDecimals, assetAddress, assetDecimals, infura, exchange }) => {
+			async ({ vaultAddress, vaultDecimals, assetAddress, assetDecimals, network, exchange }) => {
 				try {
 					if (isNullish(exchange?.coingeckoId)) {
 						return;
@@ -33,7 +32,7 @@ export const calculateErc4626Prices = async ({
 						return;
 					}
 
-					const provider = new InfuraProvider(infura, INFURA_API_KEY);
+					const provider = ethersProvider(network);
 					const contract = new Contract(vaultAddress, ERC4626_ABI, provider);
 
 					const oneShare = 10n ** BigInt(vaultDecimals);

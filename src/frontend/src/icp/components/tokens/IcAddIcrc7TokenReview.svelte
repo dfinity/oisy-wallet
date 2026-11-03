@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
-	import { blur, fade } from 'svelte/transition';
 	import { icrc7Tokens } from '$icp/derived/icrc7.derived';
 	import {
 		loadAndAssertAddCustomToken,
@@ -20,6 +19,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { blur, fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		icrc7CanisterId?: string;

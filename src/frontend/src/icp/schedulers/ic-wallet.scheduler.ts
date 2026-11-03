@@ -12,11 +12,21 @@ import { isNullish } from '@dfinity/utils';
 
 export type IcWalletMsg = 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 
+/**
+ * Resolves the message `ref` used to disambiguate wallet workers running as a singleton.
+ *
+ * ICRC and ICP tokens are keyed on their Ledger canister ID (both always provide one), while
+ * DIP-20 tokens fall back to their single canister ID. Extracted as a concrete-union helper because
+ * `in`-narrowing does not resolve cleanly on the generic `PostMessageDataRequest` type parameter.
+ */
+export const walletDataRef = (
+	data: PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
+): PostMessageCommon['ref'] =>
+	'ledgerCanisterId' in data ? data.ledgerCanisterId : data.canisterId;
+
 export abstract class IcWalletScheduler<
 	PostMessageDataRequest extends
-		| PostMessageDataRequestIcrc
-		| PostMessageDataRequestIcp
-		| PostMessageDataRequestDip20
+		PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
 > implements Scheduler<PostMessageDataRequest> {
 	protected ref: PostMessageCommon['ref'] | undefined;
 
@@ -27,13 +37,7 @@ export abstract class IcWalletScheduler<
 	}
 
 	protected setRef(data: PostMessageDataRequest | undefined) {
-		this.ref = isNullish(data)
-			? undefined
-			: 'ledgerCanisterId' in data
-				? data.ledgerCanisterId
-				: 'indexCanisterId' in data
-					? data.indexCanisterId
-					: data.canisterId;
+		this.ref = isNullish(data) ? undefined : walletDataRef(data);
 	}
 
 	async start(data: PostMessageDataRequest | undefined) {
@@ -47,6 +51,11 @@ export abstract class IcWalletScheduler<
 	}
 
 	async trigger(data: PostMessageDataRequest | undefined) {
+		// A scheduler created by a `trigger` (no prior `start`) would otherwise keep `ref` undefined
+		// and silently drop every sync result via the `isNullish(this.ref)` guard in the postMessage
+		// helpers — the same fix BtcWalletScheduler/SolWalletScheduler already carry.
+		this.setRef(data);
+
 		await this.timer.trigger<PostMessageDataRequest>({
 			job: this.syncWallet,
 			data

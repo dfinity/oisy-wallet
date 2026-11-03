@@ -1,9 +1,15 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
+	import {
+		EXTERNAL_LINK_POPUP_HEIGHT,
+		EXTERNAL_LINK_POPUP_WIDTH
+	} from '$lib/constants/app.constants';
 	import { trackEvent as trackEventServices } from '$lib/services/analytics.services';
 	import type { TrackEventParams } from '$lib/types/analytics';
+	import { isDesktop, isPWAStandalone } from '$lib/utils/device.utils';
+	import { popupCenter } from '$lib/utils/window.utils';
 
 	interface Props {
 		children?: Snippet;
@@ -12,7 +18,6 @@
 		iconSize?: string;
 		iconVisible?: boolean;
 		inline?: boolean;
-		color?: 'blue' | 'inherit';
 		fullWidth?: boolean;
 		styleClass?: string;
 		trackEvent?: TrackEventParams;
@@ -30,7 +35,6 @@
 		iconSize = '20',
 		iconVisible = true,
 		inline = false,
-		color = 'inherit',
 		fullWidth = false,
 		styleClass = '',
 		trackEvent,
@@ -41,27 +45,81 @@
 		iconAsLast = false
 	}: Props = $props();
 
-	const onclick = () => {
-		if (isNullish(trackEvent)) {
-			return;
+	// Buttons and menu items bring their own hover and press; a plain link gets the link ones.
+	const asLink = $derived(!asButton && !asMenuItem);
+	const iconOnly = $derived(iconVisible && isNullish(children));
+
+	// In a desktop PWA, a `target="_blank"` link opens in the last used browser window, which can
+	// sit on another desktop and pull the focus there. A popup window opens over the PWA instead.
+	// Modifier clicks keep the browser default so a real tab is still one Cmd/Ctrl-click away.
+	const openInPopup = (event: MouseEvent): boolean => {
+		if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+			return false;
 		}
 
-		trackEventServices(trackEvent);
+		if (!isDesktop() || !isPWAStandalone()) {
+			return false;
+		}
+
+		const features = popupCenter({
+			width: EXTERNAL_LINK_POPUP_WIDTH,
+			height: EXTERNAL_LINK_POPUP_HEIGHT
+		});
+
+		if (isNullish(features)) {
+			return false;
+		}
+
+		let protocol: string;
+		try {
+			({ protocol } = new URL(href, window.location.href));
+		} catch {
+			return false;
+		}
+
+		if (protocol !== 'http:' && protocol !== 'https:') {
+			return false;
+		}
+
+		// Not `noopener` in the features: with it, a Safari web app ignores the popup size for links
+		// on the same site (e.g. docs.oisy.com) and opens a full-size window. The opener is cut by
+		// hand instead, and the `Referrer-Policy: same-origin` header already withholds the referrer.
+		const popup = window.open(href, '_blank', features);
+
+		if (isNullish(popup)) {
+			return false;
+		}
+
+		popup.opener = null;
+
+		return true;
+	};
+
+	const onclick = (event: MouseEvent) => {
+		if (nonNullish(trackEvent)) {
+			trackEventServices(trackEvent);
+		}
+
+		if (openInPopup(event)) {
+			event.preventDefault();
+		}
 	};
 </script>
 
 <a
 	style={`${inline ? 'vertical-align: sub;' : ''}`}
 	class="inline-flex items-center gap-2 no-underline {styleClass}"
-	class:active:text-brand-primary-alt={color === 'inherit' && !asButton && !asMenuItem}
-	class:active:text-brand-secondary={color === 'blue' && !asButton && !asMenuItem}
+	class:active:text-brand-hover={asLink}
 	class:as-button={asButton}
+	class:duration-150={asLink}
+	class:ease-out={asLink}
 	class:flex-row-reverse={iconAsLast}
-	class:hover:text-brand-primary-alt={color === 'inherit' && !asButton && !asMenuItem}
-	class:hover:text-brand-secondary={color === 'blue' && !asButton && !asMenuItem}
+	class:hover:text-brand-hover={asLink}
 	class:nav-item={asMenuItem}
 	class:nav-item-condensed={asMenuItemCondensed}
-	class:text-brand-primary-alt={!asButton && !asMenuItem}
+	class:press-icon={asLink && iconOnly}
+	class:text-brand-primary-alt={asLink}
+	class:transition-[color,scale]={asLink}
 	class:w-full={fullWidth}
 	aria-label={ariaLabel}
 	data-tid={testId}

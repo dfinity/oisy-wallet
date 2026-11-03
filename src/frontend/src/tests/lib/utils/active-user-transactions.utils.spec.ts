@@ -1,11 +1,14 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	activeUserTransactionsStateToList,
+	activeUserTransactionTimestampNs,
 	advanceStatus,
 	hasActiveUserTransactionPollUpdateChanges,
+	isActiveUserTransactionError,
 	isActiveUserTransactionUnseen,
 	isTerminalActiveUserTransaction,
-	sortActiveUserTransactionsByCreatedAtDesc
+	sortActiveUserTransactionsByTimestampDesc
 } from '$lib/utils/active-user-transactions.utils';
 import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 
@@ -29,13 +32,87 @@ describe('active-user-transactions.utils', () => {
 		});
 	});
 
-	describe('sortActiveUserTransactionsByCreatedAtDesc', () => {
+	describe('isActiveUserTransactionError', () => {
+		it.each([{ IllegalStatusTransition: null }, { NotFound: null }, { InvalidData: 'bad refs' }])(
+			'is true for the canister refusing the call (%o)',
+			(err) => {
+				expect(isActiveUserTransactionError(err)).toBeTruthy();
+			}
+		);
+
+		// A transport failure, after which the call may still have committed.
+		it.each([new Error('network'), undefined, null, 'refused', { Other: null }])(
+			'is false for anything else (%o)',
+			(err) => {
+				expect(isActiveUserTransactionError(err)).toBeFalsy();
+			}
+		);
+	});
+
+	describe('activeUserTransactionTimestampNs', () => {
+		it('returns updated_at_ns for terminal transactions', () => {
+			expect(
+				activeUserTransactionTimestampNs(
+					buildTx({ status: { Succeeded: null }, created_at_ns: 1n, updated_at_ns: 5n })
+				)
+			).toBe(5n);
+
+			expect(
+				activeUserTransactionTimestampNs(
+					buildTx({ status: { Failed: null }, created_at_ns: 1n, updated_at_ns: 5n })
+				)
+			).toBe(5n);
+		});
+
+		it('returns created_at_ns for transactions still in progress', () => {
+			expect(
+				activeUserTransactionTimestampNs(
+					buildTx({ status: { Pending: null }, created_at_ns: 1n, updated_at_ns: 5n })
+				)
+			).toBe(1n);
+
+			expect(
+				activeUserTransactionTimestampNs(
+					buildTx({ status: { Executing: null }, created_at_ns: 1n, updated_at_ns: 5n })
+				)
+			).toBe(1n);
+		});
+	});
+
+	describe('sortActiveUserTransactionsByTimestampDesc', () => {
 		it('returns transactions newest-first by created_at_ns', () => {
 			const a = buildTx({ id: 'a', created_at_ns: 1n });
 			const b = buildTx({ id: 'b', created_at_ns: 3n });
 			const c = buildTx({ id: 'c', created_at_ns: 2n });
 
-			expect(sortActiveUserTransactionsByCreatedAtDesc([a, b, c]).map((t) => t.id)).toEqual([
+			expect(sortActiveUserTransactionsByTimestampDesc([a, b, c]).map((t) => t.id)).toEqual([
+				'b',
+				'c',
+				'a'
+			]);
+		});
+
+		it('orders terminal transactions by updated_at_ns', () => {
+			const a = buildTx({
+				id: 'a',
+				status: { Succeeded: null },
+				created_at_ns: 3n,
+				updated_at_ns: 4n
+			});
+			const b = buildTx({
+				id: 'b',
+				status: { Succeeded: null },
+				created_at_ns: 1n,
+				updated_at_ns: 9n
+			});
+			const c = buildTx({
+				id: 'c',
+				status: { Pending: null },
+				created_at_ns: 6n,
+				updated_at_ns: 7n
+			});
+
+			expect(sortActiveUserTransactionsByTimestampDesc([a, b, c]).map((t) => t.id)).toEqual([
 				'b',
 				'c',
 				'a'
@@ -47,7 +124,7 @@ describe('active-user-transactions.utils', () => {
 			const b = buildTx({ id: 'b', created_at_ns: 2n });
 			const input = [a, b];
 
-			sortActiveUserTransactionsByCreatedAtDesc(input);
+			sortActiveUserTransactionsByTimestampDesc(input);
 
 			expect(input.map((t) => t.id)).toEqual(['a', 'b']);
 		});
@@ -64,6 +141,8 @@ describe('active-user-transactions.utils', () => {
 					old: buildTx({ id: 'old', created_at_ns: 1n }),
 					new: buildTx({ id: 'new', created_at_ns: 9n })
 				},
+				seenUpToNs: ZERO,
+				loadedUpToNs: ZERO,
 				lastSeenUpdatedAtNs: {},
 				terminalSideEffectsApplied: {}
 			});
@@ -84,6 +163,8 @@ describe('active-user-transactions.utils', () => {
 				isActiveUserTransactionUnseen({
 					state: {
 						data: { a: tx },
+						seenUpToNs: ZERO,
+						loadedUpToNs: ZERO,
 						lastSeenUpdatedAtNs: {},
 						terminalSideEffectsApplied: {}
 					},
@@ -97,6 +178,8 @@ describe('active-user-transactions.utils', () => {
 				isActiveUserTransactionUnseen({
 					state: {
 						data: { a: tx },
+						seenUpToNs: ZERO,
+						loadedUpToNs: ZERO,
 						lastSeenUpdatedAtNs: { a: '3' },
 						terminalSideEffectsApplied: {}
 					},
@@ -110,12 +193,45 @@ describe('active-user-transactions.utils', () => {
 				isActiveUserTransactionUnseen({
 					state: {
 						data: { a: tx },
+						seenUpToNs: ZERO,
+						loadedUpToNs: ZERO,
 						lastSeenUpdatedAtNs: { a: '5' },
 						terminalSideEffectsApplied: {}
 					},
 					tx
 				})
 			).toBeFalsy();
+		});
+
+		// Seen on another device: this browser has no seen-state of its own for the row.
+		it('returns false when the seen mark covers updated_at_ns', () => {
+			expect(
+				isActiveUserTransactionUnseen({
+					state: {
+						data: { a: tx },
+						seenUpToNs: 5n,
+						loadedUpToNs: ZERO,
+						lastSeenUpdatedAtNs: {},
+						terminalSideEffectsApplied: {}
+					},
+					tx
+				})
+			).toBeFalsy();
+		});
+
+		it('returns true when the row changed after the seen mark', () => {
+			expect(
+				isActiveUserTransactionUnseen({
+					state: {
+						data: { a: tx },
+						seenUpToNs: 4n,
+						loadedUpToNs: ZERO,
+						lastSeenUpdatedAtNs: {},
+						terminalSideEffectsApplied: {}
+					},
+					tx
+				})
+			).toBeTruthy();
 		});
 	});
 

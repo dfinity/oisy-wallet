@@ -12,7 +12,7 @@ use serde::Serialize;
 
 use crate::types::network::marker_trait::{
     BitcoinMainnet, BitcoinRegtest, BitcoinTestnet, EthereumMainnet, EthereumSepolia,
-    InternetComputer, Network, SolanaDevnet, SolanaLocal, SolanaMainnet,
+    InternetComputer, Network, SolanaDevnet, SolanaLocal, SolanaMainnet, XrpMainnet,
 };
 
 pub mod conversion;
@@ -30,6 +30,7 @@ pub enum TokenAccountId {
     Sol(SolPrincipal),
     Btc(BtcAddress),
     Eth(EthAddress),
+    Xrp(XrpAddress),
 }
 
 /// An account identifier for Internet Computer tokens.
@@ -197,6 +198,24 @@ impl AccountId<EthereumMainnet> for EthAddress {}
 impl AccountId<EthereumSepolia> for EthAddress {}
 impl TokenId<EthereumMainnet> for EthAddress {}
 impl TokenId<EthereumSepolia> for EthAddress {}
+
+/// An XRP Ledger classic address.
+///
+/// # Format
+/// A string, 25-35 characters long, starting with "r". It is the base58check encoding, in the
+/// XRP Ledger alphabet, of a zero type byte followed by the 20-byte account ID. The address is
+/// case-sensitive.
+///
+/// X-addresses, which also encode a destination tag, are not supported.
+///
+/// # Example
+/// - `rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh`
+///
+/// # Reference
+/// - <https://xrpl.org/docs/references/protocol/data-types/base58-encodings>
+#[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct XrpAddress(pub String);
+impl AccountId<XrpMainnet> for XrpAddress {}
 
 /// A marker trait, used to indicate that a type can be used as a token identifier for a given
 /// network.

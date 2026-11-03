@@ -15,6 +15,7 @@ import {
 	POLYGON_AMOY_NETWORK_ID,
 	POLYGON_MAINNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
@@ -27,8 +28,10 @@ import {
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import type { NetworkId } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
+import { candidVariantKeyLabel, resolveCandidVariantKey } from '$lib/utils/candid.utils';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { isNullish } from '@dfinity/utils';
 
@@ -69,6 +72,10 @@ const networkIdToKey = (networkId: NetworkId): NetworkSettingsFor | undefined =>
 			return { ArbitrumMainnet: null };
 		case ARBITRUM_SEPOLIA_NETWORK_ID:
 			return { ArbitrumSepolia: null };
+		case XRP_MAINNET_NETWORK_ID:
+			return { XrpMainnet: null };
+		case ROBINHOOD_MAINNET_NETWORK_ID:
+			return { RobinhoodMainnet: null };
 		default:
 			// We just print the error to console and ignore the missing network, for the sake of the user's experience.
 			consoleWarn(`Unknown networkId: ${networkId.description}`);
@@ -100,3 +107,41 @@ export const isUserNetworkEnabled = ({
 	userNetworks: UserNetworks;
 	networkId: NetworkId;
 }): boolean => userNetworks[networkId]?.enabled ?? false;
+
+/**
+ * Normalises the network settings of a tolerantly decoded profile (see
+ * `backend.tolerant.factory.ts`). Keys arrive as candid hashes rather than names, because the
+ * decoder accepted any variant tag; the ones this frontend knows are resolved back to their name,
+ * and the rest are reported so we learn the backend is ahead of us.
+ *
+ * Dropping an unresolved key loses that one setting — never the whole record, which is what the
+ * generated decoder would have done.
+ */
+export const resolveNetworkSettingsKeys = ({
+	networks,
+	names
+}: {
+	networks: [object, NetworkSettings][];
+	names: readonly string[];
+}): {
+	networks: [NetworkSettingsFor, NetworkSettings][];
+	unresolved: string[];
+} =>
+	networks.reduce<{
+		networks: [NetworkSettingsFor, NetworkSettings][];
+		unresolved: string[];
+	}>(
+		(acc, [key, settings]) => {
+			const name = resolveCandidVariantKey({ key, names });
+
+			if (isNullish(name)) {
+				return { ...acc, unresolved: [...acc.unresolved, candidVariantKeyLabel(key)] };
+			}
+
+			return {
+				...acc,
+				networks: [...acc.networks, [{ [name]: null } as NetworkSettingsFor, settings]]
+			};
+		},
+		{ networks: [], unresolved: [] }
+	);

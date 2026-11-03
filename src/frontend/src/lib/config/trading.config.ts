@@ -11,7 +11,7 @@ export const tradingDepositWizardSteps = ({
 	},
 	{
 		name: WizardStepsTradingDeposit.TOKENS_LIST,
-		title: i18n.send.text.select_token
+		title: i18n.trading.deposit.title
 	},
 	{
 		name: WizardStepsTradingDeposit.FILTER_NETWORKS,

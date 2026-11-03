@@ -5,6 +5,7 @@ import type { UserNetworks } from '$lib/types/user-networks';
 import { isNetworkIdEthereum, isNetworkIdEvm, isNetworkIdSolana } from '$lib/utils/network.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import type { SolanaNetwork } from '$sol/types/network';
+import { solAccountExplorerUrl } from '$sol/utils/sol-explorer.utils';
 import { nonNullish } from '@dfinity/utils';
 
 export const defineEnabledNetworks = <T extends Network>({
@@ -40,7 +41,9 @@ export const getContractExplorerUrl = ({
 			return `${baseUrl}/address/${contractAddress}`;
 		}
 		if (isNetworkIdSolana(network.id)) {
-			return `${baseUrl}/account/${contractAddress}`;
+			// The Solana explorer URL is a template carrying a $args placeholder (devnet appends its
+			// cluster as a query after it), so the account must be substituted in, never appended.
+			return solAccountExplorerUrl({ network, address: contractAddress });
 		}
 	}
 };

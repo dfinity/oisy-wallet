@@ -72,6 +72,13 @@ in the same PR — that's the
   [`types::maps`](../../../src/backend/src/types/maps.rs).
 - Custom types are made `Storable` via the generic
   [`Candid<T>`](../../../src/backend/src/types/storable.rs) wrapper.
+- **Validate before writing.** `Candid<T>` validates on decode only: a type
+  that uses `validate_on_deserialize!` runs `Validate` every time it is read
+  back and traps when that fails, but writing it checks nothing. Endpoint
+  arguments are validated when they are decoded; a value the canister builds
+  itself (HTTP outcall data, merged lists, server-set fields) must pass
+  `Validate` before it is written. See `update_price` in
+  [`exchange/mod.rs`](../../../src/backend/src/exchange/mod.rs).
 - Adding, renaming, or repurposing a `MemoryId` is a state migration. See
   [`workflows/state-and-migrations.md`](./workflows/state-and-migrations.md)
   for the contract.
@@ -116,6 +123,24 @@ pub fn create_contact(req: CreateContactRequest) -> CreateContactResult {
 - Update `backend.did` via `npm run generate` after any change to the
   set / signature of `#[update]` / `#[query]` exports.
 
+## Reads a certified call returns — below 2 MiB
+
+A certified call runs a `#[query]` in replicated execution, where a reply
+is capped at 2 MiB (a query gets 3 MiB). A read whose result grows with
+user data must stay below that at the caps, not only for typical data:
+
+- Return lists in pages filled up to an encoded-size budget, measured per
+  item with `candid::encode_one`. The caller passes `after` (the `next` of
+  the previous page, none for the first page), the reply sets `next` while
+  items remain, and every page holds at least one item. Example:
+  `get_contacts_page` with `CONTACTS_PAGE_MAX_BYTES` (1.5 MiB).
+- Keep blobs out of list replies and return them in fixed batches sized
+  from their own cap: `get_contact_images` takes at most
+  `MAX_CONTACT_IMAGES_PER_CALL` (16) IDs of images up to 100 KiB, a bound
+  enforced while the request decodes.
+- Leave the existing endpoint as it is for callers that already use it
+  (`get_contacts`).
+
 ## Threshold signatures — chain-fusion signer only
 
 - Direct calls to `sign_with_ecdsa` / `sign_with_schnorr` are forbidden
@@ -124,6 +149,12 @@ pub fn create_contact(req: CreateContactRequest) -> CreateContactResult {
   canister**. Wiring is in
   [`signer/service.rs`](../../../src/backend/src/signer/service.rs)
   (`allow_signing`, `get_allowed_cycles`, top-up flow, allowance maths).
+- A user's signer public keys (and so their BTC / ETH / SOL addresses) are
+  derived offline from the signer's root keys, which
+  [`signer/service.rs`](../../../src/backend/src/signer/service.rs) fetches
+  once and caches (`cfs_ecdsa_root_key`, `cfs_ed25519_root_key`, derivation
+  via `ic-secp256k1` / `ic-ed25519`). Don't call `ecdsa_public_key` /
+  `schnorr_public_key` per user.
 - See [SIGNER_DOMAINS.md](../../../SIGNER_DOMAINS.md) for the architecture
   and per-domain considerations.
 
@@ -189,8 +220,8 @@ The root `Cargo.toml` enables strict lints (`pedantic`, `warnings = "deny"`,
   → use `ic_cdk::print` / `ic_cdk::println`. `std::assert_eq` in tests →
   `pretty_assertions::assert_eq`.
 - **Methods:** `dfn_core::api::print`,
-  `ic_cdk::api::management_canister::ecdsa::sign_with_ecdsa`,
-  `…::schnorr::sign_with_schnorr`.
+  `ic_cdk_management_canister::sign_with_ecdsa`,
+  `ic_cdk_management_canister::sign_with_schnorr`.
 
 ## Anti-patterns (reject these)
 

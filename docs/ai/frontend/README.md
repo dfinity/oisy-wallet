@@ -17,6 +17,9 @@ starting point. Read it once per session.
       with no `any`).
 - [ ] No hard-coded user-visible strings; a11y attributes set —
       [`i18n-and-a11y.md`](./i18n-and-a11y.md).
+- [ ] Anything pressable shows a press, rows a pressed fill, and small
+      controls have a 40 px tap area, through the shared utilities —
+      [`stack-and-patterns.md#press-feedback`](./stack-and-patterns.md#press-feedback).
 - [ ] User-visible copy, colours, and icons follow brand rules —
       [`brand-and-copy.md`](./brand-and-copy.md).
 - [ ] I have or extended tests where the [`testing.md`](./testing.md) policy
@@ -46,10 +49,15 @@ Framework, UI lib, chain SDKs, and dev tooling are discoverable from
 - **Testing.** Vitest 4 + `@testing-library/svelte` + `jsdom`, sharded 20×
   in CI. Specs live under `src/frontend/src/tests/` mirroring source
   (never co-located). Playwright (`e2e/`) is maintenance-only.
+- **Analytics.** Product events go through a single `trackEvent` entry point
+  and a small shared metadata vocabulary; it is non-critical, anonymous, and
+  never throws into a user flow. Read [`analytics.md`](./analytics.md) before
+  wiring any tracking — it and the `PLAUSIBLE_*` enums are the canonical
+  reference for events and their property schema.
 - **Path aliases** (declared in
   [`svelte.config.js`](../../../svelte.config.js) and
   [`vitest.config.ts`](../../../vitest.config.ts)): `$lib`, `$routes`,
-  `$btc`, `$eth`, `$evm`, `$icp`, `$sol`, `$icp-eth`, `$env`,
+  `$btc`, `$eth`, `$evm`, `$icp`, `$sol`, `$xrp`, `$icp-eth`, `$env`,
   `$declarations`, `$tests`. Relative imports under `src/frontend/src/`
   are an ESLint error.
 
@@ -60,7 +68,7 @@ src/frontend/src/
 ├── routes/         SvelteKit pages — (app) (public) (sign) groups
 ├── lib/            Cross-cutting components / services / stores / derived /
 │                   utils / constants / i18n / schema / validation / workers
-├── btc/  eth/  evm/  icp/  sol/  icp-eth/   Per-chain mirrors of lib/
+├── btc/  eth/  evm/  icp/  sol/  xrp/  icp-eth/   Per-chain mirrors of lib/
 ├── env/            Networks, tokens and feature-flag definitions
 ├── tests/          Mirrors src/ — every *.spec.ts lives here
 └── hooks.ts, app.html, app.d.ts

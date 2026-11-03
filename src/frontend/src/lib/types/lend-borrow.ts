@@ -9,4 +9,5 @@ export interface LendBorrowProviderConfig {
 	descriptionKey: string;
 	logo: string;
 	url: string;
+	docsUrl: string;
 }

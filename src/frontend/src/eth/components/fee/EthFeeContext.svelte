@@ -1,8 +1,14 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, onMount, type Snippet, untrack } from 'svelte';
+	import { get } from 'svelte/store';
 	import { ERC20_FALLBACK_FEE } from '$eth/constants/erc20.constants';
-	import { ETH_FEE_DATA_LISTENER_DELAY } from '$eth/constants/eth.constants';
+	import {
+		ETH_FEE_DATA_LISTENER_DELAY,
+		ETH_FEE_RETRY_BASE_DELAY,
+		ETH_FEE_RETRY_MAX_ATTEMPTS,
+		ETH_FEE_RETRY_MAX_DELAY
+	} from '$eth/constants/eth.constants';
 	import { encodeErc20Approve } from '$eth/services/approve.services';
 	import { encodeErc4626Redeem, encodeErc4626Withdraw } from '$eth/services/erc4626.services';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
@@ -31,6 +37,7 @@
 		toCkEthHelperContractAddress
 	} from '$icp-eth/utils/cketh.utils';
 	import { ethAddress } from '$lib/derived/address.derived';
+	import { EthFeePriority } from '$lib/enums/eth-fee-priority';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import type { WebSocketListener } from '$lib/types/listener';
@@ -38,12 +45,19 @@
 	import type { Nft } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
+	import type { TransactionFeeData } from '$lib/types/transaction';
 	import { maxBigInt } from '$lib/utils/bigint.utils';
 	import { assertIsNetworkEthereum, isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
 		observe: boolean;
+		// Set by `triggerUpdateFee` and cleared once a sample taken for the new inputs has landed. Until
+		// then the fee in hand was estimated for inputs that are gone, which a consumer about to freeze
+		// it has to wait out.
+		outdated?: boolean;
+		// Flows that offer no choice (swap, convert, stake) simply leave this at the default.
+		priority?: EthFeePriority;
 		destination?: string;
 		amount?: OptionAmount;
 		data?: string;
@@ -62,6 +76,8 @@
 
 	let {
 		observe,
+		outdated = $bindable(false),
+		priority = EthFeePriority.STANDARD,
 		destination = '',
 		amount,
 		data,
@@ -78,7 +94,8 @@
 		children
 	}: Props = $props();
 
-	const { feeStore }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
+	const { feeStore, feePrioritiesStore }: EthFeeContext =
+		getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
 	/**
 	 * Updating and fetching fee
@@ -88,24 +105,90 @@
 
 	const errorMsgs: symbol[] = [];
 
+	// A fetch outlives a flip of `observe`: it is a chain of awaits, and nothing cancels it. A
+	// consumer that stopped observing has frozen the fee (the send review step, for one), and what
+	// it derived from that fee is not re-derived there. So a sample that comes back late must be
+	// dropped, or the frozen fee would drift underneath the amount it was priced against.
+	//
+	// A fee that was never set is not a frozen one. No consumer stopped observing to hold on to it,
+	// and nothing was derived from it. This is what keeps a consumer that mounts straight into a
+	// frozen step from dead-ending: the send modal rebuilds its wizard on every step change, so the
+	// review step can start with an empty store, and with no fee it has nothing to show or sign.
+	// Every gate below therefore asks `isFrozen()` rather than `observe`, so the first sample is
+	// always allowed through and only later ones are refused.
+	const isFrozen = (): boolean => !observe && nonNullish(get(feeStore));
+
+	const setFee = (data: TransactionFeeData) => {
+		if (isFrozen()) {
+			return;
+		}
+
+		feeStore.setFee(data);
+	};
+
+	// Moved on by every input change a consumer reports through `triggerUpdateFee`. Such a change does
+	// not cancel a fetch already in flight, so that fetch can still come back with a sample for the
+	// inputs before, even after the sample for the current ones has landed. Only a fetch started in
+	// the current generation may write.
+	let fetchGeneration = 0;
+
 	const updateFeeData = async () => {
+		const currentGeneration = fetchGeneration;
+
 		try {
 			// The debounce utility has no cancel support, so this callback can fire after the component
-			// is destroyed or after the swap store has been reset (`sendToken` becomes `undefined`).
-			if (isDestroyed || isNullish(sendToken) || isNullish($ethAddress)) {
+			// is destroyed, after the swap store has been reset (`sendToken` becomes `undefined`), or
+			// after the consumer stopped observing. The last is why refusing to schedule is not enough:
+			// a call scheduled while observing still fires once the step has moved on, and it would pay
+			// for a fetch whose result the freeze then discards.
+			if (isDestroyed || isNullish(sendToken) || isNullish($ethAddress) || isFrozen()) {
 				return;
 			}
+
+			const setFetchedFee = (data: TransactionFeeData) => {
+				if (currentGeneration !== fetchGeneration) {
+					return;
+				}
+
+				setFee(data);
+
+				outdated = false;
+			};
 
 			const { network } = sendToken;
 
 			assertIsNetworkEthereum(network);
 
-			const { feeData, provider, params } = await getEthFeeDataWithProvider({
+			const {
+				feeData: fetchedFeeData,
+				priorities,
+				provider,
+				params
+			} = await getEthFeeDataWithProvider({
 				networkId: network.id,
 				chainId: network.chainId,
 				from: $ethAddress,
-				to: destination !== '' ? destination : $ethAddress
+				to: destination !== '' ? destination : $ethAddress,
+				priority
 			});
+
+			if (isFrozen() || currentGeneration !== fetchGeneration) {
+				return;
+			}
+
+			feePrioritiesStore.set(priorities);
+
+			// The user can pick a different priority while this request is in flight, in which case
+			// `fetchedFeeData` prices the tier they have already moved away from. Re-read the choice
+			// now and take that tier out of the sample we just received. The re-pricing effect cannot
+			// rescue this: it tracks the choice alone, and the choice has not changed since it ran.
+			const feeData = nonNullish(priorities)
+				? {
+						...fetchedFeeData,
+						...priorities.perPriority[priority],
+						baseFeePerGas: priorities.baseFeePerGas
+					}
+				: fetchedFeeData;
 
 			const { safeEstimateGas, estimateGas } = provider;
 
@@ -129,7 +212,7 @@
 							data
 						});
 
-				feeStore.setFee({
+				setFetchedFee({
 					...feeData,
 					gas: maxBigInt(feeDataGas, estimatedGas)
 				});
@@ -157,7 +240,7 @@
 						data: encodedData
 					});
 
-					feeStore.setFee({
+					setFetchedFee({
 						...feeData,
 						gas: estimatedGas ?? ERC20_FALLBACK_FEE
 					});
@@ -181,7 +264,7 @@
 						data: encodedData
 					});
 
-					feeStore.setFee({
+					setFetchedFee({
 						...feeData,
 						gas: estimatedGas ?? ERC20_FALLBACK_FEE
 					});
@@ -204,7 +287,7 @@
 				// Deposit gas cannot be estimated before approval is on-chain, so we use a
 				// conservative fallback here. The actual deposit transaction re-estimates gas
 				// after the approval step succeeds (see depositErc4626 in erc4626.services.ts).
-				feeStore.setFee({
+				setFetchedFee({
 					...feeData,
 					gas: (approveGas ?? ERC20_FALLBACK_FEE) + ERC20_FALLBACK_FEE
 				});
@@ -212,15 +295,22 @@
 				return;
 			}
 
+			// A zero amount is what the input holds mid-typing ("0", "0."), and its estimate is not the
+			// cost of the transfer the user is about to send: moving nothing leaves the recipient's
+			// balance untouched, so it skips the storage write that a first transfer to an address pays
+			// for. That is about 20k gas, and a transaction signed against it runs out of gas on-chain.
 			const erc20GasFeeParams = {
 				...params,
 				contract: sendToken as Erc20Token,
-				amount: parseToken({ value: `${amount ?? '1'}`, unitName: sendToken.decimals }),
+				amount: parseToken({
+					value: `${nonNullish(amount) && Number(amount) > 0 ? amount : '1'}`,
+					unitName: sendToken.decimals
+				}),
 				sourceNetwork
 			};
 
 			if (isSupportedErc20TwinTokenId(sendTokenId)) {
-				feeStore.setFee({
+				setFetchedFee({
 					...feeData,
 					gas: await getCkErc20FeeData({
 						...erc20GasFeeParams,
@@ -255,14 +345,14 @@
 
 				const estimatedGasNft = await estimateGas({ from: $ethAddress, to, data });
 
-				feeStore.setFee({
+				setFetchedFee({
 					...feeData,
 					gas: estimatedGasNft
 				});
 				return;
 			}
 
-			feeStore.setFee({
+			setFetchedFee({
 				...feeData,
 				gas: await getErc20FeeData({
 					...erc20GasFeeParams,
@@ -274,6 +364,12 @@
 				})
 			});
 		} catch (err: unknown) {
+			// A fetch for inputs that have changed since is neither reported nor retried: the fetch for the
+			// current ones reports its own outcome, and a retry would only repeat that fetch.
+			if (currentGeneration !== fetchGeneration) {
+				return;
+			}
+
 			toastsHide(errorMsgs);
 
 			errorMsgs.push(
@@ -282,13 +378,21 @@
 					err
 				})
 			);
+
+			// Self-heal a transient failure (e.g. a mobile radio dropping while OISY is
+			// backgrounded) by retrying with exponential backoff instead of leaving the fee unset.
+			scheduleRetry();
 		}
 	};
 
-	// Wrap the debounced function to prevent scheduling new calls after the component is destroyed.
+	// Wrap the debounced function to prevent scheduling new calls after the component is destroyed,
+	// or once the consumer has stopped observing. The latter is the single choke point every fetch
+	// goes through, including the imperative `triggerUpdateFee` a consumer calls when its own inputs
+	// change, and the throttled listener callback whose timer can outlive the listener itself.
+	// Without it a frozen step would still pay for a fetch whose result it must discard.
 	const debouncedFn = debounce(updateFeeData);
 	const debounceUpdateFeeData = (...args: unknown[]) => {
-		if (!isDestroyed) {
+		if (!isDestroyed && !isFrozen()) {
 			debouncedFn(...args);
 		}
 	};
@@ -296,6 +400,32 @@
 	let listenerCallbackTimer = $state<NodeJS.Timeout | undefined>();
 
 	let isDestroyed = $state(false);
+
+	// Retry budget for failed fee fetches: incremented per scheduled retry, reset when a fee is
+	// successfully resolved (see the $effect below) or when a fresh fetch cycle starts
+	// (`obverseFeeData`), and cleared on destroy.
+	let retryTimer = $state<NodeJS.Timeout | undefined>();
+	let retryAttempts = $state(0);
+
+	const scheduleRetry = () => {
+		if (isDestroyed || isFrozen() || retryAttempts >= ETH_FEE_RETRY_MAX_ATTEMPTS) {
+			return;
+		}
+
+		const delay = Math.min(ETH_FEE_RETRY_BASE_DELAY * 2 ** retryAttempts, ETH_FEE_RETRY_MAX_DELAY);
+		retryAttempts++;
+
+		clearTimeout(retryTimer);
+		retryTimer = setTimeout(() => {
+			retryTimer = undefined;
+
+			if (isDestroyed || isFrozen()) {
+				return;
+			}
+
+			debounceUpdateFeeData();
+		}, delay);
+	};
 
 	const obverseFeeData = async () => {
 		const throttledCallback = () => {
@@ -321,6 +451,11 @@
 			return;
 		}
 
+		// A fresh fetch cycle (mount, `observe` flip, or foreground return) restores the retry budget.
+		clearTimeout(retryTimer);
+		retryTimer = undefined;
+		retryAttempts = 0;
+
 		debounceUpdateFeeData();
 
 		listener = initMinedTransactionsListener({
@@ -331,7 +466,9 @@
 	};
 
 	onMount(() => {
-		observe && debounceUpdateFeeData();
+		if (!isFrozen()) {
+			debounceUpdateFeeData();
+		}
 	});
 
 	onDestroy(async () => {
@@ -339,6 +476,7 @@
 		await listener?.disconnect();
 		listener = undefined;
 		clearTimeout(listenerCallbackTimer);
+		clearTimeout(retryTimer);
 	});
 
 	/**
@@ -359,10 +497,70 @@
 		}
 	});
 
+	// When a fee is successfully resolved, reset the retry budget and cancel any pending retry.
+	// A failed fetch does not change the store, so this only reacts to successes.
+	$effect(() => {
+		if (nonNullish($feeStore)) {
+			untrack(() => {
+				retryAttempts = 0;
+				clearTimeout(retryTimer);
+				retryTimer = undefined;
+			});
+		}
+	});
+
+	// Recover the fee when OISY returns to the foreground. Mobile browsers freeze backgrounded
+	// tabs and tear down the fee WebSocket; on return, re-fetch and reconnect the listener.
+	const onVisibilityChange = () => {
+		if (document.hidden || isDestroyed || isFrozen()) {
+			return;
+		}
+
+		untrack(() => obverseFeeData());
+	};
+
+	// Re-price against the sample already in hand rather than re-fetching: every priority came back
+	// from the same call, so switching between them is arithmetic, not a round trip.
+	// Tracks the choice alone: a fresh fetch already applies the current priority itself, and
+	// depending on the sample too would set the fee twice per fetch.
+	// Goes through `setFee` like every other write, so re-pricing respects the freeze too: arithmetic
+	// on a sample already in hand still moves the fee a frozen step has priced its amount against.
+	$effect(() => {
+		const selected = priority;
+
+		untrack(() => {
+			const priorities = get(feePrioritiesStore);
+
+			if (isNullish(priorities)) {
+				return;
+			}
+
+			const current = get(feeStore);
+
+			if (isNullish(current)) {
+				return;
+			}
+
+			setFee({
+				...current,
+				...priorities.perPriority[selected],
+				baseFeePerGas: priorities.baseFeePerGas
+			});
+		});
+	});
+
 	/**
 	 * Expose a call to evaluate so that consumers can re-evaluate imperatively, for example, when the user manually updates the amount or destination.
+	 * Every call stands for new inputs: the fetches still in flight can no longer write, and the fee in hand stays `outdated` until a sample for the new inputs lands.
 	 */
-	export const triggerUpdateFee = () => debounceUpdateFeeData();
+	export const triggerUpdateFee = () => {
+		fetchGeneration++;
+		outdated = true;
+
+		debounceUpdateFeeData();
+	};
 </script>
+
+<svelte:document onvisibilitychange={onVisibilityChange} />
 
 {@render children()}

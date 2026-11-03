@@ -5,5 +5,7 @@ export enum EarningCardFields {
 	CURRENT_STAKED = 'currentStaked',
 	CURRENT_EARNING = 'currentEarning',
 	EARNING_POTENTIAL = 'earningPotential',
+	CURRENT_BORROWING = 'currentBorrowing',
+	INTEREST_PER_YEAR = 'interestPerYear',
 	TERMS = 'terms'
 }

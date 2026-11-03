@@ -1,3 +1,4 @@
+import { isBitcoinToken } from '$btc/utils/token.utils';
 import { isTokenErcFungible } from '$eth/utils/erc-fungible.utils';
 import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
@@ -13,6 +14,7 @@ import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isTokenSolanaNative } from '$sol/utils/token.utils';
+import { isTokenXrpNative } from '$xrp/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const determineCoverage = ({
@@ -34,6 +36,26 @@ interface SwapTokenLookup {
 	identifier: string;
 	category: SwapTokenCategory;
 }
+
+/**
+ * The identifier a token without a contract address is keyed on.
+ *
+ * The symbol alone is not unique: ETH is the native token of Ethereum mainnet, Base and
+ * Arbitrum alike, and the category sets carry no network dimension — so a bare `'eth'`
+ * made an Ethereum-mainnet-only offer (Chain Fusion's ckETH → ETH) look reachable on the
+ * L2s too. The network qualifies it back into a unique key.
+ *
+ * Contract-bearing tokens need no qualifier: their address already pins the network.
+ * Every producer of a native identifier must go through here, or the two spaces drift
+ * apart and the filter silently matches nothing.
+ */
+export const nativeSwapTokenIdentifier = ({
+	networkId,
+	symbol
+}: {
+	networkId: NetworkId;
+	symbol: string;
+}): string => `${String(networkId.description)}:${symbol.toLowerCase()}`;
 
 /**
  * Resolves the provider-group info and the token identifier used for matching
@@ -71,7 +93,7 @@ export const resolveSwapTokenLookup = ({
 	if (isTokenEthereumNative(token)) {
 		return {
 			info: supportedData?.evm,
-			identifier: token.symbol.toLowerCase(),
+			identifier: nativeSwapTokenIdentifier({ networkId: token.network.id, symbol: token.symbol }),
 			category: 'evm'
 		};
 	}
@@ -79,8 +101,27 @@ export const resolveSwapTokenLookup = ({
 	if (isTokenSolanaNative(token)) {
 		return {
 			info: supportedData?.sol,
-			identifier: token.symbol.toLowerCase(),
+			identifier: nativeSwapTokenIdentifier({ networkId: token.network.id, symbol: token.symbol }),
 			category: 'sol'
+		};
+	}
+
+	// Bitcoin has no contract address, so it is keyed like the other native tokens. No
+	// collision with them: every guard above discriminates on `standard.code`.
+	if (isBitcoinToken(token)) {
+		return {
+			info: supportedData?.btc,
+			identifier: nativeSwapTokenIdentifier({ networkId: token.network.id, symbol: token.symbol }),
+			category: 'btc'
+		};
+	}
+
+	// Native XRP has no contract address either, so it is keyed the same way.
+	if (isTokenXrpNative(token)) {
+		return {
+			info: supportedData?.xrp,
+			identifier: nativeSwapTokenIdentifier({ networkId: token.network.id, symbol: token.symbol }),
+			category: 'xrp'
 		};
 	}
 };
@@ -156,6 +197,8 @@ const toInfo = ({ total, withList, ids }: CategoryAccum): SwapSupportedTokensInf
  *   so the category falls back to coverage='some' / 'none' rules.
  * - `{ icp: Set, evm: Set, ... }`: explicit destinations per category. Each populated
  *   category bumps both `total` and `withList` and unions its IDs.
+ * - `'any'` for a category: a wildcard contributor there — the cross-category form of `{}`.
+ *   Bumps that category's `total` only, so it too falls back to the 'some' / 'none' rules.
  *
  * A category with `total === 0` (no provider supports the source there) is returned
  * as coverage='all' + empty supported set, which causes `filterSwapTokens` to drop
@@ -171,7 +214,9 @@ export const computeReceiveSupportedTokens = ({
 	const accum: Record<SwapTokenCategory, CategoryAccum> = {
 		icp: { total: 0, withList: 0, ids: new Set() },
 		evm: { total: 0, withList: 0, ids: new Set() },
-		sol: { total: 0, withList: 0, ids: new Set() }
+		sol: { total: 0, withList: 0, ids: new Set() },
+		btc: { total: 0, withList: 0, ids: new Set() },
+		xrp: { total: 0, withList: 0, ids: new Set() }
 	};
 
 	const findProviderSourceTokens = ({
@@ -191,15 +236,18 @@ export const computeReceiveSupportedTokens = ({
 		});
 
 		if (nonNullish(dests)) {
-			const entries = Object.entries(dests) as [SwapTokenCategory, Set<string>][];
+			const entries = Object.entries(dests) as [SwapTokenCategory, Set<string> | 'any'][];
 
 			if (entries.length === 0) {
 				accum[provider.sourceCategory].total++;
 			} else {
 				for (const [category, ids] of entries) {
 					accum[category].total++;
-					accum[category].withList++;
-					ids.forEach((id) => accum[category].ids.add(id));
+
+					if (ids !== 'any') {
+						accum[category].withList++;
+						ids.forEach((id) => accum[category].ids.add(id));
+					}
 				}
 			}
 		}
@@ -208,7 +256,9 @@ export const computeReceiveSupportedTokens = ({
 	return {
 		icp: toInfo(accum.icp),
 		evm: toInfo(accum.evm),
-		sol: toInfo(accum.sol)
+		sol: toInfo(accum.sol),
+		btc: toInfo(accum.btc),
+		xrp: toInfo(accum.xrp)
 	};
 };
 

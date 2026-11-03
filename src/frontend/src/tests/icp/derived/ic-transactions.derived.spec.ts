@@ -6,14 +6,20 @@ import {
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { icKnownDestinations, icTransactions } from '$icp/derived/ic-transactions.derived';
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
-import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+import {
+	type IcCertifiedTransaction,
+	icTransactionsStore
+} from '$icp/stores/ic-transactions.store';
 import type { IcCkToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import { getCyclesMintDepositAccountIdentifier } from '$icp/utils/cycles-mint.utils';
+import { authStore } from '$lib/stores/auth.store';
 import { token } from '$lib/stores/token.store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockCkBtcPendingUtxoTransaction } from '$tests/mocks/ckbtc.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { setupCkBTCStores } from '$tests/utils/ckbtc-stores.test-utils';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 import { get } from 'svelte/store';
@@ -186,6 +192,60 @@ describe('ic-transactions.derived', () => {
 
 		it('should return empty object if transactions store does not have data', () => {
 			expect(get(icKnownDestinations)).toEqual({});
+		});
+
+		it('should leave out destinations of transfers an approved spender pulled', () => {
+			const [userInitiated] = transactions;
+			const spenderInitiated: IcCertifiedTransaction = {
+				certified: true,
+				data: {
+					...createCertifiedIcTransactionUiMock('tx3').data,
+					to: 'pool-account',
+					transferSpender: 'spender-account'
+				}
+			};
+
+			token.set(ICP_TOKEN);
+			icTransactionsStore.append({
+				tokenId: ICP_TOKEN_ID,
+				transactions: [userInitiated, spenderInitiated]
+			});
+
+			expect(get(icKnownDestinations)).toEqual({
+				[userInitiated.data.to as string]: {
+					amounts: [{ value: userInitiated.data.value, token: ICP_TOKEN }],
+					timestamp: Number(userInitiated.data.timestamp),
+					address: userInitiated.data.to
+				}
+			});
+		});
+
+		it('should leave out the CMC deposit account a cycles mint pays into, in any letter case', () => {
+			authStore.setForTesting(mockIdentity);
+
+			const [userInitiated] = transactions;
+			const depositAccount = getCyclesMintDepositAccountIdentifier(mockIdentity.getPrincipal());
+			const mintDeposits: IcCertifiedTransaction[] = [
+				depositAccount,
+				depositAccount.toUpperCase()
+			].map((to, i) => ({
+				certified: true,
+				data: { ...createCertifiedIcTransactionUiMock(`mint-${i}`).data, to }
+			}));
+
+			token.set(ICP_TOKEN);
+			icTransactionsStore.append({
+				tokenId: ICP_TOKEN_ID,
+				transactions: [userInitiated, ...mintDeposits]
+			});
+
+			expect(get(icKnownDestinations)).toEqual({
+				[userInitiated.data.to as string]: {
+					amounts: [{ value: userInitiated.data.value, token: ICP_TOKEN }],
+					timestamp: Number(userInitiated.data.timestamp),
+					address: userInitiated.data.to
+				}
+			});
 		});
 	});
 });

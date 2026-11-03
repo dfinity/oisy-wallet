@@ -185,8 +185,7 @@ export interface ConfirmedTransactionStatusWithSignature {
  * Defines a consensus strategy for combining responses from different providers.
  */
 export type ConsensusStrategy =
-	| { Equality: null }
-	| { Threshold: { min: number; total: [] | [number] } };
+	{ Equality: null } | { Threshold: { min: number; total: [] | [number] } };
 /**
  * Represents a slice of the return value of the `getAccountInfo` Solana RPC method.
  * NOTE: Data slicing is only available for base58, base64, or base64+zstd encodings.
@@ -217,8 +216,7 @@ export interface EncodedConfirmedTransactionWithStatusMeta {
  * Encoding of a Solana transaction.
  */
 export type EncodedTransaction =
-	| { legacyBinary: string }
-	| { binary: [string, { base58: null } | { base64: null }] };
+	{ legacyBinary: string } | { binary: [string, { base58: null } | { base64: null }] };
 /**
  * Represents an encoded Solana transaction with status metadata object.
  */
@@ -646,10 +644,7 @@ export interface LoadedAddresses {
  * A filter for log entries.
  */
 export type LogFilter =
-	| { ShowAll: null }
-	| { HideAll: null }
-	| { ShowPattern: Regex }
-	| { HidePattern: Regex };
+	{ ShowAll: null } | { HideAll: null } | { ShowPattern: Regex } | { HidePattern: Regex };
 /**
  * Micro-lamports are used for the calculation of prioritization fees.
  * 1_000_000 MicroLamport == 1 Lamport
@@ -683,14 +678,12 @@ export type MultiGetAccountInfoResult =
  * Represents an aggregated result from multiple RPC calls to the `getBalance` Solana RPC method.
  */
 export type MultiGetBalanceResult =
-	| { Consistent: GetBalanceResult }
-	| { Inconsistent: Array<[RpcSource, GetBalanceResult]> };
+	{ Consistent: GetBalanceResult } | { Inconsistent: Array<[RpcSource, GetBalanceResult]> };
 /**
  * Represents an aggregated result from multiple RPC calls to the `getBlock` Solana RPC method.
  */
 export type MultiGetBlockResult =
-	| { Consistent: GetBlockResult }
-	| { Inconsistent: Array<[RpcSource, GetBlockResult]> };
+	{ Consistent: GetBlockResult } | { Inconsistent: Array<[RpcSource, GetBlockResult]> };
 /**
  * Represents an aggregated result from multiple RPC calls to the `getRecentPrioritizationFeesResult` Solana RPC method.
  */
@@ -719,8 +712,7 @@ export type MultiGetSignaturesForAddressResult =
  * Represents an aggregated result from multiple RPC calls to the `getSlot` Solana RPC method.
  */
 export type MultiGetSlotResult =
-	| { Consistent: GetSlotResult }
-	| { Inconsistent: Array<[RpcSource, GetSlotResult]> };
+	{ Consistent: GetSlotResult } | { Inconsistent: Array<[RpcSource, GetSlotResult]> };
 /**
  * Represents an aggregated result from multiple RPC calls to the `getTokenAccountBalance` Solana RPC method.
  */
@@ -741,8 +733,7 @@ export type MultiGetTransactionResult =
  * Represents an aggregated result from multiple RPC calls for a raw JSON-RPC request.
  */
 export type MultiRequestResult =
-	| { Consistent: RequestResult }
-	| { Inconsistent: Array<[RpcSource, RequestResult]> };
+	{ Consistent: RequestResult } | { Inconsistent: Array<[RpcSource, RequestResult]> };
 /**
  * Represents an aggregated result from multiple RPC calls to the `sendTransaction` Solana RPC method.
  */
@@ -1051,9 +1042,7 @@ export interface TokenAmount {
  * A Solana transaction confirmation status.
  */
 export type TransactionConfirmationStatus =
-	| { finalized: null }
-	| { confirmed: null }
-	| { processed: null };
+	{ finalized: null } | { confirmed: null } | { processed: null };
 /**
  * Determines whether and how transactions are included in a `getBlock` response.
  */

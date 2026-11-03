@@ -46,6 +46,7 @@ import {
 	sumMainnetTokensUsdStakeBalancesPerNetwork,
 	sumTokensUiUsdBalance,
 	sumTokensUiUsdStakeBalance,
+	sumTotalUsdBalance,
 	tokenListEqual
 } from '$lib/utils/tokens.utils';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
@@ -1015,6 +1016,42 @@ describe('tokens.utils', () => {
 			const result = sumTokensUiUsdStakeBalance([]);
 
 			expect(result).toEqual(0);
+		});
+	});
+
+	describe('sumTotalUsdBalance', () => {
+		it('should sum the wallet balances, the stake balances and the provider-held value', () => {
+			const tokens: TokenUi[] = [
+				{ ...ICP_TOKEN, usdBalance: 100, stakeUsdBalance: 30, claimableStakeBalanceUsd: 7 },
+				{ ...ETHEREUM_TOKEN, usdBalance: 200 }
+			];
+
+			const result = sumTotalUsdBalance({ tokens, providersUsdBalance: 55 });
+
+			expect(result).toEqual(392);
+		});
+
+		it('should treat missing financial data as zero', () => {
+			const tokens: TokenUi[] = [{ ...ICP_TOKEN }, { ...ETHEREUM_TOKEN, usdBalance: 50 }];
+
+			const result = sumTotalUsdBalance({ tokens, providersUsdBalance: 0 });
+
+			expect(result).toEqual(50);
+		});
+
+		// The provider-held value is portfolio-wide, so it survives an empty token list.
+		it('should return the provider-held value when the tokens list is empty', () => {
+			const result = sumTotalUsdBalance({ tokens: [], providersUsdBalance: 55 });
+
+			expect(result).toEqual(55);
+		});
+
+		it('should deduct a negative provider-held value', () => {
+			const tokens: TokenUi[] = [{ ...ICP_TOKEN, usdBalance: 100 }];
+
+			const result = sumTotalUsdBalance({ tokens, providersUsdBalance: -30 });
+
+			expect(result).toEqual(70);
 		});
 	});
 

@@ -45,6 +45,35 @@ describe('NftCollectionCard', () => {
 		).toBeInTheDocument();
 	});
 
+	it('should press to 0.98 unless disabled', async () => {
+		const { container, rerender } = render(NftCollectionCard, {
+			props: { collection: mockNftCollectionUi, testId }
+		});
+
+		const button = container.querySelector('button');
+
+		expect(button).toHaveClass('press');
+
+		await rerender({ collection: mockNftCollectionUi, testId, disabled: true });
+
+		expect(button).not.toHaveClass('press');
+	});
+
+	// It looks disabled (dimmed, not-allowed cursor), so it must not open the collection either.
+	it('should be a disabled button when disabled', async () => {
+		const { container, rerender } = render(NftCollectionCard, {
+			props: { collection: mockNftCollectionUi, testId }
+		});
+
+		const button = container.querySelector('button');
+
+		expect(button).not.toBeDisabled();
+
+		await rerender({ collection: mockNftCollectionUi, testId, disabled: true });
+
+		expect(button).toBeDisabled();
+	});
+
 	it('should go to collection page if clicked', () => {
 		const { container } = render(NftCollectionCard, {
 			props: {

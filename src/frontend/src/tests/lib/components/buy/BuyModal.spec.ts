@@ -5,6 +5,7 @@ import { render } from '@testing-library/svelte';
 
 describe('BuyModal', () => {
 	it('renders correct title if isOnRamperDev is true', () => {
+		vi.spyOn(onRamperEnv, 'isOnRamperDev', 'get').mockImplementation(() => true);
 		const { getByText } = render(BuyModal);
 
 		expect(getByText(en.buy.text.buy_dev)).toBeInTheDocument();

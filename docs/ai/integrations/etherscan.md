@@ -1,17 +1,59 @@
 # Etherscan API
 
-OISY uses [Etherscan](https://etherscan.io/) (and its per-chain equivalents —
-BaseScan, Arbiscan, PolygonScan, BscScan) **exclusively for EVM transaction
+OISY uses [Etherscan](https://etherscan.io/) **exclusively for EVM transaction
 history**: the indexed activity listings that raw JSON-RPC nodes ([Infura](./infura.md),
 [Alchemy](./alchemy.md)) cannot provide, because history lookup is not part of the
-JSON-RPC protocol. It is reached via the **ethers.js `EtherscanProvider`**
-(`src/frontend/src/eth/providers/etherscan.providers.ts`), whose `.fetch(module, params)`
-calls map directly to Etherscan's `module=account&action=…` REST API. One provider
-instance is created per EVM network.
+JSON-RPC protocol. It is reached through OISY's own `EtherscanProvider` wrapper
+(`src/frontend/src/eth/providers/etherscan.providers.ts`), whose
+`.fetch({ module, params })` calls map directly to Etherscan's
+`module=account&action=…` REST API. One wrapper instance is created per EVM network.
+
+Every chain is served by the **same** Etherscan v2 endpoint,
+`https://api.etherscan.io/v2/api`, selected by a `chainid` query parameter — the
+per-chain hosts (BaseScan, Arbiscan, PolygonScan, BscScan) are v1 and are no longer
+used for API calls, though they remain the chains' user-facing explorers
+(`src/frontend/src/env/explorers.env.ts`).
 
 This is a distinct role from the RPC providers: Etherscan answers "what has this
 address done?", while Infura/Alchemy answer "what is the current state?" and
 broadcast transactions.
+
+## Two transports behind one wrapper
+
+The wrapper builds its transport with `etherscanFetcher`, which picks one of two:
+
+- **ethers.js `EtherscanProvider`** (imported as `EtherscanProviderLib`, to keep it
+  distinct from OISY's wrapper of the same name) — for every chain ethers lists.
+  This is the path all currently supported networks take.
+- **`EtherscanV2Provider`** — OISY's own stand-in, for a chain ethers does **not**
+  list. It issues the identical v2 request over the same ethers `FetchRequest`, and
+  mirrors the library's rate-limit `processFunc` so throttling behaves the same; it
+  handles only the non-`proxy` response shape, which is all this module asks for.
+
+  The `processFunc` is not optional politeness. Etherscan signals throttling with
+  **HTTP 200** and a rate-limit string in `result`, so it slips past both the HTTP
+  check and, without this, straight into the status check — turning a retryable
+  condition into a hard failure. Since one API key is shared across every chain at
+  5 req/s, that would break history on the unlisted chain whenever the key is busy,
+  while every other chain quietly retried. `throwThrottleError` from inside
+  `processFunc` is what makes `FetchRequest` stall and retry; it handles that error
+  itself without consulting `retryFunc`, which is why the library's `retryFunc` is
+  not mirrored.
+
+The stand-in exists because ethers' constructor asserts the chain id against a
+hardcoded array in `provider-etherscan.js`, and that array trails newly launched
+chains. Nothing past the assert is chain-specific — ethers' own `getUrl` targets the
+shared v2 endpoint, and its `getBaseUrl` (the old per-chain host switch) is
+documented as deprecated and unused — so a chain it rejects is otherwise perfectly
+serviceable. `Network.register` does not help: the assert reads the literal array,
+not the network registry.
+
+Which transport is used is decided **by attempting construction**, not by copying
+ethers' array, so a chain moves back onto the library automatically once an upgrade
+lists it. Note the failure mode this guards: the provider registry is built eagerly
+at module import, so a constructor that throws takes the app down at load — and the
+SSR prerender in `npm run build` with it — rather than degrading. `vitest.setup.ts`
+mocks `ethers/providers` for the whole suite, so **only the build catches this**.
 
 ## What we use it for
 
@@ -72,21 +114,23 @@ so Etherscan is only re-queried for blocks newer than the last stored one
 
 ## Configuration
 
-| Item            | Value                                                                   |
-| --------------- | ----------------------------------------------------------------------- |
-| API key env var | `VITE_ETHERSCAN_API_KEY` (`src/frontend/src/env/rest/etherscan.env.ts`) |
-| Rate limit      | `ETHERSCAN_MAX_CALLS_PER_SECOND` — 5 (beta/prod) / 2 (other)            |
-| Transport       | ethers.js `EtherscanProvider.fetch('account', { action, … })`           |
+| Item            | Value                                                                                    |
+| --------------- | ---------------------------------------------------------------------------------------- |
+| API key env var | `VITE_ETHERSCAN_API_KEY` (`src/frontend/src/env/rest/etherscan.env.ts`)                  |
+| Rate limit      | `ETHERSCAN_MAX_CALLS_PER_SECOND` — 5 (beta/prod) / 2 (other)                             |
+| Endpoint        | `https://api.etherscan.io/v2/api?chainid=<id>` — shared across all chains                |
+| Transport       | ethers.js `EtherscanProvider`, or `EtherscanV2Provider` for a chain ethers does not list |
 
 Networks are configured per network in
 `src/frontend/src/env/networks/networks.eth.env.ts` and
 `src/frontend/src/env/networks/networks-evm/*.env.ts` (Arbitrum, Base, Polygon,
-BSC); ethers selects the matching per-chain explorer API for each.
+BSC). The chain is selected by the `chainid` parameter derived from each network's
+`chainId`; there is no per-chain API host to configure.
 
 ## Etherscan vs. the RPC providers
 
-|           | Etherscan                               | Infura / Alchemy                                |
-| --------- | --------------------------------------- | ----------------------------------------------- |
-| Question  | "What has this address done?" (history) | "What is the current state?" + broadcast / push |
-| Transport | ethers.js `EtherscanProvider` (REST)    | ethers.js / viem JSON-RPC + WS                  |
-| Scope     | EVM only                                | EVM (Alchemy also Solana)                       |
+|           | Etherscan                                                                            | Infura / Alchemy                                |
+| --------- | ------------------------------------------------------------------------------------ | ----------------------------------------------- |
+| Question  | "What has this address done?" (history)                                              | "What is the current state?" + broadcast / push |
+| Transport | Etherscan v2 REST, via ethers.js `EtherscanProvider` or OISY's `EtherscanV2Provider` | ethers.js / viem JSON-RPC + WS                  |
+| Scope     | EVM only                                                                             | EVM (Alchemy also Solana)                       |

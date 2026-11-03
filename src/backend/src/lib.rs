@@ -1,11 +1,9 @@
 #![warn(clippy::wildcard_imports)]
 
 use candid::Principal;
-use ic_cdk::{
-    export_candid, init,
-    management_canister::{HttpRequestResult, TransformArgs},
-    post_upgrade,
-};
+use ic_cdk::{export_candid, init, post_upgrade};
+use ic_cdk_management_canister::{HttpRequestResult, TransformArgs};
+use serde_bytes::ByteBuf;
 use shared::{
     http::{HttpRequest, HttpResponse},
     std_canister_status,
@@ -20,7 +18,7 @@ use shared::{
             BtcAddPendingTransactionRequest, BtcGetFeePercentilesRequest,
             BtcGetPendingTransactionsRequest,
         },
-        contact::{CreateContactRequest, UpdateContactRequest},
+        contact::{CreateContactRequest, GetContactImagesRequest, UpdateContactRequest},
         custom_token::CustomToken,
         dapp::AddHiddenDappIdRequest,
         exchange::ExchangeRate,
@@ -28,14 +26,23 @@ use shared::{
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         notification::AddDismissedNotificationRequest,
         onramper::SignOnramperWidgetUrlRequest,
+        personal_note::{DeletePersonalNoteRequest, SetPersonalNoteRequest},
+        personal_note_share::CreatePersonalNoteShareRequest,
         result_types::{
             ActiveUserTransactionResult, AddUserDismissedNotificationResult,
             AddUserHiddenDappIdResult, AllowSigningResult, BtcAddPendingTransactionResult,
-            BtcGetFeePercentilesResult, BtcGetPendingTransactionsResult, CreateContactResult,
-            CreateUserProfileResult, DeleteActiveUserTransactionResult, DeleteContactResult,
+            BtcGetFeePercentilesResult, BtcGetPendingTransactionsResult, CancelTipResult,
+            ClaimTipResult, ConsumePersonalNoteShareResult, CreateContactResult,
+            CreatePersonalNoteShareResult, CreateTipResult, CreateUserProfileResult,
+            DeleteActiveUserTransactionResult, DeleteContactResult, DeletePersonalNoteResult,
             GetActiveUserTransactionsResult, GetAgreementHistoryResult, GetAllowedCyclesResult,
-            GetContactResult, GetContactsResult, GetUserProfileResult, GetUserTransactionsResult,
-            SaveUserTransactionsResult, SetUserShowTestnetsResult, SignOnramperWidgetUrlResult,
+            GetContactImagesResult, GetContactResult, GetContactsPageResult, GetContactsResult,
+            GetMyTipsResult, GetPersonalNoteShareResult, GetPersonalNoteSharesCountResult,
+            GetPersonalNotesCountResult, GetPersonalNotesResult, GetTipDetailsResult, GetTipResult,
+            GetTipSecretResult, GetUserProfileResult, GetUserTransactionsResult,
+            MarkActiveUserTransactionsSeenResult, PersonalNotesVetkeyResult,
+            SaveUserTransactionsResult, SetPersonalNoteResult, SetTipSecretResult,
+            SetUserShowTestnetsResult, SignOnramperWidgetUrlResult, TipVetkeyResult,
             UpdateContactResult, UpdateExperimentalFeaturesSettingsResult,
             UpdateProviderAgreementsResult, UpdateTransactionFilterSettingsResult,
             UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
@@ -44,6 +51,7 @@ use shared::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
             AllowSigningRequest,
         },
+        tip::{CreateTipRequest, SetTipSecretRequest, TipClaimRequest},
         token_id::TokenId,
         transaction_settings::UpdateTransactionFilterSettingsRequest,
         user_profile::HasUserProfileResponse,
@@ -52,7 +60,7 @@ use shared::{
     },
 };
 
-use crate::state::{read_state, set_config};
+use crate::state::{ensure_personal_notes, read_state, set_config};
 
 mod active_user_transactions;
 mod api;
@@ -61,9 +69,11 @@ mod contacts;
 mod delegation;
 mod exchange;
 mod onramper;
+mod personal_notes;
 mod signer;
 mod state;
 mod status;
+mod tips;
 mod token;
 mod transactions;
 mod types;
@@ -106,12 +116,22 @@ pub fn post_upgrade(arg: Option<Arg>) {
         }
     }
 
+    // Attach the personal-notes store eagerly so `stats()` (a query, which
+    // cannot run the lazy init) reports the persisted count after an upgrade.
+    // Fresh installs (`init`) stay lazy to avoid allocating its memory regions
+    // in canisters that never use notes.
+    ensure_personal_notes();
+
     // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();
 
     utils::housekeeping::start_periodic_housekeeping_timers();
 
     exchange::start_exchange_rate_timer();
+
+    // TODO: remove once every canister has been upgraded past the release that ships it; see
+    // `contacts::migration`.
+    contacts::start_inline_image_migration();
 }
 
 export_candid!();

@@ -40,6 +40,23 @@ describe('ShortcutGuard', () => {
 			expect(get(isPrivacyMode)).toBeFalsy();
 		});
 
+		it('should not turn on privacy mode when typing in a textarea', () => {
+			render(ShortcutGuard);
+
+			const textarea = document.createElement('textarea');
+			document.body.appendChild(textarea);
+			textarea.focus();
+
+			expect(get(isPrivacyMode)).toBeFalsy();
+
+			// Bubble to the window handler so the target (the textarea) is actually evaluated.
+			textarea.dispatchEvent(new KeyboardEvent('keydown', { key: 'p', bubbles: true }));
+
+			expect(get(isPrivacyMode)).toBeFalsy();
+
+			textarea.remove();
+		});
+
 		it('should not turn on privacy mode when ctrl + p is pressed', () => {
 			render(ShortcutGuard);
 

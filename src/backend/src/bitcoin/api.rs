@@ -1,9 +1,9 @@
 use std::{cell::RefCell, collections::HashMap};
 
-use ic_cdk::bitcoin_canister::{
+use ic_cdk_bitcoin_canister::{
     bitcoin_get_current_fee_percentiles, bitcoin_get_utxos, GetCurrentFeePercentilesRequest,
-    GetUtxosRequest, GetUtxosResponse, MillisatoshiPerByte, Network as BitcoinNetwork, Utxo,
-    UtxosFilter,
+    GetUtxosRequest, GetUtxosResponse, MillisatoshiPerByte, Network as BitcoinNetwork, Page, Utxo,
+    UtxosFilterInRequest,
 };
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::bitcoin::{
@@ -31,11 +31,11 @@ thread_local! {
 async fn get_utxos(
     network: BitcoinNetwork,
     address: String,
-    filter: Option<UtxosFilter>,
+    filter: Option<UtxosFilterInRequest>,
 ) -> Result<GetUtxosResponse, String> {
     bitcoin_get_utxos(&GetUtxosRequest {
         address,
-        network,
+        network: network.into(),
         filter,
     })
     .await
@@ -54,14 +54,18 @@ pub async fn get_all_utxos(
     } else {
         min_confirmations
     };
-    let filter = final_min_confirmations.map(UtxosFilter::MinConfirmations);
+    let filter = final_min_confirmations.map(UtxosFilterInRequest::MinConfirmations);
     let mut utxos_response = get_utxos(network, address.clone(), filter).await?;
 
     let mut all_utxos: Vec<Utxo> = utxos_response.utxos;
-    let mut next_page: Option<Vec<u8>> = utxos_response.next_page;
+    let mut next_page: Option<Page> = utxos_response.next_page;
     while next_page.is_some() {
-        utxos_response =
-            get_utxos(network, address.clone(), next_page.map(UtxosFilter::Page)).await?;
+        utxos_response = get_utxos(
+            network,
+            address.clone(),
+            next_page.map(UtxosFilterInRequest::Page),
+        )
+        .await?;
         all_utxos.extend(utxos_response.utxos);
         next_page = utxos_response.next_page;
     }
@@ -170,9 +174,11 @@ async fn update_fee_percentiles_cache() -> Result<(), String> {
 async fn fetch_current_fee_percentiles(
     network: BitcoinNetwork,
 ) -> Result<Vec<MillisatoshiPerByte>, String> {
-    bitcoin_get_current_fee_percentiles(&GetCurrentFeePercentilesRequest { network })
-        .await
-        .map_err(|err| err.to_string())
+    bitcoin_get_current_fee_percentiles(&GetCurrentFeePercentilesRequest {
+        network: network.into(),
+    })
+    .await
+    .map_err(|err| err.to_string())
 }
 
 /// This function returns fee percentiles data from the in-memory cache.

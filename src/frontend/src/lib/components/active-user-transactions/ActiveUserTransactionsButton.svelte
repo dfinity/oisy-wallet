@@ -1,17 +1,19 @@
 <script lang="ts">
-	import { Popover } from '@dfinity/gix-components';
 	import ActiveUserTransactionsList from '$lib/components/active-user-transactions/ActiveUserTransactionsList.svelte';
 	import AnimatedIconLoader from '$lib/components/icons/animated/AnimatedIconLoader.svelte';
 	import IconBell from '$lib/components/icons/lucide/IconBell.svelte';
 	import IconBellDot from '$lib/components/icons/lucide/IconBellDot.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import Popover from '$lib/components/ui/Popover.svelte';
 	import {
 		activeUserTransactionsHasUnseen,
 		activeUserTransactionsList,
 		activeUserTransactionsPending
 	} from '$lib/derived/active-user-transactions.derived';
-	import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { markActiveUserTransactionsSeen } from '$lib/services/active-user-transactions.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { consoleError } from '$lib/utils/console.utils';
 
 	interface Props {
 		visible?: boolean;
@@ -25,7 +27,7 @@
 	// Mark seen on close, not open, so dots stay visible while the user reads.
 	$effect(() => {
 		if (wasVisible && !visible) {
-			activeUserTransactionsStore.markAllSeen();
+			markActiveUserTransactionsSeen({ identity: $authIdentity }).catch(consoleError);
 		}
 		wasVisible = visible;
 	});

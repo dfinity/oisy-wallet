@@ -1,6 +1,7 @@
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import { reloadEthereumTransactions } from '$eth/services/eth-transactions.services';
+import { nativeTokenOf } from '$eth/services/native-balance.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
@@ -15,28 +16,32 @@ import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
+import { TransactionNotFoundError } from 'viem';
 
 export const processTransactionSent = async ({
 	identity,
 	token,
-	transaction
+	transaction,
+	value
 }: {
 	identity: NullishIdentity;
 	token: Token;
 	transaction: TransactionResponse;
+	// The amount of an ERC-20 the transaction moves, required where its calldata is not a transfer
+	// to read it from: a swap contract's arguments decoded as `(address, uint256)` give an offset or
+	// throw.
+	value?: bigint;
 }) => {
 	if (isSupportedEthTokenId(token.id) || isSupportedEvmNativeTokenId(token.id)) {
 		await processEthTransaction({ identity, hash: transaction.hash, token });
 		return;
 	}
 
-	// We adapt the value for display purpose because the transaction we get has an ETH value of 0x00
-	const value = decodeErc20AbiDataValue({ data: transaction.data });
-
 	await processErc20Transaction({
 		identity,
 		hash: transaction.hash,
-		value,
+		// We adapt the value for display purpose because the transaction we get has an ETH value of 0x00
+		value: value ?? decodeErc20AbiDataValue({ data: transaction.data }),
 		token,
 		type: 'pending'
 	});
@@ -83,7 +88,15 @@ const processPendingTransaction = async ({
 	} = token;
 
 	const { getTransaction, wait } = alchemyProviders(networkId);
-	const transaction = await getTransaction(hash);
+
+	// Viem throws for a transaction it cannot find rather than returning `null`.
+	const transaction = await getTransaction(hash).catch((err: unknown) => {
+		if (err instanceof TransactionNotFoundError) {
+			return null;
+		}
+
+		throw err;
+	});
 
 	if (isNullish(transaction)) {
 		// The provider searches in the transaction pool for pending transactions. But that does not guarantee that it found it.
@@ -142,6 +155,20 @@ const processMinedTransaction = async ({
 
 	await reloadEthereumTransactions({ identity, tokenId, networkId, chainId, standard });
 
-	// Reload balance as a transaction has been mined
-	await reloadEthereumBalance(token);
+	// Reload balance as a transaction has been mined.
+	//
+	// The gas is paid in the network's native coin whatever the transaction moved, so an ERC-20
+	// transfer leaves that balance overstated as well, not only the balance of the token it sent.
+	// Nothing else corrects it until the next balance poll, and in that window "Max" prices a native
+	// send against a balance that still holds the gas already spent: the amount plus the gas it
+	// reserves exceeds what the account has, and the chain rejects the transaction outright rather
+	// than trimming it.
+	const nativeToken = nativeTokenOf(networkId);
+
+	const tokensToReload: Token[] = [
+		token,
+		...(nonNullish(nativeToken) && nativeToken.id !== tokenId ? [nativeToken] : [])
+	];
+
+	await Promise.all(tokensToReload.map((tokenToReload) => reloadEthereumBalance(tokenToReload)));
 };

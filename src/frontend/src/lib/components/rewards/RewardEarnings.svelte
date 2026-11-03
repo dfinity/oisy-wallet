@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -16,7 +15,6 @@
 		REWARDS_EARNINGS_ACTIVITY_BUTTON,
 		REWARDS_EARNINGS_CARD
 	} from '$lib/constants/test-ids.constants';
-	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -31,6 +29,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		reward: RewardCampaignDescription;
@@ -136,7 +135,7 @@
 </script>
 
 {#if amountOfRewards > 0}
-	<div transition:fade={SLIDE_DURATION}>
+	<div transition:fade>
 		<div
 			class="mt-2 mb-5 w-full text-center text-xl font-bold text-success-primary"
 			class:animate-pulse={loading}

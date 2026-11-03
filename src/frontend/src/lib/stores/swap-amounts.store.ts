@@ -1,5 +1,6 @@
+import type { SwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
 import type { OptionAmount } from '$lib/types/send';
-import type { SwapMappedResult, SwapProvider } from '$lib/types/swap';
+import type { SwapMappedResult, SwapProvider, SwapQuoteError } from '$lib/types/swap';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 import { writable, type Readable } from 'svelte/store';
@@ -9,6 +10,8 @@ export interface SwapAmountsStoreData {
 	amountForSwap: OptionAmount;
 	selectedProvider?: SwapMappedResult;
 	manuallySelectedProviderKey?: SwapProvider;
+	// The reason the quote round produced no offers, when a provider named one.
+	quoteError?: SwapQuoteError;
 }
 
 export interface SwapAmountsStore extends Readable<Nullish<SwapAmountsStoreData>> {
@@ -16,6 +19,7 @@ export interface SwapAmountsStore extends Readable<Nullish<SwapAmountsStoreData>
 		swaps: SwapMappedResult[];
 		amountForSwap: OptionAmount;
 		selectedProvider?: SwapMappedResult;
+		quoteError?: SwapQuoteError;
 	}) => void;
 	reset: () => void;
 	setSelectedProvider: (provider: SwapMappedResult | undefined) => void;
@@ -36,7 +40,7 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 			set(null);
 		},
 
-		setSwaps: ({ swaps, amountForSwap, selectedProvider }) => {
+		setSwaps: ({ swaps, amountForSwap, selectedProvider, quoteError }) => {
 			if (nonNullish(manualProviderKey)) {
 				const manualMatch = swaps.find((s) => s.provider === manualProviderKey);
 
@@ -45,7 +49,8 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 						swaps,
 						amountForSwap,
 						selectedProvider: manualMatch,
-						manuallySelectedProviderKey: manualProviderKey
+						manuallySelectedProviderKey: manualProviderKey,
+						quoteError
 					});
 
 					return;
@@ -57,7 +62,8 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 			set({
 				swaps,
 				amountForSwap,
-				selectedProvider
+				selectedProvider,
+				quoteError
 			});
 		},
 
@@ -91,6 +97,7 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 
 export interface SwapAmountsContext {
 	store: SwapAmountsStore;
+	activity?: SwapQuoteActivityStore;
 }
 
 export const SWAP_AMOUNTS_CONTEXT_KEY = Symbol('swap-amounts');

@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import type { CustomToken, ErcToken } from '$declarations/backend/backend.did';
 import type { DeleteIdbTokenParams, SetIdbTokensParams } from '$lib/types/idb-tokens';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
@@ -34,6 +35,11 @@ export const getIdbAllCustomTokens = (
 ): Promise<SetIdbTokensParams['tokens'] | undefined> =>
 	get(principal.toText(), idbAllCustomTokensStore);
 
+// The backend keys an EVM custom token by address and chain id only, whatever its standard, so the
+// cached entry to drop is matched the same way.
+const toErcFungibleToken = (token: CustomToken['token']): ErcToken | undefined =>
+	'Erc20' in token ? token.Erc20 : 'Erc4626' in token ? token.Erc4626 : undefined;
+
 export const deleteIdbEthToken = async ({
 	identity,
 	token
@@ -42,29 +48,29 @@ export const deleteIdbEthToken = async ({
 		return;
 	}
 
-	const { token: tokenToDelete } = token;
+	const tokenToDelete = toErcFungibleToken(token.token);
 
-	if (!('Erc20' in tokenToDelete)) {
+	if (isNullish(tokenToDelete)) {
 		return;
 	}
 
-	const {
-		Erc20: { token_address: tokenToDeleteAddress, chain_id: tokenToDeleteChainId }
-	} = tokenToDelete;
+	const { token_address: tokenToDeleteAddress, chain_id: tokenToDeleteChainId } = tokenToDelete;
 
 	const currentTokens = await getIdbAllCustomTokens(identity.getPrincipal());
 
 	if (nonNullish(currentTokens)) {
 		await setIdbAllCustomTokens({
 			identity,
-			tokens: currentTokens.filter(({ token: savedToken }) =>
-				'Erc20' in savedToken
+			tokens: currentTokens.filter(({ token: savedToken }) => {
+				const savedErcToken = toErcFungibleToken(savedToken);
+
+				return nonNullish(savedErcToken)
 					? !(
-							savedToken.Erc20.token_address === tokenToDeleteAddress &&
-							savedToken.Erc20.chain_id === tokenToDeleteChainId
+							savedErcToken.token_address === tokenToDeleteAddress &&
+							savedErcToken.chain_id === tokenToDeleteChainId
 						)
-					: true
-			)
+					: true;
+			})
 		});
 	}
 };

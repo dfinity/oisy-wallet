@@ -3,7 +3,7 @@
 mod bitcoin {
     //! Tests for the bitcoin types.
     use candid::{Decode, Encode};
-    use ic_cdk::bitcoin_canister::{Network as BitcoinNetwork, Outpoint, Utxo};
+    use ic_cdk_bitcoin_canister::{Network as BitcoinNetwork, OutPoint, Txid, Utxo};
 
     use crate::{
         types::bitcoin::{
@@ -40,8 +40,8 @@ mod bitcoin {
                 input: BtcAddPendingTransactionRequest {
                     txid: vec![0; MAX_TXID_BYTES],
                     utxos: vec![Utxo {
-                        outpoint: Outpoint {
-                            txid: vec![0; MAX_TXID_BYTES],
+                        outpoint: OutPoint {
+                            txid: Txid::from([0; MAX_TXID_BYTES]),
                             vout: 0,
                         },
                         value: 0,
@@ -53,30 +53,13 @@ mod bitcoin {
                 valid: true,
             },
             TestVector {
-                description: "With a utxo that is too long",
-                input: BtcAddPendingTransactionRequest {
-                    txid: vec![0; MAX_TXID_BYTES],
-                    utxos: vec![Utxo {
-                        outpoint: Outpoint {
-                            txid: vec![0; MAX_TXID_BYTES + 1],
-                            vout: 0,
-                        },
-                        value: 0,
-                        height: 0,
-                    }],
-                    network: BitcoinNetwork::Mainnet,
-                    ii_delegation_chain: None,
-                },
-                valid: false,
-            },
-            TestVector {
                 description: "With too many utxos",
                 input: BtcAddPendingTransactionRequest {
                     txid: vec![0; MAX_TXID_BYTES],
                     utxos: vec![
                         Utxo {
-                            outpoint: Outpoint {
-                                txid: vec![0; MAX_TXID_BYTES],
+                            outpoint: OutPoint {
+                                txid: Txid::from([0; MAX_TXID_BYTES]),
                                 vout: 0
                             },
                             value: 0,
@@ -117,8 +100,8 @@ mod bitcoin {
                     txid: vec![0; MAX_TXID_BYTES],
                     utxos: vec![
                         Utxo {
-                            outpoint: Outpoint {
-                                txid: vec![0; MAX_TXID_BYTES],
+                            outpoint: OutPoint {
+                                txid: Txid::from([0; MAX_TXID_BYTES]),
                                 vout: 0,
                             },
                             value: 0,
@@ -129,21 +112,6 @@ mod bitcoin {
                 },
                 valid: false,
             },
-            TestVector {
-                description: "PendingTransaction with a utxo that is too long",
-                input: PendingTransaction {
-                    txid: vec![0; MAX_TXID_BYTES],
-                    utxos: vec![Utxo {
-                        outpoint: Outpoint {
-                            txid: vec![0; MAX_TXID_BYTES + 1],
-                            vout: 0,
-                        },
-                        value: 0,
-                        height: 0,
-                    }],
-                },
-                valid: false,
-            }
         ]
     );
 }
@@ -735,5 +703,192 @@ mod user_profile {
             },
             valid: true,
         }]
+    );
+}
+
+mod agreement {
+    use candid::{Decode, Encode};
+
+    use crate::{
+        types::agreement::{UpdateUserAgreementsRequest, UserAgreement, UserAgreements},
+        validate::{test_validate_on_deserialize, TestVector, Validate},
+    };
+
+    fn request(text_sha256: &str) -> UpdateUserAgreementsRequest {
+        UpdateUserAgreementsRequest {
+            current_user_version: None,
+            agreements: UserAgreements {
+                license_agreement: UserAgreement {
+                    accepted: Some(true),
+                    text_sha256: Some(text_sha256.to_string()),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+        }
+    }
+
+    test_validate_on_deserialize!(
+        UpdateUserAgreementsRequest,
+        [
+            TestVector {
+                description: "No hash provided",
+                input: UpdateUserAgreementsRequest {
+                    current_user_version: None,
+                    agreements: UserAgreements::default(),
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "Lowercase hex hash of the expected length",
+                input: request(&"0123456789abcdef".repeat(4)),
+                valid: true,
+            },
+            TestVector {
+                description: "Uppercase hex hash of the expected length",
+                input: request(&"0123456789ABCDEF".repeat(4)),
+                valid: true,
+            },
+            TestVector {
+                description: "Right length, but not hexadecimal",
+                input: request(&"z".repeat(64)),
+                valid: false,
+            },
+            TestVector {
+                description: "Right length, but a single non-hex character",
+                input: request(&format!("{}g", "a".repeat(63))),
+                valid: false,
+            },
+            TestVector {
+                description: "Right length, but punctuation rather than hex",
+                input: request(&"-".repeat(64)),
+                valid: false,
+            },
+            TestVector {
+                description: "64 bytes of multi-byte characters rather than 64 hex digits",
+                input: request(&"\u{e9}".repeat(32)),
+                valid: false,
+            },
+            TestVector {
+                description: "Hexadecimal, but too short",
+                input: request("abc123"),
+                valid: false,
+            },
+        ]
+    );
+}
+
+mod stored_contacts {
+    //! Tests for decoding `StoredContacts`, the per-principal contact value in stable memory.
+    use std::collections::BTreeMap;
+
+    use candid::{decode_one, encode_one, CandidType};
+    use pretty_assertions::assert_eq;
+    use serde_bytes::ByteBuf;
+
+    use crate::types::contact::{
+        Contact, ContactAddressData, ContactImage, ImageMimeType, StoredContacts,
+        MAX_IMAGE_SIZE_BYTES,
+    };
+
+    fn contact(id: u64, image: Option<ContactImage>) -> Contact {
+        Contact {
+            id,
+            name: format!("Contact {id}"),
+            addresses: vec![],
+            update_timestamp_ns: 1,
+            image,
+        }
+    }
+
+    fn image(size: usize) -> ContactImage {
+        ContactImage {
+            data: ByteBuf::from(vec![0u8; size]),
+            mime_type: ImageMimeType::Png,
+        }
+    }
+
+    #[test]
+    fn decoding_drops_an_inline_image_that_fails_validation() {
+        // Encoding does not validate, so this is the value a contact written before the image size
+        // check holds.
+        let stored = StoredContacts {
+            contacts: BTreeMap::from([
+                (1, contact(1, Some(image(MAX_IMAGE_SIZE_BYTES + 1)))),
+                (2, contact(2, Some(image(MAX_IMAGE_SIZE_BYTES)))),
+                (3, contact(3, None)),
+            ]),
+            update_timestamp_ns: 1,
+        };
+
+        let decoded: StoredContacts = decode_one(&encode_one(&stored).unwrap()).unwrap();
+
+        assert_eq!(decoded.contacts[&1], contact(1, None));
+        assert_eq!(decoded.contacts[&2], stored.contacts[&2]);
+        assert_eq!(decoded.contacts[&3], stored.contacts[&3]);
+    }
+
+    #[test]
+    fn decoding_accepts_contacts_stored_without_an_image_field() {
+        #[derive(CandidType)]
+        struct ContactWithoutImage {
+            id: u64,
+            name: String,
+            addresses: Vec<ContactAddressData>,
+            update_timestamp_ns: u64,
+        }
+
+        #[derive(CandidType)]
+        struct StoredContactsWithoutImages {
+            contacts: BTreeMap<u64, ContactWithoutImage>,
+            update_timestamp_ns: u64,
+        }
+
+        let stored = StoredContactsWithoutImages {
+            contacts: BTreeMap::from([(
+                1,
+                ContactWithoutImage {
+                    id: 1,
+                    name: "Contact 1".to_string(),
+                    addresses: vec![],
+                    update_timestamp_ns: 1,
+                },
+            )]),
+            update_timestamp_ns: 1,
+        };
+
+        let decoded: StoredContacts = decode_one(&encode_one(&stored).unwrap()).unwrap();
+
+        assert_eq!(decoded.contacts[&1], contact(1, None));
+    }
+}
+
+mod get_contact_images_request {
+    //! Tests for `GetContactImagesRequest` validation
+    use candid::{Decode, Encode};
+
+    use crate::{
+        types::contact::{GetContactImagesRequest, MAX_CONTACT_IMAGES_PER_CALL},
+        validate::{test_validate_on_deserialize, TestVector, Validate},
+    };
+
+    test_validate_on_deserialize!(
+        GetContactImagesRequest,
+        [
+            TestVector {
+                description: "GetContactImagesRequest at the per-call limit",
+                input: GetContactImagesRequest {
+                    contact_ids: (0..MAX_CONTACT_IMAGES_PER_CALL as u64).collect(),
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "GetContactImagesRequest over the per-call limit",
+                input: GetContactImagesRequest {
+                    contact_ids: (0..=MAX_CONTACT_IMAGES_PER_CALL as u64).collect(),
+                },
+                valid: false,
+            }
+        ]
     );
 }

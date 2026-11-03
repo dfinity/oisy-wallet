@@ -2,9 +2,21 @@ import type {
 	ActiveUserTransaction,
 	BtcGetFeePercentilesResponse,
 	Contact,
+	CreatePersonalNoteShareRequest,
+	CreateTipRequest,
 	CustomToken,
+	DeletePersonalNoteRequest,
+	GetActiveUserTransactionsResponse,
 	GetAllowedCyclesResponse,
+	MyTip,
+	PersonalNoteEntry,
+	PersonalNoteShareContent,
+	PublicTip,
+	SetTipSecretRequest,
 	SignOnramperWidgetUrlResponse,
+	TipClaim,
+	TipClaimRequest,
+	TipDetails,
 	TokenId
 } from '$declarations/backend/backend.did';
 import { CanisterApi } from '$lib/api/canister.api';
@@ -349,11 +361,177 @@ export const deleteActiveUserTransaction = async ({
 };
 
 export const getActiveUserTransactions = async ({
-	identity
-}: CanisterApiFunctionParams): Promise<ActiveUserTransaction[]> => {
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<GetActiveUserTransactionsResponse> => {
 	const { getActiveUserTransactions } = await backendCanister({ identity });
 
-	return getActiveUserTransactions();
+	return getActiveUserTransactions({ certified });
+};
+
+export const markActiveUserTransactionsSeen = async ({
+	identity,
+	upToNs
+}: CanisterApiFunctionParams<{ upToNs: bigint }>): Promise<bigint> => {
+	const { markActiveUserTransactionsSeen } = await backendCanister({ identity });
+
+	return markActiveUserTransactionsSeen(upToNs);
+};
+
+export const setPersonalNote = async ({
+	identity,
+	...request
+}: CanisterApiFunctionParams<PersonalNoteEntry>): Promise<void> => {
+	const { setPersonalNote } = await backendCanister({ identity });
+	return setPersonalNote(request);
+};
+
+export const deletePersonalNote = async ({
+	identity,
+	...request
+}: CanisterApiFunctionParams<DeletePersonalNoteRequest>): Promise<void> => {
+	const { deletePersonalNote } = await backendCanister({ identity });
+	return deletePersonalNote(request);
+};
+
+export const getPersonalNotes = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<PersonalNoteEntry[]> => {
+	const { getPersonalNotes } = await backendCanister({ identity });
+	return getPersonalNotes();
+};
+
+export const getPersonalNotesCount = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<bigint> => {
+	const { getPersonalNotesCount } = await backendCanister({ identity });
+	return getPersonalNotesCount();
+};
+
+export const getPersonalNotesEncryptedVetkey = async ({
+	identity,
+	transportPublicKey
+}: CanisterApiFunctionParams<{
+	transportPublicKey: Uint8Array;
+}>): Promise<Uint8Array | number[]> => {
+	const { getPersonalNotesEncryptedVetkey } = await backendCanister({ identity });
+	return getPersonalNotesEncryptedVetkey(transportPublicKey);
+};
+
+export const getPersonalNotesVetkeyPublicKey = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<Uint8Array | number[]> => {
+	const { getPersonalNotesVetkeyPublicKey } = await backendCanister({ identity });
+	return getPersonalNotesVetkeyPublicKey();
+};
+
+export const setTipSecret = async ({
+	identity,
+	...request
+}: CanisterApiFunctionParams<SetTipSecretRequest>): Promise<void> => {
+	const { setTipSecret } = await backendCanister({ identity });
+	return setTipSecret(request);
+};
+
+export const getTipSecret = async ({
+	identity,
+	tipId
+}: CanisterApiFunctionParams<{ tipId: string }>): Promise<Uint8Array | number[] | undefined> => {
+	const { getTipSecret } = await backendCanister({ identity });
+	return getTipSecret(tipId);
+};
+
+export const getTipEncryptedVetkey = async ({
+	identity,
+	transportPublicKey
+}: CanisterApiFunctionParams<{
+	transportPublicKey: Uint8Array;
+}>): Promise<Uint8Array | number[]> => {
+	const { getTipEncryptedVetkey } = await backendCanister({ identity });
+	return getTipEncryptedVetkey(transportPublicKey);
+};
+
+export const getTipVetkeyPublicKey = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<Uint8Array | number[]> => {
+	const { getTipVetkeyPublicKey } = await backendCanister({ identity });
+	return getTipVetkeyPublicKey();
+};
+
+export const createTip = async ({
+	identity,
+	...request
+}: CanisterApiFunctionParams<CreateTipRequest>): Promise<void> => {
+	const { createTip } = await backendCanister({ identity });
+	return createTip(request);
+};
+
+export const getTip = async ({
+	identity,
+	tipId
+}: CanisterApiFunctionParams<{ tipId: string }>): Promise<PublicTip> => {
+	const { getTip } = await backendCanister({ identity });
+	return getTip(tipId);
+};
+
+export const getTipDetails = async ({
+	identity,
+	...request
+}: CanisterApiFunctionParams<TipClaimRequest>): Promise<TipDetails> => {
+	const { getTipDetails } = await backendCanister({ identity });
+	return getTipDetails(request);
+};
+
+export const claimTip = async ({
+	identity,
+	...request
+}: CanisterApiFunctionParams<TipClaimRequest>): Promise<TipClaim> => {
+	const { claimTip } = await backendCanister({ identity });
+	return claimTip(request);
+};
+
+export const cancelTip = async ({
+	identity,
+	tipId
+}: CanisterApiFunctionParams<{ tipId: string }>): Promise<void> => {
+	const { cancelTip } = await backendCanister({ identity });
+	return cancelTip(tipId);
+};
+
+export const getMyTips = async ({ identity }: CanisterApiFunctionParams): Promise<MyTip[]> => {
+	const { getMyTips } = await backendCanister({ identity });
+	return getMyTips();
+};
+
+export const createPersonalNoteShare = async ({
+	identity,
+	...request
+}: CanisterApiFunctionParams<CreatePersonalNoteShareRequest>): Promise<void> => {
+	const { createPersonalNoteShare } = await backendCanister({ identity });
+	return createPersonalNoteShare(request);
+};
+
+export const getPersonalNoteShare = async ({
+	identity,
+	token
+}: CanisterApiFunctionParams<{ token: string }>): Promise<PersonalNoteShareContent> => {
+	const { getPersonalNoteShare } = await backendCanister({ identity });
+	return getPersonalNoteShare(token);
+};
+
+export const consumePersonalNoteShare = async ({
+	identity,
+	token
+}: CanisterApiFunctionParams<{ token: string }>): Promise<PersonalNoteShareContent> => {
+	const { consumePersonalNoteShare } = await backendCanister({ identity });
+	return consumePersonalNoteShare(token);
+};
+
+export const getPersonalNoteSharesCount = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<bigint> => {
+	const { getPersonalNoteSharesCount } = await backendCanister({ identity });
+	return getPersonalNoteSharesCount();
 };
 
 const backendCanister = async ({

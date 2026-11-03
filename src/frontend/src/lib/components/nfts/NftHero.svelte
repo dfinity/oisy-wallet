@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { IconBack } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
-	import { fade } from 'svelte/transition';
 	import { afterNavigate, goto } from '$app/navigation';
+	import IconBack from '$lib/components/icons/IconBack.svelte';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftActionButtons from '$lib/components/nfts/NftActionButtons.svelte';
@@ -22,6 +21,7 @@
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { back, nftsUrl } from '$lib/utils/nav.utils';
 	import { getNftDisplayImageUrl, getNftDisplayName } from '$lib/utils/nft.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -38,7 +38,7 @@
 
 	const breadcrumbItems = $derived([
 		{
-			label: $i18n.navigation.text.tokens,
+			label: $i18n.navigation.text.nfts,
 			url: nftsUrl({
 				originSelectedNetwork: $userSelectedNetworkStore
 			})
@@ -117,7 +117,7 @@
 	<div class="bg-primary p-4">
 		<div class="flex items-center gap-2">
 			<button
-				class="pointer-events-auto flex text-brand-primary"
+				class="pointer-events-auto flex text-brand-primary transition-[color,scale] duration-150 ease-out press-icon hover:text-brand-hover active:text-brand-hover"
 				aria-label={$i18n.core.alt.up_one_level}
 				onclick={() => goto(parentUrl)}
 			>

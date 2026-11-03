@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { debounce, nonNullish } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import IconAddressType from '$lib/components/address/IconAddressType.svelte';
 	import QrCode from '$lib/components/ui/QrCode.svelte';
 	import type { ContactAddressUi } from '$lib/types/contact';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		address: ContactAddressUi;

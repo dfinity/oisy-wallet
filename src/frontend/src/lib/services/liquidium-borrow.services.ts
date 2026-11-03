@@ -36,27 +36,31 @@ export interface LiquidiumBorrowPreview {
 
 // Aggregate preview: borrowing is backed by the whole portfolio, so the cap and
 // projected health come from the summary, not a single pool. Min-borrow lives in the form.
+// The protocol books principal × `openingDebtFactor` (activation fee included) as new debt.
 export const computeLiquidiumBorrowPreview = ({
 	portfolio,
-	newBorrowUsd
+	newBorrowUsd,
+	openingDebtFactor
 }: {
 	portfolio: LiquidiumPortfolio;
 	newBorrowUsd: number;
+	openingDebtFactor: number;
 }): LiquidiumBorrowPreview => {
+	const newDebtUsd = newBorrowUsd * openingDebtFactor;
 	const projectedHealthPercent = liquidiumProjectedHealthPercent({
 		currentHealthPercent: portfolio.healthFactorPercent,
-		newBorrowUsd,
+		newBorrowUsd: newDebtUsd,
 		totalCollateralUsd: portfolio.totalSuppliedUsd,
 		weightedLiquidationThresholdBps: portfolio.weightedLiquidationThresholdBps
 	});
 	const healthLevel = liquidiumHealthLevel(projectedHealthPercent);
 	const exceedsBorrowingPower =
-		newBorrowUsd > portfolio.availableBorrowsUsd * (1 + LIQUIDIUM_BORROWING_POWER_TOLERANCE);
+		newDebtUsd > portfolio.availableBorrowsUsd * (1 + LIQUIDIUM_BORROWING_POWER_TOLERANCE);
 
 	return {
 		resultingLtvPercent: liquidiumResultingLtvPercent({
 			totalDebtUsd: portfolio.totalBorrowedUsd,
-			newBorrowUsd,
+			newBorrowUsd: newDebtUsd,
 			totalCollateralUsd: portfolio.totalSuppliedUsd
 		}),
 		projectedHealthPercent,
@@ -66,11 +70,12 @@ export const computeLiquidiumBorrowPreview = ({
 };
 
 // Borrow is a `signMessage` outflow (no oisy broadcast): resolve profile → `lending.borrow`
-// → record an AUT so the modal closes before settlement. Funds land at `receiverAddress`.
+// → record an AUT so the modal closes before settlement. Funds land at `receiver` on `chain`.
 export const executeLiquidiumBorrow = async ({
 	identity,
 	ethAddress,
 	poolId,
+	chain,
 	asset,
 	amount,
 	receiverAddress,
@@ -81,6 +86,7 @@ export const executeLiquidiumBorrow = async ({
 	identity: Identity;
 	ethAddress: EthAddress;
 	poolId: string;
+	chain: Chain;
 	asset: string;
 	amount: bigint;
 	receiverAddress: string;
@@ -99,7 +105,8 @@ export const executeLiquidiumBorrow = async ({
 		profileId,
 		poolId,
 		amount,
-		receiverAddress,
+		chain,
+		receiver: receiverAddress,
 		signerWalletAddress: ethAddress,
 		signerChain: Chain.ETH,
 		signerWalletAdapter: liquidiumWalletAdapter({ identity })

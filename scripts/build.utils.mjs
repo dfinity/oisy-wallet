@@ -15,11 +15,13 @@ export const ENV =
 			? 'staging'
 			: REQUESTED_ENV === 'audit'
 				? 'staging'
-				: REQUESTED_ENV === 'e2e'
-					? 'staging'
-					: ['staging', 'beta'].includes(REQUESTED_ENV)
-						? REQUESTED_ENV
-						: 'development';
+				: ['staging', 'beta'].includes(REQUESTED_ENV)
+					? REQUESTED_ENV
+					: 'development';
+
+// Any non-empty target is a signer build, as in the app itself. The Docker build exports a missing
+// `signer_target` build arg as "", which is not a signer build.
+export const IS_SIGNER_BUILD = notEmptyString(process.env.OISY_SIGNER_TARGET);
 
 const SIGNER_TARGET_MAP = {
 	signer: 'signer_frontend',

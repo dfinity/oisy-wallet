@@ -41,7 +41,7 @@ export type NonRequiredProps = TokenAppearance &
 	TokenBuyable &
 	TokenGroup &
 	TokenDeprecated &
-	Pick<Token, 'description'>;
+	Pick<Token, 'description' | 'metadataOnly'>;
 
 export type RequiredToken<T extends Token = Token, M extends object = {}> = RequiredExcept<
 	T,

@@ -3,6 +3,7 @@ import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { ZERO } from '$lib/constants/app.constants';
@@ -28,6 +29,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcAccount } from '$tests/mocks/identity.mock';
+import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
 import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { signature } from '@solana/kit';
 
@@ -1115,6 +1117,140 @@ describe('export-data.utils', () => {
 			// would render as 1970-01-01.
 			expect(row.timestamp_iso).toBe(TIMESTAMP_ISO);
 			expect(row.tx_id).toMatch(/^[A-HJ-NP-Za-km-z1-9]{87,88}$/);
+		});
+
+		it('renders an XRP send with fee in XRP (6 decimals) and an XRPScan explorer URL', () => {
+			const xrpTx = {
+				id: 'XRPHASH1',
+				type: 'send',
+				status: 'confirmed',
+				from: 'rSenderAddress',
+				to: 'rReceiverAddress',
+				value: 2_000_000n,
+				fee: 12n,
+				timestamp: 1n,
+				blockNumber: 42
+			} satisfies XrpTransactionUi;
+
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'xrp', transaction: xrpTx, token: XRP_TOKEN }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				exportedAt
+			});
+
+			expect(row.network).toBe(XRP_TOKEN.network.name);
+			expect(row.amount).toBe('2.0');
+			expect(row.fee).toBe('0.000012');
+			expect(row.fee_token).toBe('XRP');
+			expect(row.direction).toBe('out');
+			expect(row.from).toBe('rSenderAddress');
+			expect(row.to).toBe('rReceiverAddress');
+			expect(row.tx_id).toBe('XRPHASH1');
+			// XRPScan's base URL carries no `$args` placeholder, so the path is appended.
+			expect(row.explorer_url).toBe(`${XRP_TOKEN.network.explorerUrl}/tx/XRPHASH1`);
+		});
+
+		// XRPL lets an account pay itself to convert an issued currency into XRP. `from === to`, but
+		// the XRP genuinely arrives funded by something else, so treating it as a round trip erased
+		// the credit — and because the row is incoming, the direction-based fee rule also discarded
+		// a fee the wallet demonstrably paid. The CSV reported neither balance change.
+		it('keeps the credit and the fee for an XRP self-conversion', () => {
+			const xrpSelfConversion = {
+				id: 'XRPCONV',
+				type: 'receive',
+				status: 'confirmed',
+				from: 'rSelfAddress',
+				to: 'rSelfAddress',
+				value: 5_000_000n,
+				fee: 12n,
+				crossCurrency: true,
+				timestamp: 1n,
+				blockNumber: 77
+			} satisfies XrpTransactionUi;
+
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'xrp', transaction: xrpSelfConversion, token: XRP_TOKEN }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				exportedAt
+			});
+
+			expect(row.direction).toBe('in');
+			expect(row.fee).toBe('0.000012');
+			expect(row.effective_token).toBe('4.999988');
+
+			// The Credit/Debit columns are documented to sum to the actual balance change: the XRP
+			// arrived, and the fee left.
+			expect(row.credit).toBe('5.0');
+			expect(row.credit_raw).toBe(5_000_000n);
+			expect(row.debit).toBe('-0.000012');
+			expect(row.debit_raw).toBe(-12n);
+		});
+
+		// Classic XRP addresses are base58 over a checksummed payload, so case is significant — the
+		// RPC layer and the mapper both compare raw. Lowercasing here would read two distinct
+		// addresses as one wallet and suppress a real credit.
+		it('does not treat case-variant XRP addresses as a self-transfer', () => {
+			const xrpCaseVariant = {
+				id: 'XRPCASE',
+				type: 'receive',
+				status: 'confirmed',
+				from: 'rSelfAddress',
+				to: 'rselfaddress',
+				value: 5_000_000n,
+				timestamp: 1n,
+				blockNumber: 79
+			} satisfies XrpTransactionUi;
+
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'xrp', transaction: xrpCaseVariant, token: XRP_TOKEN }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				exportedAt
+			});
+
+			expect(row.credit).toBe('5.0');
+			expect(row.effective_token).toBe('5.0');
+		});
+
+		// A same-asset round trip really does net to zero on the asset — but the fee still left, and
+		// it was dropped for the same reason: the single row XRP emits for a self-transfer is
+		// incoming, which is the one case the outgoing-only fee rule does not fit.
+		it('keeps the fee for a plain XRP self-send while netting the asset to zero', () => {
+			const xrpSelfSend = {
+				id: 'XRPSELF',
+				type: 'receive',
+				status: 'confirmed',
+				from: 'rSelfAddress',
+				to: 'rSelfAddress',
+				value: 5_000_000n,
+				fee: 12n,
+				timestamp: 1n,
+				blockNumber: 78
+			} satisfies XrpTransactionUi;
+
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'xrp', transaction: xrpSelfSend, token: XRP_TOKEN }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				exportedAt
+			});
+
+			expect(row.direction).toBe('in');
+			expect(row.fee).toBe('0.000012');
+			expect(row.effective_token).toBe('-0.000012');
+
+			// Nothing was gained — the asset came back — so Credit is blank rather than the returned
+			// amount, and the only balance change is the fee.
+			expect(row.credit).toBe('');
+			expect(row.credit_raw).toBeUndefined();
+			expect(row.debit).toBe('-0.000012');
+			expect(row.debit_raw).toBe(-12n);
 		});
 
 		it('constructs the Solana explorer URL from the network template when txExplorerUrl is missing', () => {

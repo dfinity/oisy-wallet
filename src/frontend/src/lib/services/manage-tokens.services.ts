@@ -1,5 +1,3 @@
-import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
-import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
 	SOLANA_DEVNET_NETWORK_ID,
@@ -40,6 +38,7 @@ import {
 	isVersionMismatchError,
 	mapIcErrorMetadata
 } from '$lib/utils/error.utils';
+import { findEvmNetworkByChainId } from '$lib/utils/network.utils';
 import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
@@ -112,11 +111,7 @@ const mapTokenManageNetwork = <T extends SaveTokensToken>({
 		return;
 	}
 
-	const evmNetwork = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
-		({ chainId }) => chainId === token.chainId
-	);
-
-	return evmNetwork?.id.description;
+	return findEvmNetworkByChainId(token.chainId)?.id.description;
 };
 
 const mapTokenManageToken = <T extends SaveTokensToken>({

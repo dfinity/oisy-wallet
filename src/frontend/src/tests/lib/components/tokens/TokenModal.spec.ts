@@ -1,4 +1,6 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
+import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import * as icAddCustomTokensService from '$icp/services/ic-add-custom-tokens.service';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import * as backendApi from '$lib/api/backend.api';
@@ -17,12 +19,15 @@ import { toCustomToken } from '$lib/utils/custom-token.utils';
 import * as navUtils from '$lib/utils/nav.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { MOCK_CANISTER_ID_1 } from '$tests/mocks/exchanges.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import * as idbKeyval from 'idb-keyval';
+import { get } from 'svelte/store';
 
 vi.mock('$icp/services/icrc.services', () => ({
 	loadCustomTokens: vi.fn()
@@ -79,6 +84,64 @@ describe('TokenModal', () => {
 			expect(toasts).toHaveBeenCalledOnce();
 			expect(gotoReplaceRoot).toHaveBeenCalledOnce();
 		});
+	});
+
+	it('deletes an ERC4626 token after all required steps', async () => {
+		const token: Erc4626CustomToken = { ...mockValidErc4626Token, enabled: true };
+		const cachedToken = toCustomToken({
+			...token,
+			chainId: token.network.chainId,
+			networkKey: 'Erc4626'
+		});
+		const otherCachedToken = toCustomToken({
+			...mockValidErc20Token,
+			chainId: mockValidErc20Token.network.chainId,
+			enabled: true,
+			networkKey: 'Erc20'
+		});
+
+		erc4626CustomTokensStore.resetAll();
+		erc4626CustomTokensStore.setAll([{ data: token, certified: true }]);
+		vi.mocked(idbKeyval.get).mockResolvedValue([cachedToken, otherCachedToken]);
+
+		const { getByTestId } = render(TokenModal, {
+			props: {
+				token,
+				isDeletable: true
+			}
+		});
+
+		const removeCustomTokenMock = mockRemoveCustomToken();
+		const toasts = mockToastsShow();
+		const gotoReplaceRoot = mockGoToRoot();
+		mockAuthStore();
+
+		await fireEvent.click(getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON));
+
+		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
+
+		await waitFor(() => {
+			expect(removeCustomTokenMock).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				token: expect.objectContaining({
+					token: {
+						Erc4626: {
+							token_address: mockValidErc4626Token.address,
+							chain_id: mockValidErc4626Token.network.chainId
+						}
+					}
+				})
+			});
+			expect(toasts).toHaveBeenCalledOnce();
+			expect(gotoReplaceRoot).toHaveBeenCalledOnce();
+		});
+
+		expect(get(erc4626CustomTokensStore)).toEqual([]);
+		expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith(
+			mockIdentity.getPrincipal().toText(),
+			[otherCachedToken],
+			expect.anything()
+		);
 	});
 
 	it('saves token after all required steps if indexCanisterId was missing', async () => {

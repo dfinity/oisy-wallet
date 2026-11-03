@@ -11,8 +11,7 @@ export type TokenManageEventModifier = 'import' | 'delete' | 'enable' | 'disable
 export type TokenManageEventKey = 'index_canister';
 
 export type TokenManageSourceLocation =
-	| PLAUSIBLE_EVENT_SOURCE_LOCATIONS.MANAGE_TOKENS
-	| PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOKEN_DETAILS;
+	PLAUSIBLE_EVENT_SOURCE_LOCATIONS.MANAGE_TOKENS | PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOKEN_DETAILS;
 
 export interface TokenManageEventToken {
 	network: string;

@@ -44,6 +44,9 @@
 		onSwap: () => Promise<void>;
 		swapFees: Snippet;
 		isSwapAmountsLoading?: boolean;
+		// What the provider's wizard knows holds the swap back, such as a fee not yet known or not
+		// affordable: the wizard shows the reason itself.
+		swapDisabled?: boolean;
 	}
 
 	let {
@@ -54,7 +57,8 @@
 		onClose,
 		onSwap,
 		swapFees,
-		isSwapAmountsLoading = false
+		isSwapAmountsLoading = false,
+		swapDisabled = false
 	}: Props = $props();
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
@@ -119,7 +123,7 @@
 	});
 
 	let swapButtonDisabled = $derived(
-		isSwapAmountsLoading || (isWarningConfirmationRequired && !isWarningConfirmed)
+		isSwapAmountsLoading || swapDisabled || (isWarningConfirmationRequired && !isWarningConfirmed)
 	);
 </script>
 

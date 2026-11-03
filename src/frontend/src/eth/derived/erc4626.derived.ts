@@ -114,7 +114,9 @@ export const erc4626TokensExchangeData: Readable<Erc4626TokensExchangeData[]> = 
 				assetAddress,
 				assetDecimals,
 				network: {
-					providers: { infura },
+					name,
+					chainId,
+					providers: { infura, alchemyJsonRpcUrl },
 					exchange
 				}
 			}) => ({
@@ -123,7 +125,7 @@ export const erc4626TokensExchangeData: Readable<Erc4626TokensExchangeData[]> = 
 				assetAddress,
 				assetDecimals,
 				exchange,
-				infura
+				network: { name, chainId, providers: { infura, alchemyJsonRpcUrl } }
 			})
 		)
 );
@@ -136,6 +138,13 @@ export const erc4626CustomTokensInitialized: Readable<boolean> = derived(
 export const erc4626CustomTokensNotInitialized: Readable<boolean> = derived(
 	[erc4626CustomTokensInitialized],
 	([$erc4626CustomTokensInitialized]) => !$erc4626CustomTokensInitialized
+);
+
+export const erc4626CustomTokensLoading: Readable<boolean> = derived(
+	[erc4626CustomTokensNotInitialized, enabledEthereumNetworksIds, enabledEvmNetworksIds],
+	([$erc4626CustomTokensNotInitialized, $enabledEthereumNetworksIds, $enabledEvmNetworksIds]) =>
+		$erc4626CustomTokensNotInitialized &&
+		$enabledEthereumNetworksIds.length + $enabledEvmNetworksIds.length > 0
 );
 
 export const erc4626AssetAddresses: Readable<Erc4626ContractAddressWithNetwork[]> = derived(

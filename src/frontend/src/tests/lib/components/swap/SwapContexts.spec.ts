@@ -1,7 +1,9 @@
 import { SUPPORTED_EVM_MAINNET_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SUPPORTED_SOLANA_MAINNET_NETWORKS } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
 import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 import SwapContexts from '$lib/components/swap/SwapContexts.svelte';
 import {
@@ -52,7 +54,12 @@ describe('SwapContexts', () => {
 			expect(setContext).toHaveBeenCalledWith(
 				SWAP_AMOUNTS_CONTEXT_KEY,
 				expect.objectContaining({
-					store: expect.any(Object)
+					store: expect.any(Object),
+					activity: expect.objectContaining({
+						subscribe: expect.any(Function),
+						start: expect.any(Function),
+						reset: expect.any(Function)
+					})
 				})
 			);
 		});
@@ -138,7 +145,10 @@ describe('SwapContexts', () => {
 				ICP_NETWORK,
 				ETHEREUM_NETWORK,
 				...SUPPORTED_EVM_MAINNET_NETWORKS,
-				...SUPPORTED_SOLANA_MAINNET_NETWORKS
+				...SUPPORTED_SOLANA_MAINNET_NETWORKS,
+				// Bitcoin joins the list as long as a provider reaches it: Chain Fusion or NEAR Intents.
+				BTC_MAINNET_NETWORK,
+				XRP_MAINNET_NETWORK
 			]);
 		});
 
@@ -192,7 +202,9 @@ describe('SwapContexts', () => {
 				aggregated: {
 					icp: { coverage: 'all', supportedTokenIds: new Set([icpLedgerId]) },
 					evm: { coverage: 'none', supportedTokenIds: new Set() },
-					sol: { coverage: 'none', supportedTokenIds: new Set() }
+					sol: { coverage: 'none', supportedTokenIds: new Set() },
+					btc: { coverage: 'none', supportedTokenIds: new Set() },
+					xrp: { coverage: 'none', supportedTokenIds: new Set() }
 				},
 				providers: [
 					{
@@ -236,7 +248,9 @@ describe('SwapContexts', () => {
 						supportedTokenIds: new Set([mockValidIcToken.ledgerCanisterId, otherIcrcLedger])
 					},
 					evm: { coverage: 'none', supportedTokenIds: new Set() },
-					sol: { coverage: 'none', supportedTokenIds: new Set() }
+					sol: { coverage: 'none', supportedTokenIds: new Set() },
+					btc: { coverage: 'none', supportedTokenIds: new Set() },
+					xrp: { coverage: 'none', supportedTokenIds: new Set() }
 				},
 				providers: [
 					{

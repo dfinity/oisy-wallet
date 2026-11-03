@@ -1,3 +1,4 @@
+import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import WalletConnectSessionsModal from '$lib/components/wallet-connect/WalletConnectSessionsModal.svelte';
 import * as walletConnectServices from '$lib/services/wallet-connect.services';
 import * as toastsStore from '$lib/stores/toasts.store';
@@ -6,6 +7,7 @@ import {
 	walletConnectSessionsStore
 } from '$lib/stores/wallet-connect.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import type { SessionTypes } from '@walletconnect/types';
@@ -13,10 +15,12 @@ import type { SessionTypes } from '@walletconnect/types';
 describe('WalletConnectSessionsModal', () => {
 	const mockSession = ({
 		accounts,
+		namespace = 'eip155',
 		name = 'Test dApp',
 		url = 'https://test-dapp.com'
 	}: {
 		accounts: string[];
+		namespace?: string;
 		name?: string;
 		url?: string;
 	}): SessionTypes.Struct =>
@@ -31,7 +35,7 @@ describe('WalletConnectSessionsModal', () => {
 				}
 			},
 			namespaces: {
-				eip155: {
+				[namespace]: {
 					accounts,
 					methods: [],
 					events: []
@@ -130,6 +134,29 @@ describe('WalletConnectSessionsModal', () => {
 		expect(overlappedLogos.length).toBeGreaterThan(0);
 	});
 
+	it('should render the Bitcoin network icon for a bip122 session', () => {
+		// Regression: the bip122 chain had no entry in the icon map, so the Bitcoin icon never
+		// resolved and OverlappedLogos showed its loading skeleton indefinitely.
+		const session = mockSession({
+			namespace: 'bip122',
+			// bip122 account: `bip122:<first 32 hex chars of the mainnet genesis hash>:<address>`.
+			accounts: [
+				'bip122:000000000019d6689c085ae165831e93:bc1qexampleaddressxxxxxxxxxxxxxxxxxxxxxxx'
+			]
+		});
+
+		walletConnectListenerStore.set({
+			...mockListener,
+			getActiveSessions: vi.fn().mockReturnValue({ 'test-topic': session })
+		} as unknown as WalletConnectListener);
+
+		const { container } = render(WalletConnectSessionsModal);
+
+		const overlappedLogos = container.querySelectorAll('[style*="z-index"]');
+
+		expect(overlappedLogos).toHaveLength(1);
+	});
+
 	it('should deduplicate network icons for same chain', () => {
 		const session = mockSession({
 			accounts: [
@@ -149,6 +176,26 @@ describe('WalletConnectSessionsModal', () => {
 
 		// Two accounts on the same chain should produce only one icon
 		expect(overlappedLogos).toHaveLength(1);
+	});
+
+	it('should invert mainnet network icons on the dark theme but keep testnet icons as they are', () => {
+		setSessions({
+			'test-topic': mockSession({
+				accounts: [
+					`eip155:${ETHEREUM_NETWORK.chainId}:0xAbCdEf1234567890AbCdEf1234567890AbCdEf12`,
+					`eip155:${SEPOLIA_NETWORK.chainId}:0xAbCdEf1234567890AbCdEf1234567890AbCdEf12`
+				]
+			})
+		});
+
+		const { getByAltText } = render(WalletConnectSessionsModal);
+
+		const logoAlt = (name: string) => replacePlaceholders(en.core.alt.logo, { $name: name });
+
+		expect(
+			getByAltText(logoAlt(ETHEREUM_NETWORK.name)).closest('.invert-on-dark-theme')
+		).toBeInTheDocument();
+		expect(getByAltText(logoAlt(SEPOLIA_NETWORK.name)).closest('.invert-on-dark-theme')).toBeNull();
 	});
 
 	it('should render multiple sessions', () => {

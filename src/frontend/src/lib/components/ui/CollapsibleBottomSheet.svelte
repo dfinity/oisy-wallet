@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { BottomSheet } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import Backdrop from '$lib/components/ui/Backdrop.svelte';
+	import BottomSheetContainer from '$lib/components/ui/BottomSheetContainer.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Collapsible from '$lib/components/ui/Collapsible.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
@@ -15,7 +15,12 @@
 		contentHeader: Snippet<[{ isInBottomSheet: boolean }]>;
 		contentFooter?: Snippet<[closeFn: () => void]>;
 		showContentHeader?: boolean;
+		disabled?: boolean;
 		buttonTestId?: string;
+		// Replaces the default info-icon button on mobile, for sheets whose trigger is the current
+		// value rather than a hint that details exist.
+		trigger?: Snippet<[{ open: () => void; disabled: boolean }]>;
+		sheetTitle?: string;
 	}
 
 	let {
@@ -23,38 +28,59 @@
 		contentHeader,
 		contentFooter,
 		showContentHeader = false,
-		buttonTestId
+		disabled = false,
+		buttonTestId,
+		trigger,
+		sheetTitle
 	}: Props = $props();
 
 	let expanded = $state(false);
+	$effect(() => {
+		if (disabled) {
+			expanded = false;
+		}
+	});
+	const open = () => {
+		if (!disabled) {
+			expanded = true;
+		}
+	};
 </script>
 
 <Responsive down="sm">
 	<div class="flex w-full items-center justify-between">
 		{@render contentHeader({ isInBottomSheet: false })}
-		<ButtonIcon
-			ariaLabel={$i18n.core.alt.open_details}
-			colorStyle="muted"
-			onclick={() => (expanded = true)}
-			styleClass="text-disabled mb-2 items-end"
-			testId={buttonTestId}
-			width="w-8"
-		>
-			{#snippet icon()}
-				<IconInfo />
-			{/snippet}
-		</ButtonIcon>
+		{#if nonNullish(trigger)}
+			{@render trigger({ open, disabled })}
+		{:else}
+			<ButtonIcon
+				ariaLabel={$i18n.core.alt.open_details}
+				colorStyle="muted"
+				{disabled}
+				onclick={open}
+				styleClass="text-disabled mb-2 items-end"
+				testId={buttonTestId}
+				width="w-8"
+			>
+				{#snippet icon()}
+					<IconInfo />
+				{/snippet}
+			</ButtonIcon>
+		{/if}
 	</div>
 
 	{#if expanded}
 		<div class="fixed inset-0 z-14">
-			<BottomSheet transition>
+			<BottomSheetContainer ariaLabel={sheetTitle} onClose={() => (expanded = false)} transition>
 				{#snippet header()}
-					<div class="w-full p-4">
+					<div class="flex w-full items-center justify-between p-4">
+						{#if nonNullish(sheetTitle)}
+							<h3 class="m-0 min-w-0 text-xl font-bold break-words">{sheetTitle}</h3>
+						{/if}
 						<ButtonIcon
 							ariaLabel={$i18n.core.alt.close_details}
 							onclick={() => (expanded = false)}
-							styleClass="text-disabled float-right"
+							styleClass="text-disabled ml-auto"
 						>
 							{#snippet icon()}
 								<IconClose size="24" />
@@ -63,7 +89,7 @@
 					</div>
 				{/snippet}
 
-				<div class="min-h-[35vh] w-full px-4 pb-4">
+				<div class="w-full px-4 pb-4">
 					{#if showContentHeader}
 						{@render contentHeader({ isInBottomSheet: true })}
 					{/if}
@@ -79,7 +105,7 @@
 						{/if}
 					</div>
 				{/snippet}
-			</BottomSheet>
+			</BottomSheetContainer>
 			<Backdrop onClose={() => (expanded = false)} />
 		</div>
 	{/if}
@@ -87,7 +113,7 @@
 
 <Responsive up="md">
 	<div class="modal-expandable-values">
-		<Collapsible initiallyExpanded={expanded} bind:expanded>
+		<Collapsible {disabled} initiallyExpanded={expanded} bind:expanded>
 			{#snippet header()}
 				<div class="flex w-[calc(100%-1.5rem)] items-center">
 					{@render contentHeader({ isInBottomSheet: false })}

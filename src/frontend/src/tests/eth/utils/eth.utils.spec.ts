@@ -11,6 +11,7 @@ import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import {
 	getExplorerUrl,
 	isDefaultEthereumToken,
+	isEthersError,
 	isNotDefaultEthereumToken,
 	isNotSupportedEthTokenId,
 	isSupportedEthToken,
@@ -18,6 +19,7 @@ import {
 } from '$eth/utils/eth.utils';
 import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import type { Token } from '$lib/types/token';
+import { makeError } from 'ethers/utils';
 
 describe('eth.utils', () => {
 	describe('isDefaultEthereumToken', () => {
@@ -229,6 +231,25 @@ describe('eth.utils', () => {
 			const result3 = getExplorerUrl({ token: {} as unknown as Token });
 
 			expect(result3).toBe(DEFAULT_ETHEREUM_NETWORK.explorerUrl);
+		});
+	});
+
+	describe('isEthersError', () => {
+		it('should recognise an error ethers raised', () => {
+			const err = makeError('could not coalesce error', 'UNKNOWN_ERROR', {
+				error: { code: -32000, message: 'already known' }
+			});
+
+			expect(isEthersError(err)).toBeTruthy();
+		});
+
+		it.each([
+			new Error('offline'),
+			{ code: 'UNKNOWN_ERROR', shortMessage: 'offline' },
+			'offline',
+			undefined
+		])('should not recognise anything else: %s', (err) => {
+			expect(isEthersError(err)).toBeFalsy();
 		});
 	});
 });

@@ -27,9 +27,11 @@
 	import { pageNonFungibleToken, pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import {
+		isRouteBorrowings,
 		isRouteEarning,
 		isRouteNfts,
 		isRouteTokens,
+		isRouteTrading,
 		isRouteTransactions
 	} from '$lib/utils/nav.utils';
 
@@ -46,7 +48,13 @@
 
 	let earningRoute = $derived(isRouteEarning(page));
 
-	let assetsRoute = $derived(tokensRoute || nftsRoute || earningRoute);
+	let tradingRoute = $derived(isRouteTrading(page));
+
+	let borrowingsRoute = $derived(isRouteBorrowings(page));
+
+	let assetsRoute = $derived(
+		tokensRoute || nftsRoute || earningRoute || tradingRoute || borrowingsRoute
+	);
 
 	let transactionsRoute = $derived(isRouteTransactions(page));
 
@@ -140,7 +148,7 @@
 				{/if}
 
 				<MobileNavigationMenu>
-					<NavigationMenuMainItems testIdPrefix="mobile" />
+					<NavigationMenuMainItems layout="mobile" testIdPrefix="mobile" />
 				</MobileNavigationMenu>
 
 				<Modals />

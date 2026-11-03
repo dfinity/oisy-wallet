@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
@@ -22,6 +21,7 @@
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 	import { compareNatural } from '$lib/utils/string.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		nft?: Nft;

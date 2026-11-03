@@ -13,6 +13,7 @@
 		SOLANA_LOCAL_NETWORK,
 		SOLANA_MAINNET_NETWORK
 	} from '$env/networks/networks.sol.env';
+	import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
 	import {
 		BTC_MAINNET_TOKEN,
 		BTC_REGTEST_TOKEN,
@@ -25,6 +26,7 @@
 		SOLANA_LOCAL_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
+	import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 	import type { OptionEthAddress } from '$eth/types/address';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
@@ -42,7 +44,8 @@
 		RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
 		RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION,
 		RECEIVE_TOKENS_MODAL_SOL_LOCAL_SECTION,
-		RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION
+		RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION,
+		RECEIVE_TOKENS_MODAL_XRP_MAINNET_SECTION
 	} from '$lib/constants/test-ids.constants';
 	import {
 		btcAddressMainnet,
@@ -51,7 +54,8 @@
 		ethAddress,
 		solAddressDevnet,
 		solAddressLocal,
-		solAddressMainnet
+		solAddressMainnet,
+		xrpAddressMainnet
 	} from '$lib/derived/address.derived';
 	import {
 		networkBitcoinMainnetEnabled,
@@ -63,7 +67,8 @@
 		networkSepoliaEnabled,
 		networkSolanaDevnetEnabled,
 		networkSolanaLocalEnabled,
-		networkSolanaMainnetEnabled
+		networkSolanaMainnetEnabled,
+		networkXrpMainnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -215,6 +220,18 @@
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
 			condition: $networkSolanaLocalEnabled && $testnetsEnabled && LOCAL
+		},
+		{
+			labelRef: 'xrpAddressMainnet',
+			address: $xrpAddressMainnet,
+			network: XRP_MAINNET_NETWORK,
+			token: XRP_TOKEN,
+			testId: RECEIVE_TOKENS_MODAL_XRP_MAINNET_SECTION,
+			title: $i18n.receive.xrp.text.xrp_address_title,
+			label: $i18n.receive.xrp.text.xrp_address,
+			copyAriaLabel: $i18n.receive.xrp.text.xrp_address_copied,
+			qrCodeAriaLabel: $i18n.receive.xrp.text.display_xrp_address_qr,
+			condition: $networkXrpMainnetEnabled
 		}
 	]);
 

@@ -2,6 +2,7 @@
 	import IconMoon from '$lib/components/icons/IconMoon.svelte';
 	import IconSun from '$lib/components/icons/IconSun.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import IconSwap from '$lib/components/ui/IconSwap.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { themeStore } from '$lib/stores/theme.store';
 	import { Theme } from '$lib/types/theme';
@@ -20,12 +21,9 @@
 	onclick={handleClick}
 >
 	{#snippet icon()}
-		<span>
-			{#if $themeStore === Theme.DARK}
-				<IconSun size="24" />
-			{:else}
-				<IconMoon size="24" />
-			{/if}
-		</span>
+		<IconSwap swapped={$themeStore === Theme.DARK}>
+			{#snippet icon()}<IconMoon size="24" />{/snippet}
+			{#snippet swappedIcon()}<IconSun size="24" />{/snippet}
+		</IconSwap>
 	{/snippet}
 </ButtonIcon>

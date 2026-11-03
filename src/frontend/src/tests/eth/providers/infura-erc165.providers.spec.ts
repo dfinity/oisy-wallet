@@ -33,7 +33,7 @@ describe('infura-erc165.providers', () => {
 		});
 
 		it('should initialise the provider with the correct network and API key', () => {
-			const provider = new InfuraErc165Provider(infura);
+			const provider = new InfuraErc165Provider(ETHEREUM_NETWORK);
 
 			expect(provider).toBeDefined();
 			expect(InfuraProviderLib).toHaveBeenCalledWith(infura, INFURA_API_KEY);
@@ -60,7 +60,7 @@ describe('infura-erc165.providers', () => {
 				`should return true for supported interface %s`,
 				// eslint-disable-next-line local-rules/prefer-object-params
 				async (_, interfaceId) => {
-					const provider = new InfuraErc165Provider(infura);
+					const provider = new InfuraErc165Provider(ETHEREUM_NETWORK);
 
 					await expect(
 						provider.isSupportedInterface({
@@ -75,13 +75,13 @@ describe('infura-erc165.providers', () => {
 				const errorMessage = 'Mock error message';
 				mockSupportedInterface.mockRejectedValue(new Error(errorMessage));
 
-				const provider = new InfuraErc165Provider(infura);
+				const provider = new InfuraErc165Provider(ETHEREUM_NETWORK);
 
 				await expect(provider.isSupportedInterface(mockParams)).resolves.toBeFalsy();
 			});
 
 			it('should call the supportsInterface method of the contract', async () => {
-				const provider = new InfuraErc165Provider(infura);
+				const provider = new InfuraErc165Provider(ETHEREUM_NETWORK);
 
 				await provider.isSupportedInterface(mockParams);
 

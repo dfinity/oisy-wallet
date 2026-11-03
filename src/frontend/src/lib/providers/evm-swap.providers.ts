@@ -1,8 +1,12 @@
+import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
 import { SUPPORTED_EVM_MAINNET_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { LIFI_SWAP_ENABLED } from '$env/rest/lifi.env';
 import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
-import { ONESEC_EVM_NETWORK_IDS } from '$lib/constants/swap.constants';
+import { CHAIN_FUSION_PAIRS, ONESEC_EVM_NETWORK_IDS } from '$lib/constants/swap.constants';
+import { fetchChainFusionEvmQuote } from '$lib/services/chain-fusion-swap.services';
+import { fetchLifiSwapQuote } from '$lib/services/lifi-swap.services';
 import {
 	fetchNearIntentsSwapQuote,
 	nearIntentsSupportedTokens
@@ -10,6 +14,11 @@ import {
 import { fetchOneSecEvmToIcpQuote } from '$lib/services/onesec-swap.services';
 import { fetchVeloraSwapAmount } from '$lib/services/velora-swap.services';
 import { SwapProvider, type EvmSwapProviderConfig } from '$lib/types/swap';
+import {
+	chainFusionCompatibleDestinations,
+	chainFusionSupportedSourceTokens
+} from '$lib/utils/chain-fusion-swap.utils';
+import { buildLifiSupportedDestinations } from '$lib/utils/lifi-swap.utils';
 import { buildNearIntentsSupportedDestinations } from '$lib/utils/near-intents-swap.utils';
 import {
 	oneSecCompatibleDestinations,
@@ -54,6 +63,33 @@ export const evmSwapProviders: EvmSwapProviderConfig[] = [
 							sourceToken,
 							networkIds: ONESEC_EVM_NETWORK_IDS
 						})
+				} satisfies EvmSwapProviderConfig
+			]
+		: []),
+	...(CHAIN_FUSION_SWAP_ENABLED
+		? [
+				{
+					key: SwapProvider.CHAIN_FUSION,
+					getQuote: fetchChainFusionEvmQuote,
+					isEnabled: CHAIN_FUSION_SWAP_ENABLED,
+					getSupportedTokens: () =>
+						Promise.resolve(
+							chainFusionSupportedSourceTokens({ category: 'evm', pairs: CHAIN_FUSION_PAIRS })
+						),
+					getSupportedDestinations: ({ sourceToken }) =>
+						chainFusionCompatibleDestinations({ sourceToken, pairs: CHAIN_FUSION_PAIRS })
+				} satisfies EvmSwapProviderConfig
+			]
+		: []),
+	// No source list, like Velora: LI.FI covers practically every token on its chains, and a pair it
+	// has no route for gets no quote.
+	...(LIFI_SWAP_ENABLED
+		? [
+				{
+					key: SwapProvider.LIFI,
+					getQuote: fetchLifiSwapQuote,
+					isEnabled: LIFI_SWAP_ENABLED,
+					getSupportedDestinations: buildLifiSupportedDestinations('evm')
 				} satisfies EvmSwapProviderConfig
 			]
 		: [])

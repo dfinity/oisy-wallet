@@ -9,6 +9,9 @@ const mockEvmGetQuote = vi.fn();
 const mockEvmGetSupportedTokens = vi.fn();
 const mockSolGetQuote = vi.fn();
 const mockSolGetSupportedTokens = vi.fn();
+const mockBtcGetQuote = vi.fn();
+const mockBtcGetSupportedTokens = vi.fn();
+const mockXrpGetSupportedTokens = vi.fn();
 
 const kongDestinations = vi.fn(() => ({}));
 const icpSwapDestinations = vi.fn(() => ({}));
@@ -16,6 +19,8 @@ const icpBridgeDestinations = vi.fn(() => ({}));
 const veloraDestinations = vi.fn(() => ({}));
 const nearEvmDestinations = vi.fn(() => ({}));
 const nearSolDestinations = vi.fn(() => ({}));
+const chainFusionBtcDestinations = vi.fn(() => ({}));
+const nearXrpDestinations = vi.fn(() => ({}));
 
 vi.mock('$lib/providers/swap.providers', () => ({
 	swapProviders: [
@@ -80,6 +85,30 @@ vi.mock('$lib/providers/sol-swap.providers', () => ({
 	]
 }));
 
+vi.mock('$lib/providers/btc-swap.providers', () => ({
+	btcSwapProviders: [
+		{
+			key: 'chainFusion',
+			getQuote: mockBtcGetQuote,
+			isEnabled: true,
+			getSupportedTokens: mockBtcGetSupportedTokens,
+			getSupportedDestinations: chainFusionBtcDestinations
+		}
+	]
+}));
+
+vi.mock('$lib/providers/xrp-swap.providers', () => ({
+	xrpSwapProviders: [
+		{
+			key: 'nearIntents',
+			getQuote: vi.fn(),
+			isEnabled: true,
+			getSupportedTokens: mockXrpGetSupportedTokens,
+			getSupportedDestinations: nearXrpDestinations
+		}
+	]
+}));
+
 describe('swap-supported-tokens.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -92,6 +121,8 @@ describe('swap-supported-tokens.services', () => {
 		mockIcpBridgeSupportedTokens.mockResolvedValue(new Set(['canister-c', 'canister-d']));
 		mockEvmGetSupportedTokens.mockResolvedValue(new Set(['0xabc', '0xdef']));
 		mockSolGetSupportedTokens.mockResolvedValue(new Set(['SplAddr1']));
+		mockBtcGetSupportedTokens.mockResolvedValue(new Set(['btc']));
+		mockXrpGetSupportedTokens.mockResolvedValue(new Set(['xrp']));
 
 		const { loadSwapSupportedTokens } =
 			await import('$lib/services/swap-supported-tokens.services');
@@ -114,6 +145,14 @@ describe('swap-supported-tokens.services', () => {
 		// SOL: NEAR Intents has list, only provider → 'all'
 		expect(stored?.aggregated.sol.coverage).toBe('all');
 		expect(stored?.aggregated.sol.supportedTokenIds).toEqual(new Set(['SplAddr1']));
+
+		// BTC: Chain Fusion has a list, only provider → 'all'
+		expect(stored?.aggregated.btc.coverage).toBe('all');
+		expect(stored?.aggregated.btc.supportedTokenIds).toEqual(new Set(['btc']));
+
+		// XRP: NEAR Intents has a list, only provider → 'all'
+		expect(stored?.aggregated.xrp.coverage).toBe('all');
+		expect(stored?.aggregated.xrp.supportedTokenIds).toEqual(new Set(['xrp']));
 	});
 
 	it('should record per-provider source sets and destination resolvers', async () => {
@@ -122,6 +161,8 @@ describe('swap-supported-tokens.services', () => {
 		mockIcpBridgeSupportedTokens.mockResolvedValue(new Set(['canister-c']));
 		mockEvmGetSupportedTokens.mockResolvedValue(new Set(['0xabc']));
 		mockSolGetSupportedTokens.mockResolvedValue(new Set(['SplAddr1']));
+		mockBtcGetSupportedTokens.mockResolvedValue(new Set(['btc']));
+		mockXrpGetSupportedTokens.mockResolvedValue(new Set(['xrp']));
 
 		const { loadSwapSupportedTokens } =
 			await import('$lib/services/swap-supported-tokens.services');
@@ -129,7 +170,7 @@ describe('swap-supported-tokens.services', () => {
 
 		const stored = get(swapSupportedTokensStore);
 
-		expect(stored?.providers).toHaveLength(6);
+		expect(stored?.providers).toHaveLength(8);
 
 		const veloraEntry = stored?.providers.find(
 			(p) => p.key === 'velora' && p.sourceCategory === 'evm'
@@ -145,6 +186,20 @@ describe('swap-supported-tokens.services', () => {
 
 		expect(kongEntry?.supportedSourceTokens).toEqual(new Set(['canister-a']));
 		expect(kongEntry?.getSupportedDestinations).toBe(kongDestinations);
+
+		const chainFusionBtcEntry = stored?.providers.find(
+			(p) => p.key === 'chainFusion' && p.sourceCategory === 'btc'
+		);
+
+		expect(chainFusionBtcEntry?.supportedSourceTokens).toEqual(new Set(['btc']));
+		expect(chainFusionBtcEntry?.getSupportedDestinations).toBe(chainFusionBtcDestinations);
+
+		const nearIntentsXrpEntry = stored?.providers.find(
+			(p) => p.key === 'nearIntents' && p.sourceCategory === 'xrp'
+		);
+
+		expect(nearIntentsXrpEntry?.supportedSourceTokens).toEqual(new Set(['xrp']));
+		expect(nearIntentsXrpEntry?.getSupportedDestinations).toBe(nearXrpDestinations);
 	});
 
 	it('should handle provider getSupportedTokens failures gracefully', async () => {
@@ -153,6 +208,8 @@ describe('swap-supported-tokens.services', () => {
 		mockIcpBridgeSupportedTokens.mockRejectedValue(new Error('OneSec API error'));
 		mockEvmGetSupportedTokens.mockRejectedValue(new Error('NEAR Intents API error'));
 		mockSolGetSupportedTokens.mockResolvedValue(new Set(['SplAddr1']));
+		mockBtcGetSupportedTokens.mockRejectedValue(new Error('ckBTC minter unavailable'));
+		mockXrpGetSupportedTokens.mockRejectedValue(new Error('NEAR Intents API error'));
 
 		const { loadSwapSupportedTokens } =
 			await import('$lib/services/swap-supported-tokens.services');
@@ -173,6 +230,14 @@ describe('swap-supported-tokens.services', () => {
 		// SOL: NEAR Intents succeeded
 		expect(stored?.aggregated.sol.coverage).toBe('all');
 		expect(stored?.aggregated.sol.supportedTokenIds).toEqual(new Set(['SplAddr1']));
+
+		// BTC: Chain Fusion failed → empty set, coverage stays 'all' as its only provider
+		expect(stored?.aggregated.btc.coverage).toBe('all');
+		expect(stored?.aggregated.btc.supportedTokenIds.size).toBe(0);
+
+		// XRP: NEAR Intents failed → empty set, coverage stays 'all' as its only provider
+		expect(stored?.aggregated.xrp.coverage).toBe('all');
+		expect(stored?.aggregated.xrp.supportedTokenIds.size).toBe(0);
 	});
 
 	it('should union token IDs across multiple providers in the same group', async () => {
@@ -181,6 +246,8 @@ describe('swap-supported-tokens.services', () => {
 		mockIcpBridgeSupportedTokens.mockResolvedValue(new Set(['id-4', 'id-shared']));
 		mockEvmGetSupportedTokens.mockResolvedValue(new Set());
 		mockSolGetSupportedTokens.mockResolvedValue(new Set());
+		mockBtcGetSupportedTokens.mockResolvedValue(new Set());
+		mockXrpGetSupportedTokens.mockResolvedValue(new Set());
 
 		const { loadSwapSupportedTokens } =
 			await import('$lib/services/swap-supported-tokens.services');
@@ -191,5 +258,122 @@ describe('swap-supported-tokens.services', () => {
 		expect(stored?.aggregated.icp.supportedTokenIds).toEqual(
 			new Set(['id-1', 'id-2', 'id-3', 'id-4', 'id-shared'])
 		);
+	});
+
+	describe('reloadSolSwapSupportedTokens', () => {
+		const load = async () => {
+			mockKongSupportedTokens.mockResolvedValue(new Set(['canister-a']));
+			mockIcpSwapSupportedTokens.mockResolvedValue(new Set());
+			mockIcpBridgeSupportedTokens.mockResolvedValue(new Set());
+			mockEvmGetSupportedTokens.mockResolvedValue(new Set(['0xabc']));
+			mockSolGetSupportedTokens.mockResolvedValue(new Set(['SplAddr1']));
+			mockBtcGetSupportedTokens.mockResolvedValue(new Set(['btc']));
+			mockXrpGetSupportedTokens.mockResolvedValue(new Set(['xrp']));
+
+			const { loadSwapSupportedTokens } =
+				await import('$lib/services/swap-supported-tokens.services');
+			await loadSwapSupportedTokens({ identity: mockIdentity });
+
+			vi.clearAllMocks();
+		};
+
+		const reload = async () => {
+			const { reloadSolSwapSupportedTokens } =
+				await import('$lib/services/swap-supported-tokens.services');
+
+			return reloadSolSwapSupportedTokens();
+		};
+
+		it('should do nothing before the swap lists have loaded', async () => {
+			await reload();
+
+			expect(mockSolGetSupportedTokens).not.toHaveBeenCalled();
+			expect(get(swapSupportedTokensStore)).toBeUndefined();
+		});
+
+		it("should read the Solana registry's lists again and keep the others", async () => {
+			await load();
+
+			const before = get(swapSupportedTokensStore);
+
+			mockSolGetSupportedTokens.mockResolvedValue(new Set(['SplAddr1', 'SplAddr2']));
+
+			await reload();
+
+			const stored = get(swapSupportedTokensStore);
+
+			expect(stored?.aggregated.sol.supportedTokenIds).toEqual(new Set(['SplAddr1', 'SplAddr2']));
+			expect(
+				stored?.providers.find(({ sourceCategory }) => sourceCategory === 'sol')
+					?.supportedSourceTokens
+			).toEqual(new Set(['SplAddr1', 'SplAddr2']));
+
+			expect(stored?.aggregated.icp).toBe(before?.aggregated.icp);
+			expect(stored?.aggregated.evm).toBe(before?.aggregated.evm);
+			expect(stored?.aggregated.btc).toBe(before?.aggregated.btc);
+			expect(stored?.aggregated.xrp).toBe(before?.aggregated.xrp);
+			expect(stored?.providers.filter(({ sourceCategory }) => sourceCategory !== 'sol')).toEqual(
+				before?.providers.filter(({ sourceCategory }) => sourceCategory !== 'sol')
+			);
+			expect(
+				stored?.providers.filter(({ sourceCategory }) => sourceCategory === 'sol')
+			).toHaveLength(1);
+
+			expect(mockKongSupportedTokens).not.toHaveBeenCalled();
+			expect(mockEvmGetSupportedTokens).not.toHaveBeenCalled();
+			expect(mockBtcGetSupportedTokens).not.toHaveBeenCalled();
+			expect(mockXrpGetSupportedTokens).not.toHaveBeenCalled();
+		});
+
+		it('should keep only the latest of overlapping reads', async () => {
+			await load();
+
+			let resolveFirst: (tokens: Set<string>) => void = () => {};
+
+			mockSolGetSupportedTokens
+				.mockReturnValueOnce(
+					new Promise<Set<string>>((resolve) => {
+						resolveFirst = resolve;
+					})
+				)
+				.mockResolvedValueOnce(new Set(['latest']));
+
+			const first = reload();
+			await reload();
+
+			resolveFirst(new Set(['stale']));
+			await first;
+
+			expect(get(swapSupportedTokensStore)?.aggregated.sol.supportedTokenIds).toEqual(
+				new Set(['latest'])
+			);
+		});
+
+		it('should not bring the lists back once they were reset meanwhile', async () => {
+			await load();
+
+			let resolveRead: (tokens: Set<string>) => void = () => {};
+
+			mockSolGetSupportedTokens.mockReturnValueOnce(
+				new Promise<Set<string>>((resolve) => {
+					resolveRead = resolve;
+				})
+			);
+
+			// Imported first, so that the read has started when the lists are reset.
+			const { reloadSolSwapSupportedTokens } =
+				await import('$lib/services/swap-supported-tokens.services');
+
+			const reading = reloadSolSwapSupportedTokens();
+
+			expect(mockSolGetSupportedTokens).toHaveBeenCalledOnce();
+
+			swapSupportedTokensStore.reset();
+
+			resolveRead(new Set(['SplAddr2']));
+			await reading;
+
+			expect(get(swapSupportedTokensStore)).toBeUndefined();
+		});
 	});
 });

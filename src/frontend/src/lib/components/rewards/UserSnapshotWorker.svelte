@@ -11,7 +11,8 @@
 		btcAddressTestnet,
 		ethAddress,
 		solAddressDevnet,
-		solAddressMainnet
+		solAddressMainnet,
+		xrpAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import {
@@ -26,6 +27,7 @@
 	import { derivedMemo } from '$lib/utils/derived-memo.utils';
 	import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+	import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 
 	let timer: NodeJS.Timeout | undefined = undefined;
 	let syncInProgress = false;
@@ -112,12 +114,19 @@
 		store ? Object.getOwnPropertySymbols(store).filter((key) => nonNullish(store[key])).length : 0;
 
 	const transactionTokenEntryCount = derivedMemo(
-		[btcTransactionsStore, ethTransactionsStore, icTransactionsStore, solTransactionsStore],
-		([$btc, $eth, $ic, $sol]) =>
+		[
+			btcTransactionsStore,
+			ethTransactionsStore,
+			icTransactionsStore,
+			solTransactionsStore,
+			xrpTransactionsStore
+		],
+		([$btc, $eth, $ic, $sol, $xrp]) =>
 			countNonNullishSymbolEntries($btc) +
 			countNonNullishSymbolEntries($eth) +
 			countNonNullishSymbolEntries($ic) +
-			countNonNullishSymbolEntries($sol),
+			countNonNullishSymbolEntries($sol) +
+			countNonNullishSymbolEntries($xrp),
 		// eslint-disable-next-line local-rules/prefer-object-params
 		(a, b) => a === b
 	);
@@ -137,6 +146,7 @@
 			$ethAddress,
 			$solAddressMainnet,
 			$solAddressDevnet,
+			$xrpAddressMainnet,
 			$tokens,
 			$anyBalanceNonZero,
 			$exchangeNotInitialized,

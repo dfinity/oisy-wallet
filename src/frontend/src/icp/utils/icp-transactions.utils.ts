@@ -128,13 +128,18 @@ export const mapIcpTransaction = ({
 		const source = mapFrom(operation.Transfer.from);
 		const transferFee = operation.Transfer.fee?.e8s;
 
+		// An ICRC-2 `transfer_from` is indexed as a plain transfer with the spender attached. The
+		// account owner did not pick the destination in that case, the spender did.
+		const transferSpender = fromNullable(operation.Transfer.spender);
+
 		return {
 			...tx,
 			type: source.incoming === false ? 'send' : 'receive',
 			...source,
 			...mapTo(operation.Transfer.to),
 			value: operation.Transfer.amount.e8s,
-			...(nonNullish(transferFee) && { fee: transferFee })
+			...(nonNullish(transferFee) && { fee: transferFee }),
+			...(nonNullish(transferSpender) && { transferSpender })
 		};
 	}
 

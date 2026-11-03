@@ -1,107 +1,425 @@
+import { SOLANA_MAINNET_NETWORK, SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { getIdbBalances } from '$lib/api/idb-balances.api';
+import { getIdbSolTransactions } from '$lib/api/idb-transactions.api';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { syncWallet, syncWalletError } from '$sol/services/sol-listener.services';
-import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-import type { SolBalance } from '$sol/types/sol-balance';
-import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
-import { mockSolCertifiedTransactions } from '$tests/mocks/sol-transactions.mock';
-import { jsonReplacer } from '@dfinity/utils';
-import { lamports } from '@solana/kit';
+import {
+	syncWallet,
+	syncWalletError,
+	syncWalletFromCache
+} from '$sol/services/sol-listener.services';
+import { reportUnreadableSolTransactions } from '$sol/services/sol-unreadable-transactions.services';
+import {
+	solTransactionsStore,
+	type SolCertifiedTransaction
+} from '$sol/stores/sol-transactions.store';
+import type { SolAddress } from '$sol/types/address';
+import type { SolNetworkBalances } from '$sol/types/sol-balance';
+import type {
+	SolPostMessageDataResponseWallet,
+	SolWalletRouting
+} from '$sol/types/sol-post-message';
+import type { SolResolvedTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
+import type { SplTokenAddress } from '$sol/types/spl';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
+import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
+import {
+	mockAtaAddress,
+	mockAtaAddress2,
+	mockAtaAddress3,
+	mockSolAddress,
+	mockSolAddress2,
+	mockSplAddress
+} from '$tests/mocks/sol.mock';
+import { isNullish, jsonReplacer } from '@dfinity/utils';
+import { SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION } from '@solana/kit';
 import { get } from 'svelte/store';
 
+vi.mock(import('$lib/api/idb-transactions.api'), async (importOriginal) => ({
+	...(await importOriginal()),
+	getIdbSolTransactions: vi.fn()
+}));
+
+vi.mock(import('$lib/api/idb-balances.api'), async (importOriginal) => ({
+	...(await importOriginal()),
+	getIdbBalances: vi.fn()
+}));
+
+vi.mock('$sol/services/sol-unreadable-transactions.services', () => ({
+	reportUnreadableSolTransactions: vi.fn()
+}));
+
 describe('sol-listener.services', () => {
-	describe('sol-listener', () => {
-		const tokenId: TokenId = parseTokenId('testTokenId');
-		const mockBalance = lamports(1000n);
+	const nativeTokenId: TokenId = parseTokenId('nativeTokenId');
+	const splTokenId: TokenId = parseTokenId('splTokenId');
+	const splTokenId2: TokenId = parseTokenId('splTokenId2');
+	const tokenIds = [nativeTokenId, splTokenId, splTokenId2];
 
-		const mockPostMessage = ({
-			balance = mockBalance,
-			newTransactions = JSON.stringify(mockSolCertifiedTransactions, jsonReplacer)
-		}: {
-			balance?: SolBalance | null;
-			newTransactions?: string;
-		}): SolPostMessageDataResponseWallet => ({
-			wallet: {
-				balance: {
-					certified: true,
-					data: balance
-				},
-				newTransactions
-			}
-		});
+	const mint: SplTokenAddress = mockSplAddress;
+	const mint2: SplTokenAddress = mockSolAddress2;
 
-		beforeEach(() => {
-			vi.clearAllMocks();
+	// The wallet is the source of native SOL, each associated token account the source of its mint.
+	const routing: SolWalletRouting = {
+		network: SOLANA_MAINNET_NETWORK,
+		nativeTokenId,
+		splTokenIds: new Map([
+			[mint, splTokenId],
+			[mint2, splTokenId2]
+		]),
+		sourceTokens: new Map<SolAddress, SplTokenAddress | null>([
+			[mockSolAddress, null],
+			[mockAtaAddress, mint],
+			[mockAtaAddress2, mint2]
+		])
+	};
+
+	const mockBalances: SolNetworkBalances = { sol: 1000n, spl: { [mint]: 5n, [mint2]: 7n } };
+
+	const mockPostMessage = ({
+		balances = mockBalances,
+		transactions = []
+	}: {
+		balances?: SolNetworkBalances;
+		transactions?: SolResolvedTransaction[];
+	}): SolPostMessageDataResponseWallet => ({
+		wallet: {
+			balances,
+			newTransactions: JSON.stringify(transactions, jsonReplacer)
+		}
+	});
+
+	const toCertified = (transaction: SolTransactionUi): SolCertifiedTransaction => ({
+		data: transaction,
+		certified: false
+	});
+
+	const [transaction, transaction2] = createMockSolTransactionsUi(2);
+
+	const storedTransactions = (tokenId: TokenId) => get(solTransactionsStore)?.[tokenId];
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+
+		tokenIds.forEach((tokenId) => {
 			balancesStore.reset(tokenId);
 			solTransactionsStore.reset(tokenId);
 		});
+	});
 
-		afterEach(() => {
-			vi.useRealTimers();
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
+	describe('syncWallet', () => {
+		it('should set the SOL balance on the native token and each SPL balance on the token of its mint', async () => {
+			vi.useFakeTimers();
+
+			syncWallet({ data: mockPostMessage({}), routing });
+
+			await vi.runAllTimersAsync();
+
+			const balances = get(balancesStore);
+
+			expect(balances?.[nativeTokenId]).toEqual({ data: 1000n, certified: false });
+			expect(balances?.[splTokenId]).toEqual({ data: 5n, certified: false });
+			expect(balances?.[splTokenId2]).toEqual({ data: 7n, certified: false });
 		});
 
-		describe('syncWallet', () => {
-			it('should set the balance in balancesStore', async () => {
-				vi.useFakeTimers();
+		// The balances leave out a mint whose account could not be read, so as not to report zero for a
+		// balance the user may well hold.
+		it('should keep the balance of an SPL token whose mint the balances leave out', async () => {
+			vi.useFakeTimers();
 
-				syncWallet({ data: mockPostMessage({}), tokenId });
+			balancesStore.set({ id: splTokenId2, data: { data: 9n, certified: false } });
 
-				await vi.runAllTimersAsync();
+			syncWallet({
+				data: mockPostMessage({ balances: { sol: 1000n, spl: { [mint]: 5n } } }),
+				routing
+			});
 
-				const balance = get(balancesStore);
+			await vi.runAllTimersAsync();
 
-				expect(balance?.[tokenId]).toEqual({
-					data: mockBalance,
-					certified: true
+			expect(get(balancesStore)?.[splTokenId2]).toEqual({ data: 9n, certified: false });
+		});
+
+		it('should write a record to the token of the source that returned it', () => {
+			syncWallet({
+				data: mockPostMessage({ transactions: [{ transaction, sources: [mockAtaAddress] }] }),
+				routing
+			});
+
+			expect(storedTransactions(splTokenId)).toEqual([toCertified(transaction)]);
+			expect(storedTransactions(nativeTokenId)).toEqual([]);
+			expect(storedTransactions(splTokenId2)).toEqual([]);
+		});
+
+		it('should write a record returned by the wallet and two token accounts to all three tokens', () => {
+			syncWallet({
+				data: mockPostMessage({
+					transactions: [
+						{ transaction, sources: [mockSolAddress, mockAtaAddress, mockAtaAddress2] }
+					]
+				}),
+				routing
+			});
+
+			tokenIds.forEach((tokenId) =>
+				expect(storedTransactions(tokenId)).toEqual([toCertified(transaction)])
+			);
+		});
+
+		it('should drop a record from a source the routing does not know', () => {
+			syncWallet({
+				data: mockPostMessage({ transactions: [{ transaction, sources: [mockAtaAddress3] }] }),
+				routing
+			});
+
+			tokenIds.forEach((tokenId) => expect(storedTransactions(tokenId)).toEqual([]));
+		});
+
+		// A token without an entry in the store is still loading.
+		it('should give every token of the network a list, even an empty one', () => {
+			syncWallet({ data: mockPostMessage({}), routing });
+
+			tokenIds.forEach((tokenId) => expect(storedTransactions(tokenId)).toEqual([]));
+		});
+
+		describe('transactions the RPC refused to return', () => {
+			const refused = mockSolSignatureResponse().signature;
+
+			const withUnreadable = (sources: SolAddress[]): SolPostMessageDataResponseWallet => ({
+				wallet: {
+					...mockPostMessage({}).wallet,
+					unreadableTransactions: [
+						{
+							signature: refused,
+							sources,
+							reason: 'refused',
+							errorCode: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION
+						}
+					]
+				}
+			});
+
+			it('should report one for the tokens of the sources that returned it, on the network', () => {
+				syncWallet({ data: withUnreadable([mockSolAddress, mockAtaAddress2]), routing });
+
+				expect(reportUnreadableSolTransactions).toHaveBeenCalledExactlyOnceWith({
+					transactions: [
+						{
+							signature: refused,
+							reason: 'refused',
+							errorCode: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION,
+							network: SOLANA_MAINNET_NETWORK,
+							tokenIds: [nativeTokenId, splTokenId2]
+						}
+					]
 				});
 			});
 
-			it('should reset balanceStore if balance is empty', () => {
-				syncWallet({ data: mockPostMessage({ balance: null }), tokenId });
+			it('should report one from a source the routing does not know for no token', () => {
+				syncWallet({ data: withUnreadable([mockAtaAddress3]), routing });
 
-				const balance = get(balancesStore);
-
-				expect(balance?.[tokenId]).toBeNull();
+				expect(reportUnreadableSolTransactions).toHaveBeenCalledExactlyOnceWith({
+					transactions: [expect.objectContaining({ signature: refused, tokenIds: [] })]
+				});
 			});
 
-			it('should prepend new transactions to solTransactionsStore', () => {
-				const newTransactions = JSON.stringify(mockSolCertifiedTransactions, jsonReplacer);
-				syncWallet({ data: mockPostMessage({ newTransactions }), tokenId });
+			it('should still write the records of the tick', () => {
+				syncWallet({
+					data: {
+						wallet: {
+							...withUnreadable([mockSolAddress]).wallet,
+							newTransactions: JSON.stringify(
+								[{ transaction, sources: [mockSolAddress] }],
+								jsonReplacer
+							)
+						}
+					},
+					routing
+				});
 
-				const transactions = get(solTransactionsStore);
+				expect(storedTransactions(nativeTokenId)).toEqual([toCertified(transaction)]);
+			});
 
-				expect(transactions?.[tokenId]).toEqual(mockSolCertifiedTransactions);
+			it('should report nothing for a tick without any', () => {
+				syncWallet({ data: mockPostMessage({}), routing });
+
+				expect(reportUnreadableSolTransactions).not.toHaveBeenCalled();
 			});
 		});
 
-		describe('syncWalletError', () => {
-			it('should reset balanceStore on error', () => {
-				syncWallet({ data: mockPostMessage({}), tokenId });
+		describe('when the history was unavailable', () => {
+			const unavailable: SolPostMessageDataResponseWallet = {
+				wallet: { ...mockPostMessage({}).wallet, transactionsUnavailable: true }
+			};
 
-				syncWalletError({ error: 'test error', tokenId, hideToast: true });
+			// Balances are flushed on the next frame, which may already be scheduled by an earlier test.
+			it('should still set the balances', async () => {
+				syncWallet({ data: unavailable, routing });
 
-				const balance = get(balancesStore);
-
-				expect(balance?.[tokenId]).toBeNull();
+				await vi.waitFor(() => {
+					expect(get(balancesStore)?.[nativeTokenId]).toEqual({ data: 1000n, certified: false });
+					expect(get(balancesStore)?.[splTokenId]).toEqual({ data: 5n, certified: false });
+				});
 			});
 
-			it('should reset transactionsStore on error', () => {
-				const newTransactions = JSON.stringify(mockSolCertifiedTransactions, jsonReplacer);
-				syncWallet({ data: mockPostMessage({ newTransactions }), tokenId });
+			it('should keep the records a token holds', () => {
+				solTransactionsStore.set({
+					tokenId: nativeTokenId,
+					transactions: [toCertified(transaction2)]
+				});
 
-				syncWalletError({ error: 'test error', tokenId, hideToast: true });
+				syncWallet({ data: unavailable, routing });
 
-				const transactions = get(solTransactionsStore);
-
-				expect(transactions?.[tokenId]).toBeNull();
+				expect(storedTransactions(nativeTokenId)).toEqual([toCertified(transaction2)]);
 			});
 
-			it('should log a warning if hideToast is true', () => {
-				syncWalletError({ error: 'test error', tokenId, hideToast: true });
+			// An empty list would read as a token without any history.
+			it('should leave a token whose history never loaded still loading', () => {
+				const before = tokenIds.map(storedTransactions);
 
-				expect(console.warn).toHaveBeenCalled();
+				syncWallet({ data: unavailable, routing });
+
+				expect(tokenIds.map(storedTransactions)).toEqual(before);
+				expect(before.every(isNullish)).toBeTruthy();
 			});
+		});
+
+		it('should prepend new records to the ones a token holds', () => {
+			solTransactionsStore.set({
+				tokenId: nativeTokenId,
+				transactions: [toCertified(transaction2)]
+			});
+
+			syncWallet({
+				data: mockPostMessage({ transactions: [{ transaction, sources: [mockSolAddress] }] }),
+				routing
+			});
+
+			expect(storedTransactions(nativeTokenId)).toEqual([
+				toCertified(transaction),
+				toCertified(transaction2)
+			]);
+		});
+
+		// Older builds stored one row per instruction (`<signature>-<index>`); the worker emits one
+		// record per signature, so those rows must go once the record arrives.
+		describe('stale per-instruction rows', () => {
+			const signature = String(transaction.signature);
+
+			const withId = (id: string): SolCertifiedTransaction => toCertified({ ...transaction, id });
+
+			const instructionRows = [withId(`${signature}-0`), withId(`${signature}-1`)];
+			const record = withId(signature);
+			const otherRecord = toCertified(transaction2);
+
+			const syncRecord = (sources: SolAddress[]) =>
+				syncWallet({
+					data: mockPostMessage({ transactions: [{ transaction: record.data, sources }] }),
+					routing
+				});
+
+			it('should replace the per-instruction rows of a signature with its record', () => {
+				solTransactionsStore.set({ tokenId: nativeTokenId, transactions: instructionRows });
+
+				syncRecord([mockSolAddress]);
+
+				expect(storedTransactions(nativeTokenId)).toEqual([record]);
+			});
+
+			it('should keep the rows of other signatures', () => {
+				solTransactionsStore.set({
+					tokenId: nativeTokenId,
+					transactions: [...instructionRows, otherRecord]
+				});
+
+				syncRecord([mockSolAddress]);
+
+				expect(storedTransactions(nativeTokenId)).toEqual([record, otherRecord]);
+			});
+
+			it('should not duplicate a record re-sent with the same id', () => {
+				solTransactionsStore.set({ tokenId: nativeTokenId, transactions: [record, otherRecord] });
+
+				syncRecord([mockSolAddress]);
+
+				expect(storedTransactions(nativeTokenId)).toEqual([record, otherRecord]);
+			});
+
+			it('should replace the per-instruction rows in every token the record reaches', () => {
+				solTransactionsStore.set({ tokenId: nativeTokenId, transactions: instructionRows });
+				solTransactionsStore.set({ tokenId: splTokenId, transactions: instructionRows });
+
+				syncRecord([mockSolAddress, mockAtaAddress]);
+
+				expect(storedTransactions(nativeTokenId)).toEqual([record]);
+				expect(storedTransactions(splTokenId)).toEqual([record]);
+			});
+		});
+	});
+
+	describe('syncWalletError', () => {
+		beforeEach(() => {
+			syncWallet({
+				data: mockPostMessage({ transactions: [{ transaction, sources: [mockSolAddress] }] }),
+				routing
+			});
+		});
+
+		it('should reset balanceStore on error', () => {
+			syncWalletError({ error: 'test error', tokenId: nativeTokenId, hideToast: true });
+
+			expect(get(balancesStore)?.[nativeTokenId]).toBeNull();
+		});
+
+		it('should reset transactionsStore on error', () => {
+			syncWalletError({ error: 'test error', tokenId: nativeTokenId, hideToast: true });
+
+			expect(storedTransactions(nativeTokenId)).toBeNull();
+		});
+
+		it('should leave the other tokens alone', () => {
+			balancesStore.set({ id: splTokenId, data: { data: 5n, certified: false } });
+
+			syncWalletError({ error: 'test error', tokenId: nativeTokenId, hideToast: true });
+
+			expect(get(balancesStore)?.[splTokenId]).toEqual({ data: 5n, certified: false });
+			expect(storedTransactions(splTokenId)).toEqual([]);
+		});
+
+		it('should log a warning if hideToast is true', () => {
+			syncWalletError({ error: 'test error', tokenId: nativeTokenId, hideToast: true });
+
+			expect(console.warn).toHaveBeenCalled();
+		});
+	});
+
+	describe('syncWalletFromCache', () => {
+		beforeEach(() => {
+			mockAuthStore();
+
+			vi.mocked(getIdbBalances).mockResolvedValue(undefined);
+		});
+
+		// Earlier versions cached the backend copy of a record, which has no summary. It is not
+		// what the chain says, so it must not reach the store.
+		it('should leave out cached records that were not derived from chain data', async () => {
+			const [derived, restored] = createMockSolTransactionsUi(2);
+			const derivedRecord = { ...derived, summary: { kind: 'send' as const } };
+
+			vi.mocked(getIdbSolTransactions).mockResolvedValue([
+				derivedRecord,
+				{ ...restored, summary: undefined }
+			]);
+
+			await syncWalletFromCache({ tokenId: nativeTokenId, networkId: SOLANA_MAINNET_NETWORK_ID });
+
+			expect(storedTransactions(nativeTokenId)).toEqual([
+				{ data: derivedRecord, certified: false }
+			]);
 		});
 	});
 });

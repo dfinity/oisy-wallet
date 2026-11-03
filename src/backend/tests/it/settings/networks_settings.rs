@@ -153,6 +153,67 @@ fn test_update_user_network_settings_saves_settings() {
     assert_eq!(settings.networks.networks, NEW_NETWORKS.clone());
 }
 
+/// Network settings live in stable memory as `Candid<StoredUserProfile>`, so every new
+/// `NetworkSettingsFor` variant is a change to a persisted type. This pins that a profile
+/// carrying the most recently added variants survives a canister upgrade instead of being
+/// dropped or trapping on read.
+///
+/// It is a *self*-upgrade and proves only same-version persistence: `setup` and
+/// `upgrade_latest_wasm` both resolve `BACKEND_WASM_PATH`, so the same build encodes and
+/// decodes the profile. It is deliberately not a schema-evolution guard — that would need the
+/// harness to deploy a pre-change wasm and then upgrade to this one, which it cannot do with a
+/// single shared wasm path. Every other upgrade test here (`contacts`, `tips`,
+/// `active_user_transactions`) has the same shape and the same limit.
+#[test]
+fn test_user_network_settings_survive_a_self_upgrade() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let profile = pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
+
+    let mut networks = NEW_NETWORKS.clone();
+    networks.insert(
+        NetworkSettingsFor::XrpMainnet,
+        NetworkSettings {
+            enabled: true,
+            is_testnet: false,
+        },
+    );
+    networks.insert(
+        NetworkSettingsFor::RobinhoodMainnet,
+        NetworkSettings {
+            enabled: true,
+            is_testnet: false,
+        },
+    );
+
+    let save_response = pic_setup.update::<Result<(), UpdateNetworksSettingsError>>(
+        caller,
+        "update_user_network_settings",
+        SaveNetworksSettingsRequest {
+            networks: networks.clone(),
+            current_user_version: profile.version,
+        },
+    );
+
+    assert_eq!(save_response, Ok(Ok(())));
+
+    pic_setup
+        .upgrade_latest_wasm(None)
+        .expect("upgrade should succeed with XRP and Robinhood network settings stored");
+
+    let user_profile = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .expect("Call to get profile failed")
+        .expect("Get profile failed");
+
+    assert_eq!(user_profile.settings.unwrap().networks.networks, networks);
+}
+
 #[test]
 fn test_update_user_network_settings_merges_with_existing_settings() {
     let pic_setup = setup();

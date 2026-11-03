@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { IconInfo } from '@dfinity/gix-components';
 	import { ERC20_ICP_REPO_URL } from '$eth/constants/erc20-icp.constants';
+	import IconGixInfo from '$lib/components/icons/IconGixInfo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
@@ -10,7 +10,7 @@
 	rel="external noopener noreferrer"
 	target="_blank"
 >
-	<IconInfo />
+	<IconGixInfo />
 	<span class="pl-1">{$i18n.hero.text.learn_more_about_erc20_icp}</span>
 </a>
 

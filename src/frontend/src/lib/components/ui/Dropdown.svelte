@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { Modal, Popover } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
 	import DropdownButton from '$lib/components/ui/DropdownButton.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
+	import Popover from '$lib/components/ui/Popover.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 
 	interface Props {
@@ -11,7 +12,8 @@
 		items: Snippet;
 		disabled?: boolean;
 		asModalOnMobile?: boolean;
-		ariaLabel: string;
+		ariaLabel?: string;
+		ariaDescription?: string;
 		buttonFullWidth?: boolean;
 		buttonBorder?: boolean;
 		testId?: string;
@@ -25,6 +27,7 @@
 		disabled = false,
 		asModalOnMobile = false,
 		ariaLabel,
+		ariaDescription,
 		buttonFullWidth = false,
 		buttonBorder = false,
 		testId
@@ -32,10 +35,15 @@
 
 	let button: HTMLButtonElement | undefined = $state();
 
+	// The popover would otherwise take its name from the trigger's aria-label, which a trigger named
+	// by its visible text no longer has.
+	const panelLabel = $derived(ariaLabel ?? ariaDescription);
+
 	export const close = () => (visible = false);
 </script>
 
 <DropdownButton
+	{ariaDescription}
 	{ariaLabel}
 	border={buttonBorder}
 	{disabled}
@@ -50,7 +58,14 @@
 
 {#if asModalOnMobile}
 	<Responsive up="1.5md">
-		<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
+		<Popover
+			anchor={button}
+			ariaLabel={panelLabel}
+			direction="rtl"
+			dropdown
+			invisibleBackdrop
+			bind:visible
+		>
 			{@render items()}
 		</Popover>
 	</Responsive>
@@ -65,7 +80,14 @@
 		{/if}
 	</Responsive>
 {:else}
-	<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
+	<Popover
+		anchor={button}
+		ariaLabel={panelLabel}
+		direction="rtl"
+		dropdown
+		invisibleBackdrop
+		bind:visible
+	>
 		{@render items()}
 	</Popover>
 {/if}

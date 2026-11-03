@@ -2,11 +2,13 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import HarvestAutopilotVaultInfo from '$eth/components/stake/harvest-autopilot/HarvestAutopilotVaultInfo.svelte';
 import { HARVEST_AUTOPILOT_URL } from '$eth/constants/harvest-autopilots.constants';
 import type { Vault } from '$lib/types/vaults';
+import * as clipboardUtils from '$lib/utils/clipboard.utils';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import * as shareUtils from '$lib/utils/share.utils';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 
 describe('HarvestAutopilotVaultInfo', () => {
 	const mockVault: Vault = {
@@ -92,6 +94,24 @@ describe('HarvestAutopilotVaultInfo', () => {
 		const { getByText } = render(HarvestAutopilotVaultInfo, { props });
 
 		expect(getByText(en.stake.text.total_value_locked)).toBeInTheDocument();
+	});
+
+	it('should confirm a copy of the vault address as an address, not a transaction hash', async () => {
+		vi.spyOn(shareUtils, 'copyText').mockResolvedValue(undefined);
+		const spyCopy = vi.spyOn(clipboardUtils, 'copyToClipboard');
+
+		const { getByRole } = render(HarvestAutopilotVaultInfo, { props });
+
+		await fireEvent.click(
+			getByRole('button', { name: `${en.core.text.copy}: ${mockVault.token.address}` })
+		);
+
+		expect(spyCopy).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({
+				value: mockVault.token.address,
+				text: en.wallet.text.address_copied
+			})
+		);
 	});
 
 	it('should not render total value locked when not provided', () => {

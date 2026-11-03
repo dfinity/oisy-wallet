@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
-	import { fade, slide } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
@@ -18,6 +17,7 @@
 	import Actions from '$lib/components/hero/Actions.svelte';
 	import Balance from '$lib/components/hero/Balance.svelte';
 	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
+	import NftHeroBalance from '$lib/components/hero/NftHeroBalance.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
@@ -36,7 +36,9 @@
 		networkBsc,
 		networkEthereum,
 		networkPolygon,
+		networkRobinhood,
 		networkSolana,
+		networkXrp,
 		pseudoNetworkChainFusion,
 		networkArbitrum,
 		selectedNetworkNftUnsupported
@@ -51,7 +53,12 @@
 	import { Theme } from '$lib/types/theme';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
-	import { getTokenDisplayName, mapTokenUi } from '$lib/utils/token.utils';
+	import {
+		getTokenDisplayName,
+		isUSD1Token as isUSD1TokenUtil,
+		mapTokenUi
+	} from '$lib/utils/token.utils';
+	import { fade, slide } from '$lib/utils/transitions.utils';
 	import { isTrumpToken as isTrumpTokenUtil } from '$sol/utils/token.utils';
 
 	let pageTokenUi = $derived(
@@ -121,37 +128,62 @@
 
 	let isVeurToken = $derived(nonNullish($pageToken) && isVEURTokenUtil($pageToken));
 
+	let isUsd1Token = $derived(nonNullish($pageToken) && isUSD1TokenUtil($pageToken));
+
 	let isIcpHero = $derived(nonNullish($pageToken) && isTokenIcp($pageToken));
 
 	let isDarkTheme = $derived($themeStore === Theme.DARK);
 
-	let isGradientToRight = $derived($networkSolana && !isTrumpToken);
+	let isGradientToRight = $derived($networkSolana && !isTrumpToken && !isUsd1Token);
 
-	let isGradientToBottomRight = $derived(isGLDTToken || $networkBsc);
+	let isGradientToBottomRight = $derived((isGLDTToken || $networkBsc) && !isUsd1Token);
+
+	let isRobinhoodGradient = $derived($networkRobinhood && !isUsd1Token);
+
+	let robinhoodGradientClasses = $derived(
+		isRobinhoodGradient ? 'bg-linear-135 from-55% to-[110%]' : ''
+	);
+
+	// Only on the blocks that hold hero text, never on the card: the modals and popovers opened
+	// from Actions and ContextMenu render inside the card, and `selection:` reaches every descendant.
+	let selectionClasses = $derived(
+		isIcpHero ? '' : 'selection:bg-white selection:text-brand-primary'
+	);
 
 	let rateChangeBackground = $derived.by(() => {
 		if (isIcpHero) {
 			return isDarkTheme ? ('dark' as const) : ('light' as const);
 		}
 
-		return $networkBase || $networkPolygon || $networkArbitrum || isTrumpToken || isVeurToken
+		return $networkBase ||
+			$networkPolygon ||
+			$networkArbitrum ||
+			$networkRobinhood ||
+			isTrumpToken ||
+			isVeurToken ||
+			isUsd1Token
 			? ('dark' as const)
 			: ('light' as const);
 	});
 </script>
 
 <div
-	class="bg-pos-0 flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-primary p-3 text-center transition-[background-position,background-size] duration-500 ease-in-out md:rounded-[28px] md:p-5"
-	class:bg-center={isVeurToken}
-	class:bg-cover={isTrumpToken || isVchfToken || isVeurToken}
+	class="bg-pos-0 flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-primary p-3 text-center transition-[background-position,background-size] duration-500 ease-in-out md:rounded-[28px] md:p-5 {robinhoodGradientClasses}"
+	class:bg-center={isVeurToken || isUsd1Token}
+	class:bg-cover={isTrumpToken || isVchfToken || isVeurToken || isUsd1Token}
 	class:bg-gradient-to-r={isGradientToRight}
 	class:bg-icp-token-hero-gradient={isIcpHero}
 	class:bg-linear-105={isGradientToBottomRight}
-	class:bg-linear-to-b={!isIcpHero && !isGradientToRight && !isGradientToBottomRight}
+	class:bg-linear-to-b={!isIcpHero &&
+		!isGradientToRight &&
+		!isGradientToBottomRight &&
+		!isRobinhoodGradient &&
+		!isUsd1Token}
 	class:bg-pos-100={!$pseudoNetworkChainFusion}
-	class:bg-size-200={!isTrumpToken}
+	class:bg-size-200={!isTrumpToken && !isUsd1Token}
 	class:bg-top-right={isVchfToken}
 	class:bg-trump-token-hero-image={isTrumpToken}
+	class:bg-usd1-token-hero-image={isUsd1Token}
 	class:bg-vchf-token-hero-image={isVchfToken}
 	class:bg-veur-token-hero-image={isVeurToken}
 	class:from-arbitrum-0={$networkArbitrum}
@@ -162,8 +194,10 @@
 	class:from-eth-0={$networkEthereum}
 	class:from-gold-0={isGLDTToken}
 	class:from-polygon-0={$networkPolygon}
+	class:from-robinhood-0={$networkRobinhood}
 	class:from-sol-0={$networkSolana && !isTrumpToken}
 	class:from-trump-0={isTrumpToken}
+	class:from-xrp-0={$networkXrp}
 	class:text-primary={isIcpHero}
 	class:text-primary-inverted={!isIcpHero}
 	class:to-arbitrum-100={$networkArbitrum}
@@ -174,8 +208,10 @@
 	class:to-eth-100={$networkEthereum}
 	class:to-gold-100={isGLDTToken}
 	class:to-polygon-100={$networkPolygon}
+	class:to-robinhood-100={$networkRobinhood}
 	class:to-sol-100={$networkSolana && !isTrumpToken}
 	class:to-trump-100={isTrumpToken}
+	class:to-xrp-100={$networkXrp}
 >
 	{#if isTransactionsPage}
 		<div class="flex w-full flex-col gap-6" in:slide={SLIDE_PARAMS}>
@@ -183,7 +219,7 @@
 				<Back color="current" onlyArrow />
 
 				<div
-					class="my-0.5 flex w-full min-w-0 items-center justify-between gap-4 text-xs text-nowrap sm:text-base"
+					class="my-0.5 flex w-full min-w-0 items-center justify-between gap-4 text-xs text-nowrap sm:text-base {selectionClasses}"
 				>
 					{#if nonNullish(pageTokenUi)}
 						<div class="flex min-w-0 items-center justify-start gap-1 sm:gap-2" in:fade>
@@ -229,10 +265,16 @@
 				<ContextMenu />
 			</div>
 
-			<Balance token={pageTokenUi} />
+			<div class="contents {selectionClasses}">
+				<Balance token={pageTokenUi} />
+			</div>
+		</div>
+	{:else if isNftsPage}
+		<div class={selectionClasses} in:slide={SLIDE_PARAMS}>
+			<NftHeroBalance />
 		</div>
 	{:else}
-		<div in:slide={SLIDE_PARAMS}>
+		<div class={selectionClasses} in:slide={SLIDE_PARAMS}>
 			<ExchangeBalance hideBalance={$isPrivacyMode} />
 		</div>
 	{/if}
@@ -242,6 +284,8 @@
 	</div>
 
 	{#if isErc20Icp($pageToken)}
-		<Erc20Icp />
+		<div class="contents {selectionClasses}">
+			<Erc20Icp />
+		</div>
 	{/if}
 </div>

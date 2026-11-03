@@ -4,6 +4,7 @@ use ic_cdk::{
     api::{is_controller, msg_caller, time},
     query, update,
 };
+use ic_cdk_bitcoin_canister::Txid;
 use shared::types::{
     bitcoin::{
         BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
@@ -26,7 +27,14 @@ use crate::{
     },
 };
 
-const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
+/// Confirmation floor a UTXO must clear to be accepted as an input of a pending transaction.
+///
+/// Must stay in sync with `CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS` in
+/// `src/frontend/src/btc/constants/btc.constants.ts`, which is the floor the frontend selects
+/// UTXOs at. A frontend floor below this one selects inputs that
+/// [`btc_add_pending_transaction`] then rejects as `InvalidUtxos` — after the broadcast, so the
+/// spent UTXOs would never get reserved.
+const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 4;
 
 /// Retrieves the current fee percentiles for Bitcoin transactions from the cache
 /// for the specified network. Fee percentiles are measured in millisatoshi per byte
@@ -90,10 +98,10 @@ pub async fn btc_add_pending_transaction(
             return Err(BtcAddPendingTransactionError::EmptyUtxos);
         }
 
-        let unique_keys: HashSet<(&[u8], u32)> = params
+        let unique_keys: HashSet<(Txid, u32)> = params
             .utxos
             .iter()
-            .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
+            .map(|u| (u.outpoint.txid, u.outpoint.vout))
             .collect();
 
         if unique_keys.len() != params.utxos.len() {
@@ -112,15 +120,15 @@ pub async fn btc_add_pending_transaction(
         .await
         .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
 
-        let current_keys: HashSet<(&[u8], u32)> = current_utxos
+        let current_keys: HashSet<(Txid, u32)> = current_utxos
             .iter()
-            .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
+            .map(|u| (u.outpoint.txid, u.outpoint.vout))
             .collect();
 
         let all_param_utxos_are_current = params
             .utxos
             .iter()
-            .all(|u| current_keys.contains(&(u.outpoint.txid.as_slice(), u.outpoint.vout)));
+            .all(|u| current_keys.contains(&(u.outpoint.txid, u.outpoint.vout)));
 
         if !all_param_utxos_are_current {
             return Err(BtcAddPendingTransactionError::InvalidUtxos);

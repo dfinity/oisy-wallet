@@ -1,7 +1,7 @@
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { NullishIdentity } from '$lib/types/identity';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { BitcoinCanister, type BitcoinDid, type BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
@@ -19,16 +19,26 @@ export const getUtxosQuery = async ({
 	bitcoinCanisterId,
 	address,
 	network,
-	minConfirmations
-}: BitcoinCanisterParams): Promise<BitcoinDid.get_utxos_response> => {
+	minConfirmations,
+	page
+}: BitcoinCanisterParams & { page?: Uint8Array }): Promise<BitcoinDid.get_utxos_response> => {
 	assertNonNullish(identity);
 
 	const { getUtxosQuery } = await bitcoinCanister({ identity, bitcoinCanisterId });
 
+	// The filter is a variant: a page reference continues the paginated listing the
+	// previous response's `next_page` points into and cannot be combined with a
+	// confirmations floor, which applies to the listing as a whole.
+	const filter = nonNullish(page)
+		? { page }
+		: nonNullish(minConfirmations)
+			? { minConfirmations }
+			: undefined;
+
 	return getUtxosQuery({
 		address,
 		network,
-		...(!isNullish(minConfirmations) && { filter: { minConfirmations } })
+		...(nonNullish(filter) && { filter })
 	});
 };
 

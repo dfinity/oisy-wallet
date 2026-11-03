@@ -54,4 +54,7 @@ export interface IcTransactionUi {
 	approveSpender?: string;
 	approveSpenderExplorerUrl?: string;
 	approveExpiresAt?: bigint;
+	// Set when the transfer was pulled by an approved spender (ICRC-2 `transfer_from`) instead of
+	// being initiated by the account owner.
+	transferSpender?: string;
 }

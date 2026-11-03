@@ -1,6 +1,6 @@
-import { loadRouteParams, type RouteParams } from '$lib/utils/nav.utils';
-import type { LoadEvent } from '@sveltejs/kit';
-// eslint-disable-next-line local-rules/no-relative-imports
-import type { PageLoad } from './$types';
+import { AppPath } from '$lib/constants/routes.constants';
+import { redirect, type LoadEvent } from '@sveltejs/kit';
 
-export const load: PageLoad = ($event: LoadEvent): RouteParams => loadRouteParams($event);
+// Rewards moved out of Earn to the standalone /rewards/ page; redirect old
+// /earn/rewards/ bookmarks there, preserving the network query param.
+export const load = ({ url }: LoadEvent): never => redirect(308, `${AppPath.Rewards}${url.search}`);

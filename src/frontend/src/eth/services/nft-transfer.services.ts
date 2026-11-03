@@ -2,6 +2,7 @@ import type { EthSignTransactionRequest } from '$declarations/signer/signer.did'
 import { ERC1155_ABI } from '$eth/constants/erc1155.constants';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
 import { infuraProviders } from '$eth/providers/infura.providers';
+import { reloadNativeBalanceOnMined } from '$eth/services/native-balance.services';
 import { getNonce } from '$eth/services/nonce.services';
 import type { EthAddress } from '$eth/types/address';
 import type {
@@ -135,6 +136,10 @@ const transferErc = async ({
 
 	const raw = await signWithIdentity({ identity, transaction: tx });
 	const result = await sendRaw({ networkId, raw });
+
+	// Not awaited: the gas is only charged once the transaction is mined, and the transfer must not
+	// be held open until then. Same reasoning as `processTransactionSent` on the send path.
+	reloadNativeBalanceOnMined({ transaction: result, networkId });
 
 	progress?.(ProgressStepsSendEnum.TRANSFER);
 

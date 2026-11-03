@@ -22,10 +22,7 @@ use crate::{
     state::{self, mutate_state, read_state},
     types::StoredPrincipal,
     user_profile::{model::UserProfileModel, service},
-    utils::{
-        guards::{caller_is_controller, caller_is_not_anonymous, caller_is_registered_user},
-        housekeeping::spawn_allow_signing_if_below_limit,
-    },
+    utils::guards::{caller_is_controller, caller_is_not_anonymous, caller_is_registered_user},
 };
 
 /// Updates the user's preference to enable (or disable) networks in the interface, merging with any
@@ -333,12 +330,6 @@ pub fn create_user_profile() -> CreateUserProfileResult {
 
         UserProfile::from(&stored_user)
     });
-
-    // TODO convert create_user_profile(..) to an asynchronous function and remove spawning the
-    // async task. Upon initial user login, we ensure allow_signing is called to handle cases
-    // where users lack the cycles required for signer operations. create_user_profile(..) must
-    // be invoked before any signer-related calls (e.g., get_eth_address).
-    spawn_allow_signing_if_below_limit(stored_principal);
 
     Ok::<UserProfile, CreateUserProfileError>(user_profile).into()
 }

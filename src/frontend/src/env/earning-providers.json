@@ -16,14 +16,5 @@
 		"logo": "/images/dapps/harvest-autopilot-logo.svg",
 		"fields": ["networks", "assets", "currentEarning", "earningPotential"],
 		"actionText": "earning.cards.harvest_autopilot.action"
-	},
-	{
-		"id": "sprinkles_s1e6",
-		"type": "reward",
-		"titles": ["earning.cards.sprinkles.title"],
-		"description": "earning.cards.sprinkles.description",
-		"logo": "/images/rewards/oisy-reward-logo.svg",
-		"fields": [],
-		"actionText": "earning.cards.sprinkles.action"
 	}
 ]

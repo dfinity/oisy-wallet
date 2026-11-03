@@ -8,6 +8,7 @@
 	import { ethNetworkContacts } from '$eth/derived/eth-contacts.derived';
 	import { ethKnownDestinations } from '$eth/derived/eth-transactions.derived';
 	import { nativeEthereumTokenId } from '$eth/derived/token.derived';
+	import CyclesSentToCanisterWarning from '$icp/components/cycles-top-up/CyclesSentToCanisterWarning.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import { icNetworkContacts } from '$icp/derived/ic-contacts.derived';
 	import { icKnownDestinations } from '$icp/derived/ic-transactions.derived';
@@ -34,11 +35,15 @@
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
 		isNetworkIdICP,
-		isNetworkIdSolana
+		isNetworkIdSolana,
+		isNetworkIdXrp
 	} from '$lib/utils/network.utils';
 	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
 	import { solNetworkContacts } from '$sol/derived/sol-contacts.derived';
 	import { solKnownDestinations } from '$sol/derived/sol-transactions.derived';
+	import XrpSendDestination from '$xrp/components/send/XrpSendDestination.svelte';
+	import { xrpNetworkContacts } from '$xrp/derived/xrp-contacts.derived';
+	import { xrpKnownDestinations } from '$xrp/derived/xrp-transactions.derived';
 
 	interface Props {
 		destination: string;
@@ -106,7 +111,6 @@
 			<CkEthLoader isSendFlow={true} nativeTokenId={$nativeEthereumTokenId}>
 				<EthSendDestination
 					knownDestinations={$ethKnownDestinations}
-					networkContacts={$ethNetworkContacts}
 					{onQRCodeScan}
 					token={$sendToken}
 					bind:destination
@@ -126,12 +130,12 @@
 		<div data-tid={testId}>
 			<IcSendDestination
 				knownDestinations={$icKnownDestinations}
-				networkContacts={$icNetworkContacts}
 				{onQRCodeScan}
 				tokenStandard={$sendToken.standard}
 				bind:destination
 				bind:invalidDestination
 			/>
+			<CyclesSentToCanisterWarning {destination} styleClass="mt-4" token={$sendToken} />
 			<SendDestinationTabs
 				knownDestinations={$icKnownDestinations}
 				networkContacts={$icNetworkContacts}
@@ -145,7 +149,6 @@
 		<div data-tid={testId}>
 			<BtcSendDestination
 				knownDestinations={$btcKnownDestinations}
-				networkContacts={$btcNetworkContacts}
 				networkId={$sendTokenNetworkId}
 				{onQRCodeScan}
 				bind:destination
@@ -164,7 +167,6 @@
 		<div data-tid={testId}>
 			<SolSendDestination
 				knownDestinations={$solKnownDestinations}
-				networkContacts={$solNetworkContacts}
 				{onQRCodeScan}
 				bind:destination
 				bind:invalidDestination
@@ -172,6 +174,23 @@
 			<SendDestinationTabs
 				knownDestinations={$solKnownDestinations}
 				networkContacts={$solNetworkContacts}
+				onNext={next}
+				bind:destination
+				bind:activeSendDestinationTab
+				bind:selectedContact
+			/>
+		</div>
+	{:else if isNetworkIdXrp($sendTokenNetworkId)}
+		<div data-tid={testId}>
+			<XrpSendDestination
+				knownDestinations={$xrpKnownDestinations}
+				{onQRCodeScan}
+				bind:destination
+				bind:invalidDestination
+			/>
+			<SendDestinationTabs
+				knownDestinations={$xrpKnownDestinations}
+				networkContacts={$xrpNetworkContacts}
 				onNext={next}
 				bind:destination
 				bind:activeSendDestinationTab

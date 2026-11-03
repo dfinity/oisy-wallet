@@ -9,6 +9,7 @@ import {
 	parseAssignInstruction,
 	parseAssignWithSeedInstruction,
 	parseAuthorizeNonceAccountInstruction,
+	parseCreateAccountAllowPrefundInstruction,
 	parseCreateAccountInstruction,
 	parseCreateAccountWithSeedInstruction,
 	parseInitializeNonceAccountInstruction,
@@ -46,6 +47,11 @@ export const parseSolSystemInstruction = (
 			return {
 				...parseCreateAccountWithSeedInstruction(instruction),
 				instructionType: SystemInstruction.CreateAccountWithSeed
+			};
+		case SystemInstruction.CreateAccountAllowPrefund:
+			return {
+				...parseCreateAccountAllowPrefundInstruction(instruction),
+				instructionType: SystemInstruction.CreateAccountAllowPrefund
 			};
 		case SystemInstruction.AdvanceNonceAccount:
 			return {

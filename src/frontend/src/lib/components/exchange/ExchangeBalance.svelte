@@ -2,15 +2,13 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { page } from '$app/state';
-	import { anyTradingProviderEnabled } from '$env/trading';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
-	import { allBalancesZero } from '$lib/derived/balances.derived';
+	import { allBalancesZero, providersUsdBalance } from '$lib/derived/balances.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { enabledFungibleNetworkTokensUi } from '$lib/derived/network-tokens-ui.derived';
-	import { oisyTradeUsdValue } from '$lib/derived/oisy-trade.derived';
 	import {
 		tokenCategoryFilter,
 		showTokenCategoryFilter,
@@ -19,12 +17,12 @@
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isIOS } from '$lib/utils/device.utils';
+	import { isDesktop, isIOS } from '$lib/utils/device.utils';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 	import { filterTokensUiByCategory } from '$lib/utils/token-tag.utils';
-	import { sumTokensUiUsdBalance, sumTokensUiUsdStakeBalance } from '$lib/utils/tokens.utils';
+	import { sumTotalUsdBalance } from '$lib/utils/tokens.utils';
 
 	interface Props {
 		hideBalance?: boolean;
@@ -36,8 +34,10 @@
 
 	const isTokensRoute = $derived(isRouteTokens(page));
 
+	const categoryFilterApplied = $derived($showTokenCategoryFilter && isTokensRoute);
+
 	const heroTokens = $derived(
-		$showTokenCategoryFilter && isTokensRoute
+		categoryFilterApplied
 			? filterTokensUiByCategory({
 					tokens: $enabledFungibleNetworkTokensUi,
 					category: $tokenCategoryFilter
@@ -45,26 +45,39 @@
 			: $enabledFungibleNetworkTokensUi
 	);
 
-	const totalUsd = $derived(sumTokensUiUsdBalance(heroTokens));
+	// Provider-held value (trading deposits, lend/borrow) has no asset type, so exclude it
+	// from the Tokens total while that total is filtered to one asset type.
+	const heroProvidersUsdBalance = $derived(
+		categoryFilterApplied && nonNullish($tokenCategoryFilter) ? 0 : $providersUsdBalance
+	);
 
-	const totalStakeUsd = $derived(sumTokensUiUsdStakeBalance(heroTokens));
-
-	// DEX-deposited balances (free + reserved) count toward net worth; gated by
-	// the Trading feature/provider flags so the production hero stays unchanged.
-	const totalTradeUsd = $derived(anyTradingProviderEnabled ? $oisyTradeUsdValue : 0);
+	const totalUsd = $derived(
+		sumTotalUsdBalance({ tokens: heroTokens, providersUsdBalance: heroProvidersUsdBalance })
+	);
 
 	let balance = $derived(
 		formatCurrency({
-			value: $loaded ? totalUsd + totalStakeUsd + totalTradeUsd : 0,
+			value: $loaded ? totalUsd : 0,
 			currency: $currentCurrency,
 			exchangeRate: $currencyExchangeStore,
 			language: $currentLanguage
 		})
 	);
+
+	// The toast points to the [P] shortcut, which only helps with a keyboard.
+	const togglePrivacyMode = (source: string) =>
+		setPrivacyMode({
+			enabled: !$isPrivacyMode,
+			withToast: isDesktop(),
+			source
+		});
 </script>
 
 <span class="flex flex-col items-center gap-1">
-	<output class="mt-7 inline-block text-4xl font-bold break-all md:text-5xl">
+	<output
+		class="mt-7 inline-block cursor-pointer touch-manipulation text-4xl font-bold break-all md:text-5xl"
+		ondblclick={() => togglePrivacyMode('Hero - Double click on the ExchangeBalance amount')}
+	>
 		{#if $loaded && nonNullish(balance)}
 			{#if hideBalance}
 				<IconDots styleClass="my-4.25" times={6} variant="lg" />
@@ -92,12 +105,7 @@
 	</output>
 	<span
 		class="flex cursor-pointer flex-col items-center gap-4 text-xl font-medium text-brand-secondary-alt"
-		ondblclick={() =>
-			setPrivacyMode({
-				enabled: !$isPrivacyMode,
-				withToast: false,
-				source: 'Hero - Double click on the ExchangeBalance'
-			})}
+		ondblclick={() => togglePrivacyMode('Hero - Double click on the ExchangeBalance')}
 		role="button"
 		tabindex="0"
 	>

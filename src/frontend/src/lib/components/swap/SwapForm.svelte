@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
-	import { slide } from 'svelte/transition';
+	import { readable } from 'svelte/store';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
+	import SwapTwoSwapsHint from '$lib/components/swap/SwapTwoSwapsHint.svelte';
 	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
@@ -31,9 +32,11 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
-	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { formatToken, formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -41,9 +44,26 @@
 		slippageValue: OptionAmount;
 		isSwapAmountsLoading: boolean;
 		swapDetails?: Snippet;
+		message?: Snippet;
 		errorType?: TokenActionErrorType;
+		/**
+		 * Set by a form that already accounts for the absence of an offer itself — because the
+		 * inputs a quote needs are still loading, or because it is showing the specific reason
+		 * the amount cannot be quoted. Suppresses the generic "swap is not offered", which in
+		 * those cases contradicts the message beside it: a swap *is* offered, just not for this
+		 * amount or not yet.
+		 */
+		notOfferedExplained?: boolean;
 		onCustomValidate: (userAmount: bigint) => TokenActionErrorType;
 		fee?: bigint;
+		/**
+		 * Hard cap (base units) for "Max", for a source token whose spendable amount is lower
+		 * than its balance — BTC, where the balance also counts UTXOs a send cannot select yet.
+		 * Left unset, "Max" is the balance minus the fee as before.
+		 */
+		maxAmount?: bigint;
+		// Called when the user presses "Max", before it is applied.
+		onMax?: () => void;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
 		onClose: () => void;
 		onNext: () => void;
@@ -55,9 +75,13 @@
 		slippageValue = $bindable(),
 		isSwapAmountsLoading,
 		swapDetails,
+		message,
 		errorType = $bindable(),
+		notOfferedExplained = false,
 		onCustomValidate,
 		fee,
+		maxAmount,
+		onMax,
 		onShowTokensList,
 		onClose,
 		onNext
@@ -70,27 +94,66 @@
 		sourceTokenExchangeRate,
 		sourceTokenBalance,
 		destinationTokenExchangeRate,
+		amountSetToMax,
 		switchTokens
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+	const { store: swapAmountsStore, activity } =
+		getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+	const quoteActivity = activity ?? readable(undefined);
+	const foregroundQuotePending = $derived(
+		$quoteActivity?.pending === true && !$quoteActivity.background
+	);
 
-	let amountSetToMax = $state(false);
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	let swapAmountsLoading = $derived(
-		nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
-			? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
-			: false
+		foregroundQuotePending ||
+			(nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
+				? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
+				: false)
 	);
 
 	let showSwapNotOfferedError = $derived(
 		nonNullish($swapAmountsStore) &&
 			$swapAmountsStore.swaps.length === 0 &&
 			!isSwapAmountsLoading &&
+			!notOfferedExplained &&
 			nonNullish(swapAmount) &&
 			Number(swapAmount) > 0
+	);
+
+	// A provider that refused the amount as below its minimum names the reason no offer
+	// exists, so the specific message replaces the generic "swap is not offered".
+	let quoteError = $derived(
+		nonNullish($swapAmountsStore) && $swapAmountsStore.swaps.length === 0
+			? $swapAmountsStore.quoteError
+			: undefined
+	);
+
+	// No offer, but two separate swaps through a token OISY lists reach the destination. Unlike the
+	// "not offered" line, the hint stays up while the offers refresh, and goes with a new amount.
+	let twoSwapsQuoteError = $derived(
+		quoteError?.type === 'two-swaps' &&
+			!swapAmountsLoading &&
+			!notOfferedExplained &&
+			nonNullish(swapAmount) &&
+			Number(swapAmount) > 0
+			? quoteError
+			: undefined
+	);
+
+	let quoteErrorMinAmount = $derived(
+		quoteError?.type === 'amount-too-low' &&
+			nonNullish(quoteError.minAmount) &&
+			nonNullish($sourceToken)
+			? formatToken({
+					value: quoteError.minAmount,
+					unitName: $sourceToken.decimals,
+					displayDecimals: $sourceToken.decimals
+				})
+			: undefined
 	);
 
 	let isSwitchTokensButtonDisabled = $derived(() => {
@@ -111,6 +174,7 @@
 			isNullish(receiveAmount) ||
 			isNullish(fee) ||
 			swapAmountsLoading ||
+			foregroundQuotePending ||
 			(nonNullish(slippageValue) && Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE)
 	);
 
@@ -133,7 +197,6 @@
 		const newSourceDecimals = $destinationToken?.decimals;
 
 		swapAmountsStore.reset();
-		amountSetToMax = false;
 
 		swapAmount =
 			nonNullish(tempAmount) && nonNullish(newSourceDecimals)
@@ -168,7 +231,7 @@
 							token={$sourceToken}
 							bind:amount={swapAmount}
 							bind:errorType
-							bind:amountSetToMax
+							bind:amountSetToMax={$amountSetToMax}
 						>
 							{#snippet title()}{$i18n.tokens.text.source_token_title}{/snippet}
 
@@ -192,8 +255,10 @@
 											balance={$sourceTokenBalance}
 											error={nonNullish(errorType)}
 											{fee}
+											{maxAmount}
+											{onMax}
 											token={$sourceToken}
-											bind:amountSetToMax
+											bind:amountSetToMax={$amountSetToMax}
 											bind:amount={swapAmount}
 										/>
 									{:else}
@@ -231,7 +296,18 @@
 							{#if nonNullish($destinationToken)}
 								{#if showSwapNotOfferedError}
 									<div class="text-error-primary" transition:slide={SLIDE_DURATION}
-										>{$i18n.swap.text.swap_is_not_offered}</div
+										>{#if quoteError?.type === 'amount-too-low'}
+											{#if nonNullish(quoteErrorMinAmount) && nonNullish($sourceToken)}
+												{replacePlaceholders($i18n.swap.text.swap_amount_too_low_minimum, {
+													$amount: quoteErrorMinAmount,
+													$symbol: $sourceToken.symbol
+												})}
+											{:else}
+												{$i18n.swap.text.swap_amount_too_low}
+											{/if}
+										{:else}
+											{$i18n.swap.text.swap_is_not_offered}
+										{/if}</div
 									>
 								{:else}
 									<div class="flex gap-3 text-tertiary">
@@ -264,7 +340,18 @@
 			</TokenInputNetworkWrapper>
 		</div>
 
-		<SwapCrossChainInfo />
+		{@render message?.()}
+
+		{#if nonNullish(twoSwapsQuoteError)}
+			{#key twoSwapsQuoteError.intermediateToken.id}
+				<SwapTwoSwapsHint
+					intermediateToken={twoSwapsQuoteError.intermediateToken}
+					provider={twoSwapsQuoteError.provider}
+				/>
+			{/key}
+		{:else}
+			<SwapCrossChainInfo />
+		{/if}
 
 		<SwapSlippage
 			maxSlippageInvalidValue={isNetworkIdICP($sourceToken?.network.id)

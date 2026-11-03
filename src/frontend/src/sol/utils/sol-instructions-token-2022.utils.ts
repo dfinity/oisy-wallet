@@ -5,17 +5,22 @@ import {
 	identifyToken2022Instruction,
 	parseAmountToUiAmountInstruction,
 	parseApplyConfidentialPendingBalanceInstruction,
+	parseApplyConfidentialPendingBurnInstruction,
 	parseApproveCheckedInstruction,
 	parseApproveConfidentialTransferAccountInstruction,
 	parseApproveInstruction,
+	parseBatchInstruction,
 	parseBurnCheckedInstruction,
 	parseBurnInstruction,
 	parseCloseAccountInstruction,
+	parseConfidentialBurnInstruction,
 	parseConfidentialDepositInstruction,
+	parseConfidentialMintInstruction,
 	parseConfidentialTransferInstruction,
 	parseConfidentialTransferWithFeeInstruction,
 	parseConfidentialWithdrawInstruction,
 	parseConfigureConfidentialTransferAccountInstruction,
+	parseConfigureConfidentialTransferAccountWithRegistryInstruction,
 	parseCreateNativeMintInstruction,
 	parseDisableConfidentialCreditsInstruction,
 	parseDisableCpiGuardInstruction,
@@ -36,6 +41,7 @@ import {
 	parseInitializeAccount2Instruction,
 	parseInitializeAccount3Instruction,
 	parseInitializeAccountInstruction,
+	parseInitializeConfidentialMintBurnInstruction,
 	parseInitializeConfidentialTransferFeeInstruction,
 	parseInitializeConfidentialTransferMintInstruction,
 	parseInitializeDefaultAccountStateInstruction,
@@ -64,10 +70,12 @@ import {
 	parsePauseInstruction,
 	parsePermissionedBurnCheckedInstruction,
 	parsePermissionedBurnInstruction,
+	parsePermissionedConfidentialBurnInstruction,
 	parseReallocateInstruction,
 	parseRemoveTokenMetadataKeyInstruction,
 	parseResumeInstruction,
 	parseRevokeInstruction,
+	parseRotateSupplyElgamalPubkeyInstruction,
 	parseSetAuthorityInstruction,
 	parseSetTransferFeeInstruction,
 	parseSyncNativeInstruction,
@@ -77,6 +85,7 @@ import {
 	parseTransferInstruction,
 	parseUiAmountToAmountInstruction,
 	parseUnwrapLamportsInstruction,
+	parseUpdateConfidentialMintBurnDecryptableSupplyInstruction,
 	parseUpdateConfidentialTransferMintInstruction,
 	parseUpdateDefaultAccountStateInstruction,
 	parseUpdateGroupMemberPointerInstruction,
@@ -563,6 +572,51 @@ export const parseSolToken2022Instruction = (
 			return {
 				...parsePermissionedBurnCheckedInstruction(instruction),
 				instructionType: Token2022Instruction.PermissionedBurnChecked
+			};
+		case Token2022Instruction.ApplyConfidentialPendingBurn:
+			return {
+				...parseApplyConfidentialPendingBurnInstruction(instruction),
+				instructionType: Token2022Instruction.ApplyConfidentialPendingBurn
+			};
+		case Token2022Instruction.Batch:
+			return {
+				...parseBatchInstruction(instruction),
+				instructionType: Token2022Instruction.Batch
+			};
+		case Token2022Instruction.ConfidentialBurn:
+			return {
+				...parseConfidentialBurnInstruction(instruction),
+				instructionType: Token2022Instruction.ConfidentialBurn
+			};
+		case Token2022Instruction.ConfidentialMint:
+			return {
+				...parseConfidentialMintInstruction(instruction),
+				instructionType: Token2022Instruction.ConfidentialMint
+			};
+		case Token2022Instruction.ConfigureConfidentialTransferAccountWithRegistry:
+			return {
+				...parseConfigureConfidentialTransferAccountWithRegistryInstruction(instruction),
+				instructionType: Token2022Instruction.ConfigureConfidentialTransferAccountWithRegistry
+			};
+		case Token2022Instruction.InitializeConfidentialMintBurn:
+			return {
+				...parseInitializeConfidentialMintBurnInstruction(instruction),
+				instructionType: Token2022Instruction.InitializeConfidentialMintBurn
+			};
+		case Token2022Instruction.PermissionedConfidentialBurn:
+			return {
+				...parsePermissionedConfidentialBurnInstruction(instruction),
+				instructionType: Token2022Instruction.PermissionedConfidentialBurn
+			};
+		case Token2022Instruction.RotateSupplyElgamalPubkey:
+			return {
+				...parseRotateSupplyElgamalPubkeyInstruction(instruction),
+				instructionType: Token2022Instruction.RotateSupplyElgamalPubkey
+			};
+		case Token2022Instruction.UpdateConfidentialMintBurnDecryptableSupply:
+			return {
+				...parseUpdateConfidentialMintBurnDecryptableSupplyInstruction(instruction),
+				instructionType: Token2022Instruction.UpdateConfidentialMintBurnDecryptableSupply
 			};
 		default: {
 			assertNever(

@@ -1,14 +1,13 @@
 //! Code for interacting with the chain fusion signer.
+use std::cell::RefCell;
+
 use bitcoin::{Address, CompressedPublicKey, Network};
 use candid::{Nat, Principal};
-use ic_cdk::{
-    api::msg_caller,
-    bitcoin_canister::Network as BitcoinNetwork,
-    call::Call,
-    management_canister::{
-        ecdsa_public_key, schnorr_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgs,
-        SchnorrAlgorithm, SchnorrKeyId, SchnorrPublicKeyArgs,
-    },
+use ic_cdk::{api::msg_caller, call::Call};
+use ic_cdk_bitcoin_canister::Network as BitcoinNetwork;
+use ic_cdk_management_canister::{
+    canister_status, ecdsa_public_key, schnorr_public_key, CanisterStatusArgs, EcdsaCurve,
+    EcdsaKeyId, EcdsaPublicKeyArgs, SchnorrAlgorithm, SchnorrKeyId, SchnorrPublicKeyArgs,
 };
 use ic_cycles_ledger_client::{
     Account, AllowanceArgs, ApproveArgs, CyclesLedgerService, DepositArgs, DepositResult,
@@ -57,8 +56,8 @@ const fn per_user_cycles_allowance() -> u64 {
 
 /// Minimum cycles allowance below which a new approve is warranted.
 ///
-/// If the caller already has at least this many cycles, `allow_signing`
-/// skips the `icrc_2_approve` call.  This avoids:
+/// If the caller already has at least this many cycles, the `allow_signing`
+/// endpoint skips the `icrc_2_approve` call.  This avoids:
 /// - Unnecessary inter-canister calls when the user still has plenty of cycles.
 /// - Accidentally **reducing** an existing higher allowance, since `icrc_2_approve` *sets* (not
 ///   adds) the value.
@@ -124,7 +123,7 @@ pub async fn has_sufficient_allowance() -> Option<Nat> {
 ///
 /// Callers that want the "check first, approve only if needed" behaviour
 /// should call [`has_sufficient_allowance`] beforehand, or use
-/// [`allow_signing`] which does both.
+/// [`crate::api::signer::allow_signing`], which does both.
 ///
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`
@@ -157,22 +156,6 @@ pub async fn approve_signing() -> Result<(), AllowSigningError> {
     Ok(())
 }
 
-/// Enables the user to sign transactions.
-///
-/// Checks the current allowance first; if already at or above
-/// [`SUFFICIENT_CYCLES_THRESHOLD`], returns immediately without making an
-/// `icrc_2_approve` call.  Otherwise delegates to [`approve_signing`].
-///
-/// # Errors
-/// Errors are enumerated by: `AllowSigningError`
-pub async fn allow_signing() -> Result<(), AllowSigningError> {
-    if has_sufficient_allowance().await.is_some() {
-        return Ok(());
-    }
-
-    approve_signing().await
-}
-
 const SUB_ACCOUNT_ZERO: Subaccount = Subaccount([0; 32]);
 #[must_use]
 pub fn principal2account(principal: &Principal) -> ByteBuf {
@@ -199,8 +182,8 @@ pub fn principal_to_account_identifier_hex(principal: &Principal) -> String {
 }
 
 // Chain-fusion-signer derivation-path schema bytes — the first path element that namespaces a
-// principal's key per chain, mirrored so reproducing the path via the management canister (with
-// `canister_id = cfs_canister_id`) yields the same key the signer derives.
+// principal's key per chain, mirrored so deriving the path from the signer's root key yields the
+// same key the signer derives.
 // ECDSA schemas: see <https://github.com/dfinity/chain-fusion-signer/blob/26b683c6de9971fdbf7bd4cebc04d427d1753289/src/signer/canister/src/derivation_path.rs#L6>.
 const SCHEMA_BTC: u8 = 0x00;
 const SCHEMA_ETH: u8 = 0x01;
@@ -208,18 +191,39 @@ const SCHEMA_ETH: u8 = 0x01;
 // (`src/frontend/src/lib/ic-pub-key/src/cli.ts`, `deriveSolAddress`).
 const SCHEMA_SOL: u8 = 0xfe;
 
-/// Computes the secp256k1 public key the chain-fusion signer would derive for `principal` under the
-/// given `schema` (`SCHEMA_BTC` / `SCHEMA_ETH`), via the management canister — a public-key read,
-/// not a signing call, so it does not consume the signer's signing allowance.
-// TODO: Cache CFS pubkey and derive it offline as in [ckBTC minter](https://github.com/dfinity/ic/blob/35153c7cb7b9d1da60472ca7e94c693e418f87bd/rs/bitcoin/ckbtc/minter/src/address.rs#L101-L101)
-async fn cfs_ecdsa_pubkey_of(principal: &Principal, schema: u8) -> Result<Vec<u8>, String> {
+/// The chain-fusion signer's root public key and chain code: what the management canister returns
+/// for `canister_id = cfs_canister_id` and an empty derivation path. Every per-user key of the
+/// signer is a subkey of it, derived offline with the same derivation the management canister
+/// applies, as the ckBTC minter does for its own addresses.
+type CfsRootKey<K> = (K, [u8; 32]);
+
+thread_local! {
+    /// The signer's secp256k1 root key (BTC, ETH), once fetched.
+    ///
+    /// It depends only on the configured key name and CFS canister id, which change only at
+    /// install or upgrade, when the heap is reset anyway. Heap rather than stable memory on
+    /// purpose: re-fetching it once after an upgrade costs one call and needs no migration.
+    static CFS_ECDSA_ROOT_KEY: RefCell<Option<CfsRootKey<ic_secp256k1::PublicKey>>> =
+        const { RefCell::new(None) };
+
+    /// The signer's Ed25519 root key (SOL), once fetched. Cached like [`CFS_ECDSA_ROOT_KEY`].
+    static CFS_ED25519_ROOT_KEY: RefCell<Option<CfsRootKey<ic_ed25519::PublicKey>>> =
+        const { RefCell::new(None) };
+}
+
+/// The signer's secp256k1 root key, fetched from the management canister on first use — a
+/// public-key read, not a signing call, so it does not consume the signer's signing allowance.
+async fn cfs_ecdsa_root_key() -> Result<CfsRootKey<ic_secp256k1::PublicKey>, String> {
+    if let Some(root_key) = CFS_ECDSA_ROOT_KEY.with_borrow(Clone::clone) {
+        return Ok(root_key);
+    }
+
     let (ecdsa_key_name, maybe_cfs_canister_id) =
         read_config(|s| (s.ecdsa_key_name.clone(), s.cfs_canister_id));
-    let derivation_path = vec![vec![schema], principal.as_slice().to_vec()];
     let cfs_canister_id = maybe_cfs_canister_id.ok_or("Missing CFS canister id")?;
     let key = ecdsa_public_key(&EcdsaPublicKeyArgs {
         canister_id: Some(cfs_canister_id),
-        derivation_path,
+        derivation_path: vec![],
         key_id: EcdsaKeyId {
             curve: EcdsaCurve::Secp256k1,
             name: ecdsa_key_name,
@@ -227,25 +231,32 @@ async fn cfs_ecdsa_pubkey_of(principal: &Principal, schema: u8) -> Result<Vec<u8
     })
     .await
     .map_err(|_| "Failed to get ecdsa public key".to_string())?;
-    Ok(key.public_key)
+    let root_key = (
+        ic_secp256k1::PublicKey::deserialize_sec1(&key.public_key)
+            .map_err(|e| format!("Invalid ecdsa public key: {e}"))?,
+        <[u8; 32]>::try_from(key.chain_code).map_err(|_| "Invalid ecdsa chain code".to_string())?,
+    );
+
+    // Two callers racing the first fetch both write the same key, so last write wins is not a
+    // race worth guarding.
+    CFS_ECDSA_ROOT_KEY.set(Some(root_key.clone()));
+
+    Ok(root_key)
 }
 
-/// Computes the Ed25519 public key the chain-fusion signer would derive for `principal` on the
-/// Solana mainnet path, via the management canister `schnorr_public_key` (a public-key read, not a
-/// signing call). Mirrors the signer's path: `[SCHEMA_SOL, principal, "SOL", "mainnet"]`.
-async fn cfs_ed25519_pubkey_of(principal: &Principal) -> Result<Vec<u8>, String> {
+/// The signer's Ed25519 root key, fetched from the management canister `schnorr_public_key` on
+/// first use (a public-key read, not a signing call).
+async fn cfs_ed25519_root_key() -> Result<CfsRootKey<ic_ed25519::PublicKey>, String> {
+    if let Some(root_key) = CFS_ED25519_ROOT_KEY.with_borrow(Clone::clone) {
+        return Ok(root_key);
+    }
+
     let (key_name, maybe_cfs_canister_id) =
         read_config(|s| (s.ecdsa_key_name.clone(), s.cfs_canister_id));
-    let derivation_path = vec![
-        vec![SCHEMA_SOL],
-        principal.as_slice().to_vec(),
-        b"SOL".to_vec(),
-        b"mainnet".to_vec(),
-    ];
     let cfs_canister_id = maybe_cfs_canister_id.ok_or("Missing CFS canister id")?;
     let key = schnorr_public_key(&SchnorrPublicKeyArgs {
         canister_id: Some(cfs_canister_id),
-        derivation_path,
+        derivation_path: vec![],
         key_id: SchnorrKeyId {
             algorithm: SchnorrAlgorithm::Ed25519,
             name: key_name,
@@ -253,7 +264,72 @@ async fn cfs_ed25519_pubkey_of(principal: &Principal) -> Result<Vec<u8>, String>
     })
     .await
     .map_err(|_| "Failed to get schnorr public key".to_string())?;
-    Ok(key.public_key)
+    let root_key = (
+        ic_ed25519::PublicKey::deserialize_raw(&key.public_key)
+            .map_err(|e| format!("Invalid schnorr public key: {e}"))?,
+        <[u8; 32]>::try_from(key.chain_code)
+            .map_err(|_| "Invalid schnorr chain code".to_string())?,
+    );
+
+    // Same benign race as in `cfs_ecdsa_root_key`.
+    CFS_ED25519_ROOT_KEY.set(Some(root_key));
+
+    Ok(root_key)
+}
+
+/// Derives the compressed SEC1 secp256k1 public key the chain-fusion signer holds for `principal`
+/// under the given `schema` (`SCHEMA_BTC` / `SCHEMA_ETH`), from the signer's root key.
+fn derive_cfs_ecdsa_pubkey(
+    (root_key, chain_code): &CfsRootKey<ic_secp256k1::PublicKey>,
+    principal: &Principal,
+    schema: u8,
+) -> Vec<u8> {
+    let derivation_path = ic_secp256k1::DerivationPath::new(vec![
+        ic_secp256k1::DerivationIndex(vec![schema]),
+        ic_secp256k1::DerivationIndex(principal.as_slice().to_vec()),
+    ]);
+    root_key
+        .derive_subkey_with_chain_code(&derivation_path, chain_code)
+        .0
+        .serialize_sec1(true)
+}
+
+/// Derives the raw Ed25519 public key the chain-fusion signer holds for `principal` on the Solana
+/// mainnet path `[SCHEMA_SOL, principal, "SOL", "mainnet"]`, from the signer's root key.
+fn derive_cfs_ed25519_pubkey(
+    (root_key, chain_code): &CfsRootKey<ic_ed25519::PublicKey>,
+    principal: &Principal,
+) -> Vec<u8> {
+    let derivation_path = ic_ed25519::DerivationPath::new(vec![
+        ic_ed25519::DerivationIndex(vec![SCHEMA_SOL]),
+        ic_ed25519::DerivationIndex(principal.as_slice().to_vec()),
+        ic_ed25519::DerivationIndex(b"SOL".to_vec()),
+        ic_ed25519::DerivationIndex(b"mainnet".to_vec()),
+    ]);
+    root_key
+        .derive_subkey_with_chain_code(&derivation_path, chain_code)
+        .0
+        .serialize_raw()
+        .to_vec()
+}
+
+/// Computes the secp256k1 public key the chain-fusion signer holds for `principal` under the given
+/// `schema` (`SCHEMA_BTC` / `SCHEMA_ETH`).
+async fn cfs_ecdsa_pubkey_of(principal: &Principal, schema: u8) -> Result<Vec<u8>, String> {
+    Ok(derive_cfs_ecdsa_pubkey(
+        &cfs_ecdsa_root_key().await?,
+        principal,
+        schema,
+    ))
+}
+
+/// Computes the Ed25519 public key the chain-fusion signer holds for `principal` on the Solana
+/// mainnet path.
+async fn cfs_ed25519_pubkey_of(principal: &Principal) -> Result<Vec<u8>, String> {
+    Ok(derive_cfs_ed25519_pubkey(
+        &cfs_ed25519_root_key().await?,
+        principal,
+    ))
 }
 
 fn transform_network(network: BitcoinNetwork) -> Network {
@@ -281,7 +357,7 @@ pub async fn btc_principal_to_p2wpkh_address(
 }
 
 /// Derives the caller's Ethereum address from their principal, reproducing the chain-fusion
-/// signer's key via the management canister (no signer call).
+/// signer's key from its root key (no signer call).
 ///
 /// # Errors
 /// - The signer public key could not be retrieved, or the bytes are not a valid secp256k1 key.
@@ -291,7 +367,7 @@ pub async fn eth_principal_to_address(principal: &Principal) -> Result<String, S
 }
 
 /// Derives the caller's Solana (mainnet) address from their principal, reproducing the chain-fusion
-/// signer's Ed25519 key via the management canister (no signer call).
+/// signer's Ed25519 key from its root key (no signer call).
 ///
 /// # Errors
 /// - The signer public key could not be retrieved, or it is not a 32-byte Ed25519 key.
@@ -366,6 +442,35 @@ pub(crate) fn sol_address_from_ed25519_pubkey(pubkey: &[u8]) -> Result<String, S
     Ok(bs58::encode(pubkey).into_string())
 }
 
+/// Seconds in a day, used to convert the freezing threshold (a duration) and the idle burn rate
+/// (per day) into a cycle amount.
+const SECONDS_PER_DAY: u32 = 86_400;
+
+/// The canister's frozen reserve, in cycles.
+///
+/// The management canister reports `freezing_threshold` as a duration in seconds, not a cycle
+/// amount.  The reserve in cycles is what the canister would burn while idle over that duration:
+/// `freezing_threshold_secs * idle_cycles_burned_per_day / 86_400` — the same computation the IC
+/// uses to decide when a canister is frozen.
+fn frozen_reserve_cycles(freezing_threshold_secs: &Nat, idle_cycles_burned_per_day: &Nat) -> Nat {
+    freezing_threshold_secs.clone() * idle_cycles_burned_per_day.clone()
+        / Nat::from(SECONDS_PER_DAY)
+}
+
+/// How many cycles to send to the cycles ledger: `percentage`% of the balance available *above* the
+/// frozen reserve.
+///
+/// Returns zero when the canister is at or below its frozen reserve — a canister must never spend
+/// into the reserve, so in that case it sends nothing at all.  Because the result is at most
+/// `backend_cycles - frozen_reserve`, the canister always retains at least `frozen_reserve`.
+fn cycles_to_send(backend_cycles: &Nat, frozen_reserve: &Nat, percentage: u8) -> Nat {
+    if backend_cycles <= frozen_reserve {
+        return Nat::from(0u32);
+    }
+    let available_above_reserve = backend_cycles.clone() - frozen_reserve.clone();
+    available_above_reserve * Nat::from(percentage) / Nat::from(100u32)
+}
+
 /// Tops up the backend canister account on the cycles ledger.
 ///
 /// # Context
@@ -417,8 +522,45 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
 
     // If the ledger balance is low, send cycles:
     if ledger_balance < request.threshold() {
+        // The canister must never spend into its frozen reserve: sending a fraction of the *total*
+        // balance can push a canister with a large freezing threshold (some run at ~40T) to or
+        // below its freeze line.  Base the send on the balance available *above* the
+        // reserve instead.
+        //
+        // `freezing_threshold` from the management canister is a duration in seconds, not a cycle
+        // amount, so the reserve in cycles is derived from the idle burn rate — the same way the IC
+        // itself computes it.
+        let status = match canister_status(&CanisterStatusArgs {
+            canister_id: ic_cdk::api::canister_self(),
+        })
+        .await
+        .map_err(|_| TopUpCyclesLedgerError::CouldNotTopUpCyclesLedger {
+            available: backend_cycles.clone(),
+            tried_to_send: Nat::from(0u32),
+        }) {
+            Ok(status) => status,
+            Err(err) => return TopUpCyclesLedgerResult::Err(err),
+        };
+        let frozen_reserve = frozen_reserve_cycles(
+            &status.settings.freezing_threshold,
+            &status.idle_cycles_burned_per_day,
+        );
+
         // Decide how many cycles to keep and how many to send to the cycles ledger.
-        let to_send = backend_cycles.clone() / Nat::from(100u32) * Nat::from(request.percentage());
+        let to_send = cycles_to_send(&backend_cycles, &frozen_reserve, request.percentage());
+
+        // At or below the frozen reserve there is nothing safe to send; skip the deposit entirely
+        // rather than making a zero-cycle inter-canister call.
+        let zero = Nat::from(0u32);
+        if to_send == zero {
+            return Ok(TopUpCyclesLedgerResponse {
+                ledger_balance,
+                backend_cycles,
+                topped_up: zero,
+            })
+            .into();
+        }
+
         let to_retain = backend_cycles.clone() - to_send.clone();
 
         // Top up the cycles ledger.
@@ -468,9 +610,19 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
 
 #[cfg(test)]
 mod tests {
+    use bitcoin::{Address, CompressedPublicKey, Network};
+    use candid::{Nat, Principal};
+    use ic_ledger_types::{AccountIdentifier, DEFAULT_SUBACCOUNT};
     use pretty_assertions::assert_eq;
 
-    use super::{eth_address_from_ecdsa_pubkey, sol_address_from_ed25519_pubkey};
+    use super::{
+        cycles_to_send, derive_cfs_ecdsa_pubkey, derive_cfs_ed25519_pubkey,
+        eth_address_from_ecdsa_pubkey, frozen_reserve_cycles, principal_to_account_identifier_hex,
+        sol_address_from_ed25519_pubkey, SCHEMA_BTC, SCHEMA_ETH,
+    };
+
+    /// 1 trillion cycles (1T), the unit the examples are written in.
+    const T: u128 = 1_000_000_000_000;
 
     // secp256k1 private key `1` — a canonical known-answer vector. Its public key derives the
     // Ethereum address 0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf (widely published).
@@ -508,6 +660,20 @@ mod tests {
     }
 
     #[test]
+    fn principal_to_account_identifier_hex_uses_the_default_subaccount() {
+        let principal =
+            Principal::from_text("xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-7axl5-tae")
+                .expect("valid principal");
+
+        let account_id = principal_to_account_identifier_hex(&principal);
+
+        assert_eq!(
+            account_id,
+            AccountIdentifier::new(&principal, &DEFAULT_SUBACCOUNT).to_hex()
+        );
+    }
+
+    #[test]
     fn sol_address_of_zero_pubkey_is_the_known_base58_string() {
         // base58 of 32 zero bytes is 32 '1's — the Solana System Program id.
         let address = sol_address_from_ed25519_pubkey(&[0u8; 32]).unwrap();
@@ -529,5 +695,119 @@ mod tests {
     fn sol_address_rejects_wrong_length_pubkey() {
         assert!(sol_address_from_ed25519_pubkey(&[0u8; 31]).is_err());
         assert!(sol_address_from_ed25519_pubkey(&[0u8; 33]).is_err());
+    }
+
+    /// The production chain-fusion signer.
+    const PROD_CFS_CANISTER_ID: &str = "grghe-syaaa-aaaar-qabyq-cai";
+    // A user's addresses under the production signer and `key_1`, as OISY's frontend derives them
+    // (`src/frontend/src/lib/ic-pub-key/src/cli.ts`). The backend accepts only addresses that match
+    // its own derivation, so it must derive exactly these.
+    const USER: &str = "xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-7axl5-tae";
+    const USER_BTC_ADDRESS: &str = "bc1qatl8dhjt6gsev0un7566yud2r2zf8wlrzcdq59";
+    const USER_ETH_ADDRESS: &str = "0xC323B334EC9c9f114E254118c34690512e9107D2";
+    const USER_SOL_ADDRESS: &str = "Cu11Pg5fFAwbFEvcxELFVk95wrvcWUH29q9iSbDyYyvn";
+
+    fn prod_cfs_canister_id() -> Principal {
+        Principal::from_text(PROD_CFS_CANISTER_ID).expect("valid canister id")
+    }
+
+    fn user() -> Principal {
+        Principal::from_text(USER).expect("valid principal")
+    }
+
+    #[test]
+    fn derives_the_frontend_btc_and_eth_addresses_from_the_signer_root_key() {
+        // What the management canister returns for the signer and an empty derivation path.
+        let root_key = ic_secp256k1::PublicKey::derive_mainnet_key(
+            ic_secp256k1::MasterPublicKeyId::EcdsaKey1,
+            &prod_cfs_canister_id(),
+            &[],
+        );
+
+        let btc_pubkey = derive_cfs_ecdsa_pubkey(&root_key, &user(), SCHEMA_BTC);
+        let btc_address = Address::p2wpkh(
+            &CompressedPublicKey::from_slice(&btc_pubkey).unwrap(),
+            Network::Bitcoin,
+        )
+        .to_string();
+        let eth_address =
+            eth_address_from_ecdsa_pubkey(&derive_cfs_ecdsa_pubkey(&root_key, &user(), SCHEMA_ETH))
+                .unwrap();
+
+        assert_eq!(btc_address, USER_BTC_ADDRESS);
+        assert_eq!(eth_address, USER_ETH_ADDRESS);
+    }
+
+    #[test]
+    fn derives_the_frontend_sol_address_from_the_signer_root_key() {
+        // What the management canister returns for the signer and an empty derivation path.
+        let root_key = ic_ed25519::PublicKey::derive_mainnet_key(
+            ic_ed25519::MasterPublicKeyId::Key1,
+            &prod_cfs_canister_id(),
+            &[],
+        );
+
+        let sol_address =
+            sol_address_from_ed25519_pubkey(&derive_cfs_ed25519_pubkey(&root_key, &user()))
+                .unwrap();
+
+        assert_eq!(sol_address, USER_SOL_ADDRESS);
+    }
+
+    #[test]
+    fn frozen_reserve_is_burn_rate_scaled_by_threshold_days() {
+        // 30-day threshold at a burn rate of 2T/day → 60T reserve.
+        let reserve = frozen_reserve_cycles(&Nat::from(30u32 * 86_400), &Nat::from(2u128 * T));
+        assert_eq!(reserve, Nat::from(60u128 * T));
+    }
+
+    #[test]
+    fn frozen_reserve_is_zero_when_threshold_or_burn_rate_is_zero() {
+        assert_eq!(
+            frozen_reserve_cycles(&Nat::from(0u32), &Nat::from(2u128 * T)),
+            Nat::from(0u32)
+        );
+        assert_eq!(
+            frozen_reserve_cycles(&Nat::from(30u32 * 86_400), &Nat::from(0u32)),
+            Nat::from(0u32)
+        );
+    }
+
+    #[test]
+    fn to_send_uses_only_the_balance_above_the_reserve() {
+        // The motivating example: 80T balance, 40T reserve, default 50%.
+        // Old behaviour sent 40T (50% of total); now it sends 20T (50% of the 40T surplus).
+        let to_send = cycles_to_send(&Nat::from(80u128 * T), &Nat::from(40u128 * T), 50);
+        assert_eq!(to_send, Nat::from(20u128 * T));
+    }
+
+    #[test]
+    fn to_send_always_leaves_at_least_the_reserve() {
+        let backend_cycles = Nat::from(80u128 * T);
+        let reserve = Nat::from(40u128 * T);
+        let to_send = cycles_to_send(&backend_cycles, &reserve, 50);
+        let retained = backend_cycles - to_send;
+        assert!(retained >= reserve);
+    }
+
+    #[test]
+    fn to_send_is_zero_at_or_below_the_reserve() {
+        // Exactly at the reserve.
+        assert_eq!(
+            cycles_to_send(&Nat::from(40u128 * T), &Nat::from(40u128 * T), 50),
+            Nat::from(0u32)
+        );
+        // Below the reserve.
+        assert_eq!(
+            cycles_to_send(&Nat::from(30u128 * T), &Nat::from(40u128 * T), 50),
+            Nat::from(0u32)
+        );
+    }
+
+    #[test]
+    fn to_send_just_above_the_reserve_sends_a_fraction_of_the_small_surplus() {
+        // 40T + 10T surplus, 50% → 5T sent, reserve fully retained.
+        let to_send = cycles_to_send(&Nat::from(50u128 * T), &Nat::from(40u128 * T), 50);
+        assert_eq!(to_send, Nat::from(5u128 * T));
     }
 }

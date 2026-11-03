@@ -87,22 +87,47 @@ export enum WizardStepsUnstake {
 	UNSTAKING = 'Unstaking'
 }
 
+export enum WizardStepsTradingWithdraw {
+	WITHDRAW = 'Withdraw',
+	REVIEW = 'Review',
+	WITHDRAWING = 'Withdrawing',
+	TOKENS_LIST = 'Tokens List'
+}
+
+export enum WizardStepsTip {
+	INTRO = 'Intro',
+	TOKENS_LIST = 'Tokens List',
+	CREATE = 'Create',
+	SHARE = 'Share',
+	HISTORY = 'History'
+}
+
 export enum WizardStepsLiquidiumSupply {
 	SUPPLY = 'Supply',
 	REVIEW = 'Review',
-	SUPPLYING = 'Supplying'
+	SUPPLYING = 'Supplying',
+	TOKENS_LIST = 'Tokens List'
 }
 
 export enum WizardStepsLiquidiumBorrow {
 	BORROW = 'Borrow',
 	REVIEW = 'Review',
-	BORROWING = 'Borrowing'
+	BORROWING = 'Borrowing',
+	TOKENS_LIST = 'Tokens List'
 }
 
 export enum WizardStepsLiquidiumWithdraw {
 	WITHDRAW = 'Withdraw',
 	REVIEW = 'Review',
-	WITHDRAWING = 'Withdrawing'
+	WITHDRAWING = 'Withdrawing',
+	TOKENS_LIST = 'Tokens List'
+}
+
+export enum WizardStepsLiquidiumRepay {
+	REPAY = 'Repay',
+	REVIEW = 'Review',
+	REPAYING = 'Repaying',
+	TOKENS_LIST = 'Tokens List'
 }
 
 export enum WizardStepsClaimStakingReward {
@@ -140,8 +165,21 @@ export enum WizardStepsScanner {
 
 export enum WizardStepsLimitOrder {
 	FORM = 'Form',
-	BASE_TOKEN = 'Base Token',
-	QUOTE_TOKEN = 'Quote Token',
+	BASE_TOKEN = 'Base token',
+	QUOTE_TOKEN = 'Quote token',
 	REVIEW = 'Review',
 	PLACING = 'Placing'
+}
+
+export enum WizardStepsCyclesMint {
+	MINT = 'Mint',
+	REVIEW = 'Review',
+	MINTING = 'Minting'
+}
+
+export enum WizardStepsCyclesTopUp {
+	CANISTER = 'Canister',
+	AMOUNT = 'Amount',
+	REVIEW = 'Review',
+	TOPPING_UP = 'ToppingUp'
 }

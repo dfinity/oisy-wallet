@@ -18,8 +18,9 @@ export type CoingeckoPlatformId = z.infer<typeof CoingeckoPlatformIdSchema>;
 export type CoingeckoCurrency = Currency;
 
 export interface CoingeckoSimpleParams {
-	// vs_currency of coins, comma-separated if querying more than 1 vs_currency
-	vs_currencies: CoingeckoCurrency | `${CoingeckoCurrency},${CoingeckoCurrency}`;
+	// vs_currency of coins, comma-separated or a list if querying more than 1 vs_currency
+	vs_currencies:
+		CoingeckoCurrency | `${CoingeckoCurrency},${CoingeckoCurrency}` | readonly CoingeckoCurrency[];
 
 	// true/false to include market_cap, default: false
 	include_market_cap?: boolean;
@@ -56,9 +57,9 @@ export type CoingeckoSimplePrice = {
 	usd_24h_change?: number;
 	last_updated_at?: number;
 } & {
-	[K in
-		| Exclude<`${Currency}`, Currency.USD>
-		| `${Exclude<Currency, Currency.USD>}_24h_change`]?: number;
+	[
+		K in Exclude<`${Currency}`, Currency.USD> | `${Exclude<Currency, Currency.USD>}_24h_change`
+	]?: number;
 };
 
 export type CoingeckoSimpleTokenPrice = Omit<CoingeckoSimplePrice, 'usd_market_cap'> &

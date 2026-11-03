@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { WizardModal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { getHarvestAutopilotBaseTrackingMetadata } from '$eth/utils/harvest-autopilots.utils';
-	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
+	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import UnstakeWizard from '$lib/components/stake/UnstakeWizard.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { unstakeWizardSteps } from '$lib/config/stake.config';
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { ProgressStepsUnstake } from '$lib/enums/progress-steps';
@@ -64,7 +64,7 @@
 		});
 </script>
 
-<SendTokenContext customSendBalance={totalStaked} {token}>
+<TokenActionContext customSendBalance={totalStaked} {token}>
 	<WizardModal
 		bind:this={modal}
 		disablePointerEvents={currentStep?.name === WizardStepsUnstake.UNSTAKING}
@@ -84,4 +84,4 @@
 			bind:unstakeProgressStep
 		/>
 	</WizardModal>
-</SendTokenContext>
+</TokenActionContext>

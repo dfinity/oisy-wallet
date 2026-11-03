@@ -174,7 +174,7 @@ describe('EthConvertTokenWizard', () => {
 		mockCkEthMinterInfoStore(mockMinterInfo);
 		mockCkEthHelperContractAddress();
 
-		sendSpy = vi.spyOn(sendServices, 'send').mockResolvedValue({ hash: transactionId });
+		sendSpy = vi.spyOn(sendServices, 'send').mockResolvedValue({ hash: transactionId, nonce: 1 });
 	});
 
 	it('should call send if all requirements are met', async () => {

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
-	import { fade, slide } from 'svelte/transition';
 	import { afterNavigate } from '$app/navigation';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Backdrop from '$lib/components/ui/Backdrop.svelte';
@@ -9,6 +8,7 @@
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants.js';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { fade, slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		inputValue: string;
@@ -31,8 +31,6 @@
 	}: Props = $props();
 
 	let visible = $state(false);
-
-	let overflowableContentWidth = $state(0);
 
 	let button: HTMLButtonElement | undefined = $state();
 	let inputElement: HTMLInputElement | undefined = $state();
@@ -85,17 +83,20 @@
 	{/if}
 
 	{#if nonNullish(overflowableContent)}
-		<div class="flex pr-12" bind:clientWidth={overflowableContentWidth}>
+		<!-- min-w-0 lets this flex item shrink below its content's natural width
+		     (a flex item's automatic min-width is otherwise content-based) so an
+		     overflowing child (e.g. a 4+ tab row) scrolls internally on narrow
+		     viewports instead of pushing the page wider than the device — which
+		     on Android Chrome forces a zoom-out that misplaces the fixed bottom
+		     nav bar under the browser's own UI. -->
+		<div class="no-scrollbar flex min-w-0 overflow-x-auto pr-12" inert={visible}>
 			{@render overflowableContent()}
 		</div>
 	{/if}
 	<div class="absolute right-0 z-2 w-full">
 		{#if visible}
 			<div
-				style:--overflowable-w={`${overflowableContentWidth}px`}
 				class="input-field condensed absolute right-0 -mt-[11px] mr-px flex overflow-hidden"
-				class:md:w-[270px]={nonNullish(overflowableContent)}
-				class:overflowable-input={nonNullish(overflowableContent)}
 				class:w-[270px]={isNullish(overflowableContent)}
 				class:w-full={nonNullish(overflowableContent)}
 				in:slide={{ ...SLIDE_PARAMS, axis: 'x' }}
@@ -148,11 +149,3 @@
 		</ButtonIcon>
 	</div>
 </div>
-
-<style lang="scss">
-	@media (min-width: 768px) {
-		.overflowable-input {
-			max-width: calc(100% - var(--overflowable-w, 0px) + 2rem);
-		}
-	}
-</style>

@@ -1,6 +1,7 @@
 import { screensStore } from '$lib/stores/screens.store';
 import ResponsivePopoverTest from '$tests/lib/components/ui/ResponsivePopoverTest.svelte';
 import { render, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 
 describe('ResponsivePopover', () => {
 	beforeEach(() => {
@@ -33,5 +34,42 @@ describe('ResponsivePopover', () => {
 			expect(bottomSheet).toBeInTheDocument();
 			expect(popover).not.toBeInTheDocument();
 		});
+	});
+
+	it('keeps only the bottom sheet, with focus in it, when an open sheet grows from xs to sm', async () => {
+		const { queryByTestId } = render(ResponsivePopoverTest);
+
+		screensStore.set('xs');
+
+		await waitFor(() => expect(queryByTestId('bottom-sheet')).toBeInTheDocument());
+
+		screensStore.set('sm');
+		// Let the screen change render before asserting what is absent.
+		await tick();
+
+		const bottomSheet = queryByTestId('bottom-sheet');
+
+		expect(bottomSheet).toBeInTheDocument();
+		expect(queryByTestId('popover-content')).not.toBeInTheDocument();
+		expect(bottomSheet?.contains(document.activeElement)).toBeTruthy();
+	});
+
+	it('switches to the popover from md', async () => {
+		const { queryByTestId } = render(ResponsivePopoverTest);
+
+		screensStore.set('md');
+
+		await waitFor(() => {
+			expect(queryByTestId('popover-content')).toBeInTheDocument();
+			expect(queryByTestId('bottom-sheet')).not.toBeInTheDocument();
+		});
+	});
+
+	it('passes the dropdown layout on to the popover', async () => {
+		screensStore.set('lg');
+
+		render(ResponsivePopoverTest, { props: { dropdown: true } });
+
+		await waitFor(() => expect(document.querySelector('.wrapper.dropdown')).not.toBeNull());
 	});
 });

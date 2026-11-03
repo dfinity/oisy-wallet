@@ -1,0 +1,215 @@
+import { ZERO } from '$lib/constants/app.constants';
+import {
+	isLifiFeeAffordable,
+	lifiApprovalCount,
+	lifiCarriedFeeCeiling,
+	lifiQuoteGas,
+	lifiUnsignedTxSize,
+	raiseLifiMaxFee,
+	withLifiGasBuffer,
+	withLifiMaxFeeHeadroom,
+	withLifiReviewGasBuffer
+} from '$lib/utils/lifi-fee.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
+import { mockLifiDiamond, mockLifiQuote } from '$tests/mocks/lifi.mock';
+import type { GasCost, LiFiStep } from '@lifi/sdk';
+import { Transaction } from 'ethers/transaction';
+
+describe('lifi-fee.utils', () => {
+	const gasCost = ({ type, estimate }: Pick<GasCost, 'type' | 'estimate'>): GasCost => ({
+		type,
+		estimate,
+		price: '1000000',
+		limit: '0',
+		amount: '0',
+		amountUSD: '0',
+		token: mockLifiQuote.action.fromToken
+	});
+
+	const withGasCosts = (gasCosts: GasCost[] | undefined): LiFiStep => ({
+		...mockLifiQuote,
+		estimate: { ...mockLifiQuote.estimate, gasCosts }
+	});
+
+	describe('lifiQuoteGas', () => {
+		it("should be the swap transaction's estimate, as live quotes give it", () => {
+			expect(lifiQuoteGas(withGasCosts([gasCost({ type: 'SEND', estimate: '299867' })]))).toBe(
+				299_867n
+			);
+		});
+
+		it('should leave out the approval, which is budgeted on its own', () => {
+			expect(
+				lifiQuoteGas(
+					withGasCosts([
+						gasCost({ type: 'APPROVE', estimate: '46000' }),
+						gasCost({ type: 'SEND', estimate: '299867' })
+					])
+				)
+			).toBe(299_867n);
+		});
+
+		it.each([
+			{ case: 'no gas costs', gasCosts: undefined },
+			{ case: 'an approval only', gasCosts: [gasCost({ type: 'APPROVE', estimate: '46000' })] },
+			{
+				case: 'an estimate that is not a number',
+				gasCosts: [gasCost({ type: 'SEND', estimate: '' })]
+			}
+		])('should be undefined for $case', ({ gasCosts }) => {
+			expect(lifiQuoteGas(withGasCosts(gasCosts))).toBeUndefined();
+		});
+	});
+
+	describe('withLifiGasBuffer', () => {
+		it('should add 20 %', () => {
+			expect(withLifiGasBuffer(300_000n)).toBe(360_000n);
+		});
+	});
+
+	// More than execution adds to the node's estimate, which runs a few percent above LI.FI's.
+	describe('withLifiReviewGasBuffer', () => {
+		it('should add 30 %', () => {
+			expect(withLifiReviewGasBuffer(300_000n)).toBe(390_000n);
+		});
+
+		it("should cover execution's buffer on an estimate 5 % above LI.FI's", () => {
+			expect(withLifiReviewGasBuffer(258_163n)).toBeGreaterThanOrEqual(
+				withLifiGasBuffer((258_163n * 105n) / 100n)
+			);
+		});
+	});
+
+	// Above the rise of the fee per gas measured between the form and the review on Ethereum.
+	describe('withLifiMaxFeeHeadroom', () => {
+		it('should add 10 %', () => {
+			expect(withLifiMaxFeeHeadroom(1_000_000n)).toBe(1_100_000n);
+		});
+	});
+
+	describe('raiseLifiMaxFee', () => {
+		const usdc = parseTokenId('LifiMaxUsdc');
+		const sol = parseTokenId('LifiMaxSol');
+
+		it('should start from the fee when nothing is reserved', () => {
+			expect(raiseLifiMaxFee({ reserved: undefined, fee: 5n, destinationTokenId: usdc })).toEqual({
+				fee: 5n,
+				destinationTokenId: usdc
+			});
+		});
+
+		it('should raise the reservation for the same destination to a higher fee', () => {
+			expect(
+				raiseLifiMaxFee({
+					reserved: { fee: 5n, destinationTokenId: usdc },
+					fee: 6n,
+					destinationTokenId: usdc
+				})
+			).toEqual({ fee: 6n, destinationTokenId: usdc });
+		});
+
+		// So that the amount only steps down.
+		it('should keep the reservation itself for the same destination when the fee is not higher', () => {
+			const reserved = { fee: 5n, destinationTokenId: usdc };
+
+			expect(raiseLifiMaxFee({ reserved, fee: 5n, destinationTokenId: usdc })).toBe(reserved);
+			expect(raiseLifiMaxFee({ reserved, fee: 4n, destinationTokenId: usdc })).toBe(reserved);
+		});
+
+		it("should start over from another destination's fee, even a lower one", () => {
+			expect(
+				raiseLifiMaxFee({
+					reserved: { fee: 5n, destinationTokenId: usdc },
+					fee: 4n,
+					destinationTokenId: sol
+				})
+			).toEqual({ fee: 4n, destinationTokenId: sol });
+		});
+	});
+
+	describe('lifiCarriedFeeCeiling', () => {
+		it('should price the gas at the fee per gas given, with 10 % headroom on the gas and the L1 fee', () => {
+			expect(lifiCarriedFeeCeiling({ gas: 400_000n, l1Fee: 1_000n, maxFeePerGas: 10n })).toBe(
+				440_000n * 10n + 1_100n
+			);
+		});
+
+		// A gas price that ticked up since the refused attempt must not refuse the retry again.
+		it('should follow the fee per gas of the moment', () => {
+			expect(lifiCarriedFeeCeiling({ gas: 400_000n, l1Fee: ZERO, maxFeePerGas: 12n })).toBe(
+				440_000n * 12n
+			);
+		});
+	});
+
+	describe('lifiUnsignedTxSize', () => {
+		const transaction = {
+			chainId: 8453n,
+			to: mockLifiDiamond,
+			data: `0x${'ab'.repeat(1_348)}`,
+			value: 10_000_000_000_000_000n,
+			gas: 947_792n,
+			maxFeePerGas: 12_000_000n,
+			maxPriorityFeePerGas: 1_000_000n
+		};
+
+		it('should be the size of the unsigned EIP-1559 transaction ethers serialises', () => {
+			const { chainId, to, data, value, gas, maxFeePerGas, maxPriorityFeePerGas } = transaction;
+
+			const serialized = Transaction.from({
+				type: 2,
+				chainId,
+				nonce: 7,
+				to,
+				data,
+				value,
+				gasLimit: gas,
+				maxFeePerGas,
+				maxPriorityFeePerGas
+			}).unsignedSerialized;
+
+			expect(lifiUnsignedTxSize({ ...transaction, nonce: 7n })).toBe(
+				BigInt((serialized.length - 2) / 2)
+			);
+		});
+
+		// A nonce below 128 encodes in one byte; the largest, in nine.
+		it('should bound every nonce by encoding the largest', () => {
+			expect(lifiUnsignedTxSize(transaction)).toBe(
+				lifiUnsignedTxSize({ ...transaction, nonce: 7n }) + 8n
+			);
+		});
+	});
+
+	describe('lifiApprovalCount', () => {
+		it.each([
+			{ case: 'covers the amount', allowance: 100n, count: 0 },
+			{ case: 'exceeds the amount', allowance: 1_000n, count: 0 },
+			{ case: 'is zero', allowance: ZERO, count: 1 },
+			{ case: 'is smaller, and is reset first', allowance: 99n, count: 2 }
+		])('should count $count when the allowance $case', ({ allowance, count }) => {
+			expect(lifiApprovalCount({ allowance, amount: 100n })).toBe(count);
+		});
+	});
+
+	describe('isLifiFeeAffordable', () => {
+		it.each([
+			{
+				case: 'covers the amount and the fee',
+				isNativeSource: true,
+				nativeBalance: 110n,
+				ok: true
+			},
+			{ case: 'covers the fee only', isNativeSource: true, nativeBalance: 109n, ok: false },
+			{ case: 'covers the fee', isNativeSource: false, nativeBalance: 10n, ok: true },
+			{ case: 'falls a wei short of the fee', isNativeSource: false, nativeBalance: 9n, ok: false }
+		])(
+			'should be $ok when the native balance $case (native source: $isNativeSource)',
+			({ isNativeSource, nativeBalance, ok }) => {
+				expect(isLifiFeeAffordable({ fee: 10n, amount: 100n, isNativeSource, nativeBalance })).toBe(
+					ok
+				);
+			}
+		);
+	});
+});

@@ -122,7 +122,7 @@
 					innerStyleClass="items-center"
 					onclick={() => (expanded = !expanded)}
 					paddingSmall
-					styleClass="text-brand-primary hover:bg-transparent hover:text-brand-secondary"
+					styleClass="text-brand-primary hover:bg-transparent hover:text-brand-hover"
 					testId={`${testId}-expand-transactions-button`}
 					transparent
 				>

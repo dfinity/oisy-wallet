@@ -73,4 +73,20 @@ describe('LiquidiumBorrowReview', () => {
 
 		expect(container).toHaveTextContent(en.liquidium.text.borrow_high_risk_warning);
 	});
+
+	it('shows the activation fee info only when the pool charges one', () => {
+		const { queryByTestId, unmount } = render(LiquidiumBorrowReview, {
+			props: { ...baseProps, preview: preview() }
+		});
+
+		expect(queryByTestId('liquidium-activation-fee-info')).not.toBeInTheDocument();
+
+		unmount();
+
+		const { getByTestId } = render(LiquidiumBorrowReview, {
+			props: { ...baseProps, preview: preview(), market: { ...market, activationFeePercent: 0.5 } }
+		});
+
+		expect(getByTestId('liquidium-activation-fee-info')).toBeInTheDocument();
+	});
 });

@@ -48,6 +48,7 @@ import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
+import { isTcyclesLedgerCanisterId } from '$lib/utils/exchange.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import {
 	fromNullable,
@@ -60,14 +61,6 @@ import {
 import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
-
-export const loadIcrcTokens = async ({
-	identity
-}: {
-	identity: NullishIdentity;
-}): Promise<void> => {
-	await Promise.all([loadDefaultIcrcTokens(), loadCustomTokens({ identity, useCache: true })]);
-};
 
 export const loadDefaultIcrcTokens = async () => {
 	await Promise.all(
@@ -388,7 +381,9 @@ export const loadDisabledIcrcTokensExchanges = async ({
 		exchangeRateICRCToUsd(
 			disabledIcrcTokens.reduce<LedgerCanisterIdText[]>(
 				(acc, { ledgerCanisterId }) =>
-					!ICRC_CK_TOKENS_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)
+					// TCYCLES gets its XDR price from the exchange worker, never a market price.
+					!ICRC_CK_TOKENS_LEDGER_CANISTER_IDS.includes(ledgerCanisterId) &&
+					!isTcyclesLedgerCanisterId(ledgerCanisterId)
 						? [...acc, ledgerCanisterId]
 						: acc,
 				[]

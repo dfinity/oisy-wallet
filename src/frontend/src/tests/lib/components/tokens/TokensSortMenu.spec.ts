@@ -25,7 +25,7 @@ describe('TokensSortMenu', () => {
 		const button = container.querySelector('button');
 
 		expect(button).toBeInTheDocument();
-		expect(button).toHaveAttribute('aria-label', get(i18n).navigation.alt.menu);
+		expect(button).toHaveAttribute('aria-label', get(i18n).core.text.sorting);
 	});
 
 	it('should open the popover when button is clicked', async () => {
@@ -176,5 +176,11 @@ describe('TokensSortMenu', () => {
 			expect(button).toHaveClass('opened');
 			expect(button).toHaveAttribute('aria-expanded', 'true');
 		});
+	});
+
+	it('gives its trigger a touch-sized tap area', () => {
+		const { container } = render(TokensSortMenu);
+
+		expect(container.querySelector('button')).toHaveClass('hit-area', 'hit-area-touch');
 	});
 });

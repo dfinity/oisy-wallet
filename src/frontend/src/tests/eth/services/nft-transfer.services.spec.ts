@@ -3,6 +3,7 @@ import { ERC1155_ABI } from '$eth/constants/erc1155.constants';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
 import type { InfuraProvider } from '$eth/providers/infura.providers';
 import * as providersMod from '$eth/providers/infura.providers';
+import * as nativeBalanceServices from '$eth/services/native-balance.services';
 import {
 	encodeErc1155SafeTransfer,
 	encodeErc721SafeTransfer,
@@ -124,6 +125,10 @@ describe('nft-transfer.services', () => {
 				sendTransaction
 			} as unknown as InfuraProvider);
 
+			const reloadNativeBalanceOnMinedSpy = vi
+				.spyOn(nativeBalanceServices, 'reloadNativeBalanceOnMined')
+				.mockResolvedValue(undefined);
+
 			const signTransactionSpy = vi
 				.spyOn(signerApi, 'signTransaction')
 				.mockResolvedValue('0xsigned');
@@ -161,6 +166,13 @@ describe('nft-transfer.services', () => {
 			expect(sendTransaction).toHaveBeenCalledWith('0xsigned');
 			expect(steps).toEqual([Steps.SIGN_TRANSFER, Steps.TRANSFER]);
 			expect(result).toBe(fakeTx);
+
+			// The transfer pays its gas in the network's native coin, which no other path reloads
+			// for an NFT send.
+			expect(reloadNativeBalanceOnMinedSpy).toHaveBeenCalledExactlyOnceWith({
+				transaction: fakeTx,
+				networkId: BASE_NETWORK.id
+			});
 		});
 	});
 

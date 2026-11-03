@@ -7,9 +7,12 @@ use std::{cell::Cell, time::Duration};
 
 use ic_cdk::api::time;
 use ic_cdk_timers::{set_timer, set_timer_interval};
-use shared::types::{
-    exchange::{ExchangeData, ExchangeError, ExchangeRate},
-    token_id::TokenId,
+use shared::{
+    types::{
+        exchange::{ExchangeData, ExchangeError, ExchangeRate},
+        token_id::TokenId,
+    },
+    validate::Validate,
 };
 
 use crate::{
@@ -39,8 +42,8 @@ pub const PRICE_ACTIVITY_THRESHOLD_SEC: u64 = 10 * 60;
 const NANOS_PER_SEC: u64 = 1_000_000_000;
 
 /// A token's cached price is considered "fresh enough" if its
-/// [`ExchangeData::timestamp_ns`] (the provider-reported `last_updated_at`,
-/// or `time()` when the provider doesn't supply one) is within
+/// [`ExchangeData::timestamp_ns`] (the provider's `last_updated_at` capped at
+/// `time()`, or `time()` when the provider doesn't supply one) is within
 /// `PRICE_REFRESH_INTERVAL_SEC / 2` of now. Such tokens are skipped on the
 /// next refresh tick to avoid duplicate upstream calls when, e.g., a lazy
 /// bootstrap or a manual refresh has just populated the cache with a price
@@ -73,11 +76,13 @@ fn native_token_ids() -> Vec<StoredTokenId> {
         StoredTokenId(TokenId::EvmNative(1)),
         StoredTokenId(TokenId::EvmNative(56)),
         StoredTokenId(TokenId::EvmNative(137)),
+        StoredTokenId(TokenId::EvmNative(4663)),
         StoredTokenId(TokenId::EvmNative(8453)),
         StoredTokenId(TokenId::EvmNative(42161)),
         StoredTokenId(TokenId::IcpNative),
         StoredTokenId(TokenId::SolNativeMainnet),
         StoredTokenId(TokenId::BtcNativeMainnet),
+        StoredTokenId(TokenId::XrpNativeMainnet),
     ]
 }
 
@@ -289,14 +294,23 @@ pub(crate) fn start_exchange_rate_timer() {
     });
 }
 
+/// Caches `exchange_data` as the USD rate of `token_id`.
+///
+/// Reading a cached rate decodes it, and decoding runs [`Validate`] and traps when it fails (see
+/// `validate_on_deserialize!`). A rate that fails validation is therefore logged and skipped,
+/// which keeps any rate already cached for the token.
 fn update_price(token_id: &StoredTokenId, exchange_data: &ExchangeData) {
+    let rate = ExchangeRate {
+        usd: exchange_data.clone(),
+    };
+
+    if let Err(err) = rate.validate() {
+        ic_cdk::println!("Skipping the exchange rate for {token_id:?}: {err}");
+        return;
+    }
+
     mutate_state(|s| {
-        s.exchange_rates.insert(
-            token_id.clone(),
-            Candid(ExchangeRate {
-                usd: exchange_data.clone(),
-            }),
-        );
+        s.exchange_rates.insert(token_id.clone(), Candid(rate));
     });
 }
 
@@ -443,42 +457,52 @@ pub(crate) fn priceable_tokens_for_caller(caller: StoredPrincipal) -> Vec<Stored
     tokens
 }
 
-/// Returns the subset of `token_ids` whose cached USD price is either
-/// missing or older than [`PRICE_STALENESS_THRESHOLD_SEC`] seconds.
+/// Filters `tokens` to the non-native subset, as `TokenId`s ready for
+/// [`crate::token::mark_tokens_active`].
 ///
-/// Used by `get_exchange_rates` to decide which tokens require a
-/// blocking outcall before the response can satisfy its freshness contract.
-pub(crate) fn stale_or_missing_tokens(token_ids: &[StoredTokenId]) -> Vec<StoredTokenId> {
-    let now = time();
-    let floor_ns = staleness_floor_ns(now);
-
-    read_state(|s| {
-        tokens_missing_or_older_than(
-            token_ids,
-            |token_id| s.exchange_rates.get(token_id).map(|rate| rate.0),
-            floor_ns,
-        )
-    })
+/// The always-on native tokens are deliberately excluded: [`refresh_exchange_rates`]
+/// fetches them unconditionally and never consults `token_activity` for them,
+/// so marking them active only adds a per-call stable write and an entry that
+/// can never be evicted (it would be re-marked on every call forever).
+pub(crate) fn custom_tokens_to_mark(tokens: &[StoredTokenId]) -> Vec<TokenId> {
+    let natives = native_token_ids();
+    tokens
+        .iter()
+        .filter(|&stored| !natives.contains(stored))
+        .map(|stored| stored.0.clone())
+        .collect()
 }
 
-/// Reads the on-canister exchange rate cache for the supplied tokens and
-/// returns one `(TokenId, Option<ExchangeRate>)` entry per input id, in the
-/// same order. `None` means the cache has no fresh entry for that token.
-pub(crate) fn cached_rates_snapshot(
+/// Single-pass read of the cache for `token_ids`. Returns:
+/// - the per-token snapshot in input order — `None` when the cache has no entry or it is older than
+///   [`PRICE_STALENESS_THRESHOLD_SEC`] seconds — and
+/// - the subset whose snapshot entry is `None`, i.e. the tokens that need a refresh outcall.
+///
+/// The two outputs are exact complements, so `get_exchange_rates` derives both
+/// from one state borrow and one Candid decode per token. (The previous
+/// two-function form read and decoded the cache twice per call: once to find
+/// the stale set, once to build the snapshot.)
+pub(crate) fn snapshot_and_stale(
     token_ids: Vec<StoredTokenId>,
-) -> Vec<(TokenId, Option<ExchangeRate>)> {
+) -> (Vec<(TokenId, Option<ExchangeRate>)>, Vec<StoredTokenId>) {
     let freshness_floor_ns = staleness_floor_ns(time());
 
     read_state(|s| {
-        token_ids
-            .into_iter()
-            .map(|stored| {
-                let rate = s.exchange_rates.get(&stored).and_then(|c| {
-                    exchange_rate_is_fresh_enough(&c.0, freshness_floor_ns).then_some(c.0)
-                });
-                (stored.0, rate)
-            })
-            .collect()
+        let mut snapshot = Vec::with_capacity(token_ids.len());
+        let mut stale = Vec::new();
+
+        for stored in token_ids {
+            let rate = s.exchange_rates.get(&stored).and_then(|c| {
+                exchange_rate_is_fresh_enough(&c.0, freshness_floor_ns).then_some(c.0)
+            });
+
+            if rate.is_none() {
+                stale.push(stored.clone());
+            }
+            snapshot.push((stored.0, rate));
+        }
+
+        (snapshot, stale)
     })
 }
 
@@ -558,6 +582,22 @@ mod tests {
     }
 
     #[test]
+    fn custom_tokens_to_mark_excludes_natives_keeps_custom() {
+        let icrc = StoredTokenId(TokenId::Icrc(Principal::anonymous()));
+
+        let mut input = native_token_ids();
+        input.push(icrc.clone());
+
+        // Only the custom (non-native) token is returned for activity marking.
+        assert_eq!(custom_tokens_to_mark(&input), vec![icrc.0]);
+    }
+
+    #[test]
+    fn custom_tokens_to_mark_empty_for_natives_only() {
+        assert_eq!(custom_tokens_to_mark(&native_token_ids()), vec![]);
+    }
+
+    #[test]
     fn refresh_lock_acquires_when_idle() {
         reset_refresh_lock();
 
@@ -581,7 +621,7 @@ mod tests {
 
         let second = try_acquire_refresh_lock_at(start + REFRESH_LOCK_TIMEOUT_NS + 1).unwrap();
 
-        assert!(first.generation != second.generation);
+        assert_ne!(first.generation, second.generation);
     }
 
     #[test]
@@ -701,6 +741,41 @@ mod tests {
         }
     }
 
+    fn stored_rate(token_id: &StoredTokenId) -> Option<ExchangeRate> {
+        read_state(|s| s.exchange_rates.get(token_id).map(|rate| rate.0))
+    }
+
+    #[test]
+    fn update_price_does_not_store_a_zero_timestamp() {
+        let token = custom_token(1);
+
+        update_price(
+            &token,
+            &ExchangeData {
+                timestamp_ns: 0,
+                ..exchange_rate(1_000).usd
+            },
+        );
+
+        assert_eq!(stored_rate(&token), None);
+    }
+
+    #[test]
+    fn update_price_keeps_the_stored_rate_when_the_new_one_fails_validation() {
+        let token = custom_token(1);
+        update_price(&token, &exchange_rate(1_000).usd);
+
+        update_price(
+            &token,
+            &ExchangeData {
+                timestamp_ns: 0,
+                ..exchange_rate(2_000).usd
+            },
+        );
+
+        assert_eq!(stored_rate(&token), Some(exchange_rate(1_000)));
+    }
+
     #[test]
     fn active_custom_tokens_for_refresh_uses_strict_activity_window() {
         let now = 1_000 * NANOS_PER_SEC;
@@ -740,6 +815,30 @@ mod tests {
         assert_eq!(candidates.len(), native_token_ids().len() + 1);
         assert!(candidates.contains(&native));
         assert!(candidates.contains(&custom));
+    }
+
+    /// The test above derives its expected length from `native_token_ids()`, so removing a
+    /// native from that list shrinks both sides and still passes. XRP needs pinning explicitly:
+    /// it is not a custom token, so `native_token_ids` is the only way it can ever reach the
+    /// refresh set, and `custom_tokens_to_mark` deliberately keeps natives out of
+    /// `token_activity` — dropping it would leave XRP with no USD rate at all, silently.
+    #[test]
+    fn refresh_candidates_always_include_native_xrp() {
+        let candidates = refresh_candidates(vec![], true);
+
+        assert!(candidates.contains(&StoredTokenId(TokenId::XrpNativeMainnet)));
+    }
+
+    /// Robinhood Chain needs its own pin for the same reason as XRP, plus one of its own:
+    /// `EvmNative(4663)` groups under the `ethereum` coin id, so dropping it still leaves the
+    /// outcall intact — Ethereum, Base and Arbitrum already request it. What disappears is the
+    /// rate keyed to *this* token id, leaving native ETH on Robinhood with no USD value while
+    /// the same asset is priced on every other chain.
+    #[test]
+    fn refresh_candidates_always_include_native_robinhood() {
+        let candidates = refresh_candidates(vec![], true);
+
+        assert!(candidates.contains(&StoredTokenId(TokenId::EvmNative(4663))));
     }
 
     #[test]

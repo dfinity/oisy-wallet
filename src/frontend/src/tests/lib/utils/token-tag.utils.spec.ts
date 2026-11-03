@@ -1,3 +1,4 @@
+import { Languages } from '$lib/enums/languages';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
@@ -5,8 +6,10 @@ import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import {
 	filterTokensByCategory,
 	filterTokensUiByCategory,
+	getTokenCategorySentenceLabel,
 	getTokenCategoryTag
 } from '$lib/utils/token-tag.utils';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 
 describe('token-tag.utils', () => {
@@ -254,6 +257,46 @@ describe('token-tag.utils', () => {
 
 				expect(filtered).toHaveLength(0);
 			});
+		});
+	});
+
+	describe('getTokenCategorySentenceLabel', () => {
+		it('should lowercase the label of an asset type without an in-sentence form', () => {
+			expect(
+				getTokenCategorySentenceLabel({
+					category: TokenCategoryTagValue.STABLECOIN,
+					i18n: en,
+					language: Languages.ENGLISH
+				})
+			).toBe(en.token_tag.category.stablecoin.toLocaleLowerCase(Languages.ENGLISH));
+		});
+
+		it('should use the in-sentence form of Compute', () => {
+			expect(
+				getTokenCategorySentenceLabel({
+					category: TokenCategoryTagValue.COMPUTE,
+					i18n: en,
+					language: Languages.ENGLISH
+				})
+			).toBe(en.token_tag.category_in_sentence.compute);
+		});
+
+		it('should not lowercase an in-sentence form', () => {
+			const i18n: I18n = {
+				...en,
+				token_tag: {
+					...en.token_tag,
+					category_in_sentence: { compute: 'Token für Rechenleistung' }
+				}
+			};
+
+			expect(
+				getTokenCategorySentenceLabel({
+					category: TokenCategoryTagValue.COMPUTE,
+					i18n,
+					language: Languages.GERMAN
+				})
+			).toBe('Token für Rechenleistung');
 		});
 	});
 });

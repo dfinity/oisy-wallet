@@ -4,13 +4,15 @@ import type {
 	BtcGetFeePercentilesError,
 	BtcGetPendingTransactionsError,
 	GetAllowedCyclesError,
+	PersonalNoteError,
 	RateLimitError,
 	SignOnramperWidgetUrlError
 } from '$declarations/backend/backend.did';
 import {
 	CanisterInternalError,
 	OnramperRateLimitedError,
-	OnramperSecretNotConfiguredError
+	OnramperSecretNotConfiguredError,
+	PersonalNotesRateLimitedError
 } from '$lib/canisters/errors';
 import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
 import { assertNever } from '@dfinity/utils';
@@ -189,4 +191,23 @@ export const mapSignOnramperWidgetUrlError = (
 	}
 
 	return assertNeverOr(err, new CanisterInternalError('Unknown SignOnramperWidgetUrlError'));
+};
+
+export const mapPersonalNotesVetkeyError = (err: PersonalNoteError): CanisterInternalError => {
+	if ('RateLimited' in err) {
+		const { max_calls: maxCalls, window_ns: windowNs } = err.RateLimited;
+		const windowSeconds = windowNs / NANO_SECONDS_IN_SECOND;
+
+		return new PersonalNotesRateLimitedError(
+			`Rate limit exceeded. Maximum of ${maxCalls} calls allowed every ${windowSeconds} seconds.`
+		);
+	}
+
+	if ('InternalError' in err) {
+		return new CanisterInternalError(err.InternalError.msg);
+	}
+
+	// The remaining PersonalNoteError variants (note size / count / id) are not
+	// reachable from the vetKey endpoints; surface them as a generic failure.
+	return new CanisterInternalError('The personal-notes vetKey could not be retrieved.');
 };

@@ -11,6 +11,7 @@ import {
 	parseAssignInstruction,
 	parseAssignWithSeedInstruction,
 	parseAuthorizeNonceAccountInstruction,
+	parseCreateAccountAllowPrefundInstruction,
 	parseCreateAccountInstruction,
 	parseCreateAccountWithSeedInstruction,
 	parseInitializeNonceAccountInstruction,
@@ -32,6 +33,7 @@ vi.mock(import('@solana-program/system'), async (importOriginal) => {
 		parseAssignInstruction: vi.fn(),
 		parseAssignWithSeedInstruction: vi.fn(),
 		parseAuthorizeNonceAccountInstruction: vi.fn(),
+		parseCreateAccountAllowPrefundInstruction: vi.fn(),
 		parseCreateAccountInstruction: vi.fn(),
 		parseCreateAccountWithSeedInstruction: vi.fn(),
 		parseInitializeNonceAccountInstruction: vi.fn(),
@@ -108,6 +110,20 @@ describe('sol-instructions-system.utils', () => {
 			});
 
 			expect(parseCreateAccountWithSeedInstruction).toHaveBeenCalledExactlyOnceWith(
+				mockInstruction
+			);
+		});
+
+		it('should parse a CreateAccountAllowPrefund instruction', () => {
+			vi.mocked(identifySystemInstruction).mockReturnValue(
+				SystemInstruction.CreateAccountAllowPrefund
+			);
+
+			expect(parseSolSystemInstruction(mockInstruction)).toStrictEqual({
+				instructionType: SystemInstruction.CreateAccountAllowPrefund
+			});
+
+			expect(parseCreateAccountAllowPrefundInstruction).toHaveBeenCalledExactlyOnceWith(
 				mockInstruction
 			);
 		});

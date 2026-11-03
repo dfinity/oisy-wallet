@@ -1,5 +1,6 @@
 import { ICP_TOKEN as ICP_ETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.icp.env';
 import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
+import { USD1_TOKEN as USD1_ETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.usd1.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { ICP_TOKEN as ICP_ARB_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.icp.env';
@@ -7,6 +8,7 @@ import { USDC_TOKEN as USDC_ARBITRUM_TOKEN } from '$env/tokens/tokens-evm/tokens
 import { USDT_TOKEN as USDT_ARBITRUM_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdt.env';
 import { ICP_TOKEN as ICP_BASE_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.icp.env';
 import { USDC_TOKEN as USDC_BASE_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
+import { USD1_TOKEN as USD1_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usd1.env';
 import { USDC_TOKEN as USDC_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdc.env';
 import { USDT_TOKEN as USDT_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdt.env';
 import { USDC_TOKEN as USDC_POLYGON_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdc.env';
@@ -14,6 +16,7 @@ import { USDT_TOKEN as USDT_POLYGON_TOKEN } from '$env/tokens/tokens-evm/tokens-
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import * as tokensIcrcCkEnv from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
+import { USD1_TOKEN as USD1_SOL_TOKEN } from '$env/tokens/tokens-spl/tokens.usd1.env';
 import { USDC_TOKEN as USDC_SOL_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { USDT_TOKEN as USDT_SOL_TOKEN } from '$env/tokens/tokens-spl/tokens.usdt.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -26,6 +29,7 @@ import type { TokenStandardCode } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
+	buildIcTokenLabels,
 	calculateTokenUsdAmount,
 	calculateTokenUsdBalance,
 	filterEnabledToken,
@@ -33,6 +37,7 @@ import {
 	getMaxTransactionAmount,
 	getTokenDisplayName,
 	getTokenDisplaySymbol,
+	isUSD1Token,
 	mapDefaultTokenToToggleable,
 	mapTokenUi,
 	sumUsdBalances
@@ -680,6 +685,121 @@ describe('token.utils', () => {
 			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: 'random-string' })).toBeTruthy();
 
 			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: {} })).toBeTruthy();
+		});
+	});
+
+	describe('isUSD1Token', () => {
+		it('should return true for USD1 on all its networks', () => {
+			expect(isUSD1Token(USD1_ETH_TOKEN)).toBeTruthy();
+			expect(isUSD1Token(USD1_BSC_TOKEN)).toBeTruthy();
+			expect(isUSD1Token(USD1_SOL_TOKEN)).toBeTruthy();
+		});
+
+		it('should return false for other tokens', () => {
+			expect(isUSD1Token(USDC_TOKEN)).toBeFalsy();
+			expect(isUSD1Token(USDT_TOKEN)).toBeFalsy();
+			expect(isUSD1Token(ICP_TOKEN)).toBeFalsy();
+		});
+	});
+
+	describe('buildIcTokenLabels', () => {
+		const real = {
+			...mockValidIcToken,
+			symbol: 'XYZ',
+			name: 'XYZ Token',
+			ledgerCanisterId: 'qaa6y-5yaaa-aaaaa-aaafa-cai'
+		};
+		const impostor = { ...real, ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai' };
+
+		it('labels a token by its symbol when no other ledger claims it', () => {
+			expect(buildIcTokenLabels([ICP_TOKEN, real]).get(real.ledgerCanisterId)).toBe('XYZ');
+		});
+
+		it('suffixes both ledgers with their ids when they share a symbol', () => {
+			const labels = buildIcTokenLabels([ICP_TOKEN, real, impostor]);
+
+			expect(labels.get(real.ledgerCanisterId)).toBe('XYZ (qaa6y-5...afa-cai)');
+			expect(labels.get(impostor.ledgerCanisterId)).toBe('XYZ (mxzaz-h...ada-cai)');
+			expect(labels.get(ICP_TOKEN.ledgerCanisterId)).toBe(ICP_TOKEN.symbol);
+		});
+
+		it('treats a shared symbol as a collision even when the names differ', () => {
+			// Results show no name, so a differing name cannot tell the two apart there.
+			const labels = buildIcTokenLabels([real, { ...impostor, name: 'Something Else' }]);
+
+			expect(labels.get(impostor.ledgerCanisterId)).toBe('XYZ (mxzaz-h...ada-cai)');
+		});
+
+		it('does not flag a ledger listed twice as a collision with itself', () => {
+			// A default token that is also an enabled custom one arrives twice in enabledIcrcTokens.
+			const labels = buildIcTokenLabels([real, { ...real, name: 'custom entry' }]);
+
+			expect(labels.get(real.ledgerCanisterId)).toBe('XYZ');
+		});
+
+		describe('a ledger listed twice', () => {
+			// mapTokenOisySymbol runs only on the default-token load path, so the default entry can
+			// carry an oisySymbol that a custom duplicate of the same ledger lacks.
+			const defaultEntry = { ...real, symbol: 'RAW', oisySymbol: { oisySymbol: 'GHOSTNODE' } };
+			const customDuplicate = { ...real, symbol: 'RAW' };
+
+			it("keeps the first entry's label rather than the later duplicate's", () => {
+				expect(buildIcTokenLabels([defaultEntry, customDuplicate]).get(real.ledgerCanisterId)).toBe(
+					'GHOSTNODE'
+				);
+			});
+
+			it("does not let the duplicate's symbol invent a collision for another ledger", () => {
+				const unrelated = { ...impostor, symbol: 'RAW' };
+
+				expect(
+					buildIcTokenLabels([defaultEntry, customDuplicate, unrelated]).get(
+						unrelated.ledgerCanisterId
+					)
+				).toBe('RAW');
+			});
+		});
+
+		describe("a symbol that spells out another token's suffixed label", () => {
+			// A custom ledger can set its symbol to the literal text of the real token's suffixed
+			// label. As a raw string it is unique, so it used to be left as is.
+			const forger = {
+				...mockValidIcToken,
+				symbol: 'XYZ (qaa6y-5...afa-cai)',
+				ledgerCanisterId: 'ss2fx-dyaaa-aaaar-qacoq-cai'
+			};
+
+			it("cannot end up with the real token's label", () => {
+				const labels = buildIcTokenLabels([real, impostor, forger]);
+
+				expect(labels.get(real.ledgerCanisterId)).toBe('XYZ (qaa6y-5...afa-cai)');
+				expect(labels.get(forger.ledgerCanisterId)).toBe(
+					'XYZ (qaa6y-5...afa-cai) (ss2fx-d...coq-cai)'
+				);
+			});
+
+			it('is flagged even when nothing collides with the real token', () => {
+				// Unsuffixed, the forger would read as the real token disambiguated.
+				const labels = buildIcTokenLabels([real, forger]);
+
+				expect(labels.get(real.ledgerCanisterId)).toBe('XYZ');
+				expect(labels.get(forger.ledgerCanisterId)).toBe(
+					'XYZ (qaa6y-5...afa-cai) (ss2fx-d...coq-cai)'
+				);
+			});
+
+			it('keeps every label distinct', () => {
+				const tokens = [real, impostor, forger];
+				const labels = [...buildIcTokenLabels(tokens).values()];
+
+				expect(new Set(labels).size).toBe(tokens.length);
+			});
+		});
+
+		it('labels by the display symbol, which is what the user actually sees', () => {
+			const renamed = { ...real, oisySymbol: { oisySymbol: 'OSYM' } };
+
+			expect(buildIcTokenLabels([renamed, impostor]).get(real.ledgerCanisterId)).toBe('OSYM');
 		});
 	});
 });

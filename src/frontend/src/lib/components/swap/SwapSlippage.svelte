@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { IconWarning } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import IconExpandMore from '$lib/components/icons/IconExpandMore.svelte';
+	import IconGixWarning from '$lib/components/icons/IconGixWarning.svelte';
 	import TokenInputContainer from '$lib/components/tokens/TokenInputContainer.svelte';
 	import TokenInputCurrency from '$lib/components/tokens/TokenInputCurrency.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -15,6 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		slippageValue: OptionAmount;
@@ -129,7 +129,7 @@
 					>
 				{:else if slippageValueWarning}
 					<div class="flex gap-1" in:fade>
-						<IconWarning />
+						<IconGixWarning />
 						<span>{$i18n.swap.text.max_slippage_warning}</span>
 					</div>
 				{:else}

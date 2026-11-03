@@ -23,7 +23,10 @@
 		amount?: OptionAmount;
 		networkId?: NetworkId;
 		amountError?: boolean;
-		children: Snippet;
+		// Optional so the loader can also be mounted beside the content it feeds rather than
+		// around it — which is what the swap flow needs, to keep a source-token change from
+		// remounting the whole flow along with the loader.
+		children?: Snippet;
 	}
 
 	let { source, amount, networkId, amountError = false, children }: Props = $props();
@@ -95,7 +98,7 @@
 <BtcPendingSentTransactionsLoader {networkId} {source}>
 	<AllUtxosLoader {networkId} {source}>
 		<FeeRatePercentilesLoader {networkId}>
-			{@render children()}
+			{@render children?.()}
 		</FeeRatePercentilesLoader>
 	</AllUtxosLoader>
 </BtcPendingSentTransactionsLoader>

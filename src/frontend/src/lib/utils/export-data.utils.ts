@@ -14,6 +14,7 @@ import { filterAddressFromContact, getContactForAddress } from '$lib/utils/conta
 import type { CsvColumn, CsvRow } from '$lib/utils/csv.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
@@ -287,6 +288,8 @@ export const buildTokenRows = ({
 // all use 18; SOL uses 9; BTC uses 8.
 const EVM_NATIVE_DECIMALS = 18;
 const SOL_NATIVE_DECIMALS = 9;
+
+const XRP_NATIVE_DECIMALS = 6;
 const BTC_DECIMALS = 8;
 
 const normalizeType = (rawType: string): string => {
@@ -671,6 +674,56 @@ const toSolanaRow = ({
 	};
 };
 
+const toXrpRow = ({
+	transaction: tx,
+	token,
+	exportedAt
+}: {
+	transaction: XrpTransactionUi;
+	token: Token;
+	exportedAt: string;
+}): TransactionCsvRow => {
+	const type = normalizeType(tx.type);
+	const { from, to } = tx;
+	// XrpTransactionUi is only ever 'send' or 'receive', so the direction never needs the
+	// address-comparison fallback the other chains use.
+	const direction: string = type === 'send' ? 'out' : 'in';
+
+	return {
+		timestamp_iso: formatTimestamp(tx.timestamp),
+		timestamp_local: formatTimestampLocal(tx.timestamp),
+		timestamp_utc: formatTimestampUtc(tx.timestamp),
+		network: token.network.name,
+		token_symbol: token.symbol,
+		token_address_or_ledger_id: getAddressOrLedgerId(token),
+		type,
+		type_display: formatTypeDisplay(type),
+		type_raw: tx.type,
+		direction,
+		status: tx.status,
+		from: from ?? '',
+		to: to ?? '',
+		amount: formatAmount({ value: tx.value, decimals: token.decimals }),
+		amount_raw: tx.value ?? undefined,
+		fee: formatAmount({ value: tx.fee, decimals: XRP_NATIVE_DECIMALS }),
+		fee_raw: tx.fee ?? undefined,
+		fee_token: 'XRP',
+		counterparty: '',
+		credit: '',
+		credit_raw: undefined,
+		debit: '',
+		debit_raw: undefined,
+		fee_token_debit: '',
+		fee_token_debit_raw: undefined,
+		effective_token: '',
+		effective_fee_token: '',
+		tx_id: tx.id,
+		explorer_url:
+			tx.txExplorerUrl ?? buildTxExplorerUrl({ template: token.network.explorerUrl, txId: tx.id }),
+		exported_at: exportedAt
+	};
+};
+
 // Negates a decimal-string amount, suppressing "-0" for zero values.
 const negate = (decimal: string): string => {
 	if (decimal === '') {
@@ -736,6 +789,7 @@ const finalizeRow = ({
 	row,
 	isSelfTransfer,
 	isStandaloneRoundTrip,
+	userPaidFeeOverride,
 	contacts
 }: {
 	row: TransactionCsvRow;
@@ -745,6 +799,10 @@ const finalizeRow = ({
 	// ICRC self-transfers are emitted by the indexer as a paired in + out, where the IN
 	// duplicate's +Credit cancels the OUT's -Amount; for that case this flag is false.
 	isStandaloneRoundTrip: boolean;
+	// Overrides the direction-based default when a chain can say outright whether this wallet paid
+	// the fee. XRP needs it: its self-transfers are a single INCOMING row, so the default would
+	// discard a fee the wallet demonstrably paid.
+	userPaidFeeOverride?: boolean;
 	contacts: ContactUi[];
 }): TransactionCsvRow => {
 	const isApprove = row.type === 'approve';
@@ -754,7 +812,7 @@ const finalizeRow = ({
 	// The user paid the fee only on the outgoing row. ICRC self-transfers are emitted twice
 	// by the indexer (one 'out' + one 'in' for the same on-chain tx); attributing the fee to
 	// the outgoing row only keeps the sum honest. Non-self incoming rows: the sender paid.
-	const userPaidFee = isOutgoing;
+	const userPaidFee = userPaidFeeOverride ?? isOutgoing;
 
 	// Signed change to the user's main-asset balance for this row.
 	// Approve and self-transfer rows contribute zero — approve doesn't move the asset, and a
@@ -797,39 +855,45 @@ const finalizeRow = ({
 	// Basic-export accounting columns. Credit/Debit/Fee Token Debit are signed; Amount and
 	// Fee in their own columns stay positive for human readability. Approve rows contribute
 	// only the fee to Debit since the allowance itself doesn't move the user's balance.
-	const credit = isIncoming && row.amount !== '' ? row.amount : '';
+	//
+	// These key off the same two facts as the signed values above — whether the asset actually
+	// moved, and whether this wallet paid the fee — rather than off the row's direction. XRP is
+	// why: its self-transfers are a single INCOMING row, so a direction-keyed Credit booked the
+	// returned amount as a gain and a direction-keyed Debit dropped the fee, and the columns
+	// stopped summing to the balance change they are documented to sum to.
+	const credit = isIncoming && !isStandaloneRoundTrip && row.amount !== '' ? row.amount : '';
+
+	// Zero the asset portion for approve rows (allowance doesn't move) and for non-IC
+	// self-transfers (asset returns to the same wallet within this row). ICRC self-transfer OUTs
+	// keep -amount so the IN duplicate's +Credit nets them.
+	const assetPortion = isOutgoing && !(isApprove || isStandaloneRoundTrip) ? row.amount : '0';
+	const feePortion = userPaidFee && mergeColumns ? fee : '';
 
 	let debit = '';
-	if (isOutgoing) {
-		// Zero the asset portion for approve rows (allowance doesn't move) and for
-		// non-IC self-transfers (asset returns to the same wallet within this row). ICRC
-		// self-transfer OUTs keep -amount so the IN duplicate's +Credit nets them.
-		const assetPortion = isApprove || isStandaloneRoundTrip ? '0' : row.amount;
-		const feePortion = mergeColumns ? fee : '';
-		const total = sumDecimals({ a: assetPortion, b: feePortion });
-		if (total !== '' && parseFloat(total) !== 0) {
-			debit = negate(total);
-		}
+	const total = sumDecimals({ a: assetPortion, b: feePortion });
+	if (total !== '' && parseFloat(total) !== 0) {
+		debit = negate(total);
 	}
 
-	const fee_token_debit = isOutgoing && !mergeColumns && fee !== '' ? negate(fee) : '';
+	const fee_token_debit = userPaidFee && !mergeColumns && fee !== '' ? negate(fee) : '';
 
 	// Bigint twins of the accounting columns for the Extended export, which emits raw
 	// integers (no decimal point) — mirrors the Basic-vs-Extended balance split on tokens.
-	const credit_raw = isIncoming && nonNullish(row.amount_raw) ? row.amount_raw : undefined;
+	const credit_raw =
+		isIncoming && !isStandaloneRoundTrip && nonNullish(row.amount_raw) ? row.amount_raw : undefined;
+
+	const assetPortionRaw =
+		isOutgoing && !(isApprove || isStandaloneRoundTrip) ? (row.amount_raw ?? ZERO) : ZERO;
+	const feePortionRaw = userPaidFee && mergeColumns ? (row.fee_raw ?? ZERO) : ZERO;
 
 	let debit_raw: bigint | undefined;
-	if (isOutgoing) {
-		const assetPortionRaw = isApprove || isStandaloneRoundTrip ? ZERO : (row.amount_raw ?? ZERO);
-		const feePortionRaw = mergeColumns ? (row.fee_raw ?? ZERO) : ZERO;
-		const totalRaw = assetPortionRaw + feePortionRaw;
-		if (totalRaw !== ZERO) {
-			debit_raw = -totalRaw;
-		}
+	const totalRaw = assetPortionRaw + feePortionRaw;
+	if (totalRaw !== ZERO) {
+		debit_raw = -totalRaw;
 	}
 
 	const fee_token_debit_raw =
-		isOutgoing && !mergeColumns && nonNullish(row.fee_raw) && row.fee_raw !== ZERO
+		userPaidFee && !mergeColumns && nonNullish(row.fee_raw) && row.fee_raw !== ZERO
 			? -row.fee_raw
 			: undefined;
 
@@ -874,6 +938,7 @@ export const buildTransactionRows = ({
 		// exception — it emits a paired in + out, so the OUT row should NOT zero its asset
 		// portion (the IN duplicate's +Credit balances it).
 		let isStandaloneRoundTrip = false;
+		let userPaidFeeOverride: boolean | undefined;
 
 		switch (entry.component) {
 			case 'bitcoin':
@@ -924,8 +989,36 @@ export const buildTransactionRows = ({
 				});
 				isStandaloneRoundTrip = isSelfTransfer;
 				break;
+			case 'xrp':
+				row = toXrpRow({
+					transaction: entry.transaction,
+					token: entry.token,
+					exportedAt: exportedAtIso
+				});
+				// A conversion is not a round trip. XRPL lets an account pay itself to convert an
+				// issued currency into XRP: `from === to`, but the XRP genuinely arrives funded by
+				// something else, so zeroing the credit would erase a real balance change.
+				// Not `addressesEqual`, which lowercases: a classic XRP address is base58 over a
+				// checksummed payload, so case is significant, and `xrpl.rest.ts` and
+				// `mapXrpTransaction` both compare raw for that reason. This is the one place in the
+				// XRP path that treated case as noise.
+				isSelfTransfer =
+					nonNullish(entry.transaction.from) &&
+					entry.transaction.from === entry.transaction.to &&
+					entry.transaction.crossCurrency !== true;
+				isStandaloneRoundTrip = isSelfTransfer;
+				// The mapper records a fee only when this wallet signed, so a row carrying one paid
+				// it — including a self row, which is incoming and would otherwise lose it.
+				userPaidFeeOverride = nonNullish(entry.transaction.fee);
+				break;
 		}
 
-		return finalizeRow({ row, isSelfTransfer, isStandaloneRoundTrip, contacts });
+		return finalizeRow({
+			row,
+			isSelfTransfer,
+			isStandaloneRoundTrip,
+			userPaidFeeOverride,
+			contacts
+		});
 	});
 };

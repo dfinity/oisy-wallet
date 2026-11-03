@@ -8,6 +8,7 @@
 	import { sendNft } from '$icp/services/nft-send.services';
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import type { IcToken } from '$icp/types/ic-token';
+	import { toIcNftSendErrorType } from '$icp/utils/ic-nft.utils';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
 		TRACK_COUNT_IC_SEND_ERROR,
@@ -126,7 +127,7 @@
 					address: nft.collection.address,
 					tokenId: String(nft.id),
 					network: $sendToken.network.name,
-					error: (err as Error).message
+					result_error_type: toIcNftSendErrorType(err)
 				}
 			});
 

@@ -6,7 +6,12 @@ broadcasting signed transactions on every EVM chain. It is reached via the
 **ethers.js `InfuraProvider`** (`src/frontend/src/eth/providers/infura.providers.ts`),
 with a separate **Gas REST API** for fee suggestions
 (`src/frontend/src/eth/rest/infura.rest.ts`). One provider instance is created per
-EVM network from each network's `providers.infura` config.
+EVM network by the `ethersProvider` factory
+(`src/frontend/src/eth/providers/ethers.providers.ts`): a network with a
+`providers.infura` name gets an `InfuraProvider`; a network without one (a chain
+Infura does not host) gets a plain ethers `JsonRpcProvider` on its
+`providers.alchemyJsonRpcUrl`. Every currently supported network has an `infura`
+name, so today all traffic below goes to Infura.
 
 This is a distinct role from [Alchemy](./alchemy.md): Infura does the standard RPC
 and transaction-broadcast work, while Alchemy fills the gaps Infura cannot (indexed
@@ -88,7 +93,8 @@ Infura reads NFT data directly from contracts (unlike Alchemy's indexed NFT API)
 EVM network endpoints are configured per network in
 `src/frontend/src/env/networks/networks.eth.env.ts` and
 `src/frontend/src/env/networks/networks-evm/*.env.ts` (Arbitrum, Base, Polygon,
-BSC), each carrying both an `infura` and an `alchemy` provider entry.
+BSC), each carrying an `alchemy` provider entry and — when Infura hosts the chain —
+an `infura` one.
 
 ## Infura vs. Alchemy
 

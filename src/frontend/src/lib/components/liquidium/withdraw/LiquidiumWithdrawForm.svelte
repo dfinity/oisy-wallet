@@ -18,6 +18,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
+	import { isDesktop } from '$lib/utils/device.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -30,6 +31,8 @@
 		preview: LiquidiumWithdrawPreview;
 		amount: OptionAmount;
 		confirmChecked: boolean;
+		// Opens the token-selection step; when set, the token logo becomes a selector.
+		onSelectToken?: () => void;
 		onClose: () => void;
 		onNext: () => void;
 	}
@@ -42,6 +45,7 @@
 		preview,
 		amount = $bindable(),
 		confirmChecked = $bindable(),
+		onSelectToken,
 		onClose,
 		onNext
 	}: Props = $props();
@@ -127,9 +131,11 @@
 <ContentWithToolbar>
 	<div class="mb-6">
 		<TokenInput
+			autofocus={isDesktop()}
 			displayUnit={inputUnit}
 			exchangeRate={withdrawPrice}
-			isSelectable={false}
+			isSelectable={nonNullish(onSelectToken)}
+			onClick={onSelectToken}
 			onCustomErrorValidate={validateWithdrawAmount}
 			showTokenNetwork
 			token={withdrawToken}
@@ -186,14 +192,17 @@
 						: $i18n.liquidium.text.withdraw_at_risk_warning}
 				</span>
 
-				<label class="flex cursor-pointer items-start gap-3">
+				<div class="flex items-start gap-3">
 					<Checkbox
 						checked={confirmChecked}
 						inputId="liquidium-withdraw-confirm"
 						onChange={() => (confirmChecked = !confirmChecked)}
 					/>
-					<span class="text-sm">{$i18n.liquidium.text.withdraw_risk_confirm}</span>
-				</label>
+
+					<label class="block text-sm leading-snug" for="liquidium-withdraw-confirm"
+						>{$i18n.liquidium.text.withdraw_risk_confirm}</label
+					>
+				</div>
 			</div>
 		</MessageBox>
 	{/if}

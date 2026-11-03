@@ -5,7 +5,6 @@ import type {
 import type { IcToken } from '$icp/types/ic-token';
 import TradingDepositModal from '$lib/components/trading/TradingDepositModal.svelte';
 import {
-	TRADING_DEPOSIT_CONSENT_CHECKBOX,
 	TRADING_DEPOSIT_FORM_REVIEW_BUTTON,
 	TRADING_DEPOSIT_REVIEW_CONFIRM_BUTTON
 } from '$lib/constants/test-ids.constants';
@@ -84,22 +83,21 @@ describe('TradingDepositModal', () => {
 		expect(getByText(en.trading.deposit.empty_description)).toBeInTheDocument();
 	});
 
-	it('should render the supported token symbols as chips in the empty state', () => {
+	it('should render the empty state even when trading pairs are available but nothing is held', () => {
 		oisyTradeStore.set({
 			pairs: [
 				buildPair({ base: 'ICP', quote: 'ckUSDC' }),
 				buildPair({ base: 'ckBTC', quote: 'ckUSDC' })
 			],
 			supportedTokens: undefined,
-			balances: undefined
+			balances: undefined,
+			orders: undefined
 		});
 
 		const { getByText } = render(TradingDepositModal);
 
 		expect(getByText(en.trading.deposit.empty_title)).toBeInTheDocument();
-		expect(getByText('ICP')).toBeInTheDocument();
-		expect(getByText('ckUSDC')).toBeInTheDocument();
-		expect(getByText('ckBTC')).toBeInTheDocument();
+		expect(getByText(en.trading.deposit.empty_description)).toBeInTheDocument();
 	});
 
 	const seedDepositable = () => {
@@ -107,9 +105,12 @@ describe('TradingDepositModal', () => {
 		oisyTradeStore.set({
 			pairs: undefined,
 			supportedTokens: [supportedToken()],
-			balances: undefined
+			balances: undefined,
+			orders: undefined
 		});
-		balancesStore.set({ id: icp.id, data: { data: 100000000n, certified: true } });
+		// Comfortably above the 1-token deposit used below plus its two ledger fees,
+		// so the amount validation does not flag it as exceeding the wallet balance.
+		balancesStore.set({ id: icp.id, data: { data: 1000000000n, certified: true } });
 	};
 
 	it('should render the deposit form when there is a depositable token', () => {
@@ -118,7 +119,6 @@ describe('TradingDepositModal', () => {
 		const { getByText } = render(TradingDepositModal);
 
 		expect(getByText(en.trading.deposit.you_deposit)).toBeInTheDocument();
-		expect(getByText(en.trading.deposit.consent)).toBeInTheDocument();
 	});
 
 	it('should navigate to the tokens list and back via the token selector', async () => {
@@ -181,8 +181,6 @@ describe('TradingDepositModal', () => {
 		await waitFor(() =>
 			expect(getByTestId(TRADING_DEPOSIT_FORM_REVIEW_BUTTON)).toBeInTheDocument()
 		);
-
-		await fireEvent.click(getByTestId(TRADING_DEPOSIT_CONSENT_CHECKBOX));
 
 		const amountInput = document.querySelector<HTMLInputElement>('input[name="token-input"]');
 

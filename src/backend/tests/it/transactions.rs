@@ -66,7 +66,7 @@ fn test_get_user_transactions_returns_empty_for_new_caller() {
             total_stored,
             next_start,
         }) => {
-            assert!(transactions.is_empty());
+            assert_eq!(transactions, vec![]);
             assert!(newest_block_index.is_none());
             assert!(oldest_block_index.is_none());
             assert_eq!(total_stored, 0);

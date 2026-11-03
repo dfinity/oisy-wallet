@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TransactionStatus } from '$lib/types/transaction';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		status: TransactionStatus;

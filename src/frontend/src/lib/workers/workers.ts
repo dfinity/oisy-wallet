@@ -15,6 +15,7 @@ import type {
 import { onAuthMessage } from '$lib/workers/auth.worker';
 import { onExchangeMessage } from '$lib/workers/exchange.worker';
 import { onSolWalletMessage } from '$sol/workers/sol-wallet.worker';
+import { onXrpWalletMessage } from '$xrp/workers/xrp-wallet.worker';
 import { isNullish } from '@dfinity/utils';
 
 export const messageToHandler: PostMessageRequestMap = {
@@ -43,6 +44,10 @@ export const messageToHandler: PostMessageRequestMap = {
 	startSolWalletTimer: onSolWalletMessage,
 	stopSolWalletTimer: onSolWalletMessage,
 	triggerSolWalletTimer: onSolWalletMessage,
+
+	startXrpWalletTimer: onXrpWalletMessage,
+	stopXrpWalletTimer: onXrpWalletMessage,
+	triggerXrpWalletTimer: onXrpWalletMessage,
 
 	startBtcStatusesTimer: onBtcStatusesMessage,
 	stopBtcStatusesTimer: onBtcStatusesMessage,

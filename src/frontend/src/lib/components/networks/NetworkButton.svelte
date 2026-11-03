@@ -51,7 +51,7 @@ TODO: Find a way to have the "All networks" not be a fallback for undefined netw
 
 	{#snippet title()}
 		<span
-			class="mr-2 font-normal md:text-base"
+			class="menu-row-label mr-2 font-normal md:text-base"
 			class:md:text-base={labelsSize === 'md'}
 			class:md:text-lg={labelsSize === 'lg'}
 			class:text-base={labelsSize === 'lg'}

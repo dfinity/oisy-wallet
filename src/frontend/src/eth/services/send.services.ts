@@ -88,10 +88,11 @@ export const erc20PrepareTransaction = async ({
 	const { address: contractAddress } = token as Erc20Token;
 
 	return prepare({
+		// First, so that a `data` the caller passes along cannot replace the calldata populated here.
+		...rest,
 		data,
 		to: contractAddress,
-		amount: ZERO,
-		...rest
+		amount: ZERO
 	});
 };
 
@@ -126,10 +127,11 @@ const ethHelperContractPrepareTransaction = async ({
 	const { address: contractAddress } = contract;
 
 	return prepare({
+		// First, so that a `data` the caller passes along cannot replace the calldata populated here.
+		...rest,
 		data,
 		to: contractAddress,
-		amount,
-		...rest
+		amount
 	});
 };
 
@@ -164,10 +166,11 @@ const ckErc20HelperContractPrepareTransaction = async ({
 	const { address: contractAddress } = contract;
 
 	return prepare({
+		// First, so that a `data` the caller passes along cannot replace the calldata populated here.
+		...rest,
 		data,
 		to: contractAddress,
-		amount: ZERO,
-		...rest
+		amount: ZERO
 	});
 };
 
@@ -181,7 +184,7 @@ export const send = async ({
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> & {
 	customNonce?: number;
 } & SendParams &
-	RequiredTransactionFeeData): Promise<{ hash: string }> => {
+	RequiredTransactionFeeData): Promise<{ hash: string; nonce: number }> => {
 	progress?.(ProgressStepsSend.INITIALIZATION);
 
 	const { transactionNeededApproval, nonce } = await approve({
@@ -209,7 +212,9 @@ export const send = async ({
 
 	progress?.(lastProgressStep);
 
-	return { hash: transactionSent.hash };
+	// The nonce is returned so callers can persist it: it is what later tells a
+	// transaction that is merely unmined from one that was replaced or dropped.
+	return { hash: transactionSent.hash, nonce: nonceTransaction };
 };
 
 const sendTransaction = async ({

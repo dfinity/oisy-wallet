@@ -5,6 +5,7 @@ import { ERC1155_ABI } from '$eth/constants/erc1155.constants';
 import { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
 import { fetchMetadataFromUri } from '$eth/services/erc.services';
 import type { Erc1155ContractAddress, Erc1155Metadata } from '$eth/types/erc1155';
+import type { EthereumChainId } from '$eth/types/network';
 import { i18n } from '$lib/stores/i18n.store';
 import type { Address } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -13,42 +14,41 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapNftAttributes } from '$lib/utils/nft.utils';
 import { assertNonNullish, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
-import type { Networkish } from 'ethers/providers';
 import { SvelteMap } from 'svelte/reactivity';
 import { get } from 'svelte/store';
 
 const cachedNftMetadata = new SvelteMap<
-	Networkish,
+	EthereumChainId,
 	SvelteMap<Erc1155ContractAddress['address'], SvelteMap<NftId, NftMetadata>>
 >();
 
 const getCachedNftMetadata = ({
-	network,
+	chainId,
 	contractAddress,
 	tokenId
 }: {
-	network: Networkish;
+	chainId: EthereumChainId;
 	contractAddress: Erc1155ContractAddress['address'];
 	tokenId: NftId;
-}): NftMetadata | undefined => cachedNftMetadata.get(network)?.get(contractAddress)?.get(tokenId);
+}): NftMetadata | undefined => cachedNftMetadata.get(chainId)?.get(contractAddress)?.get(tokenId);
 
 const updateCachedNftMetadata = ({
-	network,
+	chainId,
 	contractAddress,
 	tokenId,
 	metadata
 }: {
-	network: Networkish;
+	chainId: EthereumChainId;
 	contractAddress: Erc1155ContractAddress['address'];
 	tokenId: NftId;
 	metadata: NftMetadata;
 }) => {
 	const networkMap =
-		cachedNftMetadata.get(network) ??
+		cachedNftMetadata.get(chainId) ??
 		(() => {
 			const map = new SvelteMap<Erc1155ContractAddress['address'], SvelteMap<NftId, NftMetadata>>();
 
-			cachedNftMetadata.set(network, map);
+			cachedNftMetadata.set(chainId, map);
 
 			return map;
 		})();
@@ -108,7 +108,7 @@ export class InfuraErc1155Provider extends InfuraErc165Provider {
 		tokenId: NftId;
 	}): Promise<NftMetadata> => {
 		const cached = getCachedNftMetadata({
-			network: this.network,
+			chainId: this.network.chainId,
 			contractAddress,
 			tokenId
 		});
@@ -166,7 +166,7 @@ export class InfuraErc1155Provider extends InfuraErc165Provider {
 		};
 
 		updateCachedNftMetadata({
-			network: this.network,
+			chainId: this.network.chainId,
 			contractAddress,
 			tokenId,
 			metadata: nftMetadata
@@ -193,7 +193,7 @@ const providers: Record<NetworkId, InfuraErc1155Provider> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, InfuraErc1155Provider>>(
-	(acc, { id, providers: { infura } }) => ({ ...acc, [id]: new InfuraErc1155Provider(infura) }),
+	(acc, network) => ({ ...acc, [network.id]: new InfuraErc1155Provider(network) }),
 	{}
 );
 

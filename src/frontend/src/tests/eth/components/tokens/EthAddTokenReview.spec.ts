@@ -84,21 +84,21 @@ describe('EthAddTokenReview', () => {
 		const mockErc20Provider = {
 			isErc20: vi.fn().mockResolvedValue(false),
 			metadata: mockErc20Metadata,
-			provider: new InfuraErc20Provider(ETHEREUM_NETWORK.providers.infura),
+			provider: new InfuraErc20Provider(ETHEREUM_NETWORK),
 			network: ETHEREUM_NETWORK
 		} as unknown as InfuraErc20Provider;
 
 		const mockErc721Provider = {
 			isInterfaceErc721: vi.fn().mockResolvedValue(false),
 			metadata: mockErc721Metadata,
-			provider: new InfuraErc721Provider(ETHEREUM_NETWORK.providers.infura),
+			provider: new InfuraErc721Provider(ETHEREUM_NETWORK),
 			network: ETHEREUM_NETWORK
 		} as unknown as InfuraErc721Provider;
 
 		const mockErc1155Provider = {
 			isInterfaceErc1155: vi.fn().mockResolvedValue(true),
 			metadata: mockErc1155Metadata,
-			provider: new InfuraErc1155Provider(ETHEREUM_NETWORK.providers.infura),
+			provider: new InfuraErc1155Provider(ETHEREUM_NETWORK),
 			network: ETHEREUM_NETWORK
 		} as unknown as InfuraErc1155Provider;
 
@@ -127,14 +127,14 @@ describe('EthAddTokenReview', () => {
 		const mockErc20Provider = {
 			isErc20: vi.fn().mockResolvedValue(false),
 			metadata: mockErc20Metadata,
-			provider: new InfuraErc20Provider(ETHEREUM_NETWORK.providers.infura),
+			provider: new InfuraErc20Provider(ETHEREUM_NETWORK),
 			network: ETHEREUM_NETWORK
 		} as unknown as InfuraErc20Provider;
 
 		const mockErc721Provider = {
 			isInterfaceErc721: vi.fn().mockResolvedValue(true),
 			metadata: mockErc721Metadata,
-			provider: new InfuraErc721Provider(ETHEREUM_NETWORK.providers.infura),
+			provider: new InfuraErc721Provider(ETHEREUM_NETWORK),
 			network: ETHEREUM_NETWORK
 		} as unknown as InfuraErc721Provider;
 
@@ -160,7 +160,7 @@ describe('EthAddTokenReview', () => {
 		const mockErc20Provider = {
 			isErc20: vi.fn().mockResolvedValue(true),
 			metadata: mockErc20Metadata,
-			provider: new InfuraErc20Provider(ETHEREUM_NETWORK.providers.infura),
+			provider: new InfuraErc20Provider(ETHEREUM_NETWORK),
 			network: ETHEREUM_NETWORK
 		} as unknown as InfuraErc20Provider;
 
@@ -185,21 +185,21 @@ describe('EthAddTokenReview', () => {
 		const mockErc20Provider = {
 			isErc20: vi.fn().mockResolvedValue(false),
 			metadata: mockErc20Metadata,
-			provider: new InfuraErc20Provider(ETHEREUM_NETWORK.providers.infura),
+			provider: new InfuraErc20Provider(ETHEREUM_NETWORK),
 			network: ETHEREUM_NETWORK
 		} as unknown as InfuraErc20Provider;
 
 		const mockErc721Provider = {
 			isInterfaceErc721: vi.fn().mockResolvedValue(false),
 			metadata: mockErc721Metadata,
-			provider: new InfuraErc721Provider(ETHEREUM_NETWORK.providers.infura),
+			provider: new InfuraErc721Provider(ETHEREUM_NETWORK),
 			network: ETHEREUM_NETWORK
 		} as unknown as InfuraErc721Provider;
 
 		const mockErc1155Provider = {
 			isInterfaceErc1155: vi.fn().mockResolvedValue(false),
 			metadata: mockErc1155Metadata,
-			provider: new InfuraErc1155Provider(ETHEREUM_NETWORK.providers.infura),
+			provider: new InfuraErc1155Provider(ETHEREUM_NETWORK),
 			network: ETHEREUM_NETWORK
 		} as unknown as InfuraErc1155Provider;
 
@@ -232,7 +232,7 @@ describe('EthAddTokenReview', () => {
 		const mockErc20Provider = {
 			isErc20: vi.fn().mockResolvedValue(true),
 			metadata: vi.fn().mockResolvedValue({ name: 'Test Token', decimals: 0 }),
-			provider: new InfuraErc20Provider(ETHEREUM_NETWORK.providers.infura),
+			provider: new InfuraErc20Provider(ETHEREUM_NETWORK),
 			network: ETHEREUM_NETWORK
 		} as unknown as InfuraErc20Provider;
 
@@ -257,7 +257,7 @@ describe('EthAddTokenReview', () => {
 		const mockErc20Provider = {
 			isErc20: vi.fn().mockResolvedValue(true),
 			metadata: vi.fn().mockResolvedValue({ symbol: 'HSI', decimals: 0 }),
-			provider: new InfuraErc20Provider(ETHEREUM_NETWORK.providers.infura),
+			provider: new InfuraErc20Provider(ETHEREUM_NETWORK),
 			network: ETHEREUM_NETWORK
 		} as unknown as InfuraErc20Provider;
 
@@ -284,7 +284,7 @@ describe('EthAddTokenReview', () => {
 		const mockErc20Provider = {
 			isErc20: vi.fn().mockResolvedValue(false),
 			metadata: mockErc20Metadata,
-			provider: new InfuraErc20Provider(ETHEREUM_NETWORK.providers.infura),
+			provider: new InfuraErc20Provider(ETHEREUM_NETWORK),
 			network: ETHEREUM_NETWORK
 		} as unknown as InfuraErc20Provider;
 
@@ -295,7 +295,7 @@ describe('EthAddTokenReview', () => {
 				symbol: mockErc721CustomToken.symbol,
 				decimals: 0
 			}),
-			provider: new InfuraErc721Provider(ETHEREUM_NETWORK.providers.infura),
+			provider: new InfuraErc721Provider(ETHEREUM_NETWORK),
 			network: ETHEREUM_NETWORK
 		} as unknown as InfuraErc721Provider;
 

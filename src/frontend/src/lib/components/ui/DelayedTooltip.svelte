@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Tooltip } from '@dfinity/gix-components';
 	import { type Snippet, onDestroy } from 'svelte';
+	import Tooltip from '$lib/components/ui/Tooltip.svelte';
 
 	interface Props {
 		text: string;

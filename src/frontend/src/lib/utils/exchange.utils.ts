@@ -1,15 +1,25 @@
+import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import { ZERO } from '$lib/constants/app.constants';
+import { MILLISECONDS_IN_DAY, ZERO } from '$lib/constants/app.constants';
+import {
+	XDR_BASKET,
+	XDR_BASKET_COUNTDOWN_START_MS,
+	XDR_BASKET_EXPIRY_MS,
+	XDR_BASKET_GRACE_END_MS,
+	XDR_BASKET_NON_USD_CURRENCIES
+} from '$lib/constants/exchange.constants';
+import { Currency } from '$lib/enums/currency';
 import type { OptionBalance } from '$lib/types/balance';
 import type {
 	CoingeckoPlatformId,
+	CoingeckoSimplePrice,
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPrice,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
 import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
-import type { ExchangesData } from '$lib/types/exchange';
+import type { ExchangesData, XdrBasketStatus } from '$lib/types/exchange';
 import type { IcpSwapToken } from '$lib/types/icpswap';
 import type { KongSwapToken, KongSwapTokenMetrics } from '$lib/types/kongswap';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
@@ -92,6 +102,135 @@ const mapMetricsToCoingeckoPrice = ({
 	last_updated_at: new Date(updated_at).getTime()
 });
 
+// TCYCLES is priced at its XDR peg (`xdrUsdPrice`), so no request for a market price may include it:
+// a thin pool would price it.
+export const isTcyclesLedgerCanisterId = (ledgerCanisterId: LedgerCanisterIdText): boolean =>
+	ledgerCanisterId === TCYCLES_LEDGER_CANISTER_ID;
+
+const isFiniteNumber = (value: number | undefined): value is number =>
+	nonNullish(value) && Number.isFinite(value);
+
+const isUsableRate = (value: number | undefined): value is number =>
+	isFiniteNumber(value) && value > 0;
+
+/**
+ * The USD value of one unit of `currency`, from BTC's price in USD and in that currency: there is
+ * no IC source for currency rates yet, so a very liquid asset serves as the cross. Its 24h change
+ * multiplier follows from BTC's two 24h changes, and is left out when one of them is missing.
+ * Both the display currency's rate and the XDR basket are built from it.
+ */
+export const btcCrossExchangeRate = ({
+	btcPrice,
+	currency
+}: {
+	btcPrice: CoingeckoSimplePrice | undefined;
+	currency: Exclude<Currency, Currency.USD>;
+}): { rate: number; fx24hChangeMultiplier?: number } | undefined => {
+	const btcUsd = btcPrice?.usd;
+	const btcInCurrency = btcPrice?.[currency];
+
+	if (!isUsableRate(btcUsd) || !isUsableRate(btcInCurrency)) {
+		return;
+	}
+
+	const btcUsdChange = btcPrice?.usd_24h_change;
+	const btcCurrencyChange = btcPrice?.[`${currency}_24h_change`];
+
+	return {
+		rate: btcUsd / btcInCurrency,
+		...(isFiniteNumber(btcUsdChange) &&
+			isFiniteNumber(btcCurrencyChange) && {
+				fx24hChangeMultiplier: (1 + btcUsdChange / 100) / (1 + btcCurrencyChange / 100)
+			})
+	};
+};
+
+/**
+ * The display currency's rate: 1 for USD, otherwise the BTC cross, which the display only takes
+ * with its 24h change.
+ */
+export const currencyExchangeRateFromBtc = ({
+	btcPrice,
+	currency
+}: {
+	btcPrice: CoingeckoSimplePrice | undefined;
+	currency: Currency;
+}): { rate: number; fx24hChangeMultiplier: number } | undefined => {
+	if (currency === Currency.USD) {
+		return { rate: 1, fx24hChangeMultiplier: 1 };
+	}
+
+	const exchangeRate = btcCrossExchangeRate({ btcPrice, currency });
+	const fx24hChangeMultiplier = exchangeRate?.fx24hChangeMultiplier;
+
+	if (isNullish(exchangeRate) || isNullish(fx24hChangeMultiplier)) {
+		return;
+	}
+
+	return { rate: exchangeRate.rate, fx24hChangeMultiplier };
+};
+
+/**
+ * The USD price of one XDR, and so of one TCYCLES: the IMF basket valued at the BTC cross rate of
+ * each of its currencies. The 24h change values the basket at the rates of 24 hours earlier, and is
+ * left out when one of them is missing. Without all five prices there is no price, since a partial
+ * basket is wrong.
+ */
+export const xdrUsdPrice = (
+	btcPrice: CoingeckoSimplePrice | undefined
+): CoingeckoSimpleTokenPrice | undefined => {
+	let usd = XDR_BASKET[Currency.USD];
+	let usd24hAgo: number | undefined = XDR_BASKET[Currency.USD];
+
+	for (const currency of XDR_BASKET_NON_USD_CURRENCIES) {
+		const exchangeRate = btcCrossExchangeRate({ btcPrice, currency });
+
+		if (isNullish(exchangeRate)) {
+			return;
+		}
+
+		const { rate, fx24hChangeMultiplier } = exchangeRate;
+
+		const valueInUsd = XDR_BASKET[currency] * rate;
+
+		usd += valueInUsd;
+
+		usd24hAgo =
+			nonNullish(usd24hAgo) && nonNullish(fx24hChangeMultiplier)
+				? usd24hAgo + valueInUsd / fx24hChangeMultiplier
+				: undefined;
+	}
+
+	return {
+		usd,
+		usd_market_cap: 0,
+		...(nonNullish(usd24hAgo) && { usd_24h_change: (usd / usd24hAgo - 1) * 100 })
+	};
+};
+
+const daysUntil = ({ endMs, nowMs }: { endMs: number; nowMs: number }): number =>
+	Math.ceil((endMs - nowMs) / MILLISECONDS_IN_DAY);
+
+/**
+ * Where the XDR basket stands on its way to expiry, for the countdown event. `undefined` while the
+ * basket is valid and its end date is more than a week away.
+ */
+export const xdrBasketStatus = (nowMs: number): XdrBasketStatus | undefined => {
+	if (nowMs < XDR_BASKET_COUNTDOWN_START_MS) {
+		return;
+	}
+
+	if (nowMs < XDR_BASKET_EXPIRY_MS) {
+		return { phase: 'expiring_soon', daysLeft: daysUntil({ endMs: XDR_BASKET_EXPIRY_MS, nowMs }) };
+	}
+
+	if (nowMs < XDR_BASKET_GRACE_END_MS) {
+		return { phase: 'grace', daysLeft: daysUntil({ endMs: XDR_BASKET_GRACE_END_MS, nowMs }) };
+	}
+
+	return { phase: 'expired', daysLeft: 0 };
+};
+
 export const findMissingLedgerCanisterIds = ({
 	allLedgerCanisterIds,
 	coingeckoResponse
@@ -146,12 +285,17 @@ export const buildErc20PriceParams = (
 	Object.values(
 		erc20ContractAddresses.reduce<Record<CoingeckoPlatformId, CoingeckoErc20PriceParams>>(
 			(acc, { address, coingeckoId }) => {
+				// Deliberately an EVM-only subset of `CoingeckoPlatformIdSchema`, not the whole enum:
+				// `internet-computer` and `solana` are platforms for ICRC / SPL, which are priced
+				// elsewhere. A chain missing here is dropped silently, so a new EVM network must be
+				// added in both places.
 				if (
 					coingeckoId !== 'ethereum' &&
 					coingeckoId !== 'base' &&
 					coingeckoId !== 'binance-smart-chain' &&
 					coingeckoId !== 'polygon-pos' &&
-					coingeckoId !== 'arbitrum-one'
+					coingeckoId !== 'arbitrum-one' &&
+					coingeckoId !== 'robinhood'
 				) {
 					return acc;
 				}
@@ -184,6 +328,7 @@ export interface ProviderFallbackPrices {
 	btcPrice?: CoingeckoSimplePriceResponse;
 	icpPrice?: CoingeckoSimplePriceResponse;
 	solPrice?: CoingeckoSimplePriceResponse;
+	xrpPrice?: CoingeckoSimplePriceResponse;
 	bnbPrice?: CoingeckoSimplePriceResponse;
 	polPrice?: CoingeckoSimplePriceResponse;
 	arbitrumEthPrice?: CoingeckoSimplePriceResponse;
@@ -272,6 +417,10 @@ export const mergeExchangePrices = async ({
 		currentSolPrice: mergeNative({
 			providerPrice: providerPrices.solPrice,
 			backendPrice: backendData.currentSolPrice
+		}),
+		currentXrpPrice: mergeNative({
+			providerPrice: providerPrices.xrpPrice,
+			backendPrice: backendData.currentXrpPrice
 		}),
 		currentBnbPrice: mergeNative({
 			providerPrice: providerPrices.bnbPrice,

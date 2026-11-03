@@ -15,7 +15,7 @@
 	let { onCancel, onDelete, contact, disabled = false }: Props = $props();
 </script>
 
-<BottomSheetConfirmationPopup {disabled} {onCancel}>
+<BottomSheetConfirmationPopup {disabled} {onCancel} showCloseButton={false}>
 	{#snippet title()}
 		{replacePlaceholders($i18n.contact.delete.title, {
 			$contact: contact.name

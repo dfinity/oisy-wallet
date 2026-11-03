@@ -3,9 +3,14 @@ import {
 	mapBtcAddPendingTransactionError,
 	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
-	mapGetAllowedCyclesError
+	mapGetAllowedCyclesError,
+	mapSignOnramperWidgetUrlError
 } from '$lib/canisters/backend.errors';
-import { CanisterInternalError } from '$lib/canisters/errors';
+import {
+	CanisterInternalError,
+	OnramperRateLimitedError,
+	OnramperSecretNotConfiguredError
+} from '$lib/canisters/errors';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { ApproveError } from '@icp-sdk/canisters/ledger/icp';
 
@@ -241,6 +246,38 @@ describe('backend.errors', () => {
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
 			expect(err.message).toBe('Unknown AllowSigningError');
+		});
+	});
+
+	describe('mapSignOnramperWidgetUrlError', () => {
+		it('should map SecretNotConfigured', () => {
+			const err = mapSignOnramperWidgetUrlError({
+				SecretNotConfigured: null
+			});
+
+			expect(err).toBeInstanceOf(OnramperSecretNotConfiguredError);
+			expect(err.message).toBe(
+				'OnRamper signing secret is not configured on the backend canister.'
+			);
+		});
+
+		it('should map RateLimited', () => {
+			const err = mapSignOnramperWidgetUrlError({
+				RateLimited: { max_calls: 3, window_ns: 120_000_000_000n, caller: mockPrincipal }
+			});
+
+			expect(err).toBeInstanceOf(OnramperRateLimitedError);
+			expect(err.message).toBe(
+				'Rate limit exceeded. Maximum of 3 calls allowed every 120 seconds.'
+			);
+		});
+
+		it('should return unknown error for unrecognized variant', () => {
+			// @ts-expect-error testing unknown error variant
+			const err = mapSignOnramperWidgetUrlError({ SomeOther: null });
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('Unknown SignOnramperWidgetUrlError');
 		});
 	});
 });

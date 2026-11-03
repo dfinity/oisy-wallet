@@ -1,4 +1,11 @@
-import { isDesktop, isIOS, isIPad, isMobile, isPWAStandalone } from '$lib/utils/device.utils';
+import {
+	isDesktop,
+	isIOS,
+	isIPad,
+	isMobile,
+	isPWAStandalone,
+	workerPoolSize
+} from '$lib/utils/device.utils';
 import type * as EnvUtils from '$lib/utils/env.utils';
 
 // isIPad/isIOS short-circuit via isNode(), which is true under the Node test
@@ -252,6 +259,51 @@ describe('device.utils', () => {
 			mockNavigator({ userAgent: 'Mozilla/5.0 (Linux; Android 14)' });
 
 			expect(isIOS()).toBeFalsy();
+		});
+	});
+
+	describe('workerPoolSize', () => {
+		const DESKTOP_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
+
+		it('should fall back to the full pool when hardwareConcurrency is unavailable', () => {
+			// Absent on some privacy-hardened / older browsers — assume a capable multi-core desktop
+			// rather than serializing every token's sync onto a single worker thread.
+			mockNavigator({ userAgent: DESKTOP_USER_AGENT });
+
+			expect(workerPoolSize()).toBe(4);
+		});
+
+		it('should return 1 for a genuine single-core device', () => {
+			mockNavigator({ userAgent: DESKTOP_USER_AGENT, hardwareConcurrency: 1 });
+
+			expect(workerPoolSize()).toBe(1);
+		});
+
+		it('should leave one core of headroom for a small core count', () => {
+			mockNavigator({ userAgent: DESKTOP_USER_AGENT, hardwareConcurrency: 2 });
+
+			expect(workerPoolSize()).toBe(1);
+		});
+
+		it('should scale with the core count below the cap', () => {
+			mockNavigator({ userAgent: DESKTOP_USER_AGENT, hardwareConcurrency: 3 });
+
+			expect(workerPoolSize()).toBe(2);
+		});
+
+		it('should cap the pool at the maximum for many cores', () => {
+			mockNavigator({ userAgent: DESKTOP_USER_AGENT, hardwareConcurrency: 16 });
+
+			expect(workerPoolSize()).toBe(4);
+		});
+
+		it('should keep a single shared worker on iOS regardless of cores', () => {
+			mockNavigator({
+				userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
+				hardwareConcurrency: 16
+			});
+
+			expect(workerPoolSize()).toBe(1);
 		});
 	});
 });

@@ -2,6 +2,7 @@ import * as constants from '$lib/constants/app.constants';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { authStore } from '$lib/stores/auth.store';
 import { InternetIdentityDomain } from '$lib/types/auth';
+import * as deviceUtils from '$lib/utils/device.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { AuthClient } from '@icp-sdk/auth/client';
 import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
@@ -119,6 +120,43 @@ describe('auth.store', () => {
 			await settled;
 
 			expect(caught).toBe('UserInterrupt');
+		});
+
+		describe('window opener features', () => {
+			const signInAndGetFeatures = async (): Promise<string | undefined> => {
+				await authStore.sync();
+
+				const openSpy = vi.spyOn(window, 'open').mockReturnValue(mockSignerWindow());
+
+				vi.spyOn(provider, 'createAuthClientForSignIn').mockReturnValue(
+					buildClient(() => Promise.resolve(mockIdentity))
+				);
+
+				await authStore.signIn({ domain: InternetIdentityDomain.VERSION_2_0 });
+
+				return openSpy.mock.calls[0]?.[2];
+			};
+
+			it('should open a popup in a desktop PWA', async () => {
+				vi.spyOn(deviceUtils, 'isDesktop').mockReturnValue(true);
+				vi.spyOn(deviceUtils, 'isPWAStandalone').mockReturnValue(true);
+
+				await expect(signInAndGetFeatures()).resolves.toContain('width=');
+			});
+
+			it('should open a new tab in a desktop browser tab', async () => {
+				vi.spyOn(deviceUtils, 'isDesktop').mockReturnValue(true);
+				vi.spyOn(deviceUtils, 'isPWAStandalone').mockReturnValue(false);
+
+				await expect(signInAndGetFeatures()).resolves.toBeUndefined();
+			});
+
+			it('should open a new tab in a mobile PWA', async () => {
+				vi.spyOn(deviceUtils, 'isDesktop').mockReturnValue(false);
+				vi.spyOn(deviceUtils, 'isPWAStandalone').mockReturnValue(true);
+
+				await expect(signInAndGetFeatures()).resolves.toBeUndefined();
+			});
 		});
 
 		it('should not poll when the popup was blocked (window.open returns null)', async () => {

@@ -14,7 +14,32 @@ Incremental `startBlock` comes from backend `newestBlockIndex + 1` when user-tra
 
 ### Solana (RPC signatures and details)
 
-`getSolTransactions` may receive `exitIfFirstSignatureMatches`. After `fetchSignatures`, if the newest RPC signature matches the newest backend-stored signature (non-pagination loads only), per-signature transaction detail fetching is skipped.
+Solana history is loaded from the chain only, per network: `getSolSignatures` pages through one merged list of the signatures of every source (the wallet and the associated token account of each enabled token), and `resolveSolSignatures` fetches and derives each signature once, however many sources returned it; the sources that returned a signature decide which tokens its record belongs to. `SolWalletScheduler` runs one worker per network; each tick, its head check asks every source for its newest page and resolves only the signatures newer than the newest one it has already resolved, so when no source has anything newer a tick costs one `getSignaturesForAddress` call per source and no `getTransaction`. Older history comes from the pagers in `sol-history-pagers.services.ts`: one per network for the Activity list, one per token for the token's own page, each keeping its own cursor. The backend user-transaction cache is written per token but never read for Solana, because its copy cannot carry what a row is shown from (see "Solana history" in `docs/ai/PRODUCT.md`). `fetchTransactionDetailForSignature` caches finalized details per network, so a signature already derived is not fetched again once finalized.
+
+## Token identity — key by `TokenId`
+
+Whenever a `TokenId` is in scope, identify, compare and key tokens by it.
+Do not invent a second key next to one that already exists.
+
+- `TokenId` is a `Symbol`, so it is unique per token
+  ([`$lib/validation/token.validation.ts`](../../../src/frontend/src/lib/validation/token.validation.ts)),
+  and the token stores deliberately reuse the existing Symbol when re-setting
+  an entry with the same identifier
+  ([`$lib/stores/custom-tokens.store.ts`](../../../src/frontend/src/lib/stores/custom-tokens.store.ts),
+  [`$icp/stores/certified-icrc.store.ts`](../../../src/frontend/src/icp/stores/certified-icrc.store.ts)).
+  It therefore survives a store reload, and is re-created only on a full reset
+  — `resetAll()` after a failed certified update, or the page reload on
+  sign-out.
+- **Compare the object, never its description.** `TokenId.description` _is_ the
+  ticker — it comes from `parseTokenId(symbol)`
+  ([`$eth/utils/erc20.utils.ts`](../../../src/frontend/src/eth/utils/erc20.utils.ts),
+  [`$icp/utils/icrc.utils.ts`](../../../src/frontend/src/icp/utils/icrc.utils.ts)).
+  Two distinct contracts on the same network can share a ticker, so a ticker is
+  not unique and is not a key.
+- No `TokenId` reachable? Key on the stable asset identifier — contract address
+  / ledger canister ID / canister ID, e.g. `getTokenIdentifier` from
+  [`$lib/utils/identifier.utils.ts`](../../../src/frontend/src/lib/utils/identifier.utils.ts)
+  — combined with the network. Never the ticker.
 
 ## Svelte — runes for new code
 
@@ -192,9 +217,294 @@ layer and let the service own caching.
   bikeshed it.
 - **Variants & responsive:** prefer Tailwind variants (`md:`, `dark:`,
   `data-[active=true]:`) over JS branches.
+- **Hover in SCSS:** write `@include interaction.hover { … }`
+  (`lib/styles/mixins/_interaction.scss`), not a bare `&:hover`, so a tap
+  on a touch screen doesn't leave the hover colour on. Tailwind's `hover:`
+  variant already does this.
+- **Touch sizes in SCSS:** write `@include interaction.coarse { … }` for sizes
+  a touch screen needs (44 px targets). It follows the main pointer, not the
+  width: a breakpoint cannot tell a tablet from a narrow laptop window.
+  Tailwind's `pointer-coarse:` variant does the same in markup.
 - The route-level prerendered backgrounds described in
   [HACKING.md "Routes Styles"](../../../HACKING.md#routes-styles) are the
   preferred way to set route-specific colours.
+
+## Press feedback
+
+Everything that can be pressed shows it while held. Pick the treatment by
+what the element is, and use the shared rule, never hand-written
+`active:scale-*` or `active:bg-*`:
+
+| Element                                                 | Use                                                          | Effect                                            |
+| ------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------- |
+| `Button` (any `colorStyle`, unless `link`)              | nothing, it is built in                                      | shrinks to 0.98                                   |
+| `ButtonIcon`                                            | nothing, it is built in                                      | shrinks to 0.96                                   |
+| Any other text button, or a whole-card button           | `press`                                                      | shrinks to 0.98                                   |
+| A help toggle (an info icon that shows an explanation)  | `HelpToggle` (`ui/HelpToggle.svelte`)                        | 0.96, tap area, `aria-expanded`                   |
+| Any other icon-size control (close, help, toggle icons) | `press-icon` (+ `hit-area` if under 40 px)                   | shrinks to 0.96                                   |
+| A full-width row (list item, transaction, contact)      | `row-feedback`                                               | 10 % blue on hover, 20 % while pressed, no shrink |
+| A wrapper that paints the row around its `<button>`     | `hover:bg-brand-subtle-10 child-pressed:bg-brand-subtle-20`  | as `row-feedback`, on the wrapper                 |
+| Something the press would only distract on              | `static` prop (`Button`, `ButtonIcon`), or no utility at all | nothing                                           |
+
+### Links: `text-brand-hover`
+
+Text links and link-style icons change colour: one step of OISY blue on hover
+and the same while pressed (`text-brand-hover`, blue-800 in
+light mode, blue-300 in dark, where blue-800 would drop to 2.3:1). `Button link`,
+the default `ButtonIcon` (so `Copy`), `ExternalLink` and `BreadcrumbNavigation`
+have it built in, and so does `a.blue-link` (`styles/global/links.scss`) for links
+inside translated strings rendered through `Html`; anything else that looks like a link adds
+`transition-colors duration-150 ease-out hover:text-brand-hover active:text-brand-hover`.
+Never hover a link to `text-brand-secondary`: it is the darker blue in both themes.
+A text link does not shrink on press; an icon-only link also gets `press-icon`,
+like any icon button.
+
+`press` and `press-icon` are utilities in `lib/styles/global.scss`, built
+on the same `press` mixin and the same two scales (`$press-scale-text`,
+`$press-scale-icon` in `lib/styles/mixins/_button.scss`) the shared buttons
+use, so changing a value there changes it everywhere. They skip disabled,
+`loading` and `no-press` elements, and reduced motion never scales.
+
+`row-feedback`, also in `global.scss`, is a colour change, not a shrink: it
+is not built on the press mixin, and `no-press` does not turn it off. A row
+button can therefore opt out of the shrink with `static` and keep the fill,
+as `ListItemButton` does.
+
+Wide things shrink less (0.98) than small ones (0.96) because the same
+scale takes far more pixels off a full-width element; full-width rows don't
+shrink at all.
+
+The shared buttons (`button.scss`) and `row-feedback` rows change colour in
+150 ms ease-out; use the same for new feedback. A row's pressed fill is the
+exception: it shows at once and fades back over 150 ms on release, because a
+quick click is held for about 80 ms and a fade would only peak as it is let
+go. `row-feedback`, `.nav-item` and `ListItemCheckbox` have it built in; a
+wrapper or `display: contents` row adds `child-pressed:duration-0` or
+`parent-pressed:duration-0` beside its fill. The `tertiary-alt` and
+`secondary-light` buttons and `row-feedback` rows press one step past their
+hover (`brand-subtle-10` → `-20`, or `-20` → `-30`), and a state that stays on,
+such as an open popover's button, may go a step further. `.dropdown-button`
+presses to `brand-subtle-20` (the border too when bordered), a step past its
+hover and open fill, shown at once rather than faded in. Success, error and
+other palettes keep their own steps.
+
+### Small controls: `hit-area`
+
+Anything you can tap that is under 40 × 40 px gets `hit-area`: an `::after`
+of at least 40 × 40 px around it, so it is easy to hit without looking
+bigger. Two tap areas must never overlap; where a neighbour sits closer,
+cap it: `[--hit-area:2rem]`, or one axis with `[--hit-area-x:...]` /
+`[--hit-area-y:...]` (`[--hit-area-x:0px]` grows it only up and down). It
+does not set `position`: add `relative` unless the control is already
+`absolute` or `fixed`. Add `hit-area-touch` for 44 × 44 px on a touch
+screen (`pointer: coarse`), as the icon triggers of menus and dropdowns do.
+
+### Pitfalls
+
+- **`:active` reaches every ancestor** of the pressed element. A row with a
+  copy icon or a toggle inside it would light up when the icon is pressed;
+  `row-feedback`, `pressed:` and `child-pressed:` exclude that, plain
+  `active:` does not.
+- **`display: contents` buttons paint nothing.** Put `row-feedback` on the
+  element inside, plus `parent-pressed:bg-brand-subtle-20` and
+  `parent-pressed:duration-0`: holding Space on the focused button makes
+  only the button `:active`, not the element inside (as `Transaction` and
+  `TipHistory` do).
+- **`scale` makes the element the containing block** of its absolutely
+  positioned children. If a child is positioned against something further
+  out (the mobile bar's Finance circle), scale the child, not the element:
+  put `group` on the button and `press-icon-in-group` on the child.
+- **A `transition-*` utility replaces the base transition,** which carries
+  `scale`. Buttons already have `scale` in theirs; anything else, or a
+  button with its own transition, lists it: `transition-[color,scale]`.
+- **Custom variants must not start with `has-`** (Tailwind 4 reads `has-*`
+  as its built-in compound variant), and **must not nest `:has()` inside
+  `:has()`** (invalid CSS: the browser drops the whole rule). Check a new
+  variant actually lands in the stylesheet.
+- **Hover in SCSS** goes through `@include interaction.hover { … }` (see
+  above); in Tailwind, `hover:` is already guarded.
+- **iOS Safari applies `:active` on a tap only when the page has a touch
+  listener.** The root layout (`routes/+layout.svelte`) registers a passive
+  no-op `touchstart` on the document for that; it is not dead code.
+- **Nested buttons:** a control inside a clickable row stops propagation
+  (`e.stopPropagation()`), or its click also runs the row's.
+
+## Motion
+
+Import `fade`, `fly`, `slide`, `scale` and `blur` from
+`$lib/utils/transitions.utils`, not from `svelte/transition`. They take the
+same parameters and add OISY's timings and the system's reduced-motion
+setting. Svelte's own default is 400 ms, slower than anything OISY uses. The
+module also re-exports the parameter types (`FadeParams`, `SlideParams`,
+`TransitionConfig`, …), and a lint rule refuses `svelte/transition` everywhere
+else (`transition.constants.ts` excepted, since the module is built on it).
+The restriction uses `@typescript-eslint/no-restricted-imports` separately from
+the shared core rule, preserving its deprecated-package and `/dist/` import bans.
+
+| Kind of motion                        | Timing                              | Constant (`transition.constants.ts`) |
+| ------------------------------------- | ----------------------------------- | ------------------------------------ |
+| Entrance                              | 200 ms ease-out (`cubicOut`)        | `MOTION_ENTER`                       |
+| Exit                                  | 150 ms ease-in (`cubicIn`)          | `MOTION_EXIT`                        |
+| Icon swap (`IconSwap`)                | 300 ms `cubic-bezier(0.2, 0, 0, 1)` | built into `IconSwap`                |
+| Other small state change (a chip)     | 150 ms                              | `MOTION_SWAP_DURATION`               |
+| Height change (`slide`)               | 250 ms both ways                    | `SLIDE_PARAMS`                       |
+| Any fade that replaces a reduced move | 100 ms                              | `MOTION_REDUCED_FADE_DURATION`       |
+
+- **Pass no `duration`** and the shared timing applies: a `transition:` gets
+  the entrance timing going in and the exit timing going out, so exits are
+  faster without any extra code.
+- **Pass a `duration`** only for a different kind of motion: a sheet that
+  travels the height of the screen, an instant close (`duration: 0`). A
+  passed `duration` is used exactly as Svelte would use it, easing included,
+  so pass `easing` with it.
+- **`scale` starts at 0.96** unless you pass `start`: nothing grows from
+  nothing.
+- **Reduced motion:** `fly`, `scale` and `blur` become a 100 ms fade, `fade`
+  is capped at 100 ms (a shorter one the call site chose stays shorter), and
+  `slide` happens at once, since a height change moves everything below it.
+  Colours still change.
+- **CSS animations:** under reduced motion `animate-pulse` and `animate-ping`
+  hold still. A decorative illustration with its own keyframes adds
+  `decorative-motion` to its root, which stops every animation inside it.
+  Progress indicators (`Spinner`, plus the `LoaderSpinner` and `AnimatedIconLoader`
+  wrappers) keep their trace moving under reduced motion: they are essential
+  progress cues, not decorative motion. The pre-hydration loader in `app.html`
+  follows the same rule, retaining its 30-second animation cap. Keep the owning
+  controls' loading states, translated labels and accessibility semantics intact.
+- **Progress steps (`ProgressSteps`):** a step's old marker leaves at once and
+  the new one comes in. A finished or failed badge springs in over 440 ms on a
+  spring sampled into CSS `linear()`, with an overshooting `cubic-bezier`
+  fallback. The active label grows from 16 to 18 px by `scale`, never by
+  `font-size`, and keeps one font weight, so nothing reflows. Its glint is a
+  copy of the text laid on top. Under reduced motion only the colours change
+  and the arc keeps turning.
+
+For a page backdrop use `backdrop` from the same module: it animates the dim and blur
+radius without an opacity animation that hides the blur in Chrome. Under reduced motion
+it becomes the same capped fade.
+
+Modal and popover containers use an intro-only 25 ms fade. Their children own the exits;
+a container outro would hide the panel and backdrop before their longer outros finish.
+
+### Programmatic swap comparison
+
+`SwapProviderAnimation` is a quote-state indicator, not a timer that controls quote acceptance.
+Its WAAPI entry/exit reuse the shared 200/150 ms durations with the selected Text Loop's
+reference spring phase (`SWAP_PROVIDER_TURN_EASING`): 33 equally spaced samples up to the
+first target crossing, normalized to each turn budget without overshoot or a long tail.
+The layer transform/opacity and sharp/soft opacity bridge share that curve. Feature-detect
+CSS `linear()` inside the client effect; unsupported or absent `CSS.supports` retains
+`MOTION_EASE_OUT_CSS`. Reduced motion retains its existing 100 ms opacity-only ease-out;
+confirmation timing and segment easing are separate. This feature-specific loop does not
+change the generic transitions' exit policy. Candidate dwell, the minimum comparison and the
+short borderless confirmation are configured in `swap.constants.ts`. The animation itself never
+delays a quote; the coordinator owns the minimum comparison (below).
+The multi-keyframe confirmation eases each segment on a linear effect clock; easing the
+entire clock again would hide the squeeze before the recalled text is readable.
+
+Read participants from `SwapAmountsContext.activity`, not the provider registry. The optional
+`SwapQuoteObserver.onProviderParticipating` runs after eligibility guards at pricing entry;
+cached quotes and local pricing count as participation, not fresh network requests. The
+coordinator owns input invalidation, per-round identity and the foreground/background flag.
+Always reveal the amounts store's accepted selection, preserving manual-provider policy.
+Only a foreground pending round actually observed by the mounted header may confirm: no
+replay from a completed snapshot, review remount, manual selection or periodic refresh. A scroll
+remounted across the sm/md breakpoint inherits the confirmation it mounts with, so it does not
+squeeze again.
+
+Foreground activity starts when the coordinator queues the round, before its 300 ms debounce,
+and keeps one request identity through pricing. Track the source/destination `TokenId` values,
+not token-object emissions: `initSwapContext` re-emits its selected token objects on unrelated
+balance updates, which must not invalidate a quote or restart foreground comparison. Genuine
+pair, amount, slippage and ICRC-2 readiness changes still invalidate the current round; pricing
+reads the latest complete token objects inside the untracked request path.
+The shared form blocks Review throughout that
+queued/pending foreground work; background refresh may retain a usable quote and enabled Review.
+Cancelling queued/pending foreground work discards offers priced for the previous inputs before
+clearing activity, so a same-amount remount cannot accidentally reuse them. Completed quotes and
+background refresh retain the existing Review-remount and manual-provider behavior.
+
+Every foreground round with a participant stays pending for at least
+`SWAP_PROVIDER_MIN_COMPARISON_MS` (two scroll turns) from its first participant, so fast or
+cached quotes, and one-provider pairs through the provider pool, still show more than one name
+before the winner. The coordinator holds the whole round, not just the header: the receive
+amount stays a skeleton and Review stays disabled until the winner appears, failures included.
+Background refresh and reduced motion are never held, and slower pricing is not held further. A
+round replaced during the hold commits nothing.
+
+The scroll also shows OISY's provider pool, so a pair with one or two participants still shows
+the range of providers. `swapProviderPool` (`swap-provider-pool.providers.ts`) builds it from the
+provider registries and their flags only, never a hand-written list, so a disabled provider
+never appears: `related` are the enabled providers of the registries that price the pair's
+source or destination network (as `fetchSwapAmounts` routes it), `wider` every other enabled
+one. The turn list is the asked providers first, then `related`, then `wider`, each once per
+pass. The clock starts with an asked provider on screen and the reveal is always the real
+winner, so the pool only ever fills the wait, and on fast quotes (two turns) it rarely gets past
+`related`. This is the one exception to reading participants from the activity store; the status
+copy says "Finding the best rate..." because pool names were not asked. Component specs that
+factory-mock a service the registries import (chain-fusion, OISY Trade) must stub those exports.
+
+All six quote fan-outs use the same collector and `SWAP_QUOTE_TIMEOUT_MS` budget (10 seconds,
+aligned with LI.FI's existing display-quote timeout). Finish early when every provider settles;
+at the deadline, pass completed results to the existing mapping, ordering and minimum-error
+policy, ignoring unfinished providers and late participation/results. This is logical abandonment,
+not universal transport cancellation: nonabortable SDK/canister work may continue underneath.
+Do not apply this quote budget to swap execution, signing, deposit validity or animation timing.
+
+The five swap forms opt into this presentation with `SwapProvider isForm`; review/default
+callers retain the static provider label. Keep the brand nonshrinking in the single-line
+header. While comparing, the status has a zero basis (`w-0 flex-1`) so it truncates first, and
+the scroll group keeps `min-w-24`, room for a logo and a short name down to 320 px; without it
+the label group's `min-w-min` counted the full status text and squeezed the scroll to nothing
+on phones. Below 390 px (`max-[24.375rem]:max-w-24`) the slot is also capped at 96 px, so a long
+name such as NEAR Intents truncates instead of shortening the status on its turn; wider rows let
+the slot grow to the name. During foreground comparison,
+`Collapsible` / `CollapsibleBottomSheet` use their optional `disabled` prop to close and block
+stale details. Custom sheet triggers receive `{ open, disabled }` and must forward disabled
+to their native control. Other disclosure callers retain the default enabled behavior.
+
+No hard cuts in the section. The Smart Swap row and the fee row (`SwapFeeRow`) open and close
+with `slide` (height, 250 ms) while their content fades up 4 px with `fly`; the fee row follows
+`SWAP_DETAILS_ROW_STAGGER_MS` (60 ms) later. The 12 px gap is `pb-3` inside the sliding row, not
+the forms' flex gap, so it animates with the height. The header never swaps labels in one frame:
+`comparingLayout` follows `comparing` one `MOTION_SWAP_DURATION` late, so Select (inert while
+fading) and Best Rate or the status fade out in place before the row re-lays out and the incoming
+ones fade in. Best Rate shows whenever the selected provider is the top offer, a single offer
+included; only a manual non-best choice hides it. Select needs two or more offers. The provider
+slot never shows a placeholder. A first round leaves the slot empty
+and fades the first participant up (opacity, 4 px, the soft-layer blur bridge, 200 ms ease-out);
+that fade runs once, and only a turn, which samples the pose first, cuts it short. One turn clock
+runs for the whole comparison: it starts once a name is on screen and never restarts on a
+keystroke. While a new round waits for its participants (the debounce, slow eligibility checks)
+the scroll keeps turning through the previous round's; a shown provider the new round leaves out
+gives way at the next turn. The clock is a single `$derived` boolean, so prop updates that leave
+it unchanged never restart it mid-turn.
+Reduced motion keeps the fades (100 ms at most) and drops the slide, rise and blur.
+
+While a foreground round compares, every form's fee row shows a "Total fee" skeleton instead of
+the last quote's fees, which would describe a provider that may not win; background refreshes
+keep the fees. `SwapFeeRow` owns this for all five forms: the skeleton and the form's fees share
+one grid cell and cross-fade. Its `show` decides the row outside a comparison: ICP, SOL and XRP
+fees do not need an offer, ETH and BTC pass "an offer is selected". The fee components stay
+quote-only, because Review renders them too.
+
+Screen readers hear the section through one `sr-only` `role="status"` region that
+`SwapProvider isForm` mounts before any round, outside the header. Two reasons: the Collapsible
+header is a `role="button"`, whose children are presentational, and a region inserted with its
+text already in place is not announced. Its text is the status while comparing, then the
+selected provider's name. The visible status is `aria-hidden`, the scroll's name is plain text
+for the header's accessible name, and cycling names are never announced.
+
+Keep visible layers keyed by provider through interruption. Sample their current poses before
+cancelling/retargeting WAAPI, including when a new round starts mid-reveal, which is no turn: the
+motion effect's cleanup samples the layers its run set moving. An outgoing provider can
+immediately become the winner without being remounted hidden. Only transient exits remain, never
+persistent wheel neighbours.
+A static 2px soft layer crossfades through opacity, so no filter is animated. Reduced motion
+stops rotation and confirmation scale, retains the shared short opacity bridge on an actual
+provider change, and never dims an already-readable winner. Cancel timers/animations on
+invalidation and destruction. Verify real logo sources, clipping and current-pose continuity
+in a compiled-component browser probe: mocked WAAPI unit tests cannot prove those properties.
 
 ## Icons
 
@@ -212,6 +522,10 @@ component uses. Never re-implement an icon that already exists.
   `$lib/services/auth.services` and `$lib/providers/auth-client.providers`.
 - Any HTML coming from backend / user input must be sanitized before
   `{@html …}`.
+- Text authored by a third party — e.g. a consent message built from data a
+  relying party supplies — goes through `sanitizeUntrusted` (`untrusted` prop
+  on `Html` / `Markdown`), which keeps only the markup Markdown can produce.
+  Never render it inside a `<form>` that drives a sensitive action.
 - External links: `target="_blank"` requires `rel="noopener noreferrer"`.
 - Threshold-signature operations are routed through the chain-fusion
   signer canister — not implemented here. See
@@ -241,5 +555,7 @@ component uses. Never re-implement an icon that already exists.
 - Adding a wrapper component that only re-exports another component.
 - `target="_blank"` without `rel="noopener noreferrer"`.
 - `{@html …}` without sanitisation.
+- Keying or matching a token by its ticker (including `TokenId.description`)
+  when the `TokenId` object itself is in scope.
 - `console.log` left in committed code (and `console.error` / `.warn` are
   ESLint errors — use `consoleError` / `consoleWarn`).

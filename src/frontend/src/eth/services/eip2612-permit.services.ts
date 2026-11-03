@@ -1,6 +1,6 @@
-import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { EIP2612_TYPES, PERMIT_DEADLINE_SECONDS } from '$eth/constants/eip2612.constants';
 import { ERC20_PERMIT_ABI } from '$eth/constants/erc20.constants';
+import { ethersProvider } from '$eth/providers/ethers.providers';
 import type {
 	CreateEIP2612TypedDataParams,
 	EIP2612Domain,
@@ -14,7 +14,6 @@ import { signPrehash } from '$lib/api/signer.api';
 import { Contract } from 'ethers/contract';
 import { Signature } from 'ethers/crypto';
 import { TypedDataEncoder } from 'ethers/hash';
-import { InfuraProvider } from 'ethers/providers';
 import { concat, toBeHex, zeroPadValue } from 'ethers/utils';
 
 const createDeadline = ({
@@ -24,19 +23,25 @@ const createDeadline = ({
 const fetchPermitMetadata = async ({
 	tokenContract,
 	userAddress,
-	customDeadline,
-	tokenName
+	customDeadline
 }: FetchPermitMetadataParams): Promise<PermitMetadata> => {
-	const [nonce, version] = await Promise.all([
+	// The EIP-712 domain must reproduce the token's DOMAIN_SEPARATOR bit for bit, so the name
+	// comes from the contract, not from our token metadata — display names drift (e.g.
+	// "Euro Coin" vs the on-chain "EURC"), and a drifted name yields a signature the token
+	// can never verify.
+	const [nonce, version, name, domainSeparator] = await Promise.all([
 		tokenContract.nonces(userAddress),
-		tokenContract.version()
+		tokenContract.version(),
+		tokenContract.name(),
+		tokenContract.DOMAIN_SEPARATOR()
 	]);
 
 	return {
-		name: tokenName,
+		name,
 		version,
 		nonce: nonce.toString(),
-		deadline: customDeadline ?? createDeadline()
+		deadline: customDeadline ?? createDeadline(),
+		domainSeparator
 	};
 };
 
@@ -83,14 +88,13 @@ const createPermitHash = async ({
 	value,
 	deadline
 }: Omit<PermitParams, 'identity'>): Promise<{ hash: string; metadata: PermitMetadata }> => {
-	const provider = new InfuraProvider(token.network.chainId, INFURA_API_KEY);
+	const provider = ethersProvider(token.network);
 	const tokenContract = new Contract(token.address, ERC20_PERMIT_ABI, provider);
 
 	const metadata = await fetchPermitMetadata({
 		tokenContract,
 		userAddress,
-		customDeadline: deadline,
-		tokenName: token.name
+		customDeadline: deadline
 	});
 
 	const { domain, types, values } = createEIP2612TypedData({
@@ -100,6 +104,17 @@ const createPermitHash = async ({
 		value,
 		metadata
 	});
+
+	// Some permit-capable tokens hash a different domain shape (e.g. salt-based domains
+	// without chainId, or DAI-style permits): signing would succeed but the token could never
+	// verify the result. Fail here rather than hand a dead permit to a counterparty.
+	if (
+		TypedDataEncoder.hashDomain(domain).toLowerCase() !== metadata.domainSeparator.toLowerCase()
+	) {
+		throw new Error(
+			`The EIP-2612 domain of token ${token.symbol} (${token.address}) does not match its on-chain DOMAIN_SEPARATOR; the token cannot be used with a permit.`
+		);
+	}
 
 	const hash = TypedDataEncoder.hash(domain, types, values);
 

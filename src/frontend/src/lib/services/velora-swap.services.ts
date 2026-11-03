@@ -26,7 +26,8 @@ export const fetchVeloraSwapAmount = async ({
 	sourceToken,
 	destinationToken,
 	amount,
-	userAddress
+	userAddress,
+	onProviderParticipating
 }: EvmQuoteParams): Promise<SwapMappedResult | undefined> => {
 	if (isNullish(userAddress) || !isNetworkEthereum(destinationToken.network)) {
 		return;
@@ -94,6 +95,7 @@ export const fetchVeloraSwapAmount = async ({
 	};
 
 	try {
+		onProviderParticipating?.(SwapProvider.VELORA);
 		const data = await sdk.quote.getQuote(
 			srcChainId !== destChainId ? { ...baseParams, destChainId: Number(destChainId) } : baseParams
 		);
@@ -102,7 +104,7 @@ export const fetchVeloraSwapAmount = async ({
 
 		if ('delta' in data) {
 			const destinationTokenToDecimals = formatToken({
-				value: BigInt(data.delta.destAmount),
+				value: BigInt(data.delta.route.destination.output.amount),
 				unitName: destinationToken.decimals
 			});
 

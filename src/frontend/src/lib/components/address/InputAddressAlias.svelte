@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import type { ZodError } from 'zod';
 	import InputAddress from '$lib/components/address/InputAddress.svelte';
 	import InputText from '$lib/components/ui/InputText.svelte';
@@ -15,6 +14,7 @@
 	import type { ContactAddressUi } from '$lib/types/contact';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		onQRCodeScan?: () => void;

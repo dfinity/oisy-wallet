@@ -36,6 +36,16 @@ describe('BuyModalContent', () => {
 		await expect(findByTestId(BUY_MODAL_ONRAMPER_IFRAME)).resolves.toBeInTheDocument();
 	});
 
+	it('uses the centered overlay loader while the Onramper URL is pending', () => {
+		vi.spyOn(onramperEnv, 'ONRAMPER_ENABLED', 'get').mockImplementation(() => true);
+		vi.spyOn(backendApi, 'signOnramperWidgetUrl').mockReturnValue(new Promise(() => {}));
+
+		const { getByTestId, queryByTestId } = render(BuyModalContent);
+
+		expect(getByTestId('spinner').closest('.overlay')).toBeInTheDocument();
+		expect(queryByTestId(BUY_MODAL_ONRAMPER_IFRAME)).not.toBeInTheDocument();
+	});
+
 	it('renders the disabled unavailable notice when ONRAMPER_ENABLED is false', () => {
 		vi.spyOn(onramperEnv, 'ONRAMPER_ENABLED', 'get').mockImplementation(() => false);
 

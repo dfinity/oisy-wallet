@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
@@ -9,6 +8,7 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
 	import {
 		TRACK_REWARD_CAMPAIGN_WIN_LEARN_MORE,

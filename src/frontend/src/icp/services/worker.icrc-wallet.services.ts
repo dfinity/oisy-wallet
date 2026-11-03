@@ -16,8 +16,6 @@ import type {
 } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import type { WorkerData } from '$lib/types/worker';
-import { isIOS } from '$lib/utils/device.utils';
-import { nonNullish } from '@dfinity/utils';
 
 export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
@@ -59,13 +57,6 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 							tokenId,
 							error: data.error
 						});
-
-						// In case of error, we start the listener again, but only with the ledgerCanisterId,
-						// to make it request only the balance and not the transactions
-						if (nonNullish(indexCanisterId)) {
-							this.restartWorkerWithLedgerOnly();
-						}
-
 						return;
 					case 'syncIcrcWalletCleanUp':
 						onTransactionsCleanUp({
@@ -85,27 +76,9 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	}: IcToken): Promise<IcrcWalletWorker> {
 		await syncWalletFromCache({ tokenId, networkId });
 
-		const worker = await AppWorker.getInstance({ asSingleton: isIOS() });
+		const worker = await AppWorker.getInstance({ pooled: true, poolKey: ledgerCanisterId });
 		return new IcrcWalletWorker(worker, tokenId, ledgerCanisterId, indexCanisterId, env);
 	}
-
-	private restartedWithLedgerOnly = false;
-
-	private restartWorkerWithLedgerOnly = () => {
-		if (this.restartedWithLedgerOnly) {
-			return;
-		}
-
-		this.restartedWithLedgerOnly = true;
-
-		this.postMessage({
-			msg: 'startIcrcWalletTimer',
-			data: {
-				ledgerCanisterId: this.ledgerCanisterId,
-				env: this.env
-			}
-		});
-	};
 
 	protected override stopTimer = () => {
 		this.postMessage<PostMessage<PostMessageDataRequestIcrc>>({

@@ -22,6 +22,9 @@ export const getTokenAccountIdAddressString = (tokenAccountId: TokenAccountId): 
 	if ('Sol' in tokenAccountId) {
 		return tokenAccountId.Sol;
 	}
+	if ('Xrp' in tokenAccountId) {
+		return tokenAccountId.Xrp;
+	}
 
 	assertNever(tokenAccountId, `Unexpected TokenAccountId: ${tokenAccountId}`);
 };
@@ -40,6 +43,9 @@ export const getDiscriminatorForTokenAccountId = (
 	}
 	if ('Sol' in tokenAccountId) {
 		return 'Sol';
+	}
+	if ('Xrp' in tokenAccountId) {
+		return 'Xrp';
 	}
 
 	assertNever(tokenAccountId, `Unexpected TokenAccountId: ${tokenAccountId}`);

@@ -427,7 +427,7 @@ describe('AddressBookStep', () => {
 	});
 
 	it('should call copyToClipboard function when address button is clicked', async () => {
-		const spyCopy = vi.spyOn(clipboardUtils, 'copyToClipboard').mockResolvedValue(undefined);
+		const spyCopy = vi.spyOn(clipboardUtils, 'copyToClipboard').mockResolvedValue(true);
 
 		const { getByTestId, getAllByTestId } = render(AddressBookStep, {
 			props: {

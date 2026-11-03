@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Note view + Share entry (OISY)</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+		/>
+		<style>
+			:root {
+				--white: #ffffff;
+				--text-primary: #0f0f0e;
+				--text-secondary: #5f5e5a;
+				--text-tertiary: #8a8983;
+				--brand: #0b57f5;
+				--brand-hover: #0a4cd6;
+				--brand-subtle: #e8f0fe;
+				--brand-subtle-border: #dfe6f5;
+				--error: #d92d20;
+				--bg-dim: #f4f5f7;
+				--radius-card: 12px;
+				--radius-btn: 12px;
+				--radius-modal: 20px;
+				--font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+			}
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: var(--font);
+				color: var(--text-primary);
+				background: #e9eaec;
+				padding: 2rem 1.25rem;
+			}
+			.page-note {
+				max-width: 880px;
+				margin: 0 auto 1.75rem;
+				text-align: center;
+				font-size: 12px;
+				color: #6b6a66;
+				line-height: 1.55;
+			}
+			.page-note b {
+				color: #2a2a28;
+			}
+			.grid {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 2.5rem;
+				justify-content: center;
+				align-items: flex-start;
+			}
+			.col {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+			}
+			.state-label {
+				font-size: 11px;
+				font-weight: 700;
+				letter-spacing: 0.05em;
+				text-transform: uppercase;
+				color: #6b6a66;
+				margin-bottom: 0.75rem;
+			}
+
+			/* ---- shared modal interior ---- */
+			.modal-head {
+				position: relative;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				padding: 1.15rem 1.25rem;
+				border-bottom: 1px solid #eceae6;
+			}
+			.modal-title {
+				font-size: 1.15rem;
+				font-weight: 700;
+			}
+			.modal-x {
+				position: absolute;
+				right: 1.1rem;
+				top: 50%;
+				transform: translateY(-50%);
+				font-size: 1.1rem;
+				color: var(--text-primary);
+				cursor: pointer;
+				line-height: 1;
+			}
+			/* mobile header "Edit" text action */
+			.head-action {
+				position: absolute;
+				right: 1.15rem;
+				top: 50%;
+				transform: translateY(-50%);
+				display: flex;
+				align-items: center;
+				gap: 0.3rem;
+				color: var(--brand);
+				font-size: 15px;
+				font-weight: 600;
+				cursor: pointer;
+			}
+			.modal-body {
+				padding: 1.25rem;
+				display: flex;
+				flex-direction: column;
+			}
+			.note-box {
+				border: 1px solid var(--brand-subtle-border);
+				border-radius: var(--radius-card);
+				padding: 1rem 1.1rem;
+				display: flex;
+				flex-direction: column;
+				gap: 0.85rem;
+			}
+			.note-title {
+				font-weight: 700;
+				font-size: 15px;
+			}
+			.note-body {
+				font-size: 14.5px;
+				line-height: 1.5;
+				white-space: pre-line;
+				color: var(--text-primary);
+			}
+
+			/* meta + share link row */
+			.meta-row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 1rem;
+				margin: 0.9rem 0 1.1rem;
+			}
+			.note-meta {
+				font-size: 12px;
+				color: var(--text-tertiary);
+			}
+			.share-link {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.35rem;
+				color: var(--brand);
+				font-size: 13px;
+				font-weight: 600;
+				cursor: pointer;
+				white-space: nowrap;
+			}
+			.share-link i {
+				font-size: 15px;
+			}
+
+			.btn {
+				font-family: inherit;
+				width: 100%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 0.5rem;
+				cursor: pointer;
+				border: none;
+				font-size: 15px;
+				font-weight: 600;
+				border-radius: var(--radius-btn);
+			}
+			.btn-secondary {
+				background: var(--brand-subtle);
+				color: var(--brand);
+				padding: 0.85rem;
+			}
+			.btn-secondary i {
+				font-size: 18px;
+			}
+			.btn-delete {
+				background: transparent;
+				color: var(--error);
+				padding: 0.8rem;
+				font-weight: 600;
+			}
+			.btn-delete i {
+				font-size: 18px;
+			}
+			.btn-stack {
+				display: flex;
+				flex-direction: column;
+				gap: 0.65rem;
+			}
+
+			.modal-foot {
+				padding: 1.1rem 1.25rem;
+				border-top: 1px solid #eceae6;
+			}
+			.btn-primary {
+				background: var(--brand);
+				color: #fff;
+				padding: 0.95rem;
+			}
+			.btn-primary:hover {
+				background: var(--brand-hover);
+			}
+
+			/* ---- desktop dialog ---- */
+			.desktop-scene {
+				width: 600px;
+				max-width: 100%;
+				background: var(--bg-dim);
+				border-radius: 16px;
+				padding: 2.25rem 1.5rem;
+				position: relative;
+				overflow: hidden;
+			}
+			.desktop-scene .backdrop {
+				position: absolute;
+				inset: 0;
+				background: linear-gradient(180deg, rgba(11, 87, 245, 0.06), rgba(11, 87, 245, 0) 40%);
+			}
+			.dialog {
+				position: relative;
+				width: 420px;
+				max-width: 100%;
+				margin: 0 auto;
+				background: var(--white);
+				border-radius: var(--radius-modal);
+				box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+			}
+
+			/* ---- mobile sheet ---- */
+			.phone {
+				width: 320px;
+				background: #f6eef0;
+				border-radius: 26px;
+				overflow: hidden;
+				box-shadow: 0 16px 48px rgba(0, 0, 0, 0.16);
+			}
+			.sheet {
+				background: var(--white);
+				border-radius: 22px 22px 0 0;
+				margin-top: 70px;
+			}
+			.grab {
+				display: flex;
+				justify-content: center;
+				padding: 0.6rem 0 0.2rem;
+			}
+			.grab span {
+				width: 36px;
+				height: 4px;
+				border-radius: 2px;
+				background: #cdcdc9;
+			}
+		</style>
+	</head>
+	<body>
+		<p class="page-note">
+			OISY · Personal notes — <b>note preview page</b>, the entry point for sharing.
+			<b>Share note</b> is demoted to a quiet blue text link; <b>Edit</b> stays prominent. Desktop:
+			Share sits on the meta row, right-aligned. Mobile: Edit moves to the header (right), Share is
+			a left-aligned link under the Created line, Delete unchanged.
+		</p>
+
+		<div class="grid">
+			<!-- DESKTOP -->
+			<div class="col">
+				<div class="state-label">Desktop · dialog</div>
+				<div class="desktop-scene">
+					<div class="backdrop"></div>
+					<div class="dialog">
+						<div class="modal-head">
+							<div class="modal-title">Note</div>
+							<div class="modal-x"><i class="ti ti-x"></i></div>
+						</div>
+						<div class="modal-body">
+							<div class="note-box">
+								<div class="note-title">This is a test</div>
+								<div class="note-body">Lorem Ipsum and here line 2</div>
+							</div>
+							<div class="meta-row">
+								<span class="note-meta">Created 37s ago · Updated 1s ago</span>
+								<span class="share-link"><i class="ti ti-share-2"></i> Share note</span>
+							</div>
+							<div class="btn-stack">
+								<button class="btn btn-secondary"><i class="ti ti-pencil"></i> Edit note</button>
+								<button class="btn btn-delete"><i class="ti ti-trash"></i> Delete note</button>
+							</div>
+						</div>
+						<div class="modal-foot">
+							<button class="btn btn-primary">Back</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- MOBILE -->
+			<div class="col">
+				<div class="state-label">Mobile · bottom sheet</div>
+				<div class="phone">
+					<div class="sheet">
+						<div class="modal-head">
+							<div class="modal-title">Note</div>
+							<div class="head-action">
+								<i class="ti ti-pencil" style="font-size: 16px"></i> Edit
+							</div>
+						</div>
+						<div class="modal-body">
+							<div class="note-box" style="min-height: 150px">
+								<div class="note-title">This is a test</div>
+								<div class="note-body">Lorem Ipsum and here line 2</div>
+							</div>
+							<div
+								class="meta-row"
+								style="
+									flex-direction: column;
+									align-items: flex-start;
+									gap: 0.6rem;
+									margin: 0.9rem 0 1.2rem;
+								"
+							>
+								<span class="note-meta">Created 37s ago · Updated 1s ago</span>
+								<span class="share-link"><i class="ti ti-share-2"></i> Share note</span>
+							</div>
+							<div class="btn-stack">
+								<button class="btn btn-delete"><i class="ti ti-trash"></i> Delete note</button>
+							</div>
+						</div>
+						<div class="modal-foot">
+							<button class="btn btn-primary">Back</button>
+						</div>
+						<div class="grab"><span></span></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { debounce, nonNullish } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import QrCode from '$lib/components/ui/QrCode.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		address: string;

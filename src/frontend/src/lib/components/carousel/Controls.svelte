@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { IconWest, IconEast } from '@dfinity/gix-components';
+	import IconEast from '$lib/components/icons/IconEast.svelte';
+	import IconWest from '$lib/components/icons/IconWest.svelte';
 	import ButtonControl from '$lib/components/ui/ButtonControl.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 

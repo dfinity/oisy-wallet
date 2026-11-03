@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { Chain } from '@liquidium/client';
 	import { getContext, setContext, untrack } from 'svelte';
 	import { writable } from 'svelte/store';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
@@ -34,6 +34,7 @@
 	import type { LiquidiumMarket } from '$lib/types/liquidium';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenId } from '$lib/types/token';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -42,7 +43,9 @@
 		amount: OptionAmount;
 		supplyProgressStep: string;
 		inflowFee?: bigint;
+		inflowFeeUnavailable?: boolean;
 		currentStep?: WizardStep;
+		onSelectToken?: () => void;
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
@@ -53,7 +56,9 @@
 		amount = $bindable(),
 		supplyProgressStep = $bindable(),
 		inflowFee,
+		inflowFeeUnavailable,
 		currentStep,
+		onSelectToken,
 		onClose,
 		onNext,
 		onBack
@@ -178,6 +183,7 @@
 				identity: $authIdentity,
 				ethAddress: $ethAddress,
 				poolId: market.poolId,
+				chain: Chain.ETH,
 				asset: market.asset,
 				amount: amountBaseUnits,
 				inflowFee,
@@ -213,7 +219,7 @@
 
 {#snippet feeDisplay()}
 	<EthFeeDisplay>
-		{#snippet label()}{$i18n.fee.text.network_fee}{/snippet}
+		{#snippet label()}{$i18n.liquidium.text.transaction_fee}{/snippet}
 	</EthFeeDisplay>
 {/snippet}
 
@@ -243,10 +249,12 @@
 			<LiquidiumSupplyForm
 				{feeDisplay}
 				{inflowFee}
+				{inflowFeeUnavailable}
 				{market}
 				{onClose}
 				onCustomErrorValidate={validateSupplyAmount}
 				{onNext}
+				{onSelectToken}
 				totalFee={$maxGasFee}
 				bind:amount
 			/>
