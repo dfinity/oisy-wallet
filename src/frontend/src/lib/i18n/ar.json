@@ -133,7 +133,7 @@
 			"section_finance": "",
 			"section_more": "",
 			"airdrops": "المكافآت",
-			"canister_top_up": "",
+			"tools": "",
 			"earning": "الكسب والمكافآت",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "",
 			"earning": "",
 			"airdrops": "افتح عرض المكافآت",
-			"canister_top_up": "",
+			"tools": "",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "عنوان محفظتك، الإعدادات، تسجيل الخروج والروابط الخارجية",
@@ -909,6 +909,12 @@
 			"loading_profile": "خطأ أثناء تحميل الملف الشخصي. يرجى تحديث الصفحة للحصول على التجربة الكاملة.",
 			"export_exchange_rate_unavailable": "لا تزال أسعار الصرف قيد التحميل. حاول مرة أخرى بعد لحظة.",
 			"export_failed": "لم نتمكن من إنشاء التصدير الخاص بك. يرجى المحاولة مرة أخرى."
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "",
+			"top_up_canister": ""
 		}
 	},
 	"shortcuts": {

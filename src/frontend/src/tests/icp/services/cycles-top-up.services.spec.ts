@@ -524,14 +524,14 @@ describe('cycles-top-up.services', () => {
 		});
 
 		// The terminal event is the Active transactions loader's, once per row.
-		it('reports the top-up as executing from the navigation, and leaves its outcome to the row', async () => {
+		it('reports the top-up as executing from Tools, and leaves its outcome to the row', async () => {
 			await topUpCanisterWithIcp(params);
 
 			expect(trackCyclesTopUp).toHaveBeenCalledExactlyOnceWith({
 				step: 'top_up',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
 				tokenSymbol: 'ICP',
-				sourceLocation: 'navigation'
+				sourceLocation: 'tools_page'
 			});
 		});
 
