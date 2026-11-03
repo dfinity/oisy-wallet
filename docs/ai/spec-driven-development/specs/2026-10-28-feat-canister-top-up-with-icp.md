@@ -3,7 +3,7 @@
 # Spec: Canister top-up, paid with ICP or TCYCLES
 
 - **Type:** `feat`
-- **Area:** Frontend (navigation, the Top up modal, CMC calls, ICP activity labels, recently used destinations), Backend (one active-user-transaction variant)
+- **Area:** Frontend (a Tools page and its navigation item, the Top up modal, CMC calls, ICP activity labels, recently used destinations), Backend (one active-user-transaction variant)
 - **Status:** Draft. All decisions are resolved (§12).
 
 ---
@@ -12,7 +12,7 @@
 
 OISY can top up a canister, but only from TCYCLES and only from the TCYCLES token page (PRODUCT.md → Top up a canister). A user who holds ICP has to mint TCYCLES first and then top up: two flows, two confirmations and two extra cycles-ledger fees.
 
-The NNS Cycles Minting Canister (CMC) can turn ICP into cycles and put them straight into a canister: an ICP transfer followed by `notify_top_up`. This feature adds that path and makes topping up an OISY feature of its own instead of a feature of one token: a **Canister top-up** item in the navigation opens the flow, and the user pays with ICP or TCYCLES.
+The NNS Cycles Minting Canister (CMC) can turn ICP into cycles and put them straight into a canister: an ICP transfer followed by `notify_top_up`. This feature adds that path and makes topping up an OISY feature of its own instead of a feature of one token: a **Canister top-up** card on a new **Tools** page opens the flow, and the user pays with ICP or TCYCLES.
 
 It also lets the user pick the canister from their contacts, which the TCYCLES top-up does not offer today.
 
@@ -43,10 +43,10 @@ Verified on 2026-10-28 against `dfinity/ic` (`rs/nns/cmc/src/main.rs`, `rs/nns/c
 
 ## 4. Entry points
 
-1. **Navigation.** A **Canister top-up** item in the More group, after Rewards, with the fuel pump icon of the Top up hero button. On desktop the More section reads Notes, Explore, Rewards, Canister top-up; on mobile the More sheet reads NFTs, Explore, Rewards, Canister top-up, Help, Settings. It opens the Canister top-up modal, as Notes opens its modal, and never takes the "current page" treatment. Picked in the mobile More sheet, it closes the sheet, as picking a destination does. The label leads with "canister": a plain "Top up" in a wallet's navigation reads as adding funds to the wallet.
+1. **Tools page.** A **Tools** item in the More group, after Rewards, with a wrench icon, opens a Tools page (`/tools/`). On desktop the More section reads Notes, Explore, Rewards, Tools; on mobile the More sheet reads NFTs, Explore, Rewards, Tools, Help, Settings. The page's **Canister top-up** card opens the Canister top-up modal. The page also holds Export data, moved from Settings, which keeps an Export data card that opens Tools, so the item and the page are not flagged (R18). The card leads with "canister": a plain "Top up" in a wallet reads as adding funds to the wallet.
 2. **TCYCLES page.** The Top up hero button stays, with its label, its icon and its rule for when it is enabled. It opens the same flow with TCYCLES already picked, so it never shows the token picker.
 3. The modal is titled **Canister top-up** from both entry points.
-4. **Rollout.** A new flag gates the navigation item and every change to the Top up flow (paying with ICP, the token picker, the title, the canister step's tabs): on for local and staging builds until a real ICP top-up on staging, the recovery path of §6 included, has been verified; then on everywhere and kept as a kill switch. The ICP Activity label and the Recently used exclusion (§5.6) are not flagged: they only describe transfers that already exist. The navigation item ships only together with paying with ICP, never before it. `CYCLES_TOP_UP_ENABLED` keeps governing TCYCLES: while it is off, the TCYCLES page has no Top up button, as today, and the flow does not offer TCYCLES.
+4. **Rollout.** A new flag gates the Tools page's Canister top-up card and every change to the Top up flow (paying with ICP, the token picker, the title, the canister step's tabs): on for local and staging builds until a real ICP top-up on staging, the recovery path of §6 included, has been verified; then on everywhere and kept as a kill switch. The ICP Activity label and the Recently used exclusion (§5.6) are not flagged: they only describe transfers that already exist. The Canister top-up card ships only together with paying with ICP, never before it. `CYCLES_TOP_UP_ENABLED` keeps governing TCYCLES: while it is off, the TCYCLES page has no Top up button, as today, and the flow does not offer TCYCLES.
 
 ## 5. Canister top-up
 
@@ -58,7 +58,7 @@ The steps are: token (only when needed), canister, amount, review, progress.
 2. **Both usable**: a picker lists ICP and TCYCLES with their balances. Picking one goes to the canister step, whose Back returns to the picker.
 3. **One usable**: the picker is skipped and the flow starts on the canister step with that token.
 4. **None usable**: the modal explains what a canister top-up is (cycles are what a canister runs on, and a top-up adds them) and that it can be paid with ICP or TCYCLES. It does not go on.
-5. **An unanswered TCYCLES top-up** (PRODUCT.md → Top up a canister → Outcome) keeps its guarantee: a modal opened from the navigation while one exists starts on that request's Review, as a modal opened later from the TCYCLES page does, so the same canister and amount never become a second withdrawal.
+5. **An unanswered TCYCLES top-up** (PRODUCT.md → Top up a canister → Outcome) keeps its guarantee: a modal opened from Tools while one exists starts on that request's Review, as a modal opened later from the TCYCLES page does, so the same canister and amount never become a second withdrawal.
 
 ### 5.2 Canister
 
@@ -128,17 +128,17 @@ Between the transfer and the notify, the ICP sits in the CMC's custody. Anyone c
 
 The existing **`cycles_top_up`** family (PRODUCT.md → Cycles top-up tracking) covers both tokens:
 
-1. `source_location` is `navigation` when the modal opens from the navigation and `token_details` when it opens from the TCYCLES page.
+1. `source_location` is `tools_page` when the modal opens from Tools and `token_details` when it opens from the TCYCLES page.
 2. `open` fires when the modal opens; `top_up` fires `executing`, then `success` or `error`, with `token_symbol` ICP or TCYCLES.
 3. For ICP, `result_error_code` reuses Mint's codes: `refunded`, `failed` (another final CMC answer), and, where nothing moved, `transfer_failed`, `not_trackable`, `timed_out` and `not_sent`. The terminal event of an ICP top-up fires from its row under the loader's rule, except for a top-up that ends before any ICP moves, which the modal reports once its row is deleted, as for Mint. `event_severity` is `error` for `refunded` and `failed`, `warn` otherwise.
 4. No amount, no amount range, no canister ID and no principal, as for the TCYCLES top-up: any of them, with the event's time, would pick out the one transfer on the public ICP ledger.
 
 ## 9. Acceptance criteria
 
-- **AC1** With the flag on, the More group shows Canister top-up after Rewards, with the fuel pump icon, on desktop and mobile; it opens the modal and never shows as the current page. With the flag off, it is absent.
+- **AC1** The More group shows Tools after Rewards, with a wrench icon, on desktop and mobile, whatever the flags; it opens the Tools page. With the flag on, the page's Canister top-up card opens the modal; with the flag off, the card is absent.
 - **AC2** The TCYCLES page's Top up button keeps its label and enabled rule and opens the flow with TCYCLES picked, without the picker. The modal is titled Canister top-up from both entry points.
-- **AC3** From the navigation, the picker shows only when ICP and TCYCLES are both usable (§5.1.1); with one usable, the flow starts on the canister step with it; with none, the modal explains the feature and the two ways to pay, and does not go on. A missing balance and a disabled TCYCLES count as zero.
-- **AC4** An unanswered TCYCLES top-up makes a modal opened from the navigation start on its Review.
+- **AC3** From Tools, the picker shows only when ICP and TCYCLES are both usable (§5.1.1); with one usable, the flow starts on the canister step with it; with none, the modal explains the feature and the two ways to pay, and does not go on. A missing balance and a disabled TCYCLES count as zero.
+- **AC4** An unanswered TCYCLES top-up makes a modal opened from Tools start on its Review.
 - **AC5** The canister step has Recently topped up and Contacts tabs. Recently topped up lists the canisters of loaded TCYCLES top-ups, with a contact's name where the canister is a contact address. Contacts lists every contact address that is a canister ID, one row per address, and no ICP account identifier. Picking an entry goes on after the existence check.
 - **AC6** The step opens on Contacts when Recently topped up is empty and Contacts is not, and on Recently topped up otherwise. Each tab has an empty state.
 - **AC7** With ICP picked, Recently topped up shows the hint of §5.2.6, with or without entries.
@@ -153,7 +153,8 @@ The existing **`cycles_top_up`** family (PRODUCT.md → Cycles top-up tracking) 
 - **AC16** The backend accepts the new variant only with ICP as source, a valid amount and a canister ID.
 - **AC17** The analytics fire as in §8 and never carry an amount, a canister ID or a principal.
 - **AC18** All new copy is translated in every shipped locale (`Languages` enum).
-- **AC19** PRODUCT.md documents the navigation item, paying with ICP, the token picker, Contacts in the canister step, the ICP Activity label and the Recently used exclusion, and its Top up section no longer lists "pick a canister from Contacts" and "top up straight from ICP through the CMC" among what it does not do. The 2026-10-06 spec stays as it is.
+- **AC19** PRODUCT.md documents the Tools page, paying with ICP, the token picker, Contacts in the canister step, the ICP Activity label and the Recently used exclusion, and its Top up section no longer lists "pick a canister from Contacts" and "top up straight from ICP through the CMC" among what it does not do. The 2026-10-06 spec stays as it is.
+- **AC20** Export data lives on the Tools page, unchanged, and its events report `tools_page`; Settings keeps an Export data card that says export has moved and opens Tools.
 
 ## 10. Non-goals
 
@@ -170,7 +171,7 @@ The existing **`cycles_top_up`** family (PRODUCT.md → Cycles top-up tracking) 
 
 ## 11. Implementation plan
 
-Seven PRs, stacked linearly, each in granular commits and each behaviour PR with its own PRODUCT.md entry. This spec lands with PR 1, not as a PR of its own (§12, R16):
+Eight PRs, stacked linearly, each in granular commits and each behaviour PR with its own PRODUCT.md entry. This spec lands with PR 1, not as a PR of its own (§12, R16):
 
 1. `feat(backend)!: add a cycles top-up active-user-transaction variant`: this spec, and §6.7 as the only code change, with a `BREAKING CHANGE:` line.
 2. `feat(frontend): top up a canister from ICP through the CMC`: `notify_top_up` in the wrapper, the transfer with `TPUP`, the top-up service with Mint's retry semantics, the deposit lookup (§6.4), the ICP Activity label (§5.6.1) and the Recently used exclusion (§5.6.4), with unit tests. No UI.
@@ -178,7 +179,8 @@ Seven PRs, stacked linearly, each in granular commits and each behaviour PR with
 4. `feat(frontend): top up a canister from the navigation with ICP or TCYCLES`: the navigation item, the token picker and its empty state, the ICP amount, review and progress, the row and its poller handling, the hint, the title and the analytics, in English, with component tests.
 5. Translations for every shipped locale.
 6. `feat(frontend): show ICP and TCYCLES top-ups alike in Activity`: the Top up title for ICP top-ups, the Canister label for both, the contact's canister or Canister unknown for ICP, and the Type filter's Top up entry (§5.6), translated, with tests. Added after testing on fe1 (R17).
-7. Turning the flag on in production after a real ICP top-up on staging, the recovery path included. Staging talks to the mainnet CMC, so this spends real ICP; a small amount suffices.
+7. `feat(frontend): add a Tools page for canister top-up and data export`: the Tools item in place of the Canister top-up item, the Tools page with the Canister top-up card and Export data, moved from Settings, the Settings card that points to Tools and the `tools_page` source location, translated, with tests (R18).
+8. Turning the flag on in production after a real ICP top-up on staging, the recovery path included. Staging talks to the mainnet CMC, so this spends real ICP; a small amount suffices.
 
 **Overlap with open drafts.** #14448 and #14449 extract and extend the top-up wizard that PR 3 and PR 4 change. Whichever lands second takes the merge. Through #14449, a top-up started from Send's choice gets the new canister step too.
 
@@ -198,10 +200,10 @@ None.
 
 Decided on 2026-10-28.
 
-- **R1 Entry point:** a Canister top-up item in the navigation's More group, after Rewards (§4.1). Topping up is an OISY feature, not a feature of one token. Rejected: a Top up button on the ICP page (most ICP holders never top up a canister), a "Send or Top up" choice for ICP in Send (an extra step on every ICP send), a choice of token inside the TCYCLES page's Top up, Mint with a "to a canister" option, and offering ICP only when TCYCLES runs short.
-- **R2 Names:** the navigation item and the modal title are **Canister top-up**; the TCYCLES page button stays **Top up**, where the page gives the context.
+- **R1 Entry point:** a Canister top-up item in the navigation's More group, after Rewards (§4.1). Topping up is an OISY feature, not a feature of one token. Rejected: a Top up button on the ICP page (most ICP holders never top up a canister), a "Send or Top up" choice for ICP in Send (an extra step on every ICP send), a choice of token inside the TCYCLES page's Top up, Mint with a "to a canister" option, and offering ICP only when TCYCLES runs short. Since R18, the entry point is a card on a Tools page.
+- **R2 Names:** the entry point (since R18, the Tools page's card) and the modal title are **Canister top-up**; the TCYCLES page button stays **Top up**, where the page gives the context.
 - **R3 Token picker:** shown only when both tokens are usable, meaning enough to top up, not just above zero; a missing balance counts as zero; with none usable, the modal explains the feature (§5.1).
-- **R4 Rollout:** the navigation item ships only together with paying with ICP (§4.4).
+- **R4 Rollout:** the entry point (since R18, the Tools page's Canister top-up card) ships only together with paying with ICP (§4.4).
 - **R5 TCYCLES page:** its Top up button stays and opens the flow with TCYCLES picked (§4.2).
 - **R6 Settlement:** an active user transaction with a new variant that stores the canister ID, opened before the ICP is sent (§6). The AUT is needed anyway, and the chain does not keep the canister (§3.4).
 - **R7 Memo:** the canister ID cannot go into the transfer's memo (§3.4).
@@ -213,5 +215,6 @@ Decided on 2026-10-28.
 - **R13 Unit:** the ICP flow shows the cycles a canister receives as cycles, in trillions ("≈ 2.49T cycles"), never as TCYCLES: TCYCLES is a token, and a top-up paid with ICP involves none (§5.3.2).
 - **R14 Active transactions wording:** the action, the amount and the token paid, as in "Canister top-up 1 ICP" (§6.6).
 - **R15 Tab label:** Recently topped up, as today (§5.2.2).
-- **R16 PRs:** PRs stacked linearly, six at first and seven since R17; this spec lands with PR 1, not as a PR of its own (§11).
+- **R16 PRs:** PRs stacked linearly, six at first, seven since R17 and eight since R18; this spec lands with PR 1, not as a PR of its own (§11).
 - **R17 Activity naming** (2026-10-29, after testing on fe1): ICP and TCYCLES top-ups are both titled **Top up**. The canister shows under **Canister**, not **To**, since the tokens do not go to it, as an approval's spender shows under **For**. An ICP top-up's canister is named through a contact's canister ID when one matches, and reads **Canister unknown** otherwise; the CMC deposit account never shows. The Type filter gets a **Top up** entry for both. The Active transactions row keeps "Canister top-up 1 ICP" (R14).
+- **R18 Tools page** (2026-11-03): a navigation item for a feature most users never need was too prominent. A **Tools** item takes its place and opens a Tools page with a Canister top-up card and Export data, moved from Settings, where an Export data card now says export has moved and opens Tools. Tools also shows that OISY is more than a wallet. Rejected: a Settings switch to show special features in the navigation, and Tools under the More menu next to Help.
