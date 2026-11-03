@@ -138,7 +138,7 @@ pub async fn btc_add_pending_transaction(
         mutate_state(|state| {
             // Taken after the UTXO fetch, so the reservation post-dates any concurrent call's
             // snapshot that could still lack its UTXOs (see `prune_pending_transactions`).
-            let now_ns = time();
+            let reserved_at_ns = time();
             let mut model = BtcUserPendingTransactionsModel::new(
                 &mut state.btc_user_pending_transactions,
                 None,
@@ -149,7 +149,7 @@ pub async fn btc_add_pending_transaction(
                 &source_address,
                 &current_utxos,
                 snapshot_started_ns,
-                now_ns,
+                reserved_at_ns,
             );
 
             if model.has_intersecting_pending_utxos(principal, &params.utxos) {
@@ -159,7 +159,7 @@ pub async fn btc_add_pending_transaction(
             let current_pending_transaction = StoredPendingTransaction {
                 txid: params.txid,
                 utxos: params.utxos,
-                created_at_timestamp_ns: now_ns,
+                created_at_timestamp_ns: reserved_at_ns,
             };
             model
                 .add_pending_transaction(principal, source_address, current_pending_transaction)
