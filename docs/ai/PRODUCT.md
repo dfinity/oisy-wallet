@@ -283,7 +283,7 @@ The [Help](#help) page emits one structured `help` event under `event_context: h
 | ---------------- | -------------------- | ------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `open`           | —                    | the Help page opens                         | `success`                                             | —                                                                                                          |
 | `contact`        | `support`            | the help-centre link is clicked             | `success`                                             | `event_key: link`, `event_value`: destination URL                                                          |
-| `explorer`       | `network_explorers`  | a block explorer link is clicked            | `success`                                             | `event_key: network` + the network; no `event_provider`                                                    |
+| `explorer`       | `network_explorers`  | a blockchain explorer link is clicked       | `success`                                             | `event_key: network` + the network; no `event_provider`                                                    |
 | `explorer`       | `provider_explorers` | a provider explorer link is clicked         | `success`                                             | `event_provider`: the provider id; `event_key: network` + the chain                                        |
 | `scan`           | `icpswap_withdrawal` | the scan completes                          | `executing` → `success`/`error`/`cancel` (superseded) | `event_key: balances_found` + the count; `source_detail`: pools checked                                    |
 | `select_pool`    | `icpswap_withdrawal` | a token pair resolves and its balances load | `success` / `error` (no pool)                         | `token_symbol` / `token2_symbol`, `token_network: icp`; on success `event_key: balances_found` + the count |
@@ -545,9 +545,9 @@ Data export is deliberately **not** here: it is a utility, not help. It lives on
 
 The first card explains where to get help and links out to the OISY help centre. It is the same destination as the user menu's Support link, kept at the top of the page as the fallback for anything the page below cannot resolve.
 
-### Block explorers
+### Blockchain explorers
 
-OISY's transaction history is an index built from third-party providers, so it can lag behind the chain: a received transfer missing, a balance minutes stale, a send confirmed on-chain but not yet listed. The block explorer is the ground truth, and this card opens it at the user's own address — one link per **enabled mainnet network**, labelled with that network's name and logo.
+OISY's transaction history is an index built from third-party providers, so it can lag behind the chain: a received transfer missing, a balance minutes stale, a send confirmed on-chain but not yet listed. The blockchain explorer is the ground truth, and this card opens it at the user's own address — one link per **enabled mainnet network**, labelled with that network's name and logo. Its text says what the user finds there, their balances and full transaction history, and that blockchains are public ledgers, so all on-chain activity can be checked independently.
 
 The card renders from the user's enabled mainnet networks rather than a fixed list, so switching a network off in Settings removes its link, and a network the wallet gains is one map entry away from having one. Testnets never appear: the card is about real funds, and a user running testnets already knows where the explorer is. Most of the links use the same explorer host as the rest of the wallet. Two differ on purpose:
 
@@ -599,7 +599,7 @@ The page deliberately does **not**: scan pools where only one leg is active (rou
 
 A page (`/tools/`) for what a user does now and then rather than every day, reached from the navigation's **Tools** entry. It shows that OISY does more than hold and send tokens. It is laid out like Settings, a stack of cards:
 
-- **Block explorers**, the same card as on [Help](#help): a link to the user's own address on the block explorer of each enabled network. Its clicks report `source_location: tools_page`.
+- **Blockchain explorers**, the same card as on [Help](#help): a link to the user's own address on the blockchain explorer of each enabled network. Its clicks report `source_location: tools_page`.
 - **Canister top-up**, behind `CANISTER_TOP_UP_ENABLED` (`src/frontend/src/env/canister-top-up.env.ts`, local and staging). Its **Top up** button opens [Top up a canister](#top-up-a-canister) without a token, so the user picks what pays. The card leads with the canister: a plain "Top up" in a wallet would read as adding funds to the wallet.
 - **Export data**: the CSV exports of tokens and transactions, Basic and Extended, as they were on Settings. Settings keeps an Export data card that says export has moved and opens Tools.
 

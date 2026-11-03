@@ -807,8 +807,8 @@
 			"support_title": "Wsparcie",
 			"support_description": "Odpowiedzi i więcej informacji znajdziesz na stronie wsparcia w dokumentacji $oisy_name. Jeśli utkniesz, skontaktuj się z zespołem.",
 			"support_link": "Przejdź na naszą stronę wsparcia",
-			"network_explorers_title": "Eksploratory bloków",
-			"network_explorers_description": "$oisy_name tworzy Twoją historię na podstawie zewnętrznych indekserów, które mogą nie nadążać za blockchainem. Eksplorator bloków pokazuje, co sama sieć rejestruje dla Twojego adresu.",
+			"network_explorers_title": "Eksploratory blockchaina",
+			"network_explorers_description": "Otwórz te linki, aby zobaczyć swoje adresy w eksploratorach blockchaina i śledzić salda w czasie rzeczywistym oraz pełną historię transakcji. Blockchainy są publicznymi rejestrami, więc możesz samodzielnie weryfikować i badać całą aktywność on-chain swojego $oisy_name.",
 			"explorers_title": "Status transakcji u dostawcy",
 			"explorers_description": "$oisy_name realizuje swapy i transfery przez most za pośrednictwem zewnętrznych dostawców. Jeśli któryś trwa dłużej niż oczekiwano, otwórz eksplorator dostawcy: pokazuje, na jakim etapie jest Twój transfer, już przefiltrowany do Twojego portfela.",
 			"explorers_velora_description": "Swapy na Ethereum i innych sieciach EVM.",
@@ -838,7 +838,7 @@
 			"withdraw": "Wypłać"
 		},
 		"alt": {
-			"network_explorer_link": "Otwórz eksplorator bloków sieci $network dla swojego adresu",
+			"network_explorer_link": "Otwórz eksplorator blockchaina sieci $network dla swojego adresu",
 			"explorer_link": "Otwórz eksplorator $provider dla swojego adresu ($chain)",
 			"select_token_first": "Wybierz pierwszy token puli",
 			"select_token_second": "Wybierz drugi token puli",
