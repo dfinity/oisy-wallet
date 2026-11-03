@@ -927,6 +927,7 @@ interface I18nCycles_top_up {
 	text: {
 		top_up: string;
 		title: string;
+		canister_top_up: string;
 		description: string;
 		description_icp: string;
 		pay_with: string;
@@ -952,6 +953,8 @@ interface I18nCycles_top_up {
 		one_way_icp: string;
 		topping_up: string;
 		topped_up: string;
+		topped_up_cycles: string;
+		pending: string;
 		unknown: string;
 		unknown_fresh: string;
 		sent_to_canister: string;
@@ -972,6 +975,11 @@ interface I18nCycles_top_up {
 		clock: string;
 		refunded: string;
 		refunded_nothing: string;
+		refunded_icp: string;
+		failed: string;
+		not_started: string;
+		transfer_failed: string;
+		unconfirmed: string;
 	};
 }
 

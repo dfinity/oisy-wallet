@@ -16,7 +16,10 @@
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { ProgressStepsCyclesTopUp } from '$lib/enums/progress-steps';
 	import { WizardStepsCyclesTopUp, type WizardStepsSend } from '$lib/enums/wizard-steps';
-	import { trackCyclesTopUp } from '$lib/services/cycles-top-up-analytics.services';
+	import {
+		type CyclesTopUpSourceLocation,
+		trackCyclesTopUp
+	} from '$lib/services/cycles-top-up-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -37,9 +40,23 @@
 		onClose: () => void;
 		// Leads from the first step back to whatever led to the top-up, when something did.
 		onBack?: () => void;
+		// Where the modal that hosts the top-up opened → `source_location`.
+		sourceLocation?: CyclesTopUpSourceLocation;
+		// Set when the host reports the open itself: the Canister top-up modal does when it opens,
+		// before anything is picked.
+		openReported?: boolean;
 	}
 
-	let { token, steps, currentStep, modal, onClose, onBack }: Props = $props();
+	let {
+		token,
+		steps,
+		currentStep,
+		modal,
+		onClose,
+		onBack,
+		sourceLocation,
+		openReported = false
+	}: Props = $props();
 
 	let canisterIdText = $state('');
 	let sendAmount = $state<OptionAmount>();
@@ -87,7 +104,11 @@
 		nonNullish(resendable) && resendable.canisterId === canisterId && resendable.amount === amount
 	);
 
-	onMount(() => trackCyclesTopUp({ step: 'open' }));
+	onMount(() => {
+		if (!openReported) {
+			trackCyclesTopUp({ step: 'open', sourceLocation });
+		}
+	});
 
 	// A top-up can answer after the modal is gone, closed when another identity signed in. The
 	// outcome is still recorded for its sender and shown in a toast, but the modal's own steps
@@ -205,7 +226,7 @@
 
 		lastCyclesTopUps.update((all) => ({ ...all, [sender]: { request, send } }));
 
-		const analytics = { step: 'top_up' as const, tokenSymbol: token.symbol };
+		const analytics = { step: 'top_up' as const, tokenSymbol: token.symbol, sourceLocation };
 
 		progressStep = ProgressStepsCyclesTopUp.INITIALIZATION;
 
