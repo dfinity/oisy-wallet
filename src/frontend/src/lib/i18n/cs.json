@@ -1214,6 +1214,8 @@
 			"description": "Cykly se převedou z vašeho zůstatku $token do kanistru, který je spotřebuje na výpočty a úložiště.",
 			"description_icp": "Váš $token se převede na cykly podle kurzu sítě a kanistr je spotřebuje na výpočty a úložiště.",
 			"pay_with": "Vyberte, čím dobití zaplatíte.",
+			"enable_token": "Aktivovat",
+			"not_enough_to_pay": "Na dobití nestačí",
 			"no_token_title": "Dobíjejte pomocí ICP nebo TCYCLES",
 			"no_token_description": "Kanistry běží na cyklech a dobití je kanistru přidá. Jakmile budete mít v peněžence dost ICP nebo TCYCLES, můžete dobíjet zde.",
 			"canister_id_placeholder": "Zadejte ID kanistru",
@@ -1263,6 +1265,9 @@
 			"not_started": "Dobití se nepodařilo spustit. Z peněženky nic neodešlo. Zkuste to za chvíli znovu.",
 			"transfer_failed": "Převod $token neproběhl. Z peněženky nic neodešlo. Zkuste to za chvíli znovu.",
 			"unconfirmed": "OISY nemohl potvrdit převod $token. Pokud proběhl, dobití se dokončí na pozadí: sledovat ho můžete v aktivních transakcích."
+		},
+		"alt": {
+			"enable_token": "Aktivovat $token a platit jím"
 		}
 	},
 	"active_user_transactions": {

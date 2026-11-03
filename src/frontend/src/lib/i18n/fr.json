@@ -1214,6 +1214,8 @@
 			"description": "Les cycles passent de votre solde $token au canister, qui les utilise pour le calcul et le stockage.",
 			"description_icp": "Vos $token sont convertis en cycles au taux du réseau, et le canister les utilise pour le calcul et le stockage.",
 			"pay_with": "Choisissez avec quoi payer la recharge.",
+			"enable_token": "Activer",
+			"not_enough_to_pay": "Insuffisant pour recharger",
 			"no_token_title": "Rechargez avec des ICP ou des TCYCLES",
 			"no_token_description": "Les canisters fonctionnent avec des cycles, et une recharge en ajoute à un canister. Dès que votre portefeuille contient assez d'ICP ou de TCYCLES, vous pouvez recharger ici.",
 			"canister_id_placeholder": "Saisissez un ID de canister",
@@ -1263,6 +1265,9 @@
 			"not_started": "La recharge n'a pas pu démarrer. Rien n'a quitté votre portefeuille. Réessayez dans un instant.",
 			"transfer_failed": "Le transfert des $token n'a pas abouti. Rien n'a quitté votre portefeuille. Réessayez dans un instant.",
 			"unconfirmed": "OISY n'a pas pu confirmer le transfert des $token. S'il a abouti, la recharge se termine en arrière-plan : suivez-la dans les transactions actives."
+		},
+		"alt": {
+			"enable_token": "Activer $token pour payer avec"
 		}
 	},
 	"active_user_transactions": {

@@ -1214,6 +1214,8 @@
 			"description": "The cycles go from your $token balance into the canister, which spends them on computation and storage.",
 			"description_icp": "Your $token is turned into cycles at the network's rate, and the canister spends them on computation and storage.",
 			"pay_with": "Choose what to pay the top-up with.",
+			"enable_token": "Enable",
+			"not_enough_to_pay": "Not enough to top up",
 			"no_token_title": "Top up with ICP or TCYCLES",
 			"no_token_description": "Canisters run on cycles, and a top-up adds them to a canister. Once your wallet holds enough ICP or TCYCLES, you can top up here.",
 			"canister_id_placeholder": "Enter a canister ID",
@@ -1263,6 +1265,9 @@
 			"not_started": "The top-up couldn't be started. Nothing left your wallet. Try again in a moment.",
 			"transfer_failed": "The $token transfer didn't go through. Nothing left your wallet. Try again in a moment.",
 			"unconfirmed": "OISY couldn't confirm the $token transfer. If it went through, the top-up finishes in the background: follow it under Active transactions."
+		},
+		"alt": {
+			"enable_token": "Enable $token to pay with it"
 		}
 	},
 	"active_user_transactions": {
