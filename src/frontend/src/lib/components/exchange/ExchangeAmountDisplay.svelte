@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
+	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
@@ -27,12 +27,22 @@
 			: undefined
 	);
 
-	let displayAmount = $derived(
-		`${formatToken({
+	let roundedAmount = $derived(
+		formatToken({
 			value: amount,
 			unitName: decimals,
 			displayDecimals: EIGHT_DECIMALS
-		})} ${symbol}`
+		})
+	);
+
+	// Rounded to eight decimals, a nonzero amount below 0.000000005 would read as zero, which on a
+	// token approval is a revocation. Without fixed decimals, `formatToken` states it as below that.
+	let displayAmount = $derived(
+		`${
+			amount > ZERO && Number(roundedAmount) === 0
+				? formatToken({ value: amount, unitName: decimals })
+				: roundedAmount
+		} ${symbol}`
 	);
 </script>
 

@@ -16,6 +16,7 @@ import {
 	initSwapAmountsStore,
 	type SwapAmountsStoreData
 } from '$lib/stores/swap-amounts.store';
+import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import type { OptionAmount } from '$lib/types/send';
 import { SwapProvider } from '$lib/types/swap';
@@ -25,7 +26,7 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
-import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { act, fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get, readable } from 'svelte/store';
 
@@ -75,6 +76,40 @@ describe('SwapForm', () => {
 		});
 		mockContext.set(IC_TOKEN_FEE_CONTEXT_KEY, { store: icTokenFeeStore });
 	};
+
+	describe('current-parameter Review readiness', () => {
+		it('blocks Review for a foreground round with a usable same-amount quote', async () => {
+			const store = setupSwapAmountsStore(mockSwapAmounts);
+			const activity = initSwapQuoteActivityStore();
+			mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store, activity });
+			setupIcTokenFeeStore();
+			const onNext = vi.fn();
+			const { getByRole } = render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					slippageValue: '1',
+					isSwapAmountsLoading: false,
+					fee: 1000n,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext
+				},
+				context: mockContext
+			});
+			const review = getByRole('button', { name: en.swap.text.review_button });
+
+			expect(review).toBeEnabled();
+
+			await act(() => activity.start({ requestId: 1, background: false }));
+
+			expect(review).toBeDisabled();
+
+			await act(() => review.click());
+
+			expect(onNext).not.toHaveBeenCalled();
+		});
+	});
 
 	describe('switch tokens button', () => {
 		it.each([
@@ -719,6 +754,113 @@ describe('SwapForm', () => {
 	});
 
 	describe('loading states', () => {
+		it('shows receive-field loading throughout a same-amount foreground round', async () => {
+			const store = setupSwapAmountsStore(mockSwapAmounts);
+			const activity = initSwapQuoteActivityStore();
+			mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store, activity });
+			setupIcTokenFeeStore();
+
+			const { getAllByTestId, getByText, getByRole, queryByText } = render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					slippageValue: '1',
+					isSwapAmountsLoading: false,
+					fee: 1000n,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+			const [, receiveInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
+			const receiveField = receiveInput.closest('.token-input-currency');
+			const difference = getByText(/^\+\d+\.\d+%$/);
+			const review = getByRole('button', { name: en.swap.text.review_button });
+
+			expect(receiveInput).toHaveValue('10');
+			expect(receiveField).not.toHaveClass('animate-pulse');
+			expect(review).toBeEnabled();
+
+			await act(() => activity.start({ requestId: 1, background: false }));
+
+			expect(receiveField).toHaveClass('animate-pulse');
+			expect(receiveInput).toHaveValue('0');
+			expect(difference).not.toBeInTheDocument();
+			expect(review).toBeDisabled();
+
+			await act(() => activity.complete({ requestId: 1 }));
+
+			expect(receiveField).not.toHaveClass('animate-pulse');
+			expect(receiveInput).toHaveValue('10');
+			expect(queryByText(/^\+\d+\.\d+%$/)).toBeInTheDocument();
+			expect(review).toBeEnabled();
+		});
+
+		it('keeps a usable receive amount visible during background refresh', async () => {
+			const store = setupSwapAmountsStore(mockSwapAmounts);
+			const activity = initSwapQuoteActivityStore();
+			mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store, activity });
+			setupIcTokenFeeStore();
+
+			const { getAllByTestId, getByText, getByRole } = render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					slippageValue: '1',
+					isSwapAmountsLoading: true,
+					fee: 1000n,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+			const [, receiveInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
+			const difference = getByText(/^\+\d+\.\d+%$/);
+			const review = getByRole('button', { name: en.swap.text.review_button });
+
+			expect(receiveInput).toHaveValue('10');
+			expect(review).toBeEnabled();
+
+			await act(() => activity.start({ requestId: 1, background: true }));
+
+			expect(receiveInput.closest('.token-input-currency')).not.toHaveClass('animate-pulse');
+			expect(receiveInput).toHaveValue('10');
+			expect(difference).toBeInTheDocument();
+			expect(review).toBeEnabled();
+		});
+
+		it('shows receive-field loading before the first quote exists', async () => {
+			const store = setupSwapAmountsStore();
+			const activity = initSwapQuoteActivityStore();
+			activity.start({ requestId: 1, background: false });
+			mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store, activity });
+			setupIcTokenFeeStore();
+
+			const { getAllByTestId } = render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					slippageValue: '1',
+					isSwapAmountsLoading: false,
+					fee: 1000n,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+			const [, receiveInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
+
+			expect(receiveInput.closest('.token-input-currency')).toHaveClass('animate-pulse');
+			expect(receiveInput).toHaveValue('0');
+
+			await act(() => activity.complete({ requestId: 1 }));
+
+			expect(receiveInput.closest('.token-input-currency')).not.toHaveClass('animate-pulse');
+		});
+
 		it('should show skeleton when fee is not loaded', () => {
 			setupSwapAmountsStore(mockSwapAmounts);
 			setupIcTokenFeeStore();

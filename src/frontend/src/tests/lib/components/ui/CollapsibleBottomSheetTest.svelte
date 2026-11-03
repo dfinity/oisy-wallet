@@ -9,13 +9,20 @@
 		sheetTitle?: string;
 		withinModal?: boolean;
 		onCloseModal?: () => void;
+		disabled?: boolean;
 	}
 
-	let { withTrigger = false, sheetTitle, withinModal = false, onCloseModal }: Props = $props();
+	let {
+		withTrigger = false,
+		sheetTitle,
+		withinModal = false,
+		onCloseModal,
+		disabled = false
+	}: Props = $props();
 </script>
 
 {#snippet sheet()}
-	<CollapsibleBottomSheet {sheetTitle} trigger={withTrigger ? customTrigger : undefined}>
+	<CollapsibleBottomSheet {disabled} {sheetTitle} trigger={withTrigger ? customTrigger : undefined}>
 		{#snippet contentHeader()}
 			<span>header</span>
 		{/snippet}
@@ -32,8 +39,14 @@
 	{@render sheet()}
 {/if}
 
-{#snippet customTrigger({ open }: { open: () => void })}
+{#snippet customTrigger({
+	open,
+	disabled: triggerDisabled = false
+}: {
+	open: () => void;
+	disabled?: boolean;
+})}
 	{#if nonNullish(open)}
-		<Button onclick={open} testId="custom-trigger">open me</Button>
+		<Button disabled={triggerDisabled} onclick={open} testId="custom-trigger">open me</Button>
 	{/if}
 {/snippet}

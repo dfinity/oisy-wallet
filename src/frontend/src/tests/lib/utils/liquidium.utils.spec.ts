@@ -749,7 +749,7 @@ describe('liquidium.utils', () => {
 	describe('mapLiquidiumReserve', () => {
 		it('maps a reserve to oisy units (USD numbers, base-unit amounts kept)', () => {
 			const reserve: UserReserve = {
-				position: buildPosition({ borrowed: 5n, borrowedDecimals: 6n }),
+				position: buildPosition({ borrowed: 5_000n, borrowedDecimals: 6n }),
 				pool: buildPool(),
 				priceUsd: 60_000,
 				suppliedUsd: 6_000_000n,
@@ -765,12 +765,29 @@ describe('liquidium.utils', () => {
 				borrowApy: expect.closeTo(9),
 				deposited: 100_000_000n,
 				depositedDecimals: 8,
-				borrowed: 5n,
+				borrowed: 5_000n,
 				borrowedDecimals: 6,
 				debtInterest: ZERO,
 				suppliedUsd: 60_000,
-				borrowedUsd: 300
+				borrowedUsd: expect.closeTo(300)
 			});
+		});
+
+		it('prices the debt from `borrowed` alone, which already includes the accrued interest', () => {
+			const reserve: UserReserve = {
+				position: buildPosition({ borrowed: 5_000n, borrowedDecimals: 6n, debtInterest: 1_000n }),
+				pool: buildPool(),
+				priceUsd: 60_000,
+				suppliedUsd: ZERO,
+				// The SDK values `borrowed + debtInterest`: 0.006 × 60k = 360.
+				borrowedUsd: 36_000n,
+				usdDecimals: 2n
+			};
+
+			const { borrowedUsd, debtInterest } = mapLiquidiumReserve(reserve);
+
+			expect(borrowedUsd).toBeCloseTo(300);
+			expect(debtInterest).toBe(1_000n);
 		});
 	});
 

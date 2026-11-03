@@ -24,6 +24,7 @@ import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
 import { signPrehash } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
+import { LIFI_QUOTE_TIMEOUT_MS, SWAP_QUOTE_TIMEOUT_MS } from '$lib/constants/swap.constants';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
 import {
 	PLAUSIBLE_EVENTS,
@@ -33,6 +34,7 @@ import {
 	PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES
 } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
@@ -67,7 +69,13 @@ import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsQuoteResponse
 } from '$lib/types/near-intents';
-import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
+import {
+	SwapErrorCodes,
+	SwapProvider,
+	VeloraSwapTypes,
+	type SwapMappedResult,
+	type SwapQuoteObserver
+} from '$lib/types/swap';
 import { VELORA_EXTERNAL_REF_KEYS } from '$lib/types/velora-swap';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import {
@@ -333,6 +341,49 @@ describe('swap.services', () => {
 		vi.mocked(isNearIntentsQuoteExpired).mockReturnValue(false);
 	});
 
+	describe('quote participation dispatch', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it.each([
+			{ label: 'EVM', sourceToken: mockValidErc20Token, getQuote: mockVeloraGetQuote },
+			{ label: 'SOL', sourceToken: mockValidSplToken, getQuote: mockSolGetQuote },
+			{ label: 'BTC', sourceToken: BTC_MAINNET_TOKEN, getQuote: mockBtcGetQuote },
+			{ label: 'XRP', sourceToken: XRP_TOKEN, getQuote: mockXrpGetQuote },
+			{ label: 'ICP bridge', sourceToken: mockValidIcToken, getQuote: mockIcpBridgeGetQuote }
+		] as const)(
+			'forwards the observer to $label pricing without announcing registry membership',
+			async ({ sourceToken, getQuote }) => {
+				const onProviderParticipating = vi.fn();
+				getQuote.mockImplementationOnce(
+					({ onProviderParticipating: participate }: SwapQuoteObserver) => {
+						expect(onProviderParticipating).not.toHaveBeenCalled();
+						expect(participate).toEqual(expect.any(Function));
+
+						participate?.(SwapProvider.NEAR_INTENTS);
+						return Promise.resolve(undefined);
+					}
+				);
+				await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken,
+					destinationToken: mockValidErc20Token,
+					amount: '10',
+					tokens: [],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: mockSolAddress,
+					userBtcAddress: mockBtcAddress,
+					userXrpAddress: mockXrpAddress,
+					onProviderParticipating
+				});
+
+				expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.NEAR_INTENTS);
+			}
+		);
+	});
+
 	describe('fetchSwapAmounts', () => {
 		const mockTokens = [mockValidIcToken as IcToken, mockValidIcrcToken as IcToken];
 
@@ -344,6 +395,45 @@ describe('swap.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 		});
+
+		it.each([true, false])(
+			'reports ICP pricing participation without changing the ICRC-2 offer gate (%s)',
+			async (isSourceTokenIcrc2) => {
+				const onProviderParticipating = vi.fn();
+				vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue({
+					receive_amount: 950n,
+					slippage: 0.5
+				} as SwapAmountsReply);
+				vi.mocked(icpSwapBackend.icpSwapAmounts).mockImplementationOnce(
+					(params: Parameters<typeof icpSwapBackend.icpSwapAmounts>[0] & SwapQuoteObserver) => {
+						params.onProviderParticipating?.(SwapProvider.ICP_SWAP);
+						return Promise.resolve({ receiveAmount: 975n });
+					}
+				);
+				await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken,
+					destinationToken,
+					amount,
+					tokens: mockTokens,
+					slippage,
+					userEthAddress: undefined,
+					userSolAddress: undefined,
+					userBtcAddress: undefined,
+					userXrpAddress: undefined,
+					isSourceTokenIcrc2,
+					onProviderParticipating
+				});
+
+				expect(onProviderParticipating.mock.calls).toEqual(
+					isSourceTokenIcrc2
+						? [[SwapProvider.KONG_SWAP], [SwapProvider.ICP_SWAP]]
+						: [[SwapProvider.KONG_SWAP]]
+				);
+				expect(icpSwapBackend.icpSwapAmounts).toHaveBeenCalledOnce();
+				expect(kongBackendApi.kongSwapAmounts).toHaveBeenCalledOnce();
+			}
+		);
 
 		it('should handle both KONG_SWAP and ICP_SWAP providers correctly', async () => {
 			const kongSwapResponse = {
@@ -1355,6 +1445,448 @@ describe('swap.services', () => {
 					slippage: 0.5
 				});
 			});
+		});
+	});
+
+	describe('bounded quote collection', () => {
+		const params = {
+			sourceToken: mockValidErc20Token,
+			destinationToken: mockValidErc20Token,
+			amount: 1_000_000n,
+			userAddress: mockEthAddress,
+			slippage: 1
+		};
+		const offer = {
+			provider: SwapProvider.NEAR_INTENTS as const,
+			receiveAmount: 900_000n,
+			swapDetails: mockNearIntentsQuoteResponse
+		};
+		const veloraOffer: SwapMappedResult = {
+			provider: SwapProvider.VELORA,
+			receiveAmount: 800_000n,
+			swapDetails: mockVeloraDeltaPrice,
+			type: VeloraSwapTypes.DELTA
+		};
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+			vi.clearAllMocks();
+			mockVeloraGetQuote.mockResolvedValue(undefined);
+			mockEvmNearIntentsGetQuote.mockResolvedValue(undefined);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('retains a completed offer at the deadline when a competitor never settles', async () => {
+			mockVeloraGetQuote.mockReturnValueOnce(new Promise(() => {}));
+			mockEvmNearIntentsGetQuote.mockResolvedValueOnce(offer);
+			const settled = vi.fn();
+			void fetchSwapAmountsEVM(params).then(settled);
+
+			await vi.advanceTimersByTimeAsync(LIFI_QUOTE_TIMEOUT_MS - 1);
+
+			expect(settled).not.toHaveBeenCalled();
+
+			await vi.advanceTimersByTimeAsync(1);
+
+			expect(settled).toHaveBeenCalledExactlyOnceWith([offer]);
+		});
+
+		it('ignores participation from an abandoned quote after the deadline', async () => {
+			let participate: SwapQuoteObserver['onProviderParticipating'];
+			const onProviderParticipating = vi.fn();
+			mockVeloraGetQuote.mockImplementationOnce((observer: SwapQuoteObserver) => {
+				participate = observer.onProviderParticipating;
+				participate?.(SwapProvider.VELORA);
+				return new Promise(() => {});
+			});
+			const round = fetchSwapAmountsEVM({ ...params, onProviderParticipating });
+
+			await vi.advanceTimersByTimeAsync(SWAP_QUOTE_TIMEOUT_MS);
+
+			await expect(round).resolves.toEqual([]);
+			expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.VELORA);
+
+			participate?.(SwapProvider.VELORA);
+
+			expect(onProviderParticipating).toHaveBeenCalledOnce();
+		});
+
+		it('retains a mapped ICP offer when a canister quote never settles', async () => {
+			vi.mocked(kongBackendApi.kongSwapAmounts).mockReturnValueOnce(new Promise(() => {}));
+			vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValueOnce({
+				receiveAmount: 1_000_000n
+			});
+			const settled = vi.fn();
+			void fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken: mockValidIcToken,
+				destinationToken: mockValidIcrcToken,
+				amount: '10',
+				tokens: [mockValidIcToken, mockValidIcrcToken],
+				slippage: 1,
+				isSourceTokenIcrc2: true,
+				userEthAddress: undefined,
+				userSolAddress: undefined,
+				userBtcAddress: undefined,
+				userXrpAddress: undefined
+			}).then(settled);
+
+			await vi.advanceTimersByTimeAsync(SWAP_QUOTE_TIMEOUT_MS);
+
+			expect(settled).toHaveBeenCalledExactlyOnceWith([
+				expect.objectContaining({
+					provider: SwapProvider.ICP_SWAP,
+					receiveAmount: 1_000_000n - mockValidIcrcToken.fee
+				})
+			]);
+		});
+
+		it('abandons pending ICP bridge quotes and their late participation', async () => {
+			let participate: SwapQuoteObserver['onProviderParticipating'];
+			const onProviderParticipating = vi.fn();
+			mockIcpBridgeGetQuote.mockImplementationOnce((observer: SwapQuoteObserver) => {
+				participate = observer.onProviderParticipating;
+				participate?.(SwapProvider.NEAR_INTENTS);
+				return new Promise(() => {});
+			});
+			const settled = vi.fn();
+			void fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken: mockValidIcToken,
+				destinationToken: mockValidErc20Token,
+				amount: '10',
+				tokens: [],
+				slippage: 1,
+				userEthAddress: mockEthAddress,
+				userSolAddress: mockSolAddress,
+				userBtcAddress: mockBtcAddress,
+				userXrpAddress: mockXrpAddress,
+				onProviderParticipating
+			}).then(settled);
+
+			await vi.advanceTimersByTimeAsync(SWAP_QUOTE_TIMEOUT_MS);
+
+			expect(settled).toHaveBeenCalledExactlyOnceWith([]);
+
+			participate?.(SwapProvider.NEAR_INTENTS);
+
+			expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.NEAR_INTENTS);
+		});
+
+		it('abandons pending BTC quotes and their late participation', async () => {
+			let participate: SwapQuoteObserver['onProviderParticipating'];
+			const onProviderParticipating = vi.fn();
+			mockBtcGetQuote.mockImplementationOnce((observer: SwapQuoteObserver) => {
+				participate = observer.onProviderParticipating;
+				participate?.(SwapProvider.NEAR_INTENTS);
+				return new Promise(() => {});
+			});
+			const settled = vi.fn();
+			void fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken: BTC_MAINNET_TOKEN,
+				destinationToken: mockValidErc20Token,
+				amount: '10',
+				tokens: [],
+				slippage: 1,
+				userEthAddress: mockEthAddress,
+				userSolAddress: mockSolAddress,
+				userBtcAddress: mockBtcAddress,
+				userXrpAddress: mockXrpAddress,
+				onProviderParticipating
+			}).then(settled);
+
+			await vi.advanceTimersByTimeAsync(SWAP_QUOTE_TIMEOUT_MS);
+
+			expect(settled).toHaveBeenCalledExactlyOnceWith([]);
+
+			participate?.(SwapProvider.NEAR_INTENTS);
+
+			expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.NEAR_INTENTS);
+		});
+
+		it('abandons pending XRP quotes and their late participation', async () => {
+			let participate: SwapQuoteObserver['onProviderParticipating'];
+			const onProviderParticipating = vi.fn();
+			mockXrpGetQuote.mockImplementationOnce((observer: SwapQuoteObserver) => {
+				participate = observer.onProviderParticipating;
+				participate?.(SwapProvider.NEAR_INTENTS);
+				return new Promise(() => {});
+			});
+			const settled = vi.fn();
+			void fetchSwapAmountsXRP({
+				...params,
+				sourceToken: XRP_TOKEN,
+				userAddress: mockXrpAddress,
+				onProviderParticipating
+			}).then(settled);
+
+			await vi.advanceTimersByTimeAsync(SWAP_QUOTE_TIMEOUT_MS);
+
+			expect(settled).toHaveBeenCalledExactlyOnceWith([]);
+
+			participate?.(SwapProvider.NEAR_INTENTS);
+
+			expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.NEAR_INTENTS);
+		});
+
+		it('ignores SOL participation after all providers finish before the deadline', async () => {
+			let participate: SwapQuoteObserver['onProviderParticipating'];
+			const onProviderParticipating = vi.fn();
+			mockSolGetQuote.mockImplementationOnce((observer: SwapQuoteObserver) => {
+				participate = observer.onProviderParticipating;
+				participate?.(SwapProvider.NEAR_INTENTS);
+				return Promise.resolve(undefined);
+			});
+			await fetchSwapAmountsSOL({
+				...params,
+				sourceToken: mockValidSplToken,
+				onProviderParticipating
+			});
+
+			participate?.(SwapProvider.NEAR_INTENTS);
+
+			expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.NEAR_INTENTS);
+		});
+
+		it('ignores participation after that provider has settled while a competitor is pending', async () => {
+			let participate: SwapQuoteObserver['onProviderParticipating'];
+			const onProviderParticipating = vi.fn();
+			mockVeloraGetQuote.mockImplementationOnce((observer: SwapQuoteObserver) => {
+				participate = observer.onProviderParticipating;
+				participate?.(SwapProvider.VELORA);
+				return Promise.resolve(undefined);
+			});
+			mockEvmNearIntentsGetQuote.mockReturnValueOnce(new Promise(() => {}));
+			const round = fetchSwapAmountsEVM({ ...params, onProviderParticipating });
+			await vi.advanceTimersByTimeAsync(0);
+
+			participate?.(SwapProvider.VELORA);
+
+			expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.VELORA);
+
+			await vi.advanceTimersByTimeAsync(SWAP_QUOTE_TIMEOUT_MS);
+
+			await expect(round).resolves.toEqual([]);
+		});
+
+		it('waits for the better quote rather than first arrival and finishes without a deadline delay', async () => {
+			const near = Promise.withResolvers<typeof offer>();
+			mockVeloraGetQuote.mockResolvedValueOnce(veloraOffer);
+			mockEvmNearIntentsGetQuote.mockReturnValueOnce(near.promise);
+			const now = Date.now();
+			const settled = vi.fn();
+			const round = fetchSwapAmountsEVM(params);
+			void round.then(settled);
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(settled).not.toHaveBeenCalled();
+
+			near.resolve(offer);
+
+			await expect(round).resolves.toEqual([offer, veloraOffer]);
+			expect(Date.now()).toBe(now);
+			expect(vi.getTimerCount()).toBe(0);
+		});
+
+		it('returns immediately without a deadline timer or participation when no providers are enabled', async () => {
+			const enabled = evmSwapProviders.map(({ isEnabled }) => isEnabled);
+			evmSwapProviders.forEach((provider) => {
+				provider.isEnabled = false;
+			});
+			const onProviderParticipating = vi.fn();
+			try {
+				await expect(fetchSwapAmountsEVM({ ...params, onProviderParticipating })).resolves.toEqual(
+					[]
+				);
+				expect(mockVeloraGetQuote).not.toHaveBeenCalled();
+				expect(mockEvmNearIntentsGetQuote).not.toHaveBeenCalled();
+				expect(onProviderParticipating).not.toHaveBeenCalled();
+				expect(vi.getTimerCount()).toBe(0);
+			} finally {
+				evmSwapProviders.forEach((provider, index) => {
+					provider.isEnabled = enabled[index];
+				});
+			}
+		});
+
+		it('preserves the typed minimum refusal at the deadline when no competitor quoted', async () => {
+			const error = new SwapAmountTooLowError('Amount is too low', 8300n);
+			mockVeloraGetQuote.mockReturnValueOnce(new Promise(() => {}));
+			mockEvmNearIntentsGetQuote.mockRejectedValueOnce(error);
+			const rejected = vi.fn();
+			const settled = vi.fn();
+			void fetchSwapAmountsEVM(params).then(settled, rejected);
+
+			await vi.advanceTimersByTimeAsync(SWAP_QUOTE_TIMEOUT_MS);
+
+			expect(rejected).toHaveBeenCalledExactlyOnceWith(error);
+			expect(settled).not.toHaveBeenCalled();
+			expect(vi.getTimerCount()).toBe(0);
+		});
+
+		it('returns no offers and leaves no deadline timer when all EVM providers hang', async () => {
+			mockVeloraGetQuote.mockReturnValueOnce(new Promise(() => {}));
+			mockEvmNearIntentsGetQuote.mockReturnValueOnce(new Promise(() => {}));
+			const round = fetchSwapAmountsEVM(params);
+
+			await vi.advanceTimersByTimeAsync(SWAP_QUOTE_TIMEOUT_MS);
+
+			await expect(round).resolves.toEqual([]);
+			expect(vi.getTimerCount()).toBe(0);
+		});
+
+		it('ignores late fulfillment after the deadline without changing a newer round', async () => {
+			const late = Promise.withResolvers<SwapMappedResult>();
+			mockVeloraGetQuote.mockReturnValueOnce(late.promise);
+			mockEvmNearIntentsGetQuote.mockResolvedValueOnce(offer);
+			const settled = vi.fn();
+			const round = fetchSwapAmountsEVM(params);
+			void round.then(settled);
+			await vi.advanceTimersByTimeAsync(SWAP_QUOTE_TIMEOUT_MS);
+			const accepted = await round;
+			mockVeloraGetQuote.mockResolvedValueOnce(veloraOffer);
+			const newer = await fetchSwapAmountsEVM(params);
+
+			late.resolve({ ...veloraOffer, receiveAmount: 2_000_000n });
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(accepted).toEqual([offer]);
+			expect(newer).toEqual([veloraOffer]);
+			expect(settled).toHaveBeenCalledExactlyOnceWith([offer]);
+			expect(vi.getTimerCount()).toBe(0);
+		});
+
+		it('handles late rejection without an unhandled error or a changed no-offers result', async () => {
+			const late = Promise.withResolvers<undefined>();
+			const unhandled = vi.fn();
+			process.on('unhandledRejection', unhandled);
+			try {
+				mockVeloraGetQuote.mockReturnValueOnce(late.promise);
+				const round = fetchSwapAmountsEVM(params);
+				await vi.advanceTimersByTimeAsync(SWAP_QUOTE_TIMEOUT_MS);
+
+				await expect(round).resolves.toEqual([]);
+
+				late.reject(new SwapAmountTooLowError('Amount is too low', 8300n));
+				await vi.advanceTimersByTimeAsync(0);
+
+				await expect(round).resolves.toEqual([]);
+				expect(unhandled).not.toHaveBeenCalled();
+				expect(vi.getTimerCount()).toBe(0);
+			} finally {
+				process.off('unhandledRejection', unhandled);
+			}
+		});
+
+		it('retains every completed offer sorted by amount when a third provider hangs', async () => {
+			const count = evmSwapProviders.length;
+			evmSwapProviders.push({
+				key: SwapProvider.LIFI,
+				isEnabled: true,
+				getQuote: () => new Promise<SwapMappedResult | undefined>(() => {}),
+				getSupportedDestinations: () => ({})
+			});
+			try {
+				mockVeloraGetQuote.mockResolvedValueOnce(veloraOffer);
+				mockEvmNearIntentsGetQuote.mockResolvedValueOnce(offer);
+				const round = fetchSwapAmountsEVM(params);
+
+				await vi.advanceTimersByTimeAsync(SWAP_QUOTE_TIMEOUT_MS);
+
+				await expect(round).resolves.toEqual([offer, veloraOffer]);
+			} finally {
+				evmSwapProviders.splice(count);
+			}
+		});
+
+		it('retains a valid competitor when a provider throws synchronously', async () => {
+			mockVeloraGetQuote.mockImplementationOnce(() => {
+				throw new Error('Provider setup failed');
+			});
+			mockEvmNearIntentsGetQuote.mockResolvedValueOnce(offer);
+
+			await expect(fetchSwapAmountsEVM(params)).resolves.toEqual([offer]);
+			expect(vi.getTimerCount()).toBe(0);
+		});
+
+		it('ignores delayed ICP lookup participation and mapping after the deadline', async () => {
+			let participate: SwapQuoteObserver['onProviderParticipating'];
+			const late = Promise.withResolvers<ICPSwapAmountReply>();
+			vi.mocked(kongBackendApi.kongSwapAmounts).mockReturnValueOnce(new Promise(() => {}));
+			vi.mocked(icpSwapBackend.icpSwapAmounts).mockImplementationOnce(
+				(observer: SwapQuoteObserver) => {
+					participate = observer.onProviderParticipating;
+					return late.promise;
+				}
+			);
+			const onProviderParticipating = vi.fn();
+			const round = fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken: mockValidIcToken,
+				destinationToken: mockValidIcrcToken,
+				amount: '10',
+				tokens: [mockValidIcToken, mockValidIcrcToken],
+				slippage: 1,
+				isSourceTokenIcrc2: true,
+				userEthAddress: undefined,
+				userSolAddress: undefined,
+				userBtcAddress: undefined,
+				userXrpAddress: undefined,
+				onProviderParticipating
+			});
+			await vi.advanceTimersByTimeAsync(SWAP_QUOTE_TIMEOUT_MS);
+
+			await expect(round).resolves.toEqual([]);
+
+			const analyticsCount = vi.mocked(trackEvent).mock.calls.length;
+
+			participate?.(SwapProvider.ICP_SWAP);
+			late.resolve({ receiveAmount: 1_000_000n });
+			await vi.advanceTimersByTimeAsync(0);
+
+			await expect(round).resolves.toEqual([]);
+			expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.KONG_SWAP);
+			expect(trackEvent).toHaveBeenCalledTimes(analyticsCount);
+			expect(vi.getTimerCount()).toBe(0);
+			expect(kongBackendApi.kongSwapAmounts).toHaveBeenCalledWith(
+				expect.not.objectContaining({
+					onProviderParticipating: expect.anything()
+				})
+			);
+		});
+
+		it('clears the deadline timer before propagating an early typed minimum refusal', async () => {
+			const error = new SwapAmountTooLowError('Amount is too low', 8300n);
+			mockEvmNearIntentsGetQuote.mockRejectedValueOnce(error);
+
+			await expect(fetchSwapAmountsEVM(params)).rejects.toBe(error);
+
+			expect(vi.getTimerCount()).toBe(0);
+		});
+
+		it('returns no offers without delay when every quote fails before the deadline', async () => {
+			mockVeloraGetQuote.mockRejectedValueOnce(new Error('Velora unavailable'));
+			mockEvmNearIntentsGetQuote.mockRejectedValueOnce(new Error('NEAR unavailable'));
+			const now = Date.now();
+
+			await expect(fetchSwapAmountsEVM(params)).resolves.toEqual([]);
+
+			expect(Date.now()).toBe(now);
+			expect(vi.getTimerCount()).toBe(0);
+		});
+
+		it('returns no offers at the deadline when every SOL quote hangs', async () => {
+			mockSolGetQuote.mockReturnValueOnce(new Promise(() => {}));
+			const settled = vi.fn();
+			void fetchSwapAmountsSOL({ ...params, sourceToken: mockValidSplToken }).then(settled);
+
+			await vi.advanceTimersByTimeAsync(SWAP_QUOTE_TIMEOUT_MS);
+
+			expect(settled).toHaveBeenCalledExactlyOnceWith([]);
 		});
 	});
 
@@ -2838,6 +3370,46 @@ describe('swap.services', () => {
 		afterEach(() => {
 			mockGetQuote.mockReset();
 			exchangeStore.reset();
+		});
+
+		it('reports Velora pricing after eligibility checks and before requesting the quote', async () => {
+			const onProviderParticipating = vi.fn();
+			mockGetQuote.mockImplementationOnce(() => {
+				expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.VELORA);
+
+				return Promise.resolve({ delta: mockVeloraDeltaPrice });
+			});
+			await fetchVeloraSwapAmount({
+				sourceToken,
+				destinationToken,
+				amount,
+				userAddress,
+				slippage,
+				onProviderParticipating
+			});
+
+			expect(onProviderParticipating).toHaveBeenCalledOnce();
+
+			onProviderParticipating.mockClear();
+			await fetchVeloraSwapAmount({
+				sourceToken,
+				destinationToken: mockValidIcToken,
+				amount,
+				userAddress,
+				slippage,
+				onProviderParticipating
+			});
+			await fetchVeloraSwapAmount({
+				sourceToken,
+				destinationToken,
+				amount,
+				userAddress: undefined,
+				slippage,
+				onProviderParticipating
+			});
+
+			expect(onProviderParticipating).not.toHaveBeenCalled();
+			expect(mockGetQuote).toHaveBeenCalledOnce();
 		});
 
 		it('returns undefined without calling the SDK when userAddress is nullish', async () => {

@@ -1085,6 +1085,8 @@ interface I18nSwap {
 		finishing_in_background: string;
 		refreshing_ui: string;
 		swap_provider: string;
+		smart_swap: string;
+		finding_best_rate: string;
 		swap_provider_website: string;
 		swap_route: string;
 		included_network_fees: string;
@@ -1152,6 +1154,7 @@ interface I18nSwap {
 		oisy_trade_recovery_failed: string;
 		lifi_status_unknown: string;
 		lifi_fee_changed: string;
+		lifi_route_unverified: string;
 	};
 }
 
@@ -1538,6 +1541,7 @@ interface I18nWallet_connect {
 		allowance_increase: string;
 		allowance_decrease: string;
 		unverifiable_erc20_request: string;
+		unlisted_erc20_request: string;
 		token_call_with_value: string;
 		unverifiable_approval_for_all_request: string;
 		approval_for_all_grant: string;
