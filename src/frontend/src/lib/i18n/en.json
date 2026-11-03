@@ -1214,8 +1214,8 @@
 			"sent_to_canister": "Sending $token to a canister doesn't top it up. The $token land in the canister's account, and the canister only gets cycles if its own code withdraws them.",
 			"sent_to_canister_top_up": "To add cycles to a canister, use Top up on the $token page.",
 			"choice_send": "Send $token",
-			"choice_send_description": "Send $token to another account.",
-			"choice_top_up_description": "Add cycles to a canister from your $token balance."
+			"choice_send_description": "Send $token tokens to another account. Sending $token to a canister doesn't top it up.",
+			"choice_top_up_description": "Convert $token tokens into cycles to top up any canister."
 		},
 		"error": {
 			"invalid_canister_id": "Enter a canister ID. User principals, account IDs and addresses on other networks can't be topped up.",

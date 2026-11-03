@@ -1214,8 +1214,8 @@
 			"sent_to_canister": "Enviar $token a un canister no lo recarga. Los $token llegan a la cuenta del canister, y el canister solo recibe ciclos si su propio código los retira.",
 			"sent_to_canister_top_up": "Para añadir ciclos a un canister, usa «Recargar» en la página de $token.",
 			"choice_send": "Enviar $token",
-			"choice_send_description": "Envía $token a otra cuenta.",
-			"choice_top_up_description": "Añade ciclos a un canister desde tu saldo de $token."
+			"choice_send_description": "Envía tokens $token a otra cuenta. Enviar $token a un canister no lo recarga.",
+			"choice_top_up_description": "Convierte tokens $token en ciclos para recargar cualquier canister."
 		},
 		"error": {
 			"invalid_canister_id": "Introduce un ID de canister. Los principals de usuario, los ID de cuenta y las direcciones de otras redes no se pueden recargar.",

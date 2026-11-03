@@ -1214,8 +1214,8 @@
 			"sent_to_canister": "キャニスターに$tokenを送ってもチャージにはなりません。$tokenはキャニスターのアカウントに届き、キャニスター自身のコードが引き出した場合にのみサイクルになります。",
 			"sent_to_canister_top_up": "キャニスターにサイクルを追加するには、$tokenのページで「チャージ」を使ってください。",
 			"choice_send": "$tokenを送信",
-			"choice_send_description": "$tokenを別のアカウントに送信します。",
-			"choice_top_up_description": "$tokenの残高からキャニスターにサイクルを追加します。"
+			"choice_send_description": "$tokenトークンを別のアカウントに送信します。キャニスターに$tokenを送ってもチャージにはなりません。",
+			"choice_top_up_description": "$tokenトークンをサイクルに変換して、任意のキャニスターにチャージします。"
 		},
 		"error": {
 			"invalid_canister_id": "キャニスターIDを入力してください。ユーザーのプリンシパル、アカウントID、他のネットワークのアドレスにはチャージできません。",

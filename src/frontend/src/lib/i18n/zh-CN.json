@@ -1214,8 +1214,8 @@
 			"sent_to_canister": "向 Canister 发送 $token 不会为其充值。这些 $token 会进入该 Canister 的账户，只有当 Canister 自己的代码将其提取时，它才能获得 Cycles。",
 			"sent_to_canister_top_up": "要为 Canister 添加 Cycles，请在 $token 页面使用“充值”。",
 			"choice_send": "发送 $token",
-			"choice_send_description": "将 $token 发送到另一个账户。",
-			"choice_top_up_description": "从您的 $token 余额为 Canister 添加 Cycles。"
+			"choice_send_description": "将 $token 代币发送到另一个账户。向 Canister 发送 $token 不会为其充值。",
+			"choice_top_up_description": "将 $token 代币转换为 Cycles，为任意 Canister 充值。"
 		},
 		"error": {
 			"invalid_canister_id": "请输入 Canister ID。用户 Principal、账户 ID 和其他网络的地址无法充值。",

@@ -1214,8 +1214,8 @@
 			"sent_to_canister": "캐니스터에 $token을 보내도 충전되지 않습니다. $token은 캐니스터의 계정으로 들어가며, 캐니스터 자체 코드가 인출할 때만 사이클이 됩니다.",
 			"sent_to_canister_top_up": "캐니스터에 사이클을 추가하려면 $token 페이지에서 '충전'을 사용하세요.",
 			"choice_send": "$token 보내기",
-			"choice_send_description": "다른 계정으로 $token을 보냅니다.",
-			"choice_top_up_description": "$token 잔액에서 캐니스터에 사이클을 추가합니다."
+			"choice_send_description": "다른 계정으로 $token 토큰을 보냅니다. 캐니스터에 $token을 보내도 충전되지 않습니다.",
+			"choice_top_up_description": "$token 토큰을 사이클로 전환해 어떤 캐니스터든 충전합니다."
 		},
 		"error": {
 			"invalid_canister_id": "캐니스터 ID를 입력하세요. 사용자 프린시펄, 계정 ID, 다른 네트워크의 주소는 충전할 수 없습니다.",
