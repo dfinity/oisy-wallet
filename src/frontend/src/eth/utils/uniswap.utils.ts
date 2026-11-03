@@ -466,7 +466,8 @@ const readV4Swap = ({
 
 			if (
 				key !== ZERO_ETH_ADDRESS &&
-				!pull({ plan, token: key, amount: nonNullish(owed) && owed < maxAmount ? owed : maxAmount })
+				(isNullish(owed) ||
+					!pull({ plan, token: key, amount: owed < maxAmount ? owed : maxAmount }))
 			) {
 				return false;
 			}

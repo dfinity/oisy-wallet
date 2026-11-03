@@ -843,6 +843,26 @@ describe('uniswap.utils', () => {
 				expect(getUniswapSwap(params({ data }))).toBeUndefined();
 			});
 
+			// Without the swaps' inputs to state what is owed, the cap is no amount the wallet pays.
+			it('should not describe a settlement of everything owed that a take of the same currency adds to', () => {
+				const data = execute({
+					commands: [
+						v4Swap([
+							swapExactInSingle,
+							take({ currency: EURC, recipient: UNISWAP_RECIPIENT_ROUTER, amount: 500_000n }),
+							{
+								action: UNISWAP_V4_ACTIONS.SETTLE_ALL,
+								types: ['address', 'uint256'],
+								values: [EURC, 2_000_000n]
+							},
+							take()
+						])
+					]
+				});
+
+				expect(getUniswapSwap(params({ data }))).toBeUndefined();
+			});
+
 			it('should not describe an action the router does not run', () => {
 				const data = execute({
 					commands: [

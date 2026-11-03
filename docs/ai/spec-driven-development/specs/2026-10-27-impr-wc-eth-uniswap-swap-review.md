@@ -109,11 +109,12 @@ show, or is past the last date JavaScript can hold (13 September 275760), like t
 exact-output swap through more than one pool on routers 2.0.0 and 2.1.1, where a hop can fall short
 of what the next hop took and leave a debt that the ends of the path do not show; a V4 settlement
 the wallet pays that nothing bounds: the router's whole balance, or the open amount of a currency
-that a take adds to what is owed; an open `SETTLE` the wallet pays, or a `SETTLE_ALL`, of a
-currency that a swap of the same `V4_SWAP` also outputs, since the output lowers what is owed, and
-on routers 2.0.0 and 2.1.1 a hook can make an exact output negative and raise it; and a `V4_SWAP`
-that settles one currency more than once, whose open settlements would have to be followed action
-by action.
+that a take adds to what is owed; a `SETTLE_ALL` of such a currency, or of one no swap spends a
+stated amount of, as its cap is no amount paid; an open `SETTLE` the wallet pays, or a
+`SETTLE_ALL`, of a currency that a swap of the same `V4_SWAP` also outputs, since the output lowers
+what is owed, and on routers 2.0.0 and 2.1.1 a hook can make an exact output negative and raise
+it; and a `V4_SWAP` that settles one currency more than once, whose open settlements would have to
+be followed action by action.
 
 **Allow-revert bit:** ignored, except on `PERMIT2_PERMIT`. Every other command OISY reads reverts
 the whole transaction when it fails, whatever the bit says. A `PERMIT2_PERMIT` with the bit keeps
