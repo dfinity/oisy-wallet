@@ -926,6 +926,49 @@ describe('liquidium-repay.services', () => {
 			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
 		});
 
+		it('holds only the gas of a reverted token repay until the native balance has changed', async () => {
+			storeBalance({ token: USDC_TOKEN, data: 100n });
+			storeBalance({ token: ETHEREUM_TOKEN, data: 10n });
+
+			wait.mockResolvedValue('reverted');
+
+			const heldDuringReload: unknown[] = [];
+
+			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) => {
+				heldDuringReload.push(get(liquidiumUnminedRepaysStore)[hash]);
+
+				storeBalance({ token: reloadToken, data: 9n });
+
+				return Promise.resolve({ success: true });
+			});
+
+			await holdLiquidiumRepayUntilMined(params);
+
+			expect(reloadEthereumBalance).toHaveBeenCalledExactlyOnceWith(ETHEREUM_TOKEN);
+			expect(heldDuringReload).toEqual([[{ tokenId: ETHEREUM_TOKEN.id, amount: gasFee }]]);
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('holds only the gas of a reverted native repay', async () => {
+			wait.mockResolvedValue('reverted');
+
+			let heldDuringReload: unknown;
+
+			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) => {
+				heldDuringReload = get(liquidiumUnminedRepaysStore)[hash];
+
+				storeBalance({ token: reloadToken });
+
+				return Promise.resolve({ success: true });
+			});
+
+			await holdLiquidiumRepayUntilMined({ ...params, token: ETHEREUM_TOKEN });
+
+			expect(reloadEthereumBalance).toHaveBeenCalledExactlyOnceWith(ETHEREUM_TOKEN);
+			expect(heldDuringReload).toEqual([{ tokenId: ETHEREUM_TOKEN.id, amount: gasFee }]);
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
 		it('reloads the native balance once for a native repay', async () => {
 			wait.mockResolvedValue(undefined);
 

@@ -28,7 +28,14 @@ import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import type { Listener } from 'ethers/utils';
 import { SvelteMap } from 'svelte/reactivity';
 import { get } from 'svelte/store';
-import { createPublicClient, http, isHash, type Chain, type PublicClient } from 'viem';
+import {
+	createPublicClient,
+	http,
+	isHash,
+	type Chain,
+	type PublicClient,
+	type TransactionReceipt
+} from 'viem';
 
 interface AlchemyConfig {
 	wssUrl: string;
@@ -391,12 +398,15 @@ export class AlchemyProvider {
 		return response.json();
 	};
 
-	wait = async (hash: string) => {
+	// Resolves with the receipt's `status` once the transaction is mined: a reverted one is mined too.
+	wait = async (hash: string): Promise<TransactionReceipt['status']> => {
 		if (!isHash(hash)) {
 			throw new Error(`Invalid transaction hash while waiting for transaction receipt: ${hash}`);
 		}
 
-		await this.provider.waitForTransactionReceipt({ hash });
+		const { status } = await this.provider.waitForTransactionReceipt({ hash });
+
+		return status;
 	};
 
 	private mapNftFromRpc = async ({

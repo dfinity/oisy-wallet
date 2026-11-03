@@ -135,6 +135,14 @@ describe('alchemy.providers', () => {
 			});
 		});
 
+		it.each(['success', 'reverted'])('should resolve with a %s receipt status', async (status) => {
+			mockWaitForTransactionReceipt.mockResolvedValue({ status });
+
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			await expect(provider.wait(mockEthAddress)).resolves.toBe(status);
+		});
+
 		it('should throw an error if the input is not an hash', async () => {
 			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
 

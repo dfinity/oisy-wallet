@@ -188,9 +188,16 @@ export const holdLiquidiumRepayUntilMined = async ({
 	});
 
 	try {
-		await alchemyProviders(token.network.id).wait(hash);
+		const status = await alchemyProviders(token.network.id).wait(hash);
 
-		const tokens = feeToken.id === token.id ? [token] : [token, feeToken];
+		// A reverted transfer moves no value, only its gas: the sent token's balance stays as it was,
+		// so only the gas is still held, until the native balance has it.
+		if (status === 'reverted') {
+			liquidiumUnminedRepaysStore.add({ hash, holds: [{ tokenId: feeToken.id, amount: gasFee }] });
+		}
+
+		const tokens =
+			status === 'reverted' || feeToken.id === token.id ? [feeToken] : [token, feeToken];
 
 		const reloads = await Promise.all(
 			tokens.map(async (reloadToken) => ({
