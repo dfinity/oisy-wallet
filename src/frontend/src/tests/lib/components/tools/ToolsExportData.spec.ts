@@ -1,4 +1,5 @@
 import ToolsExportData from '$lib/components/tools/ToolsExportData.svelte';
+import { OISY_EXPORT_DATA_DOCS_URL } from '$lib/constants/oisy.constants';
 import * as exportDataServices from '$lib/services/export-data.services';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -13,13 +14,17 @@ describe('ToolsExportData', () => {
 		vi.resetAllMocks();
 	});
 
-	it('labels the help toggle and starts it closed', () => {
-		const { getByRole } = render(ToolsExportData);
+	it('shows its text and Learn more link without a help toggle, as every card on Tools does', () => {
+		const { getByText, getByRole, queryByRole } = render(ToolsExportData);
 
-		const help = getByRole('button', { name: en.core.text.info });
-
-		expect(help).toHaveAttribute('aria-expanded', 'false');
-		expect(help).toHaveClass('hit-area', 'press-icon');
+		expect(
+			getByText(en.settings.text.export_data_description, { exact: false })
+		).toBeInTheDocument();
+		expect(getByRole('link', { name: en.settings.text.learn_more })).toHaveAttribute(
+			'href',
+			OISY_EXPORT_DATA_DOCS_URL
+		);
+		expect(queryByRole('button', { name: en.core.text.info })).not.toBeInTheDocument();
 	});
 
 	it('renders both subsection labels and all four download buttons', () => {

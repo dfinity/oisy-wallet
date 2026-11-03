@@ -563,7 +563,7 @@ A page (`/tools/`) for what a user does now and then rather than every day, reac
 
 - **Blockchain explorers**, the same card as on [Help](#help): a link to the user's own address on the blockchain explorer of each enabled network. Its clicks report `source_location: tools_page`.
 - **Canister top-up**, behind `CANISTER_TOP_UP_ENABLED` (`src/frontend/src/env/canister-top-up.env.ts`, on in every environment and kept as a kill switch). Its **Top up** button opens [Top up a canister](#top-up-a-canister) without a token, so the user picks what pays. The card leads with the canister: a plain "Top up" in a wallet would read as adding funds to the wallet.
-- **Export data**: the CSV exports of tokens and transactions, Basic and Extended, as they were on Settings. Settings keeps an Export data card that says export has moved and opens Tools.
+- **Export data**: the CSV exports of tokens and transactions, Basic and Extended, as they were on Settings, with their text and Learn more link shown under the title rather than behind a help toggle, as every card on Tools shows its text. Settings keeps an Export data card that says export has moved and opens Tools.
 
 The page itself is not flagged.
 
