@@ -1,5 +1,6 @@
 pub mod active_user_transactions;
 pub mod admin;
+pub mod api_doc;
 pub mod api_keys;
 pub mod bitcoin;
 pub mod contacts;

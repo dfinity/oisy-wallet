@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
+	import { readable } from 'svelte/store';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
+	import SwapTwoSwapsHint from '$lib/components/swap/SwapTwoSwapsHint.svelte';
 	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
@@ -96,15 +98,21 @@
 		switchTokens
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+	const { store: swapAmountsStore, activity } =
+		getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+	const quoteActivity = activity ?? readable(undefined);
+	const foregroundQuotePending = $derived(
+		$quoteActivity?.pending === true && !$quoteActivity.background
+	);
 
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	let swapAmountsLoading = $derived(
-		nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
-			? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
-			: false
+		foregroundQuotePending ||
+			(nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
+				? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
+				: false)
 	);
 
 	let showSwapNotOfferedError = $derived(
@@ -121,6 +129,18 @@
 	let quoteError = $derived(
 		nonNullish($swapAmountsStore) && $swapAmountsStore.swaps.length === 0
 			? $swapAmountsStore.quoteError
+			: undefined
+	);
+
+	// No offer, but two separate swaps through a token OISY lists reach the destination. Unlike the
+	// "not offered" line, the hint stays up while the offers refresh, and goes with a new amount.
+	let twoSwapsQuoteError = $derived(
+		quoteError?.type === 'two-swaps' &&
+			!swapAmountsLoading &&
+			!notOfferedExplained &&
+			nonNullish(swapAmount) &&
+			Number(swapAmount) > 0
+			? quoteError
 			: undefined
 	);
 
@@ -154,6 +174,7 @@
 			isNullish(receiveAmount) ||
 			isNullish(fee) ||
 			swapAmountsLoading ||
+			foregroundQuotePending ||
 			(nonNullish(slippageValue) && Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE)
 	);
 
@@ -321,7 +342,16 @@
 
 		{@render message?.()}
 
-		<SwapCrossChainInfo />
+		{#if nonNullish(twoSwapsQuoteError)}
+			{#key twoSwapsQuoteError.intermediateToken.id}
+				<SwapTwoSwapsHint
+					intermediateToken={twoSwapsQuoteError.intermediateToken}
+					provider={twoSwapsQuoteError.provider}
+				/>
+			{/key}
+		{:else}
+			<SwapCrossChainInfo />
+		{/if}
 
 		<SwapSlippage
 			maxSlippageInvalidValue={isNetworkIdICP($sourceToken?.network.id)

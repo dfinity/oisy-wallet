@@ -11,7 +11,8 @@
 	} from '$sol/api/solana.api';
 	import {
 		MICROLAMPORTS_PER_LAMPORT,
-		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
+		SOLANA_LAMPORTS_PER_SIGNATURE,
+		SOLANA_SEND_REQUIRED_SIGNATURES
 	} from '$sol/constants/sol.constants';
 	import { SOL_FEE_CONTEXT_KEY, type FeeContext } from '$sol/stores/sol-fee.store';
 	import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
@@ -39,7 +40,9 @@
 
 		const addresses = isTokenSpl(token) ? [token.address] : undefined;
 		const priorityFee = await estimatePriorityFee({ network: solNetwork, addresses });
-		const fee = SOLANA_TRANSACTION_FEE_IN_LAMPORTS + priorityFee / MICROLAMPORTS_PER_LAMPORT;
+		const fee =
+			SOLANA_LAMPORTS_PER_SIGNATURE * BigInt(SOLANA_SEND_REQUIRED_SIGNATURES) +
+			priorityFee / MICROLAMPORTS_PER_LAMPORT;
 		feeStore.setFee(fee);
 		prioritizationFeeStore.setFee(priorityFee);
 	};

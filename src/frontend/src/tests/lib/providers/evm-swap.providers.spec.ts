@@ -5,8 +5,29 @@ import { assertNonNullish } from '@dfinity/utils';
 
 describe('evm-swap.providers', () => {
 	describe('LI.FI entry', () => {
-		it('should not be registered while the flag is off', () => {
-			expect(evmSwapProviders.find(({ key }) => key === SwapProvider.LIFI)).toBeUndefined();
+		it('should be registered by default', () => {
+			expect(evmSwapProviders.find(({ key }) => key === SwapProvider.LIFI)).toBeDefined();
+		});
+
+		describe('with the flag off', () => {
+			beforeEach(() => {
+				vi.resetModules();
+				vi.doMock('$env/rest/lifi.env', async (importOriginal) => ({
+					...(await importOriginal<typeof lifiEnv>()),
+					LIFI_SWAP_ENABLED: false
+				}));
+			});
+
+			afterEach(() => {
+				vi.doUnmock('$env/rest/lifi.env');
+				vi.resetModules();
+			});
+
+			it('should not be registered', async () => {
+				const { evmSwapProviders: providers } = await import('$lib/providers/evm-swap.providers');
+
+				expect(providers.find(({ key }) => key === SwapProvider.LIFI)).toBeUndefined();
+			});
 		});
 
 		describe('with the flag on', () => {

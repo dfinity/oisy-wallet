@@ -46,6 +46,10 @@
 			return $i18n.help.text.explorers_near_intents_description;
 		}
 
+		if (provider === SwapProvider.LIFI) {
+			return $i18n.help.text.explorers_lifi_description;
+		}
+
 		return $i18n.help.text.explorers_onesec_description;
 	};
 

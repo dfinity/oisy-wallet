@@ -145,6 +145,44 @@ describe('swapStore', () => {
 		expect(get(lifiMaxFee)).toBeUndefined();
 	});
 
+	describe('markTwoSwapsHintShown', () => {
+		const hint = {
+			sourceTokenId: mockToken1.id,
+			destinationTokenId: mockToken2.id,
+			intermediateTokenId: mockValidErc20Token.id,
+			amount: 1
+		};
+
+		it('should count a hint once', () => {
+			const { markTwoSwapsHintShown } = initSwapContext();
+
+			expect(markTwoSwapsHintShown(hint)).toBeTruthy();
+			expect(markTwoSwapsHintShown({ ...hint })).toBeFalsy();
+		});
+
+		it.each([
+			{ field: 'source', change: { sourceTokenId: ETHEREUM_TOKEN.id } },
+			{ field: 'destination', change: { destinationTokenId: ETHEREUM_TOKEN.id } },
+			{ field: 'in-between token', change: { intermediateTokenId: ETHEREUM_TOKEN.id } },
+			{ field: 'amount', change: { amount: 2 } }
+		])('should count a hint with another $field', ({ change }) => {
+			const { markTwoSwapsHintShown } = initSwapContext();
+
+			markTwoSwapsHintShown(hint);
+
+			expect(markTwoSwapsHintShown({ ...hint, ...change })).toBeTruthy();
+		});
+
+		it('should count a hint again once the swap is reset', () => {
+			const { markTwoSwapsHintShown, reset } = initSwapContext();
+
+			markTwoSwapsHintShown(hint);
+			reset();
+
+			expect(markTwoSwapsHintShown(hint)).toBeTruthy();
+		});
+	});
+
 	// A held "Max" survives the steps that rebuild the form, but not a new source: the amount is
 	// kept as it is rather than refilled with the new token's max.
 	describe('amountSetToMax', () => {

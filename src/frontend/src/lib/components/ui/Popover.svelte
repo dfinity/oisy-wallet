@@ -169,7 +169,7 @@
 	>
 		<Backdrop invisible={invisibleBackdrop} onClose={close} />
 		<div
-			class="wrapper"
+			class="wrapper outline-none"
 			class:above={placement === 'above'}
 			class:dropdown
 			class:placed={placementResolved}

@@ -26,6 +26,5 @@ export const EFAON_TOKEN: RequiredSpl2022Token = {
 	address: 'AbvryMGnaba9oADMZk8Vp2Av6MtczsncGyfWaC4ondo',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
 	mintAuthority: '9foMHsSDq7nMg4WPusSz9eY7tyxyukqborA8GyU5cUxD',
-	freezeAuthority: 'Chm9dcASBc9C54FGxcSRGv9qC998TueQqr5XzGZkEVCc',
 	groupData: EFAON_TOKEN_GROUP
 };

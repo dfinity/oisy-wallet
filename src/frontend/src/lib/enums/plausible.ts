@@ -4,6 +4,9 @@ export enum PLAUSIBLE_EVENTS {
 	PAGE_OPEN = 'page_open',
 	LIST_SETTINGS_CHANGE = 'list_settings_change',
 	SWAP_OFFER = 'swap_offer',
+	// The swap form's hint to make a swap without an offer as two separate swaps, when it shows and
+	// when its button is used.
+	SWAP_TWO_SWAPS_HINT = 'swap_two_swaps_hint',
 	MEDIA_CONSENT = 'media_consent',
 	OPEN_MODAL = 'open_modal',
 	LOAD_CUSTOM_TOKENS = 'load_custom_tokens',

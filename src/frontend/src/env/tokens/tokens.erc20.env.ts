@@ -4,6 +4,7 @@ import {
 	SEPOLIA_NETWORK
 } from '$env/networks/networks.eth.env';
 import { ONEINCH_TOKEN } from '$env/tokens/tokens-erc20/tokens.1inch.env';
+import { AAPLON_TOKEN } from '$env/tokens/tokens-erc20/tokens.aaplon.env';
 import { AMDON_TOKEN } from '$env/tokens/tokens-erc20/tokens.amdon.env';
 import { ARB_TOKEN } from '$env/tokens/tokens-erc20/tokens.arb.env';
 import { ARMON_TOKEN } from '$env/tokens/tokens-erc20/tokens.armon.env';
@@ -21,6 +22,7 @@ import { EFAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.efaon.env';
 import { EURC_TOKEN, SEPOLIA_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { FLOKI_TOKEN } from '$env/tokens/tokens-erc20/tokens.floki.env';
 import { GLDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.gldt.env';
+import { GOOGLON_TOKEN } from '$env/tokens/tokens-erc20/tokens.googlon.env';
 import { IAUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.iauon.env';
 import { ICP_TOKEN } from '$env/tokens/tokens-erc20/tokens.icp.env';
 import { IVVON_TOKEN } from '$env/tokens/tokens-erc20/tokens.ivvon.env';
@@ -30,13 +32,17 @@ import { MATIC_TOKEN } from '$env/tokens/tokens-erc20/tokens.matic.env';
 import { MUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.muon.env';
 import { NVDAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.nvdaon.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
+import { PAXG_TOKEN } from '$env/tokens/tokens-erc20/tokens.paxg.env';
 import { PBRON_TOKEN } from '$env/tokens/tokens-erc20/tokens.pbron.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { PEPECOIN_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepecoin.env';
 import { RNDR_TOKEN } from '$env/tokens/tokens-erc20/tokens.rndr.env';
 import { SHIB_TOKEN } from '$env/tokens/tokens-erc20/tokens.shib.env';
 import { SLVON_TOKEN } from '$env/tokens/tokens-erc20/tokens.slvon.env';
+import { SPCXON_TOKEN } from '$env/tokens/tokens-erc20/tokens.spcxon.env';
 import { SPX_TOKEN } from '$env/tokens/tokens-erc20/tokens.spx.env';
+import { SPYON_TOKEN } from '$env/tokens/tokens-erc20/tokens.spyon.env';
+import { TSLAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.tslaon.env';
 import { UNI_TOKEN } from '$env/tokens/tokens-erc20/tokens.uni.env';
 import { USD1_TOKEN } from '$env/tokens/tokens-erc20/tokens.usd1.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
@@ -83,6 +89,7 @@ export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] =
 
 export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	ONEINCH_TOKEN,
+	AAPLON_TOKEN,
 	AMDON_TOKEN,
 	ARB_TOKEN,
 	ARMON_TOKEN,
@@ -98,6 +105,7 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	EFAON_TOKEN,
 	FLOKI_TOKEN,
 	GLDT_TOKEN,
+	GOOGLON_TOKEN,
 	ICP_TOKEN,
 	IAUON_TOKEN,
 	IVVON_TOKEN,
@@ -105,11 +113,15 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	MATIC_TOKEN,
 	MUON_TOKEN,
 	NVDAON_TOKEN,
+	PAXG_TOKEN,
 	PBRON_TOKEN,
 	PEPECOIN_TOKEN,
 	RNDR_TOKEN,
 	SLVON_TOKEN,
+	SPCXON_TOKEN,
 	SPX_TOKEN,
+	SPYON_TOKEN,
+	TSLAON_TOKEN,
 	USD1_TOKEN,
 	WEETH_TOKEN,
 	WETH_TOKEN,

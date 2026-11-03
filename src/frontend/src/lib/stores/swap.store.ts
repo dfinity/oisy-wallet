@@ -8,6 +8,7 @@ import {
 	type SwapSupportedTokensData
 } from '$lib/stores/swap-supported-tokens.store';
 import type { Balance } from '$lib/types/balance';
+import type { OptionAmount } from '$lib/types/send';
 import type { Token, TokenId } from '$lib/types/token';
 import { computeReceiveSupportedTokens } from '$lib/utils/swap-tokens-filter.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -42,6 +43,9 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	// The LI.FI fee "Max" leaves room for while it holds a LI.FI amount, kept with it for the same
 	// reason.
 	const lifiMaxFee = writable<LifiMaxFee | undefined>(undefined);
+	// The two-swap hints shown since the swap modal opened. Kept here rather than in the hint, which
+	// comes and goes with the quotes and is rebuilt with the form, so that each one counts once.
+	const twoSwapsHintsShown: TwoSwapsHintShown[] = [];
 
 	const sourceToken = derived(
 		[data, swappableTokens],
@@ -178,6 +182,22 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 				[address]: isPermitSupported
 			})),
 
+		markTwoSwapsHintShown: (hint: TwoSwapsHintShown): boolean => {
+			const shown = twoSwapsHintsShown.some(
+				({ sourceTokenId, destinationTokenId, intermediateTokenId, amount }) =>
+					sourceTokenId === hint.sourceTokenId &&
+					destinationTokenId === hint.destinationTokenId &&
+					intermediateTokenId === hint.intermediateTokenId &&
+					amount === hint.amount
+			);
+
+			if (!shown) {
+				twoSwapsHintsShown.push(hint);
+			}
+
+			return !shown;
+		},
+
 		reset: () => {
 			set({
 				sourceToken: undefined,
@@ -187,25 +207,39 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			lifiCarriedFee.set(undefined);
 			amountSetToMax.set(false);
 			lifiMaxFee.set(undefined);
+			twoSwapsHintsShown.splice(0);
 		}
 	};
 };
 
-// The gas and L1 data fee of a LI.FI fee ceiling that an execution found above the reviewed one,
-// for the quote inputs it was found for; the review prices them at its own fee per gas. Kept here
-// rather than in the wizard, which every step change rebuilds: the review the failed execution
-// returns to is another instance.
-export interface LifiCarriedFee {
-	key: string;
-	gas: bigint;
-	l1Fee: bigint;
-}
+// A LI.FI fee ceiling that an execution found above the reviewed one, for the quote inputs it was
+// found for: on EVM its gas and L1 data fee, which the review prices at its own fee per gas, on
+// Solana the ceiling itself, in lamports. Kept here rather than in the wizard, which every step
+// change rebuilds: the review the failed execution returns to is another instance.
+export type LifiCarriedFee =
+	| {
+			key: string;
+			gas: bigint;
+			l1Fee: bigint;
+	  }
+	| {
+			key: string;
+			solCeiling: bigint;
+	  };
 
 // The highest LI.FI fee seen for the route to a destination while "Max" holds a LI.FI amount, and
 // that destination: the fee of a route to another says nothing about the new one's.
 export interface LifiMaxFee {
 	fee: bigint;
 	destinationTokenId: TokenId;
+}
+
+// A two-swap hint the swap form showed: for a pair, the token in between and the quoted amount.
+export interface TwoSwapsHintShown {
+	sourceTokenId: TokenId;
+	destinationTokenId: TokenId;
+	intermediateTokenId: TokenId;
+	amount: OptionAmount;
 }
 
 export interface SwapContext {
@@ -236,6 +270,8 @@ export interface SwapContext {
 	setSourceToken: (token: Token) => void;
 	setDestinationToken: (token: Token | undefined) => void;
 	switchTokens: () => void;
+	// Records a two-swap hint as shown: `true` the first time since the swap modal opened.
+	markTwoSwapsHintShown: (hint: TwoSwapsHintShown) => boolean;
 	reset: () => void;
 }
 

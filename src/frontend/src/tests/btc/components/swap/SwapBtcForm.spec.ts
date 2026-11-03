@@ -6,8 +6,13 @@ import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ZERO } from '$lib/constants/app.constants';
-import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
+import {
+	CONVERT_AMOUNT_DISPLAY_SKELETON,
+	SWAP_PROVIDER_STATUS,
+	TOKEN_INPUT_CURRENCY_TOKEN
+} from '$lib/constants/test-ids.constants';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
+import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
@@ -18,6 +23,7 @@ import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { readable, writable } from 'svelte/store';
 
 describe('SwapBtcForm', () => {
@@ -136,6 +142,52 @@ describe('SwapBtcForm', () => {
 	// The Convert flow's breakdown minus its zero-valued conversion-fee row, and minus the KYT
 	// fee the minter withholds — which the provider sheet states instead, since it is already
 	// reflected in the receive amount.
+	it('compares providers before an offer exists without enabling Review', () => {
+		const activity = initSwapQuoteActivityStore();
+		activity.start({ requestId: 1, background: false });
+		const context = createContext({ offered: false });
+		context.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: initSwapAmountsStore(), activity });
+		const { getByTestId, getByText } = render(SwapBtcForm, {
+			props: { ...props, isSwapAmountsLoading: true },
+			context
+		});
+
+		expect(getByText(en.swap.text.smart_swap)).toBeInTheDocument();
+		expect(getByTestId(SWAP_PROVIDER_STATUS)).toHaveTextContent(en.swap.text.finding_best_rate);
+		expect(getByText(en.swap.text.review_button).closest('button')).toBeDisabled();
+	});
+
+	it('hides the previous offer fees behind a Total fee skeleton while comparing, and brings them back after', async () => {
+		const context = createContext();
+		const { store } = context.get(SWAP_AMOUNTS_CONTEXT_KEY);
+		const activity = initSwapQuoteActivityStore();
+		activity.start({ requestId: 2, background: false });
+		context.set(SWAP_AMOUNTS_CONTEXT_KEY, { store, activity });
+		const { getByTestId, getByText, queryByTestId, queryByText } = render(SwapBtcForm, {
+			props: { ...props, isSwapAmountsLoading: true },
+			context
+		});
+
+		expect(getByText(en.fee.text.total_fee)).toBeInTheDocument();
+		expect(getByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON)).toBeInTheDocument();
+		expect(queryByText(en.fee.text.convert_btc_network_fee)).not.toBeInTheDocument();
+
+		activity.complete({ requestId: 2 });
+
+		await waitFor(() =>
+			expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON)).not.toBeInTheDocument()
+		);
+
+		expect(getByText(en.fee.text.convert_btc_network_fee)).toBeInTheDocument();
+
+		// A background refresh keeps the fees in place.
+		activity.start({ requestId: 3, background: true });
+		await tick();
+
+		expect(queryByTestId(CONVERT_AMOUNT_DISPLAY_SKELETON)).not.toBeInTheDocument();
+		expect(getByText(en.fee.text.convert_btc_network_fee)).toBeInTheDocument();
+	});
+
 	it('itemizes the deposit fees from the selected offer', () => {
 		const { getByText, queryByText } = render(SwapBtcForm, { props, context: createContext() });
 
@@ -151,7 +203,7 @@ describe('SwapBtcForm', () => {
 		expect(
 			container.querySelectorAll(`input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`)
 		).toHaveLength(2);
-		expect(getByText(en.swap.text.swap_provider)).toBeInTheDocument();
+		expect(getByText(en.swap.text.smart_swap)).toBeInTheDocument();
 	});
 
 	it('leaves review enabled for an affordable amount', async () => {
