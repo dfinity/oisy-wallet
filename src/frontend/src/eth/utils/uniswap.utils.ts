@@ -366,7 +366,13 @@ const readV4Swap = ({
 			const { currency, path, amount, amountLimit } = args[0].toObject();
 			const exactInput = action === UNISWAP_V4_ACTIONS.SWAP_EXACT_IN;
 
-			if (path.length === 0) {
+			// Older routers let a hop of an exact-output path fall short. The debt this leaves in the
+			// hop's output currency does not show at the ends of the path: an open settlement pays it,
+			// an open take loses it.
+			if (
+				path.length === 0 ||
+				(!exactInput && path.length > 1 && !UNISWAP_V4_EXACT_OUTPUT_FILLS[reader.router.version])
+			) {
 				return false;
 			}
 

@@ -39,6 +39,8 @@ describe('uniswap.utils', () => {
 
 	// Router 2.0.0 on Base.
 	const ROUTER_2_0 = '0x6ff5693b99212da76ad316178a184ab56d299b43';
+	// Router 2.1.1 on Base.
+	const ROUTER_2_1_1 = '0xFdf682F51FE81Aa4898F0AE2163d8A55c127fbC7';
 
 	const EURC = EURC_TOKEN.address;
 	const USDC = USDC_TOKEN.address;
@@ -581,9 +583,6 @@ describe('uniswap.utils', () => {
 			// Before 2.1.2, a V4 exact-output swap reverted on its input only, so a pool short of
 			// liquidity could deliver part of the output to whoever takes it.
 			describe('an exact-output swap taken in full', () => {
-				// Router 2.1.1 on Base.
-				const ROUTER_2_1_1 = '0xFdf682F51FE81Aa4898F0AE2163d8A55c127fbC7';
-
 				const POOL = [EURC, USDC, 500, 10, ZERO_ETH_ADDRESS];
 
 				const exactOutput2_1 = {
@@ -637,6 +636,115 @@ describe('uniswap.utils', () => {
 						token: USDC_TOKEN,
 						amount: 1_087_807n
 					});
+				});
+			});
+
+			// Before 2.1.2, a hop of a V4 exact-output path could also fall short of what the next hop
+			// took, leaving a debt in that currency that the ends of the path do not show.
+			describe('an exact-output swap through several pools', () => {
+				const V4_SWAP_2_0 =
+					'tuple(address,tuple(address,uint24,int24,address,bytes)[],uint128,uint128)';
+
+				const pathSwap = ({
+					version,
+					action,
+					currency,
+					hops,
+					amount,
+					amountLimit
+				}: {
+					version: string;
+					action: number;
+					currency: string;
+					hops: string[];
+					amount: bigint;
+					amountLimit: bigint;
+				}) => {
+					const path = hops.map((hop) => [hop, 500, 10, ZERO_ETH_ADDRESS, '0x']);
+
+					return version === '2.0.0'
+						? { action, types: [V4_SWAP_2_0], values: [[currency, path, amount, amountLimit]] }
+						: { action, types: [V4_SWAP], values: [[currency, path, [], amount, amountLimit]] };
+				};
+
+				// EURC → WETH → EURC → USDC: a short hop into EURC adds to what the open settlement of
+				// EURC pays.
+				const throughPaid = (version: string): Command =>
+					v4Swap([
+						pathSwap({
+							version,
+							action: UNISWAP_V4_ACTIONS.SWAP_EXACT_OUT,
+							currency: USDC,
+							hops: [EURC, WETH, EURC],
+							amount: 1_087_807n,
+							amountLimit: 1_010_000n
+						}),
+						settle(),
+						take()
+					]);
+
+				// EURC → USDC → WETH, then WETH → USDC: a short hop into USDC takes from what the open
+				// take of USDC gets.
+				const throughTaken = (version: string): Command =>
+					v4Swap([
+						pathSwap({
+							version,
+							action: UNISWAP_V4_ACTIONS.SWAP_EXACT_OUT,
+							currency: WETH,
+							hops: [EURC, USDC],
+							amount: 400_000_000_000_000n,
+							amountLimit: 1_010_000n
+						}),
+						pathSwap({
+							version,
+							action: UNISWAP_V4_ACTIONS.SWAP_EXACT_IN,
+							currency: WETH,
+							hops: [USDC],
+							amount: ZERO,
+							amountLimit: 1_000_000n
+						}),
+						settle(),
+						take()
+					]);
+
+				it.each([
+					{ case: 'pays back into its path', swap: throughPaid, received: 1_087_807n },
+					{ case: 'passes through the token taken', swap: throughTaken, received: 1_000_000n }
+				])('should describe one that $case on 2.1.2', ({ swap, received }) => {
+					const data = execute({ commands: [swap('2.1.2')] });
+
+					expect(getUniswapSwap(params({ data }))).toEqual(
+						expect.objectContaining({
+							paid: { token: EURC_TOKEN, amount: 1_010_000n, atMost: true },
+							received: { token: USDC_TOKEN, amount: received }
+						})
+					);
+				});
+
+				it.each([
+					{ version: '2.0.0', to: ROUTER_2_0, case: 'pays back into its path', swap: throughPaid },
+					{
+						version: '2.1.1',
+						to: ROUTER_2_1_1,
+						case: 'pays back into its path',
+						swap: throughPaid
+					},
+					{
+						version: '2.0.0',
+						to: ROUTER_2_0,
+						case: 'passes through the token taken',
+						swap: throughTaken
+					},
+					{
+						version: '2.1.1',
+						to: ROUTER_2_1_1,
+						case: 'passes through the token taken',
+						swap: throughTaken
+					}
+				])('should not describe one that $case on $version', ({ version, to, swap }) => {
+					const data = execute({ commands: [swap(version)] });
+
+					expect(getUniswapSwap(params({ data, to }))).toBeUndefined();
 				});
 			});
 

@@ -106,9 +106,11 @@ router) and `BALANCE_CHECK_ERC20`, which only checks a balance.
 `PERMIT2_PERMIT` whose expiration is 0, which lasts for the current block only and is no date to
 show, or is past the last date JavaScript can hold (13 September 275760), like the
 `MaxAllowanceExpiration` of Uniswap's permit2-sdk; a V4 exact-output swap of the open amount; a V4
-settlement the wallet pays that nothing bounds: the router's whole balance, or the open amount of a
-currency that a take adds to what is owed; and a `V4_SWAP` that settles one currency more than
-once, whose open settlements would have to be followed action by action.
+exact-output swap through more than one pool on routers 2.0.0 and 2.1.1, where a hop can fall short
+of what the next hop took and leave a debt that the ends of the path do not show; a V4 settlement
+the wallet pays that nothing bounds: the router's whole balance, or the open amount of a currency
+that a take adds to what is owed; and a `V4_SWAP` that settles one currency more than once, whose
+open settlements would have to be followed action by action.
 
 **Allow-revert bit:** ignored, except on `PERMIT2_PERMIT`. Every other command OISY reads reverts
 the whole transaction when it fails, whatever the bit says. A `PERMIT2_PERMIT` with the bit keeps
