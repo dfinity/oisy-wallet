@@ -176,6 +176,9 @@ export const holdLiquidiumRepayUntilMined = async ({
 	feeToken: Token;
 	gasFee: bigint;
 }): Promise<void> => {
+	// The balances before the transfer is mined, to tell a reload that has it from one that does not.
+	const unmined = get(balancesStore);
+
 	liquidiumUnminedRepaysStore.add({
 		hash,
 		holds: [
@@ -189,8 +192,6 @@ export const holdLiquidiumRepayUntilMined = async ({
 
 		const tokens = feeToken.id === token.id ? [token] : [token, feeToken];
 
-		const before = get(balancesStore);
-
 		const reloads = await Promise.all(
 			tokens.map(async (reloadToken) => ({
 				tokenId: reloadToken.id,
@@ -198,35 +199,38 @@ export const holdLiquidiumRepayUntilMined = async ({
 			}))
 		);
 
-		await balancesStored({
+		await balancesChanged({
 			tokenIds: reloads.filter(({ success }) => success).map(({ tokenId }) => tokenId),
-			before
+			unmined
 		});
 	} finally {
 		liquidiumUnminedRepaysStore.remove(hash);
 	}
 };
 
-// `reloadEthereumBalance` stores what it loads through `batchSet`, which only lands on the next
-// animation frame, and not at all while the tab is hidden. Resolves once every one of `tokenIds`
-// has a different entry in the store than in `before`, i.e. once the reloaded balances are in it.
-const balancesStored = async ({
+// A reload does not prove the store has the mined balance: `reloadEthereumBalance` stores it through
+// `batchSet`, which only lands on the next animation frame (not at all while the tab is hidden),
+// and it reads Infura, which can still be a block behind the receipt from Alchemy. The transfer
+// always changes the balances it holds, by its value or its gas, so this resolves once every one of
+// `tokenIds` has a balance in the store other than in `unmined`. A reload that still has the old
+// balance leaves the hold to the balance poll.
+const balancesChanged = async ({
 	tokenIds,
-	before
+	unmined
 }: {
 	tokenIds: TokenId[];
-	before: CertifiedStoreData<BalancesData>;
+	unmined: CertifiedStoreData<BalancesData>;
 }): Promise<void> => {
-	const stored = (balances: CertifiedStoreData<BalancesData>): boolean =>
-		tokenIds.every((tokenId) => balances?.[tokenId] !== before?.[tokenId]);
+	const changed = (balances: CertifiedStoreData<BalancesData>): boolean =>
+		tokenIds.every((tokenId) => balances?.[tokenId]?.data !== unmined?.[tokenId]?.data);
 
-	if (stored(get(balancesStore))) {
+	if (changed(get(balancesStore))) {
 		return;
 	}
 
 	await new Promise<void>((resolve) => {
 		const unsubscribe = balancesStore.subscribe((balances) => {
-			if (stored(balances)) {
+			if (changed(balances)) {
 				unsubscribe();
 				resolve();
 			}
