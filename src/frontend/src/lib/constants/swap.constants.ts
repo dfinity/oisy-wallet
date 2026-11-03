@@ -21,6 +21,7 @@ import {
 	OISY_TRADE_LEARN_MORE_URL,
 	OISY_TRADE_PROVIDER_NAME
 } from '$lib/constants/oisy-trade.constants';
+import { MOTION_EASE_OUT_CSS } from '$lib/constants/transition.constants';
 import type { NetworkId } from '$lib/types/network';
 import { SwapProvider, type ChainFusionPair, type SwapProvidersConfig } from '$lib/types/swap';
 import { toChainFusionPairs } from '$lib/utils/chain-fusion-swap.utils';
@@ -47,13 +48,47 @@ export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeee
 
 export const SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS = 5_000;
 
+// Candidate dwell time: how long each provider stays in the comparison scroll.
+export const SWAP_PROVIDER_CYCLE_INTERVAL_MS = 650;
+
+// Shortest foreground comparison, from the first provider shown: two scroll turns, so fast or
+// cached quotes, and one-provider pairs through the provider pool, still show more than one name
+// before the winner. Slower quotes are not held further.
+export const SWAP_PROVIDER_MIN_COMPARISON_MS = SWAP_PROVIDER_CYCLE_INTERVAL_MS * 2;
+
+// A detail row that opens with the Smart Swap row fades up this much later, so the two read as
+// a sequence rather than one block.
+export const SWAP_DETAILS_ROW_STAGGER_MS = 60;
+
+// Selected Text Loop spring (k=900, c=80, m=10), sampled at 33 equally spaced times.
+// p(t)=1-exp(-4t)*(cos(sqrt(74)t)+4/sqrt(74)*sin(sqrt(74)t)); first p=1 at
+// T=(PI-atan(sqrt(74)/4))/sqrt(74). Map [0,T] to the shared turn budget: no overshoot/tail.
+export const SWAP_PROVIDER_TURN_EASING =
+	'linear(0, 0.002343, 0.009184, 0.020235, 0.035208, 0.053811, 0.075752, 0.100739, 0.128485, 0.158705, 0.191118, 0.225449, 0.26143, 0.298802, 0.337312, 0.376716, 0.416781, 0.457285, 0.498013, 0.538764, 0.579348, 0.619586, 0.659311, 0.698368, 0.736612, 0.773913, 0.810151, 0.845217, 0.879016, 0.911463, 0.942482, 0.972012, 1)';
+
+// A brief borderless confirmation, not a celebration or a minimum quote delay.
+export const SWAP_PROVIDER_CONFIRMATION_MOTION = {
+	duration: 250,
+	// Ease each segment, not the whole clock: the squeeze must still be visible during recall.
+	easing: 'linear',
+	keyframes: [
+		{ transform: 'scale(1)', offset: 0, easing: MOTION_EASE_OUT_CSS },
+		{ transform: 'scale(1.01, 0.95)', offset: 0.35, easing: MOTION_EASE_OUT_CSS },
+		{ transform: 'scale(0.995, 1.02)', offset: 0.7, easing: MOTION_EASE_OUT_CSS },
+		{ transform: 'scale(1)', offset: 1 }
+	]
+} satisfies { duration: number; easing: string; keyframes: Keyframe[] };
+
 // LI.FI is re-quoted at most this often for unchanged inputs, rather than on every periodic tick:
 // its rate limit is tight, and a displayed quote is never signed — execution always re-quotes.
 export const LIFI_QUOTE_REFRESH_INTERVAL_MS = 30_000;
 
-// The swap form shows its offers once every provider has answered, so a stalled LI.FI request would
-// hold back every other offer, and a request that never settles would never be retried.
-export const LIFI_QUOTE_TIMEOUT_MS = 10_000;
+// Display quote collection shares LI.FI's existing request budget. This bounds the whole
+// provider round (including prerequisite lookups), not execution or deposit validity.
+export const SWAP_QUOTE_TIMEOUT_MS = 10_000;
+
+// LI.FI also aborts its supported HTTP transport; other quote APIs may only be abandoned.
+export const LIFI_QUOTE_TIMEOUT_MS = SWAP_QUOTE_TIMEOUT_MS;
 
 // Added to the gas the node estimates a LI.FI transaction at, which execution signs with: the
 // route's swaps can cost more when mined than when estimated, and a transaction that runs out of
@@ -76,6 +111,13 @@ export const LIFI_CARRIED_FEE_HEADROOM_PERCENT = 10n;
 // earlier in 39–64 % of samples, by up to 5.5 % (2026-10-22): an amount with no room above the
 // form's fee could not be confirmed.
 export const LIFI_MAX_FEE_HEADROOM_PERCENT = 10n;
+
+// Added to the network fee of a Solana-source LI.FI quote's ceiling, which the form, "Max" and the
+// review budget and execution's re-quote must fit. LI.FI prices the compute units anew with each
+// quote, at 100,000 to 200,000 micro-lamports a unit for a limit fixed at 1.4M, and a re-quote came
+// out up to 34 % above the quote displayed a moment before, 57 % above one 30 s before
+// (Solana → Solana, 2026-10-29). The rent of the accounts it creates does not move.
+export const LIFI_SOL_NETWORK_FEE_HEADROOM_PERCENT = 100n;
 
 // A LI.FI row whose transaction the node refused outright is deleted, retried as a cycles mint's
 // is: a few attempts, a second apart.

@@ -1,4 +1,5 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import { infuraProviders } from '$eth/providers/infura.providers';
 import * as liquidiumApi from '$lib/api/liquidium.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS } from '$lib/constants/liquidium.constants';
@@ -11,6 +12,7 @@ import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { Activity, InflowActivity, LiquidiumState, OutflowActivity } from '@liquidium/client';
 
+vi.mock('$eth/providers/infura.providers', () => ({ infuraProviders: vi.fn() }));
 vi.mock('$lib/api/liquidium.api', () => ({ liquidiumClient: vi.fn() }));
 vi.mock('$lib/services/active-user-transactions.services', () => ({
 	applyActiveUserTransactionPollUpdate: vi.fn(),
@@ -25,6 +27,7 @@ describe('liquidium-active-tx.services', () => {
 
 	const list = vi.fn();
 	const getStatus = vi.fn();
+	const getTransactionReceipt = vi.fn();
 	const apply = vi.mocked(activeUserTransactionsServices.applyActiveUserTransactionPollUpdate);
 	const deleteTx = vi.mocked(activeUserTransactionsServices.deleteActiveUserTransaction);
 	const reload = vi.mocked(activeUserTransactionsServices.reloadActiveUserTransaction);
@@ -48,6 +51,16 @@ describe('liquidium-active-tx.services', () => {
 		error: [],
 		created_at_ns: ZERO
 	});
+
+	const buildRepayTx = (refs: Record<string, string>): ActiveUserTransaction => {
+		const tx = buildTx(refs);
+
+		if (!('Liquidium' in tx.data)) {
+			return tx;
+		}
+
+		return { ...tx, data: { Liquidium: { ...tx.data.Liquidium, action: { Repay: null } } } };
+	};
 
 	const inflowStatus = (state: LiquidiumState): InflowActivity['status'] => ({
 		operation: 'deposit',
@@ -96,6 +109,9 @@ describe('liquidium-active-tx.services', () => {
 		vi.mocked(liquidiumApi.liquidiumClient).mockReturnValue({
 			activities: { list, getStatus }
 		} as unknown as ReturnType<typeof liquidiumApi.liquidiumClient>);
+		vi.mocked(infuraProviders, { partial: true }).mockReturnValue({
+			getTransactionReceipt
+		});
 	});
 
 	it('does nothing for an empty transaction list (no client created)', async () => {
@@ -361,16 +377,6 @@ describe('liquidium-active-tx.services', () => {
 
 	// A repay records its row before the broadcast and adds the txid after it.
 	describe('repay rows without a txid', () => {
-		const buildRepayTx = (refs: Record<string, string>): ActiveUserTransaction => {
-			const tx = buildTx(refs);
-
-			if (!('Liquidium' in tx.data)) {
-				return tx;
-			}
-
-			return { ...tx, data: { Liquidium: { ...tx.data.Liquidium, action: { Repay: null } } } };
-		};
-
 		const repayWithoutTxid = buildRepayTx({ [LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId });
 
 		const repayWithTxid = buildRepayTx({
@@ -513,6 +519,93 @@ describe('liquidium-active-tx.services', () => {
 			expect(apply).toHaveBeenCalledWith(
 				expect.objectContaining({ update: { status: { Succeeded: null } } })
 			);
+		});
+	});
+
+	describe('repay rows whose Ethereum transfer Liquidium does not list', () => {
+		const ethTxid = `0x${'ab'.repeat(32)}`;
+
+		const ethRepay = buildRepayTx({
+			[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
+			[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: ethTxid
+		});
+
+		beforeEach(() => {
+			list.mockResolvedValue([]);
+		});
+
+		it('fails the row once the transfer reverted', async () => {
+			getTransactionReceipt.mockResolvedValue({ status: 0 });
+
+			await poll(ethRepay);
+
+			expect(getTransactionReceipt).toHaveBeenCalledWith(ethTxid);
+
+			const [[{ update }]] = apply.mock.calls;
+
+			expect(update?.status).toEqual({ Failed: null });
+			expect(update?.error).toBeTruthy();
+		});
+
+		it('keeps the row while the transfer is not mined', async () => {
+			getTransactionReceipt.mockResolvedValue(null);
+
+			await poll(ethRepay);
+
+			expect(apply).not.toHaveBeenCalled();
+		});
+
+		it('keeps the row while Liquidium has not listed a successful transfer', async () => {
+			getTransactionReceipt.mockResolvedValue({ status: 1 });
+
+			await poll(ethRepay);
+
+			expect(apply).not.toHaveBeenCalled();
+		});
+
+		it('follows the activity once Liquidium lists the transfer', async () => {
+			list.mockResolvedValue([
+				buildActivity({ txids: [ethTxid], status: inflowStatus('completed') })
+			]);
+
+			await poll(ethRepay);
+
+			expect(getTransactionReceipt).not.toHaveBeenCalled();
+			expect(apply).toHaveBeenCalledWith(
+				expect.objectContaining({ update: { status: { Succeeded: null } } })
+			);
+		});
+
+		it('does not read a receipt for a txid that is not an Ethereum hash', async () => {
+			await poll(
+				buildRepayTx({
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: '39851427'
+				})
+			);
+
+			expect(getTransactionReceipt).not.toHaveBeenCalled();
+			expect(apply).not.toHaveBeenCalled();
+		});
+
+		it('does not read a receipt for a supply row', async () => {
+			await poll(
+				buildTx({
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: ethTxid
+				})
+			);
+
+			expect(getTransactionReceipt).not.toHaveBeenCalled();
+			expect(apply).not.toHaveBeenCalled();
+		});
+
+		it('keeps the row when the receipt cannot be read', async () => {
+			getTransactionReceipt.mockRejectedValue(new Error('RPC unavailable'));
+
+			await expect(poll(ethRepay)).resolves.toBeUndefined();
+
+			expect(apply).not.toHaveBeenCalled();
 		});
 	});
 });

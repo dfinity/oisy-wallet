@@ -54,7 +54,12 @@ describe('SwapContexts', () => {
 			expect(setContext).toHaveBeenCalledWith(
 				SWAP_AMOUNTS_CONTEXT_KEY,
 				expect.objectContaining({
-					store: expect.any(Object)
+					store: expect.any(Object),
+					activity: expect.objectContaining({
+						subscribe: expect.any(Function),
+						start: expect.any(Function),
+						reset: expect.any(Function)
+					})
 				})
 			);
 		});
