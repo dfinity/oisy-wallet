@@ -423,6 +423,17 @@ const readV4Swap = ({
 				return false;
 			}
 
+			// A swap's output of this currency changes what is owed of it: it lowers the debt, and on
+			// older routers a hook can make an exact output negative, which raises it.
+			if (
+				key !== ZERO_ETH_ADDRESS &&
+				spent.has(key) &&
+				produced.has(key) &&
+				(action === UNISWAP_V4_ACTIONS.SETTLE_ALL || (args[1] === UNISWAP_OPEN_AMOUNT && args[2]))
+			) {
+				return false;
+			}
+
 			settled.add(key);
 		}
 

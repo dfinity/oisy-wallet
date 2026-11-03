@@ -838,6 +838,72 @@ describe('uniswap.utils', () => {
 
 				expect(getUniswapSwap(params({ data }))).toBeUndefined();
 			});
+
+			// What another swap outputs of the settled currency changes what is owed of it, so the
+			// swaps' inputs no longer state what an open settlement pays.
+			describe('a settlement of a currency a swap also outputs', () => {
+				const swapBack = {
+					action: UNISWAP_V4_ACTIONS.SWAP_EXACT_IN_SINGLE,
+					types: [V4_SWAP_SINGLE],
+					values: [[[EURC, USDC, 500, 10, ZERO_ETH_ADDRESS], false, 500_000n, 450_000n, ZERO, '0x']]
+				};
+
+				const settleAll = {
+					action: UNISWAP_V4_ACTIONS.SETTLE_ALL,
+					types: ['address', 'uint256'],
+					values: [EURC, 2_000_000n]
+				};
+
+				it.each([
+					{ case: 'an open settlement', settlement: settle() },
+					{ case: 'a settlement of everything owed', settlement: settleAll }
+				])('should not describe $case of it', ({ settlement }) => {
+					const data = execute({
+						commands: [v4Swap([swapExactInSingle, swapBack, settlement, take()])]
+					});
+
+					expect(getUniswapSwap(params({ data }))).toBeUndefined();
+				});
+
+				// Router 2.0.0 never reads an exact output, which a hook can make negative.
+				it('should not describe an open settlement of it after an exact output into it on 2.0.0', () => {
+					const SWAP_SINGLE_2_0 = `tuple(${POOL_KEY},bool,uint128,uint128,bytes)`;
+					const POOL = [EURC, USDC, 500, 10, ZERO_ETH_ADDRESS];
+
+					const data = execute({
+						commands: [
+							v4Swap([
+								{
+									action: UNISWAP_V4_ACTIONS.SWAP_EXACT_IN_SINGLE,
+									types: [SWAP_SINGLE_2_0],
+									values: [[POOL, true, 1_000_000n, 1_087_807n, '0x']]
+								},
+								{
+									action: UNISWAP_V4_ACTIONS.SWAP_EXACT_OUT_SINGLE,
+									types: [SWAP_SINGLE_2_0],
+									values: [[POOL, false, 100_000n, 120_000n, '0x']]
+								},
+								settle(),
+								take()
+							])
+						]
+					});
+
+					expect(getUniswapSwap(params({ data, to: ROUTER_2_0 }))).toBeUndefined();
+				});
+
+				it('should still describe an explicit settlement of it', () => {
+					const data = execute({
+						commands: [v4Swap([swapExactInSingle, swapBack, settle({ amount: 600_000n }), take()])]
+					});
+
+					expect(getUniswapSwap(params({ data }))?.paid).toEqual({
+						token: EURC_TOKEN,
+						amount: 600_000n,
+						atMost: false
+					});
+				});
+			});
 		});
 
 		describe('commands OISY does not read', () => {
