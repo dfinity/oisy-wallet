@@ -28,6 +28,24 @@ describe('NoteListItem', () => {
 		expect(container).toHaveTextContent('Created');
 	});
 
+	it('previews up to two lines of the body, with the timestamp on its own line below', () => {
+		const note: PersonalNoteEntryUi = {
+			id: 'a',
+			note: 'Title\nA body long enough to wrap onto a second line in the list',
+			created_at_ns: recentNs,
+			updated_at_ns: recentNs
+		};
+
+		const { getByText } = render(NoteListItem, { props: { note, ...baseProps() } });
+
+		const body = getByText('A body long enough to wrap onto a second line in the list');
+		const timestamp = getByText(/^Created/);
+
+		expect(body).toHaveClass('line-clamp-2');
+		expect(body.contains(timestamp)).toBeFalsy();
+		expect(body.compareDocumentPosition(timestamp) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+	});
+
 	it('darkens while pressed instead of shrinking, like other full-width rows', () => {
 		const note: PersonalNoteEntryUi = {
 			id: 'a',

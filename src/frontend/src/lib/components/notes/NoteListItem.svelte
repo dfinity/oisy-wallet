@@ -43,8 +43,8 @@
 		});
 	});
 
-	// Plain-text preview: first line as a bold title, the rest collapsed to one
-	// lighter line. Both are auto-escaped by Svelte and bidi-neutralized.
+	// Plain-text preview: first line as a bold title, the rest collapsed into a
+	// lighter paragraph. Both are auto-escaped by Svelte and bidi-neutralized.
 	const parts = $derived(
 		isPersonalNoteDecryptionFailure(note)
 			? { title: '', body: '' }
@@ -70,25 +70,22 @@
 		cannot contain another, and the row's pressed fill must not light up for it. -->
 	<div class="flex w-full items-center gap-1">
 		<button
-			class="flex min-w-0 flex-1 items-center gap-3 rounded-xl row-feedback px-2 py-3 text-left"
+			class="flex min-w-0 flex-1 flex-col items-stretch gap-1 rounded-xl row-feedback px-2 py-3 text-left"
 			data-tid={NOTES_LIST_ITEM}
 			onclick={() => onSelect(note.id)}
 			type="button"
 		>
-			<span class="flex min-w-0 flex-1 flex-col gap-1">
-				<span style="overflow-wrap: anywhere;" class="truncate font-bold text-primary">
-					{parts.title}
-				</span>
-				<!-- Apple-Notes style meta line: the timestamp leads and the body preview
-					follows on the same line, so every row keeps the same two-line height
-					whether or not the note has body text. -->
-				<span class="flex min-w-0 items-baseline gap-1.5 text-xs">
-					<span class="shrink-0 text-secondary">{timestamp}</span>
-					{#if parts.body !== ''}
-						<span class="min-w-0 flex-1 truncate text-tertiary">{parts.body}</span>
-					{/if}
-				</span>
+			<span style="overflow-wrap: anywhere;" class="truncate font-bold text-primary">
+				{parts.title}
 			</span>
+			<!-- Up to two lines of the body, then the timestamp on a line of its own, so
+				a row grows with its preview (a title-only note stays two lines). -->
+			{#if parts.body !== ''}
+				<span style="overflow-wrap: anywhere;" class="line-clamp-2 text-sm text-tertiary">
+					{parts.body}
+				</span>
+			{/if}
+			<span class="text-xs text-secondary">{timestamp}</span>
 		</button>
 
 		<ButtonIcon

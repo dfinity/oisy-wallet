@@ -554,7 +554,7 @@ The page deliberately does **not**: scan pools where only one leg is active (rou
 
 ## Personal notes
 
-Signed-in users have a private list of free-text **personal notes** on the **Notes** page (`/notes/`), reached from the **Notes** entry in the navigation. The page lists the user's notes newest-first, under a client-side **search** field and an **Add note** button. Each row has a **delete** button beside it. Tapping a row opens the note in a modal on a **read-only view**, from which it can be edited, shared, or deleted; **Add note** opens the same modal on the editor.
+Signed-in users have a private list of free-text **personal notes** on the **Notes** page (`/notes/`), reached from the **Notes** entry in the navigation. The page lists the user's notes newest-first, under a client-side **search** field and an **Add note** button. Each row shows the note's first line in bold, up to two lines of the rest, and when it was created or last updated, with a **delete** button beside it. Tapping a row opens the note in a modal on a **read-only view**, from which it can be edited, shared, or deleted; **Add note** opens the same modal on the editor.
 
 A note is a free-standing memo — it is **not** attached to any transaction, address, token, or network. Each note is body text plus created/updated timestamps; there is no **stored** title (the list and read-only view show the note's first line in bold as a de-facto title), and no rich text, attachments, tags, or folders.
 
