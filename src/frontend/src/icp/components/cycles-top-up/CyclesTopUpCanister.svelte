@@ -19,6 +19,7 @@
 	import { MIN_DESTINATION_LENGTH_FOR_ERROR_STATE } from '$lib/constants/app.constants';
 	import {
 		CYCLES_TOP_UP_CANISTER,
+		CYCLES_TOP_UP_CANISTER_BACK_BUTTON,
 		CYCLES_TOP_UP_CANISTER_INPUT,
 		CYCLES_TOP_UP_CANISTER_NEXT_BUTTON
 	} from '$lib/constants/test-ids.constants';
@@ -35,9 +36,10 @@
 		// The TCYCLES token, whose history lists the canisters topped up before. Absent while
 		// TCYCLES is not enabled.
 		cyclesToken?: IcToken;
-		// Back to the token picker, when there was a choice to make; Cancel otherwise.
-		onBack?: () => void;
 		onCancel: () => void;
+		// Set when an earlier step leads here, which the step then offers to go back to instead
+		// of cancelling.
+		onBack?: () => void;
 		onNext: () => void;
 	}
 
@@ -45,8 +47,8 @@
 		canisterIdText = $bindable(''),
 		token,
 		cyclesToken,
-		onBack,
 		onCancel,
+		onBack,
 		onNext
 	}: Props = $props();
 
@@ -181,7 +183,11 @@
 	{#snippet toolbar()}
 		<ButtonGroup>
 			{#if nonNullish(onBack)}
-				<ButtonBack onclick={onBack} />
+				<ButtonBack
+					disabled={checking}
+					onclick={onBack}
+					testId={CYCLES_TOP_UP_CANISTER_BACK_BUTTON}
+				/>
 			{:else}
 				<ButtonCancel onclick={onCancel} />
 			{/if}

@@ -807,8 +807,8 @@
 			"support_title": "Wsparcie",
 			"support_description": "Odpowiedzi i więcej informacji znajdziesz na stronie wsparcia w dokumentacji $oisy_name. Jeśli utkniesz, skontaktuj się z zespołem.",
 			"support_link": "Przejdź na naszą stronę wsparcia",
-			"network_explorers_title": "Eksploratory bloków",
-			"network_explorers_description": "$oisy_name tworzy Twoją historię na podstawie zewnętrznych indekserów, które mogą nie nadążać za blockchainem. Eksplorator bloków pokazuje, co sama sieć rejestruje dla Twojego adresu.",
+			"network_explorers_title": "Eksploratory blockchaina",
+			"network_explorers_description": "Otwórz te linki, aby zobaczyć swoje adresy w eksploratorach blockchaina i śledzić salda w czasie rzeczywistym oraz pełną historię transakcji. Blockchainy są publicznymi rejestrami, więc możesz samodzielnie weryfikować i badać całą aktywność on-chain swojego $oisy_name.",
 			"explorers_title": "Status transakcji u dostawcy",
 			"explorers_description": "$oisy_name realizuje swapy i transfery przez most za pośrednictwem zewnętrznych dostawców. Jeśli któryś trwa dłużej niż oczekiwano, otwórz eksplorator dostawcy: pokazuje, na jakim etapie jest Twój transfer, już przefiltrowany do Twojego portfela.",
 			"explorers_velora_description": "Swapy na Ethereum i innych sieciach EVM.",
@@ -838,7 +838,7 @@
 			"withdraw": "Wypłać"
 		},
 		"alt": {
-			"network_explorer_link": "Otwórz eksplorator bloków sieci $network dla swojego adresu",
+			"network_explorer_link": "Otwórz eksplorator blockchaina sieci $network dla swojego adresu",
 			"explorer_link": "Otwórz eksplorator $provider dla swojego adresu ($chain)",
 			"select_token_first": "Wybierz pierwszy token puli",
 			"select_token_second": "Wybierz drugi token puli",
@@ -1240,7 +1240,10 @@
 			"unknown": "OISY nie wie jeszcze, czy doładowanie się powiodło. Jeśli tak, zobaczysz je w aktywności $token. Doładuj ponownie, aby wysłać to samo doładowanie jeszcze raz: może się powieść tylko raz. Nowe lub zmienione doładowanie dodałoby cykle ponownie, jeśli to się powiodło.",
 			"unknown_fresh": "OISY nie wie jeszcze, czy Twoje ostatnie doładowanie się powiodło. Jeśli tak, to doładowanie doda cykle ponownie. Najpierw sprawdź aktywność $token.",
 			"sent_to_canister": "Wysłanie $token do kanistra go nie doładowuje. $token trafiają na konto kanistra, a kanister dostaje cykle tylko wtedy, gdy wypłaci je jego własny kod.",
-			"sent_to_canister_top_up": "Aby dodać cykle do kanistra, użyj opcji „Doładuj” na stronie $token."
+			"sent_to_canister_top_up": "Aby dodać cykle do kanistra, użyj opcji „Doładuj” na stronie $token.",
+			"choice_send": "Wyślij $token",
+			"choice_send_description": "Wyślij tokeny $token na inne konto. Wysłanie $token do kanistra go nie doładowuje.",
+			"choice_top_up_description": "Zamień tokeny $token na cykle, aby doładować dowolny kanister."
 		},
 		"error": {
 			"invalid_canister_id": "Wpisz ID kanistra. Principali użytkowników, ID kont i adresów w innych sieciach nie można doładować.",

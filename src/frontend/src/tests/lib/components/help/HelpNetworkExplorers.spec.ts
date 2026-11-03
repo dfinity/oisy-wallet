@@ -127,7 +127,7 @@ describe('HelpNetworkExplorers', () => {
 		expect(link.getAttribute('target')).toBe('_blank');
 		expect(link.getAttribute('rel')).toBe('external noopener noreferrer');
 		expect(link.getAttribute('aria-label')).toBe(
-			`Open the ${ETHEREUM_NETWORK.name} block explorer for your address`
+			`Open the ${ETHEREUM_NETWORK.name} blockchain explorer for your address`
 		);
 	});
 

@@ -1,30 +1,24 @@
 <script lang="ts">
-	import { isNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount, untrack } from 'svelte';
 	import { get } from 'svelte/store';
 	import { CANISTER_TOP_UP_ENABLED } from '$env/canister-top-up.env';
 	import { CYCLES_TOP_UP_ENABLED } from '$env/cycles-top-up.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { getIcpXdrConversionRate } from '$icp/api/cmc.api';
-	import CyclesTopUpAmount from '$icp/components/cycles-top-up/CyclesTopUpAmount.svelte';
 	import CyclesTopUpCanister from '$icp/components/cycles-top-up/CyclesTopUpCanister.svelte';
 	import CyclesTopUpIcpAmount from '$icp/components/cycles-top-up/CyclesTopUpIcpAmount.svelte';
 	import CyclesTopUpIcpReview from '$icp/components/cycles-top-up/CyclesTopUpIcpReview.svelte';
 	import CyclesTopUpProgress from '$icp/components/cycles-top-up/CyclesTopUpProgress.svelte';
-	import CyclesTopUpReview from '$icp/components/cycles-top-up/CyclesTopUpReview.svelte';
 	import CyclesTopUpToken from '$icp/components/cycles-top-up/CyclesTopUpToken.svelte';
+	import CyclesTopUpWizard from '$icp/components/cycles-top-up/CyclesTopUpWizard.svelte';
 	import {
 		CMC_RATE_REFRESH_INTERVAL_MILLIS,
 		CYCLES_TOP_UP_REFUND_FEES
 	} from '$icp/constants/cmc.constants';
-	import { topUpCanister, topUpCanisterWithIcp } from '$icp/services/cycles-top-up.services';
+	import { topUpCanisterWithIcp } from '$icp/services/cycles-top-up.services';
 	import { lastCyclesTopUps } from '$icp/stores/cycles-top-up.store';
-	import {
-		CyclesTopUpIcpError,
-		type CyclesTopUpNotifyResult,
-		type CyclesTopUpRequest,
-		type CyclesTopUpResult
-	} from '$icp/types/cycles-top-up';
+	import { CyclesTopUpIcpError, type CyclesTopUpNotifyResult } from '$icp/types/cycles-top-up';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { isTokenCyclesLedger } from '$icp/utils/cycles-mint.utils';
 	import {
@@ -38,10 +32,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { enabledIcTokens } from '$lib/derived/tokens.derived';
-	import {
-		PLAUSIBLE_EVENT_RESULT_STATUSES,
-		PLAUSIBLE_EVENT_SOURCE_LOCATIONS
-	} from '$lib/enums/plausible';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 	import { ProgressStepsCyclesTopUp } from '$lib/enums/progress-steps';
 	import { WizardStepsCyclesTopUp } from '$lib/enums/wizard-steps';
 	import {
@@ -100,6 +91,8 @@
 			: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOKEN_DETAILS
 	);
 
+	// The inputs and the progress of a top-up paid with ICP. Paid with TCYCLES, the wizard holds
+	// its own.
 	let canisterIdText = $state('');
 	let sendAmount = $state<OptionAmount>();
 	let progressStep = $state<ProgressStepsCyclesTopUp>(ProgressStepsCyclesTopUp.INITIALIZATION);
@@ -107,17 +100,14 @@
 	let modal = $state<WizardModal<WizardStepsCyclesTopUp>>();
 
 	// The principal this modal opened for. A sign-in in another tab can switch this tab's
-	// identity without a reload, and the inputs, with any resend they hold, belong to this
-	// principal: the modal closes rather than top up from another account.
+	// identity without a reload, and the inputs belong to this principal: the modal closes
+	// rather than top up from another account.
 	const openedFor = get(authIdentity)?.getPrincipal().toText();
 
 	let signedInAsOther = $derived($authIdentity?.getPrincipal().toText() !== openedFor);
 
 	// The signed-in principal's TCYCLES top-up that got no answer, kept until the page reloads,
-	// so a later modal has it too.
-	// Sending the same canister and amount again reuses its creation time, so the ledger
-	// answers with the first one's block if it went through, and the top-up runs at most
-	// once. The ledger keeps that for 24 hours; a resend after that stays unknown (below).
+	// which the wizard opens on (below).
 	let last = $derived(
 		nonNullish($authIdentity) ? $lastCyclesTopUps[$authIdentity.getPrincipal().toText()] : undefined
 	);
@@ -130,26 +120,6 @@
 		nonNullish(payToken) && nonNullish(sendAmount) && !invalidAmount(sendAmount)
 			? parseToken({ value: `${sendAmount}`, unitName: payToken.decimals })
 			: undefined
-	);
-
-	// The top-up this modal opened on (below). Top up keeps resending it after an answer to it
-	// arrived while this modal was open: the same canister and amount as a fresh request would
-	// run a second withdrawal. A refusal or a refund settles it instead (below).
-	let resumed = $state<CyclesTopUpRequest | undefined>();
-
-	const isResumed = ({ createdAt, canisterId, amount }: CyclesTopUpRequest): boolean =>
-		resumed?.createdAt === createdAt &&
-		resumed.canisterId === canisterId &&
-		resumed.amount === amount;
-
-	let resendable = $derived(unanswered ?? resumed);
-
-	// Only a TCYCLES top-up can be resent: one paid with ICP is a new top-up.
-	let resendsUnanswered = $derived(
-		!paidWithIcp &&
-			nonNullish(resendable) &&
-			resendable.canisterId === canisterId &&
-			resendable.amount === amount
 	);
 
 	// The same from both entry points, once Canister top-up is on.
@@ -184,6 +154,7 @@
 		return fromTools ? [{ name: WizardStepsCyclesTopUp.TOKEN, title }, ...topUpSteps] : topUpSteps;
 	});
 
+	// Reported here whatever pays, before anything is picked: the wizard leaves it to the modal.
 	onMount(() => trackCyclesTopUp({ step: 'open', sourceLocation }));
 
 	// A top-up can answer after the modal is gone, closed when another identity signed in. The
@@ -211,9 +182,6 @@
 		}
 	});
 
-	const formatAmount = ({ value, token }: { value: bigint; token: IcToken }): string =>
-		formatToken({ value, unitName: token.decimals, displayDecimals: token.decimals });
-
 	const goTo = (name: WizardStepsCyclesTopUp) => {
 		const index = steps.findIndex((step) => step.name === name);
 
@@ -222,11 +190,9 @@
 		}
 	};
 
-	// A modal opened while the principal's last TCYCLES top-up has no answer starts on that
-	// top-up's Review, from either entry point, so Top up resends it: once the first one went
-	// through, the Amount step's balance check would refuse the same amount. Back leads to the
-	// usual steps, where any change is a new request. The full-precision amount parses back to
-	// the stored one.
+	// A modal opened while the principal's last TCYCLES top-up has no answer goes to that
+	// top-up's Review with TCYCLES, from either entry point, where the wizard fills it in so Top
+	// up resends it.
 	// Otherwise, a modal opened from Tools when only one token can pay starts on the
 	// canister step with that token: there is nothing to pick.
 	let opened = false;
@@ -241,9 +207,6 @@
 		untrack(() => {
 			if (nonNullish(unanswered) && nonNullish(cyclesToken)) {
 				pickedToken = cyclesToken;
-				resumed = unanswered;
-				canisterIdText = unanswered.canisterId;
-				sendAmount = formatAmount({ value: unanswered.amount, token: cyclesToken });
 
 				goTo(WizardStepsCyclesTopUp.REVIEW);
 				return;
@@ -257,14 +220,10 @@
 		});
 	});
 
-	// The modal that sent the top-up, closed by leaving the page, may get its answer while this
-	// one is open on it. A refusal or a refund settles the request then too, as an answer here
-	// does: nothing is left to resend, and the next top-up is a new request.
-	$effect(() => {
-		if ((last?.outcome === 'refused' || last?.outcome === 'refunded') && isResumed(last.request)) {
-			resumed = undefined;
-		}
-	});
+	// Back to the token picker from the canister step, when there was a choice to make.
+	let backToToken = $derived(
+		fromTools && usableTokens.length > 1 ? () => modal?.back() : undefined
+	);
 
 	const pickToken = (token: IcToken) => {
 		// An amount is in its token's units.
@@ -344,162 +303,8 @@
 		modal?.next();
 	};
 
-	const failureText = ({
-		result,
-		amount,
-		token
-	}: {
-		result: Extract<CyclesTopUpResult, { status: 'refused' | 'refunded' }>;
-		amount: bigint;
-		token: IcToken;
-	}): string => {
-		if (result.status === 'refunded') {
-			// The ledger refunds the amount minus its fee, so with the fee the burn took, the
-			// attempt costs the fee twice.
-			return nonNullish(result.refundBlockIndex)
-				? replacePlaceholders($i18n.cycles_top_up.error.refunded, {
-						$refund: formatAmount({ value: amount - token.fee, token }),
-						$token: token.symbol,
-						$fees: formatAmount({ value: token.fee * 2n, token })
-					})
-				: $i18n.cycles_top_up.error.refunded_nothing;
-		}
-
-		return result.refusal === 'insufficient_funds'
-			? replacePlaceholders($i18n.cycles_top_up.error.insufficient_funds, {
-					$token: token.symbol
-				})
-			: result.refusal === 'too_old' || result.refusal === 'created_in_future'
-				? $i18n.cycles_top_up.error.clock
-				: $i18n.cycles_top_up.error.refused;
-	};
-
-	const topUp = async () => {
-		const principal = parseCanisterId(canisterIdText);
-
-		if (
-			isNullish($authIdentity) ||
-			isNullish(cyclesToken) ||
-			isNullish(principal) ||
-			isNullish(amount)
-		) {
-			toastsError({ msg: { text: $i18n.send.assertion.amount_invalid } });
-			return;
-		}
-
-		const token = cyclesToken;
-
-		const sender = $authIdentity.getPrincipal().toText();
-
-		if (sender !== openedFor) {
-			close();
-			return;
-		}
-
-		const resent = nonNullish(resendable) && resendsUnanswered;
-
-		const request: CyclesTopUpRequest =
-			nonNullish(resendable) && resendsUnanswered
-				? resendable
-				: { canisterId: principal.toText(), amount, createdAt: nowInBigIntNanoSeconds() };
-
-		// Stored before it is sent, so a modal opened while it is in flight, after this one was
-		// closed by leaving the page, starts on its Review and resends it rather than sending a
-		// second withdrawal.
-		const send = Symbol();
-
-		lastCyclesTopUps.update((all) => ({ ...all, [sender]: { request, send } }));
-
-		const analytics = { step: 'top_up' as const, tokenSymbol: token.symbol, sourceLocation };
-
-		progressStep = ProgressStepsCyclesTopUp.INITIALIZATION;
-
-		modal?.next();
-
-		trackCyclesTopUp({ ...analytics, resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING });
-
-		progressStep = ProgressStepsCyclesTopUp.TOP_UP;
-
-		const answer = await topUpCanister({
-			identity: $authIdentity,
-			canisterId: principal,
-			amount: request.amount,
-			createdAt: request.createdAt,
-			indexCanisterId: token.indexCanisterId
-		});
-
-		// A resend past the ledger's 24-hour window is refused as too old whatever happened to the
-		// first call, which may have gone through: its outcome stays unknown, and Top up keeps
-		// resending that same request rather than starting a fresh one.
-		const result: CyclesTopUpResult =
-			resent && answer.status === 'refused' && answer.refusal === 'too_old'
-				? { status: 'unknown' }
-				: answer;
-
-		// Only a top-up without an answer may be resent as it was: any other answer settles it,
-		// and its outcome stays with it for a modal opened on it (above). The stored request is
-		// updated only while this send still owns it: a resend from a later modal, or a newer
-		// top-up, may have taken it over, settled or replaced it while this answer was on its way.
-		lastCyclesTopUps.update((all) =>
-			all[sender]?.send === send
-				? {
-						...all,
-						[sender]: {
-							request,
-							send,
-							...(result.status !== 'unknown' && { outcome: result.status })
-						}
-					}
-				: all
-		);
-
-		if (result.status === 'topped_up') {
-			trackCyclesTopUp({ ...analytics, resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS });
-
-			progressStep = ProgressStepsCyclesTopUp.DONE;
-
-			toastsShow({
-				text: replacePlaceholders($i18n.cycles_top_up.text.topped_up, {
-					$canister: shortenWithMiddleEllipsis({ text: request.canisterId }),
-					$amount: formatAmount({ value: request.amount, token }),
-					$token: token.symbol
-				}),
-				level: 'success',
-				duration: 4000
-			});
-
-			waitAndTriggerWallet();
-
-			if (!destroyed) {
-				closeTimer = setTimeout(close, 750);
-			}
-			return;
-		}
-
-		trackCyclesTopUp({
-			...analytics,
-			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
-			errorCode: result.status
-		});
-
-		// Review shows the warning for a top-up without an answer.
-		if (result.status === 'refused' || result.status === 'refunded') {
-			if (isResumed(request)) {
-				resumed = undefined;
-			}
-			toastsError({ msg: { text: failureText({ result, amount: request.amount, token }) } });
-		}
-
-		if (result.status === 'refunded') {
-			waitAndTriggerWallet();
-		}
-
-		if (!destroyed) {
-			modal?.back();
-		}
-	};
-
-	const formatIcp = (value: bigint): string => formatAmount({ value, token: ICP_TOKEN });
+	const formatIcp = (value: bigint): string =>
+		formatToken({ value, unitName: ICP_TOKEN.decimals, displayDecimals: ICP_TOKEN.decimals });
 
 	// Once the ICP reached the CMC, the modal only reports: the top-up's row in Active
 	// transactions settles it, and its analytics fire from there.
@@ -644,23 +449,34 @@
 >
 	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
-	{#key currentStep?.name}
-		{#if currentStep?.name === WizardStepsCyclesTopUp.TOKEN}
-			<CyclesTopUpToken onCancel={close} onSelect={pickToken} tokens={usableTokens} />
-		{:else if currentStep?.name === WizardStepsCyclesTopUp.CANISTER && nonNullish(payToken)}
-			<CyclesTopUpCanister
-				{cyclesToken}
-				onBack={fromTools && usableTokens.length > 1 ? () => modal?.back() : undefined}
-				onCancel={close}
-				onNext={() => modal?.next()}
-				token={payToken}
-				bind:canisterIdText
-			/>
-		{:else if nonNullish(payToken)}
-			<!-- One per step, for the token picked: the contexts read their tokens only once. -->
-			<ConvertContexts destinationToken={payToken} sourceToken={payToken}>
-				{#if currentStep?.name === WizardStepsCyclesTopUp.AMOUNT}
-					{#if paidWithIcp}
+	{#if currentStep?.name === WizardStepsCyclesTopUp.TOKEN}
+		<CyclesTopUpToken onCancel={close} onSelect={pickToken} tokens={usableTokens} />
+	{:else if nonNullish(payToken) && !paidWithIcp}
+		<!-- Paid with TCYCLES, the top-up runs as on the TCYCLES page and in Send. -->
+		<CyclesTopUpWizard
+			{currentStep}
+			{modal}
+			onBack={backToToken}
+			onClose={close}
+			openReported
+			{sourceLocation}
+			{steps}
+			token={payToken}
+		/>
+	{:else if nonNullish(payToken)}
+		{#key currentStep?.name}
+			{#if currentStep?.name === WizardStepsCyclesTopUp.CANISTER}
+				<CyclesTopUpCanister
+					{cyclesToken}
+					onBack={backToToken}
+					onCancel={close}
+					onNext={() => modal?.next()}
+					token={payToken}
+					bind:canisterIdText
+				/>
+			{:else}
+				<ConvertContexts destinationToken={payToken} sourceToken={payToken}>
+					{#if currentStep?.name === WizardStepsCyclesTopUp.AMOUNT}
 						<CyclesTopUpIcpAmount
 							onBack={() => modal?.back()}
 							onNext={reviewIcp}
@@ -668,15 +484,7 @@
 							{xdrPermyriadPerIcp}
 							bind:sendAmount
 						/>
-					{:else}
-						<CyclesTopUpAmount
-							onBack={() => modal?.back()}
-							onNext={() => modal?.next()}
-							bind:sendAmount
-						/>
-					{/if}
-				{:else if currentStep?.name === WizardStepsCyclesTopUp.REVIEW && nonNullish(canisterId)}
-					{#if paidWithIcp}
+					{:else if currentStep?.name === WizardStepsCyclesTopUp.REVIEW && nonNullish(canisterId)}
 						<CyclesTopUpIcpReview
 							{canisterId}
 							onBack={() => modal?.back()}
@@ -685,23 +493,11 @@
 							{sendAmount}
 							{xdrPermyriadPerIcp}
 						/>
-					{:else}
-						<CyclesTopUpReview
-							{canisterId}
-							onBack={() => modal?.back()}
-							onTopUp={topUp}
-							{sendAmount}
-							unknownOutcome={nonNullish(resendable)
-								? resendsUnanswered
-									? 'resend'
-									: 'fresh'
-								: undefined}
-						/>
+					{:else if currentStep?.name === WizardStepsCyclesTopUp.TOPPING_UP && nonNullish(canisterId)}
+						<CyclesTopUpProgress {canisterId} {paidWithIcp} {progressStep} />
 					{/if}
-				{:else if currentStep?.name === WizardStepsCyclesTopUp.TOPPING_UP && nonNullish(canisterId)}
-					<CyclesTopUpProgress {canisterId} {paidWithIcp} {progressStep} />
-				{/if}
-			</ConvertContexts>
-		{/if}
-	{/key}
+				</ConvertContexts>
+			{/if}
+		{/key}
+	{/if}
 </WizardModal>

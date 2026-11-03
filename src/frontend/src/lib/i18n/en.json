@@ -807,8 +807,8 @@
 			"support_title": "Support",
 			"support_description": "Find answers and more information on the support page in the $oisy_name documentation, or get in touch with the team if you are stuck.",
 			"support_link": "Visit our support page",
-			"network_explorers_title": "Block explorers",
-			"network_explorers_description": "$oisy_name builds its history from third-party indexers, which can lag behind the chain. A block explorer shows what the network itself records for your address.",
+			"network_explorers_title": "Blockchain explorers",
+			"network_explorers_description": "Open these links to view your addresses on the blockchain explorers and track your real-time balances and full transaction histories. Blockchains are public ledgers, so you can independently verify and investigate all on-chain activity for your $oisy_name.",
 			"explorers_title": "Provider transaction status",
 			"explorers_description": "$oisy_name routes swaps and bridge transfers through third-party providers. If one takes longer than expected, open the provider's own explorer: it shows where your transfer stands, already filtered to your wallet.",
 			"explorers_velora_description": "Swaps on Ethereum and other EVM networks.",
@@ -838,7 +838,7 @@
 			"withdraw": "Withdraw"
 		},
 		"alt": {
-			"network_explorer_link": "Open the $network block explorer for your address",
+			"network_explorer_link": "Open the $network blockchain explorer for your address",
 			"explorer_link": "Open the $provider explorer for your $chain address",
 			"select_token_first": "Select the first token of the pool",
 			"select_token_second": "Select the second token of the pool",
@@ -1240,7 +1240,10 @@
 			"unknown": "OISY can't tell yet whether the top-up went through. Your $token activity will show it if it did. Top up again to resend the same top-up: it can only go through once. A new or changed top-up would add cycles again if this one went through.",
 			"unknown_fresh": "OISY can't tell yet whether your last top-up went through. If it did, this top-up adds cycles again. Check your $token activity first.",
 			"sent_to_canister": "Sending $token to a canister doesn't top it up. The $token land in the canister's account, and the canister only gets cycles if its own code withdraws them.",
-			"sent_to_canister_top_up": "To add cycles to a canister, use Top up on the $token page."
+			"sent_to_canister_top_up": "To add cycles to a canister, use Top up on the $token page.",
+			"choice_send": "Send $token",
+			"choice_send_description": "Send $token tokens to another account. Sending $token to a canister doesn't top it up.",
+			"choice_top_up_description": "Convert $token tokens into cycles to top up any canister."
 		},
 		"error": {
 			"invalid_canister_id": "Enter a canister ID. User principals, account IDs and addresses on other networks can't be topped up.",

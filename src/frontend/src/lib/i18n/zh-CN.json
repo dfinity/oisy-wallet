@@ -807,8 +807,8 @@
 			"support_title": "支持",
 			"support_description": "在 $oisy_name 文档的支持页面查找答案和更多信息，如果仍无法解决，请联系团队。",
 			"support_link": "前往我们的支持页面",
-			"network_explorers_title": "区块浏览器",
-			"network_explorers_description": "$oisy_name 根据第三方索引服务构建您的历史记录，这些数据可能落后于链上状态。区块浏览器会显示网络本身为您的地址记录的内容。",
+			"network_explorers_title": "区块链浏览器",
+			"network_explorers_description": "打开这些链接，即可在区块链浏览器中查看您的地址，跟踪实时余额和完整的交易记录。区块链是公开账本，因此您可以独立验证和调查 $oisy_name 中的所有链上活动。",
 			"explorers_title": "服务商交易状态",
 			"explorers_description": "$oisy_name 通过第三方服务商处理兑换和跨链桥转账。如果某笔转账耗时超出预期，请打开该服务商自己的浏览器：它会显示您的转账进度，并已按您的钱包筛选。",
 			"explorers_velora_description": "以太坊及其他 EVM 网络上的兑换。",
@@ -838,7 +838,7 @@
 			"withdraw": "提取"
 		},
 		"alt": {
-			"network_explorer_link": "为您的地址打开 $network 区块浏览器",
+			"network_explorer_link": "为您的地址打开 $network 区块链浏览器",
 			"explorer_link": "为您的 $chain 地址打开 $provider 浏览器",
 			"select_token_first": "选择资金池的第一个代币",
 			"select_token_second": "选择资金池的第二个代币",
@@ -1240,7 +1240,10 @@
 			"unknown": "OISY 暂时无法确定充值是否成功。如果成功，您的 $token 活动中会显示。再次充值会重新发送同一笔充值：它只能成功一次。如果这笔充值已成功，新的或修改过的充值会再次添加 Cycles。",
 			"unknown_fresh": "OISY 暂时无法确定您上一笔充值是否成功。如果已成功，这笔充值会再次添加 Cycles。请先检查您的 $token 活动。",
 			"sent_to_canister": "向 Canister 发送 $token 不会为其充值。这些 $token 会进入该 Canister 的账户，只有当 Canister 自己的代码将其提取时，它才能获得 Cycles。",
-			"sent_to_canister_top_up": "要为 Canister 添加 Cycles，请在 $token 页面使用“充值”。"
+			"sent_to_canister_top_up": "要为 Canister 添加 Cycles，请在 $token 页面使用“充值”。",
+			"choice_send": "发送 $token",
+			"choice_send_description": "将 $token 代币发送到另一个账户。向 Canister 发送 $token 不会为其充值。",
+			"choice_top_up_description": "将 $token 代币转换为 Cycles，为任意 Canister 充值。"
 		},
 		"error": {
 			"invalid_canister_id": "请输入 Canister ID。用户 Principal、账户 ID 和其他网络的地址无法充值。",

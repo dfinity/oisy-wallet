@@ -807,8 +807,8 @@
 			"support_title": "Suporte",
 			"support_description": "Encontre respostas e mais informações na página de suporte da documentação do $oisy_name, ou fale com a equipe se você travar.",
 			"support_link": "Ir para nossa página de suporte",
-			"network_explorers_title": "Exploradores de blocos",
-			"network_explorers_description": "O $oisy_name monta seu histórico a partir de indexadores de terceiros, que podem ficar atrás da blockchain. Um explorador de blocos mostra o que a própria rede registra para o seu endereço.",
+			"network_explorers_title": "Exploradores de blockchain",
+			"network_explorers_description": "Abra estes links para ver seus endereços nos exploradores de blockchain e acompanhar seus saldos em tempo real e o histórico completo de transações. As blockchains são registros públicos, então você pode verificar e investigar de forma independente toda a atividade on-chain da sua carteira $oisy_name.",
 			"explorers_title": "Status da transação no provedor",
 			"explorers_description": "O $oisy_name faz swaps e transferências via bridge por meio de provedores terceiros. Se alguma demorar mais do que o esperado, abra o explorador do próprio provedor: ele mostra em que ponto está sua transferência, já filtrado para a sua carteira.",
 			"explorers_velora_description": "Swaps no Ethereum e em outras redes EVM.",
@@ -838,7 +838,7 @@
 			"withdraw": "Sacar"
 		},
 		"alt": {
-			"network_explorer_link": "Abrir o explorador de blocos de $network para o seu endereço",
+			"network_explorer_link": "Abrir o explorador de blockchain de $network para o seu endereço",
 			"explorer_link": "Abrir o explorador de $provider para o seu endereço em $chain",
 			"select_token_first": "Selecionar o primeiro token do pool",
 			"select_token_second": "Selecionar o segundo token do pool",
@@ -1240,7 +1240,10 @@
 			"unknown": "OISY ainda não sabe se a recarga foi concluída. Se foi, sua atividade de $token vai mostrá-la. Recarregue de novo para reenviar a mesma recarga: ela só pode ser concluída uma vez. Uma recarga nova ou alterada adicionaria ciclos de novo se esta foi concluída.",
 			"unknown_fresh": "OISY ainda não sabe se sua última recarga foi concluída. Se foi, esta recarga adiciona ciclos de novo. Verifique primeiro sua atividade de $token.",
 			"sent_to_canister": "Enviar $token para um canister não o recarrega. Os $token chegam à conta do canister, e o canister só recebe ciclos se o próprio código dele os sacar.",
-			"sent_to_canister_top_up": "Para adicionar ciclos a um canister, use “Recarregar” na página de $token."
+			"sent_to_canister_top_up": "Para adicionar ciclos a um canister, use “Recarregar” na página de $token.",
+			"choice_send": "Enviar $token",
+			"choice_send_description": "Envie tokens $token para outra conta. Enviar $token para um canister não o recarrega.",
+			"choice_top_up_description": "Converta tokens $token em ciclos para recarregar qualquer canister."
 		},
 		"error": {
 			"invalid_canister_id": "Insira um ID de canister. Principals de usuário, IDs de conta e endereços de outras redes não podem ser recarregados.",
