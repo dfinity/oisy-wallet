@@ -1213,6 +1213,8 @@
 			"description": "",
 			"description_icp": "",
 			"pay_with": "",
+			"enable_token": "",
+			"not_enough_to_pay": "",
 			"no_token_title": "",
 			"no_token_description": "",
 			"canister_id_placeholder": "",
@@ -1262,6 +1264,9 @@
 			"not_started": "",
 			"transfer_failed": "",
 			"unconfirmed": ""
+		},
+		"alt": {
+			"enable_token": ""
 		}
 	},
 	"active_user_transactions": {

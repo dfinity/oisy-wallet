@@ -315,6 +315,7 @@ export const CYCLES_MINT_RATE = 'cycles-mint-rate';
 export const CYCLES_TOP_UP_BUTTON = 'cycles-top-up-button';
 export const CYCLES_TOP_UP_TOKEN = 'cycles-top-up-token';
 export const CYCLES_TOP_UP_TOKEN_OPTION = 'cycles-top-up-token-option';
+export const CYCLES_TOP_UP_TOKEN_ENABLE_BUTTON = 'cycles-top-up-token-enable-button';
 export const CYCLES_TOP_UP_CANISTER = 'cycles-top-up-canister';
 export const CYCLES_TOP_UP_CANISTER_INPUT = 'cycles-top-up-canister-input';
 export const CYCLES_TOP_UP_CANISTER_NEXT_BUTTON = 'cycles-top-up-canister-next-button';

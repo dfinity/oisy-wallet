@@ -1213,6 +1213,8 @@
 			"description": "Cycles được chuyển từ số dư $token của bạn vào canister, nơi chúng được dùng cho tính toán và lưu trữ.",
 			"description_icp": "$token của bạn được chuyển đổi thành cycles theo tỷ giá của mạng, và canister dùng chúng cho tính toán và lưu trữ.",
 			"pay_with": "Chọn token để thanh toán cho việc nạp.",
+			"enable_token": "Kích hoạt",
+			"not_enough_to_pay": "Không đủ để nạp",
 			"no_token_title": "Nạp bằng ICP hoặc TCYCLES",
 			"no_token_description": "Canister chạy bằng cycles, và việc nạp sẽ bổ sung cycles cho canister. Khi ví của bạn có đủ ICP hoặc TCYCLES, bạn có thể nạp tại đây.",
 			"canister_id_placeholder": "Nhập ID canister",
@@ -1262,6 +1264,9 @@
 			"not_started": "Không thể bắt đầu việc nạp. Không có gì rời khỏi ví của bạn. Vui lòng thử lại sau giây lát.",
 			"transfer_failed": "Chuyển $token không thành công. Không có gì rời khỏi ví của bạn. Vui lòng thử lại sau giây lát.",
 			"unconfirmed": "OISY không thể xác nhận việc chuyển $token. Nếu đã chuyển thành công, việc nạp sẽ hoàn tất trong nền: theo dõi trong các giao dịch đang hoạt động."
+		},
+		"alt": {
+			"enable_token": "Kích hoạt $token để thanh toán bằng token này"
 		}
 	},
 	"active_user_transactions": {

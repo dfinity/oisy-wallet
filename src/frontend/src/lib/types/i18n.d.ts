@@ -938,6 +938,8 @@ interface I18nCycles_top_up {
 		description: string;
 		description_icp: string;
 		pay_with: string;
+		enable_token: string;
+		not_enough_to_pay: string;
 		no_token_title: string;
 		no_token_description: string;
 		canister_id_placeholder: string;
@@ -988,6 +990,7 @@ interface I18nCycles_top_up {
 		transfer_failed: string;
 		unconfirmed: string;
 	};
+	alt: { enable_token: string };
 }
 
 interface I18nActive_user_transactions {
