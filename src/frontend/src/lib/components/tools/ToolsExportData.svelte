@@ -11,7 +11,6 @@
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import HelpToggle from '$lib/components/ui/HelpToggle.svelte';
 	import { OISY_EXPORT_DATA_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
 		btcAddressMainnet,
@@ -37,17 +36,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { mapAllTransactionsUi } from '$lib/utils/transactions.utils';
-	import { slide } from '$lib/utils/transitions.utils';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 
 	let exportingTokens = $state(false);
 	let exportingTransactions = $state(false);
-
-	// Single help toggle on the card title — reveals one description for the whole feature
-	// with a "Learn more" external link to the OISY docs (same pattern as the hide-micro
-	// row in Settings.svelte).
-	let helpExpanded = $state(false);
 
 	const onExportTokens = (variant: TokenCsvVariant) => {
 		exportingTokens = true;
@@ -106,35 +99,25 @@
 </script>
 
 <SettingsCard>
-	{#snippet title()}
-		<span class="inline-flex items-center">
-			{$i18n.settings.text.export_data}
-			<HelpToggle
-				styleClass="ml-1 flex p-0.5 align-top text-tertiary"
-				bind:expanded={helpExpanded}
-			/>
-		</span>
-	{/snippet}
+	{#snippet title()}{$i18n.settings.text.export_data}{/snippet}
 
-	{#if helpExpanded}
-		<span class="-mt-3 mb-3 flex w-full text-sm text-tertiary" transition:slide>
-			<span>
-				{$i18n.settings.text.export_data_description}
+	<!-- Shown, not behind a help toggle, as every card on Tools shows its text. Pulled up to the
+	     title it explains: the card's title gap is sized for rows. -->
+	<p class="-mt-4 mb-3 text-sm text-tertiary">
+		{$i18n.settings.text.export_data_description}
 
-				<ExternalLink
-					ariaLabel={$i18n.settings.text.learn_more}
-					href={OISY_EXPORT_DATA_DOCS_URL}
-					iconVisible={false}
-					trackEvent={buildLearnMoreEvent({
-						sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOOLS_PAGE,
-						sourceSublocation: 'export_data',
-						labelKey: 'settings.text.learn_more',
-						url: OISY_EXPORT_DATA_DOCS_URL
-					})}>{$i18n.settings.text.learn_more}</ExternalLink
-				>
-			</span>
-		</span>
-	{/if}
+		<ExternalLink
+			ariaLabel={$i18n.settings.text.learn_more}
+			href={OISY_EXPORT_DATA_DOCS_URL}
+			iconVisible={false}
+			trackEvent={buildLearnMoreEvent({
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOOLS_PAGE,
+				sourceSublocation: 'export_data',
+				labelKey: 'settings.text.learn_more',
+				url: OISY_EXPORT_DATA_DOCS_URL
+			})}>{$i18n.settings.text.learn_more}</ExternalLink
+		>
+	</p>
 
 	<h5 class="text-xs font-semibold tracking-wide text-tertiary uppercase">
 		{$i18n.settings.text.export_basic}
