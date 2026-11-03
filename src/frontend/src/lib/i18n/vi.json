@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "Tắt ẩn các giao dịch có giá trị rất nhỏ",
 			"save_spam_filter_success": "Cài đặt bộ lọc spam của bạn đã được cập nhật.",
 			"export_data": "Xuất dữ liệu",
+			"export_data_moved": "",
+			"open_tools": "",
 			"export_data_description": "Tải xuống token và giao dịch của bạn dưới dạng CSV — Basic cho thông tin cơ bản, Extended cho các thuộc tính bổ sung.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
