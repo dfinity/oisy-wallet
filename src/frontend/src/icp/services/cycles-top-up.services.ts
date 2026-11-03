@@ -298,11 +298,11 @@ export const topUpCanisterWithIcp = async ({
 		displayDecimals: sourceToken.decimals
 	});
 
-	// Only the navigation pays with ICP.
+	// Only Tools pays with ICP.
 	const analytics: Omit<TrackCyclesTopUpParams, 'resultStatus'> = {
 		step: 'top_up',
 		tokenSymbol: sourceToken.symbol,
-		sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NAVIGATION
+		sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOOLS_PAGE
 	};
 
 	const fail = (
