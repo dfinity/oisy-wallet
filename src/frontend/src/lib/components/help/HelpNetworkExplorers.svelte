@@ -51,7 +51,8 @@
 		<SettingsCard>
 			{#snippet title()}{$i18n.help.text.network_explorers_title}{/snippet}
 
-			<p class="mb-3 text-sm text-tertiary">
+			<!-- Pulled up to the title it explains: the card's title gap is sized for rows. -->
+			<p class="-mt-4 mb-3 text-sm text-tertiary">
 				{replaceOisyPlaceholders($i18n.help.text.network_explorers_description)}
 			</p>
 
