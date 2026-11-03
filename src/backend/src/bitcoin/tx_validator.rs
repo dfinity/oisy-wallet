@@ -11,9 +11,15 @@
 //!    floor and every signature verifies.
 //!
 //! Together they only let through a well-formed, standard transaction that spends the caller's
-//! confirmed UTXOs with valid signatures. That does not guarantee the network accepts it: a
-//! confirmed-UTXO view has no mempool, so an input an unconfirmed transaction already spends still
-//! passes.
+//! confirmed UTXOs with valid signatures. That does not guarantee the network accepts it. Two
+//! cases pass, and the UTXOs carry no data to detect them:
+//!
+//! - a confirmed-UTXO view has no mempool, so an input an unconfirmed transaction already spends
+//!   still passes;
+//! - a coinbase output may only be spent at 100 confirmations, but the Bitcoin canister returns it
+//!   like any other output and a `Utxo` does not say it is one, so spending a coinbase payout at 4
+//!   to 99 confirmations passes and the network refuses it
+//!   (`bad-txns-premature-spend-of-coinbase`).
 
 use std::collections::{HashMap, HashSet};
 

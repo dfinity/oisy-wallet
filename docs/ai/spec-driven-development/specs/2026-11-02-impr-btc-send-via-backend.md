@@ -267,7 +267,8 @@ sequence with a BIP68 relative lock), `InvalidUtxos` (an input that is not the c
    correctly signed transaction over the caller's confirmed UTXOs, which step 9 then checks no
    other OISY reservation holds. That does **not** guarantee the network accepts it: the
    ≥4-confirmation view has no mempool, so an input an unconfirmed transaction already spends still
-   passes (see [Risks](#risks)). Instructions only; the `bitcoin` crate (already
+   passes, and it does not show that a coinbase output at 4 to 99 confirmations cannot be spent yet
+   (see [Risks](#risks)). Instructions only; the `bitcoin` crate (already
    a backend dependency at 0.32) brings `secp256k1` with verification (see
    [open question 2](#open-questions-facts-to-confirm)).
 8. **Fee**: `Σinputs − Σoutputs > 0` and at least 1 sat/vB of the transaction's vsize. That is the
@@ -639,16 +640,26 @@ CFS path.
   `mapBtcAddPendingTransactionError` in `src/frontend/src/lib/canisters/backend.errors.ts`. Unlike
   `btcAddPendingTransaction`, it does not swallow `RateLimited`: nothing was broadcast, so the send
   failed.
-- Today every `sendBtc` caller shows the generic `send.error.unexpected`, and the send wizard
-  returns to the form (`onBack()` in `BtcSendTokenWizard.svelte`). A shared
-  `mapBtcBroadcastErrorToMessage`, next to `mapUtxosFeeErrorToMessage` in
-  `src/frontend/src/btc/utils/btc-send.utils.ts`, picks the message:
+- Today each flow shows its own message when `sendBtc` throws:
+  - `send.error.unexpected` in `BtcSendTokenWizard.svelte`, which then returns to the form
+    (`onBack()`), and in `AiAssistantReviewSendBtcToken.svelte`;
+  - `convert.error.unexpected` in `BtcConvertTokenWizard.svelte`;
+  - `liquidium.text.transaction_failed` in `LiquidiumSupplyBtcWizard.svelte` and
+    `LiquidiumRepayBtcWizard.svelte`;
+  - in the two swaps, the services pass the error on (`fetchNearIntentsBtcSwap` rethrows when
+    nothing was broadcast, and `fetchChainFusionBtcSwap` has no catch), and `SwapBtcWizard.svelte`
+    shows `swap.error.unexpected`.
+- A shared `mapBtcBroadcastErrorToMessage`, next to `mapUtxosFeeErrorToMessage` in
+  `src/frontend/src/btc/utils/btc-send.utils.ts`, picks the message only for the cases every flow
+  shares:
   - `UtxosAlreadyReserved` and `InvalidUtxos` → the existing `send.assertion.btc_utxo_locked`
     ("refresh and retry");
   - an unclear outcome (`BroadcastOutcomeUnknown`, `BroadcastInProgress`, or no typed answer) → a
     new key saying the transaction may have been sent, and to check the activity before trying
     again. It goes in `en.json` only, following `docs/ai/frontend/workflows/add-i18n-key.md`;
-  - anything else → `send.error.unexpected`, as today.
+  - anything else → no message, and the caller keeps its current one from the list above, as
+    `SwapBtcWizard.svelte` already does with `quoteRejected ?? $i18n.swap.error.unexpected`. In
+    the swaps, that caller is `SwapBtcWizard.svelte`.
 - After an unclear outcome, no caller returns to a filled-in form: the flow closes with that
   message. The first send's UTXOs stay reserved, so a second send would spend other coins and could
   pay the recipient twice. This is the plain-send version of the Liquidium repay gap below. There
@@ -889,6 +900,14 @@ Every PR is safe on its own.
   - a send still in the mempool after its 1-hour reservation expired (below).
 
   Each case costs one broadcast, and the reservation and the rate limiter still cap it.
+
+- **Immature coinbase outputs.** A coinbase output can only be spent at 100 confirmations
+  (`bad-txns-premature-spend-of-coinbase` otherwise). The Bitcoin canister's `get_utxos` returns it
+  like any other output, filtered by confirmations only, and a `Utxo` (`outpoint`, `value`,
+  `height`) does not say it is one. A mining payout made directly to the user's address, spent at 4
+  to 99 confirmations, therefore passes every check and the network refuses it. That costs one
+  broadcast per attempt, about a cent, and no funds; CFS has the same gap today. The send never
+  confirms, and its reservation lasts until the usual prune.
 
 - **1-hour expiry (pre-existing).** A low-fee transaction can stay in the mempool longer than
   `HOUR_IN_NS`; its UTXOs then look free again in the ≥4-confirmation view. The Bitcoin canister has
