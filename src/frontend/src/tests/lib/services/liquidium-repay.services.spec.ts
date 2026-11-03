@@ -872,6 +872,32 @@ describe('liquidium-repay.services', () => {
 			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
 		});
 
+		it('keeps both held when a poll commits the balances from before the transfer after the receipt', async () => {
+			storeBalance({ token: USDC_TOKEN, data: 100n });
+			storeBalance({ token: ETHEREUM_TOKEN, data: 10n });
+
+			wait.mockImplementation(() => {
+				storeBalance({ token: USDC_TOKEN, data: 100n });
+				storeBalance({ token: ETHEREUM_TOKEN, data: 10n });
+
+				return Promise.resolve();
+			});
+			vi.mocked(reloadEthereumBalance).mockResolvedValue({ success: true });
+
+			const held = holdLiquidiumRepayUntilMined(params);
+
+			await vi.waitFor(() => expect(reloadEthereumBalance).toHaveBeenCalledTimes(2));
+			await macrotask();
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({ [hash]: holds });
+
+			storeBalance({ token: USDC_TOKEN, data: 50n });
+			storeBalance({ token: ETHEREUM_TOKEN, data: 9n });
+			await held;
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
 		it('does not wait on the store for a reload that reports no success', async () => {
 			wait.mockResolvedValue(undefined);
 			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) =>
