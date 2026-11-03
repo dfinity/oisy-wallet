@@ -133,7 +133,7 @@
 			"section_finance": "Finance",
 			"section_more": "More",
 			"airdrops": "Rewards",
-			"canister_top_up": "Canister top-up",
+			"tools": "Tools",
 			"earning": "Earn",
 			"pay": "$oisy_short PAY",
 			"wallet_connect": "WalletConnect",
@@ -167,7 +167,7 @@
 			"borrow": "Open the Borrow view",
 			"earning": "Open the Earn view",
 			"airdrops": "Open the Rewards view",
-			"canister_top_up": "Top up a canister with ICP or TCYCLES",
+			"tools": "Open tools",
 			"pay": "Open the $oisy_short PAY",
 			"wallet_connect": "Open the WalletConnect",
 			"menu": "Your wallet address, settings, sign-out and external links",
@@ -909,6 +909,12 @@
 			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience.",
 			"export_exchange_rate_unavailable": "Exchange rates are still loading. Try again in a moment.",
 			"export_failed": "We couldn't generate your export. Please try again."
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "Tools",
+			"top_up_canister": "Top up a canister with ICP or TCYCLES"
 		}
 	},
 	"shortcuts": {

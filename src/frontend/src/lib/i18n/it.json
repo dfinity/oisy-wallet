@@ -133,7 +133,7 @@
 			"section_finance": "Finanza",
 			"section_more": "Altro",
 			"airdrops": "Ricompense",
-			"canister_top_up": "Ricarica canister",
+			"tools": "",
 			"earning": "Guadagna",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "Apri la vista Prestiti",
 			"earning": "Apri la vista Guadagni",
 			"airdrops": "Apri la vista Ricompense",
-			"canister_top_up": "Ricarica un canister con ICP o TCYCLES",
+			"tools": "",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "Il tuo indirizzo del wallet, impostazioni, disconnessione e collegamenti esterni",
@@ -909,6 +909,12 @@
 			"loading_profile": "Errore durante il caricamento del profilo. Si prega di aggiornare la pagina per avere l'esperienza completa.",
 			"export_exchange_rate_unavailable": "I tassi di cambio sono ancora in caricamento. Riprova tra un momento.",
 			"export_failed": "Non siamo riusciti a generare l'esportazione. Riprova."
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "",
+			"top_up_canister": ""
 		}
 	},
 	"shortcuts": {

@@ -117,7 +117,7 @@ interface I18nNavigation {
 		section_finance: string;
 		section_more: string;
 		airdrops: string;
-		canister_top_up: string;
+		tools: string;
 		earning: string;
 		pay: string;
 		wallet_connect: string;
@@ -151,7 +151,7 @@ interface I18nNavigation {
 		borrow: string;
 		earning: string;
 		airdrops: string;
-		canister_top_up: string;
+		tools: string;
 		pay: string;
 		wallet_connect: string;
 		menu: string;
@@ -648,6 +648,10 @@ interface I18nSettings {
 		export_exchange_rate_unavailable: string;
 		export_failed: string;
 	};
+}
+
+interface I18nTools {
+	text: { title: string; top_up_canister: string };
 }
 
 interface I18nShortcuts {
@@ -2814,6 +2818,7 @@ interface I18n {
 	hero: I18nHero;
 	help: I18nHelp;
 	settings: I18nSettings;
+	tools: I18nTools;
 	shortcuts: I18nShortcuts;
 	networks: I18nNetworks;
 	receive: I18nReceive;

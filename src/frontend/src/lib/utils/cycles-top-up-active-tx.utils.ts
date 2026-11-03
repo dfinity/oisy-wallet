@@ -160,8 +160,8 @@ export const toCyclesTopUpRowUpdate = (
 /**
  * The terminal analytics of a top-up row, read entirely off the row so they survive a
  * refresh or a later session. Never the row's `error`, the CMC's own reason text, nor its
- * amounts, for the reason `TrackCyclesTopUpParams` gives. Only the navigation pays with ICP,
- * so it is the source of every row.
+ * amounts, for the reason `TrackCyclesTopUpParams` gives. Only Tools pays with ICP, so it
+ * is the source of every row.
  */
 export const toCyclesTopUpTrackingParams = ({
 	tx
@@ -178,7 +178,7 @@ export const toCyclesTopUpTrackingParams = ({
 			? PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
 			: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 		tokenSymbol: refs[CYCLES_TOP_UP_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL],
-		sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NAVIGATION,
+		sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOOLS_PAGE,
 		...(!isSucceeded && {
 			errorCode: outcome === 'refunded' || outcome === 'not_sent' ? outcome : 'failed'
 		})
