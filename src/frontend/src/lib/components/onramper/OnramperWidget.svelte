@@ -118,7 +118,7 @@
 
 		buildOnramperLink({
 			identity: currentIdentity,
-			mode: 'buy',
+			mode: 'buy,sell',
 			defaultFiat: $currentCurrency,
 			defaultCrypto,
 			onlyCryptos,
