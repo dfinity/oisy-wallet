@@ -4,6 +4,7 @@ import * as canisterStateApi from '$icp/api/canister-state.api';
 import { lastCyclesTopUps } from '$icp/stores/cycles-top-up.store';
 import type { CanisterExistence } from '$icp/types/cycles-top-up';
 import SendModal from '$lib/components/send/SendModal.svelte';
+import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import {
 	CYCLES_SEND_OR_TOP_UP,
 	CYCLES_SEND_OR_TOP_UP_SEND_BUTTON,
@@ -15,9 +16,11 @@ import {
 	CYCLES_TOP_UP_REVIEW
 } from '$lib/constants/test-ids.constants';
 import * as authDerived from '$lib/derived/auth.derived';
+import { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import * as cyclesTopUpAnalytics from '$lib/services/cycles-top-up-analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { modalStore } from '$lib/stores/modal.store';
+import { tokenCategoryFilterStore } from '$lib/stores/settings.store';
 import { token } from '$lib/stores/token.store';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -25,6 +28,7 @@ import { mockTcyclesToken } from '$tests/mocks/cycles-mint.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipalText2 } from '$tests/mocks/identity.mock';
+import { mockPage } from '$tests/mocks/page.store.mock';
 import {
 	createSelectedNftHarness,
 	createStepsHarness
@@ -679,6 +683,51 @@ describe('SendModal', () => {
 
 				expect(result.container).toHaveTextContent(canister);
 			});
+		});
+	});
+
+	describe('asset type filter', () => {
+		const renderTokensList = async () => {
+			const result = render(SendModal, {
+				props: { isTransactionsPage: false, isNftsPage: false }
+			});
+
+			await waitFor(() => expect(result.getByTestId('stub-filter-category')).toBeInTheDocument());
+
+			return result;
+		};
+
+		beforeEach(() => {
+			token.reset();
+
+			tokenCategoryFilterStore.set({
+				key: 'token-category-filter',
+				value: { value: TokenCategoryTagValue.STABLECOIN }
+			});
+		});
+
+		afterEach(() => {
+			tokenCategoryFilterStore.reset({ key: 'token-category-filter' });
+
+			mockPage.reset();
+		});
+
+		it('opens the token list on the asset type selected on the assets page', async () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Tokens}` });
+
+			const { getByTestId } = await renderTokensList();
+
+			expect(getByTestId('stub-filter-category').textContent).toBe(
+				TokenCategoryTagValue.STABLECOIN
+			);
+		});
+
+		it('opens the token list on all asset types outside the assets page', async () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Activity}` });
+
+			const { getByTestId } = await renderTokensList();
+
+			expect(getByTestId('stub-filter-category').textContent).toBe('');
 		});
 	});
 });
