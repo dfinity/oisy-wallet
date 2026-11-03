@@ -18,7 +18,7 @@ The primary navigation is a desktop **sidebar** and a mobile **bottom bar** that
 
 - **Portfolio** — Assets, NFTs, Activity.
 - **Finance** — Trade, Earn, Borrow.
-- **More** — Notes, Explore, Rewards, Canister top-up, Help, Settings.
+- **More** — Notes, Explore, Rewards, Tools, Help, Settings.
 
 On **desktop** every section is laid out at once under a non-interactive heading (**Portfolio** / **Finance** / **More**); nothing is hidden behind a tap and there is no "menu-open" state. There is exactly **one** "current page" signal and it is blue; it always lands on the actual page the user is on, never on two things at once.
 
@@ -26,10 +26,10 @@ On **desktop** every section is laid out at once under a non-interactive heading
 - **Finance destinations.** **Earn** (`/earn/`) is a standalone destination, distinct from the Earning tab inside Assets. **Trade** and **Borrow** carry a **`NEW`** tag and — since each has a single provider today — route **directly to that provider's page**, skipping the intermediate category page: Trade to the **OISY TRADE** provider page (`/providers/oisy-trade/`), Borrow to the Liquidium provider page (`/providers/liquidium/`). The Assets **Trading** tab (`/trading/`) remains a distinct surface. Trade and Earn each appear only while their feature flag is on.
 - **Notes** is reachable directly from the navigation (in addition to the user menu). For now it opens the Notes modal rather than a page, so it never takes the blue "current page" treatment (a Notes page is a planned follow-up).
 - **Rewards** is no longer a top-level item; it lives in the More group, while its content also lives inside the Earn page.
-- **Canister top-up** (local and staging) — behind `CANISTER_TOP_UP_ENABLED` (`src/frontend/src/env/canister-top-up.env.ts`) — sits in the More group after Rewards, under the fuel pump icon of the TCYCLES page's Top up button: last in the desktop sidebar's More section, and before Help and Settings in the mobile More sheet. Like Notes, it opens a modal, [Top up a canister](#top-up-a-canister), rather than a page, so it never takes the blue "current page" treatment. The label leads with the canister: a plain "Top up" in a wallet's navigation would read as adding funds to the wallet.
+- **Tools** (`/tools/`) sits in the More group after Rewards, under a wrench icon: last in the desktop sidebar's More section, and before Help and Settings in the mobile More sheet. It is not flagged, since the page always holds Export data; its Canister top-up card follows its own flag ([Tools](#tools)).
 - **Help** (`/help/`) — behind `HELP_ENABLED` (`src/frontend/src/env/help.env.ts`, on for local, staging, beta and production builds), which gates the navigation entry only; the route itself is unguarded — sits in the More group directly before Settings, under a life-buoy icon. The user menu keeps its own link straight out to the external help centre; the two do not compete, because the navigation entry is Help and the menu entry is Support.
 
-On **mobile** the bottom bar has five slots: **Assets · Activity · Finance · Notes · More**. **Finance** is a raised center **cradle** (layers icon) and **More** is the right-hand entry; each opens a **bottom sheet** of its children (Finance: Trade / Earn / Borrow; More: NFTs / Explore / Rewards / Canister top-up / Help / Settings) under the group name. The bar **stays visible while a sheet is open** so the opened entry can show its state: a **grey** "pressed" fill when the sheet is open over another page (the current page keeps its blue), and a **blue** treatment when the entry owns the current page — with the active child marked inside the sheet. Tapping the open entry again, the backdrop, or any destination closes the sheet, and so does an item that opens a modal, such as Canister top-up. (These open-state signals are mobile-only; desktop shows every group at once with no "menu-open" state.)
+On **mobile** the bottom bar has five slots: **Assets · Activity · Finance · Notes · More**. **Finance** is a raised center **cradle** (layers icon) and **More** is the right-hand entry; each opens a **bottom sheet** of its children (Finance: Trade / Earn / Borrow; More: NFTs / Explore / Rewards / Tools / Help / Settings) under the group name. The bar **stays visible while a sheet is open** so the opened entry can show its state: a **grey** "pressed" fill when the sheet is open over another page (the current page keeps its blue), and a **blue** treatment when the entry owns the current page — with the active child marked inside the sheet. Tapping the open entry again, the backdrop, or any destination closes the sheet, and so does an item that opens a modal. (These open-state signals are mobile-only; desktop shows every group at once with no "menu-open" state.)
 
 The desktop sidebar's logo header and social-links footer remain a follow-up.
 
@@ -212,7 +212,7 @@ The event payload is built via the `buildLearnMoreEvent()` factory helper in `sr
 | ScannerInfo (scan)                   | `scanner`         | `scan`                    |
 | ScannerInfo (pay)                    | `scanner`         | `pay`                     |
 | Settings                             | `settings_page`   | `hide_micro_transactions` |
-| SettingsExportData                   | `settings_page`   | `export_data`             |
+| ToolsExportData                      | `tools_page`      | `export_data`             |
 | SettingsExperimentalFeatures         | `settings_page`   | `experimental_features`   |
 | WelcomeModal                         | `welcome`         | —                         |
 | EarningHeader                        | `earn`            | —                         |
@@ -324,7 +324,7 @@ The two gas figures show how far estimates fall short, per token and network. Th
 
 ### Cycles top-up tracking
 
-[Topping up a canister](#top-up-a-canister) emits one structured event, **`cycles_top_up`**, under `event_context: compute`, with the token paid, TCYCLES or ICP, as `token_symbol`. `source_location` is `token_details` when the modal opens from the TCYCLES page and `navigation` when it opens from the navigation, the only place to pay with ICP. It carries no amount, no amount range and no canister ID: any of them, with the event's time, would pick out the one burn on the public cycles ledger, or the one transfer to the canister's CMC deposit account on the public ICP ledger, and with it the user's account. Almost every burn there is below $1, so even a range would single out a larger top-up.
+[Topping up a canister](#top-up-a-canister) emits one structured event, **`cycles_top_up`**, under `event_context: compute`, with the token paid, TCYCLES or ICP, as `token_symbol`. `source_location` is `token_details` when the modal opens from the TCYCLES page and `tools_page` when it opens from [Tools](#tools), the only place to pay with ICP. It carries no amount, no amount range and no canister ID: any of them, with the event's time, would pick out the one burn on the public cycles ledger, or the one transfer to the canister's CMC deposit account on the public ICP ledger, and with it the user's account. Almost every burn there is below $1, so even a range would single out a larger top-up.
 
 | `event_modifier` | Fires when                   | `result_status`                 | Properties                                     |
 | ---------------- | ---------------------------- | ------------------------------- | ---------------------------------------------- |
@@ -501,7 +501,7 @@ The **currency** selector does **not** appear in the user menu — it is always 
 
 A dedicated page (`/help/`) for resolving problems without filing a ticket. The test for what belongs here is whether it lets a user settle something themselves that would otherwise become a support request. It is laid out like Settings — a stack of cards — so the two read as one family.
 
-Data export is deliberately **not** here: it is a utility, not help. It stays on the Settings page until a second utility exists to justify a Utilities page of its own.
+Data export is deliberately **not** here: it is a utility, not help. It lives on the [Tools](#tools) page, next to Canister top-up.
 
 ### Support
 
@@ -554,6 +554,17 @@ Balances at or below the token's ledger fee are **not shown at all** — they ca
 ICP and the user's **enabled** ICRC tokens can be picked — ICP always, since it is one leg of most ICPSwap pools but is not an ICRC token and so is absent from the ICRC lists. A token chosen on one side is removed from the other side's options. The order the two tokens are picked in does not matter.
 
 The page deliberately does **not**: scan pools where only one leg is active (roughly half of all pools have ICP as a leg, so that would be hundreds of balance queries — the token has to be enabled first, for manual selection too); scan other fee tiers (every live pool sits on the one OISY trades on); recover funds from any other swap provider; or touch ICPSwap liquidity positions, which OISY does not create. Linking to this page from the swap-failure toast itself, with the pair pre-selected, is a planned follow-up.
+
+---
+
+## Tools
+
+A page (`/tools/`) for what a user does now and then rather than every day, reached from the navigation's **Tools** entry. It shows that OISY does more than hold and send tokens. It is laid out like Settings, a stack of cards:
+
+- **Canister top-up**, behind `CANISTER_TOP_UP_ENABLED` (`src/frontend/src/env/canister-top-up.env.ts`, local and staging). Its **Top up** button opens [Top up a canister](#top-up-a-canister) without a token, so the user picks what pays. The card leads with the canister: a plain "Top up" in a wallet would read as adding funds to the wallet.
+- **Export data**: the CSV exports of tokens and transactions, Basic and Extended, as they were on Settings. Settings keeps an Export data card that says export has moved and opens Tools.
+
+The page itself is not flagged.
 
 ---
 
@@ -874,9 +885,9 @@ The TCYCLES token page has a fifth hero button, **Top up**, after Mint, with a f
 
 It is on in every environment; `CYCLES_TOP_UP_ENABLED` (`src/frontend/src/env/cycles-top-up.env.ts`) is kept as a kill switch that hides it.
 
-**Canister top-up (local and staging).** Behind the Canister top-up flag (`CANISTER_TOP_UP_ENABLED` in `src/frontend/src/env/canister-top-up.env.ts`), topping up is an OISY feature of its own: the navigation's **Canister top-up** item opens the flow, which can be paid with ICP or TCYCLES, and the TCYCLES page's Top up button opens the same flow with TCYCLES already picked, keeping its label, icon and enabled rule. The modal is titled **Canister top-up** from both. Only the navigation offers ICP, and TCYCLES only while `CYCLES_TOP_UP_ENABLED` is on.
+**Canister top-up (local and staging).** Behind the Canister top-up flag (`CANISTER_TOP_UP_ENABLED` in `src/frontend/src/env/canister-top-up.env.ts`), topping up is an OISY feature of its own: the **Canister top-up** card on [Tools](#tools) opens the flow, which can be paid with ICP or TCYCLES, and the TCYCLES page's Top up button opens the same flow with TCYCLES already picked, keeping its label, icon and enabled rule. The modal is titled **Canister top-up** from both. Only Tools offers ICP, and TCYCLES only while `CYCLES_TOP_UP_ENABLED` is on.
 
-**Paying with.** From the navigation, the first step is what pays. A token can pay when its balance covers the fee and an amount above what a refund keeps: more than 0.0004 ICP, or more than 0.0002 TCYCLES. A balance that has not loaded counts as zero, and so does TCYCLES while it is not enabled. With both, a picker lists them with their balances, and the canister step's Back returns to it. With one, the flow starts on the canister step with it. With none, the step explains that cycles are what a canister runs on, that a top-up adds them and that it can be paid with ICP or TCYCLES, and goes no further. A TCYCLES top-up without an answer still opens the modal on its Review, from the navigation too, so it is resent rather than made a second withdrawal.
+**Paying with.** From Tools, the first step is what pays. A token can pay when its balance covers the fee and an amount above what a refund keeps: more than 0.0004 ICP, or more than 0.0002 TCYCLES. A balance that has not loaded counts as zero, and so does TCYCLES while it is not enabled. With both, a picker lists them with their balances, and the canister step's Back returns to it. With one, the flow starts on the canister step with it. With none, the step explains that cycles are what a canister runs on, that a top-up adds them and that it can be paid with ICP or TCYCLES, and goes no further. A TCYCLES top-up without an answer still opens the modal on its Review, from Tools too, so it is resent rather than made a second withdrawal.
 
 **Canister.** The first step takes a canister ID and nothing else: a user principal, the anonymous principal, an account with a subaccount, an ICP account identifier, an address on another network or text that is not a principal gets a request for a canister ID, and the principal's checksum catches typos. Before going on, OISY reads the canister's public state, which needs no controller rights. Every canister lists its controllers there, with or without code, so a canister without code is accepted. An ID with no canister behind it is refused: the subnet that hosts the ID's range proves there is none, or the boundary node answers that no subnet hosts the ID. A check that could not be made can be retried, and the step does not go on without it. **Recently topped up** lists the canisters the loaded TCYCLES history shows top-ups to, newest first, each with its last top-up, and picking one fills in the ID and goes on, after the same check as Next. It is read from history alone, so nothing is stored.
 
