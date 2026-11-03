@@ -807,8 +807,8 @@
 			"support_title": "サポート",
 			"support_description": "$oisy_name ドキュメントのサポートページで回答や詳しい情報をご確認いただけます。解決しない場合はチームまでご連絡ください。",
 			"support_link": "サポートページへ",
-			"network_explorers_title": "ブロックエクスプローラー",
-			"network_explorers_description": "$oisy_name は第三者のインデクサーから履歴を作成しているため、チェーンより反映が遅れることがあります。ブロックエクスプローラーでは、ネットワーク自体がお客様のアドレスについて記録している内容を確認できます。",
+			"network_explorers_title": "ブロックチェーンエクスプローラー",
+			"network_explorers_description": "これらのリンクを開くと、ブロックチェーンエクスプローラーでお客様のアドレスを表示し、リアルタイムの残高とトランザクション履歴全体を確認できます。ブロックチェーンは公開台帳のため、$oisy_name のすべてのオンチェーンアクティビティをご自身で検証・調査できます。",
 			"explorers_title": "プロバイダーでの取引状況",
 			"explorers_description": "$oisy_name はスワップやブリッジ送金を第三者のプロバイダー経由で行います。想定より時間がかかっている場合は、プロバイダーのエクスプローラーを開いてください。お客様のウォレットで絞り込まれた状態で、送金の進行状況を確認できます。",
 			"explorers_velora_description": "Ethereum およびその他の EVM ネットワークでのスワップ。",
@@ -838,7 +838,7 @@
 			"withdraw": "出金"
 		},
 		"alt": {
-			"network_explorer_link": "お客様のアドレスで $network のブロックエクスプローラーを開く",
+			"network_explorer_link": "お客様のアドレスで $network のブロックチェーンエクスプローラーを開く",
 			"explorer_link": "お客様の $chain アドレスで $provider のエクスプローラーを開く",
 			"select_token_first": "プールの 1 つ目のトークンを選択",
 			"select_token_second": "プールの 2 つ目のトークンを選択",
