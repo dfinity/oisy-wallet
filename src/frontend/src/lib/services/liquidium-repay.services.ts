@@ -162,23 +162,24 @@ export const liquidiumRepayCapError = ({
 // window can spend it again, and the chain reverts that one. Its gas is still in the balance of
 // `feeToken`, the network's native token, the same way. The transfer's `amount` and the most its
 // gas can cost (`gasFee`) are held back for that long; a wait that fails (dropped, replaced, timed
-// out) releases them to the balance poll.
+// out) releases them to the balance poll. `unmined` are the balances from before the transfer was
+// sent, to tell a reload that has it from one that does not: by the time the send returns, the
+// transfer can already be mined and the balances reloaded.
 export const holdLiquidiumRepayUntilMined = async ({
 	hash,
 	token,
 	amount,
 	feeToken,
-	gasFee
+	gasFee,
+	unmined
 }: {
 	hash: string;
 	token: Token;
 	amount: bigint;
 	feeToken: Token;
 	gasFee: bigint;
+	unmined: CertifiedStoreData<BalancesData>;
 }): Promise<void> => {
-	// The balances before the transfer is mined, to tell a reload that has it from one that does not.
-	const unmined = get(balancesStore);
-
 	liquidiumUnminedRepaysStore.add({
 		hash,
 		holds: [

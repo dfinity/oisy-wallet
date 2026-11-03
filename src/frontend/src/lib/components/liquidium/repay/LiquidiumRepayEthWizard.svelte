@@ -264,6 +264,8 @@
 				displayAmount: `${amount}`,
 				progress: (step) => (repayProgressStep = step),
 				broadcast: async ({ target, amount: transferAmount }) => {
+					const unmined = $balancesStore;
+
 					const { hash } = await send({
 						identity: $authIdentity,
 						from: $ethAddress,
@@ -281,7 +283,8 @@
 						token: $sendToken,
 						amount: transferAmount,
 						feeToken,
-						gasFee
+						gasFee,
+						unmined
 					}).catch(consoleError);
 
 					return hash;

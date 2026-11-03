@@ -743,7 +743,14 @@ describe('liquidium-repay.services', () => {
 		const amount = 23_757_982n;
 		const gasFee = 120_000_000_000_000n;
 
-		const params = { hash, token: USDC_TOKEN, amount, feeToken: ETHEREUM_TOKEN, gasFee };
+		const params = {
+			hash,
+			token: USDC_TOKEN,
+			amount,
+			feeToken: ETHEREUM_TOKEN,
+			gasFee,
+			unmined: undefined
+		};
 
 		const holds = [
 			{ tokenId: USDC_TOKEN.id, amount },
@@ -858,7 +865,7 @@ describe('liquidium-repay.services', () => {
 				return Promise.resolve({ success: true });
 			});
 
-			const held = holdLiquidiumRepayUntilMined(params);
+			const held = holdLiquidiumRepayUntilMined({ ...params, unmined: get(balancesStore) });
 
 			await vi.waitFor(() => expect(reloadEthereumBalance).toHaveBeenCalledTimes(2));
 			await macrotask();
@@ -884,7 +891,7 @@ describe('liquidium-repay.services', () => {
 			});
 			vi.mocked(reloadEthereumBalance).mockResolvedValue({ success: true });
 
-			const held = holdLiquidiumRepayUntilMined(params);
+			const held = holdLiquidiumRepayUntilMined({ ...params, unmined: get(balancesStore) });
 
 			await vi.waitFor(() => expect(reloadEthereumBalance).toHaveBeenCalledTimes(2));
 			await macrotask();
@@ -896,6 +903,28 @@ describe('liquidium-repay.services', () => {
 			await held;
 
 			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('compares with the balances from before the send when the store already has the mined ones', async () => {
+			storeBalance({ token: USDC_TOKEN, data: 100n });
+			storeBalance({ token: ETHEREUM_TOKEN, data: 10n });
+
+			const unmined = get(balancesStore);
+
+			// A poll committed the mined balances before the send returned.
+			storeBalance({ token: USDC_TOKEN, data: 50n });
+			storeBalance({ token: ETHEREUM_TOKEN, data: 9n });
+
+			wait.mockResolvedValue(undefined);
+			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) => {
+				storeBalance({ token: reloadToken, data: reloadToken.id === USDC_TOKEN.id ? 50n : 9n });
+
+				return Promise.resolve({ success: true });
+			});
+
+			holdLiquidiumRepayUntilMined({ ...params, unmined });
+
+			await vi.waitFor(() => expect(get(liquidiumUnminedRepaysStore)).toEqual({}));
 		});
 
 		it('does not wait on the store for a reload that reports no success', async () => {
@@ -942,7 +971,7 @@ describe('liquidium-repay.services', () => {
 				return Promise.resolve({ success: true });
 			});
 
-			await holdLiquidiumRepayUntilMined(params);
+			await holdLiquidiumRepayUntilMined({ ...params, unmined: get(balancesStore) });
 
 			expect(reloadEthereumBalance).toHaveBeenCalledExactlyOnceWith(ETHEREUM_TOKEN);
 			expect(heldDuringReload).toEqual([[{ tokenId: ETHEREUM_TOKEN.id, amount: gasFee }]]);
