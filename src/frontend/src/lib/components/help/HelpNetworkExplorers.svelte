@@ -16,12 +16,20 @@
 	import { networksMainnets } from '$lib/derived/networks.derived';
 	import {
 		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		PLAUSIBLE_EVENT_SOURCE_LOCATIONS,
 		PLAUSIBLE_EVENT_SUBCONTEXT_HELP
 	} from '$lib/enums/plausible';
-	import { buildHelpEvent } from '$lib/services/help-analytics.services';
+	import { buildHelpEvent, type HelpSourceLocation } from '$lib/services/help-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { buildHelpNetworkExplorerLinks } from '$lib/utils/help-explorers.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+
+	interface Props {
+		// The page the card is on, which its link clicks report: Help, or Tools.
+		sourceLocation?: HelpSourceLocation;
+	}
+
+	let { sourceLocation = PLAUSIBLE_EVENT_SOURCE_LOCATIONS.HELP_PAGE }: Props = $props();
 
 	// Driven by the networks the user has enabled, so switching one off in Settings removes
 	// its link. `icrcAccountIdentifierText` is the ICP address the wallet shows everywhere
@@ -64,7 +72,8 @@
 								action: 'explorer',
 								resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 								subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.NETWORK_EXPLORERS,
-								network: chain
+								network: chain,
+								sourceLocation
 							})}
 						>
 							<NetworkWithLogo logo="start" {network} />
