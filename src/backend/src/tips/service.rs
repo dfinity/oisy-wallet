@@ -6,7 +6,7 @@
 //! every failure path leaves the money where it already was — in the sender's
 //! account.
 
-use std::cmp::Reverse;
+use std::{cmp::Reverse, ops::Bound};
 
 use candid::Principal;
 use ic_cdk::api::{canister_self, msg_caller, time};
@@ -544,45 +544,80 @@ pub fn get_my_tips() -> Result<Vec<MyTip>, TipError> {
     })
 }
 
-/// Removes tips whose retention window has passed and returns the number
-/// removed. Intended for periodic housekeeping.
+/// Removes tips whose retention window has passed, taking the by-sender index
+/// entries that come after `after` one at a time, for as long as
+/// `within_budget` holds, and always at least one, so that every call makes
+/// progress. Intended for periodic housekeeping, in batches.
+///
+/// Returns the last entry taken while entries remain, or `None` once all of
+/// them are done, together with the number of tips removed.
 ///
 /// Note what this does **not** do: it never touches a live tip, and it does not
 /// remove a tip the moment it expires. A lapsed tip is a History row the sender
 /// is entitled to see; it goes once
-/// [`TIP_RETENTION_AFTER_TERMINAL_NS`] has passed. A full scan is fine for an
-/// hourly sweep. Mirrors `personal_notes::share::service::prune_expired_shares`.
-pub fn prune_expired_tips() -> u64 {
-    let now = time();
+/// [`TIP_RETENTION_AFTER_TERMINAL_NS`] has passed.
+///
+/// The index holds each tip's [`active_until`], so deciding decodes no record,
+/// and `within_budget` is asked after each removal: one call costs its budget
+/// plus one tip, however many tips are stored. Mirrors
+/// `contacts::migration::migrate_batch`.
+pub fn prune_expired_tips(
+    mut after: Option<TipSenderKey>,
+    now_ns: u64,
+    mut within_budget: impl FnMut() -> bool,
+) -> (Option<TipSenderKey>, u64) {
+    let mut pruned = 0;
 
-    let collected: Vec<(TipId, Principal)> = mutate_state(|s| {
-        let collectable: Vec<(TipId, Principal)> = s
-            .tips
-            .iter()
-            .filter(|entry| {
-                let active_until_ns = active_until(&entry.value().0);
-                active_until_ns <= now
-                    && now.saturating_sub(active_until_ns) > TIP_RETENTION_AFTER_TERMINAL_NS
-            })
-            .map(|entry| (entry.key().clone(), entry.value().0.sender))
-            .collect();
+    loop {
+        let Some((key, past_retention)) = mutate_state(|s| prune_next(s, after.as_ref(), now_ns))
+        else {
+            return (None, pruned);
+        };
 
-        for (tip_id, sender) in &collectable {
-            remove_tip(s, tip_id, *sender);
+        // Outside the borrow above, deliberately: dropping a secret goes through
+        // `mutate_state` itself, and calling it from inside that closure would
+        // panic on the `RefCell` rather than fail politely. Without this the
+        // store grew forever — a tip's record was swept after its retention
+        // window while its ciphertext stayed behind with nothing left to point
+        // at it.
+        if past_retention {
+            let TipSenderKey(StoredPrincipal(sender), tip_id) = &key;
+            let _ = secrets::remove_tip_secret_for(*sender, tip_id.0.clone());
+            pruned += 1;
         }
-        collectable
-    });
+        after = Some(key);
 
-    // Outside the borrow above, deliberately: dropping a secret goes through
-    // `mutate_state` itself, and calling it from inside this closure would panic
-    // on the `RefCell` rather than fail politely. Without this the store grew
-    // forever — a tip's record was swept after its retention window while its
-    // ciphertext stayed behind with nothing left to point at it.
-    for (tip_id, sender) in &collected {
-        let _ = secrets::remove_tip_secret_for(*sender, tip_id.0.clone());
+        if !within_budget() {
+            return (after, pruned);
+        }
+    }
+}
+
+/// Takes the by-sender index entry after `after` (the first one for `None`)
+/// and removes its tip if the retention window has passed. Returns the entry's
+/// key and whether its tip was removed, or `None` past the last entry.
+fn prune_next(
+    s: &mut State,
+    after: Option<&TipSenderKey>,
+    now_ns: u64,
+) -> Option<(TipSenderKey, bool)> {
+    let (key, active_until_ns) = match after {
+        Some(after) => s
+            .tips_by_sender
+            .range((Bound::Excluded(after.clone()), Bound::Unbounded))
+            .next(),
+        None => s.tips_by_sender.iter().next(),
+    }
+    .map(|entry| (entry.key().clone(), entry.value()))?;
+
+    let past_retention = active_until_ns <= now_ns
+        && now_ns.saturating_sub(active_until_ns) > TIP_RETENTION_AFTER_TERMINAL_NS;
+    if past_retention {
+        let TipSenderKey(StoredPrincipal(sender), tip_id) = &key;
+        remove_tip(s, tip_id, *sender);
     }
 
-    collected.len() as u64
+    Some((key, past_retention))
 }
 
 #[cfg(test)]
@@ -800,5 +835,94 @@ mod tests {
             vec!["a-old".to_string()],
             "retention boundary is exclusive, and another sender's rows never leak in"
         );
+    }
+
+    fn sender_key(sender: u8, tip_id: &str) -> TipSenderKey {
+        TipSenderKey(
+            StoredPrincipal(test_principal(sender)),
+            TipId(tip_id.into()),
+        )
+    }
+
+    /// Stores a reserved tip through [`store_tip`], so the record and the index
+    /// agree as they do in the canister.
+    fn store_reserved(sender: u8, tip_id: &str, expires_at_ns: u64) {
+        mutate_state(|s| {
+            store_tip(
+                s,
+                &TipId(tip_id.into()),
+                TipRecord {
+                    sender: test_principal(sender),
+                    ..record_with(TipState::Reserved, expires_at_ns)
+                },
+            );
+        });
+    }
+
+    fn stored_tip_ids() -> Vec<String> {
+        read_state(|s| s.tips.keys().map(|tip_id| tip_id.0).collect())
+    }
+
+    fn indexed_tip_ids() -> Vec<String> {
+        read_state(|s| s.tips_by_sender.keys().map(|key| key.1 .0).collect())
+    }
+
+    #[test]
+    fn the_sweep_removes_only_tips_past_retention() {
+        let now = 10 * TIP_RETENTION_AFTER_TERMINAL_NS;
+        store_reserved(1, "live", now + 1);
+        store_reserved(1, "lapsed", now - 1);
+        store_reserved(2, "edge", now - TIP_RETENTION_AFTER_TERMINAL_NS);
+        store_reserved(2, "old", now - TIP_RETENTION_AFTER_TERMINAL_NS - 1);
+        store_reserved(3, "oldest", 0);
+
+        assert_eq!(prune_expired_tips(None, now, || true), (None, 2));
+        assert_eq!(stored_tip_ids(), vec!["edge", "lapsed", "live"]);
+        assert_eq!(
+            indexed_tip_ids(),
+            vec!["lapsed", "live", "edge"],
+            "the index loses exactly the removed tips"
+        );
+    }
+
+    #[test]
+    fn a_sweep_batch_stops_at_its_budget_and_the_next_resumes_after_it() {
+        let now = 10 * TIP_RETENTION_AFTER_TERMINAL_NS;
+        for sender in 1..=5 {
+            store_reserved(sender, &format!("tip-{sender}"), 0);
+        }
+        let two_per_batch = || {
+            let mut taken = 0;
+            move || {
+                taken += 1;
+                taken < 2
+            }
+        };
+
+        let first = prune_expired_tips(None, now, two_per_batch());
+        assert_eq!(first, (Some(sender_key(2, "tip-2")), 2));
+        assert_eq!(stored_tip_ids(), vec!["tip-3", "tip-4", "tip-5"]);
+
+        // The batch resumes after an entry it removed itself.
+        let second = prune_expired_tips(first.0, now, two_per_batch());
+        assert_eq!(second, (Some(sender_key(4, "tip-4")), 2));
+
+        let third = prune_expired_tips(second.0, now, two_per_batch());
+        assert_eq!(third, (None, 1));
+        assert_eq!(stored_tip_ids(), Vec::<String>::new());
+    }
+
+    #[test]
+    fn a_sweep_batch_takes_one_entry_even_without_budget() {
+        let now = 10 * TIP_RETENTION_AFTER_TERMINAL_NS;
+        store_reserved(1, "first", now + 1);
+        store_reserved(1, "second", now + 1);
+
+        assert_eq!(
+            prune_expired_tips(None, now, || false),
+            (Some(sender_key(1, "first")), 0),
+            "every batch makes progress, so the sweep always ends"
+        );
+        assert_eq!(stored_tip_ids(), vec!["first", "second"]);
     }
 }
