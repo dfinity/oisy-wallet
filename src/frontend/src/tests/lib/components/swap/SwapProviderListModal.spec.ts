@@ -1,12 +1,14 @@
 import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
+import { SWAP_SELECTED_PROVIDER_DETAILS } from '$lib/constants/test-ids.constants';
 import * as ExchangeDerived from '$lib/derived/exchange.derived';
 import { i18n } from '$lib/stores/i18n.store';
+import { screensStore } from '$lib/stores/screens.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
-import { queryAllByTestId, render } from '@testing-library/svelte';
+import { fireEvent, queryAllByTestId, render } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { derived, get, readable, writable } from 'svelte/store';
 
@@ -31,6 +33,8 @@ describe('SwapProviderListModal', () => {
 	let mockContext: Map<symbol, unknown>;
 
 	beforeEach(() => {
+		screensStore.set('xs');
+
 		mockContext = new Map();
 
 		mockContext.set(SWAP_CONTEXT_KEY, {
@@ -52,8 +56,100 @@ describe('SwapProviderListModal', () => {
 			context: mockContext
 		});
 
-		expect(getByText(get(i18n).swap.text.swap_provider)).toBeInTheDocument();
+		expect(getByText(get(i18n).swap.text.smart_swap_offers)).toBeInTheDocument();
 		expect(getByText(get(i18n).swap.text.you_receive)).toBeInTheDocument();
+	});
+
+	it('shows the selected offer with its details above the offers', () => {
+		// From md the rows spell out Best Rate.
+		screensStore.set('lg');
+
+		const { container, getByTestId } = render(SwapProviderListModal, {
+			context: mockContext,
+			props: { slippageValue: 1 }
+		});
+
+		const details = getByTestId(SWAP_SELECTED_PROVIDER_DETAILS);
+
+		expect(details).toHaveTextContent(get(i18n).swap.text.smart_swap_selected_offer);
+		expect(details).toHaveTextContent('ICP Swap');
+		// The offer's own details, worked out with the slippage the step is given.
+		expect(details).toHaveTextContent(get(i18n).swap.text.expected_minimum);
+		// Each offer row already shows its website and Best Rate.
+		expect(details).not.toHaveTextContent('icpswap.com');
+		expect(details).not.toHaveTextContent(get(i18n).swap.text.best_rate);
+		expect(container.querySelector('[data-testid="provider-item"]')).toHaveTextContent(
+			get(i18n).swap.text.best_rate
+		);
+	});
+
+	it('goes back instead of pinning the offer already in use', async () => {
+		const onSelectProvider = vi.fn();
+		const onCloseProviderList = vi.fn();
+		const { container } = render(SwapProviderListModal, {
+			context: mockContext,
+			props: { onSelectProvider, onCloseProviderList }
+		});
+
+		const [first] = Array.from(
+			container.querySelectorAll<HTMLButtonElement>('[data-testid="provider-item"] button')
+		);
+		await fireEvent.click(first);
+
+		expect(onCloseProviderList).toHaveBeenCalledOnce();
+		expect(onSelectProvider).not.toHaveBeenCalled();
+	});
+
+	it('shows only the card when there is a single offer', () => {
+		mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, {
+			store: readable({
+				swaps: [mockSwapProviders[0]],
+				amountForSwap: '1',
+				selectedProvider: mockSwapProviders[0]
+			})
+		});
+		const { container, getByTestId, queryByText } = render(SwapProviderListModal, {
+			context: mockContext
+		});
+
+		const details = getByTestId(SWAP_SELECTED_PROVIDER_DETAILS);
+
+		expect(details).toHaveTextContent('ICP Swap');
+		// Nothing to beat, so no Best Rate.
+		expect(details).not.toHaveTextContent(get(i18n).swap.text.best_rate);
+		expect(container.querySelectorAll('[data-testid="provider-item"]')).toHaveLength(0);
+		expect(queryByText(get(i18n).swap.text.smart_swap_offers)).not.toBeInTheDocument();
+	});
+
+	it('selects another offer', async () => {
+		const onSelectProvider = vi.fn();
+		const onCloseProviderList = vi.fn();
+		const { container } = render(SwapProviderListModal, {
+			context: mockContext,
+			props: { onSelectProvider, onCloseProviderList }
+		});
+
+		const [, second] = Array.from(
+			container.querySelectorAll<HTMLButtonElement>('[data-testid="provider-item"] button')
+		);
+		await fireEvent.click(second);
+
+		expect(onSelectProvider).toHaveBeenCalledExactlyOnceWith(mockSwapProviders[1]);
+		expect(onCloseProviderList).not.toHaveBeenCalled();
+	});
+
+	it('goes back with Back without selecting', async () => {
+		const onSelectProvider = vi.fn();
+		const onCloseProviderList = vi.fn();
+		const { getByText } = render(SwapProviderListModal, {
+			context: mockContext,
+			props: { onSelectProvider, onCloseProviderList }
+		});
+
+		await fireEvent.click(getByText(get(i18n).core.text.back));
+
+		expect(onCloseProviderList).toHaveBeenCalledOnce();
+		expect(onSelectProvider).not.toHaveBeenCalled();
 	});
 
 	it('renders all provider rows with USD values', () => {

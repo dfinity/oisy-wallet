@@ -1369,6 +1369,8 @@
 			"swap_provider": "Поставщик обмена",
 			"smart_swap": "",
 			"finding_best_rate": "",
+			"smart_swap_offers": "",
+			"smart_swap_selected_offer": "",
 			"swap_provider_website": "Веб-сайт",
 			"swap_route": "Маршрут обмена",
 			"included_network_fees": "Включенные сетевые комиссии",
