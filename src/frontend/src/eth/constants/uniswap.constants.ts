@@ -66,8 +66,10 @@ export const UNISWAP_EXECUTE_HASH = '0x3593564c';
 // execute(bytes commands, bytes[] inputs), which Uniswap's SDK sends when a swap sets no deadline
 export const UNISWAP_EXECUTE_WITHOUT_DEADLINE_HASH = '0x24856bc3';
 
-// `Commands.COMMAND_TYPE_MASK`: the low seven bits of a command byte name the command. The top bit,
-// `FLAG_ALLOW_REVERT`, only matters to commands that report failure instead of reverting.
+// `Commands.COMMAND_TYPE_MASK`: the low seven bits of a command byte name the command on 2.1.x, the
+// low six on 2.0.0. No command OISY reads sets bit `0x40`, so a byte that does names none OISY
+// reads, rather than the one 2.0.0 would run. The top bit, `FLAG_ALLOW_REVERT`, only matters to
+// commands that report failure instead of reverting.
 export const UNISWAP_COMMAND_TYPE_MASK = 0x7f;
 
 // `Commands`: the commands OISY reads.

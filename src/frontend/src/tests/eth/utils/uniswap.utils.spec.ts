@@ -1546,6 +1546,33 @@ describe('uniswap.utils', () => {
 				expect(getUniswapSwap(params({ data: eurcToUsdc, to: ROUTER_2_0 }))).toBeUndefined();
 			});
 
+			// 2.0.0 masks a command byte to its low six bits, so it would run 0x44 as a `SWEEP`.
+			it('should not read a command byte with bit 0x40 set at a 2.0.0 router', () => {
+				const commands = (sweepByte: number) =>
+					execute({
+						commands: [
+							v3Swap({
+								recipient: UNISWAP_RECIPIENT_ROUTER,
+								amount: 1_000_000n,
+								amountLimit: ZERO,
+								types: V3_SWAP.slice(0, 5)
+							}),
+							encode({
+								type: sweepByte,
+								types: ['address', 'address', 'uint160'],
+								values: [USDC, UNISWAP_RECIPIENT_SENDER, 1_087_807n]
+							})
+						]
+					});
+
+				expect(
+					getUniswapSwap(params({ data: commands(UNISWAP_COMMANDS.SWEEP), to: ROUTER_2_0 }))
+				).toBeDefined();
+				expect(
+					getUniswapSwap(params({ data: commands(UNISWAP_COMMANDS.SWEEP | 0x40), to: ROUTER_2_0 }))
+				).toBeUndefined();
+			});
+
 			it('should not read a command 2.0.0 does not have at a 2.0.0 router', () => {
 				const data = execute({
 					commands: [
