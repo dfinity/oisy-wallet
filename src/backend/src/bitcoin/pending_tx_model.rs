@@ -203,14 +203,16 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
             .any(|u| new_keys.contains(&(u.outpoint.txid, u.outpoint.vout)))
     }
 
-    /// Checks whether a pending transaction of the principal, on any address, already reserves
-    /// exactly `utxos` under `txid`.
+    /// Checks whether a pending transaction of the principal at `address` already reserves exactly
+    /// `utxos` under `txid`.
     ///
     /// A retry of a transaction whose outcome was unclear has the same txid over the same UTXOs,
-    /// and must not be blocked by its own reservation.
+    /// and must not be blocked by its own reservation. Only the address the request is for counts:
+    /// a reservation at another network's address does not protect this one.
     pub fn has_same_txid_reservation(
         &self,
         principal: Principal,
+        address: &str,
         txid: &[u8],
         utxos: &[Utxo],
     ) -> bool {
@@ -219,15 +221,8 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
             .map(|u| (u.outpoint.txid, u.outpoint.vout))
             .collect();
 
-        let stored_principal = StoredPrincipal(principal);
-        let Some(address_map) = self.pending_transactions_map.get(&stored_principal) else {
-            return false;
-        };
-
-        address_map
-            .0
-            .values()
-            .flatten()
+        self.get_pending_transactions(&principal, address)
+            .iter()
             .filter(|tx| tx.txid == txid)
             .any(|tx| {
                 let tx_keys: HashSet<(Txid, u32)> = tx
@@ -1037,15 +1032,25 @@ mod tests {
             .unwrap();
 
         let reversed = [(*UTXO_2).clone(), (*UTXO_1).clone()];
-        assert!(model.has_same_txid_reservation(principal, &TXID_C, &reversed));
-        assert!(!model.has_same_txid_reservation(principal, &TXID_B, &reversed));
-        assert!(!model.has_same_txid_reservation(principal, &TXID_C, &[(*UTXO_1).clone()]));
+        assert!(model.has_same_txid_reservation(principal, ADDRESS_1, &TXID_C, &reversed));
+        assert!(!model.has_same_txid_reservation(principal, ADDRESS_1, &TXID_B, &reversed));
         assert!(!model.has_same_txid_reservation(
             principal,
+            ADDRESS_1,
+            &TXID_C,
+            &[(*UTXO_1).clone()]
+        ));
+        assert!(!model.has_same_txid_reservation(
+            principal,
+            ADDRESS_1,
             &TXID_C,
             &[(*UTXO_1).clone(), (*UTXO_2).clone(), (*UTXO_3).clone()]
         ));
-        assert!(!model.has_same_txid_reservation(other, &TXID_C, &reversed));
+        assert!(!model.has_same_txid_reservation(other, ADDRESS_1, &TXID_C, &reversed));
+        assert!(
+            !model.has_same_txid_reservation(principal, ADDRESS_2, &TXID_C, &reversed),
+            "another address, as another network's, does not count"
+        );
     }
 
     #[test]

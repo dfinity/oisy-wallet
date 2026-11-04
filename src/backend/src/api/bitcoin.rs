@@ -24,8 +24,8 @@ use crate::{
     bitcoin::{
         api,
         broadcast_state_model::{
-            begin_broadcast, finish_broadcast, retain_reserved_broadcasts,
-            with_btc_broadcast_states, BroadcastTarget,
+            begin_broadcast, finish_broadcast, reserve_without_broadcast,
+            retain_reserved_broadcasts, with_btc_broadcast_states, BroadcastTarget,
         },
         pending_tx_model::BtcUserPendingTransactionsModel,
         tx_validator,
@@ -165,24 +165,21 @@ pub async fn btc_add_pending_transaction(
                 snapshot_started_ns,
                 reserved_at_ns,
             );
-            retain_reserved_broadcasts(&model, principal);
-
-            // A retry of the same transaction, after a hand-off whose outcome was unclear.
-            if model.has_same_txid_reservation(principal, &params.txid, &params.utxos) {
-                return Ok(());
-            }
-            if model.has_intersecting_pending_utxos(principal, &params.utxos) {
-                return Err(BtcAddPendingTransactionError::UtxosAlreadyReserved);
-            }
-
             let current_pending_transaction = StoredPendingTransaction {
                 txid: params.txid,
                 utxos: params.utxos,
                 created_at_timestamp_ns: reserved_at_ns,
             };
-            model
-                .add_pending_transaction(principal, source_address, current_pending_transaction)
-                .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })
+            with_btc_broadcast_states(|states| {
+                reserve_without_broadcast(
+                    &mut model,
+                    states,
+                    principal,
+                    params.network,
+                    &source_address,
+                    current_pending_transaction,
+                )
+            })
         })
     }
     inner(params).await.into()

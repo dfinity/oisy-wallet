@@ -286,11 +286,12 @@ sequence with a BIP68 relative lock), `InvalidUtxos` (an input that is not the c
 Utxo records>, created_at_timestamp_ns: now }`. In the same block, read and set the txid's
    [broadcast state](#broadcast-state-per-txid).
    - **Same txid reuses its reservation.** If a pending transaction with the **same txid**
-     already reserves exactly these inputs (`has_same_txid_reservation`), skip the insert: a retry
-     after an unclear outcome must not be blocked by its own reservation. Whether it broadcasts
-     again is decided by the broadcast state. Otherwise, any reserved input is
-     `UtxosAlreadyReserved`, including a same-txid reservation over other UTXOs, which only a
-     mismatched `btc_add_pending_transaction` can create.
+     already reserves exactly these inputs at the same address (`has_same_txid_reservation`),
+     skip the insert: a retry after an unclear outcome must not be blocked by its own reservation.
+     Whether it broadcasts again is decided by the broadcast state. Otherwise, any reserved input
+     is `UtxosAlreadyReserved`, including a same-txid reservation over other UTXOs (which only a
+     mismatched `btc_add_pending_transaction` can create) or at another network's address (which
+     would not protect this one).
    - The call remembers whether it **inserted** the reservation or **reused** one. Step 10
      releases only a reservation the call inserted.
 10. `ic_cdk_bitcoin_canister::bitcoin_send_transaction(&SendTransactionRequest { network, transaction })`.
@@ -367,9 +368,13 @@ so a definitive failure keeps it.
 `btc_add_pending_transaction` stays, for transactions OISY signs but does not broadcast itself
 (OpenCryptoPay; optionally WalletConnect `signPsbt`, see
 [Pending decisions](#pending-decisions-facts-are-clear--we-just-need-to-decide)). It gets the same
-same-txid rule as step 9. A request whose txid is already pending over exactly the same UTXOs
-succeeds without a second insert; today it fails with `UtxosAlreadyReserved`, which blocks a retry
-of the same payment for an hour (see [OpenCryptoPay](#frontend-opencryptopay)).
+same-txid rule as step 9 (`reserve_without_broadcast` in `broadcast_state_model.rs`). A request
+whose txid is already pending over exactly the same UTXOs at the same address succeeds without a
+second insert; today it fails with `UtxosAlreadyReserved`, which blocks a retry of the same payment
+for an hour (see [OpenCryptoPay](#frontend-opencryptopay)). It is still refused with
+`UtxosAlreadyReserved` while a broadcast of that txid is `InFlight`: that broadcast may yet be
+refused and release the reservation it inserted, which would free inputs the call had just
+reported as reserved.
 
 Steps 2 to 8 are **pure functions** in `src/backend/src/bitcoin/tx_validator.rs` (PR 1; the folder
 for BTC domain logic in `docs/ai/backend/structure.md`). There are three, because the endpoint runs

@@ -18,7 +18,9 @@ use std::{
 
 use candid::Principal;
 use ic_cdk_bitcoin_canister::{Network as BitcoinNetwork, Utxo};
-use shared::types::bitcoin::{BtcBroadcastTransactionError, StoredPendingTransaction};
+use shared::types::bitcoin::{
+    BtcAddPendingTransactionError, BtcBroadcastTransactionError, StoredPendingTransaction,
+};
 
 use super::pending_tx_model::BtcUserPendingTransactionsModel;
 
@@ -221,7 +223,7 @@ pub fn begin_broadcast(
         Some(BtcBroadcastState::Unknown { attempts }) => attempts + 1,
     };
 
-    let reservation = if pending.has_same_txid_reservation(principal, &txid, &utxos) {
+    let reservation = if pending.has_same_txid_reservation(principal, address, &txid, &utxos) {
         Reservation::Reused
     } else if pending.has_intersecting_pending_utxos(principal, &utxos) {
         return Err(BtcBroadcastTransactionError::UtxosAlreadyReserved);
@@ -256,6 +258,47 @@ pub fn begin_broadcast(
         attempts,
         id,
     }))
+}
+
+/// Reserves a transaction OISY signed but does not broadcast itself
+/// (`btc_add_pending_transaction`), with the same same-txid rule as `begin_broadcast`: a retry over
+/// exactly the same UTXOs at the same address succeeds without a second insert.
+///
+/// It is refused while a broadcast of the same transaction is in flight. That broadcast may still
+/// be refused and release the reservation it inserted, which would free inputs this call had just
+/// reported as reserved.
+///
+/// # Errors
+/// `UtxosAlreadyReserved`, or `InternalError` when the reservation cannot be stored.
+pub fn reserve_without_broadcast(
+    pending: &mut BtcUserPendingTransactionsModel<'_>,
+    states: &mut BtcBroadcastStates,
+    principal: Principal,
+    network: BitcoinNetwork,
+    address: &str,
+    transaction: StoredPendingTransaction,
+) -> Result<(), BtcAddPendingTransactionError> {
+    states.retain_reserved(principal, &pending.pending_txids(principal));
+
+    let is_in_flight = <[u8; 32]>::try_from(transaction.txid.as_slice()).is_ok_and(|txid| {
+        matches!(
+            states.get(principal, network, &txid),
+            Some(BtcBroadcastState::InFlight { .. })
+        )
+    });
+    if is_in_flight {
+        return Err(BtcAddPendingTransactionError::UtxosAlreadyReserved);
+    }
+    if pending.has_same_txid_reservation(principal, address, &transaction.txid, &transaction.utxos)
+    {
+        return Ok(());
+    }
+    if pending.has_intersecting_pending_utxos(principal, &transaction.utxos) {
+        return Err(BtcAddPendingTransactionError::UtxosAlreadyReserved);
+    }
+    pending
+        .add_pending_transaction(principal, address.to_string(), transaction)
+        .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })
 }
 
 /// Records the outcome of the attempt `begin_broadcast` cleared.
@@ -329,11 +372,14 @@ mod tests {
         DefaultMemoryImpl,
     };
     use pretty_assertions::assert_eq;
-    use shared::types::bitcoin::{BtcBroadcastTransactionError, StoredPendingTransaction};
+    use shared::types::bitcoin::{
+        BtcAddPendingTransactionError, BtcBroadcastTransactionError, StoredPendingTransaction,
+    };
 
     use super::{
-        begin_broadcast, finish_broadcast, BroadcastAttempt, BroadcastOutcome, BroadcastTarget,
-        BtcBroadcastState, BtcBroadcastStates, Reservation, MAX_BROADCAST_ATTEMPTS,
+        begin_broadcast, finish_broadcast, reserve_without_broadcast, BroadcastAttempt,
+        BroadcastOutcome, BroadcastTarget, BtcBroadcastState, BtcBroadcastStates, Reservation,
+        MAX_BROADCAST_ATTEMPTS,
     };
     use crate::{
         bitcoin::pending_tx_model::BtcUserPendingTransactionsModel,
@@ -708,6 +754,103 @@ mod tests {
             states.settled_answer(principal(), BitcoinNetwork::Testnet, &TXID),
             None,
             "a mainnet success does not answer a testnet request"
+        );
+    }
+
+    fn add(
+        pending: &mut BtcUserPendingTransactionsModel<'_>,
+        states: &mut BtcBroadcastStates,
+        txid: [u8; 32],
+    ) -> Result<(), BtcAddPendingTransactionError> {
+        reserve_without_broadcast(
+            pending,
+            states,
+            principal(),
+            NETWORK,
+            ADDRESS,
+            StoredPendingTransaction {
+                txid: txid.to_vec(),
+                utxos: utxos(),
+                created_at_timestamp_ns: RESERVED_AT_NS,
+            },
+        )
+    }
+
+    fn reservation_count(pending: &BtcUserPendingTransactionsModel<'_>) -> usize {
+        pending
+            .get_pending_transactions(&principal(), ADDRESS)
+            .len()
+    }
+
+    #[test]
+    fn adding_the_same_transaction_while_its_broadcast_is_in_flight_is_refused() {
+        let (mut map, _mm) = setup();
+        let mut pending = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let mut states = BtcBroadcastStates::default();
+        let attempt = begin(&mut pending, &mut states, TXID).unwrap().unwrap();
+
+        // Acknowledging it would let the broadcast's refusal free inputs reported as reserved.
+        assert_eq!(
+            add(&mut pending, &mut states, TXID),
+            Err(BtcAddPendingTransactionError::UtxosAlreadyReserved)
+        );
+
+        assert_eq!(
+            finish(&mut pending, &mut states, attempt, refused()),
+            Err(BtcBroadcastTransactionError::BroadcastRejected {
+                msg: "refused".to_string()
+            })
+        );
+        assert_eq!(reservation_count(&pending), 0);
+    }
+
+    #[test]
+    fn adding_the_same_transaction_after_its_broadcast_reuses_the_reservation() {
+        let (mut map, _mm) = setup();
+        let mut pending = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let mut states = BtcBroadcastStates::default();
+        let attempt = begin(&mut pending, &mut states, TXID).unwrap().unwrap();
+        finish(&mut pending, &mut states, attempt, BroadcastOutcome::Sent).unwrap();
+
+        assert_eq!(add(&mut pending, &mut states, TXID), Ok(()));
+        assert_eq!(reservation_count(&pending), 1);
+    }
+
+    #[test]
+    fn a_retry_of_an_added_transaction_is_not_blocked_by_its_own_reservation() {
+        let (mut map, _mm) = setup();
+        let mut pending = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let mut states = BtcBroadcastStates::default();
+
+        assert_eq!(add(&mut pending, &mut states, TXID), Ok(()));
+        assert_eq!(add(&mut pending, &mut states, TXID), Ok(()));
+        assert_eq!(reservation_count(&pending), 1);
+        assert_eq!(
+            add(&mut pending, &mut states, OTHER_TXID),
+            Err(BtcAddPendingTransactionError::UtxosAlreadyReserved)
+        );
+    }
+
+    #[test]
+    fn a_reservation_at_another_networks_address_is_not_reused() {
+        let (mut map, _mm) = setup();
+        let mut pending = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let mut states = BtcBroadcastStates::default();
+        add(&mut pending, &mut states, TXID).unwrap();
+
+        let testnet = BroadcastTarget {
+            principal: principal(),
+            network: BitcoinNetwork::Testnet,
+            address: "tb1q-caller",
+            txid: TXID,
+        };
+        assert_eq!(
+            begin_broadcast(&mut pending, &mut states, &testnet, utxos(), RESERVED_AT_NS),
+            Err(BtcBroadcastTransactionError::UtxosAlreadyReserved)
+        );
+        assert_eq!(
+            pending.get_pending_transactions(&principal(), "tb1q-caller"),
+            vec![]
         );
     }
 }
