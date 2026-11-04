@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, untrack, type Snippet } from 'svelte';
 	import { prefersReducedMotion } from 'svelte/motion';
+	import { readable } from 'svelte/store';
 	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import {
 		SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS,
@@ -21,6 +22,7 @@
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
+	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { SwapAmountTooLowError, SwapViaIntermediateTokenError } from '$lib/types/errors';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapProvider } from '$lib/types/swap';
@@ -51,6 +53,10 @@
 	}: Props = $props();
 
 	const { store, activity } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+	// Max applies the amount again when the fee changes, and the fee depends on the selected
+	// provider, so a manual pick would otherwise undo itself one round later.
+	const amountSetToMax =
+		getContext<SwapContext | undefined>(SWAP_CONTEXT_KEY)?.amountSetToMax ?? readable(false);
 
 	const sourceTokenId = $derived(sourceToken?.id);
 	const destinationTokenId = $derived(destinationToken?.id);
@@ -197,7 +203,8 @@
 			store.setSwaps({
 				swaps: swapAmounts,
 				amountForSwap: parsedAmount,
-				selectedProvider: swapAmounts[0]
+				selectedProvider: swapAmounts[0],
+				keepManualProvider: $amountSetToMax
 			});
 		} catch (err: unknown) {
 			if (!isCurrentRequest()) {

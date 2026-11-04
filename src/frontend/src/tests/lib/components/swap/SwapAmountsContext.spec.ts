@@ -369,6 +369,42 @@ describe('SwapAmountsContext.svelte', () => {
 		vi.useRealTimers();
 	});
 
+	it.each([
+		{ amountSetToMax: true, expected: SwapProvider.KONG_SWAP },
+		{ amountSetToMax: false, expected: mockSwapProviders[0].provider }
+	])(
+		'keeps a manual pick for a new amount only while Max sets it ($amountSetToMax)',
+		async ({ amountSetToMax, expected }) => {
+			vi.spyOn(swapService, 'fetchSwapAmounts').mockResolvedValue(mockSwapProviders);
+
+			store.setSwaps({
+				swaps: mockSwapProviders,
+				amountForSwap: 10,
+				selectedProvider: mockSwapProviders[0]
+			});
+
+			store.setManualProvider(mockSwapProviders[1]);
+
+			context.set(SWAP_CONTEXT_KEY, {
+				...(context.get(SWAP_CONTEXT_KEY) as object),
+				amountSetToMax: readable(amountSetToMax)
+			});
+
+			// Max lowered the amount for the picked provider's fee.
+			await renderWithContext({
+				amount: '9.5',
+				sourceToken,
+				destinationToken,
+				slippageValue: '0.3'
+			});
+
+			await waitForDebounce();
+
+			expect(get(store)?.amountForSwap).toBe(9.5);
+			expect(get(store)?.selectedProvider?.provider).toBe(expected);
+		}
+	);
+
 	it('does not fetch when pauseAmountUpdates is true', async () => {
 		vi.useFakeTimers();
 

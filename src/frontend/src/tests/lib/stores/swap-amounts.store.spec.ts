@@ -393,6 +393,112 @@ describe('swap-amounts.store', () => {
 			expect(get(store)?.selectedProvider?.provider).toBe(SwapProvider.VELORA);
 		});
 
+		it('should keep the selection for a round at the same amount, whatever its type', () => {
+			const store = initSwapAmountsStore();
+
+			store.setSwaps({
+				swaps: evmSwaps,
+				amountForSwap: '1000000',
+				selectedProvider: evmSwaps[0]
+			});
+
+			store.setManualProvider(evmSwaps[1]);
+
+			// The quote coordinator passes the parsed amount, a number.
+			store.setSwaps({
+				swaps: evmSwaps,
+				amountForSwap: 1000000,
+				selectedProvider: evmSwaps[0]
+			});
+
+			const state = get(store);
+
+			expect(state?.selectedProvider?.provider).toBe(SwapProvider.NEAR_INTENTS);
+			expect(state?.manuallySelectedProviderKey).toBe(SwapProvider.NEAR_INTENTS);
+		});
+
+		it('should release the selection for a round at another amount', () => {
+			const store = initSwapAmountsStore();
+
+			store.setSwaps({
+				swaps: evmSwaps,
+				amountForSwap: '1000000',
+				selectedProvider: evmSwaps[0]
+			});
+
+			store.setManualProvider(evmSwaps[1]);
+
+			store.setSwaps({
+				swaps: evmSwaps,
+				amountForSwap: '2000000',
+				selectedProvider: evmSwaps[0]
+			});
+
+			const state = get(store);
+
+			expect(state?.selectedProvider?.provider).toBe(SwapProvider.VELORA);
+			expect(state?.manuallySelectedProviderKey).toBeUndefined();
+		});
+
+		it('should keep the selection at another amount when the round asks to', () => {
+			const store = initSwapAmountsStore();
+
+			store.setSwaps({
+				swaps: evmSwaps,
+				amountForSwap: '1000000',
+				selectedProvider: evmSwaps[0]
+			});
+
+			store.setManualProvider(evmSwaps[1]);
+
+			store.setSwaps({
+				swaps: evmSwaps,
+				amountForSwap: '990000',
+				selectedProvider: evmSwaps[0],
+				keepManualProvider: true
+			});
+
+			// The pick now belongs to the new amount: a refresh there keeps it without asking.
+			store.setSwaps({
+				swaps: evmSwaps,
+				amountForSwap: 990000,
+				selectedProvider: evmSwaps[0]
+			});
+
+			const state = get(store);
+
+			expect(state?.selectedProvider?.provider).toBe(SwapProvider.NEAR_INTENTS);
+			expect(state?.manuallySelectedProviderKey).toBe(SwapProvider.NEAR_INTENTS);
+		});
+
+		it('should stay automatic after a release, back at the amount of the selection too', () => {
+			const store = initSwapAmountsStore();
+
+			store.setSwaps({
+				swaps: evmSwaps,
+				amountForSwap: '1000000',
+				selectedProvider: evmSwaps[0]
+			});
+
+			store.setManualProvider(evmSwaps[1]);
+
+			store.setSwaps({
+				swaps: evmSwaps,
+				amountForSwap: '2000000',
+				selectedProvider: evmSwaps[0]
+			});
+			store.setSwaps({
+				swaps: evmSwaps,
+				amountForSwap: '1000000',
+				selectedProvider: evmSwaps[0]
+			});
+
+			const state = get(store);
+
+			expect(state?.selectedProvider?.provider).toBe(SwapProvider.VELORA);
+			expect(state?.manuallySelectedProviderKey).toBeUndefined();
+		});
+
 		it('should set manuallySelectedProviderKey when using setManualProvider', () => {
 			const store = initSwapAmountsStore();
 

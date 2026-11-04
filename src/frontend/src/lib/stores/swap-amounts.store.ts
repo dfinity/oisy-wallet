@@ -3,7 +3,7 @@ import type { OptionAmount } from '$lib/types/send';
 import type { SwapMappedResult, SwapProvider, SwapQuoteError } from '$lib/types/swap';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
-import { writable, type Readable } from 'svelte/store';
+import { get, writable, type Readable } from 'svelte/store';
 
 export interface SwapAmountsStoreData {
 	swaps: SwapMappedResult[];
@@ -20,6 +20,9 @@ export interface SwapAmountsStore extends Readable<Nullish<SwapAmountsStoreData>
 		amountForSwap: OptionAmount;
 		selectedProvider?: SwapMappedResult;
 		quoteError?: SwapQuoteError;
+		// The amount changed without the user entering it (Max applied again after a fee change),
+		// so a manual pick still holds at the new amount.
+		keepManualProvider?: boolean;
 	}) => void;
 	reset: () => void;
 	setSelectedProvider: (provider: SwapMappedResult | undefined) => void;
@@ -27,7 +30,8 @@ export interface SwapAmountsStore extends Readable<Nullish<SwapAmountsStoreData>
 }
 
 export const initSwapAmountsStore = (): SwapAmountsStore => {
-	const { subscribe, set, update } = writable<Nullish<SwapAmountsStoreData>>(undefined);
+	const store = writable<Nullish<SwapAmountsStoreData>>(undefined);
+	const { subscribe, set, update } = store;
 
 	let manualProviderKey: SwapProvider | undefined;
 
@@ -40,9 +44,22 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 			set(null);
 		},
 
-		setSwaps: ({ swaps, amountForSwap, selectedProvider, quoteError }) => {
+		setSwaps: ({
+			swaps,
+			amountForSwap,
+			selectedProvider,
+			quoteError,
+			keepManualProvider = false
+		}) => {
 			if (nonNullish(manualProviderKey)) {
-				const manualMatch = swaps.find((s) => s.provider === manualProviderKey);
+				// A pick belongs to the amount of the quote it was made on, which the store still
+				// holds: refreshes and a return from Review re-quote that amount and keep it, a round
+				// at another amount goes back to the top offer, and a new pair resets the store.
+				const sameAmount = Number(amountForSwap) === Number(get(store)?.amountForSwap);
+				const manualMatch =
+					keepManualProvider || sameAmount
+						? swaps.find((s) => s.provider === manualProviderKey)
+						: undefined;
 
 				if (nonNullish(manualMatch)) {
 					set({
