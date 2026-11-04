@@ -32,6 +32,7 @@ import { formatToken } from '$lib/utils/format.utils';
 import {
 	buildNearIntentsQuoteRequest,
 	calculateSlippage,
+	calculateSwapGainUsd,
 	calculateValueDifference,
 	findNearIntentsAsset,
 	findSwapProvider,
@@ -62,6 +63,7 @@ import {
 	mockNearIntentsQuoteResponse,
 	mockNearIntentsTokens
 } from '$tests/mocks/near-intents.mock';
+import { mockSwapProviders, mockVeloraMarketProvider } from '$tests/mocks/swap.mocks';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import {
 	mockVeloraCrossChainSwapResponse,
@@ -804,6 +806,63 @@ describe('swap utils', () => {
 			});
 
 			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('calculateSwapGainUsd', () => {
+		const [icpSwap, kongSwap] = mockSwapProviders;
+
+		it('values the gain of the selected offer over the lowest one', () => {
+			expect(
+				calculateSwapGainUsd({
+					swaps: [kongSwap, icpSwap],
+					selectedProvider: kongSwap,
+					decimals: 8,
+					exchangeRate: 2
+				})
+			).toBe(20);
+		});
+
+		it('measures against the lowest of all offers, not the next best', () => {
+			expect(
+				calculateSwapGainUsd({
+					swaps: [kongSwap, icpSwap, mockVeloraMarketProvider],
+					selectedProvider: kongSwap,
+					decimals: 8,
+					exchangeRate: 2
+				})
+			).toBe(22);
+		});
+
+		it('values a manually selected offer that is not the best', () => {
+			expect(
+				calculateSwapGainUsd({
+					swaps: [kongSwap, icpSwap, mockVeloraMarketProvider],
+					selectedProvider: icpSwap,
+					decimals: 8,
+					exchangeRate: 2
+				})
+			).toBe(2);
+		});
+
+		it.each([
+			{ case: 'a single offer', swaps: [kongSwap], selectedProvider: kongSwap, exchangeRate: 2 },
+			{
+				case: 'no exchange rate',
+				swaps: [kongSwap, icpSwap],
+				selectedProvider: kongSwap,
+				exchangeRate: undefined
+			},
+			{
+				case: 'the lowest offer selected',
+				swaps: [kongSwap, icpSwap],
+				selectedProvider: icpSwap,
+				exchangeRate: 2
+			}
+		])('returns undefined for $case', ({ swaps, selectedProvider, exchangeRate }) => {
+			expect(
+				calculateSwapGainUsd({ swaps, selectedProvider, decimals: 8, exchangeRate })
+			).toBeUndefined();
 		});
 	});
 

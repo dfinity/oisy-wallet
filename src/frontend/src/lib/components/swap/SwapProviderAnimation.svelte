@@ -60,7 +60,7 @@
 	let layers = $state<ProviderLayer[]>([]);
 	let revision = $state(0);
 	let current = $derived(layers.find((layer) => layer.provider === displayedProvider));
-	// A remount, such as the header crossing the sm/md breakpoint, inherits the confirmation it is
+	// A remount, such as the form's on a return from Review, inherits the confirmation it is
 	// mounted with: it was played by the instance it replaces, so only a later one plays.
 	let lastConfirmationId: Props['confirmationId'] = untrack(() => confirmationId);
 	let animations: Animation[] = [];
@@ -381,13 +381,13 @@
 
 {#snippet providerContent(details: ProviderDetails)}
 	<Logo alt="" animateReadiness={false} loading="eager" size="xxs" src={details.logo} />
-	<span class="min-w-0 truncate text-lg font-bold"
+	<span class="min-w-0 truncate text-base font-bold"
 		>{resolveText({ i18n: $i18n, path: details.name })}</span
 	>
 {/snippet}
 
 {#if current ?? loading}
-	<!-- Plain text for the header's accessible name; `SwapProvider` announces the change. -->
+	<!-- Plain text for the cell's accessible name; `SwapProvider` announces the change. -->
 	<div class="provider-loop" data-provider={displayedProvider} data-tid={SWAP_PROVIDER_ANIMATION}>
 		<span class="sr-only"
 			>{!loading && current ? resolveText({ i18n: $i18n, path: current.details.name }) : ''}</span
