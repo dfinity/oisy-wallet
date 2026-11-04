@@ -745,10 +745,21 @@ describe('SwapProvider form header', () => {
 
 	it('opens the row with its height and keeps the gap to the next row inside it', async () => {
 		const animate = vi.spyOn(Element.prototype, 'animate');
+		// jsdom does no layout, and Svelte's slide leaves out a height it can't measure, so the
+		// row reports the height a browser would.
+		const measure = globalThis.getComputedStyle.bind(globalThis);
+		const computedStyle = vi
+			.spyOn(globalThis, 'getComputedStyle')
+			.mockImplementation((element) =>
+				element.classList.contains('pb-3')
+					? ({ opacity: '1', height: '40px' } as CSSStyleDeclaration)
+					: measure(element)
+			);
 		const { getByTestId } = render(SwapProviderHeader, { props, context });
 		activity.start({ requestId: 14, background: false });
 		await tick();
 		await tick();
+		computedStyle.mockRestore();
 		const row = getByTestId('collapsible-header').closest('.pb-3');
 		const heights = animate.mock.calls.filter(
 			([frames], index) =>

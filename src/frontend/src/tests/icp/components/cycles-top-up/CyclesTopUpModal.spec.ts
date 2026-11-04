@@ -1415,10 +1415,7 @@ describe('CyclesTopUpModal', () => {
 			expect(options).toHaveLength(2);
 			expect(options[0]).not.toHaveTextContent(en.cycles_top_up.text.not_enough_to_pay);
 			expect(options[1]).toHaveTextContent(en.cycles_top_up.text.not_enough_to_pay);
-
-			await pickToken({ result, index: 1 });
-
-			expect(result.queryByTestId(CYCLES_TOP_UP_CANISTER_INPUT)).toBeNull();
+			expect(options[1].querySelector('button')).toBeNull();
 
 			await pickToken({ result, index: 0 });
 
@@ -1437,13 +1434,10 @@ describe('CyclesTopUpModal', () => {
 
 			const result = renderFromTools();
 
-			expect(result.getAllByTestId(CYCLES_TOP_UP_TOKEN_OPTION)[0]).toHaveTextContent(
-				en.cycles_top_up.text.not_enough_to_pay
-			);
+			const [icp] = result.getAllByTestId(CYCLES_TOP_UP_TOKEN_OPTION);
 
-			await pickToken({ result, index: 0 });
-
-			expect(result.queryByTestId(CYCLES_TOP_UP_CANISTER_INPUT)).toBeNull();
+			expect(icp).toHaveTextContent(en.cycles_top_up.text.not_enough_to_pay);
+			expect(icp.querySelector('button')).toBeNull();
 
 			await pickToken({ result, index: 1 });
 
@@ -1454,7 +1448,7 @@ describe('CyclesTopUpModal', () => {
 			);
 		});
 
-		it('shows a token whose balance has not loaded, without picking it or saying why', async () => {
+		it('shows a token whose balance has not loaded, without picking it or saying why', () => {
 			balancesStore.reset(ICP_TOKEN.id);
 
 			const result = renderFromTools();
@@ -1463,10 +1457,7 @@ describe('CyclesTopUpModal', () => {
 
 			expect(options).toHaveLength(2);
 			expect(options[0]).not.toHaveTextContent(en.cycles_top_up.text.not_enough_to_pay);
-
-			await pickToken({ result, index: 0 });
-
-			expect(result.queryByTestId(CYCLES_TOP_UP_CANISTER_INPUT)).toBeNull();
+			expect(options[0].querySelector('button')).toBeNull();
 		});
 
 		it('offers to enable TCYCLES while it is not enabled, without picking it', async () => {
@@ -1481,13 +1472,15 @@ describe('CyclesTopUpModal', () => {
 
 			const result = renderFromTools();
 
-			expect(result.getAllByTestId(CYCLES_TOP_UP_TOKEN_OPTION)).toHaveLength(2);
+			const options = result.getAllByTestId(CYCLES_TOP_UP_TOKEN_OPTION);
 
-			await pickToken({ result, index: 1 });
+			expect(options).toHaveLength(2);
 
-			expect(result.queryByTestId(CYCLES_TOP_UP_CANISTER_INPUT)).toBeNull();
+			const enable = result.getByTestId(CYCLES_TOP_UP_TOKEN_ENABLE_BUTTON);
 
-			await fireEvent.click(result.getByTestId(CYCLES_TOP_UP_TOKEN_ENABLE_BUTTON));
+			expect([...options[1].querySelectorAll('button')]).toEqual([enable]);
+
+			await fireEvent.click(enable);
 
 			expect(enableSpy).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({ token: disabled, identity: mockIdentity })
