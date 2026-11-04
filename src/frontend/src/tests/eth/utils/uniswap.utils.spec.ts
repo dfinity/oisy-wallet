@@ -313,9 +313,51 @@ describe('uniswap.utils', () => {
 			expect(getUniswapSwap(params({ data }))?.deadline).toBe(stated);
 		});
 
-		it('should state no deadline for a permit whose signature outlives a transaction without one', () => {
+		// Permit2 refuses a pull under the allowance a permit sets once that allowance has expired, but a
+		// pull before the permit runs under the allowance the router had.
+		it.each([
+			{
+				case: "the permit's expiration when it comes first and a pull of its token follows",
+				commands: [
+					permit({ expiration: DEADLINE - 60n }),
+					v3Swap({ amount: 1_000_000n, amountLimit: 1n })
+				],
+				stated: Number(DEADLINE - 60n)
+			},
+			{
+				case: "the transaction's deadline when the permit follows the pull",
+				commands: [
+					v3Swap({ amount: 1_000_000n, amountLimit: 1n }),
+					permit({ expiration: DEADLINE - 60n })
+				],
+				stated: Number(DEADLINE)
+			},
+			{
+				case: "the transaction's deadline when the permit's allowance outlives it",
+				commands: [
+					permit({ expiration: DEADLINE + 60n }),
+					v3Swap({ amount: 1_000_000n, amountLimit: 1n })
+				],
+				stated: Number(DEADLINE)
+			},
+			{
+				case: "the permit's expiration when a pull follows it and the transaction has no deadline",
+				commands: [
+					permit({ expiration: DEADLINE + 60n }),
+					v3Swap({ amount: 1_000_000n, amountLimit: 1n })
+				],
+				deadline: null,
+				stated: Number(DEADLINE + 60n)
+			}
+		])('should state $case', ({ commands, deadline, stated }) => {
+			const data = execute({ commands, ...(deadline === null && { deadline }) });
+
+			expect(getUniswapSwap(params({ data }))?.deadline).toBe(stated);
+		});
+
+		it('should state no deadline for a transaction without one whose permit follows the pull', () => {
 			const data = execute({
-				commands: [permit(), v3Swap({ amount: 1_000_000n, amountLimit: 1n })],
+				commands: [v3Swap({ amount: 1_000_000n, amountLimit: 1n }), permit()],
 				deadline: null
 			});
 			const swap = getUniswapSwap(params({ data }));

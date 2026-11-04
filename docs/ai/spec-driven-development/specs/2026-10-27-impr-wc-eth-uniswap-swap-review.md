@@ -219,10 +219,11 @@ Only from checks the router enforces:
   a nonzero one below that as "< 0.0001%", an amount in full); **New spending allowance**, when
   the transaction grants the router a Permit2 allowance ("The router can spend up to 12 USDC
   until …", the amount in full, or "any amount of USDC" when unlimited); **Valid until** the
-  deadline, or the permit's signature deadline when that comes first, as Permit2 then refuses the
-  permit and the transaction reverts with it, or "No deadline" when there is neither or it is past
-  the last date JavaScript can hold; **Interacting with**: "Uniswap Universal Router" with its
-  version and address, with copy and explorer links; then the network fee as today.
+  earliest of the deadline, the permit's signature deadline and, when a pull of its token follows
+  the permit, its expiration, as Permit2 refuses the permit or that pull after them and the
+  transaction reverts with it, or "No deadline" when there is none or it is past the last date
+  JavaScript can hold; **Interacting with**: "Uniswap Universal Router" with its version and
+  address, with copy and explorer links; then the network fee as today.
 - **Red boxes,** each keeping Approve enabled:
   - Recipient not the wallet: "The tokens from this swap go to an address that isn't this wallet.
     Check the recipient below before signing."
@@ -279,7 +280,8 @@ Only from checks the router enforces:
 6. Output to another address: a Recipient row and the red recipient box; Approve enabled.
 7. Every minimum 0: the red minimum box.
 8. A deadline in the past: the red expiry box. `execute` without a deadline: "No deadline". A
-   permit whose signature deadline comes first: that deadline.
+   permit whose signature deadline comes first, or whose expiration does with a pull of its token
+   after it: that time. A permit after the pull: the deadline alone.
 9. `PAY_PORTION` of 25 bips of the output to an address: an App fee row "0.25% of USDC" with that
    address. `PAY_PORTION_FULL_PRECISION` of 4 × 10^11 in 10^18: "< 0.0001% of USDC".
 10. A V4 swap (`SWAP_EXACT_IN` with `SETTLE` and a `TAKE` of the whole amount to the wallet):

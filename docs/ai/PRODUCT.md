@@ -755,7 +755,7 @@ The review is titled "Swap" and states:
 - **Recipient:** only when the tokens go to an address that is not this wallet.
 - **App fee:** each share or amount the swap pays to another address, with that address. A share too small to show reads "< 0.0001%", never 0%.
 - **New spending allowance:** when the transaction also grants the router a Permit2 allowance, what it can spend and until when. The allowance lasts beyond the transaction.
-- **Valid until:** the swap's deadline, or the permit's signature deadline when that comes first, as Permit2 then refuses the permit and the swap reverts; or "No deadline".
+- **Valid until:** the earliest of the swap's deadline, the permit's signature deadline and, when the swap pulls the permit's token after it, the allowance's expiration, as Permit2 refuses the permit or that pull after them and the swap reverts; or "No deadline".
 - **Interacting with:** "Uniswap Universal Router" with its version and address.
 
 Three red notes can show above the summary, each leaving Approve enabled: when the tokens go to another address, when the swap guarantees no minimum amount, and when the deadline has passed by the device's clock.

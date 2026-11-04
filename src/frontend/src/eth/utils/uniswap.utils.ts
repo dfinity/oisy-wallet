@@ -65,7 +65,14 @@ interface UniswapPlan {
 	pulled: Map<string, bigint>;
 	deliveries: UniswapDelivery[];
 	fees: UniswapPlanFee[];
-	approvals: { token: string; amount: bigint; expiration: bigint; sigDeadline: bigint }[];
+	approvals: {
+		token: string;
+		amount: bigint;
+		expiration: bigint;
+		sigDeadline: bigint;
+		// Whether a pull of its token follows it, which runs under the allowance it sets.
+		pulledAfter?: boolean;
+	}[];
 	// Whether the router pulls only what the swaps take, which `pulled` caps.
 	atMost: boolean;
 }
@@ -178,6 +185,13 @@ const pull = ({
 	}
 
 	plan.pulled.set(key, (plan.pulled.get(key) ?? ZERO) + amount);
+
+	// The commands are read in order, so a permit already read comes before this pull.
+	plan.approvals
+		.filter((approval) => approval.token === key)
+		.forEach((approval) => {
+			approval.pulledAfter = true;
+		});
 
 	return true;
 };
@@ -811,8 +825,13 @@ const toSwap = ({
 
 	const [{ recipient: party }] = deliveries;
 
-	// Permit2 refuses a permit once its signature has expired, which reverts the transaction with it.
-	const end = [deadline, approval?.sigDeadline]
+	// Permit2 refuses a permit once its signature has expired, and a pull under the allowance it sets
+	// once that allowance has, either of which reverts the transaction with it.
+	const end = [
+		deadline,
+		approval?.sigDeadline,
+		approval?.pulledAfter ? approval.expiration : undefined
+	]
 		.filter(nonNullish)
 		.reduce<bigint | undefined>(
 			(earliest, time) => (isNullish(earliest) || time < earliest ? time : earliest),
