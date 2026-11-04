@@ -5,6 +5,7 @@ use std::time::Duration;
 use candid::CandidType;
 use ic_cdk_bitcoin_canister::{MillisatoshiPerByte, Network as BitcoinNetwork, Utxo};
 use serde::Deserialize;
+use serde_bytes::ByteBuf;
 
 use super::delegation::IIDelegationChain;
 use crate::types::signer::RateLimitError;
@@ -131,4 +132,63 @@ pub enum BtcGetPendingTransactionsError {
     InvalidDelegationChain {
         msg: String,
     },
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[serde(remote = "Self")]
+pub struct BtcBroadcastTransactionRequest {
+    pub network: BitcoinNetwork,
+    /// The fully signed, consensus-serialized transaction, at most `MAX_BROADCAST_TX_BYTES`.
+    pub transaction: ByteBuf,
+    pub ii_delegation_chain: Option<IIDelegationChain>,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub struct BtcBroadcastTransactionResponse {
+    /// In internal byte order, as `StoredPendingTransaction::txid`: the reverse of the hex a
+    /// block explorer shows.
+    pub txid: Vec<u8>,
+}
+
+/// Every variant up to `FeeTooLow` is returned before anything is reserved or broadcast.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum BtcBroadcastTransactionError {
+    /// The caller has exceeded the call rate limit.
+    RateLimited(RateLimitError),
+    /// The provided II delegation chain is missing or failed verification.
+    InvalidDelegationChain { msg: String },
+    /// Not exactly one consensus-encoded transaction, no inputs or no outputs, a version other
+    /// than 1 or 2, or fewer than 65 bytes without the witnesses.
+    MalformedTransaction,
+    /// More than `MAX_BROADCAST_TX_BYTES`.
+    TransactionTooLarge,
+    /// More than `MAX_BROADCAST_TX_INPUTS`.
+    TooManyInputs,
+    /// More than `MAX_BROADCAST_TX_OUTPUTS`.
+    TooManyOutputs,
+    /// Two inputs spend the same outpoint.
+    DuplicateInputs,
+    /// A non-standard script, dust, or a malformed or second `OP_RETURN`.
+    InvalidOutput { index: u32 },
+    /// The lock time is not 0.
+    UnsupportedLockTime,
+    /// A non-empty `script_sig`, or a sequence with a BIP68 relative lock.
+    InvalidInput { index: u32 },
+    /// An input is not one of the caller's UTXOs with enough confirmations.
+    InvalidUtxos,
+    /// The witness is not a valid `SIGHASH_ALL` signature by the caller's key.
+    InvalidSignature { index: u32 },
+    /// The fee is below 1 sat/vB.
+    FeeTooLow,
+    /// Another pending transaction of the caller holds one of the inputs.
+    UtxosAlreadyReserved,
+    /// Another broadcast of the same transaction is still in flight.
+    BroadcastInProgress,
+    /// Nothing was broadcast, and the inputs this call reserved are free again.
+    BroadcastRejected { msg: String },
+    /// The transaction may have been broadcast. Its inputs stay reserved, and the same bytes may
+    /// be sent again.
+    BroadcastOutcomeUnknown { msg: String },
+    /// Server-side / unexpected
+    InternalError { msg: String },
 }

@@ -182,8 +182,8 @@ response and error types in `src/shared/src/types/bitcoin.rs`, result type in
 ```rust
 pub struct BtcBroadcastTransactionRequest {
     pub network: BitcoinNetwork,
-    /// Fully signed, consensus-serialized transaction.
-    pub transaction: Vec<u8>,
+    /// Fully signed, consensus-serialized transaction (a Candid `blob`).
+    pub transaction: ByteBuf,
     pub ii_delegation_chain: Option<IIDelegationChain>, // same type as `btc_add_pending_transaction`
 }
 
@@ -195,7 +195,8 @@ pub struct BtcBroadcastTransactionResponse {
 ```
 
 Use the same `#[serde(remote = "Self")]` validated-deserialize pattern as
-`BtcAddPendingTransactionRequest`, so an oversized `transaction` is refused at decode.
+`BtcAddPendingTransactionRequest`, so an oversized `transaction` is refused at decode. The
+`index` of `InvalidOutput`, `InvalidInput` and `InvalidSignature` is a `u32` (`nat32`).
 
 Errors (`BtcBroadcastTransactionError`): `RateLimited`, `InvalidDelegationChain { msg }`,
 `MalformedTransaction`, `TransactionTooLarge`, `TooManyInputs`, `TooManyOutputs`,
@@ -282,16 +283,21 @@ sequence with a BIP68 relative lock), `InvalidUtxos` (an input that is not the c
    `StoredPendingTransaction { txid: tx.compute_txid().to_byte_array().to_vec(), utxos: <the matched
 Utxo records>, created_at_timestamp_ns: now }`. In the same block, read and set the txid's
    [broadcast state](#broadcast-state-per-txid).
-   - **Same txid reuses its reservation.** If every input is already reserved by a pending
-     transaction with the **same txid**, skip the insert: a retry after an unclear outcome must not
-     be blocked by its own reservation. Whether it broadcasts again is decided by the broadcast
-     state. A different txid over any of those inputs is `UtxosAlreadyReserved`.
+   - **Same txid reuses its reservation.** If a pending transaction with the **same txid**
+     already reserves exactly these inputs (`has_same_txid_reservation`), skip the insert: a retry
+     after an unclear outcome must not be blocked by its own reservation. Whether it broadcasts
+     again is decided by the broadcast state. Otherwise, any reserved input is
+     `UtxosAlreadyReserved`, including a same-txid reservation over other UTXOs, which only a
+     mismatched `btc_add_pending_transaction` can create.
    - The call remembers whether it **inserted** the reservation or **reused** one. Step 10
      releases only a reservation the call inserted.
 10. `ic_cdk_bitcoin_canister::bitcoin_send_transaction(&SendTransactionRequest { network, transaction })`.
-    - `Ok` → state `Sent`, return the txid.
-    - **Definitive failure** (the call was never made, e.g. insufficient cycles, or the Bitcoin
-      canister rejected it: `CanisterReject`, such as a malformed transaction):
+    - `Ok`, or a reply that fails to decode → state `Sent`, return the txid.
+    - **Definitive failure**, per [open question 3](#open-questions-facts-to-confirm): the call was
+      never made (insufficient cycles, `call_perform` failed); the system rejected it before the
+      Bitcoin canister ran it (`SysFatal`, `SysTransient`, `DestinationInvalid`); or the Bitcoin
+      canister rejected it with its own error (`CanisterReject` whose message starts with
+      `send_transaction failed:`, which it returns only for a transaction it cannot decode):
       - If this call inserted the reservation in step 9: **remove it**, clear the state, and return
         `BroadcastRejected`.
       - If it reused a same-txid reservation: that reservation is older than this call, and
@@ -305,9 +311,14 @@ Utxo records>, created_at_timestamp_ns: now }`. In the same block, read and set 
       that txid can have gone out while it was reserved. An attempt whose reservation already
       expired is the pre-existing [1-hour expiry](#risks) case.
 
-    - **Anything else** (system errors, unknown outcome) → **keep the reservation** until the
-      usual prune, state `Unknown { attempts }`, and return `BroadcastOutcomeUnknown`. The frontend
-      may resend the same bytes.
+    - **Anything else** (a trap, any other `CanisterReject`, an unrecognized reject code) →
+      **keep the reservation** until the usual prune, state `Unknown { attempts }`, and return
+      `BroadcastOutcomeUnknown`. The frontend may resend the same bytes.
+
+    The classification is `broadcast_outcome` in `src/backend/src/bitcoin/api.rs`. Steps 9 and 10
+    are `begin_broadcast` and `finish_broadcast` in
+    `src/backend/src/bitcoin/broadcast_state_model.rs`, pure over the pending-transaction model
+    and the states, so the interleavings are unit-tested.
 
 #### Broadcast state per txid
 
@@ -336,7 +347,9 @@ another attempt relies on, whether that attempt is still running or came before 
 The state lives in heap memory, not stable memory, so `StoredPendingTransaction` does not change
 (stable state; see [Pending decisions](#pending-decisions-facts-are-clear--we-just-need-to-decide)).
 An entry is dropped with its reservation (prune or release), so the map never holds more entries
-than there are reservations. An upgrade clears the map, which allows at most
+than there are reservations. So every caller of `prune_pending_transactions` calls
+`retain_reserved_broadcasts` right after it, as `btc_add_pending_transaction` and
+`btc_get_pending_transactions` do since PR 3, and PR 4's `btc_get_spendable_utxos` must too. An upgrade clears the map, which allows at most
 `MAX_BROADCAST_ATTEMPTS` more paid broadcasts of a transaction whose inputs are still in the UTXO
 view. It does not release anything: a resend after the upgrade finds its reservation and reuses it,
 so a definitive failure keeps it.
@@ -941,9 +954,21 @@ Every PR is safe on its own.
      it as `Sent`);
    - `CallRejected` carries a reject code.
 
-   Still to confirm against the Bitcoin canister's source: which reject codes it returns only
-   before queueing the transaction, and so are safe to release. Per its interface specification,
-   one of them is `CanisterReject` for a malformed transaction.
+   **Answered in PR 3**, from `canister/src/api/send_transaction.rs` and `main.rs` in
+   `dfinity/bitcoin-canister` and the IC interface specification:
+   - The Bitcoin canister's `bitcoin_send_transaction` checks API access, the network and the
+     attached cycles (trapping, so `CanisterError`), decodes the transaction
+     (`msg_reject("send_transaction failed: MalformedTransaction")`, so `CanisterReject`), then
+     forwards it and traps if that fails. Every one of its rejects comes before the forwarding.
+     A trap can come before it or after it.
+   - `SYS_FATAL`, `SYS_TRANSIENT` and `DESTINATION_INVALID` come from the system before the callee
+     runs: a frozen, stopped or missing canister, a full queue. `SYS_UNKNOWN` only applies to
+     best-effort calls.
+   - Uninstalling a canister rejects its open call contexts with `CANISTER_REJECT` too. So a
+     `CanisterReject` is definitive only with the Bitcoin canister's own `send_transaction failed:`
+     message. The canister's decode check never fails for a transaction step 2 decoded, so in
+     practice a `CanisterReject` is the uninstall case, and so unknown.
+   - `CanisterError` stays unknown, since the trap after the forwarding cannot be told apart.
 
 4. **Regtest.** Confirm the local dfx Bitcoin setup accepts transactions broadcast by the backend
    (min confirmations is forced to 1 on regtest in `get_all_utxos`).

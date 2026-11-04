@@ -3,11 +3,13 @@ use std::sync::LazyLock;
 use candid::Principal;
 use ic_cdk_bitcoin_canister::{Network as BitcoinNetwork, OutPoint, Txid, Utxo};
 use pretty_assertions::assert_eq;
+use serde_bytes::ByteBuf;
 use shared::types::{
     bitcoin::{
         BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
-        BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
-        BtcGetPendingTransactionsRequest,
+        BtcBroadcastTransactionError, BtcBroadcastTransactionRequest,
+        BtcBroadcastTransactionResponse, BtcGetPendingTransactionsError,
+        BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsRequest, MAX_BROADCAST_TX_BYTES,
     },
     signer::RateLimitError,
 };
@@ -453,4 +455,150 @@ fn test_btc_get_pending_transactions_rate_limit_is_per_caller() {
         !matches!(result, Err(BtcGetPendingTransactionsError::RateLimited(_))),
         "caller_b should not be rate-limited: {result:?}"
     );
+}
+
+// -------------------------------------------------------------------------------------------------
+// - btc_broadcast_transaction
+// -------------------------------------------------------------------------------------------------
+// PocketIC's Bitcoin canister has no UTXOs, so these cover what runs before the UTXO fetch: the
+// guards, the delegation check, the rate limit and the decoding. The validation, reservation and
+// broadcast-state rules are unit-tested in `tx_validator.rs` and `broadcast_state_model.rs`.
+
+type BtcBroadcastTransactionResult =
+    Result<BtcBroadcastTransactionResponse, BtcBroadcastTransactionError>;
+
+fn broadcast_request(transaction: Vec<u8>) -> BtcBroadcastTransactionRequest {
+    BtcBroadcastTransactionRequest {
+        network: BitcoinNetwork::Regtest,
+        transaction: ByteBuf::from(transaction),
+        ii_delegation_chain: None,
+    }
+}
+
+fn call_btc_broadcast_transaction(
+    pic_setup: &crate::utils::pocketic::PicBackend,
+    caller: Principal,
+    request: BtcBroadcastTransactionRequest,
+) -> Result<BtcBroadcastTransactionResult, String> {
+    pic_setup.update::<BtcBroadcastTransactionResult>(caller, "btc_broadcast_transaction", request)
+}
+
+#[test]
+fn test_broadcast_transaction_requires_registered_user() {
+    let pic_setup = setup();
+
+    for caller in [
+        Principal::anonymous(),
+        Principal::from_text(CALLER).unwrap(),
+    ] {
+        let response =
+            call_btc_broadcast_transaction(&pic_setup, caller, broadcast_request(vec![0xde]));
+        assert!(response.is_err(), "{caller} must be rejected by the guard");
+    }
+}
+
+#[test]
+fn test_broadcast_transaction_enforces_guard_under_production_config() {
+    let pic_setup = setup_with_production_config();
+    let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
+
+    let response =
+        call_btc_broadcast_transaction(&pic_setup, caller, broadcast_request(vec![0xde]))
+            .expect("Canister call failed");
+
+    assert!(
+        matches!(
+            response,
+            Err(BtcBroadcastTransactionError::InvalidDelegationChain { .. })
+        ),
+        "Guard is enforced in production, expected InvalidDelegationChain: {response:?}"
+    );
+}
+
+#[test]
+fn test_broadcast_transaction_controller_bypasses_delegation_check() {
+    let pic_setup = setup_with_production_config();
+    pic_setup.ensure_user_profile(controller());
+
+    let response =
+        call_btc_broadcast_transaction(&pic_setup, controller(), broadcast_request(vec![0xde]))
+            .expect("Canister call failed");
+
+    assert_eq!(
+        response,
+        Err(BtcBroadcastTransactionError::MalformedTransaction)
+    );
+}
+
+#[test]
+fn test_broadcast_transaction_refuses_bytes_that_are_not_a_transaction() {
+    let pic_setup = setup();
+    // The controller skips the delegation check, so the call reaches the decoding.
+    let caller = controller();
+    pic_setup.ensure_user_profile(caller);
+
+    let response =
+        call_btc_broadcast_transaction(&pic_setup, caller, broadcast_request(vec![0xde, 0xad]))
+            .expect("Canister call failed");
+
+    assert_eq!(
+        response,
+        Err(BtcBroadcastTransactionError::MalformedTransaction)
+    );
+}
+
+#[test]
+fn test_broadcast_transaction_refuses_an_oversized_transaction_at_decode() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
+
+    let response = call_btc_broadcast_transaction(
+        &pic_setup,
+        caller,
+        broadcast_request(vec![0; MAX_BROADCAST_TX_BYTES + 1]),
+    );
+
+    let err = response.expect_err("an oversized transaction must not decode");
+    assert!(
+        err.contains("Transaction has too many bytes"),
+        "unexpected rejection: {err}"
+    );
+}
+
+/// Calling `btc_broadcast_transaction` more than 10 times within a minute must return
+/// `BtcBroadcastTransactionError::RateLimited`.
+#[test]
+fn test_btc_broadcast_transaction_rate_limited_after_exceeding_limit() {
+    let pic_setup = setup();
+    // The controller skips the delegation check, so each allowed call reaches the decoding.
+    let caller = controller();
+    pic_setup.ensure_user_profile(caller);
+
+    for i in 0..10 {
+        let result =
+            call_btc_broadcast_transaction(&pic_setup, caller, broadcast_request(vec![0xde]))
+                .expect("Canister call failed");
+        assert_eq!(
+            result,
+            Err(BtcBroadcastTransactionError::MalformedTransaction),
+            "call {i} should not be rate-limited"
+        );
+    }
+
+    let result = call_btc_broadcast_transaction(&pic_setup, caller, broadcast_request(vec![0xde]))
+        .expect("Canister call failed");
+    match result {
+        Err(BtcBroadcastTransactionError::RateLimited(RateLimitError {
+            max_calls,
+            window_ns,
+            caller: err_caller,
+        })) => {
+            assert_eq!(max_calls, 10);
+            assert_eq!(window_ns, 60 * 1_000_000_000);
+            assert_eq!(err_caller, caller);
+        }
+        other => panic!("expected BtcBroadcastTransactionError::RateLimited, got {other:?}"),
+    }
 }

@@ -4,10 +4,12 @@ mod bitcoin {
     //! Tests for the bitcoin types.
     use candid::{Decode, Encode};
     use ic_cdk_bitcoin_canister::{Network as BitcoinNetwork, OutPoint, Txid, Utxo};
+    use serde_bytes::ByteBuf;
 
     use crate::{
         types::bitcoin::{
-            BtcAddPendingTransactionRequest, PendingTransaction, MAX_TXID_BYTES, MAX_UTXOS_LEN,
+            BtcAddPendingTransactionRequest, BtcBroadcastTransactionRequest, PendingTransaction,
+            MAX_BROADCAST_TX_BYTES, MAX_TXID_BYTES, MAX_UTXOS_LEN,
         },
         validate::{test_validate_on_deserialize, TestVector, Validate},
     };
@@ -109,6 +111,30 @@ mod bitcoin {
                         };
                         MAX_UTXOS_LEN + 1
                     ],
+                },
+                valid: false,
+            },
+        ]
+    );
+
+    test_validate_on_deserialize!(
+        BtcBroadcastTransactionRequest,
+        [
+            TestVector {
+                description: "BtcBroadcastTransactionRequest with a transaction at the size cap",
+                input: BtcBroadcastTransactionRequest {
+                    network: BitcoinNetwork::Mainnet,
+                    transaction: ByteBuf::from(vec![0; MAX_BROADCAST_TX_BYTES]),
+                    ii_delegation_chain: None,
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "BtcBroadcastTransactionRequest with a transaction above the size cap",
+                input: BtcBroadcastTransactionRequest {
+                    network: BitcoinNetwork::Mainnet,
+                    transaction: ByteBuf::from(vec![0; MAX_BROADCAST_TX_BYTES + 1]),
+                    ii_delegation_chain: None,
                 },
                 valid: false,
             },

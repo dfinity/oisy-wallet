@@ -32,6 +32,12 @@ thread_local! {
     pub(crate) static BTC_ADD_PENDING_TX_RATE_LIMITER: RateLimiter =
         RateLimiter::new(10, 60 * 1_000_000_000);
 
+    /// Rate-limits `btc_broadcast_transaction`: max 10 calls per caller per minute. A call can
+    /// pay for a `bitcoin_get_utxos` and a `bitcoin_send_transaction` from the backend's own
+    /// cycles.
+    pub(crate) static BTC_BROADCAST_TX_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(10, 60 * 1_000_000_000);
+
     /// Rate-limits `btc_get_pending_transactions`: max 15 calls per caller per minute.
     pub(crate) static BTC_GET_PENDING_TX_RATE_LIMITER: RateLimiter =
         RateLimiter::new(15, 60 * 1_000_000_000);
