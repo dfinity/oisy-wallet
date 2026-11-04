@@ -1,7 +1,9 @@
 import { BASE_NETWORK, BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { CBBTC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.cbbtc.env';
 import { EURC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.eurc.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
+import { WETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.weth.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import {
 	UNISWAP_COMMANDS,
@@ -450,11 +452,19 @@ describe('uniswap.utils', () => {
 					values: [recipient, 1_087_807n, 1_010_000n, tokens, true, []]
 				});
 
-			it('should describe an exact output through tokens OISY lists by default', () => {
-				const weth = { ...USDC_TOKEN, address: WETH, symbol: 'WETH', decimals: 18 };
-				const data = execute({ commands: [v2Swap({ path: [EURC, WETH, USDC] })] });
+			const listed = [EURC_TOKEN, USDC_TOKEN, WETH_TOKEN, CBBTC_TOKEN];
+			const CBBTC = CBBTC_TOKEN.address;
 
-				expect(getUniswapSwap(params({ data, tokens: [EURC_TOKEN, USDC_TOKEN, weth] }))).toEqual(
+			it.each([
+				{ case: 'through tokens OISY lists by default', path: [EURC, WETH, USDC] },
+				{
+					case: 'back through a token it passed, by other pairs',
+					path: [EURC, WETH, CBBTC, EURC, USDC]
+				}
+			])('should describe an exact output $case', ({ path }) => {
+				const data = execute({ commands: [v2Swap({ path })] });
+
+				expect(getUniswapSwap(params({ data, tokens: listed }))).toEqual(
 					expect.objectContaining({
 						paid: { token: EURC_TOKEN, amount: 1_010_000n, atMost: true },
 						received: { token: USDC_TOKEN, amount: 1_087_807n }
@@ -472,6 +482,16 @@ describe('uniswap.utils', () => {
 					case: 'through a token OISY does not list',
 					path: [EURC, UNLISTED, USDC],
 					tokens: [EURC_TOKEN, USDC_TOKEN]
+				},
+				{
+					case: 'through a pair it visits twice',
+					path: [EURC, USDC, WETH, EURC, USDC],
+					tokens: listed
+				},
+				{
+					case: 'through a pair it visits twice, the other way round',
+					path: [EURC, USDC, WETH, USDC],
+					tokens: listed
 				}
 			])('should not describe an exact output paying the wallet $case', ({ path, tokens }) => {
 				const data = execute({ commands: [v2Swap({ path })] });
@@ -479,26 +499,39 @@ describe('uniswap.utils', () => {
 				expect(getUniswapSwap(params({ data, tokens }))).toBeUndefined();
 			});
 
-			it('should describe an exact output into the router, whose sweep checks what arrived', () => {
-				const eurc = { ...EURC_TOKEN, category: 'custom' as const };
+			it.each([
+				{
+					case: 'from a token the user added, through one OISY does not list',
+					path: [EURC, UNLISTED, USDC],
+					tokens: [{ ...EURC_TOKEN, category: 'custom' as const }, USDC_TOKEN]
+				},
+				{
+					case: 'through a pair it visits twice',
+					path: [EURC, USDC, WETH, EURC, USDC],
+					tokens: listed
+				}
+			])(
+				'should describe an exact output into the router $case, whose sweep checks what arrived',
+				({ path, tokens }) => {
+					const data = execute({
+						commands: [
+							v2Swap({ recipient: UNISWAP_RECIPIENT_ROUTER, path }),
+							sweep({ amountMin: 1_087_807n })
+						]
+					});
 
-				const data = execute({
-					commands: [
-						v2Swap({ recipient: UNISWAP_RECIPIENT_ROUTER, path: [EURC, UNLISTED, USDC] }),
-						sweep({ amountMin: 1_087_807n })
-					]
-				});
+					expect(getUniswapSwap(params({ data, tokens }))?.received).toEqual({
+						token: USDC_TOKEN,
+						amount: 1_087_807n
+					});
+				}
+			);
 
-				expect(getUniswapSwap(params({ data, tokens: [eurc, USDC_TOKEN] }))?.received).toEqual({
-					token: USDC_TOKEN,
-					amount: 1_087_807n
-				});
-			});
-
-			it('should describe an exact input paying the wallet through any token', () => {
-				const data = execute({
-					commands: [v2Swap({ exactInput: true, path: [EURC, UNLISTED, USDC] })]
-				});
+			it.each([
+				{ case: 'through any token', path: [EURC, UNLISTED, USDC] },
+				{ case: 'through a pair it visits twice', path: [EURC, USDC, WETH, EURC, USDC] }
+			])('should describe an exact input paying the wallet $case', ({ path }) => {
+				const data = execute({ commands: [v2Swap({ exactInput: true, path })] });
 
 				expect(getUniswapSwap(params({ data }))?.received).toEqual({
 					token: USDC_TOKEN,

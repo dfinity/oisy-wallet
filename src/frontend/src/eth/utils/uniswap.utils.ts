@@ -567,11 +567,25 @@ const readCommand = ({
 			}
 
 			// Nothing checks what an exact output delivers: each hop gives what reached its pair, which
-			// comes to `amount` only if every token on the path transfers in full. Into the router, a later
+			// comes to `amount` only if every token on the path transfers in full, and no pair comes twice:
+			// the router prices every hop from the reserves before the swap. Into the router, a later
 			// command's minimum checks what arrived.
 			if (!exactInput && party(recipient).kind !== 'router') {
-				for (const token of path) {
-					plan.mustTransferInFull.add(token.toLowerCase());
+				const pairs = new Set<string>();
+
+				for (let index = 0; index < path.length; index++) {
+					const token = path[index].toLowerCase();
+					plan.mustTransferInFull.add(token);
+
+					if (index > 0) {
+						const pair = [path[index - 1].toLowerCase(), token].sort().join(':');
+
+						if (pairs.has(pair)) {
+							return false;
+						}
+
+						pairs.add(pair);
+					}
 				}
 			}
 
