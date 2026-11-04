@@ -73,9 +73,13 @@ All of the following hold; otherwise the review stays exactly as it is today for
 8. OISY lists every token the review names (paid, received, fee and approved tokens) on that
    network, enabled or not, by default or because the user added it. A native coin is the
    network's own.
-9. The received token is not one the user added. Every minimum but a V2 exact input's is checked
-   on what the router or a pool sends, and such a token may keep part of each transfer. The tokens
-   OISY lists by default are taken to transfer in full.
+9. The received token is not one the user added. Every minimum but a V2 exact input's is checked,
+   if at all, on what the router or a pool sends, and such a token may keep part of each transfer.
+   The tokens OISY lists by default are taken to transfer in full.
+10. Every token on the path of a V2 exact-output swap that pays anyone but the router is one OISY
+    lists by default. Nothing checks what such a swap delivers: each hop gives what reached its
+    pair, which comes to the swap's amount only if every token on the path transfers in full. Into
+    the router, a later command's minimum checks what arrived.
 
 ### Pinned routers
 
@@ -227,8 +231,9 @@ Only from checks the router enforces:
 10. A V4 swap (`SWAP_EXACT_IN` with `SETTLE` and a `TAKE` of the whole amount to the wallet):
     described, with the V4 swap's minimum output as the minimum.
 11. A plan with `EXECUTE_SUB_PLAN`, a token OISY doesn't list, a received token the user added,
-    two paid tokens, a value with bits beyond its type, or a 2.0.0 layout sent to a 2.1.x router
-    (or the reverse): unknown.
+    a V2 exact output paying the wallet from or through a token OISY doesn't list by default, two
+    paid tokens, a value with bits beyond its type, or a 2.0.0 layout sent to a 2.1.x router (or
+    the reverse): unknown.
 12. An exact-output swap the wallet pays for: "You pay at most" its maximum input. One the router
     pays out of a `PERMIT2_TRANSFER_FROM` or the native value, or that a V4 `SETTLE` of a stated
     amount pays: "You pay" that amount.

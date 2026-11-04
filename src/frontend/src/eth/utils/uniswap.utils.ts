@@ -64,6 +64,8 @@ interface UniswapPlan {
 	approvals: { token: string; amount: bigint; expiration: bigint }[];
 	// Whether the router pulls only what the swaps take, which `pulled` caps.
 	atMost: boolean;
+	// The lowercased tokens a stated minimum holds only if they transfer in full.
+	mustTransferInFull: Set<string>;
 }
 
 interface UniswapReader {
@@ -564,6 +566,15 @@ const readCommand = ({
 				return false;
 			}
 
+			// Nothing checks what an exact output delivers: each hop gives what reached its pair, which
+			// comes to `amount` only if every token on the path transfers in full. Into the router, a later
+			// command's minimum checks what arrived.
+			if (!exactInput && party(recipient).kind !== 'router') {
+				for (const token of path) {
+					plan.mustTransferInFull.add(token.toLowerCase());
+				}
+			}
+
 			return swap({
 				reader,
 				recipient,
@@ -752,10 +763,13 @@ const toSwap = ({
 		return;
 	}
 
-	// Every minimum but a V2 exact input's is checked on what the router or a pool sends. A token the
-	// user added may keep part of each transfer, so what arrives of it is no amount OISY can state.
-	// The tokens OISY lists by default are taken to transfer in full.
-	if (received.category === 'custom') {
+	// Every minimum but a V2 exact input's is checked, if at all, on what the router or a pool sends. A
+	// token the user added may keep part of each transfer, so what arrives of it is no amount OISY can
+	// state. The tokens OISY lists by default are taken to transfer in full.
+	if (
+		received.category === 'custom' ||
+		[...plan.mustTransferInFull].some((token) => resolveToken(token)?.category !== 'default')
+	) {
 		return;
 	}
 
@@ -849,7 +863,14 @@ export const getUniswapSwap = ({
 	}
 
 	const reader: UniswapReader = {
-		plan: { pulled: new Map(), deliveries: [], fees: [], approvals: [], atMost: false },
+		plan: {
+			pulled: new Map(),
+			deliveries: [],
+			fees: [],
+			approvals: [],
+			atMost: false,
+			mustTransferInFull: new Set()
+		},
 		party: (address) => toParty({ address, wallet, router: router.address }),
 		layouts: UNISWAP_LAYOUTS[router.version],
 		router

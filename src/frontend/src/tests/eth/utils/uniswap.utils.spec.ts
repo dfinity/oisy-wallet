@@ -432,6 +432,81 @@ describe('uniswap.utils', () => {
 			);
 		});
 
+		// Nothing checks what a V2 exact output delivers: it comes to its amount only if every token on
+		// the path transfers in full. A V2 exact input is checked at the recipient.
+		describe('a V2 path', () => {
+			const v2Swap = ({
+				exactInput = false,
+				recipient = WALLET,
+				path: tokens
+			}: {
+				exactInput?: boolean;
+				recipient?: string;
+				path: string[];
+			}) =>
+				encode({
+					type: exactInput ? UNISWAP_COMMANDS.V2_SWAP_EXACT_IN : UNISWAP_COMMANDS.V2_SWAP_EXACT_OUT,
+					types: V2_SWAP,
+					values: [recipient, 1_087_807n, 1_010_000n, tokens, true, []]
+				});
+
+			it('should describe an exact output through tokens OISY lists by default', () => {
+				const weth = { ...USDC_TOKEN, address: WETH, symbol: 'WETH', decimals: 18 };
+				const data = execute({ commands: [v2Swap({ path: [EURC, WETH, USDC] })] });
+
+				expect(getUniswapSwap(params({ data, tokens: [EURC_TOKEN, USDC_TOKEN, weth] }))).toEqual(
+					expect.objectContaining({
+						paid: { token: EURC_TOKEN, amount: 1_010_000n, atMost: true },
+						received: { token: USDC_TOKEN, amount: 1_087_807n }
+					})
+				);
+			});
+
+			it.each([
+				{
+					case: 'from a token the user added',
+					path: [EURC, USDC],
+					tokens: [{ ...EURC_TOKEN, category: 'custom' as const }, USDC_TOKEN]
+				},
+				{
+					case: 'through a token OISY does not list',
+					path: [EURC, UNLISTED, USDC],
+					tokens: [EURC_TOKEN, USDC_TOKEN]
+				}
+			])('should not describe an exact output paying the wallet $case', ({ path, tokens }) => {
+				const data = execute({ commands: [v2Swap({ path })] });
+
+				expect(getUniswapSwap(params({ data, tokens }))).toBeUndefined();
+			});
+
+			it('should describe an exact output into the router, whose sweep checks what arrived', () => {
+				const eurc = { ...EURC_TOKEN, category: 'custom' as const };
+
+				const data = execute({
+					commands: [
+						v2Swap({ recipient: UNISWAP_RECIPIENT_ROUTER, path: [EURC, UNLISTED, USDC] }),
+						sweep({ amountMin: 1_087_807n })
+					]
+				});
+
+				expect(getUniswapSwap(params({ data, tokens: [eurc, USDC_TOKEN] }))?.received).toEqual({
+					token: USDC_TOKEN,
+					amount: 1_087_807n
+				});
+			});
+
+			it('should describe an exact input paying the wallet through any token', () => {
+				const data = execute({
+					commands: [v2Swap({ exactInput: true, path: [EURC, UNLISTED, USDC] })]
+				});
+
+				expect(getUniswapSwap(params({ data }))?.received).toEqual({
+					token: USDC_TOKEN,
+					amount: 1_010_000n
+				});
+			});
+		});
+
 		it('should describe tokens pulled into the router and swapped from there', () => {
 			const data = execute({
 				commands: [
