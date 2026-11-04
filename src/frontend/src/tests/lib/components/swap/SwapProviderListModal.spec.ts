@@ -58,7 +58,7 @@ describe('SwapProviderListModal', () => {
 	});
 
 	it('shows the selected offer with its details above the offers', () => {
-		const { getByTestId } = render(SwapProviderListModal, {
+		const { container, getByTestId } = render(SwapProviderListModal, {
 			context: mockContext
 		});
 
@@ -66,9 +66,12 @@ describe('SwapProviderListModal', () => {
 
 		expect(details).toHaveTextContent(get(i18n).swap.text.smart_swap_selected_offer);
 		expect(details).toHaveTextContent('ICP Swap');
-		expect(details).toHaveTextContent(get(i18n).swap.text.best_rate);
-		// Each offer row already shows its website.
+		// Each offer row already shows its website and Best Rate.
 		expect(details).not.toHaveTextContent('icpswap.com');
+		expect(details).not.toHaveTextContent(get(i18n).swap.text.best_rate);
+		expect(container.querySelector('[data-testid="provider-item"]')).toHaveTextContent(
+			get(i18n).swap.text.best_rate
+		);
 	});
 
 	it('goes back instead of pinning the offer already in use', async () => {

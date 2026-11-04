@@ -45,10 +45,6 @@
 
 	// Below one cent the gain line would read "+$0.00"; the offer count says more.
 	const MIN_DISPLAYED_GAIN_USD = 0.01;
-	const SMART_SWAP_SLASH_DURATION = 1100;
-	// `PillButton`'s sweep curve. `MOTION_EASE_OUT_CSS` would carry the band across the title in the
-	// first quarter and spend the rest of the time past its end.
-	const SMART_SWAP_SLASH_EASING = 'cubic-bezier(0.4, 0, 0.2, 1)';
 
 	const { store: swapAmountsStore, activity } =
 		getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
@@ -223,34 +219,6 @@
 				? resolveText({ i18n: $i18n, path: swapDApp.name })
 				: ''
 	);
-
-	// The signature moment: when a foreground round confirms the automatic pick as the best of two
-	// or more offers, a band of brand blue crosses the title once, on the frame the provider plays
-	// its confirmation. A remount (back from Review, the sm/md breakpoint) inherits the confirmation
-	// it is mounted with, as `SwapProviderAnimation` does, so only a later one plays. The title is
-	// plain text before and after, and stays plain under reduced motion.
-	let title = $state<HTMLSpanElement | undefined>();
-	let slashing = $state(false);
-	let lastSlashedConfirmationId = untrack(() => confirmationId);
-	$effect(() => {
-		const confirmation = confirmationId;
-		if (isNullish(confirmation) || confirmation === lastSlashedConfirmationId) {
-			return;
-		}
-		lastSlashedConfirmationId = confirmation;
-		untrack(() => {
-			if (prefersReducedMotion.current || offerCount < 2 || !isBestRate || isNullish(title)) {
-				return;
-			}
-			slashing = true;
-			const animation = title.animate(
-				[{ backgroundPosition: '100% 0' }, { backgroundPosition: '0% 0' }],
-				{ duration: SMART_SWAP_SLASH_DURATION, easing: SMART_SWAP_SLASH_EASING }
-			);
-			animation.onfinish = () => (slashing = false);
-			animation.oncancel = () => (slashing = false);
-		});
-	});
 </script>
 
 {#if isForm}
@@ -265,36 +233,36 @@
 	<div class:pb-3={isForm} transition:slide>
 		<div transition:fly={{ y: 4 }}>
 			{#if isForm}
-				<!-- A grey card like the amount cards' fill, on the content edges like the message boxes
-				and the fee row, with the faintest border so the form stays light. It takes the rows'
-				blue on hover and press, only while it can be tapped; while a foreground round
-				compares, a band of that blue runs through it instead (`smart-thinking`). -->
+				<!-- A grey card like the amount cards (`TokenInput`: fill, faintest border, radius), on the
+				content edges like the message boxes and the fee row, so the form stays light. It takes the rows'
+				blue on hover and press, only while it can be tapped. -->
 				<button
-					class="mb-3 flex w-full items-center gap-3 rounded-xl border border-tertiary bg-secondary px-4 py-3 text-left press disabled:cursor-default"
+					class="relative mb-3 flex w-full items-center gap-3 rounded-lg border border-tertiary bg-secondary px-4 py-3 text-left press disabled:cursor-default"
 					class:hover:bg-brand-subtle-10={interactive}
 					class:pressed:bg-brand-subtle-20={interactive}
-					class:smart-thinking={comparing}
 					data-tid={SWAP_PROVIDER_CELL}
 					disabled={!interactive}
 					onclick={() => onShowProviderList?.()}
 					type="button"
 				>
+					<span class="smart-beam" class:beaming={comparing} aria-hidden="true"><span></span></span>
 					<!-- Typography of the app's list rows (`LogoButton`, as in the offers list): title and
 					provider `text-lg font-bold`, the lines under them `text-sm text-tertiary`. The title
 					sets the column's minimum width; the line under it truncates first. A single offer
 					drops the line with its height (see `compact`), so the gap above it is its padding. -->
 					<span class="flex flex-auto flex-col">
-						<span
-							bind:this={title}
-							class="text-lg font-bold whitespace-nowrap text-primary"
-							class:smart-slash={slashing}>{$i18n.swap.text.smart_swap}</span
+						<span class="text-lg font-bold whitespace-nowrap text-primary"
+							>{$i18n.swap.text.smart_swap}</span
 						>
 						{#if !compact}
 							<span class="flex w-0 min-w-full pt-0.5 text-sm whitespace-nowrap" transition:slide>
 								{#if comparingLayout}
+									<!-- While a foreground round compares, a light band runs through the status, the
+									way a thinking line does; it never gets lighter than the tertiary text. -->
 									<span
 										class="truncate text-tertiary transition-opacity duration-150 ease-in motion-reduce:duration-100"
 										class:opacity-0={!comparing}
+										class:smart-thinking={comparing}
 										aria-hidden="true"
 										in:fade={labelIn}>{$i18n.swap.text.finding_best_rate}</span
 									>
@@ -400,34 +368,26 @@
 {/if}
 
 <style lang="scss">
-	// The band rides on the glyphs (`background-clip: text`), so the title keeps its box, its
-	// accessible text and its colour on either side of the band. Logo blue on the edges, the
-	// lighter brand blue in the core where the theme has one.
-	.smart-slash {
+	.smart-thinking {
 		background: linear-gradient(
-				110deg,
-				var(--color-foreground-primary) 0 40%,
-				var(--color-foreground-brand-primary) 46%,
-				var(--color-foreground-brand-primary-alt) 50%,
-				var(--color-foreground-brand-primary) 54%,
-				var(--color-foreground-primary) 60% 100%
+				90deg,
+				var(--color-foreground-tertiary) 0 35%,
+				var(--color-foreground-primary) 50%,
+				var(--color-foreground-tertiary) 65% 100%
 			)
-			100% 0 / 250% 100%;
+			0 0 / 300% 100%;
 		-webkit-background-clip: text;
 		background-clip: text;
 		color: transparent;
-	}
 
-	// Only the image: the band is laid over the card's own grey, which shows on either side of it.
-	.smart-thinking {
-		background-image: linear-gradient(
-			110deg,
-			transparent 35%,
-			var(--color-background-brand-subtle-10) 50%,
-			transparent 65%
-		);
-		background-size: 300% 100%;
-		animation: smart-thinking 1600ms linear infinite;
+		@media (prefers-reduced-motion: no-preference) {
+			animation: smart-thinking 1600ms linear infinite;
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			background: none;
+			color: var(--color-foreground-tertiary);
+		}
 	}
 
 	@keyframes smart-thinking {
@@ -439,10 +399,67 @@
 		}
 	}
 
-	@media (prefers-reduced-motion: reduce) {
-		.smart-thinking {
-			animation: none;
-			background-image: none;
+	// While a foreground round compares, a beam of logo blue with a long, lighter tail travels round
+	// the card's border, a lap every 3.6 s, over its 1 px grey border. Calm on purpose: it fades in
+	// after 120 ms (a quick round never flashes it) over 500 ms, and out over 600 ms; between rounds
+	// the beam holds still where it is and the next round carries on from there, so it never jumps
+	// back to the start. It turns by `rotate` on an oversized square behind a ring-shaped mask, which
+	// the compositor can animate. Under reduced motion the ring is a still, faint blue.
+	.smart-beam {
+		position: absolute;
+		inset: -1.5px;
+		padding: 1.5px;
+		overflow: hidden;
+		border-radius: inherit;
+		pointer-events: none;
+		opacity: 0;
+		-webkit-mask:
+			linear-gradient(#000 0 0) content-box,
+			linear-gradient(#000 0 0);
+		-webkit-mask-composite: xor;
+		mask:
+			linear-gradient(#000 0 0) content-box,
+			linear-gradient(#000 0 0);
+		mask-composite: exclude;
+		transition: opacity 600ms cubic-bezier(0.23, 1, 0.32, 1);
+
+		span {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			width: 200%;
+			aspect-ratio: 1;
+			translate: -50% -50%;
+			background: conic-gradient(
+				transparent 0 45%,
+				color-mix(in srgb, var(--color-foreground-brand-primary-alt) 30%, transparent) 72%,
+				var(--color-foreground-brand-primary) 92%,
+				transparent 100%
+			);
+			animation: smart-beam 3600ms linear infinite paused;
+		}
+
+		&.beaming {
+			opacity: 1;
+			transition-duration: 500ms;
+			transition-delay: 120ms;
+
+			span {
+				animation-play-state: running;
+			}
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			span {
+				animation: none;
+				background: var(--color-border-brand-subtle-20);
+			}
+		}
+	}
+
+	@keyframes smart-beam {
+		to {
+			rotate: 1turn;
 		}
 	}
 </style>

@@ -412,16 +412,20 @@ replay from a completed snapshot, review remount, manual selection or periodic r
 remounted across the sm/md breakpoint inherits the confirmation it mounts with, so it does not
 squeeze again.
 
-The form cell has one signature moment on top of that squeeze. When the confirmation is the best of
-two or more offers, a band of brand blue crosses the "OISY Smart Swap" title once (`smart-slash`:
-a 110° gradient of `foreground-primary` and `foreground-brand-primary` / `-primary-alt`, clipped
-to the glyphs, animated on `background-position` for 1100 ms with `PillButton`'s
-`cubic-bezier(0.4, 0, 0.2, 1)`). It follows the same rules as the squeeze: no replay on a remount,
-nothing on a background refresh, a manual pick or a single offer, and nothing under reduced
-motion. While a foreground round compares, a band of `brand-subtle-10` runs over the card's grey
-fill (`smart-thinking`: a `background-image` only, 110°, 300 % wide, 1600 ms linear loop), so the
-card thinks and the status stays plain text; reduced motion drops the band. Both are
-scoped styles in `SwapProvider`; the title and the status stay real text.
+The form cell's thinking lives in the comparison, not the result: the confirmation plays only
+the squeeze, with no colour effect on the title (a brand-blue sweep across it was tried and
+dropped). While a foreground round compares, the status line runs a 1600 ms "thinking" band
+(`smart-thinking`) from `foreground-tertiary` to `foreground-primary` and back, never lighter
+than the plain line, and a beam travels round the card's border (`smart-beam`): a conic
+gradient of `foreground-brand-primary` with a long `-primary-alt` tail (`color-mix`, 30 %), a lap
+every 3.6 s, 1.5 px over the 1 px grey border, shown through a ring-shaped mask and turned by
+`rotate` on an oversized square so the compositor animates it. It reads on the one-row card as
+well, where a glow pooled under the status line (tried and dropped) had nothing to sit under. It
+is kept calm: it fades in over 500 ms after a 120 ms delay, so a quick round never flashes it, and
+out over 600 ms; between rounds the beam pauses where it is and the next round carries on from
+there instead of jumping to the start. Under reduced motion the line is plain and the ring is a
+still `border-brand-subtle-20`. Both are scoped styles in `SwapProvider`; the title and the
+status stay real text.
 
 Foreground activity starts when the coordinator queues the round, before its 300 ms debounce,
 and keeps one request identity through pricing. Track the source/destination `TokenId` values,
@@ -464,15 +468,17 @@ Do not apply this quote budget to swap execution, signing, deposit validity or a
 
 The five swap forms opt into this presentation with `SwapProvider isForm`; review/default
 callers retain the static provider label. In a form, Smart Swap is a grey card under the two
-amount cards, in their fill (`bg-secondary`) with the faintest border (`border-tertiary`), so the
-form stays light, on the content edges like the message boxes and the fee row: `rounded-xl px-4
-py-3`. It takes the rows' blue on hover (`brand-subtle-10`) and while pressed (`brand-subtle-20`,
+amount cards and styled as they are (`TokenInput`: `bg-secondary`, the faintest border
+`border-tertiary`, `rounded-lg`), so the form stays light, on the content edges like the message
+boxes and the fee row, with `px-4 py-3`. It takes the rows' blue on hover (`brand-subtle-10`) and while pressed (`brand-subtle-20`,
 with `press`), as `TokenGroupCard` does, only while it can be tapped. A blue tint was tried and
 dropped: the `text-tertiary` line on it fell to 4.07:1. Its type is the app's list row (`LogoButton`, as in the offers list): the
 title and the provider name `text-lg font-bold`, the line under the title `text-sm
 text-tertiary`. It has no Best Rate badge: the line already says the pick beat the other quotes,
 and by how much. It is one `<button>` that opens the provider step (`onShowProviderList`): the selected offer's
-details in a grey `bg-secondary` card on top (not the rows' hover tint, as it is not tappable),
+details on top, in the form's Smart Swap card (`rounded-lg border border-tertiary bg-secondary
+px-4 py-3`, without the website or Best Rate each row already shows), so the step opens on the
+card that was tapped,
 every offer below. The card is the one mark of the pick, so the rows carry no check, and with a
 single offer the card is the whole step, with no list and no Best Rate. Tapping the offer in use only goes back:
 `setManualProvider` would pin the automatic pick, and a better offer in the next round could no

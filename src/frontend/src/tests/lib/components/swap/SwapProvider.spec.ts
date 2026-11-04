@@ -121,16 +121,17 @@ describe('SwapProvider form cell', () => {
 		expect(getByTestId(SWAP_PROVIDER_CELL).nextElementSibling).toBe(separator);
 	});
 
-	it("runs the thinking shimmer on the card's fill only while a foreground round compares", async () => {
+	it('runs the thinking shimmer and the border beam only while a foreground round compares', async () => {
 		activity.start({ requestId: 30, background: false });
 		activity.addProvider({ requestId: 30, provider: SwapProvider.ICP_SWAP });
 		const { getByTestId, getByText } = render(SwapProviderHeader, { props, context });
 		await tick();
 
-		expect(getByTestId(SWAP_PROVIDER_CELL)).toHaveClass('smart-thinking');
-		expect(getByText(en.swap.text.finding_best_rate, visibleOnly)).not.toHaveClass(
-			'smart-thinking'
-		);
+		const beam = getByTestId(SWAP_PROVIDER_CELL).querySelector('.smart-beam');
+
+		expect(getByText(en.swap.text.finding_best_rate, visibleOnly)).toHaveClass('smart-thinking');
+		expect(beam).toHaveClass('beaming');
+		expect(beam).toHaveAttribute('aria-hidden', 'true');
 
 		store.setSwaps({ swaps: [offer], selectedProvider: offer, amountForSwap: '1' });
 		activity.complete({ requestId: 30 });
@@ -138,81 +139,31 @@ describe('SwapProvider form cell', () => {
 		await tick();
 
 		expect(document.querySelector('.smart-thinking')).toBeNull();
+		// Still in the card, so it fades out and the next round carries on from where it stopped.
+		expect(beam).toBeInTheDocument();
+		expect(beam).not.toHaveClass('beaming');
 	});
 
-	describe('signature slash on the title', () => {
-		const slashes = (animate: MockInstance<Element['animate']>) =>
-			animate.mock.calls.filter(
-				([frames]) =>
-					Array.isArray(frames) && frames.some((frame) => frame.backgroundPosition !== undefined)
-			);
-
-		const confirmRound = async ({
-			requestId,
-			swaps
-		}: {
-			requestId: number;
-			swaps: SwapMappedResult[];
-		}) => {
-			activity.start({ requestId, background: false });
-			activity.addProvider({ requestId, provider: swaps[0].provider });
-			const view = render(SwapProviderHeader, { props, context: contextWithRate(2) });
-			store.setSwaps({ swaps, selectedProvider: swaps[0], amountForSwap: '1' });
-			activity.complete({ requestId });
-			await tick();
-			await tick();
-			return view;
-		};
-
-		it('crosses the title once when a round confirms the best of several offers', async () => {
-			const animate = vi.spyOn(Element.prototype, 'animate');
-			const { getByText } = await confirmRound({
-				requestId: 40,
-				swaps: [bestOffer, lowestOffer]
-			});
-			const title = getByText(en.swap.text.smart_swap);
-
-			expect(slashes(animate)).toHaveLength(1);
-			expect(animate.mock.contexts[animate.mock.calls.indexOf(slashes(animate)[0])]).toBe(title);
-			expect(title).toHaveClass('smart-slash');
+	it('plays no colour effect on the title when the best rate is confirmed', async () => {
+		store.setSwaps({
+			swaps: [offer, mockOneSecProvider],
+			selectedProvider: offer,
+			amountForSwap: '1'
 		});
+		activity.start({ requestId: 31, background: false });
+		activity.addProvider({ requestId: 31, provider: SwapProvider.ICP_SWAP });
+		const animate = vi.spyOn(Element.prototype, 'animate');
+		const { getByText } = render(SwapProviderHeader, { props, context });
+		await tick();
 
-		it('does not cross the title for a single offer', async () => {
-			const animate = vi.spyOn(Element.prototype, 'animate');
-			const { getByText } = await confirmRound({ requestId: 41, swaps: [offer] });
+		activity.complete({ requestId: 31 });
+		await tick();
+		await tick();
 
-			expect(slashes(animate)).toHaveLength(0);
-			expect(getByText(en.swap.text.smart_swap)).not.toHaveClass('smart-slash');
-		});
+		const title = getByText(en.swap.text.smart_swap);
 
-		it('does not cross the title with reduced motion', async () => {
-			motion.reduced = true;
-			const animate = vi.spyOn(Element.prototype, 'animate');
-			const { getByText } = await confirmRound({
-				requestId: 42,
-				swaps: [bestOffer, lowestOffer]
-			});
-
-			expect(slashes(animate)).toHaveLength(0);
-			expect(getByText(en.swap.text.smart_swap)).not.toHaveClass('smart-slash');
-		});
-
-		it('does not cross the title on a background refresh', async () => {
-			store.setSwaps({
-				swaps: [bestOffer, lowestOffer],
-				selectedProvider: bestOffer,
-				amountForSwap: '1'
-			});
-			render(SwapProviderHeader, { props, context: contextWithRate(2) });
-			await tick();
-			const animate = vi.spyOn(Element.prototype, 'animate');
-			activity.start({ requestId: 43, background: true });
-			activity.complete({ requestId: 43 });
-			await tick();
-			await tick();
-
-			expect(slashes(animate)).toHaveLength(0);
-		});
+		expect(animate.mock.contexts).not.toContain(title);
+		expect(title.className).not.toMatch(/smart-/);
 	});
 
 	it('announces the comparison and the provider it picks from one region outside the cell', async () => {

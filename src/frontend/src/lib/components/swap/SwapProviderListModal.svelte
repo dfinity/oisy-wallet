@@ -4,7 +4,6 @@
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import SwapProviderDetails from '$lib/components/swap/SwapProviderDetails.svelte';
 	import SwapProviderListItem from '$lib/components/swap/SwapProviderListItem.svelte';
-	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -44,12 +43,6 @@
 		nonNullish(selectedProvider) ? findSwapProvider(selectedProvider.provider) : undefined
 	);
 	let offerCount = $derived($swapAmountsStore?.swaps.length ?? 0);
-	// A single offer beat nothing, so it is not called the best rate, as in the form's cell.
-	let isSelectedBestRate = $derived(
-		nonNullish(selectedProvider) &&
-			offerCount > 1 &&
-			selectedProvider.provider === $swapAmountsStore?.swaps[0]?.provider
-	);
 	// With one offer the card is the whole list, so the list would only repeat it.
 	let showOffers = $derived(isNullish(selectedDApp) || offerCount > 1);
 
@@ -85,13 +78,14 @@
 <div class=" mb-4 overflow-y-auto overscroll-contain" data-tid={SWAP_MODAL_SELECT_PROVIDER_STEP}>
 	{#if nonNullish(selectedProvider) && nonNullish(selectedDApp)}
 		<!-- What the form's Smart Swap cell summarises: the offer it picked, then all offers below.
-		The card is the one mark of the pick, so the rows carry no check, and it leaves out the website
-		each row already shows. Grey, not the rows' hover tint, because it is not tappable. -->
+		The card is the one mark of the pick, so the rows carry no check, and it leaves out what each
+		row already shows, the website and Best Rate. It is the form's Smart Swap card (fill,
+		faintest border, padding), so the step opens on the card that was tapped. -->
 		<section class:mb-6={showOffers} data-tid={SWAP_SELECTED_PROVIDER_DETAILS}>
 			<span class="mb-2 block px-2 text-sm text-tertiary"
 				>{$i18n.swap.text.smart_swap_selected_offer}</span
 			>
-			<div class="rounded-lg bg-secondary px-3 pt-3 pb-1">
+			<div class="rounded-lg border border-tertiary bg-secondary px-4 py-3">
 				<div class="mb-2 flex items-center gap-3">
 					<Logo
 						alt={replacePlaceholders($i18n.dapps.alt.logo, {
@@ -103,9 +97,6 @@
 					<span class="min-w-0 truncate text-lg font-bold"
 						>{resolveText({ i18n: $i18n, path: selectedDApp.name })}</span
 					>
-					{#if isSelectedBestRate}
-						<BestRateBadge styleClass="mt-0 ml-auto" />
-					{/if}
 				</div>
 				<SwapProviderDetails provider={selectedProvider} showWebsite={false} {slippageValue} />
 			</div>
