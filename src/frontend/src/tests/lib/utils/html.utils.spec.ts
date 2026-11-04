@@ -39,6 +39,40 @@ describe('html.utils', () => {
 			expect(link?.getAttribute('target')).toBe('_blank');
 			expect(link?.getAttribute('rel')).toBe('noreferrer external');
 		});
+
+		it('should remove style elements and their rules', () => {
+			const result = sanitize(
+				'Move <b>Name<style>button{opacity:0}</style></b> to spam<svg><style>p{display:none}</style></svg>'
+			);
+			const container = parseHtml(result);
+
+			expect(container.querySelector('style')).toBeNull();
+			expect(container.querySelector('b')?.textContent).toBe('Name');
+			expect(result).not.toContain('opacity');
+			expect(result).not.toContain('display:none');
+		});
+
+		it('should keep the formatting markup translated texts use', () => {
+			const result = sanitize(
+				'Remove <span class="font-bold">ICP</span>?<br><b>Note</b>: see <a href="https://oisy.com" target="_blank">OISY</a>'
+			);
+			const container = parseHtml(result);
+
+			expect(container.querySelector('span')?.getAttribute('class')).toBe('font-bold');
+			expect(container.querySelector('br')).not.toBeNull();
+			expect(container.querySelector('b')?.textContent).toBe('Note');
+			expect(container.querySelector('a')?.getAttribute('href')).toBe('https://oisy.com');
+		});
+
+		it('should not carry its configuration into a subsequent untrusted call', () => {
+			sanitize('<p>Fee</p>');
+
+			const result = sanitizeUntrusted('<p style="zoom:99">Fee</p><button>Approve</button>');
+			const container = parseHtml(result);
+
+			expect(container.querySelector('p')?.getAttribute('style')).toBeNull();
+			expect(container.querySelector('button')).toBeNull();
+		});
 	});
 
 	describe('sanitizeUntrusted', () => {
