@@ -219,6 +219,29 @@
 				? resolveText({ i18n: $i18n, path: swapDApp.name })
 				: ''
 	);
+
+	// The title and the status line run one band: `smart-thinking` sizes it in rem, not per line, so
+	// it has the same speed and position on both, and here the status line, which mounts a fade
+	// after the title starts, takes the title's start time, so the band crosses both in step.
+	let card = $state<HTMLButtonElement | undefined>();
+	$effect(() => {
+		if (!comparing || !comparingLayout || compact || isNullish(card)) {
+			return;
+		}
+		const [lead, ...rest] = Array.from(card.querySelectorAll('.smart-thinking')).flatMap(
+			(element) =>
+				element
+					.getAnimations?.()
+					.filter((animation) =>
+						(animation as CSSAnimation).animationName?.endsWith('smart-thinking')
+					) ?? []
+		);
+		const startTime = lead?.startTime ?? document.timeline?.currentTime;
+		if (isNullish(lead) || isNullish(startTime)) {
+			return;
+		}
+		[lead, ...rest].forEach((animation) => (animation.startTime = startTime));
+	});
 </script>
 
 {#if isForm}
@@ -237,6 +260,7 @@
 				content edges like the message boxes and the fee row, so the form stays light. It takes the rows'
 				blue on hover and press, only while it can be tapped. -->
 				<button
+					bind:this={card}
 					class="relative mb-3 flex w-full items-center gap-3 rounded-lg border border-tertiary bg-secondary px-4 py-3 text-left press disabled:cursor-default"
 					class:hover:bg-brand-subtle-10={interactive}
 					class:pressed:bg-brand-subtle-20={interactive}
@@ -246,15 +270,16 @@
 					type="button"
 				>
 					<span class="smart-beam" class:beaming={comparing} aria-hidden="true"><span></span></span>
-					<!-- Typography of the app's list rows (`LogoButton`, as in the offers list): title and
-					provider `text-lg font-bold`, the lines under them `text-sm text-tertiary`. The title
-					sets the column's minimum width; the line under it truncates first. A single offer
-					drops the line with its height (see `compact`), so the gap above it is its padding. -->
+					<!-- Title and provider `text-base font-bold`, a step under the list rows' `text-lg` so the
+					card sits with the amount cards' 14 px labels rather than outweighing them; the line
+					under the title `text-sm text-tertiary`. The title sets the column's minimum width; the
+					line under it truncates first. A single offer drops the line with its height (see
+					`compact`), so the gap above it is its padding. -->
 					<span class="flex flex-auto flex-col">
 						<!-- The title thinks with the status line below it. Only while motion is allowed:
 						the band's reduced-motion fallback is the status line's grey, not the title's black. -->
 						<span
-							class="text-lg font-bold whitespace-nowrap text-primary"
+							class="text-base font-bold whitespace-nowrap text-primary"
 							class:smart-thinking={comparing && !prefersReducedMotion.current}
 							>{$i18n.swap.text.smart_swap}</span
 						>
@@ -372,6 +397,8 @@
 {/if}
 
 <style lang="scss">
+	// A 30 rem tile, the same on every line it runs on, so the band keeps one speed and position
+	// across lines of different widths; it repeats, so a pass every 2 s loops seamlessly.
 	.smart-thinking {
 		background: linear-gradient(
 				90deg,
@@ -379,13 +406,13 @@
 				var(--color-foreground-primary) 50%,
 				var(--color-foreground-tertiary) 65% 100%
 			)
-			0 0 / 300% 100%;
+			0 0 / 30rem 100%;
 		-webkit-background-clip: text;
 		background-clip: text;
 		color: transparent;
 
 		@media (prefers-reduced-motion: no-preference) {
-			animation: smart-thinking 1600ms linear infinite;
+			animation: smart-thinking 2000ms linear infinite;
 		}
 
 		@media (prefers-reduced-motion: reduce) {
@@ -396,10 +423,10 @@
 
 	@keyframes smart-thinking {
 		from {
-			background-position: 100% 0;
+			background-position: 0 0;
 		}
 		to {
-			background-position: 0% 0;
+			background-position: 30rem 0;
 		}
 	}
 

@@ -381,7 +381,7 @@
 
 {#snippet providerContent(details: ProviderDetails)}
 	<Logo alt="" animateReadiness={false} loading="eager" size="xxs" src={details.logo} />
-	<span class="min-w-0 truncate text-lg font-bold"
+	<span class="min-w-0 truncate text-base font-bold"
 		>{resolveText({ i18n: $i18n, path: details.name })}</span
 	>
 {/snippet}

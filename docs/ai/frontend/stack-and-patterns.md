@@ -414,11 +414,14 @@ squeeze again.
 
 The form cell's thinking lives in the comparison, not the result: the confirmation plays only
 the squeeze, with no colour effect on the title (a brand-blue sweep across it was tried and
-dropped). While a foreground round compares, the status line runs a 1600 ms "thinking" band
+dropped). While a foreground round compares, the status line runs a "thinking" band
 (`smart-thinking`) from `foreground-tertiary` to `foreground-primary` and back, never lighter
-than the plain line. The "OISY Smart Swap" title runs the same band in step with it, but only while
-motion is allowed: the band's reduced-motion fallback is the line's grey, which would dim the
-title. A beam travels round the card's border (`smart-beam`): a conic
+than the plain line, a pass every 2 s. The "OISY Smart Swap" title runs the same band in step
+with it, but only while motion is allowed: the band's reduced-motion fallback is the line's grey,
+which would dim the title. One band on both: the gradient is a 30 rem tile rather than a share of
+each line's width, so it has one speed and position on lines of different widths, and when the
+status line mounts (a fade after the title starts) an effect gives its animation the title's
+start time. A beam travels round the card's border (`smart-beam`): a conic
 gradient of `foreground-brand-primary` with a long `-primary-alt` tail (`color-mix`, 30 %), a lap
 every 3.6 s, 1.5 px over the 1 px grey border, shown through a ring-shaped mask and turned by
 `rotate` on an oversized square so the compositor animates it. It reads on the one-row card as
@@ -474,9 +477,10 @@ amount cards and styled as they are (`TokenInput`: `bg-secondary`, the faintest 
 `border-tertiary`, `rounded-lg`), so the form stays light, on the content edges like the message
 boxes and the fee row, with `px-4 py-3`. It takes the rows' blue on hover (`brand-subtle-10`) and while pressed (`brand-subtle-20`,
 with `press`), as `TokenGroupCard` does, only while it can be tapped. A blue tint was tried and
-dropped: the `text-tertiary` line on it fell to 4.07:1. Its type is the app's list row (`LogoButton`, as in the offers list): the
-title and the provider name `text-lg font-bold`, the line under the title `text-sm
-text-tertiary`. It has no Best Rate badge: the line already says the pick beat the other quotes,
+dropped: the `text-tertiary` line on it fell to 4.07:1. The title and the provider name are
+`text-base font-bold`, a step under the list rows' `text-lg` (`LogoButton`, the offers step), so
+the card sits with the amount cards' 14 px labels instead of outweighing them; the line under the
+title is `text-sm text-tertiary`. It has no Best Rate badge: the line already says the pick beat the other quotes,
 and by how much. It is one `<button>` that opens the provider step (`onShowProviderList`): the selected offer's
 details on top, in the form's Smart Swap card (`rounded-lg border border-tertiary bg-secondary
 px-4 py-3`, without the website or Best Rate each row already shows), so the step opens on the
