@@ -33,6 +33,7 @@
 	import type { WizardStep } from '$lib/types/wizard';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import { loadSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
 	import { getSwapSlippageInvalidValue } from '$lib/utils/swap.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
@@ -69,7 +70,7 @@
 	let selectTokenType = $state<SwapSelectTokenType | undefined>();
 	let swapAmount = $state<OptionAmount>();
 	let receiveAmount = $state<number | undefined>();
-	let slippageValue = $state<OptionAmount>(SWAP_DEFAULT_SLIPPAGE_VALUE);
+	let slippageValue = $state<OptionAmount>(loadSwapSlippage() ?? SWAP_DEFAULT_SLIPPAGE_VALUE);
 	let swapProgressStep = $state(ProgressStepsSwap.INITIALIZATION);
 	let swapFailedProgressSteps = $state<ProgressStepsSwap[]>([]);
 	let allNetworksEnabled = $state<boolean>(true);
@@ -91,7 +92,7 @@
 		selectTokenType = undefined;
 		swapAmount = undefined;
 		receiveAmount = undefined;
-		slippageValue = SWAP_DEFAULT_SLIPPAGE_VALUE;
+		slippageValue = loadSwapSlippage() ?? SWAP_DEFAULT_SLIPPAGE_VALUE;
 		swapProgressStep = ProgressStepsSwap.INITIALIZATION;
 		showSelectProviderModal = false;
 		allNetworksEnabled = true;
@@ -138,10 +139,9 @@
 	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 	{#snippet headerRight()}
-		{#if currentStep?.name === WizardStepsGetToken.SWAP || currentStep?.name === WizardStepsGetToken.REVIEW}
+		{#if currentStep?.name === WizardStepsGetToken.SWAP}
 			<SwapSlippage
 				maxSlippageInvalidValue={getSwapSlippageInvalidValue($sourceToken?.network.id)}
-				readonly={currentStep.name === WizardStepsGetToken.REVIEW}
 				bind:slippageValue
 			/>
 		{/if}

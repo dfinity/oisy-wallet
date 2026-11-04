@@ -11,6 +11,7 @@ import {
 } from '$lib/stores/modal-tokens-list.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
+import { saveSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -28,6 +29,10 @@ describe('SwapModal', () => {
 		});
 
 	describe('slippage', () => {
+		beforeEach(() => {
+			sessionStorage.clear();
+		});
+
 		it('should show the slippage in the header, right before the close button', () => {
 			const { getByRole, getByTestId } = renderModal();
 
@@ -35,6 +40,16 @@ describe('SwapModal', () => {
 
 			expect(trigger.nextElementSibling).toBe(getByTestId('close-modal'));
 			expect(within(trigger).getByText('1.5%')).toBeInTheDocument();
+		});
+
+		it('should open at the slippage saved earlier in the tab', () => {
+			saveSwapSlippage('0.5');
+
+			const { getByRole } = renderModal();
+
+			const trigger = getByRole('button', { name: en.swap.text.max_slippage });
+
+			expect(within(trigger).getByText('0.5%')).toBeInTheDocument();
 		});
 
 		it('should leave the slippage out of the form', () => {

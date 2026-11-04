@@ -87,8 +87,7 @@ describe('SwapReview', () => {
 			expect(getByText(en.tokens.text.destination_token_title)).toBeInTheDocument();
 		});
 
-		// From sm up the modal header shows the slippage; phones keep it in the details.
-		it('should render the max slippage row for phones only', () => {
+		it('should render max slippage label and value', () => {
 			const { context } = createSwapContext();
 
 			const { getByText } = render(SwapReview, {
@@ -96,8 +95,42 @@ describe('SwapReview', () => {
 				context
 			});
 
+			expect(getByText(en.swap.text.max_slippage)).toBeInTheDocument();
 			expect(getByText('0.5%')).toBeInTheDocument();
-			expect(getByText(en.swap.text.max_slippage).closest('.sm\\:hidden')).not.toBeNull();
+		});
+
+		// Under 15 so the cases hold whichever limit the source network has.
+		it.each(['7', '8', '14.99'])(
+			'should mark %s% amber and warn about the risk in words, without holding the swap back',
+			(slippageValue) => {
+				const { context } = createSwapContext();
+
+				const { getByText } = render(SwapReview, {
+					props: { ...baseProps, slippageValue },
+					context
+				});
+
+				expect(getByText(en.swap.text.max_slippage_warning)).toBeInTheDocument();
+				expect(getByText(en.swap.text.swap_button).closest('button')).toBeEnabled();
+
+				const value = getByText(`${slippageValue}%`).parentElement;
+
+				expect(value).toHaveClass('text-warning-primary');
+				expect(value?.firstElementChild).toHaveTextContent('⚠');
+			}
+		);
+
+		it.each(['0.5', '6.99'])('should not warn about the risk at %s%', (slippageValue) => {
+			const { context } = createSwapContext();
+
+			const { queryByText } = render(SwapReview, {
+				props: { ...baseProps, slippageValue },
+				context
+			});
+
+			expect(queryByText(en.swap.text.max_slippage_warning)).not.toBeInTheDocument();
+			expect(queryByText(`${slippageValue}%`)?.closest('.text-warning-primary')).toBeNull();
+			expect(queryByText('⚠')).not.toBeInTheDocument();
 		});
 
 		it('should render value difference label when exchange rates are provided', () => {

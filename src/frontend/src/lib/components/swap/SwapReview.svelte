@@ -33,7 +33,11 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes, SwapProvider as SwapProviderEnum } from '$lib/types/swap';
-	import { calculateValueDifference } from '$lib/utils/swap.utils';
+	import {
+		calculateValueDifference,
+		getSwapSlippageInvalidValue,
+		getSwapSlippageStatus
+	} from '$lib/utils/swap.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -104,6 +108,13 @@
 		nonNullish(valueDifference) && valueDifference <= SWAP_VALUE_DIFFERENCE_ERROR_VALUE
 	);
 
+	let isSlippageWarning = $derived(
+		getSwapSlippageStatus({
+			slippageValue,
+			maxSlippageInvalidValue: getSwapSlippageInvalidValue($sourceToken?.network.id)
+		}) === 'warning'
+	);
+
 	let isMissingTokenPrice = $derived(
 		isNullish($sourceTokenExchangeRate) || isNullish($destinationTokenExchangeRate)
 	);
@@ -151,18 +162,22 @@
 		</ModalValue>
 	{/if}
 
-	<!-- From sm up the modal header shows the slippage; on phones it would cut the title there. -->
-	<div class="mb-2 sm:hidden">
-		<ModalValue>
-			{#snippet label()}
-				{$i18n.swap.text.max_slippage}
-			{/snippet}
+	<ModalValue>
+		{#snippet label()}
+			{$i18n.swap.text.max_slippage}
+		{/snippet}
 
-			{#snippet mainValue()}
+		{#snippet mainValue()}
+			{#if isSlippageWarning}
+				<span class="inline-flex items-center gap-2 text-warning-primary">
+					<span>⚠</span>
+					<span>{slippageValue}%</span>
+				</span>
+			{:else}
 				{slippageValue}%
-			{/snippet}
-		</ModalValue>
-	</div>
+			{/if}
+		{/snippet}
+	</ModalValue>
 
 	<div class="flex flex-col gap-3">
 		<SwapProvider {slippageValue} />
@@ -172,6 +187,15 @@
 	{#if isNearIntentsProvider && !$hasAcknowledgedNearIntentsSwap}
 		<div class="mt-4">
 			<SwapNearIntentsTos />
+		</div>
+	{/if}
+
+	<!-- The slippage row states the value; this says what a high one risks. -->
+	{#if isSlippageWarning}
+		<div class="mt-4">
+			<MessageBox level="warning" styleClass="!mb-0">
+				{$i18n.swap.text.max_slippage_warning}
+			</MessageBox>
 		</div>
 	{/if}
 

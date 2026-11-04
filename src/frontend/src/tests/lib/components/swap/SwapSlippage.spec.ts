@@ -6,7 +6,9 @@ import {
 import { screensStore } from '$lib/stores/screens.store';
 import type { OptionAmount } from '$lib/types/send';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { loadSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
 import en from '$tests/mocks/i18n.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 
 describe('SwapSlippage', () => {
@@ -30,6 +32,7 @@ describe('SwapSlippage', () => {
 
 	beforeEach(() => {
 		screensStore.set('lg');
+		sessionStorage.clear();
 	});
 
 	describe('trigger', () => {
@@ -100,58 +103,6 @@ describe('SwapSlippage', () => {
 			});
 
 			expect(trigger).toHaveClass('bg-warning-subtle-10');
-		});
-	});
-
-	// On Review the quote being confirmed carries this slippage: the pill only shows it.
-	describe('read-only', () => {
-		const renderReadonly = (slippageValue: OptionAmount) =>
-			render(SwapSlippage, {
-				props: {
-					slippageValue,
-					maxSlippageInvalidValue: SWAP_SLIPPAGE_VELORA_INVALID_VALUE,
-					readonly: true
-				}
-			});
-
-		it('should show the value without a button or settings icon', () => {
-			const { container, queryByRole } = renderReadonly('1.5');
-
-			expect(queryByRole('button')).not.toBeInTheDocument();
-			expect(container.querySelector('svg')).toBeNull();
-			expect(container).toHaveTextContent('1.5%');
-		});
-
-		it('should name the value for screen readers', () => {
-			const { getByText } = renderReadonly('1.5');
-
-			expect(getByText(en.swap.text.max_slippage)).toHaveClass('sr-only');
-		});
-
-		// Beside the longer Review title it would cut it on phones, where Review lists it instead.
-		it('should not render on phones', () => {
-			screensStore.set('sm');
-
-			const { container } = renderReadonly('1.5');
-
-			expect(container).not.toHaveTextContent('1.5%');
-		});
-
-		it('should render from 640 px up', () => {
-			screensStore.set('md');
-
-			const { container } = renderReadonly('1.5');
-
-			expect(container).toHaveTextContent('1.5%');
-		});
-
-		it('should keep the tint, without a hover', () => {
-			const { getByText } = renderReadonly('8');
-
-			const pill = getByText(en.swap.text.max_slippage).parentElement;
-
-			expect(pill).toHaveClass('bg-warning-subtle-10', 'text-primary');
-			expect(pill?.className).not.toContain('hover:');
 		});
 	});
 
@@ -239,6 +190,64 @@ describe('SwapSlippage', () => {
 
 			expect(within(trigger).getByText('3%')).toBeInTheDocument();
 			expect(trigger).toHaveAttribute('aria-expanded', 'false');
+		});
+
+		it('should save an accepted value for the next swap', async () => {
+			const { trigger, getByTestId } = renderSlippage();
+
+			await fireEvent.click(trigger);
+
+			const editor = await waitFor(() => getByTestId('popover-content'));
+
+			await fireEvent.click(within(editor).getByRole('button', { name: '3%' }));
+
+			expect(loadSwapSlippage()).toBe(3);
+		});
+
+		const typeAndClose = async ({
+			trigger,
+			getByTestId,
+			queryByTestId,
+			typed
+		}: ReturnType<typeof renderSlippage> & { typed: string[] }) => {
+			await fireEvent.click(trigger);
+
+			const editor = await waitFor(() => getByTestId('popover-content'));
+
+			const input = editor.querySelector('input[name="swap-slippage"]');
+
+			assertNonNullish(input);
+
+			for (const value of typed) {
+				await fireEvent.input(input, { target: { value } });
+			}
+
+			const savedWhileOpen = loadSwapSlippage();
+
+			await fireEvent.keyDown(window, { key: 'Escape' });
+
+			await waitFor(() => expect(queryByTestId('popover-content')).not.toBeInTheDocument());
+
+			return savedWhileOpen;
+		};
+
+		// Saved on close, so the keystrokes on the way to the final value are not.
+		it('should save a typed value once the editor closes', async () => {
+			const rendered = renderSlippage({ slippageValue: '8' });
+
+			const savedWhileOpen = await typeAndClose({ ...rendered, typed: ['2', '2.5'] });
+
+			expect(savedWhileOpen).toBe(8);
+			expect(loadSwapSlippage()).toBe(2.5);
+		});
+
+		it('should keep the last accepted value saved when the typed one is refused', async () => {
+			const rendered = renderSlippage({ slippageValue: '8' });
+
+			await typeAndClose({ ...rendered, typed: ['6', '60'] });
+
+			expect(rendered.trigger).toHaveClass('bg-error-subtle-10');
+			expect(loadSwapSlippage()).toBe(8);
 		});
 
 		it('should return focus to the trigger when closed with Escape', async () => {
