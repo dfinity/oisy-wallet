@@ -9,6 +9,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import * as analytics from '$lib/services/analytics.services';
 import * as toasts from '$lib/stores/toasts.store';
+import { SwapBroadcastOutcomeUnknownError } from '$lib/types/errors';
 import * as i18nUtils from '$lib/utils/i18n.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -68,6 +69,17 @@ describe('eth-error.utils', () => {
 					Object.assign(new Error('insufficient funds'), { code: 'INSUFFICIENT_FUNDS' })
 				)
 			).toBeTruthy();
+		});
+
+		// A refusal of a later attempt answers only that attempt: an earlier one may have been relayed.
+		it('should not be a refusal when the broadcast outcome is unknown, whatever its cause', () => {
+			expect(
+				isDefinitiveTransactionRefusal(
+					new SwapBroadcastOutcomeUnknownError({
+						cause: broadcastRefused('insufficient funds for gas * price + value')
+					})
+				)
+			).toBeFalsy();
 		});
 
 		// Each can hide a transaction that was taken: in the mempool, mined, or held by another node.

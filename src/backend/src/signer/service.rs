@@ -1,4 +1,6 @@
 //! Code for interacting with the chain fusion signer.
+use std::cell::RefCell;
+
 use bitcoin::{Address, CompressedPublicKey, Network};
 use candid::{Nat, Principal};
 use ic_cdk::{api::msg_caller, call::Call};
@@ -180,8 +182,8 @@ pub fn principal_to_account_identifier_hex(principal: &Principal) -> String {
 }
 
 // Chain-fusion-signer derivation-path schema bytes — the first path element that namespaces a
-// principal's key per chain, mirrored so reproducing the path via the management canister (with
-// `canister_id = cfs_canister_id`) yields the same key the signer derives.
+// principal's key per chain, mirrored so deriving the path from the signer's root key yields the
+// same key the signer derives.
 // ECDSA schemas: see <https://github.com/dfinity/chain-fusion-signer/blob/26b683c6de9971fdbf7bd4cebc04d427d1753289/src/signer/canister/src/derivation_path.rs#L6>.
 const SCHEMA_BTC: u8 = 0x00;
 const SCHEMA_ETH: u8 = 0x01;
@@ -189,18 +191,39 @@ const SCHEMA_ETH: u8 = 0x01;
 // (`src/frontend/src/lib/ic-pub-key/src/cli.ts`, `deriveSolAddress`).
 const SCHEMA_SOL: u8 = 0xfe;
 
-/// Computes the secp256k1 public key the chain-fusion signer would derive for `principal` under the
-/// given `schema` (`SCHEMA_BTC` / `SCHEMA_ETH`), via the management canister — a public-key read,
-/// not a signing call, so it does not consume the signer's signing allowance.
-// TODO: Cache CFS pubkey and derive it offline as in [ckBTC minter](https://github.com/dfinity/ic/blob/35153c7cb7b9d1da60472ca7e94c693e418f87bd/rs/bitcoin/ckbtc/minter/src/address.rs#L101-L101)
-async fn cfs_ecdsa_pubkey_of(principal: &Principal, schema: u8) -> Result<Vec<u8>, String> {
+/// The chain-fusion signer's root public key and chain code: what the management canister returns
+/// for `canister_id = cfs_canister_id` and an empty derivation path. Every per-user key of the
+/// signer is a subkey of it, derived offline with the same derivation the management canister
+/// applies, as the ckBTC minter does for its own addresses.
+type CfsRootKey<K> = (K, [u8; 32]);
+
+thread_local! {
+    /// The signer's secp256k1 root key (BTC, ETH), once fetched.
+    ///
+    /// It depends only on the configured key name and CFS canister id, which change only at
+    /// install or upgrade, when the heap is reset anyway. Heap rather than stable memory on
+    /// purpose: re-fetching it once after an upgrade costs one call and needs no migration.
+    static CFS_ECDSA_ROOT_KEY: RefCell<Option<CfsRootKey<ic_secp256k1::PublicKey>>> =
+        const { RefCell::new(None) };
+
+    /// The signer's Ed25519 root key (SOL), once fetched. Cached like [`CFS_ECDSA_ROOT_KEY`].
+    static CFS_ED25519_ROOT_KEY: RefCell<Option<CfsRootKey<ic_ed25519::PublicKey>>> =
+        const { RefCell::new(None) };
+}
+
+/// The signer's secp256k1 root key, fetched from the management canister on first use — a
+/// public-key read, not a signing call, so it does not consume the signer's signing allowance.
+async fn cfs_ecdsa_root_key() -> Result<CfsRootKey<ic_secp256k1::PublicKey>, String> {
+    if let Some(root_key) = CFS_ECDSA_ROOT_KEY.with_borrow(Clone::clone) {
+        return Ok(root_key);
+    }
+
     let (ecdsa_key_name, maybe_cfs_canister_id) =
         read_config(|s| (s.ecdsa_key_name.clone(), s.cfs_canister_id));
-    let derivation_path = vec![vec![schema], principal.as_slice().to_vec()];
     let cfs_canister_id = maybe_cfs_canister_id.ok_or("Missing CFS canister id")?;
     let key = ecdsa_public_key(&EcdsaPublicKeyArgs {
         canister_id: Some(cfs_canister_id),
-        derivation_path,
+        derivation_path: vec![],
         key_id: EcdsaKeyId {
             curve: EcdsaCurve::Secp256k1,
             name: ecdsa_key_name,
@@ -208,25 +231,32 @@ async fn cfs_ecdsa_pubkey_of(principal: &Principal, schema: u8) -> Result<Vec<u8
     })
     .await
     .map_err(|_| "Failed to get ecdsa public key".to_string())?;
-    Ok(key.public_key)
+    let root_key = (
+        ic_secp256k1::PublicKey::deserialize_sec1(&key.public_key)
+            .map_err(|e| format!("Invalid ecdsa public key: {e}"))?,
+        <[u8; 32]>::try_from(key.chain_code).map_err(|_| "Invalid ecdsa chain code".to_string())?,
+    );
+
+    // Two callers racing the first fetch both write the same key, so last write wins is not a
+    // race worth guarding.
+    CFS_ECDSA_ROOT_KEY.set(Some(root_key.clone()));
+
+    Ok(root_key)
 }
 
-/// Computes the Ed25519 public key the chain-fusion signer would derive for `principal` on the
-/// Solana mainnet path, via the management canister `schnorr_public_key` (a public-key read, not a
-/// signing call). Mirrors the signer's path: `[SCHEMA_SOL, principal, "SOL", "mainnet"]`.
-async fn cfs_ed25519_pubkey_of(principal: &Principal) -> Result<Vec<u8>, String> {
+/// The signer's Ed25519 root key, fetched from the management canister `schnorr_public_key` on
+/// first use (a public-key read, not a signing call).
+async fn cfs_ed25519_root_key() -> Result<CfsRootKey<ic_ed25519::PublicKey>, String> {
+    if let Some(root_key) = CFS_ED25519_ROOT_KEY.with_borrow(Clone::clone) {
+        return Ok(root_key);
+    }
+
     let (key_name, maybe_cfs_canister_id) =
         read_config(|s| (s.ecdsa_key_name.clone(), s.cfs_canister_id));
-    let derivation_path = vec![
-        vec![SCHEMA_SOL],
-        principal.as_slice().to_vec(),
-        b"SOL".to_vec(),
-        b"mainnet".to_vec(),
-    ];
     let cfs_canister_id = maybe_cfs_canister_id.ok_or("Missing CFS canister id")?;
     let key = schnorr_public_key(&SchnorrPublicKeyArgs {
         canister_id: Some(cfs_canister_id),
-        derivation_path,
+        derivation_path: vec![],
         key_id: SchnorrKeyId {
             algorithm: SchnorrAlgorithm::Ed25519,
             name: key_name,
@@ -234,7 +264,72 @@ async fn cfs_ed25519_pubkey_of(principal: &Principal) -> Result<Vec<u8>, String>
     })
     .await
     .map_err(|_| "Failed to get schnorr public key".to_string())?;
-    Ok(key.public_key)
+    let root_key = (
+        ic_ed25519::PublicKey::deserialize_raw(&key.public_key)
+            .map_err(|e| format!("Invalid schnorr public key: {e}"))?,
+        <[u8; 32]>::try_from(key.chain_code)
+            .map_err(|_| "Invalid schnorr chain code".to_string())?,
+    );
+
+    // Same benign race as in `cfs_ecdsa_root_key`.
+    CFS_ED25519_ROOT_KEY.set(Some(root_key));
+
+    Ok(root_key)
+}
+
+/// Derives the compressed SEC1 secp256k1 public key the chain-fusion signer holds for `principal`
+/// under the given `schema` (`SCHEMA_BTC` / `SCHEMA_ETH`), from the signer's root key.
+fn derive_cfs_ecdsa_pubkey(
+    (root_key, chain_code): &CfsRootKey<ic_secp256k1::PublicKey>,
+    principal: &Principal,
+    schema: u8,
+) -> Vec<u8> {
+    let derivation_path = ic_secp256k1::DerivationPath::new(vec![
+        ic_secp256k1::DerivationIndex(vec![schema]),
+        ic_secp256k1::DerivationIndex(principal.as_slice().to_vec()),
+    ]);
+    root_key
+        .derive_subkey_with_chain_code(&derivation_path, chain_code)
+        .0
+        .serialize_sec1(true)
+}
+
+/// Derives the raw Ed25519 public key the chain-fusion signer holds for `principal` on the Solana
+/// mainnet path `[SCHEMA_SOL, principal, "SOL", "mainnet"]`, from the signer's root key.
+fn derive_cfs_ed25519_pubkey(
+    (root_key, chain_code): &CfsRootKey<ic_ed25519::PublicKey>,
+    principal: &Principal,
+) -> Vec<u8> {
+    let derivation_path = ic_ed25519::DerivationPath::new(vec![
+        ic_ed25519::DerivationIndex(vec![SCHEMA_SOL]),
+        ic_ed25519::DerivationIndex(principal.as_slice().to_vec()),
+        ic_ed25519::DerivationIndex(b"SOL".to_vec()),
+        ic_ed25519::DerivationIndex(b"mainnet".to_vec()),
+    ]);
+    root_key
+        .derive_subkey_with_chain_code(&derivation_path, chain_code)
+        .0
+        .serialize_raw()
+        .to_vec()
+}
+
+/// Computes the secp256k1 public key the chain-fusion signer holds for `principal` under the given
+/// `schema` (`SCHEMA_BTC` / `SCHEMA_ETH`).
+async fn cfs_ecdsa_pubkey_of(principal: &Principal, schema: u8) -> Result<Vec<u8>, String> {
+    Ok(derive_cfs_ecdsa_pubkey(
+        &cfs_ecdsa_root_key().await?,
+        principal,
+        schema,
+    ))
+}
+
+/// Computes the Ed25519 public key the chain-fusion signer holds for `principal` on the Solana
+/// mainnet path.
+async fn cfs_ed25519_pubkey_of(principal: &Principal) -> Result<Vec<u8>, String> {
+    Ok(derive_cfs_ed25519_pubkey(
+        &cfs_ed25519_root_key().await?,
+        principal,
+    ))
 }
 
 fn transform_network(network: BitcoinNetwork) -> Network {
@@ -262,7 +357,7 @@ pub async fn btc_principal_to_p2wpkh_address(
 }
 
 /// Derives the caller's Ethereum address from their principal, reproducing the chain-fusion
-/// signer's key via the management canister (no signer call).
+/// signer's key from its root key (no signer call).
 ///
 /// # Errors
 /// - The signer public key could not be retrieved, or the bytes are not a valid secp256k1 key.
@@ -272,7 +367,7 @@ pub async fn eth_principal_to_address(principal: &Principal) -> Result<String, S
 }
 
 /// Derives the caller's Solana (mainnet) address from their principal, reproducing the chain-fusion
-/// signer's Ed25519 key via the management canister (no signer call).
+/// signer's Ed25519 key from its root key (no signer call).
 ///
 /// # Errors
 /// - The signer public key could not be retrieved, or it is not a 32-byte Ed25519 key.
@@ -515,13 +610,15 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
 
 #[cfg(test)]
 mod tests {
+    use bitcoin::{Address, CompressedPublicKey, Network};
     use candid::{Nat, Principal};
     use ic_ledger_types::{AccountIdentifier, DEFAULT_SUBACCOUNT};
     use pretty_assertions::assert_eq;
 
     use super::{
-        cycles_to_send, eth_address_from_ecdsa_pubkey, frozen_reserve_cycles,
-        principal_to_account_identifier_hex, sol_address_from_ed25519_pubkey,
+        cycles_to_send, derive_cfs_ecdsa_pubkey, derive_cfs_ed25519_pubkey,
+        eth_address_from_ecdsa_pubkey, frozen_reserve_cycles, principal_to_account_identifier_hex,
+        sol_address_from_ed25519_pubkey, SCHEMA_BTC, SCHEMA_ETH,
     };
 
     /// 1 trillion cycles (1T), the unit the examples are written in.
@@ -598,6 +695,63 @@ mod tests {
     fn sol_address_rejects_wrong_length_pubkey() {
         assert!(sol_address_from_ed25519_pubkey(&[0u8; 31]).is_err());
         assert!(sol_address_from_ed25519_pubkey(&[0u8; 33]).is_err());
+    }
+
+    /// The production chain-fusion signer.
+    const PROD_CFS_CANISTER_ID: &str = "grghe-syaaa-aaaar-qabyq-cai";
+    // A user's addresses under the production signer and `key_1`, as OISY's frontend derives them
+    // (`src/frontend/src/lib/ic-pub-key/src/cli.ts`). The backend accepts only addresses that match
+    // its own derivation, so it must derive exactly these.
+    const USER: &str = "xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-7axl5-tae";
+    const USER_BTC_ADDRESS: &str = "bc1qatl8dhjt6gsev0un7566yud2r2zf8wlrzcdq59";
+    const USER_ETH_ADDRESS: &str = "0xC323B334EC9c9f114E254118c34690512e9107D2";
+    const USER_SOL_ADDRESS: &str = "Cu11Pg5fFAwbFEvcxELFVk95wrvcWUH29q9iSbDyYyvn";
+
+    fn prod_cfs_canister_id() -> Principal {
+        Principal::from_text(PROD_CFS_CANISTER_ID).expect("valid canister id")
+    }
+
+    fn user() -> Principal {
+        Principal::from_text(USER).expect("valid principal")
+    }
+
+    #[test]
+    fn derives_the_frontend_btc_and_eth_addresses_from_the_signer_root_key() {
+        // What the management canister returns for the signer and an empty derivation path.
+        let root_key = ic_secp256k1::PublicKey::derive_mainnet_key(
+            ic_secp256k1::MasterPublicKeyId::EcdsaKey1,
+            &prod_cfs_canister_id(),
+            &[],
+        );
+
+        let btc_pubkey = derive_cfs_ecdsa_pubkey(&root_key, &user(), SCHEMA_BTC);
+        let btc_address = Address::p2wpkh(
+            &CompressedPublicKey::from_slice(&btc_pubkey).unwrap(),
+            Network::Bitcoin,
+        )
+        .to_string();
+        let eth_address =
+            eth_address_from_ecdsa_pubkey(&derive_cfs_ecdsa_pubkey(&root_key, &user(), SCHEMA_ETH))
+                .unwrap();
+
+        assert_eq!(btc_address, USER_BTC_ADDRESS);
+        assert_eq!(eth_address, USER_ETH_ADDRESS);
+    }
+
+    #[test]
+    fn derives_the_frontend_sol_address_from_the_signer_root_key() {
+        // What the management canister returns for the signer and an empty derivation path.
+        let root_key = ic_ed25519::PublicKey::derive_mainnet_key(
+            ic_ed25519::MasterPublicKeyId::Key1,
+            &prod_cfs_canister_id(),
+            &[],
+        );
+
+        let sol_address =
+            sol_address_from_ed25519_pubkey(&derive_cfs_ed25519_pubkey(&root_key, &user()))
+                .unwrap();
+
+        assert_eq!(sol_address, USER_SOL_ADDRESS);
     }
 
     #[test]

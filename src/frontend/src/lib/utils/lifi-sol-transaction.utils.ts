@@ -701,6 +701,14 @@ const sumDeltas = ({
 	);
 
 /**
+ * Whether a simulation reached by CPI a program that is neither known nor pinned for LI.FI
+ * (`LIFI_SOLANA_PROGRAM_ADDRESSES`): a venue Jupiter added since the pin, which the binding refuses.
+ * `unreadPrograms` already leaves out the known ones (`SOLANA_KNOWN_PROGRAM_ADDRESSES`).
+ */
+export const callsUnpinnedProgram = (unreadPrograms: SolAddress[]): boolean =>
+	unreadPrograms.some((program) => !LIFI_SOLANA_PROGRAM_ADDRESSES.includes(program));
+
+/**
  * Refuses a LI.FI Solana transaction unless a simulation of its exact bytes, with the pre-state read
  * at the slot it ran at, shows it doing only what the request asked, within `ceiling`, the LI.FI
  * ceiling of this very transaction (its network fee and the rent of every account it creates):
@@ -735,7 +743,7 @@ export const assertLifiSolSimulation = ({
 
 	const { preview, unreadPrograms } = result;
 
-	if (unreadPrograms.some((program) => !LIFI_SOLANA_PROGRAM_ADDRESSES.includes(program))) {
+	if (callsUnpinnedProgram(unreadPrograms)) {
 		throw rejected('the route calls a program outside the pinned ones');
 	}
 

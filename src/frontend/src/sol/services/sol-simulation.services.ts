@@ -481,7 +481,8 @@ const simulate = async ({
 			}),
 			partial: false
 		},
-		unreadPrograms
+		unreadPrograms,
+		slot: snapshot.slot
 	};
 };
 
