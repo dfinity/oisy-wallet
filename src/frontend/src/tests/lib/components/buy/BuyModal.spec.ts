@@ -1,7 +1,8 @@
 import * as onRamperEnv from '$env/rest/onramper.env';
 import BuyModal from '$lib/components/buy/BuyModal.svelte';
+import { modalStore } from '$lib/stores/modal.store';
 import en from '$tests/mocks/i18n.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 
 describe('BuyModal', () => {
 	it('renders correct title if isOnRamperDev is true', () => {
@@ -16,5 +17,14 @@ describe('BuyModal', () => {
 		const { getByText } = render(BuyModal);
 
 		expect(getByText(en.buy.text.buy_sell)).toBeInTheDocument();
+	});
+
+	it('stays open on a backdrop click', async () => {
+		const close = vi.spyOn(modalStore, 'close');
+		const { getByTestId } = render(BuyModal);
+
+		await fireEvent.click(getByTestId('backdrop'));
+
+		expect(close).not.toHaveBeenCalled();
 	});
 });
