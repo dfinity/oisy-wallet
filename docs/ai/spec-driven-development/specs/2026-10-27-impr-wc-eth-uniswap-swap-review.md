@@ -33,6 +33,19 @@ Checked against `Uniswap/universal-router` tags 2.0.0, 2.1.1, 2.1.2 and 2.2.0,
 on 2026-10-27; and against 17 live 2.1.2 transactions on Base the same day, whose inputs all
 decode under the layouts below and re-encode to themselves.
 
+On 2026-11-04, every pinned router had a runtime match on Sourcify. The verified sources of 2.1.1
+and 2.1.2 are identical to their tags, with each submodule at the commit the tag records and the
+npm packages at the versions it fixes. Those of 2.0.0 differ from its tag in 10 files of
+`v4-periphery`, `v4-core` and OpenZeppelin (19 on Sepolia), only in imports, `using`
+declarations, where two structs are declared, which base contract holds the pool-manager check,
+the visibility of constants, interface pragmas and comments; every command and action constant is
+the same. The same day, the review was checked against 138 live transactions sent straight to the
+Base routers (60 through 2.0.0, 18 through 2.1.1, 60 through 2.1.2) by 100 senders. With every
+token counted as listed, 128 are described, 38 of them through V4 pools with hooks, and in each
+the wallet paid what the review states, the recipient received at least the stated minimum, and
+the fees and Permit2 allowances match the receipt. The other 10 stay unknown by rules this spec
+states.
+
 - Uniswap's web app sends `execute(bytes commands, bytes[] inputs, uint256 deadline)`
   (`0x3593564c`), or `execute(bytes commands, bytes[] inputs)` (`0x24856bc3`) when no deadline
   is set. Each byte of `commands` is one command; `inputs[i]` holds its ABI-encoded arguments.
