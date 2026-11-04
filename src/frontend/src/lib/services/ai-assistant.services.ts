@@ -14,7 +14,7 @@ import { enabledMainnetTotalUsdBalance } from '$lib/derived/balances.derived';
 import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
 import { networks } from '$lib/derived/networks.derived';
 import { enabledMainnetFungibleTokensUi } from '$lib/derived/tokens-ui.derived';
-import { enabledTokens, enabledUniqueTokensSymbols } from '$lib/derived/tokens.derived';
+import { enabledTokens, enabledUniqueFungibleTokensSymbols } from '$lib/derived/tokens.derived';
 import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import {
@@ -60,8 +60,8 @@ export const askLlm = async ({
 			messages,
 			tools: toNullable(
 				getAiAssistantToolsDescription({
-					enabledNetworksSymbols: get(enabledUniqueTokensSymbols),
-					enabledTokensSymbols: get(enabledUniqueTokensSymbols)
+					enabledNetworksSymbols: get(enabledUniqueFungibleTokensSymbols),
+					enabledTokensSymbols: get(enabledUniqueFungibleTokensSymbols)
 				})
 			)
 		},
