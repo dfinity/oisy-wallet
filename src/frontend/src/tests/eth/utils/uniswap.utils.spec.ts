@@ -16,9 +16,11 @@ import {
 	UNISWAP_TAXED_TOKENS,
 	UNISWAP_V4_ACTIONS
 } from '$eth/constants/uniswap.constants';
+import type { UniswapSwap } from '$eth/types/uniswap';
 import { getUniswapSwap, type GetUniswapSwapParams } from '$eth/utils/uniswap.utils';
 import { MAX_UINT_160, MAX_UINT_256, ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
+import simulatedTransactions from '$tests/fixtures/uniswap/base-router-simulations.json';
 import liveTransactions from '$tests/fixtures/uniswap/base-router-transactions.json';
 import {
 	mockUniswapDeadline as DEADLINE,
@@ -1674,89 +1676,113 @@ describe('uniswap.utils', () => {
 			});
 		});
 
-		// Transactions sent to the Base routers, with what each receipt shows moved: what left the
-		// wallet, what reached the recipient, what each fee recipient got and the allowance Permit2 set.
-		describe('live transactions on Base', () => {
-			interface LiveTransaction {
-				hash: string;
+		// Swaps through the Base routers, with what each moved: what left the wallet, what reached the
+		// recipient, what each fee recipient got and the allowance Permit2 set. Live transactions as their
+		// receipts show it, and the combinations none of them makes as simulated on Base's state.
+		describe('swaps on Base', () => {
+			interface Moved {
+				paid: { token: string; amount: string };
+				received: { token: string; recipient: string | null; amount: string };
+				fees: { token: string; recipient: string; got: string; routerPaidOut: string }[];
+				permit: { token: string; amount: string; expiration: number } | null;
+			}
+
+			interface Sent {
 				router: string;
 				from: string;
 				value: string;
 				input: string;
 				// What the review names, as tokens OISY lists by default.
 				tokens: string[];
-				receipt: {
-					paid: { token: string; amount: string };
-					received: { token: string; recipient: string | null; amount: string };
-					fees: { token: string; recipient: string; got: string; routerPaidOut: string }[];
-					permit: { token: string; amount: string; expiration: number } | null;
-				};
 			}
 
-			const { transactions } = liveTransactions as { transactions: LiveTransaction[] };
+			const { transactions } = liveTransactions as {
+				transactions: (Sent & { hash: string; receipt: Moved })[];
+			};
+			const { transactions: simulations } = simulatedTransactions as {
+				transactions: (Sent & { name: string; moved: Moved; spent: string })[];
+			};
 
 			const tokenOf = (token: Token): string =>
 				'address' in token ? String(token.address).toLowerCase() : 'native';
 
+			const reviewOf = ({ router, input, value, from, tokens }: Sent): UniswapSwap | undefined =>
+				getUniswapSwap({
+					to: router,
+					data: input,
+					chainId: BASE_NETWORK.chainId,
+					networkId: BASE_NETWORK_ID,
+					value: BigInt(value),
+					wallet: from,
+					nativeToken: BASE_ETH_TOKEN,
+					tokens: tokens.map((address) => ({
+						...USDC_TOKEN,
+						address,
+						symbol: address,
+						name: address
+					}))
+				});
+
+			const expectMoved = ({ swap, moved }: { swap: UniswapSwap | undefined; moved: Moved }) => {
+				assertNonNullish(swap);
+
+				const { paid, received, recipient, fees, approval } = swap;
+				const paidByWallet = BigInt(moved.paid.amount);
+
+				expect(tokenOf(paid.token)).toBe(moved.paid.token);
+				expect(paidByWallet).toBeLessThanOrEqual(paid.amount);
+				expect(paid.atMost || paidByWallet === paid.amount).toBeTruthy();
+
+				expect(tokenOf(received.token)).toBe(moved.received.token);
+				expect(recipient?.toLowerCase() ?? null).toBe(moved.received.recipient);
+				expect(received.amount).toBeLessThanOrEqual(BigInt(moved.received.amount));
+
+				expect(fees).toHaveLength(moved.fees.length);
+
+				fees.forEach((fee, index) => {
+					const { token, recipient: feeRecipient, got, routerPaidOut } = moved.fees[index];
+					// A share is of the router's whole balance of the token, which it pays out between the
+					// fee recipient and the recipient, rounding the share down.
+					const owed =
+						'amount' in fee
+							? fee.amount
+							: (BigInt(routerPaidOut) * fee.share) / UNISWAP_FULL_PRECISION_DENOMINATOR;
+					const tolerance = 'amount' in fee ? ZERO : 1n;
+					const off = BigInt(got) - owed;
+
+					expect(tokenOf(fee.token)).toBe(token);
+					expect(fee.recipient.toLowerCase()).toBe(feeRecipient);
+					expect(off >= -tolerance && off <= tolerance).toBeTruthy();
+				});
+
+				expect(
+					nonNullish(approval)
+						? {
+								token: tokenOf(approval.token),
+								amount: String(approval.amount),
+								expiration: approval.expiration
+							}
+						: null
+				).toEqual(moved.permit);
+			};
+
 			it.each(transactions)(
 				'should state what the receipt of $hash shows',
-				({ router, input, value, from, tokens, receipt }) => {
-					const swap = getUniswapSwap({
-						to: router,
-						data: input,
-						chainId: BASE_NETWORK.chainId,
-						networkId: BASE_NETWORK_ID,
-						value: BigInt(value),
-						wallet: from,
-						nativeToken: BASE_ETH_TOKEN,
-						tokens: tokens.map((address) => ({
-							...USDC_TOKEN,
-							address,
-							symbol: address,
-							name: address
-						}))
-					});
+				({ receipt, ...sent }) => {
+					expectMoved({ swap: reviewOf(sent), moved: receipt });
+				}
+			);
 
-					assertNonNullish(swap);
+			// The wallet sends the whole value, and what the swap leaves of it comes back in a sweep, which
+			// the review leaves out: the wallet's balance falls by no more than the review states.
+			it.each(simulations)(
+				'should state what the simulated $name moved',
+				({ moved, spent, ...sent }) => {
+					const swap = reviewOf(sent);
 
-					const { paid, received, recipient, fees, approval } = swap;
-					const paidByWallet = BigInt(receipt.paid.amount);
+					expectMoved({ swap, moved });
 
-					expect(tokenOf(paid.token)).toBe(receipt.paid.token);
-					expect(paidByWallet).toBeLessThanOrEqual(paid.amount);
-					expect(paid.atMost || paidByWallet === paid.amount).toBeTruthy();
-
-					expect(tokenOf(received.token)).toBe(receipt.received.token);
-					expect(recipient?.toLowerCase() ?? null).toBe(receipt.received.recipient);
-					expect(received.amount).toBeLessThanOrEqual(BigInt(receipt.received.amount));
-
-					expect(fees).toHaveLength(receipt.fees.length);
-
-					fees.forEach((fee, index) => {
-						const { token, recipient: feeRecipient, got, routerPaidOut } = receipt.fees[index];
-						// A share is of the router's whole balance of the token, which it pays out between the
-						// fee recipient and the recipient, rounding the share down.
-						const owed =
-							'amount' in fee
-								? fee.amount
-								: (BigInt(routerPaidOut) * fee.share) / UNISWAP_FULL_PRECISION_DENOMINATOR;
-						const tolerance = 'amount' in fee ? ZERO : 1n;
-						const off = BigInt(got) - owed;
-
-						expect(tokenOf(fee.token)).toBe(token);
-						expect(fee.recipient.toLowerCase()).toBe(feeRecipient);
-						expect(off >= -tolerance && off <= tolerance).toBeTruthy();
-					});
-
-					expect(
-						nonNullish(approval)
-							? {
-									token: tokenOf(approval.token),
-									amount: String(approval.amount),
-									expiration: approval.expiration
-								}
-							: null
-					).toEqual(receipt.permit);
+					expect(BigInt(spent)).toBeLessThanOrEqual(swap?.paid.amount ?? ZERO);
 				}
 			);
 		});

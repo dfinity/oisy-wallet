@@ -52,6 +52,16 @@ pool. 30 of them, covering each version, the hooks, the two-pool paths, fees and
 allowances, are in `src/frontend/src/tests/fixtures/uniswap/base-router-transactions.json` with
 what each receipt shows moved, and `uniswap.utils.spec.ts` holds the review to them.
 
+The same day, ten swaps none of the 128 makes went through the pinned Base routers in simulation,
+on the state of blocks 53,518,059 and 53,518,060: two-pool exact inputs (ETH to cbBTC to WBTC)
+through 2.0.0 and 2.1.1, a two-pool exact output through 2.1.2, one-pool swaps through 2.1.1 and
+2.0.0, and a pool with a hook (ETH to `0x515e…4a51`, 1%) through all three versions. In each, the
+wallet paid no more than the review states and at least the stated minimum arrived. They are in
+`src/frontend/src/tests/fixtures/uniswap/base-router-simulations.json`, which the same spec holds
+the review to. No check covers a hooked pool inside a multi-pool exact output, a V4 swap the
+wallet pays in an ERC-20 through 2.1.1, or Permit2 itself, whose source is not in the router
+trees.
+
 Also on 2026-11-04, the 173 tokens OISY lists by default on the networks with a pinned router were
 sent, in simulations on each network's latest state, out of each Uniswap V2 pair, V3 pool and V4
 PoolManager holding them (979 in all) to a fresh wallet and to the router. All arrived in full but
