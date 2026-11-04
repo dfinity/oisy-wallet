@@ -66,6 +66,7 @@ describe('SwapProviderListModal', () => {
 
 		expect(details).toHaveTextContent(get(i18n).swap.text.smart_swap_selected_offer);
 		expect(details).toHaveTextContent('ICP Swap');
+		expect(details).toHaveTextContent(get(i18n).swap.text.best_rate);
 		// Each offer row already shows its website.
 		expect(details).not.toHaveTextContent('icpswap.com');
 	});
@@ -87,7 +88,7 @@ describe('SwapProviderListModal', () => {
 		expect(onSelectProvider).not.toHaveBeenCalled();
 	});
 
-	it('marks only the selected offer', () => {
+	it('names the pick in the card only, not with a mark on its row', () => {
 		const { container } = render(SwapProviderListModal, {
 			context: mockContext
 		});
@@ -96,7 +97,28 @@ describe('SwapProviderListModal', () => {
 			container.querySelectorAll('[data-testid="provider-item"] button')
 		).map((button) => button.getAttribute('aria-pressed'));
 
-		expect(pressed).toEqual(['true', 'false']);
+		expect(pressed).toEqual([null, null]);
+	});
+
+	it('shows only the card when there is a single offer', () => {
+		mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, {
+			store: readable({
+				swaps: [mockSwapProviders[0]],
+				amountForSwap: '1',
+				selectedProvider: mockSwapProviders[0]
+			})
+		});
+		const { container, getByTestId, queryByText } = render(SwapProviderListModal, {
+			context: mockContext
+		});
+
+		const details = getByTestId(SWAP_SELECTED_PROVIDER_DETAILS);
+
+		expect(details).toHaveTextContent('ICP Swap');
+		// A single offer beat nothing.
+		expect(details).not.toHaveTextContent(get(i18n).swap.text.best_rate);
+		expect(container.querySelectorAll('[data-testid="provider-item"]')).toHaveLength(0);
+		expect(queryByText(get(i18n).swap.text.smart_swap_offers)).not.toBeInTheDocument();
 	});
 
 	it('selects another offer and goes back without selecting', async () => {

@@ -3,6 +3,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import {
 	CONVERT_AMOUNT_DISPLAY_SKELETON,
 	MAX_BUTTON,
+	SWAP_FEE_ROW,
 	SWAP_PROVIDER_STATUS,
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
@@ -192,7 +193,7 @@ describe('SwapSolForm', () => {
 			context: mockContext
 		});
 
-		expect(container.querySelector('hr')).toBeInTheDocument();
+		expect(container.querySelector(`[data-tid="${SWAP_FEE_ROW}"]`)).toBeInTheDocument();
 	});
 
 	it('should not render swap details when no destination token', () => {
@@ -211,7 +212,7 @@ describe('SwapSolForm', () => {
 			context: contextWithoutDestination
 		});
 
-		expect(container.querySelector('hr')).not.toBeInTheDocument();
+		expect(container.querySelector(`[data-tid="${SWAP_FEE_ROW}"]`)).not.toBeInTheDocument();
 	});
 
 	it('should not render swap details when no source token', () => {
@@ -230,7 +231,7 @@ describe('SwapSolForm', () => {
 			context: contextWithoutSource
 		});
 
-		expect(container.querySelector('hr')).not.toBeInTheDocument();
+		expect(container.querySelector(`[data-tid="${SWAP_FEE_ROW}"]`)).not.toBeInTheDocument();
 	});
 
 	it('should handle loading state', () => {

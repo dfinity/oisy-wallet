@@ -9,6 +9,7 @@
 	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import CollapsibleBottomSheet from '$lib/components/ui/CollapsibleBottomSheet.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import {
@@ -48,6 +49,10 @@
 
 	// Below one cent the gain line would read "+$0.00"; the offer count says more.
 	const MIN_DISPLAYED_GAIN_USD = 0.01;
+	const SMART_SWAP_SLASH_DURATION = 1100;
+	// `PillButton`'s sweep curve. `MOTION_EASE_OUT_CSS` would carry the band across the title in the
+	// first quarter and spend the rest of the time past its end.
+	const SMART_SWAP_SLASH_EASING = 'cubic-bezier(0.4, 0, 0.2, 1)';
 
 	const { store: swapAmountsStore, activity } =
 		getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
@@ -164,9 +169,10 @@
 				})
 			: undefined
 	);
-	// One sentence for translators, split around the amount only to colour it. A manual pick that is
-	// not the best is still worth more than the lowest offer, but showing that as a gain would
-	// present a worse choice as a win, so it gets the offer count instead.
+	// One sentence for translators, split around the amount only to set it in the primary colour:
+	// green would fall below 4.5:1 on white at this size, and "+" already says it is a gain. A
+	// manual pick that is not the best is still worth more than the lowest offer, but showing that
+	// as a gain would present a worse choice as a win, so it gets the offer count instead.
 	let gainParts = $derived.by(() => {
 		if (isNullish(gainAmount) || !isBestRate) {
 			return;
@@ -224,6 +230,34 @@
 				? resolveText({ i18n: $i18n, path: swapDApp.name })
 				: ''
 	);
+
+	// The signature moment: when a foreground round confirms the automatic pick as the best of two
+	// or more offers, a band of brand blue crosses the title once, on the frame the provider plays
+	// its confirmation. A remount (back from Review, the sm/md breakpoint) inherits the confirmation
+	// it is mounted with, as `SwapProviderAnimation` does, so only a later one plays. The title is
+	// plain text before and after, and stays plain under reduced motion.
+	let title = $state<HTMLSpanElement | undefined>();
+	let slashing = $state(false);
+	let lastSlashedConfirmationId = untrack(() => confirmationId);
+	$effect(() => {
+		const confirmation = confirmationId;
+		if (isNullish(confirmation) || confirmation === lastSlashedConfirmationId) {
+			return;
+		}
+		lastSlashedConfirmationId = confirmation;
+		untrack(() => {
+			if (prefersReducedMotion.current || offerCount < 2 || !isBestRate || isNullish(title)) {
+				return;
+			}
+			slashing = true;
+			const animation = title.animate(
+				[{ backgroundPosition: '100% 0' }, { backgroundPosition: '0% 0' }],
+				{ duration: SMART_SWAP_SLASH_DURATION, easing: SMART_SWAP_SLASH_EASING }
+			);
+			animation.onfinish = () => (slashing = false);
+			animation.oncancel = () => (slashing = false);
+		});
+	});
 </script>
 
 {#if isForm}
@@ -254,15 +288,20 @@
 					sets the column's minimum width; the line under it truncates first. A single offer
 					drops the line with its height (see `compact`), so the gap above it is its padding. -->
 					<span class="flex flex-auto flex-col">
-						<span class="text-lg font-bold whitespace-nowrap text-primary"
-							>{$i18n.swap.text.smart_swap}</span
+						<span
+							bind:this={title}
+							class="text-lg font-bold whitespace-nowrap text-primary"
+							class:smart-slash={slashing}>{$i18n.swap.text.smart_swap}</span
 						>
 						{#if !compact}
 							<span class="flex w-0 min-w-full pt-0.5 text-sm whitespace-nowrap" transition:slide>
 								{#if comparingLayout}
+									<!-- While a foreground round compares, a light band runs through the status, the
+									way a thinking line does; it never gets lighter than the tertiary text. -->
 									<span
 										class="truncate text-tertiary transition-opacity duration-150 ease-in motion-reduce:duration-100"
 										class:opacity-0={!comparing}
+										class:smart-thinking={comparing}
 										aria-hidden="true"
 										in:fade={labelIn}>{$i18n.swap.text.finding_best_rate}</span
 									>
@@ -274,7 +313,7 @@
 									>
 										{#if nonNullish(gainParts)}
 											<span class="text-tertiary"
-												>{gainParts.before}<span class="font-semibold text-success-primary"
+												>{gainParts.before}<span class="font-semibold text-primary"
 													>{gainParts.amount}</span
 												>{gainParts.after}</span
 											>
@@ -326,6 +365,10 @@
 						<IconChevronRight size="20" />
 					</span>
 				</button>
+				<!-- The form's one separator, between the cell and the fee row: the cell sits with the
+				amounts it prices, the fees below it. It leaves with the cell, so a form with no offer
+				has none. -->
+				<Hr />
 			{:else if nonNullish(swapDApp) && nonNullish(selectedProvider) && nonNullish($swapAmountsStore)}
 				<CollapsibleBottomSheet showContentHeader>
 					{#snippet contentHeader({ isInBottomSheet })}
@@ -374,3 +417,54 @@
 		</div>
 	</div>
 {/if}
+
+<style lang="scss">
+	// The band rides on the glyphs (`background-clip: text`), so the title keeps its box, its
+	// accessible text and its colour on either side of the band. Logo blue on the edges, the
+	// lighter brand blue in the core where the theme has one.
+	.smart-slash {
+		background: linear-gradient(
+				110deg,
+				var(--color-foreground-primary) 0 40%,
+				var(--color-foreground-brand-primary) 46%,
+				var(--color-foreground-brand-primary-alt) 50%,
+				var(--color-foreground-brand-primary) 54%,
+				var(--color-foreground-primary) 60% 100%
+			)
+			100% 0 / 250% 100%;
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+	}
+
+	.smart-thinking {
+		background: linear-gradient(
+				90deg,
+				var(--color-foreground-tertiary) 0 35%,
+				var(--color-foreground-primary) 50%,
+				var(--color-foreground-tertiary) 65% 100%
+			)
+			0 0 / 300% 100%;
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+		animation: smart-thinking 1600ms linear infinite;
+	}
+
+	@keyframes smart-thinking {
+		from {
+			background-position: 100% 0;
+		}
+		to {
+			background-position: 0% 0;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.smart-thinking {
+			animation: none;
+			background: none;
+			color: var(--color-foreground-tertiary);
+		}
+	}
+</style>

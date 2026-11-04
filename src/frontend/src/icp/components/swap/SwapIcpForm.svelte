@@ -8,7 +8,6 @@
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { oisyTradeSwapPairTable } from '$lib/services/oisy-trade-swap.services';
@@ -347,8 +346,6 @@
 
 	{#snippet swapDetails()}
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
-			<Hr spacing="md" />
-
 			<div class="flex flex-col">
 				<SwapProvider isForm {onShowProviderList} showSelectButton {slippageValue} />
 				<SwapFeeRow displayExchangeRate={false}>

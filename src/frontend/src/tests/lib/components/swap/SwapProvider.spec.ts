@@ -110,6 +110,112 @@ describe('SwapProvider form cell', () => {
 
 	afterEach(() => vi.useRealTimers());
 
+	it("draws the form's one separator under the cell, and none without a cell", async () => {
+		const { container, getByTestId } = render(SwapProviderHeader, { props, context });
+
+		// No offer and no round: the fee row has nothing above it to separate from.
+		expect(container.querySelector('hr')).toBeNull();
+
+		store.setSwaps({ swaps: [offer], selectedProvider: offer, amountForSwap: '1' });
+		await tick();
+
+		const separator = container.querySelector('hr');
+
+		expect(separator).not.toBeNull();
+		expect(getByTestId(SWAP_PROVIDER_CELL).nextElementSibling).toBe(separator);
+	});
+
+	it('runs the thinking shimmer on the status only while a foreground round compares', async () => {
+		activity.start({ requestId: 30, background: false });
+		activity.addProvider({ requestId: 30, provider: SwapProvider.ICP_SWAP });
+		const { getByText } = render(SwapProviderHeader, { props, context });
+		await tick();
+
+		expect(getByText(en.swap.text.finding_best_rate, visibleOnly)).toHaveClass('smart-thinking');
+
+		store.setSwaps({ swaps: [offer], selectedProvider: offer, amountForSwap: '1' });
+		activity.complete({ requestId: 30 });
+		await tick();
+		await tick();
+
+		expect(document.querySelector('.smart-thinking')).toBeNull();
+	});
+
+	describe('signature slash on the title', () => {
+		const slashes = (animate: MockInstance<Element['animate']>) =>
+			animate.mock.calls.filter(
+				([frames]) =>
+					Array.isArray(frames) && frames.some((frame) => frame.backgroundPosition !== undefined)
+			);
+
+		const confirmRound = async ({
+			requestId,
+			swaps
+		}: {
+			requestId: number;
+			swaps: SwapMappedResult[];
+		}) => {
+			activity.start({ requestId, background: false });
+			activity.addProvider({ requestId, provider: swaps[0].provider });
+			const view = render(SwapProviderHeader, { props, context: contextWithRate(2) });
+			store.setSwaps({ swaps, selectedProvider: swaps[0], amountForSwap: '1' });
+			activity.complete({ requestId });
+			await tick();
+			await tick();
+			return view;
+		};
+
+		it('crosses the title once when a round confirms the best of several offers', async () => {
+			const animate = vi.spyOn(Element.prototype, 'animate');
+			const { getByText } = await confirmRound({
+				requestId: 40,
+				swaps: [bestOffer, lowestOffer]
+			});
+			const title = getByText(en.swap.text.smart_swap);
+
+			expect(slashes(animate)).toHaveLength(1);
+			expect(animate.mock.contexts[animate.mock.calls.indexOf(slashes(animate)[0])]).toBe(title);
+			expect(title).toHaveClass('smart-slash');
+		});
+
+		it('does not cross the title for a single offer', async () => {
+			const animate = vi.spyOn(Element.prototype, 'animate');
+			const { getByText } = await confirmRound({ requestId: 41, swaps: [offer] });
+
+			expect(slashes(animate)).toHaveLength(0);
+			expect(getByText(en.swap.text.smart_swap)).not.toHaveClass('smart-slash');
+		});
+
+		it('does not cross the title with reduced motion', async () => {
+			motion.reduced = true;
+			const animate = vi.spyOn(Element.prototype, 'animate');
+			const { getByText } = await confirmRound({
+				requestId: 42,
+				swaps: [bestOffer, lowestOffer]
+			});
+
+			expect(slashes(animate)).toHaveLength(0);
+			expect(getByText(en.swap.text.smart_swap)).not.toHaveClass('smart-slash');
+		});
+
+		it('does not cross the title on a background refresh', async () => {
+			store.setSwaps({
+				swaps: [bestOffer, lowestOffer],
+				selectedProvider: bestOffer,
+				amountForSwap: '1'
+			});
+			render(SwapProviderHeader, { props, context: contextWithRate(2) });
+			await tick();
+			const animate = vi.spyOn(Element.prototype, 'animate');
+			activity.start({ requestId: 43, background: true });
+			activity.complete({ requestId: 43 });
+			await tick();
+			await tick();
+
+			expect(slashes(animate)).toHaveLength(0);
+		});
+	});
+
 	it('announces the comparison and the provider it picks from one region outside the cell', async () => {
 		vi.useFakeTimers();
 		const { container, getByTestId, getByText } = render(SwapProviderHeader, { props, context });
@@ -294,11 +400,11 @@ describe('SwapProvider form cell', () => {
 			context: contextWithRate(2)
 		});
 
-		// One translatable sentence; only the amount is coloured.
+		// One translatable sentence; only the amount stands out, in the primary text colour.
 		expect(getByTestId(SWAP_PROVIDER_CELL)).toHaveTextContent(
 			replacePlaceholders(en.swap.text.smart_swap_gain, { $amount: '+$1.00' })
 		);
-		expect(getByText('+$1.00')).toHaveClass('text-success-primary');
+		expect(getByText('+$1.00')).toHaveClass('text-primary');
 		expect(queryByText(bestOfTwoOffers)).not.toBeInTheDocument();
 		expect(bestRateOf(getByText(en.swap.text.best_rate))).not.toHaveClass('opacity-0');
 		expect(bestRateOf(getByText(en.swap.text.best_rate))).toHaveAttribute('aria-hidden', 'false');

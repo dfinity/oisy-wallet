@@ -412,6 +412,17 @@ replay from a completed snapshot, review remount, manual selection or periodic r
 remounted across the sm/md breakpoint inherits the confirmation it mounts with, so it does not
 squeeze again.
 
+The form cell has one signature moment on top of that squeeze. When the confirmation is the best of
+two or more offers, a band of brand blue crosses the "OISY Smart Swap" title once (`smart-slash`:
+a 110° gradient of `foreground-primary` and `foreground-brand-primary` / `-primary-alt`, clipped
+to the glyphs, animated on `background-position` for 1100 ms with `PillButton`'s
+`cubic-bezier(0.4, 0, 0.2, 1)`). It follows the same rules as the squeeze: no replay on a remount,
+nothing on a background refresh, a manual pick or a single offer, and nothing under reduced
+motion. While a foreground round compares, the status line runs a 1600 ms "thinking" band
+(`smart-thinking`) from `foreground-tertiary` to `foreground-primary` and back, never lighter
+than the plain line, and reduced motion shows the plain line. Both are scoped styles in
+`SwapProvider`; the title and the status stay real text.
+
 Foreground activity starts when the coordinator queues the round, before its 300 ms debounce,
 and keeps one request identity through pricing. Track the source/destination `TokenId` values,
 not token-object emissions: `initSwapContext` re-emits its selected token objects on unrelated
@@ -457,15 +468,19 @@ resting fill, so it does not compete with the amounts: `row-feedback` only while
 tapped, and `-mx-2 px-2 md:-mx-3 md:px-3` so its text lines up with the fee row while the hover
 fill bleeds past it. Its type is the app's list row (`LogoButton`, as in the offers list): the
 title and the provider name `text-lg font-bold`, the line under the title `text-sm
-text-tertiary`, and Best Rate the shared `BestRateBadge`. It is one `<button>` that opens the provider step (`onShowProviderList`): the selected offer's details on top, every offer below with
-the current one checked. Tapping the checked offer only goes back: `setManualProvider` would pin
-the automatic pick, and a better offer in the next round could no longer replace it. The cell
+text-tertiary`, and Best Rate the shared `BestRateBadge`. It is one `<button>` that opens the provider step (`onShowProviderList`): the selected offer's
+details in a grey `bg-secondary` card on top (not the rows' hover tint, as it is not tappable),
+every offer below. The card is the one mark of the pick, so the rows carry no check, and with a
+single offer the card is the whole step, with no list and no Best Rate. Tapping the offer in use only goes back:
+`setManualProvider` would pin the automatic pick, and a better offer in the next round could no
+longer replace it. The cell
 replaces the old Select link and the inline details disclosure, and stays disabled while a
 foreground round compares, since the details would describe a stale offer. The left column holds
 the "OISY Smart Swap" title and one line under it: the status while comparing, then, when the
 pick is the best rate, what it is worth, "Est. +$X vs. lowest quote" (`calculateSwapGainUsd`,
 receive amount × the destination rate, shown from $0.01). That sentence is one i18n key; the
-component splits it at `$amount` only to colour the amount. Otherwise the line counts the offers
+component splits it at `$amount` only to set the amount in `text-primary font-semibold` (green
+falls below 4.5:1 on white at 14 px). Otherwise the line counts the offers
 ("Best of N offers", "N offers compared" for a manual non-best pick), so a worse manual pick is
 never shown as a gain. A single offer is one row (`compact`): the title and the provider, with
 neither the line nor the Best Rate slot, both of which leave with `slide`. Later rounds for the
@@ -485,8 +500,10 @@ the name.
 
 No hard cuts in the section. The Smart Swap row and the fee row (`SwapFeeRow`) open and close
 with `slide` (height, 250 ms) while their content fades up 4 px with `fly`; the fee row follows
-`SWAP_DETAILS_ROW_STAGGER_MS` (60 ms) later. The 12 px gap is `pb-3` inside the sliding row, not
-the forms' flex gap, so it animates with the height. The cell never swaps labels in one frame:
+`SWAP_DETAILS_ROW_STAGGER_MS` (60 ms) later. The form's only separator is an `Hr` under the cell,
+inside its sliding row: the cell sits with the amounts it prices and the fees below the line, and
+a form with no offer has no line. The 12 px gap under it is `pb-3` inside the sliding row, not the
+forms' flex gap, so both animate with the height. The cell never swaps labels in one frame:
 `comparingLayout` follows `comparing` one `MOTION_SWAP_DURATION` late, so the result line and
 Best Rate, or the status, fade out in place before the cell re-lays out and the incoming ones
 fade in. Best Rate shows whenever the selected provider is the top offer, a single offer

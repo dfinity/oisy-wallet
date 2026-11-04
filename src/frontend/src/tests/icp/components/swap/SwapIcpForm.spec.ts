@@ -8,6 +8,7 @@ import {
 	CONVERT_AMOUNT_DISPLAY_SKELETON,
 	CONVERT_AMOUNT_EXCHANGE_SKELETON,
 	MAX_BUTTON,
+	SWAP_FEE_ROW,
 	SWAP_PROVIDER_STATUS,
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
@@ -189,7 +190,7 @@ describe('SwapIcpForm', () => {
 			context: contextWithoutDestination
 		});
 
-		expect(container.querySelector('hr')).not.toBeInTheDocument();
+		expect(container.querySelector(`[data-tid="${SWAP_FEE_ROW}"]`)).not.toBeInTheDocument();
 	});
 
 	it('should handle loading state', () => {
@@ -256,7 +257,7 @@ describe('SwapIcpForm', () => {
 			context: contextWithoutSource
 		});
 
-		expect(container.querySelector('hr')).not.toBeInTheDocument();
+		expect(container.querySelector(`[data-tid="${SWAP_FEE_ROW}"]`)).not.toBeInTheDocument();
 	});
 
 	it('should calculate total fee as double for ICRC2 tokens', () => {

@@ -12,6 +12,8 @@
 		visible: boolean;
 		content: Snippet;
 		footer?: Snippet;
+		// Shown on the header row beside the close button, instead of leaving that row empty.
+		title?: string;
 		contentClass?: string;
 		testId?: string;
 		onClose?: () => void;
@@ -22,6 +24,7 @@
 		visible = $bindable(),
 		content,
 		footer,
+		title,
 		contentClass = 'min-h-[30vh]',
 		ariaLabel,
 		testId,
@@ -48,17 +51,33 @@
 	<div class="fixed inset-0 z-14" data-tid={testId}>
 		<BottomSheetContainer {ariaLabel} onClose={handleClose} transition>
 			{#snippet header()}
-				<div class="w-full p-4">
-					<ButtonIcon
-						ariaLabel={$i18n.core.alt.close_details}
-						onclick={handleClose}
-						styleClass="text-disabled float-right"
-					>
-						{#snippet icon()}
-							<IconClose size="24" />
-						{/snippet}
-					</ButtonIcon>
-				</div>
+				{#if nonNullish(title)}
+					<div class="flex w-full items-center justify-between gap-4 p-4">
+						<span class="text-lg font-bold">{title}</span>
+
+						<ButtonIcon
+							ariaLabel={$i18n.core.alt.close_details}
+							onclick={handleClose}
+							styleClass="text-disabled"
+						>
+							{#snippet icon()}
+								<IconClose size="24" />
+							{/snippet}
+						</ButtonIcon>
+					</div>
+				{:else}
+					<div class="w-full p-4">
+						<ButtonIcon
+							ariaLabel={$i18n.core.alt.close_details}
+							onclick={handleClose}
+							styleClass="text-disabled float-right"
+						>
+							{#snippet icon()}
+								<IconClose size="24" />
+							{/snippet}
+						</ButtonIcon>
+					</div>
+				{/if}
 			{/snippet}
 
 			<div class="w-full p-4 {contentClass}">

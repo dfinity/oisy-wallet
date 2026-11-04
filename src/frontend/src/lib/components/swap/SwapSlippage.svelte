@@ -26,12 +26,14 @@
 
 	let status = $derived(getSwapSlippageStatus({ slippageValue, maxSlippageInvalidValue }));
 
+	// The tint is the background only: brand, warning and error text on their own tints stay under
+	// 4.5:1 in one theme or the other, so the value keeps the primary text colour.
 	let tint = $derived(
 		status === 'invalid'
-			? 'bg-error-subtle-10 text-error-primary'
+			? 'bg-error-subtle-10'
 			: status === 'warning'
-				? 'bg-warning-subtle-10 text-warning-primary'
-				: 'bg-brand-subtle-20 text-brand-primary'
+				? 'bg-warning-subtle-10'
+				: 'bg-brand-subtle-20'
 	);
 
 	let hoverTint = $derived(
@@ -56,7 +58,7 @@
 	     Not rendered rather than hidden, so the close button keeps its full tap area there. -->
 	<Responsive up="md">
 		<span
-			class={`me-3 flex items-center rounded-md px-2 py-0.5 text-sm font-bold whitespace-nowrap ${tint}`}
+			class={`me-3 flex items-center rounded-md px-2 py-0.5 text-sm font-bold whitespace-nowrap text-primary ${tint}`}
 		>
 			<span class="sr-only">{$i18n.swap.text.max_slippage} </span>
 			{formatSwapSlippageShort(parsedValue)}%
@@ -65,7 +67,7 @@
 {:else}
 	<button
 		bind:this={button}
-		class={`hit-area relative me-3 flex items-center gap-1 rounded-md px-2 py-0.5 text-sm font-bold whitespace-nowrap transition-colors duration-150 ease-out press ${tint} ${hoverTint}`}
+		class={`hit-area relative me-3 flex items-center gap-1 rounded-md px-2 py-0.5 text-sm font-bold whitespace-nowrap text-primary transition-colors duration-150 ease-out press ${tint} ${hoverTint}`}
 		aria-expanded={visible}
 		aria-haspopup="dialog"
 		aria-label={$i18n.swap.text.max_slippage}
@@ -77,11 +79,16 @@
 		<IconSettings size="16" />
 	</button>
 
-	<ResponsivePopover ariaLabel={$i18n.swap.text.max_slippage} {button} bind:visible>
+	<!-- The editor fills the sheet, so it drops the sheet's minimum height and the space it leaves. -->
+	<ResponsivePopover
+		ariaLabel={$i18n.swap.text.max_slippage}
+		{button}
+		sheetContentClass=""
+		title={$i18n.swap.text.max_slippage}
+		bind:visible
+	>
 		{#snippet content()}
 			<div class="w-full md:w-90">
-				<p class="mb-3 text-sm font-bold">{$i18n.swap.text.max_slippage}</p>
-
 				<SwapSlippageEditor
 					{maxSlippageInvalidValue}
 					onPresetValueClick={() => (visible = false)}

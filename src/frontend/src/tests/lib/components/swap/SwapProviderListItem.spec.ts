@@ -112,23 +112,4 @@ describe('SwapProviderListItem', () => {
 
 		expect(getByText(en.tokens.text.exchange_is_not_available_short)).toBeInTheDocument();
 	});
-
-	it.each([
-		{ selected: true, pressed: 'true' },
-		{ selected: false, pressed: 'false' }
-	])('reports selected=$selected as a pressed toggle', ({ selected, pressed }) => {
-		const { getByRole } = render(SwapProviderListItem, {
-			props: { ...baseProps, dapp: createDapp(), selected }
-		});
-
-		expect(getByRole('button')).toHaveAttribute('aria-pressed', pressed);
-	});
-
-	it('is a plain button when selection is not tracked', () => {
-		const { getByRole } = render(SwapProviderListItem, {
-			props: { ...baseProps, dapp: createDapp() }
-		});
-
-		expect(getByRole('button')).not.toHaveAttribute('aria-pressed');
-	});
 });

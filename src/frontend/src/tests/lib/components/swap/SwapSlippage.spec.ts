@@ -33,11 +33,11 @@ describe('SwapSlippage', () => {
 	});
 
 	describe('trigger', () => {
-		it('should show the value in the brand tint, beside the settings icon', () => {
+		it('should show the value in primary text on the brand tint, beside the settings icon', () => {
 			const { trigger } = renderSlippage();
 
 			expect(trigger).toHaveTextContent(/^1\.5%$/);
-			expect(trigger).toHaveClass('bg-brand-subtle-20', 'text-brand-primary');
+			expect(trigger).toHaveClass('bg-brand-subtle-20', 'text-primary');
 			expect(trigger.querySelectorAll('svg')).toHaveLength(1);
 		});
 
@@ -74,7 +74,7 @@ describe('SwapSlippage', () => {
 			const { trigger } = renderSlippage({ slippageValue: '8' });
 
 			expect(trigger).toHaveTextContent(/^8%$/);
-			expect(trigger).toHaveClass('bg-warning-subtle-10', 'text-warning-primary');
+			expect(trigger).toHaveClass('bg-warning-subtle-10', 'text-primary');
 			expect(trigger.querySelectorAll('svg')).toHaveLength(1);
 		});
 
@@ -88,7 +88,7 @@ describe('SwapSlippage', () => {
 				const { trigger } = renderSlippage({ slippageValue });
 
 				expect(trigger).toHaveTextContent(label);
-				expect(trigger).toHaveClass('bg-error-subtle-10', 'text-error-primary');
+				expect(trigger).toHaveClass('bg-error-subtle-10', 'text-primary');
 				expect(trigger.querySelectorAll('svg')).toHaveLength(1);
 			}
 		);
@@ -150,7 +150,7 @@ describe('SwapSlippage', () => {
 
 			const pill = getByText(en.swap.text.max_slippage).parentElement;
 
-			expect(pill).toHaveClass('bg-warning-subtle-10', 'text-warning-primary');
+			expect(pill).toHaveClass('bg-warning-subtle-10', 'text-primary');
 			expect(pill?.className).not.toContain('hover:');
 		});
 	});
@@ -177,6 +177,33 @@ describe('SwapSlippage', () => {
 			await waitFor(() => expect(getByTestId('bottom-sheet')).toBeInTheDocument());
 
 			expect(queryByTestId('popover-content')).not.toBeInTheDocument();
+		});
+
+		// The sheet's header row carries the title beside its close button, and the editor drops the
+		// sheet's minimum height, which only left empty space under it.
+		it('should title the phone sheet in its header, without a minimum height', async () => {
+			screensStore.set('xs');
+
+			const { trigger, getByTestId, getByText } = renderSlippage();
+
+			await fireEvent.click(trigger);
+
+			const sheet = await waitFor(() => getByTestId('bottom-sheet'));
+
+			const title = getByText(en.swap.text.max_slippage, { selector: 'span' });
+
+			expect(title.nextElementSibling).toHaveAttribute('aria-label', en.core.alt.close_details);
+			expect(sheet.querySelector('.min-h-\\[30vh\\]')).toBeNull();
+		});
+
+		it('should title the popover above the editor', async () => {
+			const { trigger, getByTestId } = renderSlippage();
+
+			await fireEvent.click(trigger);
+
+			const popover = await waitFor(() => getByTestId('popover-content'));
+
+			expect(within(popover).getByText(en.swap.text.max_slippage)).toBeInTheDocument();
 		});
 
 		it('should hold the input, the presets and the limit', async () => {
