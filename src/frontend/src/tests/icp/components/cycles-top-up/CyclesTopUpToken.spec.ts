@@ -83,48 +83,31 @@ describe('CyclesTopUpToken', () => {
 		expect(onCancel).toHaveBeenCalledOnce();
 	});
 
-	const clickOption = async ({ options, index }: { options: HTMLElement[]; index: number }) => {
-		const button = options[index].querySelector('button');
-
-		assertNonNullish(button);
-
-		await fireEvent.click(button);
-	};
-
-	it('shows a token that cannot pay, says why and does not pick it', async () => {
-		const onSelect = vi.fn();
-
+	it('shows a token that cannot pay and says why, with nothing to pick it by', () => {
 		// Twice the TCYCLES fee: nothing above the fee is left to top up with.
 		balancesStore.set({ id: mockTcyclesToken.id, data: { data: 200_000_000n, certified: true } });
 
-		const { getAllByTestId } = renderToken({ tokens: [ICP_TOKEN, mockTcyclesToken], onSelect });
+		const { getAllByTestId } = renderToken({ tokens: [ICP_TOKEN, mockTcyclesToken] });
 
 		const options = getAllByTestId(CYCLES_TOP_UP_TOKEN_OPTION);
 
 		expect(options[0]).not.toHaveTextContent(en.cycles_top_up.text.not_enough_to_pay);
+		expect(options[0].querySelector('button')).not.toBeNull();
 		expect(options[1]).toHaveTextContent(mockTcyclesToken.symbol);
+		expect(options[1]).toHaveTextContent('0.0002');
 		expect(options[1]).toHaveTextContent(en.cycles_top_up.text.not_enough_to_pay);
-		expect(options[1].querySelector('[inert]')).not.toBeNull();
-
-		await clickOption({ options, index: 1 });
-
-		expect(onSelect).not.toHaveBeenCalled();
+		expect(options[1].querySelector('button')).toBeNull();
 	});
 
-	it('shows a token whose balance has not loaded without picking it or saying why', async () => {
-		const onSelect = vi.fn();
-
+	it('shows a token whose balance has not loaded without saying why or anything to pick it by', () => {
 		balancesStore.reset(mockTcyclesToken.id);
 
-		const { getAllByTestId } = renderToken({ tokens: [ICP_TOKEN, mockTcyclesToken], onSelect });
+		const { getAllByTestId } = renderToken({ tokens: [ICP_TOKEN, mockTcyclesToken] });
 
 		const options = getAllByTestId(CYCLES_TOP_UP_TOKEN_OPTION);
 
 		expect(options[1]).not.toHaveTextContent(en.cycles_top_up.text.not_enough_to_pay);
-
-		await clickOption({ options, index: 1 });
-
-		expect(onSelect).not.toHaveBeenCalled();
+		expect(options[1].querySelector('button')).toBeNull();
 	});
 
 	describe('a token that is not enabled', () => {
@@ -138,26 +121,22 @@ describe('CyclesTopUpToken', () => {
 			vi.spyOn(authDerived, 'authIdentity', 'get').mockReturnValue(readable(mockIdentity));
 		});
 
-		it('offers Enable where its balance would be, and does not pick it', async () => {
-			const onSelect = vi.fn();
-
-			const { getAllByTestId, getByTestId } = renderToken({
-				tokens: [ICP_TOKEN, disabled],
-				onSelect
-			});
+		it('offers Enable where its balance would be, as its only button', () => {
+			const { getAllByTestId, getByTestId } = renderToken({ tokens: [ICP_TOKEN, disabled] });
 
 			const options = getAllByTestId(CYCLES_TOP_UP_TOKEN_OPTION);
 
 			expect(options[1]).toHaveTextContent(mockTcyclesToken.symbol);
 			// No balance, as other lists hide it for a token that is not enabled.
 			expect(options[1]).not.toHaveTextContent('2');
-			expect(getByTestId(CYCLES_TOP_UP_TOKEN_ENABLE_BUTTON)).toHaveAccessibleName(
+
+			const enable = getByTestId(CYCLES_TOP_UP_TOKEN_ENABLE_BUTTON);
+
+			expect([...options[1].querySelectorAll('button')]).toEqual([enable]);
+			expect(enable).toHaveTextContent(en.cycles_top_up.text.enable_token);
+			expect(enable).toHaveAccessibleName(
 				replacePlaceholders(en.cycles_top_up.alt.enable_token, { $token: mockTcyclesToken.symbol })
 			);
-
-			await clickOption({ options, index: 1 });
-
-			expect(onSelect).not.toHaveBeenCalled();
 		});
 
 		it('enables it as the Swap enables a destination token', async () => {

@@ -5,6 +5,7 @@
 	import { isCyclesTopUpTokenUsable } from '$icp/utils/cycles-top-up.utils';
 	import { isTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 	import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/icrc-token.services';
+	import Divider from '$lib/components/common/Divider.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
@@ -12,7 +13,6 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
-	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import {
 		CYCLES_TOP_UP_TOKEN,
 		CYCLES_TOP_UP_TOKEN_ENABLE_BUTTON,
@@ -113,68 +113,76 @@
 					{#if state === 'can_pay'}
 						<ModalTokensListItem onClick={() => onSelect(token)} token={tokenUi} />
 					{:else}
-						<div class="flex items-center">
-							<!-- Shown but not picked: `inert` keeps the row out of clicks and the tab order. -->
-							<div class="min-w-0 flex-1" inert>
-								<LogoButton dividers fullWidth hover={false}>
-									{#snippet title()}
-										{nonNullish(tokenUi.oisySymbol)
-											? tokenUi.oisySymbol.oisySymbol
-											: tokenUi.symbol}
-									{/snippet}
+						<!-- Laid out as the rows of the token lists, but not a button: it cannot be picked,
+						     and Enable, when offered, sits in it where the balance would be. -->
+						<div class="flex w-full px-2">
+							<span
+								class="flex w-full flex-row items-center justify-between border-b border-brand-subtle-20 py-3"
+							>
+								<span class="flex min-w-0 items-center">
+									<span class="mr-4 flex">
+										<TokenLogo
+											badge={{ type: 'network' }}
+											color="white"
+											data={tokenUi}
+											logoSize="lg"
+										/>
+									</span>
 
-									{#snippet subtitle()}
-										{#if nonNullish(tokenUi.oisyName?.prefix)}
-											{$i18n.tokens.text.chain_key}
-										{/if}
+									<span class="flex min-w-0 flex-col text-left">
+										<span class="flex min-w-0 items-center truncate text-nowrap">
+											<span class="text-lg font-bold text-nowrap text-primary">
+												{nonNullish(tokenUi.oisySymbol)
+													? tokenUi.oisySymbol.oisySymbol
+													: tokenUi.symbol}
+											</span>
 
-										{getTokenDisplayName(tokenUi)}
-									{/snippet}
+											<span class="text-tertiary"><Divider /></span>
 
-									{#snippet description()}
-										{tokenUi.network.name}
-									{/snippet}
+											<span class="truncate text-base text-nowrap text-tertiary">
+												{#if nonNullish(tokenUi.oisyName?.prefix)}
+													{$i18n.tokens.text.chain_key}
+												{/if}
 
-									{#snippet logo()}
-										<div class="mr-2">
-											<TokenLogo
-												badge={{ type: 'network' }}
-												color="white"
-												data={tokenUi}
-												logoSize="lg"
-											/>
-										</div>
-									{/snippet}
+												{getTokenDisplayName(tokenUi)}
+											</span>
+										</span>
 
-									{#snippet titleEnd()}
-										{#if state !== 'not_enabled'}
-											<div class="ml-1 min-w-12 text-nowrap">
+										<span class="truncate text-sm text-tertiary">{tokenUi.network.name}</span>
+									</span>
+								</span>
+
+								<span class="ml-2 flex shrink-0 items-center text-nowrap">
+									{#if state === 'not_enabled'}
+										<!-- The same button as Send's choice between sending and topping up. -->
+										<Button
+											ariaLabel={replacePlaceholders($i18n.cycles_top_up.alt.enable_token, {
+												$token: token.symbol
+											})}
+											disabled={enabling}
+											loading={enabling}
+											onclick={() => enable(token)}
+											paddingSmall
+											styleClass="min-w-30 text-nowrap"
+											testId={CYCLES_TOP_UP_TOKEN_ENABLE_BUTTON}
+										>
+											{$i18n.cycles_top_up.text.enable_token}
+										</Button>
+									{:else}
+										<span class="flex flex-col text-right text-nowrap">
+											<span class="ml-1 block min-w-12 text-lg font-bold text-nowrap">
 												<TokenBalance data={tokenUi} />
-											</div>
-										{/if}
-									{/snippet}
+											</span>
 
-									{#snippet descriptionEnd()}
-										{#if state === 'too_low'}
-											{$i18n.cycles_top_up.text.not_enough_to_pay}
-										{/if}
-									{/snippet}
-								</LogoButton>
-							</div>
-
-							{#if state === 'not_enabled'}
-								<Button
-									ariaLabel={replacePlaceholders($i18n.cycles_top_up.alt.enable_token, {
-										$token: token.symbol
-									})}
-									disabled={enabling}
-									link
-									loading={enabling}
-									onclick={() => enable(token)}
-									testId={CYCLES_TOP_UP_TOKEN_ENABLE_BUTTON}
-									>{$i18n.cycles_top_up.text.enable_token}</Button
-								>
-							{/if}
+											{#if state === 'too_low'}
+												<span class="text-sm text-nowrap text-tertiary">
+													{$i18n.cycles_top_up.text.not_enough_to_pay}
+												</span>
+											{/if}
+										</span>
+									{/if}
+								</span>
+							</span>
 						</div>
 					{/if}
 				</li>
