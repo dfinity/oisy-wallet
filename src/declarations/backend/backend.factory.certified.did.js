@@ -784,9 +784,6 @@ export const idlFactory = ({ IDL }) => {
 	const EvmTransactionData = IDL.Record({
 		nft_token_id: IDL.Opt(IDL.Nat),
 		data: IDL.Opt(IDL.Text),
-		chain_id: IDL.Opt(IDL.Nat64),
-		nonce: IDL.Opt(IDL.Nat64),
-		gas_limit: IDL.Opt(IDL.Nat),
 		gas_used: IDL.Opt(IDL.Nat),
 		gas_price: IDL.Opt(IDL.Nat)
 	});
@@ -829,7 +826,9 @@ export const idlFactory = ({ IDL }) => {
 		transactions: IDL.Vec(UserTransaction)
 	});
 	const UserTransactionError = IDL.Variant({
+		TooManyTokens: IDL.Null,
 		DuplicateTransaction: IDL.Record({ id: IDL.Text }),
+		RateLimited: RateLimitError,
 		InternalError: IDL.Record({ msg: IDL.Text }),
 		TooManyTransactions: IDL.Null,
 		UserNotFound: IDL.Null
