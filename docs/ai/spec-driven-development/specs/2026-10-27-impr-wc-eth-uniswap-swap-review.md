@@ -71,7 +71,11 @@ All of the following hold; otherwise the review stays exactly as it is today for
    `PAY_PORTION_FULL_PRECISION`, `TRANSFER` of a stated amount, or the V4 `TAKE_PORTION`.
 7. At most one `PERMIT2_PERMIT`, and it names this router as the spender.
 8. OISY lists every token the review names (paid, received, fee and approved tokens) on that
-   network, enabled or not. A native coin is the network's own.
+   network, enabled or not, by default or because the user added it. A native coin is the
+   network's own.
+9. The received token is not one the user added. Every minimum but a V2 exact input's is checked
+   on what the router or a pool sends, and such a token may keep part of each transfer. The tokens
+   OISY lists by default are taken to transfer in full.
 
 ### Pinned routers
 
@@ -222,8 +226,9 @@ Only from checks the router enforces:
    address. `PAY_PORTION_FULL_PRECISION` of 4 × 10^11 in 10^18: "< 0.0001% of USDC".
 10. A V4 swap (`SWAP_EXACT_IN` with `SETTLE` and a `TAKE` of the whole amount to the wallet):
     described, with the V4 swap's minimum output as the minimum.
-11. A plan with `EXECUTE_SUB_PLAN`, a token OISY doesn't list, two paid tokens, a value with
-    bits beyond its type, or a 2.0.0 layout sent to a 2.1.x router (or the reverse): unknown.
+11. A plan with `EXECUTE_SUB_PLAN`, a token OISY doesn't list, a received token the user added,
+    two paid tokens, a value with bits beyond its type, or a 2.0.0 layout sent to a 2.1.x router
+    (or the reverse): unknown.
 12. An exact-output swap the wallet pays for: "You pay at most" its maximum input. One the router
     pays out of a `PERMIT2_TRANSFER_FROM` or the native value, or that a V4 `SETTLE` of a stated
     amount pays: "You pay" that amount.
@@ -255,4 +260,5 @@ Recommended in the design note of 2026-10-27, which Stefan asked to turn into th
   through Across.
 - `WRAP_ETH` to the wallet or another address, which would need the router's wrapped native token
   per network.
-- Tokens OISY doesn't list.
+- Tokens OISY doesn't list, and swaps into a token the user added, which would need its transfers
+  checked for a fee.

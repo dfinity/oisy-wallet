@@ -752,6 +752,13 @@ const toSwap = ({
 		return;
 	}
 
+	// Every minimum but a V2 exact input's is checked on what the router or a pool sends. A token the
+	// user added may keep part of each transfer, so what arrives of it is no amount OISY can state.
+	// The tokens OISY lists by default are taken to transfer in full.
+	if (received.category === 'custom') {
+		return;
+	}
+
 	const [{ recipient: party }] = deliveries;
 
 	return {
@@ -793,7 +800,8 @@ export interface GetUniswapSwapParams {
 	// The address signing the transaction, which the router knows as its sender.
 	wallet: OptionEthAddress;
 	nativeToken: Token;
-	// The tokens OISY lists, enabled or not. Only those on the request's network are matched.
+	// The tokens OISY lists and those the user added, enabled or not. Only those on the request's
+	// network are matched.
 	tokens: ErcFungibleToken[];
 }
 

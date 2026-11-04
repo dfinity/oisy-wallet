@@ -1281,6 +1281,27 @@ describe('uniswap.utils', () => {
 				expect(getUniswapSwap(params({ data }))).toBeUndefined();
 			});
 
+			// A token the user added may keep part of each transfer, which the router's minimums leave
+			// out.
+			it('should not describe a swap into a token the user added', () => {
+				expect(
+					getUniswapSwap(
+						params({
+							data: eurcToUsdc,
+							tokens: [EURC_TOKEN, { ...USDC_TOKEN, category: 'custom' }]
+						})
+					)
+				).toBeUndefined();
+			});
+
+			it('should describe a swap paying in a token the user added', () => {
+				const eurc = { ...EURC_TOKEN, category: 'custom' as const };
+
+				expect(
+					getUniswapSwap(params({ data: eurcToUsdc, tokens: [eurc, USDC_TOKEN] }))?.paid.token
+				).toBe(eurc);
+			});
+
 			it('should only match tokens listed on the request network', () => {
 				expect(
 					getUniswapSwap(
