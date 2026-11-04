@@ -211,12 +211,13 @@ sequence with a BIP68 relative lock), `InvalidUtxos` (an input that is not the c
 
 1. Per-caller rate limit (new `BTC_BROADCAST_TX_RATE_LIMITER` in
    `src/backend/src/utils/rate_limiter.rs`), then `delegation::require_ii_delegation` exactly as
-   `btc_add_pending_transaction` does. Decided in PR 3: `TieredRateLimiter::per_caller` with **3 per minute
-   and 20 per hour** per caller, like the vetKD derivations, which cost about as much. One call is
-   one send. The minute tier leaves room for a send and a couple of retries; the hour tier is the
-   cost control, about 6.5T cycles per caller at the size cap instead of the 195T that 10 per
-   minute would allow. It has no global tier: a shared budget would let one user with many
-   accounts block every BTC send, so that stays with
+   `btc_add_pending_transaction` does. Decided in PR 3: `TieredRateLimiter::per_caller` with **5 per
+   minute, 20 per hour and 50 per day** per caller, tiered like the vetKD derivations, which cost
+   about as much. One call is one send. The minute tier leaves room for a send and a few retries;
+   the hour and day tiers are the cost control. At the size cap they allow at most about 6.5T
+   cycles per caller an hour and 16T a day, instead of the 195T an hour that 10 per minute would.
+   It has no global tier: a shared budget would let one user with many accounts block every BTC
+   send, so that stays with
    [pending decision 3](#pending-decisions-facts-are-clear--we-just-need-to-decide).
 2. **Decode** with `bitcoin::consensus::deserialize::<Transaction>` (must consume every byte).
    Enforce the caps: serialized size `≤ MAX_BROADCAST_TX_BYTES`, `1 ≤ inputs ≤ MAX_BROADCAST_TX_INPUTS`,

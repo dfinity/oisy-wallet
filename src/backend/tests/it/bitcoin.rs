@@ -608,18 +608,18 @@ fn assert_btc_broadcast_transaction_rate_limited(
     }
 }
 
-/// Calling `btc_broadcast_transaction` more than 3 times within a minute must return
+/// Calling `btc_broadcast_transaction` more than 5 times within a minute must return
 /// `BtcBroadcastTransactionError::RateLimited` for the minute tier.
 #[test]
-fn test_btc_broadcast_transaction_rate_limited_after_3_calls_in_a_minute() {
+fn test_btc_broadcast_transaction_rate_limited_after_5_calls_in_a_minute() {
     let pic_setup = setup();
     // The controller skips the delegation check, so each allowed call reaches the decoding.
     let caller = controller();
     pic_setup.ensure_user_profile(caller);
 
-    call_btc_broadcast_transaction_within_limit(&pic_setup, caller, 3);
+    call_btc_broadcast_transaction_within_limit(&pic_setup, caller, 5);
 
-    assert_btc_broadcast_transaction_rate_limited(&pic_setup, caller, 3, 60 * 1_000_000_000);
+    assert_btc_broadcast_transaction_rate_limited(&pic_setup, caller, 5, 60 * 1_000_000_000);
 }
 
 /// Spread over minutes, calling `btc_broadcast_transaction` more than 20 times within an hour
@@ -630,11 +630,36 @@ fn test_btc_broadcast_transaction_rate_limited_after_20_calls_in_an_hour() {
     let caller = controller();
     pic_setup.ensure_user_profile(caller);
 
-    for _ in 0..6 {
-        call_btc_broadcast_transaction_within_limit(&pic_setup, caller, 3);
+    for _ in 0..4 {
+        call_btc_broadcast_transaction_within_limit(&pic_setup, caller, 5);
         pic_setup.pic.advance_time(Duration::from_secs(61));
     }
-    call_btc_broadcast_transaction_within_limit(&pic_setup, caller, 2);
 
     assert_btc_broadcast_transaction_rate_limited(&pic_setup, caller, 20, 60 * 60 * 1_000_000_000);
+}
+
+/// Spread over hours, calling `btc_broadcast_transaction` more than 50 times within a day must
+/// return `BtcBroadcastTransactionError::RateLimited` for the day tier.
+#[test]
+fn test_btc_broadcast_transaction_rate_limited_after_50_calls_in_a_day() {
+    let pic_setup = setup();
+    let caller = controller();
+    pic_setup.ensure_user_profile(caller);
+
+    // 20 in each of the first two hours and 10 in the third: 50 in all, each hour within the
+    // hour tier, so the next call is refused by the day tier.
+    for calls_this_hour in [20, 20, 10] {
+        for _ in 0..calls_this_hour / 5 {
+            call_btc_broadcast_transaction_within_limit(&pic_setup, caller, 5);
+            pic_setup.pic.advance_time(Duration::from_secs(61));
+        }
+        pic_setup.pic.advance_time(Duration::from_hours(1));
+    }
+
+    assert_btc_broadcast_transaction_rate_limited(
+        &pic_setup,
+        caller,
+        50,
+        24 * 60 * 60 * 1_000_000_000,
+    );
 }
