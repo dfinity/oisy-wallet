@@ -488,6 +488,9 @@ same token pair keep that row, so re-quoting does not grow and shrink it on ever
 provider scroll shows the round, the status region still announces it); a new pair, or a result
 with more offers, brings the two lines back. The cross-chain notice under the amounts (`SwapCrossChainInfo`) is a plain grey
 `MessageBox` (`level="plain"`, `bg-secondary!`), as each amount card already names its network.
+It is regular weight (`font-normal!`), so only the network names are bold. It and the two-swaps
+hint keep `MessageBox`'s own size, like the warnings above them: a `sm:text-sm` override leaves
+the boxes at mixed sizes and the text above centre, since `MessageBox` pads its icon to a 24 px line.
 A hidden Best Rate is also
 `aria-hidden`, so it leaves the cell's accessible name. The title sets the column's minimum width and the line has a
 zero basis (`w-0 min-w-full`), so the line truncates first. The right column is the provider

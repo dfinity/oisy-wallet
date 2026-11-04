@@ -12,10 +12,10 @@
 
 {#if nonNullish($destinationToken) && nonNullish($sourceToken) && $sourceToken.network.id !== $destinationToken.network.id}
 	<div class="mt-4">
-		<!-- Plain and grey: each amount card already names its network, so this only confirms the
-		move and must not outweigh the amounts. Text size and spacing are the shared `MessageBox`
-		ones, like the form's warnings above it. -->
-		<MessageBox level="plain" styleClass="bg-secondary!">
+		<!-- Plain, grey and regular weight, so only the network names are bold: each amount card
+		already names its network, so this only confirms the move and must not outweigh the amounts.
+		The size stays `MessageBox`'s own, like the warnings above it, whose icon row it is padded to. -->
+		<MessageBox level="plain" styleClass="bg-secondary! font-normal!">
 			<Html
 				text={replacePlaceholders($i18n.swap.text.cross_chain_networks_info, {
 					$sourceNetwork: $sourceToken.network.name,
