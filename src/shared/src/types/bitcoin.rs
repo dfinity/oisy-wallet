@@ -150,7 +150,8 @@ pub struct BtcBroadcastTransactionResponse {
     pub txid: Vec<u8>,
 }
 
-/// Every variant up to `FeeTooLow` is returned before anything is reserved or broadcast.
+/// Only `BroadcastOutcomeUnknown` and `BroadcastInProgress` leave open whether the transaction was
+/// broadcast. Every other error means this call broadcast nothing and left nothing reserved.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum BtcBroadcastTransactionError {
     /// The caller has exceeded the call rate limit.
