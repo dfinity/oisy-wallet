@@ -9,12 +9,15 @@ import {
 	UNISWAP_COMMANDS,
 	UNISWAP_CONTRACT_BALANCE,
 	UNISWAP_EXECUTE_HASH,
+	UNISWAP_FULL_PRECISION_DENOMINATOR,
 	UNISWAP_RECIPIENT_ROUTER,
 	UNISWAP_RECIPIENT_SENDER,
 	UNISWAP_V4_ACTIONS
 } from '$eth/constants/uniswap.constants';
 import { getUniswapSwap, type GetUniswapSwapParams } from '$eth/utils/uniswap.utils';
 import { MAX_UINT_160, MAX_UINT_256, ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
+import type { Token } from '$lib/types/token';
+import liveTransactions from '$tests/fixtures/uniswap/base-router-transactions.json';
 import {
 	mockUniswapDeadline as DEADLINE,
 	mockUniswapRouter as ROUTER,
@@ -29,6 +32,7 @@ import {
 	encodeUniswapV3Swap as v3Swap,
 	type MockUniswapCommand as Command
 } from '$tests/mocks/uniswap.mock';
+import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { AbiCoder } from 'ethers/abi';
 import { hexlify } from 'ethers/utils';
 
@@ -1487,6 +1491,93 @@ describe('uniswap.utils', () => {
 
 				expect(getUniswapSwap(params({ data, to: ROUTER_2_0 }))).toBeUndefined();
 			});
+		});
+
+		// Transactions sent to the Base routers, with what each receipt shows moved: what left the
+		// wallet, what reached the recipient, what each fee recipient got and the allowance Permit2 set.
+		describe('live transactions on Base', () => {
+			interface LiveTransaction {
+				hash: string;
+				router: string;
+				from: string;
+				value: string;
+				input: string;
+				// What the review names, as tokens OISY lists by default.
+				tokens: string[];
+				receipt: {
+					paid: { token: string; amount: string };
+					received: { token: string; recipient: string | null; amount: string };
+					fees: { token: string; recipient: string; got: string; routerPaidOut: string }[];
+					permit: { token: string; amount: string; expiration: number } | null;
+				};
+			}
+
+			const { transactions } = liveTransactions as { transactions: LiveTransaction[] };
+
+			const tokenOf = (token: Token): string =>
+				'address' in token ? String(token.address).toLowerCase() : 'native';
+
+			it.each(transactions)(
+				'should state what the receipt of $hash shows',
+				({ router, input, value, from, tokens, receipt }) => {
+					const swap = getUniswapSwap({
+						to: router,
+						data: input,
+						chainId: BASE_NETWORK.chainId,
+						networkId: BASE_NETWORK_ID,
+						value: BigInt(value),
+						wallet: from,
+						nativeToken: BASE_ETH_TOKEN,
+						tokens: tokens.map((address) => ({
+							...USDC_TOKEN,
+							address,
+							symbol: address,
+							name: address
+						}))
+					});
+
+					assertNonNullish(swap);
+
+					const { paid, received, recipient, fees, approval } = swap;
+					const paidByWallet = BigInt(receipt.paid.amount);
+
+					expect(tokenOf(paid.token)).toBe(receipt.paid.token);
+					expect(paidByWallet).toBeLessThanOrEqual(paid.amount);
+					expect(paid.atMost || paidByWallet === paid.amount).toBeTruthy();
+
+					expect(tokenOf(received.token)).toBe(receipt.received.token);
+					expect(recipient?.toLowerCase() ?? null).toBe(receipt.received.recipient);
+					expect(received.amount).toBeLessThanOrEqual(BigInt(receipt.received.amount));
+
+					expect(fees).toHaveLength(receipt.fees.length);
+
+					fees.forEach((fee, index) => {
+						const { token, recipient: feeRecipient, got, routerPaidOut } = receipt.fees[index];
+						// A share is of the router's whole balance of the token, which it pays out between the
+						// fee recipient and the recipient, rounding the share down.
+						const owed =
+							'amount' in fee
+								? fee.amount
+								: (BigInt(routerPaidOut) * fee.share) / UNISWAP_FULL_PRECISION_DENOMINATOR;
+						const tolerance = 'amount' in fee ? ZERO : 1n;
+						const off = BigInt(got) - owed;
+
+						expect(tokenOf(fee.token)).toBe(token);
+						expect(fee.recipient.toLowerCase()).toBe(feeRecipient);
+						expect(off >= -tolerance && off <= tolerance).toBeTruthy();
+					});
+
+					expect(
+						nonNullish(approval)
+							? {
+									token: tokenOf(approval.token),
+									amount: String(approval.amount),
+									expiration: approval.expiration
+								}
+							: null
+					).toEqual(receipt.permit);
+				}
+			);
 		});
 	});
 });
