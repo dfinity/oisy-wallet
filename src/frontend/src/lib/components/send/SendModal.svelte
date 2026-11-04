@@ -3,6 +3,7 @@
 	import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 	import { setContext } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { CYCLES_SEND_OR_TOP_UP_ENABLED } from '$env/cycles-top-up.env';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledErc4626Tokens } from '$eth/derived/erc4626.derived';
@@ -43,6 +44,7 @@
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networks } from '$lib/derived/networks.derived';
 	import { pageCollectionNfts, pageNft } from '$lib/derived/page-nft.derived';
+	import { tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { enabledTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsCyclesTopUp, WizardStepsSend } from '$lib/enums/wizard-steps';
@@ -64,6 +66,7 @@
 	import type { OptionToken, Token, TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import {
 		isNetworkIdBTCMainnet,
 		isNetworkIdBTCTestnet,
@@ -191,7 +194,9 @@
 			filterZeroBalance: true,
 			// eslint-disable-next-line svelte/no-unused-svelte-ignore
 			// svelte-ignore state_referenced_locally -- the modal-tokens-list context is initialized once at mount; the reactive `lockedNetwork` (a $derived) is consumed downstream by `SendTokensList`'s view-only lock.
-			filterNetwork: lockedNetwork ?? $selectedNetwork
+			filterNetwork: lockedNetwork ?? $selectedNetwork,
+			// The asset type filter applies on the assets page only, like the hero's balance.
+			filterCategoryTag: isRouteTokens(page) ? $tokenCategoryFilter : undefined
 		})
 	);
 

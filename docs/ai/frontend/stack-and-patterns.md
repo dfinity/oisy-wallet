@@ -521,11 +521,17 @@ component uses. Never re-implement an icon that already exists.
 - Auth flows go through `@icp-sdk/auth` and the helpers in
   `$lib/services/auth.services` and `$lib/providers/auth-client.providers`.
 - Any HTML coming from backend / user input must be sanitized before
-  `{@html …}`.
+  `{@html …}`. `sanitize` (the `Html` default) drops `<style>` elements: a
+  style element applies to the whole page, and no text we render needs one.
 - Text authored by a third party — e.g. a consent message built from data a
   relying party supplies — goes through `sanitizeUntrusted` (`untrusted` prop
   on `Html` / `Markdown`), which keeps only the markup Markdown can produce.
   Never render it inside a `<form>` that drives a sensitive action.
+- A value we do not author — a token symbol, an NFT collection name —
+  substituted into a translated text that `Html` renders is escaped with
+  `escapeHtml` (`$lib/utils/html.utils`) first, so it shows as plain text.
+  Sanitizing the result is not enough: even `sanitizeUntrusted` keeps the
+  headings, paragraphs and links such a value could carry.
 - External links: `target="_blank"` requires `rel="noopener noreferrer"`.
 - Threshold-signature operations are routed through the chain-fusion
   signer canister — not implemented here. See
