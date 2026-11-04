@@ -2974,6 +2974,7 @@
 			"send_token_on_network_message": "$network 네트워크에서 $token 토큰을 전송하고 싶습니다.",
 			"send_token_message": "$token 토큰을 전송하고 싶습니다.",
 			"send_on_network_message": "$network 네트워크에서 토큰을 전송하고 싶습니다.",
+			"type_send_address_message": "",
 			"send_token_succeeded": "거래가 완료되었습니다!",
 			"show_total_balance_tool_card_title": "총 잔액",
 			"no_contacts_found_message": "죄송합니다. 주소록에서 적합한 연락처를 찾을 수 없습니다.",

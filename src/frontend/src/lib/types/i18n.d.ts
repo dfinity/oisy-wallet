@@ -2513,6 +2513,7 @@ interface I18nAi_assistant {
 		send_token_on_network_message: string;
 		send_token_message: string;
 		send_on_network_message: string;
+		type_send_address_message: string;
 		send_token_succeeded: string;
 		show_total_balance_tool_card_title: string;
 		no_contacts_found_message: string;

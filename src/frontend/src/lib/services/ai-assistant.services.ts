@@ -9,12 +9,14 @@ import {
 	AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED,
 	AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED
 } from '$lib/constants/analytics.constants';
+import { aiAssistantChatMessages } from '$lib/derived/ai-assistant.derived';
 import { enabledMainnetTotalUsdBalance } from '$lib/derived/balances.derived';
 import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
 import { networks } from '$lib/derived/networks.derived';
 import { enabledMainnetFungibleTokensUi } from '$lib/derived/tokens-ui.derived';
 import { enabledTokens, enabledUniqueTokensSymbols } from '$lib/derived/tokens.derived';
 import { trackEvent } from '$lib/services/analytics.services';
+import { i18n } from '$lib/stores/i18n.store';
 import {
 	ToolResultType,
 	type ChatMessageContent,
@@ -23,6 +25,7 @@ import {
 } from '$lib/types/ai-assistant';
 import {
 	generateAiAssistantResponseEventMetadata,
+	isAddressTypedByUser,
 	parseReviewSendTokensToolArguments,
 	parseShowBalanceToolArguments,
 	parseShowFilteredContactsToolArguments
@@ -65,6 +68,7 @@ export const askLlm = async ({
 		identity
 	});
 	const toolResults: ToolResult[] = [];
+	let sendAddressRequested = false;
 	const toolCallsCounters: Record<ToolResultType, number> = {
 		[ToolResultType.REVIEW_SEND_TOKENS]: 0,
 		[ToolResultType.SHOW_BALANCE]: 0,
@@ -78,7 +82,13 @@ export const askLlm = async ({
 
 			if (toolCallsCounters[toolType] < TOOL_CALLS_LIMITS[toolType]) {
 				const result = executeTool({ toolCall, requestStartTimestamp });
-				nonNullish(result) && toolResults.push(result);
+
+				if (nonNullish(result)) {
+					toolResults.push(result);
+				} else {
+					sendAddressRequested = true;
+				}
+
 				toolCallsCounters[toolType] += 1;
 			}
 		}
@@ -90,7 +100,9 @@ export const askLlm = async ({
 	}
 
 	return {
-		text: fromNullable(content),
+		text: sendAddressRequested
+			? get(i18n).ai_assistant.text.type_send_address_message
+			: fromNullable(content),
 		tool: {
 			calls: tool_calls,
 			results: toolResults
@@ -104,7 +116,7 @@ export const askLlm = async ({
  * @async
  * @param {Object} params - The parameters required to launch a tool.
  * @param {Array} params.toolCall - A tool call description object returned by LLM.
- * @returns {ToolResult | undefined} - Returns a tool result or undefined if tool name is unknown.
+ * @returns {ToolResult | undefined} - Returns a tool result, or undefined if a send review needs an address the user has not typed in the chat yet.
  */
 export const executeTool = ({
 	toolCall,
@@ -119,6 +131,7 @@ export const executeTool = ({
 
 	let result: ToolResult['result'] | undefined;
 	let additionalTrackingMetadata: Record<string, string> = {};
+	let sendAddressRequested = false;
 
 	if (name === ToolResultType.SHOW_ALL_CONTACTS) {
 		result = { contacts: Object.values(get(extendedAddressContactsStore)) };
@@ -155,6 +168,13 @@ export const executeTool = ({
 			isNullish(result.token)
 		) {
 			result = undefined;
+		} else if (
+			isNullish(result.contactAddress) &&
+			!isAddressTypedByUser({ address: result.address, messages: get(aiAssistantChatMessages) })
+		) {
+			// Outside the contacts, a send goes only to an address the user typed in this chat; the model's own choice of address is never used. The user is asked to type it instead.
+			result = undefined;
+			sendAddressRequested = true;
 		} else {
 			additionalTrackingMetadata = {
 				requestedToken: result.token.symbol
@@ -170,6 +190,10 @@ export const executeTool = ({
 			additionalMetadata: additionalTrackingMetadata
 		})
 	});
+
+	if (sendAddressRequested) {
+		return;
+	}
 
 	return { type: name as ToolResult['type'], result };
 };
