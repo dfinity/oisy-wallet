@@ -750,10 +750,10 @@ describe('SwapProvider form header', () => {
 		const measure = globalThis.getComputedStyle.bind(globalThis);
 		const computedStyle = vi
 			.spyOn(globalThis, 'getComputedStyle')
-			.mockImplementation((element, pseudoElt) =>
+			.mockImplementation((element) =>
 				element.classList.contains('pb-3')
 					? ({ opacity: '1', height: '40px' } as CSSStyleDeclaration)
-					: measure(element, pseudoElt)
+					: measure(element)
 			);
 		const { getByTestId } = render(SwapProviderHeader, { props, context });
 		activity.start({ requestId: 14, background: false });
