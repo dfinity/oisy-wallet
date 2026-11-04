@@ -251,7 +251,11 @@
 					sets the column's minimum width; the line under it truncates first. A single offer
 					drops the line with its height (see `compact`), so the gap above it is its padding. -->
 					<span class="flex flex-auto flex-col">
-						<span class="text-lg font-bold whitespace-nowrap text-primary"
+						<!-- The title thinks with the status line below it. Only while motion is allowed:
+						the band's reduced-motion fallback is the status line's grey, not the title's black. -->
+						<span
+							class="text-lg font-bold whitespace-nowrap text-primary"
+							class:smart-thinking={comparing && !prefersReducedMotion.current}
 							>{$i18n.swap.text.smart_swap}</span
 						>
 						{#if !compact}

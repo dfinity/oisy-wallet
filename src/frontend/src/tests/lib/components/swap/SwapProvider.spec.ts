@@ -130,6 +130,7 @@ describe('SwapProvider form cell', () => {
 		const beam = getByTestId(SWAP_PROVIDER_CELL).querySelector('.smart-beam');
 
 		expect(getByText(en.swap.text.finding_best_rate, visibleOnly)).toHaveClass('smart-thinking');
+		expect(getByText(en.swap.text.smart_swap)).toHaveClass('smart-thinking');
 		expect(beam).toHaveClass('beaming');
 		expect(beam).toHaveAttribute('aria-hidden', 'true');
 
@@ -142,6 +143,17 @@ describe('SwapProvider form cell', () => {
 		// Still in the card, so it fades out and the next round carries on from where it stopped.
 		expect(beam).toBeInTheDocument();
 		expect(beam).not.toHaveClass('beaming');
+	});
+
+	it('keeps the title plain under reduced motion while the status line falls back to grey', async () => {
+		motion.reduced = true;
+		activity.start({ requestId: 32, background: false });
+		activity.addProvider({ requestId: 32, provider: SwapProvider.ICP_SWAP });
+		const { getByText } = render(SwapProviderHeader, { props, context });
+		await tick();
+
+		expect(getByText(en.swap.text.smart_swap)).not.toHaveClass('smart-thinking');
+		expect(getByText(en.swap.text.finding_best_rate, visibleOnly)).toHaveClass('smart-thinking');
 	});
 
 	it('plays no colour effect on the title when the best rate is confirmed', async () => {

@@ -416,7 +416,9 @@ The form cell's thinking lives in the comparison, not the result: the confirmati
 the squeeze, with no colour effect on the title (a brand-blue sweep across it was tried and
 dropped). While a foreground round compares, the status line runs a 1600 ms "thinking" band
 (`smart-thinking`) from `foreground-tertiary` to `foreground-primary` and back, never lighter
-than the plain line, and a beam travels round the card's border (`smart-beam`): a conic
+than the plain line. The "OISY Smart Swap" title runs the same band in step with it, but only while
+motion is allowed: the band's reduced-motion fallback is the line's grey, which would dim the
+title. A beam travels round the card's border (`smart-beam`): a conic
 gradient of `foreground-brand-primary` with a long `-primary-alt` tail (`color-mix`, 30 %), a lap
 every 3.6 s, 1.5 px over the 1 px grey border, shown through a ring-shaped mask and turned by
 `rotate` on an oversized square so the compositor animates it. It reads on the one-row card as
