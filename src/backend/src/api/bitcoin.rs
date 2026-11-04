@@ -285,7 +285,7 @@ pub async fn btc_broadcast_transaction(
         params: BtcBroadcastTransactionRequest,
     ) -> Result<BtcBroadcastTransactionResponse, BtcBroadcastTransactionError> {
         BTC_BROADCAST_TX_RATE_LIMITER
-            .with(rate_limiter::RateLimiter::check_caller)
+            .with(rate_limiter::TieredRateLimiter::check_caller)
             .map_err(BtcBroadcastTransactionError::RateLimited)?;
 
         let principal = msg_caller();

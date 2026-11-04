@@ -1,4 +1,4 @@
-use std::sync::LazyLock;
+use std::{sync::LazyLock, time::Duration};
 
 use candid::Principal;
 use ic_cdk_bitcoin_canister::{Network as BitcoinNetwork, OutPoint, Txid, Utxo};
@@ -567,18 +567,16 @@ fn test_broadcast_transaction_refuses_an_oversized_transaction_at_decode() {
     );
 }
 
-/// Calling `btc_broadcast_transaction` more than 10 times within a minute must return
-/// `BtcBroadcastTransactionError::RateLimited`.
-#[test]
-fn test_btc_broadcast_transaction_rate_limited_after_exceeding_limit() {
-    let pic_setup = setup();
-    // The controller skips the delegation check, so each allowed call reaches the decoding.
-    let caller = controller();
-    pic_setup.ensure_user_profile(caller);
-
-    for i in 0..10 {
+/// Calls `btc_broadcast_transaction` `count` times with bytes that are not a transaction, each of
+/// which must get past the rate limit.
+fn call_btc_broadcast_transaction_within_limit(
+    pic_setup: &crate::utils::pocketic::PicBackend,
+    caller: Principal,
+    count: usize,
+) {
+    for i in 0..count {
         let result =
-            call_btc_broadcast_transaction(&pic_setup, caller, broadcast_request(vec![0xde]))
+            call_btc_broadcast_transaction(pic_setup, caller, broadcast_request(vec![0xde]))
                 .expect("Canister call failed");
         assert_eq!(
             result,
@@ -586,8 +584,15 @@ fn test_btc_broadcast_transaction_rate_limited_after_exceeding_limit() {
             "call {i} should not be rate-limited"
         );
     }
+}
 
-    let result = call_btc_broadcast_transaction(&pic_setup, caller, broadcast_request(vec![0xde]))
+fn assert_btc_broadcast_transaction_rate_limited(
+    pic_setup: &crate::utils::pocketic::PicBackend,
+    caller: Principal,
+    expected_max_calls: u32,
+    expected_window_ns: u64,
+) {
+    let result = call_btc_broadcast_transaction(pic_setup, caller, broadcast_request(vec![0xde]))
         .expect("Canister call failed");
     match result {
         Err(BtcBroadcastTransactionError::RateLimited(RateLimitError {
@@ -595,10 +600,41 @@ fn test_btc_broadcast_transaction_rate_limited_after_exceeding_limit() {
             window_ns,
             caller: err_caller,
         })) => {
-            assert_eq!(max_calls, 10);
-            assert_eq!(window_ns, 60 * 1_000_000_000);
+            assert_eq!(max_calls, expected_max_calls);
+            assert_eq!(window_ns, expected_window_ns);
             assert_eq!(err_caller, caller);
         }
         other => panic!("expected BtcBroadcastTransactionError::RateLimited, got {other:?}"),
     }
+}
+
+/// Calling `btc_broadcast_transaction` more than 3 times within a minute must return
+/// `BtcBroadcastTransactionError::RateLimited` for the minute tier.
+#[test]
+fn test_btc_broadcast_transaction_rate_limited_after_3_calls_in_a_minute() {
+    let pic_setup = setup();
+    // The controller skips the delegation check, so each allowed call reaches the decoding.
+    let caller = controller();
+    pic_setup.ensure_user_profile(caller);
+
+    call_btc_broadcast_transaction_within_limit(&pic_setup, caller, 3);
+
+    assert_btc_broadcast_transaction_rate_limited(&pic_setup, caller, 3, 60 * 1_000_000_000);
+}
+
+/// Spread over minutes, calling `btc_broadcast_transaction` more than 20 times within an hour
+/// must return `BtcBroadcastTransactionError::RateLimited` for the hour tier.
+#[test]
+fn test_btc_broadcast_transaction_rate_limited_after_20_calls_in_an_hour() {
+    let pic_setup = setup();
+    let caller = controller();
+    pic_setup.ensure_user_profile(caller);
+
+    for _ in 0..6 {
+        call_btc_broadcast_transaction_within_limit(&pic_setup, caller, 3);
+        pic_setup.pic.advance_time(Duration::from_secs(61));
+    }
+    call_btc_broadcast_transaction_within_limit(&pic_setup, caller, 2);
+
+    assert_btc_broadcast_transaction_rate_limited(&pic_setup, caller, 20, 60 * 60 * 1_000_000_000);
 }

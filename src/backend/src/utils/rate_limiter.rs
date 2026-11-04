@@ -32,11 +32,18 @@ thread_local! {
     pub(crate) static BTC_ADD_PENDING_TX_RATE_LIMITER: RateLimiter =
         RateLimiter::new(10, 60 * 1_000_000_000);
 
-    /// Rate-limits `btc_broadcast_transaction`: max 10 calls per caller per minute. A call can
-    /// pay for a `bitcoin_get_utxos` and a `bitcoin_send_transaction` from the backend's own
-    /// cycles.
-    pub(crate) static BTC_BROADCAST_TX_RATE_LIMITER: RateLimiter =
-        RateLimiter::new(10, 60 * 1_000_000_000);
+    /// Rate-limits `btc_broadcast_transaction` per caller: 3/min and 20/hour. A call can pay
+    /// for a `bitcoin_get_utxos` and a `bitcoin_send_transaction` from the backend's own cycles,
+    /// about 12B cycles for a typical send and up to 325B at the size cap.
+    ///
+    /// One call is one BTC send. The minute tier leaves room for a send and a couple of retries
+    /// after an error; the hour tier is the cost control, above anything a user does, since
+    /// every send needs confirmed UTXOs no other pending send holds.
+    ///
+    /// No global tier: a shared budget would let one user with many accounts block every BTC
+    /// send. A canister-wide budget is a pending decision of the BTC send-via-backend spec.
+    pub(crate) static BTC_BROADCAST_TX_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::with_tiers(3, 20, u32::MAX, u32::MAX);
 
     /// Rate-limits `btc_get_pending_transactions`: max 15 calls per caller per minute.
     pub(crate) static BTC_GET_PENDING_TX_RATE_LIMITER: RateLimiter =

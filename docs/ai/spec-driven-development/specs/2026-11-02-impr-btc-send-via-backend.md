@@ -210,8 +210,14 @@ sequence with a BIP68 relative lock), `InvalidUtxos` (an input that is not the c
 **Order: cheap checks first, so a bad request never costs a Bitcoin canister call.**
 
 1. Per-caller rate limit (new `BTC_BROADCAST_TX_RATE_LIMITER` in
-   `src/backend/src/utils/rate_limiter.rs`, 10 per minute like `BTC_ADD_PENDING_TX_RATE_LIMITER`),
-   then `delegation::require_ii_delegation` exactly as `btc_add_pending_transaction` does.
+   `src/backend/src/utils/rate_limiter.rs`), then `delegation::require_ii_delegation` exactly as
+   `btc_add_pending_transaction` does. Decided in PR 3: a `TieredRateLimiter` of **3 per minute
+   and 20 per hour** per caller, like the vetKD derivations, which cost about as much. One call is
+   one send. The minute tier leaves room for a send and a couple of retries; the hour tier is the
+   cost control, about 6.5T cycles per caller at the size cap instead of the 195T that 10 per
+   minute would allow. It has no global tier: a shared budget would let one user with many
+   accounts block every BTC send, so that stays with
+   [pending decision 3](#pending-decisions-facts-are-clear--we-just-need-to-decide).
 2. **Decode** with `bitcoin::consensus::deserialize::<Transaction>` (must consume every byte).
    Enforce the caps: serialized size `≤ MAX_BROADCAST_TX_BYTES`, `1 ≤ inputs ≤ MAX_BROADCAST_TX_INPUTS`,
    `1 ≤ outputs ≤ MAX_BROADCAST_TX_OUTPUTS`, no duplicate outpoints. The output cap matters most:
