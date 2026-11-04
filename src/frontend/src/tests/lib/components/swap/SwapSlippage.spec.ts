@@ -6,8 +6,10 @@ import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import type { OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { loadSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 
 describe('SwapSlippage', () => {
@@ -33,6 +35,7 @@ describe('SwapSlippage', () => {
 
 	beforeEach(() => {
 		screensStore.set('lg');
+		sessionStorage.clear();
 	});
 
 	describe('trigger', () => {
@@ -172,6 +175,48 @@ describe('SwapSlippage', () => {
 
 			expect(within(trigger).getByText('3%')).toBeInTheDocument();
 			expect(trigger).toHaveAttribute('aria-expanded', 'false');
+		});
+
+		it('should save an accepted value for the next swap', async () => {
+			const { trigger, getByTestId } = renderSlippage();
+
+			await fireEvent.click(trigger);
+
+			const editor = await waitFor(() => getByTestId('popover-content'));
+
+			await fireEvent.click(within(editor).getByRole('button', { name: '3%' }));
+
+			expect(loadSwapSlippage()).toBe(3);
+		});
+
+		// Saved on close, so the keystrokes on the way to the final value are not.
+		it('should save a typed value once the editor closes', async () => {
+			const { trigger, getByTestId, queryByTestId } = renderSlippage({ slippageValue: '8' });
+
+			await fireEvent.click(trigger);
+
+			const editor = await waitFor(() => getByTestId('popover-content'));
+
+			const input = editor.querySelector('input[name="swap-slippage"]');
+
+			assertNonNullish(input);
+
+			await fireEvent.input(input, { target: { value: '2' } });
+			await fireEvent.input(input, { target: { value: '2.5' } });
+
+			expect(loadSwapSlippage()).toBeUndefined();
+
+			await fireEvent.keyDown(window, { key: 'Escape' });
+
+			await waitFor(() => expect(queryByTestId('popover-content')).not.toBeInTheDocument());
+
+			expect(loadSwapSlippage()).toBe(2.5);
+		});
+
+		it('should save nothing while the editor stays closed', () => {
+			renderSlippage({ slippageValue: '3' });
+
+			expect(loadSwapSlippage()).toBeUndefined();
 		});
 
 		it('should return focus to the trigger when closed with Escape', async () => {

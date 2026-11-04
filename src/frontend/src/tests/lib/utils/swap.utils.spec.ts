@@ -33,6 +33,7 @@ import {
 	type ICPSwapResult
 } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
+import { loadSwapSlippage, saveSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
 import {
 	buildNearIntentsQuoteRequest,
 	calculateSlippage,
@@ -50,6 +51,7 @@ import {
 	getSwapSlippageStatus,
 	getWithdrawableToken,
 	isSwapError,
+	keepSwapSlippage,
 	mapIcpSwapResult,
 	mapKongSwapResult,
 	mapNearIntentsQuoteResult,
@@ -416,6 +418,35 @@ describe('swap utils', () => {
 
 		it('shows 0 as 0', () => {
 			expect(formatSwapSlippageShort(0)).toBe('0');
+		});
+	});
+
+	describe('keepSwapSlippage', () => {
+		beforeEach(() => {
+			sessionStorage.clear();
+		});
+
+		it('keeps a value every source network accepts', () => {
+			keepSwapSlippage('8');
+
+			expect(loadSwapSlippage()).toBe(8);
+		});
+
+		// The next swap may start from Ethereum, where 30 % is refused.
+		it('does not keep a value that only an ICP source accepts', () => {
+			saveSwapSlippage('8');
+
+			keepSwapSlippage('30');
+
+			expect(loadSwapSlippage()).toBe(8);
+		});
+
+		it('keeps the last accepted value when the new one is refused', () => {
+			saveSwapSlippage('8');
+
+			keepSwapSlippage('60');
+
+			expect(loadSwapSlippage()).toBe(8);
 		});
 	});
 
