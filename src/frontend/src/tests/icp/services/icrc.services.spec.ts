@@ -2,6 +2,7 @@ import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { RETIRED_ICRC_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.retired.env';
 import { SNS_BUILTIN_TOKENS } from '$env/tokens/tokens.sns.env';
 import {
 	hasSufficientIcrcAllowance,
@@ -471,6 +472,43 @@ describe('icrc.services', () => {
 					level: 'warn'
 				});
 			});
+
+			it.each(RETIRED_ICRC_LEDGER_CANISTER_IDS)(
+				'should skip the retired ledger %s without calling it or showing a toast',
+				async (retiredLedgerCanisterId) => {
+					backendCanisterMock.listCustomTokens.mockResolvedValue([
+						{
+							...mockCustomToken,
+							enabled: true,
+							token: {
+								Icrc: {
+									index_id: toNullable(),
+									ledger_id: Principal.fromText(retiredLedgerCanisterId)
+								}
+							}
+						}
+					]);
+
+					const err = new Error('test');
+					ledgerCanisterMock.metadata.mockRejectedValue(err);
+					ledgerCanisterMock.getMintingAccount.mockRejectedValue(err);
+
+					await loadCustomTokens({ identity: mockIdentity });
+
+					expect(ledgerCanisterMock.metadata).not.toHaveBeenCalled();
+					expect(ledgerCanisterMock.getMintingAccount).not.toHaveBeenCalled();
+
+					expect(spyToastsShow).not.toHaveBeenCalled();
+					expect(spyToastsError).not.toHaveBeenCalled();
+					expect(trackEvent).not.toHaveBeenCalled();
+
+					expect(
+						(get(icrcCustomTokensStore) ?? []).find(
+							({ data: { ledgerCanisterId } }) => ledgerCanisterId === retiredLedgerCanisterId
+						)
+					).toBeUndefined();
+				}
+			);
 
 			it('should not show a toast on metadata error if the token was not enabled', async () => {
 				backendCanisterMock.listCustomTokens.mockResolvedValue([
