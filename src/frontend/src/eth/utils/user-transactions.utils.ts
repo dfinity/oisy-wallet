@@ -1,6 +1,7 @@
 import type { TokenId as BackendTokenId, UserTransaction } from '$declarations/backend/backend.did';
 import type { Erc20Token } from '$eth/types/erc20';
 import { ZERO } from '$lib/constants/app.constants';
+import { MAX_STORED_USER_TRANSACTION_DATA_LEN } from '$lib/constants/user-transactions.constants';
 import type { Transaction } from '$lib/types/transaction';
 import { fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 
@@ -16,9 +17,6 @@ export const mapTransactionToUserTransaction = (transaction: Transaction): UserT
 		from,
 		to,
 		value,
-		chainId,
-		nonce,
-		gasLimit,
 		gasPrice,
 		gasUsed,
 		data,
@@ -34,12 +32,9 @@ export const mapTransactionToUserTransaction = (transaction: Transaction): UserT
 		value,
 		network_data: {
 			Evm: {
-				chain_id: toNullable(nonNullish(chainId) ? BigInt(chainId) : undefined),
-				nonce: toNullable(nonNullish(nonce) ? BigInt(nonce) : undefined),
-				gas_limit: toNullable(gasLimit),
 				gas_price: toNullable(gasPrice),
 				gas_used: toNullable(gasUsed),
-				data: toNullable(data),
+				data: toNullable(data?.slice(0, MAX_STORED_USER_TRANSACTION_DATA_LEN)),
 				nft_token_id: toNullable(nonNullish(tokenId) ? BigInt(tokenId) : undefined)
 			}
 		}
@@ -61,15 +56,7 @@ export const mapUserTransactionToTransaction = (transaction: UserTransaction): T
 		network_data: { Evm: evm }
 	} = transaction;
 
-	const {
-		nonce,
-		chain_id: chainId,
-		gas_limit: gasLimit,
-		gas_price: gasPrice,
-		gas_used: gasUsed,
-		data,
-		nft_token_id: nftTokenId
-	} = evm;
+	const { gas_price: gasPrice, gas_used: gasUsed, data, nft_token_id: nftTokenId } = evm;
 
 	return {
 		hash,
@@ -78,9 +65,10 @@ export const mapUserTransactionToTransaction = (transaction: UserTransaction): T
 		from,
 		to: fromNullable(to),
 		value,
-		chainId: fromNullable(chainId) ?? ZERO,
-		nonce: Number(fromNullable(nonce) ?? 0),
-		gasLimit: fromNullable(gasLimit) ?? ZERO,
+		// Not stored: the transaction list and its details show none of them.
+		chainId: ZERO,
+		nonce: 0,
+		gasLimit: ZERO,
 		gasPrice: fromNullable(gasPrice),
 		gasUsed: fromNullable(gasUsed),
 		data: fromNullable(data) ?? '',
