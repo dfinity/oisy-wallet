@@ -51,16 +51,22 @@
 	};
 
 	// A share of what the router holds is stated as a percentage: the amount it comes to is only known
-	// once the swap has run.
+	// once the swap has run. A stated amount is shown in full, as rounded it can read as less than the
+	// router pays.
 	const formatFee = (fee: UniswapSwapFee): string =>
 		'share' in fee
 			? replacePlaceholders($i18n.wallet_connect.text.swap_app_fee_share, {
 					$share: formatShare(fee.share),
 					$symbol: fee.token.symbol
 				})
-			: `${formatToken({ value: fee.amount, unitName: fee.token.decimals })} ${fee.token.symbol}`;
+			: `${formatToken({
+					value: fee.amount,
+					unitName: fee.token.decimals,
+					displayDecimals: fee.token.decimals
+				})} ${fee.token.symbol}`;
 
-	// The allowance outlives the transaction, so it is stated with when it ends.
+	// The allowance outlives the transaction, so it is stated with when it ends, and in full, as
+	// rounded it can read as less than the router may spend.
 	let allowance = $derived(
 		nonNullish(approval)
 			? replacePlaceholders(
@@ -68,7 +74,11 @@
 						? $i18n.wallet_connect.text.swap_allowance_unlimited
 						: $i18n.wallet_connect.text.swap_allowance_amount,
 					{
-						$amount: formatToken({ value: approval.amount, unitName: approval.token.decimals }),
+						$amount: formatToken({
+							value: approval.amount,
+							unitName: approval.token.decimals,
+							displayDecimals: approval.token.decimals
+						}),
 						$symbol: approval.token.symbol,
 						$date: formatDate(approval.expiration)
 					}

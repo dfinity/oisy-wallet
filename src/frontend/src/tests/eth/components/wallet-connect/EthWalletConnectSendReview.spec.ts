@@ -1087,6 +1087,52 @@ describe('EthWalletConnectSendReview', () => {
 				})
 			);
 		});
+
+		// Rounded to four decimals, either would read as less than the router may spend or pays.
+		it('should state a finite allowance in full', () => {
+			const expiration = 1_795_682_829n;
+
+			const { container } = renderSwap(
+				encodeUniswapExecute({
+					commands: [
+						encodeUniswapPermit({ amount: 1_234_540n, expiration }),
+						encodeUniswapV3Swap({ amount: 1_000_000n, amountLimit: 1_087_807n })
+					],
+					deadline: inAnHour()
+				})
+			);
+
+			expect(container.querySelector('#swap-allowance')).toHaveTextContent(
+				replacePlaceholders(en.wallet_connect.text.swap_allowance_amount, {
+					$amount: '1.23454',
+					$symbol: 'EURC',
+					$date: formatSecondsToDate({ seconds: Number(expiration) })
+				})
+			);
+		});
+
+		it('should state a fee of a stated amount in full', () => {
+			const { container } = renderSwap(
+				encodeUniswapExecute({
+					commands: [
+						encodeUniswapV3Swap({
+							recipient: UNISWAP_RECIPIENT_ROUTER,
+							amount: 1_000_000n,
+							amountLimit: ZERO
+						}),
+						encodeUniswapCommand({
+							type: UNISWAP_COMMANDS.TRANSFER,
+							types: ['address', 'address', 'uint256'],
+							values: [BASE_USDC_TOKEN.address, OTHER, 12_000_049n]
+						}),
+						encodeUniswapSweep({ amountMin: 1_080_000n })
+					],
+					deadline: inAnHour()
+				})
+			);
+
+			expect(container.querySelector('#swap-app-fee-0 span')?.textContent).toBe('12.000049 USDC');
+		});
 	});
 
 	describe('ckETH helper contract deposits', () => {
