@@ -237,7 +237,6 @@ export const SWAP_MODAL_SELECT_PROVIDER_STEP = 'swap-modal-select-provider-step'
 export const SWAP_PROVIDER_ANIMATION = 'swap-provider-animation';
 export const SWAP_PROVIDER_STATUS = 'swap-provider-status';
 export const SWAP_PROVIDER_CELL = 'swap-provider-cell';
-export const SWAP_PROVIDER_BEST_RATE = 'swap-provider-best-rate';
 export const SWAP_SELECTED_PROVIDER_DETAILS = 'swap-selected-provider-details';
 export const SWAP_FEE_ROW = 'swap-fee-row';
 export const SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE = 'swap-lifi-insufficient-funds-for-fee';

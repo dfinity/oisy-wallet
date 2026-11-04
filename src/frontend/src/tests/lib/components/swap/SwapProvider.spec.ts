@@ -1,7 +1,6 @@
 import SwapProviderHeader from '$lib/components/swap/SwapProvider.svelte';
 import {
 	SWAP_PROVIDER_ANIMATION,
-	SWAP_PROVIDER_BEST_RATE,
 	SWAP_PROVIDER_CELL,
 	SWAP_PROVIDER_STATUS
 } from '$lib/constants/test-ids.constants';
@@ -48,9 +47,6 @@ const providerAnimationCalls = (animate: MockInstance<Element['animate']>) =>
 
 // The status region repeats the visible label for screen readers; label assertions skip it.
 const visibleOnly = { ignore: 'script, style, .sr-only' };
-// Best Rate is the shared badge; the wrapper around it carries the fade and the aria-hidden.
-const bestRateOf = (label: HTMLElement): Element | null =>
-	label.closest(`[data-tid="${SWAP_PROVIDER_BEST_RATE}"]`);
 
 const offer: SwapMappedResult = {
 	provider: SwapProvider.ICP_SWAP,
@@ -125,13 +121,16 @@ describe('SwapProvider form cell', () => {
 		expect(getByTestId(SWAP_PROVIDER_CELL).nextElementSibling).toBe(separator);
 	});
 
-	it('runs the thinking shimmer on the status only while a foreground round compares', async () => {
+	it("runs the thinking shimmer on the card's fill only while a foreground round compares", async () => {
 		activity.start({ requestId: 30, background: false });
 		activity.addProvider({ requestId: 30, provider: SwapProvider.ICP_SWAP });
-		const { getByText } = render(SwapProviderHeader, { props, context });
+		const { getByTestId, getByText } = render(SwapProviderHeader, { props, context });
 		await tick();
 
-		expect(getByText(en.swap.text.finding_best_rate, visibleOnly)).toHaveClass('smart-thinking');
+		expect(getByTestId(SWAP_PROVIDER_CELL)).toHaveClass('smart-thinking');
+		expect(getByText(en.swap.text.finding_best_rate, visibleOnly)).not.toHaveClass(
+			'smart-thinking'
+		);
 
 		store.setSwaps({ swaps: [offer], selectedProvider: offer, amountForSwap: '1' });
 		activity.complete({ requestId: 30 });
@@ -335,9 +334,8 @@ describe('SwapProvider form cell', () => {
 
 		expect(cell).toBeEnabled();
 		expect(cell.lastElementChild).not.toHaveClass('opacity-40');
-		// No resting fill; the row only answers hover and press while it can be tapped.
-		expect(cell).not.toHaveClass('bg-brand-subtle-10');
-		expect(cell).toHaveClass('row-feedback');
+		// A grey card at rest; the rows' blue answers hover and press only while it can be tapped.
+		expect(cell).toHaveClass('bg-secondary', 'hover:bg-brand-subtle-10');
 
 		activity.start({ requestId: 2, background: false });
 		await tick();
@@ -345,7 +343,8 @@ describe('SwapProvider form cell', () => {
 		// The selected provider's details would describe a stale offer meanwhile.
 		expect(cell).toBeDisabled();
 		expect(cell.lastElementChild).toHaveClass('opacity-40');
-		expect(cell).not.toHaveClass('row-feedback');
+		expect(cell).toHaveClass('bg-secondary');
+		expect(cell).not.toHaveClass('hover:bg-brand-subtle-10');
 
 		// A tap lands on the content: jsdom, unlike a browser, still dispatches a click on the
 		// disabled button itself.
@@ -406,8 +405,8 @@ describe('SwapProvider form cell', () => {
 		);
 		expect(getByText('+$1.00')).toHaveClass('text-primary');
 		expect(queryByText(bestOfTwoOffers)).not.toBeInTheDocument();
-		expect(bestRateOf(getByText(en.swap.text.best_rate))).not.toHaveClass('opacity-0');
-		expect(bestRateOf(getByText(en.swap.text.best_rate))).toHaveAttribute('aria-hidden', 'false');
+		// The line already says the pick beat the other quotes, so the form has no Best Rate badge.
+		expect(queryByText(en.swap.text.best_rate)).not.toBeInTheDocument();
 	});
 
 	it('does not present a manual pick between the best and the lowest offer as a gain', () => {
@@ -430,7 +429,6 @@ describe('SwapProvider form cell', () => {
 			getByText(replacePlaceholders(en.swap.text.smart_swap_offers_compared, { $count: '3' }))
 		).toBeInTheDocument();
 		expect(queryByText(gainSentence)).not.toBeInTheDocument();
-		expect(bestRateOf(getByText(en.swap.text.best_rate))).toHaveAttribute('aria-hidden', 'true');
 	});
 
 	it.each([
@@ -450,10 +448,9 @@ describe('SwapProvider form cell', () => {
 
 		expect(getByText(bestOfTwoOffers)).toBeInTheDocument();
 		expect(queryByText(gainSentence)).not.toBeInTheDocument();
-		expect(bestRateOf(getByText(en.swap.text.best_rate))).not.toHaveClass('opacity-0');
 	});
 
-	it('counts the compared offers without Best Rate for a manual non-best selection', () => {
+	it('counts the compared offers for a manual non-best selection', () => {
 		store.setSwaps({
 			swaps: [bestOffer, lowestOffer],
 			selectedProvider: bestOffer,
@@ -467,9 +464,6 @@ describe('SwapProvider form cell', () => {
 
 		expect(getByText(twoOffersCompared)).toBeInTheDocument();
 		expect(queryByText(gainSentence)).not.toBeInTheDocument();
-		// Kept in the layout while hidden, so the cell does not change height, but out of its name.
-		expect(bestRateOf(getByText(en.swap.text.best_rate))).toHaveClass('opacity-0');
-		expect(bestRateOf(getByText(en.swap.text.best_rate))).toHaveAttribute('aria-hidden', 'true');
 	});
 
 	it('does not replay confirmation when a completed cell disappears and mounts again', async () => {
@@ -538,7 +532,7 @@ describe('SwapProvider form cell', () => {
 		await tick();
 		await tick();
 
-		expect(bestRateOf(first.getByText(en.swap.text.best_rate))).not.toHaveClass('opacity-0');
+		expect(first.getByText(bestOfTwoOffers)).toBeInTheDocument();
 		expect(providerAnimationCalls(animate)).toHaveLength(0);
 
 		first.unmount();
@@ -638,7 +632,7 @@ describe('SwapProvider form cell', () => {
 		store.setManualProvider(mockOneSecProvider);
 		activity.start({ requestId: 5, background: false });
 		activity.addProvider({ requestId: 5, provider: SwapProvider.ICP_SWAP });
-		const { getByTestId, getByText, findByText } = render(SwapProviderHeader, { props, context });
+		const { getByTestId, findByText } = render(SwapProviderHeader, { props, context });
 		const animate = vi.spyOn(Element.prototype, 'animate');
 		await tick();
 		await tick();
@@ -654,7 +648,6 @@ describe('SwapProvider form cell', () => {
 		expect(providerAnimationCalls(animate)).toHaveLength(0);
 		// The result line fades in once the status has faded out of the cell.
 		await expect(findByText(twoOffersCompared)).resolves.toBeInTheDocument();
-		expect(bestRateOf(getByText(en.swap.text.best_rate))).toHaveClass('opacity-0');
 	});
 
 	it('removes an empty completed comparison instead of leaving a blank clickable cell', async () => {
@@ -829,7 +822,6 @@ describe('SwapProvider form cell', () => {
 			SwapProvider.ICP_SWAP
 		);
 		expect(getByTestId(SWAP_PROVIDER_ANIMATION).parentElement).toHaveClass('items-end');
-		expect(bestRateOf(getByText(en.swap.text.best_rate))).toHaveClass('opacity-0');
 		expect(cell).toBeDisabled();
 	});
 
@@ -855,22 +847,17 @@ describe('SwapProvider form cell', () => {
 		store.setSwaps({ swaps: offers, selectedProvider: offer, amountForSwap: '1' });
 		const { getByText, queryByText } = render(SwapProviderHeader, { props, context });
 		const resultLine = getByText(bestOfTwoOffers).parentElement;
-		const bestRate = bestRateOf(getByText(en.swap.text.best_rate));
 
 		activity.start({ requestId: 12, background: false });
 		await tick();
 
 		// Fading out in place: still laid out, transparent, and no status beside it yet.
 		expect(resultLine).toHaveClass('opacity-0');
-		expect(bestRate).toHaveClass('opacity-0');
 		expect(queryByText(en.swap.text.finding_best_rate, visibleOnly)).not.toBeInTheDocument();
 
 		await vi.advanceTimersByTimeAsync(MOTION_SWAP_DURATION);
 
 		expect(resultLine).not.toBeInTheDocument();
-		// Best Rate stays laid out, so the cell is as tall comparing as with a result.
-		expect(bestRate).toBeInTheDocument();
-		expect(bestRate).toHaveClass('opacity-0');
 		expect(getByText(en.swap.text.finding_best_rate, visibleOnly)).not.toHaveClass('opacity-0');
 
 		store.setSwaps({ swaps: offers, selectedProvider: offer, amountForSwap: '1' });
@@ -878,13 +865,11 @@ describe('SwapProvider form cell', () => {
 		await tick();
 
 		expect(getByText(en.swap.text.finding_best_rate, visibleOnly)).toHaveClass('opacity-0');
-		expect(bestRate).toHaveClass('opacity-0');
 
 		await vi.advanceTimersByTimeAsync(MOTION_SWAP_DURATION);
 
 		expect(queryByText(en.swap.text.finding_best_rate, visibleOnly)).not.toBeInTheDocument();
 		expect(getByText(bestOfTwoOffers).parentElement).not.toHaveClass('opacity-0');
-		expect(bestRate).not.toHaveClass('opacity-0');
 	});
 
 	it('retargets an interrupted label fade without re-laying out the cell', async () => {
@@ -936,7 +921,7 @@ describe('SwapProvider form cell', () => {
 
 	it('shows a single offer as one row, with no line under the title and no Best Rate', () => {
 		store.setSwaps({ swaps: [offer], selectedProvider: offer, amountForSwap: '1' });
-		const { getByTestId, queryByTestId } = render(SwapProviderHeader, {
+		const { getByTestId, queryByText } = render(SwapProviderHeader, {
 			props,
 			context: contextWithRate(2)
 		});
@@ -946,7 +931,7 @@ describe('SwapProvider form cell', () => {
 		expect(cell).toHaveAccessibleName(/ICPSwap/);
 		expect(cell).not.toHaveTextContent(gainSentence);
 		expect(cell).not.toHaveTextContent(/offer/i);
-		expect(queryByTestId(SWAP_PROVIDER_BEST_RATE)).not.toBeInTheDocument();
+		expect(queryByText(en.swap.text.best_rate)).not.toBeInTheDocument();
 	});
 
 	it('shrinks the first round to one row when it finds a single offer', async () => {
@@ -1005,7 +990,6 @@ describe('SwapProvider form cell', () => {
 		await vi.advanceTimersByTimeAsync(MOTION_SWAP_DURATION + 1_000);
 
 		expect(getByText(bestOfTwoOffers)).toBeInTheDocument();
-		expect(bestRateOf(getByText(en.swap.text.best_rate))).not.toHaveClass('opacity-0');
 	});
 
 	it('starts a new pair with the status under the title again', async () => {

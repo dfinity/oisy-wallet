@@ -12,11 +12,7 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
-	import {
-		SWAP_PROVIDER_BEST_RATE,
-		SWAP_PROVIDER_CELL,
-		SWAP_PROVIDER_STATUS
-	} from '$lib/constants/test-ids.constants';
+	import { SWAP_PROVIDER_CELL, SWAP_PROVIDER_STATUS } from '$lib/constants/test-ids.constants';
 	import {
 		MOTION_ENTER,
 		MOTION_REDUCED_FADE_DURATION,
@@ -180,9 +176,6 @@
 		const [before, after = ''] = $i18n.swap.text.smart_swap_gain.split('$amount');
 		return { before, amount: `+${gainAmount}`, after };
 	});
-	// Hidden Best Rate keeps its place in the layout (see the cell), so it must also leave the
-	// cell's accessible name. A single offer beat nothing, so it is not called the best rate.
-	let showBestRate = $derived(!comparingLayout && !comparing && isBestRate && offerCount > 1);
 	let offersLabel = $derived(
 		replacePlaceholders(
 			isBestRate
@@ -272,12 +265,15 @@
 	<div class:pb-3={isForm} transition:slide>
 		<div transition:fly={{ y: 4 }}>
 			{#if isForm}
-				<!-- A full-width row with no resting fill, so it does not compete with the amounts. The
-				negative margin lets the hover fill bleed past the text, which lines up with the fee row
-				below; the fill only shows while the row can be tapped. -->
+				<!-- A grey card like the amount cards' fill, on the content edges like the message boxes
+				and the fee row, with the faintest border so the form stays light. It takes the rows'
+				blue on hover and press, only while it can be tapped; while a foreground round
+				compares, a band of that blue runs through it instead (`smart-thinking`). -->
 				<button
-					class="-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-lg px-2 py-3 text-left disabled:cursor-default md:-mx-3 md:w-[calc(100%+1.5rem)] md:px-3"
-					class:row-feedback={interactive}
+					class="mb-3 flex w-full items-center gap-3 rounded-xl border border-tertiary bg-secondary px-4 py-3 text-left press disabled:cursor-default"
+					class:hover:bg-brand-subtle-10={interactive}
+					class:pressed:bg-brand-subtle-20={interactive}
+					class:smart-thinking={comparing}
 					data-tid={SWAP_PROVIDER_CELL}
 					disabled={!interactive}
 					onclick={() => onShowProviderList?.()}
@@ -296,12 +292,9 @@
 						{#if !compact}
 							<span class="flex w-0 min-w-full pt-0.5 text-sm whitespace-nowrap" transition:slide>
 								{#if comparingLayout}
-									<!-- While a foreground round compares, a light band runs through the status, the
-									way a thinking line does; it never gets lighter than the tertiary text. -->
 									<span
 										class="truncate text-tertiary transition-opacity duration-150 ease-in motion-reduce:duration-100"
 										class:opacity-0={!comparing}
-										class:smart-thinking={comparing}
 										aria-hidden="true"
 										in:fade={labelIn}>{$i18n.swap.text.finding_best_rate}</span
 									>
@@ -334,6 +327,8 @@
 						class:min-w-0={!comparingLayout}
 						class:min-w-24={comparingLayout}
 					>
+						<!-- No Best Rate badge on the form: the line under the title already says the pick
+						beat the other quotes, and by how much. -->
 						<SwapProviderAnimation
 							{animate}
 							{confirmationId}
@@ -342,20 +337,6 @@
 							providers={$quoteActivity?.providers ?? []}
 							selectedProvider={selectedProvider?.provider}
 						/>
-						<!-- The same badge as the offers list and Review. Kept in the layout while hidden, so
-						the cell is as tall comparing as with a result, and hidden for a manual non-best
-						choice; a single offer drops it with the line under the title. -->
-						{#if !compact}
-							<span
-								class="flex pt-0.5 transition-opacity duration-150 ease-in motion-reduce:duration-100"
-								class:opacity-0={!showBestRate}
-								aria-hidden={!showBestRate}
-								data-tid={SWAP_PROVIDER_BEST_RATE}
-								transition:slide
-							>
-								<BestRateBadge styleClass="mt-0" />
-							</span>
-						{/if}
 					</span>
 					<span
 						class="flex shrink-0 text-tertiary transition-opacity duration-150"
@@ -437,17 +418,15 @@
 		color: transparent;
 	}
 
+	// Only the image: the band is laid over the card's own grey, which shows on either side of it.
 	.smart-thinking {
-		background: linear-gradient(
-				90deg,
-				var(--color-foreground-tertiary) 0 35%,
-				var(--color-foreground-primary) 50%,
-				var(--color-foreground-tertiary) 65% 100%
-			)
-			0 0 / 300% 100%;
-		-webkit-background-clip: text;
-		background-clip: text;
-		color: transparent;
+		background-image: linear-gradient(
+			110deg,
+			transparent 35%,
+			var(--color-background-brand-subtle-10) 50%,
+			transparent 65%
+		);
+		background-size: 300% 100%;
 		animation: smart-thinking 1600ms linear infinite;
 	}
 
@@ -463,8 +442,7 @@
 	@media (prefers-reduced-motion: reduce) {
 		.smart-thinking {
 			animation: none;
-			background: none;
-			color: var(--color-foreground-tertiary);
+			background-image: none;
 		}
 	}
 </style>

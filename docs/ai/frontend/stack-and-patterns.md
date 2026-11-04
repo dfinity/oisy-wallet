@@ -418,10 +418,10 @@ a 110° gradient of `foreground-primary` and `foreground-brand-primary` / `-prim
 to the glyphs, animated on `background-position` for 1100 ms with `PillButton`'s
 `cubic-bezier(0.4, 0, 0.2, 1)`). It follows the same rules as the squeeze: no replay on a remount,
 nothing on a background refresh, a manual pick or a single offer, and nothing under reduced
-motion. While a foreground round compares, the status line runs a 1600 ms "thinking" band
-(`smart-thinking`) from `foreground-tertiary` to `foreground-primary` and back, never lighter
-than the plain line, and reduced motion shows the plain line. Both are scoped styles in
-`SwapProvider`; the title and the status stay real text.
+motion. While a foreground round compares, a band of `brand-subtle-10` runs over the card's grey
+fill (`smart-thinking`: a `background-image` only, 110°, 300 % wide, 1600 ms linear loop), so the
+card thinks and the status stays plain text; reduced motion drops the band. Both are
+scoped styles in `SwapProvider`; the title and the status stay real text.
 
 Foreground activity starts when the coordinator queues the round, before its 300 ms debounce,
 and keeps one request identity through pricing. Track the source/destination `TokenId` values,
@@ -463,12 +463,15 @@ not universal transport cancellation: nonabortable SDK/canister work may continu
 Do not apply this quote budget to swap execution, signing, deposit validity or animation timing.
 
 The five swap forms opt into this presentation with `SwapProvider isForm`; review/default
-callers retain the static provider label. In a form, Smart Swap is a full-width row with no
-resting fill, so it does not compete with the amounts: `row-feedback` only while it can be
-tapped, and `-mx-2 px-2 md:-mx-3 md:px-3` so its text lines up with the fee row while the hover
-fill bleeds past it. Its type is the app's list row (`LogoButton`, as in the offers list): the
+callers retain the static provider label. In a form, Smart Swap is a grey card under the two
+amount cards, in their fill (`bg-secondary`) with the faintest border (`border-tertiary`), so the
+form stays light, on the content edges like the message boxes and the fee row: `rounded-xl px-4
+py-3`. It takes the rows' blue on hover (`brand-subtle-10`) and while pressed (`brand-subtle-20`,
+with `press`), as `TokenGroupCard` does, only while it can be tapped. A blue tint was tried and
+dropped: the `text-tertiary` line on it fell to 4.07:1. Its type is the app's list row (`LogoButton`, as in the offers list): the
 title and the provider name `text-lg font-bold`, the line under the title `text-sm
-text-tertiary`, and Best Rate the shared `BestRateBadge`. It is one `<button>` that opens the provider step (`onShowProviderList`): the selected offer's
+text-tertiary`. It has no Best Rate badge: the line already says the pick beat the other quotes,
+and by how much. It is one `<button>` that opens the provider step (`onShowProviderList`): the selected offer's
 details in a grey `bg-secondary` card on top (not the rows' hover tint, as it is not tappable),
 every offer below. The card is the one mark of the pick, so the rows carry no check, and with a
 single offer the card is the whole step, with no list and no Best Rate. Tapping the offer in use only goes back:
@@ -483,7 +486,7 @@ component splits it at `$amount` only to set the amount in `text-primary font-se
 falls below 4.5:1 on white at 14 px). Otherwise the line counts the offers
 ("Best of N offers", "N offers compared" for a manual non-best pick), so a worse manual pick is
 never shown as a gain. A single offer is one row (`compact`): the title and the provider, with
-neither the line nor the Best Rate slot, both of which leave with `slide`. Later rounds for the
+no line under the title, which leaves with `slide`. Later rounds for the
 same token pair keep that row, so re-quoting does not grow and shrink it on every amount (the
 provider scroll shows the round, the status region still announces it); a new pair, or a result
 with more offers, brings the two lines back. The cross-chain notice under the amounts (`SwapCrossChainInfo`) is a plain grey
@@ -491,11 +494,9 @@ with more offers, brings the two lines back. The cross-chain notice under the am
 It is regular weight (`font-normal!`), so only the network names are bold. It and the two-swaps
 hint keep `MessageBox`'s own size, like the warnings above them: a `sm:text-sm` override leaves
 the boxes at mixed sizes and the text above centre, since `MessageBox` pads its icon to a 24 px line.
-A hidden Best Rate is also
-`aria-hidden`, so it leaves the cell's accessible name. The title sets the column's minimum width and the line has a
+The title sets the column's minimum width and the line has a
 zero basis (`w-0 min-w-full`), so the line truncates first. The right column is the provider
-scroll with the Best Rate badge under it; the badge stays in the layout at `opacity-0` while it is
-hidden, so the cell is as tall comparing as with a result. While comparing the scroll keeps
+scroll alone; the two lines on the left keep the card as tall comparing as with a result. While comparing the scroll keeps
 `min-w-24`, room for a logo and a short name down to 320 px. Below 390 px
 (`max-[24.375rem]:max-w-24`) the slot is also capped at 96 px, so a long name such as NEAR
 Intents truncates instead of shortening the status on its turn; wider cells let the slot grow to
@@ -505,11 +506,11 @@ No hard cuts in the section. The Smart Swap row and the fee row (`SwapFeeRow`) o
 with `slide` (height, 250 ms) while their content fades up 4 px with `fly`; the fee row follows
 `SWAP_DETAILS_ROW_STAGGER_MS` (60 ms) later. The form's only separator is an `Hr` under the cell,
 inside its sliding row: the cell sits with the amounts it prices and the fees below the line, and
-a form with no offer has no line. The 12 px gap under it is `pb-3` inside the sliding row, not the
-forms' flex gap, so both animate with the height. The cell never swaps labels in one frame:
-`comparingLayout` follows `comparing` one `MOTION_SWAP_DURATION` late, so the result line and
-Best Rate, or the status, fade out in place before the cell re-lays out and the incoming ones
-fade in. Best Rate shows whenever the selected provider is the top offer, a single offer
+a form with no offer has no line. The 12 px gaps around it are the card's `mb-3` and `pb-3` inside
+the sliding row, not the forms' flex gap, so they animate with the height. The cell never swaps labels in one frame:
+`comparingLayout` follows `comparing` one `MOTION_SWAP_DURATION` late, so the result line, or the
+status, fades out in place before the cell re-lays out and the incoming one fades in. On Review,
+Best Rate shows whenever the selected provider is the top offer, a single offer
 included; only a manual non-best choice hides it. The provider slot never shows a placeholder. A first round leaves the slot empty
 and fades the first participant up (opacity, 4 px, the soft-layer blur bridge, 200 ms ease-out);
 that fade runs once, and only a turn, which samples the pose first, cuts it short. One turn clock
