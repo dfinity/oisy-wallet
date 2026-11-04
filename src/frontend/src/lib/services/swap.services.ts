@@ -1844,11 +1844,12 @@ export const fetchVeloraDeltaSwap = async ({
 	}
 
 	// The server derives the signed on-chain minimum (`destAmount`) from the route and the
-	// slippage; re-derive it from the quoted origin output (the leg the on-chain order settles)
-	// and refuse to sign an order that guarantees less than the user accepted.
-	const minDestAmount = calculateSlippage({
-		quoteAmount: BigInt(swapDetails.route.origin.output.amount),
-		slippagePercentage: slippageBasisPoints / 100
+	// slippage; re-derive it from the quoted origin output (the leg the on-chain order settles),
+	// on integers as Velora does, and refuse to sign an order that guarantees less than the user
+	// accepted.
+	const minDestAmount = veloraMinimumAmount({
+		amount: BigInt(swapDetails.route.origin.output.amount),
+		slippageBasisPoints
 	});
 
 	if (BigInt(builtOrder.toSign.value.destAmount) < minDestAmount) {

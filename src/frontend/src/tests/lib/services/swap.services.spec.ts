@@ -2134,6 +2134,48 @@ describe('swap.services', () => {
 			expect(mockDeltaContractPostDeltaOrder).not.toHaveBeenCalled();
 		});
 
+		it('signs an order whose minimum is exactly the one Velora computes on integers', async () => {
+			// A real quote and order Velora returned on 2026-10-23 for 100 USDC to WETH at 1%: the
+			// signed minimum is 41173455568984299; in floating point the same minimum comes out as
+			// 41173455568984304.
+			const quotedOutput = '41589349059580101';
+			const { origin, destination } = mockSwapDetails.route;
+
+			mockDeltaContractBuildDeltaOrder.mockResolvedValue(
+				mockBuiltDeltaOrder({ destAmount: '41173455568984299', expectedAmount: quotedOutput })
+			);
+
+			await fetchVeloraDeltaSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				receiveAmount: mockReceiveAmount,
+				slippageValue: '1',
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				isGasless: false,
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: {
+					...mockSwapDetails,
+					route: {
+						...mockSwapDetails.route,
+						origin: { ...origin, output: { ...origin.output, amount: quotedOutput } },
+						destination: {
+							...destination,
+							output: { ...destination.output, amount: quotedOutput }
+						}
+					}
+				}
+			});
+
+			expect(signPrehash).toHaveBeenCalledOnce();
+			expect(mockDeltaContractPostDeltaOrder).toHaveBeenCalledOnce();
+		});
+
 		describe('binding the order to the reviewed swap', () => {
 			const params = {
 				identity: mockIdentity,
