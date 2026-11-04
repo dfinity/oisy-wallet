@@ -509,8 +509,11 @@ export type BtcAddress =
 			P2TR: string;
 	  };
 /**
- * Only `BroadcastOutcomeUnknown` and `BroadcastInProgress` leave open whether the transaction was
- * broadcast. Every other error means this call broadcast nothing and left nothing reserved.
+ * Each error describes this call only. `BroadcastOutcomeUnknown` and `BroadcastInProgress` leave
+ * open whether the transaction was broadcast. Any other error means this call broadcast nothing
+ * and reserved nothing, but says nothing about an earlier submission of the same transaction,
+ * whose reservation stays until it is pruned. After an unclear outcome, a later error is no
+ * reason to build a new transaction.
  */
 export type BtcBroadcastTransactionError =
 	| {

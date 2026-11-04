@@ -2,6 +2,9 @@
 //! with the same txid neither pays for a broadcast that already went out nor races one still in
 //! flight.
 //!
+//! States are kept per principal, network and txid: a txid names the same transaction on every
+//! network, but a broadcast on one says nothing about another.
+//!
 //! The states live in heap memory, not stable memory, so an upgrade clears them. That allows at
 //! most `MAX_BROADCAST_ATTEMPTS` more paid broadcasts of a transaction whose inputs are still in
 //! the UTXO view, and releases nothing: a resend after the upgrade finds its reservation, reuses
@@ -14,7 +17,7 @@ use std::{
 };
 
 use candid::Principal;
-use ic_cdk_bitcoin_canister::Utxo;
+use ic_cdk_bitcoin_canister::{Network as BitcoinNetwork, Utxo};
 use shared::types::bitcoin::{BtcBroadcastTransactionError, StoredPendingTransaction};
 
 use super::pending_tx_model::BtcUserPendingTransactionsModel;
@@ -26,13 +29,24 @@ pub const MAX_BROADCAST_ATTEMPTS: u8 = 3;
 /// `attempts` counts the paid broadcasts so far.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum BtcBroadcastState {
-    InFlight { attempts: u8 },
+    /// `attempt_id` tells this attempt's completion apart from that of an older one, whose
+    /// reservation was pruned while it was in flight.
+    InFlight {
+        attempts: u8,
+        attempt_id: u64,
+    },
     Sent,
-    Unknown { attempts: u8 },
+    Unknown {
+        attempts: u8,
+    },
 }
 
+/// Indexed by principal first, so a prune only visits the caller's own states.
 #[derive(Debug, Default)]
-pub struct BtcBroadcastStates(HashMap<(Principal, [u8; 32]), BtcBroadcastState>);
+pub struct BtcBroadcastStates {
+    by_principal: HashMap<Principal, HashMap<(BitcoinNetwork, [u8; 32]), BtcBroadcastState>>,
+    next_attempt_id: u64,
+}
 
 thread_local! {
     static BTC_BROADCAST_STATES: RefCell<BtcBroadcastStates> = RefCell::default();
@@ -58,9 +72,10 @@ impl BtcBroadcastStates {
     pub fn settled_answer(
         &self,
         principal: Principal,
+        network: BitcoinNetwork,
         txid: &[u8; 32],
     ) -> Option<Result<(), BtcBroadcastTransactionError>> {
-        match self.0.get(&(principal, *txid))? {
+        match self.get(principal, network, txid)? {
             BtcBroadcastState::Sent => Some(Ok(())),
             BtcBroadcastState::InFlight { .. } => {
                 Some(Err(BtcBroadcastTransactionError::BroadcastInProgress))
@@ -70,22 +85,71 @@ impl BtcBroadcastStates {
     }
 
     pub fn retain_reserved(&mut self, principal: Principal, reserved_txids: &HashSet<Vec<u8>>) {
-        self.0.retain(|(state_principal, txid), _| {
-            *state_principal != principal || reserved_txids.contains(txid.as_slice())
-        });
+        let Some(states) = self.by_principal.get_mut(&principal) else {
+            return;
+        };
+        states.retain(|(_, txid), _| reserved_txids.contains(txid.as_slice()));
+        if states.is_empty() {
+            self.by_principal.remove(&principal);
+        }
     }
 
-    fn get(&self, principal: Principal, txid: &[u8; 32]) -> Option<BtcBroadcastState> {
-        self.0.get(&(principal, *txid)).copied()
+    fn get(
+        &self,
+        principal: Principal,
+        network: BitcoinNetwork,
+        txid: &[u8; 32],
+    ) -> Option<BtcBroadcastState> {
+        self.by_principal
+            .get(&principal)?
+            .get(&(network, *txid))
+            .copied()
     }
 
-    fn set(&mut self, principal: Principal, txid: [u8; 32], state: BtcBroadcastState) {
-        self.0.insert((principal, txid), state);
+    fn set(
+        &mut self,
+        principal: Principal,
+        network: BitcoinNetwork,
+        txid: [u8; 32],
+        state: BtcBroadcastState,
+    ) {
+        self.by_principal
+            .entry(principal)
+            .or_default()
+            .insert((network, txid), state);
     }
 
-    fn remove(&mut self, principal: Principal, txid: &[u8; 32]) {
-        self.0.remove(&(principal, *txid));
+    fn remove(&mut self, principal: Principal, network: BitcoinNetwork, txid: &[u8; 32]) {
+        let Some(states) = self.by_principal.get_mut(&principal) else {
+            return;
+        };
+        states.remove(&(network, *txid));
+        if states.is_empty() {
+            self.by_principal.remove(&principal);
+        }
     }
+
+    fn is_current(
+        &self,
+        principal: Principal,
+        network: BitcoinNetwork,
+        txid: &[u8; 32],
+        attempt: &BroadcastAttempt,
+    ) -> bool {
+        matches!(
+            self.get(principal, network, txid),
+            Some(BtcBroadcastState::InFlight { attempt_id, .. }) if attempt_id == attempt.id
+        )
+    }
+}
+
+/// The transaction a broadcast is for: the caller's, on `network`, reserved at `address`.
+#[derive(Clone, Copy, Debug)]
+pub struct BroadcastTarget<'a> {
+    pub principal: Principal,
+    pub network: BitcoinNetwork,
+    pub address: &'a str,
+    pub txid: [u8; 32],
 }
 
 /// Whether the attempt took a new reservation or found the transaction's own, from an earlier
@@ -101,6 +165,7 @@ pub enum Reservation {
 pub struct BroadcastAttempt {
     pub reservation: Reservation,
     pub attempts: u8,
+    pub id: u64,
 }
 
 /// What a `bitcoin_send_transaction` call says about whether the transaction went out.
@@ -130,15 +195,19 @@ pub enum BroadcastOutcome {
 pub fn begin_broadcast(
     pending: &mut BtcUserPendingTransactionsModel<'_>,
     states: &mut BtcBroadcastStates,
-    principal: Principal,
-    address: &str,
-    txid: [u8; 32],
+    target: &BroadcastTarget<'_>,
     utxos: Vec<Utxo>,
     reserved_at_ns: u64,
 ) -> Result<Option<BroadcastAttempt>, BtcBroadcastTransactionError> {
+    let BroadcastTarget {
+        principal,
+        network,
+        address,
+        txid,
+    } = *target;
     states.retain_reserved(principal, &pending.pending_txids(principal));
 
-    let attempts = match states.get(principal, &txid) {
+    let attempts = match states.get(principal, network, &txid) {
         None => 1,
         Some(BtcBroadcastState::Sent) => return Ok(None),
         Some(BtcBroadcastState::InFlight { .. }) => {
@@ -171,10 +240,21 @@ pub fn begin_broadcast(
         Reservation::Inserted
     };
 
-    states.set(principal, txid, BtcBroadcastState::InFlight { attempts });
+    let id = states.next_attempt_id;
+    states.next_attempt_id += 1;
+    states.set(
+        principal,
+        network,
+        txid,
+        BtcBroadcastState::InFlight {
+            attempts,
+            attempt_id: id,
+        },
+    );
     Ok(Some(BroadcastAttempt {
         reservation,
         attempts,
+        id,
     }))
 }
 
@@ -186,30 +266,48 @@ pub fn begin_broadcast(
 /// `btc_add_pending_transaction`. So `BroadcastRejected` means nothing for this txid can have gone
 /// out while it was reserved.
 ///
+/// If the attempt is no longer the current one, its reservation was pruned while it was in
+/// flight, and the reservation and state now belong to a newer attempt or to nobody. Nothing is
+/// changed then.
+///
 /// # Errors
 /// `BroadcastRejected` or `BroadcastOutcomeUnknown`.
 pub fn finish_broadcast(
     pending: &mut BtcUserPendingTransactionsModel<'_>,
     states: &mut BtcBroadcastStates,
-    principal: Principal,
-    address: &str,
-    txid: [u8; 32],
+    target: &BroadcastTarget<'_>,
     attempt: BroadcastAttempt,
     outcome: BroadcastOutcome,
 ) -> Result<(), BtcBroadcastTransactionError> {
+    let BroadcastTarget {
+        principal,
+        network,
+        address,
+        txid,
+    } = *target;
+    if !states.is_current(principal, network, &txid, &attempt) {
+        return match outcome {
+            BroadcastOutcome::Sent => Ok(()),
+            BroadcastOutcome::Refused { msg } | BroadcastOutcome::Unknown { msg } => {
+                Err(BtcBroadcastTransactionError::BroadcastOutcomeUnknown { msg })
+            }
+        };
+    }
+
     match (outcome, attempt.reservation) {
         (BroadcastOutcome::Sent, _) => {
-            states.set(principal, txid, BtcBroadcastState::Sent);
+            states.set(principal, network, txid, BtcBroadcastState::Sent);
             Ok(())
         }
         (BroadcastOutcome::Refused { msg }, Reservation::Inserted) => {
             pending.remove_pending_transaction(principal, address, &txid);
-            states.remove(principal, &txid);
+            states.remove(principal, network, &txid);
             Err(BtcBroadcastTransactionError::BroadcastRejected { msg })
         }
         (BroadcastOutcome::Refused { msg } | BroadcastOutcome::Unknown { msg }, _) => {
             states.set(
                 principal,
+                network,
                 txid,
                 BtcBroadcastState::Unknown {
                     attempts: attempt.attempts,
@@ -225,7 +323,7 @@ mod tests {
     use std::cell::RefCell;
 
     use candid::Principal;
-    use ic_cdk_bitcoin_canister::{OutPoint, Txid, Utxo};
+    use ic_cdk_bitcoin_canister::{Network as BitcoinNetwork, OutPoint, Txid, Utxo};
     use ic_stable_structures::{
         memory_manager::{MemoryId, MemoryManager},
         DefaultMemoryImpl,
@@ -234,8 +332,8 @@ mod tests {
     use shared::types::bitcoin::{BtcBroadcastTransactionError, StoredPendingTransaction};
 
     use super::{
-        begin_broadcast, finish_broadcast, BroadcastAttempt, BroadcastOutcome, BtcBroadcastState,
-        BtcBroadcastStates, Reservation, MAX_BROADCAST_ATTEMPTS,
+        begin_broadcast, finish_broadcast, BroadcastAttempt, BroadcastOutcome, BroadcastTarget,
+        BtcBroadcastState, BtcBroadcastStates, Reservation, MAX_BROADCAST_ATTEMPTS,
     };
     use crate::{
         bitcoin::pending_tx_model::BtcUserPendingTransactionsModel,
@@ -246,6 +344,7 @@ mod tests {
     const TXID: [u8; 32] = [0x77; 32];
     const OTHER_TXID: [u8; 32] = [0x88; 32];
     const RESERVED_AT_NS: u64 = 1_000;
+    const NETWORK: BitcoinNetwork = BitcoinNetwork::Mainnet;
 
     fn principal() -> Principal {
         Principal::from_text("7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe")
@@ -275,20 +374,21 @@ mod tests {
         (map, memory_manager)
     }
 
+    fn target(txid: [u8; 32]) -> BroadcastTarget<'static> {
+        BroadcastTarget {
+            principal: principal(),
+            network: NETWORK,
+            address: ADDRESS,
+            txid,
+        }
+    }
+
     fn begin(
         pending: &mut BtcUserPendingTransactionsModel<'_>,
         states: &mut BtcBroadcastStates,
         txid: [u8; 32],
     ) -> Result<Option<BroadcastAttempt>, BtcBroadcastTransactionError> {
-        begin_broadcast(
-            pending,
-            states,
-            principal(),
-            ADDRESS,
-            txid,
-            utxos(),
-            RESERVED_AT_NS,
-        )
+        begin_broadcast(pending, states, &target(txid), utxos(), RESERVED_AT_NS)
     }
 
     fn finish(
@@ -297,15 +397,12 @@ mod tests {
         attempt: BroadcastAttempt,
         outcome: BroadcastOutcome,
     ) -> Result<(), BtcBroadcastTransactionError> {
-        finish_broadcast(
-            pending,
-            states,
-            principal(),
-            ADDRESS,
-            TXID,
-            attempt,
-            outcome,
-        )
+        finish_broadcast(pending, states, &target(TXID), attempt, outcome)
+    }
+
+    /// The reservation and attempt count, without the attempt's id.
+    fn shape(attempt: Option<BroadcastAttempt>) -> Option<(Reservation, u8)> {
+        attempt.map(|attempt| (attempt.reservation, attempt.attempts))
     }
 
     fn refused() -> BroadcastOutcome {
@@ -331,13 +428,7 @@ mod tests {
         let mut states = BtcBroadcastStates::default();
 
         let attempt = begin(&mut pending, &mut states, TXID).unwrap().unwrap();
-        assert_eq!(
-            attempt,
-            BroadcastAttempt {
-                reservation: Reservation::Inserted,
-                attempts: 1
-            }
-        );
+        assert_eq!(shape(Some(attempt)), Some((Reservation::Inserted, 1)));
         assert_eq!(
             pending.get_pending_transactions(&principal(), ADDRESS),
             vec![StoredPendingTransaction {
@@ -363,7 +454,10 @@ mod tests {
         finish(&mut pending, &mut states, attempt, BroadcastOutcome::Sent).unwrap();
 
         // Answered before the UTXO fetch, so the inputs' absence from the view never matters.
-        assert_eq!(states.settled_answer(principal(), &TXID), Some(Ok(())));
+        assert_eq!(
+            states.settled_answer(principal(), NETWORK, &TXID),
+            Some(Ok(()))
+        );
         assert_eq!(begin(&mut pending, &mut states, TXID), Ok(None));
     }
 
@@ -377,7 +471,7 @@ mod tests {
         // A second request for the same transaction never reaches a paid call while the first
         // is in flight, so it cannot rely on the reservation the first one may release.
         assert_eq!(
-            states.settled_answer(principal(), &TXID),
+            states.settled_answer(principal(), NETWORK, &TXID),
             Some(Err(BtcBroadcastTransactionError::BroadcastInProgress))
         );
         assert_eq!(
@@ -392,14 +486,11 @@ mod tests {
             })
         );
         assert_eq!(reserved_txids(&pending), Vec::<Vec<u8>>::new());
-        assert_eq!(states.settled_answer(principal(), &TXID), None);
+        assert_eq!(states.settled_answer(principal(), NETWORK, &TXID), None);
 
         assert_eq!(
-            begin(&mut pending, &mut states, TXID).unwrap(),
-            Some(BroadcastAttempt {
-                reservation: Reservation::Inserted,
-                attempts: 1
-            })
+            shape(begin(&mut pending, &mut states, TXID).unwrap()),
+            Some((Reservation::Inserted, 1))
         );
     }
 
@@ -417,13 +508,7 @@ mod tests {
         );
 
         let retry = begin(&mut pending, &mut states, TXID).unwrap().unwrap();
-        assert_eq!(
-            retry,
-            BroadcastAttempt {
-                reservation: Reservation::Reused,
-                attempts: 2
-            }
-        );
+        assert_eq!(shape(Some(retry)), Some((Reservation::Reused, 2)));
         assert_eq!(
             finish(&mut pending, &mut states, retry, refused()),
             Err(BtcBroadcastTransactionError::BroadcastOutcomeUnknown {
@@ -452,13 +537,7 @@ mod tests {
         let mut states = BtcBroadcastStates::default();
 
         let resend = begin(&mut pending, &mut states, TXID).unwrap().unwrap();
-        assert_eq!(
-            resend,
-            BroadcastAttempt {
-                reservation: Reservation::Reused,
-                attempts: 1
-            }
-        );
+        assert_eq!(shape(Some(resend)), Some((Reservation::Reused, 1)));
         assert_eq!(
             finish(&mut pending, &mut states, resend, refused()),
             Err(BtcBroadcastTransactionError::BroadcastOutcomeUnknown {
@@ -488,7 +567,7 @@ mod tests {
             Err(BtcBroadcastTransactionError::BroadcastOutcomeUnknown { .. })
         ));
         assert_eq!(
-            states.settled_answer(principal(), &TXID),
+            states.settled_answer(principal(), NETWORK, &TXID),
             None,
             "an exhausted transaction still goes through the checks, then is refused"
         );
@@ -507,7 +586,10 @@ mod tests {
             begin(&mut pending, &mut states, OTHER_TXID),
             Err(BtcBroadcastTransactionError::UtxosAlreadyReserved)
         );
-        assert_eq!(states.settled_answer(principal(), &OTHER_TXID), None);
+        assert_eq!(
+            states.settled_answer(principal(), NETWORK, &OTHER_TXID),
+            None
+        );
         assert_eq!(reserved_txids(&pending), vec![TXID.to_vec()]);
     }
 
@@ -523,13 +605,10 @@ mod tests {
         pending.remove_pending_transaction(principal(), ADDRESS, &TXID);
         states.retain_reserved(principal(), &pending.pending_txids(principal()));
 
-        assert_eq!(states.settled_answer(principal(), &TXID), None);
+        assert_eq!(states.settled_answer(principal(), NETWORK, &TXID), None);
         assert_eq!(
-            begin(&mut pending, &mut states, TXID).unwrap(),
-            Some(BroadcastAttempt {
-                reservation: Reservation::Inserted,
-                attempts: 1
-            })
+            shape(begin(&mut pending, &mut states, TXID).unwrap()),
+            Some((Reservation::Inserted, 1))
         );
     }
 
@@ -546,11 +625,89 @@ mod tests {
                 .unwrap();
         states.retain_reserved(other, &pending.pending_txids(other));
 
-        assert_eq!(states.settled_answer(other, &TXID), None);
-        assert_eq!(states.settled_answer(principal(), &TXID), Some(Ok(())));
+        assert_eq!(states.settled_answer(other, NETWORK, &TXID), None);
         assert_eq!(
-            states.0.get(&(principal(), TXID)),
-            Some(&BtcBroadcastState::Sent)
+            states.settled_answer(principal(), NETWORK, &TXID),
+            Some(Ok(()))
+        );
+        assert_eq!(
+            states.get(principal(), NETWORK, &TXID),
+            Some(BtcBroadcastState::Sent)
+        );
+    }
+
+    #[test]
+    fn a_late_completion_leaves_a_newer_attempt_alone() {
+        let (mut map, _mm) = setup();
+        let mut pending = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let mut states = BtcBroadcastStates::default();
+        let old = begin(&mut pending, &mut states, TXID).unwrap().unwrap();
+        // As the prune does once the reservation expired while `old` was still in flight.
+        pending.remove_pending_transaction(principal(), ADDRESS, &TXID);
+        states.retain_reserved(principal(), &pending.pending_txids(principal()));
+        let newer = begin(&mut pending, &mut states, TXID).unwrap().unwrap();
+        assert_eq!(shape(Some(newer)), Some((Reservation::Inserted, 1)));
+
+        assert_eq!(
+            finish(&mut pending, &mut states, old, refused()),
+            Err(BtcBroadcastTransactionError::BroadcastOutcomeUnknown {
+                msg: "refused".to_string()
+            }),
+            "a stale refusal cannot vouch for the newer attempt"
+        );
+        assert_eq!(reserved_txids(&pending), vec![TXID.to_vec()]);
+        assert_eq!(
+            states.settled_answer(principal(), NETWORK, &TXID),
+            Some(Err(BtcBroadcastTransactionError::BroadcastInProgress))
+        );
+
+        assert_eq!(
+            finish(&mut pending, &mut states, newer, refused()),
+            Err(BtcBroadcastTransactionError::BroadcastRejected {
+                msg: "refused".to_string()
+            })
+        );
+        assert_eq!(reserved_txids(&pending), Vec::<Vec<u8>>::new());
+    }
+
+    #[test]
+    fn a_late_completion_does_not_recreate_a_pruned_state() {
+        let (mut map, _mm) = setup();
+        let mut pending = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let mut states = BtcBroadcastStates::default();
+        let old = begin(&mut pending, &mut states, TXID).unwrap().unwrap();
+        pending.remove_pending_transaction(principal(), ADDRESS, &TXID);
+        states.retain_reserved(principal(), &pending.pending_txids(principal()));
+
+        assert_eq!(
+            finish(&mut pending, &mut states, old, BroadcastOutcome::Sent),
+            Ok(())
+        );
+        assert_eq!(states.get(principal(), NETWORK, &TXID), None);
+    }
+
+    #[test]
+    fn states_are_kept_per_network() {
+        let (mut map, _mm) = setup();
+        let mut pending = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let mut states = BtcBroadcastStates::default();
+        let attempt = begin(&mut pending, &mut states, TXID).unwrap().unwrap();
+
+        assert_eq!(
+            states.settled_answer(principal(), BitcoinNetwork::Testnet, &TXID),
+            None,
+            "an attempt in flight on mainnet does not block testnet"
+        );
+
+        finish(&mut pending, &mut states, attempt, BroadcastOutcome::Sent).unwrap();
+        assert_eq!(
+            states.settled_answer(principal(), NETWORK, &TXID),
+            Some(Ok(()))
+        );
+        assert_eq!(
+            states.settled_answer(principal(), BitcoinNetwork::Testnet, &TXID),
+            None,
+            "a mainnet success does not answer a testnet request"
         );
     }
 }

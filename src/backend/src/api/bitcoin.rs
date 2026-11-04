@@ -25,7 +25,7 @@ use crate::{
         api,
         broadcast_state_model::{
             begin_broadcast, finish_broadcast, retain_reserved_broadcasts,
-            with_btc_broadcast_states,
+            with_btc_broadcast_states, BroadcastTarget,
         },
         pending_tx_model::BtcUserPendingTransactionsModel,
         tx_validator,
@@ -314,9 +314,12 @@ pub async fn btc_broadcast_transaction(
 
         // Before the UTXO fetch, so a retry of a transaction already sent gets its txid back even
         // after its inputs have left the UTXO view.
-        if let Some(answer) =
-            with_btc_broadcast_states(|states| states.settled_answer(principal, &txid))
-        {
+        let settled_answer = || {
+            with_btc_broadcast_states(|states| {
+                states.settled_answer(principal, params.network, &txid)
+            })
+        };
+        if let Some(answer) = settled_answer() {
             return answer.map(|()| response);
         }
 
@@ -336,7 +339,19 @@ pub async fn btc_broadcast_transaction(
         .await
         .map_err(|msg| BtcBroadcastTransactionError::InternalError { msg })?;
 
+        // Again after the awaits: a concurrent submission of the same bytes may have been sent
+        // meanwhile, and its inputs may have left the fetched view.
+        if let Some(answer) = settled_answer() {
+            return answer.map(|()| response);
+        }
+
         let spent_utxos = tx_validator::verify_transaction_spend(&tx, &public_key, &current_utxos)?;
+        let target = BroadcastTarget {
+            principal,
+            network: params.network,
+            address: &source_address,
+            txid,
+        };
 
         let attempt = mutate_state(|state| {
             // Taken after the UTXO fetch, so the reservation post-dates any concurrent call's
@@ -355,15 +370,7 @@ pub async fn btc_broadcast_transaction(
                 reserved_at_ns,
             );
             with_btc_broadcast_states(|states| {
-                begin_broadcast(
-                    &mut model,
-                    states,
-                    principal,
-                    &source_address,
-                    txid,
-                    spent_utxos,
-                    reserved_at_ns,
-                )
+                begin_broadcast(&mut model, states, &target, spent_utxos, reserved_at_ns)
             })
         })?;
         let Some(attempt) = attempt else {
@@ -379,15 +386,7 @@ pub async fn btc_broadcast_transaction(
                 None,
             );
             with_btc_broadcast_states(|states| {
-                finish_broadcast(
-                    &mut model,
-                    states,
-                    principal,
-                    &source_address,
-                    txid,
-                    attempt,
-                    outcome,
-                )
+                finish_broadcast(&mut model, states, &target, attempt, outcome)
             })
         })?;
 

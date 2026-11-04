@@ -222,8 +222,10 @@ sequence with a BIP68 relative lock), `InvalidUtxos` (an input that is not the c
    Then look up the caller's [broadcast state](#broadcast-state-per-txid) for the decoded txid.
    `Sent` returns the txid and `InFlight` returns `BroadcastInProgress`, both before any paid call.
    This way a same-bytes retry of a successful send gets its success back even after its inputs
-   have left the UTXO view, which step 6 would otherwise report as `InvalidUtxos`. The step-9
-   block still re-checks the state atomically before a new broadcast.
+   have left the UTXO view, which step 6 would otherwise report as `InvalidUtxos`. The same lookup
+   runs again after the awaits of steps 5 and 6, before the ownership check: a concurrent
+   submission of the same bytes may have been sent meanwhile. The step-9 block still re-checks the
+   state atomically before a new broadcast.
 
 3. **Outputs must be standard**, since a non-standard output is dropped by relay policy after we
    paid for the broadcast, however valid the signatures. Every output is one of:
@@ -328,9 +330,17 @@ be rebroadcast at the backend's cost on every request while its inputs stay in t
 view. And with two concurrent attempts, A could release the reservation on a rejection while B,
 reusing it, is still broadcasting or has already succeeded.
 
-So the backend keeps, per `(principal, txid)`, one of `InFlight { attempts }`, `Sent` or
-`Unknown { attempts }`, where `attempts` counts the paid broadcasts so far. It is read in step 2
-(`Sent` and `InFlight` only), read and written in the step-9 block, and updated in step 10:
+So the backend keeps, per `(principal, network, txid)`, one of `InFlight { attempts, attempt_id }`,
+`Sent` or `Unknown { attempts }`, where `attempts` counts the paid broadcasts so far. The network
+is part of the key because a txid names the same transaction on every network, but a broadcast on
+one says nothing about another. It is read in step 2 (`Sent` and `InFlight` only), read and written
+in the step-9 block, and updated in step 10.
+
+Step 10 changes nothing unless its attempt is still the `InFlight` one, matched by `attempt_id`. If
+the reservation was pruned while the broadcast was in flight, the state went with it, and a newer
+attempt may have reserved the same txid; the late completion must neither release that
+reservation nor overwrite its state. It answers `Ok` if it was sent and `BroadcastOutcomeUnknown`
+otherwise. The states are indexed by principal, so the sync after a prune visits only the caller's.
 
 | State                                           | A same-txid request                                                              |
 | ----------------------------------------------- | -------------------------------------------------------------------------------- |
