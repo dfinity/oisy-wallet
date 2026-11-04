@@ -64,8 +64,6 @@ interface UniswapPlan {
 	approvals: { token: string; amount: bigint; expiration: bigint }[];
 	// Whether the router pulls only what the swaps take, which `pulled` caps.
 	atMost: boolean;
-	// The lowercased tokens a stated minimum holds only if they transfer in full.
-	mustTransferInFull: Set<string>;
 }
 
 interface UniswapReader {
@@ -566,27 +564,12 @@ const readCommand = ({
 				return false;
 			}
 
-			// Nothing checks what an exact output delivers: each hop gives what reached its pair, which
-			// comes to `amount` only if every token on the path transfers in full, and no pair comes twice:
-			// the router prices every hop from the reserves before the swap. Into the router, a later
+			// Nothing checks what an exact output delivers: each hop gives what reached its pair, which the
+			// router prices from the reserves before the swap, so a pair the path visits twice, or a token
+			// keeping part of a transfer into or out of a pair, leaves it short. Into the router, a later
 			// command's minimum checks what arrived.
 			if (!exactInput && party(recipient).kind !== 'router') {
-				const pairs = new Set<string>();
-
-				for (let index = 0; index < path.length; index++) {
-					const token = path[index].toLowerCase();
-					plan.mustTransferInFull.add(token);
-
-					if (index > 0) {
-						const pair = [path[index - 1].toLowerCase(), token].sort().join(':');
-
-						if (pairs.has(pair)) {
-							return false;
-						}
-
-						pairs.add(pair);
-					}
-				}
+				return false;
 			}
 
 			return swap({
@@ -780,10 +763,7 @@ const toSwap = ({
 	// Every minimum but a V2 exact input's is checked, if at all, on what the router or a pool sends. A
 	// token the user added may keep part of each transfer, so what arrives of it is no amount OISY can
 	// state. The tokens OISY lists by default are taken to transfer in full.
-	if (
-		received.category === 'custom' ||
-		[...plan.mustTransferInFull].some((token) => resolveToken(token)?.category !== 'default')
-	) {
+	if (received.category === 'custom') {
 		return;
 	}
 
@@ -882,8 +862,7 @@ export const getUniswapSwap = ({
 			deliveries: [],
 			fees: [],
 			approvals: [],
-			atMost: false,
-			mustTransferInFull: new Set()
+			atMost: false
 		},
 		party: (address) => toParty({ address, wallet, router: router.address }),
 		layouts: UNISWAP_LAYOUTS[router.version],

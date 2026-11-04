@@ -434,8 +434,8 @@ describe('uniswap.utils', () => {
 			);
 		});
 
-		// Nothing checks what a V2 exact output delivers: it comes to its amount only if every token on
-		// the path transfers in full. A V2 exact input is checked at the recipient.
+		// Nothing checks what a V2 exact output delivers, so only one into the router, whose later
+		// minimum checks what arrived, is described. A V2 exact input is checked at the recipient.
 		describe('a V2 path', () => {
 			const v2Swap = ({
 				exactInput = false,
@@ -460,9 +460,29 @@ describe('uniswap.utils', () => {
 				{
 					case: 'back through a token it passed, by other pairs',
 					path: [EURC, WETH, CBBTC, EURC, USDC]
-				}
-			])('should describe an exact output $case', ({ path }) => {
+				},
+				{ case: 'through a pair it visits twice', path: [EURC, USDC, WETH, EURC, USDC] }
+			])('should not describe an exact output paying the wallet $case', ({ path }) => {
 				const data = execute({ commands: [v2Swap({ path })] });
+
+				expect(getUniswapSwap(params({ data, tokens: listed }))).toBeUndefined();
+			});
+
+			it('should not describe an exact output paying another address', () => {
+				const data = execute({
+					commands: [v2Swap({ recipient: OTHER, path: [EURC, WETH, USDC] })]
+				});
+
+				expect(getUniswapSwap(params({ data, tokens: listed }))).toBeUndefined();
+			});
+
+			it('should state the maximum input of an exact output into the router as at most', () => {
+				const data = execute({
+					commands: [
+						v2Swap({ recipient: UNISWAP_RECIPIENT_ROUTER, path: [EURC, WETH, USDC] }),
+						sweep({ amountMin: 1_087_807n })
+					]
+				});
 
 				expect(getUniswapSwap(params({ data, tokens: listed }))).toEqual(
 					expect.objectContaining({
@@ -470,33 +490,6 @@ describe('uniswap.utils', () => {
 						received: { token: USDC_TOKEN, amount: 1_087_807n }
 					})
 				);
-			});
-
-			it.each([
-				{
-					case: 'from a token the user added',
-					path: [EURC, USDC],
-					tokens: [{ ...EURC_TOKEN, category: 'custom' as const }, USDC_TOKEN]
-				},
-				{
-					case: 'through a token OISY does not list',
-					path: [EURC, UNLISTED, USDC],
-					tokens: [EURC_TOKEN, USDC_TOKEN]
-				},
-				{
-					case: 'through a pair it visits twice',
-					path: [EURC, USDC, WETH, EURC, USDC],
-					tokens: listed
-				},
-				{
-					case: 'through a pair it visits twice, the other way round',
-					path: [EURC, USDC, WETH, USDC],
-					tokens: listed
-				}
-			])('should not describe an exact output paying the wallet $case', ({ path, tokens }) => {
-				const data = execute({ commands: [v2Swap({ path })] });
-
-				expect(getUniswapSwap(params({ data, tokens }))).toBeUndefined();
 			});
 
 			it.each([
