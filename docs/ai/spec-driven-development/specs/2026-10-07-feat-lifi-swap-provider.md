@@ -351,9 +351,13 @@ From PR 3 the Solana entry's `getSupportedTokens` returns the identifiers of eve
 Solana **mainnet** token known at load time — native SOL on `SOLANA_MAINNET_NETWORK_ID`
 and every token of `splTokens` whose network is Solana mainnet, read with `get()` and
 keyed through `resolveSwapTokenLookup` so the identifiers stay in the filter's key
-space. `loadSwapSupportedTokens` runs on every Swap modal open (`SwapLoader.svelte`), so
-a custom SPL token the user added since the last load is covered the next time the
-modal opens. The category keeps coverage `all` (NEAR Intents and LI.FI both list), and
+space. The swap lists load once per session, as soon as the user is signed in
+(`LoaderSwapTokens`; `SwapLoader` loads them only if that has not), before the default
+SPL tokens, which wait for the Solana address, and the custom ones, which come from the
+backend. So `LoaderSwapTokens` reads the Solana registry's lists again
+(`reloadSolSwapSupportedTokens`) whenever the Solana mainnet SPL tokens change, and once
+the lists have loaded, leaving the other registries' as they are: NEAR Intents answers
+from its cache. A token loaded or added later becomes a source then. The category keeps coverage `all` (NEAR Intents and LI.FI both list), and
 the union is NEAR's list plus every known mainnet SPL token. The EVM entry needs no such
 guard, because Velora is already a wildcard for the EVM category; that Velora's wildcard
 admits Sepolia tokens the same way is pre-existing and out of scope here.
@@ -1079,7 +1083,8 @@ The result must show all of the following:
   the rent of the accounts it creates, each sized from its mint — may not exceed the one the
   user reviewed. Above it,
   nothing is signed and the review returns with the higher ceiling and the
-  `lifi_fee_changed` note, as on EVM (`LifiSolFeeChangedError`, carrying the ceiling).
+  `lifi_fee_changed` note, as on EVM (`LifiSolFeeChangedError`, carrying the ceiling with
+  the displayed quote's headroom on its network fee).
 - **Receipt is bound (Solana → Solana).** The user's destination-token delta is at least
   the displayed quote's `toAmountMin`. A missing `preview`, or no delta for the
   destination token, fails this check.
@@ -1379,7 +1384,9 @@ swap, after its approval was paid.
 
 ### Solana execution
 
-New `fetchLifiSolSwap`:
+New `fetchLifiSolSwap` (`lib/services/lifi-sol-swap.services.ts`, from 3d-2). The re-quote,
+its slippage wording, and the row's creation and deletion are shared with
+`fetchLifiEvmSwap` in `lib/services/lifi-swap-execution.services.ts`:
 
 1. **Re-quote immediately before signing, with simulation on** (the displayed quote's
    blockhash is likely stale), with the offer's own request (its exchanges pinned), run
@@ -1420,27 +1427,36 @@ New `fetchLifiSolSwap`:
    blockhash** as a ref, and the slot of the binding's simulation of those bytes
    (`lifi_simulation_slot`, returned by `assertLifiSolTransaction`), where the blockhash
    was valid. As on EVM, a row that cannot be created aborts the swap before
-   it is sent, and only a definitive refusal deletes it: a failed preflight simulation,
-   after which the RPC forwards nothing — except one reporting the transaction as already
-   processed, which is its landing. Any other failure first **sends the same signed
-   bytes again**, up to `SWAP_BROADCAST_ATTEMPTS` (3) attempts a second apart, as EVM's
-   `swap()` does: one signature can land once only, and a transport failure would
-   otherwise leave unsent a swap that counts as sent. It stops at a definitive refusal or
-   once the transaction is processed.
+   it is sent, and only a definitive refusal deletes it (`isSolSendRefusal`): the node's
+   answers before it forwards anything (Agave's `send_transaction`) — a failed preflight
+   simulation, except one reporting the transaction as already processed, which is its
+   landing; the health check before it, a node too far behind the cluster (`-32005`); and
+   a transaction it cannot read (`-32602`, invalid params). Any other failure first
+   **sends the same signed bytes again**, up to `SWAP_BROADCAST_ATTEMPTS` (3) attempts a
+   second apart, as EVM's `swap()` does: one signature can land once only, and a
+   transport failure would otherwise leave unsent a swap that counts as sent. So does a
+   node too far behind, which forwarded nothing and whose refusal another node may not
+   share; it stands once the attempts run out. It stops at any other definitive refusal
+   or once the transaction is processed.
 
-   **A refusal deletes the row only when it answers the first attempt.** A preflight
+   **A refusal deletes the row only when no earlier attempt may have relayed the
+   bytes.** A preflight
    refusal proves only that its own attempt was not forwarded: the first can time out
    after it was, and a retry then fail its preflight against state that moved meanwhile
    (a price past the slippage, a balance the first is about to spend) while the first is
    still in flight. Deleting the row then would drop the tracking of a swap that can
    still land and let the user sign another. So once one attempt's outcome is unknown, a
-   later refusal ends the retries and the swap counts as sent. Any end but a refusal of
-   the first attempt (processed, a transport failure that may have relayed it, or such a
-   later refusal) leaves the row to the poller, which settles it as landed or, once the
+   later refusal ends the retries and the swap counts as sent. Any end but such a
+   refusal (processed, a transport failure that may have relayed it, or a refusal after
+   one) leaves the row to the poller, which settles it as landed or, once the
    blockhash expires, never landed. EVM's `swap()` takes the same rule in 3d. There it is
    hardening rather than a fix: each definitive refusal on EVM answers either the bytes
    alone, which the first attempt shared, or a state change (a balance spent, a base fee
-   more than doubled) that cannot happen within the retry window. Then
+   more than doubled) that cannot happen within the retry window. On both chains, a
+   broadcast that ends after an attempt with an unknown outcome rejects with
+   `SwapBroadcastOutcomeUnknownError`, its last answer as the cause, which neither
+   `isDefinitiveTransactionRefusal` nor `isSolSendRefusal` counts as a refusal, so
+   the row stays. Then
    `enableSwapDestinationToken`. The blockhash is read from the compiled
    message (`getCompiledTransactionMessageDecoder` → `lifetimeToken`). LI.FI's
    transaction carries only the blockhash, not its `lastValidBlockHeight`; the expiry
@@ -1457,9 +1473,28 @@ Signing the bytes LI.FI built keeps them exactly as simulated; the re-quote in s
 is what keeps the blockhash fresh.
 
 Wizard: `SwapSolWizard.svelte` gets an if/else on `selectedProvider.provider`
-(NEAR Intents vs LI.FI). The NEAR Intents branch keeps its terms gate unchanged. The
-same PR removes the "no Solana source" restriction from the `solSwapProviders` LI.FI
-entry (see [Quoting](#quoting)).
+(NEAR Intents vs LI.FI, any other provider refused as unexpected). The NEAR Intents
+branch keeps its terms gate unchanged. The same PR (3d-3) removes the "no Solana
+source" restriction from the `solSwapProviders` LI.FI entry (see [Quoting](#quoting)).
+A `LifiSolFeeChangedError` from execution is carried back to the review through
+`lifiCarriedFee`, keyed by the offer's request, as the EVM one is; on Solana it carries
+the ceiling itself, in lamports, which the review shows when it is above the quote's. A
+LI.FI failure is reported by its category only (`toLifiSwapErrorType`), as on EVM, and
+a slippage refusal shows the slippage copy.
+
+**The review simulates the displayed route** (`lifiSolQuoteCallsUnpinnedProgram`), so
+that a route through a venue `LIFI_SOLANA_PROGRAM_ADDRESSES` does not pin yet is refused
+before the user confirms rather than at the binding. It simulates the display quote's
+own bytes with the blockhash replaced (the cached quote's may be stale), once per quote
+the review shows, and refuses the route when the simulation reaches by CPI a program
+neither known nor pinned (`callsUnpinnedProgram`, which the binding uses too): the
+review shows `swap.error.lifi_route_unverified` and does not confirm. It holds the
+confirmation until the check answers, at most `SOLANA_SIMULATION_TIMEOUT_MILLISECONDS` with
+the read of the message's lookup tables included, which the simulation's own timeout
+does not cover.
+A simulation with no answer (a failed transaction, an RPC failure, lookup tables that
+cannot be read) lets the review confirm: the binding still checks the transaction that
+is signed, and fails closed.
 
 **The form budgets LI.FI's own transaction.** `SwapSolForm` validates the amount and fills
 "Max" against `SolFeeContext`'s estimate (`feeStore`, plus `ataFeeStore` for an SPL
@@ -1512,11 +1547,24 @@ As on EVM, the form, its validation, "Max" and the review use that total
 once it is known, and shows `InsufficientFundsForFee` when the balance cannot cover it.
 "Max" from SOL leaves room for it with the same swap-context reservation as on EVM
 (`amountSetToMax`, `lifiMaxFee` per destination, raised by a review that cannot fit its
-total), the ceiling coming with each quote and each quote with the amount. Whether it
-also needs headroom, as `LIFI_MAX_FEE_HEADROOM_PERCENT` gives EVM, depends on how much
-LI.FI's compute price moves between the display quote and the execution re-quote; 3d
-measures it, as 2b measured the EVM gas estimate, and the review buffers the ceiling if
-the re-quote's comes out higher.
+total), the ceiling coming with each quote and each quote with the amount.
+
+**The ceiling has headroom on its network fee** (`LIFI_SOL_NETWORK_FEE_HEADROOM_PERCENT`,
+100 %), added by `loadLifiSolQuoteCeiling` to the `solFeeCeiling` the offer carries, so
+the form, "Max", the review and the ceiling execution holds the re-quote's own to all
+include it. The ceiling a `LifiSolFeeChangedError` carries back gets the same headroom,
+as EVM's carried fee gets `LIFI_CARRIED_FEE_HEADROOM_PERCENT`: the displayed quote stays
+cached for 30 s, so a retry in that time would otherwise pass only at a price no higher
+than the refused re-quote's. Measured on Solana → Solana (SOL → USDC, USDC → SOL, USDC → USDT,
+2026-10-29), LI.FI prices the compute units anew with every quote: the limit stays at
+1.4M units, but the price came out anywhere from 100,000 to 200,000 micro-lamports a
+unit, a re-quote moments after the display quote up to 34 % above it and one 30 s later
+up to 57 % above. Without headroom, a re-quote priced higher than the quote displayed
+would refuse the swap with `LifiSolFeeChangedError` about as often as not. The rent of the
+accounts a route creates does not move, so it gets none. Doubling the network fee covers
+the whole price range observed, for at most about 0.0003 SOL more held back by "Max".
+EVM's `LIFI_MAX_FEE_HEADROOM_PERCENT` has no Solana counterpart: the review prices the
+same ceiling as the form, not a fee read anew.
 
 ### Active User Transactions
 
@@ -1951,7 +1999,10 @@ rows.
   `help.text.explorers_lifi_description` for a help-page explorer entry. A refund reuses
   `swap.error.swap_refunded`, the copy Velora and NEAR Intents already write, and a route
   that paid out in another token needs no copy of its own: the row shows the received
-  amount and symbol in place of the destination token.
+  amount and symbol in place of the destination token. 3d-3 adds
+  `swap.error.lifi_route_unverified`, for a route the review refuses, and the help page's
+  LI.FI Scan entry gets a second link, on the user's Solana address, which a Solana-source
+  transfer leaves from.
 
 ## Delivery plan
 
@@ -2257,6 +2308,15 @@ Recorded so a future reader can tell "excluded on purpose" from "forgotten".
   WalletConnect review. The cost is a route through a venue Jupiter adds later, refused
   until the list follows; 3d simulates the display quote's transaction at the review step
   so that the refusal comes before the user confirms, not after.
+- **Solana's network fee is reviewed with 100 % headroom** (2026-10-29), not with a
+  margin sized like EVM's: LI.FI's compute price moved by up to 57 % between quotes and
+  spans a factor of two, and the network fee is a small part of the ceiling next to the
+  rent, which gets no headroom (see [Solana execution](#solana-execution)).
+- **The review's route check fails open** (2026-10-29): a simulation of the display quote
+  with no answer lets the review confirm, since the binding simulates the transaction
+  that is signed and refuses it if the simulation fails. Failing closed would block every
+  LI.FI swap from Solana during an RPC hiccup for a check whose purpose is only to bring
+  a refusal forward.
 - **The Solana spend and receipt bounds use the transaction's own LI.FI ceiling**
   (2026-10-23), not a fixed `LIFI_SOL_MAX_FEE_LAMPORTS`: the ceiling is computed for the
   network-fee bound anyway, is held to the one the user reviewed, and is what the

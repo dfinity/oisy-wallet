@@ -11,6 +11,7 @@ import {
 } from '$lib/constants/swap.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
+import { SwapBroadcastOutcomeUnknownError } from '$lib/types/errors';
 import type { NetworkId } from '$lib/types/network';
 import type { TransferParams } from '$lib/types/send';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
@@ -82,6 +83,10 @@ const signSwapTransaction = ({
 // The same signed bytes are sent again while the node has neither refused them nor answered that
 // they are in: a transport failure or a server error would otherwise leave a signed swap unsent, and
 // with one hash and one nonce they cannot swap twice.
+//
+// Once an attempt has failed in a way that may have relayed them, no later answer shows they were
+// not taken: a refusal answers only its own attempt. The broadcast then ends with an unknown outcome
+// rather than the refusal, so that the caller does not take it for one of the first attempt.
 const broadcast = async ({
 	networkId,
 	rawTransaction
@@ -91,21 +96,28 @@ const broadcast = async ({
 }): Promise<TransactionResponse> => {
 	const { sendTransaction } = infuraProviders(networkId);
 
+	let relayed = false;
+
 	for (let attempt = 1; attempt < SWAP_BROADCAST_ATTEMPTS; attempt++) {
 		try {
 			return await sendTransaction(rawTransaction);
 		} catch (err: unknown) {
 			if (!isBroadcastRetriable(err)) {
-				throw err;
+				throw relayed ? new SwapBroadcastOutcomeUnknownError({ cause: err }) : err;
 			}
 
+			relayed = true;
 			consoleError(err);
 		}
 
 		await waitForMilliseconds(SWAP_BROADCAST_RETRY_DELAY_MILLIS);
 	}
 
-	return await sendTransaction(rawTransaction);
+	try {
+		return await sendTransaction(rawTransaction);
+	} catch (err: unknown) {
+		throw relayed ? new SwapBroadcastOutcomeUnknownError({ cause: err }) : err;
+	}
 };
 
 export const swap = async ({

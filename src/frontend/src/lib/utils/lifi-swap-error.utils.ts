@@ -3,7 +3,8 @@ import { PLAUSIBLE_EVENT_SWAP_ERROR_TYPES } from '$lib/enums/plausible';
 import {
 	LifiFeeChangedError,
 	LifiQuoteRejectedError,
-	LifiRouteUnsupportedError
+	LifiRouteUnsupportedError,
+	LifiSolFeeChangedError
 } from '$lib/types/errors';
 import { errorDetailToString } from '$lib/utils/error.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -15,11 +16,11 @@ import { nonNullish } from '@dfinity/utils';
  * `docs/ai/frontend/analytics.md`). The message itself stays for the toast and the console.
  */
 export const toLifiSwapErrorType = (err: unknown): PLAUSIBLE_EVENT_SWAP_ERROR_TYPES => {
-	if (err instanceof LifiFeeChangedError) {
+	if (err instanceof LifiFeeChangedError || err instanceof LifiSolFeeChangedError) {
 		return PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.FEE_CHANGED;
 	}
 
-	// `fetchLifiEvmSwap`'s own wording, which the wizard recognises by the same prefix.
+	// The execution services' own wording, which the wizard recognises by the same prefix.
 	if (errorDetailToString(err)?.startsWith('Slippage exceeded.') === true) {
 		return PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.SLIPPAGE_EXCEEDED;
 	}

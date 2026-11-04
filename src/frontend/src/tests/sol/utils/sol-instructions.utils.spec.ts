@@ -2096,7 +2096,11 @@ describe('sol-instructions.utils', () => {
 		});
 
 		it('should ignore a Memo instruction', () => {
-			const instruction = getAddMemoInstruction({ memo: 'Deposit 42' });
+			// The client now defaults to the Memo v4 program; pin the v3 one we recognise.
+			const instruction = getAddMemoInstruction(
+				{ memo: 'Deposit 42' },
+				{ programAddress: address(MEMO_PROGRAM_ADDRESS) }
+			);
 
 			expect(mapSolInstruction({ instruction })).toStrictEqual({ amount: undefined });
 

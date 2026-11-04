@@ -1212,7 +1212,10 @@
 			"unknown": "OISY kann noch nicht sagen, ob die Aufladung durchgegangen ist. Falls ja, zeigt deine $token-Aktivität sie an. Lade erneut auf, um dieselbe Aufladung noch einmal zu senden: Sie kann nur einmal durchgehen. Eine neue oder geänderte Aufladung würde erneut Cycles hinzufügen, falls diese durchgegangen ist.",
 			"unknown_fresh": "OISY kann noch nicht sagen, ob deine letzte Aufladung durchgegangen ist. Falls ja, fügt diese Aufladung erneut Cycles hinzu. Prüfe zuerst deine $token-Aktivität.",
 			"sent_to_canister": "$token an einen Canister zu senden, lädt ihn nicht auf. Die $token landen auf dem Konto des Canisters, und der Canister erhält nur dann Cycles, wenn sein eigener Code sie abhebt.",
-			"sent_to_canister_top_up": "Um einem Canister Cycles hinzuzufügen, nutze „Aufladen“ auf der $token-Seite."
+			"sent_to_canister_top_up": "Um einem Canister Cycles hinzuzufügen, nutze „Aufladen“ auf der $token-Seite.",
+			"choice_send": "$token senden",
+			"choice_send_description": "Sende $token-Token an ein anderes Konto. $token an einen Canister zu senden, lädt ihn nicht auf.",
+			"choice_top_up_description": "Wandle $token-Token in Cycles um, um einen beliebigen Canister aufzuladen."
 		},
 		"error": {
 			"invalid_canister_id": "Gib eine Canister-ID ein. User-Principals, Konto-IDs und Adressen in anderen Netzwerken können nicht aufgeladen werden.",
@@ -1364,6 +1367,8 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "UI aktualisieren",
 			"swap_provider": "Tausch-Anbieter",
+			"smart_swap": "",
+			"finding_best_rate": "",
 			"swap_provider_website": "Website",
 			"swap_route": "Tauschroute",
 			"included_network_fees": "Enthaltene Netzwerkgebühren",
@@ -1430,7 +1435,8 @@
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
-			"lifi_fee_changed": ""
+			"lifi_fee_changed": "",
+			"lifi_route_unverified": ""
 		}
 	},
 	"buy": {
@@ -2486,6 +2492,7 @@
 			"create": "Kontakt konnte nicht erstellt werden",
 			"update": "Kontakt konnte nicht aktualisiert werden",
 			"delete": "Kontakt konnte nicht gelöscht werden",
+			"load": "Kontakte konnten nicht geladen werden",
 			"name_too_long": "Bitte halte den Namen auf höchstens $maxCharacters Zeichen."
 		}
 	},

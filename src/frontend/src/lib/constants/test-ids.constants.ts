@@ -234,7 +234,11 @@ export const SWAP_SWITCH_TOKENS_BUTTON = 'swap-switch-tokens-button';
 export const SWAP_TOKENS_MODAL_OPEN_BUTTON = 'swap-tokens-modal-open-button';
 export const SWAP_TOKENS_MODAL = 'swap-tokens-modal';
 export const SWAP_MODAL_SELECT_PROVIDER_STEP = 'swap-modal-select-provider-step';
+export const SWAP_PROVIDER_ANIMATION = 'swap-provider-animation';
+export const SWAP_PROVIDER_STATUS = 'swap-provider-status';
+export const SWAP_FEE_ROW = 'swap-fee-row';
 export const SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE = 'swap-lifi-insufficient-funds-for-fee';
+export const SWAP_LIFI_UNVERIFIED_ROUTE = 'swap-lifi-unverified-route';
 export const SWAP_TWO_SWAPS_HINT = 'swap-two-swaps-hint';
 export const SWAP_TWO_SWAPS_HINT_BUTTON = 'swap-two-swaps-hint-button';
 
@@ -308,6 +312,7 @@ export const CYCLES_TOP_UP_BUTTON = 'cycles-top-up-button';
 export const CYCLES_TOP_UP_CANISTER = 'cycles-top-up-canister';
 export const CYCLES_TOP_UP_CANISTER_INPUT = 'cycles-top-up-canister-input';
 export const CYCLES_TOP_UP_CANISTER_NEXT_BUTTON = 'cycles-top-up-canister-next-button';
+export const CYCLES_TOP_UP_CANISTER_BACK_BUTTON = 'cycles-top-up-canister-back-button';
 export const CYCLES_TOP_UP_RECENT_CANISTER = 'cycles-top-up-recent-canister';
 export const CYCLES_TOP_UP_AMOUNT = 'cycles-top-up-amount';
 export const CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON = 'cycles-top-up-amount-next-button';
@@ -315,6 +320,9 @@ export const CYCLES_TOP_UP_REVIEW = 'cycles-top-up-review';
 export const CYCLES_TOP_UP_REVIEW_BACK_BUTTON = 'cycles-top-up-review-back-button';
 export const CYCLES_TOP_UP_REVIEW_TOP_UP_BUTTON = 'cycles-top-up-review-top-up-button';
 export const CYCLES_SENT_TO_CANISTER_WARNING = 'cycles-sent-to-canister-warning';
+export const CYCLES_SEND_OR_TOP_UP = 'cycles-send-or-top-up';
+export const CYCLES_SEND_OR_TOP_UP_SEND_BUTTON = 'cycles-send-or-top-up-send-button';
+export const CYCLES_SEND_OR_TOP_UP_TOP_UP_BUTTON = 'cycles-send-or-top-up-top-up-button';
 
 export const HELP_AUTH_IMAGE_BANNER = 'help-auth-image-banner';
 export const HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON = 'help-auth-new-identity-version-button';
@@ -420,7 +428,6 @@ export const ETH_FEE_PRIORITY = 'eth-fee-priority';
 export const ETH_FEE_PRIORITY_OPTION = 'eth-fee-priority-option';
 export const ETH_FEE_PRIORITY_OPTION_AMOUNT = 'eth-fee-priority-option-amount';
 export const ETH_FEE_PRIORITY_TRIGGER = 'eth-fee-priority-trigger';
-export const SWAP_FEE_INFO = 'swap-fee-info';
 
 // Avatar
 export const AVATAR_IMAGE = 'avatar-image';
