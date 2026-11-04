@@ -867,7 +867,7 @@ describe('EthWalletConnectSendReview', () => {
 
 		const inAnHour = () => BigInt(Math.floor(Date.now() / 1000) + 60 * 60);
 
-		const renderSwap = (data: string) =>
+		const renderSwapWithValue = ({ data, value }: { data: string; value: bigint }) =>
 			render(EthWalletConnectSendReview, {
 				props: {
 					...props,
@@ -879,7 +879,7 @@ describe('EthWalletConnectSendReview', () => {
 						minterInfo: undefined,
 						principal: mockPrincipal,
 						chainId: BASE_NETWORK.chainId,
-						value: ZERO,
+						value,
 						wallet: mockUniswapWallet,
 						nativeToken: BASE_ETH_TOKEN,
 						tokens: [BASE_EURC_TOKEN, BASE_USDC_TOKEN]
@@ -890,6 +890,8 @@ describe('EthWalletConnectSendReview', () => {
 				},
 				context: mockContext
 			});
+
+		const renderSwap = (data: string) => renderSwapWithValue({ data, value: ZERO });
 
 		it('should state what the swap pays, what it receives at least and until when', () => {
 			const deadline = inAnHour();
@@ -1086,6 +1088,61 @@ describe('EthWalletConnectSendReview', () => {
 					$symbol: 'USDC'
 				})
 			);
+		});
+
+		// Rounded to eight decimals, an 18-decimal amount could read as less than the wallet pays or as
+		// more than the minimum the router enforces.
+		describe('an 18-decimal amount', () => {
+			const BASE_WETH = '0x4200000000000000000000000000000000000006';
+
+			it('should state a payment in full', () => {
+				const value = 1_000_000_004_999_999_999n;
+
+				const { container } = renderSwapWithValue({
+					data: encodeUniswapExecute({
+						commands: [
+							encodeUniswapCommand({
+								type: UNISWAP_COMMANDS.WRAP_ETH,
+								types: ['address', 'uint256'],
+								values: [UNISWAP_RECIPIENT_ROUTER, value]
+							}),
+							encodeUniswapV3Swap({
+								amount: value,
+								amountLimit: 1_087_807n,
+								tokens: [BASE_WETH, BASE_USDC_TOKEN.address],
+								payerIsUser: false
+							})
+						],
+						deadline: inAnHour()
+					}),
+					value
+				});
+
+				expect(container.querySelector('#swap-pay')).toHaveTextContent('1.000000004999999999 ETH');
+			});
+
+			it('should state a minimum in full', () => {
+				const { container } = renderSwap(
+					encodeUniswapExecute({
+						commands: [
+							encodeUniswapV3Swap({
+								recipient: UNISWAP_RECIPIENT_ROUTER,
+								amount: 1_000_000n,
+								amountLimit: ZERO,
+								tokens: [BASE_EURC_TOKEN.address, BASE_WETH]
+							}),
+							encodeUniswapCommand({
+								type: UNISWAP_COMMANDS.UNWRAP_WETH,
+								types: ['address', 'uint256'],
+								values: [mockUniswapWallet, 1_000_000_005_000_000_000n]
+							})
+						],
+						deadline: inAnHour()
+					})
+				);
+
+				expect(container.querySelector('#swap-receive')).toHaveTextContent('1.000000005 ETH');
+			});
 		});
 
 		// Rounded to four decimals, either would read as less than the router may spend or pays.

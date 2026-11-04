@@ -5,7 +5,6 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { UniswapSwap, UniswapSwapFee } from '$eth/types/uniswap';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
-	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import SendDataApplication from '$lib/components/send/SendDataApplication.svelte';
 	import SendDataSpender from '$lib/components/send/SendDataSpender.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
@@ -13,6 +12,7 @@
 	import { ZERO } from '$lib/constants/app.constants';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Token } from '$lib/types/token';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -50,23 +50,22 @@
 		return share > ZERO && shown === percent.format(0) ? `< ${percent.format(0.000_001)}` : shown;
 	};
 
+	// Every amount is stated in full: rounded, it could read as more than a minimum the router
+	// enforces, or as less than what the wallet pays, a fee or an allowance.
+	const inFull = ({ amount, token: { decimals } }: { amount: bigint; token: Token }): string =>
+		formatToken({ value: amount, unitName: decimals, displayDecimals: decimals });
+
 	// A share of what the router holds is stated as a percentage: the amount it comes to is only known
-	// once the swap has run. A stated amount is shown in full, as rounded it can read as less than the
-	// router pays.
+	// once the swap has run.
 	const formatFee = (fee: UniswapSwapFee): string =>
 		'share' in fee
 			? replacePlaceholders($i18n.wallet_connect.text.swap_app_fee_share, {
 					$share: formatShare(fee.share),
 					$symbol: fee.token.symbol
 				})
-			: `${formatToken({
-					value: fee.amount,
-					unitName: fee.token.decimals,
-					displayDecimals: fee.token.decimals
-				})} ${fee.token.symbol}`;
+			: `${inFull(fee)} ${fee.token.symbol}`;
 
-	// The allowance outlives the transaction, so it is stated with when it ends, and in full, as
-	// rounded it can read as less than the router may spend.
+	// The allowance outlives the transaction, so it is stated with when it ends.
 	let allowance = $derived(
 		nonNullish(approval)
 			? replacePlaceholders(
@@ -74,11 +73,7 @@
 						? $i18n.wallet_connect.text.swap_allowance_unlimited
 						: $i18n.wallet_connect.text.swap_allowance_amount,
 					{
-						$amount: formatToken({
-							value: approval.amount,
-							unitName: approval.token.decimals,
-							displayDecimals: approval.token.decimals
-						}),
+						$amount: inFull(approval),
 						$symbol: approval.token.symbol,
 						$date: formatDate(approval.expiration)
 					}
@@ -97,19 +92,11 @@
 		: $i18n.wallet_connect.text.swap_pay}
 	ref="swap-pay"
 >
-	<ExchangeAmountDisplay
-		amount={paid.amount}
-		decimals={paid.token.decimals}
-		symbol={paid.token.symbol}
-	/>
+	<span class="break-all">{`${inFull(paid)} ${paid.token.symbol}`}</span>
 </WalletConnectModalValue>
 
 <WalletConnectModalValue label={$i18n.wallet_connect.text.swap_receive_at_least} ref="swap-receive">
-	<ExchangeAmountDisplay
-		amount={received.amount}
-		decimals={received.token.decimals}
-		symbol={received.token.symbol}
-	/>
+	<span class="break-all">{`${inFull(received)} ${received.token.symbol}`}</span>
 </WalletConnectModalValue>
 
 {#if nonNullish(recipient)}

@@ -198,8 +198,9 @@ Only from checks the router enforces:
 ### What the user sees
 
 - **Title:** "Swap".
-- **Rows,** in this order: Application; Network; **You pay** (or **You pay at most**); **You
-  receive at least**; **Recipient**, only when it is not the wallet; one **App fee** row per fee
+- **Rows,** in this order: Application; Network; **You pay** (or **You pay at most**) and **You
+  receive at least**, each amount in full, as rounded it could read as less than the wallet pays
+  or more than the minimum; **Recipient**, only when it is not the wallet; one **App fee** row per fee
   (share or amount, token, recipient address; a share is shown to four decimals of a percent, and
   a nonzero one below that as "< 0.0001%", an amount in full); **New spending allowance**, when
   the transaction grants the router a Permit2 allowance ("The router can spend up to 12 USDC
