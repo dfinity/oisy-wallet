@@ -5,6 +5,7 @@
 	import GetTokenWizardStep from '$lib/components/get-token/GetTokenWizardStep.svelte';
 	import ReceiveAddressQrCode from '$lib/components/receive/ReceiveAddressQrCode.svelte';
 	import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
+	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { getTokenWizardSteps } from '$lib/config/get-token.config';
 	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
@@ -134,6 +135,12 @@
 	bind:currentStep
 >
 	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
+
+	{#snippet headerRight()}
+		{#if currentStep?.name === WizardStepsGetToken.SWAP}
+			<SwapSlippage bind:slippageValue />
+		{/if}
+	{/snippet}
 
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsGetToken.GET_TOKEN}

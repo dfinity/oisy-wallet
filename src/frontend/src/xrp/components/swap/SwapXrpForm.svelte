@@ -123,9 +123,9 @@
 	onCustomValidate={customValidate}
 	{onNext}
 	{onShowTokensList}
+	{slippageValue}
 	bind:swapAmount
 	bind:receiveAmount
-	bind:slippageValue
 >
 	{#snippet message()}
 		<!-- The input only turns red, and the reserve is the part of the refusal a user cannot

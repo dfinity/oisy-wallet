@@ -2,6 +2,7 @@
 	import { getContext, onDestroy } from 'svelte';
 	import { page } from '$app/state';
 	import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
+	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';
 	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
@@ -105,6 +106,12 @@
 	bind:currentStep
 >
 	{#snippet title()}{titleString}{/snippet}
+
+	{#snippet headerRight()}
+		{#if currentStep?.name === WizardStepsSwap.SWAP}
+			<SwapSlippage bind:slippageValue />
+		{/if}
+	{/snippet}
 
 	<SwapModalWizardSteps
 		{currentStep}
